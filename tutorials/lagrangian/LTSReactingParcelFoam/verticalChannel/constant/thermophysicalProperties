@@ -47,5 +47,7 @@ solids
     // none
 }
 
+// de-activate the pressure-work term when running local time-stepping
+dpdt            no;
 
 // ************************************************************************* //
