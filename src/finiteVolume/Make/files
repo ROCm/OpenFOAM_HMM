@@ -53,10 +53,13 @@ $(fvMeshMapper)/fvSurfaceMapper.C
 extendedStencil = fvMesh/extendedStencil
 
 cellToCell = $(extendedStencil)/cellToCell
+$(cellToCell)/extendedCellToCellStencil.C
+$(cellToCell)/extendedCentredCellToCellStencil.C
 $(cellToCell)/fullStencils/cellToCellStencil.C
 $(cellToCell)/fullStencils/CFCCellToCellStencil.C
 $(cellToCell)/fullStencils/CPCCellToCellStencil.C
 $(cellToCell)/fullStencils/CECCellToCellStencil.C
+$(cellToCell)/MeshObjects/centredCECCellToCellStencilObject.C
 
 cellToFace = $(extendedStencil)/cellToFace
 $(cellToFace)/fullStencils/cellToFaceStencil.C
