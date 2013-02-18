@@ -170,7 +170,7 @@ private:
         void init();
 
         //- Calculate total area of faceZone accross procesors
-        void calculateTotalArea(scalar& var);
+        void calculateTotalArea(scalar& area);
 
 
 public:

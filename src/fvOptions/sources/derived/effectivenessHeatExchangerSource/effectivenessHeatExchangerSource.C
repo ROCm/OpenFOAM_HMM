@@ -119,23 +119,26 @@ void Foam::fv::effectivenessHeatExchangerSource::init()
 }
 
 
-void Foam::fv::effectivenessHeatExchangerSource::calculateTotalArea(scalar& var)
+void Foam::fv::effectivenessHeatExchangerSource::calculateTotalArea
+(
+    scalar& area
+)
 {
-    var = 0;
+    area = 0;
     forAll(faceId_, i)
     {
         label faceI = faceId_[i];
         if (facePatchId_[i] != -1)
         {
             label patchI = facePatchId_[i];
-            var += mesh_.magSf().boundaryField()[patchI][faceI];
+            area += mesh_.magSf().boundaryField()[patchI][faceI];
         }
         else
         {
-            var += mesh_.magSf()[faceI];
+            area += mesh_.magSf()[faceI];
         }
     }
-    reduce(var, sumOp<scalar>());
+    reduce(area, sumOp<scalar>());
 }
 
 
@@ -171,10 +174,10 @@ Foam::fv::effectivenessHeatExchangerSource::effectivenessHeatExchangerSource
         (
             "effectivenessHeatExchangerSource::effectivenessHeatExchangerSource"
             "("
-            "   const word& name,"
-            "   const word& modelType,"
-            "   const dictionary& dict,"
-            "   const fvMesh& mesh"
+                "const word&, "
+                "const word&, "
+                "const dictionary&, "
+                "const fvMesh&"
             ")"
         )
             << type() << " " << this->name() << ": "
@@ -223,7 +226,7 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
 
             CpfMean +=
                 Cpf.boundaryField()[patchI][faceI]
-              * mesh_.magSf().boundaryField()[patchI][faceI];
+               *mesh_.magSf().boundaryField()[patchI][faceI];
         }
         else
         {
@@ -236,8 +239,8 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
 
     scalar Qt =
         eTable_()(mag(totalphi), secondaryMassFlowRate_)
-        * (secondaryInletT_ - primaryInletT_)
-        * (CpfMean/faceZoneArea_)*mag(totalphi);
+       *(secondaryInletT_ - primaryInletT_)
+       *(CpfMean/faceZoneArea_)*mag(totalphi);
 
     const volScalarField& T = mesh_.lookupObject<volScalarField>(TName_);
     const scalarField TCells(T, cells_);
