@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UFT-8"/>
-<title> OpenFOAM&reg; programmer's C++ documentation </title>
+<title> OpenFOAM&reg; Programmer's C++ documentation </title>
 <!-- links -->
 <link href="../OpenFOAMdocIcon.png" rel="icon" type="image/png" />
 <link href="search/search.css" rel="stylesheet" type="text/css" />
@@ -34,4 +34,5 @@
   </div>  <!-- header -->
 
   <div class="main">
-  <!-- begin of doxygen-generated content -->
+    <div>
+    <!-- begin of doxygen-generated content -->
