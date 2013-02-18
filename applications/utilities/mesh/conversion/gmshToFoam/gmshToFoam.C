@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1059,7 +1059,7 @@ int main(int argc, char *argv[])
         {
             if (zoneFaces[zoneI].size())
             {
-                label physReg = zoneToPhys[zoneI];
+                label physReg = patchToPhys[zoneI];
 
                 Map<word>::const_iterator iter = physicalNames.find(physReg);
 
