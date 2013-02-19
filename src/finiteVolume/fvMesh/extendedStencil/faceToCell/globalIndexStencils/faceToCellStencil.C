@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,56 +21,20 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::CFCFaceToCellStencil
-
-Description
-
-SourceFiles
-    CFCFaceToCellStencil.C
-
 \*---------------------------------------------------------------------------*/
-
-#ifndef CFCFaceToCellStencil_H
-#define CFCFaceToCellStencil_H
 
 #include "faceToCellStencil.H"
+#include "polyMesh.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-namespace Foam
-{
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-/*---------------------------------------------------------------------------*\
-                    Class CFCFaceToCellStencil Declaration
-\*---------------------------------------------------------------------------*/
-
-class CFCFaceToCellStencil
+Foam::faceToCellStencil::faceToCellStencil(const polyMesh& mesh)
 :
-    public faceToCellStencil
-{
-    // Private Member Functions
+    mesh_(mesh),
+    globalNumbering_(mesh_.nFaces())
+{}
 
-        void calcFaceBoundaryData(labelListList& neiGlobal) const;
-
-        void calcCellStencil(labelListList& globalCellFaces) const;
-
-
-public:
-
-    // Constructors
-
-        //- Construct from mesh
-        explicit CFCFaceToCellStencil(const polyMesh&);
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

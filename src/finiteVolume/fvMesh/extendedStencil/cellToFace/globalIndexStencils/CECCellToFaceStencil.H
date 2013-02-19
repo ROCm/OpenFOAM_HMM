@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,20 +21,51 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::CECCellToFaceStencil
+
+Description
+    Combined corresponding cellToCellStencil of owner and neighbour.
+
+SourceFiles
+    CECCellToFaceStencil.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "faceToCellStencil.H"
-#include "polyMesh.H"
+#ifndef CECCellToFaceStencil_H
+#define CECCellToFaceStencil_H
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+#include "cellToFaceStencil.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::faceToCellStencil::faceToCellStencil(const polyMesh& mesh)
+namespace Foam
+{
+
+/*---------------------------------------------------------------------------*\
+                    Class CECCellToFaceStencil Declaration
+\*---------------------------------------------------------------------------*/
+
+class CECCellToFaceStencil
 :
-    mesh_(mesh),
-    globalNumbering_(mesh_.nFaces())
-{}
+    public cellToFaceStencil
+{
+public:
 
+    // Constructors
+
+        //- Construct from all cells and boundary faces
+        explicit CECCellToFaceStencil(const polyMesh&);
+
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

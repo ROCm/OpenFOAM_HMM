@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,54 +22,67 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::FECCellToFaceStencil
+    Foam::faceToCellStencil
 
 Description
-    All cells connected via edge to face.
+    baseclass for extended cell centred addressing. Contains per cell a
+    list of neighbouring faces in global addressing.
 
 SourceFiles
-    FECCellToFaceStencil.C
+    faceToCellStencil.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef FECCellToFaceStencil_H
-#define FECCellToFaceStencil_H
+#ifndef faceToCellStencil_H
+#define faceToCellStencil_H
 
-#include "cellToFaceStencil.H"
-#include "EdgeMap.H"
+#include "globalIndex.H"
+#include "boolList.H"
+#include "HashSet.H"
+#include "indirectPrimitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+class polyMesh;
+
 /*---------------------------------------------------------------------------*\
-                    Class FECCellToFaceStencil Declaration
+                      Class faceToCellStencil Declaration
 \*---------------------------------------------------------------------------*/
 
-class FECCellToFaceStencil
+class faceToCellStencil
 :
-    public cellToFaceStencil
+    public labelListList
 {
-    // Private Member Functions
+    // Private data
 
-        //- Calculates per edge the neighbour data (= edgeCells)
-        void calcEdgeBoundaryData
-        (
-            const boolList& isValidBFace,
-            const labelList& boundaryEdges,
-            EdgeMap<labelList>& neiGlobal
-        ) const;
+        const polyMesh& mesh_;
 
-        void calcFaceStencil(labelListList& faceStencil) const;
-
+        //- Global numbering for faces
+        const globalIndex globalNumbering_;
 
 public:
 
     // Constructors
 
-        //- Construct from all cells and boundary faces
-        explicit FECCellToFaceStencil(const polyMesh&);
+        //- Construct from mesh
+        explicit faceToCellStencil(const polyMesh&);
+
+
+    // Member Functions
+
+        const polyMesh& mesh() const
+        {
+            return mesh_;
+        }
+
+        //- Global numbering for faces
+        const globalIndex& globalNumbering() const
+        {
+            return globalNumbering_;
+        }
 
 };
 

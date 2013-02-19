@@ -23,39 +23,26 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "itoa.H"
+#include "CECCellToFaceStencil.H"
+#include "CECCellToCellStencil.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::CECCellToFaceStencil::CECCellToFaceStencil(const polyMesh& mesh)
+:
+    cellToFaceStencil(mesh)
 {
+    // Calculate per cell the (edge) connected cells (in global numbering)
+    CECCellToCellStencil globalCellCells(mesh);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Add stencils of neighbouring cells to create faceStencil
+    labelListList faceStencil;
+    calcFaceStencil(globalCellCells, faceStencil);
 
-word itoa(const label n)
-{
-    const label offset = '0';
-    const label length = 4;
-
-    char val[length + 1];
-
-    label leftOfN = n;
-
-    for (label i=0; i<length; i++)
-    {
-        label j = label(leftOfN/pow(10, length - i - 1));
-        leftOfN -= j*pow(10, length - i - 1);
-        val[i] = offset + j;
-    }
-
-    val[length] = 0;
-
-    return val;
+    // Transfer to *this
+    transfer(faceStencil);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
