@@ -116,11 +116,19 @@ public:
         }
 
         //- Sum vol field contributions to create cell values
-        template<class Type>
-        tmp<GeometricField<Type, fvPatchField, volMesh> > weightedSum
+        template<class Type, class WeightType>
+        tmp
+        <
+            GeometricField
+            <
+                typename outerProduct<WeightType, Type>::type,
+                fvPatchField,
+                volMesh
+            >
+        > weightedSum
         (
             const GeometricField<Type, fvPatchField, volMesh>& fld,
-            const List<List<scalar> >& stencilWeights
+            const List<List<WeightType> >& stencilWeights
         ) const
         {
             return weightedSum
@@ -131,7 +139,6 @@ public:
                 stencilWeights
             );
         }
-
 };
 
 
