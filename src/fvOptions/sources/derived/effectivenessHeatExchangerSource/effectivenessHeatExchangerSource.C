@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,7 +24,7 @@ License
 
 \*----------------------------------------------------------------------------*/
 
-#include "heatExchangerSource.H"
+#include "effectivenessHeatExchangerSource.H"
 #include "fvMesh.H"
 #include "fvMatrix.H"
 #include "addToRunTimeSelectionTable.H"
@@ -38,11 +38,11 @@ namespace Foam
 {
 namespace fv
 {
-    defineTypeNameAndDebug(heatExchangerSource, 0);
+    defineTypeNameAndDebug(effectivenessHeatExchangerSource, 0);
     addToRunTimeSelectionTable
     (
         option,
-        heatExchangerSource,
+        effectivenessHeatExchangerSource,
         dictionary
     );
 }
@@ -51,7 +51,7 @@ namespace fv
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::fv::heatExchangerSource::init()
+void Foam::fv::effectivenessHeatExchangerSource::init()
 {
     const faceZone& fZone = mesh_.faceZones()[zoneID_];
 
@@ -119,47 +119,32 @@ void Foam::fv::heatExchangerSource::init()
 }
 
 
-void Foam::fv::heatExchangerSource::addHeatSource
+void Foam::fv::effectivenessHeatExchangerSource::calculateTotalArea
 (
-    scalarField& heSource,
-    const labelList& cells,
-    const scalarField& Vcells,
-    const vectorField& U,
-    const scalar Qt,
-    const scalarField& deltaTCells,
-    const scalar totHeat
-) const
+    scalar& area
+)
 {
-    forAll(cells, i)
-    {
-        heSource[cells[i]] -=
-            Qt*Vcells[cells[i]]*mag(U[cells[i]])*deltaTCells[i]/totHeat;
-    }
-}
-
-
-void Foam::fv::heatExchangerSource::calculateTotalArea(scalar& var)
-{
-    var = 0;
+    area = 0;
     forAll(faceId_, i)
     {
         label faceI = faceId_[i];
         if (facePatchId_[i] != -1)
         {
             label patchI = facePatchId_[i];
-            var += mesh_.magSf().boundaryField()[patchI][faceI];
+            area += mesh_.magSf().boundaryField()[patchI][faceI];
         }
         else
         {
-            var += mesh_.magSf()[faceI];
+            area += mesh_.magSf()[faceI];
         }
     }
-    reduce(var, sumOp<scalar>());
+    reduce(area, sumOp<scalar>());
 }
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fv::heatExchangerSource::heatExchangerSource
+Foam::fv::effectivenessHeatExchangerSource::effectivenessHeatExchangerSource
 (
     const word& name,
     const word& modelType,
@@ -187,12 +172,12 @@ Foam::fv::heatExchangerSource::heatExchangerSource
     {
         FatalErrorIn
         (
-            "heatExchangerSource::heatExchangerSource"
+            "effectivenessHeatExchangerSource::effectivenessHeatExchangerSource"
             "("
-            "   const word& name,"
-            "   const word& modelType,"
-            "   const dictionary& dict,"
-            "   const fvMesh& mesh"
+                "const word&, "
+                "const word&, "
+                "const dictionary&, "
+                "const fvMesh&"
             ")"
         )
             << type() << " " << this->name() << ": "
@@ -208,14 +193,14 @@ Foam::fv::heatExchangerSource::heatExchangerSource
 
     init();
 
-    Info<< "    - creating heatExchangerSource: "
+    Info<< "    - creating effectivenessHeatExchangerSource: "
         << this->name() << endl;
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::fv::heatExchangerSource::addSup
+void Foam::fv::effectivenessHeatExchangerSource::addSup
 (
     fvMatrix<scalar>& eqn,
     const label
@@ -224,7 +209,7 @@ void Foam::fv::heatExchangerSource::addSup
     const basicThermo& thermo =
         mesh_.lookupObject<basicThermo>("thermophysicalProperties");
 
-    const surfaceScalarField Cpf = fvc::interpolate(thermo.Cp());
+    const surfaceScalarField Cpf(fvc::interpolate(thermo.Cp()));
 
     const surfaceScalarField& phi =
         mesh_.lookupObject<surfaceScalarField>(phiName_);
@@ -241,7 +226,7 @@ void Foam::fv::heatExchangerSource::addSup
 
             CpfMean +=
                 Cpf.boundaryField()[patchI][faceI]
-              * mesh_.magSf().boundaryField()[patchI][faceI];
+               *mesh_.magSf().boundaryField()[patchI][faceI];
         }
         else
         {
@@ -254,8 +239,8 @@ void Foam::fv::heatExchangerSource::addSup
 
     scalar Qt =
         eTable_()(mag(totalphi), secondaryMassFlowRate_)
-        * (secondaryInletT_ - primaryInletT_)
-        * (CpfMean/faceZoneArea_)*mag(totalphi);
+       *(secondaryInletT_ - primaryInletT_)
+       *(CpfMean/faceZoneArea_)*mag(totalphi);
 
     const volScalarField& T = mesh_.lookupObject<volScalarField>(TName_);
     const scalarField TCells(T, cells_);
@@ -285,19 +270,23 @@ void Foam::fv::heatExchangerSource::addSup
     }
 
     const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
-    const scalarField& cellsV = mesh_.V();
-    scalar totHeat = 0;
+    const scalarField& V = mesh_.V();
+    scalar sumWeight = 0;
     forAll(cells_, i)
     {
-        totHeat += cellsV[cells_[i]]*mag(U[cells_[i]])*deltaTCells[i];
+        sumWeight += V[cells_[i]]*mag(U[cells_[i]])*deltaTCells[i];
     }
-    reduce(totHeat, sumOp<scalar>());
+    reduce(sumWeight, sumOp<scalar>());
 
-    scalarField& heSource = eqn.source();
-
-    if (V() > VSMALL && mag(Qt) > VSMALL)
+    if (this->V() > VSMALL && mag(Qt) > VSMALL)
     {
-        addHeatSource(heSource, cells_, cellsV, U, Qt, deltaTCells, totHeat);
+        scalarField& heSource = eqn.source();
+
+        forAll(cells_, i)
+        {
+            heSource[cells_[i]] -=
+                Qt*V[cells_[i]]*mag(U[cells_[i]])*deltaTCells[i]/sumWeight;
+        }
     }
 
     if (debug && Pstream::master())
@@ -311,14 +300,14 @@ void Foam::fv::heatExchangerSource::addSup
 }
 
 
-void Foam::fv::heatExchangerSource::writeData(Ostream& os) const
+void Foam::fv::effectivenessHeatExchangerSource::writeData(Ostream& os) const
 {
     os  << indent << name_ << endl;
     dict_.write(os);
 }
 
 
-bool Foam::fv::heatExchangerSource::read(const dictionary& dict)
+bool Foam::fv::effectivenessHeatExchangerSource::read(const dictionary& dict)
 {
     if (option::read(dict))
     {

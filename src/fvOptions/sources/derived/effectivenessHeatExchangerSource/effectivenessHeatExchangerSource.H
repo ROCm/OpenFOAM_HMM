@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::fv::heatExchangerSource
+    Foam::fv::effectivenessHeatExchangerSource
 
 Description
     Heat exchanger source model.
@@ -40,25 +40,25 @@ Description
 
     Then the distribution inside the hear exchanger is given by:
 
-    Qcell = V*Ucell*(Tcell - Tref)/sum(V*Ucell*(Tcell - Tref));
+    Qcell = Vcell*|Ucell|*(Tcell - Tref)/sum(Vcell*|Ucell|*(Tcell - Tref));
 
     where:
         Qcell is the source for cell
-        V is the volume of the cell
+        Vcell is the volume of the cell
         Ucell is the local cell velocity
         Tcell is the local call temperature
         Tref : min(T) or max(T) in the cell zone depending on the sign of Qt
 
     Example :
 
-    heatExchangerSource1
+    effectivenessHeatExchangerSource1
     {
-        type            heatExchangerSource;
+        type            effectivenessHeatExchangerSource;
         active          true;
         selectionMode   cellZone;
         cellZone        porosity;
 
-        heatExchangerSourceCoeffs
+        effectivenessHeatExchangerSourceCoeffs
         {
             fieldNames              (e);
             secondaryMassFlowRate   1.0;
@@ -79,12 +79,12 @@ Description
 
 
 SourceFiles
-    heatExchangerSource.C
+    effectivenessHeatExchangerSource.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef heatExchangerSource_H
-#define heatExchangerSource_H
+#ifndef effectivenessHeatExchangerSource_H
+#define effectivenessHeatExchangerSource_H
 
 #include "fvOption.H"
 #include "autoPtr.H"
@@ -98,10 +98,10 @@ namespace fv
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class heatExchangerSource Declaration
+                     Class effectivenessHeatExchangerSource Declaration
 \*---------------------------------------------------------------------------*/
 
-class heatExchangerSource
+class effectivenessHeatExchangerSource
 :
     public option
 {
@@ -158,41 +158,31 @@ private:
 
 
         //- Disallow default bitwise copy construct
-        heatExchangerSource(const heatExchangerSource&);
+        effectivenessHeatExchangerSource
+        (
+            const effectivenessHeatExchangerSource&
+        );
 
         //- Disallow default bitwise assignment
-        void operator=(const heatExchangerSource&);
-
-        //- Add heat source
-        void addHeatSource
-        (
-            scalarField& Tsource,
-            const labelList& cells,
-            const scalarField& V,
-            const vectorField& U,
-            const scalar Qt,
-            const scalarField& deltaTref,
-            const scalar totalHeat
-        ) const;
+        void operator=(const effectivenessHeatExchangerSource&);
 
         //- Init heat exchanger source model
         void init();
 
         //- Calculate total area of faceZone accross procesors
-        void calculateTotalArea(scalar& var);
-
+        void calculateTotalArea(scalar& area);
 
 
 public:
 
     //- Runtime type information
-    TypeName("heatExchangerSource");
+    TypeName("effectivenessHeatExchangerSource");
 
 
     // Constructors
 
         //- Construct from components
-        heatExchangerSource
+        effectivenessHeatExchangerSource
         (
             const word& name,
             const word& modelType,
@@ -202,7 +192,7 @@ public:
 
 
     //- Destructor
-    virtual ~heatExchangerSource()
+    virtual ~effectivenessHeatExchangerSource()
     {}
 
 

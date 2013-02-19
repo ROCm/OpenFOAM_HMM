@@ -161,6 +161,12 @@ public:
         //- Const access to the coefficients dictionary
         virtual const dictionary& coeffDict() const = 0;
 
+        //- Helper function to return the nam eof the turbulence G field
+        inline word GName() const
+        {
+            return word(type() + ":G");
+        }
+
         //- Access function to density field
         const volScalarField& rho() const
         {
