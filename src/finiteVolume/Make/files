@@ -60,6 +60,8 @@ $(cellToCell)/globalIndexStencils/CFCCellToCellStencil.C
 $(cellToCell)/globalIndexStencils/CPCCellToCellStencil.C
 $(cellToCell)/globalIndexStencils/CECCellToCellStencil.C
 $(cellToCell)/MeshObjects/centredCECCellToCellStencilObject.C
+$(cellToCell)/MeshObjects/centredCFCCellToCellStencilObject.C
+$(cellToCell)/MeshObjects/centredCPCCellToCellStencilObject.C
 
 cellToFace = $(extendedStencil)/cellToFace
 $(cellToFace)/globalIndexStencils/cellToFaceStencil.C
