@@ -25,54 +25,67 @@ License
 
 #include "volFields.H"
 
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class CompType, class SolidThermo>
+template<class CompType, class SolidThermo, class GasThermo>
 inline Foam::PtrList<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >&
-Foam::solidChemistryModel<CompType, SolidThermo>::RRs()
+Foam::pyrolysisChemistryModel<CompType, SolidThermo, GasThermo>::RRg()
 {
-    return RRs_;
-}
-
-template<class CompType, class SolidThermo>
-inline const Foam::PtrList<Foam::Reaction<SolidThermo> >&
-Foam::solidChemistryModel<CompType, SolidThermo>::reactions() const
-{
-    return reactions_;
+    return RRg_;
 }
 
 
-template<class CompType, class SolidThermo>
+template<class CompType, class SolidThermo, class GasThermo>
+inline const Foam::PtrList<GasThermo>&
+Foam::pyrolysisChemistryModel<CompType, SolidThermo, GasThermo>::
+gasThermo() const
+{
+    return gasThermo_;
+}
+
+
+template<class CompType, class SolidThermo, class GasThermo>
+inline const Foam::speciesTable&
+Foam::pyrolysisChemistryModel<CompType, SolidThermo, GasThermo>::
+gasTable() const
+{
+    return pyrolisisGases_;
+}
+
+
+template<class CompType, class SolidThermo, class GasThermo>
 inline Foam::label
-Foam::solidChemistryModel<CompType, SolidThermo>::
-nReaction() const
+Foam::pyrolysisChemistryModel<CompType, SolidThermo, GasThermo>::
+nSpecie() const
 {
-    return nReaction_;
+    return nSpecie_;
 }
 
 
-template<class CompType, class SolidThermo>
+template<class CompType, class SolidThermo, class GasThermo>
 inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
-Foam::solidChemistryModel<CompType, SolidThermo>::RRs
+Foam::pyrolysisChemistryModel<CompType, SolidThermo, GasThermo>::RRg
 (
     const label i
 ) const
 {
-    return RRs_[i];
+    return RRg_[i];
 }
 
 
-template<class CompType, class SolidThermo>
+template<class CompType, class SolidThermo, class GasThermo>
 inline Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
-Foam::solidChemistryModel<CompType, SolidThermo>::RRs() const
+Foam::pyrolysisChemistryModel<CompType, SolidThermo, GasThermo>::
+RRg() const
 {
-    tmp<DimensionedField<scalar, volMesh> > tRRs
+    tmp<DimensionedField<scalar, volMesh> > tRRg
     (
         new DimensionedField<scalar, volMesh>
         (
             IOobject
             (
-                "RRs",
+                "RRg",
                 this->time().timeName(),
                 this->mesh(),
                 IOobject::NO_READ,
@@ -85,26 +98,12 @@ Foam::solidChemistryModel<CompType, SolidThermo>::RRs() const
 
     if (this->chemistry_)
     {
-        DimensionedField<scalar, volMesh>& RRs = tRRs();
-        for (label i=0; i < nSolids_; i++)
+        DimensionedField<scalar, volMesh>& RRg = tRRg();
+        for (label i=0; i < nGases_; i++)
         {
-            RRs += RRs_[i];
+            RRg += RRg_[i];
         }
     }
-    return tRRs;
+    return tRRg;
 }
-
-
-template<class CompType, class SolidThermo>
-inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
-Foam::solidChemistryModel<CompType, SolidThermo>::RR
-(
-    const label i
-) const
-{
-    notImplemented("solidChemistryModel::RR(const label)");
-    return (DimensionedField<scalar, volMesh>::null());
-}
-
-
 // ************************************************************************* //

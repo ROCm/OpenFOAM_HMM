@@ -21,40 +21,44 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+InClass
+    Foam::basicSolidChemistryModel
+
+Description
+    Creates solid chemistry model instances templated on the type of
+    solid thermodynamics
+
 \*---------------------------------------------------------------------------*/
 
-#include "makeSolidChemistrySolverType.H"
-#include "solidThermoPhysicsTypes.H"
-#include "thermoPhysicsTypes.H"
+#include "makeSolidChemistryModel.H"
 
 #include "pyrolysisChemistryModel.H"
 #include "basicSolidChemistryModel.H"
-
-#include "ode.H"
+#include "solidChemistryModel.H"
+#include "solidThermoPhysicsTypes.H"
+#include "thermoPhysicsTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeSolidChemistrySolverType
+    makeSolidChemistryModel
     (
-        ode,
+        solidChemistryModel,
         pyrolysisChemistryModel,
         basicSolidChemistryModel,
         hConstSolidThermoPhysics,
         gasHThermoPhysics
-    )
+    );
 
-    makeSolidChemistrySolverType
+    makeSolidChemistryModel
     (
-        ode,
+        solidChemistryModel,
         pyrolysisChemistryModel,
         basicSolidChemistryModel,
         hExponentialSolidThermoPhysics,
         gasHThermoPhysics
-    )
-
+    );
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// ************************************************************************* //

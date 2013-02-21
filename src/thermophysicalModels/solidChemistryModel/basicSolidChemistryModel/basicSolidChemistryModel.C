@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,38 +23,34 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "makeSolidChemistrySolverType.H"
-#include "solidThermoPhysicsTypes.H"
-#include "thermoPhysicsTypes.H"
-
-#include "pyrolysisChemistryModel.H"
 #include "basicSolidChemistryModel.H"
+#include "fvMesh.H"
+#include "Time.H"
 
-#include "ode.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
 
 namespace Foam
 {
-    makeSolidChemistrySolverType
-    (
-        ode,
-        pyrolysisChemistryModel,
-        basicSolidChemistryModel,
-        hConstSolidThermoPhysics,
-        gasHThermoPhysics
-    )
-
-    makeSolidChemistrySolverType
-    (
-        ode,
-        pyrolysisChemistryModel,
-        basicSolidChemistryModel,
-        hExponentialSolidThermoPhysics,
-        gasHThermoPhysics
-    )
-
+    defineTypeNameAndDebug(basicSolidChemistryModel, 0);
+    defineRunTimeSelectionTable(basicSolidChemistryModel, fvMesh);
 }
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Foam::basicSolidChemistryModel::basicSolidChemistryModel
+(
+    const fvMesh& mesh
+)
+:
+    basicChemistryModel(mesh),
+    solidThermo_(solidReactionThermo::New(mesh))
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::basicSolidChemistryModel::~basicSolidChemistryModel()
+{}
+
+
+// ************************************************************************* //
