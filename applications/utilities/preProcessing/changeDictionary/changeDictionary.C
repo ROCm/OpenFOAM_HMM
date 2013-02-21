@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -381,7 +381,6 @@ bool merge
 }
 
 
-// Main program:
 
 int main(int argc, char *argv[])
 {
@@ -399,7 +398,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "literalRE",
-        "treat regular expressions literally (ie, as a keyword)"
+        "treat regular expressions literally (i.e., as a keyword)"
     );
     argList::addBoolOption
     (

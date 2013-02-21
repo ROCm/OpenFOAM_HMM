@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,8 @@ Application
     yPlusLES
 
 Description
-    Calculates and reports yPlus for all wall patches, for the specified times.
+    Calculates and reports yPlus for all wall patches, for the specified times
+    when using LES turbulence models.
 
 \*---------------------------------------------------------------------------*/
 

@@ -108,7 +108,6 @@ static const NamedEnum<ExtrudeMode, 2> ExtrudeModeNames;
 //}
 
 
-// Main program:
 
 int main(int argc, char *argv[])
 {

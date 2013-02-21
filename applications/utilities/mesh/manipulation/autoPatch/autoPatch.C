@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -20,6 +20,9 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+Application
+    autoPatch
 
 Description
     Divides external faces into patches based on (user supplied) feature
@@ -64,7 +67,6 @@ void collectFeatureEdges(const boundaryMesh& bMesh, labelList& markedEdges)
 }
 
 
-// Main program:
 
 int main(int argc, char *argv[])
 {

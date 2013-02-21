@@ -2,7 +2,7 @@
  =========                   |
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
-   \\  /     A nd            | Copyright (C) 2011 OpenFOAM Foundation
+   \\  /     A nd            | Copyright (C) 2011-2013 OpenFOAM Foundation
     \\/      M anipulation   |
 -------------------------------------------------------------------------------
 License
@@ -22,11 +22,11 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    momentOfInertiaTest
+    surfaceInertia
 
 Description
-    Calculates the inertia tensor and principal axes and moments of a
-    command line specified triSurface.  Inertia can either be of the
+    Calculates the inertia tensor, principal axes and moments of a
+    command line specified triSurface. Inertia can either be of the
     solid body or of a thin shell.
 
 \*---------------------------------------------------------------------------*/
