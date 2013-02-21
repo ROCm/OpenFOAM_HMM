@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,18 +23,15 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "faceToCellStencil.H"
-#include "polyMesh.H"
+#include "centredCPCCellToCellStencilObject.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-Foam::faceToCellStencil::faceToCellStencil(const polyMesh& mesh)
-:
-    mesh_(mesh),
-    globalNumbering_(mesh_.nFaces())
-{}
+namespace Foam
+{
+    defineTypeNameAndDebug(centredCPCCellToCellStencilObject, 0);
+}
 
 
 // ************************************************************************* //

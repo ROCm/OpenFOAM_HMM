@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,19 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::CFCFaceToCellStencil
+    Foam::FECCellToFaceStencil
 
 Description
+    All cells connected via edge to face.
 
 SourceFiles
-    CFCFaceToCellStencil.C
+    FECCellToFaceStencil.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef CFCFaceToCellStencil_H
-#define CFCFaceToCellStencil_H
+#ifndef FECCellToFaceStencil_H
+#define FECCellToFaceStencil_H
 
-#include "faceToCellStencil.H"
+#include "cellToFaceStencil.H"
+#include "EdgeMap.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,26 +44,33 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class CFCFaceToCellStencil Declaration
+                    Class FECCellToFaceStencil Declaration
 \*---------------------------------------------------------------------------*/
 
-class CFCFaceToCellStencil
+class FECCellToFaceStencil
 :
-    public faceToCellStencil
+    public cellToFaceStencil
 {
     // Private Member Functions
 
-        void calcFaceBoundaryData(labelListList& neiGlobal) const;
+        //- Calculates per edge the neighbour data (= edgeCells)
+        void calcEdgeBoundaryData
+        (
+            const boolList& isValidBFace,
+            const labelList& boundaryEdges,
+            EdgeMap<labelList>& neiGlobal
+        ) const;
 
-        void calcCellStencil(labelListList& globalCellFaces) const;
+        void calcFaceStencil(labelListList& faceStencil) const;
 
 
 public:
 
     // Constructors
 
-        //- Construct from mesh
-        explicit CFCFaceToCellStencil(const polyMesh&);
+        //- Construct from all cells and boundary faces
+        explicit FECCellToFaceStencil(const polyMesh&);
+
 };
 
 

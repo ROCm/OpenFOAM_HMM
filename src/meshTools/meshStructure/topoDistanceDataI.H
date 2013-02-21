@@ -52,7 +52,7 @@ inline Foam::topoDistanceData::topoDistanceData
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class TrackingData>
+template<class TrackingData>
 inline bool Foam::topoDistanceData::valid(TrackingData& td) const
 {
     return distance_ != -1;
@@ -60,7 +60,7 @@ inline bool Foam::topoDistanceData::valid(TrackingData& td) const
 
 
 // No geometric data so never any problem on cyclics
-template <class TrackingData>
+template<class TrackingData>
 inline bool Foam::topoDistanceData::sameGeometry
 (
     const polyMesh&,
@@ -74,7 +74,7 @@ inline bool Foam::topoDistanceData::sameGeometry
 
 
 // No geometric data.
-template <class TrackingData>
+template<class TrackingData>
 inline void Foam::topoDistanceData::leaveDomain
 (
     const polyMesh&,
@@ -87,7 +87,7 @@ inline void Foam::topoDistanceData::leaveDomain
 
 
 // No geometric data.
-template <class TrackingData>
+template<class TrackingData>
 inline void Foam::topoDistanceData::transform
 (
     const polyMesh&,
@@ -98,7 +98,7 @@ inline void Foam::topoDistanceData::transform
 
 
 // No geometric data.
-template <class TrackingData>
+template<class TrackingData>
 inline void Foam::topoDistanceData::enterDomain
 (
     const polyMesh&,
@@ -111,7 +111,7 @@ inline void Foam::topoDistanceData::enterDomain
 
 
 // Update cell with neighbouring face information
-template <class TrackingData>
+template<class TrackingData>
 inline bool Foam::topoDistanceData::updateCell
 (
     const polyMesh&,
@@ -135,7 +135,7 @@ inline bool Foam::topoDistanceData::updateCell
 
 
 // Update face with neighbouring cell information
-template <class TrackingData>
+template<class TrackingData>
 inline bool Foam::topoDistanceData::updateFace
 (
     const polyMesh& mesh,
@@ -162,7 +162,7 @@ inline bool Foam::topoDistanceData::updateFace
 
 
 // Update face with coupled face information
-template <class TrackingData>
+template<class TrackingData>
 inline bool Foam::topoDistanceData::updateFace
 (
     const polyMesh&,
@@ -185,7 +185,7 @@ inline bool Foam::topoDistanceData::updateFace
 }
 
 
-template <class TrackingData>
+template<class TrackingData>
 inline bool Foam::topoDistanceData::equal
 (
     const topoDistanceData& rhs,

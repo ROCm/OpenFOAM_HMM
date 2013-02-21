@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
         // test pre check variable if there is a moving mesh
         if (meshMoving)
         {
-            geomFileName = prepend + "***";
+            geomFileName = prepend + "****";
         }
 
         ensightCaseFile
@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
             <<  (
                     "measured:     1     "
                   + prepend
-                  + "***."
+                  + "****."
                   + cloudIter.key()
                 ).c_str()
             << nl;

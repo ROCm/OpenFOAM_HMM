@@ -291,7 +291,7 @@ void separateList
 
 
 // Synchronise points on both sides of coupled boundaries.
-template <class CombineOp>
+template<class CombineOp>
 void syncPoints
 (
     const polyMesh& mesh,

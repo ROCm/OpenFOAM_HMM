@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,19 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::cellToFaceStencil
+    Foam::cellToCellStencil
 
 Description
-    Base class for extended cell-to-face stencils (face values from
-    neighbouring cells)
+    baseclass for extended cell centred addressing. Contains per cell a
+    list of neighbouring cells and/or boundaryfaces in global addressing.
 
 SourceFiles
-    faceStencil.C
+    cellToCellStencil.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellToFaceStencil_H
-#define cellToFaceStencil_H
+#ifndef cellToCellStencil_H
+#define cellToCellStencil_H
 
 #include "globalIndex.H"
 #include "boolList.H"
@@ -49,10 +49,10 @@ namespace Foam
 class polyMesh;
 
 /*---------------------------------------------------------------------------*\
-                      Class cellToFaceStencil Declaration
+                      Class cellToCellStencil Declaration
 \*---------------------------------------------------------------------------*/
 
-class cellToFaceStencil
+class cellToCellStencil
 :
     public labelListList
 {
@@ -88,7 +88,7 @@ protected:
         class unionEqOp
         {
             public:
-            void operator()( labelList& x, const labelList& y ) const;
+            void operator()(labelList& x, const labelList& y) const;
         };
 
         //- Collect cell neighbours of faces in global numbering
@@ -110,20 +110,12 @@ protected:
         ) const;
 
 
-        //- Collect cell neighbours into extended stencil
-        void calcFaceStencil
-        (
-            const labelListList& globalCellCells,
-            labelListList& faceStencil
-        ) const;
-
-
 public:
 
     // Constructors
 
         //- Construct from mesh
-        explicit cellToFaceStencil(const polyMesh&);
+        explicit cellToCellStencil(const polyMesh&);
 
 
     // Member Functions
