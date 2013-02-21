@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,28 +21,56 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::CFCCellToCellStencil
+
+Description
+
+SourceFiles
+    CFCCellToCellStencil.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "CECCellToFaceStencil.H"
-#include "CECCellToCellStencil.H"
+#ifndef CFCCellToCellStencil_H
+#define CFCCellToCellStencil_H
 
+#include "cellToCellStencil.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::CECCellToFaceStencil::CECCellToFaceStencil(const polyMesh& mesh)
-:
-    cellToFaceStencil(mesh)
+namespace Foam
 {
-    // Calculate per cell the (edge) connected cells (in global numbering)
-    CECCellToCellStencil globalCellCells(mesh);
 
-    // Add stencils of neighbouring cells to create faceStencil
-    labelListList faceStencil;
-    calcFaceStencil(globalCellCells, faceStencil);
+/*---------------------------------------------------------------------------*\
+                    Class CFCCellToCellStencil Declaration
+\*---------------------------------------------------------------------------*/
 
-    // Transfer to *this
-    transfer(faceStencil);
-}
+class CFCCellToCellStencil
+:
+    public cellToCellStencil
+{
+    // Private Member Functions
 
+        void calcFaceBoundaryData(labelList& neiGlobal) const;
+
+        void calcCellStencil(labelListList& globalCellCells) const;
+
+
+public:
+
+    // Constructors
+
+        //- Construct from mesh
+        explicit CFCCellToCellStencil(const polyMesh& mesh);
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

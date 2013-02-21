@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,20 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::CFCCellToFaceStencil
+    Foam::centredCFCCellToCellStencilObject
 
 Description
-    Combined corresponding cellToCellStencil of owner and neighbour.
 
 SourceFiles
-    CFCCellToFaceStencil.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef CFCCellToFaceStencil_H
-#define CFCCellToFaceStencil_H
+#ifndef centredCFCCellToCellStencilObject_H
+#define centredCFCCellToCellStencilObject_H
 
-#include "cellToFaceStencil.H"
+#include "extendedCentredCellToCellStencil.H"
+#include "CFCCellToCellStencil.H"
+#include "MeshObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,19 +43,35 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class CFCCellToFaceStencil Declaration
+              Class centredCFCCellToCellStencilObject Declaration
 \*---------------------------------------------------------------------------*/
 
-class CFCCellToFaceStencil
+class centredCFCCellToCellStencilObject
 :
-    public cellToFaceStencil
+    public MeshObject<fvMesh, centredCFCCellToCellStencilObject>,
+    public extendedCentredCellToCellStencil
 {
+
 public:
+
+    TypeName("centredCFCCellToCellStencil");
 
     // Constructors
 
-        //- Construct from mesh
-        explicit CFCCellToFaceStencil(const polyMesh&);
+        //- Construct from uncompacted cell stencil
+        explicit centredCFCCellToCellStencilObject
+        (
+            const fvMesh& mesh
+        )
+        :
+            MeshObject<fvMesh, centredCFCCellToCellStencilObject>(mesh),
+            extendedCentredCellToCellStencil(CFCCellToCellStencil(mesh))
+        {}
+
+
+    //- Destructor
+    virtual ~centredCFCCellToCellStencilObject()
+    {}
 };
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,56 +21,17 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::CFCCellToCellStencil
-
-Description
-
-SourceFiles
-    CFCCellToCellStencil.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef CFCCellToCellStencil_H
-#define CFCCellToCellStencil_H
+#include "centredCFCCellToCellStencilObject.H"
 
-#include "cellToCellStencil.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(centredCFCCellToCellStencilObject, 0);
+}
 
-/*---------------------------------------------------------------------------*\
-                    Class CFCCellToCellStencil Declaration
-\*---------------------------------------------------------------------------*/
-
-class CFCCellToCellStencil
-:
-    public cellToCellStencil
-{
-    // Private Member Functions
-
-        void calcFaceBoundaryData(labelList& neiGlobal) const;
-
-        void calcCellStencil(labelListList& globalCellCells) const;
-
-
-public:
-
-    // Constructors
-
-        //- Construct from mesh
-        explicit CFCCellToCellStencil(const polyMesh& mesh);
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

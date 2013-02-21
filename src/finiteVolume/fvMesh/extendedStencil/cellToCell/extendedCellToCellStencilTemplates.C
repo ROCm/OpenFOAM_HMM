@@ -24,28 +24,40 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "extendedCellToCellStencil.H"
+#include "extendedCellToFaceStencil.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
-Foam::extendedCellToCellStencil::weightedSum
+template<class Type, class WeightType>
+Foam::tmp
+<
+    Foam::GeometricField
+    <
+        typename Foam::outerProduct<WeightType, Type>::type,
+        Foam::fvPatchField,
+        Foam::volMesh
+    >
+> Foam::extendedCellToCellStencil::weightedSum
 (
     const mapDistribute& map,
     const labelListList& stencil,
     const GeometricField<Type, fvPatchField, volMesh>& fld,
-    const List<List<scalar> >& stencilWeights
+    const List<List<WeightType> >& stencilWeights
 )
 {
+    typedef typename outerProduct<WeightType, Type>::type WeightedType;
+    typedef GeometricField<WeightedType, fvPatchField, volMesh>
+        WeightedFieldType;
+
     const fvMesh& mesh = fld.mesh();
 
     // Collect internal and boundary values
     List<List<Type> > stencilFld;
-    collectData(map, stencil, fld, stencilFld);
+    extendedCellToFaceStencil::collectData(map, stencil, fld, stencilFld);
 
-    tmp<GeometricField<Type, fvPatchField, volMesh> > tsfCorr
+    tmp<WeightedFieldType> twf
     (
-        new GeometricField<Type, fvPatchField, volMesh>
+        new WeightedFieldType
         (
             IOobject
             (
@@ -54,31 +66,31 @@ Foam::extendedCellToCellStencil::weightedSum
                 mesh
             ),
             mesh,
-            dimensioned<Type>
+            dimensioned<WeightedType>
             (
                 fld.name(),
                 fld.dimensions(),
-                pTraits<Type>::zero
+                pTraits<WeightedType>::zero
             )
         )
     );
-    GeometricField<Type, fvPatchField, volMesh>& sf = tsfCorr();
+    WeightedFieldType& wf = twf();
 
     // cells
-    forAll(sf, cellI)
+    forAll(wf, cellI)
     {
         const List<Type>& stField = stencilFld[cellI];
-        const List<scalar>& stWeight = stencilWeights[cellI];
+        const List<WeightType>& stWeight = stencilWeights[cellI];
 
         forAll(stField, i)
         {
-            sf[cellI] += stField[i]*stWeight[i];
+            wf[cellI] += stWeight[i]*stField[i];
         }
     }
 
     // Boundaries values?
 
-    return tsfCorr;
+    return twf;
 }
 
 

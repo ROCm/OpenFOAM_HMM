@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,21 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::FECCellToFaceStencil
+    Foam::CFCCellToFaceStencil
 
 Description
-    All cells connected via edge to face.
+    Combined corresponding cellToCellStencil of owner and neighbour.
 
 SourceFiles
-    FECCellToFaceStencil.C
+    CFCCellToFaceStencil.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef FECCellToFaceStencil_H
-#define FECCellToFaceStencil_H
+#ifndef CFCCellToFaceStencil_H
+#define CFCCellToFaceStencil_H
 
 #include "cellToFaceStencil.H"
-#include "EdgeMap.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,33 +43,19 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class FECCellToFaceStencil Declaration
+                    Class CFCCellToFaceStencil Declaration
 \*---------------------------------------------------------------------------*/
 
-class FECCellToFaceStencil
+class CFCCellToFaceStencil
 :
     public cellToFaceStencil
 {
-    // Private Member Functions
-
-        //- Calculates per edge the neighbour data (= edgeCells)
-        void calcEdgeBoundaryData
-        (
-            const boolList& isValidBFace,
-            const labelList& boundaryEdges,
-            EdgeMap<labelList>& neiGlobal
-        ) const;
-
-        void calcFaceStencil(labelListList& faceStencil) const;
-
-
 public:
 
     // Constructors
 
-        //- Construct from all cells and boundary faces
-        explicit FECCellToFaceStencil(const polyMesh&);
-
+        //- Construct from mesh
+        explicit CFCCellToFaceStencil(const polyMesh&);
 };
 
 
