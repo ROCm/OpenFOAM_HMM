@@ -236,7 +236,7 @@ inline bool Foam::refinementData::updateFace
 }
 
 
-template <class TrackingData>
+template<class TrackingData>
 inline bool Foam::refinementData::equal
 (
     const refinementData& rhs,

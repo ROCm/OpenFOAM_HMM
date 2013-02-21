@@ -67,7 +67,7 @@ namespace Foam
                  Class uniformInterpolationTable Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class Type>
+template<class Type>
 class uniformInterpolationTable
 :
     public IOobject,

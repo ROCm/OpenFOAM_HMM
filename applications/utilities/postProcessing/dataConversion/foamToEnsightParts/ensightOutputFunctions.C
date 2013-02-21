@@ -207,7 +207,7 @@ void Foam::ensightLagrangianField
 
 
 //- write generalized field components
-template <class Type>
+template<class Type>
 void Foam::ensightVolField
 (
     const ensightParts& partsList,

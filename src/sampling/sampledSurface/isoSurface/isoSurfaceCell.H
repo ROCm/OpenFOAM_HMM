@@ -357,7 +357,7 @@ public:
 
         //- Interpolates cCoords,pCoords. Takes the original fields
         //  used to create the iso surface.
-        template <class Type>
+        template<class Type>
         tmp<Field<Type> > interpolate
         (
             const scalarField& cVals,
@@ -367,7 +367,7 @@ public:
         ) const;
 
         //- Interpolates cCoords,pCoords.
-        template <class Type>
+        template<class Type>
         tmp<Field<Type> > interpolate
         (
             const Field<Type>& cCoords,

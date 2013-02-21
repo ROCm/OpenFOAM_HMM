@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "extendedCellToCellStencil.H"
+#include "extendedCellToFaceStencil.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -52,7 +53,7 @@ Foam::tmp
 
     // Collect internal and boundary values
     List<List<Type> > stencilFld;
-    collectData(map, stencil, fld, stencilFld);
+    extendedCellToFaceStencil::collectData(map, stencil, fld, stencilFld);
 
     tmp<WeightedFieldType> twf
     (
@@ -65,11 +66,11 @@ Foam::tmp
                 mesh
             ),
             mesh,
-            dimensioned<Type>
+            dimensioned<WeightedType>
             (
                 fld.name(),
                 fld.dimensions(),
-                pTraits<Type>::zero
+                pTraits<WeightedType>::zero
             )
         )
     );

@@ -47,7 +47,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template <class T, class CombineOp>
+template<class T, class CombineOp>
 void combineReduce
 (
     const List<UPstream::commsStruct>& comms,
@@ -61,7 +61,7 @@ void combineReduce
 }
 
 
-template <class T, class CombineOp>
+template<class T, class CombineOp>
 void combineReduce
 (
     T& Value,

@@ -163,7 +163,7 @@ inline bool Foam::patchEdgeFaceRegion::updateFace
 }
 
 
-template <class TrackingData>
+template<class TrackingData>
 inline bool Foam::patchEdgeFaceRegion::equal
 (
     const patchEdgeFaceRegion& rhs,

@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::ORourkeCollision<CloudType>::ORourkeCollision
 (
     const dictionary& dict,
@@ -39,7 +39,7 @@ Foam::ORourkeCollision<CloudType>::ORourkeCollision
 {}
 
 
-template <class CloudType>
+template<class CloudType>
 Foam::ORourkeCollision<CloudType>::ORourkeCollision
 (
     const ORourkeCollision<CloudType>& cm
@@ -52,7 +52,7 @@ Foam::ORourkeCollision<CloudType>::ORourkeCollision
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::ORourkeCollision<CloudType>::~ORourkeCollision()
 {}
 

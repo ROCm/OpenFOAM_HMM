@@ -32,7 +32,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-template <class Type>
+template<class Type>
 Ostream& operator<<
 (
     Ostream& os,
@@ -45,7 +45,7 @@ Ostream& operator<<
 }
 
 
-template <class Type>
+template<class Type>
 Istream& operator>>
 (
     Istream& is,

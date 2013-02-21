@@ -177,7 +177,7 @@ inline bool Foam::smoothData::updateFace
 }
 
 
-template <class TrackingData>
+template<class TrackingData>
 inline bool Foam::smoothData::equal
 (
     const smoothData& rhs,

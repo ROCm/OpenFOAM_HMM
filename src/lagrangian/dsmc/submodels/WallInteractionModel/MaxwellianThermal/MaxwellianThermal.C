@@ -30,7 +30,7 @@ using namespace Foam::constant;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::MaxwellianThermal<CloudType>::MaxwellianThermal
 (
     const dictionary& dict,
@@ -43,14 +43,14 @@ Foam::MaxwellianThermal<CloudType>::MaxwellianThermal
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::MaxwellianThermal<CloudType>::~MaxwellianThermal()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 void Foam::MaxwellianThermal<CloudType>::correct
 (
     typename CloudType::parcelType& p,

@@ -53,7 +53,7 @@ TemplateName(MeshWave);
                            Class MeshWave Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class Type, class TrackingData = int>
+template<class Type, class TrackingData = int>
 class MeshWave
 :
     public MeshWaveName

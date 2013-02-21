@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-template <class Type>
+template<class Type>
 void Foam::calcTypes::components::writeComponentFields
 (
     const IOobject& header,

@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::LISAAtomization<CloudType>::LISAAtomization
 (
     const dictionary& dict,
@@ -62,7 +62,7 @@ Foam::LISAAtomization<CloudType>::LISAAtomization
     }
 }
 
-template <class CloudType>
+template<class CloudType>
 Foam::LISAAtomization<CloudType>::LISAAtomization
 (
     const LISAAtomization<CloudType>& am
@@ -80,7 +80,7 @@ Foam::LISAAtomization<CloudType>::LISAAtomization
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::LISAAtomization<CloudType>::~LISAAtomization()
 {}
 

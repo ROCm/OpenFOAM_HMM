@@ -30,7 +30,7 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template <class Type>
+template<class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::sampledIsoSurface::sampleField
 (
@@ -44,7 +44,7 @@ Foam::sampledIsoSurface::sampleField
 }
 
 
-template <class Type>
+template<class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::sampledIsoSurface::interpolateField
 (

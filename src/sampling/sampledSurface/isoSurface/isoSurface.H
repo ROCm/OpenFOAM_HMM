@@ -427,7 +427,7 @@ public:
 
         //- Interpolates cCoords,pCoords. Uses the references to the original
         //  fields used to create the iso surface.
-        template <class Type>
+        template<class Type>
         tmp<Field<Type> > interpolate
         (
             const GeometricField<Type, fvPatchField, volMesh>& cCoords,

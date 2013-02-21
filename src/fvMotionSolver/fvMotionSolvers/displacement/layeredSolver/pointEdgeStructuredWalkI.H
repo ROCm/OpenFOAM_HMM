@@ -264,7 +264,7 @@ inline bool Foam::pointEdgeStructuredWalk::updateEdge
 }
 
 
-template <class TrackingData>
+template<class TrackingData>
 inline bool Foam::pointEdgeStructuredWalk::equal
 (
     const pointEdgeStructuredWalk& rhs,

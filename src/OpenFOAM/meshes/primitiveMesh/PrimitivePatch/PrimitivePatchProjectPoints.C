@@ -41,7 +41,7 @@ template
     class PointField,
     class PointType
 >
-template <class ToPatch>
+template<class ToPatch>
 Foam::List<Foam::objectHit>
 Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
 projectPoints
@@ -288,7 +288,7 @@ template
     class PointField,
     class PointType
 >
-template <class ToPatch>
+template<class ToPatch>
 Foam::List<Foam::objectHit>
 Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
 projectFaceCentres

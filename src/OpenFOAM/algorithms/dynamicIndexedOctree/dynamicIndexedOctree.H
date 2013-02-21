@@ -74,7 +74,7 @@ TemplateName(dynamicIndexedOctree);
                            Class dynamicIndexedOctree Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class Type>
+template<class Type>
 class dynamicIndexedOctree
 :
     public dynamicIndexedOctreeName
@@ -372,7 +372,7 @@ private:
             ) const;
 
 
-            template <class CompareOp>
+            template<class CompareOp>
             static void findNear
             (
                 const scalar nearDist,
@@ -632,7 +632,7 @@ public:
 
             //- Find near pairs and apply CompareOp to them.
             //  tree2 can be *this or different tree.
-            template <class CompareOp>
+            template<class CompareOp>
             void findNear
             (
                 const scalar nearDist,

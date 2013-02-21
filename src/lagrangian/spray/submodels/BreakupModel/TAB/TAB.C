@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::TAB<CloudType>::TAB
 (
     const dictionary& dict,
@@ -80,7 +80,7 @@ Foam::TAB<CloudType>::TAB
 }
 
 
-template <class CloudType>
+template<class CloudType>
 Foam::TAB<CloudType>::TAB(const TAB<CloudType>& bum)
 :
     BreakupModel<CloudType>(bum),
@@ -93,7 +93,7 @@ Foam::TAB<CloudType>::TAB(const TAB<CloudType>& bum)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::TAB<CloudType>::~TAB()
 {}
 

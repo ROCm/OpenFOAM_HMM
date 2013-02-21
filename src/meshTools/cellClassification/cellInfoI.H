@@ -244,7 +244,7 @@ inline bool Foam::cellInfo::updateFace
 }
 
 
-template <class TrackingData>
+template<class TrackingData>
 inline bool Foam::cellInfo::equal
 (
     const cellInfo& rhs,

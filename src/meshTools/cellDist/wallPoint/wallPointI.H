@@ -277,7 +277,7 @@ inline bool Foam::wallPoint::updateFace
 }
 
 
-template <class TrackingData>
+template<class TrackingData>
 inline bool Foam::wallPoint::equal
 (
     const wallPoint& rhs,

@@ -44,7 +44,7 @@ defineTypeNameAndDebug(removePoints, 0);
 
 //- Combine-reduce operator to combine data on faces. Takes care
 //  of reverse orientation on coupled face.
-template <class T, template<class> class CombineOp>
+template<class T, template<class> class CombineOp>
 class faceEqOp
 {
 
@@ -73,7 +73,7 @@ public:
 
 
 //// Dummy transform for List. Used in synchronisation.
-//template <class T>
+//template<class T>
 //class dummyTransformList
 //{
 //public:

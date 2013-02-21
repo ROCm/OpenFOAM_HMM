@@ -31,7 +31,7 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template <class Type>
+template<class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::sampledCuttingPlane::sampleField
 (
@@ -42,7 +42,7 @@ Foam::sampledCuttingPlane::sampleField
 }
 
 
-template <class Type>
+template<class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::sampledCuttingPlane::interpolateField
 (

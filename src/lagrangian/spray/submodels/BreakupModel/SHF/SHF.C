@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::SHF<CloudType>::SHF
 (
     const dictionary& dict,
@@ -67,7 +67,7 @@ Foam::SHF<CloudType>::SHF
 {}
 
 
-template <class CloudType>
+template<class CloudType>
 Foam::SHF<CloudType>::SHF(const SHF<CloudType>& bum)
 :
     BreakupModel<CloudType>(bum),
@@ -105,7 +105,7 @@ Foam::SHF<CloudType>::SHF(const SHF<CloudType>& bum)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::SHF<CloudType>::~SHF()
 {}
 

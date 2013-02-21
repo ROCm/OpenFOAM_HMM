@@ -193,7 +193,7 @@ inline bool Foam::sweepData::updateFace
 }
 
 
-template <class TrackingData>
+template<class TrackingData>
 inline bool Foam::sweepData::equal
 (
     const sweepData& rhs,

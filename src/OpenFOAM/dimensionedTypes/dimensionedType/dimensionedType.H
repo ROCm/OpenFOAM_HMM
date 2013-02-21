@@ -61,7 +61,7 @@ class dictionary;
                            Class dimensioned Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class Type>
+template<class Type>
 class dimensioned
 {
     // private data

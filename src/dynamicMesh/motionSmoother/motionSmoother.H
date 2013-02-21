@@ -179,7 +179,7 @@ class motionSmoother
     // Private Member Functions
 
         //- Average of connected points.
-        template <class Type>
+        template<class Type>
         tmp<GeometricField<Type, pointPatchField, pointMesh> > avg
         (
             const GeometricField<Type, pointPatchField, pointMesh>& fld,
@@ -187,7 +187,7 @@ class motionSmoother
         ) const;
 
         //- Average postion of connected points.
-        template <class Type>
+        template<class Type>
         tmp<GeometricField<Type, pointPatchField, pointMesh> > avgPositions
         (
             const GeometricField<Type, pointPatchField, pointMesh>& fld,
@@ -510,7 +510,7 @@ public:
 
                 //- Fully explicit smoothing of fields (not positions)
                 //  of internal points with varying diffusivity.
-                template <class Type>
+                template<class Type>
                 void smooth
                 (
                     const GeometricField<Type, pointPatchField, pointMesh>& fld,

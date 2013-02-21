@@ -103,14 +103,14 @@ class fvMeshDistribute
             label findNonEmptyPatch() const;
 
             //- Save boundary fields
-            template <class T, class Mesh>
+            template<class T, class Mesh>
             void saveBoundaryFields
             (
                 PtrList<FieldField<fvsPatchField, T> >& bflds
             ) const;
 
             //- Map boundary fields
-            template <class T, class Mesh>
+            template<class T, class Mesh>
             void mapBoundaryFields
             (
                 const mapPolyMesh& map,

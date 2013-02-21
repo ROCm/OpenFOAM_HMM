@@ -32,7 +32,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class Type>
+template<class Type>
 Type GatherBase::flatten(const List<Type> lst)
 {
     label sum = 0;
@@ -60,7 +60,7 @@ Type GatherBase::flatten(const List<Type> lst)
 }
 
 
-template <class DataType, class IndexType, class AddOp>
+template<class DataType, class IndexType, class AddOp>
 IndexType GatherBase::offset
 (
     const List<DataType>& values,

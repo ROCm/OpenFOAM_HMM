@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::ReitzKHRT<CloudType>::ReitzKHRT
 (
     const dictionary& dict,
@@ -54,7 +54,7 @@ Foam::ReitzKHRT<CloudType>::ReitzKHRT
 }
 
 
-template <class CloudType>
+template<class CloudType>
 Foam::ReitzKHRT<CloudType>::ReitzKHRT(const ReitzKHRT<CloudType>& bum)
 :
     BreakupModel<CloudType>(bum),
@@ -69,7 +69,7 @@ Foam::ReitzKHRT<CloudType>::ReitzKHRT(const ReitzKHRT<CloudType>& bum)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::ReitzKHRT<CloudType>::~ReitzKHRT()
 {}
 

@@ -337,7 +337,7 @@ void thermalBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
     mixedFvPatchScalarField::updateCoeffs();
 }
 
-template <class solidType>
+template<class solidType>
 void thermalBaffle1DFvPatchScalarField<solidType>::
 write(Ostream& os) const
 {

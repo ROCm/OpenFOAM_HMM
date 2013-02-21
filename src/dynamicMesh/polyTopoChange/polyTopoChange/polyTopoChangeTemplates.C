@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class T>
+template<class T>
 void Foam::polyTopoChange::reorder
 (
     const labelList& oldToNew,
@@ -49,7 +49,7 @@ void Foam::polyTopoChange::reorder
 }
 
 
-template <class T>
+template<class T>
 void Foam::polyTopoChange::reorder
 (
     const labelList& oldToNew,
@@ -71,7 +71,7 @@ void Foam::polyTopoChange::reorder
 }
 
 
-template <class T>
+template<class T>
 void Foam::polyTopoChange::renumberKey
 (
     const labelList& oldToNew,

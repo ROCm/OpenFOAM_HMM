@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::MixedDiffuseSpecular<CloudType>::MixedDiffuseSpecular
 (
     const dictionary& dict,
@@ -41,14 +41,14 @@ Foam::MixedDiffuseSpecular<CloudType>::MixedDiffuseSpecular
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::MixedDiffuseSpecular<CloudType>::~MixedDiffuseSpecular()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 void Foam::MixedDiffuseSpecular<CloudType>::correct
 (
     typename CloudType::parcelType& p,

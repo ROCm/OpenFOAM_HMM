@@ -111,7 +111,7 @@ void Foam::probes::sampleAndWrite
 }
 
 
-template <class Type>
+template<class Type>
 void Foam::probes::sampleAndWrite(const fieldGroup<Type>& fields)
 {
     forAll(fields, fieldI)

@@ -681,7 +681,7 @@ void Foam::isoSurface::generateTriPoints
 }
 
 
-//template <class Type>
+//template<class Type>
 //Foam::tmp<Foam::Field<Type> >
 //Foam::isoSurface::sample(const Field<Type>& vField) const
 //{
@@ -689,7 +689,7 @@ void Foam::isoSurface::generateTriPoints
 //}
 
 
-template <class Type>
+template<class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::isoSurface::interpolate
 (

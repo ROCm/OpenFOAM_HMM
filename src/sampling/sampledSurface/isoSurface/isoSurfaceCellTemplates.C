@@ -491,7 +491,7 @@ void Foam::isoSurfaceCell::generateTriPoints
 }
 
 
-template <class Type>
+template<class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::isoSurfaceCell::interpolate
 (
@@ -545,7 +545,7 @@ Foam::isoSurfaceCell::interpolate
 }
 
 
-template <class Type>
+template<class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::isoSurfaceCell::interpolate
 (

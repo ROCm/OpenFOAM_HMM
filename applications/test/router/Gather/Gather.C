@@ -37,7 +37,7 @@ namespace Foam
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from component
-template <class T0>
+template<class T0>
 Gather<T0>::Gather(const T0& localData, const bool redistribute)
 :
     List<T0>(0),

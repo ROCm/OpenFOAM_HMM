@@ -110,7 +110,7 @@ Foam::MultiInteraction<CloudType>::MultiInteraction
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::MultiInteraction<CloudType>::~MultiInteraction()
 {}
 
@@ -131,7 +131,7 @@ bool Foam::MultiInteraction<CloudType>::active() const
 }
 
 
-template <class CloudType>
+template<class CloudType>
 bool Foam::MultiInteraction<CloudType>::correct
 (
     typename CloudType::parcelType& p,

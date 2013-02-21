@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::TrajectoryCollision<CloudType>::TrajectoryCollision
 (
     const dictionary& dict,
@@ -41,7 +41,7 @@ Foam::TrajectoryCollision<CloudType>::TrajectoryCollision
 {}
 
 
-template <class CloudType>
+template<class CloudType>
 Foam::TrajectoryCollision<CloudType>::TrajectoryCollision
 (
     const TrajectoryCollision<CloudType>& cm
@@ -56,7 +56,7 @@ Foam::TrajectoryCollision<CloudType>::TrajectoryCollision
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::TrajectoryCollision<CloudType>::~TrajectoryCollision()
 {}
 

@@ -269,11 +269,11 @@ public:
         ) const;
 
         //- Sample a single vol field on all sample locations
-        template <class Type>
+        template<class Type>
         tmp<Field<Type> > sample(const word& fieldName) const;
 
         //- Sample a single scalar field on all sample locations
-        template <class Type>
+        template<class Type>
         tmp<Field<Type> > sampleSurfaceFields(const word& fieldName) const;
 
         //- Sample a surface field at all locations

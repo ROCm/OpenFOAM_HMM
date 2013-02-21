@@ -194,7 +194,7 @@ inline bool Foam::wallNormalInfo::updateFace
 }
 
 
-template <class TrackingData>
+template<class TrackingData>
 inline bool Foam::wallNormalInfo::equal
 (
     const wallNormalInfo& rhs,

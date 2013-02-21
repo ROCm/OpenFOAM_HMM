@@ -260,7 +260,7 @@ inline bool Foam::refinementDistanceData::updateFace
 }
 
 
-template <class TrackingData>
+template<class TrackingData>
 inline bool Foam::refinementDistanceData::equal
 (
     const refinementDistanceData& rhs,

@@ -583,7 +583,7 @@ void Foam::Distribution<Type>::operator=
 
 // * * * * * * * * * * * * * * Friend Operators * * * * * * * * * * * * * * //
 
-template <class Type>
+template<class Type>
 Foam::Istream& Foam::operator>>
 (
     Istream& is,
@@ -621,7 +621,7 @@ Foam::Ostream& Foam::operator<<
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
-template <class Type>
+template<class Type>
 Foam::Distribution<Type> Foam::operator+
 (
     const Distribution<Type>& d1,

@@ -30,7 +30,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class AccessType, class T, class AccessOp>
+template<class AccessType, class T, class AccessOp>
 AccessType ListListOps::combine(const List<T>& lst, AccessOp aop)
 {
     label sum = 0;
@@ -57,7 +57,7 @@ AccessType ListListOps::combine(const List<T>& lst, AccessOp aop)
 }
 
 
-template <class T, class AccessOp>
+template<class T, class AccessOp>
 labelList ListListOps::subSizes(const List<T>& lst, AccessOp aop)
 {
     labelList sizes(lst.size());
@@ -70,7 +70,7 @@ labelList ListListOps::subSizes(const List<T>& lst, AccessOp aop)
 }
 
 
-template <class AccessType, class T, class AccessOp, class OffsetOp>
+template<class AccessType, class T, class AccessOp, class OffsetOp>
 AccessType ListListOps::combineOffset
 (
     const List<T>& lst,

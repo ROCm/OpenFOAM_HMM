@@ -112,7 +112,7 @@ class globalMeshData
     // Private class
 
         // To combineReduce a pointField. Just appends all lists.
-        template <class T>
+        template<class T>
         class plusEqOp
         {
 

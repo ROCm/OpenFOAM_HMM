@@ -66,7 +66,7 @@ TemplateName(ParSortableList);
                            Class ParSortableList Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class Type>
+template<class Type>
 class ParSortableList
 :
     public ParSortableListName,

@@ -91,9 +91,10 @@ public:
         inline SphericalTensor();
 
         //- Construct given VectorSpace
+        template<class Cmpt2>
         inline SphericalTensor
         (
-            const VectorSpace<SphericalTensor<Cmpt>, Cmpt, 1>&
+            const VectorSpace<SphericalTensor<Cmpt2>, Cmpt2, 1>&
         );
 
         //- Construct given the component

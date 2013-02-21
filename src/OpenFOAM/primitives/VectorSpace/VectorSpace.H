@@ -107,6 +107,10 @@ public:
         //- Construct as copy
         inline VectorSpace(const VectorSpace<Form, Cmpt, nCmpt>&);
 
+        //- Construct as copy of another VectorSpace type of the same rank
+        template<class Form2, class Cmpt2>
+        inline VectorSpace(const VectorSpace<Form2, Cmpt2, nCmpt>&);
+
 
     // Member Functions
 

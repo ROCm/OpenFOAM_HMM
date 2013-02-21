@@ -83,7 +83,7 @@ class patchProbes
 
 
         //- Sample and write all the fields of the given type
-        template <class Type>
+        template<class Type>
         void sampleAndWrite(const fieldGroup<Type>&);
 
 
@@ -109,7 +109,7 @@ class patchProbes
 
 
         //- Sample a single field on all sample locations
-        template <class Type>
+        template<class Type>
         tmp<Field<Type> > sample(const word& fieldName) const;
 
 

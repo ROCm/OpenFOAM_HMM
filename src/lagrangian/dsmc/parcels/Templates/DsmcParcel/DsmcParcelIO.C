@@ -30,7 +30,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class ParcelType>
+template<class ParcelType>
 Foam::DsmcParcel<ParcelType>::DsmcParcel
 (
     const polyMesh& mesh,

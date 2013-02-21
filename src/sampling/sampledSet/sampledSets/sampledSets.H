@@ -105,7 +105,7 @@ class sampledSets
 
 
         //- Class used for sampling volFields
-        template <class Type>
+        template<class Type>
         class volFieldSampler
         :
             public List<Field<Type> >

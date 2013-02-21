@@ -285,7 +285,7 @@ inline bool Foam::directionInfo::updateFace
 }
 
 
-template <class TrackingData>
+template<class TrackingData>
 inline bool Foam::directionInfo::equal
 (
     const directionInfo& rhs,

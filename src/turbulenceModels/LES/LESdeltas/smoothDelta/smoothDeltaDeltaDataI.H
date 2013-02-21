@@ -189,7 +189,7 @@ inline bool smoothDelta::deltaData::updateFace
 }
 
 
-template <class TrackingData>
+template<class TrackingData>
 inline bool smoothDelta::deltaData::equal
 (
     const deltaData& rhs,

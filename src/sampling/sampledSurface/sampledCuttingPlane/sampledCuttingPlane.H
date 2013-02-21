@@ -102,14 +102,14 @@ class sampledCuttingPlane
         void createGeometry();
 
         //- sample field on faces
-        template <class Type>
+        template<class Type>
         tmp<Field<Type> > sampleField
         (
             const GeometricField<Type, fvPatchField, volMesh>& vField
         ) const;
 
 
-        template <class Type>
+        template<class Type>
         tmp<Field<Type> >
         interpolateField(const interpolation<Type>&) const;
 

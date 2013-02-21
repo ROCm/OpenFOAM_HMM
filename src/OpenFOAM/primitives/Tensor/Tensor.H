@@ -53,7 +53,7 @@ class SymmTensor;
                            Class Tensor Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class Cmpt>
+template<class Cmpt>
 class Tensor
 :
     public VectorSpace<Tensor<Cmpt>, Cmpt, 9>
@@ -94,8 +94,9 @@ public:
         //- Construct null
         inline Tensor();
 
-        //- Construct given VectorSpace
-        inline Tensor(const VectorSpace<Tensor<Cmpt>, Cmpt, 9>&);
+        //- Construct given VectorSpace of the same rank
+        template<class Cmpt2>
+        inline Tensor(const VectorSpace<Tensor<Cmpt2>, Cmpt2, 9>&);
 
         //- Construct given SphericalTensor
         inline Tensor(const SphericalTensor<Cmpt>&);

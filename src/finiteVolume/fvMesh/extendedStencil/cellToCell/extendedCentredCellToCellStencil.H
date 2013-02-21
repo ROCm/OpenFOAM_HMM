@@ -131,7 +131,7 @@ public:
             const List<List<WeightType> >& stencilWeights
         ) const
         {
-            return weightedSum
+            return extendedCellToCellStencil::weightedSum
             (
                 map(),
                 stencil(),

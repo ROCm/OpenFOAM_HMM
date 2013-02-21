@@ -42,7 +42,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class T, class BinaryOp>
+template<class T, class BinaryOp>
 void Pstream::gather
 (
     const List<UPstream::commsStruct>& comms,
@@ -111,7 +111,7 @@ void Pstream::gather
 }
 
 
-template <class T, class BinaryOp>
+template<class T, class BinaryOp>
 void Pstream::gather(T& Value, const BinaryOp& bop, const int tag)
 {
     if (UPstream::nProcs() < UPstream::nProcsSimpleSum)
@@ -125,7 +125,7 @@ void Pstream::gather(T& Value, const BinaryOp& bop, const int tag)
 }
 
 
-template <class T>
+template<class T>
 void Pstream::scatter
 (
     const List<UPstream::commsStruct>& comms,
@@ -189,7 +189,7 @@ void Pstream::scatter
 }
 
 
-template <class T>
+template<class T>
 void Pstream::scatter(T& Value, const int tag)
 {
     if (UPstream::nProcs() < UPstream::nProcsSimpleSum)

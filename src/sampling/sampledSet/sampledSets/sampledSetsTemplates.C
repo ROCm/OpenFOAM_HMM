@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template <class Type>
+template<class Type>
 Foam::sampledSets::volFieldSampler<Type>::volFieldSampler
 (
     const word& interpolationScheme,
@@ -76,7 +76,7 @@ Foam::sampledSets::volFieldSampler<Type>::volFieldSampler
 }
 
 
-template <class Type>
+template<class Type>
 Foam::sampledSets::volFieldSampler<Type>::volFieldSampler
 (
     const GeometricField<Type, fvPatchField, volMesh>& field,
@@ -109,7 +109,7 @@ Foam::sampledSets::volFieldSampler<Type>::volFieldSampler
 }
 
 
-template <class Type>
+template<class Type>
 Foam::sampledSets::volFieldSampler<Type>::volFieldSampler
 (
     const List<Field<Type> >& values,

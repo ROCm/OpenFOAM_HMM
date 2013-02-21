@@ -52,7 +52,7 @@ inline Foam::pointTopoDistanceData::pointTopoDistanceData
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class TrackingData>
+template<class TrackingData>
 inline bool Foam::pointTopoDistanceData::valid(TrackingData& td) const
 {
     return distance_ != -1;
@@ -60,7 +60,7 @@ inline bool Foam::pointTopoDistanceData::valid(TrackingData& td) const
 
 
 // No geometric data so never any problem on cyclics
-template <class TrackingData>
+template<class TrackingData>
 inline bool Foam::pointTopoDistanceData::sameGeometry
 (
     const pointTopoDistanceData&,
@@ -73,7 +73,7 @@ inline bool Foam::pointTopoDistanceData::sameGeometry
 
 
 // No geometric data.
-template <class TrackingData>
+template<class TrackingData>
 inline void Foam::pointTopoDistanceData::leaveDomain
 (
     const polyPatch& patch,
@@ -85,7 +85,7 @@ inline void Foam::pointTopoDistanceData::leaveDomain
 
 
 // No geometric data.
-template <class TrackingData>
+template<class TrackingData>
 inline void Foam::pointTopoDistanceData::transform
 (
     const tensor& rotTensor,
@@ -95,7 +95,7 @@ inline void Foam::pointTopoDistanceData::transform
 
 
 // No geometric data.
-template <class TrackingData>
+template<class TrackingData>
 inline void Foam::pointTopoDistanceData::enterDomain
 (
     const polyPatch& patch,
@@ -107,7 +107,7 @@ inline void Foam::pointTopoDistanceData::enterDomain
 
 
 // Update this with information from connected edge
-template <class TrackingData>
+template<class TrackingData>
 inline bool Foam::pointTopoDistanceData::updatePoint
 (
     const polyMesh& mesh,
@@ -199,7 +199,7 @@ inline bool Foam::pointTopoDistanceData::updateEdge
 }
 
 
-template <class TrackingData>
+template<class TrackingData>
 inline bool Foam::pointTopoDistanceData::equal
 (
     const pointTopoDistanceData& rhs,

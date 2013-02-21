@@ -78,7 +78,7 @@ void Foam::patchProbes::sampleAndWrite
 }
 
 
-template <class Type>
+template<class Type>
 void Foam::patchProbes::sampleAndWrite
 (
     const fieldGroup<Type>& fields

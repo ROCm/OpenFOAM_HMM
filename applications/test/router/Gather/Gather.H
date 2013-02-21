@@ -48,7 +48,7 @@ namespace Foam
                            Class Gather Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class T0>
+template<class T0>
 class Gather
 :
     public GatherBase,

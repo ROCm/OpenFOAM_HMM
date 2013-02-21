@@ -116,7 +116,7 @@ void meshRefinement::testSyncBoundaryFaceList
 }
 
 
-//template <class T, class Mesh>
+//template<class T, class Mesh>
 template<class GeoField>
 void meshRefinement::addPatchFields(fvMesh& mesh, const word& patchFieldType)
 {

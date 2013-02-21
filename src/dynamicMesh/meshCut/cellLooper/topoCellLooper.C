@@ -49,7 +49,7 @@ const Foam::scalar Foam::topoCellLooper::featureCos = Foam::cos(degToRad(10.0));
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // In-memory truncate a list
-template <class T>
+template<class T>
 void Foam::topoCellLooper::subsetList
 (
     const label startI,

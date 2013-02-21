@@ -50,6 +50,17 @@ inline VectorSpace<Form, Cmpt, nCmpt>::VectorSpace
 }
 
 
+template<class Form, class Cmpt, int nCmpt>
+template<class Form2, class Cmpt2>
+inline VectorSpace<Form, Cmpt, nCmpt>::VectorSpace
+(
+    const VectorSpace<Form2, Cmpt2, nCmpt>& vs
+)
+{
+    VectorSpaceOps<nCmpt,0>::eqOp(*this, vs, eqOp<Cmpt>());
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Form, class Cmpt, int nCmpt>

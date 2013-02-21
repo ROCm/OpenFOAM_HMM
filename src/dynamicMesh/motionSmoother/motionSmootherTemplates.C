@@ -153,7 +153,7 @@ void Foam::motionSmoother::applyCornerConstraints
 
 
 // Average of connected points.
-template <class Type>
+template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::pointPatchField, Foam::pointMesh> >
 Foam::motionSmoother::avg
 (
@@ -252,7 +252,7 @@ Foam::motionSmoother::avg
 
 
 // smooth field (point-jacobi)
-template <class Type>
+template<class Type>
 void Foam::motionSmoother::smooth
 (
     const GeometricField<Type, pointPatchField, pointMesh>& fld,

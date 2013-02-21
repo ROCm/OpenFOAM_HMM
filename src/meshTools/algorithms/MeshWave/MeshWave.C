@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template <class Type, class TrackingData>
+template<class Type, class TrackingData>
 int Foam::MeshWave<Type, TrackingData>::dummyTrackData_ = 12345;
 
 
@@ -37,7 +37,7 @@ int Foam::MeshWave<Type, TrackingData>::dummyTrackData_ = 12345;
 
 // Iterate, propagating changedFacesInfo across mesh, until no change (or
 // maxIter reached).
-template <class Type, class TrackingData>
+template<class Type, class TrackingData>
 Foam::MeshWave<Type, TrackingData>::MeshWave
 (
     const polyMesh& mesh,
@@ -64,7 +64,7 @@ Foam::MeshWave<Type, TrackingData>::MeshWave
 
 // Iterate, propagating changedFacesInfo across mesh, until no change (or
 // maxIter reached). Initial cell values specified.
-template <class Type, class TrackingData>
+template<class Type, class TrackingData>
 Foam::MeshWave<Type, TrackingData>::MeshWave
 (
     const polyMesh& mesh,

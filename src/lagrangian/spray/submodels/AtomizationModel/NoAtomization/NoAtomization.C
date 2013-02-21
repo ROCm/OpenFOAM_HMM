@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::NoAtomization<CloudType>::NoAtomization
 (
     const dictionary& dict,
@@ -38,7 +38,7 @@ Foam::NoAtomization<CloudType>::NoAtomization
 {}
 
 
-template <class CloudType>
+template<class CloudType>
 Foam::NoAtomization<CloudType>::NoAtomization
 (
     const NoAtomization<CloudType>& am
@@ -50,7 +50,7 @@ Foam::NoAtomization<CloudType>::NoAtomization
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::NoAtomization<CloudType>::~NoAtomization()
 {}
 

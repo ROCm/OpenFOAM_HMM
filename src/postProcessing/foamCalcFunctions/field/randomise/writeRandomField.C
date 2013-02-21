@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-template <class Type>
+template<class Type>
 void Foam::calcTypes::randomise::writeRandomField
 (
     const IOobject& header,

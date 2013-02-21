@@ -56,7 +56,7 @@ void Foam::fvMeshDistribute::printFieldInfo(const fvMesh& mesh)
 
 
 // Save whole boundary field
-template <class T, class Mesh>
+template<class T, class Mesh>
 void Foam::fvMeshDistribute::saveBoundaryFields
 (
     PtrList<FieldField<fvsPatchField, T> >& bflds
@@ -85,7 +85,7 @@ void Foam::fvMeshDistribute::saveBoundaryFields
 
 
 // Map boundary field
-template <class T, class Mesh>
+template<class T, class Mesh>
 void Foam::fvMeshDistribute::mapBoundaryFields
 (
     const mapPolyMesh& map,
