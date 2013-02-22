@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,11 +25,10 @@ Application
     foamUpgradeFvSolution
 
 Description
-    Simple tool to upgrade the syntax of system/fvSolution::solvers
+    Simple tool to upgrade the syntax of system/fvSolution.solvers.
 
 Usage
-
-    - foamUpgradeFvSolution [OPTION]
+    foamUpgradeFvSolution [OPTION]
 
     \param -test \n
     Suppress writing the updated fvSolution file
@@ -44,7 +43,6 @@ Usage
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Main program:
 
 int main(int argc, char *argv[])
 {
@@ -60,8 +58,8 @@ int main(int argc, char *argv[])
         "suppress writing the updated system/fvSolution file"
     );
 
-#   include "setRootCase.H"
-#   include "createTime.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
 
     IOdictionary solutionDict
     (

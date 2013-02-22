@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+Application
+    PDRMesh
 
 Description
     Mesh and field preparation utility for PDR type simulations.
@@ -553,7 +556,6 @@ label findPatch(const polyBoundaryMesh& patches, const word& patchName)
 }
 
 
-// Main program:
 
 int main(int argc, char *argv[])
 {

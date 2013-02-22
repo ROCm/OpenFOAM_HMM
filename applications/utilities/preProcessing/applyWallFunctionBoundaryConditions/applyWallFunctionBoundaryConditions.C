@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,10 +25,10 @@ Application
     applyWallFunctionBounaryConditions
 
 Description
-    Updates OpenFOAM RAS cases to use the new (v1.6) wall function framework
+    Updates OpenFOAM RAS cases to use the new (v1.6) wall function framework.
 
     Attempts to determine whether case is compressible or incompressible, or
-    can be supplied with -compressible command line argument
+    can be supplied with -compressible command line argument.
 
 \*---------------------------------------------------------------------------*/
 
@@ -332,7 +332,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "compressible",
-        "force use of compressible wall functions. default is auto-detect."
+        "force use of compressible wall functions. Default is auto-detect."
     );
 
     #include "setRootCase.H"

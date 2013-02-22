@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    adiabaticFlameT
+    equilibriumFlameT
 
 Description
     Calculates the equilibrium flame temperature for a given fuel and

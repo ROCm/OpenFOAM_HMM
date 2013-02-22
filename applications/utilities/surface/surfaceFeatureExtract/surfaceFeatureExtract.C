@@ -670,7 +670,6 @@ void writeStats(const extendedFeatureEdgeMesh& fem, Ostream& os)
 }
 
 
-// Main program:
 
 int main(int argc, char *argv[])
 {

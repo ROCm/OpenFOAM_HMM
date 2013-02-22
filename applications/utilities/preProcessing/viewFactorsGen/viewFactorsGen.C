@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    viewFactorGenerator
+    viewFactorsGen
 
 Description
     View factors are calculated based on a face agglomeration array
@@ -572,7 +572,7 @@ int main(int argc, char *argv[])
     label totalPatches = coarsePatches.size();
     reduce(totalPatches, maxOp<label>());
 
-    // Matrix sum in j(Fij) for each i (if enclosure sum = 1
+    // Matrix sum in j(Fij) for each i (if enclosure sum = 1)
     scalarSquareMatrix sumViewFactorPatch
     (
         totalPatches,
