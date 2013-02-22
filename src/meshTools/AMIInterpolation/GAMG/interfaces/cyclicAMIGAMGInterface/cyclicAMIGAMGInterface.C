@@ -58,10 +58,7 @@ Foam::cyclicAMIGAMGInterface::cyclicAMIGAMGInterface
     GAMGInterface
     (
         index,
-        coarseInterfaces,
-        fineInterface,
-        localRestrictAddressing,
-        neighbourRestrictAddressing
+        coarseInterfaces
     ),
     fineCyclicAMIInterface_
     (
