@@ -45,12 +45,7 @@ Foam::regionCoupledBaseGAMGInterface::regionCoupledBaseGAMGInterface
     GAMGInterface
     (
         index,
-        coarseInterfaces,
-        fineInterface,
-        localRestrictAddressing,
-        neighbourRestrictAddressing,
-        fineLevelIndex,
-        coarseComm
+        coarseInterfaces
     ),
     fineRegionCoupledLduInterface_
     (
