@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ License
 
 #include "lduMesh.H"
 #include "objectRegistry.H"
+#include "processorLduInterface.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -41,6 +42,58 @@ const Foam::objectRegistry& Foam::lduMesh::thisDb() const
     notImplemented("lduMesh::thisDb() const");
     const objectRegistry* orPtr_ = NULL;
     return *orPtr_;
+}
+
+
+// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+
+Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<lduMesh>& ip)
+{
+    const lduMesh& ldum = ip.t_;
+    const lduAddressing& addr = ldum.lduAddr();
+    const lduInterfacePtrsList interfaces = ldum.interfaces();
+
+    Pout<< "lduMesh :"
+        << " size:" << addr.size()
+        << " l:" << addr.lowerAddr().size()
+        << " u:" << addr.upperAddr().size()
+        << " interfaces:" << interfaces.size()
+        << " comm:" << ldum.comm()
+        << endl;
+    forAll(interfaces, i)
+    {
+        if (interfaces.set(i))
+        {
+            const labelUList& faceCells = addr.patchAddr(i);
+
+            if (isA<processorLduInterface>(interfaces[i]))
+            {
+                const processorLduInterface& pi = refCast
+                <
+                    const processorLduInterface
+                >(interfaces[i]);
+
+                Pout<< "    patch:" << i
+                    << " type:" << interfaces[i].type()
+                    << " size:" << faceCells.size()
+                    << " myProcNo:" << pi.myProcNo()
+                    << " neighbProcNo:" << pi.neighbProcNo()
+                    << " comm:" << pi.comm()
+                    << endl;
+            }
+            else
+            {
+                Pout<< "    patch:" << i
+                    << " type:" << interfaces[i].type()
+                    << " size:" << faceCells.size()
+                    << endl;
+            }
+        }
+    }
+
+    os.check("Ostream& operator<<(Ostream&, const lduMesh&");
+
+    return os;
 }
 
 

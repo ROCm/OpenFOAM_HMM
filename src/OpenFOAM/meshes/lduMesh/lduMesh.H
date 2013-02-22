@@ -36,6 +36,7 @@ Description
 #include "lduAddressing.H"
 #include "lduInterfacePtrsList.H"
 #include "typeInfo.H"
+#include "InfoProxy.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -88,6 +89,19 @@ public:
                 T& Value,
                 const BinaryOp& bop
             ) const;
+
+        // Info
+
+            //- Return info proxy.
+            //  Used to print mesh information to a stream
+            InfoProxy<lduMesh> info() const
+            {
+                return *this;
+            }
+
+    // Ostream operator
+
+        friend Ostream& operator<<(Ostream&, const InfoProxy<lduMesh>&);
 };
 
 

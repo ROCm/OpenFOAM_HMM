@@ -71,15 +71,30 @@ class lduPrimitiveMesh
 
         //- List of pointers for each patch
         //  with only those pointing to interfaces being set
-        const lduInterfacePtrsList interfaces_;
+        lduInterfacePtrsList interfaces_;
 
         //- Patch field evaluation schedule
-        const lduSchedule patchSchedule_;
+        lduSchedule patchSchedule_;
 
         //- Communicator to use for any parallel communication
         const label comm_;
 
     // Private Member Functions
+
+        //- Get size of all meshes
+        static label size(const PtrList<lduMesh>&);
+
+        //- Check if in upper-triangular ordering
+        static void checkUpperTriangular
+        (
+            const label size,
+            const labelUList& l,
+            const labelUList& u
+        );
+
+        //- Get non-scheduled send/receive schedule
+        template<class ProcPatch>
+        static lduSchedule nonBlockingSchedule(const lduInterfacePtrsList&);
 
         //- Disallow default bitwise copy construct
         lduPrimitiveMesh(const lduPrimitiveMesh&);
@@ -117,8 +132,36 @@ public:
             bool reUse
         );
 
-        //- Construct from Istream
-        lduPrimitiveMesh(Istream& is);
+        ////- Construct from Istream
+        //lduPrimitiveMesh(Istream& is);
+
+        //- Construct by combining multiple meshes. The meshes come from
+        //  processors procIDs but these are only used to detect the interfaces
+        //  that are to be merged.
+        //
+        // Sets mapping information:
+        //  cellOffsets     : per mesh the starting cell
+        //  faceMap         : per mesh, per internal face, the combined face
+        //  boundaryMap     : per mesh, per boundary, the combined boundary
+        //                    or -1 for merged boundaries
+        //  boundaryFaceMap : per mesh, per boundary face:
+        //      kept boundaries: the new boundary face
+        //      merged boundaries: the new internal face (on the owner) or
+        //                         -faceI-1 (on the neighbour)
+        //
+        // TBD: hardcoded for processorGAMGInterface. Should use some 'clone' or
+        // New functionality instead.
+        lduPrimitiveMesh
+        (
+            const label comm,
+            const labelList& procIDs,
+            const PtrList<lduMesh>& procMeshes,
+
+            labelList& cellOffsets,
+            labelListList& faceMap,
+            labelListList& boundaryMap,
+            labelListListList& boundaryFaceMap
+        );
 
 
     //- Destructor
@@ -172,6 +215,19 @@ public:
             {
                 return patchSchedule_;
             }
+
+
+        // Helper
+
+            //- Gather meshes from processors. Hardcoded for
+            //  processorGAMGInterface
+            static void gather
+            (
+                const lduMesh& mesh,
+                const labelList& procIDs,
+                PtrList<lduMesh>& procMeshes
+            );
+
 //
 //    // Ostream operator
 //
@@ -182,6 +238,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "lduPrimitiveMeshTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
