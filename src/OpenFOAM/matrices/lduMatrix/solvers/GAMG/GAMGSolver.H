@@ -109,6 +109,9 @@ class GAMGSolver
         //- Direct or iteratively solve the coarsest level
         bool directSolveCoarsest_;
 
+        //- Agglomerate processors
+        bool processorAgglomerate_;
+
         //- The agglomeration
         const GAMGAgglomeration& agglomeration_;
 
@@ -127,6 +130,28 @@ class GAMGSolver
 
         //- LU decompsed coarsest matrix
         autoPtr<LUscalarMatrix> coarsestLUMatrixPtr_;
+
+
+
+        // Processor addressing agglomeration - to be moved into
+        // GAMGAgglomeration
+
+            //- Combined coarsest meshes for all processors
+            autoPtr<lduPrimitiveMesh> allMeshPtr_;
+
+            //- Mapping from processor to coarsestAllMesh
+            labelList cellOffsets_;
+            labelListList faceMap_;
+            labelListList boundaryMap_;
+            labelListListList boundaryFaceMap_;
+
+        // Processor matrix agglomeration
+
+            //- Combined coarsest level matrix for all processors
+            autoPtr<lduMatrix> allMatrixPtr_;
+            FieldField<Field, scalar> allInterfaceBouCoeffs_;
+            FieldField<Field, scalar> allInterfaceIntCoeffs_;
+            lduInterfaceFieldPtrsList allInterfaces_;
 
 
     // Private Member Functions
@@ -157,6 +182,32 @@ class GAMGSolver
 
         //- Agglomerate coarse matrix
         void agglomerateMatrix(const label fineLevelIndex);
+
+        //- Collect matrices from other processors
+        void gatherMatrices
+        (
+            const labelList& procIDs,
+            const PtrList<lduMesh>& procMeshes,
+
+            const lduMatrix& mat,
+            const FieldField<Field, scalar>& interfaceBouCoeffs,
+            const FieldField<Field, scalar>& interfaceIntCoeffs,
+            const lduInterfaceFieldPtrsList& interfaces,
+
+            PtrList<lduMatrix>& otherMats,
+            PtrList<FieldField<Field, scalar> >& otherBouCoeffs,
+            PtrList<FieldField<Field, scalar> >& otherIntCoeffs,
+            PtrList<lduInterfaceFieldPtrsList>& otherInterfaces
+        ) const;
+
+        //- Gather field in allMatrix form
+        void gatherField
+        (
+            const label meshComm,
+            const labelList& procIDs,
+            const scalarField& coarsestSource,
+            scalarField& allSource
+        ) const;
 
         //-  Interpolate the correction after injected prolongation
         void interpolate

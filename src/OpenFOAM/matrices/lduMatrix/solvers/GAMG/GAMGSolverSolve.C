@@ -31,6 +31,67 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::GAMGSolver::gatherField
+(
+    const label meshComm,
+    const labelList& procIDs,
+    const scalarField& coarsestSource,
+    scalarField& allSource
+) const
+{
+    if (Pstream::myProcNo(meshComm) == procIDs[0])
+    {
+        // Master.
+        const lduMesh& allMesh = allMeshPtr_();
+
+        allSource.setSize(allMesh.lduAddr().size());
+
+        SubList<scalar>
+        (
+            allSource,
+            coarsestSource.size(),
+            0
+        ).assign(coarsestSource);
+
+        for (label i = 1; i < procIDs.size(); i++)
+        {
+            IPstream fromSlave
+            (
+                Pstream::scheduled,
+                procIDs[i],
+                0,          // bufSize
+                Pstream::msgType(),
+                meshComm
+            );
+
+            SubList<scalar> slaveSlots
+            (
+                allSource,
+                cellOffsets_[i+1]-cellOffsets_[i],
+                cellOffsets_[i]
+            );
+
+            UList<scalar>& l = slaveSlots;
+
+            fromSlave >> l;
+        }
+    }
+    else
+    {
+        // Send to master
+        OPstream toMaster
+        (
+            Pstream::scheduled,
+            procIDs[0],
+            0,
+            Pstream::msgType(),
+            meshComm
+        );
+        toMaster << coarsestSource;
+    }
+}
+
+
 Foam::solverPerformance Foam::GAMGSolver::solve
 (
     scalarField& psi,
@@ -451,9 +512,113 @@ void Foam::GAMGSolver::solveCoarsestLevel
         coarsestCorrField = coarsestSource;
         coarsestLUMatrixPtr_->solve(coarsestCorrField);
     }
+    else if (processorAgglomerate_)
+    {
+        Pout<< "** Processor agglomeration" << endl;
+
+        const lduMatrix& allMatrix = allMatrixPtr_();
+        //const lduMesh& allMesh = allMeshPtr_();
+
+        const List<int>& procIDs = UPstream::procID(coarseComm);
+
+        scalarField allSource;
+        gatherField
+        (
+            coarseComm,
+            procIDs,
+            coarsestSource,
+            allSource
+        );
+
+        scalarField allCorrField;
+        solverPerformance coarseSolverPerf;
+
+        if (Pstream::myProcNo(coarseComm) == procIDs[0])
+        {
+            allCorrField.setSize(allSource.size(), 0);
+
+            if (allMatrix.asymmetric())
+            {
+                coarseSolverPerf = BICCG
+                (
+                    "coarsestLevelCorr",
+                    allMatrix,
+                    allInterfaceBouCoeffs_,
+                    allInterfaceIntCoeffs_,
+                    allInterfaces_,
+                    tolerance_,
+                    relTol_
+                ).solve
+                (
+                    allCorrField,
+                    allSource
+                );
+            }
+            else
+            {
+                coarseSolverPerf = ICCG
+                (
+                    "coarsestLevelCorr",
+                    allMatrix,
+                    allInterfaceBouCoeffs_,
+                    allInterfaceIntCoeffs_,
+                    allInterfaces_,
+                    tolerance_,
+                    relTol_
+                ).solve
+                (
+                    allCorrField,
+                    allSource
+                );
+            }
+
+
+            // Distribute correction
+            coarsestCorrField = SubList<scalar>
+            (
+                allCorrField,
+                coarsestSource.size(),
+                0
+            );
+            for (label i=1; i < procIDs.size(); i++)
+            {
+                OPstream toSlave
+                (
+                    Pstream::scheduled,
+                    procIDs[i],
+                    0,          // bufSize
+                    Pstream::msgType(),
+                    coarseComm
+                );
+
+                toSlave << SubList<scalar>
+                (
+                    allCorrField,
+                    cellOffsets_[i+1]-cellOffsets_[i],
+                    cellOffsets_[i]
+                );
+            }
+        }
+        else
+        {
+            IPstream fromMaster
+            (
+                Pstream::scheduled,
+                0,
+                0,          // bufSize
+                Pstream::msgType(),
+                coarseComm
+            );
+            fromMaster >> coarsestCorrField;
+        }
+
+        if (debug >= 2)
+        {
+            coarseSolverPerf.print(Info(coarseComm));
+        }
+    }
     else
     {
-        const label coarsestLevel = matrixLevels_.size() - 1;
         coarsestCorrField = 0;
         solverPerformance coarseSolverPerf;
 
