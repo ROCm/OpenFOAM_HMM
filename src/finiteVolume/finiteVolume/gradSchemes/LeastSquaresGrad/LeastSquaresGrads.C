@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,8 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvMesh.H"
-#include "extendedLeastSquaresGrad.H"
+#include "LeastSquaresGrad.H"
+#include "centredCPCCellToCellStencilObject.H"
+#include "centredCECCellToCellStencilObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -32,7 +33,17 @@ namespace Foam
 {
 namespace fv
 {
-    makeFvGradScheme(extendedLeastSquaresGrad)
+    makeLeastSquaresGradScheme
+    (
+        pointCellsLeastSquares,
+        centredCPCCellToCellStencilObject
+    )
+
+    makeLeastSquaresGradScheme
+    (
+        edgeCellsLeastSquares,
+        centredCECCellToCellStencilObject
+    )
 }
 }
 

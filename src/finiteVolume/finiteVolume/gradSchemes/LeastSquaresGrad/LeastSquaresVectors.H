@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,91 +22,88 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::extendedLeastSquaresVectors
+    Foam::fv::LeastSquaresVectors
 
 Description
-    Extended molecule least-squares gradient scheme vectors
+    Least-squares gradient scheme vectors
+
+See Also
+    Foam::fv::LeastSquaresGrad
 
 SourceFiles
-    extendedLeastSquaresVectors.C
+    LeastSquaresVectors.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef extendedLeastSquaresVectors_H
-#define extendedLeastSquaresVectors_H
+#ifndef LeastSquaresVectors_H
+#define LeastSquaresVectors_H
 
+#include "extendedCentredCellToCellStencil.H"
 #include "MeshObject.H"
-#include "fvMesh.H"
-#include "surfaceFieldsFwd.H"
-#include "labelPair.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace fv
+{
+
 /*---------------------------------------------------------------------------*\
-                     Class extendedLeastSquaresVectors Declaration
+                     Class LeastSquaresVectors Declaration
 \*---------------------------------------------------------------------------*/
 
-class extendedLeastSquaresVectors
+template<class Stencil>
+class LeastSquaresVectors
 :
-    public MeshObject<fvMesh, extendedLeastSquaresVectors>
+    public MeshObject<fvMesh, LeastSquaresVectors<Stencil> >
 {
     // Private data
 
-        //- Minimum determinant criterion to choose extra cells
-        scalar minDet_;
-
         //- Least-squares gradient vectors
-        mutable surfaceVectorField* pVectorsPtr_;
-        mutable surfaceVectorField* nVectorsPtr_;
-
-        mutable List<labelPair>* additionalCellsPtr_;
-        mutable vectorField* additionalVectorsPtr_;
+        List<List<vector> > vectors_;
 
 
     // Private Member Functions
 
-        //- Construct Least-squares gradient vectors
-        void makeLeastSquaresVectors() const;
+        //- Calculate Least-squares gradient vectors
+        void calcLeastSquaresVectors();
 
 
 public:
 
     // Declare name of the class and its debug switch
-    TypeName("extendedLeastSquaresVectors");
+    TypeName("LeastSquaresVectors");
 
 
     // Constructors
 
         //- Construct given an fvMesh and the minimum determinant criterion
-        extendedLeastSquaresVectors
+        LeastSquaresVectors
         (
-            const fvMesh&,
-            const scalar minDet
+            const fvMesh&
         );
 
 
     //- Destructor
-    virtual ~extendedLeastSquaresVectors();
+    virtual ~LeastSquaresVectors();
 
 
     // Member functions
 
-        //- Return reference to owner least square vectors
-        const surfaceVectorField& pVectors() const;
+        //- Return reference to the stencil
+        const extendedCentredCellToCellStencil& stencil() const
+        {
+            return Stencil::New(this->mesh_);
+        }
 
-        //- Return reference to neighbour least square vectors
-        const surfaceVectorField& nVectors() const;
-
-
-        //- Return reference to additional cells
-        const List<labelPair>& additionalCells() const;
-
-        //- Return reference to additional least square vectors
-        const vectorField& additionalVectors() const;
-
+        //- Return reference to the least square vectors
+        const List<List<vector> >& vectors() const
+        {
+            return vectors_;
+        }
 
         //- Delete the least square vectors when the mesh moves
         virtual bool movePoints();
@@ -115,7 +112,17 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace fv
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "LeastSquaresVectors.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

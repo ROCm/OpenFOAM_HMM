@@ -38,8 +38,6 @@ License
 #include "mapClouds.H"
 
 #include "volPointInterpolation.H"
-#include "extendedLeastSquaresVectors.H"
-#include "extendedLeastSquaresVectors.H"
 #include "leastSquaresVectors.H"
 #include "CentredFitData.H"
 #include "linearFitPolynomial.H"
@@ -132,7 +130,6 @@ void Foam::fvMesh::clearGeom()
 
     // Things geometry dependent that are not updated.
     volPointInterpolation::Delete(*this);
-    extendedLeastSquaresVectors::Delete(*this);
     leastSquaresVectors::Delete(*this);
     CentredFitData<linearFitPolynomial>::Delete(*this);
     CentredFitData<quadraticFitPolynomial>::Delete(*this);
@@ -154,7 +151,6 @@ void Foam::fvMesh::clearAddressing()
     // Hack until proper callbacks. Below are all the fvMesh-MeshObjects.
 
     volPointInterpolation::Delete(*this);
-    extendedLeastSquaresVectors::Delete(*this);
     leastSquaresVectors::Delete(*this);
     CentredFitData<linearFitPolynomial>::Delete(*this);
     CentredFitData<quadraticFitPolynomial>::Delete(*this);
@@ -718,7 +714,6 @@ Foam::tmp<Foam::scalarField> Foam::fvMesh::movePoints(const pointField& p)
     // Hack until proper callbacks. Below are all the fvMesh MeshObjects with a
     // movePoints function.
     MeshObjectMovePoints<volPointInterpolation>(*this);
-    MeshObjectMovePoints<extendedLeastSquaresVectors>(*this);
     MeshObjectMovePoints<leastSquaresVectors>(*this);
     MeshObjectMovePoints<CentredFitData<linearFitPolynomial> >(*this);
     MeshObjectMovePoints<CentredFitData<quadraticFitPolynomial> >(*this);

@@ -76,15 +76,14 @@ Foam::tmp
     );
     WeightedFieldType& wf = twf();
 
-    // cells
-    forAll(wf, cellI)
+    forAll(wf, celli)
     {
-        const List<Type>& stField = stencilFld[cellI];
-        const List<WeightType>& stWeight = stencilWeights[cellI];
+        const List<Type>& stField = stencilFld[celli];
+        const List<WeightType>& stWeight = stencilWeights[celli];
 
         forAll(stField, i)
         {
-            wf[cellI] += stWeight[i]*stField[i];
+            wf[celli] += stWeight[i]*stField[i];
         }
     }
 
