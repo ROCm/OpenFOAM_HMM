@@ -101,7 +101,11 @@ Foam::fv::LeastSquaresGrad<Type, Stencil>::calcGrad
     forAll(vtf.boundaryField(), patchi)
     {
         const fvPatchField<Type>& ptf = vtf.boundaryField()[patchi];
-        label nCompact = ptf.patch().start();
+
+        label nCompact =
+            ptf.patch().start()
+          - mesh.nInternalFaces()
+          + mesh.nCells();
 
         forAll(ptf, i)
         {

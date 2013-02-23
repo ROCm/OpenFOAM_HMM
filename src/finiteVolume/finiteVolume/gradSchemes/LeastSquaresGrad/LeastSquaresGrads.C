@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "LeastSquaresGrad.H"
+//#include "centredCFCCellToCellStencilObject.H"
 #include "centredCPCCellToCellStencilObject.H"
 #include "centredCECCellToCellStencilObject.H"
 
@@ -33,6 +34,12 @@ namespace Foam
 {
 namespace fv
 {
+    // makeLeastSquaresGradScheme
+    // (
+    //     faceCellsLeastSquares,
+    //     centredCFCCellToCellStencilObject
+    // )
+
     makeLeastSquaresGradScheme
     (
         pointCellsLeastSquares,
