@@ -43,7 +43,6 @@ License
 #include "linearFitPolynomial.H"
 #include "quadraticFitPolynomial.H"
 #include "quadraticLinearFitPolynomial.H"
-//#include "quadraticFitSnGradData.H"
 #include "skewCorrectionVectors.H"
 
 
@@ -135,7 +134,6 @@ void Foam::fvMesh::clearGeom()
     CentredFitData<quadraticFitPolynomial>::Delete(*this);
     CentredFitData<quadraticLinearFitPolynomial>::Delete(*this);
     skewCorrectionVectors::Delete(*this);
-    //quadraticFitSnGradData::Delete(*this);
 
     // Note: should be in polyMesh::clearGeom but meshSearch not in OpenFOAM
     // library
@@ -156,7 +154,6 @@ void Foam::fvMesh::clearAddressing()
     CentredFitData<quadraticFitPolynomial>::Delete(*this);
     CentredFitData<quadraticLinearFitPolynomial>::Delete(*this);
     skewCorrectionVectors::Delete(*this);
-    //quadraticFitSnGradData::Delete(*this);
 
     centredCECCellToFaceStencilObject::Delete(*this);
     centredCFCCellToFaceStencilObject::Delete(*this);
@@ -719,7 +716,6 @@ Foam::tmp<Foam::scalarField> Foam::fvMesh::movePoints(const pointField& p)
     MeshObjectMovePoints<CentredFitData<quadraticFitPolynomial> >(*this);
     MeshObjectMovePoints<CentredFitData<quadraticLinearFitPolynomial> >(*this);
     MeshObjectMovePoints<skewCorrectionVectors>(*this);
-    //MeshObjectMovePoints<quadraticFitSnGradData>(*this);
 
     return tsweptVols;
 }
