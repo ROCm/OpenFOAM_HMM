@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,11 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "solidChemistryModel.H"
+#include "basicSolidChemistryModel.H"
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::solidChemistryModel> Foam::solidChemistryModel::New
+Foam::autoPtr<Foam::basicSolidChemistryModel> Foam::basicSolidChemistryModel::
+New
 (
     const fvMesh& mesh
 )
@@ -160,7 +161,7 @@ Foam::autoPtr<Foam::solidChemistryModel> Foam::solidChemistryModel::New
         FatalError<< exit(FatalError);
     }
 
-    return autoPtr<solidChemistryModel>(cstrIter()(mesh));
+    return autoPtr<basicSolidChemistryModel>(cstrIter()(mesh));
 }
 
 

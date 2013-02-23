@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Application
+    foamToEnsight
+
 Description
     Translates OpenFOAM data to EnSight format.
 
@@ -91,7 +94,6 @@ bool inFileNameList
 }
 
 
-// Main program:
 
 int main(int argc, char *argv[])
 {

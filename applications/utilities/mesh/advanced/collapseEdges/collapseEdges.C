@@ -21,8 +21,11 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Application
+    collapseEdges
+
 Description
-    Collapse short edges and combines edges that are in line.
+    Collapses short edges and combines edges that are in line.
 
     - collapse short edges. Length of edges to collapse provided as argument.
     - merge two edges if they are in line. Maximum angle provided as argument.
@@ -54,7 +57,6 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Main program:
 int main(int argc, char *argv[])
 {
     timeSelector::addOptions(true, false);

@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Application
+    extrudeToRegionMesh
+
 Description
     Extrude faceZones (internal or boundary faces) or faceSets (boundary faces
     only) into a separate mesh (as a different region).
@@ -1481,7 +1484,6 @@ void extrudeGeometricProperties
 
 
 
-// Main program:
 
 int main(int argc, char *argv[])
 {
