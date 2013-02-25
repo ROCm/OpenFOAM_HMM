@@ -23,9 +23,9 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\defgroup grpThermoBoundaryConditions Thermo baffle boundary conditions
+\defgroup grpThermoBaffleBoundaryConditions Thermo baffle boundary conditions
 @{
-    \ingroup grpRegionBoundaryConditions
+    \ingroup grpThermoBoundaryConditions
     This group contains thermo baffle model boundary conditions
 @}
 
