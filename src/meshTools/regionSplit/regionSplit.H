@@ -113,7 +113,7 @@ class polyMesh;
 
 class regionSplit
 :
-    public MeshObject<polyMesh, regionSplit>,
+    public MeshObject<polyMesh, TopologicalMeshObject, regionSplit>,
     public labelList
 {
     // Private data

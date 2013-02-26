@@ -72,7 +72,7 @@ void Foam::pointMesh::mapFields(const mapPolyMesh& mpm)
 
 Foam::pointMesh::pointMesh(const polyMesh& pMesh)
 :
-    MeshObject<polyMesh, pointMesh>(pMesh),
+    MeshObject<polyMesh, Foam::UpdateableMeshObject, pointMesh>(pMesh),
     GeoMesh<polyMesh>(pMesh),
     boundary_(*this, pMesh.boundaryMesh())
 {
@@ -88,7 +88,7 @@ Foam::pointMesh::pointMesh(const polyMesh& pMesh)
 }
 
 
-void Foam::pointMesh::movePoints(const pointField& newPoints)
+bool Foam::pointMesh::movePoints()
 {
     if (debug)
     {
@@ -96,7 +96,9 @@ void Foam::pointMesh::movePoints(const pointField& newPoints)
             << "Moving points." << endl;
     }
 
-    boundary_.movePoints(newPoints);
+    boundary_.movePoints(GeoMesh<polyMesh>::mesh_.points());
+
+    return true;
 }
 
 

@@ -612,9 +612,10 @@ void volPointInterpolation::makePatchPatchAddressing()
 
 volPointInterpolation::volPointInterpolation(const fvMesh& vm)
 :
-    MeshObject<fvMesh, volPointInterpolation>(vm)
+    MeshObject<fvMesh, Foam::UpdateableMeshObject, volPointInterpolation>(vm)
 {
-    updateMesh();
+    makeWeights();
+    makePatchPatchAddressing();
 }
 
 
@@ -626,7 +627,7 @@ volPointInterpolation::~volPointInterpolation()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void volPointInterpolation::updateMesh()
+void volPointInterpolation::updateMesh(const mapPolyMesh&)
 {
     makeWeights();
     makePatchPatchAddressing();

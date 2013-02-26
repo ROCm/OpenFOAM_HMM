@@ -48,7 +48,7 @@ namespace Foam
 
 class meshSearchMeshObject
 :
-    public MeshObject<polyMesh, meshSearchMeshObject>,
+    public MeshObject<polyMesh, GeometricMeshObject, meshSearchMeshObject>,
     public meshSearch
 {
 
@@ -66,18 +66,6 @@ public:
     //- Destructor
     virtual ~meshSearchMeshObject()
     {}
-
-//
-//    // Member functions
-//
-//        // Edit
-//
-//            //- Update mesh topology using the morph engine
-//            void updateMesh();
-//
-//            //- Correct weighting factors for moving mesh.
-//            bool movePoints();
-//
 };
 
 

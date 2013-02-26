@@ -77,6 +77,34 @@ Foam::HashTable<const Type*> Foam::objectRegistry::lookupClass
 
 
 template<class Type>
+Foam::HashTable<Type*> Foam::objectRegistry::lookupClass
+(
+    const bool strict
+)
+{
+    HashTable<Type*> objectsOfClass(size());
+
+    forAllIter(HashTable<regIOobject*>, *this, iter)
+    {
+        if
+        (
+            (strict && isType<Type>(*iter()))
+         || (!strict && isA<Type>(*iter()))
+        )
+        {
+            objectsOfClass.insert
+            (
+                iter()->name(),
+                dynamic_cast<Type*>(iter())
+            );
+        }
+    }
+
+    return objectsOfClass;
+}
+
+
+template<class Type>
 bool Foam::objectRegistry::foundObject(const word& name) const
 {
     const_iterator iter = find(name);

@@ -159,6 +159,10 @@ public:
             template<class Type>
             HashTable<const Type*> lookupClass(const bool strict = false) const;
 
+            //- Lookup and return all objects of the given Type
+            template<class Type>
+            HashTable<Type*> lookupClass(const bool strict = false);
+
             //- Is the named Type found?
             template<class Type>
             bool foundObject(const word& name) const;

@@ -37,7 +37,7 @@ namespace Foam
 
 Foam::meshSearchMeshObject::meshSearchMeshObject(const polyMesh& mesh)
 :
-    MeshObject<polyMesh, meshSearchMeshObject>(mesh),
+    MeshObject<polyMesh, Foam::GeometricMeshObject, meshSearchMeshObject>(mesh),
     meshSearch(mesh)
 {}
 

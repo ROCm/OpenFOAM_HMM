@@ -40,7 +40,12 @@ Foam::meshSearchFACECENTRETETSMeshObject::meshSearchFACECENTRETETSMeshObject
     const polyMesh& mesh
 )
 :
-    MeshObject<polyMesh, meshSearchFACECENTRETETSMeshObject>(mesh),
+    MeshObject
+    <
+        polyMesh,
+        Foam::GeometricMeshObject,
+        meshSearchFACECENTRETETSMeshObject
+    >(mesh),
     meshSearch(mesh, polyMesh::FACECENTRETETS)
 {}
 

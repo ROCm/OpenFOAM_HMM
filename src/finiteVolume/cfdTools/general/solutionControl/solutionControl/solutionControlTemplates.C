@@ -34,12 +34,12 @@ void Foam::solutionControl::storePrevIter() const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> GeoField;
 
-    HashTable<const GeoField*>
+    HashTable<GeoField*>
         flds(mesh_.objectRegistry::lookupClass<GeoField>());
 
-    forAllConstIter(typename HashTable<const GeoField*>, flds, iter)
+    forAllIter(typename HashTable<GeoField*>, flds, iter)
     {
-        GeoField& fld = const_cast<GeoField&>(*iter());
+        GeoField& fld = *iter();
 
         const word& fName = fld.name();
 

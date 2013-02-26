@@ -52,7 +52,7 @@ class fvMesh;
 
 class skewCorrectionVectors
 :
-    public MeshObject<fvMesh, skewCorrectionVectors>
+    public MeshObject<fvMesh, MoveableMeshObject, skewCorrectionVectors>
 {
     // Private data
 

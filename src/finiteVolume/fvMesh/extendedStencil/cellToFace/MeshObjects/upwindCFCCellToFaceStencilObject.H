@@ -48,7 +48,12 @@ namespace Foam
 
 class upwindCFCCellToFaceStencilObject
 :
-    public MeshObject<fvMesh, upwindCFCCellToFaceStencilObject>,
+    public MeshObject
+    <
+        fvMesh,
+        TopologicalMeshObject,
+        upwindCFCCellToFaceStencilObject
+    >,
     public extendedUpwindCellToFaceStencil
 {
 
@@ -66,7 +71,12 @@ public:
             const scalar minOpposedness
         )
         :
-            MeshObject<fvMesh, upwindCFCCellToFaceStencilObject>(mesh),
+            MeshObject
+            <
+                fvMesh,
+                Foam::TopologicalMeshObject,
+                upwindCFCCellToFaceStencilObject
+            >(mesh),
             extendedUpwindCellToFaceStencil
             (
                 CFCCellToFaceStencil(mesh),

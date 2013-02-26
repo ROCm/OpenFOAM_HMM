@@ -54,7 +54,7 @@ namespace Foam
 template<class FitDataType, class ExtendedStencil, class Polynomial>
 class FitData
 :
-    public MeshObject<fvMesh, FitDataType>
+    public MeshObject<fvMesh, MoveableMeshObject, FitDataType>
 {
     // Private data
 

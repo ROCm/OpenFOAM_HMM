@@ -48,7 +48,12 @@ namespace Foam
 
 class pureUpwindCFCCellToFaceStencilObject
 :
-    public MeshObject<fvMesh, pureUpwindCFCCellToFaceStencilObject>,
+    public MeshObject
+    <
+        fvMesh,
+        TopologicalMeshObject,
+        pureUpwindCFCCellToFaceStencilObject
+    >,
     public extendedUpwindCellToFaceStencil
 {
 
@@ -64,7 +69,12 @@ public:
             const fvMesh& mesh
         )
         :
-            MeshObject<fvMesh, pureUpwindCFCCellToFaceStencilObject>(mesh),
+            MeshObject
+            <
+                fvMesh,
+                Foam::TopologicalMeshObject,
+                pureUpwindCFCCellToFaceStencilObject
+            >(mesh),
             extendedUpwindCellToFaceStencil(CFCCellToFaceStencil(mesh))
         {
             if (extendedCellToFaceStencil::debug)

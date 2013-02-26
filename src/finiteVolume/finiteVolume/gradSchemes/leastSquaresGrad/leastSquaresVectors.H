@@ -50,7 +50,7 @@ namespace Foam
 
 class leastSquaresVectors
 :
-    public MeshObject<fvMesh, leastSquaresVectors>
+    public MeshObject<fvMesh, MoveableMeshObject, leastSquaresVectors>
 {
     // Private data
 
