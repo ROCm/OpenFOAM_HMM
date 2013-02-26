@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,14 +38,11 @@ License
 #include "mapClouds.H"
 
 #include "volPointInterpolation.H"
-#include "extendedLeastSquaresVectors.H"
-#include "extendedLeastSquaresVectors.H"
 #include "leastSquaresVectors.H"
 #include "CentredFitData.H"
 #include "linearFitPolynomial.H"
 #include "quadraticFitPolynomial.H"
 #include "quadraticLinearFitPolynomial.H"
-//#include "quadraticFitSnGradData.H"
 #include "skewCorrectionVectors.H"
 
 
@@ -132,13 +129,11 @@ void Foam::fvMesh::clearGeom()
 
     // Things geometry dependent that are not updated.
     volPointInterpolation::Delete(*this);
-    extendedLeastSquaresVectors::Delete(*this);
     leastSquaresVectors::Delete(*this);
     CentredFitData<linearFitPolynomial>::Delete(*this);
     CentredFitData<quadraticFitPolynomial>::Delete(*this);
     CentredFitData<quadraticLinearFitPolynomial>::Delete(*this);
     skewCorrectionVectors::Delete(*this);
-    //quadraticFitSnGradData::Delete(*this);
 
     // Note: should be in polyMesh::clearGeom but meshSearch not in OpenFOAM
     // library
@@ -154,13 +149,11 @@ void Foam::fvMesh::clearAddressing()
     // Hack until proper callbacks. Below are all the fvMesh-MeshObjects.
 
     volPointInterpolation::Delete(*this);
-    extendedLeastSquaresVectors::Delete(*this);
     leastSquaresVectors::Delete(*this);
     CentredFitData<linearFitPolynomial>::Delete(*this);
     CentredFitData<quadraticFitPolynomial>::Delete(*this);
     CentredFitData<quadraticLinearFitPolynomial>::Delete(*this);
     skewCorrectionVectors::Delete(*this);
-    //quadraticFitSnGradData::Delete(*this);
 
     centredCECCellToFaceStencilObject::Delete(*this);
     centredCFCCellToFaceStencilObject::Delete(*this);
@@ -718,13 +711,11 @@ Foam::tmp<Foam::scalarField> Foam::fvMesh::movePoints(const pointField& p)
     // Hack until proper callbacks. Below are all the fvMesh MeshObjects with a
     // movePoints function.
     MeshObjectMovePoints<volPointInterpolation>(*this);
-    MeshObjectMovePoints<extendedLeastSquaresVectors>(*this);
     MeshObjectMovePoints<leastSquaresVectors>(*this);
     MeshObjectMovePoints<CentredFitData<linearFitPolynomial> >(*this);
     MeshObjectMovePoints<CentredFitData<quadraticFitPolynomial> >(*this);
     MeshObjectMovePoints<CentredFitData<quadraticLinearFitPolynomial> >(*this);
     MeshObjectMovePoints<skewCorrectionVectors>(*this);
-    //MeshObjectMovePoints<quadraticFitSnGradData>(*this);
 
     return tsweptVols;
 }

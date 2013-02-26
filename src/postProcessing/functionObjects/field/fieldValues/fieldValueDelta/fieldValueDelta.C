@@ -39,15 +39,16 @@ namespace Foam
 
     template<>
     const char*
-    NamedEnum<fieldValues::fieldValueDelta::operationType, 4>::names[] =
+    NamedEnum<fieldValues::fieldValueDelta::operationType, 5>::names[] =
     {
         "add",
         "subtract",
         "min",
-        "max"
+        "max",
+        "average"
     };
 
-    const NamedEnum<fieldValues::fieldValueDelta::operationType, 4>
+    const NamedEnum<fieldValues::fieldValueDelta::operationType, 5>
         fieldValues::fieldValueDelta::operationTypeNames_;
 }
 

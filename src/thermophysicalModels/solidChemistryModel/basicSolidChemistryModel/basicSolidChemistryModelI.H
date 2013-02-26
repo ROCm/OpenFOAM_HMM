@@ -21,41 +21,21 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InClass
-    Foam::solidChemistryModel
-
-Description
-    Creates solid chemistry model instances templated on the type of
-    solid thermodynamics
-
 \*---------------------------------------------------------------------------*/
 
-#include "makeSolidChemistryModel.H"
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-#include "ODESolidChemistryModel.H"
-#include "solidChemistryModel.H"
-#include "solidThermoPhysicsTypes.H"
-#include "thermoPhysicsTypes.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+inline Foam::solidReactionThermo& Foam::basicSolidChemistryModel::solidThermo()
 {
-    makeSolidChemistryModel
-    (
-        ODESolidChemistryModel,
-        solidChemistryModel,
-        hConstSolidThermoPhysics,
-        gasHThermoPhysics
-    );
-
-    makeSolidChemistryModel
-    (
-        ODESolidChemistryModel,
-        solidChemistryModel,
-        hExponentialSolidThermoPhysics,
-        gasHThermoPhysics
-    );
+    return solidThermo_();
 }
+
+
+inline const Foam::solidReactionThermo&
+Foam::basicSolidChemistryModel::solidThermo() const
+{
+    return solidThermo_();
+}
+
 
 // ************************************************************************* //

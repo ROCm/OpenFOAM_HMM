@@ -340,8 +340,7 @@ $(gradSchemes)/gaussGrad/gaussGrads.C
 
 $(gradSchemes)/leastSquaresGrad/leastSquaresVectors.C
 $(gradSchemes)/leastSquaresGrad/leastSquaresGrads.C
-$(gradSchemes)/extendedLeastSquaresGrad/extendedLeastSquaresVectors.C
-$(gradSchemes)/extendedLeastSquaresGrad/extendedLeastSquaresGrads.C
+$(gradSchemes)/LeastSquaresGrad/LeastSquaresGrads.C
 $(gradSchemes)/fourthGrad/fourthGrads.C
 
 limitedGradSchemes = $(gradSchemes)/limitedGradSchemes
