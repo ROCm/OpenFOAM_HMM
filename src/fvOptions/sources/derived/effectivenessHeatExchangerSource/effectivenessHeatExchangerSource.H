@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 3 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,38 +19,50 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
     Foam::fv::effectivenessHeatExchangerSource
 
 Description
-    Heat exchanger source model.
-    The total heat exchange is given by:
+    Heat exchanger source model, in which the heat exchanger is defined as a
+    selection of cells.
 
-    Qt = e(phi, secondaryMassFlowRate)
-        * (secondaryInletT - primaryInletT)
-        * phi*Cp;
-
-    where:
-        e(phi, secondaryMassFlowRate) is a effectivenes table in function of
-        mass net flux coming imto the heat exchanger (phi) and
-        secondaryMassFlowRate
-
-    Then the distribution inside the hear exchanger is given by:
-
-    Qcell = Vcell*|Ucell|*(Tcell - Tref)/sum(Vcell*|Ucell|*(Tcell - Tref));
+    The total heat exchange source is given by:
+    \f[
+        Q_t = e(\phi, \dot{m}_2) (T_2 - T_1) \phi c_p
+    \f]
 
     where:
-        Qcell is the source for cell
-        Vcell is the volume of the cell
-        Ucell is the local cell velocity
-        Tcell is the local call temperature
-        Tref : min(T) or max(T) in the cell zone depending on the sign of Qt
+    \vartable
+        Q_t       | total heat source
+        e(\phi,\dot{m}_2) | effectivenes table
+        \phi      | net mass flux entering heat exchanger [kg/s]
+        \dot{m}_2 | secondary mass flow rate [kg/s]
+        T_1       | primary inlet temperature [K]
+        T_2       | secondary inlet temperature [K]
+        c_p       | specific heat capacity [J/kg/K]
+    \endvartable
 
-    Example :
 
+    The distribution inside the hear exchanger is given by:
+    \f[
+        Q_c = \frac{V_c |U_c| (T_c - T_{ref})}{\sum(V_c |U_c| (T_c - T_{ref}))}
+    \f]
+
+    where:
+    \vartable
+        Q_c     | source for cell
+        V_c     | volume of the cell [m3]
+        U_c     | local cell velocity [m/s]
+        T_c     | local call temperature [K]
+        T_{ref} | min or max(T) in cell zone depending on the sign of Q_t [K]
+    \endvartable
+
+    \heading Source usage
+
+    Example usage:
+    \verbatim
     effectivenessHeatExchangerSource1
     {
         type            effectivenessHeatExchangerSource;
@@ -69,13 +81,14 @@ Description
             fileName                "effTable";
         }
     }
+    \endverbatim
 
-    Note:
-        the table with name "fileName" should have the same units as
-        secondaryMassFlowRate and kg/s for phi
-        faceZone is the faces at the inlet of the cellzone, it needs to be
-        created with flip map flags. It is used to integrate the net mass flow
-        rate into the heat exchanger
+Note
+- the table with name "fileName" should have the same units as the
+  secondary mass flow rate and kg/s for phi
+- faceZone is the faces at the inlet of the cellzone, it needs to be
+  created with flip map flags. It is used to integrate the net mass flow
+  rate into the heat exchanger
 
 
 SourceFiles
@@ -98,7 +111,7 @@ namespace fv
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class effectivenessHeatExchangerSource Declaration
+              Class effectivenessHeatExchangerSource Declaration
 \*---------------------------------------------------------------------------*/
 
 class effectivenessHeatExchangerSource
@@ -110,7 +123,7 @@ protected:
 
     // Protected data
 
-        //- Secondary flow mass rate [Kg/s]
+        //- Secondary flow mass rate [kg/s]
         scalar secondaryMassFlowRate_;
 
         //- Inlet secondary temperature [K]
@@ -119,8 +132,8 @@ protected:
         //- Primary air temperature at the heat exchanger inlet [K]
         scalar primaryInletT_;
 
-        //- 2D look up table efficiency = F(total primary mass flow rate [Kg/s]
-        //, secondary mass flow rate [Kg/s])
+        //- 2D look up table efficiency = function of primary and secondary
+        // mass flow rates [kg/s]
         autoPtr<interpolation2DTable<scalar> > eTable_;
 
         //- Name of velocity field; default = U
@@ -144,8 +157,7 @@ protected:
         //- Local list of patch ID per face
         labelList facePatchId_;
 
-        //- List of +1/-1 representing face flip map
-        //  (1 use as is, -1 negate)
+        //- List of +1/-1 representing face flip map (1 use as is, -1 negate)
         labelList faceSign_;
 
         //- Area of the face zone
