@@ -767,10 +767,17 @@ int main(int argc, char *argv[])
 
         if (extractionMethod == "extractFromFile")
         {
+            const dictionary& extractFromFileDict =
+                surfaceDict.subDict("extractFromFileCoeffs");
+
             const fileName featureEdgeFile =
-                surfaceDict.subDict("extractFromFileCoeffs").lookup
+                extractFromFileDict.lookup("featureEdgeFile");
+
+            const Switch geometricTestOnly =
+                extractFromFileDict.lookupOrDefault<Switch>
                 (
-                    "featureEdgeFile"
+                    "geometricTestOnly",
+                    "no"
                 );
 
             edgeMesh eMesh(featureEdgeFile);
@@ -779,24 +786,54 @@ int main(int argc, char *argv[])
             eMesh.mergeEdges();
 
             Info<< nl << "Reading existing feature edges from file "
-                << featureEdgeFile << endl;
+                << featureEdgeFile << nl
+                << "Selecting edges purely based on geometric tests: "
+                << geometricTestOnly.asText() << endl;
 
-            set.set(new surfaceFeatures(surf, eMesh.points(), eMesh.edges()));
+            set.set
+            (
+                new surfaceFeatures
+                (
+                    surf,
+                    eMesh.points(),
+                    eMesh.edges(),
+                    1e-6,
+                    geometricTestOnly
+                )
+            );
         }
         else if (extractionMethod == "extractFromSurface")
         {
-            includedAngle = readScalar
-            (
-                surfaceDict.subDict("extractFromSurfaceCoeffs").lookup
+            const dictionary& extractFromSurfaceDict =
+                surfaceDict.subDict("extractFromSurfaceCoeffs");
+
+            includedAngle =
+                readScalar(extractFromSurfaceDict.lookup("includedAngle"));
+
+            const Switch geometricTestOnly =
+                extractFromSurfaceDict.lookupOrDefault<Switch>
                 (
-                    "includedAngle"
+                    "geometricTestOnly",
+                    "no"
+                );
+
+            Info<< nl
+                << "Constructing feature set from included angle "
+                << includedAngle << nl
+                << "Selecting edges purely based on geometric tests: "
+                << geometricTestOnly.asText() << endl;
+
+            set.set
+            (
+                new surfaceFeatures
+                (
+                    surf,
+                    includedAngle,
+                    0,
+                    0,
+                    geometricTestOnly
                 )
             );
-
-            Info<< nl << "Constructing feature set from included angle "
-                << includedAngle << endl;
-
-            set.set(new surfaceFeatures(surf, includedAngle));
         }
         else
         {

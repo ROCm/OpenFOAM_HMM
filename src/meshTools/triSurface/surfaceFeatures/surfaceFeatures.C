@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -213,7 +213,8 @@ void Foam::surfaceFeatures::classifyFeatureAngles
 (
     const labelListList& edgeFaces,
     List<edgeStatus>& edgeStat,
-    const scalar minCos
+    const scalar minCos,
+    const bool geometricTestOnly
 ) const
 {
     const vectorField& faceNormals = surf_.faceNormals();
@@ -236,7 +237,11 @@ void Foam::surfaceFeatures::classifyFeatureAngles
             label face0 = eFaces[0];
             label face1 = eFaces[1];
 
-            if (surf_[face0].region() != surf_[face1].region())
+            if
+            (
+                !geometricTestOnly
+             && surf_[face0].region() != surf_[face1].region()
+            )
             {
                 edgeStat[edgeI] = REGION;
             }
@@ -445,7 +450,8 @@ Foam::surfaceFeatures::surfaceFeatures
     const triSurface& surf,
     const scalar includedAngle,
     const scalar minLen,
-    const label minElems
+    const label minElems,
+    const bool geometricTestOnly
 )
 :
     surf_(surf),
@@ -454,7 +460,7 @@ Foam::surfaceFeatures::surfaceFeatures
     externalStart_(0),
     internalStart_(0)
 {
-    findFeatures(includedAngle);
+    findFeatures(includedAngle, geometricTestOnly);
 
     if (minLen > 0 || minElems > 0)
     {
@@ -507,7 +513,8 @@ Foam::surfaceFeatures::surfaceFeatures
     const triSurface& surf,
     const pointField& points,
     const edgeList& edges,
-    const scalar mergeTol
+    const scalar mergeTol,
+    const bool geometricTestOnly
 )
 :
     surf_(surf),
@@ -553,7 +560,13 @@ Foam::surfaceFeatures::surfaceFeatures
     // Find whether an edge is external or internal
     List<edgeStatus> edgeStat(dynFeatEdges.size(), NONE);
 
-    classifyFeatureAngles(dynFeatureEdgeFaces, edgeStat, GREAT);
+    classifyFeatureAngles
+    (
+        dynFeatureEdgeFaces,
+        edgeStat,
+        GREAT,
+        geometricTestOnly
+    );
 
     // Transfer the edge status to a list encompassing all edges in the surface
     // so that calcFeatPoints can be used.
@@ -632,14 +645,24 @@ Foam::labelList Foam::surfaceFeatures::selectFeatureEdges
 }
 
 
-void Foam::surfaceFeatures::findFeatures(const scalar includedAngle)
+void Foam::surfaceFeatures::findFeatures
+(
+    const scalar includedAngle,
+    const bool geometricTestOnly
+)
 {
     scalar minCos = Foam::cos(degToRad(180.0 - includedAngle));
 
     // Per edge whether is feature edge.
     List<edgeStatus> edgeStat(surf_.nEdges(), NONE);
 
-    classifyFeatureAngles(surf_.edgeFaces(), edgeStat, minCos);
+    classifyFeatureAngles
+    (
+        surf_.edgeFaces(),
+        edgeStat,
+        minCos,
+        geometricTestOnly
+    );
 
     setFromStatus(edgeStat);
 }
