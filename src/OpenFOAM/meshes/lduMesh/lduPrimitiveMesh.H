@@ -114,7 +114,7 @@ public:
             const labelUList& l,
             const labelUList& u,
             const labelListList& pa,
-            const lduInterfacePtrsList& interfaces,
+            const lduInterfacePtrsList interfaces,
             const lduSchedule& ps,
             const label comm
         );
@@ -126,7 +126,7 @@ public:
             labelList& l,
             labelList& u,
             labelListList& pa,
-            lduInterfacePtrsList& interfaces,
+            lduInterfacePtrsList interfaces,
             const lduSchedule& ps,
             const label comm,
             bool reUse

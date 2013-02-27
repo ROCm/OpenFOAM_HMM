@@ -68,7 +68,8 @@ void Foam::lduPrimitiveMesh::checkUpperTriangular
     {
         if (l[faceI-1] > l[faceI])
         {
-            FatalErrorIn
+            //FatalErrorIn
+            WarningIn
             (
                 "checkUpperTriangular"
                 "(const label, const labelUList&, const labelUList&)"
@@ -76,7 +77,8 @@ void Foam::lduPrimitiveMesh::checkUpperTriangular
                 << " Problem at face " << faceI
                 << " l:" << l[faceI] << " u:" << u[faceI]
                 << " previous l:" << l[faceI-1]
-                << abort(FatalError);
+                //<< abort(FatalError);
+                << endl;
         }
         else if (l[faceI-1] == l[faceI])
         {
@@ -120,7 +122,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     const labelUList& l,
     const labelUList& u,
     const labelListList& pa,
-    const lduInterfacePtrsList& interfaces,
+    const lduInterfacePtrsList interfaces,
     const lduSchedule& ps,
     const label comm
 )
@@ -170,7 +172,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     labelList& l,
     labelList& u,
     labelListList& pa,
-    lduInterfacePtrsList& interfaces,
+    lduInterfacePtrsList interfaces,
     const lduSchedule& ps,
     const label comm,
     bool reUse
