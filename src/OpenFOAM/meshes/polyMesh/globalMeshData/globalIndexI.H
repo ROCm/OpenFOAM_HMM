@@ -25,7 +25,25 @@ License
 
 #include "ListOps.H"
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::globalIndex::globalIndex()
+{}
+
+
+Foam::globalIndex::globalIndex(const Xfer<labelList>& offsets)
+:
+    offsets_(offsets)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+inline Foam::labelList& Foam::globalIndex::offsets()
+{
+    return offsets_;
+}
+
 
 inline Foam::label Foam::globalIndex::offset(const label procI) const
 {

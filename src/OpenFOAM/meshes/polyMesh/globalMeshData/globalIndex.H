@@ -33,7 +33,9 @@ Description
 
 
 SourceFiles
+    globalIndexI.H
     globalIndex.C
+    globalIndexTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -71,6 +73,8 @@ public:
 
     // Constructors
 
+        //- Construct null
+        inline globalIndex();
 
         //- Construct from local max size
         globalIndex(const label localSize);
@@ -87,11 +91,20 @@ public:
         //- Construct from components
         globalIndex(const labelList& offsets);
 
+        //- Construct from components
+        inline globalIndex(const Xfer<labelList>& offsets);
+
         //- Construct from Istream
         globalIndex(Istream& is);
 
 
     // Member Functions
+
+        // Edit
+
+            //- Change after construction
+            inline labelList& offsets();
+
 
         // Queries relating to my processor (using world communicator)
 
@@ -133,6 +146,31 @@ public:
             inline label offset(const label procI) const;
 
 
+        // Other
+
+            //- Collect data in processor order on master (== procIDs[0]).
+            //  Needs offsets only on master.
+            template<class Type>
+            void gather
+            (
+                const label comm,
+                const labelList& procIDs,
+                const UList<Type>& fld,
+                List<Type>& allFld,
+                const int tag = UPstream::msgType()
+            ) const;
+
+            //- Distribute data in processor order. Requires fld to be sized!
+            template<class Type>
+            void scatter
+            (
+                const label comm,
+                const labelList& procIDs,
+                const UList<Type>& allFld,
+                UList<Type>& fld,
+                const int tag = UPstream::msgType()
+            ) const;
+
 
     // IOstream Operators
 
@@ -144,6 +182,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "globalIndexTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
