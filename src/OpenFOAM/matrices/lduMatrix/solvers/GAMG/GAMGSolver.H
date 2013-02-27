@@ -188,6 +188,7 @@ class GAMGSolver
         (
             const labelList& procIDs,
             const PtrList<lduMesh>& procMeshes,
+            const label meshComm,
 
             const lduMatrix& mat,
             const FieldField<Field, scalar>& interfaceBouCoeffs,

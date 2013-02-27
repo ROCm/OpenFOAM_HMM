@@ -516,9 +516,6 @@ void Foam::GAMGSolver::solveCoarsestLevel
     {
         Pout<< "** Processor agglomeration" << endl;
 
-        const lduMatrix& allMatrix = allMatrixPtr_();
-        //const lduMesh& allMesh = allMeshPtr_();
-
         const List<int>& procIDs = UPstream::procID(coarseComm);
 
         scalarField allSource;
@@ -535,41 +532,51 @@ void Foam::GAMGSolver::solveCoarsestLevel
 
         if (Pstream::myProcNo(coarseComm) == procIDs[0])
         {
+            const lduMatrix& allMatrix = allMatrixPtr_();
+
             allCorrField.setSize(allSource.size(), 0);
 
-            if (allMatrix.asymmetric())
             {
-                coarseSolverPerf = BICCG
-                (
-                    "coarsestLevelCorr",
-                    allMatrix,
-                    allInterfaceBouCoeffs_,
-                    allInterfaceIntCoeffs_,
-                    allInterfaces_,
-                    tolerance_,
-                    relTol_
-                ).solve
-                (
-                    allCorrField,
-                    allSource
-                );
-            }
-            else
-            {
-                coarseSolverPerf = ICCG
-                (
-                    "coarsestLevelCorr",
-                    allMatrix,
-                    allInterfaceBouCoeffs_,
-                    allInterfaceIntCoeffs_,
-                    allInterfaces_,
-                    tolerance_,
-                    relTol_
-                ).solve
-                (
-                    allCorrField,
-                    allSource
-                );
+                label solveComm = allMatrix.mesh().comm();
+                label oldWarn = UPstream::warnComm;
+                UPstream::warnComm = solveComm;
+                Pout<< "** Master:Solving on comm:" << solveComm << endl;
+
+                if (allMatrix.asymmetric())
+                {
+                    coarseSolverPerf = BICCG
+                    (
+                        "coarsestLevelCorr",
+                        allMatrix,
+                        allInterfaceBouCoeffs_,
+                        allInterfaceIntCoeffs_,
+                        allInterfaces_,
+                        tolerance_,
+                        relTol_
+                    ).solve
+                    (
+                        allCorrField,
+                        allSource
+                    );
+                }
+                else
+                {
+                    coarseSolverPerf = ICCG
+                    (
+                        "coarsestLevelCorr",
+                        allMatrix,
+                        allInterfaceBouCoeffs_,
+                        allInterfaceIntCoeffs_,
+                        allInterfaces_,
+                        tolerance_,
+                        relTol_
+                    ).solve
+                    (
+                        allCorrField,
+                        allSource
+                    );
+                }
+                UPstream::warnComm = oldWarn;
             }
 
 
@@ -582,6 +589,8 @@ void Foam::GAMGSolver::solveCoarsestLevel
             );
             for (label i=1; i < procIDs.size(); i++)
             {
+                Pout<< "** master sending to " << procIDs[i] << endl;
+
                 OPstream toSlave
                 (
                     Pstream::scheduled,
@@ -601,16 +610,18 @@ void Foam::GAMGSolver::solveCoarsestLevel
         }
         else
         {
+            Pout<< "** slave receiving from " << procIDs[0] << endl;
             IPstream fromMaster
             (
                 Pstream::scheduled,
-                0,
+                procIDs[0],
                 0,          // bufSize
                 Pstream::msgType(),
                 coarseComm
             );
             fromMaster >> coarsestCorrField;
         }
+
 
         if (debug >= 2)
         {

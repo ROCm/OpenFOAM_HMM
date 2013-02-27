@@ -49,6 +49,7 @@ void Foam::GAMGSolver::gatherMatrices
 (
     const labelList& procIDs,
     const PtrList<lduMesh>& procMeshes,
+    const label meshComm,
 
     const lduMatrix& mat,
     const FieldField<Field, scalar>& interfaceBouCoeffs,
@@ -61,13 +62,35 @@ void Foam::GAMGSolver::gatherMatrices
     PtrList<lduInterfaceFieldPtrsList>& otherInterfaces
 ) const
 {
-    const label meshComm = mat.mesh().comm();
+    Pout<< "GAMGSolver::gatherMatrices :"
+        << " collecting matrices on procs:" << procIDs
+        << " using comm:" << meshComm << endl;
+
 
     //lduInterfacePtrsList interfaces(mesh.interfaces());
 
     if (Pstream::myProcNo(meshComm) == procIDs[0])
     {
         // Master.
+
+        Pout<< "GAMGSolver::gatherMatrices :"
+            << " master:" << Pstream::myProcNo(meshComm) << endl;
+
+        for (label i=0; i < procMeshes.size(); i++)
+        {
+            if (meshComm != procMeshes[i].comm())
+            {
+                FatalErrorIn("GAMGSolver::gatherMatrices()")
+                    << "Inconsistent communicator :"
+                    << "master processor:" << procIDs[0]
+                    << " comm:" << meshComm
+                    << " slave processor:" << procIDs[i]
+                    << " comm:" << procMeshes[i].comm()
+                    << abort(FatalError);
+            }
+        }
+
+
         otherMats.setSize(procIDs.size()-1);
         otherBouCoeffs.setSize(procIDs.size()-1);
         otherIntCoeffs.setSize(procIDs.size()-1);
@@ -139,16 +162,11 @@ void Foam::GAMGSolver::gatherMatrices
     }
     else
     {
-        // Send to master
-        OPstream toMaster
-        (
-            Pstream::scheduled,
-            procIDs[0],
-            0,
-            Pstream::msgType(),
-            meshComm
-        );
+        Pout<< "GAMGSolver::gatherMatrices :"
+            << " sending from:" << Pstream::myProcNo(meshComm)
+            << " to master:" << procIDs[0] << endl;
 
+        // Send to master
 
         // Count valid interfaces
         boolList validTransforms(interfaceBouCoeffs.size(), false);
@@ -167,6 +185,18 @@ void Foam::GAMGSolver::gatherMatrices
                 validRanks[intI] = interface.rank();
             }
         }
+
+        Pout<< "GAMGSolver::gatherMatrices :"
+            << " sending matrix:" << mat.info() << endl;
+
+        OPstream toMaster
+        (
+            Pstream::scheduled,
+            procIDs[0],
+            0,
+            Pstream::msgType(),
+            meshComm
+        );
 
         toMaster << mat << validTransforms << validRanks;
         forAll(validTransforms, intI)
@@ -261,7 +291,15 @@ Foam::GAMGSolver::GAMGSolver
         }
         else if (processorAgglomerate_)
         {
-            const lduMesh& coarsestMesh = matrixLevels_[coarsestLevel].mesh();
+            const lduMatrix& coarsestMatrix = matrixLevels_[coarsestLevel];
+            const lduInterfaceFieldPtrsList& coarsestInterfaces =
+                interfaceLevels_[coarsestLevel];
+            const FieldField<Field, scalar>& coarsestBouCoeffs =
+                interfaceLevelsBouCoeffs_[coarsestLevel];
+            const FieldField<Field, scalar>& coarsestIntCoeffs =
+                interfaceLevelsIntCoeffs_[coarsestLevel];
+            const lduMesh& coarsestMesh = coarsestMatrix.mesh();
+
 
             label coarseComm = coarsestMesh.comm();
             label oldWarn = UPstream::warnComm;
@@ -280,12 +318,7 @@ Foam::GAMGSolver::GAMGSolver
             Pout<< "procIDs:" << procIDs << endl;
 
             PtrList<lduMesh> procMeshes;
-            lduPrimitiveMesh::gather
-            (
-                coarsestMesh,
-                procIDs,
-                procMeshes
-            );
+            lduPrimitiveMesh::gather(coarsestMesh, procIDs, procMeshes);
 
             forAll(procMeshes, procI)
             {
@@ -307,11 +340,12 @@ Foam::GAMGSolver::GAMGSolver
             (
                 procIDs,
                 procMeshes,
+                coarseComm,
 
-                matrix,
-                interfaceBouCoeffs,
-                interfaceIntCoeffs,
-                interfaces,
+                coarsestMatrix,
+                coarsestBouCoeffs,
+                coarsestIntCoeffs,
+                coarsestInterfaces,
 
                 otherMats,
                 otherBouCoeffs,
@@ -319,7 +353,7 @@ Foam::GAMGSolver::GAMGSolver
                 otherInterfaces
             );
 
-            Pout<< "Own matrix:" << matrix.info() << endl;
+            Pout<< "Own matrix:" << coarsestMatrix.info() << endl;
 
             forAll(otherMats, i)
             {
@@ -328,6 +362,17 @@ Foam::GAMGSolver::GAMGSolver
                     << endl;
             }
             Pout<< endl;
+
+
+            // Allocate a communicator for single processor
+            label masterComm = UPstream::allocateCommunicator
+            (
+                coarseComm,
+                labelList(1, 0)
+            );
+            Pout<< "** Allocated communicator " << masterComm
+                << " for processor " << procIDs[0]
+                << " out of " << procIDs << endl;
 
 
             if (Pstream::myProcNo(coarseComm) == procIDs[0])
@@ -339,7 +384,7 @@ Foam::GAMGSolver::GAMGSolver
                 (
                     new lduPrimitiveMesh
                     (
-                        coarseComm,
+                        masterComm,
                         procIDs,
                         procMeshes,
 
@@ -358,12 +403,16 @@ Foam::GAMGSolver::GAMGSolver
                 allMatrixPtr_.reset(new lduMatrix(allMesh));
                 lduMatrix& allMatrix = allMatrixPtr_();
 
-                if (matrix.hasDiag())
+                if (coarsestMatrix.hasDiag())
                 {
                     scalarField& allDiag = allMatrix.diag();
-                    SubList<scalar>(allDiag, matrix.diag().size()).assign
+                    SubList<scalar>
                     (
-                        matrix.diag()
+                        allDiag,
+                        coarsestMatrix.diag().size()
+                    ).assign
+                    (
+                        coarsestMatrix.diag()
                     );
                     forAll(otherMats, i)
                     {
@@ -378,22 +427,22 @@ Foam::GAMGSolver::GAMGSolver
                         );
                     }
                 }
-                if (matrix.hasLower())
+                if (coarsestMatrix.hasLower())
                 {
                     scalarField& allLower = allMatrix.lower();
                     UIndirectList<scalar>(allLower, faceMap_[0]) =
-                        matrix.lower();
+                        coarsestMatrix.lower();
                     forAll(otherMats, i)
                     {
                         UIndirectList<scalar>(allLower, faceMap_[i+1]) =
                             otherMats[i].lower();
                     }
                 }
-                if (matrix.hasUpper())
+                if (coarsestMatrix.hasUpper())
                 {
                     scalarField& allUpper = allMatrix.upper();
                     UIndirectList<scalar>(allUpper, faceMap_[0]) =
-                        matrix.upper();
+                        coarsestMatrix.upper();
                     forAll(otherMats, i)
                     {
                         UIndirectList<scalar>(allUpper, faceMap_[i+1]) =
@@ -426,19 +475,19 @@ Foam::GAMGSolver::GAMGSolver
                     const FieldField<Field, scalar>& procBouCoeffs
                     (
                         (procI == 0)
-                      ? interfaceBouCoeffs
+                      ? coarsestBouCoeffs
                       : otherBouCoeffs[procI-1]
                     );
                     const FieldField<Field, scalar>& procIntCoeffs
                     (
                         (procI == 0)
-                      ? interfaceIntCoeffs
+                      ? coarsestIntCoeffs
                       : otherIntCoeffs[procI-1]
                     );
                     const lduInterfaceFieldPtrsList procInterfaces
                     (
                         (procI == 0)
-                      ? interfaces
+                      ? coarsestInterfaces
                       : otherInterfaces[procI-1]
                     );
 
@@ -446,9 +495,6 @@ Foam::GAMGSolver::GAMGSolver
                     const labelList& bMap = boundaryMap_[procI];
                     forAll(bMap, procIntI)
                     {
-                        const scalarField& procBou = procBouCoeffs[procIntI];
-                        const scalarField& procInt = procIntCoeffs[procIntI];
-
                         label allIntI = bMap[procIntI];
 
                         if (allIntI != -1)
@@ -491,6 +537,10 @@ Foam::GAMGSolver::GAMGSolver
 
                             const labelList& map =
                                 boundaryFaceMap_[procI][procIntI];
+                            const scalarField& procBou =
+                                procBouCoeffs[procIntI];
+                            const scalarField& procInt =
+                                procIntCoeffs[procIntI];
 
                             forAll(map, i)
                             {
@@ -530,18 +580,52 @@ Foam::GAMGSolver::GAMGSolver
                                 allMesh.lduAddr().lowerAddr();
                             const label off = cellOffsets_[procI];
 
+                            const scalarField& procBou =
+                                procBouCoeffs[procIntI];
+                            const scalarField& procInt =
+                                procIntCoeffs[procIntI];
+
                             forAll(map, i)
                             {
                                 if (map[i] >= 0)
                                 {
-                                    FatalErrorIn
-                                    (
-                                        "GAMGSolver::GAMGSolver()"
-                                    )   << "problem."
-                                        << abort(FatalError);
+                                    label allFaceI = map[i];
+
+                                    if (coarsestMatrix.hasUpper())
+                                    {
+                                        allMatrix.upper()[allFaceI] =
+                                            procBou[i];
+                                    }
+                                    if (coarsestMatrix.hasLower())
+                                    {
+                                        allMatrix.lower()[allFaceI] =
+                                            procInt[i];
+                                    }
+                                }
+                                else
+                                {
+                                    label allFaceI = -map[i]-1;
+
+                                    if (coarsestMatrix.hasUpper())
+                                    {
+                                        allMatrix.upper()[allFaceI] =
+                                            procInt[i];
+                                    }
+                                    if (coarsestMatrix.hasLower())
+                                    {
+                                        allMatrix.lower()[allFaceI] =
+                                            procBou[i];
+                                    }
                                 }
 
-                                label allFaceI = -(map[i]+1);
+
+                                // Simple check
+                                label allFaceI =
+                                (
+                                    map[i] >= 0
+                                  ? map[i]
+                                  : -map[i]-1
+                                );
                                 label allCellI = off + fCells[i];
 
                                 if
@@ -560,34 +644,6 @@ Foam::GAMGSolver::GAMGSolver
                                         << " allLower:" << allL[allFaceI]
                                         << " allUpper:" << allU[allFaceI]
                                         << abort(FatalError);
-                                }
-
-
-                                if (allL[allFaceI] == allCellI)
-                                {
-                                    if (matrix.hasUpper())
-                                    {
-                                        allMatrix.upper()[allFaceI] =
-                                            procBou[i];
-                                    }
-                                    if (matrix.hasLower())
-                                    {
-                                        allMatrix.lower()[allFaceI] =
-                                            procInt[i];
-                                    }
-                                }
-                                else
-                                {
-                                    if (matrix.hasUpper())
-                                    {
-                                        allMatrix.upper()[allFaceI] =
-                                            procInt[i];
-                                    }
-                                    if (matrix.hasLower())
-                                    {
-                                        allMatrix.lower()[allFaceI] =
-                                            procBou[i];
-                                    }
                                 }
                             }
                         }
