@@ -119,7 +119,10 @@ Foam::lduMatrix::lduMatrix(lduMatrix& A, bool reUse)
 
 Foam::lduMatrix::lduMatrix(const lduMesh& mesh, Istream& is)
 :
-    lduMesh_(mesh)
+    lduMesh_(mesh),
+    lowerPtr_(NULL),
+    diagPtr_(NULL),
+    upperPtr_(NULL)
 {
     Switch hasLow(is);
     Switch hasDiag(is);
