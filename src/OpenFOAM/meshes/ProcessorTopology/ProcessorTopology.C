@@ -210,50 +210,67 @@ Foam::ProcessorTopology<Container, ProcPatch>::ProcessorTopology
     }
     else
     {
-        label patchEvali = 0;
+        patchSchedule_ = nonBlockingSchedule(patches);
+    }
+}
 
-        // 1. All non-processor patches
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        // Have evaluate directly after initEvaluate. Could have them separated
-        // as long as they're not intermingled with processor patches since
-        // then e.g. any reduce parallel traffic would interfere with the
-        // processor swaps.
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-        forAll(patches, patchi)
+template<class Container, class ProcPatch>
+Foam::lduSchedule
+Foam::ProcessorTopology<Container, ProcPatch>::nonBlockingSchedule
+(
+    const Container& patches
+)
+{
+    lduSchedule patchSchedule(2*patches.size());
+
+    label patchEvali = 0;
+
+    // 1. All non-processor patches
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Have evaluate directly after initEvaluate. Could have them separated
+    // as long as they're not intermingled with processor patches since
+    // then e.g. any reduce parallel traffic would interfere with the
+    // processor swaps.
+
+    forAll(patches, patchi)
+    {
+        if (!isA<ProcPatch>(patches[patchi]))
         {
-            if (!isA<ProcPatch>(patches[patchi]))
-            {
-                patchSchedule_[patchEvali].patch = patchi;
-                patchSchedule_[patchEvali++].init = true;
-                patchSchedule_[patchEvali].patch = patchi;
-                patchSchedule_[patchEvali++].init = false;
-            }
-        }
-
-        // 2. All processor patches
-        // ~~~~~~~~~~~~~~~~~~~~~~~~
-
-        // 2a. initEvaluate
-        forAll(patches, patchi)
-        {
-            if (isA<ProcPatch>(patches[patchi]))
-            {
-                patchSchedule_[patchEvali].patch = patchi;
-                patchSchedule_[patchEvali++].init = true;
-            }
-        }
-
-        // 2b. evaluate
-        forAll(patches, patchi)
-        {
-            if (isA<ProcPatch>(patches[patchi]))
-            {
-                patchSchedule_[patchEvali].patch = patchi;
-                patchSchedule_[patchEvali++].init = false;
-            }
+            patchSchedule[patchEvali].patch = patchi;
+            patchSchedule[patchEvali++].init = true;
+            patchSchedule[patchEvali].patch = patchi;
+            patchSchedule[patchEvali++].init = false;
         }
     }
+
+    // 2. All processor patches
+    // ~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // 2a. initEvaluate
+    forAll(patches, patchi)
+    {
+        if (isA<ProcPatch>(patches[patchi]))
+        {
+            patchSchedule[patchEvali].patch = patchi;
+            patchSchedule[patchEvali++].init = true;
+        }
+    }
+
+    // 2b. evaluate
+    forAll(patches, patchi)
+    {
+        if (isA<ProcPatch>(patches[patchi]))
+        {
+            patchSchedule[patchEvali].patch = patchi;
+            patchSchedule[patchEvali++].init = false;
+        }
+    }
+
+    return patchSchedule;
 }
 
 

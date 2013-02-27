@@ -101,6 +101,10 @@ public:
         {
             return patchSchedule_;
         }
+
+        //- Calculate non-blocking (i.e. unscheduled) schedule
+        static lduSchedule nonBlockingSchedule(const Container& patches);
+
 };
 
 
