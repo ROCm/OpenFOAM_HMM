@@ -27,6 +27,7 @@ License
 #include "ListOps.H"
 #include "Time.H"
 #include "volFields.H"
+#include "surfaceFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
