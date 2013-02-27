@@ -72,7 +72,6 @@ Description
 
         effectivenessHeatExchangerSourceCoeffs
         {
-            fieldNames              (e);
             secondaryMassFlowRate   1.0;
             secondaryInletT         336;
             primaryInletT           293;
@@ -178,10 +177,10 @@ private:
         //- Disallow default bitwise assignment
         void operator=(const effectivenessHeatExchangerSource&);
 
-        //- Init heat exchanger source model
-        void init();
+        //- Initialise heat exchanger source model
+        void initialise();
 
-        //- Calculate total area of faceZone accross procesors
+        //- Calculate total area of faceZone accross processors
         void calculateTotalArea(scalar& area);
 
 
@@ -209,6 +208,8 @@ public:
 
 
     // Member Functions
+
+        virtual bool alwaysApply() const;
 
 
         // Public Functions
