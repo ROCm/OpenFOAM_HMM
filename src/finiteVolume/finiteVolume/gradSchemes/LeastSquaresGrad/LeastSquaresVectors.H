@@ -58,7 +58,7 @@ namespace fv
 template<class Stencil>
 class LeastSquaresVectors
 :
-    public MeshObject<fvMesh, LeastSquaresVectors<Stencil> >
+    public MeshObject<fvMesh, MoveableMeshObject, LeastSquaresVectors<Stencil> >
 {
     // Private data
 
@@ -105,7 +105,7 @@ public:
             return vectors_;
         }
 
-        //- Delete the least square vectors when the mesh moves
+        //- Update the least square vectors when the mesh moves
         virtual bool movePoints();
 };
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ namespace Foam
 
 Foam::skewCorrectionVectors::skewCorrectionVectors(const fvMesh& mesh)
 :
-    MeshObject<fvMesh, skewCorrectionVectors>(mesh),
+    MeshObject<fvMesh, Foam::MoveableMeshObject, skewCorrectionVectors>(mesh),
     skew_(false),
     skewCorrectionVectors_
     (
