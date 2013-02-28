@@ -160,7 +160,7 @@ void Foam::fieldValues::fieldValueDelta::write()
 
     if (log_)
     {
-        Info<< type() << " output:" << endl;
+        Info<< type() << " " << name_ << " output:" << endl;
     }
 
     bool found = false;
