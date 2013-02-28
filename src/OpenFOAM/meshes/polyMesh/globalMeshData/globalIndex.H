@@ -76,10 +76,12 @@ public:
         //- Construct null
         inline globalIndex();
 
-        //- Construct from local max size
+        //- Construct from local max size. Does communication with default
+        //  communicator and message tag.
         globalIndex(const label localSize);
 
-        //- Construct from local max size
+        //- Construct from local max size. Does communication with given
+        //  communicator and message tag
         globalIndex
         (
             const label localSize,
