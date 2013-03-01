@@ -58,7 +58,7 @@ class lduMatrix;
 
 class GAMGAgglomeration
 :
-    public MeshObject<lduMesh, TopologicalMeshObject, GAMGAgglomeration>
+    public MeshObject<lduMesh, GeometricMeshObject, GAMGAgglomeration>
 {
 protected:
 

@@ -70,7 +70,7 @@ Foam::GAMGAgglomeration::GAMGAgglomeration
     const dictionary& controlDict
 )
 :
-    MeshObject<lduMesh, Foam::TopologicalMeshObject, GAMGAgglomeration>(mesh),
+    MeshObject<lduMesh, Foam::GeometricMeshObject, GAMGAgglomeration>(mesh),
 
     maxLevels_(50),
 
