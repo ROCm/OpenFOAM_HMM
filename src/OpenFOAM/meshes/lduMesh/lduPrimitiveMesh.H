@@ -43,12 +43,6 @@ SourceFiles
 namespace Foam
 {
 
-//// Forward declaration of friend functions and operators
-//
-//class lduPrimitiveMesh;
-//
-//Ostream& operator<<(Ostream&, const lduPrimitiveMesh&);
-
 /*---------------------------------------------------------------------------*\
                        Class lduPrimitiveMesh Declaration
 \*---------------------------------------------------------------------------*/
@@ -132,9 +126,6 @@ public:
             bool reUse
         );
 
-        ////- Construct from Istream
-        //lduPrimitiveMesh(Istream& is);
-
         //- Construct by combining multiple meshes. The meshes come from
         //  processors procIDs but these are only used to detect the interfaces
         //  that are to be merged.
@@ -149,13 +140,14 @@ public:
         //      merged boundaries: the new internal face (on the owner) or
         //                         -faceI-1 (on the neighbour)
         //
-        // TBD: hardcoded for processorGAMGInterface. Should use some 'clone' or
-        // New functionality instead.
+        //// TBD: hardcoded for processorGAMGInterface. Should use some
+        //// 'clone' or New functionality instead.
         lduPrimitiveMesh
         (
             const label comm,
             const labelList& procIDs,
-            const PtrList<lduMesh>& procMeshes,
+            const lduMesh& myMesh,
+            const PtrList<lduMesh>& otherMeshes,
 
             labelList& cellOffsets,
             labelListList& faceMap,
@@ -219,19 +211,22 @@ public:
 
         // Helper
 
-            //- Gather meshes from processors. Hardcoded for
-            //  processorGAMGInterface
+            //- Select either mesh0 (meshI is 0) or otherMeshes[meshI-1]
+            static const lduMesh& mesh
+            (
+                const lduMesh& mesh0,
+                const PtrList<lduMesh>& otherMeshes,
+                const label meshI
+            );
+
+            //- Gather meshes from other processors onto procIDs[0].
+            //  Hardcoded for GAMGInterface.
             static void gather
             (
                 const lduMesh& mesh,
                 const labelList& procIDs,
-                PtrList<lduMesh>& procMeshes
+                PtrList<lduMesh>& otherMeshes
             );
-
-//
-//    // Ostream operator
-//
-//        friend Ostream& operator<<(Ostream&, const procLduMatrix&);
 };
 
 

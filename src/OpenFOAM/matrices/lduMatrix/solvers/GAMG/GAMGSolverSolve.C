@@ -27,70 +27,9 @@ License
 #include "ICCG.H"
 #include "BICCG.H"
 #include "SubField.H"
-
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::GAMGSolver::gatherField
-(
-    const label meshComm,
-    const labelList& procIDs,
-    const scalarField& coarsestSource,
-    scalarField& allSource
-) const
-{
-    if (Pstream::myProcNo(meshComm) == procIDs[0])
-    {
-        // Master.
-        const lduMesh& allMesh = allMeshPtr_();
-
-        allSource.setSize(allMesh.lduAddr().size());
-
-        SubList<scalar>
-        (
-            allSource,
-            coarsestSource.size(),
-            0
-        ).assign(coarsestSource);
-
-        for (label i = 1; i < procIDs.size(); i++)
-        {
-            IPstream fromSlave
-            (
-                Pstream::scheduled,
-                procIDs[i],
-                0,          // bufSize
-                Pstream::msgType(),
-                meshComm
-            );
-
-            SubList<scalar> slaveSlots
-            (
-                allSource,
-                cellOffsets_[i+1]-cellOffsets_[i],
-                cellOffsets_[i]
-            );
-
-            UList<scalar>& l = slaveSlots;
-
-            fromSlave >> l;
-        }
-    }
-    else
-    {
-        // Send to master
-        OPstream toMaster
-        (
-            Pstream::scheduled,
-            procIDs[0],
-            0,
-            Pstream::msgType(),
-            meshComm
-        );
-        toMaster << coarsestSource;
-    }
-}
-
 
 Foam::solverPerformance Foam::GAMGSolver::solve
 (
@@ -519,7 +458,9 @@ void Foam::GAMGSolver::solveCoarsestLevel
         const List<int>& procIDs = UPstream::procID(coarseComm);
 
         scalarField allSource;
-        gatherField
+
+        const globalIndex cellOffsets(agglomeration_.cellOffsets());
+        cellOffsets.gather
         (
             coarseComm,
             procIDs,
@@ -578,55 +519,25 @@ void Foam::GAMGSolver::solveCoarsestLevel
                 }
                 UPstream::warnComm = oldWarn;
             }
-
-
-            // Distribute correction
-            coarsestCorrField = SubList<scalar>
-            (
-                allCorrField,
-                coarsestSource.size(),
-                0
-            );
-            for (label i=1; i < procIDs.size(); i++)
-            {
-                Pout<< "** master sending to " << procIDs[i] << endl;
-
-                OPstream toSlave
-                (
-                    Pstream::scheduled,
-                    procIDs[i],
-                    0,          // bufSize
-                    Pstream::msgType(),
-                    coarseComm
-                );
-
-                toSlave << SubList<scalar>
-                (
-                    allCorrField,
-                    cellOffsets_[i+1]-cellOffsets_[i],
-                    cellOffsets_[i]
-                );
-            }
-        }
-        else
-        {
-            Pout<< "** slave receiving from " << procIDs[0] << endl;
-            IPstream fromMaster
-            (
-                Pstream::scheduled,
-                procIDs[0],
-                0,          // bufSize
-                Pstream::msgType(),
-                coarseComm
-            );
-            fromMaster >> coarsestCorrField;
         }
 
+        // Scatter to all processors
+        coarsestCorrField.setSize(coarsestSource.size());
+        cellOffsets.scatter
+        (
+            coarseComm,
+            procIDs,
+            allCorrField,
+            coarsestCorrField
+        );
 
         if (debug >= 2)
         {
             coarseSolverPerf.print(Info(coarseComm));
         }
+
+        Pout<< "procAgglom: coarsestSource   :" << coarsestSource << endl;
+        Pout<< "procAgglom: coarsestCorrField:" << coarsestCorrField << endl;
     }
     else
     {
@@ -672,6 +583,9 @@ void Foam::GAMGSolver::solveCoarsestLevel
         {
             coarseSolverPerf.print(Info(coarseComm));
         }
+
+        Pout<< "GC: coarsestSource   :" << coarsestSource << endl;
+        Pout<< "GC: coarsestCorrField:" << coarsestCorrField << endl;
     }
 
     UPstream::warnComm = oldWarn;

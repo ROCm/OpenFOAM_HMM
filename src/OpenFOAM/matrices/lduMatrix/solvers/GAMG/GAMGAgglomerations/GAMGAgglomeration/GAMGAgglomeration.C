@@ -255,4 +255,101 @@ const Foam::lduInterfacePtrsList& Foam::GAMGAgglomeration::interfaceLevel
 }
 
 
+void Foam::GAMGAgglomeration::gatherMeshes
+(
+    const labelList& procIDs,
+    const label allMeshComm
+) const
+{
+    const lduMesh& coarsestMesh = meshLevels_.last();
+
+    label coarseComm = coarsestMesh.comm();
+
+    label oldWarn = UPstream::warnComm;
+    UPstream::warnComm = coarseComm;
+
+    Pout<< "GAMGAgglomeration : gathering coarsestmesh (level="
+        << meshLevels_.size()-1
+        << ") using communicator " << coarseComm << endl;
+
+    lduPrimitiveMesh::gather(coarsestMesh, procIDs, otherMeshes_);
+
+    Pout<< "** Own Mesh " << coarsestMesh.info() << endl;
+    forAll(otherMeshes_, i)
+    {
+        Pout<< "** otherMesh " << i << " "
+            << otherMeshes_[i].info()
+            << endl;
+    }
+    Pout<< endl;
+
+    if (Pstream::myProcNo(coarseComm) == procIDs[0])
+    {
+        // Agglomerate all addressing
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        allMeshPtr_.reset
+        (
+            new lduPrimitiveMesh
+            (
+                allMeshComm,
+                procIDs,
+                coarsestMesh,
+                otherMeshes_,
+
+                cellOffsets_,
+                faceMap_,
+                boundaryMap_,
+                boundaryFaceMap_
+            )
+        );
+    }
+
+    UPstream::warnComm = oldWarn;
+}
+
+
+const Foam::lduPrimitiveMesh& Foam::GAMGAgglomeration::allMesh() const
+{
+    if (!allMeshPtr_.valid())
+    {
+        FatalErrorIn("GAMGAgglomeration::allMesh() const")
+            << "Processor-agglomerated mesh not constructed. Did you call"
+            << " gatherMeshes?"
+            << exit(FatalError);
+    }
+    return allMeshPtr_();
+}
+
+
+const Foam::labelList& Foam::GAMGAgglomeration::cellOffsets() const
+{
+    return cellOffsets_;
+}
+
+
+const Foam::labelListList& Foam::GAMGAgglomeration::faceMap() const
+{
+    return faceMap_;
+}
+
+
+const Foam::labelListList& Foam::GAMGAgglomeration::boundaryMap() const
+{
+    return boundaryMap_;
+}
+
+
+const Foam::labelListListList& Foam::GAMGAgglomeration::boundaryFaceMap() const
+{
+    return boundaryFaceMap_;
+}
+
+
+const Foam::PtrList<Foam::lduMesh>& Foam::GAMGAgglomeration::otherMeshes() const
+{
+    return otherMeshes_;
+}
+
+
 // ************************************************************************* //

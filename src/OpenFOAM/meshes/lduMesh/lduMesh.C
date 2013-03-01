@@ -91,6 +91,36 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<lduMesh>& ip)
         }
     }
 
+
+    // Print actual contents
+    {
+        const labelList& l = addr.lowerAddr();
+        const labelList& u = addr.upperAddr();
+        forAll(l, faceI)
+        {
+            Pout<< "        face:" << faceI << " l:" << l[faceI]
+                << " u:" << u[faceI] << endl;
+        }
+        forAll(interfaces, i)
+        {
+            if (interfaces.set(i))
+            {
+                const labelUList& faceCells = addr.patchAddr(i);
+                if (faceCells.size())
+                {
+                    Pout<< "    patch:" << i
+                        << " type:" << interfaces[i].type() << endl;
+
+                    forAll(faceCells, i)
+                    {
+                        Pout<< "        " << i << " own:" << faceCells[i]
+                            << endl;
+                    }
+                }
+            }
+        }
+    }
+
     os.check("Ostream& operator<<(Ostream&, const lduMesh&");
 
     return os;

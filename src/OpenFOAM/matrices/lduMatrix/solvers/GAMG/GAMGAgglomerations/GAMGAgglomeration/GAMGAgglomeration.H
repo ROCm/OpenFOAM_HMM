@@ -99,6 +99,30 @@ protected:
         //  Warning: Needs to be deleted explicitly.
         PtrList<lduInterfacePtrsList> interfaceLevels_;
 
+
+        //- Processor agglomeration
+
+            //- Combined coarsest meshes for all processors
+            mutable autoPtr<lduPrimitiveMesh> allMeshPtr_;
+
+            //- Per remote processor the local equivalent. TBD: hack. Can be
+            //  deleted once lduMatrices get received and merged into single
+            //  one without constructing local ones
+            mutable PtrList<lduMesh> otherMeshes_;
+
+            //- Mapping from processor to coarsestAllMesh cells
+            mutable labelList cellOffsets_;
+
+            //- Mapping from processor to coarsestAllMesh face
+            mutable labelListList faceMap_;
+
+            //- Mapping from processor to coarsestAllMesh boundary
+            mutable labelListList boundaryMap_;
+
+            //- Mapping from processor to coarsestAllMesh boundary face
+            mutable labelListListList boundaryFaceMap_;
+
+
         //- Assemble coarse mesh addressing
         void agglomerateLduAddressing(const label fineLevelIndex);
 
@@ -250,6 +274,38 @@ public:
                 const Field<Type>& cf,
                 const label coarseLevelIndex
             ) const;
+
+
+        // Procesor agglomeration
+
+            //- Collect and combine processor meshes into allMesh. Pass in
+            //  communicator for combined mesh.
+            void gatherMeshes
+            (
+                const labelList& procIDs,
+                const label allMeshComm
+            ) const;
+
+            //- Combined mesh
+            const lduPrimitiveMesh& allMesh() const;
+
+            //- Mapping from processor to coarsestAllMesh cells
+            const labelList& cellOffsets() const;
+
+            //- Mapping from processor to coarsestAllMesh face
+            const labelListList& faceMap() const;
+
+            //- Mapping from processor to coarsestAllMesh boundary
+            const labelListList& boundaryMap() const;
+
+            //- Mapping from processor to coarsestAllMesh boundary face
+            const labelListListList& boundaryFaceMap() const;
+
+            //- Per remote processor the local equivalent. TBD: hack. Can be
+            //  deleted once lduMatrices get received and merged into single
+            //  one without constructing local ones
+            const PtrList<lduMesh>& otherMeshes() const;
+
 };
 
 

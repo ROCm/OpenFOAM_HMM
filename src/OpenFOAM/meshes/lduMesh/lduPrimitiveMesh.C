@@ -217,22 +217,12 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
 }
 
 
-//Foam::lduPrimitiveMesh::lduPrimitiveMesh(Istream& is)
-//:
-//    lduAddressing(readLabel(is)),
-//    lowerAddr_(is),
-//    upperAddr_(is),
-//    patchAddr_(is),
-//    interfaces_(is),
-//    patchSchedule_(is),
-//    comm_(readLabel(is))
-//{}
-
 Foam::lduPrimitiveMesh::lduPrimitiveMesh
 (
     const label comm,
     const labelList& procIDs,
-    const PtrList<lduMesh>& procMeshes,
+    const lduMesh& myMesh,
+    const PtrList<lduMesh>& otherMeshes,
 
     labelList& cellOffsets,
     labelListList& faceMap,
@@ -240,7 +230,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     labelListListList& boundaryFaceMap
 )
 :
-    lduAddressing(size(procMeshes)),
+    lduAddressing(myMesh.lduAddr().size() + size(otherMeshes)),
     lowerAddr_(0),
     upperAddr_(0),
     patchAddr_(0),
@@ -261,40 +251,49 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
                 << procIDs[i-1]
                 << exit(FatalError);
         }
-        if (procMeshes[i].comm() != procMeshes[i-1].comm())
+    }
+
+    const label currentComm = myMesh.comm();
+
+    forAll(otherMeshes, i)
+    {
+        if (otherMeshes[i].comm() != currentComm)
         {
             FatalErrorIn
             (
                 "lduPrimitiveMesh::lduPrimitiveMesh(..)"
-            )   << "Communicator " << procMeshes[i].comm() << " at index " << i
+            )   << "Communicator " << otherMeshes[i].comm()
+                << " at index " << i
                 << " differs from that of predecessor "
-                << procMeshes[i-1].comm()
+                << currentComm
                 << exit(FatalError);
         }
     }
 
-    const label currentComm = procMeshes[0].comm();
+    const label nMeshes = otherMeshes.size()+1;
 
     // Cells get added in order.
-    cellOffsets.setSize(procMeshes.size()+1);
+    cellOffsets.setSize(nMeshes+1);
     cellOffsets[0] = 0;
-    forAll(procMeshes, procMeshI)
+    for (label procMeshI = 0; procMeshI < nMeshes; procMeshI++)
     {
-        const lduMesh& mesh = procMeshes[procMeshI];
+        const lduMesh& procMesh = mesh(myMesh, otherMeshes, procMeshI);
+
         cellOffsets[procMeshI+1] =
             cellOffsets[procMeshI]
-          + mesh.lduAddr().size();
+          + procMesh.lduAddr().size();
     }
 
     // Faces initially get added in order, sorted later
-    labelList internalFaceOffsets(procMeshes.size()+1);
+    labelList internalFaceOffsets(nMeshes+1);
     internalFaceOffsets[0] = 0;
-    forAll(procMeshes, procMeshI)
+    for (label procMeshI = 0; procMeshI < nMeshes; procMeshI++)
     {
-        const lduMesh& mesh = procMeshes[procMeshI];
+        const lduMesh& procMesh = mesh(myMesh, otherMeshes, procMeshI);
+
         internalFaceOffsets[procMeshI+1] =
             internalFaceOffsets[procMeshI]
-          + mesh.lduAddr().lowerAddr().size();
+          + procMesh.lduAddr().lowerAddr().size();
     }
 
     // Count how faces get added. Interfaces inbetween get merged.
@@ -304,7 +303,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     // - interface in procMesh
     EdgeMap<labelPairList> mergedMap
     (
-        2*procMeshes[0].interfaces().size()
+        2*myMesh.interfaces().size()
     );
 
     // Unmerged interfaces: map from two processors back to
@@ -312,18 +311,18 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     // - interface in procMesh
     EdgeMap<labelPairList> unmergedMap(mergedMap.size());
 
-    boundaryMap.setSize(procMeshes.size());
-    boundaryFaceMap.setSize(procMeshes.size());
+    boundaryMap.setSize(nMeshes);
+    boundaryFaceMap.setSize(nMeshes);
 
 
     label nBoundaryFaces = 0;
     label nInterfaces = 0;
-    labelList nCoupledFaces(procMeshes.size(), 0);
+    labelList nCoupledFaces(nMeshes, 0);
 
-    forAll(procMeshes, procMeshI)
+    for (label procMeshI = 0; procMeshI < nMeshes; procMeshI++)
     {
         const lduInterfacePtrsList interfaces =
-            procMeshes[procMeshI].interfaces();
+            mesh(myMesh, otherMeshes, procMeshI).interfaces();
 
         // Inialise all boundaries as merged
         boundaryMap[procMeshI].setSize(interfaces.size(), -1);
@@ -449,7 +448,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
                 label procMeshI = elems[i][0];
                 label interfaceI = elems[i][1];
                 const lduInterfacePtrsList interfaces =
-                    procMeshes[procMeshI].interfaces();
+                    mesh(myMesh, otherMeshes, procMeshI).interfaces();
                 const processorLduInterface& pldui =
                     refCast<const processorLduInterface>
                     (
@@ -476,7 +475,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
                 label procMeshI = elems[i][0];
                 label interfaceI = elems[i][1];
                 const lduInterfacePtrsList interfaces =
-                    procMeshes[procMeshI].interfaces();
+                    mesh(myMesh, otherMeshes, procMeshI).interfaces();
                 const processorLduInterface& pldui =
                     refCast<const processorLduInterface>
                     (
@@ -495,12 +494,13 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
 
 
     // Adapt faceOffsets for internal interfaces
-    labelList faceOffsets(procMeshes.size()+1);
+    labelList faceOffsets(nMeshes+1);
     faceOffsets[0] = 0;
-    faceMap.setSize(procMeshes.size());
-    forAll(procMeshes, procMeshI)
+    faceMap.setSize(nMeshes);
+    for (label procMeshI = 0; procMeshI < nMeshes; procMeshI++)
     {
-        label nInternal = procMeshes[procMeshI].lduAddr().lowerAddr().size();
+        const lduMesh& procMesh = mesh(myMesh, otherMeshes, procMeshI);
+        label nInternal = procMesh.lduAddr().lowerAddr().size();
 
         faceOffsets[procMeshI+1] =
             faceOffsets[procMeshI]
@@ -524,10 +524,12 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     // Old internal faces and resolved coupled interfaces
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    forAll(procMeshes, procMeshI)
+    for (label procMeshI = 0; procMeshI < nMeshes; procMeshI++)
     {
-        const labelUList& l = procMeshes[procMeshI].lduAddr().lowerAddr();
-        const labelUList& u = procMeshes[procMeshI].lduAddr().upperAddr();
+        const lduMesh& procMesh = mesh(myMesh, otherMeshes, procMeshI);
+
+        const labelUList& l = procMesh.lduAddr().lowerAddr();
+        const labelUList& u = procMesh.lduAddr().upperAddr();
 
         // Add internal faces
         label allFaceI = faceOffsets[procMeshI];
@@ -540,8 +542,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
         }
 
         // Add merged interfaces
-        const lduInterfacePtrsList interfaces =
-            procMeshes[procMeshI].interfaces();
+        const lduInterfacePtrsList interfaces = procMesh.interfaces();
 
         forAll(interfaces, intI)
         {
@@ -596,7 +597,13 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
 
 
                             const lduInterfacePtrsList nbrInterfaces =
-                                procMeshes[nbrProcMeshI].interfaces();
+                                mesh
+                                (
+                                    myMesh,
+                                    otherMeshes,
+                                    nbrProcMeshI
+                                ).interfaces();
+
 
                             const labelUList& faceCells =
                                 interfaces[intI].faceCells();
@@ -648,7 +655,13 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
             label procMeshI = elems[i][0];
             label interfaceI = elems[i][1];
             const lduInterfacePtrsList interfaces =
-                procMeshes[procMeshI].interfaces();
+                mesh
+                (
+                    myMesh,
+                    otherMeshes,
+                    procMeshI
+                ).interfaces();
+
             n += interfaces[interfaceI].faceCells().size();
         }
 
@@ -661,7 +674,12 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
             label procMeshI = elems[i][0];
             label interfaceI = elems[i][1];
             const lduInterfacePtrsList interfaces =
-                procMeshes[procMeshI].interfaces();
+                mesh
+                (
+                    myMesh,
+                    otherMeshes,
+                    procMeshI
+                ).interfaces();
 
             boundaryMap[procMeshI][interfaceI] = allInterfaceI;
             labelList& bfMap = boundaryFaceMap[procMeshI][interfaceI];
@@ -755,87 +773,39 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+const Foam::lduMesh& Foam::lduPrimitiveMesh::mesh
+(
+    const lduMesh& myMesh,
+    const PtrList<lduMesh>& otherMeshes,
+    const label meshI
+)
+{
+    return (meshI == 0 ? myMesh : otherMeshes[meshI-1]);
+}
+
+
 void Foam::lduPrimitiveMesh::gather
 (
     const lduMesh& mesh,
     const labelList& procIDs,
-    PtrList<lduMesh>& procMeshes
+    PtrList<lduMesh>& otherMeshes
 )
 {
+    // Force calculation of schedule (since does parallel comms)
+    (void)mesh.lduAddr().patchSchedule();
+
+
     const label meshComm = mesh.comm();
-
-    lduInterfacePtrsList interfaces(mesh.interfaces());
-
-    const lduAddressing& addressing = mesh.lduAddr();
 
     if (Pstream::myProcNo(meshComm) == procIDs[0])
     {
-        procMeshes.setSize(procIDs.size());
-
-        // Master mesh (copy for now. TBD)
-        {
-            // Convert to processorGAMGInterfaces in new communicator
-            lduInterfacePtrsList newInterfaces(interfaces.size());
-            labelListList newPatchAddr(interfaces.size());
-
-            forAll(interfaces, intI)
-            {
-                if (interfaces.set(intI))
-                {
-                    const processorLduInterface& pldui =
-                        refCast<const processorLduInterface>(interfaces[intI]);
-
-                    newPatchAddr[intI] = interfaces[intI].faceCells();
-                    labelList faceRestrictAddressing
-                    (
-                        identity(interfaces[intI].faceCells().size())
-                    );
-
-                    newInterfaces.set
-                    (
-                        intI,
-                        new processorGAMGInterface
-                        (
-                            intI,
-                            newInterfaces,
-                            newPatchAddr[intI],
-                            faceRestrictAddressing,
-                            pldui.comm(),
-                            pldui.myProcNo(),
-                            pldui.neighbProcNo(),
-                            pldui.forwardT(),
-                            pldui.tag()
-                        )
-                    );
-                }
-            }
-
-
-            procMeshes.set
-            (
-                0,
-                new lduPrimitiveMesh
-                (
-                    addressing.size(),
-                    addressing.lowerAddr(),
-                    addressing.upperAddr(),
-                    newPatchAddr,
-                    newInterfaces,
-                    nonBlockingSchedule<processorGAMGInterface>
-                    (
-                        newInterfaces
-                    ),
-                    meshComm
-                )
-            );
-        }
+        otherMeshes.setSize(procIDs.size()-1);
 
         // Slave meshes
         for (label i = 1; i < procIDs.size(); i++)
         {
             //Pout<< "on master :"
-            //    << " receiving from slave " << procIDs[i]
-            //    << endl;
+            //    << " receiving from slave " << procIDs[i] << endl;
 
             IPstream fromSlave
             (
@@ -849,46 +819,35 @@ void Foam::lduPrimitiveMesh::gather
             label nCells = readLabel(fromSlave);
             labelList lowerAddr(fromSlave);
             labelList upperAddr(fromSlave);
-            labelListList patchAddr(fromSlave);
-            labelList comm(fromSlave);
-            labelList myProcNo(fromSlave);
-            labelList neighbProcNo(fromSlave);
-            List<tensorField> forwardT(fromSlave);
-            labelList tag(fromSlave);
+            boolList validInterface(fromSlave);
 
-            // Convert to processorGAMGInterfaces
-            lduInterfacePtrsList newInterfaces(patchAddr.size());
-            forAll(patchAddr, intI)
+            // Construct GAMGInterfaces
+            lduInterfacePtrsList newInterfaces(validInterface.size());
+            labelListList patchAddr(validInterface.size());
+            forAll(validInterface, intI)
             {
-                if (tag[intI] != -1)
+                if (validInterface[intI])
                 {
-                    labelList faceRestrictAddressing
-                    (
-                        identity(patchAddr[intI].size())
-                    );
+                    word coupleType(fromSlave);
 
                     newInterfaces.set
                     (
                         intI,
-                        new processorGAMGInterface
+                        GAMGInterface::New
                         (
+                            coupleType,
                             intI,
                             newInterfaces,
-                            patchAddr[intI],
-                            faceRestrictAddressing,
-                            comm[intI],
-                            myProcNo[intI],
-                            neighbProcNo[intI],
-                            forwardT[intI],
-                            tag[intI]
-                        )
+                            fromSlave
+                        ).ptr()
                     );
+                    patchAddr[intI] = newInterfaces[intI].faceCells();
                 }
             }
 
-            procMeshes.set
+            otherMeshes.set
             (
-                i,
+                i-1,
                 new lduPrimitiveMesh
                 (
                     nCells,
@@ -900,7 +859,8 @@ void Foam::lduPrimitiveMesh::gather
                     (
                         newInterfaces
                     ),
-                    meshComm
+                    meshComm,
+                    true
                 )
             );
         }
@@ -909,28 +869,12 @@ void Foam::lduPrimitiveMesh::gather
     {
         // Send to master
 
-        //- Extract info from processorGAMGInterface
-        labelListList patchAddr(interfaces.size());
-        labelList comm(interfaces.size(), -1);
-        labelList myProcNo(interfaces.size(), -1);
-        labelList neighbProcNo(interfaces.size(), -1);
-        List<tensorField> forwardT(interfaces.size());
-        labelList tag(interfaces.size(), -1);
-
+        const lduAddressing& addressing = mesh.lduAddr();
+        lduInterfacePtrsList interfaces(mesh.interfaces());
+        boolList validInterface(interfaces.size());
         forAll(interfaces, intI)
         {
-            if (interfaces.set(intI))
-            {
-                const processorLduInterface& pldui =
-                    refCast<const processorLduInterface>(interfaces[intI]);
-
-                patchAddr[intI] = interfaces[intI].faceCells();
-                comm[intI] = pldui.comm();
-                myProcNo[intI] = pldui.myProcNo();
-                neighbProcNo[intI] =  pldui.neighbProcNo();
-                forwardT[intI] =  pldui.forwardT();
-                tag[intI] =  pldui.tag();
-            }
+            validInterface[intI] = interfaces.set(intI);
         }
 
         OPstream toMaster
@@ -941,38 +885,34 @@ void Foam::lduPrimitiveMesh::gather
             Pstream::msgType(),
             meshComm
         );
+
+        //Pout<< "sent nCells:" << addressing.size()
+        //    << "sent lowerAddr:" << addressing.lowerAddr().size()
+        //    << "sent upperAddr:" << addressing.upperAddr()
+        //    << "sent validInterface:" << validInterface
+        //    << endl;
+
         toMaster
             << addressing.size()
             << addressing.lowerAddr()
             << addressing.upperAddr()
-            << patchAddr
-            << comm
-            << myProcNo
-            << neighbProcNo
-            << forwardT
-            << tag;
+            << validInterface;
+
+        forAll(interfaces, intI)
+        {
+            if (interfaces.set(intI))
+            {
+                const GAMGInterface& interface = refCast<const GAMGInterface>
+                (
+                    interfaces[intI]
+                );
+
+                toMaster << interface.type();
+                interface.write(toMaster);
+            }
+        }
     }
 }
-
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-//Foam::Ostream& Foam::operator<<
-//(
-//    Ostream& os,
-//    const Foam::lduPrimitiveMesh& mesh
-//)
-//{
-//    os  << mesh.size()
-//        << mesh.lowerAddr_
-//        << mesh.upperAddr_
-//        << mesh.patchAddr_
-//        << mesh.interfaces_
-//        << mesh.patchSchedule_
-//        << mesh.comm_
-//
-//    return os;
-//}
 
 
 // ************************************************************************* //

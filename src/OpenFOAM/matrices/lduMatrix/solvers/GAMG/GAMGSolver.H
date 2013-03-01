@@ -131,20 +131,6 @@ class GAMGSolver
         //- LU decompsed coarsest matrix
         autoPtr<LUscalarMatrix> coarsestLUMatrixPtr_;
 
-
-
-        // Processor addressing agglomeration - to be moved into
-        // GAMGAgglomeration
-
-            //- Combined coarsest meshes for all processors
-            autoPtr<lduPrimitiveMesh> allMeshPtr_;
-
-            //- Mapping from processor to coarsestAllMesh
-            labelList cellOffsets_;
-            labelListList faceMap_;
-            labelListList boundaryMap_;
-            labelListListList boundaryFaceMap_;
-
         // Processor matrix agglomeration
 
             //- Combined coarsest level matrix for all processors
@@ -187,7 +173,8 @@ class GAMGSolver
         void gatherMatrices
         (
             const labelList& procIDs,
-            const PtrList<lduMesh>& procMeshes,
+            const lduMesh& myMesh,
+            const PtrList<lduMesh>& otherMeshes,
             const label meshComm,
 
             const lduMatrix& mat,
@@ -200,14 +187,22 @@ class GAMGSolver
             PtrList<FieldField<Field, scalar> >& otherIntCoeffs,
             PtrList<lduInterfaceFieldPtrsList>& otherInterfaces
         ) const;
-
-        //- Gather field in allMatrix form
-        void gatherField
+        void gatherMatrices
         (
-            const label meshComm,
             const labelList& procIDs,
-            const scalarField& coarsestSource,
-            scalarField& allSource
+            const lduMesh& dummyMesh,
+            const label meshComm,
+
+            const lduMatrix& mat,
+            const FieldField<Field, scalar>& interfaceBouCoeffs,
+            const FieldField<Field, scalar>& interfaceIntCoeffs,
+            const lduInterfaceFieldPtrsList& interfaces,
+
+            PtrList<lduMatrix>& otherMats,
+            PtrList<FieldField<Field, scalar> >& otherBouCoeffs,
+            PtrList<FieldField<Field, scalar> >& otherIntCoeffs,
+            List<boolList>& otherTransforms,
+            List<List<int> >& otherRanks
         ) const;
 
         //-  Interpolate the correction after injected prolongation
