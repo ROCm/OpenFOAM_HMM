@@ -39,6 +39,12 @@ namespace Foam
         processorGAMGInterface,
         lduInterface
     );
+    addToRunTimeSelectionTable
+    (
+        GAMGInterface,
+        processorGAMGInterface,
+        Istream
+    );
 }
 
 
@@ -165,6 +171,22 @@ Foam::processorGAMGInterface::processorGAMGInterface
 {}
 
 
+Foam::processorGAMGInterface::processorGAMGInterface
+(
+    const label index,
+    const lduInterfacePtrsList& coarseInterfaces,
+    Istream& is
+)
+:
+    GAMGInterface(index, coarseInterfaces, is),
+    comm_(readLabel(is)),
+    myProcNo_(readLabel(is)),
+    neighbProcNo_(readLabel(is)),
+    forwardT_(is),
+    tag_(readLabel(is))
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
 
 Foam::processorGAMGInterface::~processorGAMGInterface()
@@ -201,6 +223,17 @@ UPstream::warnComm = comm();
 
 UPstream::warnComm = oldWarn;
     return tfld;
+}
+
+
+void Foam::processorGAMGInterface::write(Ostream& os) const
+{
+    GAMGInterface::write(os);
+    os  << token::SPACE << comm_
+        << token::SPACE << myProcNo_
+        << token::SPACE << neighbProcNo_
+        << token::SPACE << forwardT_
+        << token::SPACE << tag_;
 }
 
 

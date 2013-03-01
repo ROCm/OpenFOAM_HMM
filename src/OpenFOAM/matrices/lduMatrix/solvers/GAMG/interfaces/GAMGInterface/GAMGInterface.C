@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,24 @@ namespace Foam
 {
     defineTypeNameAndDebug(GAMGInterface, 0);
     defineRunTimeSelectionTable(GAMGInterface, lduInterface);
+    defineRunTimeSelectionTable(GAMGInterface, Istream);
 }
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::GAMGInterface::GAMGInterface
+(
+    const label index,
+    const lduInterfacePtrsList& coarseInterfaces,
+    Istream& is
+)
+:
+    index_(index),
+    coarseInterfaces_(coarseInterfaces),
+    faceCells_(is),
+    faceRestrictAddressing_(is)
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -72,6 +89,12 @@ Foam::tmp<Foam::scalarField> Foam::GAMGInterface::agglomerateCoeffs
     }
 
     return tcoarseCoeffs;
+}
+
+
+void Foam::GAMGInterface::write(Ostream& os) const
+{
+    os  << faceCells_ << token::SPACE << faceRestrictAddressing_;
 }
 
 

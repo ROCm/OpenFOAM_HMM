@@ -39,6 +39,12 @@ namespace Foam
         cyclicGAMGInterface,
         lduInterface
     );
+    addToRunTimeSelectionTable
+    (
+        GAMGInterface,
+        cyclicGAMGInterface,
+        Istream
+    );
 }
 
 
@@ -63,7 +69,14 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
 //        localRestrictAddressing,
 //        neighbourRestrictAddressing
     ),
-    fineCyclicInterface_(refCast<const cyclicLduInterface>(fineInterface))
+    //fineCyclicInterface_(refCast<const cyclicLduInterface>(fineInterface))
+    neighbPatchID_
+    (
+        refCast<const cyclicLduInterface>(fineInterface).neighbPatchID()
+    ),
+    owner_(refCast<const cyclicLduInterface>(fineInterface).owner()),
+    forwardT_(refCast<const cyclicLduInterface>(fineInterface).forwardT()),
+    reverseT_(refCast<const cyclicLduInterface>(fineInterface).reverseT())
 {
     // From coarse face to coarse cell
     DynamicList<label> dynFaceCells(localRestrictAddressing.size());
@@ -127,6 +140,21 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
 }
 
 
+Foam::cyclicGAMGInterface::cyclicGAMGInterface
+(
+    const label index,
+    const lduInterfacePtrsList& coarseInterfaces,
+    Istream& is
+)
+:
+    GAMGInterface(index, coarseInterfaces, is),
+    neighbPatchID_(readLabel(is)),
+    owner_(readBool(is)),
+    forwardT_(is),
+    reverseT_(is)
+{}
+
+
 // * * * * * * * * * * * * * * * * Desstructor * * * * * * * * * * * * * * * //
 
 Foam::cyclicGAMGInterface::~cyclicGAMGInterface()
@@ -141,10 +169,11 @@ Foam::tmp<Foam::labelField> Foam::cyclicGAMGInterface::internalFieldTransfer
     const labelUList& iF
 ) const
 {
-    const cyclicGAMGInterface& nbr = dynamic_cast<const cyclicGAMGInterface&>
-    (
-        neighbPatch()
-    );
+    const cyclicGAMGInterface& nbr =
+    //dynamic_cast<const cyclicGAMGInterface&>
+    //(
+        neighbPatch();
+    //);
     const labelUList& nbrFaceCells = nbr.faceCells();
 
     tmp<labelField> tpnf(new labelField(size()));
@@ -156,6 +185,16 @@ Foam::tmp<Foam::labelField> Foam::cyclicGAMGInterface::internalFieldTransfer
     }
 
     return tpnf;
+}
+
+
+void Foam::cyclicGAMGInterface::write(Ostream& os) const
+{
+    GAMGInterface::write(os);
+    os  << token::SPACE << neighbPatchID_
+        << token::SPACE << owner_
+        << token::SPACE << forwardT_
+        << token::SPACE << reverseT_;
 }
 
 

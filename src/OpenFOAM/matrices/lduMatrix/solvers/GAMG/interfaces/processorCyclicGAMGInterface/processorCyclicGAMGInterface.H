@@ -80,6 +80,14 @@ public:
             const label coarseComm
         );
 
+        //- Construct from Istream
+        processorCyclicGAMGInterface
+        (
+            const label index,
+            const lduInterfacePtrsList& coarseInterfaces,
+            Istream& is
+        );
+
 
     // Destructor
 

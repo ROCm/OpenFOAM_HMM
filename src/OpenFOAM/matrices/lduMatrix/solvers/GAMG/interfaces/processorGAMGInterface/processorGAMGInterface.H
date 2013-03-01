@@ -119,6 +119,14 @@ public:
             const int tag
         );
 
+        //- Construct from Istream
+        processorGAMGInterface
+        (
+            const label index,
+            const lduInterfacePtrsList& coarseInterfaces,
+            Istream& is
+        );
+
 
     //- Destructor
     virtual ~processorGAMGInterface();
@@ -174,6 +182,12 @@ public:
             {
                 return tag_;
             }
+
+
+        // I/O
+
+            //- Write to stream
+            virtual void write(Ostream&) const;
 };
 
 

@@ -115,6 +115,23 @@ public:
             )
         );
 
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            GAMGInterface,
+            Istream,
+            (
+                const label index,
+                const lduInterfacePtrsList& coarseInterfaces,
+                Istream& is
+            ),
+            (
+                index,
+                coarseInterfaces,
+                is
+            )
+        );
+
 
     // Selectors
 
@@ -129,6 +146,16 @@ public:
             const labelField& neighbourRestrictAddressing,
             const label fineLevelIndex,
             const label coarseComm
+        );
+
+        //- Return a pointer to a new interface created on freestore given
+        //  the fine interface
+        static autoPtr<GAMGInterface> New
+        (
+            const word& coupleType,
+            const label index,
+            const lduInterfacePtrsList& coarseInterfaces,
+            Istream& is
         );
 
 
@@ -160,6 +187,15 @@ public:
             faceCells_(faceCells),
             faceRestrictAddressing_(faceRestrictAddressing)
         {}
+
+
+        //- Construct from Istream
+        GAMGInterface
+        (
+            const label index,
+            const lduInterfacePtrsList& coarseInterfaces,
+            Istream& is
+        );
 
 
     // Member Functions
@@ -235,6 +271,12 @@ public:
             (
                 const scalarField& fineCoeffs
             ) const;
+
+
+        // I/O
+
+            //- Write to stream
+            virtual void write(Ostream&) const = 0;
 };
 
 

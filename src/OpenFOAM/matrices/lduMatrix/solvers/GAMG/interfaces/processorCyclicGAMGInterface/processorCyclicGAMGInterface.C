@@ -38,6 +38,12 @@ namespace Foam
         processorCyclicGAMGInterface,
         lduInterface
     );
+    addToRunTimeSelectionTable
+    (
+        GAMGInterface,
+        processorCyclicGAMGInterface,
+        Istream
+    );
 }
 
 
@@ -64,6 +70,17 @@ Foam::processorCyclicGAMGInterface::processorCyclicGAMGInterface
         fineLevelIndex,
         coarseComm
     )
+{}
+
+
+Foam::processorCyclicGAMGInterface::processorCyclicGAMGInterface
+(
+    const label index,
+    const lduInterfacePtrsList& coarseInterfaces,
+    Istream& is
+)
+:
+    processorGAMGInterface(index, coarseInterfaces, is)
 {}
 
 

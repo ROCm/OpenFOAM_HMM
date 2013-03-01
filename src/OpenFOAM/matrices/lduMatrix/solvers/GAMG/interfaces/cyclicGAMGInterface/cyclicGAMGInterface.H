@@ -54,9 +54,21 @@ class cyclicGAMGInterface
 {
     // Private data
 
-        //- Reference tor the cyclicLduInterface from which this is
-        //  agglomerated
-        const cyclicLduInterface& fineCyclicInterface_;
+//        //- Reference tor the cyclicLduInterface from which this is
+//        //  agglomerated
+//        const cyclicLduInterface& fineCyclicInterface_;
+
+        //- Neigbour patch number
+        label neighbPatchID_;
+
+        //- Am I owner?
+        bool owner_;
+
+        //- Transformation tensor
+        tensorField forwardT_;
+
+        //- Transformation tensor
+        tensorField reverseT_;
 
 
     // Private Member Functions
@@ -89,6 +101,14 @@ public:
             const label coarseComm
         );
 
+        //- Construct from Istream
+        cyclicGAMGInterface
+        (
+            const label index,
+            const lduInterfacePtrsList& coarseInterfaces,
+            Istream& is
+        );
+
 
     //- Destructor
     virtual ~cyclicGAMGInterface();
@@ -111,12 +131,14 @@ public:
             //- Return neigbour processor number
             virtual label neighbPatchID() const
             {
-                return fineCyclicInterface_.neighbPatchID();
+                //return fineCyclicInterface_.neighbPatchID();
+                return neighbPatchID_;
             }
 
             virtual bool owner() const
             {
-                return fineCyclicInterface_.owner();
+                //return fineCyclicInterface_.owner();
+                return owner_;
             }
 
             virtual const cyclicGAMGInterface& neighbPatch() const
@@ -130,14 +152,22 @@ public:
             //- Return face transformation tensor
             virtual const tensorField& forwardT() const
             {
-                return fineCyclicInterface_.forwardT();
+                //return fineCyclicInterface_.forwardT();
+                return forwardT_;
             }
 
             //- Return neighbour-cell transformation tensor
             virtual const tensorField& reverseT() const
             {
-                return fineCyclicInterface_.reverseT();
+                //return fineCyclicInterface_.reverseT();
+                return reverseT_;
             }
+
+
+        // I/O
+
+            //- Write to stream
+            virtual void write(Ostream&) const;
 };
 
 
