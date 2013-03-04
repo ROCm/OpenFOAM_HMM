@@ -48,7 +48,12 @@ namespace Foam
 
 class centredCFCCellToCellStencilObject
 :
-    public MeshObject<fvMesh, centredCFCCellToCellStencilObject>,
+    public MeshObject
+    <
+        fvMesh,
+        TopologicalMeshObject,
+        centredCFCCellToCellStencilObject
+    >,
     public extendedCentredCellToCellStencil
 {
 
@@ -64,7 +69,12 @@ public:
             const fvMesh& mesh
         )
         :
-            MeshObject<fvMesh, centredCFCCellToCellStencilObject>(mesh),
+            MeshObject
+            <
+                fvMesh,
+                Foam::TopologicalMeshObject,
+                centredCFCCellToCellStencilObject
+            >(mesh),
             extendedCentredCellToCellStencil(CFCCellToCellStencil(mesh))
         {}
 

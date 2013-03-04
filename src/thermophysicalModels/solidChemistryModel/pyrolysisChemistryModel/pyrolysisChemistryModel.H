@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,26 +22,24 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::ODESolidChemistryModel
+    Foam::pyrolysisChemistryModel
 
 Description
-    Extends base chemistry model by adding a thermo package, and ODE functions.
-    Introduces chemistry equation system and evaluation of chemical source
-    terms.
+    Pyrolysis chemistry model. It includes gas phase in the solid
+    reaction.
 
 SourceFiles
-    ODESolidChemistryModelI.H
-    ODESolidChemistryModel.C
+    pyrolysisChemistryModelI.H
+    pyrolysisChemistryModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ODESolidChemistryModel_H
-#define ODESolidChemistryModel_H
+#ifndef pyrolysisChemistryModel_H
+#define pyrolysisChemistryModel_H
 
-#include "Reaction.H"
-#include "ODE.H"
 #include "volFieldsFwd.H"
 #include "DimensionedField.H"
+#include "solidChemistryModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,34 +50,24 @@ namespace Foam
 class fvMesh;
 
 /*---------------------------------------------------------------------------*\
-                   Class ODESolidChemistryModel Declaration
+                   Class pyrolysisChemistryModel Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CompType, class SolidThermo, class GasThermo>
-class ODESolidChemistryModel
+class pyrolysisChemistryModel
 :
-    public CompType,
-    public ODE
+    public solidChemistryModel<CompType, SolidThermo>
 {
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const ODESolidChemistryModel&);
+        void operator=(const pyrolysisChemistryModel&);
 
 
 protected:
 
-        //- Reference to solid mass fractions
-        PtrList<volScalarField>& Ys_;
-
-        //- Reactions
-        const PtrList<Reaction<SolidThermo> >& reactions_;
-
         //- List of gas species present in reaction system
         speciesTable pyrolisisGases_;
-
-        //- Thermodynamic data of solids
-        const PtrList<SolidThermo>& solidThermo_;
 
         //- Thermodynamic data of gases
         PtrList<GasThermo> gasThermo_;
@@ -90,23 +78,11 @@ protected:
         //- Number of components being solved by ODE
         label nSpecie_;
 
-        //- Number of solid components
-        label nSolids_;
-
-        //- Number of solid reactions
-        label nReaction_;
-
-        //- List of reaction rate per solid [kg/m3/s]
-        PtrList<DimensionedField<scalar, volMesh> > RRs_;
-
         //- List of reaction rate per gas [kg/m3/s]
         PtrList<DimensionedField<scalar, volMesh> > RRg_;
 
 
     // Protected Member Functions
-
-        //- Write access to source terms for solids
-        inline PtrList<DimensionedField<scalar, volMesh> >& RRs();
 
         //- Write access to source terms for gases
         inline PtrList<DimensionedField<scalar, volMesh> >& RRg();
@@ -120,36 +96,24 @@ private:
         //- Cell counter
         label cellCounter_;
 
-        //- List of active reacting cells
-        List<bool> reactingCells_;
-
-
-        // Private members
-
-            //- Set reacting status of cell, cellI
-            void setCellReacting(const label cellI, const bool active);
-
 
 public:
 
     //- Runtime type information
-    TypeName("ODESolidChemistryModel");
+    TypeName("pyrolysis");
 
 
     // Constructors
 
         //- Construct from mesh
-        ODESolidChemistryModel(const fvMesh& mesh);
+        pyrolysisChemistryModel(const fvMesh& mesh);
 
 
     //- Destructor
-    virtual ~ODESolidChemistryModel();
+    virtual ~pyrolysisChemistryModel();
 
 
     // Member Functions
-
-        //- The reactions
-        inline const PtrList<Reaction<SolidThermo> >& reactions() const;
 
         //- Thermodynamic data of gases
         inline const PtrList<GasThermo>& gasThermo() const;
@@ -162,9 +126,6 @@ public:
 
         //- The number of solids
         inline label nGases() const;
-
-        //- The number of reactions
-        inline label nReaction() const;
 
 
         //- dc/dt = omega, rate of change in concentration, for each species
@@ -198,12 +159,6 @@ public:
 
         // Chemistry model functions
 
-            //- Return const access to the chemical source terms for solids
-            inline const DimensionedField<scalar, volMesh>& RRs
-            (
-                const label i
-            ) const;
-
             //- Return const access to the chemical source terms for gases
             inline const DimensionedField<scalar, volMesh>& RRg
             (
@@ -212,15 +167,6 @@ public:
 
             //- Return total gas source term
             inline tmp<DimensionedField<scalar, volMesh> > RRg() const;
-
-            //- Return total solid source term
-            inline tmp<DimensionedField<scalar, volMesh> > RRs() const;
-
-            //- Return const access to the total source terms
-            inline const DimensionedField<scalar, volMesh>& RR
-            (
-                const label i
-            ) const;
 
             //- Return sensible enthalpy for gas i [J/Kg]
             virtual tmp<volScalarField> gasHs
@@ -232,16 +178,7 @@ public:
 
             //- Solve the reaction system for the given start time and time
             //  step and return the characteristic time
-            virtual scalar solve(const scalar t0, const scalar deltaT);
-
-            //- Return the chemical time scale
-            virtual tmp<volScalarField> tc() const;
-
-            //- Return source for enthalpy equation [kg/m/s3]
-            virtual tmp<volScalarField> Sh() const;
-
-            //- Return the heat release, i.e. enthalpy/sec [m2/s3]
-            virtual tmp<volScalarField> dQ() const;
+            virtual scalar solve(const scalar t0, const scalar deltaT) ;
 
 
         // ODE functions (overriding abstract functions in ODE.H)
@@ -281,12 +218,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#   include "ODESolidChemistryModelI.H"
+#   include "pyrolysisChemistryModelI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "ODESolidChemistryModel.C"
+#   include "pyrolysisChemistryModel.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
