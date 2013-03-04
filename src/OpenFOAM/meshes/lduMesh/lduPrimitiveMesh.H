@@ -67,6 +67,9 @@ class lduPrimitiveMesh
         //  with only those pointing to interfaces being set
         lduInterfacePtrsList interfaces_;
 
+        //- Concrete interfaces if above interfaces were created locally
+        PtrList<lduInterface> primitiveInterfaces_;
+
         //- Patch field evaluation schedule
         lduSchedule patchSchedule_;
 
@@ -127,25 +130,21 @@ public:
         );
 
         //- Construct by combining multiple meshes. The meshes come from
-        //  processors procIDs but these are only used to detect the interfaces
-        //  that are to be merged.
-        //
-        // Sets mapping information:
-        //  cellOffsets     : per mesh the starting cell
-        //  faceMap         : per mesh, per internal face, the combined face
-        //  boundaryMap     : per mesh, per boundary, the combined boundary
-        //                    or -1 for merged boundaries
-        //  boundaryFaceMap : per mesh, per boundary face:
-        //      kept boundaries: the new boundary face
-        //      merged boundaries: the new internal face (on the owner) or
-        //                         -faceI-1 (on the neighbour)
-        //
-        //// TBD: hardcoded for processorGAMGInterface. Should use some
-        //// 'clone' or New functionality instead.
+        //  processors procIDs:
+        //  procIDs[0] : local processor (myMesh)
+        //  procIDs[i] : processor where otherMeshes[i-1] comes from
+        //  procAgglomMap : for every processor which processor it agglomerates
+        //                  onto. The new processor numbers are in compact
+        //                  numbering (so ranks in communicator comm), i.e.
+        //                  similar to cell-restrict-addressing.
+        //                  We need this information to be able to map
+        //                  inter-processor interfaces
         lduPrimitiveMesh
         (
             const label comm,
-            const labelList& procIDs,
+            const labelList& procAgglomMap,
+
+            const labelList& procIDs,               // procIDs[0] = myMesh
             const lduMesh& myMesh,
             const PtrList<lduMesh>& otherMeshes,
 

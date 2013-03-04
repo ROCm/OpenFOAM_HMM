@@ -111,6 +111,19 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<lduMesh>& ip)
                     Pout<< "    patch:" << i
                         << " type:" << interfaces[i].type() << endl;
 
+                    if (isA<processorLduInterface>(interfaces[i]))
+                    {
+                        const processorLduInterface& pi = refCast
+                        <
+                            const processorLduInterface
+                        >(interfaces[i]);
+
+                        Pout<< "    myProcNo:" << pi.myProcNo()
+                            << " neighbProcNo:" << pi.neighbProcNo()
+                            << " comm:" << pi.comm()
+                            << endl;
+                    }
+
                     forAll(faceCells, i)
                     {
                         Pout<< "        " << i << " own:" << faceCells[i]

@@ -25,6 +25,8 @@ License
 
 #include "GAMGSolver.H"
 #include "GAMGInterfaceField.H"
+#include "processorLduInterfaceField.H"
+#include "processorGAMGInterfaceField.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -205,6 +207,519 @@ void Foam::GAMGSolver::agglomerateMatrix(const label fineLevelIndex)
         }
     }
 }
+
+
+// Gather matrices.
+// Note: matrices get constructed with dummy mesh
+void Foam::GAMGSolver::gatherMatrices
+(
+    const labelList& procIDs,
+    const lduMesh& dummyMesh,
+    const label meshComm,
+
+    const lduMatrix& mat,
+    const FieldField<Field, scalar>& interfaceBouCoeffs,
+    const FieldField<Field, scalar>& interfaceIntCoeffs,
+    const lduInterfaceFieldPtrsList& interfaces,
+
+    PtrList<lduMatrix>& otherMats,
+    PtrList<FieldField<Field, scalar> >& otherBouCoeffs,
+    PtrList<FieldField<Field, scalar> >& otherIntCoeffs,
+    List<boolList>& otherTransforms,
+    List<List<int> >& otherRanks
+) const
+{
+    Pout<< "GAMGSolver::gatherMatrices :"
+        << " collecting matrices on procs:" << procIDs
+        << " using comm:" << meshComm << endl;
+
+    if (Pstream::myProcNo(meshComm) == procIDs[0])
+    {
+        // Master.
+
+        Pout<< "GAMGSolver::gatherMatrices :"
+            << " master:" << Pstream::myProcNo(meshComm) << endl;
+
+
+        otherMats.setSize(procIDs.size()-1);
+        otherBouCoeffs.setSize(procIDs.size()-1);
+        otherIntCoeffs.setSize(procIDs.size()-1);
+        otherTransforms.setSize(procIDs.size()-1);
+        otherRanks.setSize(procIDs.size()-1);
+
+        for (label procI = 1; procI < procIDs.size(); procI++)
+        {
+            label otherI = procI-1;
+
+            IPstream fromSlave
+            (
+                Pstream::scheduled,
+                procIDs[procI],
+                0,          // bufSize
+                Pstream::msgType(),
+                meshComm
+            );
+
+            otherMats.set(otherI, new lduMatrix(dummyMesh, fromSlave));
+
+            // Receive number of/valid interfaces
+            boolList& procTransforms = otherTransforms[otherI];
+            List<int>& procRanks = otherRanks[otherI];
+
+            fromSlave >> procTransforms;
+            fromSlave >> procRanks;
+
+            // Size coefficients
+            otherBouCoeffs.set
+            (
+                otherI,
+                new FieldField<Field, scalar>(procRanks.size())
+            );
+            otherIntCoeffs.set
+            (
+                otherI,
+                new FieldField<Field, scalar>(procRanks.size())
+            );
+            forAll(procRanks, intI)
+            {
+                if (procRanks[intI] != -1)
+                {
+                    otherBouCoeffs[otherI].set
+                    (
+                        intI,
+                        new scalarField(fromSlave)
+                    );
+                    otherIntCoeffs[otherI].set
+                    (
+                        intI,
+                        new scalarField(fromSlave)
+                    );
+                }
+            }
+        }
+    }
+    else
+    {
+        Pout<< "GAMGSolver::gatherMatrices :"
+            << " sending from:" << Pstream::myProcNo(meshComm)
+            << " to master:" << procIDs[0] << endl;
+
+        // Send to master
+
+        // Count valid interfaces
+        boolList procTransforms(interfaceBouCoeffs.size(), false);
+        List<int> procRanks(interfaceBouCoeffs.size(), -1);
+        forAll(interfaces, intI)
+        {
+            if (interfaces.set(intI))
+            {
+                const processorLduInterfaceField& interface =
+                    refCast<const processorLduInterfaceField>
+                    (
+                        interfaces[intI]
+                    );
+
+                procTransforms[intI] = interface.doTransform();
+                procRanks[intI] = interface.rank();
+            }
+        }
+
+        //Pout<< "GAMGSolver::gatherMatrices :"
+        //    << " sending matrix:" << mat.info() << endl;
+
+        OPstream toMaster
+        (
+            Pstream::scheduled,
+            procIDs[0],
+            0,
+            Pstream::msgType(),
+            meshComm
+        );
+
+        toMaster << mat << procTransforms << procRanks;
+        forAll(procRanks, intI)
+        {
+            if (procRanks[intI] != -1)
+            {
+                toMaster
+                    << interfaceBouCoeffs[intI]
+                    << interfaceIntCoeffs[intI];
+            }
+        }
+    }
+}
+
+
+void Foam::GAMGSolver::procAgglomerateMatrix
+(
+    // Current mesh and  matrix
+    const lduMesh& coarsestMesh,
+    const lduMatrix& coarsestMatrix,
+    const lduInterfaceFieldPtrsList& coarsestInterfaces,
+    const FieldField<Field, scalar>& coarsestBouCoeffs,
+    const FieldField<Field, scalar>& coarsestIntCoeffs,
+
+    // Agglomeration information
+    const labelList& procAgglomMap,
+    const List<int>& agglomProcIDs,
+    label masterComm,
+
+    // Resulting matrix
+    autoPtr<lduMatrix>& allMatrixPtr,
+    FieldField<Field, scalar>& allInterfaceBouCoeffs,
+    FieldField<Field, scalar>& allInterfaceIntCoeffs,
+    PtrList<lduInterfaceField>& allPrimitiveInterfaces,
+    lduInterfaceFieldPtrsList& allInterfaces
+)
+{
+    label coarseComm = coarsestMesh.comm();
+
+    label oldWarn = UPstream::warnComm;
+    UPstream::warnComm = coarseComm;
+
+
+    // Construct (on the agglomeration) a complete mesh with mapping
+    agglomeration_.gatherMeshes(procAgglomMap, agglomProcIDs, masterComm);
+
+
+    // Gather all matrix coefficients onto agglomProcIDs[0]
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    PtrList<lduMatrix> otherMats;
+    PtrList<FieldField<Field, scalar> > otherBouCoeffs;
+    PtrList<FieldField<Field, scalar> > otherIntCoeffs;
+    List<boolList> otherTransforms;
+    List<List<int> > otherRanks;
+    gatherMatrices
+    (
+        agglomProcIDs,
+        coarsestMesh,
+        coarseComm,
+
+        coarsestMatrix,
+        coarsestBouCoeffs,
+        coarsestIntCoeffs,
+        coarsestInterfaces,
+
+        otherMats,
+        otherBouCoeffs,
+        otherIntCoeffs,
+        otherTransforms,
+        otherRanks
+    );
+
+
+    if (Pstream::myProcNo(coarseComm) == agglomProcIDs[0])
+    {
+        // Agglomerate all matrix
+        // ~~~~~~~~~~~~~~~~~~~~~~
+
+        Pout<< "Own matrix:" << coarsestMatrix.info() << endl;
+
+        forAll(otherMats, i)
+        {
+            Pout<< "** otherMats " << i << " "
+                << otherMats[i].info()
+                << endl;
+        }
+        Pout<< endl;
+
+
+        const lduMesh& allMesh = agglomeration_.allMesh();
+
+        allMatrixPtr.reset(new lduMatrix(allMesh));
+        lduMatrix& allMatrix = allMatrixPtr();
+
+        if (coarsestMatrix.hasDiag())
+        {
+            scalarField& allDiag = allMatrix.diag();
+            SubList<scalar>
+            (
+                allDiag,
+                coarsestMatrix.diag().size()
+            ).assign
+            (
+                coarsestMatrix.diag()
+            );
+            forAll(otherMats, i)
+            {
+                SubList<scalar>
+                (
+                    allDiag,
+                    otherMats[i].diag().size(),
+                    agglomeration_.cellOffsets()[i+1]
+                ).assign
+                (
+                    otherMats[i].diag()
+                );
+            }
+        }
+        if (coarsestMatrix.hasLower())
+        {
+            scalarField& allLower = allMatrix.lower();
+            UIndirectList<scalar>
+            (
+                allLower,
+                agglomeration_.faceMap()[0]
+            ) = coarsestMatrix.lower();
+            forAll(otherMats, i)
+            {
+                UIndirectList<scalar>
+                (
+                    allLower,
+                    agglomeration_.faceMap()[i+1]
+                ) = otherMats[i].lower();
+            }
+        }
+        if (coarsestMatrix.hasUpper())
+        {
+            scalarField& allUpper = allMatrix.upper();
+            UIndirectList<scalar>
+            (
+                allUpper,
+                agglomeration_.faceMap()[0]
+            ) = coarsestMatrix.upper();
+            forAll(otherMats, i)
+            {
+                UIndirectList<scalar>
+                (
+                    allUpper,
+                    agglomeration_.faceMap()[i+1]
+                ) = otherMats[i].upper();
+            }
+        }
+
+
+        // Agglomerate interface fields and coefficients
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        lduInterfacePtrsList allMeshInterfaces = allMesh.interfaces();
+
+        allInterfaceBouCoeffs.setSize(allMeshInterfaces.size());
+        allInterfaceIntCoeffs.setSize(allMeshInterfaces.size());
+        allPrimitiveInterfaces.setSize(allMeshInterfaces.size());
+        allInterfaces.setSize(allMeshInterfaces.size());
+
+        forAll(allMeshInterfaces, intI)
+        {
+            const lduInterface& patch = allMeshInterfaces[intI];
+            label size = patch.faceCells().size();
+
+            allInterfaceBouCoeffs.set(intI, new scalarField(size));
+            allInterfaceIntCoeffs.set(intI, new scalarField(size));
+        }
+
+        labelList nBounFaces(allMeshInterfaces.size());
+        forAll(agglomeration_.boundaryMap(), procI)
+        {
+            const FieldField<Field, scalar>& procBouCoeffs
+            (
+                (procI == 0)
+              ? coarsestBouCoeffs
+              : otherBouCoeffs[procI-1]
+            );
+            const FieldField<Field, scalar>& procIntCoeffs
+            (
+                (procI == 0)
+              ? coarsestIntCoeffs
+              : otherIntCoeffs[procI-1]
+            );
+
+            const labelList& bMap = agglomeration_.boundaryMap()[procI];
+            forAll(bMap, procIntI)
+            {
+                label allIntI = bMap[procIntI];
+
+                if (allIntI != -1)
+                {
+                    // So this boundary has been preserved. Copy
+                    // data across.
+
+                    if (!allInterfaces.set(allIntI))
+                    {
+                        // Construct lduInterfaceField
+
+                        bool doTransform = false;
+                        int rank = -1;
+                        if (procI == 0)
+                        {
+                            const processorGAMGInterfaceField& procInt =
+                                refCast
+                                <
+                                    const processorGAMGInterfaceField
+                                >
+                                (
+                                    coarsestInterfaces[procIntI]
+                                );
+                            doTransform = procInt.doTransform();
+                            rank = procInt.rank();
+                        }
+                        else
+                        {
+                            doTransform =
+                                otherTransforms[procI-1][procIntI];
+                            rank = otherRanks[procI-1][procIntI];
+                        }
+
+                        allPrimitiveInterfaces.set
+                        (
+                            allIntI,
+                            GAMGInterfaceField::New
+                            (
+                                refCast<const GAMGInterface>
+                                (
+                                    allMeshInterfaces[allIntI]
+                                ),
+                                doTransform,
+                                rank
+                            ).ptr()
+                        );
+                        allInterfaces.set
+                        (
+                            allIntI,
+                            &allPrimitiveInterfaces[allIntI]
+                        );
+                    }
+
+
+                    // Map data from processor to complete mesh
+
+                    scalarField& allBou = allInterfaceBouCoeffs[allIntI];
+                    scalarField& allInt = allInterfaceIntCoeffs[allIntI];
+
+                    const labelList& map =
+                        agglomeration_.boundaryFaceMap()[procI][procIntI];
+
+Pout<< "    from proc:" << procI << " interface:" << procIntI
+<< " mapped to faces:" << map << endl;
+
+                    const scalarField& procBou = procBouCoeffs[procIntI];
+                    const scalarField& procInt = procIntCoeffs[procIntI];
+
+                    forAll(map, i)
+                    {
+                        label allFaceI = map[i];
+                        if (allFaceI < 0)
+                        {
+                            FatalErrorIn("GAMGSolver::GAMGSolver()")
+                                << "problem." << abort(FatalError);
+                        }
+                        allBou[allFaceI] = procBou[i];
+                        allInt[allFaceI] = procInt[i];
+                    }
+                }
+                else if (procBouCoeffs.set(procIntI))
+                {
+                    // Boundary has become internal face
+
+                    const labelList& map =
+                        agglomeration_.boundaryFaceMap()[procI][procIntI];
+
+                    const labelList& allU = allMesh.lduAddr().upperAddr();
+                    const labelList& allL = allMesh.lduAddr().lowerAddr();
+                    const label off = agglomeration_.cellOffsets()[procI];
+
+                    const scalarField& procBou = procBouCoeffs[procIntI];
+                    const scalarField& procInt = procIntCoeffs[procIntI];
+
+                    forAll(map, i)
+                    {
+                        if (map[i] >= 0)
+                        {
+                            label allFaceI = map[i];
+
+                            if (coarsestMatrix.hasUpper())
+                            {
+                                allMatrix.upper()[allFaceI] = -procBou[i];
+                            }
+                            if (coarsestMatrix.hasLower())
+                            {
+                                allMatrix.lower()[allFaceI] = -procInt[i];
+                            }
+                        }
+                        else
+                        {
+                            label allFaceI = -map[i]-1;
+
+                            if (coarsestMatrix.hasUpper())
+                            {
+                                allMatrix.upper()[allFaceI] = -procInt[i];
+                            }
+                            if (coarsestMatrix.hasLower())
+                            {
+                                allMatrix.lower()[allFaceI] = -procBou[i];
+                            }
+                        }
+
+
+                        // Simple check
+                        label allFaceI =
+                        (
+                            map[i] >= 0
+                          ? map[i]
+                          : -map[i]-1
+                        );
+
+                        const labelList& fCells =
+                            lduPrimitiveMesh::mesh
+                            (
+                                coarsestMesh,
+                                agglomeration_.otherMeshes(),
+                                procI
+                            ).lduAddr().patchAddr(procIntI);
+
+                        label allCellI = off + fCells[i];
+
+                        if
+                        (
+                            allCellI != allL[allFaceI]
+                         && allCellI != allU[allFaceI]
+                        )
+                        {
+                            FatalErrorIn
+                            (
+                                "GAMGSolver::GAMGSolver()"
+                            )   << "problem."
+                                << " allFaceI:" << allFaceI
+                                << " local cellI:" << fCells[i]
+                                << " allCellI:" << allCellI
+                                << " allLower:" << allL[allFaceI]
+                                << " allUpper:" << allU[allFaceI]
+                                << abort(FatalError);
+                        }
+                    }
+                }
+            }
+        }
+
+        Pout<< "** Assembled allMatrix:" << allMatrix.info() << endl;
+
+        forAll(allInterfaces, intI)
+        {
+            if (allInterfaces.set(intI))
+            {
+                Pout<< "    patch:" << intI
+                    << " type:" << allInterfaces[intI].type()
+                    << " size:"
+                    << allInterfaces[intI].interface().
+                        faceCells().size()
+                    << endl;
+                const scalarField& bouCoeffs = allInterfaceBouCoeffs[intI];
+                const scalarField& intCoeffs = allInterfaceIntCoeffs[intI];
+
+                forAll(bouCoeffs, faceI)
+                {
+                    Pout<< "        " << faceI
+                        << "\tbou:" << bouCoeffs[faceI]
+                        << "\tint:" << intCoeffs[faceI]
+                        << endl;
+                }
+            }
+        }
+    }
+    UPstream::warnComm = oldWarn;
+}
+//XXXX
 
 
 // ************************************************************************* //

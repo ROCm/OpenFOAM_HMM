@@ -257,10 +257,18 @@ const Foam::lduInterfacePtrsList& Foam::GAMGAgglomeration::interfaceLevel
 
 void Foam::GAMGAgglomeration::gatherMeshes
 (
+    const labelList& procAgglomMap,
     const labelList& procIDs,
     const label allMeshComm
 ) const
 {
+    if (allMeshPtr_.valid())
+    {
+        FatalErrorIn("GAMGAgglomeration::gatherMeshes(..)")
+            << "Processor-agglomerated mesh already constructed"
+            << exit(FatalError);
+    }
+
     const lduMesh& coarsestMesh = meshLevels_.last();
 
     label coarseComm = coarsestMesh.comm();
@@ -293,6 +301,8 @@ void Foam::GAMGAgglomeration::gatherMeshes
             new lduPrimitiveMesh
             (
                 allMeshComm,
+                procAgglomMap,
+
                 procIDs,
                 coarsestMesh,
                 otherMeshes_,
@@ -303,6 +313,8 @@ void Foam::GAMGAgglomeration::gatherMeshes
                 boundaryFaceMap_
             )
         );
+
+        Pout<< "** Agglomerated Mesh " << allMeshPtr_().info() << endl;
     }
 
     UPstream::warnComm = oldWarn;

@@ -137,6 +137,7 @@ class GAMGSolver
             autoPtr<lduMatrix> allMatrixPtr_;
             FieldField<Field, scalar> allInterfaceBouCoeffs_;
             FieldField<Field, scalar> allInterfaceIntCoeffs_;
+            PtrList<lduInterfaceField> allPrimitiveInterfaces_;
             lduInterfaceFieldPtrsList allInterfaces_;
 
 
@@ -173,23 +174,6 @@ class GAMGSolver
         void gatherMatrices
         (
             const labelList& procIDs,
-            const lduMesh& myMesh,
-            const PtrList<lduMesh>& otherMeshes,
-            const label meshComm,
-
-            const lduMatrix& mat,
-            const FieldField<Field, scalar>& interfaceBouCoeffs,
-            const FieldField<Field, scalar>& interfaceIntCoeffs,
-            const lduInterfaceFieldPtrsList& interfaces,
-
-            PtrList<lduMatrix>& otherMats,
-            PtrList<FieldField<Field, scalar> >& otherBouCoeffs,
-            PtrList<FieldField<Field, scalar> >& otherIntCoeffs,
-            PtrList<lduInterfaceFieldPtrsList>& otherInterfaces
-        ) const;
-        void gatherMatrices
-        (
-            const labelList& procIDs,
             const lduMesh& dummyMesh,
             const label meshComm,
 
@@ -204,6 +188,29 @@ class GAMGSolver
             List<boolList>& otherTransforms,
             List<List<int> >& otherRanks
         ) const;
+
+        //- Agglomerate processor matrices
+        void procAgglomerateMatrix
+        (
+            // Current mesh and  matrix
+            const lduMesh& coarsestMesh,
+            const lduMatrix& coarsestMatrix,
+            const lduInterfaceFieldPtrsList& coarsestInterfaces,
+            const FieldField<Field, scalar>& coarsestBouCoeffs,
+            const FieldField<Field, scalar>& coarsestIntCoeffs,
+
+            // Agglomeration information
+            const labelList& procAgglomMap,
+            const List<int>& agglomProcIDs,
+            label masterComm,
+
+            // Resulting matrix
+            autoPtr<lduMatrix>& allMatrixPtr,
+            FieldField<Field, scalar>& allInterfaceBouCoeffs,
+            FieldField<Field, scalar>& allInterfaceIntCoeffs,
+            PtrList<lduInterfaceField>& allPrimitiveInterfaces,
+            lduInterfaceFieldPtrsList& allInterfaces
+        );
 
         //-  Interpolate the correction after injected prolongation
         void interpolate

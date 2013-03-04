@@ -146,6 +146,17 @@ public:
             {
                 return fineCyclicAMIInterface_.reverseT();
             }
+
+
+        // I/O
+
+            //- Write to stream
+            virtual void write(Ostream&) const
+            {
+                //TBD. How to serialise the AMI such that we can stream
+                // cyclicAMIGAMGInterface.
+                notImplemented("cyclicAMIGAMGInterface::write(Ostream&) const");
+            }
 };
 
 

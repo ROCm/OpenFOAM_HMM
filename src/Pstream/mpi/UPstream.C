@@ -359,10 +359,15 @@ void Foam::UPstream::allocatePstreamCommunicator
     }
     else
     {
-        //std::cout
-        //    << "MPI : Allocating new communicator at index " << index
-        //    << " from parent " << parentIndex
-        //    << std::endl;
+        std::cout
+            << "MPI : Allocating new communicator at index " << index
+            << " from parent " << parentIndex
+            << std::endl;
+        for (label i=0; i < procIDs_[index].size(); i++)
+        {
+            std::cout<< "    " << i << " rank:" << procIDs_[index][i]
+                << std::endl;
+        }
 
         // Create new group
         MPI_Group_incl
@@ -395,19 +400,38 @@ void Foam::UPstream::allocatePstreamCommunicator
         }
         else
         {
-            //std::cout
-            //    << "MPI : New comm "
-            //    << long(PstreamGlobals::MPICommunicators_[index])
-            //    << std::endl;
-            MPI_Comm_rank
+            std::cout
+                << "MPI : New comm "
+                << long(PstreamGlobals::MPICommunicators_[index])
+                << std::endl;
+            if
             (
-                PstreamGlobals::MPICommunicators_[index],
-               &myProcNo_[index]
-            );
+                MPI_Comm_rank
+                (
+                    PstreamGlobals::MPICommunicators_[index],
+                   &myProcNo_[index]
+                )
+            )
+            {
+                FatalErrorIn
+                (
+                    "UPstream::allocatePstreamCommunicator\n"
+                    "(\n"
+                    "    const label,\n"
+                    "    const labelList&\n"
+                    ")\n"
+                )   << "Problem :"
+                    << " when allocating communicator at " << index
+                    << " from ranks " << procIDs_[index]
+                    << " of parent " << parentIndex
+                    << " cannot find my own rank"
+                    << Foam::exit(FatalError);
+            }
         }
     }
 
-    //std::cout<< "MPI : I am rank " << myProcNo_[index] << std::endl;
+    std::cout<< "MPI : in communicator " << index
+        << " I am rank " << myProcNo_[index] << std::endl;
 }
 
 

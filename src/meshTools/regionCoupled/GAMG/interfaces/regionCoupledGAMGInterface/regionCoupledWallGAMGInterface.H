@@ -86,6 +86,20 @@ public:
     //- Destructor
     virtual ~regionCoupledWallGAMGInterface();
 
+
+        // I/O
+
+            //- Write to stream
+            virtual void write(Ostream&) const
+            {
+                //TBD. How to serialise the AMI such that we can stream
+                // regionCoupledWallGAMGInterface.
+                notImplemented
+                (
+                    "regionCoupledWallGAMGInterface::write(Ostream&) const"
+                );
+            }
+
 };
 
 

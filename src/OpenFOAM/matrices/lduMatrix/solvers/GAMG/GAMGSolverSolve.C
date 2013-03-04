@@ -453,9 +453,49 @@ void Foam::GAMGSolver::solveCoarsestLevel
     }
     else if (processorAgglomerate_)
     {
-        Pout<< "** Processor agglomeration" << endl;
 
-        const List<int>& procIDs = UPstream::procID(coarseComm);
+//XXXX
+        labelList procAgglomMap(UPstream::nProcs(coarseComm));
+        procAgglomMap[0] = 0;
+        procAgglomMap[1] = 0;
+        procAgglomMap[2] = 1;
+        procAgglomMap[3] = 1;
+
+        // Determine the master processors
+        Map<label> agglomToMaster(procAgglomMap.size());
+
+        forAll(procAgglomMap, procI)
+        {
+            label coarseI = procAgglomMap[procI];
+
+            Map<label>::iterator fnd = agglomToMaster.find(coarseI);
+            if (fnd == agglomToMaster.end())
+            {
+                agglomToMaster.insert(coarseI, procI);
+            }
+            else
+            {
+                fnd() = max(fnd(), procI);
+            }
+        }
+
+        List<int> agglomProcIDs;
+        // Collect all the processors in my agglomeration
+        {
+            label myProcID = Pstream::myProcNo(coarseComm);
+            label myAgglom = procAgglomMap[myProcID];
+
+            // Get all processors agglomerating to the same coarse processor
+            agglomProcIDs = findIndices(procAgglomMap, myAgglom);
+            // Make sure the master is the first element.
+            label index = findIndex
+            (
+                agglomProcIDs,
+                agglomToMaster[myAgglom]
+            );
+            Swap(agglomProcIDs[0], agglomProcIDs[index]);
+        }
+//XXXX
 
         scalarField allSource;
 
@@ -463,7 +503,7 @@ void Foam::GAMGSolver::solveCoarsestLevel
         cellOffsets.gather
         (
             coarseComm,
-            procIDs,
+            agglomProcIDs,
             coarsestSource,
             allSource
         );
@@ -471,7 +511,7 @@ void Foam::GAMGSolver::solveCoarsestLevel
         scalarField allCorrField;
         solverPerformance coarseSolverPerf;
 
-        if (Pstream::myProcNo(coarseComm) == procIDs[0])
+        if (Pstream::myProcNo(coarseComm) == agglomProcIDs[0])
         {
             const lduMatrix& allMatrix = allMatrixPtr_();
 
@@ -481,7 +521,8 @@ void Foam::GAMGSolver::solveCoarsestLevel
                 label solveComm = allMatrix.mesh().comm();
                 label oldWarn = UPstream::warnComm;
                 UPstream::warnComm = solveComm;
-                Pout<< "** Master:Solving on comm:" << solveComm << endl;
+                Pout<< "** Master:Solving on comm:" << solveComm
+                    << " with procs:" << UPstream::procID(solveComm) << endl;
 
                 if (allMatrix.asymmetric())
                 {
@@ -521,12 +562,14 @@ void Foam::GAMGSolver::solveCoarsestLevel
             }
         }
 
+        Pout<< "done master solve." << endl;
+
         // Scatter to all processors
         coarsestCorrField.setSize(coarsestSource.size());
         cellOffsets.scatter
         (
             coarseComm,
-            procIDs,
+            agglomProcIDs,
             allCorrField,
             coarsestCorrField
         );

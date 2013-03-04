@@ -278,10 +278,15 @@ public:
 
         // Procesor agglomeration
 
-            //- Collect and combine processor meshes into allMesh. Pass in
-            //  communicator for combined mesh.
+            //- Collect and combine processor meshes into allMesh.
+            //  - allMeshComm   : communicator for combined mesh.
+            //  - procAgglomMap : per processor the new agglomerated processor
+            //                    (rank in allMeshComm!). Global information.
+            //  - procIDs       : local information: same for all in
+            //                    agglomerated processor.
             void gatherMeshes
             (
+                const labelList& procAgglomMap,
                 const labelList& procIDs,
                 const label allMeshComm
             ) const;
