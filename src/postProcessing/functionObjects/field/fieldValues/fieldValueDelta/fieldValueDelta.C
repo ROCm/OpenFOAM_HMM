@@ -27,6 +27,7 @@ License
 #include "ListOps.H"
 #include "Time.H"
 #include "volFields.H"
+#include "surfaceFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -160,7 +161,7 @@ void Foam::fieldValues::fieldValueDelta::write()
 
     if (log_)
     {
-        Info<< type() << " output:" << endl;
+        Info<< type() << " " << name_ << " output:" << endl;
     }
 
     bool found = false;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,12 +21,10 @@ License
     You should have received a copy of the GNU General Public License along with
     OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-\defgroup grpThermoBaffleBoundaryConditions Thermo baffle boundary conditions
+\defgroup grpFVFunctionObjects Finite volume tools function objects
 @{
-    \ingroup grpThermoBoundaryConditions
-    This group contains thermo baffle model boundary conditions
+    \ingroup grpFunctionObjects
+    This group contains finite-volume tools-based function objects
 @}
 
 \*---------------------------------------------------------------------------*/

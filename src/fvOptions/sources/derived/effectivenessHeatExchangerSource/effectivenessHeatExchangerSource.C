@@ -51,7 +51,7 @@ namespace fv
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::fv::effectivenessHeatExchangerSource::init()
+void Foam::fv::effectivenessHeatExchangerSource::initialise()
 {
     const faceZone& fZone = mesh_.faceZones()[zoneID_];
 
@@ -186,19 +186,22 @@ Foam::fv::effectivenessHeatExchangerSource::effectivenessHeatExchangerSource
             << nl << exit(FatalError);
     }
 
-    coeffs_.lookup("fieldNames") >> fieldNames_;
-    applied_.setSize(fieldNames_.size(), false);
+    fieldNames_.setSize(1, "energy");
+    applied_.setSize(1, false);
 
     eTable_.reset(new interpolation2DTable<scalar>(coeffs_));
 
-    init();
-
-    Info<< "    - creating effectivenessHeatExchangerSource: "
-        << this->name() << endl;
+    initialise();
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::fv::effectivenessHeatExchangerSource::alwaysApply() const
+{
+    return true;
+}
+
 
 void Foam::fv::effectivenessHeatExchangerSource::addSup
 (
@@ -208,6 +211,11 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
 {
     const basicThermo& thermo =
         mesh_.lookupObject<basicThermo>("thermophysicalProperties");
+
+    if (eqn.psi().name() != thermo.he().name())
+    {
+        return;
+    }
 
     const surfaceScalarField Cpf(fvc::interpolate(thermo.Cp()));
 
