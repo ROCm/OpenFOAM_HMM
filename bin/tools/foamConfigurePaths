@@ -36,11 +36,11 @@ usage() {
 
 usage: ${0##*/}
   --foamInstall dir         specify installation directory (e.g. /opt)
-  --projectName name        specify project name (e.g. openfoam170)
-  --projectVersion ver      specify project version (e.g. 1.7.x)
-  --archOption  arch        specify architecture option (only 32 or 64 applicable)
-  --paraviewInstall dir     specify ParaView_DIR (e.g. /opt/paraviewopenfoam380)
-  --paraviewVersion ver     specify ParaView_VERSION (e.g. 3.14.1)
+  --projectName name        specify project name (e.g. openfoam220)
+  --projectVersion ver      specify project version (e.g. 2.2.0)
+  --archOption arch         specify architecture option (only 32 or 64 applicable)
+  --paraviewInstall dir     specify ParaView_DIR (e.g. /opt/paraviewopenfoam3120)
+  --paraviewVersion ver     specify ParaView_VERSION (e.g. 3.12.0)
 
 * hardcode paths to installation
 
@@ -51,26 +51,51 @@ USAGE
 
 # Function to do replacement on file. Checks if any replacement has been done.
 # inlineSed <file> <sedCommand> <description>
+#_inlineSed()
+#{
+#    [ -f "$1" ] || {
+#        echo "Missing file: $1"
+#        exit 1
+#    }
+#
+#    backup="temp.$$"
+#    cp $1 $backup
+#    sed -i -e "$2" $1
+#
+#    if cmp $1 $backup > /dev/null 2>&1
+#    then
+#        echo "Failed: $3 in $1"
+#        rm $backup 2>/dev/null
+#        exit 1
+#    else
+#        echo "Okay: $3 in $1"
+#        rm $backup 2>/dev/null
+#    fi
+#
+#    return 0
+#}
+
+# Function to do replacement on file. Checks if any replacement has been done.
+# _inlineSed <file> <regexp> <replacement> <msg>
 _inlineSed()
 {
-    [ -f "$1" ] || {
-        echo "Missing file: $1"
+    file="$1"
+
+    [ -f "$file" ] || {
+        echo "Missing file: $file"
         exit 1
     }
 
-    backup="temp.$$"
-    cp $1 $backup
-    sed -i -e "$2" $1
+    regexp="$2"
+    replacement="$3"
+    msg="$4"
 
-    if cmp $1 $backup > /dev/null 2>&1
-    then
-        echo "Failed: $3 in $1"
-        rm $backup 2>/dev/null
-        exit 1
-    else
-        echo "Okay: $3 in $1"
-        rm $backup 2>/dev/null
-    fi
+    cmd='/^[^#]/s@'"$regexp"'@'"$replacement"'@'
+
+    grep -q "$regexp" "$file" && sed -i -e "$cmd" "$file" || \
+        (echo "Failed: $msg in $file" && exit 1)
+
+    echo "Okay: $msg in $file"
 
     return 0
 }
@@ -93,7 +118,8 @@ do
         # replace foamInstall=...
         _inlineSed \
             etc/bashrc \
-            '/^[^#]/s@foamInstall=.*@foamInstall='"$foamInstall@" \
+            'foamInstall=.*' \
+            'foamInstall='"$foamInstall" \
             "Replacing foamInstall setting by '$foamInstall'"
         shift 2
         ;;
@@ -103,7 +129,8 @@ do
         # replace WM_PROJECT_DIR=...
         _inlineSed \
             etc/bashrc \
-            '/^[^#]/s@WM_PROJECT_DIR=.*@WM_PROJECT_DIR=$WM_PROJECT_INST_DIR/'"$projectName@" \
+            'WM_PROJECT_DIR=.*' \
+            'WM_PROJECT_DIR=$WM_PROJECT_INST_DIR/'"$projectName" \
             "Replacing WM_PROJECT_DIR setting by $projectName"
         shift 2
         ;;
@@ -111,11 +138,13 @@ do
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         projectVersion="$2"
         # replace WM_PROJECT_VERSION=...
-        # No checking since might already be set.
         echo "Replacing WM_PROJECT_VERSION setting by $projectVersion"
-        sed -i \
-            '/^[^#]/s@WM_PROJECT_VERSION=.*@WM_PROJECT_VERSION='"$projectVersion@" \
-            etc/bashrc
+        _inlineSed \
+            etc/bashrc \
+            'WM_PROJECT_VERSION=.*' \
+            'WM_PROJECT_VERSION='"$projectVersion" \
+            "Replacing WM_PROJECT_VERSION setting by $projectVersion"
+
         shift 2
         ;;
     -archOption | --archOption)
@@ -127,8 +156,9 @@ do
             # replace WM_ARCH_OPTION=...
             _inlineSed \
                 etc/bashrc \
-                '/^[^#]/s@WM_ARCH_OPTION=.*@WM_ARCH_OPTION='"$archOption@" \
-                 "Replacing WM_ARCH_OPTION setting by '$archOption'"
+                'WM_ARCH_OPTION=.*' \
+                'WM_ARCH_OPTION='"$archOption" \
+                "Replacing WM_ARCH_OPTION setting by '$archOption'"
         else
             echo "WM_ARCH_OPTION already set to $archOption"
         fi
@@ -140,7 +170,8 @@ do
         # replace ParaView_DIR=...
         _inlineSed \
             etc/config/paraview.sh \
-            '/^[^#]/s@ParaView_DIR=.*@ParaView_DIR='"$paraviewInstall@" \
+            'ParaView_DIR=.*' \
+            'ParaView_DIR='"$paraviewInstall" \
              "Replacing ParaView_DIR setting by '$paraviewInstall'"
         shift 2
         ;;
@@ -150,8 +181,9 @@ do
         # replace ParaView_VERSION=...
         _inlineSed \
             etc/config/paraview.sh \
-            '/^[^#]/s@ParaView_VERSION=.*@ParaView_VERSION='"$paraviewVersion@" \
-             "Replacing ParaView_VERSION setting by '$paraviewVersion'"
+            'ParaView_VERSION=.*' \
+            'ParaView_VERSION='"$paraviewVersion" \
+            "Replacing ParaView_VERSION setting by '$paraviewVersion'"
         shift 2
         ;;
     *)
@@ -168,13 +200,15 @@ done
 # Set WM_MPLIB=SYSTEMOPENMPI always
 _inlineSed \
     etc/bashrc \
-    '/^[^#]/s@export WM_MPLIB=.*@export WM_MPLIB=SYSTEMOPENMPI@' \
+    'export WM_MPLIB=.*' \
+    'export WM_MPLIB=SYSTEMOPENMPI' \
     "Replacing WM_MPLIB setting by 'SYSTEMOPENMPI'"
 
 ## set foamCompiler=system always
 #_inlineSed \
 #    etc/bashrc \
-#    '/^[^#]/s@foamCompiler=.*@foamCompiler=system@' \
+#    'foamCompiler=.*' \
+#    'foamCompiler=system' \
 #    "Replacing foamCompiler setting by 'system'"
 
 #------------------------------------------------------------------------------
