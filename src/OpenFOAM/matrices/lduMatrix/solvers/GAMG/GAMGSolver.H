@@ -192,17 +192,12 @@ class GAMGSolver
         //- Agglomerate processor matrices
         void procAgglomerateMatrix
         (
-            // Current mesh and  matrix
-            const lduMesh& coarsestMesh,
-            const lduMatrix& coarsestMatrix,
-            const lduInterfaceFieldPtrsList& coarsestInterfaces,
-            const FieldField<Field, scalar>& coarsestBouCoeffs,
-            const FieldField<Field, scalar>& coarsestIntCoeffs,
-
             // Agglomeration information
             const labelList& procAgglomMap,
             const List<int>& agglomProcIDs,
             label masterComm,
+
+            const label levelI,
 
             // Resulting matrix
             autoPtr<lduMatrix>& allMatrixPtr,

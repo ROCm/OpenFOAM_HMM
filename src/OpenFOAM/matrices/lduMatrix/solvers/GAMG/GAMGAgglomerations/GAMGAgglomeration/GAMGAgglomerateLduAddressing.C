@@ -241,12 +241,12 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
     }
 
 
-    // Allocate a communicator for the coarse level
-    label coarseComm = UPstream::allocateCommunicator
-    (
-        fineMesh.comm(),
-        identity(UPstream::nProcs(fineMesh.comm()))  //TBD
-    );
+//    // Allocate a communicator for the coarse level
+//    label coarseComm = UPstream::allocateCommunicator
+//    (
+//        fineMesh.comm(),
+//        identity(UPstream::nProcs(fineMesh.comm()))  //TBD
+//    );
 
 
     // Add the coarse level
@@ -269,12 +269,24 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
                         restrictMap
                     ),
                     fineLevelIndex,
-                    coarseComm
+                    fineMesh.comm() //coarseComm
                 ).ptr()
             );
 
             coarseInterfaceAddr[inti] = coarseInterfaces[inti].faceCells();
         }
+    }
+
+
+    if (debug)
+    {
+        Pout<< "GAMGAgglomeration :"
+            << " agglomerated level " << fineLevelIndex
+            << " from nCells:" << fineMeshAddr.size()
+            << " nFaces:" << upperAddr.size()
+            << " to nCells:" << nCoarseCells
+            << " nFaces:" << coarseOwner.size()
+            << endl;
     }
 
 
@@ -290,10 +302,98 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
             coarseInterfaceAddr,
             coarseInterfaces,
             fineMeshAddr.patchSchedule(),
-            coarseComm,
+            fineMesh.comm(),    //coarseComm,
             true
         )
     );
+}
+
+
+void Foam::GAMGAgglomeration::procAgglomerateLduAddressing
+(
+    const labelList& procAgglomMap,
+    const labelList& procIDs,
+    const label allMeshComm,
+
+    const label levelIndex
+) const
+{
+    if (procCellOffsets_.empty())
+    {
+        Pout<< "GAMGAgglomeration : sizing to " << size()
+            << " levels" << endl;
+        procAgglomMap_.setSize(size());
+        agglomProcIDs_.setSize(size());
+        procMeshLevels_.setSize(size());
+        procCommunicator_.setSize(size(), -1);
+        procCellOffsets_.setSize(size());
+        procFaceMap_.setSize(size());
+        procBoundaryMap_.setSize(size());
+        procBoundaryFaceMap_.setSize(size());
+    }
+
+
+    const lduMesh& myMesh = meshLevels_[levelIndex];
+
+    label meshComm = myMesh.comm();
+
+    label oldWarn = UPstream::warnComm;
+    UPstream::warnComm = meshComm;
+
+    Pout<< "GAMGAgglomeration : gathering myMesh (level="
+        << levelIndex
+        << ") using communicator " << meshComm << endl;
+
+    PtrList<lduMesh> otherMeshes;
+    lduPrimitiveMesh::gather(myMesh, procIDs, otherMeshes);
+
+    Pout<< "** Own Mesh " << myMesh.info() << endl;
+    forAll(otherMeshes, i)
+    {
+        Pout<< "** otherMesh " << i << " "
+            << otherMeshes[i].info()
+            << endl;
+    }
+    Pout<< endl;
+
+    procAgglomMap_.set(levelIndex, new labelList(procAgglomMap));
+    agglomProcIDs_.set(levelIndex, new labelList(procIDs));
+    procCommunicator_[levelIndex] = allMeshComm;
+
+    if (Pstream::myProcNo(meshComm) == procIDs[0])
+    {
+        // Agglomerate all addressing
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        procCellOffsets_.set(levelIndex, new labelList(0));
+        procFaceMap_.set(levelIndex, new labelListList(0));
+        procBoundaryMap_.set(levelIndex, new labelListList(0));
+        procBoundaryFaceMap_.set(levelIndex, new labelListListList(0));
+
+        procMeshLevels_.set
+        (
+            levelIndex,
+            new lduPrimitiveMesh
+            (
+                procCommunicator_[levelIndex],
+                procAgglomMap,
+
+                procIDs,
+                myMesh,
+                otherMeshes,
+
+                procCellOffsets_[levelIndex],
+                procFaceMap_[levelIndex],
+                procBoundaryMap_[levelIndex],
+                procBoundaryFaceMap_[levelIndex]
+            )
+        );
+
+        Pout<< "** Agglomerated Mesh " << procMeshLevels_[levelIndex].info()
+            << endl;
+    }
+
+    UPstream::warnComm = oldWarn;
 }
 
 

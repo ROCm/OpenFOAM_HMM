@@ -197,10 +197,17 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
 Foam::GAMGAgglomeration::~GAMGAgglomeration()
 {
     // Temporary store the user-defined communicators so we can delete them
-    labelList communicators(meshLevels_.size());
+    labelHashSet communicators(meshLevels_.size()+procMeshLevels_.size());
     forAll(meshLevels_, leveli)
     {
-        communicators[leveli] = meshLevels_[leveli].comm();
+        communicators.insert(meshLevels_[leveli].comm());
+    }
+    forAll(procMeshLevels_, leveli)
+    {
+        if (procMeshLevels_.set(leveli))
+        {
+            communicators.insert(procMeshLevels_[leveli].comm());
+        }
     }
 
     Pout<< "~GAMGAgglomeration() : current communicators:" << communicators
@@ -221,9 +228,9 @@ Foam::GAMGAgglomeration::~GAMGAgglomeration()
         }
     }
 
-    forAll(communicators, i)
+    forAllConstIter(labelHashSet, communicators, iter)
     {
-        UPstream::freeCommunicator(communicators[i]);
+        UPstream::freeCommunicator(iter.key());
     }
 }
 
@@ -255,112 +262,76 @@ const Foam::lduInterfacePtrsList& Foam::GAMGAgglomeration::interfaceLevel
 }
 
 
-void Foam::GAMGAgglomeration::gatherMeshes
+const Foam::labelList& Foam::GAMGAgglomeration::procAgglomMap
 (
-    const labelList& procAgglomMap,
-    const labelList& procIDs,
-    const label allMeshComm
+    const label leveli
 ) const
 {
-    if (allMeshPtr_.valid())
-    {
-        FatalErrorIn("GAMGAgglomeration::gatherMeshes(..)")
-            << "Processor-agglomerated mesh already constructed"
-            << exit(FatalError);
-    }
-
-    const lduMesh& coarsestMesh = meshLevels_.last();
-
-    label coarseComm = coarsestMesh.comm();
-
-    label oldWarn = UPstream::warnComm;
-    UPstream::warnComm = coarseComm;
-
-    Pout<< "GAMGAgglomeration : gathering coarsestmesh (level="
-        << meshLevels_.size()-1
-        << ") using communicator " << coarseComm << endl;
-
-    lduPrimitiveMesh::gather(coarsestMesh, procIDs, otherMeshes_);
-
-    Pout<< "** Own Mesh " << coarsestMesh.info() << endl;
-    forAll(otherMeshes_, i)
-    {
-        Pout<< "** otherMesh " << i << " "
-            << otherMeshes_[i].info()
-            << endl;
-    }
-    Pout<< endl;
-
-    if (Pstream::myProcNo(coarseComm) == procIDs[0])
-    {
-        // Agglomerate all addressing
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        allMeshPtr_.reset
-        (
-            new lduPrimitiveMesh
-            (
-                allMeshComm,
-                procAgglomMap,
-
-                procIDs,
-                coarsestMesh,
-                otherMeshes_,
-
-                cellOffsets_,
-                faceMap_,
-                boundaryMap_,
-                boundaryFaceMap_
-            )
-        );
-
-        Pout<< "** Agglomerated Mesh " << allMeshPtr_().info() << endl;
-    }
-
-    UPstream::warnComm = oldWarn;
+    return procAgglomMap_[leveli];
 }
 
 
-const Foam::lduPrimitiveMesh& Foam::GAMGAgglomeration::allMesh() const
+const Foam::labelList& Foam::GAMGAgglomeration::agglomProcIDs
+(
+    const label leveli
+) const
 {
-    if (!allMeshPtr_.valid())
-    {
-        FatalErrorIn("GAMGAgglomeration::allMesh() const")
-            << "Processor-agglomerated mesh not constructed. Did you call"
-            << " gatherMeshes?"
-            << exit(FatalError);
-    }
-    return allMeshPtr_();
+    return agglomProcIDs_[leveli];
 }
 
 
-const Foam::labelList& Foam::GAMGAgglomeration::cellOffsets() const
+bool Foam::GAMGAgglomeration::hasProcMesh(const label leveli) const
 {
-    return cellOffsets_;
+    return procMeshLevels_.set(leveli);
 }
 
 
-const Foam::labelListList& Foam::GAMGAgglomeration::faceMap() const
+const Foam::lduMesh& Foam::GAMGAgglomeration::procMeshLevel(const label leveli)
+const
 {
-    return faceMap_;
+    return procMeshLevels_[leveli];
 }
 
 
-const Foam::labelListList& Foam::GAMGAgglomeration::boundaryMap() const
+Foam::label Foam::GAMGAgglomeration::procCommunicator(const label leveli) const
 {
-    return boundaryMap_;
+    return procCommunicator_[leveli];
 }
 
 
-const Foam::labelListListList& Foam::GAMGAgglomeration::boundaryFaceMap() const
+const Foam::labelList& Foam::GAMGAgglomeration::cellOffsets
+(
+    const label leveli
+) const
 {
-    return boundaryFaceMap_;
+    return procCellOffsets_[leveli];
 }
 
 
-const Foam::PtrList<Foam::lduMesh>& Foam::GAMGAgglomeration::otherMeshes() const
+const Foam::labelListList& Foam::GAMGAgglomeration::faceMap
+(
+    const label leveli
+) const
 {
-    return otherMeshes_;
+    return procFaceMap_[leveli];
+}
+
+
+const Foam::labelListList& Foam::GAMGAgglomeration::boundaryMap
+(
+    const label leveli
+) const
+{
+    return procBoundaryMap_[leveli];
+}
+
+
+const Foam::labelListListList& Foam::GAMGAgglomeration::boundaryFaceMap
+(
+    const label leveli
+) const
+{
+    return procBoundaryFaceMap_[leveli];
 }
 
 

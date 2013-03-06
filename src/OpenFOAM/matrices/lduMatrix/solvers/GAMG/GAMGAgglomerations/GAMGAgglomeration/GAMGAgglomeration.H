@@ -30,7 +30,6 @@ Description
 SourceFiles
     GAMGAgglomeration.C
     GAMGAgglomerationTemplates.C
-    GAMGAgglomerate.C
     GAMGAgglomerateLduAddressing.C
 
 \*---------------------------------------------------------------------------*/
@@ -102,25 +101,30 @@ protected:
 
         //- Processor agglomeration
 
-            //- Combined coarsest meshes for all processors
-            mutable autoPtr<lduPrimitiveMesh> allMeshPtr_;
+            //- Per level, per processor the processor it agglomerates into
+            mutable PtrList<labelList> procAgglomMap_;
 
-            //- Per remote processor the local equivalent. TBD: hack. Can be
-            //  deleted once lduMatrices get received and merged into single
-            //  one without constructing local ones
-            mutable PtrList<lduMesh> otherMeshes_;
+            //- Per level the set of processors to agglomerate. Element 0 is
+            //  the 'master' of the cluster.
+            mutable PtrList<labelList> agglomProcIDs_;
 
-            //- Mapping from processor to coarsestAllMesh cells
-            mutable labelList cellOffsets_;
+            //- Combined mesh for all processors
+            mutable PtrList<lduPrimitiveMesh> procMeshLevels_;
 
-            //- Mapping from processor to coarsestAllMesh face
-            mutable labelListList faceMap_;
+            //- Communicator for given level
+            mutable labelList procCommunicator_;
 
-            //- Mapping from processor to coarsestAllMesh boundary
-            mutable labelListList boundaryMap_;
+            //- Mapping from processor to procMeshLevel cells
+            mutable PtrList<labelList> procCellOffsets_;
 
-            //- Mapping from processor to coarsestAllMesh boundary face
-            mutable labelListListList boundaryFaceMap_;
+            //- Mapping from processor to procMeshLevel face
+            mutable PtrList<labelListList> procFaceMap_;
+
+            //- Mapping from processor to procMeshLevel boundary
+            mutable PtrList<labelListList> procBoundaryMap_;
+
+            //- Mapping from processor to procMeshLevel boundary face
+            mutable PtrList<labelListListList> procBoundaryFaceMap_;
 
 
         //- Assemble coarse mesh addressing
@@ -284,32 +288,45 @@ public:
             //                    (rank in allMeshComm!). Global information.
             //  - procIDs       : local information: same for all in
             //                    agglomerated processor.
-            void gatherMeshes
+            void procAgglomerateLduAddressing
             (
                 const labelList& procAgglomMap,
                 const labelList& procIDs,
-                const label allMeshComm
+                const label allMeshComm,
+                const label levelIndex
             ) const;
 
+
+            //- Mapping from processor to agglomerated processor (global, all
+            //  processors have the same information)
+            const labelList& procAgglomMap(const label leveli) const;
+
+            //- Set of processors to agglomerate. Element 0 is the
+            //  master processor. (local, same only on those processor that
+            //  agglomerate)
+            const labelList& agglomProcIDs(const label leveli) const;
+
+            //- Check that level has combined mesh
+            bool hasProcMesh(const label leveli) const;
+
             //- Combined mesh
-            const lduPrimitiveMesh& allMesh() const;
+            const lduMesh& procMeshLevel(const label leveli) const;
 
-            //- Mapping from processor to coarsestAllMesh cells
-            const labelList& cellOffsets() const;
+            //- Communicator for procMesh (stored separately so also works
+            //  even if no mesh is stored on this processor)
+            label procCommunicator(const label leveli) const;
 
-            //- Mapping from processor to coarsestAllMesh face
-            const labelListList& faceMap() const;
+            //- Mapping from processor to procMesh cells
+            const labelList& cellOffsets(const label leveli) const;
 
-            //- Mapping from processor to coarsestAllMesh boundary
-            const labelListList& boundaryMap() const;
+            //- Mapping from processor to procMesh face
+            const labelListList& faceMap(const label leveli) const;
 
-            //- Mapping from processor to coarsestAllMesh boundary face
-            const labelListListList& boundaryFaceMap() const;
+            //- Mapping from processor to procMesh boundary
+            const labelListList& boundaryMap(const label leveli) const;
 
-            //- Per remote processor the local equivalent. TBD: hack. Can be
-            //  deleted once lduMatrices get received and merged into single
-            //  one without constructing local ones
-            const PtrList<lduMesh>& otherMeshes() const;
+            //- Mapping from processor to procMesh boundary face
+            const labelListListList& boundaryFaceMap(const label leveli) const;
 
 };
 

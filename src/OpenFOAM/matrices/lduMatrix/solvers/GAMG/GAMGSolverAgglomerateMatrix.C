@@ -352,17 +352,12 @@ void Foam::GAMGSolver::gatherMatrices
 
 void Foam::GAMGSolver::procAgglomerateMatrix
 (
-    // Current mesh and  matrix
-    const lduMesh& coarsestMesh,
-    const lduMatrix& coarsestMatrix,
-    const lduInterfaceFieldPtrsList& coarsestInterfaces,
-    const FieldField<Field, scalar>& coarsestBouCoeffs,
-    const FieldField<Field, scalar>& coarsestIntCoeffs,
-
     // Agglomeration information
     const labelList& procAgglomMap,
     const List<int>& agglomProcIDs,
     label masterComm,
+
+    const label levelI,
 
     // Resulting matrix
     autoPtr<lduMatrix>& allMatrixPtr,
@@ -372,6 +367,16 @@ void Foam::GAMGSolver::procAgglomerateMatrix
     lduInterfaceFieldPtrsList& allInterfaces
 )
 {
+    const lduMatrix& coarsestMatrix = matrixLevels_[levelI];
+    const lduInterfaceFieldPtrsList& coarsestInterfaces =
+        interfaceLevels_[levelI];
+    const FieldField<Field, scalar>& coarsestBouCoeffs =
+        interfaceLevelsBouCoeffs_[levelI];
+    const FieldField<Field, scalar>& coarsestIntCoeffs =
+        interfaceLevelsIntCoeffs_[levelI];
+    const lduMesh& coarsestMesh = coarsestMatrix.mesh();
+
+
     label coarseComm = coarsestMesh.comm();
 
     label oldWarn = UPstream::warnComm;
@@ -379,7 +384,16 @@ void Foam::GAMGSolver::procAgglomerateMatrix
 
 
     // Construct (on the agglomeration) a complete mesh with mapping
-    agglomeration_.gatherMeshes(procAgglomMap, agglomProcIDs, masterComm);
+    Pout<< "procAgglomerateMatrix :" << " level:" << levelI << endl;
+
+
+    agglomeration_.procAgglomerateLduAddressing
+    (
+        procAgglomMap,
+        agglomProcIDs,
+        masterComm,
+        levelI     // coarsest level
+    );
 
 
     // Gather all matrix coefficients onto agglomProcIDs[0]
@@ -425,7 +439,13 @@ void Foam::GAMGSolver::procAgglomerateMatrix
         Pout<< endl;
 
 
-        const lduMesh& allMesh = agglomeration_.allMesh();
+        const lduMesh& allMesh = agglomeration_.procMeshLevel(levelI);
+        const labelList& cellOffsets = agglomeration_.cellOffsets(levelI);
+        const labelListList& faceMap = agglomeration_.faceMap(levelI);
+        const labelListList& boundaryMap = agglomeration_.boundaryMap(levelI);
+        const labelListListList& boundaryFaceMap =
+            agglomeration_.boundaryFaceMap(levelI);
+
 
         allMatrixPtr.reset(new lduMatrix(allMesh));
         lduMatrix& allMatrix = allMatrixPtr();
@@ -447,7 +467,7 @@ void Foam::GAMGSolver::procAgglomerateMatrix
                 (
                     allDiag,
                     otherMats[i].diag().size(),
-                    agglomeration_.cellOffsets()[i+1]
+                    cellOffsets[i+1]
                 ).assign
                 (
                     otherMats[i].diag()
@@ -460,14 +480,14 @@ void Foam::GAMGSolver::procAgglomerateMatrix
             UIndirectList<scalar>
             (
                 allLower,
-                agglomeration_.faceMap()[0]
+                faceMap[0]
             ) = coarsestMatrix.lower();
             forAll(otherMats, i)
             {
                 UIndirectList<scalar>
                 (
                     allLower,
-                    agglomeration_.faceMap()[i+1]
+                    faceMap[i+1]
                 ) = otherMats[i].lower();
             }
         }
@@ -477,14 +497,14 @@ void Foam::GAMGSolver::procAgglomerateMatrix
             UIndirectList<scalar>
             (
                 allUpper,
-                agglomeration_.faceMap()[0]
+                faceMap[0]
             ) = coarsestMatrix.upper();
             forAll(otherMats, i)
             {
                 UIndirectList<scalar>
                 (
                     allUpper,
-                    agglomeration_.faceMap()[i+1]
+                    faceMap[i+1]
                 ) = otherMats[i].upper();
             }
         }
@@ -510,7 +530,7 @@ void Foam::GAMGSolver::procAgglomerateMatrix
         }
 
         labelList nBounFaces(allMeshInterfaces.size());
-        forAll(agglomeration_.boundaryMap(), procI)
+        forAll(boundaryMap, procI)
         {
             const FieldField<Field, scalar>& procBouCoeffs
             (
@@ -525,7 +545,7 @@ void Foam::GAMGSolver::procAgglomerateMatrix
               : otherIntCoeffs[procI-1]
             );
 
-            const labelList& bMap = agglomeration_.boundaryMap()[procI];
+            const labelList& bMap = boundaryMap[procI];
             forAll(bMap, procIntI)
             {
                 label allIntI = bMap[procIntI];
@@ -587,8 +607,7 @@ void Foam::GAMGSolver::procAgglomerateMatrix
                     scalarField& allBou = allInterfaceBouCoeffs[allIntI];
                     scalarField& allInt = allInterfaceIntCoeffs[allIntI];
 
-                    const labelList& map =
-                        agglomeration_.boundaryFaceMap()[procI][procIntI];
+                    const labelList& map = boundaryFaceMap[procI][procIntI];
 
 Pout<< "    from proc:" << procI << " interface:" << procIntI
 << " mapped to faces:" << map << endl;
@@ -612,12 +631,11 @@ Pout<< "    from proc:" << procI << " interface:" << procIntI
                 {
                     // Boundary has become internal face
 
-                    const labelList& map =
-                        agglomeration_.boundaryFaceMap()[procI][procIntI];
+                    const labelList& map = boundaryFaceMap[procI][procIntI];
 
-                    const labelList& allU = allMesh.lduAddr().upperAddr();
-                    const labelList& allL = allMesh.lduAddr().lowerAddr();
-                    const label off = agglomeration_.cellOffsets()[procI];
+                    //const labelList& allU = allMesh.lduAddr().upperAddr();
+                    //const labelList& allL = allMesh.lduAddr().lowerAddr();
+                    //const label off = cellOffsets[procI];
 
                     const scalarField& procBou = procBouCoeffs[procIntI];
                     const scalarField& procInt = procIntCoeffs[procIntI];
@@ -652,41 +670,41 @@ Pout<< "    from proc:" << procI << " interface:" << procIntI
                         }
 
 
-                        // Simple check
-                        label allFaceI =
-                        (
-                            map[i] >= 0
-                          ? map[i]
-                          : -map[i]-1
-                        );
-
-                        const labelList& fCells =
-                            lduPrimitiveMesh::mesh
-                            (
-                                coarsestMesh,
-                                agglomeration_.otherMeshes(),
-                                procI
-                            ).lduAddr().patchAddr(procIntI);
-
-                        label allCellI = off + fCells[i];
-
-                        if
-                        (
-                            allCellI != allL[allFaceI]
-                         && allCellI != allU[allFaceI]
-                        )
-                        {
-                            FatalErrorIn
-                            (
-                                "GAMGSolver::GAMGSolver()"
-                            )   << "problem."
-                                << " allFaceI:" << allFaceI
-                                << " local cellI:" << fCells[i]
-                                << " allCellI:" << allCellI
-                                << " allLower:" << allL[allFaceI]
-                                << " allUpper:" << allU[allFaceI]
-                                << abort(FatalError);
-                        }
+                        //// Simple check
+                        //label allFaceI =
+                        //(
+                        //    map[i] >= 0
+                        //  ? map[i]
+                        //  : -map[i]-1
+                        //);
+                        //
+                        //const labelList& fCells =
+                        //    lduPrimitiveMesh::mesh
+                        //    (
+                        //        coarsestMesh,
+                        //        agglomeration_.otherMeshes(),
+                        //        procI
+                        //    ).lduAddr().patchAddr(procIntI);
+                        //
+                        //label allCellI = off + fCells[i];
+                        //
+                        //if
+                        //(
+                        //    allCellI != allL[allFaceI]
+                        // && allCellI != allU[allFaceI]
+                        //)
+                        //{
+                        //    FatalErrorIn
+                        //    (
+                        //        "GAMGSolver::GAMGSolver()"
+                        //    )   << "problem."
+                        //        << " allFaceI:" << allFaceI
+                        //        << " local cellI:" << fCells[i]
+                        //        << " allCellI:" << allCellI
+                        //        << " allLower:" << allL[allFaceI]
+                        //        << " allUpper:" << allU[allFaceI]
+                        //        << abort(FatalError);
+                        //}
                     }
                 }
             }

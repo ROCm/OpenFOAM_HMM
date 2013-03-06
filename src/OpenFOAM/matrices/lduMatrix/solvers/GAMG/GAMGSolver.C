@@ -91,10 +91,13 @@ Foam::GAMGSolver::GAMGSolver
 
     if (matrixLevels_.size())
     {
-        const label coarsestLevel = matrixLevels_.size() - 1;
-
         if (directSolveCoarsest_)
         {
+            const label coarsestLevel = matrixLevels_.size() - 1;
+
+            Pout<< "GAMGSolver :"
+                << " coarsestLevel:" << coarsestLevel << endl;
+
             const lduMesh& coarsestMesh = matrixLevels_[coarsestLevel].mesh();
 
             label coarseComm = coarsestMesh.comm();
@@ -118,73 +121,63 @@ Foam::GAMGSolver::GAMGSolver
         }
         else if (processorAgglomerate_)
         {
-            const lduMatrix& coarsestMatrix = matrixLevels_[coarsestLevel];
-            const lduInterfaceFieldPtrsList& coarsestInterfaces =
-                interfaceLevels_[coarsestLevel];
-            const FieldField<Field, scalar>& coarsestBouCoeffs =
-                interfaceLevelsBouCoeffs_[coarsestLevel];
-            const FieldField<Field, scalar>& coarsestIntCoeffs =
-                interfaceLevelsIntCoeffs_[coarsestLevel];
-            const lduMesh& coarsestMesh = coarsestMatrix.mesh();
+            // Pick a level to processor agglomerate
+            label agglomLevel = matrixLevels_.size() - 1;//1;
 
 
-            label coarseComm = coarsestMesh.comm();
+            // Get mesh and matrix at this level
+            const lduMatrix& levelMatrix = matrixLevels_[agglomLevel];
+            const lduMesh& levelMesh = levelMatrix.mesh();
+
+
+            label levelComm = levelMesh.comm();
             label oldWarn = UPstream::warnComm;
-            UPstream::warnComm = coarseComm;
+            UPstream::warnComm = levelComm;
 
-            Pout<< "Solve generic on coarsestmesh (level=" << coarsestLevel
-                << ") using communicator " << coarseComm << endl;
-
-            //const List<int>& procIDs = UPstream::procID(coarseComm);
+            Pout<< "Solve generic on mesh (level=" << agglomLevel
+                << ") using communicator " << levelComm << endl;
 
             // Processor restriction map: per processor the coarse processor
-            labelList procAgglomMap(UPstream::nProcs(coarseComm));
-            procAgglomMap[0] = 0;
-            procAgglomMap[1] = 0;
-            procAgglomMap[2] = 1;
-            procAgglomMap[3] = 1;
-
-            // Determine the master processors
-            Map<label> agglomToMaster(procAgglomMap.size());
-
-            forAll(procAgglomMap, procI)
-            {
-                label coarseI = procAgglomMap[procI];
-
-                Map<label>::iterator fnd = agglomToMaster.find(coarseI);
-                if (fnd == agglomToMaster.end())
-                {
-                    agglomToMaster.insert(coarseI, procI);
-                }
-                else
-                {
-                    fnd() = max(fnd(), procI);
-                }
-            }
-
-            labelList masterProcs(agglomToMaster.size());
-            forAllConstIter(Map<label>, agglomToMaster, iter)
-            {
-                masterProcs[iter.key()] = iter();
-            }
-
-            // Allocate a communicator for the linear solver
-
-            label masterComm = UPstream::allocateCommunicator
-            (
-                coarseComm,
-                masterProcs
-            );
-            Pout<< "** Allocated communicator " << masterComm
-                << " for indices " << masterProcs
-                << " in processor list " << UPstream::procID(coarseComm)
-                << endl;
-
-
+            labelList procAgglomMap(UPstream::nProcs(levelComm));
+            // Master processor
+            labelList masterProcs;
+            // Local processors that agglomerate. agglomProcIDs[0] is in
+            // masterProc.
             List<int> agglomProcIDs;
-            // Collect all the processors in my agglomeration
+
             {
-                label myProcID = Pstream::myProcNo(coarseComm);
+                procAgglomMap[0] = 0;
+                procAgglomMap[1] = 0;
+                procAgglomMap[2] = 1;
+                procAgglomMap[3] = 1;
+
+                // Determine the master processors
+                Map<label> agglomToMaster(procAgglomMap.size());
+
+                forAll(procAgglomMap, procI)
+                {
+                    label coarseI = procAgglomMap[procI];
+
+                    Map<label>::iterator fnd = agglomToMaster.find(coarseI);
+                    if (fnd == agglomToMaster.end())
+                    {
+                        agglomToMaster.insert(coarseI, procI);
+                    }
+                    else
+                    {
+                        fnd() = max(fnd(), procI);
+                    }
+                }
+
+                masterProcs.setSize(agglomToMaster.size());
+                forAllConstIter(Map<label>, agglomToMaster, iter)
+                {
+                    masterProcs[iter.key()] = iter();
+                }
+
+
+                // Collect all the processors in my agglomeration
+                label myProcID = Pstream::myProcNo(levelComm);
                 label myAgglom = procAgglomMap[myProcID];
 
                 // Get all processors agglomerating to the same coarse processor
@@ -198,8 +191,21 @@ Foam::GAMGSolver::GAMGSolver
                 Swap(agglomProcIDs[0], agglomProcIDs[index]);
             }
 
+
             Pout<< "procAgglomMap:" << procAgglomMap << endl;
             Pout<< "agglomProcIDs:" << agglomProcIDs << endl;
+
+            // Allocate a communicator for the processor-agglomerated matrix
+            label procAgglomComm = UPstream::allocateCommunicator
+            (
+                levelComm,
+                masterProcs
+            );
+            Pout<< "** Allocated communicator " << procAgglomComm
+                << " for indices " << masterProcs
+                << " in processor list " << UPstream::procID(levelComm)
+                << endl;
+
 
 
             // Gather matrix and mesh onto agglomProcIDs[0]
@@ -207,17 +213,12 @@ Foam::GAMGSolver::GAMGSolver
 
             procAgglomerateMatrix
             (
-                // Current mesh and  matrix
-                coarsestMesh,
-                coarsestMatrix,
-                coarsestInterfaces,
-                coarsestBouCoeffs,
-                coarsestIntCoeffs,
-
                 // Agglomeration information
                 procAgglomMap,
                 agglomProcIDs,
-                masterComm,
+                procAgglomComm,
+
+                agglomLevel,  // level (coarse, not fine level!)
 
                 // Resulting matrix
                 allMatrixPtr_,
