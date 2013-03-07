@@ -434,22 +434,6 @@ bool Foam::polyMesh::checkCellDeterminant
             << "checking for under-determined cells" << endl;
     }
 
-    // Determine number of dimensions and (for 2D) missing dimension
-    label nDims = 0;
-    label twoD = -1;
-    for (direction dir = 0; dir < vector::nComponents; dir++)
-    {
-        if (meshD[dir] == 1)
-        {
-            nDims++;
-        }
-        else
-        {
-            twoD = dir;
-        }
-    }
-
-
     tmp<scalarField> tcellDeterminant = primitiveMeshTools::cellDeterminant
     (
         *this,

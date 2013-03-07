@@ -42,7 +42,7 @@ purgeWrite      0;
 
 //- Have regular restart files
 secondaryWriteControl    cpuTime;
-secondaryWriteInterval   120;
+secondaryWriteInterval   3600;
 secondaryPurgeWrite      1;
 
 
