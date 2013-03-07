@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -76,70 +76,11 @@ tmp<fvVectorMatrix> surfaceShearForce::correct(volVectorField& U)
     const volScalarField& delta = film.delta();
     const volVectorField& Up = film.UPrimary();
 
-    // film surface linear coeff to apply to velocity
-    tmp<volScalarField> tCs;
-
-    typedef compressible::turbulenceModel turbModel;
-    if (film.primaryMesh().foundObject<turbModel>("turbulenceModel"))
-    {
-        // local reference to turbulence model
-        const turbModel& turb =
-            film.primaryMesh().lookupObject<turbModel>("turbulenceModel");
-
-        // calculate and store the stress on the primary region
-        const volSymmTensorField primaryReff(turb.devRhoReff());
-
-        // create stress field on film
-        // - note boundary condition types (mapped)
-        // - to map, the field name must be the same as the field on the
-        //   primary region
-        volSymmTensorField Reff
-        (
-            IOobject
-            (
-                primaryReff.name(),
-                film.regionMesh().time().timeName(),
-                film.regionMesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            film.regionMesh(),
-            dimensionedSymmTensor
-            (
-                "zero",
-                primaryReff.dimensions(),
-                symmTensor::zero
-            ),
-            film.mappedFieldAndInternalPatchTypes<symmTensor>()
-        );
-
-        // map stress from primary region to film region
-        Reff.correctBoundaryConditions();
-
-        dimensionedScalar U0("SMALL", U.dimensions(), SMALL);
-        volVectorField UHat("UHat", (Up - U)/(mag(Up - U) + U0));
-
-        // shear stress tangential to the film
-        volVectorField tauTan
-        (
-            "tauTan",
-            UHat & (Reff + film.nHat()*(-film.nHat() & Reff))
-        );
-
-        // note: Cf_ 'should' be 1 in this case
-        tCs = Cf_*mag(tauTan)/(mag(Up - U) + U0);
-    }
-    else
-    {
-        // laminar case - employ simple coeff-based model
-        const volScalarField& rhop = film.rhoPrimary();
-        tCs = Cf_*rhop*mag(Up - U);
-    }
+    // laminar case - employ simple coeff-based model
+    const volScalarField& rhop = film.rhoPrimary();
+    volScalarField Cs("Cs", Cf_*rhop*mag(Up - U));
 
     dimensionedScalar d0("SMALL", delta.dimensions(), SMALL);
-
-    // linear coeffs to apply to velocity
-    const volScalarField& Cs = tCs();
     volScalarField Cw("Cw", mu/(0.3333*(delta + d0)));
     Cw.min(5000.0);
 
