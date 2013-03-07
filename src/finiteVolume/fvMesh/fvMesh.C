@@ -50,6 +50,7 @@ namespace Foam
 void Foam::fvMesh::clearGeomNotOldVol()
 {
     meshObject::clear<fvMesh, GeometricMeshObject>(*this);
+    meshObject::clear<lduMesh, GeometricMeshObject>(*this);
 
     slicedVolScalarField::DimensionedInternalField* VPtr =
         static_cast<slicedVolScalarField::DimensionedInternalField*>(VPtr_);
@@ -112,6 +113,7 @@ void Foam::fvMesh::clearGeom()
 void Foam::fvMesh::clearAddressing()
 {
     meshObject::clear<fvMesh, TopologicalMeshObject>(*this);
+    meshObject::clear<lduMesh, TopologicalMeshObject>(*this);
     deleteDemandDrivenData(lduPtr_);
 }
 
@@ -632,6 +634,7 @@ Foam::tmp<Foam::scalarField> Foam::fvMesh::movePoints(const pointField& p)
     surfaceInterpolation::movePoints();
 
     meshObject::movePoints<fvMesh>(*this);
+    meshObject::movePoints<lduMesh>(*this);
 
     return tsweptVols;
 }
@@ -654,6 +657,7 @@ void Foam::fvMesh::updateMesh(const mapPolyMesh& mpm)
     clearAddressing();
 
     meshObject::updateMesh<fvMesh>(*this, mpm);
+    meshObject::updateMesh<lduMesh>(*this, mpm);
 }
 
 
