@@ -198,10 +198,10 @@ void Foam::forces::applyBins
 {
     if (nBin_ == 1)
     {
-        force_[0][0] = sum(fN);
-        force_[1][0] = sum(fT);
-        moment_[0][0] = sum(Md ^ fN);
-        moment_[1][0] = sum(Md ^ fT);
+        force_[0][0] += sum(fN);
+        force_[1][0] += sum(fT);
+        moment_[0][0] += sum(Md ^ fN);
+        moment_[1][0] += sum(Md ^ fT);
     }
     else
     {
@@ -471,7 +471,7 @@ void Foam::forces::read(const dictionary& dict)
         // specified directly, from coordinate system, or implicitly (0 0 0)
         if (!dict.readIfPresent<point>("CofR", coordSys_.origin()))
         {
-            coordSys_ = coordinateSystem(obr_, dict);
+            coordSys_ = coordinateSystem(dict, obr_);
             localSystem_ = true;
         }
 
