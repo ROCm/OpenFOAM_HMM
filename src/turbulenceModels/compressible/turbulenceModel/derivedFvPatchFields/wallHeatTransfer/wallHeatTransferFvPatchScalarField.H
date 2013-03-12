@@ -44,7 +44,7 @@ Description
     myPatch
     {
         type            wallHeatTransfer;
-        Tif             uniform 500;
+        Tinf            uniform 500;
         alphaWall       uniform 1;
     }
     \endverbatim
