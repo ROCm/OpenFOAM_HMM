@@ -148,7 +148,10 @@ void Foam::surfaceInterpolation::makeWeights() const
         (
             "weights",
             mesh_.pointsInstance(),
-            mesh_
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false // Do not register
         ),
         mesh_,
         dimless
@@ -217,7 +220,10 @@ void Foam::surfaceInterpolation::makeDeltaCoeffs() const
         (
             "deltaCoeffs",
             mesh_.pointsInstance(),
-            mesh_
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false // Do not register
         ),
         mesh_,
         dimless/dimLength
@@ -262,7 +268,10 @@ void Foam::surfaceInterpolation::makeNonOrthDeltaCoeffs() const
         (
             "nonOrthDeltaCoeffs",
             mesh_.pointsInstance(),
-            mesh_
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false // Do not register
         ),
         mesh_,
         dimless/dimLength
@@ -320,7 +329,10 @@ void Foam::surfaceInterpolation::makeNonOrthCorrectionVectors() const
         (
             "nonOrthCorrectionVectors",
             mesh_.pointsInstance(),
-            mesh_
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false // Do not register
         ),
         mesh_,
         dimless

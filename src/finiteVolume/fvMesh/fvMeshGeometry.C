@@ -208,7 +208,8 @@ const volScalarField::DimensionedInternalField& fvMesh::V() const
                 time().timeName(),
                 *this,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                false
             ),
             *this,
             dimVolume,
@@ -258,7 +259,8 @@ const volScalarField::DimensionedInternalField& fvMesh::V00() const
                 time().timeName(),
                 *this,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                false
             ),
             V0()
         );
