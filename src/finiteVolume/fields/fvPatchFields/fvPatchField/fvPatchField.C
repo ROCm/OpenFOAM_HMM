@@ -173,15 +173,23 @@ void Foam::fvPatchField<Type>::check(const fvPatchField<Type>& ptf) const
 }
 
 
-// Return gradient at boundary
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::fvPatchField<Type>::snGrad() const
+Foam::tmp<Foam::Field<Type> > Foam::fvPatchField<Type>::snGrad
+(
+    const scalarField& deltaCoeffs
+) const
 {
-    return (*this - patchInternalField())*patch_.deltaCoeffs();
+    return deltaCoeffs*(*this - patchInternalField());
 }
 
 
-// Return internal field next to patch as patch field
+template<class Type>
+Foam::tmp<Foam::Field<Type> > Foam::fvPatchField<Type>::snGrad() const
+{
+    return this->snGrad(patch_.deltaCoeffs());
+}
+
+
 template<class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::fvPatchField<Type>::patchInternalField() const
