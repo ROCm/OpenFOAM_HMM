@@ -145,7 +145,14 @@ public:
             ) const;
 
             //- Return patch-normal gradient
-            virtual tmp<Field<Type> > snGrad() const;
+            virtual tmp<Field<Type> > snGrad() const
+            {
+                notImplemented
+                (
+                    type() + "::coupledFvPatchField<Type>::snGrad()"
+                );
+                return *this;
+            }
 
             //- Initialise the evaluation of the patch field
             virtual void initEvaluate
