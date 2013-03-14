@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
+|  \\    /   O peration     | Version:  dev                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -21,18 +21,18 @@ nIntervals      20;
 nSamples        10000;
 
 // Type of pdf
-pdfType         RosinRammler;
+type            RosinRammler;
 
 // Write data flag
 writeData       true;
 
 // PDF model coefficients
-RosinRammlerPDF
+RosinRammlerDistribution
 {
     minValue        1e-06;
     maxValue        200e-06;
-    d               (60.0e-06);
-    n               (0.8);
+    d               60.0e-06;
+    n               0.8;
 }
 
 // ************************************************************************* //
