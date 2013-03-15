@@ -347,13 +347,21 @@ public:
         // Evaluation functions
 
             //- Return patch-normal gradient
+            virtual tmp<Field<Type> > snGrad() const;
+
+            //- Return patch-normal gradient for coupled-patches
+            //  using the deltaCoeffs provided
             virtual tmp<Field<Type> > snGrad
             (
                 const scalarField& deltaCoeffs
-            ) const;
-
-            //- Return patch-normal gradient
-            virtual tmp<Field<Type> > snGrad() const;
+            ) const
+            {
+                notImplemented
+                (
+                    type() + "::snGrad(const scalarField& deltaCoeffs)"
+                );
+                return *this;
+            }
 
             //- Update the coefficients associated with the patch field
             //  Sets Updated to true
@@ -421,6 +429,15 @@ public:
 
             //- Return the matrix diagonal coefficients corresponding to the
             //  evaluation of the gradient of this patchField
+            virtual tmp<Field<Type> > gradientInternalCoeffs() const
+            {
+                notImplemented(type() + "::gradientInternalCoeffs()");
+                return *this;
+            }
+
+            //- Return the matrix diagonal coefficients corresponding to the
+            //  evaluation of the gradient of this coupled patchField
+            //  using the deltaCoeffs provided
             virtual tmp<Field<Type> > gradientInternalCoeffs
             (
                 const scalarField& deltaCoeffs
@@ -434,16 +451,17 @@ public:
                 return *this;
             }
 
-            //- Return the matrix diagonal coefficients corresponding to the
+            //- Return the matrix source coefficients corresponding to the
             //  evaluation of the gradient of this patchField
-            virtual tmp<Field<Type> > gradientInternalCoeffs() const
+            virtual tmp<Field<Type> > gradientBoundaryCoeffs() const
             {
-                notImplemented(type() + "::gradientInternalCoeffs()");
+                notImplemented(type() + "::gradientBoundaryCoeffs()");
                 return *this;
             }
 
             //- Return the matrix source coefficients corresponding to the
-            //  evaluation of the gradient of this patchField
+            //  evaluation of the gradient of this coupled patchField
+            //  using the deltaCoeffs provided
             virtual tmp<Field<Type> > gradientBoundaryCoeffs
             (
                 const scalarField& deltaCoeffs
@@ -454,14 +472,6 @@ public:
                     type()
                   + "::gradientBoundaryCoeffs(const scalarField& deltaCoeffs)"
                 );
-                return *this;
-            }
-
-            //- Return the matrix source coefficients corresponding to the
-            //  evaluation of the gradient of this patchField
-            virtual tmp<Field<Type> > gradientBoundaryCoeffs() const
-            {
-                notImplemented(type() + "::gradientBoundaryCoeffs()");
                 return *this;
             }
 

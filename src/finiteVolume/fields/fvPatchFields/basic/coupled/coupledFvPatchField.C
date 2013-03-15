@@ -105,16 +105,6 @@ Foam::coupledFvPatchField<Type>::coupledFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::coupledFvPatchField<Type>::snGrad() const
-{
-    notImplemented("coupledFvPatchField<Type>::snGrad()");
-    return
-        this->patch().deltaCoeffs()
-       *(this->patchNeighbourField() - this->patchInternalField());
-}
-
-
-template<class Type>
 Foam::tmp<Foam::Field<Type> > Foam::coupledFvPatchField<Type>::snGrad
 (
     const scalarField& deltaCoeffs
