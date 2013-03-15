@@ -480,7 +480,10 @@ void Foam::CV2D::newPoints()
                 alignments[vit->index()] = toPoint2D(norm[0]);
 
                 sizes[vit->index()] =
-                    cellSizeControl_.cellSize(toPoint3D(vit->point()));
+                    cellSizeControl_.cellSize
+                    (
+                        toPoint3D(vit->point())
+                    );
             }
         }
     }

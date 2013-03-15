@@ -56,7 +56,7 @@ class cellSizeAndAlignmentControls
 
         PtrList<cellSizeAndAlignmentControl> controlFunctions_;
 
-        const scalar& defaultCellSize_;
+        const scalar defaultCellSize_;
 
 
     // Private Member Functions
