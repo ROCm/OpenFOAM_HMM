@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -564,7 +564,7 @@ Foam::triSurfaceMesh::tree() const
         (
             new indexedOctree<treeDataTriSurface>
             (
-                treeDataTriSurface(*this, tolerance_),
+                treeDataTriSurface(true, *this, tolerance_),
                 bb,
                 maxTreeDepth_,  // maxLevel
                 10,             // leafsize
@@ -609,7 +609,7 @@ Foam::triSurfaceMesh::edgeTree() const
         bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
         bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
-        scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
+        scalar oldTol = indexedOctree<treeDataEdge>::perturbTol();
         indexedOctree<treeDataEdge>::perturbTol() = tolerance_;
 
         edgeTree_.reset

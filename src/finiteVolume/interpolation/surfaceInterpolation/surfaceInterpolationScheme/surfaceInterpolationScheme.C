@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -238,7 +238,7 @@ surfaceInterpolationScheme<Type>::interpolate
 
 
 //- Return the face-interpolate of the given cell field
-//  with the given weigting factors
+//  with the given weighting factors
 template<class Type>
 tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
 surfaceInterpolationScheme<Type>::interpolate

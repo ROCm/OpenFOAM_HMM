@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -135,7 +135,12 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::resetTree
         (
             new indexedOctree<treeType>
             (
-                treeType(false, tgtPatch),
+                treeType
+                (
+                    false,
+                    tgtPatch,
+                    indexedOctree<treeType>::perturbTol()
+                ),
                 bb,                         // overall search domain
                 8,                          // maxLevel
                 10,                         // leaf size

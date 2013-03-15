@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -143,6 +143,24 @@ Foam::treeDataFace::treeDataFace
 {
     update();
 }
+
+
+Foam::treeDataFace::findNearestOp::findNearestOp
+(
+    const indexedOctree<treeDataFace>& tree
+)
+:
+    tree_(tree)
+{}
+
+
+Foam::treeDataFace::findIntersectOp::findIntersectOp
+(
+    const indexedOctree<treeDataFace>& tree
+)
+:
+    tree_(tree)
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -477,9 +495,7 @@ bool Foam::treeDataFace::overlaps
 }
 
 
-// Calculate nearest point to sample. Updates (if any) nearestDistSqr, minIndex,
-// nearestPoint.
-void Foam::treeDataFace::findNearest
+void Foam::treeDataFace::findNearestOp::operator()
 (
     const labelUList& indices,
     const point& sample,
@@ -489,13 +505,15 @@ void Foam::treeDataFace::findNearest
     point& nearestPoint
 ) const
 {
+    const treeDataFace& shape = tree_.shapes();
+
     forAll(indices, i)
     {
         const label index = indices[i];
 
-        const face& f = mesh_.faces()[faceLabels_[index]];
+        const face& f = shape.mesh().faces()[shape.faceLabels()[index]];
 
-        pointHit nearHit = f.nearestPoint(sample, mesh_.points());
+        pointHit nearHit = f.nearestPoint(sample, shape.mesh().points());
         scalar distSqr = sqr(nearHit.distance());
 
         if (distSqr < nearestDistSqr)
@@ -508,7 +526,33 @@ void Foam::treeDataFace::findNearest
 }
 
 
-bool Foam::treeDataFace::intersects
+void Foam::treeDataFace::findNearestOp::operator()
+(
+    const labelUList& indices,
+    const linePointRef& ln,
+
+    treeBoundBox& tightest,
+    label& minIndex,
+    point& linePoint,
+    point& nearestPoint
+) const
+{
+    notImplemented
+    (
+        "treeDataFace::findNearestOp::operator()"
+        "("
+        "    const labelUList&,"
+        "    const linePointRef&,"
+        "    treeBoundBox&,"
+        "    label&,"
+        "    point&,"
+        "    point&"
+        ") const"
+    );
+}
+
+
+bool Foam::treeDataFace::findIntersectOp::operator()
 (
     const label index,
     const point& start,
@@ -516,10 +560,12 @@ bool Foam::treeDataFace::intersects
     point& intersectionPoint
 ) const
 {
+    const treeDataFace& shape = tree_.shapes();
+
     // Do quick rejection test
-    if (cacheBb_)
+    if (shape.cacheBb_)
     {
-        const treeBoundBox& faceBb = bbs_[index];
+        const treeBoundBox& faceBb = shape.bbs_[index];
 
         if ((faceBb.posBits(start) & faceBb.posBits(end)) != 0)
         {
@@ -528,16 +574,16 @@ bool Foam::treeDataFace::intersects
         }
     }
 
-    const label faceI = faceLabels_[index];
+    const label faceI = shape.faceLabels_[index];
 
     const vector dir(end - start);
 
-    pointHit inter = mesh_.faces()[faceI].intersection
+    pointHit inter = shape.mesh_.faces()[faceI].intersection
     (
         start,
         dir,
-        mesh_.faceCentres()[faceI],
-        mesh_.points(),
+        shape.mesh_.faceCentres()[faceI],
+        shape.mesh_.points(),
         intersection::HALF_RAY
     );
 
