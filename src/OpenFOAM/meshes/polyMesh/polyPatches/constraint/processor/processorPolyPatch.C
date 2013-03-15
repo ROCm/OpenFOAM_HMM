@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -193,7 +193,7 @@ void Foam::processorPolyPatch::calcGeometry(PstreamBuffers& pBufs)
 
             // For small face area calculation the results of the area
             // calculation have been found to only be accurate to ~1e-20
-            if (magSf < SMALL && nbrMagSf < SMALL)
+            if (magSf < SMALL || nbrMagSf < SMALL)
             {
                 // Undetermined normal. Use dummy normal to force separation
                 // check.
