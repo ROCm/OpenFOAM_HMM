@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -270,6 +270,20 @@ inline Foam::pointHit Foam::triFace::intersection
 ) const
 {
     return this->tri(points).intersection(p, q, alg, tol);
+}
+
+
+inline Foam::pointHit Foam::triFace::intersection
+(
+    const point& p,
+    const vector& q,
+    const point& ctr,
+    const pointField& points,
+    const intersection::algorithm alg,
+    const scalar tol
+) const
+{
+    return intersection(p, q, points, alg, tol);
 }
 
 
