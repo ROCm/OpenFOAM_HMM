@@ -212,6 +212,7 @@ private:
         // Query
 
             //- Find nearest point to line.
+            template <class FindNearestOp>
             void findNearest
             (
                 const label nodeI,
@@ -220,7 +221,9 @@ private:
                 treeBoundBox& tightest,
                 label& nearestShapeI,
                 point& linePoint,
-                point& nearestPoint
+                point& nearestPoint,
+
+                const FindNearestOp& fnOp
             ) const;
 
             //- Return bbox of octant
@@ -294,6 +297,7 @@ private:
             // intersection point.
             // findAny=true : return any intersection
             // findAny=false: return nearest (to start) intersection
+            template <class FindIntersectOp>
             void traverseNode
             (
                 const bool findAny,
@@ -306,10 +310,13 @@ private:
                 const direction octantI,
 
                 pointIndexHit& hitInfo,
-                direction& faceID
+                direction& faceID,
+
+                const FindIntersectOp& fiOp
             ) const;
 
             //- Find any or nearest intersection
+            template <class FindIntersectOp>
             pointIndexHit findLine
             (
                 const bool findAny,
@@ -317,6 +324,7 @@ private:
                 const point& treeEnd,
                 const label startNodeI,
                 const direction startOctantI,
+                const FindIntersectOp& fiOp,
                 const bool verbose = false
             ) const;
 
@@ -328,11 +336,13 @@ private:
 //            ) const;
 
             //- Find any or nearest intersection of line between start and end.
+            template <class FindIntersectOp>
             pointIndexHit findLine
             (
                 const bool findAny,
                 const point& start,
-                const point& end
+                const point& end,
+                const FindIntersectOp& fiOp
             ) const;
 
             //- Find all elements intersecting box.
@@ -528,15 +538,24 @@ public:
 
         // Queries
 
+            pointIndexHit findNearest
+            (
+                const point& sample,
+                const scalar nearestDistSqr
+            ) const;
+
             //- Calculate nearest point on nearest shape.
             //  Returns
             //  - bool : any point found nearer than nearestDistSqr
             //  - label: index in shapes
             //  - point: actual nearest point found
+            template <class FindNearestOp>
             pointIndexHit findNearest
             (
                 const point& sample,
-                const scalar nearestDistSqr
+                const scalar nearestDistSqr,
+
+                const FindNearestOp& fnOp
             ) const;
 
 //            bool findAnyOverlap
@@ -553,6 +572,7 @@ public:
 //            ) const;
 
             //- Low level: calculate nearest starting from subnode.
+            template <class FindNearestOp>
             void findNearest
             (
                 const label nodeI,
@@ -560,7 +580,9 @@ public:
 
                 scalar& nearestDistSqr,
                 label& nearestShapeI,
-                point& nearestPoint
+                point& nearestPoint,
+
+                const FindNearestOp& fnOp
             ) const;
 
             //- Find nearest to line.
@@ -577,6 +599,16 @@ public:
                 point& linePoint
             ) const;
 
+            template <class FindNearestOp>
+            pointIndexHit findNearest
+            (
+                const linePointRef& ln,
+                treeBoundBox& tightest,
+                point& linePoint,
+
+                const FindNearestOp& fnOp
+            ) const;
+
             //- Find nearest intersection of line between start and end.
             pointIndexHit findLine
             (
@@ -589,6 +621,24 @@ public:
             (
                 const point& start,
                 const point& end
+            ) const;
+
+            //- Find nearest intersection of line between start and end.
+            template <class FindIntersectOp>
+            pointIndexHit findLine
+            (
+                const point& start,
+                const point& end,
+                const FindIntersectOp& fiOp
+            ) const;
+
+            //- Find any intersection of line between start and end.
+            template <class FindIntersectOp>
+            pointIndexHit findLineAny
+            (
+                const point& start,
+                const point& end,
+                const FindIntersectOp& fiOp
             ) const;
 
             //- Find (in no particular order) indices of all shapes inside or

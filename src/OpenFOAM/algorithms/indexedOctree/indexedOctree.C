@@ -576,6 +576,7 @@ Foam::indexedOctree<Type>::getSide
 
 // Find nearest point starting from nodeI
 template<class Type>
+template<class FindNearestOp>
 void Foam::indexedOctree<Type>::findNearest
 (
     const label nodeI,
@@ -583,7 +584,9 @@ void Foam::indexedOctree<Type>::findNearest
 
     scalar& nearestDistSqr,
     label& nearestShapeI,
-    point& nearestPoint
+    point& nearestPoint,
+
+    const FindNearestOp& fnOp
 ) const
 {
     const node& nod = nodes_[nodeI];
@@ -614,7 +617,9 @@ void Foam::indexedOctree<Type>::findNearest
 
                     nearestDistSqr,
                     nearestShapeI,
-                    nearestPoint
+                    nearestPoint,
+
+                    fnOp
                 );
             }
         }
@@ -631,7 +636,7 @@ void Foam::indexedOctree<Type>::findNearest
                 )
             )
             {
-                shapes_.findNearest
+                fnOp
                 (
                     contents_[getContent(index)],
                     sample,
@@ -648,6 +653,7 @@ void Foam::indexedOctree<Type>::findNearest
 
 // Find nearest point to line.
 template<class Type>
+template<class FindNearestOp>
 void Foam::indexedOctree<Type>::findNearest
 (
     const label nodeI,
@@ -656,7 +662,9 @@ void Foam::indexedOctree<Type>::findNearest
     treeBoundBox& tightest,
     label& nearestShapeI,
     point& linePoint,
-    point& nearestPoint
+    point& nearestPoint,
+
+    const FindNearestOp& fnOp
 ) const
 {
     const node& nod = nodes_[nodeI];
@@ -687,7 +695,9 @@ void Foam::indexedOctree<Type>::findNearest
                     tightest,
                     nearestShapeI,
                     linePoint,
-                    nearestPoint
+                    nearestPoint,
+
+                    fnOp
                 );
             }
         }
@@ -697,7 +707,7 @@ void Foam::indexedOctree<Type>::findNearest
 
             if (subBb.overlaps(tightest))
             {
-                shapes_.findNearest
+                fnOp
                 (
                     contents_[getContent(index)],
                     ln,
@@ -1620,6 +1630,7 @@ Foam::word Foam::indexedOctree<Type>::faceString
 //  hitInfo.point = coordinate of intersection of ray with bounding box
 //  hitBits  = posbits of point on bounding box
 template<class Type>
+template<class FindIntersectOp>
 void Foam::indexedOctree<Type>::traverseNode
 (
     const bool findAny,
@@ -1632,7 +1643,9 @@ void Foam::indexedOctree<Type>::traverseNode
     const direction octant,
 
     pointIndexHit& hitInfo,
-    direction& hitBits
+    direction& hitBits,
+
+    const FindIntersectOp& fiOp
 ) const
 {
     if (debug)
@@ -1667,7 +1680,7 @@ void Foam::indexedOctree<Type>::traverseNode
                     label shapeI = indices[elemI];
 
                     point pt;
-                    bool hit = shapes_.intersects(shapeI, start, end, pt);
+                    bool hit = fiOp(shapeI, start, end, pt);
 
                     // Note that intersection of shape might actually be
                     // in a neighbouring box. For findAny this is not important.
@@ -1695,13 +1708,7 @@ void Foam::indexedOctree<Type>::traverseNode
                     label shapeI = indices[elemI];
 
                     point pt;
-                    bool hit = shapes_.intersects
-                    (
-                        shapeI,
-                        start,
-                        nearestPoint,
-                        pt
-                    );
+                    bool hit = fiOp(shapeI, start, nearestPoint, pt);
 
                     // Note that intersection of shape might actually be
                     // in a neighbouring box. Since we need to maintain strict
@@ -1774,7 +1781,9 @@ void Foam::indexedOctree<Type>::traverseNode
             octant,
 
             hitInfo,
-            hitBits
+            hitBits,
+
+            fiOp
         );
     }
 }
@@ -1782,6 +1791,7 @@ void Foam::indexedOctree<Type>::traverseNode
 
 // Find first intersection
 template<class Type>
+template<class FindIntersectOp>
 Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
 (
     const bool findAny,
@@ -1789,6 +1799,7 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
     const point& treeEnd,
     const label startNodeI,
     const direction startOctant,
+    const FindIntersectOp& fiOp,
     const bool verbose
 ) const
 {
@@ -1864,7 +1875,9 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
             octant,
 
             hitInfo,
-            hitFaceID
+            hitFaceID,
+
+            fiOp
         );
 
         // Did we hit a triangle?
@@ -1948,7 +1961,8 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
                 treeEnd,
                 startNodeI,
                 startOctant,
-                true            //verbose
+                fiOp,
+                true            //verbose,
             );
         }
         if (debug)
@@ -2007,11 +2021,13 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
 
 // Find first intersection
 template<class Type>
+template<class FindIntersectOp>
 Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
 (
     const bool findAny,
     const point& start,
-    const point& end
+    const point& end,
+    const FindIntersectOp& fiOp
 ) const
 {
     pointIndexHit hitInfo;
@@ -2069,7 +2085,8 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
             trackStart,
             trackEnd,
             parentNodeI,
-            octant
+            octant,
+            fiOp
         );
     }
 
@@ -2657,6 +2674,25 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
     const scalar startDistSqr
 ) const
 {
+    return findNearest
+    (
+        sample,
+        startDistSqr,
+        typename Type::findNearestOp(*this)
+    );
+}
+
+
+template <class Type>
+template <class FindNearestOp>
+Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
+(
+    const point& sample,
+    const scalar startDistSqr,
+
+    const FindNearestOp& fnOp
+) const
+{
     scalar nearestDistSqr = startDistSqr;
     label nearestShapeI = -1;
     point nearestPoint = vector::zero;
@@ -2670,7 +2706,9 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
 
             nearestDistSqr,
             nearestShapeI,
-            nearestPoint
+            nearestPoint,
+
+            fnOp
         );
     }
 
@@ -2686,6 +2724,27 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
     point& linePoint
 ) const
 {
+    return findNearest
+    (
+        ln,
+        tightest,
+        linePoint,
+        typename Type::findNearestOp(*this)
+    );
+}
+
+
+template <class Type>
+template <class FindNearestOp>
+Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
+(
+    const linePointRef& ln,
+    treeBoundBox& tightest,
+    point& linePoint,
+
+    const FindNearestOp& fnOp
+) const
+{
     label nearestShapeI = -1;
     point nearestPoint = vector::zero;
 
@@ -2699,7 +2758,9 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
             tightest,
             nearestShapeI,
             linePoint,
-            nearestPoint
+            nearestPoint,
+
+            fnOp
         );
     }
 
@@ -2715,7 +2776,13 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
     const point& end
 ) const
 {
-    return findLine(false, start, end);
+    return findLine
+    (
+        false,
+        start,
+        end,
+        typename Type::findIntersectOp(*this)
+    );
 }
 
 
@@ -2727,7 +2794,41 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLineAny
     const point& end
 ) const
 {
-    return findLine(true, start, end);
+    return findLine
+    (
+        true,
+        start,
+        end,
+        typename Type::findIntersectOp(*this)
+    );
+}
+
+
+// Find nearest intersection
+template <class Type>
+template <class FindIntersectOp>
+Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
+(
+    const point& start,
+    const point& end,
+    const FindIntersectOp& fiOp
+) const
+{
+    return findLine(false, start, end, fiOp);
+}
+
+
+// Find nearest intersection
+template <class Type>
+template <class FindIntersectOp>
+Foam::pointIndexHit Foam::indexedOctree<Type>::findLineAny
+(
+    const point& start,
+    const point& end,
+    const FindIntersectOp& fiOp
+) const
+{
+    return findLine(true, start, end, fiOp);
 }
 
 

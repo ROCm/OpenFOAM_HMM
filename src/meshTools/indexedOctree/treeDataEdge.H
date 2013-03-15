@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -86,6 +86,58 @@ class treeDataEdge
 
 public:
 
+
+    class findNearestOp
+    {
+        const indexedOctree<treeDataEdge>& tree_;
+
+    public:
+
+        findNearestOp(const indexedOctree<treeDataEdge>& tree);
+
+        void operator()
+        (
+            const labelUList& indices,
+            const point& sample,
+
+            scalar& nearestDistSqr,
+            label& minIndex,
+            point& nearestPoint
+        ) const;
+
+        void operator()
+        (
+            const labelUList& indices,
+            const linePointRef& ln,
+
+            treeBoundBox& tightest,
+            label& minIndex,
+            point& linePoint,
+            point& nearestPoint
+        ) const;
+    };
+
+
+    class findIntersectOp
+    {
+        const indexedOctree<treeDataEdge>& tree_;
+
+    public:
+
+        findIntersectOp(const indexedOctree<treeDataEdge>& tree);
+
+        //- Calculate intersection of triangle with ray. Sets result
+        //  accordingly
+        bool operator()
+        (
+            const label index,
+            const point& start,
+            const point& end,
+            point& intersectionPoint
+        ) const;
+    };
+
+
     // Declare name of the class and its debug switch
     ClassName("treeDataEdge");
 
@@ -115,6 +167,16 @@ public:
     // Member Functions
 
         // Access
+
+            const edgeList& edges() const
+            {
+                return edges_;
+            }
+
+            const pointField& points() const
+            {
+                return points_;
+            }
 
             const labelList& edgeLabels() const
             {
@@ -155,50 +217,6 @@ public:
                 const point& centre,
                 const scalar radiusSqr
             ) const;
-
-            //- Calculates nearest (to sample) point in shape.
-            //  Returns actual point and distance (squared)
-            void findNearest
-            (
-                const labelUList& indices,
-                const point& sample,
-
-                scalar& nearestDistSqr,
-                label& nearestIndex,
-                point& nearestPoint
-            ) const;
-
-            //- Calculates nearest (to line) point in shape.
-            //  Returns point and distance (squared)
-            void findNearest
-            (
-                const labelUList& indices,
-                const linePointRef& ln,
-
-                treeBoundBox& tightest,
-                label& minIndex,
-                point& linePoint,
-                point& nearestPoint
-            ) const;
-
-            //- Calculate intersection of shape with ray. Sets result
-            //  accordingly
-            bool intersects
-            (
-                const label index,
-                const point& start,
-                const point& end,
-                point& result
-            ) const
-            {
-                notImplemented
-                (
-                    "treeDataEdge::intersects(const label, const point&,"
-                    "const point&, point&)"
-                );
-                return false;
-            }
-
 };
 
 
