@@ -95,13 +95,13 @@ motionControl
             cellSizeFunction        linearDistance;
             linearDistanceCoeffs
             {
-                distanceCellSize    $minCellSize;
-                distance            #calc"5*$minCellSize";
+                distanceCellSizeCoeff    1;
+                distanceCoeff            5;
             }
             surfaceCellSizeFunction uniformValue;
             uniformValueCoeffs
             {
-                surfaceCellSize     #calc"0.05*$minCellSize";
+                surfaceCellSizeCoeff     0.05;
             }
         }
 
@@ -113,13 +113,13 @@ motionControl
             cellSizeFunction        linearDistance;
             linearDistanceCoeffs
             {
-                distanceCellSize    $minCellSize;
-                distance            #calc"5*$minCellSize";
+                distanceCellSizeCoeff    1;
+                distanceCoeff            5;
             }
             surfaceCellSizeFunction uniformValue;
             uniformValueCoeffs
             {
-                surfaceCellSize     #calc"0.05*$minCellSize";
+                surfaceCellSizeCoeff     0.05;
             }
         }
     }

@@ -94,15 +94,15 @@ motionControl
             cellSizeFunction        surfaceOffsetLinearDistance;
             surfaceOffsetLinearDistanceCoeffs
             {
-                distanceCellSize    $minCellSize;
-                totalDistance       0.2;
-                surfaceOffset       0.05;
+                distanceCellSizeCoeff    1;
+                totalDistanceCoeff       5;
+                surfaceOffsetCoeff       1;
             }
 
             surfaceCellSizeFunction uniformValue;
             uniformValueCoeffs
             {
-                surfaceCellSize     0.005;
+                surfaceCellSizeCoeff     0.1;
             }
         }
     }

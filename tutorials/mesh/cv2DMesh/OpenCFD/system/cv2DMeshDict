@@ -103,8 +103,8 @@ motionControl
 
             linearDistanceCoeffs
             {
-                distanceCellSize  $minCellSize;
-                distance          1;
+                distanceCellSizeCoeff  1;
+                distanceCoeff          50;
             }
             uniformCoeffs
             {}
@@ -112,7 +112,7 @@ motionControl
             surfaceCellSizeFunction uniformValue;
             uniformValueCoeffs
             {
-                surfaceCellSize   $minCellSize;
+                surfaceCellSizeCoeff   1;
             }
         }
     }
