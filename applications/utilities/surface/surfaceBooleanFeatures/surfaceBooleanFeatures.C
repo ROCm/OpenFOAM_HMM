@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -428,7 +428,7 @@ int main(int argc, char *argv[])
         (
             sFeatFileName + ".extendedFeatureEdgeMesh",
             runTime.constant(),
-            "featureEdgeMesh",
+            "extendedFeatureEdgeMesh",
             runTime,
             IOobject::NO_READ,
             IOobject::NO_WRITE
@@ -452,7 +452,7 @@ int main(int argc, char *argv[])
 
     feMesh.write();
 
-    feMesh.writeObj(sFeatFileName);
+    feMesh.writeObj(feMesh.path()/sFeatFileName);
 
     {
         // Write a featureEdgeMesh for backwards compatibility
