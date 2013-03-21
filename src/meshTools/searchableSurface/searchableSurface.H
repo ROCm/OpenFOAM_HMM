@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -277,6 +277,19 @@ public:
                 const scalarField& nearestDistSqr,
                 List<pointIndexHit>&
             ) const = 0;
+
+            //- Find the nearest locations for the supplied points to a
+            //  particular region in the searchable surface.
+            virtual void findNearest
+            (
+                const pointField& samples,
+                const scalarField& nearestDistSqr,
+                const labelList& regionIndices,
+                List<pointIndexHit>& info
+            ) const
+            {
+                findNearest(samples, nearestDistSqr, info);
+            }
 
             //- Find first intersection on segment from start to end.
             //  Note: searchableSurfacesQueries expects no

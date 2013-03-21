@@ -218,84 +218,33 @@ bool Foam::triSurfaceMesh::isSurfaceClosed() const
 }
 
 
-// Gets all intersections after initial one. Adds smallVec and starts tracking
-// from there.
-void Foam::triSurfaceMesh::getNextIntersections
-(
-    const indexedOctree<treeDataTriSurface>& octree,
-    const point& start,
-    const point& end,
-    const vector& smallVec,
-    DynamicList<pointIndexHit, 1, 1>& hits
-)
+void Foam::triSurfaceMesh::calcBounds(boundBox& bb, label& nPoints) const
 {
-    const vector dirVec(end-start);
-    const scalar magSqrDirVec(magSqr(dirVec));
+    const triSurface& s = static_cast<const triSurface&>(*this);
 
-    // Initial perturbation amount
-    vector perturbVec(smallVec);
-
-    while (true)
-    {
-        // Start tracking from last hit.
-        point pt = hits.last().hitPoint() + perturbVec;
-
-        if (((pt-start)&dirVec) > magSqrDirVec)
-        {
-            return;
-        }
-
-        // See if any intersection between pt and end
-        pointIndexHit inter = octree.findLine(pt, end);
-
-        if (!inter.hit())
-        {
-            return;
-        }
-
-        // Check if already found this intersection
-        bool duplicateHit = false;
-        forAllReverse(hits, i)
-        {
-            if (hits[i].index() == inter.index())
-            {
-                duplicateHit = true;
-                break;
-            }
-        }
-
-
-        if (duplicateHit)
-        {
-            // Hit same triangle again. Increase perturbVec and try again.
-            perturbVec *= 2;
-        }
-        else
-        {
-            // Proper hit
-            hits.append(inter);
-            // Restore perturbVec
-            perturbVec = smallVec;
-        }
-    }
+    calcBounds(s, bb, nPoints);
 }
 
 
-void Foam::triSurfaceMesh::calcBounds(boundBox& bb, label& nPoints) const
+template <class PatchType>
+void Foam::triSurfaceMesh::calcBounds
+(
+    const PatchType& patch,
+    boundBox& bb,
+    label& nPoints
+) const
 {
     // Unfortunately nPoints constructs meshPoints() so do compact version
     // ourselves
-
-    const triSurface& s = static_cast<const triSurface&>(*this);
 
     PackedBoolList pointIsUsed(points()().size());
 
     nPoints = 0;
     bb = boundBox::invertedBox;
 
-    forAll(s, faceI)
+    forAll(patch, faceI)
     {
-        const triSurface::FaceType& f = s[faceI];
+        const typename PatchType::FaceType& f = patch[faceI];
 
         forAll(f, fp)
         {
@@ -579,6 +528,118 @@ Foam::triSurfaceMesh::tree() const
 }
 
 
+const Foam::PtrList
+<
+    Foam::indexedOctree
+    <
+        Foam::triSurfaceMesh::treeDataTriSurfacePrimitivePatch
+    >
+>&
+Foam::triSurfaceMesh::treeByRegion() const
+{
+    if (treeByRegion_.empty())
+    {
+        Map<label> regionSizes;
+        forAll(*this, fI)
+        {
+            const label regionI = this->triSurface::operator[](fI).region();
+
+            regionSizes(regionI)++;
+        }
+
+        label nRegions = regionSizes.size();
+
+        indirectRegionPatches_.setSize(nRegions);
+        treeByRegion_.setSize(nRegions);
+
+        labelListList regionsAddressing(nRegions);
+
+        forAll(regionsAddressing, regionI)
+        {
+            regionsAddressing[regionI] = labelList(regionSizes[regionI], -1);
+        }
+
+        labelList nFacesInRegions(nRegions, 0);
+
+        forAll(*this, fI)
+        {
+            const label regionI = this->triSurface::operator[](fI).region();
+
+            regionsAddressing[regionI][nFacesInRegions[regionI]++] = fI;
+        }
+
+        forAll(regionsAddressing, regionI)
+        {
+            scalar oldTol =
+                indexedOctree<treeDataTriSurfacePrimitivePatch>::perturbTol();
+            indexedOctree<treeDataTriSurfacePrimitivePatch>::perturbTol() =
+                tolerance_;
+
+            indirectRegionPatches_.set
+            (
+                regionI,
+                new indirectTriSurfacePrimitivePatch
+                (
+                    IndirectList<labelledTri>
+                    (
+                        *this,
+                        regionsAddressing[regionI]
+                    ),
+                    points()
+                )
+            );
+
+            // Calculate bb without constructing local point numbering.
+            treeBoundBox bb;
+            label nPoints;
+            calcBounds(indirectRegionPatches_[regionI], bb, nPoints);
+
+            if (nPoints != points()().size())
+            {
+                WarningIn("triSurfaceMesh::treeByRegion() const")
+                    << "Surface " << searchableSurface::name()
+                    << " does not have compact point numbering."
+                    << " Of " << points()().size() << " only " << nPoints
+                    << " are used. This might give problems in some routines."
+                    << endl;
+            }
+
+            // Random number generator. Bit dodgy since not exactly random ;-)
+            Random rndGen(65431);
+
+            // Slightly extended bb. Slightly off-centred just so on symmetric
+            // geometry there are fewer face/edge aligned items.
+            bb = bb.extend(rndGen, 1e-4);
+            bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+            bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+
+            treeByRegion_.set
+            (
+                regionI,
+                new indexedOctree<treeDataTriSurfacePrimitivePatch>
+                (
+                    treeDataTriSurfacePrimitivePatch
+                    (
+                        true,
+                        indirectRegionPatches_[regionI],
+                        tolerance_
+                    ),
+                    bb,
+                    maxTreeDepth_,  // maxLevel
+                    10,             // leafsize
+                    3.0             // duplicity
+                )
+            );
+
+            indexedOctree<treeDataTriSurfacePrimitivePatch>::perturbTol() =
+                oldTol;
+        }
+    }
+
+    return treeByRegion_;
+}
+
+
 const Foam::indexedOctree<Foam::treeDataEdge>&
 Foam::triSurfaceMesh::edgeTree() const
 {
@@ -682,23 +743,96 @@ void Foam::triSurfaceMesh::findNearest
     List<pointIndexHit>& info
 ) const
 {
+    scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
+    indexedOctree<treeDataTriSurface>::perturbTol() = tolerance_;
+
     const indexedOctree<treeDataTriSurface>& octree = tree();
 
     info.setSize(samples.size());
-
-    scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
-    indexedOctree<treeDataTriSurface>::perturbTol() = tolerance_;
 
     forAll(samples, i)
     {
         static_cast<pointIndexHit&>(info[i]) = octree.findNearest
         (
             samples[i],
-            nearestDistSqr[i]
+            nearestDistSqr[i],
+            treeDataTriSurface::findNearestOp(octree)
         );
     }
 
     indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;
+}
+
+
+void Foam::triSurfaceMesh::findNearest
+(
+    const pointField& samples,
+    const scalarField& nearestDistSqr,
+    const labelList& regionIndices,
+    List<pointIndexHit>& info
+) const
+{
+    if (regionIndices.empty())
+    {
+        findNearest(samples, nearestDistSqr, info);
+    }
+    else
+    {
+        scalar oldTol =
+            indexedOctree<treeDataTriSurfacePrimitivePatch>::perturbTol();
+        indexedOctree<treeDataTriSurfacePrimitivePatch>::perturbTol() =
+            tolerance_;
+
+        const PtrList<indexedOctree<treeDataTriSurfacePrimitivePatch> >&
+            octrees = treeByRegion();
+
+        info.setSize(samples.size());
+
+        forAll(octrees, treeI)
+        {
+            if (findIndex(regionIndices, treeI) == -1)
+            {
+                continue;
+            }
+
+            const indexedOctree<treeDataTriSurfacePrimitivePatch>& octree =
+                octrees[treeI];
+
+            forAll(samples, i)
+            {
+//                if (!octree.bb().contains(samples[i]))
+//                {
+//                    continue;
+//                }
+
+                pointIndexHit currentRegionHit = octree.findNearest
+                (
+                    samples[i],
+                    nearestDistSqr[i],
+                    treeDataTriSurfacePrimitivePatch::findNearestOp(octree)
+                );
+
+                if
+                (
+                    currentRegionHit.hit()
+                 &&
+                    (
+                        !info[i].hit()
+                     ||
+                        (
+                            magSqr(currentRegionHit.hitPoint() - samples[i])
+                          < magSqr(info[i].hitPoint() - samples[i])
+                        )
+                    )
+                )
+                {
+                    info[i] = currentRegionHit;
+                }
+            }
+        }
+
+        indexedOctree<treeDataTriSurfacePrimitivePatch>::perturbTol() = oldTol;
+    }
 }
 
 
@@ -773,44 +907,38 @@ void Foam::triSurfaceMesh::findLineAll
     // Work array
     DynamicList<pointIndexHit, 1, 1> hits;
 
-    // Tolerances:
-    // To find all intersections we add a small vector to the last intersection
-    // This is chosen such that
-    // - it is significant (SMALL is smallest representative relative tolerance;
-    //   we need something bigger since we're doing calculations)
-    // - if the start-end vector is zero we still progress
-    const vectorField dirVec(end-start);
-    const vectorField smallVec
-    (
-        indexedOctree<treeDataTriSurface>::perturbTol()*dirVec
-      + vector(ROOTVSMALL,ROOTVSMALL,ROOTVSMALL)
-    );
+    DynamicList<label> shapeMask;
+
+    treeDataTriSurface::findAllIntersectOp allIntersectOp(octree, shapeMask);
 
     forAll(start, pointI)
     {
-        // See if any intersection between pt and end
-        pointIndexHit inter = octree.findLine(start[pointI], end[pointI]);
+        hits.clear();
+        shapeMask.clear();
 
-        if (inter.hit())
+        while (true)
         {
-            hits.clear();
-            hits.append(inter);
-
-            getNextIntersections
+            // See if any intersection between pt and end
+            pointIndexHit inter = octree.findLine
             (
-                octree,
                 start[pointI],
                 end[pointI],
-                smallVec[pointI],
-                hits
+                allIntersectOp
             );
 
-            info[pointI].transfer(hits);
+            if (inter.hit())
+            {
+                hits.append(inter);
+
+                shapeMask.append(inter.index());
+            }
+            else
+            {
+                break;
+            }
         }
-        else
-        {
-            info[pointI].clear();
-        }
+
+        info[pointI].transfer(hits);
     }
 
     indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;

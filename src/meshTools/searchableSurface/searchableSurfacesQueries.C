@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -324,9 +324,8 @@ bool Foam::searchableSurfacesQueries::morphTet
 void Foam::searchableSurfacesQueries::mergeHits
 (
     const point& start,
-    const scalar mergeDist,
 
-    const label testI,                          // index of surface
+    const label testI,                    // index of surface
     const List<pointIndexHit>& surfHits,  // hits on surface
 
     labelList& allSurfaces,
@@ -338,7 +337,7 @@ void Foam::searchableSurfacesQueries::mergeHits
     scalarList surfDistSqr(surfHits.size());
     forAll(surfHits, i)
     {
-        surfDistSqr[i] = magSqr(surfHits[i].hitPoint()-start);
+        surfDistSqr[i] = magSqr(surfHits[i].hitPoint() - start);
     }
 
     forAll(surfDistSqr, i)
@@ -346,11 +345,7 @@ void Foam::searchableSurfacesQueries::mergeHits
         label index = findLower(allDistSqr, surfDistSqr[i]);
 
         // Check if equal to lower.
-        if
-        (
-            index >= 0
-         && (mag(allDistSqr[index]-surfDistSqr[i]) < mergeDist)
-        )
+        if (index >= 0)
         {
             // Same. Do not count.
             //Pout<< "point:" << surfHits[i].hitPoint()
@@ -361,12 +356,9 @@ void Foam::searchableSurfacesQueries::mergeHits
         else
         {
             // Check if equal to higher
-            label next = index+1;
-            if
-            (
-                next < allDistSqr.size()
-             && (mag(allDistSqr[next]-surfDistSqr[i]) < mergeDist)
-            )
+            label next = index + 1;
+
+            if (next < allDistSqr.size())
             {
                 //Pout<< "point:" << surfHits[i].hitPoint()
                 //    << " considered same as:" << allInfo[next].hitPoint()
@@ -510,21 +502,6 @@ void Foam::searchableSurfacesQueries::findAllIntersections
 
     if (surfacesToTest.size() > 1)
     {
-        // Small vector to increment start vector by to find next intersection
-        // along line. Constant factor added to make sure that start==end still
-        // ends iteration in findAllIntersections. Also SMALL is just slightly
-        // too small.
-        const vectorField smallVec
-        (
-            1E2*SMALL*(end-start)
-          + vector(ROOTVSMALL,ROOTVSMALL,ROOTVSMALL)
-        );
-
-        // Tolerance used to check whether points are equal. Note: used to
-        // compare distance^2. Note that we use the maximum possible tolerance
-        // (reached at intersections close to the end point)
-        const scalarField mergeDist(2*mag(smallVec)*mag(end-start));
-
         // Test the other surfaces and merge (according to distance from start).
         for (label testI = 1; testI < surfacesToTest.size(); testI++)
         {
@@ -541,7 +518,6 @@ void Foam::searchableSurfacesQueries::findAllIntersections
                 mergeHits
                 (
                     start[pointI],          // Current segment
-                    mergeDist[pointI],
 
                     testI,                  // Surface and its hits
                     surfHits[pointI],
@@ -670,6 +646,68 @@ void Foam::searchableSurfacesQueries::findNearest
         (
             samples,
             minDistSqr,
+            hitInfo
+        );
+
+        // Update minDistSqr and arguments
+        forAll(hitInfo, pointI)
+        {
+            if (hitInfo[pointI].hit())
+            {
+                minDistSqr[pointI] = magSqr
+                (
+                    hitInfo[pointI].hitPoint()
+                  - samples[pointI]
+                );
+                nearestInfo[pointI] = hitInfo[pointI];
+                nearestSurfaces[pointI] = testI;
+            }
+        }
+    }
+}
+
+
+// Find nearest. Return -1 or nearest point
+void Foam::searchableSurfacesQueries::findNearest
+(
+    const PtrList<searchableSurface>& allSurfaces,
+    const labelList& surfacesToTest,
+    const pointField& samples,
+    const scalarField& nearestDistSqr,
+    const labelList& regionIndices,
+    labelList& nearestSurfaces,
+    List<pointIndexHit>& nearestInfo
+)
+{
+    if (regionIndices.empty())
+    {
+        findNearest
+        (
+            allSurfaces,
+            surfacesToTest,
+            samples,
+            nearestDistSqr,
+            nearestSurfaces,
+            nearestInfo
+        );
+    }
+
+    // Initialise
+    nearestSurfaces.setSize(samples.size());
+    nearestSurfaces = -1;
+    nearestInfo.setSize(samples.size());
+
+    // Work arrays
+    scalarField minDistSqr(nearestDistSqr);
+    List<pointIndexHit> hitInfo(samples.size());
+
+    forAll(surfacesToTest, testI)
+    {
+        allSurfaces[surfacesToTest[testI]].findNearest
+        (
+            samples,
+            minDistSqr,
+            regionIndices,
             hitInfo
         );
 

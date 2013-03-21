@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,8 +46,10 @@ SourceFiles
 #include "objectRegistry.H"
 #include "indexedOctree.H"
 #include "treeDataTriSurface.H"
+#include "treeDataPrimitivePatch.H"
 #include "treeDataEdge.H"
 #include "EdgeMap.H"
+#include "triSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -66,6 +68,18 @@ class triSurfaceMesh
 {
 private:
 
+    // Private typedefs
+
+        typedef PrimitivePatch
+        <
+            labelledTri,
+            IndirectList,
+            const pointField&
+        > indirectTriSurfacePrimitivePatch;
+
+        typedef treeDataPrimitivePatch<indirectTriSurfacePrimitivePatch>
+            treeDataTriSurfacePrimitivePatch;
+
     // Private member data
 
         //- Optional tolerance to use in searches
@@ -80,6 +94,13 @@ private:
 
         //- Search tree (triangles)
         mutable autoPtr<indexedOctree<treeDataTriSurface> > tree_;
+
+        mutable PtrList<indirectTriSurfacePrimitivePatch>
+            indirectRegionPatches_;
+
+        //- Search tree for each region
+        mutable PtrList<indexedOctree<treeDataTriSurfacePrimitivePatch> >
+            treeByRegion_;
 
         //- Search tree for boundary edges.
         mutable autoPtr<indexedOctree<treeDataEdge> > edgeTree_;
@@ -138,8 +159,17 @@ private:
 
 protected:
 
-        //- Calculate (number of)used points and their bounding box
+        //- Calculate (number of) used points and their bounding box
         void calcBounds(boundBox& bb, label& nPoints) const;
+
+        template <class PatchType>
+        void calcBounds
+        (
+            const PatchType& patch,
+            boundBox& bb,
+            label& nPoints
+        ) const;
+
 
 public:
 
@@ -176,8 +206,12 @@ public:
         //- Move points
         virtual void movePoints(const pointField&);
 
-        //- Demand driven contruction of octree
+        //- Demand driven construction of octree
         const indexedOctree<treeDataTriSurface>& tree() const;
+
+        //- Demand driven construction of octree by region
+        const PtrList<indexedOctree<treeDataTriSurfacePrimitivePatch> >&
+        treeByRegion() const;
 
         //- Demand driven contruction of octree for boundary edges
         const indexedOctree<treeDataEdge>& edgeTree() const;
@@ -211,6 +245,14 @@ public:
             (
                 const pointField& sample,
                 const scalarField& nearestDistSqr,
+                List<pointIndexHit>&
+            ) const;
+
+            virtual void findNearest
+            (
+                const pointField& sample,
+                const scalarField& nearestDistSqr,
+                const labelList& regionIndices,
                 List<pointIndexHit>&
             ) const;
 
