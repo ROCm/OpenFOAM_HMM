@@ -28,6 +28,11 @@ Description
     Extracts and writes surface features to file. All but the basic feature
     extraction is WIP.
 
+    Curvature calculation is an implementation of the algorithm from:
+
+      "Estimating Curvatures and their Derivatives on Triangle Meshes"
+      by S. Rusinkiewicz
+
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
@@ -46,129 +51,383 @@ Description
 #include "treeDataEdge.H"
 #include "unitConversion.H"
 #include "plane.H"
-
-#ifdef ENABLE_CURVATURE
-#include "buildCGALPolyhedron.H"
-#include "CGALPolyhedronRings.H"
-#include <CGAL/Monge_via_jet_fitting.h>
-#include <CGAL/Lapack/Linear_algebra_lapack.h>
-#include <CGAL/property_map.h>
-#endif
+#include "tensor2D.H"
+#include "symmTensor2D.H"
+#include "point.H"
+#include "triadField.H"
+#include "transform.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#ifdef ENABLE_CURVATURE
-scalarField calcCurvature(const triSurface& surf)
+scalar calcVertexNormalWeight
+(
+    const triFace& f,
+    const label pI,
+    const vector& fN,
+    const pointField& points
+)
 {
-    scalarField k(surf.points().size(), 0);
+    label index = findIndex(f, pI);
 
-    Polyhedron P;
-
-    buildCGALPolyhedron convert(surf);
-    P.delegate(convert);
-
-    // Info<< "Created CGAL Polyhedron with " << label(P.size_of_vertices())
-    //     << " vertices and " << label(P.size_of_facets())
-    //     << " facets. " << endl;
-
-    // The rest of this function adapted from
-    //     CGAL-3.7/examples/Jet_fitting_3/Mesh_estimation.cpp
-
-     //Vertex property map, with std::map
-    typedef std::map<Vertex*, int> Vertex2int_map_type;
-    typedef boost::associative_property_map< Vertex2int_map_type >
-        Vertex_PM_type;
-    typedef T_PolyhedralSurf_rings<Polyhedron, Vertex_PM_type > Poly_rings;
-
-    typedef CGAL::Monge_via_jet_fitting<Kernel>         Monge_via_jet_fitting;
-    typedef Monge_via_jet_fitting::Monge_form           Monge_form;
-
-    std::vector<Point_3> in_points;  //container for data points
-
-    // default parameter values and global variables
-    unsigned int d_fitting = 2;
-    unsigned int d_monge = 2;
-    unsigned int min_nb_points = (d_fitting + 1)*(d_fitting + 2)/2;
-
-    //initialize the tag of all vertices to -1
-    Vertex_iterator vitb = P.vertices_begin();
-    Vertex_iterator vite = P.vertices_end();
-
-    Vertex2int_map_type vertex2props;
-    Vertex_PM_type vpm(vertex2props);
-
-    CGAL_For_all(vitb, vite)
+    if (index == -1)
     {
-        put(vpm, &(*vitb), -1);
+        FatalErrorIn("calcVertexNormals()")
+            << "Point not in face" << abort(FatalError);
     }
 
-    vite = P.vertices_end();
+    const vector e1 = points[f[index]] - points[f[f.fcIndex(index)]];
+    const vector e2 = points[f[index]] - points[f[f.rcIndex(index)]];
 
-    label vertI = 0;
+    return mag(fN)/(magSqr(e1)*magSqr(e2) + VSMALL);
+}
 
-    for (vitb = P.vertices_begin(); vitb != vite; vitb++)
+
+point randomPointInPlane(const plane& p)
+{
+    // Perturb base point
+    const point& refPt = p.refPoint();
+
+    // ax + by + cz + d = 0
+    const FixedList<scalar, 4>& planeCoeffs = p.planeCoeffs();
+
+    const scalar perturbX = refPt.x() + 1e-3;
+    const scalar perturbY = refPt.y() + 1e-3;
+    const scalar perturbZ = refPt.z() + 1e-3;
+
+    if (mag(planeCoeffs[2]) < SMALL)
     {
-        //initialize
-        Vertex* v = &(*vitb);
-
-        //gather points around the vertex using rings
-        // From: gather_fitting_points(v, in_points, vpm);
+        if (mag(planeCoeffs[1]) < SMALL)
         {
-            std::vector<Vertex*> gathered;
-            in_points.clear();
+            const scalar x =
+                -1.0
+                *(
+                     planeCoeffs[3]
+                   + planeCoeffs[1]*perturbY
+                   + planeCoeffs[2]*perturbZ
+                 )/planeCoeffs[0];
 
-            Poly_rings::collect_enough_rings(v, min_nb_points, gathered, vpm);
-
-            //store the gathered points
-            std::vector<Vertex*>::iterator itb = gathered.begin();
-            std::vector<Vertex*>::iterator ite = gathered.end();
-
-            CGAL_For_all(itb, ite)
-            {
-                in_points.push_back((*itb)->point());
-            }
+            return point
+            (
+                x,
+                perturbY,
+                perturbZ
+            );
         }
 
-        //skip if the nb of points is to small
-        if ( in_points.size() < min_nb_points )
-        {
-            std::cerr
-                << "not enough pts for fitting this vertex"
-                << in_points.size()
-                << std::endl;
+        const scalar y =
+            -1.0
+            *(
+                 planeCoeffs[3]
+               + planeCoeffs[0]*perturbX
+               + planeCoeffs[2]*perturbZ
+             )/planeCoeffs[1];
 
+        return point
+        (
+            perturbX,
+            y,
+            perturbZ
+        );
+    }
+    else
+    {
+        const scalar z =
+            -1.0
+            *(
+                 planeCoeffs[3]
+               + planeCoeffs[0]*perturbX
+               + planeCoeffs[1]*perturbY
+             )/planeCoeffs[2];
+
+        return point
+        (
+            perturbX,
+            perturbY,
+            z
+        );
+    }
+}
+
+
+triadField calcVertexCoordSys
+(
+    const triSurface& surf,
+    const vectorField& pointNormals
+)
+{
+    const pointField& points = surf.points();
+    const Map<label>& meshPointMap = surf.meshPointMap();
+
+    triadField pointCoordSys(points.size());
+
+    forAll(points, pI)
+    {
+        const point& pt = points[pI];
+        const vector& normal = pointNormals[meshPointMap[pI]];
+
+        if (mag(normal) < SMALL)
+        {
+            pointCoordSys[meshPointMap[pI]] = triad::unset[0];
             continue;
         }
 
-        // perform the fitting
-        Monge_via_jet_fitting monge_fit;
+        plane p(pt, normal);
 
-        Monge_form monge_form = monge_fit
-        (
-            in_points.begin(),
-            in_points.end(),
-            d_fitting,
-            d_monge
-        );
+        // Pick random point in plane
+        vector dir1 = pt - randomPointInPlane(p);
+        dir1 /= mag(dir1);
 
-//        std::cout<< monge_form;;
-//        std::cout<< "condition number : "
-//                 << monge_fit.condition_number() << nl << std::endl;
+        vector dir2 = dir1 ^ normal;
+        dir2 /= mag(dir2);
 
-        // Use the maximum curvature to give smaller cell sizes later.
-        k[vertI++] =
-            max
-            (
-                mag(monge_form.principal_curvatures(0)),
-                mag(monge_form.principal_curvatures(1))
-            );
+        pointCoordSys[meshPointMap[pI]] = triad(dir1, dir2, normal);
     }
 
-    return k;
+    return pointCoordSys;
 }
-#endif
+
+
+vectorField calcVertexNormals(const triSurface& surf)
+{
+    // Weighted average of normals of faces attached to the vertex
+    // Weight = fA / (mag(e0)^2 * mag(e1)^2);
+
+    Info<< "Calculating vertex normals" << endl;
+
+    vectorField pointNormals(surf.nPoints(), vector::zero);
+
+    const pointField& points = surf.points();
+    const labelListList& pointFaces = surf.pointFaces();
+    const labelList& meshPoints = surf.meshPoints();
+
+    forAll(pointFaces, pI)
+    {
+        const labelList& pFaces = pointFaces[pI];
+
+        forAll(pFaces, fI)
+        {
+            const label faceI = pFaces[fI];
+            const triFace& f = surf[faceI];
+
+            vector fN = f.normal(points);
+
+            scalar weight = calcVertexNormalWeight
+            (
+                f,
+                meshPoints[pI],
+                fN,
+                points
+            );
+
+            pointNormals[pI] += weight*fN;
+        }
+
+        pointNormals[pI] /= mag(pointNormals[pI]) + VSMALL;
+    }
+
+    return pointNormals;
+}
+
+
+triSurfacePointScalarField calcCurvature
+(
+    const word& name,
+    const Time& runTime,
+    const triSurface& surf,
+    const vectorField& pointNormals,
+    const triadField& pointCoordSys
+)
+{
+    Info<< "Calculating face curvature" << endl;
+
+    const pointField& points = surf.points();
+    const labelList& meshPoints = surf.meshPoints();
+    const Map<label>& meshPointMap = surf.meshPointMap();
+
+    triSurfacePointScalarField curvaturePointField
+    (
+        IOobject
+        (
+            name + ".curvature",
+            runTime.constant(),
+            "triSurface",
+            runTime,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        surf,
+        dimLength,
+        scalarField(points.size(), 0.0)
+    );
+
+    List<symmTensor2D> pointFundamentalTensors
+    (
+        points.size(),
+        symmTensor2D::zero
+    );
+
+    scalarList accumulatedWeights(points.size(), 0.0);
+
+    forAll(surf, fI)
+    {
+        const triFace& f = surf[fI];
+        const edgeList fEdges = f.edges();
+
+        // Calculate the edge vectors and the normal differences
+        vectorField edgeVectors(f.size(), vector::zero);
+        vectorField normalDifferences(f.size(), vector::zero);
+
+        forAll(fEdges, feI)
+        {
+            const edge& e = fEdges[feI];
+
+            edgeVectors[feI] = e.vec(points);
+            normalDifferences[feI] =
+               pointNormals[meshPointMap[e[0]]]
+             - pointNormals[meshPointMap[e[1]]];
+        }
+
+        // Set up a local coordinate system for the face
+        const vector& e0 = edgeVectors[0];
+        const vector eN = f.normal(points);
+        const vector e1 = (e0 ^ eN);
+
+        if (magSqr(eN) < ROOTVSMALL)
+        {
+            continue;
+        }
+
+        triad faceCoordSys(e0, e1, eN);
+        faceCoordSys.normalize();
+
+        // Construct the matrix to solve
+        scalarSymmetricSquareMatrix T(3, 3, 0);
+        scalarDiagonalMatrix Z(3, 0);
+
+        // Least Squares
+        for (label i = 0; i < 3; ++i)
+        {
+            scalar x = edgeVectors[i] & faceCoordSys[0];
+            scalar y = edgeVectors[i] & faceCoordSys[1];
+
+            T[0][0] += sqr(x);
+            T[1][0] += x*y;
+            T[1][1] += sqr(x) + sqr(y);
+            T[2][1] += x*y;
+            T[2][2] += sqr(y);
+
+            scalar dndx = normalDifferences[i] & faceCoordSys[0];
+            scalar dndy = normalDifferences[i] & faceCoordSys[1];
+
+            Z[0] += dndx*x;
+            Z[1] += dndx*y + dndy*x;
+            Z[2] += dndy*y;
+        }
+
+        // Perform Cholesky decomposition and back substitution.
+        // Decomposed matrix is in T and solution is in Z.
+        LUsolve(T, Z);
+        symmTensor2D secondFundamentalTensor(Z[0], Z[1], Z[2]);
+
+        // Loop over the face points adding the contribution of the face
+        // curvature to the points.
+        forAll(f, fpI)
+        {
+            const label patchPointIndex = meshPointMap[f[fpI]];
+
+            const triad& ptCoordSys = pointCoordSys[patchPointIndex];
+
+            if (!ptCoordSys.set())
+            {
+                continue;
+            }
+
+            // Rotate faceCoordSys to ptCoordSys
+            tensor rotTensor = rotationTensor(ptCoordSys[2], faceCoordSys[2]);
+            triad rotatedFaceCoordSys = rotTensor & tensor(faceCoordSys);
+
+            // Project the face curvature onto the point plane
+
+            vector2D cmp1
+            (
+                ptCoordSys[0] & rotatedFaceCoordSys[0],
+                ptCoordSys[0] & rotatedFaceCoordSys[1]
+            );
+            vector2D cmp2
+            (
+                ptCoordSys[1] & rotatedFaceCoordSys[0],
+                ptCoordSys[1] & rotatedFaceCoordSys[1]
+            );
+
+            tensor2D projTensor
+            (
+                cmp1,
+                cmp2
+            );
+
+            symmTensor2D projectedFundamentalTensor
+            (
+                projTensor.x() & (secondFundamentalTensor & projTensor.x()),
+                projTensor.x() & (secondFundamentalTensor & projTensor.y()),
+                projTensor.y() & (secondFundamentalTensor & projTensor.y())
+            );
+
+            // Calculate weight
+            // @todo Voronoi area weighting
+            scalar weight = calcVertexNormalWeight
+            (
+                f,
+                meshPoints[patchPointIndex],
+                f.normal(points),
+                points
+            );
+
+            // Sum contribution of face to this point
+            pointFundamentalTensors[patchPointIndex] +=
+                weight*projectedFundamentalTensor;
+
+            accumulatedWeights[patchPointIndex] += weight;
+        }
+
+        if (false)
+        {
+            Info<< "Points = " << points[f[0]] << " "
+                << points[f[1]] << " "
+                << points[f[2]] << endl;
+            Info<< "edgeVecs = " << edgeVectors[0] << " "
+                << edgeVectors[1] << " "
+                << edgeVectors[2] << endl;
+            Info<< "normDiff = " << normalDifferences[0] << " "
+                << normalDifferences[1] << " "
+                << normalDifferences[2] << endl;
+            Info<< "faceCoordSys = " << faceCoordSys << endl;
+            Info<< "T = " << T << endl;
+            Info<< "Z = " << Z << endl;
+        }
+    }
+
+    forAll(curvaturePointField, pI)
+    {
+        pointFundamentalTensors[pI] /= (accumulatedWeights[pI] + SMALL);
+
+        vector2D principalCurvatures = eigenValues(pointFundamentalTensors[pI]);
+
+        //scalar curvature =
+        //    (principalCurvatures[0] + principalCurvatures[1])/2;
+        scalar curvature = max
+        (
+            mag(principalCurvatures[0]),
+            mag(principalCurvatures[1])
+        );
+        //scalar curvature = principalCurvatures[0]*principalCurvatures[1];
+
+        curvaturePointField[meshPoints[pI]] = curvature;
+    }
+
+    return curvaturePointField;
+}
 
 
 bool edgesConnected(const edge& e1, const edge& e2)
@@ -1400,41 +1659,24 @@ int main(int argc, char *argv[])
         }
 
 
-#ifdef ENABLE_CURVATURE
         if (curvature)
         {
             Info<< nl << "Extracting curvature of surface at the points."
                 << endl;
 
-            scalarField k = calcCurvature(surf);
+            vectorField pointNormals = calcVertexNormals(surf);
+            triadField pointCoordSys = calcVertexCoordSys(surf, pointNormals);
 
-        // Modify the curvature values on feature edges and points to be zero.
-
-        //    forAll(newSet.featureEdges(), fEI)
-        //    {
-        //        const edge& e = surf.edges()[newSet.featureEdges()[fEI]];
-        //
-        //        k[surf.meshPoints()[e.start()]] = 0.0;
-        //        k[surf.meshPoints()[e.end()]] = 0.0;
-        //    }
-
-            triSurfacePointScalarField kField
+            triSurfacePointScalarField k = calcCurvature
             (
-                IOobject
-                (
-                    sFeatFileName + ".curvature",
-                    runTime.constant(),
-                    "triSurface",
-                    runTime,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
+                sFeatFileName,
+                runTime,
                 surf,
-                dimLength,
-                k
+                pointNormals,
+                pointCoordSys
             );
 
-            kField.write();
+            k.write();
 
             if (writeVTK)
             {
@@ -1451,7 +1693,6 @@ int main(int argc, char *argv[])
                 );
             }
         }
-#endif
 
 
         if (featureProximity)
