@@ -116,7 +116,8 @@ bool Foam::treeDataPrimitivePatch<PatchType>::findIntersection
             dir,
             faceCentres[index],
             points,
-            intersection::HALF_RAY
+            intersection::HALF_RAY,
+            shape.planarTol_
         );
     }
 

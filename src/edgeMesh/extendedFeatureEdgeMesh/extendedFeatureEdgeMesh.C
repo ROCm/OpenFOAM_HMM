@@ -165,7 +165,7 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh(const IOobject& io)
                 edgeDirections_[eI] = eds[eI].vec(pts);
             }
 
-            edgeDirections_ /= mag(edgeDirections_);
+            edgeDirections_ /= (mag(edgeDirections_) + SMALL);
         }
     }
 

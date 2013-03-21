@@ -136,7 +136,7 @@ Foam::pointField Foam::coupledPolyPatch::getAnchorPoints
 {
     pointField anchors(faces.size());
 
-    if (transform == COINCIDENTFULLMATCH)
+    if (transform != COINCIDENTFULLMATCH)
     {
         // Return the first point
         forAll(faces, faceI)
