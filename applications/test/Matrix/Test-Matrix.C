@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ License
 
 #include "scalarMatrices.H"
 #include "vector.H"
+#include "IFstream.H"
 
 using namespace Foam;
 
@@ -55,9 +56,9 @@ int main(int argc, char *argv[])
 
     Info<< hmm << endl;
 
-    //SquareMatrix<scalar> hmm3(Sin);
+    SquareMatrix<scalar> hmm3(Sin);
 
-    //Info<< hmm3 << endl;
+    Info<< hmm3 << endl;
 
     SquareMatrix<scalar> hmm4;
 
@@ -69,38 +70,6 @@ int main(int argc, char *argv[])
 
     hmm4 = hmm5;
     Info<< hmm5 << endl;
-
-    {
-        scalarSymmetricSquareMatrix symmMatrix(3, 3, 0);
-
-        symmMatrix(0, 0) = 4;
-        symmMatrix(1, 0) = 12;
-        symmMatrix(1, 1) = 37;
-        symmMatrix(2, 0) = -16;
-        symmMatrix(2, 1) = -43;
-        symmMatrix(2, 2) = 98;
-
-        Info<< "Symmetric Square Matrix = " << symmMatrix << endl;
-
-        Info<< "Inverse = " << inv(symmMatrix) << endl;
-        Info<< "Determinant = " << det(symmMatrix) << endl;
-
-        scalarSymmetricSquareMatrix symmMatrix2(symmMatrix);
-        LUDecompose(symmMatrix2);
-
-        Info<< "Inverse = " << invDecomposed(symmMatrix2) << endl;
-        Info<< "Determinant = " << detDecomposed(symmMatrix2) << endl;
-
-        scalarDiagonalMatrix rhs(3, 0);
-        rhs[0] = 1;
-        rhs[1] = 2;
-        rhs[2] = 3;
-
-        LUsolve(symmMatrix, rhs);
-
-        Info<< "Decomposition = " << symmMatrix << endl;
-        Info<< "Solution = " << rhs << endl;
-    }
 
     {
         scalarSquareMatrix squareMatrix(3, 3, 0);
@@ -125,6 +94,64 @@ int main(int argc, char *argv[])
         LUsolve(squareMatrix, rhs);
 
         Info<< "Decomposition = " << squareMatrix << endl;
+        Info<< "Solution = " << rhs << endl;
+    }
+
+    {
+        scalarSymmetricSquareMatrix symmMatrix(4, 4, 0);
+
+        symmMatrix(0, 0) = 3.44854;
+
+        symmMatrix(1, 0) = -2.70766;
+        symmMatrix(1, 1) = 5.49922;
+
+        symmMatrix(2, 0) = -0.96245;
+        symmMatrix(2, 1) = 2.40948;
+        symmMatrix(2, 2) = 1.56918;
+
+        symmMatrix(3, 0) = 1.95912;
+        symmMatrix(3, 1) = -3.46118;
+        symmMatrix(3, 2) = -1.01410;
+        symmMatrix(3, 3) = 3.24753;
+
+        Info<< "Symmetric Square Matrix = " << symmMatrix << endl;
+
+        Info<< "Inverse = " << inv(symmMatrix) << endl;
+        Info<< "Determinant = " << det(symmMatrix) << endl;
+
+        scalarSymmetricSquareMatrix symmMatrix2(symmMatrix);
+        LUDecompose(symmMatrix2);
+
+        Info<< "Inverse = " << invDecomposed(symmMatrix2) << endl;
+        Info<< "Determinant = " << detDecomposed(symmMatrix2) << endl;
+
+        scalarDiagonalMatrix rhs(4, 0);
+        rhs[0] = 1;
+        rhs[1] = 2;
+        rhs[2] = 3;
+        rhs[3] = 4;
+
+        LUsolve(symmMatrix, rhs);
+
+        Info<< "Decomposition = " << symmMatrix << endl;
+        Info<< "Solution = " << rhs << endl;
+    }
+
+    {
+        IFstream str("datafile");
+        scalarSymmetricSquareMatrix symmMatrix(str);
+        Info<< "Symmetric Square Matrix = " << symmMatrix << endl;
+
+        Info<< "Inverse = " << inv(symmMatrix) << endl;
+        Info<< "Determinant (ans = 0.24130) = " << det(symmMatrix) << endl;
+
+        scalarDiagonalMatrix rhs(4, 0);
+        rhs[0] = 1;
+        rhs[1] = 2;
+        rhs[2] = 3;
+        rhs[3] = 4;
+
+        LUsolve(symmMatrix, rhs);
         Info<< "Solution = " << rhs << endl;
     }
 
