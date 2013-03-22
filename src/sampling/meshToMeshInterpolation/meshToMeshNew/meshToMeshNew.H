@@ -41,6 +41,7 @@ SourceFiles
 #include "mapDistribute.H"
 #include "volFieldsFwd.H"
 #include "NamedEnum.H"
+#include "AMIPatchToPatchInterpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -71,11 +72,20 @@ private:
 
     // Private data
 
-        //- Name of source mesh region
-        const word srcRegionName_;
+        //- Reference to the source mesh
+        const polyMesh& srcRegion_;
 
-        //- Name of target mesh region
-        const word tgtRegionName_;
+        //- Reference to the target mesh
+        const polyMesh& tgtRegion_;
+
+        //- List of target patch IDs per source patch (local index)
+        List<label> srcPatchID_;
+
+        //- List of source patch IDs per target patch (local index)
+        List<label> tgtPatchID_;
+
+        //- List of AMIs between source and target patches
+        mutable PtrList<AMIPatchToPatchInterpolation> patchAMIs_;
 
         //- Source to target cell addressing
         labelListList srcToTgtCellAddr_;
@@ -230,8 +240,14 @@ private:
 
 
         //- Calculate the addressing between overalping regions of src and tgt
-        //  meshes - main driver function
+        //  meshes
         void calcAddressing(const polyMesh& src, const polyMesh& tgt);
+
+        //- Calculate - main driver function
+        void calculate();
+
+        //- Return the list of AMIs between source and target patches
+        const PtrList<AMIPatchToPatchInterpolation>& patchAMIs() const;
 
 
         // Parallel operations
@@ -306,7 +322,18 @@ public:
     (
         const polyMesh& src,
         const polyMesh& tgt,
-        const interpolationMethod& method
+        const interpolationMethod& method,
+        const bool interpAllPatches = true
+    );
+
+
+    //- Construct from source and target meshes
+    meshToMeshNew
+    (
+        const polyMesh& src,
+        const polyMesh& tgt,
+        const interpolationMethod& method,
+        const HashTable<word>& patchMap
     );
 
 
@@ -317,6 +344,12 @@ public:
     // Member Functions
 
         // Access
+
+            //- Return const access to the source mesh
+            inline const polyMesh& srcRegion() const;
+
+            //- Return const access to the target mesh
+            inline const polyMesh& tgtRegion() const;
 
             //- Return const access to the source to target cell addressing
             inline const labelListList& srcToTgtCellAddr() const;
@@ -432,60 +465,103 @@ public:
                 ) const;
 
 
-            // Volume field mapping
+            // Source-to-target volume field mapping
 
-                //- Interpolare a field with a defined operation.  Values
+                //- Interpolate a field with a defined operation.  Values
                 //  passed in via 'result' are used to initialise the return
-                //  value.  Optionally interpolate patch values
+                //  value
                 template<class Type, class CombineOp>
-                void interpolate
+                void mapSrcToTgt
                 (
                     const GeometricField<Type, fvPatchField, volMesh>& field,
                     const CombineOp& cop,
-                    GeometricField<Type, fvPatchField, volMesh>& result,
-                    const bool interpPatches = true
+                    GeometricField<Type, fvPatchField, volMesh>& result
                 ) const;
 
-                //- Interpolare a field with a defined operation.  The initial
-                //  values of the result are set to zero.  Optionally
-                //  interpolate patch values
+                //- Interpolate a field with a defined operation.  The initial
+                //  values of the result are set to zero
                 template<class Type, class CombineOp>
-                tmp<GeometricField<Type, fvPatchField, volMesh> > interpolate
+                tmp<GeometricField<Type, fvPatchField, volMesh> > mapSrcToTgt
                 (
                     const GeometricField<Type, fvPatchField, volMesh>& field,
-                    const CombineOp& cop,
-                    const bool interpPatches = true
+                    const CombineOp& cop
                 ) const;
 
-                //- Interpolare a tmp field with a defined operation.  The
-                //  initial values of the result are set to zero.  Optionally
-                //  interpolate patch values
+                //- Interpolate a tmp field with a defined operation.  The
+                //  initial values of the result are set to zero
                 template<class Type, class CombineOp>
-                tmp<GeometricField<Type, fvPatchField, volMesh> > interpolate
+                tmp<GeometricField<Type, fvPatchField, volMesh> > mapSrcToTgt
                 (
                     const tmp<GeometricField<Type, fvPatchField, volMesh> >&
                         tfield,
-                    const CombineOp& cop,
-                    const bool interpPatches = true
+                    const CombineOp& cop
                 ) const;
 
                 //- Convenience function to map a field with a default
-                //  operation (plusEqOp).  Optionally interpolate patch values
+                //  operation (plusEqOp)
                 template<class Type>
-                tmp<GeometricField<Type, fvPatchField, volMesh> > interpolate
+                tmp<GeometricField<Type, fvPatchField, volMesh> > mapSrcToTgt
                 (
-                    const GeometricField<Type, fvPatchField, volMesh>& field,
-                    const bool interpPatches = true
+                    const GeometricField<Type, fvPatchField, volMesh>& field
                 ) const;
 
                 //- Convenience function to map a tmp field with a default
-                //  operation (plusEqOp).  Optionally interpolate patch values
+                //  operation (plusEqOp)
                 template<class Type>
-                tmp<GeometricField<Type, fvPatchField, volMesh> > interpolate
+                tmp<GeometricField<Type, fvPatchField, volMesh> > mapSrcToTgt
+                (
+                    const tmp<GeometricField<Type, fvPatchField, volMesh> >&
+                        tfield
+                ) const;
+
+
+            // Target-to-source volume field mapping
+
+                //- Interpolate a field with a defined operation.  Values
+                //  passed in via 'result' are used to initialise the return
+                //  value
+                template<class Type, class CombineOp>
+                void mapTgtToSrc
+                (
+                    const GeometricField<Type, fvPatchField, volMesh>& field,
+                    const CombineOp& cop,
+                    GeometricField<Type, fvPatchField, volMesh>& result
+                ) const;
+
+                //- Interpolate a field with a defined operation.  The initial
+                //  values of the result are set to zero
+                template<class Type, class CombineOp>
+                tmp<GeometricField<Type, fvPatchField, volMesh> > mapTgtToSrc
+                (
+                    const GeometricField<Type, fvPatchField, volMesh>& field,
+                    const CombineOp& cop
+                ) const;
+
+                //- Interpolate a tmp field with a defined operation.  The
+                //  initial values of the result are set to zero
+                template<class Type, class CombineOp>
+                tmp<GeometricField<Type, fvPatchField, volMesh> > mapTgtToSrc
                 (
                     const tmp<GeometricField<Type, fvPatchField, volMesh> >&
                         tfield,
-                    const bool interpPatches = true
+                    const CombineOp& cop
+                ) const;
+
+                //- Convenience function to map a field with a default
+                //  operation (plusEqOp)
+                template<class Type>
+                tmp<GeometricField<Type, fvPatchField, volMesh> > mapTgtToSrc
+                (
+                    const GeometricField<Type, fvPatchField, volMesh>& field
+                ) const;
+
+                //- Convenience function to map a tmp field with a default
+                //  operation (plusEqOp)
+                template<class Type>
+                tmp<GeometricField<Type, fvPatchField, volMesh> > mapTgtToSrc
+                (
+                    const tmp<GeometricField<Type, fvPatchField, volMesh> >&
+                        tfield
                 ) const;
 };
 

@@ -25,7 +25,6 @@ License
 
 #include "fvMesh.H"
 #include "volFields.H"
-//#include "ops.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -55,31 +54,6 @@ namespace Foam
                 }
             }
         }
-    };
-
-    //- Combine operator for maps/interpolations
-    template<class Type, class CombineOp>
-    class combineBinaryOp
-    {
-        const CombineOp& cop_;
-
-        public:
-
-            combineBinaryOp(const CombineOp& cop)
-            :
-                cop_(cop)
-            {}
-
-            void operator()
-            (
-                Type& x,
-                const label faceI,
-                const Type& y,
-                const scalar weight
-            ) const
-            {
-                cop_(x, weight*y);
-            }
     };
 }
 
@@ -119,13 +93,13 @@ void Foam::meshToMeshNew::mapSrcToTgt
                 "List<Type>&"
             ") const"
         )   << "Supplied field size is not equal to target mesh size" << nl
-            << "    source mesh   = " << srcToTgtCellAddr_.size() << nl
-            << "    target mesh   = " << tgtToSrcCellAddr_.size() << nl
+            << "    source mesh    = " << srcToTgtCellAddr_.size() << nl
+            << "    target mesh    = " << tgtToSrcCellAddr_.size() << nl
             << "    supplied field = " << result.size()
             << abort(FatalError);
     }
 
-    combineBinaryOp<Type, CombineOp> cbop(cop);
+    multiplyWeightedOp<Type, CombineOp> cbop(cop);
 
     if (singleMeshProc_ == -1)
     {
@@ -247,13 +221,13 @@ void Foam::meshToMeshNew::mapTgtToSrc
                 "List<Type>&"
             ") const"
         )   << "Supplied field size is not equal to source mesh size" << nl
-            << "    source mesh   = " << srcToTgtCellAddr_.size() << nl
-            << "    target mesh   = " << tgtToSrcCellAddr_.size() << nl
+            << "    source mesh    = " << srcToTgtCellAddr_.size() << nl
+            << "    target mesh    = " << tgtToSrcCellAddr_.size() << nl
             << "    supplied field = " << result.size()
             << abort(FatalError);
     }
 
-    combineBinaryOp<Type, CombineOp> cbop(cop);
+    multiplyWeightedOp<Type, CombineOp> cbop(cop);
 
     if (singleMeshProc_ == -1)
     {
@@ -269,7 +243,6 @@ void Foam::meshToMeshNew::mapTgtToSrc
 
             if (tgtAddress.size())
             {
-//                result[cellI] = pTraits<Type>::zero;
                 result[cellI] *= (1.0 - sum(tgtWeight));
                 forAll(tgtAddress, i)
                 {
@@ -289,7 +262,6 @@ void Foam::meshToMeshNew::mapTgtToSrc
 
             if (tgtAddress.size())
             {
-//                result[cellI] = pTraits<Type>::zero;
                 result[cellI] *= (1.0 - sum(tgtWeight));
                 forAll(tgtAddress, i)
                 {
@@ -357,140 +329,75 @@ Foam::tmp<Foam::Field<Type> > Foam::meshToMeshNew::mapTgtToSrc
 
 
 template<class Type, class CombineOp>
-void Foam::meshToMeshNew::interpolate
+void Foam::meshToMeshNew::mapSrcToTgt
 (
     const GeometricField<Type, fvPatchField, volMesh>& field,
     const CombineOp& cop,
-    GeometricField<Type, fvPatchField, volMesh>& result,
-    const bool interpPatches
+    GeometricField<Type, fvPatchField, volMesh>& result
 ) const
 {
-    const fvMesh& mesh = field.mesh();
+    // clear any previously stored values
 
-    if (mesh.name() == srcRegionName_)
+
+    mapSrcToTgt(field, cop, result.internalField());
+
+    const PtrList<AMIPatchToPatchInterpolation>& AMIList = patchAMIs();
+
+    forAll(AMIList, i)
     {
-        mapSrcToTgt(field, cop, result.internalField());
-    }
-    else if (mesh.name() == tgtRegionName_)
-    {
-        mapTgtToSrc(field, cop, result.internalField());
-    }
-    else
-    {
-        FatalErrorIn
+        label srcPatchI = srcPatchID_[i];
+        label tgtPatchI = tgtPatchID_[i];
+
+        const Field<Type>& srcField = field.boundaryField()[srcPatchI];
+        Field<Type>& tgtField = result.boundaryField()[tgtPatchI];
+
+        tgtField = pTraits<Type>::zero;
+
+        AMIList[i].interpolateToTarget
         (
-            "void Foam::meshToMeshNew::interpolate"
-            "("
-                "const GeometricField<Type, fvPatchField, volMesh>&, "
-                "const CombineOp&, "
-                "GeometricField<Type, fvPatchField, volMesh>&, "
-                "const bool"
-            ") const"
-        )
-            << "Supplied field " << field.name() << " did not originate from "
-            << "either the source or target meshes used to create this "
-            << "interpolation object"
-            << abort(FatalError);
-    }
-
-    if (interpPatches)
-    {
-        switch (method_)
-        {
-            case imMap:
-            {
-                result.boundaryField() == field.boundaryField();
-                break;
-            }
-            default:
-            {
-                notImplemented
-                (
-                    "void Foam::meshToMeshNew::interpolate"
-                    "("
-                        "const GeometricField<Type, fvPatchField, volMesh>&, "
-                        "const CombineOp&, "
-                        "GeometricField<Type, fvPatchField, volMesh>&, "
-                        "const bool"
-                    ") const - non-conformal patches"
-                )
-
-                // do something...
-            }
-        }
+            srcField,
+            multiplyWeightedOp<Type, CombineOp>(cop),
+            tgtField
+        );
     }
 }
 
 
 template<class Type, class CombineOp>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
-Foam::meshToMeshNew::interpolate
+Foam::meshToMeshNew::mapSrcToTgt
 (
     const GeometricField<Type, fvPatchField, volMesh>& field,
-    const CombineOp& cop,
-    const bool interpPatches
+    const CombineOp& cop
 ) const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
-    const fvMesh& mesh = field.mesh();
+    const fvMesh& tgtMesh = static_cast<const fvMesh&>(tgtRegion_);
 
-    tmp<fieldType> tresult;
-
-    if (mesh.name() == srcRegionName_)
-    {
-        const fvMesh& tgtMesh =
-            mesh.time().lookupObject<fvMesh>(tgtRegionName_);
-
-        tresult =
-            new fieldType
+    tmp<fieldType> tresult
+    (
+        new fieldType
+        (
+            IOobject
             (
-                IOobject
-                (
-                    type() + "::interpolate(" + field.name() + ")",
-                    tgtMesh.time().timeName(),
-                    tgtMesh,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
+                type() + ".interpolate(" + field.name() + ")",
+                tgtMesh.time().timeName(),
                 tgtMesh,
-                dimensioned<Type>
-                (
-                    "zero",
-                    field.dimensions(),
-                    pTraits<Type>::zero
-                )
-            );
-
-         interpolate(field, cop, tresult(), interpPatches);
-    }
-    else if (mesh.name() == tgtRegionName_)
-    {
-        const fvMesh& srcMesh =
-            mesh.time().lookupObject<fvMesh>(srcRegionName_);
-
-        tresult =
-            new fieldType
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            tgtMesh,
+            dimensioned<Type>
             (
-                IOobject
-                (
-                    type() + "::interpolate(" + field.name() + ")",
-                    srcMesh.time().timeName(),
-                    srcMesh,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                srcMesh,
-                dimensioned<Type>
-                (
-                    "zero",
-                    field.dimensions(),
-                    pTraits<Type>::zero
-                )
-            );
+                "zero",
+                field.dimensions(),
+                pTraits<Type>::zero
+            )
+        )
+    );
 
-         interpolate(field, cop, tresult(), interpPatches);
-    }
+    mapSrcToTgt(field, cop, tresult());
 
     return tresult;
 }
@@ -498,44 +405,141 @@ Foam::meshToMeshNew::interpolate
 
 template<class Type, class CombineOp>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
-Foam::meshToMeshNew::interpolate
+Foam::meshToMeshNew::mapSrcToTgt
 (
     const tmp<GeometricField<Type, fvPatchField, volMesh> >& tfield,
-    const CombineOp& cop,
-    const bool interpPatches
+    const CombineOp& cop
 ) const
 {
-    return
-        interpolate
-        (
-            tfield(),
-            combineBinaryOp<Type, CombineOp>(cop),
-            interpPatches
-        );
+    return mapSrcToTgt(tfield(), cop);
 }
 
 
 template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
-Foam::meshToMeshNew::interpolate
+Foam::meshToMeshNew::mapSrcToTgt
+(
+    const GeometricField<Type, fvPatchField, volMesh>& field
+) const
+{
+    return mapSrcToTgt(field, plusEqOp<Type>());
+}
+
+
+template<class Type>
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
+Foam::meshToMeshNew::mapSrcToTgt
+(
+    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tfield
+) const
+{
+    return mapSrcToTgt(tfield(), plusEqOp<Type>());
+}
+
+
+template<class Type, class CombineOp>
+void Foam::meshToMeshNew::mapTgtToSrc
 (
     const GeometricField<Type, fvPatchField, volMesh>& field,
-    const bool interpPatches
+    const CombineOp& cop,
+    GeometricField<Type, fvPatchField, volMesh>& result
 ) const
 {
-    return interpolate(field, plusEqOp<Type>(), interpPatches);
+    mapTgtToSrc(field, cop, result.internalField());
+
+    const PtrList<AMIPatchToPatchInterpolation>& AMIList = patchAMIs();
+
+    forAll(AMIList, i)
+    {
+        label srcPatchI = srcPatchID_[i];
+        label tgtPatchI = tgtPatchID_[i];
+
+        Field<Type>& srcField = result.boundaryField()[srcPatchI];
+        const Field<Type>& tgtField = field.boundaryField()[tgtPatchI];
+
+        srcField = pTraits<Type>::zero;
+
+        AMIList[i].interpolateToSource
+        (
+            tgtField,
+            multiplyWeightedOp<Type, CombineOp>(cop),
+            srcField
+        );
+    }
+}
+
+
+template<class Type, class CombineOp>
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
+Foam::meshToMeshNew::mapTgtToSrc
+(
+    const GeometricField<Type, fvPatchField, volMesh>& field,
+    const CombineOp& cop
+) const
+{
+    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
+
+    const fvMesh& srcMesh = static_cast<const fvMesh&>(srcRegion_);
+
+    tmp<fieldType> tresult
+    (
+        new fieldType
+        (
+            IOobject
+            (
+                type() + ".interpolate(" + field.name() + ")",
+                srcMesh.time().timeName(),
+                srcMesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            srcMesh,
+            dimensioned<Type>
+            (
+                "zero",
+                field.dimensions(),
+                pTraits<Type>::zero
+            )
+        )
+    );
+
+    mapTgtToSrc(field, cop, tresult());
+
+    return tresult;
+}
+
+
+template<class Type, class CombineOp>
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
+Foam::meshToMeshNew::mapTgtToSrc
+(
+    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tfield,
+    const CombineOp& cop
+) const
+{
+    return mapTgtToSrc(tfield(), cop);
 }
 
 
 template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
-Foam::meshToMeshNew::interpolate
+Foam::meshToMeshNew::mapTgtToSrc
 (
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tfield,
-    const bool interpPatches
+    const GeometricField<Type, fvPatchField, volMesh>& field
 ) const
 {
-    return interpolate(tfield(), plusEqOp<Type>(), interpPatches);
+    return mapTgtToSrc(field, plusEqOp<Type>());
+}
+
+
+template<class Type>
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
+Foam::meshToMeshNew::mapTgtToSrc
+(
+    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tfield
+) const
+{
+    return mapTgtToSrc(tfield(), plusEqOp<Type>());
 }
 
 
