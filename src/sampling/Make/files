@@ -60,6 +60,9 @@ $(meshToMesh)/calculateMeshToMeshAddressing.C
 $(meshToMesh)/calculateMeshToMeshWeights.C
 
 meshToMeshNew = meshToMeshInterpolation/meshToMeshNew
+$(meshToMeshNew)/calcDirect.C
+$(meshToMeshNew)/calcMapNearest.C
+$(meshToMeshNew)/calcCellVolumeWeight.C
 $(meshToMeshNew)/meshToMeshNew.C
 $(meshToMeshNew)/meshToMeshNewParallelOps.C
 

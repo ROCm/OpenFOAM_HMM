@@ -28,6 +28,9 @@ Description
     Class to calculate the cell-addressing between two overlapping meshes
 
 SourceFiles
+    calcDirect.C
+    calcMapNearest.C
+    calcCellVolumeWeight.C
     meshToMeshNew.C
     meshToMeshNewTemplates.C
 
@@ -61,11 +64,12 @@ public:
         //- Enumeration specifying required accuracy
         enum interpolationMethod
         {
-            imMap,
+            imDirect,
+            imMapNearest,
             imCellVolumeWeight
         };
 
-        static const NamedEnum<interpolationMethod, 2>
+        static const NamedEnum<interpolationMethod, 3>
             interpolationMethodNames_;
 
 private:
@@ -149,8 +153,35 @@ private:
             label& tgtSeedI
         ) const;
 
+        //- Append target cell neihgbour cells to cellIDs list
+        void appendNbrCells
+        (
+            const label tgtCellI,
+            const polyMesh& tgt,
+            const DynamicList<label>& visitedTgtCells,
+            DynamicList<label>& nbrTgtCellIDs
+        ) const;
+
+        //- Normalise the interpolation weights
+        void normaliseWeights
+        (
+            const word& descriptor,
+            const scalarField& cellVolumes,
+            const labelListList& addr,
+            scalarListList& wght
+        ) const;
+
 
         // Direct (one-to-one) mapping
+
+            //- Main driver routine for direct mapping
+            void calcDirect
+            (
+                const polyMesh& src,
+                const polyMesh& tgt,
+                const label srcSeedI,
+                const label tgtSeedI
+            );
 
             //- Append to list of src mesh seed indices
             void appendToDirectSeeds
@@ -164,35 +195,63 @@ private:
                 label& tgtSeedI
             ) const;
 
-            //- Main driver routine for direct mapping
-            void calcDirect
+        // Nearest (non-conformal) mapping
+
+            //- Main driver routine for nearest-mapping routine
+            void calcMapNearest
             (
                 const polyMesh& src,
                 const polyMesh& tgt,
                 const label srcSeedI,
-                const label tgtSeedI
+                const label tgtSeedI,
+                const labelList& srcCellIDs,
+                boolList& mapFlag,
+                label& startSeedI
             );
 
-
-        // Indirect (non-conformal) mapping
-
-            //- Normalise the interpolation weights
-            void normaliseWeights
+            //- Find target cell index of cell closest to source cell
+            void findNearestCell
             (
-                const word& descriptor,
-                const scalarField& cellVolumes,
-                const labelListList& addr,
-                scalarListList& wght
-            ) const;
-
-            //- Append target cell neihgbour cells to cellIDs list
-            void appendNbrTgtCells
-            (
-                const label tgtCellI,
+                const polyMesh& src,
                 const polyMesh& tgt,
-                const DynamicList<label>& visitedTgtCells,
-                DynamicList<label>& nbrTgtCellIDs
+                const label srcCellI,
+                label& tgtCellI
+            );
+
+            //- Set the next pair of cells
+            void setNextNearestCells
+            (
+                label& startSeedI,
+                label& srcCellI,
+                label& tgtCellI,
+                boolList& mapFlag,
+                const polyMesh& src,
+                const polyMesh& tgt,
+                const labelList& srcCellIDs
+            );
+
+            //- Find source cell for target cell
+            label findMappedSrcCell
+            (
+                const polyMesh& tgt,
+                const label tgtCellI,
+                const List<DynamicList<label> >& tgtToSrc
             ) const;
+
+
+        // Cell volume weighted (non-conformal) interpolation
+
+            //- Main driver routine for cell volume weighted interpolation
+            void calcCellVolumeWeight
+            (
+                const polyMesh& src,
+                const polyMesh& tgt,
+                const label srcSeedI,
+                const label tgtSeedI,
+                const labelList& srcCellIDs,
+                boolList& mapFlag,
+                label& startSeedI
+            );
 
             //- Set the next cells in the advancing front algorithm
             void setNextCells
@@ -225,18 +284,6 @@ private:
                 const label srcCellI,
                 const label tgtCellI
             ) const;
-
-            //- Main driver routine for indirect mapping
-            void calcIndirect
-            (
-                const polyMesh& src,
-                const polyMesh& tgt,
-                const label srcSeedI,
-                const label tgtSeedI,
-                const labelList& srcCellIDs,
-                boolList& mapFlag,
-                label& startSeedI
-            );
 
 
         //- Calculate the addressing between overalping regions of src and tgt
