@@ -27,6 +27,15 @@ Class
 Description
     Class to calculate the cell-addressing between two overlapping meshes
 
+    Three methods are currently available:
+    - direct           : 1-to-1 mapping between meshes
+    - mapNearest       : assign nearest cell values without interpolation
+    - cellVolumeWeight : volume consistent mapping
+
+    The \c direct and \c cellVolumeWeight options are volume conservative,
+    whereas mapNearest is non-conservative.
+
+
 SourceFiles
     calcDirect.C
     calcMapNearest.C

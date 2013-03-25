@@ -52,12 +52,11 @@ void Foam::meshToMeshNew::calcMapNearest
 
     do
     {
-        srcToTgt[srcCellI].append(tgtCellI);
-
         // find nearest tgt cell
         findNearestCell(src, tgt, srcCellI, tgtCellI);
 
         // store src/tgt cell pair
+        srcToTgt[srcCellI].append(tgtCellI);
         tgtToSrc[tgtCellI].append(srcCellI);
 
         // mark source cell srcCellI and tgtCellI as matched
@@ -108,12 +107,7 @@ void Foam::meshToMeshNew::calcMapNearest
     forAll(tgtToSrcCellAddr_, i)
     {
         scalar v = tgtVc[i];
-        scalarList w(tgtToSrc[i].size(), v);
-        forAll(w, j)
-        {
-            w[j] /= w.size();
-        }
-        tgtToSrcCellWght_[i] = scalarList(w, v);
+        tgtToSrcCellWght_[i] = scalarList(tgtToSrc[i].size(), v);
         tgtToSrcCellAddr_[i].transfer(tgtToSrc[i]);
     }
 }
@@ -238,5 +232,6 @@ Foam::label Foam::meshToMeshNew::findMappedSrcCell
     // did not find any match - should not be possible to get here!
     return -1;
 }
+
 
 // ************************************************************************* //

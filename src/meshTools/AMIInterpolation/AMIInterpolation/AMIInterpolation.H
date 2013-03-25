@@ -469,7 +469,7 @@ public:
                 ) const;
 
 
-            //- Interpolate from target to source with supplied binary op
+            //- Interpolate from target to source with supplied op
             template<class Type, class CombineOp>
             tmp<Field<Type> > interpolateToSource
             (
@@ -477,8 +477,7 @@ public:
                 const CombineOp& cop
             ) const;
 
-            //- Interpolate from target tmp field to source with supplied
-            //  binary op
+            //- Interpolate from target tmp field to source with supplied op
             template<class Type, class CombineOp>
             tmp<Field<Type> > interpolateToSource
             (
