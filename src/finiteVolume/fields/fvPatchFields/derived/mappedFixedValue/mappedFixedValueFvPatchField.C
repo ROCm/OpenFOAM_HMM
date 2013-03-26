@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,6 @@ License
 #include "mappedFixedValueFvPatchField.H"
 #include "mappedPatchBase.H"
 #include "volFields.H"
-#include "interpolationCell.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,10 +42,7 @@ mappedFixedValueFvPatchField<Type>::mappedFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF),
-    fieldName_(iF.name()),
-    setAverage_(false),
-    average_(pTraits<Type>::zero),
-    interpolationScheme_(interpolationCell<Type>::typeName)
+    mappedPatchFieldBase<Type>(this->mapper(p, iF), *this)
 {}
 
 
@@ -60,31 +56,8 @@ mappedFixedValueFvPatchField<Type>::mappedFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf, p, iF, mapper),
-    fieldName_(ptf.fieldName_),
-    setAverage_(ptf.setAverage_),
-    average_(ptf.average_),
-    interpolationScheme_(ptf.interpolationScheme_)
-{
-    if (!isA<mappedPatchBase>(this->patch().patch()))
-    {
-        FatalErrorIn
-        (
-            "mappedFixedValueFvPatchField<Type>::"
-            "mappedFixedValueFvPatchField\n"
-            "(\n"
-            "    const mappedFixedValueFvPatchField<Type>&,\n"
-            "    const fvPatch&,\n"
-            "    const Field<Type>&,\n"
-            "    const fvPatchFieldMapper&\n"
-            ")\n"
-        )   << "\n    patch type '" << p.type()
-            << "' not type '" << mappedPatchBase::typeName << "'"
-            << "\n    for patch " << p.name()
-            << " of field " << this->dimensionedInternalField().name()
-            << " in file " << this->dimensionedInternalField().objectPath()
-            << exit(FatalError);
-    }
-}
+    mappedPatchFieldBase<Type>(this->mapper(p, iF), *this, ptf)
+{}
 
 
 template<class Type>
@@ -96,39 +69,8 @@ mappedFixedValueFvPatchField<Type>::mappedFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF, dict),
-    fieldName_(dict.lookupOrDefault<word>("fieldName", iF.name())),
-    setAverage_(readBool(dict.lookup("setAverage"))),
-    average_(pTraits<Type>(dict.lookup("average"))),
-    interpolationScheme_(interpolationCell<Type>::typeName)
-{
-    if (!isA<mappedPatchBase>(this->patch().patch()))
-    {
-        FatalErrorIn
-        (
-            "mappedFixedValueFvPatchField<Type>::"
-            "mappedFixedValueFvPatchField\n"
-            "(\n"
-            "    const fvPatch& p,\n"
-            "    const DimensionedField<Type, volMesh>& iF,\n"
-            "    const dictionary& dict\n"
-            ")\n"
-        )   << "\n    patch type '" << p.type()
-            << "' not type '" << mappedPatchBase::typeName << "'"
-            << "\n    for patch " << p.name()
-            << " of field " << this->dimensionedInternalField().name()
-            << " in file " << this->dimensionedInternalField().objectPath()
-            << exit(FatalError);
-    }
-
-    const mappedPatchBase& mpp = refCast<const mappedPatchBase>
-    (
-        mappedFixedValueFvPatchField<Type>::patch().patch()
-    );
-    if (mpp.mode() == mappedPatchBase::NEARESTCELL)
-    {
-        dict.lookup("interpolationScheme") >> interpolationScheme_;
-    }
-}
+    mappedPatchFieldBase<Type>(this->mapper(p, iF), *this, dict)
+{}
 
 
 template<class Type>
@@ -138,10 +80,7 @@ mappedFixedValueFvPatchField<Type>::mappedFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf),
-    fieldName_(ptf.fieldName_),
-    setAverage_(ptf.setAverage_),
-    average_(ptf.average_),
-    interpolationScheme_(ptf.interpolationScheme_)
+    mappedPatchFieldBase<Type>(ptf)
 {}
 
 
@@ -153,64 +92,32 @@ mappedFixedValueFvPatchField<Type>::mappedFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf, iF),
-    fieldName_(ptf.fieldName_),
-    setAverage_(ptf.setAverage_),
-    average_(ptf.average_),
-    interpolationScheme_(ptf.interpolationScheme_)
+    mappedPatchFieldBase<Type>(this->mapper(this->patch(), iF), *this, ptf)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-const GeometricField<Type, fvPatchField, volMesh>&
-mappedFixedValueFvPatchField<Type>::sampleField() const
+const mappedPatchBase& mappedFixedValueFvPatchField<Type>::mapper
+(
+    const fvPatch& p,
+    const DimensionedField<Type, volMesh>& iF
+)
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
-
-    const mappedPatchBase& mpp = refCast<const mappedPatchBase>
-    (
-        mappedFixedValueFvPatchField<Type>::patch().patch()
-    );
-    const fvMesh& nbrMesh = refCast<const fvMesh>(mpp.sampleMesh());
-
-    if (mpp.sameRegion())
+    if (!isA<mappedPatchBase>(p.patch()))
     {
-        if (fieldName_ == this->dimensionedInternalField().name())
-        {
-            // Optimisation: bypass field lookup
-            return
-                dynamic_cast<const fieldType&>
-                (
-                    this->dimensionedInternalField()
-                );
-        }
-        else
-        {
-            const fvMesh& thisMesh = this->patch().boundaryMesh().mesh();
-            return thisMesh.lookupObject<fieldType>(fieldName_);
-        }
-    }
-    else
-    {
-        return nbrMesh.lookupObject<fieldType>(fieldName_);
-    }
-}
-
-
-template<class Type>
-const interpolation<Type>&
-mappedFixedValueFvPatchField<Type>::interpolator() const
-{
-    if (!interpolator_.valid())
-    {
-        interpolator_ = interpolation<Type>::New
+        FatalErrorIn
         (
-            interpolationScheme_,
-            sampleField()
-        );
+            "mappedFixedValueFvPatchField<Type>::mapper()"
+        )   << "\n    patch type '" << p.patch().type()
+            << "' not type '" << mappedPatchBase::typeName << "'"
+            << "\n    for patch " << p.patch().name()
+            << " of field " << iF.name()
+            << " in file " << iF.objectPath()
+            << exit(FatalError);
     }
-    return interpolator_();
+    return refCast<const mappedPatchBase>(p.patch());
 }
 
 
@@ -222,140 +129,7 @@ void mappedFixedValueFvPatchField<Type>::updateCoeffs()
         return;
     }
 
-    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
-
-    // Since we're inside initEvaluate/evaluate there might be processor
-    // comms underway. Change the tag we use.
-    int oldTag = UPstream::msgType();
-    UPstream::msgType() = oldTag + 1;
-
-    // Get the scheduling information from the mappedPatchBase
-    const mappedPatchBase& mpp = refCast<const mappedPatchBase>
-    (
-        mappedFixedValueFvPatchField<Type>::patch().patch()
-    );
-
-    const fvMesh& thisMesh = this->patch().boundaryMesh().mesh();
-    const fvMesh& nbrMesh = refCast<const fvMesh>(mpp.sampleMesh());
-
-    // Result of obtaining remote values
-    Field<Type> newValues;
-
-    switch (mpp.mode())
-    {
-        case mappedPatchBase::NEARESTCELL:
-        {
-            const mapDistribute& distMap = mpp.map();
-
-            if (interpolationScheme_ != interpolationCell<Type>::typeName)
-            {
-                // Send back sample points to the processor that holds the cell
-                vectorField samples(mpp.samplePoints());
-                distMap.reverseDistribute
-                (
-                    (mpp.sameRegion() ? thisMesh.nCells() : nbrMesh.nCells()),
-                    point::max,
-                    samples
-                );
-
-                const interpolation<Type>& interp = interpolator();
-
-                newValues.setSize(samples.size(), pTraits<Type>::max);
-                forAll(samples, cellI)
-                {
-                    if (samples[cellI] != point::max)
-                    {
-                        newValues[cellI] = interp.interpolate
-                        (
-                            samples[cellI],
-                            cellI
-                        );
-                    }
-                }
-            }
-            else
-            {
-                newValues = sampleField();
-            }
-
-            distMap.distribute(newValues);
-
-            break;
-        }
-        case mappedPatchBase::NEARESTPATCHFACE:
-        case mappedPatchBase::NEARESTPATCHFACEAMI:
-        {
-            const label nbrPatchID =
-                nbrMesh.boundaryMesh().findPatchID(mpp.samplePatch());
-
-            if (nbrPatchID < 0)
-            {
-                FatalErrorIn
-                (
-                    "void mappedFixedValueFvPatchField<Type>::updateCoeffs()"
-                )<< "Unable to find sample patch " << mpp.samplePatch()
-                 << " in region " << mpp.sampleRegion()
-                 << " for patch " << this->patch().name() << nl
-                 << abort(FatalError);
-            }
-
-            const fieldType& nbrField = sampleField();
-
-            newValues = nbrField.boundaryField()[nbrPatchID];
-            mpp.distribute(newValues);
-
-            break;
-        }
-        case mappedPatchBase::NEARESTFACE:
-        {
-            Field<Type> allValues(nbrMesh.nFaces(), pTraits<Type>::zero);
-
-            const fieldType& nbrField = sampleField();
-
-            forAll(nbrField.boundaryField(), patchI)
-            {
-                const fvPatchField<Type>& pf =
-                    nbrField.boundaryField()[patchI];
-                label faceStart = pf.patch().start();
-
-                forAll(pf, faceI)
-                {
-                    allValues[faceStart++] = pf[faceI];
-                }
-            }
-
-            mpp.distribute(allValues);
-            newValues.transfer(allValues);
-
-            break;
-        }
-        default:
-        {
-            FatalErrorIn
-            (
-                "mappedFixedValueFvPatchField<Type>::updateCoeffs()"
-            )<< "Unknown sampling mode: " << mpp.mode()
-             << nl << abort(FatalError);
-        }
-    }
-
-    if (setAverage_)
-    {
-        Type averagePsi =
-            gSum(this->patch().magSf()*newValues)
-           /gSum(this->patch().magSf());
-
-        if (mag(averagePsi)/mag(average_) > 0.5)
-        {
-            newValues *= mag(average_)/mag(averagePsi);
-        }
-        else
-        {
-            newValues += (average_ - averagePsi);
-        }
-    }
-
-    this->operator==(newValues);
+    this->operator==(this->mappedField());
 
     if (debug)
     {
@@ -368,9 +142,6 @@ void mappedFixedValueFvPatchField<Type>::updateCoeffs()
             << endl;
     }
 
-    // Restore tag
-    UPstream::msgType() = oldTag;
-
     fixedValueFvPatchField<Type>::updateCoeffs();
 }
 
@@ -379,11 +150,7 @@ template<class Type>
 void mappedFixedValueFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    os.writeKeyword("fieldName") << fieldName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("setAverage") << setAverage_ << token::END_STATEMENT << nl;
-    os.writeKeyword("average") << average_ << token::END_STATEMENT << nl;
-    os.writeKeyword("interpolationScheme") << interpolationScheme_
-        << token::END_STATEMENT << nl;
+    mappedPatchFieldBase<Type>::write(os);
     this->writeEntry("value", os);
 }
 
