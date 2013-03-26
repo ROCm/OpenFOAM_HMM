@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,10 +68,9 @@ Foam::PatchTools::sortedEdgeFaces
 
             // Get opposite vertex for 0th face
             const Face& f = localFaces[faceNbs[0]];
-
             label fp0 = findIndex(f, e[0]);
             label fp1 = f.fcIndex(fp0);
-            label vertI = (f[fp1] != e[1] ? f[fp1] : f.fcIndex(fp1));
+            label vertI = (f[fp1] != e[1] ? f[fp1] : f[f.fcIndex(fp1)]);
 
             // Get vector normal both to e2 and to edge from opposite vertex
             // to edge (will be x-axis of our coordinate system)
@@ -92,7 +91,7 @@ Foam::PatchTools::sortedEdgeFaces
                 const Face& f = localFaces[faceNbs[nbI]];
                 label fp0 = findIndex(f, e[0]);
                 label fp1 = f.fcIndex(fp0);
-                label vertI = (f[fp1] != e[1] ? f[fp1] : f.fcIndex(fp1));
+                label vertI = (f[fp1] != e[1] ? f[fp1] : f[f.fcIndex(fp1)]);
 
                 vector vec = e2 ^ (localPoints[vertI] - edgePt);
                 vec /= mag(vec) + VSMALL;
