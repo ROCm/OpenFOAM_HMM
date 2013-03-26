@@ -48,8 +48,6 @@ void Foam::meshToMeshNew::calcMapNearest
     label srcCellI = srcSeedI;
     label tgtCellI = tgtSeedI;
 
-    boolList tgtMapFlag(tgt.nCells(), true);
-
     do
     {
         // find nearest tgt cell
@@ -61,7 +59,6 @@ void Foam::meshToMeshNew::calcMapNearest
 
         // mark source cell srcCellI and tgtCellI as matched
         mapFlag[srcCellI] = false;
-        tgtMapFlag[tgtCellI] = false;
 
         // accumulate intersection volume
         V_ += srcVc[srcCellI];
@@ -80,11 +77,44 @@ void Foam::meshToMeshNew::calcMapNearest
     }
     while (srcCellI >= 0);
 
-    // If there are more target cells than source cells, some target cells
-    // will not yet be mapped
-    forAll(tgtMapFlag, tgtCellI)
+
+    // for the case of multiple source cells per target cell, select the
+    // nearest source cell only and discard the others
+    const vectorField& srcCc = src.cellCentres();
+    const vectorField& tgtCc = tgt.cellCentres();
+
+    forAll(tgtToSrc, targetCellI)
     {
-        if (tgtMapFlag[tgtCellI])
+        if (tgtToSrc[targetCellI].size() > 1)
+        {
+            const vector& tgtC = tgtCc[tgtCellI];
+
+            DynamicList<label>& srcCells = tgtToSrc[targetCellI];
+
+            label srcCellI = srcCells[0];
+            scalar d = magSqr(tgtC - srcCc[srcCellI]);
+
+            for (label i = 1; i < srcCells.size(); i++)
+            {
+                label srcI = srcCells[i];
+                scalar dNew = magSqr(tgtC - srcCc[srcI]);
+                if (dNew < d)
+                {
+                    d = dNew;
+                    srcCellI = srcI;
+                }
+            }
+
+            srcCells.clear();
+            srcCells.append(srcCellI);
+        }
+    }
+
+    // If there are more target cells than source cells, some target cells
+    // might not yet be mapped
+    forAll(tgtToSrc, tgtCellI)
+    {
+        if (tgtToSrc[tgtCellI].empty())
         {
             label srcCellI = findMappedSrcCell(tgt, tgtCellI, tgtToSrc);
 
@@ -95,8 +125,6 @@ void Foam::meshToMeshNew::calcMapNearest
     }
 
     // transfer addressing into persistent storage
-    // note: always 1 target cell per source cell (srcToTgt)
-    //       can be multiple source cells per target cell (tgtToSrc)
     forAll(srcToTgtCellAddr_, i)
     {
         scalar v = srcVc[i];
