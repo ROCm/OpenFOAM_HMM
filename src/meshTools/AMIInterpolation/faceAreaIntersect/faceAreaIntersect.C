@@ -37,6 +37,8 @@ namespace Foam
     };
 }
 
+const Foam::NamedEnum<Foam::faceAreaIntersect::triangulationMode, 2>
+    Foam::faceAreaIntersect::triangulationModeNames_;
 
 Foam::scalar Foam::faceAreaIntersect::tol = 1e-6;
 
