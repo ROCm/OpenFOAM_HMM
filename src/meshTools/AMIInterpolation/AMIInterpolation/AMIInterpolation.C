@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -857,7 +857,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
 
         if (nFace)
         {
-            Info<< "AMI: Patch " << patchName << " weights min/max/average = "
+            IInfo<< "AMI: Patch " << patchName << " weights min/max/average = "
                 << gMin(wghtSum) << ", "
                 << gMax(wghtSum) << ", "
                 << gAverage(wghtSum) << endl;
@@ -1156,7 +1156,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     label srcSize = returnReduce(srcPatch.size(), sumOp<label>());
     label tgtSize = returnReduce(tgtPatch.size(), sumOp<label>());
 
-    Info<< "AMI: Creating addressing and weights between "
+    IInfo<< "AMI: Creating addressing and weights between "
         << srcSize << " source faces and " << tgtSize << " target faces"
         << endl;
 
@@ -1191,7 +1191,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     label srcSize = returnReduce(srcPatch.size(), sumOp<label>());
     label tgtSize = returnReduce(tgtPatch.size(), sumOp<label>());
 
-    Info<< "AMI: Creating addressing and weights between "
+    IInfo<< "AMI: Creating addressing and weights between "
         << srcSize << " source faces and " << tgtSize << " target faces"
         << endl;
 
@@ -1312,9 +1312,9 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
         (
             "AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation"
             "("
-            "    const AMIInterpolation<SourcePatch, TargetPatch>&, "
-            "    const labelList&, "
-            "    const labelList&"
+                "const AMIInterpolation<SourcePatch, TargetPatch>&, "
+                "const labelList&, "
+                "const labelList&"
             ")"
         )   << "Size mismatch." << nl
             << "Source patch size:" << fineAMI.srcAddress().size() << nl
@@ -1579,7 +1579,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
     if (debug)
     {
         Info<< "AMIInterpolation : Constructed addressing and weights" << nl
-            << "    triMode        :" << triMode_ << nl
+            << "    triMode        :"
+            << faceAreaIntersect::triangulationModeNames_[triMode_] << nl
             << "    singlePatchProc:" << singlePatchProc_ << nl
             << "    srcMagSf       :" << gSum(srcMagSf_) << nl
             << "    tgtMagSf       :" << gSum(tgtMagSf_) << nl

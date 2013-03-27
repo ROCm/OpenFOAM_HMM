@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,19 @@ License
 #include "faceAreaIntersect.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    template<>
+    const char* NamedEnum<faceAreaIntersect::triangulationMode, 2>::names[] =
+    {
+        "fan",
+        "mesh"
+    };
+}
+
+const Foam::NamedEnum<Foam::faceAreaIntersect::triangulationMode, 2>
+    Foam::faceAreaIntersect::triangulationModeNames_;
 
 Foam::scalar Foam::faceAreaIntersect::tol = 1e-6;
 

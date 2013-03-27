@@ -41,14 +41,16 @@ baffles
                 name            baffles;
                 type            wall;
 
+                    XXX 9.8;
                 patchFields
                 {
+
                     epsilon
                     {
                         type            epsilonWallFunction;
                         Cmu             0.09;
                         kappa           0.41;
-                        E               9.8;
+                        E               $Cmu; // XXX; //9.8;
                         value           uniform 0;
                     }
                     k

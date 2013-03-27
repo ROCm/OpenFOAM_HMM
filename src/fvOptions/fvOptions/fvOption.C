@@ -193,7 +193,8 @@ void Foam::fv::option::setCellSet()
                             meshToMeshNew::interpolationMethodNames_.read
                             (
                                 dict_.lookup("interpolationMethod")
-                            )
+                            ),
+                            false // not interpolating patches
                         )
                     );
                 }
