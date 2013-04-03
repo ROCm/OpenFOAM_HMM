@@ -563,6 +563,14 @@ public:
             scalarField& diag();
             scalarField& upper();
 
+            // Size with externally provided sizes (for constructing with 'fake'
+            // mesh in GAMG)
+
+                scalarField& lower(const label size);
+                scalarField& diag(const label nCoeffs);
+                scalarField& upper(const label nCoeffs);
+
+
             const scalarField& lower() const;
             const scalarField& diag() const;
             const scalarField& upper() const;

@@ -209,6 +209,53 @@ Foam::scalarField& Foam::lduMatrix::upper()
 }
 
 
+Foam::scalarField& Foam::lduMatrix::lower(const label nCoeffs)
+{
+    if (!lowerPtr_)
+    {
+        if (upperPtr_)
+        {
+            lowerPtr_ = new scalarField(*upperPtr_);
+        }
+        else
+        {
+            lowerPtr_ = new scalarField(nCoeffs, 0.0);
+        }
+    }
+
+    return *lowerPtr_;
+}
+
+
+Foam::scalarField& Foam::lduMatrix::diag(const label size)
+{
+    if (!diagPtr_)
+    {
+        diagPtr_ = new scalarField(size, 0.0);
+    }
+
+    return *diagPtr_;
+}
+
+
+Foam::scalarField& Foam::lduMatrix::upper(const label nCoeffs)
+{
+    if (!upperPtr_)
+    {
+        if (lowerPtr_)
+        {
+            upperPtr_ = new scalarField(*lowerPtr_);
+        }
+        else
+        {
+            upperPtr_ = new scalarField(nCoeffs, 0.0);
+        }
+    }
+
+    return *upperPtr_;
+}
+
+
 const Foam::scalarField& Foam::lduMatrix::lower() const
 {
     if (!lowerPtr_ && !upperPtr_)
@@ -320,33 +367,33 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<lduMatrix>& ip)
     }
 
 
-    if (hasLow)
-    {
-        os  << "lower contents:" << endl;
-        forAll(ldum.lower(), i)
-        {
-            os  << "i:" << i << "\t" << ldum.lower()[i] << endl;
-        }
-        os  << endl;
-    }
-    if (hasDiag)
-    {
-        os  << "diag contents:" << endl;
-        forAll(ldum.diag(), i)
-        {
-            os  << "i:" << i << "\t" << ldum.diag()[i] << endl;
-        }
-        os  << endl;
-    }
-    if (hasUp)
-    {
-        os  << "upper contents:" << endl;
-        forAll(ldum.upper(), i)
-        {
-            os  << "i:" << i << "\t" << ldum.upper()[i] << endl;
-        }
-        os  << endl;
-    }
+    //if (hasLow)
+    //{
+    //    os  << "lower contents:" << endl;
+    //    forAll(ldum.lower(), i)
+    //    {
+    //        os  << "i:" << i << "\t" << ldum.lower()[i] << endl;
+    //    }
+    //    os  << endl;
+    //}
+    //if (hasDiag)
+    //{
+    //    os  << "diag contents:" << endl;
+    //    forAll(ldum.diag(), i)
+    //    {
+    //        os  << "i:" << i << "\t" << ldum.diag()[i] << endl;
+    //    }
+    //    os  << endl;
+    //}
+    //if (hasUp)
+    //{
+    //    os  << "upper contents:" << endl;
+    //    forAll(ldum.upper(), i)
+    //    {
+    //        os  << "i:" << i << "\t" << ldum.upper()[i] << endl;
+    //    }
+    //    os  << endl;
+    //}
 
     os.check("Ostream& operator<<(Ostream&, const lduMatrix&");
 
