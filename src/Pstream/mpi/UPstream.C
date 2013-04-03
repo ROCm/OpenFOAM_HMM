@@ -441,9 +441,14 @@ void Foam::UPstream::freePstreamCommunicator(const label communicator)
     {
         if (PstreamGlobals::MPICommunicators_[communicator] != MPI_COMM_NULL)
         {
+            // Free communicator. Sets communicator to MPI_COMM_NULL
             MPI_Comm_free(&PstreamGlobals::MPICommunicators_[communicator]);
         }
-        MPI_Group_free(&PstreamGlobals::MPIGroups_[communicator]);
+        if (PstreamGlobals::MPIGroups_[communicator] != MPI_GROUP_NULL)
+        {
+            // Free greoup. Sets group to MPI_GROUP_NULL
+            MPI_Group_free(&PstreamGlobals::MPIGroups_[communicator]);
+        }
     }
 }
 
