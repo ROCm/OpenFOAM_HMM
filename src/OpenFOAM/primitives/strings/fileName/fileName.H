@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -152,6 +152,9 @@ public:
 
             //- Return file name (part beyond last /)
             word name() const;
+
+            //- Return file name (part beyond last /), subsitute for FOAM_CASE
+            string caseName() const;
 
             //- Return file name, optionally without extension
             word name(const bool noExt) const;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -200,6 +200,25 @@ Foam::word Foam::fileName::name() const
     else
     {
         return substr(i+1, npos);
+    }
+}
+
+
+Foam::string Foam::fileName::caseName() const
+{
+    string cName = *this;
+
+    const string caseStr(getEnv("FOAM_CASE"));
+
+    const size_type i = find(caseStr);
+
+    if (i == npos)
+    {
+        return cName;
+    }
+    else
+    {
+        return cName.replace(i, caseStr.size(), string("$FOAM_CASE"));
     }
 }
 
