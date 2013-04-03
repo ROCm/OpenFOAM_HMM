@@ -29,8 +29,16 @@ Group
 
 Description
     This boundary condition provides an interface to an external application.
-    Values are transferred as plain text files, comprising of the constituent
-    pieces of the `mixed' condition, i.e.
+    Values are transferred as plain text files, where OperFOAM data is written
+    as:
+
+        <value1> <surfaceNormalGradient1>
+        <value2> <surfaceNormalGradient2>
+        <value3> <surfaceNormalGradient3>
+        ...
+        <valueN> <surfaceNormalGradientN>
+
+    and received as the constituent pieces of the `mixed' condition, i.e.
 
         <value1> <gradient1> <valueFracion1>
         <value2> <gradient2> <valueFracion2>
@@ -63,6 +71,7 @@ Description
         Property     | Description             | Required    | Default value
         commsDir     | communications folder   | yes         |
         fileName     | transfer file name      | yes         |
+        collate      | collate all patch data into single file | yes |
         waitInterval | interval [s] between file checks | no | 1
         timeOut      | time after which error invoked [s] |no |100*waitInterval
         calcFrequency | calculation frequency  | no          | 1
@@ -76,6 +85,8 @@ Description
         type            externalCoupled;
         commsDir        "$FOAM_CASE/comms";
         fileName        data;
+        collate         yes;
+        calcFrequency   1;
     }
     \endverbatim
 
@@ -91,6 +102,7 @@ SourceFiles
 #define externalCoupledMixedFvPatchField_H
 
 #include "mixedFvPatchFields.H"
+#include "OFstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -109,7 +121,7 @@ class externalCoupledMixedFvPatchField
     public mixedFvPatchField<Type>
 {
 
-protected:
+private:
 
     // Private data
 
@@ -118,6 +130,9 @@ protected:
 
         //- Name of data file
         word fName_;
+
+        //- Flag to collate all data into single transfer file
+        bool collate_;
 
         //- Interval time between checking for return data [s]
         label waitInterval_;
@@ -131,14 +146,21 @@ protected:
         //- Log flag
         bool log_;
 
+        //- Master patch flag - controls when to pause/resume execution
+        //  Note: only valid when collate option is selected
+        bool master_;
+
 
     // Private Member Functions
 
+        //- Set the master flag when collate option is selected
+        void setMaster();
+
         //- Return the file path to the base communications folder
-        fileName baseDir() const;
+        fileName baseDir(const word& patchName = word::null) const;
 
         //- Write the geometry to the comms dir
-        void writeGeometry() const;
+        void writeGeometry(OFstream& osPoints, OFstream& osFaces) const;
 
         //- Return the file path to the lock file
         fileName lockFile() const;
@@ -149,11 +171,22 @@ protected:
         //- Remove lock file
         void removeLockFile() const;
 
-        //- Wait and remove lock file
-        void writeAndWait(const fileName& transferFile) const;
+        //- Wait for response from external source
+        void startWait() const;
+
+        //- Wait for response from external source
+        void wait() const;
 
         //- Initialise input stream for reading
         void initialiseRead(IFstream& is) const;
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Write data for external source - calls transferData
+        void writeData(const fileName& transferFile) const;
 
 
 public:
@@ -163,6 +196,9 @@ public:
 
     //- Name of lock file
     static word lockName;
+
+    //- Name of patch key, e.g. '# Patch:' when looking for start of patch data
+    static string patchKey;
 
 
     // Constructors
@@ -227,13 +263,50 @@ public:
         }
 
 
+    //- Destructor
+    virtual ~externalCoupledMixedFvPatchField();
+
+
     // Member functions
+
+        // Access
+
+            //- Return the log flag
+            bool log() const
+            {
+                return log_;
+            }
+
+            //- Return the collate flag
+            bool collate() const
+            {
+                return collate_;
+            }
+
+            //- Return the master flag
+            bool master() const
+            {
+                return master_;
+            }
+
+            //- Return the master flag
+            bool& master()
+            {
+                return master_;
+            }
+
 
         // Evaluation functions
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
 
+            //- Transfer data for external source
+            virtual void transferData(OFstream& os) const;
+
+
+        //- Write the geometry to the comms dir
+        void writeGeometry() const;
 
         //- Write
         virtual void write(Ostream&) const;

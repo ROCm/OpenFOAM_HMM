@@ -24,11 +24,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "externalCoupledMixedFvPatchField.H"
-#include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "IFstream.H"
-#include "OFstream.H"
 #include "globalIndex.H"
 #include "ListListOps.H"
 
@@ -37,11 +35,18 @@ License
 template<class Type>
 Foam::word Foam::externalCoupledMixedFvPatchField<Type>::lockName = "OpenFOAM";
 
+template<class Type>
+Foam::string
+Foam::externalCoupledMixedFvPatchField<Type>::patchKey = "# Patch: ";
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-Foam::fileName Foam::externalCoupledMixedFvPatchField<Type>::baseDir() const
+Foam::fileName Foam::externalCoupledMixedFvPatchField<Type>::baseDir
+(
+    const word& patchName
+) const
 {
     word regionName(this->dimensionedInternalField().mesh().name());
     if (regionName == polyMesh::defaultRegion)
@@ -49,12 +54,106 @@ Foam::fileName Foam::externalCoupledMixedFvPatchField<Type>::baseDir() const
         regionName = ".";
     }
 
-    return fileName(commsDir_/regionName/this->patch().name());
+    fileName result(commsDir_/regionName);
+    result.clean();
+
+    if (collate_)
+    {
+        return result;
+    }
+    else
+    {
+        if (patchName == word::null)
+        {
+            return fileName(result/this->patch().name());
+        }
+        else
+        {
+            return fileName(result/patchName);
+        }
+    }
 }
 
 
 template<class Type>
-void Foam::externalCoupledMixedFvPatchField<Type>::writeGeometry() const
+void Foam::externalCoupledMixedFvPatchField<Type>::setMaster()
+{
+    typedef GeometricField<Type, fvPatchField, volMesh> volFieldType;
+
+    const volFieldType& cvf =
+        static_cast<const volFieldType&>(this->dimensionedInternalField());
+
+    volFieldType& vf = const_cast<volFieldType&>(cvf);
+
+    typename volFieldType::GeometricBoundaryField& bf = vf.boundaryField();
+
+    if (collate_)
+    {
+        bool found = false;
+        forAll(bf, patchI)
+        {
+            if (isA<externalCoupledMixedFvPatchField<Type> >(bf[patchI]))
+            {
+                externalCoupledMixedFvPatchField<Type>& pf =
+                    refCast<externalCoupledMixedFvPatchField<Type> >
+                    (
+                        bf[patchI]
+                    );
+
+                // only attempt to change master flags of BCs that have not
+                // been set (or at least only the master)
+                if (pf.master())
+                {
+                    if (!found)
+                    {
+                        pf.master() = true;
+                        found = true;
+                    }
+                    else
+                    {
+                        pf.master() = false;
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        // check that collated flag is not set on any other patches
+        forAll(bf, patchI)
+        {
+            if (isA<externalCoupledMixedFvPatchField<Type> >(bf[patchI]))
+            {
+                const externalCoupledMixedFvPatchField<Type>& pf =
+                    refCast<const externalCoupledMixedFvPatchField<Type> >
+                    (
+                        bf[patchI]
+                    );
+
+                if (pf.collate())
+                {
+                    FatalErrorIn
+                    (
+                        "void Foam::externalCoupledMixedFvPatchField<Type>::"
+                        "setMaster()"
+                    )   << "All " << type() << " patches should either use "
+                        << "collate = true OR false, but not a mix of both"
+                        << exit(FatalError);
+                }
+            }
+        }
+
+        master_ = true;
+    }
+}
+
+
+template<class Type>
+void Foam::externalCoupledMixedFvPatchField<Type>::writeGeometry
+(
+    OFstream& osPoints,
+    OFstream& osFaces
+) const
 {
     int tag = Pstream::msgType() + 1;
 
@@ -88,21 +187,13 @@ void Foam::externalCoupledMixedFvPatchField<Type>::writeGeometry() const
 
     if (Pstream::master())
     {
-        OFstream osPoints(baseDir()/"patchPoints");
-        if (log_)
-        {
-            Info<< "writing patch points to: " << osPoints.name() << endl;
-        }
-
+        // write points
+        osPoints<< patchKey.c_str() << this->patch().name() << endl;
         osPoints<<
             ListListOps::combine<pointField>(allPoints, accessOp<pointField>());
 
-        OFstream osFaces(baseDir()/"patchFaces");
-        if (log_)
-        {
-            Info<< "writing patch faces to: " << osFaces.name() << endl;
-        }
-
+        // write faces
+        osFaces<< patchKey.c_str() << this->patch().name() << endl;
         osFaces<<
             ListListOps::combine<faceList>(allFaces, accessOp<faceList>());
     }
@@ -119,7 +210,7 @@ Foam::fileName Foam::externalCoupledMixedFvPatchField<Type>::lockFile() const
 template<class Type>
 void Foam::externalCoupledMixedFvPatchField<Type>::createLockFile() const
 {
-    if (!Pstream::master())
+    if (!master_ || !Pstream::master())
     {
         return;
     }
@@ -138,7 +229,7 @@ void Foam::externalCoupledMixedFvPatchField<Type>::createLockFile() const
 template<class Type>
 void Foam::externalCoupledMixedFvPatchField<Type>::removeLockFile() const
 {
-    if (!Pstream::master())
+    if (!master_ || !Pstream::master())
     {
         return;
     }
@@ -153,88 +244,59 @@ void Foam::externalCoupledMixedFvPatchField<Type>::removeLockFile() const
 
 
 template<class Type>
-void Foam::externalCoupledMixedFvPatchField<Type>::writeAndWait
-(
-    const fileName& transferFile
-) const
+void Foam::externalCoupledMixedFvPatchField<Type>::startWait() const
 {
-    if (log_)
+    if (collate_)
     {
-        Info<< type() << ": writing data to " << transferFile << endl;
-    }
+        // only wait on master patch
 
-    if (Pstream::parRun())
-    {
-        int tag = Pstream::msgType() + 1;
+        typedef GeometricField<Type, fvPatchField, volMesh> volFieldType;
 
-        List<Field<Type> > values(Pstream::nProcs());
-        values[Pstream::myProcNo()].setSize(this->refValue().size());
-        values[Pstream::myProcNo()] = this->refValue();
-        Pstream::gatherList(values, tag);
+        const volFieldType& cvf =
+            static_cast<const volFieldType&>(this->dimensionedInternalField());
 
-        List<Field<Type> > grads(Pstream::nProcs());
-        grads[Pstream::myProcNo()].setSize(this->refGrad().size());
-        grads[Pstream::myProcNo()] = this->refGrad();
-        Pstream::gatherList(grads, tag);
+        const typename volFieldType::GeometricBoundaryField& bf =
+            cvf.boundaryField();
 
-        List<scalarField> fracs(Pstream::nProcs());
-        fracs[Pstream::myProcNo()].setSize(this->valueFraction().size());
-        fracs[Pstream::myProcNo()] = this->valueFraction();
-        Pstream::gatherList(fracs, tag);
-
-        if (Pstream::master())
+        forAll(bf, patchI)
         {
-            OFstream os(transferFile);
-
-            forAll(values, procI)
+            if (isA<externalCoupledMixedFvPatchField<Type> >(bf[patchI]))
             {
-                const Field<Type>& v = values[procI];
-                const Field<Type>& g = grads[procI];
-                const scalarField& f = fracs[procI];
+                const externalCoupledMixedFvPatchField<Type>& pf =
+                    refCast<const externalCoupledMixedFvPatchField<Type> >
+                    (
+                        bf[patchI]
+                    );
 
-                forAll(v, faceI)
+                if (pf.master())
                 {
-                    os  << v[faceI] << token::SPACE
-                        << g[faceI] << token::SPACE
-                        << f[faceI] << nl;
+                    pf.wait();
+                    break;
                 }
             }
-
-            os.flush();
         }
     }
     else
     {
-        OFstream os(transferFile);
-
-        forAll(this->patch(), faceI)
-        {
-            os  << this->refValue()[faceI] << token::SPACE
-                << this->refGrad()[faceI] << token::SPACE
-                << this->valueFraction()[faceI] << nl;
-        }
-
-        os.flush();
+        wait();
     }
-
-    // remove lock file, signalling external source to execute
-    removeLockFile();
+}
 
 
-    if (log_)
-    {
-        Info<< type() << ": beginning wait for lock file " << lockFile()
-            << endl;
-    }
-
+template<class Type>
+void Foam::externalCoupledMixedFvPatchField<Type>::wait() const
+{
+    const fileName fName(lockFile());
     bool found = false;
     label totalTime = 0;
 
+    if (log_)
+    {
+        Info<< type() << ": beginning wait for lock file " << fName << endl;
+    }
+
     while (!found)
     {
-        sleep(waitInterval_);
-        totalTime += waitInterval_;
-
         if (log_)
         {
             Info<< type() << ": wait time = " << totalTime << endl;
@@ -244,31 +306,27 @@ void Foam::externalCoupledMixedFvPatchField<Type>::writeAndWait
         {
             FatalErrorIn
             (
-                "void Foam::externalCoupledMixedFvPatchField<Type>::"
-                "writeAndWait(const fileName&) const"
+                "void "
+                "Foam::externalCoupledMixedFvPatchField<Type>::wait() const"
             )
                 << "Wait time exceeded time out time of " << timeOut_
                 << " s" << abort(FatalError);
         }
 
-        IFstream is(lockFile());
+        IFstream is(fName);
 
         if (is.good())
         {
             if (log_)
             {
-                Info<< type() << ": found lock file " << lockFile() << endl;
+                Info<< type() << ": found lock file " << fName << endl;
             }
 
             found = true;
         }
-    }
 
-
-    if (Pstream::master())
-    {
-        // remove old data file from OpenFOAM
-        rm(transferFile);
+        sleep(waitInterval_);
+        totalTime += waitInterval_;
     }
 }
 
@@ -286,9 +344,40 @@ void Foam::externalCoupledMixedFvPatchField<Type>::initialiseRead
             "void Foam::externalCoupledMixedFvPatchField<Type>::"
             "initialiseRead()"
         )
-            << "Unable to open data transfer file " << is.name()
+            << "Unable to open data transfer file " << is.name().caseName()
             << " for patch " << this->patch().name()
             << exit(FatalError);
+    }
+
+    string line;
+
+    // scan forward to the line that starts '# Patch: <myPatchName>'
+    const string searchStr(patchKey + this->patch().name());
+
+    bool scan = true;
+    while (is.good() && scan)
+    {
+        is.getLine(line);
+
+        if (line.rfind(searchStr) != std::string::npos)
+        {
+            scan = false;
+        }
+    }
+
+    if (scan)
+    {
+        FatalErrorIn
+        (
+            "void Foam::externalCoupledMixedFvPatchField<Type>::"
+            "initialiseRead"
+            "("
+                "IFstream&"
+            ") const"
+        )
+            << "Unable to find data starting with " << searchStr
+            << " in file" << nl
+            << "    " << is.name().caseName() << abort(FatalError);
     }
 
     if (Pstream::parRun())
@@ -298,7 +387,6 @@ void Foam::externalCoupledMixedFvPatchField<Type>::initialiseRead
 
         if (this->patch().size())
         {
-            string line;
             const label offset = gi.offset(Pstream::myProcNo());
             for (label i = 0; i < offset; i++)
             {
@@ -311,14 +399,66 @@ void Foam::externalCoupledMixedFvPatchField<Type>::initialiseRead
                     FatalErrorIn
                     (
                         "void Foam::externalCoupledMixedFvPatchField<Type>::"
-                        "initialiseRead()"
+                        "initialiseRead"
+                        "("
+                            "IFstream&"
+                        ") const"
                     )
                         << "Unable to distribute parallel data for file "
-                        << is.name() << " for patch " << this->patch().name()
-                        << exit(FatalError);
+                        << is.name().caseName() << " for patch "
+                        << this->patch().name() << exit(FatalError);
                 }
             }
         }
+    }
+}
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class Type>
+void Foam::externalCoupledMixedFvPatchField<Type>::writeData
+(
+    const fileName& transferFile
+) const
+{
+    if (!master_)
+    {
+        return;
+    }
+
+    OFstream os(transferFile);
+
+    if (collate_)
+    {
+        typedef GeometricField<Type, fvPatchField, volMesh> volFieldType;
+
+        const volFieldType& cvf =
+            static_cast<const volFieldType&>(this->dimensionedInternalField());
+
+        volFieldType& vf = const_cast<volFieldType&>(cvf);
+
+        typename volFieldType::GeometricBoundaryField& bf = vf.boundaryField();
+
+        forAll(bf, patchI)
+        {
+            if (isA<externalCoupledMixedFvPatchField<Type> >(bf[patchI]))
+            {
+                const externalCoupledMixedFvPatchField<Type>& pf =
+                    refCast<const externalCoupledMixedFvPatchField<Type> >
+                    (
+                        bf[patchI]
+                    );
+
+                os  << patchKey.c_str() << pf.patch().name() << nl;
+                pf.transferData(os);
+            }
+        }
+    }
+    else
+    {
+        os  << patchKey.c_str() << this->patch().name() << nl;
+        transferData(os);
     }
 }
 
@@ -334,10 +474,13 @@ Foam::externalCoupledMixedFvPatchField<Type>::externalCoupledMixedFvPatchField
 :
     mixedFvPatchField<Type>(p, iF),
     commsDir_("unknown-commsDir"),
+    fName_("unknown-fName"),
+    collate_(false),
     waitInterval_(0),
     timeOut_(0),
     calcFrequency_(0),
-    log_(false)
+    log_(false),
+    master_(false)
 {
     this->refValue() = pTraits<Type>::zero;
     this->refGrad() = pTraits<Type>::zero;
@@ -357,10 +500,12 @@ Foam::externalCoupledMixedFvPatchField<Type>::externalCoupledMixedFvPatchField
     mixedFvPatchField<Type>(ptf, p, iF, mapper),
     commsDir_(ptf.commsDir_),
     fName_(ptf.fName_),
+    collate_(ptf.collate_),
     waitInterval_(ptf.waitInterval_),
     timeOut_(ptf.timeOut_),
     calcFrequency_(ptf.calcFrequency_),
-    log_(ptf.log_)
+    log_(ptf.log_),
+    master_(ptf.master_)
 {}
 
 
@@ -375,10 +520,12 @@ Foam::externalCoupledMixedFvPatchField<Type>::externalCoupledMixedFvPatchField
     mixedFvPatchField<Type>(p, iF),
     commsDir_(dict.lookup("commsDir")),
     fName_(dict.lookup("fileName")),
+    collate_(readBool(dict.lookup("collate"))),
     waitInterval_(dict.lookupOrDefault("waitInterval", 1)),
     timeOut_(dict.lookupOrDefault("timeOut", 100*waitInterval_)),
     calcFrequency_(dict.lookupOrDefault("calcFrequency", 1)),
-    log_(dict.lookupOrDefault("log", false))
+    log_(dict.lookupOrDefault("log", false)),
+    master_(true)
 {
     if (dict.found("value"))
     {
@@ -396,15 +543,14 @@ Foam::externalCoupledMixedFvPatchField<Type>::externalCoupledMixedFvPatchField
     {
         commsDir_.expand();
         mkDir(baseDir());
-        createLockFile();
     }
+
+    createLockFile();
 
     // initialise as a fixed value
     this->refValue() = *this;
     this->refGrad() = pTraits<Type>::zero;
     this->valueFraction() = 1.0;
-
-    writeGeometry();
 }
 
 
@@ -417,10 +563,12 @@ Foam::externalCoupledMixedFvPatchField<Type>::externalCoupledMixedFvPatchField
     mixedFvPatchField<Type>(ecmpf),
     commsDir_(ecmpf.commsDir_),
     fName_(ecmpf.fName_),
+    collate_(ecmpf.collate_),
     waitInterval_(ecmpf.waitInterval_),
     timeOut_(ecmpf.timeOut_),
     calcFrequency_(ecmpf.calcFrequency_),
-    log_(ecmpf.log_)
+    log_(ecmpf.log_),
+    master_(ecmpf.master_)
 {}
 
 
@@ -434,10 +582,20 @@ Foam::externalCoupledMixedFvPatchField<Type>::externalCoupledMixedFvPatchField
     mixedFvPatchField<Type>(ecmpf, iF),
     commsDir_(ecmpf.commsDir_),
     fName_(ecmpf.fName_),
+    collate_(ecmpf.collate_),
     waitInterval_(ecmpf.waitInterval_),
     timeOut_(ecmpf.timeOut_),
     calcFrequency_(ecmpf.calcFrequency_),
-    log_(ecmpf.log_)
+    log_(ecmpf.log_),
+    master_(ecmpf.master_)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template<class Type>
+Foam::externalCoupledMixedFvPatchField<Type>::
+~externalCoupledMixedFvPatchField()
 {}
 
 
@@ -451,12 +609,26 @@ void Foam::externalCoupledMixedFvPatchField<Type>::updateCoeffs()
         return;
     }
 
+    setMaster();
+
     if (this->db().time().timeIndex() % calcFrequency_ == 0)
     {
         fileName transferFile(baseDir()/fName_);
 
-        // write data for external source and wait for response
-        writeAndWait(transferFile + ".out");
+        // write data for external source
+        writeData(transferFile + ".out");
+
+        // remove lock file, signalling external source to execute
+        removeLockFile();
+
+        // wait for response
+        startWait();
+
+        if (master_ && Pstream::master())
+        {
+            // remove old data file from OpenFOAM
+            rm(transferFile + ".out");
+        }
 
         // read data passed back from external source
         IFstream is(transferFile + ".in");
@@ -481,7 +653,7 @@ void Foam::externalCoupledMixedFvPatchField<Type>::updateCoeffs()
                     "updateCoeffs()"
                 )
                     << "Insufficient data for patch " << this->patch().name()
-                    << " in file " << is.name() << exit(FatalError);
+                    << " in file " << is.name().caseName() << exit(FatalError);
             }
         }
 
@@ -494,12 +666,150 @@ void Foam::externalCoupledMixedFvPatchField<Type>::updateCoeffs()
 
 
 template<class Type>
+void Foam::externalCoupledMixedFvPatchField<Type>::transferData
+(
+    OFstream& os
+) const
+{
+    if (log_)
+    {
+        Info<< type() << ": writing data to " << os.name().caseName() << endl;
+    }
+
+    if (Pstream::parRun())
+    {
+        int tag = Pstream::msgType() + 1;
+
+        List<Field<scalar> > magSfs(Pstream::nProcs());
+        magSfs[Pstream::myProcNo()].setSize(this->patch().size());
+        magSfs[Pstream::myProcNo()] = this->patch().magSf();
+        Pstream::gatherList(magSfs, tag);
+
+        List<Field<Type> > values(Pstream::nProcs());
+        values[Pstream::myProcNo()].setSize(this->patch().size());
+        values[Pstream::myProcNo()] = this->refValue();
+        Pstream::gatherList(values, tag);
+
+        List<Field<Type> > snGrads(Pstream::nProcs());
+        snGrads[Pstream::myProcNo()].setSize(this->patch().size());
+        snGrads[Pstream::myProcNo()] = this->snGrad();
+        Pstream::gatherList(snGrads, tag);
+
+        if (Pstream::master())
+        {
+            forAll(values, procI)
+            {
+                const Field<scalar>& magSf = magSfs[procI];
+                const Field<Type>& value = values[procI];
+                const Field<Type>& snGrad = snGrads[procI];
+
+                forAll(magSf, faceI)
+                {
+                    os  << magSf[faceI] << token::SPACE
+                        << value[faceI] << token::SPACE
+                        << snGrad[faceI] << nl;
+                }
+            }
+
+            os.flush();
+        }
+    }
+    else
+    {
+        const Field<scalar>& magSf(this->patch().magSf());
+        const Field<Type>& value(this->refValue());
+        const Field<Type> snGrad(this->snGrad());
+
+        forAll(magSf, faceI)
+        {
+            os  << magSf[faceI] << token::SPACE
+                << value[faceI] << token::SPACE
+                << snGrad[faceI] << nl;
+        }
+
+        os.flush();
+    }
+}
+
+
+template<class Type>
+void Foam::externalCoupledMixedFvPatchField<Type>::writeGeometry() const
+{
+    typedef GeometricField<Type, fvPatchField, volMesh> volFieldType;
+
+    const volFieldType& cvf =
+        static_cast<const volFieldType&>(this->dimensionedInternalField());
+
+    const typename volFieldType::GeometricBoundaryField& bf =
+        cvf.boundaryField();
+
+    if (collate_)
+    {
+        OFstream osPoints(baseDir()/"patchPoints");
+        OFstream osFaces(baseDir()/"patchFaces");
+
+        if (log_)
+        {
+            Info<< "writing collated patch points to:" << nl
+                << "    " << osPoints.name().caseName() << endl;
+            Info<< "writing collated patch faces to:" << nl
+                << "    " << osFaces.name().caseName() << endl;
+        }
+
+        forAll(bf, patchI)
+        {
+            if (isA<externalCoupledMixedFvPatchField<Type> >(bf[patchI]))
+            {
+                const externalCoupledMixedFvPatchField<Type>& pf =
+                    refCast<const externalCoupledMixedFvPatchField<Type> >
+                    (
+                        bf[patchI]
+                    );
+
+                pf.writeGeometry(osPoints, osFaces);
+            }
+        }
+    }
+    else
+    {
+        forAll(bf, patchI)
+        {
+            if (isA<externalCoupledMixedFvPatchField<Type> >(bf[patchI]))
+            {
+                const word& patchName = this->patch().name();
+
+                OFstream osPoints(baseDir(patchName)/"patchPoints");
+                OFstream osFaces(baseDir(patchName)/"patchFaces");
+
+                if (log_)
+                {
+                    Info<< "writing patch " << patchName << " points to:" << nl
+                        << "    " << osPoints.name().caseName() << endl;
+                    Info<< "writing patch " << patchName << " faces to:" << nl
+                        << "    " << osFaces.name().caseName() << endl;
+                }
+
+                const externalCoupledMixedFvPatchField<Type>& pf =
+                    refCast<const externalCoupledMixedFvPatchField<Type> >
+                    (
+                        bf[patchI]
+                    );
+
+                pf.writeGeometry(osPoints, osFaces);
+            }
+        }
+    }
+}
+
+
+template<class Type>
 void Foam::externalCoupledMixedFvPatchField<Type>::write(Ostream& os) const
 {
     mixedFvPatchField<Type>::write(os);
 
     os.writeKeyword("commsDir") << commsDir_ << token::END_STATEMENT << nl;
     os.writeKeyword("fileName") << fName_ << token::END_STATEMENT << nl;
+    os.writeKeyword("collate") << collate_ << token::END_STATEMENT << nl;
     os.writeKeyword("waitInterval") << waitInterval_ << token::END_STATEMENT
         << nl;
     os.writeKeyword("timeOut") << timeOut_ << token::END_STATEMENT << nl;
