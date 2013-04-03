@@ -43,6 +43,8 @@ SourceFiles
 #include "primitiveFields.H"
 #include "runTimeSelectionTables.H"
 
+#include "boolList.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -60,15 +62,29 @@ class GAMGAgglomeration
 :
     public MeshObject<lduMesh, GAMGAgglomeration>
 {
-protected:
+//protected:
+public:
+
+    // Protected data types
+
+        //- Enumeration how to handle the mapping of flipped faces
+        enum faceMappingType
+        {
+            IGNORESIGN, // do not apply sign on flipped faces
+            APPLYSIGN,  // apply sign
+            DONTMAP     // do not sign mapped faces
+        };
 
     // Protected data
 
         //- Max number of levels
-        label maxLevels_;
+        const label maxLevels_;
 
         //- Number of cells in coarsest level
-        label nCellsInCoarsestLevel_;
+        const label nCellsInCoarsestLevel_;
+
+        //- Whether to agglomerate across processors
+        const bool processorAgglomerate_;
 
         //- The number of cells in each level
         labelList nCells_;
@@ -77,8 +93,9 @@ protected:
         //  Maps from the finer to the coarser level.
         PtrList<labelField> restrictAddressing_;
 
-        //- For cross-processor operation
-        autoPtr<mapDistribute> restrictDistributeMapPtr_;
+        //- The number of (coarse) faces in each level.
+        //  max(faceRestrictAddressing)+1.
+        labelList nFaces_;
 
         //- Face restriction addressing array.
         //  Maps from the finer to the coarser level.
@@ -88,8 +105,19 @@ protected:
         //  coarser cells to minus the corresponding coarser cell index minus 1.
         PtrList<labelList> faceRestrictAddressing_;
 
-        //- For cross-processor operation
-        autoPtr<mapDistribute> faceRestrictDistributeMapPtr_;
+        //- Face flip: for faces mapped to internal faces stores whether
+        //  the face is reversed or not. This is used to avoid having
+        //  to access the coarse mesh at all when mapping
+        PtrList<boolList> faceFlipMap_;
+
+        //- The number of (coarse) patch faces in each level.
+        //  max(patchFaceRestrictAddressing_)+1.
+        PtrList<labelList> nPatchFaces_;
+
+        //- Patch-local face restriction addressing array.
+        //  Maps from the finer to the coarser level. Always positive.
+        //  Extracted from GAMGInterfaces after agglomeration.
+        PtrList<labelListList> patchFaceRestrictAddressing_;
 
         //- Hierarchy of mesh addressing
         PtrList<lduPrimitiveMesh> meshLevels_;
@@ -109,7 +137,11 @@ protected:
             mutable PtrList<labelList> agglomProcIDs_;
 
             //- Combined mesh for all processors
-            mutable PtrList<lduPrimitiveMesh> procMeshLevels_;
+            //mutable PtrList<lduPrimitiveMesh> procMeshLevels_;
+
+            //mutable PtrList<labelField> procRestrictAddressing_;
+
+            //mutable PtrList<labelList> procFaceRestrictAddressing_;
 
             //- Communicator for given level
             mutable labelList procCommunicator_;
@@ -135,6 +167,48 @@ protected:
 
         //- Check the need for further agglomeration
         bool continueAgglomerating(const label nCoarseCells) const;
+
+        //- Collect and combine processor meshes onto procIDs[0]
+        static void gatherMeshes
+        (
+            const label comm,
+            const labelList& procAgglomMap,
+            const labelList& procIDs,
+            const label allMeshComm,
+
+            const lduMesh& myMesh,
+
+            autoPtr<lduPrimitiveMesh>& allMesh,
+            labelList& procCellOffsets,
+            labelListList& procFaceMap,
+            labelListList& procBoundaryMap,
+            labelListListList& procBoundaryFaceMap
+        );
+
+        ////- Gather value from all procIDs onto procIDs[0]
+        //static void gatherList
+        //(
+        //    const label comm,
+        //    const labelList& procIDs,
+        //
+        //    const label myVal,
+        //    labelList& vals,
+        //    const int tag = Pstream::msgType()
+        //);
+
+        //- Gather value from all procIDs onto procIDs[0]
+        template<class Type>
+        static void gatherList
+        (
+            const label comm,
+            const labelList& procIDs,
+
+            const Type& myVal,
+            List<Type>& allVals,
+            const int tag = Pstream::msgType()
+        );
+
+        void clearLevel(const label leveli);
 
 
     // Private Member Functions
@@ -231,6 +305,9 @@ public:
             //- Return LDU mesh of given level
             const lduMesh& meshLevel(const label leveli) const;
 
+            //- Do we have mesh for given level?
+            bool hasMeshLevel(const label leveli) const;
+
             //- Return LDU interface addressing of given level
             const lduInterfacePtrsList& interfaceLevel
             (
@@ -249,6 +326,37 @@ public:
                 return faceRestrictAddressing_[leveli];
             }
 
+            const labelListList& patchFaceRestrictAddressing(const label leveli)
+            const
+            {
+                return patchFaceRestrictAddressing_[leveli];
+            }
+
+            //- Return face flip map of given level
+            const boolList& faceFlipMap(const label leveli) const
+            {
+                return faceFlipMap_[leveli];
+            }
+
+            //- Return number of coarse cells (before processor agglomeration)
+            label nCells(const label leveli) const
+            {
+                return nCells_[leveli];
+            }
+
+            //- Return number of coarse faces (before processor agglomeration)
+            label nFaces(const label leveli) const
+            {
+                return nFaces_[leveli];
+            }
+
+            //- Return number of coarse patch faces (before processor
+            //  agglomeration)
+            const labelList& nPatchFaces(const label leveli) const
+            {
+                return nPatchFaces_[leveli];
+            }
+
 
         // Restriction and prolongation
 
@@ -258,7 +366,8 @@ public:
             (
                 Field<Type>& cf,
                 const Field<Type>& ff,
-                const label fineLevelIndex
+                const label fineLevelIndex,
+                const bool procAgglom
             ) const;
 
             //- Restrict (integrate by summation) face field
@@ -270,17 +379,82 @@ public:
                 const label fineLevelIndex
             ) const;
 
+            //- Restrict (integrate by summation) cell field
+            template<class Type>
+            void restrictField
+            (
+                Field<Type>& cf,
+                const Field<Type>& ff,
+                const labelList& fineToCoarse
+            ) const;
+
+            ////- Restrict (integrate by summation) face field
+            //template<class Type>
+            //void restrictFaceField
+            //(
+            //    Field<Type>& cf,
+            //    const Field<Type>& ff,
+            //    const label fineLevelIndex,
+            //    const bool dummy
+            //) const;
+
             //- Prolong (interpolate by injection) cell field
             template<class Type>
             void prolongField
             (
                 Field<Type>& ff,
                 const Field<Type>& cf,
-                const label coarseLevelIndex
+                const label coarseLevelIndex,
+                const bool procAgglom
             ) const;
 
 
-        // Procesor agglomeration
+        // Procesor agglomeration. Note that the mesh and agglomeration is
+        // stored per fineLevel (even though it is the coarse level mesh that
+        // has been agglomerated). This is just for convenience and consistency
+        // with GAMGSolver notation.
+
+            //- Whether to agglomerate across processors
+            bool processorAgglomerate() const
+            {
+                return processorAgglomerate_;
+            }
+
+
+
+            template<class Type>
+            static void mapField
+            (
+                const faceMappingType mapType,
+                const labelList& map,
+                const UList<Type>& fld,
+                UList<Type>& mappedFld
+            );
+
+            //- Helper: collect and order faces. Requires allFaceFld,
+            //  allPatchFld to have been sized already.
+            template<class Type>
+            static void gatherFaceField
+            (
+                const label comm,
+                const labelList& procIDs,
+
+                const faceMappingType mapType,
+
+                // Field on internal faces
+                const labelListList& procFaceMap,
+                const UList<Type>& faceFld,
+
+                // Field on patches faces
+                const labelListList& procPatchMap,
+                const labelListListList& procPatchFaceMap,
+                const UList<List<Type> >& patchFld,
+
+                List<Type>& allFaceFld,
+                List<List<Type> >& allPatchFld,
+                const int tag = Pstream::msgType()
+            );
+
 
             //- Collect and combine processor meshes into allMesh.
             //  - allMeshComm   : communicator for combined mesh.
@@ -290,43 +464,56 @@ public:
             //                    agglomerated processor.
             void procAgglomerateLduAddressing
             (
+                const label comm,
                 const labelList& procAgglomMap,
                 const labelList& procIDs,
                 const label allMeshComm,
                 const label levelIndex
-            ) const;
+            );
 
+            //- Collect and combine basic restriction addressing:
+            //      nCells_
+            //      restrictAddressing_
+            void procAgglomerateRestrictAddressing
+            (
+                const label comm,
+                const labelList& procIDs,
+                const label levelIndex
+            );
 
             //- Mapping from processor to agglomerated processor (global, all
-            //  processors have the same information)
-            const labelList& procAgglomMap(const label leveli) const;
+            //  processors have the same information). Note that level is
+            //  the fine, not the coarse, level index. This is to be
+            //  consistent with the way the restriction is stored
+            const labelList& procAgglomMap(const label fineLeveli) const;
 
             //- Set of processors to agglomerate. Element 0 is the
             //  master processor. (local, same only on those processor that
             //  agglomerate)
-            const labelList& agglomProcIDs(const label leveli) const;
+            const labelList& agglomProcIDs(const label fineLeveli) const;
 
             //- Check that level has combined mesh
-            bool hasProcMesh(const label leveli) const;
+            bool hasProcMesh(const label fineLeveli) const;
 
             //- Combined mesh
-            const lduMesh& procMeshLevel(const label leveli) const;
+            //const lduMesh& procMeshLevel(const label leveli) const;
 
             //- Communicator for procMesh (stored separately so also works
             //  even if no mesh is stored on this processor)
-            label procCommunicator(const label leveli) const;
+            label procCommunicator(const label fineLeveli) const;
 
             //- Mapping from processor to procMesh cells
-            const labelList& cellOffsets(const label leveli) const;
+            const labelList& cellOffsets(const label fineLeveli) const;
 
             //- Mapping from processor to procMesh face
-            const labelListList& faceMap(const label leveli) const;
+            const labelListList& faceMap(const label fineLeveli) const;
 
             //- Mapping from processor to procMesh boundary
-            const labelListList& boundaryMap(const label leveli) const;
+            const labelListList& boundaryMap(const label fineLeveli) const;
 
             //- Mapping from processor to procMesh boundary face
-            const labelListListList& boundaryFaceMap(const label leveli) const;
+            const labelListListList& boundaryFaceMap(const label fineLeveli)
+            const;
 
 };
 
