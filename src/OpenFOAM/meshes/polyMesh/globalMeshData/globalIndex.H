@@ -162,6 +162,17 @@ public:
                 const int tag = UPstream::msgType()
             ) const;
 
+            //- Inplace collect data in processor order on master
+            //  (== procIDs[0]). Needs offsets only on master.
+            template<class Type>
+            void gather
+            (
+                const label comm,
+                const labelList& procIDs,
+                List<Type>& fld,
+                const int tag = UPstream::msgType()
+            ) const;
+
             //- Distribute data in processor order. Requires fld to be sized!
             template<class Type>
             void scatter

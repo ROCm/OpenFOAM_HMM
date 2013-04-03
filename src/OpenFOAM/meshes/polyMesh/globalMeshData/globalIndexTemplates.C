@@ -110,6 +110,89 @@ void Foam::globalIndex::gather
 
 
 template<class Type>
+void Foam::globalIndex::gather
+(
+    const label comm,
+    const labelList& procIDs,
+    List<Type>& fld,
+    const int tag
+) const
+{
+    if (Pstream::myProcNo(comm) == procIDs[0])
+    {
+        List<Type> allFld(size());
+
+        // Assign my local data
+        SubList<Type>(allFld, fld.size(), 0).assign(fld);
+
+        for (label i = 1; i < procIDs.size(); i++)
+        {
+            SubList<Type> procSlot
+            (
+                allFld,
+                offsets_[i+1]-offsets_[i],
+                offsets_[i]
+            );
+
+            if (contiguous<Type>())
+            {
+                IPstream::read
+                (
+                    Pstream::scheduled,
+                    procIDs[i],
+                    reinterpret_cast<char*>(procSlot.begin()),
+                    procSlot.byteSize(),
+                    tag,
+                    comm
+                );
+            }
+            else
+            {
+                IPstream fromSlave
+                (
+                    Pstream::scheduled,
+                    procIDs[i],
+                    0,
+                    tag,
+                    comm
+                );
+                fromSlave >> procSlot;
+            }
+        }
+
+        fld.transfer(allFld);
+    }
+    else
+    {
+        if (contiguous<Type>())
+        {
+            OPstream::write
+            (
+                Pstream::scheduled,
+                procIDs[0],
+                reinterpret_cast<const char*>(fld.begin()),
+                fld.byteSize(),
+                tag,
+                comm
+            );
+        }
+        else
+        {
+            OPstream toMaster
+            (
+                Pstream::scheduled,
+                procIDs[0],
+                0,
+                tag,
+                comm
+            );
+            toMaster << fld;
+        }
+    }
+}
+
+
+template<class Type>
 void Foam::globalIndex::scatter
 (
     const label comm,
