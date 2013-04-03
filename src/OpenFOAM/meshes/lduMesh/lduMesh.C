@@ -93,6 +93,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<lduMesh>& ip)
 
 
     // Print actual contents
+    if (lduMesh::debug)
     {
         const labelList& l = addr.lowerAddr();
         const labelList& u = addr.upperAddr();
