@@ -156,6 +156,17 @@ public:
             interface_(GAMGCp)
         {}
 
+
+    // Member Functions
+
+        // Access
+
+            //- Return interface
+            const GAMGInterface& interface() const
+            {
+                return interface_;
+            }
+
 };
 
 
