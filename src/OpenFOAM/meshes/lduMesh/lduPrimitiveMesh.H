@@ -68,7 +68,7 @@ class lduPrimitiveMesh
         lduInterfacePtrsList interfaces_;
 
         //- Concrete interfaces if above interfaces were created locally
-        PtrList<lduInterface> primitiveInterfaces_;
+        PtrList<const lduInterface> primitiveInterfaces_;
 
         //- Patch field evaluation schedule
         lduSchedule patchSchedule_;
@@ -139,16 +139,28 @@ public:
         //                  similar to cell-restrict-addressing.
         //                  We need this information to be able to map
         //                  inter-processor interfaces
+        // cellOffsets : for every processor the offset it gets in the mesh
+        // faceMap     : for every processor, for every face, the destination
+        //               face. Negative for flipped faces.
+        // boundaryMap : for every processor, for every patch, -1 or the new
+        //               patch index in the mesh.
+        // boundaryFaceMap : for every processor, for every patch, for every
+        //                   patch face:
+        //                   - the new internal face (if boundaryMap=-1)
+        //                   - the new patch face (if boundaryMap>=0)
+        //                   Faces becoming internal are negative for flipped
+        //                   faces.
         lduPrimitiveMesh
         (
             const label comm,
             const labelList& procAgglomMap,
 
-            const labelList& procIDs,               // procIDs[0] = myMesh
+            const labelList& procIDs,
             const lduMesh& myMesh,
             const PtrList<lduMesh>& otherMeshes,
 
             labelList& cellOffsets,
+            labelList& faceOffsets,
             labelListList& faceMap,
             labelListList& boundaryMap,
             labelListListList& boundaryFaceMap
@@ -173,6 +185,14 @@ public:
             //- Return a list of pointers for each patch
             //  with only those pointing to interfaces being set
             virtual lduInterfacePtrsList interfaces() const
+            {
+                return interfaces_;
+            }
+
+            //- Return a list of pointers for each patch
+            //  with only those pointing to interfaces being set
+            //  (reference to cached interfaces)
+            const lduInterfacePtrsList& rawInterfaces() const
             {
                 return interfaces_;
             }
@@ -219,9 +239,10 @@ public:
             );
 
             //- Gather meshes from other processors onto procIDs[0].
-            //  Hardcoded for GAMGInterface.
+            //  Received meshes get GAMGInterface and communicator comm
             static void gather
             (
+                const label comm,
                 const lduMesh& mesh,
                 const labelList& procIDs,
                 PtrList<lduMesh>& otherMeshes

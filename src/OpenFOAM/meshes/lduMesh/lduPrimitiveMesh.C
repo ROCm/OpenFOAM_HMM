@@ -242,6 +242,63 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
 }
 
 
+//Foam::lduPrimitiveMesh::lduPrimitiveMesh
+//(
+//    const label nCells,
+//    labelList& l,
+//    labelList& u,
+//    labelListList& pa,
+//    PtrList<const lduInterface>& primitiveInterfaces,
+//    const lduSchedule& ps,
+//    const label comm,
+//    bool reUse
+//)
+//:
+//    lduAddressing(nCells),
+//    lowerAddr_(l, reUse),
+//    upperAddr_(u, reUse),
+//    patchAddr_(pa, reUse),
+//    primitiveInterfaces_(primitiveInterfaces, reUse),
+//    patchSchedule_(ps),
+//    comm_(comm)
+//{
+//    interfaces_.setSize(primitiveInterfaces_.size());
+//    forAll(primitiveInterfaces, intI)
+//    {
+//        interfaces_.set(intI, &primitiveInterfaces_[intI]);
+//    }
+//
+//    //Pout<< "lduPrimitiveMesh :"
+//    //    << " nCells:" << nCells
+//    //    << " l:" << lowerAddr_.size()
+//    //    << " u:" << upperAddr_.size()
+//    //    << " pa:" << patchAddr_.size()
+//    //    << " interfaces:" << interfaces_.size()
+//    //    << " comm:" << comm_
+//    //    << endl;
+//    //forAll(interfaces_, i)
+//    //{
+//    //    if (interfaces_.set(i))
+//    //    {
+//    //        if (isA<processorLduInterface>(interfaces_[i]))
+//    //        {
+//    //            const processorLduInterface& pi = refCast
+//    //            <
+//    //                const processorLduInterface
+//    //            >(interfaces_[i]);
+//    //
+//    //            Pout<< "    patch:" << i
+//    //                << " size:" << patchAddr_[i].size()
+//    //                << " myProcNo:" << pi.myProcNo()
+//    //                << " neighbProcNo:" << pi.neighbProcNo()
+//    //                << " comm:" << pi.comm()
+//    //                << endl;
+//    //        }
+//    //    }
+//    //}
+//}
+
+
 Foam::lduPrimitiveMesh::lduPrimitiveMesh
 (
     const label comm,
@@ -252,6 +309,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     const PtrList<lduMesh>& otherMeshes,
 
     labelList& cellOffsets,
+    labelList& faceOffsets,
     labelListList& faceMap,
     labelListList& boundaryMap,
     labelListListList& boundaryFaceMap
@@ -271,14 +329,14 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     {
         if (otherMeshes[i].comm() != currentComm)
         {
-            FatalErrorIn
+            WarningIn
             (
                 "lduPrimitiveMesh::lduPrimitiveMesh(..)"
             )   << "Communicator " << otherMeshes[i].comm()
                 << " at index " << i
                 << " differs from that of predecessor "
                 << currentComm
-                << exit(FatalError);
+                << endl;    //exit(FatalError);
         }
     }
 
@@ -527,7 +585,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
 
 
     // Adapt faceOffsets for internal interfaces
-    labelList faceOffsets(nMeshes+1);
+    faceOffsets.setSize(nMeshes+1);
     faceOffsets[0] = 0;
     faceMap.setSize(nMeshes);
     for (label procMeshI = 0; procMeshI < nMeshes; procMeshI++)
@@ -836,6 +894,7 @@ const Foam::lduMesh& Foam::lduPrimitiveMesh::mesh
 
 void Foam::lduPrimitiveMesh::gather
 (
+    const label comm,
     const lduMesh& mesh,
     const labelList& procIDs,
     PtrList<lduMesh>& otherMeshes
@@ -844,10 +903,7 @@ void Foam::lduPrimitiveMesh::gather
     // Force calculation of schedule (since does parallel comms)
     (void)mesh.lduAddr().patchSchedule();
 
-
-    const label meshComm = mesh.comm();
-
-    if (Pstream::myProcNo(meshComm) == procIDs[0])
+    if (Pstream::myProcNo(comm) == procIDs[0])
     {
         otherMeshes.setSize(procIDs.size()-1);
 
@@ -863,7 +919,7 @@ void Foam::lduPrimitiveMesh::gather
                 procIDs[i],
                 0,          // bufSize
                 Pstream::msgType(),
-                meshComm
+                comm
             );
 
             label nCells = readLabel(fromSlave);
@@ -909,13 +965,13 @@ void Foam::lduPrimitiveMesh::gather
                     (
                         newInterfaces
                     ),
-                    meshComm,
+                    comm,
                     true
                 )
             );
         }
     }
-    else if (findIndex(procIDs, Pstream::myProcNo(meshComm)) != -1)
+    else if (findIndex(procIDs, Pstream::myProcNo(comm)) != -1)
     {
         // Send to master
 
@@ -933,7 +989,7 @@ void Foam::lduPrimitiveMesh::gather
             procIDs[0],
             0,
             Pstream::msgType(),
-            meshComm
+            comm
         );
 
         //Pout<< "sent nCells:" << addressing.size()
