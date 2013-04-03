@@ -109,7 +109,6 @@ public:
         (
             const label index,
             const lduInterfacePtrsList& coarseInterfaces,
-            //const lduInterface& fineInterface,
             const labelUList& faceCells,
             const labelUList& faceRestrictAddresssing,
             const label coarseComm,
