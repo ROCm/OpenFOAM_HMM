@@ -224,7 +224,7 @@ public:
                 return faceCells_;
             }
 
-            //- Return face restrict addressing
+            //- Return (local)face restrict addressing
             virtual const labelList& faceRestrictAddressing() const
             {
                 return faceRestrictAddressing_;

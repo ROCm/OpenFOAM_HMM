@@ -83,6 +83,27 @@ Foam::tmp<Foam::scalarField> Foam::GAMGInterface::agglomerateCoeffs
     tmp<scalarField> tcoarseCoeffs(new scalarField(size(), 0.0));
     scalarField& coarseCoeffs = tcoarseCoeffs();
 
+    if (fineCoeffs.size() != faceRestrictAddressing_.size())
+    {
+        FatalErrorIn
+        (
+            "GAMGInterface::agglomerateCoeffs(const scalarField&) const"
+        )   << "Size of coefficients " << fineCoeffs.size()
+            << " does not correspond to the size of the restriction "
+            << faceRestrictAddressing_.size()
+            << abort(FatalError);
+    }
+    if (debug && max(faceRestrictAddressing_) > size())
+    {
+        FatalErrorIn
+        (
+            "GAMGInterface::agglomerateCoeffs(const scalarField&) const"
+        )   << "Face restrict addressing addresses outside of coarse interface"
+            << " size. Max addressing:" << max(faceRestrictAddressing_)
+            << " coarse size:" << size()
+            << abort(FatalError);
+    }
+
     forAll(faceRestrictAddressing_, ffi)
     {
         coarseCoeffs[faceRestrictAddressing_[ffi]] += fineCoeffs[ffi];
