@@ -30,27 +30,179 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::GAMGSolver::agglomerateMatrix(const label fineLevelIndex)
+void Foam::GAMGSolver::agglomerateMatrix
+(
+    const label fineLevelIndex,
+    const lduMesh& coarseMesh,
+    const lduInterfacePtrsList& coarseMeshInterfaces
+)
 {
     // Get fine matrix
     const lduMatrix& fineMatrix = matrixLevel(fineLevelIndex);
 
-    // Set the coarse level matrix
-    matrixLevels_.set
-    (
-        fineLevelIndex,
-        new lduMatrix(agglomeration_.meshLevel(fineLevelIndex + 1))
-    );
-    lduMatrix& coarseMatrix = matrixLevels_[fineLevelIndex];
+    if (UPstream::myProcNo(fineMatrix.mesh().comm()) != -1)
+    {
+        const label nCoarseFaces = agglomeration_.nFaces(fineLevelIndex);
+        const label nCoarseCells = agglomeration_.nCells(fineLevelIndex);
 
-    // Get face restriction map for current level
-    const labelList& faceRestrictAddr =
-        agglomeration_.faceRestrictAddressing(fineLevelIndex);
 
-    // Coarse matrix diagonal initialised by restricting the finer mesh diagonal
-    scalarField& coarseDiag = coarseMatrix.diag();
-    agglomeration_.restrictField(coarseDiag, fineMatrix.diag(), fineLevelIndex);
 
+        Pout<< "agglomerateMatrix : I have fine mesh:"
+            << fineMatrix.mesh().lduAddr().size()
+            << " at fine level:" << fineLevelIndex
+            << " constricting to coarse cells:"
+            << nCoarseCells
+            << " coarse nFaces:" << nCoarseFaces << endl;
+
+        // Set the coarse level matrix
+        matrixLevels_.set
+        (
+            fineLevelIndex,
+            new lduMatrix(coarseMesh)
+        );
+        lduMatrix& coarseMatrix = matrixLevels_[fineLevelIndex];
+
+
+        // Coarse matrix diagonal initialised by restricting the finer mesh
+        // diagonal. Note that we size with the cached coarse nCells and not
+        // the actual coarseMesh size since this might be dummy when processor
+        // agglomerating.
+        scalarField& coarseDiag = coarseMatrix.diag(nCoarseCells);
+
+        agglomeration_.restrictField
+        (
+            coarseDiag,
+            fineMatrix.diag(),
+            fineLevelIndex,
+            false               // no processor agglomeration
+        );
+
+        // Get reference to fine-level interfaces
+        const lduInterfaceFieldPtrsList& fineInterfaces =
+            interfaceLevel(fineLevelIndex);
+
+        // Create coarse-level interfaces
+        interfaceLevels_.set
+        (
+            fineLevelIndex,
+            new lduInterfaceFieldPtrsList(fineInterfaces.size())
+        );
+
+        lduInterfaceFieldPtrsList& coarseInterfaces =
+            interfaceLevels_[fineLevelIndex];
+
+        // Set coarse-level boundary coefficients
+        interfaceLevelsBouCoeffs_.set
+        (
+            fineLevelIndex,
+            new FieldField<Field, scalar>(fineInterfaces.size())
+        );
+        FieldField<Field, scalar>& coarseInterfaceBouCoeffs =
+            interfaceLevelsBouCoeffs_[fineLevelIndex];
+
+        // Set coarse-level internal coefficients
+        interfaceLevelsIntCoeffs_.set
+        (
+            fineLevelIndex,
+            new FieldField<Field, scalar>(fineInterfaces.size())
+        );
+        FieldField<Field, scalar>& coarseInterfaceIntCoeffs =
+            interfaceLevelsIntCoeffs_[fineLevelIndex];
+
+        // Add the coarse level
+        agglomerateInterfaceCoefficients
+        (
+            fineLevelIndex,
+            coarseMeshInterfaces,
+            coarseInterfaces,
+            coarseInterfaceBouCoeffs,
+            coarseInterfaceIntCoeffs
+        );
+
+
+        // Get face restriction map for current level
+        const labelList& faceRestrictAddr =
+            agglomeration_.faceRestrictAddressing(fineLevelIndex);
+        const boolList& faceFlipMap =
+            agglomeration_.faceFlipMap(fineLevelIndex);
+
+        // Check if matrix is asymetric and if so agglomerate both upper
+        // and lower coefficients ...
+        if (fineMatrix.hasLower())
+        {
+            // Get off-diagonal matrix coefficients
+            const scalarField& fineUpper = fineMatrix.upper();
+            const scalarField& fineLower = fineMatrix.lower();
+
+            // Coarse matrix upper coefficients. Note passed in size
+            scalarField& coarseUpper = coarseMatrix.upper(nCoarseFaces);
+            scalarField& coarseLower = coarseMatrix.lower(nCoarseFaces);
+
+            forAll(faceRestrictAddr, fineFacei)
+            {
+                label cFace = faceRestrictAddr[fineFacei];
+
+                if (cFace >= 0)
+                {
+                    // Check the orientation of the fine-face relative to the
+                    // coarse face it is being agglomerated into
+                    if (!faceFlipMap[fineFacei])
+                    {
+                        coarseUpper[cFace] += fineUpper[fineFacei];
+                        coarseLower[cFace] += fineLower[fineFacei];
+                    }
+                    else
+                    {
+                        coarseUpper[cFace] += fineLower[fineFacei];
+                        coarseLower[cFace] += fineUpper[fineFacei];
+                    }
+                }
+                else
+                {
+                    // Add the fine face coefficients into the diagonal.
+                    coarseDiag[-1 - cFace] +=
+                        fineUpper[fineFacei] + fineLower[fineFacei];
+                }
+            }
+        }
+        else // ... Otherwise it is symmetric so agglomerate just the upper
+        {
+            // Get off-diagonal matrix coefficients
+            const scalarField& fineUpper = fineMatrix.upper();
+
+            // Coarse matrix upper coefficients
+            scalarField& coarseUpper = coarseMatrix.upper(nCoarseFaces);
+
+            forAll(faceRestrictAddr, fineFacei)
+            {
+                label cFace = faceRestrictAddr[fineFacei];
+
+                if (cFace >= 0)
+                {
+                    coarseUpper[cFace] += fineUpper[fineFacei];
+                }
+                else
+                {
+                    // Add the fine face coefficient into the diagonal.
+                    coarseDiag[-1 - cFace] += 2*fineUpper[fineFacei];
+                }
+            }
+        }
+    }
+}
+
+
+//XXXXX
+// Agglomerate only the interface coefficients.
+void Foam::GAMGSolver::agglomerateInterfaceCoefficients
+(
+    const label fineLevelIndex,
+    const lduInterfacePtrsList& coarseMeshInterfaces,
+    lduInterfaceFieldPtrsList& coarseInterfaces,
+    FieldField<Field, scalar>& coarseInterfaceBouCoeffs,
+    FieldField<Field, scalar>& coarseInterfaceIntCoeffs
+) const
+{
     // Get reference to fine-level interfaces
     const lduInterfaceFieldPtrsList& fineInterfaces =
         interfaceLevel(fineLevelIndex);
@@ -63,34 +215,12 @@ void Foam::GAMGSolver::agglomerateMatrix(const label fineLevelIndex)
     const FieldField<Field, scalar>& fineInterfaceIntCoeffs =
         interfaceIntCoeffsLevel(fineLevelIndex);
 
+    const labelListList& patchFineToCoarse =
+        agglomeration_.patchFaceRestrictAddressing(fineLevelIndex);
 
-    // Create coarse-level interfaces
-    interfaceLevels_.set
-    (
-        fineLevelIndex,
-        new lduInterfaceFieldPtrsList(fineInterfaces.size())
-    );
+    const labelList& nPatchFaces =
+        agglomeration_.nPatchFaces(fineLevelIndex);
 
-    lduInterfaceFieldPtrsList& coarseInterfaces =
-        interfaceLevels_[fineLevelIndex];
-
-    // Set coarse-level boundary coefficients
-    interfaceLevelsBouCoeffs_.set
-    (
-        fineLevelIndex,
-        new FieldField<Field, scalar>(fineInterfaces.size())
-    );
-    FieldField<Field, scalar>& coarseInterfaceBouCoeffs =
-        interfaceLevelsBouCoeffs_[fineLevelIndex];
-
-    // Set coarse-level internal coefficients
-    interfaceLevelsIntCoeffs_.set
-    (
-        fineLevelIndex,
-        new FieldField<Field, scalar>(fineInterfaces.size())
-    );
-    FieldField<Field, scalar>& coarseInterfaceIntCoeffs =
-        interfaceLevelsIntCoeffs_[fineLevelIndex];
 
     // Add the coarse level
     forAll(fineInterfaces, inti)
@@ -100,7 +230,7 @@ void Foam::GAMGSolver::agglomerateMatrix(const label fineLevelIndex)
             const GAMGInterface& coarseInterface =
                 refCast<const GAMGInterface>
                 (
-                    agglomeration_.interfaceLevel(fineLevelIndex + 1)[inti]
+                    coarseMeshInterfaces[inti]
                 );
 
             coarseInterfaces.set
@@ -113,97 +243,31 @@ void Foam::GAMGSolver::agglomerateMatrix(const label fineLevelIndex)
                 ).ptr()
             );
 
+            const labelList& faceRestrictAddressing = patchFineToCoarse[inti];
+
             coarseInterfaceBouCoeffs.set
             (
                 inti,
-                coarseInterface.agglomerateCoeffs(fineInterfaceBouCoeffs[inti])
+                new scalarField(nPatchFaces[inti], 0.0)
+            );
+            agglomeration_.restrictField
+            (
+                coarseInterfaceBouCoeffs[inti],
+                fineInterfaceBouCoeffs[inti],
+                faceRestrictAddressing
             );
 
             coarseInterfaceIntCoeffs.set
             (
                 inti,
-                coarseInterface.agglomerateCoeffs(fineInterfaceIntCoeffs[inti])
+                new scalarField(nPatchFaces[inti], 0.0)
             );
-        }
-    }
-
-
-    // Check if matrix is asymetric and if so agglomerate both upper and lower
-    // coefficients ...
-    if (fineMatrix.hasLower())
-    {
-        // Get off-diagonal matrix coefficients
-        const scalarField& fineUpper = fineMatrix.upper();
-        const scalarField& fineLower = fineMatrix.lower();
-
-        // Coarse matrix upper coefficients
-        scalarField& coarseUpper = coarseMatrix.upper();
-        scalarField& coarseLower = coarseMatrix.lower();
-
-        const labelList& restrictAddr =
-            agglomeration_.restrictAddressing(fineLevelIndex);
-
-        const labelUList& l = fineMatrix.lduAddr().lowerAddr();
-        const labelUList& cl = coarseMatrix.lduAddr().lowerAddr();
-        const labelUList& cu = coarseMatrix.lduAddr().upperAddr();
-
-        forAll(faceRestrictAddr, fineFacei)
-        {
-            label cFace = faceRestrictAddr[fineFacei];
-
-            if (cFace >= 0)
-            {
-                // Check the orientation of the fine-face relative to the
-                // coarse face it is being agglomerated into
-                if (cl[cFace] == restrictAddr[l[fineFacei]])
-                {
-                    coarseUpper[cFace] += fineUpper[fineFacei];
-                    coarseLower[cFace] += fineLower[fineFacei];
-                }
-                else if (cu[cFace] == restrictAddr[l[fineFacei]])
-                {
-                    coarseUpper[cFace] += fineLower[fineFacei];
-                    coarseLower[cFace] += fineUpper[fineFacei];
-                }
-                else
-                {
-                    FatalErrorIn
-                    (
-                        "GAMGSolver::agglomerateMatrix(const label)"
-                    )   << "Inconsistent addressing between "
-                           "fine and coarse grids"
-                        << exit(FatalError);
-                }
-            }
-            else
-            {
-                // Add the fine face coefficients into the diagonal.
-                coarseDiag[-1 - cFace] +=
-                    fineUpper[fineFacei] + fineLower[fineFacei];
-            }
-        }
-    }
-    else // ... Otherwise it is symmetric so agglomerate just the upper
-    {
-        // Get off-diagonal matrix coefficients
-        const scalarField& fineUpper = fineMatrix.upper();
-
-        // Coarse matrix upper coefficients
-        scalarField& coarseUpper = coarseMatrix.upper();
-
-        forAll(faceRestrictAddr, fineFacei)
-        {
-            label cFace = faceRestrictAddr[fineFacei];
-
-            if (cFace >= 0)
-            {
-                coarseUpper[cFace] += fineUpper[fineFacei];
-            }
-            else
-            {
-                // Add the fine face coefficient into the diagonal.
-                coarseDiag[-1 - cFace] += 2*fineUpper[fineFacei];
-            }
+            agglomeration_.restrictField
+            (
+                coarseInterfaceIntCoeffs[inti],
+                fineInterfaceIntCoeffs[inti],
+                faceRestrictAddressing
+            );
         }
     }
 }
@@ -355,7 +419,6 @@ void Foam::GAMGSolver::procAgglomerateMatrix
     // Agglomeration information
     const labelList& procAgglomMap,
     const List<int>& agglomProcIDs,
-    label masterComm,
 
     const label levelI,
 
@@ -365,7 +428,7 @@ void Foam::GAMGSolver::procAgglomerateMatrix
     FieldField<Field, scalar>& allInterfaceIntCoeffs,
     PtrList<lduInterfaceField>& allPrimitiveInterfaces,
     lduInterfaceFieldPtrsList& allInterfaces
-)
+) const
 {
     const lduMatrix& coarsestMatrix = matrixLevels_[levelI];
     const lduInterfaceFieldPtrsList& coarsestInterfaces =
@@ -385,15 +448,6 @@ void Foam::GAMGSolver::procAgglomerateMatrix
 
     // Construct (on the agglomeration) a complete mesh with mapping
     Pout<< "procAgglomerateMatrix :" << " level:" << levelI << endl;
-
-
-    agglomeration_.procAgglomerateLduAddressing
-    (
-        procAgglomMap,
-        agglomProcIDs,
-        masterComm,
-        levelI     // coarsest level
-    );
 
 
     // Gather all matrix coefficients onto agglomProcIDs[0]
@@ -439,12 +493,15 @@ void Foam::GAMGSolver::procAgglomerateMatrix
         Pout<< endl;
 
 
-        const lduMesh& allMesh = agglomeration_.procMeshLevel(levelI);
-        const labelList& cellOffsets = agglomeration_.cellOffsets(levelI);
-        const labelListList& faceMap = agglomeration_.faceMap(levelI);
-        const labelListList& boundaryMap = agglomeration_.boundaryMap(levelI);
+        //const lduMesh& allMesh = agglomeration_.procMeshLevel(levelI);
+        const lduMesh& allMesh = agglomeration_.meshLevel(levelI+1);
+        const labelList& cellOffsets = agglomeration_.cellOffsets(levelI+1);
+        const labelListList& faceMap = agglomeration_.faceMap(levelI+1);
+        const labelListList& boundaryMap = agglomeration_.boundaryMap(levelI+1);
         const labelListListList& boundaryFaceMap =
-            agglomeration_.boundaryFaceMap(levelI);
+            agglomeration_.boundaryFaceMap(levelI+1);
+
+Pout<< "Agglomerating onto mesh:" << allMesh.info() << endl;
 
 
         allMatrixPtr.reset(new lduMatrix(allMesh));
@@ -738,6 +795,56 @@ Pout<< "    from proc:" << procI << " interface:" << procIntI
     UPstream::warnComm = oldWarn;
 }
 //XXXX
+
+
+void Foam::GAMGSolver::procAgglomerateMatrix
+(
+    const labelList& procAgglomMap,
+    const List<int>& agglomProcIDs,
+
+    const label levelI
+)
+{
+    autoPtr<lduMatrix> allMatrixPtr;
+    autoPtr<FieldField<Field, scalar> > allInterfaceBouCoeffs
+    (
+        new FieldField<Field, scalar>(0)
+    );
+    autoPtr<FieldField<Field, scalar> > allInterfaceIntCoeffs
+    (
+        new FieldField<Field, scalar>(0)
+    );
+    autoPtr<PtrList<lduInterfaceField> > allPrimitiveInterfaces
+    (
+        new PtrList<lduInterfaceField>(0)
+    );
+    autoPtr<lduInterfaceFieldPtrsList> allInterfaces
+    (
+        new lduInterfaceFieldPtrsList(0)
+    );
+
+    procAgglomerateMatrix
+    (
+        // Agglomeration information
+        procAgglomMap,
+        agglomProcIDs,
+
+        levelI,
+
+        // Resulting matrix
+        allMatrixPtr,
+        allInterfaceBouCoeffs(),
+        allInterfaceIntCoeffs(),
+        allPrimitiveInterfaces(),
+        allInterfaces()
+    );
+
+    matrixLevels_.set(levelI, allMatrixPtr);
+    interfaceLevelsBouCoeffs_.set(levelI, allInterfaceBouCoeffs);
+    interfaceLevelsIntCoeffs_.set(levelI, allInterfaceIntCoeffs);
+    primitiveInterfaceLevels_.set(levelI, allPrimitiveInterfaces);
+    interfaceLevels_.set(levelI, allInterfaces);
+}
 
 
 // ************************************************************************* //

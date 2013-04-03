@@ -33,6 +33,7 @@ void Foam::GAMGSolver::scale
     scalarField& field,
     scalarField& Acf,
     const lduMatrix& A,
+    const int comm,
     const FieldField<Field, scalar>& interfaceLevelBouCoeffs,
     const lduInterfaceFieldPtrsList& interfaceLevel,
     const scalarField& source,
@@ -58,11 +59,13 @@ void Foam::GAMGSolver::scale
     }
 
     vector2D scalingVector(scalingFactorNum, scalingFactorDenom);
-    matrix().mesh().reduce
-    (
-        scalingVector,
-        sumOp<vector2D>()
-    );
+    //A.mesh().reduce
+    //(
+    //    scalingVector,
+    //    sumOp<vector2D>()
+    //);
+    Foam::reduce(scalingVector, sumOp<vector2D>(), Pstream::msgType(), comm);
+
     scalar sf = scalingVector.x()/stabilise(scalingVector.y(), VSMALL);
 
     if (debug >= 2)
