@@ -28,6 +28,19 @@ Description
     Application to generate the patch geometry (points and faces) for use
     with the externalCoupled boundary condition.
 
+    Usage:
+
+        createExternalCoupledPatchGeometry <fieldName>
+
+    On execution, the field <fieldName> is read, and its boundary conditions
+    interrogated for the presence of an \c externalCoupled type.  If found,
+    the patch geometry (points and faces) for the coupled patches are output
+    to the communications folder.
+
+Note:
+    The addressing is patch-local, i.e. point indices for each patch point
+    used for face addressing starts at index 0.
+
 SeeAlso
     externalCoupledMixedFvPatchField
 

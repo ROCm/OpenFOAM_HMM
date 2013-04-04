@@ -32,34 +32,46 @@ Description
     application.  Values are transferred as plain text files, where OperFOAM
     data is written as:
 
-        <value1> <surfaceNormalGradient1>
-        <value2> <surfaceNormalGradient2>
-        <value3> <surfaceNormalGradient3>
+        # Patch: <patch name>
+        <magSf1> <value1> <qDot1> <htc1>
+        <magSf2> <value2> <qDot2> <htc2>
+        <magSf3> <value3> <qDot3> <htc2>
         ...
-        <valueN> <surfaceNormalGradientN>
+        <magSfN> <valueN> <qDotN> <htcN>
 
     and received as the constituent pieces of the `mixed' condition, i.e.
 
+        # Patch: <patch name>
         <value1> <gradient1> <valueFracion1>
         <value2> <gradient2> <valueFracion2>
         <value3> <gradient3> <valueFracion3>
         ...
         <valueN> <gradientN> <valueFracionN>
 
-    At start-up, the boundary creates a lock file, e.g.
+    Data is either sent/received as one file per patch, or as a single file
+    for all patches, based on the \c collate flag.  In the former case, the
+    folder used for communications is:
 
-        $FOAM_CASE/comms/patchName/OpenFOAM.lock
+        $FOAM_CASE/<commsDir>/patchName
+
+    and when using the \c collate option:
+
+        $FOAM_CASE/<commsDir>
+
+    At start-up, the boundary creates a lock file, i.e..
+
+        OpenFOAM.lock
 
     ... to signal the external source to wait.  During the boundary condition
     update, boundary values are written to file, e.g.
 
-        $FOAM_CASE/comms/patchName/data.out
+        <fileName>.out
 
     The lock file is then removed, instructing the external source to take
     control of the program execution.  When ready, the external program
     should create the return values, e.g. to file
 
-        $FOAM_CASE/comms/patchName/data.in
+        <fileName>.in
 
     ... and then re-instate the lock file.  The boundary condition will then
     read the return values, and pass program execution back to OpenFOAM.
