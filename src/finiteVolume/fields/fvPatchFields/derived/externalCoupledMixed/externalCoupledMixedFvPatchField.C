@@ -187,15 +187,21 @@ void Foam::externalCoupledMixedFvPatchField<Type>::writeGeometry
 
     if (Pstream::master())
     {
+        pointField pts
+        (
+            ListListOps::combine<pointField>(allPoints, accessOp<pointField>())
+        );
+
         // write points
-        osPoints<< patchKey.c_str() << this->patch().name() << endl;
-        osPoints<<
-            ListListOps::combine<pointField>(allPoints, accessOp<pointField>());
+        osPoints << patchKey.c_str() << this->patch().name() << pts << endl;
+
+        faceList fcs
+        (
+            ListListOps::combine<faceList>(allFaces, accessOp<faceList>())
+        );
 
         // write faces
-        osFaces<< patchKey.c_str() << this->patch().name() << endl;
-        osFaces<<
-            ListListOps::combine<faceList>(allFaces, accessOp<faceList>());
+        osFaces<< patchKey.c_str() << this->patch().name() << fcs << endl;
     }
 }
 
@@ -215,14 +221,21 @@ void Foam::externalCoupledMixedFvPatchField<Type>::createLockFile() const
         return;
     }
 
-    if (log_)
-    {
-        Info<< type() << ": creating lock file" << endl;
-    }
+    const fileName fName(lockFile());
+    IFstream is(fName);
 
-    OFstream os(lockFile());
-    os  << "waiting";
-    os.flush();
+    // only create lock file if it doesn't already exist
+    if (!is.good())
+    {
+        if (log_)
+        {
+            Info<< type() << ": creating lock file" << endl;
+        }
+
+        OFstream os(fName);
+        os  << "lock file";
+        os.flush();
+    }
 }
 
 
@@ -297,11 +310,6 @@ void Foam::externalCoupledMixedFvPatchField<Type>::wait() const
 
     while (!found)
     {
-        if (log_)
-        {
-            Info<< type() << ": wait time = " << totalTime << endl;
-        }
-
         if (totalTime > timeOut_)
         {
             FatalErrorIn
@@ -323,10 +331,16 @@ void Foam::externalCoupledMixedFvPatchField<Type>::wait() const
             }
 
             found = true;
+            break;
         }
 
         sleep(waitInterval_);
         totalTime += waitInterval_;
+
+        if (log_)
+        {
+            Info<< type() << ": wait time = " << totalTime << endl;
+        }
     }
 }
 
@@ -429,6 +443,8 @@ void Foam::externalCoupledMixedFvPatchField<Type>::writeData
 
     OFstream os(transferFile);
 
+    writeHeader(os);
+
     if (collate_)
     {
         typedef GeometricField<Type, fvPatchField, volMesh> volFieldType;
@@ -460,6 +476,16 @@ void Foam::externalCoupledMixedFvPatchField<Type>::writeData
         os  << patchKey.c_str() << this->patch().name() << nl;
         transferData(os);
     }
+}
+
+
+template<class Type>
+void Foam::externalCoupledMixedFvPatchField<Type>::writeHeader
+(
+    OFstream& os
+) const
+{
+    os  << "# Values: magSf value snGrad" << endl;
 }
 
 
@@ -750,10 +776,10 @@ void Foam::externalCoupledMixedFvPatchField<Type>::writeGeometry() const
 
         if (log_)
         {
-            Info<< "writing collated patch points to:" << nl
-                << "    " << osPoints.name().caseName() << endl;
-            Info<< "writing collated patch faces to:" << nl
-                << "    " << osFaces.name().caseName() << endl;
+            Info<< "writing collated patch points to: "
+                << osPoints.name().caseName() << endl;
+            Info<< "writing collated patch faces to: "
+                << osFaces.name().caseName() << endl;
         }
 
         forAll(bf, patchI)
@@ -783,10 +809,10 @@ void Foam::externalCoupledMixedFvPatchField<Type>::writeGeometry() const
 
                 if (log_)
                 {
-                    Info<< "writing patch " << patchName << " points to:" << nl
-                        << "    " << osPoints.name().caseName() << endl;
-                    Info<< "writing patch " << patchName << " faces to:" << nl
-                        << "    " << osFaces.name().caseName() << endl;
+                    Info<< "writing patch " << patchName << " points to: "
+                        << osPoints.name().caseName() << endl;
+                    Info<< "writing patch " << patchName << " faces to: "
+                        << osFaces.name().caseName() << endl;
                 }
 
                 const externalCoupledMixedFvPatchField<Type>& pf =

@@ -186,7 +186,10 @@ protected:
     // Protected Member Functions
 
         //- Write data for external source - calls transferData
-        void writeData(const fileName& transferFile) const;
+        virtual void writeData(const fileName& transferFile) const;
+
+        //- Write header to transfer file
+        virtual void writeHeader(OFstream& os) const;
 
 
 public:
