@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------*\
+ /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
@@ -25,9 +25,9 @@ License
 
 #include "temperatureCoupledBase.H"
 #include "volFields.H"
+#include "fluidThermo.H"
 #include "solidThermo.H"
 #include "turbulenceModel.H"
-#include "fluidThermo.H"
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
@@ -90,19 +90,39 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
 
     switch (method_)
     {
-        case BASICTHERMO:
+        case mtFluidThermo:
         {
-            const compressible::turbulenceModel& turbModel =
-                mesh.lookupObject<compressible::turbulenceModel>
-                (
-                    "turbulenceModel"
-                );
+            typedef compressible::turbulenceModel turbulenceModel;
 
-            return turbModel.kappaEff(patch_.index());
+            if (mesh.foundObject<turbulenceModel>("turbulenceModel"))
+            {
+                const turbulenceModel& turbModel =
+                    mesh.lookupObject<turbulenceModel>("turbulenceModel");
+
+                return turbModel.kappaEff(patch_.index());
+            }
+            else if (mesh.foundObject<fluidThermo>("thermophysicalProperties"))
+            {
+                const fluidThermo& thermo =
+                    mesh.lookupObject<fluidThermo>("thermophysicalProperties");
+
+                return thermo.kappa(patch_.index());
+            }
+            else
+            {
+                FatalErrorIn
+                (
+                    "temperatureCoupledBase::kappa(const scalarField&) const"
+                )
+                    << "Kappa defined to employ " << KMethodTypeNames_[method_]
+                    << " method, but thermo package not available"
+                    << exit(FatalError);
+            }
+
             break;
         }
 
-        case SOLIDTHERMO:
+        case mtSolidThermo:
         {
             const solidThermo& thermo =
                 mesh.lookupObject<solidThermo>("thermophysicalProperties");
@@ -111,7 +131,7 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
             break;
         }
 
-        case DIRECTIONALSOLIDTHERMO:
+        case mtDirectionalSolidThermo:
         {
             const solidThermo& thermo =
                 mesh.lookupObject<solidThermo>("thermophysicalProperties");
@@ -129,22 +149,16 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
             break;
         }
 
-        case LOOKUP:
+        case mtLookup:
         {
-            if (mesh.objectRegistry::foundObject<volScalarField>(kappaName_))
+            if (mesh.foundObject<volScalarField>(kappaName_))
             {
                 return patch_.lookupPatchField<volScalarField, scalar>
                 (
                     kappaName_
                 );
             }
-            else if
-            (
-                mesh.objectRegistry::foundObject<volSymmTensorField>
-                (
-                    kappaName_
-                )
-            )
+            else if (mesh.foundObject<volSymmTensorField>(kappaName_))
             {
                 const symmTensorField& KWall =
                     patch_.lookupPatchField<volSymmTensorField, scalar>
@@ -164,15 +178,14 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
                 )
                     << "Did not find field " << kappaName_
                     << " on mesh " << mesh.name() << " patch " << patch_.name()
-                    << endl
+                    << nl
                     << "Please set 'kappa' to one of "
                     << KMethodTypeNames_.toc()
                     << " and 'kappaName' to the name of the volScalar"
                     << " or volSymmTensor field (if kappa=lookup)"
                     << exit(FatalError);
-
-                return scalarField(0);
             }
+
             break;
         }
 
@@ -182,14 +195,14 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
             (
                 "temperatureCoupledBase::kappa(const scalarField&) const"
             )
-                << "Unimplemented method " << method_ << nl
+                << "Unimplemented method " << KMethodTypeNames_[method_] << nl
                 << "Please set 'kappa' to one of " << KMethodTypeNames_.toc()
                 << " and 'kappaName' to the name of the volScalar"
                 << " or volSymmTensor field (if kappa=lookup)"
                 << exit(FatalError);
         }
-        break;
     }
+
     return scalarField(0);
 }
 
