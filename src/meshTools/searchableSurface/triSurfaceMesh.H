@@ -50,6 +50,7 @@ SourceFiles
 #include "treeDataEdge.H"
 #include "EdgeMap.H"
 #include "triSurface.H"
+#include "triSurfaceRegionSearch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,43 +65,16 @@ class triSurfaceMesh
 :
     public searchableSurface,
     public objectRegistry,      // so we can store fields
-    public triSurface
+    public triSurface,
+    public triSurfaceRegionSearch
 {
 private:
 
-    // Private typedefs
-
-        typedef PrimitivePatch
-        <
-            labelledTri,
-            IndirectList,
-            const pointField&
-        > indirectTriSurfacePrimitivePatch;
-
-        typedef treeDataPrimitivePatch<indirectTriSurfacePrimitivePatch>
-            treeDataTriSurfacePrimitivePatch;
-
     // Private member data
-
-        //- Optional tolerance to use in searches
-        scalar tolerance_;
 
         //- Optional min triangle quality. Triangles below this get
         //  ignored for normal calculation
         scalar minQuality_;
-
-        //- Optional max tree depth of octree
-        label maxTreeDepth_;
-
-        //- Search tree (triangles)
-        mutable autoPtr<indexedOctree<treeDataTriSurface> > tree_;
-
-        mutable PtrList<indirectTriSurfacePrimitivePatch>
-            indirectRegionPatches_;
-
-        //- Search tree for each region
-        mutable PtrList<indexedOctree<treeDataTriSurfacePrimitivePatch> >
-            treeByRegion_;
 
         //- Search tree for boundary edges.
         mutable autoPtr<indexedOctree<treeDataEdge> > edgeTree_;
@@ -157,20 +131,6 @@ private:
         void operator=(const triSurfaceMesh&);
 
 
-protected:
-
-        //- Calculate (number of) used points and their bounding box
-        void calcBounds(boundBox& bb, label& nPoints) const;
-
-        template <class PatchType>
-        void calcBounds
-        (
-            const PatchType& patch,
-            boundBox& bb,
-            label& nPoints
-        ) const;
-
-
 public:
 
     //- Runtime type information
@@ -206,17 +166,9 @@ public:
         //- Move points
         virtual void movePoints(const pointField&);
 
-        //- Demand driven construction of octree
-        const indexedOctree<treeDataTriSurface>& tree() const;
-
-        //- Demand driven construction of octree by region
-        const PtrList<indexedOctree<treeDataTriSurfacePrimitivePatch> >&
-        treeByRegion() const;
-
         //- Demand driven contruction of octree for boundary edges
         const indexedOctree<treeDataEdge>& edgeTree() const;
 
-        scalar tolerance() const;
 
         // searchableSurface implementation
 

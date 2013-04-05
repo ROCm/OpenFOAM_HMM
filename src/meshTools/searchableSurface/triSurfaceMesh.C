@@ -29,7 +29,7 @@ License
 #include "EdgeMap.H"
 #include "triSurfaceFields.H"
 #include "Time.H"
-#include "PackedBoolList.H"
+#include "PatchTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -218,48 +218,6 @@ bool Foam::triSurfaceMesh::isSurfaceClosed() const
 }
 
 
-void Foam::triSurfaceMesh::calcBounds(boundBox& bb, label& nPoints) const
-{
-    const triSurface& s = static_cast<const triSurface&>(*this);
-
-    calcBounds(s, bb, nPoints);
-}
-
-
-template <class PatchType>
-void Foam::triSurfaceMesh::calcBounds
-(
-    const PatchType& patch,
-    boundBox& bb,
-    label& nPoints
-) const
-{
-    // Unfortunately nPoints constructs meshPoints() so do compact version
-    // ourselves
-
-    PackedBoolList pointIsUsed(points()().size());
-
-    nPoints = 0;
-    bb = boundBox::invertedBox;
-
-    forAll(patch, faceI)
-    {
-        const typename PatchType::FaceType& f = patch[faceI];
-
-        forAll(f, fp)
-        {
-            label pointI = f[fp];
-            if (pointIsUsed.set(pointI, 1u))
-            {
-                bb.min() = ::Foam::min(bb.min(), points()()[pointI]);
-                bb.max() = ::Foam::max(bb.max(), points()()[pointI]);
-                nPoints++;
-            }
-        }
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io, const triSurface& s)
@@ -279,9 +237,8 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io, const triSurface& s)
         )
     ),
     triSurface(s),
-    tolerance_(indexedOctree<treeDataTriSurface>::perturbTol()),
+    triSurfaceRegionSearch(s),
     minQuality_(-1),
-    maxTreeDepth_(10),
     surfaceClosed_(-1)
 {
     bounds() = boundBox(points());
@@ -326,9 +283,8 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io)
             searchableSurface::objectPath()
         )
     ),
-    tolerance_(indexedOctree<treeDataTriSurface>::perturbTol()),
+    triSurfaceRegionSearch(static_cast<const triSurface&>(*this)),
     minQuality_(-1),
-    maxTreeDepth_(10),
     surfaceClosed_(-1)
 {
     bounds() = boundBox(points());
@@ -376,9 +332,8 @@ Foam::triSurfaceMesh::triSurfaceMesh
             searchableSurface::objectPath()
         )
     ),
-    tolerance_(indexedOctree<treeDataTriSurface>::perturbTol()),
+    triSurfaceRegionSearch(static_cast<const triSurface&>(*this), dict),
     minQuality_(-1),
-    maxTreeDepth_(10),
     surfaceClosed_(-1)
 {
     scalar scaleFactor = 0;
@@ -394,26 +349,12 @@ Foam::triSurfaceMesh::triSurfaceMesh
 
     bounds() = boundBox(points());
 
-    // Have optional non-standard search tolerance for gappy surfaces.
-    if (dict.readIfPresent("tolerance", tolerance_) && tolerance_ > 0)
-    {
-        Info<< searchableSurface::name() << " : using intersection tolerance "
-            << tolerance_ << endl;
-    }
-
     // Have optional minimum quality for normal calculation
     if (dict.readIfPresent("minQuality", minQuality_) && minQuality_ > 0)
     {
         Info<< searchableSurface::name()
             << " : ignoring triangles with quality < "
             << minQuality_ << " for normals calculation." << endl;
-    }
-
-    // Have optional non-standard tree-depth to limit storage.
-    if (dict.readIfPresent("maxTreeDepth", maxTreeDepth_) && maxTreeDepth_ > 0)
-    {
-        Info<< searchableSurface::name() << " : using maximum tree depth "
-            << maxTreeDepth_ << endl;
     }
 }
 
@@ -428,7 +369,7 @@ Foam::triSurfaceMesh::~triSurfaceMesh()
 
 void Foam::triSurfaceMesh::clearOut()
 {
-    tree_.clear();
+    triSurfaceRegionSearch::clearOut();
     edgeTree_.clear();
     triSurface::clearOut();
 }
@@ -470,173 +411,9 @@ bool Foam::triSurfaceMesh::overlaps(const boundBox& bb) const
 
 void Foam::triSurfaceMesh::movePoints(const pointField& newPoints)
 {
-    tree_.clear();
+    triSurfaceRegionSearch::clearOut();
     edgeTree_.clear();
     triSurface::movePoints(newPoints);
-}
-
-
-const Foam::indexedOctree<Foam::treeDataTriSurface>&
-Foam::triSurfaceMesh::tree() const
-{
-    if (tree_.empty())
-    {
-        // Calculate bb without constructing local point numbering.
-        treeBoundBox bb;
-        label nPoints;
-        calcBounds(bb, nPoints);
-
-        if (nPoints != points()().size())
-        {
-            WarningIn("triSurfaceMesh::tree() const")
-                << "Surface " << searchableSurface::name()
-                << " does not have compact point numbering."
-                << " Of " << points()().size() << " only " << nPoints
-                << " are used. This might give problems in some routines."
-                << endl;
-        }
-
-
-        // Random number generator. Bit dodgy since not exactly random ;-)
-        Random rndGen(65431);
-
-        // Slightly extended bb. Slightly off-centred just so on symmetric
-        // geometry there are less face/edge aligned items.
-        bb = bb.extend(rndGen, 1e-4);
-        bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-        bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-
-        scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
-        indexedOctree<treeDataTriSurface>::perturbTol() = tolerance_;
-
-        tree_.reset
-        (
-            new indexedOctree<treeDataTriSurface>
-            (
-                treeDataTriSurface(true, *this, tolerance_),
-                bb,
-                maxTreeDepth_,  // maxLevel
-                10,             // leafsize
-                3.0             // duplicity
-            )
-        );
-
-        indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;
-    }
-
-    return tree_();
-}
-
-
-const Foam::PtrList
-<
-    Foam::indexedOctree
-    <
-        Foam::triSurfaceMesh::treeDataTriSurfacePrimitivePatch
-    >
->&
-Foam::triSurfaceMesh::treeByRegion() const
-{
-    if (treeByRegion_.empty())
-    {
-        Map<label> regionSizes;
-        forAll(*this, fI)
-        {
-            const label regionI = this->triSurface::operator[](fI).region();
-
-            regionSizes(regionI)++;
-        }
-
-        label nRegions = regionSizes.size();
-
-        indirectRegionPatches_.setSize(nRegions);
-        treeByRegion_.setSize(nRegions);
-
-        labelListList regionsAddressing(nRegions);
-
-        forAll(regionsAddressing, regionI)
-        {
-            regionsAddressing[regionI] = labelList(regionSizes[regionI], -1);
-        }
-
-        labelList nFacesInRegions(nRegions, 0);
-
-        forAll(*this, fI)
-        {
-            const label regionI = this->triSurface::operator[](fI).region();
-
-            regionsAddressing[regionI][nFacesInRegions[regionI]++] = fI;
-        }
-
-        forAll(regionsAddressing, regionI)
-        {
-            scalar oldTol =
-                indexedOctree<treeDataTriSurfacePrimitivePatch>::perturbTol();
-            indexedOctree<treeDataTriSurfacePrimitivePatch>::perturbTol() =
-                tolerance_;
-
-            indirectRegionPatches_.set
-            (
-                regionI,
-                new indirectTriSurfacePrimitivePatch
-                (
-                    IndirectList<labelledTri>
-                    (
-                        *this,
-                        regionsAddressing[regionI]
-                    ),
-                    points()
-                )
-            );
-
-            // Calculate bb without constructing local point numbering.
-            treeBoundBox bb;
-            label nPoints;
-            calcBounds(indirectRegionPatches_[regionI], bb, nPoints);
-
-            if (nPoints != points()().size())
-            {
-                WarningIn("triSurfaceMesh::treeByRegion() const")
-                    << "Surface " << searchableSurface::name()
-                    << " does not have compact point numbering."
-                    << " Of " << points()().size() << " only " << nPoints
-                    << " are used. This might give problems in some routines."
-                    << endl;
-            }
-
-            // Random number generator. Bit dodgy since not exactly random ;-)
-            Random rndGen(65431);
-
-            // Slightly extended bb. Slightly off-centred just so on symmetric
-            // geometry there are fewer face/edge aligned items.
-            bb = bb.extend(rndGen, 1e-4);
-            bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-            bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-
-            treeByRegion_.set
-            (
-                regionI,
-                new indexedOctree<treeDataTriSurfacePrimitivePatch>
-                (
-                    treeDataTriSurfacePrimitivePatch
-                    (
-                        true,
-                        indirectRegionPatches_[regionI],
-                        tolerance_
-                    ),
-                    bb,
-                    maxTreeDepth_,  // maxLevel
-                    10,             // leafsize
-                    3.0             // duplicity
-                )
-            );
-
-            indexedOctree<treeDataTriSurfacePrimitivePatch>::perturbTol() =
-                oldTol;
-        }
-    }
-
-    return treeByRegion_;
 }
 
 
@@ -658,7 +435,12 @@ Foam::triSurfaceMesh::edgeTree() const
 
         treeBoundBox bb;
         label nPoints;
-        calcBounds(bb, nPoints);
+        PatchTools::calcBounds
+        (
+            static_cast<const triSurface&>(*this),
+            bb,
+            nPoints
+        );
 
         // Random number generator. Bit dodgy since not exactly random ;-)
         Random rndGen(65431);
@@ -671,7 +453,7 @@ Foam::triSurfaceMesh::edgeTree() const
         bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
         scalar oldTol = indexedOctree<treeDataEdge>::perturbTol();
-        indexedOctree<treeDataEdge>::perturbTol() = tolerance_;
+        indexedOctree<treeDataEdge>::perturbTol() = tolerance();
 
         edgeTree_.reset
         (
@@ -685,7 +467,7 @@ Foam::triSurfaceMesh::edgeTree() const
                     bEdges          // selected edges
                 ),
                 bb,                 // bb
-                maxTreeDepth_,      // maxLevel
+                maxTreeDepth(),      // maxLevel
                 10,                 // leafsize
                 3.0                 // duplicity
             )
@@ -694,12 +476,6 @@ Foam::triSurfaceMesh::edgeTree() const
         indexedOctree<treeDataEdge>::perturbTol() = oldTol;
     }
     return edgeTree_();
-}
-
-
-Foam::scalar Foam::triSurfaceMesh::tolerance() const
-{
-    return tolerance_;
 }
 
 
@@ -743,24 +519,7 @@ void Foam::triSurfaceMesh::findNearest
     List<pointIndexHit>& info
 ) const
 {
-    scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
-    indexedOctree<treeDataTriSurface>::perturbTol() = tolerance_;
-
-    const indexedOctree<treeDataTriSurface>& octree = tree();
-
-    info.setSize(samples.size());
-
-    forAll(samples, i)
-    {
-        static_cast<pointIndexHit&>(info[i]) = octree.findNearest
-        (
-            samples[i],
-            nearestDistSqr[i],
-            treeDataTriSurface::findNearestOp(octree)
-        );
-    }
-
-    indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;
+    triSurfaceSearch::findNearest(samples, nearestDistSqr, info);
 }
 
 
@@ -772,67 +531,13 @@ void Foam::triSurfaceMesh::findNearest
     List<pointIndexHit>& info
 ) const
 {
-    if (regionIndices.empty())
-    {
-        findNearest(samples, nearestDistSqr, info);
-    }
-    else
-    {
-        scalar oldTol =
-            indexedOctree<treeDataTriSurfacePrimitivePatch>::perturbTol();
-        indexedOctree<treeDataTriSurfacePrimitivePatch>::perturbTol() =
-            tolerance_;
-
-        const PtrList<indexedOctree<treeDataTriSurfacePrimitivePatch> >&
-            octrees = treeByRegion();
-
-        info.setSize(samples.size());
-
-        forAll(octrees, treeI)
-        {
-            if (findIndex(regionIndices, treeI) == -1)
-            {
-                continue;
-            }
-
-            const indexedOctree<treeDataTriSurfacePrimitivePatch>& octree =
-                octrees[treeI];
-
-            forAll(samples, i)
-            {
-//                if (!octree.bb().contains(samples[i]))
-//                {
-//                    continue;
-//                }
-
-                pointIndexHit currentRegionHit = octree.findNearest
-                (
-                    samples[i],
-                    nearestDistSqr[i],
-                    treeDataTriSurfacePrimitivePatch::findNearestOp(octree)
-                );
-
-                if
-                (
-                    currentRegionHit.hit()
-                 &&
-                    (
-                        !info[i].hit()
-                     ||
-                        (
-                            magSqr(currentRegionHit.hitPoint() - samples[i])
-                          < magSqr(info[i].hitPoint() - samples[i])
-                        )
-                    )
-                )
-                {
-                    info[i] = currentRegionHit;
-                }
-            }
-        }
-
-        indexedOctree<treeDataTriSurfacePrimitivePatch>::perturbTol() = oldTol;
-    }
+    triSurfaceRegionSearch::findNearest
+    (
+        samples,
+        nearestDistSqr,
+        regionIndices,
+        info
+    );
 }
 
 
@@ -843,23 +548,7 @@ void Foam::triSurfaceMesh::findLine
     List<pointIndexHit>& info
 ) const
 {
-    const indexedOctree<treeDataTriSurface>& octree = tree();
-
-    info.setSize(start.size());
-
-    scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
-    indexedOctree<treeDataTriSurface>::perturbTol() = tolerance_;
-
-    forAll(start, i)
-    {
-        static_cast<pointIndexHit&>(info[i]) = octree.findLine
-        (
-            start[i],
-            end[i]
-        );
-    }
-
-    indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;
+    triSurfaceSearch::findLine(start, end, info);
 }
 
 
@@ -870,23 +559,7 @@ void Foam::triSurfaceMesh::findLineAny
     List<pointIndexHit>& info
 ) const
 {
-    const indexedOctree<treeDataTriSurface>& octree = tree();
-
-    info.setSize(start.size());
-
-    scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
-    indexedOctree<treeDataTriSurface>::perturbTol() = tolerance_;
-
-    forAll(start, i)
-    {
-        static_cast<pointIndexHit&>(info[i]) = octree.findLineAny
-        (
-            start[i],
-            end[i]
-        );
-    }
-
-    indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;
+    triSurfaceSearch::findLineAny(start, end, info);
 }
 
 
@@ -897,51 +570,7 @@ void Foam::triSurfaceMesh::findLineAll
     List<List<pointIndexHit> >& info
 ) const
 {
-    const indexedOctree<treeDataTriSurface>& octree = tree();
-
-    info.setSize(start.size());
-
-    scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
-    indexedOctree<treeDataTriSurface>::perturbTol() = tolerance_;
-
-    // Work array
-    DynamicList<pointIndexHit, 1, 1> hits;
-
-    DynamicList<label> shapeMask;
-
-    treeDataTriSurface::findAllIntersectOp allIntersectOp(octree, shapeMask);
-
-    forAll(start, pointI)
-    {
-        hits.clear();
-        shapeMask.clear();
-
-        while (true)
-        {
-            // See if any intersection between pt and end
-            pointIndexHit inter = octree.findLine
-            (
-                start[pointI],
-                end[pointI],
-                allIntersectOp
-            );
-
-            if (inter.hit())
-            {
-                hits.append(inter);
-
-                shapeMask.append(inter.index());
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        info[pointI].transfer(hits);
-    }
-
-    indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;
+    triSurfaceSearch::findLineAll(start, end, info);
 }
 
 
@@ -1103,7 +732,7 @@ void Foam::triSurfaceMesh::getVolumeType
     volType.setSize(points.size());
 
     scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
-    indexedOctree<treeDataTriSurface>::perturbTol() = tolerance_;
+    indexedOctree<treeDataTriSurface>::perturbTol() = tolerance();
 
     forAll(points, pointI)
     {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,8 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "PatchTools.H"
+#include "PackedBoolList.H"
+#include "boundBox.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -219,6 +221,47 @@ Foam::PatchTools::subsetMap
     // Trim
     faceMap.setSize(faceI);
     pointMap.setSize(pointI);
+}
+
+
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+void Foam::PatchTools::calcBounds
+(
+    const PrimitivePatch<Face, FaceList, PointField, PointType>& p,
+    boundBox& bb,
+    label& nPoints
+)
+{
+    // Unfortunately nPoints constructs meshPoints() so do compact version
+    // ourselves
+    const PointField& points = p.points();
+
+    PackedBoolList pointIsUsed(points.size());
+
+    nPoints = 0;
+    bb = boundBox::invertedBox;
+
+    forAll(p, faceI)
+    {
+        const Face& f = p[faceI];
+
+        forAll(f, fp)
+        {
+            label pointI = f[fp];
+            if (pointIsUsed.set(pointI, 1u))
+            {
+                bb.min() = ::Foam::min(bb.min(), points[pointI]);
+                bb.max() = ::Foam::max(bb.max(), points[pointI]);
+                nPoints++;
+            }
+        }
+    }
 }
 
 
