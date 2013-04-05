@@ -128,6 +128,31 @@ bool Foam::objectRegistry::foundObject(const word& name) const
 
 
 template<class Type>
+Foam::wordList Foam::objectRegistry::foundObjectRe(const wordRe& name) const
+{
+    wordList objectNames(size());
+
+    label count = 0;
+    forAllConstIter(HashTable<regIOobject*>, *this, iter)
+    {
+        if (isA<Type>(*iter()))
+        {
+            const word& objectName = iter()->name();
+
+            if (name.match(objectName))
+            {
+                objectNames[count++] = objectName;
+            }
+        }
+    }
+
+    objectNames.setSize(count);
+
+    return objectNames;
+}
+
+
+template<class Type>
 const Type& Foam::objectRegistry::lookupObject(const word& name) const
 {
     const_iterator iter = find(name);

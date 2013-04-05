@@ -22,22 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::externalCoupledMixedFvPatchField
+    Foam::externalCoupledTemperatureMixedFvPatchScalarField
 
 Group
-    grpGenericBoundaryConditions grpCoupledBoundaryConditions
+    grpCoupledBoundaryConditions
 
 Description
-    This boundary condition provides an interface to an external application.
-    Values are transferred as plain text files, where OperFOAM data is written
-    as:
+    This boundary condition provides a temperatue interface to an external
+    application.  Values are transferred as plain text files, where OperFOAM
+    data is written as:
 
         # Patch: <patch name>
-        <magSf1> <value1> <surfaceNormalGradient1>
-        <magSf2> <value2> <surfaceNormalGradient2>
-        <magSf3> <value3> <surfaceNormalGradient3>
+        <magSf1> <value1> <qDot1> <htc1>
+        <magSf2> <value2> <qDot2> <htc2>
+        <magSf3> <value3> <qDot3> <htc2>
         ...
-        <magSfN> <valueN> <surfaceNormalGradientN>
+        <magSfN> <valueN> <qDotN> <htcN>
 
     and received as the constituent pieces of the `mixed' condition, i.e.
 
@@ -94,7 +94,7 @@ Description
     \verbatim
     myPatch
     {
-        type            externalCoupled;
+        type            externalCoupledTemperature;
         commsDir        "$FOAM_CASE/comms";
         fileName        data;
         collate         yes;
@@ -104,17 +104,17 @@ Description
 
 SeeAlso
     mixedFvPatchField
+    externalCoupledMixedFvPatchField
 
 SourceFiles
-    externalCoupledMixedFvPatchField.C
+    externalCoupledTemperatureMixedFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef externalCoupledMixedFvPatchField_H
-#define externalCoupledMixedFvPatchField_H
+#ifndef externalCoupledTemperatureMixedFvPatchScalarField_H
+#define externalCoupledTemperatureMixedFvPatchScalarField_H
 
-#include "mixedFvPatchFields.H"
-#include "OFstream.H"
+#include "externalCoupledMixedFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -124,81 +124,17 @@ namespace Foam
 class IFstream;
 
 /*---------------------------------------------------------------------------*\
-              Class externalCoupledMixedFvPatchField Declaration
+     Class externalCoupledTemperatureMixedFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type>
-class externalCoupledMixedFvPatchField
+class externalCoupledTemperatureMixedFvPatchScalarField
 :
-    public mixedFvPatchField<Type>
+    public externalCoupledMixedFvPatchField<scalar>
 {
-
-private:
-
-    // Private data
-
-        //- Path to communications folder
-        fileName commsDir_;
-
-        //- Name of data file
-        word fName_;
-
-        //- Flag to collate all data into single transfer file
-        bool collate_;
-
-        //- Interval time between checking for return data [s]
-        label waitInterval_;
-
-        //- Time out time [s]
-        label timeOut_;
-
-        //- Calculation frequency
-        label calcFrequency_;
-
-        //- Log flag
-        bool log_;
-
-        //- Master patch flag - controls when to pause/resume execution
-        //  Note: only valid when collate option is selected
-        bool master_;
-
-
-    // Private Member Functions
-
-        //- Set the master flag when collate option is selected
-        void setMaster();
-
-        //- Return the file path to the base communications folder
-        fileName baseDir(const word& patchName = word::null) const;
-
-        //- Write the geometry to the comms dir
-        void writeGeometry(OFstream& osPoints, OFstream& osFaces) const;
-
-        //- Return the file path to the lock file
-        fileName lockFile() const;
-
-        //- Create lock file
-        void createLockFile() const;
-
-        //- Remove lock file
-        void removeLockFile() const;
-
-        //- Wait for response from external source
-        void startWait() const;
-
-        //- Wait for response from external source
-        void wait() const;
-
-        //- Initialise input stream for reading
-        void initialiseRead(IFstream& is) const;
-
 
 protected:
 
     // Protected Member Functions
-
-        //- Write data for external source - calls transferData
-        virtual void writeData(const fileName& transferFile) const;
 
         //- Write header to transfer file
         virtual void writeHeader(OFstream& os) const;
@@ -207,109 +143,80 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("externalCoupled");
-
-    //- Name of lock file
-    static word lockName;
-
-    //- Name of patch key, e.g. '# Patch:' when looking for start of patch data
-    static string patchKey;
+    TypeName("externalCoupledTemperature");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        externalCoupledMixedFvPatchField
+        externalCoupledTemperatureMixedFvPatchScalarField
         (
             const fvPatch&,
-            const DimensionedField<Type, volMesh>&
+            const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        externalCoupledMixedFvPatchField
+        externalCoupledTemperatureMixedFvPatchScalarField
         (
             const fvPatch&,
-            const DimensionedField<Type, volMesh>&,
+            const DimensionedField<scalar, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given externalCoupledMixedFvPatchField
-        //  onto a new patch
-        externalCoupledMixedFvPatchField
+        //- Construct by mapping given
+        //  externalCoupledTemperatureMixedFvPatchScalarField onto a new patch
+        externalCoupledTemperatureMixedFvPatchScalarField
         (
-            const externalCoupledMixedFvPatchField<Type>&,
+            const externalCoupledTemperatureMixedFvPatchScalarField&,
             const fvPatch&,
-            const DimensionedField<Type, volMesh>&,
+            const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        externalCoupledMixedFvPatchField
+        externalCoupledTemperatureMixedFvPatchScalarField
         (
-            const externalCoupledMixedFvPatchField&
+            const externalCoupledTemperatureMixedFvPatchScalarField&
         );
 
         //- Construct and return a clone
-        virtual tmp<fvPatchField<Type> > clone() const
+        virtual tmp<fvPatchField<scalar> > clone() const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchField<scalar> >
             (
-                new externalCoupledMixedFvPatchField<Type>(*this)
+                new externalCoupledTemperatureMixedFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        externalCoupledMixedFvPatchField
+        externalCoupledTemperatureMixedFvPatchScalarField
         (
-            const externalCoupledMixedFvPatchField&,
-            const DimensionedField<Type, volMesh>&
+            const externalCoupledTemperatureMixedFvPatchScalarField&,
+            const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchField<Type> > clone
+        virtual tmp<fvPatchField<scalar> > clone
         (
-            const DimensionedField<Type, volMesh>& iF
+            const DimensionedField<scalar, volMesh>& iF
         ) const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchField<scalar> >
             (
-                new externalCoupledMixedFvPatchField<Type>(*this, iF)
+                new externalCoupledTemperatureMixedFvPatchScalarField
+                (
+                    *this,
+                    iF
+                )
             );
         }
 
 
     //- Destructor
-    virtual ~externalCoupledMixedFvPatchField();
+    virtual ~externalCoupledTemperatureMixedFvPatchScalarField();
 
 
     // Member functions
-
-        // Access
-
-            //- Return the log flag
-            bool log() const
-            {
-                return log_;
-            }
-
-            //- Return the collate flag
-            bool collate() const
-            {
-                return collate_;
-            }
-
-            //- Return the master flag
-            bool master() const
-            {
-                return master_;
-            }
-
-            //- Return the master flag
-            bool& master()
-            {
-                return master_;
-            }
-
 
         // Evaluation functions
 
@@ -320,9 +227,6 @@ public:
             virtual void transferData(OFstream& os) const;
 
 
-        //- Write the geometry to the comms dir
-        void writeGeometry() const;
-
         //- Write
         virtual void write(Ostream&) const;
 };
@@ -331,12 +235,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "externalCoupledMixedFvPatchField.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

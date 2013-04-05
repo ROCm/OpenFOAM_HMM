@@ -1404,6 +1404,7 @@ int main(int argc, char *argv[])
     (
         "splits mesh into multiple regions (detected by walking across faces)"
     );
+#   include "addRegionOption.H"
     #include "addOverwriteOption.H"
     argList::addBoolOption
     (
@@ -1467,7 +1468,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
     runTime.functionObjects().off();
-    #include "createMesh.H"
+    #include "createNamedMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
     word blockedFacesName;

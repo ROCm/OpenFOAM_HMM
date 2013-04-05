@@ -102,7 +102,7 @@ private:
     // Private data
 
         //- Operation mode
-        operationMode oldMode_;
+        operationMode mode_;
 
         //- Heat flux / [W/m2]
         scalarField q_;
