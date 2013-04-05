@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,7 @@ License
 #include "geomDecomp.H"
 #include "vectorList.H"
 #include "PackedBoolList.H"
+#include "PatchTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -2356,7 +2357,7 @@ void Foam::distributedTriSurfaceMesh::writeStats(Ostream& os) const
 {
     boundBox bb;
     label nPoints;
-    calcBounds(bb, nPoints);
+    PatchTools::calcBounds(static_cast<const triSurface&>(*this), bb, nPoints);
     reduce(bb.min(), minOp<point>());
     reduce(bb.max(), maxOp<point>());
 

@@ -54,6 +54,7 @@ namespace Foam
 
 class polyMesh;
 class PackedBoolList;
+class boundBox;
 
 /*---------------------------------------------------------------------------*\
                          Class PatchTools Declaration
@@ -138,6 +139,21 @@ public:
         const BoolListType& includeFaces,
         labelList& pointMap,
         labelList& faceMap
+    );
+
+    //-
+    template
+    <
+        class Face,
+        template<class> class FaceList,
+        class PointField,
+        class PointType
+    >
+    static void calcBounds
+    (
+        const PrimitivePatch<Face, FaceList, PointField, PointType>& p,
+        boundBox& bb,
+        label& nPoints
     );
 
     //- Return edge-face addressing sorted by angle around the edge.
@@ -271,7 +287,6 @@ public:
         List<Face>& mergedFaces,
         labelList& pointMergeMap
     );
-
 };
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -258,7 +258,8 @@ void Foam::orientedSurface::findZoneSide
     zoneFaceI = -1;
     isOutside = false;
 
-    List<pointIndexHit> hits;
+    pointField start(1, outsidePoint);
+    List<List<pointIndexHit> > hits(1, List<pointIndexHit>());
 
     forAll(faceZone, faceI)
     {
@@ -273,7 +274,7 @@ void Foam::orientedSurface::findZoneSide
             // Check if normal different enough to decide upon
             if (magD > SMALL && (mag(n & d/magD) > 1e-6))
             {
-                point end = fc + d;
+                pointField end(1, fc + d);
 
                 //Info<< "Zone " << zoneI << " : Shooting ray"
                 //    << " from " << outsidePoint
@@ -281,12 +282,13 @@ void Foam::orientedSurface::findZoneSide
                 //    << " to pierce triangle " << faceI
                 //    << " with centre " << fc << endl;
 
-                surfSearches.findLineAll(outsidePoint, end, hits);
+
+                surfSearches.findLineAll(start, end, hits);
 
                 label zoneIndex = -1;
-                forAll(hits, i)
+                forAll(hits[0], i)
                 {
-                    if (hits[i].index() == faceI)
+                    if (hits[0][i].index() == faceI)
                     {
                         zoneIndex = i;
                         break;
@@ -570,6 +572,21 @@ bool Foam::orientedSurface::orient
     bool geomFlipped = flipSurface(s, flipState);
 
     return topoFlipped || geomFlipped;
+}
+
+
+bool Foam::orientedSurface::orientAll(triSurface& s)
+{
+    if (orientConsistent(s))
+    {
+        Info<< "Some triangles are not oriented consistently. Aborting."
+            << endl;
+        return false;
+    }
+
+    labelList flipState(s.size(), FLIP);
+
+    return flipSurface(s, flipState);
 }
 
 
