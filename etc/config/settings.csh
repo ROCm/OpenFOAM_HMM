@@ -219,14 +219,14 @@ case ThirdParty:
     case Gcc++0x:
     case Gcc46:
     case Gcc46++0x:
-        set gcc_version=gcc-4.6.2
+        set gcc_version=gcc-4.6.1
         set gmp_version=gmp-5.0.4
         set mpfr_version=mpfr-3.1.0
         set mpc_version=mpc-0.9
         breaksw
     case Gcc47:
     case Gcc47++0x:
-        set gcc_version=gcc-4.7.0
+        set gcc_version=gcc-4.7.2
         set gmp_version=gmp-5.0.4
         set mpfr_version=mpfr-3.1.0
         set mpc_version=mpc-0.9
@@ -237,17 +237,6 @@ case ThirdParty:
         set gmp_version=gmp-5.0.1
         set mpfr_version=mpfr-2.4.2
         set mpc_version=mpc-0.8.1
-        breaksw
-    case Gcc44:
-    case Gcc44++0x:
-        set gcc_version=gcc-4.4.3
-        set gmp_version=gmp-5.0.1
-        set mpfr_version=mpfr-2.4.2
-        breaksw
-    case Gcc43:
-        set gcc_version=gcc-4.3.3
-        set gmp_version=gmp-4.2.4
-        set mpfr_version=mpfr-2.4.1
         breaksw
     case Clang:
         # using clang - not gcc

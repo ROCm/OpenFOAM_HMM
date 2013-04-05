@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,8 +27,8 @@ License
 #include "solidThermoPhysicsTypes.H"
 #include "thermoPhysicsTypes.H"
 
-#include "ODESolidChemistryModel.H"
-#include "solidChemistryModel.H"
+#include "pyrolysisChemistryModel.H"
+#include "basicSolidChemistryModel.H"
 
 #include "ode.H"
 
@@ -39,7 +39,8 @@ namespace Foam
     makeSolidChemistrySolverType
     (
         ode,
-        solidChemistryModel,
+        pyrolysisChemistryModel,
+        basicSolidChemistryModel,
         hConstSolidThermoPhysics,
         gasHThermoPhysics
     )
@@ -47,7 +48,8 @@ namespace Foam
     makeSolidChemistrySolverType
     (
         ode,
-        solidChemistryModel,
+        pyrolysisChemistryModel,
+        basicSolidChemistryModel,
         hExponentialSolidThermoPhysics,
         gasHThermoPhysics
     )

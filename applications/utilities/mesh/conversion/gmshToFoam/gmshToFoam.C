@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,11 +21,15 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Application
+    gmshToFoam
+
 Description
     Reads .msh file as written by Gmsh.
 
     Needs surface elements on mesh to be present and aligned with outside faces
-    of the mesh. I.e. if the mesh is hexes, the outside faces need to be quads
+    of the mesh. I.e. if the mesh is hexes, the outside faces need to be
+    quads.
 
     Note: There is something seriously wrong with the ordering written in the
     .msh file. Normal operation is to check the ordering and invert prisms
@@ -38,6 +42,7 @@ Description
 
     A use of the cell zone information, is for field initialization with the
     "setFields" utility. see the classes:  topoSetSource, zoneToCell.
+
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
@@ -745,7 +750,6 @@ void readCells
 }
 
 
-// Main program:
 
 int main(int argc, char *argv[])
 {
@@ -1059,7 +1063,7 @@ int main(int argc, char *argv[])
         {
             if (zoneFaces[zoneI].size())
             {
-                label physReg = zoneToPhys[zoneI];
+                label physReg = patchToPhys[zoneI];
 
                 Map<word>::const_iterator iter = physicalNames.find(physReg);
 

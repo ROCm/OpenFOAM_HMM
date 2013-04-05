@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -155,6 +155,47 @@ timeVaryingMappedFixedValuePointPatchField
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+void Foam::timeVaryingMappedFixedValuePointPatchField<Type>::autoMap
+(
+    const pointPatchFieldMapper& m
+)
+{
+    fixedValuePointPatchField<Type>::autoMap(m);
+    if (startSampledValues_.size())
+    {
+        startSampledValues_.autoMap(m);
+        endSampledValues_.autoMap(m);
+    }
+    // Clear interpolator
+    mapperPtr_.clear();
+    startSampleTime_ = -1;
+    endSampleTime_ = -1;
+}
+
+
+template<class Type>
+void Foam::timeVaryingMappedFixedValuePointPatchField<Type>::rmap
+(
+    const pointPatchField<Type>& ptf,
+    const labelList& addr
+)
+{
+    fixedValuePointPatchField<Type>::rmap(ptf, addr);
+
+    const timeVaryingMappedFixedValuePointPatchField<Type>& tiptf =
+        refCast<const timeVaryingMappedFixedValuePointPatchField<Type> >(ptf);
+
+    startSampledValues_.rmap(tiptf.startSampledValues_, addr);
+    endSampledValues_.rmap(tiptf.endSampledValues_, addr);
+
+    // Clear interpolator
+    mapperPtr_.clear();
+    startSampleTime_ = -1;
+    endSampleTime_ = -1;
+}
+
 
 template<class Type>
 void Foam::timeVaryingMappedFixedValuePointPatchField<Type>::checkTable()
@@ -313,6 +354,18 @@ void Foam::timeVaryingMappedFixedValuePointPatchField<Type>::checkTable()
                 )
             );
 
+            if (vals.size() != mapperPtr_().sourceSize())
+            {
+                FatalErrorIn
+                (
+                    "timeVaryingMappedFixedValuePointPatchField<Type>::"
+                    "checkTable()"
+                )   << "Number of values (" << vals.size()
+                    << ") differs from the number of points ("
+                    <<  mapperPtr_().sourceSize()
+                    << ") in file " << vals.objectPath() << exit(FatalError);
+            }
+
             startAverage_ = vals.average();
             startSampledValues_ = mapperPtr_().interpolate(vals);
         }
@@ -357,6 +410,19 @@ void Foam::timeVaryingMappedFixedValuePointPatchField<Type>::checkTable()
                     false
                 )
             );
+
+            if (vals.size() != mapperPtr_().sourceSize())
+            {
+                FatalErrorIn
+                (
+                    "timeVaryingMappedFixedValuePointPatchField<Type>::"
+                    "checkTable()"
+                )   << "Number of values (" << vals.size()
+                    << ") differs from the number of points ("
+                    <<  mapperPtr_().sourceSize()
+                    << ") in file " << vals.objectPath() << exit(FatalError);
+            }
+
             endAverage_ = vals.average();
             endSampledValues_ = mapperPtr_().interpolate(vals);
         }

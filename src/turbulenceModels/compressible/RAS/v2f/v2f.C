@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -398,7 +398,7 @@ void v2f::correct()
     const volTensorField gradU(fvc::grad(U_));
     const volScalarField S2(2*magSqr(dev(symm(gradU))));
 
-    const volScalarField G(type() + ".G", mut_*S2);
+    const volScalarField G(GName(), mut_*S2);
     const volScalarField T(Ts());
     const volScalarField L2("v2f.L2", sqr(Ls()));
     const volScalarField alpha
@@ -406,9 +406,11 @@ void v2f::correct()
         "v2f::alpha",
         1.0/T*((C1_ - N)*v2_ - 2.0/3.0*k_*(C1_ - 1.0))
     );
-
-    tmp<volScalarField> Ceps1 =
-        1.4*(1.0 + 0.05*min(sqrt(k_/v2_), scalar(100.0)));
+    const volScalarField Ceps1
+    (
+        "Ceps1",
+        1.4*(1.0 + 0.05*min(sqrt(k_/v2_), scalar(100.0)))
+    );
 
     // Update epsilon (and possibly G) at the wall
     epsilon_.boundaryField().updateCoeffs();
@@ -420,7 +422,7 @@ void v2f::correct()
       + fvm::div(phi_, epsilon_)
       - fvm::laplacian(DepsilonEff(), epsilon_)
      ==
-        Ceps1()*G/T
+        Ceps1*G/T
       - fvm::SuSp(((2.0/3.0)*Ceps1 + Ceps3_)*rho_*divU, epsilon_)
       - fvm::Sp(Ceps2_*rho_/T, epsilon_)
     );

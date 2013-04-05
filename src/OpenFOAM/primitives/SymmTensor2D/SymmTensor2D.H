@@ -50,7 +50,7 @@ namespace Foam
                          Class SymmTensor2D Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class Cmpt>
+template<class Cmpt>
 class SymmTensor2D
 :
     public VectorSpace<SymmTensor2D<Cmpt>, Cmpt, 3>

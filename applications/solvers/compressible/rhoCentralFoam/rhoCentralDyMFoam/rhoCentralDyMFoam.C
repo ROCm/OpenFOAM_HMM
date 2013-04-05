@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -165,7 +165,6 @@ int main(int argc, char *argv[])
         mesh.movePoints(motionPtr->newPoints());
 
         phi = aphiv_pos*rho_pos + aphiv_neg*rho_neg;
-        Info<< phi.boundaryField()[0] << endl;
 
         surfaceVectorField phiUp
         (

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -167,13 +167,7 @@ void Foam::fieldAverage::calcAverages()
         prevTimeIndex_ = currentTimeIndex;
     }
 
-
     Info<< "Calculating averages" << nl << endl;
-    forAll(faItems_, fieldI)
-    {
-        totalIter_[fieldI]++;
-        totalTime_[fieldI] += obr_.time().deltaTValue();
-    }
 
     addMeanSqrToPrime2Mean<scalar, scalar>
     (
@@ -202,6 +196,12 @@ void Foam::fieldAverage::calcAverages()
         meanVectorFields_,
         prime2MeanSymmTensorFields_
     );
+
+    forAll(faItems_, fieldI)
+    {
+        totalIter_[fieldI]++;
+        totalTime_[fieldI] += obr_.time().deltaTValue();
+    }
 }
 
 

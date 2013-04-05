@@ -53,7 +53,7 @@ class SymmTensor2D;
                            Class Tensor2D Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class Cmpt>
+template<class Cmpt>
 class Tensor2D
 :
     public VectorSpace<Tensor2D<Cmpt>, Cmpt, 4>

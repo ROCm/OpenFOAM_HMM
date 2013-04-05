@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -20,6 +20,9 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+Application
+    foamToEnsight
 
 Description
     Translates OpenFOAM data to EnSight format.
@@ -91,7 +94,6 @@ bool inFileNameList
 }
 
 
-// Main program:
 
 int main(int argc, char *argv[])
 {
@@ -243,7 +245,7 @@ int main(int argc, char *argv[])
         // test pre check variable if there is a moving mesh
         if (meshMoving)
         {
-            geomFileName = prepend + "***";
+            geomFileName = prepend + "****";
         }
 
         ensightCaseFile
@@ -292,7 +294,7 @@ int main(int argc, char *argv[])
             <<  (
                     "measured:     1     "
                   + prepend
-                  + "***."
+                  + "****."
                   + cloudIter.key()
                 ).c_str()
             << nl;

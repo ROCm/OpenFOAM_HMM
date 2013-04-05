@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    buoyantSimpleRadiationFoam
+    buoyantSimpleFoam
 
 Description
     Steady-state solver for buoyant, turbulent flow of compressible fluids,
@@ -31,7 +31,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "psiThermo.H"
+#include "rhoThermo.H"
 #include "RASModel.H"
 #include "radiationModel.H"
 #include "simpleControl.H"

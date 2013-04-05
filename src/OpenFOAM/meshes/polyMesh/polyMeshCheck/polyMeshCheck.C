@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -434,22 +434,6 @@ bool Foam::polyMesh::checkCellDeterminant
             << "checking for under-determined cells" << endl;
     }
 
-    // Determine number of dimensions and (for 2D) missing dimension
-    label nDims = 0;
-    label twoD = -1;
-    for (direction dir = 0; dir < vector::nComponents; dir++)
-    {
-        if (meshD[dir] == 1)
-        {
-            nDims++;
-        }
-        else
-        {
-            twoD = dir;
-        }
-    }
-
-
     tmp<scalarField> tcellDeterminant = primitiveMeshTools::cellDeterminant
     (
         *this,
@@ -516,15 +500,17 @@ bool Foam::polyMesh::checkCellDeterminant
 }
 
 
-bool Foam::polyMesh::checkClosedBoundary(const bool report) const
-{
-    return primitiveMesh::checkClosedBoundary
-    (
-        faceAreas(),
-        report,
-        syncTools::getInternalOrCoupledFaces(*this)
-    );
-}
+//- Could override checkClosedBoundary to not look at (collocated!) coupled
+//  faces
+//bool Foam::polyMesh::checkClosedBoundary(const bool report) const
+//{
+//    return primitiveMesh::checkClosedBoundary
+//    (
+//        faceAreas(),
+//        report,
+//        syncTools::getInternalOrCollocatedCoupledFaces(*this)
+//    );
+//}
 
 
 bool Foam::polyMesh::checkFaceOrthogonality

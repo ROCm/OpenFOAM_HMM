@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,12 +59,13 @@ void Foam::energyRegionCoupledFvPatchScalarField::setMethod() const
 {
     if (method_ == UNDEFINED)
     {
-        if (
-                this->db().foundObject<compressible::turbulenceModel>
-                (
-                    "turbulenceModel"
-                )
-           )
+        if
+        (
+            this->db().foundObject<compressible::turbulenceModel>
+            (
+                "turbulenceModel"
+            )
+        )
         {
             method_ = FLUID;
         }
@@ -105,13 +106,13 @@ kappa() const
     {
         case FLUID:
         {
-            const compressible::turbulenceModel& model =
+            const compressible::turbulenceModel& turbModel =
                 this->db().lookupObject<compressible::turbulenceModel>
                 (
                     "turbulenceModel"
                 );
 
-            return model.kappaEff(patch().index());
+            return turbModel.kappaEff(patch().index());
         }
         break;
 
@@ -212,8 +213,7 @@ energyRegionCoupledFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    LduInterfaceField<scalar>(refCast<const lduInterface>(p)),
-    fvPatchScalarField(p, iF),
+    coupledFvPatchField<scalar>(p, iF),
     regionCoupledPatch_(refCast<const regionCoupledBaseFvPatch>(p)),
     method_(UNDEFINED),
     nbrThermoPtr_(NULL),
@@ -230,8 +230,7 @@ energyRegionCoupledFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    LduInterfaceField<scalar>(refCast<const lduInterface>(p)),
-    fvPatchScalarField(ptf, p, iF, mapper),
+    coupledFvPatchField<scalar>(ptf, p, iF, mapper),
     regionCoupledPatch_(refCast<const regionCoupledBaseFvPatch>(p)),
     method_(ptf.method_),
     nbrThermoPtr_(NULL),
@@ -247,8 +246,7 @@ energyRegionCoupledFvPatchScalarField
     const dictionary& dict
 )
 :
-    LduInterfaceField<scalar>(refCast<const lduInterface>(p)),
-    fvPatchScalarField(p, iF, dict),
+    coupledFvPatchField<scalar>(p, iF, dict),
     regionCoupledPatch_(refCast<const regionCoupledBaseFvPatch>(p)),
     method_(UNDEFINED),
     nbrThermoPtr_(NULL),
@@ -287,8 +285,7 @@ energyRegionCoupledFvPatchScalarField
     const energyRegionCoupledFvPatchScalarField& ptf
 )
 :
-    LduInterfaceField<scalar>(refCast<const lduInterface>(ptf.patch())),
-    fvPatchScalarField(ptf),
+    coupledFvPatchField<scalar>(ptf),
     regionCoupledPatch_(ptf.regionCoupledPatch_),
     method_(ptf.method_),
     nbrThermoPtr_(NULL),
@@ -303,8 +300,7 @@ energyRegionCoupledFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    LduInterfaceField<scalar>(refCast<const lduInterface>(ptf.patch())),
-    fvPatchScalarField(ptf, iF),
+    coupledFvPatchField<scalar>(ptf, iF),
     regionCoupledPatch_(ptf.regionCoupledPatch_),
     method_(ptf.method_),
     nbrThermoPtr_(NULL),
@@ -314,24 +310,19 @@ energyRegionCoupledFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
 Foam::tmp<Foam::scalarField> Foam::energyRegionCoupledFvPatchScalarField::
 snGrad() const
 {
     return
-    (*this - patchInternalField())*regionCoupledPatch_.patch().deltaCoeffs();
+        regionCoupledPatch_.patch().deltaCoeffs()
+       *(*this - patchInternalField());
 }
 
 
-void Foam::energyRegionCoupledFvPatchScalarField::initEvaluate
-(
-    const Pstream::commsTypes
-)
+Foam::tmp<Foam::scalarField> Foam::energyRegionCoupledFvPatchScalarField::
+snGrad(const scalarField&) const
 {
-    if (!updated())
-    {
-        updateCoeffs();
-    }
+    return snGrad();
 }
 
 
@@ -362,42 +353,6 @@ void Foam::energyRegionCoupledFvPatchScalarField::evaluate
     );
 
     fvPatchScalarField::evaluate();
-}
-
-
-Foam::tmp<Foam::scalarField> Foam::energyRegionCoupledFvPatchScalarField::
-valueInternalCoeffs
-(
-    const tmp<scalarField>& w
-) const
-{
-    return scalar(pTraits<scalar>::one)*w;
-}
-
-
-Foam::tmp<Foam::scalarField> Foam::energyRegionCoupledFvPatchScalarField::
-valueBoundaryCoeffs
-(
-    const tmp<scalarField>& w
-) const
-{
-    return scalar(pTraits<scalar>::one)*(1.0 - w);
-}
-
-
-Foam::tmp<Foam::scalarField> Foam::energyRegionCoupledFvPatchScalarField::
-gradientInternalCoeffs() const
-{
-    return
-        -scalar(pTraits<scalar>::one)
-        *regionCoupledPatch_.patch().deltaCoeffs();
-}
-
-
-Foam::tmp<Foam::scalarField> Foam::energyRegionCoupledFvPatchScalarField::
-gradientBoundaryCoeffs() const
-{
-    return -this->gradientInternalCoeffs();
 }
 
 
@@ -545,6 +500,7 @@ void Foam::energyRegionCoupledFvPatchScalarField::write(Ostream& os) const
     fvPatchField<scalar>::write(os);
     this->writeEntry("value", os);
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

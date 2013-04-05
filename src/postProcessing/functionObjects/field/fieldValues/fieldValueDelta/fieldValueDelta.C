@@ -26,6 +26,8 @@ License
 #include "fieldValueDelta.H"
 #include "ListOps.H"
 #include "Time.H"
+#include "volFields.H"
+#include "surfaceFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -180,8 +182,10 @@ void Foam::fieldValues::fieldValueDelta::write()
         {
             Info<< "    none" << endl;
         }
-
-        Info<< endl;
+        else
+        {
+            Info<< endl;
+        }
     }
 }
 

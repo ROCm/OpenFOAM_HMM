@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,6 +42,7 @@ Description
 SourceFiles
     AMIInterpolation.C
     AMIInterpolationName.C
+    AMIInterpolationParallelOps.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -468,7 +469,7 @@ public:
                 ) const;
 
 
-            //- Interpolate from target to source with supplied binary op
+            //- Interpolate from target to source with supplied op
             template<class Type, class CombineOp>
             tmp<Field<Type> > interpolateToSource
             (
@@ -476,8 +477,7 @@ public:
                 const CombineOp& cop
             ) const;
 
-            //- Interpolate from target tmp field to source with supplied
-            //  binary op
+            //- Interpolate from target tmp field to source with supplied op
             template<class Type, class CombineOp>
             tmp<Field<Type> > interpolateToSource
             (

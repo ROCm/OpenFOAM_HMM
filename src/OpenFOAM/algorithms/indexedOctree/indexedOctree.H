@@ -65,7 +65,7 @@ TemplateName(indexedOctree);
                            Class indexedOctree Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class Type>
+template<class Type>
 class indexedOctree
 :
     public indexedOctreeName
@@ -212,7 +212,7 @@ private:
         // Query
 
             //- Find nearest point to line.
-            template <class FindNearestOp>
+            template<class FindNearestOp>
             void findNearest
             (
                 const label nodeI,
@@ -297,7 +297,7 @@ private:
             // intersection point.
             // findAny=true : return any intersection
             // findAny=false: return nearest (to start) intersection
-            template <class FindIntersectOp>
+            template<class FindIntersectOp>
             void traverseNode
             (
                 const bool findAny,
@@ -316,7 +316,7 @@ private:
             ) const;
 
             //- Find any or nearest intersection
-            template <class FindIntersectOp>
+            template<class FindIntersectOp>
             pointIndexHit findLine
             (
                 const bool findAny,
@@ -336,7 +336,7 @@ private:
 //            ) const;
 
             //- Find any or nearest intersection of line between start and end.
-            template <class FindIntersectOp>
+            template<class FindIntersectOp>
             pointIndexHit findLine
             (
                 const bool findAny,
@@ -364,7 +364,7 @@ private:
             ) const;
 
 
-            template <class CompareOp>
+            template<class CompareOp>
             static void findNear
             (
                 const scalar nearDist,
@@ -549,7 +549,7 @@ public:
             //  - bool : any point found nearer than nearestDistSqr
             //  - label: index in shapes
             //  - point: actual nearest point found
-            template <class FindNearestOp>
+            template<class FindNearestOp>
             pointIndexHit findNearest
             (
                 const point& sample,
@@ -572,7 +572,7 @@ public:
 //            ) const;
 
             //- Low level: calculate nearest starting from subnode.
-            template <class FindNearestOp>
+            template<class FindNearestOp>
             void findNearest
             (
                 const label nodeI,
@@ -599,7 +599,7 @@ public:
                 point& linePoint
             ) const;
 
-            template <class FindNearestOp>
+            template<class FindNearestOp>
             pointIndexHit findNearest
             (
                 const linePointRef& ln,
@@ -624,7 +624,7 @@ public:
             ) const;
 
             //- Find nearest intersection of line between start and end.
-            template <class FindIntersectOp>
+            template<class FindIntersectOp>
             pointIndexHit findLine
             (
                 const point& start,
@@ -633,7 +633,7 @@ public:
             ) const;
 
             //- Find any intersection of line between start and end.
-            template <class FindIntersectOp>
+            template<class FindIntersectOp>
             pointIndexHit findLineAny
             (
                 const point& start,
@@ -690,7 +690,7 @@ public:
 
             //- Find near pairs and apply CompareOp to them.
             //  tree2 can be *this or different tree.
-            template <class CompareOp>
+            template<class CompareOp>
             void findNear
             (
                 const scalar nearDist,

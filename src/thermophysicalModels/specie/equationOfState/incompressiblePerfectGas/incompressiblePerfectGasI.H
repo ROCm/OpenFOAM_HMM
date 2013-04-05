@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -121,7 +121,7 @@ inline Foam::scalar Foam::incompressiblePerfectGas<Specie>::psi
     scalar T
 ) const
 {
-    return 1.0/(this->R()*T);
+    return 0.0;
 }
 
 
@@ -132,7 +132,7 @@ inline Foam::scalar Foam::incompressiblePerfectGas<Specie>::Z
     scalar
 ) const
 {
-    return 1.0;
+    return 0.0;
 }
 
 

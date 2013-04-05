@@ -54,7 +54,7 @@ using namespace Foam;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
-template <class Triangulation, class Type>
+template<class Triangulation, class Type>
 Foam::tmp<Foam::Field<Type> > filterFarPoints
 (
     const Triangulation& mesh,
@@ -89,7 +89,7 @@ Foam::tmp<Foam::Field<Type> > filterFarPoints
 }
 
 
-template <class T>
+template<class T>
 autoPtr<mapDistribute> buildMap
 (
     const T& mesh,
@@ -153,7 +153,7 @@ autoPtr<mapDistribute> buildMap
 }
 
 
-template <class T>
+template<class T>
 Foam::tmp<Foam::triadField> buildAlignmentField(const T& mesh)
 {
     tmp<triadField> tAlignments
@@ -181,7 +181,7 @@ Foam::tmp<Foam::triadField> buildAlignmentField(const T& mesh)
 }
 
 
-template <class T>
+template<class T>
 Foam::tmp<Foam::pointField> buildPointField(const T& mesh)
 {
     tmp<pointField> tPoints

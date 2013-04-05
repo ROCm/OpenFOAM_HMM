@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -83,6 +83,10 @@ void Foam::attachDetach::attachInterface
 
     forAll(removedPoints, pointI)
     {
+        //Pout<< "Removing point:" << removedPoints[pointI]
+        //    << " currently at:" << ref.points()[removedPoints[pointI]]
+        //    << endl;
+
         ref.setAction(polyRemovePoint(removedPoints[pointI]));
     }
 
@@ -90,8 +94,16 @@ void Foam::attachDetach::attachInterface
     // Remove all faces from the slave patch
     forAll(slavePatch, i)
     {
+        //Pout<< "Removing face " << i + slavePatchStart
+        //    << " with verts:" << ref.faces()[i + slavePatchStart]
+        //    << " at:"
+        //    <<  UIndirectList<point>
+        //        (
+        //            ref.points(),
+        //            ref.faces()[i + slavePatchStart]
+        //        )
+        //    << endl;
         ref.setAction(polyRemoveFace(i + slavePatchStart));
-// Pout<< "Removing face " << i + slavePatchStart << endl;
     }
 
     // Modify the faces from the master patch

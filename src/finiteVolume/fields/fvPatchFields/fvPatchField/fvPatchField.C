@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -173,15 +173,13 @@ void Foam::fvPatchField<Type>::check(const fvPatchField<Type>& ptf) const
 }
 
 
-// Return gradient at boundary
 template<class Type>
 Foam::tmp<Foam::Field<Type> > Foam::fvPatchField<Type>::snGrad() const
 {
-    return (*this - patchInternalField())*patch_.deltaCoeffs();
+    return patch_.deltaCoeffs()*(*this - patchInternalField());
 }
 
 
-// Return internal field next to patch as patch field
 template<class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::fvPatchField<Type>::patchInternalField() const
@@ -200,10 +198,61 @@ void Foam::fvPatchField<Type>::patchInternalField(Field<Type>& pif) const
 template<class Type>
 void Foam::fvPatchField<Type>::autoMap
 (
-    const fvPatchFieldMapper& m
+    const fvPatchFieldMapper& mapper
 )
 {
-    Field<Type>::autoMap(m);
+    Field<Type>& f = *this;
+
+    if (!this->size())
+    {
+        f.setSize(mapper.size());
+        if (f.size())
+        {
+            f = this->patchInternalField();
+        }
+    }
+    else
+    {
+        // Map all faces provided with mapping data
+        Field<Type>::autoMap(mapper);
+
+        // For unmapped faces set to internal field value (zero-gradient)
+        if
+        (
+            mapper.direct()
+         && &mapper.directAddressing()
+         && mapper.directAddressing().size()
+        )
+        {
+            Field<Type> pif(this->patchInternalField());
+
+            const labelList& mapAddressing = mapper.directAddressing();
+
+            forAll(mapAddressing, i)
+            {
+                if (mapAddressing[i] < 0)
+                {
+                    f[i] = pif[i];
+                }
+            }
+        }
+        else if (!mapper.direct() && mapper.addressing().size())
+        {
+            Field<Type> pif(this->patchInternalField());
+
+            const labelListList& mapAddressing = mapper.addressing();
+
+            forAll(mapAddressing, i)
+            {
+                const labelList& localAddrs = mapAddressing[i];
+
+                if (!localAddrs.size())
+                {
+                    f[i] = pif[i];
+                }
+            }
+        }
+    }
 }
 
 

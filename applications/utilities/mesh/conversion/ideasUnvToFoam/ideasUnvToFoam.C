@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -20,6 +20,9 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+Application
+    ideasUnvToFoam
 
 Description
     I-Deas unv format mesh conversion.
@@ -650,7 +653,6 @@ label findPatch(const List<labelHashSet>& dofGroups, const face& f)
 }
 
 
-// Main program:
 
 int main(int argc, char *argv[])
 {
@@ -907,6 +909,8 @@ int main(int argc, char *argv[])
         {
             if (own[faceI] != -1 && nei[faceI] != -1)
             {
+                faceToCell[1].insert(faceI, own[faceI]);
+                faceToCell[0].insert(faceI, nei[faceI]);
                 cnt++;
             }
         }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,6 +39,7 @@ SourceFiles
 #include "chemistryReader.H"
 #include "fileName.H"
 #include "typeInfo.H"
+#include "Switch.H"
 #include "HashPtrTable.H"
 #include "ReactionList.H"
 #include "DynamicList.H"
@@ -207,6 +208,9 @@ private:
         //- List of the reactions
         ReactionList<gasHThermoPhysics> reactions_;
 
+        //- Flag to indicate that file is in new format
+        Switch newFormat_;
+
 
     // Private Member Functions
 
@@ -319,7 +323,8 @@ public:
         (
             const fileName& chemkinFile,
             speciesTable& species,
-            const fileName& thermoFileName = fileName::null
+            const fileName& thermoFileName = fileName::null,
+            const bool newFormat = false
         );
 
         //- Construct by getting the CHEMKIN III file name from dictionary

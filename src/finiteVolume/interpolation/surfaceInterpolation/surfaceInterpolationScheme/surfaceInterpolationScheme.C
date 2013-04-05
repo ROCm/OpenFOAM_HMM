@@ -171,7 +171,10 @@ surfaceInterpolationScheme<Type>::interpolate
                "(const GeometricField<Type, fvPatchField, volMesh>&, "
                "const tmp<surfaceScalarField>&, "
                "const tmp<surfaceScalarField>&) : "
-               "interpolating volTypeField from cells to faces "
+               "interpolating "
+            << vf.type() << " "
+            << vf.name()
+            << " from cells to faces "
                "without explicit correction"
             << endl;
     }
@@ -252,7 +255,10 @@ surfaceInterpolationScheme<Type>::interpolate
         Info<< "surfaceInterpolationScheme<Type>::interpolate"
                "(const GeometricField<Type, fvPatchField, volMesh>&, "
                "const tmp<surfaceScalarField>&) : "
-               "interpolating volTypeField from cells to faces "
+               "interpolating "
+            << vf.type() << " "
+            << vf.name()
+            << " from cells to faces "
                "without explicit correction"
             << endl;
     }
@@ -326,7 +332,10 @@ surfaceInterpolationScheme<Type>::interpolate
     {
         Info<< "surfaceInterpolationScheme<Type>::interpolate"
                "(const GeometricField<Type, fvPatchField, volMesh>&) : "
-            << "interpolating volTypeField from cells to faces"
+               "interpolating "
+            << vf.type() << " "
+            << vf.name()
+            << " from cells to faces"
             << endl;
     }
 

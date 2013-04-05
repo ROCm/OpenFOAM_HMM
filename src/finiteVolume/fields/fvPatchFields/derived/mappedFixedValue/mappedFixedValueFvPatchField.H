@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -83,7 +83,8 @@ SourceFiles
 #define mappedFixedValueFvPatchField_H
 
 #include "fixedValueFvPatchFields.H"
-#include "interpolation.H"
+//#include "interpolation.H"
+#include "mappedPatchFieldBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -97,37 +98,19 @@ namespace Foam
 template<class Type>
 class mappedFixedValueFvPatchField
 :
-    public fixedValueFvPatchField<Type>
+    public fixedValueFvPatchField<Type>,
+    public mappedPatchFieldBase<Type>
 {
 
 protected:
 
-    // Protected data
-
-        //- Name of field to sample - defaults to field associated with this
-        //  patchField if not specified
-        word fieldName_;
-
-        //- If true adjust the mapped field to maintain average value average_
-        const bool setAverage_;
-
-        //- Average value the mapped field is adjusted to maintain if
-        //  setAverage_ is set true
-        const Type average_;
-
-        //- Interpolation scheme to use for nearestcell mode
-        word interpolationScheme_;
-
-        mutable autoPtr<interpolation<Type> > interpolator_;
-
-
     // Protected Member Functions
 
-        //- Field to sample. Either on my or nbr mesh
-        const GeometricField<Type, fvPatchField, volMesh>& sampleField() const;
-
-        //- Access the interpolation method
-        const interpolation<Type>& interpolator() const;
+        const mappedPatchBase& mapper
+        (
+            const fvPatch& p,
+            const DimensionedField<Type, volMesh>& iF
+        );
 
 
 public:

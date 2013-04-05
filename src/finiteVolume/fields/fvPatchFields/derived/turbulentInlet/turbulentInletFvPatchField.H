@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,7 @@ Description
 
     \vartable
         x_p     | patch values
-        x_{ref} | refernce patch values
+        x_{ref} | reference patch values
         n       | time level
         \alpha  | fraction of new random component added to previous time value
         C_{RMS} | RMS coefficient

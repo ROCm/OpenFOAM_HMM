@@ -1,9 +1,0 @@
-thermoBaffleModel/thermoBaffleModel.C
-thermoBaffleModel/thermoBaffleModelNew.C
-thermoBaffle/thermoBaffle.C
-noThermo/noThermo.C
-
-derivedFvPatchFields/thermoBaffle/thermoBaffleFvPatchScalarField.C
-
-
-LIB = $(FOAM_LIBBIN)/libthermoBaffleModels

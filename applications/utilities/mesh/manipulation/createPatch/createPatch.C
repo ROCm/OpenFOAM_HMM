@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -20,6 +20,9 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+Application
+    createPatch
 
 Description
     Utility to create patches out of selected boundary faces. Faces come either
@@ -288,7 +291,7 @@ void separateList
 
 
 // Synchronise points on both sides of coupled boundaries.
-template <class CombineOp>
+template<class CombineOp>
 void syncPoints
 (
     const polyMesh& mesh,
@@ -499,7 +502,6 @@ void syncPoints
 }
 
 
-// Main program:
 
 int main(int argc, char *argv[])
 {

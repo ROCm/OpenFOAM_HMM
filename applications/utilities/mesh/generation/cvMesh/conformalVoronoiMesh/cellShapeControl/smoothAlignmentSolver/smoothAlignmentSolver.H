@@ -57,31 +57,31 @@ class smoothAlignmentSolver
 
     // Private Member Functions
 
-        template <class Triangulation, class Type>
+        template<class Triangulation, class Type>
         tmp<Field<Type> > filterFarPoints
         (
             const Triangulation& mesh,
             const Field<Type>& field
         );
 
-        template <class Triangulation>
+        template<class Triangulation>
         autoPtr<mapDistribute> buildMap
         (
             const Triangulation& mesh,
             labelListList& pointPoints
         );
 
-        template <class Triangulation>
+        template<class Triangulation>
         autoPtr<mapDistribute> buildReferredMap
         (
             const Triangulation& mesh,
             labelList& indices
         );
 
-        template <class Triangulation>
+        template<class Triangulation>
         tmp<triadField> buildAlignmentField(const Triangulation& mesh);
 
-        template <class Triangulation>
+        template<class Triangulation>
         tmp<pointField> buildPointField(const Triangulation& mesh);
 
         //- Disallow default bitwise copy construct

@@ -33,12 +33,12 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class Cmpt>
+template<class Cmpt>
 inline SymmTensor2D<Cmpt>::SymmTensor2D()
 {}
 
 
-template <class Cmpt>
+template<class Cmpt>
 inline SymmTensor2D<Cmpt>::SymmTensor2D
 (
     const VectorSpace<SymmTensor2D<Cmpt>, Cmpt, 3>& vs
@@ -48,7 +48,7 @@ inline SymmTensor2D<Cmpt>::SymmTensor2D
 {}
 
 
-template <class Cmpt>
+template<class Cmpt>
 inline SymmTensor2D<Cmpt>::SymmTensor2D(const SphericalTensor2D<Cmpt>& st)
 {
     this->v_[XX] = st.ii(); this->v_[XY] = 0;
@@ -56,7 +56,7 @@ inline SymmTensor2D<Cmpt>::SymmTensor2D(const SphericalTensor2D<Cmpt>& st)
 }
 
 
-template <class Cmpt>
+template<class Cmpt>
 inline SymmTensor2D<Cmpt>::SymmTensor2D
 (
     const Cmpt txx, const Cmpt txy,
@@ -68,7 +68,7 @@ inline SymmTensor2D<Cmpt>::SymmTensor2D
 }
 
 
-template <class Cmpt>
+template<class Cmpt>
 inline SymmTensor2D<Cmpt>::SymmTensor2D(Istream& is)
 :
     VectorSpace<SymmTensor2D<Cmpt>, Cmpt, 3>(is)
@@ -77,45 +77,45 @@ inline SymmTensor2D<Cmpt>::SymmTensor2D(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class Cmpt>
+template<class Cmpt>
 inline const Cmpt& SymmTensor2D<Cmpt>::xx() const
 {
     return this->v_[XX];
 }
 
-template <class Cmpt>
+template<class Cmpt>
 inline const Cmpt& SymmTensor2D<Cmpt>::xy() const
 {
     return this->v_[XY];
 }
 
-template <class Cmpt>
+template<class Cmpt>
 inline const Cmpt& SymmTensor2D<Cmpt>::yy() const
 {
     return this->v_[YY];
 }
 
 
-template <class Cmpt>
+template<class Cmpt>
 inline Cmpt& SymmTensor2D<Cmpt>::xx()
 {
     return this->v_[XX];
 }
 
-template <class Cmpt>
+template<class Cmpt>
 inline Cmpt& SymmTensor2D<Cmpt>::xy()
 {
     return this->v_[XY];
 }
 
-template <class Cmpt>
+template<class Cmpt>
 inline Cmpt& SymmTensor2D<Cmpt>::yy()
 {
     return this->v_[YY];
 }
 
 
-template <class Cmpt>
+template<class Cmpt>
 inline const SymmTensor2D<Cmpt>& SymmTensor2D<Cmpt>::T() const
 {
     return *this;
@@ -124,7 +124,7 @@ inline const SymmTensor2D<Cmpt>& SymmTensor2D<Cmpt>::T() const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class Cmpt>
+template<class Cmpt>
 inline void SymmTensor2D<Cmpt>::operator=(const SphericalTensor2D<Cmpt>& st)
 {
     this->v_[XX] = st.ii(); this->v_[XY] = 0;
@@ -135,7 +135,7 @@ inline void SymmTensor2D<Cmpt>::operator=(const SphericalTensor2D<Cmpt>& st)
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 //- Inner-product between two symmetric tensors
-template <class Cmpt>
+template<class Cmpt>
 inline Tensor2D<Cmpt>
 operator&(const SymmTensor2D<Cmpt>& st1, const SymmTensor2D<Cmpt>& st2)
 {
@@ -151,7 +151,7 @@ operator&(const SymmTensor2D<Cmpt>& st1, const SymmTensor2D<Cmpt>& st2)
 
 
 //- Double-dot-product between a symmetric tensor and a symmetric tensor
-template <class Cmpt>
+template<class Cmpt>
 inline Cmpt
 operator&&(const SymmTensor2D<Cmpt>& st1, const SymmTensor2D<Cmpt>& st2)
 {
@@ -164,7 +164,7 @@ operator&&(const SymmTensor2D<Cmpt>& st1, const SymmTensor2D<Cmpt>& st2)
 
 
 //- Inner-product between a symmetric tensor and a vector
-template <class Cmpt>
+template<class Cmpt>
 inline Vector2D<Cmpt>
 operator&(const SymmTensor2D<Cmpt>& st, const Vector2D<Cmpt>& v)
 {
@@ -177,7 +177,7 @@ operator&(const SymmTensor2D<Cmpt>& st, const Vector2D<Cmpt>& v)
 
 
 //- Inner-product between a vector and a symmetric tensor
-template <class Cmpt>
+template<class Cmpt>
 inline Vector2D<Cmpt>
 operator&(const Vector2D<Cmpt>& v, const SymmTensor2D<Cmpt>& st)
 {
@@ -189,7 +189,7 @@ operator&(const Vector2D<Cmpt>& v, const SymmTensor2D<Cmpt>& st)
 }
 
 
-template <class Cmpt>
+template<class Cmpt>
 inline Cmpt magSqr(const SymmTensor2D<Cmpt>& st)
 {
     return
@@ -201,7 +201,7 @@ inline Cmpt magSqr(const SymmTensor2D<Cmpt>& st)
 
 
 //- Return the trace of a symmetric tensor
-template <class Cmpt>
+template<class Cmpt>
 inline Cmpt tr(const SymmTensor2D<Cmpt>& st)
 {
     return st.xx() + st.yy();
@@ -209,7 +209,7 @@ inline Cmpt tr(const SymmTensor2D<Cmpt>& st)
 
 
 //- Return the spherical part of a symmetric tensor
-template <class Cmpt>
+template<class Cmpt>
 inline SphericalTensor2D<Cmpt> sph(const SymmTensor2D<Cmpt>& st)
 {
     return (1.0/2.0)*tr(st);
@@ -217,7 +217,7 @@ inline SphericalTensor2D<Cmpt> sph(const SymmTensor2D<Cmpt>& st)
 
 
 //- Return the symmetric part of a symmetric tensor, i.e. itself
-template <class Cmpt>
+template<class Cmpt>
 inline const SymmTensor2D<Cmpt>& symm(const SymmTensor2D<Cmpt>& st)
 {
     return st;
@@ -225,7 +225,7 @@ inline const SymmTensor2D<Cmpt>& symm(const SymmTensor2D<Cmpt>& st)
 
 
 //- Return twice the symmetric part of a symmetric tensor
-template <class Cmpt>
+template<class Cmpt>
 inline SymmTensor2D<Cmpt> twoSymm(const SymmTensor2D<Cmpt>& st)
 {
     return 2*st;
@@ -233,7 +233,7 @@ inline SymmTensor2D<Cmpt> twoSymm(const SymmTensor2D<Cmpt>& st)
 
 
 //- Return the deviatoric part of a symmetric tensor
-template <class Cmpt>
+template<class Cmpt>
 inline SymmTensor2D<Cmpt> dev(const SymmTensor2D<Cmpt>& st)
 {
     return st - SphericalTensor2D<Cmpt>::oneThirdI*tr(st);
@@ -241,7 +241,7 @@ inline SymmTensor2D<Cmpt> dev(const SymmTensor2D<Cmpt>& st)
 
 
 //- Return the deviatoric part of a symmetric tensor
-template <class Cmpt>
+template<class Cmpt>
 inline SymmTensor2D<Cmpt> dev2(const SymmTensor2D<Cmpt>& st)
 {
     return st - SphericalTensor2D<Cmpt>::twoThirdsI*tr(st);
@@ -249,7 +249,7 @@ inline SymmTensor2D<Cmpt> dev2(const SymmTensor2D<Cmpt>& st)
 
 
 //- Return the determinant of a symmetric tensor
-template <class Cmpt>
+template<class Cmpt>
 inline Cmpt det(const SymmTensor2D<Cmpt>& st)
 {
     return
@@ -260,7 +260,7 @@ inline Cmpt det(const SymmTensor2D<Cmpt>& st)
 
 
 //- Return the cofactor symmetric tensor of a symmetric tensor
-template <class Cmpt>
+template<class Cmpt>
 inline SymmTensor2D<Cmpt> cof(const SymmTensor2D<Cmpt>& st)
 {
     return SymmTensor2D<Cmpt>
@@ -272,7 +272,7 @@ inline SymmTensor2D<Cmpt> cof(const SymmTensor2D<Cmpt>& st)
 
 
 //- Return the inverse of a symmetric tensor give the determinant
-template <class Cmpt>
+template<class Cmpt>
 inline SymmTensor2D<Cmpt> inv(const SymmTensor2D<Cmpt>& st, const Cmpt detst)
 {
     return cof(st)/detst;
@@ -280,7 +280,7 @@ inline SymmTensor2D<Cmpt> inv(const SymmTensor2D<Cmpt>& st, const Cmpt detst)
 
 
 //- Return the inverse of a symmetric tensor
-template <class Cmpt>
+template<class Cmpt>
 inline SymmTensor2D<Cmpt> inv(const SymmTensor2D<Cmpt>& st)
 {
     return inv(st, det(st));
@@ -288,7 +288,7 @@ inline SymmTensor2D<Cmpt> inv(const SymmTensor2D<Cmpt>& st)
 
 
 //- Return the 1st invariant of a symmetric tensor
-template <class Cmpt>
+template<class Cmpt>
 inline Cmpt invariantI(const SymmTensor2D<Cmpt>& st)
 {
     return tr(st);
@@ -296,7 +296,7 @@ inline Cmpt invariantI(const SymmTensor2D<Cmpt>& st)
 
 
 //- Return the 2nd invariant of a symmetric tensor
-template <class Cmpt>
+template<class Cmpt>
 inline Cmpt invariantII(const SymmTensor2D<Cmpt>& st)
 {
     return
@@ -312,14 +312,14 @@ inline Cmpt invariantII(const SymmTensor2D<Cmpt>& st)
 
 
 //- Return the 3rd invariant of a symmetric tensor
-template <class Cmpt>
+template<class Cmpt>
 inline Cmpt invariantIII(const SymmTensor2D<Cmpt>& st)
 {
     return det(st);
 }
 
 
-template <class Cmpt>
+template<class Cmpt>
 inline SymmTensor2D<Cmpt>
 operator+(const SphericalTensor2D<Cmpt>& spt1, const SymmTensor2D<Cmpt>& st2)
 {
@@ -331,7 +331,7 @@ operator+(const SphericalTensor2D<Cmpt>& spt1, const SymmTensor2D<Cmpt>& st2)
 }
 
 
-template <class Cmpt>
+template<class Cmpt>
 inline SymmTensor2D<Cmpt>
 operator+(const SymmTensor2D<Cmpt>& st1, const SphericalTensor2D<Cmpt>& spt2)
 {
@@ -343,7 +343,7 @@ operator+(const SymmTensor2D<Cmpt>& st1, const SphericalTensor2D<Cmpt>& spt2)
 }
 
 
-template <class Cmpt>
+template<class Cmpt>
 inline SymmTensor2D<Cmpt>
 operator-(const SphericalTensor2D<Cmpt>& spt1, const SymmTensor2D<Cmpt>& st2)
 {
@@ -355,7 +355,7 @@ operator-(const SphericalTensor2D<Cmpt>& spt1, const SymmTensor2D<Cmpt>& st2)
 }
 
 
-template <class Cmpt>
+template<class Cmpt>
 inline SymmTensor2D<Cmpt>
 operator-(const SymmTensor2D<Cmpt>& st1, const SphericalTensor2D<Cmpt>& spt2)
 {
@@ -368,7 +368,7 @@ operator-(const SymmTensor2D<Cmpt>& st1, const SphericalTensor2D<Cmpt>& spt2)
 
 
 //- Inner-product between a spherical symmetric tensor and a symmetric tensor
-template <class Cmpt>
+template<class Cmpt>
 inline SymmTensor2D<Cmpt>
 operator&(const SphericalTensor2D<Cmpt>& spt1, const SymmTensor2D<Cmpt>& st2)
 {
@@ -381,7 +381,7 @@ operator&(const SphericalTensor2D<Cmpt>& spt1, const SymmTensor2D<Cmpt>& st2)
 
 
 //- Inner-product between a tensor and a spherical tensor
-template <class Cmpt>
+template<class Cmpt>
 inline SymmTensor2D<Cmpt>
 operator&(const SymmTensor2D<Cmpt>& st1, const SphericalTensor2D<Cmpt>& spt2)
 {
@@ -394,7 +394,7 @@ operator&(const SymmTensor2D<Cmpt>& st1, const SphericalTensor2D<Cmpt>& spt2)
 
 
 //- Double-dot-product between a spherical tensor and a symmetric tensor
-template <class Cmpt>
+template<class Cmpt>
 inline Cmpt
 operator&&(const SphericalTensor2D<Cmpt>& spt1, const SymmTensor2D<Cmpt>& st2)
 {
@@ -403,7 +403,7 @@ operator&&(const SphericalTensor2D<Cmpt>& spt1, const SymmTensor2D<Cmpt>& st2)
 
 
 //- Double-dot-product between a tensor and a spherical tensor
-template <class Cmpt>
+template<class Cmpt>
 inline Cmpt
 operator&&(const SymmTensor2D<Cmpt>& st1, const SphericalTensor2D<Cmpt>& spt2)
 {
@@ -411,7 +411,7 @@ operator&&(const SymmTensor2D<Cmpt>& st1, const SphericalTensor2D<Cmpt>& spt2)
 }
 
 
-template <class Cmpt>
+template<class Cmpt>
 inline SymmTensor2D<Cmpt> sqr(const Vector2D<Cmpt>& v)
 {
     return SymmTensor2D<Cmpt>

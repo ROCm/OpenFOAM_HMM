@@ -22,9 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
+    equilibriumCO
 
 Description
-    Calculates the equilibrium level of carbon monoxide
+    Calculates the equilibrium level of carbon monoxide.
 
 \*---------------------------------------------------------------------------*/
 
@@ -49,7 +50,6 @@ typedef species::thermo<janafThermo<perfectGas<specie> >, absoluteEnthalpy>
     thermo;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Main program:
 
 int main(int argc, char *argv[])
 {

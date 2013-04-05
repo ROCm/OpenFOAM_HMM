@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,10 +21,13 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Application
+    combinePatchFaces
+
 Description
-    Checks for multiple patch faces on same cell and combines them. These
-    result from e.g. refined neighbouring cells getting removed, leaving 4
-    exposed faces with same owner.
+    Checks for multiple patch faces on same cell and combines them.
+    Multiple patch faces can result from e.g. removal of refined
+    neighbouring cells, leaving 4 exposed faces with same owner.
 
     Rules for merging:
     - only boundary faces (since multiple internal faces between two cells
@@ -336,7 +339,6 @@ label mergeEdges(const scalar minCos, polyMesh& mesh)
 }
 
 
-// Main program:
 
 int main(int argc, char *argv[])
 {

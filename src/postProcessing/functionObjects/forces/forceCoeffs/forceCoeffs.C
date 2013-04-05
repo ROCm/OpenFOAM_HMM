@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -137,8 +137,8 @@ void Foam::forceCoeffs::write()
             scalar Cd = sum(coeffs[1]);
             scalar Cm = sum(coeffs[2]);
 
-            scalar Clf = Cl/2.0 - Cm;
-            scalar Clr = Cl/2.0 + Cm;
+            scalar Clf = Cl/2.0 + Cm;
+            scalar Clr = Cl/2.0 - Cm;
 
             file()
                 << obr_.time().value() << tab
@@ -178,6 +178,17 @@ void Foam::forceCoeffs::write()
                 }
 
                 OFstream osCoeffs(forcesDir/"forceCoeffs_bins");
+
+                if (binCumulative_)
+                {
+                    for (label i = 1; i < coeffs[0].size(); i++)
+                    {
+                        coeffs[0][i] += coeffs[0][i-1];
+                        coeffs[1][i] += coeffs[1][i-1];
+                        coeffs[2][i] += coeffs[2][i-1];
+                    }
+                }
+
                 binWriterPtr->write(axis, fieldNames, coeffs, osCoeffs);
             }
 

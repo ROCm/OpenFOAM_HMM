@@ -136,7 +136,7 @@ namespace meshTools
         );
 
         //- Write obj representation of faces subset
-        template <class FaceType>
+        template<class FaceType>
         void writeOBJ
         (
             Ostream& os,
@@ -146,7 +146,7 @@ namespace meshTools
         );
 
         //- Write obj representation of faces
-        template <class FaceType>
+        template<class FaceType>
         void writeOBJ
         (
             Ostream& os,

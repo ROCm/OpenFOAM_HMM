@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class Triangulation>
+template<class Triangulation>
 Foam::scalar Foam::conformalVoronoiMesh::calculateLoadUnbalance
 (
     const Triangulation& mesh
@@ -68,7 +68,7 @@ Foam::scalar Foam::conformalVoronoiMesh::calculateLoadUnbalance
 }
 
 
-template <class Triangulation>
+template<class Triangulation>
 bool Foam::conformalVoronoiMesh::distributeBackground(const Triangulation& mesh)
 {
     if (!Pstream::parRun())

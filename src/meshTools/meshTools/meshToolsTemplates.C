@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-template <class FaceType>
+template<class FaceType>
 void Foam::meshTools::writeOBJ
 (
     Ostream& os,
@@ -59,7 +59,7 @@ void Foam::meshTools::writeOBJ
 }
 
 
-template <class FaceType>
+template<class FaceType>
 void Foam::meshTools::writeOBJ
 (
     Ostream& os,

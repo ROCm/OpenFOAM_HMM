@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1360,6 +1360,19 @@ void Foam::autoSnapDriver::doSnap
                 regionSide
             );
             meshRefinement::updateList(mapPtr().faceMap(), -1, filterFace);
+
+            if (debug&meshRefinement::MESH)
+            {
+                const_cast<Time&>(mesh.time())++;
+                Pout<< "Writing duplicatedPoints mesh to time "
+                    << meshRefiner_.timeName()
+                    << endl;
+                meshRefiner_.write
+                (
+                    debug, mesh.time().path()
+                   /"duplicatedPoints"
+                );
+            }
         }
 
 
@@ -1516,13 +1529,18 @@ void Foam::autoSnapDriver::doSnap
 
             if (!meshOk)
             {
-                Info<< "Did not succesfully snap mesh. Giving up."
-                    << nl << endl;
-
-                // Use current mesh as base mesh
-                meshMover.correct();
-
-                break;
+                WarningIn("autoSnapDriver::doSnap(..)")
+                    << "Did not succesfully snap mesh."
+                    << " Continuing to snap to resolve easy surfaces but the"
+                    << " resulting mesh will not satisfy your quality"
+                    << " constraints" << nl << endl;
+                //Info<< "Did not succesfully snap mesh. Giving up."
+                //    << nl << endl;
+                //
+                //// Use current mesh as base mesh
+                //meshMover.correct();
+                //
+                //break;
             }
 
             if (debug&meshRefinement::MESH)

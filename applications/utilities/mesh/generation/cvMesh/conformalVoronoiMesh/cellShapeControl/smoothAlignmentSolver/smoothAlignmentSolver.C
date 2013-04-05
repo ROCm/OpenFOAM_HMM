@@ -33,7 +33,7 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template <class Triangulation, class Type>
+template<class Triangulation, class Type>
 Foam::tmp<Foam::Field<Type> > Foam::smoothAlignmentSolver::filterFarPoints
 (
     const Triangulation& mesh,
@@ -68,7 +68,7 @@ Foam::tmp<Foam::Field<Type> > Foam::smoothAlignmentSolver::filterFarPoints
 }
 
 
-template <class Triangulation>
+template<class Triangulation>
 Foam::autoPtr<Foam::mapDistribute> Foam::smoothAlignmentSolver::buildReferredMap
 (
     const Triangulation& mesh,
@@ -111,7 +111,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::smoothAlignmentSolver::buildReferredMap
 }
 
 
-template <class Triangulation>
+template<class Triangulation>
 Foam::autoPtr<Foam::mapDistribute> Foam::smoothAlignmentSolver::buildMap
 (
     const Triangulation& mesh,
@@ -175,7 +175,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::smoothAlignmentSolver::buildMap
 }
 
 
-template <class Triangulation>
+template<class Triangulation>
 Foam::tmp<Foam::triadField> Foam::smoothAlignmentSolver::buildAlignmentField
 (
     const Triangulation& mesh
@@ -207,7 +207,7 @@ Foam::tmp<Foam::triadField> Foam::smoothAlignmentSolver::buildAlignmentField
 }
 
 
-template <class Triangulation>
+template<class Triangulation>
 Foam::tmp<Foam::pointField> Foam::smoothAlignmentSolver::buildPointField
 (
     const Triangulation& mesh

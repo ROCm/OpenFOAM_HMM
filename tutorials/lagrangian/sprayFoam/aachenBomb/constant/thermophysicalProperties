@@ -28,7 +28,9 @@ thermoType
 
 CHEMKINFile     "$FOAM_CASE/chemkin/chem.inp";
 
-CHEMKINThermoFile "~OpenFOAM/thermoData/therm.dat";
+CHEMKINThermoFile "$FOAM_CASE/chemkin/therm.dat";
+
+newFormat       yes;
 
 inertSpecie     N2;
 

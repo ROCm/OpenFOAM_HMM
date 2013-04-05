@@ -30,7 +30,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template <class Type>
+template<class Type>
 Foam::scalar Foam::indexedOctree<Type>::perturbTol_ = 10*SMALL;
 
 
@@ -38,7 +38,7 @@ Foam::scalar Foam::indexedOctree<Type>::perturbTol_ = 10*SMALL;
 
 // Does bb intersect a sphere around sample? Or is any corner point of bb
 // closer than nearestDistSqr to sample.
-template <class Type>
+template<class Type>
 bool Foam::indexedOctree<Type>::overlaps
 (
     const point& p0,
@@ -55,7 +55,7 @@ bool Foam::indexedOctree<Type>::overlaps
 
 // Does bb intersect a sphere around sample? Or is any corner point of bb
 // closer than nearestDistSqr to sample.
-template <class Type>
+template<class Type>
 bool Foam::indexedOctree<Type>::overlaps
 (
     const treeBoundBox& parentBb,
@@ -118,7 +118,7 @@ bool Foam::indexedOctree<Type>::overlaps
 //
 
 // Split list of indices into 8 bins
-template <class Type>
+template<class Type>
 void Foam::indexedOctree<Type>::divide
 (
     const labelList& indices,
@@ -161,7 +161,7 @@ void Foam::indexedOctree<Type>::divide
 
 
 // Subdivide the (content) node.
-template <class Type>
+template<class Type>
 typename Foam::indexedOctree<Type>::node
 Foam::indexedOctree<Type>::divide
 (
@@ -231,7 +231,7 @@ Foam::indexedOctree<Type>::divide
 
 
 // Split any contents node with more than minSize elements.
-template <class Type>
+template<class Type>
 void Foam::indexedOctree<Type>::splitNodes
 (
     const label minSize,
@@ -285,7 +285,7 @@ void Foam::indexedOctree<Type>::splitNodes
 
 // Reorder contents to be in same order as nodes. Returns number of nodes on
 // the compactLevel.
-template <class Type>
+template<class Type>
 Foam::label Foam::indexedOctree<Type>::compactContents
 (
     DynamicList<node>& nodes,
@@ -355,7 +355,7 @@ Foam::label Foam::indexedOctree<Type>::compactContents
 // Pre-calculates wherever possible the volume status per node/subnode.
 // Recurses to determine status of lowest level boxes. Level above is
 // combination of octants below.
-template <class Type>
+template<class Type>
 typename Foam::indexedOctree<Type>::volumeType
 Foam::indexedOctree<Type>::calcVolumeType
 (
@@ -413,7 +413,7 @@ Foam::indexedOctree<Type>::calcVolumeType
 }
 
 
-template <class Type>
+template<class Type>
 typename Foam::indexedOctree<Type>::volumeType
 Foam::indexedOctree<Type>::getVolumeType
 (
@@ -489,7 +489,7 @@ Foam::indexedOctree<Type>::getVolumeType
 }
 
 
-template <class Type>
+template<class Type>
 typename Foam::indexedOctree<Type>::volumeType
 Foam::indexedOctree<Type>::getSide
 (
@@ -514,7 +514,7 @@ Foam::indexedOctree<Type>::getSide
 //
 
 
-//template <class Type>
+//template<class Type>
 //bool Foam::indexedOctree<Type>::findAnyOverlap
 //(
 //    const label nodeI,
@@ -575,8 +575,8 @@ Foam::indexedOctree<Type>::getSide
 
 
 // Find nearest point starting from nodeI
-template <class Type>
-template <class FindNearestOp>
+template<class Type>
+template<class FindNearestOp>
 void Foam::indexedOctree<Type>::findNearest
 (
     const label nodeI,
@@ -652,8 +652,8 @@ void Foam::indexedOctree<Type>::findNearest
 
 
 // Find nearest point to line.
-template <class Type>
-template <class FindNearestOp>
+template<class Type>
+template<class FindNearestOp>
 void Foam::indexedOctree<Type>::findNearest
 (
     const label nodeI,
@@ -723,7 +723,7 @@ void Foam::indexedOctree<Type>::findNearest
 }
 
 
-template <class Type>
+template<class Type>
 Foam::treeBoundBox Foam::indexedOctree<Type>::subBbox
 (
     const label parentNodeI,
@@ -749,7 +749,7 @@ Foam::treeBoundBox Foam::indexedOctree<Type>::subBbox
 
 // Takes a bb and a point on/close to the edge of the bb and pushes the point
 // inside by a small fraction.
-template <class Type>
+template<class Type>
 Foam::point Foam::indexedOctree<Type>::pushPoint
 (
     const treeBoundBox& bb,
@@ -820,7 +820,7 @@ Foam::point Foam::indexedOctree<Type>::pushPoint
 
 // Takes a bb and a point on the edge of the bb and pushes the point
 // outside by a small fraction.
-template <class Type>
+template<class Type>
 Foam::point Foam::indexedOctree<Type>::pushPoint
 (
     const treeBoundBox& bb,
@@ -933,7 +933,7 @@ Foam::point Foam::indexedOctree<Type>::pushPoint
 // Guarantees that if pt is on a face it gets perturbed so it is away
 // from the face edges.
 // If pt is not on a face does nothing.
-template <class Type>
+template<class Type>
 Foam::point Foam::indexedOctree<Type>::pushPointIntoFace
 (
     const treeBoundBox& bb,
@@ -1093,7 +1093,7 @@ Foam::point Foam::indexedOctree<Type>::pushPointIntoFace
 //// Takes a bb and a point on the outside of the bb. Checks if on multiple
 // faces
 //// and if so perturbs point so it is only on one face.
-//template <class Type>
+//template<class Type>
 //void Foam::indexedOctree<Type>::checkMultipleFaces
 //(
 //    const treeBoundBox& bb,
@@ -1289,7 +1289,7 @@ Foam::point Foam::indexedOctree<Type>::pushPointIntoFace
 
 
 // Get parent node and octant. Return false if top of tree reached.
-template <class Type>
+template<class Type>
 bool Foam::indexedOctree<Type>::walkToParent
 (
     const label nodeI,
@@ -1339,7 +1339,7 @@ bool Foam::indexedOctree<Type>::walkToParent
 // node and octant in this node and walks in the direction given by
 // the facePointBits (combination of treeBoundBox::LEFTBIT, TOPBIT etc.)
 // Returns false if edge of tree hit.
-template <class Type>
+template<class Type>
 bool Foam::indexedOctree<Type>::walkToNeighbour
 (
     const point& facePoint,
@@ -1577,7 +1577,7 @@ bool Foam::indexedOctree<Type>::walkToNeighbour
 }
 
 
-template <class Type>
+template<class Type>
 Foam::word Foam::indexedOctree<Type>::faceString
 (
     const direction faceID
@@ -1629,8 +1629,8 @@ Foam::word Foam::indexedOctree<Type>::faceString
 // Else return a miss and the bounding box face hit:
 //  hitInfo.point = coordinate of intersection of ray with bounding box
 //  hitBits  = posbits of point on bounding box
-template <class Type>
-template <class FindIntersectOp>
+template<class Type>
+template<class FindIntersectOp>
 void Foam::indexedOctree<Type>::traverseNode
 (
     const bool findAny,
@@ -1790,8 +1790,8 @@ void Foam::indexedOctree<Type>::traverseNode
 
 
 // Find first intersection
-template <class Type>
-template <class FindIntersectOp>
+template<class Type>
+template<class FindIntersectOp>
 Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
 (
     const bool findAny,
@@ -1987,7 +1987,7 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
 }
 
 
-//template <class Type>
+//template<class Type>
 //bool Foam::indexedOctree<Type>::isLineInsideOrOutside
 //(
 //    const label nodeI,
@@ -2020,8 +2020,8 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
 
 
 // Find first intersection
-template <class Type>
-template <class FindIntersectOp>
+template<class Type>
+template<class FindIntersectOp>
 Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
 (
     const bool findAny,
@@ -2094,7 +2094,7 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
 }
 
 
-template <class Type>
+template<class Type>
 void Foam::indexedOctree<Type>::findBox
 (
     const label nodeI,
@@ -2141,7 +2141,7 @@ void Foam::indexedOctree<Type>::findBox
 }
 
 
-template <class Type>
+template<class Type>
 void Foam::indexedOctree<Type>::findSphere
 (
     const label nodeI,
@@ -2189,8 +2189,8 @@ void Foam::indexedOctree<Type>::findSphere
 }
 
 
-template <class Type>
-template <class CompareOp>
+template<class Type>
+template<class CompareOp>
 void Foam::indexedOctree<Type>::findNear
 (
     const scalar nearDist,
@@ -2364,7 +2364,7 @@ void Foam::indexedOctree<Type>::findNear
 
 
 // Number of elements in node.
-template <class Type>
+template<class Type>
 Foam::label Foam::indexedOctree<Type>::countElements
 (
     const labelBits index
@@ -2397,7 +2397,7 @@ Foam::label Foam::indexedOctree<Type>::countElements
 }
 
 
-template <class Type>
+template<class Type>
 void Foam::indexedOctree<Type>::writeOBJ
 (
     const label nodeI,
@@ -2446,7 +2446,7 @@ void Foam::indexedOctree<Type>::writeOBJ
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class Type>
+template<class Type>
 Foam::indexedOctree<Type>::indexedOctree(const Type& shapes)
 :
     shapes_(shapes),
@@ -2456,7 +2456,7 @@ Foam::indexedOctree<Type>::indexedOctree(const Type& shapes)
 {}
 
 
-template <class Type>
+template<class Type>
 Foam::indexedOctree<Type>::indexedOctree
 (
     const Type& shapes,
@@ -2471,7 +2471,7 @@ Foam::indexedOctree<Type>::indexedOctree
 {}
 
 
-template <class Type>
+template<class Type>
 Foam::indexedOctree<Type>::indexedOctree
 (
     const Type& shapes,
@@ -2623,7 +2623,7 @@ Foam::indexedOctree<Type>::indexedOctree
 }
 
 
-template <class Type>
+template<class Type>
 Foam::indexedOctree<Type>::indexedOctree
 (
     const Type& shapes,
@@ -2639,14 +2639,14 @@ Foam::indexedOctree<Type>::indexedOctree
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class Type>
+template<class Type>
 Foam::scalar& Foam::indexedOctree<Type>::perturbTol()
 {
     return perturbTol_;
 }
 
 
-//template <class Type>
+//template<class Type>
 //bool Foam::indexedOctree<Type>::findAnyOverlap
 //(
 //    const point& sample,
@@ -2667,7 +2667,7 @@ Foam::scalar& Foam::indexedOctree<Type>::perturbTol()
 //}
 
 
-template <class Type>
+template<class Type>
 Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
 (
     const point& sample,
@@ -2683,8 +2683,8 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
 }
 
 
-template <class Type>
-template <class FindNearestOp>
+template<class Type>
+template<class FindNearestOp>
 Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
 (
     const point& sample,
@@ -2716,7 +2716,7 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
 }
 
 
-template <class Type>
+template<class Type>
 Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
 (
     const linePointRef& ln,
@@ -2734,8 +2734,8 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
 }
 
 
-template <class Type>
-template <class FindNearestOp>
+template<class Type>
+template<class FindNearestOp>
 Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
 (
     const linePointRef& ln,
@@ -2769,7 +2769,7 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
 
 
 // Find nearest intersection
-template <class Type>
+template<class Type>
 Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
 (
     const point& start,
@@ -2787,7 +2787,7 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
 
 
 // Find nearest intersection
-template <class Type>
+template<class Type>
 Foam::pointIndexHit Foam::indexedOctree<Type>::findLineAny
 (
     const point& start,
@@ -2805,8 +2805,8 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLineAny
 
 
 // Find nearest intersection
-template <class Type>
-template <class FindIntersectOp>
+template<class Type>
+template<class FindIntersectOp>
 Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
 (
     const point& start,
@@ -2819,8 +2819,8 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
 
 
 // Find nearest intersection
-template <class Type>
-template <class FindIntersectOp>
+template<class Type>
+template<class FindIntersectOp>
 Foam::pointIndexHit Foam::indexedOctree<Type>::findLineAny
 (
     const point& start,
@@ -2832,7 +2832,7 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLineAny
 }
 
 
-template <class Type>
+template<class Type>
 Foam::labelList Foam::indexedOctree<Type>::findBox
 (
     const treeBoundBox& searchBox
@@ -2850,7 +2850,7 @@ Foam::labelList Foam::indexedOctree<Type>::findBox
 }
 
 
-template <class Type>
+template<class Type>
 Foam::labelList Foam::indexedOctree<Type>::findSphere
 (
     const point& centre,
@@ -2870,7 +2870,7 @@ Foam::labelList Foam::indexedOctree<Type>::findSphere
 
 
 // Find node (as parent+octant) containing point
-template <class Type>
+template<class Type>
 Foam::labelBits Foam::indexedOctree<Type>::findNode
 (
     const label nodeI,
@@ -2917,7 +2917,7 @@ Foam::labelBits Foam::indexedOctree<Type>::findNode
 }
 
 
-template <class Type>
+template<class Type>
 Foam::label Foam::indexedOctree<Type>::findInside(const point& sample) const
 {
     labelBits index = findNode(0, sample);
@@ -2946,7 +2946,7 @@ Foam::label Foam::indexedOctree<Type>::findInside(const point& sample) const
 }
 
 
-template <class Type>
+template<class Type>
 const Foam::labelList& Foam::indexedOctree<Type>::findIndices
 (
     const point& sample
@@ -2971,7 +2971,7 @@ const Foam::labelList& Foam::indexedOctree<Type>::findIndices
 
 
 // Determine type (inside/outside/mixed) per node.
-template <class Type>
+template<class Type>
 typename Foam::indexedOctree<Type>::volumeType
 Foam::indexedOctree<Type>::getVolumeType
 (
@@ -3041,8 +3041,8 @@ Foam::indexedOctree<Type>::getVolumeType
 }
 
 
-template <class Type>
-template <class CompareOp>
+template<class Type>
+template<class CompareOp>
 void Foam::indexedOctree<Type>::findNear
 (
     const scalar nearDist,
@@ -3066,7 +3066,7 @@ void Foam::indexedOctree<Type>::findNear
 
 
 // Print contents of nodeI
-template <class Type>
+template<class Type>
 void Foam::indexedOctree<Type>::print
 (
     prefixOSstream& os,
@@ -3140,7 +3140,7 @@ void Foam::indexedOctree<Type>::print
 
 
 // Print contents of nodeI
-template <class Type>
+template<class Type>
 bool Foam::indexedOctree<Type>::write(Ostream& os) const
 {
     os << *this;
@@ -3149,7 +3149,7 @@ bool Foam::indexedOctree<Type>::write(Ostream& os) const
 }
 
 
-template <class Type>
+template<class Type>
 Foam::Ostream& Foam::operator<<(Ostream& os, const indexedOctree<Type>& t)
 {
     return

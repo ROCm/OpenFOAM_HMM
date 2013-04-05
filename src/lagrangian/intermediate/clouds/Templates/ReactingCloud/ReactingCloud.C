@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -132,7 +132,7 @@ Foam::ReactingCloud<CloudType>::ReactingCloud
             (
                 IOobject
                 (
-                    this->name() + "::rhoTrans_" + specieName,
+                    this->name() + ":rhoTrans_" + specieName,
                     this->db().time().timeName(),
                     this->db(),
                     IOobject::READ_IF_PRESENT,
@@ -176,7 +176,7 @@ Foam::ReactingCloud<CloudType>::ReactingCloud
             (
                 IOobject
                 (
-                    this->name() + "::rhoTrans_" + specieName,
+                    this->name() + ":rhoTrans_" + specieName,
                     this->db().time().timeName(),
                     this->db(),
                     IOobject::NO_READ,

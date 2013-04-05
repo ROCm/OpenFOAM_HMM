@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -577,7 +577,6 @@ void ReadCells
 }
 
 
-// Main program:
 
 int main(int argc, char *argv[])
 {
@@ -951,7 +950,8 @@ int main(int argc, char *argv[])
                     foamPatchSizes[patchI],
                     meshFaceI,
                     patchI,
-                    mesh.boundaryMesh()
+                    mesh.boundaryMesh(),
+                    patchType
                 );
         }
         else if (patchType == "symmetryplane")
@@ -963,7 +963,8 @@ int main(int argc, char *argv[])
                     foamPatchSizes[patchI],
                     meshFaceI,
                     patchI,
-                    mesh.boundaryMesh()
+                    mesh.boundaryMesh(),
+                    patchType
                 );
         }
         else if (patchType == "empty")
@@ -976,13 +977,14 @@ int main(int argc, char *argv[])
                     foamPatchSizes[patchI],
                     meshFaceI,
                     patchI,
-                    mesh.boundaryMesh()
+                    mesh.boundaryMesh(),
+                    patchType
                 );
         }
         else
         {
             // All other ccm types become straight polyPatch:
-            // 'inlet', 'outlet', 'pressured'.
+            // 'inlet', 'outlet', ...
             newPatches[patchI] =
                 new polyPatch
                 (
@@ -990,7 +992,8 @@ int main(int argc, char *argv[])
                     foamPatchSizes[patchI],
                     meshFaceI,
                     patchI,
-                    mesh.boundaryMesh()
+                    mesh.boundaryMesh(),
+                    word::null
                 );
         }
 
