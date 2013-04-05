@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/ParaViewResources" >
+        <file>PV398FoamReader.xml</file>
+    </qresource>
+</RCC>
