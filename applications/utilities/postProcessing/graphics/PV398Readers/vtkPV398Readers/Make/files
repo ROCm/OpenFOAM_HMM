@@ -1,0 +1,3 @@
+vtkPV398Readers.C
+
+LIB = $(FOAM_LIBBIN)/libvtkPV398Readers
