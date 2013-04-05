@@ -163,6 +163,10 @@ public:
             template<class Type>
             HashTable<Type*> lookupClass(const bool strict = false);
 
+            //- Return the list of objects whose name matches the input regExp
+            template<class Type>
+            wordList foundObjectRe(const wordRe& name) const;
+
             //- Is the named Type found?
             template<class Type>
             bool foundObject(const word& name) const;
