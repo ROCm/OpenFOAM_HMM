@@ -245,6 +245,4 @@ makePatchTypeField
 } // End namespace incompressible
 } // End namespace Foam
 
-
 // ************************************************************************* //
-
