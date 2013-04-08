@@ -229,7 +229,8 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
 
     scalarField q(size(), 0.0);
     const scalarField Tc(patchInternalField());
-    const scalarField KWall(kappa(*this));
+    const scalarField Tp(*this);
+    const scalarField KWall(kappa(Tp));
     const scalarField KDelta(KWall*patch().deltaCoeffs());
 
     switch (mode_)
@@ -241,7 +242,7 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
         }
         case fixedHeatTransferCoeff:
         {
-            q = (Ta_ - Tc)*h_;
+            q = (Ta_ - Tp)*h_;
             break;
         }
         default:
