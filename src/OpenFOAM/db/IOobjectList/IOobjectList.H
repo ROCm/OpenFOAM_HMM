@@ -37,6 +37,7 @@ SourceFiles
 
 #include "HashPtrTable.H"
 #include "IOobject.H"
+#include "wordReList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -92,7 +93,10 @@ public:
         IOobject* lookup(const word& name) const;
 
         //- Return the list for all IOobects whose name matches name
-        IOobjectList lookupRe(const wordRe& name) const;
+        IOobjectList lookup(const wordRe& name) const;
+
+        //- Return the list for all IOobects whose name matches name
+        IOobjectList lookup(const wordReList& patterns) const;
 
         //- Return the list for all IOobjects of a given class
         IOobjectList lookupClass(const word& className) const;

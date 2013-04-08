@@ -63,7 +63,7 @@ vtkPolyData* Foam::vtkPV398Foam::lagrangianVTKMesh
         cloud::prefix/cloudName
     );
 
-    IOobject* positionsPtr = sprayObjs.lookup("positions");
+    IOobject* positionsPtr = sprayObjs.lookup(word("positions"));
     if (positionsPtr)
     {
         Cloud<passiveParticle> parcels(mesh, cloudName, false);
