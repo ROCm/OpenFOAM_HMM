@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -737,7 +737,7 @@ Foam::labelHashSet Foam::polyBoundaryMesh::patchSet
 
     forAll(patchNames, i)
     {
-         const word& patchName = patchNames[i];
+         const wordRe& patchName = patchNames[i];
 
         // Treat the given patch names as wild-cards and search the set
         // of all patch names for matches
