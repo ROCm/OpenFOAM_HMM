@@ -386,7 +386,7 @@ int main(int argc, char *argv[])
 
     instantList timeDirs = timeSelector::select0(runTime, args);
 
-#   include "createNamedMesh.H"
+    #include "createNamedMesh.H"
 
     // VTK/ directory in the case
     fileName fvPath(runTime.path()/"VTK");
@@ -448,7 +448,7 @@ int main(int argc, char *argv[])
                 cloud::prefix/cloudDirs[i]
             );
 
-            IOobject* positionsPtr = sprayObjs.lookup("positions");
+            IOobject* positionsPtr = sprayObjs.lookup(word("positions"));
 
             if (positionsPtr)
             {
@@ -1094,7 +1094,7 @@ int main(int argc, char *argv[])
                 cloud::prefix/cloudName
             );
 
-            IOobject* positionsPtr = sprayObjs.lookup("positions");
+            IOobject* positionsPtr = sprayObjs.lookup(word("positions"));
 
             if (positionsPtr)
             {

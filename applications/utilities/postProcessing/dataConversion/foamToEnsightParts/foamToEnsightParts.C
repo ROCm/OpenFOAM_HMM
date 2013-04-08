@@ -131,8 +131,8 @@ int main(int argc, char *argv[])
 
     const char* geometryName = "geometry";
 
-#   include "setRootCase.H"
-#   include "createTime.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
 
     // get times list
     instantList timeDirs = timeSelector::select0(runTime, args);
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
     mkDir(ensightDir);
     mkDir(dataDir);
 
-#   include "createNamedMesh.H"
+    #include "createNamedMesh.H"
 
     // Mesh instance (region0 gets filtered out)
     fileName regionPrefix;
@@ -203,8 +203,8 @@ int main(int argc, char *argv[])
         partsList.writeSummary(partsInfoFile);
     }
 
-#   include "checkHasMovingMesh.H"
-#   include "findFields.H"
+    #include "checkHasMovingMesh.H"
+    #include "findFields.H"
 
     if (hasMovingMesh && optNoMesh)
     {
@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
     {
         runTime.setTime(timeDirs[timeI], timeI);
 
-#       include "getTimeIndex.H"
+        #include "getTimeIndex.H"
 
         // remember the time index
         fieldTimesUsed.append(timeIndex);
@@ -250,7 +250,7 @@ int main(int argc, char *argv[])
                 << subDir.c_str() << " " << runTime.timeName() << nl;
         }
 
-#       include "moveMesh.H"
+        #include "moveMesh.H"
 
         if (timeI == 0 || mesh.moving())
         {
@@ -380,7 +380,8 @@ int main(int argc, char *argv[])
             );
 
             // check that the positions field is present for this time
-            if (cloudObjs.lookup("positions"))
+            IOobject* positionPtr = cloudObjs.lookup(word("positions"));
+            if (positionPtr != NULL)
             {
                 ensightParticlePositions
                 (
@@ -459,7 +460,7 @@ int main(int argc, char *argv[])
         }
     }
 
-#   include "ensightOutputCase.H"
+    #include "ensightOutputCase.H"
 
     Info<< "\nEnd\n"<< endl;
 
