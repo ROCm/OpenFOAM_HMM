@@ -357,6 +357,7 @@ $(snGradSchemes)/limitedSnGrad/limitedSnGrads.C
 $(snGradSchemes)/uncorrectedSnGrad/uncorrectedSnGrads.C
 $(snGradSchemes)/orthogonalSnGrad/orthogonalSnGrads.C
 $(snGradSchemes)/quadraticFitSnGrad/quadraticFitSnGrads.C
+$(snGradSchemes)/linearFitSnGrad/linearFitSnGrads.C
 
 convectionSchemes = finiteVolume/convectionSchemes
 $(convectionSchemes)/convectionScheme/convectionSchemes.C
