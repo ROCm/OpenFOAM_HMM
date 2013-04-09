@@ -168,18 +168,32 @@ void Foam::sampledSurfaces::sampleAndWrite
 template<class GeoField>
 void Foam::sampledSurfaces::sampleAndWrite(const IOobjectList& objects)
 {
+    wordList names;
     if (loadFromFiles_)
     {
         IOobjectList fieldObjects(objects.lookupClass(GeoField::typeName));
+        names = fieldObjects.names();
+    }
+    else
+    {
+        names = mesh_.thisDb().names<GeoField>();
+    }
 
-        wordList names(fieldObjects.names());
+    labelList nameIDs(findStrings(fieldSelection_, names));
 
-        labelList fieldNames(findStrings(fieldSelection_, names));
+    wordHashSet fieldNames(wordList(names, nameIDs));
 
-        forAll(fieldNames, fieldI)
+    forAllConstIter(wordHashSet, fieldNames, iter)
+    {
+        const word& fieldName = iter.key();
+
+        if ((Pstream::master()) && verbose_)
         {
-            const word& fieldName = names[fieldNames[fieldI]];
+            Pout<< "sampleAndWrite: " << fieldName << endl;
+        }
 
+        if (loadFromFiles_)
+        {
             const GeoField fld
             (
                 IOobject
@@ -192,30 +206,10 @@ void Foam::sampledSurfaces::sampleAndWrite(const IOobjectList& objects)
                 mesh_
             );
 
-            if ((Pstream::master()) && verbose_)
-            {
-                Pout<< "sampleAndWrite: " << fieldName << endl;
-            }
-
             sampleAndWrite(fld);
         }
-    }
-    else
-    {
-        const wordList fieldNames
-        (
-            mesh_.thisDb().names<GeoField>(fieldSelection_)
-        );
-
-        forAll(fieldNames, i)
+        else
         {
-            const word& fieldName = fieldNames[i];
-
-            if ((Pstream::master()) && verbose_)
-            {
-                Pout<< "sampleAndWrite: " << fieldName << endl;
-            }
-
             sampleAndWrite
             (
                 mesh_.thisDb().lookupObject<GeoField>(fieldName)
