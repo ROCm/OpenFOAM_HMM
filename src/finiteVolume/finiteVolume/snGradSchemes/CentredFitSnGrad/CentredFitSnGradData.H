@@ -25,7 +25,7 @@ Class
     Foam::CentredFitSnGradData
 
 Description
-    Data for the quadratic fit correction interpolation scheme
+    Data for centred fit snGrad schemes
 
 SourceFiles
     CentredFitSnGradData.C
@@ -63,6 +63,7 @@ class CentredFitSnGradData
         //- For each cell in the mesh store the values which multiply the
         //  values of the stencil to obtain the gradient for each direction
         List<scalarList> coeffs_;
+
 
 public:
 
