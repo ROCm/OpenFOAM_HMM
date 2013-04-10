@@ -122,7 +122,7 @@ class alphatJayatillekeWallFunctionFvPatchScalarField
 public:
 
     //- Runtime type information
-    TypeName("alphatJayatillekeWallFunction");
+    TypeName("compressible::alphatJayatillekeWallFunction");
 
 
     // Constructors

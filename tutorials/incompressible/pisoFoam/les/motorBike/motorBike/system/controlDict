@@ -19,13 +19,13 @@ libs            ("libOpenFOAM.so" "libfieldFunctionObjects.so");
 
 application     simpleFoam;
 
-startFrom       latestTime;
+startFrom       startTime;
 
 startTime       0;
 
 stopAt          endTime;
 
-endTime         500;
+endTime         5;
 
 deltaT          1;
 

@@ -23,7 +23,7 @@ ddtSchemes
 gradSchemes
 {
     default         Gauss linear;
-    grad(U)         cellLimited Gauss linear 1;
+    grad(U)         fourth; //cellLimited Gauss linear 1;
     grad(nuTilda)   cellLimited Gauss linear 1;
 }
 
