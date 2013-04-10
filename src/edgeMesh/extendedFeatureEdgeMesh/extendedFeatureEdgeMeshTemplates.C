@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,20 +59,24 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
     DynamicList<vector> norms;
     vectorField edgeDirections(nFeatEds);
     labelListList edgeNormals(nFeatEds);
+    labelListList normalDirections(nFeatEds);
     DynamicList<label> regionEdges;
 
     // Keep track of the ordered feature point feature edges
     labelListList featurePointFeatureEdges(nFeatPts);
     forAll(featurePointFeatureEdges, pI)
     {
-        featurePointFeatureEdges[pI] =
-            labelList(pointEdges[featurePoints[pI]].size(), -1);
+        featurePointFeatureEdges[pI] = pointEdges[featurePoints[pI]];
     }
 
     // Mapping between old and new indices, there is entry in the map for each
     // of surf.localPoints, -1 means that this point hasn't been used (yet),
     // >= 0 corresponds to the index
     labelList pointMap(sFeatLocalPts.size(), -1);
+
+    // Mapping between surface edge index and its feature edge index. -1 if it
+    // is not a feature edge
+    labelList edgeMap(sFeatEds.size(), -1);
 
     // Noting when the normal of a face has been used so not to duplicate
     labelList faceMap(surf.size(), -1);
@@ -98,7 +102,11 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
     {
         label sFEI = featureEdges[i];
 
-        const edge& fE(sFeatEds[sFEI]);
+        edgeMap[sFEI] = i;
+
+        const edge& fE = sFeatEds[sFEI];
+
+        edgeDirections[i] = fE.vec(sFeatLocalPts);
 
         // Check to see if the points have been already used
         if (pointMap[fE.start()] == -1)
@@ -150,51 +158,37 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
 
         edStatus[i] = classifyEdge(norms, edgeNormals[i], fC0tofC1);
 
-        edgeDirections[i] = fE.vec(sFeatLocalPts);
-
         if (isRegionFeatureEdge[i])
         {
             regionEdges.append(i);
         }
-
-        forAll(featurePointFeatureEdges, pI)
-        {
-            const labelList& fpfEdges = pointEdges[featurePoints[pI]];
-
-            labelList& fpfe = featurePointFeatureEdges[pI];
-
-            forAll(fpfEdges, eI)
-            {
-                if (sFEI == fpfEdges[eI])
-                {
-                    fpfe[eI] = i;
-                }
-            }
-        }
     }
+
+    // Populate feature point feature edges
+    DynamicList<label> newFeatureEdges;
 
     forAll(featurePointFeatureEdges, pI)
     {
         const labelList& fpfe = featurePointFeatureEdges[pI];
 
-        DynamicList<label> newFeatureEdges(fpfe.size());
+        newFeatureEdges.setCapacity(fpfe.size());
 
         forAll(fpfe, eI)
         {
-            const label edgeIndex = fpfe[eI];
+            const label oldEdgeIndex = fpfe[eI];
+            const label newEdgeIndex = edgeMap[oldEdgeIndex];
 
-            if (edgeIndex != -1)
+            if (newEdgeIndex != -1)
             {
-                newFeatureEdges.append(edgeIndex);
+                newFeatureEdges.append(newEdgeIndex);
             }
         }
 
-        featurePointFeatureEdges[pI] = newFeatureEdges;
+        featurePointFeatureEdges[pI].transfer(newFeatureEdges);
     }
 
 
     // Reorder the edges by classification
-
     List<DynamicList<label> > allEds(nEdgeTypes);
 
     DynamicList<label>& externalEds(allEds[0]);
@@ -277,7 +271,8 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
     edgeMesh::operator=(edgeMesh(pts, eds));
 
     // Initialise sorted edge related data
-    edgeDirections_ = edgeDirections/mag(edgeDirections);
+    edgeDirections_ = edgeDirections/(mag(edgeDirections) + VSMALL);
+
     edgeNormals_ = edgeNormals;
     regionEdges_ = regionEdges;
 
