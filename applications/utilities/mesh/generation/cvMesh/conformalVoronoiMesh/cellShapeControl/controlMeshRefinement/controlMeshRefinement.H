@@ -48,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class controlMeshRefinement Declaration
+                   Class controlMeshRefinement Declaration
 \*---------------------------------------------------------------------------*/
 
 class controlMeshRefinement
@@ -124,10 +124,6 @@ public:
 
     // Member Functions
 
-        // Access
-
-        // Check
-
         // Edit
 
             void initialMeshPopulation
@@ -139,10 +135,6 @@ public:
             (
                 const autoPtr<backgroundMeshDecomposition>& decomposition
             );
-
-
-        // Write
-
 };
 
 

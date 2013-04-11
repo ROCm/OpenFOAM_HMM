@@ -103,7 +103,11 @@ Foam::scalar Foam::cellShapeControl::cellSize(const point& pt) const
 
     scalar size = 0;
 
-    if (shapeControlMesh_.dimension() < 3 || shapeControlMesh_.is_infinite(ch))
+    if (shapeControlMesh_.dimension() < 3)
+    {
+        size = sizeAndAlignment_.cellSize(pt);
+    }
+    else if (shapeControlMesh_.is_infinite(ch))
     {
 //        if (nFarPoints != 0)
 //        {
@@ -204,7 +208,7 @@ Foam::tensor Foam::cellShapeControl::cellAlignment(const point& pt) const
 
             tri.normalize();
             tri.orthogonalize();
-            //            tri = tri.sortxyz();
+            tri = tri.sortxyz();
 
             alignment = tri;
         }
@@ -282,7 +286,7 @@ void Foam::cellShapeControl::cellSizeAndAlignment
 
             tri.normalize();
             tri.orthogonalize();
-//            tri = tri.sortxyz();
+            tri = tri.sortxyz();
 
             alignment = tri;
 
@@ -298,21 +302,51 @@ void Foam::cellShapeControl::cellSizeAndAlignment
 
     for (label dir = 0; dir < 3; dir++)
     {
-        const triad v = alignment;
+        triad v = alignment;
 
         if (!v.set(dir) || size == 0)
         {
-            FatalErrorIn
-            (
-                "Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()"
-            )   << "Point has bad alignment! "
-                << pt << " " << size << " " << alignment << nl
-                << "Bary Coords = " << bary <<  nl
-                << ch->vertex(0)->info() << nl
-                << ch->vertex(1)->info() << nl
-                << ch->vertex(2)->info() << nl
-                << ch->vertex(3)->info()
-                << abort(FatalError);
+            // Force orthogonalization of triad.
+
+            scalar dotProd = GREAT;
+            if (dir == 0)
+            {
+                dotProd = v[1] & v[2];
+
+                v[dir] = v[1] ^ v[2];
+            }
+            if (dir == 1)
+            {
+                dotProd = v[0] & v[2];
+
+                v[dir] = v[0] ^ v[2];
+            }
+            if (dir == 2)
+            {
+                dotProd = v[0] & v[1];
+
+                v[dir] = v[0] ^ v[1];
+            }
+
+            v.normalize();
+            v.orthogonalize();
+
+            Pout<< "Dot prod = " << dotProd << endl;
+            Pout<< "Alignment = " << v << endl;
+
+            alignment = v;
+
+//            FatalErrorIn
+//            (
+//                "Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()"
+//            )   << "Point has bad alignment! "
+//                << pt << " " << size << " " << alignment << nl
+//                << "Bary Coords = " << bary <<  nl
+//                << ch->vertex(0)->info() << nl
+//                << ch->vertex(1)->info() << nl
+//                << ch->vertex(2)->info() << nl
+//                << ch->vertex(3)->info()
+//                << abort(FatalError);
         }
     }
 }

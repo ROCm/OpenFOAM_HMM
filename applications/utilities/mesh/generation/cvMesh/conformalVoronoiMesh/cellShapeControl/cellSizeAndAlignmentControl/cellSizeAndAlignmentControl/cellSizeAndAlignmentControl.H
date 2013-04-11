@@ -59,6 +59,8 @@ protected:
 
         const scalar& defaultCellSize_;
 
+        Switch forceInitialPointInsertion_;
+
 
 private:
 
@@ -144,6 +146,11 @@ public:
             const word& name() const
             {
                 return name_;
+            }
+
+            const Switch& forceInitialPointInsertion() const
+            {
+                return forceInitialPointInsertion_;
             }
 
 

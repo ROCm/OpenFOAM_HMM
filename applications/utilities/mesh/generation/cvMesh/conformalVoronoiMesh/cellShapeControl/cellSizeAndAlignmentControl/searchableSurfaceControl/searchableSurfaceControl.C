@@ -186,60 +186,92 @@ Foam::searchableSurfaceControl::searchableSurfaceControl
         (
             controlFunctionDict,
             searchableSurface_,
-            defaultCellSize_
+            defaultCellSize_,
+            labelList()
         )
     );
 
     Info<< decrIndent;
 
-    PtrList<cellSizeFunction> regionCellSizeFunctions
-    (
-        searchableSurface_.regions().size()
-    );
+    PtrList<cellSizeFunction> regionCellSizeFunctions;
 
-    label functionI = 0;
+    DynamicList<label> defaultCellSizeRegions;
+
+    label nRegionCellSizeFunctions = 0;
 
     // Loop over regions - if any entry is not specified they should
     // inherit values from the parent surface.
     if (controlFunctionDict.found("regions"))
     {
         const dictionary& regionsDict = controlFunctionDict.subDict("regions");
-        const wordList& regionNames = geometryToConformTo.patchNames();
+        const wordList& regionNames = geometryToConformTo_.patchNames();
+
+        label nRegions = regionsDict.size();
+
+        regionCellSizeFunctions.setSize(nRegions + 1);
+        defaultCellSizeRegions.setCapacity(nRegions);
 
         forAll(regionNames, regionI)
         {
             const word& regionName = regionNames[regionI];
+
+            label regionID = geometryToConformTo_.geometry().findSurfaceRegionID
+            (
+                this->name(),
+                regionName
+            );
 
             if (regionsDict.found(regionName))
             {
                 // Get the dictionary for region
                 const dictionary& regionDict = regionsDict.subDict(regionName);
 
-                Info<< indent << "Region " << regionName << " settings:"
+                Info<< indent << "Region " << regionName
+                    << " (ID = " << regionID << ")" << " settings:"
                     << endl;
                 Info<< incrIndent;
 
                 regionCellSizeFunctions.set
                 (
-                    functionI,
+                    nRegionCellSizeFunctions,
                     cellSizeFunction::New
                     (
                         regionDict,
                         searchableSurface_,
-                        defaultCellSize_
+                        defaultCellSize_,
+                        labelList(1, regionID)
                     )
                 );
                 Info<< decrIndent;
 
-                functionI++;
+                nRegionCellSizeFunctions++;
+            }
+            else
+            {
+                // Add to default list
+                defaultCellSizeRegions.append(regionID);
             }
         }
     }
 
-    regionCellSizeFunctions.setSize(functionI);
-
-    if (functionI > 0)
+    if (defaultCellSizeRegions.empty() && !regionCellSizeFunctions.empty())
     {
+        cellSizeFunctions_.transfer(regionCellSizeFunctions);
+    }
+    else if (nRegionCellSizeFunctions > 0)
+    {
+        regionCellSizeFunctions.set
+        (
+            nRegionCellSizeFunctions,
+            cellSizeFunction::New
+            (
+                controlFunctionDict,
+                searchableSurface_,
+                defaultCellSize_,
+                labelList()
+            )
+        );
+
         cellSizeFunctions_.transfer(regionCellSizeFunctions);
     }
 
@@ -252,6 +284,9 @@ Foam::searchableSurfaceControl::searchableSurfaceControl
             maxPriority_ = funcPriority;
         }
     }
+
+    Info<< nl << "There are " << cellSizeFunctions_.size()
+        << " region control functions" << endl;
 }
 
 
@@ -387,7 +422,7 @@ bool Foam::searchableSurfaceControl::cellSize
             continue;
         }
 
-        scalar sizeI = GREAT;
+        scalar sizeI = -1;
 
         if (sizeFunc.cellSize(pt, sizeI))
         {
@@ -403,15 +438,15 @@ bool Foam::searchableSurfaceControl::cellSize
             else
             {
                 cellSize = sizeI;
+
+                priority = sizeFunc.priority();
             }
 
             if (debug)
             {
-                Info<< "sizeI " << sizeI
-                    <<" minSize " << cellSize << endl;
+                Info<< "    sizeI " << sizeI
+                    <<"    minSize " << cellSize << endl;
             }
-
-            priority = sizeFunc.priority();
         }
     }
 

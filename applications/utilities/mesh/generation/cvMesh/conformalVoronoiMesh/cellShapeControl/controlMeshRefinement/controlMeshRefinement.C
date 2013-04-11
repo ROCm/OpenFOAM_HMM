@@ -77,12 +77,7 @@ bool Foam::controlMeshRefinement::detectEdge
     Foam::point a(startPt);
     Foam::point b(endPt);
 
-//    scalar cellSizeA = sizeControls_.cellSize(a);
-//    scalar cellSizeB = sizeControls_.cellSize(b);
-
     Foam::point midPoint = (a + b)/2.0;
-
-//    scalar cellSizeMid = sizeControls_.cellSize(midPoint);
 
     label nIterations = 0;
 
@@ -106,10 +101,10 @@ bool Foam::controlMeshRefinement::detectEdge
         scalar cellSizeA = sizeControls_.cellSize(a);
         scalar cellSizeB = sizeControls_.cellSize(b);
 
-        if (magSqr(cellSizeA - cellSizeB) < 1e-6)
-        {
-            return false;
-        }
+//        if (magSqr(cellSizeA - cellSizeB) < 1e-6)
+//        {
+//            return false;
+//        }
 
         scalar cellSizeMid = sizeControls_.cellSize(midPoint);
 
@@ -164,16 +159,12 @@ bool Foam::controlMeshRefinement::detectEdge
         if (magSqr(secondDerivative1) > magSqr(secondDerivative2))
         {
             b = midPoint;
-//            cellSizeB = cellSizeMid;
             midPoint = midPoint1;
-//            cellSizeMid = cellSizeMid1;
         }
         else
         {
             a = midPoint;
-//            cellSizeA = cellSizeMid;
             midPoint = midPoint2;
-//            cellSizeMid = cellSizeMid2;
         }
     }
 }
@@ -186,8 +177,8 @@ Foam::pointHit Foam::controlMeshRefinement::findDiscontinuities
 {
     pointHit p(point::max);
 
-    const scalar tolSqr = sqr(1e-1);
-    const scalar secondDerivTolSqr = sqr(1e-1);
+    const scalar tolSqr = sqr(1e-3);
+    const scalar secondDerivTolSqr = sqr(1e-3);
 
     detectEdge
     (
@@ -242,16 +233,16 @@ void Foam::controlMeshRefinement::initialMeshPopulation
     }
     else
     {
-        overallBoundBox.set
-        (
-            new boundBox(geometryToConformTo_.geometry().bounds())
-        );
-
-        mesh_.insertBoundingPoints
-        (
-            overallBoundBox(),
-            sizeControls_
-        );
+//        overallBoundBox.set
+//        (
+//            new boundBox(geometryToConformTo_.geometry().bounds())
+//        );
+//
+//        mesh_.insertBoundingPoints
+//        (
+//            overallBoundBox(),
+//            sizeControls_
+//        );
     }
 
     const PtrList<cellSizeAndAlignmentControl>& controlFunctions =
@@ -262,14 +253,20 @@ void Foam::controlMeshRefinement::initialMeshPopulation
         const cellSizeAndAlignmentControl& controlFunction =
             controlFunctions[fI];
 
+        const Switch& forceInsertion =
+            controlFunction.forceInitialPointInsertion();
+
         Info<< "Inserting points from " << controlFunction.name()
             << " (" << controlFunction.type() << ")" << endl;
+        Info<< "    Force insertion is " << forceInsertion.asText() << endl;
 
         pointField pts;
         scalarField sizes;
         triadField alignments;
 
         controlFunction.initialVertices(pts, sizes, alignments);
+
+        Info<< "    Got initial vertices list" << endl;
 
         List<Vb> vertices(pts.size());
 
@@ -279,11 +276,17 @@ void Foam::controlMeshRefinement::initialMeshPopulation
             vertices[vI] = Vb(pts[vI], Vb::vtInternalNearBoundary);
             vertices[vI].targetCellSize() = max
             (
-                sizes[vI],
+                min
+                (
+                    sizes[vI],
+                    shapeController_.cellSize(pts[vI])
+                ),
                 shapeController_.minimumCellSize()
             );
             vertices[vI].alignment() = alignments[vI];
         }
+
+        Info<< "    Clipped minimum size" << endl;
 
         pts.clear();
         sizes.clear();
@@ -293,25 +296,33 @@ void Foam::controlMeshRefinement::initialMeshPopulation
 
         PackedBoolList keepVertex(vertices.size(), true);
 
-        if (Pstream::parRun())
+        forAll(vertices, vI)
         {
-            forAll(vertices, vI)
-            {
-                const bool onProc = decomposition().positionOnThisProcessor
-                (
-                    topoint(vertices[vI].point())
-                );
+            bool keep = true;
 
-                if (!onProc)
-                {
-                    keepVertex[vI] = false;
-                }
+            pointFromPoint pt = topoint(vertices[vI].point());
+
+            if (Pstream::parRun())
+            {
+                keep = decomposition().positionOnThisProcessor(pt);
+            }
+
+            if (geometryToConformTo_.wellOutside(pt, SMALL))
+            {
+                keep = false;
+            }
+
+            if (!keep)
+            {
+                keepVertex[vI] = false;
             }
         }
 
         inplaceSubset(keepVertex, vertices);
 
         const label preInsertedSize = mesh_.number_of_vertices();
+
+        Info<< "    Check sizes" << endl;
 
         forAll(vertices, vI)
         {
@@ -368,7 +379,7 @@ void Foam::controlMeshRefinement::initialMeshPopulation
                 insertPoint = true;
             }
 
-            if (insertPoint)
+            if (forceInsertion || insertPoint)
             {
                 mesh_.insert
                 (
@@ -491,9 +502,6 @@ Foam::label Foam::controlMeshRefinement::refineMesh
         pointFromPoint ptB(topoint(vB->point()));
 
         linePointRef l(ptA, ptB);
-
-//        Info<< "Edge " << l << endl;
-//        Info<< vA->info() << vB->info();
 
         const pointHit hitPt = findDiscontinuities(l);
 

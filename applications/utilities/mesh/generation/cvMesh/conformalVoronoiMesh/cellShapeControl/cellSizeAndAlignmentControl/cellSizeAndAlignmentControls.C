@@ -50,7 +50,7 @@ bool Foam::cellSizeAndAlignmentControls::evalCellSizeFunctions
     {
         // Maintain priority of current hit. Initialise so it always goes
         // through at least once.
-        label previousPriority = -1;
+        label previousPriority = labelMin;
 
         forAll(controlFunctions_, i)
         {

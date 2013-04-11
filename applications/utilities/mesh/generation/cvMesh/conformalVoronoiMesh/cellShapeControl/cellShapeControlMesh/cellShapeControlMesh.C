@@ -536,6 +536,7 @@ void Foam::cellShapeControlMesh::barycentricCoords
 ) const
 {
     // Use the previous cell handle as a hint on where to start searching
+    // Giving a hint causes strange errors...
     ch = locate(toPoint<Point>(pt));
 
     if (dimension() > 2 && !is_infinite(ch))
@@ -671,8 +672,6 @@ void Foam::cellShapeControlMesh::distribute
         verticesToInsert.end(),
         true
     );
-
-    Info<< nl << "    Inserted distributed background tessellation" << endl;
 
     sync(decomposition.procBounds());
 
