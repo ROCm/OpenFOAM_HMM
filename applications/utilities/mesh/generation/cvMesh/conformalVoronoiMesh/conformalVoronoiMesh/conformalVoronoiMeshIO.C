@@ -817,7 +817,7 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
 //    }
 
     // Rotation on new faces.
-    labelList rotation(faces.size(), -1);
+    labelList rotation(faces.size(), 0);
     labelList faceMap(faces.size(), -1);
 
     PstreamBuffers pBufs(Pstream::nonBlocking);
@@ -909,18 +909,26 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
 
     if (anyChanged)
     {
-        inplaceReorder(faceMap, faces);
+        label nReorderedFaces = 0;
+
+        forAll(faceMap, faceI)
+        {
+           if (faceMap[faceI] != -1)
+           {
+               nReorderedFaces++;
+           }
+        }
+
+        if (nReorderedFaces > 0)
+        {
+            inplaceReorder(faceMap, faces);
+        }
 
         // Rotate faces (rotation is already in new face indices).
         label nRotated = 0;
 
         forAll(rotation, faceI)
         {
-            if (rotation[faceI] == -1)
-            {
-                continue;
-            }
-
             if (rotation[faceI] != 0)
             {
                 inplaceRotateList<List, label>(faces[faceI], rotation[faceI]);
@@ -928,8 +936,11 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
             }
         }
 
-        Info<< indent << returnReduce(nRotated, sumOp<label>())
-            << " faces have been rotated" << decrIndent << decrIndent << endl;
+        Info<< indent << returnReduce(nReorderedFaces, sumOp<label>())
+            << " faces have been reordered" << nl
+            << indent << returnReduce(nRotated, sumOp<label>())
+            << " faces have been rotated"
+            << decrIndent << decrIndent << endl;
     }
 }
 
@@ -1005,6 +1016,13 @@ void Foam::conformalVoronoiMesh::writeMesh
 
         if (patchTypes[p] == processorPolyPatch::typeName)
         {
+            const_cast<dictionary&>(patchDicts[p]).set
+            (
+                "transform",
+                "noOrdering"
+                //"coincidentFullMatch"
+            );
+
             // Do not create empty processor patches
             if (totalPatchSize > 0)
             {
