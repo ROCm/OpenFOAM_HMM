@@ -599,7 +599,7 @@ private:
             pointIndexHitAndFeatureList& surfaceHits
         );
 
-        bool locationConformsToInside
+        bool surfaceLocationConformsToInside
         (
             const pointIndexHitAndFeature& info
         ) const;

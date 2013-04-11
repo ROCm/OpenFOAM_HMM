@@ -808,13 +808,11 @@ Foam::label Foam::conformalVoronoiMesh::synchroniseEdgeTrees
 }
 
 
-bool Foam::conformalVoronoiMesh::locationConformsToInside
+bool Foam::conformalVoronoiMesh::surfaceLocationConformsToInside
 (
     const pointIndexHitAndFeature& info
 ) const
 {
-    bool keepLocation = true;
-
     if (info.first().hit())
     {
         vectorField norm(1);
@@ -833,15 +831,13 @@ bool Foam::conformalVoronoiMesh::locationConformsToInside
 
         if (!geometryToConformTo_.inside(innerPoint))
         {
-            keepLocation = false;
+            return false;
         }
-    }
-    else
-    {
-        keepLocation = false;
+
+        return true;
     }
 
-    return keepLocation;
+    return false;
 }
 
 
@@ -995,7 +991,7 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceAllIntersections
 
             bool rejectPoint = false;
 
-            if (!locationConformsToInside(info))
+            if (!surfaceLocationConformsToInside(info))
             {
                 rejectPoint = true;
             }
