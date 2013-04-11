@@ -36,7 +36,10 @@ Foam::AMIMethod<SourcePatch, TargetPatch>::New
     const bool reverseTarget
 )
 {
-    Info<< "Selecting AMIMethod " << methodName << endl;
+    if (debug)
+    {
+        Info<< "Selecting AMIMethod " << methodName << endl;
+    }
 
     typename componentsConstructorTable::iterator cstrIter =
         componentsConstructorTablePtr_->find(methodName);

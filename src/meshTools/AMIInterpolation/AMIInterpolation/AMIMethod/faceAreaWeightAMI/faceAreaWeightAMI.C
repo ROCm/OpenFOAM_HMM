@@ -515,7 +515,7 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
 
     if (nonOverlapFaces.size() != 0)
     {
-        Pout<< "AMI: " << nonOverlapFaces.size()
+        Pout<< "    AMI: " << nonOverlapFaces.size()
             << " non-overlap faces identified"
             << endl;
 

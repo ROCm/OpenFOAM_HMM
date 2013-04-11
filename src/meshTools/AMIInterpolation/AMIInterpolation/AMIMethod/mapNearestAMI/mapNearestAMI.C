@@ -329,13 +329,13 @@ void Foam::mapNearestAMI<SourcePatch, TargetPatch>::calculate
     {
         scalar magSf = this->srcMagSf_[i];
         srcAddress[i].transfer(srcAddr[i]);
-        srcWeights[i] = scalarList(srcAddr[i].size(), magSf);
+        srcWeights[i] = scalarList(1, magSf);
     }
     forAll(tgtAddr, i)
     {
         scalar magSf = this->tgtMagSf_[i];
         tgtAddress[i].transfer(tgtAddr[i]);
-        tgtWeights[i] = scalarList(tgtAddr[i].size(), magSf);
+        tgtWeights[i] = scalarList(1, magSf);
     }
 }
 

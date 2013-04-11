@@ -72,13 +72,13 @@ void Foam::directAMI<SourcePatch, TargetPatch>::appendToDirectSeeds
 
                     break;
                 }
+            }
 
-                if (!found)
-                {
-                    // no match available for source face srcI
-                    mapFlag[srcI] = false;
-                    nonOverlapFaces.append(srcI);
-                }
+            if (!found)
+            {
+                // no match available for source face srcI
+                mapFlag[srcI] = false;
+                nonOverlapFaces.append(srcI);
             }
         }
     }
@@ -198,7 +198,7 @@ void Foam::directAMI<SourcePatch, TargetPatch>::calculate
 
     if (nonOverlapFaces.size() != 0)
     {
-        Pout<< "AMI: " << nonOverlapFaces.size()
+        Pout<< "    AMI: " << nonOverlapFaces.size()
             << " non-overlap faces identified"
             << endl;
 
@@ -210,13 +210,13 @@ void Foam::directAMI<SourcePatch, TargetPatch>::calculate
     {
         scalar magSf = this->srcMagSf_[i];
         srcAddress[i].transfer(srcAddr[i]);
-        srcWeights[i] = scalarList(srcAddr[i].size(), magSf);
+        srcWeights[i] = scalarList(1, magSf);
     }
     forAll(tgtAddr, i)
     {
         scalar magSf = this->tgtMagSf_[i];
         tgtAddress[i].transfer(tgtAddr[i]);
-        tgtWeights[i] = scalarList(tgtAddr[i].size(), magSf);
+        tgtWeights[i] = scalarList(1, magSf);
     }
 }
 

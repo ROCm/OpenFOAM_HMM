@@ -111,7 +111,7 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("faceAreaWeight");
+    TypeName("faceAreaWeightAMI");
 
 
     // Constructors
