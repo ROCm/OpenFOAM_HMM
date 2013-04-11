@@ -36,6 +36,7 @@ SourceFiles
 #define treeDataPrimitivePatch_H
 
 #include "treeBoundBoxList.H"
+#include "volumeType.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -213,7 +214,7 @@ public:
 
             //- Get type (inside,outside,mixed,unknown) of point w.r.t. surface.
             //  Only makes sense for closed surfaces.
-            label getVolumeType
+            volumeType getVolumeType
             (
                 const indexedOctree<treeDataPrimitivePatch<PatchType> >&,
                 const point&

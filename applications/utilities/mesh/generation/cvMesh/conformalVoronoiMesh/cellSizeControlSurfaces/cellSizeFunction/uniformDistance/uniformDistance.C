@@ -25,7 +25,7 @@ License
 
 #include "uniformDistance.H"
 #include "addToRunTimeSelectionTable.H"
-#include "dimensionSet.H"
+#include "volumeType.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -95,7 +95,7 @@ bool uniformDistance::cellSize
         }
 
         pointField ptF(1, pt);
-        List<searchableSurface::volumeType> vTL;
+        List<volumeType> vTL;
 
         surface_.getVolumeType(ptF, vTL);
 
@@ -104,7 +104,7 @@ bool uniformDistance::cellSize
         if
         (
             sideMode_ == smInside
-         && vTL[0] == searchableSurface::INSIDE
+         && vTL[0] == volumeType::INSIDE
         )
         {
             size = surfaceCellSizeFunction_().surfaceSize(hitInfo.index());
@@ -114,7 +114,7 @@ bool uniformDistance::cellSize
         else if
         (
             sideMode_ == smOutside
-         && vTL[0] == searchableSurface::OUTSIDE
+         && vTL[0] == volumeType::OUTSIDE
         )
         {
             size = surfaceCellSizeFunction_().surfaceSize(hitInfo.index());

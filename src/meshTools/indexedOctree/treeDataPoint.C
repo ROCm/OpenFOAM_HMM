@@ -92,13 +92,13 @@ Foam::pointField Foam::treeDataPoint::shapePoints() const
 
 //- Get type (inside,outside,mixed,unknown) of point w.r.t. surface.
 //  Only makes sense for closed surfaces.
-Foam::label Foam::treeDataPoint::getVolumeType
+Foam::volumeType Foam::treeDataPoint::getVolumeType
 (
     const indexedOctree<treeDataPoint>& oc,
     const point& sample
 ) const
 {
-    return indexedOctree<treeDataPoint>::UNKNOWN;
+    return volumeType::UNKNOWN;
 }
 
 

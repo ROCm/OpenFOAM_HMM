@@ -180,7 +180,7 @@ Foam::pointField Foam::treeDataFace::shapePoints() const
 
 //- Get type (inside,outside,mixed,unknown) of point w.r.t. surface.
 //  Only makes sense for closed surfaces.
-Foam::label Foam::treeDataFace::getVolumeType
+Foam::volumeType Foam::treeDataFace::getVolumeType
 (
     const indexedOctree<treeDataFace>& oc,
     const point& sample
@@ -433,7 +433,7 @@ Foam::label Foam::treeDataFace::getVolumeType
     // - tolerances are wrong. (if e.g. face has zero area)
     // - or (more likely) surface is not closed.
 
-    return indexedOctree<treeDataFace>::UNKNOWN;
+    return volumeType::UNKNOWN;
 }
 
 

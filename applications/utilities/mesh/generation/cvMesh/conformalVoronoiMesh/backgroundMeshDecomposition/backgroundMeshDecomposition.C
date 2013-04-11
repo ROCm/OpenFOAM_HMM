@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -155,10 +155,10 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
 
     // For each cell in the mesh has it been determined if it is fully
     // inside, outside, or overlaps the surface
-    labelList volumeStatus
+    List<volumeType> volumeStatus
     (
         mesh_.nCells(),
-        searchableSurface::UNKNOWN
+        volumeType::UNKNOWN
     );
 
     // Surface refinement
@@ -168,7 +168,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
             // Determine/update the status of each cell
             forAll(volumeStatus, cellI)
             {
-                if (volumeStatus[cellI] == searchableSurface::UNKNOWN)
+                if (volumeStatus[cellI] == volumeType::UNKNOWN)
                 {
                     treeBoundBox cellBb
                     (
@@ -181,16 +181,15 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
 
                     if (geometry.overlaps(cellBb))
                     {
-                        volumeStatus[cellI] = searchableSurface::MIXED;
+                        volumeStatus[cellI] = volumeType::MIXED;
                     }
                     else if (geometry.inside(cellBb.midpoint()))
                     {
-                        volumeStatus[cellI] = searchableSurface::INSIDE;
+                        volumeStatus[cellI] = volumeType::INSIDE;
                     }
                     else
                     {
-                        volumeStatus[cellI] =
-                            searchableSurface::OUTSIDE;
+                        volumeStatus[cellI] = volumeType::OUTSIDE;
                     }
                 }
             }
@@ -216,9 +215,9 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                 {
                     label cellI = newCellsToRefine[nCTRI];
 
-                    if (volumeStatus[cellI] == searchableSurface::MIXED)
+                    if (volumeStatus[cellI] == volumeType::MIXED)
                     {
-                        volumeStatus[cellI] = searchableSurface::UNKNOWN;
+                        volumeStatus[cellI] = volumeType::UNKNOWN;
                     }
 
                     icellWeights[cellI] = max
@@ -260,7 +259,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
 
                     const labelList& cellMap = map().cellMap();
 
-                    labelList newVolumeStatus(cellMap.size());
+                    List<volumeType> newVolumeStatus(cellMap.size());
 
                     forAll(cellMap, newCellI)
                     {
@@ -268,8 +267,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
 
                         if (oldCellI == -1)
                         {
-                            newVolumeStatus[newCellI] =
-                                searchableSurface::UNKNOWN;
+                            newVolumeStatus[newCellI] = volumeType::UNKNOWN;
                         }
                         else
                         {
@@ -289,7 +287,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
             // Determine/update the status of each cell
             forAll(volumeStatus, cellI)
             {
-                if (volumeStatus[cellI] == searchableSurface::UNKNOWN)
+                if (volumeStatus[cellI] == volumeType::UNKNOWN)
                 {
                     treeBoundBox cellBb
                     (
@@ -302,16 +300,15 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
 
                     if (geometry.overlaps(cellBb))
                     {
-                        volumeStatus[cellI] = searchableSurface::MIXED;
+                        volumeStatus[cellI] = volumeType::MIXED;
                     }
                     else if (geometry.inside(cellBb.midpoint()))
                     {
-                        volumeStatus[cellI] = searchableSurface::INSIDE;
+                        volumeStatus[cellI] = volumeType::INSIDE;
                     }
                     else
                     {
-                        volumeStatus[cellI] =
-                            searchableSurface::OUTSIDE;
+                        volumeStatus[cellI] = volumeType::OUTSIDE;
                     }
                 }
             }
@@ -325,7 +322,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
 
                 forAll(volumeStatus, cellI)
                 {
-                    if (volumeStatus[cellI] == searchableSurface::OUTSIDE)
+                    if (volumeStatus[cellI] == volumeType::OUTSIDE)
                     {
                         cellsToRemove.append(cellI);
                     }
@@ -372,7 +369,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
 
                     const labelList& cellMap = map().cellMap();
 
-                    labelList newVolumeStatus(cellMap.size());
+                    List<volumeType> newVolumeStatus(cellMap.size());
 
                     forAll(cellMap, newCellI)
                     {
@@ -380,13 +377,11 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
 
                         if (oldCellI == -1)
                         {
-                            newVolumeStatus[newCellI] =
-                                searchableSurface::UNKNOWN;
+                            newVolumeStatus[newCellI] = volumeType::UNKNOWN;
                         }
                         else
                         {
-                            newVolumeStatus[newCellI] =
-                                volumeStatus[oldCellI];
+                            newVolumeStatus[newCellI] = volumeStatus[oldCellI];
                         }
                     }
 
@@ -511,7 +506,7 @@ void Foam::backgroundMeshDecomposition::printMeshData
 bool Foam::backgroundMeshDecomposition::refineCell
 (
     label cellI,
-    label volType,
+    volumeType volType,
     scalar& weightEstimate
 ) const
 {
@@ -531,7 +526,7 @@ bool Foam::backgroundMeshDecomposition::refineCell
 
     weightEstimate = 1.0;
 
-    if (volType == searchableSurface::MIXED)
+    if (volType == volumeType::MIXED)
     {
 //        // Assess the cell size at the nearest point on the surface for the
 //        // MIXED cells, if the cell is large with respect to the cell size,
@@ -611,7 +606,7 @@ bool Foam::backgroundMeshDecomposition::refineCell
 //            return true;
 //        }
     }
-    else if (volType == searchableSurface::INSIDE)
+    else if (volType == volumeType::INSIDE)
     {
         // scalar s = cvMesh_.cellShapeControl_.cellSize(cellBb.midpoint());
 
@@ -634,7 +629,7 @@ bool Foam::backgroundMeshDecomposition::refineCell
 
 Foam::labelList Foam::backgroundMeshDecomposition::selectRefinementCells
 (
-    labelList& volumeStatus,
+    List<volumeType>& volumeStatus,
     volScalarField& cellWeights
 ) const
 {
@@ -645,7 +640,7 @@ Foam::labelList Foam::backgroundMeshDecomposition::selectRefinementCells
     // Determine/update the status of each cell
     forAll(volumeStatus, cellI)
     {
-        if (volumeStatus[cellI] == searchableSurface::MIXED)
+        if (volumeStatus[cellI] == volumeType::MIXED)
         {
             if (meshCutter_.cellLevel()[cellI] < minLevels_)
             {
@@ -653,7 +648,7 @@ Foam::labelList Foam::backgroundMeshDecomposition::selectRefinementCells
             }
         }
 
-        if (volumeStatus[cellI] != searchableSurface::OUTSIDE)
+        if (volumeStatus[cellI] != volumeType::OUTSIDE)
         {
             if
             (
@@ -705,7 +700,12 @@ void Foam::backgroundMeshDecomposition::buildPatchAndTree()
     (
         new indexedOctree<treeDataBPatch>
         (
-            treeDataBPatch(false, boundaryFacesPtr_()),
+            treeDataBPatch
+            (
+                false,
+                boundaryFacesPtr_(),
+                indexedOctree<treeDataBPatch>::perturbTol()
+            ),
             overallBb.extend(rnd, 1e-4),
             10, // maxLevel
             10, // leafSize
@@ -1064,11 +1064,7 @@ bool Foam::backgroundMeshDecomposition::positionOnThisProcessor
 {
 //    return bFTreePtr_().findAnyOverlap(pt, 0.0);
 
-    return
-    (
-        bFTreePtr_().getVolumeType(pt)
-     == indexedOctree<treeDataBPatch>::INSIDE
-    );
+    return (bFTreePtr_().getVolumeType(pt) == volumeType::INSIDE);
 }
 
 

@@ -27,11 +27,19 @@ License
 #include "conformalVoronoiMesh.H"
 #include "triSurface.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+defineTypeNameAndDebug(conformationSurfaces, 0);
+}
+
+
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 void Foam::conformationSurfaces::hasBoundedVolume
 (
-    List<searchableSurface::volumeType>& referenceVolumeTypes
+    List<volumeType>& referenceVolumeTypes
 ) const
 {
     vector sum(vector::zero);
@@ -41,14 +49,18 @@ void Foam::conformationSurfaces::hasBoundedVolume
     {
         const searchableSurface& surface(allGeometry_[surfaces_[s]]);
 
-        if (surface.hasVolumeType())
+        if
+        (
+            surface.hasVolumeType()
+         && !baffleSurfaces_[regionOffset_[s]]
+        )
         {
             pointField pts(1, locationInMesh_);
 
-            List<searchableSurface::volumeType> vTypes
+            List<volumeType> vTypes
             (
                 pts.size(),
-                searchableSurface::UNKNOWN
+                volumeType::UNKNOWN
             );
 
             surface.getVolumeType(pts, vTypes);
@@ -56,7 +68,7 @@ void Foam::conformationSurfaces::hasBoundedVolume
             referenceVolumeTypes[s] = vTypes[0];
 
             Info<< "    is "
-                << searchableSurface::volumeTypeNames[referenceVolumeTypes[s]]
+                << volumeType::names[referenceVolumeTypes[s]]
                 << " surface " << surface.name()
                 << endl;
         }
@@ -407,7 +419,7 @@ Foam::conformationSurfaces::conformationSurfaces
     referenceVolumeTypes_.setSize
     (
         surfaces_.size(),
-        searchableSurface::UNKNOWN
+        volumeType::UNKNOWN
     );
 
     Info<< endl
@@ -471,24 +483,24 @@ bool Foam::conformationSurfaces::outside
     const point& samplePt
 ) const
 {
-    return !inside(samplePt);
+    return wellOutside(pointField(1, samplePt), scalarField(1, 0))[0];
+    //return !inside(samplePt);
 }
 
 
-Foam::Field<bool> Foam::conformationSurfaces::wellInOutSide
+Foam::Field<bool> Foam::conformationSurfaces::wellInside
 (
     const pointField& samplePts,
-    const scalarField& testDistSqr,
-    bool testForInside
+    const scalarField& testDistSqr
 ) const
 {
-    List<List<searchableSurface::volumeType> > surfaceVolumeTests
+    List<List<volumeType> > surfaceVolumeTests
     (
         surfaces_.size(),
-        List<searchableSurface::volumeType>
+        List<volumeType>
         (
             samplePts.size(),
-            searchableSurface::UNKNOWN
+            volumeType::UNKNOWN
         )
     );
 
@@ -497,7 +509,9 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInOutSide
     {
         const searchableSurface& surface(allGeometry_[surfaces_[s]]);
 
-        if (surface.hasVolumeType())
+        const label regionI = regionOffset_[s];
+
+        if (!baffleSurfaces_[regionI])
         {
             surface.getVolumeType(samplePts, surfaceVolumeTests[s]);
         }
@@ -508,7 +522,7 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInOutSide
     // distanceSquared
 
     // Assume that the point is wellInside until demonstrated otherwise.
-    Field<bool> inOutSidePoint(samplePts.size(), testForInside);
+    Field<bool> insidePoint(samplePts.size(), true);
 
     //Check if the points are inside the surface by the given distance squared
 
@@ -534,37 +548,47 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInOutSide
         {
             // If the point is within range of the surface, then it can't be
             // well (in|out)side
-            inOutSidePoint[i] = false;
+            insidePoint[i] = false;
 
             continue;
         }
 
         forAll(surfaces_, s)
         {
+            const label regionI = regionOffset_[s];
+
+            const searchableSurface& surface(allGeometry_[surfaces_[s]]);
+
+            if
+            (
+                !surface.hasVolumeType()
+             && !surface.bounds().contains(samplePts[i])
+            )
+            {
+                continue;
+            }
+
             // If one of the pattern tests is failed, then the point cannot be
             // inside, therefore, if this is a testForInside = true call, the
             // result is false.  If this is a testForInside = false call, then
             // the result is true.
-            if (surfaceVolumeTests[s][i] != referenceVolumeTypes_[s])
+            if (baffleSurfaces_[regionI])
             {
-                inOutSidePoint[i] = !testForInside;
+                continue;
+            }
+
+            if (surfaceVolumeTests[s][i] == volumeType::OUTSIDE)
+            {
+                insidePoint[i] = false;
 
                 break;
             }
         }
     }
 
-    return inOutSidePoint;
-}
+    return insidePoint;
 
-
-Foam::Field<bool> Foam::conformationSurfaces::wellInside
-(
-    const pointField& samplePts,
-    const scalarField& testDistSqr
-) const
-{
-    return wellInOutSide(samplePts, testDistSqr, true);
+    //return wellInOutSide(samplePts, testDistSqr, true);
 }
 
 
@@ -584,7 +608,103 @@ Foam::Field<bool> Foam::conformationSurfaces::wellOutside
     const scalarField& testDistSqr
 ) const
 {
-    return wellInOutSide(samplePts, testDistSqr, false);
+    // First check if it is outside any closed surface
+
+    List<List<volumeType> > surfaceVolumeTests
+    (
+        surfaces_.size(),
+        List<volumeType>
+        (
+            samplePts.size(),
+            volumeType::UNKNOWN
+        )
+    );
+
+    // Get lists for the volumeTypes for each sample wrt each surface
+    forAll(surfaces_, s)
+    {
+        const searchableSurface& surface(allGeometry_[surfaces_[s]]);
+
+        const label regionI = regionOffset_[s];
+
+        if (!baffleSurfaces_[regionI])
+        {
+            surface.getVolumeType(samplePts, surfaceVolumeTests[s]);
+        }
+    }
+
+    // Compare the volumeType result for each point wrt to each surface with the
+    // reference value and if the points are inside the surface by a given
+    // distanceSquared
+
+    // Assume that the point is wellInside until demonstrated otherwise.
+    Field<bool> outsidePoint(samplePts.size(), true);
+
+    //Check if the points are inside the surface by the given distance squared
+
+    labelList hitSurfaces;
+
+    List<pointIndexHit> hitInfo;
+
+    searchableSurfacesQueries::findNearest
+    (
+        allGeometry_,
+        surfaces_,
+        samplePts,
+        testDistSqr,
+        hitSurfaces,
+        hitInfo
+    );
+
+    forAll(samplePts, i)
+    {
+        const pointIndexHit& pHit = hitInfo[i];
+
+        if (pHit.hit())
+        {
+            // If the point is within range of the surface, then it can't be
+            // well (in|out)side
+            outsidePoint[i] = false;
+
+            //continue;
+        }
+
+        forAll(surfaces_, s)
+        {
+            const searchableSurface& surface(allGeometry_[surfaces_[s]]);
+
+            if
+            (
+                !surface.hasVolumeType()
+             && !surface.bounds().contains(samplePts[i])
+            )
+            {
+                continue;
+            }
+
+            const label regionI = regionOffset_[s];
+
+            // If one of the pattern tests is failed, then the point cannot be
+            // inside, therefore, if this is a testForInside = true call, the
+            // result is false.  If this is a testForInside = false call, then
+            // the result is true.
+            if (baffleSurfaces_[regionI])
+            {
+                continue;
+            }
+
+            if (surfaceVolumeTests[s][i] == volumeType::INSIDE)
+            {
+                outsidePoint[i] = false;
+
+                break;
+            }
+        }
+    }
+
+    return outsidePoint;
+
+    //return wellInOutSide(samplePts, testDistSqr, false);
 }
 
 

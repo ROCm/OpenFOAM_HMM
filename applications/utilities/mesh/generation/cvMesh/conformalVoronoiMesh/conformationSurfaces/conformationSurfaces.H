@@ -39,6 +39,7 @@ SourceFiles
 #include "searchableSurfacesQueries.H"
 #include "extendedFeatureEdgeMesh.H"
 #include "boolList.H"
+#include "volumeType.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -95,15 +96,12 @@ class conformationSurfaces
 
         //- The pattern/signature of volumeTypes representing a point in the
         // domain to be meshed
-        List<searchableSurface::volumeType> referenceVolumeTypes_;
+        List<volumeType> referenceVolumeTypes_;
 
 
     // Private Member Functions
 
-        void hasBoundedVolume
-        (
-            List<searchableSurface::volumeType>& referenceVolumeTypes
-        ) const;
+        void hasBoundedVolume(List<volumeType>& referenceVolumeTypes) const;
 
         //- Read into features_ from a dictionary
         void readFeatures
@@ -121,6 +119,10 @@ class conformationSurfaces
 
 
 public:
+
+    //- Runtime type information
+    ClassName("conformationSurfaces");
+
 
     // Constructors
 
@@ -186,12 +188,12 @@ public:
             //- Check if point is closer to the surfaces to conform to than
             //  testDistSqr, in which case return false, otherwise assess in or
             //  outside and return a result depending on the testForInside flag
-            Field<bool> wellInOutSide
-            (
-                const pointField& samplePts,
-                const scalarField& testDistSqr,
-                bool testForInside
-            ) const;
+//            Field<bool> wellInOutSide
+//            (
+//                const pointField& samplePts,
+//                const scalarField& testDistSqr,
+//                bool testForInside
+//            ) const;
 
             //- Check if point is inside surfaces to conform to by at least
             //  testDistSqr

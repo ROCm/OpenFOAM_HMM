@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,6 +71,7 @@ SourceFiles
 #include "pointField.H"
 #include "indexedOctree.H"
 #include "treeDataPrimitivePatch.H"
+#include "volumeType.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -166,7 +167,7 @@ class backgroundMeshDecomposition
         bool refineCell
         (
             label cellI,
-            label volType,
+            volumeType volType,
             scalar& weightEstimate
         ) const;
 
@@ -174,7 +175,7 @@ class backgroundMeshDecomposition
         //  meshed
         labelList selectRefinementCells
         (
-            labelList& volumeStatus,
+            List<volumeType>& volumeStatus,
             volScalarField& cellWeights
         ) const;
 

@@ -25,6 +25,7 @@ License
 
 #include "uniform.H"
 #include "addToRunTimeSelectionTable.H"
+#include "volumeType.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -103,7 +104,7 @@ bool uniform::cellSize
         }
 
         pointField ptF(1, pt);
-        List<searchableSurface::volumeType> vTL(1);
+        List<volumeType> vTL(1);
 
         surface_.getVolumeType(ptF, vTL);
 
@@ -112,7 +113,7 @@ bool uniform::cellSize
         if
         (
             sideMode_ == smInside
-         && vTL[0] == searchableSurface::INSIDE
+         && vTL[0] == volumeType::INSIDE
         )
         {
             size = surfaceCellSizeFunction_().interpolate(hitPt, index);
@@ -122,7 +123,7 @@ bool uniform::cellSize
         else if
         (
             sideMode_ == smOutside
-         && vTL[0] == searchableSurface::OUTSIDE
+         && vTL[0] == volumeType::OUTSIDE
         )
         {
             size = surfaceCellSizeFunction_().interpolate(hitPt, index);

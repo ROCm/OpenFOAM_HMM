@@ -356,15 +356,14 @@ Foam::label Foam::indexedOctree<Type>::compactContents
 // Recurses to determine status of lowest level boxes. Level above is
 // combination of octants below.
 template<class Type>
-typename Foam::indexedOctree<Type>::volumeType
-Foam::indexedOctree<Type>::calcVolumeType
+Foam::volumeType Foam::indexedOctree<Type>::calcVolumeType
 (
     const label nodeI
 ) const
 {
     const node& nod = nodes_[nodeI];
 
-    volumeType myType = UNKNOWN;
+    volumeType myType = volumeType::UNKNOWN;
 
     for (direction octant = 0; octant < nod.subNodes_.size(); octant++)
     {
@@ -381,7 +380,7 @@ Foam::indexedOctree<Type>::calcVolumeType
         {
             // Contents. Depending on position in box might be on either
             // side.
-            subType = MIXED;
+            subType = volumeType::MIXED;
         }
         else
         {
@@ -389,10 +388,7 @@ Foam::indexedOctree<Type>::calcVolumeType
             // of its bounding box.
             const treeBoundBox subBb = nod.bb_.subBbox(octant);
 
-            subType = volumeType
-            (
-                shapes_.getVolumeType(*this, subBb.midpoint())
-            );
+            subType = shapes_.getVolumeType(*this, subBb.midpoint());
         }
 
         // Store octant type
@@ -400,13 +396,13 @@ Foam::indexedOctree<Type>::calcVolumeType
 
         // Combine sub node types into type for treeNode. Result is 'mixed' if
         // types differ among subnodes.
-        if (myType == UNKNOWN)
+        if (myType == volumeType::UNKNOWN)
         {
             myType = subType;
         }
         else if (subType != myType)
         {
-            myType = MIXED;
+            myType = volumeType::MIXED;
         }
     }
     return myType;
@@ -414,8 +410,7 @@ Foam::indexedOctree<Type>::calcVolumeType
 
 
 template<class Type>
-typename Foam::indexedOctree<Type>::volumeType
-Foam::indexedOctree<Type>::getVolumeType
+Foam::volumeType Foam::indexedOctree<Type>::getVolumeType
 (
     const label nodeI,
     const point& sample
@@ -425,22 +420,22 @@ Foam::indexedOctree<Type>::getVolumeType
 
     direction octant = nod.bb_.subOctant(sample);
 
-    volumeType octantType = volumeType(nodeTypes_.get((nodeI<<3)+octant));
+    volumeType octantType = volumeType::type(nodeTypes_.get((nodeI<<3)+octant));
 
-    if (octantType == INSIDE)
+    if (octantType == volumeType::INSIDE)
     {
         return octantType;
     }
-    else if (octantType == OUTSIDE)
+    else if (octantType == volumeType::OUTSIDE)
     {
         return octantType;
     }
-    else if (octantType == UNKNOWN)
+    else if (octantType == volumeType::UNKNOWN)
     {
         // Can happen for e.g. non-manifold surfaces.
         return octantType;
     }
-    else if (octantType == MIXED)
+    else if (octantType == volumeType::MIXED)
     {
         labelBits index = nod.subNodes_[octant];
 
@@ -469,7 +464,7 @@ Foam::indexedOctree<Type>::getVolumeType
                 << "Empty subnode has invalid volume type MIXED."
                 << abort(FatalError);
 
-            return UNKNOWN;
+            return volumeType::UNKNOWN;
         }
     }
     else
@@ -484,14 +479,13 @@ Foam::indexedOctree<Type>::getVolumeType
             << "Node has invalid volume type " << octantType
             << abort(FatalError);
 
-        return UNKNOWN;
+        return volumeType::UNKNOWN;
     }
 }
 
 
 template<class Type>
-typename Foam::indexedOctree<Type>::volumeType
-Foam::indexedOctree<Type>::getSide
+Foam::volumeType Foam::indexedOctree<Type>::getSide
 (
     const vector& outsideNormal,
     const vector& vec
@@ -499,11 +493,11 @@ Foam::indexedOctree<Type>::getSide
 {
     if ((outsideNormal&vec) >= 0)
     {
-        return OUTSIDE;
+        return volumeType::OUTSIDE;
     }
     else
     {
-        return INSIDE;
+        return volumeType::INSIDE;
     }
 }
 
@@ -2972,23 +2966,29 @@ const Foam::labelList& Foam::indexedOctree<Type>::findIndices
 
 // Determine type (inside/outside/mixed) per node.
 template<class Type>
-typename Foam::indexedOctree<Type>::volumeType
-Foam::indexedOctree<Type>::getVolumeType
+Foam::volumeType Foam::indexedOctree<Type>::getVolumeType
 (
     const point& sample
 ) const
 {
     if (nodes_.empty())
     {
-        return UNKNOWN;
+        return volumeType::UNKNOWN;
     }
+
+//    // If the sample is not within the octree, then have to query shapes
+//    // directly
+//    if (!nodes_[0].bb_.contains(sample))
+//    {
+//        return volumeType(shapes_.getVolumeType(*this, sample));
+//    }
 
     if (nodeTypes_.size() != 8*nodes_.size())
     {
         // Calculate type for every octant of node.
 
         nodeTypes_.setSize(8*nodes_.size());
-        nodeTypes_ = UNKNOWN;
+        nodeTypes_ = volumeType::UNKNOWN;
 
         calcVolumeType(0);
 
@@ -3001,21 +3001,21 @@ Foam::indexedOctree<Type>::getVolumeType
 
             forAll(nodeTypes_, i)
             {
-                volumeType type = volumeType(nodeTypes_.get(i));
+                volumeType type = volumeType::type(nodeTypes_.get(i));
 
-                if (type == UNKNOWN)
+                if (type == volumeType::UNKNOWN)
                 {
                     nUNKNOWN++;
                 }
-                else if (type == MIXED)
+                else if (type == volumeType::MIXED)
                 {
                     nMIXED++;
                 }
-                else if (type == INSIDE)
+                else if (type == volumeType::INSIDE)
                 {
                     nINSIDE++;
                 }
-                else if (type == OUTSIDE)
+                else if (type == volumeType::OUTSIDE)
                 {
                     nOUTSIDE++;
                 }

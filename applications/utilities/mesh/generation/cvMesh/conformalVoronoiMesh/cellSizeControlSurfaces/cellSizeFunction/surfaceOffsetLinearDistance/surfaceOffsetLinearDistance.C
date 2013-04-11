@@ -25,6 +25,7 @@ License
 
 #include "surfaceOffsetLinearDistance.H"
 #include "addToRunTimeSelectionTable.H"
+#include "volumeType.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -194,7 +195,7 @@ bool surfaceOffsetLinearDistance::cellSize
         }
 
         pointField ptF(1, pt);
-        List<searchableSurface::volumeType> vTL;
+        List<volumeType> vTL;
 
         surface_.getVolumeType(ptF, vTL);
 
@@ -203,7 +204,7 @@ bool surfaceOffsetLinearDistance::cellSize
         if
         (
             sideMode_ == smInside
-         && vTL[0] == searchableSurface::INSIDE
+         && vTL[0] == volumeType::INSIDE
         )
         {
             size = sizeFunction(hitPt, dist, hitIndex);
@@ -213,7 +214,7 @@ bool surfaceOffsetLinearDistance::cellSize
         else if
         (
             sideMode_ == smOutside
-         && vTL[0] == searchableSurface::OUTSIDE
+         && vTL[0] == volumeType::OUTSIDE
         )
         {
             size = sizeFunction(hitPt, dist, hitIndex);

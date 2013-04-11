@@ -735,7 +735,7 @@ void Foam::searchableSurfacesQueries::signedDistance
     const labelList& surfacesToTest,
     const pointField& samples,
     const scalarField& nearestDistSqr,
-    const searchableSurface::volumeType illegalHandling,
+    const volumeType illegalHandling,
     labelList& nearestSurfaces,
     scalarField& distance
 )
@@ -775,7 +775,7 @@ void Foam::searchableSurfacesQueries::signedDistance
         }
 
         // Calculate sideness of these surface points
-        List<searchableSurface::volumeType> volType;
+        List<volumeType> volType;
         allSurfaces[surfacesToTest[testI]].getVolumeType(surfPoints, volType);
 
         // Push back to original
@@ -784,13 +784,13 @@ void Foam::searchableSurfacesQueries::signedDistance
             label pointI = surfIndices[i];
             scalar dist = mag(samples[pointI] - nearestInfo[pointI].hitPoint());
 
-            searchableSurface::volumeType vT = volType[i];
+            volumeType vT = volType[i];
 
-            if (vT == searchableSurface::OUTSIDE)
+            if (vT == volumeType::OUTSIDE)
             {
                 distance[pointI] = dist;
             }
-            else if (vT == searchableSurface::INSIDE)
+            else if (vT == volumeType::INSIDE)
             {
                 distance[i] = -dist;
             }
@@ -798,12 +798,12 @@ void Foam::searchableSurfacesQueries::signedDistance
             {
                 switch (illegalHandling)
                 {
-                    case searchableSurface::OUTSIDE:
+                    case volumeType::OUTSIDE:
                     {
                         distance[pointI] = dist;
                         break;
                     }
-                    case searchableSurface::INSIDE:
+                    case volumeType::INSIDE:
                     {
                         distance[pointI] = -dist;
                         break;
@@ -817,7 +817,7 @@ void Foam::searchableSurfacesQueries::signedDistance
                             << " surface:"
                             << allSurfaces[surfacesToTest[testI]].name()
                             << " volType:"
-                            << searchableSurface::volumeTypeNames[vT]
+                            << volumeType::names[vT]
                             << exit(FatalError);
                         break;
                     }

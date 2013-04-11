@@ -25,6 +25,7 @@ License
 
 #include "linearSpatial.H"
 #include "addToRunTimeSelectionTable.H"
+#include "volumeType.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -108,7 +109,7 @@ bool linearSpatial::cellSize
     }
 
     pointField ptF(1, pt);
-    List<searchableSurface::volumeType> vTL;
+    List<volumeType> vTL;
 
     surface_.getVolumeType(ptF, vTL);
 
@@ -117,7 +118,7 @@ bool linearSpatial::cellSize
     if
     (
         sideMode_ == smInside
-     && vTL[0] == searchableSurface::INSIDE
+     && vTL[0] == volumeType::INSIDE
     )
     {
         size = sizeFunction(pt);
@@ -127,7 +128,7 @@ bool linearSpatial::cellSize
     else if
     (
         sideMode_ == smOutside
-     && vTL[0] == searchableSurface::OUTSIDE
+     && vTL[0] == volumeType::OUTSIDE
     )
     {
         size = sizeFunction(pt);
