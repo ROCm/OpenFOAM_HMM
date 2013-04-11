@@ -70,10 +70,9 @@ geometry
         type triSurfaceMesh;
     }
 
-    // Surface used for cell size control
-    tunnel_APPROACH_INLET.obj
+    refinementBox
     {
-        type triSurfaceMesh;
+        type searchableBox;
     }
 }
 
@@ -101,16 +100,16 @@ surfaceConformation
     // Distance to a feature point within which surface and edge
     // conformation points are excluded - fraction of the local target
     // cell size
-    featurePointExclusionDistanceCoeff  0.4;
+    featurePointExclusionDistanceCoeff  0.65;
 
     // Distance to an existing feature edge conformation location
     // within which other edge conformation location are excluded -
     // fraction of the local target cell size
-    featureEdgeExclusionDistanceCoeff   0.2;
+    featureEdgeExclusionDistanceCoeff   0.65;
 
     // Optimisation: do not check for surface intersection (of dual edges)
     // for points near to surface.
-    surfaceSearchDistanceCoeff  2.5;
+    surfaceSearchDistanceCoeff  5;
 
     // Maximum allowable protrusion through the surface before
     // conformation points are added - fraction of the local target
@@ -126,56 +125,27 @@ surfaceConformation
     surfaceConformationRebuildFrequency 10;
 
     // Initial and intermediate controls
-    coarseConformationControls
+    conformationControls
     {
-        // Initial conformation
-        initial
-        {
-            // We've got a point poking through the surface. Don't do any
-            // surface conformation if near feature edge (since feature edge
-            // conformation should have priority)
+        // We've got a point poking through the surface. Don't do any
+        // surface conformation if near feature edge (since feature edge
+        // conformation should have priority)
 
-            // distance to search for near feature edges
-            edgeSearchDistCoeff         1.1;
+        // distance to search for near feature edges
+        edgeSearchDistCoeff         1.1;
 
-            // Proximity to a feature edge where a surface hit is
-            //  not created, only the edge conformation is created
-            // - fraction of the local target cell size. Coarse
-            // conformation, initial protrusion tests.
-            surfacePtReplaceDistCoeff   0.5;
-        }
+        // Proximity to a feature edge where a surface hit is
+        //  not created, only the edge conformation is created
+        // - fraction of the local target cell size. Coarse
+        // conformation, initial protrusion tests.
+        surfacePtReplaceDistCoeff   0.5;
 
-        // Same for iterations
-        iteration
-        {
-            edgeSearchDistCoeff         1.25;
-            surfacePtReplaceDistCoeff   0.7;
-        }
+        surfacePtExclusionDistanceCoeff 0.5;
 
         // Stop either at maxIterations or if the number of surface pokes
         // is very small (iterationToInitialHitRatioLimit * initial number)
         // Note: perhaps iterationToInitialHitRatioLimit should be absolute
         // count?
-        maxIterations 15;
-
-        iterationToInitialHitRatioLimit 0.001;
-    }
-
-    // Final (at endTime) controls
-    fineConformationControls
-    {
-        initial
-        {
-            edgeSearchDistCoeff         1.1;
-            surfacePtReplaceDistCoeff   0.5;
-        }
-
-        iteration
-        {
-            edgeSearchDistCoeff         1.25;
-            surfacePtReplaceDistCoeff   0.7;
-        }
-
         maxIterations 15;
 
         iterationToInitialHitRatioLimit 0.001;
@@ -219,7 +189,7 @@ initialPoints
 
     // Take boundbox of all geometry. Sample with this box. If too much
     // samples in box (due to target cell size) split box.
-    autoDensityDetails
+    autoDensityCoeffs
     {
         // Initial number of refinement levels. Needs to be enough to pick
         // up features due to size ratio. If not enough it will take longer
@@ -233,7 +203,7 @@ initialPoints
         surfaceSampleResolution 5;
     }
 
-    uniformGridDetails
+    uniformGridCoeffs
     {
         // Absolute cell size.
         initialCellSize         0.0015;
@@ -241,14 +211,14 @@ initialPoints
         randomPerturbationCoeff 0.02;
     }
 
-    bodyCentredCubicDetails
+    bodyCentredCubicCoeffs
     {
         initialCellSize         0.0015;
         randomiseInitialGrid    no;
         randomPerturbationCoeff 0.1;
     }
 
-    pointFileDetails
+    pointFileCoeffs
     {
         // Reads points from file. Still rejects points that are too
         // close to the surface (minimumSurfaceDistanceCoeff) or on the
@@ -269,74 +239,44 @@ initialPoints
 motionControl
 {
     // Absolute cell size of back ground mesh. This is the maximum cell size.
-    defaultCellSize     0.00075;
+    defaultCellSize         0.25;
 
-    // Absolute cell size of back ground mesh. This is the minimum cell size.
-    minimumCellSize     0;
+    minimumCellSizeCoeff    0;
 
-    //cellShapeControl    constantControl;
-    //cellShapeControl    fileControl;
-    cellShapeControl    surfaceControl;
+    maxSmoothingIterations  200;
 
-    // Provide constant values for cell size and alignment
-    constantControlCoeffs
-    {
-        cellSize      0.00075;
-        cellAlignment (1 0 0 0 1 0 0 0 1);
-    }
-
-    // Read in the points of the background grid used for cell shape control
-    // from a file, with corresponding files for alignment and size
-    fileControlCoeffs
-    {
-        pointFile       "";
-        sizesFile       "";
-        alignmentsFile  "";
-    }
+    maxRefinementIterations 2;
 
     // Calculate the sizes and alignments from surfaces
-    surfaceControlCoeffs
+    shapeControlFunctions
     {
-        ref7_outside
+        flange
         {
-            // optional name of geometry
-            surface             ref7;
-            priority            1;
-            mode                outside;//inside/bothSides
-            cellSizeFunction    linearDistance;
-
-            // cellSizeFunctions:
-            //  uniform : uniform size
-            //  uniformDistance : fixed size for all within distance
-            //  linearSpatial : grading in specified direction only
-            //  linearDistance : vary linearly as distance to surface
-            //  surfaceOffsetLinearDistance : constant close to surface then
-            //  fade like linearDistance
-
-            // Vary from surfaceCellSize (close to the surface) to
-            // distanceCellSize (further than 'distance')
-            linearDistanceCoeffs
+            type                        searchableSurfaceControl;
+            forceInitialPointInsertion  on;
+            priority                    1;
+            mode                        inside;
+            surfaceCellSizeFunction     uniformValue;
+            uniformValueCoeffs
             {
-                surfaceCellSize     1e-5;    // absolute size
-                distanceCellSize    $defaultCellSize;
-                distance            1.0;
+                surfaceCellSizeCoeff    0.5;
+            }
+            cellSizeFunction            surfaceOffsetLinearDistance;
+            surfaceOffsetLinearDistanceCoeffs
+            {
+                distanceCellSizeCoeff   1;
+                surfaceOffsetCoeff      1;
+                linearDistanceCoeff     1;
             }
         }
 
-        tunnel_APPROACH_INLET.obj
+        fileControl
         {
-            priority            1;
-            mode                bothSides;
-            cellSizeFunction    surfaceOffsetLinearDistance;
-            // Constant within a certain distance then linear fade away.
-            // Good for layers.
-            surfaceOffsetLinearDistanceCoeffs
-            {
-                surfaceCellSize     1e-5;
-                distanceCellSize    $defaultCellSize;
-                surfaceOffset       0.1;
-                totalDistance       1.0;
-            }
+            type                    fileControl;
+            priority                1;
+            pointsFile              "points";
+            sizesFile               "sizes";
+            alignmentsFile          "alignments";
         }
     }
 
@@ -345,7 +285,7 @@ motionControl
     cellAspectRatioControl
     {
         // Aspect ratio.
-        aspectRatio                 2.0;
+        aspectRatio                 1.0;
         // Direction of action of the aspect ratio
         aspectRatioDirection        (1 0 0);
     }
@@ -366,26 +306,7 @@ motionControl
     objOutput                   no;
 
     // Timing and memory usage.
-    timeChecks                  yes;
-
-    // Number of rays in plane parallel to nearest surface. Used to detect
-    // next closest surfaces. Used to work out alignment (three vectors)
-    // to surface.
-    // Note that only the initial points (from the seeding) calculate this
-    // information so if these are not fine enough the alignment will
-    // not be correct. (any points added during the running will lookup
-    // this information from the nearest initial point since it is
-    // expensive)
-    alignmentSearchSpokes       36;
-
-    // For each delaunay edge (between two vertices, becomes
-    // the Voronoi face normal) snap to the alignment direction if within
-    // alignmentAcceptanceAngle. Slightly > 45 is a good choice - prevents
-    // flipping.
-    alignmentAcceptanceAngle    48;
-
-    // How often to rebuild the alignment info (expensive)
-    sizeAndAlignmentRebuildFrequency 20;
+    timeChecks                  no;
 
     // When to insert points. Not advisable change to
     // these settings.
@@ -434,7 +355,7 @@ polyMeshFiltering
     filterFaces                             off;
 
     // Write the underlying Delaunay tet mesh at output time
-    writeTetDualMesh                        false;  //true;
+    writeTetDualMesh                        false;
 
     // Upper limit on the size of faces to be filtered.
     // fraction of the local target cell size
