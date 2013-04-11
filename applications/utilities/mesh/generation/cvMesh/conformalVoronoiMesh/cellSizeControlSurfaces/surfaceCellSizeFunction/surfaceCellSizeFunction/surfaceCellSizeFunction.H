@@ -139,17 +139,11 @@ public:
             return coeffsDict_;
         }
 
-        virtual const scalar& surfaceSize(const label index) const = 0;
-
-        virtual const scalar& refineSurfaceSize(const label index) = 0;
-
         virtual scalar interpolate
         (
             const point& pt,
             const label index
         ) const = 0;
-
-        virtual void recalculateInterpolation() const = 0;
 };
 
 

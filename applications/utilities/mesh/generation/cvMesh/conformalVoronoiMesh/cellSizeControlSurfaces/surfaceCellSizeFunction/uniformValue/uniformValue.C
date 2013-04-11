@@ -65,20 +65,6 @@ Foam::uniformValue::uniformValue
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::scalar& Foam::uniformValue::surfaceSize(const label index) const
-{
-    return surfaceCellSize_;
-}
-
-
-const Foam::scalar& Foam::uniformValue::refineSurfaceSize(const label index)
-{
-    surfaceCellSize_ *= refinementFactor_;
-
-    return surfaceCellSize_;
-}
-
-
 Foam::scalar Foam::uniformValue::interpolate
 (
     const point& pt,
@@ -87,10 +73,6 @@ Foam::scalar Foam::uniformValue::interpolate
 {
     return surfaceCellSize_;
 }
-
-
-void Foam::uniformValue::recalculateInterpolation() const
-{}
 
 
 // ************************************************************************* //

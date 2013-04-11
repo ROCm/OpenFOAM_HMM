@@ -81,17 +81,11 @@ public:
 
     // Member Functions
 
-        virtual const scalar& surfaceSize(const label index) const;
-
-        virtual const scalar& refineSurfaceSize(const label index);
-
         virtual scalar interpolate
         (
             const point& pt,
             const label index
         ) const;
-
-        virtual void recalculateInterpolation() const;
 };
 
 
