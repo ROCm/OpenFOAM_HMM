@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -92,7 +92,7 @@ List<Vb::Point> uniformGrid::initialPoints() const
     scalar pert = randomPerturbationCoeff_*cmptMin(delta);
 
     // Initialise points list
-    DynamicList<Vb::Point> initialPoints(ni*nj*nk/10);
+    DynamicList<Vb::Point> initialPoints(scalar(ni)*nj*nk/10);
 
     for (label i = 0; i < ni; i++)
     {
