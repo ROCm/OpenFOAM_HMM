@@ -169,7 +169,7 @@ triadField calcVertexCoordSys
 
         if (mag(normal) < SMALL)
         {
-            pointCoordSys[meshPointMap[pI]] = triad::unset[0];
+            pointCoordSys[meshPointMap[pI]] = triad::unset;
             continue;
         }
 
