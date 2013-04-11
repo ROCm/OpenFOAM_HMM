@@ -43,10 +43,18 @@ uniform::uniform
 (
     const dictionary& initialPointsDict,
     const searchableSurface& surface,
-    const scalar& defaultCellSize
+    const scalar& defaultCellSize,
+    const labelList regionIndices
 )
 :
-    cellSizeFunction(typeName, initialPointsDict, surface, defaultCellSize)
+    cellSizeFunction
+    (
+        typeName,
+        initialPointsDict,
+        surface,
+        defaultCellSize,
+        regionIndices
+    )
 {}
 
 
@@ -64,6 +72,7 @@ bool uniform::cellSize
     (
         pointField(1, pt),
         scalarField(1, sqr(GREAT)),
+        regionIndices_,
         hits
     );
 
@@ -89,6 +98,7 @@ bool uniform::cellSize
         (
             pointField(1, pt),
             scalarField(1, sqr(snapToSurfaceTol_)),
+            regionIndices_,
             closeToSurfaceHits
         );
 

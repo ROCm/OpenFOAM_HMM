@@ -46,10 +46,18 @@ linearDistance::linearDistance
 (
     const dictionary& initialPointsDict,
     const searchableSurface& surface,
-    const scalar& defaultCellSize
+    const scalar& defaultCellSize,
+    const labelList regionIndices
 )
 :
-    cellSizeFunction(typeName, initialPointsDict, surface, defaultCellSize),
+    cellSizeFunction
+    (
+        typeName,
+        initialPointsDict,
+        surface,
+        defaultCellSize,
+        regionIndices
+    ),
     distanceCellSize_
     (
         readScalar(coeffsDict().lookup("distanceCellSizeCoeff"))
@@ -97,6 +105,7 @@ bool linearDistance::cellSize(const point& pt, scalar& size) const
     (
         pointField(1, pt),
         scalarField(1, distanceSqr_),
+        regionIndices_,
         hits
     );
 

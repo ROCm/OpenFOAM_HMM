@@ -96,6 +96,10 @@ protected:
 
         const scalar& defaultCellSize_;
 
+        //- Index of the region of the surface that this cell size function
+        //  applies to
+        const labelList regionIndices_;
+
         //- Mode of size specification, i.e. inside, outside or bothSides
         sideMode sideMode_;
 
@@ -125,9 +129,10 @@ public:
             (
                 const dictionary& cellSizeFunctionDict,
                 const searchableSurface& surface,
-                const scalar& defaultCellSize
+                const scalar& defaultCellSize,
+                const labelList regionIndices
             ),
-            (cellSizeFunctionDict, surface, defaultCellSize)
+            (cellSizeFunctionDict, surface, defaultCellSize, regionIndices)
         );
 
 
@@ -139,7 +144,8 @@ public:
             const word& type,
             const dictionary& cellSizeFunctionDict,
             const searchableSurface& surface,
-            const scalar& defaultCellSize
+            const scalar& defaultCellSize,
+            const labelList regionIndices
         );
 
 
@@ -150,7 +156,8 @@ public:
         (
             const dictionary& cellSizeFunctionDict,
             const searchableSurface& surface,
-            const scalar& defaultCellSize
+            const scalar& defaultCellSize,
+            const labelList regionIndices
         );
 
 

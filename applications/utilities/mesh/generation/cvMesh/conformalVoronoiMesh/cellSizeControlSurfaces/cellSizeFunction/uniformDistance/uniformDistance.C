@@ -43,10 +43,18 @@ uniformDistance::uniformDistance
 (
     const dictionary& initialPointsDict,
     const searchableSurface& surface,
-    const scalar& defaultCellSize
+    const scalar& defaultCellSize,
+    const labelList regionIndices
 )
 :
-    cellSizeFunction(typeName, initialPointsDict, surface, defaultCellSize),
+    cellSizeFunction
+    (
+        typeName,
+        initialPointsDict,
+        surface,
+        defaultCellSize,
+        regionIndices
+    ),
     distance_
     (
         readScalar(coeffsDict().lookup("distanceCoeff"))*defaultCellSize
@@ -71,6 +79,7 @@ bool uniformDistance::cellSize
     (
         pointField(1, pt),
         scalarField(1, distanceSqr_),
+        regionIndices_,
         hits
     );
 
@@ -78,9 +87,12 @@ bool uniformDistance::cellSize
 
     if (hitInfo.hit())
     {
+        const point& hitPt = hitInfo.hitPoint();
+        const label index = hitInfo.index();
+
         if (sideMode_ == rmBothsides)
         {
-            size = surfaceCellSizeFunction_().surfaceSize(hitInfo.index());
+            size = surfaceCellSizeFunction_().interpolate(hitPt, index);
 
             return true;
         }
@@ -89,7 +101,7 @@ bool uniformDistance::cellSize
         // getVolumeType calculation, as it will be prone to error.
         if (mag(pt  - hitInfo.hitPoint()) < snapToSurfaceTol_)
         {
-            size = surfaceCellSizeFunction_().surfaceSize(hitInfo.index());
+            size = surfaceCellSizeFunction_().interpolate(hitPt, index);
 
             return true;
         }
@@ -107,7 +119,7 @@ bool uniformDistance::cellSize
          && vTL[0] == volumeType::INSIDE
         )
         {
-            size = surfaceCellSizeFunction_().surfaceSize(hitInfo.index());
+            size = surfaceCellSizeFunction_().interpolate(hitPt, index);
 
             functionApplied = true;
         }
@@ -117,7 +129,7 @@ bool uniformDistance::cellSize
          && vTL[0] == volumeType::OUTSIDE
         )
         {
-            size = surfaceCellSizeFunction_().surfaceSize(hitInfo.index());
+            size = surfaceCellSizeFunction_().interpolate(hitPt, index);
 
             functionApplied = true;
         }
@@ -134,30 +146,33 @@ bool uniformDistance::setCellSize
     const pointField& pts
 )
 {
-    labelHashSet surfaceAlreadyHit(surface_.size());
+//    labelHashSet surfaceAlreadyHit(surface_.size());
+//
+//    forAll(pts, ptI)
+//    {
+//        const Foam::point& pt = pts[ptI];
+//
+//        List<pointIndexHit> hits;
+//
+//        surface_.findNearest
+//        (
+//            pointField(1, pt),
+//            scalarField(1, distanceSqr_),
+//            regionIndices_,
+//            hits
+//        );
+//
+//        if (hits[0].hit() && !surfaceAlreadyHit.found(hits[0].index()))
+//        {
+//            surfaceCellSizeFunction_().refineSurfaceSize(hits[0].index());
+//
+//            surfaceAlreadyHit.insert(hits[0].index());
+//        }
+//    }
+//
+//    return true;
 
-    forAll(pts, ptI)
-    {
-        const Foam::point& pt = pts[ptI];
-
-        List<pointIndexHit> hits;
-
-        surface_.findNearest
-        (
-            pointField(1, pt),
-            scalarField(1, distanceSqr_),
-            hits
-        );
-
-        if (hits[0].hit() && !surfaceAlreadyHit.found(hits[0].index()))
-        {
-            surfaceCellSizeFunction_().refineSurfaceSize(hits[0].index());
-
-            surfaceAlreadyHit.insert(hits[0].index());
-        }
-    }
-
-    return true;
+    return false;
 }
 
 

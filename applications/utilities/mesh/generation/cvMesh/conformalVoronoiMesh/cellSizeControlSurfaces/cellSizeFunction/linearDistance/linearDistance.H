@@ -82,7 +82,8 @@ public:
         (
             const dictionary& initialPointsDict,
             const searchableSurface& surface,
-            const scalar& defaultCellSize
+            const scalar& defaultCellSize,
+            const labelList regionIndices
         );
 
 

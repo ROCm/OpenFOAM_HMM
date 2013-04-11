@@ -43,7 +43,8 @@ Foam::cellSizeFunction::cellSizeFunction
     const word& type,
     const dictionary& cellSizeFunctionDict,
     const searchableSurface& surface,
-    const scalar& defaultCellSize
+    const scalar& defaultCellSize,
+    const labelList regionIndices
 )
 :
     dictionary(cellSizeFunctionDict),
@@ -59,6 +60,7 @@ Foam::cellSizeFunction::cellSizeFunction
     ),
     coeffsDict_(subDict(type + "Coeffs")),
     defaultCellSize_(defaultCellSize),
+    regionIndices_(regionIndices),
     sideMode_(),
     priority_(readLabel(cellSizeFunctionDict.lookup("priority", true)))
 {
@@ -106,7 +108,8 @@ Foam::autoPtr<Foam::cellSizeFunction> Foam::cellSizeFunction::New
 (
     const dictionary& cellSizeFunctionDict,
     const searchableSurface& surface,
-    const scalar& defaultCellSize
+    const scalar& defaultCellSize,
+    const labelList regionIndices
 )
 {
     word cellSizeFunctionTypeName
@@ -136,7 +139,13 @@ Foam::autoPtr<Foam::cellSizeFunction> Foam::cellSizeFunction::New
 
     return autoPtr<cellSizeFunction>
     (
-        cstrIter()(cellSizeFunctionDict, surface, defaultCellSize)
+        cstrIter()
+        (
+            cellSizeFunctionDict,
+            surface,
+            defaultCellSize,
+            regionIndices
+        )
     );
 }
 

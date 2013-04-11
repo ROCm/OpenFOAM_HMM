@@ -44,10 +44,18 @@ linearSpatial::linearSpatial
 (
     const dictionary& initialPointsDict,
     const searchableSurface& surface,
-    const scalar& defaultCellSize
+    const scalar& defaultCellSize,
+    const labelList regionIndices
 )
 :
-    cellSizeFunction(typeName, initialPointsDict, surface, defaultCellSize),
+    cellSizeFunction
+    (
+        typeName,
+        initialPointsDict,
+        surface,
+        defaultCellSize,
+        regionIndices
+    ),
     referencePoint_(coeffsDict().lookup("referencePoint")),
     referenceCellSize_
     (
@@ -94,6 +102,7 @@ bool linearSpatial::cellSize
     (
         pointField(1, pt),
         scalarField(1, sqr(snapToSurfaceTol_)),
+        regionIndices_,
         hits
     );
 
