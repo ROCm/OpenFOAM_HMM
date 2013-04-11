@@ -740,7 +740,7 @@ void Foam::triSurfaceMesh::getVolumeType
 
         // - use cached volume type per each tree node
         // - cheat conversion since same values
-        volType[pointI] = static_cast<volumeType>(tree().getVolumeType(pt));
+        volType[pointI] = tree().getVolumeType(pt);
     }
 
     indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;

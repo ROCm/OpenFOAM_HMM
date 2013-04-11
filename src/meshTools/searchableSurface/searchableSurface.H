@@ -48,6 +48,7 @@ SourceFiles
 #include "pointIndexHit.H"
 #include "linePointRef.H"
 #include "objectRegistry.H"
+#include "volumeType.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -67,25 +68,6 @@ class searchableSurface
 :
     public regIOobject
 {
-public:
-
-    // Data types
-
-        //- Volume types
-        enum volumeType
-        {
-            UNKNOWN = 0,
-            MIXED = 1,      // not used. only here to maintain consistency with
-                            // indexedOctree volumeType.
-            INSIDE = 2,
-            OUTSIDE = 3
-        };
-
-        static const NamedEnum<volumeType, 4> volumeTypeNames;
-
-
-private:
-
     // Private data
 
         const word name_;

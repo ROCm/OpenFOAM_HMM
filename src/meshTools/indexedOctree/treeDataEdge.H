@@ -37,6 +37,7 @@ SourceFiles
 
 #include "treeBoundBoxList.H"
 #include "linePointRef.H"
+#include "volumeType.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -197,7 +198,7 @@ public:
 
             //- Get type (inside,outside,mixed,unknown) of point w.r.t. surface.
             //  Only makes sense for closed surfaces.
-            label getVolumeType
+            volumeType getVolumeType
             (
                 const indexedOctree<treeDataEdge>&,
                 const point&

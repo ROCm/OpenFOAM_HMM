@@ -29,7 +29,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<>
-Foam::label Foam::treeDataPrimitivePatch<Foam::triSurface>::getVolumeType
+Foam::volumeType Foam::treeDataPrimitivePatch<Foam::triSurface>::getVolumeType
 (
     const indexedOctree<treeDataPrimitivePatch<triSurface> >& oc,
     const point& sample
@@ -60,21 +60,21 @@ Foam::label Foam::treeDataPrimitivePatch<Foam::triSurface>::getVolumeType
 
     if (t == triSurfaceTools::UNKNOWN)
     {
-        return indexedOctree<treeDataPrimitivePatch<triSurface> >::UNKNOWN;
+        return volumeType::UNKNOWN;
     }
     else if (t == triSurfaceTools::INSIDE)
     {
-        return indexedOctree<treeDataPrimitivePatch<triSurface> >::INSIDE;
+        return volumeType::INSIDE;
     }
     else if (t == triSurfaceTools::OUTSIDE)
     {
-        return indexedOctree<treeDataPrimitivePatch<triSurface> >::OUTSIDE;
+        return volumeType::OUTSIDE;
     }
     else
     {
         FatalErrorIn("treeDataPrimitivePatch<PatchType>::getVolumeType(..)")
             << "problem" << abort(FatalError);
-        return indexedOctree<treeDataPrimitivePatch<triSurface> >::UNKNOWN;
+        return volumeType::UNKNOWN;
     }
 }
 

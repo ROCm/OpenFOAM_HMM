@@ -206,7 +206,7 @@ public:
                 const labelList& surfacesToTest,
                 const pointField& samples,
                 const scalarField& nearestDistSqr,
-                const searchableSurface::volumeType illegalHandling,
+                const volumeType illegalHandling,
                 labelList& nearestSurfaces,
                 scalarField& distance
             );

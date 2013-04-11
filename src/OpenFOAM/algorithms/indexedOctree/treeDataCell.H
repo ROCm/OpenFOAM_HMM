@@ -38,6 +38,7 @@ SourceFiles
 
 #include "polyMesh.H"
 #include "treeBoundBoxList.H"
+#include "volumeType.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -196,7 +197,7 @@ public:
 
             //- Get type (inside,outside,mixed,unknown) of point w.r.t. surface.
             //  Only makes sense for closed surfaces.
-            label getVolumeType
+            volumeType getVolumeType
             (
                 const indexedOctree<treeDataCell>&,
                 const point&
@@ -207,7 +208,7 @@ public:
                     "treeDataCell::getVolumeType"
                     "(const indexedOctree<treeDataCell>&, const point&)"
                 );
-                return -1;
+                return volumeType::UNKNOWN;
             }
 
             //- Does (bb of) shape at index overlap bb

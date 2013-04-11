@@ -205,7 +205,7 @@ Foam::pointField Foam::treeDataPrimitivePatch<PatchType>::shapePoints() const
 //- Get type (inside,outside,mixed,unknown) of point w.r.t. surface.
 //  Only makes sense for closed surfaces.
 template<class PatchType>
-Foam::label Foam::treeDataPrimitivePatch<PatchType>::getVolumeType
+Foam::volumeType Foam::treeDataPrimitivePatch<PatchType>::getVolumeType
 (
     const indexedOctree<treeDataPrimitivePatch<PatchType> >& oc,
     const point& sample
@@ -435,7 +435,7 @@ Foam::label Foam::treeDataPrimitivePatch<PatchType>::getVolumeType
     // - tolerances are wrong. (if e.g. face has zero area)
     // - or (more likely) surface is not closed.
 
-    return indexedOctree<treeDataPrimitivePatch>::UNKNOWN;
+    return volumeType::UNKNOWN;
 }
 
 
