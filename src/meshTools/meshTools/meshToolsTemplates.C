@@ -27,7 +27,7 @@ template<class FaceType>
 void Foam::meshTools::writeOBJ
 (
     Ostream& os,
-    const List<FaceType>& faces,
+    const UList<FaceType>& faces,
     const pointField& points,
     const labelList& faceLabels
 )
@@ -63,7 +63,7 @@ template<class FaceType>
 void Foam::meshTools::writeOBJ
 (
     Ostream& os,
-    const List<FaceType>& faces,
+    const UList<FaceType>& faces,
     const pointField& points
 )
 {

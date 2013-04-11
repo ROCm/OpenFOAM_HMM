@@ -140,7 +140,7 @@ namespace meshTools
         void writeOBJ
         (
             Ostream& os,
-            const List<FaceType>&,
+            const UList<FaceType>&,
             const pointField&,
             const labelList& faceLabels
         );
@@ -150,7 +150,7 @@ namespace meshTools
         void writeOBJ
         (
             Ostream& os,
-            const List<FaceType>&,
+            const UList<FaceType>&,
             const pointField&
         );
 
