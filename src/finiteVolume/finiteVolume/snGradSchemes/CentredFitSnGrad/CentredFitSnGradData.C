@@ -25,9 +25,7 @@ License
 
 #include "CentredFitSnGradData.H"
 #include "surfaceFields.H"
-#include "volFields.H"
 #include "SVD.H"
-#include "syncTools.H"
 #include "extendedCentredCellToFaceStencil.H"
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
@@ -226,7 +224,7 @@ void Foam::CentredFitSnGradData<Polynomial>::calcFit()
     // find the fit coefficients for every face in the mesh
 
     const surfaceScalarField& w = mesh.surfaceInterpolation::weights();
-    const surfaceScalarField& dC = mesh.deltaCoeffs();
+    const surfaceScalarField& dC = mesh.nonOrthDeltaCoeffs();
 
     for (label facei = 0; facei < mesh.nInternalFaces(); facei++)
     {

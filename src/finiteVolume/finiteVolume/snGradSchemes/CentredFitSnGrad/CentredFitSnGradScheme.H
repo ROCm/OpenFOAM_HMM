@@ -100,7 +100,7 @@ public:
             const GeometricField<Type, fvPatchField, volMesh>&
         ) const
         {
-            return this->mesh().deltaCoeffs();
+            return this->mesh().nonOrthDeltaCoeffs();
         }
 
         //- Return true if this scheme uses an explicit correction
@@ -124,24 +124,25 @@ public:
             );
 
             const CentredFitSnGradData<Polynomial>& cfd =
-            CentredFitSnGradData<Polynomial>::New
-            (
-                mesh,
-                stencil,
-                linearLimitFactor_,
-                centralWeight_
-            );
-
-            const List<scalarList>& f = cfd.coeffs();
+                CentredFitSnGradData<Polynomial>::New
+                (
+                    mesh,
+                    stencil,
+                    linearLimitFactor_,
+                    centralWeight_
+                );
 
             tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > sft
-                = stencil.weightedSum(vf, f);
+            (
+                stencil.weightedSum(vf, cfd.coeffs())
+            );
 
             sft().dimensions() /= dimLength;
 
             return sft;
         }
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -47,8 +47,8 @@ namespace Foam
     defineTemplateTypeNameAndDebugWithName                                    \
     (                                                                         \
         SS##Schem##Comp##SThermo##GThermo,                                    \
-        (#SS"<"#Schem"<"#Comp"," + SThermo::typeName() + ","                  \
-      + GThermo::typeName() + ">>").c_str(),                                  \
+        (#SS"<" + word(Schem::typeName_()) +"<"#Comp"," + SThermo::typeName() \
+        + ","  + GThermo::typeName() + ">>").c_str(),                         \
         0                                                                     \
     );                                                                        \
                                                                               \
