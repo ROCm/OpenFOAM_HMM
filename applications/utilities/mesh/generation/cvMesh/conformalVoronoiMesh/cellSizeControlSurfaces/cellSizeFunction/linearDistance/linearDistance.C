@@ -171,43 +171,45 @@ bool linearDistance::cellSize(const point& pt, scalar& size) const
 
 bool linearDistance::setCellSize(const pointField& pts)
 {
-    labelHashSet surfaceAlreadyHit(surfaceCellSize_.size());
+//    labelHashSet surfaceAlreadyHit(surfaceCellSize_.size());
 
-    forAll(pts, ptI)
-    {
-        const Foam::point& pt = pts[ptI];
+//    forAll(pts, ptI)
+//    {
+//        const Foam::point& pt = pts[ptI];
 
-        List<pointIndexHit> hits;
+//        List<pointIndexHit> hits;
 
-        surface_.findNearest
-        (
-            pointField(1, pt),
-            scalarField(1, distanceSqr_),
-            hits
-        );
+//        surface_.findNearest
+//        (
+//            pointField(1, pt),
+//            scalarField(1, distanceSqr_),
+//            hits
+//        );
 
-        const label surfHitI = hits[0].index();
+//        const label surfHitI = hits[0].index();
 
-        if
-        (
-            hits[0].hit()
-         && !surfaceAlreadyHit.found(surfHitI)
-        )
-        {
-            // Halving cell size is arbitrary
-            surfaceCellSizeFunction_().refineSurfaceSize(surfHitI);
+//        if
+//        (
+//            hits[0].hit()
+//         && !surfaceAlreadyHit.found(surfHitI)
+//        )
+//        {
+//            // Halving cell size is arbitrary
+//            surfaceCellSizeFunction_().refineSurfaceSize(surfHitI);
 
-            surfaceAlreadyHit.insert(surfHitI);
-        }
-    }
+//            surfaceAlreadyHit.insert(surfHitI);
+//        }
+//    }
 
-    // Force recalculation of the interpolation
-    if (!pts.empty())
-    {
-        surfaceCellSizeFunction_().recalculateInterpolation();
-    }
+//    // Force recalculation of the interpolation
+//    if (!pts.empty())
+//    {
+//        surfaceCellSizeFunction_().recalculateInterpolation();
+//    }
 
-    return true;
+//    return true;
+
+    return false;
 }
 
 
