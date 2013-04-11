@@ -50,7 +50,7 @@ namespace Foam
 class triSurface;
 
 /*---------------------------------------------------------------------------*\
-                           Class triSurfaceSearch Declaration
+                      Class triSurfaceSearch Declaration
 \*---------------------------------------------------------------------------*/
 
 class triSurfaceSearch
@@ -71,6 +71,15 @@ class triSurfaceSearch
 
 
     // Private Member Functions
+
+        //- Check whether the current hit on the surface which lies on lineVec
+        //  is unique.
+        bool checkUniqueHit
+        (
+            const pointIndexHit& currHit,
+            const DynamicList<pointIndexHit, 1, 1>& hits,
+            const vector& lineVec
+        ) const;
 
         //- Disallow default bitwise copy construct
         triSurfaceSearch(const triSurfaceSearch&);

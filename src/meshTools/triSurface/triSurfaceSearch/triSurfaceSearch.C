@@ -28,6 +28,83 @@ License
 #include "PatchTools.H"
 #include "volumeType.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+bool Foam::triSurfaceSearch::checkUniqueHit
+(
+    const pointIndexHit& currHit,
+    const DynamicList<pointIndexHit, 1, 1>& hits,
+    const vector& lineVec
+) const
+{
+    // Classify the hit
+    label nearType = -1;
+    label nearLabel = -1;
+
+    const labelledTri& f = surface()[currHit.index()];
+
+    f.nearestPointClassify
+    (
+        currHit.hitPoint(),
+        surface().points(),
+        nearType,
+        nearLabel
+    );
+
+    if (nearType == 1)
+    {
+        // near point
+    }
+    else if (nearType == 2)
+    {
+        // near edge
+        // check if the other face of the edge is already hit
+
+        const labelList& fEdges = surface().faceEdges()[currHit.index()];
+
+        const label edgeI = fEdges[nearLabel];
+
+        const labelList& edgeFaces = surface().edgeFaces()[edgeI];
+
+        forAll(edgeFaces, fI)
+        {
+            const label edgeFaceI = edgeFaces[fI];
+
+            if (edgeFaceI != currHit.index())
+            {
+                forAll(hits, hI)
+                {
+                    const pointIndexHit& hit = hits[hI];
+
+                    if (hit.index() == edgeFaceI)
+                    {
+                        // Check normals
+                        const vector currHitNormal =
+                            surface().faceNormals()[currHit.index()];
+
+                        const vector existingHitNormal =
+                            surface().faceNormals()[edgeFaceI];
+
+                        const label signCurrHit =
+                            pos(currHitNormal & lineVec);
+
+                        const label signExistingHit =
+                            pos(existingHitNormal & lineVec);
+
+                        if (signCurrHit == signExistingHit)
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::triSurfaceSearch::triSurfaceSearch(const triSurface& surface)
@@ -306,7 +383,21 @@ void Foam::triSurfaceSearch::findLineAll
 
             if (inter.hit())
             {
-                hits.append(inter);
+                vector lineVec = end[pointI] - start[pointI];
+                lineVec /= mag(lineVec) + VSMALL;
+
+                if
+                (
+                    checkUniqueHit
+                    (
+                        inter,
+                        hits,
+                        lineVec
+                    )
+                )
+                {
+                    hits.append(inter);
+                }
 
                 shapeMask.append(inter.index());
             }
