@@ -220,6 +220,9 @@ public:
         //- A dual vertex on a feature edge will result from this Delaunay cell
         inline bool featureEdgeDualVertex() const;
 
+        //- A dual vertex on a feature point will result from this Delaunay cell
+        inline bool featurePointDualVertex() const;
+
         inline bool nearProcBoundary() const;
 
         inline bool potentialCoplanarCell() const;

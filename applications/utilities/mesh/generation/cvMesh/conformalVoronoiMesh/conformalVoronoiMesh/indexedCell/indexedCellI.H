@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -428,6 +428,19 @@ inline bool CGAL::indexedCell<Gt, Cb>::featureEdgeDualVertex() const
      && this->vertex(1)->featureEdgePoint()
      && this->vertex(2)->featureEdgePoint()
      && this->vertex(3)->featureEdgePoint()
+    );
+}
+
+
+template<class Gt, class Cb>
+inline bool CGAL::indexedCell<Gt, Cb>::featurePointDualVertex() const
+{
+    return
+    (
+        this->vertex(0)->featurePoint()
+     && this->vertex(1)->featurePoint()
+     && this->vertex(2)->featurePoint()
+     && this->vertex(3)->featurePoint()
     );
 }
 

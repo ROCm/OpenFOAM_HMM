@@ -516,9 +516,6 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     wordList& patchTypes,
     wordList& patchNames,
     PtrList<dictionary>& patchDicts,
-    //labelList& patchSizes,
-    //labelList& patchStarts,
-    //labelList& procNeighbours,
     pointField& cellCentres,
     labelList& cellToDelaunayVertex,
     labelListList& patchToDelaunayVertex,
@@ -566,9 +563,6 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         patchTypes,
         patchNames,
         patchDicts,
-//        patchSizes,
-//        patchStarts,
-//        procNeighbours,
         patchToDelaunayVertex,  // from patch face to Delaunay vertex (slavePp)
         boundaryFacesToRemove,
         false
@@ -1246,6 +1240,8 @@ Foam::conformalVoronoiMesh::createPolyMeshFromPoints
             // Do not create empty processor patches
             if (totalPatchSize > 0)
             {
+                patchDicts[p].set("transform", "coincidentFullMatch");
+
                 patches[nValidPatches] = new processorPolyPatch
                 (
                     patchNames[p],
@@ -1773,6 +1769,31 @@ void Foam::conformalVoronoiMesh::indexDualVertices
                 pts[cit->cellIndex()] = cit->dual();
             }
 
+            if (cit->featurePointDualVertex())
+            {
+                pointFromPoint dual = cit->dual();
+
+                pointIndexHit fpHit;
+                label featureHit;
+
+                // Find nearest feature point and compare
+                geometryToConformTo_.findFeaturePointNearest
+                (
+                    dual,
+                    sqr(targetCellSize(dual)),
+                    fpHit,
+                    featureHit
+                );
+
+                if (fpHit.hit())
+                {
+                    Info<< "Dual        = " << dual << nl
+                        << "    Nearest = " << fpHit.hitPoint() << endl;
+
+                    pts[cit->cellIndex()] = fpHit.hitPoint();
+                }
+            }
+
             if (cit->boundaryDualVertex())
             {
                 if (cit->featureEdgeDualVertex())
@@ -1973,11 +1994,11 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
         if (patchDicts[patchI].found("neighbProcNo"))
         {
             procNeighbours[patchI] =
-                (
-                    patchDicts[patchI].found("neighbProcNo")
-                  ? readLabel(patchDicts[patchI].lookup("neighbProcNo"))
-                  : -1
-                );
+            (
+                patchDicts[patchI].found("neighbProcNo")
+              ? readLabel(patchDicts[patchI].lookup("neighbProcNo"))
+              : -1
+            );
         }
     }
 
@@ -2449,7 +2470,6 @@ void Foam::conformalVoronoiMesh::addPatches
     {
         patchDicts[p].set("nFaces", patchFaces[p].size());
         patchDicts[p].set("startFace", nInternalFaces + nBoundaryFaces);
-        patchDicts[p].set("transform", "noOrdering");
 
         nBoundaryFaces += patchFaces[p].size();
     }
