@@ -70,7 +70,7 @@ public:
 
     // Public data types
 
-        //- Enumeration specifying required accuracy
+        //- Enumeration specifying interpolation method
         enum interpolationMethod
         {
             imDirect,
@@ -301,6 +301,13 @@ private:
 
         //- Calculate - main driver function
         void calculate();
+
+        //- Conversion between mesh and patch interpolation methods
+        AMIPatchToPatchInterpolation::interpolationMethod
+        interpolationMethodAMI
+        (
+            const interpolationMethod method
+        ) const;
 
         //- Return the list of AMIs between source and target patches
         const PtrList<AMIPatchToPatchInterpolation>& patchAMIs() const;

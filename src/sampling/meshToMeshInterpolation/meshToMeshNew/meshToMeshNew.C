@@ -165,17 +165,81 @@ bool Foam::meshToMeshNew::findInitialSeeds
             const pointField
                 pts(srcCells[srcI].points(srcFaces, srcPts).xfer());
 
-            forAll(pts, ptI)
+            switch (method_)
             {
-                const point& pt = pts[ptI];
-                label tgtI = tgt.cellTree().findInside(pt);
-
-                if (tgtI != -1 && intersect(src, tgt, srcI, tgtI))
+                case imDirect:
+                case imCellVolumeWeight:
                 {
-                    srcSeedI = srcI;
-                    tgtSeedI = tgtI;
+                    forAll(pts, ptI)
+                    {
+                        const point& pt = pts[ptI];
+                        label tgtI = tgt.cellTree().findInside(pt);
 
-                    return true;
+                        if (tgtI != -1 && intersect(src, tgt, srcI, tgtI))
+                        {
+                            srcSeedI = srcI;
+                            tgtSeedI = tgtI;
+
+                            return true;
+                        }
+                    }
+
+                    break;
+                }
+                case imMapNearest:
+                {
+                    const point& pt = pts[0];
+                    pointIndexHit hit = tgt.cellTree().findNearest(pt, GREAT);
+
+                    if (hit.hit())
+                    {
+                        srcSeedI = srcI;
+                        tgtSeedI = hit.index();
+
+                        return true;
+                    }
+                    else
+                    {
+                        FatalErrorIn
+                        (
+                            "bool Foam::meshToMeshNew::findInitialSeeds"
+                            "("
+                                "const polyMesh&, "
+                                "const polyMesh&, "
+                                "const labelList&, "
+                                "const boolList&, "
+                                "const label, "
+                                "label&, "
+                                "label&"
+                            ") const"
+                        )
+                            << "Unable to find nearest target cell"
+                            << " for source cell " << srcI
+                            << " with centre "
+                            << srcCells[srcI].centre(srcPts, srcFaces)
+                            << abort(FatalError);
+                    }
+
+                    break;
+                }
+                default:
+                {
+                    FatalErrorIn
+                    (
+                        "bool Foam::meshToMeshNew::findInitialSeeds"
+                        "("
+                            "const polyMesh&, "
+                            "const polyMesh&, "
+                            "const labelList&, "
+                            "const boolList&, "
+                            "const label, "
+                            "label&, "
+                            "label&"
+                        ") const"
+                    )
+                        << "Unhandled method: "
+                        << interpolationMethodNames_[method_]
+                        << abort(FatalError);
                 }
             }
         }
@@ -577,6 +641,48 @@ void Foam::meshToMeshNew::calculate()
 }
 
 
+Foam::AMIPatchToPatchInterpolation::interpolationMethod
+Foam::meshToMeshNew::interpolationMethodAMI
+(
+    const interpolationMethod method
+) const
+{
+    switch (method_)
+    {
+        case imDirect:
+        {
+            return AMIPatchToPatchInterpolation::imDirect;
+            break;
+        }
+        case imMapNearest:
+        {
+            return AMIPatchToPatchInterpolation::imMapNearest;
+            break;
+        }
+        case imCellVolumeWeight:
+        {
+            return AMIPatchToPatchInterpolation::imFaceAreaWeight;
+            break;
+        }
+        default:
+        {
+            FatalErrorIn
+            (
+                "Foam::AMIPatchToPatchInterpolation::interpolationMethod"
+                "Foam::meshToMeshNew::interpolationMethodAMI"
+                "("
+                    "const interpolationMethod method"
+                ") const"
+            )
+                << "Unhandled enumeration " << method_
+                << abort(FatalError);
+        }
+    }
+
+    return AMIPatchToPatchInterpolation::imDirect;
+}
+
+
 const Foam::PtrList<Foam::AMIPatchToPatchInterpolation>&
 Foam::meshToMeshNew::patchAMIs() const
 {
@@ -593,7 +699,9 @@ Foam::meshToMeshNew::patchAMIs() const
             const polyPatch& tgtPP = tgtRegion_.boundaryMesh()[tgtPatchI];
 
             Info<< "Creating AMI between source patch " << srcPP.name()
-                << " and target patch " << tgtPP.name() << endl;
+                << " and target patch " << tgtPP.name()
+                << " using " << interpolationMethodAMI(method_)
+                << endl;
 
             Info<< incrIndent;
 
@@ -605,6 +713,7 @@ Foam::meshToMeshNew::patchAMIs() const
                     srcPP,
                     tgtPP,
                     faceAreaIntersect::tmMesh,
+                    interpolationMethodAMI(method_),
                     true // flip target patch since patch normals are aligned
                 )
             );
