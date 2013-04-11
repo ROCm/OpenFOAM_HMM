@@ -68,6 +68,7 @@ void Foam::autoDensity::writeOBJ
     }
 }
 
+
 bool Foam::autoDensity::combinedOverlaps(const treeBoundBox& box) const
 {
     if (Pstream::parRun())

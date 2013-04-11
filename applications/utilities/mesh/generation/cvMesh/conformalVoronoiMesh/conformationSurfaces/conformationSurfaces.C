@@ -83,7 +83,7 @@ void Foam::conformationSurfaces::hasBoundedVolume
             {
                 const label patchID =
                     triSurf[sI].region()
-                  + regionOffset_[allGeometryToSurfaces_[s]];
+                  + regionOffset_[s];
 
                 // Don't include baffle surfaces in the calculation
                 if (!baffleSurfaces_[patchID])
@@ -123,7 +123,7 @@ void Foam::conformationSurfaces::readFeatures
 
         features_.set
         (
-            featureIndex++,
+            featureIndex,
             new extendedFeatureEdgeMesh
             (
                 IOobject
@@ -137,6 +137,8 @@ void Foam::conformationSurfaces::readFeatures
                 )
             )
         );
+
+        featureIndex++;
     }
     else if (featureMethod == "extractFeatures")
     {
