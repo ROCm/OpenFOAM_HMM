@@ -113,7 +113,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
 
         if (nFace)
         {
-            IInfo<< "AMI: Patch " << patchName << " weights min/max/average = "
+            IInfo<< "AMI: Patch " << patchName
+                << " sum(weights) min/max/average = "
                 << gMin(wghtSum) << ", "
                 << gMax(wghtSum) << ", "
                 << gAverage(wghtSum) << endl;
