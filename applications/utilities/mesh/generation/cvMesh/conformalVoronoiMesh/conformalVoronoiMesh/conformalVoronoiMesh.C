@@ -580,12 +580,23 @@ void Foam::conformalVoronoiMesh::insertEdgePointGroups
 
     forAll(edgeHits, i)
     {
-        const extendedFeatureEdgeMesh& feMesh
-        (
-            geometryToConformTo_.features()[edgeHits[i].second()]
-        );
+        if (edgeHits[i].first().hit())
+        {
+            const extendedFeatureEdgeMesh& feMesh
+            (
+                geometryToConformTo_.features()[edgeHits[i].second()]
+            );
 
-        createEdgePointGroup(feMesh, edgeHits[i].first(), pts);
+//            const bool isBaffle =
+//                geometryToConformTo_.isBaffleFeature(edgeHits[i].second());
+
+            createEdgePointGroup
+            (
+                feMesh,
+                edgeHits[i].first(),
+                pts
+            );
+        }
     }
 
     pts.shrink();
@@ -733,7 +744,11 @@ void Foam::conformalVoronoiMesh::buildCellSizeAndAlignmentMesh()
 
     if (Pstream::parRun())
     {
-        distributeBackground(cellSizeMesh);
+        if (!distributeBackground(cellSizeMesh))
+        {
+            // Synchronise the cell size mesh if it has not been distributed
+            cellSizeMesh.distribute(decomposition_);
+        }
     }
 
     label nMaxIter = readLabel
@@ -754,7 +769,7 @@ void Foam::conformalVoronoiMesh::buildCellSizeAndAlignmentMesh()
 
         if (Pstream::parRun())
         {
-            distributeBackground(cellSizeMesh);
+            cellSizeMesh.distribute(decomposition_);
         }
 
         Info<< "    Iteration " << i
@@ -764,6 +779,15 @@ void Foam::conformalVoronoiMesh::buildCellSizeAndAlignmentMesh()
         if (nAdded == 0)
         {
             break;
+        }
+    }
+
+    if (Pstream::parRun())
+    {
+        // Need to distribute the cell size mesh to cover the background mesh
+        if (!distributeBackground(cellSizeMesh))
+        {
+            cellSizeMesh.distribute(decomposition_);
         }
     }
 
