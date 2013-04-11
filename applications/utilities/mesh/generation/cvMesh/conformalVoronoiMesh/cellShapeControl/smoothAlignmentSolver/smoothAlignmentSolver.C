@@ -25,12 +25,6 @@ License
 
 #include "smoothAlignmentSolver.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Triangulation, class Type>
@@ -239,7 +233,59 @@ Foam::tmp<Foam::pointField> Foam::smoothAlignmentSolver::buildPointField
 }
 
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+void Foam::smoothAlignmentSolver::applyBoundaryConditions
+(
+    const triad& fixedAlignment,
+    triad& t
+) const
+{
+    label nFixed = 0;
+
+    forAll(fixedAlignment, dirI)
+    {
+        if (fixedAlignment.set(dirI))
+        {
+            nFixed++;
+        }
+    }
+
+    if (nFixed == 1)
+    {
+        forAll(fixedAlignment, dirI)
+        {
+            if (fixedAlignment.set(dirI))
+            {
+                t.align(fixedAlignment[dirI]);
+            }
+        }
+    }
+    else if (nFixed == 2)
+    {
+        forAll(fixedAlignment, dirI)
+        {
+            if (fixedAlignment.set(dirI))
+            {
+                t[dirI] = fixedAlignment[dirI];
+            }
+            else
+            {
+                t[dirI] = triad::unset[dirI];
+            }
+        }
+
+        t.orthogonalize();
+    }
+    else if (nFixed == 3)
+    {
+        forAll(fixedAlignment, dirI)
+        {
+            if (fixedAlignment.set(dirI))
+            {
+                t[dirI] = fixedAlignment[dirI];
+            }
+        }
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -274,6 +320,7 @@ void Foam::smoothAlignmentSolver::smoothAlignments
 
     triadField alignments(buildAlignmentField(mesh_));
     pointField points(buildPointField(mesh_));
+
     // Setup the sizes and alignments on each point
     triadField fixedAlignments(mesh_.vertexCount(), triad::unset);
 
@@ -293,11 +340,13 @@ void Foam::smoothAlignmentSolver::smoothAlignments
 
     Info<< nl << "Smoothing alignments" << endl;
 
+
     for (label iter = 0; iter < maxSmoothingIterations; iter++)
     {
         Info<< "Iteration " << iter;
 
         meshDistributor().distribute(points);
+        meshDistributor().distribute(fixedAlignments);
         meshDistributor().distribute(alignments);
 
         scalar residual = 0;
@@ -333,63 +382,29 @@ void Foam::smoothAlignmentSolver::smoothAlignments
 
                 newTriad += tmpTriad;
             }
+        }
+
+        // Update the alignment field
+        forAll(alignments, pI)
+        {
+            const triad& oldTriad = alignments[pI];
+            triad& newTriad = triadAv[pI];
 
             newTriad.normalize();
             newTriad.orthogonalize();
-//            newTriad = newTriad.sortxyz();
 
             // Enforce the boundary conditions
             const triad& fixedAlignment = fixedAlignments[pI];
 
-            label nFixed = 0;
+            applyBoundaryConditions
+            (
+                fixedAlignment,
+                newTriad
+            );
 
-            forAll(fixedAlignment, dirI)
-            {
-                if (fixedAlignment.set(dirI))
-                {
-                    nFixed++;
-                }
-            }
+            newTriad = newTriad.sortxyz();
 
-            if (nFixed == 1)
-            {
-                forAll(fixedAlignment, dirI)
-                {
-                    if (fixedAlignment.set(dirI))
-                    {
-                        newTriad.align(fixedAlignment[dirI]);
-                    }
-                }
-            }
-            else if (nFixed == 2)
-            {
-                forAll(fixedAlignment, dirI)
-                {
-                    if (fixedAlignment.set(dirI))
-                    {
-                        newTriad[dirI] = fixedAlignment[dirI];
-                    }
-                    else
-                    {
-                        newTriad[dirI] = triad::unset[dirI];
-                    }
-                }
-
-                newTriad.orthogonalize();
-            }
-            else if (nFixed == 3)
-            {
-                forAll(fixedAlignment, dirI)
-                {
-                    if (fixedAlignment.set(dirI))
-                    {
-                        newTriad[dirI] = fixedAlignment[dirI];
-                    }
-                }
-            }
-
-            const triad& oldTriad = alignments[pI];
-
+            // Residual Calculation
             for (direction dir = 0; dir < 3; ++dir)
             {
                 if
@@ -403,22 +418,7 @@ void Foam::smoothAlignmentSolver::smoothAlignments
                 }
             }
 
-//            if (iter == 198 || iter == 199)
-//            {
-//                Info<< "Triad" << nl
-//                    << "    Fixed (" << nFixed << ") = " << fixedAlignment
-//                    << nl
-//                    << "    Old      = " << oldTriad << nl
-//                    << "    Pre-Align= " << triadAv[pI] << nl
-//                    << "    New      = " << newTriad << nl
-//                    << "    Residual = " << residual << endl;
-//            }
-        }
-
-        forAll(alignments, pI)
-        {
-            triadAv[pI].orthogonalize();
-            alignments[pI] = triadAv[pI].sortxyz();
+            alignments[pI] = newTriad;
         }
 
         reduce(residual, sumOp<scalar>());
@@ -475,15 +475,6 @@ void Foam::smoothAlignmentSolver::smoothAlignments
         }
     }
 }
-
-
-// * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * Friend Operators * * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

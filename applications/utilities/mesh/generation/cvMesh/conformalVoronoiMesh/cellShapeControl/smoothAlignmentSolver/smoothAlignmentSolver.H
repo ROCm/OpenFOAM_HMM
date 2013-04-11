@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class smoothAlignmentSolver Declaration
+                   Class smoothAlignmentSolver Declaration
 \*---------------------------------------------------------------------------*/
 
 class smoothAlignmentSolver
@@ -84,6 +84,13 @@ class smoothAlignmentSolver
         template<class Triangulation>
         tmp<pointField> buildPointField(const Triangulation& mesh);
 
+        //- Apply the fixed alignments to the triad
+        void applyBoundaryConditions
+        (
+            const triad& fixedAlignment,
+            triad& t
+        ) const;
+
         //- Disallow default bitwise copy construct
         smoothAlignmentSolver(const smoothAlignmentSolver&);
 
@@ -105,26 +112,10 @@ public:
 
     // Member Functions
 
-        // Access
-
-        // Check
-
         // Edit
 
             //- Smooth the alignments on the mesh
             void smoothAlignments(const label maxSmoothingIterations);
-
-
-        // Write
-
-
-    // Member Operators
-
-    // Friend Functions
-
-    // Friend Operators
-
-    // IOstream Operators
 };
 
 
