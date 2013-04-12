@@ -148,21 +148,9 @@ inline Foam::scalar Foam::cvControls::maxLoadUnbalance() const
 }
 
 
-inline Foam::label Foam::cvControls::alignmentSearchSpokes() const
-{
-    return alignmentSearchSpokes_;
-}
-
-
 inline Foam::scalar Foam::cvControls::cosAlignmentAcceptanceAngle() const
 {
     return cosAlignmentAcceptanceAngle_;
-}
-
-
-inline Foam::label Foam::cvControls::sizeAndAlignmentRebuildFrequency() const
-{
-    return sizeAndAlignmentRebuildFrequency_;
 }
 
 

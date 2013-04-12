@@ -148,16 +148,9 @@ class cvControls
         //- Allowed relative load unbalance
         scalar maxLoadUnbalance_;
 
-        //- Number of "spokes" to use to search for secondary alignment
-        //  direction
-        label alignmentSearchSpokes_;
-
         //- cosine of angle of alignment with required direction within which a
         //  face will be accepted for rotation
         scalar cosAlignmentAcceptanceAngle_;
-
-        //- Now often to re-store the size and alignment data
-        label sizeAndAlignmentRebuildFrequency_;
 
 
         // Point insertion criteria
@@ -286,14 +279,8 @@ public:
             //- Return the maxLoadUnbalance
             inline scalar maxLoadUnbalance() const;
 
-            //- Return the number of alignmentSearchSpokes to use
-            inline label alignmentSearchSpokes() const;
-
             //- Return the cosAlignmentAcceptanceAngle
             inline scalar cosAlignmentAcceptanceAngle() const;
-
-            //- Return the sizeAndAlignmentRebuildFrequency
-            inline label sizeAndAlignmentRebuildFrequency() const;
 
             //- Return the aspectRatio
             inline scalar aspectRatio() const;

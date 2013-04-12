@@ -308,6 +308,12 @@ motionControl
     // Timing and memory usage.
     timeChecks                  no;
 
+    // For each delaunay edge (between two vertices, becomes
+    // the Voronoi face normal) snap to the alignment direction if within
+    // alignmentAcceptanceAngle. Slightly > 45 is a good choice - prevents
+    // flipping.
+    alignmentAcceptanceAngle    48;
+
     // When to insert points. Not advisable change to
     // these settings.
     pointInsertionCriteria

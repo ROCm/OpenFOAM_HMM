@@ -151,21 +151,11 @@ Foam::cvControls::cvControls
         maxLoadUnbalance_ = -1;
     }
 
-    alignmentSearchSpokes_ = readLabel
-    (
-        motionDict.lookup("alignmentSearchSpokes")
-    );
-
     cosAlignmentAcceptanceAngle_ = cos
     (
         degToRad(readScalar(motionDict.lookup("alignmentAcceptanceAngle")))
     );
 
-    sizeAndAlignmentRebuildFrequency_ = max
-    (
-        1,
-        readLabel(motionDict.lookup("sizeAndAlignmentRebuildFrequency"))
-    );
 
     // Point removal criteria
 
