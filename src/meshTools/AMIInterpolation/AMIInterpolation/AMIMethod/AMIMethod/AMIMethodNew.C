@@ -23,6 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 template<class SourcePatch, class TargetPatch>
 Foam::autoPtr<Foam::AMIMethod<SourcePatch, TargetPatch> >
 Foam::AMIMethod<SourcePatch, TargetPatch>::New
