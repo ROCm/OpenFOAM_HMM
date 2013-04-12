@@ -80,7 +80,7 @@ controlMeshQualityCoeffs
 
     // The amount that initialFaceLengthFactor will be reduced by for each
     // face if its collapse generates a poor quality face
-    faceReductionFactor         $initialFaceLengthFactor;
+    faceReductionFactor         0.5;
 
     // Maximum number of smoothing iterations for the reductionFactors
     maximumSmoothingIterations  2;
