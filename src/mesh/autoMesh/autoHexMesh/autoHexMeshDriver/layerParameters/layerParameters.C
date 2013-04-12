@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -138,6 +138,7 @@ Foam::layerParameters::layerParameters
         readLabel(dict.lookup("nSmoothSurfaceNormals"))
     ),
     nSmoothNormals_(readLabel(dict.lookup("nSmoothNormals"))),
+    nSmoothDisplacement_(dict.lookupOrDefault("nSmoothDisplacement", 0)),
     nSmoothThickness_(readLabel(dict.lookup("nSmoothThickness"))),
     maxFaceThicknessRatio_
     (
@@ -278,7 +279,7 @@ Foam::layerParameters::layerParameters
             const keyType& key = iter().keyword();
             const labelHashSet patchIDs
             (
-                boundaryMesh.patchSet(List<wordRe>(1, key))
+                boundaryMesh.patchSet(List<wordRe>(1, wordRe(key)))
             );
 
             if (patchIDs.size() == 0)
