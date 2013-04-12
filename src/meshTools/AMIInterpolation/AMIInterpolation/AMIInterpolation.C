@@ -639,7 +639,7 @@ Foam::word
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolationMethodToWord
 (
     const interpolationMethod& im
-) const
+)
 {
     word method = "unknown-interpolationMethod";
 

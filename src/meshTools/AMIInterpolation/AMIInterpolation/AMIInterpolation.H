@@ -302,10 +302,10 @@ public:
             label singlePatchProc() const;
 
             //- Convert interpolationMethod to word representation
-            word interpolationMethodToWord
+            static word interpolationMethodToWord
             (
                 const interpolationMethod& method
-            ) const;
+            );
 
 
             // Source patch
