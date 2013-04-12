@@ -28,6 +28,101 @@ License
 #include "meshTools.H"
 #include "mapDistribute.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template<class SourcePatch, class TargetPatch>
+Foam::word
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolationMethodToWord
+(
+    const interpolationMethod& im
+)
+{
+    word method = "unknown-interpolationMethod";
+
+    switch (im)
+    {
+        case imDirect:
+        {
+            method = "directAMI";
+            break;
+        }
+        case imMapNearest:
+        {
+            method = "mapNearestAMI";
+            break;
+        }
+        case imFaceAreaWeight:
+        {
+            method = "faceAreaWeightAMI";
+            break;
+        }
+        default:
+        {
+            FatalErrorIn
+            (
+                "const Foam::word"
+                "Foam::AMIInterpolation<SourcePatch, TargetPatch>::"
+                "interpolationMethodToWord"
+                "("
+                    "const interpolationMethod&"
+                ")"
+            )
+                << "Unhandled interpolationMethod enumeration " << method
+                << abort(FatalError);
+        }
+    }
+
+    return method;
+}
+
+
+template<class SourcePatch, class TargetPatch>
+typename Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolationMethod
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::wordTointerpolationMethod
+(
+    const word& im
+)
+{
+    interpolationMethod method = imDirect;
+
+    wordList methods
+    (
+        IStringStream("(directAMI mapNearestAMI faceAreaWeightAMI)")()
+    );
+
+    if (im == "directAMI")
+    {
+        method = imDirect;
+    }
+    else if (im == "mapNearestAMI")
+    {
+        method = imMapNearest;
+    }
+    else if (im == "faceAreaWeightAMI")
+    {
+        method = imFaceAreaWeight;
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "Foam::AMIInterpolation<SourcePatch, TargetPatch>::"
+            "interpolationMethod"
+            "Foam::AMIInterpolation<SourcePatch, TargetPatch>::"
+            "wordTointerpolationMethod"
+            "("
+                "const word&"
+            ")"
+        )
+            << "Invalid interpolationMethod " << im
+            << ".  Valid methods are:" << methods
+            << exit(FatalError);
+    }
+
+    return method;
+}
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class SourcePatch, class TargetPatch>
@@ -633,52 +728,6 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::~AMIInterpolation()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class SourcePatch, class TargetPatch>
-Foam::word
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolationMethodToWord
-(
-    const interpolationMethod& im
-)
-{
-    word method = "unknown-interpolationMethod";
-
-    switch (im)
-    {
-        case imDirect:
-        {
-            method = "directAMI";
-            break;
-        }
-        case imMapNearest:
-        {
-            method = "mapNearestAMI";
-            break;
-        }
-        case imFaceAreaWeight:
-        {
-            method = "faceAreaWeightAMI";
-            break;
-        }
-        default:
-        {
-            FatalErrorIn
-            (
-                "const Foam::word"
-                "Foam::AMIInterpolation<SourcePatch, TargetPatch>::"
-                "interpolationMethodToWord"
-                "("
-                    "const interpolationMethod&"
-                ") const"
-            )
-                << "Unhandled interpolationMethod enumeration " << method
-                << abort(FatalError);
-        }
-    }
-
-    return method;
-}
-
 
 template<class SourcePatch, class TargetPatch>
 void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update

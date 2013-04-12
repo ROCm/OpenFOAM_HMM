@@ -91,6 +91,18 @@ public:
             imFaceAreaWeight
         };
 
+        //- Convert interpolationMethod to word representation
+        static word interpolationMethodToWord
+        (
+            const interpolationMethod& method
+        );
+
+        //- Convert word to interpolationMethod
+        static interpolationMethod wordTointerpolationMethod
+        (
+            const word& method
+        );
+
 
 private:
 
@@ -300,12 +312,6 @@ public:
             //- Set to -1, or the processor holding all faces (both sides) of
             //  the AMI
             label singlePatchProc() const;
-
-            //- Convert interpolationMethod to word representation
-            static word interpolationMethodToWord
-            (
-                const interpolationMethod& method
-            );
 
 
             // Source patch
