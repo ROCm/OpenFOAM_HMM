@@ -24,14 +24,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "meshToMeshNew.H"
-#include "OFstream.H"
 #include "Time.H"
 #include "globalIndex.H"
-#include "mergePoints.H"
-#include "treeBoundBox.H"
-#include "indexedOctree.H"
-#include "treeDataCell.H"
-#include "ListOps.H"
+#include "meshToMeshMethod.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -55,54 +50,8 @@ namespace Foam
         meshToMeshNew::interpolationMethodNames_;
 }
 
-Foam::scalar Foam::meshToMeshNew::tolerance_ = 1e-6;
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::meshToMeshNew::writeConnectivity
-(
-    const polyMesh& src,
-    const polyMesh& tgt,
-    const labelListList& srcToTargetAddr
-) const
-{
-    Pout<< "Source size = " << src.nCells() << endl;
-    Pout<< "Target size = " << tgt.nCells() << endl;
-
-    word fName("addressing_" + src.name() + "_to_" + tgt.name());
-
-    if (Pstream::parRun())
-    {
-        fName = fName +  "_proc" + Foam::name(Pstream::myProcNo());
-    }
-
-    OFstream os(src.time().path()/fName + ".obj");
-
-    label vertI = 0;
-    forAll(srcToTargetAddr, i)
-    {
-        const labelList& tgtAddress = srcToTargetAddr[i];
-        forAll(tgtAddress, j)
-        {
-            label tgtI = tgtAddress[j];
-            const vector& c0 = src.cellCentres()[i];
-
-            const cell& c = tgt.cells()[tgtI];
-            const pointField pts(c.points(tgt.faces(), tgt.points()));
-            forAll(pts, j)
-            {
-                const point& p = pts[j];
-                os  << "v " << p.x() << ' ' << p.y() << ' ' << p.z() << nl;
-                vertI++;
-                os  << "v " << c0.x() << ' ' << c0.y() << ' ' << c0.z()
-                    << nl;
-                vertI++;
-                os  << "l " << vertI - 1 << ' ' << vertI << nl;
-            }
-        }
-    }
-}
-
 
 Foam::labelList Foam::meshToMeshNew::maskCells
 (
@@ -138,146 +87,6 @@ Foam::labelList Foam::meshToMeshNew::maskCells
     }
 
     return cells;
-}
-
-
-bool Foam::meshToMeshNew::findInitialSeeds
-(
-    const polyMesh& src,
-    const polyMesh& tgt,
-    const labelList& srcCellIDs,
-    const boolList& mapFlag,
-    const label startSeedI,
-    label& srcSeedI,
-    label& tgtSeedI
-) const
-{
-    const cellList& srcCells = src.cells();
-    const faceList& srcFaces = src.faces();
-    const pointField& srcPts = src.points();
-
-    for (label i = startSeedI; i < srcCellIDs.size(); i++)
-    {
-        label srcI = srcCellIDs[i];
-
-        if (mapFlag[srcI])
-        {
-            const pointField
-                pts(srcCells[srcI].points(srcFaces, srcPts).xfer());
-
-            switch (method_)
-            {
-                case imDirect:
-                case imCellVolumeWeight:
-                {
-                    forAll(pts, ptI)
-                    {
-                        const point& pt = pts[ptI];
-                        label tgtI = tgt.cellTree().findInside(pt);
-
-                        if (tgtI != -1 && intersect(src, tgt, srcI, tgtI))
-                        {
-                            srcSeedI = srcI;
-                            tgtSeedI = tgtI;
-
-                            return true;
-                        }
-                    }
-
-                    break;
-                }
-                case imMapNearest:
-                {
-                    const point& pt = pts[0];
-                    pointIndexHit hit = tgt.cellTree().findNearest(pt, GREAT);
-
-                    if (hit.hit())
-                    {
-                        srcSeedI = srcI;
-                        tgtSeedI = hit.index();
-
-                        return true;
-                    }
-                    else
-                    {
-                        FatalErrorIn
-                        (
-                            "bool Foam::meshToMeshNew::findInitialSeeds"
-                            "("
-                                "const polyMesh&, "
-                                "const polyMesh&, "
-                                "const labelList&, "
-                                "const boolList&, "
-                                "const label, "
-                                "label&, "
-                                "label&"
-                            ") const"
-                        )
-                            << "Unable to find nearest target cell"
-                            << " for source cell " << srcI
-                            << " with centre "
-                            << srcCells[srcI].centre(srcPts, srcFaces)
-                            << abort(FatalError);
-                    }
-
-                    break;
-                }
-                default:
-                {
-                    FatalErrorIn
-                    (
-                        "bool Foam::meshToMeshNew::findInitialSeeds"
-                        "("
-                            "const polyMesh&, "
-                            "const polyMesh&, "
-                            "const labelList&, "
-                            "const boolList&, "
-                            "const label, "
-                            "label&, "
-                            "label&"
-                        ") const"
-                    )
-                        << "Unhandled method: "
-                        << interpolationMethodNames_[method_]
-                        << abort(FatalError);
-                }
-            }
-        }
-    }
-
-    if (debug)
-    {
-        Pout<< "could not find starting seed" << endl;
-    }
-
-    return false;
-}
-
-
-void Foam::meshToMeshNew::appendNbrCells
-(
-    const label cellI,
-    const polyMesh& mesh,
-    const DynamicList<label>& visitedCells,
-    DynamicList<label>& nbrCellIDs
-) const
-{
-    const labelList& nbrCells = mesh.cellCells()[cellI];
-
-    // filter out cells already visited from cell neighbours
-    forAll(nbrCells, i)
-    {
-        label nbrCellI = nbrCells[i];
-
-        if
-        (
-            (findIndex(visitedCells, nbrCellI) == -1)
-         && (findIndex(nbrCellIDs, nbrCellI) == -1)
-        )
-        {
-            nbrCellIDs.append(nbrCellI);
-        }
-    }
 }
 
 
@@ -324,124 +133,29 @@ void Foam::meshToMeshNew::calcAddressing
     const polyMesh& tgt
 )
 {
-    srcToTgtCellAddr_.setSize(src.nCells());
-    srcToTgtCellWght_.setSize(src.nCells());
-
-    tgtToSrcCellAddr_.setSize(tgt.nCells());
-    tgtToSrcCellWght_.setSize(tgt.nCells());
-
-    if (!src.nCells() || !tgt.nCells())
-    {
-        if (debug)
-        {
-            Pout<< "mesh interpolation: cells not on processor: Source cells = "
-                << src.nCells() << ", target cells = " << tgt.nCells()
-                << endl;
-        }
-    }
-
-    if (!src.nCells())
-    {
-        return;
-    }
-    else if (!tgt.nCells())
-    {
-        if (debug)
-        {
-            Pout<< "mesh interpolation: hhave " << src.nCells() << " source "
-                << " cells but no target cells" << endl;
-        }
-
-        return;
-    }
-
-    // (potentially) participating source mesh cells
-    const labelList srcCellIDs = maskCells(src, tgt);
-
-    // list to keep track of whether src cell can be mapped
-    boolList mapFlag(src.nCells(), false);
-    UIndirectList<bool>(mapFlag, srcCellIDs) = true;
-
-    // find initial point in tgt mesh
-    label srcSeedI = -1;
-    label tgtSeedI = -1;
-    label startSeedI = 0;
-
-    bool startWalk =
-        findInitialSeeds
+    autoPtr<meshToMeshMethod> methodPtr
+    (
+        meshToMeshMethod::New
         (
+            interpolationMethodNames_[method_],
             src,
-            tgt,
-            srcCellIDs,
-            mapFlag,
-            startSeedI,
-            srcSeedI,
-            tgtSeedI
-        );
+            tgt
+        )
+    );
 
-    if (!startWalk)
-    {
-        // if meshes are collocated, after inflating the source mesh bounding
-        // box tgt mesh cells may be transferred, but may still not overlap
-        // with the source mesh
-        return;
-    }
+    methodPtr->calculate
+    (
+        srcToTgtCellAddr_,
+        srcToTgtCellWght_,
+        tgtToSrcCellAddr_,
+        tgtToSrcCellWght_
+    );
 
-
-    switch (method_)
-    {
-        case imDirect:
-        {
-            calcDirect(src, tgt, srcSeedI, tgtSeedI);
-            break;
-        }
-        case imMapNearest:
-        {
-            calcMapNearest
-            (
-                src,
-                tgt,
-                srcSeedI,
-                tgtSeedI,
-                srcCellIDs,
-                mapFlag,
-                startSeedI
-            );
-            break;
-        }
-        case imCellVolumeWeight:
-        {
-            calcCellVolumeWeight
-            (
-                src,
-                tgt,
-                srcSeedI,
-                tgtSeedI,
-                srcCellIDs,
-                mapFlag,
-                startSeedI
-            );
-            break;
-        }
-        default:
-        {
-            FatalErrorIn
-            (
-                "void Foam::meshToMeshNew::calcAddressing"
-                "("
-                    "const polyMesh&, "
-                    "const polyMesh&"
-                ")"
-            )
-                << "Unknown interpolation method"
-                << abort(FatalError);
-        }
-    }
-
+    V_ = methodPtr->V();
 
     if (debug)
     {
-        writeConnectivity(src, tgt, srcToTgtCellAddr_);
+        methodPtr->writeConnectivity(src, tgt, srcToTgtCellAddr_);
     }
 }
 
@@ -688,6 +402,12 @@ Foam::meshToMeshNew::patchAMIs() const
 {
     if (patchAMIs_.empty())
     {
+        const word amiMethod =
+            AMIPatchToPatchInterpolation::interpolationMethodToWord
+            (
+                interpolationMethodAMI(method_)
+            );
+
         patchAMIs_.setSize(srcPatchID_.size());
 
         forAll(srcPatchID_, i)
@@ -700,7 +420,7 @@ Foam::meshToMeshNew::patchAMIs() const
 
             Info<< "Creating AMI between source patch " << srcPP.name()
                 << " and target patch " << tgtPP.name()
-                << " using " << interpolationMethodAMI(method_)
+                << " using " << amiMethod
                 << endl;
 
             Info<< incrIndent;

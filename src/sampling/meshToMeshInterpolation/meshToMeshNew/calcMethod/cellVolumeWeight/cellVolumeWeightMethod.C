@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,15 +23,79 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "meshToMeshNew.H"
-#include "tetOverlapVolume.H"
+#include "cellVolumeWeightMethod.H"
+#include "indexedOctree.H"
+#include "treeDataCell.H"
+#include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-void Foam::meshToMeshNew::calcCellVolumeWeight
+namespace Foam
+{
+    defineTypeNameAndDebug(cellVolumeWeightMethod, 0);
+    addToRunTimeSelectionTable
+    (
+        meshToMeshMethod,
+        cellVolumeWeightMethod,
+        components
+    );
+}
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+bool Foam::cellVolumeWeightMethod::findInitialSeeds
 (
-    const polyMesh& src,
-    const polyMesh& tgt,
+    const labelList& srcCellIDs,
+    const boolList& mapFlag,
+    const label startSeedI,
+    label& srcSeedI,
+    label& tgtSeedI
+) const
+{
+    const cellList& srcCells = src_.cells();
+    const faceList& srcFaces = src_.faces();
+    const pointField& srcPts = src_.points();
+
+    for (label i = startSeedI; i < srcCellIDs.size(); i++)
+    {
+        label srcI = srcCellIDs[i];
+
+        if (mapFlag[srcI])
+        {
+            const pointField
+                pts(srcCells[srcI].points(srcFaces, srcPts).xfer());
+
+            forAll(pts, ptI)
+            {
+                const point& pt = pts[ptI];
+                label tgtI = tgt_.cellTree().findInside(pt);
+
+                if (tgtI != -1 && intersect(srcI, tgtI))
+                {
+                    srcSeedI = srcI;
+                    tgtSeedI = tgtI;
+
+                    return true;
+                }
+            }
+        }
+    }
+
+    if (debug)
+    {
+        Pout<< "could not find starting seed" << endl;
+    }
+
+    return false;
+}
+
+
+void Foam::cellVolumeWeightMethod::calculateAddressing
+(
+    labelListList& srcToTgtCellAddr,
+    scalarListList& srcToTgtCellWght,
+    labelListList& tgtToSrcCellAddr,
+    scalarListList& tgtToSrcCellWght,
     const label srcSeedI,
     const label tgtSeedI,
     const labelList& srcCellIDs,
@@ -42,11 +106,11 @@ void Foam::meshToMeshNew::calcCellVolumeWeight
     label srcCellI = srcSeedI;
     label tgtCellI = tgtSeedI;
 
-    List<DynamicList<label> > srcToTgtAddr(src.nCells());
-    List<DynamicList<scalar> > srcToTgtWght(src.nCells());
+    List<DynamicList<label> > srcToTgtAddr(src_.nCells());
+    List<DynamicList<scalar> > srcToTgtWght(src_.nCells());
 
-    List<DynamicList<label> > tgtToSrcAddr(tgt.nCells());
-    List<DynamicList<scalar> > tgtToSrcWght(tgt.nCells());
+    List<DynamicList<label> > tgtToSrcAddr(tgt_.nCells());
+    List<DynamicList<scalar> > tgtToSrcWght(tgt_.nCells());
 
     // list of tgt cell neighbour cells
     DynamicList<label> nbrTgtCells(10);
@@ -55,10 +119,10 @@ void Foam::meshToMeshNew::calcCellVolumeWeight
     DynamicList<label> visitedTgtCells(10);
 
     // list to keep track of tgt cells used to seed src cells
-    labelList seedCells(src.nCells(), -1);
+    labelList seedCells(src_.nCells(), -1);
     seedCells[srcCellI] = tgtCellI;
 
-    const scalarField& srcVol = src.cellVolumes();
+    const scalarField& srcVol = src_.cellVolumes();
 
     do
     {
@@ -67,14 +131,14 @@ void Foam::meshToMeshNew::calcCellVolumeWeight
 
         // append initial target cell and neighbours
         nbrTgtCells.append(tgtCellI);
-        appendNbrCells(tgtCellI, tgt, visitedTgtCells, nbrTgtCells);
+        appendNbrCells(tgtCellI, tgt_, visitedTgtCells, nbrTgtCells);
 
         do
         {
             tgtCellI = nbrTgtCells.remove();
             visitedTgtCells.append(tgtCellI);
 
-            scalar vol = interVol(src, tgt, srcCellI, tgtCellI);
+            scalar vol = interVol(srcCellI, tgtCellI);
 
             // accumulate addressing and weights for valid intersection
             if (vol/srcVol[srcCellI] > tolerance_)
@@ -86,7 +150,7 @@ void Foam::meshToMeshNew::calcCellVolumeWeight
                 tgtToSrcAddr[tgtCellI].append(srcCellI);
                 tgtToSrcWght[tgtCellI].append(vol);
 
-                appendNbrCells(tgtCellI, tgt, visitedTgtCells, nbrTgtCells);
+                appendNbrCells(tgtCellI, tgt_, visitedTgtCells, nbrTgtCells);
 
                 // accumulate intersection volume
                 V_ += vol;
@@ -102,8 +166,6 @@ void Foam::meshToMeshNew::calcCellVolumeWeight
             startSeedI,
             srcCellI,
             tgtCellI,
-            src,
-            tgt,
             srcCellIDs,
             mapFlag,
             visitedTgtCells,
@@ -113,34 +175,32 @@ void Foam::meshToMeshNew::calcCellVolumeWeight
     while (srcCellI != -1);
 
     // transfer addressing into persistent storage
-    forAll(srcToTgtCellAddr_, i)
+    forAll(srcToTgtCellAddr, i)
     {
-        srcToTgtCellAddr_[i].transfer(srcToTgtAddr[i]);
-        srcToTgtCellWght_[i].transfer(srcToTgtWght[i]);
+        srcToTgtCellAddr[i].transfer(srcToTgtAddr[i]);
+        srcToTgtCellWght[i].transfer(srcToTgtWght[i]);
     }
 
-    forAll(tgtToSrcCellAddr_, i)
+    forAll(tgtToSrcCellAddr, i)
     {
-        tgtToSrcCellAddr_[i].transfer(tgtToSrcAddr[i]);
-        tgtToSrcCellWght_[i].transfer(tgtToSrcWght[i]);
+        tgtToSrcCellAddr[i].transfer(tgtToSrcAddr[i]);
+        tgtToSrcCellWght[i].transfer(tgtToSrcWght[i]);
     }
 }
 
 
-void Foam::meshToMeshNew::setNextCells
+void Foam::cellVolumeWeightMethod::setNextCells
 (
     label& startSeedI,
     label& srcCellI,
     label& tgtCellI,
-    const polyMesh& src,
-    const polyMesh& tgt,
     const labelList& srcCellIDs,
     const boolList& mapFlag,
     const DynamicList<label>& visitedCells,
     labelList& seedCells
 ) const
 {
-    const labelList& srcNbrCells = src.cellCells()[srcCellI];
+    const labelList& srcNbrCells = src_.cellCells()[srcCellI];
 
     // set possible seeds for later use by querying all src cell neighbours
     // with all visited target cells
@@ -155,7 +215,7 @@ void Foam::meshToMeshNew::setNextCells
             {
                 label cellT = visitedCells[j];
 
-                if (intersect(src, tgt, cellS, cellT))
+                if (intersect(cellS, cellT))
                 {
                     seedCells[cellS] = cellT;
 
@@ -211,8 +271,6 @@ void Foam::meshToMeshNew::setNextCells
         bool restart =
             findInitialSeeds
             (
-                src,
-                tgt,
                 srcCellIDs,
                 mapFlag,
                 startSeedI,
@@ -233,68 +291,91 @@ void Foam::meshToMeshNew::setNextCells
 }
 
 
-bool Foam::meshToMeshNew::intersect
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::cellVolumeWeightMethod::cellVolumeWeightMethod
 (
     const polyMesh& src,
-    const polyMesh& tgt,
-    const label srcCellI,
-    const label tgtCellI
-) const
-{
-    scalar threshold = tolerance_*src.cellVolumes()[srcCellI];
-
-    tetOverlapVolume overlapEngine;
-
-    treeBoundBox bbTgtCell
-    (
-        pointField
-        (
-            tgt.points(),
-            tgt.cellPoints()[tgtCellI]
-        )
-    );
-
-    return overlapEngine.cellCellOverlapMinDecomp
-    (
-        src,
-        srcCellI,
-        tgt,
-        tgtCellI,
-        bbTgtCell,
-        threshold
-    );
-}
+    const polyMesh& tgt
+)
+:
+    meshToMeshMethod(src, tgt)
+{}
 
 
-Foam::scalar Foam::meshToMeshNew::interVol
+// * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
+
+Foam::cellVolumeWeightMethod::~cellVolumeWeightMethod()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::cellVolumeWeightMethod::calculate
 (
-    const polyMesh& src,
-    const polyMesh& tgt,
-    const label srcCellI,
-    const label tgtCellI
-) const
+    labelListList& srcToTgtAddr,
+    scalarListList& srcToTgtWght,
+    labelListList& tgtToSrcAddr,
+    scalarListList& tgtToSrcWght
+)
 {
-    tetOverlapVolume overlapEngine;
-
-    treeBoundBox bbTgtCell
+    bool ok = initialise
     (
-        pointField
+        srcToTgtAddr,
+        srcToTgtWght,
+        tgtToSrcAddr,
+        tgtToSrcWght
+    );
+
+    if (!ok)
+    {
+        return;
+    }
+
+    // (potentially) participating source mesh cells
+    const labelList srcCellIDs(maskCells());
+
+    // list to keep track of whether src cell can be mapped
+    boolList mapFlag(src_.nCells(), false);
+    UIndirectList<bool>(mapFlag, srcCellIDs) = true;
+
+    // find initial point in tgt mesh
+    label srcSeedI = -1;
+    label tgtSeedI = -1;
+    label startSeedI = 0;
+
+    bool startWalk =
+        findInitialSeeds
         (
-            tgt.points(),
-            tgt.cellPoints()[tgtCellI]
-        )
-    );
+            srcCellIDs,
+            mapFlag,
+            startSeedI,
+            srcSeedI,
+            tgtSeedI
+        );
 
-    scalar vol = overlapEngine.cellCellOverlapVolumeMinDecomp
-    (
-        src,
-        srcCellI,
-        tgt,
-        tgtCellI,
-        bbTgtCell
-    );
-
-    return vol;
+    if (startWalk)
+    {
+        calculateAddressing
+        (
+            srcToTgtAddr,
+            srcToTgtWght,
+            tgtToSrcAddr,
+            tgtToSrcWght,
+            srcSeedI,
+            tgtSeedI,
+            srcCellIDs,
+            mapFlag,
+            startSeedI
+        );
+    }
+    else
+    {
+        // if meshes are collocated, after inflating the source mesh bounding
+        // box tgt mesh cells may be transferred, but may still not overlap
+        // with the source mesh
+        return;
+    }
 }
 
 
