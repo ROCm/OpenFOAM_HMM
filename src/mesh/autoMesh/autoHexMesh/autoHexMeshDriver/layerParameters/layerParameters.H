@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -118,6 +118,8 @@ private:
         label nSmoothSurfaceNormals_;
 
         label nSmoothNormals_;
+
+        label nSmoothDisplacement_;
 
         label nSmoothThickness_;
 
@@ -273,6 +275,12 @@ public:
         scalar layerTerminationCos() const
         {
             return layerTerminationCos_;
+        }
+
+        //- Smooth internal displacement
+        label nSmoothDisplacement() const
+        {
+            return nSmoothDisplacement_;
         }
 
         //- Smooth layer thickness over surface patches
