@@ -166,11 +166,7 @@ motionControl
 
     maxLoadUnbalance            0.2;
 
-    alignmentSearchSpokes       36;
-
     alignmentAcceptanceAngle    48;
-
-    sizeAndAlignmentRebuildFrequency 20;
 
     pointInsertionCriteria
     {
