@@ -271,16 +271,12 @@ void Foam::controlMeshRefinement::initialMeshPopulation
         List<Vb> vertices(pts.size());
 
         // Clip the minimum size
-        forAll(vertices, vI)
+        for (label vI = 0; vI < pts.size(); ++vI)
         {
             vertices[vI] = Vb(pts[vI], Vb::vtInternalNearBoundary);
             vertices[vI].targetCellSize() = max
             (
-                min
-                (
-                    sizes[vI],
-                    shapeController_.cellSize(pts[vI])
-                ),
+                sizes[vI],
                 shapeController_.minimumCellSize()
             );
             vertices[vI].alignment() = alignments[vI];
@@ -392,6 +388,135 @@ void Foam::controlMeshRefinement::initialMeshPopulation
         }
 
         //mesh_.rangeInsertWithInfo(vertices.begin(), vertices.end());
+
+        Info<< "    Inserted "
+            << returnReduce
+               (
+                   label(mesh_.number_of_vertices()) - preInsertedSize,
+                   sumOp<label>()
+               )
+            << "/" << returnReduce(vertices.size(), sumOp<label>())
+            << endl;
+    }
+
+
+
+    forAll(controlFunctions, fI)
+    {
+        const cellSizeAndAlignmentControl& controlFunction =
+            controlFunctions[fI];
+
+        const Switch& forceInsertion =
+            controlFunction.forceInitialPointInsertion();
+
+        Info<< "Inserting points from " << controlFunction.name()
+            << " (" << controlFunction.type() << ")" << endl;
+        Info<< "    Force insertion is " << forceInsertion.asText() << endl;
+
+        DynamicList<Foam::point> extraPts;
+        DynamicList<scalar> extraSizes;
+
+        controlFunction.cellSizeFunctionVertices(extraPts, extraSizes);
+
+        List<Vb> vertices(extraPts.size());
+
+        // Clip the minimum size
+        for (label vI = 0; vI < extraPts.size(); ++vI)
+        {
+            vertices[vI] = Vb(extraPts[vI], Vb::vtUnassigned);
+            vertices[vI].targetCellSize() = max
+            (
+                extraSizes[vI],
+                shapeController_.minimumCellSize()
+            );
+        }
+
+        label nRejected = 0;
+
+        PackedBoolList keepVertex(vertices.size(), true);
+
+        forAll(vertices, vI)
+        {
+            bool keep = true;
+
+            pointFromPoint pt = topoint(vertices[vI].point());
+
+            if (Pstream::parRun())
+            {
+                keep = decomposition().positionOnThisProcessor(pt);
+            }
+
+            if (geometryToConformTo_.wellOutside(pt, SMALL))
+            {
+                keep = false;
+            }
+
+            if (!keep)
+            {
+                keepVertex[vI] = false;
+            }
+        }
+
+        inplaceSubset(keepVertex, vertices);
+
+        const label preInsertedSize = mesh_.number_of_vertices();
+
+        forAll(vertices, vI)
+        {
+            bool insertPoint = false;
+
+            pointFromPoint pt(topoint(vertices[vI].point()));
+
+            if
+            (
+                mesh_.dimension() < 3
+             || mesh_.is_infinite
+                (
+                    mesh_.locate(vertices[vI].point())
+                )
+            )
+            {
+                insertPoint = true;
+            }
+
+            const scalar interpolatedCellSize = shapeController_.cellSize(pt);
+            const scalar calculatedCellSize = vertices[vI].targetCellSize();
+
+            if (debug)
+            {
+                Info<< "Point = " << pt << nl
+                    << "  Size(interp) = " << interpolatedCellSize << nl
+                    << "    Size(calc) = " << calculatedCellSize << nl
+                    << endl;
+            }
+
+            const scalar sizeDiff =
+                mag(interpolatedCellSize - calculatedCellSize);
+
+            if (debug)
+            {
+                Info<< "    size difference = " << sizeDiff << endl;
+            }
+
+            // @todo Also need to base it on the alignments
+            if (sizeDiff/interpolatedCellSize > 0.1)
+            {
+                insertPoint = true;
+            }
+
+            if (forceInsertion || insertPoint)
+            {
+                mesh_.insert
+                (
+                    pt,
+                    calculatedCellSize,
+                    vertices[vI].alignment(),
+                    Vb::vtInternal
+                );
+            }
+        }
+
+       //mesh_.rangeInsertWithInfo(vertices.begin(), vertices.end());
 
         Info<< "    Inserted "
             << returnReduce

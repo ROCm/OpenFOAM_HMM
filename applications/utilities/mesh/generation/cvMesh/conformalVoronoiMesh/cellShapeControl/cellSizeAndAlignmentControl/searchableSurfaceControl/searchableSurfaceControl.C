@@ -174,6 +174,7 @@ Foam::searchableSurfaceControl::searchableSurfaceControl
     searchableSurface_(geometryToConformTo.geometry()[surfaceName_]),
     geometryToConformTo_(geometryToConformTo),
     cellSizeFunctions_(1),
+    regionToCellSizeFunctions_(geometryToConformTo_.patchNames().size(), 0),
     maxPriority_(-1)
 {
     Info<< indent << "Master settings:" << endl;
@@ -244,6 +245,8 @@ Foam::searchableSurfaceControl::searchableSurfaceControl
                 );
                 Info<< decrIndent;
 
+                regionToCellSizeFunctions_[regionID] = nRegionCellSizeFunctions;
+
                 nRegionCellSizeFunctions++;
             }
             else
@@ -271,6 +274,16 @@ Foam::searchableSurfaceControl::searchableSurfaceControl
                 labelList()
             )
         );
+
+        const wordList& regionNames = geometryToConformTo_.patchNames();
+
+        forAll(regionNames, regionI)
+        {
+            if (regionToCellSizeFunctions_[regionI] == -1)
+            {
+                regionToCellSizeFunctions_[regionI] = nRegionCellSizeFunctions;
+            }
+        }
 
         cellSizeFunctions_.transfer(regionCellSizeFunctions);
     }
@@ -400,6 +413,56 @@ void Foam::searchableSurfaceControl::initialVertices
         }
 
         alignments[pI] = pointAlignment();
+    }
+}
+
+
+void Foam::searchableSurfaceControl::cellSizeFunctionVertices
+(
+    DynamicList<Foam::point>& pts,
+    DynamicList<scalar>& sizes
+) const
+{
+    const pointField& points = searchableSurface_.points();
+
+    const scalar nearFeatDistSqrCoeff = 1e-8;
+
+    forAll(points, pI)
+    {
+        // Is the point in the extendedFeatureEdgeMesh? If so get the
+        // point normal, otherwise get the surface normal from
+        // searchableSurface
+
+        pointField ptField(1, points[pI]);
+        scalarField distField(1, nearFeatDistSqrCoeff);
+        List<pointIndexHit> infoList(1, pointIndexHit());
+
+        searchableSurface_.findNearest(ptField, distField, infoList);
+
+        if (infoList[0].hit())
+        {
+            vectorField normals(1);
+            searchableSurface_.getNormal(infoList, normals);
+
+            labelList region(1, -1);
+            searchableSurface_.getRegion(infoList, region);
+
+            const cellSizeFunction& sizeFunc =
+                sizeFunctions()[regionToCellSizeFunctions_[region[0]]];
+
+            pointField extraPts;
+            scalarField extraSizes;
+            sizeFunc.sizeLocations
+            (
+                infoList[0],
+                normals[0],
+                extraPts,
+                extraSizes
+            );
+
+            pts.append(extraPts);
+            sizes.append(extraSizes);
+        }
     }
 }
 

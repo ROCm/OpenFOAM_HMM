@@ -173,6 +173,14 @@ public:
             return coeffsDict_;
         }
 
+        virtual bool sizeLocations
+        (
+            const pointIndexHit& hitPt,
+            const vector& n,
+            pointField& shapePts,
+            scalarField& shapeSizes
+        ) const = 0;
+
         //- Modify scalar argument to the cell size specified by function.
         //  Return a boolean specifying if the function was used, i.e. false if
         //  the point was not in range of the surface for a spatially varying

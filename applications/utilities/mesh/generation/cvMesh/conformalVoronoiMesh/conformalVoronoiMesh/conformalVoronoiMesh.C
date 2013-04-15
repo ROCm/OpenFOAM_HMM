@@ -594,7 +594,6 @@ void Foam::conformalVoronoiMesh::updateSizesAndAlignments
         !Pstream::parRun()
      && runTime_.run()
      && runTime_.timeIndex()
-      % cvMeshControls().sizeAndAlignmentRebuildFrequency() == 0
     )
     {
         storeSizesAndAlignments(storePts);

@@ -95,6 +95,48 @@ scalar linearDistance::sizeFunction
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+bool linearDistance::sizeLocations
+(
+    const pointIndexHit& hitPt,
+    const vector& n,
+    pointField& shapePts,
+    scalarField& shapeSizes
+) const
+{
+    const Foam::point& pt = hitPt.hitPoint();
+
+    if (sideMode_ == rmBothsides)
+    {
+        shapePts.resize(2);
+        shapeSizes.resize(2);
+
+        shapePts[0] = pt - n*distance_;
+        shapeSizes[0] = distanceCellSize_;
+
+        shapePts[1] = pt + n*distance_;
+        shapeSizes[1] = distanceCellSize_;
+    }
+    else if (sideMode_ == smInside)
+    {
+        shapePts.resize(1);
+        shapeSizes.resize(1);
+
+        shapePts[0] = pt - n*distance_;
+        shapeSizes[0] = distanceCellSize_;
+    }
+    else if (sideMode_ == smOutside)
+    {
+        shapePts.resize(1);
+        shapeSizes.resize(1);
+
+        shapePts[0] = pt - n*distance_;
+        shapeSizes[0] = distanceCellSize_;
+    }
+
+    return false;
+}
+
+
 bool linearDistance::cellSize(const point& pt, scalar& size) const
 {
     size = 0;
@@ -183,6 +225,7 @@ bool linearDistance::setCellSize(const pointField& pts)
 //        (
 //            pointField(1, pt),
 //            scalarField(1, distanceSqr_),
+//            regionIndices_,
 //            hits
 //        );
 
@@ -201,14 +244,7 @@ bool linearDistance::setCellSize(const pointField& pts)
 //        }
 //    }
 
-//    // Force recalculation of the interpolation
-//    if (!pts.empty())
-//    {
-//        surfaceCellSizeFunction_().recalculateInterpolation();
-//    }
-
 //    return true;
-
     return false;
 }
 

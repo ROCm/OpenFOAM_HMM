@@ -63,6 +63,8 @@ class searchableSurfaceControl
 
         PtrList<cellSizeFunction> cellSizeFunctions_;
 
+        labelList regionToCellSizeFunctions_;
+
         label maxPriority_;
 
 
@@ -142,6 +144,12 @@ public:
 //                scalar& size,
 //                tensor& alignment
 //            ) const;
+
+        virtual void cellSizeFunctionVertices
+        (
+            DynamicList<Foam::point>& pts,
+            DynamicList<scalar>& sizes
+        ) const;
 
         virtual void initialVertices
         (

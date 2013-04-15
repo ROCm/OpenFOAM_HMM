@@ -60,6 +60,21 @@ uniform::uniform
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+bool uniform::sizeLocations
+(
+    const pointIndexHit& hitPt,
+    const vector& n,
+    pointField& shapePts,
+    scalarField& shapeSizes
+) const
+{
+    shapePts.setSize(0);
+    shapeSizes.setSize(0);
+
+    return true;
+}
+
+
 bool uniform::cellSize
 (
     const point& pt,

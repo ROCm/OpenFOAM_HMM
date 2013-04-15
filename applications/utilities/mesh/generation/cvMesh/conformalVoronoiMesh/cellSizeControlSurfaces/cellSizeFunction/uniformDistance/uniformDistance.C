@@ -65,6 +65,52 @@ uniformDistance::uniformDistance
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+
+bool uniformDistance::sizeLocations
+(
+    const pointIndexHit& hitPt,
+    const vector& n,
+    pointField& shapePts,
+    scalarField& shapeSizes
+) const
+{
+    const Foam::point& pt = hitPt.hitPoint();
+
+    const scalar distanceCellSize =
+        surfaceCellSizeFunction_().interpolate(pt, hitPt.index());
+
+    if (sideMode_ == rmBothsides)
+    {
+        shapePts.resize(2);
+        shapeSizes.resize(2);
+
+        shapePts[0] = pt - n*distance_;
+        shapeSizes[0] = distanceCellSize;
+
+        shapePts[1] = pt + n*distance_;
+        shapeSizes[1] = distanceCellSize;
+    }
+    else if (sideMode_ == smInside)
+    {
+        shapePts.resize(1);
+        shapeSizes.resize(1);
+
+        shapePts[0] = pt - n*distance_;
+        shapeSizes[0] = distanceCellSize;
+    }
+    else if (sideMode_ == smOutside)
+    {
+        shapePts.resize(1);
+        shapeSizes.resize(1);
+
+        shapePts[0] = pt - n*distance_;
+        shapeSizes[0] = distanceCellSize;
+    }
+
+    return false;
+}
+
+
 bool uniformDistance::cellSize
 (
     const point& pt,

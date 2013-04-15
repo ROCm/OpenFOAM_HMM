@@ -160,6 +160,59 @@ scalar surfaceOffsetLinearDistance::sizeFunction
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+bool surfaceOffsetLinearDistance::sizeLocations
+(
+    const pointIndexHit& hitPt,
+    const vector& n,
+    pointField& shapePts,
+    scalarField& shapeSizes
+) const
+{
+    const Foam::point& pt = hitPt.hitPoint();
+
+    const scalar offsetCellSize =
+        surfaceCellSizeFunction_().interpolate(pt, hitPt.index());
+
+    if (sideMode_ == rmBothsides)
+    {
+        shapePts.resize(4);
+        shapeSizes.resize(4);
+
+        shapePts[0] = pt - n*surfaceOffset_;
+        shapeSizes[0] = offsetCellSize;
+        shapePts[1] = pt - n*totalDistance_;
+        shapeSizes[1] = distanceCellSize_;
+
+        shapePts[2] = pt + n*surfaceOffset_;
+        shapeSizes[2] = offsetCellSize;
+        shapePts[3] = pt + n*totalDistance_;
+        shapeSizes[3] = distanceCellSize_;
+    }
+    else if (sideMode_ == smInside)
+    {
+        shapePts.resize(2);
+        shapeSizes.resize(2);
+
+        shapePts[0] = pt - n*surfaceOffset_;
+        shapeSizes[0] = offsetCellSize;
+        shapePts[1] = pt - n*totalDistance_;
+        shapeSizes[1] = distanceCellSize_;
+    }
+    else if (sideMode_ == smOutside)
+    {
+        shapePts.resize(2);
+        shapeSizes.resize(2);
+
+        shapePts[0] = pt + n*surfaceOffset_;
+        shapeSizes[0] = offsetCellSize;
+        shapePts[1] = pt + n*totalDistance_;
+        shapeSizes[1] = distanceCellSize_;
+    }
+
+    return true;
+}
+
+
 bool surfaceOffsetLinearDistance::cellSize
 (
     const point& pt,

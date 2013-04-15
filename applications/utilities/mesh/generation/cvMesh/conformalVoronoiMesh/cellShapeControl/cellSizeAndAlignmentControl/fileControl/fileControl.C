@@ -162,6 +162,17 @@ Foam::fileControl::~fileControl()
 //    alignment = cellAlignment(pt);
 //}
 
+
+void Foam::fileControl::cellSizeFunctionVertices
+(
+    DynamicList<Foam::point>& pts,
+    DynamicList<scalar>& sizes
+) const
+{
+    return;
+}
+
+
 void Foam::fileControl::initialVertices
 (
     pointField& pts,

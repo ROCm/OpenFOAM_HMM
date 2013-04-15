@@ -114,6 +114,12 @@ public:
 
         // Edit
 
+        virtual void cellSizeFunctionVertices
+        (
+            DynamicList<Foam::point>& pts,
+            DynamicList<scalar>& sizes
+        ) const;
+
         virtual void initialVertices
         (
             pointField& pts,

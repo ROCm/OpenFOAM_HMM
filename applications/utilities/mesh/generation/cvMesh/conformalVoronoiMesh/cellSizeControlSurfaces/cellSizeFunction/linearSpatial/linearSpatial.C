@@ -79,7 +79,30 @@ scalar linearSpatial::sizeFunction(const point& pt) const
 }
 
 
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool linearSpatial::sizeLocations
+(
+    const pointIndexHit& hitPt,
+    const vector& n,
+    pointField& shapePts,
+    scalarField& shapeSizes
+) const
+{
+    if (sideMode_ == rmBothsides)
+    {
+    }
+    else if (sideMode_ == smInside)
+    {
+    }
+    else if (sideMode_ == smOutside)
+    {
+    }
+
+    return false;
+}
+
 
 bool linearSpatial::cellSize
 (
