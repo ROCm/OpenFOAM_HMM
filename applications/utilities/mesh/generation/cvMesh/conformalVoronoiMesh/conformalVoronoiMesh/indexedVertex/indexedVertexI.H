@@ -32,9 +32,9 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex()
 :
     Vb(),
     type_(vtUnassigned),
-    index_(vtUnassigned),
+    index_(-1),
     processor_(Foam::Pstream::myProcNo()),
-    alignment_(Foam::tensor::zero),
+    alignment_(Foam::triad::unset),
     targetCellSize_(0.0)
 {}
 
@@ -44,9 +44,9 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex(const Point& p)
 :
     Vb(p),
     type_(vtUnassigned),
-    index_(vtUnassigned),
+    index_(-1),
     processor_(Foam::Pstream::myProcNo()),
-    alignment_(Foam::tensor::zero),
+    alignment_(Foam::triad::unset),
     targetCellSize_(0.0)
 {}
 
@@ -62,7 +62,7 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex
     type_(type),
     index_(-1),
     processor_(Foam::Pstream::myProcNo()),
-    alignment_(Foam::tensor::zero),
+    alignment_(Foam::triad::unset),
     targetCellSize_(0.0)
 {}
 
@@ -78,7 +78,7 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex
     type_(type),
     index_(-1),
     processor_(Foam::Pstream::myProcNo()),
-    alignment_(Foam::tensor::zero),
+    alignment_(Foam::triad::unset),
     targetCellSize_(0.0)
 {}
 
@@ -106,9 +106,9 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex(const Point& p, Cell_handle f)
 :
     Vb(f, p),
     type_(vtUnassigned),
-    index_(vtUnassigned),
+    index_(-1),
     processor_(Foam::Pstream::myProcNo()),
-    alignment_(Foam::tensor::zero),
+    alignment_(Foam::triad::unset),
     targetCellSize_(0.0)
 {}
 
@@ -118,9 +118,9 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex(Cell_handle f)
 :
     Vb(f),
     type_(vtUnassigned),
-    index_(vtUnassigned),
+    index_(-1),
     processor_(Foam::Pstream::myProcNo()),
-    alignment_(Foam::tensor::zero),
+    alignment_(Foam::triad::unset),
     targetCellSize_(0.0)
 {}
 

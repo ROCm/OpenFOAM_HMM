@@ -40,6 +40,7 @@ SourceFiles
 #include <CGAL/Triangulation_3.h>
 #include "CGALTriangulation3DKernel.H"
 #include "tensor.H"
+#include "triad.H"
 #include "InfoProxy.H"
 #include "point.H"
 #include "indexedVertexEnum.H"
