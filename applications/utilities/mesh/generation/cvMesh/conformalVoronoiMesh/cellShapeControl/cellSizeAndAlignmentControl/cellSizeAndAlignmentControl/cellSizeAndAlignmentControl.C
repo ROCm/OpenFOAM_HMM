@@ -52,7 +52,6 @@ Foam::cellSizeAndAlignmentControl::cellSizeAndAlignmentControl
 :
     runTime_(runTime),
     defaultCellSize_(defaultCellSize),
-    name_(name),
     forceInitialPointInsertion_
     (
         controlFunctionDict.lookupOrDefault<Switch>
@@ -60,7 +59,8 @@ Foam::cellSizeAndAlignmentControl::cellSizeAndAlignmentControl
             "forceInitialPointInsertion",
             "off"
         )
-    )
+    ),
+    name_(name)
 {}
 
 
