@@ -310,24 +310,11 @@ motionControl
     // Timing and memory usage.
     timeChecks                  no;
 
-    // Number of rays in plane parallel to nearest surface. Used to detect
-    // next closest surfaces. Used to work out alignment (three vectors)
-    // to surface.
-    // Note that only the initial points (from the seeding) calculate this
-    // information so if these are not fine enough the alignment will
-    // not be correct. (any points added during the running will lookup
-    // this information from the nearest initial point since it is
-    // expensive)
-    alignmentSearchSpokes       36;
-
     // For each delaunay edge (between two vertices, becomes
     // the Voronoi face normal) snap to the alignment direction if within
     // alignmentAcceptanceAngle. Slightly > 45 is a good choice - prevents
     // flipping.
     alignmentAcceptanceAngle    48;
-
-    // How often to rebuild the alignment info (expensive)
-    sizeAndAlignmentRebuildFrequency 20;
 
     // When to insert points. Not advisable change to
     // these settings.
