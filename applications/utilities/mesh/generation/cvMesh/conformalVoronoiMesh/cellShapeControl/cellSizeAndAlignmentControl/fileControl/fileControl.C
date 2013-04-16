@@ -72,9 +72,11 @@ Foam::fileControl::fileControl
     ),
     pointsFile_(controlFunctionDict.lookup("pointsFile")),
     sizesFile_(controlFunctionDict.lookup("sizesFile")),
-    alignmentsFile_(controlFunctionDict.lookup("alignmentsFile"))
+    alignmentsFile_(controlFunctionDict.lookup("alignmentsFile")),
+    maxPriority_(readLabel(controlFunctionDict.lookup("priority")))
 {
     Info<< indent << "Loading " << name << " from file:" << nl
+        << indent << "    priority   : " << maxPriority_ << nl
         << indent << "    points     : " << pointsFile_ << nl
         << indent << "    sizes      : " << sizesFile_ << nl
         << indent << "    alignments : " << alignmentsFile_

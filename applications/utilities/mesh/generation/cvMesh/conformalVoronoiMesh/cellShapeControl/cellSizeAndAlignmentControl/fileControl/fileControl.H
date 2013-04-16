@@ -58,6 +58,8 @@ class fileControl
 
         const fileName alignmentsFile_;
 
+        label maxPriority_;
+
 
     // Private Member Functions
 
@@ -112,20 +114,25 @@ public:
 //            ) const;
 
 
+            virtual label maxPriority() const
+            {
+                return maxPriority_;
+            }
+
         // Edit
 
-        virtual void cellSizeFunctionVertices
-        (
-            DynamicList<Foam::point>& pts,
-            DynamicList<scalar>& sizes
-        ) const;
+            virtual void cellSizeFunctionVertices
+            (
+                DynamicList<Foam::point>& pts,
+                DynamicList<scalar>& sizes
+            ) const;
 
-        virtual void initialVertices
-        (
-            pointField& pts,
-            scalarField& sizes,
-            triadField& alignments
-        ) const;
+            virtual void initialVertices
+            (
+                pointField& pts,
+                scalarField& sizes,
+                triadField& alignments
+            ) const;
 };
 
 

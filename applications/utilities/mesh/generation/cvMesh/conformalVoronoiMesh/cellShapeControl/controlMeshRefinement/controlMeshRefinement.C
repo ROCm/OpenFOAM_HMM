@@ -245,6 +245,8 @@ void Foam::controlMeshRefinement::initialMeshPopulation
 //        );
     }
 
+    Map<label> priorityMap;
+
     const PtrList<cellSizeAndAlignmentControl>& controlFunctions =
         sizeControls_.controlFunctions();
 
@@ -377,13 +379,24 @@ void Foam::controlMeshRefinement::initialMeshPopulation
 
             if (forceInsertion || insertPoint)
             {
-                mesh_.insert
+                const label oldSize = mesh_.vertexCount();
+
+                cellShapeControlMesh::Vertex_handle insertedVert = mesh_.insert
                 (
                     pt,
                     calculatedCellSize,
                     vertices[vI].alignment(),
                     Vb::vtInternalNearBoundary
                 );
+
+                if (oldSize == mesh_.vertexCount() - 1)
+                {
+                    priorityMap.insert
+                    (
+                        insertedVert->index(),
+                        controlFunction.maxPriority()
+                    );
+                }
             }
         }
 
@@ -506,19 +519,53 @@ void Foam::controlMeshRefinement::initialMeshPopulation
 
             if (forceInsertion || insertPoint)
             {
-                mesh_.insert
-                (
-                    pt,
-                    calculatedCellSize,
-                    vertices[vI].alignment(),
-                    Vb::vtInternal
-                );
+                // Check the priority
+
+                cellShapeControlMesh::Cell_handle ch =
+                    mesh_.locate(toPoint<cellShapeControlMesh::Point>(pt));
+
+                const label newPtPriority = controlFunction.maxPriority();
+
+                label highestPriority = -1;
+                for (label cI = 0; cI < 4; ++cI)
+                {
+                    const label vertPriority =
+                        priorityMap[ch->vertex(cI)->index()];
+
+                    if (vertPriority > highestPriority)
+                    {
+                        highestPriority = vertPriority;
+                    }
+                }
+
+                if (newPtPriority >= highestPriority)
+                {
+                    const label oldSize = mesh_.vertexCount();
+
+                    cellShapeControlMesh::Vertex_handle insertedVert =
+                        mesh_.insert
+                        (
+                            pt,
+                            calculatedCellSize,
+                            vertices[vI].alignment(),
+                            Vb::vtInternal
+                        );
+
+                    if (oldSize == mesh_.vertexCount() - 1)
+                    {
+                        priorityMap.insert
+                        (
+                            insertedVert->index(),
+                            newPtPriority
+                        );
+                    }
+                }
             }
         }
 
        //mesh_.rangeInsertWithInfo(vertices.begin(), vertices.end());
 
-        Info<< "    Inserted "
+        Info<< "    Inserted extra points "
             << returnReduce
                (
                    label(mesh_.number_of_vertices()) - preInsertedSize,

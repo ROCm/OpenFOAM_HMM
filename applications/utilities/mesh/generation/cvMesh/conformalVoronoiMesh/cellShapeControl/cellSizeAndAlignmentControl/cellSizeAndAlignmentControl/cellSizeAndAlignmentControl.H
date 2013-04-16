@@ -156,6 +156,8 @@ public:
 
         // Query
 
+            virtual label maxPriority() const = 0;
+
             virtual void cellSizeFunctionVertices
             (
                 DynamicList<Foam::point>& pts,
