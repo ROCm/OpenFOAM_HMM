@@ -270,12 +270,19 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
         interfaceLevels_[fineLevelIndex];
 
     // Create coarse-level interfaces
+    primitiveInterfaces_.set
+    (
+        fineLevelIndex + 1,
+        new PtrList<const lduInterface>(fineInterfaces.size())
+    );
+    PtrList<const lduInterface>& coarsePrimInterfaces =
+        primitiveInterfaces_[fineLevelIndex + 1];
+
     interfaceLevels_.set
     (
         fineLevelIndex + 1,
         new lduInterfacePtrsList(fineInterfaces.size())
     );
-
     lduInterfacePtrsList& coarseInterfaces =
         interfaceLevels_[fineLevelIndex + 1];
 
@@ -317,7 +324,7 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
     {
         if (fineInterfaces.set(inti))
         {
-            coarseInterfaces.set
+            coarsePrimInterfaces.set
             (
                 inti,
                 GAMGInterface::New
@@ -336,6 +343,7 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
                 ).ptr()
             );
 
+            coarseInterfaces.set(inti, &coarsePrimInterfaces[inti]);
             coarseInterfaceAddr[inti] = coarseInterfaces[inti].faceCells();
             nPatchFaces[inti] = coarseInterfaceAddr[inti].size();
             patchFineToCoarse[inti] = refCast<const GAMGInterface>
@@ -408,13 +416,13 @@ void Foam::GAMGAgglomeration::gatherMeshes
         // Combine all addressing
         // ~~~~~~~~~~~~~~~~~~~~~~
 
-        Pout<< "Own Mesh " << myMesh.lduAddr().size() << endl;
-        forAll(otherMeshes, i)
-        {
-            Pout<< "    otherMesh " << i << " "
-                << otherMeshes[i].lduAddr().size()
-                << endl;
-        }
+        //Pout<< "Own Mesh " << myMesh.lduAddr().size() << endl;
+        //forAll(otherMeshes, i)
+        //{
+        //    Pout<< "    otherMesh " << i << " "
+        //        << otherMeshes[i].lduAddr().size()
+        //        << endl;
+        //}
 
         labelList procFaceOffsets;
 
@@ -437,7 +445,7 @@ void Foam::GAMGAgglomeration::gatherMeshes
             )
         );
 
-        Pout<< "** Agglomerated Mesh " << allMesh().info();
+        //Pout<< "** Agglomerated Mesh " << allMesh().info();
     }
 
     UPstream::warnComm = oldWarn;
@@ -459,7 +467,6 @@ void Foam::GAMGAgglomeration::procAgglomerateLduAddressing
         << " havefinemesh:" << meshLevels_.set(levelIndex-1) << endl;
 
     const lduMesh& myMesh = meshLevels_[levelIndex-1];
-    //label meshComm = myMesh.comm();
 
     Pout<< "my mesh                     :" << myMesh.info();
     Pout<< "nCoarseCells                :" << nCells_[levelIndex] << endl;
@@ -510,8 +517,6 @@ void Foam::GAMGAgglomeration::procAgglomerateLduAddressing
     // These could only be set on the master procs but it is
     // quite convenient to also have them on the slaves
     procCellOffsets_.set(levelIndex, new labelList(0));
-    //procRestrictAddressing_.set(levelIndex, new labelField(0));
-    //procFaceRestrictAddressing_.set(levelIndex, new labelList(0));
     procFaceMap_.set(levelIndex, new labelListList(0));
     procBoundaryMap_.set(levelIndex, new labelListList(0));
     procBoundaryFaceMap_.set(levelIndex, new labelListListList(0));
@@ -575,46 +580,16 @@ void Foam::GAMGAgglomeration::procAgglomerateLduAddressing
     }
     else
     {
-        const lduPrimitiveMesh& levelMesh = meshLevels_[levelIndex-1];
-
-        Pout<< "** DONE GAMGAgglomeration:procAgglomerateLduAddressing **"
-            << endl;
-        Pout<< "my mesh:" << levelMesh.info();
-        Pout<< "nCoarseCells:" << nCells_[levelIndex] << endl;
-        Pout<< "restrictAddressing_:" << restrictAddressing_[levelIndex].size()
-            << " max:" << max(restrictAddressing_[levelIndex]) << endl;
-        //Pout<< "faceRestrictAddressing_:"
-        //    << faceRestrictAddressing_[levelIndex].size()
-        //    << " max:" << max(faceRestrictAddressing_[levelIndex]) << endl;
-        //Pout<< "patchFaceRestrictAddressing_:" << endl;
-        //forAll(patchFaceRestrictAddressing_[levelIndex], patchI)
-        //{
-        //    const labelList& map =
-        //        patchFaceRestrictAddressing_[levelIndex][patchI];
-        //
-        //    if (map.size())
-        //    {
-        //        Pout<< "    patch:" << patchI
-        //            << " size:" << map.size()
-        //            << " max:" << max(map)
-        //            << endl;
-        //    }
-        //}
-        //Pout<< "interfaceLevels_:" << endl;
-        //forAll(interfaceLevels_[levelIndex], patchI)
-        //{
-        //    if (interfaceLevels_[levelIndex].set(patchI))
-        //    {
-        //        Pout<< "    patch:" << patchI
-        //            << " interface:"
-        //            << interfaceLevels_[levelIndex][patchI].type()
-        //            << " size:"
-        //            << interfaceLevels_[levelIndex][patchI].faceCells().size()
-        //            << endl;
-        //    }
-        //}
-        Pout<< "** DONE GAMGAgglomeration:procAgglomerateLduAddressing **"
-            << endl;
+        //const lduPrimitiveMesh& levelMesh = meshLevels_[levelIndex-1];
+        //Pout<< "** DONE GAMGAgglomeration:procAgglomerateLduAddressing **"
+        //    << endl;
+        //Pout<< "my mesh:" << levelMesh.info();
+        //Pout<< "nCoarseCells:" << nCells_[levelIndex] << endl;
+        //Pout<< "restrictAddressing_:"
+        //    << restrictAddressing_[levelIndex].size()
+        //    << " max:" << max(restrictAddressing_[levelIndex]) << endl;
+        //Pout<< "** DONE GAMGAgglomeration:procAgglomerateLduAddressing **"
+        //    << endl;
     }
 
     UPstream::warnComm = oldWarn;
@@ -628,14 +603,15 @@ void Foam::GAMGAgglomeration::procAgglomerateRestrictAddressing
     const label levelIndex
 )
 {
-    Pout<< "** GAMGAgglomeration:procAgglomerateRestrictAddressing **" << endl;
-    Pout<< "level:" << levelIndex << endl;
-    Pout<< "procIDs:" << procIDs << endl;
-    Pout<< "myProcNo:" << UPstream::myProcNo(comm) << endl;
+    //Pout<< "** GAMGAgglomeration:procAgglomerateRestrictAddressing **"
+    //    << endl;
+    //Pout<< "level:" << levelIndex << endl;
+    //Pout<< "procIDs:" << procIDs << endl;
+    //Pout<< "myProcNo:" << UPstream::myProcNo(comm) << endl;
     //Pout<< "procCellOffsets_:" << procCellOffsets_[levelIndex] << endl;
 
     //const lduMesh& levelMesh = meshLevel(levelIndex);
-    Pout<< "fine:" << restrictAddressing_[levelIndex].size() << endl;
+    //Pout<< "fine:" << restrictAddressing_[levelIndex].size() << endl;
 
     // Collect number of cells
     labelList nFineCells;
@@ -648,7 +624,7 @@ void Foam::GAMGAgglomeration::procAgglomerateRestrictAddressing
     );
     //const labelList& offsets = procCellOffsets_[levelIndex];
     //Pout<< "offsets:" << offsets << endl;
-    Pout<< "nFineCells:" << nFineCells << endl;
+    //Pout<< "nFineCells:" << nFineCells << endl;
 
     labelList offsets(nFineCells.size()+1);
     {
@@ -658,10 +634,10 @@ void Foam::GAMGAgglomeration::procAgglomerateRestrictAddressing
             offsets[i+1] = offsets[i] + nFineCells[i];
         }
     }
-    Pout<< "offsets:" << offsets << endl;
+    //Pout<< "offsets:" << offsets << endl;
 
     // Combine and renumber nCoarseCells
-    Pout<< "Starting nCells_ ..." << endl;
+    //Pout<< "Starting nCells_ ..." << endl;
     labelList nCoarseCells;
     gatherList
     (
@@ -672,7 +648,7 @@ void Foam::GAMGAgglomeration::procAgglomerateRestrictAddressing
     );
 
     // (cell)restrictAddressing
-    Pout<< "Starting restrictAddressing_ ..." << endl;
+    //Pout<< "Starting restrictAddressing_ ..." << endl;
     const globalIndex cellOffsetter(offsets);
 
     labelList procRestrictAddressing;
@@ -695,12 +671,13 @@ void Foam::GAMGAgglomeration::procAgglomerateRestrictAddressing
                 coarseCellOffsets[i+1] = coarseCellOffsets[i]+nCoarseCells[i];
             }
         }
-        label nOldCoarseCells = nCells_[levelIndex];
+        //label nOldCoarseCells = nCells_[levelIndex];
 
         nCells_[levelIndex] = coarseCellOffsets.last();
-        Pout<< "Finished nCoarseCells_ ..."
-            << " was:" << nOldCoarseCells
-            << " now:" << nCells_[levelIndex] << endl;
+
+        //Pout<< "Finished nCoarseCells_ ..."
+        //    << " was:" << nOldCoarseCells
+        //    << " now:" << nCells_[levelIndex] << endl;
 
 
         // Renumber consecutively
@@ -718,17 +695,17 @@ void Foam::GAMGAgglomeration::procAgglomerateRestrictAddressing
             }
         }
 
-        Pout<< "coarseCellOffsets:" << coarseCellOffsets << endl;
+        //Pout<< "coarseCellOffsets:" << coarseCellOffsets << endl;
         restrictAddressing_[levelIndex].transfer(procRestrictAddressing);
-        Pout<< "restrictAddressing_:"
-            << restrictAddressing_[levelIndex].size()
-            << " min:" << min(restrictAddressing_[levelIndex])
-            << " max:" << max(restrictAddressing_[levelIndex])
-            << endl;
-        Pout<< "Finished restrictAddressing_ ..." << endl;
+        //Pout<< "restrictAddressing_:"
+        //    << restrictAddressing_[levelIndex].size()
+        //    << " min:" << min(restrictAddressing_[levelIndex])
+        //    << " max:" << max(restrictAddressing_[levelIndex])
+        //    << endl;
+        //Pout<< "Finished restrictAddressing_ ..." << endl;
     }
-    Pout<< "** DONE GAMGAgglomeration:procAgglomerateRestrictAddressing **"
-        << endl;
+    //Pout<< "** DONE GAMGAgglomeration:procAgglomerateRestrictAddressing **"
+    //    << endl;
 }
 
 
@@ -775,6 +752,57 @@ void Foam::GAMGAgglomeration::procAgglomerateRestrictAddressing
 //        );
 //    }
 //}
+
+
+void Foam::GAMGAgglomeration::calculateRegionMaster
+(
+    const label comm,
+    const labelList& procAgglomMap,
+    labelList& masterProcs,
+    List<int>& agglomProcIDs
+)
+{
+    // Determine the master processors
+    Map<label> agglomToMaster(procAgglomMap.size());
+
+    forAll(procAgglomMap, procI)
+    {
+        label coarseI = procAgglomMap[procI];
+
+        Map<label>::iterator fnd = agglomToMaster.find(coarseI);
+        if (fnd == agglomToMaster.end())
+        {
+            agglomToMaster.insert(coarseI, procI);
+        }
+        else
+        {
+            fnd() = min(fnd(), procI);
+        }
+    }
+
+    masterProcs.setSize(agglomToMaster.size());
+    forAllConstIter(Map<label>, agglomToMaster, iter)
+    {
+        masterProcs[iter.key()] = iter();
+    }
+
+
+    // Collect all the processors in my agglomeration
+    label myProcID = Pstream::myProcNo(comm);
+    label myAgglom = procAgglomMap[myProcID];
+
+    // Get all processors agglomerating to the same coarse
+    // processor
+    agglomProcIDs = findIndices(procAgglomMap, myAgglom);
+    // Make sure the master is the first element.
+    label index = findIndex
+    (
+        agglomProcIDs,
+        agglomToMaster[myAgglom]
+    );
+    Swap(agglomProcIDs[0], agglomProcIDs[index]);
+}
+
 
 
 // ************************************************************************* //

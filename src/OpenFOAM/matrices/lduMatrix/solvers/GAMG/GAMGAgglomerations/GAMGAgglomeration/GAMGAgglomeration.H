@@ -62,8 +62,7 @@ class GAMGAgglomeration
 :
     public MeshObject<lduMesh, GAMGAgglomeration>
 {
-//protected:
-public:
+protected:
 
     // Protected data types
 
@@ -85,6 +84,7 @@ public:
 
         //- Whether to agglomerate across processors
         const bool processorAgglomerate_;
+
 
         //- The number of cells in each level
         labelList nCells_;
@@ -122,8 +122,10 @@ public:
         //- Hierarchy of mesh addressing
         PtrList<lduPrimitiveMesh> meshLevels_;
 
-        //- Hierarchy interfaces.
-        //  Warning: Needs to be deleted explicitly.
+        //- Hierarchy of interfaces
+        PtrList<PtrList<const lduInterface> > primitiveInterfaces_;
+
+        //- Hierarchy of interfaces in lduInterfacePtrsList form
         PtrList<lduInterfacePtrsList> interfaceLevels_;
 
 
@@ -135,13 +137,6 @@ public:
             //- Per level the set of processors to agglomerate. Element 0 is
             //  the 'master' of the cluster.
             mutable PtrList<labelList> agglomProcIDs_;
-
-            //- Combined mesh for all processors
-            //mutable PtrList<lduPrimitiveMesh> procMeshLevels_;
-
-            //mutable PtrList<labelField> procRestrictAddressing_;
-
-            //mutable PtrList<labelList> procFaceRestrictAddressing_;
 
             //- Communicator for given level
             mutable labelList procCommunicator_;
@@ -184,17 +179,6 @@ public:
             labelListList& procBoundaryMap,
             labelListListList& procBoundaryFaceMap
         );
-
-        ////- Gather value from all procIDs onto procIDs[0]
-        //static void gatherList
-        //(
-        //    const label comm,
-        //    const labelList& procIDs,
-        //
-        //    const label myVal,
-        //    labelList& vals,
-        //    const int tag = Pstream::msgType()
-        //);
 
         //- Gather value from all procIDs onto procIDs[0]
         template<class Type>
@@ -420,7 +404,18 @@ public:
                 return processorAgglomerate_;
             }
 
-
+            //- Given fine to coarse processor map determine:
+            //  - for each coarse processor a master (minimum of the fine
+            //    processors)
+            //  - for each coarse processor the set of fine processors
+            //    (element 0 is the master processor)
+            static void calculateRegionMaster
+            (
+                const label comm,
+                const labelList& procAgglomMap,
+                labelList& masterProcs,
+                List<int>& agglomProcIDs
+            );
 
             template<class Type>
             static void mapField
@@ -488,18 +483,14 @@ public:
             const labelList& procAgglomMap(const label fineLeveli) const;
 
             //- Set of processors to agglomerate. Element 0 is the
-            //  master processor. (local, same only on those processor that
+            //  master processor. (local, same only on those processors that
             //  agglomerate)
             const labelList& agglomProcIDs(const label fineLeveli) const;
 
             //- Check that level has combined mesh
             bool hasProcMesh(const label fineLeveli) const;
 
-            //- Combined mesh
-            //const lduMesh& procMeshLevel(const label leveli) const;
-
-            //- Communicator for procMesh (stored separately so also works
-            //  even if no mesh is stored on this processor)
+            //- Communicator for current level or -1
             label procCommunicator(const label fineLeveli) const;
 
             //- Mapping from processor to procMesh cells

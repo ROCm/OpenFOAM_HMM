@@ -78,21 +78,12 @@ Foam::GAMGSolver::GAMGSolver
     agglomeration_(GAMGAgglomeration::New(matrix_, controlDict_)),
 
     matrixLevels_(agglomeration_.size()),
-    interfaceLevels_(agglomeration_.size()),
     primitiveInterfaceLevels_(agglomeration_.size()),
+    interfaceLevels_(agglomeration_.size()),
     interfaceLevelsBouCoeffs_(agglomeration_.size()),
     interfaceLevelsIntCoeffs_(agglomeration_.size())
 {
     readControls();
-
-    //if (agglomeration_.processorAgglomerate())
-    //{
-    //    procMatrixLevels_.setSize(agglomeration_.size());
-    //    procInterfaceLevels_.setSize(agglomeration_.size());
-    //    procPrimitiveInterfaces_.setSize(agglomeration_.size());
-    //    procInterfaceLevelsBouCoeffs_.setSize(agglomeration_.size());
-    //    procInterfaceLevelsIntCoeffs_.setSize(agglomeration_.size());
-    //}
 
     if (agglomeration_.processorAgglomerate())
     {
@@ -105,15 +96,9 @@ Foam::GAMGSolver::GAMGSolver
 
                 if
                 (
-                    //   !agglomeration_.hasMeshLevel(fineLevelIndex+1)
-                    //||  (
-                    //        agglomeration_.nCells(fineLevelIndex)
-                    //     != agglomeration_.meshLevel(fineLevelIndex+1).
-                    //            lduAddr().size()
-                    //    )
-
-                    (fineLevelIndex+1) < agglomeration_.procBoundaryMap_.size()
-                 && agglomeration_.procBoundaryMap_.set(fineLevelIndex+1)
+                    (fineLevelIndex+1) < agglomeration_.size()
+                 //&& agglomeration_.procBoundaryMap_.set(fineLevelIndex+1)
+                 && agglomeration_.hasProcMesh(fineLevelIndex+1)
                 )
                 {
                     Pout<< "Level:" << fineLevelIndex
@@ -291,29 +276,33 @@ Foam::GAMGSolver::GAMGSolver
             Pout<< "GAMGSolver :"
                 << " coarsestLevel:" << coarsestLevel << endl;
 
-            const lduMesh& coarsestMesh = matrixLevels_[coarsestLevel].mesh();
+            if (matrixLevels_.set(coarsestLevel))
+            {
+                const lduMesh& coarsestMesh =
+                    matrixLevels_[coarsestLevel].mesh();
 
-            label coarseComm = coarsestMesh.comm();
-            label oldWarn = UPstream::warnComm;
-            UPstream::warnComm = coarseComm;
+                label coarseComm = coarsestMesh.comm();
+                label oldWarn = UPstream::warnComm;
+                UPstream::warnComm = coarseComm;
 
-            Pout<< "Solve direct on coasestmesh (level=" << coarsestLevel
-                << ") using communicator " << coarseComm << endl;
+                Pout<< "Solve direct on coasestmesh (level=" << coarsestLevel
+                    << ") using communicator " << coarseComm << endl;
 
-            coarsestLUMatrixPtr_.set
-            (
-                new LUscalarMatrix
+                coarsestLUMatrixPtr_.set
                 (
-                    matrixLevels_[coarsestLevel],
-                    interfaceLevelsBouCoeffs_[coarsestLevel],
-                    interfaceLevels_[coarsestLevel]
-                )
-            );
+                    new LUscalarMatrix
+                    (
+                        matrixLevels_[coarsestLevel],
+                        interfaceLevelsBouCoeffs_[coarsestLevel],
+                        interfaceLevels_[coarsestLevel]
+                    )
+                );
 
-            UPstream::warnComm = oldWarn;
+                UPstream::warnComm = oldWarn;
+            }
         }
-        else if (agglomeration_.processorAgglomerate())
-        {
+        //else if (agglomeration_.processorAgglomerate())
+        //{
             //// Pick a level to processor agglomerate
             //label agglomLevel = matrixLevels_.size() - 1;//1;
             //
@@ -424,7 +413,7 @@ Foam::GAMGSolver::GAMGSolver
             //
             //
             //UPstream::warnComm = oldWarn;
-        }
+        //}
     }
     else
     {

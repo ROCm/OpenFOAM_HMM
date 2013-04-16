@@ -81,6 +81,13 @@ class lduPrimitiveMesh
         //- Get size of all meshes
         static label size(const PtrList<lduMesh>&);
 
+        static labelList upperTriOrder
+        (
+            const label nCells,
+            const labelUList& lower,
+            const labelUList& upper
+        );
+
         //- Check if in upper-triangular ordering
         static void checkUpperTriangular
         (
@@ -127,6 +134,18 @@ public:
             const lduSchedule& ps,
             const label comm,
             bool reUse
+        );
+
+        //- Construct from components and re-use storage.
+        lduPrimitiveMesh
+        (
+            const label nCells,
+            labelList& l,
+            labelList& u,
+            labelListList& pa,
+            const Xfer<PtrList<const lduInterface> >& primitiveInterfaces,
+            const lduSchedule& ps,
+            const label comm
         );
 
         //- Construct by combining multiple meshes. The meshes come from

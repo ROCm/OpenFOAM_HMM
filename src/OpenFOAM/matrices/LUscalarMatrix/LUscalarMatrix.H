@@ -87,6 +87,9 @@ class LUscalarMatrix
 
 public:
 
+    // Declare name of the class and its debug switch
+    ClassName("LUscalarMatrix");
+
     // Constructors
 
         //- Construct from scalarSquareMatrix and perform LU decomposition

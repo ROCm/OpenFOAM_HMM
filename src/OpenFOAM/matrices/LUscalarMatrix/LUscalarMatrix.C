@@ -29,6 +29,14 @@ License
 #include "procLduInterface.H"
 #include "cyclicLduInterface.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(LUscalarMatrix, 0);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::LUscalarMatrix::LUscalarMatrix(const scalarSquareMatrix& matrix)
@@ -134,8 +142,39 @@ Foam::LUscalarMatrix::LUscalarMatrix
         convert(ldum, interfaceCoeffs, interfaces);
     }
 
-    if (Pstream::master(comm_))
+    if (debug && Pstream::master(comm_))
     {
+        label nRows = n();
+        label nColumns = m();
+
+        Pout<< "LUscalarMatrix : size:" << nRows << endl;
+        for (label rowI = 0; rowI < nRows; rowI++)
+        {
+            const scalar* row = operator[](rowI);
+
+            Pout<< "cell:" << rowI << " diagCoeff:" << row[rowI] << endl;
+
+            Pout<< "    connects to upper cells :";
+            for (label columnI = rowI+1; columnI < nColumns; columnI++)
+            {
+                if (mag(row[columnI]) > SMALL)
+                {
+                    Pout<< ' ' << columnI << " (coeff:" << row[columnI] << ")";
+                }
+            }
+            Pout<< endl;
+            Pout<< "    connects to lower cells :";
+            for (label columnI = 0; columnI < rowI; columnI++)
+            {
+                if (mag(row[columnI]) > SMALL)
+                {
+                    Pout<< ' ' << columnI << " (coeff:" << row[columnI] << ")";
+                }
+            }
+            Pout<< endl;
+        }
+        Pout<< endl;
+
         pivotIndices_.setSize(n());
         LUDecompose(*this, pivotIndices_);
     }

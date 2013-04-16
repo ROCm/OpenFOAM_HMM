@@ -109,9 +109,6 @@ class GAMGSolver
         //- Direct or iteratively solve the coarsest level
         bool directSolveCoarsest_;
 
-        //- Agglomerate processors
-        bool processorAgglomerate_;
-
         //- The agglomeration
         const GAMGAgglomeration& agglomeration_;
 
@@ -119,10 +116,10 @@ class GAMGSolver
         PtrList<lduMatrix> matrixLevels_;
 
         //- Hierarchy of interfaces.
-        //  Warning: Needs to be deleted explicitly.
-        PtrList<lduInterfaceFieldPtrsList> interfaceLevels_;
-
         PtrList<PtrList<lduInterfaceField> > primitiveInterfaceLevels_;
+
+        //- Hierarchy of interfaces in lduInterfaceFieldPtrs form
+        PtrList<lduInterfaceFieldPtrsList> interfaceLevels_;
 
         //- Hierarchy of interface boundary coefficients
         PtrList<FieldField<Field, scalar> > interfaceLevelsBouCoeffs_;
@@ -132,15 +129,6 @@ class GAMGSolver
 
         //- LU decompsed coarsest matrix
         autoPtr<LUscalarMatrix> coarsestLUMatrixPtr_;
-
-        //// Processor matrix agglomeration
-
-            ////- Combined coarsest level matrix for all processors
-            //PtrList<lduMatrix> procMatrixLevels_;
-            //PtrList<lduInterfaceFieldPtrsList> procInterfaceLevels_;
-            //PtrList<PtrList<lduInterfaceField> > procPrimitiveInterfaces_;
-            //PtrList<FieldField<Field, scalar> > procInterfaceLevelsBouCoeffs_;
-            //PtrList<FieldField<Field, scalar> > procInterfaceLevelsIntCoeffs_;
 
 
     // Private Member Functions
@@ -184,6 +172,7 @@ class GAMGSolver
         (
             const label fineLevelIndex,
             const lduInterfacePtrsList& coarseMeshInterfaces,
+            PtrList<lduInterfaceField>& coarsePrimInterfaces,
             lduInterfaceFieldPtrsList& coarseInterfaces,
             FieldField<Field, scalar>& coarseInterfaceBouCoeffs,
             FieldField<Field, scalar>& coarseInterfaceIntCoeffs
@@ -255,7 +244,6 @@ class GAMGSolver
             scalarField& field,
             scalarField& Acf,
             const lduMatrix& A,
-            const int comm,
             const FieldField<Field, scalar>& interfaceLevelBouCoeffs,
             const lduInterfaceFieldPtrsList& interfaceLevel,
             const scalarField& source,
@@ -267,7 +255,9 @@ class GAMGSolver
         (
             PtrList<scalarField>& coarseCorrFields,
             PtrList<scalarField>& coarseSources,
-            PtrList<lduMatrix::smoother>& smoothers
+            PtrList<lduMatrix::smoother>& smoothers,
+            scalarField& scratch1,
+            scalarField& scratch2
         ) const;
 
 
@@ -280,6 +270,10 @@ class GAMGSolver
             scalarField& Apsi,
             scalarField& finestCorrection,
             scalarField& finestResidual,
+
+            scalarField& scratch1,
+            scalarField& scratch2,
+
             PtrList<scalarField>& coarseCorrFields,
             PtrList<scalarField>& coarseSources,
             const direction cmpt=0

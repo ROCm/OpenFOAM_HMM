@@ -52,6 +52,7 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
     nPatchFaces_.setSize(nCreatedLevels);
     patchFaceRestrictAddressing_.setSize(nCreatedLevels);
     meshLevels_.setSize(nCreatedLevels);
+    primitiveInterfaces_.setSize(nCreatedLevels + 1);
     interfaceLevels_.setSize(nCreatedLevels + 1);
 
     // Have procCommunicator_ always, even if not procAgglomerating
@@ -62,9 +63,6 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
             << " to " << nCreatedLevels << " levels" << endl;
         procAgglomMap_.setSize(nCreatedLevels);
         agglomProcIDs_.setSize(nCreatedLevels);
-        //procMeshLevels_.setSize(nCreatedLevels);
-        //procRestrictAddressing_.setSize(nCreatedLevels);
-        //procFaceRestrictAddressing_.setSize(nCreatedLevels);
         procCellOffsets_.setSize(nCreatedLevels);
         procFaceMap_.setSize(nCreatedLevels);
         procBoundaryMap_.setSize(nCreatedLevels);
@@ -165,60 +163,34 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
 
         // Processor restriction map: per processor the coarse processor
         labelList procAgglomMap(UPstream::nProcs(levelComm));
+        {
+            label half = (procAgglomMap.size()+1)/2;
+            for (label i = 0; i < half; i++)
+            {
+                procAgglomMap[i] = 0;
+            }
+            for (label i = half; i < procAgglomMap.size(); i++)
+            {
+                procAgglomMap[i] = 1;
+            }
+        }
+
         // Master processor
         labelList masterProcs;
         // Local processors that agglomerate. agglomProcIDs[0] is in
         // masterProc.
         List<int> agglomProcIDs;
+        calculateRegionMaster
+        (
+            levelComm,
+            procAgglomMap,
+            masterProcs,
+            agglomProcIDs
+        );
 
-        {
-            procAgglomMap[0] = 0;
-            procAgglomMap[1] = 0;
-            procAgglomMap[2] = 1;
-            //procAgglomMap[3] = 1;
-
-            // Determine the master processors
-            Map<label> agglomToMaster(procAgglomMap.size());
-
-            forAll(procAgglomMap, procI)
-            {
-                label coarseI = procAgglomMap[procI];
-
-                Map<label>::iterator fnd = agglomToMaster.find(coarseI);
-                if (fnd == agglomToMaster.end())
-                {
-                    agglomToMaster.insert(coarseI, procI);
-                }
-                else
-                {
-                    fnd() = max(fnd(), procI);
-                }
-            }
-
-            masterProcs.setSize(agglomToMaster.size());
-            forAllConstIter(Map<label>, agglomToMaster, iter)
-            {
-                masterProcs[iter.key()] = iter();
-            }
-
-
-            // Collect all the processors in my agglomeration
-            label myProcID = Pstream::myProcNo(levelComm);
-            label myAgglom = procAgglomMap[myProcID];
-
-            // Get all processors agglomerating to the same coarse
-            // processor
-            agglomProcIDs = findIndices(procAgglomMap, myAgglom);
-            // Make sure the master is the first element.
-            label index = findIndex
-            (
-                agglomProcIDs,
-                agglomToMaster[myAgglom]
-            );
-            Swap(agglomProcIDs[0], agglomProcIDs[index]);
-        }
         Pout<< "procAgglomMap:" << procAgglomMap << endl;
         Pout<< "agglomProcIDs:" << agglomProcIDs << endl;
+        Pout<< "masterProcs:" << masterProcs << endl;
 
 
         // Allocate a communicator for the processor-agglomerated matrix
@@ -258,10 +230,6 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
             {
                 Pout<< "Starting procAgglomerateRestrictAddressing level:"
                     << levelI << endl;
-
-                //procAgglomMap_.set(levelI, new labelList(procAgglomMap));
-                //agglomProcIDs_.set(levelI, new labelList(agglomProcIDs));
-                //procCommunicator_[levelI] = procAgglomComm;
 
                 procAgglomerateRestrictAddressing
                 (
@@ -335,6 +303,9 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
                             << endl;
                     }
                 }
+
+                Pout<< fineMesh.info() << endl;
+
                 Pout<< endl;
             }
             else
@@ -445,6 +416,7 @@ Foam::GAMGAgglomeration::GAMGAgglomeration
     patchFaceRestrictAddressing_(maxLevels_),
 
     meshLevels_(maxLevels_),
+    primitiveInterfaces_(maxLevels_ + 1),
     interfaceLevels_(maxLevels_ + 1)
 {
     procCommunicator_.setSize(maxLevels_ + 1, -1);
@@ -454,9 +426,6 @@ Foam::GAMGAgglomeration::GAMGAgglomeration
             << " levels" << endl;
         procAgglomMap_.setSize(maxLevels_);
         agglomProcIDs_.setSize(maxLevels_);
-        //procMeshLevels_.setSize(maxLevels_);
-        //procRestrictAddressing_.setSize(maxLevels_);
-        //procFaceRestrictAddressing_.setSize(maxLevels_);
         procCellOffsets_.setSize(maxLevels_);
         procFaceMap_.setSize(maxLevels_);
         procBoundaryMap_.setSize(maxLevels_);
@@ -573,42 +542,6 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
 
 Foam::GAMGAgglomeration::~GAMGAgglomeration()
 {
-//    // Temporary store the user-defined communicators so we can delete them
-//    labelHashSet communicators(meshLevels_.size());
-//    forAll(meshLevels_, leveli)
-//    {
-//        communicators.insert(meshLevels_[leveli].comm());
-//    }
-    //forAll(procMeshLevels_, leveli)
-    //{
-    //    if (procMeshLevels_.set(leveli))
-    //    {
-    //        communicators.insert(procMeshLevels_[leveli].comm());
-    //    }
-    //}
-
-//    Pout<< "~GAMGAgglomeration() : current communicators:" << communicators
-//        << endl;
-
-    // Clear the interface storage by hand.
-    // It is a list of ptrs not a PtrList for consistency of the interface
-    for (label leveli=1; leveli<interfaceLevels_.size(); leveli++)
-    {
-        lduInterfacePtrsList& curLevel = interfaceLevels_[leveli];
-
-        forAll(curLevel, i)
-        {
-            if (curLevel.set(i))
-            {
-                delete curLevel(i);
-            }
-        }
-    }
-
-//    forAllConstIter(labelHashSet, communicators, iter)
-//    {
-//        UPstream::freeCommunicator(iter.key());
-//    }
     forAllReverse(procCommunicator_, i)
     {
         if (procCommunicator_[i] != -1)
@@ -676,7 +609,8 @@ void Foam::GAMGAgglomeration::clearLevel(const label i)
             faceFlipMap_.set(i, NULL);
             nPatchFaces_.set(i, NULL);
             patchFaceRestrictAddressing_.set(i, NULL);
-            interfaceLevels_.set(i, NULL);  // TBD: delete storage
+            primitiveInterfaces_.set(i, NULL);
+            interfaceLevels_.set(i, NULL);
         }
     }
 }
@@ -704,13 +638,6 @@ bool Foam::GAMGAgglomeration::hasProcMesh(const label leveli) const
 {
     return procCommunicator_[leveli] != -1;
 }
-
-
-//const Foam::lduMesh& Foam::GAMGAgglomeration::procMeshLevel
-//(const label leveli) const
-//{
-//    return procMeshLevels_[leveli];
-//}
 
 
 Foam::label Foam::GAMGAgglomeration::procCommunicator(const label leveli) const
