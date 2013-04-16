@@ -372,16 +372,6 @@ public:
                 const labelList& fineToCoarse
             ) const;
 
-            ////- Restrict (integrate by summation) face field
-            //template<class Type>
-            //void restrictFaceField
-            //(
-            //    Field<Type>& cf,
-            //    const Field<Type>& ff,
-            //    const label fineLevelIndex,
-            //    const bool dummy
-            //) const;
-
             //- Prolong (interpolate by injection) cell field
             template<class Type>
             void prolongField
