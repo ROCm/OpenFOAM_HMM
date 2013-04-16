@@ -316,6 +316,10 @@ $(pairGAMGAgglomeration)/pairGAMGAgglomerationCombineLevels.C
 algebraicPairGAMGAgglomeration = $(GAMGAgglomerations)/algebraicPairGAMGAgglomeration
 $(algebraicPairGAMGAgglomeration)/algebraicPairGAMGAgglomeration.C
 
+dummyAgglomeration = $(GAMGAgglomerations)/dummyAgglomeration
+$(dummyAgglomeration)/dummyAgglomeration.C
+
+
 meshes/lduMesh/lduMesh.C
 meshes/lduMesh/lduPrimitiveMesh.C
 
