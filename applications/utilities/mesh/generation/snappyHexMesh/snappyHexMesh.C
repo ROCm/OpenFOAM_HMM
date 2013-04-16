@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,6 +47,8 @@ Description
 #include "snapParameters.H"
 #include "layerParameters.H"
 #include "vtkSetWriter.H"
+#include "faceSet.H"
+#include "motionSmoother.H"
 
 using namespace Foam;
 
@@ -672,6 +674,31 @@ int main(int argc, char *argv[])
 
         Info<< "Layers added in = "
             << timer.cpuTimeIncrement() << " s." << endl;
+    }
+
+
+    {
+        // Check final mesh
+        Info<< "Checking final mesh ..." << endl;
+        faceSet wrongFaces(mesh, "wrongFaces", mesh.nFaces()/100);
+        motionSmoother::checkMesh(false, mesh, motionDict, wrongFaces);
+        const label nErrors = returnReduce
+        (
+            wrongFaces.size(),
+            sumOp<label>()
+        );
+
+        if (nErrors > 0)
+        {
+            Info<< "Finished meshing with " << nErrors << " illegal faces"
+                << " (concave, zero area or negative cell pyramid volume)"
+                << endl;
+            wrongFaces.write();
+        }
+        else
+        {
+            Info<< "Finished meshing without any errors" << endl;
+        }
     }
 
 

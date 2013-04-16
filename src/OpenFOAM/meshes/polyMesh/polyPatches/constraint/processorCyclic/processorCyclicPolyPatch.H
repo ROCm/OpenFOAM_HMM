@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class processorCyclicPolyPatch Declaration
+                  Class processorCyclicPolyPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class processorCyclicPolyPatch
@@ -62,8 +62,6 @@ class processorCyclicPolyPatch
 
         //- Index of originating patch
         mutable label referPatchID_;
-
-    // Private member functions
 
 
 protected:
@@ -223,8 +221,7 @@ public:
 
 
     // Destructor
-
-        virtual ~processorCyclicPolyPatch();
+    virtual ~processorCyclicPolyPatch();
 
 
     // Member functions

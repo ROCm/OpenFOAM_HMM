@@ -27,6 +27,7 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "ListListOps.H"
+#include "stringListOps.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -146,7 +147,6 @@ void Foam::sampledSurfaces::sampleAndWrite
 }
 
 
-
 template<class Type>
 void Foam::sampledSurfaces::sampleAndWrite
 (
@@ -168,65 +168,52 @@ void Foam::sampledSurfaces::sampleAndWrite
 template<class GeoField>
 void Foam::sampledSurfaces::sampleAndWrite(const IOobjectList& objects)
 {
+    wordList names;
     if (loadFromFiles_)
     {
         IOobjectList fieldObjects(objects.lookupClass(GeoField::typeName));
-
-        forAll(fieldSelection_, fieldI)
-        {
-            const wordRe fieldNameRe = fieldSelection_[fieldI];
-            IOobjectList fieldIO = fieldObjects.lookupRe(fieldNameRe);
-
-            forAllConstIter(IOobjectList, fieldIO, iter)
-            {
-                const word& fieldName = iter()->name();
-
-                const GeoField fld
-                (
-                    IOobject
-                    (
-                        fieldName,
-                        mesh_.time().timeName(),
-                        mesh_,
-                        IOobject::MUST_READ
-                    ),
-                    mesh_
-                );
-
-                if ((Pstream::master()) && verbose_)
-                {
-                    Pout<< "sampleAndWrite: " << fieldName << endl;
-                }
-
-                sampleAndWrite(fld);
-            }
-        }
+        names = fieldObjects.names();
     }
     else
     {
-        forAll(fieldSelection_, fieldI)
-        {
-            const wordRe& fieldNameRe = fieldSelection_[fieldI];
+        names = mesh_.thisDb().names<GeoField>();
+    }
 
-            const wordList dbFields
+    labelList nameIDs(findStrings(fieldSelection_, names));
+
+    wordHashSet fieldNames(wordList(names, nameIDs));
+
+    forAllConstIter(wordHashSet, fieldNames, iter)
+    {
+        const word& fieldName = iter.key();
+
+        if ((Pstream::master()) && verbose_)
+        {
+            Pout<< "sampleAndWrite: " << fieldName << endl;
+        }
+
+        if (loadFromFiles_)
+        {
+            const GeoField fld
             (
-                mesh_.thisDb().foundObjectRe<GeoField>(fieldNameRe)
+                IOobject
+                (
+                    fieldName,
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::MUST_READ
+                ),
+                mesh_
             );
 
-            forAll(dbFields, i)
-            {
-                const word& fieldName = dbFields[i];
-
-                if ((Pstream::master()) && verbose_)
-                {
-                    Pout<< "sampleAndWrite: " << fieldName << endl;
-                }
-
-                sampleAndWrite
-                (
-                    mesh_.thisDb().lookupObject<GeoField>(fieldName)
-                );
-            }
+            sampleAndWrite(fld);
+        }
+        else
+        {
+            sampleAndWrite
+            (
+                mesh_.thisDb().lookupObject<GeoField>(fieldName)
+            );
         }
     }
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,14 +52,6 @@ inline const Foam::scalarListList&
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcWeights() const
 {
     return srcWeights_;
-}
-
-
-template<class SourcePatch, class TargetPatch>
-inline const Foam::labelList&
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcNonOverlap() const
-{
-    return srcNonOverlap_;
 }
 
 

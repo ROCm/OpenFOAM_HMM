@@ -176,17 +176,17 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
         forAll(fpfe, eI)
         {
             const label oldEdgeIndex = fpfe[eI];
-            const label newEdgeIndex = edgeMap[oldEdgeIndex];
 
-            if (newEdgeIndex != -1)
+            const label newFeatureEdgeIndex = edgeMap[oldEdgeIndex];
+
+            if (newFeatureEdgeIndex != -1)
             {
-                newFeatureEdges.append(newEdgeIndex);
+                newFeatureEdges.append(newFeatureEdgeIndex);
             }
         }
 
         featurePointFeatureEdges[pI].transfer(newFeatureEdges);
     }
-
 
     // Reorder the edges by classification
     List<DynamicList<label> > allEds(nEdgeTypes);
@@ -272,7 +272,6 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
 
     // Initialise sorted edge related data
     edgeDirections_ = edgeDirections/(mag(edgeDirections) + VSMALL);
-
     edgeNormals_ = edgeNormals;
     regionEdges_ = regionEdges;
 

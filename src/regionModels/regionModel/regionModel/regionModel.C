@@ -221,6 +221,7 @@ Foam::regionModels::regionModel::interRegionAMI
                     p,
                     nbrP,
                     faceAreaIntersect::tmMesh,
+                    AMIPatchToPatchInterpolation::imFaceAreaWeight,
                     flip
                 )
             );
@@ -261,6 +262,7 @@ Foam::regionModels::regionModel::interRegionAMI
                 p,
                 nbrP,
                 faceAreaIntersect::tmMesh,
+                AMIPatchToPatchInterpolation::imFaceAreaWeight,
                 flip
             )
         );
@@ -318,7 +320,7 @@ Foam::label Foam::regionModels::regionModel::nbrCoupledPatchID
         (
             "Foam::label Foam::regionModels::regionModel::nbrCoupledPatchID"
             "("
-                "const regionModel& , "
+                "const regionModel&, "
                 "const label"
             ") const"
         )
