@@ -529,6 +529,11 @@ void Foam::controlMeshRefinement::initialMeshPopulation
                 label highestPriority = -1;
                 for (label cI = 0; cI < 4; ++cI)
                 {
+                    if (mesh_.is_infinite(ch->vertex(cI)))
+                    {
+                        continue;
+                    }
+
                     const label vertPriority =
                         priorityMap[ch->vertex(cI)->index()];
 
