@@ -118,7 +118,7 @@ void Foam::shellSurfaces::setAndCheckLevels
         {
             Info<< "    level " << levels_[shellI][j]
                 << " for all cells within " << distances_[shellI][j]
-                << " meter." << endl;
+                << " metre." << endl;
         }
     }
     else

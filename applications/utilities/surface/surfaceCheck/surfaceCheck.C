@@ -435,7 +435,7 @@ int main(int argc, char *argv[])
         scalar smallDim = 1e-6 * bb.mag();
 
         Info<< "Checking for points less than 1e-6 of bounding box ("
-            << bb.span() << " meter) apart."
+            << bb.span() << " metre) apart."
             << endl;
 
         // Sort points

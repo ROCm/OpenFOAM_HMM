@@ -69,7 +69,7 @@ class blockMesh
         //- The list of curved edges
         curvedEdgeList edges_;
 
-        //- The scaling factor to convert to meters
+        //- The scaling factor to convert to metres
         scalar scaleFactor_;
 
         //- The blocks themselves (the topology) as a polyMesh
@@ -171,7 +171,7 @@ public:
                 return edges_;
             }
 
-            //- The scaling factor used to convert to meters
+            //- The scaling factor used to convert to metres
             scalar scaleFactor() const;
 
             //- The points for the entire mesh

@@ -269,7 +269,7 @@ void Foam::topoSet::writeDebug
     boundBox bb(pointField(coords, toc()), true);
 
     os  << "Set bounding box: min = "
-        << bb.min() << "    max = " << bb.max() << " meters. " << endl << endl;
+        << bb.min() << "    max = " << bb.max() << " metres. " << endl << endl;
 
     label n = 0;
 
