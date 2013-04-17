@@ -45,14 +45,6 @@ void Foam::GAMGSolver::agglomerateMatrix
         const label nCoarseFaces = agglomeration_.nFaces(fineLevelIndex);
         const label nCoarseCells = agglomeration_.nCells(fineLevelIndex);
 
-
-        Pout<< "agglomerateMatrix : I have fine mesh:"
-            << fineMatrix.mesh().lduAddr().size()
-            << " at fine level:" << fineLevelIndex
-            << " constricting to coarse cells:"
-            << nCoarseCells
-            << " coarse nFaces:" << nCoarseFaces << endl;
-
         // Set the coarse level matrix
         matrixLevels_.set
         (
@@ -307,18 +299,16 @@ void Foam::GAMGSolver::gatherMatrices
     List<List<int> >& otherRanks
 ) const
 {
-    Pout<< "GAMGSolver::gatherMatrices :"
-        << " collecting matrices on procs:" << procIDs
-        << " using comm:" << meshComm << endl;
+    if (debug)
+    {
+        Pout<< "GAMGSolver::gatherMatrices :"
+            << " collecting matrices from procs:" << procIDs
+            << " using comm:" << meshComm << endl;
+    }
 
     if (Pstream::myProcNo(meshComm) == procIDs[0])
     {
         // Master.
-
-        Pout<< "GAMGSolver::gatherMatrices :"
-            << " master:" << Pstream::myProcNo(meshComm) << endl;
-
-
         otherMats.setSize(procIDs.size()-1);
         otherBouCoeffs.setSize(procIDs.size()-1);
         otherIntCoeffs.setSize(procIDs.size()-1);
@@ -378,10 +368,6 @@ void Foam::GAMGSolver::gatherMatrices
     }
     else
     {
-        //Pout<< "GAMGSolver::gatherMatrices :"
-        //    << " sending from:" << Pstream::myProcNo(meshComm)
-        //    << " to master:" << procIDs[0] << endl;
-
         // Send to master
 
         // Count valid interfaces
@@ -401,9 +387,6 @@ void Foam::GAMGSolver::gatherMatrices
                 procRanks[intI] = interface.rank();
             }
         }
-
-        //Pout<< "GAMGSolver::gatherMatrices :"
-        //    << " sending matrix:" << mat.info() << endl;
 
         OPstream toMaster
         (
@@ -460,9 +443,6 @@ void Foam::GAMGSolver::procAgglomerateMatrix
     UPstream::warnComm = coarseComm;
 
 
-    // Construct (on the agglomeration) a complete mesh with mapping
-    Pout<< "procAgglomerateMatrix :" << " level:" << levelI << endl;
-
 
     // Gather all matrix coefficients onto agglomProcIDs[0]
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -496,26 +476,23 @@ void Foam::GAMGSolver::procAgglomerateMatrix
         // Agglomerate all matrix
         // ~~~~~~~~~~~~~~~~~~~~~~
 
-        Pout<< "Own matrix:" << coarsestMatrix.info() << endl;
+        //Pout<< "Own matrix:" << coarsestMatrix.info() << endl;
+        //
+        //forAll(otherMats, i)
+        //{
+        //    Pout<< "** otherMats " << i << " "
+        //        << otherMats[i].info()
+        //        << endl;
+        //}
+        //Pout<< endl;
 
-        forAll(otherMats, i)
-        {
-            Pout<< "** otherMats " << i << " "
-                << otherMats[i].info()
-                << endl;
-        }
-        Pout<< endl;
 
-
-        //const lduMesh& allMesh = agglomeration_.procMeshLevel(levelI);
         const lduMesh& allMesh = agglomeration_.meshLevel(levelI+1);
         const labelList& cellOffsets = agglomeration_.cellOffsets(levelI+1);
         const labelListList& faceMap = agglomeration_.faceMap(levelI+1);
         const labelListList& boundaryMap = agglomeration_.boundaryMap(levelI+1);
         const labelListListList& boundaryFaceMap =
             agglomeration_.boundaryFaceMap(levelI+1);
-
-Pout<< "Agglomerating onto mesh:" << allMesh.info() << endl;
 
         allMatrixPtr.reset(new lduMatrix(allMesh));
         lduMatrix& allMatrix = allMatrixPtr();
@@ -679,10 +656,6 @@ Pout<< "Agglomerating onto mesh:" << allMesh.info() << endl;
 
                     const labelList& map = boundaryFaceMap[procI][procIntI];
 
-                    //Pout<< "    from proc:" << procI
-                    //<< " interface:" << procIntI
-                    //<< " mapped to faces:" << map << endl;
-
                     const scalarField& procBou = procBouCoeffs[procIntI];
                     const scalarField& procInt = procIntCoeffs[procIntI];
 
@@ -703,11 +676,6 @@ Pout<< "Agglomerating onto mesh:" << allMesh.info() << endl;
                     // Boundary has become internal face
 
                     const labelList& map = boundaryFaceMap[procI][procIntI];
-
-                    //const labelList& allU = allMesh.lduAddr().upperAddr();
-                    //const labelList& allL = allMesh.lduAddr().lowerAddr();
-                    //const label off = cellOffsets[procI];
-
                     const scalarField& procBou = procBouCoeffs[procIntI];
                     const scalarField& procInt = procIntCoeffs[procIntI];
 
@@ -740,72 +708,35 @@ Pout<< "Agglomerating onto mesh:" << allMesh.info() << endl;
                                 allMatrix.lower()[allFaceI] = -procBou[i];
                             }
                         }
-
-
-                        //// Simple check
-                        //label allFaceI =
-                        //(
-                        //    map[i] >= 0
-                        //  ? map[i]
-                        //  : -map[i]-1
-                        //);
-                        //
-                        //const labelList& fCells =
-                        //    lduPrimitiveMesh::mesh
-                        //    (
-                        //        coarsestMesh,
-                        //        agglomeration_.otherMeshes(),
-                        //        procI
-                        //    ).lduAddr().patchAddr(procIntI);
-                        //
-                        //label allCellI = off + fCells[i];
-                        //
-                        //if
-                        //(
-                        //    allCellI != allL[allFaceI]
-                        // && allCellI != allU[allFaceI]
-                        //)
-                        //{
-                        //    FatalErrorIn
-                        //    (
-                        //        "GAMGSolver::GAMGSolver()"
-                        //    )   << "problem."
-                        //        << " allFaceI:" << allFaceI
-                        //        << " local cellI:" << fCells[i]
-                        //        << " allCellI:" << allCellI
-                        //        << " allLower:" << allL[allFaceI]
-                        //        << " allUpper:" << allU[allFaceI]
-                        //        << abort(FatalError);
-                        //}
                     }
                 }
             }
         }
 
-        Pout<< "** Assembled allMatrix:" << allMatrix.info() << endl;
-
-        forAll(allInterfaces, intI)
-        {
-            if (allInterfaces.set(intI))
-            {
-                Pout<< "    patch:" << intI
-                    << " type:" << allInterfaces[intI].type()
-                    << " size:"
-                    << allInterfaces[intI].interface().
-                        faceCells().size()
-                    << endl;
-
-                //const scalarField& bouCoeffs = allInterfaceBouCoeffs[intI];
-                //const scalarField& intCoeffs = allInterfaceIntCoeffs[intI];
-                //forAll(bouCoeffs, faceI)
-                //{
-                //    Pout<< "        " << faceI
-                //        << "\tbou:" << bouCoeffs[faceI]
-                //        << "\tint:" << intCoeffs[faceI]
-                //        << endl;
-                //}
-            }
-        }
+        //Pout<< "** Assembled allMatrix:" << allMatrix.info() << endl;
+        //
+        //forAll(allInterfaces, intI)
+        //{
+        //    if (allInterfaces.set(intI))
+        //    {
+        //        Pout<< "    patch:" << intI
+        //            << " type:" << allInterfaces[intI].type()
+        //            << " size:"
+        //            << allInterfaces[intI].interface().
+        //                faceCells().size()
+        //            << endl;
+        //
+        //        //const scalarField& bouCoeffs = allInterfaceBouCoeffs[intI];
+        //        //const scalarField& intCoeffs = allInterfaceIntCoeffs[intI];
+        //        //forAll(bouCoeffs, faceI)
+        //        //{
+        //        //    Pout<< "        " << faceI
+        //        //        << "\tbou:" << bouCoeffs[faceI]
+        //        //        << "\tint:" << intCoeffs[faceI]
+        //        //        << endl;
+        //        //}
+        //    }
+        //}
     }
     UPstream::warnComm = oldWarn;
 }

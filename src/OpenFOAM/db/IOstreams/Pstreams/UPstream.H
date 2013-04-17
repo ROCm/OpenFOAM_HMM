@@ -384,12 +384,6 @@ public:
 
             static void freeTag(const word&, const int tag);
 
-//            //- Return (index of) request to use in calls to nonblocking ops
-//            static label allocateRequest(const word&);
-//
-//            //- Free (index of) request
-//            static void freeRequest(const word&, const label request);
-
 
         //- Is this a parallel run?
         static bool& parRun()
@@ -425,13 +419,6 @@ public:
         {
             return parentCommunicator_(communicator);
         }
-
-//        //- Process IDs
-//        static const List<int>& procIDs()
-//        {
-//            return procIDs_;
-//        }
-
 
         //- Process ID of given process index
         static List<int>& procID(int communicator)

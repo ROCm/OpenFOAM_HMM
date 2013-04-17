@@ -257,10 +257,13 @@ Foam::label Foam::UPstream::allocateCommunicator
         treeCommunication_.append(List<commsStruct>(0));
     }
 
-    Pout<< "Communicators : Allocating communicator " << index << endl
-        << "    parent : " << parentIndex << endl
-        << "    procs  : " << subRanks << endl
-        << endl;
+    if (debug)
+    {
+        Pout<< "Communicators : Allocating communicator " << index << endl
+            << "    parent : " << parentIndex << endl
+            << "    procs  : " << subRanks << endl
+            << endl;
+    }
 
     // Initialise; overwritten by allocatePstreamCommunicator
     myProcNo_[index] = 0;
@@ -305,10 +308,13 @@ void Foam::UPstream::freeCommunicator
     const bool doPstream
 )
 {
-    Pout<< "Communicators : Freeing communicator " << communicator << endl
-        << "    parent   : " << parentCommunicator_[communicator] << endl
-        << "    myProcNo : " << myProcNo_[communicator] << endl
-        << endl;
+    if (debug)
+    {
+        Pout<< "Communicators : Freeing communicator " << communicator << endl
+            << "    parent   : " << parentCommunicator_[communicator] << endl
+            << "    myProcNo : " << myProcNo_[communicator] << endl
+            << endl;
+    }
 
     if (doPstream && parRun())
     {
@@ -326,9 +332,6 @@ void Foam::UPstream::freeCommunicator
 
 void Foam::UPstream::freeCommunicators(const bool doPstream)
 {
-    Pout<< "Communicators : Freeing all communicators" << endl
-        << endl;
-
     forAll(myProcNo_, communicator)
     {
         if (myProcNo_[communicator] != -1)

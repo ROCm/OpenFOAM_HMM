@@ -327,10 +327,6 @@ void Foam::UPstream::allocatePstreamCommunicator
     {
         // Allocate world communicator
 
-        //std::cout
-        //    << "MPI : Allocating world communicator at index " << index
-        //    << std::endl;
-
         if (index != UPstream::worldComm)
         {
             FatalErrorIn
@@ -359,16 +355,6 @@ void Foam::UPstream::allocatePstreamCommunicator
     }
     else
     {
-        std::cout
-            << "MPI : Allocating new communicator at index " << index
-            << " from parent " << parentIndex
-            << std::endl;
-        for (label i=0; i < procIDs_[index].size(); i++)
-        {
-            std::cout<< "    " << i << " rank:" << procIDs_[index][i]
-                << std::endl;
-        }
-
         // Create new group
         MPI_Group_incl
         (
@@ -378,11 +364,6 @@ void Foam::UPstream::allocatePstreamCommunicator
            &PstreamGlobals::MPIGroups_[index]
         );
  
-       //std::cout
-       //     << "MPI : New group " << long(PstreamGlobals::MPIGroups_[index])
-       //     << std::endl;
-
-
         // Create new communicator
         MPI_Comm_create
         (
@@ -393,17 +374,10 @@ void Foam::UPstream::allocatePstreamCommunicator
 
         if (PstreamGlobals::MPICommunicators_[index] == MPI_COMM_NULL)
         {
-            //std::cout
-            //     << "MPI : NULL : not in group"
-            //    << std::endl;
             myProcNo_[index] = -1;
         }
         else
         {
-            std::cout
-                << "MPI : New comm "
-                << long(PstreamGlobals::MPICommunicators_[index])
-                << std::endl;
             if
             (
                 MPI_Comm_rank
@@ -429,9 +403,6 @@ void Foam::UPstream::allocatePstreamCommunicator
             }
         }
     }
-
-    std::cout<< "MPI : in communicator " << index
-        << " I am rank " << myProcNo_[index] << std::endl;
 }
 
 
@@ -681,64 +652,6 @@ void Foam::UPstream::freeTag(const word& s, const int tag)
     }
     PstreamGlobals::freedTags_.append(tag);
 }
-
-
-//Foam::label Foam::UPstream::allocateRequest(const word& s)
-//{
-//    label request;
-//    if (PstreamGlobals::freedRequests_.size())
-//    {
-//        request = PstreamGlobals::freedRequests_.remove();
-//    }
-//    else
-//    {
-//        request = PstreamGlobals::outstandingRequests_.size();
-//
-//        // Make sure outstanding requests table can hold this
-//        PstreamGlobals::outstandingRequests_.reserve(request);
-//    }
-//
-//    if (debug)
-//    {
-//        //if (UPstream::lateBlocking > 0)
-//        //{
-//        //    string& poutp = Pout.prefix();
-//        //    poutp[poutp.size()-(UPstream::lateBlocking+2)+request] = 'X';
-//        //    Perr.prefix() = Pout.prefix();
-//        //}
-//        Pout<< "UPstream::allocateRequest " << s
-//            << " : request:" << request
-//            << " out of:" << PstreamGlobals::outstandingRequests_.size()
-//            << " capacity:" << PstreamGlobals::outstandingRequests_.capacity()
-//            << endl;
-//    }
-//
-//    return request;
-//}
-//
-//
-//void Foam::UPstream::freeRequest(const word& s, const label index)
-//{
-//    if (PstreamGlobals::outstandingRequests_(index) != MPI_REQUEST_NULL)
-//    {
-//        PstreamGlobals::outstandingRequests_(index) = MPI_REQUEST_NULL;
-//        PstreamGlobals::freedRequests_.append(index);
-//
-//        if (debug)
-//        {
-//            //if (UPstream::lateBlocking > 0)
-//            //{
-//            //    string& poutp = Pout.prefix();
-//            //    poutp[poutp.size()-(UPstream::lateBlocking+2)+index] = ' ';
-//            //    Perr.prefix() = Pout.prefix();
-//            //}
-//            Pout<< "UPstream::freeRequest " << s
-//                << " : request:" << index
-//                << " now nullRequest:"
-//                << long(PstreamGlobals::outstandingRequests_(index)) << endl;
-//        }
-//    }
-//}
 
 
 // ************************************************************************* //

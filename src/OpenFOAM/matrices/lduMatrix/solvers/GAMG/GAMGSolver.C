@@ -91,19 +91,12 @@ Foam::GAMGSolver::GAMGSolver
         {
             if (agglomeration_.hasMeshLevel(fineLevelIndex))
             {
-                Pout<< "Level:" << fineLevelIndex
-                    << " agglomerating matrix." << endl;
-
                 if
                 (
                     (fineLevelIndex+1) < agglomeration_.size()
-                 //&& agglomeration_.procBoundaryMap_.set(fineLevelIndex+1)
                  && agglomeration_.hasProcMesh(fineLevelIndex+1)
                 )
                 {
-                    Pout<< "Level:" << fineLevelIndex
-                        << " agglomerating onto dummy coarse mesh." << endl;
-
                     // Construct matrix without referencing the coarse mesh so
                     // construct a dummy mesh instead. This will get overwritten
                     // by the call to procAgglomerateMatrix so is only to get
@@ -174,36 +167,21 @@ Foam::GAMGSolver::GAMGSolver
                     const List<int>& procIDs =
                         agglomeration_.agglomProcIDs(fineLevelIndex+1);
 
-                    Pout<< "Level:" << fineLevelIndex
-                        << " agglomerating onto procIDs:" << procIDs << endl;
-
                     procAgglomerateMatrix
                     (
                         procAgglomMap,
                         procIDs,
                         fineLevelIndex
                     );
-
-                    Pout<< "Level:" << fineLevelIndex
-                        << " DONE agglomerating onto procIDs:" << procIDs
-                        << endl;
                 }
                 else
                 {
-                    Pout<< "Level:" << fineLevelIndex
-                        << " agglomerating onto coarse mesh at level "
-                        << fineLevelIndex + 1 << endl;
-
                     agglomerateMatrix
                     (
                         fineLevelIndex,
                         agglomeration_.meshLevel(fineLevelIndex + 1),
                         agglomeration_.interfaceLevel(fineLevelIndex + 1)
                     );
-                    Pout<< "Level:" << fineLevelIndex
-                        << " DONE agglomerating onto coarse mesh at level "
-                        << fineLevelIndex + 1 << endl;
-
                 }
             }
             else
@@ -273,9 +251,6 @@ Foam::GAMGSolver::GAMGSolver
         {
             const label coarsestLevel = matrixLevels_.size() - 1;
 
-            Pout<< "GAMGSolver :"
-                << " coarsestLevel:" << coarsestLevel << endl;
-
             if (matrixLevels_.set(coarsestLevel))
             {
                 const lduMesh& coarsestMesh =
@@ -284,9 +259,6 @@ Foam::GAMGSolver::GAMGSolver
                 label coarseComm = coarsestMesh.comm();
                 label oldWarn = UPstream::warnComm;
                 UPstream::warnComm = coarseComm;
-
-                Pout<< "Solve direct on coasestmesh (level=" << coarsestLevel
-                    << ") using communicator " << coarseComm << endl;
 
                 coarsestLUMatrixPtr_.set
                 (
@@ -301,119 +273,6 @@ Foam::GAMGSolver::GAMGSolver
                 UPstream::warnComm = oldWarn;
             }
         }
-        //else if (agglomeration_.processorAgglomerate())
-        //{
-            //// Pick a level to processor agglomerate
-            //label agglomLevel = matrixLevels_.size() - 1;//1;
-            //
-            //
-            //// Get mesh and matrix at this level
-            //const lduMatrix& levelMatrix = matrixLevels_[agglomLevel];
-            //const lduMesh& levelMesh = levelMatrix.mesh();
-            //
-            //
-            //label levelComm = levelMesh.comm();
-            //label oldWarn = UPstream::warnComm;
-            //UPstream::warnComm = levelComm;
-            //
-            //Pout<< "Solve generic on mesh (level=" << agglomLevel
-            //    << ") using communicator " << levelComm << endl;
-            //
-            //// Processor restriction map: per processor the coarse processor
-            //labelList procAgglomMap(UPstream::nProcs(levelComm));
-            //// Master processor
-            //labelList masterProcs;
-            //// Local processors that agglomerate. agglomProcIDs[0] is in
-            //// masterProc.
-            //List<int> agglomProcIDs;
-            //
-            //{
-            //    procAgglomMap[0] = 0;
-            //    procAgglomMap[1] = 0;
-            //    procAgglomMap[2] = 1;
-            //    procAgglomMap[3] = 1;
-            //
-            //    // Determine the master processors
-            //    Map<label> agglomToMaster(procAgglomMap.size());
-            //
-            //    forAll(procAgglomMap, procI)
-            //    {
-            //        label coarseI = procAgglomMap[procI];
-            //
-            //        Map<label>::iterator fnd = agglomToMaster.find(coarseI);
-            //        if (fnd == agglomToMaster.end())
-            //        {
-            //            agglomToMaster.insert(coarseI, procI);
-            //        }
-            //        else
-            //        {
-            //            fnd() = max(fnd(), procI);
-            //        }
-            //    }
-            //
-            //    masterProcs.setSize(agglomToMaster.size());
-            //    forAllConstIter(Map<label>, agglomToMaster, iter)
-            //    {
-            //        masterProcs[iter.key()] = iter();
-            //    }
-            //
-            //
-            //    // Collect all the processors in my agglomeration
-            //    label myProcID = Pstream::myProcNo(levelComm);
-            //    label myAgglom = procAgglomMap[myProcID];
-            //
-            //    // Get all processors agglomerating to the same coarse
-            //    // processor
-            //    agglomProcIDs = findIndices(procAgglomMap, myAgglom);
-            //    // Make sure the master is the first element.
-            //    label index = findIndex
-            //    (
-            //        agglomProcIDs,
-            //        agglomToMaster[myAgglom]
-            //    );
-            //    Swap(agglomProcIDs[0], agglomProcIDs[index]);
-            //}
-            //
-            //
-            //Pout<< "procAgglomMap:" << procAgglomMap << endl;
-            //Pout<< "agglomProcIDs:" << agglomProcIDs << endl;
-            //
-            //// Allocate a communicator for the processor-agglomerated matrix
-            //label procAgglomComm = UPstream::allocateCommunicator
-            //(
-            //    levelComm,
-            //    masterProcs
-            //);
-            //Pout<< "** Allocated communicator " << procAgglomComm
-            //    << " for indices " << masterProcs
-            //    << " in processor list " << UPstream::procID(levelComm)
-            //    << endl;
-            //
-            //
-            //
-            //// Gather matrix and mesh onto agglomProcIDs[0]
-            //// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            //
-            //procAgglomerateMatrix
-            //(
-            //    // Agglomeration information
-            //    procAgglomMap,
-            //    agglomProcIDs,
-            //    procAgglomComm,
-            //
-            //    agglomLevel,  // level (coarse, not fine level!)
-            //
-            //    // Resulting matrix
-            //    allMatrixPtr_,
-            //    allInterfaceBouCoeffs_,
-            //    allInterfaceIntCoeffs_,
-            //    allPrimitiveInterfaces_,
-            //    allInterfaces_
-            //);
-            //
-            //
-            //UPstream::warnComm = oldWarn;
-        //}
     }
     else
     {
@@ -441,20 +300,6 @@ Foam::GAMGSolver::GAMGSolver
 
 Foam::GAMGSolver::~GAMGSolver()
 {
-//    // Clear the the lists of pointers to the interfaces
-//    forAll(interfaceLevels_, leveli)
-//    {
-//        lduInterfaceFieldPtrsList& curLevel = interfaceLevels_[leveli];
-//
-//        forAll(curLevel, i)
-//        {
-//            if (curLevel.set(i))
-//            {
-//                delete curLevel(i);
-//            }
-//        }
-//    }
-
     if (!cacheAgglomeration_)
     {
         delete &agglomeration_;
@@ -489,19 +334,22 @@ void Foam::GAMGSolver::readControls()
     controlDict_.readIfPresent("scaleCorrection", scaleCorrection_);
     controlDict_.readIfPresent("directSolveCoarsest", directSolveCoarsest_);
 
-    Pout<< "GAMGSolver settings :"
-        << " cacheAgglomeration:" << cacheAgglomeration_
-        << " nPreSweeps:" << nPreSweeps_
-        << " preSweepsLevelMultiplier:" << preSweepsLevelMultiplier_
-        << " maxPreSweeps:" << maxPreSweeps_
-        << " nPostSweeps:" << nPostSweeps_
-        << " postSweepsLevelMultiplier:" << postSweepsLevelMultiplier_
-        << " maxPostSweeps:" << maxPostSweeps_
-        << " nFinestSweeps:" << nFinestSweeps_
-        << " interpolateCorrection:" << interpolateCorrection_
-        << " scaleCorrection:" << scaleCorrection_
-        << " directSolveCoarsest:" << directSolveCoarsest_
-        << endl;
+    if (debug)
+    {
+        Pout<< "GAMGSolver settings :"
+            << " cacheAgglomeration:" << cacheAgglomeration_
+            << " nPreSweeps:" << nPreSweeps_
+            << " preSweepsLevelMultiplier:" << preSweepsLevelMultiplier_
+            << " maxPreSweeps:" << maxPreSweeps_
+            << " nPostSweeps:" << nPostSweeps_
+            << " postSweepsLevelMultiplier:" << postSweepsLevelMultiplier_
+            << " maxPostSweeps:" << maxPostSweeps_
+            << " nFinestSweeps:" << nFinestSweeps_
+            << " interpolateCorrection:" << interpolateCorrection_
+            << " scaleCorrection:" << scaleCorrection_
+            << " directSolveCoarsest:" << directSolveCoarsest_
+            << endl;
+    }
 }
 
 
