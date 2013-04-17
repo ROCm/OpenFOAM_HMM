@@ -320,6 +320,14 @@ dummyAgglomeration = $(GAMGAgglomerations)/dummyAgglomeration
 $(dummyAgglomeration)/dummyAgglomeration.C
 
 
+GAMGProcAgglomerations = $(GAMG)/GAMGProcAgglomerations
+
+GAMGProcAgglomeration = $(GAMGProcAgglomerations)/GAMGProcAgglomeration
+$(GAMGProcAgglomeration)/GAMGProcAgglomeration.C
+masterCoarsest = $(GAMGProcAgglomerations)/masterCoarsest
+$(masterCoarsest)/masterCoarsest.C
+
+
 meshes/lduMesh/lduMesh.C
 meshes/lduMesh/lduPrimitiveMesh.C
 

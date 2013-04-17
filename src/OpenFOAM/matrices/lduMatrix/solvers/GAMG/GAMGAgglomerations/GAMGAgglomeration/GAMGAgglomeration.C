@@ -29,6 +29,7 @@ License
 #include "Time.H"
 #include "dlLibraryTable.H"
 #include "GAMGInterface.H"
+#include "GAMGProcAgglomeration.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -57,10 +58,8 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
 
     // Have procCommunicator_ always, even if not procAgglomerating
     procCommunicator_.setSize(nCreatedLevels + 1);
-    if (processorAgglomerate_)
+    if (processorAgglomerate())
     {
-        Pout<< "GAMGAgglomeration : compacting from " << procAgglomMap_.size()
-            << " to " << nCreatedLevels << " levels" << endl;
         procAgglomMap_.setSize(nCreatedLevels);
         agglomProcIDs_.setSize(nCreatedLevels);
         procCellOffsets_.setSize(nCreatedLevels);
@@ -68,308 +67,7 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
         procBoundaryMap_.setSize(nCreatedLevels);
         procBoundaryFaceMap_.setSize(nCreatedLevels);
 
-
-        if (debug)
-        {
-            Pout<< nl << "Starting mesh overview" << endl;
-            for (label levelI = 0; levelI <= size(); levelI++)
-            {
-                if (hasMeshLevel(levelI))
-                {
-                    const lduMesh& fineMesh = meshLevel(levelI);
-                    const lduInterfacePtrsList& interfaces =
-                        interfaceLevel(levelI);
-
-                    Pout<< "Level " << levelI << " fine mesh:"<< nl
-                        << "    nCells:"
-                        << fineMesh.lduAddr().size() << nl
-                        << "    nFaces:"
-                        << fineMesh.lduAddr().lowerAddr().size() << nl
-                        << "    nInterfaces:" << interfaces.size()
-                        << endl;
-
-                    forAll(interfaces, i)
-                    {
-                        if (interfaces.set(i))
-                        {
-                            Pout<< "        " << i
-                                << "\tsize:" << interfaces[i].faceCells().size()
-                                << endl;
-                        }
-                    }
-                    Pout<< endl;
-                }
-                else
-                {
-                    Pout<< "Level " << levelI << " has no fine mesh:" << nl
-                        << endl;
-                }
-
-                if
-                (
-                    levelI < restrictAddressing_.size()
-                 && restrictAddressing_.set(levelI)
-                )
-                {
-                    const labelList& cellRestrict = restrictAddressing(levelI);
-                    const labelList& faceRestrict =
-                        faceRestrictAddressing(levelI);
-
-                    Pout<< "Level " << levelI << " agglomeration:" << nl
-                        << "    nCoarseCells:" << nCells(levelI) << nl
-                        << "    nCoarseFaces:" << nFaces(levelI) << nl
-                        << "    cellRestriction:"
-                        << " size:" << cellRestrict.size()
-                        << " max:" << max(cellRestrict)
-                        << nl
-                        << "    faceRestriction:"
-                        << " size:" << faceRestrict.size()
-                        << " max:" << max(faceRestrict)
-                        << nl;
-
-
-                    const labelListList& patchFaceRestrict =
-                        patchFaceRestrictAddressing(levelI);
-                    forAll(patchFaceRestrict, i)
-                    {
-                        if (patchFaceRestrict[i].size())
-                        {
-                            const labelList& faceRestrict =
-                                patchFaceRestrict[i];
-                            Pout<< "        " << i
-                                << " size:" << faceRestrict.size()
-                                << " max:" << max(faceRestrict)
-                                << nl;
-                        }
-                    }
-                    Pout<< endl;
-                }
-                Pout<< endl;
-            }
-            Pout<< endl;
-        }
-
-
-
-
-//XXXXXX
-        // As a test: agglomerate finelevel 2, coarselevel 3
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        label fineLevelIndex = 2;
-
-        // Get the coarse mesh
-        const lduMesh& levelMesh = meshLevels_[fineLevelIndex];
-        label levelComm = levelMesh.comm();
-
-        // Processor restriction map: per processor the coarse processor
-        labelList procAgglomMap(UPstream::nProcs(levelComm));
-        {
-            label half = (procAgglomMap.size()+1)/2;
-            for (label i = 0; i < half; i++)
-            {
-                procAgglomMap[i] = 0;
-            }
-            for (label i = half; i < procAgglomMap.size(); i++)
-            {
-                procAgglomMap[i] = 1;
-            }
-        }
-
-        // Master processor
-        labelList masterProcs;
-        // Local processors that agglomerate. agglomProcIDs[0] is in
-        // masterProc.
-        List<int> agglomProcIDs;
-        calculateRegionMaster
-        (
-            levelComm,
-            procAgglomMap,
-            masterProcs,
-            agglomProcIDs
-        );
-
-        Pout<< "procAgglomMap:" << procAgglomMap << endl;
-        Pout<< "agglomProcIDs:" << agglomProcIDs << endl;
-        Pout<< "masterProcs:" << masterProcs << endl;
-
-
-        // Allocate a communicator for the processor-agglomerated matrix
-        label procAgglomComm = UPstream::allocateCommunicator
-        (
-            levelComm,
-            masterProcs
-        );
-
-
-        // Above should really be determined by a procesor-agglomeration
-        // engine. Use procesor agglomeration maps to do the actual
-        // collecting.
-
-        if (Pstream::myProcNo(levelComm) != -1)
-        {
-            // Collect meshes and restrictAddressing onto master
-            // Overwrites the fine mesh (meshLevels_[index-1]) and addressing
-            // from fine mesh to coarse mesh (restrictAddressing_[index]).
-            procAgglomerateLduAddressing
-            (
-                levelComm,
-                procAgglomMap,
-                agglomProcIDs,
-                procAgglomComm,
-
-                fineLevelIndex               //fine level index
-            );
-
-            // Combine restrict addressing only onto master
-            for
-            (
-                label levelI = fineLevelIndex+1;
-                levelI < meshLevels_.size();
-                levelI++
-            )
-            {
-                Pout<< "Starting procAgglomerateRestrictAddressing level:"
-                    << levelI << endl;
-
-                procAgglomerateRestrictAddressing
-                (
-                    levelComm,
-                    agglomProcIDs,
-                    levelI
-                );
-                Pout<< "Finished procAgglomerateRestrictAddressing level:"
-                    << levelI << endl;
-            }
-
-            if (Pstream::myProcNo(levelComm) == agglomProcIDs[0])
-            {
-                // On master. Recreate coarse meshes from restrict addressing
-                for
-                (
-                    label levelI = fineLevelIndex;
-                    levelI < meshLevels_.size();
-                    levelI++
-                )
-                {
-                    Pout<< "Starting agglomerateLduAddressing level:" << levelI
-                        << endl;
-                    agglomerateLduAddressing(levelI);
-                    Pout<< "Finished agglomerateLduAddressing level:" << levelI
-                        << endl;
-                }
-            }
-            else
-            {
-                // Agglomerated away. Clear mesh storage.
-                for
-                (
-                    label levelI = fineLevelIndex+1;
-                    levelI <= size();
-                    levelI++
-                )
-                {
-                    clearLevel(levelI);
-                }
-            }
-        }
-    }
-
-    // Print a bit
-    if (debug)
-    {
-        Pout<< nl << "Mesh overview" << endl;
-        for (label levelI = 0; levelI <= size(); levelI++)
-        {
-            if (hasMeshLevel(levelI))
-            {
-                const lduMesh& fineMesh = meshLevel(levelI);
-                const lduInterfacePtrsList& interfaces =
-                    interfaceLevel(levelI);
-
-                Pout<< "Level " << levelI << " fine mesh:"<< nl
-                    << "    nCells:"
-                    << fineMesh.lduAddr().size() << nl
-                    << "    nFaces:"
-                    << fineMesh.lduAddr().lowerAddr().size() << nl
-                    << "    nInterfaces:" << interfaces.size()
-                    << endl;
-
-                forAll(interfaces, i)
-                {
-                    if (interfaces.set(i))
-                    {
-                        Pout<< "        " << i
-                            << "\tsize:" << interfaces[i].faceCells().size()
-                            << endl;
-                    }
-                }
-
-                Pout<< fineMesh.info() << endl;
-
-                Pout<< endl;
-            }
-            else
-            {
-                Pout<< "Level " << levelI << " has no fine mesh:" << nl
-                    << endl;
-            }
-
-            if
-            (
-                levelI < restrictAddressing_.size()
-             && restrictAddressing_.set(levelI)
-            )
-            {
-                const labelList& cellRestrict = restrictAddressing(levelI);
-                const labelList& faceRestrict =
-                    faceRestrictAddressing(levelI);
-
-                Pout<< "Level " << levelI << " agglomeration:" << nl
-                    << "    nCoarseCells:" << nCells(levelI) << nl
-                    << "    nCoarseFaces:" << nFaces(levelI) << nl
-                    << "    cellRestriction:"
-                    << " size:" << cellRestrict.size()
-                    << " max:" << max(cellRestrict)
-                    << nl
-                    << "    faceRestriction:"
-                    << " size:" << faceRestrict.size()
-                    << " max:" << max(faceRestrict)
-                    << nl;
-
-                const labelListList& patchFaceRestrict =
-                    patchFaceRestrictAddressing(levelI);
-                forAll(patchFaceRestrict, i)
-                {
-                    if (patchFaceRestrict[i].size())
-                    {
-                        const labelList& faceRestrict =
-                            patchFaceRestrict[i];
-                        Pout<< "        " << i
-                            << " size:" << faceRestrict.size()
-                            << " max:" << max(faceRestrict)
-                            << nl;
-                    }
-                }
-            }
-            if
-            (
-                levelI < procCellOffsets_.size()
-             && procCellOffsets_.set(levelI)
-            )
-            {
-                Pout<< "    procCellOffsets:" << procCellOffsets_[levelI]
-                    << nl
-                    << "    procAgglomMap:" << procAgglomMap_[levelI]
-                    << nl
-                    << "    procIDs:" << agglomProcIDs_[levelI]
-                    << nl
-                    << "    comm:" << procCommunicator_[levelI]
-                    << endl;
-            }
-
-            Pout<< endl;
-        }
-        Pout<< endl;
+        procAgglomeratorPtr_().agglomerate();
     }
 }
 
@@ -402,9 +100,16 @@ Foam::GAMGAgglomeration::GAMGAgglomeration
     (
         readLabel(controlDict.lookup("nCellsInCoarsestLevel"))
     ),
-    processorAgglomerate_
+    procAgglomeratorPtr_
     (
-        controlDict.lookupOrDefault<bool>("processorAgglomerate", false)
+        controlDict.found("processorAgglomerator")
+      ? GAMGProcAgglomeration::New
+        (
+            controlDict.lookup("processorAgglomerator"),
+            *this,
+            controlDict
+        )
+      : autoPtr<GAMGProcAgglomeration>(NULL)
     ),
 
     nCells_(maxLevels_),
@@ -420,10 +125,8 @@ Foam::GAMGAgglomeration::GAMGAgglomeration
     interfaceLevels_(maxLevels_ + 1)
 {
     procCommunicator_.setSize(maxLevels_ + 1, -1);
-    if (processorAgglomerate_)
+    if (processorAgglomerate())
     {
-        Pout<< "GAMGAgglomeration : sizing to " << maxLevels_
-            << " levels" << endl;
         procAgglomMap_.setSize(maxLevels_);
         agglomProcIDs_.setSize(maxLevels_);
         procCellOffsets_.setSize(maxLevels_);
@@ -596,8 +299,6 @@ void Foam::GAMGAgglomeration::clearLevel(const label i)
 {
     if (hasMeshLevel(i))
     {
-        Pout<< "Clearing out level " << i << endl;
-
         meshLevels_.set(i - 1, NULL);
 
         if (i < nCells_.size())
