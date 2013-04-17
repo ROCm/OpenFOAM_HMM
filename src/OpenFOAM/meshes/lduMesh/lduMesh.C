@@ -53,18 +53,20 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<lduMesh>& ip)
     const lduAddressing& addr = ldum.lduAddr();
     const lduInterfacePtrsList interfaces = ldum.interfaces();
 
-    Pout<< "lduMesh :"
+    os  << "lduMesh :"
         << " size:" << addr.size()
         << " l:" << addr.lowerAddr().size()
         << " u:" << addr.upperAddr().size()
         << " interfaces:" << interfaces.size()
         << " comm:" << ldum.comm()
         << endl;
+    label nCouples = 0;
     forAll(interfaces, i)
     {
         if (interfaces.set(i))
         {
             const labelUList& faceCells = addr.patchAddr(i);
+            nCouples += faceCells.size();
 
             if (isA<processorLduInterface>(interfaces[i]))
             {
@@ -73,7 +75,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<lduMesh>& ip)
                     const processorLduInterface
                 >(interfaces[i]);
 
-                Pout<< "    patch:" << i
+                os  << "    patch:" << i
                     << " type:" << interfaces[i].type()
                     << " size:" << faceCells.size()
                     << " myProcNo:" << pi.myProcNo()
@@ -83,13 +85,15 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<lduMesh>& ip)
             }
             else
             {
-                Pout<< "    patch:" << i
+                os  << "    patch:" << i
                     << " type:" << interfaces[i].type()
                     << " size:" << faceCells.size()
                     << endl;
             }
         }
     }
+    os  << "    Interface faces/cells:" << scalar(nCouples)/addr.size()
+        << endl;
 
 
     // Print actual contents
@@ -99,7 +103,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<lduMesh>& ip)
         const labelList& u = addr.upperAddr();
         forAll(l, faceI)
         {
-            Pout<< "        face:" << faceI << " l:" << l[faceI]
+            os  << "        face:" << faceI << " l:" << l[faceI]
                 << " u:" << u[faceI] << endl;
         }
         forAll(interfaces, i)
@@ -109,7 +113,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<lduMesh>& ip)
                 const labelUList& faceCells = addr.patchAddr(i);
                 if (faceCells.size())
                 {
-                    Pout<< "    patch:" << i
+                    os  << "    patch:" << i
                         << " type:" << interfaces[i].type() << endl;
 
                     if (isA<processorLduInterface>(interfaces[i]))
@@ -119,7 +123,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<lduMesh>& ip)
                             const processorLduInterface
                         >(interfaces[i]);
 
-                        Pout<< "    myProcNo:" << pi.myProcNo()
+                        os  << "    myProcNo:" << pi.myProcNo()
                             << " neighbProcNo:" << pi.neighbProcNo()
                             << " comm:" << pi.comm()
                             << endl;
@@ -127,7 +131,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<lduMesh>& ip)
 
                     forAll(faceCells, i)
                     {
-                        Pout<< "        " << i << " own:" << faceCells[i]
+                        os  << "        " << i << " own:" << faceCells[i]
                             << endl;
                     }
                 }
