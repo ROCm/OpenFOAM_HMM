@@ -109,6 +109,11 @@ class lduPrimitiveMesh
 
 public:
 
+    // Static data
+
+        // Declare name of the class and its debug switch
+        ClassName("lduPrimitiveMesh");
+
     // Constructors
 
         //- Construct from components as copies

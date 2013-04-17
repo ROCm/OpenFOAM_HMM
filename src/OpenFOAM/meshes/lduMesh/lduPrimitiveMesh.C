@@ -33,6 +33,7 @@ License
 
 namespace Foam
 {
+    defineTypeNameAndDebug(lduPrimitiveMesh, 0);
 
     //- Less operator for pairs of <processor><index>
     class procLess
@@ -682,7 +683,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
                                 if
                                 (
                                     elems[i][0] == nbrProcMeshI
-                                 && pldui.neighbProcNo() == procMeshI
+                                 && pldui.neighbProcNo() == procIDs[procMeshI]
                                 )
                                 {
                                     nbrIntI = elems[i][1];
