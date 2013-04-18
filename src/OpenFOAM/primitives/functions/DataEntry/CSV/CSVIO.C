@@ -74,8 +74,17 @@ void Foam::CSV<Type>::writeData(Ostream& os) const
     os.writeKeyword("nHeaderLine") << nHeaderLine_ << token::END_STATEMENT
         << nl;
     os.writeKeyword("refColumn") << refColumn_ << token::END_STATEMENT << nl;
-    os.writeKeyword("componentColumns") << componentColumns_
-        << token::END_STATEMENT << nl;
+
+    // Force writing labelList in ascii
+    os.writeKeyword("componentColumns");
+    if (os.format() == IOstream::BINARY)
+    {
+        os.format(IOstream::ASCII);
+        os  << componentColumns_;
+        os.format(IOstream::BINARY);
+    }
+    os  << token::END_STATEMENT << nl;
+
     os.writeKeyword("separator") << string(separator_)
         << token::END_STATEMENT << nl;
     os.writeKeyword("mergeSeparators") << string(mergeSeparators_)
