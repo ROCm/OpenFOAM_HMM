@@ -264,7 +264,7 @@ Foam::tmp<Foam::scalarField> Foam::polyMeshTools::volRatio
         scalar volOwn = vol[own[faceI]];
         scalar volNei = vol[nei[faceI]];
 
-        ratio[faceI] = min(volOwn,volNei)/(volOwn+volNei+VSMALL);
+        ratio[faceI] = min(volOwn,volNei)/(max(volOwn, volNei)+VSMALL);
     }
 
 
@@ -286,7 +286,7 @@ Foam::tmp<Foam::scalarField> Foam::polyMeshTools::volRatio
                 scalar volOwn = vol[own[faceI]];
                 scalar volNei = neiVol[bFaceI];
 
-                ratio[faceI] = min(volOwn,volNei)/(volOwn+volNei+VSMALL);
+                ratio[faceI] = min(volOwn,volNei)/(max(volOwn, volNei)+VSMALL);
             }
         }
     }
