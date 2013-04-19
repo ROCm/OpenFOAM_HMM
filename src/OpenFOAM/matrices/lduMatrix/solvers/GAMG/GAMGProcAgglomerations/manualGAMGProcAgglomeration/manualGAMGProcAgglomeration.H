@@ -27,6 +27,23 @@ Class
 Description
     Manual processor agglomeration of GAMGAgglomerations.
 
+    In the GAMG defintion:
+
+        processorAgglomerator manual;
+        processorAgglomeration
+        (
+            (3 (0 0 1 1))
+            (6 (0 0))
+        );
+
+    which says that
+    - at level 3 of the agglomeration processors 0 and 1 will combine
+      into coarse processor 0 (located on processor0) and 2,3
+      will combine into coarse processor 1 (located on 2)
+      (currently the master is always the minimum of the set)
+    - at level 6 of the agglomeration coarse processors 0 and 1 will combine
+      into coarse processor 0 (located on the minimum, processor 0)
+
 SourceFiles
     manualGAMGProcAgglomeration.C
 
