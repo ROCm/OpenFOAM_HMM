@@ -142,7 +142,8 @@ bool Foam::polyMesh::checkFaceOrthogonality
 
         if (severeNonOrth > 0)
         {
-            Info<< "   *Number of severely non-orthogonal faces: "
+            Info<< "   *Number of severely non-orthogonal (> "
+                << primitiveMesh::nonOrthThreshold_ << " degrees) faces: "
                 << severeNonOrth << "." << endl;
         }
     }
@@ -427,6 +428,8 @@ bool Foam::polyMesh::checkCellDeterminant
     const Vector<label>& meshD
 ) const
 {
+    const scalar warnDet = 1e-3;
+
     if (debug)
     {
         Info<< "bool polyMesh::checkCellDeterminant(const bool"
@@ -450,7 +453,7 @@ bool Foam::polyMesh::checkCellDeterminant
 
     forAll (cellDeterminant, cellI)
     {
-        if (cellDeterminant[cellI] < 1e-3)
+        if (cellDeterminant[cellI] < warnDet)
         {
             if (setPtr)
             {
@@ -480,7 +483,8 @@ bool Foam::polyMesh::checkCellDeterminant
     {
         if (debug || report)
         {
-            Info<< " ***Cells with small determinant found, number of cells: "
+            Info<< " ***Cells with small determinant (< "
+                << warnDet << ") found, number of cells: "
                 << nErrorCells << endl;
         }
 
@@ -576,7 +580,8 @@ bool Foam::polyMesh::checkFaceWeight
     {
         if (debug || report)
         {
-            Info<< " ***Faces with small interpolation found, number of faces: "
+            Info<< " ***Faces with small interpolation weight (< " << minWeight
+                << ") found, number of faces: "
                 << nErrorFaces << endl;
         }
 
@@ -608,7 +613,7 @@ bool Foam::polyMesh::checkVolRatio
     {
         Info<< "bool polyMesh::checkVolRatio(const bool"
             << ", labelHashSet*) const: "
-            << "checking for low volume ratio" << endl;
+            << "checking for volume ratio < " << minRatio << endl;
     }
 
     tmp<scalarField> tvolRatio = polyMeshTools::volRatio(*this, cellVols);
@@ -664,7 +669,8 @@ bool Foam::polyMesh::checkVolRatio
     {
         if (debug || report)
         {
-            Info<< " ***Faces with small volume ratio found, number of faces: "
+            Info<< " ***Faces with small volume ratio (< " << minRatio
+                << ") found, number of faces: "
                 << nErrorFaces << endl;
         }
 
