@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,58 +22,78 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::faceAreaPairGAMGAgglomeration
+    Foam::masterCoarsestGAMGProcAgglomeration
 
 Description
-    Agglomerate using the pair algorithm.
+    Processor agglomeration of GAMGAgglomerations.
 
 SourceFiles
-    faceAreaPairGAMGAgglomeration.C
+    masterCoarsestGAMGProcAgglomeration.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faceAreaPairGAMGAgglomeration_H
-#define faceAreaPairGAMGAgglomeration_H
+#ifndef masterCoarsestGAMGProcAgglomeration_H
+#define masterCoarsestGAMGProcAgglomeration_H
 
-#include "pairGAMGAgglomeration.H"
+#include "GAMGProcAgglomeration.H"
+#include "DynamicList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+class GAMGAgglomeration;
+
 /*---------------------------------------------------------------------------*\
-                 Class faceAreaPairGAMGAgglomeration Declaration
+              Class masterCoarsestGAMGProcAgglomeration Declaration
 \*---------------------------------------------------------------------------*/
 
-class faceAreaPairGAMGAgglomeration
+class masterCoarsestGAMGProcAgglomeration
 :
-    public pairGAMGAgglomeration
+    public GAMGProcAgglomeration
 {
+    // Private data
+
+        DynamicList<label> comms_;
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        masterCoarsestGAMGProcAgglomeration
+        (
+            const masterCoarsestGAMGProcAgglomeration&
+        );
+
+        //- Disallow default bitwise assignment
+        void operator=(const masterCoarsestGAMGProcAgglomeration&);
+
 
 public:
 
     //- Runtime type information
-    TypeName("faceAreaPair");
+    TypeName("masterCoarsest");
 
 
     // Constructors
 
-        //- Construct given mesh and controls
-        faceAreaPairGAMGAgglomeration
+        //- Construct given agglomerator and controls
+        masterCoarsestGAMGProcAgglomeration
         (
-            const lduMesh& mesh,
+            GAMGAgglomeration& agglom,
             const dictionary& controlDict
         );
 
-        //- Construct given mesh and controls
-        faceAreaPairGAMGAgglomeration
-        (
-            const lduMesh& mesh,
-            const scalarField& cellVolumes,
-            const vectorField& faceAreas,
-            const dictionary& controlDict
-        );
+
+    //- Destructor
+    virtual ~masterCoarsestGAMGProcAgglomeration();
+
+
+    // Member Functions
+
+       //- Modify agglomeration. Return true if modified
+        virtual bool agglomerate();
+
 };
 
 

@@ -96,10 +96,6 @@ class lduPrimitiveMesh
             const labelUList& u
         );
 
-        //- Get non-scheduled send/receive schedule
-        template<class ProcPatch>
-        static lduSchedule nonBlockingSchedule(const lduInterfacePtrsList&);
-
         //- Disallow default bitwise copy construct
         lduPrimitiveMesh(const lduPrimitiveMesh&);
 
@@ -271,6 +267,11 @@ public:
                 const labelList& procIDs,
                 PtrList<lduMesh>& otherMeshes
             );
+
+            //- Get non-scheduled send/receive schedule
+            template<class ProcPatch>
+            static lduSchedule nonBlockingSchedule(const lduInterfacePtrsList&);
+
 };
 
 

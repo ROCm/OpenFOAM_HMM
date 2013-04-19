@@ -47,36 +47,11 @@ void Foam::GAMGProcAgglomeration::printStats
     {
         if (agglom.hasMeshLevel(levelI))
         {
-            const lduMesh& fineMesh = agglom.meshLevel(levelI);
-            const lduInterfacePtrsList& interfaces =
-                agglom.interfaceLevel(levelI);
-
-            os  << "Level " << levelI << " fine mesh:"<< nl
-                << "    nCells:"
-                << fineMesh.lduAddr().size() << nl
-                << "    nFaces:"
-                << fineMesh.lduAddr().lowerAddr().size() << nl
-                << "    nInterfaces:" << interfaces.size()
-                << endl;
-
-            forAll(interfaces, i)
-            {
-                if (interfaces.set(i))
-                {
-                    os  << "        " << i
-                        << "\tsize:" << interfaces[i].faceCells().size()
-                        << endl;
-                }
-            }
-
-            os  << fineMesh.info() << endl;
-
-            os  << endl;
+            os  << agglom.meshLevel(levelI).info() << endl;
         }
         else
         {
-            os  << "Level " << levelI << " has no fine mesh:" << nl
-                << endl;
+            os  << "Level " << levelI << " has no fine mesh:" << endl;
         }
 
         if

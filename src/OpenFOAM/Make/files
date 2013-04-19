@@ -324,8 +324,14 @@ GAMGProcAgglomerations = $(GAMG)/GAMGProcAgglomerations
 
 GAMGProcAgglomeration = $(GAMGProcAgglomerations)/GAMGProcAgglomeration
 $(GAMGProcAgglomeration)/GAMGProcAgglomeration.C
-masterCoarsest = $(GAMGProcAgglomerations)/masterCoarsest
-$(masterCoarsest)/masterCoarsest.C
+masterCoarsestGAMGProcAgglomeration = $(GAMGProcAgglomerations)/masterCoarsestGAMGProcAgglomeration
+$(masterCoarsestGAMGProcAgglomeration)/masterCoarsestGAMGProcAgglomeration.C
+manualGAMGProcAgglomeration = $(GAMGProcAgglomerations)/manualGAMGProcAgglomeration
+$(manualGAMGProcAgglomeration)/manualGAMGProcAgglomeration.C
+/*
+cellFaceRatioGAMGProcAgglomeration = $(GAMGProcAgglomerations)/cellFaceRatioGAMGProcAgglomeration
+$(cellFaceRatioGAMGProcAgglomeration)/cellFaceRatioGAMGProcAgglomeration.C
+*/
 
 
 meshes/lduMesh/lduMesh.C

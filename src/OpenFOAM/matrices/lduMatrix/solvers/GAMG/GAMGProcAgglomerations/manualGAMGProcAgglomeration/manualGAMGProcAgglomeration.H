@@ -22,20 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::masterCoarsest
+    Foam::manualGAMGProcAgglomeration
 
 Description
-    Processor agglomeration of GAMGAgglomerations.
+    Manual processor agglomeration of GAMGAgglomerations.
 
 SourceFiles
-    masterCoarsest.C
+    manualGAMGProcAgglomeration.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef masterCoarsest_H
-#define masterCoarsest_H
+#ifndef manualGAMGProcAgglomeration_H
+#define manualGAMGProcAgglomeration_H
 
 #include "GAMGProcAgglomeration.H"
+#include "DynamicList.H"
+#include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,34 +47,44 @@ namespace Foam
 class GAMGAgglomeration;
 
 /*---------------------------------------------------------------------------*\
-                    Class masterCoarsest Declaration
+              Class manualGAMGProcAgglomeration Declaration
 \*---------------------------------------------------------------------------*/
 
-class masterCoarsest
+class manualGAMGProcAgglomeration
 :
     public GAMGProcAgglomeration
 {
     // Private data
 
+        //- Per level the agglomeration map
+        const List<Tuple2<label, labelList> > procAgglomMaps_;
+
+        //- Any allocated communicators
+        DynamicList<label> comms_;
+
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        masterCoarsest(const masterCoarsest&);
+        manualGAMGProcAgglomeration
+        (
+            const manualGAMGProcAgglomeration&
+        );
 
         //- Disallow default bitwise assignment
-        void operator=(const masterCoarsest&);
+        void operator=(const manualGAMGProcAgglomeration&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("masterCoarsest");
+    TypeName("manual");
 
 
     // Constructors
 
         //- Construct given agglomerator and controls
-        masterCoarsest
+        manualGAMGProcAgglomeration
         (
             GAMGAgglomeration& agglom,
             const dictionary& controlDict
@@ -80,8 +92,7 @@ public:
 
 
     //- Destructor
-    virtual ~masterCoarsest()
-    {}
+    virtual ~manualGAMGProcAgglomeration();
 
 
     // Member Functions
@@ -95,12 +106,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-//#ifdef NoRepository
-//#   include "masterCoarsestTemplates.C"
-//#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

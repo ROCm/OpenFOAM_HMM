@@ -38,6 +38,7 @@ namespace Foam
     defineTypeNameAndDebug(GAMGAgglomeration, 0);
     defineRunTimeSelectionTable(GAMGAgglomeration, lduMesh);
     defineRunTimeSelectionTable(GAMGAgglomeration, lduMatrix);
+    defineRunTimeSelectionTable(GAMGAgglomeration, geometry);
 }
 
 
@@ -68,6 +69,24 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
         procBoundaryFaceMap_.setSize(nCreatedLevels);
 
         procAgglomeratorPtr_().agglomerate();
+    }
+
+    if (debug)
+    {
+        for (label levelI = 0; levelI <= size(); levelI++)
+        {
+            if (hasMeshLevel(levelI))
+            {
+                const lduMesh& fineMesh = meshLevel(levelI);
+                Pout<< "Level " << levelI << " fine mesh:"<< nl;
+                Pout<< fineMesh.info() << endl;
+            }
+            else
+            {
+                Pout<< "Level " << levelI << " has no fine mesh:" << nl
+                    << endl;
+            }
+        }
     }
 }
 
@@ -241,18 +260,56 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
 }
 
 
+Foam::autoPtr<Foam::GAMGAgglomeration> Foam::GAMGAgglomeration::New
+(
+    const lduMesh& mesh,
+    const scalarField& cellVolumes,
+    const vectorField& faceAreas,
+    const dictionary& controlDict
+)
+{
+    const word agglomeratorType(controlDict.lookup("agglomerator"));
+
+    const_cast<Time&>(mesh.thisDb().time()).libs().open
+    (
+        controlDict,
+        "geometricGAMGAgglomerationLibs",
+        geometryConstructorTablePtr_
+    );
+
+    geometryConstructorTable::iterator cstrIter =
+        geometryConstructorTablePtr_->find(agglomeratorType);
+
+    if (cstrIter == geometryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "GAMGAgglomeration::New"
+            "(const lduMesh& mesh, const dictionary& controlDict)"
+        )   << "Unknown GAMGAgglomeration type "
+            << agglomeratorType << ".\n"
+            << "Valid geometric GAMGAgglomeration types are :"
+            << geometryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<GAMGAgglomeration>
+    (
+        cstrIter()
+        (
+            mesh,
+            cellVolumes,
+            faceAreas,
+            controlDict
+        )
+    );
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::GAMGAgglomeration::~GAMGAgglomeration()
-{
-    forAllReverse(procCommunicator_, i)
-    {
-        if (procCommunicator_[i] != -1)
-        {
-            UPstream::freeCommunicator(procCommunicator_[i]);
-        }
-    }
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

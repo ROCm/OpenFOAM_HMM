@@ -253,6 +253,27 @@ public:
             )
         );
 
+        //- Runtime selection table for matrix or mixed geometric/matrix
+        //  agglomerators
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            GAMGAgglomeration,
+            geometry,
+            (
+                const lduMesh& mesh,
+                const scalarField& cellVolumes,
+                const vectorField& faceAreas,
+                const dictionary& controlDict
+            ),
+            (
+                mesh,
+                cellVolumes,
+                faceAreas,
+                controlDict
+            )
+        );
+
 
     // Constructors
 
@@ -277,6 +298,15 @@ public:
         static const GAMGAgglomeration& New
         (
             const lduMatrix& matrix,
+            const dictionary& controlDict
+        );
+
+        //- Return the selected geometric agglomerator
+        static autoPtr<GAMGAgglomeration> New
+        (
+            const lduMesh& mesh,
+            const scalarField& cellVolumes,
+            const vectorField& faceAreas,
             const dictionary& controlDict
         );
 
