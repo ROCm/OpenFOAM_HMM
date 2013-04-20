@@ -102,95 +102,104 @@ bool Foam::manualGAMGProcAgglomeration::agglomerate()
             {
                 // Get the fine mesh
                 const lduMesh& levelMesh = agglom_.meshLevel(fineLevelIndex);
+                label nProcs = UPstream::nProcs(levelMesh.comm());
 
-                // My processor id
-                const label myProcID = Pstream::myProcNo(levelMesh.comm());
-
-                const List<clusterAndMaster>& clusters =
-                    procAgglomMaps_[i].second();
-
-                // Coarse to fine master processor
-                labelList coarseToMaster(clusters.size());
-
-                // Fine to coarse map
-                labelList procAgglomMap(Pstream::nProcs(levelMesh.comm()), -1);
-
-                // Cluster for my processor (with master index first)
-                labelList agglomProcIDs;
-
-
-
-                forAll(clusters, coarseI)
+                if (nProcs > 1)
                 {
-                    const labelList& cluster = clusters[coarseI].first();
-                    coarseToMaster[coarseI] = clusters[coarseI].second();
+                    // My processor id
+                    const label myProcID = Pstream::myProcNo(levelMesh.comm());
 
-                    forAll(cluster, i)
+                    const List<clusterAndMaster>& clusters =
+                        procAgglomMaps_[i].second();
+
+                    // Coarse to fine master processor
+                    labelList coarseToMaster(clusters.size());
+
+                    // Fine to coarse map
+                    labelList procAgglomMap(nProcs, -1);
+
+                    // Cluster for my processor (with master index first)
+                    labelList agglomProcIDs;
+
+
+
+                    forAll(clusters, coarseI)
                     {
-                        procAgglomMap[cluster[i]] = coarseI;
+                        const labelList& cluster = clusters[coarseI].first();
+                        coarseToMaster[coarseI] = clusters[coarseI].second();
+
+                        forAll(cluster, i)
+                        {
+                            procAgglomMap[cluster[i]] = coarseI;
+                        }
+
+                        label masterIndex = findIndex
+                        (
+                            cluster,
+                            coarseToMaster[coarseI]
+                        );
+
+                        if (masterIndex == -1)
+                        {
+                            FatalErrorIn
+                            (
+                                "manualGAMGProcAgglomeration::agglomerate()"
+                            )   << "At level " << fineLevelIndex
+                                << " the master processor "
+                                << coarseToMaster[coarseI]
+                                << " is not in the cluster "
+                                << cluster
+                                << exit(FatalError);
+                        }
+
+                        if (findIndex(cluster, myProcID) != -1)
+                        {
+                            // This is my cluster. Make sure master index is
+                            // first
+                            agglomProcIDs = cluster;
+                            Swap(agglomProcIDs[0], agglomProcIDs[masterIndex]);
+                        }
                     }
 
-                    label masterIndex = findIndex
-                    (
-                        cluster,
-                        coarseToMaster[coarseI]
-                    );
 
-                    if (masterIndex == -1)
+                    // Check that we've done all processors
+                    if (findIndex(procAgglomMap, -1) != -1)
                     {
                         FatalErrorIn
                         (
                             "manualGAMGProcAgglomeration::agglomerate()"
                         )   << "At level " << fineLevelIndex
-                            << " the master processor "
-                            << coarseToMaster[coarseI]
-                            << " is not in the cluster "
-                            << cluster
+                            << " processor "
+                            << findIndex(procAgglomMap, -1)
+                            << " is not in any cluster"
                             << exit(FatalError);
                     }
 
-                    if (findIndex(cluster, myProcID) != -1)
-                    {
-                        // This is my cluster. Make sure master index is first
-                        agglomProcIDs = cluster;
-                        Swap(agglomProcIDs[0], agglomProcIDs[masterIndex]);
-                    }
-                }
 
-
-                // Check that we've done all processors
-                if (findIndex(procAgglomMap, -1) != -1)
-                {
-                    FatalErrorIn("manualGAMGProcAgglomeration::agglomerate()")
-                        << "At level " << fineLevelIndex
-                        << " processor "
-                        << findIndex(procAgglomMap, -1)
-                        << " is not in any cluster"
-                        << exit(FatalError);
-                }
-
-
-                // Allocate a communicator for the processor-agglomerated matrix
-                comms_.append
-                (
-                    UPstream::allocateCommunicator
+                    // Allocate a communicator for the processor-agglomerated
+                    // matrix
+                    comms_.append
                     (
-                        levelMesh.comm(),
-                        coarseToMaster
-                    )
-                );
-
-                // Use procesor agglomeration maps to do the actual collecting.
-                if (Pstream::myProcNo(levelMesh.comm()) != -1)
-                {
-                    GAMGProcAgglomeration::agglomerate
-                    (
-                        fineLevelIndex,
-                        procAgglomMap,
-                        coarseToMaster,
-                        agglomProcIDs,
-                        comms_.last()
+                        UPstream::allocateCommunicator
+                        (
+                            levelMesh.comm(),
+                            coarseToMaster
+                        )
                     );
+
+                    // Use procesor agglomeration maps to do the actual
+                    // collecting
+                    if (Pstream::myProcNo(levelMesh.comm()) != -1)
+                    {
+                        GAMGProcAgglomeration::agglomerate
+                        (
+                            fineLevelIndex,
+                            procAgglomMap,
+                            coarseToMaster,
+                            agglomProcIDs,
+                            comms_.last()
+                        );
+                    }
                 }
             }
         }

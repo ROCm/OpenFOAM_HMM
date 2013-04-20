@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "masterCoarsestGAMGProcAgglomeration.H"
+#include "eagerGAMGProcAgglomeration.H"
 #include "addToRunTimeSelectionTable.H"
 #include "GAMGAgglomeration.H"
 
@@ -31,12 +31,12 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(masterCoarsestGAMGProcAgglomeration, 0);
+    defineTypeNameAndDebug(eagerGAMGProcAgglomeration, 0);
 
     addToRunTimeSelectionTable
     (
         GAMGProcAgglomeration,
-        masterCoarsestGAMGProcAgglomeration,
+        eagerGAMGProcAgglomeration,
         GAMGAgglomeration
     );
 }
@@ -47,20 +47,21 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::masterCoarsestGAMGProcAgglomeration::masterCoarsestGAMGProcAgglomeration
+Foam::eagerGAMGProcAgglomeration::eagerGAMGProcAgglomeration
 (
     GAMGAgglomeration& agglom,
     const dictionary& controlDict
 )
 :
-    GAMGProcAgglomeration(agglom, controlDict)
+    GAMGProcAgglomeration(agglom, controlDict),
+    mergeLevels_(controlDict.lookupOrDefault<label>("mergeLevels", 1))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::masterCoarsestGAMGProcAgglomeration::
-~masterCoarsestGAMGProcAgglomeration()
+Foam::eagerGAMGProcAgglomeration::
+~eagerGAMGProcAgglomeration()
 {
     forAllReverse(comms_, i)
     {
@@ -74,7 +75,7 @@ Foam::masterCoarsestGAMGProcAgglomeration::
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::masterCoarsestGAMGProcAgglomeration::agglomerate()
+bool Foam::eagerGAMGProcAgglomeration::agglomerate()
 {
     if (debug)
     {
@@ -86,54 +87,68 @@ bool Foam::masterCoarsestGAMGProcAgglomeration::agglomerate()
     {
         // Agglomerate one but last level (since also agglomerating
         // restrictAddressing)
-        label fineLevelIndex = agglom_.size()-1;
-
-        if (agglom_.hasMeshLevel(fineLevelIndex))
+        for
+        (
+            label fineLevelIndex = 2;
+            fineLevelIndex < agglom_.size();
+            fineLevelIndex++
+        )
         {
-            // Get the fine mesh
-            const lduMesh& levelMesh = agglom_.meshLevel(fineLevelIndex);
-            label levelComm = levelMesh.comm();
-            label nProcs = UPstream::nProcs(levelComm);
-
-            if (nProcs > 1)
+            if (agglom_.hasMeshLevel(fineLevelIndex))
             {
-                // Processor restriction map: per processor the coarse processor
-                labelList procAgglomMap(nProcs, 0);
+                // Get the fine mesh
+                const lduMesh& levelMesh = agglom_.meshLevel(fineLevelIndex);
+                label levelComm = levelMesh.comm();
+                label nProcs = UPstream::nProcs(levelComm);
 
-                // Master processor
-                labelList masterProcs;
-                // Local processors that agglomerate. agglomProcIDs[0] is in
-                // masterProc.
-                List<int> agglomProcIDs;
-                GAMGAgglomeration::calculateRegionMaster
-                (
-                    levelComm,
-                    procAgglomMap,
-                    masterProcs,
-                    agglomProcIDs
-                );
+                if (nProcs > 1)
+                {
+                    // Processor restriction map: per processor the coarse
+                    // processor
+                    labelList procAgglomMap(nProcs);
 
-                // Allocate a communicator for the processor-agglomerated matrix
-                comms_.append
-                (
-                    UPstream::allocateCommunicator
+                    forAll(procAgglomMap, procI)
+                    {
+                        procAgglomMap[procI] = procI/(1<<mergeLevels_);
+                    }
+
+                    // Master processor
+                    labelList masterProcs;
+                    // Local processors that agglomerate. agglomProcIDs[0]
+                    // is in masterProc.
+                    List<int> agglomProcIDs;
+                    GAMGAgglomeration::calculateRegionMaster
                     (
                         levelComm,
-                        masterProcs
-                    )
-                );
-
-                // Use procesor agglomeration maps to do the actual collecting.
-                if (Pstream::myProcNo(levelComm) != -1)
-                {
-                    GAMGProcAgglomeration::agglomerate
-                    (
-                        fineLevelIndex,
                         procAgglomMap,
                         masterProcs,
-                        agglomProcIDs,
-                        comms_.last()
+                        agglomProcIDs
                     );
+
+                    // Allocate a communicator for the processor-agglomerated
+                    // matrix
+                    comms_.append
+                    (
+                        UPstream::allocateCommunicator
+                        (
+                            levelComm,
+                            masterProcs
+                        )
+                    );
+
+                    // Use procesor agglomeration maps to do the actual
+                    // collecting.
+                    if (Pstream::myProcNo(levelComm) != -1)
+                    {
+                        GAMGProcAgglomeration::agglomerate
+                        (
+                            fineLevelIndex,
+                            procAgglomMap,
+                            masterProcs,
+                            agglomProcIDs,
+                            comms_.last()
+                        );
+                    }
                 }
             }
         }

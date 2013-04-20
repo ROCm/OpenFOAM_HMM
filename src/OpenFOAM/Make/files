@@ -328,6 +328,8 @@ masterCoarsestGAMGProcAgglomeration = $(GAMGProcAgglomerations)/masterCoarsestGA
 $(masterCoarsestGAMGProcAgglomeration)/masterCoarsestGAMGProcAgglomeration.C
 manualGAMGProcAgglomeration = $(GAMGProcAgglomerations)/manualGAMGProcAgglomeration
 $(manualGAMGProcAgglomeration)/manualGAMGProcAgglomeration.C
+eagerGAMGProcAgglomeration = $(GAMGProcAgglomerations)/eagerGAMGProcAgglomeration
+$(eagerGAMGProcAgglomeration)/eagerGAMGProcAgglomeration.C
 /*
 cellFaceRatioGAMGProcAgglomeration = $(GAMGProcAgglomerations)/cellFaceRatioGAMGProcAgglomeration
 $(cellFaceRatioGAMGProcAgglomeration)/cellFaceRatioGAMGProcAgglomeration.C

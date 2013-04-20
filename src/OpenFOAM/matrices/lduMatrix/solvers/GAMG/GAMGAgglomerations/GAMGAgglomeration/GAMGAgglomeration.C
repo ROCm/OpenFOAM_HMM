@@ -121,7 +121,10 @@ Foam::GAMGAgglomeration::GAMGAgglomeration
     ),
     procAgglomeratorPtr_
     (
-        controlDict.found("processorAgglomerator")
+        (
+            (UPstream::nProcs(mesh.comm()) > 1)
+         && controlDict.found("processorAgglomerator")
+        )
       ? GAMGProcAgglomeration::New
         (
             controlDict.lookup("processorAgglomerator"),
