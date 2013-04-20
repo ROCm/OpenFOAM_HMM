@@ -27,22 +27,25 @@ Class
 Description
     Manual processor agglomeration of GAMGAgglomerations.
 
-    In the GAMG defintion:
+    In the GAMG control dictionary:
 
         processorAgglomerator manual;
         processorAgglomeration
         (
-            (3 (0 0 1 1))
-            (6 (0 0))
+            (
+                3           //at level 3
+                (
+                    ((0 1) 0)   //coarse 0 from 0,1 (and moved onto 0)
+                    ((2 3) 3)   //coarse 1 from 2,3 (and moved onto 3)
+                )
+            )
+            (
+                6           //at level6
+                (
+                    ((0 1) 0)   //coarse 0 from 0,1 (and moved onto 0)
+                )
+            )
         );
-
-    which says that
-    - at level 3 of the agglomeration processors 0 and 1 will combine
-      into coarse processor 0 (located on processor0) and 2,3
-      will combine into coarse processor 1 (located on 2)
-      (currently the master is always the minimum of the set)
-    - at level 6 of the agglomeration coarse processors 0 and 1 will combine
-      into coarse processor 0 (located on the minimum, processor 0)
 
 SourceFiles
     manualGAMGProcAgglomeration.C
@@ -73,8 +76,10 @@ class manualGAMGProcAgglomeration
 {
     // Private data
 
+        typedef Tuple2<labelList, label> clusterAndMaster;
+
         //- Per level the agglomeration map
-        const List<Tuple2<label, labelList> > procAgglomMaps_;
+        const List<Tuple2<label, List<clusterAndMaster> > > procAgglomMaps_;
 
         //- Any allocated communicators
         DynamicList<label> comms_;

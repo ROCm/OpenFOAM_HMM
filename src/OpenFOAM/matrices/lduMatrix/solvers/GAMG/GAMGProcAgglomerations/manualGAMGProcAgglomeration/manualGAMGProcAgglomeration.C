@@ -98,37 +98,77 @@ bool Foam::manualGAMGProcAgglomeration::agglomerate()
                 continue;
             }
 
-
             if (agglom_.hasMeshLevel(fineLevelIndex))
             {
-                const labelList& procAgglomMap = procAgglomMaps_[i].second();
                 // Get the fine mesh
                 const lduMesh& levelMesh = agglom_.meshLevel(fineLevelIndex);
 
+                // My processor id
+                const label myProcID = Pstream::myProcNo(levelMesh.comm());
 
-                if (procAgglomMap.size() != Pstream::nProcs(levelMesh.comm()))
+                const List<clusterAndMaster>& clusters =
+                    procAgglomMaps_[i].second();
+
+                // Coarse to fine master processor
+                labelList coarseToMaster(clusters.size());
+
+                // Fine to coarse map
+                labelList procAgglomMap(Pstream::nProcs(levelMesh.comm()), -1);
+
+                // Cluster for my processor (with master index first)
+                labelList agglomProcIDs;
+
+
+
+                forAll(clusters, coarseI)
+                {
+                    const labelList& cluster = clusters[coarseI].first();
+                    coarseToMaster[coarseI] = clusters[coarseI].second();
+
+                    forAll(cluster, i)
+                    {
+                        procAgglomMap[cluster[i]] = coarseI;
+                    }
+
+                    label masterIndex = findIndex
+                    (
+                        cluster,
+                        coarseToMaster[coarseI]
+                    );
+
+                    if (masterIndex == -1)
+                    {
+                        FatalErrorIn
+                        (
+                            "manualGAMGProcAgglomeration::agglomerate()"
+                        )   << "At level " << fineLevelIndex
+                            << " the master processor "
+                            << coarseToMaster[coarseI]
+                            << " is not in the cluster "
+                            << cluster
+                            << exit(FatalError);
+                    }
+
+                    if (findIndex(cluster, myProcID) != -1)
+                    {
+                        // This is my cluster. Make sure master index is first
+                        agglomProcIDs = cluster;
+                        Swap(agglomProcIDs[0], agglomProcIDs[masterIndex]);
+                    }
+                }
+
+
+                // Check that we've done all processors
+                if (findIndex(procAgglomMap, -1) != -1)
                 {
                     FatalErrorIn("manualGAMGProcAgglomeration::agglomerate()")
                         << "At level " << fineLevelIndex
-                        << "The fine-to-coarse agglomeration map size "
-                        << procAgglomMap.size() << " differs from the"
-                        << " number of processors "
-                        << Pstream::nProcs(levelMesh.comm())
+                        << " processor "
+                        << findIndex(procAgglomMap, -1)
+                        << " is not in any cluster"
                         << exit(FatalError);
                 }
 
-                // Master processor
-                labelList masterProcs;
-                // Local processors that agglomerate. agglomProcIDs[0] is in
-                // masterProc.
-                List<int> agglomProcIDs;
-                GAMGAgglomeration::calculateRegionMaster
-                (
-                    levelMesh.comm(),
-                    procAgglomMap,
-                    masterProcs,
-                    agglomProcIDs
-                );
 
                 // Allocate a communicator for the processor-agglomerated matrix
                 comms_.append
@@ -136,7 +176,7 @@ bool Foam::manualGAMGProcAgglomeration::agglomerate()
                     UPstream::allocateCommunicator
                     (
                         levelMesh.comm(),
-                        masterProcs
+                        coarseToMaster
                     )
                 );
 
@@ -147,7 +187,7 @@ bool Foam::manualGAMGProcAgglomeration::agglomerate()
                     (
                         fineLevelIndex,
                         procAgglomMap,
-                        masterProcs,
+                        coarseToMaster,
                         agglomProcIDs,
                         comms_.last()
                     );
