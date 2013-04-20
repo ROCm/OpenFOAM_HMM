@@ -129,7 +129,7 @@ bool linearDistance::sizeLocations
         shapePts.resize(1);
         shapeSizes.resize(1);
 
-        shapePts[0] = pt - n*distance_;
+        shapePts[0] = pt + n*distance_;
         shapeSizes[0] = distanceCellSize_;
     }
 
