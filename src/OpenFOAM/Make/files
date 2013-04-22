@@ -330,6 +330,8 @@ manualGAMGProcAgglomeration = $(GAMGProcAgglomerations)/manualGAMGProcAgglomerat
 $(manualGAMGProcAgglomeration)/manualGAMGProcAgglomeration.C
 eagerGAMGProcAgglomeration = $(GAMGProcAgglomerations)/eagerGAMGProcAgglomeration
 $(eagerGAMGProcAgglomeration)/eagerGAMGProcAgglomeration.C
+noneGAMGProcAgglomeration = $(GAMGProcAgglomerations)/noneGAMGProcAgglomeration
+$(noneGAMGProcAgglomeration)/noneGAMGProcAgglomeration.C
 /*
 cellFaceRatioGAMGProcAgglomeration = $(GAMGProcAgglomerations)/cellFaceRatioGAMGProcAgglomeration
 $(cellFaceRatioGAMGProcAgglomeration)/cellFaceRatioGAMGProcAgglomeration.C
