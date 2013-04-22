@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -160,7 +160,11 @@ void Foam::treeDataPoint::findNearest
 ) const
 {
     // Best so far
-    scalar nearestDistSqr = magSqr(linePoint - nearestPoint);
+    scalar nearestDistSqr = GREAT;
+    if (minIndex >= 0)
+    {
+        nearestDistSqr = magSqr(linePoint - nearestPoint);
+    }
 
     forAll(indices, i)
     {
