@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,18 +25,15 @@ Class
     Foam::coordinateSystem
 
 Description
-    A cartesian coordinate system and the base class for other coordinate
+    Base class for other coordinate
     system specifications.
 
     All systems are defined by an origin point and a coordinateRotation.
-    For convenience, the dictionary constructor forms allow a few shortcuts:
-    - the default origin corresponds to <em>(0 0 0)</em>
-    - if the \c type is not otherwise specified, a Cartesian coordinateSystem
-      is implicit
 
     \verbatim
-        flipped
+        coordinateSystem
         {
+            type    cartesian;
             origin  (0 0 0);
             coordinateRotation
             {
@@ -46,79 +43,18 @@ Description
         }
     \endverbatim
 
-    - if an axes specification (eg, e3/e1) is used, the coordinateRotation
-      sub-dictionary can be dropped.
+    Types of coordinateRotation:
+    1) axesRotation
+    2) STARCDRotation
+    3) localAxesRotation
+    4) EulerCoordinateRotation
 
-    \verbatim
-        flipped     // the same, specified as axes
-        {
-            origin  (0 0 0);
-            coordinateRotation
-            {
-                type    axes;
-                e3      (1 0 0);
-                e1      (0 0 -1);
-            }
-        }
-        flipped     // the same, using all the shortcuts
-        {
-            e3      (1 0 0);
-            e1      (0 0 -1);
-        }
-    \endverbatim
-
-    - if a sub-dictionary coordinateSystem is found within the dictionary, it
-      will be used. This provides a convenient means of embedding
-      coordinateSystem information in another dictionary.
-      This is used, for example, in the porousZones:
-
-    \verbatim
-        1
-        (
-        cat1
-        {
-            coordinateSystem
-            {
-                origin  (0 0 0);
-                coordinateRotation
-                {
-                    type        STARCDRotation;
-                    rotation    (0 0 90);
-                }
-            }
-            porosity        0.781;
-            Darcy
-            {
-                d   d [0 -2 0 0 0]  (-1000 -1000 0.50753e+08);
-                f   f [0 -1 0 0 0]  (-1000 -1000 12.83);
-            }
-        }
-        )
-    \endverbatim
-
-    - additionally, if the coordinateSystem points to a plain entry,
-      it can be used to reference one of the global coordinateSystems
-
-    \verbatim
-        1
-        (
-        cat1
-        {
-            coordinateSystem  system_10;
-            porosity        0.781;
-            Darcy
-            {
-                d   d [0 -2 0 0 0]  (-1000 -1000 0.50753e+08);
-                f   f [0 -1 0 0 0]  (-1000 -1000 12.83);
-            }
-        }
-        )
-    \endverbatim
-    For this to work correctly, the coordinateSystem constructor must be
-    supplied with both a dictionary and an objectRegistry.
+    Type of coordinates:
+    1) cartesian
+    2) cylindricalCS
 
 See Also
-    coordinateSystems and coordinateSystems::New
+    coordinateSystem and coordinateSystem::New
 
 SourceFiles
     coordinateSystem.C
@@ -136,6 +72,7 @@ SourceFiles
 #include "tmp.H"
 #include "coordinateRotation.H"
 #include "objectRegistry.H"
+#include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -151,19 +88,16 @@ class coordinateSystem
     // Private data
 
         //- Name of coordinate system
-        mutable word name_;
+        word name_;
 
         //- Optional note
-        mutable string note_;
+        string note_;
 
         //- Origin
-        mutable point origin_;
+        point origin_;
 
         //- Local-to-Global transformation tensor
-        coordinateRotation R_;
-
-        //- Global-to-Local transformation tensor
-        tensor Rtr_;
+        autoPtr<coordinateRotation> R_;
 
 
 protected:
@@ -193,6 +127,12 @@ protected:
             const vectorField&,
             bool translate
         ) const;
+
+        //- Init from dict and obr
+        void init(const dictionary&);
+
+        //- Init from dictionary
+        void init(const dictionary&, const objectRegistry&);
 
 
 public:
@@ -238,63 +178,47 @@ public:
 
         //- Construct from dictionary (default name)
         //  With the ability to reference global coordinateSystems
-        coordinateSystem(const dictionary&, const objectRegistry&);
+        coordinateSystem(const objectRegistry&, const dictionary&);
 
         //- Construct from Istream
         //  The Istream contains a word followed by a dictionary
         coordinateSystem(Istream&);
 
-        //- Return clone
-        autoPtr<coordinateSystem> clone() const
-        {
-            return autoPtr<coordinateSystem>(new coordinateSystem(*this));
-        }
+
+    //- Return clone
+    autoPtr<coordinateSystem> clone() const
+    {
+        return autoPtr<coordinateSystem>(new coordinateSystem(*this));
+    }
 
 
     // Declare run-time constructor selection table
-
-        declareRunTimeSelectionTable
+    declareRunTimeSelectionTable
+    (
+        autoPtr,
+        coordinateSystem,
+        dictionary,
         (
-            autoPtr,
-            coordinateSystem,
-            dictionary,
-            (
-                const word& name,
-                const dictionary& dict
-            ),
-            (name, dict)
-        );
-
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            coordinateSystem,
-            origRotation,
-            (
-                const word& name,
-                const point& origin,
-                const coordinateRotation& cr
-            ),
-            (name, origin, cr)
-        );
+            const objectRegistry& obr,
+            const dictionary& dict
+        ),
+        (obr, dict)
+    );
 
 
     // Selectors
 
+        //- Select constructed from dictionary and objectRegistry
+        static autoPtr<coordinateSystem> New
+        (
+            const objectRegistry& obr,
+            const dictionary& dict
+        );
+
         //- Select constructed from dictionary
         static autoPtr<coordinateSystem> New
         (
-            const word& name,
-            const dictionary&
-        );
-
-        //- Select constructed from origin and rotation
-        static autoPtr<coordinateSystem> New
-        (
-            const word& coordType,
-            const word& name,
-            const point& origin,
-            const coordinateRotation&
+            const dictionary& dict
         );
 
         //- Select constructed from Istream
@@ -306,6 +230,7 @@ public:
 
 
     // Member Functions
+
 
         // Access
 
@@ -333,49 +258,18 @@ public:
                 return origin_;
             }
 
-            //- Return coordinate rotation
-            const coordinateRotation& rotation() const
+            //- Return const reference to coordinate rotation
+            const coordinateRotation& R() const
             {
-                return R_;
+                return R_();
             }
 
-            //- Return local-to-global transformation tensor
-            const tensor& R() const
+            //- Return non const reference to coordinate rotation
+            coordinateRotation& R()
             {
-                return R_;
+                return R_();
             }
 
-            //- Return local Cartesian x-axis
-            const vector e1() const
-            {
-                return Rtr_.x();
-            }
-
-            //- Return local Cartesian y-axis
-            const vector e2() const
-            {
-                return Rtr_.y();
-            }
-
-            //- Return local Cartesian z-axis
-            const vector e3() const
-            {
-                return Rtr_.z();
-            }
-
-            //- Return axis (e3: local Cartesian z-axis)
-            // \deprecated method e3 is preferred (deprecated Apr 2008)
-            const vector axis() const
-            {
-                return Rtr_.z();
-            }
-
-            //- Return direction (e1: local Cartesian x-axis)
-            // \deprecated method e1 is preferred (deprecated Apr 2008)
-            const vector direction() const
-            {
-                return Rtr_.x();
-            }
 
             //- Return as dictionary of entries
             //  \param [in] ignoreType drop type (cartesian, cylindrical, etc)
@@ -386,7 +280,7 @@ public:
         // Edit
 
             //- Rename
-            virtual void rename(const word& newName)
+            void rename(const word& newName)
             {
                 name_ = newName;
             }
@@ -408,7 +302,7 @@ public:
             virtual void write(Ostream&) const;
 
             //- Write dictionary
-            virtual void writeDict(Ostream&, bool subDict=true) const;
+            void writeDict(Ostream&, bool subDict=true) const;
 
 
         // Transformations
@@ -472,22 +366,18 @@ public:
 
     // Member Operators
 
-        //- assign from dictionary
-        void operator=(const dictionary&);
+        // friend Operators
+
+            friend bool operator!=
+            (
+                const coordinateSystem&,
+                const coordinateSystem&
+            );
 
 
-    // friend Operators
+        // IOstream Operators
 
-        friend bool operator!=
-        (
-            const coordinateSystem&,
-            const coordinateSystem&
-        );
-
-
-    // IOstream Operators
-
-        friend Ostream& operator<<(Ostream&, const coordinateSystem&);
+            friend Ostream& operator<<(Ostream&, const coordinateSystem&);
 };
 
 

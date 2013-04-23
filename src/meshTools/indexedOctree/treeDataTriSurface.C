@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -404,11 +404,50 @@ void Foam::treeDataTriSurface::findNearest
     point& nearestPoint
 ) const
 {
-    notImplemented
-    (
-        "treeDataTriSurface::findNearest(const labelUList&"
-        ", const linePointRef&, treeBoundBox&, label&, point&, point&) const"
-    );
+    // Best so far
+    scalar nearestDistSqr = VGREAT;
+    if (minIndex >= 0)
+    {
+        nearestDistSqr = magSqr(linePoint - nearestPoint);
+    }
+
+    const pointField& points = surface_.points();
+
+    forAll(indices, i)
+    {
+        label index = indices[i];
+        const triSurface::FaceType& f = surface_[index];
+
+        triPointRef tri(f.tri(points));
+
+        pointHit lineInfo(point::max);
+        pointHit pHit = tri.nearestPoint(ln, lineInfo);
+
+        scalar distSqr = sqr(pHit.distance());
+
+        if (distSqr < nearestDistSqr)
+        {
+            nearestDistSqr = distSqr;
+            minIndex = index;
+            linePoint = lineInfo.rawPoint();
+            nearestPoint = pHit.rawPoint();
+
+            {
+                point& minPt = tightest.min();
+                minPt = min(ln.start(), ln.end());
+                minPt.x() -= pHit.distance();
+                minPt.y() -= pHit.distance();
+                minPt.z() -= pHit.distance();
+            }
+            {
+                point& maxPt = tightest.max();
+                maxPt = max(ln.start(), ln.end());
+                maxPt.x() += pHit.distance();
+                maxPt.y() += pHit.distance();
+                maxPt.z() += pHit.distance();
+            }
+        }
+    }
 }
 
 

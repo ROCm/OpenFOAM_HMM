@@ -9,9 +9,12 @@
 forceCoeffs1
 {
     type        forceCoeffs;
+
     functionObjectLibs ( "libforces.so" );
-    outputControl timeStep;
-    outputInterval 1;
+
+    outputControl   timeStep;
+    outputInterval  1;
+
     log         yes;
 
     patches     ( "motorBike.*" );
@@ -28,9 +31,13 @@ forceCoeffs1
     lRef        1.42;        // Wheelbase length
     Aref        0.75;        // Estimated
 
-    nBin        20;          // output data into bins
-    binDir      (1 0 0);     // bin direction
-    binFormat   gnuplot;
+    binData
+    {
+        nBin        20;          // output data into 20 bins
+        direction   (1 0 0);     // bin direction
+        format      gnuplot;
+        cumulative  yes;
+    }
 }
 
 

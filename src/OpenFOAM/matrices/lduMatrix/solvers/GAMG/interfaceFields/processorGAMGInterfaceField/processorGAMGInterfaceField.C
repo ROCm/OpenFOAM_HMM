@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -99,8 +99,8 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
     const Pstream::commsTypes commsType
 ) const
 {
-label oldWarn = UPstream::warnComm;
-UPstream::warnComm = comm();
+    label oldWarn = UPstream::warnComm;
+    UPstream::warnComm = comm();
 
     procInterface_.interfaceInternalField(psiInternal, scalarSendBuf_);
 
@@ -137,7 +137,7 @@ UPstream::warnComm = comm();
 
     const_cast<processorGAMGInterfaceField&>(*this).updatedMatrix() = false;
 
-UPstream::warnComm = oldWarn;
+    UPstream::warnComm = oldWarn;
 }
 
 
@@ -155,8 +155,8 @@ void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
         return;
     }
 
-label oldWarn = UPstream::warnComm;
-UPstream::warnComm = comm();
+    label oldWarn = UPstream::warnComm;
+    UPstream::warnComm = comm();
 
     const labelUList& faceCells = procInterface_.faceCells();
 
@@ -202,7 +202,7 @@ UPstream::warnComm = comm();
 
     const_cast<processorGAMGInterfaceField&>(*this).updatedMatrix() = true;
 
-UPstream::warnComm = oldWarn;
+    UPstream::warnComm = oldWarn;
 }
 
 

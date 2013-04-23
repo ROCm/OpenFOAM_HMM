@@ -27,6 +27,18 @@ License
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
+inline const Foam::polyMesh& Foam::meshToMeshNew::srcRegion() const
+{
+    return srcRegion_;
+}
+
+
+inline const Foam::polyMesh& Foam::meshToMeshNew::tgtRegion() const
+{
+    return tgtRegion_;
+}
+
+
 inline const Foam::labelListList&
 Foam::meshToMeshNew::srcToTgtCellAddr() const
 {

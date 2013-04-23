@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -221,6 +221,7 @@ Foam::regionModels::regionModel::interRegionAMI
                     p,
                     nbrP,
                     faceAreaIntersect::tmMesh,
+                    AMIPatchToPatchInterpolation::imFaceAreaWeight,
                     flip
                 )
             );
@@ -261,6 +262,7 @@ Foam::regionModels::regionModel::interRegionAMI
                 p,
                 nbrP,
                 faceAreaIntersect::tmMesh,
+                AMIPatchToPatchInterpolation::imFaceAreaWeight,
                 flip
             )
         );
@@ -318,7 +320,7 @@ Foam::label Foam::regionModels::regionModel::nbrCoupledPatchID
         (
             "Foam::label Foam::regionModels::regionModel::nbrCoupledPatchID"
             "("
-                "const regionModel& , "
+                "const regionModel&, "
                 "const label"
             ") const"
         )

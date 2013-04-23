@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,15 +41,6 @@ namespace Foam
         const volScalarField& Cprho,
         const volScalarField& kappa
     );
-
-    scalar solidRegionDiffNo
-    (
-        const fvMesh& mesh,
-        const Time& runTime,
-        const volScalarField& Cprho,
-        const volSymmTensorField& kappa
-    );
-
 }
 
 #endif

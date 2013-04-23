@@ -1,20 +1,15 @@
 {
-    rho = thermo.rho();
-    rho = max(rho, rhoMin);
-    rho = min(rho, rhoMax);
-    rho.relax();
-
     const volScalarField& psi = thermo.psi();
 
     volVectorField HbyA("HbyA", U);
 
     if (pressureImplicitPorosity)
     {
-        HbyA = trTU() & (UEqn() == fvOptions(rho, U))().H();
+        HbyA = trTU() & UEqn().H();
     }
     else
     {
-        HbyA = trAU()*(UEqn() == fvOptions(rho, U))().H();
+        HbyA = trAU()*UEqn().H();
     }
 
     UEqn.clear();
@@ -27,7 +22,7 @@
         fvc::interpolate(rho*HbyA) & mesh.Sf()
     );
 
-    mrfZones.relativeFlux(fvc::interpolate(rho), phiHbyA);
+    fvOptions.relativeFlux(fvc::interpolate(rho), phiHbyA);
 
     closedVolume = adjustPhi(phiHbyA, U, p);
 

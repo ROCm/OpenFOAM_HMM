@@ -427,9 +427,13 @@ Foam::polyMeshFilter::polyMeshFilter(const fvMesh& mesh)
             IOobject::NO_WRITE
         )
     ),
+    controlMeshQuality_
+    (
+        dict_.lookupOrDefault<Switch>("controlMeshQuality", false)
+    ),
     collapseEdgesCoeffDict_(dict_.subDict("collapseEdgesCoeffs")),
-    collapseFacesCoeffDict_(dict_.subDict("collapseFacesCoeffs")),
-    meshQualityCoeffDict_(dict_.subDict("meshQualityCoeffs")),
+    collapseFacesCoeffDict_(dict_.subOrEmptyDict("collapseFacesCoeffs")),
+    meshQualityCoeffDict_(dict_.subOrEmptyDict("controlMeshQualityCoeffs")),
     minLen_(readScalar(collapseEdgesCoeffDict_.lookup("minimumEdgeLength"))),
     maxCos_
     (
@@ -443,27 +447,39 @@ Foam::polyMeshFilter::polyMeshFilter(const fvMesh& mesh)
     ),
     edgeReductionFactor_
     (
-        readScalar(collapseEdgesCoeffDict_.lookup("reductionFactor"))
+        meshQualityCoeffDict_.lookupOrDefault<scalar>("edgeReductionFactor", -1)
     ),
     maxIterations_
     (
-        readLabel(meshQualityCoeffDict_.lookup("maximumIterations"))
+        meshQualityCoeffDict_.lookupOrAddDefault<label>("maximumIterations", 1)
     ),
     maxSmoothIters_
     (
-        readLabel(meshQualityCoeffDict_.lookup("maximumSmoothingIterations"))
+        meshQualityCoeffDict_.lookupOrAddDefault<label>
+        (
+            "maximumSmoothingIterations",
+            0
+        )
     ),
     initialFaceLengthFactor_
     (
-        readScalar(collapseFacesCoeffDict_.lookup("initialFaceLengthFactor"))
+        collapseFacesCoeffDict_.lookupOrAddDefault<scalar>
+        (
+            "initialFaceLengthFactor",
+            -1
+        )
     ),
     faceReductionFactor_
     (
-        readScalar(collapseFacesCoeffDict_.lookup("reductionFactor"))
+        meshQualityCoeffDict_.lookupOrAddDefault<scalar>
+        (
+            "faceReductionFactor",
+            -1
+        )
     ),
     maxPointErrorCount_
     (
-        readLabel(meshQualityCoeffDict_.lookup("maxPointErrorCount"))
+        meshQualityCoeffDict_.lookupOrAddDefault<label>("maxPointErrorCount", 0)
     ),
     minEdgeLen_(),
     faceFilterFactor_()
@@ -547,22 +563,9 @@ Foam::label Foam::polyMeshFilter::filter(const label nOriginalBadFaces)
                 Map<point> collapsePointToLocation(newMesh.nPoints());
 
                 // Mark points on boundary
-                const labelList boundaryPoint = findBoundaryPoints
-                (
-                    newMesh//,
-    //                    boundaryIOPts
-                );
+                const labelList boundaryPoint = findBoundaryPoints(newMesh);
 
                 edgeCollapser collapser(newMesh, collapseFacesCoeffDict_);
-
-                // Per face collapse status:
-                //    -1 : not collapsed
-                //  >= 0 : index of point in face to collapse to
-                List<Map<point> > faceCollapseToPoints
-                (
-                    newMesh.nFaces(),
-                    Map<point>()
-                );
 
                 {
                     // Collapse faces
@@ -832,41 +835,48 @@ Foam::label Foam::polyMeshFilter::filter(const label nOriginalBadFaces)
         // Do not allow collapses in regions of error.
         // Updates minEdgeLen, nRelaxedEdges
 
-        PackedBoolList isErrorPoint(newMesh.nPoints());
-        nBadFaces = edgeCollapser::checkMeshQuality
-        (
-            newMesh,
-            meshQualityCoeffDict_,
-            isErrorPoint
-        );
+        if (controlMeshQuality_)
+        {
+            PackedBoolList isErrorPoint(newMesh.nPoints());
+            nBadFaces = edgeCollapser::checkMeshQuality
+            (
+                newMesh,
+                meshQualityCoeffDict_,
+                isErrorPoint
+            );
 
-        Info<< nl << "    Number of bad faces     : " << nBadFaces << nl
-            << "    Number of marked points : "
-            << returnReduce(isErrorPoint.count(), sumOp<unsigned int>())
-            << endl;
+            Info<< nl << "    Number of bad faces     : " << nBadFaces << nl
+                << "    Number of marked points : "
+                << returnReduce(isErrorPoint.count(), sumOp<unsigned int>())
+                << endl;
 
-        updatePointErrorCount
-        (
-            isErrorPoint,
-            origToCurrentPointMap,
-            pointErrorCount
-        );
+            updatePointErrorCount
+            (
+                isErrorPoint,
+                origToCurrentPointMap,
+                pointErrorCount
+            );
 
-        checkMeshEdgesAndRelaxEdges
-        (
-            newMesh,
-            origToCurrentPointMap,
-            isErrorPoint,
-            pointErrorCount
-        );
+            checkMeshEdgesAndRelaxEdges
+            (
+                newMesh,
+                origToCurrentPointMap,
+                isErrorPoint,
+                pointErrorCount
+            );
 
-        checkMeshFacesAndRelaxEdges
-        (
-            newMesh,
-            origToCurrentPointMap,
-            isErrorPoint,
-            pointErrorCount
-        );
+            checkMeshFacesAndRelaxEdges
+            (
+                newMesh,
+                origToCurrentPointMap,
+                isErrorPoint,
+                pointErrorCount
+            );
+        }
+        else
+        {
+            return -1;
+        }
     }
 
     return nBadFaces;
@@ -931,11 +941,7 @@ Foam::label Foam::polyMeshFilter::filterEdges
             Map<point> collapsePointToLocation(newMesh.nPoints());
 
             // Mark points on boundary
-            const labelList boundaryPoint = findBoundaryPoints
-            (
-                newMesh//,
-//                    boundaryIOPts
-            );
+            const labelList boundaryPoint = findBoundaryPoints(newMesh);
 
             edgeCollapser collapser(newMesh, collapseFacesCoeffDict_);
 
@@ -1059,33 +1065,40 @@ Foam::label Foam::polyMeshFilter::filterEdges
         // Do not allow collapses in regions of error.
         // Updates minEdgeLen, nRelaxedEdges
 
-        PackedBoolList isErrorPoint(newMesh.nPoints());
-        nBadFaces = edgeCollapser::checkMeshQuality
-        (
-            newMesh,
-            meshQualityCoeffDict_,
-            isErrorPoint
-        );
+        if (controlMeshQuality_)
+        {
+            PackedBoolList isErrorPoint(newMesh.nPoints());
+            nBadFaces = edgeCollapser::checkMeshQuality
+            (
+                newMesh,
+                meshQualityCoeffDict_,
+                isErrorPoint
+            );
 
-        Info<< nl << "    Number of bad faces     : " << nBadFaces << nl
-            << "    Number of marked points : "
-            << returnReduce(isErrorPoint.count(), sumOp<unsigned int>())
-            << endl;
+            Info<< nl << "    Number of bad faces     : " << nBadFaces << nl
+                << "    Number of marked points : "
+                << returnReduce(isErrorPoint.count(), sumOp<unsigned int>())
+                << endl;
 
-        updatePointErrorCount
-        (
-            isErrorPoint,
-            origToCurrentPointMap,
-            pointErrorCount
-        );
+            updatePointErrorCount
+            (
+                isErrorPoint,
+                origToCurrentPointMap,
+                pointErrorCount
+            );
 
-        checkMeshEdgesAndRelaxEdges
-        (
-            newMesh,
-            origToCurrentPointMap,
-            isErrorPoint,
-            pointErrorCount
-        );
+            checkMeshEdgesAndRelaxEdges
+            (
+                newMesh,
+                origToCurrentPointMap,
+                isErrorPoint,
+                pointErrorCount
+            );
+        }
+        else
+        {
+            return -1;
+        }
     }
 
     return nBadFaces;
@@ -1174,18 +1187,21 @@ Foam::label Foam::polyMeshFilter::filterIndirectPatchFaces()
         // Do not allow collapses in regions of error.
         // Updates minEdgeLen, nRelaxedEdges
 
-        PackedBoolList isErrorPoint(newMesh.nPoints());
-        nBadFaces = edgeCollapser::checkMeshQuality
-        (
-            newMesh,
-            meshQualityCoeffDict_,
-            isErrorPoint
-        );
+        if (controlMeshQuality_)
+        {
+            PackedBoolList isErrorPoint(newMesh.nPoints());
+            nBadFaces = edgeCollapser::checkMeshQuality
+            (
+                newMesh,
+                meshQualityCoeffDict_,
+                isErrorPoint
+            );
 
-        Info<< nl << "    Number of bad faces     : " << nBadFaces << nl
-            << "    Number of marked points : "
-            << returnReduce(isErrorPoint.count(), sumOp<unsigned int>())
-            << endl;
+            Info<< nl << "    Number of bad faces     : " << nBadFaces << nl
+                << "    Number of marked points : "
+                << returnReduce(isErrorPoint.count(), sumOp<unsigned int>())
+                << endl;
+        }
     }
 
     return nBadFaces;

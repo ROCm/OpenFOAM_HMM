@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::PilchErdman<CloudType>::PilchErdman
 (
     const dictionary& dict,
@@ -46,7 +46,7 @@ Foam::PilchErdman<CloudType>::PilchErdman
 }
 
 
-template <class CloudType>
+template<class CloudType>
 Foam::PilchErdman<CloudType>::PilchErdman(const PilchErdman<CloudType>& bum)
 :
     BreakupModel<CloudType>(bum),
@@ -57,7 +57,7 @@ Foam::PilchErdman<CloudType>::PilchErdman(const PilchErdman<CloudType>& bum)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::PilchErdman<CloudType>::~PilchErdman()
 {}
 
@@ -127,10 +127,10 @@ bool Foam::PilchErdman<CloudType>::update
 
         scalar rho12 = sqrt(rhoc/rho);
 
-        scalar Vd = Urmag*rho12*(B1_*taubBar * B2_*taubBar*taubBar);
+        scalar Vd = Urmag*rho12*(B1_*taubBar + B2_*taubBar*taubBar);
         scalar Vd1 = sqr(1.0 - Vd/Urmag);
         Vd1 = max(Vd1, SMALL);
-        scalar Ds = 2.0*Wec*sigma*Vd1/(Vd1*rhoc*sqr(Urmag));
+        scalar Ds = 2.0*Wec*sigma/(Vd1*rhoc*sqr(Urmag));
         scalar A = Urmag*rho12/d;
 
         scalar taub = taubBar/A;

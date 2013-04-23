@@ -337,55 +337,75 @@ addLayersControls
 
     // Advanced settings
 
-    // When not to extrude surface. 0 is flat surface, 90 is when two faces
-    // are perpendicular
-    featureAngle 60;
 
-    // At non-patched sides allow mesh to slip if extrusion direction makes
-    // angle larger than slipFeatureAngle.
-    slipFeatureAngle 30;
+    // Static analysis of starting mesh
 
-    // Maximum number of snapping relaxation iterations. Should stop
-    // before upon reaching a correct mesh.
-    nRelaxIter 5;
+        // When not to extrude surface. 0 is flat surface, 90 is when two faces
+        // are perpendicular
+        featureAngle 130;
 
-    // Number of smoothing iterations of surface normals
-    nSmoothSurfaceNormals 1;
+        // Stop layer growth on highly warped cells
+        maxFaceThicknessRatio 0.5;
 
-    // Number of smoothing iterations of interior mesh movement direction
-    nSmoothNormals 3;
 
-    // Smooth layer thickness over surface patches
-    nSmoothThickness 10;
+    // Patch displacement
 
-    // Stop layer growth on highly warped cells
-    maxFaceThicknessRatio 0.5;
+        // Number of smoothing iterations of surface normals
+        nSmoothSurfaceNormals 1;
 
-    // Reduce layer growth where ratio thickness to medial
-    // distance is large
-    maxThicknessToMedialRatio 0.3;
+        // Smooth layer thickness over surface patches
+        nSmoothThickness 10;
 
-    // Angle used to pick up medial axis points
-    // Note: changed(corrected) w.r.t 17x! 90 degrees corresponds to 130 in 17x.
-    minMedianAxisAngle 90;
 
-    // Create buffer region for new layer terminations
-    nBufferCellsNoExtrude 0;
 
-    // Overall max number of layer addition iterations. The mesher will exit
-    // if it reaches this number of iterations; possibly with an illegal
-    // mesh.
-    nLayerIter 50;
+    // Medial axis analysis
 
-    // Max number of iterations after which relaxed meshQuality controls
-    // get used. Up to nRelaxIter it uses the settings in meshQualityControls,
-    // after nRelaxIter it uses the values in meshQualityControls::relaxed.
-    nRelaxedIter 20;
+        // Angle used to pick up medial axis points
+        // Note: changed(corrected) w.r.t 17x! 90 degrees corresponds to 130
+        // in 17x.
+        minMedianAxisAngle 90;
 
-    // Additional reporting: if there are just a few faces where there
-    // are mesh errors (after adding the layers) print their face centres.
-    // This helps in tracking down problematic mesh areas.
-    //additionalReporting true;
+        // Reduce layer growth where ratio thickness to medial
+        // distance is large
+        maxThicknessToMedialRatio 0.3;
+
+        // Number of smoothing iterations of interior mesh movement direction
+        nSmoothNormals 3;
+
+        // Optional: smooth displacement after medial axis determination.
+        // default is 0.
+        nSmoothDisplacement 90;
+
+
+    // Mesh shrinking
+
+        // Optional: at non-patched sides allow mesh to slip if extrusion
+        // direction makes angle larger than slipFeatureAngle. Default is
+        // 0.5*featureAngle.
+        slipFeatureAngle 30;
+
+        // Maximum number of snapping relaxation iterations. Should stop
+        // before upon reaching a correct mesh.
+        nRelaxIter 5;
+
+        // Create buffer region for new layer terminations
+        nBufferCellsNoExtrude 0;
+
+        // Overall max number of layer addition iterations. The mesher will
+        // exit if it reaches this number of iterations; possibly with an
+        // illegal mesh.
+        nLayerIter 50;
+
+        // Max number of iterations after which relaxed meshQuality controls
+        // get used. Up to nRelaxIter it uses the settings in
+        // meshQualityControls,
+        // after nRelaxIter it uses the values in meshQualityControls::relaxed.
+        nRelaxedIter 20;
+
+        // Additional reporting: if there are just a few faces where there
+        // are mesh errors (after adding the layers) print their face centres.
+        // This helps in tracking down problematic mesh areas.
+        //additionalReporting true;
 }
 
 // Generic mesh quality settings. At any undoable phase these determine

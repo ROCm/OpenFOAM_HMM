@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -221,8 +221,7 @@ public:
     );
 
 
-    //- Return parallel consistent point normals for patches (on boundary faces)
-    //  using mesh points.
+    //- Return parallel consistent point normals for patches using mesh points.
     template
     <
         class Face,
@@ -233,13 +232,30 @@ public:
     static tmp<pointField> pointNormals
     (
         const polyMesh&,
-        const PrimitivePatch<Face, FaceList, PointField, PointType>&,
-        const labelList& meshFaces
+        const PrimitivePatch<Face, FaceList, PointField, PointType>&
     );
 
 
-    //- Gather points and faces onto master and merge (geometrically) into
-    //  single patch.
+    //- Return parallel consistent edge normals for patches using mesh points.
+    //  Supply with patch matching info from matchEdges.
+    template
+    <
+        class Face,
+        template<class> class FaceList,
+        class PointField,
+        class PointType
+    >
+    static tmp<pointField> edgeNormals
+    (
+        const polyMesh&,
+        const PrimitivePatch<Face, FaceList, PointField, PointType>&,
+        const labelList& patchEdges,
+        const labelList& coupledEdges
+    );
+
+
+    //- Gather points and faces onto master and merge into single patch.
+    //  Note: uses faces/points, not localFaces/localPoints.
     template
     <
         class Face,

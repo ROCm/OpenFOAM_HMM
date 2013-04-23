@@ -15,9 +15,9 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-combustionModel  PaSR<psiChemistryCombustion>;
+combustionModel PaSR<psiChemistryCombustion>;
 
-active  false;
+active          yes;
 
 PaSRCoeffs
 {

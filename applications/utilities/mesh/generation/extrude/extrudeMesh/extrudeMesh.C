@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -20,6 +20,9 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+Application
+    extrudeMesh
 
 Description
     Extrude mesh from existing patch (by default outwards facing normals;
@@ -190,7 +193,6 @@ void updateFaceLabels(const mapPolyMesh& map, labelList& faceLabels)
 
 
 
-// Main program:
 
 int main(int argc, char *argv[])
 {
@@ -383,12 +385,7 @@ int main(int argc, char *argv[])
         // Determine extrudePatch normal
         pointField extrudePatchPointNormals
         (
-            PatchTools::pointNormals    //calcNormals
-            (
-                mesh,
-                extrudePatch,
-                meshFaces
-            )
+            PatchTools::pointNormals(mesh, extrudePatch)
         );
 
 
@@ -630,11 +627,12 @@ int main(int argc, char *argv[])
         const labelListList& layerFaces = layerExtrude.layerFaces();
         backPatchFaces.setSize(layerFaces.size());
         frontPatchFaces.setSize(layerFaces.size());
-        forAll(backPatchFaces, i)
+        forAll(backPatchFaces, patchFaceI)
         {
-            backPatchFaces[i]  = layerFaces[i].first();
-            frontPatchFaces[i] = layerFaces[i].last();
+            backPatchFaces[patchFaceI]  = layerFaces[patchFaceI].first();
+            frontPatchFaces[patchFaceI] = layerFaces[patchFaceI].last();
         }
+
 
         // Create dummy fvSchemes, fvSolution
         createDummyFvMeshFiles(mesh, regionDir);
@@ -653,6 +651,13 @@ int main(int argc, char *argv[])
                 false
             ),
             mesh
+        );
+
+        layerExtrude.updateMesh
+        (
+            map(),
+            identity(extrudePatch.size()),
+            identity(extrudePatch.nPoints())
         );
 
         // Calculate face labels for front and back.

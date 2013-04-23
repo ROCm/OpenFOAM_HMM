@@ -36,7 +36,6 @@ Description
 #include "basicReactingMultiphaseCloud.H"
 #include "rhoCombustionModel.H"
 #include "radiationModel.H"
-#include "IOporosityModelList.H"
 #include "fvIOoptionList.H"
 #include "SLGThermo.H"
 #include "pimpleControl.H"

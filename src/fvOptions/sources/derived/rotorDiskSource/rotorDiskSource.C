@@ -92,7 +92,7 @@ void Foam::fv::rotorDiskSource::checkData()
                     (
                         readScalar(coeffs_.lookup("inletNormalVelocity"))
                     );
-                    inletVelocity_ = -coordSys_.e3()*UIn;
+                    inletVelocity_ = -coordSys_.R().e3()*UIn;
                     break;
                 }
                 case ifLocal:
@@ -203,7 +203,7 @@ void Foam::fv::rotorDiskSource::setFaceArea(vector& axis, const bool correct)
             {
                 const label faceI = pp.start() + j;
                 const label own = cellAddr[mesh_.faceOwner()[faceI]];
-                const bool nbr = nbrFaceCellAddr[faceI - nInternalFaces];
+                const label nbr = nbrFaceCellAddr[faceI - nInternalFaces];
                 const vector nf = Sfp[j]/magSfp[j];
 
                 if ((own != -1) && (nbr == -1) && ((nf & axis) > tol))
@@ -345,9 +345,9 @@ void Foam::fv::rotorDiskSource::createCoordinateSystem()
         << "    - disk diameter = " << diameter << nl
         << "    - disk area     = " << sumArea << nl
         << "    - origin        = " << coordSys_.origin() << nl
-        << "    - r-axis        = " << coordSys_.e1() << nl
-        << "    - psi-axis      = " << coordSys_.e2() << nl
-        << "    - z-axis        = " << coordSys_.e3() << endl;
+        << "    - r-axis        = " << coordSys_.R().e1() << nl
+        << "    - psi-axis      = " << coordSys_.R().e2() << nl
+        << "    - z-axis        = " << coordSys_.R().e3() << endl;
 }
 
 

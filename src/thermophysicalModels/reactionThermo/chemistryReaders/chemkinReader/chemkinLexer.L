@@ -296,13 +296,13 @@ List<specieElement> currentSpecieComposition(5);
 scalar currentLowT = 0;
 scalar currentHighT = 0;
 scalar currentCommonT = 0;
-gasThermoPhysics::coeffArray highCpCoeffs(scalarList(7));
-gasThermoPhysics::coeffArray lowCpCoeffs(scalarList(7));
+gasHThermoPhysics::coeffArray highCpCoeffs(scalarList(7));
+gasHThermoPhysics::coeffArray lowCpCoeffs(scalarList(7));
 
-gasReaction::specieCoeffs currentSpecieCoeff;
+gasHReaction::specieCoeffs currentSpecieCoeff;
 
-DynamicList<gasReaction::specieCoeffs> lhs;
-DynamicList<gasReaction::specieCoeffs> rhs;
+DynamicList<gasHReaction::specieCoeffs> lhs;
+DynamicList<gasHReaction::specieCoeffs> rhs;
 
 scalarList ArrheniusCoeffs(3);
 DynamicList<scalar> reactionCoeffs;
@@ -312,7 +312,7 @@ label currentThirdBodyIndex = -1;
 word reactionCoeffsName = word::null;
 HashTable<scalarList> reactionCoeffsTable;
 
-DynamicList<gasReaction::specieCoeffs> *lrhsPtr = &lhs;
+DynamicList<gasHReaction::specieCoeffs> *lrhsPtr = &lhs;
 
 reactionType rType = unknownReactionType;
 reactionRateType rrType = Arrhenius;
@@ -439,9 +439,25 @@ bool finishReaction = false;
 
 <readThermoSpecieName>{thermoSpecieName} {
         string specieString(foamSpecieString(YYText()));
-        specieString.replaceAll(" ", "_");
-        size_t strEnd = specieString.find_last_not_of('_');
-        currentSpecieName = specieString.substr(0, strEnd + 1);
+        if (newFormat_)
+        {
+            specieString.replaceAll(" ", "_");
+            size_t strEnd = specieString.find_last_not_of('_');
+            currentSpecieName = specieString.substr(0, strEnd + 1);
+        }
+        else
+        {
+            size_t spacePos = specieString.find(' ');
+            if (spacePos != string::npos)
+            {
+                currentSpecieName = specieString(0, spacePos);
+            }
+            else
+            {
+                currentSpecieName = specieString;
+            }
+        }
+
         BEGIN(readThermoDate);
     }
 
@@ -598,7 +614,7 @@ bool finishReaction = false;
 
 <readThermoLineLabel4>{thermoLineLabel4} {
 
-        HashPtrTable<gasThermoPhysics>::iterator specieThermoIter
+        HashPtrTable<gasHThermoPhysics>::iterator specieThermoIter
         (
             speciesThermo_.find(currentSpecieName)
         );
@@ -611,7 +627,7 @@ bool finishReaction = false;
         speciesThermo_.insert
         (
             currentSpecieName,
-            new gasThermoPhysics
+            new gasHThermoPhysics
             (
                 janafThermo<perfectGas<specie> >
                 (
@@ -1418,7 +1434,7 @@ bool finishReaction = false;
 
 <readReactionOrder>{reactionCoeff}{endReactionCoeffs} {
 
-        DynamicList<gasReaction::specieCoeffs>& lrhs = *lrhsPtr;
+        DynamicList<gasHReaction::specieCoeffs>& lrhs = *lrhsPtr;
 
         bool found = false;
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,7 +54,7 @@ makeDeltaCoeffs(scalarField& dc) const
     const modelType& region1D =
         patch().boundaryMesh().mesh().time().lookupObject<modelType>
         (
-            "thermoBaffleProperties"
+            "thermalBaffleProperties"
         );
 
     dc = 2.0/(pp.thickness()/region1D.nLayers());

@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 3 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,10 +19,9 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\*----------------------------------------------------------------------------*/
+\*---------------------------------------------------------------------------*/
 
 #include "interRegionExplicitPorositySource.H"
 #include "fvMesh.H"
@@ -55,7 +54,7 @@ void Foam::fv::interRegionExplicitPorositySource::initialise()
         return;
     }
 
-    const word zoneName(name_ + ".porous");
+    const word zoneName(name_ + ":porous");
 
     const fvMesh& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName_);
     const cellZoneMesh& cellZones = nbrMesh.cellZones();
@@ -152,7 +151,7 @@ void Foam::fv::interRegionExplicitPorositySource::addSup
     (
         IOobject
         (
-            name_ + ".UNbr",
+            name_ + ":UNbr",
             nbrMesh.time().timeName(),
             nbrMesh,
             IOobject::NO_READ,

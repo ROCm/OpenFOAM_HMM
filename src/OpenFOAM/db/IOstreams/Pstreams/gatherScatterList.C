@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,7 +44,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class T>
+template<class T>
 void Pstream::gatherList
 (
     const List<UPstream::commsStruct>& comms,
@@ -203,7 +203,7 @@ void Pstream::gatherList(List<T>& Values, const int tag, const label comm)
 }
 
 
-template <class T>
+template<class T>
 void Pstream::scatterList
 (
     const List<UPstream::commsStruct>& comms,

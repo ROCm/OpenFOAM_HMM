@@ -4,11 +4,11 @@
     (
         fvm::div(phi, U)
       + turbulence->divDevRhoReff(U)
+     ==
+        fvOptions(rho, U)
     );
 
     UEqn().relax();
-
-    mrfZones.addCoriolis(rho, UEqn());
 
     // Include the porous media resistance and solve the momentum equation
     // either implicit in the tensorial resistance or transport using by
@@ -30,7 +30,7 @@
 
         for (int UCorr=0; UCorr<nUCorr; UCorr++)
         {
-            U = trTU() & ((UEqn() == fvOptions(rho, U))().H() - gradp);
+            U = trTU() & (UEqn().H() - gradp);
         }
         U.correctBoundaryConditions();
 
@@ -42,7 +42,7 @@
 
         fvOptions.constrain(UEqn());
 
-        solve(UEqn() == -fvc::grad(p) + fvOptions(rho, U));
+        solve(UEqn() == -fvc::grad(p));
 
         fvOptions.correct(U);
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,20 +54,24 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-        Class temperatureCoupledBase Declaration
+                   Class temperatureCoupledBase Declaration
 \*---------------------------------------------------------------------------*/
 
 class temperatureCoupledBase
 {
 public:
+
+    // Public enumerations
+
         //- Type of supplied Kappa
         enum KMethodType
         {
-            BASICTHERMO,
-            SOLIDTHERMO,
-            DIRECTIONALSOLIDTHERMO,
-            LOOKUP
+            mtFluidThermo,
+            mtSolidThermo,
+            mtDirectionalSolidThermo,
+            mtLookup
         };
+
 
 private:
 

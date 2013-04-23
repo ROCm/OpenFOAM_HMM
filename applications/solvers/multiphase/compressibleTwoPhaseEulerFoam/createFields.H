@@ -16,14 +16,14 @@
     (
         transportProperties.found("phases")
       ? wordList(transportProperties.lookup("phases"))[0]
-      : "phase1"
+      : "1"
     );
 
     word phase2Name
     (
         transportProperties.found("phases")
       ? wordList(transportProperties.lookup("phases"))[1]
-      : "phase2"
+      : "2"
     );
 
     autoPtr<phaseModel> phase1 = phaseModel::New
@@ -62,10 +62,10 @@
 
     volScalarField& p = thermo1.p();
 
-    volScalarField rho1("rho" + phase1Name, thermo1.rho());
+    volScalarField& rho1 = thermo1.rho();
     const volScalarField& psi1 = thermo1.psi();
 
-    volScalarField rho2("rho" + phase2Name, thermo2.rho());
+    volScalarField& rho2 = thermo2.rho();
     const volScalarField& psi2 = thermo2.psi();
 
     volVectorField U
@@ -275,8 +275,8 @@
     );
 
 
-    Info<< "Creating field dpdt\n" << endl;
-    volScalarField dpdt
+    Info<< "Creating field dalpha1pdt\n" << endl;
+    volScalarField dalpha1pdt
     (
         IOobject
         (
@@ -285,7 +285,20 @@
             mesh
         ),
         mesh,
-        dimensionedScalar("dpdt", p.dimensions()/dimTime, 0)
+        dimensionedScalar("dalpha1pdt", p.dimensions()/dimTime, 0)
+    );
+
+    Info<< "Creating field dalpha2pdt\n" << endl;
+    volScalarField dalpha2pdt
+    (
+        IOobject
+        (
+            "dpdt",
+            runTime.timeName(),
+            mesh
+        ),
+        mesh,
+        dimensionedScalar("dalpha2pdt", p.dimensions()/dimTime, 0)
     );
 
     Info<< "Creating field kinetic energy K\n" << endl;

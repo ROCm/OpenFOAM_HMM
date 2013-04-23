@@ -31,6 +31,8 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "MULES.H"
+#include "subCycle.H"
 #include "rhoThermo.H"
 #include "nearWallDist.H"
 #include "wallFvPatch.H"

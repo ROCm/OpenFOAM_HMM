@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,7 @@ SourceFiles
 
 #include "HashTable.H"
 #include "regIOobject.H"
+#include "wordReList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -147,6 +148,14 @@ public:
             template<class Type>
             wordList names() const;
 
+            //- Return the list of objects whose name matches the input regExp
+            template<class Type>
+            wordList names(const wordRe& name) const;
+
+            //- Return the list of objects whose name matches the input regExp
+            template<class Type>
+            wordList names(const wordReList& name) const;
+
             //- Lookup and return a const sub-objectRegistry. Optionally create
             //  it if it does not exist.
             const objectRegistry& subRegistry
@@ -158,6 +167,10 @@ public:
             //- Lookup and return all objects of the given Type
             template<class Type>
             HashTable<const Type*> lookupClass(const bool strict = false) const;
+
+            //- Lookup and return all objects of the given Type
+            template<class Type>
+            HashTable<Type*> lookupClass(const bool strict = false);
 
             //- Is the named Type found?
             template<class Type>

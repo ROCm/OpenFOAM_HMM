@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "objectRegistry.H"
-
+#include "stringListOps.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -49,6 +49,40 @@ Foam::wordList Foam::objectRegistry::names() const
 
 
 template<class Type>
+Foam::wordList Foam::objectRegistry::names(const wordRe& name) const
+{
+    wordList objectNames(size());
+
+    label count = 0;
+    forAllConstIter(HashTable<regIOobject*>, *this, iter)
+    {
+        if (isA<Type>(*iter()))
+        {
+            const word& objectName = iter()->name();
+
+            if (name.match(objectName))
+            {
+                objectNames[count++] = objectName;
+            }
+        }
+    }
+
+    objectNames.setSize(count);
+
+    return objectNames;
+}
+
+
+template<class Type>
+Foam::wordList Foam::objectRegistry::names(const wordReList& patterns) const
+{
+    wordList names(this->names<Type>());
+
+    return wordList(names, findStrings(patterns, names));
+}
+
+
+template<class Type>
 Foam::HashTable<const Type*> Foam::objectRegistry::lookupClass
 (
     const bool strict
@@ -68,6 +102,34 @@ Foam::HashTable<const Type*> Foam::objectRegistry::lookupClass
             (
                 iter()->name(),
                 dynamic_cast<const Type*>(iter())
+            );
+        }
+    }
+
+    return objectsOfClass;
+}
+
+
+template<class Type>
+Foam::HashTable<Type*> Foam::objectRegistry::lookupClass
+(
+    const bool strict
+)
+{
+    HashTable<Type*> objectsOfClass(size());
+
+    forAllIter(HashTable<regIOobject*>, *this, iter)
+    {
+        if
+        (
+            (strict && isType<Type>(*iter()))
+         || (!strict && isA<Type>(*iter()))
+        )
+        {
+            objectsOfClass.insert
+            (
+                iter()->name(),
+                dynamic_cast<Type*>(iter())
             );
         }
     }

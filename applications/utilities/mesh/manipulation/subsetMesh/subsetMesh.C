@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,11 +21,15 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Application
+    subsetMesh
+
 Description
     Selects a section of mesh based on a cellSet.
 
     The utility sub-sets the mesh to choose only a part of interest. Check
-    the setSet/cellSet utilities to see how to select cells based on various.
+    the setSet/cellSet/topoSet utilities to see how to select cells based on
+    various shapes.
 
     The mesh will subset all points, faces and cells needed to make a sub-mesh
     but will not preserve attached boundary types.
@@ -146,7 +150,6 @@ void subsetPointFields
 }
 
 
-// Main program:
 
 int main(int argc, char *argv[])
 {

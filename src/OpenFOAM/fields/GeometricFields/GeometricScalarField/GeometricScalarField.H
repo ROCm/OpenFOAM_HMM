@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -83,6 +83,9 @@ BINARY_TYPE_OPERATOR_SF(scalar, scalar, scalar, /, '|', divide)
 
 BINARY_FUNCTION(scalar, scalar, scalar, pow)
 BINARY_TYPE_FUNCTION(scalar, scalar, scalar, pow)
+
+BINARY_FUNCTION(scalar, scalar, scalar, atan2)
+BINARY_TYPE_FUNCTION(scalar, scalar, scalar, atan2)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

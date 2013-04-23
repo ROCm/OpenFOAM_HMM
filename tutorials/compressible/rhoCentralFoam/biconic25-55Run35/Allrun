@@ -20,7 +20,7 @@ runApplication datToFoam grid256.dat
 
 CONST="constant"
 cat $CONST/pointsHeader $CONST/points.tmp > $CONST/polyMesh/points
-runApplication collapseEdges "2e-07" 5
+runApplication collapseEdges
 moveTimeMeshToConstant
 
 echo "Changing patch type to wedge type in boundary file"

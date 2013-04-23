@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -637,8 +637,16 @@ void thermoSingleLayer::evolveRegion()
         Info<< "thermoSingleLayer::evolveRegion()" << endl;
     }
 
+    // Update film coverage indicator
     correctAlpha();
 
+    // Update film wall and surface velocities
+    updateSurfaceVelocities();
+
+    // Update film wall and surface temperatures
+    updateSurfaceTemperatures();
+
+    // Update sub-models to provide updated source contributions
     updateSubmodels();
 
     // Solve continuity for deltaRho_
@@ -671,12 +679,6 @@ void thermoSingleLayer::evolveRegion()
 
     // Update temperature using latest hs_
     T_ == T(hs_);
-
-    // Update film wall and surface velocities
-    updateSurfaceVelocities();
-
-    // Update film wall and surface temperatures
-    updateSurfaceTemperatures();
 
     // Reset source terms for next time integration
     resetPrimaryRegionSourceTerms();

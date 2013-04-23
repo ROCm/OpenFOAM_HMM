@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ License
 
 namespace Foam
 {
-    addChemistryReaderType(chemkinReader, gasThermoPhysics);
+    addChemistryReaderType(chemkinReader, gasHThermoPhysics);
 }
 
 
@@ -168,8 +168,8 @@ template<class ReactionRateType>
 void Foam::chemkinReader::addReactionType
 (
     const reactionType rType,
-    DynamicList<gasReaction::specieCoeffs>& lhs,
-    DynamicList<gasReaction::specieCoeffs>& rhs,
+    DynamicList<gasHReaction::specieCoeffs>& lhs,
+    DynamicList<gasHReaction::specieCoeffs>& rhs,
     const ReactionRateType& rr
 )
 {
@@ -180,9 +180,9 @@ void Foam::chemkinReader::addReactionType
             reactions_.append
             (
                 new IrreversibleReaction
-                <Reaction, gasThermoPhysics, ReactionRateType>
+                <Reaction, gasHThermoPhysics, ReactionRateType>
                 (
-                    Reaction<gasThermoPhysics>
+                    Reaction<gasHThermoPhysics>
                     (
                         speciesTable_,
                         lhs.shrink(),
@@ -200,9 +200,9 @@ void Foam::chemkinReader::addReactionType
             reactions_.append
             (
                 new ReversibleReaction
-                <Reaction, gasThermoPhysics, ReactionRateType>
+                <Reaction, gasHThermoPhysics, ReactionRateType>
                 (
-                    Reaction<gasThermoPhysics>
+                    Reaction<gasHThermoPhysics>
                     (
                         speciesTable_,
                         lhs.shrink(),
@@ -240,8 +240,8 @@ void Foam::chemkinReader::addPressureDependentReaction
 (
     const reactionType rType,
     const fallOffFunctionType fofType,
-    DynamicList<gasReaction::specieCoeffs>& lhs,
-    DynamicList<gasReaction::specieCoeffs>& rhs,
+    DynamicList<gasHReaction::specieCoeffs>& lhs,
+    DynamicList<gasHReaction::specieCoeffs>& rhs,
     const scalarList& efficiencies,
     const scalarList& k0Coeffs,
     const scalarList& kInfCoeffs,
@@ -423,8 +423,8 @@ void Foam::chemkinReader::addPressureDependentReaction
 
 void Foam::chemkinReader::addReaction
 (
-    DynamicList<gasReaction::specieCoeffs>& lhs,
-    DynamicList<gasReaction::specieCoeffs>& rhs,
+    DynamicList<gasHReaction::specieCoeffs>& lhs,
+    DynamicList<gasHReaction::specieCoeffs>& rhs,
     const scalarList& efficiencies,
     const reactionType rType,
     const reactionRateType rrType,
@@ -499,9 +499,9 @@ void Foam::chemkinReader::addReaction
                 reactions_.append
                 (
                     new NonEquilibriumReversibleReaction
-                        <Reaction, gasThermoPhysics, ArrheniusReactionRate>
+                        <Reaction, gasHThermoPhysics, ArrheniusReactionRate>
                     (
-                        Reaction<gasThermoPhysics>
+                        Reaction<gasHThermoPhysics>
                         (
                             speciesTable_,
                             lhs.shrink(),
@@ -554,11 +554,11 @@ void Foam::chemkinReader::addReaction
                     new NonEquilibriumReversibleReaction
                     <
                         Reaction,
-                        gasThermoPhysics,
+                        gasHThermoPhysics,
                         thirdBodyArrheniusReactionRate
                     >
                     (
-                        Reaction<gasThermoPhysics>
+                        Reaction<gasHThermoPhysics>
                         (
                             speciesTable_,
                             lhs.shrink(),
@@ -661,9 +661,9 @@ void Foam::chemkinReader::addReaction
                 reactions_.append
                 (
                     new NonEquilibriumReversibleReaction
-                        <Reaction, gasThermoPhysics, LandauTellerReactionRate>
+                        <Reaction, gasHThermoPhysics, LandauTellerReactionRate>
                     (
-                        Reaction<gasThermoPhysics>
+                        Reaction<gasHThermoPhysics>
                         (
                             speciesTable_,
                             lhs.shrink(),
@@ -862,13 +862,15 @@ Foam::chemkinReader::chemkinReader
 (
     const fileName& CHEMKINFileName,
     speciesTable& species,
-    const fileName& thermoFileName
+    const fileName& thermoFileName,
+    const bool newFormat
 )
 :
     lineNo_(1),
     specieNames_(10),
     speciesTable_(species),
-    reactions_(speciesTable_, speciesThermo_)
+    reactions_(speciesTable_, speciesThermo_),
+    newFormat_(newFormat)
 {
     read(CHEMKINFileName, thermoFileName);
 }
@@ -883,8 +885,14 @@ Foam::chemkinReader::chemkinReader
     lineNo_(1),
     specieNames_(10),
     speciesTable_(species),
-    reactions_(speciesTable_, speciesThermo_)
+    reactions_(speciesTable_, speciesThermo_),
+    newFormat_(thermoDict.lookupOrDefault("newFormat", false))
 {
+    if (newFormat_)
+    {
+        Info<< "Reading CHEMKIN thermo data in new file format" << endl;
+    }
+
     fileName chemkinFile(fileName(thermoDict.lookup("CHEMKINFile")).expand());
 
     fileName thermoFile = fileName::null;

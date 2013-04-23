@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,8 +26,8 @@ Application
 
 Description
     (Re)distribution of triSurface. Either takes an undecomposed surface
-    or an already decomposed surface and redistribute it so each processor
-    has all triangles that overlap its mesh.
+    or an already decomposed surface and redistributes it so that each
+    processor has all triangles that overlap its mesh.
 
 Note
     - best decomposition option is hierarchGeomDecomp since
@@ -95,7 +95,6 @@ void writeProcStats
 }
 
 
-// Main program:
 
 int main(int argc, char *argv[])
 {

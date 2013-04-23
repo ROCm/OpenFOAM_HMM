@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,29 +25,22 @@ License
 
 #include "MeshObject.H"
 #include "objectRegistry.H"
+#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class Mesh, class Type>
-Foam::MeshObject<Mesh, Type>::MeshObject(const Mesh& mesh)
+template<class Mesh, template<class> class MeshObjectType, class Type>
+Foam::MeshObject<Mesh, MeshObjectType, Type>::MeshObject(const Mesh& mesh)
 :
-    regIOobject
-    (
-        IOobject
-        (
-            Type::typeName,
-            mesh.thisDb().instance(),
-            mesh.thisDb()
-        )
-    ),
+    MeshObjectType<Mesh>(Type::typeName, mesh.thisDb()),
     mesh_(mesh)
 {}
 
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-template<class Mesh, class Type>
-const Type& Foam::MeshObject<Mesh, Type>::New
+template<class Mesh, template<class> class MeshObjectType, class Type>
+const Type& Foam::MeshObject<Mesh, MeshObjectType, Type>::New
 (
     const Mesh& mesh
 )
@@ -67,14 +60,19 @@ const Type& Foam::MeshObject<Mesh, Type>::New
     }
     else
     {
-        return store(new Type(mesh));
+        if (meshObject::debug)
+        {
+            Pout<< "MeshObject::New(const Mesh&) : constructing new "
+                << Type::typeName << endl;
+        }
+        return regIOobject::store(new Type(mesh));
     }
 }
 
 
-template<class Mesh, class Type>
+template<class Mesh, template<class> class MeshObjectType, class Type>
 template<class Data1>
-const Type& Foam::MeshObject<Mesh, Type>::New
+const Type& Foam::MeshObject<Mesh, MeshObjectType, Type>::New
 (
     const Mesh& mesh,
     const Data1& d
@@ -95,14 +93,19 @@ const Type& Foam::MeshObject<Mesh, Type>::New
     }
     else
     {
-        return store(new Type(mesh, d));
+        if (meshObject::debug)
+        {
+            Pout<< "MeshObject::New(const Mesh&) : constructing new "
+                << Type::typeName << endl;
+        }
+        return regIOobject::store(new Type(mesh, d));
     }
 }
 
 
-template<class Mesh, class Type>
+template<class Mesh, template<class> class MeshObjectType, class Type>
 template<class Data1, class Data2>
-const Type& Foam::MeshObject<Mesh, Type>::New
+const Type& Foam::MeshObject<Mesh, MeshObjectType, Type>::New
 (
     const Mesh& mesh,
     const Data1& d1,
@@ -124,14 +127,19 @@ const Type& Foam::MeshObject<Mesh, Type>::New
     }
     else
     {
-        return store(new Type(mesh, d1, d2));
+        if (meshObject::debug)
+        {
+            Pout<< "MeshObject(const Mesh&) : constructing new "
+                << Type::typeName << endl;
+        }
+        return regIOobject::store(new Type(mesh, d1, d2));
     }
 }
 
 
-template<class Mesh, class Type>
+template<class Mesh, template<class> class MeshObjectType, class Type>
 template<class Data1, class Data2, class Data3>
-const Type& Foam::MeshObject<Mesh, Type>::New
+const Type& Foam::MeshObject<Mesh, MeshObjectType, Type>::New
 (
     const Mesh& mesh,
     const Data1& d1,
@@ -154,14 +162,19 @@ const Type& Foam::MeshObject<Mesh, Type>::New
     }
     else
     {
-        return store(new Type(mesh, d1, d2, d3));
+        if (meshObject::debug)
+        {
+            Pout<< "MeshObject(const Mesh&) : constructing new "
+                << Type::typeName << endl;
+        }
+        return regIOobject::store(new Type(mesh, d1, d2, d3));
     }
 }
 
 
-template<class Mesh, class Type>
+template<class Mesh, template<class> class MeshObjectType, class Type>
 template<class Data1, class Data2, class Data3, class Data4>
-const Type& Foam::MeshObject<Mesh, Type>::New
+const Type& Foam::MeshObject<Mesh, MeshObjectType, Type>::New
 (
     const Mesh& mesh,
     const Data1& d1,
@@ -185,15 +198,20 @@ const Type& Foam::MeshObject<Mesh, Type>::New
     }
     else
     {
-        return store(new Type(mesh, d1, d2, d3, d4));
+        if (meshObject::debug)
+        {
+            Pout<< "MeshObject(const Mesh&) : constructing new "
+                << Type::typeName << endl;
+        }
+        return regIOobject::store(new Type(mesh, d1, d2, d3, d4));
     }
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
 
-template<class Mesh, class Type>
-bool Foam::MeshObject<Mesh, Type>::Delete(const Mesh& mesh)
+template<class Mesh, template<class> class MeshObjectType, class Type>
+bool Foam::MeshObject<Mesh, MeshObjectType, Type>::Delete(const Mesh& mesh)
 {
     if
     (
@@ -203,6 +221,12 @@ bool Foam::MeshObject<Mesh, Type>::Delete(const Mesh& mesh)
         )
     )
     {
+        if (meshObject::debug)
+        {
+            Pout<< "MeshObject::Delete(const Mesh&) : deleting "
+                << Type::typeName << endl;
+        }
+
         return mesh.thisDb().checkOut
         (
             const_cast<Type&>
@@ -221,10 +245,107 @@ bool Foam::MeshObject<Mesh, Type>::Delete(const Mesh& mesh)
 }
 
 
-template<class Mesh, class Type>
-Foam::MeshObject<Mesh, Type>::~MeshObject()
+template<class Mesh, template<class> class MeshObjectType, class Type>
+Foam::MeshObject<Mesh, MeshObjectType, Type>::~MeshObject()
 {
-    release();
+    MeshObjectType<Mesh>::release();
+}
+
+
+template<class Mesh>
+void Foam::meshObject::movePoints(objectRegistry& obr)
+{
+    HashTable<GeometricMeshObject<Mesh>*> meshObjects
+    (
+        obr.lookupClass<GeometricMeshObject<Mesh> >()
+    );
+
+    forAllIter
+    (
+        typename HashTable<GeometricMeshObject<Mesh>*>,
+        meshObjects,
+        iter
+    )
+    {
+        if (isA<MoveableMeshObject<Mesh> >(*iter()))
+        {
+            if (meshObject::debug)
+            {
+                Pout<< "meshObject::movePoints(objectRegistry&) :"
+                    << " movePoints on "
+                    << iter()->name() << endl;
+            }
+            dynamic_cast<MoveableMeshObject<Mesh>*>(iter())->movePoints();
+        }
+        else
+        {
+            if (meshObject::debug)
+            {
+                Pout<< "meshObject::movePoints(objectRegistry&) :"
+                    << " destroying "
+                    << iter()->name() << endl;
+            }
+            obr.checkOut(*iter());
+        }
+    }
+}
+
+
+template<class Mesh>
+void Foam::meshObject::updateMesh(objectRegistry& obr, const mapPolyMesh& mpm)
+{
+    HashTable<GeometricMeshObject<Mesh>*> meshObjects
+    (
+        obr.lookupClass<GeometricMeshObject<Mesh> >()
+    );
+
+    forAllIter
+    (
+        typename HashTable<GeometricMeshObject<Mesh>*>,
+        meshObjects,
+        iter
+    )
+    {
+        if (isA<UpdateableMeshObject<Mesh> >(*iter()))
+        {
+            if (meshObject::debug)
+            {
+                Pout<< "meshObject::updateMesh(objectRegistry&) :"
+                    << " updateMesh on "
+                    << iter()->name() << endl;
+            }
+            dynamic_cast<UpdateableMeshObject<Mesh>*>(iter())->updateMesh(mpm);
+        }
+        else
+        {
+            if (meshObject::debug)
+            {
+                Pout<< "meshObject::updateMesh(objectRegistry&) : destroying "
+                    << iter()->name() << endl;
+            }
+            obr.checkOut(*iter());
+        }
+    }
+}
+
+
+template<class Mesh, template<class> class MeshObjectType>
+void Foam::meshObject::clear(objectRegistry& obr)
+{
+    HashTable<MeshObjectType<Mesh>*> meshObjects
+    (
+        obr.lookupClass<MeshObjectType<Mesh> >()
+    );
+
+    forAllIter(typename HashTable<MeshObjectType<Mesh>*>, meshObjects, iter)
+    {
+        if (meshObject::debug)
+        {
+            Pout<< "meshObject::clear(objectRegistry&) : destroying "
+                << iter()->name() << endl;
+        }
+        obr.checkOut(*iter());
+    }
 }
 
 

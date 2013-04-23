@@ -16,6 +16,10 @@ if (turbulence)
     (
         fvm::ddt(alpha2, epsilon)
       + fvm::div(alphaPhi2, epsilon)
+
+        // Compressibity correction
+      - fvm::Sp(fvc::ddt(alpha2) + fvc::div(alphaPhi2), epsilon)
+
       - fvm::laplacian
         (
             alpha1Eps*nuEff2, epsilon,
@@ -41,6 +45,10 @@ if (turbulence)
     (
         fvm::ddt(alpha2, k)
       + fvm::div(alphaPhi2, k)
+
+        // Compressibity correction
+      - fvm::Sp(fvc::ddt(alpha2) + fvc::div(alphaPhi2), k)
+
       - fvm::laplacian
         (
             alpha1k*nuEff2, k,

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,11 +25,12 @@ Application
     wallGradU
 
 Description
-    Calculates and writes the gradient of U at the wall
+    Calculates and writes the gradient of U at the wall.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "wallFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -37,9 +38,9 @@ int main(int argc, char *argv[])
 {
     timeSelector::addOptions();
     #include "setRootCase.H"
-#   include "createTime.H"
+    #include "createTime.H"
     instantList timeDirs = timeSelector::select0(runTime, args);
-#   include "createMesh.H"
+    #include "createMesh.H"
 
     forAll(timeDirs, timeI)
     {
@@ -83,10 +84,17 @@ int main(int argc, char *argv[])
                 )
             );
 
+            const fvPatchList& patches = mesh.boundary();
+
             forAll(wallGradU.boundaryField(), patchi)
             {
-                wallGradU.boundaryField()[patchi] =
-                    -U.boundaryField()[patchi].snGrad();
+                const fvPatch& currPatch = patches[patchi];
+
+                if (isA<wallFvPatch>(currPatch))
+                {
+                    wallGradU.boundaryField()[patchi] =
+                        -U.boundaryField()[patchi].snGrad();
+                }
             }
 
             wallGradU.write();

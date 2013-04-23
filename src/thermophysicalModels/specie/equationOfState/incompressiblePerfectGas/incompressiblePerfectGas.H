@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -105,7 +105,10 @@ public:
     // Constructors
 
         //- Construct from components
-        inline incompressiblePerfectGas(const Specie& sp);
+        inline incompressiblePerfectGas(const Specie& sp, const scalar pRef);
+
+        //- Construct from incompressiblePerfectGas
+        inline incompressiblePerfectGas(const incompressiblePerfectGas& sp);
 
         //- Construct from Istream
         incompressiblePerfectGas(Istream&);
@@ -173,6 +176,10 @@ public:
 
     // Member operators
 
+        inline incompressiblePerfectGas& operator=
+        (
+            const incompressiblePerfectGas&
+        );
         inline void operator+=(const incompressiblePerfectGas&);
         inline void operator-=(const incompressiblePerfectGas&);
 

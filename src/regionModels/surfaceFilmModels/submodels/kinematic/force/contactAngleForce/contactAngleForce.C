@@ -96,14 +96,14 @@ contactAngleForce::contactAngleForce
     (
         IOobject
         (
-            typeName + ".contactForceMask",
+            typeName + ":contactForceMask",
             owner_.time().timeName(),
             owner_.regionMesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
         owner_.regionMesh(),
-        dimensionedScalar("mask", dimless, 0.0)
+        dimensionedScalar("mask", dimless, 1.0)
     )
 {
     initialise();
@@ -126,7 +126,7 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
         (
             IOobject
             (
-                typeName + ".contactForce",
+                typeName + ":contactForce",
                 owner_.time().timeName(),
                 owner_.regionMesh(),
                 IOobject::NO_READ,
@@ -149,8 +149,6 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
 
     volVectorField gradAlpha(fvc::grad(alpha));
 
-    scalarField nHits(owner_.regionMesh().nCells(), 0.0);
-
     forAll(nbr, faceI)
     {
         const label cellO = own[faceI];
@@ -166,14 +164,13 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
             cellI = cellN;
         }
 
-        if (cellI != -1 && mask_[cellI] > 0)
+        if (cellI != -1 && mask_[cellI] > 0.5)
         {
-            const scalar dx = owner_.regionMesh().deltaCoeffs()[faceI];
+            const scalar invDx = owner_.regionMesh().deltaCoeffs()[faceI];
             const vector n =
                 gradAlpha[cellI]/(mag(gradAlpha[cellI]) + ROOTVSMALL);
             scalar theta = cos(degToRad(distribution_->sample()));
-            force[cellI] += Ccf_*n*sigma[cellI]*(1.0 - theta)/dx;
-            nHits[cellI]++;
+            force[cellI] += Ccf_*n*sigma[cellI]*(1.0 - theta)/invDx;
         }
     }
 
@@ -183,12 +180,12 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
         {
             const fvPatchField<scalar>& alphaf = alpha.boundaryField()[patchI];
             const fvPatchField<scalar>& maskf = mask_.boundaryField()[patchI];
-            const scalarField& dx = alphaf.patch().deltaCoeffs();
+            const scalarField& invDx = alphaf.patch().deltaCoeffs();
             const labelUList& faceCells = alphaf.patch().faceCells();
 
             forAll(alphaf, faceI)
             {
-                if (maskf[faceI] > 0)
+                if (maskf[faceI] > 0.5)
                 {
                     label cellO = faceCells[faceI];
 
@@ -199,16 +196,14 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
                            /(mag(gradAlpha[cellO]) + ROOTVSMALL);
                         scalar theta = cos(degToRad(distribution_->sample()));
                         force[cellO] +=
-                            Ccf_*n*sigma[cellO]*(1.0 - theta)/dx[faceI];
-                        nHits[cellO]++;
+                            Ccf_*n*sigma[cellO]*(1.0 - theta)/invDx[faceI];
                     }
                 }
             }
         }
     }
 
-    force /= (max(nHits, scalar(1.0))*magSf);
-    tForce().correctBoundaryConditions();
+    force /= magSf;
 
     if (owner_.regionMesh().time().outputTime())
     {

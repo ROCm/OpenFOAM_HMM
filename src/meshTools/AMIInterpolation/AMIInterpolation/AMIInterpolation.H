@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,6 +42,7 @@ Description
 SourceFiles
     AMIInterpolation.C
     AMIInterpolationName.C
+    AMIInterpolationParallelOps.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -49,14 +50,11 @@ SourceFiles
 #define AMIInterpolation_H
 
 #include "className.H"
-#include "DynamicList.H"
 #include "searchableSurface.H"
+#include "treeBoundBoxList.H"
 #include "boolList.H"
 #include "primitivePatch.H"
 #include "faceAreaIntersect.H"
-#include "indexedOctree.H"
-#include "treeDataPrimitivePatch.H"
-#include "treeBoundBoxList.H"
 #include "globalIndex.H"
 #include "ops.H"
 
@@ -81,11 +79,37 @@ class AMIInterpolation
 :
     public AMIInterpolationName
 {
-    //- local typedef to octree tree-type
-    typedef treeDataPrimitivePatch<TargetPatch> treeType;
+public:
 
+    // Public data types
+
+        //- Enumeration specifying interpolation method
+        enum interpolationMethod
+        {
+            imDirect,
+            imMapNearest,
+            imFaceAreaWeight
+        };
+
+        //- Convert interpolationMethod to word representation
+        static word interpolationMethodToWord
+        (
+            const interpolationMethod& method
+        );
+
+        //- Convert word to interpolationMethod
+        static interpolationMethod wordTointerpolationMethod
+        (
+            const word& method
+        );
+
+
+private:
 
     // Private data
+
+        //- Interpolation method
+        interpolationMethod method_;
 
         //- Flag to indicate that the two patches are co-directional and
         //  that the orientation of the target patch should be reversed
@@ -94,6 +118,7 @@ class AMIInterpolation
         //- Index of processor that holds all of both sides. -1 in all other
         //  cases
         label singlePatchProc_;
+
 
         // Source patch
 
@@ -108,10 +133,6 @@ class AMIInterpolation
 
             //- Sum of weights of target faces per source face
             scalarField srcWeightsSum_;
-
-            //- Labels of faces that are not overlapped by any target faces
-            //  (should be empty for correct functioning)
-            labelList srcNonOverlap_;
 
 
         // Target patch
@@ -128,9 +149,6 @@ class AMIInterpolation
             //- Sum of weights of source faces per target face
             scalarField tgtWeightsSum_;
 
-
-        //- Octree used to find face seeds
-        autoPtr<indexedOctree<treeType> > treePtr_;
 
         //- Face triangulation mode
         const faceAreaIntersect::triangulationMode triMode_;
@@ -149,30 +167,6 @@ class AMIInterpolation
 
         //- Disallow default bitwise assignment
         void operator=(const AMIInterpolation&);
-
-
-        // Helper functions
-
-            //- Write triangle intersection to OBJ file
-            void writeIntersectionOBJ
-            (
-                const scalar area,
-                const face& f1,
-                const face& f2,
-                const pointField& f1Points,
-                const pointField& f2Points
-            ) const;
-
-            //- Check that patches are valid
-            void checkPatches
-            (
-                const SourcePatch& srcPatch,
-                const TargetPatch& tgtPatch
-            ) const;
-
-            //- Reset the octree for the traget patch face search
-            void resetTree(const TargetPatch& tgtPatch);
-
 
 
         // Parallel functionality
@@ -228,82 +222,7 @@ class AMIInterpolation
             ) const;
 
 
-        // Marching front
-
-            //- Find face on target patch that overlaps source face
-            label findTargetFace
-            (
-                const label srcFaceI,
-                const SourcePatch& srcPatch
-            ) const;
-
-            //- Add faces neighbouring faceI to the ID list
-            void appendNbrFaces
-            (
-                const label faceI,
-                const TargetPatch& patch,
-                const DynamicList<label>& visitedFaces,
-                DynamicList<label>& faceIDs
-            ) const;
-
-            bool processSourceFace
-            (
-                const SourcePatch& srcPatch,
-                const TargetPatch& tgtPatch,
-                const label srcFaceI,
-                const label tgtStartFaceI,
-
-                DynamicList<label>& nbrFaces,
-                DynamicList<label>& visitedFaces,
-                List<DynamicList<label> >& srcAddr,
-                List<DynamicList<scalar> >& srcWght,
-                List<DynamicList<label> >& tgtAddr,
-                List<DynamicList<scalar> >& tgtWght
-            );
-
-            void restartUncoveredSourceFace
-            (
-                const SourcePatch& srcPatch,
-                const TargetPatch& tgtPatch,
-                List<DynamicList<label> >& srcAddr,
-                List<DynamicList<scalar> >& srcWght,
-                List<DynamicList<label> >& tgtAddr,
-                List<DynamicList<scalar> >& tgtWght
-            );
-
-            //- Set the source and target seed faces
-            void setNextFaces
-            (
-                label& startSeedI,
-                label& srcFaceI,
-                label& tgtFaceI,
-                const SourcePatch& srcPatch0,
-                const TargetPatch& tgtPatch0,
-                const boolList& mapFlag,
-                labelList& seedFaces,
-                const DynamicList<label>& visitedFaces
-            ) const;
-
-
         // Evaluation
-
-            //- Area of intersection between source and target faces
-            scalar interArea
-            (
-                const label srcFaceI,
-                const label tgtFaceI,
-                const SourcePatch& srcPatch,
-                const TargetPatch& tgtPatch
-            ) const;
-
-            //- Calculate addressing
-            void calcAddressing
-            (
-                const SourcePatch& srcPatch,
-                const TargetPatch& tgtPatch,
-                label srcFaceI = -1,
-                label tgtFaceI = -1
-            );
 
             //- Normalise the (area) weights - suppresses numerical error in
             //  weights calculation
@@ -351,6 +270,7 @@ public:
             const SourcePatch& srcPatch,
             const TargetPatch& tgtPatch,
             const faceAreaIntersect::triangulationMode& triMode,
+            const interpolationMethod& method = imFaceAreaWeight,
             const bool reverseTarget = false
         );
 
@@ -361,6 +281,7 @@ public:
             const TargetPatch& tgtPatch,
             const autoPtr<searchableSurface>& surf,
             const faceAreaIntersect::triangulationMode& triMode,
+            const interpolationMethod& method = imFaceAreaWeight,
             const bool reverseTarget = false
         );
 
@@ -376,6 +297,12 @@ public:
 
     //- Destructor
     ~AMIInterpolation();
+
+    // Typedef to SourcePatch type this AMIInterplation is instantiated on
+    typedef SourcePatch sourcePatchType;
+
+    // Typedef to TargetPatch type this AMIInterplation is instantiated on
+    typedef TargetPatch targetPatchType;
 
 
     // Member Functions
@@ -401,10 +328,6 @@ public:
                 //- Return const access to normalisation factor of source
                 //  patch weights (i.e. the sum before normalisation)
                 inline const scalarField& srcWeightsSum() const;
-
-                //- Labels of faces that are not overlapped by any target faces
-                //  (should be empty for correct functioning)
-                inline const labelList& srcNonOverlap() const;
 
                 //- Source map pointer - valid only if singlePatchProc = -1
                 //  This gets source data into a form to be consumed by
@@ -468,7 +391,7 @@ public:
                 ) const;
 
 
-            //- Interpolate from target to source with supplied binary op
+            //- Interpolate from target to source with supplied op
             template<class Type, class CombineOp>
             tmp<Field<Type> > interpolateToSource
             (
@@ -476,8 +399,7 @@ public:
                 const CombineOp& cop
             ) const;
 
-            //- Interpolate from target tmp field to source with supplied
-            //  binary op
+            //- Interpolate from target tmp field to source with supplied op
             template<class Type, class CombineOp>
             tmp<Field<Type> > interpolateToSource
             (

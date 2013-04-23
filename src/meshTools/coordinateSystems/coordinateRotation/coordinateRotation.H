@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,46 +25,24 @@ Class
     Foam::coordinateRotation
 
 Description
-    A coordinate rotation specified per local axes and the base class for
-    other rotation specifications
-
-    The rotation is defined by a combination of local vectors (e1/e2), (e2/e3)
-    or (e3/e1). Any nonorthogonality will be absorbed into the second vector.
-
-    For convenience, the dictionary constructor forms allow a few shortcuts:
-    - if the \c type is not otherwise specified, the type \c axes
-      is implicit
-    - if an axes specification (eg, e3/e1) is used, the coordinateRotation
-      sub-dictionary can be dropped.
-
-    Specifying the rotation by an EulerCoordinateRotation
-    (type "EulerRotation") or by a STARCDCoordinateRotation
-    (type "STARCDRotation") requires the coordinateRotation sub-dictionary.
+    Abstract base class for coordinate rotation
 
     \verbatim
         coordinateRotation
         {
-            type        STARCDRotation
-            rotation    (0 0 90);
+            type        axesRotation
+            e1          (1 0 0);
+            e2          (0 1 0);
         }
     \endverbatim
 
-    - the rotation angles are in degrees, unless otherwise explictly specified:
+    Types of coordinateRotation:
+    1) axesRotation
+    2) STARCDRotation
+    3) localAxesRotation
+    4) EulerCoordinateRotation
 
-    \verbatim
-        coordinateRotation
-        {
-            type        STARCDRotation
-            degrees     false;
-            rotation    (0 0 3.141592654);
-        }
-    \endverbatim
 
-Deprecated
-    Specifying the local vectors as an \c axis (corresponding to e3) and a
-    \c direction (corresponding to e1), is allowed for backwards
-    compatibility, but this terminology is generally a bit confusing.
-    (deprecated Apr 2008)
 
 \*---------------------------------------------------------------------------*/
 
@@ -73,8 +51,10 @@ Deprecated
 
 #include "vector.H"
 #include "tensor.H"
+#include "tensorField.H"
 #include "dictionary.H"
 #include "runTimeSelectionTables.H"
+#include "objectRegistry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -86,72 +66,59 @@ namespace Foam
 \*---------------------------------------------------------------------------*/
 
 class coordinateRotation
-:
-    public tensor
 {
-    // Private data
+protected:
 
-        //- the combination of local axes to be used
-        enum axisOrder
-        {
-            e1e2,
-            e2e3,
-            e3e1
-        };
+    // Protected member functions
 
-    // Private Member Functions
+        //- Transform principal
+        symmTensor transformPrincipal(const tensor&, const vector&) const;
 
-        //- Calculate transformation tensor
-        void calcTransform
-        (
-            const vector& axis1,
-            const vector& axis2,
-            const axisOrder& order = e3e1
-        );
 
 public:
+
 
     //- Runtime type information
     TypeName("coordinateRotation");
 
-    // Constructors
-
-        //- Construct null
-        coordinateRotation();
-
-        //- Construct from 2 axes
-        coordinateRotation
-        (
-            const vector& axis,
-            const vector& dir
-        );
-
-        //- Construct from dictionary
-        coordinateRotation(const dictionary&);
-
-        //- Return clone
-        autoPtr<coordinateRotation> clone() const
-        {
-            return autoPtr<coordinateRotation>(new coordinateRotation(*this));
-        }
 
     // Declare run-time constructor selection table
-
-        declareRunTimeSelectionTable
+    // for constructors with dictionary and objectRegistry
+    declareRunTimeSelectionTable
+    (
+        autoPtr,
+        coordinateRotation,
+        objectRegistry,
         (
-            autoPtr,
-            coordinateRotation,
-            dictionary,
-            (
-                const dictionary& dict
-            ),
-            (dict)
-        );
+            const dictionary& dict, const objectRegistry& obr
+        ),
+        (dict, obr)
+    );
+
+
+    // Declare run-time constructor selection table
+    // for constructors with dictionary
+    declareRunTimeSelectionTable
+    (
+        autoPtr,
+        coordinateRotation,
+        dictionary,
+        (
+            const dictionary& dict
+        ),
+        (dict)
+    );
 
 
     // Selectors
 
-        //- Select constructed from Istream
+        //- Select constructed from dictionary and objectRegistry
+        static autoPtr<coordinateRotation> New
+        (
+            const dictionary& dict, const objectRegistry& obr
+        );
+
+        //- Select constructed from dictionary
         static autoPtr<coordinateRotation> New
         (
             const dictionary& dict
@@ -166,37 +133,76 @@ public:
     // Member Functions
 
         //- Reset rotation to an identity rotation
-        virtual void clear();
+        virtual void clear() = 0;
 
         //- Return local-to-global transformation tensor
-        const tensor& R() const
-        {
-            return (*this);
-        }
+        virtual const tensor& R() const = 0;
+
+        //- Return global-to-local transformation tensor
+        virtual const tensor& Rtr() const = 0;
 
         //- Return local Cartesian x-axis
-        const vector e1() const
-        {
-            return tensor::T().x();
-        }
+        virtual const vector e1() const = 0;
 
         //- Return local Cartesian y-axis
-        const vector e2() const
-        {
-            return tensor::T().y();
-        }
+        virtual const vector e2() const = 0;
 
         //- Return local Cartesian z-axis
-        const vector e3() const
+        virtual const vector e3() const = 0;
+
+        //- Return local-to-global transformation tensor
+        virtual const tensorField& Tr() const = 0;
+
+        //- Return true if the rotation tensor is uniform
+        virtual bool uniform() const
         {
-            return tensor::T().z();
+            return true;
         }
 
+        //- Transform vectorField using transformation tensor field
+        virtual tmp<vectorField> transform(const vectorField& st) const = 0;
 
-    // Member Operators
+        //- Transform vector using transformation tensor
+        virtual vector transform(const vector& st) const = 0;
 
-        //- assign from dictionary
-        void operator=(const dictionary&);
+        //- Inverse transform vectorField using transformation tensor field
+        virtual tmp<vectorField> invTransform(const vectorField& st) const = 0;
+
+        //- Inverse transform vector using transformation tensor
+        virtual vector invTransform(const vector& st) const = 0;
+
+        //- Transform tensor field using transformation tensorField
+        virtual tmp<tensorField> transformTensor
+        (
+            const tensorField& st
+        ) const = 0;
+
+        //- Transform tensor sub-field using transformation tensorField
+        virtual tmp<tensorField> transformTensor
+        (
+            const tensorField& st,
+            const labelList& cellMap
+        ) const = 0;
+
+        //- Transform tensor using transformation tensorField
+        virtual tensor transformTensor(const tensor& st) const = 0;
+
+        //- Transform vectorField using transformation tensorField and return
+        // symmetrical tensorField
+        virtual tmp<symmTensorField> transformVector
+        (
+            const vectorField& st
+        ) const = 0;
+
+        //- Transform vector using transformation tensor and return
+        // symmetrical tensor
+        virtual symmTensor transformVector(const vector& st) const = 0;
+
+
+    // Write
+
+            //- Write
+            virtual void write(Ostream&) const = 0;
 
 };
 

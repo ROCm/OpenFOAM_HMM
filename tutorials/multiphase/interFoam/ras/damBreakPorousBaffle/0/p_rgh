@@ -25,19 +25,16 @@ boundaryField
     {
         type            fixedFluxPressure;
         gradient        uniform 0;
-        value           uniform 0;
     }
     rightWall
     {
         type            fixedFluxPressure;
         gradient        uniform 0;
-        value           uniform 0;
     }
     lowerWall
     {
         type            fixedFluxPressure;
         gradient        uniform 0;
-        value           uniform 0;
     }
     atmosphere
     {
@@ -48,29 +45,28 @@ boundaryField
         p0              uniform 0;
         value           uniform 0;
     }
+    defaultFaces
+    {
+        type            empty;
+    }
     porous_half0
     {
         type            porousBafflePressure;
         patchType       cyclic;
         jump            uniform 0;
+        value           uniform 0;
         D               700;
         I               500;
         length          1.05;
-        value           uniform 0;
     }
     porous_half1
     {
         type            porousBafflePressure;
         patchType       cyclic;
-        jump            uniform 0;
+        value           uniform 0;
         D               700;
         I               500;
         length          1.05;
-        value           uniform 0;
-    }
-    defaultFaces
-    {
-        type            empty;
     }
 }
 

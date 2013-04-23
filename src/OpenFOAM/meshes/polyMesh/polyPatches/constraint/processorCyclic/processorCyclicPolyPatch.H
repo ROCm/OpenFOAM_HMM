@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class processorCyclicPolyPatch Declaration
+                  Class processorCyclicPolyPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class processorCyclicPolyPatch
@@ -54,16 +54,14 @@ class processorCyclicPolyPatch
 {
     // Private data
 
-        //- Message tag to use for communication
-        const int tag_;
-
         //- Name of originating patch
         const word referPatchName_;
 
+        //- Message tag to use for communication
+        mutable int tag_;
+
         //- Index of originating patch
         mutable label referPatchID_;
-
-    // Private member functions
 
 
 protected:
@@ -224,8 +222,7 @@ public:
 
 
     // Destructor
-
-        virtual ~processorCyclicPolyPatch();
+    virtual ~processorCyclicPolyPatch();
 
 
     // Member functions
@@ -265,10 +262,7 @@ public:
         }
 
         //- Return message tag to use for communication
-        virtual int tag() const
-        {
-            return tag_;
-        }
+        virtual int tag() const;
 
         //- Does this side own the patch ?
         virtual bool owner() const

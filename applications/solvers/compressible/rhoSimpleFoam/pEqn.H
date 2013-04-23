@@ -1,9 +1,4 @@
 {
-    rho = thermo.rho();
-    rho = max(rho, rhoMin);
-    rho = min(rho, rhoMax);
-    rho.relax();
-
     volScalarField rAU(1.0/UEqn().A());
     volVectorField HbyA("HbyA", U);
     HbyA = rAU*UEqn().H();

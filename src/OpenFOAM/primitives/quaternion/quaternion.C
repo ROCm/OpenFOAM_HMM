@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,8 +30,8 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* const Foam::quaternion::typeName = "quaternion";
-const Foam::quaternion Foam::quaternion::zero(0, vector::zero);
-const Foam::quaternion Foam::quaternion::I(1, vector::zero);
+const Foam::quaternion Foam::quaternion::zero(0, vector(0, 0, 0));
+const Foam::quaternion Foam::quaternion::I(1, vector(0, 0, 0));
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

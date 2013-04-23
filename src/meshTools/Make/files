@@ -14,12 +14,13 @@ $(csys)/coordinateSystem.C
 $(csys)/coordinateSystemNew.C
 $(csys)/coordinateSystems.C
 $(csys)/cylindricalCS.C
-$(csys)/sphericalCS.C
-$(csys)/parabolicCylindricalCS.C
-$(csys)/toroidalCS.C
+$(csys)/cartesianCS.C
+$(csys)/coordinateRotation/axesRotation.C
 $(csys)/coordinateRotation/coordinateRotation.C
+$(csys)/coordinateRotation/coordinateRotationNew.C
 $(csys)/coordinateRotation/EulerCoordinateRotation.C
 $(csys)/coordinateRotation/STARCDCoordinateRotation.C
+$(csys)/coordinateRotation/localAxesRotation.C
 
 edgeFaceCirculator/edgeFaceCirculator.C
 
@@ -128,6 +129,7 @@ faceZoneSources = sets/faceZoneSources
 $(faceZoneSources)/faceZoneToFaceZone/faceZoneToFaceZone.C
 $(faceZoneSources)/setsToFaceZone/setsToFaceZone.C
 $(faceZoneSources)/setToFaceZone/setToFaceZone.C
+$(faceZoneSources)/setAndNormalToFaceZone/setAndNormalToFaceZone.C
 $(faceZoneSources)/searchableSurfaceToFaceZone/searchableSurfaceToFaceZone.C
 
 cellZoneSources = sets/cellZoneSources
@@ -168,6 +170,7 @@ twoDPointCorrector/twoDPointCorrector.C
 
 AMI=AMIInterpolation
 $(AMI)/AMIInterpolation/AMIInterpolationName.C
+$(AMI)/AMIInterpolation/AMIPatchToPatchInterpolation.C
 $(AMI)/faceAreaIntersect/faceAreaIntersect.C
 $(AMI)/GAMG/interfaces/cyclicAMIGAMGInterface/cyclicAMIGAMGInterface.C
 $(AMI)/GAMG/interfaceFields/cyclicAMIGAMGInterfaceField/cyclicAMIGAMGInterfaceField.C
@@ -187,6 +190,9 @@ mappedPatches/mappedPolyPatch/mappedVariableThicknessWallPolyPatch.C
 mappedPatches/mappedPointPatch/mappedPointPatch.C
 mappedPatches/mappedPointPatch/mappedWallPointPatch.C
 
+meshStructure/meshStructure.C
+meshStructure/topoDistanceData.C
+meshStructure/pointTopoDistanceData.C
 
 regionCoupled/patches/regionCoupledPolyPatch/regionCoupledBase.C
 regionCoupled/patches/regionCoupledPolyPatch/regionCoupledPolyPatch.C

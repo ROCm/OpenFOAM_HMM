@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Application
     foamUpgradeCyclics
 
 Description
-    Tool to upgrade mesh and fields for split cyclics
+    Tool to upgrade mesh and fields for split cyclics.
 
 Usage
 
@@ -388,7 +388,6 @@ void rewriteFields
 }
 
 
-// Main program:
 
 int main(int argc, char *argv[])
 {

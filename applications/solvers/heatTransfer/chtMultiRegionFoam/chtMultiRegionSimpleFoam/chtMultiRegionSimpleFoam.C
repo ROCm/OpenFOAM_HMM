@@ -37,6 +37,7 @@ Description
 #include "solidThermo.H"
 #include "radiationModel.H"
 #include "fvIOoptionList.H"
+#include "coordinateSystem.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

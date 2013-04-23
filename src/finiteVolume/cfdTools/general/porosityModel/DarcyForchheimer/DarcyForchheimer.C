@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,66 +52,65 @@ Foam::porosityModels::DarcyForchheimer::DarcyForchheimer
 )
 :
     porosityModel(name, modelType, mesh, dict, cellZoneName),
-    coordSys_(coeffs_, mesh),
-    D_("D", dimless/sqr(dimLength), tensor::zero),
-    F_("F", dimless/dimLength, tensor::zero),
+    D_(cellZoneIds_.size()),
+    F_(cellZoneIds_.size()),
     rhoName_(coeffs_.lookupOrDefault<word>("rho", "rho")),
     muName_(coeffs_.lookupOrDefault<word>("mu", "thermo:mu")),
     nuName_(coeffs_.lookupOrDefault<word>("nu", "nu"))
 {
-    // local-to-global transformation tensor
-    const tensor& E = coordSys_.R();
 
     dimensionedVector d(coeffs_.lookup("d"));
-    if (D_.dimensions() != d.dimensions())
-    {
-        FatalIOErrorIn
-        (
-            "Foam::porosityModels::DarcyForchheimer::DarcyForchheimer"
-            "("
-                "const word&, "
-                "const word&, "
-                "const fvMesh&, "
-                "const dictionary&"
-            ")",
-            coeffs_
-        )   << "incorrect dimensions for d: " << d.dimensions()
-            << " should be " << D_.dimensions()
-            << exit(FatalIOError);
-    }
+    dimensionedVector f(coeffs_.lookup("f"));
 
     adjustNegativeResistance(d);
-
-    D_.value().xx() = d.value().x();
-    D_.value().yy() = d.value().y();
-    D_.value().zz() = d.value().z();
-    D_.value() = (E & D_ & E.T()).value();
-
-    dimensionedVector f(coeffs_.lookup("f"));
-    if (F_.dimensions() != f.dimensions())
-    {
-        FatalIOErrorIn
-        (
-            "Foam::porosityModels::DarcyForchheimer::DarcyForchheimer"
-            "("
-                "const word&, "
-                "const word&, "
-                "const fvMesh&, "
-                "const dictionary&"
-            ")",
-            coeffs_
-        )   << "incorrect dimensions for f: " << f.dimensions()
-            << " should be " << F_.dimensions()
-            << exit(FatalIOError);
-    }
-
     adjustNegativeResistance(f);
 
-    // leading 0.5 is from 1/2*rho
-    F_.value().xx() = 0.5*f.value().x();
-    F_.value().yy() = 0.5*f.value().y();
-    F_.value().zz() = 0.5*f.value().z();
-    F_.value() = (E & F_ & E.T()).value();
+    if (coordSys_.R().uniform())
+    {
+        forAll (cellZoneIds_, zoneI)
+        {
+            D_[zoneI].setSize(1, tensor::zero);
+            F_[zoneI].setSize(1, tensor::zero);
+
+            D_[zoneI][0].xx() = d.value().x();
+            D_[zoneI][0].yy() = d.value().y();
+            D_[zoneI][0].zz() = d.value().z();
+
+            D_[zoneI][0] = coordSys_.R().transformTensor(D_[zoneI][0]);
+
+            // leading 0.5 is from 1/2*rho
+            F_[zoneI][0].xx() = 0.5*f.value().x();
+            F_[zoneI][0].yy() = 0.5*f.value().y();
+            F_[zoneI][0].zz() = 0.5*f.value().z();
+
+            F_[zoneI][0] = coordSys_.R().transformTensor(F_[zoneI][0]);
+        }
+
+    }
+    else
+    {
+        forAll(cellZoneIds_, zoneI)
+        {
+            const labelList& cells = mesh_.cellZones()[cellZoneIds_[zoneI]];
+
+            D_[zoneI].setSize(cells.size(), tensor::zero);
+            F_[zoneI].setSize(cells.size(), tensor::zero);
+
+            forAll(cells, i)
+            {
+                D_[zoneI][i].xx() = d.value().x();
+                D_[zoneI][i].yy() = d.value().y();
+                D_[zoneI][i].zz() = d.value().z();
+
+                F_[zoneI][i].xx() = f.value().x();
+                F_[zoneI][i].yy() = f.value().y();
+                F_[zoneI][i].zz() = f.value().z();
+            }
+
+            D_[zoneI] = coordSys_.R().transformTensor(D_[zoneI], cells);
+            F_[zoneI] = coordSys_.R().transformTensor(F_[zoneI], cells);
+        }
+    }
 }
 
 
@@ -132,7 +131,7 @@ void Foam::porosityModels::DarcyForchheimer::correct
     const scalarField& V = mesh_.V();
     scalarField& Udiag = UEqn.diag();
     vectorField& Usource = UEqn.source();
- 
+
     if (UEqn.dimensions() == dimForce)
     {
         const volScalarField& rho =
@@ -163,7 +162,7 @@ void Foam::porosityModels::DarcyForchheimer::correct
     const scalarField& V = mesh_.V();
     scalarField& Udiag = UEqn.diag();
     vectorField& Usource = UEqn.source();
- 
+
     apply(Udiag, Usource, V, rho, mu, U);
 }
 

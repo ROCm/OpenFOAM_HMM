@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,6 +85,7 @@ Description
         this is the original facelabel+1, for a turned face this is -facelabel-1
         - boundaryRegionAddressing : for every patch in this region the
         patch in the original mesh (or -1 if added patch)
+
 \*---------------------------------------------------------------------------*/
 
 #include "SortableList.H"
@@ -1396,7 +1397,6 @@ void writeCellToRegion(const fvMesh& mesh, const labelList& cellRegion)
 
 
 
-// Main program:
 
 int main(int argc, char *argv[])
 {
@@ -1404,6 +1404,7 @@ int main(int argc, char *argv[])
     (
         "splits mesh into multiple regions (detected by walking across faces)"
     );
+#   include "addRegionOption.H"
     #include "addOverwriteOption.H"
     argList::addBoolOption
     (
@@ -1467,7 +1468,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
     runTime.functionObjects().off();
-    #include "createMesh.H"
+    #include "createNamedMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
     word blockedFacesName;

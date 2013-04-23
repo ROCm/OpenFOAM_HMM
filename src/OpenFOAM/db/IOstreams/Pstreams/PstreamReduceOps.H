@@ -38,7 +38,7 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Reduce operation with user specified communication schedule
-template <class T, class BinaryOp>
+template<class T, class BinaryOp>
 void reduce
 (
     const List<UPstream::commsStruct>& comms,
@@ -60,7 +60,7 @@ void reduce
 
 
 // Reduce using either linear or tree communication schedule
-template <class T, class BinaryOp>
+template<class T, class BinaryOp>
 void reduce
 (
     T& Value,
@@ -81,7 +81,7 @@ void reduce
 
 
 // Reduce using either linear or tree communication schedule
-template <class T, class BinaryOp>
+template<class T, class BinaryOp>
 T returnReduce
 (
     const T& Value,
@@ -120,7 +120,7 @@ T returnReduce
 
 
 // Reduce with sum of both value and count (for averaging)
-template <class T>
+template<class T>
 void sumReduce
 (
     T& Value,
@@ -135,7 +135,7 @@ void sumReduce
 
 
 // Non-blocking version of reduce. Sets request.
-template <class T, class BinaryOp>
+template<class T, class BinaryOp>
 void reduce
 (
     T& Value,

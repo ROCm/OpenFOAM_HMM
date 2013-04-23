@@ -1,18 +1,22 @@
 {
-    kappat = turbulence->nut()/Prt;
-    kappat.correctBoundaryConditions();
+    alphat = turbulence->nut()/Prt;
+    alphat.correctBoundaryConditions();
 
-    volScalarField kappaEff("kappaEff", turbulence->nu()/Pr + kappat);
+    volScalarField alphaEff("alphaEff", turbulence->nu()/Pr + alphat);
 
     fvScalarMatrix TEqn
     (
         fvm::ddt(T)
       + fvm::div(phi, T)
-      - fvm::laplacian(kappaEff, T)
+      - fvm::laplacian(alphaEff, T)
+     ==
+        radiation->ST(rhoCpRef, T)
     );
 
     TEqn.relax();
     TEqn.solve();
+
+    radiation->correct();
 
     rhok = 1.0 - beta*(T - TRef);
 }

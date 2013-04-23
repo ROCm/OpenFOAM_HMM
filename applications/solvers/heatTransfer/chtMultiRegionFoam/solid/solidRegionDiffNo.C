@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,39 +55,5 @@ Foam::scalar Foam::solidRegionDiffNo
 
     return DiNum;
 }
-
-
-Foam::scalar Foam::solidRegionDiffNo
-(
-    const fvMesh& mesh,
-    const Time& runTime,
-    const volScalarField& Cprho,
-    const volSymmTensorField& kappadirectional
-)
-{
-    scalar DiNum = 0.0;
-    scalar meanDiNum = 0.0;
-
-    volScalarField kappa(mag(kappadirectional));
-
-    //- Take care: can have fluid domains with 0 cells so do not test for
-    //  zero internal faces.
-    surfaceScalarField kapparhoCpbyDelta
-    (
-        mesh.surfaceInterpolation::deltaCoeffs()
-      * fvc::interpolate(kappa)
-      / fvc::interpolate(Cprho)
-    );
-
-    DiNum = gMax(kapparhoCpbyDelta.internalField())*runTime.deltaT().value();
-
-    meanDiNum = (average(kapparhoCpbyDelta)).value()*runTime.deltaT().value();
-
-    Info<< "Region: " << mesh.name() << " Diffusion Number mean: " << meanDiNum
-        << " max: " << DiNum << endl;
-
-    return DiNum;
-}
-
 
 // ************************************************************************* //

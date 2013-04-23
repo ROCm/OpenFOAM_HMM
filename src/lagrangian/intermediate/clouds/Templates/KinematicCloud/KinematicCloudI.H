@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -344,7 +344,7 @@ inline Foam::scalar Foam::KinematicCloud<CloudType>::Dmax() const
 template<class CloudType>
 inline Foam::scalar Foam::KinematicCloud<CloudType>::penetration
 (
-    const scalar& fraction
+    const scalar fraction
 ) const
 {
     if ((fraction < 0) || (fraction > 1))
@@ -353,7 +353,7 @@ inline Foam::scalar Foam::KinematicCloud<CloudType>::penetration
         (
             "inline Foam::scalar Foam::KinematicCloud<CloudType>::penetration"
             "("
-                "const scalar&"
+                "const scalar"
             ") const"
         )
             << "fraction should be in the range 0 < fraction < 1"
@@ -372,8 +372,14 @@ inline Foam::scalar Foam::KinematicCloud<CloudType>::penetration
     }
 
     // lists of parcels mass and distance from initial injection point
-    List<scalar> mass(nParcel, 0.0);
-    List<scalar> dist(nParcel, 0.0);
+    List<List<scalar> > procMass(Pstream::nProcs());
+    List<List<scalar> > procDist(Pstream::nProcs());
+
+    List<scalar>& mass = procMass[Pstream::myProcNo()];
+    List<scalar>& dist = procDist[Pstream::myProcNo()];
+
+    mass.setSize(nParcel);
+    dist.setSize(nParcel);
 
     label i = 0;
     scalar mSum = 0.0;
@@ -392,75 +398,86 @@ inline Foam::scalar Foam::KinematicCloud<CloudType>::penetration
 
     // calculate total mass across all processors
     reduce(mSum, sumOp<scalar>());
+    Pstream::gatherList(procMass);
+    Pstream::gatherList(procDist);
 
-    // flatten the mass list
-    List<scalar> allMass(nParcelSum, 0.0);
-    SubList<scalar>
-    (
-        allMass,
-        globalParcels.localSize(Pstream::myProcNo()),
-        globalParcels.offset(Pstream::myProcNo())
-    ).assign(mass);
-
-    // flatten the distance list
-    SortableList<scalar> allDist(nParcelSum, 0.0);
-    SubList<scalar>
-    (
-        allDist,
-        globalParcels.localSize(Pstream::myProcNo()),
-        globalParcels.offset(Pstream::myProcNo())
-    ).assign(dist);
-
-    // sort allDist distances into ascending order
-    // note: allMass masses are left unsorted
-    allDist.sort();
-
-    if (nParcelSum > 1)
+    if (Pstream::master())
     {
-        const scalar mLimit = fraction*mSum;
-        const labelList& indices = allDist.indices();
-
-        if (mLimit > (mSum - allMass[indices.last()]))
+        // flatten the mass lists
+        List<scalar> allMass(nParcelSum, 0.0);
+        SortableList<scalar> allDist(nParcelSum, 0.0);
+        for (label procI = 0; procI < Pstream::nProcs(); procI++)
         {
-            distance = allDist.last();
+            SubList<scalar>
+            (
+                allMass,
+                globalParcels.localSize(procI),
+                globalParcels.offset(procI)
+            ).assign(procMass[procI]);
+
+            // flatten the distance list
+            SubList<scalar>
+            (
+                allDist,
+                globalParcels.localSize(procI),
+                globalParcels.offset(procI)
+            ).assign(procDist[procI]);
         }
-        else
+
+        // sort allDist distances into ascending order
+        // note: allMass masses are left unsorted
+        allDist.sort();
+
+        if (nParcelSum > 1)
         {
-            // assuming that 'fraction' is generally closer to 1 than 0, loop
-            // through in reverse distance order
-            const scalar mThreshold = (1.0 - fraction)*mSum;
-            scalar mCurrent = 0.0;
-            label i0 = 0;
+            const scalar mLimit = fraction*mSum;
+            const labelList& indices = allDist.indices();
 
-            forAllReverse(indices, i)
-            {
-                label indI = indices[i];
-
-                mCurrent += allMass[indI];
-
-                if (mCurrent > mThreshold)
-                {
-                    i0 = i;
-                    break;
-                }
-            }
-
-            if (i0 == indices.size() - 1)
+            if (mLimit > (mSum - allMass[indices.last()]))
             {
                 distance = allDist.last();
             }
             else
             {
-                // linearly interpolate to determine distance
-                scalar alpha = (mCurrent - mThreshold)/allMass[indices[i0]];
-                distance = allDist[i0] + alpha*(allDist[i0+1] - allDist[i0]);
+                // assuming that 'fraction' is generally closer to 1 than 0,
+                // loop through in reverse distance order
+                const scalar mThreshold = (1.0 - fraction)*mSum;
+                scalar mCurrent = 0.0;
+                label i0 = 0;
+
+                forAllReverse(indices, i)
+                {
+                    label indI = indices[i];
+
+                    mCurrent += allMass[indI];
+
+                    if (mCurrent > mThreshold)
+                    {
+                        i0 = i;
+                        break;
+                    }
+                }
+
+                if (i0 == indices.size() - 1)
+                {
+                    distance = allDist.last();
+                }
+                else
+                {
+                    // linearly interpolate to determine distance
+                    scalar alpha = (mCurrent - mThreshold)/allMass[indices[i0]];
+                    distance =
+                        allDist[i0] + alpha*(allDist[i0+1] - allDist[i0]);
+                }
             }
         }
+        else
+        {
+            distance = allDist.first();
+        }
     }
-    else
-    {
-        distance = allDist.first();
-    }
+
+    Pstream::scatter(distance);
 
     return distance;
 }
@@ -564,7 +581,7 @@ Foam::KinematicCloud<CloudType>::theta() const
         (
             IOobject
             (
-                this->name() + ".theta",
+                this->name() + ":theta",
                 this->db().time().timeName(),
                 this->db(),
                 IOobject::NO_READ,
@@ -603,7 +620,7 @@ Foam::KinematicCloud<CloudType>::alpha() const
         (
             IOobject
             (
-                this->name() + ".alpha",
+                this->name() + ":alpha",
                 this->db().time().timeName(),
                 this->db(),
                 IOobject::NO_READ,
@@ -640,7 +657,7 @@ Foam::KinematicCloud<CloudType>::rhoEff() const
         (
             IOobject
             (
-                this->name() + ".rhoEff",
+                this->name() + ":rhoEff",
                 this->db().time().timeName(),
                 this->db(),
                 IOobject::NO_READ,

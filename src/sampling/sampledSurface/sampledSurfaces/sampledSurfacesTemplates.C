@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,7 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "ListListOps.H"
+#include "stringListOps.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -146,7 +147,6 @@ void Foam::sampledSurfaces::sampleAndWrite
 }
 
 
-
 template<class Type>
 void Foam::sampledSurfaces::sampleAndWrite
 (
@@ -166,47 +166,54 @@ void Foam::sampledSurfaces::sampleAndWrite
 
 
 template<class GeoField>
-void Foam::sampledSurfaces::sampleAndWrite(const IOobjectList& allObjects)
+void Foam::sampledSurfaces::sampleAndWrite(const IOobjectList& objects)
 {
-    forAll (fieldSelection_, fieldI)
+    wordList names;
+    if (loadFromFiles_)
     {
-        const wordRe field = fieldSelection_[fieldI];
-        IOobject* fieldIOPtr = allObjects.lookup(field);
+        IOobjectList fieldObjects(objects.lookupClass(GeoField::typeName));
+        names = fieldObjects.names();
+    }
+    else
+    {
+        names = mesh_.thisDb().names<GeoField>();
+    }
 
-        if
-        (
-            fieldIOPtr != NULL
-         && fieldIOPtr->headerClassName() == GeoField::typeName
-        )
+    labelList nameIDs(findStrings(fieldSelection_, names));
+
+    wordHashSet fieldNames(wordList(names, nameIDs));
+
+    forAllConstIter(wordHashSet, fieldNames, iter)
+    {
+        const word& fieldName = iter.key();
+
+        if ((Pstream::master()) && verbose_)
         {
-            if (Pstream::master() && verbose_)
-            {
-                Pout<< "sampleAndWrite: " << field << endl;
-            }
+            Pout<< "sampleAndWrite: " << fieldName << endl;
+        }
 
-            if (loadFromFiles_)
-            {
-                const GeoField geoField
+        if (loadFromFiles_)
+        {
+            const GeoField fld
+            (
+                IOobject
                 (
-                    IOobject
-                    (
-                        field,
-                        mesh_.time().timeName(),
-                        mesh_,
-                        IOobject::MUST_READ
-                    ),
-                    mesh_
-                );
+                    fieldName,
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::MUST_READ
+                ),
+                mesh_
+            );
 
-                sampleAndWrite(geoField);
-            }
-            else
-            {
-                sampleAndWrite
-                (
-                    mesh_.thisDb().lookupObject<GeoField>(field)
-                );
-            }
+            sampleAndWrite(fld);
+        }
+        else
+        {
+            sampleAndWrite
+            (
+                mesh_.thisDb().lookupObject<GeoField>(fieldName)
+            );
         }
     }
 }

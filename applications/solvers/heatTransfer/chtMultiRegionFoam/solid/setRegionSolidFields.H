@@ -8,10 +8,36 @@
     tmp<volScalarField> tcp = thermo.Cp();
     const volScalarField& cp = tcp();
 
-    tmp<volScalarField> talpha = thermo.alpha();
-    const volScalarField& alpha = talpha();
-    tmp<volScalarField> tkappa = thermo.kappa();
-    const volScalarField& kappa = tkappa();
+    tmp<volSymmTensorField> tAnialpha;
+
+    if (!thermo.isotropic())
+    {
+        tmp<volVectorField> tkappaByCp = thermo.Kappa()/cp;
+
+        const coordinateSystem& coodSys = coordinates[i];
+        tAnialpha =
+            tmp<volSymmTensorField>
+            (
+                new volSymmTensorField
+                (
+                    IOobject
+                    (
+                        "Anialpha",
+                        runTime.timeName(),
+                        mesh,
+                        IOobject::NO_READ,
+                        IOobject::NO_WRITE
+                    ),
+                    mesh,
+                    tkappaByCp().dimensions(),
+                    zeroGradientFvPatchVectorField::typeName
+                )
+            );
+
+        volSymmTensorField& Anialpha = tAnialpha();
+        Anialpha.internalField() = coodSys.R().transformVector(tkappaByCp());
+        Anialpha.correctBoundaryConditions();
+    }
 
     volScalarField& h = thermo.he();
 

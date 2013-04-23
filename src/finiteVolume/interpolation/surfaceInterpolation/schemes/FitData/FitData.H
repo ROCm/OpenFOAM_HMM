@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
     The linearCorrection_ determines whether the fit is for a corrected
     linear scheme (first two coefficients are corrections for owner and
     neighbour) or a pure upwind scheme (first coefficient is correction for
-    owner ; weight on face taken as 1).
+    owner; weight on face taken as 1).
 
 SourceFiles
     FitData.C
@@ -54,7 +54,7 @@ namespace Foam
 template<class FitDataType, class ExtendedStencil, class Polynomial>
 class FitData
 :
-    public MeshObject<fvMesh, FitDataType>
+    public MeshObject<fvMesh, MoveableMeshObject, FitDataType>
 {
     // Private data
 
@@ -80,7 +80,7 @@ class FitData
         const label minSize_;
 
 
-    // Private Member Functions
+protected:
 
         //- Find the normal direction (i) and j and k directions for face faci
         void findFaceDirs
@@ -92,9 +92,6 @@ class FitData
         );
 
 public:
-
-    //TypeName("FitData");
-
 
     // Constructors
 
@@ -122,6 +119,30 @@ public:
             return stencil_;
         }
 
+        //- Factor the fit is allowed to deviate from the base scheme
+        scalar linearLimitFactor() const
+        {
+            return linearLimitFactor_;
+        }
+
+        //- Return weight for central stencil
+        scalar centralWeight() const
+        {
+            return centralWeight_;
+        }
+
+        //- Dimensionality of the geometry
+        label dim() const
+        {
+            return dim_;
+        }
+
+        //- Minimum stencil size
+        label minSize() const
+        {
+            return minSize_;
+        }
+
         bool linearCorrection() const
         {
             return linearCorrection_;
@@ -139,7 +160,6 @@ public:
 
         //- Calculate the fit for all the faces
         virtual void calcFit() = 0;
-
 
         //- Recalculate weights (but not stencil) when the mesh moves
         bool movePoints();

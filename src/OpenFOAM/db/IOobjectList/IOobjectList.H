@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,7 @@ SourceFiles
 
 #include "HashPtrTable.H"
 #include "IOobject.H"
+#include "wordReList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class IOobjectList Declaration
+                        Class IOobjectList Declaration
 \*---------------------------------------------------------------------------*/
 
 class IOobjectList
@@ -90,6 +91,12 @@ public:
 
         //- Lookup a given name and return IOobject ptr if found else NULL
         IOobject* lookup(const word& name) const;
+
+        //- Return the list for all IOobects whose name matches name
+        IOobjectList lookup(const wordRe& name) const;
+
+        //- Return the list for all IOobects whose name matches name
+        IOobjectList lookup(const wordReList& patterns) const;
 
         //- Return the list for all IOobjects of a given class
         IOobjectList lookupClass(const word& className) const;

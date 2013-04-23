@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,7 +60,7 @@ Foam::tmp<Foam::scalarField> Foam::polyMeshTools::faceOrthogonality
     // Coupled faces
 
     pointField neighbourCc;
-    syncTools::swapBoundaryCellList(mesh, cc, neighbourCc);
+    syncTools::swapBoundaryCellPositions(mesh, cc, neighbourCc);
 
     forAll(pbm, patchI)
     {
@@ -123,7 +123,7 @@ Foam::tmp<Foam::scalarField> Foam::polyMeshTools::faceSkewness
     // (i.e. treat as if mirror cell on other side)
 
     pointField neighbourCc;
-    syncTools::swapBoundaryCellList(mesh, cellCtrs, neighbourCc);
+    syncTools::swapBoundaryCellPositions(mesh, cellCtrs, neighbourCc);
 
     forAll(pbm, patchI)
     {
@@ -184,6 +184,114 @@ Foam::tmp<Foam::scalarField> Foam::polyMeshTools::faceSkewness
     }
 
     return tskew;
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::polyMeshTools::faceWeights
+(
+    const polyMesh& mesh,
+    const vectorField& fCtrs,
+    const vectorField& fAreas,
+    const vectorField& cellCtrs
+)
+{
+    const labelList& own = mesh.faceOwner();
+    const labelList& nei = mesh.faceNeighbour();
+    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+
+    tmp<scalarField> tweight(new scalarField(mesh.nFaces(), 1.0));
+    scalarField& weight = tweight();
+
+    // Internal faces
+    forAll(nei, faceI)
+    {
+        const point& fc = fCtrs[faceI];
+        const vector& fa = fAreas[faceI];
+
+        scalar dOwn = mag(fa & (fc-cellCtrs[own[faceI]]));
+        scalar dNei = mag(fa & (cellCtrs[nei[faceI]]-fc));
+
+        weight[faceI] = min(dNei,dOwn)/(dNei+dOwn+VSMALL);
+    }
+
+
+    // Coupled faces
+
+    pointField neiCc;
+    syncTools::swapBoundaryCellPositions(mesh, cellCtrs, neiCc);
+
+    forAll(pbm, patchI)
+    {
+        const polyPatch& pp = pbm[patchI];
+        if (pp.coupled())
+        {
+            forAll(pp, i)
+            {
+                label faceI = pp.start() + i;
+                label bFaceI = faceI - mesh.nInternalFaces();
+
+                const point& fc = fCtrs[faceI];
+                const vector& fa = fAreas[faceI];
+
+                scalar dOwn = mag(fa & (fc-cellCtrs[own[faceI]]));
+                scalar dNei = mag(fa & (neiCc[bFaceI]-fc));
+
+                weight[faceI] = min(dNei,dOwn)/(dNei+dOwn+VSMALL);
+            }
+        }
+    }
+
+    return tweight;
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::polyMeshTools::volRatio
+(
+    const polyMesh& mesh,
+    const scalarField& vol
+)
+{
+    const labelList& own = mesh.faceOwner();
+    const labelList& nei = mesh.faceNeighbour();
+    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+
+    tmp<scalarField> tratio(new scalarField(mesh.nFaces(), 1.0));
+    scalarField& ratio = tratio();
+
+    // Internal faces
+    forAll(nei, faceI)
+    {
+        scalar volOwn = vol[own[faceI]];
+        scalar volNei = vol[nei[faceI]];
+
+        ratio[faceI] = min(volOwn,volNei)/(max(volOwn, volNei)+VSMALL);
+    }
+
+
+    // Coupled faces
+
+    scalarField neiVol;
+    syncTools::swapBoundaryCellList(mesh, vol, neiVol);
+
+    forAll(pbm, patchI)
+    {
+        const polyPatch& pp = pbm[patchI];
+        if (pp.coupled())
+        {
+            forAll(pp, i)
+            {
+                label faceI = pp.start() + i;
+                label bFaceI = faceI - mesh.nInternalFaces();
+
+                scalar volOwn = vol[own[faceI]];
+                scalar volNei = neiVol[bFaceI];
+
+                ratio[faceI] = min(volOwn,volNei)/(max(volOwn, volNei)+VSMALL);
+            }
+        }
+    }
+
+    return tratio;
 }
 
 

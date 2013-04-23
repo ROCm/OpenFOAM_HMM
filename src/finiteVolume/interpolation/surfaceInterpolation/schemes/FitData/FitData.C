@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,16 +40,16 @@ Foam::FitData<Form, ExtendedStencil, Polynomial>::FitData
     const scalar centralWeight
 )
 :
-    MeshObject<fvMesh, Form>(mesh),
+    MeshObject<fvMesh, Foam::MoveableMeshObject, Form>(mesh),
     stencil_(stencil),
     linearCorrection_(linearCorrection),
     linearLimitFactor_(linearLimitFactor),
     centralWeight_(centralWeight),
-#   ifdef SPHERICAL_GEOMETRY
+    #ifdef SPHERICAL_GEOMETRY
     dim_(2),
-#   else
+    #else
     dim_(mesh.nGeometricD()),
-#   endif
+    #endif
     minSize_(Polynomial::nTerms(dim_))
 {
     // Check input
@@ -79,7 +79,7 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::findFaceDirs
     idir = mesh.faceAreas()[facei];
     idir /= mag(idir);
 
-#   ifndef SPHERICAL_GEOMETRY
+    #ifndef SPHERICAL_GEOMETRY
     if (mesh.nGeometricD() <= 2) // find the normal direction
     {
         if (mesh.geometricD()[0] == -1)
@@ -100,10 +100,10 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::findFaceDirs
         const face& f = mesh.faces()[facei];
         kdir = mesh.points()[f[0]] - mesh.faceCentres()[facei];
     }
-#   else
+    #else
     // Spherical geometry so kdir is the radial direction
     kdir = mesh.faceCentres()[facei];
-#   endif
+    #endif
 
     if (mesh.nGeometricD() == 3)
     {
@@ -170,11 +170,11 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::calcFit
 
         d.x() = (p - p0)&idir;
         d.y() = (p - p0)&jdir;
-#       ifndef SPHERICAL_GEOMETRY
+        #ifndef SPHERICAL_GEOMETRY
         d.z() = (p - p0)&kdir;
-#       else
+        #else
         d.z() = mag(p) - mag(p0);
-#       endif
+        #endif
 
         if (ip == 0)
         {

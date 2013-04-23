@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,7 @@ License
 #include "faceZoneSet.H"
 #include "searchableSurface.H"
 #include "syncTools.H"
+#include "Time.H"
 
 #include "addToRunTimeSelectionTable.H"
 
@@ -69,7 +70,15 @@ Foam::searchableSurfaceToFaceZone::searchableSurfaceToFaceZone
         searchableSurface::New
         (
             word(dict.lookup("surface")),
-            mesh.objectRegistry::db(),
+            IOobject
+            (
+                dict.lookupOrDefault("name", mesh.objectRegistry::db().name()),
+                mesh.time().constant(),
+                "triSurface",
+                mesh.objectRegistry::db(),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            ),
             dict
         )
     )
@@ -120,7 +129,7 @@ void Foam::searchableSurfaceToFaceZone::applyToSet
 
         // Boundary faces
         vectorField nbrCellCentres;
-        syncTools::swapBoundaryCellList(mesh_, cc, nbrCellCentres);
+        syncTools::swapBoundaryCellPositions(mesh_, cc, nbrCellCentres);
 
         const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
 

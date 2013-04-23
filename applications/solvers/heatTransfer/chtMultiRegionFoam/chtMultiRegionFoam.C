@@ -40,13 +40,14 @@ Description
 #include "rhoThermo.H"
 #include "turbulenceModel.H"
 #include "fixedGradientFvPatchFields.H"
+#include "zeroGradientFvPatchFields.H"
 #include "regionProperties.H"
 #include "compressibleCourantNo.H"
 #include "solidRegionDiffNo.H"
 #include "solidThermo.H"
 #include "radiationModel.H"
 #include "fvIOoptionList.H"
-
+#include "coordinateSystem.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

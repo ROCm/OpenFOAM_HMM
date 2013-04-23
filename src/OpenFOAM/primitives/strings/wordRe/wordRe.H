@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -120,22 +120,25 @@ public:
         inline wordRe(const wordRe&);
 
         //- Construct from keyType
-        inline wordRe(const keyType&, const compOption=LITERAL);
+        inline explicit wordRe(const keyType&);
+
+        //- Construct from keyType
+        inline wordRe(const keyType&, const compOption);
 
         //- Construct as copy of word
-        inline wordRe(const word&);
+        inline explicit wordRe(const word&);
 
         //- Construct as copy of character array
         //  Optionally specify how it should be treated.
-        inline wordRe(const char*, const compOption = LITERAL);
+        inline explicit wordRe(const char*, const compOption = LITERAL);
 
         //- Construct as copy of string.
         //  Optionally specify how it should be treated.
-        inline wordRe(const string&, const compOption = LITERAL);
+        inline explicit wordRe(const string&, const compOption = LITERAL);
 
         //- Construct as copy of std::string
         //  Optionally specify how it should be treated.
-        inline wordRe(const std::string&, const compOption = LITERAL);
+        inline explicit wordRe(const std::string&, const compOption = LITERAL);
 
         //- Construct from Istream
         //  Words are treated as literals, strings with an auto-test

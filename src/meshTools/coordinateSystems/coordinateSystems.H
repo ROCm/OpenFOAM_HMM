@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,6 +30,25 @@ Description
 Note
     Mixing normal constructors and the coordinateSystems::New constructor
     may yield unexpected results.
+
+    \verbatim
+        1
+        (
+        cat1
+        {
+            coordinateSystem  system_10;
+            porosity        0.781;
+            Darcy
+            {
+                d   d [0 -2 0 0 0]  (-1000 -1000 0.50753e+08);
+                f   f [0 -1 0 0 0]  (-1000 -1000 12.83);
+            }
+        }
+        )
+    \endverbatim
+
+    For this to work correctly, the coordinateSystem constructor must be
+    supplied with both a dictionary and an objectRegistry.
 
 SourceFiles
     coordinateSystems.C

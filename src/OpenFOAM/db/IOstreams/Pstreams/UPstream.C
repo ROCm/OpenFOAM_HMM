@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -224,15 +224,6 @@ Foam::List<Foam::UPstream::commsStruct> Foam::UPstream::calcTreeComm
 }
 
 
-//// Callback from UPstream::init() : initialize linear and tree communication
-//// schedules now that nProcs is known.
-//void Foam::UPstream::initCommunicationSchedule()
-//{
-//    calcLinearComm(nProcs());
-//    calcTreeComm(nProcs());
-//}
-
-
 Foam::label Foam::UPstream::allocateCommunicator
 (
     const label parentIndex,
@@ -392,12 +383,6 @@ Foam::label Foam::UPstream::procNo
 // By default this is not a parallel run
 bool Foam::UPstream::parRun_(false);
 
-//// Initialise my process number to 0 (the master)
-//int Foam::UPstream::myProcNo_(0);
-//
-//// List of process IDs
-//Foam::List<int> Foam::UPstream::procIDs_(label(1), 0);
-
 // Free communicators
 Foam::LIFOStack<Foam::label> Foam::UPstream::freeComms_;
 
@@ -412,13 +397,6 @@ Foam::DynamicList<Foam::label> Foam::UPstream::parentCommunicator_(10);
 
 // Standard transfer message type
 int Foam::UPstream::msgType_(1);
-
-//// Linear communication schedule
-//Foam::List<Foam::UPstream::commsStruct>
-//      Foam::UPstream::linearCommunication_(0);
-//// Multi level communication schedule
-//Foam::List<Foam::UPstream::commsStruct>
-//      Foam::UPstream::treeCommunication_(0);
 
 // Linear communication schedule
 Foam::DynamicList<Foam::List<Foam::UPstream::commsStruct> >

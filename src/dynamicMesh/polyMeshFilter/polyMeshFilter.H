@@ -70,14 +70,18 @@ class polyMeshFilter
         //- Dictionary containing the coefficient sub-dictionaries
         const IOdictionary dict_;
 
+        //- After collapsing, check the mesh quality and redo the collapsing
+        //  iteration if there are too many bad faces in the mesh
+        Switch controlMeshQuality_;
+
         //- Coefficients for collapsing edges
         const dictionary& collapseEdgesCoeffDict_;
 
         //- Coefficients for collapsing faces
-        const dictionary& collapseFacesCoeffDict_;
+        dictionary collapseFacesCoeffDict_;
 
         //- Coefficients for controlling the mesh quality
-        const dictionary& meshQualityCoeffDict_;
+        dictionary meshQualityCoeffDict_;
 
         //- Remove edges shorter than this length
         const scalar minLen_;

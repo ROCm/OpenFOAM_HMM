@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,18 +75,24 @@ Foam::PackedBoolList Foam::isoSurface::collocatedFaces
     // Initialise to false
     PackedBoolList collocated(pp.size());
 
-    if (isA<processorPolyPatch>(pp) && collocatedPatch(pp))
+    if (isA<processorPolyPatch>(pp))
     {
-        forAll(pp, i)
+        if (collocatedPatch(pp))
         {
-            collocated[i] = 1u;
+            forAll(pp, i)
+            {
+                collocated[i] = 1u;
+            }
         }
     }
-    else if (isA<cyclicPolyPatch>(pp) && collocatedPatch(pp))
+    else if (isA<cyclicPolyPatch>(pp))
     {
-        forAll(pp, i)
+        if (collocatedPatch(pp))
         {
-            collocated[i] = 1u;
+            forAll(pp, i)
+            {
+                collocated[i] = 1u;
+            }
         }
     }
     else

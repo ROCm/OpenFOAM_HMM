@@ -826,15 +826,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
     // Determine pointNormal
     // ~~~~~~~~~~~~~~~~~~~~~
 
-    pointField pointNormals
-    (
-        PatchTools::pointNormals
-        (
-            mesh,
-            pp,
-            pp.addressing()
-        )
-    );
+    pointField pointNormals(PatchTools::pointNormals(mesh, pp));
 
     // pointNormals
     if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
@@ -1074,15 +1066,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
                         << featureAngle << " degrees." << endl;
 
                     scalar featureAngleCos = Foam::cos(degToRad(featureAngle));
-                    pointField pointNormals
-                    (
-                        PatchTools::pointNormals
-                        (
-                            mesh,
-                            pp,
-                            identity(pp.size())+pp.start()
-                        )
-                    );
+                    pointField pointNormals(PatchTools::pointNormals(mesh, pp));
 
                     forAll(meshPoints, i)
                     {
@@ -1303,7 +1287,7 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
               + ".obj"
             )
         );
-        Info<< "Writing points with too large a extrusion distance to "
+        Info<< "Writing points with too large an extrusion distance to "
             << str().name() << endl;
     }
 
@@ -1320,7 +1304,7 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
               + ".obj"
             )
         );
-        Info<< "Writing points with too large a extrusion distance to "
+        Info<< "Writing points with too large an extrusion distance to "
             << medialVecStr().name() << endl;
     }
 

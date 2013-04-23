@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -2052,6 +2052,9 @@ void Foam::polyTopoChange::reorderCoupledFaces
 
     if (anyChanged)
     {
+        // Reorder faces according to oldToNew.
+        reorderCompactFaces(oldToNew.size(), oldToNew);
+
         // Rotate faces (rotation is already in new face indices).
         forAll(rotation, faceI)
         {
@@ -2060,9 +2063,6 @@ void Foam::polyTopoChange::reorderCoupledFaces
                 inplaceRotateList<List, label>(faces_[faceI], rotation[faceI]);
             }
         }
-
-        // Reorder faces according to oldToNew.
-        reorderCompactFaces(oldToNew.size(), oldToNew);
     }
 }
 

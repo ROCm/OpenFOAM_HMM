@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -77,7 +77,7 @@ public:
             const volScalarField& alpha1,
             const volScalarField& Theta,
             const volScalarField& g0,
-            const dimensionedScalar& rho1,
+            const volScalarField& rho1,
             const volScalarField& da,
             const dimensionedScalar& e
         ) const;

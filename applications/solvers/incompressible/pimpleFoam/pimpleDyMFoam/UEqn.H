@@ -5,6 +5,8 @@ tmp<fvVectorMatrix> UEqn
     fvm::ddt(U)
   + fvm::div(phi, U)
   + turbulence->divDevReff(U)
+ ==
+    fvOptions(U)
 );
 
 UEqn().relax();
@@ -15,7 +17,7 @@ rAU = 1.0/UEqn().A();
 
 if (pimple.momentumPredictor())
 {
-    solve(UEqn() == -fvc::grad(p) + fvOptions(U));
+    solve(UEqn() == -fvc::grad(p));
 
     fvOptions.correct(U);
 }

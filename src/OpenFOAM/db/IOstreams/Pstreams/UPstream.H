@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -184,11 +184,8 @@ private:
         static bool parRun_;
         static int msgType_;
 
-//        static int myProcNo_;
-//        static List<int> procIDs_;
-//        static List<commsStruct> linearCommunication_;
-//        static List<commsStruct> treeCommunication_;
         // Communicator specific data
+
         static LIFOStack<label> freeComms_;
         static DynamicList<int> myProcNo_;
         static DynamicList<List<int> > procIDs_;
@@ -230,11 +227,6 @@ private:
         (
             const label index
         );
-
-//        //- Initialize all communication schedules. Callback from
-//        //  UPstream::init()
-//        static void initCommunicationSchedule();
-
 
 protected:
 

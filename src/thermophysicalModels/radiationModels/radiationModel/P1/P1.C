@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,7 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "P1.H"
-#include "fvm.H"
+#include "fvmLaplacian.H"
+#include "fvmSup.H"
 
 #include "absorptionEmissionModel.H"
 #include "scatterModel.H"
@@ -240,10 +241,14 @@ void Foam::radiation::P1::calculate()
     );
 
     // Calculate radiative heat flux on boundaries.
-    forAll(mesh_.boundaryMesh(), patchI)
+    forAll(mesh_.boundaryMesh(), patchi)
     {
-        Qr_.boundaryField()[patchI] =
-            -gamma.boundaryField()[patchI]*G_.boundaryField()[patchI].snGrad();
+        if (!G_.boundaryField()[patchi].coupled())
+        {
+            Qr_.boundaryField()[patchi] =
+                -gamma.boundaryField()[patchi]
+                *G_.boundaryField()[patchi].snGrad();
+        }
     }
 }
 
@@ -279,7 +284,7 @@ Foam::radiation::P1::Ru() const
     const DimensionedField<scalar, volMesh> a =
         absorptionEmission_->aCont()().dimensionedInternalField();
 
-    return  a*G - 4.0*E;
+    return a*G - 4.0*E;
 }
 
 

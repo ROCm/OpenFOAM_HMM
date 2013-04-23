@@ -1,20 +1,21 @@
 {
-    volScalarField kByCv
-    (
-        "kByCv",
-        (alpha1*k1/Cv1 + alpha2*k2/Cv2)
-      + (alpha1*rho1 + alpha2*rho2)*turbulence->nut()
-    );
-
-    solve
+    fvScalarMatrix TEqn
     (
         fvm::ddt(rho, T)
       + fvm::div(rhoPhi, T)
-      - fvm::laplacian(kByCv, T)
-      + p*fvc::div(phi)*(alpha1/Cv1 + alpha2/Cv2)
+      - fvm::laplacian(twoPhaseProperties.alphaEff(turbulence->mut()), T)
+      + (
+            fvc::div(fvc::absolute(phi, U), p)
+          + fvc::ddt(rho, K) + fvc::div(rhoPhi, K)
+        )
+       *(
+           alpha1/twoPhaseProperties.thermo1().Cv()
+         + alpha2/twoPhaseProperties.thermo2().Cv()
+        )
     );
 
-    // Update compressibilities
-    psi1 = eos1->psi(p, T);
-    psi2 = eos2->psi(p, T);
+    TEqn.relax();
+    TEqn.solve();
+
+    twoPhaseProperties.correct();
 }

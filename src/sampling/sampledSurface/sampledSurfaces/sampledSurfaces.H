@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -89,6 +89,7 @@ class sampledSurfaces
         //- Tolerance for merging points (fraction of mesh bounding box)
         static scalar mergeTol_;
 
+
     // Private data
 
         //- Name of this set of surfaces,
@@ -112,6 +113,7 @@ class sampledSurfaces
 
             //- Interpolation scheme to use
             word interpolationScheme_;
+
 
         // surfaces
 
@@ -159,8 +161,7 @@ class sampledSurfaces
         );
 
         //- Sample and write all sampled fields
-        template<class Type>
-        void sampleAndWrite(const IOobjectList&);
+        template<class Type> void sampleAndWrite(const IOobjectList& objects);
 
         //- Disallow default bitwise copy construct and assignment
         sampledSurfaces(const sampledSurfaces&);
@@ -234,7 +235,6 @@ public:
 
         //- Update for changes of mesh due to readUpdate - expires the surfaces
         virtual void readUpdate(const polyMesh::readUpdateState state);
-
 };
 
 

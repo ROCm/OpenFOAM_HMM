@@ -26,6 +26,7 @@ License
 #include "phaseModel.H"
 #include "diameterModel.H"
 #include "fixedValueFvPatchFields.H"
+#include "slipFvPatchFields.H"
 #include "surfaceInterpolate.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -51,7 +52,15 @@ Foam::phaseModel::phaseModel
         dimensionedScalar("alpha", dimless, 0)
     ),
     name_(phaseName),
-    phaseDict_(transportProperties.subDict(phaseName)),
+    phaseDict_
+    (
+        transportProperties.subDict
+        (
+            phaseName == "1" || phaseName == "2"
+          ? "phase" + phaseName
+          : word(phaseName)
+        )
+    ),
     thermo_(rhoThermo::New(mesh, phaseName)),
     U_
     (
@@ -110,7 +119,11 @@ Foam::phaseModel::phaseModel
 
         forAll(U_.boundaryField(), i)
         {
-            if (isA<fixedValueFvPatchVectorField>(U_.boundaryField()[i]))
+            if
+            (
+                isA<fixedValueFvPatchVectorField>(U_.boundaryField()[i])
+             || isA<slipFvPatchVectorField>(U_.boundaryField()[i])
+            )
             {
                 phiTypes[i] = fixedValueFvPatchScalarField::typeName;
             }

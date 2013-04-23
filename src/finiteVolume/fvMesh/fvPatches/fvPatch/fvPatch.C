@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -161,6 +161,7 @@ void Foam::fvPatch::movePoints()
 const Foam::scalarField& Foam::fvPatch::deltaCoeffs() const
 {
     return boundaryMesh().mesh().deltaCoeffs().boundaryField()[index()];
+  //return boundaryMesh().mesh().nonOrthDeltaCoeffs().boundaryField()[index()];
 }
 
 

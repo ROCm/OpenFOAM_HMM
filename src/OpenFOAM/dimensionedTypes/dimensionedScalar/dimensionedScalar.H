@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -79,6 +79,7 @@ dimensionedScalar tan(const dimensionedScalar&);
 dimensionedScalar asin(const dimensionedScalar&);
 dimensionedScalar acos(const dimensionedScalar&);
 dimensionedScalar atan(const dimensionedScalar&);
+dimensionedScalar atan2(const dimensionedScalar&, const dimensionedScalar&);
 dimensionedScalar sinh(const dimensionedScalar&);
 dimensionedScalar cosh(const dimensionedScalar&);
 dimensionedScalar tanh(const dimensionedScalar&);

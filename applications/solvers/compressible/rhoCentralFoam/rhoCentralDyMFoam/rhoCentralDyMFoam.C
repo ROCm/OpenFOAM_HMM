@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,6 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
     #include "createFields.H"
-    #include "readThermophysicalProperties.H"
     #include "readTimeControls.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -166,7 +165,6 @@ int main(int argc, char *argv[])
         mesh.movePoints(motionPtr->newPoints());
 
         phi = aphiv_pos*rho_pos + aphiv_neg*rho_neg;
-        Info<< phi.boundaryField()[0] << endl;
 
         surfaceVectorField phiUp
         (
@@ -236,13 +234,10 @@ int main(int argc, char *argv[])
 
         if (!inviscid)
         {
-            volScalarField k("k", thermo.Cp()*muEff/Pr);
             solve
             (
                 fvm::ddt(rho, e) - fvc::ddt(rho, e)
               - fvm::laplacian(turbulence->alphaEff(), e)
-              + fvc::laplacian(turbulence->alpha(), e)
-              - fvc::laplacian(k, T)
             );
             thermo.correct();
             rhoE = rho*(e + 0.5*magSqr(U));

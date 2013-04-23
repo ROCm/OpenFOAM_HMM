@@ -172,6 +172,13 @@ Foam::Istream& Foam::UIPstream::read(token& t)
             t.type() = token::VERBATIMSTRING;
             return *this;
         }
+        case token::VARIABLE :
+        {
+            // Recurse to read actual string
+            read(t);
+            t.type() = token::VARIABLE;
+            return *this;
+        }
         case token::STRING :
         {
             string* pval = new string;

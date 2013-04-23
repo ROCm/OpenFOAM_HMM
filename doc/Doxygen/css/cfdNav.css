@@ -326,6 +326,11 @@ nav3-bullet
     color:rgb(42,90,138);
 }
 
+div.navpath, div.summary
+{
+    display: none;
+}
+
 /*main-navigation ************************************************/
 .main-navigation .loginform
 {

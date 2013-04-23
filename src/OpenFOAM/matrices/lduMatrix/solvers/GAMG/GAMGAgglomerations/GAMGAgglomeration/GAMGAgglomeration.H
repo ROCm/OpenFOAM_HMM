@@ -61,7 +61,7 @@ class GAMGProcAgglomeration;
 
 class GAMGAgglomeration
 :
-    public MeshObject<lduMesh, GAMGAgglomeration>
+    public MeshObject<lduMesh, GeometricMeshObject, GAMGAgglomeration>
 {
 protected:
 
