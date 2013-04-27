@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -175,6 +175,7 @@ class triSurface
         void writeDXGeometry(const bool, Ostream&) const;
         void writeDXTrailer(Ostream&) const;
 
+
     // Static private functions
 
         //- Convert faces to labelledTri. All get same region.
@@ -203,6 +204,7 @@ class triSurface
         //- read non-comment line
         static string getLineNoComment(IFstream&);
 
+
 protected:
 
     // Protected Member Functions
@@ -218,6 +220,7 @@ protected:
         {
             return static_cast<List<Face>&>(*this);
         }
+
 
 public:
 
@@ -287,7 +290,6 @@ public:
         triSurface(const triSurface&);
 
 
-
     //- Destructor
     ~triSurface();
 
@@ -323,6 +325,7 @@ public:
             //  If 1 neighbour: label of only face.
             //  If >2 neighbours: undetermined.
             const labelList& edgeOwner() const;
+
 
         // Edit
 
@@ -380,6 +383,7 @@ public:
                 labelList& pointMap,
                 labelList& faceMap
             ) const;
+
 
         // Write
 

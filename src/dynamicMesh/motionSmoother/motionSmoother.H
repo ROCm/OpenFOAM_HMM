@@ -385,6 +385,10 @@ public:
             //- Take over existing mesh position.
             void correct();
 
+            //- Set patch fields on displacement to be consistent with
+            //  internal values.
+            void setDisplacementPatchFields();
+
             //- Set displacement field from displacement on patch points.
             //  Modify provided displacement to be consistent with actual
             //  boundary conditions on displacement. Note: resets the

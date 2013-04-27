@@ -678,34 +678,8 @@ void Foam::motionSmoother::correct()
 }
 
 
-void Foam::motionSmoother::setDisplacement(pointField& patchDisp)
+void Foam::motionSmoother::setDisplacementPatchFields()
 {
-    // See comment in .H file about shared points.
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
-    forAll(patches, patchI)
-    {
-        const polyPatch& pp = patches[patchI];
-
-        if (pp.coupled())
-        {
-            const labelList& meshPoints = pp.meshPoints();
-
-            forAll(meshPoints, i)
-            {
-                displacement_[meshPoints[i]] = vector::zero;
-            }
-        }
-    }
-
-    const labelList& ppMeshPoints = pp_.meshPoints();
-
-    // Set internal point data from displacement on combined patch points.
-    forAll(ppMeshPoints, patchPointI)
-    {
-        displacement_[ppMeshPoints[patchPointI]] = patchDisp[patchPointI];
-    }
-
     // Adapt the fixedValue bc's (i.e. copy internal point data to
     // boundaryField for all affected patches)
     forAll(adaptPatchIDs_, i)
@@ -765,6 +739,42 @@ void Foam::motionSmoother::setDisplacement(pointField& patchDisp)
         displacement_.boundaryField()[patchI] ==
             displacement_.boundaryField()[patchI].patchInternalField();
     }
+}
+
+
+void Foam::motionSmoother::setDisplacement(pointField& patchDisp)
+{
+    // See comment in .H file about shared points.
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        if (pp.coupled())
+        {
+            const labelList& meshPoints = pp.meshPoints();
+
+            forAll(meshPoints, i)
+            {
+                displacement_[meshPoints[i]] = vector::zero;
+            }
+        }
+    }
+
+    const labelList& ppMeshPoints = pp_.meshPoints();
+
+    // Set internal point data from displacement on combined patch points.
+    forAll(ppMeshPoints, patchPointI)
+    {
+        displacement_[ppMeshPoints[patchPointI]] = patchDisp[patchPointI];
+    }
+
+
+    // Adapt the fixedValue bc's (i.e. copy internal point data to
+    // boundaryField for all affected patches)
+    setDisplacementPatchFields();
+
 
     if (debug)
     {

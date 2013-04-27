@@ -142,7 +142,8 @@ bool Foam::polyMesh::checkFaceOrthogonality
 
         if (severeNonOrth > 0)
         {
-            Info<< "   *Number of severely non-orthogonal faces: "
+            Info<< "   *Number of severely non-orthogonal (> "
+                << primitiveMesh::nonOrthThreshold_ << " degrees) faces: "
                 << severeNonOrth << "." << endl;
         }
     }
@@ -427,6 +428,8 @@ bool Foam::polyMesh::checkCellDeterminant
     const Vector<label>& meshD
 ) const
 {
+    const scalar warnDet = 1e-3;
+
     if (debug)
     {
         Info<< "bool polyMesh::checkCellDeterminant(const bool"
@@ -450,7 +453,7 @@ bool Foam::polyMesh::checkCellDeterminant
 
     forAll (cellDeterminant, cellI)
     {
-        if (cellDeterminant[cellI] < 1e-3)
+        if (cellDeterminant[cellI] < warnDet)
         {
             if (setPtr)
             {
@@ -480,7 +483,8 @@ bool Foam::polyMesh::checkCellDeterminant
     {
         if (debug || report)
         {
-            Info<< " ***Cells with small determinant found, number of cells: "
+            Info<< " ***Cells with small determinant (< "
+                << warnDet << ") found, number of cells: "
                 << nErrorCells << endl;
         }
 
@@ -491,6 +495,192 @@ bool Foam::polyMesh::checkCellDeterminant
         if (debug || report)
         {
             Info<< "    Cell determinant check OK." << endl;
+        }
+
+        return false;
+    }
+
+    return false;
+}
+
+
+bool Foam::polyMesh::checkFaceWeight
+(
+    const vectorField& fCtrs,
+    const vectorField& fAreas,
+    const vectorField& cellCtrs,
+    const bool report,
+    const scalar minWeight,
+    labelHashSet* setPtr
+) const
+{
+    if (debug)
+    {
+        Info<< "bool polyMesh::checkFaceWeight(const bool"
+            << ", labelHashSet*) const: "
+            << "checking for low face interpolation weights" << endl;
+    }
+
+    tmp<scalarField> tfaceWght = polyMeshTools::faceWeights
+    (
+        *this,
+        fCtrs,
+        fAreas,
+        cellCtrs
+    );
+    scalarField& faceWght = tfaceWght();
+
+
+    label nErrorFaces = 0;
+    scalar minDet = GREAT;
+    scalar sumDet = 0.0;
+    label nSummed = 0;
+
+    // Statistics only for internal and masters of coupled faces
+    PackedBoolList isMasterFace(syncTools::getInternalOrMasterFaces(*this));
+
+    forAll (faceWght, faceI)
+    {
+        if (faceWght[faceI] < minWeight)
+        {
+            // Note: insert both sides of coupled faces
+            if (setPtr)
+            {
+                setPtr->insert(faceI);
+            }
+
+            nErrorFaces++;
+        }
+
+        // Note: statistics only on master of coupled faces
+        if (isMasterFace[faceI])
+        {
+            minDet = min(minDet, faceWght[faceI]);
+            sumDet += faceWght[faceI];
+            nSummed++;
+        }
+    }
+
+    reduce(nErrorFaces, sumOp<label>());
+    reduce(minDet, minOp<scalar>());
+    reduce(sumDet, sumOp<scalar>());
+    reduce(nSummed, sumOp<label>());
+
+    if (debug || report)
+    {
+        if (nSummed > 0)
+        {
+            Info<< "    Face interpolation weight : minimum: " << minDet
+                << " average: " << sumDet/nSummed
+                << endl;
+        }
+    }
+
+    if (nErrorFaces > 0)
+    {
+        if (debug || report)
+        {
+            Info<< " ***Faces with small interpolation weight (< " << minWeight
+                << ") found, number of faces: "
+                << nErrorFaces << endl;
+        }
+
+        return true;
+    }
+    else
+    {
+        if (debug || report)
+        {
+            Info<< "    Face interpolation weight check OK." << endl;
+        }
+
+        return false;
+    }
+
+    return false;
+}
+
+
+bool Foam::polyMesh::checkVolRatio
+(
+    const scalarField& cellVols,
+    const bool report,
+    const scalar minRatio,
+    labelHashSet* setPtr
+) const
+{
+    if (debug)
+    {
+        Info<< "bool polyMesh::checkVolRatio(const bool"
+            << ", labelHashSet*) const: "
+            << "checking for volume ratio < " << minRatio << endl;
+    }
+
+    tmp<scalarField> tvolRatio = polyMeshTools::volRatio(*this, cellVols);
+    scalarField& volRatio = tvolRatio();
+
+
+    label nErrorFaces = 0;
+    scalar minDet = GREAT;
+    scalar sumDet = 0.0;
+    label nSummed = 0;
+
+    // Statistics only for internal and masters of coupled faces
+    PackedBoolList isMasterFace(syncTools::getInternalOrMasterFaces(*this));
+
+    forAll (volRatio, faceI)
+    {
+        if (volRatio[faceI] < minRatio)
+        {
+            // Note: insert both sides of coupled faces
+            if (setPtr)
+            {
+                setPtr->insert(faceI);
+            }
+
+            nErrorFaces++;
+        }
+
+        // Note: statistics only on master of coupled faces
+        if (isMasterFace[faceI])
+        {
+            minDet = min(minDet, volRatio[faceI]);
+            sumDet += volRatio[faceI];
+            nSummed++;
+        }
+    }
+
+    reduce(nErrorFaces, sumOp<label>());
+    reduce(minDet, minOp<scalar>());
+    reduce(sumDet, sumOp<scalar>());
+    reduce(nSummed, sumOp<label>());
+
+    if (debug || report)
+    {
+        if (nSummed > 0)
+        {
+            Info<< "    Face volume ratio : minimum: " << minDet
+                << " average: " << sumDet/nSummed
+                << endl;
+        }
+    }
+
+    if (nErrorFaces > 0)
+    {
+        if (debug || report)
+        {
+            Info<< " ***Faces with small volume ratio (< " << minRatio
+                << ") found, number of faces: "
+                << nErrorFaces << endl;
+        }
+
+        return true;
+    }
+    else
+    {
+        if (debug || report)
+        {
+            Info<< "    Face volume ratio check OK." << endl;
         }
 
         return false;
@@ -579,6 +769,36 @@ bool Foam::polyMesh::checkCellDeterminant
         setPtr,
         geometricD()
     );
+}
+
+
+bool Foam::polyMesh::checkFaceWeight
+(
+    const bool report,
+    const scalar minWeight,
+    labelHashSet* setPtr
+) const
+{
+    return checkFaceWeight
+    (
+        faceCentres(),
+        faceAreas(),
+        cellCentres(),
+        report,
+        minWeight,
+        setPtr
+    );
+}
+
+
+bool Foam::polyMesh::checkVolRatio
+(
+    const bool report,
+    const scalar minRatio,
+    labelHashSet* setPtr
+) const
+{
+    return checkVolRatio(cellVolumes(), report, minRatio, setPtr);
 }
 
 

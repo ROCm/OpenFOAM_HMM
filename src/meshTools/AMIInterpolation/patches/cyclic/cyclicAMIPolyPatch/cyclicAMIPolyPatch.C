@@ -283,6 +283,7 @@ void Foam::cyclicAMIPolyPatch::resetAMI() const
                 nbrPatch0,
                 surfPtr(),
                 faceAreaIntersect::tmMesh,
+                AMIPatchToPatchInterpolation::imFaceAreaWeight,
                 AMIReverse_
             )
         );
