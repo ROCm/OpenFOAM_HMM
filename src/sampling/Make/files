@@ -60,10 +60,14 @@ $(meshToMesh)/calculateMeshToMeshAddressing.C
 $(meshToMesh)/calculateMeshToMeshWeights.C
 
 meshToMeshNew = meshToMeshInterpolation/meshToMeshNew
-$(meshToMeshNew)/calcDirect.C
-$(meshToMeshNew)/calcMapNearest.C
-$(meshToMeshNew)/calcCellVolumeWeight.C
 $(meshToMeshNew)/meshToMeshNew.C
 $(meshToMeshNew)/meshToMeshNewParallelOps.C
+meshToMeshNewMethods = meshToMeshInterpolation/meshToMeshNew/calcMethod
+$(meshToMeshNewMethods)/meshToMeshMethod/meshToMeshMethod.C
+$(meshToMeshNewMethods)/meshToMeshMethod/meshToMeshMethodNew.C
+$(meshToMeshNewMethods)/cellVolumeWeight/cellVolumeWeightMethod.C
+$(meshToMeshNewMethods)/direct/directMethod.C
+$(meshToMeshNewMethods)/mapNearest/mapNearestMethod.C
+
 
 LIB = $(FOAM_LIBBIN)/libsampling

@@ -148,13 +148,36 @@ Foam::IOobject* Foam::IOobjectList::lookup(const word& name) const
 }
 
 
-Foam::IOobjectList Foam::IOobjectList::lookupRe(const wordRe& name) const
+Foam::IOobjectList Foam::IOobjectList::lookup(const wordRe& name) const
 {
     IOobjectList objectsOfName(size());
 
     forAllConstIter(HashPtrTable<IOobject>, *this, iter)
     {
         if (name.match(iter()->name()))
+        {
+            if (IOobject::debug)
+            {
+                Info<< "IOobjectList::lookupRe : found " << iter.key() << endl;
+            }
+
+            objectsOfName.insert(iter.key(), new IOobject(*iter()));
+        }
+    }
+
+    return objectsOfName;
+}
+
+
+Foam::IOobjectList Foam::IOobjectList::lookup(const wordReList& patterns) const
+{
+    wordReListMatcher names(patterns);
+
+    IOobjectList objectsOfName(size());
+
+    forAllConstIter(HashPtrTable<IOobject>, *this, iter)
+    {
+        if (names.match(iter()->name()))
         {
             if (IOobject::debug)
             {

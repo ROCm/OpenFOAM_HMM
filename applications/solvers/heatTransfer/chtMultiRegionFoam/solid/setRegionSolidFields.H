@@ -12,7 +12,7 @@
 
     if (!thermo.isotropic())
     {
-        tmp<volVectorField> tkappaCp = thermo.Kappa()/cp;
+        tmp<volVectorField> tkappaByCp = thermo.Kappa()/cp;
 
         const coordinateSystem& coodSys = coordinates[i];
         tAnialpha =
@@ -29,13 +29,13 @@
                         IOobject::NO_WRITE
                     ),
                     mesh,
-                    tkappaCp().dimensions(),
+                    tkappaByCp().dimensions(),
                     zeroGradientFvPatchVectorField::typeName
                 )
             );
 
         volSymmTensorField& Anialpha = tAnialpha();
-        Anialpha.internalField() = coodSys.R().transformVector(tkappaCp());
+        Anialpha.internalField() = coodSys.R().transformVector(tkappaByCp());
         Anialpha.correctBoundaryConditions();
     }
 

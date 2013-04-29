@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -179,7 +179,10 @@ void Foam::vtkPV3Foam::convertMeshPatches
 
         const word patchName = getPartName(partId);
 
-        labelHashSet patchIds(patches.patchSet(List<wordRe>(1, patchName)));
+        labelHashSet patchIds
+        (
+            patches.patchSet(List<wordRe>(1, wordRe(patchName)))
+        );
 
         if (debug)
         {

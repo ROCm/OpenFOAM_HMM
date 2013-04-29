@@ -91,6 +91,7 @@ void Foam::regionCoupledBase::resetAMI() const
                 nbrPatch0,
                 surfPtr(),
                 faceAreaIntersect::tmMesh,
+                AMIPatchToPatchInterpolation::imFaceAreaWeight,
                 AMIReverse_
             )
         );

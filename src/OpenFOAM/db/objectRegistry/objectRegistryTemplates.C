@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "objectRegistry.H"
-
+#include "stringListOps.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -45,6 +45,40 @@ Foam::wordList Foam::objectRegistry::names() const
     objectNames.setSize(count);
 
     return objectNames;
+}
+
+
+template<class Type>
+Foam::wordList Foam::objectRegistry::names(const wordRe& name) const
+{
+    wordList objectNames(size());
+
+    label count = 0;
+    forAllConstIter(HashTable<regIOobject*>, *this, iter)
+    {
+        if (isA<Type>(*iter()))
+        {
+            const word& objectName = iter()->name();
+
+            if (name.match(objectName))
+            {
+                objectNames[count++] = objectName;
+            }
+        }
+    }
+
+    objectNames.setSize(count);
+
+    return objectNames;
+}
+
+
+template<class Type>
+Foam::wordList Foam::objectRegistry::names(const wordReList& patterns) const
+{
+    wordList names(this->names<Type>());
+
+    return wordList(names, findStrings(patterns, names));
 }
 
 
@@ -124,31 +158,6 @@ bool Foam::objectRegistry::foundObject(const word& name) const
     }
 
     return false;
-}
-
-
-template<class Type>
-Foam::wordList Foam::objectRegistry::foundObjectRe(const wordRe& name) const
-{
-    wordList objectNames(size());
-
-    label count = 0;
-    forAllConstIter(HashTable<regIOobject*>, *this, iter)
-    {
-        if (isA<Type>(*iter()))
-        {
-            const word& objectName = iter()->name();
-
-            if (name.match(objectName))
-            {
-                objectNames[count++] = objectName;
-            }
-        }
-    }
-
-    objectNames.setSize(count);
-
-    return objectNames;
 }
 
 

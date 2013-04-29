@@ -834,5 +834,39 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
         }
     }
 
+    if (allGeometry)
+    {
+        faceSet faces(mesh, "lowWeightFaces", mesh.nFaces()/100);
+        if (mesh.checkFaceWeight(true, 0.05, &faces))
+        {
+            noFailedChecks++;
+
+            label nFaces = returnReduce(faces.size(), sumOp<label>());
+
+            Info<< "  <<Writing " << nFaces
+                << " faces with low interpolation weights to set "
+                << faces.name() << endl;
+            faces.instance() = mesh.pointsInstance();
+            faces.write();
+        }
+    }
+
+    if (allGeometry)
+    {
+        faceSet faces(mesh, "lowVolRatioFaces", mesh.nFaces()/100);
+        if (mesh.checkVolRatio(true, 0.05, &faces))
+        {
+            noFailedChecks++;
+
+            label nFaces = returnReduce(faces.size(), sumOp<label>());
+
+            Info<< "  <<Writing " << nFaces
+                << " faces with low volume ratio cells to set "
+                << faces.name() << endl;
+            faces.instance() = mesh.pointsInstance();
+            faces.write();
+        }
+    }
+
     return noFailedChecks;
 }

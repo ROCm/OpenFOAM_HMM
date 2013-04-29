@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,7 +63,7 @@ vtkPolyData* Foam::vtkPV3Foam::lagrangianVTKMesh
         cloud::prefix/cloudName
     );
 
-    IOobject* positionsPtr = sprayObjs.lookup("positions");
+    IOobject* positionsPtr = sprayObjs.lookup(word("positions"));
     if (positionsPtr)
     {
         Cloud<passiveParticle> parcels(mesh, cloudName, false);

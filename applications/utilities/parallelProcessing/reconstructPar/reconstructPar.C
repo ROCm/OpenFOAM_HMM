@@ -529,10 +529,8 @@ int main(int argc, char *argv[])
                                 cloud::prefix/cloudDirs[i]
                             );
 
-                            IOobject* positionsPtr = sprayObjs.lookup
-                            (
-                                "positions"
-                            );
+                            IOobject* positionsPtr =
+                                sprayObjs.lookup(word("positions"));
 
                             if (positionsPtr)
                             {
