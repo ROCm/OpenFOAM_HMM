@@ -61,7 +61,12 @@ class cellSizeAndAlignmentControls
 
     // Private Member Functions
 
-        bool evalCellSizeFunctions(const point& pt, scalar& minSize) const;
+        bool evalCellSizeFunctions
+        (
+            const point& pt,
+            scalar& minSize,
+            label& maxPriority
+        ) const;
 
         //- Disallow default bitwise copy construct
         cellSizeAndAlignmentControls(const cellSizeAndAlignmentControls&);
@@ -111,6 +116,8 @@ public:
         // Query
 
             scalar cellSize(const point& pt) const;
+
+            scalar cellSize(const point& pt, label& maxPriority) const;
 };
 
 

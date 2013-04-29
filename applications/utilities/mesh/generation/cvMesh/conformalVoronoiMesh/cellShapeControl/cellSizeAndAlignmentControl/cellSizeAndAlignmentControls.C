@@ -39,7 +39,8 @@ defineTypeNameAndDebug(cellSizeAndAlignmentControls, 0);
 bool Foam::cellSizeAndAlignmentControls::evalCellSizeFunctions
 (
     const point& pt,
-    scalar& minSize
+    scalar& minSize,
+    label& maxPriority
 ) const
 {
     bool anyFunctionFound = false;
@@ -67,6 +68,11 @@ bool Foam::cellSizeAndAlignmentControls::evalCellSizeFunctions
                 }
 
                 anyFunctionFound = sSC.cellSize(pt, minSize, previousPriority);
+
+                if (previousPriority > maxPriority)
+                {
+                    maxPriority = previousPriority;
+                }
             }
         }
     }
@@ -138,8 +144,24 @@ Foam::scalar Foam::cellSizeAndAlignmentControls::cellSize
 ) const
 {
     scalar size = defaultCellSize_;
+    label maxPriority = -1;
 
-    evalCellSizeFunctions(pt, size);
+    evalCellSizeFunctions(pt, size, maxPriority);
+
+    return size;
+}
+
+
+Foam::scalar Foam::cellSizeAndAlignmentControls::cellSize
+(
+    const point& pt,
+    label& maxPriority
+) const
+{
+    scalar size = defaultCellSize_;
+    maxPriority = -1;
+
+    evalCellSizeFunctions(pt, size, maxPriority);
 
     return size;
 }

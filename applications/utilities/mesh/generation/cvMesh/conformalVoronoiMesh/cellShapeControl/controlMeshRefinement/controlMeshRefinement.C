@@ -275,12 +275,35 @@ void Foam::controlMeshRefinement::initialMeshPopulation
         // Clip the minimum size
         for (label vI = 0; vI < pts.size(); ++vI)
         {
+            label maxPriority = -1;
+            scalar size = sizeControls_.cellSize(pts[vI], maxPriority);
+
+            if (maxPriority > controlFunction.maxPriority)
+            {
+                vertices[vI].targetCellSize() = max
+                (
+                    size,
+                    shapeController_.minimumCellSize()
+                );
+            }
+            else if (maxPriority == controlFunction.maxPriority)
+            {
+                vertices[vI].targetCellSize() = max
+                (
+                    min(sizes[vI], size),
+                    shapeController_.minimumCellSize()
+                );
+            }
+            else
+            {
+                vertices[vI].targetCellSize() = max
+                (
+                    sizes[vI],
+                    shapeController_.minimumCellSize()
+                );
+            }
+
             vertices[vI] = Vb(pts[vI], Vb::vtInternalNearBoundary);
-            vertices[vI].targetCellSize() = max
-            (
-                sizes[vI],
-                shapeController_.minimumCellSize()
-            );
             vertices[vI].alignment() = alignments[vI];
         }
 
@@ -437,11 +460,34 @@ void Foam::controlMeshRefinement::initialMeshPopulation
         for (label vI = 0; vI < extraPts.size(); ++vI)
         {
             vertices[vI] = Vb(extraPts[vI], Vb::vtUnassigned);
-            vertices[vI].targetCellSize() = max
-            (
-                extraSizes[vI],
-                shapeController_.minimumCellSize()
-            );
+
+            label maxPriority = -1;
+            scalar size = sizeControls_.cellSize(extraPts[vI], maxPriority);
+
+            if (maxPriority > controlFunction.maxPriority)
+            {
+                vertices[vI].targetCellSize() = max
+                (
+                    size,
+                    shapeController_.minimumCellSize()
+                );
+            }
+            else if (maxPriority == controlFunction.maxPriority)
+            {
+                vertices[vI].targetCellSize() = max
+                (
+                    min(extraSizes[vI], size),
+                    shapeController_.minimumCellSize()
+                );
+            }
+            else
+            {
+                vertices[vI].targetCellSize() = max
+                (
+                    extraSizes[vI],
+                    shapeController_.minimumCellSize()
+                );
+            }
         }
 
         label nRejected = 0;
