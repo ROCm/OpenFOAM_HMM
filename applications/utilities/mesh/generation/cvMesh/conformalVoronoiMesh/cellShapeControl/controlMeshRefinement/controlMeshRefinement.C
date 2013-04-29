@@ -275,6 +275,8 @@ void Foam::controlMeshRefinement::initialMeshPopulation
         // Clip the minimum size
         for (label vI = 0; vI < pts.size(); ++vI)
         {
+            vertices[vI] = Vb(pts[vI], Vb::vtInternalNearBoundary);
+
             label maxPriority = -1;
             scalar size = sizeControls_.cellSize(pts[vI], maxPriority);
 
@@ -303,7 +305,6 @@ void Foam::controlMeshRefinement::initialMeshPopulation
                 );
             }
 
-            vertices[vI] = Vb(pts[vI], Vb::vtInternalNearBoundary);
             vertices[vI].alignment() = alignments[vI];
         }
 
