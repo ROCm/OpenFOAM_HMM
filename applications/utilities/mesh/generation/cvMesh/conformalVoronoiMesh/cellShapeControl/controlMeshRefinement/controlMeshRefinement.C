@@ -278,7 +278,7 @@ void Foam::controlMeshRefinement::initialMeshPopulation
             label maxPriority = -1;
             scalar size = sizeControls_.cellSize(pts[vI], maxPriority);
 
-            if (maxPriority > controlFunction.maxPriority)
+            if (maxPriority > controlFunction.maxPriority())
             {
                 vertices[vI].targetCellSize() = max
                 (
@@ -286,7 +286,7 @@ void Foam::controlMeshRefinement::initialMeshPopulation
                     shapeController_.minimumCellSize()
                 );
             }
-            else if (maxPriority == controlFunction.maxPriority)
+            else if (maxPriority == controlFunction.maxPriority())
             {
                 vertices[vI].targetCellSize() = max
                 (
@@ -464,7 +464,7 @@ void Foam::controlMeshRefinement::initialMeshPopulation
             label maxPriority = -1;
             scalar size = sizeControls_.cellSize(extraPts[vI], maxPriority);
 
-            if (maxPriority > controlFunction.maxPriority)
+            if (maxPriority > controlFunction.maxPriority())
             {
                 vertices[vI].targetCellSize() = max
                 (
@@ -472,7 +472,7 @@ void Foam::controlMeshRefinement::initialMeshPopulation
                     shapeController_.minimumCellSize()
                 );
             }
-            else if (maxPriority == controlFunction.maxPriority)
+            else if (maxPriority == controlFunction.maxPriority())
             {
                 vertices[vI].targetCellSize() = max
                 (
