@@ -328,7 +328,7 @@ void Foam::controlMeshRefinement::initialMeshPopulation
                 keep = decomposition().positionOnThisProcessor(pt);
             }
 
-            if (geometryToConformTo_.wellOutside(pt, SMALL))
+            if (keep && geometryToConformTo_.wellOutside(pt, SMALL))
             {
                 keep = false;
             }
@@ -505,7 +505,7 @@ void Foam::controlMeshRefinement::initialMeshPopulation
                 keep = decomposition().positionOnThisProcessor(pt);
             }
 
-            if (geometryToConformTo_.wellOutside(pt, SMALL))
+            if (keep && geometryToConformTo_.wellOutside(pt, SMALL))
             {
                 keep = false;
             }
