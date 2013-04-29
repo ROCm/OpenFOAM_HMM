@@ -33,9 +33,9 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "dynamicFvMesh.H"
 #include "singlePhaseTransportModel.H"
 #include "turbulenceModel.H"
-#include "dynamicFvMesh.H"
 #include "pimpleControl.H"
 #include "fvIOoptionList.H"
 
@@ -44,15 +44,21 @@ Description
 int main(int argc, char *argv[])
 {
     #include "setRootCase.H"
-
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
     #include "initContinuityErrs.H"
+
+    pimpleControl pimple(mesh);
+
     #include "createFields.H"
     #include "createFvOptions.H"
     #include "readTimeControls.H"
+    #include "createPcorrTypes.H"
+    #include "CourantNo.H"
+    #include "setInitialDeltaT.H"
 
-    pimpleControl pimple(mesh);
+    // Create old-time absolute flux for ddtPhiCorr
+    surfaceScalarField phiAbs("phiAbs", phi);
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,6 +71,9 @@ int main(int argc, char *argv[])
 
         // Make the fluxes absolute
         fvc::makeAbsolute(phi, U);
+
+        // Update absolute flux for ddtPhiCorr
+        phiAbs = phi;
 
         #include "setDeltaT.H"
 
