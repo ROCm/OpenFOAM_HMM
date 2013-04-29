@@ -22,20 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    pimpleDyMFoam.C
+    rhoPimpleFoam
 
 Description
-    Transient solver for incompressible, flow of Newtonian fluids
-    on a moving mesh using the PIMPLE (merged PISO-SIMPLE) algorithm.
+    Transient solver for laminar or turbulent flow of compressible fluids
+    for HVAC and similar applications.
 
-    Turbulence modelling is generic, i.e. laminar, RAS or LES may be selected.
+    Uses the flexible PIMPLE (PISO-SIMPLE) solution for time-resolved and
+    pseudo-transient simulations.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "dynamicFvMesh.H"
-#include "singlePhaseTransportModel.H"
+#include "psiThermo.H"
 #include "turbulenceModel.H"
+#include "bound.H"
 #include "pimpleControl.H"
 #include "fvIOoptionList.H"
 
@@ -50,15 +52,16 @@ int main(int argc, char *argv[])
 
     pimpleControl pimple(mesh);
 
+    #include "readControls.H"
     #include "createFields.H"
     #include "createFvOptions.H"
-    #include "readTimeControls.H"
     #include "createPcorrTypes.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
 
     // Create old-time absolute flux for ddtPhiCorr
     surfaceScalarField phiAbs("phiAbs", phi);
+
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -67,10 +70,10 @@ int main(int argc, char *argv[])
     while (runTime.run())
     {
         #include "readControls.H"
-        #include "CourantNo.H"
+        #include "compressibleCourantNo.H"
 
-        // Make the fluxes absolute
-        fvc::makeAbsolute(phi, U);
+        // Make the fluxes absolute before mesh-motion
+        fvc::makeAbsolute(phi, rho, U);
 
         // Update absolute flux for ddtPhiCorr
         phiAbs = phi;
@@ -81,25 +84,39 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        mesh.update();
-
-        if (mesh.changing() && correctPhi)
         {
-            #include "correctPhi.H"
+            // Store divrhoU from the previous time-step/mesh for the correctPhi
+            volScalarField divrhoU(fvc::div(phi));
+
+            // Do any mesh changes
+            mesh.update();
+
+            if (mesh.changing() && correctPhi)
+            {
+                #include "correctPhi.H"
+            }
         }
 
-        // Make the fluxes relative to the mesh motion
-        fvc::makeRelative(phi, U);
+        // Make the fluxes relative to the mesh-motion
+        fvc::makeRelative(phi, rho, U);
 
         if (mesh.changing() && checkMeshCourantNo)
         {
             #include "meshCourantNo.H"
         }
 
+        if (pimple.nCorrPIMPLE() <= 1)
+        {
+            #include "rhoEqn.H"
+            Info<< "rhoEqn max/min : " << max(rho).value()
+                << " " << min(rho).value() << endl;
+        }
+
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())
         {
             #include "UEqn.H"
+            #include "EEqn.H"
 
             // --- Pressure corrector loop
             while (pimple.correct())

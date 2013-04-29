@@ -10,12 +10,8 @@ surfaceScalarField phiHbyA
 (
     "phiHbyA",
     (fvc::interpolate(HbyA) & mesh.Sf())
+  + fvc::ddtPhiCorr(rAU, U, phiAbs)
 );
-
-if (ddtPhiCorr)
-{
-    phiHbyA += fvc::ddtPhiCorr(rAU, U, phi);
-}
 
 if (p.needReference())
 {
