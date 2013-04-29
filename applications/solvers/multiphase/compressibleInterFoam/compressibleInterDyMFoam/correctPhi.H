@@ -38,7 +38,7 @@
         pcorrTypes
     );
 
-    dimensionedScalar rAUf("(1|A(U))", dimTime/rho.dimensions(), 1.0);
+    dimensionedScalar Dp("Dp", dimTime/rho.dimensions(), 1.0);
 
     adjustPhi(phi, U, pcorr);
 
@@ -46,7 +46,7 @@
     {
         fvScalarMatrix pcorrEqn
         (
-            fvm::laplacian(rAUf, pcorr) == fvc::div(phi) - divU
+            fvm::laplacian(Dp, pcorr) == fvc::div(phi) - divU
         );
 
         pcorrEqn.solve();
