@@ -51,9 +51,10 @@ int main(int argc, char *argv[])
     #include "createDynamicFvMesh.H"
     #include "initContinuityErrs.H"
     #include "createFields.H"
-    #include "readTimeControls.H"
 
     pimpleControl pimple(mesh);
+
+    #include "readTimeControls.H"
 
     surfaceScalarField phiAbs("phiAbs", phi);
     fvc::makeAbsolute(phiAbs, U);

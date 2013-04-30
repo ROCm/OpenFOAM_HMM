@@ -97,6 +97,23 @@ int main(int argc, char *argv[])
 
             cci.write();
         }
+
+        volScalarField V
+        (
+            IOobject
+            (
+                "V",
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            mesh,
+
+        );
+        mesh.V().setInstance(runTime.timeName());
+        mesh.V().write();
     }
 
     Info<< "\nEnd\n" << endl;

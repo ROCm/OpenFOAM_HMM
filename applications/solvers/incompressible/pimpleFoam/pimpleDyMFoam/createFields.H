@@ -40,19 +40,3 @@
     (
         incompressible::turbulenceModel::New(U, phi, laminarTransport)
     );
-
-    Info<< "Reading field rAU if present\n" << endl;
-    volScalarField rAU
-    (
-        IOobject
-        (
-            "rAU",
-            runTime.timeName(),
-            mesh,
-            IOobject::READ_IF_PRESENT,
-            IOobject::AUTO_WRITE
-        ),
-        mesh,
-        runTime.deltaT(),
-        zeroGradientFvPatchScalarField::typeName
-    );
