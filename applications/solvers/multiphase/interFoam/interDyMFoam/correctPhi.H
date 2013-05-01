@@ -50,11 +50,11 @@
         {
             phi -= pcorrEqn.flux();
             phiAbs = phi;
+            phiAbs.oldTime() = phi;
             fvc::makeRelative(phi, U);
+            phi.oldTime() = phi;
         }
     }
 }
-
-phi.oldTime() = phi;
 
 #include "continuityErrs.H"

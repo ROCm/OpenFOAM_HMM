@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,17 +36,20 @@ Description
 
 SourceFiles
     MULES.C
+    MULESTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef MULES_H
 #define MULES_H
 
-#include "volFields.H"
+#include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
 #include "primitiveFieldsFwd.H"
 #include "geometricOneField.H"
 #include "zero.H"
+#include "zeroField.H"
+#include "UPtrList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -85,28 +88,6 @@ void explicitSolve
     volScalarField& psi,
     const surfaceScalarField& phiBD,
     surfaceScalarField& phiPsi,
-    const scalar psiMax,
-    const scalar psiMin
-);
-
-template<class RhoType, class SpType, class SuType>
-void implicitSolve
-(
-    const RhoType& rho,
-    volScalarField& gamma,
-    const surfaceScalarField& phi,
-    surfaceScalarField& phiCorr,
-    const SpType& Sp,
-    const SuType& Su,
-    const scalar psiMax,
-    const scalar psiMin
-);
-
-void implicitSolve
-(
-    volScalarField& gamma,
-    const surfaceScalarField& phi,
-    surfaceScalarField& phiCorr,
     const scalar psiMax,
     const scalar psiMin
 );

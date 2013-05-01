@@ -852,7 +852,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
     if (allGeometry)
     {
         faceSet faces(mesh, "lowVolRatioFaces", mesh.nFaces()/100);
-        if (mesh.checkVolRatio(true, 0.05, &faces))
+        if (mesh.checkVolRatio(true, 0.01, &faces))
         {
             noFailedChecks++;
 

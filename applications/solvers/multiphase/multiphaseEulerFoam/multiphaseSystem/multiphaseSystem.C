@@ -29,7 +29,10 @@ License
 #include "Time.H"
 #include "subCycle.H"
 #include "MULES.H"
+#include "surfaceInterpolate.H"
+#include "fvcGrad.H"
 #include "fvcSnGrad.H"
+#include "fvcDiv.H"
 #include "fvcFlux.H"
 #include "fvcAverage.H"
 

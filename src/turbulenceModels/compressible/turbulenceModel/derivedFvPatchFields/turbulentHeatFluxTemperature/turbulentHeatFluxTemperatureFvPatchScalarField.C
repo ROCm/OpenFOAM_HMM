@@ -114,8 +114,17 @@ turbulentHeatFluxTemperatureFvPatchScalarField
     q_("q", dict, p.size()),
     QrName_(dict.lookupOrDefault<word>("Qr", "none"))
 {
-    fvPatchField<scalar>::operator=(patchInternalField());
-    gradient() = 0.0;
+    if (dict.found("value") && dict.found("gradient"))
+    {
+        fvPatchField<scalar>::operator=(Field<scalar>("value", dict, p.size()));
+        gradient() = Field<scalar>("gradient", dict, p.size());
+    }
+    else
+    {
+        // Still reading so cannot yet evaluate. Make up a value.
+        fvPatchField<scalar>::operator=(patchInternalField());
+        gradient() = 0.0;
+    }
 }
 
 
