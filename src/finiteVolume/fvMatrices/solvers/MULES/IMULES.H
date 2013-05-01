@@ -22,34 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Global
-    MULES
+    IMULES
 
 Description
-    MULES: Multidimensional universal limiter with explicit solution.
-
-    Solve a convective-only transport equation using an explicit universal
-    multi-dimensional limiter.
-
-    Parameters are the variable to solve, the normal convective flux and the
-    actual explicit flux of the variable which is also used to return limited
-    flux used in the bounded-solution.
+    IMULES: Multidimensional universal limiter with implicit solution.
 
 SourceFiles
-    MULES.C
-    MULESTemplates.C
+    IMULES.C
+    IMULESTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef MULES_H
-#define MULES_H
+#ifndef IMULES_H
+#define IMULES_H
 
-#include "volFieldsFwd.H"
-#include "surfaceFieldsFwd.H"
-#include "primitiveFieldsFwd.H"
-#include "geometricOneField.H"
-#include "zero.H"
-#include "zeroField.H"
-#include "UPtrList.H"
+#include "MULES.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,71 +48,26 @@ namespace MULES
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class RhoType, class SpType, class SuType>
-void explicitSolve
+void implicitSolve
 (
     const RhoType& rho,
-    volScalarField& psi,
-    const surfaceScalarField& phiPsi,
-    const SpType& Sp,
-    const SuType& Su
-);
-
-template<class RhoType, class SpType, class SuType>
-void explicitSolve
-(
-    const RhoType& rho,
-    volScalarField& psi,
-    const surfaceScalarField& phiBD,
-    surfaceScalarField& phiPsi,
-    const SpType& Sp,
-    const SuType& Su,
-    const scalar psiMax,
-    const scalar psiMin
-);
-
-void explicitSolve
-(
-    volScalarField& psi,
-    const surfaceScalarField& phiBD,
-    surfaceScalarField& phiPsi,
-    const scalar psiMax,
-    const scalar psiMin
-);
-
-template<class RhoType, class SpType, class SuType>
-void limiter
-(
-    scalarField& allLambda,
-    const RhoType& rho,
-    const volScalarField& psi,
-    const surfaceScalarField& phiBD,
-    const surfaceScalarField& phiCorr,
-    const SpType& Sp,
-    const SuType& Su,
-    const scalar psiMax,
-    const scalar psiMin,
-    const label nLimiterIter
-);
-
-template<class RhoType, class SpType, class SuType>
-void limit
-(
-    const RhoType& rho,
-    const volScalarField& psi,
+    volScalarField& gamma,
     const surfaceScalarField& phi,
-    surfaceScalarField& phiPsi,
+    surfaceScalarField& phiCorr,
     const SpType& Sp,
     const SuType& Su,
     const scalar psiMax,
-    const scalar psiMin,
-    const label nLimiterIter,
-    const bool returnCorr
+    const scalar psiMin
 );
 
-void limitSum(UPtrList<scalarField>& phiPsiCorrs);
-
-template<class SurfaceScalarFieldList>
-void limitSum(SurfaceScalarFieldList& phiPsiCorrs);
+void implicitSolve
+(
+    volScalarField& gamma,
+    const surfaceScalarField& phi,
+    surfaceScalarField& phiCorr,
+    const scalar psiMax,
+    const scalar psiMin
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -135,7 +77,7 @@ void limitSum(SurfaceScalarFieldList& phiPsiCorrs);
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "MULESTemplates.C"
+#   include "IMULESTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
