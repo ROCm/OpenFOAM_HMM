@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -109,6 +109,24 @@ public:
             bool operator()(const label a, const label b)
             {
                 return values_[a] < values_[b];
+            }
+        };
+
+        //- Greater function class that can be used for sorting
+        class greater
+        {
+            const UList<T>& values_;
+
+        public:
+
+            greater(const UList<T>& values)
+            :
+                values_(values)
+            {}
+
+            bool operator()(const label a, const label b)
+            {
+                return values_[a] > values_[b];
             }
         };
 
