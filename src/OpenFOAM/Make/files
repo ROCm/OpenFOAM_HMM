@@ -311,7 +311,6 @@ $(GAMGAgglomeration)/GAMGAgglomerateLduAddressing.C
 pairGAMGAgglomeration = $(GAMGAgglomerations)/pairGAMGAgglomeration
 $(pairGAMGAgglomeration)/pairGAMGAgglomeration.C
 $(pairGAMGAgglomeration)/pairGAMGAgglomerate.C
-$(pairGAMGAgglomeration)/pairGAMGAgglomerationCombineLevels.C
 
 algebraicPairGAMGAgglomeration = $(GAMGAgglomerations)/algebraicPairGAMGAgglomeration
 $(algebraicPairGAMGAgglomeration)/algebraicPairGAMGAgglomeration.C

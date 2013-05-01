@@ -67,7 +67,7 @@ class lduPrimitiveMesh
         //  with only those pointing to interfaces being set
         lduInterfacePtrsList interfaces_;
 
-        //- Concrete interfaces if above interfaces were created locally
+        //- Concrete interfaces
         PtrList<const lduInterface> primitiveInterfaces_;
 
         //- Patch field evaluation schedule
@@ -79,7 +79,7 @@ class lduPrimitiveMesh
     // Private Member Functions
 
         //- Get size of all meshes
-        static label size(const PtrList<lduMesh>&);
+        static label size(const PtrList<lduPrimitiveMesh>&);
 
         static labelList upperTriOrder
         (
@@ -112,29 +112,23 @@ public:
 
     // Constructors
 
-        //- Construct from components as copies
-        lduPrimitiveMesh
-        (
-            const label nCells,
-            const labelUList& l,
-            const labelUList& u,
-            const labelListList& pa,
-            const lduInterfacePtrsList interfaces,
-            const lduSchedule& ps,
-            const label comm
-        );
-
-        //- Construct from components and re-use storage as specified.
+        //- Construct from components but without interfaces. Add interfaces
+        //  separately using addInterfaces
         lduPrimitiveMesh
         (
             const label nCells,
             labelList& l,
             labelList& u,
-            labelListList& pa,
-            lduInterfacePtrsList interfaces,
-            const lduSchedule& ps,
             const label comm,
             bool reUse
+        );
+
+        //- Add interfaces to a mesh constructed without
+        void addInterfaces
+        (
+            lduInterfacePtrsList& interfaces,
+            labelListList& pa,
+            const lduSchedule& ps
         );
 
         //- Construct from components and re-use storage.
@@ -177,7 +171,7 @@ public:
 
             const labelList& procIDs,
             const lduMesh& myMesh,
-            const PtrList<lduMesh>& otherMeshes,
+            const PtrList<lduPrimitiveMesh>& otherMeshes,
 
             labelList& cellOffsets,
             labelList& faceOffsets,
@@ -254,7 +248,7 @@ public:
             static const lduMesh& mesh
             (
                 const lduMesh& mesh0,
-                const PtrList<lduMesh>& otherMeshes,
+                const PtrList<lduPrimitiveMesh>& otherMeshes,
                 const label meshI
             );
 
@@ -265,7 +259,7 @@ public:
                 const label comm,
                 const lduMesh& mesh,
                 const labelList& procIDs,
-                PtrList<lduMesh>& otherMeshes
+                PtrList<lduPrimitiveMesh>& otherMeshes
             );
 
             //- Get non-scheduled send/receive schedule

@@ -54,8 +54,6 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
     nPatchFaces_.setSize(nCreatedLevels);
     patchFaceRestrictAddressing_.setSize(nCreatedLevels);
     meshLevels_.setSize(nCreatedLevels);
-    primitiveInterfaces_.setSize(nCreatedLevels + 1);
-    interfaceLevels_.setSize(nCreatedLevels + 1);
 
     // Have procCommunicator_ always, even if not procAgglomerating
     procCommunicator_.setSize(nCreatedLevels + 1);
@@ -142,9 +140,7 @@ Foam::GAMGAgglomeration::GAMGAgglomeration
     nPatchFaces_(maxLevels_),
     patchFaceRestrictAddressing_(maxLevels_),
 
-    meshLevels_(maxLevels_),
-    primitiveInterfaces_(maxLevels_ + 1),
-    interfaceLevels_(maxLevels_ + 1)
+    meshLevels_(maxLevels_)
 {
     procCommunicator_.setSize(maxLevels_ + 1, -1);
     if (processorAgglomerate())
@@ -351,7 +347,14 @@ const Foam::lduInterfacePtrsList& Foam::GAMGAgglomeration::interfaceLevel
     const label i
 ) const
 {
-    return interfaceLevels_[i];
+    if (i == 0)
+    {
+        return meshInterfaces_;
+    }
+    else
+    {
+        return meshLevels_[i - 1].rawInterfaces();
+    }
 }
 
 
@@ -370,8 +373,6 @@ void Foam::GAMGAgglomeration::clearLevel(const label i)
             faceFlipMap_.set(i, NULL);
             nPatchFaces_.set(i, NULL);
             patchFaceRestrictAddressing_.set(i, NULL);
-            primitiveInterfaces_.set(i, NULL);
-            interfaceLevels_.set(i, NULL);
         }
     }
 }

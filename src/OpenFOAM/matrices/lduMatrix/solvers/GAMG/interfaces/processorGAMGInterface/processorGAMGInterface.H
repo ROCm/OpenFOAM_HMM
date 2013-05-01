@@ -55,10 +55,6 @@ class processorGAMGInterface
 {
     // Private data
 
-//        //- Reference to the processorLduInterface from which this is
-//        //  agglomerated
-//        const processorLduInterface& fineProcInterface_;
-
         //- Communicator to use for parallel communication
         const label comm_;
 

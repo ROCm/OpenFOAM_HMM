@@ -53,11 +53,7 @@ Foam::dummyAgglomeration::dummyAgglomeration
     nLevels_(readLabel(controlDict.lookup("nLevels")))
 {
     // Get the finest-level interfaces from the mesh
-    interfaceLevels_.set
-    (
-        0,
-        new lduInterfacePtrsList(mesh.interfaces())
-    );
+    meshInterfaces_ = mesh.interfaces();
 
     const label nCoarseCells = mesh.lduAddr().size();
 

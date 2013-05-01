@@ -65,11 +65,7 @@ Foam::processorGAMGInterface::processorGAMGInterface
     (
         index,
         coarseInterfaces
-//        fineInterface,
-//        localRestrictAddressing,
-//        neighbourRestrictAddressing
     ),
-//    fineProcInterface_(refCast<const processorLduInterface>(fineInterface)),
     comm_(coarseComm),
     myProcNo_(refCast<const processorLduInterface>(fineInterface).myProcNo()),
     neighbProcNo_
@@ -145,7 +141,6 @@ Foam::processorGAMGInterface::processorGAMGInterface
 (
     const label index,
     const lduInterfacePtrsList& coarseInterfaces,
-//    const lduInterface& fineInterface,
     const labelUList& faceCells,
     const labelUList& faceRestrictAddresssing,
     const label coarseComm,
@@ -162,7 +157,6 @@ Foam::processorGAMGInterface::processorGAMGInterface
         faceCells,
         faceRestrictAddresssing
     ),
-    //fineProcInterface_(refCast<const processorLduInterface>(fineInterface)),
     comm_(coarseComm),
     myProcNo_(myProcNo),
     neighbProcNo_(neighbProcNo),
@@ -201,12 +195,12 @@ void Foam::processorGAMGInterface::initInternalFieldTransfer
     const labelUList& iF
 ) const
 {
-label oldWarn = UPstream::warnComm;
-UPstream::warnComm = comm();
+    label oldWarn = UPstream::warnComm;
+    UPstream::warnComm = comm();
 
     send(commsType, interfaceInternalField(iF)());
 
-UPstream::warnComm = oldWarn;
+    UPstream::warnComm = oldWarn;
 }
 
 
@@ -216,12 +210,13 @@ Foam::tmp<Foam::labelField> Foam::processorGAMGInterface::internalFieldTransfer
     const labelUList& iF
 ) const
 {
-label oldWarn = UPstream::warnComm;
-UPstream::warnComm = comm();
+    label oldWarn = UPstream::warnComm;
+    UPstream::warnComm = comm();
 
     tmp<Field<label> > tfld(receive<label>(commsType, this->size()));
 
-UPstream::warnComm = oldWarn;
+    UPstream::warnComm = oldWarn;
+
     return tfld;
 }
 

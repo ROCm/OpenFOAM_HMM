@@ -122,7 +122,10 @@ void Foam::lduPrimitiveMesh::checkUpperTriangular
 }
 
 
-Foam::label Foam::lduPrimitiveMesh::size(const PtrList<lduMesh>& meshes)
+Foam::label Foam::lduPrimitiveMesh::size
+(
+    const PtrList<lduPrimitiveMesh>& meshes
+)
 {
     label size = 0;
 
@@ -212,32 +215,8 @@ Foam::labelList Foam::lduPrimitiveMesh::upperTriOrder
 Foam::lduPrimitiveMesh::lduPrimitiveMesh
 (
     const label nCells,
-    const labelUList& l,
-    const labelUList& u,
-    const labelListList& pa,
-    const lduInterfacePtrsList interfaces,
-    const lduSchedule& ps,
-    const label comm
-)
-:
-    lduAddressing(nCells),
-    lowerAddr_(l),
-    upperAddr_(u),
-    patchAddr_(pa),
-    interfaces_(interfaces),
-    patchSchedule_(ps),
-    comm_(comm)
-{}
-
-
-Foam::lduPrimitiveMesh::lduPrimitiveMesh
-(
-    const label nCells,
     labelList& l,
     labelList& u,
-    labelListList& pa,
-    lduInterfacePtrsList interfaces,
-    const lduSchedule& ps,
     const label comm,
     bool reUse
 )
@@ -245,11 +224,31 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     lduAddressing(nCells),
     lowerAddr_(l, reUse),
     upperAddr_(u, reUse),
-    patchAddr_(pa, reUse),
-    interfaces_(interfaces, reUse),
-    patchSchedule_(ps),
     comm_(comm)
 {}
+
+
+void Foam::lduPrimitiveMesh::addInterfaces
+(
+    lduInterfacePtrsList& interfaces,
+    labelListList& pa,
+    const lduSchedule& ps
+)
+{
+    interfaces_ = interfaces;
+    patchAddr_ = pa;
+    patchSchedule_ = ps;
+
+    // Create interfaces
+    primitiveInterfaces_.setSize(interfaces_.size());
+    forAll(interfaces_, i)
+    {
+        if (interfaces_.set(i))
+        {
+            primitiveInterfaces_.set(i, &interfaces_[i]);
+        }
+    }
+}
 
 
 Foam::lduPrimitiveMesh::lduPrimitiveMesh
@@ -290,7 +289,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
 
     const labelList& procIDs,
     const lduMesh& myMesh,
-    const PtrList<lduMesh>& otherMeshes,
+    const PtrList<lduPrimitiveMesh>& otherMeshes,
 
     labelList& cellOffsets,
     labelList& faceOffsets,
@@ -972,7 +971,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
 const Foam::lduMesh& Foam::lduPrimitiveMesh::mesh
 (
     const lduMesh& myMesh,
-    const PtrList<lduMesh>& otherMeshes,
+    const PtrList<lduPrimitiveMesh>& otherMeshes,
     const label meshI
 )
 {
@@ -985,7 +984,7 @@ void Foam::lduPrimitiveMesh::gather
     const label comm,
     const lduMesh& mesh,
     const labelList& procIDs,
-    PtrList<lduMesh>& otherMeshes
+    PtrList<lduPrimitiveMesh>& otherMeshes
 )
 {
     // Force calculation of schedule (since does parallel comms)
@@ -1015,6 +1014,21 @@ void Foam::lduPrimitiveMesh::gather
             labelList upperAddr(fromSlave);
             boolList validInterface(fromSlave);
 
+
+            // Construct mesh without interfaces
+            otherMeshes.set
+            (
+                i-1,
+                new lduPrimitiveMesh
+                (
+                    nCells,
+                    lowerAddr,
+                    upperAddr,
+                    comm,
+                    true    // reuse
+                )
+            );
+
             // Construct GAMGInterfaces
             lduInterfacePtrsList newInterfaces(validInterface.size());
             labelListList patchAddr(validInterface.size());
@@ -1031,7 +1045,7 @@ void Foam::lduPrimitiveMesh::gather
                         (
                             coupleType,
                             intI,
-                            newInterfaces,
+                            otherMeshes[i-1].rawInterfaces(),
                             fromSlave
                         ).ptr()
                     );
@@ -1039,25 +1053,16 @@ void Foam::lduPrimitiveMesh::gather
                 }
             }
 
-            otherMeshes.set
+            otherMeshes[i-1].addInterfaces
             (
-                i-1,
-                new lduPrimitiveMesh
+                newInterfaces,
+                patchAddr,
+                nonBlockingSchedule<processorGAMGInterface>
                 (
-                    nCells,
-                    lowerAddr,
-                    upperAddr,
-                    patchAddr,
-                    newInterfaces,
-                    nonBlockingSchedule<processorGAMGInterface>
-                    (
-                        newInterfaces
-                    ),
-                    comm,
-                    true
+                    newInterfaces
                 )
             );
-        }
+       }
     }
     else if (findIndex(procIDs, Pstream::myProcNo(comm)) != -1)
     {

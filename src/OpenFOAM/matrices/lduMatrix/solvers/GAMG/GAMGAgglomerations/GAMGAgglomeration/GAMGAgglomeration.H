@@ -75,6 +75,8 @@ protected:
 
         autoPtr<GAMGProcAgglomeration> procAgglomeratorPtr_;
 
+        //- Cached mesh interfaces
+        lduInterfacePtrsList meshInterfaces_;
 
         //- The number of cells in each level
         labelList nCells_;
@@ -112,12 +114,6 @@ protected:
         //- Hierarchy of mesh addressing
         PtrList<lduPrimitiveMesh> meshLevels_;
 
-        //- Hierarchy of interfaces
-        PtrList<PtrList<const lduInterface> > primitiveInterfaces_;
-
-        //- Hierarchy of interfaces in lduInterfacePtrsList form
-        PtrList<lduInterfacePtrsList> interfaceLevels_;
-
 
         // Processor agglomeration
 
@@ -148,6 +144,9 @@ protected:
 
         //- Assemble coarse mesh addressing
         void agglomerateLduAddressing(const label fineLevelIndex);
+
+        //- Combine a level with the previous one
+        void combineLevels(const label curLevel);
 
         //- Shrink the number of levels to that specified
         void compactLevels(const label nCreatedLevels);
