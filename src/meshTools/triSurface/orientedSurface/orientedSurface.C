@@ -575,19 +575,4 @@ bool Foam::orientedSurface::orient
 }
 
 
-bool Foam::orientedSurface::orientAll(triSurface& s)
-{
-    if (orientConsistent(s))
-    {
-        Info<< "Some triangles are not oriented consistently. Aborting."
-            << endl;
-        return false;
-    }
-
-    labelList flipState(s.size(), FLIP);
-
-    return flipSurface(s, flipState);
-}
-
-
 // ************************************************************************* //
