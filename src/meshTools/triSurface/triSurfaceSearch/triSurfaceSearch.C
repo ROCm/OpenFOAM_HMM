@@ -51,7 +51,7 @@ bool Foam::triSurfaceSearch::checkUniqueHit
         nearLabel
     );
 
-    if (nearType == 1)
+    if (nearType == triPointRef::POINT)
     {
         // near point
 
@@ -78,7 +78,7 @@ bool Foam::triSurfaceSearch::checkUniqueHit
             }
         }
     }
-    else if (nearType == 2)
+    else if (nearType == triPointRef::EDGE)
     {
         // near edge
         // check if the other face of the edge is already hit
