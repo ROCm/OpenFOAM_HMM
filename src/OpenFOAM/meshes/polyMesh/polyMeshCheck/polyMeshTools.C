@@ -178,7 +178,7 @@ Foam::tmp<Foam::scalarField> Foam::polyMeshTools::faceSkewness
                 }
 
                 // Normalised skewness
-                 skew[faceI] = mag(sv)/fd;
+                skew[faceI] = mag(sv)/fd;
             }
         }
     }
