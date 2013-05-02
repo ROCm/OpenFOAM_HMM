@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,9 +55,20 @@ class processorGAMGInterface
 {
     // Private data
 
-        //- Reference tor the processorLduInterface from which this is
-        //  agglomerated
-        const processorLduInterface& fineProcInterface_;
+        //- Communicator to use for parallel communication
+        const label comm_;
+
+        //- My processor rank in communicator
+        label myProcNo_;
+
+        //- Neighbouring processor rank in communicator
+        label neighbProcNo_;
+
+        //- Transformation tensor
+        tensorField forwardT_;
+
+        //- Message tag used for sending
+        int tag_;
 
 
     // Private Member Functions
@@ -85,7 +96,30 @@ public:
             const lduInterface& fineInterface,
             const labelField& restrictAddressing,
             const labelField& neighbourRestrictAddressing,
-            const label fineLevelIndex
+            const label fineLevelIndex,
+            const label coarseComm
+        );
+
+        //- Construct from components
+        processorGAMGInterface
+        (
+            const label index,
+            const lduInterfacePtrsList& coarseInterfaces,
+            const labelUList& faceCells,
+            const labelUList& faceRestrictAddresssing,
+            const label coarseComm,
+            const label myProcNo,
+            const label neighbProcNo,
+            const tensorField& forwardT,
+            const int tag
+        );
+
+        //- Construct from Istream
+        processorGAMGInterface
+        (
+            const label index,
+            const lduInterfacePtrsList& coarseInterfaces,
+            Istream& is
         );
 
 
@@ -114,29 +148,41 @@ public:
 
         //- Processor interface functions
 
-            //- Return processor number
-            virtual int myProcNo() const
+            //- Return communicator used for sending
+            virtual int comm() const
             {
-                return fineProcInterface_.myProcNo();
+                return comm_;
             }
 
-            //- Return neigbour processor number
+            //- Return processor number (rank in communicator)
+            virtual int myProcNo() const
+            {
+                return myProcNo_;
+            }
+
+            //- Return neigbour processor number (rank in communicator)
             virtual int neighbProcNo() const
             {
-                return fineProcInterface_.neighbProcNo();
+                return neighbProcNo_;
             }
 
             //- Return face transformation tensor
             virtual const tensorField& forwardT() const
             {
-                return fineProcInterface_.forwardT();
+                return forwardT_;
             }
 
             //- Return message tag used for sending
             virtual int tag() const
             {
-                return fineProcInterface_.tag();
+                return tag_;
             }
+
+
+        // I/O
+
+            //- Write to stream
+            virtual void write(Ostream&) const;
 };
 
 

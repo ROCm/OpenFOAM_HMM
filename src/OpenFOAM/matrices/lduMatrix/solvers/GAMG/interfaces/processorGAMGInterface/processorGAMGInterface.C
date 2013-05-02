@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,6 +39,12 @@ namespace Foam
         processorGAMGInterface,
         lduInterface
     );
+    addToRunTimeSelectionTable
+    (
+        GAMGInterface,
+        processorGAMGInterface,
+        Istream
+    );
 }
 
 
@@ -51,18 +57,23 @@ Foam::processorGAMGInterface::processorGAMGInterface
     const lduInterface& fineInterface,
     const labelField& localRestrictAddressing,
     const labelField& neighbourRestrictAddressing,
-    const label fineLevelIndex
+    const label fineLevelIndex,
+    const label coarseComm
 )
 :
     GAMGInterface
     (
         index,
-        coarseInterfaces,
-        fineInterface,
-        localRestrictAddressing,
-        neighbourRestrictAddressing
+        coarseInterfaces
     ),
-    fineProcInterface_(refCast<const processorLduInterface>(fineInterface))
+    comm_(coarseComm),
+    myProcNo_(refCast<const processorLduInterface>(fineInterface).myProcNo()),
+    neighbProcNo_
+    (
+        refCast<const processorLduInterface>(fineInterface).neighbProcNo()
+    ),
+    forwardT_(refCast<const processorLduInterface>(fineInterface).forwardT()),
+    tag_(refCast<const processorLduInterface>(fineInterface).tag())
 {
     // From coarse face to coarse cell
     DynamicList<label> dynFaceCells(localRestrictAddressing.size());
@@ -126,7 +137,51 @@ Foam::processorGAMGInterface::processorGAMGInterface
 }
 
 
-// * * * * * * * * * * * * * * * * Desstructor * * * * * * * * * * * * * * * //
+Foam::processorGAMGInterface::processorGAMGInterface
+(
+    const label index,
+    const lduInterfacePtrsList& coarseInterfaces,
+    const labelUList& faceCells,
+    const labelUList& faceRestrictAddresssing,
+    const label coarseComm,
+    const label myProcNo,
+    const label neighbProcNo,
+    const tensorField& forwardT,
+    const int tag
+)
+:
+    GAMGInterface
+    (
+        index,
+        coarseInterfaces,
+        faceCells,
+        faceRestrictAddresssing
+    ),
+    comm_(coarseComm),
+    myProcNo_(myProcNo),
+    neighbProcNo_(neighbProcNo),
+    forwardT_(forwardT),
+    tag_(tag)
+{}
+
+
+Foam::processorGAMGInterface::processorGAMGInterface
+(
+    const label index,
+    const lduInterfacePtrsList& coarseInterfaces,
+    Istream& is
+)
+:
+    GAMGInterface(index, coarseInterfaces, is),
+    comm_(readLabel(is)),
+    myProcNo_(readLabel(is)),
+    neighbProcNo_(readLabel(is)),
+    forwardT_(is),
+    tag_(readLabel(is))
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
 
 Foam::processorGAMGInterface::~processorGAMGInterface()
 {}
@@ -140,7 +195,12 @@ void Foam::processorGAMGInterface::initInternalFieldTransfer
     const labelUList& iF
 ) const
 {
+    label oldWarn = UPstream::warnComm;
+    UPstream::warnComm = comm();
+
     send(commsType, interfaceInternalField(iF)());
+
+    UPstream::warnComm = oldWarn;
 }
 
 
@@ -150,7 +210,25 @@ Foam::tmp<Foam::labelField> Foam::processorGAMGInterface::internalFieldTransfer
     const labelUList& iF
 ) const
 {
-    return receive<label>(commsType, this->size());
+    label oldWarn = UPstream::warnComm;
+    UPstream::warnComm = comm();
+
+    tmp<Field<label> > tfld(receive<label>(commsType, this->size()));
+
+    UPstream::warnComm = oldWarn;
+
+    return tfld;
+}
+
+
+void Foam::processorGAMGInterface::write(Ostream& os) const
+{
+    GAMGInterface::write(os);
+    os  << token::SPACE << comm_
+        << token::SPACE << myProcNo_
+        << token::SPACE << neighbProcNo_
+        << token::SPACE << forwardT_
+        << token::SPACE << tag_;
 }
 
 

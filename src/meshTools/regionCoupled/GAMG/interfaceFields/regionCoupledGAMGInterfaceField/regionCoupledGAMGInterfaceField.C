@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,6 +38,12 @@ namespace Foam
         regionCoupledGAMGInterfaceField,
         lduInterface
     );
+    addToRunTimeSelectionTable
+    (
+        GAMGInterfaceField,
+        regionCoupledGAMGInterfaceField,
+        lduInterfaceField
+    );
 }
 
 
@@ -50,6 +56,21 @@ Foam::regionCoupledGAMGInterfaceField::regionCoupledGAMGInterfaceField
 )
 :
     GAMGInterfaceField(GAMGCp, fineInterface),
+    regionCoupledGAMGInterface_
+    (
+        refCast<const regionCoupledGAMGInterface>(GAMGCp)
+    )
+{}
+
+
+Foam::regionCoupledGAMGInterfaceField::regionCoupledGAMGInterfaceField
+(
+    const GAMGInterface& GAMGCp,
+    const bool doTransform,
+    const int rank
+)
+:
+    GAMGInterfaceField(GAMGCp, doTransform, rank),
     regionCoupledGAMGInterface_
     (
         refCast<const regionCoupledGAMGInterface>(GAMGCp)

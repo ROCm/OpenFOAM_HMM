@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,6 +38,12 @@ namespace Foam
         processorCyclicGAMGInterfaceField,
         lduInterface
     );
+    addToRunTimeSelectionTable
+    (
+        GAMGInterfaceField,
+        processorCyclicGAMGInterfaceField,
+        lduInterfaceField
+    );
 }
 
 
@@ -50,6 +56,17 @@ Foam::processorCyclicGAMGInterfaceField::processorCyclicGAMGInterfaceField
 )
 :
     processorGAMGInterfaceField(GAMGCp, fineInterface)
+{}
+
+
+Foam::processorCyclicGAMGInterfaceField::processorCyclicGAMGInterfaceField
+(
+    const GAMGInterface& GAMGCp,
+    const bool doTransform,
+    const int rank
+)
+:
+    processorGAMGInterfaceField(GAMGCp, doTransform, rank)
 {}
 
 

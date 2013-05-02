@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,6 @@ Description
 SourceFiles
     pairGAMGAgglomeration.C
     pairGAMGAgglomerate.C
-    pairGAMGAgglomerationCombineLevels.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -76,8 +75,6 @@ protected:
             const lduMesh& mesh,
             const scalarField& faceWeights
         );
-
-        void combineLevels(const label curLevel);
 
         //- Disallow default bitwise copy construct
         pairGAMGAgglomeration(const pairGAMGAgglomeration&);

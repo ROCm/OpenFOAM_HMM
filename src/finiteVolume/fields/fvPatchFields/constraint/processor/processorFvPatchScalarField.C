@@ -60,23 +60,25 @@ void processorFvPatchField<scalar>::initInterfaceMatrixUpdate
 
         scalarReceiveBuf_.setSize(scalarSendBuf_.size());
         outstandingRecvRequest_ = UPstream::nRequests();
-        IPstream::read
+        UIPstream::read
         (
             Pstream::nonBlocking,
             procPatch_.neighbProcNo(),
             reinterpret_cast<char*>(scalarReceiveBuf_.begin()),
             scalarReceiveBuf_.byteSize(),
-            procPatch_.tag()
+            procPatch_.tag(),
+            procPatch_.comm()
         );
 
         outstandingSendRequest_ = UPstream::nRequests();
-        OPstream::write
+        UOPstream::write
         (
             Pstream::nonBlocking,
             procPatch_.neighbProcNo(),
             reinterpret_cast<const char*>(scalarSendBuf_.begin()),
             scalarSendBuf_.byteSize(),
-            procPatch_.tag()
+            procPatch_.tag(),
+            procPatch_.comm()
         );
     }
     else

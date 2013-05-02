@@ -311,12 +311,34 @@ $(GAMGAgglomeration)/GAMGAgglomerateLduAddressing.C
 pairGAMGAgglomeration = $(GAMGAgglomerations)/pairGAMGAgglomeration
 $(pairGAMGAgglomeration)/pairGAMGAgglomeration.C
 $(pairGAMGAgglomeration)/pairGAMGAgglomerate.C
-$(pairGAMGAgglomeration)/pairGAMGAgglomerationCombineLevels.C
 
 algebraicPairGAMGAgglomeration = $(GAMGAgglomerations)/algebraicPairGAMGAgglomeration
 $(algebraicPairGAMGAgglomeration)/algebraicPairGAMGAgglomeration.C
 
+dummyAgglomeration = $(GAMGAgglomerations)/dummyAgglomeration
+$(dummyAgglomeration)/dummyAgglomeration.C
+
+
+GAMGProcAgglomerations = $(GAMG)/GAMGProcAgglomerations
+
+GAMGProcAgglomeration = $(GAMGProcAgglomerations)/GAMGProcAgglomeration
+$(GAMGProcAgglomeration)/GAMGProcAgglomeration.C
+masterCoarsestGAMGProcAgglomeration = $(GAMGProcAgglomerations)/masterCoarsestGAMGProcAgglomeration
+$(masterCoarsestGAMGProcAgglomeration)/masterCoarsestGAMGProcAgglomeration.C
+manualGAMGProcAgglomeration = $(GAMGProcAgglomerations)/manualGAMGProcAgglomeration
+$(manualGAMGProcAgglomeration)/manualGAMGProcAgglomeration.C
+eagerGAMGProcAgglomeration = $(GAMGProcAgglomerations)/eagerGAMGProcAgglomeration
+$(eagerGAMGProcAgglomeration)/eagerGAMGProcAgglomeration.C
+noneGAMGProcAgglomeration = $(GAMGProcAgglomerations)/noneGAMGProcAgglomeration
+$(noneGAMGProcAgglomeration)/noneGAMGProcAgglomeration.C
+/*
+cellFaceRatioGAMGProcAgglomeration = $(GAMGProcAgglomerations)/cellFaceRatioGAMGProcAgglomeration
+$(cellFaceRatioGAMGProcAgglomeration)/cellFaceRatioGAMGProcAgglomeration.C
+*/
+
+
 meshes/lduMesh/lduMesh.C
+meshes/lduMesh/lduPrimitiveMesh.C
 
 LduMatrix = matrices/LduMatrix
 $(LduMatrix)/LduMatrix/lduMatrices.C

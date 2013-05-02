@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "GAMGSolver.H"
+#include "GAMGInterface.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -77,32 +78,200 @@ Foam::GAMGSolver::GAMGSolver
     agglomeration_(GAMGAgglomeration::New(matrix_, controlDict_)),
 
     matrixLevels_(agglomeration_.size()),
+    primitiveInterfaceLevels_(agglomeration_.size()),
     interfaceLevels_(agglomeration_.size()),
     interfaceLevelsBouCoeffs_(agglomeration_.size()),
     interfaceLevelsIntCoeffs_(agglomeration_.size())
 {
     readControls();
 
-    forAll(agglomeration_, fineLevelIndex)
+    if (agglomeration_.processorAgglomerate())
     {
-        agglomerateMatrix(fineLevelIndex);
+        forAll(agglomeration_, fineLevelIndex)
+        {
+            if (agglomeration_.hasMeshLevel(fineLevelIndex))
+            {
+                if
+                (
+                    (fineLevelIndex+1) < agglomeration_.size()
+                 && agglomeration_.hasProcMesh(fineLevelIndex+1)
+                )
+                {
+                    // Construct matrix without referencing the coarse mesh so
+                    // construct a dummy mesh instead. This will get overwritten
+                    // by the call to procAgglomerateMatrix so is only to get
+                    // it through agglomerateMatrix
+
+
+                    const lduInterfacePtrsList& fineMeshInterfaces =
+                        agglomeration_.interfaceLevel(fineLevelIndex);
+
+                    PtrList<GAMGInterface> dummyPrimMeshInterfaces
+                    (
+                        fineMeshInterfaces.size()
+                    );
+                    lduInterfacePtrsList dummyMeshInterfaces
+                    (
+                        dummyPrimMeshInterfaces.size()
+                    );
+                    forAll(fineMeshInterfaces, intI)
+                    {
+                        if (fineMeshInterfaces.set(intI))
+                        {
+                            OStringStream os;
+                            refCast<const GAMGInterface>
+                            (
+                                fineMeshInterfaces[intI]
+                            ).write(os);
+                            IStringStream is(os.str());
+
+                            dummyPrimMeshInterfaces.set
+                            (
+                                intI,
+                                GAMGInterface::New
+                                (
+                                    fineMeshInterfaces[intI].type(),
+                                    intI,
+                                    dummyMeshInterfaces,
+                                    is
+                                )
+                            );
+                        }
+                    }
+
+                    forAll(dummyPrimMeshInterfaces, intI)
+                    {
+                        if (dummyPrimMeshInterfaces.set(intI))
+                        {
+                            dummyMeshInterfaces.set
+                            (
+                                intI,
+                                &dummyPrimMeshInterfaces[intI]
+                            );
+                        }
+                    }
+
+                    // So:
+                    // - pass in incorrect mesh (= fine mesh instead of coarse)
+                    // - pass in dummy interfaces
+                    agglomerateMatrix
+                    (
+                        fineLevelIndex,
+                        agglomeration_.meshLevel(fineLevelIndex),
+                        dummyMeshInterfaces
+                    );
+
+
+                    const labelList& procAgglomMap =
+                        agglomeration_.procAgglomMap(fineLevelIndex+1);
+                    const List<int>& procIDs =
+                        agglomeration_.agglomProcIDs(fineLevelIndex+1);
+
+                    procAgglomerateMatrix
+                    (
+                        procAgglomMap,
+                        procIDs,
+                        fineLevelIndex
+                    );
+                }
+                else
+                {
+                    agglomerateMatrix
+                    (
+                        fineLevelIndex,
+                        agglomeration_.meshLevel(fineLevelIndex + 1),
+                        agglomeration_.interfaceLevel(fineLevelIndex + 1)
+                    );
+                }
+            }
+            else
+            {
+                // No mesh. Not involved in calculation anymore
+            }
+        }
     }
+    else
+    {
+        forAll(agglomeration_, fineLevelIndex)
+        {
+            // Agglomerate on to coarse level mesh
+            agglomerateMatrix
+            (
+                fineLevelIndex,
+                agglomeration_.meshLevel(fineLevelIndex + 1),
+                agglomeration_.interfaceLevel(fineLevelIndex + 1)
+            );
+        }
+    }
+
+
+    if (debug)
+    {
+        for
+        (
+            label fineLevelIndex = 0;
+            fineLevelIndex <= matrixLevels_.size();
+            fineLevelIndex++
+        )
+        {
+            if (fineLevelIndex == 0 || matrixLevels_.set(fineLevelIndex-1))
+            {
+                const lduMatrix& matrix = matrixLevel(fineLevelIndex);
+                const lduInterfaceFieldPtrsList& interfaces =
+                    interfaceLevel(fineLevelIndex);
+
+                Pout<< "level:" << fineLevelIndex << nl
+                    << "    nCells:" << matrix.diag().size() << nl
+                    << "    nFaces:" << matrix.lower().size() << nl
+                    << "    nInterfaces:" << interfaces.size()
+                    << endl;
+
+                forAll(interfaces, i)
+                {
+                    if (interfaces.set(i))
+                    {
+                        Pout<< "        " << i
+                            << "\ttype:" << interfaces[i].type()
+                            << endl;
+                    }
+                }
+            }
+            else
+            {
+                Pout<< "level:" << fineLevelIndex << " : no matrix" << endl;
+            }
+        }
+        Pout<< endl;
+    }
+
 
     if (matrixLevels_.size())
     {
-        const label coarsestLevel = matrixLevels_.size() - 1;
-
         if (directSolveCoarsest_)
         {
-            coarsestLUMatrixPtr_.set
-            (
-                new LUscalarMatrix
+            const label coarsestLevel = matrixLevels_.size() - 1;
+
+            if (matrixLevels_.set(coarsestLevel))
+            {
+                const lduMesh& coarsestMesh =
+                    matrixLevels_[coarsestLevel].mesh();
+
+                label coarseComm = coarsestMesh.comm();
+                label oldWarn = UPstream::warnComm;
+                UPstream::warnComm = coarseComm;
+
+                coarsestLUMatrixPtr_.set
                 (
-                    matrixLevels_[coarsestLevel],
-                    interfaceLevelsBouCoeffs_[coarsestLevel],
-                    interfaceLevels_[coarsestLevel]
-                )
-            );
+                    new LUscalarMatrix
+                    (
+                        matrixLevels_[coarsestLevel],
+                        interfaceLevelsBouCoeffs_[coarsestLevel],
+                        interfaceLevels_[coarsestLevel]
+                    )
+                );
+
+                UPstream::warnComm = oldWarn;
+            }
         }
     }
     else
@@ -131,20 +300,6 @@ Foam::GAMGSolver::GAMGSolver
 
 Foam::GAMGSolver::~GAMGSolver()
 {
-    // Clear the the lists of pointers to the interfaces
-    forAll(interfaceLevels_, leveli)
-    {
-        lduInterfaceFieldPtrsList& curLevel = interfaceLevels_[leveli];
-
-        forAll(curLevel, i)
-        {
-            if (curLevel.set(i))
-            {
-                delete curLevel(i);
-            }
-        }
-    }
-
     if (!cacheAgglomeration_)
     {
         delete &agglomeration_;
@@ -178,6 +333,23 @@ void Foam::GAMGSolver::readControls()
     controlDict_.readIfPresent("interpolateCorrection", interpolateCorrection_);
     controlDict_.readIfPresent("scaleCorrection", scaleCorrection_);
     controlDict_.readIfPresent("directSolveCoarsest", directSolveCoarsest_);
+
+    if (debug)
+    {
+        Pout<< "GAMGSolver settings :"
+            << " cacheAgglomeration:" << cacheAgglomeration_
+            << " nPreSweeps:" << nPreSweeps_
+            << " preSweepsLevelMultiplier:" << preSweepsLevelMultiplier_
+            << " maxPreSweeps:" << maxPreSweeps_
+            << " nPostSweeps:" << nPostSweeps_
+            << " postSweepsLevelMultiplier:" << postSweepsLevelMultiplier_
+            << " maxPostSweeps:" << maxPostSweeps_
+            << " nFinestSweeps:" << nFinestSweeps_
+            << " interpolateCorrection:" << interpolateCorrection_
+            << " scaleCorrection:" << scaleCorrection_
+            << " directSolveCoarsest:" << directSolveCoarsest_
+            << endl;
+    }
 }
 
 

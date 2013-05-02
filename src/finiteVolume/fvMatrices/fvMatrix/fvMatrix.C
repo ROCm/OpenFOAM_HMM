@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -599,10 +599,28 @@ void Foam::fvMatrix<Type>::relax(const scalar alpha)
             }
         }
 
-        reduce(nNon, sumOp<label>());
-        reduce(maxNon, maxOp<scalar>());
-        reduce(sumNon, sumOp<scalar>());
-        sumNon /= returnReduce(D.size(), sumOp<label>());
+        reduce(nNon, sumOp<label>(), UPstream::msgType(), psi_.mesh().comm());
+        reduce
+        (
+            maxNon,
+            maxOp<scalar>(),
+            UPstream::msgType(),
+            psi_.mesh().comm()
+        );
+        reduce
+        (
+            sumNon,
+            sumOp<scalar>(),
+            UPstream::msgType(),
+            psi_.mesh().comm()
+        );
+        sumNon /= returnReduce
+        (
+            D.size(),
+            sumOp<label>(),
+            UPstream::msgType(),
+            psi_.mesh().comm()
+        );
 
         InfoIn("fvMatrix<Type>::relax(const scalar alpha)")
             << "Matrix dominance test for " << psi_.name() << nl

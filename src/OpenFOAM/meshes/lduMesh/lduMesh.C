@@ -25,6 +25,7 @@ License
 
 #include "lduMesh.H"
 #include "objectRegistry.H"
+#include "processorLduInterface.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

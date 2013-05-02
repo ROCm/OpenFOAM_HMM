@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,7 +34,7 @@ void Foam::LUscalarMatrix::solve(Field<Type>& sourceSol) const
     {
         Field<Type> completeSourceSol(n());
 
-        if (Pstream::master())
+        if (Pstream::master(comm_))
         {
             typename Field<Type>::subField
             (
@@ -45,7 +45,7 @@ void Foam::LUscalarMatrix::solve(Field<Type>& sourceSol) const
             for
             (
                 int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave();
+                slave<=Pstream::lastSlave(comm_);
                 slave++
             )
             {
@@ -57,7 +57,9 @@ void Foam::LUscalarMatrix::solve(Field<Type>& sourceSol) const
                     (
                         &(completeSourceSol[procOffsets_[slave]])
                     ),
-                    (procOffsets_[slave + 1] - procOffsets_[slave])*sizeof(Type)
+                    (procOffsets_[slave+1]-procOffsets_[slave])*sizeof(Type),
+                    Pstream::msgType(),
+                    comm_
                 );
             }
         }
@@ -68,11 +70,13 @@ void Foam::LUscalarMatrix::solve(Field<Type>& sourceSol) const
                 Pstream::scheduled,
                 Pstream::masterNo(),
                 reinterpret_cast<const char*>(sourceSol.begin()),
-                sourceSol.byteSize()
+                sourceSol.byteSize(),
+                Pstream::msgType(),
+                comm_
             );
         }
 
-        if (Pstream::master())
+        if (Pstream::master(comm_))
         {
             LUBacksubstitute(*this, pivotIndices_, completeSourceSol);
 
@@ -85,7 +89,7 @@ void Foam::LUscalarMatrix::solve(Field<Type>& sourceSol) const
             for
             (
                 int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave();
+                slave<=Pstream::lastSlave(comm_);
                 slave++
             )
             {
@@ -97,7 +101,9 @@ void Foam::LUscalarMatrix::solve(Field<Type>& sourceSol) const
                     (
                         &(completeSourceSol[procOffsets_[slave]])
                     ),
-                    (procOffsets_[slave + 1] - procOffsets_[slave])*sizeof(Type)
+                    (procOffsets_[slave + 1]-procOffsets_[slave])*sizeof(Type),
+                    Pstream::msgType(),
+                    comm_
                 );
             }
         }
@@ -108,7 +114,9 @@ void Foam::LUscalarMatrix::solve(Field<Type>& sourceSol) const
                 Pstream::scheduled,
                 Pstream::masterNo(),
                 reinterpret_cast<char*>(sourceSol.begin()),
-                sourceSol.byteSize()
+                sourceSol.byteSize(),
+                Pstream::msgType(),
+                comm_
             );
         }
     }

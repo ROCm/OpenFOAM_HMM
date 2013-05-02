@@ -105,6 +105,14 @@ public:
             const lduInterfaceField& fineInterface
         );
 
+        //- Construct from GAMG interface and fine level interface field
+        processorGAMGInterfaceField
+        (
+            const GAMGInterface& GAMGCp,
+            const bool doTransform,
+            const int rank
+        );
+
 
     //- Destructor
     virtual ~processorGAMGInterfaceField();
@@ -145,6 +153,12 @@ public:
 
 
         //- Processor interface functions
+
+            //- Return communicator used for comms
+            virtual int comm() const
+            {
+                return procInterface_.comm();
+            }
 
             //- Return processor number
             virtual int myProcNo() const

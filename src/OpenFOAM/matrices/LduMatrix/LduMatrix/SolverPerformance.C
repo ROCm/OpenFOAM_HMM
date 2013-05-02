@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "SolverPerformance.H"
+#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,7 +65,8 @@ bool Foam::SolverPerformance<Type>::checkConvergence
 {
     if (debug >= 2)
     {
-        Info<< solverName_
+        //Info<< solverName_
+        Pout<< solverName_
             << ":  Iteration " << noIterations_
             << " residual = " << finalResidual_
             << endl;

@@ -337,7 +337,9 @@ Foam::Istream& Foam::UIPstream::rewind()
 void Foam::UIPstream::print(Ostream& os) const
 {
     os  << "Reading from processor " << fromProcNo_
-        << " to processor " << myProcNo() << Foam::endl;
+        << " using communicator " << comm_
+        <<  " and tag " << tag_
+        << Foam::endl;
 }
 
 

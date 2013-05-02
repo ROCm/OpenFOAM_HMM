@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,11 +59,7 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
 
 
     // Get the finest-level interfaces from the mesh
-    interfaceLevels_.set
-    (
-        0,
-        new lduInterfacePtrsList(fvMesh_.boundary().interfaces())
-    );
+    meshInterfaces_(fvMesh_.boundary().interfaces());
 
     // Start geometric agglomeration from the cell volumes and areas of the mesh
     scalarField* VPtr = const_cast<scalarField*>(&fvMesh_.cellVolumes());

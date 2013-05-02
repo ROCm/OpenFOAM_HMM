@@ -28,6 +28,8 @@ License
 #include "lduMatrix.H"
 #include "Time.H"
 #include "dlLibraryTable.H"
+#include "GAMGInterface.H"
+#include "GAMGProcAgglomeration.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -36,6 +38,7 @@ namespace Foam
     defineTypeNameAndDebug(GAMGAgglomeration, 0);
     defineRunTimeSelectionTable(GAMGAgglomeration, lduMesh);
     defineRunTimeSelectionTable(GAMGAgglomeration, lduMatrix);
+    defineRunTimeSelectionTable(GAMGAgglomeration, geometry);
 }
 
 
@@ -45,8 +48,44 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
 {
     nCells_.setSize(nCreatedLevels);
     restrictAddressing_.setSize(nCreatedLevels);
+    nFaces_.setSize(nCreatedLevels);
+    faceRestrictAddressing_.setSize(nCreatedLevels);
+    faceFlipMap_.setSize(nCreatedLevels);
+    nPatchFaces_.setSize(nCreatedLevels);
+    patchFaceRestrictAddressing_.setSize(nCreatedLevels);
     meshLevels_.setSize(nCreatedLevels);
-    interfaceLevels_.setSize(nCreatedLevels + 1);
+
+    // Have procCommunicator_ always, even if not procAgglomerating
+    procCommunicator_.setSize(nCreatedLevels + 1);
+    if (processorAgglomerate())
+    {
+        procAgglomMap_.setSize(nCreatedLevels);
+        agglomProcIDs_.setSize(nCreatedLevels);
+        procCellOffsets_.setSize(nCreatedLevels);
+        procFaceMap_.setSize(nCreatedLevels);
+        procBoundaryMap_.setSize(nCreatedLevels);
+        procBoundaryFaceMap_.setSize(nCreatedLevels);
+
+        procAgglomeratorPtr_().agglomerate();
+    }
+
+    if (debug)
+    {
+        for (label levelI = 0; levelI <= size(); levelI++)
+        {
+            if (hasMeshLevel(levelI))
+            {
+                const lduMesh& fineMesh = meshLevel(levelI);
+                Pout<< "Level " << levelI << " fine mesh:"<< nl;
+                Pout<< fineMesh.info() << endl;
+            }
+            else
+            {
+                Pout<< "Level " << levelI << " has no fine mesh:" << nl
+                    << endl;
+            }
+        }
+    }
 }
 
 
@@ -57,7 +96,7 @@ bool Foam::GAMGAgglomeration::continueAgglomerating
 {
     // Check the need for further agglomeration on all processors
     bool contAgg = nCoarseCells >= nCellsInCoarsestLevel_;
-    reduce(contAgg, andOp<bool>());
+    mesh().reduce(contAgg, andOp<bool>());
     return contAgg;
 }
 
@@ -78,14 +117,42 @@ Foam::GAMGAgglomeration::GAMGAgglomeration
     (
         readLabel(controlDict.lookup("nCellsInCoarsestLevel"))
     ),
+    procAgglomeratorPtr_
+    (
+        (
+            (UPstream::nProcs(mesh.comm()) > 1)
+         && controlDict.found("processorAgglomerator")
+        )
+      ? GAMGProcAgglomeration::New
+        (
+            controlDict.lookup("processorAgglomerator"),
+            *this,
+            controlDict
+        )
+      : autoPtr<GAMGProcAgglomeration>(NULL)
+    ),
 
     nCells_(maxLevels_),
     restrictAddressing_(maxLevels_),
+    nFaces_(maxLevels_),
     faceRestrictAddressing_(maxLevels_),
+    faceFlipMap_(maxLevels_),
+    nPatchFaces_(maxLevels_),
+    patchFaceRestrictAddressing_(maxLevels_),
 
-    meshLevels_(maxLevels_),
-    interfaceLevels_(maxLevels_ + 1)
-{}
+    meshLevels_(maxLevels_)
+{
+    procCommunicator_.setSize(maxLevels_ + 1, -1);
+    if (processorAgglomerate())
+    {
+        procAgglomMap_.setSize(maxLevels_);
+        agglomProcIDs_.setSize(maxLevels_);
+        procCellOffsets_.setSize(maxLevels_);
+        procFaceMap_.setSize(maxLevels_);
+        procBoundaryMap_.setSize(maxLevels_);
+        procBoundaryFaceMap_.setSize(maxLevels_);
+    }
+}
 
 
 const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
@@ -192,25 +259,56 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
 }
 
 
+Foam::autoPtr<Foam::GAMGAgglomeration> Foam::GAMGAgglomeration::New
+(
+    const lduMesh& mesh,
+    const scalarField& cellVolumes,
+    const vectorField& faceAreas,
+    const dictionary& controlDict
+)
+{
+    const word agglomeratorType(controlDict.lookup("agglomerator"));
+
+    const_cast<Time&>(mesh.thisDb().time()).libs().open
+    (
+        controlDict,
+        "geometricGAMGAgglomerationLibs",
+        geometryConstructorTablePtr_
+    );
+
+    geometryConstructorTable::iterator cstrIter =
+        geometryConstructorTablePtr_->find(agglomeratorType);
+
+    if (cstrIter == geometryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "GAMGAgglomeration::New"
+            "(const lduMesh& mesh, const dictionary& controlDict)"
+        )   << "Unknown GAMGAgglomeration type "
+            << agglomeratorType << ".\n"
+            << "Valid geometric GAMGAgglomeration types are :"
+            << geometryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<GAMGAgglomeration>
+    (
+        cstrIter()
+        (
+            mesh,
+            cellVolumes,
+            faceAreas,
+            controlDict
+        )
+    );
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::GAMGAgglomeration::~GAMGAgglomeration()
-{
-    // Clear the interface storage by hand.
-    // It is a list of ptrs not a PtrList for consistency of the interface
-    for (label leveli=1; leveli<interfaceLevels_.size(); leveli++)
-    {
-        lduInterfacePtrsList& curLevel = interfaceLevels_[leveli];
-
-        forAll(curLevel, i)
-        {
-            if (curLevel.set(i))
-            {
-                delete curLevel(i);
-            }
-        }
-    }
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -231,12 +329,118 @@ const Foam::lduMesh& Foam::GAMGAgglomeration::meshLevel
 }
 
 
+bool Foam::GAMGAgglomeration::hasMeshLevel(const label i) const
+{
+    if (i == 0)
+    {
+        return true;
+    }
+    else
+    {
+        return meshLevels_.set(i - 1);
+    }
+}
+
+
 const Foam::lduInterfacePtrsList& Foam::GAMGAgglomeration::interfaceLevel
 (
     const label i
 ) const
 {
-    return interfaceLevels_[i];
+    if (i == 0)
+    {
+        return meshInterfaces_;
+    }
+    else
+    {
+        return meshLevels_[i - 1].rawInterfaces();
+    }
+}
+
+
+void Foam::GAMGAgglomeration::clearLevel(const label i)
+{
+    if (hasMeshLevel(i))
+    {
+        meshLevels_.set(i - 1, NULL);
+
+        if (i < nCells_.size())
+        {
+            nCells_[i] = -555;
+            restrictAddressing_.set(i, NULL);
+            nFaces_[i] = -666;
+            faceRestrictAddressing_.set(i, NULL);
+            faceFlipMap_.set(i, NULL);
+            nPatchFaces_.set(i, NULL);
+            patchFaceRestrictAddressing_.set(i, NULL);
+        }
+    }
+}
+
+
+const Foam::labelList& Foam::GAMGAgglomeration::procAgglomMap
+(
+    const label leveli
+) const
+{
+    return procAgglomMap_[leveli];
+}
+
+
+const Foam::labelList& Foam::GAMGAgglomeration::agglomProcIDs
+(
+    const label leveli
+) const
+{
+    return agglomProcIDs_[leveli];
+}
+
+
+bool Foam::GAMGAgglomeration::hasProcMesh(const label leveli) const
+{
+    return procCommunicator_[leveli] != -1;
+}
+
+
+Foam::label Foam::GAMGAgglomeration::procCommunicator(const label leveli) const
+{
+    return procCommunicator_[leveli];
+}
+
+
+const Foam::labelList& Foam::GAMGAgglomeration::cellOffsets
+(
+    const label leveli
+) const
+{
+    return procCellOffsets_[leveli];
+}
+
+
+const Foam::labelListList& Foam::GAMGAgglomeration::faceMap
+(
+    const label leveli
+) const
+{
+    return procFaceMap_[leveli];
+}
+
+
+const Foam::labelListList& Foam::GAMGAgglomeration::boundaryMap
+(
+    const label leveli
+) const
+{
+    return procBoundaryMap_[leveli];
+}
+
+
+const Foam::labelListListList& Foam::GAMGAgglomeration::boundaryFaceMap
+(
+    const label leveli
+) const
+{
+    return procBoundaryFaceMap_[leveli];
 }
 
 

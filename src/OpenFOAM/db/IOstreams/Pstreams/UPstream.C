@@ -54,18 +54,33 @@ const Foam::NamedEnum<Foam::UPstream::commsTypes, 3>
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::UPstream::setParRun()
+void Foam::UPstream::setParRun(const label nProcs)
 {
     parRun_ = true;
 
-    Pout.prefix() = '[' +  name(myProcNo()) + "] ";
-    Perr.prefix() = '[' +  name(myProcNo()) + "] ";
+    // Redo worldComm communicator (this has been created at static
+    // initialisation time)
+    freeCommunicator(UPstream::worldComm);
+    label comm = allocateCommunicator(-1, identity(nProcs), true);
+    if (comm != UPstream::worldComm)
+    {
+        FatalErrorIn("UPstream::setParRun(const label)")
+            << "problem : comm:" << comm
+            << "  UPstream::worldComm:" << UPstream::worldComm
+            << Foam::exit(FatalError);
+    }
+
+    Pout.prefix() = '[' +  name(myProcNo(Pstream::worldComm)) + "] ";
+    Perr.prefix() = '[' +  name(myProcNo(Pstream::worldComm)) + "] ";
 }
 
 
-void Foam::UPstream::calcLinearComm(const label nProcs)
+Foam::List<Foam::UPstream::commsStruct> Foam::UPstream::calcLinearComm
+(
+    const label nProcs
+)
 {
-    linearCommunication_.setSize(nProcs);
+    List<commsStruct> linearCommunication(nProcs);
 
     // Master
     labelList belowIDs(nProcs - 1);
@@ -74,7 +89,7 @@ void Foam::UPstream::calcLinearComm(const label nProcs)
         belowIDs[i] = i + 1;
     }
 
-    linearCommunication_[0] = commsStruct
+    linearCommunication[0] = commsStruct
     (
         nProcs,
         0,
@@ -86,7 +101,7 @@ void Foam::UPstream::calcLinearComm(const label nProcs)
     // Slaves. Have no below processors, only communicate up to master
     for (label procID = 1; procID < nProcs; procID++)
     {
-        linearCommunication_[procID] = commsStruct
+        linearCommunication[procID] = commsStruct
         (
             nProcs,
             procID,
@@ -95,6 +110,7 @@ void Foam::UPstream::calcLinearComm(const label nProcs)
             labelList(0)
         );
     }
+    return linearCommunication;
 }
 
 
@@ -142,7 +158,10 @@ void Foam::UPstream::collectReceives
 //  5       -               4
 //  6       7               4
 //  7       -               6
-void Foam::UPstream::calcTreeComm(label nProcs)
+Foam::List<Foam::UPstream::commsStruct> Foam::UPstream::calcTreeComm
+(
+    label nProcs
+)
 {
     label nLevels = 1;
     while ((1 << nLevels) < nProcs)
@@ -188,11 +207,11 @@ void Foam::UPstream::calcTreeComm(label nProcs)
     }
 
 
-    treeCommunication_.setSize(nProcs);
+    List<commsStruct> treeCommunication(nProcs);
 
     for (label procID = 0; procID < nProcs; procID++)
     {
-        treeCommunication_[procID] = commsStruct
+        treeCommunication[procID] = commsStruct
         (
             nProcs,
             procID,
@@ -201,37 +220,198 @@ void Foam::UPstream::calcTreeComm(label nProcs)
             allReceives[procID].shrink()
         );
     }
+    return treeCommunication;
 }
 
 
-// Callback from UPstream::init() : initialize linear and tree communication
-// schedules now that nProcs is known.
-void Foam::UPstream::initCommunicationSchedule()
+Foam::label Foam::UPstream::allocateCommunicator
+(
+    const label parentIndex,
+    const labelList& subRanks,
+    const bool doPstream
+)
 {
-    calcLinearComm(nProcs());
-    calcTreeComm(nProcs());
+    label index;
+    if (!freeComms_.empty())
+    {
+        index = freeComms_.pop();
+    }
+    else
+    {
+        // Extend storage
+        index = parentCommunicator_.size();
+
+        myProcNo_.append(-1);
+        procIDs_.append(List<int>(0));
+        parentCommunicator_.append(-1);
+        linearCommunication_.append(List<commsStruct>(0));
+        treeCommunication_.append(List<commsStruct>(0));
+    }
+
+    if (debug)
+    {
+        Pout<< "Communicators : Allocating communicator " << index << endl
+            << "    parent : " << parentIndex << endl
+            << "    procs  : " << subRanks << endl
+            << endl;
+    }
+
+    // Initialise; overwritten by allocatePstreamCommunicator
+    myProcNo_[index] = 0;
+
+    // Convert from label to int
+    procIDs_[index].setSize(subRanks.size());
+    forAll(procIDs_[index], i)
+    {
+        procIDs_[index][i] = subRanks[i];
+
+        // Enforce incremental order (so index is rank in next communicator)
+        if (i >= 1 && subRanks[i] <= subRanks[i-1])
+        {
+            FatalErrorIn
+            (
+                "UPstream::allocateCommunicator"
+                "(const label, const labelList&, const bool)"
+            )   << "subranks not sorted : " << subRanks
+                << " when allocating subcommunicator from parent "
+                << parentIndex
+                << Foam::abort(FatalError);
+        }
+    }
+    parentCommunicator_[index] = parentIndex;
+
+    linearCommunication_[index] = calcLinearComm(procIDs_[index].size());
+    treeCommunication_[index] = calcTreeComm(procIDs_[index].size());
+
+
+    if (doPstream && parRun())
+    {
+        allocatePstreamCommunicator(parentIndex, index);
+    }
+
+    return index;
+}
+
+
+void Foam::UPstream::freeCommunicator
+(
+    const label communicator,
+    const bool doPstream
+)
+{
+    if (debug)
+    {
+        Pout<< "Communicators : Freeing communicator " << communicator << endl
+            << "    parent   : " << parentCommunicator_[communicator] << endl
+            << "    myProcNo : " << myProcNo_[communicator] << endl
+            << endl;
+    }
+
+    if (doPstream && parRun())
+    {
+        freePstreamCommunicator(communicator);
+    }
+    myProcNo_[communicator] = -1;
+    //procIDs_[communicator].clear();
+    parentCommunicator_[communicator] = -1;
+    linearCommunication_[communicator].clear();
+    treeCommunication_[communicator].clear();
+
+    freeComms_.push(communicator);
+}
+
+
+void Foam::UPstream::freeCommunicators(const bool doPstream)
+{
+    forAll(myProcNo_, communicator)
+    {
+        if (myProcNo_[communicator] != -1)
+        {
+            freeCommunicator(communicator, doPstream);
+        }
+    }
+}
+
+
+int Foam::UPstream::baseProcNo(const label myComm, const int myProcID)
+{
+    int procID = myProcID;
+    label comm = myComm;
+
+    while (parent(comm) != -1)
+    {
+        const List<int>& parentRanks = UPstream::procID(comm);
+        procID = parentRanks[procID];
+        comm = UPstream::parent(comm);
+    }
+
+    return procID;
+}
+
+
+Foam::label Foam::UPstream::procNo(const label myComm, const int baseProcID)
+{
+    const List<int>& parentRanks = procID(myComm);
+    label parentComm = parent(myComm);
+
+    if (parentComm == -1)
+    {
+        return findIndex(parentRanks, baseProcID);
+    }
+    else
+    {
+        label parentRank = procNo(parentComm, baseProcID);
+        return findIndex(parentRanks, parentRank);
+    }
+}
+
+
+Foam::label Foam::UPstream::procNo
+(
+    const label myComm,
+    const label currentComm,
+    const int currentProcID
+)
+{
+    label physProcID = UPstream::baseProcNo(currentComm, currentProcID);
+    return procNo(myComm, physProcID);
 }
 
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// Initialise my process number to 0 (the master)
-int Foam::UPstream::myProcNo_(0);
-
 // By default this is not a parallel run
 bool Foam::UPstream::parRun_(false);
 
+// Free communicators
+Foam::LIFOStack<Foam::label> Foam::UPstream::freeComms_;
+
+// My processor number
+Foam::DynamicList<int> Foam::UPstream::myProcNo_(10);
+
 // List of process IDs
-Foam::List<int> Foam::UPstream::procIDs_(label(1), 0);
+Foam::DynamicList<Foam::List<int> > Foam::UPstream::procIDs_(10);
+
+// Parent communicator
+Foam::DynamicList<Foam::label> Foam::UPstream::parentCommunicator_(10);
 
 // Standard transfer message type
 int Foam::UPstream::msgType_(1);
 
 // Linear communication schedule
-Foam::List<Foam::UPstream::commsStruct> Foam::UPstream::linearCommunication_(0);
+Foam::DynamicList<Foam::List<Foam::UPstream::commsStruct> >
+Foam::UPstream::linearCommunication_(10);
 
 // Multi level communication schedule
-Foam::List<Foam::UPstream::commsStruct> Foam::UPstream::treeCommunication_(0);
+Foam::DynamicList<Foam::List<Foam::UPstream::commsStruct> >
+Foam::UPstream::treeCommunication_(10);
+
+
+// Allocate a serial communicator. This gets overwritten in parallel mode
+// (by UPstream::setParRun())
+Foam::UPstream::communicator serialComm(-1, Foam::labelList(1, 0), false);
+
+
 
 // Should compact transfer be used in which floats replace doubles
 // reducing the bandwidth requirement at the expense of some loss
@@ -290,6 +470,14 @@ public:
     }
 };
 addcommsTypeToOpt addcommsTypeToOpt_("commsType");
+
+
+// Default communicator
+Foam::label Foam::UPstream::worldComm(0);
+
+
+// Warn for use of any communicator
+Foam::label Foam::UPstream::warnComm(-1);
 
 
 // Number of polling cycles in processor updates
