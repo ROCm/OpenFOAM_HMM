@@ -112,14 +112,6 @@ public:
             const lduInterfaceField& fineInterface
         );
 
-
-//TBD: make into construct from Istream.
-//   autoPtr<GAMGInterfaceField> New
-//        (
-//            const GAMGInterface& GAMGCp,
-//            Istream& is
-//        );
-
         //- Return a pointer to a new interface created on freestore given
         //  the fine interface
         static autoPtr<GAMGInterfaceField> New
@@ -128,7 +120,6 @@ public:
             const bool doTransform,
             const int rank
         );
-
 
 
     // Constructors
