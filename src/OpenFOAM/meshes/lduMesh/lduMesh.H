@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,6 +36,7 @@ Description
 #include "lduAddressing.H"
 #include "lduInterfacePtrsList.H"
 #include "typeInfo.H"
+#include "InfoProxy.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,6 +78,19 @@ public:
             //- Return a list of pointers for each patch
             //  with only those pointing to interfaces being set
             virtual lduInterfacePtrsList interfaces() const = 0;
+
+        // Info
+
+            //- Return info proxy.
+            //  Used to print mesh information to a stream
+            InfoProxy<lduMesh> info() const
+            {
+                return *this;
+            }
+
+    // Ostream operator
+
+        friend Ostream& operator<<(Ostream&, const InfoProxy<lduMesh>&);
 };
 
 
