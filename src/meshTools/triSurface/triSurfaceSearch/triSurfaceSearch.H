@@ -74,6 +74,9 @@ class triSurfaceSearch
 
         //- Check whether the current hit on the surface which lies on lineVec
         //  is unique.
+        //  point : return 1 unique hit
+        //  edge  : return 1 hit if in the cone of the edge faces
+        //        : return 2 hits if outside or on the cone.
         bool checkUniqueHit
         (
             const pointIndexHit& currHit,
