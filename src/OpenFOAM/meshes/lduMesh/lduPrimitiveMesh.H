@@ -60,9 +60,6 @@ class lduPrimitiveMesh
         //- Upper addressing
         labelList upperAddr_;
 
-        //- Patch to internal addressing
-        labelListList patchAddr_;
-
         //- List of pointers for each patch
         //  with only those pointing to interfaces being set
         lduInterfacePtrsList interfaces_;
@@ -127,7 +124,6 @@ public:
         void addInterfaces
         (
             lduInterfacePtrsList& interfaces,
-            labelListList& pa,
             const lduSchedule& ps
         );
 
@@ -137,7 +133,6 @@ public:
             const label nCells,
             labelList& l,
             labelList& u,
-            labelListList& pa,
             const Xfer<PtrList<const lduInterface> >& primitiveInterfaces,
             const lduSchedule& ps,
             const label comm
@@ -232,7 +227,7 @@ public:
             //- Return patch addressing
             virtual const labelUList& patchAddr(const label i) const
             {
-                return patchAddr_[i];
+                return interfaces_[i].faceCells();
             }
 
             //- Return patch evaluation schedule

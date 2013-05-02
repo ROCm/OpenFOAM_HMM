@@ -308,7 +308,6 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
         )
     );
 
-    labelListList coarseInterfaceAddr(fineInterfaces.size());
     lduInterfacePtrsList coarseInterfaces(fineInterfaces.size());
 
     forAll(fineInterfaces, inti)
@@ -334,8 +333,7 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
                 ).ptr()
             );
 
-            coarseInterfaceAddr[inti] = coarseInterfaces[inti].faceCells();
-            nPatchFaces[inti] = coarseInterfaceAddr[inti].size();
+            nPatchFaces[inti] = coarseInterfaces[inti].faceCells().size();
             patchFineToCoarse[inti] = refCast<const GAMGInterface>
             (
                 coarseInterfaces[inti]
@@ -346,7 +344,6 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
     meshLevels_[fineLevelIndex].addInterfaces
     (
         coarseInterfaces,
-        coarseInterfaceAddr,
         lduPrimitiveMesh::nonBlockingSchedule<processorGAMGInterface>
         (
             coarseInterfaces

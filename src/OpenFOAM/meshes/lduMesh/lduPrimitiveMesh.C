@@ -231,12 +231,10 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
 void Foam::lduPrimitiveMesh::addInterfaces
 (
     lduInterfacePtrsList& interfaces,
-    labelListList& pa,
     const lduSchedule& ps
 )
 {
     interfaces_ = interfaces;
-    patchAddr_ = pa;
     patchSchedule_ = ps;
 
     // Create interfaces
@@ -256,7 +254,6 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     const label nCells,
     labelList& l,
     labelList& u,
-    labelListList& pa,
     const Xfer<PtrList<const lduInterface> >& primitiveInterfaces,
     const lduSchedule& ps,
     const label comm
@@ -265,7 +262,6 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     lduAddressing(nCells),
     lowerAddr_(l, true),
     upperAddr_(u, true),
-    patchAddr_(pa, true),
     primitiveInterfaces_(primitiveInterfaces),
     patchSchedule_(ps),
     comm_(comm)
@@ -301,7 +297,6 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     lduAddressing(myMesh.lduAddr().size() + size(otherMeshes)),
     lowerAddr_(0),
     upperAddr_(0),
-    patchAddr_(0),
     interfaces_(0),
     patchSchedule_(0),
     comm_(comm)
@@ -950,16 +945,6 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     }
 
 
-    // Extract faceCells from interfaces_
-    patchAddr_.setSize(interfaces_.size());
-    forAll(interfaces_, coarseIntI)
-    {
-        if (interfaces_.set(coarseIntI))
-        {
-            patchAddr_[coarseIntI] = interfaces_[coarseIntI].faceCells();
-        }
-    }
-
     patchSchedule_ = nonBlockingSchedule<processorGAMGInterface>(interfaces_);
 
     checkUpperTriangular(cellOffsets.last(), lowerAddr_, upperAddr_);
@@ -1031,7 +1016,6 @@ void Foam::lduPrimitiveMesh::gather
 
             // Construct GAMGInterfaces
             lduInterfacePtrsList newInterfaces(validInterface.size());
-            labelListList patchAddr(validInterface.size());
             forAll(validInterface, intI)
             {
                 if (validInterface[intI])
@@ -1049,14 +1033,12 @@ void Foam::lduPrimitiveMesh::gather
                             fromSlave
                         ).ptr()
                     );
-                    patchAddr[intI] = newInterfaces[intI].faceCells();
                 }
             }
 
             otherMeshes[i-1].addInterfaces
             (
                 newInterfaces,
-                patchAddr,
                 nonBlockingSchedule<processorGAMGInterface>
                 (
                     newInterfaces
