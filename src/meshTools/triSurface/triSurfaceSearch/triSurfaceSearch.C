@@ -54,6 +54,29 @@ bool Foam::triSurfaceSearch::checkUniqueHit
     if (nearType == 1)
     {
         // near point
+
+        const label nearPointI = f[nearLabel];
+
+        const labelList& pointFaces =
+            surface().pointFaces()[surface().meshPointMap()[nearPointI]];
+
+        forAll(pointFaces, pI)
+        {
+            const label pointFaceI = pointFaces[pI];
+
+            if (pointFaceI != currHit.index())
+            {
+                forAll(hits, hI)
+                {
+                    const pointIndexHit& hit = hits[hI];
+
+                    if (hit.index() == pointFaceI)
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
     }
     else if (nearType == 2)
     {
