@@ -53,7 +53,7 @@ void Pstream::gatherList
     const label comm
 )
 {
-    if (UPstream::parRun())
+    if (UPstream::nProcs(comm) > 1)
     {
         if (Values.size() != UPstream::nProcs(comm))
         {
@@ -212,7 +212,7 @@ void Pstream::scatterList
     const label comm
 )
 {
-    if (UPstream::parRun())
+    if (UPstream::nProcs(comm) > 1)
     {
         if (Values.size() != UPstream::nProcs(comm))
         {

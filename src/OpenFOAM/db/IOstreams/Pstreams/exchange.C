@@ -81,7 +81,7 @@ void Pstream::exchange
     // Send sizes across. Note: blocks.
     combineReduce(sizes, UPstream::listEq(), tag, comm);
 
-    if (Pstream::parRun())
+    if (UPstream::nProcs(comm) > 1)
     {
         label startOfRequests = Pstream::nRequests();
 
