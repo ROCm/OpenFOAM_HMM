@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ Class
 
 Description
     Geometric class that creates a 2D plane and can return the intersection
-     point between a line and the plane.
+    point between a line and the plane.
 
 SourceFiles
     plane.C
@@ -61,6 +61,14 @@ Ostream& operator<<(Ostream&, const plane&);
 class plane
 {
 public:
+
+    //- Side of the plane
+    enum side
+    {
+        NORMAL,
+        FLIP
+    };
+
 
         //- A direction and a reference point
         class ray
@@ -181,6 +189,10 @@ public:
 
         //- Return the cutting point between this plane and two other planes
         point planePlaneIntersect(const plane&, const plane&) const;
+
+        //- Return the side of the plane that the point is on.
+        //  If the point is on the plane, then returns NORMAL.
+        side sideOfPlane(const point& p) const;
 
         //- Write to dictionary
         void writeDict(Ostream&) const;

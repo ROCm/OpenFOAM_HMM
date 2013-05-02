@@ -57,6 +57,24 @@ Foam::treeDataPoint::treeDataPoint
 {}
 
 
+Foam::treeDataPoint::findNearestOp::findNearestOp
+(
+    const indexedOctree<treeDataPoint>& tree
+)
+:
+    tree_(tree)
+{}
+
+
+Foam::treeDataPoint::findIntersectOp::findIntersectOp
+(
+    const indexedOctree<treeDataPoint>& tree
+)
+:
+    tree_(tree)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::pointField Foam::treeDataPoint::shapePoints() const
@@ -74,13 +92,13 @@ Foam::pointField Foam::treeDataPoint::shapePoints() const
 
 //- Get type (inside,outside,mixed,unknown) of point w.r.t. surface.
 //  Only makes sense for closed surfaces.
-Foam::label Foam::treeDataPoint::getVolumeType
+Foam::volumeType Foam::treeDataPoint::getVolumeType
 (
     const indexedOctree<treeDataPoint>& oc,
     const point& sample
 ) const
 {
-    return indexedOctree<treeDataPoint>::UNKNOWN;
+    return volumeType::UNKNOWN;
 }
 
 
@@ -115,9 +133,7 @@ bool Foam::treeDataPoint::overlaps
 }
 
 
-// Calculate nearest point to sample. Updates (if any) nearestDistSqr, minIndex,
-// nearestPoint.
-void Foam::treeDataPoint::findNearest
+void Foam::treeDataPoint::findNearestOp::operator()
 (
     const labelUList& indices,
     const point& sample,
@@ -127,12 +143,19 @@ void Foam::treeDataPoint::findNearest
     point& nearestPoint
 ) const
 {
+    const treeDataPoint& shape = tree_.shapes();
+
     forAll(indices, i)
     {
         const label index = indices[i];
-        label pointI = (useSubset_ ? pointLabels_[index] : index);
+        label pointI =
+        (
+            shape.useSubset()
+          ? shape.pointLabels()[index]
+          : index
+        );
 
-        const point& pt = points_[pointI];
+        const point& pt = shape.points()[pointI];
 
         scalar distSqr = magSqr(pt - sample);
 
@@ -146,9 +169,7 @@ void Foam::treeDataPoint::findNearest
 }
 
 
-//- Calculates nearest (to line) point in shape.
-//  Returns point and distance (squared)
-void Foam::treeDataPoint::findNearest
+void Foam::treeDataPoint::findNearestOp::operator()
 (
     const labelUList& indices,
     const linePointRef& ln,
@@ -159,6 +180,8 @@ void Foam::treeDataPoint::findNearest
     point& nearestPoint
 ) const
 {
+    const treeDataPoint& shape = tree_.shapes();
+
     // Best so far
     scalar nearestDistSqr = GREAT;
     if (minIndex >= 0)
@@ -169,9 +192,14 @@ void Foam::treeDataPoint::findNearest
     forAll(indices, i)
     {
         const label index = indices[i];
-        label pointI = (useSubset_ ? pointLabels_[index] : index);
+        label pointI =
+        (
+            shape.useSubset()
+          ? shape.pointLabels()[index]
+          : index
+        );
 
-        const point& shapePt = points_[pointI];
+        const point& shapePt = shape.points()[pointI];
 
         if (tightest.contains(shapePt))
         {
@@ -203,6 +231,23 @@ void Foam::treeDataPoint::findNearest
             }
         }
     }
+}
+
+
+bool Foam::treeDataPoint::findIntersectOp::operator()
+(
+    const label index,
+    const point& start,
+    const point& end,
+    point& result
+) const
+{
+    notImplemented
+    (
+        "treeDataPoint::intersects(const label, const point&,"
+        "const point&, point&)"
+    );
+    return false;
 }
 
 

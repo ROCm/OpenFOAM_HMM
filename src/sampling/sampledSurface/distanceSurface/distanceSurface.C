@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,6 +29,7 @@ License
 #include "volPointInterpolation.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvMesh.H"
+#include "volumeType.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -94,19 +95,19 @@ void Foam::distanceSurface::createGeometry()
 
         if (signed_)
         {
-            List<searchableSurface::volumeType> volType;
+            List<volumeType> volType;
 
             surfPtr_().getVolumeType(cc, volType);
 
             forAll(volType, i)
             {
-                searchableSurface::volumeType vT = volType[i];
+                volumeType vT = volType[i];
 
-                if (vT == searchableSurface::OUTSIDE)
+                if (vT == volumeType::OUTSIDE)
                 {
                     fld[i] = Foam::mag(cc[i] - nearest[i].hitPoint());
                 }
-                else if (vT == searchableSurface::INSIDE)
+                else if (vT == volumeType::INSIDE)
                 {
                     fld[i] = -Foam::mag(cc[i] - nearest[i].hitPoint());
                 }
@@ -146,19 +147,19 @@ void Foam::distanceSurface::createGeometry()
 
             if (signed_)
             {
-                List<searchableSurface::volumeType> volType;
+                List<volumeType> volType;
 
                 surfPtr_().getVolumeType(cc, volType);
 
                 forAll(volType, i)
                 {
-                    searchableSurface::volumeType vT = volType[i];
+                    volumeType vT = volType[i];
 
-                    if (vT == searchableSurface::OUTSIDE)
+                    if (vT == volumeType::OUTSIDE)
                     {
                         fld[i] = Foam::mag(cc[i] - nearest[i].hitPoint());
                     }
-                    else if (vT == searchableSurface::INSIDE)
+                    else if (vT == volumeType::INSIDE)
                     {
                         fld[i] = -Foam::mag(cc[i] - nearest[i].hitPoint());
                     }
@@ -203,20 +204,20 @@ void Foam::distanceSurface::createGeometry()
 
         if (signed_)
         {
-            List<searchableSurface::volumeType> volType;
+            List<volumeType> volType;
 
             surfPtr_().getVolumeType(pts, volType);
 
             forAll(volType, i)
             {
-                searchableSurface::volumeType vT = volType[i];
+                volumeType vT = volType[i];
 
-                if (vT == searchableSurface::OUTSIDE)
+                if (vT == volumeType::OUTSIDE)
                 {
                     pointDistance_[i] =
                         Foam::mag(pts[i] - nearest[i].hitPoint());
                 }
-                else if (vT == searchableSurface::INSIDE)
+                else if (vT == volumeType::INSIDE)
                 {
                     pointDistance_[i] =
                         -Foam::mag(pts[i] - nearest[i].hitPoint());

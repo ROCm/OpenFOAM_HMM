@@ -181,6 +181,18 @@ void Foam::sortedOrder
     labelList& order
 )
 {
+    sortedOrder(lst, order, typename UList<T>::less(lst));
+}
+
+
+template<class T, class Cmp>
+void Foam::sortedOrder
+(
+    const UList<T>& lst,
+    labelList& order,
+    const Cmp& cmp
+)
+{
     // list lengths must be identical
     if (order.size() != lst.size())
     {
@@ -193,7 +205,7 @@ void Foam::sortedOrder
     {
         order[elemI] = elemI;
     }
-    Foam::stableSort(order, typename UList<T>::less(lst));
+    Foam::stableSort(order, cmp);
 }
 
 
@@ -204,13 +216,25 @@ void Foam::duplicateOrder
     labelList& order
 )
 {
+    duplicateOrder(lst, order, typename UList<T>::less(lst));
+}
+
+
+template<class T, class Cmp>
+void Foam::duplicateOrder
+(
+    const UList<T>& lst,
+    labelList& order,
+    const Cmp& cmp
+)
+{
     if (lst.size() < 2)
     {
         order.clear();
         return;
     }
 
-    sortedOrder(lst, order);
+    sortedOrder(lst, order, cmp);
 
     label n = 0;
     for (label i = 0; i < order.size() - 1; ++i)
@@ -231,7 +255,19 @@ void Foam::uniqueOrder
     labelList& order
 )
 {
-    sortedOrder(lst, order);
+    uniqueOrder(lst, order, typename UList<T>::less(lst));
+}
+
+
+template<class T, class Cmp>
+void Foam::uniqueOrder
+(
+    const UList<T>& lst,
+    labelList& order,
+    const Cmp& cmp
+)
+{
+    sortedOrder(lst, order, cmp);
 
     if (order.size() > 1)
     {

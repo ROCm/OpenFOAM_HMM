@@ -241,7 +241,7 @@ surfaceInterpolationScheme<Type>::interpolate
 
 
 //- Return the face-interpolate of the given cell field
-//  with the given weigting factors
+//  with the given weighting factors
 template<class Type>
 tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
 surfaceInterpolationScheme<Type>::interpolate

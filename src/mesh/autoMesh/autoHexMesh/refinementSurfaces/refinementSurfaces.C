@@ -31,6 +31,7 @@ License
 #include "labelPair.H"
 #include "searchableSurfacesQueries.H"
 #include "UPtrList.H"
+#include "volumeType.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -1302,7 +1303,7 @@ void Foam::refinementSurfaces::findInside
 
         if (allGeometry_[surfaces_[surfI]].hasVolumeType())
         {
-            List<searchableSurface::volumeType> volType;
+            List<volumeType> volType;
             allGeometry_[surfaces_[surfI]].getVolumeType(pt, volType);
 
             forAll(volType, pointI)
@@ -1312,11 +1313,11 @@ void Foam::refinementSurfaces::findInside
                     if
                     (
                         (
-                            volType[pointI] == triSurfaceMesh::INSIDE
+                            volType[pointI] == volumeType::INSIDE
                          && zoneInside_[surfI] == INSIDE
                         )
                      || (
-                            volType[pointI] == triSurfaceMesh::OUTSIDE
+                            volType[pointI] == volumeType::OUTSIDE
                          && zoneInside_[surfI] == OUTSIDE
                         )
                     )

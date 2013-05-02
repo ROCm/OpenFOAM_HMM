@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -924,6 +924,11 @@ Foam::labelList Foam::boundaryMesh::getNearest
     bbMax.y() += 2*tol;
     bbMax.z() += 2*tol;
 
+    const scalar planarTol =
+        indexedOctree<treeDataPrimitivePatch<uindirectPrimitivePatch> >::
+        perturbTol();
+
+
     // Create the octrees
     indexedOctree
     <
@@ -933,7 +938,8 @@ Foam::labelList Foam::boundaryMesh::getNearest
         treeDataPrimitivePatch<uindirectPrimitivePatch>
         (
             false,          // cacheBb
-            leftPatch
+            leftPatch,
+            planarTol
         ),
         overallBb,
         10, // maxLevel
@@ -948,7 +954,8 @@ Foam::labelList Foam::boundaryMesh::getNearest
         treeDataPrimitivePatch<uindirectPrimitivePatch>
         (
             false,          // cacheBb
-            rightPatch
+            rightPatch,
+            planarTol
         ),
         overallBb,
         10, // maxLevel

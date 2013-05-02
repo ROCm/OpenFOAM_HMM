@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,9 +35,8 @@ SourceFiles
 #ifndef treeDataPrimitivePatch_H
 #define treeDataPrimitivePatch_H
 
-#include "PrimitivePatch.H"
-//#include "indexedOctree.H"
 #include "treeBoundBoxList.H"
+#include "volumeType.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,11 +63,6 @@ class treeDataPrimitivePatch
 :
     public treeDataPrimitivePatchName
 {
-    // Static data
-
-        //- tolerance on linear dimensions
-        static scalar tolSqr;
-
     // Private data
 
         //- Underlying geometry
@@ -76,6 +70,9 @@ class treeDataPrimitivePatch
 
         //- Whether to precalculate and store face bounding box
         const bool cacheBb_;
+
+        //- Tolerance to use for intersection tests
+        const scalar planarTol_;
 
         //- face bounding boxes (valid only if cacheBb_)
         treeBoundBoxList bbs_;
@@ -89,7 +86,98 @@ class treeDataPrimitivePatch
         //- Initialise all member data
         void update();
 
+        //- Find intersection of line with shapes
+        static bool findIntersection
+        (
+            const indexedOctree<treeDataPrimitivePatch<PatchType> >& tree,
+            const label index,
+            const point& start,
+            const point& end,
+            point& intersectionPoint
+        );
+
+
 public:
+
+
+    class findNearestOp
+    {
+        const indexedOctree<treeDataPrimitivePatch>& tree_;
+
+    public:
+
+        findNearestOp(const indexedOctree<treeDataPrimitivePatch>& tree);
+
+        void operator()
+        (
+            const labelUList& indices,
+            const point& sample,
+
+            scalar& nearestDistSqr,
+            label& minIndex,
+            point& nearestPoint
+        ) const;
+
+        //- Calculates nearest (to line) point in shape.
+        //  Returns point and distance (squared)
+        void operator()
+        (
+            const labelUList& indices,
+            const linePointRef& ln,
+
+            treeBoundBox& tightest,
+            label& minIndex,
+            point& linePoint,
+            point& nearestPoint
+        ) const;
+    };
+
+
+    class findIntersectOp
+    {
+        const indexedOctree<treeDataPrimitivePatch>& tree_;
+
+    public:
+
+        findIntersectOp(const indexedOctree<treeDataPrimitivePatch>& tree);
+
+        //- Calculate intersection of triangle with ray. Sets result
+        //  accordingly
+        bool operator()
+        (
+            const label index,
+            const point& start,
+            const point& end,
+            point& intersectionPoint
+        ) const;
+    };
+
+
+    class findAllIntersectOp
+    {
+        const indexedOctree<treeDataPrimitivePatch>& tree_;
+
+        DynamicList<label>& shapeMask_;
+
+    public:
+
+        findAllIntersectOp
+        (
+            const indexedOctree<treeDataPrimitivePatch>& tree,
+            DynamicList<label>& shapeMask
+        );
+
+        //- Calculate intersection of triangle with ray. Sets result
+        //  accordingly
+        bool operator()
+        (
+            const label index,
+            const point& start,
+            const point& end,
+            point& intersectionPoint
+        ) const;
+    };
+
 
     // Constructors
 
@@ -97,7 +185,8 @@ public:
         treeDataPrimitivePatch
         (
             const bool cacheBb,
-            const PatchType&
+            const PatchType&,
+            const scalar planarTol
         );
 
 
@@ -125,7 +214,7 @@ public:
 
             //- Get type (inside,outside,mixed,unknown) of point w.r.t. surface.
             //  Only makes sense for closed surfaces.
-            label getVolumeType
+            volumeType getVolumeType
             (
                 const indexedOctree<treeDataPrimitivePatch<PatchType> >&,
                 const point&
@@ -145,49 +234,6 @@ public:
                 const point& centre,
                 const scalar radiusSqr
             ) const;
-
-            //- Calculates nearest (to sample) point in shape.
-            //  Returns actual point and distance (squared)
-            void findNearest
-            (
-                const labelUList& indices,
-                const point& sample,
-
-                scalar& nearestDistSqr,
-                label& nearestIndex,
-                point& nearestPoint
-            ) const;
-
-            //- Calculates nearest (to line) point in shape.
-            //  Returns point and distance (squared)
-            void findNearest
-            (
-                const labelUList& indices,
-                const linePointRef& ln,
-
-                treeBoundBox& tightest,
-                label& minIndex,
-                point& linePoint,
-                point& nearestPoint
-            ) const
-            {
-                notImplemented
-                (
-                    "treeDataPrimitivePatch::findNearest"
-                    "(const labelUList&, const linePointRef&, ..)"
-                );
-            }
-
-            //- Calculate intersection of shape with ray. Sets result
-            //  accordingly
-            bool intersects
-            (
-                const label index,
-                const point& start,
-                const point& end,
-                point& result
-            ) const;
-
 };
 
 

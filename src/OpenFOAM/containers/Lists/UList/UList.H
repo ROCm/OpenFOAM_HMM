@@ -113,6 +113,24 @@ public:
             }
         };
 
+        //- Greater function class that can be used for sorting
+        class greater
+        {
+            const UList<T>& values_;
+
+        public:
+
+            greater(const UList<T>& values)
+            :
+                values_(values)
+            {}
+
+            bool operator()(const label a, const label b)
+            {
+                return values_[a] > values_[b];
+            }
+        };
+
 
     // Constructors
 

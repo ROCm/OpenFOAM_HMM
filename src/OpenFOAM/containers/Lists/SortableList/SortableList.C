@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,26 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
-template<class T>
-void Foam::SortableList<T>::sortIndices(List<label>& order) const
-{
-    // list lengths must be identical
-    if (order.size() != this->size())
-    {
-        // avoid copying any elements, they are overwritten anyhow
-        order.clear();
-        order.setSize(this->size());
-    }
-
-    forAll(order, elemI)
-    {
-        order[elemI] = elemI;
-    }
-    Foam::stableSort(order, typename UList<T>::less(*this));
-}
-
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -113,7 +94,7 @@ Foam::List<T>& Foam::SortableList<T>::shrink()
 template<class T>
 void Foam::SortableList<T>::sort()
 {
-    sortIndices(indices_);
+    sortedOrder(*this, indices_);
 
     List<T> lst(this->size());
     forAll(indices_, i)
@@ -128,13 +109,12 @@ void Foam::SortableList<T>::sort()
 template<class T>
 void Foam::SortableList<T>::reverseSort()
 {
-    sortIndices(indices_);
+    sortedOrder(*this, indices_, typename UList<T>::greater(*this));
 
     List<T> lst(this->size());
-    label endI = indices_.size();
     forAll(indices_, i)
     {
-        lst[--endI] = this->operator[](indices_[i]);
+        lst[i] = this->operator[](indices_[i]);
     }
 
     List<T>::transfer(lst);
