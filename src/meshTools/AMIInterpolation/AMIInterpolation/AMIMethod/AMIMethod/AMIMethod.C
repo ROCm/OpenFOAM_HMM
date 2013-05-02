@@ -210,7 +210,12 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::resetTree()
         (
             new indexedOctree<treeType>
             (
-                treeType(false, tgtPatch_),
+                treeType
+                (
+                    false,
+                    tgtPatch_,
+                    indexedOctree<treeType>::perturbTol()
+                ),
                 bb,                         // overall search domain
                 8,                          // maxLevel
                 10,                         // leaf size
