@@ -76,7 +76,7 @@ class lduPrimitiveMesh
     // Private Member Functions
 
         //- Get size of all meshes
-        static label size(const PtrList<lduPrimitiveMesh>&);
+        static label totalSize(const PtrList<lduPrimitiveMesh>&);
 
         static labelList upperTriOrder
         (
