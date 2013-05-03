@@ -122,7 +122,7 @@ inline Foam::label Foam::globalIndex::toLocal(const label i) const
 
 inline Foam::label Foam::globalIndex::whichProcID(const label i) const
 {
-    if (i < 0 || i >= offsets_.size()-1)
+    if (i < 0 || i >= size())
     {
         FatalErrorIn("globalIndex::whichProcID(const label)")
             << "Global " << i << " does not belong on any processor."
