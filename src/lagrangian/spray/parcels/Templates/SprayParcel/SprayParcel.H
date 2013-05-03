@@ -59,6 +59,74 @@ class SprayParcel
     public ParcelType
 {
 
+public:
+
+    //- Class to hold reacting particle constant properties
+    class constantProperties
+    :
+        public ParcelType::constantProperties
+    {
+        // Private data
+
+            //- Particle initial surface tension [N/m]
+            scalar sigma0_;
+
+            //- Particle initial dynamic viscosity [Pa.s]
+            scalar mu0_;
+
+
+    public:
+
+        // Constructors
+
+            //- Null constructor
+            constantProperties();
+
+            //- Copy constructor
+            constantProperties(const constantProperties& cp);
+
+            //- Constructor from dictionary
+            constantProperties
+            (
+                const dictionary& parentDict,
+                const bool readFields = true
+            );
+
+            //- Construct from components
+            constantProperties
+            (
+                const label parcelTypeId,
+                const scalar rhoMin,
+                const scalar rho0,
+                const scalar minParticleMass,
+                const scalar youngsModulus,
+                const scalar poissonsRatio,
+                const scalar T0,
+                const scalar TMin,
+                const scalar TMax,
+                const scalar Cp0,
+                const scalar epsilon0,
+                const scalar f0,
+                const scalar Pr,
+                const scalar pMin,
+                const Switch& constantVolume,
+                const scalar Tvap,
+                const scalar Tbp,
+                const scalar sigma0,
+                const scalar mu0
+            );
+
+
+        // Access
+
+            //- Return const access to the initial surface tension
+            inline scalar sigma0() const;
+
+            //- Return const access to the initial dynamic viscosity
+            inline scalar mu0() const;
+    };
+
+
 protected:
 
     // Protected data
@@ -70,6 +138,12 @@ protected:
 
             //- Injection position
             vector position0_;
+
+            //- Liquid surface tension [N/m]
+            scalar sigma_;
+
+            //- Liquid dynamic viscosity [Pa.s]
+            scalar mu_;
 
             //- Part of liquid core ( >0.5=liquid, <0.5=droplet )
             scalar liquidCore_;
@@ -219,6 +293,12 @@ public:
             //- Return const access to initial droplet position
             inline const vector& position0() const;
 
+            //- Return const access to the liquid surface tension
+            inline scalar sigma() const;
+
+            //- Return const access to the liquid dynamic viscosity
+            inline scalar mu() const;
+
             //- Return const access to liquid core
             inline scalar liquidCore() const;
 
@@ -254,6 +334,12 @@ public:
 
             //- Return access to initial droplet position
             inline vector& position0();
+
+            //- Return access to the liquid surface tension
+            inline scalar& sigma();
+
+            //- Return access to the liquid dynamic viscosity
+            inline scalar& mu();
 
             //- Return access to liquid core
             inline scalar& liquidCore();

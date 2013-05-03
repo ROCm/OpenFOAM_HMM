@@ -33,6 +33,8 @@ Foam::string Foam::SprayParcel<ParcelType>::propHeader =
     ParcelType::propHeader
   + " d0"
   + " position0"
+  + " sigma"
+  + " mu"
   + " liquidCore"
   + " KHindex"
   + " y"
@@ -57,6 +59,8 @@ Foam::SprayParcel<ParcelType>::SprayParcel
     ParcelType(mesh, is, readFields),
     d0_(0.0),
     position0_(vector::zero),
+    sigma_(0.0),
+    mu_(0.0),
     liquidCore_(0.0),
     KHindex_(0.0),
     y_(0.0),
@@ -74,6 +78,8 @@ Foam::SprayParcel<ParcelType>::SprayParcel
         {
             d0_ = readScalar(is);
             is >> position0_;
+            sigma_ = readScalar(is);
+            mu_ = readScalar(is);
             liquidCore_ = readScalar(is);
             KHindex_ = readScalar(is);
             y_ = readScalar(is);
@@ -91,6 +97,8 @@ Foam::SprayParcel<ParcelType>::SprayParcel
                 reinterpret_cast<char*>(&d0_),
                 sizeof(d0_)
               + sizeof(position0_)
+              + sizeof(sigma_)
+              + sizeof(mu_)
               + sizeof(liquidCore_)
               + sizeof(KHindex_)
               + sizeof(y_)
@@ -154,6 +162,12 @@ void Foam::SprayParcel<ParcelType>::readFields
     );
     c.checkFieldIOobject(c, position0);
 
+    IOField<scalar> sigma(c.fieldIOobject("sigma", IOobject::MUST_READ));
+    c.checkFieldIOobject(c, sigma);
+
+    IOField<scalar> mu(c.fieldIOobject("mu", IOobject::MUST_READ));
+    c.checkFieldIOobject(c, mu);
+
     IOField<scalar> liquidCore(c.fieldIOobject
     (
         "liquidCore", IOobject::MUST_READ)
@@ -190,6 +204,8 @@ void Foam::SprayParcel<ParcelType>::readFields
         SprayParcel<ParcelType>& p = iter();
         p.d0_ = d0[i];
         p.position0_ = position0[i];
+        p.sigma_ = sigma[i];
+        p.mu_ = mu[i];
         p.liquidCore_ = liquidCore[i];
         p.KHindex_ = KHindex[i];
         p.y_ = y[i];
@@ -230,6 +246,8 @@ void Foam::SprayParcel<ParcelType>::writeFields
         c.fieldIOobject("position0", IOobject::NO_READ),
         np
     );
+    IOField<scalar> sigma(c.fieldIOobject("sigma", IOobject::NO_READ), np);
+    IOField<scalar> mu(c.fieldIOobject("mu", IOobject::NO_READ), np);
     IOField<scalar> liquidCore
     (
         c.fieldIOobject("liquidCore", IOobject::NO_READ),
@@ -254,6 +272,8 @@ void Foam::SprayParcel<ParcelType>::writeFields
         const SprayParcel<ParcelType>& p = iter();
         d0[i] = p.d0_;
         position0[i] = p.position0_;
+        sigma[i] = p.sigma_;
+        mu[i] = p.mu_;
         liquidCore[i] = p.liquidCore_;
         KHindex[i] = p.KHindex_;
         y[i] = p.y_;
@@ -268,6 +288,8 @@ void Foam::SprayParcel<ParcelType>::writeFields
 
     d0.write();
     position0.write();
+    sigma.write();
+    mu.write();
     liquidCore.write();
     KHindex.write();
     y.write();
@@ -294,6 +316,8 @@ Foam::Ostream& Foam::operator<<
         os  << static_cast<const ParcelType&>(p)
         << token::SPACE << p.d0()
         << token::SPACE << p.position0()
+        << token::SPACE << p.sigma()
+        << token::SPACE << p.mu()
         << token::SPACE << p.liquidCore()
         << token::SPACE << p.KHindex()
         << token::SPACE << p.y()
@@ -312,6 +336,8 @@ Foam::Ostream& Foam::operator<<
             reinterpret_cast<const char*>(&p.d0_),
             sizeof(p.d0())
           + sizeof(p.position0())
+          + sizeof(p.sigma())
+          + sizeof(p.mu())
           + sizeof(p.liquidCore())
           + sizeof(p.KHindex())
           + sizeof(p.y())
