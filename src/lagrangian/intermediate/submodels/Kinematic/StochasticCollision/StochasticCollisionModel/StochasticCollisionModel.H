@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,6 +55,12 @@ class StochasticCollisionModel
 :
     public SubModelBase<CloudType>
 {
+protected:
+
+    //- Main collision routine
+    virtual void collide(const scalar dt);
+
+
 public:
 
     //- Runtime type information
@@ -114,33 +120,8 @@ public:
 
     // Member Functions
 
-        virtual bool update
-        (
-            const scalar dt,
-            cachedRandom& rndGen,
-            vector& pos1,
-            scalar& m1,
-            scalar& d1,
-            scalar& N1,
-            vector& U1,
-            scalar& rho1,
-            scalar& T1,
-            scalarField& Y1,
-            const scalar sigma1,
-            const label celli,
-            const scalar voli,
-            vector& pos2,
-            scalar& m2,
-            scalar& d2,
-            scalar& N2,
-            vector& U2,
-            scalar& rho2,
-            scalar& T2,
-            scalarField& Y2,
-            const scalar sigma2,
-            const label cellj,
-            const scalar volj
-        ) const;
+        //- Update the model
+        void update(const scalar dt);
 };
 
 
@@ -152,27 +133,27 @@ public:
 
 #define makeStochasticCollisionModel(CloudType)                                         \
                                                                               \
-    typedef CloudType::sprayCloudType sprayCloudType;                         \
+    typedef CloudType::kinematicCloudType kinematicCloudType;                 \
     defineNamedTemplateTypeNameAndDebug                                       \
     (                                                                         \
-        StochasticCollisionModel<sprayCloudType>,                             \
+        StochasticCollisionModel<kinematicCloudType>,                         \
         0                                                                     \
     );                                                                        \
     defineTemplateRunTimeSelectionTable                                       \
     (                                                                         \
-        StochasticCollisionModel<sprayCloudType>,                             \
+        StochasticCollisionModel<kinematicCloudType>,                         \
         dictionary                                                            \
     );
 
 
 #define makeStochasticCollisionModelType(SS, CloudType)                       \
                                                                               \
-    typedef CloudType::sprayCloudType sprayCloudType;                         \
-    defineNamedTemplateTypeNameAndDebug(SS<sprayCloudType>, 0);               \
+    typedef CloudType::kinematicCloudType kinematicCloudType;                 \
+    defineNamedTemplateTypeNameAndDebug(SS<kinematicCloudType>, 0);           \
                                                                               \
-    StochasticCollisionModel<sprayCloudType>::                                \
-        adddictionaryConstructorToTable<SS<sprayCloudType> >                  \
-            add##SS##CloudType##sprayCloudType##ConstructorToTable_;
+    StochasticCollisionModel<kinematicCloudType>::                            \
+        adddictionaryConstructorToTable<SS<kinematicCloudType> >              \
+            add##SS##CloudType##kinematicCloudType##ConstructorToTable_;
 
 
 

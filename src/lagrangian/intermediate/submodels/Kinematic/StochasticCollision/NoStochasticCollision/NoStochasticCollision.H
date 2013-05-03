@@ -22,103 +22,71 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::ORourkeCollision
+    Foam::NoStochasticCollision
 
 Description
-    Collision model by P.J. O'Rourke.
-
+    Dummy collision model for 'none'
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ORourkeCollision_H
-#define ORourkeCollision_H
+#ifndef NoStochasticCollision_H
+#define NoStochasticCollision_H
 
 #include "StochasticCollisionModel.H"
-#include "liquidMixtureProperties.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                      Class ORourkeCollision Declaration
+                    Class NoStochasticCollision Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class ORourkeCollision
+class NoStochasticCollision
 :
     public StochasticCollisionModel<CloudType>
 {
 protected:
 
-    // Protected Data
-
-        //- Convenience typedef to the cloud's parcel type
-        typedef typename CloudType::parcelType parcelType;
-
-        const liquidMixtureProperties& liquids_;
-
-        //- Coalescence activation switch
-        Switch coalescence_;
-
-
     // Protected Member Functions
 
-        //- Main collision routine
+        //- Update the model
         virtual void collide(const scalar dt);
-
-        //- Collide parcels and return true if mass has changed
-        virtual bool collideParcels
-        (
-            const scalar dt,
-            parcelType& p1,
-            parcelType& p2,
-            scalar& m1,
-            scalar& m2
-        );
-
-        // 1 is the larger drop and 2 is the smaller
-        virtual bool collideSorted
-        (
-            const scalar dt,
-            parcelType& p1,
-            parcelType& p2,
-            scalar& m1,
-            scalar& m2
-        );
 
 
 public:
 
     //- Runtime type information
-    TypeName("ORourke");
+    TypeName("none");
 
 
     // Constructors
 
         //- Construct from dictionary
-        ORourkeCollision
-        (
-            const dictionary& dict,
-            CloudType& cloud,
-            const word& modelName = typeName
-        );
+        NoStochasticCollision(const dictionary& dict, CloudType& owner);
 
         //- Construct copy
-        ORourkeCollision(const ORourkeCollision<CloudType>& cm);
+        NoStochasticCollision(const NoStochasticCollision<CloudType>& cm);
 
         //- Construct and return a clone
         virtual autoPtr<StochasticCollisionModel<CloudType> > clone() const
         {
             return autoPtr<StochasticCollisionModel<CloudType> >
             (
-                new ORourkeCollision<CloudType>(*this)
+                new NoStochasticCollision<CloudType>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~ORourkeCollision();
+    virtual ~NoStochasticCollision();
+
+
+    // Member Functions
+
+        //- Flag to indicate whether model activates collision model
+        virtual bool active() const;
 };
 
 
@@ -129,7 +97,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "ORourkeCollision.C"
+#   include "NoStochasticCollision.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

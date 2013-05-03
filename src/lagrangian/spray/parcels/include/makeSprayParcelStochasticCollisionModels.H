@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,45 +23,27 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "StochasticCollisionModel.H"
+#ifndef makeSprayParcelStochasticCollisionModels_H
+#define makeSprayParcelStochasticCollisionModels_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class CloudType>
-Foam::autoPtr<Foam::StochasticCollisionModel<CloudType> >
-Foam::StochasticCollisionModel<CloudType>::New
-(
-    const dictionary& dict,
-    CloudType& owner
-)
-{
-    word modelType(dict.lookup("stochasticCollisionModel"));
+#include "NoStochasticCollision.H"
+#include "ORourkeCollision.H"
+#include "TrajectoryCollision.H"
 
-    Info<< "Selecting StochasticCollisionModel " << modelType << endl;
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+#define makeSprayParcelStochasticCollisionModels(CloudType)                   \
+                                                                              \
+    makeStochasticCollisionModel(CloudType);                                  \
+    makeStochasticCollisionModelType(NoStochasticCollision, CloudType);       \
+    makeStochasticCollisionModelType(ORourkeCollision, CloudType);            \
+    makeStochasticCollisionModelType(TrajectoryCollision, CloudType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
-    {
-        FatalErrorIn
-        (
-            "StochasticCollisionModel<CloudType>::New"
-            "("
-                "const dictionary&, "
-                "CloudType&"
-            ")"
-        )   << "Unknown StochasticCollisionModelType type "
-            << modelType << ", constructor not in hash table" << nl << nl
-            << "    Valid StochasticCollisionModel types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
-    }
 
-    return autoPtr<StochasticCollisionModel<CloudType> >
-    (
-        cstrIter()(dict, owner)
-    );
-}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#endif
 
 // ************************************************************************* //
