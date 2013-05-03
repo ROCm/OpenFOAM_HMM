@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,14 +30,12 @@ License
 
 Foam::surfaceMeshWriter::surfaceMeshWriter
 (
-    const vtkMesh& vMesh,
     const bool binary,
     const indirectPrimitivePatch& pp,
     const word& name,
     const fileName& fName
 )
 :
-    vMesh_(vMesh),
     binary_(binary),
     pp_(pp),
     fName_(fName),
@@ -76,10 +74,6 @@ Foam::surfaceMeshWriter::surfaceMeshWriter
     }
     writeFuns::write(os_, binary_, vertLabels);
 }
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 
 
 // ************************************************************************* //
