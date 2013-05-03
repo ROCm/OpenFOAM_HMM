@@ -49,7 +49,7 @@ Description
 
         d/dt(fmm) + div(U*fmm)
         =
-        (1/T)*(M && M - flm)
+        (1/T)*(M && M - fmm)
 
     where
 
