@@ -57,10 +57,6 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
     label minSize(readLabel(controlDict.lookup("minSize")));
     label maxSize(readLabel(controlDict.lookup("maxSize")));
 
-
-    // Get the finest-level interfaces from the mesh
-    meshInterfaces_(fvMesh_.boundary().interfaces());
-
     // Start geometric agglomeration from the cell volumes and areas of the mesh
     scalarField* VPtr = const_cast<scalarField*>(&fvMesh_.cellVolumes());
     vectorField* SfPtr = const_cast<vectorField*>(&fvMesh_.faceAreas());

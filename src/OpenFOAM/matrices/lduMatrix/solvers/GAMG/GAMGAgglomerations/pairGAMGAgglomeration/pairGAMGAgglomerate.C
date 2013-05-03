@@ -204,9 +204,6 @@ void Foam::pairGAMGAgglomeration::agglomerate
     const scalarField& faceWeights
 )
 {
-    // Get the finest-level interfaces from the mesh
-    meshInterfaces_ = mesh.interfaces();
-
     // Start geometric agglomeration from the given faceWeights
     scalarField* faceWeightsPtr = const_cast<scalarField*>(&faceWeights);
 

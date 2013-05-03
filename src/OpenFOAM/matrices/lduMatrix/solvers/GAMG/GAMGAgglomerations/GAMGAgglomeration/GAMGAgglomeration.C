@@ -117,6 +117,7 @@ Foam::GAMGAgglomeration::GAMGAgglomeration
     (
         readLabel(controlDict.lookup("nCellsInCoarsestLevel"))
     ),
+    meshInterfaces_(mesh.interfaces()),
     procAgglomeratorPtr_
     (
         (

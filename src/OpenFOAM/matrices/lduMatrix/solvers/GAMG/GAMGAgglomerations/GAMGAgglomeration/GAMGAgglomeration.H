@@ -73,10 +73,10 @@ protected:
         //- Number of cells in coarsest level
         const label nCellsInCoarsestLevel_;
 
-        autoPtr<GAMGProcAgglomeration> procAgglomeratorPtr_;
-
         //- Cached mesh interfaces
-        lduInterfacePtrsList meshInterfaces_;
+        const lduInterfacePtrsList meshInterfaces_;
+
+        autoPtr<GAMGProcAgglomeration> procAgglomeratorPtr_;
 
         //- The number of cells in each level
         labelList nCells_;

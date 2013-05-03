@@ -52,9 +52,6 @@ Foam::dummyAgglomeration::dummyAgglomeration
     GAMGAgglomeration(mesh, controlDict),
     nLevels_(readLabel(controlDict.lookup("nLevels")))
 {
-    // Get the finest-level interfaces from the mesh
-    meshInterfaces_ = mesh.interfaces();
-
     const label nCoarseCells = mesh.lduAddr().size();
 
     for
