@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,38 +21,40 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::fluidThermoCloud
-
-Description
-    Cloud class to introduce thermodynamic parcels
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef fluidThermoCloud_H
-#define fluidThermoCloud_H
+#include "basicThermoCloud.H"
 
-#include "ThermoCloud.H"
-#include "fluidThermoParcel.H"
+#include "makeParcelCloudFunctionObjects.H"
+
+// Kinematic
+#include "makeThermoParcelForces.H" // thermo variant
+#include "makeParcelDispersionModels.H"
+#include "makeParcelInjectionModels.H"
+#include "makeParcelPatchInteractionModels.H"
+#include "makeParcelStochasticCollisionModels.H"
+#include "makeThermoParcelSurfaceFilmModels.H" // thermo variant
+
+// Thermodynamic
+#include "makeParcelHeatTransferModels.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef ThermoCloud
-    <
-        KinematicCloud
-        <
-            Cloud
-            <
-                fluidThermoParcel
-            >
-        >
-    > fluidThermoCloud;
+    makeParcelCloudFunctionObjects(basicThermoCloud);
+
+    // Kinematic sub-models
+    makeThermoParcelForces(basicThermoCloud);
+    makeParcelDispersionModels(basicThermoCloud);
+    makeParcelInjectionModels(basicThermoCloud);
+    makeParcelPatchInteractionModels(basicThermoCloud);
+    makeParcelStochasticCollisionModels(basicThermoCloud);
+    makeParcelSurfaceFilmModels(basicThermoCloud);
+
+    // Thermo sub-models
+    makeParcelHeatTransferModels(basicThermoCloud);
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

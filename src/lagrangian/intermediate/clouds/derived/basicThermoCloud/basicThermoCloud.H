@@ -21,17 +21,38 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::basicThermoCloud
+
+Description
+    Cloud class to introduce thermodynamic parcels
+
 \*---------------------------------------------------------------------------*/
 
-#include "fluidThermoParcel.H"
-#include "Cloud.H"
+#ifndef basicThermoCloud_H
+#define basicThermoCloud_H
+
+#include "ThermoCloud.H"
+#include "basicThermoParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTemplateTypeNameAndDebug(fluidThermoParcel, 0);
-    defineTemplateTypeNameAndDebug(Cloud<fluidThermoParcel>, 0);
+    typedef ThermoCloud
+    <
+        KinematicCloud
+        <
+            Cloud
+            <
+                basicThermoParcel
+            >
+        >
+    > basicThermoCloud;
 }
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

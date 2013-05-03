@@ -22,18 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fluidThermoParcel
+    Foam::basicThermoParcel
 
 Description
     Definition of basic thermo parcel
 
 SourceFiles
-    fluidThermoParcel.C
+    basicThermoParcel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fluidThermoParcel_H
-#define fluidThermoParcel_H
+#ifndef basicThermoParcel_H
+#define basicThermoParcel_H
 
 #include "contiguous.H"
 #include "particle.H"
@@ -44,10 +44,10 @@ SourceFiles
 
 namespace Foam
 {
-    typedef ThermoParcel<KinematicParcel<particle> > fluidThermoParcel;
+    typedef ThermoParcel<KinematicParcel<particle> > basicThermoParcel;
 
     template<>
-    inline bool contiguous<fluidThermoParcel>()
+    inline bool contiguous<basicThermoParcel>()
     {
         return true;
     }

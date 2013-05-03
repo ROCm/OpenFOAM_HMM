@@ -23,36 +23,15 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fluidThermoCloud.H"
-
-#include "makeParcelCloudFunctionObjects.H"
-
-// Kinematic
-#include "makeThermoParcelForces.H" // thermo variant
-#include "makeParcelDispersionModels.H"
-#include "makeParcelInjectionModels.H"
-#include "makeParcelPatchInteractionModels.H"
-
-// Thermodynamic
-#include "makeParcelHeatTransferModels.H"
-#include "makeThermoParcelSurfaceFilmModels.H"
+#include "basicThermoParcel.H"
+#include "Cloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeParcelCloudFunctionObjects(fluidThermoCloud);
-
-    // Kinematic sub-models
-    makeThermoParcelForces(fluidThermoCloud);
-    makeParcelDispersionModels(fluidThermoCloud);
-    makeParcelInjectionModels(fluidThermoCloud);
-    makeParcelPatchInteractionModels(fluidThermoCloud);
-
-    // Thermo sub-models
-    makeParcelHeatTransferModels(fluidThermoCloud);
-    makeParcelSurfaceFilmModels(fluidThermoCloud);
+    defineTemplateTypeNameAndDebug(basicThermoParcel, 0);
+    defineTemplateTypeNameAndDebug(Cloud<basicThermoParcel>, 0);
 }
-
 
 // ************************************************************************* //
