@@ -1210,7 +1210,8 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
     motionSmoother& meshMover,
     const dictionary& meshQualityDict,
     const List<labelPair>& baffles,
-    const label nSmoothThickness,
+    const label nSmoothPatchThickness,
+    const label nSmoothDisplacement,
     const scalar maxThicknessToMedialRatio,
     const label nAllowableErrors,
     const label nSnap,
@@ -1412,7 +1413,7 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
         isMasterEdge,
         meshEdges,
         minThickness,
-        nSmoothThickness,
+        nSmoothPatchThickness,
 
         thickness
     );
@@ -1473,6 +1474,90 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
 
 
 
+    // Smear displacement away from fixed values (medialRatio=0 or 1)
+    if (nSmoothDisplacement > 0)
+    {
+        scalarField invSumWeight(mesh.nPoints());
+        sumWeights
+        (
+            isMasterEdge,
+            identity(mesh.nEdges()),
+            identity(mesh.nPoints()),
+            mesh.edges(),
+            invSumWeight
+        );
+
+
+        // Get smoothly varying patch field.
+        Info<< "shrinkMeshDistance : Smoothing displacement ..." << endl;
+
+        const scalar lambda = 0.33;
+        const scalar mu = -0.34;
+
+        pointField average(mesh.nPoints());
+        for (label iter = 0; iter < nSmoothDisplacement; iter++)
+        {
+            // Calculate average of field
+            averageNeighbours
+            (
+                mesh,
+                isMasterEdge,
+                identity(mesh.nEdges()),    //meshEdges,
+                identity(mesh.nPoints()),   //meshPoints,
+                mesh.edges(),               //edges,
+                invSumWeight,
+                displacement,
+                average
+            );
+
+            forAll(displacement, i)
+            {
+                if (medialRatio[i] > SMALL && medialRatio[i] < 1-SMALL)
+                {
+                    displacement[i] =
+                        (1-lambda)*displacement[i]
+                       +lambda*average[i];
+                }
+            }
+
+
+            // Calculate average of field
+            averageNeighbours
+            (
+                mesh,
+                isMasterEdge,
+                identity(mesh.nEdges()),    //meshEdges,
+                identity(mesh.nPoints()),   //meshPoints,
+                mesh.edges(),               //edges,
+                invSumWeight,
+                displacement,
+                average
+            );
+
+            forAll(displacement, i)
+            {
+                if (medialRatio[i] > SMALL && medialRatio[i] < 1-SMALL)
+                {
+                    displacement[i] = (1-mu)*displacement[i]+mu*average[i];
+                }
+            }
+
+
+            // Do residual calculation every so often.
+            if ((iter % 10) == 0)
+            {
+                Info<< "    Iteration " << iter << "   residual "
+                    <<  gSum(mag(displacement-average))
+                       /returnReduce(average.size(), sumOp<label>())
+                    << endl;
+            }
+        }
+    }
+
+    // Make sure displacement boundary conditions is uptodate with
+    // internal field
+    meshMover.setDisplacementPatchFields();
+
 
     // Check a bit the sync of displacements
     if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
@@ -1507,92 +1592,6 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
             displacement
         );
     }
-
-
-//XXXXX
-//    // Smear displacement away from fixed values (medialRatio=0 or 1)
-//    {
-//        const edgeList& edges = mesh.edges();
-//        scalarField edgeWeight(edges.size(), 0.0);
-//        forAll(edges, edgeI)
-//        {
-//            if (isMasterEdge[edgeI])
-//            {
-//                scalar eMag = edges[edgeI].mag(mesh.points());
-//                if (eMag > VSMALL)
-//                {
-//                    edgeWeight[edgeI] = 1.0/eMag;
-//                }
-//                else
-//                {
-//                    edgeWeight[edgeI] = GREAT;
-//                }
-//            }
-//        }
-//        scalarField invSumWeight(mesh.nPoints());
-//        sumWeights(isMasterEdge, edgeWeight, invSumWeight);
-//
-//
-//        // Get smoothly varying patch field.
-//        Info<< "shrinkMeshDistance : Smoothing displacement ..." << endl;
-//
-//        const scalar lambda = 0.33;
-//        const scalar mu = -0.34;
-//
-//        pointField average(mesh.nPoints());
-//        for (label iter = 0; iter < 90; iter++)
-//        {
-//            // Calculate average of field
-//            averageNeighbours
-//            (
-//                mesh,
-//                edgeWeight,
-//                invSumWeight,
-//                displacement,
-//                average
-//            );
-//
-//            forAll(displacement, i)
-//            {
-//                if (medialRatio[i] > SMALL && medialRatio[i] < 1-SMALL)
-//                {
-//                    displacement[i] =
-//                        (1-lambda)*displacement[i]
-//                       +lambda*average[i];
-//                }
-//            }
-//
-//
-//            // Calculate average of field
-//            averageNeighbours
-//            (
-//                mesh,
-//                edgeWeight,
-//                invSumWeight,
-//                displacement,
-//                average
-//            );
-//
-//            forAll(displacement, i)
-//            {
-//                if (medialRatio[i] > SMALL && medialRatio[i] < 1-SMALL)
-//                {
-//                    displacement[i] = (1-mu)*displacement[i]+mu*average[i];
-//                }
-//            }
-//
-//
-//            // Do residual calculation every so often.
-//            if ((iter % 10) == 0)
-//            {
-//                Info<< "    Iteration " << iter << "   residual "
-//                    <<  gSum(mag(displacement-average))
-//                       /returnReduce(average.size(), sumOp<label>())
-//                    << endl;
-//            }
-//        }
-//    }
-//XXXXX
 
 
     if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
