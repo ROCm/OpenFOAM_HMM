@@ -36,7 +36,9 @@ void Foam::SuppressionCollision<CloudType>::collide(const scalar dt)
         lookupObject<kinematicCloud>(suppressionCloud_);
 
     volScalarField vDotSweep(sc.vDotSweep());
-    volScalarField P(type() + ":p", 1.0 - exp(-vDotSweep*dt));
+
+    dimensionedScalar Dt("dt", dimTime, dt);
+    volScalarField P(type() + ":p", 1.0 - exp(-vDotSweep*Dt));
 
     forAllIter(typename CloudType, this->owner(), iter)
     {
@@ -63,9 +65,12 @@ Foam::SuppressionCollision<CloudType>::SuppressionCollision
     CloudType& owner
 )
 :
-    StochasticCollisionModel<CloudType>(owner),
-    suppressionCloud_(dict.lookup("suppressionCloud")),
-    suppressedParcelType_(dict.lookupOrDefault("suppressedParcelType", -1))
+    StochasticCollisionModel<CloudType>(dict, owner, typeName),
+    suppressionCloud_(this->coeffDict().lookup("suppressionCloud")),
+    suppressedParcelType_
+    (
+        this->coeffDict().lookupOrDefault("suppressedParcelType", -1)
+    )
 {}
 
 

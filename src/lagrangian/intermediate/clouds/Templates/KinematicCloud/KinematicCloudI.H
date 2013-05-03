@@ -622,7 +622,7 @@ Foam::KinematicCloud<CloudType>::vDotSweep() const
     vDotSweep.internalField() /= mesh_.V();
     vDotSweep.correctBoundaryConditions();
 
-    return vDotSweep;
+    return tvDotSweep;
 }
 
 
