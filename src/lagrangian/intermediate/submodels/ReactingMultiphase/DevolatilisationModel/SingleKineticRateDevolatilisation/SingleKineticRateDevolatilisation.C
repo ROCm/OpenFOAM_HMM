@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -112,7 +112,7 @@ void Foam::SingleKineticRateDevolatilisation<CloudType>::calculate
     const scalarField& YGasEff,
     const scalarField& YLiquidEff,
     const scalarField& YSolidEff,
-    bool& canCombust,
+    label& canCombust,
     scalarField& dMassDV
 ) const
 {
@@ -137,7 +137,10 @@ void Foam::SingleKineticRateDevolatilisation<CloudType>::calculate
         dMassDV[id] = min(dt*kappa*massVolatile, massVolatile);
     }
 
-    canCombust = done;
+    if (done && canCombust != -1)
+    {
+        canCombust = 1;
+    }
 }
 
 

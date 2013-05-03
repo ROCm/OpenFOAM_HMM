@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,18 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "StochasticCollisionModel.H"
+
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+template<class CloudType>
+void Foam::StochasticCollisionModel<CloudType>::collide(const scalar dt)
+{
+    notImplemented
+    (
+        "void Foam::NoStochasticCollision<CloudType>::collide(const scalar)"
+    );
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -69,66 +81,12 @@ Foam::StochasticCollisionModel<CloudType>::~StochasticCollisionModel()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-bool Foam::StochasticCollisionModel<CloudType>::update
-(
-    const scalar dt,
-    cachedRandom& rndGen,
-    vector& pos1,
-    scalar& m1,
-    scalar& d1,
-    scalar& N1,
-    vector& U1,
-    scalar& rho1,
-    scalar& T1,
-    scalarField& Y1,
-    const scalar sigma1,
-    const label celli,
-    const scalar voli,
-    vector& pos2,
-    scalar& m2,
-    scalar& d2,
-    scalar& N2,
-    vector& U2,
-    scalar& rho2,
-    scalar& T2,
-    scalarField& Y2,
-    const scalar sigma2,
-    const label cellj,
-    const scalar volj
-) const
+void Foam::StochasticCollisionModel<CloudType>::update(const scalar dt)
 {
-    notImplemented
-    (
-        "bool Foam::StochasticCollisionModel<CloudType>::update"
-        "("
-            "const scalar, "
-            "cachedRandom&, "
-            "vector&, "
-            "scalar&, "
-            "scalar&, "
-            "scalar&, "
-            "vector&, "
-            "scalar&, "
-            "scalar&, "
-            "scalarField&, "
-            "const scalar, "
-            "const label, "
-            "const scalar, "
-            "vector&, "
-            "scalar&, "
-            "scalar&, "
-            "scalar&, "
-            "vector&, "
-            "scalar&, "
-            "scalar&, "
-            "scalarField&, "
-            "const scalar, "
-            "const label, "
-            "const scalar"
-        ") const"
-    );
-
-    return false;
+    if (this->active())
+    {
+        this->collide(dt);
+    }
 }
 
 
@@ -137,4 +95,3 @@ bool Foam::StochasticCollisionModel<CloudType>::update
 #include "StochasticCollisionModelNew.C"
 
 // ************************************************************************* //
-

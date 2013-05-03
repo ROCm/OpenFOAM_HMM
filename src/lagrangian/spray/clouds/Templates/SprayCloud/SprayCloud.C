@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,6 @@ License
 #include "SprayCloud.H"
 #include "AtomizationModel.H"
 #include "BreakupModel.H"
-#include "StochasticCollisionModel.H"
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
@@ -50,15 +49,6 @@ void Foam::SprayCloud<CloudType>::setModels()
             *this
         ).ptr()
     );
-
-    stochasticCollisionModel_.reset
-    (
-        StochasticCollisionModel<SprayCloud<CloudType> >::New
-        (
-            this->subModelProperties(),
-            *this
-        ).ptr()
-    );
 }
 
 
@@ -72,7 +62,6 @@ void Foam::SprayCloud<CloudType>::cloudReset
 
     atomizationModel_.reset(c.atomizationModel_.ptr());
     breakupModel_.reset(c.breakupModel_.ptr());
-    stochasticCollisionModel_.reset(c.stochasticCollisionModel_.ptr());
 }
 
 
@@ -94,8 +83,7 @@ Foam::SprayCloud<CloudType>::SprayCloud
     cloudCopyPtr_(NULL),
     averageParcelMass_(0.0),
     atomizationModel_(NULL),
-    breakupModel_(NULL),
-    stochasticCollisionModel_(NULL)
+    breakupModel_(NULL)
 {
     if (this->solution().active())
     {
@@ -130,8 +118,7 @@ Foam::SprayCloud<CloudType>::SprayCloud
     cloudCopyPtr_(NULL),
     averageParcelMass_(c.averageParcelMass_),
     atomizationModel_(c.atomizationModel_->clone()),
-    breakupModel_(c.breakupModel_->clone()),
-    stochasticCollisionModel_(c.stochasticCollisionModel_->clone())
+    breakupModel_(c.breakupModel_->clone())
 {}
 
 
@@ -148,8 +135,7 @@ Foam::SprayCloud<CloudType>::SprayCloud
     cloudCopyPtr_(NULL),
     averageParcelMass_(0.0),
     atomizationModel_(NULL),
-    breakupModel_(NULL),
-    stochasticCollisionModel_(NULL)
+    breakupModel_(NULL)
 {}
 
 
@@ -179,6 +165,8 @@ void Foam::SprayCloud<CloudType>::setParcelThermoProperties
     // override rho and Cp from constantProperties
     parcel.Cp() = liqMix.Cp(parcel.pc(), parcel.T(), X);
     parcel.rho() = liqMix.rho(parcel.pc(), parcel.T(), X);
+    parcel.sigma() = liqMix.sigma(parcel.pc(), parcel.T(), X);
+    parcel.mu() = liqMix.mu(parcel.pc(), parcel.T(), X);
 }
 
 
@@ -233,128 +221,6 @@ void Foam::SprayCloud<CloudType>::evolve()
             TrackingData<SprayCloud<CloudType> > td(*this);
 
         this->solve(td);
-    }
-}
-
-
-template<class CloudType>
-template<class TrackData>
-void Foam::SprayCloud<CloudType>::motion(TrackData& td)
-{
-    const scalar dt = this->solution().trackTime();
-
-    td.part() = TrackData::tpLinearTrack;
-    CloudType::move(td, dt);
-
-    this->updateCellOccupancy();
-
-    if (stochasticCollision().active())
-    {
-        const liquidMixtureProperties& liqMix = this->composition().liquids();
-
-        label i = 0;
-        forAllIter(typename SprayCloud<CloudType>, *this, iter)
-        {
-            label j = 0;
-            forAllIter(typename SprayCloud<CloudType>, *this, jter)
-            {
-                if (j > i)
-                {
-                    parcelType& p = iter();
-                    scalar Vi = this->mesh().V()[p.cell()];
-                    scalarField X1(liqMix.X(p.Y()));
-                    scalar sigma1 = liqMix.sigma(p.pc(), p.T(), X1);
-                    scalar mp = p.mass()*p.nParticle();
-
-                    parcelType& q = jter();
-                    scalar Vj = this->mesh().V()[q.cell()];
-                    scalarField X2(liqMix.X(q.Y()));
-                    scalar sigma2 = liqMix.sigma(q.pc(), q.T(), X2);
-                    scalar mq = q.mass()*q.nParticle();
-
-                    bool updateProperties = stochasticCollision().update
-                    (
-                        dt,
-                        this->rndGen(),
-                        p.position(),
-                        mp,
-                        p.d(),
-                        p.nParticle(),
-                        p.U(),
-                        p.rho(),
-                        p.T(),
-                        p.Y(),
-                        sigma1,
-                        p.cell(),
-                        Vi,
-                        q.position(),
-                        mq,
-                        q.d(),
-                        q.nParticle(),
-                        q.U(),
-                        q.rho(),
-                        q.T(),
-                        q.Y(),
-                        sigma2,
-                        q.cell(),
-                        Vj
-                    );
-
-                    // for coalescence we need to update the density and
-                    // the diameter cause of the temp/conc/mass-change
-                    if (updateProperties)
-                    {
-                        if (mp > VSMALL)
-                        {
-                            scalarField Xp(liqMix.X(p.Y()));
-                            p.rho() = liqMix.rho(p.pc(), p.T(), Xp);
-                            p.Cp() = liqMix.Cp(p.pc(), p.T(), Xp);
-                            p.d() =
-                                cbrt
-                                (
-                                    6.0*mp
-                                   /(
-                                        p.nParticle()
-                                       *p.rho()
-                                       *constant::mathematical::pi
-                                    )
-                                );
-                        }
-
-                        if (mq > VSMALL)
-                        {
-                            scalarField Xq(liqMix.X(q.Y()));
-                            q.rho() = liqMix.rho(q.pc(), q.T(), Xq);
-                            q.Cp() = liqMix.Cp(q.pc(), q.T(), Xq);
-                            q.d() =
-                                cbrt
-                                (
-                                    6.0*mq
-                                   /(
-                                        q.nParticle()
-                                       *q.rho()
-                                       *constant::mathematical::pi
-                                    )
-                                );
-                        }
-                    }
-                }
-                j++;
-            }
-            i++;
-        }
-
-        // remove coalesced parcels that fall below minimum mass threshold
-        forAllIter(typename SprayCloud<CloudType>, *this, iter)
-        {
-            parcelType& p = iter();
-            scalar mass = p.nParticle()*p.mass();
-
-            if (mass < td.cloud().constProps().minParticleMass())
-            {
-                this->deleteParticle(p);
-            }
-        }
     }
 }
 

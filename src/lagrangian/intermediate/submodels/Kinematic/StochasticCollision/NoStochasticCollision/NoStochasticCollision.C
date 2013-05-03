@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,15 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "NoStochasticCollision.H"
+
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+template<class CloudType>
+void Foam::NoStochasticCollision<CloudType>::collide(const scalar)
+{
+    // do nothing
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -59,39 +68,6 @@ Foam::NoStochasticCollision<CloudType>::~NoStochasticCollision()
 
 template<class CloudType>
 bool Foam::NoStochasticCollision<CloudType>::active() const
-{
-    return false;
-}
-
-
-template<class CloudType>
-bool Foam::NoStochasticCollision<CloudType>::update
-(
-    const scalar dt,
-    cachedRandom& rndGen,
-    vector& pos1,
-    scalar& m1,
-    scalar& d1,
-    scalar& N1,
-    vector& U,
-    scalar& rho1,
-    scalar& T1,
-    scalarField& Y1,
-    const scalar sigma1,
-    const label celli,
-    const scalar voli,
-    vector& pos2,
-    scalar& m2,
-    scalar& d2,
-    scalar& N2,
-    vector& U2,
-    scalar& rho2,
-    scalar& T2,
-    scalarField& Y2,
-    const scalar sigma2,
-    const label cellj,
-    const scalar volj
-) const
 {
     return false;
 }

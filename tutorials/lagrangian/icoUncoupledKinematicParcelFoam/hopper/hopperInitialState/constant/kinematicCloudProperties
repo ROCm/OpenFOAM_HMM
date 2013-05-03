@@ -80,6 +80,8 @@ subModels
 
     heatTransferModel none;
 
+    stochasticCollisionModel none;
+
     surfaceFilmModel none;
 
     collisionModel pairCollision;

@@ -161,13 +161,13 @@ subModels
 
     phaseChangeModel liquidEvaporationBoil;
 
+    stochasticCollisionModel none;
+
     surfaceFilmModel none;
 
     atomizationModel none;
 
     breakupModel    ReitzDiwakar; // ReitzKHRT;
-
-    stochasticCollisionModel none;
 
     radiation       off;
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,7 +69,7 @@ class blockMesh
         //- The list of curved edges
         curvedEdgeList edges_;
 
-        //- The scaling factor to convert to meters
+        //- The scaling factor to convert to metres
         scalar scaleFactor_;
 
         //- The blocks themselves (the topology) as a polyMesh
@@ -171,7 +171,7 @@ public:
                 return edges_;
             }
 
-            //- The scaling factor used to convert to meters
+            //- The scaling factor used to convert to metres
             scalar scaleFactor() const;
 
             //- The points for the entire mesh

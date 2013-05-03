@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,13 +34,14 @@ Description
 #define ORourkeCollision_H
 
 #include "StochasticCollisionModel.H"
+#include "liquidMixtureProperties.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                       Class ORourkeCollision Declaration
+                      Class ORourkeCollision Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
@@ -48,10 +49,44 @@ class ORourkeCollision
 :
     public StochasticCollisionModel<CloudType>
 {
-private:
+protected:
 
-    dictionary coeffsDict_;
-    Switch coalescence_;
+    // Protected Data
+
+        //- Convenience typedef to the cloud's parcel type
+        typedef typename CloudType::parcelType parcelType;
+
+        const liquidMixtureProperties& liquids_;
+
+        //- Coalescence activation switch
+        Switch coalescence_;
+
+
+    // Protected Member Functions
+
+        //- Main collision routine
+        virtual void collide(const scalar dt);
+
+        //- Collide parcels and return true if mass has changed
+        virtual bool collideParcels
+        (
+            const scalar dt,
+            parcelType& p1,
+            parcelType& p2,
+            scalar& m1,
+            scalar& m2
+        );
+
+        // 1 is the larger drop and 2 is the smaller
+        virtual bool collideSorted
+        (
+            const scalar dt,
+            parcelType& p1,
+            parcelType& p2,
+            scalar& m1,
+            scalar& m2
+        );
+
 
 public:
 
@@ -62,7 +97,12 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        ORourkeCollision(const dictionary& dict, CloudType& cloud);
+        ORourkeCollision
+        (
+            const dictionary& dict,
+            CloudType& cloud,
+            const word& modelName = typeName
+        );
 
         //- Construct copy
         ORourkeCollision(const ORourkeCollision<CloudType>& cm);
@@ -79,67 +119,6 @@ public:
 
     //- Destructor
     virtual ~ORourkeCollision();
-
-
-    // Member Functions
-
-        virtual bool update
-        (
-            const scalar dt,
-            cachedRandom& rndGen,
-            vector& pos1,
-            scalar& m1,
-            scalar& d1,
-            scalar& N1,
-            vector& U,
-            scalar& rho1,
-            scalar& T1,
-            scalarField& Y1,
-            const scalar sigma1,
-            const label celli,
-            const scalar voli,
-            vector& pos2,
-            scalar& m2,
-            scalar& d2,
-            scalar& N2,
-            vector& U2,
-            scalar& rho2,
-            scalar& T2,
-            scalarField& Y2,
-            const scalar sigma2,
-            const label cellj,
-            const scalar volj
-        ) const;
-
-
-        // 1 is the larger drop and 2 is the smaller
-        bool collideSorted
-        (
-            const scalar dt,
-            cachedRandom& rndGen,
-            vector& pos1,
-            scalar& m1,
-            scalar& d1,
-            scalar& N1,
-            vector& U,
-            scalar& rho1,
-            scalar& T1,
-            scalarField& Y1,
-            const scalar sigma1,
-            const label celli,
-            const scalar voli,
-            vector& pos2,
-            scalar& m2,
-            scalar& d2,
-            scalar& N2,
-            vector& U2,
-            scalar& rho2,
-            scalar& T2,
-            scalarField& Y2,
-            const scalar sigma2,
-            const label cellj,
-            const scalar volj
-        ) const;
 };
 
 

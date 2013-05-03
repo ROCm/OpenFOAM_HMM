@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,24 +23,25 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeSprayParcelCollisionModels_H
-#define makeSprayParcelCollisionModels_H
+#ifndef uniformFixedGradientFvPatchFieldsFwd_H
+#define uniformFixedGradientFvPatchFieldsFwd_H
+
+#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NoStochasticCollision.H"
-#include "ORourkeCollision.H"
-#include "TrajectoryCollision.H"
+namespace Foam
+{
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeSprayParcelCollisionModels(CloudType)                             \
-                                                                              \
-    makeStochasticCollisionModel(CloudType);                                  \
-    makeStochasticCollisionModelType(NoStochasticCollision, CloudType);       \
-    makeStochasticCollisionModelType(ORourkeCollision, CloudType);            \
-    makeStochasticCollisionModelType(TrajectoryCollision, CloudType);
+template<class Type> class uniformFixedGradientFvPatchField;
 
+makePatchTypeFieldTypedefs(uniform);
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

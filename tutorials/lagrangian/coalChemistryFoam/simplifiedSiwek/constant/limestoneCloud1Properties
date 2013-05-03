@@ -104,6 +104,8 @@ subModels
 
     heatTransferModel RanzMarshall;
 
+    stochasticCollisionModel none;
+
     surfaceFilmModel none;
 
     radiation       on;

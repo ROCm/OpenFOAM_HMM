@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,35 +25,57 @@ Class
     Foam::TrajectoryCollision
 
 Description
-    Trajectory collision model by N. Nordin.
+    Trajectory collision model by N. Nordin, based on O'Rourke's collision
+    model
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef TrajectoryCollision_H
 #define TrajectoryCollision_H
 
-#include "StochasticCollisionModel.H"
+#include "ORourkeCollision.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                       Class TrajectoryCollision Declaration
+                     Class TrajectoryCollision Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
 class TrajectoryCollision
 :
-    public StochasticCollisionModel<CloudType>
+    public ORourkeCollision<CloudType>
 {
-private:
+protected:
 
-    // Private data
+    // Protected Data
 
+        //- Convenience typedef to the cloud's parcel type
+        typedef typename CloudType::parcelType parcelType;
+
+        //- Space coefficient
         scalar cSpace_;
+
+        //- Time coefficient
         scalar cTime_;
-        Switch coalescence_;
+
+
+    // Protected Member Functions
+
+        //- Main collision routine
+        virtual void collide(const scalar dt);
+
+        //- Collide parcels and return true if mass has changed
+        virtual bool collideParcels
+        (
+            const scalar dt,
+            parcelType& p1,
+            parcelType& p2,
+            scalar& m1,
+            scalar& m2
+        );
 
 
 public:
@@ -82,66 +104,6 @@ public:
 
     //- Destructor
     virtual ~TrajectoryCollision();
-
-
-    // Member Functions
-
-        virtual bool update
-        (
-            const scalar dt,
-            cachedRandom& rndGen,
-            vector& pos1,
-            scalar& m1,
-            scalar& d1,
-            scalar& N1,
-            vector& U,
-            scalar& rho1,
-            scalar& T1,
-            scalarField& Y1,
-            const scalar sigma1,
-            const label celli,
-            const scalar voli,
-            vector& pos2,
-            scalar& m2,
-            scalar& d2,
-            scalar& N2,
-            vector& U2,
-            scalar& rho2,
-            scalar& T2,
-            scalarField& Y2,
-            const scalar sigma2,
-            const label cellj,
-            const scalar volj
-        ) const;
-
-        // 1 is the larger drop and 2 is the smaller
-        bool collideSorted
-        (
-            const scalar dt,
-            cachedRandom& rndGen,
-            vector& pos1,
-            scalar& m1,
-            scalar& d1,
-            scalar& N1,
-            vector& U,
-            scalar& rho1,
-            scalar& T1,
-            scalarField& Y1,
-            const scalar sigma1,
-            const label celli,
-            const scalar voli,
-            vector& pos2,
-            scalar& m2,
-            scalar& d2,
-            scalar& N2,
-            vector& U2,
-            scalar& rho2,
-            scalar& T2,
-            scalarField& Y2,
-            const scalar sigma2,
-            const label cellj,
-            const scalar volj
-        ) const;
 };
 
 

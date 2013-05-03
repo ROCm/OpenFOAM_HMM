@@ -25,187 +25,96 @@ License
 
 #include "TrajectoryCollision.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
 template<class CloudType>
-Foam::TrajectoryCollision<CloudType>::TrajectoryCollision
-(
-    const dictionary& dict,
-    CloudType& owner
-)
-:
-    StochasticCollisionModel<CloudType>(dict, owner, typeName),
-    cSpace_(readScalar(this->coeffDict().lookup("cSpace"))),
-    cTime_(readScalar(this->coeffDict().lookup("cTime"))),
-    coalescence_(this->coeffDict().lookup("coalescence"))
-{}
+void Foam::TrajectoryCollision<CloudType>::collide(const scalar dt)
+{
+    ORourkeCollision<CloudType>::collide(dt);
+}
 
 
 template<class CloudType>
-Foam::TrajectoryCollision<CloudType>::TrajectoryCollision
-(
-    const TrajectoryCollision<CloudType>& cm
-)
-:
-    StochasticCollisionModel<CloudType>(cm),
-    cSpace_(cm.cSpace_),
-    cTime_(cm.cTime_),
-    coalescence_(cm.coalescence_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::TrajectoryCollision<CloudType>::~TrajectoryCollision()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::TrajectoryCollision<CloudType>::update
+bool Foam::TrajectoryCollision<CloudType>::collideParcels
 (
     const scalar dt,
-    cachedRandom& rndGen,
-    vector& pos1,
+    parcelType& p1,
+    parcelType& p2,
     scalar& m1,
-    scalar& d1,
-    scalar& N1,
-    vector& U1,
-    scalar& rho1,
-    scalar& T1,
-    scalarField& Y1,
-    const scalar sigma1,
-    const label celli,
-    const scalar voli,
-    vector& pos2,
-    scalar& m2,
-    scalar& d2,
-    scalar& N2,
-    vector& U2,
-    scalar& rho2,
-    scalar& T2,
-    scalarField& Y2,
-    const scalar sigma2,
-    const label cellj,
-    const scalar volj
-) const
+    scalar& m2
+)
 {
     bool coalescence = false;
 
-    vector vRel = U1 - U2;
+    const vector& pos1 = p1.position();
+    const vector& pos2 = p2.position();
 
-    vector p = pos2 - pos1;
-    scalar dist = mag(p);
+    const vector& U1 = p1.U();
+    const vector& U2 = p2.U();
 
-    scalar vAlign = vRel & (p/(dist + SMALL));
+    vector URel = U1 - U2;
+
+    vector d = pos2 - pos1;
+    scalar magd = mag(d);
+
+    scalar vAlign = URel & (d/(magd + ROOTVSMALL));
 
     if (vAlign > 0)
     {
+        const scalar d1 = p1.d();
+        const scalar d2 = p2.d();
+
         scalar sumD = d1 + d2;
 
-        if (vAlign*dt > dist - 0.5*sumD)
+        if (vAlign*dt > magd - 0.5*sumD)
         {
-            scalar v1Mag = mag(U1);
-            scalar v2Mag = mag(U2);
-            vector nv1 = U1/v1Mag;
-            vector nv2 = U2/v2Mag;
+            scalar magU1 = mag(U1) + ROOTVSMALL;
+            scalar magU2 = mag(U2) + ROOTVSMALL;
+            vector n1 = U1/magU1;
+            vector n2 = U2/magU2;
 
-            scalar v1v2 = nv1 & nv2;
-            scalar v1p = nv1 & p;
-            scalar v2p = nv2 & p;
+            scalar n1n2 = n1 & n2;
+            scalar n1d = n1 & d;
+            scalar n2d = n2 & d;
 
-            scalar det = 1.0 - v1v2*v1v2;
+            scalar det = 1.0 - sqr(n1n2);
 
-            scalar alpha = 1.0e+20;
-            scalar beta = 1.0e+20;
+            scalar alpha = GREAT;
+            scalar beta = GREAT;
 
             if (mag(det) > 1.0e-4)
             {
-                beta = -(v2p - v1v2*v1p)/det;
-                alpha = v1p + v1v2*beta;
+                beta = -(n2d - n1n2*n1d)/det;
+                alpha = n1d + n1n2*beta;
             }
 
-            alpha /= v1Mag*dt;
-            beta /= v2Mag*dt;
+            alpha /= magU1*dt;
+            beta /= magU2*dt;
 
             // is collision possible within this timestep
-            if ((alpha>0) && (alpha<1.0) && (beta>0) && (beta<1.0))
+            if ((alpha > 0) && (alpha < 1.0) && (beta > 0) && (beta < 1.0))
             {
                 vector p1c = pos1 + alpha*U1*dt;
                 vector p2c = pos2 + beta*U2*dt;
 
-                scalar closestDist = mag(p1c-p2c);
+                scalar closestDist = mag(p1c - p2c);
 
                 scalar collProb =
                     pow(0.5*sumD/max(0.5*sumD, closestDist), cSpace_)
-                  * exp(-cTime_*mag(alpha-beta));
+                   *exp(-cTime_*mag(alpha - beta));
 
-                scalar xx = rndGen.sample01<scalar>();
+                scalar xx = this->owner().rndGen().template sample01<scalar>();
 
-                // collision occur
-                if ((xx < collProb) && (m1 > VSMALL) && (m2 > VSMALL))
+                // collision occurs
+                if (xx > collProb)
                 {
                     if (d1 > d2)
                     {
-                        coalescence = collideSorted
-                        (
-                            dt,
-                            rndGen,
-                            pos1,
-                            m1,
-                            d1,
-                            N1,
-                            U1,
-                            rho1,
-                            T1,
-                            Y1,
-                            sigma1,
-                            celli,
-                            voli,
-                            pos2,
-                            m2,
-                            d2,
-                            N2,
-                            U2,
-                            rho2,
-                            T2,
-                            Y2,
-                            sigma2,
-                            cellj,
-                            volj
-                        );
+                        coalescence = this->collideSorted(dt, p1, p2, m1, m2);
                     }
                     else
                     {
-                        coalescence = collideSorted
-                        (
-                            dt,
-                            rndGen,
-                            pos2,
-                            m2,
-                            d2,
-                            N2,
-                            U2,
-                            rho2,
-                            T2,
-                            Y2,
-                            sigma2,
-                            cellj,
-                            volj,
-                            pos1,
-                            m1,
-                            d1,
-                            N1,
-                            U1,
-                            rho1,
-                            T1,
-                            Y1,
-                            sigma1,
-                            celli,
-                            voli
-                        );
+                        coalescence = this->collideSorted(dt, p2, p1, m2, m1);
                     }
                 }
             }
@@ -216,128 +125,38 @@ bool Foam::TrajectoryCollision<CloudType>::update
 }
 
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
 template<class CloudType>
-bool Foam::TrajectoryCollision<CloudType>::collideSorted
+Foam::TrajectoryCollision<CloudType>::TrajectoryCollision
 (
-    const scalar dt,
-    cachedRandom& rndGen,
-    vector& pos1,
-    scalar& m1,
-    scalar& d1,
-    scalar& N1,
-    vector& U1,
-    scalar& rho1,
-    scalar& T1,
-    scalarField& Y1,
-    const scalar sigma1,
-    const label celli,
-    const scalar voli,
-    vector& pos2,
-    scalar& m2,
-    scalar& d2,
-    scalar& N2,
-    vector& U2,
-    scalar& rho2,
-    scalar& T2,
-    scalarField& Y2,
-    const scalar sigma2,
-    const label cellj,
-    const scalar volj
-) const
-{
-    bool coalescence = false;
+    const dictionary& dict,
+    CloudType& owner
+)
+:
+    ORourkeCollision<CloudType>(dict, owner, typeName),
+    cSpace_(readScalar(this->coeffDict().lookup("cSpace"))),
+    cTime_(readScalar(this->coeffDict().lookup("cTime")))
+{}
 
-    vector vRel = U1 - U2;
 
-    scalar mdMin = m2/N2;
+template<class CloudType>
+Foam::TrajectoryCollision<CloudType>::TrajectoryCollision
+(
+    const TrajectoryCollision<CloudType>& cm
+)
+:
+    ORourkeCollision<CloudType>(cm),
+    cSpace_(cm.cSpace_),
+    cTime_(cm.cTime_)
+{}
 
-    scalar mTot = m1 + m2;
 
-    scalar gamma = d1/max(d2, 1.0e-12);
-    scalar f = gamma*gamma*gamma + 2.7*gamma - 2.4*gamma*gamma;
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-    vector momMax = m1*U1;
-    vector momMin = m2*U2;
-
-    // use mass-averaged temperature to calculate We number
-    scalar Tm = (T1*m1 + T2*m2)/mTot;
-
-    // and mass averaged fractions ...
-    //scalarField Yav((m1*Y1 + m2*Y2)/mTot;
-
-    // interpolate the averaged surface tension
-    scalar sigma = sigma1 + (sigma2 - sigma1)*(Tm - T1)/(T2 - T1);
-
-    sigma = max(1.0e-6, sigma);
-    scalar Vtot = m1/rho1 + m2/rho2;
-    scalar rho = mTot/Vtot;
-
-    scalar dMean = sqrt(d1*d2);
-    scalar WeColl = max(1.0e-12, 0.5*rho*magSqr(vRel)*dMean/sigma);
-
-    scalar coalesceProb = min(1.0, 2.4*f/WeColl);
-
-    scalar prob = rndGen.sample01<scalar>();
-
-    // Coalescence
-    if ( prob < coalesceProb && coalescence_)
-    {
-        coalescence = true;
-        // How 'many' of the droplets coalesce
-        scalar nProb = prob*N2/N1;
-
-        // Conservation of mass, momentum and energy
-        scalar m2Org = m2;
-        scalar dm = N1*nProb*mdMin;
-        m2 -= dm;
-        scalar V2 = constant::mathematical::pi*pow3(d2)/6.0;
-        N2 = m2/(rho2*V2);
-
-        scalar m1Org = m1;
-        m1 += dm;
-        T1 = (Tm*mTot - m2*T2)/m1;
-
-        U1 =(momMax + (1.0 - m2/m2Org)*momMin)/m1;
-
-        // update the liquid mass fractions
-        Y1 = (m1Org*Y1 + dm*Y2)/m1;
-    }
-    // Grazing collision (no coalescence)
-    else
-    {
-        scalar gf = sqrt(prob) - sqrt(coalesceProb);
-        scalar denom = 1.0 - sqrt(coalesceProb);
-        if (denom < 1.0e-5)
-        {
-            denom = 1.0;
-        }
-        gf /= denom;
-
-        // if gf negative, this means that coalescence is turned off
-        // and these parcels should have coalesced
-        gf = max(0.0, gf);
-
-        // gf -> 1 => v1p -> p1().U() ...
-        // gf -> 0 => v1p -> momentum/(m1 + m2)
-
-        vector mr = m1*U1 + m2*U2;
-        vector v1p = (mr + m2*gf*vRel)/(m1 + m2);
-        vector v2p = (mr - m1*gf*vRel)/(m1 + m2);
-
-        if (N1 < N2)
-        {
-            U1 = v1p;
-            U2 = (N1*v2p + (N2 - N1)*U2)/N2;
-        }
-        else
-        {
-            U1 = (N2*v1p + (N1 - N2)*U1)/N1;
-            U2 = v2p;
-        }
-    }
-
-    return coalescence;
-}
+template<class CloudType>
+Foam::TrajectoryCollision<CloudType>::~TrajectoryCollision()
+{}
 
 
 // ************************************************************************* //

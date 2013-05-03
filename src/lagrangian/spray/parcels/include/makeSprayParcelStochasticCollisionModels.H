@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,36 +23,27 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fluidThermoCloud.H"
-
-#include "makeParcelCloudFunctionObjects.H"
-
-// Kinematic
-#include "makeThermoParcelForces.H" // thermo variant
-#include "makeParcelDispersionModels.H"
-#include "makeParcelInjectionModels.H"
-#include "makeParcelPatchInteractionModels.H"
-
-// Thermodynamic
-#include "makeParcelHeatTransferModels.H"
-#include "makeThermoParcelSurfaceFilmModels.H"
+#ifndef makeSprayParcelStochasticCollisionModels_H
+#define makeSprayParcelStochasticCollisionModels_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    makeParcelCloudFunctionObjects(fluidThermoCloud);
+#include "NoStochasticCollision.H"
+#include "ORourkeCollision.H"
+#include "TrajectoryCollision.H"
 
-    // Kinematic sub-models
-    makeThermoParcelForces(fluidThermoCloud);
-    makeParcelDispersionModels(fluidThermoCloud);
-    makeParcelInjectionModels(fluidThermoCloud);
-    makeParcelPatchInteractionModels(fluidThermoCloud);
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    // Thermo sub-models
-    makeParcelHeatTransferModels(fluidThermoCloud);
-    makeParcelSurfaceFilmModels(fluidThermoCloud);
-}
+#define makeSprayParcelStochasticCollisionModels(CloudType)                   \
+                                                                              \
+    makeStochasticCollisionModel(CloudType);                                  \
+    makeStochasticCollisionModelType(NoStochasticCollision, CloudType);       \
+    makeStochasticCollisionModelType(ORourkeCollision, CloudType);            \
+    makeStochasticCollisionModelType(TrajectoryCollision, CloudType);
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

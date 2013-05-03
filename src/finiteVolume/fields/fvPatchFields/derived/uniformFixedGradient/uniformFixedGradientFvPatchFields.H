@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,35 +21,26 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::fluidThermoCloud
-
-Description
-    Cloud class to introduce thermodynamic parcels
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef fluidThermoCloud_H
-#define fluidThermoCloud_H
+#ifndef uniformFixedGradientFvPatchFields_H
+#define uniformFixedGradientFvPatchFields_H
 
-#include "ThermoCloud.H"
-#include "fluidThermoParcel.H"
+#include "uniformFixedGradientFvPatchField.H"
+#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef ThermoCloud
-    <
-        KinematicCloud
-        <
-            Cloud
-            <
-                fluidThermoParcel
-            >
-        >
-    > fluidThermoCloud;
-}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+makePatchTypeFieldTypedefs(uniformFixedGradient);
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

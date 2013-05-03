@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,15 +22,16 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::NoStochasticCollision
+    Foam::SuppressionCollision
 
 Description
-    Dummy collision model for 'none'
+    Inter-cloud collision model, whereby the \c canReact flag can be used
+    to inhibit devolatilisation and surface reactions
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef NoStochasticCollision_H
-#define NoStochasticCollision_H
+#ifndef SuppressionCollision_H
+#define SuppressionCollision_H
 
 #include "StochasticCollisionModel.H"
 
@@ -39,74 +40,57 @@ Description
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                       Class NoStochasticCollision Declaration
+                    Class SuppressionCollision Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class NoStochasticCollision
+class SuppressionCollision
 :
     public StochasticCollisionModel<CloudType>
 {
+protected:
+
+    // Protected data
+
+        //- Name of cloud used for suppression
+        const word suppressionCloud_;
+
+        //- Suppressed parcel type - optional
+        const label suppressedParcelType_;
+
+
+   // Protected Member Functions
+
+        //- Update the model
+        virtual void collide(const scalar dt);
+
+
 public:
 
     //- Runtime type information
-    TypeName("none");
+    TypeName("suppressionCollision");
 
 
     // Constructors
 
         //- Construct from dictionary
-        NoStochasticCollision(const dictionary& dict, CloudType& owner);
+        SuppressionCollision(const dictionary& dict, CloudType& owner);
 
         //- Construct copy
-        NoStochasticCollision(const NoStochasticCollision<CloudType>& cm);
+        SuppressionCollision(const SuppressionCollision<CloudType>& cm);
 
         //- Construct and return a clone
         virtual autoPtr<StochasticCollisionModel<CloudType> > clone() const
         {
             return autoPtr<StochasticCollisionModel<CloudType> >
             (
-                new NoStochasticCollision<CloudType>(*this)
+                new SuppressionCollision<CloudType>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~NoStochasticCollision();
-
-
-    // Member Functions
-
-        //- Flag to indicate whether model activates collision model
-        virtual bool active() const;
-
-        virtual bool update
-        (
-            const scalar dt,
-            cachedRandom& rndGen,
-            vector& pos1,
-            scalar& m1,
-            scalar& d1,
-            scalar& N1,
-            vector& U,
-            scalar& rho1,
-            scalar& T1,
-            scalarField& Y1,
-            const scalar sigma1,
-            const label celli,
-            const scalar voli,
-            vector& pos2,
-            scalar& m2,
-            scalar& d2,
-            scalar& N2,
-            vector& U2,
-            scalar& rho2,
-            scalar& T2,
-            scalarField& Y2,
-            const scalar sigma2,
-            const label cellj,
-            const scalar volj
-        ) const;
+    virtual ~SuppressionCollision();
 };
 
 
@@ -117,7 +101,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "NoStochasticCollision.C"
+#   include "SuppressionCollision.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

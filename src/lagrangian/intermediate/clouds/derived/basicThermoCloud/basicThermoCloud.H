@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,35 +22,33 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fluidThermoParcel
+    Foam::basicThermoCloud
 
 Description
-    Definition of basic thermo parcel
-
-SourceFiles
-    fluidThermoParcel.C
+    Cloud class to introduce thermodynamic parcels
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fluidThermoParcel_H
-#define fluidThermoParcel_H
+#ifndef basicThermoCloud_H
+#define basicThermoCloud_H
 
-#include "contiguous.H"
-#include "particle.H"
-#include "KinematicParcel.H"
-#include "ThermoParcel.H"
+#include "ThermoCloud.H"
+#include "basicThermoParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef ThermoParcel<KinematicParcel<particle> > fluidThermoParcel;
-
-    template<>
-    inline bool contiguous<fluidThermoParcel>()
-    {
-        return true;
-    }
+    typedef ThermoCloud
+    <
+        KinematicCloud
+        <
+            Cloud
+            <
+                basicThermoParcel
+            >
+        >
+    > basicThermoCloud;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

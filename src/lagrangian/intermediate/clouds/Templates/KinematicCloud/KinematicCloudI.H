@@ -205,6 +205,22 @@ Foam::KinematicCloud<CloudType>::patchInteraction()
 
 
 template<class CloudType>
+inline const Foam::StochasticCollisionModel<Foam::KinematicCloud<CloudType> >&
+Foam::KinematicCloud<CloudType>::stochasticCollision() const
+{
+    return stochasticCollisionModel_();
+}
+
+
+template<class CloudType>
+inline Foam::StochasticCollisionModel<Foam::KinematicCloud<CloudType> >&
+Foam::KinematicCloud<CloudType>::stochasticCollision()
+{
+    return stochasticCollisionModel_();
+}
+
+
+template<class CloudType>
 inline const Foam::SurfaceFilmModel<Foam::KinematicCloud<CloudType> >&
 Foam::KinematicCloud<CloudType>::surfaceFilm() const
 {
@@ -568,6 +584,45 @@ Foam::KinematicCloud<CloudType>::SU(volVectorField& U) const
     }
 
     return tmp<fvVectorMatrix>(new fvVectorMatrix(U, dimForce));
+}
+
+
+template<class CloudType>
+inline const Foam::tmp<Foam::volScalarField>
+Foam::KinematicCloud<CloudType>::vDotSweep() const
+{
+    tmp<volScalarField> tvDotSweep
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                this->name() + ":vDotSweep",
+                this->db().time().timeName(),
+                this->db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimless/dimTime, 0.0),
+            zeroGradientFvPatchScalarField::typeName
+        )
+    );
+
+    volScalarField& vDotSweep = tvDotSweep();
+    forAllConstIter(typename KinematicCloud<CloudType>, *this, iter)
+    {
+        const parcelType& p = iter();
+        const label cellI = p.cell();
+
+        vDotSweep[cellI] += p.nParticle()*p.areaP()*mag(p.U() - U_[cellI]);
+    }
+
+    vDotSweep.internalField() /= mesh_.V();
+    vDotSweep.correctBoundaryConditions();
+
+    return tvDotSweep;
 }
 
 
