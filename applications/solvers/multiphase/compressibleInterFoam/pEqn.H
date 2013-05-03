@@ -85,8 +85,8 @@
 
         if (pimple.finalNonOrthogonalIter())
         {
-            //p = max(p_rgh + (alpha1*rho1 + alpha2*rho2)*gh, pMin);
-            //p_rgh = p - (alpha1*rho1 + alpha2*rho2)*gh;
+            p = max(p_rgh + (alpha1*rho1 + alpha2*rho2)*gh, pMin);
+            p_rgh = p - (alpha1*rho1 + alpha2*rho2)*gh;
 
             dgdt =
             (
@@ -102,7 +102,7 @@
         }
     }
 
-    p = max(p_rgh + (alpha1*rho1 + alpha2*rho2)*gh, pMin);
+    // p = max(p_rgh + (alpha1*rho1 + alpha2*rho2)*gh, pMin);
 
     // Update densities from change in p_rgh
     rho1 += psi1*(p_rgh - p_rgh_0);

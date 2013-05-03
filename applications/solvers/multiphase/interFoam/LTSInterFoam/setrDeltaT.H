@@ -130,10 +130,7 @@
             << ", " << gMax(1/rDeltaT.internalField()) << endl;
     }
 
-    label nAlphaSubCycles
-    (
-        readLabel(pimpleDict.lookup("nAlphaSubCycles"))
-    );
+    #include "alphaControls.H"
 
     rSubDeltaT = rDeltaT*nAlphaSubCycles;
 }

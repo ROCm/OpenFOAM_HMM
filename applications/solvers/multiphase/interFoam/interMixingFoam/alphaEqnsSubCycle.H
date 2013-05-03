@@ -1,6 +1,4 @@
-const dictionary& pimpleDict = pimple.dict();
-label nAlphaCorr(readLabel(pimpleDict.lookup("nAlphaCorr")));
-label nAlphaSubCycles(readLabel(pimpleDict.lookup("nAlphaSubCycles")));
+#include "alphaControls.H"
 
 if (nAlphaSubCycles > 1)
 {

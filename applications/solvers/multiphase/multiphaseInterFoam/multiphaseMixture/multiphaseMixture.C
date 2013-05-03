@@ -249,14 +249,11 @@ void Foam::multiphaseMixture::solve()
 
     const Time& runTime = mesh_.time();
 
-    const dictionary& pimpleDict = mesh_.solutionDict().subDict("PIMPLE");
-
-    label nAlphaSubCycles(readLabel(pimpleDict.lookup("nAlphaSubCycles")));
-
-    scalar cAlpha(readScalar(pimpleDict.lookup("cAlpha")));
-
-
     volScalarField& alpha = phases_.first();
+
+    const dictionary& alphaControls = mesh_.solverDict(alpha.name());
+    label nAlphaSubCycles(readLabel(alphaControls.lookup("nAlphaSubCycles")));
+    scalar cAlpha(readScalar(alphaControls.lookup("cAlpha")));
 
     if (nAlphaSubCycles > 1)
     {

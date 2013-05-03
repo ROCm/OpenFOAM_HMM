@@ -812,9 +812,8 @@ void Foam::multiphaseSystem::solve()
 
     const Time& runTime = mesh_.time();
 
-    const dictionary& pimpleDict = mesh_.solutionDict().subDict("PIMPLE");
-
-    label nAlphaSubCycles(readLabel(pimpleDict.lookup("nAlphaSubCycles")));
+    const dictionary& alphaControls = mesh_.solverDict(phases_.first().name());
+    label nAlphaSubCycles(readLabel(alphaControls.lookup("nAlphaSubCycles")));
 
     if (nAlphaSubCycles > 1)
     {

@@ -159,7 +159,7 @@ Foam::interfaceProperties::interfaceProperties
     (
         readScalar
         (
-            alpha1.mesh().solutionDict().subDict("PIMPLE").lookup("cAlpha")
+            alpha1.mesh().solverDict(alpha1.name()).lookup("cAlpha")
         )
     ),
     sigma_(dict.lookup("sigma")),
