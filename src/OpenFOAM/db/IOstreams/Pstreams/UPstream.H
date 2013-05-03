@@ -29,7 +29,6 @@ Description
 
 SourceFiles
     UPstream.C
-    UPstreamsPrint.C
     UPstreamCommsStruct.C
     gatherScatter.C
     combineGatherScatter.C
@@ -45,6 +44,8 @@ SourceFiles
 #include "HashTable.H"
 #include "string.H"
 #include "NamedEnum.H"
+#include "ListOps.H"
+#include "LIFOStack.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -180,26 +181,30 @@ private:
 
     // Private data
 
-        static int myProcNo_;
         static bool parRun_;
-
-        static List<int> procIDs_;
         static int msgType_;
 
-        static List<commsStruct> linearCommunication_;
-        static List<commsStruct> treeCommunication_;
+        // Communicator specific data
+
+        static LIFOStack<label> freeComms_;
+        static DynamicList<int> myProcNo_;
+        static DynamicList<List<int> > procIDs_;
+        static DynamicList<label> parentCommunicator_;
+
+        static DynamicList<List<commsStruct> > linearCommunication_;
+        static DynamicList<List<commsStruct> > treeCommunication_;
 
 
     // Private Member Functions
 
         //- Set data for parallel running
-        static void setParRun();
+        static void setParRun(const label nProcs);
 
         //- Calculate linear communication schedule
-        static void calcLinearComm(const label nProcs);
+        static List<commsStruct> calcLinearComm(const label nProcs);
 
         //- Calculate tree communication schedule
-        static void calcTreeComm(const label nProcs);
+        static List<commsStruct> calcTreeComm(const label nProcs);
 
         //- Helper function for tree communication schedule determination
         //  Collects all processorIDs below a processor
@@ -210,10 +215,18 @@ private:
             DynamicList<label>& allReceives
         );
 
-        //- Initialize all communication schedules. Callback from
-        //  UPstream::init()
-        static void initCommunicationSchedule();
+        //- Allocate a communicator with index
+        static void allocatePstreamCommunicator
+        (
+            const label parentIndex,
+            const label index
+        );
 
+        //- Free a communicator
+        static void freePstreamCommunicator
+        (
+            const label index
+        );
 
 protected:
 
@@ -245,6 +258,13 @@ public:
         //- Number of polling cycles in processor updates
         static int nPollProcInterfaces;
 
+        //- Default communicator (all processors)
+        static label worldComm;
+
+        //- Debugging: warn for use of any communicator differing from warnComm
+        static label warnComm;
+
+
     // Constructors
 
         //- Construct given optional buffer size
@@ -255,6 +275,73 @@ public:
 
 
     // Member functions
+
+        //- Allocate a new communicator
+        static label allocateCommunicator
+        (
+            const label parent,
+            const labelList& subRanks,
+            const bool doPstream = true
+        );
+
+        //- Free a previously allocated communicator
+        static void freeCommunicator
+        (
+            const label communicator,
+            const bool doPstream = true
+        );
+
+        //- Free all communicators
+        static void freeCommunicators(const bool doPstream);
+
+        //- Helper class for allocating/freeing communicators
+        class communicator
+        {
+            label comm_;
+
+            //- Disallow copy and assignment
+            communicator(const communicator&);
+            void operator=(const communicator&);
+
+        public:
+
+            communicator
+            (
+                const label parent,
+                const labelList& subRanks,
+                const bool doPstream
+            )
+            :
+                comm_(allocateCommunicator(parent, subRanks, doPstream))
+            {}
+
+            ~communicator()
+            {
+                freeCommunicator(comm_);
+            }
+
+            operator label() const
+            {
+                return comm_;
+            }
+        };
+
+        //- Return physical processor number (i.e. processor number in
+        //  worldComm) given communicator and procssor
+        static int baseProcNo(const label myComm, const int procID);
+
+        //- Return processor number in communicator (given physical processor
+        //  number) (= reverse of baseProcNo)
+        static label procNo(const label comm, const int baseProcID);
+
+        //- Return processor number in communicator (given processor number
+        //  and communicator)
+        static label procNo
+        (
+            const label myComm,
+            const label currentComm,
+            const int currentProcID
+        );
 
         //- Add the valid option this type of communications library
         //  adds/requires on the command line
@@ -281,6 +368,14 @@ public:
             //- Non-blocking comms: has request i finished?
             static bool finishedRequest(const label i);
 
+            static int allocateTag(const char*);
+
+            static int allocateTag(const word&);
+
+            static void freeTag(const char*, const int tag);
+
+            static void freeTag(const word&, const int tag);
+
 
         //- Is this a parallel run?
         static bool& parRun()
@@ -289,15 +384,9 @@ public:
         }
 
         //- Number of processes in parallel run
-        static label nProcs()
+        static label nProcs(const label communicator = 0)
         {
-            return procIDs_.size();
-        }
-
-        //- Am I the master process
-        static bool master()
-        {
-            return myProcNo_ == 0;
+            return procIDs_[communicator].size();
         }
 
         //- Process index of the master
@@ -306,22 +395,27 @@ public:
             return 0;
         }
 
-        //- Number of this process (starting from masterNo() = 0)
-        static int myProcNo()
+        //- Am I the master process
+        static bool master(const label communicator = 0)
         {
-            return myProcNo_;
+            return myProcNo_[communicator] == masterNo();
         }
 
-        //- Process IDs
-        static const List<int>& procIDs()
+        //- Number of this process (starting from masterNo() = 0)
+        static int myProcNo(const label communicator = 0)
         {
-            return procIDs_;
+            return myProcNo_[communicator];
+        }
+
+        static label parent(const label communicator)
+        {
+            return parentCommunicator_(communicator);
         }
 
         //- Process ID of given process index
-        static int procID(int procNo)
+        static List<int>& procID(int communicator)
         {
-            return procIDs_[procNo];
+            return procIDs_[communicator];
         }
 
         //- Process index of first slave
@@ -331,21 +425,27 @@ public:
         }
 
         //- Process index of last slave
-        static int lastSlave()
+        static int lastSlave(const label communicator = 0)
         {
-            return nProcs() - 1;
+            return nProcs(communicator) - 1;
         }
 
         //- Communication schedule for linear all-to-master (proc 0)
-        static const List<commsStruct>& linearCommunication()
+        static const List<commsStruct>& linearCommunication
+        (
+            const label communicator = 0
+        )
         {
-            return linearCommunication_;
+            return linearCommunication_[communicator];
         }
 
         //- Communication schedule for tree all-to-master (proc 0)
-        static const List<commsStruct>& treeCommunication()
+        static const List<commsStruct>& treeCommunication
+        (
+            const label communicator = 0
+        )
         {
-            return treeCommunication_;
+            return treeCommunication_[communicator];
         }
 
         //- Message tag of standard messages

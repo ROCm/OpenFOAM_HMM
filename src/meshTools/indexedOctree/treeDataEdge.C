@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -96,6 +96,35 @@ Foam::treeDataEdge::treeDataEdge
 }
 
 
+Foam::treeDataEdge::findNearestOp::findNearestOp
+(
+    const indexedOctree<treeDataEdge>& tree
+)
+:
+    tree_(tree)
+{}
+
+
+Foam::treeDataEdge::findNearestOpSubset::findNearestOpSubset
+(
+    const indexedOctree<treeDataEdge>& tree,
+    DynamicList<label>& shapeMask
+)
+:
+    tree_(tree),
+    shapeMask_(shapeMask)
+{}
+
+
+Foam::treeDataEdge::findIntersectOp::findIntersectOp
+(
+    const indexedOctree<treeDataEdge>& tree
+)
+:
+    tree_(tree)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::pointField Foam::treeDataEdge::shapePoints() const
@@ -114,13 +143,13 @@ Foam::pointField Foam::treeDataEdge::shapePoints() const
 
 //- Get type (inside,outside,mixed,unknown) of point w.r.t. surface.
 //  Only makes sense for closed surfaces.
-Foam::label Foam::treeDataEdge::getVolumeType
+Foam::volumeType Foam::treeDataEdge::getVolumeType
 (
     const indexedOctree<treeDataEdge>& oc,
     const point& sample
 ) const
 {
-    return indexedOctree<treeDataEdge>::UNKNOWN;
+    return volumeType::UNKNOWN;
 }
 
 
@@ -165,9 +194,7 @@ bool Foam::treeDataEdge::overlaps
 }
 
 
-// Calculate nearest point to sample. Updates (if any) nearestDistSqr, minIndex,
-// nearestPoint.
-void Foam::treeDataEdge::findNearest
+void Foam::treeDataEdge::findNearestOp::operator()
 (
     const labelUList& indices,
     const point& sample,
@@ -177,13 +204,15 @@ void Foam::treeDataEdge::findNearest
     point& nearestPoint
 ) const
 {
+    const treeDataEdge& shape = tree_.shapes();
+
     forAll(indices, i)
     {
         const label index = indices[i];
 
-        const edge& e = edges_[edgeLabels_[index]];
+        const edge& e = shape.edges()[shape.edgeLabels()[index]];
 
-        pointHit nearHit = e.line(points_).nearestDist(sample);
+        pointHit nearHit = e.line(shape.points()).nearestDist(sample);
 
         scalar distSqr = sqr(nearHit.distance());
 
@@ -197,9 +226,7 @@ void Foam::treeDataEdge::findNearest
 }
 
 
-//- Calculates nearest (to line) point in shape.
-//  Returns point and distance (squared)
-void Foam::treeDataEdge::findNearest
+void Foam::treeDataEdge::findNearestOp::operator()
 (
     const labelUList& indices,
     const linePointRef& ln,
@@ -210,6 +237,8 @@ void Foam::treeDataEdge::findNearest
     point& nearestPoint
 ) const
 {
+    const treeDataEdge& shape = tree_.shapes();
+
     // Best so far
     scalar nearestDistSqr = magSqr(linePoint - nearestPoint);
 
@@ -217,13 +246,13 @@ void Foam::treeDataEdge::findNearest
     {
         const label index = indices[i];
 
-        const edge& e = edges_[edgeLabels_[index]];
+        const edge& e = shape.edges()[shape.edgeLabels()[index]];
 
         // Note: could do bb test ? Worthwhile?
 
         // Nearest point on line
         point ePoint, lnPt;
-        scalar dist = e.line(points_).nearestDist(ln, ePoint, lnPt);
+        scalar dist = e.line(shape.points()).nearestDist(ln, ePoint, lnPt);
         scalar distSqr = sqr(dist);
 
         if (distSqr < nearestDistSqr)
@@ -249,6 +278,122 @@ void Foam::treeDataEdge::findNearest
             }
         }
     }
+}
+
+
+void Foam::treeDataEdge::findNearestOpSubset::operator()
+(
+    const labelUList& indices,
+    const point& sample,
+
+    scalar& nearestDistSqr,
+    label& minIndex,
+    point& nearestPoint
+) const
+{
+    const treeDataEdge& shape = tree_.shapes();
+
+    forAll(indices, i)
+    {
+        const label index = indices[i];
+        const label edgeIndex = shape.edgeLabels()[index];
+
+        if (!shapeMask_.empty() && findIndex(shapeMask_, edgeIndex) != -1)
+        {
+            continue;
+        }
+
+        const edge& e = shape.edges()[edgeIndex];
+
+        pointHit nearHit = e.line(shape.points()).nearestDist(sample);
+
+        scalar distSqr = sqr(nearHit.distance());
+
+        if (distSqr < nearestDistSqr)
+        {
+            nearestDistSqr = distSqr;
+            minIndex = index;
+            nearestPoint = nearHit.rawPoint();
+        }
+    }
+}
+
+
+void Foam::treeDataEdge::findNearestOpSubset::operator()
+(
+    const labelUList& indices,
+    const linePointRef& ln,
+
+    treeBoundBox& tightest,
+    label& minIndex,
+    point& linePoint,
+    point& nearestPoint
+) const
+{
+    const treeDataEdge& shape = tree_.shapes();
+
+    // Best so far
+    scalar nearestDistSqr = magSqr(linePoint - nearestPoint);
+
+    forAll(indices, i)
+    {
+        const label index = indices[i];
+        const label edgeIndex = shape.edgeLabels()[index];
+
+        if (!shapeMask_.empty() && findIndex(shapeMask_, edgeIndex) != -1)
+        {
+            continue;
+        }
+
+        const edge& e = shape.edges()[edgeIndex];
+
+        // Note: could do bb test ? Worthwhile?
+
+        // Nearest point on line
+        point ePoint, lnPt;
+        scalar dist = e.line(shape.points()).nearestDist(ln, ePoint, lnPt);
+        scalar distSqr = sqr(dist);
+
+        if (distSqr < nearestDistSqr)
+        {
+            nearestDistSqr = distSqr;
+            minIndex = index;
+            linePoint = lnPt;
+            nearestPoint = ePoint;
+
+            {
+                point& minPt = tightest.min();
+                minPt = min(ln.start(), ln.end());
+                minPt.x() -= dist;
+                minPt.y() -= dist;
+                minPt.z() -= dist;
+            }
+            {
+                point& maxPt = tightest.max();
+                maxPt = max(ln.start(), ln.end());
+                maxPt.x() += dist;
+                maxPt.y() += dist;
+                maxPt.z() += dist;
+            }
+        }
+    }
+}
+
+
+bool Foam::treeDataEdge::findIntersectOp::operator()
+(
+    const label index,
+    const point& start,
+    const point& end,
+    point& result
+) const
+{
+    notImplemented
+    (
+        "treeDataEdge::intersects(const label, const point&,"
+        "const point&, point&)"
+    );
+    return false;
 }
 
 

@@ -270,6 +270,12 @@ public:
                 return boundary().interfaces();
             }
 
+            //- Return communicator used for parallel communication
+            virtual int comm() const
+            {
+                return polyMesh::comm();
+            }
+
             //- Internal face owner
             const labelUList& owner() const
             {

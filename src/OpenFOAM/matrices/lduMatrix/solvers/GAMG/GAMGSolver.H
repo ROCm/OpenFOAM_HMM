@@ -43,9 +43,7 @@ Description
 
 SourceFiles
     GAMGSolver.C
-    GAMGSolverCalcAgglomeration.C
-    GAMGSolverMakeCoarseMatrix.C
-    GAMGSolverOperations.C
+    GAMGSolverAgglomerateMatrix.C
     GAMGSolverInterpolate.C
     GAMGSolverScale.C
     GAMGSolverSolve.C
@@ -118,7 +116,9 @@ class GAMGSolver
         PtrList<lduMatrix> matrixLevels_;
 
         //- Hierarchy of interfaces.
-        //  Warning: Needs to be deleted explicitly.
+        PtrList<PtrList<lduInterfaceField> > primitiveInterfaceLevels_;
+
+        //- Hierarchy of interfaces in lduInterfaceFieldPtrs form
         PtrList<lduInterfaceFieldPtrsList> interfaceLevels_;
 
         //- Hierarchy of interface boundary coefficients
@@ -157,8 +157,70 @@ class GAMGSolver
             const label i
         ) const;
 
-        //- Agglomerate coarse matrix
-        void agglomerateMatrix(const label fineLevelIndex);
+        //- Agglomerate coarse matrix. Supply mesh to use - so we can
+        //  construct temporary matrix on the fine mesh (instead of the coarse
+        //  mesh)
+        void agglomerateMatrix
+        (
+            const label fineLevelIndex,
+            const lduMesh& coarseMesh,
+            const lduInterfacePtrsList& coarseMeshInterfaces
+        );
+
+        //- Agglomerate coarse interface coefficients
+        void agglomerateInterfaceCoefficients
+        (
+            const label fineLevelIndex,
+            const lduInterfacePtrsList& coarseMeshInterfaces,
+            PtrList<lduInterfaceField>& coarsePrimInterfaces,
+            lduInterfaceFieldPtrsList& coarseInterfaces,
+            FieldField<Field, scalar>& coarseInterfaceBouCoeffs,
+            FieldField<Field, scalar>& coarseInterfaceIntCoeffs
+        ) const;
+
+        //- Collect matrices from other processors
+        void gatherMatrices
+        (
+            const labelList& procIDs,
+            const lduMesh& dummyMesh,
+            const label meshComm,
+
+            const lduMatrix& mat,
+            const FieldField<Field, scalar>& interfaceBouCoeffs,
+            const FieldField<Field, scalar>& interfaceIntCoeffs,
+            const lduInterfaceFieldPtrsList& interfaces,
+
+            PtrList<lduMatrix>& otherMats,
+            PtrList<FieldField<Field, scalar> >& otherBouCoeffs,
+            PtrList<FieldField<Field, scalar> >& otherIntCoeffs,
+            List<boolList>& otherTransforms,
+            List<List<int> >& otherRanks
+        ) const;
+
+        //- Agglomerate processor matrices
+        void procAgglomerateMatrix
+        (
+            // Agglomeration information
+            const labelList& procAgglomMap,
+            const List<int>& agglomProcIDs,
+
+            const label levelI,
+
+            // Resulting matrix
+            autoPtr<lduMatrix>& allMatrixPtr,
+            FieldField<Field, scalar>& allInterfaceBouCoeffs,
+            FieldField<Field, scalar>& allInterfaceIntCoeffs,
+            PtrList<lduInterfaceField>& allPrimitiveInterfaces,
+            lduInterfaceFieldPtrsList& allInterfaces
+        ) const;
+
+        //- Agglomerate processor matrices
+        void procAgglomerateMatrix
+        (
+            const labelList& procAgglomMap,
+            const List<int>& agglomProcIDs,
+            const label levelI
+        );
 
         //-  Interpolate the correction after injected prolongation
         void interpolate
@@ -193,7 +255,9 @@ class GAMGSolver
         (
             PtrList<scalarField>& coarseCorrFields,
             PtrList<scalarField>& coarseSources,
-            PtrList<lduMatrix::smoother>& smoothers
+            PtrList<lduMatrix::smoother>& smoothers,
+            scalarField& scratch1,
+            scalarField& scratch2
         ) const;
 
 
@@ -206,6 +270,10 @@ class GAMGSolver
             scalarField& Apsi,
             scalarField& finestCorrection,
             scalarField& finestResidual,
+
+            scalarField& scratch1,
+            scalarField& scratch2,
+
             PtrList<scalarField>& coarseCorrFields,
             PtrList<scalarField>& coarseSources,
             const direction cmpt=0

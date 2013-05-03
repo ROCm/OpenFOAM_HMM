@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -99,8 +99,20 @@ void Foam::GAMGPreconditioner::precondition
     // Create the smoothers for all levels
     PtrList<lduMatrix::smoother> smoothers;
 
+    // Scratch fields if processor-agglomerated coarse level meshes
+    // are bigger than original. Usually not needed
+    scalarField ApsiScratch;
+    scalarField finestCorrectionScratch;
+
     // Initialise the above data structures
-    initVcycle(coarseCorrFields, coarseSources, smoothers);
+    initVcycle
+    (
+        coarseCorrFields,
+        coarseSources,
+        smoothers,
+        ApsiScratch,
+        finestCorrectionScratch
+    );
 
     for (label cycle=0; cycle<nVcycles_; cycle++)
     {
@@ -112,6 +124,14 @@ void Foam::GAMGPreconditioner::precondition
             AwA,
             finestCorrection,
             finestResidual,
+
+            (ApsiScratch.size() ? ApsiScratch : AwA),
+            (
+                finestCorrectionScratch.size()
+              ? finestCorrectionScratch
+              : finestCorrection
+            ),
+
             coarseCorrFields,
             coarseSources,
             cmpt

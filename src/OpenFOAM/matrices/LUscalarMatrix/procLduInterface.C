@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,7 +40,8 @@ Foam::procLduInterface::procLduInterface
     coeffs_(coeffs),
     myProcNo_(-1),
     neighbProcNo_(-1),
-    tag_(-1)
+    tag_(-1),
+    comm_(-1)
 {
     if (isA<processorLduInterface>(interface.interface()))
     {
@@ -50,6 +51,7 @@ Foam::procLduInterface::procLduInterface
         myProcNo_ = pldui.myProcNo();
         neighbProcNo_ = pldui.neighbProcNo();
         tag_ = pldui.tag();
+        comm_ = pldui.comm();
     }
     else if (isA<cyclicLduInterface>(interface.interface()))
     {
@@ -73,7 +75,8 @@ Foam::procLduInterface::procLduInterface(Istream& is)
     coeffs_(is),
     myProcNo_(readLabel(is)),
     neighbProcNo_(readLabel(is)),
-    tag_(readLabel(is))
+    tag_(readLabel(is)),
+    comm_(readLabel(is))
 {}
 
 
@@ -85,7 +88,8 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const procLduInterface& cldui)
         << cldui.coeffs_
         << cldui.myProcNo_
         << cldui.neighbProcNo_
-        << cldui.tag_;
+        << cldui.tag_
+        << cldui.comm_;
 
     return os;
 }

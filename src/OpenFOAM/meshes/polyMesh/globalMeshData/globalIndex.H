@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,7 +33,9 @@ Description
 
 
 SourceFiles
+    globalIndexI.H
     globalIndex.C
+    globalIndexTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -71,13 +73,28 @@ public:
 
     // Constructors
 
-        //- Construct from local max size
+        //- Construct null
+        inline globalIndex();
+
+        //- Construct from local max size. Does communication with default
+        //  communicator and message tag.
+        globalIndex(const label localSize);
+
+        //- Construct from local max size. Does communication with given
+        //  communicator and message tag
         globalIndex
         (
             const label localSize,
-            const int tag = Pstream::msgType(),
-            const bool parallel = true              // use parallel comms
+            const int tag,
+            const label comm,
+            const bool parallel     // use parallel comms
         );
+
+        //- Construct from components
+        globalIndex(const labelList& offsets);
+
+        //- Construct from components
+        inline globalIndex(const Xfer<labelList>& offsets);
 
         //- Construct from Istream
         globalIndex(Istream& is);
@@ -85,7 +102,13 @@ public:
 
     // Member Functions
 
-        // Queries relating to my processor
+        // Edit
+
+            //- Change after construction
+            inline labelList& offsets();
+
+
+        // Queries relating to my processor (using world communicator)
 
             //- my local size
             inline label localSize() const;
@@ -125,6 +148,42 @@ public:
             inline label offset(const label procI) const;
 
 
+        // Other
+
+            //- Collect data in processor order on master (== procIDs[0]).
+            //  Needs offsets only on master.
+            template<class Type>
+            void gather
+            (
+                const label comm,
+                const labelList& procIDs,
+                const UList<Type>& fld,
+                List<Type>& allFld,
+                const int tag = UPstream::msgType()
+            ) const;
+
+            //- Inplace collect data in processor order on master
+            //  (== procIDs[0]). Needs offsets only on master.
+            template<class Type>
+            void gather
+            (
+                const label comm,
+                const labelList& procIDs,
+                List<Type>& fld,
+                const int tag = UPstream::msgType()
+            ) const;
+
+            //- Distribute data in processor order. Requires fld to be sized!
+            template<class Type>
+            void scatter
+            (
+                const label comm,
+                const labelList& procIDs,
+                const UList<Type>& allFld,
+                UList<Type>& fld,
+                const int tag = UPstream::msgType()
+            ) const;
+
 
     // IOstream Operators
 
@@ -136,6 +195,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "globalIndexTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

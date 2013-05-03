@@ -1473,6 +1473,11 @@ void Foam::autoLayerDriver::getPatchDisplacement
     // Start off from same thickness everywhere (except where no extrusion)
     patchDisp = thickness*pointNormals;
 
+
+    label nNoVisNormal = 0;
+    label nExtrudeRemove = 0;
+
+
     // Check if no extrude possible.
     forAll(pointNormals, patchPointI)
     {
@@ -1491,12 +1496,17 @@ void Foam::autoLayerDriver::getPatchDisplacement
 
             if (!meshTools::visNormal(n, faceNormals, pointFaces[patchPointI]))
             {
-                Pout<< "No valid normal for point " << meshPointI
-                    << ' ' << pp.points()[meshPointI]
-                    << "; setting displacement to " << patchDisp[patchPointI]
-                    << endl;
+                if (debug&meshRefinement::OBJINTERSECTIONS)
+                {
+                    Pout<< "No valid normal for point " << meshPointI
+                        << ' ' << pp.points()[meshPointI]
+                        << "; setting displacement to "
+                        << patchDisp[patchPointI]
+                        << endl;
+                }
 
                 extrudeStatus[patchPointI] = EXTRUDEREMOVE;
+                nNoVisNormal++;
             }
         }
     }
@@ -1526,17 +1536,29 @@ void Foam::autoLayerDriver::getPatchDisplacement
 
             if (nPoints > 0)
             {
-                Pout<< "Displacement at illegal point "
-                    << localPoints[patchPointI]
-                    << " set to " << (avg / nPoints - localPoints[patchPointI])
-                    << endl;
+                if (debug&meshRefinement::OBJINTERSECTIONS)
+                {
+                    Pout<< "Displacement at illegal point "
+                        << localPoints[patchPointI]
+                        << " set to "
+                        << (avg / nPoints - localPoints[patchPointI])
+                        << endl;
+                }
 
                 patchDisp[patchPointI] =
                     avg / nPoints
                   - localPoints[patchPointI];
+
+                nExtrudeRemove++;
             }
         }
     }
+
+    Info<< "Detected " << returnReduce(nNoVisNormal, sumOp<label>())
+        << " points with point normal pointing through faces." << nl
+        << "Reset displacement at "
+        << returnReduce(nExtrudeRemove, sumOp<label>())
+        << " points to average of surrounding points." << endl;
 
     // Make sure displacement is equal on both sides of coupled patches.
     syncPatchDisplacement
@@ -2849,6 +2871,7 @@ void Foam::autoLayerDriver::addLayers
                 baffles,
 
                 layerParams.nSmoothThickness(),
+                layerParams.nSmoothDisplacement(),
                 layerParams.maxThicknessToMedialRatio(),
                 nAllowableErrors,
                 layerParams.nSnap(),

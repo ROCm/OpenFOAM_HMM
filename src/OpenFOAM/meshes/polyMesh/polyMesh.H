@@ -133,6 +133,9 @@ private:
             //  Created from points on construction, updated when the mesh moves
             boundBox bounds_;
 
+            //- Communicator used for parallel communication
+            label comm_;
+
             //- vector of non-constrained directions in mesh
             //  defined according to the presence of empty and wedge patches
             mutable Vector<label> geometricD_;
@@ -459,6 +462,12 @@ public:
 
             //- Return parallel info
             const globalMeshData& globalData() const;
+
+            //- Return communicator used for parallel communication
+            label comm() const;
+
+            //- Return communicator used for parallel communication
+            label& comm();
 
             //- Return the object registry
             const objectRegistry& thisDb() const

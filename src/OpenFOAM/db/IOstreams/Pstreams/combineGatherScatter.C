@@ -51,13 +51,14 @@ void Pstream::combineGather
     const List<UPstream::commsStruct>& comms,
     T& Value,
     const CombineOp& cop,
-    const int tag
+    const int tag,
+    const label comm
 )
 {
-    if (UPstream::parRun())
+    if (UPstream::nProcs(comm) > 1)
     {
         // Get my communication order
-        const commsStruct& myComm = comms[UPstream::myProcNo()];
+        const commsStruct& myComm = comms[UPstream::myProcNo(comm)];
 
         // Receive from my downstairs neighbours
         forAll(myComm.below(), belowI)
@@ -73,7 +74,8 @@ void Pstream::combineGather
                     belowID,
                     reinterpret_cast<char*>(&value),
                     sizeof(T),
-                    tag
+                    tag,
+                    comm
                 );
 
                 if (debug & 2)
@@ -86,7 +88,7 @@ void Pstream::combineGather
             }
             else
             {
-                IPstream fromBelow(UPstream::scheduled, belowID, 0, tag);
+                IPstream fromBelow(UPstream::scheduled, belowID, 0, tag, comm);
                 T value(fromBelow);
 
                 if (debug & 2)
@@ -116,12 +118,20 @@ void Pstream::combineGather
                     myComm.above(),
                     reinterpret_cast<const char*>(&Value),
                     sizeof(T),
-                    tag
+                    tag,
+                    comm
                 );
             }
             else
             {
-                OPstream toAbove(UPstream::scheduled, myComm.above(), 0, tag);
+                OPstream toAbove
+                (
+                    UPstream::scheduled,
+                    myComm.above(),
+                    0,
+                    tag,
+                    comm
+                );
                 toAbove << Value;
             }
         }
@@ -129,16 +139,36 @@ void Pstream::combineGather
 }
 
 
-template<class T, class CombineOp>
-void Pstream::combineGather(T& Value, const CombineOp& cop, const int tag)
+template <class T, class CombineOp>
+void Pstream::combineGather
+(
+    T& Value,
+    const CombineOp& cop,
+    const int tag,
+    const label comm
+)
 {
-    if (UPstream::nProcs() < UPstream::nProcsSimpleSum)
+    if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)
     {
-        combineGather(UPstream::linearCommunication(), Value, cop, tag);
+        combineGather
+        (
+            UPstream::linearCommunication(comm),
+            Value,
+            cop,
+            tag,
+            comm
+        );
     }
     else
     {
-        combineGather(UPstream::treeCommunication(), Value, cop, tag);
+        combineGather
+        (
+            UPstream::treeCommunication(comm),
+            Value,
+            cop,
+            tag,
+            comm
+        );
     }
 }
 
@@ -148,13 +178,14 @@ void Pstream::combineScatter
 (
     const List<UPstream::commsStruct>& comms,
     T& Value,
-    const int tag
+    const int tag,
+    const label comm
 )
 {
-    if (UPstream::parRun())
+    if (UPstream::nProcs(comm) > 1)
     {
         // Get my communication order
-        const UPstream::commsStruct& myComm = comms[UPstream::myProcNo()];
+        const UPstream::commsStruct& myComm = comms[UPstream::myProcNo(comm)];
 
         // Reveive from up
         if (myComm.above() != -1)
@@ -167,12 +198,20 @@ void Pstream::combineScatter
                     myComm.above(),
                     reinterpret_cast<char*>(&Value),
                     sizeof(T),
-                    tag
+                    tag,
+                    comm
                 );
             }
             else
             {
-                IPstream fromAbove(UPstream::scheduled, myComm.above(), 0, tag);
+                IPstream fromAbove
+                (
+                    UPstream::scheduled,
+                    myComm.above(),
+                    0,
+                    tag,
+                    comm
+                );
                 Value = T(fromAbove);
             }
 
@@ -201,12 +240,13 @@ void Pstream::combineScatter
                     belowID,
                     reinterpret_cast<const char*>(&Value),
                     sizeof(T),
-                    tag
+                    tag,
+                    comm
                 );
             }
             else
             {
-                OPstream toBelow(UPstream::scheduled, belowID, 0, tag);
+                OPstream toBelow(UPstream::scheduled, belowID, 0, tag, comm);
                 toBelow << Value;
             }
         }
@@ -214,16 +254,21 @@ void Pstream::combineScatter
 }
 
 
-template<class T>
-void Pstream::combineScatter(T& Value, const int tag)
+template <class T>
+void Pstream::combineScatter
+(
+    T& Value,
+    const int tag,
+    const label comm
+)
 {
-    if (UPstream::nProcs() < UPstream::nProcsSimpleSum)
+    if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)
     {
-        combineScatter(UPstream::linearCommunication(), Value, tag);
+        combineScatter(UPstream::linearCommunication(comm), Value, tag, comm);
     }
     else
     {
-        combineScatter(UPstream::treeCommunication(), Value, tag);
+        combineScatter(UPstream::treeCommunication(comm), Value, tag, comm);
     }
 }
 
@@ -238,13 +283,14 @@ void Pstream::listCombineGather
     const List<UPstream::commsStruct>& comms,
     List<T>& Values,
     const CombineOp& cop,
-    const int tag
+    const int tag,
+    const label comm
 )
 {
-    if (UPstream::parRun())
+    if (UPstream::nProcs(comm) > 1)
     {
         // Get my communication order
-        const commsStruct& myComm = comms[UPstream::myProcNo()];
+        const commsStruct& myComm = comms[UPstream::myProcNo(comm)];
 
         // Receive from my downstairs neighbours
         forAll(myComm.below(), belowI)
@@ -261,7 +307,8 @@ void Pstream::listCombineGather
                     belowID,
                     reinterpret_cast<char*>(receivedValues.begin()),
                     receivedValues.byteSize(),
-                    tag
+                    tag,
+                    comm
                 );
 
                 if (debug & 2)
@@ -277,7 +324,7 @@ void Pstream::listCombineGather
             }
             else
             {
-                IPstream fromBelow(UPstream::scheduled, belowID, 0, tag);
+                IPstream fromBelow(UPstream::scheduled, belowID, 0, tag, comm);
                 List<T> receivedValues(fromBelow);
 
                 if (debug & 2)
@@ -310,12 +357,20 @@ void Pstream::listCombineGather
                     myComm.above(),
                     reinterpret_cast<const char*>(Values.begin()),
                     Values.byteSize(),
-                    tag
+                    tag,
+                    comm
                 );
             }
             else
             {
-                OPstream toAbove(UPstream::scheduled, myComm.above(), 0, tag);
+                OPstream toAbove
+                (
+                    UPstream::scheduled,
+                    myComm.above(),
+                    0,
+                    tag,
+                    comm
+                );
                 toAbove << Values;
             }
         }
@@ -328,16 +383,31 @@ void Pstream::listCombineGather
 (
     List<T>& Values,
     const CombineOp& cop,
-    const int tag
+    const int tag,
+    const label comm
 )
 {
-    if (UPstream::nProcs() < UPstream::nProcsSimpleSum)
+    if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)
     {
-        listCombineGather(UPstream::linearCommunication(), Values, cop, tag);
+        listCombineGather
+        (
+            UPstream::linearCommunication(comm),
+            Values,
+            cop,
+            tag,
+            comm
+        );
     }
     else
     {
-        listCombineGather(UPstream::treeCommunication(), Values, cop, tag);
+        listCombineGather
+        (
+            UPstream::treeCommunication(comm),
+            Values,
+            cop,
+            tag,
+            comm
+        );
     }
 }
 
@@ -347,13 +417,14 @@ void Pstream::listCombineScatter
 (
     const List<UPstream::commsStruct>& comms,
     List<T>& Values,
-    const int tag
+    const int tag,
+    const label comm
 )
 {
-    if (UPstream::parRun())
+    if (UPstream::nProcs(comm) > 1)
     {
         // Get my communication order
-        const UPstream::commsStruct& myComm = comms[UPstream::myProcNo()];
+        const UPstream::commsStruct& myComm = comms[UPstream::myProcNo(comm)];
 
         // Reveive from up
         if (myComm.above() != -1)
@@ -366,12 +437,20 @@ void Pstream::listCombineScatter
                     myComm.above(),
                     reinterpret_cast<char*>(Values.begin()),
                     Values.byteSize(),
-                    tag
+                    tag,
+                    comm
                 );
             }
             else
             {
-                IPstream fromAbove(UPstream::scheduled, myComm.above(), 0, tag);
+                IPstream fromAbove
+                (
+                    UPstream::scheduled,
+                    myComm.above(),
+                    0,
+                    tag,
+                    comm
+                );
                 fromAbove >> Values;
             }
 
@@ -400,12 +479,13 @@ void Pstream::listCombineScatter
                     belowID,
                     reinterpret_cast<const char*>(Values.begin()),
                     Values.byteSize(),
-                    tag
+                    tag,
+                    comm
                 );
             }
             else
             {
-                OPstream toBelow(UPstream::scheduled, belowID, 0, tag);
+                OPstream toBelow(UPstream::scheduled, belowID, 0, tag, comm);
                 toBelow << Values;
             }
         }
@@ -413,16 +493,33 @@ void Pstream::listCombineScatter
 }
 
 
-template<class T>
-void Pstream::listCombineScatter(List<T>& Values, const int tag)
+template <class T>
+void Pstream::listCombineScatter
+(
+    List<T>& Values,
+    const int tag,
+    const label comm
+)
 {
-    if (UPstream::nProcs() < UPstream::nProcsSimpleSum)
+    if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)
     {
-        listCombineScatter(UPstream::linearCommunication(), Values, tag);
+        listCombineScatter
+        (
+            UPstream::linearCommunication(comm),
+            Values,
+            tag,
+            comm
+        );
     }
     else
     {
-        listCombineScatter(UPstream::treeCommunication(), Values, tag);
+        listCombineScatter
+        (
+            UPstream::treeCommunication(comm),
+            Values,
+            tag,
+            comm
+        );
     }
 }
 
@@ -439,20 +536,21 @@ void Pstream::mapCombineGather
     const List<UPstream::commsStruct>& comms,
     Container& Values,
     const CombineOp& cop,
-    const int tag
+    const int tag,
+    const label comm
 )
 {
-    if (UPstream::parRun())
+    if (UPstream::nProcs(comm) > 1)
     {
         // Get my communication order
-        const commsStruct& myComm = comms[UPstream::myProcNo()];
+        const commsStruct& myComm = comms[UPstream::myProcNo(comm)];
 
         // Receive from my downstairs neighbours
         forAll(myComm.below(), belowI)
         {
             label belowID = myComm.below()[belowI];
 
-            IPstream fromBelow(UPstream::scheduled, belowID, 0, tag);
+            IPstream fromBelow(UPstream::scheduled, belowID, 0, tag, comm);
             Container receivedValues(fromBelow);
 
             if (debug & 2)
@@ -492,7 +590,7 @@ void Pstream::mapCombineGather
                     << " data:" << Values << endl;
             }
 
-            OPstream toAbove(UPstream::scheduled, myComm.above(), 0, tag);
+            OPstream toAbove(UPstream::scheduled, myComm.above(), 0, tag, comm);
             toAbove << Values;
         }
     }
@@ -504,16 +602,31 @@ void Pstream::mapCombineGather
 (
     Container& Values,
     const CombineOp& cop,
-    const int tag
+    const int tag,
+    const label comm
 )
 {
-    if (UPstream::nProcs() < UPstream::nProcsSimpleSum)
+    if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)
     {
-        mapCombineGather(UPstream::linearCommunication(), Values, cop, tag);
+        mapCombineGather
+        (
+            UPstream::linearCommunication(comm),
+            Values,
+            cop,
+            tag,
+            comm
+        );
     }
     else
     {
-        mapCombineGather(UPstream::treeCommunication(), Values, cop, tag);
+        mapCombineGather
+        (
+            UPstream::treeCommunication(comm),
+            Values,
+            cop,
+            tag,
+            comm
+        );
     }
 }
 
@@ -523,18 +636,26 @@ void Pstream::mapCombineScatter
 (
     const List<UPstream::commsStruct>& comms,
     Container& Values,
-    const int tag
+    const int tag,
+    const label comm
 )
 {
-    if (UPstream::parRun())
+    if (UPstream::nProcs(comm) > 1)
     {
         // Get my communication order
-        const UPstream::commsStruct& myComm = comms[UPstream::myProcNo()];
+        const UPstream::commsStruct& myComm = comms[UPstream::myProcNo(comm)];
 
         // Reveive from up
         if (myComm.above() != -1)
         {
-            IPstream fromAbove(UPstream::scheduled, myComm.above(), 0, tag);
+            IPstream fromAbove
+            (
+                UPstream::scheduled,
+                myComm.above(),
+                0,
+                tag,
+                comm
+            );
             fromAbove >> Values;
 
             if (debug & 2)
@@ -554,23 +675,40 @@ void Pstream::mapCombineScatter
                 Pout<< " sending to " << belowID << " data:" << Values << endl;
             }
 
-            OPstream toBelow(UPstream::scheduled, belowID, 0, tag);
+            OPstream toBelow(UPstream::scheduled, belowID, 0, tag, comm);
             toBelow << Values;
         }
     }
 }
 
 
-template<class Container>
-void Pstream::mapCombineScatter(Container& Values, const int tag)
+template <class Container>
+void Pstream::mapCombineScatter
+(
+    Container& Values,
+    const int tag,
+    const label comm
+)
 {
-    if (UPstream::nProcs() < UPstream::nProcsSimpleSum)
+    if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)
     {
-        mapCombineScatter(UPstream::linearCommunication(), Values, tag);
+        mapCombineScatter
+        (
+            UPstream::linearCommunication(comm),
+            Values,
+            tag,
+            comm
+        );
     }
     else
     {
-        mapCombineScatter(UPstream::treeCommunication(), Values, tag);
+        mapCombineScatter
+        (
+            UPstream::treeCommunication(comm),
+            Values,
+            tag,
+            comm
+        );
     }
 }
 

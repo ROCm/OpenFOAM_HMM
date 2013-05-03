@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,7 +55,6 @@ void Foam::UPstream::addValidParOptions(HashTable<string>& validParOptions)
     validParOptions.insert("p4wd", "directory");
     validParOptions.insert("p4amslave", "");
     validParOptions.insert("p4yourname", "hostname");
-    validParOptions.insert("GAMMANP", "number of instances");
     validParOptions.insert("machinefile", "machine file");
 }
 
@@ -66,12 +65,13 @@ bool Foam::UPstream::init(int& argc, char**& argv)
 
     int numprocs;
     MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
-    MPI_Comm_rank(MPI_COMM_WORLD, &myProcNo_);
+    int myRank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
     if (debug)
     {
         Pout<< "UPstream::init : initialised with numProcs:" << numprocs
-            << " myProcNo:" << myProcNo_ << endl;
+            << " myRank:" << myRank << endl;
     }
 
     if (numprocs <= 1)
@@ -82,14 +82,9 @@ bool Foam::UPstream::init(int& argc, char**& argv)
             << Foam::abort(FatalError);
     }
 
-    procIDs_.setSize(numprocs);
 
-    forAll(procIDs_, procNo)
-    {
-        procIDs_[procNo] = procNo;
-    }
-
-    setParRun();
+    // Initialise parallel structure
+    setParRun(numprocs);
 
 #   ifndef SGIMPI
     string bufferSizeName = getEnv("MPI_BUFFER_SIZE");
@@ -112,15 +107,12 @@ bool Foam::UPstream::init(int& argc, char**& argv)
     }
 #   endif
 
-    int processorNameLen;
-    char processorName[MPI_MAX_PROCESSOR_NAME];
-
-    MPI_Get_processor_name(processorName, &processorNameLen);
-
-    //signal(SIGABRT, stop);
-
-    // Now that nprocs is known construct communication tables.
-    initCommunicationSchedule();
+    //int processorNameLen;
+    //char processorName[MPI_MAX_PROCESSOR_NAME];
+    //
+    //MPI_Get_processor_name(processorName, &processorNameLen);
+    //processorName[processorNameLen] = '\0';
+    //Pout<< "Processor name:" << processorName << endl;
 
     return true;
 }
@@ -153,6 +145,15 @@ void Foam::UPstream::exit(int errnum)
             << endl;
     }
 
+    // Clean mpi communicators
+    forAll(myProcNo_, communicator)
+    {
+        if (myProcNo_[communicator] != -1)
+        {
+            freePstreamCommunicator(communicator);
+        }
+    }
+
     if (errnum == 0)
     {
         MPI_Finalize();
@@ -171,21 +172,60 @@ void Foam::UPstream::abort()
 }
 
 
-void Foam::reduce(scalar& Value, const sumOp<scalar>& bop, const int tag)
+void Foam::reduce
+(
+    scalar& Value,
+    const sumOp<scalar>& bop,
+    const int tag,
+    const label communicator
+)
 {
-    allReduce(Value, 1, MPI_SCALAR, MPI_SUM, bop, tag);
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "** reducing:" << Value << " with comm:" << communicator
+            << " warnComm:" << UPstream::warnComm
+            << endl;
+        error::printStack(Pout);
+    }
+    allReduce(Value, 1, MPI_SCALAR, MPI_SUM, bop, tag, communicator);
 }
 
 
-void Foam::reduce(scalar& Value, const minOp<scalar>& bop, const int tag)
+void Foam::reduce
+(
+    scalar& Value,
+    const minOp<scalar>& bop,
+    const int tag,
+    const label communicator
+)
 {
-    allReduce(Value, 1, MPI_SCALAR, MPI_MIN, bop, tag);
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "** reducing:" << Value << " with comm:" << communicator
+            << " warnComm:" << UPstream::warnComm
+            << endl;
+        error::printStack(Pout);
+    }
+    allReduce(Value, 1, MPI_SCALAR, MPI_MIN, bop, tag, communicator);
 }
 
 
-void Foam::reduce(vector2D& Value, const sumOp<vector2D>& bop, const int tag)
+void Foam::reduce
+(
+    vector2D& Value,
+    const sumOp<vector2D>& bop,
+    const int tag,
+    const label communicator
+)
 {
-    allReduce(Value, 2, MPI_SCALAR, MPI_SUM, bop, tag);
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "** reducing:" << Value << " with comm:" << communicator
+            << " warnComm:" << UPstream::warnComm
+            << endl;
+        error::printStack(Pout);
+    }
+    allReduce(Value, 2, MPI_SCALAR, MPI_SUM, bop, tag, communicator);
 }
 
 
@@ -193,11 +233,19 @@ void Foam::sumReduce
 (
     scalar& Value,
     label& Count,
-    const int tag
+    const int tag,
+    const label communicator
 )
 {
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "** reducing:" << Value << " with comm:" << communicator
+            << " warnComm:" << UPstream::warnComm
+            << endl;
+        error::printStack(Pout);
+    }
     vector2D twoScalars(Value, scalar(Count));
-    reduce(twoScalars, sumOp<vector2D>());
+    reduce(twoScalars, sumOp<vector2D>(), tag, communicator);
 
     Value = twoScalars.x();
     Count = twoScalars.y();
@@ -209,6 +257,7 @@ void Foam::reduce
     scalar& Value,
     const sumOp<scalar>& bop,
     const int tag,
+    const label communicator,
     label& requestID
 )
 {
@@ -225,17 +274,153 @@ void Foam::reduce
         MPI_SCALAR,
         MPI_SUM,
         0,              //root
-        MPI_COMM_WORLD,
+        PstreamGlobals::MPICommunicators_[communicator],
         &request
     );
 
     requestID = PstreamGlobals::outstandingRequests_.size();
     PstreamGlobals::outstandingRequests_.append(request);
+
+    if (debug)
+    {
+        Pout<< "UPstream::allocateRequest for non-blocking reduce"
+            << " : request:" << requestID
+            << endl;
+
 #else
     // Non-blocking not yet implemented in mpi
-    reduce(Value, bop, tag);
+    reduce(Value, bop, tag, communicator);
     requestID = -1;
 #endif
+}
+
+
+void Foam::UPstream::allocatePstreamCommunicator
+(
+    const label parentIndex,
+    const label index
+)
+{
+    if (index == PstreamGlobals::MPIGroups_.size())
+    {
+        // Extend storage with dummy values
+        MPI_Group newGroup;
+        PstreamGlobals::MPIGroups_.append(newGroup);
+        MPI_Comm newComm;
+        PstreamGlobals::MPICommunicators_.append(newComm);
+    }
+    else if (index > PstreamGlobals::MPIGroups_.size())
+    {
+        FatalErrorIn
+        (
+            "UPstream::allocatePstreamCommunicator\n"
+            "(\n"
+            "    const label parentIndex,\n"
+            "    const labelList& subRanks\n"
+            ")\n"
+        )   << "PstreamGlobals out of sync with UPstream data. Problem."
+            << Foam::exit(FatalError);
+    }
+
+
+    if (parentIndex == -1)
+    {
+        // Allocate world communicator
+
+        if (index != UPstream::worldComm)
+        {
+            FatalErrorIn
+            (
+                "UPstream::allocateCommunicator\n"
+                "(\n"
+                "    const label parentIndex,\n"
+                "    const labelList& subRanks\n"
+                ")\n"
+            )   << "world communicator should always be index "
+                << UPstream::worldComm << Foam::exit(FatalError);
+        }
+
+        PstreamGlobals::MPICommunicators_[index] = MPI_COMM_WORLD;
+        MPI_Comm_group(MPI_COMM_WORLD, &PstreamGlobals::MPIGroups_[index]);
+        MPI_Comm_rank
+        (
+            PstreamGlobals::MPICommunicators_[index],
+           &myProcNo_[index]
+        );
+
+        // Set the number of processes to the actual number
+        int numProcs;
+        MPI_Comm_size(PstreamGlobals::MPICommunicators_[index], &numProcs);
+        procIDs_[index] = identity(numProcs);
+    }
+    else
+    {
+        // Create new group
+        MPI_Group_incl
+        (
+            PstreamGlobals::MPIGroups_[parentIndex],
+            procIDs_[index].size(),
+            procIDs_[index].begin(),
+           &PstreamGlobals::MPIGroups_[index]
+        );
+
+        // Create new communicator
+        MPI_Comm_create
+        (
+            PstreamGlobals::MPICommunicators_[parentIndex],
+            PstreamGlobals::MPIGroups_[index],
+           &PstreamGlobals::MPICommunicators_[index]
+        );
+
+        if (PstreamGlobals::MPICommunicators_[index] == MPI_COMM_NULL)
+        {
+            myProcNo_[index] = -1;
+        }
+        else
+        {
+            if
+            (
+                MPI_Comm_rank
+                (
+                    PstreamGlobals::MPICommunicators_[index],
+                   &myProcNo_[index]
+                )
+            )
+            {
+                FatalErrorIn
+                (
+                    "UPstream::allocatePstreamCommunicator\n"
+                    "(\n"
+                    "    const label,\n"
+                    "    const labelList&\n"
+                    ")\n"
+                )   << "Problem :"
+                    << " when allocating communicator at " << index
+                    << " from ranks " << procIDs_[index]
+                    << " of parent " << parentIndex
+                    << " cannot find my own rank"
+                    << Foam::exit(FatalError);
+            }
+        }
+    }
+}
+
+
+void Foam::UPstream::freePstreamCommunicator(const label communicator)
+{
+    if (communicator != UPstream::worldComm)
+    {
+        if (PstreamGlobals::MPICommunicators_[communicator] != MPI_COMM_NULL)
+        {
+            // Free communicator. Sets communicator to MPI_COMM_NULL
+            MPI_Comm_free(&PstreamGlobals::MPICommunicators_[communicator]);
+        }
+        if (PstreamGlobals::MPIGroups_[communicator] != MPI_GROUP_NULL)
+        {
+            // Free greoup. Sets group to MPI_GROUP_NULL
+            MPI_Group_free(&PstreamGlobals::MPIGroups_[communicator]);
+        }
+    }
 }
 
 
@@ -345,7 +530,7 @@ bool Foam::UPstream::finishedRequest(const label i)
 {
     if (debug)
     {
-        Pout<< "UPstream::waitRequests : checking finishedRequest:" << i
+        Pout<< "UPstream::finishedRequest : checking request:" << i
             << endl;
     }
 
@@ -371,11 +556,101 @@ bool Foam::UPstream::finishedRequest(const label i)
 
     if (debug)
     {
-        Pout<< "UPstream::waitRequests : finished finishedRequest:" << i
+        Pout<< "UPstream::finishedRequest : finished request:" << i
             << endl;
     }
 
     return flag != 0;
+}
+
+
+int Foam::UPstream::allocateTag(const char* s)
+{
+    int tag;
+    if (PstreamGlobals::freedTags_.size())
+    {
+        tag = PstreamGlobals::freedTags_.remove();
+    }
+    else
+    {
+        tag = PstreamGlobals::nTags_++;
+    }
+
+    if (debug)
+    {
+        //if (UPstream::lateBlocking > 0)
+        //{
+        //    string& poutp = Pout.prefix();
+        //    poutp[poutp.size()-2*(UPstream::lateBlocking+2)+tag] = 'X';
+        //    Perr.prefix() = Pout.prefix();
+        //}
+        Pout<< "UPstream::allocateTag " << s
+            << " : tag:" << tag
+            << endl;
+    }
+
+    return tag;
+}
+
+
+int Foam::UPstream::allocateTag(const word& s)
+{
+    int tag;
+    if (PstreamGlobals::freedTags_.size())
+    {
+        tag = PstreamGlobals::freedTags_.remove();
+    }
+    else
+    {
+        tag = PstreamGlobals::nTags_++;
+    }
+
+    if (debug)
+    {
+        //if (UPstream::lateBlocking > 0)
+        //{
+        //    string& poutp = Pout.prefix();
+        //    poutp[poutp.size()-2*(UPstream::lateBlocking+2)+tag] = 'X';
+        //    Perr.prefix() = Pout.prefix();
+        //}
+        Pout<< "UPstream::allocateTag " << s
+            << " : tag:" << tag
+            << endl;
+    }
+
+    return tag;
+}
+
+
+void Foam::UPstream::freeTag(const char* s, const int tag)
+{
+    if (debug)
+    {
+        //if (UPstream::lateBlocking > 0)
+        //{
+        //    string& poutp = Pout.prefix();
+        //    poutp[poutp.size()-2*(UPstream::lateBlocking+2)+tag] = ' ';
+        //    Perr.prefix() = Pout.prefix();
+        //}
+        Pout<< "UPstream::freeTag " << s << " tag:" << tag << endl;
+    }
+    PstreamGlobals::freedTags_.append(tag);
+}
+
+
+void Foam::UPstream::freeTag(const word& s, const int tag)
+{
+    if (debug)
+    {
+        //if (UPstream::lateBlocking > 0)
+        //{
+        //    string& poutp = Pout.prefix();
+        //    poutp[poutp.size()-2*(UPstream::lateBlocking+2)+tag] = ' ';
+        //    Perr.prefix() = Pout.prefix();
+        //}
+        Pout<< "UPstream::freeTag " << s << " tag:" << tag << endl;
+    }
+    PstreamGlobals::freedTags_.append(tag);
 }
 
 

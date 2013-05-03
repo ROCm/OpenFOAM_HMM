@@ -91,6 +91,7 @@ Foam::UOPstream::UOPstream
     const int toProcNo,
     DynamicList<char>& sendBuf,
     const int tag,
+    const label comm,
     const bool sendAtDestruct,
     streamFormat format,
     versionNumber version
@@ -101,6 +102,7 @@ Foam::UOPstream::UOPstream
     toProcNo_(toProcNo),
     sendBuf_(sendBuf),
     tag_(tag),
+    comm_(comm),
     sendAtDestruct_(sendAtDestruct)
 {
     setOpened();
@@ -115,6 +117,7 @@ Foam::UOPstream::UOPstream(const int toProcNo, PstreamBuffers& buffers)
     toProcNo_(toProcNo),
     sendBuf_(buffers.sendBuf_[toProcNo]),
     tag_(buffers.tag_),
+    comm_(buffers.comm_),
     sendAtDestruct_(buffers.commsType_ != UPstream::nonBlocking)
 {
     setOpened();
@@ -136,7 +139,8 @@ Foam::UOPstream::~UOPstream()
                 toProcNo_,
                 sendBuf_.begin(),
                 sendBuf_.size(),
-                tag_
+                tag_,
+                comm_
             )
         )
         {
@@ -292,7 +296,8 @@ Foam::Ostream& Foam::UOPstream::write(const char* data, std::streamsize count)
 void Foam::UOPstream::print(Ostream& os) const
 {
     os  << "Writing from processor " << toProcNo_
-        << " to processor " << myProcNo() << Foam::endl;
+        << " to processor " << myProcNo() << " in communicator " << comm_
+        << " and tag " << tag_ << Foam::endl;
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,11 +29,20 @@ License
 #include "procLduInterface.H"
 #include "cyclicLduInterface.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(LUscalarMatrix, 0);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::LUscalarMatrix::LUscalarMatrix(const scalarSquareMatrix& matrix)
 :
     scalarSquareMatrix(matrix),
+    comm_(Pstream::worldComm),
     pivotIndices_(n())
 {
     LUDecompose(*this, pivotIndices_);
@@ -46,10 +55,12 @@ Foam::LUscalarMatrix::LUscalarMatrix
     const FieldField<Field, scalar>& interfaceCoeffs,
     const lduInterfaceFieldPtrsList& interfaces
 )
+:
+    comm_(ldum.mesh().comm())
 {
     if (Pstream::parRun())
     {
-        PtrList<procLduMatrix> lduMatrices(Pstream::nProcs());
+        PtrList<procLduMatrix> lduMatrices(Pstream::nProcs(comm_));
 
         label lduMatrixi = 0;
 
@@ -64,25 +75,42 @@ Foam::LUscalarMatrix::LUscalarMatrix
             )
         );
 
-        if (Pstream::master())
+        if (Pstream::master(comm_))
         {
             for
             (
                 int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave();
+                slave<=Pstream::lastSlave(comm_);
                 slave++
             )
             {
                 lduMatrices.set
                 (
                     lduMatrixi++,
-                    new procLduMatrix(IPstream(Pstream::scheduled, slave)())
+                    new procLduMatrix
+                    (
+                        IPstream
+                        (
+                            Pstream::scheduled,
+                            slave,
+                            0,          // bufSize
+                            Pstream::msgType(),
+                            comm_
+                        )()
+                    )
                 );
             }
         }
         else
         {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
+            OPstream toMaster
+            (
+                Pstream::scheduled,
+                Pstream::masterNo(),
+                0,              // bufSize
+                Pstream::msgType(),
+                comm_
+            );
             procLduMatrix cldum
             (
                 ldum,
@@ -93,7 +121,7 @@ Foam::LUscalarMatrix::LUscalarMatrix
 
         }
 
-        if (Pstream::master())
+        if (Pstream::master(comm_))
         {
             label nCells = 0;
             forAll(lduMatrices, i)
@@ -114,8 +142,44 @@ Foam::LUscalarMatrix::LUscalarMatrix
         convert(ldum, interfaceCoeffs, interfaces);
     }
 
-    if (Pstream::master())
+    if (Pstream::master(comm_))
     {
+        label nRows = n();
+        label nColumns = m();
+
+        if (debug)
+        {
+            Pout<< "LUscalarMatrix : size:" << nRows << endl;
+            for (label rowI = 0; rowI < nRows; rowI++)
+            {
+                const scalar* row = operator[](rowI);
+
+                Pout<< "cell:" << rowI << " diagCoeff:" << row[rowI] << endl;
+
+                Pout<< "    connects to upper cells :";
+                for (label columnI = rowI+1; columnI < nColumns; columnI++)
+                {
+                    if (mag(row[columnI]) > SMALL)
+                    {
+                        Pout<< ' ' << columnI << " (coeff:" << row[columnI]
+                            << ")";
+                    }
+                }
+                Pout<< endl;
+                Pout<< "    connects to lower cells :";
+                for (label columnI = 0; columnI < rowI; columnI++)
+                {
+                    if (mag(row[columnI]) > SMALL)
+                    {
+                        Pout<< ' ' << columnI << " (coeff:" << row[columnI]
+                            << ")";
+                    }
+                }
+                Pout<< endl;
+            }
+            Pout<< endl;
+        }
+
         pivotIndices_.setSize(n());
         LUDecompose(*this, pivotIndices_);
     }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -140,6 +140,11 @@ public:
         //- Find index of surface. Return -1 if not found.
         label findSurfaceID(const word& name) const;
 
+        label findSurfaceRegionID
+        (
+            const word& surfaceName,
+            const word& regionName
+        ) const;
 
         // Multiple point queries.
 
@@ -183,6 +188,15 @@ public:
                 const scalarField& nearestDistSqr,
                 labelList& surfaces,
                 List<pointIndexHit>&
+            ) const;
+
+            void findNearest
+            (
+                const pointField& samples,
+                const scalarField& nearestDistSqr,
+                const labelList& regionIndices,
+                labelList& nearestSurfaces,
+                List<pointIndexHit>& nearestInfo
             ) const;
 
             //- Calculate bounding box

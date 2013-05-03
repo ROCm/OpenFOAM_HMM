@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,17 +40,19 @@ Foam::PstreamBuffers::PstreamBuffers
 (
     const UPstream::commsTypes commsType,
     const int tag,
+    const label comm,
     IOstream::streamFormat format,
     IOstream::versionNumber version
 )
 :
     commsType_(commsType),
     tag_(tag),
+    comm_(comm),
     format_(format),
     version_(version),
-    sendBuf_(UPstream::nProcs()),
-    recvBuf_(UPstream::nProcs()),
-    recvBufPos_(UPstream::nProcs(),  0),
+    sendBuf_(UPstream::nProcs(comm)),
+    recvBuf_(UPstream::nProcs(comm)),
+    recvBufPos_(UPstream::nProcs(comm),  0),
     finishedSendsCalled_(false)
 {}
 
@@ -90,6 +92,7 @@ void Foam::PstreamBuffers::finishedSends(const bool block)
             recvBuf_,
             sizes,
             tag_,
+            comm_,
             block
         );
     }
@@ -108,6 +111,7 @@ void Foam::PstreamBuffers::finishedSends(labelListList& sizes, const bool block)
             recvBuf_,
             sizes,
             tag_,
+            comm_,
             block
         );
     }
@@ -123,9 +127,9 @@ void Foam::PstreamBuffers::finishedSends(labelListList& sizes, const bool block)
 
         // Note: possible only if using different tag from write started
         // by ~UOPstream. Needs some work.
-        //sizes.setSize(UPstream::nProcs());
-        //labelList& nsTransPs = sizes[UPstream::myProcNo()];
-        //nsTransPs.setSize(UPstream::nProcs());
+        //sizes.setSize(UPstream::nProcs(comm));
+        //labelList& nsTransPs = sizes[UPstream::myProcNo(comm)];
+        //nsTransPs.setSize(UPstream::nProcs(comm));
         //
         //forAll(sendBuf_, procI)
         //{

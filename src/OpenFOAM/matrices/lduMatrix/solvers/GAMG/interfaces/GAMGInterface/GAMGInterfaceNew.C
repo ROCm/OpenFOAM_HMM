@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,8 @@ Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
     const lduInterface& fineInterface,
     const labelField& localRestrictAddressing,
     const labelField& neighbourRestrictAddressing,
-    const label fineLevelIndex
+    const label fineLevelIndex,
+    const label coarseComm
 )
 {
     const word coupleType(fineInterface.type());
@@ -68,9 +69,37 @@ Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
             fineInterface,
             localRestrictAddressing,
             neighbourRestrictAddressing,
-            fineLevelIndex
+            fineLevelIndex,
+            coarseComm
         )
     );
+}
+
+
+Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
+(
+    const word& coupleType,
+    const label index,
+    const lduInterfacePtrsList& coarseInterfaces,
+    Istream& is
+)
+{
+    IstreamConstructorTable::iterator cstrIter =
+        IstreamConstructorTablePtr_->find(coupleType);
+
+    if (cstrIter == IstreamConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "GAMGInterface::New"
+            "(const word&, const label, const lduInterfacePtrsList&, Istream&)"
+        )   << "Unknown GAMGInterface type " << coupleType << ".\n"
+            << "Valid GAMGInterface types are :"
+            << IstreamConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<GAMGInterface>(cstrIter()(index, coarseInterfaces, is));
 }
 
 
