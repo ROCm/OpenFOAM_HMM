@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,6 +42,7 @@ SourceFiles
 #include "coupledPolyPatch.H"
 #include "polyBoundaryMesh.H"
 #include "faceListFwd.H"
+#include "polyMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -133,6 +134,7 @@ public:
             const label start,
             const label index,
             const polyBoundaryMesh& bm,
+            const label comm,
             const int myProcNo,
             const int neighbProcNo,
             const transformType transform = UNKNOWN  // transformation type
@@ -244,6 +246,14 @@ public:
             }
         }
 
+
+        //- Return communicator used for communication
+        label comm() const
+        {
+            //return comm_;
+            return boundaryMesh().mesh().comm();
+        }
+
         //- Return processor number
         int myProcNo() const
         {
@@ -255,6 +265,30 @@ public:
         {
             return neighbProcNo_;
         }
+
+
+        // For testing
+
+//            //- Return communicator used for communication
+//            label& comm()
+//            {
+//                return comm_;
+//            }
+
+            //- Return processor number
+            int& myProcNo()
+            {
+                return myProcNo_;
+            }
+
+            //- Return neigbour processor number
+            int& neighbProcNo()
+            {
+                return neighbProcNo_;
+            }
+
+
+
 
         //- Does the processor own the patch ?
         virtual bool owner() const

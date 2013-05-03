@@ -92,13 +92,22 @@ void inplaceMapKey(const labelUList& oldToNew, Container&);
 template<class T>
 void sortedOrder(const UList<T>&, labelList& order);
 
+template<class T, class Cmp>
+void sortedOrder(const UList<T>&, labelList& order, const Cmp& cmp);
+
 //- Generate (sorted) indices corresponding to duplicate list values
 template<class T>
 void duplicateOrder(const UList<T>&, labelList& order);
 
+template<class T, class Cmp>
+void duplicateOrder(const UList<T>&, labelList& order, const Cmp& cmp);
+
 //- Generate (sorted) indices corresponding to unique list values
 template<class T>
 void uniqueOrder(const UList<T>&, labelList& order);
+
+template<class T, class Cmp>
+void uniqueOrder(const UList<T>&, labelList& order, const Cmp& cmp);
 
 //- Extract elements of List when select is a certain value.
 //  eg, to extract all selected elements:

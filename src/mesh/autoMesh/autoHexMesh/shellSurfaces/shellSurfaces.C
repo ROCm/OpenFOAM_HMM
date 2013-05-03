@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,6 +31,7 @@ License
 #include "searchableSurfaces.H"
 #include "orientedSurface.H"
 #include "pointIndexHit.H"
+#include "volumeType.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -329,7 +330,7 @@ void Foam::shellSurfaces::findHigherLevel
         candidateMap.setSize(candidateI);
 
         // Do the expensive nearest test only for the candidate points.
-        List<searchableSurface::volumeType> volType;
+        List<volumeType> volType;
         allGeometry_[shells_[shellI]].getVolumeType(candidates, volType);
 
         forAll(volType, i)
@@ -340,11 +341,11 @@ void Foam::shellSurfaces::findHigherLevel
             (
                 (
                     modes_[shellI] == INSIDE
-                 && volType[i] == searchableSurface::INSIDE
+                 && volType[i] == volumeType::INSIDE
                 )
              || (
                     modes_[shellI] == OUTSIDE
-                 && volType[i] == searchableSurface::OUTSIDE
+                 && volType[i] == volumeType::OUTSIDE
                 )
             )
             {

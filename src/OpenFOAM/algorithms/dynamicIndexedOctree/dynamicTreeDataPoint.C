@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,13 +57,13 @@ Foam::dynamicTreeDataPoint::shapePoints() const
 
 //- Get type (inside,outside,mixed,unknown) of point w.r.t. surface.
 //  Only makes sense for closed surfaces.
-Foam::label Foam::dynamicTreeDataPoint::getVolumeType
+Foam::volumeType Foam::dynamicTreeDataPoint::getVolumeType
 (
     const dynamicIndexedOctree<dynamicTreeDataPoint>& oc,
     const point& sample
 ) const
 {
-    return dynamicIndexedOctree<dynamicTreeDataPoint>::UNKNOWN;
+    return volumeType::UNKNOWN;
 }
 
 

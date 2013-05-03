@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -133,6 +133,24 @@ Foam::treeDataCell::treeDataCell
 }
 
 
+Foam::treeDataCell::findNearestOp::findNearestOp
+(
+    const indexedOctree<treeDataCell>& tree
+)
+:
+    tree_(tree)
+{}
+
+
+Foam::treeDataCell::findIntersectOp::findIntersectOp
+(
+    const indexedOctree<treeDataCell>& tree
+)
+:
+    tree_(tree)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::pointField Foam::treeDataCell::shapePoints() const
@@ -175,7 +193,7 @@ bool Foam::treeDataCell::contains
 }
 
 
-void Foam::treeDataCell::findNearest
+void Foam::treeDataCell::findNearestOp::operator()
 (
     const labelUList& indices,
     const point& sample,
@@ -185,23 +203,51 @@ void Foam::treeDataCell::findNearest
     point& nearestPoint
 ) const
 {
+    const treeDataCell& shape = tree_.shapes();
+
     forAll(indices, i)
     {
         label index = indices[i];
-        label cellI = cellLabels_[index];
-        scalar distSqr = magSqr(sample - mesh_.cellCentres()[cellI]);
+        label cellI = shape.cellLabels()[index];
+        scalar distSqr = magSqr(sample - shape.mesh().cellCentres()[cellI]);
 
         if (distSqr < nearestDistSqr)
         {
             nearestDistSqr = distSqr;
             minIndex = index;
-            nearestPoint = mesh_.cellCentres()[cellI];
+            nearestPoint = shape.mesh().cellCentres()[cellI];
         }
     }
 }
 
 
-bool Foam::treeDataCell::intersects
+void Foam::treeDataCell::findNearestOp::operator()
+(
+    const labelUList& indices,
+    const linePointRef& ln,
+
+    treeBoundBox& tightest,
+    label& minIndex,
+    point& linePoint,
+    point& nearestPoint
+) const
+{
+    notImplemented
+    (
+        "treeDataCell::findNearestOp::operator()"
+        "("
+        "    const labelUList&,"
+        "    const linePointRef&,"
+        "    treeBoundBox&,"
+        "    label&,"
+        "    point&,"
+        "    point&"
+        ") const"
+    );
+}
+
+
+bool Foam::treeDataCell::findIntersectOp::operator()
 (
     const label index,
     const point& start,
@@ -209,10 +255,12 @@ bool Foam::treeDataCell::intersects
     point& intersectionPoint
 ) const
 {
+    const treeDataCell& shape = tree_.shapes();
+
     // Do quick rejection test
-    if (cacheBb_)
+    if (shape.cacheBb_)
     {
-        const treeBoundBox& cellBb = bbs_[index];
+        const treeBoundBox& cellBb = shape.bbs_[index];
 
         if ((cellBb.posBits(start) & cellBb.posBits(end)) != 0)
         {
@@ -222,7 +270,7 @@ bool Foam::treeDataCell::intersects
     }
     else
     {
-        const treeBoundBox cellBb = calcCellBb(cellLabels_[index]);
+        const treeBoundBox cellBb = shape.calcCellBb(shape.cellLabels_[index]);
 
         if ((cellBb.posBits(start) & cellBb.posBits(end)) != 0)
         {
@@ -238,7 +286,7 @@ bool Foam::treeDataCell::intersects
     // Disable picking up intersections behind us.
     scalar oldTol = intersection::setPlanarTol(0.0);
 
-    const cell& cFaces = mesh_.cells()[cellLabels_[index]];
+    const cell& cFaces = shape.mesh_.cells()[shape.cellLabels_[index]];
 
     const vector dir(end - start);
     scalar minDistSqr = magSqr(dir);
@@ -246,13 +294,13 @@ bool Foam::treeDataCell::intersects
 
     forAll(cFaces, i)
     {
-        const face& f = mesh_.faces()[cFaces[i]];
+        const face& f = shape.mesh_.faces()[cFaces[i]];
 
         pointHit inter = f.ray
         (
             start,
             dir,
-            mesh_.points(),
+            shape.mesh_.points(),
             intersection::HALF_RAY
         );
 

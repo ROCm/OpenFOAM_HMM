@@ -446,6 +446,7 @@ private:
             //  have corresponding faceZone.
             void findCellZoneGeometric
             (
+                const pointField& neiCc,
                 const labelList& closedNamedSurfaces,
                 labelList& namedSurfaceIndex,
                 const labelList& surfaceToCellZone,

@@ -247,6 +247,12 @@ public:
 
         //- Processor coupled interface functions
 
+            //- Return communicator used for comms
+            virtual int comm() const
+            {
+                return procPatch_.comm();
+            }
+
             //- Return processor number
             virtual int myProcNo() const
             {

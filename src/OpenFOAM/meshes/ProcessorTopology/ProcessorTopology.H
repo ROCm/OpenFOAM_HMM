@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,7 +53,7 @@ namespace Foam
                        Class ProcessorTopology Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Patch, class ProcPatch>
+template<class Container, class ProcPatch>
 class ProcessorTopology
 :
     public labelListList
@@ -76,14 +76,14 @@ private:
 
         //- Return all neighbouring processors of this processor. Set
         //  procPatchMap_.
-        labelList procNeighbours(const PtrList<Patch>&);
+        labelList procNeighbours(const label nProcs, const Container&);
 
 public:
 
     // Constructors
 
         //- Construct from boundaryMesh
-        ProcessorTopology(const PtrList<Patch>& patches);
+        ProcessorTopology(const Container& patches, const label comm);
 
 
     // Member Functions
@@ -101,6 +101,10 @@ public:
         {
             return patchSchedule_;
         }
+
+        //- Calculate non-blocking (i.e. unscheduled) schedule
+        static lduSchedule nonBlockingSchedule(const Container& patches);
+
 };
 
 

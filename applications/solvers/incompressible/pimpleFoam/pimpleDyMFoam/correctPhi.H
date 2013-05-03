@@ -22,20 +22,6 @@
         }
     }
 
-    wordList pcorrTypes
-    (
-        p.boundaryField().size(),
-        zeroGradientFvPatchScalarField::typeName
-    );
-
-    forAll(p.boundaryField(), patchI)
-    {
-        if (p.boundaryField()[patchI].fixesValue())
-        {
-            pcorrTypes[patchI] = fixedValueFvPatchScalarField::typeName;
-        }
-    }
-
     volScalarField pcorr
     (
         IOobject
@@ -51,11 +37,13 @@
         pcorrTypes
     );
 
+    dimensionedScalar Dp("Dp", dimTime, 1.0);
+
     while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix pcorrEqn
         (
-            fvm::laplacian(rAU, pcorr) == fvc::div(phi)
+            fvm::laplacian(Dp, pcorr) == fvc::div(phi)
         );
 
         pcorrEqn.setReference(pRefCell, pRefValue);
@@ -67,7 +55,5 @@
         }
     }
 }
-
-phi.oldTime() = phi;
 
 #include "continuityErrs.H"

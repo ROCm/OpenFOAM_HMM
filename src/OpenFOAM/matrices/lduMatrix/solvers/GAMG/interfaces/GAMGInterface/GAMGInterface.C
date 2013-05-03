@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,24 @@ namespace Foam
 {
     defineTypeNameAndDebug(GAMGInterface, 0);
     defineRunTimeSelectionTable(GAMGInterface, lduInterface);
+    defineRunTimeSelectionTable(GAMGInterface, Istream);
 }
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::GAMGInterface::GAMGInterface
+(
+    const label index,
+    const lduInterfacePtrsList& coarseInterfaces,
+    Istream& is
+)
+:
+    index_(index),
+    coarseInterfaces_(coarseInterfaces),
+    faceCells_(is),
+    faceRestrictAddressing_(is)
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -66,12 +83,39 @@ Foam::tmp<Foam::scalarField> Foam::GAMGInterface::agglomerateCoeffs
     tmp<scalarField> tcoarseCoeffs(new scalarField(size(), 0.0));
     scalarField& coarseCoeffs = tcoarseCoeffs();
 
+    if (fineCoeffs.size() != faceRestrictAddressing_.size())
+    {
+        FatalErrorIn
+        (
+            "GAMGInterface::agglomerateCoeffs(const scalarField&) const"
+        )   << "Size of coefficients " << fineCoeffs.size()
+            << " does not correspond to the size of the restriction "
+            << faceRestrictAddressing_.size()
+            << abort(FatalError);
+    }
+    if (debug && max(faceRestrictAddressing_) > size())
+    {
+        FatalErrorIn
+        (
+            "GAMGInterface::agglomerateCoeffs(const scalarField&) const"
+        )   << "Face restrict addressing addresses outside of coarse interface"
+            << " size. Max addressing:" << max(faceRestrictAddressing_)
+            << " coarse size:" << size()
+            << abort(FatalError);
+    }
+
     forAll(faceRestrictAddressing_, ffi)
     {
         coarseCoeffs[faceRestrictAddressing_[ffi]] += fineCoeffs[ffi];
     }
 
     return tcoarseCoeffs;
+}
+
+
+void Foam::GAMGInterface::write(Ostream& os) const
+{
+    os  << faceCells_ << token::SPACE << faceRestrictAddressing_;
 }
 
 

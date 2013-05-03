@@ -26,6 +26,7 @@ License
 #include "AMIMethod.H"
 #include "meshTools.H"
 #include "mapDistribute.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -209,7 +210,12 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::resetTree()
         (
             new indexedOctree<treeType>
             (
-                treeType(false, tgtPatch_),
+                treeType
+                (
+                    false,
+                    tgtPatch_,
+                    indexedOctree<treeType>::perturbTol()
+                ),
                 bb,                         // overall search domain
                 8,                          // maxLevel
                 10,                         // leaf size
@@ -262,6 +268,7 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::appendNbrFaces
 ) const
 {
     const labelList& nbrFaces = patch.faceFaces()[faceI];
+    const pointField& tgtPoints = patch.points();
 
     // filter out faces already visited from src face neighbours
     forAll(nbrFaces, i)
@@ -291,7 +298,17 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::appendNbrFaces
 
         if (valid)
         {
-            faceIDs.append(nbrFaceI);
+            const face& myn = patch[faceI];
+            const face& nbrn = patch[nbrFaceI];
+            const vector& nbrNormal = nbrn.normal(tgtPoints);
+            const vector& mynNormal = myn.normal(tgtPoints);
+
+            scalar cosI = nbrNormal & mynNormal;
+
+            if (cosI > Foam::cos(degToRad(89.0)))
+            {
+                faceIDs.append(nbrFaceI);
+            }
         }
     }
 }

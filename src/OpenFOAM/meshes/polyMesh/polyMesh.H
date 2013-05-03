@@ -133,6 +133,9 @@ private:
             //  Created from points on construction, updated when the mesh moves
             boundBox bounds_;
 
+            //- Communicator used for parallel communication
+            label comm_;
+
             //- vector of non-constrained directions in mesh
             //  defined according to the presence of empty and wedge patches
             mutable Vector<label> geometricD_;
@@ -263,6 +266,24 @@ private:
                 const bool report,
                 labelHashSet* setPtr,
                 const Vector<label>& meshD
+            ) const;
+
+            bool checkFaceWeight
+            (
+                const vectorField& fCtrs,
+                const vectorField& fAreas,
+                const vectorField& cellCtrs,
+                const bool report,
+                const scalar minWeight,
+                labelHashSet* setPtr
+            ) const;
+
+            bool checkVolRatio
+            (
+                const scalarField& cellVols,
+                const bool report,
+                const scalar minRatio,
+                labelHashSet* setPtr
             ) const;
 
 public:
@@ -442,6 +463,12 @@ public:
             //- Return parallel info
             const globalMeshData& globalData() const;
 
+            //- Return communicator used for parallel communication
+            label comm() const;
+
+            //- Return communicator used for parallel communication
+            label& comm();
+
             //- Return the object registry
             const objectRegistry& thisDb() const
             {
@@ -610,6 +637,22 @@ public:
                 const pointField& newPoints,
                 const bool report = false,
                 const bool detailedReport = false
+            ) const;
+
+            //- Check for face weights
+            virtual bool checkFaceWeight
+            (
+                const bool report,
+                const scalar minWeight = 0.05,
+                labelHashSet* setPtr = NULL
+            ) const;
+
+            //- Check for neighbouring cell volumes
+            virtual bool checkVolRatio
+            (
+                const bool report,
+                const scalar minRatio = 0.01,
+                labelHashSet* setPtr = NULL
             ) const;
 
 

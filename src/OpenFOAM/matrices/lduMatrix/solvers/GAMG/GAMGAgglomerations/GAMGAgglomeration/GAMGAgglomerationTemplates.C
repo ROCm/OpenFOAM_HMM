@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,20 +24,85 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "GAMGAgglomeration.H"
+#include "mapDistribute.H"
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class Type>
+void Foam::GAMGAgglomeration::gatherList
+(
+    const label comm,
+    const labelList& procIDs,
+
+    const Type& myVal,
+    List<Type>& allVals,
+    const int tag
+)
+{
+    if (Pstream::myProcNo(comm) == procIDs[0])
+    {
+        allVals.setSize(procIDs.size());
+
+        allVals[0] = myVal;
+        for (label i = 1; i < procIDs.size(); i++)
+        {
+            IPstream fromSlave
+            (
+                Pstream::scheduled,
+                procIDs[i],
+                0,
+                tag,
+                comm
+            );
+
+            fromSlave >> allVals[i];
+        }
+    }
+    else
+    {
+        OPstream toMaster
+        (
+            Pstream::scheduled,
+            procIDs[0],
+            0,
+            tag,
+            comm
+        );
+        toMaster << myVal;
+    }
+}
+
 
 template<class Type>
 void Foam::GAMGAgglomeration::restrictField
 (
     Field<Type>& cf,
     const Field<Type>& ff,
-    const label fineLevelIndex
+    const labelList& fineToCoarse
+) const
+{
+    cf = pTraits<Type>::zero;
+
+    forAll(ff, i)
+    {
+        cf[fineToCoarse[i]] += ff[i];
+    }
+}
+
+
+template<class Type>
+void Foam::GAMGAgglomeration::restrictField
+(
+    Field<Type>& cf,
+    const Field<Type>& ff,
+    const label fineLevelIndex,
+    const bool procAgglom
 ) const
 {
     const labelList& fineToCoarse = restrictAddressing_[fineLevelIndex];
 
-    if (ff.size() != fineToCoarse.size())
+    if (!procAgglom && ff.size() != fineToCoarse.size())
     {
         FatalErrorIn
         (
@@ -50,11 +115,19 @@ void Foam::GAMGAgglomeration::restrictField
             << abort(FatalError);
     }
 
-    cf = pTraits<Type>::zero;
+    restrictField(cf, ff, fineToCoarse);
 
-    forAll(ff, i)
+    label coarseLevelIndex = fineLevelIndex+1;
+
+    if (procAgglom && hasProcMesh(coarseLevelIndex))
     {
-        cf[fineToCoarse[i]] += ff[i];
+        label fineComm = UPstream::parent(procCommunicator_[coarseLevelIndex]);
+
+        const List<int>& procIDs = agglomProcIDs(coarseLevelIndex);
+        const labelList& offsets = cellOffsets(coarseLevelIndex);
+
+        const globalIndex cellOffsetter(offsets);
+        cellOffsetter.gather(fineComm, procIDs, cf);
     }
 }
 
@@ -68,6 +141,19 @@ void Foam::GAMGAgglomeration::restrictFaceField
 ) const
 {
     const labelList& fineToCoarse = faceRestrictAddressing_[fineLevelIndex];
+
+    if (ff.size() != fineToCoarse.size())
+    {
+        FatalErrorIn
+        (
+            "void GAMGAgglomeration::restrictFaceField"
+            "(Field<Type>& cf, const Field<Type>& ff, "
+            "const label fineLevelIndex) const"
+        )   << "field does not correspond to level " << fineLevelIndex
+            << " sizes: field = " << ff.size()
+            << " level = " << fineToCoarse.size()
+            << abort(FatalError);
+    }
 
     cf = pTraits<Type>::zero;
 
@@ -88,14 +174,49 @@ void Foam::GAMGAgglomeration::prolongField
 (
     Field<Type>& ff,
     const Field<Type>& cf,
-    const label coarseLevelIndex
+    const label levelIndex,
+    const bool procAgglom
 ) const
 {
-    const labelList& fineToCoarse = restrictAddressing_[coarseLevelIndex];
+    const labelList& fineToCoarse = restrictAddressing_[levelIndex];
 
-    forAll(fineToCoarse, i)
+    label coarseLevelIndex = levelIndex+1;
+
+    if (procAgglom && hasProcMesh(coarseLevelIndex))
     {
-        ff[i] = cf[fineToCoarse[i]];
+        label coarseComm = UPstream::parent
+        (
+            procCommunicator_[coarseLevelIndex]
+        );
+
+        const List<int>& procIDs = agglomProcIDs(coarseLevelIndex);
+        const labelList& offsets = cellOffsets(coarseLevelIndex);
+
+        const globalIndex cellOffsetter(offsets);
+
+        label localSize = nCells_[levelIndex];
+
+
+        Field<Type> allCf(localSize);
+        cellOffsetter.scatter
+        (
+            coarseComm,
+            procIDs,
+            cf,
+            allCf
+        );
+
+        forAll(fineToCoarse, i)
+        {
+            ff[i] = allCf[fineToCoarse[i]];
+        }
+    }
+    else
+    {
+        forAll(fineToCoarse, i)
+        {
+            ff[i] = cf[fineToCoarse[i]];
+        }
     }
 }
 

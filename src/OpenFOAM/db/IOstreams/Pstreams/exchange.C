@@ -46,6 +46,7 @@ void Pstream::exchange
     List<Container>& recvBufs,
     labelListList& sizes,
     const int tag,
+    const label comm,
     const bool block
 )
 {
@@ -57,20 +58,20 @@ void Pstream::exchange
         )   << "Continuous data only." << Foam::abort(FatalError);
     }
 
-    if (sendBufs.size() != UPstream::nProcs())
+    if (sendBufs.size() != UPstream::nProcs(comm))
     {
         FatalErrorIn
         (
             "Pstream::exchange(..)"
         )   << "Size of list:" << sendBufs.size()
             << " does not equal the number of processors:"
-            << UPstream::nProcs()
+            << UPstream::nProcs(comm)
             << Foam::abort(FatalError);
     }
 
-    sizes.setSize(UPstream::nProcs());
-    labelList& nsTransPs = sizes[UPstream::myProcNo()];
-    nsTransPs.setSize(UPstream::nProcs());
+    sizes.setSize(UPstream::nProcs(comm));
+    labelList& nsTransPs = sizes[UPstream::myProcNo(comm)];
+    nsTransPs.setSize(UPstream::nProcs(comm));
 
     forAll(sendBufs, procI)
     {
@@ -78,9 +79,9 @@ void Pstream::exchange
     }
 
     // Send sizes across. Note: blocks.
-    combineReduce(sizes, UPstream::listEq(), tag);
+    combineReduce(sizes, UPstream::listEq(), tag, comm);
 
-    if (Pstream::parRun())
+    if (UPstream::nProcs(comm) > 1)
     {
         label startOfRequests = Pstream::nRequests();
 
@@ -90,9 +91,9 @@ void Pstream::exchange
         recvBufs.setSize(sendBufs.size());
         forAll(sizes, procI)
         {
-            label nRecv = sizes[procI][UPstream::myProcNo()];
+            label nRecv = sizes[procI][UPstream::myProcNo(comm)];
 
-            if (procI != Pstream::myProcNo() && nRecv > 0)
+            if (procI != Pstream::myProcNo(comm) && nRecv > 0)
             {
                 recvBufs[procI].setSize(nRecv);
                 UIPstream::read
@@ -101,7 +102,8 @@ void Pstream::exchange
                     procI,
                     reinterpret_cast<char*>(recvBufs[procI].begin()),
                     nRecv*sizeof(T),
-                    tag
+                    tag,
+                    comm
                 );
             }
         }
@@ -112,7 +114,7 @@ void Pstream::exchange
 
         forAll(sendBufs, procI)
         {
-            if (procI != Pstream::myProcNo() && sendBufs[procI].size() > 0)
+            if (procI != Pstream::myProcNo(comm) && sendBufs[procI].size() > 0)
             {
                 if
                 (
@@ -122,7 +124,8 @@ void Pstream::exchange
                         procI,
                         reinterpret_cast<const char*>(sendBufs[procI].begin()),
                         sendBufs[procI].size()*sizeof(T),
-                        tag
+                        tag,
+                        comm
                     )
                 )
                 {
@@ -146,7 +149,7 @@ void Pstream::exchange
     }
 
     // Do myself
-    recvBufs[Pstream::myProcNo()] = sendBufs[Pstream::myProcNo()];
+    recvBufs[Pstream::myProcNo(comm)] = sendBufs[Pstream::myProcNo(comm)];
 }
 
 

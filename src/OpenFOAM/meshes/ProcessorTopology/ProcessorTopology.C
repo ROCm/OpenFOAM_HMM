@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,10 +31,11 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class Patch, class ProcPatch>
-Foam::labelList Foam::ProcessorTopology<Patch, ProcPatch>::procNeighbours
+template<class Container, class ProcPatch>
+Foam::labelList Foam::ProcessorTopology<Container, ProcPatch>::procNeighbours
 (
-    const PtrList<Patch>& patches
+    const label nProcs,
+    const Container& patches
 )
 {
     // Determine number of processor neighbours and max neighbour id.
@@ -43,11 +44,11 @@ Foam::labelList Foam::ProcessorTopology<Patch, ProcPatch>::procNeighbours
 
     label maxNb = 0;
 
-    boolList isNeighbourProc(Pstream::nProcs(), false);
+    boolList isNeighbourProc(nProcs, false);
 
     forAll(patches, patchi)
     {
-        const Patch& patch = patches[patchi];
+        const typename Container::const_reference patch = patches[patchi];
 
         if (isA<ProcPatch>(patch))
         {
@@ -84,7 +85,7 @@ Foam::labelList Foam::ProcessorTopology<Patch, ProcPatch>::procNeighbours
 
     forAll(patches, patchi)
     {
-        const Patch& patch = patches[patchi];
+        const typename Container::const_reference patch = patches[patchi];
 
         if (isA<ProcPatch>(patch))
         {
@@ -103,23 +104,25 @@ Foam::labelList Foam::ProcessorTopology<Patch, ProcPatch>::procNeighbours
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
-template<class Patch, class ProcPatch>
-Foam::ProcessorTopology<Patch, ProcPatch>::ProcessorTopology
+template<class Container, class ProcPatch>
+Foam::ProcessorTopology<Container, ProcPatch>::ProcessorTopology
 (
-    const PtrList<Patch>& patches
+    const Container& patches,
+    const label comm
 )
 :
-    labelListList(Pstream::nProcs()),
+    labelListList(Pstream::nProcs(comm)),
     patchSchedule_(2*patches.size())
 {
     if (Pstream::parRun())
     {
         // Fill my 'slot' with my neighbours
-        operator[](Pstream::myProcNo()) = procNeighbours(patches);
+        operator[](Pstream::myProcNo(comm)) =
+            procNeighbours(this->size(), patches);
 
         // Distribute to all processors
-        Pstream::gatherList(*this);
-        Pstream::scatterList(*this);
+        Pstream::gatherList(*this, Pstream::msgType(), comm);
+        Pstream::scatterList(*this, Pstream::msgType(), comm);
     }
 
     if (Pstream::parRun() && Pstream::defaultCommsType == Pstream::scheduled)
@@ -172,9 +175,9 @@ Foam::ProcessorTopology<Patch, ProcPatch>::ProcessorTopology
         (
             commSchedule
             (
-                Pstream::nProcs(),
+                Pstream::nProcs(comm),
                 comms
-            ).procSchedule()[Pstream::myProcNo()]
+            ).procSchedule()[Pstream::myProcNo(comm)]
         );
 
         forAll(mySchedule, iter)
@@ -183,13 +186,13 @@ Foam::ProcessorTopology<Patch, ProcPatch>::ProcessorTopology
 
             // Get the other processor
             label nb = comms[commI][0];
-            if (nb == Pstream::myProcNo())
+            if (nb == Pstream::myProcNo(comm))
             {
                 nb = comms[commI][1];
             }
             label patchi = procPatchMap_[nb];
 
-            if (Pstream::myProcNo() > nb)
+            if (Pstream::myProcNo(comm) > nb)
             {
                 patchSchedule_[patchEvali].patch = patchi;
                 patchSchedule_[patchEvali++].init = true;
@@ -207,50 +210,67 @@ Foam::ProcessorTopology<Patch, ProcPatch>::ProcessorTopology
     }
     else
     {
-        label patchEvali = 0;
+        patchSchedule_ = nonBlockingSchedule(patches);
+    }
+}
 
-        // 1. All non-processor patches
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        // Have evaluate directly after initEvaluate. Could have them separated
-        // as long as they're not intermingled with processor patches since
-        // then e.g. any reduce parallel traffic would interfere with the
-        // processor swaps.
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-        forAll(patches, patchi)
+template<class Container, class ProcPatch>
+Foam::lduSchedule
+Foam::ProcessorTopology<Container, ProcPatch>::nonBlockingSchedule
+(
+    const Container& patches
+)
+{
+    lduSchedule patchSchedule(2*patches.size());
+
+    label patchEvali = 0;
+
+    // 1. All non-processor patches
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Have evaluate directly after initEvaluate. Could have them separated
+    // as long as they're not intermingled with processor patches since
+    // then e.g. any reduce parallel traffic would interfere with the
+    // processor swaps.
+
+    forAll(patches, patchi)
+    {
+        if (!isA<ProcPatch>(patches[patchi]))
         {
-            if (!isA<ProcPatch>(patches[patchi]))
-            {
-                patchSchedule_[patchEvali].patch = patchi;
-                patchSchedule_[patchEvali++].init = true;
-                patchSchedule_[patchEvali].patch = patchi;
-                patchSchedule_[patchEvali++].init = false;
-            }
-        }
-
-        // 2. All processor patches
-        // ~~~~~~~~~~~~~~~~~~~~~~~~
-
-        // 2a. initEvaluate
-        forAll(patches, patchi)
-        {
-            if (isA<ProcPatch>(patches[patchi]))
-            {
-                patchSchedule_[patchEvali].patch = patchi;
-                patchSchedule_[patchEvali++].init = true;
-            }
-        }
-
-        // 2b. evaluate
-        forAll(patches, patchi)
-        {
-            if (isA<ProcPatch>(patches[patchi]))
-            {
-                patchSchedule_[patchEvali].patch = patchi;
-                patchSchedule_[patchEvali++].init = false;
-            }
+            patchSchedule[patchEvali].patch = patchi;
+            patchSchedule[patchEvali++].init = true;
+            patchSchedule[patchEvali].patch = patchi;
+            patchSchedule[patchEvali++].init = false;
         }
     }
+
+    // 2. All processor patches
+    // ~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // 2a. initEvaluate
+    forAll(patches, patchi)
+    {
+        if (isA<ProcPatch>(patches[patchi]))
+        {
+            patchSchedule[patchEvali].patch = patchi;
+            patchSchedule[patchEvali++].init = true;
+        }
+    }
+
+    // 2b. evaluate
+    forAll(patches, patchi)
+    {
+        if (isA<ProcPatch>(patches[patchi]))
+        {
+            patchSchedule[patchEvali].patch = patchi;
+            patchSchedule[patchEvali++].init = false;
+        }
+    }
+
+    return patchSchedule;
 }
 
 

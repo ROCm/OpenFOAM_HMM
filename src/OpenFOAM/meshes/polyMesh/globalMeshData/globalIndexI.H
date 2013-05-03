@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,25 @@ License
 
 #include "ListOps.H"
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::globalIndex::globalIndex()
+{}
+
+
+Foam::globalIndex::globalIndex(const Xfer<labelList>& offsets)
+:
+    offsets_(offsets)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+inline Foam::labelList& Foam::globalIndex::offsets()
+{
+    return offsets_;
+}
+
 
 inline Foam::label Foam::globalIndex::offset(const label procI) const
 {
@@ -47,7 +65,7 @@ inline Foam::label Foam::globalIndex::localSize() const
 
 inline Foam::label Foam::globalIndex::size() const
 {
-    return offsets_[Pstream::nProcs()];
+    return offsets_.last();
 }
 
 
@@ -104,7 +122,7 @@ inline Foam::label Foam::globalIndex::toLocal(const label i) const
 
 inline Foam::label Foam::globalIndex::whichProcID(const label i) const
 {
-    if (i < 0 || i >= offsets_[Pstream::nProcs()])
+    if (i < 0 || i >= size())
     {
         FatalErrorIn("globalIndex::whichProcID(const label)")
             << "Global " << i << " does not belong on any processor."

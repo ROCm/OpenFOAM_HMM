@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -215,9 +215,10 @@ bool Foam::regIOobject::read()
         (
             comms,
             const_cast<word&>(headerClassName()),
-            Pstream::msgType()
+            Pstream::msgType(),
+            Pstream::worldComm
         );
-        Pstream::scatter(comms, note(), Pstream::msgType());
+        Pstream::scatter(comms, note(), Pstream::msgType(), Pstream::worldComm);
 
 
         // Get my communication order

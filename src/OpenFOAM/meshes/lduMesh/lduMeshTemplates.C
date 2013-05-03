@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,22 +23,19 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "boundedBackwardDdtScheme.H"
-#include "fvMesh.H"
+#include "lduMesh.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-namespace Foam
+template<class T, class BinaryOp>
+void Foam::lduMesh::reduce
+(
+    T& Value,
+    const BinaryOp& bop
+) const
 {
-namespace fv
-{
-
-defineTypeNameAndDebug(boundedBackwardDdtScheme, 0);
-
-ddtScheme<scalar>::addIstreamConstructorToTable<boundedBackwardDdtScheme>
-    addboundedBackwardDdtSchemeIstreamConstructorToTable_;
-
+    Foam::reduce(Value, bop, Pstream::msgType(), comm());
 }
-}
+
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -186,10 +186,15 @@ Foam::scalar Foam::lduMatrix::solver::normFactor
 {
     // --- Calculate A dot reference value of psi
     matrix_.sumA(tmpField, interfaceBouCoeffs_, interfaces_);
-    tmpField *= gAverage(psi);
+
+    tmpField *= gAverage(psi, matrix_.lduMesh_.comm());
 
     return
-        gSum(mag(Apsi - tmpField) + mag(source - tmpField))
+        gSum
+        (
+            (mag(Apsi - tmpField) + mag(source - tmpField))(),
+            matrix_.lduMesh_.comm()
+        )
       + solverPerformance::small_;
 
     // At convergence this simpler method is equivalent to the above

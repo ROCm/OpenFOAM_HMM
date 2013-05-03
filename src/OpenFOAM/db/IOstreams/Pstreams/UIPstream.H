@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,6 +66,8 @@ class UIPstream
 
         const int tag_;
 
+        const label comm_;
+
         const bool clearAtEnd_;
 
         int messageSize_;
@@ -97,6 +99,7 @@ public:
             DynamicList<char>& externalBuf,
             label& externalBufPosition,
             const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
             const bool clearAtEnd = false,   // destroy externalBuf if at end
             streamFormat format=BINARY,
             versionNumber version=currentVersion
@@ -131,7 +134,8 @@ public:
                 const int fromProcNo,
                 char* buf,
                 const std::streamsize bufSize,
-                const int tag = UPstream::msgType()
+                const int tag = UPstream::msgType(),
+                const label communicator = 0
             );
 
             //- Return next token from stream

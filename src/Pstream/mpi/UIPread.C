@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,6 +41,7 @@ Foam::UIPstream::UIPstream
     DynamicList<char>& externalBuf,
     label& externalBufPosition,
     const int tag,
+    const label comm,
     const bool clearAtEnd,
     streamFormat format,
     versionNumber version
@@ -52,6 +53,7 @@ Foam::UIPstream::UIPstream
     externalBuf_(externalBuf),
     externalBufPosition_(externalBufPosition),
     tag_(tag),
+    comm_(comm),
     clearAtEnd_(clearAtEnd),
     messageSize_(0)
 {
@@ -71,7 +73,8 @@ Foam::UIPstream::UIPstream
         if (debug)
         {
             Pout<< "UIPstream::UIPstream : read from:" << fromProcNo
-                << " tag:" << tag << " wanted size:" << wantedSize
+                << " tag:" << tag << " comm:" << comm_
+                << " wanted size:" << wantedSize
                 << Foam::endl;
         }
 
@@ -80,7 +83,13 @@ Foam::UIPstream::UIPstream
         // and set it
         if (!wantedSize)
         {
-            MPI_Probe(procID(fromProcNo_), tag_, MPI_COMM_WORLD, &status);
+            MPI_Probe
+            (
+                fromProcNo_,
+                tag_,
+                PstreamGlobals::MPICommunicators_[comm_],
+                &status
+            );
             MPI_Get_count(&status, MPI_BYTE, &messageSize_);
 
             externalBuf_.setCapacity(messageSize_);
@@ -99,7 +108,8 @@ Foam::UIPstream::UIPstream
             fromProcNo_,
             externalBuf_.begin(),
             wantedSize,
-            tag_
+            tag_,
+            comm_
         );
 
         // Set addressed size. Leave actual allocated memory intact.
@@ -121,6 +131,7 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
     externalBuf_(buffers.recvBuf_[fromProcNo]),
     externalBufPosition_(buffers.recvBufPos_[fromProcNo]),
     tag_(buffers.tag_),
+    comm_(buffers.comm_),
     clearAtEnd_(true),
     messageSize_(0)
 {
@@ -145,7 +156,8 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
         {
             Pout<< "UIPstream::UIPstream PstreamBuffers :"
                 << " fromProcNo:" << fromProcNo
-                << " tag:" << tag_ << " receive buffer size:" << messageSize_
+                << " tag:" << tag_ << " comm:" << comm_
+                << " receive buffer size:" << messageSize_
                 << Foam::endl;
         }
     }
@@ -159,7 +171,8 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
         {
             Pout<< "UIPstream::UIPstream PstreamBuffers :"
                 << " read from:" << fromProcNo
-                << " tag:" << tag_ << " wanted size:" << wantedSize
+                << " tag:" << tag_ << " comm:" << comm_
+                << " wanted size:" << wantedSize
                 << Foam::endl;
         }
 
@@ -167,7 +180,13 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
         // and set it
         if (!wantedSize)
         {
-            MPI_Probe(procID(fromProcNo_), tag_, MPI_COMM_WORLD, &status);
+            MPI_Probe
+            (
+                fromProcNo_,
+                tag_,
+                PstreamGlobals::MPICommunicators_[comm_],
+                &status
+            );
             MPI_Get_count(&status, MPI_BYTE, &messageSize_);
 
             externalBuf_.setCapacity(messageSize_);
@@ -186,7 +205,8 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
             fromProcNo_,
             externalBuf_.begin(),
             wantedSize,
-            tag_
+            tag_,
+            comm_
         );
 
         // Set addressed size. Leave actual allocated memory intact.
@@ -208,15 +228,27 @@ Foam::label Foam::UIPstream::read
     const int fromProcNo,
     char* buf,
     const std::streamsize bufSize,
-    const int tag
+    const int tag,
+    const label communicator
 )
 {
     if (debug)
     {
         Pout<< "UIPstream::read : starting read from:" << fromProcNo
-            << " tag:" << tag << " wanted size:" << label(bufSize)
+            << " tag:" << tag << " comm:" << communicator
+            << " wanted size:" << label(bufSize)
             << " commsType:" << UPstream::commsTypeNames[commsType]
             << Foam::endl;
+    }
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "UIPstream::read : starting read from:" << fromProcNo
+            << " tag:" << tag << " comm:" << communicator
+            << " wanted size:" << label(bufSize)
+            << " commsType:" << UPstream::commsTypeNames[commsType]
+            << " warnComm:" << UPstream::warnComm
+            << Foam::endl;
+        error::printStack(Pout);
     }
 
     if (commsType == blocking || commsType == scheduled)
@@ -230,9 +262,9 @@ Foam::label Foam::UIPstream::read
                 buf,
                 bufSize,
                 MPI_PACKED,
-                procID(fromProcNo),
+                fromProcNo,
                 tag,
-                MPI_COMM_WORLD,
+                PstreamGlobals::MPICommunicators_[communicator],
                 &status
             )
         )
@@ -286,9 +318,9 @@ Foam::label Foam::UIPstream::read
                 buf,
                 bufSize,
                 MPI_PACKED,
-                procID(fromProcNo),
+                fromProcNo,
                 tag,
-                MPI_COMM_WORLD,
+                PstreamGlobals::MPICommunicators_[communicator],
                 &request
             )
         )

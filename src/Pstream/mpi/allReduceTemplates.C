@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,7 +35,8 @@ void Foam::allReduce
     MPI_Datatype MPIType,
     MPI_Op MPIOp,
     const BinaryOp& bop,
-    const int tag
+    const int tag,
+    const label communicator
 )
 {
     if (!UPstream::parRun())
@@ -43,14 +44,14 @@ void Foam::allReduce
         return;
     }
 
-    if (UPstream::nProcs() <= UPstream::nProcsSimpleSum)
+    if (UPstream::nProcs(communicator) <= UPstream::nProcsSimpleSum)
     {
-        if (UPstream::master())
+        if (UPstream::master(communicator))
         {
             for
             (
                 int slave=UPstream::firstSlave();
-                slave<=UPstream::lastSlave();
+                slave<=UPstream::lastSlave(communicator);
                 slave++
             )
             {
@@ -63,9 +64,9 @@ void Foam::allReduce
                         &value,
                         MPICount,
                         MPIType,
-                        UPstream::procID(slave),
+                        slave,  //UPstream::procID(slave),
                         tag,
-                        MPI_COMM_WORLD,
+                        PstreamGlobals::MPICommunicators_[communicator],
                         MPI_STATUS_IGNORE
                     )
                 )
@@ -97,9 +98,9 @@ void Foam::allReduce
                     &Value,
                     MPICount,
                     MPIType,
-                    UPstream::procID(UPstream::masterNo()),
+                    UPstream::masterNo(),//UPstream::procID(masterNo()),
                     tag,
-                    MPI_COMM_WORLD
+                    PstreamGlobals::MPICommunicators_[communicator]
                 )
             )
             {
@@ -120,12 +121,12 @@ void Foam::allReduce
         }
 
 
-        if (UPstream::master())
+        if (UPstream::master(communicator))
         {
             for
             (
                 int slave=UPstream::firstSlave();
-                slave<=UPstream::lastSlave();
+                slave<=UPstream::lastSlave(communicator);
                 slave++
             )
             {
@@ -136,9 +137,9 @@ void Foam::allReduce
                         &Value,
                         MPICount,
                         MPIType,
-                        UPstream::procID(slave),
+                        slave,      //UPstream::procID(slave),
                         tag,
-                        MPI_COMM_WORLD
+                        PstreamGlobals::MPICommunicators_[communicator]
                     )
                 )
                 {
@@ -167,9 +168,9 @@ void Foam::allReduce
                     &Value,
                     MPICount,
                     MPIType,
-                    UPstream::procID(UPstream::masterNo()),
+                    UPstream::masterNo(),//UPstream::procID(masterNo()),
                     tag,
-                    MPI_COMM_WORLD,
+                    PstreamGlobals::MPICommunicators_[communicator],
                     MPI_STATUS_IGNORE
                 )
             )
@@ -193,7 +194,15 @@ void Foam::allReduce
     else
     {
         Type sum;
-        MPI_Allreduce(&Value, &sum, MPICount, MPIType, MPIOp, MPI_COMM_WORLD);
+        MPI_Allreduce
+        (
+            &Value,
+            &sum,
+            MPICount,
+            MPIType,
+            MPIOp,
+            PstreamGlobals::MPICommunicators_[communicator]
+        );
         Value = sum;
     }
 }

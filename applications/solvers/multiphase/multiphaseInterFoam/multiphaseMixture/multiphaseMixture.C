@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,10 @@ License
 #include "Time.H"
 #include "subCycle.H"
 #include "MULES.H"
+#include "surfaceInterpolate.H"
+#include "fvcGrad.H"
 #include "fvcSnGrad.H"
+#include "fvcDiv.H"
 #include "fvcFlux.H"
 
 // * * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * //
@@ -246,14 +249,11 @@ void Foam::multiphaseMixture::solve()
 
     const Time& runTime = mesh_.time();
 
-    const dictionary& pimpleDict = mesh_.solutionDict().subDict("PIMPLE");
-
-    label nAlphaSubCycles(readLabel(pimpleDict.lookup("nAlphaSubCycles")));
-
-    scalar cAlpha(readScalar(pimpleDict.lookup("cAlpha")));
-
-
     volScalarField& alpha = phases_.first();
+
+    const dictionary& alphaControls = mesh_.solverDict(alpha.name());
+    label nAlphaSubCycles(readLabel(alphaControls.lookup("nAlphaSubCycles")));
+    scalar cAlpha(readScalar(alphaControls.lookup("cAlpha")));
 
     if (nAlphaSubCycles > 1)
     {

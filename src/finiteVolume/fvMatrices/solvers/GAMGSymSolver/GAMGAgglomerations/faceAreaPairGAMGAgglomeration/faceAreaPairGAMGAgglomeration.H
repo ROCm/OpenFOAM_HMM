@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,6 +63,15 @@ public:
         faceAreaPairGAMGAgglomeration
         (
             const lduMesh& mesh,
+            const dictionary& controlDict
+        );
+
+        //- Construct given mesh and controls
+        faceAreaPairGAMGAgglomeration
+        (
+            const lduMesh& mesh,
+            const scalarField& cellVolumes,
+            const vectorField& faceAreas,
             const dictionary& controlDict
         );
 };

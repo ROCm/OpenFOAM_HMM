@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,6 +58,7 @@ template<class T> class SubList;
 // Forward declaration of friend functions and operators
 template<class T> class UList;
 template<class T> Ostream& operator<<(Ostream&, const UList<T>&);
+template<class T> Istream& operator>>(Istream&, UList<T>&);
 
 typedef UList<label> labelUList;
 
@@ -109,6 +110,24 @@ public:
             bool operator()(const label a, const label b)
             {
                 return values_[a] < values_[b];
+            }
+        };
+
+        //- Greater function class that can be used for sorting
+        class greater
+        {
+            const UList<T>& values_;
+
+        public:
+
+            greater(const UList<T>& values)
+            :
+                values_(values)
+            {}
+
+            bool operator()(const label a, const label b)
+            {
+                return values_[a] > values_[b];
             }
         };
 
@@ -330,6 +349,14 @@ public:
         (
             Ostream&,
             const UList<T>&
+        );
+
+        //- Read UList contents from Istream. Requires size to have been set
+        //  before.
+        friend Istream& operator>> <T>
+        (
+            Istream&,
+            UList<T>&
         );
 };
 

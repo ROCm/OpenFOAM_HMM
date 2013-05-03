@@ -38,6 +38,12 @@ namespace Foam
         processorGAMGInterfaceField,
         lduInterface
     );
+    addToRunTimeSelectionTable
+    (
+        GAMGInterfaceField,
+        processorGAMGInterfaceField,
+        lduInterfaceField
+    );
 }
 
 
@@ -62,6 +68,20 @@ Foam::processorGAMGInterfaceField::processorGAMGInterfaceField
 }
 
 
+Foam::processorGAMGInterfaceField::processorGAMGInterfaceField
+(
+    const GAMGInterface& GAMGCp,
+    const bool doTransform,
+    const int rank
+)
+:
+    GAMGInterfaceField(GAMGCp, doTransform, rank),
+    procInterface_(refCast<const processorGAMGInterface>(GAMGCp)),
+    doTransform_(doTransform),
+    rank_(rank)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::processorGAMGInterfaceField::~processorGAMGInterfaceField()
@@ -79,6 +99,9 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
     const Pstream::commsTypes commsType
 ) const
 {
+    label oldWarn = UPstream::warnComm;
+    UPstream::warnComm = comm();
+
     procInterface_.interfaceInternalField(psiInternal, scalarSendBuf_);
 
     if (commsType == Pstream::nonBlocking && !Pstream::floatTransfer)
@@ -92,7 +115,8 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
             procInterface_.neighbProcNo(),
             reinterpret_cast<char*>(scalarReceiveBuf_.begin()),
             scalarReceiveBuf_.byteSize(),
-            procInterface_.tag()
+            procInterface_.tag(),
+            comm()
         );
 
         outstandingSendRequest_ = UPstream::nRequests();
@@ -102,7 +126,8 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
             procInterface_.neighbProcNo(),
             reinterpret_cast<const char*>(scalarSendBuf_.begin()),
             scalarSendBuf_.byteSize(),
-            procInterface_.tag()
+            procInterface_.tag(),
+            comm()
         );
     }
     else
@@ -111,6 +136,8 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
     }
 
     const_cast<processorGAMGInterfaceField&>(*this).updatedMatrix() = false;
+
+    UPstream::warnComm = oldWarn;
 }
 
 
@@ -127,6 +154,9 @@ void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
     {
         return;
     }
+
+    label oldWarn = UPstream::warnComm;
+    UPstream::warnComm = comm();
 
     const labelUList& faceCells = procInterface_.faceCells();
 
@@ -171,6 +201,8 @@ void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
     }
 
     const_cast<processorGAMGInterfaceField&>(*this).updatedMatrix() = true;
+
+    UPstream::warnComm = oldWarn;
 }
 
 

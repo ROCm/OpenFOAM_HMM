@@ -334,15 +334,14 @@ void Foam::dynamicIndexedOctree<Type>::recursiveSubDivision
 // Recurses to determine status of lowest level boxes. Level above is
 // combination of octants below.
 template<class Type>
-typename Foam::dynamicIndexedOctree<Type>::volumeType
-Foam::dynamicIndexedOctree<Type>::calcVolumeType
+Foam::volumeType Foam::dynamicIndexedOctree<Type>::calcVolumeType
 (
     const label nodeI
 ) const
 {
     const node& nod = nodes_[nodeI];
 
-    volumeType myType = UNKNOWN;
+    volumeType myType = volumeType::UNKNOWN;
 
     for (direction octant = 0; octant < nod.subNodes_.size(); octant++)
     {
@@ -359,7 +358,7 @@ Foam::dynamicIndexedOctree<Type>::calcVolumeType
         {
             // Contents. Depending on position in box might be on either
             // side.
-            subType = MIXED;
+            subType = volumeType::MIXED;
         }
         else
         {
@@ -378,13 +377,13 @@ Foam::dynamicIndexedOctree<Type>::calcVolumeType
 
         // Combine sub node types into type for treeNode. Result is 'mixed' if
         // types differ among subnodes.
-        if (myType == UNKNOWN)
+        if (myType == volumeType::UNKNOWN)
         {
             myType = subType;
         }
         else if (subType != myType)
         {
-            myType = MIXED;
+            myType = volumeType::MIXED;
         }
     }
     return myType;
@@ -392,8 +391,7 @@ Foam::dynamicIndexedOctree<Type>::calcVolumeType
 
 
 template<class Type>
-typename Foam::dynamicIndexedOctree<Type>::volumeType
-Foam::dynamicIndexedOctree<Type>::getVolumeType
+Foam::volumeType Foam::dynamicIndexedOctree<Type>::getVolumeType
 (
     const label nodeI,
     const point& sample
@@ -403,22 +401,22 @@ Foam::dynamicIndexedOctree<Type>::getVolumeType
 
     direction octant = nod.bb_.subOctant(sample);
 
-    volumeType octantType = volumeType(nodeTypes_.get((nodeI<<3)+octant));
+    volumeType octantType = volumeType::type(nodeTypes_.get((nodeI<<3)+octant));
 
-    if (octantType == INSIDE)
+    if (octantType == volumeType::INSIDE)
     {
         return octantType;
     }
-    else if (octantType == OUTSIDE)
+    else if (octantType == volumeType::OUTSIDE)
     {
         return octantType;
     }
-    else if (octantType == UNKNOWN)
+    else if (octantType == volumeType::UNKNOWN)
     {
         // Can happen for e.g. non-manifold surfaces.
         return octantType;
     }
-    else if (octantType == MIXED)
+    else if (octantType == volumeType::MIXED)
     {
         labelBits index = nod.subNodes_[octant];
 
@@ -447,7 +445,7 @@ Foam::dynamicIndexedOctree<Type>::getVolumeType
                 << "Empty subnode has invalid volume type MIXED."
                 << abort(FatalError);
 
-            return UNKNOWN;
+            return volumeType::UNKNOWN;
         }
     }
     else
@@ -462,14 +460,13 @@ Foam::dynamicIndexedOctree<Type>::getVolumeType
             << "Node has invalid volume type " << octantType
             << abort(FatalError);
 
-        return UNKNOWN;
+        return volumeType::UNKNOWN;
     }
 }
 
 
 template<class Type>
-typename Foam::dynamicIndexedOctree<Type>::volumeType
-Foam::dynamicIndexedOctree<Type>::getSide
+Foam::volumeType Foam::dynamicIndexedOctree<Type>::getSide
 (
     const vector& outsideNormal,
     const vector& vec
@@ -477,11 +474,11 @@ Foam::dynamicIndexedOctree<Type>::getSide
 {
     if ((outsideNormal&vec) >= 0)
     {
-        return OUTSIDE;
+        return volumeType::OUTSIDE;
     }
     else
     {
-        return INSIDE;
+        return volumeType::INSIDE;
     }
 }
 
@@ -2582,15 +2579,14 @@ const Foam::labelList& Foam::dynamicIndexedOctree<Type>::findIndices
 
 // Determine type (inside/outside/mixed) per node.
 template<class Type>
-typename Foam::dynamicIndexedOctree<Type>::volumeType
-Foam::dynamicIndexedOctree<Type>::getVolumeType
+Foam::volumeType Foam::dynamicIndexedOctree<Type>::getVolumeType
 (
     const point& sample
 ) const
 {
     if (nodes_.empty())
     {
-        return UNKNOWN;
+        return volumeType::UNKNOWN;
     }
 
     if (nodeTypes_.size() != 8*nodes_.size())
@@ -2598,7 +2594,7 @@ Foam::dynamicIndexedOctree<Type>::getVolumeType
         // Calculate type for every octant of node.
 
         nodeTypes_.setSize(8*nodes_.size());
-        nodeTypes_ = UNKNOWN;
+        nodeTypes_ = volumeType::UNKNOWN;
 
         calcVolumeType(0);
 
@@ -2611,21 +2607,21 @@ Foam::dynamicIndexedOctree<Type>::getVolumeType
 
             forAll(nodeTypes_, i)
             {
-                volumeType type = volumeType(nodeTypes_.get(i));
+                volumeType type = volumeType::type(nodeTypes_.get(i));
 
-                if (type == UNKNOWN)
+                if (type == volumeType::UNKNOWN)
                 {
                     nUNKNOWN++;
                 }
-                else if (type == MIXED)
+                else if (type == volumeType::MIXED)
                 {
                     nMIXED++;
                 }
-                else if (type == INSIDE)
+                else if (type == volumeType::INSIDE)
                 {
                     nINSIDE++;
                 }
-                else if (type == OUTSIDE)
+                else if (type == volumeType::OUTSIDE)
                 {
                     nOUTSIDE++;
                 }

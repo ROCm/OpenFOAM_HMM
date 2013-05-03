@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,11 +48,9 @@ namespace Foam
 
 // Forward declaration of classes
 class triSurface;
-class treeDataTriSurface;
-template<class Type> class indexedOctree;
 
 /*---------------------------------------------------------------------------*\
-                           Class triSurfaceSearch Declaration
+                      Class triSurfaceSearch Declaration
 \*---------------------------------------------------------------------------*/
 
 class triSurfaceSearch
@@ -62,12 +60,29 @@ class triSurfaceSearch
         //- Reference to surface to work on
         const triSurface& surface_;
 
+        //- Optional tolerance to use in searches
+        scalar tolerance_;
+
+        //- Optional max tree depth of octree
+        label maxTreeDepth_;
+
         //- Octree for searches
-        autoPtr<indexedOctree<treeDataTriSurface> > treePtr_;
+        mutable autoPtr<indexedOctree<treeDataTriSurface> > treePtr_;
 
 
     // Private Member Functions
 
+        //- Check whether the current hit on the surface which lies on lineVec
+        //  is unique.
+        //  point : return 1 unique hit
+        //  edge  : return 1 hit if in the cone of the edge faces
+        //        : return 2 hits if outside or on the cone.
+        bool checkUniqueHit
+        (
+            const pointIndexHit& currHit,
+            const DynamicList<pointIndexHit, 1, 1>& hits,
+            const vector& lineVec
+        ) const;
 
         //- Disallow default bitwise copy construct
         triSurfaceSearch(const triSurfaceSearch&);
@@ -75,51 +90,64 @@ class triSurfaceSearch
         //- Disallow default bitwise assignment
         void operator=(const triSurfaceSearch&);
 
+
 public:
-
-    // Static data members
-
-        //- Point far away; used for illegal finds
-        static const point greatPoint;
-
 
     // Constructors
 
         //- Construct from surface. Holds reference to surface!
-        triSurfaceSearch(const triSurface&);
+        explicit triSurfaceSearch(const triSurface&);
 
+        //- Construct from surface and dictionary.
+        triSurfaceSearch(const triSurface&, const dictionary& dict);
+
+        //- Construct from components
+        triSurfaceSearch
+        (
+            const triSurface& surface,
+            const scalar tolerance,
+            const label maxTreeDepth
+        );
+
+
+    //- Destructor
+    ~triSurfaceSearch();
+
+        //- Clear storage
+        void clearOut();
 
 
     // Member Functions
 
-        const indexedOctree<treeDataTriSurface>& tree() const
-        {
-            return treePtr_();
-        }
+        //- Demand driven construction of the octree
+        const indexedOctree<treeDataTriSurface>& tree() const;
 
+        //- Return reference to the surface.
         const triSurface& surface() const
         {
             return surface_;
         }
 
+        //- Return tolerance to use in searches
+        scalar tolerance() const
+        {
+            return tolerance_;
+        }
+
+        //- Return max tree depth of octree
+        label maxTreeDepth() const
+        {
+            return maxTreeDepth_;
+        }
+
         //- Calculate for each searchPoint inside/outside status.
         boolList calcInside(const pointField& searchPoints) const;
 
-        //- Calculate index of nearest triangle (or -1) for each sample.
-        //  Looks only in box of size 2*span around sample.
-        labelList calcNearestTri
+        void findNearest
         (
             const pointField& samples,
-            const vector& span
-        ) const;
-
-        //- Calculate nearest points (to searchPoints) on surface.
-        //  Looks only in box of size 2*span around sample. Returns greatPoint
-        //  if not found.
-        tmp<pointField> calcNearest
-        (
-            const pointField& samples,
-            const vector& span
+            const scalarField& nearestDistSqr,
+            List<pointIndexHit>& info
         ) const;
 
         //- Calculate nearest point on surface for single searchPoint. Returns
@@ -129,14 +157,27 @@ public:
         //  - index()    : surface triangle label
         pointIndexHit nearest(const point&, const vector& span) const;
 
+        void findLine
+        (
+            const pointField& start,
+            const pointField& end,
+            List<pointIndexHit>& info
+        ) const;
+
+        void findLineAny
+        (
+            const pointField& start,
+            const pointField& end,
+            List<pointIndexHit>& info
+        ) const;
+
         //- Calculate all intersections from start to end
         void findLineAll
         (
-            const point& start,
-            const point& end,
-            List<pointIndexHit>&
+            const pointField& start,
+            const pointField& end,
+            List<List<pointIndexHit> >& info
         ) const;
-
 };
 
 

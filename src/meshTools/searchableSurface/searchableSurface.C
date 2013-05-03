@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,25 +30,11 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(searchableSurface, 0);
-    defineRunTimeSelectionTable(searchableSurface, dict);
 
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::searchableSurface::volumeType,
-        4
-    >::names[] =
-    {
-        "unknown",
-        "mixed",
-        "inside",
-        "outside"
-    };
+defineTypeNameAndDebug(searchableSurface, 0);
+defineRunTimeSelectionTable(searchableSurface, dict);
+
 }
-
-const Foam::NamedEnum<Foam::searchableSurface::volumeType, 4>
-    Foam::searchableSurface::volumeTypeNames;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

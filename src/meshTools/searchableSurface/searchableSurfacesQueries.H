@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -116,7 +116,6 @@ class searchableSurfacesQueries
         static void mergeHits
         (
             const point& start,
-            const scalar mergeDist,
 
             const label surfI,
             const List<pointIndexHit>& surfHits,
@@ -184,6 +183,18 @@ public:
                 List<pointIndexHit>&
             );
 
+            //- Find nearest points to a specific region of the surface
+            static void findNearest
+            (
+                const PtrList<searchableSurface>& allSurfaces,
+                const labelList& surfacesToTest,
+                const pointField& samples,
+                const scalarField& nearestDistSqr,
+                const labelList& regionIndices,
+                labelList& nearestSurfaces,
+                List<pointIndexHit>& nearestInfo
+            );
+
             //- Find signed distance to nearest surface. Outside is positive.
             //  illegalHandling: how to handle non-inside or outside
             //      OUTSIDE : treat as outside
@@ -195,7 +206,7 @@ public:
                 const labelList& surfacesToTest,
                 const pointField& samples,
                 const scalarField& nearestDistSqr,
-                const searchableSurface::volumeType illegalHandling,
+                const volumeType illegalHandling,
                 labelList& nearestSurfaces,
                 scalarField& distance
             );

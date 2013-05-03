@@ -293,6 +293,18 @@ Foam::label Foam::searchableSurfaces::findSurfaceID
 }
 
 
+Foam::label Foam::searchableSurfaces::findSurfaceRegionID
+(
+    const word& surfaceName,
+    const word& regionName
+) const
+{
+    label surfaceIndex = findSurfaceID(surfaceName);
+
+    return findIndex(regionNames()[surfaceIndex], regionName);
+}
+
+
 // Find any intersection
 void Foam::searchableSurfaces::findAnyIntersection
 (
@@ -381,6 +393,28 @@ void Foam::searchableSurfaces::findNearest
     );
 }
 
+
+// Find nearest. Return -1 or nearest point
+void Foam::searchableSurfaces::findNearest
+(
+    const pointField& samples,
+    const scalarField& nearestDistSqr,
+    const labelList& regionIndices,
+    labelList& nearestSurfaces,
+    List<pointIndexHit>& nearestInfo
+) const
+{
+    searchableSurfacesQueries::findNearest
+    (
+        *this,
+        allSurfaces_,
+        samples,
+        nearestDistSqr,
+        regionIndices,
+        nearestSurfaces,
+        nearestInfo
+    );
+}
 
 //- Calculate bounding box
 Foam::boundBox Foam::searchableSurfaces::bounds() const

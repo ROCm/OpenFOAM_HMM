@@ -65,10 +65,10 @@ protected:
         const lduInterfacePtrsList& coarseInterfaces_;
 
         //- Face-cell addressing
-        labelField faceCells_;
+        labelList faceCells_;
 
         //- Face restrict addressing
-        labelField faceRestrictAddressing_;
+        labelList faceRestrictAddressing_;
 
 
 private:
@@ -101,7 +101,8 @@ public:
                 const lduInterface& fineInterface,
                 const labelField& localRestrictAddressing,
                 const labelField& neighbourRestrictAddressing,
-                const label fineLevelIndex
+                const label fineLevelIndex,
+                const label coarseComm
             ),
             (
                 index,
@@ -109,7 +110,25 @@ public:
                 fineInterface,
                 localRestrictAddressing,
                 neighbourRestrictAddressing,
-                fineLevelIndex
+                fineLevelIndex,
+                coarseComm
+            )
+        );
+
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            GAMGInterface,
+            Istream,
+            (
+                const label index,
+                const lduInterfacePtrsList& coarseInterfaces,
+                Istream& is
+            ),
+            (
+                index,
+                coarseInterfaces,
+                is
             )
         );
 
@@ -125,27 +144,58 @@ public:
             const lduInterface& fineInterface,
             const labelField& localRestrictAddressing,
             const labelField& neighbourRestrictAddressing,
-            const label fineLevelIndex
+            const label fineLevelIndex,
+            const label coarseComm
+        );
+
+        //- Return a pointer to a new interface created on freestore given
+        //  the fine interface
+        static autoPtr<GAMGInterface> New
+        (
+            const word& coupleType,
+            const label index,
+            const lduInterfacePtrsList& coarseInterfaces,
+            Istream& is
         );
 
 
     // Constructors
 
-        //- Construct from fine-level interface,
-        //  local and neighbour restrict addressing
+        //- Construct from interfaces, restrict addressing set later on
         GAMGInterface
         (
             const label index,
-            const lduInterfacePtrsList& coarseInterfaces,
-            const lduInterface&,
-            const labelField&,
-            const labelField&,
-            const label fineLevelIndex = -1
+            const lduInterfacePtrsList& coarseInterfaces
         )
         :
             index_(index),
             coarseInterfaces_(coarseInterfaces)
         {}
+
+
+        //- Construct from interfaces and restrict addressing
+        GAMGInterface
+        (
+            const label index,
+            const lduInterfacePtrsList& coarseInterfaces,
+            const labelUList& faceCells,
+            const labelUList& faceRestrictAddressing
+        )
+        :
+            index_(index),
+            coarseInterfaces_(coarseInterfaces),
+            faceCells_(faceCells),
+            faceRestrictAddressing_(faceRestrictAddressing)
+        {}
+
+
+        //- Construct from Istream
+        GAMGInterface
+        (
+            const label index,
+            const lduInterfacePtrsList& coarseInterfaces,
+            Istream& is
+        );
 
 
     // Member Functions
@@ -174,7 +224,7 @@ public:
                 return faceCells_;
             }
 
-            //- Return face restrict addressing
+            //- Return (local)face restrict addressing
             virtual const labelList& faceRestrictAddressing() const
             {
                 return faceRestrictAddressing_;
@@ -221,6 +271,12 @@ public:
             (
                 const scalarField& fineCoeffs
             ) const;
+
+
+        // I/O
+
+            //- Write to stream
+            virtual void write(Ostream&) const = 0;
 };
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -504,6 +504,7 @@ Foam::polyMesh::polyMesh
         boundaryFaces.size() + 1    // add room for a default patch
     ),
     bounds_(points_, syncPar),
+    comm_(UPstream::worldComm),
     geometricD_(Vector<label>::zero),
     solutionD_(Vector<label>::zero),
     tetBasePtIsPtr_(NULL),
@@ -787,6 +788,7 @@ Foam::polyMesh::polyMesh
         boundaryFaces.size() + 1    // add room for a default patch
     ),
     bounds_(points_, syncPar),
+    comm_(UPstream::worldComm),
     geometricD_(Vector<label>::zero),
     solutionD_(Vector<label>::zero),
     tetBasePtIsPtr_(NULL),

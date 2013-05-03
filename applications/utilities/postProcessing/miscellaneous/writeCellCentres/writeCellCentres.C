@@ -97,6 +97,33 @@ int main(int argc, char *argv[])
 
             cci.write();
         }
+
+
+        volScalarField V
+        (
+            IOobject
+            (
+                "V",
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            mesh,
+            dimensionedScalar("V", mesh.V().dimensions(), 0.0),
+            calculatedFvPatchField<scalar>::typeName
+        );
+        V.dimensionedInternalField() = mesh.V();
+        forAll(V.boundaryField(), patchI)
+        {
+            V.boundaryField()[patchI] =
+                V.boundaryField()[patchI].patch().magSf();
+        }
+        Info<< "Writing cellVolumes and patch faceAreas to " << V.name()
+            << " in " << runTime.timeName() << endl;
+        V.write();
+
     }
 
     Info<< "\nEnd\n" << endl;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,7 @@ Description
     and thus introduce a third dimension into a 2-D problem.
 
     The operation is performed by looping through all edges approximately
-    normal to the plane and enforcing their orthoginality onto the plane by
+    normal to the plane and enforcing their orthogonality onto the plane by
     adjusting points on their ends.
 
 SourceFiles
