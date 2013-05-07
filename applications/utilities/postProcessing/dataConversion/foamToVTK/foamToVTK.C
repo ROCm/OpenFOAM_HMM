@@ -1043,7 +1043,6 @@ int main(int argc, char *argv[])
 
                 surfaceMeshWriter writer
                 (
-                    vMesh,
                     binary,
                     pp,
                     fz.name(),
