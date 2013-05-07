@@ -122,7 +122,7 @@ void Foam::lduPrimitiveMesh::checkUpperTriangular
 }
 
 
-Foam::label Foam::lduPrimitiveMesh::size
+Foam::label Foam::lduPrimitiveMesh::totalSize
 (
     const PtrList<lduPrimitiveMesh>& meshes
 )
@@ -294,7 +294,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     labelListListList& boundaryFaceMap
 )
 :
-    lduAddressing(myMesh.lduAddr().size() + size(otherMeshes)),
+    lduAddressing(myMesh.lduAddr().size() + totalSize(otherMeshes)),
     lowerAddr_(0),
     upperAddr_(0),
     interfaces_(0),
