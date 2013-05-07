@@ -174,8 +174,10 @@ Foam::threePhaseInterfaceProperties::threePhaseInterfaceProperties
     (
         readScalar
         (
-            mixture.U().mesh().solutionDict().subDict("PIMPLE").
-                lookup("cAlpha")
+            mixture.U().mesh().solverDict
+            (
+                mixture_.alpha1().name()
+            ).lookup("cAlpha")
         )
     ),
     sigma12_(mixture.lookup("sigma12")),

@@ -498,7 +498,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
     const scalarField& YGasEff,
     const scalarField& YLiquidEff,
     const scalarField& YSolidEff,
-    bool& canCombust,
+    label& canCombust,
     scalarField& dMassDV,
     scalar& Sh,
     scalar& N,
@@ -512,6 +512,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
     (
         !td.cloud().devolatilisation().active()
      || T < td.cloud().constProps().Tvap()
+     || canCombust == -1
     )
     {
         return;
@@ -588,7 +589,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcSurfaceReactions
     const scalar d,
     const scalar T,
     const scalar mass,
-    const bool canCombust,
+    const label canCombust,
     const scalar N,
     const scalarField& YMix,
     const scalarField& YGas,
@@ -603,7 +604,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcSurfaceReactions
 ) const
 {
     // Check that model is active
-    if (!td.cloud().surfaceReaction().active() || !canCombust)
+    if (!td.cloud().surfaceReaction().active() || (canCombust != 1))
     {
         return;
     }

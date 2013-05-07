@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,6 +32,8 @@ License
 #include "makeParcelDispersionModels.H"
 #include "makeReactingParcelInjectionModels.H" // Reacting variant
 #include "makeParcelPatchInteractionModels.H"
+#include "makeParcelStochasticCollisionModels.H"
+#include "makeReactingParcelSurfaceFilmModels.H" // Reacting variant
 
 // Thermodynamic
 #include "makeParcelHeatTransferModels.H"
@@ -39,7 +41,6 @@ License
 // Reacting
 #include "makeReactingParcelCompositionModels.H"
 #include "makeReactingParcelPhaseChangeModels.H"
-#include "makeReactingParcelSurfaceFilmModels.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,6 +53,8 @@ namespace Foam
     makeParcelDispersionModels(basicReactingCloud);
     makeReactingParcelInjectionModels(basicReactingCloud);
     makeParcelPatchInteractionModels(basicReactingCloud);
+    makeParcelStochasticCollisionModels(basicReactingCloud);
+    makeReactingParcelSurfaceFilmModels(basicReactingCloud);
 
     // Thermo sub-models
     makeParcelHeatTransferModels(basicReactingCloud);
@@ -59,7 +62,6 @@ namespace Foam
     // Reacting sub-models
     makeReactingParcelCompositionModels(basicReactingCloud);
     makeReactingParcelPhaseChangeModels(basicReactingCloud);
-    makeReactingParcelSurfaceFilmModels(basicReactingCloud);
 }
 
 

@@ -1,7 +1,7 @@
 const dictionary& alphaControls = mesh.solverDict(alpha1.name());
 label nAlphaCorr(readLabel(alphaControls.lookup("nAlphaCorr")));
 label nAlphaSubCycles(readLabel(alphaControls.lookup("nAlphaSubCycles")));
-Switch MULESCorr(alphaControls.lookup("MULESCorr"));
+Switch MULESCorr(alphaControls.lookupOrDefault<Switch>("MULESCorr", false));
 
 if (nAlphaSubCycles > 1 && pimple.nCorrPIMPLE() != 1)
 {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,7 @@ Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
     YGas_(0),
     YLiquid_(0),
     YSolid_(0),
-    canCombust_(false)
+    canCombust_(0)
 {
     if (readFields)
     {

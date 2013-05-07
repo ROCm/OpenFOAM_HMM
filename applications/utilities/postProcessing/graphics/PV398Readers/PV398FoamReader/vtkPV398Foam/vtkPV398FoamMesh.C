@@ -179,12 +179,13 @@ void Foam::vtkPV398Foam::convertMeshPatches
 
         const word patchName = getPartName(partId);
 
-        labelHashSet patchIds(patches.patchSet(List<wordRe>(1, patchName)));
+        labelHashSet
+            patchIds(patches.patchSet(List<wordRe>(1, wordRe(patchName))));
 
         if (debug)
         {
             Info<< "Creating VTK mesh for patches [" << patchIds <<"] "
-                << patchName  << endl;
+                << patchName << endl;
         }
 
         vtkPolyData* vtkmesh = NULL;

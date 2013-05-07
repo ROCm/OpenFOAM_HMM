@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     const fileName outFileName = args[3];
 
     Info<< "Reading surface from " << surfFileName << " ..." << endl;
-    Info<< "Merging points within " << mergeTol << " meter." << endl;
+    Info<< "Merging points within " << mergeTol << " metre." << endl;
 
     triSurface surf1(surfFileName);
 

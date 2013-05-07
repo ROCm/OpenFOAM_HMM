@@ -181,6 +181,7 @@ $(derivedFvPatchFields)/translatingWallVelocity/translatingWallVelocityFvPatchVe
 $(derivedFvPatchFields)/turbulentInlet/turbulentInletFvPatchFields.C
 $(derivedFvPatchFields)/turbulentIntensityKineticEnergyInlet/turbulentIntensityKineticEnergyInletFvPatchScalarField.C
 $(derivedFvPatchFields)/uniformDensityHydrostaticPressure/uniformDensityHydrostaticPressureFvPatchScalarField.C
+$(derivedFvPatchFields)/uniformFixedGradient/uniformFixedGradientFvPatchFields.C
 $(derivedFvPatchFields)/uniformFixedValue/uniformFixedValueFvPatchFields.C
 $(derivedFvPatchFields)/uniformJump/uniformJumpFvPatchFields.C
 $(derivedFvPatchFields)/uniformJumpAMI/uniformJumpAMIFvPatchFields.C
@@ -401,6 +402,5 @@ $(SRF)/SRFModel/SRFModel/SRFModelNew.C
 $(SRF)/SRFModel/rpm/rpm.C
 $(SRF)/derivedFvPatchFields/SRFVelocityFvPatchVectorField/SRFVelocityFvPatchVectorField.C
 $(SRF)/derivedFvPatchFields/SRFFreestreamVelocityFvPatchVectorField/SRFFreestreamVelocityFvPatchVectorField.C
-
 
 LIB = $(FOAM_LIBBIN)/libfiniteVolume

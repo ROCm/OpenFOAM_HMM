@@ -133,7 +133,7 @@ void Foam::refinementFeatures::read
         {
             Info<< "    level " << levels_[featI][j]
                 << " for all cells within " << distances_[featI][j]
-                << " meter." << endl;
+                << " metre." << endl;
         }
     }
 }

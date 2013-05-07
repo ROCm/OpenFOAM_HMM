@@ -117,6 +117,8 @@ subModels
 
     devolatilisationModel constantRateDevolatilisation;
 
+    stochasticCollisionModel none;
+
     surfaceReactionModel COxidationKineticDiffusionLimitedRate;
 
     surfaceFilmModel none;

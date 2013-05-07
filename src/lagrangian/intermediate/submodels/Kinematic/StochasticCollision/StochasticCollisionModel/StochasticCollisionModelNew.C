@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,7 @@ Foam::StochasticCollisionModel<CloudType>::New
 {
     word modelType(dict.lookup("stochasticCollisionModel"));
 
-    Info<< "Selecting StochasticCollisionModel " << modelType << endl;
+    Info<< "Selecting stochastic collision model " << modelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
@@ -51,9 +51,9 @@ Foam::StochasticCollisionModel<CloudType>::New
                 "const dictionary&, "
                 "CloudType&"
             ")"
-        )   << "Unknown StochasticCollisionModelType type "
+        )   << "Unknown model type type "
             << modelType << ", constructor not in hash table" << nl << nl
-            << "    Valid StochasticCollisionModel types are:" << nl
+            << "    Valid model types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
     }
 

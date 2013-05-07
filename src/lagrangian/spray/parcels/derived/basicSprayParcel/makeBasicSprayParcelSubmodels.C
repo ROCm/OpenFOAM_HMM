@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,6 +32,7 @@ License
 #include "makeParcelDispersionModels.H"
 #include "makeSprayParcelInjectionModels.H" // Spray variant
 #include "makeParcelPatchInteractionModels.H"
+#include "makeSprayParcelStochasticCollisionModels.H" // Spray variant
 
 // Thermodynamic
 #include "makeParcelHeatTransferModels.H"
@@ -44,7 +45,6 @@ License
 // Spray
 #include "makeSprayParcelAtomizationModels.H"
 #include "makeSprayParcelBreakupModels.H"
-#include "makeSprayParcelCollisionModels.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,6 +57,7 @@ namespace Foam
     makeParcelDispersionModels(basicSprayCloud);
     makeSprayParcelInjectionModels(basicSprayCloud);
     makeParcelPatchInteractionModels(basicSprayCloud);
+    makeSprayParcelStochasticCollisionModels(basicSprayCloud);
 
     // Thermo sub-models
     makeParcelHeatTransferModels(basicSprayCloud);
@@ -69,7 +70,6 @@ namespace Foam
     // Spray sub-models
     makeSprayParcelAtomizationModels(basicSprayCloud);
     makeSprayParcelBreakupModels(basicSprayCloud);
-    makeSprayParcelCollisionModels(basicSprayCloud);
 };
 
 
