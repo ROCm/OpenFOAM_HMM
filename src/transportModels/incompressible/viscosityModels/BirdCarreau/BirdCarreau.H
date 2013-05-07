@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,9 @@ Class
 
 Description
     An incompressible Bird-Carreau non-Newtonian viscosity model.
+
+    The Bird-Carreau-Yasuda form is also supported if the optional "a"
+    coefficient is specified.  "a" defaults to 2 for the Bird-Carreau model.
 
 SourceFiles
     BirdCarreau.C
@@ -62,6 +65,7 @@ class BirdCarreau
         dimensionedScalar nuInf_;
         dimensionedScalar k_;
         dimensionedScalar n_;
+        dimensionedScalar a_;
 
         volScalarField nu_;
 
