@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -132,6 +132,12 @@ public:
         virtual int tag() const
         {
             return procPolyPatch_.tag();
+        }
+
+        //- Return communicator used for communication
+        virtual label comm() const
+        {
+            return procPolyPatch_.comm();
         }
 
         //- Return the constraint type this pointPatch implements.

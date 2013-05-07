@@ -246,14 +246,6 @@ public:
             }
         }
 
-
-        //- Return communicator used for communication
-        label comm() const
-        {
-            //return comm_;
-            return boundaryMesh().mesh().comm();
-        }
-
         //- Return processor number
         int myProcNo() const
         {
@@ -265,30 +257,6 @@ public:
         {
             return neighbProcNo_;
         }
-
-
-        // For testing
-
-//            //- Return communicator used for communication
-//            label& comm()
-//            {
-//                return comm_;
-//            }
-
-            //- Return processor number
-            int& myProcNo()
-            {
-                return myProcNo_;
-            }
-
-            //- Return neigbour processor number
-            int& neighbProcNo()
-            {
-                return neighbProcNo_;
-            }
-
-
-
 
         //- Does the processor own the patch ?
         virtual bool owner() const
@@ -330,6 +298,12 @@ public:
         virtual int tag() const
         {
             return Pstream::msgType();
+        }
+
+        //- Return communicator used for communication
+        virtual label comm() const
+        {
+            return boundaryMesh().mesh().comm();
         }
 
         //- Transform a patch-based position from other side to this side
