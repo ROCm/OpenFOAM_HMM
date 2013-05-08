@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,8 +52,12 @@ void triSurface::writeOBJ(const bool writeSorted, Ostream& os) const
     // Print patch names as comment
     forAll(myPatches, patchI)
     {
-        os  << "#     " << patchI << "    "
-            << myPatches[patchI].name() << nl;
+        const surfacePatch& patch = myPatches[patchI];
+
+        if (patch.size() > 0)
+        {
+            os  << "#     " << patchI << "    " << patch.name() << nl;
+        }
     }
     os  << "#" << nl;
 
@@ -77,25 +81,29 @@ void triSurface::writeOBJ(const bool writeSorted, Ostream& os) const
 
         forAll(myPatches, patchI)
         {
+            const surfacePatch& patch = myPatches[patchI];
+
             // Print all faces belonging to this patch
-
-            os  << "g " << myPatches[patchI].name() << nl;
-
-            for
-            (
-                label patchFaceI = 0;
-                patchFaceI < myPatches[patchI].size();
-                patchFaceI++
-            )
+            if (patch.size() > 0)
             {
-                const label faceI = faceMap[faceIndex++];
+                os  << "g " << patch.name() << nl;
 
-                os  << "f "
-                    << operator[](faceI)[0] + 1 << ' '
-                    << operator[](faceI)[1] + 1 << ' '
-                    << operator[](faceI)[2] + 1
-                    //<< "  # " << operator[](faceI).region()
-                    << nl;
+                for
+                (
+                    label patchFaceI = 0;
+                    patchFaceI < patch.size();
+                    patchFaceI++
+                )
+                {
+                    const label faceI = faceMap[faceIndex++];
+
+                    os  << "f "
+                        << operator[](faceI)[0] + 1 << ' '
+                        << operator[](faceI)[1] + 1 << ' '
+                        << operator[](faceI)[2] + 1
+                        //<< "  # " << operator[](faceI).region()
+                        << nl;
+                }
             }
         }
     }

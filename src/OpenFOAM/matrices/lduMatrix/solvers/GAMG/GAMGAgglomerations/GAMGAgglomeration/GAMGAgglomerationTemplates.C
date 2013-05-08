@@ -126,8 +126,7 @@ void Foam::GAMGAgglomeration::restrictField
         const List<int>& procIDs = agglomProcIDs(coarseLevelIndex);
         const labelList& offsets = cellOffsets(coarseLevelIndex);
 
-        const globalIndex cellOffsetter(offsets);
-        cellOffsetter.gather(fineComm, procIDs, cf);
+        globalIndex::gather(offsets, fineComm, procIDs, cf);
     }
 }
 
@@ -192,19 +191,10 @@ void Foam::GAMGAgglomeration::prolongField
         const List<int>& procIDs = agglomProcIDs(coarseLevelIndex);
         const labelList& offsets = cellOffsets(coarseLevelIndex);
 
-        const globalIndex cellOffsetter(offsets);
-
         label localSize = nCells_[levelIndex];
 
-
         Field<Type> allCf(localSize);
-        cellOffsetter.scatter
-        (
-            coarseComm,
-            procIDs,
-            cf,
-            allCf
-        );
+        globalIndex::scatter(offsets, coarseComm, procIDs, cf, allCf);
 
         forAll(fineToCoarse, i)
         {

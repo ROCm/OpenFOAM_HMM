@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,39 +43,42 @@ void Foam::triSurface::writeSTLASCII(Ostream& os) const
         // Print all faces belonging to this region
         const surfacePatch& patch = myPatches[patchI];
 
-        os  << "solid " << patch.name() << endl;
-
-        for
-        (
-            label patchFaceI = 0;
-            patchFaceI < patch.size();
-            patchFaceI++
-        )
+        if (patch.size() > 0)
         {
-            const label faceI = faceMap[faceIndex++];
+            os  << "solid " << patch.name() << endl;
 
-            const vector& n = faceNormals()[faceI];
+            for
+            (
+                label patchFaceI = 0;
+                patchFaceI < patch.size();
+                patchFaceI++
+            )
+            {
+                const label faceI = faceMap[faceIndex++];
 
-            os  << "  facet normal "
-                << n.x() << ' ' << n.y() << ' ' << n.z() << nl
-                << "    outer loop" << endl;
+                const vector& n = faceNormals()[faceI];
 
-            const labelledTri& f = (*this)[faceI];
-            const point& pa = points()[f[0]];
-            const point& pb = points()[f[1]];
-            const point& pc = points()[f[2]];
+                os  << "  facet normal "
+                    << n.x() << ' ' << n.y() << ' ' << n.z() << nl
+                    << "    outer loop" << endl;
 
-            os  << "       vertex "
-                << pa.x() << ' ' << pa.y() << ' ' << pa.z() << nl
-                << "       vertex "
-                << pb.x() << ' ' << pb.y() << ' ' << pb.z() << nl
-                << "       vertex "
-                << pc.x() << ' ' << pc.y() << ' ' << pc.z() << nl
-                << "    endloop" << nl
-                << "  endfacet" << endl;
+                const labelledTri& f = (*this)[faceI];
+                const point& pa = points()[f[0]];
+                const point& pb = points()[f[1]];
+                const point& pc = points()[f[2]];
+
+                os  << "       vertex "
+                    << pa.x() << ' ' << pa.y() << ' ' << pa.z() << nl
+                    << "       vertex "
+                    << pb.x() << ' ' << pb.y() << ' ' << pb.z() << nl
+                    << "       vertex "
+                    << pc.x() << ' ' << pc.y() << ' ' << pc.z() << nl
+                    << "    endloop" << nl
+                    << "  endfacet" << endl;
+            }
+
+            os  << "endsolid " << patch.name() << endl;
         }
-
-        os  << "endsolid " << patch.name() << endl;
     }
 }
 

@@ -30,28 +30,24 @@ License
 template<class Type>
 void Foam::globalIndex::gather
 (
+    const labelUList& offsets,
     const label comm,
     const labelList& procIDs,
     const UList<Type>& fld,
     List<Type>& allFld,
     const int tag
-) const
+)
 {
     if (Pstream::myProcNo(comm) == procIDs[0])
     {
-        allFld.setSize(size());
+        allFld.setSize(offsets.last());
 
         // Assign my local data
         SubList<Type>(allFld, fld.size(), 0).assign(fld);
 
         for (label i = 1; i < procIDs.size(); i++)
         {
-            SubList<Type> procSlot
-            (
-                allFld,
-                offsets_[i+1]-offsets_[i],
-                offsets_[i]
-            );
+            SubList<Type> procSlot(allFld, offsets[i+1]-offsets[i], offsets[i]);
 
             if (contiguous<Type>())
             {
@@ -112,27 +108,23 @@ void Foam::globalIndex::gather
 template<class Type>
 void Foam::globalIndex::gather
 (
+    const labelUList& offsets,
     const label comm,
     const labelList& procIDs,
     List<Type>& fld,
     const int tag
-) const
+)
 {
     if (Pstream::myProcNo(comm) == procIDs[0])
     {
-        List<Type> allFld(size());
+        List<Type> allFld(offsets.last());
 
         // Assign my local data
         SubList<Type>(allFld, fld.size(), 0).assign(fld);
 
         for (label i = 1; i < procIDs.size(); i++)
         {
-            SubList<Type> procSlot
-            (
-                allFld,
-                offsets_[i+1]-offsets_[i],
-                offsets_[i]
-            );
+            SubList<Type> procSlot(allFld, offsets[i+1]-offsets[i], offsets[i]);
 
             if (contiguous<Type>())
             {
@@ -195,31 +187,25 @@ void Foam::globalIndex::gather
 template<class Type>
 void Foam::globalIndex::scatter
 (
+    const labelUList& offsets,
     const label comm,
     const labelList& procIDs,
     const UList<Type>& allFld,
     UList<Type>& fld,
     const int tag
-) const
+)
 {
     if (Pstream::myProcNo(comm) == procIDs[0])
     {
-        fld.assign
-        (
-            SubList<Type>
-            (
-                allFld,
-                offsets_[1]-offsets_[0]
-            )
-        );
+        fld.assign(SubList<Type>(allFld, offsets[1]-offsets[0]));
 
         for (label i = 1; i < procIDs.size(); i++)
         {
             const SubList<Type> procSlot
             (
                 allFld,
-                offsets_[i+1]-offsets_[i],
-                offsets_[i]
+                offsets[i+1]-offsets[i],
+                offsets[i]
             );
 
             if (contiguous<Type>())
