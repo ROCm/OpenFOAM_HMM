@@ -365,9 +365,6 @@ void Foam::distributedTriSurfaceMesh::findLine
 {
     const indexedOctree<treeDataTriSurface>& octree = tree();
 
-    // Important:force synchronised construction of indexing
-    const globalIndex& triIndexer = globalTris();
-
     // Initialise
     info.setSize(start.size());
     forAll(info, i)
@@ -375,15 +372,9 @@ void Foam::distributedTriSurfaceMesh::findLine
         info[i].setMiss();
     }
 
-
-    // Do any local queries
-    // ~~~~~~~~~~~~~~~~~~~~
-
-    label nLocal = 0;
-
-    forAll(start, i)
+    if (!Pstream::parRun())
     {
-        if (isLocal(procBb_[Pstream::myProcNo()], start[i], end[i]))
+        forAll(start, i)
         {
             if (nearestIntersection)
             {
@@ -393,126 +384,149 @@ void Foam::distributedTriSurfaceMesh::findLine
             {
                 info[i] = octree.findLineAny(start[i], end[i]);
             }
-
-            if (info[i].hit())
-            {
-                info[i].setIndex(triIndexer.toGlobal(info[i].index()));
-            }
-            nLocal++;
         }
     }
+    else
+    {
+        // Important:force synchronised construction of indexing
+        const globalIndex& triIndexer = globalTris();
 
 
-    if
-    (
-        Pstream::parRun()
-     && (
+        // Do any local queries
+        // ~~~~~~~~~~~~~~~~~~~~
+
+        label nLocal = 0;
+
+        forAll(start, i)
+        {
+            if (isLocal(procBb_[Pstream::myProcNo()], start[i], end[i]))
+            {
+                if (nearestIntersection)
+                {
+                    info[i] = octree.findLine(start[i], end[i]);
+                }
+                else
+                {
+                    info[i] = octree.findLineAny(start[i], end[i]);
+                }
+
+                if (info[i].hit())
+                {
+                    info[i].setIndex(triIndexer.toGlobal(info[i].index()));
+                }
+                nLocal++;
+            }
+        }
+
+
+        if
+        (
             returnReduce(nLocal, sumOp<label>())
           < returnReduce(start.size(), sumOp<label>())
         )
-    )
-    {
-        // Not all can be resolved locally. Build segments and map, send over
-        // segments, do intersections, send back and merge.
+        {
+            // Not all can be resolved locally. Build segments and map,
+            // send over segments, do intersections, send back and merge.
 
 
-        // Construct queries (segments)
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // Construct queries (segments)
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        // Segments to test
-        List<segment> allSegments(start.size());
-        // Original index of segment
-        labelList allSegmentMap(start.size());
+            // Segments to test
+            List<segment> allSegments(start.size());
+            // Original index of segment
+            labelList allSegmentMap(start.size());
 
-        const autoPtr<mapDistribute> mapPtr
-        (
-            distributeSegments
+            const autoPtr<mapDistribute> mapPtr
             (
-                start,
-                end,
-                allSegments,
-                allSegmentMap
-            )
-        );
-        const mapDistribute& map = mapPtr();
-
-        label nOldAllSegments = allSegments.size();
-
-
-        // Exchange the segments
-        // ~~~~~~~~~~~~~~~~~~~~~
-
-        map.distribute(allSegments);
-
-
-        // Do tests I need to do
-        // ~~~~~~~~~~~~~~~~~~~~~
-
-        // Intersections
-        List<pointIndexHit> intersections(allSegments.size());
-
-        forAll(allSegments, i)
-        {
-            if (nearestIntersection)
-            {
-                intersections[i] = octree.findLine
+                distributeSegments
                 (
-                    allSegments[i].first(),
-                    allSegments[i].second()
-                );
-            }
-            else
+                    start,
+                    end,
+                    allSegments,
+                    allSegmentMap
+                )
+            );
+            const mapDistribute& map = mapPtr();
+
+            label nOldAllSegments = allSegments.size();
+
+
+            // Exchange the segments
+            // ~~~~~~~~~~~~~~~~~~~~~
+
+            map.distribute(allSegments);
+
+
+            // Do tests I need to do
+            // ~~~~~~~~~~~~~~~~~~~~~
+
+            // Intersections
+            List<pointIndexHit> intersections(allSegments.size());
+
+            forAll(allSegments, i)
             {
-                intersections[i] = octree.findLineAny
-                (
-                    allSegments[i].first(),
-                    allSegments[i].second()
-                );
-            }
-
-            // Convert triangle index to global numbering
-            if (intersections[i].hit())
-            {
-                intersections[i].setIndex
-                (
-                    triIndexer.toGlobal(intersections[i].index())
-                );
-            }
-        }
-
-
-        // Exchange the intersections (opposite to segments)
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        map.reverseDistribute(nOldAllSegments, intersections);
-
-
-        // Extract the hits
-        // ~~~~~~~~~~~~~~~~
-
-        forAll(intersections, i)
-        {
-            const pointIndexHit& allInfo = intersections[i];
-            label segmentI = allSegmentMap[i];
-            pointIndexHit& hitInfo = info[segmentI];
-
-            if (allInfo.hit())
-            {
-                if (!hitInfo.hit())
+                if (nearestIntersection)
                 {
-                    // No intersection yet so take this one
-                    hitInfo = allInfo;
-                }
-                else if (nearestIntersection)
-                {
-                    // Nearest intersection
-                    if
+                    intersections[i] = octree.findLine
                     (
-                        magSqr(allInfo.hitPoint()-start[segmentI])
-                      < magSqr(hitInfo.hitPoint()-start[segmentI])
-                    )
+                        allSegments[i].first(),
+                        allSegments[i].second()
+                    );
+                }
+                else
+                {
+                    intersections[i] = octree.findLineAny
+                    (
+                        allSegments[i].first(),
+                        allSegments[i].second()
+                    );
+                }
+
+                // Convert triangle index to global numbering
+                if (intersections[i].hit())
+                {
+                    intersections[i].setIndex
+                    (
+                        triIndexer.toGlobal(intersections[i].index())
+                    );
+                }
+            }
+
+
+            // Exchange the intersections (opposite to segments)
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            map.reverseDistribute(nOldAllSegments, intersections);
+
+
+            // Extract the hits
+            // ~~~~~~~~~~~~~~~~
+
+            forAll(intersections, i)
+            {
+                const pointIndexHit& allInfo = intersections[i];
+                label segmentI = allSegmentMap[i];
+                pointIndexHit& hitInfo = info[segmentI];
+
+                if (allInfo.hit())
+                {
+                    if (!hitInfo.hit())
                     {
+                        // No intersection yet so take this one
                         hitInfo = allInfo;
+                    }
+                    else if (nearestIntersection)
+                    {
+                        // Nearest intersection
+                        if
+                        (
+                            magSqr(allInfo.hitPoint()-start[segmentI])
+                          < magSqr(hitInfo.hitPoint()-start[segmentI])
+                        )
+                        {
+                            hitInfo = allInfo;
+                        }
                     }
                 }
             }

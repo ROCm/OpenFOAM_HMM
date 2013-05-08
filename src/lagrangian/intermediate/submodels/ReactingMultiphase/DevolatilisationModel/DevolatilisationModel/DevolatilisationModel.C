@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -82,7 +82,7 @@ void Foam::DevolatilisationModel<CloudType>::calculate
     const scalarField&,
     const scalarField&,
     const scalarField&,
-    bool&,
+    label&,
     scalarField&
 ) const
 {
@@ -98,7 +98,7 @@ void Foam::DevolatilisationModel<CloudType>::calculate
             "const scalarField&, "
             "const scalarField&, "
             "const scalarField&, "
-            "bool&, "
+            "label&, "
             "scalarField&"
         ") const"
     );

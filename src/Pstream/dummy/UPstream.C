@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,28 +55,41 @@ void Foam::UPstream::abort()
 }
 
 
-void Foam::reduce(scalar&, const sumOp<scalar>&, const int)
+void Foam::reduce(scalar&, const sumOp<scalar>&, const int, const label)
 {}
 
 
-void Foam::reduce(scalar&, const minOp<scalar>&, const int)
+void Foam::reduce(scalar&, const minOp<scalar>&, const int, const label)
 {}
 
 
-void Foam::reduce(vector2D&, const sumOp<vector2D>&, const int)
+void Foam::reduce(vector2D&, const sumOp<vector2D>&, const int, const label)
 {}
 
 
 void Foam::sumReduce
 (
-    scalar& Value,
-    label& Count,
-    const int tag
+    scalar&,
+    label&,
+    const int,
+    const label
 )
 {}
 
 
-void Foam::reduce(scalar&, const sumOp<scalar>&, const int, label&)
+void Foam::reduce(scalar&, const sumOp<scalar>&, const int, const label, label&)
+{}
+
+
+void Foam::UPstream::allocatePstreamCommunicator
+(
+    const label,
+    const label
+)
+{}
+
+
+void Foam::UPstream::freePstreamCommunicator(const label)
 {}
 
 

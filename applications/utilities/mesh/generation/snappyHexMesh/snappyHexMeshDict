@@ -222,6 +222,11 @@ castellatedMeshControls
     // are only on the boundary of corresponding cellZones or also allow
     // free-standing zone faces. Not used if there are no faceZones.
     allowFreeStandingZoneFaces true;
+
+
+    // Optional: whether all baffles get eroded away. WIP. Used for
+    // surface simplification.
+    //allowFreeStandingBaffles false;
 }
 
 // Settings for the snapping.

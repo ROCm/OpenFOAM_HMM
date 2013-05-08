@@ -373,7 +373,8 @@ Foam::argList::argList
     int& argc,
     char**& argv,
     bool checkArgs,
-    bool checkOpts
+    bool checkOpts,
+    const bool initialise
 )
 :
     args_(argc),
@@ -405,12 +406,12 @@ Foam::argList::argList
 
     // Check arguments and options, we already have argv[0]
     int nArgs = 1;
-    string argListString = args_[0];
+    argListStr_ = args_[0];
 
     for (int argI = 1; argI < args_.size(); ++argI)
     {
-        argListString += ' ';
-        argListString += args_[argI];
+        argListStr_ += ' ';
+        argListStr_ += args_[argI];
 
         if (args_[argI][0] == '-')
         {
@@ -438,8 +439,8 @@ Foam::argList::argList
                     FatalError.exit();
                 }
 
-                argListString += ' ';
-                argListString += args_[argI];
+                argListStr_ += ' ';
+                argListStr_ += args_[argI];
                 options_.insert(optionName, args_[argI]);
             }
             else
@@ -459,6 +460,39 @@ Foam::argList::argList
 
     args_.setSize(nArgs);
 
+    parse(checkArgs, checkOpts, initialise);
+}
+
+
+Foam::argList::argList
+(
+    const argList& args,
+    const HashTable<string>& options,
+    bool checkArgs,
+    bool checkOpts,
+    bool initialise
+)
+:
+    args_(args.args_),
+    options_(options),
+    executable_(args.executable_),
+    rootPath_(args.rootPath_),
+    globalCase_(args.globalCase_),
+    case_(args.case_),
+    argListStr_(args.argListStr_),
+    parRunControl_(args.parRunControl_)
+{
+    parse(checkArgs, checkOpts, initialise);
+}
+
+
+void Foam::argList::parse
+(
+    bool checkArgs,
+    bool checkOpts,
+    bool initialise
+)
+{
     // Help/documentation options:
     //   -help    print the usage
     //   -doc     display application documentation in browser
@@ -495,42 +529,44 @@ Foam::argList::argList
     }
 
 
-    string dateString = clock::date();
-    string timeString = clock::clockTime();
-
-    // Print the banner once only for parallel runs
-    if (Pstream::master() && bannerEnabled)
+    if (initialise)
     {
-        IOobject::writeBanner(Info, true)
-            << "Build  : " << Foam::FOAMbuild << nl
-            << "Exec   : " << argListString.c_str() << nl
-            << "Date   : " << dateString.c_str() << nl
-            << "Time   : " << timeString.c_str() << nl
-            << "Host   : " << hostName() << nl
-            << "PID    : " << pid() << endl;
-    }
+        string dateString = clock::date();
+        string timeString = clock::clockTime();
 
-    jobInfo.add("startDate", dateString);
-    jobInfo.add("startTime", timeString);
-    jobInfo.add("userName", userName());
-    jobInfo.add("foamVersion", word(FOAMversion));
-    jobInfo.add("code", executable_);
-    jobInfo.add("argList", argListString);
-    jobInfo.add("currentDir", cwd());
-    jobInfo.add("PPID", ppid());
-    jobInfo.add("PGID", pgid());
-
-    // add build information - only use the first word
-    {
-        std::string build(Foam::FOAMbuild);
-        std::string::size_type found = build.find(' ');
-        if (found != std::string::npos)
+        // Print the banner once only for parallel runs
+        if (Pstream::master() && bannerEnabled)
         {
-            build.resize(found);
+            IOobject::writeBanner(Info, true)
+                << "Build  : " << Foam::FOAMbuild << nl
+                << "Exec   : " << argListStr_.c_str() << nl
+                << "Date   : " << dateString.c_str() << nl
+                << "Time   : " << timeString.c_str() << nl
+                << "Host   : " << hostName() << nl
+                << "PID    : " << pid() << endl;
         }
-        jobInfo.add("foamBuild", build);
-    }
 
+        jobInfo.add("startDate", dateString);
+        jobInfo.add("startTime", timeString);
+        jobInfo.add("userName", userName());
+        jobInfo.add("foamVersion", word(FOAMversion));
+        jobInfo.add("code", executable_);
+        jobInfo.add("argList", argListStr_);
+        jobInfo.add("currentDir", cwd());
+        jobInfo.add("PPID", ppid());
+        jobInfo.add("PGID", pgid());
+
+        // add build information - only use the first word
+        {
+            std::string build(Foam::FOAMbuild);
+            std::string::size_type found = build.find(' ');
+            if (found != std::string::npos)
+            {
+                build.resize(found);
+            }
+            jobInfo.add("foamBuild", build);
+        }
+    }
 
     // Case is a single processor run unless it is running parallel
     int nProcs = 1;
@@ -781,51 +817,55 @@ Foam::argList::argList
         }
     }
 
-    jobInfo.add("root", rootPath_);
-    jobInfo.add("case", globalCase_);
-    jobInfo.add("nProcs", nProcs);
-    if (slaveProcs.size())
+    if (initialise)
     {
-        jobInfo.add("slaves", slaveProcs);
-    }
-    if (roots.size())
-    {
-        jobInfo.add("roots", roots);
-    }
-    jobInfo.write();
-
-    // Switch on signal trapping. We have to wait until after Pstream::init
-    // since this sets up its own ones.
-    sigFpe_.set(bannerEnabled);
-    sigInt_.set(bannerEnabled);
-    sigQuit_.set(bannerEnabled);
-    sigSegv_.set(bannerEnabled);
-
-    if (bannerEnabled)
-    {
-        Info<< "fileModificationChecking : "
-            << "Monitoring run-time modified files using "
-            << regIOobject::fileCheckTypesNames
-                [
-                    regIOobject::fileModificationChecking
-                ]
-            << endl;
-
-        Info<< "allowSystemOperations : ";
-        if (dynamicCode::allowSystemOperations)
+        jobInfo.add("root", rootPath_);
+        jobInfo.add("case", globalCase_);
+        jobInfo.add("nProcs", nProcs);
+        if (slaveProcs.size())
         {
-            Info<< "Allowing user-supplied system call operations" << endl;
+            jobInfo.add("slaves", slaveProcs);
         }
-        else
+        if (roots.size())
         {
-            Info<< "Disallowing user-supplied system call operations" << endl;
+            jobInfo.add("roots", roots);
         }
-    }
+        jobInfo.write();
 
-    if (Pstream::master() && bannerEnabled)
-    {
-        Info<< endl;
-        IOobject::writeDivider(Info);
+        // Switch on signal trapping. We have to wait until after Pstream::init
+        // since this sets up its own ones.
+        sigFpe_.set(bannerEnabled);
+        sigInt_.set(bannerEnabled);
+        sigQuit_.set(bannerEnabled);
+        sigSegv_.set(bannerEnabled);
+
+        if (bannerEnabled)
+        {
+            Info<< "fileModificationChecking : "
+                << "Monitoring run-time modified files using "
+                << regIOobject::fileCheckTypesNames
+                    [
+                        regIOobject::fileModificationChecking
+                    ]
+                << endl;
+
+            Info<< "allowSystemOperations : ";
+            if (dynamicCode::allowSystemOperations)
+            {
+                Info<< "Allowing user-supplied system call operations" << endl;
+            }
+            else
+            {
+                Info<< "Disallowing user-supplied system call operations"
+                    << endl;
+            }
+        }
+
+        if (Pstream::master() && bannerEnabled)
+        {
+            Info<< endl;
+            IOobject::writeDivider(Info);
+        }
     }
 }
 

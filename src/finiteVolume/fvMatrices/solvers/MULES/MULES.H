@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,17 +36,20 @@ Description
 
 SourceFiles
     MULES.C
+    MULESTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef MULES_H
 #define MULES_H
 
-#include "volFields.H"
+#include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
 #include "primitiveFieldsFwd.H"
 #include "geometricOneField.H"
 #include "zero.H"
+#include "zeroField.H"
+#include "UPtrList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -89,12 +92,22 @@ void explicitSolve
     const scalar psiMin
 );
 
+
 template<class RhoType, class SpType, class SuType>
-void implicitSolve
+void correct
 (
     const RhoType& rho,
-    volScalarField& gamma,
-    const surfaceScalarField& phi,
+    volScalarField& psi,
+    const surfaceScalarField& phiCorr,
+    const SpType& Sp,
+    const SuType& Su
+);
+
+template<class RhoType, class SpType, class SuType>
+void correct
+(
+    const RhoType& rho,
+    volScalarField& psi,
     surfaceScalarField& phiCorr,
     const SpType& Sp,
     const SuType& Su,
@@ -102,14 +115,14 @@ void implicitSolve
     const scalar psiMin
 );
 
-void implicitSolve
+void correct
 (
-    volScalarField& gamma,
-    const surfaceScalarField& phi,
+    volScalarField& psi,
     surfaceScalarField& phiCorr,
     const scalar psiMax,
     const scalar psiMin
 );
+
 
 template<class RhoType, class SpType, class SuType>
 void limiter
@@ -140,6 +153,35 @@ void limit
     const label nLimiterIter,
     const bool returnCorr
 );
+
+
+template<class RhoType, class SpType, class SuType>
+void limiterCorr
+(
+    scalarField& allLambda,
+    const RhoType& rho,
+    const volScalarField& psi,
+    const surfaceScalarField& phiCorr,
+    const SpType& Sp,
+    const SuType& Su,
+    const scalar psiMax,
+    const scalar psiMin,
+    const label nLimiterIter
+);
+
+template<class RhoType, class SpType, class SuType>
+void limitCorr
+(
+    const RhoType& rho,
+    const volScalarField& psi,
+    surfaceScalarField& phiCorr,
+    const SpType& Sp,
+    const SuType& Su,
+    const scalar psiMax,
+    const scalar psiMin,
+    const label nLimiterIter
+);
+
 
 void limitSum(UPtrList<scalarField>& phiPsiCorrs);
 

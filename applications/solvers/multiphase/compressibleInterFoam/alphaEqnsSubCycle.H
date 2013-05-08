@@ -1,7 +1,5 @@
 {
-    label nAlphaCorr(readLabel(pimple.dict().lookup("nAlphaCorr")));
-
-    label nAlphaSubCycles(readLabel(pimple.dict().lookup("nAlphaSubCycles")));
+    #include "alphaControls.H"
 
     surfaceScalarField phic(mag(phi/mesh.magSf()));
     phic = min(interface.cAlpha()*phic, max(phic));

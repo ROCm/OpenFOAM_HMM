@@ -72,13 +72,21 @@ protected:
         labelList maskCells() const;
 
         //- Return the true if cells intersect
-        bool intersect(const label srcCellI, const label tgtCellI) const;
+        virtual bool intersect
+        (
+            const label srcCellI,
+            const label tgtCellI
+        ) const;
 
         //- Return the intersection volume between two cells
-        scalar interVol(const label srcCellI, const label tgtCellI) const;
+        virtual scalar interVol
+        (
+            const label srcCellI,
+            const label tgtCellI
+        ) const;
 
         //- Append target cell neihgbour cells to cellIDs list
-        void appendNbrCells
+        virtual void appendNbrCells
         (
             const label tgtCellI,
             const polyMesh& mesh,
@@ -86,7 +94,7 @@ protected:
             DynamicList<label>& nbrTgtCellIDs
         ) const;
 
-        bool initialise
+        virtual bool initialise
         (
             labelListList& srcToTgtAddr,
             scalarListList& srcToTgtWght,

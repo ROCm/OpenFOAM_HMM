@@ -4,9 +4,41 @@
 
     surfaceScalarField phir("phir", phic*interface.nHatf());
 
-    for (int gCorr=0; gCorr<nAlphaCorr; gCorr++)
+    Pair<tmp<volScalarField> > vDotAlphal =
+        twoPhaseProperties->vDotAlphal();
+    const volScalarField& vDotcAlphal = vDotAlphal[0]();
+    const volScalarField& vDotvAlphal = vDotAlphal[1]();
+    const volScalarField vDotvmcAlphal(vDotvAlphal - vDotcAlphal);
+
+    tmp<surfaceScalarField> tphiAlpha;
+
+    if (MULESCorr)
     {
-        surfaceScalarField phiAlpha
+        fvScalarMatrix alpha1Eqn
+        (
+            fvm::ddt(alpha1)
+          + fvm::div(phi, alpha1, "UD") - fvm::Sp(divU, alpha1)
+         ==
+            fvm::Sp(vDotvmcAlphal, alpha1)
+          + vDotcAlphal
+        );
+
+        alpha1Eqn.solve();
+
+        Info<< "Phase-1 volume fraction = "
+            << alpha1.weightedAverage(mesh.Vsc()).value()
+            << "  Min(alpha1) = " << min(alpha1).value()
+            << "  Max(alpha1) = " << max(alpha1).value()
+            << endl;
+
+        tphiAlpha = alpha1Eqn.flux();
+    }
+
+    volScalarField alpha10("alpha10", alpha1);
+
+    for (int aCorr=0; aCorr<nAlphaCorr; aCorr++)
+    {
+        tmp<surfaceScalarField> tphiAlphaCorr
         (
             fvc::flux
             (
@@ -16,70 +48,57 @@
             )
           + fvc::flux
             (
-                -fvc::flux(-phir, scalar(1) - alpha1, alpharScheme),
+                -fvc::flux(-phir, alpha2, alpharScheme),
                 alpha1,
                 alpharScheme
             )
         );
 
-        Pair<tmp<volScalarField> > vDotAlphal =
-            twoPhaseProperties->vDotAlphal();
-        const volScalarField& vDotcAlphal = vDotAlphal[0]();
-        const volScalarField& vDotvAlphal = vDotAlphal[1]();
+        if (MULESCorr)
+        {
+            tphiAlphaCorr() -= tphiAlpha();
 
-        volScalarField Sp
-        (
-            IOobject
+
+            volScalarField alpha100("alpha100", alpha10);
+            alpha10 = alpha1;
+
+            MULES::correct
             (
-                "Sp",
-                runTime.timeName(),
-                mesh
-            ),
-            vDotvAlphal - vDotcAlphal
-        );
+                geometricOneField(),
+                alpha1,
+                tphiAlphaCorr(),
+                vDotvmcAlphal,
+                (
+                    divU*(alpha10 - alpha100)
+                  - vDotvmcAlphal*alpha10
+                )(),
+                1,
+                0
+            );
 
-        volScalarField Su
-        (
-            IOobject
+            tphiAlpha() += tphiAlphaCorr();
+        }
+        else
+        {
+            MULES::explicitSolve
             (
-                "Su",
-                runTime.timeName(),
-                mesh
-            ),
-            // Divergence term is handled explicitly to be
-            // consistent with the explicit transport solution
-            divU*alpha1
-          + vDotcAlphal
-        );
+                geometricOneField(),
+                alpha1,
+                phi,
+                tphiAlphaCorr(),
+                vDotvmcAlphal,
+                (divU*alpha1 + vDotcAlphal)(),
+                1,
+                0
+            );
 
-        //MULES::explicitSolve
-        //(
-        //    geometricOneField(),
-        //    alpha1,
-        //    phi,
-        //    phiAlpha,
-        //    Sp,
-        //    Su,
-        //    1,
-        //    0
-        //);
+            tphiAlpha = tphiAlphaCorr;
+        }
 
-        MULES::implicitSolve
-        (
-            geometricOneField(),
-            alpha1,
-            phi,
-            phiAlpha,
-            Sp,
-            Su,
-            1,
-            0
-        );
-
-        rhoPhi +=
-            (runTime.deltaT()/totalDeltaT)
-           *(phiAlpha*(rho1 - rho2) + phi*rho2);
+        alpha2 = 1.0 - alpha1;
     }
+
+    rhoPhi = tphiAlpha()*(rho1 - rho2) + phi*rho2;
 
     Info<< "Liquid phase volume fraction = "
         << alpha1.weightedAverage(mesh.V()).value()

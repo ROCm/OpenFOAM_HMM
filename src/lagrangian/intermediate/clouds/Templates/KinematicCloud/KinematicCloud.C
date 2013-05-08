@@ -31,6 +31,7 @@ License
 #include "InjectionModelList.H"
 #include "DispersionModel.H"
 #include "PatchInteractionModel.H"
+#include "StochasticCollisionModel.H"
 #include "SurfaceFilmModel.H"
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
@@ -50,6 +51,15 @@ void Foam::KinematicCloud<CloudType>::setModels()
     patchInteractionModel_.reset
     (
         PatchInteractionModel<KinematicCloud<CloudType> >::New
+        (
+            subModelProperties_,
+            *this
+        ).ptr()
+    );
+
+    stochasticCollisionModel_.reset
+    (
+        StochasticCollisionModel<KinematicCloud<CloudType> >::New
         (
             subModelProperties_,
             *this
@@ -181,7 +191,6 @@ void Foam::KinematicCloud<CloudType>::evolveCloud(TrackData& td)
         if (preInjectionSize != this->size())
         {
             updateCellOccupancy();
-
             preInjectionSize = this->size();
         }
 
@@ -191,6 +200,8 @@ void Foam::KinematicCloud<CloudType>::evolveCloud(TrackData& td)
         // Assume that motion will update the cellOccupancy as necessary
         // before it is required.
         td.cloud().motion(td);
+
+        stochasticCollision().update(solution_.trackTime());
     }
     else
     {
@@ -249,6 +260,7 @@ void Foam::KinematicCloud<CloudType>::cloudReset(KinematicCloud<CloudType>& c)
 
     dispersionModel_.reset(c.dispersionModel_.ptr());
     patchInteractionModel_.reset(c.patchInteractionModel_.ptr());
+    stochasticCollisionModel_.reset(c.stochasticCollisionModel_.ptr());
     surfaceFilmModel_.reset(c.surfaceFilmModel_.ptr());
 
     UIntegrator_.reset(c.UIntegrator_.ptr());
@@ -338,6 +350,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     ),
     dispersionModel_(NULL),
     patchInteractionModel_(NULL),
+    stochasticCollisionModel_(NULL),
     surfaceFilmModel_(NULL),
     UIntegrator_(NULL),
     UTrans_
@@ -418,6 +431,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     injectors_(c.injectors_),
     dispersionModel_(c.dispersionModel_->clone()),
     patchInteractionModel_(c.patchInteractionModel_->clone()),
+    stochasticCollisionModel_(c.stochasticCollisionModel_->clone()),
     surfaceFilmModel_(c.surfaceFilmModel_->clone()),
     UIntegrator_(c.UIntegrator_->clone()),
     UTrans_
@@ -507,6 +521,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     injectors_(*this),
     dispersionModel_(NULL),
     patchInteractionModel_(NULL),
+    stochasticCollisionModel_(NULL),
     surfaceFilmModel_(NULL),
     UIntegrator_(NULL),
     UTrans_(NULL),

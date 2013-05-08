@@ -224,6 +224,13 @@ case ThirdParty:
         set mpfr_version=mpfr-3.1.0
         set mpc_version=mpc-0.9
         breaksw
+    case Gcc48:
+    case Gcc48++0x:
+        set gcc_version=gcc-4.8.0
+        set gmp_version=gmp-5.0.4
+        set mpfr_version=mpfr-3.1.0
+        set mpc_version=mpc-0.9
+        breaksw
     case Gcc47:
     case Gcc47++0x:
         set gcc_version=gcc-4.7.2
@@ -242,8 +249,7 @@ case ThirdParty:
         # using clang - not gcc
         setenv WM_CC 'clang'
         setenv WM_CXX 'clang++'
-        set clang_version=llvm-3.1
-        #set clang_version=llvm-svn
+        set clang_version=llvm-3.2
         breaksw
     default:
         echo

@@ -484,13 +484,13 @@ Foam::polyMeshFilter::polyMeshFilter(const fvMesh& mesh)
     minEdgeLen_(),
     faceFilterFactor_()
 {
-    Info<< "Edge Collapser will merge:" << nl
-            << "    edges with length less than " << minLen_ << " meters" << nl
-            << "    edges split by a point with edges in line to within "
-            << radToDeg(::acos(maxCos_)) << " degrees" << nl
-            << "    Minimum edge length reduction factor = "
-            << edgeReductionFactor_ << nl
-            << endl;
+    Info<< "Merging:" << nl
+        << "    edges with length less than " << minLen_ << " metres" << nl
+        << "    edges split by a point with edges in line to within "
+        << radToDeg(::acos(maxCos_)) << " degrees" << nl
+        << "    Minimum edge length reduction factor = "
+        << edgeReductionFactor_ << nl
+        << endl;
 
     if (collapseFacesCoeffDict_.empty())
     {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -78,9 +78,10 @@ void Foam::IOdictionary::readFile(const bool masterOnly)
         (
             comms,
             const_cast<word&>(headerClassName()),
-            Pstream::msgType()
+            Pstream::msgType(),
+            Pstream::worldComm
         );
-        Pstream::scatter(comms, note(), Pstream::msgType());
+        Pstream::scatter(comms, note(), Pstream::msgType(), Pstream::worldComm);
 
         // Get my communication order
         const Pstream::commsStruct& myComm = comms[Pstream::myProcNo()];
@@ -104,6 +105,7 @@ void Foam::IOdictionary::readFile(const bool masterOnly)
                 myComm.above(),
                 0,
                 Pstream::msgType(),
+                Pstream::worldComm,
                 IOstream::ASCII
             );
             IOdictionary::readData(fromAbove);
@@ -123,6 +125,7 @@ void Foam::IOdictionary::readFile(const bool masterOnly)
                 myComm.below()[belowI],
                 0,
                 Pstream::msgType(),
+                Pstream::worldComm,
                 IOstream::ASCII
             );
             IOdictionary::writeData(toBelow);

@@ -122,7 +122,8 @@ void Foam::processorCyclicPointPatchField<Type>::initSwapAddSeparated
                 procPatch_.neighbProcNo(),
                 reinterpret_cast<char*>(receiveBuf_.begin()),
                 receiveBuf_.byteSize(),
-                procPatch_.tag()
+                procPatch_.tag(),
+                procPatch_.comm()
             );
         }
         OPstream::write
@@ -131,7 +132,8 @@ void Foam::processorCyclicPointPatchField<Type>::initSwapAddSeparated
             procPatch_.neighbProcNo(),
             reinterpret_cast<const char*>(pf.begin()),
             pf.byteSize(),
-            procPatch_.tag()
+            procPatch_.tag(),
+            procPatch_.comm()
         );
     }
 }
@@ -156,7 +158,8 @@ void Foam::processorCyclicPointPatchField<Type>::swapAddSeparated
                 procPatch_.neighbProcNo(),
                 reinterpret_cast<char*>(receiveBuf_.begin()),
                 receiveBuf_.byteSize(),
-                procPatch_.tag()
+                procPatch_.tag(),
+                procPatch_.comm()
             );
         }
 

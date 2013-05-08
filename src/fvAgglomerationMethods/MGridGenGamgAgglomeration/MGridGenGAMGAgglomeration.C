@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,14 +56,6 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
     // Min, max size of agglomerated cells
     label minSize(readLabel(controlDict.lookup("minSize")));
     label maxSize(readLabel(controlDict.lookup("maxSize")));
-
-
-    // Get the finest-level interfaces from the mesh
-    interfaceLevels_.set
-    (
-        0,
-        new lduInterfacePtrsList(fvMesh_.boundary().interfaces())
-    );
 
     // Start geometric agglomeration from the cell volumes and areas of the mesh
     scalarField* VPtr = const_cast<scalarField*>(&fvMesh_.cellVolumes());
@@ -127,7 +119,8 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
                 new scalarField(meshLevels_[nCreatedLevels].size())
             );
 
-            restrictField(*aggVPtr, *VPtr, nCreatedLevels);
+            // Restrict but no parallel agglomeration (not supported)
+            restrictField(*aggVPtr, *VPtr, nCreatedLevels, false);
 
             if (nCreatedLevels)
             {
@@ -165,7 +158,8 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
                 new scalarField(meshLevels_[nCreatedLevels].size())
             );
 
-            restrictField(*aggSbPtr, *SbPtr, nCreatedLevels);
+            // Restrict but no parallel agglomeration (not supported)
+            restrictField(*aggSbPtr, *SbPtr, nCreatedLevels, false);
 
             delete SbPtr;
             SbPtr = aggSbPtr;

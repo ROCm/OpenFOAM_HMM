@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -477,10 +477,10 @@ TMP_UNARY_FUNCTION(Type, average)
 #define G_UNARY_FUNCTION(ReturnType, gFunc, Func, rFunc)                      \
                                                                               \
 template<class Type>                                                          \
-ReturnType gFunc(const UList<Type>& f)                                        \
+ReturnType gFunc(const UList<Type>& f, const int comm)                        \
 {                                                                             \
     ReturnType res = Func(f);                                                 \
-    reduce(res, rFunc##Op<Type>());                                           \
+    reduce(res, rFunc##Op<Type>(), Pstream::msgType(), comm);                 \
     return res;                                                               \
 }                                                                             \
 TMP_UNARY_FUNCTION(ReturnType, gFunc)
@@ -495,27 +495,41 @@ G_UNARY_FUNCTION(Type, gSumCmptMag, sumCmptMag, sum)
 #undef G_UNARY_FUNCTION
 
 template<class Type>
-scalar gSumProd(const UList<Type>& f1, const UList<Type>& f2)
+scalar gSumProd
+(
+    const UList<Type>& f1,
+    const UList<Type>& f2,
+    const int comm
+)
 {
     scalar SumProd = sumProd(f1, f2);
-    reduce(SumProd, sumOp<scalar>());
+    reduce(SumProd, sumOp<scalar>(), Pstream::msgType(), comm);
     return SumProd;
 }
 
 template<class Type>
-Type gSumCmptProd(const UList<Type>& f1, const UList<Type>& f2)
+Type gSumCmptProd
+(
+    const UList<Type>& f1,
+    const UList<Type>& f2,
+    const int comm
+)
 {
     Type SumProd = sumCmptProd(f1, f2);
-    reduce(SumProd, sumOp<Type>());
+    reduce(SumProd, sumOp<Type>(), Pstream::msgType(), comm);
     return SumProd;
 }
 
 template<class Type>
-Type gAverage(const UList<Type>& f)
+Type gAverage
+(
+    const UList<Type>& f,
+    const int comm
+)
 {
     label n = f.size();
     Type s = sum(f);
-    sumReduce(s, n);
+    sumReduce(s, n, Pstream::msgType(), comm);
 
     if (n > 0)
     {

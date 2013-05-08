@@ -94,6 +94,9 @@ private:
         //- List of AMIs between source and target patches
         mutable PtrList<AMIPatchToPatchInterpolation> patchAMIs_;
 
+        //- Cutting patches whose values are set using a zero-gradient condition
+        List<label> cuttingPatches_;
+
         //- Source to target cell addressing
         labelListList srcToTgtCellAddr_;
 
@@ -136,7 +139,6 @@ private:
         void normaliseWeights
         (
             const word& descriptor,
-            const scalarField& cellVolumes,
             const labelListList& addr,
             scalarListList& wght
         ) const;
@@ -242,7 +244,8 @@ public:
         const polyMesh& src,
         const polyMesh& tgt,
         const interpolationMethod& method,
-        const HashTable<word>& patchMap
+        const HashTable<word>& patchMap,
+        const wordList& cuttingPatches
     );
 
 

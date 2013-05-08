@@ -34,6 +34,169 @@ using namespace Foam::constant::mathematical;
 
 template<class ParcelType>
 template<class TrackData>
+void Foam::ReactingParcel<ParcelType>::calcPhaseChange
+(
+    TrackData& td,
+    const scalar dt,
+    const label cellI,
+    const scalar Re,
+    const scalar Pr,
+    const scalar Ts,
+    const scalar nus,
+    const scalar d,
+    const scalar T,
+    const scalar mass,
+    const label idPhase,
+    const scalar YPhase,
+    const scalarField& YComponents,
+    scalarField& dMassPC,
+    scalar& Sh,
+    scalar& N,
+    scalar& NCpW,
+    scalarField& Cs
+)
+{
+    if
+    (
+        !td.cloud().phaseChange().active()
+     || T < td.cloud().constProps().Tvap()
+     || YPhase < SMALL
+    )
+    {
+        return;
+    }
+
+    typedef typename TrackData::cloudType::reactingCloudType reactingCloudType;
+    const CompositionModel<reactingCloudType>& composition =
+        td.cloud().composition();
+
+    const scalar TMax = td.cloud().phaseChange().TMax(pc_, this->Tc_);
+    const scalar Tdash = min(T, TMax);
+    const scalar Tsdash = min(Ts, TMax);
+
+    // Calculate mass transfer due to phase change
+    td.cloud().phaseChange().calculate
+    (
+        dt,
+        cellI,
+        Re,
+        Pr,
+        d,
+        nus,
+        Tdash,
+        Tsdash,
+        pc_,
+        this->Tc_,
+        YComponents,
+        dMassPC
+    );
+
+    // Limit phase change mass by availability of each specie
+    dMassPC = min(mass*YPhase*YComponents, dMassPC);
+
+    const scalar dMassTot = sum(dMassPC);
+
+    // Add to cumulative phase change mass
+    td.cloud().phaseChange().addToPhaseChangeMass(this->nParticle_*dMassTot);
+
+    forAll(dMassPC, i)
+    {
+        const label idc = composition.localToGlobalCarrierId(idPhase, i);
+        const label idl = composition.globalIds(idPhase)[i];
+
+        const scalar dh = td.cloud().phaseChange().dh(idc, idl, pc_, Tdash);
+        Sh -= dMassPC[i]*dh/dt;
+    }
+
+
+    // Update molar emissions
+    if (td.cloud().heatTransfer().BirdCorrection())
+    {
+        // Average molecular weight of carrier mix - assumes perfect gas
+        const scalar Wc = this->rhoc_*specie::RR*this->Tc_/this->pc_;
+
+
+        forAll(dMassPC, i)
+        {
+            const label idc = composition.localToGlobalCarrierId(idPhase, i);
+            const label idl = composition.globalIds(idPhase)[i];
+
+            const scalar Cp = composition.carrier().Cp(idc, pc_, Tsdash);
+            const scalar W = composition.carrier().W(idc);
+            const scalar Ni = dMassPC[i]/(this->areaS(d)*dt*W);
+
+            const scalar Dab =
+                composition.liquids().properties()[idl].D(pc_, Tsdash, Wc);
+
+            // Molar flux of species coming from the particle (kmol/m^2/s)
+            N += Ni;
+
+            // Sum of Ni*Cpi*Wi of emission species
+            NCpW += Ni*Cp*W;
+
+            // Concentrations of emission species
+            Cs[idc] += Ni*d/(2.0*Dab);
+        }
+    }
+}
+
+
+template<class ParcelType>
+Foam::scalar Foam::ReactingParcel<ParcelType>::updateMassFraction
+(
+    const scalar mass0,
+    const scalarField& dMass,
+    scalarField& Y
+) const
+{
+    scalar mass1 = mass0 - sum(dMass);
+
+    // only update the mass fractions if the new particle mass is finite
+    if (mass1 > ROOTVSMALL)
+    {
+        forAll(Y, i)
+        {
+            Y[i] = (Y[i]*mass0 - dMass[i])/mass1;
+        }
+    }
+
+    return mass1;
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class ParcelType>
+Foam::ReactingParcel<ParcelType>::ReactingParcel
+(
+    const ReactingParcel<ParcelType>& p
+)
+:
+    ParcelType(p),
+    mass0_(p.mass0_),
+    Y_(p.Y_),
+    pc_(p.pc_)
+{}
+
+
+template<class ParcelType>
+Foam::ReactingParcel<ParcelType>::ReactingParcel
+(
+    const ReactingParcel<ParcelType>& p,
+    const polyMesh& mesh
+)
+:
+    ParcelType(p, mesh),
+    mass0_(p.mass0_),
+    Y_(p.Y_),
+    pc_(p.pc_)
+{}
+
+
+// * * * * * * * * * * * * *  Member Functions * * * * * * * * * * * * * * * //
+
+template<class ParcelType>
+template<class TrackData>
 void Foam::ReactingParcel<ParcelType>::setCellValues
 (
     TrackData& td,
@@ -165,7 +328,7 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
     const SLGThermo& thermo = td.cloud().thermo();
 
     // Far field carrier  molar fractions
-    scalarField Xinf(td.cloud().thermo().carrier().species().size());
+    scalarField Xinf(thermo.carrier().species().size());
 
     forAll(Xinf, i)
     {
@@ -231,29 +394,6 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
     kappas = max(kappas, ROOTVSMALL);
 
     Prs = Cps*mus/kappas;
-}
-
-
-template<class ParcelType>
-Foam::scalar Foam::ReactingParcel<ParcelType>::updateMassFraction
-(
-    const scalar mass0,
-    const scalarField& dMass,
-    scalarField& Y
-) const
-{
-    scalar mass1 = mass0 - sum(dMass);
-
-    // only update the mass fractions if the new particle mass is finite
-    if (mass1 > ROOTVSMALL)
-    {
-        forAll(Y, i)
-        {
-            Y[i] = (Y[i]*mass0 - dMass[i])/mass1;
-        }
-    }
-
-    return mass1;
 }
 
 
@@ -470,144 +610,6 @@ void Foam::ReactingParcel<ParcelType>::calc
         }
     }
 }
-
-
-template<class ParcelType>
-template<class TrackData>
-void Foam::ReactingParcel<ParcelType>::calcPhaseChange
-(
-    TrackData& td,
-    const scalar dt,
-    const label cellI,
-    const scalar Re,
-    const scalar Pr,
-    const scalar Ts,
-    const scalar nus,
-    const scalar d,
-    const scalar T,
-    const scalar mass,
-    const label idPhase,
-    const scalar YPhase,
-    const scalarField& YComponents,
-    scalarField& dMassPC,
-    scalar& Sh,
-    scalar& N,
-    scalar& NCpW,
-    scalarField& Cs
-)
-{
-    if
-    (
-        !td.cloud().phaseChange().active()
-     || T < td.cloud().constProps().Tvap()
-     || YPhase < SMALL
-    )
-    {
-        return;
-    }
-
-    typedef typename TrackData::cloudType::reactingCloudType reactingCloudType;
-    const CompositionModel<reactingCloudType>& composition =
-        td.cloud().composition();
-
-    const scalar TMax = td.cloud().phaseChange().TMax(pc_, this->Tc_);
-    const scalar Tdash = min(T, TMax);
-    const scalar Tsdash = min(Ts, TMax);
-
-    // Calculate mass transfer due to phase change
-    td.cloud().phaseChange().calculate
-    (
-        dt,
-        cellI,
-        Re,
-        Pr,
-        d,
-        nus,
-        Tdash,
-        Tsdash,
-        pc_,
-        this->Tc_,
-        YComponents,
-        dMassPC
-    );
-
-    // Limit phase change mass by availability of each specie
-    dMassPC = min(mass*YPhase*YComponents, dMassPC);
-
-    const scalar dMassTot = sum(dMassPC);
-
-    // Add to cumulative phase change mass
-    td.cloud().phaseChange().addToPhaseChangeMass(this->nParticle_*dMassTot);
-
-    forAll(dMassPC, i)
-    {
-        const label idc = composition.localToGlobalCarrierId(idPhase, i);
-        const label idl = composition.globalIds(idPhase)[i];
-
-        const scalar dh = td.cloud().phaseChange().dh(idc, idl, pc_, Tdash);
-        Sh -= dMassPC[i]*dh/dt;
-    }
-
-
-    // Update molar emissions
-    if (td.cloud().heatTransfer().BirdCorrection())
-    {
-        // Average molecular weight of carrier mix - assumes perfect gas
-        const scalar Wc = this->rhoc_*specie::RR*this->Tc_/this->pc_;
-
-
-        forAll(dMassPC, i)
-        {
-            const label idc = composition.localToGlobalCarrierId(idPhase, i);
-            const label idl = composition.globalIds(idPhase)[i];
-
-            const scalar Cp = composition.carrier().Cp(idc, pc_, Tsdash);
-            const scalar W = composition.carrier().W(idc);
-            const scalar Ni = dMassPC[i]/(this->areaS(d)*dt*W);
-
-            const scalar Dab =
-                composition.liquids().properties()[idl].D(pc_, Tsdash, Wc);
-
-            // Molar flux of species coming from the particle (kmol/m^2/s)
-            N += Ni;
-
-            // Sum of Ni*Cpi*Wi of emission species
-            NCpW += Ni*Cp*W;
-
-            // Concentrations of emission species
-            Cs[idc] += Ni*d/(2.0*Dab);
-        }
-    }
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class ParcelType>
-Foam::ReactingParcel<ParcelType>::ReactingParcel
-(
-    const ReactingParcel<ParcelType>& p
-)
-:
-    ParcelType(p),
-    mass0_(p.mass0_),
-    Y_(p.Y_),
-    pc_(p.pc_)
-{}
-
-
-template<class ParcelType>
-Foam::ReactingParcel<ParcelType>::ReactingParcel
-(
-    const ReactingParcel<ParcelType>& p,
-    const polyMesh& mesh
-)
-:
-    ParcelType(p, mesh),
-    mass0_(p.mass0_),
-    Y_(p.Y_),
-    pc_(p.pc_)
-{}
 
 
 // * * * * * * * * * * * * * * IOStream operators  * * * * * * * * * * * * * //

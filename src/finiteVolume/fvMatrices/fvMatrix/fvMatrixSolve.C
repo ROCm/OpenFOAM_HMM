@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,7 +60,8 @@ Foam::solverPerformance Foam::fvMatrix<Type>::solve
 {
     if (debug)
     {
-        Info<< "fvMatrix<Type>::solve(const dictionary& solverControls) : "
+        Info(this->mesh().comm())
+            << "fvMatrix<Type>::solve(const dictionary& solverControls) : "
                "solving fvMatrix<Type>"
             << endl;
     }
@@ -107,7 +108,8 @@ Foam::solverPerformance Foam::fvMatrix<Type>::solveSegregated
 {
     if (debug)
     {
-        Info<< "fvMatrix<Type>::solveSegregated"
+        Info(this->mesh().comm())
+            << "fvMatrix<Type>::solveSegregated"
                "(const dictionary& solverControls) : "
                "solving fvMatrix<Type>"
             << endl;
@@ -198,7 +200,8 @@ Foam::solverPerformance Foam::fvMatrix<Type>::solveSegregated
             solverControls
         )->solve(psiCmpt, sourceCmpt, cmpt);
 
-        solverPerf.print(Info);
+        //solverPerf.print(Info);
+        solverPerf.print(Info(this->mesh().comm()));
 
         solverPerfVec = max(solverPerfVec, solverPerf);
         solverPerfVec.solverName() = solverPerf.solverName();
@@ -223,7 +226,8 @@ Foam::solverPerformance Foam::fvMatrix<Type>::solveCoupled
 {
     if (debug)
     {
-        Info<< "fvMatrix<Type>::solveCoupled"
+        Info(this->mesh().comm())
+            << "fvMatrix<Type>::solveCoupled"
                "(const dictionary& solverControls) : "
                "solving fvMatrix<Type>"
             << endl;
@@ -261,7 +265,8 @@ Foam::solverPerformance Foam::fvMatrix<Type>::solveCoupled
         coupledMatrixSolver->solve(psi)
     );
 
-    solverPerf.print(Info);
+    //solverPerf.print(Info);
+    solverPerf.print(Info(this->mesh().comm()));
 
     psi.correctBoundaryConditions();
 

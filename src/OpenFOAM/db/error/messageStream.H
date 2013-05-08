@@ -184,6 +184,11 @@ public:
             const dictionary&
         );
 
+        //- Convert to OSstream
+        //  Use Info for default communicator, use Pout
+        //  on master for non-default one.
+        OSstream& operator()(const label communicator);
+
         //- Convert to OSstream for << operations
         operator OSstream&();
 

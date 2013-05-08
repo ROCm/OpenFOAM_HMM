@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,6 +42,7 @@ SourceFiles
 #include "Random.H"
 #include "FixedList.H"
 #include "UList.H"
+#include "linePointRef.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -220,6 +221,15 @@ public:
                 const point& p,
                 label& nearType,
                 label& nearLabel
+            ) const;
+
+            //- Return nearest point to line on triangle. Returns hit if
+            //  point is inside triangle. Sets edgePoint to point on edge
+            //  (hit if nearest is inside line)
+            inline pointHit nearestPoint
+            (
+                const linePointRef& edge,
+                pointHit& edgePoint
             ) const;
 
 

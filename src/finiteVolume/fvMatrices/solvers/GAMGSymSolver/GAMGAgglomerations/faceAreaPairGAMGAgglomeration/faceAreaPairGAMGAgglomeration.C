@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,6 +40,13 @@ namespace Foam
         faceAreaPairGAMGAgglomeration,
         lduMesh
     );
+
+    addToRunTimeSelectionTable
+    (
+        GAMGAgglomeration,
+        faceAreaPairGAMGAgglomeration,
+        geometry
+    );
 }
 
 
@@ -65,6 +72,35 @@ Foam::faceAreaPairGAMGAgglomeration::faceAreaPairGAMGAgglomeration
             (
                 fvmesh.Sf().internalField()
                /sqrt(fvmesh.magSf().internalField()),
+                vector(1, 1.01, 1.02)
+                //vector::one
+            )
+        )
+    );
+}
+
+
+Foam::faceAreaPairGAMGAgglomeration::faceAreaPairGAMGAgglomeration
+(
+    const lduMesh& mesh,
+    const scalarField& cellVolumes,
+    const vectorField& faceAreas,
+    const dictionary& controlDict
+)
+:
+    pairGAMGAgglomeration(mesh, controlDict)
+{
+    vectorField n(faceAreas/mag(faceAreas));
+
+    //agglomerate(mesh, sqrt(mag(faceAreas)));
+    agglomerate
+    (
+        mesh,
+        mag
+        (
+            cmptMultiply
+            (
+                n,
                 vector(1, 1.01, 1.02)
                 //vector::one
             )

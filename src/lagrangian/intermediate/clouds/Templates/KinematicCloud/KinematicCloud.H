@@ -39,6 +39,7 @@ Description
       - dispersion model
       - injection model
       - patch interaction model
+      - stochastic collision model
       - surface film model
 
 SourceFiles
@@ -83,6 +84,9 @@ class PatchInteractionModel;
 
 template<class CloudType>
 class SurfaceFilmModel;
+
+template<class CloudType>
+class StochasticCollisionModel;
 
 
 /*---------------------------------------------------------------------------*\
@@ -202,6 +206,10 @@ protected:
             //- Patch interaction model
             autoPtr<PatchInteractionModel<KinematicCloud<CloudType> > >
                 patchInteractionModel_;
+
+            //- Stochastic collision model
+            autoPtr<StochasticCollisionModel<KinematicCloud<CloudType> > >
+                stochasticCollisionModel_;
 
             //- Surface film model
             autoPtr<SurfaceFilmModel<KinematicCloud<CloudType> > >
@@ -416,6 +424,15 @@ public:
                 inline PatchInteractionModel<KinematicCloud<CloudType> >&
                     patchInteraction();
 
+                //- Return const-access to the stochastic collision model
+                inline const
+                    StochasticCollisionModel<KinematicCloud<CloudType> >&
+                    stochasticCollision() const;
+
+                //- Return reference to the stochastic collision model
+                inline StochasticCollisionModel<KinematicCloud<CloudType> >&
+                    stochasticCollision();
+
                 //- Return const-access to the surface film model
                 inline const SurfaceFilmModel<KinematicCloud<CloudType> >&
                     surfaceFilm() const;
@@ -481,6 +498,9 @@ public:
 
 
             // Fields
+
+                //- Volume swept rate of parcels per cell
+                inline const tmp<volScalarField> vDotSweep() const;
 
                 //- Return the particle volume fraction field
                 //  Note: for particles belonging to this cloud only

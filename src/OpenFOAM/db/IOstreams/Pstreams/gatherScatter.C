@@ -48,13 +48,14 @@ void Pstream::gather
     const List<UPstream::commsStruct>& comms,
     T& Value,
     const BinaryOp& bop,
-    const int tag
+    const int tag,
+    const label comm
 )
 {
-    if (UPstream::parRun())
+    if (UPstream::nProcs(comm) > 1)
     {
         // Get my communication order
-        const commsStruct& myComm = comms[UPstream::myProcNo()];
+        const commsStruct& myComm = comms[UPstream::myProcNo(comm)];
 
         // Receive from my downstairs neighbours
         forAll(myComm.below(), belowI)
@@ -69,7 +70,8 @@ void Pstream::gather
                     myComm.below()[belowI],
                     reinterpret_cast<char*>(&value),
                     sizeof(T),
-                    tag
+                    tag,
+                    comm
                 );
             }
             else
@@ -79,7 +81,8 @@ void Pstream::gather
                     UPstream::scheduled,
                     myComm.below()[belowI],
                     0,
-                    tag
+                    tag,
+                    comm
                 );
                 fromBelow >> value;
             }
@@ -98,12 +101,20 @@ void Pstream::gather
                     myComm.above(),
                     reinterpret_cast<const char*>(&Value),
                     sizeof(T),
-                    tag
+                    tag,
+                    comm
                 );
             }
             else
             {
-                OPstream toAbove(UPstream::scheduled, myComm.above(), 0, tag);
+                OPstream toAbove
+                (
+                    UPstream::scheduled,
+                    myComm.above(),
+                    0,
+                    tag,
+                    comm
+                );
                 toAbove << Value;
             }
         }
@@ -111,16 +122,22 @@ void Pstream::gather
 }
 
 
-template<class T, class BinaryOp>
-void Pstream::gather(T& Value, const BinaryOp& bop, const int tag)
+template <class T, class BinaryOp>
+void Pstream::gather
+(
+    T& Value,
+    const BinaryOp& bop,
+    const int tag,
+    const label comm
+)
 {
-    if (UPstream::nProcs() < UPstream::nProcsSimpleSum)
+    if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)
     {
-        gather(UPstream::linearCommunication(), Value, bop, tag);
+        gather(UPstream::linearCommunication(comm), Value, bop, tag, comm);
     }
     else
     {
-        gather(UPstream::treeCommunication(), Value, bop, tag);
+        gather(UPstream::treeCommunication(comm), Value, bop, tag, comm);
     }
 }
 
@@ -130,13 +147,14 @@ void Pstream::scatter
 (
     const List<UPstream::commsStruct>& comms,
     T& Value,
-    const int tag
+    const int tag,
+    const label comm
 )
 {
-    if (UPstream::parRun())
+    if (UPstream::nProcs(comm) > 1)
     {
         // Get my communication order
-        const commsStruct& myComm = comms[UPstream::myProcNo()];
+        const commsStruct& myComm = comms[UPstream::myProcNo(comm)];
 
         // Reveive from up
         if (myComm.above() != -1)
@@ -149,12 +167,20 @@ void Pstream::scatter
                     myComm.above(),
                     reinterpret_cast<char*>(&Value),
                     sizeof(T),
-                    tag
+                    tag,
+                    comm
                 );
             }
             else
             {
-                IPstream fromAbove(UPstream::scheduled, myComm.above(), 0, tag);
+                IPstream fromAbove
+                (
+                    UPstream::scheduled,
+                    myComm.above(),
+                    0,
+                    tag,
+                    comm
+                );
                 fromAbove >> Value;
             }
         }
@@ -170,7 +196,8 @@ void Pstream::scatter
                     myComm.below()[belowI],
                     reinterpret_cast<const char*>(&Value),
                     sizeof(T),
-                    tag
+                    tag,
+                    comm
                 );
             }
             else
@@ -180,7 +207,8 @@ void Pstream::scatter
                     UPstream::scheduled,
                     myComm.below()[belowI],
                     0,
-                    tag
+                    tag,
+                    comm
                 );
                 toBelow << Value;
             }
@@ -189,16 +217,16 @@ void Pstream::scatter
 }
 
 
-template<class T>
-void Pstream::scatter(T& Value, const int tag)
+template <class T>
+void Pstream::scatter(T& Value, const int tag, const label comm)
 {
-    if (UPstream::nProcs() < UPstream::nProcsSimpleSum)
+    if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)
     {
-        scatter(UPstream::linearCommunication(), Value, tag);
+        scatter(UPstream::linearCommunication(comm), Value, tag, comm);
     }
     else
     {
-        scatter(UPstream::treeCommunication(), Value, tag);
+        scatter(UPstream::treeCommunication(comm), Value, tag, comm);
     }
 }
 

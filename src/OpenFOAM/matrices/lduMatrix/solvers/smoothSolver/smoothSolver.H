@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Class
     Foam::smoothSolver
 
 Description
-    Iterative solver for symmetric and assymetric matrices which uses a
+    Iterative solver for symmetric and asymetric matrices which uses a
     run-time selected smoother e.g. GaussSeidel to converge the solution to
     the required tolerance.
 

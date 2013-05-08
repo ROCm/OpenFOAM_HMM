@@ -148,7 +148,7 @@ bool Foam::checkWedges
                     {
                         Info<< " ***Wedge patch " << pp.name() << " not planar."
                             << " Point " << pt << " is not in patch plane by "
-                            << d << " meter."
+                            << d << " metre."
                             << endl;
                     }
                     return true;
@@ -854,7 +854,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
     if (allGeometry)
     {
         faceSet faces(mesh, "lowVolRatioFaces", mesh.nFaces()/100);
-        if (mesh.checkVolRatio(true, 0.05, &faces))
+        if (mesh.checkVolRatio(true, 0.01, &faces))
         {
             noFailedChecks++;
 

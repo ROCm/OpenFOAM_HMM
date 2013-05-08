@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,6 +69,7 @@ public:
             const int fromProcNo,
             const label bufSize = 0,
             const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
             streamFormat format=BINARY,
             versionNumber version=currentVersion
         );

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,22 +62,6 @@ inline Foam::BreakupModel<Foam::SprayCloud<CloudType> >&
 Foam::SprayCloud<CloudType>::breakup()
 {
     return breakupModel_();
-}
-
-
-template<class CloudType>
-inline const Foam::StochasticCollisionModel<Foam::SprayCloud<CloudType> >&
-Foam::SprayCloud<CloudType>::stochasticCollision() const
-{
-    return stochasticCollisionModel_;
-}
-
-
-template<class CloudType>
-inline Foam::StochasticCollisionModel<Foam::SprayCloud<CloudType> >&
-Foam::SprayCloud<CloudType>::stochasticCollision()
-{
-    return stochasticCollisionModel_();
 }
 
 

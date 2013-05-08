@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -88,7 +88,8 @@ public:
             const lduInterface& fineInterface,
             const labelField& restrictAddressing,
             const labelField& neighbourRestrictAddressing,
-            const label fineLevelIndex
+            const label fineLevelIndex,
+            const label coarseComm
         );
 
 
@@ -144,6 +145,17 @@ public:
             virtual const tensorField& reverseT() const
             {
                 return fineCyclicAMIInterface_.reverseT();
+            }
+
+
+        // I/O
+
+            //- Write to stream
+            virtual void write(Ostream&) const
+            {
+                //TBD. How to serialise the AMI such that we can stream
+                // cyclicAMIGAMGInterface.
+                notImplemented("cyclicAMIGAMGInterface::write(Ostream&) const");
             }
 };
 

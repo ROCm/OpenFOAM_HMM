@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,16 +51,14 @@ Foam::cyclicAMIGAMGInterface::cyclicAMIGAMGInterface
     const lduInterface& fineInterface,
     const labelField& localRestrictAddressing,
     const labelField& neighbourRestrictAddressing,
-    const label fineLevelIndex
+    const label fineLevelIndex,
+    const label coarseComm
 )
 :
     GAMGInterface
     (
         index,
-        coarseInterfaces,
-        fineInterface,
-        localRestrictAddressing,
-        neighbourRestrictAddressing
+        coarseInterfaces
     ),
     fineCyclicAMIInterface_
     (

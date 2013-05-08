@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ Namespace
 
 Description
     Global functions and variables for working with parallel streams,
-    but principally for gamma/mpi
+    but principally for mpi
 
 SourceFiles
     PstreamGlobals.C
@@ -53,6 +53,20 @@ namespace PstreamGlobals
 {
 
 extern DynamicList<MPI_Request> outstandingRequests_;
+
+//extern int nRequests_;
+//extern DynamicList<label> freedRequests_;
+
+extern int nTags_;
+
+extern DynamicList<int> freedTags_;
+
+
+// Current communicators. First element will be MPI_COMM_WORLD
+extern DynamicList<MPI_Comm> MPICommunicators_;
+extern DynamicList<MPI_Group> MPIGroups_;
+
+void checkCommunicator(const label, const label procNo);
 
 };
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,10 +35,10 @@ Foam::autoPtr<Foam::GAMGInterfaceField> Foam::GAMGInterfaceField::New
 {
     const word coupleType(fineInterface.interfaceFieldType());
 
-    lduInterfaceConstructorTable::iterator cstrIter =
-        lduInterfaceConstructorTablePtr_->find(coupleType);
+    lduInterfaceFieldConstructorTable::iterator cstrIter =
+        lduInterfaceFieldConstructorTablePtr_->find(coupleType);
 
-    if (cstrIter == lduInterfaceConstructorTablePtr_->end())
+    if (cstrIter == lduInterfaceFieldConstructorTablePtr_->end())
     {
         FatalErrorIn
         (
@@ -48,11 +48,40 @@ Foam::autoPtr<Foam::GAMGInterfaceField> Foam::GAMGInterfaceField::New
         )   << "Unknown GAMGInterfaceField type "
             << coupleType << nl
             << "Valid GAMGInterfaceField types are :"
-            << lduInterfaceConstructorTablePtr_->sortedToc()
+            << lduInterfaceFieldConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
     return autoPtr<GAMGInterfaceField>(cstrIter()(GAMGCp, fineInterface));
+}
+
+
+Foam::autoPtr<Foam::GAMGInterfaceField> Foam::GAMGInterfaceField::New
+(
+    const GAMGInterface& GAMGCp,
+    const bool doTransform,
+    const int rank
+)
+{
+    const word coupleType(GAMGCp.type());
+
+    lduInterfaceConstructorTable::iterator cstrIter =
+        lduInterfaceConstructorTablePtr_->find(coupleType);
+
+    if (cstrIter == lduInterfaceConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "GAMGInterfaceField::New"
+            "(const word&, const GAMGInterface&, const bool, const int)"
+        )   << "Unknown GAMGInterfaceField type "
+            << coupleType << nl
+            << "Valid GAMGInterfaceField types are :"
+            << lduInterfaceConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<GAMGInterfaceField>(cstrIter()(GAMGCp, doTransform, rank));
 }
 
 

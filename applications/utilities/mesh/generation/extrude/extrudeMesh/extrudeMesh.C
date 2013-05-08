@@ -493,6 +493,7 @@ int main(int argc, char *argv[])
                         mesh.nFaces(),      // start
                         patchI,             // index
                         mesh.boundaryMesh(),// polyBoundaryMesh
+                        Pstream::worldComm, // communicator
                         Pstream::myProcNo(),// myProcNo
                         nbrProcI            // neighbProcNo
                     )

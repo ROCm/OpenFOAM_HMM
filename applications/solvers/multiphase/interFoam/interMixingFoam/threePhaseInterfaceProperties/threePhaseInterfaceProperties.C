@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -174,8 +174,10 @@ Foam::threePhaseInterfaceProperties::threePhaseInterfaceProperties
     (
         readScalar
         (
-            mixture.U().mesh().solutionDict().subDict("PIMPLE").
-                lookup("cAlpha")
+            mixture.U().mesh().solverDict
+            (
+                mixture_.alpha1().name()
+            ).lookup("cAlpha")
         )
     ),
     sigma12_(mixture.lookup("sigma12")),

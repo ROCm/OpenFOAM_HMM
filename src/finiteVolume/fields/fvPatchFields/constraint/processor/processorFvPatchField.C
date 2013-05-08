@@ -240,23 +240,25 @@ void Foam::processorFvPatchField<Type>::initEvaluate
             // Fast path. Receive into *this
             this->setSize(sendBuf_.size());
             outstandingRecvRequest_ = UPstream::nRequests();
-            IPstream::read
+            UIPstream::read
             (
                 Pstream::nonBlocking,
                 procPatch_.neighbProcNo(),
                 reinterpret_cast<char*>(this->begin()),
                 this->byteSize(),
-                procPatch_.tag()
+                procPatch_.tag(),
+                procPatch_.comm()
             );
 
             outstandingSendRequest_ = UPstream::nRequests();
-            OPstream::write
+            UOPstream::write
             (
                 Pstream::nonBlocking,
                 procPatch_.neighbProcNo(),
                 reinterpret_cast<const char*>(sendBuf_.begin()),
                 this->byteSize(),
-                procPatch_.tag()
+                procPatch_.tag(),
+                procPatch_.comm()
             );
         }
         else
@@ -342,23 +344,25 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
 
         scalarReceiveBuf_.setSize(scalarSendBuf_.size());
         outstandingRecvRequest_ = UPstream::nRequests();
-        IPstream::read
+        UIPstream::read
         (
             Pstream::nonBlocking,
             procPatch_.neighbProcNo(),
             reinterpret_cast<char*>(scalarReceiveBuf_.begin()),
             scalarReceiveBuf_.byteSize(),
-            procPatch_.tag()
+            procPatch_.tag(),
+            procPatch_.comm()
         );
 
         outstandingSendRequest_ = UPstream::nRequests();
-        OPstream::write
+        UOPstream::write
         (
             Pstream::nonBlocking,
             procPatch_.neighbProcNo(),
             reinterpret_cast<const char*>(scalarSendBuf_.begin()),
             scalarSendBuf_.byteSize(),
-            procPatch_.tag()
+            procPatch_.tag(),
+            procPatch_.comm()
         );
     }
     else
@@ -467,7 +471,8 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
             procPatch_.neighbProcNo(),
             reinterpret_cast<char*>(receiveBuf_.begin()),
             receiveBuf_.byteSize(),
-            procPatch_.tag()
+            procPatch_.tag(),
+            procPatch_.comm()
         );
 
         outstandingSendRequest_ = UPstream::nRequests();
@@ -477,7 +482,8 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
             procPatch_.neighbProcNo(),
             reinterpret_cast<const char*>(sendBuf_.begin()),
             sendBuf_.byteSize(),
-            procPatch_.tag()
+            procPatch_.tag(),
+            procPatch_.comm()
         );
     }
     else

@@ -183,7 +183,11 @@ void Foam::treeDataPoint::findNearestOp::operator()
     const treeDataPoint& shape = tree_.shapes();
 
     // Best so far
-    scalar nearestDistSqr = magSqr(linePoint - nearestPoint);
+    scalar nearestDistSqr = GREAT;
+    if (minIndex >= 0)
+    {
+        nearestDistSqr = magSqr(linePoint - nearestPoint);
+    }
 
     forAll(indices, i)
     {

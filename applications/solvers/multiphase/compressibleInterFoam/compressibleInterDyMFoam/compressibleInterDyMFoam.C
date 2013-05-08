@@ -137,9 +137,6 @@ int main(int argc, char *argv[])
             while (pimple.correct())
             {
                 #include "pEqn.H"
-
-                // Make the fluxes relative to the mesh motion
-                fvc::makeRelative(phi, U);
             }
         }
 

@@ -49,7 +49,7 @@ Description
 
         d/dt(fmm) + div(U*fmm)
         =
-        (1/T)*(M && M - flm)
+        (1/T)*(M && M - fmm)
 
     where
 
@@ -154,8 +154,7 @@ public:
         tmp<volScalarField> k(const tmp<volTensorField>& gradU) const
         {
             return
-                pow(2.0, 4.0/3.0)
-              * pow(flm_/fmm_, 2.0/3.0)
+                pow(2.0*flm_/fmm_, 2.0/3.0)
               * pow(ce_, -2.0/3.0)
               * sqr(delta())*magSqr(dev(symm(gradU)));
         }

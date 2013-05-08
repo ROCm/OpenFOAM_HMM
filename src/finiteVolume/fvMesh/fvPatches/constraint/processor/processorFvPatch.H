@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,14 +84,20 @@ public:
 
     // Member functions
 
+        //- Return communicator used for comms
+        virtual int comm() const
+        {
+            return procPolyPatch_.comm();
+        }
+
         //- Return processor number
-        int myProcNo() const
+        virtual int myProcNo() const
         {
             return procPolyPatch_.myProcNo();
         }
 
         //- Return neigbour processor number
-        int neighbProcNo() const
+        virtual int neighbProcNo() const
         {
             return procPolyPatch_.neighbProcNo();
         }

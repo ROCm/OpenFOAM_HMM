@@ -67,8 +67,8 @@ bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::processSourceFace
         visitedFaces.append(tgtFaceI);
         scalar area = interArea(srcFaceI, tgtFaceI);
 
-        // store when intersection area > 0
-        if (area > 0)
+        // store when intersection fractional area > tolerance
+        if (area/this->srcMagSf_[srcFaceI] > faceAreaIntersect::tolerance())
         {
             srcAddr[srcFaceI].append(tgtFaceI);
             srcWght[srcFaceI].append(area);
@@ -227,12 +227,9 @@ Foam::scalar Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::interArea
     const face& tgt = this->tgtPatch_[tgtFaceI];
 
     // quick reject if either face has zero area
-    // Note: do not used stored face areas for target patch
-    if
-    (
-        (this->srcMagSf_[srcFaceI] < ROOTVSMALL)
-     || (tgt.mag(tgtPoints) < ROOTVSMALL)
-    )
+    // Note: do not use stored face areas for target patch
+    const scalar tgtMag = tgt.mag(tgtPoints);
+    if ((this->srcMagSf_[srcFaceI] < ROOTVSMALL) || (tgtMag < ROOTVSMALL))
     {
         return 0.0;
     }
@@ -242,13 +239,14 @@ Foam::scalar Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::interArea
 
     // crude resultant norm
     vector n(-src.normal(srcPoints));
+    n /= mag(n);
     if (this->reverseTarget_)
     {
-        n -= tgt.normal(tgtPoints);
+        n -= tgt.normal(tgtPoints)/tgtMag;
     }
     else
     {
-        n += tgt.normal(tgtPoints);
+        n += tgt.normal(tgtPoints)/tgtMag;
     }
     n *= 0.5;
 

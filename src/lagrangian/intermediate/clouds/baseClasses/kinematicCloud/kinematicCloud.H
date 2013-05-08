@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -99,6 +99,9 @@ public:
 
 
             // Fields
+
+                //- Volume swept rate of parcels per cell
+                virtual const tmp<volScalarField> vDotSweep() const = 0;
 
                 //- Return the particle volume fraction field
                 //  Note: for particles belonging to this cloud only

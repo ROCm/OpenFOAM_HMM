@@ -1150,6 +1150,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeBaffles
 // Finds region per cell for cells inside closed named surfaces
 void Foam::meshRefinement::findCellZoneGeometric
 (
+    const pointField& neiCc,
     const labelList& closedNamedSurfaces,   // indices of closed surfaces
     labelList& namedSurfaceIndex,           // per face index of named surface
     const labelList& surfaceToCellZone,     // cell zone index per surface
@@ -1232,7 +1233,9 @@ void Foam::meshRefinement::findCellZoneGeometric
             }
             else
             {
-                const point& neiFc = mesh_.faceCentres()[faceI];
+                //const point& neiFc = mesh_.faceCentres()[faceI];
+                const point& neiFc = neiCc[faceI-mesh_.nInternalFaces()];
+
                 // Perturbed cc
                 const vector d = 1e-4*(neiFc - ownCc);
                 candidatePoints[nCandidates++] = ownCc-d;
@@ -2568,6 +2571,12 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
 
+    // Swap neighbouring cell centres and cell level
+    labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
+    pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
+    calcNeighbourData(neiLevel, neiCc);
+
+
     // Mark faces intersecting zoned surfaces
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -2578,11 +2587,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     {
         // Statistics: number of faces per faceZone
         labelList nSurfFaces(faceZoneNames.size(), 0);
-
-        // Swap neighbouring cell centres and cell level
-        labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
-        pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
-        calcNeighbourData(neiLevel, neiCc);
 
         // Note: for all internal faces? internal + coupled?
         // Since zonify is run after baffling the surfaceIndex_ on baffles is
@@ -2748,6 +2752,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
 
         findCellZoneGeometric
         (
+            neiCc,
             closedNamedSurfaces,    // indices of closed surfaces
             namedSurfaceIndex,      // per face index of named surface
             surfaceToCellZone,      // cell zone index per surface

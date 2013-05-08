@@ -29,7 +29,10 @@ License
 #include "Time.H"
 #include "subCycle.H"
 #include "MULES.H"
+#include "surfaceInterpolate.H"
+#include "fvcGrad.H"
 #include "fvcSnGrad.H"
+#include "fvcDiv.H"
 #include "fvcFlux.H"
 #include "fvcAverage.H"
 
@@ -809,9 +812,8 @@ void Foam::multiphaseSystem::solve()
 
     const Time& runTime = mesh_.time();
 
-    const dictionary& pimpleDict = mesh_.solutionDict().subDict("PIMPLE");
-
-    label nAlphaSubCycles(readLabel(pimpleDict.lookup("nAlphaSubCycles")));
+    const dictionary& alphaControls = mesh_.solverDict(phases_.first().name());
+    label nAlphaSubCycles(readLabel(alphaControls.lookup("nAlphaSubCycles")));
 
     if (nAlphaSubCycles > 1)
     {

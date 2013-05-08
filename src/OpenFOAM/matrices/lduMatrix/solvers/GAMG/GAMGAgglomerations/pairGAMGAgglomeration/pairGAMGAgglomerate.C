@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -204,13 +204,6 @@ void Foam::pairGAMGAgglomeration::agglomerate
     const scalarField& faceWeights
 )
 {
-    // Get the finest-level interfaces from the mesh
-    interfaceLevels_.set
-    (
-        0,
-        new lduInterfacePtrsList(mesh.interfaces())
-    );
-
     // Start geometric agglomeration from the given faceWeights
     scalarField* faceWeightsPtr = const_cast<scalarField*>(&faceWeights);
 

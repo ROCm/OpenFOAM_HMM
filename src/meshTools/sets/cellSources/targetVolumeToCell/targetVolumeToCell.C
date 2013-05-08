@@ -133,7 +133,7 @@ void Foam::targetVolumeToCell::combine(topoSet& set, const bool add) const
 
     scalar maxComp = -GREAT;
     label maxCells = 0;
-    scalar maxVol = 0;
+    //scalar maxVol = 0;
     scalar minComp = GREAT;
     {
         const boundBox& bb = mesh_.bounds();
@@ -158,7 +158,7 @@ void Foam::targetVolumeToCell::combine(topoSet& set, const bool add) const
 
         PackedBoolList maxSelected(mesh_.nCells());
         maxCells = selectCells(maxComp, maskSet, maxSelected);
-        maxVol = volumeOfSet(maxSelected);
+        //maxVol = volumeOfSet(maxSelected);
 
         // Check that maxPoint indeed selects all cells
         if (maxCells != nTotCells)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,10 @@ Class
 Description
     Templated base class for spray cloud
 
+    - sub-models:
+      - atomization model
+      - break-up model
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef SprayCloud_H
@@ -45,9 +49,6 @@ class AtomizationModel;
 
 template<class CloudType>
 class BreakupModel;
-
-template<class CloudType>
-class StochasticCollisionModel;
 
 /*---------------------------------------------------------------------------*\
                       Class SprayCloud Declaration
@@ -105,10 +106,6 @@ protected:
 
             //- Break-up model
             autoPtr<BreakupModel<SprayCloud<CloudType> > > breakupModel_;
-
-            //- Collision model
-            autoPtr<StochasticCollisionModel<SprayCloud<CloudType> > >
-                stochasticCollisionModel_;
 
 
     // Protected Member Functions
@@ -202,14 +199,6 @@ public:
                 //- Return reference to the breakup model
                 inline BreakupModel<SprayCloud<CloudType> >& breakup();
 
-                //- Return const-access to the breakup model
-                inline const StochasticCollisionModel<SprayCloud<CloudType> >&
-                    stochasticCollision() const;
-
-                //- Return reference to the breakup model
-                inline StochasticCollisionModel<SprayCloud<CloudType> >&
-                    stochasticCollision();
-
 
         // Cloud evolution functions
 
@@ -236,10 +225,6 @@ public:
 
             //- Evolve the spray (inject, move)
             void evolve();
-            //- Particle motion
-
-            template<class TrackData>
-            void motion(TrackData& td);
 
 
         // I-O
@@ -247,7 +232,6 @@ public:
             //- Print cloud information
             void info();
 };
-
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

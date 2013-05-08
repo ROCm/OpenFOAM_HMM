@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,7 @@ Foam::UIPstream::UIPstream
     DynamicList<char>& externalBuf,
     label& externalBufPosition,
     const int tag,
+    const label comm,
     const bool clearAtEnd,
     streamFormat format,
     versionNumber version
@@ -48,6 +49,7 @@ Foam::UIPstream::UIPstream
     externalBuf_(externalBuf),
     externalBufPosition_(externalBufPosition),
     tag_(tag),
+    comm_(comm),
     clearAtEnd_(clearAtEnd),
     messageSize_(0)
 {
@@ -60,6 +62,7 @@ Foam::UIPstream::UIPstream
             "DynamicList<char>&,\n"
             "label&,\n"
             "const int,\n"
+            "const label,\n"
             "const bool,\n"
             "streamFormat,\n"
             "versionNumber\n"
@@ -68,11 +71,7 @@ Foam::UIPstream::UIPstream
 }
 
 
-Foam::UIPstream::UIPstream
-(
-    const int fromProcNo,
-    PstreamBuffers& buffers
-)
+Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
 :
     UPstream(buffers.commsType_),
     Istream(buffers.format_, buffers.version_),
@@ -80,6 +79,7 @@ Foam::UIPstream::UIPstream
     externalBuf_(buffers.recvBuf_[fromProcNo]),
     externalBufPosition_(buffers.recvBufPos_[fromProcNo]),
     tag_(buffers.tag_),
+    comm_(buffers.comm_),
     clearAtEnd_(true),
     messageSize_(0)
 {
@@ -102,7 +102,8 @@ Foam::label Foam::UIPstream::read
     const int fromProcNo,
     char* buf,
     const std::streamsize bufSize,
-    const int tag
+    const int tag,
+    const label communicator
 )
 {
     notImplemented
@@ -113,7 +114,8 @@ Foam::label Foam::UIPstream::read
             "const int fromProcNo,"
             "char* buf,"
             "const label bufSize,"
-            "const int tag"
+            "const int tag,"
+            "const label communicator"
         ")"
      );
 
