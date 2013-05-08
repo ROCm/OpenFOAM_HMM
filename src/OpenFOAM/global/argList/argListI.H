@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,6 +51,12 @@ inline const Foam::fileName& Foam::argList::globalCaseName() const
 }
 
 
+inline const Foam::ParRunControl& Foam::argList::parRunControl() const
+{
+    return parRunControl_;
+}
+
+
 inline Foam::fileName Foam::argList::path() const
 {
     return rootPath()/caseName();
@@ -58,6 +64,12 @@ inline Foam::fileName Foam::argList::path() const
 
 
 inline const Foam::stringList& Foam::argList::args() const
+{
+    return args_;
+}
+
+
+inline Foam::stringList& Foam::argList::args()
 {
     return args_;
 }
@@ -76,6 +88,12 @@ inline Foam::label Foam::argList::size() const
 
 
 inline const Foam::HashTable<Foam::string>& Foam::argList::options() const
+{
+    return options_;
+}
+
+
+inline Foam::HashTable<Foam::string>& Foam::argList::options()
 {
     return options_;
 }
