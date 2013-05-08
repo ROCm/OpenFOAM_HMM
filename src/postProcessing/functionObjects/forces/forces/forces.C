@@ -191,9 +191,9 @@ Foam::scalar Foam::forces::rho(const volScalarField& p) const
 void Foam::forces::applyBins
 (
     const label patchI,
-    const vectorField fN,
-    const vectorField Md,
-    const vectorField fT
+    const vectorField& fN,
+    const vectorField& Md,
+    const vectorField& fT
 )
 {
     if (nBin_ == 1)

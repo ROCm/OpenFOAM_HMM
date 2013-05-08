@@ -232,9 +232,9 @@ protected:
         void applyBins
         (
             const label patchI,
-            const vectorField fN,
-            const vectorField Md,
-            const vectorField fT
+            const vectorField& fN,
+            const vectorField& Md,
+            const vectorField& fT
         );
 
         //- Helper function to write bin data
