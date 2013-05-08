@@ -47,6 +47,10 @@ x 5;
 varName x;
 
 
+//Indirection for keys
+key inlet_9;
+
+
 boundaryField
 {
     Default_Boundary_Region
@@ -63,6 +67,7 @@ boundaryField
     inlet_6  { $.inactive }     // Test scoping
     inlet_7  { ${inactive}}     // Test variable expansion
     inlet_8  { $inactive }
+    ${key}   { $inactive }
 
     #include "testDictInc"
 
