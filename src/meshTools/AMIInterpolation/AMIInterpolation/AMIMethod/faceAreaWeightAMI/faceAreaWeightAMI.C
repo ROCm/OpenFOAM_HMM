@@ -67,7 +67,7 @@ bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::processSourceFace
         visitedFaces.append(tgtFaceI);
         scalar area = interArea(srcFaceI, tgtFaceI);
 
-        // store when intersection area > 0
+        // store when intersection fractional area > tolerance
         if (area/this->srcMagSf_[srcFaceI] > faceAreaIntersect::tolerance())
         {
             srcAddr[srcFaceI].append(tgtFaceI);
@@ -227,12 +227,9 @@ Foam::scalar Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::interArea
     const face& tgt = this->tgtPatch_[tgtFaceI];
 
     // quick reject if either face has zero area
-    // Note: do not used stored face areas for target patch
+    // Note: do not use stored face areas for target patch
     const scalar tgtMag = tgt.mag(tgtPoints);
-    if
-    (
-        (this->srcMagSf_[srcFaceI] < ROOTVSMALL) || (tgtMag < ROOTVSMALL)
-    )
+    if ((this->srcMagSf_[srcFaceI] < ROOTVSMALL) || (tgtMag < ROOTVSMALL))
     {
         return 0.0;
     }
