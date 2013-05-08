@@ -70,8 +70,17 @@ class thermalBaffle1DFvPatchScalarField
         //- Superficial heat source [W/m2]
         scalarField Qs_;
 
-        // Solid thermo
-        autoPtr<solidType> solidPtr_;
+        //- Solid dictionary
+        dictionary  solidDict_;
+
+        //- Solid thermo
+        mutable autoPtr<solidType> solidPtr_;
+
+
+    // Private members
+
+        //- Return non const solid thermo autoMap
+        const solidType& solidPtr() const;
 
 
 public:
@@ -144,6 +153,7 @@ public:
 
     // Member functions
 
+
         // Mapping functions
 
             //- Map (and resize as needed) from self given a mapping object
@@ -158,6 +168,8 @@ public:
                 const fvPatchScalarField&,
                 const labelList&
             );
+
+
 
 
         //- Update the coefficients associated with the patch field
