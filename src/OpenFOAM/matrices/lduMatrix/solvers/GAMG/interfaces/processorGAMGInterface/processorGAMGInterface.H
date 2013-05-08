@@ -29,7 +29,6 @@ Description
 
 SourceFiles
     processorGAMGInterface.C
-    processorGAMGInterfaceTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
