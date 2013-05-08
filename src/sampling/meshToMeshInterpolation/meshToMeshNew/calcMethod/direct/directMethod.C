@@ -38,6 +38,16 @@ namespace Foam
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+bool Foam::directMethod::intersect
+(
+    const label srcCellI,
+    const label tgtCellI
+) const
+{
+    return tgt_.pointInCell(src_.cellCentres()[srcCellI], tgtCellI);
+}
+
+
 bool Foam::directMethod::findInitialSeeds
 (
     const labelList& srcCellIDs,

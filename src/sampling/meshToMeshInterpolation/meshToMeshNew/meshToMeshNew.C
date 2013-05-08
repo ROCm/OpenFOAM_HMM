@@ -93,7 +93,6 @@ Foam::labelList Foam::meshToMeshNew::maskCells
 void Foam::meshToMeshNew::normaliseWeights
 (
     const word& descriptor,
-    const scalarField& cellVolumes,
     const labelListList& addr,
     scalarListList& wght
 ) const
@@ -102,27 +101,18 @@ void Foam::meshToMeshNew::normaliseWeights
 
     if (nCell > 0)
     {
-        scalar minW = GREAT;
-        scalar maxW = -GREAT;
-
         forAll(wght, cellI)
         {
             scalarList& w = wght[cellI];
             scalar s = sum(w);
-            scalar Vc = cellVolumes[cellI];
 
             forAll(w, i)
             {
-                w[i] /= Vc;
+                // note: normalise by s instead of cell volume since
+                // 1-to-1 methods duplicate contributions in parallel
+                w[i] /= s;
             }
-
-            minW = min(minW, s/Vc);
-            maxW = max(maxW, s/Vc);
         }
-
-        Info<< "    " << descriptor << " weights min/max = "
-            << returnReduce(minW, minOp<scalar>()) << ", "
-            << returnReduce(maxW, maxOp<scalar>()) << endl;
     }
 }
 
@@ -303,7 +293,6 @@ void Foam::meshToMeshNew::calculate()
         normaliseWeights
         (
             "source",
-            srcRegion_.cellVolumes(),
             srcToTgtCellAddr_,
             srcToTgtCellWght_
         );
@@ -311,7 +300,6 @@ void Foam::meshToMeshNew::calculate()
         normaliseWeights
         (
             "target",
-            tgtRegion_.cellVolumes(),
             tgtToSrcCellAddr_,
             tgtToSrcCellWght_
         );
@@ -337,7 +325,6 @@ void Foam::meshToMeshNew::calculate()
         normaliseWeights
         (
             "source",
-            srcRegion_.cellVolumes(),
             srcToTgtCellAddr_,
             srcToTgtCellWght_
         );
@@ -345,7 +332,6 @@ void Foam::meshToMeshNew::calculate()
         normaliseWeights
         (
             "target",
-            tgtRegion_.cellVolumes(),
             tgtToSrcCellAddr_,
             tgtToSrcCellWght_
         );
@@ -461,6 +447,7 @@ Foam::meshToMeshNew::meshToMeshNew
     srcPatchID_(),
     tgtPatchID_(),
     patchAMIs_(),
+    cuttingPatches_(),
     srcToTgtCellAddr_(),
     tgtToSrcCellAddr_(),
     srcToTgtCellWght_(),
@@ -476,34 +463,42 @@ Foam::meshToMeshNew::meshToMeshNew
         const polyBoundaryMesh& srcBM = src.boundaryMesh();
         const polyBoundaryMesh& tgtBM = tgt.boundaryMesh();
 
-        if (srcBM.size() != tgtBM.size())
-        {
-            FatalErrorIn
-            (
-                "Foam::meshToMeshNew::meshToMeshNew"
-                "("
-                    "const polyMesh&, "
-                    "const polyMesh&, "
-                    "const interpolationMethod&"
-                ")"
-            )   << "Source and target meshes are dissimiar:" << nl
-                << "    Source patches: " << srcBM.size() << nl
-                << "    Target patches: " << tgtBM.size() << exit(FatalError);
-        }
-
-        DynamicList<label> patchID(src.boundaryMesh().size());
-
+        DynamicList<label> srcPatchID(src.boundaryMesh().size());
+        DynamicList<label> tgtPatchID(tgt.boundaryMesh().size());
         forAll(srcBM, patchI)
         {
             const polyPatch& pp = srcBM[patchI];
             if (!polyPatch::constraintType(pp.type()))
             {
-                patchID.append(pp.index());
+                srcPatchID.append(pp.index());
+
+                label tgtPatchI = tgt.boundaryMesh().findPatchID(pp.name());
+
+                if (tgtPatchI != -1)
+                {
+                    tgtPatchID.append(tgtPatchI);
+                }
+                else
+                {
+                    FatalErrorIn
+                    (
+                        "Foam::meshToMeshNew::meshToMeshNew"
+                        "("
+                            "const polyMesh&, "
+                            "const polyMesh&, "
+                            "const interpolationMethod&, "
+                            "bool"
+                        ")"
+                    )   << "Source patch " << pp.name()
+                        << " not found in target mesh. "
+                        << "Available target patches are " << tgtBM.names()
+                        << exit(FatalError);
+                }
             }
         }
 
-        srcPatchID_.transfer(patchID);
-        tgtPatchID_ = srcPatchID_;
+        srcPatchID_.transfer(srcPatchID);
+        tgtPatchID_.transfer(tgtPatchID);
     }
 
     // calculate volume addressing and weights
@@ -519,7 +514,8 @@ Foam::meshToMeshNew::meshToMeshNew
     const polyMesh& src,
     const polyMesh& tgt,
     const interpolationMethod& method,
-    const HashTable<word>& patchMap
+    const HashTable<word>& patchMap,
+    const wordList& cuttingPatches
 )
 :
     srcRegion_(src),
@@ -527,6 +523,7 @@ Foam::meshToMeshNew::meshToMeshNew
     srcPatchID_(),
     tgtPatchID_(),
     patchAMIs_(),
+    cuttingPatches_(),
     srcToTgtCellAddr_(),
     tgtToSrcCellAddr_(),
     srcToTgtCellWght_(),
@@ -559,6 +556,14 @@ Foam::meshToMeshNew::meshToMeshNew
 
     // calculate patch addressing and weights
     (void)patchAMIs();
+
+    // set IDs of cutting patches on target mesh
+    cuttingPatches_.setSize(cuttingPatches.size());
+    forAll(cuttingPatches_, i)
+    {
+        const word& patchName = cuttingPatches[i];
+        cuttingPatches_[i] = tgt.boundaryMesh().findPatchID(patchName);
+    }
 }
 
 
