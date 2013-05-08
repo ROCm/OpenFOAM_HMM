@@ -82,6 +82,7 @@ void Foam::SprayParcel<ParcelType>::calc
 
     scalar T0 = this->T();
     this->Cp() = td.cloud().composition().liquids().Cp(this->pc_, T0, X);
+    sigma_ = td.cloud().composition().liquids().sigma(this->pc_, T0, X);
     scalar rho0 = td.cloud().composition().liquids().rho(this->pc_, T0, X);
     this->rho() = rho0;
 
@@ -89,13 +90,14 @@ void Foam::SprayParcel<ParcelType>::calc
 
     if (td.keepParticle)
     {
-        // update Cp, diameter and density due to change in temperature
+        // update Cp, sigma, diameter and density due to change in temperature
         // and/or composition
         scalar T1 = this->T();
         const scalarField& Y1(this->Y());
         scalarField X1(td.cloud().composition().liquids().X(Y1));
 
         this->Cp() = td.cloud().composition().liquids().Cp(this->pc_, T1, X1);
+        sigma_ = td.cloud().composition().liquids().sigma(this->pc_, T1, X);
 
         scalar rho1 = td.cloud().composition().liquids().rho(this->pc_, T1, X1);
         this->rho() = rho1;
@@ -139,15 +141,6 @@ void Foam::SprayParcel<ParcelType>::calcAtomization
     const AtomizationModel<sprayCloudType>& atomization =
         td.cloud().atomization();
 
-
-    // cell state info is updated in ReactingParcel calc
-    const scalarField& Y(this->Y());
-    scalarField X(composition.liquids().X(Y));
-
-    scalar rho = composition.liquids().rho(this->pc(), this->T(), X);
-    scalar mu = composition.liquids().mu(this->pc(), this->T(), X);
-    scalar sigma = composition.liquids().sigma(this->pc(), this->T(), X);
-
     // Average molecular weight of carrier mix - assumes perfect gas
     scalar Wc = this->rhoc_*specie::RR*this->Tc()/this->pc();
     scalar R = specie::RR/Wc;
@@ -174,7 +167,7 @@ void Foam::SprayParcel<ParcelType>::calcAtomization
     scalar chi = 0.0;
     if (atomization.calcChi())
     {
-        chi = this->chi(td, X);
+        chi = this->chi(td, composition.liquids().X(this->Y()));
     }
 
     atomization.update
@@ -183,9 +176,9 @@ void Foam::SprayParcel<ParcelType>::calcAtomization
         this->d(),
         this->liquidCore(),
         this->tc(),
-        rho,
-        mu,
-        sigma,
+        this->rho(),
+        mu_,
+        sigma_,
         volFlowRate,
         rhoAv,
         Urel,
@@ -207,10 +200,6 @@ void Foam::SprayParcel<ParcelType>::calcBreakup
     const label cellI
 )
 {
-    typedef typename TrackData::cloudType::reactingCloudType reactingCloudType;
-    const CompositionModel<reactingCloudType>& composition =
-        td.cloud().composition();
-
     typedef typename TrackData::cloudType cloudType;
     typedef typename cloudType::parcelType parcelType;
     typedef typename cloudType::forceType forceType;
@@ -222,14 +211,6 @@ void Foam::SprayParcel<ParcelType>::calcBreakup
     {
         solveTABEq(td, dt);
     }
-
-    // cell state info is updated in ReactingParcel calc
-    const scalarField& Y(this->Y());
-    scalarField X(composition.liquids().X(Y));
-
-    scalar rho = composition.liquids().rho(this->pc(), this->T(), X);
-    scalar mu = composition.liquids().mu(this->pc(), this->T(), X);
-    scalar sigma = composition.liquids().sigma(this->pc(), this->T(), X);
 
     // Average molecular weight of carrier mix - assumes perfect gas
     scalar Wc = this->rhoc()*specie::RR*this->Tc()/this->pc();
@@ -266,9 +247,9 @@ void Foam::SprayParcel<ParcelType>::calcBreakup
             this->y(),
             this->yDot(),
             this->d0(),
-            rho,
-            mu,
-            sigma,
+            this->rho(),
+            mu_,
+            sigma_,
             this->U(),
             rhoAv,
             muAv,
@@ -287,7 +268,7 @@ void Foam::SprayParcel<ParcelType>::calcBreakup
         SprayParcel<ParcelType>* child = new SprayParcel<ParcelType>(*this);
         child->mass0() = massChild;
         child->d() = dChild;
-        child->nParticle() = massChild/rho*this->volume(dChild);
+        child->nParticle() = massChild/this->rho()*this->volume(dChild);
 
         const forceSuSp Fcp =
             forces.calcCoupled(*child, dt, massChild, Re, muAv);
@@ -447,6 +428,8 @@ Foam::SprayParcel<ParcelType>::SprayParcel(const SprayParcel<ParcelType>& p)
     ParcelType(p),
     d0_(p.d0_),
     position0_(p.position0_),
+    sigma_(p.sigma_),
+    mu_(p.mu_),
     liquidCore_(p.liquidCore_),
     KHindex_(p.KHindex_),
     y_(p.y_),
@@ -469,6 +452,8 @@ Foam::SprayParcel<ParcelType>::SprayParcel
     ParcelType(p, mesh),
     d0_(p.d0_),
     position0_(p.position0_),
+    sigma_(p.sigma_),
+    mu_(p.mu_),
     liquidCore_(p.liquidCore_),
     KHindex_(p.KHindex_),
     y_(p.y_),

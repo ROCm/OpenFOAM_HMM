@@ -110,6 +110,8 @@ subModels
 
     surfaceReactionModel none;
 
+    stochasticCollisionModel none;
+
     surfaceFilmModel none;
 
     radiation       off;

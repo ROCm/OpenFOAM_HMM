@@ -1,5 +1,4 @@
-label nAlphaCorr(readLabel(pimple.dict().lookup("nAlphaCorr")));
-label nAlphaSubCycles(readLabel(pimple.dict().lookup("nAlphaSubCycles")));
+#include "alphaControls.H"
 
 if (nAlphaSubCycles > 1)
 {

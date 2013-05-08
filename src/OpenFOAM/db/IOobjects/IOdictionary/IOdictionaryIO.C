@@ -105,6 +105,7 @@ void Foam::IOdictionary::readFile(const bool masterOnly)
                 myComm.above(),
                 0,
                 Pstream::msgType(),
+                Pstream::worldComm,
                 IOstream::ASCII
             );
             IOdictionary::readData(fromAbove);
@@ -124,6 +125,7 @@ void Foam::IOdictionary::readFile(const bool masterOnly)
                 myComm.below()[belowI],
                 0,
                 Pstream::msgType(),
+                Pstream::worldComm,
                 IOstream::ASCII
             );
             IOdictionary::writeData(toBelow);

@@ -18,22 +18,24 @@ solvers
 {
     alpha1
     {
-        maxUnboundedness 1e-5;
-        CoCoeff          2;
-        maxIter          5;
-        nLimiterIter     2;
+        cAlpha          0;
+        nAlphaCorr      2;
+        nAlphaSubCycles 1;
 
-        solver           PBiCG;
-        preconditioner   DILU;
-        tolerance        1e-12;
-        relTol           0.1;
+        MULESCorr       yes;
+        nLimiterIter    5;
+
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-8;
+        relTol          0;
     };
 
-    U
+    "U.*"
     {
         solver           PBiCG;
         preconditioner   DILU;
-        tolerance        1e-06;
+        tolerance        1e-6;
         relTol           0;
     };
 
@@ -96,10 +98,6 @@ PIMPLE
     nOuterCorrectors           1;
     nCorrectors                3;
     nNonOrthogonalCorrectors   0;
-
-    cAlpha                     0;
-    nAlphaCorr                 1;
-    nAlphaSubCycles            1;
 }
 
 

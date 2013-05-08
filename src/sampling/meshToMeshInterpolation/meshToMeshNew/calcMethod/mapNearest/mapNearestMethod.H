@@ -58,7 +58,7 @@ protected:
 
         //- Find indices of overlapping cells in src and tgt meshes - returns
         //  true if found a matching pair
-        bool findInitialSeeds
+        virtual bool findInitialSeeds
         (
             const labelList& srcCellIDs,
             const boolList& mapFlag,
@@ -68,7 +68,7 @@ protected:
         ) const;
 
         //- Calculate the mesh-to-mesh addressing and weights
-        void calculateAddressing
+        virtual void calculateAddressing
         (
             labelListList& srcToTgtCellAddr,
             scalarListList& srcToTgtCellWght,
@@ -82,7 +82,7 @@ protected:
         );
 
         //- Find the nearest cell on mesh2 for cell1 on mesh1
-        void findNearestCell
+        virtual void findNearestCell
         (
             const polyMesh& mesh1,
             const polyMesh& mesh2,
@@ -91,7 +91,7 @@ protected:
         ) const;
 
         //- Set the next cells for the marching front algorithm
-        void setNextNearestCells
+        virtual void setNextNearestCells
         (
             label& startSeedI,
             label& srcCellI,
@@ -101,7 +101,7 @@ protected:
         ) const;
 
         //- Find a source cell mapped to target cell tgtCellI
-        label findMappedSrcCell
+        virtual label findMappedSrcCell
         (
             const label tgtCellI,
             const List<DynamicList<label> >& tgtToSrc

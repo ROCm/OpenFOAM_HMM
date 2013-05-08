@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -109,7 +109,7 @@ void Foam::ConstantRateDevolatilisation<CloudType>::calculate
     const scalarField& YGasEff,
     const scalarField& YLiquidEff,
     const scalarField& YSolidEff,
-    bool& canCombust,
+    label& canCombust,
     scalarField& dMassDV
 ) const
 {
@@ -130,7 +130,10 @@ void Foam::ConstantRateDevolatilisation<CloudType>::calculate
         dMassDV[id] = min(dt*A0*massVolatile0, massVolatile);
     }
 
-    canCombust = done;
+    if (done && canCombust != -1)
+    {
+        canCombust = 1;
+    }
 }
 
 

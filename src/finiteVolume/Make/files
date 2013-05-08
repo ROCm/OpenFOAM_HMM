@@ -181,6 +181,7 @@ $(derivedFvPatchFields)/translatingWallVelocity/translatingWallVelocityFvPatchVe
 $(derivedFvPatchFields)/turbulentInlet/turbulentInletFvPatchFields.C
 $(derivedFvPatchFields)/turbulentIntensityKineticEnergyInlet/turbulentIntensityKineticEnergyInletFvPatchScalarField.C
 $(derivedFvPatchFields)/uniformDensityHydrostaticPressure/uniformDensityHydrostaticPressureFvPatchScalarField.C
+$(derivedFvPatchFields)/uniformFixedGradient/uniformFixedGradientFvPatchFields.C
 $(derivedFvPatchFields)/uniformFixedValue/uniformFixedValueFvPatchFields.C
 $(derivedFvPatchFields)/uniformJump/uniformJumpFvPatchFields.C
 $(derivedFvPatchFields)/uniformJumpAMI/uniformJumpAMIFvPatchFields.C
@@ -321,8 +322,6 @@ $(ddtSchemes)/CoEulerDdtScheme/CoEulerDdtSchemes.C
 $(ddtSchemes)/SLTSDdtScheme/SLTSDdtSchemes.C
 $(ddtSchemes)/localEulerDdtScheme/localEulerDdtSchemes.C
 $(ddtSchemes)/backwardDdtScheme/backwardDdtSchemes.C
-$(ddtSchemes)/boundedBackwardDdtScheme/boundedBackwardDdtScheme.C
-$(ddtSchemes)/boundedBackwardDdtScheme/boundedBackwardDdtSchemes.C
 $(ddtSchemes)/CrankNicolsonDdtScheme/CrankNicolsonDdtSchemes.C
 $(ddtSchemes)/boundedDdtScheme/boundedDdtSchemes.C
 
@@ -403,6 +402,5 @@ $(SRF)/SRFModel/SRFModel/SRFModelNew.C
 $(SRF)/SRFModel/rpm/rpm.C
 $(SRF)/derivedFvPatchFields/SRFVelocityFvPatchVectorField/SRFVelocityFvPatchVectorField.C
 $(SRF)/derivedFvPatchFields/SRFFreestreamVelocityFvPatchVectorField/SRFFreestreamVelocityFvPatchVectorField.C
-
 
 LIB = $(FOAM_LIBBIN)/libfiniteVolume

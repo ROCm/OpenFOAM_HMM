@@ -19,6 +19,10 @@ solvers
 {
     "alpha."
     {
+        nAlphaCorr      1;
+        nAlphaSubCycles 2;
+        cAlpha          1;
+
         solver          smoothSolver;
         smoother        GaussSeidel;
         tolerance       1e-06;
@@ -64,9 +68,6 @@ PIMPLE
     momentumPredictor no;
     nCorrectors     3;
     nNonOrthogonalCorrectors 0;
-    nAlphaCorr      1;
-    nAlphaSubCycles 2;
-    cAlpha          1;
 }
 
 

@@ -9,7 +9,7 @@ coalCloud coalParcels
 );
 
 Info<< "\nConstructing limestone cloud" << endl;
-fluidThermoCloud limestoneParcels
+basicThermoCloud limestoneParcels
 (
     "limestoneCloud1",
     rho,

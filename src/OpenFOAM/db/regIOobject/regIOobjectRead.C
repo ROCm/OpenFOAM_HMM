@@ -243,6 +243,7 @@ bool Foam::regIOobject::read()
                 myComm.above(),
                 0,
                 Pstream::msgType(),
+                Pstream::worldComm,
                 IOstream::ASCII
             );
             ok = readData(fromAbove);
@@ -257,6 +258,7 @@ bool Foam::regIOobject::read()
                 myComm.below()[belowI],
                 0,
                 Pstream::msgType(),
+                Pstream::worldComm,
                 IOstream::ASCII
             );
             writeData(toBelow);

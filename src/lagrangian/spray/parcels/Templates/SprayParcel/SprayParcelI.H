@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,94 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
+inline Foam::SprayParcel<ParcelType>::constantProperties::constantProperties()
+:
+    ParcelType::constantProperties(),
+    sigma0_(0.0),
+    mu0_(0.0)
+{}
+
+
+template<class ParcelType>
+inline Foam::SprayParcel<ParcelType>::constantProperties::constantProperties
+(
+    const constantProperties& cp
+)
+:
+    ParcelType::constantProperties(cp),
+    sigma0_(cp.sigma0_),
+    mu0_(cp.mu0_)
+{}
+
+
+template<class ParcelType>
+inline Foam::SprayParcel<ParcelType>::constantProperties::constantProperties
+(
+    const dictionary& parentDict,
+    const bool readFields
+)
+:
+    ParcelType::constantProperties(parentDict, readFields),
+    sigma0_(0.0),
+    mu0_(0.0)
+{
+    if (readFields)
+    {
+        this->dict().lookup("sigma0") >> sigma0_;
+    }
+}
+
+
+template<class ParcelType>
+inline Foam::SprayParcel<ParcelType>::constantProperties::constantProperties
+(
+    const label parcelTypeId,
+    const scalar rhoMin,
+    const scalar rho0,
+    const scalar minParticleMass,
+    const scalar youngsModulus,
+    const scalar poissonsRatio,
+    const scalar T0,
+    const scalar TMin,
+    const scalar TMax,
+    const scalar Cp0,
+    const scalar epsilon0,
+    const scalar f0,
+    const scalar Pr,
+    const scalar pMin,
+    const Switch& constantVolume,
+    const scalar Tvap,
+    const scalar Tbp,
+    const scalar sigma0,
+    const scalar mu0
+)
+:
+    ParcelType::constantProperties
+    (
+        parcelTypeId,
+        rhoMin,
+        rho0,
+        minParticleMass,
+        youngsModulus,
+        poissonsRatio,
+        T0,
+        TMin,
+        TMax,
+        Cp0,
+        epsilon0,
+        f0,
+        Pr,
+        pMin,
+        constantVolume,
+        Tvap,
+        Tbp
+    ),
+    sigma0_(sigma0),
+    mu0_(mu0)
+{}
+
+
+template<class ParcelType>
 inline Foam::SprayParcel<ParcelType>::SprayParcel
 (
     const polyMesh& mesh,
@@ -38,6 +126,8 @@ inline Foam::SprayParcel<ParcelType>::SprayParcel
     ParcelType(mesh, position, cellI, tetFaceI, tetPtI),
     d0_(this->d()),
     position0_(position),
+    sigma_(0.0),
+    mu_(0.0),
     liquidCore_(0.0),
     KHindex_(0.0),
     y_(0.0),
@@ -99,6 +189,8 @@ inline Foam::SprayParcel<ParcelType>::SprayParcel
     ),
     d0_(d0),
     position0_(position),
+    sigma_(constProps.sigma0()),
+    mu_(constProps.mu0()),
     liquidCore_(liquidCore),
     KHindex_(KHindex),
     y_(y),
@@ -124,6 +216,20 @@ template<class ParcelType>
 inline const Foam::vector& Foam::SprayParcel<ParcelType>::position0() const
 {
     return position0_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar Foam::SprayParcel<ParcelType>::sigma() const
+{
+    return sigma_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar Foam::SprayParcel<ParcelType>::mu() const
+{
+    return mu_;
 }
 
 
@@ -201,6 +307,20 @@ template<class ParcelType>
 inline Foam::vector& Foam::SprayParcel<ParcelType>::position0()
 {
     return position0_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar& Foam::SprayParcel<ParcelType>::sigma()
+{
+    return sigma_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar& Foam::SprayParcel<ParcelType>::mu()
+{
+    return mu_;
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,6 +40,7 @@ Description
 #include "pairPatchAgglomeration.H"
 #include "labelListIOList.H"
 #include "syncTools.H"
+#include "globalIndex.H"
 
 using namespace Foam;
 
@@ -53,7 +54,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createNamedMesh.H"
 
-    const word dictName("faceAgglomerateDict");
+    const word dictName("viewFactorsDict");
 
     #include "setConstantMeshDictionaryIO.H"
 
@@ -79,16 +80,16 @@ int main(int argc, char *argv[])
         boundary.size()
     );
 
-    forAll(boundary, patchId)
+    label nCoarseFaces = 0;
+
+    forAllConstIter(dictionary, agglomDict, iter)
     {
-        const polyPatch& pp = boundary[patchId];
-
-        label patchI = pp.index();
-        finalAgglom[patchI].setSize(pp.size(), 0);
-
-        if (!pp.coupled())
+        labelList patchIds = boundary.findIndices(iter().keyword());
+        forAll(patchIds, i)
         {
-            if (agglomDict.found(pp.name()))
+            label patchI =  patchIds[i];
+            const polyPatch& pp = boundary[patchI];
+            if (!pp.coupled())
             {
                 Info << "\nAgglomerating patch : " << pp.name() << endl;
                 pairPatchAgglomeration agglomObject
@@ -99,12 +100,11 @@ int main(int argc, char *argv[])
                 agglomObject.agglomerate();
                 finalAgglom[patchI] =
                     agglomObject.restrictTopBottomAddressing();
-            }
-            else
-            {
-                FatalErrorIn(args.executable())
-                    << "Patch " << pp.name() << " not found in dictionary: "
-                    << agglomDict.name() << exit(FatalError);
+
+                if (finalAgglom[patchI].size())
+                {
+                    nCoarseFaces += max(finalAgglom[patchI] + 1);
+                }
             }
         }
     }
@@ -144,6 +144,7 @@ int main(int argc, char *argv[])
 
     if (writeAgglom)
     {
+        globalIndex index(nCoarseFaces);
         volScalarField facesAgglomeration
         (
             IOobject
@@ -158,14 +159,26 @@ int main(int argc, char *argv[])
             dimensionedScalar("facesAgglomeration", dimless, 0)
         );
 
+        label coarsePatchIndex = 0;
         forAll(boundary, patchId)
         {
-            fvPatchScalarField& bFacesAgglomeration =
-                facesAgglomeration.boundaryField()[patchId];
-
-            forAll(bFacesAgglomeration, j)
+            const polyPatch& pp = boundary[patchId];
+            if (pp.size() > 0)
             {
-                bFacesAgglomeration[j] = finalAgglom[patchId][j];
+                fvPatchScalarField& bFacesAgglomeration =
+                    facesAgglomeration.boundaryField()[patchId];
+
+                forAll(bFacesAgglomeration, j)
+                {
+                    bFacesAgglomeration[j] =
+                        index.toGlobal
+                        (
+                            Pstream::myProcNo(),
+                            finalAgglom[patchId][j] + coarsePatchIndex
+                        );
+                }
+
+                coarsePatchIndex += max(finalAgglom[patchId]) + 1;
             }
         }
 

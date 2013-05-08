@@ -32,6 +32,7 @@ divSchemes
     div(phi,k)           Gauss linearUpwind grad(k);
     div(phi,alpha)       Gauss vanLeer;
     div(phirb,alpha)     Gauss interfaceCompression;
+    UD                   Gauss upwind;
     div((muEff*dev(T(grad(U))))) Gauss linear;
 }
 
@@ -47,10 +48,7 @@ laplacianSchemes
 
 snGradSchemes
 {
-    default              none;
-    snGrad(pd)           limited corrected 0.5;
-    snGrad(rho)          limited corrected 0.5;
-    snGrad(alpha1)       limited corrected 0.5;
+    default              limited corrected 0.5;
 }
 
 fluxRequired

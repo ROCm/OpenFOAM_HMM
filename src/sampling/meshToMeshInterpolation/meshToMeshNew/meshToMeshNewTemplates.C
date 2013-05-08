@@ -336,9 +336,6 @@ void Foam::meshToMeshNew::mapSrcToTgt
     GeometricField<Type, fvPatchField, volMesh>& result
 ) const
 {
-    // clear any previously stored values
-
-
     mapSrcToTgt(field, cop, result.internalField());
 
     const PtrList<AMIPatchToPatchInterpolation>& AMIList = patchAMIs();
@@ -359,6 +356,13 @@ void Foam::meshToMeshNew::mapSrcToTgt
             multiplyWeightedOp<Type, CombineOp>(cop),
             tgtField
         );
+    }
+
+    forAll(cuttingPatches_, i)
+    {
+        label patchI = cuttingPatches_[i];
+        fvPatchField<Type>& pf = result.boundaryField()[patchI];
+        pf == pf.patchInternalField();
     }
 }
 
@@ -465,6 +469,13 @@ void Foam::meshToMeshNew::mapTgtToSrc
             multiplyWeightedOp<Type, CombineOp>(cop),
             srcField
         );
+    }
+
+    forAll(cuttingPatches_, i)
+    {
+        label patchI = cuttingPatches_[i];
+        fvPatchField<Type>& pf = result.boundaryField()[patchI];
+        pf == pf.patchInternalField();
     }
 }
 

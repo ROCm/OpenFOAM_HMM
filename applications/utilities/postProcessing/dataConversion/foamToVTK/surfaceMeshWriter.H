@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,13 +53,11 @@ namespace Foam
 class volPointInterpolation;
 
 /*---------------------------------------------------------------------------*\
-                           Class surfaceMeshWriter Declaration
+                      Class surfaceMeshWriter Declaration
 \*---------------------------------------------------------------------------*/
 
 class surfaceMeshWriter
 {
-    const vtkMesh& vMesh_;
-
     const bool binary_;
 
     const indirectPrimitivePatch& pp_;
@@ -68,9 +66,6 @@ class surfaceMeshWriter
 
     std::ofstream os_;
 
-//    label nPoints_;
-//
-//    label nFaces_;
 
 public:
 
@@ -79,7 +74,6 @@ public:
         //- Construct from components
         surfaceMeshWriter
         (
-            const vtkMesh&,
             const bool binary,
             const indirectPrimitivePatch& pp,
             const word& name,
@@ -93,19 +87,6 @@ public:
         {
             return os_;
         }
-
-//        label nPoints() const
-//        {
-//            return nPoints_;
-//        }
-//
-//        label nFaces() const
-//        {
-//            return nFaces_;
-//        }
-//
-//        //- Write cellIDs
-//        void writePatchIDs();
 
         //- Extract face data
         template<class Type>

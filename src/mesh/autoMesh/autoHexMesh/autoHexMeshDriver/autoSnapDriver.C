@@ -918,7 +918,7 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
                     << " coordinate:" << localPoints[pointI]
                     << " did not find any surface within:"
                     << minSnapDist[pointI]
-                    << " meter." << endl;
+                    << " metre." << endl;
             }
         }
 

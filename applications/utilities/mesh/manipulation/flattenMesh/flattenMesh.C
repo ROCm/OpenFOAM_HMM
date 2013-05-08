@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     boundBox bb(points);
 
     Info<< "bounding box: min = " << bb.min()
-        << " max = " << bb.max() << " meters."
+        << " max = " << bb.max() << " metres."
         << endl;
 
 

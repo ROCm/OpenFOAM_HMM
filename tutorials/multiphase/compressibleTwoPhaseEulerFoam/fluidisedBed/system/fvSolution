@@ -17,6 +17,12 @@ FoamFile
 
 solvers
 {
+    alpha1
+    {
+        nAlphaCorr      1;
+        nAlphaSubCycles 2;
+    }
+
     p
     {
         solver          GAMG;
@@ -90,11 +96,9 @@ solvers
 
 PIMPLE
 {
-    nOuterCorrectors 3;
-    nCorrectors     1;
+    nOuterCorrectors 1;
+    nCorrectors     3;
     nNonOrthogonalCorrectors 0;
-    nAlphaCorr      1;
-    nAlphaSubCycles 2;
 }
 
 relaxationFactors

@@ -148,7 +148,7 @@ bool Foam::checkWedges
                     {
                         Info<< " ***Wedge patch " << pp.name() << " not planar."
                             << " Point " << pt << " is not in patch plane by "
-                            << d << " meter."
+                            << d << " metre."
                             << endl;
                     }
                     return true;

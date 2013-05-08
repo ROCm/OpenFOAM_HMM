@@ -119,7 +119,8 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
                 new scalarField(meshLevels_[nCreatedLevels].size())
             );
 
-            restrictField(*aggVPtr, *VPtr, nCreatedLevels);
+            // Restrict but no parallel agglomeration (not supported)
+            restrictField(*aggVPtr, *VPtr, nCreatedLevels, false);
 
             if (nCreatedLevels)
             {
@@ -157,7 +158,8 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
                 new scalarField(meshLevels_[nCreatedLevels].size())
             );
 
-            restrictField(*aggSbPtr, *SbPtr, nCreatedLevels);
+            // Restrict but no parallel agglomeration (not supported)
+            restrictField(*aggSbPtr, *SbPtr, nCreatedLevels, false);
 
             delete SbPtr;
             SbPtr = aggSbPtr;

@@ -101,6 +101,8 @@ subModels
 
     phaseChangeModel none;
 
+    stochasticCollisionModel none;
+
     surfaceFilmModel thermoSurfaceFilm;
 
     radiation       off;

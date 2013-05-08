@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,6 +32,8 @@ License
 #include "makeParcelDispersionModels.H"
 #include "makeReactingMultiphaseParcelInjectionModels.H" // MP variant
 #include "makeParcelPatchInteractionModels.H"
+#include "makeReactingMultiphaseParcelStochasticCollisionModels.H" // MP variant
+#include "makeReactingParcelSurfaceFilmModels.H" // Reacting variant
 
 // Thermodynamic
 #include "makeParcelHeatTransferModels.H"
@@ -39,7 +41,6 @@ License
 // Reacting
 #include "makeReactingMultiphaseParcelCompositionModels.H" // MP Variant
 #include "makeReactingParcelPhaseChangeModels.H"
-#include "makeReactingParcelSurfaceFilmModels.H"
 
 // Reacting multiphase
 #include "makeReactingMultiphaseParcelDevolatilisationModels.H"
@@ -56,6 +57,11 @@ namespace Foam
     makeParcelDispersionModels(basicReactingMultiphaseCloud);
     makeReactingMultiphaseParcelInjectionModels(basicReactingMultiphaseCloud);
     makeParcelPatchInteractionModels(basicReactingMultiphaseCloud);
+    makeReactingMultiphaseParcelStochasticCollisionModels
+    (
+        basicReactingMultiphaseCloud
+    );
+    makeReactingParcelSurfaceFilmModels(basicReactingMultiphaseCloud);
 
     // Thermo sub-models
     makeParcelHeatTransferModels(basicReactingMultiphaseCloud);
@@ -69,10 +75,6 @@ namespace Foam
 
     // Reacting multiphase sub-models
     makeReactingMultiphaseParcelDevolatilisationModels
-    (
-        basicReactingMultiphaseCloud
-    );
-    makeReactingParcelSurfaceFilmModels
     (
         basicReactingMultiphaseCloud
     );

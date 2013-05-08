@@ -485,7 +485,7 @@ Foam::polyMeshFilter::polyMeshFilter(const fvMesh& mesh)
     faceFilterFactor_()
 {
     Info<< "Merging:" << nl
-        << "    edges with length less than " << minLen_ << " meters" << nl
+        << "    edges with length less than " << minLen_ << " metres" << nl
         << "    edges split by a point with edges in line to within "
         << radToDeg(::acos(maxCos_)) << " degrees" << nl
         << "    Minimum edge length reduction factor = "
