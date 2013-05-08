@@ -44,6 +44,7 @@ namespace Foam
 {
 
 class GAMGAgglomeration;
+class lduMesh;
 
 /*---------------------------------------------------------------------------*\
                     Class GAMGProcAgglomeration Declaration
@@ -73,6 +74,9 @@ protected:
             const List<int>& agglomProcIDs,
             const label procAgglomComm
         );
+
+        //- Debug: calculate global cell-cells
+        static labelListList globalCellCells(const lduMesh&);
 
 private:
 
@@ -139,7 +143,7 @@ public:
 
     // Member Functions
 
-       //- Modify agglomeration. Return true if modified
+        //- Modify agglomeration. Return true if modified
         virtual bool agglomerate() = 0;
 
 };

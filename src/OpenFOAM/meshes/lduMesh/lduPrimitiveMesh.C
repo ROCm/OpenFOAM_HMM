@@ -360,6 +360,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
           + procMesh.lduAddr().size();
     }
 
+
     // Faces initially get added in order, sorted later
     labelList internalFaceOffsets(nMeshes+1);
     internalFaceOffsets[0] = 0;
@@ -818,9 +819,37 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     {
         const labelPairList& elems = iter();
 
-        // Sort processors in increasing order
-        labelList order(identity(elems.size()));
-        Foam::sort(order, procLess(elems));
+        // Sort processors in increasing order so both sides walk through in
+        // same order.
+        labelPairList procPairs(elems.size());
+        forAll(elems, i)
+        {
+            const labelPair& elem = elems[i];
+            label procMeshI = elem[0];
+            label interfaceI = elem[1];
+            const lduInterfacePtrsList interfaces = mesh
+            (
+                myMesh,
+                otherMeshes,
+                procMeshI
+            ).interfaces();
+
+            const processorLduInterface& pldui =
+                refCast<const processorLduInterface>
+                (
+                    interfaces[interfaceI]
+                );
+            label myProcNo = pldui.myProcNo();
+            label nbrProcNo = pldui.neighbProcNo();
+            procPairs[i] = labelPair
+            (
+                min(myProcNo, nbrProcNo),
+                max(myProcNo, nbrProcNo)
+            );
+        }
+
+        labelList order;
+        sortedOrder(procPairs, order);
 
         // Count
         label n = 0;
@@ -836,11 +865,6 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
                 otherMeshes,
                 procMeshI
             ).interfaces();
-
-            //Pout<< "    adding interface:" << " procMeshI:" << procMeshI
-            //    << " interface:" << interfaceI
-            //    << " size:" << interfaces[interfaceI].faceCells().size()
-            //    << endl;
 
             n += interfaces[interfaceI].faceCells().size();
         }
@@ -868,6 +892,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
 
             const labelUList& l = interfaces[interfaceI].faceCells();
             bfMap.setSize(l.size());
+
             forAll(l, faceI)
             {
                 allFaceCells[n] = cellOffsets[procMeshI]+l[faceI];
@@ -947,7 +972,10 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
 
     patchSchedule_ = nonBlockingSchedule<processorGAMGInterface>(interfaces_);
 
-    checkUpperTriangular(cellOffsets.last(), lowerAddr_, upperAddr_);
+    if (debug)
+    {
+        checkUpperTriangular(cellOffsets.last(), lowerAddr_, upperAddr_);
+    }
 }
 
 

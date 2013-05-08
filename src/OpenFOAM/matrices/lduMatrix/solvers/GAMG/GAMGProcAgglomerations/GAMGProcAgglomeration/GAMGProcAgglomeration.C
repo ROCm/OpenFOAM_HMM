@@ -25,6 +25,7 @@ License
 
 #include "GAMGProcAgglomeration.H"
 #include "GAMGAgglomeration.H"
+#include "lduMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -111,6 +112,152 @@ void Foam::GAMGProcAgglomeration::printStats
         os  << endl;
     }
     os  << endl;
+}
+
+
+Foam::labelListList Foam::GAMGProcAgglomeration::globalCellCells
+(
+    const lduMesh& mesh
+)
+{
+    const lduAddressing& addr = mesh.lduAddr();
+    lduInterfacePtrsList interfaces = mesh.interfaces();
+
+    const label myProcID = Pstream::myProcNo(mesh.comm());
+
+    globalIndex globalNumbering
+    (
+        addr.size(),
+        Pstream::msgType(),
+        mesh.comm(),
+        Pstream::parRun()
+    );
+
+    labelList globalIndices(addr.size());
+    forAll(globalIndices, cellI)
+    {
+        globalIndices[cellI] = globalNumbering.toGlobal(myProcID, cellI);
+    }
+
+
+    // Get the interface cells
+    PtrList<labelList> nbrGlobalCells(interfaces.size());
+    {
+        // Initialise transfer of restrict addressing on the interface
+        forAll(interfaces, inti)
+        {
+            if (interfaces.set(inti))
+            {
+                interfaces[inti].initInternalFieldTransfer
+                (
+                    Pstream::nonBlocking,
+                    globalIndices
+                );
+            }
+        }
+
+        if (Pstream::parRun())
+        {
+            Pstream::waitRequests();
+        }
+
+        forAll(interfaces, inti)
+        {
+            if (interfaces.set(inti))
+            {
+                nbrGlobalCells.set
+                (
+                    inti,
+                    new labelList
+                    (
+                        interfaces[inti].internalFieldTransfer
+                        (
+                            Pstream::nonBlocking,
+                            globalIndices
+                        )
+                    )
+                );
+            }
+        }
+    }
+
+
+    // Scan the neighbour list to find out how many times the cell
+    // appears as a neighbour of the face. Done this way to avoid guessing
+    // and resizing list
+    labelList nNbrs(addr.size(), 1);
+
+    const labelUList& nbr = addr.upperAddr();
+    const labelUList& own = addr.lowerAddr();
+
+    {
+        forAll(nbr, faceI)
+        {
+            nNbrs[nbr[faceI]]++;
+            nNbrs[own[faceI]]++;
+        }
+
+        forAll(interfaces, inti)
+        {
+            if (interfaces.set(inti))
+            {
+                const labelUList& faceCells = interfaces[inti].faceCells();
+
+                forAll(faceCells, i)
+                {
+                    nNbrs[faceCells[i]]++;
+                }
+            }
+        }
+    }
+
+
+    // Create cell-cells addressing
+    labelListList cellCells(addr.size());
+
+    forAll(cellCells, cellI)
+    {
+        cellCells[cellI].setSize(nNbrs[cellI], -1);
+    }
+
+    // Reset the list of number of neighbours to zero
+    nNbrs = 0;
+
+    // Scatter the neighbour faces
+    forAll(nbr, faceI)
+    {
+        label c0 = own[faceI];
+        label c1 = nbr[faceI];
+
+        cellCells[c0][nNbrs[c0]++] = globalIndices[c1];
+        cellCells[c1][nNbrs[c1]++] = globalIndices[c0];
+    }
+    forAll(interfaces, inti)
+    {
+        if (interfaces.set(inti))
+        {
+            const labelUList& faceCells = interfaces[inti].faceCells();
+
+            forAll(faceCells, i)
+            {
+                label c0 = faceCells[i];
+                cellCells[c0][nNbrs[c0]++] = nbrGlobalCells[inti][i];
+            }
+        }
+    }
+
+    forAll(cellCells, cellI)
+    {
+        Foam::stableSort(cellCells[cellI]);
+    }
+
+    // Replace the initial element (always -1) with the local cell
+    forAll(cellCells, cellI)
+    {
+        cellCells[cellI][0] = globalIndices[cellI];
+    }
+
+    return cellCells;
 }
 
 
@@ -241,9 +388,6 @@ Foam::autoPtr<Foam::GAMGProcAgglomeration> Foam::GAMGProcAgglomeration::New
 
 Foam::GAMGProcAgglomeration::~GAMGProcAgglomeration()
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //
