@@ -52,8 +52,8 @@ Foam::porosityModels::DarcyForchheimer::DarcyForchheimer
 )
 :
     porosityModel(name, modelType, mesh, dict, cellZoneName),
-    D_(cellZoneIds_.size()),
-    F_(cellZoneIds_.size()),
+    D_(cellZoneIDs_.size()),
+    F_(cellZoneIDs_.size()),
     rhoName_(coeffs_.lookupOrDefault<word>("rho", "rho")),
     muName_(coeffs_.lookupOrDefault<word>("mu", "thermo:mu")),
     nuName_(coeffs_.lookupOrDefault<word>("nu", "nu"))
@@ -67,7 +67,7 @@ Foam::porosityModels::DarcyForchheimer::DarcyForchheimer
 
     if (coordSys_.R().uniform())
     {
-        forAll (cellZoneIds_, zoneI)
+        forAll (cellZoneIDs_, zoneI)
         {
             D_[zoneI].setSize(1, tensor::zero);
             F_[zoneI].setSize(1, tensor::zero);
@@ -89,9 +89,9 @@ Foam::porosityModels::DarcyForchheimer::DarcyForchheimer
     }
     else
     {
-        forAll(cellZoneIds_, zoneI)
+        forAll(cellZoneIDs_, zoneI)
         {
-            const labelList& cells = mesh_.cellZones()[cellZoneIds_[zoneI]];
+            const labelList& cells = mesh_.cellZones()[cellZoneIDs_[zoneI]];
 
             D_[zoneI].setSize(cells.size(), tensor::zero);
             F_[zoneI].setSize(cells.size(), tensor::zero);
@@ -121,6 +121,24 @@ Foam::porosityModels::DarcyForchheimer::~DarcyForchheimer()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::porosityModels::DarcyForchheimer::calcForce
+(
+    const volVectorField& U,
+    const volScalarField& rho,
+    const volScalarField& mu,
+    vectorField& force
+) const
+{
+    scalarField Udiag(U.size());
+    vectorField Usource(U.size());
+    const scalarField& V = mesh_.V();
+
+    apply(Udiag, Usource, V, rho, mu, U);
+
+    force = Udiag*U - Usource;
+}
+
 
 void Foam::porosityModels::DarcyForchheimer::correct
 (
@@ -194,10 +212,12 @@ void Foam::porosityModels::DarcyForchheimer::correct
 }
 
 
-void Foam::porosityModels::DarcyForchheimer::writeData(Ostream& os) const
+bool Foam::porosityModels::DarcyForchheimer::writeData(Ostream& os) const
 {
     os  << indent << name_ << endl;
     dict_.write(os);
+
+    return true;
 }
 
 

@@ -143,6 +143,15 @@ public:
 
     // Member Functions
 
+        //- Calculate the porosity force
+        virtual void calcForce
+        (
+            const volVectorField& U,
+            const volScalarField& rho,
+            const volScalarField& mu,
+            vectorField& force
+        ) const;
+
         //- Add resistance
         virtual void correct(fvVectorMatrix& UEqn) const;
 
@@ -165,7 +174,7 @@ public:
     // I-O
 
         //- Write
-        void writeData(Ostream& os) const;
+        bool writeData(Ostream& os) const;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

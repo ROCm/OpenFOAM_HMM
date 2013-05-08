@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,6 +66,23 @@ Foam::porosityModels::powerLaw::~powerLaw()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::porosityModels::powerLaw::calcForce
+(
+    const volVectorField& U,
+    const volScalarField& rho,
+    const volScalarField& mu,
+    vectorField& force
+) const
+{
+    scalarField Udiag(U.size());
+    const scalarField& V = mesh_.V();
+
+    apply(Udiag, V, rho, U);
+
+    force = Udiag*U;
+}
+
+
 void Foam::porosityModels::powerLaw::correct
 (
     fvVectorMatrix& UEqn
@@ -126,10 +143,12 @@ void Foam::porosityModels::powerLaw::correct
 }
 
 
-void Foam::porosityModels::powerLaw::writeData(Ostream& os) const
+bool Foam::porosityModels::powerLaw::writeData(Ostream& os) const
 {
     os  << indent << name_ << endl;
     dict_.write(os);
+
+    return true;
 }
 
 
