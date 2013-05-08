@@ -190,12 +190,13 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
     wghtSum.setSize(wght.size());
     forAll(wght, faceI)
     {
-        scalar s = sum(wght[faceI]);
+        scalarList& w = wght[faceI];
+        scalar s = sum(w);
         scalar t = s/patchAreas[faceI];
 
-        forAll(addr[faceI], i)
+        forAll(w, i)
         {
-            wght[faceI][i] /= s;
+            w[i] /= s;
         }
 
         wghtSum[faceI] = t;
