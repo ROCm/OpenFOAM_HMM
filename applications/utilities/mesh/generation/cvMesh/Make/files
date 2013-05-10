@@ -1,3 +1,0 @@
-cvMesh.C
-
-EXE = $(FOAM_APPBIN)/cvMesh
