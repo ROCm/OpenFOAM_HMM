@@ -620,6 +620,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::conformalVoronoiMesh::createDummyMesh
                 0,          //patchStarts[p],
                 patchI,
                 mesh.boundaryMesh(),
+                mesh.comm(),
                 readLabel(patchDicts[patchI].lookup("myProcNo")),
                 readLabel(patchDicts[patchI].lookup("neighbProcNo")),
                 coupledPolyPatch::COINCIDENTFULLMATCH
@@ -638,6 +639,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::conformalVoronoiMesh::createDummyMesh
             ).ptr();
         }
     }
+
     mesh.addFvPatches(patches);
 
     return meshPtr;
