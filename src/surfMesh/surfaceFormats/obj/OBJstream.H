@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -92,7 +92,7 @@ public:
 
         // Access
 
-            //- Return the name of the stream
+            //- Return the number of vertices written
             label nVertices() const
             {
                 return nVertices_;
@@ -134,6 +134,14 @@ public:
 
             //- Write line
             Ostream& write(const linePointRef&);
+
+            //- Write line with points and vector normals ('vn')
+            Ostream& write
+            (
+                const linePointRef&,
+                const vector& n0,
+                const vector& n1
+            );
 
             //- Write triangle as points with lines or filled polygon
             Ostream& write(const triPointRef&, const bool lines = true);

@@ -109,7 +109,7 @@ bool Foam::manualGAMGProcAgglomeration::agglomerate()
                     // My processor id
                     const label myProcID = Pstream::myProcNo(levelMesh.comm());
 
-                    const List<clusterAndMaster>& clusters =
+                    const List<labelList>& clusters =
                         procAgglomMaps_[i].second();
 
                     // Coarse to fine master processor
@@ -125,8 +125,8 @@ bool Foam::manualGAMGProcAgglomeration::agglomerate()
 
                     forAll(clusters, coarseI)
                     {
-                        const labelList& cluster = clusters[coarseI].first();
-                        coarseToMaster[coarseI] = clusters[coarseI].second();
+                        const labelList& cluster = clusters[coarseI];
+                        coarseToMaster[coarseI] = cluster[0];
 
                         forAll(cluster, i)
                         {
