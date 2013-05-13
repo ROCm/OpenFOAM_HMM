@@ -106,6 +106,14 @@ class conformationSurfaces
         //- Read into features_ from a dictionary
         void readFeatures
         (
+            const label surfI,
+            const dictionary& featureDict,
+            const word& surfaceName,
+            label& featureIndex
+        );
+
+        void readFeatures
+        (
             const dictionary& featureDict,
             const word& surfaceName,
             label& featureIndex
