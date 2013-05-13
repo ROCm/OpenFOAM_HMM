@@ -26,6 +26,7 @@ License
 #include "conformationSurfaces.H"
 #include "conformalVoronoiMesh.H"
 #include "triSurface.H"
+#include "searchableSurfaceFeatures.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -107,6 +108,7 @@ void Foam::conformationSurfaces::hasBoundedVolume
 
 void Foam::conformationSurfaces::readFeatures
 (
+    const label surfI,
     const dictionary& featureDict,
     const word& surfaceName,
     label& featureIndex
@@ -142,11 +144,85 @@ void Foam::conformationSurfaces::readFeatures
     }
     else if (featureMethod == "extractFeatures")
     {
-        notImplemented
+        const searchableSurface& surface = allGeometry_[surfaces_[surfI]];
+
+        Info<< "    features: " << surface.name() << " of type "
+            << surface.type() << endl;
+
+        autoPtr<searchableSurfaceFeatures> ssFeatures
         (
-            "Foam::conformationSurfaces::readFeatures, "
-            "else if (featureMethod == \"extractFeatures\")"
+            searchableSurfaceFeatures::New(surface, featureDict)
         );
+
+        if (ssFeatures().hasFeatures())
+        {
+            features_.set
+            (
+                featureIndex,
+                ssFeatures().features()
+            );
+
+            featureIndex++;
+        }
+        else
+        {
+            WarningIn
+            (
+                "Foam::conformationSurfaces::readFeatures"
+                "(const label, const dictionary&, const word&, label&)"
+            )   << surface.name() << " of type "
+                << surface.type() << " does not have features"
+                << endl;
+        }
+    }
+    else if (featureMethod == "none")
+    {
+        // Currently nothing to do
+    }
+    else
+    {
+        FatalErrorIn("Foam::conformationSurfaces::readFeatures")
+            << "No valid featureMethod found for surface " << surfaceName
+            << nl << "Use \"extendedFeatureEdgeMesh\" "
+            << "or \"extractFeatures\"."
+            << exit(FatalError);
+    }
+}
+
+void Foam::conformationSurfaces::readFeatures
+(
+    const dictionary& featureDict,
+    const word& surfaceName,
+    label& featureIndex
+)
+{
+    word featureMethod =
+        featureDict.lookupOrDefault<word>("featureMethod", "none");
+
+    if (featureMethod == "extendedFeatureEdgeMesh")
+    {
+        fileName feMeshName(featureDict.lookup("extendedFeatureEdgeMesh"));
+
+        Info<< "    features: " << feMeshName << endl;
+
+        features_.set
+        (
+            featureIndex,
+            new extendedFeatureEdgeMesh
+            (
+                IOobject
+                (
+                    feMeshName,
+                    runTime_.time().constant(),
+                    "extendedFeatureEdgeMesh",
+                    runTime_.time(),
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                )
+            )
+        );
+
+        featureIndex++;
     }
     else if (featureMethod == "none")
     {
@@ -275,7 +351,13 @@ Foam::conformationSurfaces::conformationSurfaces
             );
         }
 
-        readFeatures(surfaceSubDict, surfaceName, featureI);
+        readFeatures
+        (
+            surfI,
+            surfaceSubDict,
+            surfaceName,
+            featureI
+        );
 
         if (surfaceSubDict.found("regions"))
         {
