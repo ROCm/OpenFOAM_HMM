@@ -35,7 +35,7 @@ runApplication surfaceFeatureExtract
 
 # Generate aligned points (in constant/internalDelaunayVertices) and a
 # mesh from that.
-runApplication cvMesh
+runApplication foamyHexMesh
 
 # Generate some sets for a bit of mesh inspection
 runApplication topoSet -time 0:100

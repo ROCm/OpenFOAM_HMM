@@ -47,8 +47,8 @@ surfaceConformation
     {
         flange
         {
-            featureMethod           extendedFeatureEdgeMesh;
-            extendedFeatureEdgeMesh "flange.extendedFeatureEdgeMesh";
+            featureMethod           extractFeatures;
+            includedAngle           140;
         }
     }
 }

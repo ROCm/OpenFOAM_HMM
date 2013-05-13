@@ -1,0 +1,203 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version         2.0;
+    format          ascii;
+    class           dictionary;
+    object          foamyHexMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Include defaults parameters from master dictionary
+#include "$WM_PROJECT_DIR/etc/caseDicts/foamyHexMeshDict"
+
+geometry
+{
+    // Internal shape
+    coneAndSphere_clean_orient.obj
+    {
+        name coneAndSphere;
+        type triSurfaceMesh;
+    }
+
+    // Outside of domain
+    domain_clean_orient.stl
+    {
+        name domain;
+        type triSurfaceMesh;
+        regions
+        {
+            ascii{ name domain_patch0; }
+        }
+    }
+
+}
+
+
+// Controls for conforming to the surfaces.
+surfaceConformation
+{
+    // A point inside surfaces that is inside mesh.
+    locationInMesh (0 -0.5 0);
+
+    // Geometry to mesh to
+    geometryToConformTo
+    {
+        coneAndSphere
+        {
+            featureMethod           extractFeatures;
+            includedAngle           140;
+            featureMethod extendedFeatureEdgeMesh;
+            extendedFeatureEdgeMesh "coneAndSphere_clean_orient.extendedFeatureEdgeMesh";
+        }
+
+        domain
+        {
+            featureMethod           extractFeatures;
+            includedAngle           125;
+            featureMethod extendedFeatureEdgeMesh;
+            extendedFeatureEdgeMesh "domain_clean_orient.extendedFeatureEdgeMesh";
+        }
+    }
+
+    additionalFeatures
+    {}
+}
+
+
+// Controls for seeding initial points and general control of the target
+// cell size (used everywhere)
+initialPoints
+{
+    initialPointsMethod             autoDensity;
+    // initialPointsMethod          uniformGrid;
+    // initialPointsMethod          bodyCentredCubic;
+    // initialPointsMethod          pointFile;
+
+    // Take boundbox of all geometry. Samples with this box. If too much
+    // samples (due to target cell size) in box split box.
+    autoDensityCoeffs
+    {
+        minCellSizeLimit 0.1;
+        // Initial number of refinement levels. Needs to be enough to pick
+        // up features due to size ratio. If not enough it will take longer
+        // to determine point seeding.
+        minLevels 4;
+        // Split box if ratio of min to max cell size larger than maxSizeRatio
+        maxSizeRatio 5.0;
+        // Per box sample 3x3x3 internally
+        sampleResolution 3;
+        // Additionally per face of the box sample 3
+        surfaceSampleResolution 3;
+    }
+
+    uniformGridCoeffs
+    {
+        // Absolute cell size.
+        initialCellSize         0.0015;
+        randomiseInitialGrid    yes;
+        randomPerturbationCoeff 0.02;
+    }
+
+    bodyCentredCubicCoeffs
+    {
+        initialCellSize         0.0015;
+        randomiseInitialGrid    no;
+        randomPerturbationCoeff 0.1;
+    }
+
+    pointFileCoeffs
+    {
+        // Reads points from file. Still rejects points that are too
+        // close to the surface (minimumSurfaceDistanceCoeff) or on the
+        // wrong side of the surfaces.
+        pointFile              "constant/internalDelaunayVertices";
+    }
+}
+
+
+// Control size of voronoi cells i.e. distance between points. This
+// determines the target cell size which is used everywhere.
+// It determines the cell size given a location. It then uses all
+// the rules
+// - defaultCellSize
+// - cellSizeControlGeometry
+// to determine target cell size. Rule with highest priority wins. If same
+// priority smallest cell size wins.
+motionControl
+{
+    // Absolute cell size of back ground mesh. This is the maximum cell size.
+    defaultCellSize         0.1;
+
+    minimumCellSizeCoeff    0;
+
+    // For background cell size and alignment grid
+    maxSmoothingIterations      100;
+
+    maxRefinementIterations     0;
+
+    shapeControlFunctions
+    {
+        coneAndSphere
+        {
+            type                searchableSurfaceControl;
+            priority            1;
+            mode                bothSides;
+
+            surfaceCellSizeFunction uniformValue;
+            uniformValueCoeffs
+            {
+                surfaceCellSizeCoeff 0.75;
+            }
+
+            cellSizeFunction        uniform;
+            uniformCoeffs
+            {}
+        }
+
+        domain
+        {
+            type                searchableSurfaceControl;
+            priority            1;
+            mode                bothSides;
+
+            surfaceCellSizeFunction uniformValue;
+            uniformValueCoeffs
+            {
+                surfaceCellSizeCoeff 1;
+            }
+
+            cellSizeFunction        uniform;
+            uniformCoeffs
+            {}
+        }
+    }
+
+    // Output lots and lots of .obj files
+    objOutput                   no;
+
+    // Timing and memory usage.
+    timeChecks                  no;
+}
+
+
+// After simulation, when converting to polyMesh, filter out small faces/edges.
+// Do not change. See cvControls.H
+polyMeshFiltering
+{
+    filterEdges                 on;
+    filterFaces                 on;
+    writeTetDualMesh            false;
+}
+
+
+#include "meshQualityDict";
+
+
+// ************************************************************************* //
