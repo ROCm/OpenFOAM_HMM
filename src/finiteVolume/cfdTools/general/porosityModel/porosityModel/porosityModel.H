@@ -36,6 +36,7 @@ SourceFiles
 #ifndef porosityModel_H
 #define porosityModel_H
 
+#include "MeshObject.H"
 #include "fvMesh.H"
 #include "dictionary.H"
 #include "fvMatricesFwd.H"
@@ -54,6 +55,8 @@ namespace Foam
 \*---------------------------------------------------------------------------*/
 
 class porosityModel
+:
+    public MeshObject<fvMesh, UpdateableMeshObject, porosityModel>
 {
 private:
 
@@ -88,8 +91,8 @@ protected:
         //- Name(s) of cell-zone
         keyType zoneName_;
 
-        //- Cell zone Ids
-        labelList cellZoneIds_;
+        //- Cell zone IDs
+        labelList cellZoneIDs_;
 
         //- Local co-ordinate system
         coordinateSystem coordSys_;
@@ -99,6 +102,15 @@ protected:
 
         //- Adjust negative resistance values to be multiplier of max value
         void adjustNegativeResistance(dimensionedVector& resist);
+
+        //- Calculate the porosity force
+        virtual void calcForce
+        (
+            const volVectorField& U,
+            const volScalarField& rho,
+            const volScalarField& mu,
+            vectorField& force
+        ) const = 0;
 
         virtual void correct(fvVectorMatrix& UEqn) const = 0;
 
@@ -207,6 +219,17 @@ public:
         //- Return const access to the porosity active flag
         inline bool active() const;
 
+        //- Return const access to the cell zone IDs
+        inline const labelList& cellZoneIDs() const;
+
+        //- Return the force over the cell zone(s)
+        virtual tmp<vectorField> force
+        (
+            const volVectorField& U,
+            const volScalarField& rho,
+            const volScalarField& mu
+        ) const;
+
         //- Add resistance
         virtual void addResistance(fvVectorMatrix& UEqn) const;
 
@@ -227,10 +250,19 @@ public:
         ) const;
 
 
+    // Topology change
+
+        //- Move points
+        virtual bool movePoints();
+
+        //- Update on meshUpdate
+        virtual void updateMesh(const mapPolyMesh& mpm);
+
+
     // I-O
 
         //- Write
-        virtual void writeData(Ostream& os) const = 0;
+        virtual bool writeData(Ostream& os) const;
 
         //- Read porosity dictionary
         virtual bool read(const dictionary& dict);

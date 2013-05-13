@@ -111,11 +111,6 @@ Foam::multiphaseMixture::multiphaseMixture
 {
     calcAlphas();
     alphas_.write();
-
-    forAllIter(PtrDictionary<phase>, phases_, iter)
-    {
-        alphaTable_.add(iter());
-    }
 }
 
 

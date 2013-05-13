@@ -36,12 +36,12 @@ void Foam::porosityModels::DarcyForchheimer::apply
     const vectorField& U
 ) const
 {
-    forAll(cellZoneIds_, zoneI)
+    forAll(cellZoneIDs_, zoneI)
     {
         const tensorField& dZones = D_[zoneI];
         const tensorField& fZones = F_[zoneI];
 
-        const labelList& cells = mesh_.cellZones()[cellZoneIds_[zoneI]];
+        const labelList& cells = mesh_.cellZones()[cellZoneIDs_[zoneI]];
 
         forAll(cells, i)
         {
@@ -68,12 +68,12 @@ void Foam::porosityModels::DarcyForchheimer::apply
     const vectorField& U
 ) const
 {
-    forAll(cellZoneIds_, zoneI)
+    forAll(cellZoneIDs_, zoneI)
     {
         const tensorField& dZones = D_[zoneI];
         const tensorField& fZones = F_[zoneI];
 
-        const labelList& cells = mesh_.cellZones()[cellZoneIds_[zoneI]];
+        const labelList& cells = mesh_.cellZones()[cellZoneIDs_[zoneI]];
 
         forAll(cells, i)
         {

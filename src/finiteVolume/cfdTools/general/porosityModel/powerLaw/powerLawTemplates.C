@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,9 +37,9 @@ void Foam::porosityModels::powerLaw::apply
     const scalar C0 = C0_;
     const scalar C1m1b2 = (C1_ - 1.0)/2.0;
 
-    forAll(cellZoneIds_, zoneI)
+    forAll(cellZoneIDs_, zoneI)
     {
-        const labelList& cells = mesh_.cellZones()[cellZoneIds_[zoneI]];
+        const labelList& cells = mesh_.cellZones()[cellZoneIDs_[zoneI]];
 
         forAll(cells, i)
         {
@@ -63,9 +63,9 @@ void Foam::porosityModels::powerLaw::apply
     const scalar C0 = C0_;
     const scalar C1m1b2 = (C1_ - 1.0)/2.0;
 
-    forAll(cellZoneIds_, zoneI)
+    forAll(cellZoneIDs_, zoneI)
     {
-        const labelList& cells = mesh_.cellZones()[cellZoneIds_[zoneI]];
+        const labelList& cells = mesh_.cellZones()[cellZoneIDs_[zoneI]];
 
         forAll(cells, i)
         {

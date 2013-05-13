@@ -488,7 +488,10 @@ void Foam::GAMGAgglomeration::procAgglomerateRestrictAddressing
         comm,
         procIDs,
         restrictAddressing_[levelIndex],
-        procRestrictAddressing
+        procRestrictAddressing,
+
+        UPstream::msgType(),
+        Pstream::nonBlocking    //Pstream::scheduled
     );
 
 
