@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,6 +43,7 @@ namespace Foam
     typedef IOList<wordList> wordListIOList;
 
     // Print word list list as a table
+    void printTable(const List<wordList>&, List<string::size_type>&, Ostream&);
     void printTable(const List<wordList>&, Ostream&);
 }
 
