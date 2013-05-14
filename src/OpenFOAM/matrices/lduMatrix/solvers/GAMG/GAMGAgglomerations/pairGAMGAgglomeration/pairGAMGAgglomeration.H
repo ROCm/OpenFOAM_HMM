@@ -61,14 +61,6 @@ protected:
 
     // Protected Member Functions
 
-        //- Calculate and return agglomeration of given level
-        tmp<labelField> agglomerate
-        (
-            label& nCoarseCells,
-            const lduAddressing& fineMatrixAddressing,
-            const scalarField& faceWeights
-        );
-
         //- Agglomerate all levels starting from the given face weights
         void agglomerate
         (
@@ -97,6 +89,15 @@ public:
             const lduMesh& mesh,
             const dictionary& controlDict
         );
+
+        //- Calculate and return agglomeration
+        static tmp<labelField> agglomerate
+        (
+            label& nCoarseCells,
+            const lduAddressing& fineMatrixAddressing,
+            const scalarField& faceWeights
+        );
+
 };
 
 

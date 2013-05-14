@@ -27,9 +27,9 @@ License
 #include "lduMesh.H"
 #include "lduMatrix.H"
 #include "Time.H"
-#include "dlLibraryTable.H"
 #include "GAMGInterface.H"
 #include "GAMGProcAgglomeration.H"
+#include "IOmanip.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -67,23 +67,94 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
         procBoundaryFaceMap_.setSize(nCreatedLevels);
 
         procAgglomeratorPtr_().agglomerate();
-    }
 
-    if (debug)
-    {
-        for (label levelI = 0; levelI <= size(); levelI++)
+
+        if (debug)
         {
-            if (hasMeshLevel(levelI))
+
+            Info<< "GAMGAgglomeration:" << nl
+                << "    local agglomerator     : " << type() << nl
+                << "    processor agglomerator : "
+                << procAgglomeratorPtr_().type() << nl
+                << nl;
+
+            Info<< setw(40) << "nCells"
+                << setw(24) << "nInterfaces"
+                << setw(24) << "Ratio" << nl
+                << setw(8) << "Level"
+                << setw(8) << "nProcs"
+                << "        "
+                << setw(8) << "avg"
+                << setw(8) << "max"
+                << "        "
+                << setw(8) << "avg"
+                << setw(8) << "max"
+                << "            " << setw(4) << "avg"
+                << "    " << setw(4) << "max"
+                << nl
+                << setw(8) << "-----"
+                << setw(8) << "------"
+                << "        "
+                << setw(8) << "---"
+                << setw(8) << "---"
+                << "        "
+                << setw(8) << "---"
+                << setw(8) << "---"
+                << "            " << setw(4) << "---"
+                << "    " << setw(4) << "---"
+                << nl;
+
+            for (label levelI = 0; levelI <= size(); levelI++)
             {
-                const lduMesh& fineMesh = meshLevel(levelI);
-                Pout<< "Level " << levelI << " fine mesh:"<< nl;
-                Pout<< fineMesh.info() << endl;
+                label nProcs = 0;
+                label nCells = 0;
+                label nInterfaces = 0;
+                label nIntFaces = 0;
+                scalar ratio = 0.0;
+
+                if (hasMeshLevel(levelI))
+                {
+                    nProcs = 1;
+
+                    const lduMesh& fineMesh = meshLevel(levelI);
+                    nCells = fineMesh.lduAddr().size();
+
+                    const lduInterfacePtrsList interfaces =
+                        fineMesh.interfaces();
+                    forAll(interfaces, i)
+                    {
+                        if (interfaces.set(i))
+                        {
+                            nInterfaces++;
+                            nIntFaces += interfaces[i].faceCells().size();
+                        }
+                    }
+                    ratio = scalar(nIntFaces)/nCells;
+                }
+
+                label totNprocs = returnReduce(nProcs, sumOp<label>());
+
+                label maxNCells = returnReduce(nCells, maxOp<label>());
+                label totNCells = returnReduce(nCells, sumOp<label>());
+
+                label maxNInt = returnReduce(nInterfaces, maxOp<label>());
+                label totNInt = returnReduce(nInterfaces, sumOp<label>());
+
+                scalar maxRatio = returnReduce(ratio, maxOp<scalar>());
+                scalar totRatio = returnReduce(ratio, sumOp<scalar>());
+
+                Info<< setw(8) << levelI
+                    << setw(8) << totNprocs
+                    << setw(16) << totNCells/totNprocs
+                    << setw(8) << maxNCells
+                    << setw(16) << totNInt/totNprocs
+                    << setw(8) << maxNInt
+                    << "        "
+                    << setw(8) << setprecision(4) << totRatio/totNprocs
+                    << setw(8) << setprecision(4) << maxRatio
+                    << nl;
             }
-            else
-            {
-                Pout<< "Level " << levelI << " has no fine mesh:" << nl
-                    << endl;
-            }
+            Info<< endl;
         }
     }
 }

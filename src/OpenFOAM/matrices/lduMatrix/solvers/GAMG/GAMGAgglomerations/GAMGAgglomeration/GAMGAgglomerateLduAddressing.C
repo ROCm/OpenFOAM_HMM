@@ -351,7 +351,7 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
     );
 
 
-    if (debug)
+    if (debug & 2)
     {
         Pout<< "GAMGAgglomeration :"
             << " agglomerated level " << fineLevelIndex
