@@ -58,7 +58,8 @@ initialPointsMethod::initialPointsMethod
                 initialPointsDict.lookup("minimumSurfaceDistanceCoeff")
             )
         )
-    )
+    ),
+    fixInitialPoints_(Switch(initialPointsDict.lookup("fixInitialPoints")))
 {}
 
 

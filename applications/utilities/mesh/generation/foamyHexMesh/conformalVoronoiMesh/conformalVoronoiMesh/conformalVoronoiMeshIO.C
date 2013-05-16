@@ -181,6 +181,30 @@ void Foam::conformalVoronoiMesh::writePoints
 }
 
 
+void Foam::conformalVoronoiMesh::writeFixedPoints
+(
+    const fileName& fName
+) const
+{
+    OFstream str(runTime_.path()/fName);
+
+    Pout<< nl << "Writing fixed points to " << str.name() << endl;
+
+    for
+    (
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        ++vit
+    )
+    {
+        if (vit->fixed())
+        {
+            meshTools::writeOBJ(str, topoint(vit->point()));
+        }
+    }
+}
+
+
 void Foam::conformalVoronoiMesh::writeBoundaryPoints
 (
     const fileName& fName

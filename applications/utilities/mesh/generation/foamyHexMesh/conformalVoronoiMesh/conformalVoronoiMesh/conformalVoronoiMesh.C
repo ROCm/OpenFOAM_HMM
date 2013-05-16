@@ -141,7 +141,7 @@ void Foam::conformalVoronoiMesh::insertInternalPoints
     Info<< "    " << nInserted << " points inserted"
         << ", failed to insert " << nPoints - nInserted
         << " ("
-        << 100.0*(nPoints - nInserted)/nInserted
+        << 100.0*(nPoints - nInserted)/(nInserted + SMALL)
         << " %)"<< endl;
 
     for
@@ -330,6 +330,28 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
     // Assume that the initial points method made the correct decision for
     // which processor each point should be on, so give distribute = false
     insertInternalPoints(initPts);
+
+    if (initialPointsMethod_->fixInitialPoints())
+    {
+        for
+        (
+            Finite_vertices_iterator vit = finite_vertices_begin();
+            vit != finite_vertices_end();
+            ++vit
+        )
+        {
+            vit->fixed() = true;
+        }
+    }
+
+    if (foamyHexMeshControls().objOutput())
+    {
+        writePoints
+        (
+            "initialPoints.obj",
+            Foam::indexedVertexEnum::vtInternal
+        );
+    }
 }
 
 
@@ -1187,8 +1209,8 @@ void Foam::conformalVoronoiMesh::move()
 
                 if
                 (
-                    vA->internalPoint() && !vA->referred()
-                 && vB->internalPoint() && !vB->referred()
+                    vA->internalPoint() && !vA->referred() && !vA->fixed()
+                 && vB->internalPoint() && !vB->referred() && !vB->fixed()
                 )
                 {
                     // Only insert a point at the midpoint of
@@ -1209,12 +1231,12 @@ void Foam::conformalVoronoiMesh::move()
                     }
                 }
 
-                if (vA->internalPoint() && !vA->referred())
+                if (vA->internalPoint() && !vA->referred() && !vA->fixed())
                 {
                     pointToBeRetained[vA->index()] = false;
                 }
 
-                if (vB->internalPoint() && !vB->referred())
+                if (vB->internalPoint() && !vB->referred() && !vB->fixed())
                 {
                     pointToBeRetained[vB->index()] = false;
                 }
@@ -1358,8 +1380,12 @@ void Foam::conformalVoronoiMesh::move()
                         // Point removal
                         if
                         (
-                            vA->internalPoint() && !vA->referred()
-                         && vB->internalPoint() && !vB->referred()
+                            vA->internalPoint()
+                         && !vA->referred()
+                         && !vA->fixed()
+                         && vB->internalPoint()
+                         && !vB->referred()
+                         && !vB->fixed()
                         )
                         {
                             // Only insert a point at the midpoint of
@@ -1379,26 +1405,60 @@ void Foam::conformalVoronoiMesh::move()
                             }
                         }
 
-                        if (vA->internalPoint() && !vA->referred())
+                        if
+                        (
+                            vA->internalPoint()
+                         && !vA->referred()
+                         && !vA->fixed()
+                        )
                         {
                             pointToBeRetained[vA->index()] = false;
                         }
 
-                        if (vB->internalPoint() && !vB->referred())
+                        if
+                        (
+                            vB->internalPoint()
+                         && !vB->referred()
+                         && !vB->fixed()
+                        )
                         {
                             pointToBeRetained[vB->index()] = false;
                         }
                     }
                     else
                     {
-                        if (vA->internalPoint() && !vA->referred())
+                        if
+                        (
+                            vA->internalPoint()
+                         && !vA->referred()
+                         && !vA->fixed()
+                        )
                         {
-                            displacementAccumulator[vA->index()] += delta;
+                            if (vB->fixed())
+                            {
+                                displacementAccumulator[vA->index()] += 2*delta;
+                            }
+                            else
+                            {
+                                displacementAccumulator[vA->index()] += delta;
+                            }
                         }
 
-                        if (vB->internalPoint() && !vB->referred())
+                        if
+                        (
+                            vB->internalPoint()
+                         && !vB->referred()
+                         && !vB->fixed()
+                        )
                         {
-                            displacementAccumulator[vB->index()] -= delta;
+                            if (vA->fixed())
+                            {
+                                displacementAccumulator[vB->index()] -= 2*delta;
+                            }
+                            else
+                            {
+                                displacementAccumulator[vB->index()] -= delta;
+                            }
                         }
                     }
                 }
@@ -1416,7 +1476,7 @@ void Foam::conformalVoronoiMesh::move()
         ++vit
     )
     {
-        if (vit->internalPoint() && !vit->referred())
+        if (vit->internalPoint() && !vit->referred() && !vit->fixed())
         {
             if (pointToBeRetained[vit->index()] == true)
             {
@@ -1443,7 +1503,7 @@ void Foam::conformalVoronoiMesh::move()
         ++vit
     )
     {
-        if (vit->internalPoint() && !vit->referred())
+        if (vit->internalPoint() && !vit->referred() && !vit->fixed())
         {
             if (pointToBeRetained[vit->index()] == true)
             {

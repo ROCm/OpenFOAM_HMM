@@ -354,8 +354,8 @@ Foam::DelaunayMesh<Triangulation>::createMesh
     List<DynamicList<face> > patchFaces(1, DynamicList<face>());
     List<DynamicList<label> > patchOwners(1, DynamicList<label>());
 
-    vertexMap.setSize(vertexCount());
-    cellMap.setSize(Triangulation::number_of_finite_cells());
+    vertexMap.setSize(vertexCount(), -1);
+    cellMap.setSize(Triangulation::number_of_finite_cells(), -1);
 
     // Calculate pts and a map of point index to location in pts.
     label vertI = 0;
