@@ -27,6 +27,8 @@ License
 #include "ListListOps.H"
 #include "unitConversion.H"
 #include "PackedBoolList.H"
+#include "PatchTools.H"
+#include "searchableBox.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -41,7 +43,7 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
 {
     const pointField& sFeatLocalPts(surf.localPoints());
     const edgeList& sFeatEds(surf.edges());
-    const labelListList& edgeFaces = surf.edgeFaces();
+    const labelListList edgeFaces = PatchTools::sortedEdgeFaces(surf);
     const vectorField& faceNormals = surf.faceNormals();
     const labelListList& pointEdges = surf.pointEdges();
 
@@ -131,6 +133,7 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
         const labelList& eFaces = edgeFaces[sFEI];
 
         edgeNormals[i].setSize(eFaces.size());
+        normalDirections[i].setSize(eFaces.size());
 
         forAll(eFaces, j)
         {
@@ -145,6 +148,22 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
             }
 
             edgeNormals[i][j] = faceMap[eFI];
+
+            const vector cross = (faceNormals[eFI] ^ edgeDirections[i]);
+            const vector fC0tofE0 =
+                surf[eFI].centre(surf.points())
+              - sFeatLocalPts[fE.start()];
+
+            normalDirections[i][j] =
+                (
+                    (
+                        (cross/(mag(cross) + VSMALL))
+                      & (fC0tofE0/(mag(fC0tofE0)+ VSMALL))
+                    )
+                  > 0.0
+                    ? 1
+                    : -1
+                );
         }
 
         vector fC0tofC1(vector::zero);
@@ -258,6 +277,7 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
     inplaceReorder(edMap, edStatus);
     inplaceReorder(edMap, edgeDirections);
     inplaceReorder(edMap, edgeNormals);
+    inplaceReorder(edMap, normalDirections);
     inplaceRenumber(edMap, regionEdges);
 
     forAll(featurePointFeatureEdges, pI)
@@ -273,10 +293,12 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
     // Initialise sorted edge related data
     edgeDirections_ = edgeDirections/(mag(edgeDirections) + VSMALL);
     edgeNormals_ = edgeNormals;
+    normalDirections_ = normalDirections;
     regionEdges_ = regionEdges;
 
     // Normals are all now found and indirectly addressed, can also be stored
     normals_ = vectorField(norms);
+
 
     // Reorder the feature points by classification
 
@@ -354,7 +376,6 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
     // Reinitialise the edgeMesh with sorted feature points and
     // renumbered edges
     reset(xferMove(pts), xferMove(eds));
-
 
     // Generate the featurePointNormals
 
