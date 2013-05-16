@@ -58,9 +58,6 @@ private:
 
     // Private data
 
-        //- Reference to the triSurfaceMesh
-        const triSurfaceMesh& surface_;
-
         //- Name of the triSurfaceScalarField file to load in. Must be in
         //  constant/triSurface
         const word fileName_;
@@ -91,7 +88,7 @@ public:
     // Member Functions
 
         //- Load the cell size field
-        virtual triSurfaceScalarField load();
+        virtual tmp<triSurfacePointScalarField> load();
 };
 
 

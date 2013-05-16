@@ -70,13 +70,9 @@ protected:
 
         const triSurfaceMesh& surfaceTriMesh_;
 
-        triSurfaceScalarField surfaceCellSize_;
-
         autoPtr<cellSizeCalculationType> cellSizeCalculationType_;
 
-        mutable autoPtr<triSurfacePointScalarField> pointCellSize_;
-
-        mutable autoPtr<primitivePatchInterpolation> patch_;
+        triSurfacePointScalarField pointCellSize_;
 
 
 public:
@@ -103,13 +99,15 @@ public:
 
     // Member Functions
 
-        virtual const scalar& surfaceSize(const label index) const;
+        // Query
 
-        virtual const scalar& refineSurfaceSize(const label index);
-
-        virtual scalar interpolate(const point& pt, const label index) const;
-
-        virtual void recalculateInterpolation() const;
+            //- Return the interpolated cell size for a point in the given
+            //  surface triangle
+            virtual scalar interpolate
+            (
+                const point& pt,
+                const label index
+            ) const;
 };
 
 

@@ -46,6 +46,7 @@ Foam::cellSizeCalculationType::cellSizeCalculationType
 )
 :
     cellSizeCalculationTypeDict_(cellSizeCalculationTypeDict),
+    surface_(surface),
     defaultCellSize_(defaultCellSize)
 {}
 

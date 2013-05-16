@@ -60,7 +60,7 @@ void Foam::conformalVoronoiMesh::cellSizeMeshOverlapsBackground() const
         ++vit
     )
     {
-        if (vit->internalOrBoundaryPoint())
+        if (vit->internalOrBoundaryPoint() && !vit->referred())
         {
             pts.append(topoint(vit->point()));
         }

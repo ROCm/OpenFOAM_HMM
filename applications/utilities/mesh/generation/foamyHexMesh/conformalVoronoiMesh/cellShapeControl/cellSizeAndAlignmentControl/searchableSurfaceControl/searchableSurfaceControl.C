@@ -288,6 +288,7 @@ Foam::searchableSurfaceControl::searchableSurfaceControl
         cellSizeFunctions_.transfer(regionCellSizeFunctions);
     }
 
+
     forAll(cellSizeFunctions_, funcI)
     {
         const label funcPriority = cellSizeFunctions_[funcI].priority();
@@ -297,6 +298,21 @@ Foam::searchableSurfaceControl::searchableSurfaceControl
             maxPriority_ = funcPriority;
         }
     }
+
+    // Sort controlFunctions_ by maxPriority
+    SortableList<label> functionPriorities(cellSizeFunctions_.size());
+
+    forAll(cellSizeFunctions_, funcI)
+    {
+        functionPriorities[funcI] = cellSizeFunctions_[funcI].priority();
+    }
+
+    functionPriorities.reverseSort();
+
+    labelList invertedFunctionPriorities =
+        invert(functionPriorities.size(), functionPriorities.indices());
+
+    cellSizeFunctions_.reorder(invertedFunctionPriorities);
 
     Info<< nl << "There are " << cellSizeFunctions_.size()
         << " region control functions" << endl;
@@ -339,6 +355,8 @@ void Foam::searchableSurfaceControl::initialVertices
             info,
             infoFeature
         );
+
+        scalar limitedCellSize = GREAT;
 
         autoPtr<triad> pointAlignment;
 
@@ -398,6 +416,26 @@ void Foam::searchableSurfaceControl::initialVertices
                 searchableSurface_.getNormal(infoList, normals);
 
                 pointAlignment.set(new triad(normals[0]));
+
+                // Limit cell size
+                const vector vN =
+                    infoList[0].hitPoint()
+                  - 2.0*normals[0]*defaultCellSize_;
+
+                List<pointIndexHit> intersectionList;
+                searchableSurface_.findLineAny
+                (
+                    ptField,
+                    pointField(1, vN),
+                    intersectionList
+                );
+
+                if (intersectionList[0].hit())
+                {
+                    scalar dist = mag(intersectionList[0].hitPoint() - pts[pI]);
+
+                    //limitedCellSize = dist/2.0;
+                }
             }
         }
 
@@ -411,6 +449,8 @@ void Foam::searchableSurfaceControl::initialVertices
             )   << "Could not calculate cell size"
                 << abort(FatalError);
         }
+
+        sizes[pI] = min(limitedCellSize, sizes[pI]);
 
         alignments[pI] = pointAlignment();
     }

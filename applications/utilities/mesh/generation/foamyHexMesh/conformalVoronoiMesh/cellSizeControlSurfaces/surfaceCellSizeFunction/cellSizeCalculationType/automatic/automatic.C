@@ -27,6 +27,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "triSurfaceMesh.H"
 #include "vtkSurfaceWriter.H"
+#include "primitivePatchInterpolation.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -68,9 +69,9 @@ void Foam::automatic::smoothField(triSurfaceScalarField& surf)
                 const scalar faceValue = surf[faceLabel];
                 const scalar distance = mag(faceCentre - fC);
 
-                newValue += faceValue/distance;
+                newValue += faceValue/(distance + SMALL);
 
-                totalDist += 1.0/distance;
+                totalDist += 1.0/(distance + SMALL);
 
                 if (value < faceValue)
                 {
@@ -81,7 +82,7 @@ void Foam::automatic::smoothField(triSurfaceScalarField& surf)
             // Do not smooth out the peak values
             if (nFaces == faceFaces.size())
             {
-                //continue;
+                continue;
             }
 
             surf[sI] = newValue/totalDist;
@@ -107,7 +108,6 @@ Foam::automatic::automatic
         defaultCellSize
     ),
     coeffsDict_(cellSizeCalcTypeDict.subDict(typeName + "Coeffs")),
-    surface_(surface),
     surfaceName_(surface.searchableSurface::name()),
     readCurvature_(Switch(coeffsDict_.lookup("curvature"))),
     curvatureFile_(coeffsDict_.lookup("curvatureFile")),
@@ -128,31 +128,36 @@ Foam::automatic::automatic
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::triSurfaceScalarField Foam::automatic::load()
+Foam::tmp<Foam::triSurfacePointScalarField> Foam::automatic::load()
 {
-    Info<< indent << "Calculating cell size on surface: "
-        << surfaceName_ << endl;
+    Info<< indent
+        << "Calculating cell size on surface: " << surfaceName_ << endl;
 
-    triSurfaceScalarField surfaceCellSize
+    tmp<triSurfacePointScalarField> tPointCellSize
     (
-        IOobject
+        new triSurfacePointScalarField
         (
-            surfaceName_ + ".cellSize",
-            surface_.searchableSurface::time().constant(),
-            "triSurface",
-            surface_.searchableSurface::time(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        surface_,
-        dimLength,
-        scalarField(surface_.size(), maximumCellSize_)
+            IOobject
+            (
+                surfaceName_ + ".cellSize",
+                surface_.searchableSurface::time().constant(),
+                "triSurface",
+                surface_.searchableSurface::time(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            surface_,
+            dimLength,
+            scalarField(surface_.nPoints(), maximumCellSize_)
+        )
     );
+
+    triSurfacePointScalarField& pointCellSize = tPointCellSize();
 
     if (readCurvature_)
     {
-        Info<< indent << "Reading curvature         : "
-            << curvatureFile_ << endl;
+        Info<< indent
+            << "Reading curvature         : " << curvatureFile_ << endl;
 
         triSurfacePointScalarField curvature
         (
@@ -170,42 +175,33 @@ Foam::triSurfaceScalarField Foam::automatic::load()
             true
         );
 
-        const List<labelledTri>& localFaces = surface_.localFaces();
-        const labelList& meshPoints = surface_.meshPoints();
-
-        forAll(surfaceCellSize, fI)
+        forAll(pointCellSize, pI)
         {
-            const labelList& facePoints = localFaces[fI].triFaceFace();
-
-            scalar interpolatedCurvatureToFace = 0.0;
-
-            forAll(facePoints, fpI)
-            {
-                interpolatedCurvatureToFace
-                    += curvature[meshPoints[facePoints[fpI]]];
-            }
-
-            interpolatedCurvatureToFace /= facePoints.size();
-
-            surfaceCellSize[fI] =
+            pointCellSize[pI] =
                 min
                 (
                     1.0
                    /max
                     (
-                        (1.0/curvatureCellSizeCoeff_)
-                       *interpolatedCurvatureToFace,
+                        (1.0/curvatureCellSizeCoeff_)*mag(curvature[pI]),
                         1.0/maximumCellSize_
                     ),
-                    surfaceCellSize[fI]
+                    pointCellSize[pI]
                 );
         }
     }
 
+    PrimitivePatchInterpolation
+    <
+        PrimitivePatch<labelledTri, ::Foam::List, pointField, point>
+    > patchInterpolate(surface_);
+
+    const Map<label>& meshPointMap = surface_.meshPointMap();
+
     if (readInternalCloseness_)
     {
-        Info<< indent << "Reading internal closeness: "
-            << internalClosenessFile_ << endl;
+        Info<< indent
+            << "Reading internal closeness: " << internalClosenessFile_ << endl;
 
         triSurfaceScalarField internalCloseness
         (
@@ -223,21 +219,24 @@ Foam::triSurfaceScalarField Foam::automatic::load()
             true
         );
 
-        forAll(surfaceCellSize, fI)
+        scalarField internalClosenessPointField =
+            patchInterpolate.faceToPointInterpolate(internalCloseness);
+
+        forAll(pointCellSize, pI)
         {
-            surfaceCellSize[fI] =
+            pointCellSize[pI] =
                 min
                 (
-                    internalCloseness[fI],
-                    surfaceCellSize[fI]
+                    internalClosenessPointField[meshPointMap[pI]],
+                    pointCellSize[pI]
                 );
         }
     }
 
     if (readFeatureProximity_)
     {
-        Info<< indent << "Reading feature proximity : "
-            << featureProximityFile_ << endl;
+        Info<< indent
+            << "Reading feature proximity : " << featureProximityFile_ << endl;
 
         triSurfaceScalarField featureProximity
         (
@@ -255,20 +254,23 @@ Foam::triSurfaceScalarField Foam::automatic::load()
             true
         );
 
-        forAll(surfaceCellSize, fI)
+        scalarField featureProximityPointField =
+            patchInterpolate.faceToPointInterpolate(featureProximity);
+
+        forAll(pointCellSize, pI)
         {
-            surfaceCellSize[fI] =
+            pointCellSize[pI] =
                 min
                 (
-                    featureProximity[fI],
-                    surfaceCellSize[fI]
+                    featureProximityPointField[meshPointMap[pI]],
+                    pointCellSize[pI]
                 );
         }
     }
 
-    smoothField(surfaceCellSize);
+    //smoothField(surfaceCellSize);
 
-    surfaceCellSize.write();
+    pointCellSize.write();
 
     if (debug)
     {
@@ -282,17 +284,17 @@ Foam::triSurfaceScalarField Foam::automatic::load()
         vtkSurfaceWriter().write
         (
             surface_.searchableSurface::time().constant()/"triSurface",
-            surfaceName_,
+            surfaceName_.lessExt().name(),
             surface_.points(),
             faces,
             "cellSize",
-            surfaceCellSize,
-            false,
+            pointCellSize,
+            true,
             true
         );
     }
 
-    return surfaceCellSize;
+    return tPointCellSize;
 }
 
 
