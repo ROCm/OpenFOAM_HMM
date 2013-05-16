@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,20 +60,51 @@ tmp<volScalarField> SpalartAllmaras::fv1() const
 
 tmp<volScalarField> SpalartAllmaras::fv2() const
 {
-    return 1/pow3(scalar(1) + nuTilda_/(Cv2_*nu()));
+    if (ashfordCorrection_)
+    {
+        return 1/pow3(scalar(1) + nuTilda_/(Cv2_*nu()));
+    }
+    else
+    {
+        const volScalarField chi("chi", nuTilda_/nu());
+        return 1.0 - chi/(1.0 + chi*fv1());
+    }
 }
 
 
 tmp<volScalarField> SpalartAllmaras::fv3() const
 {
-    const volScalarField chi("chi", nuTilda_/nu());
-    const volScalarField chiByCv2(chi/Cv2_);
+    if (ashfordCorrection_)
+    {
+        const volScalarField chi("chi", nuTilda_/nu());
+        const volScalarField chiByCv2(chi/Cv2_);
 
-    return
-        (scalar(1) + chi*fv1())
-       *(1/Cv2_)
-       *(3*(scalar(1) + chiByCv2) + sqr(chiByCv2))
-       /pow3(scalar(1) + chiByCv2);
+        return
+            (scalar(1) + chi*fv1())
+           *(1/Cv2_)
+           *(3*(scalar(1) + chiByCv2) + sqr(chiByCv2))
+           /pow3(scalar(1) + chiByCv2);
+    }
+    else
+    {
+        return tmp<volScalarField>
+        (
+            new volScalarField
+            (
+                IOobject
+                (
+                    "fv3",
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh_,
+                dimensionedScalar("fv3", dimless, 1),
+                zeroGradientFvPatchScalarField::typeName
+            )
+        );
+    }
 }
 
 
@@ -246,6 +277,8 @@ SpalartAllmaras::SpalartAllmaras
         )
     ),
 
+    ashfordCorrection_(coeffDict_.lookupOrDefault("ashfordCorrection", true)),
+
     y_(mesh_),
 
     nuTilda_
@@ -275,6 +308,11 @@ SpalartAllmaras::SpalartAllmaras
     )
 {
     updateSubGridScaleFields();
+
+    if (ashfordCorrection_)
+    {
+        Info<< "    Employing Ashford correction" << endl;
+    }
 }
 
 
@@ -376,6 +414,7 @@ bool SpalartAllmaras::read()
     {
         sigmaNut_.readIfPresent(coeffDict());
         kappa_.readIfPresent(*this);
+
         Cb1_.readIfPresent(coeffDict());
         Cb2_.readIfPresent(coeffDict());
         Cv1_.readIfPresent(coeffDict());
@@ -385,6 +424,8 @@ bool SpalartAllmaras::read()
         Cw1_ = Cb1_/sqr(kappa_) + (1.0 + Cb2_)/sigmaNut_;
         Cw2_.readIfPresent(coeffDict());
         Cw3_.readIfPresent(coeffDict());
+
+        ashfordCorrection_.readIfPresent("ashfordCorrection", coeffDict());
 
         return true;
     }

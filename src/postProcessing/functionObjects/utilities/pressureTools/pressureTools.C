@@ -70,7 +70,7 @@ Foam::dimensionedScalar Foam::pressureTools::rhoScale
     }
     else
     {
-        return dimensionedScalar("rhoRef", dimDensity, rhoRef_);
+        return dimensionedScalar("rhoRef", dimDensity, rhoInf_);
     }
 }
 
@@ -100,7 +100,7 @@ Foam::tmp<Foam::volScalarField> Foam::pressureTools::rho
                         IOobject::NO_WRITE
                     ),
                     p.mesh(),
-                    dimensionedScalar("zero", dimDensity, rhoRef_)
+                    dimensionedScalar("zero", dimDensity, rhoInf_)
                 )
             );
     }
@@ -193,7 +193,6 @@ Foam::pressureTools::pressureTools
     pName_("p"),
     UName_("U"),
     rhoName_("rho"),
-    rhoRef_(1.0),
     calcTotal_(false),
     pRef_(0.0),
     calcCoeff_(false),
@@ -242,7 +241,7 @@ void Foam::pressureTools::read(const dictionary& dict)
 
         if (p.dimensions() != dimPressure)
         {
-            dict.lookup("rhoRef") >> rhoRef_;
+            dict.lookup("rhoRef") >> rhoInf_;
         } 
 
         dict.lookup("calcTotal") >> calcTotal_;

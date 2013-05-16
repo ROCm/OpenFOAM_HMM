@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,6 +29,15 @@ Group
 
 Description
     SpalartAllmaras DES (SA + LES) turbulence model for incompressible flows
+
+    Extended according to
+    \verbatim
+        "An Unstructured Grid Generation and Adaptive Solution Technique
+        for High Reynolds Number Compressible Flows"
+        G.A. Ashford,
+        Ph.D. thesis, University of Michigan, 1996.
+    \endverbatim
+    by using the optional flag \c ashfordCorrection
 
 SourceFiles
     SpalartAllmaras.C
@@ -88,6 +97,10 @@ protected:
             dimensionedScalar Cw1_;
             dimensionedScalar Cw2_;
             dimensionedScalar Cw3_;
+
+
+        //- Optional flag to activate the Ashford correction
+        Switch ashfordCorrection_;
 
 
         // Fields

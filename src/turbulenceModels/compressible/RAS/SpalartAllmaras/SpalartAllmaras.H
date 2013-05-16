@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,14 +37,16 @@ Description
         P.R. Spalart,
         S.R. Allmaras,
         La Recherche Aerospatiale, No. 1, 1994, pp. 5-21.
+    \endverbatim
 
-        Extended according to:
-
+    Extended according to:
+    \verbatim
         "An Unstructured Grid Generation and Adaptive Solution Technique
         for High Reynolds Number Compressible Flows"
         G.A. Ashford,
         Ph.D. thesis, University of Michigan, 1996.
     \endverbatim
+    by using the optional flag \c ashfordCorrection
 
     The default model coefficients correspond to the following:
     \verbatim
@@ -108,6 +110,10 @@ protected:
             dimensionedScalar Cw3_;
             dimensionedScalar Cv1_;
             dimensionedScalar Cv2_;
+
+
+        //- Optional flag to activate the Ashford correction
+        Switch ashfordCorrection_;
 
 
         // Fields
