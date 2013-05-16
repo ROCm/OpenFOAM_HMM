@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,6 +29,15 @@ Group
 
 Description
     SpalartAllmaras for compressible flows
+
+    Extended according to
+    \verbatim
+        "An Unstructured Grid Generation and Adaptive Solution Technique
+        for High Reynolds Number Compressible Flows"
+        G.A. Ashford,
+        Ph.D. thesis, University of Michigan, 1996.
+    \endverbatim
+    by using the optional flag \c ashfordCorrection
 
 SourceFiles
     SpalartAllmaras.C
@@ -77,12 +86,16 @@ class SpalartAllmaras
             dimensionedScalar Cw3_;
 
 
-    // Fields
+        //- Optional flag to activate the Ashford correction
+        Switch ashfordCorrection_;
 
-        volScalarField nuTilda_;
-        volScalarField dTilda_;
-        volScalarField muSgs_;
-        volScalarField alphaSgs_;
+
+        // Fields
+
+            volScalarField nuTilda_;
+            volScalarField dTilda_;
+            volScalarField muSgs_;
+            volScalarField alphaSgs_;
 
 
     // Private Member Functions
