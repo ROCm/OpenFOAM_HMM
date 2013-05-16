@@ -90,8 +90,8 @@ Foam::triSurfaceMeshFeatures::features() const
         (
             sFeat,
             surface().db(),
-            surface().name() + ".extendedFeatureEdgeMesh",
-            surfBaffleRegions
+            surface().name() + ".extendedFeatureEdgeMesh"//,
+            //surfBaffleRegions
         )
     );
 

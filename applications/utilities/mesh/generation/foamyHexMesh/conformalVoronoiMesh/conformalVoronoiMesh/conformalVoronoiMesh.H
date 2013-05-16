@@ -1099,6 +1099,8 @@ public:
                 const Foam::indexedVertexEnum::vertexType pointType
             ) const;
 
+            void writeFixedPoints(const fileName& fName) const;
+
             //- Write the boundary Delaunay points to .obj file
             void writeBoundaryPoints(const fileName& fName) const;
 
