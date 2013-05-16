@@ -287,6 +287,7 @@ public:
             label openStart,
             label multipleStart,
             const vectorField& normals,
+            const PackedList<2>& normalVolumeTypes,
             const vectorField& edgeDirections,
             const labelListList& normalDirections,
             const labelListList& edgeNormals,
