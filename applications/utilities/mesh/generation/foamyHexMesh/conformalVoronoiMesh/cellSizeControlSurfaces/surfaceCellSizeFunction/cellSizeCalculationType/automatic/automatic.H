@@ -62,11 +62,8 @@ private:
         //- Dictionary of coefficients for automatic cell sizing
         const dictionary& coeffsDict_;
 
-        //- Reference to the triSurfaceMesh
-        const triSurfaceMesh& surface_;
-
         //- Name of the surface. Used to write the cell size field
-        const word surfaceName_;
+        const fileName surfaceName_;
 
         const Switch readCurvature_;
         const word curvatureFile_;
@@ -115,7 +112,7 @@ public:
     // Member Functions
 
         //- Load the cell size field
-        virtual triSurfaceScalarField load();
+        virtual tmp<triSurfacePointScalarField> load();
 };
 
 

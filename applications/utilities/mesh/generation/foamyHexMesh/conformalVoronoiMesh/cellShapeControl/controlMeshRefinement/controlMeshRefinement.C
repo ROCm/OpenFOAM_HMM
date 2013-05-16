@@ -277,8 +277,13 @@ void Foam::controlMeshRefinement::initialMeshPopulation
         {
             vertices[vI] = Vb(pts[vI], Vb::vtInternalNearBoundary);
 
+//            Info<< "Find size of vertex " << vI << endl;
+
             label maxPriority = -1;
             scalar size = sizeControls_.cellSize(pts[vI], maxPriority);
+
+//            Info<< "    Size = " << size << ", priority = " << maxPriority
+//                << endl;
 
             if (maxPriority > controlFunction.maxPriority())
             {
@@ -387,7 +392,7 @@ void Foam::controlMeshRefinement::initialMeshPopulation
 
             if (debug)
             {
-                Info<< "    size difference = " << sizeDiff
+                Info<< "    size difference = " << sizeDiff << nl
                     << ", alignment difference = " << alignmentDiff << endl;
             }
 
@@ -568,30 +573,35 @@ void Foam::controlMeshRefinement::initialMeshPopulation
             {
                 // Check the priority
 
-                cellShapeControlMesh::Cell_handle ch =
-                    mesh_.locate(toPoint<cellShapeControlMesh::Point>(pt));
+//                cellShapeControlMesh::Cell_handle ch =
+//                    mesh_.locate(toPoint<cellShapeControlMesh::Point>(pt));
 
-                const label newPtPriority = controlFunction.maxPriority();
+//                if (mesh_.is_infinite(ch))
+//                {
+//                    continue;
+//                }
 
-                label highestPriority = -1;
-                for (label cI = 0; cI < 4; ++cI)
-                {
-                    if (mesh_.is_infinite(ch->vertex(cI)))
-                    {
-                        continue;
-                    }
+//                const label newPtPriority = controlFunction.maxPriority();
 
-                    const label vertPriority =
-                        priorityMap[ch->vertex(cI)->index()];
+//                label highestPriority = -1;
+//                for (label cI = 0; cI < 4; ++cI)
+//                {
+//                    if (mesh_.is_infinite(ch->vertex(cI)))
+//                    {
+//                        continue;
+//                    }
 
-                    if (vertPriority > highestPriority)
-                    {
-                        highestPriority = vertPriority;
-                    }
-                }
+//                    const label vertPriority =
+//                        priorityMap[ch->vertex(cI)->index()];
 
-                if (newPtPriority >= highestPriority)
-                {
+//                    if (vertPriority > highestPriority)
+//                    {
+//                        highestPriority = vertPriority;
+//                    }
+//                }
+
+//                if (newPtPriority >= highestPriority)
+//                {
                     const label oldSize = mesh_.vertexCount();
 
                     cellShapeControlMesh::Vertex_handle insertedVert =
@@ -603,15 +613,15 @@ void Foam::controlMeshRefinement::initialMeshPopulation
                             Vb::vtInternal
                         );
 
-                    if (oldSize == mesh_.vertexCount() - 1)
-                    {
-                        priorityMap.insert
-                        (
-                            insertedVert->index(),
-                            newPtPriority
-                        );
-                    }
-                }
+//                    if (oldSize == mesh_.vertexCount() - 1)
+//                    {
+//                        priorityMap.insert
+//                        (
+//                            insertedVert->index(),
+//                            newPtPriority
+//                        );
+//                    }
+//                }
             }
         }
 

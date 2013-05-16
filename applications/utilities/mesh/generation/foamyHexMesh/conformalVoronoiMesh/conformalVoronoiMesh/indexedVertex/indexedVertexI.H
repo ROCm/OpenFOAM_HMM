@@ -35,7 +35,8 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex()
     index_(-1),
     processor_(Foam::Pstream::myProcNo()),
     alignment_(Foam::triad::unset),
-    targetCellSize_(0.0)
+    targetCellSize_(0.0),
+    vertexFixed_(false)
 {}
 
 
@@ -47,7 +48,8 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex(const Point& p)
     index_(-1),
     processor_(Foam::Pstream::myProcNo()),
     alignment_(Foam::triad::unset),
-    targetCellSize_(0.0)
+    targetCellSize_(0.0),
+    vertexFixed_(false)
 {}
 
 
@@ -63,7 +65,8 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex
     index_(-1),
     processor_(Foam::Pstream::myProcNo()),
     alignment_(Foam::triad::unset),
-    targetCellSize_(0.0)
+    targetCellSize_(0.0),
+    vertexFixed_(false)
 {}
 
 
@@ -79,7 +82,8 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex
     index_(-1),
     processor_(Foam::Pstream::myProcNo()),
     alignment_(Foam::triad::unset),
-    targetCellSize_(0.0)
+    targetCellSize_(0.0),
+    vertexFixed_(false)
 {}
 
 
@@ -96,8 +100,28 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex
     type_(type),
     index_(index),
     processor_(processor),
-    alignment_(Foam::tensor::zero),
-    targetCellSize_(0.0)
+    alignment_(Foam::triad::unset),
+    targetCellSize_(0.0),
+    vertexFixed_(false)
+{}
+
+
+template<class Gt, class Vb>
+inline CGAL::indexedVertex<Gt, Vb>::indexedVertex
+(
+    const Foam::point& p,
+    int index,
+    vertexType type,
+    int processor
+)
+:
+    Vb(Point(p.x(), p.y(), p.z())),
+    type_(type),
+    index_(index),
+    processor_(processor),
+    alignment_(Foam::triad::unset),
+    targetCellSize_(0.0),
+    vertexFixed_(false)
 {}
 
 
@@ -109,7 +133,8 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex(const Point& p, Cell_handle f)
     index_(-1),
     processor_(Foam::Pstream::myProcNo()),
     alignment_(Foam::triad::unset),
-    targetCellSize_(0.0)
+    targetCellSize_(0.0),
+    vertexFixed_(false)
 {}
 
 
@@ -121,7 +146,8 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex(Cell_handle f)
     index_(-1),
     processor_(Foam::Pstream::myProcNo()),
     alignment_(Foam::triad::unset),
-    targetCellSize_(0.0)
+    targetCellSize_(0.0),
+    vertexFixed_(false)
 {}
 
 
@@ -317,18 +343,18 @@ inline bool CGAL::indexedVertex<Gt, Vb>::surfacePoint() const
 }
 
 
-//template<class Gt, class Vb>
-//inline bool CGAL::indexedVertex<Gt, Vb>::isVertexFixed() const
-//{
-//    return vertexFixed_;
-//}
-//
-//
-//template<class Gt, class Vb>
-//inline void CGAL::indexedVertex<Gt, Vb>::setVertexFixed()
-//{
-//    vertexFixed_ = true;
-//}
+template<class Gt, class Vb>
+inline bool CGAL::indexedVertex<Gt, Vb>::fixed() const
+{
+    return vertexFixed_;
+}
+
+
+template<class Gt, class Vb>
+inline bool& CGAL::indexedVertex<Gt, Vb>::fixed()
+{
+    return vertexFixed_;
+}
 
 
 // * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //

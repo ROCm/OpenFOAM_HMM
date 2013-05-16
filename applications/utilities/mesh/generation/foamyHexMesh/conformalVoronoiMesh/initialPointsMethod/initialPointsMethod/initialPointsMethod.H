@@ -73,6 +73,9 @@ protected:
         //  the local target cell size.  Store square of value.
         scalar minimumSurfaceDistanceCoeffSqr_;
 
+        Switch fixInitialPoints_;
+
+
 private:
 
     // Private Member Functions
@@ -136,6 +139,11 @@ public:
         const dictionary& detailsDict() const
         {
             return detailsDict_;
+        }
+
+        Switch fixInitialPoints() const
+        {
+            return fixInitialPoints_;
         }
 
         //- Return the initial points for the conformalVoronoiMesh

@@ -60,21 +60,6 @@ Foam::nonUniformField::nonUniformField
         defaultCellSize
     ),
     surfaceTriMesh_(refCast<const triSurfaceMesh>(surface)),
-    surfaceCellSize_
-    (
-        IOobject
-        (
-            "surfaceCellSize.cellSize",
-            surface.time().constant(),
-            "triSurface",
-            surface.time(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        surfaceTriMesh_,
-        dimLength,
-        false
-    ),
     cellSizeCalculationType_
     (
         cellSizeCalculationType::New
@@ -84,17 +69,30 @@ Foam::nonUniformField::nonUniformField
             defaultCellSize
         )
     ),
-    pointCellSize_(),
-    patch_()
+    pointCellSize_
+    (
+        IOobject
+        (
+            "pointCellSize.cellSize",
+            surfaceTriMesh_.searchableSurface::time().constant(),
+            "triSurface",
+            surfaceTriMesh_.searchableSurface::time(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        surfaceTriMesh_,
+        dimLength,
+        false
+    )
 {
     Info<< incrIndent;
 
-    surfaceCellSize_ = cellSizeCalculationType_().load();
+    pointCellSize_ = cellSizeCalculationType_().load();
 
     Info<< indent << "Cell size field statistics:" << nl
-        << indent << "    Minimum: " << min(surfaceCellSize_).value() << nl
-        << indent << "    Average: " << average(surfaceCellSize_).value() << nl
-        << indent << "    Maximum: " << max(surfaceCellSize_).value() << endl;
+        << indent << "    Minimum: " << min(pointCellSize_).value() << nl
+        << indent << "    Average: " << average(pointCellSize_).value() << nl
+        << indent << "    Maximum: " << max(pointCellSize_).value() << endl;
 
     Info<< decrIndent;
 }
@@ -102,31 +100,12 @@ Foam::nonUniformField::nonUniformField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::scalar& Foam::nonUniformField::surfaceSize(const label index) const
-{
-    return surfaceCellSize_[index];
-}
-
-
-const Foam::scalar& Foam::nonUniformField::refineSurfaceSize(const label index)
-{
-    surfaceCellSize_[index] *= refinementFactor_;
-
-    return surfaceCellSize_[index];
-}
-
-
 Foam::scalar Foam::nonUniformField::interpolate
 (
     const point& pt,
     const label index
 ) const
 {
-    if (patch_.empty())
-    {
-        recalculateInterpolation();
-    }
-
     const face& faceHitByPt = surfaceTriMesh_.triSurface::operator[](index);
 
     const pointField& pts = surfaceTriMesh_.points();
@@ -143,34 +122,9 @@ Foam::scalar Foam::nonUniformField::interpolate
 
     tri.barycentric(pt, bary);
 
-    return pointCellSize_()[pMap[faceHitByPt[0]]]*bary[0]
-         + pointCellSize_()[pMap[faceHitByPt[1]]]*bary[1]
-         + pointCellSize_()[pMap[faceHitByPt[2]]]*bary[2];
-}
-
-
-void Foam::nonUniformField::recalculateInterpolation() const
-{
-    patch_.reset(new primitivePatchInterpolation(surfaceTriMesh_));
-
-    pointCellSize_.reset
-    (
-        new triSurfacePointScalarField
-        (
-            IOobject
-            (
-                "pointCellSize.cellSize",
-                surfaceTriMesh_.searchableSurface::time().constant(),
-                "triSurface",
-                surfaceTriMesh_.searchableSurface::time(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            surfaceTriMesh_,
-            dimLength,
-            patch_().faceToPointInterpolate(surfaceCellSize_)
-        )
-    );
+    return pointCellSize_[pMap[faceHitByPt[0]]]*bary[0]
+         + pointCellSize_[pMap[faceHitByPt[1]]]*bary[1]
+         + pointCellSize_[pMap[faceHitByPt[2]]]*bary[2];
 }
 
 

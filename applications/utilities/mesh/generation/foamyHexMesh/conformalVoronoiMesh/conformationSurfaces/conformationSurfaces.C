@@ -100,8 +100,8 @@ void Foam::conformationSurfaces::hasBoundedVolume
     Info<< "    Sum of all the surface normals (if near zero, surface is"
         << " probably closed):" << nl
         << "    Note: Does not include baffle surfaces in calculation" << nl
-        << "        Sum = " << sum/totalTriangles << nl
-        << "        mag(Sum) = " << mag(sum)/totalTriangles
+        << "        Sum = " << sum/(totalTriangles + SMALL) << nl
+        << "        mag(Sum) = " << mag(sum)/(totalTriangles + SMALL)
         << endl;
 }
 
@@ -641,16 +641,16 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInside
         {
             const label regionI = regionOffset_[s];
 
-            const searchableSurface& surface(allGeometry_[surfaces_[s]]);
+//            const searchableSurface& surface(allGeometry_[surfaces_[s]]);
 
-            if
-            (
-                !surface.hasVolumeType()
-             && !surface.bounds().contains(samplePts[i])
-            )
-            {
-                continue;
-            }
+//            if
+//            (
+//                !surface.hasVolumeType()
+//             //&& !surface.bounds().contains(samplePts[i])
+//            )
+//            {
+//                continue;
+//            }
 
             // If one of the pattern tests is failed, then the point cannot be
             // inside, therefore, if this is a testForInside = true call, the
@@ -661,7 +661,11 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInside
                 continue;
             }
 
+//            Info<< surface.name() << " = "
+//                << volumeType::names[surfaceVolumeTests[s][i]] << endl;
+
             if (surfaceVolumeTests[s][i] == volumeType::OUTSIDE)
+            //if (surfaceVolumeTests[s][i] == volumeType::OUTSIDE)
             {
                 insidePoint[i] = false;
 
@@ -722,7 +726,7 @@ Foam::Field<bool> Foam::conformationSurfaces::wellOutside
     // distanceSquared
 
     // Assume that the point is wellInside until demonstrated otherwise.
-    Field<bool> outsidePoint(samplePts.size(), true);
+    Field<bool> outsidePoint(samplePts.size(), false);
 
     //Check if the points are inside the surface by the given distance squared
 
@@ -755,16 +759,16 @@ Foam::Field<bool> Foam::conformationSurfaces::wellOutside
 
         forAll(surfaces_, s)
         {
-            const searchableSurface& surface(allGeometry_[surfaces_[s]]);
+//            const searchableSurface& surface(allGeometry_[surfaces_[s]]);
 
-            if
-            (
-                !surface.hasVolumeType()
-             && !surface.bounds().contains(samplePts[i])
-            )
-            {
-                continue;
-            }
+//            if
+//            (
+//                !surface.hasVolumeType()
+//             //&& !surface.bounds().contains(samplePts[i])
+//            )
+//            {
+//                continue;
+//            }
 
             const label regionI = regionOffset_[s];
 
@@ -777,9 +781,9 @@ Foam::Field<bool> Foam::conformationSurfaces::wellOutside
                 continue;
             }
 
-            if (surfaceVolumeTests[s][i] == volumeType::INSIDE)
+            if (surfaceVolumeTests[s][i] == volumeType::OUTSIDE)
             {
-                outsidePoint[i] = false;
+                outsidePoint[i] = true;
 
                 break;
             }

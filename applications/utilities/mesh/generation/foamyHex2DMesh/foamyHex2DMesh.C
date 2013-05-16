@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    cv2DMesh
+    foamyHex2DMesh
 
 Description
     Conformal-Voronoi 2D extruding automatic mesher with grid or read

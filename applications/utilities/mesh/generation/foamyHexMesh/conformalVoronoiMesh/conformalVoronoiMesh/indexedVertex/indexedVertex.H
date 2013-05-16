@@ -124,7 +124,7 @@ class indexedVertex
         Foam::scalar targetCellSize_;
 
         //- Specify whether the vertex is fixed or movable.
-//        bool vertexFixed_;
+        bool vertexFixed_;
 
 
 public:
@@ -154,6 +154,14 @@ public:
         inline indexedVertex
         (
             const Point& p,
+            int index,
+            vertexType type,
+            int processor
+        );
+
+        inline indexedVertex
+        (
+            const Foam::point& p,
             int index,
             vertexType type,
             int processor
@@ -240,11 +248,11 @@ public:
 
         inline bool externalBoundaryPoint() const;
 
-//        //- Is the vertex fixed or movable
-//        inline bool isVertexFixed() const;
-//
-//        //- Fix the vertex so that it can't be moved
-//        inline void setVertexFixed();
+        //- Is the vertex fixed or movable
+        inline bool fixed() const;
+
+        //- Fix the vertex so that it can't be moved
+        inline bool& fixed();
 
         inline indexedVertex& operator=(const indexedVertex& rhs)
         {
@@ -255,6 +263,7 @@ public:
             this->processor_ = rhs.procIndex();
             this->alignment_ = rhs.alignment();
             this->targetCellSize_ = rhs.targetCellSize();
+            this->vertexFixed_ = rhs.fixed();
 
             return *this;
         }
@@ -267,6 +276,7 @@ public:
                 this->type_ == rhs.type()
              && this->index_ == rhs.index()
              && this->processor_ == rhs.procIndex()
+             && this->vertexFixed_ == rhs.fixed()
             );
         }
 

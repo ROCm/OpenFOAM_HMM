@@ -62,11 +62,6 @@ bool Foam::cellSizeAndAlignmentControls::evalCellSizeFunctions
                 const searchableSurfaceControl& sSC =
                     refCast<const searchableSurfaceControl>(cSF);
 
-                if (debug)
-                {
-                    Info<< "size function " << sSC.name() << endl;
-                }
-
                 anyFunctionFound = sSC.cellSize(pt, minSize, previousPriority);
 
                 if (previousPriority > maxPriority)
@@ -127,6 +122,21 @@ Foam::cellSizeAndAlignmentControls::cellSizeAndAlignmentControls
 
         functionI++;
     }
+
+    // Sort controlFunctions_ by maxPriority
+    SortableList<label> functionPriorities(functionI);
+
+    forAll(controlFunctions_, funcI)
+    {
+        functionPriorities[funcI] = controlFunctions_[funcI].maxPriority();
+    }
+
+    functionPriorities.reverseSort();
+
+    labelList invertedFunctionPriorities =
+        invert(functionPriorities.size(), functionPriorities.indices());
+
+    controlFunctions_.reorder(invertedFunctionPriorities);
 }
 
 

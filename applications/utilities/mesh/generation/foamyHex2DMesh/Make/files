@@ -7,6 +7,6 @@ insertSurfaceNearPointPairs.C
 insertBoundaryConformPointPairs.C
 CV2DIO.C
 shortEdgeFilter2D.C
-cv2DMesh.C
+foamyHex2DMesh.C
 
-EXE = $(FOAM_APPBIN)/cv2DMesh
+EXE = $(FOAM_APPBIN)/foamyHex2DMesh

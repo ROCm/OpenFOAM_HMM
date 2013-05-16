@@ -118,7 +118,9 @@ Foam::Ostream& Foam::operator<<
         << static_cast<int>(p.type())
         << p.procIndex()
         << p.alignment()
-        << p.targetCellSize();
+        << p.targetCellSize()
+        << token::SPACE
+        << static_cast<int>(p.fixed());
 
     return os;
 }
@@ -136,12 +138,15 @@ Foam::Istream& Foam::operator>>
 
     int type;
     is  >> type;
-
     p.type() = static_cast<Foam::indexedVertexEnum::vertexType>(type);
 
     is  >> p.procIndex()
         >> p.alignment()
         >> p.targetCellSize();
+
+    int fixed;
+    is  >> fixed;
+    p.fixed() = static_cast<bool>(fixed);
 
     return is;
 }
@@ -163,6 +168,13 @@ Foam::Ostream& Foam::operator<<
         CGAL::to_double(iv.point().z())
     );
 
+    string fixed
+    (
+        iv.vertexFixed_
+      ? string(" fixed, ")
+      : string(" free, ")
+    );
+
     string referred
     (
         Pstream::myProcNo() == iv.processor_
@@ -175,6 +187,7 @@ Foam::Ostream& Foam::operator<<
         << " at:" << pt
         << " size:" << iv.targetCellSize_
         << " alignment:" << iv.alignment_
+        << fixed
         << referred.c_str()
         << endl;
 

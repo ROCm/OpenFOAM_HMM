@@ -64,10 +64,40 @@ void Foam::DelaunayMesh<Triangulation>::reset()
 {
     Info<< "Clearing triangulation" << endl;
 
+    DynamicList<Vb> vertices;
+
+    for
+    (
+        Finite_vertices_iterator vit = Triangulation::finite_vertices_begin();
+        vit != Triangulation::finite_vertices_end();
+        ++vit
+    )
+    {
+        if (vit->fixed())
+        {
+            vertices.append
+            (
+                Vb
+                (
+                    vit->point(),
+                    vit->index(),
+                    vit->type(),
+                    vit->procIndex()
+                )
+            );
+
+            vertices.last().fixed() = vit->fixed();
+        }
+    }
+
     this->clear();
 
     resetVertexCount();
     resetCellCount();
+
+    insertPoints(vertices);
+
+    Info<< "Inserted " << vertexCount() << " fixed points" << endl;
 }
 
 

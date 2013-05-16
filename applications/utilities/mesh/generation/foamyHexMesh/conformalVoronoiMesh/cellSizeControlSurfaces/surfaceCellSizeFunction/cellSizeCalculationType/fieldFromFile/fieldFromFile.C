@@ -58,7 +58,6 @@ Foam::fieldFromFile::fieldFromFile
         surface,
         defaultCellSize
     ),
-    surface_(surface),
     fileName_
     (
         cellSizeCalcTypeDict.subDict(typeName + "Coeffs").lookup("fieldFile")
@@ -68,27 +67,30 @@ Foam::fieldFromFile::fieldFromFile
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::triSurfaceScalarField Foam::fieldFromFile::load()
+Foam::tmp<Foam::triSurfacePointScalarField> Foam::fieldFromFile::load()
 {
     Info<< indent << "Loading: " << fileName_ << endl;
 
-    triSurfaceScalarField surfaceCellSize
+    tmp<triSurfacePointScalarField> pointCellSize
     (
-        IOobject
+        new triSurfacePointScalarField
         (
-            fileName_,
-            surface_.searchableSurface::time().constant(),
-            "triSurface",
-            surface_.searchableSurface::time(),
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        ),
-        surface_,
-        dimLength,
-        true
+            IOobject
+            (
+                fileName_,
+                surface_.searchableSurface::time().constant(),
+                "triSurface",
+                surface_.searchableSurface::time(),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            ),
+            surface_,
+            dimLength,
+            true
+        )
     );
 
-    return surfaceCellSize;
+    return pointCellSize;
 }
 
 

@@ -118,43 +118,6 @@ public:
         ) const;
     };
 
-    class findNearestOpSubset
-    {
-        const indexedOctree<treeDataEdge>& tree_;
-
-        DynamicList<label>& shapeMask_;
-
-    public:
-
-        findNearestOpSubset
-        (
-            const indexedOctree<treeDataEdge>& tree,
-            DynamicList<label>& shapeMask
-        );
-
-        void operator()
-        (
-            const labelUList& indices,
-            const point& sample,
-
-            scalar& nearestDistSqr,
-            label& minIndex,
-            point& nearestPoint
-        ) const;
-
-        //- Calculates nearest (to line) point in shape.
-        //  Returns point and distance (squared)
-        void operator()
-        (
-            const labelUList& indices,
-            const linePointRef& ln,
-
-            treeBoundBox& tightest,
-            label& minIndex,
-            point& linePoint,
-            point& nearestPoint
-        ) const;
-    };
 
     class findIntersectOp
     {

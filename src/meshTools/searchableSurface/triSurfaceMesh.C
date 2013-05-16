@@ -738,9 +738,19 @@ void Foam::triSurfaceMesh::getVolumeType
     {
         const point& pt = points[pointI];
 
-        // - use cached volume type per each tree node
-        // - cheat conversion since same values
-        volType[pointI] = tree().getVolumeType(pt);
+        if (!tree().bb().contains(pt))
+        {
+            // Have to calculate directly as outside the octree
+            volType[pointI] = tree().shapes().getVolumeType(tree(), pt);
+        }
+        else
+        {
+            // - use cached volume type per each tree node
+            volType[pointI] = tree().getVolumeType(pt);
+        }
+
+//        Info<< "octree : " << pt << " = "
+//            << volumeType::names[volType[pointI]] << endl;
     }
 
     indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;

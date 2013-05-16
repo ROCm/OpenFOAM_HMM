@@ -35,7 +35,6 @@ SourceFiles
 #ifndef cellSizeCalculationType_H
 #define cellSizeCalculationType_H
 
-#include "searchableSurface.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
 #include "triSurfaceFields.H"
@@ -57,6 +56,9 @@ class cellSizeCalculationType
 protected:
 
         const dictionary& cellSizeCalculationTypeDict_;
+
+        //- Reference to the triSurfaceMesh
+        const triSurfaceMesh& surface_;
 
         const scalar& defaultCellSize_;
 
@@ -124,7 +126,7 @@ public:
     // Member Functions
 
         //- Load the cell size
-        virtual triSurfaceScalarField load() = 0;
+        virtual tmp<triSurfacePointScalarField> load() = 0;
 };
 
 

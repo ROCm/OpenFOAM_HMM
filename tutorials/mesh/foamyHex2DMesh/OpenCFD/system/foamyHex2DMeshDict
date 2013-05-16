@@ -10,7 +10,8 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      cv2DMeshDict;
+    location    "system";
+    object      foamyHex2DMeshDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -98,7 +99,7 @@ motionControl
         {
             type                  searchableSurfaceControl;
             priority              1;
-            mode                  bothSides;
+            mode                  inside;
             cellSizeFunction      uniform;
 
             linearDistanceCoeffs
