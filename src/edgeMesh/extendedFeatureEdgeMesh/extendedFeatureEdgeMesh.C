@@ -337,12 +337,7 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
             // Check to see if the points have been already used
             if (faceMap[eFI] == -1)
             {
-                normalVolumeTypes_[nAdded++] =
-                    (
-                        surfBaffleRegions[surf[eFI].region()]
-                      ? BOTH
-                      : INSIDE
-                    );
+                normalVolumeTypes_[nAdded++] = INSIDE;
 
                 faceMap[eFI] = nAdded - 1;
             }
