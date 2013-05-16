@@ -79,10 +79,14 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
                 << nl;
 
             Info<< setw(40) << "nCells"
+                << setw(24) << "nFaces/nCells"
                 << setw(24) << "nInterfaces"
-                << setw(24) << "Ratio" << nl
+                << setw(24) << "nIntFaces/nCells" << nl
                 << setw(8) << "Level"
                 << setw(8) << "nProcs"
+                << "        "
+                << setw(8) << "avg"
+                << setw(8) << "max"
                 << "        "
                 << setw(8) << "avg"
                 << setw(8) << "max"
@@ -108,6 +112,7 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
             {
                 label nProcs = 0;
                 label nCells = 0;
+                scalar faceCellRatio = 0;
                 label nInterfaces = 0;
                 label nIntFaces = 0;
                 scalar ratio = 0.0;
@@ -118,6 +123,8 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
 
                     const lduMesh& fineMesh = meshLevel(levelI);
                     nCells = fineMesh.lduAddr().size();
+                    faceCellRatio =
+                        scalar(fineMesh.lduAddr().lowerAddr().size())/nCells;
 
                     const lduInterfacePtrsList interfaces =
                         fineMesh.interfaces();
@@ -137,6 +144,11 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
                 label maxNCells = returnReduce(nCells, maxOp<label>());
                 label totNCells = returnReduce(nCells, sumOp<label>());
 
+                scalar maxFaceCellRatio =
+                    returnReduce(faceCellRatio, maxOp<scalar>());
+                scalar totFaceCellRatio =
+                    returnReduce(faceCellRatio, sumOp<scalar>());
+
                 label maxNInt = returnReduce(nInterfaces, maxOp<label>());
                 label totNInt = returnReduce(nInterfaces, sumOp<label>());
 
@@ -145,9 +157,15 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
 
                 Info<< setw(8) << levelI
                     << setw(8) << totNprocs
+
                     << setw(16) << totNCells/totNprocs
                     << setw(8) << maxNCells
-                    << setw(16) << totNInt/totNprocs
+
+                    << "        "
+                    << setw(8) << setprecision(4) << totFaceCellRatio/totNprocs
+                    << setw(8) << setprecision(4) << maxFaceCellRatio
+                    << "        "
+                    << setw(8) << totNInt/totNprocs
                     << setw(8) << maxNInt
                     << "        "
                     << setw(8) << setprecision(4) << totRatio/totNprocs
