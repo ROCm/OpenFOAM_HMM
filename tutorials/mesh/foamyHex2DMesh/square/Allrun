@@ -5,8 +5,8 @@ cd ${0%/*} || exit 1    # run from this directory
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 runApplication surfaceFeatureExtract
-runApplication cv2DMesh -overwrite
-runApplication extrude2DMesh -overwrite MeshedSurface
+runApplication foamyHex2DMesh -overwrite
+runApplication extrude2DMesh -overwrite polyMesh2D
 runApplication checkMesh -allGeometry -allTopology -constant -noZero
 
 

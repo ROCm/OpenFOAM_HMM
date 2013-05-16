@@ -12,7 +12,7 @@ EXE_INC = \
     -I$(FOAM_APP)/utilities/mesh/generation/extrude2DMesh/extrude2DMesh/lnInclude \
     -I../cvMesh/vectorTools \
     -IconformalVoronoi2DMesh/lnInclude \
-    -I$(FOAM_APP)/utilities/mesh/generation/cvMesh/conformalVoronoiMesh/lnInclude \
+    -I$(FOAM_APP)/utilities/mesh/generation/foamyHexMesh/conformalVoronoiMesh/lnInclude \
     -I$(LIB_SRC)/parallel/decompose/decompositionMethods/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
