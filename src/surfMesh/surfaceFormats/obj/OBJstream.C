@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -236,6 +236,20 @@ Foam::Ostream& Foam::OBJstream::write(const linePointRef& ln)
 {
     write(ln.start());
     write(ln.end());
+    write("l ") << nVertices_-1 << ' ' << nVertices_ << nl;
+    return *this;
+}
+
+
+Foam::Ostream& Foam::OBJstream::write
+(
+    const linePointRef& ln,
+    const vector& n0,
+    const vector& n1
+)
+{
+    write(ln.start(), n0);
+    write(ln.end(), n1);
     write("l ") << nVertices_-1 << ' ' << nVertices_ << nl;
     return *this;
 }

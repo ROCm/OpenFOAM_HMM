@@ -160,7 +160,8 @@ public:
                 const labelList& procIDs,
                 const UList<Type>& fld,
                 List<Type>& allFld,
-                const int tag = UPstream::msgType()
+                const int tag = UPstream::msgType(),
+                const Pstream::commsTypes commsType=Pstream::nonBlocking
             );
 
             //- Collect data in processor order on master (== procIDs[0]).
@@ -172,10 +173,11 @@ public:
                 const labelList& procIDs,
                 const UList<Type>& fld,
                 List<Type>& allFld,
-                const int tag = UPstream::msgType()
+                const int tag = UPstream::msgType(),
+                const Pstream::commsTypes commsType=Pstream::nonBlocking
             ) const
             {
-                gather(offsets_, comm, procIDs, fld, allFld, tag);
+                gather(offsets_, comm, procIDs, fld, allFld, tag, commsType);
             }
 
             //- Inplace collect data in processor order on master
@@ -187,7 +189,8 @@ public:
                 const label comm,
                 const labelList& procIDs,
                 List<Type>& fld,
-                const int tag = UPstream::msgType()
+                const int tag = UPstream::msgType(),
+                const Pstream::commsTypes commsType=Pstream::nonBlocking
             );
 
             //- Inplace collect data in processor order on master
@@ -198,10 +201,11 @@ public:
                 const label comm,
                 const labelList& procIDs,
                 List<Type>& fld,
-                const int tag = UPstream::msgType()
+                const int tag = UPstream::msgType(),
+                const Pstream::commsTypes commsType=Pstream::nonBlocking
             ) const
             {
-                gather(offsets_, comm, procIDs, fld, tag);
+                gather(offsets_, comm, procIDs, fld, tag, commsType);
             }
 
             //- Distribute data in processor order. Requires fld to be sized!
@@ -213,7 +217,8 @@ public:
                 const labelList& procIDs,
                 const UList<Type>& allFld,
                 UList<Type>& fld,
-                const int tag = UPstream::msgType()
+                const int tag = UPstream::msgType(),
+                const Pstream::commsTypes commsType=Pstream::nonBlocking
             );
 
             //- Distribute data in processor order. Requires fld to be sized!
@@ -224,10 +229,11 @@ public:
                 const labelList& procIDs,
                 const UList<Type>& allFld,
                 UList<Type>& fld,
-                const int tag = UPstream::msgType()
+                const int tag = UPstream::msgType(),
+                const Pstream::commsTypes commsType=Pstream::nonBlocking
             ) const
             {
-                scatter(offsets_, comm, procIDs, allFld, fld, tag);
+                scatter(offsets_, comm, procIDs, allFld, fld, tag, commsType);
             }
 
 

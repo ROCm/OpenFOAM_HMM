@@ -114,13 +114,6 @@ Foam::solverPerformance Foam::GAMGSolver::solve
                 cmpt
             );
 
-
-            //Pout<< "finestCorrection:" << finestCorrection << endl;
-            //Pout<< "finestResidual:" << finestResidual << endl;
-            //Pout<< "psi:" << psi << endl;
-            //Pout<< "Apsi:" << Apsi << endl;
-
-
             // Calculate finest level residual field
             matrix_.Amul(Apsi, psi, interfaceBouCoeffs_, interfaces_, cmpt);
             finestResidual = source;
@@ -205,7 +198,6 @@ void Foam::GAMGSolver::Vcycle
                     scratch1,
                     coarseCorrFields[leveli].size()
                 );
-                //scalarField ACf(coarseCorrFields[leveli].size(), VGREAT);
 
                 // Scale coarse-grid correction field
                 // but not on the coarsest level because it evaluates to 1
@@ -218,8 +210,6 @@ void Foam::GAMGSolver::Vcycle
                         (
                             ACf.operator const scalarField&()
                         ),
-                        //ACf,
-
                         matrixLevels_[leveli],
                         interfaceLevelsBouCoeffs_[leveli],
                         interfaceLevels_[leveli],
@@ -235,7 +225,6 @@ void Foam::GAMGSolver::Vcycle
                     (
                         ACf.operator const scalarField&()
                     ),
-                    //ACf,
                     coarseCorrFields[leveli],
                     interfaceLevelsBouCoeffs_[leveli],
                     interfaceLevels_[leveli],
@@ -294,11 +283,6 @@ void Foam::GAMGSolver::Vcycle
                 scratch2,
                 coarseCorrFields[leveli].size()
             );
-            //scalarField preSmoothedCoarseCorrField
-            //(
-            //    coarseCorrFields[leveli].size(),
-            //    VGREAT
-            //);
 
             // Only store the preSmoothedCoarseCorrField if pre-smoothing is
             // used
@@ -328,12 +312,6 @@ void Foam::GAMGSolver::Vcycle
             );
             scalarField& ACfRef =
                 const_cast<scalarField&>(ACf.operator const scalarField&());
-            //scalarField ACfRef
-            //(
-            //    coarseCorrFields[leveli].size(),
-            //    VGREAT
-            //);
-
 
             if (interpolateCorrection_)
             {

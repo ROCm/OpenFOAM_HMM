@@ -22,46 +22,27 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::manualGAMGProcAgglomeration
+    Foam::procFacesGAMGProcAgglomeration
 
 Description
-    Manual processor agglomeration of GAMGAgglomerations.
-
-    In the GAMG control dictionary:
-
-        processorAgglomerator manual;
-        // List of level+procagglomeration where
-        // procagglomeration is a set of labelLists. Each labelList is
-        // a cluster of processor which gets combined onto the first element
-        // in the list.
-        processorAgglomeration
-        (
-            (
-                3           //at level 3
-                (
-                    (0 1)   //coarse 0 from 0,1 (and moved onto 0)
-                    (3 2)   //coarse 1 from 2,3 (and moved onto 3)
-                )
-            )
-            (
-                6           //at level6
-                (
-                    (0 1)   //coarse 0 from 0,1 (and moved onto 0)
-                )
-            )
-        );
+    Processor agglomeration of GAMGAgglomerations. Needs nAgglomeratingCells
+    which is when to start agglomerating processors. Processors get agglomerated
+    by constructing a single cell mesh for each processor with each
+    processor interface a face. This then gets agglomerated using
+    the pairGAMGAgglomeration algorithm with the number of faces
+    on the original processor interface as face weight.
 
 SourceFiles
-    manualGAMGProcAgglomeration.C
+    procFacesGAMGProcAgglomeration.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef manualGAMGProcAgglomeration_H
-#define manualGAMGProcAgglomeration_H
+#ifndef procFacesGAMGProcAgglomeration_H
+#define procFacesGAMGProcAgglomeration_H
 
 #include "GAMGProcAgglomeration.H"
 #include "DynamicList.H"
-#include "Tuple2.H"
+#include "labelField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -69,46 +50,63 @@ namespace Foam
 {
 
 class GAMGAgglomeration;
+class lduMesh;
+class lduPrimitiveMesh;
 
 /*---------------------------------------------------------------------------*\
-              Class manualGAMGProcAgglomeration Declaration
+                    Class procFacesGAMGProcAgglomeration Declaration
 \*---------------------------------------------------------------------------*/
 
-class manualGAMGProcAgglomeration
+class procFacesGAMGProcAgglomeration
 :
     public GAMGProcAgglomeration
 {
     // Private data
 
-        //- Per level the agglomeration map
-        const List<Tuple2<label, List<labelList> > > procAgglomMaps_;
+        //- When to processor agglomerate
+        const label nAgglomeratingCells_;
 
-        //- Any allocated communicators
+        //- Allocated communicators
         DynamicList<label> comms_;
-
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        manualGAMGProcAgglomeration
+        //- Return (on master) all single-cell meshes collected. single-cell
+        //  meshes are just one cell with all proc faces intact.
+        autoPtr<lduPrimitiveMesh> singleCellMesh
         (
-            const manualGAMGProcAgglomeration&
+            const label singleCellMeshComm,
+            const lduMesh& mesh,
+            scalarField& faceWeights
+        ) const;
+
+        //- Construct processor agglomeration: for every processor the
+        //  coarse processor-cluster it agglomerates onto
+        tmp<labelField> processorAgglomeration(const lduMesh&) const;
+
+        //- Do we need to agglomerate across processors?
+        bool doProcessorAgglomeration(const lduMesh&) const;
+
+        //- Disallow default bitwise copy construct
+        procFacesGAMGProcAgglomeration
+        (
+            const procFacesGAMGProcAgglomeration&
         );
 
         //- Disallow default bitwise assignment
-        void operator=(const manualGAMGProcAgglomeration&);
+        void operator=(const procFacesGAMGProcAgglomeration&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("manual");
+    TypeName("procFaces");
 
 
     // Constructors
 
         //- Construct given agglomerator and controls
-        manualGAMGProcAgglomeration
+        procFacesGAMGProcAgglomeration
         (
             GAMGAgglomeration& agglom,
             const dictionary& controlDict
@@ -116,7 +114,7 @@ public:
 
 
     //- Destructor
-    virtual ~manualGAMGProcAgglomeration();
+    virtual ~procFacesGAMGProcAgglomeration();
 
 
     // Member Functions

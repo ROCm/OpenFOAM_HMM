@@ -30,30 +30,75 @@ License
 template<class Type>
 void Foam::globalIndex::gather
 (
-    const labelUList& offsets,
+    const labelUList& off,
     const label comm,
     const labelList& procIDs,
     const UList<Type>& fld,
     List<Type>& allFld,
-    const int tag
+    const int tag,
+    const Pstream::commsTypes commsType
 )
 {
     if (Pstream::myProcNo(comm) == procIDs[0])
     {
-        allFld.setSize(offsets.last());
+        allFld.setSize(off.last());
 
         // Assign my local data
         SubList<Type>(allFld, fld.size(), 0).assign(fld);
 
-        for (label i = 1; i < procIDs.size(); i++)
+        if (commsType == Pstream::scheduled || commsType == Pstream::blocking)
         {
-            SubList<Type> procSlot(allFld, offsets[i+1]-offsets[i], offsets[i]);
-
-            if (contiguous<Type>())
+            for (label i = 1; i < procIDs.size(); i++)
             {
+                SubList<Type> procSlot(allFld, off[i+1]-off[i], off[i]);
+
+                if (contiguous<Type>())
+                {
+                    IPstream::read
+                    (
+                        commsType,
+                        procIDs[i],
+                        reinterpret_cast<char*>(procSlot.begin()),
+                        procSlot.byteSize(),
+                        tag,
+                        comm
+                    );
+                }
+                else
+                {
+                    IPstream fromSlave
+                    (
+                        commsType,
+                        procIDs[i],
+                        0,
+                        tag,
+                        comm
+                    );
+                    fromSlave >> procSlot;
+                }
+            }
+        }
+        else
+        {
+            // nonBlocking
+
+            if (!contiguous<Type>())
+            {
+                FatalErrorIn("globalIndex::gather(..)")
+                    << "nonBlocking not supported for non-contiguous data"
+                    << exit(FatalError);
+            }
+
+            label startOfRequests = Pstream::nRequests();
+
+            // Set up reads
+            for (label i = 1; i < procIDs.size(); i++)
+            {
+                SubList<Type> procSlot(allFld, off[i+1]-off[i], off[i]);
+
                 IPstream::read
                 (
-                    Pstream::scheduled,
+                    commsType,
                     procIDs[i],
                     reinterpret_cast<char*>(procSlot.begin()),
                     procSlot.byteSize(),
@@ -61,45 +106,66 @@ void Foam::globalIndex::gather
                     comm
                 );
             }
-            else
-            {
-                IPstream fromSlave
-                (
-                    Pstream::scheduled,
-                    procIDs[i],
-                    0,
-                    tag,
-                    comm
-                );
-                fromSlave >> procSlot;
-            }
+
+            // Wait for all to finish
+            Pstream::waitRequests(startOfRequests);
         }
     }
     else
     {
-        if (contiguous<Type>())
+        if (commsType == Pstream::scheduled || commsType == Pstream::blocking)
         {
+            if (contiguous<Type>())
+            {
+                OPstream::write
+                (
+                    commsType,
+                    procIDs[0],
+                    reinterpret_cast<const char*>(fld.begin()),
+                    fld.byteSize(),
+                    tag,
+                    comm
+                );
+            }
+            else
+            {
+                OPstream toMaster
+                (
+                    commsType,
+                    procIDs[0],
+                    0,
+                    tag,
+                    comm
+                );
+                toMaster << fld;
+            }
+        }
+        else
+        {
+            // nonBlocking
+
+            if (!contiguous<Type>())
+            {
+                FatalErrorIn("globalIndex::gather(..)")
+                    << "nonBlocking not supported for non-contiguous data"
+                    << exit(FatalError);
+            }
+
+            label startOfRequests = Pstream::nRequests();
+
+            // Set up write
             OPstream::write
             (
-                Pstream::scheduled,
+                commsType,
                 procIDs[0],
                 reinterpret_cast<const char*>(fld.begin()),
                 fld.byteSize(),
                 tag,
                 comm
             );
-        }
-        else
-        {
-            OPstream toMaster
-            (
-                Pstream::scheduled,
-                procIDs[0],
-                0,
-                tag,
-                comm
-            );
-            toMaster << fld;
+
+            // Wait for all to finish
+            Pstream::waitRequests(startOfRequests);
         }
     }
 }
@@ -108,78 +174,21 @@ void Foam::globalIndex::gather
 template<class Type>
 void Foam::globalIndex::gather
 (
-    const labelUList& offsets,
+    const labelUList& off,
     const label comm,
     const labelList& procIDs,
     List<Type>& fld,
-    const int tag
+    const int tag,
+    const Pstream::commsTypes commsType
 )
 {
+    List<Type> allFld;
+
+    gather(off, comm, procIDs, fld, allFld, tag, commsType);
+
     if (Pstream::myProcNo(comm) == procIDs[0])
     {
-        List<Type> allFld(offsets.last());
-
-        // Assign my local data
-        SubList<Type>(allFld, fld.size(), 0).assign(fld);
-
-        for (label i = 1; i < procIDs.size(); i++)
-        {
-            SubList<Type> procSlot(allFld, offsets[i+1]-offsets[i], offsets[i]);
-
-            if (contiguous<Type>())
-            {
-                IPstream::read
-                (
-                    Pstream::scheduled,
-                    procIDs[i],
-                    reinterpret_cast<char*>(procSlot.begin()),
-                    procSlot.byteSize(),
-                    tag,
-                    comm
-                );
-            }
-            else
-            {
-                IPstream fromSlave
-                (
-                    Pstream::scheduled,
-                    procIDs[i],
-                    0,
-                    tag,
-                    comm
-                );
-                fromSlave >> procSlot;
-            }
-        }
-
         fld.transfer(allFld);
-    }
-    else
-    {
-        if (contiguous<Type>())
-        {
-            OPstream::write
-            (
-                Pstream::scheduled,
-                procIDs[0],
-                reinterpret_cast<const char*>(fld.begin()),
-                fld.byteSize(),
-                tag,
-                comm
-            );
-        }
-        else
-        {
-            OPstream toMaster
-            (
-                Pstream::scheduled,
-                procIDs[0],
-                0,
-                tag,
-                comm
-            );
-            toMaster << fld;
-        }
     }
 }
 
@@ -187,32 +196,82 @@ void Foam::globalIndex::gather
 template<class Type>
 void Foam::globalIndex::scatter
 (
-    const labelUList& offsets,
+    const labelUList& off,
     const label comm,
     const labelList& procIDs,
     const UList<Type>& allFld,
     UList<Type>& fld,
-    const int tag
+    const int tag,
+    const Pstream::commsTypes commsType
 )
 {
     if (Pstream::myProcNo(comm) == procIDs[0])
     {
-        fld.assign(SubList<Type>(allFld, offsets[1]-offsets[0]));
+        fld.assign(SubList<Type>(allFld, off[1]-off[0]));
 
-        for (label i = 1; i < procIDs.size(); i++)
+        if (commsType == Pstream::scheduled || commsType == Pstream::blocking)
         {
-            const SubList<Type> procSlot
-            (
-                allFld,
-                offsets[i+1]-offsets[i],
-                offsets[i]
-            );
-
-            if (contiguous<Type>())
+            for (label i = 1; i < procIDs.size(); i++)
             {
+                const SubList<Type> procSlot
+                (
+                    allFld,
+                    off[i+1]-off[i],
+                    off[i]
+                );
+
+                if (contiguous<Type>())
+                {
+                    OPstream::write
+                    (
+                        commsType,
+                        procIDs[i],
+                        reinterpret_cast<const char*>(procSlot.begin()),
+                        procSlot.byteSize(),
+                        tag,
+                        comm
+                    );
+                }
+                else
+                {
+                    OPstream toSlave
+                    (
+                        commsType,
+                        procIDs[i],
+                        0,
+                        tag,
+                        comm
+                    );
+                    toSlave << procSlot;
+                }
+            }
+        }
+        else
+        {
+            // nonBlocking
+
+            if (!contiguous<Type>())
+            {
+                FatalErrorIn("globalIndex::scatter(..)")
+                    << "nonBlocking not supported for non-contiguous data"
+                    << exit(FatalError);
+            }
+
+            label startOfRequests = Pstream::nRequests();
+
+            // Set up writes
+            for (label i = 1; i < procIDs.size(); i++)
+            {
+                const SubList<Type> procSlot
+                (
+                    allFld,
+                    off[i+1]-off[i],
+                    off[i]
+                );
+
                 OPstream::write
                 (
-                    Pstream::scheduled,
+                    commsType,
                     procIDs[i],
                     reinterpret_cast<const char*>(procSlot.begin()),
                     procSlot.byteSize(),
@@ -220,45 +279,66 @@ void Foam::globalIndex::scatter
                     comm
                 );
             }
-            else
-            {
-                OPstream toSlave
-                (
-                    Pstream::scheduled,
-                    procIDs[i],
-                    0,
-                    tag,
-                    comm
-                );
-                toSlave << procSlot;
-            }
+
+            // Wait for all to finish
+            Pstream::waitRequests(startOfRequests);
         }
     }
     else
     {
-        if (contiguous<Type>())
+        if (commsType == Pstream::scheduled || commsType == Pstream::blocking)
         {
+            if (contiguous<Type>())
+            {
+                IPstream::read
+                (
+                    commsType,
+                    procIDs[0],
+                    reinterpret_cast<char*>(fld.begin()),
+                    fld.byteSize(),
+                    tag,
+                    comm
+                );
+            }
+            else
+            {
+                IPstream fromMaster
+                (
+                    commsType,
+                    procIDs[0],
+                    0,
+                    tag,
+                    comm
+                );
+                fromMaster >> fld;
+            }
+        }
+        else
+        {
+            // nonBlocking
+
+            if (!contiguous<Type>())
+            {
+                FatalErrorIn("globalIndex::scatter(..)")
+                    << "nonBlocking not supported for non-contiguous data"
+                    << exit(FatalError);
+            }
+
+            label startOfRequests = Pstream::nRequests();
+
+            // Set up read
             IPstream::read
             (
-                Pstream::scheduled,
+                commsType,
                 procIDs[0],
                 reinterpret_cast<char*>(fld.begin()),
                 fld.byteSize(),
                 tag,
                 comm
             );
-        }
-        else
-        {
-            IPstream fromMaster
-            (
-                Pstream::scheduled,
-                procIDs[0],
-                0,
-                tag,
-                comm
-            );
-            fromMaster >> fld;
+
+            // Wait for all to finish
+            Pstream::waitRequests(startOfRequests);
         }
     }
 }
