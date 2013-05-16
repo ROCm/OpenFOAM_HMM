@@ -2360,10 +2360,28 @@ bool Foam::distributedTriSurfaceMesh::writeObject
     // Make sure dictionary goes to same directory as surface
     const_cast<fileName&>(dict_.instance()) = searchableSurface::instance();
 
+    // Copy of triSurfaceMesh::writeObject except for the sorting of
+    // triangles by region. This is done so we preserve region names,
+    // even if locally we have zero triangles.
+    {
+        fileName fullPath(searchableSurface::objectPath());
+
+        if (!mkDir(fullPath.path()))
+        {
+            return false;
+        }
+
+        // Important: preserve any zero-sized patches
+        triSurface::write(fullPath, true);
+
+        if (!isFile(fullPath))
+        {
+            return false;
+        }
+    }
+
     // Dictionary needs to be written in ascii - binary output not supported.
-    return
-        triSurfaceMesh::writeObject(fmt, ver, cmp)
-     && dict_.writeObject(IOstream::ASCII, ver, cmp);
+    return dict_.writeObject(IOstream::ASCII, ver, cmp);
 }
 
 
