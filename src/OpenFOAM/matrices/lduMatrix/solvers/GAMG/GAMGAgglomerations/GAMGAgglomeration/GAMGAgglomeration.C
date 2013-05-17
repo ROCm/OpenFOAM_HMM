@@ -279,9 +279,9 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
                 "(const lduMesh& mesh, const dictionary& controlDict)"
             )   << "Unknown GAMGAgglomeration type "
                 << agglomeratorType << ".\n"
-                << "Valid algebraic GAMGAgglomeration types are :"
+                << "Valid matrix GAMGAgglomeration types are :"
                 << lduMatrixConstructorTablePtr_->sortedToc() << endl
-                << "Valid algebraic GAMGAgglomeration types are :"
+                << "Valid geometric GAMGAgglomeration types are :"
                 << lduMeshConstructorTablePtr_->sortedToc()
                 << exit(FatalError);
         }
@@ -374,7 +374,8 @@ Foam::autoPtr<Foam::GAMGAgglomeration> Foam::GAMGAgglomeration::New
         FatalErrorIn
         (
             "GAMGAgglomeration::New"
-            "(const lduMesh& mesh, const dictionary& controlDict)"
+            "(const lduMesh& mesh, const scalarField&"
+            ", const vectorField&, const dictionary& controlDict)"
         )   << "Unknown GAMGAgglomeration type "
             << agglomeratorType << ".\n"
             << "Valid geometric GAMGAgglomeration types are :"
