@@ -463,7 +463,8 @@ void Foam::searchableSurfaceControl::cellSizeFunctionVertices
     DynamicList<scalar>& sizes
 ) const
 {
-    const pointField& points = searchableSurface_.points();
+    const tmp<pointField> tmpPoints = searchableSurface_.points();
+    const pointField& points = tmpPoints();
 
     const scalar nearFeatDistSqrCoeff = 1e-8;
 
