@@ -843,6 +843,8 @@ Foam::DistributedDelaunayMesh<Triangulation>::rangeInsertReferredWithInfo
         // Locate the point
         Cell_handle c = Triangulation::locate(pointToInsert, lt, li, lj, hint);
 
+        bool inserted = false;
+
         if (lt == Triangulation::VERTEX)
         {
             if (printErrors)
@@ -854,47 +856,59 @@ Foam::DistributedDelaunayMesh<Triangulation>::rangeInsertReferredWithInfo
                     << "Failed insertion : " << vert.info()
                     << "         nearest : " << nearV->info();
             }
-
-            uninserted.insert(labelPair(vert.procIndex(), vert.index()));
-            nNotInserted++;
-
-            continue;
         }
-
-        // Get the cells that conflict with p in a vector V,
-        // and a facet on the boundary of this hole in f.
-        std::vector<Cell_handle> V;
-        typename Triangulation::Facet f;
-
-        Triangulation::find_conflicts
-        (
-            pointToInsert,
-            c,
-            CGAL::Oneset_iterator<typename Triangulation::Facet>(f),
-            std::back_inserter(V)
-        );
-
-        bool insert = false;
-        for (size_t i = 0; i < V.size(); ++i)
+        else if (lt == Triangulation::OUTSIDE_CONVEX_HULL)
         {
-            if (V[i]->real() || V[i]->hasFarPoint())
+            hint = this->insert(pointToInsert, hint);
+
+            inserted = true;
+        }
+        else if (lt == Triangulation::OUTSIDE_AFFINE_HULL)
+        {
+            WarningIn
+            (
+                "Foam::DistributedDelaunayMesh<Triangulation>"
+                "::rangeInsertReferredWithInfo"
+            )   << "Point is outside affine hull! pt = " << pointToInsert
+                << endl;
+        }
+        else
+        {
+            // Get the cells that conflict with p in a vector V,
+            // and a facet on the boundary of this hole in f.
+            std::vector<Cell_handle> V;
+            typename Triangulation::Facet f;
+
+            Triangulation::find_conflicts
+            (
+                pointToInsert,
+                c,
+                CGAL::Oneset_iterator<typename Triangulation::Facet>(f),
+                std::back_inserter(V)
+            );
+
+            for (size_t i = 0; i < V.size(); ++i)
             {
-                insert = true;
-                break;
+                if (V[i]->real() || V[i]->hasFarPoint())
+                {
+                    hint = Triangulation::insert_in_hole
+                    (
+                        pointToInsert,
+                        V.begin(),
+                        V.end(),
+                        f.first,
+                        f.second
+                    );
+
+                    inserted = true;
+
+                    break;
+                }
             }
         }
 
-        if (insert)
+        if (inserted)
         {
-            hint = Triangulation::insert_in_hole
-            (
-                pointToInsert,
-                V.begin(),
-                V.end(),
-                f.first,
-                f.second
-            );
-
             if (checkInsertion != Triangulation::number_of_vertices() - 1)
             {
                 if (printErrors)
