@@ -857,12 +857,12 @@ Foam::DistributedDelaunayMesh<Triangulation>::rangeInsertReferredWithInfo
                     << "         nearest : " << nearV->info();
             }
         }
-        else if (lt == Triangulation::OUTSIDE_CONVEX_HULL)
-        {
-            hint = this->insert(pointToInsert, hint);
-
-            inserted = true;
-        }
+//        else if (lt == Triangulation::OUTSIDE_CONVEX_HULL)
+//        {
+//            hint = this->insert(pointToInsert, hint);
+//
+//            inserted = true;
+//        }
         else if (lt == Triangulation::OUTSIDE_AFFINE_HULL)
         {
             WarningIn
@@ -889,7 +889,15 @@ Foam::DistributedDelaunayMesh<Triangulation>::rangeInsertReferredWithInfo
 
             for (size_t i = 0; i < V.size(); ++i)
             {
-                if (V[i]->real() || V[i]->hasFarPoint())
+                if
+                (
+                    !Triangulation::is_infinite(V[i])
+                 &&
+                    (
+                        V[i]->real()
+                     || V[i]->hasFarPoint()
+                    )
+                )
                 {
                     hint = Triangulation::insert_in_hole
                     (
