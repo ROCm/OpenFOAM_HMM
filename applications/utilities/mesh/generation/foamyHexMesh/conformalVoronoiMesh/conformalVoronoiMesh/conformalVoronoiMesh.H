@@ -585,11 +585,13 @@ private:
 
         label synchroniseEdgeTrees
         (
+            const DynamicList<label>& edgeToTreeShape,
             pointIndexHitAndFeatureList& featureEdgeHits
         );
 
         label synchroniseSurfaceTrees
         (
+            const DynamicList<label>& surfaceToTreeShape,
             pointIndexHitAndFeatureList& surfaceHits
         );
 
@@ -730,12 +732,15 @@ private:
         //  and edge conformation locations to add
         void addSurfaceAndEdgeHits
         (
-            const Delaunay::Finite_vertices_iterator& vit,
+            const Foam::point& vit,
             const pointIndexHitAndFeatureDynList& surfaceIntersections,
             scalar surfacePtReplaceDistCoeffSqr,
             scalar edgeSearchDistCoeffSqr,
             pointIndexHitAndFeatureDynList& surfaceHits,
-            pointIndexHitAndFeatureDynList& featureEdgeHits
+            pointIndexHitAndFeatureDynList& featureEdgeHits,
+            DynamicList<label>& surfaceToTreeShape,
+            DynamicList<label>& edgeToTreeShape,
+            bool firstPass
         ) const;
 
         //- Store the surface conformation with the indices offset to be
