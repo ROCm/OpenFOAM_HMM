@@ -46,7 +46,6 @@ Foam::processorCyclicPolyPatch::processorCyclicPolyPatch
     const label start,
     const label index,
     const polyBoundaryMesh& bm,
-    const label comm,
     const int myProcNo,
     const int neighbProcNo,
     const word& referPatchName,
@@ -60,7 +59,6 @@ Foam::processorCyclicPolyPatch::processorCyclicPolyPatch
         start,
         index,
         bm,
-        comm,
         myProcNo,
         neighbProcNo,
         transform
