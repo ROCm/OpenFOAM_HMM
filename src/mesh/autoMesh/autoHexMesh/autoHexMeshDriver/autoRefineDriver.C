@@ -522,6 +522,7 @@ void Foam::autoRefineDriver::baffleAndSplitMesh
         false,                          // perpendicular edge connected cells
         scalarField(0),                 // per region perpendicular angle
         !handleSnapProblems,            // merge free standing baffles?
+        refineParams.planarAngle(),
         motionDict,
         const_cast<Time&>(mesh.time()),
         globalToMasterPatch_,
@@ -606,8 +607,8 @@ void Foam::autoRefineDriver::splitAndMergeBaffles
         handleSnapProblems,
         handleSnapProblems,                 // remove perp edge connected cells
         perpAngle,                          // perp angle
-        false,                              // merge free standing baffles?
-        //true,                               // merge free standing baffles?
+        true,                               // merge free standing baffles?
+        refineParams.planarAngle(),         // planar angle
         motionDict,
         const_cast<Time&>(mesh.time()),
         globalToMasterPatch_,

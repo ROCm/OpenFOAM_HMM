@@ -202,7 +202,7 @@ Foam::labelList Foam::structuredRenumber::renumber
             if (depthFirst_)
             {
                 orderedToOld[nLayers*cellData[cellI].data()+layerI] = cellI;
-                                }
+            }
             else
             {
                 orderedToOld[cellData[cellI].data()+nLayers*layerI] = cellI;

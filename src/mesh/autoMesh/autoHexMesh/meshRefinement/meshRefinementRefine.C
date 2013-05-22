@@ -244,14 +244,10 @@ bool Foam::meshRefinement::markForRefine
 }
 
 
-// Calculates list of cells to refine based on intersection with feature edge.
-Foam::label Foam::meshRefinement::markFeatureRefinement
+void Foam::meshRefinement::markFeatureCellLevel
 (
     const point& keepPoint,
-    const label nAllowRefine,
-
-    labelList& refineCell,
-    label& nRefine
+    labelList& maxFeatureLevel
 ) const
 {
     // We want to refine all cells containing a feature edge.
@@ -384,7 +380,7 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
 
 
     // Largest refinement level of any feature passed through
-    labelList maxFeatureLevel(mesh_.nCells(), -1);
+    maxFeatureLevel = labelList(mesh_.nCells(), -1);
 
     // Database to pass into trackedParticle::move
     trackedParticle::trackingData td(cloud, maxFeatureLevel);
@@ -467,7 +463,22 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
         // Track all particles to their end position.
         cloud.move(td, GREAT);
     }
+}
 
+
+// Calculates list of cells to refine based on intersection with feature edge.
+Foam::label Foam::meshRefinement::markFeatureRefinement
+(
+    const point& keepPoint,
+    const label nAllowRefine,
+
+    labelList& refineCell,
+    label& nRefine
+) const
+{
+    // Largest refinement level of any feature passed through
+    labelList maxFeatureLevel;
+    markFeatureCellLevel(keepPoint, maxFeatureLevel);
 
     // See which cells to refine. maxFeatureLevel will hold highest level
     // of any feature edge that passed through.
