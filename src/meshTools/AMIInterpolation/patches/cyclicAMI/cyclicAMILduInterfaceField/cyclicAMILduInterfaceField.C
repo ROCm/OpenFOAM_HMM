@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,20 +23,43 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "cyclicAMILduInterface.H"
+#include "cyclicAMILduInterfaceField.H"
+#include "diagTensorField.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-defineTypeNameAndDebug(cyclicAMILduInterface, 0);
+defineTypeNameAndDebug(cyclicAMILduInterfaceField, 0);
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::cyclicAMILduInterface::~cyclicAMILduInterface()
+Foam::cyclicAMILduInterfaceField::~cyclicAMILduInterfaceField()
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::cyclicAMILduInterfaceField::transformCoupleField
+(
+    scalarField& f,
+    const direction cmpt
+) const
+{
+    if (doTransform())
+    {
+        if (forwardT().size() == 1)
+        {
+            f *= pow(diag(forwardT()[0]).component(cmpt), rank());
+        }
+        else
+        {
+            f *= pow(diag(forwardT())().component(cmpt), rank());
+        }
+    }
+}
 
 
 // ************************************************************************* //

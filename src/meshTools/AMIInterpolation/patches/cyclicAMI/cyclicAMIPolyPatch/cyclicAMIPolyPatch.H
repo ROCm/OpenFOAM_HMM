@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -108,13 +108,17 @@ private:
             const vectorField& half1Areas
         );
 
-        //- Reset the AMI interpolator
-        void resetAMI() const;
-
 
 protected:
 
     // Protected Member Functions
+
+        //- Reset the AMI interpolator
+        virtual void resetAMI
+        (
+            const AMIPatchToPatchInterpolation::interpolationMethod& AMIMethod =
+                AMIPatchToPatchInterpolation::imFaceAreaWeight
+        ) const;
 
         //- Recalculate the transformation tensors
         virtual void calcTransforms();

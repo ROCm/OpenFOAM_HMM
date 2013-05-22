@@ -232,7 +232,12 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
 }
 
 
-void Foam::cyclicAMIPolyPatch::resetAMI() const
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void Foam::cyclicAMIPolyPatch::resetAMI
+(
+    const AMIPatchToPatchInterpolation::interpolationMethod& AMIMethod
+) const
 {
     if (owner())
     {
@@ -283,7 +288,7 @@ void Foam::cyclicAMIPolyPatch::resetAMI() const
                 nbrPatch0,
                 surfPtr(),
                 faceAreaIntersect::tmMesh,
-                AMIPatchToPatchInterpolation::imFaceAreaWeight,
+                AMIMethod,
                 AMIReverse_
             )
         );
@@ -300,8 +305,6 @@ void Foam::cyclicAMIPolyPatch::resetAMI() const
     }
 }
 
-
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::cyclicAMIPolyPatch::initGeometry(PstreamBuffers& pBufs)
 {
