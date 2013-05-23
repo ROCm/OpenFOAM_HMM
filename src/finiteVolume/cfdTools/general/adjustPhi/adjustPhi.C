@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,11 +56,7 @@ bool Foam::adjustPhi
 
             if (!isA<processorFvsPatchScalarField>(phip))
             {
-                if
-                (
-                    Up.fixesValue()
-                 && !isA<inletOutletFvPatchVectorField>(Up)
-                )
+                if (Up.fixesValue() && !isA<inletOutletFvPatchVectorField>(Up))
                 {
                     forAll(phip, i)
                     {
@@ -113,8 +109,12 @@ bool Foam::adjustPhi
         {
             FatalErrorIn
             (
-                "adjustPhi(surfaceScalarField& phi, const volVectorField& U,"
-                "const volScalarField& p"
+                "adjustPhi"
+                "("
+                    "surfaceScalarField&, "
+                    "const volVectorField&,"
+                    "volScalarField&"
+                ")"
             )   << "Continuity error cannot be removed by adjusting the"
                    " outflow.\nPlease check the velocity boundary conditions"
                    " and/or run potentialFoam to initialise the outflow." << nl

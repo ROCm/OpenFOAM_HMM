@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,87 +22,93 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::pairGAMGAgglomeration
+    Foam::regionModels::surfaceFilmModels::laminar
 
 Description
-    Agglomerate using the pair algorithm.
+    Film laminar turbulence model.
 
 SourceFiles
-    pairGAMGAgglomeration.C
-    pairGAMGAgglomerate.C
+    laminar.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pairGAMGAgglomeration_H
-#define pairGAMGAgglomeration_H
+#ifndef laminar_H
+#define laminar_H
 
-#include "GAMGAgglomeration.H"
+#include "filmTurbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace regionModels
+{
+namespace surfaceFilmModels
+{
 
 /*---------------------------------------------------------------------------*\
-                           Class pairGAMGAgglomeration Declaration
+                           Class laminar Declaration
 \*---------------------------------------------------------------------------*/
 
-class pairGAMGAgglomeration
+class laminar
 :
-    public GAMGAgglomeration
+    public filmTurbulenceModel
 {
-    // Private data
+private:
 
-        //- Number of levels to merge, 1 = don't merge, 2 = merge pairs etc.
-        label mergeLevels_;
+    // Private Data
+
+        //- Surface roughness coefficient
+        scalar Cf_;
 
 
-protected:
-
-    // Protected Member Functions
-
-        //- Agglomerate all levels starting from the given face weights
-        void agglomerate
-        (
-            const lduMesh& mesh,
-            const scalarField& faceWeights
-        );
+    // Private member functions
 
         //- Disallow default bitwise copy construct
-        pairGAMGAgglomeration(const pairGAMGAgglomeration&);
+        laminar(const laminar&);
 
         //- Disallow default bitwise assignment
-        void operator=(const pairGAMGAgglomeration&);
+        void operator=(const laminar&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("pair");
+    TypeName("laminar");
 
 
     // Constructors
 
-        //- Construct given mesh and controls
-        pairGAMGAgglomeration
-        (
-            const lduMesh& mesh,
-            const dictionary& controlDict
-        );
+        //- Construct from surface film model
+        laminar(const surfaceFilmModel& owner, const dictionary& dict);
 
-        //- Calculate and return agglomeration
-        static tmp<labelField> agglomerate
-        (
-            label& nCoarseCells,
-            const lduAddressing& fineMatrixAddressing,
-            const scalarField& faceWeights
-        );
 
+    //- Destructor
+    virtual ~laminar();
+
+
+    // Member Functions
+
+        // Evolution
+
+            //- Return the film surface velocity
+            virtual tmp<volVectorField> Us() const;
+
+            //- Return the film turbulence viscosity
+            virtual tmp<volScalarField> mut() const;
+
+            //- Correct/update the model
+            virtual void correct();
+
+            //- Return the source for the film momentum equation
+            virtual tmp<fvVectorMatrix> Su(volVectorField& U) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace surfaceFilmModels
+} // End namespace regionModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

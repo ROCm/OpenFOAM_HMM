@@ -23,30 +23,51 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "MeshObject.H"
+#include "filmTurbulenceModel.H"
 
-/* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(meshObject, 0);
-}
+namespace regionModels
+{
+namespace surfaceFilmModels
+{
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameAndDebug(filmTurbulenceModel, 0);
+defineRunTimeSelectionTable(filmTurbulenceModel, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::meshObject::meshObject(const word& typeName, const objectRegistry& obr)
+filmTurbulenceModel::filmTurbulenceModel(const surfaceFilmModel& owner)
 :
-    regIOobject
-    (
-        IOobject
-        (
-            typeName,
-            obr.instance(),
-            obr
-        )
-    )
+    subModelBase(owner)
 {}
 
+
+filmTurbulenceModel::filmTurbulenceModel
+(
+    const word& type,
+    const surfaceFilmModel& owner,
+    const dictionary& dict
+)
+:
+    subModelBase(type, owner, dict)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+filmTurbulenceModel::~filmTurbulenceModel()
+{}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace surfaceFilmModels
+} // End namespace regionModels
+} // End namespace Foam
 
 // ************************************************************************* //

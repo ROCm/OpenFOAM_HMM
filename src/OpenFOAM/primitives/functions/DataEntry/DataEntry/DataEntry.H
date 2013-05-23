@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -142,62 +142,60 @@ public:
             virtual void convertTimeBase(const Time& t);
 
 
-public:
+        // Evaluation
+
+            //- Return value as a function of (scalar) independent variable
+            virtual Type value(const scalar x) const;
+
+            //- Return value as a function of (scalar) independent variable
+            virtual tmp<Field<Type> > value(const scalarField& x) const;
+
+            //- Integrate between two (scalar) values
+            virtual Type integrate(const scalar x1, const scalar x2) const;
+
+            //- Integrate between two (scalar) values
+            virtual tmp<Field<Type> > integrate
+            (
+                const scalarField& x1,
+                const scalarField& x2
+            ) const;
+
+            //- Return dimensioned type
+            virtual dimensioned<Type> dimValue(const scalar x) const;
+
+            //- Return dimensioned type as a function of (scalar)
+            virtual tmp<Field<dimensioned<Type> > > dimValue
+            (
+                const scalarField& x
+            ) const;
+
+            //- Integrate between two scalars and return a dimensioned type
+            virtual dimensioned<Type> dimIntegrate
+            (
+                const scalar x1,
+                const scalar x2
+            ) const;
+
+            //- Integrate between two scalar fields and return a field of
+            //  dimensioned type
+            virtual tmp<Field<dimensioned<Type> > > dimIntegrate
+            (
+                const scalarField& x1,
+                const scalarField& x2
+            ) const;
 
 
-    // Evaluation
+        // I/O
 
-        //- Return value as a function of (scalar) independent variable
-        virtual Type value(const scalar x) const;
+            //- Ostream Operator
+            friend Ostream& operator<< <Type>
+            (
+                Ostream& os,
+                const DataEntry<Type>& de
+            );
 
-        //- Return value as a function of (scalar) independent variable
-        virtual tmp<Field<Type> > value(const scalarField& x) const;
-
-        //- Integrate between two (scalar) values
-        virtual Type integrate(const scalar x1, const scalar x2) const;
-
-        //- Integrate between two (scalar) values
-        virtual tmp<Field<Type> > integrate
-        (
-            const scalarField& x1,
-            const scalarField& x2
-        ) const;
-
-        //- Return dimensioned type
-        virtual dimensioned<Type> dimValue(const scalar x) const;
-
-        //- Return dimensioned type as a function of (scalar)
-        virtual tmp<Field<dimensioned<Type> > > dimValue
-        (
-            const scalarField& x
-        ) const;
-
-        //- Integrate between two scalars and returns a dimensioned type
-        virtual dimensioned<Type> dimIntegrate
-        (
-            const scalar x1,
-            const scalar x2
-        ) const;
-
-        //- Integrate between two scalars and returns list of dimensioned type
-        virtual tmp<Field<dimensioned<Type> > > dimIntegrate
-        (
-            const scalarField& x1,
-            const scalarField& x2
-        ) const;
-
-
-    // I/O
-
-        //- Ostream Operator
-        friend Ostream& operator<< <Type>
-        (
-            Ostream& os,
-            const DataEntry<Type>& de
-        );
-
-        //- Write in dictionary format
-        virtual void writeData(Ostream& os) const;
+            //- Write in dictionary format
+            virtual void writeData(Ostream& os) const;
 };
 
 

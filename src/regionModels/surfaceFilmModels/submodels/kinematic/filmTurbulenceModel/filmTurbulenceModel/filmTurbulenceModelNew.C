@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,34 +21,57 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::wordIOList
-
-Description
-    IO of a list of words
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef wordIOList_H
-#define wordIOList_H
-
-#include "wordList.H"
-#include "IOList.H"
+#include "filmTurbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef IOList<word> wordIOList;
-    typedef IOList<wordList> wordListIOList;
+namespace regionModels
+{
+namespace surfaceFilmModels
+{
 
-    // Print word list list as a table
-    void printTable(const List<wordList>&, List<string::size_type>&, Ostream&);
-    void printTable(const List<wordList>&, Ostream&);
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+autoPtr<filmTurbulenceModel> filmTurbulenceModel::New
+(
+    const surfaceFilmModel& model,
+    const dictionary& dict
+)
+{
+    const word modelType(dict.lookup("turbulence"));
+
+    Info<< "        " << modelType << endl;
+
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(modelType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "filmTurbulenceModel::New"
+            "("
+                "const surfaceFilmModel&, "
+                "const dictionary&"
+            ")"
+        )   << "Unknown filmTurbulenceModel type " << modelType
+            << nl << nl << "Valid filmTurbulenceModel types are:" << nl
+            << dictionaryConstructorTablePtr_->toc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<filmTurbulenceModel>(cstrIter()(model, dict));
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#endif
+} // End namespace surfaceFilmModels
+} // End namespace regionModels
+} // End namespace Foam
 
 // ************************************************************************* //

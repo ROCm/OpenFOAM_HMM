@@ -56,6 +56,8 @@ Description
 //#include "centredCFCFaceToCellStencilObject.H"
 
 #include "centredCECCellToCellStencilObject.H"
+#include "centredCFCCellToCellStencilObject.H"
+#include "centredCPCCellToCellStencilObject.H"
 
 using namespace Foam;
 
@@ -460,7 +462,63 @@ int main(int argc, char *argv[])
         {
             writeStencilOBJ
             (
-                runTime.path()/"centredCell" + Foam::name(cellI) + ".obj",
+                runTime.path()/"centredCECCell" + Foam::name(cellI) + ".obj",
+                mesh.cellCentres()[cellI],
+                stencilPoints[cellI]
+            );
+        }
+    }
+    {
+        const extendedCentredCellToCellStencil& addressing =
+        centredCPCCellToCellStencilObject::New
+        (
+            mesh
+        );
+
+        Info<< "cellCellCell:" << endl;
+        writeStencilStats(addressing.stencil());
+
+        // Collect stencil cell centres
+        List<List<point> > stencilPoints(mesh.nCells());
+        addressing.collectData
+        (
+            mesh.C(),
+            stencilPoints
+        );
+
+        forAll(stencilPoints, cellI)
+        {
+            writeStencilOBJ
+            (
+                runTime.path()/"centredCPCCell" + Foam::name(cellI) + ".obj",
+                mesh.cellCentres()[cellI],
+                stencilPoints[cellI]
+            );
+        }
+    }
+    {
+        const extendedCentredCellToCellStencil& addressing =
+        centredCFCCellToCellStencilObject::New
+        (
+            mesh
+        );
+
+        Info<< "cellCellCell:" << endl;
+        writeStencilStats(addressing.stencil());
+
+        // Collect stencil cell centres
+        List<List<point> > stencilPoints(mesh.nCells());
+        addressing.collectData
+        (
+            mesh.C(),
+            stencilPoints
+        );
+
+        forAll(stencilPoints, cellI)
+        {
+            writeStencilOBJ
+            (
+                runTime.path()/"centredCFCCell" + Foam::name(cellI) + ".obj",
                 mesh.cellCentres()[cellI],
                 stencilPoints[cellI]
             );

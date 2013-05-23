@@ -253,6 +253,14 @@ private:
                 label& nRefine
             );
 
+            //- Mark every cell with level of feature passing through it
+            //  (or -1 if not passed through). Uses tracking.
+            void markFeatureCellLevel
+            (
+                const point& keepPoint,
+                labelList& maxFeatureLevel
+            ) const;
+
             //- Calculate list of cells to refine based on intersection of
             //  features.
             label markFeatureRefinement
@@ -335,16 +343,6 @@ private:
                 const bool allowBoundary,
                 const labelList& globalToMasterPatch,
                 const labelList& globalToSlavePatch
-            ) const;
-
-            //- Geometric test on see whether face needs to be baffled:
-            //  is face boundary face and perpendicular to surface normal?
-            bool validBaffleTopology
-            (
-                const label faceI,
-                const vector& n1,
-                const vector& n2,
-                const vector& testDir
             ) const;
 
             //- Determine patches for baffles
@@ -435,7 +433,11 @@ private:
 
             //- Extract those baffles (duplicate) faces that are on the edge
             //  of a baffle region. These are candidates for merging.
-            List<labelPair> freeStandingBaffles(const List<labelPair>&) const;
+            List<labelPair> freeStandingBaffles
+            (
+                const List<labelPair>&,
+                const scalar freeStandingAngle
+            ) const;
 
 
         // Zone handling
@@ -489,6 +491,16 @@ private:
                 labelList& namedSurfaceIndex
             ) const;
 
+            //- Remove any loose standing cells
+            void handleSnapProblems
+            (
+                const bool removeEdgeConnectedCells,
+                const scalarField& perpendicularAngle,
+                const dictionary& motionDict,
+                Time& runTime,
+                const labelList& globalToMasterPatch,
+                const labelList& globalToSlavePatch
+            );
 
         //- Disallow default bitwise copy construct
         meshRefinement(const meshRefinement&);
@@ -707,6 +719,7 @@ public:
                 const bool removeEdgeConnectedCells,
                 const scalarField& perpendicularAngle,
                 const bool mergeFreeStanding,
+                const scalar freeStandingAngle,
                 const dictionary& motionDict,
                 Time& runTime,
                 const labelList& globalToMasterPatch,
