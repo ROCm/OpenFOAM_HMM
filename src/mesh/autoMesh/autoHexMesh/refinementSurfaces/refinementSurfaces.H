@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,6 +50,8 @@ namespace Foam
 class searchableSurfaces;
 class shellSurfaces;
 class triSurfaceMesh;
+
+typedef List<point> pointList;
 
 /*---------------------------------------------------------------------------*\
                            Class refinementSurfaces Declaration
@@ -119,6 +121,9 @@ private:
 
         //- From global region number to refinement level
         labelList maxLevel_;
+
+        //- From global region number to small-gap level
+        labelList gapLevel_;
 
         //- From global region number to perpendicular angle
         scalarField perpendicularAngle_;
@@ -226,6 +231,12 @@ public:
                 return maxLevel_;
             }
 
+            //- From global region number to small gap refinement level
+            const labelList& gapLevel() const
+            {
+                return gapLevel_;
+            }
+
             //- From global region number to perpendicular angle
             const scalarField& perpendicularAngle() const
             {
@@ -295,7 +306,21 @@ public:
                 const pointField& start,
                 const pointField& end,
                 const labelList& currentLevel,  // current cell refinement level
+                const labelList& globalRegionLevel, // level per surfregion
 
+                List<vectorList>& surfaceNormal,
+                labelListList& surfaceLevel
+            ) const;
+
+            //- Find all intersections of edge. Unsorted order.
+            void findAllHigherIntersections
+            (
+                const pointField& start,
+                const pointField& end,
+                const labelList& currentLevel,  // current cell refinement level
+                const labelList& globalRegionLevel, // level per surfregion
+
+                List<pointList>& surfaceLocation,
                 List<vectorList>& surfaceNormal,
                 labelListList& surfaceLevel
             ) const;
