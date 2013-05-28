@@ -218,6 +218,37 @@ Foam::pressureTools::pressureTools
     }
 
     read(dict);
+
+    if (active_)
+    {
+        dimensionSet pDims(dimPressure);
+
+        if (calcCoeff_)
+        {
+            pDims /= dimPressure;
+        }
+
+        const fvMesh& mesh = refCast<const fvMesh>(obr_);
+
+        volScalarField* pPtr
+        (
+            new volScalarField
+            (
+                IOobject
+                (
+                    pName(),
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensionedScalar("0", pDims, 0.0)
+            )
+        );
+
+        mesh.objectRegistry::store(pPtr);
+    }
 }
 
 
@@ -279,17 +310,13 @@ void Foam::pressureTools::write()
     {
         const volScalarField& p = obr_.lookupObject<volScalarField>(pName_);
 
-        volScalarField pResult
-        (
-            IOobject
+        volScalarField& pResult =
+            const_cast<volScalarField&>
             (
-                pName(),
-                obr_.time().timeName(),
-                obr_,
-                IOobject::NO_READ
-            ),
-            convertToCoeff(rhoScale(p)*p + pDyn(p) + pRef())
-        );
+                obr_.lookupObject<volScalarField>(pName())
+            );
+
+        pResult == convertToCoeff(rhoScale(p)*p + pDyn(p) + pRef());
 
         pResult.write();
     }
