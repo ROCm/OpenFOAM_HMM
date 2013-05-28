@@ -68,12 +68,6 @@ void Foam::fieldAverage::initialize()
     resetFields(prime2MeanScalarFields_);
     resetFields(prime2MeanSymmTensorFields_);
 
-    totalIter_.clear();
-    totalIter_.setSize(faItems_.size(), 1);
-
-    totalTime_.clear();
-    totalTime_.setSize(faItems_.size(), obr_.time().deltaTValue());
-
 
     // Add mean fields to the field lists
     forAll(faItems_, fieldI)
@@ -248,6 +242,12 @@ void Foam::fieldAverage::writeAveragingProperties() const
 
 void Foam::fieldAverage::readAveragingProperties()
 {
+    totalIter_.clear();
+    totalIter_.setSize(faItems_.size(), 1);
+
+    totalTime_.clear();
+    totalTime_.setSize(faItems_.size(), obr_.time().deltaTValue());
+
     if (resetOnRestart_)
     {
         Info<< "fieldAverage: starting averaging at time "
@@ -258,7 +258,7 @@ void Foam::fieldAverage::readAveragingProperties()
         IOobject propsDictHeader
         (
             "fieldAveragingProperties",
-            obr_.time().timeName(),
+            obr_.time().timeName(obr_.time().startTime().value()),
             "uniform",
             obr_,
             IOobject::MUST_READ_IF_MODIFIED,
@@ -290,6 +290,7 @@ void Foam::fieldAverage::readAveragingProperties()
                     << " time = " << totalTime_[fieldI] << endl;
             }
         }
+
         Info<< endl;
     }
 }
@@ -358,6 +359,8 @@ void Foam::fieldAverage::read(const dictionary& dict)
 {
     if (active_)
     {
+        initialised_ = false;
+
         dict.readIfPresent("resetOnRestart", resetOnRestart_);
         dict.readIfPresent("resetOnOutput", resetOnOutput_);
         dict.lookup("fields") >> faItems_;
@@ -394,6 +397,16 @@ void Foam::fieldAverage::write()
 {
     if (active_)
     {
+        if (!initialised_)
+        {
+            initialize();
+
+            // ensure first averaging works unconditionally
+            prevTimeIndex_ = -1;
+
+            initialised_ = true;
+        }
+
         calcAverages();
         writeAverages();
         writeAveragingProperties();
