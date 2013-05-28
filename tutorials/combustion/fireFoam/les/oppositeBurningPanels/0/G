@@ -10,7 +10,7 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      IDefault;
+    object      G;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -22,10 +22,18 @@ boundaryField
 {
     ".*"
     {
-        type            greyDiffusiveRadiation;
+        type            MarshakRadiation;
         T               T;
         emissivityMode  lookup;
-        emissivity      uniform 1;
+        emissivity      uniform 1.0;
+        value           uniform 0;
+    }
+
+    "(region0_to.*)"
+    {
+        type            MarshakRadiation;
+        T               T;
+        emissivityMode  solidRadiation;
         value           uniform 0;
     }
 }
