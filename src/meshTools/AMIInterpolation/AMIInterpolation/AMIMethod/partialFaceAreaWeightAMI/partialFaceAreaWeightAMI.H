@@ -25,7 +25,7 @@ Class
     Foam::partialFaceAreaWeightAMI
 
 Description
-    Face area weighted Arbitrary Mesh Interface (AMI) method
+    Partial face area weighted Arbitrary Mesh Interface (AMI) method
 
 SourceFiles
     partialFaceAreaWeightAMI.C
@@ -35,7 +35,7 @@ SourceFiles
 #ifndef partialFaceAreaWeightAMI_H
 #define partialFaceAreaWeightAMI_H
 
-#include "AMIMethod.H"
+#include "faceAreaWeightAMI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +49,7 @@ namespace Foam
 template<class SourcePatch, class TargetPatch>
 class partialFaceAreaWeightAMI
 :
-    public AMIMethod<SourcePatch, TargetPatch>
+    public faceAreaWeightAMI<SourcePatch, TargetPatch>
 {
 
 private:
@@ -64,47 +64,16 @@ private:
 
         // Marching front
 
-            //- Determine overlap contributions for source face srcFaceI
-            bool processSourceFace
-            (
-                const label srcFaceI,
-                const label tgtStartFaceI,
-                DynamicList<label>& nbrFaces,
-                DynamicList<label>& visitedFaces,
-                List<DynamicList<label> >& srcAddr,
-                List<DynamicList<scalar> >& srcWght,
-                List<DynamicList<label> >& tgtAddr,
-                List<DynamicList<scalar> >& tgtWght
-            );
-
-            //- Attempt to re-evaluate source faces that have not been included
-            void restartUncoveredSourceFace
-            (
-                List<DynamicList<label> >& srcAddr,
-                List<DynamicList<scalar> >& srcWght,
-                List<DynamicList<label> >& tgtAddr,
-                List<DynamicList<scalar> >& tgtWght
-            );
-
             //- Set the source and target seed faces
-            void setNextFaces
+            virtual void setNextFaces
             (
                 label& startSeedI,
                 label& srcFaceI,
                 label& tgtFaceI,
                 const boolList& mapFlag,
                 labelList& seedFaces,
-                const DynamicList<label>& visitedFaces
-            ) const;
-
-
-        // Evaluation
-
-            //- Area of intersection between source and target faces
-            scalar interArea
-            (
-                const label srcFaceI,
-                const label tgtFaceI
+                const DynamicList<label>& visitedFaces,
+                bool errorOnNotFound = true
             ) const;
 
 
@@ -136,8 +105,8 @@ public:
 
         // Access
 
-            //- Flag to indicate that weights should be normalised
-            virtual bool normalise() const;
+            //- Flag to indicate that interpolation patches are conformal
+            virtual bool conformal() const;
 
 
         // Manipulation
