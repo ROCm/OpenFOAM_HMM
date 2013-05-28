@@ -207,6 +207,9 @@ public:
             //  Note: this should be empty for correct functioning
             inline const labelList& srcNonOverlap() const;
 
+            //- Flag to indicate that weights should be normalised
+            virtual bool normalise() const;
+
 
         // Manipulation
 

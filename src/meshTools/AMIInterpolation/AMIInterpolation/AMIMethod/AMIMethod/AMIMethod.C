@@ -241,17 +241,16 @@ Foam::label Foam::AMIMethod<SourcePatch, TargetPatch>::findTargetFace
 
     pointIndexHit sample = treePtr_->findNearest(srcPt, 10.0*srcFaceArea);
 
-
-    if (debug)
-    {
-        Pout<< "Source point = " << srcPt << ", Sample point = "
-            << sample.hitPoint() << ", Sample index = " << sample.index()
-            << endl;
-    }
-
     if (sample.hit())
     {
         targetFaceI = sample.index();
+
+        if (debug)
+        {
+            Pout<< "Source point = " << srcPt << ", Sample point = "
+                << sample.hitPoint() << ", Sample index = " << sample.index()
+                << endl;
+        }
     }
 
     return targetFaceI;
@@ -350,6 +349,15 @@ Foam::AMIMethod<SourcePatch, TargetPatch>::AMIMethod
 template<class SourcePatch, class TargetPatch>
 Foam::AMIMethod<SourcePatch, TargetPatch>::~AMIMethod()
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class SourcePatch, class TargetPatch>
+bool Foam::AMIMethod<SourcePatch, TargetPatch>::normalise() const
+{
+    return true;
+}
 
 
 // ************************************************************************* //
