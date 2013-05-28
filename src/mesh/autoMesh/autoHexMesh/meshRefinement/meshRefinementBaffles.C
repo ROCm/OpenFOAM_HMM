@@ -1965,7 +1965,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
     const bool removeEdgeConnectedCells,
     const scalarField& perpendicularAngle,
     const bool mergeFreeStanding,
-    const scalar freeStandingAngle,
+    const scalar planarAngle,
     const dictionary& motionDict,
     Time& runTime,
     const labelList& globalToMasterPatch,
@@ -2172,7 +2172,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
                     identity(mesh_.nFaces()-mesh_.nInternalFaces())
                    +mesh_.nInternalFaces()
                 ),
-                freeStandingAngle
+                planarAngle
             )
         );
 

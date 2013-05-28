@@ -175,13 +175,22 @@ $(AMI)/AMIInterpolation/AMIPatchToPatchInterpolation.C
 $(AMI)/faceAreaIntersect/faceAreaIntersect.C
 $(AMI)/GAMG/interfaces/cyclicAMIGAMGInterface/cyclicAMIGAMGInterface.C
 $(AMI)/GAMG/interfaceFields/cyclicAMIGAMGInterfaceField/cyclicAMIGAMGInterfaceField.C
+$(AMI)/GAMG/interfaces/cyclicACMIGAMGInterface/cyclicACMIGAMGInterface.C
+$(AMI)/GAMG/interfaceFields/cyclicACMIGAMGInterfaceField/cyclicACMIGAMGInterfaceField.C
 
-AMICycPatches=$(AMI)/patches/cyclic
+AMICycPatches=$(AMI)/patches/cyclicAMI
 $(AMICycPatches)/cyclicAMILduInterfaceField/cyclicAMILduInterface.C
 $(AMICycPatches)/cyclicAMILduInterfaceField/cyclicAMILduInterfaceField.C
 $(AMICycPatches)/cyclicAMIPolyPatch/cyclicAMIPolyPatch.C
 $(AMICycPatches)/cyclicAMIPointPatch/cyclicAMIPointPatch.C
 $(AMICycPatches)/cyclicAMIPointPatchField/cyclicAMIPointPatchFields.C
+
+ACMICycPatches=$(AMI)/patches/cyclicACMI
+$(ACMICycPatches)/cyclicACMILduInterfaceField/cyclicACMILduInterface.C
+$(ACMICycPatches)/cyclicACMILduInterfaceField/cyclicACMILduInterfaceField.C
+$(ACMICycPatches)/cyclicACMIPolyPatch/cyclicACMIPolyPatch.C
+$(ACMICycPatches)/cyclicACMIPointPatch/cyclicACMIPointPatch.C
+$(ACMICycPatches)/cyclicACMIPointPatchField/cyclicACMIPointPatchFields.C
 
 mappedPatches/mappedPolyPatch/mappedPatchBase.C
 mappedPatches/mappedPolyPatch/mappedPolyPatch.C

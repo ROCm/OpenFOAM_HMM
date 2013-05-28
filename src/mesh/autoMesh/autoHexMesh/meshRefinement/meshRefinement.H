@@ -335,6 +335,48 @@ private:
                 label& nRefine
             ) const;
 
+            //- Is local topology a small gap?
+            bool isGap
+            (
+                const scalar,
+                const vector&,
+                const vector&,
+                const vector&,
+                const vector&
+            ) const;
+
+            //- Mark cell if local a gap topology or
+            bool checkProximity
+            (
+                const scalar planarCos,
+                const label nAllowRefine,
+
+                const label surfaceLevel,
+                const vector& surfaceLocation,
+                const vector& surfaceNormal,
+
+                const label cellI,
+
+                label& cellMaxLevel,
+                vector& cellMaxLocation,
+                vector& cellMaxNormal,
+
+                labelList& refineCell,
+                label& nRefine
+            ) const;
+
+            //- Mark cells for surface proximity based refinement.
+            label markProximityRefinement
+            (
+                const scalar curvature,
+                const label nAllowRefine,
+                const labelList& neiLevel,
+                const pointField& neiCc,
+
+                labelList& refineCell,
+                label& nRefine
+            ) const;
+
         // Baffle handling
 
             //- Get faces to repatch. Returns map from face to patch.
@@ -676,12 +718,14 @@ public:
             (
                 const point& keepPoint,
                 const scalar curvature,
+                const scalar planarAngle,
 
                 const bool featureRefinement,
                 const bool featureDistanceRefinement,
                 const bool internalRefinement,
                 const bool surfaceRefinement,
                 const bool curvatureRefinement,
+                const bool gapRefinement,
                 const label maxGlobalCells,
                 const label maxLocalCells
             ) const;

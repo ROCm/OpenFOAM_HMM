@@ -41,24 +41,28 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::checkPatches() const
     }
 
 
-    const scalar maxBoundsError = 0.05;
-
-    // check bounds of source and target
-    boundBox bbSrc(srcPatch_.points(), srcPatch_.meshPoints(), true);
-    boundBox bbTgt(tgtPatch_.points(), tgtPatch_.meshPoints(), true);
-
-    boundBox bbTgtInf(bbTgt);
-    bbTgtInf.inflate(maxBoundsError);
-
-    if (!bbTgtInf.contains(bbSrc))
+    if (conformal())
     {
-        WarningIn("AMIMethod<SourcePatch, TargetPatch>::checkPatches()")
-            << "Source and target patch bounding boxes are not similar" << nl
-            << "    source box span     : " << bbSrc.span() << nl
-            << "    target box span     : " << bbTgt.span() << nl
-            << "    source box          : " << bbSrc << nl
-            << "    target box          : " << bbTgt << nl
-            << "    inflated target box : " << bbTgtInf << endl;
+        const scalar maxBoundsError = 0.05;
+
+        // check bounds of source and target
+        boundBox bbSrc(srcPatch_.points(), srcPatch_.meshPoints(), true);
+        boundBox bbTgt(tgtPatch_.points(), tgtPatch_.meshPoints(), true);
+
+        boundBox bbTgtInf(bbTgt);
+        bbTgtInf.inflate(maxBoundsError);
+
+        if (!bbTgtInf.contains(bbSrc))
+        {
+            WarningIn("AMIMethod<SourcePatch, TargetPatch>::checkPatches()")
+                << "Source and target patch bounding boxes are not similar"
+                << nl
+                << "    source box span     : " << bbSrc.span() << nl
+                << "    target box span     : " << bbTgt.span() << nl
+                << "    source box          : " << bbSrc << nl
+                << "    target box          : " << bbTgt << nl
+                << "    inflated target box : " << bbTgtInf << endl;
+        }
     }
 }
 
@@ -74,6 +78,8 @@ bool Foam::AMIMethod<SourcePatch, TargetPatch>::initialise
     label& tgtFaceI
 )
 {
+    checkPatches();
+
     // set initial sizes for weights and addressing - must be done even if
     // returns false below
     srcAddress.setSize(srcPatch_.size());
@@ -241,17 +247,16 @@ Foam::label Foam::AMIMethod<SourcePatch, TargetPatch>::findTargetFace
 
     pointIndexHit sample = treePtr_->findNearest(srcPt, 10.0*srcFaceArea);
 
-
-    if (debug)
-    {
-        Pout<< "Source point = " << srcPt << ", Sample point = "
-            << sample.hitPoint() << ", Sample index = " << sample.index()
-            << endl;
-    }
-
     if (sample.hit())
     {
         targetFaceI = sample.index();
+
+        if (debug)
+        {
+            Pout<< "Source point = " << srcPt << ", Sample point = "
+                << sample.hitPoint() << ", Sample index = " << sample.index()
+                << endl;
+        }
     }
 
     return targetFaceI;
@@ -334,8 +339,6 @@ Foam::AMIMethod<SourcePatch, TargetPatch>::AMIMethod
     srcNonOverlap_(),
     triMode_(triMode)
 {
-    checkPatches();
-
     label srcSize = returnReduce(srcPatch_.size(), sumOp<label>());
     label tgtSize = returnReduce(tgtPatch_.size(), sumOp<label>());
 
@@ -350,6 +353,15 @@ Foam::AMIMethod<SourcePatch, TargetPatch>::AMIMethod
 template<class SourcePatch, class TargetPatch>
 Foam::AMIMethod<SourcePatch, TargetPatch>::~AMIMethod()
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class SourcePatch, class TargetPatch>
+bool Foam::AMIMethod<SourcePatch, TargetPatch>::conformal() const
+{
+    return true;
+}
 
 
 // ************************************************************************* //

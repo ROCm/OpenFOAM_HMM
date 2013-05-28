@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,6 +85,21 @@ class autoRefineDriver
         label surfaceOnlyRefine
         (
             const refinementParameters& refineParams,
+            const label maxIter
+        );
+
+        //- Refine all cells in small gaps
+        label gapOnlyRefine
+        (
+            const refinementParameters& refineParams,
+            const label maxIter
+        );
+
+        //- Refine cells with almost all sides refined
+        label danglingCellRefine
+        (
+            const refinementParameters& refineParams,
+            const label nFaces,
             const label maxIter
         );
 
