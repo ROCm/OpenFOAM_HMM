@@ -56,6 +56,11 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolationMethodToWord
             method = "faceAreaWeightAMI";
             break;
         }
+        case imPartialFaceAreaWeight:
+        {
+            method = "partialFaceAreaWeightAMI";
+            break;
+        }
         default:
         {
             FatalErrorIn
@@ -87,7 +92,15 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::wordTointerpolationMethod
 
     wordList methods
     (
-        IStringStream("(directAMI mapNearestAMI faceAreaWeightAMI)")()
+        IStringStream
+        (
+            "("
+                "directAMI "
+                "mapNearestAMI "
+                "faceAreaWeightAMI "
+                "partialFaceAreaWeightAMI"
+            ")"
+        )()
     );
 
     if (im == "directAMI")
@@ -101,6 +114,10 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::wordTointerpolationMethod
     else if (im == "faceAreaWeightAMI")
     {
         method = imFaceAreaWeight;
+    }
+    else if (im == "partialFaceAreaWeightAMI")
+    {
+        method = imPartialFaceAreaWeight;
     }
     else
     {
@@ -183,6 +200,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
     const labelListList& addr,
     scalarListList& wght,
     scalarField& wghtSum,
+    const bool normalise,
     const bool output
 )
 {
@@ -191,12 +209,19 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
     forAll(wght, faceI)
     {
         scalarList& w = wght[faceI];
+        scalar denom = patchAreas[faceI];
+
         scalar s = sum(w);
-        scalar t = s/patchAreas[faceI];
+        scalar t = s/denom;
+
+        if (normalise)
+        {
+            denom = s;
+        }
 
         forAll(w, i)
         {
-            w[i] /= s;
+            w[i] /= denom;
         }
 
         wghtSum[faceI] = t;
@@ -476,6 +501,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
         srcAddress,
         srcWeights,
         srcWeightsSum,
+        true,
         false
     );
 }
@@ -749,7 +775,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
         tgtMagSf_[faceI] = tgtPatch[faceI].mag(tgtPatch.points());
     }
 
-
     // Calculate if patches present on multiple processors
     singlePatchProc_ = calcDistribution(srcPatch, tgtPatch);
 
@@ -794,32 +819,28 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
                 newTgtPoints
             );
 
-
         // calculate AMI interpolation
-        {
-            autoPtr<AMIMethod<SourcePatch, TargetPatch> > AMIPtr
+        autoPtr<AMIMethod<SourcePatch, TargetPatch> > AMIPtr
+        (
+            AMIMethod<SourcePatch, TargetPatch>::New
             (
-                AMIMethod<SourcePatch, TargetPatch>::New
-                (
-                    interpolationMethodToWord(method_),
-                    srcPatch,
-                    newTgtPatch,
-                    srcMagSf_,
-                    tgtMagSf_,
-                    triMode_,
-                    reverseTarget_
-                )
-            );
+                interpolationMethodToWord(method_),
+                srcPatch,
+                newTgtPatch,
+                srcMagSf_,
+                tgtMagSf_,
+                triMode_,
+                reverseTarget_
+            )
+        );
 
-            AMIPtr->calculate
-            (
-                srcAddress_,
-                srcWeights_,
-                tgtAddress_,
-                tgtWeights_
-            );
-        }
-
+        AMIPtr->calculate
+        (
+            srcAddress_,
+            srcWeights_,
+            tgtAddress_,
+            tgtWeights_
+        );
 
         // Now
         // ~~~
@@ -886,6 +907,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             srcAddress_,
             srcWeights_,
             srcWeightsSum_,
+            AMIPtr->normalise(),
             true
         );
         normaliseWeights
@@ -895,6 +917,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             tgtAddress_,
             tgtWeights_,
             tgtWeightsSum_,
+            AMIPtr->normalise(),
             true
         );
 
@@ -902,7 +925,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
         List<Map<label> > cMap;
         srcMapPtr_.reset(new mapDistribute(globalSrcFaces, tgtAddress_, cMap));
         tgtMapPtr_.reset(new mapDistribute(globalTgtFaces, srcAddress_, cMap));
-
 
         if (debug)
         {
@@ -913,29 +935,27 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
     {
 
         // calculate AMI interpolation
-        {
-            autoPtr<AMIMethod<SourcePatch, TargetPatch> > AMIPtr
+        autoPtr<AMIMethod<SourcePatch, TargetPatch> > AMIPtr
+        (
+            AMIMethod<SourcePatch, TargetPatch>::New
             (
-                AMIMethod<SourcePatch, TargetPatch>::New
-                (
-                    interpolationMethodToWord(method_),
-                    srcPatch,
-                    tgtPatch,
-                    srcMagSf_,
-                    tgtMagSf_,
-                    triMode_,
-                    reverseTarget_
-                )
-            );
+                interpolationMethodToWord(method_),
+                srcPatch,
+                tgtPatch,
+                srcMagSf_,
+                tgtMagSf_,
+                triMode_,
+                reverseTarget_
+            )
+        );
 
-            AMIPtr->calculate
-            (
-                srcAddress_,
-                srcWeights_,
-                tgtAddress_,
-                tgtWeights_
-            );
-        }
+        AMIPtr->calculate
+        (
+            srcAddress_,
+            srcWeights_,
+            tgtAddress_,
+            tgtWeights_
+        );
 
         normaliseWeights
         (
@@ -944,6 +964,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             srcAddress_,
             srcWeights_,
             srcWeightsSum_,
+            AMIPtr->normalise(),
             true
         );
         normaliseWeights
@@ -953,6 +974,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             tgtAddress_,
             tgtWeights_,
             tgtWeightsSum_,
+            AMIPtr->normalise(),
             true
         );
     }
