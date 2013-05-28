@@ -23,24 +23,21 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "AMIPatchToPatchInterpolation.H"
-#include "AMIMethod.H"
-#include "directAMI.H"
-#include "mapNearestAMI.H"
-#include "faceAreaWeightAMI.H"
-#include "partialFaceAreaWeightAMI.H"
+#include "cyclicACMIFvsPatchFields.H"
+#include "fvsPatchFields.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeAMIMethod(AMIPatchToPatchInterpolation);
 
-    makeAMIMethodType(AMIPatchToPatchInterpolation, directAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, mapNearestAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, faceAreaWeightAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, partialFaceAreaWeightAMI);
-}
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+makeFvsPatchFields(cyclicACMI);
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // ************************************************************************* //

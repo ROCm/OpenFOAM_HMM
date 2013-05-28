@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,24 +23,20 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "AMIPatchToPatchInterpolation.H"
-#include "AMIMethod.H"
-#include "directAMI.H"
-#include "mapNearestAMI.H"
-#include "faceAreaWeightAMI.H"
-#include "partialFaceAreaWeightAMI.H"
+#include "cyclicAMILduInterface.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeAMIMethod(AMIPatchToPatchInterpolation);
-
-    makeAMIMethodType(AMIPatchToPatchInterpolation, directAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, mapNearestAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, faceAreaWeightAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, partialFaceAreaWeightAMI);
+defineTypeNameAndDebug(cyclicAMILduInterface, 0);
 }
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::cyclicAMILduInterface::~cyclicAMILduInterface()
+{}
 
 
 // ************************************************************************* //

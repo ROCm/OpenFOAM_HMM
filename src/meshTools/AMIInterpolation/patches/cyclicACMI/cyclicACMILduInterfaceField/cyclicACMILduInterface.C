@@ -23,24 +23,20 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "AMIPatchToPatchInterpolation.H"
-#include "AMIMethod.H"
-#include "directAMI.H"
-#include "mapNearestAMI.H"
-#include "faceAreaWeightAMI.H"
-#include "partialFaceAreaWeightAMI.H"
+#include "cyclicACMILduInterface.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeAMIMethod(AMIPatchToPatchInterpolation);
-
-    makeAMIMethodType(AMIPatchToPatchInterpolation, directAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, mapNearestAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, faceAreaWeightAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, partialFaceAreaWeightAMI);
+defineTypeNameAndDebug(cyclicACMILduInterface, 0);
 }
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::cyclicACMILduInterface::~cyclicACMILduInterface()
+{}
 
 
 // ************************************************************************* //

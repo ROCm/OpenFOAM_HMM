@@ -23,23 +23,32 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "AMIPatchToPatchInterpolation.H"
-#include "AMIMethod.H"
-#include "directAMI.H"
-#include "mapNearestAMI.H"
-#include "faceAreaWeightAMI.H"
-#include "partialFaceAreaWeightAMI.H"
+#include "cyclicACMILduInterfaceField.H"
+#include "diagTensorField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeAMIMethod(AMIPatchToPatchInterpolation);
+defineTypeNameAndDebug(cyclicACMILduInterfaceField, 0);
+}
 
-    makeAMIMethodType(AMIPatchToPatchInterpolation, directAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, mapNearestAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, faceAreaWeightAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, partialFaceAreaWeightAMI);
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::cyclicACMILduInterfaceField::~cyclicACMILduInterfaceField()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::cyclicACMILduInterfaceField::transformCoupleField
+(
+    scalarField& f,
+    const direction cmpt
+) const
+{
+    cyclicAMILduInterfaceField::transformCoupleField(f, cmpt);
 }
 
 

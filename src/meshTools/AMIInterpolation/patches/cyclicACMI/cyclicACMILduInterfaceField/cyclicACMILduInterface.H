@@ -21,26 +21,60 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::cyclicACMILduInterface
+
+Description
+    An abstract base class for cyclic ACMI coupled interfaces
+
+SourceFiles
+    cyclicACMILduInterface.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "AMIPatchToPatchInterpolation.H"
-#include "AMIMethod.H"
-#include "directAMI.H"
-#include "mapNearestAMI.H"
-#include "faceAreaWeightAMI.H"
-#include "partialFaceAreaWeightAMI.H"
+#ifndef cyclicACMILduInterface_H
+#define cyclicACMILduInterface_H
+
+#include "cyclicAMILduInterface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeAMIMethod(AMIPatchToPatchInterpolation);
 
-    makeAMIMethodType(AMIPatchToPatchInterpolation, directAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, mapNearestAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, faceAreaWeightAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, partialFaceAreaWeightAMI);
-}
+/*---------------------------------------------------------------------------*\
+                   Class cyclicACMILduInterface Declaration
+\*---------------------------------------------------------------------------*/
 
+class cyclicACMILduInterface
+:
+    public cyclicAMILduInterface
+{
+
+public:
+
+    //- Runtime type information
+    TypeName("cyclicACMILduInterface");
+
+
+    // Constructors
+
+        //- Construct null
+        cyclicACMILduInterface()
+        {}
+
+
+    //- Destructor
+    virtual ~cyclicACMILduInterface();
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

@@ -22,20 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::faceAreaWeightAMI
+    Foam::partialFaceAreaWeightAMI
 
 Description
-    Face area weighted Arbitrary Mesh Interface (AMI) method
+    Partial face area weighted Arbitrary Mesh Interface (AMI) method
 
 SourceFiles
-    faceAreaWeightAMI.C
+    partialFaceAreaWeightAMI.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faceAreaWeightAMI_H
-#define faceAreaWeightAMI_H
+#ifndef partialFaceAreaWeightAMI_H
+#define partialFaceAreaWeightAMI_H
 
-#include "AMIMethod.H"
+#include "faceAreaWeightAMI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,59 +43,26 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class faceAreaWeightAMI Declaration
+                  Class partialFaceAreaWeightAMI Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class SourcePatch, class TargetPatch>
-class faceAreaWeightAMI
+class partialFaceAreaWeightAMI
 :
-    public AMIMethod<SourcePatch, TargetPatch>
+    public faceAreaWeightAMI<SourcePatch, TargetPatch>
 {
 
-protected:
+private:
 
-    // Protected Member Functions
+    // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        faceAreaWeightAMI(const faceAreaWeightAMI&);
+        partialFaceAreaWeightAMI(const partialFaceAreaWeightAMI&);
 
         //- Disallow default bitwise assignment
-        void operator=(const faceAreaWeightAMI&);
+        void operator=(const partialFaceAreaWeightAMI&);
 
         // Marching front
-
-            //- Calculate addressing and weights using temporary storage
-            virtual void calcAddressing
-            (
-                List<DynamicList<label> >& srcAddress,
-                List<DynamicList<scalar> >& srcWeights,
-                List<DynamicList<label> >& tgtAddress,
-                List<DynamicList<scalar> >& tgtWeights,
-                label srcFaceI,
-                label tgtFaceI
-            );
-
-            //- Determine overlap contributions for source face srcFaceI
-            virtual bool processSourceFace
-            (
-                const label srcFaceI,
-                const label tgtStartFaceI,
-                DynamicList<label>& nbrFaces,
-                DynamicList<label>& visitedFaces,
-                List<DynamicList<label> >& srcAddr,
-                List<DynamicList<scalar> >& srcWght,
-                List<DynamicList<label> >& tgtAddr,
-                List<DynamicList<scalar> >& tgtWght
-            );
-
-            //- Attempt to re-evaluate source faces that have not been included
-            virtual void restartUncoveredSourceFace
-            (
-                List<DynamicList<label> >& srcAddr,
-                List<DynamicList<scalar> >& srcWght,
-                List<DynamicList<label> >& tgtAddr,
-                List<DynamicList<scalar> >& tgtWght
-            );
 
             //- Set the source and target seed faces
             virtual void setNextFaces
@@ -110,26 +77,16 @@ protected:
             ) const;
 
 
-        // Evaluation
-
-            //- Area of intersection between source and target faces
-            virtual scalar interArea
-            (
-                const label srcFaceI,
-                const label tgtFaceI
-            ) const;
-
-
 public:
 
     //- Runtime type information
-    TypeName("faceAreaWeightAMI");
+    TypeName("partialFaceAreaWeightAMI");
 
 
     // Constructors
 
         //- Construct from components
-        faceAreaWeightAMI
+        partialFaceAreaWeightAMI
         (
             const SourcePatch& srcPatch,
             const TargetPatch& tgtPatch,
@@ -141,10 +98,16 @@ public:
 
 
     //- Destructor
-    virtual ~faceAreaWeightAMI();
+    virtual ~partialFaceAreaWeightAMI();
 
 
     // Member Functions
+
+        // Access
+
+            //- Flag to indicate that interpolation patches are conformal
+            virtual bool conformal() const;
+
 
         // Manipulation
 
@@ -168,7 +131,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "faceAreaWeightAMI.C"
+#   include "partialFaceAreaWeightAMI.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

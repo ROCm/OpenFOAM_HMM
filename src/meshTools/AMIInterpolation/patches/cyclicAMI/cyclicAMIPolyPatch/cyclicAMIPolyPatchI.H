@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,23 +23,37 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "AMIPatchToPatchInterpolation.H"
-#include "AMIMethod.H"
-#include "directAMI.H"
-#include "mapNearestAMI.H"
-#include "faceAreaWeightAMI.H"
-#include "partialFaceAreaWeightAMI.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+inline const Foam::word& Foam::cyclicAMIPolyPatch::neighbPatchName() const
 {
-    makeAMIMethod(AMIPatchToPatchInterpolation);
+    return nbrPatchName_;
+}
 
-    makeAMIMethodType(AMIPatchToPatchInterpolation, directAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, mapNearestAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, faceAreaWeightAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, partialFaceAreaWeightAMI);
+
+inline const Foam::cyclicAMIPolyPatch&
+Foam::cyclicAMIPolyPatch::neighbPatch() const
+{
+    const polyPatch& pp = this->boundaryMesh()[neighbPatchID()];
+    return refCast<const cyclicAMIPolyPatch>(pp);
+}
+
+
+inline const Foam::vector& Foam::cyclicAMIPolyPatch::rotationAxis() const
+{
+    return rotationAxis_;
+}
+
+
+inline const Foam::point& Foam::cyclicAMIPolyPatch::rotationCentre() const
+{
+    return rotationCentre_;
+}
+
+
+inline const Foam::vector& Foam::cyclicAMIPolyPatch::separationVector() const
+{
+    return separationVector_;
 }
 
 

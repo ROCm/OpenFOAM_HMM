@@ -23,23 +23,60 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "AMIPatchToPatchInterpolation.H"
-#include "AMIMethod.H"
-#include "directAMI.H"
-#include "mapNearestAMI.H"
-#include "faceAreaWeightAMI.H"
-#include "partialFaceAreaWeightAMI.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+inline void Foam::cyclicACMIPolyPatch::setUpdated(const bool flag) const
 {
-    makeAMIMethod(AMIPatchToPatchInterpolation);
+    updated_ = flag;
+}
 
-    makeAMIMethodType(AMIPatchToPatchInterpolation, directAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, mapNearestAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, faceAreaWeightAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, partialFaceAreaWeightAMI);
+
+inline bool Foam::cyclicACMIPolyPatch::updated() const
+{
+    return updated_;
+}
+
+
+inline const Foam::vectorField& Foam::cyclicACMIPolyPatch::faceAreas0() const
+{
+    return faceAreas0_;
+}
+
+
+inline const Foam::word& Foam::cyclicACMIPolyPatch::nonOverlapPatchName() const
+{
+    return nonOverlapPatchName_;
+}
+
+
+inline const Foam::polyPatch& Foam::cyclicACMIPolyPatch::nonOverlapPatch() const
+{
+    // note: use nonOverlapPatchID() as opposed to patch name to initialise
+    // demand-driven data
+
+    return this->boundaryMesh()[nonOverlapPatchID()];
+}
+
+
+inline Foam::polyPatch& Foam::cyclicACMIPolyPatch::nonOverlapPatch()
+{
+    // note: use nonOverlapPatchID() as opposed to patch name to initialise
+    // demand-driven data
+
+    return const_cast<polyPatch&>(this->boundaryMesh()[nonOverlapPatchID()]);
+}
+
+
+inline const Foam::scalarField& Foam::cyclicACMIPolyPatch::mask() const
+{
+    if (owner())
+    {
+        return AMI().srcWeightsSum();
+    }
+    else
+    {
+        return neighbPatch().AMI().tgtWeightsSum();
+    }
 }
 
 

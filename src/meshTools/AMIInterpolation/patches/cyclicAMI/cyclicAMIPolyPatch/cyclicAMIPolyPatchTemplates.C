@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,23 +23,58 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "AMIPatchToPatchInterpolation.H"
-#include "AMIMethod.H"
-#include "directAMI.H"
-#include "mapNearestAMI.H"
-#include "faceAreaWeightAMI.H"
-#include "partialFaceAreaWeightAMI.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+template<class Type>
+Foam::tmp<Foam::Field<Type> > Foam::cyclicAMIPolyPatch::interpolate
+(
+    const Field<Type>& fld
+) const
 {
-    makeAMIMethod(AMIPatchToPatchInterpolation);
+    if (owner())
+    {
+        return AMI().interpolateToSource(fld);
+    }
+    else
+    {
+        return neighbPatch().AMI().interpolateToTarget(fld);
+    }
+}
 
-    makeAMIMethodType(AMIPatchToPatchInterpolation, directAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, mapNearestAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, faceAreaWeightAMI);
-    makeAMIMethodType(AMIPatchToPatchInterpolation, partialFaceAreaWeightAMI);
+
+template<class Type>
+Foam::tmp<Foam::Field<Type> > Foam::cyclicAMIPolyPatch::interpolate
+(
+    const tmp<Field<Type> >& tFld
+) const
+{
+    if (owner())
+    {
+        return AMI().interpolateToSource(tFld);
+    }
+    else
+    {
+        return neighbPatch().AMI().interpolateToTarget(tFld);
+    }
+}
+
+
+template<class Type, class CombineOp>
+void Foam::cyclicAMIPolyPatch::interpolate
+(
+    const UList<Type>& fld,
+    const CombineOp& cop,
+    List<Type>& result
+) const
+{
+    if (owner())
+    {
+        AMI().interpolateToSource(fld, cop, result);
+    }
+    else
+    {
+        neighbPatch().AMI().interpolateToTarget(fld, cop, result);
+    }
 }
 
 
