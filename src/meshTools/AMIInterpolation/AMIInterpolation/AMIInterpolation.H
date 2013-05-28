@@ -237,7 +237,7 @@ private:
                 const labelListList& addr,
                 scalarListList& wght,
                 scalarField& wghtSum,
-                const bool normalise,
+                const bool conformal,
                 const bool output
             );
 

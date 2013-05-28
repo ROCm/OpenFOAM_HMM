@@ -200,7 +200,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
     const labelListList& addr,
     scalarListList& wght,
     scalarField& wghtSum,
-    const bool normalise,
+    const bool conformal,
     const bool output
 )
 {
@@ -214,7 +214,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
         scalar s = sum(w);
         scalar t = s/denom;
 
-        if (normalise)
+        if (conformal)
         {
             denom = s;
         }
@@ -907,7 +907,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             srcAddress_,
             srcWeights_,
             srcWeightsSum_,
-            AMIPtr->normalise(),
+            AMIPtr->conformal(),
             true
         );
         normaliseWeights
@@ -917,7 +917,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             tgtAddress_,
             tgtWeights_,
             tgtWeightsSum_,
-            AMIPtr->normalise(),
+            AMIPtr->conformal(),
             true
         );
 
@@ -964,7 +964,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             srcAddress_,
             srcWeights_,
             srcWeightsSum_,
-            AMIPtr->normalise(),
+            AMIPtr->conformal(),
             true
         );
         normaliseWeights
@@ -974,7 +974,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             tgtAddress_,
             tgtWeights_,
             tgtWeightsSum_,
-            AMIPtr->normalise(),
+            AMIPtr->conformal(),
             true
         );
     }
