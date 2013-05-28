@@ -1,0 +1,81 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev.ACMI                              |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       polyBoundaryMesh;
+    location    "constant/polyMesh";
+    object      boundary;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+8
+(
+    inlet
+    {
+        type            patch;
+        nFaces          40;
+        startFace       21464;
+    }
+    outlet
+    {
+        type            patch;
+        nFaces          96;
+        startFace       21504;
+    }
+    walls
+    {
+        type            wall;
+        nFaces          320;
+        startFace       21600;
+    }
+    defaultFaces
+    {
+        type            empty;
+        inGroups        1(empty);
+        nFaces          21760;
+        startFace       21920;
+    }
+    ACMI1_blockage
+    {
+        type            wall;
+        nFaces          40;
+        startFace       43680;
+    }
+    ACMI1_couple
+    {
+        type            cyclicACMI;
+        inGroups        1(cyclicACMI);
+        nFaces          40;
+        startFace       43720;
+        matchTolerance  0.0001;
+        transform       noOrdering;
+        neighbourPatch  ACMI2_couple;
+        nonOverlapPatch ACMI1_blockage;
+    }
+    ACMI2_blockage
+    {
+        type            wall;
+        nFaces          96;
+        startFace       43760;
+    }
+    ACMI2_couple
+    {
+        type            cyclicACMI;
+        inGroups        1(cyclicACMI);
+        nFaces          96;
+        startFace       43856;
+        matchTolerance  0.0001;
+        transform       noOrdering;
+        neighbourPatch  ACMI1_couple;
+        nonOverlapPatch ACMI2_blockage;
+    }
+)
+
+// ************************************************************************* //
