@@ -33,6 +33,12 @@ thermoSingleLayerCoeffs
 
     radiationModel  none;
 
+    turbulence  laminar;
+    laminarCoeffs
+    {
+        Cf          0.005;
+    }
+
     upperSurfaceModels
     {
 /*
@@ -56,15 +62,9 @@ thermoSingleLayerCoeffs
 
     forces
     (
-        surfaceShear
         thermocapillary
         contactAngle
     );
-
-    surfaceShearCoeffs
-    {
-        Cf          0.005;
-    }
 
     contactAngleCoeffs
     {
