@@ -33,13 +33,17 @@ kinematicSingleLayerCoeffs
 
     injectionModels ();
 
+    turbulence      laminar;
+    laminarCoeffs
+    {
+        Cf          0.001;
+    }
+
     forces
     (
         contactAngle
-        surfaceShear
         thermocapillary
     );
-
 
     contactAngleCoeffs
     {
@@ -57,10 +61,5 @@ kinematicSingleLayerCoeffs
         }
 
         zeroForcePatches    ();
-    }
-
-    surfaceShearCoeffs
-    {
-        Cf          0.001;
     }
 }
