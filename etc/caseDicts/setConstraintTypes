@@ -16,6 +16,11 @@ cyclicAMI
     type  cyclicAMI;
 }
 
+cyclicACMI
+{
+    type  cyclicACMI;
+}
+
 cyclicSlip
 {
     type  cyclicSlip;
