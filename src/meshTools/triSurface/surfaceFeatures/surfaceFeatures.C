@@ -118,7 +118,11 @@ Foam::List<Foam::surfaceFeatures::edgeStatus> Foam::surfaceFeatures::toStatus()
 
 
 // Set from value for every edge
-void Foam::surfaceFeatures::setFromStatus(const List<edgeStatus>& edgeStat)
+void Foam::surfaceFeatures::setFromStatus
+(
+    const List<edgeStatus>& edgeStat,
+    const scalar includedAngle
+)
 {
     // Count
 
@@ -170,20 +174,24 @@ void Foam::surfaceFeatures::setFromStatus(const List<edgeStatus>& edgeStat)
         }
     }
 
-    // Calculate consistent feature points
-    calcFeatPoints(edgeStat);
+    const scalar minCos = Foam::cos(degToRad(180.0 - includedAngle));
+
+    calcFeatPoints(edgeStat, minCos);
 }
 
 
 //construct feature points where more than 2 feature edges meet
 void Foam::surfaceFeatures::calcFeatPoints
 (
-    const List<edgeStatus>& edgeStat
+    const List<edgeStatus>& edgeStat,
+    const scalar minCos
 )
 {
     DynamicList<label> featurePoints(surf_.nPoints()/1000);
 
     const labelListList& pointEdges = surf_.pointEdges();
+    const edgeList& edges = surf_.edges();
+    const pointField& localPoints = surf_.localPoints();
 
     forAll(pointEdges, pointI)
     {
@@ -202,6 +210,27 @@ void Foam::surfaceFeatures::calcFeatPoints
         if (nFeatEdges > 2)
         {
             featurePoints.append(pointI);
+        }
+        else if (nFeatEdges == 2)
+        {
+            // Check the angle between the two edges
+            DynamicList<vector> edgeVecs(2);
+
+            forAll(pEdges, i)
+            {
+                const label edgeI = pEdges[i];
+
+                if (edgeStat[edgeI] != NONE)
+                {
+                    edgeVecs.append(edges[edgeI].vec(localPoints));
+                    edgeVecs.last() /= mag(edgeVecs.last());
+                }
+            }
+
+            if (mag(edgeVecs[0] & edgeVecs[1]) < minCos)
+            {
+                featurePoints.append(pointI);
+            }
         }
     }
 
@@ -230,7 +259,7 @@ void Foam::surfaceFeatures::classifyFeatureAngles
         if (eFaces.size() != 2)
         {
             // Non-manifold. What to do here? Is region edge? external edge?
-            edgeStat[edgeI] = REGION;
+            edgeStat[edgeI] = NONE;
         }
         else
         {
@@ -464,7 +493,7 @@ Foam::surfaceFeatures::surfaceFeatures
 
     if (minLen > 0 || minElems > 0)
     {
-        trimFeatures(minLen, minElems);
+        trimFeatures(minLen, minElems, includedAngle);
     }
 }
 
@@ -585,7 +614,7 @@ Foam::surfaceFeatures::surfaceFeatures
     edgeStat.clear();
     dynFeatEdges.clear();
 
-    setFromStatus(allEdgeStat);
+    setFromStatus(allEdgeStat, GREAT);
 }
 
 
@@ -664,7 +693,7 @@ void Foam::surfaceFeatures::findFeatures
         geometricTestOnly
     );
 
-    setFromStatus(edgeStat);
+    setFromStatus(edgeStat, includedAngle);
 }
 
 
@@ -673,7 +702,8 @@ void Foam::surfaceFeatures::findFeatures
 Foam::labelList Foam::surfaceFeatures::trimFeatures
 (
     const scalar minLen,
-    const label minElems
+    const label minElems,
+    const scalar includedAngle
 )
 {
     // Convert feature edge list to status per edge.
@@ -797,7 +827,7 @@ Foam::labelList Foam::surfaceFeatures::trimFeatures
     }
 
     // Convert back to edge labels
-    setFromStatus(edgeStat);
+    setFromStatus(edgeStat, includedAngle);
 
     return featLines;
 }

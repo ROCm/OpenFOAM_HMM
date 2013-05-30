@@ -133,7 +133,11 @@ private:
 
 
         //- Construct feature points where more than 2 feature edges meet
-        void calcFeatPoints(const List<edgeStatus>&);
+        void calcFeatPoints
+        (
+            const List<edgeStatus>& edgeStat,
+            const scalar minCos
+        );
 
         //- Classify the angles of the feature edges
         void classifyFeatureAngles
@@ -288,13 +292,22 @@ public:
 
             //- Delete small sets of edges. Edges are stringed up and any
             //  string of length < minLen (or nElems < minElems) is deleted.
-            labelList trimFeatures(const scalar minLen, const label minElems);
+            labelList trimFeatures
+            (
+                const scalar minLen,
+                const label minElems,
+                const scalar includedAngle
+            );
 
             //- From member feature edges to status per edge.
             List<edgeStatus> toStatus() const;
 
             //- Set from status per edge
-            void setFromStatus(const List<edgeStatus>&);
+            void setFromStatus
+            (
+                const List<edgeStatus>& edgeStat,
+                const scalar includedAngle
+            );
 
 
         // Find
