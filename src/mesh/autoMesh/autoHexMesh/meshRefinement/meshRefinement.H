@@ -253,6 +253,14 @@ private:
                 label& nRefine
             );
 
+            //- Mark every cell with level of feature passing through it
+            //  (or -1 if not passed through). Uses tracking.
+            void markFeatureCellLevel
+            (
+                const point& keepPoint,
+                labelList& maxFeatureLevel
+            ) const;
+
             //- Calculate list of cells to refine based on intersection of
             //  features.
             label markFeatureRefinement
@@ -327,6 +335,48 @@ private:
                 label& nRefine
             ) const;
 
+            //- Is local topology a small gap?
+            bool isGap
+            (
+                const scalar,
+                const vector&,
+                const vector&,
+                const vector&,
+                const vector&
+            ) const;
+
+            //- Mark cell if local a gap topology or
+            bool checkProximity
+            (
+                const scalar planarCos,
+                const label nAllowRefine,
+
+                const label surfaceLevel,
+                const vector& surfaceLocation,
+                const vector& surfaceNormal,
+
+                const label cellI,
+
+                label& cellMaxLevel,
+                vector& cellMaxLocation,
+                vector& cellMaxNormal,
+
+                labelList& refineCell,
+                label& nRefine
+            ) const;
+
+            //- Mark cells for surface proximity based refinement.
+            label markProximityRefinement
+            (
+                const scalar curvature,
+                const label nAllowRefine,
+                const labelList& neiLevel,
+                const pointField& neiCc,
+
+                labelList& refineCell,
+                label& nRefine
+            ) const;
+
         // Baffle handling
 
             //- Get faces to repatch. Returns map from face to patch.
@@ -335,16 +385,6 @@ private:
                 const bool allowBoundary,
                 const labelList& globalToMasterPatch,
                 const labelList& globalToSlavePatch
-            ) const;
-
-            //- Geometric test on see whether face needs to be baffled:
-            //  is face boundary face and perpendicular to surface normal?
-            bool validBaffleTopology
-            (
-                const label faceI,
-                const vector& n1,
-                const vector& n2,
-                const vector& testDir
             ) const;
 
             //- Determine patches for baffles
@@ -435,7 +475,11 @@ private:
 
             //- Extract those baffles (duplicate) faces that are on the edge
             //  of a baffle region. These are candidates for merging.
-            List<labelPair> freeStandingBaffles(const List<labelPair>&) const;
+            List<labelPair> freeStandingBaffles
+            (
+                const List<labelPair>&,
+                const scalar freeStandingAngle
+            ) const;
 
 
         // Zone handling
@@ -489,6 +533,16 @@ private:
                 labelList& namedSurfaceIndex
             ) const;
 
+            //- Remove any loose standing cells
+            void handleSnapProblems
+            (
+                const bool removeEdgeConnectedCells,
+                const scalarField& perpendicularAngle,
+                const dictionary& motionDict,
+                Time& runTime,
+                const labelList& globalToMasterPatch,
+                const labelList& globalToSlavePatch
+            );
 
         //- Disallow default bitwise copy construct
         meshRefinement(const meshRefinement&);
@@ -664,12 +718,14 @@ public:
             (
                 const point& keepPoint,
                 const scalar curvature,
+                const scalar planarAngle,
 
                 const bool featureRefinement,
                 const bool featureDistanceRefinement,
                 const bool internalRefinement,
                 const bool surfaceRefinement,
                 const bool curvatureRefinement,
+                const bool gapRefinement,
                 const label maxGlobalCells,
                 const label maxLocalCells
             ) const;
@@ -707,6 +763,7 @@ public:
                 const bool removeEdgeConnectedCells,
                 const scalarField& perpendicularAngle,
                 const bool mergeFreeStanding,
+                const scalar freeStandingAngle,
                 const dictionary& motionDict,
                 Time& runTime,
                 const labelList& globalToMasterPatch,

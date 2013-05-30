@@ -88,7 +88,8 @@ public:
         {
             imDirect,
             imMapNearest,
-            imFaceAreaWeight
+            imFaceAreaWeight,
+            imPartialFaceAreaWeight
         };
 
         //- Convert interpolationMethod to word representation
@@ -236,6 +237,7 @@ private:
                 const labelListList& addr,
                 scalarListList& wght,
                 scalarField& wghtSum,
+                const bool conformal,
                 const bool output
             );
 

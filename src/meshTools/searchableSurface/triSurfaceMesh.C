@@ -433,24 +433,28 @@ Foam::triSurfaceMesh::edgeTree() const
           + nInternalEdges()
         );
 
-        treeBoundBox bb;
-        label nPoints;
-        PatchTools::calcBounds
-        (
-            static_cast<const triSurface&>(*this),
-            bb,
-            nPoints
-        );
+        treeBoundBox bb(vector::zero, vector::zero);
 
-        // Random number generator. Bit dodgy since not exactly random ;-)
-        Random rndGen(65431);
+        if (bEdges.size())
+        {
+            label nPoints;
+            PatchTools::calcBounds
+            (
+                static_cast<const triSurface&>(*this),
+                bb,
+                nPoints
+            );
 
-        // Slightly extended bb. Slightly off-centred just so on symmetric
-        // geometry there are less face/edge aligned items.
+            // Random number generator. Bit dodgy since not exactly random ;-)
+            Random rndGen(65431);
 
-        bb = bb.extend(rndGen, 1e-4);
-        bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-        bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+            // Slightly extended bb. Slightly off-centred just so on symmetric
+            // geometry there are less face/edge aligned items.
+
+            bb = bb.extend(rndGen, 1e-4);
+            bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+            bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        }
 
         scalar oldTol = indexedOctree<treeDataEdge>::perturbTol();
         indexedOctree<treeDataEdge>::perturbTol() = tolerance();

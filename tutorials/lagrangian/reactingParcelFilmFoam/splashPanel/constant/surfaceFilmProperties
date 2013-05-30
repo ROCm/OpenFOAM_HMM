@@ -30,16 +30,16 @@ thermoSingleLayerCoeffs
     deltaWet    1e-4;
     hydrophilic no;
 
-    forces
-    (
-        surfaceShear
-        thermocapillary
-    );
-
-    surfaceShearCoeffs
+    turbulence  laminar;
+    laminarCoeffs
     {
         Cf          0.005;
     }
+
+    forces
+    (
+        thermocapillary
+    );
 
     injectionModels
     ();

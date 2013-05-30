@@ -180,6 +180,12 @@ castellatedMeshControls
     // - used if feature snapping (see snapControls below) is used
     resolveFeatureAngle 30;
 
+    // Planar angle:
+    // - used to determine if neighbouring surface normals
+    //   are roughly the same so e.g. free-standing baffles can be merged
+    // If not specified same as resolveFeatureAngle
+    //planarAngle 30;
+
 
     // Region-wise refinement
     // ~~~~~~~~~~~~~~~~~~~~~~

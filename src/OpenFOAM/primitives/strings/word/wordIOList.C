@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,12 +38,17 @@ namespace Foam
 }
 
 
-void Foam::printTable(const List<wordList>& wll, Ostream& os)
+void Foam::printTable
+(
+    const List<wordList>& wll,
+    List<string::size_type>& columnWidth,
+    Ostream& os
+)
 {
     if (!wll.size()) return;
 
     // Find the maximum word length for each column
-    List<string::size_type> columnWidth(wll[0].size(), string::size_type(0));
+    columnWidth.setSize(wll[0].size(), string::size_type(0));
     forAll(columnWidth, j)
     {
         forAll(wll, i)
@@ -72,6 +77,13 @@ void Foam::printTable(const List<wordList>& wll, Ostream& os)
 
         if (i == 0) os  << nl;
     }
+}
+
+
+void Foam::printTable(const List<wordList>& wll, Ostream& os)
+{
+    List<string::size_type> columnWidth;
+    printTable(wll, columnWidth, os);
 }
 
 

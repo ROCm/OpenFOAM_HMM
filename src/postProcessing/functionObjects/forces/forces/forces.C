@@ -28,16 +28,12 @@ License
 #include "dictionary.H"
 #include "Time.H"
 #include "wordReList.H"
-
-#include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
-#include "incompressible/RAS/RASModel/RASModel.H"
-#include "incompressible/LES/LESModel/LESModel.H"
-
-#include "fluidThermo.H"
-#include "compressible/RAS/RASModel/RASModel.H"
-#include "compressible/LES/LESModel/LESModel.H"
-
+#include "fvcGrad.H"
 #include "porosityModel.H"
+#include "fluidThermo.H"
+#include "incompressible/turbulenceModel/turbulenceModel.H"
+#include "compressible/turbulenceModel/turbulenceModel.H"
+#include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -70,38 +66,27 @@ void Foam::forces::writeFileHeader(const label i)
 
 Foam::tmp<Foam::volSymmTensorField> Foam::forces::devRhoReff() const
 {
-    if (obr_.foundObject<compressible::RASModel>("RASProperties"))
-    {
-        const compressible::RASModel& ras
-            = obr_.lookupObject<compressible::RASModel>("RASProperties");
+    typedef compressible::turbulenceModel cmpTurbModel;
+    typedef incompressible::turbulenceModel icoTurbModel;
 
-        return ras.devRhoReff();
-    }
-    else if (obr_.foundObject<incompressible::RASModel>("RASProperties"))
+    if (obr_.foundObject<cmpTurbModel>(cmpTurbModel::typeName))
     {
-        const incompressible::RASModel& ras
-            = obr_.lookupObject<incompressible::RASModel>("RASProperties");
+        const cmpTurbModel& turb =
+            obr_.lookupObject<cmpTurbModel>(cmpTurbModel::typeName);
 
-        return rho()*ras.devReff();
+        return turb.devRhoReff();
     }
-    else if (obr_.foundObject<compressible::LESModel>("LESProperties"))
+    else if (obr_.foundObject<icoTurbModel>(icoTurbModel::typeName))
     {
-        const compressible::LESModel& les =
-        obr_.lookupObject<compressible::LESModel>("LESProperties");
+        const incompressible::turbulenceModel& turb =
+            obr_.lookupObject<icoTurbModel>(icoTurbModel::typeName);
 
-        return les.devRhoReff();
+        return rho()*turb.devReff();
     }
-    else if (obr_.foundObject<incompressible::LESModel>("LESProperties"))
-    {
-        const incompressible::LESModel& les
-            = obr_.lookupObject<incompressible::LESModel>("LESProperties");
-
-        return rho()*les.devReff();
-    }
-    else if (obr_.foundObject<fluidThermo>("thermophysicalProperties"))
+    else if (obr_.foundObject<fluidThermo>(fluidThermo::typeName))
     {
         const fluidThermo& thermo =
-             obr_.lookupObject<fluidThermo>("thermophysicalProperties");
+            obr_.lookupObject<fluidThermo>(fluidThermo::typeName);
 
         const volVectorField& U = obr_.lookupObject<volVectorField>(UName_);
 
@@ -438,7 +423,13 @@ Foam::forces::forces
     binPoints_(),
     binFormat_("undefined"),
     binCumulative_(true)
-{}
+{
+    forAll(force_, i)
+    {
+        force_[i].setSize(nBin_);
+        moment_[i].setSize(nBin_);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

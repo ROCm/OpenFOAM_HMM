@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -95,7 +95,9 @@ Foam::forceSuSp Foam::SRFForce<CloudType>::calcNonCoupled
     const vector& r = p.position();
 
     // Coriolis and centrifugal acceleration terms
-    value.Su() = mass*(2.0*(p.U() ^ omega) + (omega ^ (r ^ omega)));
+    value.Su() =
+        mass*(1.0 - p.rhoc()/p.rho())
+       *(2.0*(p.U() ^ omega) + (omega ^ (r ^ omega)));
 
     return value;
 }

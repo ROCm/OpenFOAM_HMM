@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,6 +41,7 @@ Foam::refinementParameters::refinementParameters
     maxLocalCells_(readLabel(dict.lookup("procCellLimit"))),
     minRefineCells_(readLabel(dict.lookup("minimumRefine"))),
     curvature_(readScalar(dict.lookup("curvature"))),
+    planarAngle_(dict.lookupOrDefault("planarAngle", curvature_)),
     nBufferLayers_(readLabel(dict.lookup("nBufferLayers"))),
     keepPoints_(dict.lookup("keepPoints")),
     allowFreeStandingZoneFaces_(dict.lookup("allowFreeStandingZoneFaces")),
@@ -53,6 +54,14 @@ Foam::refinementParameters::refinementParameters(const dictionary& dict)
     maxGlobalCells_(readLabel(dict.lookup("maxGlobalCells"))),
     maxLocalCells_(readLabel(dict.lookup("maxLocalCells"))),
     minRefineCells_(readLabel(dict.lookup("minRefinementCells"))),
+    planarAngle_
+    (
+        dict.lookupOrDefault
+        (
+            "planarAngle",
+            readScalar(dict.lookup("resolveFeatureAngle"))
+        )
+    ),
     nBufferLayers_(readLabel(dict.lookup("nCellsBetweenLevels"))),
     keepPoints_(pointField(1, dict.lookup("locationInMesh"))),
     allowFreeStandingZoneFaces_(dict.lookup("allowFreeStandingZoneFaces")),
