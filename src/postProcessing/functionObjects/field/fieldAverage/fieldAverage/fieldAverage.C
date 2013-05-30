@@ -144,11 +144,21 @@ void Foam::fieldAverage::initialize()
             }
         }
     }
+
+    // ensure first averaging works unconditionally
+    prevTimeIndex_ = -1;
+
+    initialised_ = true;
 }
 
 
 void Foam::fieldAverage::calcAverages()
 {
+    if (!initialised_)
+    {
+        initialize();
+    }
+
     const label currentTimeIndex =
         static_cast<const fvMesh&>(obr_).time().timeIndex();
 
@@ -374,16 +384,6 @@ void Foam::fieldAverage::execute()
 {
     if (active_)
     {
-        if (!initialised_)
-        {
-            initialize();
-
-            // ensure first averaging works unconditionally
-            prevTimeIndex_ = -1;
-
-            initialised_ = true;
-        }
-
         calcAverages();
     }
 }
@@ -397,16 +397,6 @@ void Foam::fieldAverage::write()
 {
     if (active_)
     {
-        if (!initialised_)
-        {
-            initialize();
-
-            // ensure first averaging works unconditionally
-            prevTimeIndex_ = -1;
-
-            initialised_ = true;
-        }
-
         calcAverages();
         writeAverages();
         writeAveragingProperties();
