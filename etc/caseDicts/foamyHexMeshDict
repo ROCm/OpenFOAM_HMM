@@ -19,7 +19,15 @@ surfaceConformation
     maxSurfaceProtrusionCoeff           0.1;
     maxQuadAngle                        125;
     surfaceConformationRebuildFrequency 10;
-    specialiseFeaturePoints             on;
+
+    featurePointControls
+    {
+        specialiseFeaturePoints on;
+        edgeAiming              on;
+        guardFeaturePoints      off;
+        snapFeaturePoints       off;
+        circulateEdges          off;
+    }
 
     conformationControls
     {
