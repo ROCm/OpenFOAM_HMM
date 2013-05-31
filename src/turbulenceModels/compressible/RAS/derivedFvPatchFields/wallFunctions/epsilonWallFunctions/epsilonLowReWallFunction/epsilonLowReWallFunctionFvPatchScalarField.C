@@ -55,6 +55,67 @@ scalar epsilonLowReWallFunctionFvPatchScalarField::yPlusLam
 }
 
 
+void epsilonLowReWallFunctionFvPatchScalarField::calculate
+(
+    const turbulenceModel& turbulence,
+    const List<scalar>& cornerWeights,
+    const fvPatch& patch,
+    scalarField& G,
+    scalarField& epsilon
+)
+{
+    const label patchI = patch.index();
+
+    const scalarField& y = turbulence.y()[patchI];
+
+    const scalar Cmu25 = pow025(Cmu_);
+    const scalar Cmu75 = pow(Cmu_, 0.75);
+
+    const tmp<volScalarField> tk = turbulence.k();
+    const volScalarField& k = tk();
+
+    const tmp<volScalarField> tmu = turbulence.mu();
+    const scalarField& muw = tmu().boundaryField()[patchI];
+
+    const tmp<volScalarField> tmut = turbulence.mut();
+    const volScalarField& mut = tmut();
+    const scalarField& mutw = mut.boundaryField()[patchI];
+
+    const scalarField& rhow = turbulence.rho().boundaryField()[patchI];
+
+    const fvPatchVectorField& Uw = turbulence.U().boundaryField()[patchI];
+
+    const scalarField magGradUw(mag(Uw.snGrad()));
+
+    // Set epsilon and G
+    forAll(mutw, faceI)
+    {
+        label cellI = patch.faceCells()[faceI];
+
+        scalar yPlus = Cmu25*sqrt(k[cellI])*y[faceI]/muw[faceI]/rhow[faceI];
+
+        scalar w = cornerWeights[faceI];
+
+        if (yPlus > yPlusLam_)
+        {
+            epsilon[cellI] = w*Cmu75*pow(k[cellI], 1.5)/(kappa_*y[faceI]);
+        }
+        else
+        {
+            epsilon[cellI] =
+                w*2.0*k[cellI]*muw[faceI]/rhow[faceI]/sqr(y[faceI]);
+        }
+
+        G[cellI] =
+            w
+           *(mutw[faceI] + muw[faceI])
+           *magGradUw[faceI]
+           *Cmu25*sqrt(k[cellI])
+           /(kappa_*y[faceI]);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 epsilonLowReWallFunctionFvPatchScalarField::
@@ -117,84 +178,6 @@ epsilonLowReWallFunctionFvPatchScalarField
     epsilonWallFunctionFvPatchScalarField(ewfpsf, iF),
     yPlusLam_(ewfpsf.yPlusLam_)
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void epsilonLowReWallFunctionFvPatchScalarField::updateCoeffs()
-{
-    if (updated())
-    {
-        return;
-    }
-
-    const label patchI = patch().index();
-
-    const turbulenceModel& turbulence =
-        db().lookupObject<turbulenceModel>("turbulenceModel");
-    const scalarField& y = turbulence.y()[patchI];
-
-    volScalarField& G =
-        const_cast<volScalarField&>
-        (
-            db().lookupObject<volScalarField>
-            (
-                turbulence.GName()
-            )
-        );
-
-    DimensionedField<scalar, volMesh>& epsilon =
-        const_cast<DimensionedField<scalar, volMesh>&>
-        (
-            dimensionedInternalField()
-        );
-
-    const tmp<volScalarField> tk = turbulence.k();
-    const volScalarField& k = tk();
-
-    const tmp<volScalarField> tmu = turbulence.mu();
-    const scalarField& muw = tmu().boundaryField()[patchI];
-
-    const tmp<volScalarField> tmut = turbulence.mut();
-    const volScalarField& mut = tmut();
-    const scalarField& mutw = mut.boundaryField()[patchI];
-
-    const scalarField& rhow = turbulence.rho().boundaryField()[patchI];
-
-    const fvPatchVectorField& Uw = turbulence.U().boundaryField()[patchI];
-    const scalarField magGradUw(mag(Uw.snGrad()));
-
-    const scalar Cmu25 = pow025(Cmu_);
-    const scalar Cmu75 = pow(Cmu_, 0.75);
-
-    // Set epsilon and G
-    forAll(mutw, faceI)
-    {
-        label faceCellI = patch().faceCells()[faceI];
-
-        scalar yPlus = Cmu25*sqrt(k[faceCellI])*y[faceI]/muw[faceI]/rhow[faceI];
-
-        if (yPlus > yPlusLam_)
-        {
-            epsilon[faceCellI] = Cmu75*pow(k[faceCellI], 1.5)/(kappa_*y[faceI]);
-        }
-        else
-        {
-            epsilon[faceCellI] =
-                2.0*k[faceCellI]*muw[faceI]/rhow[faceI]/sqr(y[faceI]);
-        }
-
-        G[faceCellI] =
-            (mutw[faceI] + muw[faceI])
-           *magGradUw[faceI]
-           *Cmu25*sqrt(k[faceCellI])
-           /(kappa_*y[faceI]);
-    }
-
-    fixedInternalValueFvPatchField<scalar>::updateCoeffs();
-
-    // TODO: perform averaging for cells sharing more than one boundary face
-}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
