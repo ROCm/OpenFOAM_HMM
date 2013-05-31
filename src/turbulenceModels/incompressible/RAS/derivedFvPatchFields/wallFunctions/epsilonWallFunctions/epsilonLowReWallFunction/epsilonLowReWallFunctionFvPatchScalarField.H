@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -97,6 +97,16 @@ protected:
         //- Calculate the Y+ at the edge of the laminar sublayer
         scalar yPlusLam(const scalar kappa, const scalar E);
 
+        //- Calculate the epsilon and G
+        virtual void calculate
+        (
+            const turbulenceModel& turbulence,
+            const List<scalar>& cornerWeights,
+            const fvPatch& patch,
+            scalarField& G,
+            scalarField& epsilon
+        );
+
 
 public:
 
@@ -166,13 +176,9 @@ public:
             );
         }
 
-
-    // Member functions
-
-        // Evaluation functions
-
-            //- Update the coefficients associated with the patch field
-            virtual void updateCoeffs();
+    //- Destructor
+    virtual ~epsilonLowReWallFunctionFvPatchScalarField()
+    {}
 };
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,7 +71,7 @@ SourceFiles
 #ifndef epsilonWallFunctionFvPatchScalarField_H
 #define epsilonWallFunctionFvPatchScalarField_H
 
-#include "fixedInternalValueFvPatchField.H"
+#include "fixedValueFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,13 +80,15 @@ namespace Foam
 namespace incompressible
 {
 
+class turbulenceModel;
+
 /*---------------------------------------------------------------------------*\
            Class epsilonWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class epsilonWallFunctionFvPatchScalarField
 :
-    public fixedInternalValueFvPatchField<scalar>
+    public fixedValueFvPatchField<scalar>
 {
 protected:
 
@@ -101,6 +103,21 @@ protected:
         //- E coefficient
         scalar E_;
 
+        //- Local copy of turbulence G field
+        scalarField G_;
+
+        //- Local copy of turbulence epsilon field
+        scalarField epsilon_;
+
+        //- Initialised flag
+        bool initialised_;
+
+        //- Master patch ID
+        label master_;
+
+        //- List of averaging corner weights
+        List<List<scalar> > cornerWeights_;
+
 
     // Protected Member Functions
 
@@ -109,6 +126,44 @@ protected:
 
         //- Write local wall function variables
         virtual void writeLocalEntries(Ostream&) const;
+
+        //- Set the master patch - master is responsible for updating all
+        //  wall function patches
+        virtual void setMaster();
+
+        //- Create the averaging weights for cells which are bounded by
+        //  multiple wall function faces
+        virtual void createAveragingWeights();
+
+        //- Helper function to return non-const access to an epsilon patch
+        virtual epsilonWallFunctionFvPatchScalarField& epsilonPatch
+        (
+            const label patchI
+        );
+
+        //- Main driver to calculate the turbulence fields
+        virtual void calculateTurbulenceFields
+        (
+            const turbulenceModel& turbulence,
+            scalarField& G0,
+            scalarField& epsilon0
+        );
+
+        //- Calculate the epsilon and G
+        virtual void calculate
+        (
+            const turbulenceModel& turbulence,
+            const List<scalar>& cornerWeights,
+            const fvPatch& patch,
+            scalarField& G,
+            scalarField& epsilon
+        );
+
+        //- Return non-const access to the master patch ID
+        virtual label& master()
+        {
+            return master_;
+        }
 
 
 public:
@@ -179,16 +234,39 @@ public:
             );
         }
 
+    //- Destructor
+    virtual ~epsilonWallFunctionFvPatchScalarField()
+    {}
+
 
     // Member functions
+
+        // Access
+
+            //- Return non-const access to the master's G field
+            scalarField& G(bool init = false);
+
+            //- Return non-const access to the master's epsilon field
+            scalarField& epsilon(bool init = false);
+
 
         // Evaluation functions
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
 
-            //- Evaluate the patchField
-            virtual void evaluate(const Pstream::commsTypes);
+            //- Update the coefficients associated with the patch field
+            virtual void updateCoeffs(const scalarField& weights);
+
+            //- Manipulate matrix
+            virtual void manipulateMatrix(fvMatrix<scalar>& matrix);
+
+            //- Manipulate matrix with given weights
+            virtual void manipulateMatrix
+            (
+                fvMatrix<scalar>& matrix,
+                const scalarField& weights
+            );
 
 
         // I-O
