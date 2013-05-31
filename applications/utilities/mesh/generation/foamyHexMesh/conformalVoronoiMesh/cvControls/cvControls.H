@@ -78,8 +78,6 @@ class cvControls
             //  fraction of the local target cell size
             scalar featureEdgeExclusionDistanceCoeff_;
 
-            //- Switch for using specialised feature points
-            Switch specialiseFeaturePoints_;
 
             //- Surface search distance coefficient - fraction of the local
             //  target cell size
@@ -96,6 +94,23 @@ class cvControls
 
             //- Now often to rebuild the surface conformation
             label surfaceConformationRebuildFrequency_;
+
+            // Controls for feature point conformation
+
+                //-
+                Switch guardFeaturePoints_;
+
+                //-
+                Switch edgeAiming_;
+
+                //-
+                Switch snapFeaturePoints_;
+
+                //-
+                Switch circulateEdges_;
+
+                //- Switch for using specialised feature points
+                Switch specialiseFeaturePoints_;
 
 
             // Controls for coarse surface conformation
@@ -230,6 +245,18 @@ public:
 
             //- Return the featureEdgeExclusionDistanceCoeff
             inline scalar featureEdgeExclusionDistanceCoeff() const;
+
+            //-
+            inline Switch guardFeaturePoints() const;
+
+            //-
+            inline Switch edgeAiming() const;
+
+            //-
+            inline Switch snapFeaturePoints() const;
+
+            //-
+            inline Switch circulateEdges() const;
 
             //- Return the surfacePtExclusionDistanceCoeff
             inline scalar surfacePtExclusionDistanceCoeff() const;

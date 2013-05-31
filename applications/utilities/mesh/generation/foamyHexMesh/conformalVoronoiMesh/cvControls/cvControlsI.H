@@ -54,6 +54,28 @@ inline Foam::scalar Foam::cvControls::featureEdgeExclusionDistanceCoeff() const
     return featureEdgeExclusionDistanceCoeff_;
 }
 
+
+inline Foam::Switch Foam::cvControls::guardFeaturePoints() const
+{
+    return guardFeaturePoints_;
+}
+
+inline Foam::Switch Foam::cvControls::edgeAiming() const
+{
+    return edgeAiming_;
+}
+
+inline Foam::Switch Foam::cvControls::snapFeaturePoints() const
+{
+    return snapFeaturePoints_;
+}
+
+inline Foam::Switch Foam::cvControls::circulateEdges() const
+{
+    return circulateEdges_;
+}
+
+
 inline Foam::scalar Foam::cvControls::surfacePtExclusionDistanceCoeff() const
 {
     return surfacePtExclusionDistanceCoeff_;

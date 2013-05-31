@@ -538,6 +538,39 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 //        Info<< nl << "Finished checks" << nl << endl;
 //    }
 
+//    OFstream str("attachedToFeature.obj");
+//    label offset = 0;
+//
+//    for
+//    (
+//        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+//        vit != finite_vertices_end();
+//        ++vit
+//    )
+//    {
+//        if (vit->featurePoint())
+//        {
+//            std::list<Cell_handle> adjacentCells;
+//
+//            finite_incident_cells(vit, std::back_inserter(adjacentCells));
+//
+//            for
+//            (
+//                std::list<Cell_handle>::iterator acit = adjacentCells.begin();
+//                acit != adjacentCells.end();
+//                ++acit
+//            )
+//            {
+//                if ((*acit)->real())
+//                {
+//                    drawDelaunayCell(str, (*acit), offset);
+//                    offset++;
+////                    meshTools::writeOBJ(str, topoint((*acit)->dual()));
+//                }
+//            }
+//        }
+//    }
+
     setVertexSizeAndAlignment();
 
     timeCheck("After setVertexSizeAndAlignment");
@@ -557,6 +590,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     createFacesOwnerNeighbourAndPatches
     (
+        points,
         faces,
         owner,
         neighbour,
@@ -1190,6 +1224,7 @@ Foam::conformalVoronoiMesh::createPolyMeshFromPoints
 
     createFacesOwnerNeighbourAndPatches
     (
+        pts,
         faces,
         owner,
         neighbour,
@@ -1703,9 +1738,53 @@ void Foam::conformalVoronoiMesh::indexDualVertices
 
     this->resetCellCount();
 
-    pts.setSize(number_of_finite_cells());
+    label nConstrainedVertices = 0;
+    if (foamyHexMeshControls().guardFeaturePoints())
+    {
+        for
+        (
+            Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+            vit != finite_vertices_end();
+            ++vit
+        )
+        {
+            if (vit->constrained())
+            {
+                vit->index() = number_of_finite_cells() + nConstrainedVertices;
+                nConstrainedVertices++;
+            }
+        }
+    }
 
-    boundaryPts.setSize(number_of_finite_cells(), -1);
+    pts.setSize(number_of_finite_cells() + nConstrainedVertices);
+    boundaryPts.setSize
+    (
+        number_of_finite_cells() + nConstrainedVertices,
+        -1
+    );
+
+    if (foamyHexMeshControls().guardFeaturePoints())
+    {
+        nConstrainedVertices = 0;
+        for
+        (
+            Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+            vit != finite_vertices_end();
+            ++vit
+        )
+        {
+            if (vit->constrained())
+            {
+                pts[number_of_finite_cells() + nConstrainedVertices] =
+                    topoint(vit->point());
+
+                boundaryPts[number_of_finite_cells() + nConstrainedVertices] =
+                    1;
+
+                nConstrainedVertices++;
+            }
+        }
+    }
 
     for
     (
@@ -1780,28 +1859,35 @@ void Foam::conformalVoronoiMesh::indexDualVertices
                 pts[cit->cellIndex()] = cit->dual();
             }
 
-            if (cit->featurePointDualVertex())
+            // Feature point snapping
+            if (foamyHexMeshControls().snapFeaturePoints())
             {
-                pointFromPoint dual = cit->dual();
-
-                pointIndexHit fpHit;
-                label featureHit;
-
-                // Find nearest feature point and compare
-                geometryToConformTo_.findFeaturePointNearest
-                (
-                    dual,
-                    sqr(targetCellSize(dual)),
-                    fpHit,
-                    featureHit
-                );
-
-                if (fpHit.hit())
+                if (cit->featurePointDualVertex())
                 {
-                    Info<< "Dual        = " << dual << nl
-                        << "    Nearest = " << fpHit.hitPoint() << endl;
+                    pointFromPoint dual = cit->dual();
 
-                    pts[cit->cellIndex()] = fpHit.hitPoint();
+                    pointIndexHit fpHit;
+                    label featureHit;
+
+                    // Find nearest feature point and compare
+                    geometryToConformTo_.findFeaturePointNearest
+                    (
+                        dual,
+                        sqr(targetCellSize(dual)),
+                        fpHit,
+                        featureHit
+                    );
+
+                    if (fpHit.hit())
+                    {
+                        if (debug)
+                        {
+                            Info<< "Dual        = " << dual << nl
+                                << "    Nearest = " << fpHit.hitPoint() << endl;
+                        }
+
+                        pts[cit->cellIndex()] = fpHit.hitPoint();
+                    }
                 }
             }
 
@@ -1823,9 +1909,9 @@ void Foam::conformalVoronoiMesh::indexDualVertices
         }
     }
 
-    pts.setSize(this->cellCount());
+    //pts.setSize(this->cellCount());
 
-    boundaryPts.setSize(this->cellCount());
+    //boundaryPts.setSize(this->cellCount());
 }
 
 
@@ -1873,9 +1959,13 @@ Foam::label Foam::conformalVoronoiMesh::createPatchInfo
                     "type",
                     wallPolyPatch::typeName
                 );
-        }
 
-        patchDicts.set(patchI, new dictionary());
+            patchDicts.set(patchI, new dictionary(patchInfo[patchI]));
+        }
+        else
+        {
+            patchDicts.set(patchI, new dictionary());
+        }
     }
 
     patchNames.setSize(patchNames.size() + 1);
@@ -1977,8 +2067,71 @@ Foam::label Foam::conformalVoronoiMesh::createPatchInfo
 }
 
 
+Foam::vector Foam::conformalVoronoiMesh::calcSharedPatchNormal
+(
+    Cell_handle c1,
+    Cell_handle c2
+) const
+{
+    List<Foam::point> patchEdge(2, point::max);
+
+    label count = 0;
+
+    // Get shared Facet
+    for (label cI = 0; cI < 4; ++cI)
+    {
+        if (c1->neighbor(cI) != c2 && !c1->vertex(cI)->constrained())
+        {
+            if (c1->vertex(cI)->internalBoundaryPoint())
+            {
+                patchEdge[0] = topoint(c1->vertex(cI)->point());
+            }
+            else
+            {
+                patchEdge[1] = topoint(c1->vertex(cI)->point());
+            }
+        }
+    }
+
+    Info<< "    " << patchEdge << endl;
+
+    return vector(patchEdge[1] - patchEdge[0]);
+}
+
+
+bool Foam::conformalVoronoiMesh::boundaryDualFace
+(
+    Cell_handle c1,
+    Cell_handle c2
+) const
+{
+    label nInternal = 0;
+    label nExternal = 0;
+
+    for (label cI = 0; cI < 4; ++cI)
+    {
+        if (c1->neighbor(cI) != c2 && !c1->vertex(cI)->constrained())
+        {
+            if (c1->vertex(cI)->internalBoundaryPoint())
+            {
+                nInternal++;
+            }
+            else if (c1->vertex(cI)->externalBoundaryPoint())
+            {
+                nExternal++;
+            }
+        }
+    }
+
+    Info<< "in = " << nInternal << " out = " << nExternal << endl;
+
+    return (nInternal == 1 && nExternal == 1);
+}
+
+
 void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 (
+    const pointField& pts,
     faceList& faces,
     labelList& owner,
     labelList& neighbour,
@@ -2023,10 +2176,243 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
     faces.setSize(number_of_finite_edges());
     owner.setSize(number_of_finite_edges());
     neighbour.setSize(number_of_finite_edges());
+    boundaryFacesToRemove.setSize(number_of_finite_edges(), false);
 
     labelPairPairDynListList procPatchSortingIndex(nPatches);
 
     label dualFaceI = 0;
+
+    if (foamyHexMeshControls().guardFeaturePoints())
+    {
+        OBJstream startCellStr("startingCell.obj");
+        OBJstream featurePointFacesStr("ftPtFaces.obj");
+        OBJstream featurePointDualsStr("ftPtDuals.obj");
+        OFstream cellStr("vertexCells.obj");
+
+        label vcount = 1;
+
+        for
+        (
+            Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+            vit != finite_vertices_end();
+            ++vit
+        )
+        {
+            if (vit->constrained())
+            {
+                // Find a starting cell
+                std::list<Cell_handle> vertexCells;
+                finite_incident_cells(vit, std::back_inserter(vertexCells));
+
+                Cell_handle startCell;
+
+                for
+                (
+                    std::list<Cell_handle>::iterator vcit = vertexCells.begin();
+                    vcit != vertexCells.end();
+                    ++vcit
+                )
+                {
+                    if ((*vcit)->featurePointExternalCell())
+                    {
+                        startCell = *vcit;
+                    }
+
+                    if ((*vcit)->real())
+                    {
+                        featurePointDualsStr.write
+                        (
+                            linePointRef(topoint(vit->point()), (*vcit)->dual())
+                        );
+                    }
+                }
+
+                // Error if startCell is null
+                if (startCell == NULL)
+                {
+                    Pout<< "Start cell is null!" << endl;
+                }
+
+                // Need to pick a direction to walk in
+                Cell_handle vc1 = startCell;
+                Cell_handle vc2;
+
+                Info<< "c1 index = " << vc1->cellIndex() << " "
+                    << vc1->dual() << endl;
+
+                for (label cI = 0; cI < 4; ++cI)
+                {
+                    Info<< "c1 = " << cI << " "
+                        << vc1->neighbor(cI)->cellIndex() << " v = "
+                        << vc1->neighbor(cI)->dual() << endl;
+
+                    Info<< vc1->vertex(cI)->info();
+                }
+
+                Cell_handle nextCell;
+
+                for (label cI = 0; cI < 4; ++cI)
+                {
+                    if (vc1->vertex(cI)->externalBoundaryPoint())
+                    {
+                        vc2 = vc1->neighbor(cI);
+
+                        Info<< "    c2 is neighbor "
+                            << vc2->cellIndex()
+                            << " of c1" << endl;
+
+                        for (label cI = 0; cI < 4; ++cI)
+                        {
+                            Info<< "    c2 = " << cI << " "
+                                << vc2->neighbor(cI)->cellIndex() << " v = "
+                                << vc2->vertex(cI)->index() << endl;
+                        }
+
+                        face f(3);
+                        f[0] = vit->index();
+                        f[1] = vc1->cellIndex();
+                        f[2] = vc2->cellIndex();
+
+                        Info<< "f " << f << endl;
+                        forAll(f, pI)
+                        {
+                            Info<< "    " << pts[f[pI]] << endl;
+                        }
+
+                        vector correctNormal = calcSharedPatchNormal(vc1, vc2);
+                        correctNormal /= mag(correctNormal);
+
+                        Info<< "    cN " << correctNormal << endl;
+
+                        vector fN = f.normal(pts);
+
+                        if (mag(fN) < SMALL)
+                        {
+                            nextCell = vc2;
+                            continue;
+                        }
+
+                        fN /= mag(fN);
+                        Info<< "    fN " << fN << endl;
+
+                        if ((fN & correctNormal) > 0)
+                        {
+                            nextCell = vc2;
+                            break;
+                        }
+                    }
+                }
+
+                vc2 = nextCell;
+
+                label own = vit->index();
+                face f(3);
+                f[0] = own;
+
+                Info<< "Start walk from " << vc1->cellIndex()
+                    << " to " << vc2->cellIndex() << endl;
+
+                // Walk while not at start cell
+
+                label iter = 0;
+                do
+                {
+                    Info<< "     Walk from " << vc1->cellIndex()
+                        << " " << vc1->dual()
+                        << " to " << vc2->cellIndex()
+                        << " " << vc2->dual()
+                        << endl;
+
+                    startCellStr.write(linePointRef(vc1->dual(), vc2->dual()));
+
+                    // Get patch by getting face between cells and the two
+                    // points on the face that are not the feature vertex
+                    label patchIndex =
+                        geometryToConformTo_.findPatch
+                        (
+                            topoint(vit->point())
+                        );
+
+                    f[1] = vc1->cellIndex();
+                    f[2] = vc2->cellIndex();
+
+                    patchFaces[patchIndex].append(f);
+                    patchOwners[patchIndex].append(own);
+                    patchPPSlaves[patchIndex].append(own);
+
+                    // Find next cell
+                    Cell_handle nextCell;
+
+                    Info<< "    c1 vertices " << vc2->dual() << endl;
+                    for (label cI = 0; cI < 4; ++cI)
+                    {
+                        Info<< "        " << vc2->vertex(cI)->info();
+                    }
+                    Info<< "    c1 neighbour vertices " << endl;
+                    for (label cI = 0; cI < 4; ++cI)
+                    {
+                        if
+                        (
+                            !vc2->vertex(cI)->constrained()
+                         && vc2->neighbor(cI) != vc1
+                         && !is_infinite(vc2->neighbor(cI))
+                         &&
+                            (
+                                vc2->neighbor(cI)->featurePointExternalCell()
+                             || vc2->neighbor(cI)->featurePointInternalCell()
+                            )
+                         && vc2->neighbor(cI)->hasConstrainedPoint()
+                        )
+                        {
+                            drawDelaunayCell
+                            (
+                                cellStr,
+                                vc2->neighbor(cI),
+                                vcount++
+                            );
+
+                            Info<< "        neighbour " << cI << " "
+                                << vc2->neighbor(cI)->dual() << endl;
+                            for (label I = 0; I < 4; ++I)
+                            {
+                                Info<< "            "
+                                    << vc2->neighbor(cI)->vertex(I)->info();
+                            }
+                        }
+                    }
+
+                    for (label cI = 0; cI < 4; ++cI)
+                    {
+                        if
+                        (
+                            !vc2->vertex(cI)->constrained()
+                         && vc2->neighbor(cI) != vc1
+                         && !is_infinite(vc2->neighbor(cI))
+                         &&
+                            (
+                                vc2->neighbor(cI)->featurePointExternalCell()
+                             || vc2->neighbor(cI)->featurePointInternalCell()
+                            )
+                         && vc2->neighbor(cI)->hasConstrainedPoint()
+                        )
+                        {
+                            // check if shared edge is internal/internal
+                            if (boundaryDualFace(vc2, vc2->neighbor(cI)))
+                            {
+                                nextCell = vc2->neighbor(cI);
+                                break;
+                            }
+                        }
+                    }
+
+                    vc1 = vc2;
+                    vc2 = nextCell;
+
+                    iter++;
+                } while (vc1 != startCell && iter < 100);
+            }
+        }
+    }
 
     for
     (
@@ -2039,7 +2425,35 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
         Vertex_handle vA = c->vertex(eit->second);
         Vertex_handle vB = c->vertex(eit->third);
 
+        if (vA->constrained() && vB->constrained())
+        {
+            continue;
+        }
+
         if
+        (
+            (vA->constrained() && vB->internalOrBoundaryPoint())
+         || (vB->constrained() && vA->internalOrBoundaryPoint())
+        )
+        {
+            face newDualFace = buildDualFace(eit);
+
+            label own = -1;
+            label nei = -1;
+
+            if (ownerAndNeighbour(vA, vB, own, nei))
+            {
+                reverse(newDualFace);
+            }
+
+            // internal face
+            faces[dualFaceI] = newDualFace;
+            owner[dualFaceI] = own;
+            neighbour[dualFaceI] = nei;
+
+            dualFaceI++;
+        }
+        else if
         (
             (vA->internalOrBoundaryPoint() && !vA->referred())
          || (vB->internalOrBoundaryPoint() && !vB->referred())
@@ -2057,14 +2471,14 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                     reverse(newDualFace);
                 }
 
+                label patchIndex = -1;
+
+                pointFromPoint ptA = topoint(vA->point());
+                pointFromPoint ptB = topoint(vB->point());
+
                 if (nei == -1)
                 {
                     // boundary face
-
-                    pointFromPoint ptA = topoint(vA->point());
-                    pointFromPoint ptB = topoint(vB->point());
-
-                    label patchIndex = -1;
 
                     if (isProcBoundaryEdge(eit))
                     {
@@ -2487,6 +2901,7 @@ void Foam::conformalVoronoiMesh::addPatches
 
     faces.setSize(nInternalFaces + nBoundaryFaces);
     owner.setSize(nInternalFaces + nBoundaryFaces);
+    boundaryFacesToRemove.setSize(nInternalFaces + nBoundaryFaces);
 
     label faceI = nInternalFaces;
 

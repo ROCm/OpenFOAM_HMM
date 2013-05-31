@@ -62,10 +62,6 @@ Foam::cvControls::cvControls
         surfDict.lookup("featureEdgeExclusionDistanceCoeff")
     );
 
-    specialiseFeaturePoints_ = Switch
-    (
-        surfDict.lookup("specialiseFeaturePoints")
-    );
 
     surfaceSearchDistanceCoeff_ = readScalar
     (
@@ -83,6 +79,40 @@ Foam::cvControls::cvControls
     (
         1,
         readLabel(surfDict.lookup("surfaceConformationRebuildFrequency"))
+    );
+
+
+    const dictionary& featurePointControlsDict
+    (
+        surfDict.subDict("featurePointControls")
+    );
+
+    specialiseFeaturePoints_ = Switch
+    (
+        featurePointControlsDict.lookup("specialiseFeaturePoints")
+    );
+
+    guardFeaturePoints_ = Switch
+    (
+        featurePointControlsDict.lookup("guardFeaturePoints")
+    );
+
+    edgeAiming_ = Switch
+    (
+        featurePointControlsDict.lookup("edgeAiming")
+    );
+
+    if (!guardFeaturePoints_)
+    {
+        snapFeaturePoints_ = Switch
+        (
+            featurePointControlsDict.lookup("snapFeaturePoints")
+        );
+    }
+
+    circulateEdges_ = Switch
+    (
+        featurePointControlsDict.lookup("circulateEdges")
     );
 
     // Controls for coarse surface conformation

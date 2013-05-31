@@ -111,6 +111,8 @@ public:
 
     typedef Delaunay::Vertex_handle    Vertex_handle;
     typedef Delaunay::Cell_handle      Cell_handle;
+    typedef Delaunay::Edge             Edge;
+    typedef Delaunay::Facet            Facet;
     typedef Delaunay::Point            Point;
 
     typedef List<DynamicList<Pair<labelPair> > > labelPairPairDynListList;
@@ -370,6 +372,28 @@ private:
             const pointIndexHit& edHit,
             DynamicList<Vb>& pts
         );
+
+        void createEdgePointGroupByCirculating
+        (
+            const extendedFeatureEdgeMesh& feMesh,
+            const pointIndexHit& edHit,
+            DynamicList<Vb>& pts
+        );
+
+        bool meshableRegion
+        (
+            const plane::side side,
+            const extendedFeatureEdgeMesh::sideVolumeType volType
+        ) const;
+
+        bool regionIsInside
+        (
+            const extendedFeatureEdgeMesh::sideVolumeType volTypeA,
+            const vector& normalA,
+            const extendedFeatureEdgeMesh::sideVolumeType volTypeB,
+            const vector& normalB,
+            const vector& masterPtVec
+        ) const;
 
         //- Create points to conform to an external edge
         void createExternalEdgePointGroup
@@ -872,9 +896,14 @@ private:
             PtrList<dictionary>& patchDicts
         ) const;
 
+        vector calcSharedPatchNormal(Cell_handle c1, Cell_handle c2) const;
+
+        bool boundaryDualFace(Cell_handle c1, Cell_handle c2) const;
+
         //- Create all of the internal and boundary faces
         void createFacesOwnerNeighbourAndPatches
         (
+            const pointField& pts,
             faceList& faces,
             labelList& owner,
             labelList& neighbour,
