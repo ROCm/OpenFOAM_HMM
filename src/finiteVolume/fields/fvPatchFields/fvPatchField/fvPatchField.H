@@ -93,6 +93,10 @@ class fvPatchField
         //  the construction of the matrix
         bool updated_;
 
+        //- Update index used so that manipulateMatrix is called only once
+        //  during the construction of the matrix
+        bool manipulatedMatrix_;
+
         //- Optional patch type, used to allow specified boundary conditions
         //  to be applied to constraint patches by providing the constraint
         //  patch type as 'patchType'
@@ -327,6 +331,12 @@ public:
                 return updated_;
             }
 
+            //- Return true if the matrix has already been manipulated
+            bool manipulatedMatrix() const
+            {
+                return manipulatedMatrix_;
+            }
+
 
         // Mapping functions
 
@@ -365,10 +375,12 @@ public:
 
             //- Update the coefficients associated with the patch field
             //  Sets Updated to true
-            virtual void updateCoeffs()
-            {
-                updated_ = true;
-            }
+            virtual void updateCoeffs();
+
+            //- Update the coefficients associated with the patch field
+            //  and apply weight field
+            //  Sets Updated to true
+            virtual void updateCoeffs(const scalarField& weights);
 
             //- Return internal field next to patch as patch field
             virtual tmp<Field<Type> > patchInternalField() const;
@@ -478,6 +490,13 @@ public:
 
             //- Manipulate matrix
             virtual void manipulateMatrix(fvMatrix<Type>& matrix);
+
+            //- Manipulate matrix with given weights
+            virtual void manipulateMatrix
+            (
+                fvMatrix<Type>& matrix,
+                const scalarField& weights
+            );
 
 
         // I-O
