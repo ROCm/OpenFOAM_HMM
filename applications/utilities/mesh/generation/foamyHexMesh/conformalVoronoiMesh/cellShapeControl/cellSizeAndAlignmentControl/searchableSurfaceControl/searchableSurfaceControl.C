@@ -174,7 +174,7 @@ Foam::searchableSurfaceControl::searchableSurfaceControl
     searchableSurface_(geometryToConformTo.geometry()[surfaceName_]),
     geometryToConformTo_(geometryToConformTo),
     cellSizeFunctions_(1),
-    regionToCellSizeFunctions_(geometryToConformTo_.patchNames().size(), 0),
+    regionToCellSizeFunctions_(geometryToConformTo_.patchNames().size(), -1),
     maxPriority_(-1)
 {
     Info<< indent << "Master settings:" << endl;
@@ -286,6 +286,18 @@ Foam::searchableSurfaceControl::searchableSurfaceControl
         }
 
         cellSizeFunctions_.transfer(regionCellSizeFunctions);
+    }
+    else
+    {
+        const wordList& regionNames = geometryToConformTo_.patchNames();
+
+        forAll(regionNames, regionI)
+        {
+            if (regionToCellSizeFunctions_[regionI] == -1)
+            {
+                regionToCellSizeFunctions_[regionI] = 0;
+            }
+        }
     }
 
 

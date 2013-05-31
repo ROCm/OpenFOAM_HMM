@@ -28,6 +28,7 @@ License
 #include "vectorTools.H"
 #include "indexedCellChecks.H"
 #include "IOmanip.H"
+#include "OBJstream.H"
 
 using namespace Foam::vectorTools;
 
@@ -519,7 +520,11 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation()
                     }
                 }
             }
-            else if (vit->externalBoundaryPoint())
+            else if
+            (
+                vit->externalBoundaryPoint()
+             || (vit->externalBoundaryPoint() && vit->referred())
+            )
             {
                 pointIndexHitAndFeatureDynList surfaceIntersections(0.5*AtoV);
 
@@ -617,6 +622,63 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation()
                 }
             }
         }
+
+//        for
+//        (
+//            Delaunay::Finite_cells_iterator cit = finite_cells_begin();
+//            cit != finite_cells_end();
+//            ++cit
+//        )
+//        {
+//            if (cit->boundaryDualVertex() && !cit->parallelDualVertex())
+//            {
+//                const Foam::point& pt = cit->dual();
+//
+//                pointIndexHitAndFeatureDynList surfaceIntersections(0.5*AtoV);
+//                pointIndexHit surfHit;
+//                label hitSurface;
+//
+//                geometryToConformTo_.findSurfaceNearest
+//                (
+//                    pt,
+//                    sqr(targetCellSize(pt)),//surfaceSearchDistanceSqr(pt),
+//                    surfHit,
+//                    hitSurface
+//                );
+//
+//                if (!surfHit.hit())
+//                {
+//                    geometryToConformTo_.findSurfaceNearest
+//                    (
+//                        pt,
+//                        GREAT,
+//                        surfHit,
+//                        hitSurface
+//                    );
+//
+//                    if (surfHit.hit())
+//                    {
+//                        surfaceIntersections.append
+//                        (
+//                            pointIndexHitAndFeature(surfHit, hitSurface)
+//                        );
+//
+//                        addSurfaceAndEdgeHits
+//                        (
+//                            pt,
+//                            surfaceIntersections,
+//                            surfacePtReplaceDistCoeffSqr,
+//                            edgeSearchDistCoeffSqr,
+//                            surfaceHits,
+//                            featureEdgeHits,
+//                            surfaceToTreeShape,
+//                            edgeToTreeShape,
+//                            false
+//                        );
+//                    }
+//                }
+//            }
+//        }
 
 //        for
 //        (
@@ -2281,6 +2343,7 @@ void Foam::conformalVoronoiMesh::storeSurfaceConformation()
             !vit->referred()
          && vit->boundaryPoint()
          && !vit->featurePoint()
+         && !vit->constrained()
         )
         {
             tempSurfaceVertices.append

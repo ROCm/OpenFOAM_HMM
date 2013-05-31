@@ -44,9 +44,9 @@ Foam::cellAspectRatioControl::cellAspectRatioControl
         )
     )
 {
-    Info<< nl << "    Cell Aspect Ratio Control" << nl
-        << "        Ratio     : " << aspectRatio_ << nl
-        << "        Direction : " << aspectRatioDirection_
+    Info<< nl << "Cell Aspect Ratio Control" << nl
+        << "    Ratio     : " << aspectRatio_ << nl
+        << "    Direction : " << aspectRatioDirection_
         << endl;
 }
 

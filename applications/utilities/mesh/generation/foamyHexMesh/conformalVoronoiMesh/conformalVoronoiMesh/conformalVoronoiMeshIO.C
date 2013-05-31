@@ -1177,91 +1177,93 @@ void Foam::conformalVoronoiMesh::writeMesh
     }
 
 
-    volTensorField alignments
-    (
-        IOobject
-        (
-            "alignmentsField",
-            runTime_.timeName(),
-            runTime_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh,
-        tensor::zero
-    );
+//    volTensorField alignments
+//    (
+//        IOobject
+//        (
+//            "alignmentsField",
+//            runTime_.timeName(),
+//            runTime_,
+//            IOobject::NO_READ,
+//            IOobject::AUTO_WRITE
+//        ),
+//        mesh,
+//        tensor::zero
+//    );
+//
+//    forAll(mesh.cellCentres(), pI)
+//    {
+//        Vertex_handle nearV =
+//            nearest_vertex
+//            (
+//                toPoint<Point>(mesh.cellCentres()[pI])
+//            );
+//        alignments[pI] = nearV->alignment();
+//    }
+//    alignments.write();
+//
+//    {
+//        volVectorField alignmentx
+//        (
+//            IOobject
+//            (
+//                "alignmentsx",
+//                runTime_.timeName(),
+//                runTime_,
+//                IOobject::NO_READ,
+//                IOobject::AUTO_WRITE
+//            ),
+//            mesh,
+//            vector::zero
+//        );
+//        forAll(alignmentx, aI)
+//        {
+//            alignmentx[aI] = alignments[aI].x();
+//        }
+//        alignmentx.write();
+//    }
+//    {
+//        volVectorField alignmenty
+//        (
+//            IOobject
+//            (
+//                "alignmentsy",
+//                runTime_.timeName(),
+//                runTime_,
+//                IOobject::NO_READ,
+//                IOobject::AUTO_WRITE
+//            ),
+//            mesh,
+//            vector::zero
+//        );
+//        forAll(alignmenty, aI)
+//        {
+//            alignmenty[aI] = alignments[aI].y();
+//        }
+//        alignmenty.write();
+//    }
+//    {
+//        volVectorField alignmentz
+//        (
+//            IOobject
+//            (
+//                "alignmentsz",
+//                runTime_.timeName(),
+//                runTime_,
+//                IOobject::NO_READ,
+//                IOobject::AUTO_WRITE
+//            ),
+//            mesh,
+//            vector::zero
+//        );
+//        forAll(alignmentz, aI)
+//        {
+//            alignmentz[aI] = alignments[aI].z();
+//        }
+//        alignmentz.write();
+//    }
 
-    forAll(mesh.cellCentres(), pI)
-    {
-        Vertex_handle nearV =
-            nearest_vertex
-            (
-                toPoint<Point>(mesh.cellCentres()[pI])
-            );
-        alignments[pI] = nearV->alignment();
-    }
-    alignments.write();
 
-    {
-        volVectorField alignmentx
-        (
-            IOobject
-            (
-                "alignmentsx",
-                runTime_.timeName(),
-                runTime_,
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh,
-            vector::zero
-        );
-        forAll(alignmentx, aI)
-        {
-            alignmentx[aI] = alignments[aI].x();
-        }
-        alignmentx.write();
-    }
-    {
-        volVectorField alignmenty
-        (
-            IOobject
-            (
-                "alignmentsy",
-                runTime_.timeName(),
-                runTime_,
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh,
-            vector::zero
-        );
-        forAll(alignmenty, aI)
-        {
-            alignmenty[aI] = alignments[aI].y();
-        }
-        alignmenty.write();
-    }
-    {
-        volVectorField alignmentz
-        (
-            IOobject
-            (
-                "alignmentsz",
-                runTime_.timeName(),
-                runTime_,
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh,
-            vector::zero
-        );
-        forAll(alignmentz, aI)
-        {
-            alignmentz[aI] = alignments[aI].z();
-        }
-        alignmentz.write();
-    }
     labelIOList boundaryIOPts
     (
         IOobject
@@ -1274,9 +1276,6 @@ void Foam::conformalVoronoiMesh::writeMesh
         ),
         boundaryPts
     );
-
-
-
 
     // Dump list of boundary points
     forAll(mesh.boundaryMesh(), patchI)

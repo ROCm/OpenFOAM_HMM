@@ -65,6 +65,7 @@ public:
 
         typedef typename Triangulation::Cell_handle Cell_handle;
         typedef typename Triangulation::Vertex_handle Vertex_handle;
+        typedef typename Triangulation::Edge Edge;
         typedef typename Triangulation::Point Point;
         typedef typename Triangulation::Facet Facet;
 

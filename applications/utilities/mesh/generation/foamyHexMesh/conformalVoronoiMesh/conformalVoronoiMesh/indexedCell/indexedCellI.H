@@ -230,6 +230,19 @@ inline bool CGAL::indexedCell<Gt, Cb>::hasInternalPoint() const
 
 
 template<class Gt, class Cb>
+inline bool CGAL::indexedCell<Gt, Cb>::hasConstrainedPoint() const
+{
+    return
+    (
+        this->vertex(0)->constrained()
+     || this->vertex(1)->constrained()
+     || this->vertex(2)->constrained()
+     || this->vertex(3)->constrained()
+    );
+}
+
+
+template<class Gt, class Cb>
 inline bool CGAL::indexedCell<Gt, Cb>::parallelDualVertex() const
 {
     return
@@ -539,6 +552,130 @@ inline bool CGAL::indexedCell<Gt, Cb>::potentialCoplanarCell() const
             {
                 Foam::Pout<< "PARALLEL" << Foam::endl;
 
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+
+template<class Gt, class Cb>
+inline bool CGAL::indexedCell<Gt, Cb>::featurePointExternalCell() const
+{
+    int featureVertex = -1;
+    for (int i = 0; i < 4; ++i)
+    {
+        if (this->vertex(i)->constrained())
+        {
+            featureVertex = i;
+        }
+    }
+
+    // Pick cell with a face attached to an infinite cell
+
+    if (featureVertex != -1)
+    {
+        Vertex_handle v1 =
+            this->vertex(Tds::vertex_triple_index(featureVertex, 0));
+        Vertex_handle v2 =
+            this->vertex(Tds::vertex_triple_index(featureVertex, 1));
+        Vertex_handle v3 =
+            this->vertex(Tds::vertex_triple_index(featureVertex, 2));
+
+        if (v1->internalBoundaryPoint())
+        {
+            if
+            (
+                v2->externalBoundaryPoint()
+             && v3->externalBoundaryPoint()
+            )
+            {
+                return true;
+            }
+        }
+        else if (v2->internalBoundaryPoint())
+        {
+            if
+            (
+                v1->externalBoundaryPoint()
+             && v3->externalBoundaryPoint()
+            )
+            {
+                return true;
+            }
+        }
+        else if (v3->internalBoundaryPoint())
+        {
+            if
+            (
+                v1->externalBoundaryPoint()
+             && v2->externalBoundaryPoint()
+            )
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+
+template<class Gt, class Cb>
+inline bool CGAL::indexedCell<Gt, Cb>::featurePointInternalCell() const
+{
+    int featureVertex = -1;
+    for (int i = 0; i < 4; ++i)
+    {
+        if (this->vertex(i)->constrained())
+        {
+            featureVertex = i;
+        }
+    }
+
+    // Pick cell with a face attached to an infinite cell
+
+    if (featureVertex != -1)
+    {
+        Vertex_handle v1 =
+            this->vertex(Tds::vertex_triple_index(featureVertex, 0));
+        Vertex_handle v2 =
+            this->vertex(Tds::vertex_triple_index(featureVertex, 1));
+        Vertex_handle v3 =
+            this->vertex(Tds::vertex_triple_index(featureVertex, 2));
+
+        if (v1->externalBoundaryPoint())
+        {
+            if
+            (
+                v2->internalBoundaryPoint()
+             && v3->internalBoundaryPoint()
+            )
+            {
+                return true;
+            }
+        }
+        else if (v2->externalBoundaryPoint())
+        {
+            if
+            (
+                v1->internalBoundaryPoint()
+             && v3->internalBoundaryPoint()
+            )
+            {
+                return true;
+            }
+        }
+        else if (v3->externalBoundaryPoint())
+        {
+            if
+            (
+                v1->internalBoundaryPoint()
+             && v2->internalBoundaryPoint()
+            )
+            {
                 return true;
             }
         }

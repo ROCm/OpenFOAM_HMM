@@ -115,6 +115,7 @@ class indexedCell
 
 public:
 
+    typedef typename Cb::Triangulation_data_structure    Tds;
     typedef typename Cb::Vertex_handle                   Vertex_handle;
     typedef typename Cb::Cell_handle                     Cell_handle;
 
@@ -183,6 +184,8 @@ public:
 
         inline bool hasInternalPoint() const;
 
+        inline bool hasConstrainedPoint() const;
+
         //- Does the Dual vertex form part of a processor patch
         inline bool parallelDualVertex() const;
 
@@ -226,6 +229,9 @@ public:
         inline bool nearProcBoundary() const;
 
         inline bool potentialCoplanarCell() const;
+
+        inline bool featurePointExternalCell() const;
+        inline bool featurePointInternalCell() const;
 
 
     // Info

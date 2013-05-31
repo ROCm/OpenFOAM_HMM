@@ -514,7 +514,7 @@ void Foam::conformalVoronoiMesh::buildCellSizeAndAlignmentMesh()
         << (cellSizeMesh.is_valid() ? "valid" : "not valid!" )
         << endl;
 
-    if (!Pstream::parRun())
+    if (!Pstream::parRun() && foamyHexMeshControls().objOutput())
     {
         //cellSizeMesh.writeTriangulation();
         cellSizeMesh.write();
@@ -709,6 +709,44 @@ void Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()
             );
         }
     }
+
+//    OFstream str(runTime_.path()/"alignments_internal.obj");
+//
+//    for
+//    (
+//        Finite_vertices_iterator vit = finite_vertices_begin();
+//        vit != finite_vertices_end();
+//        ++vit
+//    )
+//    {
+//        if (!vit->farPoint())
+//        {
+//            // Write alignments
+//            const tensor& alignment = vit->alignment();
+//            pointFromPoint pt = topoint(vit->point());
+//
+//            if
+//            (
+//                alignment.x() == triad::unset[0]
+//             || alignment.y() == triad::unset[0]
+//             || alignment.z() == triad::unset[0]
+//            )
+//            {
+//                Info<< "Bad alignment = " << vit->info();
+//
+//                vit->alignment() = tensor::I;
+//
+//                Info<< "New alignment = " << vit->info();
+//
+//                continue;
+//            }
+//
+//            meshTools::writeOBJ(str, pt, alignment.x() + pt);
+//            meshTools::writeOBJ(str, pt, alignment.y() + pt);
+//            meshTools::writeOBJ(str, pt, alignment.z() + pt);
+//        }
+//    }
+
 }
 
 
@@ -754,7 +792,6 @@ Foam::face Foam::conformalVoronoiMesh::buildDualFace
         }
 
         label cc1I = cc1->cellIndex();
-
         label cc2I = cc2->cellIndex();
 
         if (cc1I != cc2I)
@@ -768,7 +805,6 @@ Foam::face Foam::conformalVoronoiMesh::buildDualFace
         }
 
         cc1++;
-
         cc2++;
 
     } while (cc1 != ccStart);
@@ -854,14 +890,20 @@ bool Foam::conformalVoronoiMesh::ownerAndNeighbour
 
     if (!vA->internalOrBoundaryPoint() || vA->referred())
     {
-        dualCellIndexA = -1;
+        if (!vA->constrained())
+        {
+            dualCellIndexA = -1;
+        }
     }
 
     label dualCellIndexB = vB->index();
 
     if (!vB->internalOrBoundaryPoint() || vB->referred())
     {
-        dualCellIndexB = -1;
+        if (!vB->constrained())
+        {
+            dualCellIndexB = -1;
+        }
     }
 
     if (dualCellIndexA == -1 && dualCellIndexB == -1)
@@ -1065,6 +1107,8 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
             Foam::indexedVertexEnum::vtExternalFeaturePoint
         );
     }
+
+    //writeFixedPoints("fixedPointsStart.obj");
 }
 
 
@@ -1532,7 +1576,7 @@ void Foam::conformalVoronoiMesh::move()
     pointsToInsert.shrink();
 
     // Save displacements to file.
-    if (foamyHexMeshControls().objOutput() && runTime_.outputTime())
+    if (foamyHexMeshControls().objOutput() && time().outputTime())
     {
         Pout<< "Writing point displacement vectors to file." << endl;
         OFstream str("displacements_" + runTime_.timeName() + ".obj");
@@ -1567,38 +1611,62 @@ void Foam::conformalVoronoiMesh::move()
 
     Info<< nl << "Inserting displaced tessellation" << endl;
 
-    insertInternalPoints(pointsToInsert, true);
-
     reinsertFeaturePoints(true);
 
-    // Remove internal points that have been inserted outside the surface.
-//    label internalPtIsOutside = 0;
-//
-//    for
-//    (
-//        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-//        vit != finite_vertices_end();
-//        ++vit
-//    )
-//    {
-//        if (vit->internalPoint() && !vit->referred())
-//        {
-//            bool inside = geometryToConformTo_.inside
-//            (
-//                topoint(vit->point())
-//            );
-//
-//            if (!inside)
-//            {
-//                remove(vit);
-//                internalPtIsOutside++;
-//            }
-//        }
-//    }
-//
-//    Info<< "    " << internalPtIsOutside
-//        << " internal points were inserted outside the domain. "
-//        << "They have been removed." << endl;
+    insertInternalPoints(pointsToInsert, true);
+
+    {
+        // Remove internal points that have been inserted outside the surface.
+        label internalPtIsOutside = 0;
+
+        autoPtr<OBJstream> str;
+
+        if (foamyHexMeshControls().objOutput() && time().outputTime())
+        {
+            str.set
+            (
+                new OBJstream(time().path()/"internalPointsOutsideDomain.obj")
+            );
+        }
+
+        for
+        (
+            Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+            vit != finite_vertices_end();
+            ++vit
+        )
+        {
+            if
+            (
+                (vit->internalPoint() || vit->internalBoundaryPoint())
+             && !vit->referred()
+            )
+            {
+                bool inside = geometryToConformTo_.inside
+                (
+                    topoint(vit->point())
+                );
+
+                if (!inside)
+                {
+                    if
+                    (
+                        foamyHexMeshControls().objOutput()
+                     && time().outputTime()
+                    )
+                    {
+                        str().write(topoint(vit->point()));
+                    }
+                    remove(vit);
+                    internalPtIsOutside++;
+                }
+            }
+        }
+
+        Info<< "    " << internalPtIsOutside
+            << " internal points were inserted outside the domain. "
+            << "They have been removed." << endl;
+    }
 
     // Fix points that have not been significantly displaced
 //    for
@@ -1649,14 +1717,14 @@ void Foam::conformalVoronoiMesh::move()
     {
         writePoints
         (
-            "internalPoints_" + runTime_.timeName() + ".obj",
+            "internalPoints_" + time().timeName() + ".obj",
             Foam::indexedVertexEnum::vtInternal
         );
     }
 
-    if (foamyHexMeshControls().objOutput() && runTime_.outputTime())
+    if (foamyHexMeshControls().objOutput() && time().outputTime())
     {
-        writeBoundaryPoints("boundaryPoints_" + runTime_.timeName() + ".obj");
+        writeBoundaryPoints("boundaryPoints_" + time().timeName() + ".obj");
     }
 
     timeCheck("After conformToSurface");
@@ -1667,9 +1735,35 @@ void Foam::conformalVoronoiMesh::move()
     }
 
     // Write the intermediate mesh, do not filter the dual faces.
-    if (runTime_.outputTime())
+    if (time().outputTime())
     {
-        writeMesh(runTime_.timeName());
+        writeMesh(time().timeName());
+
+//        label cellI = 0;
+//        for
+//        (
+//            Finite_cells_iterator cit = finite_cells_begin();
+//            cit != finite_cells_end();
+//            ++cit
+//        )
+//        {
+//            if
+//            (
+//                !cit->hasFarPoint()
+//             && !is_infinite(cit)
+//            )
+//            {
+//                cit->cellIndex() = cellI++;
+//            }
+//        }
+//
+//        labelList vertexMap;
+//        labelList cellMap;
+//        autoPtr<fvMesh> tetMesh =
+//            createMesh("tetMesh", runTime_, vertexMap, cellMap);
+//
+//        tetMesh().write();
+        //writeFixedPoints("fixedPointsStart_" + runTime_.timeName() + ".obj");
     }
 
     updateSizesAndAlignments(pointsToInsert);

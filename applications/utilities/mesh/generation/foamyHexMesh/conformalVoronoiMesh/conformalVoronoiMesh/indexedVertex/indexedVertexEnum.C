@@ -30,7 +30,7 @@ License
 
 template<>
 const char*
-Foam::NamedEnum<Foam::indexedVertexEnum::vertexType, 10>::names[] =
+Foam::NamedEnum<Foam::indexedVertexEnum::vertexType, 11>::names[] =
 {
     "Unassigned",
     "Internal",
@@ -41,10 +41,11 @@ Foam::NamedEnum<Foam::indexedVertexEnum::vertexType, 10>::names[] =
     "ExternalSurface",
     "ExternalFeatureEdge",
     "ExternalFeaturePoint",
-    "Far"
+    "Far",
+    "Constrained"
 };
 
-const Foam::NamedEnum<Foam::indexedVertexEnum::vertexType, 10>
+const Foam::NamedEnum<Foam::indexedVertexEnum::vertexType, 11>
 Foam::indexedVertexEnum::vertexTypeNames_;
 
 

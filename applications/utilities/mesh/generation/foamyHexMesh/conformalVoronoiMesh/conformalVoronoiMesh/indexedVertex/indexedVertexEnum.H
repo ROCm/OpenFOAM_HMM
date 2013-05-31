@@ -58,7 +58,8 @@ public:
         vtExternalSurface       = 6,
         vtExternalFeatureEdge   = 7,
         vtExternalFeaturePoint  = 8,
-        vtFar                   = 9
+        vtFar                   = 9,
+        vtConstrained           = 10
     };
 
     enum vertexMotion
@@ -67,7 +68,7 @@ public:
         movable = 1
     };
 
-    static const Foam::NamedEnum<vertexType, 10> vertexTypeNames_;
+    static const Foam::NamedEnum<vertexType, 11> vertexTypeNames_;
 
     static const Foam::NamedEnum<vertexMotion, 2> vertexMotionNames_;
 

@@ -334,23 +334,48 @@ inline void Foam::conformalVoronoiMesh::createPointPair
 {
     vector ppDistn = ppDist*n;
 
-    pts.append
-    (
-        Vb
-        (
-            surfPt - ppDistn,
-            Vb::vtInternalSurface
-        )
-    );
+    const Foam::point internalPt = surfPt - ppDistn;
+    const Foam::point externalPt = surfPt + ppDistn;
 
-    pts.append
+    if
     (
-        Vb
+        geometryToConformTo_.inside(internalPt)
+     && geometryToConformTo_.outside(externalPt)
+    )
+    {
+        pts.append
         (
-            surfPt + ppDistn,
-            Vb::vtExternalSurface
-        )
-    );
+            Vb
+            (
+                surfPt - ppDistn,
+                vertexCount() + pts.size(),
+                Vb::vtInternalSurface,
+                Pstream::myProcNo()
+            )
+        );
+
+        pts.append
+        (
+            Vb
+            (
+                surfPt + ppDistn,
+                vertexCount() + pts.size(),
+                Vb::vtExternalSurface,
+                Pstream::myProcNo()
+            )
+        );
+    }
+    else
+    {
+        Info<< "Warning: point pair not inside/outside" << nl
+            << "    surfPt = " << surfPt << nl
+            << "    internal = "
+            << internalPt << " " << geometryToConformTo_.inside(internalPt)
+            << nl
+            << "    external = "
+            << externalPt << " " << geometryToConformTo_.outside(externalPt)
+            << endl;
+    }
 }
 
 
@@ -386,12 +411,25 @@ inline void Foam::conformalVoronoiMesh::createBafflePointPair
 
     pts.append
     (
-        Vb(surfPt - ppDistn, Vb::vtInternalSurface)
+        Vb
+        (
+            surfPt - ppDistn,
+            vertexCount() + 1 + pts.size(),
+            Vb::vtInternalSurface,
+            Pstream::myProcNo()
+        )
     );
 
     pts.append
     (
-        Vb(surfPt + ppDistn, Vb::vtInternalSurface)
+        Vb
+        (
+            surfPt + ppDistn,
+            vertexCount() + 1 + pts.size(),
+            Vb::vtInternalSurface,
+            Pstream::myProcNo()
+        )
+    );
     );
 }
 

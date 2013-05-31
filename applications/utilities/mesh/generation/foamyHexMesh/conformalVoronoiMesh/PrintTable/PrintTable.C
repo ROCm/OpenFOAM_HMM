@@ -140,10 +140,11 @@ void Foam::PrintTable<KeyType, DataType>::print
         }
 
         os.width(largestKeyLength);
-        os  << nl << indent << tab << title_.c_str() << endl;
+        os  << nl << indent << tab << "# " << title_.c_str() << endl;
 
         os.width(largestKeyLength);
-        os  << indent << "Proc #";
+        os  << indent << "# Proc No";
+
         forAll(procData, procI)
         {
             os  << tab;

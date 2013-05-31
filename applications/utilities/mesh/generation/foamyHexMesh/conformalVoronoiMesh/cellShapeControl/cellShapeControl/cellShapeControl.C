@@ -124,7 +124,17 @@ Foam::scalar Foam::cellShapeControl::cellSize(const point& pt) const
 //            }
 //        }
 
-        // Find nearest surface
+//        cellShapeControlMesh::Vertex_handle nearV =
+//            shapeControlMesh_.nearest_vertex_in_cell
+//            (
+//                toPoint<cellShapeControlMesh::Point>(pt),
+//                ch
+//            );
+//
+//        size = nearV->targetCellSize();
+
+        // Find nearest surface. This can be quite slow if there are a lot of
+        // surfaces
         size = sizeAndAlignment_.cellSize(pt);
     }
     else

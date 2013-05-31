@@ -885,19 +885,9 @@ Foam::DistributedDelaunayMesh<Triangulation>::rangeInsertReferredWithInfo
             {
                 Cell_handle conflictingCell = V[i];
 
-                bool hasNullVertex = false;
-                for (label vertexI = 0; vertexI < 4; ++vertexI)
-                {
-                    if (conflictingCell->vertex(vertexI) == NULL)
-                    {
-                        hasNullVertex = true;
-                    }
-                }
-
                 if
                 (
-
-                    hasNullVertex
+                    Triangulation::dimension() < 3 // 2D triangulation
                  ||
                     (
                         !Triangulation::is_infinite(conflictingCell)

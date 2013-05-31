@@ -510,6 +510,21 @@ Foam::conformationSurfaces::conformationSurfaces
         << "Testing for locationInMesh " << locationInMesh_ << endl;
 
     hasBoundedVolume(referenceVolumeTypes_);
+
+    if (debug)
+    {
+        Info<< "Names = " << allGeometry_.names() << endl;
+        Info<< "Surfaces = " << surfaces_ << endl;
+        Info<< "AllGeom to Surfaces = " << allGeometryToSurfaces_ << endl;
+        Info<< "Baffle Surfaces = " << baffleSurfaces_ << endl;
+        Info<< "Patch names = " << patchNames_ << endl;
+        Info<< "Region Offset = " << regionOffset_ << endl;
+
+        forAll(features_, fI)
+        {
+            Info<< features_[fI].name() << endl;
+        }
+    }
 }
 
 
@@ -597,7 +612,34 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInside
 
         if (!baffleSurfaces_[regionI])
         {
-            surface.getVolumeType(samplePts, surfaceVolumeTests[s]);
+//            if (surface.hasVolumeType())
+//            {
+//                List<List<pointIndexHit> > info;
+//
+//                // Count number of intersections
+//                surface.findLineAll
+//                (
+//                    samplePts,
+//                    pointField(samplePts.size(), locationInMesh()),
+//                    info
+//                );
+//
+//                forAll(info, ptI)
+//                {
+//                    if (info[ptI].size() % 2 == 0)
+//                    {
+//                        surfaceVolumeTests[s][ptI] = volumeType::INSIDE;
+//                    }
+//                    else
+//                    {
+//                        surfaceVolumeTests[s][ptI] = volumeType::OUTSIDE;
+//                    }
+//                }
+//            }
+//            else
+            {
+                surface.getVolumeType(samplePts, surfaceVolumeTests[s]);
+            }
         }
     }
 
@@ -664,8 +706,8 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInside
 //            Info<< surface.name() << " = "
 //                << volumeType::names[surfaceVolumeTests[s][i]] << endl;
 
-            if (surfaceVolumeTests[s][i] == volumeType::OUTSIDE)
             //if (surfaceVolumeTests[s][i] == volumeType::OUTSIDE)
+            if (surfaceVolumeTests[s][i] != volumeType::INSIDE)
             {
                 insidePoint[i] = false;
 

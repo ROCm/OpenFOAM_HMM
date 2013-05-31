@@ -99,6 +99,16 @@ Foam::cellSizeFunction::cellSizeFunction
 
         sideMode_ = rmBothsides;
     }
+
+    if (debug)
+    {
+        Info<< nl
+            << "Cell size function for surface " << surface.name()
+            << ", " << mode
+            << ", priority = " << priority_
+            << ", regions = " << regionIndices_
+            << endl;
+    }
 }
 
 

@@ -248,6 +248,8 @@ public:
 
         inline bool externalBoundaryPoint() const;
 
+        inline bool constrained() const;
+
         //- Is the vertex fixed or movable
         inline bool fixed() const;
 

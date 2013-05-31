@@ -323,6 +323,13 @@ inline bool CGAL::indexedVertex<Gt, Vb>::externalBoundaryPoint() const
 
 
 template<class Gt, class Vb>
+inline bool CGAL::indexedVertex<Gt, Vb>::constrained() const
+{
+    return type_ == vtConstrained;
+}
+
+
+template<class Gt, class Vb>
 inline bool CGAL::indexedVertex<Gt, Vb>::featurePoint() const
 {
     return type_ == vtInternalFeaturePoint || type_ == vtExternalFeaturePoint;
