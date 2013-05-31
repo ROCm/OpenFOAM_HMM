@@ -27,24 +27,28 @@ geometry
     }
 
     // Outside of domain
-    domain_clean_orient.stl
+    domain
     {
-        name domain;
-        type triSurfaceMesh;
-        regions
-        {
-            ascii{ name domain_patch0; }
-        }
+        type searchableBox;
+        min (-0.7 -0.9 -1);
+        max (1.3 1.1 1);
     }
 
 }
 
 
-// Controls for conforming to the surfaces.
 surfaceConformation
 {
-    // A point inside surfaces that is inside mesh.
     locationInMesh (0 -0.5 0);
+
+    featurePointControls
+    {
+        specialiseFeaturePoints on;
+        edgeAiming              on;
+        guardFeaturePoints      off;
+        snapFeaturePoints       on;
+        circulateEdges          off;
+    }
 
     // Geometry to mesh to
     geometryToConformTo
@@ -53,94 +57,43 @@ surfaceConformation
         {
             featureMethod           extractFeatures;
             includedAngle           140;
-            featureMethod extendedFeatureEdgeMesh;
-            extendedFeatureEdgeMesh "coneAndSphere_clean_orient.extendedFeatureEdgeMesh";
         }
 
         domain
         {
             featureMethod           extractFeatures;
-            includedAngle           125;
-            featureMethod extendedFeatureEdgeMesh;
-            extendedFeatureEdgeMesh "domain_clean_orient.extendedFeatureEdgeMesh";
+            includedAngle           100;
+            mode                    outside;
         }
     }
-
-    additionalFeatures
-    {}
 }
 
 
-// Controls for seeding initial points and general control of the target
-// cell size (used everywhere)
 initialPoints
 {
     initialPointsMethod             autoDensity;
-    // initialPointsMethod          uniformGrid;
-    // initialPointsMethod          bodyCentredCubic;
-    // initialPointsMethod          pointFile;
 
-    // Take boundbox of all geometry. Samples with this box. If too much
-    // samples (due to target cell size) in box split box.
     autoDensityCoeffs
     {
-        minCellSizeLimit 0.1;
-        // Initial number of refinement levels. Needs to be enough to pick
-        // up features due to size ratio. If not enough it will take longer
-        // to determine point seeding.
-        minLevels 4;
-        // Split box if ratio of min to max cell size larger than maxSizeRatio
-        maxSizeRatio 5.0;
-        // Per box sample 3x3x3 internally
-        sampleResolution 3;
-        // Additionally per face of the box sample 3
+        minCellSizeLimit        0.1;
+        minLevels               4;
+        maxSizeRatio            5.0;
+        sampleResolution        3;
         surfaceSampleResolution 3;
-    }
-
-    uniformGridCoeffs
-    {
-        // Absolute cell size.
-        initialCellSize         0.0015;
-        randomiseInitialGrid    yes;
-        randomPerturbationCoeff 0.02;
-    }
-
-    bodyCentredCubicCoeffs
-    {
-        initialCellSize         0.0015;
-        randomiseInitialGrid    no;
-        randomPerturbationCoeff 0.1;
-    }
-
-    pointFileCoeffs
-    {
-        // Reads points from file. Still rejects points that are too
-        // close to the surface (minimumSurfaceDistanceCoeff) or on the
-        // wrong side of the surfaces.
-        pointFile              "constant/internalDelaunayVertices";
     }
 }
 
 
-// Control size of voronoi cells i.e. distance between points. This
-// determines the target cell size which is used everywhere.
-// It determines the cell size given a location. It then uses all
-// the rules
-// - defaultCellSize
-// - cellSizeControlGeometry
-// to determine target cell size. Rule with highest priority wins. If same
-// priority smallest cell size wins.
 motionControl
 {
-    // Absolute cell size of back ground mesh. This is the maximum cell size.
     defaultCellSize         0.1;
 
     minimumCellSizeCoeff    0;
 
     // For background cell size and alignment grid
-    maxSmoothingIterations      100;
+    maxSmoothingIterations  100;
 
-    maxRefinementIterations     0;
+    maxRefinementIterations 0;
 
     shapeControlFunctions
     {
@@ -197,7 +150,10 @@ polyMeshFiltering
 }
 
 
-#include "meshQualityDict";
+meshQualityControls
+{
+    #include "meshQualityDict"
+}
 
 
 // ************************************************************************* //

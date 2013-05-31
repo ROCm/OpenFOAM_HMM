@@ -7,8 +7,6 @@ cd ${0%/*} || exit 1    # run from this directory
 # Get the number of processors to run on from system/decomposeParDict
 nProc=$(getNumberOfProcessors)
 
-runApplication surfaceFeatureExtract
-
 # Create tight-fitting background mesh
 runApplication blockMesh
 runApplication topoSet -dict system/topoSetDict-background
@@ -17,10 +15,11 @@ runApplication subsetMesh background -patch walls -overwrite
 
 runApplication decomposePar
 
-runParallel cvMesh $nProc
+runParallel foamyHexMesh $nProc
 runParallel collapseEdges $nProc -latestTime -collapseFaces
 runParallel checkMesh $nProc -latestTime -allTopology -allGeometry
 
 runApplication reconstructParMesh -latestTime
+
 
 # ----------------------------------------------------------------- end-of-file

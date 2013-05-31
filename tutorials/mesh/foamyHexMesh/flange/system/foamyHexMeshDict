@@ -26,29 +26,28 @@ geometry
     {
         name flange;
         type triSurfaceMesh;
-    }
-}
 
-
-backgroundMeshDecomposition
-{
-    minLevels 1;
-    sampleResolution 4;
-    spanScale 5;
-    maxCellWeightCoeff 10;
-}
-
-
-surfaceConformation
-{
-    locationInMesh                      (0 0 0);
-
-    geometryToConformTo
-    {
-        flange
+        regions
         {
-            featureMethod           extractFeatures;
-            includedAngle           140;
+            patch1
+            {
+                name wall;
+            }
+
+            patch2
+            {
+                name plate;
+            }
+
+            patch3
+            {
+                name rings;
+            }
+
+            patch4
+            {
+                name outlet;
+            }
         }
     }
 }
@@ -68,13 +67,63 @@ initialPoints
 }
 
 
+surfaceConformation
+{
+    locationInMesh      (0 0 0);
+
+    geometryToConformTo
+    {
+        flange
+        {
+            featureMethod           extractFeatures;
+            includedAngle           140;
+
+            regions
+            {
+                wall
+                {
+                    patchInfo
+                    {
+                        inGroups    (groupFlange groupWalls);
+                    }
+                }
+
+                plate
+                {
+                    patchInfo
+                    {
+                        inGroups    (groupFlange groupWalls);
+                    }
+                }
+
+                rings
+                {
+                    patchInfo
+                    {
+                        inGroups    (groupFlange);
+                    }
+                }
+
+                outlet
+                {
+                    patchInfo
+                    {
+                        type        patch;
+                        inGroups    (groupFlange);
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 motionControl
 {
     defaultCellSize             0.0008;
 
     minimumCellSizeCoeff        0;
 
-    // For background cell size and alignment grid
     maxSmoothingIterations      100;
 
     maxRefinementIterations     0;
@@ -98,6 +147,28 @@ motionControl
                 surfaceOffsetCoeff      2.5;
                 linearDistanceCoeff     2.5;
             }
+
+            regions
+            {
+                rings
+                {
+                    type                        searchableSurfaceControl;
+                    priority                    2;
+                    mode                        inside;
+                    surfaceCellSizeFunction     uniformValue;
+                    uniformValueCoeffs
+                    {
+                        surfaceCellSizeCoeff    0.5;
+                    }
+                    cellSizeFunction            surfaceOffsetLinearDistance;
+                    surfaceOffsetLinearDistanceCoeffs
+                    {
+                        distanceCellSizeCoeff   1;
+                        surfaceOffsetCoeff      2;
+                        linearDistanceCoeff     2;
+                    }
+                }
+            }
         }
     }
 
@@ -110,6 +181,15 @@ motionControl
     objOutput                   no;
 
     timeChecks                  no;
+}
+
+
+backgroundMeshDecomposition
+{
+    minLevels           1;
+    sampleResolution    4;
+    spanScale           5;
+    maxCellWeightCoeff  10;
 }
 
 

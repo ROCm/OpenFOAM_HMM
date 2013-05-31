@@ -36,10 +36,10 @@ geometry
 
 backgroundMeshDecomposition
 {
-    minLevels 0;
-    sampleResolution 4;
-    spanScale 20;
-    maxCellWeightCoeff 20;
+    minLevels           0;
+    sampleResolution    4;
+    spanScale           20;
+    maxCellWeightCoeff  20;
 }
 
 
@@ -65,7 +65,16 @@ initialPoints
 
 surfaceConformation
 {
-    locationInMesh                      (0.1 0.1 0.2);
+    locationInMesh              (0.1 0.1 0.2);
+
+    featurePointControls
+    {
+        specialiseFeaturePoints off;
+        edgeAiming              off;
+        guardFeaturePoints      off;
+        snapFeaturePoints       off;
+        circulateEdges          off;
+    }
 
     geometryToConformTo
     {
