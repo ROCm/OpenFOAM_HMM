@@ -123,6 +123,14 @@ surfaceConformation
     // Frequency to redo surface conformation (expensive).
     surfaceConformationRebuildFrequency 10;
 
+    featurePointControls
+    {
+        specialiseFeaturePoints on;
+        guardFeaturePoints      on;
+        snapFeaturePoints       on;
+        circulateEdges          on;
+    }
+
     // Initial and intermediate controls
     conformationControls
     {
