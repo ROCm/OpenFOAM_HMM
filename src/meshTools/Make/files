@@ -43,6 +43,9 @@ patchWave = $(algorithms)/PatchEdgeFaceWave
 $(patchWave)/PatchEdgeFaceWaveName.C
 $(patchWave)/patchEdgeFaceInfo.C
 $(patchWave)/patchPatchDist.C
+$(patchWave)/patchEdgeFaceRegion.C
+$(patchWave)/patchEdgeFaceRegions.C
+
 
 meshWave = $(algorithms)/MeshWave
 $(meshWave)/MeshWaveName.C
@@ -113,7 +116,6 @@ $(faceSources)/boundaryToFace/boundaryToFace.C
 $(faceSources)/zoneToFace/zoneToFace.C
 $(faceSources)/boxToFace/boxToFace.C
 $(faceSources)/regionToFace/regionToFace.C
-$(faceSources)/regionToFace/patchEdgeFaceRegion.C
 
 pointSources = sets/pointSources
 $(pointSources)/labelToPoint/labelToPoint.C

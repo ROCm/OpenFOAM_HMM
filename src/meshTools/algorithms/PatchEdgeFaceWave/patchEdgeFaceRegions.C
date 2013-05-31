@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,27 +23,27 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "patchEdgeFaceRegion.H"
+#include "patchEdgeFaceRegions.H"
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<
 (
     Foam::Ostream& os,
-    const Foam::patchEdgeFaceRegion& wDist
+    const Foam::patchEdgeFaceRegions& wDist
 )
 {
-    return os << wDist.region_;
+    return os << wDist.regions_;
 }
 
 
 Foam::Istream& Foam::operator>>
 (
     Foam::Istream& is,
-    Foam::patchEdgeFaceRegion& wDist
+    Foam::patchEdgeFaceRegions& wDist
 )
 {
-    return is >> wDist.region_;
+    return is >> wDist.regions_;
 }
 
 
