@@ -430,7 +430,6 @@ inline void Foam::conformalVoronoiMesh::createBafflePointPair
             Pstream::myProcNo()
         )
     );
-    );
 }
 
 

@@ -571,7 +571,6 @@ void Foam::conformalVoronoiMesh::createExternalEdgePointGroup
             Pstream::myProcNo()
         )
     );
-    );
 }
 
 
@@ -705,7 +704,6 @@ void Foam::conformalVoronoiMesh::createInternalEdgePointGroup
             Vb::vtExternalFeatureEdge,
             Pstream::myProcNo()
         )
-    );
     );
 
     if (nAddPoints == 1)
@@ -848,7 +846,6 @@ void Foam::conformalVoronoiMesh::createMultipleEdgePointGroup
     const labelList& edNormalIs = feMesh.edgeNormals()[edHit.index()];
 
     Info<< edNormalIs.size() << endl;
-    Info<< feMesh.edgeBaffles(edHit.index()) << endl;
 
     // As this is a flat edge, there are two normals by definition
     const vector& nA = feNormals[edNormalIs[0]];

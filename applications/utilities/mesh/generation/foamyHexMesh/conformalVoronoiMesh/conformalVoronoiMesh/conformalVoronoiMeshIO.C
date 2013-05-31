@@ -644,7 +644,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::conformalVoronoiMesh::createDummyMesh
                 0,          //patchStarts[p],
                 patchI,
                 mesh.boundaryMesh(),
-                mesh.comm(),
                 readLabel(patchDicts[patchI].lookup("myProcNo")),
                 readLabel(patchDicts[patchI].lookup("neighbProcNo")),
                 coupledPolyPatch::COINCIDENTFULLMATCH
