@@ -285,6 +285,16 @@ Foam::tmp<Foam::Field<Type> > Foam::cyclicACMIFvPatchField<Type>::snGrad
 
 
 template<class Type>
+void Foam::cyclicACMIFvPatchField<Type>::updateCoeffs()
+{
+    const scalarField& mask = cyclicACMIPatch_.cyclicACMIPatch().mask();
+
+    const fvPatchField<Type>& npf = nonOverlapPatchField();
+    const_cast<fvPatchField<Type>&>(npf).updateCoeffs(mask);
+}
+
+
+template<class Type>
 void Foam::cyclicACMIFvPatchField<Type>::evaluate
 (
     const Pstream::commsTypes comms
@@ -373,6 +383,20 @@ Foam::cyclicACMIFvPatchField<Type>::gradientBoundaryCoeffs() const
     // note: do not blend based on mask field
     // - when applied this is scaled by the areas which area already scaled
     return coupledFvPatchField<Type>::gradientBoundaryCoeffs();
+}
+
+
+template<class Type>
+void Foam::cyclicACMIFvPatchField<Type>::manipulateMatrix
+(
+    fvMatrix<Type>& matrix
+)
+{
+    // blend contrubutions from the coupled and non-overlap patches
+    const fvPatchField<Type>& npf = nonOverlapPatchField();
+
+    const scalarField& mask = cyclicACMIPatch_.cyclicACMIPatch().mask();
+    const_cast<fvPatchField<Type>&>(npf).manipulateMatrix(matrix, mask);
 }
 
 

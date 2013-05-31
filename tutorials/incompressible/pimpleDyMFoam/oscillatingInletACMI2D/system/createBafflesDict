@@ -23,6 +23,9 @@ internalFacesOnly false;
 // Baffles to create.
 baffles
 {
+    // NOTE: cyclicAMI patches MUST BE defined PRIOR to their associted
+    //       blockage patches
+
     ACMI1
     {
         //- Use predefined faceZone to select faces and orientation.
@@ -34,19 +37,6 @@ baffles
             master
             {
                 //- Master side patch
-                name            ACMI1_blockage;
-                type            wall;
-            }
-            slave // not used since we're manipulating a boundary patch
-            {
-                //- Slave side patch
-                name            ACMI1_blockage;
-                type            wall;
-            }
-
-            master2
-            {
-                //- Master side patch
                 name            ACMI1_couple;
                 type            cyclicACMI;
                 matchTolerance  0.0001;
@@ -54,12 +44,26 @@ baffles
                 nonOverlapPatch ACMI1_blockage;
                 transform       noOrdering;
             }
-            slave2 // not used since we're manipulating a boundary patch
+            slave // not used since we're manipulating a boundary patch
             {
                 //- Slave side patch
                 name            ACMI1_couple;
                 type            patch;
             }
+
+            master2
+            {
+                //- Master side patch
+                name            ACMI1_blockage;
+                type            wall;
+            }
+            slave2 // not used since we're manipulating a boundary patch
+            {
+                //- Slave side patch
+                name            ACMI1_blockage;
+                type            wall;
+            }
+
         }
     }
     ACMI2
@@ -73,19 +77,6 @@ baffles
             master
             {
                 //- Master side patch
-                name            ACMI2_blockage;
-                type            wall;
-            }
-            slave // not used since we're manipulating a boundary patch
-            {
-                //- Slave side patch
-                name            ACMI2_blockage;
-                type            wall;
-            }
-
-            master2
-            {
-                //- Master side patch
                 name            ACMI2_couple;
                 type            cyclicACMI;
                 matchTolerance  0.0001;
@@ -93,11 +84,24 @@ baffles
                 nonOverlapPatch ACMI2_blockage;
                 transform       noOrdering;
             }
-            slave2 // not used since we're manipulating a boundary patch
+            slave // not used since we're manipulating a boundary patch
             {
                 //- Slave side patch
                 name            ACMI2_couple;
                 type            patch;
+            }
+
+            master2
+            {
+                //- Master side patch
+                name            ACMI2_blockage;
+                type            wall;
+            }
+            slave2 // not used since we're manipulating a boundary patch
+            {
+                //- Slave side patch
+                name            ACMI2_blockage;
+                type            wall;
             }
         }
     }
