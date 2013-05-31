@@ -217,10 +217,7 @@ inline const Foam::labelList& Foam::extendedFeatureEdgeMesh::regionEdges() const
 
 
 inline Foam::extendedFeatureEdgeMesh::pointStatus
-Foam::extendedFeatureEdgeMesh::getPointStatus
-(
-    label ptI
-) const
+Foam::extendedFeatureEdgeMesh::getPointStatus(label ptI) const
 {
     if (ptI < concaveStart_)
     {
@@ -242,10 +239,7 @@ Foam::extendedFeatureEdgeMesh::getPointStatus
 
 
 inline Foam::extendedFeatureEdgeMesh::edgeStatus
-Foam::extendedFeatureEdgeMesh::getEdgeStatus
-(
-    label edgeI
-) const
+Foam::extendedFeatureEdgeMesh::getEdgeStatus(label edgeI) const
 {
     if (edgeI < internalStart_)
     {
