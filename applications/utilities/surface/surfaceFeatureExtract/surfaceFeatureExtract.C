@@ -1021,7 +1021,7 @@ int main(int argc, char *argv[])
 
         autoPtr<surfaceFeatures> set;
 
-        scalar includedAngle = -1;
+        scalar includedAngle = 0.0;
 
         if (extractionMethod == "extractFromFile")
         {
@@ -1123,7 +1123,7 @@ int main(int argc, char *argv[])
                 Info<< "Removing features with number of edges < "
                     << minElem << endl;
 
-                set().trimFeatures(minLen, minElem);
+                set().trimFeatures(minLen, minElem, includedAngle);
             }
         }
 
@@ -1223,7 +1223,7 @@ int main(int argc, char *argv[])
 
 
         surfaceFeatures newSet(surf);
-        newSet.setFromStatus(edgeStat);
+        newSet.setFromStatus(edgeStat, includedAngle);
 
         Info<< nl
             << "Initial feature set:" << nl
