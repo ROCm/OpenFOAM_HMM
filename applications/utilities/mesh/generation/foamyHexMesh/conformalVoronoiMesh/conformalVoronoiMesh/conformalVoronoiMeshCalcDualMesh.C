@@ -28,6 +28,7 @@ License
 #include "backgroundMeshDecomposition.H"
 #include "polyMeshGeometry.H"
 #include "indexedCellChecks.H"
+#include "OBJstream.H"
 
 #include "CGAL/Exact_predicates_exact_constructions_kernel.h"
 #include "CGAL/Gmpq.h"
