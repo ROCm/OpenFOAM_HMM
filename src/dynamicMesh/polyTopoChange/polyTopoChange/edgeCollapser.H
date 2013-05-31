@@ -339,8 +339,11 @@ public:
             ) const;
 
             //- Marks edges in the faceZone indirectPatchFaces for collapse
-            void markIndirectPatchFaces
+            labelPair markFaceZoneEdges
             (
+                const faceZone& fZone,
+                const scalarField& faceFilterFactor,
+                const labelList& pointPriority,
                 PackedBoolList& collapseEdge,
                 Map<point>& collapsePointToLocation
             ) const;

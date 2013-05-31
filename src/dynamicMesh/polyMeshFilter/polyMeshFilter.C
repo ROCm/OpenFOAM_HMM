@@ -32,6 +32,7 @@ License
 #include "polyTopoChange.H"
 #include "globalIndex.H"
 #include "PackedBoolList.H"
+#include "faceZone.H"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -1134,82 +1135,329 @@ Foam::label Foam::polyMeshFilter::filterEdges
 }
 
 
-Foam::label Foam::polyMeshFilter::filterIndirectPatchFaces()
+Foam::label Foam::polyMeshFilter::filterFaceZone(const faceZone& fZone)
 {
-    newMeshPtr_ = copyMesh(mesh_);
-    fvMesh& newMesh = newMeshPtr_();
+    const label nOriginalBadFaces = 0;
 
-    label nIterations = 0;
-    label nBadFaces = 0;
+    label nBadFaces = labelMax;
+    label nOuterIterations = 0;
 
-    while (true)
+    minEdgeLen_.resize(mesh_.nEdges(), minLen_);
+    faceFilterFactor_.resize(mesh_.nFaces(), initialFaceLengthFactor_);
+
+    // Maintain the number of times a point has been part of a bad face
+    labelList pointErrorCount(mesh_.nPoints(), 0);
+
+    // Main loop
+    // ~~~~~~~~~
+    // It tries and do some collapses, checks the resulting mesh and
+    // 'freezes' some edges (by marking in minEdgeLen) and tries again.
+    // This will iterate ultimately to the situation where every edge is
+    // frozen and nothing gets collapsed.
+    while
+    (
+        nOuterIterations < maxIterations_
+     && nBadFaces > nOriginalBadFaces
+    )
     {
-        Info<< nl << indent << "Iteration = "
-            << nIterations++ << nl << incrIndent << endl;
+        Info<< nl << "Outer Iteration = " << nOuterIterations++ << nl
+            << endl;
 
-        // Per edge collapse status
-        PackedBoolList collapseEdge(newMesh.nEdges());
+        printScalarFieldStats("Edge Filter Factor", minEdgeLen_);
+        printScalarFieldStats("Face Filter Factor", faceFilterFactor_);
 
-        Map<point> collapsePointToLocation(newMesh.nPoints());
+        // Reset the new mesh to the old mesh
+        newMeshPtr_ = copyMesh(mesh_);
+        fvMesh& newMesh = newMeshPtr_();
 
-        labelList boundaryPoint(newMesh.nPoints());
+        scalarField newMeshFaceFilterFactor = faceFilterFactor_;
 
-        edgeCollapser collapser(newMesh, collapseFacesCoeffDict_);
-
-        collapser.markIndirectPatchFaces
-        (
-            collapseEdge,
-            collapsePointToLocation
-        );
-
-        // Merge edge collapses into consistent collapse-network.
-        // Make sure no cells get collapsed.
-        List<pointEdgeCollapse> allPointInfo;
-        const globalIndex globalPoints(newMesh.nPoints());
-
-        collapser.consistentCollapse
-        (
-            globalPoints,
-            boundaryPoint,
-            collapsePointToLocation,
-            collapseEdge,
-            allPointInfo
-        );
-
-        label nLocalCollapse = collapseEdge.count();
-
-        reduce(nLocalCollapse, sumOp<label>());
-        Info<< nl << indent << "Collapsing " << nLocalCollapse
-            << " edges after synchronisation and PointEdgeWave" << endl;
-
-        if (nLocalCollapse == 0)
+        labelList origToCurrentPointMap(identity(newMesh.nPoints()));
         {
-            break;
+
+            label nInnerIterations = 0;
+            label nPrevLocalCollapse = labelMax;
+
+            Info<< incrIndent;
+
+            while (true)
+            {
+                Info<< nl << indent << "Inner iteration = "
+                    << nInnerIterations++ << nl << incrIndent << endl;
+
+                // Per edge collapse status
+                PackedBoolList collapseEdge(newMesh.nEdges());
+
+                Map<point> collapsePointToLocation(newMesh.nPoints());
+
+                // Mark points on boundary
+                const labelList boundaryPoint = findBoundaryPoints(newMesh);
+
+                edgeCollapser collapser(newMesh, collapseFacesCoeffDict_);
+
+                {
+                    // Collapse faces
+                    labelPair nCollapsedPtEdge = collapser.markFaceZoneEdges
+                    (
+                        fZone,
+                        newMeshFaceFilterFactor,
+                        boundaryPoint,
+                        collapseEdge,
+                        collapsePointToLocation
+                    );
+
+                    label nCollapsed = 0;
+                    forAll(nCollapsedPtEdge, collapseTypeI)
+                    {
+                        nCollapsed += nCollapsedPtEdge[collapseTypeI];
+                    }
+
+                    reduce(nCollapsed, sumOp<label>());
+
+                    Info<< indent
+                        << "Collapsing " << nCollapsed << " faces"
+                        << " (to point = "
+                        << returnReduce
+                           (
+                               nCollapsedPtEdge.first(),
+                               sumOp<label>()
+                           )
+                        << ", to edge = "
+                        << returnReduce
+                           (
+                               nCollapsedPtEdge.second(),
+                               sumOp<label>()
+                           )
+                        << ")" << endl;
+
+                    if (nCollapsed == 0)
+                    {
+                        Info<< decrIndent;
+                        Info<< decrIndent;
+                        break;
+                    }
+                }
+
+                // Merge edge collapses into consistent collapse-network.
+                // Make sure no cells get collapsed.
+                List<pointEdgeCollapse> allPointInfo;
+                const globalIndex globalPoints(newMesh.nPoints());
+
+                collapser.consistentCollapse
+                (
+                    globalPoints,
+                    boundaryPoint,
+                    collapsePointToLocation,
+                    collapseEdge,
+                    allPointInfo
+                );
+
+                label nLocalCollapse = collapseEdge.count();
+
+                reduce(nLocalCollapse, sumOp<label>());
+                Info<< nl << indent << "Collapsing " << nLocalCollapse
+                    << " edges after synchronisation and PointEdgeWave" << endl;
+
+                if (nLocalCollapse >= nPrevLocalCollapse)
+                {
+                    Info<< decrIndent;
+                    Info<< decrIndent;
+                    break;
+                }
+                else
+                {
+                    nPrevLocalCollapse = nLocalCollapse;
+                }
+
+                {
+                    // Apply collapses to current mesh
+                    polyTopoChange newMeshMod(newMesh);
+
+                    // Insert mesh refinement into polyTopoChange.
+                    collapser.setRefinement(allPointInfo, newMeshMod);
+
+                    Info<< indent << "Apply changes to the current mesh"
+                        << decrIndent << endl;
+
+                    // Apply changes to current mesh
+                    autoPtr<mapPolyMesh> newMapPtr = newMeshMod.changeMesh
+                    (
+                        newMesh,
+                        false
+                    );
+                    const mapPolyMesh& newMap = newMapPtr();
+
+                    // Update fields
+                    newMesh.updateMesh(newMap);
+                    if (newMap.hasMotionPoints())
+                    {
+                        newMesh.movePoints(newMap.preMotionPoints());
+                    }
+
+                    // Relabel the boundary points
+        //            labelList newBoundaryPoints(newMesh.nPoints(), -1);
+        //            forAll(newBoundaryPoints, pI)
+        //            {
+        //                const label newToOldptI= map.pointMap()[pI];
+        //                newBoundaryPoints[pI] = boundaryIOPts[newToOldptI];
+        //            }
+        //            boundaryIOPts = newBoundaryPoints;
+
+
+                    mapOldMeshFaceFieldToNewMesh
+                    (
+                        newMesh,
+                        newMap.faceMap(),
+                        newMeshFaceFilterFactor
+                    );
+
+                    updateOldToNewPointMap
+                    (
+                        newMap.reversePointMap(),
+                        origToCurrentPointMap
+                    );
+                }
+            }
         }
 
-        // Apply collapses to current mesh
-        polyTopoChange newMeshMod(newMesh);
 
-        // Insert mesh refinement into polyTopoChange.
-        collapser.setRefinement(allPointInfo, newMeshMod);
+        scalarField newMeshMinEdgeLen = minEdgeLen_;
 
-        Info<< indent << "Apply changes to the current mesh"
-            << decrIndent << endl;
+        label nInnerIterations = 0;
+        label nPrevLocalCollapse = labelMax;
 
-        // Apply changes to current mesh
-        autoPtr<mapPolyMesh> newMapPtr = newMeshMod.changeMesh
-        (
-            newMesh,
-            false
-        );
-        const mapPolyMesh& newMap = newMapPtr();
-
-        // Update fields
-        newMesh.updateMesh(newMap);
-        if (newMap.hasMotionPoints())
+        while (true)
         {
-            newMesh.movePoints(newMap.preMotionPoints());
+            Info<< nl << indent << "Inner iteration = "
+                << nInnerIterations++ << nl << incrIndent << endl;
+
+            // Per edge collapse status
+            PackedBoolList collapseEdge(newMesh.nEdges());
+
+            Map<point> collapsePointToLocation(newMesh.nPoints());
+
+            // Mark points on boundary
+            const labelList boundaryPoint = findBoundaryPoints
+            (
+                newMesh//,
+//                    boundaryIOPts
+            );
+
+            edgeCollapser collapser(newMesh, collapseFacesCoeffDict_);
+
+            // Work out which edges to collapse
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // This is by looking at minEdgeLen (to avoid frozen edges)
+            // and marking in collapseEdge.
+            label nSmallCollapsed = collapser.markSmallEdges
+            (
+                newMeshMinEdgeLen,
+                boundaryPoint,
+                collapseEdge,
+                collapsePointToLocation
+            );
+
+            reduce(nSmallCollapsed, sumOp<label>());
+            Info<< indent << "Collapsing " << nSmallCollapsed
+                << " small edges" << endl;
+
+            // Merge inline edges
+            label nMerged = collapser.markMergeEdges
+            (
+                maxCos_,
+                boundaryPoint,
+                collapseEdge,
+                collapsePointToLocation
+            );
+
+            reduce(nMerged, sumOp<label>());
+            Info<< indent << "Collapsing " << nMerged << " in line edges"
+                << endl;
+
+            if (nMerged + nSmallCollapsed == 0)
+            {
+                Info<< decrIndent;
+                break;
+            }
+
+            // Merge edge collapses into consistent collapse-network.
+            // Make sure no cells get collapsed.
+            List<pointEdgeCollapse> allPointInfo;
+            const globalIndex globalPoints(newMesh.nPoints());
+
+            collapser.consistentCollapse
+            (
+                globalPoints,
+                boundaryPoint,
+                collapsePointToLocation,
+                collapseEdge,
+                allPointInfo
+            );
+
+            label nLocalCollapse = collapseEdge.count();
+
+            reduce(nLocalCollapse, sumOp<label>());
+            Info<< nl << indent << "Collapsing " << nLocalCollapse
+                << " edges after synchronisation and PointEdgeWave" << endl;
+
+            if (nLocalCollapse >= nPrevLocalCollapse)
+            {
+                Info<< decrIndent;
+                break;
+            }
+            else
+            {
+                nPrevLocalCollapse = nLocalCollapse;
+            }
+
+            // Apply collapses to current mesh
+            polyTopoChange newMeshMod(newMesh);
+
+            // Insert mesh refinement into polyTopoChange.
+            collapser.setRefinement(allPointInfo, newMeshMod);
+
+            Info<< indent << "Apply changes to the current mesh"
+                << decrIndent << endl;
+
+            // Apply changes to current mesh
+            autoPtr<mapPolyMesh> newMapPtr = newMeshMod.changeMesh
+            (
+                newMesh,
+                false
+            );
+            const mapPolyMesh& newMap = newMapPtr();
+
+            // Update fields
+            newMesh.updateMesh(newMap);
+            if (newMap.hasMotionPoints())
+            {
+                newMesh.movePoints(newMap.preMotionPoints());
+            }
+
+            // Relabel the boundary points
+//            labelList newBoundaryPoints(newMesh.nPoints(), -1);
+//            forAll(newBoundaryPoints, pI)
+//            {
+//                const label newToOldptI= map.pointMap()[pI];
+//                newBoundaryPoints[pI] = boundaryIOPts[newToOldptI];
+//            }
+//            boundaryIOPts = newBoundaryPoints;
+
+            // Synchronise the factors
+            mapOldMeshEdgeFieldToNewMesh
+            (
+                newMesh,
+                newMap.pointMap(),
+                newMeshMinEdgeLen
+            );
+
+            updateOldToNewPointMap
+            (
+                newMap.reversePointMap(),
+                origToCurrentPointMap
+            );
         }
+
 
         // Mesh check
         // ~~~~~~~~~~~~~~~~~~
@@ -1230,6 +1478,33 @@ Foam::label Foam::polyMeshFilter::filterIndirectPatchFaces()
                 << "    Number of marked points : "
                 << returnReduce(isErrorPoint.count(), sumOp<unsigned int>())
                 << endl;
+
+            updatePointErrorCount
+            (
+                isErrorPoint,
+                origToCurrentPointMap,
+                pointErrorCount
+            );
+
+            checkMeshEdgesAndRelaxEdges
+            (
+                newMesh,
+                origToCurrentPointMap,
+                isErrorPoint,
+                pointErrorCount
+            );
+
+            checkMeshFacesAndRelaxEdges
+            (
+                newMesh,
+                origToCurrentPointMap,
+                isErrorPoint,
+                pointErrorCount
+            );
+        }
+        else
+        {
+            return -1;
         }
     }
 

@@ -52,6 +52,7 @@ namespace Foam
 class polyMesh;
 class fvMesh;
 class PackedBoolList;
+class faceZone;
 
 /*---------------------------------------------------------------------------*\
                        Class polyMeshFilter Declaration
@@ -238,7 +239,7 @@ public:
             label filterEdges(const label nOriginalBadFaces);
 
             //- Filter all faces that are in the face zone indirectPatchFaces
-            label filterIndirectPatchFaces();
+            label filterFaceZone(const faceZone& fZone);
 };
 
 

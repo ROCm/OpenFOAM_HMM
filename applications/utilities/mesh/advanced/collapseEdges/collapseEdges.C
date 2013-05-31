@@ -72,10 +72,11 @@ int main(int argc, char *argv[])
         "Collapse small and sliver faces as well as small edges"
     );
 
-    argList::addBoolOption
+    argList::addOption
     (
-        "collapseIndirectPatchFaces",
-        "Collapse faces that are in the face zone indirectPatchFaces"
+        "collapseFaceZone",
+        "zoneName",
+        "Collapse faces that are in the supplied face zone"
     );
 
 #   include "addOverwriteOption.H"
@@ -92,8 +93,7 @@ int main(int argc, char *argv[])
     const bool overwrite = args.optionFound("overwrite");
 
     const bool collapseFaces = args.optionFound("collapseFaces");
-    const bool collapseIndirectPatchFaces =
-        args.optionFound("collapseIndirectPatchFaces");
+    const bool collapseFaceZone = args.optionFound("collapseFaceZone");
 
     forAll(timeDirs, timeI)
     {
@@ -115,11 +115,15 @@ int main(int argc, char *argv[])
             meshMod.changeMesh(mesh, false);
         }
 
-        if (collapseIndirectPatchFaces)
+        if (collapseFaceZone)
         {
+            const word faceZoneName = args.optionRead<word>("collapseFaceZone");
+
+            const faceZone& fZone = mesh.faceZones()[faceZoneName];
+
             // Filter faces. Pass in the number of bad faces that are present
             // from the previous edge filtering to use as a stopping criterion.
-            meshFilter.filterIndirectPatchFaces();
+            meshFilter.filterFaceZone(fZone);
             {
                 polyTopoChange meshMod(newMesh);
 
