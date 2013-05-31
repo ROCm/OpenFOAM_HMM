@@ -215,12 +215,47 @@ bool intersectSurfaces
 }
 
 
+label calcNormalDirection
+(
+    const vector& normal,
+    const vector& otherNormal,
+    const vector& edgeDir,
+    const vector& faceCentre,
+    const vector& pointOnEdge
+)
+{
+    vector cross = (normal ^ edgeDir);
+    cross /= mag(cross);
+
+    vector fC0tofE0 = faceCentre - pointOnEdge;
+    fC0tofE0 /= mag(fC0tofE0);
+
+    label nDir = ((cross & fC0tofE0) > 0.0 ? 1 : -1);
+
+    nDir *= ((otherNormal & fC0tofE0) > 0.0 ? -1 : 1);
+
+    return nDir;
+}
+
+
 int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("action");
     argList::validArgs.append("surface file");
     argList::validArgs.append("surface file");
+
+    argList::addBoolOption
+    (
+        "surf1Baffle",
+        "Mark surface 1 as a baffle"
+    );
+
+    argList::addBoolOption
+    (
+        "surf2Baffle",
+        "Mark surface 2 as a baffle"
+    );
 
     argList::addBoolOption
     (
@@ -250,10 +285,10 @@ int main(int argc, char *argv[])
     {
         FatalErrorIn(args.executable())
             << "Unsupported action " << action << endl
-            << "Supported actions:" << validActions.toc() << exit(FatalError);
+            << "Supported actions:" << validActions.toc() << abort(FatalError);
     }
 
-    fileName surf1Name(args[2]);
+    fileName surf1Name(args.args()[2]);
     Info<< "Reading surface " << surf1Name << endl;
     triSurface surf1(surf1Name);
 
@@ -268,6 +303,9 @@ int main(int argc, char *argv[])
     Info<< surf2Name << " statistics:" << endl;
     surf2.writeStats(Info);
     Info<< endl;
+
+    const bool surf1Baffle = args.optionFound("surf1Baffle");
+    const bool surf2Baffle = args.optionFound("surf2Baffle");
 
     edgeIntersections edge1Cuts;
     edgeIntersections edge2Cuts;
@@ -330,52 +368,142 @@ int main(int argc, char *argv[])
 
     label nFeatEds = inter.cutEdges().size();
 
-    vectorField normals(2*nFeatEds, vector::zero);
+    DynamicList<vector> normals(2*nFeatEds);
     vectorField edgeDirections(nFeatEds, vector::zero);
-    labelListList edgeNormals(nFeatEds, labelList(2, label(-1)));
+    DynamicList<label> normalVolumeTypes(2*nFeatEds);
+    List<DynamicList<label> > edgeNormals(nFeatEds);
+    List<DynamicList<label> > normalDirections(nFeatEds);
 
-    triSurfaceSearch querySurf1(surf1);
-    triSurfaceSearch querySurf2(surf2);
-
-    OFstream normalFile(sFeatFileName + "_normals.obj");
-
-    scalar scale = 0.05*min
-    (
-        querySurf1.tree().bb().mag(),
-        querySurf2.tree().bb().mag()
-    );
-
-    forAll(inter.cutEdges(), i)
+    forAllConstIter(labelPairLookup, inter.facePairToEdge(), iter)
     {
-        const edge& fE(inter.cutEdges()[i]);
+        const label& cutEdgeI = iter();
+        const labelPair& facePair = iter.key();
 
-        point fEC = fE.centre(inter.cutPoints());
+        const edge& fE = inter.cutEdges()[cutEdgeI];
 
-        pointIndexHit nearest1 = querySurf1.tree().findNearest(fEC, sqr(GREAT));
-        pointIndexHit nearest2 = querySurf2.tree().findNearest(fEC, sqr(GREAT));
+        const vector& norm1 = surf1.faceNormals()[facePair.first()];
+        const vector& norm2 = surf2.faceNormals()[facePair.second()];
 
-        normals[2*i] = surf1.faceNormals()[nearest1.index()];
-        normals[2*i + 1] = surf2.faceNormals()[nearest2.index()];
+        DynamicList<label>& eNormals = edgeNormals[cutEdgeI];
+        DynamicList<label>& nDirections = normalDirections[cutEdgeI];
 
-        edgeNormals[i][0] = 2*i;
-        edgeNormals[i][1] = 2*i + 1;
+        edgeDirections[cutEdgeI] = fE.vec(inter.cutPoints());
 
-        edgeDirections[i] = fE.vec(inter.cutPoints());
+        normals.append(norm1);
 
+        if (surf1Baffle)
         {
-            meshTools::writeOBJ(normalFile, inter.cutPoints()[fE.start()]);
-            meshTools::writeOBJ(normalFile, inter.cutPoints()[fE.end()]);
+            normalVolumeTypes.append(extendedFeatureEdgeMesh::BOTH);
 
-            normalFile<< "l " << (5*i) + 1 << " " << (5*i) + 2<< endl;
+            nDirections.append(1);
+        }
+        else
+        {
+            normalVolumeTypes.append(extendedFeatureEdgeMesh::INSIDE);
+            nDirections.append
+            (
+                calcNormalDirection
+                (
+                    norm1,
+                    norm2,
+                    edgeDirections[cutEdgeI],
+                    surf1[facePair.first()].centre(surf1.points()),
+                    inter.cutPoints()[fE.start()]
+                )
+            );
+        }
 
-            meshTools::writeOBJ(normalFile, fEC);
-            meshTools::writeOBJ(normalFile, fEC + scale*normals[2*i]);
-            meshTools::writeOBJ(normalFile, fEC + scale*normals[2*i + 1]);
+        eNormals.append(normals.size() - 1);
 
-            normalFile<< "l " << (5*i) + 3 << " " << (5*i) + 4 << endl;
-            normalFile<< "l " << (5*i) + 3 << " " << (5*i) + 5 << endl;
+        normals.append(norm2);
+
+        if (surf2Baffle)
+        {
+            normalVolumeTypes.append(extendedFeatureEdgeMesh::BOTH);
+
+            nDirections.append(1);
+        }
+        else
+        {
+            normalVolumeTypes.append(extendedFeatureEdgeMesh::INSIDE);
+
+            nDirections.append
+            (
+                calcNormalDirection
+                (
+                    norm2,
+                    norm1,
+                    edgeDirections[cutEdgeI],
+                    surf2[facePair.second()].centre(surf2.points()),
+                    inter.cutPoints()[fE.start()]
+                )
+            );
+        }
+
+        eNormals.append(normals.size() - 1);
+
+
+        if (surf1Baffle)
+        {
+            normals.append(norm2);
+
+            if (surf2Baffle)
+            {
+                normalVolumeTypes.append(extendedFeatureEdgeMesh::BOTH);
+
+                nDirections.append(1);
+            }
+            else
+            {
+                normalVolumeTypes.append(extendedFeatureEdgeMesh::INSIDE);
+
+                nDirections.append
+                (
+                    calcNormalDirection
+                    (
+                        norm2,
+                        norm1,
+                        edgeDirections[cutEdgeI],
+                        surf2[facePair.second()].centre(surf2.points()),
+                        inter.cutPoints()[fE.start()]
+                    )
+                );
+            }
+
+            eNormals.append(normals.size() - 1);
+        }
+
+        if (surf2Baffle)
+        {
+            normals.append(norm1);
+
+            if (surf1Baffle)
+            {
+                normalVolumeTypes.append(extendedFeatureEdgeMesh::BOTH);
+
+                nDirections.append(1);
+            }
+            else
+            {
+                normalVolumeTypes.append(extendedFeatureEdgeMesh::INSIDE);
+
+                nDirections.append
+                (
+                    calcNormalDirection
+                    (
+                        norm1,
+                        norm2,
+                        edgeDirections[cutEdgeI],
+                        surf1[facePair.first()].centre(surf1.points()),
+                        inter.cutPoints()[fE.start()]
+                    )
+                );
+            }
+
+            eNormals.append(normals.size() - 1);
         }
     }
+
 
     label internalStart = -1;
 
@@ -422,6 +550,19 @@ int main(int argc, char *argv[])
     // Flat, open or multiple edges are assumed to be impossible
     // Region edges are not explicitly supported by surfaceIntersection
 
+    vectorField normalsTmp(normals);
+    PackedList<2> normalVolumeTypesTmp(normalVolumeTypes);
+    labelListList edgeNormalsTmp(edgeNormals.size());
+    forAll(edgeNormalsTmp, i)
+    {
+        edgeNormalsTmp[i] = edgeNormals[i];
+    }
+    labelListList normalDirectionsTmp(normalDirections.size());
+    forAll(normalDirectionsTmp, i)
+    {
+        normalDirectionsTmp[i] = normalDirections[i];
+    }
+
     extendedFeatureEdgeMesh feMesh
     (
         IOobject
@@ -442,9 +583,11 @@ int main(int argc, char *argv[])
         nFeatEds,           // flatStart,
         nFeatEds,           // openStart,
         nFeatEds,           // multipleStart,
-        normals,
+        normalsTmp,
+        normalVolumeTypesTmp,
         edgeDirections,
-        edgeNormals,
+        normalDirectionsTmp,
+        edgeNormalsTmp,
         labelListList(0),   // featurePointNormals,
         labelListList(0),   // featurePointEdges,
         labelList(0)        // regionEdges
