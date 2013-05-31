@@ -33,6 +33,7 @@ License
 #include "indexedCellChecks.H"
 #include "controlMeshRefinement.H"
 #include "smoothAlignmentSolver.H"
+#include "OBJstream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
