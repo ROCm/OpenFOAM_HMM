@@ -124,49 +124,49 @@ void Foam::triad::orthogonalize()
     {
         for (int i=0; i<2; i++)
         {
-        scalar o01 = mag(operator[](0) & operator[](1));
-        scalar o02 = mag(operator[](0) & operator[](2));
-        scalar o12 = mag(operator[](1) & operator[](2));
+            scalar o01 = mag(operator[](0) & operator[](1));
+            scalar o02 = mag(operator[](0) & operator[](2));
+            scalar o12 = mag(operator[](1) & operator[](2));
 
-        if (o01 < o02 && o01 < o12)
-        {
-            operator[](2) = orthogonal(operator[](0), operator[](1));
+            if (o01 < o02 && o01 < o12)
+            {
+                operator[](2) = orthogonal(operator[](0), operator[](1));
 
-            // if (o02 < o12)
-            // {
-            //     operator[](1) = orthogonal(operator[](0), operator[](2));
-            // }
-            // else
-            // {
-            //     operator[](0) = orthogonal(operator[](1), operator[](2));
-            // }
-        }
-        else if (o02 < o12)
-        {
-            operator[](1) = orthogonal(operator[](0), operator[](2));
+                // if (o02 < o12)
+                // {
+                //     operator[](1) = orthogonal(operator[](0), operator[](2));
+                // }
+                // else
+                // {
+                //     operator[](0) = orthogonal(operator[](1), operator[](2));
+                // }
+            }
+            else if (o02 < o12)
+            {
+                operator[](1) = orthogonal(operator[](0), operator[](2));
 
-            // if (o01 < o12)
-            // {
-            //     operator[](2) = orthogonal(operator[](0), operator[](1));
-            // }
-            // else
-            // {
-            //     operator[](0) = orthogonal(operator[](1), operator[](2));
-            // }
-        }
-        else
-        {
-            operator[](0) = orthogonal(operator[](1), operator[](2));
+                // if (o01 < o12)
+                // {
+                //     operator[](2) = orthogonal(operator[](0), operator[](1));
+                // }
+                // else
+                // {
+                //     operator[](0) = orthogonal(operator[](1), operator[](2));
+                // }
+            }
+            else
+            {
+                operator[](0) = orthogonal(operator[](1), operator[](2));
 
-            // if (o02 < o01)
-            // {
-            //     operator[](1) = orthogonal(operator[](0), operator[](2));
-            // }
-            // else
-            // {
-            //     operator[](2) = orthogonal(operator[](0), operator[](1));
-            // }
-        }
+                // if (o02 < o01)
+                // {
+                //     operator[](1) = orthogonal(operator[](0), operator[](2));
+                // }
+                // else
+                // {
+                //     operator[](2) = orthogonal(operator[](0), operator[](1));
+                // }
+            }
         }
     }
 }
