@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,32 +48,6 @@ namespace Foam
 
 class primitiveMeshTools
 {
-
-protected:
-
-   // Protected Member Functions
-
-        //- Skewness of single face
-        static scalar faceSkewness
-        (
-            const primitiveMesh& mesh,
-            const pointField& p,
-            const vectorField& fCtrs,
-            const vectorField& fAreas,
-
-            const label faceI,
-            const point& ownCc,
-            const point& neiCc
-        );
-
-        //- Orthogonality of single face
-        static scalar faceOrthogonality
-        (
-            const point& ownCc,
-            const point& neiCc,
-            const vector& s
-        );
-
 public:
 
     //- Generate non-orthogonality field (internal faces only)
@@ -154,6 +128,41 @@ public:
         const PackedBoolList& internalOrCoupledFace
     );
 
+
+    // Helpers: single face check
+
+        //- Skewness of single face
+        static scalar faceSkewness
+        (
+            const primitiveMesh& mesh,
+            const pointField& p,
+            const vectorField& fCtrs,
+            const vectorField& fAreas,
+
+            const label faceI,
+            const point& ownCc,
+            const point& neiCc
+        );
+
+        //- Skewness of single boundary face
+        static scalar boundaryFaceSkewness
+        (
+            const primitiveMesh& mesh,
+            const pointField& p,
+            const vectorField& fCtrs,
+            const vectorField& fAreas,
+
+            const label faceI,
+            const point& ownCc
+        );
+
+        //- Orthogonality of single face
+        static scalar faceOrthogonality
+        (
+            const point& ownCc,
+            const point& neiCc,
+            const vector& s
+        );
 };
 
 

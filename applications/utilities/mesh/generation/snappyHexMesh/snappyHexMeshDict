@@ -478,7 +478,7 @@ meshQualityControls
     //  resulting volume after snapping (by approximation) is larger than
     //  minVolCollapseRatio times old volume (i.e. not collapsed to flat cell).
     //  If <0 : delete always.
-    //minVolCollapseRatio 0.5;
+    //minVolCollapseRatio 0.1;
 
     // Advanced
 
