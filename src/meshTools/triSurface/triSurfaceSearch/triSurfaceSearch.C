@@ -200,27 +200,32 @@ Foam::triSurfaceSearch::tree() const
     if (treePtr_.empty())
     {
         // Calculate bb without constructing local point numbering.
-        treeBoundBox bb;
-        label nPoints;
-        PatchTools::calcBounds(surface(), bb, nPoints);
+        treeBoundBox bb(vector::zero, vector::zero);
 
-        if (nPoints != surface().points().size())
+        if (surface().size())
         {
-            WarningIn("triSurfaceSearch::tree() const")
-                << "Surface does not have compact point numbering."
-                << " Of " << surface().points().size() << " only " << nPoints
-                << " are used. This might give problems in some routines."
-                << endl;
+            label nPoints;
+            PatchTools::calcBounds(surface(), bb, nPoints);
+
+            if (nPoints != surface().points().size())
+            {
+                WarningIn("triSurfaceSearch::tree() const")
+                    << "Surface does not have compact point numbering."
+                    << " Of " << surface().points().size()
+                    << " only " << nPoints
+                    << " are used. This might give problems in some routines."
+                    << endl;
+            }
+
+            // Random number generator. Bit dodgy since not exactly random ;-)
+            Random rndGen(65431);
+
+            // Slightly extended bb. Slightly off-centred just so on symmetric
+            // geometry there are less face/edge aligned items.
+            bb = bb.extend(rndGen, 1e-4);
+            bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+            bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
         }
-
-        // Random number generator. Bit dodgy since not exactly random ;-)
-        Random rndGen(65431);
-
-        // Slightly extended bb. Slightly off-centred just so on symmetric
-        // geometry there are less face/edge aligned items.
-        bb = bb.extend(rndGen, 1e-4);
-        bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-        bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
         scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
         indexedOctree<treeDataTriSurface>::perturbTol() = tolerance_;

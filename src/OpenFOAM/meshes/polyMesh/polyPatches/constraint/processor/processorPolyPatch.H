@@ -134,7 +134,6 @@ public:
             const label start,
             const label index,
             const polyBoundaryMesh& bm,
-            const label comm,
             const int myProcNo,
             const int neighbProcNo,
             const transformType transform = UNKNOWN  // transformation type

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,6 +43,7 @@ ReactingMultiphaseLookupTableInjection
     (
         readScalar(this->coeffDict().lookup("parcelsPerSecond"))
     ),
+    randomise_(readBool(this->coeffDict().lookup("randomise"))),
     injectors_
     (
         IOobject
@@ -88,6 +89,7 @@ ReactingMultiphaseLookupTableInjection
     inputFileName_(im.inputFileName_),
     duration_(im.duration_),
     parcelsPerSecond_(im.parcelsPerSecond_),
+    randomise_(im.randomise_),
     injectors_(im.injectors_),
     injectorCells_(im.injectorCells_),
     injectorTetFaces_(im.injectorTetFaces_),
@@ -182,7 +184,16 @@ void Foam::ReactingMultiphaseLookupTableInjection<CloudType>::setPositionAndCell
     label& tetPtI
 )
 {
-    label injectorI = parcelI*injectorCells_.size()/nParcels;
+    label injectorI = 0;
+    if (randomise_)
+    {
+        cachedRandom& rnd = this->owner().rndGen();
+        injectorI = rnd.position<label>(0, injectorCells_.size() - 1);
+    }
+    else
+    {
+        injectorI = parcelI*injectorCells_.size()/nParcels;
+    }
 
     position = injectors_[injectorI].x();
     cellOwner = injectorCells_[injectorI];

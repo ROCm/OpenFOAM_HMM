@@ -90,8 +90,6 @@ Foam::faceAreaPairGAMGAgglomeration::faceAreaPairGAMGAgglomeration
 :
     pairGAMGAgglomeration(mesh, controlDict)
 {
-    vectorField n(faceAreas/mag(faceAreas));
-
     //agglomerate(mesh, sqrt(mag(faceAreas)));
     agglomerate
     (
@@ -100,7 +98,8 @@ Foam::faceAreaPairGAMGAgglomeration::faceAreaPairGAMGAgglomeration
         (
             cmptMultiply
             (
-                n,
+                faceAreas
+               /sqrt(mag(faceAreas)),
                 vector(1, 1.01, 1.02)
                 //vector::one
             )

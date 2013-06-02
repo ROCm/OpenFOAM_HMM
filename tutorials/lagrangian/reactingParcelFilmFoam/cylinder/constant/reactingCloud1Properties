@@ -88,6 +88,7 @@ subModels
             inputFile       "parcelInjectionProperties";
             duration        20.0;
             parcelsPerSecond 50;
+            randomise       true;
         }
     }
 

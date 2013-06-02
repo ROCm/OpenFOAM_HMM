@@ -29,6 +29,7 @@ License
 #include "tetrahedron.H"
 #include "syncTools.H"
 #include "unitConversion.H"
+#include "primitiveMeshTools.H"
 
 namespace Foam
 {
@@ -283,29 +284,6 @@ Foam::scalar Foam::polyMeshGeometry::checkNonOrtho
         }
     }
     return dDotS;
-}
-
-
-Foam::scalar Foam::polyMeshGeometry::calcSkewness
-(
-    const point& ownCc,
-    const point& neiCc,
-    const point& fc
-)
-{
-    scalar dOwn = mag(fc - ownCc);
-    scalar dNei = mag(fc - neiCc);
-
-    point faceIntersection =
-        ownCc*dNei/(dOwn+dNei+VSMALL)
-      + neiCc*dOwn/(dOwn+dNei+VSMALL);
-
-    return
-        mag(fc - faceIntersection)
-      / (
-            mag(neiCc-ownCc)
-          + VSMALL
-        );
 }
 
 
@@ -1008,6 +986,7 @@ bool Foam::polyMeshGeometry::checkFaceSkewness
     const scalar internalSkew,
     const scalar boundarySkew,
     const polyMesh& mesh,
+    const pointField& points,
     const vectorField& cellCentres,
     const vectorField& faceCentres,
     const vectorField& faceAreas,
@@ -1024,14 +1003,8 @@ bool Foam::polyMeshGeometry::checkFaceSkewness
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
     // Calculate coupled cell centre
-    pointField neiCc(mesh.nFaces()-mesh.nInternalFaces());
-
-    for (label faceI = mesh.nInternalFaces(); faceI < mesh.nFaces(); faceI++)
-    {
-        neiCc[faceI-mesh.nInternalFaces()] = cellCentres[own[faceI]];
-    }
-    syncTools::swapBoundaryFacePositions(mesh, neiCc);
-
+    pointField neiCc;
+    syncTools::swapBoundaryCellPositions(mesh, cellCentres, neiCc);
 
     scalar maxSkew = 0;
 
@@ -1043,11 +1016,16 @@ bool Foam::polyMeshGeometry::checkFaceSkewness
 
         if (mesh.isInternalFace(faceI))
         {
-            scalar skewness = calcSkewness
+            scalar skewness = primitiveMeshTools::faceSkewness
             (
+                mesh,
+                points,
+                faceCentres,
+                faceAreas,
+
+                faceI,
                 cellCentres[own[faceI]],
-                cellCentres[nei[faceI]],
-                faceCentres[faceI]
+                cellCentres[nei[faceI]]
             );
 
             // Check if the skewness vector is greater than the PN vector.
@@ -1073,11 +1051,16 @@ bool Foam::polyMeshGeometry::checkFaceSkewness
         }
         else if (patches[patches.whichPatch(faceI)].coupled())
         {
-            scalar skewness = calcSkewness
+            scalar skewness = primitiveMeshTools::faceSkewness
             (
+                mesh,
+                points,
+                faceCentres,
+                faceAreas,
+
+                faceI,
                 cellCentres[own[faceI]],
-                neiCc[faceI-mesh.nInternalFaces()],
-                faceCentres[faceI]
+                neiCc[faceI-mesh.nInternalFaces()]
             );
 
             // Check if the skewness vector is greater than the PN vector.
@@ -1103,21 +1086,17 @@ bool Foam::polyMeshGeometry::checkFaceSkewness
         }
         else
         {
-            // Boundary faces: consider them to have only skewness error.
-            // (i.e. treat as if mirror cell on other side)
+            scalar skewness = primitiveMeshTools::boundaryFaceSkewness
+            (
+                mesh,
+                points,
+                faceCentres,
+                faceAreas,
 
-            vector faceNormal = faceAreas[faceI];
-            faceNormal /= mag(faceNormal) + ROOTVSMALL;
+                faceI,
+                cellCentres[own[faceI]]
+            );
 
-            vector dOwn = faceCentres[faceI] - cellCentres[own[faceI]];
-
-            vector dWall = faceNormal*(faceNormal & dOwn);
-
-            point faceIntersection = cellCentres[own[faceI]] + dWall;
-
-            scalar skewness =
-                mag(faceCentres[faceI] - faceIntersection)
-                /(2*mag(dWall) + ROOTVSMALL);
 
             // Check if the skewness vector is greater than the PN vector.
             // This does not cause trouble but is a good indication of a poor
@@ -1148,12 +1127,18 @@ bool Foam::polyMeshGeometry::checkFaceSkewness
         label face1 = baffles[i].second();
 
         const point& ownCc = cellCentres[own[face0]];
+        const point& neiCc = cellCentres[own[face1]];
 
-        scalar skewness = calcSkewness
+        scalar skewness = primitiveMeshTools::faceSkewness
         (
+            mesh,
+            points,
+            faceCentres,
+            faceAreas,
+
+            face0,
             ownCc,
-            cellCentres[own[face1]],
-            faceCentres[face0]
+            neiCc
         );
 
         // Check if the skewness vector is greater than the PN vector.
@@ -2361,30 +2346,30 @@ bool Foam::polyMeshGeometry::checkFaceTets
 }
 
 
-bool Foam::polyMeshGeometry::checkFaceSkewness
-(
-    const bool report,
-    const scalar internalSkew,
-    const scalar boundarySkew,
-    const labelList& checkFaces,
-    const List<labelPair>& baffles,
-    labelHashSet* setPtr
-) const
-{
-    return checkFaceSkewness
-    (
-        report,
-        internalSkew,
-        boundarySkew,
-        mesh_,
-        cellCentres_,
-        faceCentres_,
-        faceAreas_,
-        checkFaces,
-        baffles,
-        setPtr
-    );
-}
+//bool Foam::polyMeshGeometry::checkFaceSkewness
+//(
+//    const bool report,
+//    const scalar internalSkew,
+//    const scalar boundarySkew,
+//    const labelList& checkFaces,
+//    const List<labelPair>& baffles,
+//    labelHashSet* setPtr
+//) const
+//{
+//    return checkFaceSkewness
+//    (
+//        report,
+//        internalSkew,
+//        boundarySkew,
+//        mesh_,
+//        cellCentres_,
+//        faceCentres_,
+//        faceAreas_,
+//        checkFaces,
+//        baffles,
+//        setPtr
+//    );
+//}
 
 
 bool Foam::polyMeshGeometry::checkFaceWeights

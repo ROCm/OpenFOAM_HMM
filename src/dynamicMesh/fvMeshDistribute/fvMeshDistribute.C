@@ -945,7 +945,6 @@ void Foam::fvMeshDistribute::addProcPatches
                         mesh_.nFaces(),
                         mesh_.boundaryMesh().size(),
                         mesh_.boundaryMesh(),
-                        Pstream::worldComm,
                         Pstream::myProcNo(),
                         nbrProc[bFaceI]
                     );
@@ -989,7 +988,6 @@ void Foam::fvMeshDistribute::addProcPatches
                         mesh_.nFaces(),
                         mesh_.boundaryMesh().size(),
                         mesh_.boundaryMesh(),
-                        Pstream::worldComm,
                         Pstream::myProcNo(),
                         nbrProc[bFaceI],
                         cycName,

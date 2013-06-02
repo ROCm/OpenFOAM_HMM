@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -229,6 +229,7 @@ public:
                 const scalar internalSkew,
                 const scalar boundarySkew,
                 const polyMesh& mesh,
+                const pointField& points,
                 const vectorField& cellCentres,
                 const vectorField& faceCentres,
                 const vectorField& faceAreas,
@@ -367,16 +368,6 @@ public:
                 const bool report,
                 const scalar minTetQuality,
                 const pointField& p,
-                const labelList& checkFaces,
-                const List<labelPair>& baffles,
-                labelHashSet* setPtr
-            ) const;
-
-            bool checkFaceSkewness
-            (
-                const bool report,
-                const scalar internalSkew,
-                const scalar boundarySkew,
                 const labelList& checkFaces,
                 const List<labelPair>& baffles,
                 labelHashSet* setPtr

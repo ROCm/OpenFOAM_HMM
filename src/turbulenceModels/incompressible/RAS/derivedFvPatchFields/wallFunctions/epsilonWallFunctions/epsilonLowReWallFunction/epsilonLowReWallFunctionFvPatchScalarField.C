@@ -55,6 +55,64 @@ scalar epsilonLowReWallFunctionFvPatchScalarField::yPlusLam
 }
 
 
+void epsilonLowReWallFunctionFvPatchScalarField::calculate
+(
+    const turbulenceModel& turbulence,
+    const List<scalar>& cornerWeights,
+    const fvPatch& patch,
+    scalarField& G,
+    scalarField& epsilon
+)
+{
+    const label patchI = patch.index();
+
+    const scalarField& y = turbulence.y()[patchI];
+
+    const scalar Cmu25 = pow025(Cmu_);
+    const scalar Cmu75 = pow(Cmu_, 0.75);
+
+    const tmp<volScalarField> tk = turbulence.k();
+    const volScalarField& k = tk();
+
+    const tmp<volScalarField> tnu = turbulence.nu();
+    const scalarField& nuw = tnu().boundaryField()[patchI];
+
+    const tmp<volScalarField> tnut = turbulence.nut();
+    const volScalarField& nut = tnut();
+    const scalarField& nutw = nut.boundaryField()[patchI];
+
+    const fvPatchVectorField& Uw = turbulence.U().boundaryField()[patchI];
+
+    const scalarField magGradUw(mag(Uw.snGrad()));
+
+    // Set epsilon and G
+    forAll(nutw, faceI)
+    {
+        label cellI = patch.faceCells()[faceI];
+
+        scalar yPlus = Cmu25*sqrt(k[cellI])*y[faceI]/nuw[faceI];
+
+        scalar w = cornerWeights[faceI];
+
+        if (yPlus > yPlusLam_)
+        {
+            epsilon[cellI] = w*Cmu75*pow(k[cellI], 1.5)/(kappa_*y[faceI]);
+        }
+        else
+        {
+            epsilon[cellI] = w*2.0*k[cellI]*nuw[faceI]/sqr(y[faceI]);
+        }
+
+        G[cellI] =
+            w
+           *(nutw[faceI] + nuw[faceI])
+           *magGradUw[faceI]
+           *Cmu25*sqrt(k[cellI])
+           /(kappa_*y[faceI]);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 epsilonLowReWallFunctionFvPatchScalarField::
@@ -117,81 +175,6 @@ epsilonLowReWallFunctionFvPatchScalarField
     epsilonWallFunctionFvPatchScalarField(ewfpsf, iF),
     yPlusLam_(ewfpsf.yPlusLam_)
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void epsilonLowReWallFunctionFvPatchScalarField::updateCoeffs()
-{
-    if (updated())
-    {
-        return;
-    }
-
-    const label patchI = patch().index();
-
-    const turbulenceModel& turbulence =
-        db().lookupObject<turbulenceModel>("turbulenceModel");
-    const scalarField& y = turbulence.y()[patchI];
-
-    volScalarField& G =
-        const_cast<volScalarField&>
-        (
-            db().lookupObject<volScalarField>
-            (
-                turbulence.GName()
-            )
-        );
-
-    DimensionedField<scalar, volMesh>& epsilon =
-        const_cast<DimensionedField<scalar, volMesh>&>
-        (
-            dimensionedInternalField()
-        );
-
-    const tmp<volScalarField> tk = turbulence.k();
-    const volScalarField& k = tk();
-
-    const tmp<volScalarField> tnu = turbulence.nu();
-    const scalarField& nuw = tnu().boundaryField()[patchI];
-
-    const tmp<volScalarField> tnut = turbulence.nut();
-    const volScalarField& nut = tnut();
-    const scalarField& nutw = nut.boundaryField()[patchI];
-
-    const fvPatchVectorField& Uw = turbulence.U().boundaryField()[patchI];
-    const scalarField magGradUw(mag(Uw.snGrad()));
-
-    const scalar Cmu25 = pow025(Cmu_);
-    const scalar Cmu75 = pow(Cmu_, 0.75);
-
-    // Set epsilon and G
-    forAll(nutw, faceI)
-    {
-        label faceCellI = patch().faceCells()[faceI];
-
-        scalar yPlus = Cmu25*sqrt(k[faceCellI])*y[faceI]/nuw[faceI];
-
-        if (yPlus > yPlusLam_)
-        {
-            epsilon[faceCellI] = Cmu75*pow(k[faceCellI], 1.5)/(kappa_*y[faceI]);
-        }
-        else
-        {
-            epsilon[faceCellI] = 2.0*k[faceCellI]*nuw[faceI]/sqr(y[faceI]);
-        }
-
-        G[faceCellI] =
-            (nutw[faceI] + nuw[faceI])
-           *magGradUw[faceI]
-           *Cmu25*sqrt(k[faceCellI])
-           /(kappa_*y[faceI]);
-    }
-
-    fixedInternalValueFvPatchField<scalar>::updateCoeffs();
-
-    // TODO: perform averaging for cells sharing more than one boundary face
-}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

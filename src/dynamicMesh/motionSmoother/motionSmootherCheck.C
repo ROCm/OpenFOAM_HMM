@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -239,6 +239,7 @@ bool Foam::motionSmoother::checkMesh
             maxIntSkew,
             maxBounSkew,
             mesh,
+            mesh.points(),
             mesh.cellCentres(),
             mesh.faceCentres(),
             mesh.faceAreas(),
@@ -481,14 +482,14 @@ bool Foam::motionSmoother::checkMesh
     (
         readScalar(dict.lookup("minArea", true))
     );
-    const scalar maxIntSkew
-    (
-        readScalar(dict.lookup("maxInternalSkewness", true))
-    );
-    const scalar maxBounSkew
-    (
-        readScalar(dict.lookup("maxBoundarySkewness", true))
-    );
+    //const scalar maxIntSkew
+    //(
+    //    readScalar(dict.lookup("maxInternalSkewness", true))
+    //);
+    //const scalar maxBounSkew
+    //(
+    //    readScalar(dict.lookup("maxBoundarySkewness", true))
+    //);
     const scalar minWeight
     (
         readScalar(dict.lookup("minFaceWeight", true))
@@ -615,27 +616,30 @@ bool Foam::motionSmoother::checkMesh
         nWrongFaces = nNewWrongFaces;
     }
 
-    if (maxIntSkew > 0 || maxBounSkew > 0)
-    {
-        meshGeom.checkFaceSkewness
-        (
-            report,
-            maxIntSkew,
-            maxBounSkew,
-            checkFaces,
-            baffles,
-            &wrongFaces
-        );
 
-        label nNewWrongFaces = returnReduce(wrongFaces.size(), sumOp<label>());
-
-        Info<< "    faces with skewness > "
-            << setw(3) << maxIntSkew
-            << " (internal) or " << setw(3) << maxBounSkew
-            << " (boundary) : " << nNewWrongFaces-nWrongFaces << endl;
-
-        nWrongFaces = nNewWrongFaces;
-    }
+    //- Note: cannot check the skewness without the points and don't want
+    //  to store them on polyMeshGeometry.
+    //if (maxIntSkew > 0 || maxBounSkew > 0)
+    //{
+    //    meshGeom.checkFaceSkewness
+    //    (
+    //        report,
+    //        maxIntSkew,
+    //        maxBounSkew,
+    //        checkFaces,
+    //        baffles,
+    //        &wrongFaces
+    //    );
+    //
+    //    label nNewWrongFaces = returnReduce(wrongFaces.size(),sumOp<label>());
+    //
+    //    Info<< "    faces with skewness > "
+    //        << setw(3) << maxIntSkew
+    //        << " (internal) or " << setw(3) << maxBounSkew
+    //        << " (boundary) : " << nNewWrongFaces-nWrongFaces << endl;
+    //
+    //    nWrongFaces = nNewWrongFaces;
+    //}
 
     if (minWeight >= 0 && minWeight < 1)
     {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -67,6 +67,9 @@ class refinementParameters
         //- Curvature
         scalar curvature_;
 
+        //- Planarity criterion
+        scalar planarAngle_;
+
         //- Number of layers between different refinement levels
         const label nBufferLayers_;
 
@@ -127,6 +130,12 @@ public:
             scalar curvature() const
             {
                 return curvature_;
+            }
+
+            //- Angle when two intersections are considered to be planar
+            scalar planarAngle() const
+            {
+                return planarAngle_;
             }
 
             //- Number of layers between different refinement levels

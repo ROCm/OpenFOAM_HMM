@@ -133,7 +133,7 @@ public:
             const label nCells,
             labelList& l,
             labelList& u,
-            const Xfer<PtrList<const lduInterface> >& primitiveInterfaces,
+            PtrList<const lduInterface>& primitiveInterfaces,
             const lduSchedule& ps,
             const label comm
         );

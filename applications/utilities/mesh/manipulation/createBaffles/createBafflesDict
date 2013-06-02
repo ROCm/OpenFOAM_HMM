@@ -14,6 +14,20 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Sample for creating baffles:
+// - usually converting internal faces into two boundary faces
+// - or converting boundary faces into a boundary face
+//   (internalFacesOnly=false)(though should use really createPatch
+//    to do this)
+// - can also create duplicate (overlapping) sets of baffles:
+//      - internalFacesOnly = false
+//      - have 4 entries in patches:
+//          - master
+//          - slave
+//          - additional master
+//          - additional slave
+
+
 // Whether to convert internal faces only (so leave boundary faces intact).
 // This is only relevant if your face selection type can pick up boundary
 // faces.

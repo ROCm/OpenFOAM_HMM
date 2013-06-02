@@ -25,7 +25,85 @@ License
 
 #include "faceAreaWeightAMI.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+template<class SourcePatch, class TargetPatch>
+void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calcAddressing
+(
+    List<DynamicList<label> >& srcAddr,
+    List<DynamicList<scalar> >& srcWght,
+    List<DynamicList<label> >& tgtAddr,
+    List<DynamicList<scalar> >& tgtWght,
+    label srcFaceI,
+    label tgtFaceI
+)
+{
+    // construct weights and addressing
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    label nFacesRemaining = srcAddr.size();
+
+    // list of tgt face neighbour faces
+    DynamicList<label> nbrFaces(10);
+
+    // list of faces currently visited for srcFaceI to avoid multiple hits
+    DynamicList<label> visitedFaces(10);
+
+    // list to keep track of tgt faces used to seed src faces
+    labelList seedFaces(nFacesRemaining, -1);
+    seedFaces[srcFaceI] = tgtFaceI;
+
+    // list to keep track of whether src face can be mapped
+    boolList mapFlag(nFacesRemaining, true);
+
+    // reset starting seed
+    label startSeedI = 0;
+
+    DynamicList<label> nonOverlapFaces;
+    do
+    {
+        // Do advancing front starting from srcFaceI,tgtFaceI
+        bool faceProcessed = processSourceFace
+        (
+            srcFaceI,
+            tgtFaceI,
+
+            nbrFaces,
+            visitedFaces,
+
+            srcAddr,
+            srcWght,
+            tgtAddr,
+            tgtWght
+        );
+
+        mapFlag[srcFaceI] = false;
+
+        nFacesRemaining--;
+
+        if (!faceProcessed)
+        {
+            nonOverlapFaces.append(srcFaceI);
+        }
+
+        // choose new src face from current src face neighbour
+        if (nFacesRemaining > 0)
+        {
+            setNextFaces
+            (
+                startSeedI,
+                srcFaceI,
+                tgtFaceI,
+                mapFlag,
+                seedFaces,
+                visitedFaces
+            );
+        }
+    } while (nFacesRemaining > 0);
+
+    this->srcNonOverlap_.transfer(nonOverlapFaces);
+}
+
 
 template<class SourcePatch, class TargetPatch>
 bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::processSourceFace
@@ -45,6 +123,11 @@ bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::processSourceFace
     List<DynamicList<scalar> >& tgtWght
 )
 {
+    if (tgtStartFaceI == -1)
+    {
+        return false;
+    }
+
     nbrFaces.clear();
     visitedFaces.clear();
 
@@ -101,10 +184,14 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
     label& tgtFaceI,
     const boolList& mapFlag,
     labelList& seedFaces,
-    const DynamicList<label>& visitedFaces
+    const DynamicList<label>& visitedFaces,
+    bool errorOnNotFound
 ) const
 {
     const labelList& srcNbrFaces = this->srcPatch_.faceFaces()[srcFaceI];
+
+    // initialise tgtFaceI
+    tgtFaceI = -1;
 
     // set possible seeds for later use
     bool valuesSet = false;
@@ -195,19 +282,23 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
             }
         }
 
-        FatalErrorIn
-        (
-            "void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::"
-            "setNextFaces"
-            "("
-                "label&, "
-                "label&, "
-                "label&, "
-                "const boolList&, "
-                "labelList&, "
-                "const DynamicList<label>&"
-            ") const"
-        )  << "Unable to set source and target faces" << abort(FatalError);
+        if (errorOnNotFound)
+        {
+            FatalErrorIn
+            (
+                "void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::"
+                "setNextFaces"
+                "("
+                    "label&, "
+                    "label&, "
+                    "label&, "
+                    "const boolList&, "
+                    "labelList&, "
+                    "const DynamicList<label>&, "
+                    "bool"
+                ") const"
+            )  << "Unable to set source and target faces" << abort(FatalError);
+        }
     }
 }
 
@@ -447,77 +538,21 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
     List<DynamicList<label> > tgtAddr(this->tgtPatch_.size());
     List<DynamicList<scalar> > tgtWght(tgtAddr.size());
 
+    calcAddressing
+    (
+        srcAddr,
+        srcWght,
+        tgtAddr,
+        tgtWght,
+        srcFaceI,
+        tgtFaceI
+    );
 
-    // construct weights and addressing
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    label nFacesRemaining = srcAddr.size();
-
-    // list of tgt face neighbour faces
-    DynamicList<label> nbrFaces(10);
-
-    // list of faces currently visited for srcFaceI to avoid multiple hits
-    DynamicList<label> visitedFaces(10);
-
-    // list to keep track of tgt faces used to seed src faces
-    labelList seedFaces(nFacesRemaining, -1);
-    seedFaces[srcFaceI] = tgtFaceI;
-
-    // list to keep track of whether src face can be mapped
-    boolList mapFlag(nFacesRemaining, true);
-
-    // reset starting seed
-    label startSeedI = 0;
-
-    DynamicList<label> nonOverlapFaces;
-    do
+    if (this->srcNonOverlap_.size() != 0)
     {
-        // Do advancing front starting from srcFaceI,tgtFaceI
-        bool faceProcessed = processSourceFace
-        (
-            srcFaceI,
-            tgtFaceI,
-
-            nbrFaces,
-            visitedFaces,
-
-            srcAddr,
-            srcWght,
-            tgtAddr,
-            tgtWght
-        );
-
-        mapFlag[srcFaceI] = false;
-
-        nFacesRemaining--;
-
-        if (!faceProcessed)
-        {
-            nonOverlapFaces.append(srcFaceI);
-        }
-
-        // choose new src face from current src face neighbour
-        if (nFacesRemaining > 0)
-        {
-            setNextFaces
-            (
-                startSeedI,
-                srcFaceI,
-                tgtFaceI,
-                mapFlag,
-                seedFaces,
-                visitedFaces
-            );
-        }
-    } while (nFacesRemaining > 0);
-
-    if (nonOverlapFaces.size() != 0)
-    {
-        Pout<< "    AMI: " << nonOverlapFaces.size()
+        Pout<< "    AMI: " << this->srcNonOverlap_.size()
             << " non-overlap faces identified"
             << endl;
-
-        this->srcNonOverlap_.transfer(nonOverlapFaces);
     }
 
 

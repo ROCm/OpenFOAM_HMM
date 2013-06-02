@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -79,6 +79,9 @@ class ThermoLookupTableInjection
 
         //- Number of parcels per injector - common to all injection sources
         const scalar parcelsPerSecond_;
+
+        //- Flag to indicate to randomise injection positions
+        bool randomise_;
 
         //- List of injectors
         kinematicParcelInjectionDataIOList injectors_;

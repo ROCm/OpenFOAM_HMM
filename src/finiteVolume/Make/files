@@ -18,6 +18,7 @@ $(basicFvPatches)/generic/genericFvPatch.C
 constraintFvPatches = $(fvPatches)/constraint
 $(constraintFvPatches)/cyclic/cyclicFvPatch.C
 $(constraintFvPatches)/cyclicAMI/cyclicAMIFvPatch.C
+$(constraintFvPatches)/cyclicACMI/cyclicACMIFvPatch.C
 $(constraintFvPatches)/cyclicSlip/cyclicSlipFvPatch.C
 $(constraintFvPatches)/empty/emptyFvPatch.C
 $(constraintFvPatches)/nonuniformTransformCyclic/nonuniformTransformCyclicFvPatch.C
@@ -109,6 +110,7 @@ $(basicFvPatchFields)/zeroGradient/zeroGradientFvPatchFields.C
 constraintFvPatchFields = $(fvPatchFields)/constraint
 $(constraintFvPatchFields)/cyclic/cyclicFvPatchFields.C
 $(constraintFvPatchFields)/cyclicAMI/cyclicAMIFvPatchFields.C
+$(constraintFvPatchFields)/cyclicACMI/cyclicACMIFvPatchFields.C
 $(constraintFvPatchFields)/cyclicSlip/cyclicSlipFvPatchFields.C
 $(constraintFvPatchFields)/empty/emptyFvPatchFields.C
 $(constraintFvPatchFields)/jumpCyclic/jumpCyclicFvPatchFields.C
@@ -203,6 +205,7 @@ $(basicFvsPatchFields)/sliced/slicedFvsPatchFields.C
 constraintFvsPatchFields = $(fvsPatchFields)/constraint
 $(constraintFvsPatchFields)/cyclic/cyclicFvsPatchFields.C
 $(constraintFvsPatchFields)/cyclicAMI/cyclicAMIFvsPatchFields.C
+$(constraintFvsPatchFields)/cyclicACMI/cyclicACMIFvsPatchFields.C
 $(constraintFvsPatchFields)/cyclicSlip/cyclicSlipFvsPatchFields.C
 $(constraintFvsPatchFields)/empty/emptyFvsPatchFields.C
 $(constraintFvsPatchFields)/nonuniformTransformCyclic/nonuniformTransformCyclicFvsPatchFields.C

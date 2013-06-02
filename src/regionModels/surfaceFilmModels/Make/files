@@ -24,6 +24,10 @@ $(KINEMATICMODELS)/injectionModel/drippingInjection/drippingInjection.C
 $(KINEMATICMODELS)/injectionModel/removeInjection/removeInjection.C
 $(KINEMATICMODELS)/injectionModel/curvatureSeparation/curvatureSeparation.C
 
+$(KINEMATICMODELS)/filmTurbulenceModel/filmTurbulenceModel/filmTurbulenceModel.C
+$(KINEMATICMODELS)/filmTurbulenceModel/filmTurbulenceModel/filmTurbulenceModelNew.C
+$(KINEMATICMODELS)/filmTurbulenceModel/laminar/laminar.C
+
 THERMOMODELS=submodels/thermo
 $(THERMOMODELS)/phaseChangeModel/phaseChangeModel/phaseChangeModel.C
 $(THERMOMODELS)/phaseChangeModel/phaseChangeModel/phaseChangeModelNew.C

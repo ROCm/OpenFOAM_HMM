@@ -42,6 +42,7 @@ Foam::fvPatchField<Type>::fvPatchField
     patch_(p),
     internalField_(iF),
     updated_(false),
+    manipulatedMatrix_(false),
     patchType_(word::null)
 {}
 
@@ -58,6 +59,7 @@ Foam::fvPatchField<Type>::fvPatchField
     patch_(p),
     internalField_(iF),
     updated_(false),
+    manipulatedMatrix_(false),
     patchType_(word::null)
 {}
 
@@ -75,6 +77,7 @@ Foam::fvPatchField<Type>::fvPatchField
     patch_(p),
     internalField_(iF),
     updated_(false),
+    manipulatedMatrix_(false),
     patchType_(ptf.patchType_)
 {}
 
@@ -92,6 +95,7 @@ Foam::fvPatchField<Type>::fvPatchField
     patch_(p),
     internalField_(iF),
     updated_(false),
+    manipulatedMatrix_(false),
     patchType_(dict.lookupOrDefault<word>("patchType", word::null))
 {
     if (dict.found("value"))
@@ -133,6 +137,7 @@ Foam::fvPatchField<Type>::fvPatchField
     patch_(ptf.patch_),
     internalField_(ptf.internalField_),
     updated_(false),
+    manipulatedMatrix_(false),
     patchType_(ptf.patchType_)
 {}
 
@@ -148,6 +153,7 @@ Foam::fvPatchField<Type>::fvPatchField
     patch_(ptf.patch_),
     internalField_(iF),
     updated_(false),
+    manipulatedMatrix_(false),
     patchType_(ptf.patchType_)
 {}
 
@@ -268,6 +274,28 @@ void Foam::fvPatchField<Type>::rmap
 
 
 template<class Type>
+void Foam::fvPatchField<Type>::updateCoeffs()
+{
+    updated_ = true;
+}
+
+
+template<class Type>
+void Foam::fvPatchField<Type>::updateCoeffs(const scalarField& weights)
+{
+    if (!updated_)
+    {
+        updateCoeffs();
+
+        Field<Type>& fld = *this;
+        fld *= weights;
+
+        updated_ = true;
+    }
+}
+
+
+template<class Type>
 void Foam::fvPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     if (!updated_)
@@ -276,13 +304,25 @@ void Foam::fvPatchField<Type>::evaluate(const Pstream::commsTypes)
     }
 
     updated_ = false;
+    manipulatedMatrix_ = false;
 }
 
 
 template<class Type>
 void Foam::fvPatchField<Type>::manipulateMatrix(fvMatrix<Type>& matrix)
 {
-    // do nothing
+    manipulatedMatrix_ = true;
+}
+
+
+template<class Type>
+void Foam::fvPatchField<Type>::manipulateMatrix
+(
+    fvMatrix<Type>& matrix,
+    const scalarField& weights
+)
+{
+    manipulatedMatrix_ = true;
 }
 
 

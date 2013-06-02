@@ -254,7 +254,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     const label nCells,
     labelList& l,
     labelList& u,
-    const Xfer<PtrList<const lduInterface> >& primitiveInterfaces,
+    PtrList<const lduInterface>& primitiveInterfaces,
     const lduSchedule& ps,
     const label comm
 )
@@ -262,10 +262,12 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     lduAddressing(nCells),
     lowerAddr_(l, true),
     upperAddr_(u, true),
-    primitiveInterfaces_(primitiveInterfaces),
+    primitiveInterfaces_(0),
     patchSchedule_(ps),
     comm_(comm)
 {
+    primitiveInterfaces_.transfer(primitiveInterfaces);
+
     // Create interfaces
     interfaces_.setSize(primitiveInterfaces_.size());
     forAll(primitiveInterfaces_, i)

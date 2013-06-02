@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,6 +43,7 @@ SourceFiles
 
 #include "injectionModelList.H"
 #include "forceList.H"
+#include "filmTurbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -196,6 +197,9 @@ protected:
 
             //- Cloud injection
             injectionModelList injection_;
+
+            //- Turbulence model
+            autoPtr<filmTurbulenceModel> turbulence_;
 
             //- List of film forces
             forceList forces_;
@@ -443,6 +447,9 @@ public:
 
             //- Injection
             inline injectionModelList& injection();
+
+            //- Turbulence
+            inline const filmTurbulenceModel& turbulence() const;
 
 
         // Helper functions

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -167,7 +167,8 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
             "Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection"
             "("
                 "const dictionary&, "
-                "CloudType&"
+                "CloudType&, "
+                "const word&"
             ")"
         )<< "innerNozzleDiameter >= outerNozzleDiameter" << nl
          << exit(FatalError);
@@ -368,6 +369,7 @@ void Foam::ConeNozzleInjection<CloudType>::setPositionAndCell
                     "const label, "
                     "const scalar, "
                     "vector&, "
+                    "label&, "
                     "label&, "
                     "label&"
                 ")"
