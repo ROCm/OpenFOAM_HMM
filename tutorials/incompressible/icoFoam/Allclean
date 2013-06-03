@@ -18,6 +18,10 @@ do
     then
         rm -rf fluentInterface
     fi
+    if [ "$caseName" = cavityClipped ]
+    then
+        rm -rf 0
+    fi
 )
 done
 
