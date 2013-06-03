@@ -35,6 +35,7 @@ License
 #include "shellSurfaces.H"
 #include "mapDistributePolyMesh.H"
 #include "unitConversion.H"
+#include "snapParameters.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -610,9 +611,16 @@ Foam::label Foam::autoRefineDriver::danglingCellRefine
             << " cells (out of " << mesh.globalData().nTotalCells()
             << ')' << endl;
 
-        // Stop when no cells to refine. No checking of minRefineCells since
-        // too few cells
-        if (nCellsToRefine == 0)
+        // Stop when no cells to refine. After a few iterations check if too
+        // few cells
+        if
+        (
+            nCellsToRefine == 0
+         || (
+                iter >= 1
+             && nCellsToRefine <= refineParams.minRefineCells()
+            )
+        )
         {
             Info<< "Stopping refining since too few cells selected."
                 << nl << endl;
@@ -870,6 +878,7 @@ Foam::label Foam::autoRefineDriver::shellRefine
 void Foam::autoRefineDriver::baffleAndSplitMesh
 (
     const refinementParameters& refineParams,
+    const snapParameters& snapParams,
     const bool handleSnapProblems,
     const dictionary& motionDict
 )
@@ -887,10 +896,17 @@ void Foam::autoRefineDriver::baffleAndSplitMesh
     meshRefiner_.baffleAndSplitMesh
     (
         handleSnapProblems,             // detect&remove potential snap problem
+
+        // Snap problem cell detection
+        snapParams,
+        refineParams.useTopologicalSnapDetection(),
         false,                          // perpendicular edge connected cells
         scalarField(0),                 // per region perpendicular angle
+
+        // Free standing baffles
         !handleSnapProblems,            // merge free standing baffles?
         refineParams.planarAngle(),
+
         motionDict,
         const_cast<Time&>(mesh.time()),
         globalToMasterPatch_,
@@ -951,6 +967,7 @@ void Foam::autoRefineDriver::zonify
 void Foam::autoRefineDriver::splitAndMergeBaffles
 (
     const refinementParameters& refineParams,
+    const snapParameters& snapParams,
     const bool handleSnapProblems,
     const dictionary& motionDict
 )
@@ -973,10 +990,17 @@ void Foam::autoRefineDriver::splitAndMergeBaffles
     meshRefiner_.baffleAndSplitMesh
     (
         handleSnapProblems,
+
+        // Snap problem cell detection
+        snapParams,
+        refineParams.useTopologicalSnapDetection(),
         handleSnapProblems,                 // remove perp edge connected cells
         perpAngle,                          // perp angle
+
+        // Free standing baffles
         true,                               // merge free standing baffles?
         refineParams.planarAngle(),         // planar angle
+
         motionDict,
         const_cast<Time&>(mesh.time()),
         globalToMasterPatch_,
@@ -1081,6 +1105,7 @@ void Foam::autoRefineDriver::doRefine
 (
     const dictionary& refineDict,
     const refinementParameters& refineParams,
+    const snapParameters& snapParams,
     const bool prepareForSnapping,
     const dictionary& motionDict
 )
@@ -1146,13 +1171,25 @@ void Foam::autoRefineDriver::doRefine
 
     // Introduce baffles at surface intersections. Remove sections unreachable
     // from keepPoint.
-    baffleAndSplitMesh(refineParams, prepareForSnapping, motionDict);
+    baffleAndSplitMesh
+    (
+        refineParams,
+        snapParams,
+        prepareForSnapping,
+        motionDict
+    );
 
     // Mesh is at its finest. Do optional zoning.
     zonify(refineParams);
 
     // Pull baffles apart
-    splitAndMergeBaffles(refineParams, prepareForSnapping, motionDict);
+    splitAndMergeBaffles
+    (
+        refineParams,
+        snapParams,
+        prepareForSnapping,
+        motionDict
+    );
 
     // Do something about cells with refined faces on the boundary
     if (prepareForSnapping)

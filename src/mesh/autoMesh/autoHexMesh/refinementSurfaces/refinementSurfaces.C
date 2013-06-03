@@ -77,7 +77,8 @@ const Foam::NamedEnum<Foam::refinementSurfaces::faceZoneType, 3>
 Foam::refinementSurfaces::refinementSurfaces
 (
     const searchableSurfaces& allGeometry,
-    const dictionary& surfacesDict
+    const dictionary& surfacesDict,
+    const label gapLevelIncrement
 )
 :
     allGeometry_(allGeometry),
@@ -143,7 +144,7 @@ Foam::refinementSurfaces::refinementSurfaces
             globalLevelIncr[surfI] = dict.lookupOrDefault
             (
                 "gapLevelIncrement",
-                0
+                gapLevelIncrement
             );
 
             if
@@ -274,7 +275,7 @@ Foam::refinementSurfaces::refinementSurfaces
                         label levelIncr = regionDict.lookupOrDefault
                         (
                             "gapLevelIncrement",
-                            0
+                            gapLevelIncrement
                         );
                         regionLevelIncr[surfI].insert(regionI, levelIncr);
 

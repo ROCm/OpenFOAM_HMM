@@ -45,7 +45,11 @@ Foam::refinementParameters::refinementParameters
     nBufferLayers_(readLabel(dict.lookup("nBufferLayers"))),
     keepPoints_(dict.lookup("keepPoints")),
     allowFreeStandingZoneFaces_(dict.lookup("allowFreeStandingZoneFaces")),
-    maxLoadUnbalance_(dict.lookupOrDefault<scalar>("maxLoadUnbalance",0))
+    useTopologicalSnapDetection_
+    (
+        dict.lookupOrDefault<bool>("useTopologicalSnapDetection", true)
+    ),
+    maxLoadUnbalance_(dict.lookupOrDefault<scalar>("maxLoadUnbalance", 0))
 {}
 
 
@@ -65,7 +69,11 @@ Foam::refinementParameters::refinementParameters(const dictionary& dict)
     nBufferLayers_(readLabel(dict.lookup("nCellsBetweenLevels"))),
     keepPoints_(pointField(1, dict.lookup("locationInMesh"))),
     allowFreeStandingZoneFaces_(dict.lookup("allowFreeStandingZoneFaces")),
-    maxLoadUnbalance_(dict.lookupOrDefault<scalar>("maxLoadUnbalance",0))
+    useTopologicalSnapDetection_
+    (
+        dict.lookupOrDefault<bool>("useTopologicalSnapDetection", true)
+    ),
+    maxLoadUnbalance_(dict.lookupOrDefault<scalar>("maxLoadUnbalance", 0))
 {
     scalar featAngle(readScalar(dict.lookup("resolveFeatureAngle")));
 
@@ -83,7 +91,7 @@ Foam::refinementParameters::refinementParameters(const dictionary& dict)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::labelList Foam::refinementParameters::findCells(const polyMesh& mesh)
- const
+const
 {
     // Force calculation of tet-diag decomposition (for use in findCell)
     (void)mesh.tetBasePtIs();

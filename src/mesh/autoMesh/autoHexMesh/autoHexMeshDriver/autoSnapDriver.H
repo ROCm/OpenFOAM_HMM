@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -81,11 +81,11 @@ class autoSnapDriver
 
             //- Calculate displacement per patch point to smooth out patch.
             //  Quite complicated in determining which points to move where.
-            pointField smoothPatchDisplacement
+            static pointField smoothPatchDisplacement
             (
                 const motionSmoother&,
                 const List<labelPair>&
-            ) const;
+            );
 
             //- Check that face zones are synced
             void checkCoupledFaceZones() const;
@@ -406,37 +406,51 @@ public:
             autoPtr<mapPolyMesh> mergeZoneBaffles(const List<labelPair>&);
 
             //- Calculate edge length per patch point.
-            scalarField calcSnapDistance
+            static scalarField calcSnapDistance
             (
+                const fvMesh& mesh,
                 const snapParameters& snapParams,
                 const indirectPrimitivePatch&
-            ) const;
+            );
 
             //- Smooth the mesh (patch and internal) to increase visibility
             //  of surface points (on castellated mesh) w.r.t. surface.
-            void preSmoothPatch
+            static void preSmoothPatch
             (
+                const meshRefinement& meshRefiner,
                 const snapParameters& snapParams,
                 const label nInitErrors,
                 const List<labelPair>& baffles,
                 motionSmoother&
-            ) const;
+            );
 
             //- Get points both on patch and facezone.
-            labelList getZoneSurfacePoints
+            static labelList getZoneSurfacePoints
             (
+                const fvMesh& mesh,
                 const indirectPrimitivePatch&,
                 const word& zoneName
-            ) const;
+            );
 
             //- Per patch point calculate point on nearest surface. Set as
             //  boundary conditions of motionSmoother displacement field. Return
             //  displacement of patch points.
-            vectorField calcNearestSurface
+            static vectorField calcNearestSurface
             (
+                const meshRefinement& meshRefiner,
                 const scalarField& snapDist,
-                motionSmoother& meshMover
-            ) const;
+                const indirectPrimitivePatch&
+            );
+
+            ////- Per patch point calculate point on nearest surface. Set as
+            ////  boundary conditions of motionSmoother displacement field.
+            ////  Return displacement of patch points.
+            //static vectorField calcNearestLocalSurface
+            //(
+            //    const meshRefinement& meshRefiner,
+            //    const scalarField& snapDist,
+            //    const indirectPrimitivePatch&
+            //);
 
             //- Smooth the displacement field to the internal.
             void smoothDisplacement

@@ -247,7 +247,8 @@ int main(int argc, char *argv[])
     refinementSurfaces surfaces
     (
         allGeometry,
-        refineDict.subDict("refinementSurfaces")
+        refineDict.subDict("refinementSurfaces"),
+        refineDict.lookupOrDefault("gapLevelIncrement", 0)
     );
     Info<< "Read refinement surfaces in = "
         << mesh.time().cpuTimeIncrement() << " s" << nl << endl;
@@ -551,6 +552,13 @@ int main(int argc, char *argv[])
     const Switch wantSnap(meshDict.lookup("snap"));
     const Switch wantLayers(meshDict.lookup("addLayers"));
 
+    // Refinement parameters
+    const refinementParameters refineParams(refineDict);
+
+    // Snap parameters
+    const snapParameters snapParams(snapDict);
+
+
     if (wantRefine)
     {
         cpuTime timer;
@@ -564,15 +572,20 @@ int main(int argc, char *argv[])
             globalToSlavePatch
         );
 
-        // Refinement parameters
-        refinementParameters refineParams(refineDict);
 
         if (!overwrite && !debug)
         {
             const_cast<Time&>(mesh.time())++;
         }
 
-        refineDriver.doRefine(refineDict, refineParams, wantSnap, motionDict);
+        refineDriver.doRefine
+        (
+            refineDict,
+            refineParams,
+            snapParams,
+            wantSnap,
+            motionDict
+        );
 
         writeMesh
         (
@@ -596,19 +609,13 @@ int main(int argc, char *argv[])
             globalToSlavePatch
         );
 
-        // Snap parameters
-        snapParameters snapParams(snapDict);
-        // Temporary hack to get access to resolveFeatureAngle
-        scalar curvature;
-        {
-            refinementParameters refineParams(refineDict);
-            curvature = refineParams.curvature();
-        }
-
         if (!overwrite && !debug)
         {
             const_cast<Time&>(mesh.time())++;
         }
+
+        // Use the resolveFeatureAngle from the refinement parameters
+        scalar curvature = refineParams.curvature();
 
         snapDriver.doSnap(snapDict, motionDict, curvature, snapParams);
 
@@ -637,17 +644,12 @@ int main(int argc, char *argv[])
         // Layer addition parameters
         layerParameters layerParams(layerDict, mesh.boundaryMesh());
 
-        //!!! Temporary hack to get access to maxLocalCells
-        bool preBalance;
-        {
-            refinementParameters refineParams(refineDict);
-
-            preBalance = returnReduce
-            (
-                (mesh.nCells() >= refineParams.maxLocalCells()),
-                orOp<bool>()
-            );
-        }
+        // Use the maxLocalCells from the refinement parameters
+        bool preBalance = returnReduce
+        (
+            (mesh.nCells() >= refineParams.maxLocalCells()),
+            orOp<bool>()
+        );
 
 
         if (!overwrite &&  !debug)
