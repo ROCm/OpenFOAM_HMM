@@ -153,7 +153,7 @@ castellatedMeshControls
             }
 
 
-            //- Optional increment (on top of max level) in small gaps.
+            //- Optional increment (on top of max level) in small gaps
             //gapLevelIncrement 2;
 
             //- Optional angle to detect small-large cell situation
@@ -184,14 +184,17 @@ castellatedMeshControls
     // - used if feature snapping (see snapControls below) is used
     resolveFeatureAngle 30;
 
+    //- Optional increment (on top of max level) in small gaps
+    //gapLevelIncrement 2;
+
 
     // Planar angle:
     // - used to determine if surface normals
-    //   are roughly the same or opposite. Used e.g. in gap refinement
+    //   are roughly the same or opposite. Used e.g. in proximity refinement
     //   and to decide when to merge free-standing baffles
     //
     // If not specified same as resolveFeatureAngle
-    planarAngle 15;
+    planarAngle 30;
 
 
     // Region-wise refinement
@@ -235,6 +238,9 @@ castellatedMeshControls
     // are only on the boundary of corresponding cellZones or also allow
     // free-standing zone faces. Not used if there are no faceZones.
     allowFreeStandingZoneFaces true;
+
+    //
+    //useTopologicalSnapDetection false;
 }
 
 // Settings for the snapping.
