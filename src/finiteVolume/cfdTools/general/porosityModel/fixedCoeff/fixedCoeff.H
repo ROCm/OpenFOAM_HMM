@@ -53,7 +53,7 @@ namespace porosityModels
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class fixedCoeff Declaration
+                          Class fixedCoeff Declaration
 \*---------------------------------------------------------------------------*/
 
 class fixedCoeff
