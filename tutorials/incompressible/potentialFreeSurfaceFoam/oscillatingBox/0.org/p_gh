@@ -32,7 +32,8 @@ boundaryField
     }
     floatingObject
     {
-        type            zeroGradient;
+        type            fixedFluxPressure;
+        value           uniform 0;
     }
     frontAndBack
     {
