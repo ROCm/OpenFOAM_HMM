@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -111,16 +111,7 @@ public:
                     mesh.gradScheme(gradSchemeName_)
                 )
             )
-        {
-            if (!schemeData.eof())
-            {
-                IOWarningIn("linearUpwind(const fvMesh&, Istream&)", schemeData)
-                    << "unexpected additional entries in stream." << nl
-                    << "    Only the name of the gradient scheme in the"
-                       " 'gradSchemes' dictionary should be specified."
-                    << endl;
-            }
-        }
+        {}
 
         //- Construct from faceFlux and Istream
         linearUpwind
@@ -140,21 +131,7 @@ public:
                     mesh.gradScheme(gradSchemeName_)
                 )
             )
-        {
-
-            if (!schemeData.eof())
-            {
-                IOWarningIn
-                (
-                    "linearUpwind(const fvMesh&, "
-                    "const surfaceScalarField& faceFlux, Istream&)",
-                    schemeData
-                )   << "unexpected additional entries in stream." << nl
-                    << "    Only the name of the gradient scheme in the"
-                       " 'gradSchemes' dictionary should be specified."
-                    << endl;
-            }
-        }
+        {}
 
 
     // Member Functions
