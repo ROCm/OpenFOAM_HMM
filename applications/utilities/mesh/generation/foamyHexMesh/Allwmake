@@ -5,7 +5,7 @@ set -x
 wmake libso conformalVoronoiMesh
 wmake
 #wmake cvMeshBackgroundMesh
-(cd cvMeshSurfaceSimplify && ./Allwmake)
-wmake cellSizeAndAlignmentGrid
+#(cd cvMeshSurfaceSimplify && ./Allwmake)
+#wmake cellSizeAndAlignmentGrid
 
 # ----------------------------------------------------------------- end-of-file
