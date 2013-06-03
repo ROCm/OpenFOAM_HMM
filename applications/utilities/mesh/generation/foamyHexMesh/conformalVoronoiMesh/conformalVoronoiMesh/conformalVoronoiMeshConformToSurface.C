@@ -569,7 +569,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation()
             Vertex_handle vA = c->vertex(eit->second);
             Vertex_handle vB = c->vertex(eit->third);
 
-            if (vA->referred() && vB->referred())
+            if (vA->referred() || vB->referred())
             {
                 continue;
             }
@@ -630,7 +630,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation()
 //            ++cit
 //        )
 //        {
-//            if (cit->boundaryDualVertex() && !cit->parallelDualVertex())
+//            if (cit->boundaryDualVertex() && !cit->hasReferredPoint())
 //            {
 //                const Foam::point& pt = cit->dual();
 //
@@ -641,7 +641,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation()
 //                geometryToConformTo_.findSurfaceNearest
 //                (
 //                    pt,
-//                    sqr(targetCellSize(pt)),//surfaceSearchDistanceSqr(pt),
+//                    sqr(0.1*targetCellSize(pt)),
 //                    surfHit,
 //                    hitSurface
 //                );
@@ -676,76 +676,6 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation()
 //                            false
 //                        );
 //                    }
-//                }
-//            }
-//        }
-
-//        for
-//        (
-//            Delaunay::Finite_cells_iterator cit = finite_cells_begin();
-//            cit != finite_cells_end();
-//            ++cit
-//        )
-//        {
-//            if
-//            (
-//                (
-//                    cit->vertex(0)->internalPoint()
-//                 && cit->vertex(1)->surfacePoint()
-//                 && cit->vertex(2)->surfacePoint()
-//                 && cit->vertex(3)->surfacePoint()
-//                )
-//             || (
-//                    cit->vertex(0)->surfacePoint()
-//                 && cit->vertex(1)->internalPoint()
-//                 && cit->vertex(2)->surfacePoint()
-//                 && cit->vertex(3)->surfacePoint()
-//                )
-//             ||(
-//                    cit->vertex(0)->surfacePoint()
-//                 && cit->vertex(1)->surfacePoint()
-//                 && cit->vertex(2)->internalPoint()
-//                 && cit->vertex(3)->surfacePoint()
-//              )
-//             ||(
-//                    cit->vertex(0)->surfacePoint()
-//                 && cit->vertex(1)->surfacePoint()
-//                 && cit->vertex(2)->surfacePoint()
-//                 && cit->vertex(3)->internalPoint()
-//               )
-//            )
-//            {
-//                pointIndexHitAndFeatureDynList surfaceIntersections(0.5*AtoV);
-//                pointIndexHit surfHit;
-//                label hitSurface;
-//
-//                geometryToConformTo_.findSurfaceNearest
-//                (
-//                    cit->dual(),
-//                    magSqr(targetCellSize(cit->dual())),
-//                    surfHit,
-//                    hitSurface
-//                );
-//
-//                if (surfHit.hit())
-//                {
-//                    surfaceIntersections.append
-//                    (
-//                        pointIndexHitAndFeature(surfHit, hitSurface)
-//                    );
-//
-//                    addSurfaceAndEdgeHits
-//                    (
-//                        cit->dual(),
-//                        surfaceIntersections,
-//                        surfacePtReplaceDistCoeffSqr,
-//                        edgeSearchDistCoeffSqr,
-//                        surfaceHits,
-//                        featureEdgeHits,
-//                        surfaceToTreeShape,
-//                        edgeToTreeShape,
-//                        false
-//                    );
 //                }
 //            }
 //        }
