@@ -178,11 +178,33 @@ public:
             //- Return reference to non-overlapping patchField
             const fvPatchField<Type>& nonOverlapPatchField() const;
 
+            //- Update result field based on interface functionality
+            virtual void updateInterfaceMatrix
+            (
+                scalarField& result,
+                const scalarField& psiInternal,
+                const scalarField& coeffs,
+                const direction cmpt,
+                const Pstream::commsTypes commsType
+            ) const;
+
+            //- Update result field based on interface functionality
+            virtual void updateInterfaceMatrix
+            (
+                Field<Type>&,
+                const Field<Type>&,
+                const scalarField&,
+                const Pstream::commsTypes commsType
+            ) const;
+
             //- Return patch-normal gradient
             virtual tmp<Field<Type> > snGrad
             (
                 const scalarField& deltaCoeffs
             ) const;
+
+            //- Update the coefficients associated with the patch field
+            void updateCoeffs();
 
             //- Evaluate the patch field
             virtual void evaluate
@@ -226,24 +248,8 @@ public:
             //  evaluation of the gradient of this patchField
             virtual tmp<Field<Type> > gradientBoundaryCoeffs() const;
 
-            //- Update result field based on interface functionality
-            virtual void updateInterfaceMatrix
-            (
-                scalarField& result,
-                const scalarField& psiInternal,
-                const scalarField& coeffs,
-                const direction cmpt,
-                const Pstream::commsTypes commsType
-            ) const;
-
-            //- Update result field based on interface functionality
-            virtual void updateInterfaceMatrix
-            (
-                Field<Type>&,
-                const Field<Type>&,
-                const scalarField&,
-                const Pstream::commsTypes commsType
-            ) const;
+            //- Manipulate matrix
+            virtual void manipulateMatrix(fvMatrix<Type>& matrix);
 
 
         // Cyclic AMI coupled interface functions

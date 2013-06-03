@@ -342,6 +342,18 @@ Foam::label Foam::cyclicACMIPolyPatch::nonOverlapPatchID() const
                 << exit(FatalError);
         }
 
+        if (nonOverlapPatchID_ < index())
+        {
+            FatalErrorIn("cyclicPolyAMIPatch::neighbPatchID() const")
+                << "Boundary ordering error: " << type()
+                << " patch must be defined prior to its non-overlapping patch"
+                << nl
+                << type() << " patch: " << name() << ", ID:" << index() << nl
+                << "Non-overlap patch: " << nonOverlapPatchName_
+                << ", ID:" << nonOverlapPatchID_ << nl
+                << exit(FatalError);
+        }
+
         const polyPatch& noPp = this->boundaryMesh()[nonOverlapPatchID_];
 
         bool ok = true;

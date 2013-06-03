@@ -26,10 +26,11 @@ License
 #include "omegaWallFunctionFvPatchScalarField.H"
 #include "compressible/turbulenceModel/turbulenceModel.H"
 #include "fvPatchFieldMapper.H"
+#include "fvMatrix.H"
 #include "volFields.H"
-#include "addToRunTimeSelectionTable.H"
-#include "mutWallFunctionFvPatchScalarField.H"
 #include "wallFvPatch.H"
+#include "mutWallFunctionFvPatchScalarField.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,6 +64,198 @@ void omegaWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
 }
 
 
+void omegaWallFunctionFvPatchScalarField::setMaster()
+{
+    if (master_ != -1)
+    {
+        return;
+    }
+
+    const volScalarField& omega =
+        static_cast<const volScalarField&>(this->dimensionedInternalField());
+
+    const volScalarField::GeometricBoundaryField& bf = omega.boundaryField();
+
+    label master = -1;
+    forAll(bf, patchI)
+    {
+        if (isA<omegaWallFunctionFvPatchScalarField>(bf[patchI]))
+        {
+            omegaWallFunctionFvPatchScalarField& epf = omegaPatch(patchI);
+
+            if (master == -1)
+            {
+                master = patchI;
+            }
+
+            epf.master() = master;
+        }
+    }
+}
+
+
+void omegaWallFunctionFvPatchScalarField::createAveragingWeights()
+{
+    if (initialised_)
+    {
+        return;
+    }
+
+    const volScalarField& omega =
+        static_cast<const volScalarField&>(this->dimensionedInternalField());
+
+    const volScalarField::GeometricBoundaryField& bf = omega.boundaryField();
+
+    const fvMesh& mesh = omega.mesh();
+
+    volScalarField weights
+    (
+        IOobject
+        (
+            "weights",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false // do not register
+        ),
+        mesh,
+        dimensionedScalar("zero", dimless, 0.0)
+    );
+
+    DynamicList<label> omegaPatches(bf.size());
+    forAll(bf, patchI)
+    {
+        if (isA<omegaWallFunctionFvPatchScalarField>(bf[patchI]))
+        {
+            omegaPatches.append(patchI);
+
+            const labelUList& faceCells = bf[patchI].patch().faceCells();
+            forAll(faceCells, i)
+            {
+                label cellI = faceCells[i];
+                weights[cellI]++;
+            }
+        }
+    }
+
+    cornerWeights_.setSize(bf.size());
+    forAll(omegaPatches, i)
+    {
+        label patchI = omegaPatches[i];
+        const fvPatchField& wf = weights.boundaryField()[patchI];
+        cornerWeights_[patchI] = 1.0/wf.patchInternalField();
+    }
+
+    G_.setSize(dimensionedInternalField().size(), 0.0);
+    omega_.setSize(dimensionedInternalField().size(), 0.0);
+
+    initialised_ = true;
+}
+
+
+omegaWallFunctionFvPatchScalarField&
+omegaWallFunctionFvPatchScalarField::omegaPatch(const label patchI)
+{
+    const volScalarField& omega =
+        static_cast<const volScalarField&>(this->dimensionedInternalField());
+
+    const volScalarField::GeometricBoundaryField& bf = omega.boundaryField();
+
+    const omegaWallFunctionFvPatchScalarField& epf =
+        refCast<const omegaWallFunctionFvPatchScalarField>(bf[patchI]);
+
+    return const_cast<omegaWallFunctionFvPatchScalarField&>(epf);
+}
+
+
+void omegaWallFunctionFvPatchScalarField::calculateTurbulenceFields
+(
+    const turbulenceModel& turbulence,
+    scalarField& G0,
+    scalarField& omega0
+)
+{
+    // accumulate all of the G and omega contributions
+    forAll(cornerWeights_, patchI)
+    {
+        if (!cornerWeights_[patchI].empty())
+        {
+            omegaWallFunctionFvPatchScalarField& epf = omegaPatch(patchI);
+
+            const List<scalar>& w = cornerWeights_[patchI];
+
+            epf.calculate(turbulence, w, epf.patch(), G0, omega0);
+        }
+    }
+
+    // apply zero-gradient condition for omega
+    forAll(cornerWeights_, patchI)
+    {
+        if (!cornerWeights_[patchI].empty())
+        {
+            omegaWallFunctionFvPatchScalarField& epf = omegaPatch(patchI);
+
+            epf == scalarField(omega0, epf.patch().faceCells());
+        }
+    }
+}
+
+
+void omegaWallFunctionFvPatchScalarField::calculate
+(
+    const turbulenceModel& turbulence,
+    const List<scalar>& cornerWeights,
+    const fvPatch& patch,
+    scalarField& G,
+    scalarField& omega
+)
+{
+    const label patchI = patch.index();
+
+    const scalarField& y = turbulence.y()[patchI];
+
+    const scalar Cmu25 = pow025(Cmu_);
+
+    const tmp<volScalarField> tk = turbulence.k();
+    const volScalarField& k = tk();
+
+    const scalarField& rhow = turbulence.rho().boundaryField()[patchI];
+
+    const tmp<volScalarField> tmu = turbulence.mu();
+    const scalarField& muw = tmu().boundaryField()[patchI];
+
+    const tmp<volScalarField> tmut = turbulence.mut();
+    const volScalarField& mut = tmut();
+    const scalarField& mutw = mut.boundaryField()[patchI];
+
+    const fvPatchVectorField& Uw = turbulence.U().boundaryField()[patchI];
+
+    const scalarField magGradUw(mag(Uw.snGrad()));
+
+    // Set omega and G
+    forAll(mutw, faceI)
+    {
+        label cellI = patch.faceCells()[faceI];
+
+        scalar w = cornerWeights[faceI];
+
+        scalar omegaVis = 6.0*muw[faceI]/(rhow[faceI]*beta1_*sqr(y[faceI]));
+
+        scalar omegaLog = sqrt(k[cellI])/(Cmu25*kappa_*y[faceI]);
+
+        omega[cellI] = w*sqrt(sqr(omegaVis) + sqr(omegaLog));
+
+        G[cellI] =
+            w
+           *(mutw[faceI] + muw[faceI])
+           *magGradUw[faceI]
+           *Cmu25*sqrt(k[cellI])
+           /(kappa_*y[faceI]);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
@@ -71,13 +264,17 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedInternalValueFvPatchField<scalar>(p, iF),
+    fixedValueFvPatchField<scalar>(p, iF),
     Cmu_(0.09),
     kappa_(0.41),
     E_(9.8),
     beta1_(0.075),
-    yPlusLam_(mutWallFunctionFvPatchScalarField::yPlusLam(kappa_, E_))
-
+    yPlusLam_(mutWallFunctionFvPatchScalarField::yPlusLam(kappa_, E_)),
+    G_(),
+    omega_(),
+    initialised_(false),
+    master_(-1),
+    cornerWeights_()
 {
     checkType();
 }
@@ -91,12 +288,17 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedInternalValueFvPatchField<scalar>(ptf, p, iF, mapper),
+    fixedValueFvPatchField<scalar>(ptf, p, iF, mapper),
     Cmu_(ptf.Cmu_),
     kappa_(ptf.kappa_),
     E_(ptf.E_),
     beta1_(ptf.beta1_),
-    yPlusLam_(ptf.yPlusLam_)
+    yPlusLam_(ptf.yPlusLam_),
+    G_(),
+    omega_(),
+    initialised_(false),
+    master_(-1),
+    cornerWeights_()
 {
     checkType();
 }
@@ -109,12 +311,17 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedInternalValueFvPatchField<scalar>(p, iF, dict),
+    fixedValueFvPatchField<scalar>(p, iF, dict),
     Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
     E_(dict.lookupOrDefault<scalar>("E", 9.8)),
     beta1_(dict.lookupOrDefault<scalar>("beta1", 0.075)),
-    yPlusLam_(mutWallFunctionFvPatchScalarField::yPlusLam(kappa_, E_))
+    yPlusLam_(mutWallFunctionFvPatchScalarField::yPlusLam(kappa_, E_)),
+    G_(),
+    omega_(),
+    initialised_(false),
+    master_(-1),
+    cornerWeights_()
 {
     checkType();
 }
@@ -125,12 +332,17 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     const omegaWallFunctionFvPatchScalarField& owfpsf
 )
 :
-    fixedInternalValueFvPatchField<scalar>(owfpsf),
+    fixedValueFvPatchField<scalar>(owfpsf),
     Cmu_(owfpsf.Cmu_),
     kappa_(owfpsf.kappa_),
     E_(owfpsf.E_),
     beta1_(owfpsf.beta1_),
-    yPlusLam_(owfpsf.yPlusLam_)
+    yPlusLam_(owfpsf.yPlusLam_),
+    G_(),
+    omega_(),
+    initialised_(false),
+    master_(-1),
+    cornerWeights_()
 {
     checkType();
 }
@@ -142,19 +354,55 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedInternalValueFvPatchField<scalar>(owfpsf, iF),
+    fixedValueFvPatchField<scalar>(owfpsf, iF),
     Cmu_(owfpsf.Cmu_),
     kappa_(owfpsf.kappa_),
     E_(owfpsf.E_),
     beta1_(owfpsf.beta1_),
-    yPlusLam_(owfpsf.yPlusLam_)
-
+    yPlusLam_(owfpsf.yPlusLam_),
+    G_(),
+    omega_(),
+    initialised_(false),
+    master_(-1),
+    cornerWeights_()
 {
     checkType();
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+scalarField& omegaWallFunctionFvPatchScalarField::G(bool init)
+{
+    if (patch().index() == master_)
+    {
+        if (init)
+        {
+            G_ = 0.0;
+        }
+
+        return G_;
+    }
+
+    return omegaPatch(master_).G();
+}
+
+
+scalarField& omegaWallFunctionFvPatchScalarField::omega(bool init)
+{
+    if (patch().index() == master_)
+    {
+        if (init)
+        {
+            omega_ = 0.0;
+        }
+
+        return omega_;
+    }
+
+    return omegaPatch(master_).omega(init);
+}
+
 
 void omegaWallFunctionFvPatchScalarField::updateCoeffs()
 {
@@ -163,68 +411,168 @@ void omegaWallFunctionFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const label patchI = patch().index();
-
     const turbulenceModel& turbulence =
-        db().lookupObject<turbulenceModel>("turbulenceModel");
-    const scalarField& y = turbulence.y()[patch().index()];
+        db().lookupObject<turbulenceModel>(turbulenceModel::typeName);
 
-    const scalar Cmu25 = pow025(Cmu_);
+    setMaster();
 
-    volScalarField& G = const_cast<volScalarField&>
-        (
-            db().lookupObject<volScalarField>
-            (
-                turbulence.GName()
-            )
-        );
-
-    DimensionedField<scalar, volMesh>& omega =
-        const_cast<DimensionedField<scalar, volMesh>&>
-        (
-            dimensionedInternalField()
-        );
-
-    const tmp<volScalarField> tk = turbulence.k();
-    const volScalarField& k = tk();
-
-    const scalarField& rhow = turbulence.rho().boundaryField()[patchI];
-
-    const scalarField& muw = turbulence.mu().boundaryField()[patchI];
-
-    const tmp<volScalarField> tmut = turbulence.mut();
-    const volScalarField& mut = tmut();
-    const scalarField& mutw = mut.boundaryField()[patchI];
-
-    const fvPatchVectorField& Uw = turbulence.U().boundaryField()[patchI];
-
-    const scalarField magGradUw(mag(Uw.snGrad()));
-
-    // Set omega and G
-    forAll(mutw, faceI)
+    if (patch().index() == master_)
     {
-        label faceCellI = patch().faceCells()[faceI];
-
-        scalar omegaVis = 6.0*muw[faceI]/(rhow[faceI]*beta1_*sqr(y[faceI]));
-        scalar omegaLog = sqrt(k[faceCellI])/(Cmu25*kappa_*y[faceI]);
-        omega[faceCellI] = sqrt(sqr(omegaVis) + sqr(omegaLog));
-
-        G[faceCellI] =
-            (mutw[faceI] + muw[faceI])
-           *magGradUw[faceI]
-           *Cmu25*sqrt(k[faceCellI])
-           /(kappa_*y[faceI]);
+        createAveragingWeights();
+        calculateTurbulenceFields(turbulence, G(true), omega(true));
     }
 
-    fixedInternalValueFvPatchField<scalar>::updateCoeffs();
+    const scalarField& G0 = this->G();
+    const scalarField& omega0 = this->omega();
 
-    // TODO: perform averaging for cells sharing more than one boundary face
+    typedef DimensionedField<scalar, volMesh> FieldType;
+
+    FieldType& G =
+        const_cast<FieldType&>
+        (
+            db().lookupObject<FieldType>(turbulence.GName())
+        );
+
+    FieldType& omega = const_cast<FieldType&>(dimensionedInternalField());
+
+    forAll(*this, faceI)
+    {
+        label cellI = patch().faceCells()[faceI];
+
+        G[cellI] = G0[cellI];
+        omega[cellI] = omega0[cellI];
+    }
+
+    fvPatchField<scalar>::updateCoeffs();
+}
+
+
+void omegaWallFunctionFvPatchScalarField::updateCoeffs
+(
+    const scalarField& weights
+)
+{
+    if (updated())
+    {
+        return;
+    }
+
+    const turbulenceModel& turbulence =
+        db().lookupObject<turbulenceModel>(turbulenceModel::typeName);
+
+    setMaster();
+
+    if (patch().index() == master_)
+    {
+        createAveragingWeights();
+        calculateTurbulenceFields(turbulence, G(true), omega(true));
+    }
+
+    const scalarField& G0 = this->G();
+    const scalarField& omega0 = this->omega();
+
+    typedef DimensionedField<scalar, volMesh> FieldType;
+
+    FieldType& G =
+        const_cast<FieldType&>
+        (
+            db().lookupObject<FieldType>(turbulence.GName())
+        );
+
+    FieldType& omega = const_cast<FieldType&>(dimensionedInternalField());
+
+    // only set the values if the weights are < 1 - tolerance
+    forAll(weights, faceI)
+    {
+        scalar w = weights[faceI];
+
+        if (w < 1.0 - 1e-6)
+        {
+            label cellI = patch().faceCells()[faceI];
+
+            G[cellI] = w*G[cellI] + (1.0 - w)*G0[cellI];
+            omega[cellI] = w*omega[cellI] + (1.0 - w)*omega0[cellI];
+        }
+    }
+
+    fvPatchField<scalar>::updateCoeffs();
+}
+
+
+void omegaWallFunctionFvPatchScalarField::manipulateMatrix
+(
+    fvMatrix<scalar>& matrix
+)
+{
+    if (manipulatedMatrix())
+    {
+        return;
+    }
+
+    matrix.setValues(patch().faceCells(), patchInternalField());
+
+    fvPatchField<scalar>::manipulateMatrix(matrix);
+}
+
+
+void omegaWallFunctionFvPatchScalarField::manipulateMatrix
+(
+    fvMatrix<scalar>& matrix,
+    const Field<scalar>& weights
+)
+{
+    if (manipulatedMatrix())
+    {
+        return;
+    }
+
+    // filter weights so that we only apply the constraint where the
+    // weight > SMALL
+    DynamicList<label> constraintCells(weights.size());
+    DynamicList<scalar> constraintomega(weights.size());
+    const labelUList& faceCells = patch().faceCells();
+
+    const DimensionedField<scalar, volMesh>& omega
+        = dimensionedInternalField();
+
+    label nConstrainedCells = 0;
+
+
+    forAll(weights, faceI)
+    {
+        // only set the values if the weights are < 1 - tolerance
+        if (weights[faceI] < (1.0 - 1e-6))
+        {
+            nConstrainedCells++;
+
+            label cellI = faceCells[faceI];
+
+            constraintCells.append(cellI);
+            constraintomega.append(omega[cellI]);
+        }
+    }
+
+    if (debug)
+    {
+        Pout<< "Patch: " << patch().name()
+            << ": number of constrained cells = " << nConstrainedCells
+            << " out of " << patch().size()
+            << endl;
+    }
+
+    matrix.setValues
+    (
+        constraintCells,
+        scalarField(constraintomega.xfer())
+    );
+
+    fvPatchField<scalar>::manipulateMatrix(matrix);
 }
 
 
 void omegaWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
-    fixedInternalValueFvPatchField<scalar>::write(os);
+    fixedValueFvPatchField<scalar>::write(os);
     writeLocalEntries(os);
     writeEntry("value", os);
 }

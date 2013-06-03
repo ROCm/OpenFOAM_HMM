@@ -1872,6 +1872,8 @@ void Foam::meshRefinement::makeConsistentFaceIndex
 
 void Foam::meshRefinement::handleSnapProblems
 (
+    const snapParameters& snapParams,
+    const bool useTopologicalSnapDetection,
     const bool removeEdgeConnectedCells,
     const scalarField& perpendicularAngle,
     const dictionary& motionDict,
@@ -1885,44 +1887,39 @@ void Foam::meshRefinement::handleSnapProblems
         << "----------------------------------------------" << nl
         << endl;
 
-    labelList facePatch
-    (
-        markFacesOnProblemCells
+    labelList facePatch;
+    if (useTopologicalSnapDetection)
+    {
+        facePatch = markFacesOnProblemCells
         (
             motionDict,
             removeEdgeConnectedCells,
             perpendicularAngle,
             globalToMasterPatch
-        )
-    );
+        );
+    }
+    else
+    {
+        facePatch = markFacesOnProblemCellsGeometric(snapParams, motionDict);
+    }
     Info<< "Analyzed problem cells in = "
         << runTime.cpuTimeIncrement() << " s\n" << nl << endl;
 
     if (debug&meshRefinement::MESH)
     {
-        faceSet problemTopo(mesh_, "problemFacesTopo", 100);
+        faceSet problemFaces(mesh_, "problemFaces", 100);
 
-        const labelList facePatchTopo
-        (
-            markFacesOnProblemCells
-            (
-                motionDict,
-                removeEdgeConnectedCells,
-                perpendicularAngle,
-                globalToMasterPatch
-            )
-        );
-        forAll(facePatchTopo, faceI)
+        forAll(facePatch, faceI)
         {
-            if (facePatchTopo[faceI] != -1)
+            if (facePatch[faceI] != -1)
             {
-                problemTopo.insert(faceI);
+                problemFaces.insert(faceI);
             }
         }
-        problemTopo.instance() = timeName();
-        Pout<< "Dumping " << problemTopo.size()
-            << " problem faces to " << problemTopo.objectPath() << endl;
-        problemTopo.write();
+        problemFaces.instance() = timeName();
+        Pout<< "Dumping " << problemFaces.size()
+            << " problem faces to " << problemFaces.objectPath() << endl;
+        problemFaces.write();
     }
 
     Info<< "Introducing baffles to delete problem cells." << nl << endl;
@@ -1962,6 +1959,8 @@ void Foam::meshRefinement::handleSnapProblems
 void Foam::meshRefinement::baffleAndSplitMesh
 (
     const bool doHandleSnapProblems,
+    const snapParameters& snapParams,
+    const bool useTopologicalSnapDetection,
     const bool removeEdgeConnectedCells,
     const scalarField& perpendicularAngle,
     const bool mergeFreeStanding,
@@ -2029,83 +2028,10 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
     if (doHandleSnapProblems)
     {
-        //Info<< nl
-        //    << "Introducing baffles to block off problem cells" << nl
-        //    << "----------------------------------------------" << nl
-        //    << endl;
-        //
-        //labelList facePatch
-        //(
-        //    markFacesOnProblemCells
-        //    (
-        //        motionDict,
-        //        removeEdgeConnectedCells,
-        //        perpendicularAngle,
-        //        globalToMasterPatch
-        //    )
-        //    //markFacesOnProblemCellsGeometric(motionDict)
-        //);
-        //Info<< "Analyzed problem cells in = "
-        //    << runTime.cpuTimeIncrement() << " s\n" << nl << endl;
-        //
-        //if (debug&meshRefinement::MESH)
-        //{
-        //    faceSet problemTopo(mesh_, "problemFacesTopo", 100);
-        //
-        //    const labelList facePatchTopo
-        //    (
-        //        markFacesOnProblemCells
-        //        (
-        //            motionDict,
-        //            removeEdgeConnectedCells,
-        //            perpendicularAngle,
-        //            globalToMasterPatch
-        //        )
-        //    );
-        //    forAll(facePatchTopo, faceI)
-        //    {
-        //        if (facePatchTopo[faceI] != -1)
-        //        {
-        //            problemTopo.insert(faceI);
-        //        }
-        //    }
-        //    problemTopo.instance() = timeName();
-        //    Pout<< "Dumping " << problemTopo.size()
-        //        << " problem faces to " << problemTopo.objectPath() << endl;
-        //    problemTopo.write();
-        //}
-        //
-        //Info<< "Introducing baffles to delete problem cells." << nl << endl;
-        //
-        //if (debug)
-        //{
-        //    runTime++;
-        //}
-        //
-        //// Create baffles with same owner and neighbour for now.
-        //createBaffles(facePatch, facePatch);
-        //
-        //if (debug)
-        //{
-        //    // Debug:test all is still synced across proc patches
-        //    checkData();
-        //}
-        //Info<< "Created baffles in = "
-        //    << runTime.cpuTimeIncrement() << " s\n" << nl << endl;
-        //
-        //printMeshInfo(debug, "After introducing baffles");
-        //
-        //if (debug&meshRefinement::MESH)
-        //{
-        //    Pout<< "Writing extra baffled mesh to time "
-        //        << timeName() << endl;
-        //    write(debug, runTime.path()/"extraBaffles");
-        //    Pout<< "Dumped debug data in = "
-        //        << runTime.cpuTimeIncrement() << " s\n" << nl << endl;
-        //}
-
         handleSnapProblems
         (
+            snapParams,
+            useTopologicalSnapDetection,
             removeEdgeConnectedCells,
             perpendicularAngle,
             motionDict,
@@ -2192,6 +2118,8 @@ void Foam::meshRefinement::baffleAndSplitMesh
             // and delete them
             handleSnapProblems
             (
+                snapParams,
+                useTopologicalSnapDetection,
                 removeEdgeConnectedCells,
                 perpendicularAngle,
                 motionDict,

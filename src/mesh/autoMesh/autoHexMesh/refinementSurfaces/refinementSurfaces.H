@@ -149,7 +149,8 @@ public:
         refinementSurfaces
         (
             const searchableSurfaces& allGeometry,
-            const dictionary&
+            const dictionary&,
+            const label gapLevelIncrement
         );
 
         //- Construct from components
