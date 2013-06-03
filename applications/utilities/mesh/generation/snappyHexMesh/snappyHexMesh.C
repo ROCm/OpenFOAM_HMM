@@ -137,8 +137,11 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
                 const scalar surfaceCellSize =
                     readScalar(scsDict.lookup("surfaceCellSizeCoeff"));
 
-                globalMinLevel[surfI] = label(1.0/surfaceCellSize);
-                globalMaxLevel[surfI] = label(1.0/surfaceCellSize);
+                const label calculatedCellLevel =
+                    round(::log(1.0/surfaceCellSize)/::log(2) + 1);
+
+                globalMinLevel[surfI] = calculatedCellLevel;
+                globalMaxLevel[surfI] = calculatedCellLevel;
                 globalLevelIncr[surfI] = shapeDict.lookupOrDefault
                 (
                     "gapLevelIncrement",
@@ -319,8 +322,14 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
                                     scsDict.lookup("surfaceCellSizeCoeff")
                                 );
 
-                            globalMinLevel[surfI] = label(1.0/surfaceCellSize);
-                            globalMaxLevel[surfI] = label(1.0/surfaceCellSize);
+                            const label calculatedCellLevel =
+                                round
+                                (
+                                    ::log(1.0/surfaceCellSize)/::log(2) + 1
+                                );
+
+                            globalMinLevel[surfI] = calculatedCellLevel;
+                            globalMaxLevel[surfI] = calculatedCellLevel;
                             globalLevelIncr[surfI] =
                                 shapeControlRegionDict.lookupOrDefault
                                 (
@@ -1518,12 +1527,14 @@ int main(int argc, char *argv[])
             }
         }
 
-        fileName outFileName("simplifiedSurface.obj");
-
-        if (args.optionFound("outFile"))
-        {
-            outFileName = word(args.optionLookup("outFile")());
-        }
+        fileName outFileName
+        (
+            args.optionLookupOrDefault<fileName>
+            (
+                "outFile",
+                "constant/triSurface/simplifiedSurface.stl"
+            )
+        );
 
         extractSurface
         (
