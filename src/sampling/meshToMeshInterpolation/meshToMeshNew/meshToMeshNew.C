@@ -540,8 +540,8 @@ Foam::meshToMeshNew::meshToMeshNew
     label i = 0;
     forAllConstIter(HashTable<word>, patchMap, iter)
     {
-        const word& srcPatchName = iter.key();
-        const word& tgtPatchName = iter();
+        const word& tgtPatchName = iter.key();
+        const word& srcPatchName = iter();
 
         const polyPatch& srcPatch = srcRegion_.boundaryMesh()[srcPatchName];
         const polyPatch& tgtPatch = tgtRegion_.boundaryMesh()[tgtPatchName];

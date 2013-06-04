@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -133,14 +133,19 @@ private:
 
 
         //- Construct feature points where more than 2 feature edges meet
-        void calcFeatPoints(const List<edgeStatus>&);
+        void calcFeatPoints
+        (
+            const List<edgeStatus>& edgeStat,
+            const scalar minCos
+        );
 
         //- Classify the angles of the feature edges
         void classifyFeatureAngles
         (
             const labelListList& edgeFaces,
             List<edgeStatus>& edgeStat,
-            const scalar minCos
+            const scalar minCos,
+            const bool geometricTestOnly
         ) const;
 
         //- Choose next unset feature edge.
@@ -184,13 +189,16 @@ public:
         );
 
         //- Construct from surface, angle and min cumulative length and/or
-        //  number of elements
+        //  number of elements. If geometric test only is true, then region
+        //  information is ignored and features are only assigned based on the
+        //  geometric criteria
         surfaceFeatures
         (
             const triSurface&,
             const scalar includedAngle,
             const scalar minLen = 0,
-            const label minElems = 0
+            const label minElems = 0,
+            const bool geometricTestOnly = false
         );
 
         //- Construct from dictionary
@@ -205,7 +213,8 @@ public:
             const triSurface&,
             const pointField& points,
             const edgeList& edges,
-            const scalar mergeTol = 1e-6
+            const scalar mergeTol = 1e-6,
+            const bool geometricTestOnly = false
         );
 
         //- Construct as copy
@@ -275,17 +284,30 @@ public:
         // Edit
 
             //- Find feature edges using provided included angle
-            void findFeatures(const scalar includedAngle);
+            void findFeatures
+            (
+                const scalar includedAngle,
+                const bool geometricTestOnly
+            );
 
             //- Delete small sets of edges. Edges are stringed up and any
             //  string of length < minLen (or nElems < minElems) is deleted.
-            labelList trimFeatures(const scalar minLen, const label minElems);
+            labelList trimFeatures
+            (
+                const scalar minLen,
+                const label minElems,
+                const scalar includedAngle
+            );
 
             //- From member feature edges to status per edge.
             List<edgeStatus> toStatus() const;
 
             //- Set from status per edge
-            void setFromStatus(const List<edgeStatus>&);
+            void setFromStatus
+            (
+                const List<edgeStatus>& edgeStat,
+                const scalar includedAngle
+            );
 
 
         // Find

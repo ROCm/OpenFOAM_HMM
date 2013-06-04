@@ -8,14 +8,8 @@ Each ACMI patch requires the specification of a 'non-overlapping' patch.  In
 this example, the non-overlapping patches are described as walls, e.g. taken
 from the constant/polyMesh/boundary file:
 
-    1. First ACMI poatch pair applied to the inlet channel outlet
+    1. First ACMI patch pair applied to the inlet channel outlet
 
-        ACMI1_blockage
-        {
-            type            wall;
-            nFaces          40;
-            startFace       43680;
-        }
         ACMI1_couple
         {
             type            cyclicACMI;
@@ -26,16 +20,16 @@ from the constant/polyMesh/boundary file:
             neighbourPatch  ACMI2_couple;
             nonOverlapPatch ACMI1_blockage;
         }
-
-
-    1. Second ACMI poatch pair applied to the fixed mesh region inlet
-
-        ACMI2_blockage
+        ACMI1_blockage
         {
             type            wall;
-            nFaces          96;
-            startFace       43760;
+            nFaces          40;
+            startFace       43680;
         }
+
+
+    1. Second ACMI patch pair applied to the fixed mesh region inlet
+
         ACMI2_couple
         {
             type            cyclicACMI;
@@ -45,6 +39,12 @@ from the constant/polyMesh/boundary file:
             transform       noOrdering;
             neighbourPatch  ACMI1_couple;
             nonOverlapPatch ACMI2_blockage;
+        }
+        ACMI2_blockage
+        {
+            type            wall;
+            nFaces          96;
+            startFace       43760;
         }
 
 
@@ -56,7 +56,10 @@ The duplicate patches are initially created using the createBaffles utility.
 Firstly, the original (non-duplicated) patch faces are collected into zones
 using the topoSet utility.
 
-Each ACMI/no-overlapping patch pair is specified using a master-slave approach.
+Note: when specifying the ACMI patch-pairs, the coupled patch must be specified
+before its associated non-overlapping patch.
+
+Each ACMI/non-overlapping patch pair is specified using a master-slave approach.
 However, since we are generating boundary patches (which are always master
 patches) the slave patches are simply defined using 'dummy' entries, e.g.:
 
@@ -65,22 +68,8 @@ patches) the slave patches are simply defined using 'dummy' entries, e.g.:
 
     patches
     {
-        // create blockage patch
-        master
-        {
-            //- Master side patch
-            name            ACMI1_blockage;
-            type            wall;
-        }
-        slave1 // dummy entries only
-        {
-            //- Slave side patch
-            name            ACMI1_blockage;
-            type            wall;
-        }
-
         // create cyclic ACMI patch
-        master2
+        master
         {
             //- Master side patch
             name            ACMI1_couple;
@@ -90,12 +79,26 @@ patches) the slave patches are simply defined using 'dummy' entries, e.g.:
             nonOverlapPatch ACMI1_blockage;
             transform       noOrdering;
         }
-        slave2 // dummy entries only
+        slave // dummy entries only
         {
             //- Slave side patch
             name            ACMI1_couple;
             type            patch;
         }
+        // create blockage patch
+        master2
+        {
+            //- Master side patch
+            name            ACMI1_blockage;
+            type            wall;
+        }
+        slave12 // dummy entries only
+        {
+            //- Slave side patch
+            name            ACMI1_blockage;
+            type            wall;
+        }
+
     }
 
 Boundary conditions must then be applied to all geometric patches in the usual,

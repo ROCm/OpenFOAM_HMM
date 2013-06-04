@@ -435,8 +435,10 @@ bool Foam::checkCoupledPoints
                                 setPtr->insert(cpp.start()+i);
                             }
                             nErrorFaces++;
+
                             break;
                         }
+
                         avgMismatch += d;
                         nCoupledPoints++;
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -90,10 +90,22 @@ inline const Foam::vectorField& Foam::extendedFeatureEdgeMesh::normals() const
     return normals_;
 }
 
+inline const Foam::PackedList<2>&
+Foam::extendedFeatureEdgeMesh::normalVolumeTypes() const
+{
+    return normalVolumeTypes_;
+}
+
 inline const Foam::vectorField& Foam::extendedFeatureEdgeMesh::edgeDirections()
 const
 {
     return edgeDirections_;
+}
+
+inline const Foam::labelListList&
+Foam::extendedFeatureEdgeMesh::normalDirections() const
+{
+    return normalDirections_;
 }
 
 
@@ -205,10 +217,7 @@ inline const Foam::labelList& Foam::extendedFeatureEdgeMesh::regionEdges() const
 
 
 inline Foam::extendedFeatureEdgeMesh::pointStatus
-Foam::extendedFeatureEdgeMesh::getPointStatus
-(
-    label ptI
-) const
+Foam::extendedFeatureEdgeMesh::getPointStatus(label ptI) const
 {
     if (ptI < concaveStart_)
     {
@@ -230,10 +239,7 @@ Foam::extendedFeatureEdgeMesh::getPointStatus
 
 
 inline Foam::extendedFeatureEdgeMesh::edgeStatus
-Foam::extendedFeatureEdgeMesh::getEdgeStatus
-(
-    label edgeI
-) const
+Foam::extendedFeatureEdgeMesh::getEdgeStatus(label edgeI) const
 {
     if (edgeI < internalStart_)
     {

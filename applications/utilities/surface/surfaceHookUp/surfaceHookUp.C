@@ -201,6 +201,71 @@ void createBoundaryEdgeTrees
 }
 
 
+class findNearestOpSubset
+{
+    const indexedOctree<treeDataEdge>& tree_;
+
+    DynamicList<label>& shapeMask_;
+
+public:
+
+    findNearestOpSubset
+    (
+        const indexedOctree<treeDataEdge>& tree,
+        DynamicList<label>& shapeMask
+    )
+    :
+        tree_(tree),
+        shapeMask_(shapeMask)
+    {}
+
+    void operator()
+    (
+        const labelUList& indices,
+        const point& sample,
+
+        scalar& nearestDistSqr,
+        label& minIndex,
+        point& nearestPoint
+    ) const
+    {
+        const treeDataEdge& shape = tree_.shapes();
+
+        forAll(indices, i)
+        {
+            const label index = indices[i];
+            const label edgeIndex = shape.edgeLabels()[index];
+
+            if
+            (
+                !shapeMask_.empty()
+             && findIndex(shapeMask_, edgeIndex) != -1
+            )
+            {
+                continue;
+            }
+
+            const edge& e = shape.edges()[edgeIndex];
+
+            pointHit nearHit = e.line(shape.points()).nearestDist(sample);
+
+            // Only register hit if closest point is not an edge point
+            if (nearHit.hit())
+            {
+                scalar distSqr = sqr(nearHit.distance());
+
+                if (distSqr < nearestDistSqr)
+                {
+                    nearestDistSqr = distSqr;
+                    minIndex = index;
+                    nearestPoint = nearHit.rawPoint();
+                }
+            }
+        }
+    }
+};
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
@@ -226,7 +291,8 @@ int main(int argc, char *argv[])
     const IOdictionary dict(dictIO);
 
     const scalar dist(args.argRead<scalar>(1));
-    const scalar matchTolerance(SMALL);
+    const scalar matchTolerance(max(1e-6*dist, SMALL));
+    const label maxIters = 100;
 
     Info<< "Hooking distance = " << dist << endl;
 
@@ -289,7 +355,7 @@ int main(int argc, char *argv[])
     }
 
     label nChanged = 0;
-    label nIters = 0;
+    label nIters = 1;
 
     do
     {
@@ -339,7 +405,7 @@ int main(int argc, char *argv[])
                         (
                             samplePt,
                             sqr(dist),
-                            treeDataEdge::findNearestOpSubset
+                            findNearestOpSubset
                             (
                                 bEdgeTree,
                                 shapeMask
@@ -439,14 +505,18 @@ int main(int argc, char *argv[])
 
                     nChanged++;
 
+                    label newPointI = -1;
+
                     // Keep the points in the same place and move the edge
-                    newPoints[hitSurfI].append(newPoints[surfI][pointI]);
-
-                    // Move the points to the edges
-                    //newPoints[pointI] = eHit.hitPoint();
-                    //newPoints.append(eHit.hitPoint());
-
-                    visitedFace[hitSurfI][faceI] = true;
+                    if (hitSurfI == surfI)
+                    {
+                        newPointI = pointI;
+                    }
+                    else
+                    {
+                        newPoints[hitSurfI].append(newPoints[surfI][pointI]);
+                        newPointI = newPoints[hitSurfI].size() - 1;
+                    }
 
                     // Split the other face.
                     greenRefine
@@ -454,22 +524,23 @@ int main(int argc, char *argv[])
                         hitSurf,
                         faceI,
                         eIndex,
-                        newPoints[hitSurfI].size() - 1,
+                        newPointI,
                         newFacesFromSplit
                     );
 
+                    visitedFace[hitSurfI][faceI] = true;
+
                     forAll(newFacesFromSplit, newFaceI)
                     {
+                        const labelledTri& fN = newFacesFromSplit[newFaceI];
+
                         if (newFaceI == 0)
                         {
-                            newFaces[hitSurfI][faceI] = newFacesFromSplit[0];
+                            newFaces[hitSurfI][faceI] = fN;
                         }
                         else
                         {
-                            newFaces[hitSurfI].append
-                            (
-                                newFacesFromSplit[newFaceI]
-                            );
+                            newFaces[hitSurfI].append(fN);
                         }
                     }
                 }
@@ -502,7 +573,7 @@ int main(int argc, char *argv[])
             );
         }
 
-    } while (nChanged > 0);
+    } while (nChanged > 0 && nIters <= maxIters);
 
     Info<< endl;
 

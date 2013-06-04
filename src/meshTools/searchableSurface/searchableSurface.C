@@ -39,7 +39,6 @@ defineRunTimeSelectionTable(searchableSurface, dict);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
 Foam::autoPtr<Foam::searchableSurface> Foam::searchableSurface::New
 (
     const word& searchableSurfaceType,

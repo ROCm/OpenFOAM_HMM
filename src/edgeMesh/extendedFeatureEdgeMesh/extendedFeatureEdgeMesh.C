@@ -68,6 +68,19 @@ namespace Foam
         "multiple",
         "none"
     };
+
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::extendedFeatureEdgeMesh::sideVolumeType,
+        4
+    >::names[] =
+    {
+        "inside",
+        "outside",
+        "both",
+        "neither"
+    };
 }
 
 const Foam::NamedEnum<Foam::extendedFeatureEdgeMesh::pointStatus, 4>
@@ -75,6 +88,9 @@ const Foam::NamedEnum<Foam::extendedFeatureEdgeMesh::pointStatus, 4>
 
 const Foam::NamedEnum<Foam::extendedFeatureEdgeMesh::edgeStatus, 6>
     Foam::extendedFeatureEdgeMesh::edgeStatusNames_;
+
+const Foam::NamedEnum<Foam::extendedFeatureEdgeMesh::sideVolumeType, 4>
+    Foam::extendedFeatureEdgeMesh::sideVolumeTypeNames_;
 
 Foam::scalar Foam::extendedFeatureEdgeMesh::cosNormalAngleTol_ =
     Foam::cos(degToRad(0.1));
@@ -106,7 +122,9 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh(const IOobject& io)
     openStart_(0),
     multipleStart_(0),
     normals_(0),
+    normalVolumeTypes_(0),
     edgeDirections_(0),
+    normalDirections_(0),
     edgeNormals_(0),
     featurePointNormals_(0),
     featurePointEdges_(0),
@@ -144,6 +162,8 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh(const IOobject& io)
             >> openStart_
             >> multipleStart_
             >> normals_
+            >> normalVolumeTypes_
+            >> normalDirections_
             >> edgeNormals_
             >> featurePointNormals_
             >> featurePointEdges_
@@ -165,7 +185,7 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh(const IOobject& io)
                 edgeDirections_[eI] = eds[eI].vec(pts);
             }
 
-            edgeDirections_ /= mag(edgeDirections_);
+            edgeDirections_ /= (mag(edgeDirections_) + SMALL);
         }
     }
 
@@ -196,7 +216,9 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
     openStart_(fem.openStart()),
     multipleStart_(fem.multipleStart()),
     normals_(fem.normals()),
+    normalVolumeTypes_(fem.normalVolumeTypes()),
     edgeDirections_(fem.edgeDirections()),
+    normalDirections_(fem.normalDirections()),
     edgeNormals_(fem.edgeNormals()),
     featurePointNormals_(fem.featurePointNormals()),
     featurePointEdges_(fem.featurePointEdges()),
@@ -224,7 +246,9 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
     openStart_(0),
     multipleStart_(0),
     normals_(0),
+    normalVolumeTypes_(0),
     edgeDirections_(0),
+    normalDirections_(0),
     edgeNormals_(0),
     featurePointNormals_(0),
     featurePointEdges_(0),
@@ -263,7 +287,9 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
     openStart_(-1),
     multipleStart_(-1),
     normals_(0),
+    normalVolumeTypes_(0),
     edgeDirections_(0),
+    normalDirections_(0),
     edgeNormals_(0),
     featurePointNormals_(0),
     featurePointEdges_(0),
@@ -287,6 +313,36 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
         regionFeatureEdges,
         featurePoints
     );
+
+    const labelListList& edgeFaces = surf.edgeFaces();
+
+    normalVolumeTypes_.setSize(normals_.size());
+
+    // Noting when the normal of a face has been used so not to duplicate
+    labelList faceMap(surf.size(), -1);
+
+    label nAdded = 0;
+
+    forAll(featureEdges, i)
+    {
+        label sFEI = featureEdges[i];
+
+        // Pick up the faces adjacent to the feature edge
+        const labelList& eFaces = edgeFaces[sFEI];
+
+        forAll(eFaces, j)
+        {
+            label eFI = eFaces[j];
+
+            // Check to see if the points have been already used
+            if (faceMap[eFI] == -1)
+            {
+                normalVolumeTypes_[nAdded++] = INSIDE;
+
+                faceMap[eFI] = nAdded - 1;
+            }
+        }
+    }
 }
 
 
@@ -309,7 +365,9 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
     openStart_(-1),
     multipleStart_(-1),
     normals_(0),
+    normalVolumeTypes_(0),
     edgeDirections_(0),
+    normalDirections_(0),
     edgeNormals_(0),
     featurePointNormals_(0),
     featurePointEdges_(0),
@@ -341,7 +399,9 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
     label openStart,
     label multipleStart,
     const vectorField& normals,
+    const PackedList<2>& normalVolumeTypes,
     const vectorField& edgeDirections,
+    const labelListList& normalDirections,
     const labelListList& edgeNormals,
     const labelListList& featurePointNormals,
     const labelListList& featurePointEdges,
@@ -358,7 +418,9 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
     openStart_(openStart),
     multipleStart_(multipleStart),
     normals_(normals),
+    normalVolumeTypes_(normalVolumeTypes),
     edgeDirections_(edgeDirections),
+    normalDirections_(normalDirections),
     edgeNormals_(edgeNormals),
     featurePointNormals_(featurePointNormals),
     featurePointEdges_(featurePointEdges),
@@ -1300,6 +1362,10 @@ bool Foam::extendedFeatureEdgeMesh::writeData(Ostream& os) const
         << multipleStart_ << nl
         << "// normals" << nl
         << normals_ << nl
+        << "// normal volume types" << nl
+        << normalVolumeTypes_ << nl
+        << "// normalDirections" << nl
+        << normalDirections_ << nl
         << "// edgeNormals" << nl
         << edgeNormals_ << nl
         << "// featurePointNormals" << nl

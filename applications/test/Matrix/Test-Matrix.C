@@ -25,6 +25,7 @@ License
 
 #include "scalarMatrices.H"
 #include "vector.H"
+#include "IFstream.H"
 
 using namespace Foam;
 

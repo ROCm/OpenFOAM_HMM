@@ -843,8 +843,9 @@ bool Foam::primitiveMesh::checkFaceFlatness
     {
         if (nSummed > 0)
         {
-            Info<< "    Face flatness (1 = flat, 0 = butterfly) : average = "
-                << sumFlatness / nSummed << "  min = " << minFlatness << endl;
+            Info<< "    Face flatness (1 = flat, 0 = butterfly) : min = "
+                << minFlatness << "  average = " << sumFlatness / nSummed
+                << endl;
         }
     }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,6 +61,7 @@ SourceFiles
 #include "treeDataEdge.H"
 #include "treeDataPoint.H"
 #include "PrimitivePatch.H"
+#include "PackedList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -108,6 +109,17 @@ public:
 
     static const Foam::NamedEnum<edgeStatus, 6> edgeStatusNames_;
 
+    //- Normals point to the outside
+    enum sideVolumeType
+    {
+        INSIDE  = 0,  // mesh inside
+        OUTSIDE = 1,  // mesh outside
+        BOTH    = 2,  // e.g. a baffle
+        NEITHER = 3   // not sure when this may be used
+    };
+
+    static const Foam::NamedEnum<sideVolumeType, 4> sideVolumeTypeNames_;
+
 
 private:
 
@@ -150,8 +162,16 @@ private:
         //  points and edges, unsorted
         vectorField normals_;
 
+        //-
+        PackedList<2> normalVolumeTypes_;
+
         //- Flat and open edges require the direction of the edge
         vectorField edgeDirections_;
+
+        //- Starting directions for the edges.
+        //  This vector points to the half of the plane defined by the first
+        //  edge normal.
+        labelListList normalDirections_;
 
         //- Indices of the normals that are adjacent to the feature edges
         labelListList edgeNormals_;
@@ -267,7 +287,9 @@ public:
             label openStart,
             label multipleStart,
             const vectorField& normals,
+            const PackedList<2>& normalVolumeTypes,
             const vectorField& edgeDirections,
+            const labelListList& normalDirections,
             const labelListList& edgeNormals,
             const labelListList& featurePointNormals,
             const labelListList& featurePointEdges,
@@ -369,8 +391,14 @@ public:
             //  and points
             inline const vectorField& normals() const;
 
+            //- Return
+            inline const PackedList<2>& normalVolumeTypes() const;
+
             //- Return the edgeDirection vectors
             inline const vectorField& edgeDirections() const;
+
+            //-
+            inline const labelListList& normalDirections() const;
 
             //- Return the direction of edgeI, pointing away from ptI
             inline vector edgeDirection(label edgeI, label ptI) const;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -149,6 +149,10 @@ public:
                //- The rotation tensor corresponding the quaternion
                inline tensor R() const;
 
+               //- Return a vector of euler angles (rotations in radians about
+               //  the x, y and z axes.
+               inline vector eulerAngles(const quaternion& q) const;
+
                inline quaternion normalized() const;
 
 
@@ -209,7 +213,7 @@ inline scalar mag(const quaternion& q);
 //- Return the conjugate of the given quaternion
 inline quaternion conjugate(const quaternion& q);
 
-//- Return the normailzed (unit) quaternion of the given quaternion
+//- Return the normalized (unit) quaternion of the given quaternion
 inline quaternion normalize(const quaternion& q);
 
 //- Return the inverse of the given quaternion
@@ -225,6 +229,15 @@ quaternion slerp
     const quaternion& qb,
     const scalar t
 );
+
+//- Exponent of a quaternion
+quaternion exp(const quaternion& q);
+
+//- Power of a quaternion
+quaternion pow(const quaternion& q, const label power);
+
+//- Power of a quaternion
+quaternion pow(const quaternion& q, const scalar power);
 
 //- Data associated with quaternion type are contiguous
 template<>
