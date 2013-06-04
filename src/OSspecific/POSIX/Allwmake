@@ -1,5 +1,6 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
+makeType=${1:-libo}
 
 unset COMP_FLAGS LINK_FLAGS
 
@@ -19,6 +20,6 @@ fi
 
 
 # make (non-shared) object
-wmake libo
+wmake $makeType 
 
 # ----------------------------------------------------------------- end-of-file
