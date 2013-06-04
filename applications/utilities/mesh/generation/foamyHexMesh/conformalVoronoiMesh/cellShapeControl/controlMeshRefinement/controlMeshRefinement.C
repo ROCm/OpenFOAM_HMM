@@ -319,8 +319,6 @@ void Foam::controlMeshRefinement::initialMeshPopulation
         sizes.clear();
         alignments.clear();
 
-        label nRejected = 0;
-
         PackedBoolList keepVertex(vertices.size(), true);
 
         forAll(vertices, vI)
@@ -496,8 +494,6 @@ void Foam::controlMeshRefinement::initialMeshPopulation
             }
         }
 
-        label nRejected = 0;
-
         PackedBoolList keepVertex(vertices.size(), true);
 
         forAll(vertices, vI)
@@ -602,9 +598,9 @@ void Foam::controlMeshRefinement::initialMeshPopulation
 
 //                if (newPtPriority >= highestPriority)
 //                {
-                    const label oldSize = mesh_.vertexCount();
-
-                    cellShapeControlMesh::Vertex_handle insertedVert =
+//                    const label oldSize = mesh_.vertexCount();
+//
+//                    cellShapeControlMesh::Vertex_handle insertedVert =
                         mesh_.insert
                         (
                             pt,

@@ -513,7 +513,7 @@ bool Foam::backgroundMeshDecomposition::refineCell
     // Sample the box to find an estimate of the min size, and a volume
     // estimate when overlapping == true.
 
-    const conformationSurfaces& geometry = geometryToConformTo_;
+//    const conformationSurfaces& geometry = geometryToConformTo_;
 
     treeBoundBox cellBb
     (

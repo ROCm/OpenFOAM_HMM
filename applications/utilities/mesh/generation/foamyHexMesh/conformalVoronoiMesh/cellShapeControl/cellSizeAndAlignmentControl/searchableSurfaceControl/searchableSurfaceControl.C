@@ -442,12 +442,13 @@ void Foam::searchableSurfaceControl::initialVertices
                     intersectionList
                 );
 
-                if (intersectionList[0].hit())
-                {
-                    scalar dist = mag(intersectionList[0].hitPoint() - pts[pI]);
-
-                    //limitedCellSize = dist/2.0;
-                }
+//                if (intersectionList[0].hit())
+//                {
+//                    scalar dist =
+//                        mag(intersectionList[0].hitPoint() - pts[pI]);
+//
+//                    limitedCellSize = dist/2.0;
+//                }
             }
         }
 
