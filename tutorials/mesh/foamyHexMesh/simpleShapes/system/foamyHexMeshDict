@@ -19,10 +19,15 @@ FoamFile
 
 geometry
 {
-    // Internal shape
-    coneAndSphere_clean_orient.obj
+    sphere_orient.stl
     {
-        name coneAndSphere;
+        name sphere;
+        type triSurfaceMesh;
+    }
+
+    cone_orient.stl
+    {
+        name cone;
         type triSurfaceMesh;
     }
 
@@ -43,27 +48,53 @@ surfaceConformation
 
     featurePointControls
     {
-        specialiseFeaturePoints on;
-        edgeAiming              on;
+        specialiseFeaturePoints off;
+        edgeAiming              off;
         guardFeaturePoints      off;
-        snapFeaturePoints       on;
+        snapFeaturePoints       off;
         circulateEdges          off;
     }
 
     // Geometry to mesh to
     geometryToConformTo
     {
-        coneAndSphere
+        cone
         {
-            featureMethod           extractFeatures;
-            includedAngle           140;
+            featureMethod   extractFeatures;
+            includedAngle   140;
+
+            patchInfo
+            {
+                type        wall;
+                inGroups    (groupConeAndSphere);
+            }
+        }
+
+        sphere
+        {
+            featureMethod   none;
+
+            patchInfo
+            {
+                type        wall;
+                inGroups    (groupConeAndSphere);
+            }
         }
 
         domain
         {
-            featureMethod           extractFeatures;
-            includedAngle           100;
-            mode                    outside;
+            featureMethod   extractFeatures;
+            includedAngle   100;
+            mode            outside;
+        }
+    }
+
+    additionalFeatures
+    {
+        coneSphereIntersection
+        {
+            featureMethod           extendedFeatureEdgeMesh;
+            extendedFeatureEdgeMesh "cone_orient_sphere_orient_intersection.extendedFeatureEdgeMesh";
         }
     }
 }
@@ -71,7 +102,7 @@ surfaceConformation
 
 initialPoints
 {
-    initialPointsMethod             autoDensity;
+    initialPointsMethod         autoDensity;
 
     autoDensityCoeffs
     {
@@ -97,7 +128,24 @@ motionControl
 
     shapeControlFunctions
     {
-        coneAndSphere
+        sphere
+        {
+            type                searchableSurfaceControl;
+            priority            1;
+            mode                bothSides;
+
+            surfaceCellSizeFunction uniformValue;
+            uniformValueCoeffs
+            {
+                surfaceCellSizeCoeff 0.5;
+            }
+
+            cellSizeFunction        uniform;
+            uniformCoeffs
+            {}
+        }
+
+        cone
         {
             type                searchableSurfaceControl;
             priority            1;
