@@ -2076,8 +2076,6 @@ Foam::vector Foam::conformalVoronoiMesh::calcSharedPatchNormal
 {
     List<Foam::point> patchEdge(2, point::max);
 
-    label count = 0;
-
     // Get shared Facet
     for (label cI = 0; cI < 4; ++cI)
     {
