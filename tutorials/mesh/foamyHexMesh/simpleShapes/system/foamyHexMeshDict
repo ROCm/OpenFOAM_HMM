@@ -23,12 +23,28 @@ geometry
     {
         name sphere;
         type triSurfaceMesh;
+
+        regions
+        {
+            ascii
+            {
+                name sphere_patch;
+            }
+        }
     }
 
     cone_orient.stl
     {
         name cone;
         type triSurfaceMesh;
+
+        regions
+        {
+            ascii
+            {
+                name cone_patch;
+            }
+        }
     }
 
     // Outside of domain
@@ -130,19 +146,22 @@ motionControl
     {
         sphere
         {
-            type                searchableSurfaceControl;
-            priority            1;
-            mode                bothSides;
+            type                        searchableSurfaceControl;
+            priority                    2;
+            mode                        inside;
 
-            surfaceCellSizeFunction uniformValue;
+            surfaceCellSizeFunction     uniformValue;
             uniformValueCoeffs
             {
-                surfaceCellSizeCoeff 0.5;
+                surfaceCellSizeCoeff    0.25;
             }
 
-            cellSizeFunction        uniform;
-            uniformCoeffs
-            {}
+            cellSizeFunction            linearDistance;
+            linearDistanceCoeffs
+            {
+                distanceCellSizeCoeff   1;
+                distanceCoeff           2;
+            }
         }
 
         cone
@@ -154,7 +173,7 @@ motionControl
             surfaceCellSizeFunction uniformValue;
             uniformValueCoeffs
             {
-                surfaceCellSizeCoeff 0.75;
+                surfaceCellSizeCoeff 1;
             }
 
             cellSizeFunction        uniform;
