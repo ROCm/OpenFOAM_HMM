@@ -111,6 +111,10 @@ bool Foam::conformalVoronoiMesh::meshableRegion
         {
             return false;
         }
+        default:
+        {
+            return false;
+        }
     }
 }
 
@@ -944,8 +948,8 @@ void Foam::conformalVoronoiMesh::createMixedFeaturePoints
                 // external edge groups at feature point.
 
                 // Skipping unsupported mixed feature point types
-                bool skipEdge = false;
-
+//                bool skipEdge = false;
+//
 //                forAll(pEds, e)
 //                {
 //                    const label edgeI = pEds[e];
@@ -1231,7 +1235,7 @@ void Foam::conformalVoronoiMesh::addMasterAndSlavePoints
             )
         );
 
-        const label masterIndex = pts[pts.size() - 1].index();
+//        const label masterIndex = pts[pts.size() - 1].index();
 
         //meshTools::writeOBJ(strMasters, masterPt);
 
@@ -1330,7 +1334,7 @@ void Foam::conformalVoronoiMesh::createMasterAndSlavePoints
     // Loop around the edges of the feature point
     if (circ.size()) do
     {
-        const edgeStatus eStatusPrev = feMesh.getEdgeStatus(circ.prev());
+//        const edgeStatus eStatusPrev = feMesh.getEdgeStatus(circ.prev());
         const edgeStatus eStatusCurr = feMesh.getEdgeStatus(circ());
 //        const edgeStatus eStatusNext = feMesh.getEdgeStatus(circ.next());
 
