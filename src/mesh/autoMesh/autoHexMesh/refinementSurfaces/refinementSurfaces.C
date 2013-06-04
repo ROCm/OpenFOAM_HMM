@@ -403,6 +403,49 @@ Foam::refinementSurfaces::refinementSurfaces
 }
 
 
+Foam::refinementSurfaces::refinementSurfaces
+(
+    const searchableSurfaces& allGeometry,
+    const labelList& surfaces,
+    const wordList& names,
+    const wordList& faceZoneNames,
+    const wordList& cellZoneNames,
+    const List<areaSelectionAlgo>& zoneInside,
+    const pointField& zoneInsidePoints,
+    const List<faceZoneType>& faceType,
+    const labelList& regionOffset,
+    const labelList& minLevel,
+    const labelList& maxLevel,
+    const labelList& gapLevel,
+    const scalarField& perpendicularAngle,
+    const PtrList<dictionary>& patchInfo
+)
+:
+    allGeometry_(allGeometry),
+    surfaces_(surfaces),
+    names_(names),
+    faceZoneNames_(faceZoneNames),
+    cellZoneNames_(cellZoneNames),
+    zoneInside_(zoneInside),
+    zoneInsidePoints_(zoneInsidePoints),
+    faceType_(faceType),
+    regionOffset_(regionOffset),
+    minLevel_(minLevel),
+    maxLevel_(maxLevel),
+    gapLevel_(gapLevel),
+    perpendicularAngle_(perpendicularAngle),
+    patchInfo_(patchInfo.size())
+{
+    forAll(patchInfo_, pI)
+    {
+        if (patchInfo.set(pI))
+        {
+            patchInfo_[pI] = patchInfo[pI];
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Get indices of unnamed surfaces (surfaces without faceZoneName)

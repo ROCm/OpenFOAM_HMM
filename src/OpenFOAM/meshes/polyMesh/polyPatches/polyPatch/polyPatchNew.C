@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -94,6 +94,26 @@ Foam::autoPtr<Foam::polyPatch> Foam::polyPatch::New
 
     word patchType(dict.lookup("type"));
     dict.readIfPresent("geometricType", patchType);
+
+    return polyPatch::New(patchType, name, dict, index, bm);
+}
+
+
+Foam::autoPtr<Foam::polyPatch> Foam::polyPatch::New
+(
+    const word& patchType,
+    const word& name,
+    const dictionary& dict,
+    const label index,
+    const polyBoundaryMesh& bm
+)
+{
+    if (debug)
+    {
+        Info<< "polyPatch::New(const word&, const word&, const dictionary&, "
+               "const label, const polyBoundaryMesh&) : constructing polyPatch"
+            << endl;
+    }
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(patchType);

@@ -2677,8 +2677,8 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
 }
 
 
-template <class Type>
-template <class FindNearestOp>
+template<class Type>
+template<class FindNearestOp>
 Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
 (
     const point& sample,
@@ -2728,8 +2728,8 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
 }
 
 
-template <class Type>
-template <class FindNearestOp>
+template<class Type>
+template<class FindNearestOp>
 Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
 (
     const linePointRef& ln,
@@ -2799,8 +2799,8 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLineAny
 
 
 // Find nearest intersection
-template <class Type>
-template <class FindIntersectOp>
+template<class Type>
+template<class FindIntersectOp>
 Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
 (
     const point& start,
@@ -2813,8 +2813,8 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
 
 
 // Find nearest intersection
-template <class Type>
-template <class FindIntersectOp>
+template<class Type>
+template<class FindIntersectOp>
 Foam::pointIndexHit Foam::indexedOctree<Type>::findLineAny
 (
     const point& start,

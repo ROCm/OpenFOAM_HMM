@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -153,6 +153,9 @@ public:
 
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+//- Return a quantity of the difference between two triads
+scalar diff(const triad& A, const triad& B);
 
 //- Data associated with quaternion type are contiguous
 template<>

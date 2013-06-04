@@ -58,21 +58,67 @@ Foam::quaternion Foam::slerp
     const scalar t
 )
 {
-    // Calculate angle between the quaternions
-    scalar cosHalfTheta = qa & qb;
+    label sign = 1;
 
-    if (mag(cosHalfTheta) >= 1)
+    if ((qa & qb) < 0)
     {
-        return qa;
+        sign = -1;
     }
 
-    scalar halfTheta = acos(cosHalfTheta);
-    scalar sinHalfTheta = sqrt(1.0 - sqr(cosHalfTheta));
+    return qa*pow((inv(qa)*sign*qb), t);
+}
 
-    scalar wa = sin((1 - t)*halfTheta)/sinHalfTheta;
-    scalar wb = sin(t*halfTheta)/sinHalfTheta;
 
-    return wa*qa + wb*qb;
+Foam::quaternion Foam::exp(const quaternion& q)
+{
+    const scalar magV = mag(q.v());
+
+    if (magV == 0)
+    {
+        return quaternion(1, vector::zero);
+    }
+
+    const scalar expW = exp(q.w());
+
+    return quaternion
+    (
+        expW*cos(magV),
+        expW*sin(magV)*q.v()/magV
+    );
+}
+
+
+Foam::quaternion Foam::pow(const quaternion& q, const label power)
+{
+    const scalar magQ = mag(q);
+    const scalar magV = mag(q.v());
+
+    quaternion powq(q.v());
+
+    if (magV != 0 && magQ != 0)
+    {
+        powq /= magV;
+        powq *= power*acos(q.w()/magQ);
+    }
+
+    return pow(magQ, power)*exp(powq);
+}
+
+
+Foam::quaternion Foam::pow(const quaternion& q, const scalar power)
+{
+    const scalar magQ = mag(q);
+    const scalar magV = mag(q.v());
+
+    quaternion powq(q.v());
+
+    if (magV != 0 && magQ != 0)
+    {
+        powq /= magV;
+        powq *= power*acos(q.w()/magQ);
+    }
+
+    return pow(magQ, power)*exp(powq);
 }
 
 

@@ -26,6 +26,9 @@ surface1.stl
         // - 0  : selects no edges
         // - 180: selects all edges
         includedAngle   120;
+
+        // Do not mark region edges
+        geometricTestOnly       yes;
     }
 
     // Write options
@@ -71,10 +74,10 @@ surface2.nas
 
         // Keep nonManifold edges (edges with >2 connected faces where
         // the faces form more than two different normal planes)
-        nonManifoldEdges       yes;
+        nonManifoldEdges    yes;
 
         // Keep open edges (edges with 1 connected face)
-        openEdges       yes;
+        openEdges           yes;
     }
 
     addFeatures
@@ -92,6 +95,7 @@ surface2.nas
 
     // Output the proximity of feature points and edges to each other
     featureProximity        no;
+
     // The maximum search distance to use when looking for other feature
     // points and edges
     maxFeatureProximity     1;

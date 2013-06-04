@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,7 @@ SourceFiles
 
 #include "label.H"
 #include "vector.H"
+#include "triad.H"
 #include "labelList.H"
 #include "pointField.H"
 #include "faceList.H"
@@ -107,6 +108,15 @@ namespace meshTools
             const point& pt
         );
 
+        //- Write obj representation of a triad. Requires the location of the
+        //  triad to be supplied
+        void writeOBJ
+        (
+            Ostream& os,
+            const triad& t,
+            const point& pt
+        );
+
         //- Write obj representation of a line connecting two points
         //  Need to keep track of points that have been added. count starts at 0
         void writeOBJ
@@ -126,19 +136,21 @@ namespace meshTools
         );
 
         //- Write obj representation of faces subset
+        template<class FaceType>
         void writeOBJ
         (
             Ostream& os,
-            const faceList&,
+            const UList<FaceType>&,
             const pointField&,
             const labelList& faceLabels
         );
 
         //- Write obj representation of faces
+        template<class FaceType>
         void writeOBJ
         (
             Ostream& os,
-            const faceList&,
+            const UList<FaceType>&,
             const pointField&
         );
 
@@ -329,6 +341,12 @@ namespace meshTools
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "meshToolsTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

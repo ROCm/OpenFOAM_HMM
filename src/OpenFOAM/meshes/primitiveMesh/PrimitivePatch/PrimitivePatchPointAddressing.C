@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,76 +75,6 @@ calcPointEdges() const
             << "calcPointEdges() finished calculating pointEdges"
             << endl;
     }
-
-    // Now order the edges of each point according to whether they share a
-    // face
-
-//    DynamicList<label> newEdgeList;
-
-//    forAll(pe, pointI)
-//    {
-//        const labelList& pEdges = pe[pointI];
-
-//        label edgeI = pEdges[0];
-
-//        label prevFaceI = edgeFaces()[edgeI][0];
-
-//        newEdgeList.clear();
-//        newEdgeList.setCapacity(pEdges.size());
-
-//        do
-//        {
-//            newEdgeList.append(edgeI);
-
-//            // Cross edge to next face
-//            const labelList& eFaces = edgeFaces()[edgeI];
-
-//            if (eFaces.size() != 2)
-//            {
-//                break;
-//            }
-
-//            label faceI = eFaces[0];
-//            if (faceI == prevFaceI)
-//            {
-//                faceI = eFaces[1];
-//            }
-
-//            // Cross face to next edge
-//            const labelList& fEdges = faceEdges()[faceI];
-
-//            forAll(fEdges, feI)
-//            {
-//                const label nextEdgeI = fEdges[feI];
-//                const edge& nextEdge = edges()[nextEdgeI];
-
-//                if
-//                (
-//                    nextEdgeI != edgeI
-//                 && (nextEdge.start() == pointI || nextEdge.end() == pointI)
-//                )
-//                {
-//                    edgeI = nextEdgeI;
-//                    break;
-//                }
-//            }
-
-//            prevFaceI = faceI;
-
-//        } while (edgeI != pEdges[0]);
-
-//        if (newEdgeList.size() == pEdges.size())
-//        {
-//            pe[pointI] = newEdgeList;
-//        }
-//    }
-
-//    if (debug)
-//    {
-//        Info<< "PrimitivePatch<Face, FaceList, PointField, PointType>::"
-//            << "calcPointEdges() finished ordering pointEdges"
-//            << endl;
-//    }
 }
 
 

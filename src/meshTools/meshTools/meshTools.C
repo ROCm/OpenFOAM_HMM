@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -218,6 +218,20 @@ void Foam::meshTools::writeOBJ
 void Foam::meshTools::writeOBJ
 (
     Ostream& os,
+    const triad& t,
+    const point& pt
+)
+{
+    forAll(t, dirI)
+    {
+        writeOBJ(os, pt, pt + t[dirI]);
+    }
+}
+
+
+void Foam::meshTools::writeOBJ
+(
+    Ostream& os,
     const point& p1,
     const point& p2,
     label& count
@@ -245,57 +259,6 @@ void Foam::meshTools::writeOBJ
         << ' ' << p2.x() - p1.x()
         << ' ' << p2.y() - p1.y()
         << ' ' << p2.z() - p1.z() << endl;
-}
-
-
-void Foam::meshTools::writeOBJ
-(
-    Ostream& os,
-    const faceList& faces,
-    const pointField& points,
-    const labelList& faceLabels
-)
-{
-    Map<label> foamToObj(4*faceLabels.size());
-
-    label vertI = 0;
-
-    forAll(faceLabels, i)
-    {
-        const face& f = faces[faceLabels[i]];
-
-        forAll(f, fp)
-        {
-            if (foamToObj.insert(f[fp], vertI))
-            {
-                writeOBJ(os, points[f[fp]]);
-                vertI++;
-            }
-        }
-
-        os << 'l';
-        forAll(f, fp)
-        {
-            os << ' ' << foamToObj[f[fp]]+1;
-        }
-        os << ' ' << foamToObj[f[0]]+1 << endl;
-    }
-}
-
-
-void Foam::meshTools::writeOBJ
-(
-    Ostream& os,
-    const faceList& faces,
-    const pointField& points
-)
-{
-    labelList allFaces(faces.size());
-    forAll(allFaces, i)
-    {
-        allFaces[i] = i;
-    }
-    writeOBJ(os, faces, points, allFaces);
 }
 
 

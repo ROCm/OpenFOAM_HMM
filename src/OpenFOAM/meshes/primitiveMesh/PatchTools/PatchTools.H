@@ -170,6 +170,18 @@ public:
         const PrimitivePatch<Face, FaceList, PointField, PointType>&
     );
 
+    //- Return point-edge addressing sorted by order around the point.
+    template
+    <
+        class Face,
+        template<class> class FaceList,
+        class PointField,
+        class PointType
+    >
+    static labelListList sortedPointEdges
+    (
+        const PrimitivePatch<Face, FaceList, PointField, PointType>&
+    );
 
     //- If 2 face neighbours: label of face where ordering of edge
     //  is consistent with righthand walk.

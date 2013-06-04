@@ -1,0 +1,25 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+# Get the number of processors to run on from system/decomposeParDict
+nProc=$(getNumberOfProcessors)
+
+# Create tight-fitting background mesh
+runApplication blockMesh
+runApplication topoSet -dict system/topoSetDict-background
+mv log.topoSet log.topoSet.background
+runApplication subsetMesh background -patch walls -overwrite
+
+runApplication decomposePar
+
+runParallel foamyHexMesh $nProc
+runParallel collapseEdges $nProc -latestTime -collapseFaces
+runParallel checkMesh $nProc -latestTime -allTopology -allGeometry
+
+runApplication reconstructParMesh -latestTime
+
+
+# ----------------------------------------------------------------- end-of-file
