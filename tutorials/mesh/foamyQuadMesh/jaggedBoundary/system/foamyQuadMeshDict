@@ -11,40 +11,36 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "system";
-    object      foamyHex2DMeshDict;
+    object      foamyQuadMeshDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 geometry
 {
-    opencfd_text.stl
+    jaggedBoundary.stl
     {
-        name letters;
-        type closedTriSurfaceMesh;
-    }
-
-    opencfd_box.stl
-    {
-        name box;
+        name jaggedBoundary;
         type closedTriSurfaceMesh;
     }
 }
 
-
 surfaceConformation
 {
     // The z-coordinate of the plane is taken from here.
-    locationInMesh                  (0 0 0);
+    locationInMesh                  (-0.6 0.3 0.0);
 
-    pointPairDistanceCoeff          0.1;
+    pointPairDistanceCoeff          0.001;
 
-    minEdgeLenCoeff                 0.1;
+    // If area of a dual cell is less than the square of this, do not refine.
+    minEdgeLenCoeff                 0.001;
 
-    maxNotchLenCoeff                1.0;
+    // How much cells are allowed to stick out of the surfaces before
+    // points are inserted onto the boundary
+    maxNotchLenCoeff                1;
 
-    minNearPointDistCoeff           0.1;
+    minNearPointDistCoeff           0.001;
 
-    maxQuadAngle                    120;
+    maxQuadAngle                    125;
 
     // Insert near-boundary point mirror or point-pairs
     insertSurfaceNearestPointPairs  yes;
@@ -60,27 +56,22 @@ surfaceConformation
 
     geometryToConformTo
     {
-        letters
+        jaggedBoundary
         {
             featureMethod           extendedFeatureEdgeMesh;
-            extendedFeatureEdgeMesh "opencfd_text.extendedFeatureEdgeMesh";
-        }
-
-        box
-        {
-            featureMethod           extendedFeatureEdgeMesh;
-            extendedFeatureEdgeMesh "opencfd_box.extendedFeatureEdgeMesh";
+            extendedFeatureEdgeMesh "jaggedBoundary.extendedFeatureEdgeMesh";
         }
     }
 
     additionalFeatures
-    {}
+    {
+    }
 
     // Choose if to randomise the initial grid created by insertGrid.
-    randomiseInitialGrid            yes;
+    randomiseInitialGrid yes;
 
     // Perturbation fraction, 1 = cell-size.
-    randomPerturbation              0.1;
+    randomPerturbation   0.1;
 }
 
 
@@ -88,32 +79,31 @@ motionControl
 {
     // This is a tolerance for determining whether to deal with surface
     // protrusions or not.
-    minCellSize         0.02;
+    minCellSize         0.04;
 
     // Assign a priority to all requests for cell sizes, the highest overrules.
     defaultPriority     0;
 
     shapeControlFunctions
     {
-        letters
+        jaggedBoundary
         {
-            type                  searchableSurfaceControl;
-            priority              1;
-            mode                  inside;
-            cellSizeFunction      uniform;
+            type                    searchableSurfaceControl;
+            priority                1;
+            mode                    inside;
 
-            linearDistanceCoeffs
+            cellSizeFunction        surfaceOffsetLinearDistance;
+            surfaceOffsetLinearDistanceCoeffs
             {
-                distanceCellSizeCoeff  1;
-                distanceCoeff          50;
+                distanceCellSizeCoeff    1;
+                totalDistanceCoeff       5;
+                surfaceOffsetCoeff       1;
             }
-            uniformCoeffs
-            {}
 
             surfaceCellSizeFunction uniformValue;
             uniformValueCoeffs
             {
-                surfaceCellSizeCoeff   1;
+                surfaceCellSizeCoeff     0.1;
             }
         }
     }
@@ -140,19 +130,18 @@ shortEdgeFilter
 {
     // Factor to multiply the average of a face's edge lengths by.
     // If an edge of that face is smaller than that value then delete it.
-    shortEdgeFilterFactor           0.2;
+    shortEdgeFilterFactor        0.2;
 
     // Weighting for the lengths of edges that are attached to the boundaries.
     // Used when calculating the length of an edge. Default 2.0.
-    edgeAttachedToBoundaryFactor    2.0;
+    edgeAttachedToBoundaryFactor 2.0;
 }
 
 
 extrusion
 {
-    extrude  off;
-
-    #include "extrude2DMeshDict"
+    extrude     off;
+    #include    "extrude2DMeshDict";
 }
 
 
