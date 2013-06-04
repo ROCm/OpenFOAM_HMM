@@ -147,7 +147,7 @@ checkIllegalCode()
     do
         case "$f" in
         # exclude potential makefiles
-        (*[Mm]akefile* | wmake/rules/* | *.f* | *.v[cf]proj | *.pdf | *.png | *.html | *.gif | *.css)
+        (*[Mm]akefile* | wmake/rules/* | *.f* | *.v[cf]proj | *.pdf | *.png | *.html | *.gif | *.css | *.gz)
         ;;
         (*)
             fileType=`file -b $f`

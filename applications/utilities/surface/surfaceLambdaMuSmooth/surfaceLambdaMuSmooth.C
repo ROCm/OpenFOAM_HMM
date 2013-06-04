@@ -222,14 +222,6 @@ int main(int argc, char *argv[])
     }
 
     Info<< "Writing surface to " << outFileName << " ..." << endl;
-
-//    meshedSurface
-//    (
-//        xferMove(newPoints),
-//        xferCopy(surf1.localFaces()),
-//        xferCopy(surf1.surfZones())
-//    ).write(outFileName);
-
     surf1.write(outFileName);
 
     Info<< "End\n" << endl;
