@@ -2458,6 +2458,54 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
          || (vB->internalOrBoundaryPoint() && !vB->referred())
         )
         {
+            if
+            (
+                (vA->internalPoint() && vB->externalBoundaryPoint())
+             || (vB->internalPoint() && vA->externalBoundaryPoint())
+            )
+            {
+                Cell_circulator ccStart = incident_cells(*eit);
+                Cell_circulator cc1 = ccStart;
+                Cell_circulator cc2 = cc1;
+
+                cc2++;
+
+                bool skipEdge = false;
+
+                do
+                {
+                    if
+                    (
+                        cc1->hasFarPoint() || cc2->hasFarPoint()
+                     || is_infinite(cc1) || is_infinite(cc2)
+                    )
+                    {
+                        Pout<< "Ignoring edge between internal and external: "
+                            << vA->info()
+                            << vB->info();
+
+                        skipEdge = true;
+                        break;
+                    }
+
+                    cc1++;
+                    cc2++;
+
+                } while (cc1 != ccStart);
+
+
+                // Do not create faces if the internal point is outside!
+                // This occurs because the internal point is not determined to
+                // be outside in the inside/outside test. This is most likely
+                // due to the triangle.nearestPointClassify test not returning
+                // edge/point as the nearest type.
+
+                if (skipEdge)
+                {
+                    continue;
+                }
+            }
+
             face newDualFace = buildDualFace(eit);
 
             if (newDualFace.size() >= 3)

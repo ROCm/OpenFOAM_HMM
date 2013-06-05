@@ -1458,8 +1458,6 @@ void Foam::conformalVoronoiMesh::createFeaturePoints(DynamicList<Vb>& pts)
 
     forAll(feMeshes, i)
     {
-        Info<< indent << "Edge mesh = " << feMeshes[i].name() << nl << endl;
-
         const extendedFeatureEdgeMesh& feMesh(feMeshes[i]);
 
         for

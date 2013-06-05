@@ -787,8 +787,8 @@ Foam::face Foam::conformalVoronoiMesh::buildDualFace
                 << "Dual face uses circumcenter defined by a "
                 << "Delaunay tetrahedron with no internal "
                 << "or boundary points.  Defining Delaunay edge ends: "
-                << topoint(vA->point()) << " "
-                << topoint(vB->point()) << nl
+                << vA->info() << " "
+                << vB->info() << nl
                 << exit(FatalError);
         }
 
@@ -1630,6 +1630,8 @@ void Foam::conformalVoronoiMesh::move()
             );
         }
 
+        DynamicList<Vertex_handle> pointsToRemove;
+
         for
         (
             Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
@@ -1640,15 +1642,18 @@ void Foam::conformalVoronoiMesh::move()
             if
             (
                 (vit->internalPoint() || vit->internalBoundaryPoint())
-             && !vit->referred()
+             //&& !vit->referred()
             )
             {
-                bool inside = geometryToConformTo_.inside
-                (
-                    topoint(vit->point())
-                );
+                const Foam::point& pt = topoint(vit->point());
 
-                if (!inside)
+                bool inside = geometryToConformTo_.inside(pt);
+
+                if
+                (
+                    !inside
+                 || !geometryToConformTo_.globalBounds().contains(pt)
+                )
                 {
                     if
                     (
@@ -1658,13 +1663,16 @@ void Foam::conformalVoronoiMesh::move()
                     {
                         str().write(topoint(vit->point()));
                     }
-                    remove(vit);
+
+                    pointsToRemove.append(vit);
                     internalPtIsOutside++;
                 }
             }
         }
 
-        Info<< "    " << internalPtIsOutside
+        remove(pointsToRemove.begin(), pointsToRemove.end());
+
+        Info<< "    " << returnReduce(internalPtIsOutside, sumOp<label>())
             << " internal points were inserted outside the domain. "
             << "They have been removed." << endl;
     }
