@@ -873,17 +873,7 @@ void Foam::conformalVoronoiMesh::reinsertFeaturePoints(bool distribute)
 {
     Info<< nl << "Reinserting stored feature points" << endl;
 
-    label preReinsertionSize(number_of_vertices());
-
     insertPoints(featureVertices_, distribute);
-
-    const label nReinserted = returnReduce
-    (
-        label(number_of_vertices()) - preReinsertionSize,
-        sumOp<label>()
-    );
-
-    Info<< "    Reinserted " << nReinserted << " vertices" << endl;
 }
 
 

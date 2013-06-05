@@ -194,12 +194,24 @@ void Foam::conformalVoronoiMesh::insertPoints
         }
     }
 
+    label preReinsertionSize(number_of_vertices());
+
     rangeInsertWithInfo
     (
         vertices.begin(),
         vertices.end(),
-        true
+        false
     );
+
+    const label nReinserted = returnReduce
+    (
+        label(number_of_vertices()) - preReinsertionSize,
+        sumOp<label>()
+    );
+
+    Info<< "    Reinserted " << nReinserted << " vertices out of "
+        << returnReduce(vertices.size(), sumOp<label>())
+        << endl;
 }
 
 
