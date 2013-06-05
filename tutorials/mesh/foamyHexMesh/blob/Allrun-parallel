@@ -7,6 +7,9 @@ cd ${0%/*} || exit 1    # run from this directory
 # Get the number of processors to run on from system/decomposeParDict
 nProc=$(getNumberOfProcessors)
 
+# copy flange surface from resources folder
+cp $FOAM_TUTORIALS/resources/geometry/blob.stl.gz constant/triSurface/
+
 runApplication blockMesh
 runApplication decomposePar
 
@@ -15,5 +18,6 @@ runParallel collapseEdges $nProc -latestTime -collapseFaces
 runParallel checkMesh $nProc -latestTime -allTopology -allGeometry
 
 runApplication reconstructParMesh -latestTime
+
 
 # ----------------------------------------------------------------- end-of-file

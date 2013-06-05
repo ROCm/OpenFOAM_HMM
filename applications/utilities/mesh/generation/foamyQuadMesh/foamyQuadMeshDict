@@ -11,31 +11,18 @@ FoamFile
     format          ascii;
     class           dictionary;
     location        "system";
-    object          foamyHex2DMeshDict;
+    object          foamyQuadMeshDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
 geometry
 {
-    laurence_clean_preciser.stl
+    surfaceFile.stl
     {
-        name laurence_clean_preciser;
-        type closedTriSurfaceMesh;
-        //type triSurfaceMesh;
+        name surfaceFile;
+        type triSurfaceMesh;
     }
-//    refinementBox
-//    {
-//        type searchableBox;
-//        min (-0.5 0.35 -1000);
-//        max (-0.5 0.35 1000);
-//    }
-//    refinementSphere
-//    {
-//        type searchableSphere;
-//        centre (0.85 0.4 0.0);
-//        radius 0.01;
-//    }
 }
 
 surfaceConformation
@@ -66,10 +53,10 @@ surfaceConformation
 
     geometryToConformTo
     {
-        laurence_clean_preciser
+        surfaceFile
         {
             featureMethod           extendedFeatureEdgeMesh;
-            extendedFeatureEdgeMesh "laurence_clean_preciser.extendedFeatureEdgeMesh";
+            extendedFeatureEdgeMesh "surfaceFile.extendedFeatureEdgeMesh";
         }
     }
 
@@ -94,7 +81,7 @@ motionControl
 
     cellSizeControlGeometry
     {
-        laurence_clean_preciser
+        surfaceFile
         {
             priority              1;
             mode                  bothSides;
