@@ -76,7 +76,7 @@ tmp<volVectorField> laminar::Us() const
         (
             IOobject
             (
-                typeName + ".Us",
+                typeName + ":Us",
                 owner_.regionMesh().time().timeName(),
                 owner_.regionMesh(),
                 IOobject::NO_READ,
@@ -104,7 +104,7 @@ tmp<volScalarField> laminar::mut() const
         (
             IOobject
             (
-                typeName + ".mut",
+                typeName + ":mut",
                 owner_.regionMesh().time().timeName(),
                 owner_.regionMesh(),
                 IOobject::NO_READ,
