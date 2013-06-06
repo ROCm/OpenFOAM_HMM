@@ -926,6 +926,8 @@ Foam::label Foam::polyMeshFilter::filter(const label nOriginalBadFaces)
                     }
                 }
             }
+
+            reduce(newBadFaces, orOp<bool>());
         }
         else
         {
