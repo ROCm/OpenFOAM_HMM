@@ -535,4 +535,123 @@ const Foam::labelListListList& Foam::GAMGAgglomeration::boundaryFaceMap
 }
 
 
+bool Foam::GAMGAgglomeration::checkRestriction
+(
+    labelList& newRestrict,
+    label& nNewCoarse,
+    const lduAddressing& fineAddressing,
+    const labelUList& restrict,
+    const label nCoarse
+)
+{
+    if (fineAddressing.size() != restrict.size())
+    {
+        FatalErrorIn
+        (
+            "checkRestriction(..)"
+        )   << "nCells:" << fineAddressing.size()
+            << " agglom:" << restrict.size()
+            << abort(FatalError);
+    }
+
+    // Seed (master) for every region
+    labelList master(identity(fineAddressing.size()));
+
+    // Now loop and transport master through region
+    const labelUList& lower = fineAddressing.lowerAddr();
+    const labelUList& upper = fineAddressing.upperAddr();
+
+    while (true)
+    {
+        label nChanged = 0;
+
+        forAll(lower, faceI)
+        {
+            label own = lower[faceI];
+            label nei = upper[faceI];
+
+            if (restrict[own] == restrict[nei])
+            {
+                // coarse-mesh-internal face
+
+                if (master[own] < master[nei])
+                {
+                    master[nei] = master[own];
+                    nChanged++;
+                }
+                else if (master[own] > master[nei])
+                {
+                    master[own] = master[nei];
+                    nChanged++;
+                }
+            }
+        }
+
+        reduce(nChanged, sumOp<label>());
+
+        if (nChanged == 0)
+        {
+            break;
+        }
+    }
+
+
+    // Count number of regions/masters per coarse cell
+    labelListList coarseToMasters(nCoarse);
+    nNewCoarse = 0;
+    forAll(restrict, cellI)
+    {
+        labelList& masters = coarseToMasters[restrict[cellI]];
+
+        if (findIndex(masters, master[cellI]) == -1)
+        {
+            masters.append(master[cellI]);
+            nNewCoarse++;
+        }
+    }
+
+    if (nNewCoarse > nCoarse)
+    {
+        //WarningIn("GAMGAgglomeration::checkRestriction(..)")
+        //    << "Have " << nCoarse
+        //    << " agglomerated cells but " << nNewCoarse
+        //    << " disconnected regions" << endl;
+
+        // Keep coarseToMasters[0] the original coarse, allocate new ones
+        // for the others
+        labelListList coarseToNewCoarse(coarseToMasters.size());
+
+        nNewCoarse = nCoarse;
+
+        forAll(coarseToMasters, coarseI)
+        {
+            const labelList& masters = coarseToMasters[coarseI];
+
+            labelList& newCoarse = coarseToNewCoarse[coarseI];
+            newCoarse.setSize(masters.size());
+            newCoarse[0] = coarseI;
+            for (label i = 1; i < newCoarse.size(); i++)
+            {
+                newCoarse[i] = nNewCoarse++;
+            }
+        }
+
+        newRestrict.setSize(fineAddressing.size());
+        forAll(restrict, cellI)
+        {
+            label coarseI = restrict[cellI];
+
+            label index = findIndex(coarseToMasters[coarseI], master[cellI]);
+            newRestrict[cellI] = coarseToNewCoarse[coarseI][index];
+        }
+
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+
 // ************************************************************************* //
