@@ -551,14 +551,14 @@ Foam::label Foam::polyMeshFilter::filter(const label nOriginalBadFaces)
     labelList pointErrorCount(mesh_.nPoints(), 0);
 
     PackedBoolList newErrorPoint(mesh_.nPoints());
-    nBadFaces = edgeCollapser::checkMeshQuality
+    edgeCollapser::checkMeshQuality
     (
         mesh_,
         meshQualityCoeffDict_,
         newErrorPoint
     );
 
-    bool newBadFaces = false;
+    bool newBadFaces = true;
 
     // Main loop
     // ~~~~~~~~~
@@ -569,8 +569,8 @@ Foam::label Foam::polyMeshFilter::filter(const label nOriginalBadFaces)
     while
     (
         nOuterIterations < maxIterations_
-     && nBadFaces > nOriginalBadFaces
-     && !newBadFaces
+     //&& nBadFaces > nOriginalBadFaces
+     && newBadFaces
     )
     {
         Info<< nl << "Outer Iteration = " << nOuterIterations++ << nl
@@ -919,7 +919,7 @@ Foam::label Foam::polyMeshFilter::filter(const label nOriginalBadFaces)
             {
                 if (isErrorPoint[origToCurrentPointMap[pI]])
                 {
-                    if (newErrorPoint[pI] == false)
+                    if (!newErrorPoint[pI])
                     {
                         newBadFaces = true;
                         break;
