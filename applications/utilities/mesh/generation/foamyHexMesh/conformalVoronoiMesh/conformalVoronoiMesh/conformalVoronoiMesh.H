@@ -764,6 +764,7 @@ private:
             pointIndexHitAndFeatureDynList& featureEdgeHits,
             DynamicList<label>& surfaceToTreeShape,
             DynamicList<label>& edgeToTreeShape,
+            Map<scalar>& surfacePtToEdgePtDist,
             bool firstPass
         ) const;
 
