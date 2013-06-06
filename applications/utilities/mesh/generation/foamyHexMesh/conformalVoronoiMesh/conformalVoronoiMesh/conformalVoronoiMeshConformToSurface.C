@@ -569,7 +569,20 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation()
             Vertex_handle vA = c->vertex(eit->second);
             Vertex_handle vB = c->vertex(eit->third);
 
-            if (vA->referred() || vB->referred())
+            if
+            (
+                vA->referred()
+             || vB->referred()
+            )
+            {
+                continue;
+            }
+
+            if
+            (
+                (vA->internalPoint() && vA->referred())
+             || (vB->internalPoint() && vB->referred())
+            )
             {
                 continue;
             }
@@ -2183,59 +2196,59 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
                                 pointIndexHitAndFeature(edHit, featureHit)
                             );
                         }
-                        else if (firstPass)
-                        {
-                            label hitIndex = nearestEdgeHit.index();
-
-                            // Calc new edge location
-                            Foam::point newPt =
-                                0.5
-                               *(
-                                    nearestEdgeHit.hitPoint()
-                                  + edHit.hitPoint()
-                                );
-
-                            pointIndexHit pHitOld =
-                                edgeLocationTreePtr_().findNearest
-                                (
-                                    nearestEdgeHit.hitPoint(), GREAT
-                                );
-
-                            pointIndexHit pHitNew =
-                                edgeLocationTreePtr_().findNearest
-                                (
-                                    edHit.hitPoint(), GREAT
-                                );
-
-                            if
-                            (
-                                magSqr(pHitNew.hitPoint() - edHit.hitPoint())
-                              < magSqr
-                                (
-                                    pHitOld.hitPoint()
-                                  - nearestEdgeHit.hitPoint()
-                                )
-                            )
-                            {
-                                edHit.setPoint(edHit.hitPoint());
-
-                                featureEdgeHits[hitIndex] =
-                                   pointIndexHitAndFeature(edHit, featureHit);
-
-                                existingEdgeLocations_[hitIndex] =
-                                    edHit.hitPoint();
-
-                                // Change edge location in featureEdgeHits
-                                // remove index from edge tree
-                                // reinsert new point into tree
-                                edgeLocationTreePtr_().remove(hitIndex);
-                                edgeLocationTreePtr_().insert
-                                (
-                                    hitIndex,
-                                    hitIndex + 1
-                                );
-                            }
-                        }
+//                        else if (firstPass)
+//                        {
+//                            label hitIndex = nearestEdgeHit.index();
+//
+//                            // Calc new edge location
+////                            Foam::point newPt =
+////                                0.5
+////                               *(
+////                                    nearestEdgeHit.hitPoint()
+////                                  + edHit.hitPoint()
+////                                );
+//
+//                            pointIndexHit pHitOld =
+//                                edgeLocationTreePtr_().findNearest
+//                                (
+//                                    nearestEdgeHit.hitPoint(), GREAT
+//                                );
+//
+//                            pointIndexHit pHitNew =
+//                                edgeLocationTreePtr_().findNearest
+//                                (
+//                                    edHit.hitPoint(), GREAT
+//                                );
+//
+//                            if
+//                            (
+//                                magSqr(pHitNew.hitPoint() - edHit.hitPoint())
+//                              < magSqr
+//                                (
+//                                    pHitOld.hitPoint()
+//                                  - nearestEdgeHit.hitPoint()
+//                                )
+//                            )
+//                            {
+//                                edHit.setPoint(edHit.hitPoint());
+//
+//                                featureEdgeHits[hitIndex] =
+//                                   pointIndexHitAndFeature(edHit, featureHit);
+//
+//                                existingEdgeLocations_[hitIndex] =
+//                                    edHit.hitPoint();
+//
+//                                // Change edge location in featureEdgeHits
+//                                // remove index from edge tree
+//                                // reinsert new point into tree
+//                                edgeLocationTreePtr_().remove(hitIndex);
+//                                edgeLocationTreePtr_().insert
+//                                (
+//                                    hitIndex,
+//                                    hitIndex + 1
+//                                );
+//                            }
+//                        }
                     }
                 }
             }
