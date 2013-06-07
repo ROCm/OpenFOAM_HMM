@@ -390,6 +390,10 @@ void Foam::fieldAverage::end()
 {}
 
 
+void Foam::fieldAverage::timeSet()
+{}
+
+
 void Foam::fieldAverage::write()
 {
     if (active_)

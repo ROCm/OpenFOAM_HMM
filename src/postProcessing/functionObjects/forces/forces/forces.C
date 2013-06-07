@@ -619,6 +619,12 @@ void Foam::forces::end()
 }
 
 
+void Foam::forces::timeSet()
+{
+    // Do nothing - only valid on write
+}
+
+
 void Foam::forces::write()
 {
     if (!active_)
