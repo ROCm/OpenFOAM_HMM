@@ -141,8 +141,8 @@ public:
 
         findIntersectOp(const indexedOctree<treeDataPrimitivePatch>& tree);
 
-        //- Calculate intersection of triangle with ray. Sets result
-        //  accordingly
+        //- Calculate intersection of any face with ray. Sets result
+        //  accordingly. Used to find first intersection.
         bool operator()
         (
             const label index,
@@ -167,8 +167,34 @@ public:
             DynamicList<label>& shapeMask
         );
 
-        //- Calculate intersection of triangle with ray. Sets result
-        //  accordingly
+        //- Calculate intersection of unique face with ray. Sets result
+        //  accordingly. Used to find all faces.
+        bool operator()
+        (
+            const label index,
+            const point& start,
+            const point& end,
+            point& intersectionPoint
+        ) const;
+    };
+
+
+    class findSelfIntersectOp
+    {
+        const indexedOctree<treeDataPrimitivePatch>& tree_;
+
+        const label edgeID_;
+
+    public:
+
+        findSelfIntersectOp
+        (
+            const indexedOctree<treeDataPrimitivePatch>& tree,
+            const label edgeID
+        );
+
+        //- Calculate intersection of face with edge of patch. Excludes
+        //  faces that use edgeID. Used to find self intersection.
         bool operator()
         (
             const label index,

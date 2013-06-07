@@ -187,6 +187,19 @@ Foam::treeDataPrimitivePatch<PatchType>::findAllIntersectOp::findAllIntersectOp
 {}
 
 
+template<class PatchType>
+Foam::treeDataPrimitivePatch<PatchType>::
+findSelfIntersectOp::findSelfIntersectOp
+(
+    const indexedOctree<treeDataPrimitivePatch<PatchType> >& tree,
+    const label edgeID
+)
+:
+    tree_(tree),
+    edgeID_(edgeID)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class PatchType>
@@ -642,6 +655,48 @@ bool Foam::treeDataPrimitivePatch<PatchType>::findAllIntersectOp::operator()
     }
 
     return findIntersection(tree_, index, start, end, intersectionPoint);
+}
+
+
+template<class PatchType>
+bool Foam::treeDataPrimitivePatch<PatchType>::findSelfIntersectOp::operator()
+(
+    const label index,
+    const point& start,
+    const point& end,
+    point& intersectionPoint
+) const
+{
+    if (edgeID_ == -1)
+    {
+        FatalErrorIn
+        (
+            "findSelfIntersectOp::operator()\n"
+            "(\n"
+            "    const label index,\n"
+            "    const point& start,\n"
+            "    const point& end,\n"
+            "    point& intersectionPoint\n"
+            ") const"
+        )   << "EdgeID not set. Please set edgeID to the index of"
+            << " the edge you are testing"
+            << exit(FatalError);
+    }
+
+    const treeDataPrimitivePatch<PatchType>& shape = tree_.shapes();
+    const PatchType& patch = shape.patch();
+
+    const typename PatchType::FaceType& f = patch.localFaces()[index];
+    const edge& e = patch.edges()[edgeID_];
+
+    if (findIndex(f, e[0]) == -1 && findIndex(f, e[1]) == -1)
+    {
+        return findIntersection(tree_, index, start, end, intersectionPoint);
+    }
+    else
+    {
+        return false;
+    }
 }
 
 
