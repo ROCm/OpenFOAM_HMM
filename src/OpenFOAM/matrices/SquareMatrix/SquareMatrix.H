@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -81,6 +81,21 @@ public:
 };
 
 
+// Global functions
+
+//- Return the LU decomposed SquareMatrix det
+template<class Type>
+scalar detDecomposed(const SquareMatrix<Type>&, const label sign);
+
+//- Return the SquareMatrix det
+template<class Type>
+scalar det(const SquareMatrix<Type>&);
+
+//- Return the SquareMatrix det and the LU decomposition in the original matrix
+template<class Type>
+scalar det(SquareMatrix<Type>&);
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
@@ -88,6 +103,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #   include "SquareMatrixI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "SquareMatrix.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

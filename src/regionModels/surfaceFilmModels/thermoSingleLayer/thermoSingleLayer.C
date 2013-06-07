@@ -294,10 +294,20 @@ tmp<fvScalarMatrix> thermoSingleLayer::q(volScalarField& hs) const
 {
     dimensionedScalar Tstd("Tstd", dimTemperature, 298.15);
 
+    volScalarField htcst = htcs_->h()();
+    volScalarField htcwt = htcw_->h()();
+    forAll(alpha_, i)
+    {
+        htcst[i] *= max(alpha_[i], ROOTVSMALL);
+        htcwt[i] *= max(alpha_[i], ROOTVSMALL);
+    }
+    htcst.correctBoundaryConditions();
+    htcwt.correctBoundaryConditions();
+
     return
     (
-      - fvm::Sp(htcs_->h()/Cp_, hs) - htcs_->h()*(Tstd - TPrimary_)
-      - fvm::Sp(htcw_->h()/Cp_, hs) - htcw_->h()*(Tstd - Tw_)
+      - fvm::Sp(htcst/Cp_, hs) - htcst*(Tstd - TPrimary_)
+      - fvm::Sp(htcwt/Cp_, hs) -htcwt*(Tstd - Tw_)
     );
 }
 
