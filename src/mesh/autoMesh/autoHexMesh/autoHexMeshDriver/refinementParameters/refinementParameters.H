@@ -80,6 +80,10 @@ class refinementParameters
         //  cellZone?
         Switch allowFreeStandingZoneFaces_;
 
+        //- Use old topology based problem-cell removal (cells with 8 points
+        //  on surface)
+        Switch useTopologicalSnapDetection_;
+
         //- Allowed load unbalance
         scalar maxLoadUnbalance_;
 
@@ -155,6 +159,13 @@ public:
             bool allowFreeStandingZoneFaces() const
             {
                 return allowFreeStandingZoneFaces_;
+            }
+
+            //- Use old topology based problem-cell removal
+            //  (cells with 8 points on surface)
+            bool useTopologicalSnapDetection() const
+            {
+                return useTopologicalSnapDetection_;
             }
 
             //- Allowed load unbalance

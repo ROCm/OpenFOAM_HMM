@@ -336,7 +336,7 @@ void Foam::autoLayerDriver::smoothNormals
 ) const
 {
     // Get smoothly varying internal normals field.
-    Info<< "shrinkMeshDistance : Smoothing normals ..." << endl;
+    Info<< "shrinkMeshDistance : Smoothing normals in interior ..." << endl;
 
     const fvMesh& mesh = meshRefiner_.mesh();
     const edgeList& edges = mesh.edges();
@@ -1161,6 +1161,11 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
         scalar mDist = medialDist[pointI];
 
         if (wDist2 < sqr(SMALL) && mDist < SMALL)
+        //- Note: maybe less strict:
+        //(
+        //    wDist2 < sqr(meshRefiner_.mergeDistance())
+        // && mDist < meshRefiner_.mergeDistance()
+        //)
         {
             medialRatio[pointI] = 0.0;
         }

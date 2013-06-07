@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cachedRandom.H"
+#include "Pstream.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -58,6 +59,52 @@ template<class Type>
 void Foam::cachedRandom::randomise01(Type& value)
 {
     value = sample01<Type>();
+}
+
+
+template<class Type>
+Type Foam::cachedRandom::globalSample01()
+{
+    Type value = -GREAT*pTraits<Type>::one;
+
+    if (Pstream::master())
+    {
+        value = sample01<Type>();
+    }
+
+    reduce(value, maxOp<Type>());
+
+    return value;
+}
+
+
+template<class Type>
+Type Foam::cachedRandom::globalPosition(const Type& start, const Type& end)
+{
+    Type value = -GREAT*pTraits<Type>::one;
+
+    if (Pstream::master())
+    {
+        value = position<Type>(start, end);
+    }
+
+    reduce(value, maxOp<Type>());
+
+    return value;
+}
+
+
+template<class Type>
+void Foam::cachedRandom::globalRandomise01(Type& value)
+{
+    value = -GREAT*pTraits<Type>::one;
+
+    if (Pstream::master())
+    {
+        value = sample01<Type>();
+    }
+
+    reduce(value, maxOp<Type>());
 }
 
 

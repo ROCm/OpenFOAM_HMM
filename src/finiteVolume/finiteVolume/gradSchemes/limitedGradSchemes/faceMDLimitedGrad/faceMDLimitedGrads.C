@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -235,7 +235,7 @@ Foam::fv::faceMDLimitedGrad<Foam::vector>::calcGrad
             g[own],
             maxFace - vvfOwn,
             minFace - vvfOwn,
-            Cf[facei] - C[nei]
+            Cf[facei] - C[own]
         );
 
 

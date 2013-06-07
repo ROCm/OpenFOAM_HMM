@@ -152,6 +152,10 @@ castellatedMeshControls
                 inGroups (meshedPatches);
             }
 
+
+            //- Optional increment (on top of max level) in small gaps
+            //gapLevelIncrement 2;
+
             //- Optional angle to detect small-large cell situation
             //  perpendicular to the surface. Is the angle of face w.r.t.
             //  the local surface normal. Use on flat(ish) surfaces only.
@@ -180,11 +184,17 @@ castellatedMeshControls
     // - used if feature snapping (see snapControls below) is used
     resolveFeatureAngle 30;
 
+    //- Optional increment (on top of max level) in small gaps
+    //gapLevelIncrement 2;
+
+
     // Planar angle:
-    // - used to determine if neighbouring surface normals
-    //   are roughly the same so e.g. free-standing baffles can be merged
+    // - used to determine if surface normals
+    //   are roughly the same or opposite. Used e.g. in proximity refinement
+    //   and to decide when to merge free-standing baffles
+    //
     // If not specified same as resolveFeatureAngle
-    //planarAngle 30;
+    planarAngle 30;
 
 
     // Region-wise refinement
@@ -229,10 +239,8 @@ castellatedMeshControls
     // free-standing zone faces. Not used if there are no faceZones.
     allowFreeStandingZoneFaces true;
 
-
-    // Optional: whether all baffles get eroded away. WIP. Used for
-    // surface simplification.
-    //allowFreeStandingBaffles false;
+    //
+    //useTopologicalSnapDetection false;
 }
 
 // Settings for the snapping.
@@ -462,20 +470,21 @@ meshQualityControls
     // 1 = hex, <= 0 = folded or flattened illegal cell
     minDeterminant 0.001;
 
-    // minFaceWeight (0 -> 0.5)
+    // Relative position of face in relation to cell centres (0.5 for orthogonal
+    // mesh) (0 -> 0.5)
     minFaceWeight 0.05;
 
-    // minVolRatio (0 -> 1)
+    // Volume ratio of neighbouring cells (0 -> 1)
     minVolRatio 0.01;
 
     // must be >0 for Fluent compatibility
     minTriangleTwist -1;
 
-    //- if >0 : preserve single cells with all points on the surface if the
+    //- if >0 : preserve cells with all points on the surface if the
     //  resulting volume after snapping (by approximation) is larger than
     //  minVolCollapseRatio times old volume (i.e. not collapsed to flat cell).
     //  If <0 : delete always.
-    //minVolCollapseRatio 0.5;
+    //minVolCollapseRatio 0.1;
 
     // Advanced
 

@@ -457,7 +457,7 @@ hline
 echo "$COL1 $COL2 $COL3"
 hline
 reportExecutable flex
-reportExecutable gcc
+reportExecutable "$WM_CC"
 reportExecutable gzip
 if [ "$OSTYPE" = Linux ]
 then

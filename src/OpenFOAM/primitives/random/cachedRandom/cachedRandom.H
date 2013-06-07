@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -121,17 +121,33 @@ public:
 
         // Evaluation
 
-            //- Return a sample whose components lie in the range 0-1
-            template<class Type>
-            Type sample01();
+            // Random numbers
+                //- Return a sample whose components lie in the range 0-1
+                template<class Type>
+                Type sample01();
 
-            //- Return a sample between start and end
-            template<class Type>
-            Type position(const Type& start, const Type& end);
+                //- Return a sample between start and end
+                template<class Type>
+                Type position(const Type& start, const Type& end);
 
-            //- Randomise value in the range 0-1
-            template<class Type>
-            void randomise01(Type& value);
+                //- Randomise value in the range 0-1
+                template<class Type>
+                void randomise01(Type& value);
+
+
+            // Global random numbers - consistent across all processors
+
+                //- Return a sample whose components lie in the range 0-1
+                template<class Type>
+                Type globalSample01();
+
+                //- Return a sample between start and end
+                template<class Type>
+                Type globalPosition(const Type& start, const Type& end);
+
+                //- Randomise value in the range 0-1
+                template<class Type>
+                void globalRandomise01(Type& value);
 
 
         // Operators
@@ -155,6 +171,22 @@ label cachedRandom::position<label>(const label& start, const label& end);
 
 template<>
 scalar cachedRandom::position<scalar>
+(
+    const scalar& start,
+    const scalar& end
+);
+
+template<>
+label cachedRandom::globalSample01<label>();
+
+template<>
+scalar cachedRandom::globalSample01<scalar>();
+
+template<>
+label cachedRandom::globalPosition<label>(const label& start, const label& end);
+
+template<>
+scalar cachedRandom::globalPosition<scalar>
 (
     const scalar& start,
     const scalar& end

@@ -9,13 +9,13 @@ cavityCases="cavity cavityFine cavityGrade cavityHighRe cavityClipped"
 runMapFields()
 {
     echo "Running mapFields from $1 to $2"
-    mapFields $1 -case $2 -sourceTime latestTime > $2/log.mapFields 2>&1
+    mapFieldsNew $1 -case $2 -sourceTime latestTime > $2/log.mapFields 2>&1
 }
 
 runMapFieldsConsistent()
 {
     echo "Running mapFields from $1 to $2"
-    mapFields $1 -case $2 -sourceTime latestTime -consistent > $2/log.mapFields 2>&1
+    mapFieldsNew $1 -case $2 -sourceTime latestTime -consistent > $2/log.mapFields 2>&1
 }
 
 runFluentMeshToFoam()
@@ -37,8 +37,6 @@ setCavityFine()
     sed s/"20 20 1"/"41 41 1"/g $blockMeshDict > temp.$$
     mv temp.$$ $blockMeshDict
     sed \
-    -e s/"\(startTime[ \t]*\) 0;"/"\1 0.5;"/g \
-    -e s/"\(endTime[ \t]*\) 0.5;"/"\1 0.7;"/g \
     -e s/"\(deltaT[ \t]*\) 0.005;"/"\1 0.0025;"/g \
     -e s/"\(writeControl[ \t]*\) timeStep;"/"\1 runTime;"/g \
     -e s/"\(writeInterval[ \t]*\) 20;"/"\1 0.1;"/g \
@@ -83,12 +81,12 @@ do
         runMapFieldsConsistent $previousCase $caseName
         ;;
     cavityClipped)
-        cp -r $caseName/0 $caseName/0.5
+        cp -r $caseName/0.org $caseName/0
         runMapFields cavity $caseName
-        if [ ".`grep nonuniform $caseName/0.5/U`" != "." ]
+        if [ ".`grep nonuniform $caseName/0/U`" != "." ]
         then
-            sed -f resetFixedWallsScr $caseName/0.5/U > $caseName/0.5/U.temp
-            mv $caseName/0.5/U.temp $caseName/0.5/U
+            sed -f resetFixedWallsScr $caseName/0/U > $caseName/0/U.temp
+            mv $caseName/0/U.temp $caseName/0/U
         fi
         ;;
     esac

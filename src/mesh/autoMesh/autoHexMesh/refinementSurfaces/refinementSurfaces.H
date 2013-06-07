@@ -110,7 +110,7 @@ private:
         pointField zoneInsidePoints_;
 
         //- Per 'interface' surface :
-        //  Waht to do with outside
+        //  What to do with outside
         List<faceZoneType> faceType_;
 
         //- From local region number to global region number
@@ -149,7 +149,27 @@ public:
         refinementSurfaces
         (
             const searchableSurfaces& allGeometry,
-            const dictionary&
+            const dictionary&,
+            const label gapLevelIncrement
+        );
+
+        //- Construct from components
+        refinementSurfaces
+        (
+            const searchableSurfaces& allGeometry,
+            const labelList& surfaces,
+            const wordList& names,
+            const wordList& faceZoneNames,
+            const wordList& cellZoneNames,
+            const List<areaSelectionAlgo>& zoneInside,
+            const pointField& zoneInsidePoints,
+            const List<faceZoneType>& faceType,
+            const labelList& regionOffset,
+            const labelList& minLevel,
+            const labelList& maxLevel,
+            const labelList& gapLevel,
+            const scalarField& perpendicularAngle,
+            const PtrList<dictionary>& patchInfo
         );
 
 

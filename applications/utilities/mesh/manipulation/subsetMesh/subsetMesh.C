@@ -168,6 +168,12 @@ int main(int argc, char *argv[])
         "add exposed internal faces to specified patch instead of to "
         "'oldInternalFaces'"
     );
+    argList::addOption
+    (
+        "resultTime",
+        "time",
+        "specify a time for the resulting mesh"
+    );
     #include "setRootCase.H"
     #include "createTime.H"
     runTime.functionObjects().off();
@@ -178,10 +184,12 @@ int main(int argc, char *argv[])
     #include "createNamedMesh.H"
 
 
-    const word oldInstance = mesh.pointsInstance();
-
     const word setName = args[1];
-    const bool overwrite = args.optionFound("overwrite");
+
+    word resultInstance = mesh.pointsInstance();
+    const bool specifiedInstance =
+        args.optionFound("overwrite")
+     || args.optionReadIfPresent("resultTime", resultInstance);
 
 
     Info<< "Reading cell set from " << setName << endl << endl;
@@ -347,13 +355,14 @@ int main(int argc, char *argv[])
     // Write mesh and fields to new time
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    if (!overwrite)
+    if (!specifiedInstance)
     {
         runTime++;
     }
     else
     {
-        subsetter.subMesh().setInstance(oldInstance);
+        runTime.setTime(instant(resultInstance), 0);
+        subsetter.subMesh().setInstance(runTime.timeName());
     }
 
     Info<< "Writing subsetted mesh and fields to time " << runTime.timeName()

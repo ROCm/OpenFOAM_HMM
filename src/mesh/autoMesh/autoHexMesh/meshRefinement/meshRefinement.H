@@ -72,6 +72,8 @@ class globalIndex;
 class removePoints;
 class localPointRegion;
 
+class snapParameters;
+
 /*---------------------------------------------------------------------------*\
                            Class meshRefinement Declaration
 \*---------------------------------------------------------------------------*/
@@ -470,6 +472,14 @@ private:
                 const labelList& globalToMasterPatch
             ) const;
 
+            //- Returns list with for every internal face -1 or the patch
+            //  they should be baffled into.
+            labelList markFacesOnProblemCellsGeometric
+            (
+                const snapParameters& snapParams,
+                const dictionary& motionDict
+            ) const;
+
 
         // Baffle merging
 
@@ -536,6 +546,8 @@ private:
             //- Remove any loose standing cells
             void handleSnapProblems
             (
+                const snapParameters& snapParams,
+                const bool useTopologicalSnapDetection,
                 const bool removeEdgeConnectedCells,
                 const scalarField& perpendicularAngle,
                 const dictionary& motionDict,
@@ -760,10 +772,17 @@ public:
             void baffleAndSplitMesh
             (
                 const bool handleSnapProblems,
+
+                // How to remove problem snaps
+                const snapParameters& snapParams,
+                const bool useTopologicalSnapDetection,
                 const bool removeEdgeConnectedCells,
                 const scalarField& perpendicularAngle,
+
+                // How to handle free-standing baffles
                 const bool mergeFreeStanding,
                 const scalar freeStandingAngle,
+
                 const dictionary& motionDict,
                 Time& runTime,
                 const labelList& globalToMasterPatch,

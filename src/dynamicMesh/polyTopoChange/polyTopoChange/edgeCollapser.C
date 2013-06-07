@@ -32,6 +32,7 @@ License
 #include "globalIndex.H"
 #include "removePoints.H"
 #include "motionSmoother.H"
+#include "OFstream.H"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -1242,7 +1243,19 @@ Foam::edgeCollapser::edgeCollapser
     (
         dict.lookupOrDefault<scalar>("allowEarlyCollapseCoeff", 0)
     )
-{}
+{
+    if (debug)
+    {
+        Info<< "Edge Collapser Settings:" << nl
+            << "    Guard Fraction = " << guardFraction_ << nl
+            << "    Max collapse face to point side length = "
+            << maxCollapseFaceToPointSideLengthCoeff_ << nl
+            << "    " << (allowEarlyCollapseToPoint_ ? "Allow" : "Do not allow")
+            << " early collapse to point" << nl
+            << "    Early collapse coeff = " << allowEarlyCollapseCoeff_
+            << endl;
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -2017,93 +2030,150 @@ Foam::labelPair Foam::edgeCollapser::markSmallSliverFaces
 }
 
 
-void Foam::edgeCollapser::markIndirectPatchFaces
+Foam::labelPair Foam::edgeCollapser::markFaceZoneEdges
 (
+    const faceZone& fZone,
+    const scalarField& faceFilterFactor,
+    const labelList& pointPriority,
     PackedBoolList& collapseEdge,
     Map<point>& collapsePointToLocation
 ) const
 {
-    const faceZone& indirectFaceZone = mesh_.faceZones()["indirectPatchFaces"];
+    const faceList& faces = mesh_.faces();
 
-    const edgeList& edges = mesh_.edges();
-    const pointField& points = mesh_.points();
-    const labelListList& edgeFaces = mesh_.edgeFaces();
-    const polyBoundaryMesh& bMesh = mesh_.boundaryMesh();
+    const scalarField targetFaceSizes = calcTargetFaceSizes();
 
-    forAll(edges, eI)
+    // Calculate number of faces that will be collapsed to a point or an edge
+    label nCollapseToPoint = 0;
+    label nCollapseToEdge = 0;
+
+    forAll(faces, fI)
     {
-        const edge& e = edges[eI];
-
-        const labelList& eFaces = edgeFaces[eI];
-
-        bool keepEdge = false;
-
-        label nInternalFaces = 0;
-        label nPatchFaces = 0;
-        label nIndirectFaces = 0;
-
-        bool coupled = false;
-
-        forAll(eFaces, eFaceI)
+        if (fZone.whichFace(fI) == -1)
         {
-            const label eFaceIndex = eFaces[eFaceI];
-
-            if (mesh_.isInternalFace(eFaceIndex))
-            {
-                nInternalFaces++;
-            }
-            else
-            {
-                const label patchIndex = bMesh.whichPatch(eFaceIndex);
-                const polyPatch& pPatch = bMesh[patchIndex];
-
-                if (pPatch.coupled())
-                {
-                    coupled = true;
-                    nInternalFaces++;
-                }
-                else
-                {
-                    // Keep the edge if an attached face is not in the face zone
-                    if (indirectFaceZone.whichFace(eFaceIndex) == -1)
-                    {
-                        nPatchFaces++;
-                    }
-                    else
-                    {
-                        nIndirectFaces++;
-                    }
-                }
-            }
+            continue;
         }
 
-        if (eFaces.size() != nInternalFaces + nPatchFaces + nIndirectFaces)
+        const face& f = faces[fI];
+
+        if (faceFilterFactor[fI] == 0)
         {
-            Pout<< eFaces.size() << " ("
-                << nInternalFaces << "/" << nPatchFaces << "/" << nIndirectFaces
-                << ")" << endl;
+            continue;
         }
 
-        if
+        collapseType flagCollapseFace = collapseFace
         (
-            eFaces.size() == nInternalFaces
-         || nIndirectFaces < (coupled ? 1 : 2)
-        )
+            pointPriority,
+            f,
+            fI,
+            targetFaceSizes[fI],
+            collapseEdge,
+            collapsePointToLocation,
+            faceFilterFactor
+        );
+
+        if (flagCollapseFace == noCollapse)
         {
-            keepEdge = true;
+            continue;
         }
-
-        if (!keepEdge)
+        else if (flagCollapseFace == toPoint)
         {
-            collapseEdge[eI] = true;
-
-            const Foam::point collapsePoint =
-                0.5*(points[e.end()] + points[e.start()]);
-
-            collapsePointToLocation.insert(e.start(), collapsePoint);
-            collapsePointToLocation.insert(e.end(), collapsePoint);
+            nCollapseToPoint++;
+        }
+        else if (flagCollapseFace == toEdge)
+        {
+            nCollapseToEdge++;
+        }
+        else
+        {
+            FatalErrorIn("collapseFaces(const polyMesh&, List<labelPair>&)")
+                << "Face is marked to be collapsed to " << flagCollapseFace
+                << ". Currently can only collapse to point/edge."
+                << abort(FatalError);
         }
     }
+
+    return labelPair(nCollapseToPoint, nCollapseToEdge);
+
+//    const edgeList& edges = mesh_.edges();
+//    const pointField& points = mesh_.points();
+//    const labelListList& edgeFaces = mesh_.edgeFaces();
+//    const polyBoundaryMesh& bMesh = mesh_.boundaryMesh();
+//
+//    forAll(edges, eI)
+//    {
+//        const edge& e = edges[eI];
+//
+//        const labelList& eFaces = edgeFaces[eI];
+//
+//        bool keepEdge = false;
+//
+//        label nInternalFaces = 0;
+//        label nPatchFaces = 0;
+//        label nIndirectFaces = 0;
+//
+//        bool coupled = false;
+//
+//        forAll(eFaces, eFaceI)
+//        {
+//            const label eFaceIndex = eFaces[eFaceI];
+//
+//            if (mesh_.isInternalFace(eFaceIndex))
+//            {
+//                nInternalFaces++;
+//            }
+//            else
+//            {
+//                const label patchIndex = bMesh.whichPatch(eFaceIndex);
+//                const polyPatch& pPatch = bMesh[patchIndex];
+//
+//                if (pPatch.coupled())
+//                {
+//                    coupled = true;
+//                    nInternalFaces++;
+//                }
+//                else
+//                {
+//                    // Keep the edge if an attached face is not in the zone
+//                    if (fZone.whichFace(eFaceIndex) == -1)
+//                    {
+//                        nPatchFaces++;
+//                    }
+//                    else
+//                    {
+//                        nIndirectFaces++;
+//                    }
+//                }
+//            }
+//        }
+//
+//        if (eFaces.size() != nInternalFaces + nPatchFaces + nIndirectFaces)
+//        {
+//            Pout<< eFaces.size() << " ("
+//                << nInternalFaces << "/" << nPatchFaces << "/"
+//                << nIndirectFaces << ")" << endl;
+//        }
+//
+//        if
+//        (
+//            eFaces.size() == nInternalFaces
+//         || nIndirectFaces < (coupled ? 1 : 2)
+//        )
+//        {
+//            keepEdge = true;
+//        }
+//
+//        if (!keepEdge)
+//        {
+//            collapseEdge[eI] = true;
+//
+//            const Foam::point collapsePoint =
+//                0.5*(points[e.end()] + points[e.start()]);
+//
+//            collapsePointToLocation.insert(e.start(), collapsePoint);
+//            collapsePointToLocation.insert(e.end(), collapsePoint);
+//        }
+//    }
 
 //    OFstream str
 //    (

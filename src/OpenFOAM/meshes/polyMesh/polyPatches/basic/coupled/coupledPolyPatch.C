@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -136,7 +136,7 @@ Foam::pointField Foam::coupledPolyPatch::getAnchorPoints
 {
     pointField anchors(faces.size());
 
-    if (transform == COINCIDENTFULLMATCH)
+    if (transform != COINCIDENTFULLMATCH)
     {
         // Return the first point
         forAll(faces, faceI)
@@ -344,7 +344,15 @@ void Foam::coupledPolyPatch::calcTransformTensors
             Pout<< "    error:" << error << endl;
         }
 
-        if
+        if (transform == NOORDERING)
+        {
+            forwardT_.setSize(0);
+            reverseT_.setSize(0);
+
+            separation_.setSize(0);
+            collocated_ = boolList(1, true);
+        }
+        else if
         (
             transform == ROTATIONAL
          || (

@@ -46,6 +46,9 @@ SourceFiles
 namespace Foam
 {
 
+template<class Cmpt>
+class SymmTensor2D;
+
 /*---------------------------------------------------------------------------*\
                            Class Tensor2D Declaration
 \*---------------------------------------------------------------------------*/
@@ -89,6 +92,9 @@ public:
 
         //- Construct given VectorSpace
         inline Tensor2D(const VectorSpace<Tensor2D<Cmpt>, Cmpt, 4>&);
+
+        //- Construct given SymmTensor2D
+        inline Tensor2D(const SymmTensor2D<Cmpt>&);
 
         //- Construct given SphericalTensor2D
         inline Tensor2D(const SphericalTensor2D<Cmpt>&);
@@ -135,6 +141,9 @@ public:
 
 
     // Member Operators
+
+        //- Copy SymmTensor2D
+        inline void operator=(const SymmTensor2D<Cmpt>&);
 
         //- Copy SphericalTensor2D
         inline void operator=(const SphericalTensor2D<Cmpt>&);

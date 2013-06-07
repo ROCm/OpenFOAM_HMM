@@ -1,0 +1,1227 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+Class
+    Foam::conformalVoronoiMesh
+
+Description
+
+SourceFiles
+    conformalVoronoiMeshI.H
+    conformalVoronoiMesh.C
+    conformalVoronoiMeshIO.C
+    conformalVoronoiMeshConformToSurface.C
+    conformalVoronoiMeshFeaturePoints.C
+    conformalVoronoiMeshFeaturePointSpecialisations.C
+    conformalVoronoiMeshCalcDualMesh.C
+    conformalVoronoiMeshTemplates.C
+
+\*---------------------------------------------------------------------------*/
+
+#ifndef conformalVoronoiMesh_H
+#define conformalVoronoiMesh_H
+
+#include "CGALTriangulation3Ddefs.H"
+#include "uint.H"
+#include "ulong.H"
+#include "searchableSurfaces.H"
+#include "conformationSurfaces.H"
+#include "cellShapeControl.H"
+#include "cvControls.H"
+#include "DynamicList.H"
+#include "PackedBoolList.H"
+#include "Time.H"
+#include "polyMesh.H"
+#include "plane.H"
+#include "SortableList.H"
+#include "meshTools.H"
+#include "dynamicIndexedOctree.H"
+#include "dynamicTreeDataPoint.H"
+#include "indexedOctree.H"
+#include "treeDataPoint.H"
+#include "unitConversion.H"
+#include "transform.H"
+#include "volFields.H"
+#include "fvMesh.H"
+#include "labelPair.H"
+#include "HashSet.H"
+#include "memInfo.H"
+#include "point.H"
+#include "cellSet.H"
+#include "wallPolyPatch.H"
+#include "processorPolyPatch.H"
+#include "zeroGradientFvPatchFields.H"
+#include "globalIndex.H"
+#include "pointFeatureEdgesTypes.H"
+#include "pointConversion.H"
+#include "Tuple2.H"
+#include "DistributedDelaunayMesh.H"
+#include "tensorIOField.H"
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Forward declaration of classes
+class initialPointsMethod;
+
+class relaxationModel;
+
+class faceAreaWeightModel;
+
+class backgroundMeshDecomposition;
+
+/*---------------------------------------------------------------------------*\
+                    Class conformalVoronoiMesh Declaration
+\*---------------------------------------------------------------------------*/
+
+class conformalVoronoiMesh
+:
+    public DistributedDelaunayMesh<Delaunay>
+{
+public:
+
+    enum reconformationMode
+    {
+        rmOff,   // Do not rebuild the surface conformation
+        rmOn
+    };
+
+    typedef Delaunay::Vertex_handle    Vertex_handle;
+    typedef Delaunay::Cell_handle      Cell_handle;
+    typedef Delaunay::Edge             Edge;
+    typedef Delaunay::Facet            Facet;
+    typedef Delaunay::Point            Point;
+
+    typedef List<DynamicList<Pair<labelPair> > > labelPairPairDynListList;
+
+    typedef Tuple2<pointIndexHit, label>         pointIndexHitAndFeature;
+    typedef List<pointIndexHitAndFeature>        pointIndexHitAndFeatureList;
+    typedef DynamicList<pointIndexHitAndFeature> pointIndexHitAndFeatureDynList;
+
+
+private:
+
+    // Static data
+
+        static const scalar tolParallel;
+
+        static const scalar searchConeAngle;
+
+        static const scalar searchAngleOppositeSurface;
+
+
+    // Private data
+
+        //- The time registry of the application
+        const Time& runTime_;
+
+        //- Random number generator
+        mutable Random rndGen_;
+
+        //- Controls for the conformal Voronoi meshing process
+        cvControls foamyHexMeshControls_;
+
+        //- All geometry of the meshing process, including surfaces to be
+        //  conformed to and those to be used for refinement
+        searchableSurfaces allGeometry_;
+
+        //- The surfaces to conform to
+        conformationSurfaces geometryToConformTo_;
+
+        //- The cell shape control object
+        cellShapeControl cellShapeControl_;
+
+        //- Limiting bound box before infinity begins
+        treeBoundBox limitBounds_;
+
+        //- Store the feature constraining points to be reinserted after a
+        //  triangulation clear. Maintained with relative types and indices.
+        List<Vb> featureVertices_;
+
+        //- Storing the locations of all of the features to be conformed to.
+        //  Single pointField required by the featurePointTree.
+        pointField featurePointLocations_;
+
+        //- Search tree for edge point locations
+        mutable autoPtr<dynamicIndexedOctree<dynamicTreeDataPoint> >
+            edgeLocationTreePtr_;
+
+        mutable DynamicList<Foam::point> existingEdgeLocations_;
+
+        //- Search tree for surface point locations
+        mutable autoPtr<dynamicIndexedOctree<dynamicTreeDataPoint> >
+            surfacePtLocationTreePtr_;
+
+        mutable DynamicList<Foam::point> existingSurfacePtLocations_;
+
+        //- Store locations where the cell size and alignments will be
+        //  pre-calculated and looked up
+        pointField sizeAndAlignmentLocations_;
+
+        //- Stored cell size at sizeAndAlignmentLocations_
+        scalarField storedSizes_;
+
+        //- Stored alignments at sizeAndAlignmentLocations_
+        tensorField storedAlignments_;
+
+        //- Search tree for size and alignment lookup points
+        mutable autoPtr<indexedOctree<treeDataPoint> > sizeAndAlignmentTreePtr_;
+
+        //- Store the surface and feature edge conformation locations to be
+        //  reinserted
+        List<Vb> surfaceConformationVertices_;
+
+        //- Method for inserting initial points.  Runtime selectable.
+        autoPtr<initialPointsMethod> initialPointsMethod_;
+
+        //- Relaxation coefficient model.  Runtime selectable.
+        autoPtr<relaxationModel> relaxationModel_;
+
+        //-  Face area weight function.  Runtime selectable.
+        autoPtr<faceAreaWeightModel> faceAreaWeightModel_;
+
+        //- Background mesh decomposition, only available in parallel.
+        autoPtr<backgroundMeshDecomposition> decomposition_;
+
+
+    // Private Member Functions
+
+        inline scalar defaultCellSize() const;
+
+        //- Return the local target cell size at the given location.  Takes
+        //  boolean argument to allow speed-up of queries if the point is going
+        //  to be on a surface.
+        inline scalar targetCellSize(const Foam::point& pt) const;
+
+        //- Return the target cell size from that stored on a pair of
+        //  Delaunay vertices, using a mean function.
+        inline scalar averageCellSize
+        (
+            const Vertex_handle& vA,
+            const Vertex_handle& vB
+        ) const;
+
+        //- Return the target cell size from that stored on a pair of
+        //  Delaunay vertices, including the possibility that one of
+        //  them is not an internalOrBoundaryPoint, and so will not
+        //  have valid data.
+        inline scalar averageAnyCellSize
+        (
+            const Vertex_handle& vA,
+            const Vertex_handle& vB
+        ) const;
+
+        //- The average target cell size of a Delaunay facet, i.e., of
+        //  a dual edge
+        inline scalar averageAnyCellSize
+        (
+            const Delaunay::Finite_facets_iterator& fit
+        ) const;
+
+        //- Return the local point pair separation at the given location
+        inline scalar pointPairDistance(const Foam::point& pt) const;
+
+        //- Return the local mixed feature point placement distance
+        inline scalar mixedFeaturePointDistance(const Foam::point& pt) const;
+
+        //- Return the square of the local feature point exclusion distance
+        inline scalar featurePointExclusionDistanceSqr
+        (
+            const Foam::point& pt
+        ) const;
+
+        //- Return the square of the local feature edge exclusion distance
+        inline scalar featureEdgeExclusionDistanceSqr
+        (
+            const Foam::point& pt
+        ) const;
+
+        //- Return the square of the local surface point exclusion distance
+        inline scalar surfacePtExclusionDistanceSqr
+        (
+            const Foam::point& pt
+        ) const;
+
+        //- Return the square of the local surface search distance
+        inline scalar surfaceSearchDistanceSqr(const Foam::point& pt) const;
+
+        //- Return the local maximum surface protrusion distance
+        inline scalar maxSurfaceProtrusion(const Foam::point& pt) const;
+
+        //- Insert Point and return its auto-generated index
+        inline bool insertPoint
+        (
+            const Point& P,
+            const indexedVertexEnum::vertexType type
+        );
+
+        //- Insert Foam::point with specified index and type
+        inline bool insertPoint
+        (
+            const Foam::point& p,
+            const indexedVertexEnum::vertexType type
+        );
+
+        //- Insert Point with specified index, type and original processor
+        inline bool insertReferredPoint
+        (
+            const Point& P,
+            const label index,
+            const indexedVertexEnum::vertexType type,
+            const label processor
+        );
+
+        inline bool insertReferredPoint(const Vb& P);
+
+        //- Insert Foam::point with specified index, type and original processor
+        inline bool insertReferredPoint
+        (
+            const Foam::point& p,
+            const label index,
+            const indexedVertexEnum::vertexType type,
+            const label processor
+        );
+
+        //- Insert Delaunay vertices using the CGAL range insertion method,
+        //  optionally check processor occupancy and distribute to other
+        //  processors
+        void insertInternalPoints
+        (
+            List<Point>& points,
+            const bool distribute = false
+        );
+
+        void insertPoints
+        (
+            List<Vb>& vertices,
+            bool distribute
+        );
+
+        //- Create a point-pair at a ppDist distance either side of
+        //  surface point surfPt, in the direction n
+        inline void createPointPair
+        (
+            const scalar ppDist,
+            const Foam::point& surfPt,
+            const vector& n,
+            DynamicList<Vb>& pts
+        );
+
+        inline Foam::point perturbPoint(const Foam::point& pt) const;
+
+        //- Create a point-pair at a ppDist distance either side of
+        //  surface point surfPt, in the direction n
+        inline void createBafflePointPair
+        (
+            const scalar ppDist,
+            const Foam::point& surfPt,
+            const vector& n,
+            DynamicList<Vb>& pts
+        );
+
+        inline bool isPointPair
+        (
+            const Vertex_handle& vA,
+            const Vertex_handle& vB
+        ) const;
+
+        //- Insert pairs of points on the surface with the given normals, at the
+        //  specified spacing
+        void insertSurfacePointPairs
+        (
+            const pointIndexHitAndFeatureList& surfaceHits,
+            const fileName fName = fileName::null
+        );
+
+        //- Insert groups of points to conform to an edge given a list of
+        //  pointIndexHits specifying the location and edge index of the point
+        //  to be conformed to on the corresponding entry in featureHit
+        void insertEdgePointGroups
+        (
+            const pointIndexHitAndFeatureList& edgeHits,
+            const fileName fName = fileName::null
+        );
+
+        //- Call the appropriate function to conform to an edge
+        void createEdgePointGroup
+        (
+            const extendedFeatureEdgeMesh& feMesh,
+            const pointIndexHit& edHit,
+            DynamicList<Vb>& pts
+        );
+
+        void createEdgePointGroupByCirculating
+        (
+            const extendedFeatureEdgeMesh& feMesh,
+            const pointIndexHit& edHit,
+            DynamicList<Vb>& pts
+        );
+
+        bool meshableRegion
+        (
+            const plane::side side,
+            const extendedFeatureEdgeMesh::sideVolumeType volType
+        ) const;
+
+        bool regionIsInside
+        (
+            const extendedFeatureEdgeMesh::sideVolumeType volTypeA,
+            const vector& normalA,
+            const extendedFeatureEdgeMesh::sideVolumeType volTypeB,
+            const vector& normalB,
+            const vector& masterPtVec
+        ) const;
+
+        //- Create points to conform to an external edge
+        void createExternalEdgePointGroup
+        (
+            const extendedFeatureEdgeMesh& feMesh,
+            const pointIndexHit& edHit,
+            DynamicList<Vb>& pts
+        );
+
+        //- Create points to conform to an internal edge
+        void createInternalEdgePointGroup
+        (
+            const extendedFeatureEdgeMesh& feMesh,
+            const pointIndexHit& edHit,
+            DynamicList<Vb>& pts
+        );
+
+        //- Create points to conform to a flat edge
+        void createFlatEdgePointGroup
+        (
+            const extendedFeatureEdgeMesh& feMesh,
+            const pointIndexHit& edHit,
+            DynamicList<Vb>& pts
+        );
+
+        //- Create points to conform to an open edge
+        void createOpenEdgePointGroup
+        (
+            const extendedFeatureEdgeMesh& feMesh,
+            const pointIndexHit& edHit,
+            DynamicList<Vb>& pts
+        );
+
+        //- Create points to conform to multiply connected edge
+        void createMultipleEdgePointGroup
+        (
+            const extendedFeatureEdgeMesh& feMesh,
+            const pointIndexHit& edHit,
+            DynamicList<Vb>& pts
+        );
+
+        //- Determine and insert point groups at the feature points
+        void insertFeaturePoints();
+
+        //- Create point groups at mixed feature points
+        void createMixedFeaturePoints(DynamicList<Vb>& pts);
+
+        void addMasterAndSlavePoints
+        (
+            const DynamicList<Foam::point>& masterPoints,
+            const DynamicList<indexedVertexEnum::vertexType>&masterPointsTypes,
+            const Map<DynamicList<autoPtr<plane> > >& masterPointReflections,
+            DynamicList<Vb>& pts,
+            const label ptI
+        ) const;
+
+        label getSign(const extendedFeatureEdgeMesh::edgeStatus eStatus) const;
+
+        void createMasterAndSlavePoints
+        (
+            const extendedFeatureEdgeMesh& feMesh,
+            const label ptI,
+            DynamicList<Vb>& pts
+        ) const;
+
+        void createFeaturePoints(DynamicList<Vb>& pts);
+
+        vector sharedFaceNormal
+        (
+            const extendedFeatureEdgeMesh& feMesh,
+            const label edgeI,
+            const label nextEdgeI
+        ) const;
+
+        List<Foam::point> reflectPointInPlanes
+        (
+            const Foam::point p,
+            const DynamicList<autoPtr<plane> >& planes
+        ) const;
+
+        Foam::point reflectPointInPlane
+        (
+            const Foam::point p,
+            const plane& planeN
+        ) const;
+
+
+        //- Fill the pointFeatureEdgesType struct with the types of feature
+        //  edges that are attached to the point.
+        List<extendedFeatureEdgeMesh::edgeStatus> calcPointFeatureEdgesTypes
+        (
+            const extendedFeatureEdgeMesh& feMesh,
+            const labelList& pEds,
+            pointFeatureEdgesTypes& pFEdgeTypes
+        ) const;
+
+        //- Create feature point groups if a specialisation exists for the
+        //  structure
+        bool createSpecialisedFeaturePoint
+        (
+            const extendedFeatureEdgeMesh& feMesh,
+            const labelList& pEds,
+            const pointFeatureEdgesTypes& pFEdgeTypes,
+            const List<extendedFeatureEdgeMesh::edgeStatus>& allEdStat,
+            const label ptI,
+            DynamicList<Vb>& pts
+        );
+
+        //- Store the locations of all of the features to be conformed to
+        void constructFeaturePointLocations();
+
+        List<pointIndexHit> findSurfacePtLocationsNearFeaturePoint
+        (
+            const Foam::point& featurePoint
+        ) const;
+
+        //- Reinsert stored feature point defining points
+        void reinsertFeaturePoints(bool distribute = false);
+
+        //- Check if a location is in exclusion range around a feature point
+        bool nearFeaturePt(const Foam::point& pt) const;
+
+        //- Insert the initial points into the triangulation, based on the
+        //  initialPointsMethod
+        void insertInitialPoints();
+
+        //- Calculate the worst load balance
+        template<class Triangulation>
+        scalar calculateLoadUnbalance(const Triangulation& mesh) const;
+
+        //- In parallel redistribute the backgroundMeshDecomposition and
+        //  vertices to balance the number of vertices on each processor.
+        //  Returns true if the background mesh changes as this removes all
+        //  referred vertices, so the parallel interface may need rebuilt.
+        template<class Triangulation>
+        bool distributeBackground(const Triangulation& mesh);
+
+        // Test for full containment
+        void cellSizeMeshOverlapsBackground() const;
+
+        //-
+        void distribute();
+
+        void buildCellSizeAndAlignmentMesh();
+
+        //- Store data for sizeAndAlignmentLocations_, storedSizes_ and
+        //  storedAlignments_ and initialise the sizeAndAlignmentTreePtr_,
+        //  determining the appropriate sizeAndAlignmentLocations_
+        //  automatically
+        void storeSizesAndAlignments();
+
+        //- Store data for sizeAndAlignmentLocations_, storedSizes_ and
+        //  storedAlignments_ and initialise the sizeAndAlignmentTreePtr_
+        void storeSizesAndAlignments(const List<Point>& storePts);
+
+        //- Restore the sizes and alignments if required
+        void updateSizesAndAlignments(const List<Point>& storePts);
+
+        //- Demand driven construction of octree for and alignment points
+        const indexedOctree<treeDataPoint>& sizeAndAlignmentTree() const;
+
+        //- Set the size and alignment data for each vertex
+        void setVertexSizeAndAlignment();
+
+        //- Builds a dual face by circulating around the supplied edge.
+        face buildDualFace
+        (
+            const Delaunay::Finite_edges_iterator& eit
+        ) const;
+
+        boolList dualFaceBoundaryPoints
+        (
+            const Delaunay::Finite_edges_iterator& eit
+        ) const;
+
+        //- Finds the maximum filterCount of the dual vertices
+        //  (Delaunay cells) that form the dual face produced by the
+        //  supplied edge
+        label maxFilterCount
+        (
+            const Delaunay::Finite_edges_iterator& eit
+        ) const;
+
+        //- Determines the owner and neighbour labels for dual cells
+        //  corresponding to the dual face formed by the supplied
+        //  Delaunay vertices.  If the dual face is a boundary face
+        //  then neighbour = -1.  Returns true if the dual face
+        //  created by vA -> vB needs to be reversed to be correctly
+        //  orientated.
+        bool ownerAndNeighbour
+        (
+            Vertex_handle vA,
+            Vertex_handle vB,
+            label& owner,
+            label& neighbour
+        ) const;
+
+        //- Insert the necessary point pairs to conform to the surface, either
+        //  from stored results, or trigger a re-conformation
+        void conformToSurface();
+
+        //- Decision making function for when to rebuild the surface
+        //  conformation
+        reconformationMode reconformationControl() const;
+
+        //- Determines geometrically whether a vertex is close to a surface
+        //  This is an optimisation
+        label findVerticesNearBoundaries();
+
+        //- Create and insert the necessary point pairs to conform to the
+        //  surface, then store the result
+        void buildSurfaceConformation();
+
+        label synchroniseEdgeTrees
+        (
+            const DynamicList<label>& edgeToTreeShape,
+            pointIndexHitAndFeatureList& featureEdgeHits
+        );
+
+        label synchroniseSurfaceTrees
+        (
+            const DynamicList<label>& surfaceToTreeShape,
+            pointIndexHitAndFeatureList& surfaceHits
+        );
+
+        bool surfaceLocationConformsToInside
+        (
+            const pointIndexHitAndFeature& info
+        ) const;
+
+        //- Check to see if dual cell specified by given vertex iterator
+        //  intersects the boundary and hence reqires a point-pair
+        bool dualCellSurfaceAnyIntersection
+        (
+            const Delaunay::Finite_vertices_iterator& vit
+        ) const;
+
+        //- Return all intersections
+        bool dualCellSurfaceAllIntersections
+        (
+            const Delaunay::Finite_vertices_iterator& vit,
+            pointIndexHitAndFeatureDynList& info
+        ) const;
+
+        //- Return false if the line is entirely outside the current processor
+        //  domain, true is either point is inside, or the processor domain
+        //  bounadry is intersected (i.e. the points are box outside but the
+        //  line cuts.  The points will be moved onto the box where they
+        //  intersect.
+        bool clipLineToProc
+        (
+            const Foam::point& pt,
+            Foam::point& a,
+            Foam::point& b
+        ) const;
+
+        //- Find the "worst" protrusion of a dual cell through the surface,
+        //  subject to the maxSurfaceProtrusion tolerance
+        void dualCellLargestSurfaceProtrusion
+        (
+            const Delaunay::Finite_vertices_iterator& vit,
+            pointIndexHit& surfHit,
+            label& hitSurface
+        ) const;
+
+        //- Find the "worst" incursion of the dual cell of a non-internal or
+        //  boundary point through the surface, subject to the
+        //  maxSurfaceProtrusion tolerance
+        void dualCellLargestSurfaceIncursion
+        (
+            const Delaunay::Finite_vertices_iterator& vit,
+            pointIndexHit& surfHitLargest,
+            label& hitSurfaceLargest
+        ) const;
+
+        //- Write out vertex-processor occupancy information for debugging
+        void reportProcessorOccupancy();
+
+        //- Write out debugging information about the surface conformation
+        //  quality
+//        void reportSurfaceConformationQuality();
+
+        //- Limit the displacement of a point so that it doesn't penetrate the
+        //  surface to be meshed or come too close to it
+        void limitDisplacement
+        (
+            const Delaunay::Finite_vertices_iterator& vit,
+            vector& displacement,
+            label callCount = 0
+        ) const;
+
+        //- Find angle between the normals of two close surface points.
+        scalar angleBetweenSurfacePoints(Foam::point pA, Foam::point pB) const;
+
+        //- Check if a surface point is near another.
+        bool nearSurfacePoint
+        (
+            pointIndexHitAndFeature& pHit
+        ) const;
+
+        //- Append a point to the surface point tree and the existing list
+        bool appendToSurfacePtTree
+        (
+            const Foam::point& pt
+        ) const;
+
+        //- Append a point to the edge location tree and the existing list
+        bool appendToEdgeLocationTree
+        (
+            const Foam::point& pt
+        ) const;
+
+        //- Return a list of the nearest feature edge locations
+        List<pointIndexHit> nearestFeatureEdgeLocations
+        (
+            const Foam::point& pt
+        ) const;
+
+        //- Check if a point is near any feature edge points.
+        bool pointIsNearFeatureEdgeLocation(const Foam::point& pt) const;
+
+        bool pointIsNearFeatureEdgeLocation
+        (
+            const Foam::point& pt,
+            pointIndexHit& info
+        ) const;
+
+        //- Check if a point is near any surface conformation points.
+        bool pointIsNearSurfaceLocation(const Foam::point& pt) const;
+
+        bool pointIsNearSurfaceLocation
+        (
+            const Foam::point& pt,
+            pointIndexHit& info
+        ) const;
+
+        //- Check if a location is in the exclusion range of an existing feature
+        //- edge conformation location
+        bool nearFeatureEdgeLocation
+        (
+            pointIndexHit& pHit
+        ) const;
+
+        //- Build or rebuild the edge location tree
+        void buildEdgeLocationTree
+        (
+            const DynamicList<Foam::point>& existingEdgeLocations
+        ) const;
+
+        //- Build or rebuild the surface point location tree
+        void buildSurfacePtLocationTree
+        (
+            const DynamicList<Foam::point>& existingSurfacePtLocations
+        ) const;
+
+        //- Build or rebuild the sizeAndAlignmentTree
+        void buildSizeAndAlignmentTree() const;
+
+        //- Process the surface conformation locations to decide which surface
+        //  and edge conformation locations to add
+        void addSurfaceAndEdgeHits
+        (
+            const Foam::point& vit,
+            const pointIndexHitAndFeatureDynList& surfaceIntersections,
+            scalar surfacePtReplaceDistCoeffSqr,
+            scalar edgeSearchDistCoeffSqr,
+            pointIndexHitAndFeatureDynList& surfaceHits,
+            pointIndexHitAndFeatureDynList& featureEdgeHits,
+            DynamicList<label>& surfaceToTreeShape,
+            DynamicList<label>& edgeToTreeShape,
+            Map<scalar>& surfacePtToEdgePtDist,
+            bool firstPass
+        ) const;
+
+        //- Store the surface conformation with the indices offset to be
+        //  relative to zero
+        void storeSurfaceConformation();
+
+        //- Reinsert the surface conformation re-offsetting indices to be
+        //  relative to new number of internal vertices
+        void reinsertSurfaceConformation();
+
+        void checkCells();
+
+        void checkDuals();
+
+        void checkVertices();
+
+        void checkCoPlanarCells() const;
+
+        //- Dual calculation
+        void calcDualMesh
+        (
+            pointField& points,
+            labelList& boundaryPts,
+            faceList& faces,
+            labelList& owner,
+            labelList& neighbour,
+            wordList& patchTypes,
+            wordList& patchNames,
+            PtrList<dictionary>& patchDicts,
+            pointField& cellCentres,
+            labelList& cellToDelaunayVertex,
+            labelListList& patchToDelaunayVertex,
+            PackedBoolList& boundaryFacesToRemove
+        );
+
+        //- Tet mesh calculation
+        void calcTetMesh
+        (
+            pointField& points,
+            labelList& pointToDelaunayVertex,
+            faceList& faces,
+            labelList& owner,
+            labelList& neighbour,
+            wordList& patchTypes,
+            wordList& patchNames,
+            PtrList<dictionary>& patchDicts
+        );
+
+        //- Determines if the dual face constructed by the Delaunay
+        //  edge is a boundary face
+        inline bool isBoundaryDualFace
+        (
+            const Delaunay::Finite_edges_iterator& eit
+        ) const;
+
+        //- Which processors are attached to the dual edge represented by this
+        //  Delaunay facet
+        inline List<label> processorsAttached
+        (
+            const Delaunay::Finite_facets_iterator& fit
+        ) const;
+
+        //- Determines if the edge constructed from the face is on
+        //  a processor patch
+        inline bool isParallelDualEdge
+        (
+            const Delaunay::Finite_facets_iterator& fit
+        ) const;
+
+        //- Determines if the dual face constructed by the Delaunay
+        //  edge is a processor boundary face
+        inline bool isProcBoundaryEdge
+        (
+            const Delaunay::Finite_edges_iterator& eit
+        ) const;
+
+        //- Merge vertices that are identical
+        void mergeIdenticalDualVertices
+        (
+            const pointField& pts,
+            const labelList& boundaryPts
+        );
+
+        label mergeIdenticalDualVertices
+        (
+            const pointField& pts,
+            const labelList& boundaryPts,
+            Map<label>& dualPtIndexMap
+        ) const;
+
+        //- Identify the face labels of the deferred collapse faces
+        void deferredCollapseFaceSet
+        (
+            labelList& owner,
+            labelList& neighbour,
+            const HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces
+        ) const;
+
+        //- Check whether the cell sizes are fine enough. Creates a polyMesh.
+        void checkCellSizing();
+
+        //- Find all cells with a patch face that is not near the surface. The
+        //  allowed offset is the fraction of the target cell size.
+        labelHashSet findOffsetPatchFaces
+        (
+            const polyMesh& mesh,
+            const scalar allowedOffset
+        ) const;
+
+        //- Create a polyMesh and check its quality, reports which
+        //  elements damage the mesh quality, allowing backtracking.
+        labelHashSet checkPolyMeshQuality(const pointField& pts) const;
+
+        //- Index all of the the Delaunay cells and calculate their
+        //- dual points
+        void indexDualVertices
+        (
+            pointField& pts,
+            labelList& boundaryPts
+        );
+
+        //- Re-index all of the Delaunay cells
+        void reindexDualVertices(const Map<label>& dualPtIndexMap);
+
+        label createPatchInfo
+        (
+            wordList& patchNames,
+            wordList& patchTypes,
+            PtrList<dictionary>& patchDicts
+        ) const;
+
+        vector calcSharedPatchNormal(Cell_handle c1, Cell_handle c2) const;
+
+        bool boundaryDualFace(Cell_handle c1, Cell_handle c2) const;
+
+        //- Create all of the internal and boundary faces
+        void createFacesOwnerNeighbourAndPatches
+        (
+            const pointField& pts,
+            faceList& faces,
+            labelList& owner,
+            labelList& neighbour,
+            wordList& patchTypes,
+            wordList& patchNames,
+            PtrList<dictionary>& patchDicts,
+            labelListList& patchPointPairSlaves,
+            PackedBoolList& boundaryFacesToRemove,
+            bool includeEmptyPatches = false
+        ) const;
+
+        //- Create the cell centres to use for the mesh
+        void createCellCentres(pointField& cellCentres) const;
+
+        //- Extract all points in vertex-index order
+        tmp<pointField> allPoints() const;
+
+        //- Sort the faces, owner and neighbour lists into
+        //  upper-triangular order.  For internal faces only, use
+        //  before adding patch faces
+        void sortFaces
+        (
+            faceList& faces,
+            labelList& owner,
+            labelList& neighbour
+        ) const;
+
+        //- Sort the processor patches so that the faces are in the same order
+        //  on both processors
+        void sortProcPatches
+        (
+            List<DynamicList<face> >& patchFaces,
+            List<DynamicList<label> >& patchOwners,
+            List<DynamicList<label> >& patchPointPairSlaves,
+            labelPairPairDynListList& patchSortingIndices
+        ) const;
+
+        //- Add the faces and owner information for the patches
+        void addPatches
+        (
+            const label nInternalFaces,
+            faceList& faces,
+            labelList& owner,
+            PtrList<dictionary>& patchDicts,
+            PackedBoolList& boundaryFacesToRemove,
+            const List<DynamicList<face> >& patchFaces,
+            const List<DynamicList<label> >& patchOwners,
+            const List<DynamicList<bool> >& indirectPatchFace
+        ) const;
+
+        //- Remove points that are no longer used by any faces
+        void removeUnusedPoints
+        (
+            faceList& faces,
+            pointField& pts,
+            labelList& boundaryPts
+        ) const;
+
+        //- Remove dual cells that are not used by any faces. Return compaction
+        //  map.
+        labelList removeUnusedCells
+        (
+            labelList& owner,
+            labelList& neighbour
+        ) const;
+
+        //- Create an empty fvMesh
+        autoPtr<fvMesh> createDummyMesh
+        (
+            const IOobject& io,
+            const wordList& patchTypes,
+            const wordList& patchNames,
+            const PtrList<dictionary>& patchDicts
+        ) const;
+
+        //- Create a polyMesh from points.
+        autoPtr<polyMesh> createPolyMeshFromPoints(const pointField& pts) const;
+
+        void checkProcessorPatchesMatch
+        (
+            const wordList& patchTypes,
+            const PtrList<dictionary>& patchDicts
+        ) const;
+
+        void reorderPoints
+        (
+            pointField& points,
+            labelList& boundaryPts,
+            faceList& faces,
+            const label nInternalFaces
+        ) const;
+
+        //- Rotate the faces on processor patches if necessary
+        void reorderProcessorPatches
+        (
+            const word& meshName,
+            const fileName& instance,
+            const pointField& points,
+            faceList& faces,
+            const wordList& patchTypes,
+            const wordList& patchNames,
+            const PtrList<dictionary>& patchDicts
+        ) const;
+
+        //- Disallow default bitwise copy construct
+        conformalVoronoiMesh(const conformalVoronoiMesh&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const conformalVoronoiMesh&);
+
+
+public:
+
+    //- Runtime type information
+    ClassName("conformalVoronoiMesh");
+
+
+    // Constructors
+
+        //- Construct from Time and foamyHexMeshDict
+        conformalVoronoiMesh
+        (
+            const Time& runTime,
+            const dictionary& foamyHexMeshDict
+        );
+
+
+    //- Destructor
+    ~conformalVoronoiMesh();
+
+
+    // Member Functions
+
+        //- Move the vertices according to the controller, re-conforming to the
+        //  surface as required
+        void move();
+
+        //- Check if the point is in the domain handled by this processor
+        bool positionOnThisProc(const Foam::point& pt) const;
+
+        //- Check if the point is in the domain handled by this processor
+        boolList positionOnThisProc(const Foam::List<Foam::point>& pts) const;
+
+        //- Which processor's domain handles this point
+        labelList positionProc(const Foam::List<Foam::point>& pts) const;
+
+        //- Which other processors does each line segment intersect
+        List<List<pointIndexHit> > intersectsProc
+        (
+            const List<Foam::point>& starts,
+            const List<Foam::point>& ends
+        ) const;
+
+//        //- Which other processors does each sphere overlap
+//        labelListList overlapsProc
+//        (
+//            const List<Foam::point>& centres,
+//            const List<scalar>& radiusSqrs
+//        ) const;
+
+        typedef K::Vector_3 CGALVector;
+
+        inline CGALVector toCGALVector(const Foam::vector& v) const;
+
+
+        // Access
+
+            //- Return the Time object
+            inline const Time& time() const;
+
+            //- Return the random number generator
+            inline Random& rndGen() const;
+
+            //- Return the allGeometry object
+            inline const searchableSurfaces& allGeometry() const;
+
+            //- Return the conformationSurfaces object
+            inline const conformationSurfaces& geometryToConformTo() const;
+
+            //- Return the backgroundMeshDecomposition
+            inline const backgroundMeshDecomposition& decomposition() const;
+
+            //- Return the cellShapeControl object
+            inline const cellShapeControl& cellShapeControls() const;
+
+            //- Return the foamyHexMeshControls object
+            inline const cvControls& foamyHexMeshControls() const;
+
+
+        // Write
+
+            //- Write the elapsedCpuTime and memory usage, with an optional
+            //  description
+            static void timeCheck
+            (
+                const Time& runTime,
+                const string& description = string::null,
+                const bool check = true
+            );
+
+            void timeCheck
+            (
+                const string& description = string::null
+            ) const;
+
+            //- Write the Delaunay cell
+            void drawDelaunayCell
+            (
+                Ostream& os,
+                const Cell_handle& c,
+                label offset = 0
+            ) const;
+
+            //- Write Delaunay points in the range between (and including)
+            //  type startPointType and endPointType to .obj file
+            void writePoints
+            (
+                const fileName& fName,
+                const Foam::indexedVertexEnum::vertexType startPointType,
+                const Foam::indexedVertexEnum::vertexType endPointType
+            ) const;
+
+            //- Write Delaunay points of type pointType to .obj file
+            void writePoints
+            (
+                const fileName& fName,
+                const Foam::indexedVertexEnum::vertexType pointType
+            ) const;
+
+            void writeFixedPoints(const fileName& fName) const;
+
+            //- Write the boundary Delaunay points to .obj file
+            void writeBoundaryPoints(const fileName& fName) const;
+
+            //- Write list of points to file
+            void writePoints
+            (
+                const fileName& fName,
+                const List<Foam::point>& points
+            ) const;
+
+            //- Write list of points to file
+            void writePoints
+            (
+                const fileName& fName,
+                const List<Vb>& points
+            ) const;
+
+            //- Write the internal Delaunay vertices of the tessellation as a
+            //  pointField that may be used to restart the meshing process
+            void writeInternalDelaunayVertices(const fileName& instance) const;
+
+            //- Prepare data and call writeMesh for polyMesh and
+            //  tetDualMesh
+            void writeMesh(const fileName& instance);
+
+            //- Write mesh to disk
+            void writeMesh
+            (
+                const word& meshName,
+                const fileName& instance,
+                pointField& points,
+                labelList& boundaryPts,
+                faceList& faces,
+                labelList& owner,
+                labelList& neighbour,
+                const wordList& patchTypes,
+                const wordList& patchNames,
+                const PtrList<dictionary>& patchDicts,
+                const pointField& cellCentres,
+                const PackedBoolList& boundaryFacesToRemove
+            ) const;
+
+            //- Write points and faces as .obj file
+            void writeObjMesh
+            (
+                const pointField& points,
+                const faceList& faces,
+                const fileName& fName
+            ) const;
+
+            //- Calculate and write a field of the target cell size,
+            //  target cell volume, actual cell volume and equivalent
+            //  actual cell size (cbrt(actual cell volume)).
+            void writeCellSizes(const fvMesh& mesh) const;
+
+            void writeCellAlignments(const fvMesh& mesh) const;
+
+            //- Calculate and write the cell centres.
+            void writeCellCentres(const fvMesh& mesh) const;
+
+            //- Find the cellSet of the boundary cells which have points that
+            //  protrude out of the surface beyond a tolerance.
+            labelHashSet findRemainingProtrusionSet(const polyMesh& mesh) const;
+
+            void writeProcessorInterface
+            (
+                const fileName& fName,
+                const faceList& faces
+            ) const;
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "conformalVoronoiMeshI.H"
+
+#ifdef NoRepository
+#   include "conformalVoronoiMeshTemplates.C"
+#endif
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //

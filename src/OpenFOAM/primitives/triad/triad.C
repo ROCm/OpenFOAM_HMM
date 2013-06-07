@@ -124,49 +124,49 @@ void Foam::triad::orthogonalize()
     {
         for (int i=0; i<2; i++)
         {
-        scalar o01 = mag(operator[](0) & operator[](1));
-        scalar o02 = mag(operator[](0) & operator[](2));
-        scalar o12 = mag(operator[](1) & operator[](2));
+            scalar o01 = mag(operator[](0) & operator[](1));
+            scalar o02 = mag(operator[](0) & operator[](2));
+            scalar o12 = mag(operator[](1) & operator[](2));
 
-        if (o01 < o02 && o01 < o12)
-        {
-            operator[](2) = orthogonal(operator[](0), operator[](1));
+            if (o01 < o02 && o01 < o12)
+            {
+                operator[](2) = orthogonal(operator[](0), operator[](1));
 
-            // if (o02 < o12)
-            // {
-            //     operator[](1) = orthogonal(operator[](0), operator[](2));
-            // }
-            // else
-            // {
-            //     operator[](0) = orthogonal(operator[](1), operator[](2));
-            // }
-        }
-        else if (o02 < o12)
-        {
-            operator[](1) = orthogonal(operator[](0), operator[](2));
+                // if (o02 < o12)
+                // {
+                //     operator[](1) = orthogonal(operator[](0), operator[](2));
+                // }
+                // else
+                // {
+                //     operator[](0) = orthogonal(operator[](1), operator[](2));
+                // }
+            }
+            else if (o02 < o12)
+            {
+                operator[](1) = orthogonal(operator[](0), operator[](2));
 
-            // if (o01 < o12)
-            // {
-            //     operator[](2) = orthogonal(operator[](0), operator[](1));
-            // }
-            // else
-            // {
-            //     operator[](0) = orthogonal(operator[](1), operator[](2));
-            // }
-        }
-        else
-        {
-            operator[](0) = orthogonal(operator[](1), operator[](2));
+                // if (o01 < o12)
+                // {
+                //     operator[](2) = orthogonal(operator[](0), operator[](1));
+                // }
+                // else
+                // {
+                //     operator[](0) = orthogonal(operator[](1), operator[](2));
+                // }
+            }
+            else
+            {
+                operator[](0) = orthogonal(operator[](1), operator[](2));
 
-            // if (o02 < o01)
-            // {
-            //     operator[](1) = orthogonal(operator[](0), operator[](2));
-            // }
-            // else
-            // {
-            //     operator[](2) = orthogonal(operator[](0), operator[](1));
-            // }
-        }
+                // if (o02 < o01)
+                // {
+                //     operator[](1) = orthogonal(operator[](0), operator[](2));
+                // }
+                // else
+                // {
+                //     operator[](2) = orthogonal(operator[](0), operator[](1));
+                // }
+            }
         }
     }
 }
@@ -174,19 +174,19 @@ void Foam::triad::orthogonalize()
 
 void Foam::triad::operator+=(const triad& t2)
 {
-    if (t2.set(0) && !set(0))
-    {
-        operator[](0) = t2.operator[](0);
-    }
+    bool preset[3];
 
-    if (t2.set(1) && !set(1))
+    for (direction i=0; i<3; i++)
     {
-        operator[](1) = t2.operator[](1);
-    }
-
-    if (t2.set(2) && !set(2))
-    {
-        operator[](2) = t2.operator[](2);
+        if (t2.set(i) && !set(i))
+        {
+            operator[](i) = t2.operator[](i);
+            preset[i] = true;
+        }
+        else
+        {
+            preset[i] = false;
+        }
     }
 
     if (set() && t2.set())
@@ -196,6 +196,12 @@ void Foam::triad::operator+=(const triad& t2)
 
         for (direction i=0; i<3; i++)
         {
+            if (preset[i])
+            {
+                signd[i] = 0;
+                continue;
+            }
+
             scalar mostAligned = -1;
             for (direction j=0; j<3; j++)
             {
@@ -222,10 +228,7 @@ void Foam::triad::operator+=(const triad& t2)
                     }
                 }
             }
-        }
 
-        for (direction i=0; i<3; i++)
-        {
             operator[](i) += signd[i]*t2.operator[](correspondance[i]);
         }
     }
@@ -370,6 +373,35 @@ void Foam::triad::operator=(const tensor& t)
     x() = t.x();
     y() = t.y();
     z() = t.z();
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+Foam::scalar Foam::diff(const triad& A, const triad& B)
+{
+    triad tmpA = A.sortxyz();
+    triad tmpB = B.sortxyz();
+
+    scalar sumDifference = 0;
+
+    for (direction dir = 0; dir < 3; dir++)
+    {
+        if (!tmpA.set(dir) || !tmpB.set(dir))
+        {
+            continue;
+        }
+
+        scalar cosPhi =
+            (tmpA[dir] & tmpB[dir])
+           /(mag(tmpA[dir])*mag(tmpA[dir]) + SMALL);
+
+        cosPhi = min(max(cosPhi, -1), 1);
+
+        sumDifference += mag(cosPhi - 1);
+    }
+
+    return (sumDifference/3);
 }
 
 

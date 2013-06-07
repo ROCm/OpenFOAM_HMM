@@ -26,11 +26,10 @@ License
 #include "epsilonWallFunctionFvPatchScalarField.H"
 #include "incompressible/turbulenceModel/turbulenceModel.H"
 #include "fvPatchFieldMapper.H"
+#include "fvMatrix.H"
 #include "volFields.H"
-#include "addToRunTimeSelectionTable.H"
 #include "wallFvPatch.H"
-#include "nutkWallFunctionFvPatchScalarField.H"
-
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -39,7 +38,7 @@ namespace Foam
 namespace incompressible
 {
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
 void epsilonWallFunctionFvPatchScalarField::checkType()
 {
@@ -63,117 +62,159 @@ void epsilonWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
-(
-    const fvPatch& p,
-    const DimensionedField<scalar, volMesh>& iF
-)
-:
-    fixedInternalValueFvPatchField<scalar>(p, iF),
-    Cmu_(0.09),
-    kappa_(0.41),
-    E_(9.8)
+void epsilonWallFunctionFvPatchScalarField::setMaster()
 {
-    checkType();
-}
-
-
-epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
-(
-    const epsilonWallFunctionFvPatchScalarField& ptf,
-    const fvPatch& p,
-    const DimensionedField<scalar, volMesh>& iF,
-    const fvPatchFieldMapper& mapper
-)
-:
-    fixedInternalValueFvPatchField<scalar>(ptf, p, iF, mapper),
-    Cmu_(ptf.Cmu_),
-    kappa_(ptf.kappa_),
-    E_(ptf.E_)
-{
-    checkType();
-}
-
-
-epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
-(
-    const fvPatch& p,
-    const DimensionedField<scalar, volMesh>& iF,
-    const dictionary& dict
-)
-:
-    fixedInternalValueFvPatchField<scalar>(p, iF, dict),
-    Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    E_(dict.lookupOrDefault<scalar>("E", 9.8))
-{
-    checkType();
-}
-
-
-epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
-(
-    const epsilonWallFunctionFvPatchScalarField& ewfpsf
-)
-:
-    fixedInternalValueFvPatchField<scalar>(ewfpsf),
-    Cmu_(ewfpsf.Cmu_),
-    kappa_(ewfpsf.kappa_),
-    E_(ewfpsf.E_)
-{
-    checkType();
-}
-
-
-epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
-(
-    const epsilonWallFunctionFvPatchScalarField& ewfpsf,
-    const DimensionedField<scalar, volMesh>& iF
-)
-:
-    fixedInternalValueFvPatchField<scalar>(ewfpsf, iF),
-    Cmu_(ewfpsf.Cmu_),
-    kappa_(ewfpsf.kappa_),
-    E_(ewfpsf.E_)
-{
-    checkType();
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void epsilonWallFunctionFvPatchScalarField::updateCoeffs()
-{
-    if (updated())
+    if (master_ != -1)
     {
         return;
     }
 
-    const label patchI = patch().index();
+    const volScalarField& epsilon =
+        static_cast<const volScalarField&>(this->dimensionedInternalField());
 
-    const turbulenceModel& turbulence =
-        db().lookupObject<turbulenceModel>("turbulenceModel");
+    const volScalarField::GeometricBoundaryField& bf = epsilon.boundaryField();
+
+    label master = -1;
+    forAll(bf, patchI)
+    {
+        if (isA<epsilonWallFunctionFvPatchScalarField>(bf[patchI]))
+        {
+            epsilonWallFunctionFvPatchScalarField& epf = epsilonPatch(patchI);
+
+            if (master == -1)
+            {
+                master = patchI;
+            }
+
+            epf.master() = master;
+        }
+    }
+}
+
+
+void epsilonWallFunctionFvPatchScalarField::createAveragingWeights()
+{
+    if (initialised_)
+    {
+        return;
+    }
+
+    const volScalarField& epsilon =
+        static_cast<const volScalarField&>(this->dimensionedInternalField());
+
+    const volScalarField::GeometricBoundaryField& bf = epsilon.boundaryField();
+
+    const fvMesh& mesh = epsilon.mesh();
+
+    volScalarField weights
+    (
+        IOobject
+        (
+            "weights",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false // do not register
+        ),
+        mesh,
+        dimensionedScalar("zero", dimless, 0.0)
+    );
+
+    DynamicList<label> epsilonPatches(bf.size());
+    forAll(bf, patchI)
+    {
+        if (isA<epsilonWallFunctionFvPatchScalarField>(bf[patchI]))
+        {
+            epsilonPatches.append(patchI);
+
+            const labelUList& faceCells = bf[patchI].patch().faceCells();
+            forAll(faceCells, i)
+            {
+                label cellI = faceCells[i];
+                weights[cellI]++;
+            }
+        }
+    }
+
+    cornerWeights_.setSize(bf.size());
+    forAll(epsilonPatches, i)
+    {
+        label patchI = epsilonPatches[i];
+        const fvPatchField& wf = weights.boundaryField()[patchI];
+        cornerWeights_[patchI] = 1.0/wf.patchInternalField();
+    }
+
+    G_.setSize(dimensionedInternalField().size(), 0.0);
+    epsilon_.setSize(dimensionedInternalField().size(), 0.0);
+
+    initialised_ = true;
+}
+
+
+epsilonWallFunctionFvPatchScalarField&
+epsilonWallFunctionFvPatchScalarField::epsilonPatch(const label patchI)
+{
+    const volScalarField& epsilon =
+        static_cast<const volScalarField&>(this->dimensionedInternalField());
+
+    const volScalarField::GeometricBoundaryField& bf = epsilon.boundaryField();
+
+    const epsilonWallFunctionFvPatchScalarField& epf =
+        refCast<const epsilonWallFunctionFvPatchScalarField>(bf[patchI]);
+
+    return const_cast<epsilonWallFunctionFvPatchScalarField&>(epf);
+}
+
+
+void epsilonWallFunctionFvPatchScalarField::calculateTurbulenceFields
+(
+    const turbulenceModel& turbulence,
+    scalarField& G0,
+    scalarField& epsilon0
+)
+{
+    // accumulate all of the G and epsilon contributions
+    forAll(cornerWeights_, patchI)
+    {
+        if (!cornerWeights_[patchI].empty())
+        {
+            epsilonWallFunctionFvPatchScalarField& epf = epsilonPatch(patchI);
+
+            const List<scalar>& w = cornerWeights_[patchI];
+
+            epf.calculate(turbulence, w, epf.patch(), G0, epsilon0);
+        }
+    }
+
+    // apply zero-gradient condition for epsilon
+    forAll(cornerWeights_, patchI)
+    {
+        if (!cornerWeights_[patchI].empty())
+        {
+            epsilonWallFunctionFvPatchScalarField& epf = epsilonPatch(patchI);
+
+            epf == scalarField(epsilon0, epf.patch().faceCells());
+        }
+    }
+}
+
+
+void epsilonWallFunctionFvPatchScalarField::calculate
+(
+    const turbulenceModel& turbulence,
+    const List<scalar>& cornerWeights,
+    const fvPatch& patch,
+    scalarField& G,
+    scalarField& epsilon
+)
+{
+    const label patchI = patch.index();
+
     const scalarField& y = turbulence.y()[patchI];
 
     const scalar Cmu25 = pow025(Cmu_);
     const scalar Cmu75 = pow(Cmu_, 0.75);
-
-    volScalarField& G =
-        const_cast<volScalarField&>
-        (
-            db().lookupObject<volScalarField>
-            (
-                turbulence.GName()
-            )
-        );
-
-    DimensionedField<scalar, volMesh>& epsilon =
-        const_cast<DimensionedField<scalar, volMesh>&>
-        (
-            dimensionedInternalField()
-        );
 
     const tmp<volScalarField> tk = turbulence.k();
     const volScalarField& k = tk();
@@ -192,35 +233,329 @@ void epsilonWallFunctionFvPatchScalarField::updateCoeffs()
     // Set epsilon and G
     forAll(nutw, faceI)
     {
-        label faceCellI = patch().faceCells()[faceI];
+        label cellI = patch.faceCells()[faceI];
 
-        epsilon[faceCellI] = Cmu75*pow(k[faceCellI], 1.5)/(kappa_*y[faceI]);
+        scalar w = cornerWeights[faceI];
 
-        G[faceCellI] =
-            (nutw[faceI] + nuw[faceI])
+        epsilon[cellI] += w*Cmu75*pow(k[cellI], 1.5)/(kappa_*y[faceI]);
+
+        G[cellI] +=
+            w
+           *(nutw[faceI] + nuw[faceI])
            *magGradUw[faceI]
-           *Cmu25*sqrt(k[faceCellI])
+           *Cmu25*sqrt(k[cellI])
            /(kappa_*y[faceI]);
     }
-
-    fixedInternalValueFvPatchField<scalar>::updateCoeffs();
-
-    // TODO: perform averaging for cells sharing more than one boundary face
 }
 
 
-void epsilonWallFunctionFvPatchScalarField::evaluate
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
 (
-    const Pstream::commsTypes commsType
+    const fvPatch& p,
+    const DimensionedField<scalar, volMesh>& iF
+)
+:
+    fixedValueFvPatchField<scalar>(p, iF),
+    Cmu_(0.09),
+    kappa_(0.41),
+    E_(9.8),
+    G_(),
+    epsilon_(),
+    initialised_(false),
+    master_(-1),
+    cornerWeights_()
+{
+    checkType();
+}
+
+
+epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
+(
+    const epsilonWallFunctionFvPatchScalarField& ptf,
+    const fvPatch& p,
+    const DimensionedField<scalar, volMesh>& iF,
+    const fvPatchFieldMapper& mapper
+)
+:
+    fixedValueFvPatchField<scalar>(ptf, p, iF, mapper),
+    Cmu_(ptf.Cmu_),
+    kappa_(ptf.kappa_),
+    E_(ptf.E_),
+    G_(),
+    epsilon_(),
+    initialised_(false),
+    master_(-1),
+    cornerWeights_()
+{
+    checkType();
+}
+
+
+epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
+(
+    const fvPatch& p,
+    const DimensionedField<scalar, volMesh>& iF,
+    const dictionary& dict
+)
+:
+    fixedValueFvPatchField<scalar>(p, iF, dict),
+    Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
+    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
+    E_(dict.lookupOrDefault<scalar>("E", 9.8)),
+    G_(),
+    epsilon_(),
+    initialised_(false),
+    master_(-1),
+    cornerWeights_()
+{
+    checkType();
+}
+
+
+epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
+(
+    const epsilonWallFunctionFvPatchScalarField& ewfpsf
+)
+:
+    fixedValueFvPatchField<scalar>(ewfpsf),
+    Cmu_(ewfpsf.Cmu_),
+    kappa_(ewfpsf.kappa_),
+    E_(ewfpsf.E_),
+    G_(),
+    epsilon_(),
+    initialised_(false),
+    master_(-1),
+    cornerWeights_()
+{
+    checkType();
+}
+
+
+epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
+(
+    const epsilonWallFunctionFvPatchScalarField& ewfpsf,
+    const DimensionedField<scalar, volMesh>& iF
+)
+:
+    fixedValueFvPatchField<scalar>(ewfpsf, iF),
+    Cmu_(ewfpsf.Cmu_),
+    kappa_(ewfpsf.kappa_),
+    E_(ewfpsf.E_),
+    G_(),
+    epsilon_(),
+    initialised_(false),
+    master_(-1),
+    cornerWeights_()
+{
+    checkType();
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+scalarField& epsilonWallFunctionFvPatchScalarField::G(bool init)
+{
+    if (patch().index() == master_)
+    {
+        if (init)
+        {
+            G_ = 0.0;
+        }
+
+        return G_;
+    }
+
+    return epsilonPatch(master_).G();
+}
+
+
+scalarField& epsilonWallFunctionFvPatchScalarField::epsilon(bool init)
+{
+    if (patch().index() == master_)
+    {
+        if (init)
+        {
+            epsilon_ = 0.0;
+        }
+
+        return epsilon_;
+    }
+
+    return epsilonPatch(master_).epsilon(init);
+}
+
+
+void epsilonWallFunctionFvPatchScalarField::updateCoeffs()
+{
+    if (updated())
+    {
+        return;
+    }
+
+    const turbulenceModel& turbulence =
+        db().lookupObject<turbulenceModel>(turbulenceModel::typeName);
+
+    setMaster();
+
+    if (patch().index() == master_)
+    {
+        createAveragingWeights();
+        calculateTurbulenceFields(turbulence, G(true), epsilon(true));
+    }
+
+    const scalarField& G0 = this->G();
+    const scalarField& epsilon0 = this->epsilon();
+
+    typedef DimensionedField<scalar, volMesh> FieldType;
+
+    FieldType& G =
+        const_cast<FieldType&>
+        (
+            db().lookupObject<FieldType>(turbulence.GName())
+        );
+
+    FieldType& epsilon = const_cast<FieldType&>(dimensionedInternalField());
+
+    forAll(*this, faceI)
+    {
+        label cellI = patch().faceCells()[faceI];
+
+        G[cellI] = G0[cellI];
+        epsilon[cellI] = epsilon0[cellI];
+    }
+
+    fvPatchField<scalar>::updateCoeffs();
+}
+
+
+void epsilonWallFunctionFvPatchScalarField::updateCoeffs
+(
+    const scalarField& weights
 )
 {
-    fixedInternalValueFvPatchField<scalar>::evaluate(commsType);
+    if (updated())
+    {
+        return;
+    }
+
+    const turbulenceModel& turbulence =
+        db().lookupObject<turbulenceModel>(turbulenceModel::typeName);
+
+    setMaster();
+
+    if (patch().index() == master_)
+    {
+        createAveragingWeights();
+        calculateTurbulenceFields(turbulence, G(true), epsilon(true));
+    }
+
+    const scalarField& G0 = this->G();
+    const scalarField& epsilon0 = this->epsilon();
+
+    typedef DimensionedField<scalar, volMesh> FieldType;
+
+    FieldType& G =
+        const_cast<FieldType&>
+        (
+            db().lookupObject<FieldType>(turbulence.GName())
+        );
+
+    FieldType& epsilon = const_cast<FieldType&>(dimensionedInternalField());
+
+    // only set the values if the weights are < 1 - tolerance
+    forAll(weights, faceI)
+    {
+        scalar w = weights[faceI];
+
+        if (w < 1.0 - 1e-6)
+        {
+            label cellI = patch().faceCells()[faceI];
+
+            G[cellI] = w*G[cellI] + (1.0 - w)*G0[cellI];
+            epsilon[cellI] = w*epsilon[cellI] + (1.0 - w)*epsilon0[cellI];
+        }
+    }
+
+    fvPatchField<scalar>::updateCoeffs();
+}
+
+
+void epsilonWallFunctionFvPatchScalarField::manipulateMatrix
+(
+    fvMatrix<scalar>& matrix
+)
+{
+    if (manipulatedMatrix())
+    {
+        return;
+    }
+
+    matrix.setValues(patch().faceCells(), patchInternalField());
+
+    fvPatchField<scalar>::manipulateMatrix(matrix);
+}
+
+
+void epsilonWallFunctionFvPatchScalarField::manipulateMatrix
+(
+    fvMatrix<scalar>& matrix,
+    const Field<scalar>& weights
+)
+{
+    if (manipulatedMatrix())
+    {
+        return;
+    }
+
+    // filter weights so that we only apply the constraint where the
+    // weight > SMALL
+    DynamicList<label> constraintCells(weights.size());
+    DynamicList<scalar> constraintEpsilon(weights.size());
+    const labelUList& faceCells = patch().faceCells();
+
+    const DimensionedField<scalar, volMesh>& epsilon
+        = dimensionedInternalField();
+
+    label nConstrainedCells = 0;
+
+
+    forAll(weights, faceI)
+    {
+        // only set the values if the weights are < 1 - tolerance
+        if (weights[faceI] < (1.0 - 1e-6))
+        {
+            nConstrainedCells++;
+
+            label cellI = faceCells[faceI];
+
+            constraintCells.append(cellI);
+            constraintEpsilon.append(epsilon[cellI]);
+        }
+    }
+
+    if (debug)
+    {
+        Pout<< "Patch: " << patch().name()
+            << ": number of constrained cells = " << nConstrainedCells
+            << " out of " << patch().size()
+            << endl;
+    }
+
+    matrix.setValues
+    (
+        constraintCells,
+        scalarField(constraintEpsilon.xfer())
+    );
+
+    fvPatchField<scalar>::manipulateMatrix(matrix);
 }
 
 
 void epsilonWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
-    fixedInternalValueFvPatchField<scalar>::write(os);
+    fixedValueFvPatchField<scalar>::write(os);
     writeLocalEntries(os);
     writeEntry("value", os);
 }

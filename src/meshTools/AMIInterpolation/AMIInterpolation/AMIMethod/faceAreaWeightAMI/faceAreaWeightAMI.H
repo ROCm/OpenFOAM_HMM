@@ -52,9 +52,9 @@ class faceAreaWeightAMI
     public AMIMethod<SourcePatch, TargetPatch>
 {
 
-private:
+protected:
 
-    // Private Member Functions
+    // Protected Member Functions
 
         //- Disallow default bitwise copy construct
         faceAreaWeightAMI(const faceAreaWeightAMI&);
@@ -64,8 +64,19 @@ private:
 
         // Marching front
 
+            //- Calculate addressing and weights using temporary storage
+            virtual void calcAddressing
+            (
+                List<DynamicList<label> >& srcAddress,
+                List<DynamicList<scalar> >& srcWeights,
+                List<DynamicList<label> >& tgtAddress,
+                List<DynamicList<scalar> >& tgtWeights,
+                label srcFaceI,
+                label tgtFaceI
+            );
+
             //- Determine overlap contributions for source face srcFaceI
-            bool processSourceFace
+            virtual bool processSourceFace
             (
                 const label srcFaceI,
                 const label tgtStartFaceI,
@@ -78,7 +89,7 @@ private:
             );
 
             //- Attempt to re-evaluate source faces that have not been included
-            void restartUncoveredSourceFace
+            virtual void restartUncoveredSourceFace
             (
                 List<DynamicList<label> >& srcAddr,
                 List<DynamicList<scalar> >& srcWght,
@@ -87,21 +98,22 @@ private:
             );
 
             //- Set the source and target seed faces
-            void setNextFaces
+            virtual void setNextFaces
             (
                 label& startSeedI,
                 label& srcFaceI,
                 label& tgtFaceI,
                 const boolList& mapFlag,
                 labelList& seedFaces,
-                const DynamicList<label>& visitedFaces
+                const DynamicList<label>& visitedFaces,
+                bool errorOnNotFound = true
             ) const;
 
 
         // Evaluation
 
             //- Area of intersection between source and target faces
-            scalar interArea
+            virtual scalar interArea
             (
                 const label srcFaceI,
                 const label tgtFaceI
