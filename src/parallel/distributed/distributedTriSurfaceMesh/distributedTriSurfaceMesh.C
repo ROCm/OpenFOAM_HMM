@@ -203,10 +203,6 @@ void Foam::distributedTriSurfaceMesh::distributeSegment
     List<DynamicList<label> >& sendMap
 ) const
 {
-    // Work points
-    point clipPt;
-
-
     // 1. Fully local already handled outside. Note: retest is cheap.
     if (isLocal(procBb_[Pstream::myProcNo()], start, end))
     {
@@ -246,6 +242,9 @@ void Foam::distributedTriSurfaceMesh::distributeSegment
 
             // Scheme a: any processor that intersects the segment gets
             // the segment.
+
+            // Intersection point
+            point clipPt;
 
             if (bb.intersects(start, end, clipPt))
             {
