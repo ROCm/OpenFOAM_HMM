@@ -86,16 +86,6 @@ class treeDataPrimitivePatch
         //- Initialise all member data
         void update();
 
-        //- Find intersection of line with shapes
-        static bool findIntersection
-        (
-            const indexedOctree<treeDataPrimitivePatch<PatchType> >& tree,
-            const label index,
-            const point& start,
-            const point& end,
-            point& intersectionPoint
-        );
-
 
 public:
 
@@ -260,6 +250,16 @@ public:
                 const point& centre,
                 const scalar radiusSqr
             ) const;
+
+            //- Helper: find intersection of line with shapes
+            static bool findIntersection
+            (
+                const indexedOctree<treeDataPrimitivePatch<PatchType> >& tree,
+                const label index,
+                const point& start,
+                const point& end,
+                point& intersectionPoint
+            );
 };
 
 
