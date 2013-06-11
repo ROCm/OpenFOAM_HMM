@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -116,6 +116,30 @@ int main(int argc, char *argv[])
             << returnReduce(addr.size(), sumOp<label>()) << endl
             << "    agglomerated size : "
             << returnReduce(coarseSize, sumOp<label>()) << endl;
+
+        labelList newAddr;
+        label newCoarseSize = 0;
+        bool ok = GAMGAgglomeration::checkRestriction
+        (
+            newAddr,
+            newCoarseSize,
+
+            agglom.meshLevel(level).lduAddr(),
+            addr,
+            coarseSize
+        );
+        if (!ok)
+        {
+            WarningIn(args.executable())
+                << "At level " << level
+                << " there are " << coarseSize
+                << " agglomerated cells but " << newCoarseSize
+                << " disconnected regions" << endl
+                << "    This means that some agglomerations (coarse cells)"
+                << "    consist of multiple disconnected regions."
+                << endl;
+        }
+
 
         forAll(addr, fineI)
         {

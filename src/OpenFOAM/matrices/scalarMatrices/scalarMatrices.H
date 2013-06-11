@@ -79,6 +79,15 @@ void LUDecompose
     labelList& pivotIndices
 );
 
+//- LU decompose the matrix with pivoting.
+//  sign is -1 for odd number of row interchanges and 1 for even number.
+void LUDecompose
+(
+    scalarSquareMatrix& matrix,
+    labelList& pivotIndices,
+    label& sign
+);
+
 //- LU decompose the matrix into a lower (L) and upper (U) part. U = L.T()
 void LUDecompose(scalarSymmetricSquareMatrix& matrix);
 

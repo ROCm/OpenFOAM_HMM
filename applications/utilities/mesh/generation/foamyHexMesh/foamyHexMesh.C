@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     (
         IOobject
         (
-            "foamyHexMeshDict",
+            args.executable() + "Dict",
             runTime.system(),
             runTime,
             IOobject::MUST_READ_IF_MODIFIED,

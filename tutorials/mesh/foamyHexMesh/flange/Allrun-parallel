@@ -7,6 +7,9 @@ cd ${0%/*} || exit 1    # run from this directory
 # Get the number of processors to run on from system/decomposeParDict
 nProc=$(getNumberOfProcessors)
 
+# copy flange surface from resources folder
+cp $FOAM_TUTORIALS/resources/geometry/flange.stl.gz constant/triSurface/
+
 # Create tight-fitting background mesh
 runApplication blockMesh
 runApplication topoSet -dict system/topoSetDict-background

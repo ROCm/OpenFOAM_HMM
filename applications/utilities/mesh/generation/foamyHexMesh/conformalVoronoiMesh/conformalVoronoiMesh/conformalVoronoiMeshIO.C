@@ -101,7 +101,9 @@ void Foam::conformalVoronoiMesh::drawDelaunayCell
     // Supply offset as tet number
     offset *= 4;
 
-    os  << "# cell index: " << label(c->cellIndex()) << endl;
+    os  << "# cell index: " << label(c->cellIndex())
+        << " INT_MIN = " << INT_MIN
+        << endl;
 
     os  << "# circumradius "
         << mag(c->dual() - topoint(c->vertex(0)->point()))
@@ -112,7 +114,15 @@ void Foam::conformalVoronoiMesh::drawDelaunayCell
         os  << "# index / type / procIndex: "
             << label(c->vertex(i)->index()) << " "
             << label(c->vertex(i)->type()) << " "
-            << label(c->vertex(i)->procIndex()) << endl;
+            << label(c->vertex(i)->procIndex())
+            << (is_infinite(c->vertex(i)) ? " # This vertex is infinite!" : "")
+            <<
+                (
+                    c->vertex(i)->uninitialised()
+                  ? " # This vertex is uninitialised!"
+                  : ""
+                )
+            << endl;
 
         meshTools::writeOBJ(os, topoint(c->vertex(i)->point()));
     }

@@ -474,6 +474,16 @@ public:
             const labelListListList& boundaryFaceMap(const label fineLeveli)
             const;
 
+        //- Given restriction determines if coarse cells are connected.
+        //  Return ok is so, otherwise creates new restriction that is
+        static bool checkRestriction
+        (
+            labelList& newRestrict,
+            label& nNewCoarse,
+            const lduAddressing& fineAddressing,
+            const labelUList& restrict,
+            const label nCoarse
+        );
 };
 
 

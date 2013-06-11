@@ -273,7 +273,7 @@ void Foam::pressureTools::read(const dictionary& dict)
         if (p.dimensions() != dimPressure)
         {
             dict.lookup("rhoRef") >> rhoInf_;
-        } 
+        }
 
         dict.lookup("calcTotal") >> calcTotal_;
         if (calcTotal_)
@@ -299,6 +299,12 @@ void Foam::pressureTools::execute()
 
 
 void Foam::pressureTools::end()
+{
+    // Do nothing - only valid on write
+}
+
+
+void Foam::pressureTools::timeSet()
 {
     // Do nothing - only valid on write
 }

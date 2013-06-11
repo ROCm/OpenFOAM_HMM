@@ -317,7 +317,7 @@ private:
         void insertPoints
         (
             List<Vb>& vertices,
-            bool distribute = true
+            bool distribute
         );
 
         //- Create a point-pair at a ppDist distance either side of
@@ -764,6 +764,7 @@ private:
             pointIndexHitAndFeatureDynList& featureEdgeHits,
             DynamicList<label>& surfaceToTreeShape,
             DynamicList<label>& edgeToTreeShape,
+            Map<scalar>& surfacePtToEdgePtDist,
             bool firstPass
         ) const;
 

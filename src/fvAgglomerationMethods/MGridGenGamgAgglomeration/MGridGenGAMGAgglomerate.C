@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -155,6 +155,26 @@ Foam::tmp<Foam::labelField> Foam::MGridGenGAMGAgglomeration::agglomerate
         &nCoarseCells,
         finalAgglom.begin()
     );
+
+    {
+        label nNewCoarseCells = 0;
+        labelList newRestrictAddr;
+        bool ok = checkRestriction
+        (
+            newRestrictAddr,
+            nNewCoarseCells
+,
+            fineAddressing,
+            finalAgglom,
+            nCoarseCells
+        );
+
+        if (!ok)
+        {
+            nCoarseCells = nNewCoarseCells;
+            finalAgglom.transfer(newRestrictAddr);
+        }
+    }
 
     return tmp<labelField>(new labelField(finalAgglom));
 }

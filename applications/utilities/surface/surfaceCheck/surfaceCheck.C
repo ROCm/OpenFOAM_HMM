@@ -653,6 +653,36 @@ int main(int argc, char *argv[])
         Info<< "Checking self-intersection." << endl;
 
         triSurfaceSearch querySurf(surf);
+
+        //{
+        //    OBJstream intStream("selfInter2.obj");
+        //    const indexedOctree<treeDataTriSurface>& tree = querySurf.tree();
+        //    forAll(surf.edges(), edgeI)
+        //    {
+        //        const edge& e = surf.edges()[edgeI];
+        //
+        //        pointIndexHit hitInfo
+        //        (
+        //            tree.findLine
+        //            (
+        //                surf.points()[surf.meshPoints()[e[0]]],
+        //                surf.points()[surf.meshPoints()[e[1]]],
+        //                treeDataTriSurface::findSelfIntersectOp
+        //                (
+        //                    tree,
+        //                    edgeI
+        //                )
+        //            )
+        //        );
+        //
+        //        if (hitInfo.hit())
+        //        {
+        //            Pout<< "Found hit:" << hitInfo.hitPoint() << endl;
+        //            intStream.write(hitInfo.hitPoint());
+        //        }
+        //    }
+        //}
+
         surfaceIntersection inter(querySurf);
 
         if (inter.cutEdges().empty() && inter.cutPoints().empty())

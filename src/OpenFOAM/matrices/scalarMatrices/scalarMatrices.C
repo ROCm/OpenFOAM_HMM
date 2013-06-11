@@ -34,8 +34,21 @@ void Foam::LUDecompose
     labelList& pivotIndices
 )
 {
+    label sign;
+    LUDecompose(matrix, pivotIndices, sign);
+}
+
+
+void Foam::LUDecompose
+(
+    scalarSquareMatrix& matrix,
+    labelList& pivotIndices,
+    label& sign
+)
+{
     label n = matrix.n();
     scalar vv[n];
+    sign = 1;
 
     for (register label i=0; i<n; i++)
     {
@@ -113,6 +126,7 @@ void Foam::LUDecompose
                 Swap(matrixj[k], matrixiMax[k]);
             }
 
+            sign *= -1;
             vv[iMax] = vv[j];
         }
 

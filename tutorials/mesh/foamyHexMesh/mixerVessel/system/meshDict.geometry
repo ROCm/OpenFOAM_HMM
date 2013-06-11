@@ -1,0 +1,66 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version         2.0;
+    format          ascii;
+    class           dictionary;
+    object          meshDict.geometry;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+vessel.stl
+{
+    name vessel;
+    type triSurfaceMesh;
+
+    regions
+    {
+        patch0 {name vessel_wall;}
+        patch1 {name vessel_outletPipe;}
+        patch2 {name vessel_outlet;}
+    }
+}
+
+
+spargerInlet.stl
+{
+    name spargerInlet;
+    type triSurfaceMesh;
+}
+
+
+spargerShaft.stl
+{
+    name spargerShaft;
+    type triSurfaceMesh;
+}
+
+
+shaftRotating.stl
+{
+    name shaftRotating;
+    type triSurfaceMesh;
+}
+
+
+shaftStatic.stl
+{
+    name shaftStatic;
+    type triSurfaceMesh;
+}
+
+
+stirrer.stl
+{
+    name stirrer;
+    type triSurfaceMesh;
+}
+
+
+// ************************************************************************* //

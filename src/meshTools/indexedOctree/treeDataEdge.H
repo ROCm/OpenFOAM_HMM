@@ -121,8 +121,6 @@ public:
 
     class findIntersectOp
     {
-        const indexedOctree<treeDataEdge>& tree_;
-
     public:
 
         findIntersectOp(const indexedOctree<treeDataEdge>& tree);
