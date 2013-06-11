@@ -26,13 +26,11 @@ Application
 
 Description
     Combination of heatConductionFoam and buoyantFoam for conjugate heat
-    transfer between a solid region and fluid region. It includes
-    porous media in the primary fluid region treated explicitly.
+    transfer between solid regions and fluid regions. Both regions include
+    the fvOptions framework.
 
     It handles secondary fluid or solid circuits which can be coupled
     thermally with the main fluid region. i.e radiators, etc.
-
-    The secondary fluid region is
 
 \*---------------------------------------------------------------------------*/
 
@@ -40,7 +38,6 @@ Description
 #include "rhoThermo.H"
 #include "turbulenceModel.H"
 #include "fixedGradientFvPatchFields.H"
-#include "zeroGradientFvPatchFields.H"
 #include "regionProperties.H"
 #include "compressibleCourantNo.H"
 #include "solidRegionDiffNo.H"

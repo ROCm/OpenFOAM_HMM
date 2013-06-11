@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "scalarField.H"
+#include "unitConversion.H"
 
 #define TEMPLATE
 #include "FieldFunctionsM.C"
@@ -154,6 +155,11 @@ UNARY_FUNCTION(scalar, scalar, j0)
 UNARY_FUNCTION(scalar, scalar, j1)
 UNARY_FUNCTION(scalar, scalar, y0)
 UNARY_FUNCTION(scalar, scalar, y1)
+
+UNARY_FUNCTION(scalar, scalar, degToRad)
+UNARY_FUNCTION(scalar, scalar, radToDeg)
+UNARY_FUNCTION(scalar, scalar, atmToPa)
+UNARY_FUNCTION(scalar, scalar, paToAtm)
 
 
 #define BesselFunc(func)                                                      \

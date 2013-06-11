@@ -237,9 +237,9 @@ void epsilonWallFunctionFvPatchScalarField::calculate
 
         scalar w = cornerWeights[faceI];
 
-        epsilon[cellI] = w*Cmu75*pow(k[cellI], 1.5)/(kappa_*y[faceI]);
+        epsilon[cellI] += w*Cmu75*pow(k[cellI], 1.5)/(kappa_*y[faceI]);
 
-        G[cellI] =
+        G[cellI] +=
             w
            *(mutw[faceI] + muw[faceI])
            *magGradUw[faceI]
@@ -464,6 +464,8 @@ void epsilonWallFunctionFvPatchScalarField::updateCoeffs
 
     FieldType& epsilon = const_cast<FieldType&>(dimensionedInternalField());
 
+    scalarField& epsilonf = *this;
+
     // only set the values if the weights are < 1 - tolerance
     forAll(weights, faceI)
     {
@@ -475,6 +477,7 @@ void epsilonWallFunctionFvPatchScalarField::updateCoeffs
 
             G[cellI] = w*G[cellI] + (1.0 - w)*G0[cellI];
             epsilon[cellI] = w*epsilon[cellI] + (1.0 - w)*epsilon0[cellI];
+            epsilonf[faceI] = epsilon[cellI];
         }
     }
 

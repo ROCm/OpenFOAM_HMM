@@ -70,8 +70,6 @@ Foam::treeDataPoint::findIntersectOp::findIntersectOp
 (
     const indexedOctree<treeDataPoint>& tree
 )
-:
-    tree_(tree)
 {}
 
 

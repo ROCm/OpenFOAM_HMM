@@ -109,8 +109,6 @@ Foam::treeDataEdge::findIntersectOp::findIntersectOp
 (
     const indexedOctree<treeDataEdge>& tree
 )
-:
-    tree_(tree)
 {}
 
 
