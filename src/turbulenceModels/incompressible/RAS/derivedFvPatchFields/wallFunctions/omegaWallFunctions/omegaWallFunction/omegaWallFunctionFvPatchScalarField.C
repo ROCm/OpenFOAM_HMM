@@ -242,9 +242,9 @@ void omegaWallFunctionFvPatchScalarField::calculate
 
         scalar omegaLog = sqrt(k[cellI])/(Cmu25*kappa_*y[faceI]);
 
-        omega[cellI] = w*sqrt(sqr(omegaVis) + sqr(omegaLog));
+        omega[cellI] += w*sqrt(sqr(omegaVis) + sqr(omegaLog));
 
-        G[cellI] =
+        G[cellI] +=
             w
            *(nutw[faceI] + nuw[faceI])
            *magGradUw[faceI]

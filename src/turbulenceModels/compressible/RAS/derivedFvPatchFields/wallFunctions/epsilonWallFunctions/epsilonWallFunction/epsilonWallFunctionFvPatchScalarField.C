@@ -237,9 +237,9 @@ void epsilonWallFunctionFvPatchScalarField::calculate
 
         scalar w = cornerWeights[faceI];
 
-        epsilon[cellI] = w*Cmu75*pow(k[cellI], 1.5)/(kappa_*y[faceI]);
+        epsilon[cellI] += w*Cmu75*pow(k[cellI], 1.5)/(kappa_*y[faceI]);
 
-        G[cellI] =
+        G[cellI] +=
             w
            *(mutw[faceI] + muw[faceI])
            *magGradUw[faceI]
