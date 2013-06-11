@@ -104,8 +104,6 @@ public:
 
     class findIntersectOp
     {
-        const indexedOctree<treeDataPoint>& tree_;
-
     public:
 
         findIntersectOp(const indexedOctree<treeDataPoint>& tree);
