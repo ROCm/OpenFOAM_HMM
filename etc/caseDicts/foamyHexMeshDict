@@ -78,6 +78,7 @@ motionControl
 
     objOutput                   no;
     timeChecks                  no;
+    printVertexInfo             off;
 
     maxLoadUnbalance            0.2;
 
