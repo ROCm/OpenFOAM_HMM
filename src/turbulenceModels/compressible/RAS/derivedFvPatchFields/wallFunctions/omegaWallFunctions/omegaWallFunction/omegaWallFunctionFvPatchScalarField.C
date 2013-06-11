@@ -481,6 +481,8 @@ void omegaWallFunctionFvPatchScalarField::updateCoeffs
 
     FieldType& omega = const_cast<FieldType&>(dimensionedInternalField());
 
+    scalarField& omegaf = *this;
+
     // only set the values if the weights are < 1 - tolerance
     forAll(weights, faceI)
     {
@@ -492,6 +494,7 @@ void omegaWallFunctionFvPatchScalarField::updateCoeffs
 
             G[cellI] = w*G[cellI] + (1.0 - w)*G0[cellI];
             omega[cellI] = w*omega[cellI] + (1.0 - w)*omega0[cellI];
+            omegaf[faceI] = omega[cellI];
         }
     }
 
