@@ -143,7 +143,7 @@ void omegaWallFunctionFvPatchScalarField::createAveragingWeights()
     forAll(omegaPatches, i)
     {
         label patchI = omegaPatches[i];
-        const fvPatchField& wf = weights.boundaryField()[patchI];
+        const fvPatchScalarField& wf = weights.boundaryField()[patchI];
         cornerWeights_[patchI] = 1.0/wf.patchInternalField();
     }
 
