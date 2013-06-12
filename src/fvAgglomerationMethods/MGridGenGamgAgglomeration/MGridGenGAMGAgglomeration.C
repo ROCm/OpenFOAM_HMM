@@ -59,7 +59,11 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
 
     // Start geometric agglomeration from the cell volumes and areas of the mesh
     scalarField* VPtr = const_cast<scalarField*>(&fvMesh_.cellVolumes());
-    SubField<vector> Sf(fvMesh_.faceAreas(), fvMesh_.nInternalFaces());
+
+    vectorField magFaceAreas(vector::one*mag(fvMesh_.faceAreas()));
+    SubField<vector> Sf(magFaceAreas, fvMesh_.nInternalFaces());
+    //SubField<vector> Sf(fvMesh_.faceAreas(), fvMesh_.nInternalFaces());
+
     vectorField* SfPtr = const_cast<vectorField*>
     (
         &Sf.operator const vectorField&()
