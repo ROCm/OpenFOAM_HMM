@@ -1046,6 +1046,18 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
         )
     ),
     decomposition_()
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::conformalVoronoiMesh::~conformalVoronoiMesh()
+{}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void Foam::conformalVoronoiMesh::initialiseForMotion()
 {
     if (foamyHexMeshControls().objOutput())
     {
@@ -1061,7 +1073,10 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
                 runTime_,
                 rndGen_,
                 geometryToConformTo_,
-                foamyHexMeshDict.subDict("backgroundMeshDecomposition")
+                foamyHexMeshControls().foamyHexMeshDict().subDict
+                (
+                    "backgroundMeshDecomposition"
+                )
             )
         );
     }
@@ -1125,13 +1140,53 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+void Foam::conformalVoronoiMesh::initialiseForConformation()
+{
+    if (Pstream::parRun())
+    {
+        decomposition_.reset
+        (
+            new backgroundMeshDecomposition
+            (
+                runTime_,
+                rndGen_,
+                geometryToConformTo_,
+                foamyHexMeshControls().foamyHexMeshDict().subDict
+                (
+                    "backgroundMeshDecomposition"
+                )
+            )
+        );
+    }
 
-Foam::conformalVoronoiMesh::~conformalVoronoiMesh()
-{}
+    insertInitialPoints();
 
+    insertFeaturePoints();
 
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+    // Improve the guess that the backgroundMeshDecomposition makes with the
+    // initial positions.  Use before building the surface conformation to
+    // better balance the surface conformation load.
+    distributeBackground(*this);
+
+    buildSurfaceConformation();
+
+    // The introduction of the surface conformation may have distorted the
+    // balance of vertices, distribute if necessary.
+    distributeBackground(*this);
+
+    if (Pstream::parRun())
+    {
+        sync(decomposition_().procBounds());
+    }
+
+    cellSizeMeshOverlapsBackground();
+
+    if (foamyHexMeshControls().printVertexInfo())
+    {
+        printVertexInfo(Info);
+    }
+}
+
 
 void Foam::conformalVoronoiMesh::move()
 {

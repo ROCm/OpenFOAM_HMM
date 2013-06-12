@@ -45,12 +45,22 @@ int main(int argc, char *argv[])
         "check all surface geometry for quality"
     );
 
+    Foam::argList::addBoolOption
+    (
+        "conformationOnly",
+        "conform to the initial points without any point motion"
+    );
+
+    #include "addOverwriteOption.H"
+
     #include "setRootCase.H"
     #include "createTime.H"
 
     runTime.functionObjects().off();
 
     const bool checkGeometry = args.optionFound("checkGeometry");
+    const bool conformationOnly = args.optionFound("conformationOnly");
+    const bool overwrite = args.optionFound("overwrite");
 
     IOdictionary foamyHexMeshDict
     (
@@ -104,16 +114,33 @@ int main(int argc, char *argv[])
     conformalVoronoiMesh mesh(runTime, foamyHexMeshDict);
 
 
-    while (runTime.loop())
+    if (conformationOnly)
     {
-        Info<< nl << "Time = " << runTime.timeName() << endl;
+        mesh.initialiseForConformation();
 
-        mesh.move();
+        if (!overwrite)
+        {
+            runTime++;
+        }
 
-        Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << endl;
+        mesh.writeMesh(runTime.timeName());
     }
+    else
+    {
+        mesh.initialiseForMotion();
+
+        while (runTime.loop())
+        {
+            Info<< nl << "Time = " << runTime.timeName() << endl;
+
+            mesh.move();
+
+            Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+                << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+                << endl;
+        }
+    }
+
 
     Info<< nl << "End" << nl << endl;
 
