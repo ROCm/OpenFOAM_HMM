@@ -141,7 +141,7 @@ void epsilonWallFunctionFvPatchScalarField::createAveragingWeights()
     forAll(epsilonPatches, i)
     {
         label patchI = epsilonPatches[i];
-        const fvPatchField& wf = weights.boundaryField()[patchI];
+        const fvPatchScalarField& wf = weights.boundaryField()[patchI];
         cornerWeights_[patchI] = 1.0/wf.patchInternalField();
     }
 
