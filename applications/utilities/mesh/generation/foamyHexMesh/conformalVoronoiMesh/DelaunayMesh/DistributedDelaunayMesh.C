@@ -254,31 +254,47 @@ void Foam::DistributedDelaunayMesh<Triangulation>::findProcessorBoundaryCells
        /Pstream::nProcs()
     );
 
+    std::list<Cell_handle> infinite_cells;
+    Triangulation::incident_cells
+    (
+        Triangulation::infinite_vertex(),
+        std::back_inserter(infinite_cells)
+    );
+
     for
     (
-        All_cells_iterator cit = Triangulation::all_cells_begin();
-        cit != Triangulation::all_cells_end();
+        typename std::list<Cell_handle>::iterator vcit = infinite_cells.begin();
+        vcit != infinite_cells.end();
+        ++vcit
+    )
+    {
+        Cell_handle cit = *vcit;
+
+        // Index of infinite vertex in this cell.
+        int i = cit->index(Triangulation::infinite_vertex());
+
+        Cell_handle c = cit->neighbor(i);
+
+        if (c->unassigned())
+        {
+            c->cellIndex() = this->getNewCellIndex();
+
+            if (checkProcBoundaryCell(c, circumsphereOverlaps))
+            {
+                cellToCheck.insert(c->cellIndex());
+            }
+        }
+    }
+
+
+    for
+    (
+        Finite_cells_iterator cit = Triangulation::finite_cells_begin();
+        cit != Triangulation::finite_cells_end();
         ++cit
     )
     {
-        if (Triangulation::is_infinite(cit))
-        {
-            // Index of infinite vertex in this cell.
-            int i = cit->index(Triangulation::infinite_vertex());
-
-            Cell_handle c = cit->neighbor(i);
-
-            if (c->unassigned())
-            {
-                c->cellIndex() = this->getNewCellIndex();
-
-                if (checkProcBoundaryCell(c, circumsphereOverlaps))
-                {
-                    cellToCheck.insert(c->cellIndex());
-                }
-            }
-        }
-        else if (cit->parallelDualVertex())
+        if (cit->parallelDualVertex())
         {
             if (cit->unassigned())
             {
@@ -315,12 +331,20 @@ void Foam::DistributedDelaunayMesh<Triangulation>::findProcessorBoundaryCells
                     continue;
                 }
 
-                checkProcBoundaryCell
+                if
                 (
-                    citNeighbor,
-                    circumsphereOverlaps
-                );
+                    checkProcBoundaryCell
+                    (
+                        citNeighbor,
+                        circumsphereOverlaps
+                    )
+                )
+                {
+                    cellToCheck.insert(citNeighbor->cellIndex());
+                }
             }
+
+            cellToCheck.unset(cit->cellIndex());
         }
     }
 }
@@ -521,7 +545,6 @@ Foam::label Foam::DistributedDelaunayMesh<Triangulation>::referVertices
                         << originalParallelVertices[vI].procIndex()
                         << " " << originalParallelVertices[vI].index() << endl;
                 }
-
             }
         }
     }
