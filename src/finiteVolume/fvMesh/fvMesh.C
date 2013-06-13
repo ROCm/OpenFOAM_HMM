@@ -679,7 +679,13 @@ bool Foam::fvMesh::writeObjects
 //- Write mesh using IO settings from the time
 bool Foam::fvMesh::write() const
 {
-    return polyMesh::write();
+    bool ok = true;
+    if (phiPtr_)
+    {
+        ok = phiPtr_->write();
+    }
+
+    return ok && polyMesh::write();
 }
 
 
