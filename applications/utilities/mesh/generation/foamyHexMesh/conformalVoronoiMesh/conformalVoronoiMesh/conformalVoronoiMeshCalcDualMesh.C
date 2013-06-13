@@ -1899,7 +1899,7 @@ void Foam::conformalVoronoiMesh::indexDualVertices
 
             {
                 // Snapping points far outside
-                if (cit->boundaryDualVertex())
+                if (cit->boundaryDualVertex() && !cit->parallelDualVertex())
                 {
                     pointFromPoint dual = cit->dual();
 
