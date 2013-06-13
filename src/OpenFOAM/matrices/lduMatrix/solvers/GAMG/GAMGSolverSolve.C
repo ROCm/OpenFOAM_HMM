@@ -313,7 +313,7 @@ void Foam::GAMGSolver::Vcycle
             scalarField& ACfRef =
                 const_cast<scalarField&>(ACf.operator const scalarField&());
 
-            if (interpolateCorrection_)
+            if (interpolateCorrection_ && leveli < coarsestLevel - 2)
             {
                 interpolate
                 (
@@ -322,7 +322,8 @@ void Foam::GAMGSolver::Vcycle
                     matrixLevels_[leveli],
                     interfaceLevelsBouCoeffs_[leveli],
                     interfaceLevels_[leveli],
-                    coarseSources[leveli],
+                    agglomeration_.restrictAddressing(leveli + 1),
+                    coarseCorrFields[leveli + 1],
                     cmpt
                 );
             }
@@ -382,7 +383,8 @@ void Foam::GAMGSolver::Vcycle
             matrix_,
             interfaceBouCoeffs_,
             interfaces_,
-            finestResidual,
+            agglomeration_.restrictAddressing(0),
+            coarseCorrFields[0],
             cmpt
         );
     }

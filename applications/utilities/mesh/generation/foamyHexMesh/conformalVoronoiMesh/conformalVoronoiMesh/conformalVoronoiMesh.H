@@ -1038,6 +1038,10 @@ public:
 
     // Member Functions
 
+        void initialiseForMotion();
+
+        void initialiseForConformation();
+
         //- Move the vertices according to the controller, re-conforming to the
         //  surface as required
         void move();

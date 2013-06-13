@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,8 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::XiGModel::basicSubGrid
-
+    Foam::XiGModels::basicSubGrid
 
 Description
 
@@ -39,12 +38,13 @@ Description
 
     and the removal:
 
-    \f[ - k_{1} /frac{\vert \dwea{\vec{U}} \vert}{L_{sub}}
-    \frac{\Xi_{sub}-1}{\Xi_{sub}} \f]
+    \f[
+        - k_{1} /frac{\vert \dwea{\vec{U}} \vert}{L_{sub}}
+        \frac{\Xi_{sub}-1}{\Xi_{sub}}
+    \f]
 
     Finally, \f$ G_{sub} \f$ is added to generation rate \f$ G_{in} \f$
     due to the turbulence.
-
 
 SourceFiles
     basicSubGrid.C
@@ -64,7 +64,7 @@ namespace XiGModels
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class basicSubGrid Declaration
+                        Class basicSubGrid Declaration
 \*---------------------------------------------------------------------------*/
 
 class basicSubGrid

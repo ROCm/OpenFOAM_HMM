@@ -58,7 +58,7 @@ List<Vb::Point> pointFile::initialPoints() const
         IOobject
         (
             pointFileName_.name(),
-            foamyHexMesh_.time().constant(),
+            foamyHexMesh_.time().timeName(),
             foamyHexMesh_.time(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE

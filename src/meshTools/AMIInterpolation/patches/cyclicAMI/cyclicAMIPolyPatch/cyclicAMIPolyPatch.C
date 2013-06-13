@@ -297,9 +297,9 @@ void Foam::cyclicAMIPolyPatch::resetAMI
         {
             Pout<< "cyclicAMIPolyPatch : " << name()
                 << " constructed AMI with " << nl
-                << "    " << ":srcAddress:" << AMIPtr_().srcAddress().size()
+                << "    " << "srcAddress:" << AMIPtr_().srcAddress().size()
                 << nl
-                << "    " << " tgAddress :" << AMIPtr_().tgtAddress().size()
+                << "    " << "tgAddress :" << AMIPtr_().tgtAddress().size()
                 << nl << endl;
         }
     }
