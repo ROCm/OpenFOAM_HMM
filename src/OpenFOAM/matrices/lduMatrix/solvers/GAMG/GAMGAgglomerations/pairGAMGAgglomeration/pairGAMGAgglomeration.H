@@ -56,6 +56,9 @@ class pairGAMGAgglomeration
         //- Number of levels to merge, 1 = don't merge, 2 = merge pairs etc.
         label mergeLevels_;
 
+        //- Direction of cell loop for the current level
+        static bool forward_;
+
 
 protected:
 
@@ -97,7 +100,6 @@ public:
             const lduAddressing& fineMatrixAddressing,
             const scalarField& faceWeights
         );
-
 };
 
 

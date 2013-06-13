@@ -24,7 +24,7 @@ wmakeLnInclude OpenFOAM
 wmakeLnInclude OSspecific/${WM_OSTYPE:-POSIX}
 Pstream/Allwmake $*
 
-OSspecific/${WM_OSTYPE:-POSIX}/Allwmake
+OSspecific/${WM_OSTYPE:-POSIX}/Allwmake $*
 wmake $makeType OpenFOAM
 
 wmake $makeType fileFormats

@@ -30,11 +30,6 @@ Description
 #include "fvMesh.H"
 #include "syncTools.H"
 
-//extern "C"
-//{
-//#   include "mgridgen.h"
-//}
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::MGridGenGAMGAgglomeration::
