@@ -35,116 +35,6 @@ Description
 #include "meshTools.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-void checkConnectedAgglomeration
-(
-    const lduMesh& mesh,
-    const labelUList& restrict,
-    const label nCoarse
-)
-{
-    if (mesh.lduAddr().size() != restrict.size())
-    {
-        FatalErrorIn
-        (
-            "checkConnectedAgglomeration(const lduMesh&, const labelList&)"
-        )   << "nCells:" << mesh.lduAddr().size()
-            << " agglom:" << restrict.size()
-            << abort(FatalError);
-    }
-
-    // Seed (master) for every region
-    labelList regionToMaster(nCoarse, -1);
-    labelList master(mesh.lduAddr().size(), -1);
-    forAll(restrict, cellI)
-    {
-        label region = restrict[cellI];
-        if (regionToMaster[region] == -1)
-        {
-            // Set cell to be master for region
-            //Pout<< "For region " << region
-            //    << " allocating local master " << cellI
-            //    << endl;
-            regionToMaster[region] = cellI;
-            master[cellI] = cellI;
-        }
-    }
-
-    // Now loop and transport master through region
-    const labelUList& lower = mesh.lduAddr().lowerAddr();
-    const labelUList& upper = mesh.lduAddr().upperAddr();
-
-    while (true)
-    {
-        label nChanged = 0;
-
-        forAll(lower, faceI)
-        {
-            label own = lower[faceI];
-            label nei = upper[faceI];
-
-            if (restrict[own] == restrict[nei])
-            {
-                // Region-internal face
-
-                if (master[own] != -1)
-                {
-                    if (master[nei] == -1)
-                    {
-                        master[nei] = master[own];
-                        nChanged++;
-                    }
-                    else if (master[nei] != master[own])
-                    {
-                        FatalErrorIn("checkConnectedAgglomeration(..)")
-                            << "problem" << abort(FatalError);
-                    }
-                }
-                else if (master[nei] != -1)
-                {
-                    master[own] = master[nei];
-                    nChanged++;
-                }
-            }
-        }
-
-        reduce(nChanged, sumOp<label>());
-
-        if (nChanged == 0)
-        {
-            break;
-        }
-    }
-
-    // Check that master is set for all cells
-    boolList singleRegion(nCoarse, true);
-    label nSet = nCoarse;
-    forAll(master, cellI)
-    {
-        if (master[cellI] == -1)
-        {
-            label region = restrict[cellI];
-            if (singleRegion[region] == true)
-            {
-                singleRegion[region] = false;
-                nSet--;
-            }
-        }
-    }
-
-    label totalNCoarse = returnReduce(nCoarse, sumOp<label>());
-    label totalNVisited = returnReduce(nSet, sumOp<label>());
-
-    if (totalNVisited < totalNCoarse)
-    {
-        WarningIn("checkConnectedAgglomeration(..)")
-            << "out of " << totalNCoarse
-            << " agglomerated cells have " << totalNCoarse-totalNVisited
-            << " cells that are not a single connected region" << endl;
-    }
-}
-
-
 // Main program:
 
 int main(int argc, char *argv[])
@@ -227,12 +117,28 @@ int main(int argc, char *argv[])
             << "    agglomerated size : "
             << returnReduce(coarseSize, sumOp<label>()) << endl;
 
-        checkConnectedAgglomeration
+        labelList newAddr;
+        label newCoarseSize = 0;
+        bool ok = GAMGAgglomeration::checkRestriction
         (
-            agglom.meshLevel(level),
+            newAddr,
+            newCoarseSize,
+
+            agglom.meshLevel(level).lduAddr(),
             addr,
             coarseSize
         );
+        if (!ok)
+        {
+            WarningIn(args.executable())
+                << "At level " << level
+                << " there are " << coarseSize
+                << " agglomerated cells but " << newCoarseSize
+                << " disconnected regions" << endl
+                << "    This means that some agglomerations (coarse cells)"
+                << "    consist of multiple disconnected regions."
+                << endl;
+        }
 
 
         forAll(addr, fineI)

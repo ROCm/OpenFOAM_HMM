@@ -194,12 +194,24 @@ void Foam::conformalVoronoiMesh::insertPoints
         }
     }
 
+    label preReinsertionSize(number_of_vertices());
+
     rangeInsertWithInfo
     (
         vertices.begin(),
         vertices.end(),
-        true
+        false
     );
+
+    const label nReinserted = returnReduce
+    (
+        label(number_of_vertices()) - preReinsertionSize,
+        sumOp<label>()
+    );
+
+    Info<< "    Reinserted " << nReinserted << " vertices out of "
+        << returnReduce(vertices.size(), sumOp<label>())
+        << endl;
 }
 
 
@@ -787,8 +799,8 @@ Foam::face Foam::conformalVoronoiMesh::buildDualFace
                 << "Dual face uses circumcenter defined by a "
                 << "Delaunay tetrahedron with no internal "
                 << "or boundary points.  Defining Delaunay edge ends: "
-                << topoint(vA->point()) << " "
-                << topoint(vB->point()) << nl
+                << vA->info() << " "
+                << vB->info() << nl
                 << exit(FatalError);
         }
 
@@ -1034,6 +1046,18 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
         )
     ),
     decomposition_()
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::conformalVoronoiMesh::~conformalVoronoiMesh()
+{}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void Foam::conformalVoronoiMesh::initialiseForMotion()
 {
     if (foamyHexMeshControls().objOutput())
     {
@@ -1049,7 +1073,10 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
                 runTime_,
                 rndGen_,
                 geometryToConformTo_,
-                foamyHexMeshDict.subDict("backgroundMeshDecomposition")
+                foamyHexMeshControls().foamyHexMeshDict().subDict
+                (
+                    "backgroundMeshDecomposition"
+                )
             )
         );
     }
@@ -1113,13 +1140,53 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+void Foam::conformalVoronoiMesh::initialiseForConformation()
+{
+    if (Pstream::parRun())
+    {
+        decomposition_.reset
+        (
+            new backgroundMeshDecomposition
+            (
+                runTime_,
+                rndGen_,
+                geometryToConformTo_,
+                foamyHexMeshControls().foamyHexMeshDict().subDict
+                (
+                    "backgroundMeshDecomposition"
+                )
+            )
+        );
+    }
 
-Foam::conformalVoronoiMesh::~conformalVoronoiMesh()
-{}
+    insertInitialPoints();
 
+    insertFeaturePoints();
 
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+    // Improve the guess that the backgroundMeshDecomposition makes with the
+    // initial positions.  Use before building the surface conformation to
+    // better balance the surface conformation load.
+    distributeBackground(*this);
+
+    buildSurfaceConformation();
+
+    // The introduction of the surface conformation may have distorted the
+    // balance of vertices, distribute if necessary.
+    distributeBackground(*this);
+
+    if (Pstream::parRun())
+    {
+        sync(decomposition_().procBounds());
+    }
+
+    cellSizeMeshOverlapsBackground();
+
+    if (foamyHexMeshControls().printVertexInfo())
+    {
+        printVertexInfo(Info);
+    }
+}
+
 
 void Foam::conformalVoronoiMesh::move()
 {
@@ -1630,6 +1697,8 @@ void Foam::conformalVoronoiMesh::move()
             );
         }
 
+        DynamicList<Vertex_handle> pointsToRemove;
+
         for
         (
             Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
@@ -1640,15 +1709,18 @@ void Foam::conformalVoronoiMesh::move()
             if
             (
                 (vit->internalPoint() || vit->internalBoundaryPoint())
-             && !vit->referred()
+             //&& !vit->referred()
             )
             {
-                bool inside = geometryToConformTo_.inside
-                (
-                    topoint(vit->point())
-                );
+                const Foam::point& pt = topoint(vit->point());
 
-                if (!inside)
+                bool inside = geometryToConformTo_.inside(pt);
+
+                if
+                (
+                    !inside
+                 || !geometryToConformTo_.globalBounds().contains(pt)
+                )
                 {
                     if
                     (
@@ -1658,13 +1730,16 @@ void Foam::conformalVoronoiMesh::move()
                     {
                         str().write(topoint(vit->point()));
                     }
-                    remove(vit);
+
+                    pointsToRemove.append(vit);
                     internalPtIsOutside++;
                 }
             }
         }
 
-        Info<< "    " << internalPtIsOutside
+        remove(pointsToRemove.begin(), pointsToRemove.end());
+
+        Info<< "    " << returnReduce(internalPtIsOutside, sumOp<label>())
             << " internal points were inserted outside the domain. "
             << "They have been removed." << endl;
     }

@@ -1787,6 +1787,11 @@ void Foam::conformalVoronoiMesh::indexDualVertices
         }
     }
 
+    OBJstream snapping1("snapToSurface1.obj");
+    OBJstream snapping2("snapToSurface2.obj");
+    OFstream tetToSnapTo("tetsToSnapTo.obj");
+    label offset = 0;
+
     for
     (
         Delaunay::Finite_cells_iterator cit = finite_cells_begin();
@@ -1888,6 +1893,88 @@ void Foam::conformalVoronoiMesh::indexDualVertices
                         }
 
                         pts[cit->cellIndex()] = fpHit.hitPoint();
+                    }
+                }
+            }
+
+            {
+                // Snapping points far outside
+                if (cit->boundaryDualVertex() && !cit->parallelDualVertex())
+                {
+                    pointFromPoint dual = cit->dual();
+
+                    pointIndexHit hitInfo;
+                    label surfHit;
+
+                    // Find nearest surface point
+                    geometryToConformTo_.findSurfaceNearest
+                    (
+                        dual,
+                        sqr(targetCellSize(dual)),
+                        hitInfo,
+                        surfHit
+                    );
+
+                    if (!hitInfo.hit())
+                    {
+                        // Project dual to nearest point on tet
+
+                        tetPointRef tet
+                        (
+                            topoint(cit->vertex(0)->point()),
+                            topoint(cit->vertex(1)->point()),
+                            topoint(cit->vertex(2)->point()),
+                            topoint(cit->vertex(3)->point())
+                        );
+
+                        pointFromPoint nearestPointOnTet =
+                            tet.nearestPoint(dual).rawPoint();
+
+                        // Get nearest point on surface from tet.
+                        geometryToConformTo_.findSurfaceNearest
+                        (
+                            nearestPointOnTet,
+                            sqr(targetCellSize(nearestPointOnTet)),
+                            hitInfo,
+                            surfHit
+                        );
+
+                        vector snapDir = nearestPointOnTet - dual;
+                        snapDir /= mag(snapDir) + SMALL;
+
+                        drawDelaunayCell(tetToSnapTo, cit, offset);
+                        offset += 1;
+
+                        vectorField norm(1);
+                        allGeometry_[surfHit].getNormal
+                        (
+                            List<pointIndexHit>(1, hitInfo),
+                            norm
+                        );
+                        norm[0] /= mag(norm[0]) + SMALL;
+
+                        if
+                        (
+                            hitInfo.hit()
+                         && (mag(snapDir & norm[0]) > 0.5)
+                        )
+                        {
+                            snapping1.write
+                            (
+                                linePointRef(dual, nearestPointOnTet)
+                            );
+
+                            snapping2.write
+                            (
+                                linePointRef
+                                (
+                                    nearestPointOnTet,
+                                    hitInfo.hitPoint()
+                                )
+                            );
+
+                            pts[cit->cellIndex()] = hitInfo.hitPoint();
+                        }
                     }
                 }
             }
@@ -2458,6 +2545,54 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
          || (vB->internalOrBoundaryPoint() && !vB->referred())
         )
         {
+            if
+            (
+                (vA->internalPoint() && vB->externalBoundaryPoint())
+             || (vB->internalPoint() && vA->externalBoundaryPoint())
+            )
+            {
+                Cell_circulator ccStart = incident_cells(*eit);
+                Cell_circulator cc1 = ccStart;
+                Cell_circulator cc2 = cc1;
+
+                cc2++;
+
+                bool skipEdge = false;
+
+                do
+                {
+                    if
+                    (
+                        cc1->hasFarPoint() || cc2->hasFarPoint()
+                     || is_infinite(cc1) || is_infinite(cc2)
+                    )
+                    {
+                        Pout<< "Ignoring edge between internal and external: "
+                            << vA->info()
+                            << vB->info();
+
+                        skipEdge = true;
+                        break;
+                    }
+
+                    cc1++;
+                    cc2++;
+
+                } while (cc1 != ccStart);
+
+
+                // Do not create faces if the internal point is outside!
+                // This occurs because the internal point is not determined to
+                // be outside in the inside/outside test. This is most likely
+                // due to the triangle.nearestPointClassify test not returning
+                // edge/point as the nearest type.
+
+                if (skipEdge)
+                {
+                    continue;
+                }
+            }
+
             face newDualFace = buildDualFace(eit);
 
             if (newDualFace.size() >= 3)

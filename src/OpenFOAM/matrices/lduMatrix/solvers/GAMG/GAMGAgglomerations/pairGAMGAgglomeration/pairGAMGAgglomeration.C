@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,8 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(pairGAMGAgglomeration, 0);
+    defineTypeNameAndDebug(pairGAMGAgglomeration, 0);
+    bool pairGAMGAgglomeration::forward_(true);
 }
 
 

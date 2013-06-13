@@ -63,11 +63,11 @@ public:
         //- Store object pointer
         inline explicit autoPtr(T* = 0);
 
-        //- Construct as copy by transfering pointer to this autoPtr and
+        //- Construct as copy by transferring pointer to this autoPtr and
         //  setting the arguments pointer to NULL
         inline autoPtr(const autoPtr<T>&);
 
-        //- Construct either by transfering pointer or cloning. Should
+        //- Construct either by transferring pointer or cloning. Should
         //  only be called with type that supports cloning.
         inline autoPtr(const autoPtr<T>&, const bool reUse);
 

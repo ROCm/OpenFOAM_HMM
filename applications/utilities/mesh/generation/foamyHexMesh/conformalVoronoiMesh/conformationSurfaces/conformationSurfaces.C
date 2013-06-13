@@ -706,8 +706,8 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInside
 //            Info<< surface.name() << " = "
 //                << volumeType::names[surfaceVolumeTests[s][i]] << endl;
 
-            //if (surfaceVolumeTests[s][i] == volumeType::OUTSIDE)
-            if (surfaceVolumeTests[s][i] != volumeType::INSIDE)
+            if (surfaceVolumeTests[s][i] == volumeType::OUTSIDE)
+//            if (surfaceVolumeTests[s][i] != volumeType::INSIDE)
             {
                 insidePoint[i] = false;
 

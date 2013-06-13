@@ -415,46 +415,10 @@ void Foam::PointEdgeWave<Type, TrackingData>::handleProcPatches()
         }
     }
 
-
-
-    //
-    // 3. Handle all shared points
-    //    (Note:irrespective if changed or not for now)
-    //
-
-    const globalMeshData& pd = mesh_.globalData();
-
-    List<Type> sharedData(pd.nGlobalPoints());
-
-    forAll(pd.sharedPointLabels(), i)
-    {
-        label meshPointI = pd.sharedPointLabels()[i];
-
-        // Fill my entries in the shared points
-        sharedData[pd.sharedPointAddr()[i]] = allPointInfo_[meshPointI];
-    }
-
-    // Combine on master. Reduce operator has to handle a list and call
-    // Type.updatePoint for all elements
-    combineReduce(sharedData, listUpdateOp<Type>(propagationTol_, td_));
-
-    forAll(pd.sharedPointLabels(), i)
-    {
-        label meshPointI = pd.sharedPointLabels()[i];
-
-        // Retrieve my entries from the shared points.
-        const Type& nbrInfo = sharedData[pd.sharedPointAddr()[i]];
-
-        if (!allPointInfo_[meshPointI].equal(nbrInfo, td_))
-        {
-            updatePoint
-            (
-                meshPointI,
-                nbrInfo,
-                allPointInfo_[meshPointI]
-            );
-        }
-    }
+    // Collocated points should be handled by face based transfer
+    // (since that is how connectivity is worked out)
+    // They are also explicitly equalised in handleCollocatedPoints to
+    // guarantee identical values.
 }
 
 

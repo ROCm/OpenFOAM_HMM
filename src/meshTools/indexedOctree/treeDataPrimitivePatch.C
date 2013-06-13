@@ -66,76 +66,6 @@ void Foam::treeDataPrimitivePatch<PatchType>::update()
 }
 
 
-template<class PatchType>
-bool Foam::treeDataPrimitivePatch<PatchType>::findIntersection
-(
-    const indexedOctree<treeDataPrimitivePatch<PatchType> >& tree,
-    const label index,
-    const point& start,
-    const point& end,
-    point& intersectionPoint
-)
-{
-    const treeDataPrimitivePatch<PatchType>& shape = tree.shapes();
-    const PatchType& patch = shape.patch();
-
-    const pointField& points = patch.points();
-    const typename PatchType::FaceType& f = patch[index];
-
-    // Do quick rejection test
-    if (shape.cacheBb_)
-    {
-        const treeBoundBox& faceBb = shape.bbs_[index];
-
-        if ((faceBb.posBits(start) & faceBb.posBits(end)) != 0)
-        {
-            // start and end in same block outside of faceBb.
-            return false;
-        }
-    }
-
-    const vector dir(end - start);
-    pointHit inter;
-
-    if (f.size() == 3)
-    {
-        inter = triPointRef
-        (
-            points[f[0]],
-            points[f[1]],
-            points[f[2]]
-        ).intersection(start, dir, intersection::HALF_RAY, shape.planarTol_);
-    }
-    else
-    {
-        const pointField& faceCentres = patch.faceCentres();
-
-        inter = f.intersection
-        (
-            start,
-            dir,
-            faceCentres[index],
-            points,
-            intersection::HALF_RAY,
-            shape.planarTol_
-        );
-    }
-
-    if (inter.hit() && inter.distance() <= 1)
-    {
-        // Note: no extra test on whether intersection is in front of us
-        // since using half_ray
-        intersectionPoint = inter.hitPoint();
-
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
@@ -184,6 +114,19 @@ Foam::treeDataPrimitivePatch<PatchType>::findAllIntersectOp::findAllIntersectOp
 :
     tree_(tree),
     shapeMask_(shapeMask)
+{}
+
+
+template<class PatchType>
+Foam::treeDataPrimitivePatch<PatchType>::
+findSelfIntersectOp::findSelfIntersectOp
+(
+    const indexedOctree<treeDataPrimitivePatch<PatchType> >& tree,
+    const label edgeID
+)
+:
+    tree_(tree),
+    edgeID_(edgeID)
 {}
 
 
@@ -642,6 +585,118 @@ bool Foam::treeDataPrimitivePatch<PatchType>::findAllIntersectOp::operator()
     }
 
     return findIntersection(tree_, index, start, end, intersectionPoint);
+}
+
+
+template<class PatchType>
+bool Foam::treeDataPrimitivePatch<PatchType>::findSelfIntersectOp::operator()
+(
+    const label index,
+    const point& start,
+    const point& end,
+    point& intersectionPoint
+) const
+{
+    if (edgeID_ == -1)
+    {
+        FatalErrorIn
+        (
+            "findSelfIntersectOp::operator()\n"
+            "(\n"
+            "    const label index,\n"
+            "    const point& start,\n"
+            "    const point& end,\n"
+            "    point& intersectionPoint\n"
+            ") const"
+        )   << "EdgeID not set. Please set edgeID to the index of"
+            << " the edge you are testing"
+            << exit(FatalError);
+    }
+
+    const treeDataPrimitivePatch<PatchType>& shape = tree_.shapes();
+    const PatchType& patch = shape.patch();
+
+    const typename PatchType::FaceType& f = patch.localFaces()[index];
+    const edge& e = patch.edges()[edgeID_];
+
+    if (findIndex(f, e[0]) == -1 && findIndex(f, e[1]) == -1)
+    {
+        return findIntersection(tree_, index, start, end, intersectionPoint);
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+template<class PatchType>
+bool Foam::treeDataPrimitivePatch<PatchType>::findIntersection
+(
+    const indexedOctree<treeDataPrimitivePatch<PatchType> >& tree,
+    const label index,
+    const point& start,
+    const point& end,
+    point& intersectionPoint
+)
+{
+    const treeDataPrimitivePatch<PatchType>& shape = tree.shapes();
+    const PatchType& patch = shape.patch();
+
+    const pointField& points = patch.points();
+    const typename PatchType::FaceType& f = patch[index];
+
+    // Do quick rejection test
+    if (shape.cacheBb_)
+    {
+        const treeBoundBox& faceBb = shape.bbs_[index];
+
+        if ((faceBb.posBits(start) & faceBb.posBits(end)) != 0)
+        {
+            // start and end in same block outside of faceBb.
+            return false;
+        }
+    }
+
+    const vector dir(end - start);
+    pointHit inter;
+
+    if (f.size() == 3)
+    {
+        inter = triPointRef
+        (
+            points[f[0]],
+            points[f[1]],
+            points[f[2]]
+        ).intersection(start, dir, intersection::HALF_RAY, shape.planarTol_);
+    }
+    else
+    {
+        const pointField& faceCentres = patch.faceCentres();
+
+        inter = f.intersection
+        (
+            start,
+            dir,
+            faceCentres[index],
+            points,
+            intersection::HALF_RAY,
+            shape.planarTol_
+        );
+    }
+
+    if (inter.hit() && inter.distance() <= 1)
+    {
+        // Note: no extra test on whether intersection is in front of us
+        // since using half_ray
+        intersectionPoint = inter.hitPoint();
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 
