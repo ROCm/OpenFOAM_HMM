@@ -251,11 +251,16 @@ Foam::cvControls::cvControls
     writeCellShapeControlMesh_ =
         Switch(filteringDict.lookup("writeCellShapeControlMesh"));
 
-    writeBackgroundMeshDecomposition_ =
-        (
-            Switch(filteringDict.lookup("writeBackgroundMeshDecomposition"))
-         && Pstream::parRun()
-        );
+    if (Pstream::parRun())
+    {
+        writeBackgroundMeshDecomposition_ =
+            Switch(filteringDict.lookup("writeBackgroundMeshDecomposition"));
+    }
+    else
+    {
+        writeBackgroundMeshDecomposition_ = Switch(false);
+    }
+
 }
 
 
