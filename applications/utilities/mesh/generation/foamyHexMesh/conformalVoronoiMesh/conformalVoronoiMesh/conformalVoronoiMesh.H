@@ -734,7 +734,8 @@ private:
         //- edge conformation location
         bool nearFeatureEdgeLocation
         (
-            pointIndexHit& pHit
+            const pointIndexHit& pHit,
+            pointIndexHit& nearestEdgeHit
         ) const;
 
         //- Build or rebuild the edge location tree

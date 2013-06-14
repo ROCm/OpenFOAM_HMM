@@ -1897,87 +1897,87 @@ void Foam::conformalVoronoiMesh::indexDualVertices
                 }
             }
 
-            {
-                // Snapping points far outside
-                if (cit->boundaryDualVertex() && !cit->parallelDualVertex())
-                {
-                    pointFromPoint dual = cit->dual();
-
-                    pointIndexHit hitInfo;
-                    label surfHit;
-
-                    // Find nearest surface point
-                    geometryToConformTo_.findSurfaceNearest
-                    (
-                        dual,
-                        sqr(targetCellSize(dual)),
-                        hitInfo,
-                        surfHit
-                    );
-
-                    if (!hitInfo.hit())
-                    {
-                        // Project dual to nearest point on tet
-
-                        tetPointRef tet
-                        (
-                            topoint(cit->vertex(0)->point()),
-                            topoint(cit->vertex(1)->point()),
-                            topoint(cit->vertex(2)->point()),
-                            topoint(cit->vertex(3)->point())
-                        );
-
-                        pointFromPoint nearestPointOnTet =
-                            tet.nearestPoint(dual).rawPoint();
-
-                        // Get nearest point on surface from tet.
-                        geometryToConformTo_.findSurfaceNearest
-                        (
-                            nearestPointOnTet,
-                            sqr(targetCellSize(nearestPointOnTet)),
-                            hitInfo,
-                            surfHit
-                        );
-
-                        vector snapDir = nearestPointOnTet - dual;
-                        snapDir /= mag(snapDir) + SMALL;
-
-                        drawDelaunayCell(tetToSnapTo, cit, offset);
-                        offset += 1;
-
-                        vectorField norm(1);
-                        allGeometry_[surfHit].getNormal
-                        (
-                            List<pointIndexHit>(1, hitInfo),
-                            norm
-                        );
-                        norm[0] /= mag(norm[0]) + SMALL;
-
-                        if
-                        (
-                            hitInfo.hit()
-                         && (mag(snapDir & norm[0]) > 0.5)
-                        )
-                        {
-                            snapping1.write
-                            (
-                                linePointRef(dual, nearestPointOnTet)
-                            );
-
-                            snapping2.write
-                            (
-                                linePointRef
-                                (
-                                    nearestPointOnTet,
-                                    hitInfo.hitPoint()
-                                )
-                            );
-
-                            pts[cit->cellIndex()] = hitInfo.hitPoint();
-                        }
-                    }
-                }
-            }
+//            {
+//                // Snapping points far outside
+//                if (cit->boundaryDualVertex() && !cit->parallelDualVertex())
+//                {
+//                    pointFromPoint dual = cit->dual();
+//
+//                    pointIndexHit hitInfo;
+//                    label surfHit;
+//
+//                    // Find nearest surface point
+//                    geometryToConformTo_.findSurfaceNearest
+//                    (
+//                        dual,
+//                        sqr(targetCellSize(dual)),
+//                        hitInfo,
+//                        surfHit
+//                    );
+//
+//                    if (!hitInfo.hit())
+//                    {
+//                        // Project dual to nearest point on tet
+//
+//                        tetPointRef tet
+//                        (
+//                            topoint(cit->vertex(0)->point()),
+//                            topoint(cit->vertex(1)->point()),
+//                            topoint(cit->vertex(2)->point()),
+//                            topoint(cit->vertex(3)->point())
+//                        );
+//
+//                        pointFromPoint nearestPointOnTet =
+//                            tet.nearestPoint(dual).rawPoint();
+//
+//                        // Get nearest point on surface from tet.
+//                        geometryToConformTo_.findSurfaceNearest
+//                        (
+//                            nearestPointOnTet,
+//                            sqr(targetCellSize(nearestPointOnTet)),
+//                            hitInfo,
+//                            surfHit
+//                        );
+//
+//                        vector snapDir = nearestPointOnTet - dual;
+//                        snapDir /= mag(snapDir) + SMALL;
+//
+//                        drawDelaunayCell(tetToSnapTo, cit, offset);
+//                        offset += 1;
+//
+//                        vectorField norm(1);
+//                        allGeometry_[surfHit].getNormal
+//                        (
+//                            List<pointIndexHit>(1, hitInfo),
+//                            norm
+//                        );
+//                        norm[0] /= mag(norm[0]) + SMALL;
+//
+//                        if
+//                        (
+//                            hitInfo.hit()
+//                         && (mag(snapDir & norm[0]) > 0.5)
+//                        )
+//                        {
+//                            snapping1.write
+//                            (
+//                                linePointRef(dual, nearestPointOnTet)
+//                            );
+//
+//                            snapping2.write
+//                            (
+//                                linePointRef
+//                                (
+//                                    nearestPointOnTet,
+//                                    hitInfo.hitPoint()
+//                                )
+//                            );
+//
+//                            pts[cit->cellIndex()] = hitInfo.hitPoint();
+//                        }
+//                    }
+//                }
+//            }
 
             if (cit->boundaryDualVertex())
             {
