@@ -109,9 +109,9 @@ polyMeshFiltering
 {
     filterEdges                         on;
     filterFaces                         off;
-    writeTetDualMesh                    false;
-    writeCellShapeControlMesh           false;
-    writeBackgroundMeshDecomposition    false;
+    writeTetDualMesh                    true;
+    writeCellShapeControlMesh           true;
+    writeBackgroundMeshDecomposition    true;
 }
 
 
