@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -188,6 +188,11 @@ public:
             //- Clear the PtrList, i.e. set size to zero deleting all the
             //  allocated entries.
             void clear();
+
+            //- Append an element at the end of the list
+            inline void append(const T*);
+            inline void append(const autoPtr<T>&);
+            inline void append(const tmp<T>&);
 
             //- Transfer the contents of the argument PtrList into this PtrList
             //  and annul the argument list.

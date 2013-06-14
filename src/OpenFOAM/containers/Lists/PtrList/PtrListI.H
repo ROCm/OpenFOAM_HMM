@@ -80,6 +80,32 @@ inline void Foam::PtrList<T>::resize(const label newSize)
 
 
 template<class T>
+inline void Foam::PtrList<T>::append(const T* ptr)
+{
+    label sz = size();
+    this->setSize(sz+1);
+    ptrs_[sz] = ptr;
+}
+
+
+template<class T>
+inline void Foam::PtrList<T>::append(const autoPtr<T>& aptr)
+{
+    return append(const_cast<autoPtr<T>&>(aptr).ptr());
+}
+
+
+template<class T>
+inline void Foam::PtrList<T>::append
+(
+    const tmp<T>& t
+)
+{
+    return append(const_cast<tmp<T>&>(t).ptr());
+}
+
+
+template<class T>
 inline bool Foam::PtrList<T>::set(const label i) const
 {
     return ptrs_[i] != NULL;

@@ -77,7 +77,7 @@ namespace Foam
         > hExponentialSolidThermoPhysics;
 
 
-      typedef
+    typedef
         polynomialSolidTransport
         <
             species::thermo
