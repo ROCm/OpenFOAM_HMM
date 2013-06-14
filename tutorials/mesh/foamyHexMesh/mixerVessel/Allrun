@@ -43,8 +43,8 @@ mv log.surfaceBooleanFeatures log.surfaceBooleanFeatures.stirrer_shaftRotating
 
 runApplication surfaceFeatureExtract
 
-runApplication blockMesh
-runApplication decomposePar
+runApplication blockMesh -region backgroundMeshDecomposition
+runApplication decomposePar -region backgroundMeshDecomposition
 
 runParallel foamyHexMesh $nProcs
 
