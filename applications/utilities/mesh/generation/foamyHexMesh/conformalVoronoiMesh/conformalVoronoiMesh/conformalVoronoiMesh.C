@@ -981,7 +981,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     const dictionary& foamyHexMeshDict
 )
 :
-    DistributedDelaunayMesh<Delaunay>(),
+    DistributedDelaunayMesh<Delaunay>(runTime),
     runTime_(runTime),
     rndGen_(64293*Pstream::myProcNo()),
     foamyHexMeshControls_(foamyHexMeshDict),
@@ -1135,8 +1135,6 @@ void Foam::conformalVoronoiMesh::initialiseForMotion()
             Foam::indexedVertexEnum::vtExternalFeaturePoint
         );
     }
-
-    //writeFixedPoints("fixedPointsStart.obj");
 }
 
 
@@ -1814,32 +1812,6 @@ void Foam::conformalVoronoiMesh::move()
     if (time().outputTime())
     {
         writeMesh(time().timeName());
-
-//        label cellI = 0;
-//        for
-//        (
-//            Finite_cells_iterator cit = finite_cells_begin();
-//            cit != finite_cells_end();
-//            ++cit
-//        )
-//        {
-//            if
-//            (
-//                !cit->hasFarPoint()
-//             && !is_infinite(cit)
-//            )
-//            {
-//                cit->cellIndex() = cellI++;
-//            }
-//        }
-//
-//        labelList vertexMap;
-//        labelList cellMap;
-//        autoPtr<fvMesh> tetMesh =
-//            createMesh("tetMesh", runTime_, vertexMap, cellMap);
-//
-//        tetMesh().write();
-        //writeFixedPoints("fixedPointsStart_" + runTime_.timeName() + ".obj");
     }
 
     updateSizesAndAlignments(pointsToInsert);

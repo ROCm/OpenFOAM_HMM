@@ -95,6 +95,9 @@ public:
     //- Runtime type information
     ClassName("cellShapeControlMesh");
 
+    //- Return the mesh sub-directory name (usually "cellShapeControlMesh")
+    static word meshSubDir;
+
 
     // Constructors
 

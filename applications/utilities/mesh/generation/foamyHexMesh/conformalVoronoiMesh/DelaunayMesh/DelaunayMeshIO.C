@@ -28,6 +28,7 @@ License
 #include "pointConversion.H"
 #include "wallPolyPatch.H"
 #include "processorPolyPatch.H"
+#include "labelIOField.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -331,13 +332,13 @@ void Foam::DelaunayMesh<Triangulation>::printVertexInfo(Ostream& os) const
 
 
 template<class Triangulation>
-Foam::autoPtr<Foam::fvMesh>
+Foam::autoPtr<Foam::polyMesh>
 Foam::DelaunayMesh<Triangulation>::createMesh
 (
     const fileName& name,
-    const Time& runTime,
-    labelList& vertexMap,
-    labelList& cellMap
+    labelTolabelPairHashTable& vertexMap,
+    labelList& cellMap,
+    const bool writeDelaunayData
 ) const
 {
     pointField points(Triangulation::number_of_vertices());
@@ -354,11 +355,53 @@ Foam::DelaunayMesh<Triangulation>::createMesh
     List<DynamicList<face> > patchFaces(1, DynamicList<face>());
     List<DynamicList<label> > patchOwners(1, DynamicList<label>());
 
-    vertexMap.setSize(vertexCount(), -1);
+    vertexMap.resize(vertexCount());
     cellMap.setSize(Triangulation::number_of_finite_cells(), -1);
 
     // Calculate pts and a map of point index to location in pts.
     label vertI = 0;
+
+    labelIOField indices
+    (
+        IOobject
+        (
+            "indices",
+            time().timeName(),
+            name,
+            time(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        Triangulation::number_of_vertices()
+    );
+
+    labelIOField types
+    (
+        IOobject
+        (
+            "types",
+            time().timeName(),
+            name,
+            time(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        Triangulation::number_of_vertices()
+    );
+
+    labelIOField processorIndices
+    (
+        IOobject
+        (
+            "processorIndices",
+            time().timeName(),
+            name,
+            time(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        Triangulation::number_of_vertices()
+    );
 
     for
     (
@@ -369,13 +412,20 @@ Foam::DelaunayMesh<Triangulation>::createMesh
     {
         if (!vit->farPoint())
         {
-            vertexMap[vit->index()] = vertI;
+            vertexMap(labelPair(vit->index(), vit->procIndex())) = vertI;
             points[vertI] = topoint(vit->point());
+            indices[vertI] = vit->index();
+            types[vertI] = static_cast<label>(vit->type());
+            processorIndices[vertI] = vit->procIndex();
             vertI++;
         }
     }
 
     points.setSize(vertI);
+    indices.setSize(vertI);
+    types.setSize(vertI);
+    processorIndices.setSize(vertI);
+
 
     // Index the cells
     label cellI = 0;
@@ -391,6 +441,7 @@ Foam::DelaunayMesh<Triangulation>::createMesh
         (
             !cit->hasFarPoint()
          && !Triangulation::is_infinite(cit)
+         && cit->real()
         )
         {
             cellMap[cit->cellIndex()] = cellI++;
@@ -424,7 +475,12 @@ Foam::DelaunayMesh<Triangulation>::createMesh
 
         label c1I = Cb::ctFar;
         bool c1Real = false;
-        if (!c1->hasFarPoint() && !Triangulation::is_infinite(c1))
+        if
+        (
+            !c1->hasFarPoint()
+         && !Triangulation::is_infinite(c1)
+         && c1->real()
+        )
         {
             c1I = cellMap[c1->cellIndex()];
             c1Real = true;
@@ -432,7 +488,12 @@ Foam::DelaunayMesh<Triangulation>::createMesh
 
         label c2I = Cb::ctFar;
         bool c2Real = false;
-        if (!c2->hasFarPoint() && !Triangulation::is_infinite(c2))
+        if
+        (
+            !c2->hasFarPoint()
+         && !Triangulation::is_infinite(c2)
+         && c2->real()
+        )
         {
             c2I = cellMap[c2->cellIndex()];
             c2Real = true;
@@ -451,10 +512,17 @@ Foam::DelaunayMesh<Triangulation>::createMesh
         {
             verticesOnTriFace[i] = vertexMap
             [
-                c1->vertex
+                labelPair
                 (
-                    Triangulation::vertex_triple_index(oppositeVertex, i)
-                )->index()
+                    c1->vertex
+                    (
+                        Triangulation::vertex_triple_index(oppositeVertex, i)
+                    )->index(),
+                    c1->vertex
+                    (
+                        Triangulation::vertex_triple_index(oppositeVertex, i)
+                    )->procIndex()
+                )
             ];
         }
 
@@ -524,15 +592,15 @@ Foam::DelaunayMesh<Triangulation>::createMesh
 
     Info<< "Creating mesh" << endl;
 
-    autoPtr<fvMesh> meshPtr
+    autoPtr<polyMesh> meshPtr
     (
-        new fvMesh
+        new polyMesh
         (
             IOobject
             (
                 name,
-                runTime.timeName(),
-                runTime,
+                time().timeName(),
+                time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
@@ -565,7 +633,14 @@ Foam::DelaunayMesh<Triangulation>::createMesh
 
     patches.setSize(nValidPatches);
 
-    meshPtr().addFvPatches(patches);
+    meshPtr().addPatches(patches);
+
+    if (writeDelaunayData)
+    {
+        indices.write();
+        types.write();
+        processorIndices.write();
+    }
 
     Info<< "Mesh created" << endl;
 

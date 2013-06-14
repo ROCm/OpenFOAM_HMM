@@ -107,9 +107,11 @@ motionControl
 
 polyMeshFiltering
 {
-    filterEdges         on;
-    filterFaces         off;
-    writeTetDualMesh    false;
+    filterEdges                         on;
+    filterFaces                         off;
+    writeTetDualMesh                    false;
+    writeCellShapeControlMesh           false;
+    writeBackgroundMeshDecomposition    false;
 }
 
 
