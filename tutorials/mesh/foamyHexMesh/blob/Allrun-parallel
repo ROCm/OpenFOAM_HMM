@@ -10,8 +10,8 @@ nProc=$(getNumberOfProcessors)
 # copy flange surface from resources folder
 cp $FOAM_TUTORIALS/resources/geometry/blob.stl.gz constant/triSurface/
 
-runApplication blockMesh
-runApplication decomposePar
+runApplication blockMesh -region backgroundMeshDecomposition
+runApplication decomposePar -region backgroundMeshDecomposition
 
 runParallel foamyHexMesh $nProc
 runParallel collapseEdges $nProc -latestTime -collapseFaces

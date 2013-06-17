@@ -215,5 +215,15 @@ inline Foam::Switch Foam::cvControls::writeTetDualMesh() const
     return writeTetDualMesh_;
 }
 
+inline Foam::Switch Foam::cvControls::writeCellShapeControlMesh() const
+{
+    return writeCellShapeControlMesh_;
+}
+
+inline Foam::Switch Foam::cvControls::writeBackgroundMeshDecomposition() const
+{
+    return writeBackgroundMeshDecomposition_;
+}
+
 
 // ************************************************************************* //

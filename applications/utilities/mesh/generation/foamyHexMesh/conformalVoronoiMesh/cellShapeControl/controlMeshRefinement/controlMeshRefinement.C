@@ -223,6 +223,13 @@ void Foam::controlMeshRefinement::initialMeshPopulation
     const autoPtr<backgroundMeshDecomposition>& decomposition
 )
 {
+    if (shapeController_.shapeControlMesh().vertexCount() > 0)
+    {
+        // Mesh already populated.
+        Info<< "Cell size and alignment mesh already populated." << endl;
+        return;
+    }
+
     autoPtr<boundBox> overallBoundBox;
 
     // Need to pass in the background mesh decomposition so that can test if
@@ -268,7 +275,7 @@ void Foam::controlMeshRefinement::initialMeshPopulation
 
         controlFunction.initialVertices(pts, sizes, alignments);
 
-        Info<< "    Got initial vertices list" << endl;
+        Info<< "    Got initial vertices list of size " << pts.size() << endl;
 
         List<Vb> vertices(pts.size());
 

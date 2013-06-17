@@ -337,11 +337,10 @@ inline void Foam::conformalVoronoiMesh::createPointPair
     const Foam::point internalPt = surfPt - ppDistn;
     const Foam::point externalPt = surfPt + ppDistn;
 
-    if
-    (
-        geometryToConformTo_.inside(internalPt)
-     && geometryToConformTo_.outside(externalPt)
-    )
+    bool internalInside = geometryToConformTo_.inside(internalPt);
+    bool externalOutside = geometryToConformTo_.outside(externalPt);
+
+    if (internalInside && externalOutside)
     {
         pts.append
         (
@@ -369,11 +368,8 @@ inline void Foam::conformalVoronoiMesh::createPointPair
     {
         Info<< "Warning: point pair not inside/outside" << nl
             << "    surfPt = " << surfPt << nl
-            << "    internal = "
-            << internalPt << " " << geometryToConformTo_.inside(internalPt)
-            << nl
-            << "    external = "
-            << externalPt << " " << geometryToConformTo_.outside(externalPt)
+            << "    internal = " << internalPt << " " << internalInside << nl
+            << "    external = " << externalPt << " " << externalOutside
             << endl;
     }
 }

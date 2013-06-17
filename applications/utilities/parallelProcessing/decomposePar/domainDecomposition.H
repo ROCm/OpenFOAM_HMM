@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -172,7 +172,7 @@ public:
         void decomposeMesh();
 
         //- Write decomposition
-        bool writeDecomposition();
+        bool writeDecomposition(const bool decomposeSets);
 
         //- Cell-processor decomposition labels
         const labelList& cellToProc() const

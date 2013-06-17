@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "IOobject.H"
+#include "objectRegistry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,7 +54,7 @@ bool Foam::IOobject::writeHeader(Ostream& os, const word& type) const
         os  << "    note        " << note() << ";\n";
     }
 
-    os  << "    location    " << instance()/local() << ";\n"
+    os  << "    location    " << instance()/db().dbDir()/local() << ";\n"
         << "    object      " << name() << ";\n"
         << "}" << nl;
 

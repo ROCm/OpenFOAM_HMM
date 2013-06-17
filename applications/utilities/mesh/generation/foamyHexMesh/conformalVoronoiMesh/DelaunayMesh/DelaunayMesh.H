@@ -43,6 +43,7 @@ SourceFiles
 #include "boundBox.H"
 #include "indexedVertex.H"
 #include "CGALTriangulation3Ddefs.H"
+#include "Time.H"
 #include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -82,6 +83,12 @@ public:
            FixedList<label, 2>::Hash<>
         > labelPairHashSet;
 
+        typedef HashTable
+        <
+            label,
+            labelPair,
+            FixedList<label, 2>::Hash<>
+        > labelTolabelPairHashTable;
 
 private:
 
@@ -94,6 +101,9 @@ private:
         //- Keep track of the number of cells that have been added.
         //  This allows a unique index to be assigned to each cell.
         mutable label cellCount_;
+
+        //- Reference to Time
+        const Time& runTime_;
 
         //- Spatial sort traits to use with a pair of point pointers and an int.
         //  Taken from a post on the CGAL lists: 2010-01/msg00004.html by
@@ -159,7 +169,13 @@ public:
     // Constructors
 
         //- Construct from components
-        DelaunayMesh();
+        explicit DelaunayMesh(const Time& runTime);
+
+        DelaunayMesh
+        (
+            const Time& runTime,
+            const word& meshName
+        );
 
 
     //- Destructor
@@ -167,6 +183,14 @@ public:
 
 
     // Member Functions
+
+        inline const Time& time() const;
+
+        inline void timeCheck
+        (
+            const string& description,
+            const bool check = true
+        ) const;
 
         inline label getNewVertexIndex() const;
 
@@ -177,6 +201,7 @@ public:
         inline void resetCellCount();
 
         inline label vertexCount() const;
+        inline label& vertexCount();
 
         inline void resetVertexCount();
 
@@ -209,12 +234,12 @@ public:
 
         //- Create an fvMesh from the triangulation.
         //  The mesh is not parallel consistent - only used for viewing
-        autoPtr<fvMesh> createMesh
+        autoPtr<polyMesh> createMesh
         (
             const fileName& name,
-            const Time& runTime,
-            labelList& vertexMap,
-            labelList& cellMap
+            labelTolabelPairHashTable& vertexMap,
+            labelList& cellMap,
+            const bool writeDelaunayData = true
         ) const;
 };
 
