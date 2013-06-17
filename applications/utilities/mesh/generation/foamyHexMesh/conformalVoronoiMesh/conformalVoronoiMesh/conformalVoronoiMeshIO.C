@@ -430,6 +430,12 @@ void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
     {
         Info<< nl << "Writing " << "backgroundMeshDecomposition" << endl;
 
+        // Have to explicitly update the mesh instance.
+        const_cast<fvMesh&>(decomposition_().mesh()).setInstance
+        (
+            time().timeName()
+        );
+
         decomposition_().mesh().write();
     }
 
