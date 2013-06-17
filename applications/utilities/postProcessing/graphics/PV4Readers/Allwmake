@@ -2,7 +2,7 @@
 cd ${0%/*} || exit 1    # run from this directory
 #set -x
 
-if [ "$ParaView_VERSION" != "4.0.1" ]
+if [ "$ParaView_VERSION" == "4.0.1" ]
     then
     if [ -d "$ParaView_DIR" -a -r "$ParaView_DIR" ]
     then
@@ -14,14 +14,14 @@ if [ "$ParaView_VERSION" != "4.0.1" ]
         # ensure CMake gets the correct C++ compiler
         [ -n "$WM_CXX" ] && export CXX="$WM_CXX"
 
-        wmake libso vtkPV3Readers
-        PV3blockMeshReader/Allwmake
-        PV3FoamReader/Allwmake
+        wmake libso vtkPV4Readers
+        PV4blockMeshReader/Allwmake
+        PV4FoamReader/Allwmake
     else
         echo "ERROR: ParaView not found in $ParaView_DIR"
     fi
 else
-    echo "WARN: PV3 readers not building: ParaView_VERSION=$ParaView_VERSION"
+    echo "WARN: PV4 readers not building: ParaView_VERSION=$ParaView_VERSION"
 fi
 
 # ----------------------------------------------------------------- end-of-file
