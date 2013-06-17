@@ -202,6 +202,10 @@ class cvControls
         //- Write tet mesh at output time (it always writes the Voronoi)
         Switch writeTetDualMesh_;
 
+        Switch writeCellShapeControlMesh_;
+
+        Switch writeBackgroundMeshDecomposition_;
+
 
     // Private Member Functions
 
@@ -335,6 +339,12 @@ public:
 
             //- Write tetMesh at output time
             inline Switch writeTetDualMesh() const;
+
+            //- Write cellShapeControlMesh at output time
+            inline Switch writeCellShapeControlMesh() const;
+
+            //- Write backgroundMeshDecomposition at output time
+            inline Switch writeBackgroundMeshDecomposition() const;
 };
 
 

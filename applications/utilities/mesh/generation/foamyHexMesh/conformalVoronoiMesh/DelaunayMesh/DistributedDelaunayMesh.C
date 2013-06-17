@@ -126,9 +126,24 @@ Foam::DistributedDelaunayMesh<Triangulation>::buildMap
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Triangulation>
-Foam::DistributedDelaunayMesh<Triangulation>::DistributedDelaunayMesh()
+Foam::DistributedDelaunayMesh<Triangulation>::DistributedDelaunayMesh
+(
+    const Time& runTime
+)
 :
-    DelaunayMesh<Triangulation>(),
+    DelaunayMesh<Triangulation>(runTime),
+    allBackgroundMeshBounds_()
+{}
+
+
+template<class Triangulation>
+Foam::DistributedDelaunayMesh<Triangulation>::DistributedDelaunayMesh
+(
+    const Time& runTime,
+    const word& meshName
+)
+:
+    DelaunayMesh<Triangulation>(runTime, meshName),
     allBackgroundMeshBounds_()
 {}
 

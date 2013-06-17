@@ -41,6 +41,8 @@ usage: ${0##*/}
   --archOption arch         specify architecture option (only 32 or 64 applicable)
   --paraviewInstall dir     specify ParaView_DIR (e.g. /opt/paraviewopenfoam3120)
   --paraviewVersion ver     specify ParaView_VERSION (e.g. 3.12.0)
+  --scotchArchPath dir      specify SCOTCH_ARCH_PATH (e.g. /opt/OpenFOAM-scotch-6.0.0/)
+  --scotchVersion ver       specify SCOTCH_VERSION (e.g. 6.0.0)
 
 * hardcode paths to installation
 
@@ -48,32 +50,6 @@ USAGE
     exit 1
 }
 
-
-# Function to do replacement on file. Checks if any replacement has been done.
-# inlineSed <file> <sedCommand> <description>
-#_inlineSed()
-#{
-#    [ -f "$1" ] || {
-#        echo "Missing file: $1"
-#        exit 1
-#    }
-#
-#    backup="temp.$$"
-#    cp $1 $backup
-#    sed -i -e "$2" $1
-#
-#    if cmp $1 $backup > /dev/null 2>&1
-#    then
-#        echo "Failed: $3 in $1"
-#        rm $backup 2>/dev/null
-#        exit 1
-#    else
-#        echo "Okay: $3 in $1"
-#        rm $backup 2>/dev/null
-#    fi
-#
-#    return 0
-#}
 
 # Function to do replacement on file. Checks if any replacement has been done.
 # _inlineSed <file> <regexp> <replacement> <msg>
@@ -103,7 +79,8 @@ _inlineSed()
 
 [ -f etc/bashrc ] || usage "Please run from top-level directory of installation"
 
-unset foamInstall projectName projectVersion archOption paraviewInstall
+unset foamInstall projectName projectVersion archOption
+unset paraviewInstall scotchArchPath
 
 # parse options
 while [ "$#" -gt 0 ]
@@ -172,7 +149,7 @@ do
             etc/config/paraview.sh \
             'ParaView_DIR=.*' \
             'ParaView_DIR='"$paraviewInstall" \
-             "Replacing ParaView_DIR setting by '$paraviewInstall'"
+            "Replacing ParaView_DIR setting by '$paraviewInstall'"
         shift 2
         ;;
     -paraviewVersion | --paraviewVersion)
@@ -186,13 +163,36 @@ do
             "Replacing ParaView_VERSION setting by '$paraviewVersion'"
         shift 2
         ;;
+    -scotchVersion | --scotchVersion)
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        scotchVersion="$2"
+        _inlineSed \
+            etc/config/scotch.sh \
+            'SCOTCH_VERSION=.*' \
+            'SCOTCH_VERSION='"$scotchVersion" \
+            "Replacing SCOTCH_VERSION setting by '$scotchVersion'"
+        shift 2
+        ;;
+    -scotchArchPath | --scotchArchPath)
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        scotchArchPath="$2"
+        _inlineSed \
+            etc/config/scotch.sh \
+            'SCOTCH_ARCH_PATH=.*' \
+            'SCOTCH_ARCH_PATH='"$scotchArchPath" \
+            "Replacing SCOTCH_ARCH_PATH setting by '$scotchArchPath'"
+        shift 2
+        ;;
     *)
         usage "unknown option/argument: '$*'"
         ;;
     esac
 done
 
-[ -n "$foamInstall" -o -n "$projectName" -o -n "$projectVersion" -o -n "$archOption" -o -n "$paraviewInstall" -o -n "$paraviewVersion" ] || usage "Please specify at least one configure option"
+[ -n "$foamInstall" -o -n "$projectName" -o -n "$projectVersion" -o -n "$archOption" \
+-o -n "$paraviewInstall" -o -n "$paraviewVersion" \
+-o -n "$scotchVersion" -o -n "$scotchArchPath" \
+] || usage "Please specify at least one configure option"
 
 #echo "Replacing WM_PROJECT setting by '$projectName'"
 #sed -i -e 's@WM_PROJECT=.*@WM_PROJECT='"$projectName@" etc/bashrc

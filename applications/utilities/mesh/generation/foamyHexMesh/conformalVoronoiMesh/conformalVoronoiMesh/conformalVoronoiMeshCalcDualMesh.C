@@ -2808,7 +2808,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
         patchPointPairSlaves[patchI].transfer(patchPPSlaves[patchI]);
     }
 
-//    if (foamyHexMeshControls().objOutput())
+    if (foamyHexMeshControls().objOutput())
     {
         Info<< "Writing processor interfaces" << endl;
 
