@@ -958,13 +958,15 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
 
     // Because of isCollapsedFace one side can decide not to baffle whereas
     // the other side does so sync. Baffling is prefered over not baffling.
-    syncTools::syncFaceList
-    (
-        mesh_,
-        facePatch,
-        maxEqOp<label>()
-    );
-
+    if (checkCollapse)  // Or always?
+    {
+        syncTools::syncFaceList
+        (
+            mesh_,
+            facePatch,
+            maxEqOp<label>()
+        );
+    }
 
     Info<< "markFacesOnProblemCells : marked "
         << returnReduce(nBaffleFaces, sumOp<label>())

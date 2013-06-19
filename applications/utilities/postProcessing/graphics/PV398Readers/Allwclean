@@ -1,9 +1,0 @@
-#!/bin/sh
-cd ${0%/*} || exit 1    # run from this directory
-set -x
-
-wclean libso vtkPV398Readers
-PV398blockMeshReader/Allwclean
-PV398FoamReader/Allwclean
-
-# ----------------------------------------------------------------- end-of-file

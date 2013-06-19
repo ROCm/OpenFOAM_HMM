@@ -50,7 +50,8 @@ readField
     }
 
 
-    // 1. Handle explicit patch names
+    // 1. Handle explicit patch names. Note that there can be only one explicit
+    //    patch name since is key of dictionary.
     forAllConstIter(dictionary, dict, iter)
     {
         if (iter().isDict() && !iter().keyword().isPattern())
@@ -76,33 +77,45 @@ readField
 
     // 2. Patch-groups. (using non-wild card entries of dictionaries)
     // (patchnames already matched above)
-    // Note: in order of entries in the dictionary (first patchGroups wins)
-    forAllConstIter(dictionary, dict, iter)
+    // Note: in reverse order of entries in the dictionary (last
+    // patchGroups wins). This is so is consistent with dictionary wildcard
+    // behaviour
+    if (dict.size())
     {
-        if (iter().isDict() && !iter().keyword().isPattern())
+        for
+        (
+            IDLList<entry>::const_reverse_iterator iter = dict.rbegin();
+            iter != dict.rend();
+            ++iter
+        )
         {
-            const labelList patchIDs = bmesh_.findIndices
-            (
-                iter().keyword(),
-                true                    // use patchGroups
-            );
+            const entry& e = iter();
 
-            forAll(patchIDs, i)
+            if (e.isDict() && !e.keyword().isPattern())
             {
-                label patchi = patchIDs[i];
+                const labelList patchIDs = bmesh_.findIndices
+                (
+                    e.keyword(),
+                    true                    // use patchGroups
+                );
 
-                if (!this->set(patchi))
+                forAll(patchIDs, i)
                 {
-                    this->set
-                    (
-                        patchi,
-                        PatchField<Type>::New
+                    label patchi = patchIDs[i];
+
+                    if (!this->set(patchi))
+                    {
+                        this->set
                         (
-                            bmesh_[patchi],
-                            field,
-                            iter().dict()
-                        )
-                    );
+                            patchi,
+                            PatchField<Type>::New
+                            (
+                                bmesh_[patchi],
+                                field,
+                                e.dict()
+                            )
+                        );
+                    }
                 }
             }
         }
