@@ -73,7 +73,7 @@ class MGridGenGAMGAgglomeration
             const lduAddressing& fineAddressing,
             List<idxtype>& cellCells,
             List<idxtype>& cellCellOffsets,
-            const vectorField& Si,
+            const scalarField& magSi,
             List<scalar>& faceWeights
         );
 
@@ -85,8 +85,8 @@ class MGridGenGAMGAgglomeration
             const label maxSize,
             const lduAddressing& fineAddressing,
             const scalarField& V,
-            const vectorField& Sf,
-            const scalarField& Sb
+            const scalarField& magSf,
+            const scalarField& magSb
         );
 
 
