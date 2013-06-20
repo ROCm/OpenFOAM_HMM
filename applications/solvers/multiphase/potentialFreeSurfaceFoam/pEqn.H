@@ -1,5 +1,3 @@
-#include "resetPhiPatches.H"
-
 volScalarField rAU(1.0/UEqn().A());
 surfaceScalarField rAUf("Dp", fvc::interpolate(rAU));
 
@@ -21,6 +19,9 @@ surfaceScalarField phiHbyA
 adjustPhi(phiHbyA, U, p_gh);
 
 fvOptions.relativeFlux(phiHbyA);
+
+// Update the phi BCs from U before p BCs are updated
+phi.boundaryField() = mesh.Sf().boundaryField() & U.boundaryField();
 
 // Non-orthogonal pressure corrector loop
 while (pimple.correctNonOrthogonal())

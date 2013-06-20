@@ -111,6 +111,8 @@ int main(int argc, char *argv[])
 
     conformalVoronoiMesh::debug = true;
 
+    Info<< "Create mesh for time = " << runTime.timeName() << nl << endl;
+
     conformalVoronoiMesh mesh(runTime, foamyHexMeshDict);
 
 

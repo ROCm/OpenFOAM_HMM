@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -169,6 +169,12 @@ public:
         virtual label index() const
         {
             return polyPatch_.index();
+        }
+
+        //- Return true if this patch field is coupled
+        virtual bool coupled() const
+        {
+            return polyPatch_.coupled();
         }
 
         //- Return mesh points

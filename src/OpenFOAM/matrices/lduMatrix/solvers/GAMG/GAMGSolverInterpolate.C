@@ -90,10 +90,6 @@ void Foam::GAMGSolver::interpolate
     {
         corrC[restrictAddressing[celli]] += diagPtr[celli]*psiPtr[celli];
         diagC[restrictAddressing[celli]] += diagPtr[celli];
-        //corrC[restrictAddressing[celli]] += psiPtr[celli]/diagPtr[celli];
-        //diagC[restrictAddressing[celli]] += 1.0/diagPtr[celli];
-        //corrC[restrictAddressing[celli]] += psiPtr[celli];
-        //diagC[restrictAddressing[celli]] += 1.0;
     }
 
     for (register label ccelli=0; ccelli<nCCells; ccelli++)

@@ -1783,7 +1783,7 @@ int main(int argc, char *argv[])
                 {
                     extrudeMeshShadowFaces[nShadowFaces] = fz[j];
                     zoneShadowFlipMap[nShadowFaces] = fz.flipMap()[j];
-                    zoneShadowID[nShadowFaces] = zoneShadowIDs[i];
+                    zoneShadowID[nShadowFaces] = i;
                     nShadowFaces++;
                 }
             }
