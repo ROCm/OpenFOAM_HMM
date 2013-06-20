@@ -465,6 +465,9 @@ public:
 
             //- WriteData function required for regIOobject write operation
             virtual bool writeData(Ostream&) const;
+
+            friend Istream& operator>>(Istream& is, sideVolumeType& vt);
+            friend Ostream& operator<<(Ostream& os, const sideVolumeType& vt);
 };
 
 

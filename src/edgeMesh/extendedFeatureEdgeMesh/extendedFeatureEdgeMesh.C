@@ -1380,4 +1380,40 @@ bool Foam::extendedFeatureEdgeMesh::writeData(Ostream& os) const
 }
 
 
+Foam::Istream& Foam::operator>>
+(
+    Istream& is,
+    Foam::extendedFeatureEdgeMesh::sideVolumeType& vt
+)
+{
+    // Read beginning of sideVolumeType
+    is.readBegin("sideVolumeType");
+
+    int type;
+    is  >> type;
+
+    vt = static_cast<Foam::extendedFeatureEdgeMesh::sideVolumeType>(type);
+
+    // Read end of volumeType
+    is.readEnd("sideVolumeType");
+
+    // Check state of Istream
+    is.check("operator>>(Istream&, sideVolumeType&)");
+
+    return is;
+}
+
+
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const Foam::extendedFeatureEdgeMesh::sideVolumeType& vt
+)
+{
+    os  << static_cast<int>(vt);
+
+    return os;
+}
+
+
 // ************************************************************************* //
