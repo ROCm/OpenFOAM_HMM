@@ -115,19 +115,6 @@ public:
 
     // Member functions
 
-        //- Return true if running parallel
-        virtual bool coupled() const
-        {
-            if (Pstream::parRun())
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
         //- Return message tag to use for communication
         virtual int tag() const
         {
