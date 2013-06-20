@@ -19,6 +19,9 @@ solvers
 {
     "alpha1.*"
     {
+        nAlphaSubCycles     2;
+        nAlphaCorr          1;
+
         solver          smoothSolver;
         smoother        GaussSeidel;
         tolerance       1e-9;
@@ -66,8 +69,7 @@ PIMPLE
     nOuterCorrectors    1;
     nCorrectors         2;
     nNonOrthogonalCorrectors 0;
-    nAlphaSubCycles     2;
-    nAlphaCorr          1;
+
     pRefValue           0;
     pRefPoint           (0.1 0.1 1);
 }

@@ -17,6 +17,12 @@ FoamFile
 
 solvers
 {
+    alpha1
+    {
+        nAlphaCorr      1;
+        nAlphaSubCycles 2;
+    }
+
     p
     {
         solver          GAMG;
@@ -54,31 +60,14 @@ solvers
         tolerance       1e-05;
         relTol          0;
     }
-
-    alpha
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-10;
-        relTol          0.1;
-    }
-
-    alpha1Final
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-10;
-        relTol          0;
-    }
 }
 
 PIMPLE
 {
     nCorrectors     2;
     nNonOrthogonalCorrectors 0;
-    nAlphaCorr      1;
-    nAlphaSubCycles 2;
     correctAlpha    yes;
+
     pRefCell        0;
     pRefValue       0;
 }

@@ -17,6 +17,12 @@ FoamFile
 
 solvers
 {
+    alpha
+    {
+        nAlphaSubCycles 4;
+        cAlpha          2;
+    }
+
     pcorr
     {
         solver          PCG;
@@ -92,8 +98,6 @@ PIMPLE
     momentumPredictor no;
     nCorrectors     2;
     nNonOrthogonalCorrectors 0;
-    nAlphaSubCycles 4;
-    cAlpha          2;
 }
 
 relaxationFactors

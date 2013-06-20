@@ -17,6 +17,17 @@ FoamFile
 
 solvers
 {
+    "alpha1.*"
+    {
+        nAlphaCorr      1;
+        nAlphaSubCycles 3;
+
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-10;
+        relTol          0.1;
+    }
+
     p
     {
         solver          GAMG;
@@ -52,26 +63,6 @@ solvers
         $k;
         relTol          0;
     }
-
-    alpha1
-    {
-        nAlphaCorr      2;
-        nAlphaSubCycles 3;
-    }
-
-    alpha
-    {
-        solver          PCG;
-        preconditioner  DIC;
-        tolerance       1e-10;
-        relTol          0.1;
-    }
-
-    alpha1Final
-    {
-        $alpha;
-        relTol          0;
-    }
 }
 
 PIMPLE
@@ -79,6 +70,7 @@ PIMPLE
     nCorrectors     2;
     nNonOrthogonalCorrectors 0;
     correctAlpha    yes;
+
     pRefCell        0;
     pRefValue       0;
 }

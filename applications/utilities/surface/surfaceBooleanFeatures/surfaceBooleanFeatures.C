@@ -370,7 +370,10 @@ int main(int argc, char *argv[])
 
     DynamicList<vector> normals(2*nFeatEds);
     vectorField edgeDirections(nFeatEds, vector::zero);
-    DynamicList<label> normalVolumeTypes(2*nFeatEds);
+    DynamicList<extendedFeatureEdgeMesh::sideVolumeType> normalVolumeTypes
+    (
+        2*nFeatEds
+    );
     List<DynamicList<label> > edgeNormals(nFeatEds);
     List<DynamicList<label> > normalDirections(nFeatEds);
 
@@ -551,7 +554,10 @@ int main(int argc, char *argv[])
     // Region edges are not explicitly supported by surfaceIntersection
 
     vectorField normalsTmp(normals);
-    PackedList<2> normalVolumeTypesTmp(normalVolumeTypes);
+    List<extendedFeatureEdgeMesh::sideVolumeType> normalVolumeTypesTmp
+    (
+        normalVolumeTypes
+    );
     labelListList edgeNormalsTmp(edgeNormals.size());
     forAll(edgeNormalsTmp, i)
     {
