@@ -53,7 +53,10 @@ void Foam::conformationSurfaces::hasBoundedVolume
         if
         (
             surface.hasVolumeType()
-         && !baffleSurfaces_[regionOffset_[s]]
+         && (
+                normalVolumeTypes_[regionOffset_[s]]
+             != extendedFeatureEdgeMesh::BOTH
+            )
         )
         {
             pointField pts(1, locationInMesh_);
@@ -87,7 +90,11 @@ void Foam::conformationSurfaces::hasBoundedVolume
                   + regionOffset_[s];
 
                 // Don't include baffle surfaces in the calculation
-                if (!baffleSurfaces_[patchID])
+                if
+                (
+                    normalVolumeTypes_[patchID]
+                 != extendedFeatureEdgeMesh::BOTH
+                )
                 {
                     sum += triSurf[sI].normal(surfPts);
                 }
@@ -256,7 +263,7 @@ Foam::conformationSurfaces::conformationSurfaces
     locationInMesh_(surfaceConformationDict.lookup("locationInMesh")),
     surfaces_(),
     allGeometryToSurfaces_(),
-    baffleSurfaces_(),
+    normalVolumeTypes_(),
     patchNames_(),
     regionOffset_(),
     patchInfo_(),
@@ -283,7 +290,7 @@ Foam::conformationSurfaces::conformationSurfaces
 
     allGeometryToSurfaces_.setSize(allGeometry_.size(), -1);
 
-    baffleSurfaces_.setSize(nSurf, false);
+    normalVolumeTypes_.setSize(nSurf);
 
     // Features may be attached to host surfaces or independent
     features_.setSize(nSurf + nAddFeat);
@@ -294,8 +301,8 @@ Foam::conformationSurfaces::conformationSurfaces
 
     PtrList<dictionary> globalPatchInfo(nSurf);
     List<Map<autoPtr<dictionary> > > regionPatchInfo(nSurf);
-    boolList globalBaffleSurfaces(nSurf, false);
-    List<Map<bool> > regionBaffleSurface(nSurf);
+    List<sideVolumeType> globalVolumeTypes(nSurf);
+    List<Map<sideVolumeType> > regionVolumeTypes(nSurf);
 
     label surfI = 0;
 
@@ -324,12 +331,15 @@ Foam::conformationSurfaces::conformationSurfaces
 
         const dictionary& surfaceSubDict(surfacesDict.subDict(surfaceName));
 
-        globalBaffleSurfaces[surfI] = Switch
+        globalVolumeTypes[surfI] =
         (
-            surfaceSubDict.lookupOrDefault("baffleSurface", false)
+            extendedFeatureEdgeMesh::sideVolumeTypeNames_
+            [
+                surfaceSubDict.lookupOrDefault<word>("meshableSide", "inside")
+            ]
         );
 
-        if (!globalBaffleSurfaces[surfI])
+        if (!globalVolumeTypes[surfI])
         {
             if (!allGeometry_[surfaces_[surfI]].hasVolumeType())
             {
@@ -384,22 +394,20 @@ Foam::conformationSurfaces::conformationSurfaces
                             regionI,
                             regionDict.subDict("patchInfo").clone()
                         );
-
-//                        Info<< "            patchInfo: "
-//                            << regionPatchInfo[surfI][regionI] << endl;
                     }
 
-                    if (regionDict.found("baffleSurface"))
-                    {
-                        regionBaffleSurface[surfI].insert
-                        (
-                            regionI,
-                            regionDict.lookup("baffleSurface")
-                        );
-
-//                        Info<< "            baffle: "
-//                            << regionBaffleSurface[surfI][regionI] << endl;
-                    }
+                    regionVolumeTypes[surfI].insert
+                    (
+                        regionI,
+                        extendedFeatureEdgeMesh::sideVolumeTypeNames_
+                        [
+                             regionDict.lookupOrDefault<word>
+                             (
+                                 "meshableSide",
+                                 "inside"
+                             )
+                        ]
+                    );
 
                     readFeatures(regionDict, regionName, featureI);
                 }
@@ -420,7 +428,7 @@ Foam::conformationSurfaces::conformationSurfaces
 
     // Rework surface specific information into information per global region
     patchInfo_.setSize(nRegions);
-    baffleSurfaces_.setSize(nRegions, false);
+    normalVolumeTypes_.setSize(nRegions);
 
     forAll(surfaces_, surfI)
     {
@@ -430,7 +438,7 @@ Foam::conformationSurfaces::conformationSurfaces
         for (label i = 0; i < nRegions; i++)
         {
             label globalRegionI = regionOffset_[surfI] + i;
-            baffleSurfaces_[globalRegionI] = globalBaffleSurfaces[surfI];
+            normalVolumeTypes_[globalRegionI] = globalVolumeTypes[surfI];
             if (globalPatchInfo.set(surfI))
             {
                 patchInfo_.set
@@ -441,12 +449,12 @@ Foam::conformationSurfaces::conformationSurfaces
             }
         }
 
-        forAllConstIter(Map<bool>, regionBaffleSurface[surfI], iter)
+        forAllConstIter(Map<sideVolumeType>, regionVolumeTypes[surfI], iter)
         {
             label globalRegionI = regionOffset_[surfI] + iter.key();
 
-            baffleSurfaces_[globalRegionI] =
-                regionBaffleSurface[surfI][iter.key()];
+            normalVolumeTypes_[globalRegionI] =
+                regionVolumeTypes[surfI][iter.key()];
         }
 
         const Map<autoPtr<dictionary> >& localInfo = regionPatchInfo[surfI];
@@ -516,7 +524,7 @@ Foam::conformationSurfaces::conformationSurfaces
         Info<< "Names = " << allGeometry_.names() << endl;
         Info<< "Surfaces = " << surfaces_ << endl;
         Info<< "AllGeom to Surfaces = " << allGeometryToSurfaces_ << endl;
-        Info<< "Baffle Surfaces = " << baffleSurfaces_ << endl;
+        Info<< "Volume types = " << normalVolumeTypes_ << endl;
         Info<< "Patch names = " << patchNames_ << endl;
         Info<< "Region Offset = " << regionOffset_ << endl;
 
@@ -610,7 +618,7 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInside
 
         const label regionI = regionOffset_[s];
 
-        if (!baffleSurfaces_[regionI])
+        if (normalVolumeTypes_[regionI] != extendedFeatureEdgeMesh::BOTH)
         {
 //            if (surface.hasVolumeType())
 //            {
@@ -653,9 +661,7 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInside
     //Check if the points are inside the surface by the given distance squared
 
     labelList hitSurfaces;
-
     List<pointIndexHit> hitInfo;
-
     searchableSurfacesQueries::findNearest
     (
         allGeometry_,
@@ -698,7 +704,7 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInside
             // inside, therefore, if this is a testForInside = true call, the
             // result is false.  If this is a testForInside = false call, then
             // the result is true.
-            if (baffleSurfaces_[regionI])
+            if (normalVolumeTypes_[regionI] == extendedFeatureEdgeMesh::BOTH)
             {
                 continue;
             }
@@ -709,9 +715,27 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInside
             if (surfaceVolumeTests[s][i] == volumeType::OUTSIDE)
 //            if (surfaceVolumeTests[s][i] != volumeType::INSIDE)
             {
-                insidePoint[i] = false;
-
-                break;
+                if
+                (
+                    normalVolumeTypes_[regionI]
+                 == extendedFeatureEdgeMesh::INSIDE
+                )
+                {
+                    insidePoint[i] = false;
+                    break;
+                }
+            }
+            else if (surfaceVolumeTests[s][i] == volumeType::INSIDE)
+            {
+                if
+                (
+                    normalVolumeTypes_[regionI]
+                 == extendedFeatureEdgeMesh::OUTSIDE
+                )
+                {
+                    insidePoint[i] = false;
+                    break;
+                }
             }
         }
     }
@@ -757,7 +781,7 @@ Foam::Field<bool> Foam::conformationSurfaces::wellOutside
 
         const label regionI = regionOffset_[s];
 
-        if (!baffleSurfaces_[regionI])
+        if (normalVolumeTypes_[regionI] != extendedFeatureEdgeMesh::BOTH)
         {
             surface.getVolumeType(samplePts, surfaceVolumeTests[s]);
         }
@@ -773,9 +797,7 @@ Foam::Field<bool> Foam::conformationSurfaces::wellOutside
     //Check if the points are inside the surface by the given distance squared
 
     labelList hitSurfaces;
-
     List<pointIndexHit> hitInfo;
-
     searchableSurfacesQueries::findNearest
     (
         allGeometry_,
@@ -795,13 +817,12 @@ Foam::Field<bool> Foam::conformationSurfaces::wellOutside
             // If the point is within range of the surface, then it can't be
             // well (in|out)side
             outsidePoint[i] = false;
-
             //continue;
         }
 
         forAll(surfaces_, s)
         {
-//            const searchableSurface& surface(allGeometry_[surfaces_[s]]);
+            const searchableSurface& surface(allGeometry_[surfaces_[s]]);
 
 //            if
 //            (
@@ -814,20 +835,42 @@ Foam::Field<bool> Foam::conformationSurfaces::wellOutside
 
             const label regionI = regionOffset_[s];
 
+//            Info<< s << " " << surfaces_[s] << " " << surface.name() << " "
+//                << normalVolumeTypes_[regionI] << " "
+//                << surfaceVolumeTests[s][i] << endl;
+
             // If one of the pattern tests is failed, then the point cannot be
             // inside, therefore, if this is a testForInside = true call, the
             // result is false.  If this is a testForInside = false call, then
             // the result is true.
-            if (baffleSurfaces_[regionI])
+            if (normalVolumeTypes_[regionI] == extendedFeatureEdgeMesh::BOTH)
             {
                 continue;
             }
 
             if (surfaceVolumeTests[s][i] == volumeType::OUTSIDE)
             {
-                outsidePoint[i] = true;
-
-                break;
+                if
+                (
+                    normalVolumeTypes_[regionI]
+                 == extendedFeatureEdgeMesh::INSIDE
+                )
+                {
+                    outsidePoint[i] = true;
+                    break;
+                }
+            }
+            else if (surfaceVolumeTests[s][i] == volumeType::INSIDE)
+            {
+                if
+                (
+                    normalVolumeTypes_[regionI]
+                 == extendedFeatureEdgeMesh::OUTSIDE
+                )
+                {
+                    outsidePoint[i] = true;
+                    break;
+                }
             }
         }
     }
@@ -1281,7 +1324,8 @@ Foam::label Foam::conformationSurfaces::getPatchID
 }
 
 
-bool Foam::conformationSurfaces::isBaffle
+Foam::extendedFeatureEdgeMesh::sideVolumeType
+Foam::conformationSurfaces::meshableSide
 (
     const label hitSurface,
     const pointIndexHit& surfHit
@@ -1291,10 +1335,33 @@ bool Foam::conformationSurfaces::isBaffle
 
     if (patchID == -1)
     {
-        return false;
+        return extendedFeatureEdgeMesh::NEITHER;
     }
 
-    return baffleSurfaces_[patchID];
+    return normalVolumeTypes_[patchID];
+}
+
+
+void Foam::conformationSurfaces::getNormal
+(
+    const label hitSurface,
+    const List<pointIndexHit>& surfHit,
+    vectorField& normal
+) const
+{
+    allGeometry_[hitSurface].getNormal
+    (
+        surfHit,
+        normal
+    );
+
+    const label patchID = regionOffset_[allGeometryToSurfaces_[hitSurface]];
+
+    // Now flip sign of normal depending on mesh side
+    if (normalVolumeTypes_[patchID] == extendedFeatureEdgeMesh::OUTSIDE)
+    {
+        normal *= -1;
+    }
 }
 
 
