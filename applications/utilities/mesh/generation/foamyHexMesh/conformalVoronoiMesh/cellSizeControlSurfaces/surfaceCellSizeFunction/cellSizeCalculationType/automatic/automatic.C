@@ -219,8 +219,10 @@ Foam::tmp<Foam::triSurfacePointScalarField> Foam::automatic::load()
             true
         );
 
-        scalarField internalClosenessPointField =
-            patchInterpolate.faceToPointInterpolate(internalCloseness);
+        scalarField internalClosenessPointField
+        (
+            patchInterpolate.faceToPointInterpolate(internalCloseness)
+        );
 
         forAll(pointCellSize, pI)
         {
@@ -254,8 +256,10 @@ Foam::tmp<Foam::triSurfacePointScalarField> Foam::automatic::load()
             true
         );
 
-        scalarField featureProximityPointField =
-            patchInterpolate.faceToPointInterpolate(featureProximity);
+        scalarField featureProximityPointField
+        (
+            patchInterpolate.faceToPointInterpolate(featureProximity)
+        );
 
         forAll(pointCellSize, pI)
         {
