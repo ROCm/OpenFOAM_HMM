@@ -399,7 +399,7 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
     label openStart,
     label multipleStart,
     const vectorField& normals,
-    const PackedList<2>& normalVolumeTypes,
+    const List<sideVolumeType>& normalVolumeTypes,
     const vectorField& edgeDirections,
     const labelListList& normalDirections,
     const labelListList& edgeNormals,

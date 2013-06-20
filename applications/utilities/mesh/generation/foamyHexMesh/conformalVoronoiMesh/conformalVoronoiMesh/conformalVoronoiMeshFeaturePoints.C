@@ -179,7 +179,7 @@ void Foam::conformalVoronoiMesh::createEdgePointGroupByCirculating
     const labelList& edNormalIs = feMesh.edgeNormals()[edgeI];
     const labelList& feNormalDirections = feMesh.normalDirections()[edgeI];
 
-    const PackedList<2>& normalVolumeTypes = feMesh.normalVolumeTypes();
+    const List<sideVolumeType>& normalVolumeTypes = feMesh.normalVolumeTypes();
 
     const_circulator<labelList> circ(edNormalIs);
     const_circulator<labelList> circNormalDirs(feNormalDirections);
@@ -197,10 +197,8 @@ void Foam::conformalVoronoiMesh::createEdgePointGroupByCirculating
 
     if (circ.size()) do
     {
-        const sideVolumeType volType =
-            sideVolumeType(normalVolumeTypes[circ()]);
-        const sideVolumeType nextVolType =
-            sideVolumeType(normalVolumeTypes[circ.next()]);
+        const sideVolumeType volType = normalVolumeTypes[circ()];
+        const sideVolumeType nextVolType = normalVolumeTypes[circ.next()];
 
         const vector& normal = feNormals[circ()];
         const vector& nextNormal = feNormals[circ.next()];

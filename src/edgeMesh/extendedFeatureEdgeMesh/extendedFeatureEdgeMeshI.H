@@ -90,7 +90,7 @@ inline const Foam::vectorField& Foam::extendedFeatureEdgeMesh::normals() const
     return normals_;
 }
 
-inline const Foam::PackedList<2>&
+inline const Foam::List<Foam::extendedFeatureEdgeMesh::sideVolumeType>&
 Foam::extendedFeatureEdgeMesh::normalVolumeTypes() const
 {
     return normalVolumeTypes_;

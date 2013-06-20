@@ -61,7 +61,6 @@ SourceFiles
 #include "treeDataEdge.H"
 #include "treeDataPoint.H"
 #include "PrimitivePatch.H"
-#include "PackedList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -163,7 +162,7 @@ private:
         vectorField normals_;
 
         //-
-        PackedList<2> normalVolumeTypes_;
+        List<sideVolumeType> normalVolumeTypes_;
 
         //- Flat and open edges require the direction of the edge
         vectorField edgeDirections_;
@@ -287,7 +286,7 @@ public:
             label openStart,
             label multipleStart,
             const vectorField& normals,
-            const PackedList<2>& normalVolumeTypes,
+            const List<sideVolumeType>& normalVolumeTypes,
             const vectorField& edgeDirections,
             const labelListList& normalDirections,
             const labelListList& edgeNormals,
@@ -392,7 +391,7 @@ public:
             inline const vectorField& normals() const;
 
             //- Return
-            inline const PackedList<2>& normalVolumeTypes() const;
+            inline const List<sideVolumeType>& normalVolumeTypes() const;
 
             //- Return the edgeDirection vectors
             inline const vectorField& edgeDirections() const;

@@ -52,6 +52,8 @@ namespace Foam
 
 class conformationSurfaces
 {
+    typedef extendedFeatureEdgeMesh::sideVolumeType sideVolumeType;
+
     // Private data
 
         const Time& runTime_;
@@ -78,7 +80,7 @@ class conformationSurfaces
 
         //- A boolean value for each surface to be conformed to specifying if it
         //  is to be treated as a baffle
-        boolList baffleSurfaces_;
+        List<sideVolumeType> normalVolumeTypes_;
 
         //- A flat list of all of the names of the patches from all of the
         //  surfaces to be reproduced in the meshed geometry
@@ -337,10 +339,17 @@ public:
             label findPatch(const point& pt) const;
 
             //- Is the surface a baffle.
-            bool isBaffle
+            extendedFeatureEdgeMesh::sideVolumeType meshableSide
             (
                 const label hitSurface,
                 const pointIndexHit& surfHit
+            ) const;
+
+            void getNormal
+            (
+                const label hitSurface,
+                const List<pointIndexHit>& surfHit,
+                vectorField& normal
             ) const;
 
 
