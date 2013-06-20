@@ -313,7 +313,7 @@ void Foam::GAMGSolver::Vcycle
             scalarField& ACfRef =
                 const_cast<scalarField&>(ACf.operator const scalarField&());
 
-            if (interpolateCorrection_ && leveli < coarsestLevel - 2)
+            if (interpolateCorrection_) //&& leveli < coarsestLevel - 2)
             {
                 interpolate
                 (
