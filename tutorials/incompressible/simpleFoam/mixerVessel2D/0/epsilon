@@ -24,13 +24,13 @@ boundaryField
     rotor
     {
         type            epsilonWallFunction;
-        value           uniform 0;
+        value           $internalField;
     }
 
     stator
     {
         type            epsilonWallFunction;
-        value           uniform 0;
+        value           $internalField;
     }
 
     front

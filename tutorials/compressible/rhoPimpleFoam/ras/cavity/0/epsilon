@@ -24,13 +24,13 @@ boundaryField
     movingWall
     {
         type            compressible::epsilonWallFunction;
-        value           uniform 0;
+        value           $internalField;
     }
 
     fixedWalls
     {
         type            compressible::epsilonWallFunction;
-        value           uniform 0;
+        value           $internalField;
     }
 
     frontAndBack
