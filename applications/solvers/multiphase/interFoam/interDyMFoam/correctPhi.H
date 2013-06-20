@@ -52,7 +52,6 @@
             phiAbs = phi;
             phiAbs.oldTime() = phi;
             fvc::makeRelative(phi, U);
-            phi.oldTime() = phi;
         }
     }
 }

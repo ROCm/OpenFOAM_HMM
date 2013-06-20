@@ -81,6 +81,9 @@ int main(int argc, char *argv[])
         scalar timeBeforeMeshUpdate = runTime.elapsedCpuTime();
 
         {
+            // Ensure old-time U exists for mapping
+            U.oldTime();
+
             // Calculate the relative velocity used to map the relative flux phi
             volVectorField Urel("Urel", U);
 
