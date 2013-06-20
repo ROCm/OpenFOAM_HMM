@@ -421,202 +421,247 @@ void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
         }
     }
 
+    if (foamyHexMeshControls().writeCellShapeControlMesh())
+    {
+        cellShapeControls().shapeControlMesh().write();
+    }
+
+    if (foamyHexMeshControls().writeBackgroundMeshDecomposition())
+    {
+        Info<< nl << "Writing " << "backgroundMeshDecomposition" << endl;
+
+        // Have to explicitly update the mesh instance.
+        const_cast<fvMesh&>(decomposition_().mesh()).setInstance
+        (
+            time().timeName()
+        );
+
+        decomposition_().mesh().write();
+    }
+
     if (foamyHexMeshControls().writeTetDualMesh())
     {
-        // Determine map from Delaunay vertex to Dual mesh
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        // From all Delaunay vertices to cell (positive index)
-        // or patch face (negative index)
-        labelList vertexToDualAddressing(number_of_vertices(), 0);
-
-        forAll(cellToDelaunayVertex, cellI)
+        label cellI = 0;
+        for
+        (
+            Finite_cells_iterator cit = finite_cells_begin();
+            cit != finite_cells_end();
+            ++cit
+        )
         {
-            label vertI = cellToDelaunayVertex[cellI];
-
-            if (vertexToDualAddressing[vertI] != 0)
+            if
+            (
+                !cit->hasFarPoint()
+             && !is_infinite(cit)
+            )
             {
-                FatalErrorIn("conformalVoronoiMesh::writeMesh(..)")
-                    << "Delaunay vertex " << vertI
-                    << " from cell " << cellI
-                    << " is already mapped to "
-                    << vertexToDualAddressing[vertI]
-                    << exit(FatalError);
-            }
-            vertexToDualAddressing[vertI] = cellI+1;
-        }
-
-        forAll(patchToDelaunayVertex, patchI)
-        {
-            const labelList& patchVertices = patchToDelaunayVertex[patchI];
-
-            forAll(patchVertices, i)
-            {
-                label vertI = patchVertices[i];
-
-                if (vertexToDualAddressing[vertI] > 0)
-                {
-                    FatalErrorIn("conformalVoronoiMesh::writeMesh(..)")
-                        << "Delaunay vertex " << vertI
-                        << " from patch " << patchI
-                        << " local index " << i
-                        << " is already mapped to cell "
-                        << vertexToDualAddressing[vertI]-1
-                        << exit(FatalError);
-                }
-
-                // Vertex might be used by multiple faces. Which one to
-                // use? For now last one wins.
-                label dualFaceI = dualPatchStarts[patchI]+i;
-                vertexToDualAddressing[vertI] = -dualFaceI-1;
+                cit->cellIndex() = cellI++;
             }
         }
 
+        Info<< nl << "Writing " << "tetDualMesh" << endl;
 
-        // Calculate tet mesh addressing
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        DistributedDelaunayMesh<Delaunay>::labelTolabelPairHashTable vertexMap;
+        labelList cellMap;
+        autoPtr<polyMesh> tetMesh =
+            createMesh("tetDualMesh", vertexMap, cellMap);
 
-        pointField points;
-        labelList boundaryPts(number_of_finite_cells(), -1);
-        // From tet point back to Delaunay vertex index
-        labelList pointToDelaunayVertex;
-        faceList faces;
-        labelList owner;
-        labelList neighbour;
-        wordList patchTypes;
-        wordList patchNames;
-        PtrList<dictionary> patchDicts;
-        pointField cellCentres;
+        tetMesh().write();
 
-        calcTetMesh
-        (
-            points,
-            pointToDelaunayVertex,
-            faces,
-            owner,
-            neighbour,
-            patchTypes,
-            patchNames,
-            patchDicts
-        );
-
-
-
-        // Calculate map from tet points to dual mesh cells/patch faces
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        labelIOList pointDualAddressing
-        (
-            IOobject
-            (
-                "pointDualAddressing",
-                instance,
-                "tetDualMesh"/polyMesh::meshSubDir,
-                runTime_,
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
-            ),
-            UIndirectList<label>
-            (
-                vertexToDualAddressing,
-                pointToDelaunayVertex
-            )()
-        );
-
-        label pointI = findIndex(pointDualAddressing, -1);
-        if (pointI != -1)
-        {
-            WarningIn
-            (
-                "conformalVoronoiMesh::writeMesh\n"
-                "(\n"
-                "    const fileName& instance,\n"
-                "    bool filterFaces\n"
-                ")\n"
-            )   << "Delaunay vertex " << pointI
-                << " does not have a corresponding dual cell." << endl;
-        }
-
-        Info<< "Writing map from tetDualMesh points to Voronoi mesh to "
-            << pointDualAddressing.objectPath() << endl;
-        pointDualAddressing.write();
-
-
-
-        // Write tet points corresponding to the Voronoi cell/face centre
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        {
-            // Read Voronoi mesh
-            fvMesh mesh
-            (
-                IOobject
-                (
-                    Foam::polyMesh::defaultRegion,
-                    instance,
-                    runTime_,
-                    IOobject::MUST_READ
-                )
-            );
-            pointIOField dualPoints
-            (
-                IOobject
-                (
-                    "dualPoints",
-                    instance,
-                    "tetDualMesh"/polyMesh::meshSubDir,
-                    runTime_,
-                    IOobject::NO_READ,
-                    IOobject::AUTO_WRITE,
-                    false
-                ),
-                points
-            );
-
-            forAll(pointDualAddressing, pointI)
-            {
-                label index = pointDualAddressing[pointI];
-
-                if (index > 0)
-                {
-                    label cellI = index-1;
-                    dualPoints[pointI] = mesh.cellCentres()[cellI];
-                }
-                else if (index < 0)
-                {
-                    label faceI = -index-1;
-                    if (faceI >= mesh.nInternalFaces())
-                    {
-                        dualPoints[pointI] = mesh.faceCentres()[faceI];
-                    }
-                }
-            }
-
-            Info<< "Writing new tetDualMesh points mapped onto Voronoi mesh to "
-                << dualPoints.objectPath() << endl
-                << "Replace the polyMesh/points with these." << endl;
-            dualPoints.write();
-        }
-
-
-        Info<< nl << "Writing tetDualMesh to " << instance << endl;
-
-        PackedBoolList boundaryFacesToRemove;
-        writeMesh
-        (
-            "tetDualMesh",
-            instance,
-            points,
-            boundaryPts,
-            faces,
-            owner,
-            neighbour,
-            patchTypes,
-            patchNames,
-            patchDicts,
-            cellCentres,
-            boundaryFacesToRemove
-        );
+//        // Determine map from Delaunay vertex to Dual mesh
+//        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//        // From all Delaunay vertices to cell (positive index)
+//        // or patch face (negative index)
+//        labelList vertexToDualAddressing(number_of_vertices(), 0);
+//
+//        forAll(cellToDelaunayVertex, cellI)
+//        {
+//            label vertI = cellToDelaunayVertex[cellI];
+//
+//            if (vertexToDualAddressing[vertI] != 0)
+//            {
+//                FatalErrorIn("conformalVoronoiMesh::writeMesh(..)")
+//                    << "Delaunay vertex " << vertI
+//                    << " from cell " << cellI
+//                    << " is already mapped to "
+//                    << vertexToDualAddressing[vertI]
+//                    << exit(FatalError);
+//            }
+//            vertexToDualAddressing[vertI] = cellI+1;
+//        }
+//
+//        forAll(patchToDelaunayVertex, patchI)
+//        {
+//            const labelList& patchVertices = patchToDelaunayVertex[patchI];
+//
+//            forAll(patchVertices, i)
+//            {
+//                label vertI = patchVertices[i];
+//
+//                if (vertexToDualAddressing[vertI] > 0)
+//                {
+//                    FatalErrorIn("conformalVoronoiMesh::writeMesh(..)")
+//                        << "Delaunay vertex " << vertI
+//                        << " from patch " << patchI
+//                        << " local index " << i
+//                        << " is already mapped to cell "
+//                        << vertexToDualAddressing[vertI]-1
+//                        << exit(FatalError);
+//                }
+//
+//                // Vertex might be used by multiple faces. Which one to
+//                // use? For now last one wins.
+//                label dualFaceI = dualPatchStarts[patchI]+i;
+//                vertexToDualAddressing[vertI] = -dualFaceI-1;
+//            }
+//        }
+//
+//
+//        // Calculate tet mesh addressing
+//        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//        pointField points;
+//        labelList boundaryPts(number_of_finite_cells(), -1);
+//        // From tet point back to Delaunay vertex index
+//        labelList pointToDelaunayVertex;
+//        faceList faces;
+//        labelList owner;
+//        labelList neighbour;
+//        wordList patchTypes;
+//        wordList patchNames;
+//        PtrList<dictionary> patchDicts;
+//        pointField cellCentres;
+//
+//        calcTetMesh
+//        (
+//            points,
+//            pointToDelaunayVertex,
+//            faces,
+//            owner,
+//            neighbour,
+//            patchTypes,
+//            patchNames,
+//            patchDicts
+//        );
+//
+//
+//
+//        // Calculate map from tet points to dual mesh cells/patch faces
+//        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//        labelIOList pointDualAddressing
+//        (
+//            IOobject
+//            (
+//                "pointDualAddressing",
+//                instance,
+//                "tetDualMesh"/polyMesh::meshSubDir,
+//                runTime_,
+//                IOobject::NO_READ,
+//                IOobject::AUTO_WRITE,
+//                false
+//            ),
+//            UIndirectList<label>
+//            (
+//                vertexToDualAddressing,
+//                pointToDelaunayVertex
+//            )()
+//        );
+//
+//        label pointI = findIndex(pointDualAddressing, -1);
+//        if (pointI != -1)
+//        {
+//            WarningIn
+//            (
+//                "conformalVoronoiMesh::writeMesh\n"
+//                "(\n"
+//                "    const fileName& instance,\n"
+//                "    bool filterFaces\n"
+//                ")\n"
+//            )   << "Delaunay vertex " << pointI
+//                << " does not have a corresponding dual cell." << endl;
+//        }
+//
+//        Info<< "Writing map from tetDualMesh points to Voronoi mesh to "
+//            << pointDualAddressing.objectPath() << endl;
+//        pointDualAddressing.write();
+//
+//
+//
+//        // Write tet points corresponding to the Voronoi cell/face centre
+//        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//        {
+//            // Read Voronoi mesh
+//            fvMesh mesh
+//            (
+//                IOobject
+//                (
+//                    Foam::polyMesh::defaultRegion,
+//                    instance,
+//                    runTime_,
+//                    IOobject::MUST_READ
+//                )
+//            );
+//            pointIOField dualPoints
+//            (
+//                IOobject
+//                (
+//                    "dualPoints",
+//                    instance,
+//                    "tetDualMesh"/polyMesh::meshSubDir,
+//                    runTime_,
+//                    IOobject::NO_READ,
+//                    IOobject::AUTO_WRITE,
+//                    false
+//                ),
+//                points
+//            );
+//
+//            forAll(pointDualAddressing, pointI)
+//            {
+//                label index = pointDualAddressing[pointI];
+//
+//                if (index > 0)
+//                {
+//                    label cellI = index-1;
+//                    dualPoints[pointI] = mesh.cellCentres()[cellI];
+//                }
+//                else if (index < 0)
+//                {
+//                    label faceI = -index-1;
+//                    if (faceI >= mesh.nInternalFaces())
+//                    {
+//                        dualPoints[pointI] = mesh.faceCentres()[faceI];
+//                    }
+//                }
+//            }
+//
+//            Info<< "Writing tetDualMesh points mapped onto Voronoi mesh to "
+//                << dualPoints.objectPath() << endl
+//                << "Replace the polyMesh/points with these." << endl;
+//            dualPoints.write();
+//        }
+//
+//
+//        Info<< nl << "Writing tetDualMesh to " << instance << endl;
+//
+//        PackedBoolList boundaryFacesToRemove;
+//        writeMesh
+//        (
+//            "tetDualMesh",
+//            instance,
+//            points,
+//            boundaryPts,
+//            faces,
+//            owner,
+//            neighbour,
+//            patchTypes,
+//            patchNames,
+//            patchDicts,
+//            cellCentres,
+//            boundaryFacesToRemove
+//        );
     }
 }
 

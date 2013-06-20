@@ -734,7 +734,8 @@ private:
         //- edge conformation location
         bool nearFeatureEdgeLocation
         (
-            pointIndexHit& pHit
+            const pointIndexHit& pHit,
+            pointIndexHit& nearestEdgeHit
         ) const;
 
         //- Build or rebuild the edge location tree
@@ -1037,6 +1038,10 @@ public:
 
 
     // Member Functions
+
+        void initialiseForMotion();
+
+        void initialiseForConformation();
 
         //- Move the vertices according to the controller, re-conforming to the
         //  surface as required

@@ -791,10 +791,11 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
     (
         IOobject
         (
-            fvMesh::defaultRegion,
+            "backgroundMeshDecomposition",
             runTime_.timeName(),
             runTime_,
-            IOobject::MUST_READ
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
         )
     ),
     meshCutter_

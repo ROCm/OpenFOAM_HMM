@@ -981,7 +981,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     const dictionary& foamyHexMeshDict
 )
 :
-    DistributedDelaunayMesh<Delaunay>(),
+    DistributedDelaunayMesh<Delaunay>(runTime),
     runTime_(runTime),
     rndGen_(64293*Pstream::myProcNo()),
     foamyHexMeshControls_(foamyHexMeshDict),
@@ -1046,6 +1046,18 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
         )
     ),
     decomposition_()
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::conformalVoronoiMesh::~conformalVoronoiMesh()
+{}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void Foam::conformalVoronoiMesh::initialiseForMotion()
 {
     if (foamyHexMeshControls().objOutput())
     {
@@ -1061,7 +1073,10 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
                 runTime_,
                 rndGen_,
                 geometryToConformTo_,
-                foamyHexMeshDict.subDict("backgroundMeshDecomposition")
+                foamyHexMeshControls().foamyHexMeshDict().subDict
+                (
+                    "backgroundMeshDecomposition"
+                )
             )
         );
     }
@@ -1120,18 +1135,56 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
             Foam::indexedVertexEnum::vtExternalFeaturePoint
         );
     }
-
-    //writeFixedPoints("fixedPointsStart.obj");
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+void Foam::conformalVoronoiMesh::initialiseForConformation()
+{
+    if (Pstream::parRun())
+    {
+        decomposition_.reset
+        (
+            new backgroundMeshDecomposition
+            (
+                runTime_,
+                rndGen_,
+                geometryToConformTo_,
+                foamyHexMeshControls().foamyHexMeshDict().subDict
+                (
+                    "backgroundMeshDecomposition"
+                )
+            )
+        );
+    }
 
-Foam::conformalVoronoiMesh::~conformalVoronoiMesh()
-{}
+    insertInitialPoints();
 
+    insertFeaturePoints();
 
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+    // Improve the guess that the backgroundMeshDecomposition makes with the
+    // initial positions.  Use before building the surface conformation to
+    // better balance the surface conformation load.
+    distributeBackground(*this);
+
+    buildSurfaceConformation();
+
+    // The introduction of the surface conformation may have distorted the
+    // balance of vertices, distribute if necessary.
+    distributeBackground(*this);
+
+    if (Pstream::parRun())
+    {
+        sync(decomposition_().procBounds());
+    }
+
+    cellSizeMeshOverlapsBackground();
+
+    if (foamyHexMeshControls().printVertexInfo())
+    {
+        printVertexInfo(Info);
+    }
+}
+
 
 void Foam::conformalVoronoiMesh::move()
 {
@@ -1759,32 +1812,6 @@ void Foam::conformalVoronoiMesh::move()
     if (time().outputTime())
     {
         writeMesh(time().timeName());
-
-//        label cellI = 0;
-//        for
-//        (
-//            Finite_cells_iterator cit = finite_cells_begin();
-//            cit != finite_cells_end();
-//            ++cit
-//        )
-//        {
-//            if
-//            (
-//                !cit->hasFarPoint()
-//             && !is_infinite(cit)
-//            )
-//            {
-//                cit->cellIndex() = cellI++;
-//            }
-//        }
-//
-//        labelList vertexMap;
-//        labelList cellMap;
-//        autoPtr<fvMesh> tetMesh =
-//            createMesh("tetMesh", runTime_, vertexMap, cellMap);
-//
-//        tetMesh().write();
-        //writeFixedPoints("fixedPointsStart_" + runTime_.timeName() + ".obj");
     }
 
     updateSizesAndAlignments(pointsToInsert);

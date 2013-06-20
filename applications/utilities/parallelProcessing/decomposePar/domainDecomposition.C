@@ -34,6 +34,10 @@ License
 #include "globalMeshData.H"
 #include "DynamicList.H"
 #include "fvFieldDecomposer.H"
+#include "IOobjectList.H"
+#include "cellSet.H"
+#include "faceSet.H"
+#include "pointSet.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -123,7 +127,7 @@ Foam::domainDecomposition::~domainDecomposition()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::domainDecomposition::writeDecomposition()
+bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
 {
     Info<< "\nConstructing processor meshes" << endl;
 
@@ -157,6 +161,37 @@ bool Foam::domainDecomposition::writeDecomposition()
     forAll(cellZones(), zoneI)
     {
         mark(cellZones()[zoneI], zoneI, cellToZone);
+    }
+
+
+    PtrList<const cellSet> cellSets;
+    PtrList<const faceSet> faceSets;
+    PtrList<const pointSet> pointSets;
+    if (decomposeSets)
+    {
+        // Read sets
+        IOobjectList objects(*this, facesInstance(), "polyMesh/sets");
+        {
+            IOobjectList cSets(objects.lookupClass(cellSet::typeName));
+            forAllConstIter(IOobjectList, cSets, iter)
+            {
+                cellSets.append(new cellSet(*iter()));
+            }
+        }
+        {
+            IOobjectList fSets(objects.lookupClass(faceSet::typeName));
+            forAllConstIter(IOobjectList, fSets, iter)
+            {
+                faceSets.append(new faceSet(*iter()));
+            }
+        }
+        {
+            IOobjectList pSets(objects.lookupClass(pointSet::typeName));
+            forAllConstIter(IOobjectList, pSets, iter)
+            {
+                pointSets.append(new pointSet(*iter()));
+            }
+        }
     }
 
 
@@ -731,6 +766,52 @@ bool Foam::domainDecomposition::writeDecomposition()
         IOstream::defaultPrecision(10);
 
         procMesh.write();
+
+
+
+        if (decomposeSets)
+        {
+            forAll(cellSets, i)
+            {
+                const cellSet& cs = cellSets[i];
+                cellSet set(procMesh, cs.name(), cs.size()/nProcs_);
+                forAll(curCellLabels, i)
+                {
+                    if (cs.found(curCellLabels[i]))
+                    {
+                        set.insert(i);
+                    }
+                }
+                set.write();
+            }
+            forAll(faceSets, i)
+            {
+                const faceSet& cs = faceSets[i];
+                faceSet set(procMesh, cs.name(), cs.size()/nProcs_);
+                forAll(curFaceLabels, i)
+                {
+                    if (cs.found(mag(curFaceLabels[i])-1))
+                    {
+                        set.insert(i);
+                    }
+                }
+                set.write();
+            }
+            forAll(pointSets, i)
+            {
+                const pointSet& cs = pointSets[i];
+                pointSet set(procMesh, cs.name(), cs.size()/nProcs_);
+                forAll(curPointLabels, i)
+                {
+                    if (cs.found(curPointLabels[i]))
+                    {
+                        set.insert(i);
+                    }
+                }
+                set.write();
+            }
+        }
+
 
         // Write points if pointsInstance differing from facesInstance
         if (facesInstancePointsPtr_.valid())

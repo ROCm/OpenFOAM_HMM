@@ -1928,14 +1928,16 @@ bool Foam::conformalVoronoiMesh::pointIsNearSurfaceLocation
 
 bool Foam::conformalVoronoiMesh::nearFeatureEdgeLocation
 (
-    pointIndexHit& pHit
+    const pointIndexHit& pHit,
+    pointIndexHit& nearestEdgeHit
 ) const
 {
-    Foam::point pt = pHit.hitPoint();
+    const Foam::point& pt = pHit.hitPoint();
 
     const scalar exclusionRangeSqr = featureEdgeExclusionDistanceSqr(pt);
 
-    bool closeToFeatureEdge = pointIsNearFeatureEdgeLocation(pt);
+    bool closeToFeatureEdge =
+        pointIsNearFeatureEdgeLocation(pt, nearestEdgeHit);
 
     if (closeToFeatureEdge)
     {
@@ -1978,15 +1980,11 @@ bool Foam::conformalVoronoiMesh::nearFeatureEdgeLocation
             if
             (
                 mag(cosAngle) < searchConeAngle
-             && (
-                    mag(lineBetweenPoints)
-                  > foamyHexMeshControls().pointPairDistanceCoeff()
-                   *targetCellSize(pt)
-                )
+             && (mag(lineBetweenPoints) > pointPairDistance(pt))
             )
             {
-                pt = edgeHit.hitPoint();
-                pHit.setPoint(pt);
+                //pt = edgeHit.hitPoint();
+                //pHit.setPoint(pt);
                 closeToFeatureEdge = false;
             }
             else
@@ -2183,12 +2181,12 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
 
                         if
                         (
-                            !pointIsNearFeatureEdgeLocation
-                            (
-                                edPt,
-                                nearestEdgeHit
-                            )
-//                            !nearFeatureEdgeLocation(edHit)
+//                            !pointIsNearFeatureEdgeLocation
+//                            (
+//                                edPt,
+//                                nearestEdgeHit
+//                            )
+                            !nearFeatureEdgeLocation(edHit, nearestEdgeHit)
                         )
                         {
                             appendToEdgeLocationTree(edPt);

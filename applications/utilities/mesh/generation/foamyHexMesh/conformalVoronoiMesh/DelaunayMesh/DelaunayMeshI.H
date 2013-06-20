@@ -37,6 +37,40 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Triangulation>
+inline const Foam::Time& Foam::DelaunayMesh<Triangulation>::time() const
+{
+    return runTime_;
+}
+
+
+template<class Triangulation>
+void Foam::DelaunayMesh<Triangulation>::timeCheck
+(
+    const string& description,
+    const bool check
+) const
+{
+    if (check)
+    {
+        Info<< nl << "--- [ cpuTime "
+            << time().elapsedCpuTime() << " s, "
+            << "delta " << time().cpuTimeIncrement()<< " s";
+
+        if (description != word::null)
+        {
+            Info<< ", " << description << " ";
+        }
+        else
+        {
+            Info<< " ";
+        }
+
+        Info<< "] --- " << endl;
+    }
+}
+
+
+template<class Triangulation>
 inline Foam::label Foam::DelaunayMesh<Triangulation>::getNewVertexIndex() const
 {
     label id = vertexCount_++;
@@ -86,6 +120,12 @@ void Foam::DelaunayMesh<Triangulation>::resetCellCount()
 
 template<class Triangulation>
 Foam::label Foam::DelaunayMesh<Triangulation>::vertexCount() const
+{
+    return vertexCount_;
+}
+
+template<class Triangulation>
+Foam::label& Foam::DelaunayMesh<Triangulation>::vertexCount()
 {
     return vertexCount_;
 }

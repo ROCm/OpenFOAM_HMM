@@ -26,12 +26,12 @@ else
 fi
 
 # build OpenFOAM libraries and applications
-src/Allwmake
-applications/Allwmake
+src/Allwmake $*
+applications/Allwmake $*
 
 if [ "$1" = doc ]
 then
-    doc/Allwmake
+    doc/Allwmake $*
 fi
 
 # ----------------------------------------------------------------- end-of-file

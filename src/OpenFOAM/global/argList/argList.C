@@ -473,14 +473,14 @@ Foam::argList::argList
     bool initialise
 )
 :
+    parRunControl_(args.parRunControl_),
     args_(args.args_),
     options_(options),
     executable_(args.executable_),
     rootPath_(args.rootPath_),
     globalCase_(args.globalCase_),
     case_(args.case_),
-    argListStr_(args.argListStr_),
-    parRunControl_(args.parRunControl_)
+    argListStr_(args.argListStr_)
 {
     parse(checkArgs, checkOpts, initialise);
 }
