@@ -230,7 +230,8 @@ class GAMGSolver
             const lduMatrix& m,
             const FieldField<Field, scalar>& interfaceBouCoeffs,
             const lduInterfaceFieldPtrsList& interfaces,
-            const scalarField& source,
+            const labelList& restrictAddressing,
+            const scalarField& psiC,
             const direction cmpt
         ) const;
 

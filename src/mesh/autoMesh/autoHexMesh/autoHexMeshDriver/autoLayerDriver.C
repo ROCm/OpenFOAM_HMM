@@ -2501,7 +2501,8 @@ void Foam::autoLayerDriver::addLayers
     if (debug&meshRefinement::MESH)
     {
         const_cast<Time&>(mesh.time())++;
-        Info<< "Writing baffled mesh to " << meshRefiner_.timeName() << endl;
+        Info<< "Writing baffled mesh to time "
+            << meshRefiner_.timeName() << endl;
         meshRefiner_.write
         (
             debug,
@@ -2923,7 +2924,8 @@ void Foam::autoLayerDriver::addLayers
             );
 
             const_cast<Time&>(mesh.time())++;
-            Info<< "Writing shrunk mesh to " << meshRefiner_.timeName() << endl;
+            Info<< "Writing shrunk mesh to time "
+                << meshRefiner_.timeName() << endl;
 
             // See comment in autoSnapDriver why we should not remove meshPhi
             // using mesh.clearOut().
@@ -3057,7 +3059,8 @@ void Foam::autoLayerDriver::addLayers
 
         if (debug&meshRefinement::MESH)
         {
-            Info<< "Writing layer mesh to " << meshRefiner_.timeName() << endl;
+            Info<< "Writing layer mesh to time " << meshRefiner_.timeName()
+                << endl;
             newMesh.write();
             cellSet addedCellSet
             (

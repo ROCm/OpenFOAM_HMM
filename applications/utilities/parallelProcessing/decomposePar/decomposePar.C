@@ -55,6 +55,9 @@ Usage
     \param -fields \n
     Use existing geometry decomposition and convert fields only.
 
+    \param -sets \n
+    Decompose cellSets, faceSets, pointSets.
+
     \param -force \n
     Remove any existing \a processor subdirectories before decomposing the
     geometry.
@@ -128,6 +131,11 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
+        "sets",
+        "decompose cellSets, faceSets, pointSets"
+    );
+    argList::addBoolOption
+    (
         "force",
         "remove existing processor*/ subdirs before decomposing the geometry"
     );
@@ -146,6 +154,7 @@ int main(int argc, char *argv[])
     bool writeCellDist           = args.optionFound("cellDist");
     bool copyUniform             = args.optionFound("copyUniform");
     bool decomposeFieldsOnly     = args.optionFound("fields");
+    bool decomposeSets           = args.optionFound("sets");
     bool forceOverwrite          = args.optionFound("force");
     bool ifRequiredDecomposition = args.optionFound("ifRequired");
 
@@ -312,7 +321,7 @@ int main(int argc, char *argv[])
         {
             mesh.decomposeMesh();
 
-            mesh.writeDecomposition();
+            mesh.writeDecomposition(decomposeSets);
 
             if (writeCellDist)
             {

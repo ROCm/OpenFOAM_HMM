@@ -1,0 +1,113 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      surfaceFeatureExtractDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+shaftRotating.stl
+{
+    extractionMethod    extractFromSurface;
+
+    extractFromSurfaceCoeffs
+    {
+        // Mark edges whose adjacent surface normals are at an angle less
+        // than includedAngle as features
+        // - 0  : selects no edges
+        // - 180: selects all edges
+        includedAngle   100;
+    }
+
+    subsetFeatures
+    {
+        // Remove the top feature
+        insideBox       (-100 -100 -100)(100 100 100);
+    }
+
+    // Write options
+
+        // Write features to obj format for postprocessing
+        writeObj        no;
+}
+
+
+vessel.stl
+{
+    extractionMethod        extractFromSurface;
+
+    extractFromSurfaceCoeffs
+    {
+        // Mark edges whose adjacent surface normals are at an angle less
+        // than includedAngle as features
+        // - 0  : selects no edges
+        // - 180: selects all edges
+        includedAngle       120;
+    }
+
+    subsetFeatures
+    {
+        // Keep nonManifold edges (edges with >2 connected faces where
+        // the faces form more than two different normal planes)
+        nonManifoldEdges    no;
+
+        // Keep open edges (edges with 1 connected face)
+        openEdges           no;
+    }
+
+    // Write options
+
+        // Write features to obj format for postprocessing
+        writeObj            no;
+}
+
+
+spargerInlet.stl
+{
+    extractionMethod    extractFromSurface;
+
+    extractFromSurfaceCoeffs
+    {
+        // Mark edges whose adjacent surface normals are at an angle less
+        // than includedAngle as features
+        // - 0  : selects no edges
+        // - 180: selects all edges
+        includedAngle   120;
+    }
+
+    // Write options
+
+        // Write features to obj format for postprocessing
+        writeObj        no;
+}
+
+
+stirrer.stl
+{
+    extractionMethod    extractFromSurface;
+
+    extractFromSurfaceCoeffs
+    {
+        // Mark edges whose adjacent surface normals are at an angle less
+        // than includedAngle as features
+        // - 0  : selects no edges
+        // - 180: selects all edges
+        includedAngle   120;
+    }
+
+    // Write options
+
+        // Write features to obj format for postprocessing
+        writeObj        no;
+}
+
+
+// ************************************************************************* //

@@ -7,13 +7,12 @@ cd ${0%/*} || exit 1    # run from this directory
 # Get the number of processors to run on from system/decomposeParDict
 nProc=$(getNumberOfProcessors)
 
-# Create tight-fitting background mesh
-runApplication blockMesh
-runApplication topoSet -dict system/topoSetDict-background
-mv log.topoSet log.topoSet.background
-runApplication subsetMesh background -patch walls -overwrite
+# copy flange surface from resources folder
+cp $FOAM_TUTORIALS/resources/geometry/flange.stl.gz constant/triSurface/
 
-runApplication decomposePar
+# Create tight-fitting background mesh
+runApplication blockMesh -region backgroundMeshDecomposition
+runApplication decomposePar -region backgroundMeshDecomposition
 
 runParallel foamyHexMesh $nProc
 runParallel collapseEdges $nProc -latestTime -collapseFaces

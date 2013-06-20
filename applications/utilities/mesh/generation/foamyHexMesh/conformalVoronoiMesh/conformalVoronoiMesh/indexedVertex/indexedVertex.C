@@ -113,13 +113,12 @@ Foam::Ostream& Foam::operator<<
     const CGAL::indexedVertex<Gt, Vb>& p
 )
 {
-    os  << p.point()
-        << p.index()
-        << static_cast<int>(p.type())
-        << p.procIndex()
-        << p.alignment()
-        << p.targetCellSize()
-        << token::SPACE
+    os  << p.point() << ' '
+        << p.index() << ' '
+        << static_cast<int>(p.type()) << ' '
+        << p.procIndex() << ' '
+        << p.alignment() << ' '
+        << p.targetCellSize() << ' '
         << static_cast<int>(p.fixed());
 
     return os;

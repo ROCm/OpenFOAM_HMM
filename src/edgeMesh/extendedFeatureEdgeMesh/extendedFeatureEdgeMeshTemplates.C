@@ -45,7 +45,7 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
     const edgeList& sFeatEds(surf.edges());
     const labelListList edgeFaces = PatchTools::sortedEdgeFaces(surf);
     const vectorField& faceNormals = surf.faceNormals();
-    const labelListList& pointEdges = PatchTools::sortedPointEdges(surf);
+    const labelListList pointEdges = PatchTools::sortedPointEdges(surf);
 
     // Extract and reorder the data from surfaceFeatures
 

@@ -26,6 +26,10 @@ License
 #include "DelaunayMesh.H"
 #include "labelPair.H"
 #include "PrintTable.H"
+#include "pointIOField.H"
+#include "scalarIOField.H"
+#include "labelIOField.H"
+#include "pointConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -36,12 +40,119 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Triangulation>
-Foam::DelaunayMesh<Triangulation>::DelaunayMesh()
+Foam::DelaunayMesh<Triangulation>::DelaunayMesh(const Time& runTime)
 :
     Triangulation(),
     vertexCount_(0),
-    cellCount_(0)
+    cellCount_(0),
+    runTime_(runTime)
 {}
+
+
+template<class Triangulation>
+Foam::DelaunayMesh<Triangulation>::DelaunayMesh
+(
+    const Time& runTime,
+    const word& meshName
+)
+:
+    Triangulation(),
+    vertexCount_(0),
+    cellCount_(0),
+    runTime_(runTime)
+{
+    pointIOField pts
+    (
+        IOobject
+        (
+            "points",
+            runTime.timeName(),
+            meshName/polyMesh::meshSubDir,
+            runTime,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE
+        )
+    );
+
+    labelIOField types
+    (
+        IOobject
+        (
+            "types",
+            runTime.timeName(),
+            meshName,
+            runTime,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE
+        )
+    );
+
+    labelIOField indices
+    (
+        IOobject
+        (
+            "indices",
+            runTime.timeName(),
+            meshName,
+            runTime,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE
+        )
+    );
+
+    labelIOField processorIndices
+    (
+        IOobject
+        (
+            "processorIndices",
+            runTime.timeName(),
+            meshName,
+            runTime,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE
+        )
+    );
+
+    if (pts.headerOk())
+    {
+        forAll(pts, ptI)
+        {
+            Vertex_handle vh = this->insert(toPoint<Point>(pts[ptI]));
+
+            if (indices.headerOk())
+            {
+                vh->index() = indices[ptI];
+                vertexCount()++;
+            }
+            else
+            {
+                vh->index() = getNewVertexIndex();
+            }
+
+            if (processorIndices.headerOk())
+            {
+                vh->procIndex() = processorIndices[ptI];
+            }
+            else
+            {
+                vh->procIndex() = Pstream::myProcNo();
+            }
+
+            if (types.headerOk())
+            {
+                vh->type() =
+                    static_cast<Foam::indexedVertexEnum::vertexType>
+                    (
+                        types[ptI]
+                    );
+            }
+            else
+            {
+                vh->type() = Vb::vtUnassigned;
+            }
+        }
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

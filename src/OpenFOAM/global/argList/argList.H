@@ -105,6 +105,10 @@ class argList
     // Private data
         static bool bannerEnabled;
 
+        //- Switch on/off parallel mode. Has to be first to be constructed
+        //  so destructor is done last.
+        ParRunControl parRunControl_;
+
         stringList args_;
         HashTable<string> options_;
 
@@ -113,8 +117,6 @@ class argList
         fileName globalCase_;
         fileName case_;
         string argListStr_;
-
-        ParRunControl parRunControl_;
 
         // Signal handlers
         sigFpe sigFpe_;

@@ -40,7 +40,7 @@ boundaryField
     walls
     {
         type            epsilonWallFunction;
-        value           uniform 0;
+        value           $internalField;
     }
 }
 

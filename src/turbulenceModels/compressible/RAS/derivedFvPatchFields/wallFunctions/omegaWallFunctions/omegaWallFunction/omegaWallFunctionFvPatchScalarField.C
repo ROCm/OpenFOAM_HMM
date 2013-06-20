@@ -143,7 +143,7 @@ void omegaWallFunctionFvPatchScalarField::createAveragingWeights()
     forAll(omegaPatches, i)
     {
         label patchI = omegaPatches[i];
-        const fvPatchField& wf = weights.boundaryField()[patchI];
+        const fvPatchScalarField& wf = weights.boundaryField()[patchI];
         cornerWeights_[patchI] = 1.0/wf.patchInternalField();
     }
 
@@ -244,9 +244,9 @@ void omegaWallFunctionFvPatchScalarField::calculate
 
         scalar omegaLog = sqrt(k[cellI])/(Cmu25*kappa_*y[faceI]);
 
-        omega[cellI] = w*sqrt(sqr(omegaVis) + sqr(omegaLog));
+        omega[cellI] += w*sqrt(sqr(omegaVis) + sqr(omegaLog));
 
-        G[cellI] =
+        G[cellI] +=
             w
            *(mutw[faceI] + muw[faceI])
            *magGradUw[faceI]
@@ -481,6 +481,8 @@ void omegaWallFunctionFvPatchScalarField::updateCoeffs
 
     FieldType& omega = const_cast<FieldType&>(dimensionedInternalField());
 
+    scalarField& omegaf = *this;
+
     // only set the values if the weights are < 1 - tolerance
     forAll(weights, faceI)
     {
@@ -492,6 +494,7 @@ void omegaWallFunctionFvPatchScalarField::updateCoeffs
 
             G[cellI] = w*G[cellI] + (1.0 - w)*G0[cellI];
             omega[cellI] = w*omega[cellI] + (1.0 - w)*omega0[cellI];
+            omegaf[faceI] = omega[cellI];
         }
     }
 

@@ -2,7 +2,7 @@
 cd ${0%/*} || exit 1    # run from this directory
 #set -x
 
-if [ "$ParaView_VERSION" != "3.98.1" ]
+if [ "$ParaView_VERSION" != "4.0.1" ]
     then
     if [ -d "$ParaView_DIR" -a -r "$ParaView_DIR" ]
     then

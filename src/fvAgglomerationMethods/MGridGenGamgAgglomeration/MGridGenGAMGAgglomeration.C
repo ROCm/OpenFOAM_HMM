@@ -25,6 +25,7 @@ License
 
 #include "MGridGenGAMGAgglomeration.H"
 #include "fvMesh.H"
+#include "processorPolyPatch.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -59,17 +60,20 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
 
     // Start geometric agglomeration from the cell volumes and areas of the mesh
     scalarField* VPtr = const_cast<scalarField*>(&fvMesh_.cellVolumes());
-    SubField<vector> Sf(fvMesh_.faceAreas(), fvMesh_.nInternalFaces());
-    vectorField* SfPtr = const_cast<vectorField*>
+
+    scalarField magFaceAreas(sqrt(3.0)*mag(fvMesh_.faceAreas()));
+    SubField<scalar> magSf(magFaceAreas, fvMesh_.nInternalFaces());
+
+    scalarField* magSfPtr = const_cast<scalarField*>
     (
-        &Sf.operator const vectorField&()
+        &magSf.operator const scalarField&()
     );
 
     // Create the boundary area cell field
-    scalarField* SbPtr(new scalarField(fvMesh_.nCells(), 0));
+    scalarField* magSbPtr(new scalarField(fvMesh_.nCells(), 0));
 
     {
-        scalarField& Sb = *SbPtr;
+        scalarField& magSb = *magSbPtr;
 
         const labelList& own = fvMesh_.faceOwner();
         const vectorField& Sf = fvMesh_.faceAreas();
@@ -78,11 +82,32 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
         {
             if (!fvMesh_.isInternalFace(facei))
             {
-                Sb[own[facei]] += mag(Sf[facei]);
+                magSb[own[facei]] += mag(Sf[facei]);
             }
         }
     }
 
+    /*
+    {
+        scalarField& magSb = *magSbPtr;
+        const polyBoundaryMesh& patches = fvMesh_.boundaryMesh();
+
+        forAll(patches, patchi)
+        {
+            const polyPatch& pp = patches[patchi];
+
+            if (!(Pstream::parRun() && isA<processorPolyPatch>(pp)))
+            {
+                const labelUList& faceCells = pp.faceCells();
+                const vectorField& pSf = pp.faceAreas();
+                forAll(faceCells, pfi)
+                {
+                    magSb[faceCells[pfi]] += mag(pSf[pfi]);
+                }
+            }
+        }
+    }
+    */
 
     // Agglomerate until the required number of cells in the coarsest level
     // is reached
@@ -100,8 +125,8 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
             maxSize,
             meshLevel(nCreatedLevels).lduAddr(),
             *VPtr,
-            *SfPtr,
-            *SbPtr
+            *magSfPtr,
+            *magSbPtr
         );
 
         if (continueAgglomerating(nCoarseCells))
@@ -136,37 +161,37 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
 
         // Agglomerate the face areas field for the next level
         {
-            vectorField* aggSfPtr
+            scalarField* aggMagSfPtr
             (
-                new vectorField
+                new scalarField
                 (
                     meshLevels_[nCreatedLevels].upperAddr().size(),
-                    vector::zero
+                    0
                 )
             );
 
-            restrictFaceField(*aggSfPtr, *SfPtr, nCreatedLevels);
+            restrictFaceField(*aggMagSfPtr, *magSfPtr, nCreatedLevels);
 
             if (nCreatedLevels)
             {
-                delete SfPtr;
+                delete magSfPtr;
             }
 
-            SfPtr = aggSfPtr;
+            magSfPtr = aggMagSfPtr;
         }
 
         // Agglomerate the cell boundary areas field for the next level
         {
-            scalarField* aggSbPtr
+            scalarField* aggMagSbPtr
             (
                 new scalarField(meshLevels_[nCreatedLevels].size())
             );
 
             // Restrict but no parallel agglomeration (not supported)
-            restrictField(*aggSbPtr, *SbPtr, nCreatedLevels, false);
+            restrictField(*aggMagSbPtr, *magSbPtr, nCreatedLevels, false);
 
-            delete SbPtr;
-            SbPtr = aggSbPtr;
+            delete magSbPtr;
+            magSbPtr = aggMagSbPtr;
         }
 
         nCreatedLevels++;
@@ -179,9 +204,9 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
     if (nCreatedLevels)
     {
         delete VPtr;
-        delete SfPtr;
+        delete magSfPtr;
     }
-    delete SbPtr;
+    delete magSbPtr;
 }
 
 

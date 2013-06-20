@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,11 +30,6 @@ Description
 #include "fvMesh.H"
 #include "syncTools.H"
 
-//extern "C"
-//{
-//#   include "mgridgen.h"
-//}
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::MGridGenGAMGAgglomeration::
@@ -43,7 +38,7 @@ makeCompactCellFaceAddressingAndFaceWeights
     const lduAddressing& fineAddressing,
     List<idxtype>& cellCells,
     List<idxtype>& cellCellOffsets,
-    const vectorField& Si,
+    const scalarField& magSi,
     List<scalar>& faceWeights
 )
 {
@@ -92,8 +87,8 @@ makeCompactCellFaceAddressingAndFaceWeights
         cellCells[l1] = nei;
         cellCells[l2] = own;
 
-        faceWeights[l1] = mag(Si[facei]);
-        faceWeights[l2] = mag(Si[facei]);
+        faceWeights[l1] = magSi[facei];
+        faceWeights[l2] = magSi[facei];
     }
 }
 
@@ -105,8 +100,8 @@ Foam::tmp<Foam::labelField> Foam::MGridGenGAMGAgglomeration::agglomerate
     const label maxSize,
     const lduAddressing& fineAddressing,
     const scalarField& V,
-    const vectorField& Sf,
-    const scalarField& Sb
+    const scalarField& magSf,
+    const scalarField& magSb
 )
 {
     const label nFineCells = fineAddressing.size();
@@ -124,15 +119,15 @@ Foam::tmp<Foam::labelField> Foam::MGridGenGAMGAgglomeration::agglomerate
         fineAddressing,
         cellCells,
         cellCellOffsets,
-        Sf,
+        magSf,
         faceWeights
     );
 
     // agglomeration options.
     List<int> options(4, 0);
-    options[0] = 4;                   // globular agglom
-    options[1] = 6;                   // objective F3 and F2
-    options[2] = 128;                 // debugging output level
+    options[0] = 4;                     // globular agglom
+    options[1] = 6;                     // objective F3 and F2
+    options[2] = 128;                   // debugging output level
     options[3] = fvMesh_.nGeometricD(); // Dimensionality of the grid
 
 
@@ -145,7 +140,7 @@ Foam::tmp<Foam::labelField> Foam::MGridGenGAMGAgglomeration::agglomerate
         nFineCells,
         cellCellOffsets.begin(),
         const_cast<scalar*>(V.begin()),
-        const_cast<scalar*>(Sb.begin()),
+        const_cast<scalar*>(magSb.begin()),
         cellCells.begin(),
         faceWeights.begin(),
         minSize,
@@ -155,6 +150,25 @@ Foam::tmp<Foam::labelField> Foam::MGridGenGAMGAgglomeration::agglomerate
         &nCoarseCells,
         finalAgglom.begin()
     );
+
+    {
+        label nNewCoarseCells = 0;
+        labelList newRestrictAddr;
+        bool ok = checkRestriction
+        (
+            newRestrictAddr,
+            nNewCoarseCells,
+            fineAddressing,
+            finalAgglom,
+            nCoarseCells
+        );
+
+        if (!ok)
+        {
+            nCoarseCells = nNewCoarseCells;
+            finalAgglom.transfer(newRestrictAddr);
+        }
+    }
 
     return tmp<labelField>(new labelField(finalAgglom));
 }

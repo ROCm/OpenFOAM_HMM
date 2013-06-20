@@ -27,7 +27,7 @@ License
 #include "cellSizeAndAlignmentControls.H"
 #include "pointIOField.H"
 #include "scalarIOField.H"
-#include "tensorIOField.H"
+#include "triadIOField.H"
 #include "tetrahedron.H"
 #include "plane.H"
 #include "transform.H"
@@ -38,6 +38,8 @@ License
 namespace Foam
 {
 defineTypeNameAndDebug(cellShapeControlMesh, 0);
+
+word cellShapeControlMesh::meshSubDir = "cellShapeControlMesh";
 }
 
 
@@ -366,9 +368,89 @@ void Foam::cellShapeControlMesh::writeTriangulation()
 
 Foam::cellShapeControlMesh::cellShapeControlMesh(const Time& runTime)
 :
+    DistributedDelaunayMesh<CellSizeDelaunay>
+    (
+        runTime,
+        meshSubDir
+    ),
     runTime_(runTime),
     defaultCellSize_(0.0)
-{}
+{
+    if (this->vertexCount())
+    {
+        fvMesh mesh
+        (
+            IOobject
+            (
+                meshSubDir,
+                runTime.timeName(),
+                runTime,
+                IOobject::READ_IF_PRESENT,
+                IOobject::NO_WRITE
+            )
+        );
+
+        if (mesh.nPoints() == this->vertexCount())
+        {
+            pointScalarField sizes
+            (
+                IOobject
+                (
+                    "sizes",
+                    runTime.timeName(),
+                    meshSubDir,
+                    runTime,
+                    IOobject::READ_IF_PRESENT,
+                    IOobject::NO_WRITE
+                ),
+                pointMesh::New(mesh)
+            );
+
+            triadIOField alignments
+            (
+                IOobject
+                (
+                    "alignments",
+                    mesh.time().timeName(),
+                    meshSubDir,
+                    mesh.time(),
+                    IOobject::READ_IF_PRESENT,
+                    IOobject::AUTO_WRITE
+                )
+            );
+
+            if
+            (
+                sizes.size() == this->vertexCount()
+             && alignments.size() == this->vertexCount()
+            )
+            {
+                label count = 0;
+                for
+                (
+                    Finite_vertices_iterator vit = finite_vertices_begin();
+                    vit != finite_vertices_end();
+                    ++vit
+                )
+                {
+                    vit->targetCellSize() = sizes[count];
+                    vit->alignment() = alignments[count];
+                    count++;
+                }
+            }
+            else
+            {
+                FatalErrorIn
+                (
+                    "Foam::cellShapeControlMesh::cellShapeControlMesh"
+                    "(const Time&)"
+                )   << "Cell size point field is not the same size as the "
+                    << "mesh."
+                    << abort(FatalError);
+            }
+        }
+    }
+}
 
 
 //Foam::triangulatedMesh::triangulatedMesh
@@ -744,9 +826,7 @@ void Foam::cellShapeControlMesh::insertBoundingPoints
 
 void Foam::cellShapeControlMesh::write() const
 {
-    Info<< "Writing cell size and alignment mesh" << endl;
-
-    const fileName name("cellSizeAndAlignmentMesh");
+    Info<< "Writing " << meshSubDir << endl;
 
     // Reindex the cells
     label cellCount = 0;
@@ -763,17 +843,16 @@ void Foam::cellShapeControlMesh::write() const
         }
     }
 
-    labelList vertexMap;
+    DelaunayMesh<CellSizeDelaunay>::labelTolabelPairHashTable vertexMap;
     labelList cellMap;
 
-    autoPtr<fvMesh> meshPtr = DelaunayMesh<CellSizeDelaunay>::createMesh
+    autoPtr<polyMesh> meshPtr = DelaunayMesh<CellSizeDelaunay>::createMesh
     (
-        name,
-        runTime_,
+        meshSubDir,
         vertexMap,
         cellMap
     );
-    const fvMesh& mesh = meshPtr();
+    const polyMesh& mesh = meshPtr();
 
     pointScalarField sizes
     (
@@ -781,7 +860,8 @@ void Foam::cellShapeControlMesh::write() const
         (
             "sizes",
             mesh.time().timeName(),
-            mesh,
+            meshSubDir,
+            mesh.time(),
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
@@ -789,7 +869,22 @@ void Foam::cellShapeControlMesh::write() const
         scalar(0)
     );
 
-    OFstream str(runTime_.path()/"alignments.obj");
+    triadIOField alignments
+    (
+        IOobject
+        (
+            "alignments",
+            mesh.time().timeName(),
+            meshSubDir,
+            mesh.time(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        sizes.size()
+    );
+
+    // Write alignments
+//    OFstream str(runTime_.path()/"alignments.obj");
 
     for
     (
@@ -801,35 +896,41 @@ void Foam::cellShapeControlMesh::write() const
         if (!vit->farPoint())
         {
             // Populate sizes
-            sizes[vertexMap[vit->index()]] = vit->targetCellSize();
+            sizes[vertexMap[labelPair(vit->index(), vit->procIndex())]] =
+                vit->targetCellSize();
 
-            // Write alignments
-            const tensor& alignment = vit->alignment();
-            pointFromPoint pt = topoint(vit->point());
+            alignments[vertexMap[labelPair(vit->index(), vit->procIndex())]] =
+                vit->alignment();
 
-            if
-            (
-                alignment.x() == triad::unset[0]
-             || alignment.y() == triad::unset[0]
-             || alignment.z() == triad::unset[0]
-            )
-            {
-                Info<< "Bad alignment = " << vit->info();
-
-                vit->alignment() = tensor::I;
-
-                Info<< "New alignment = " << vit->info();
-
-                continue;
-            }
-
-            meshTools::writeOBJ(str, pt, alignment.x() + pt);
-            meshTools::writeOBJ(str, pt, alignment.y() + pt);
-            meshTools::writeOBJ(str, pt, alignment.z() + pt);
+//            // Write alignments
+//            const tensor& alignment = vit->alignment();
+//            pointFromPoint pt = topoint(vit->point());
+//
+//            if
+//            (
+//                alignment.x() == triad::unset[0]
+//             || alignment.y() == triad::unset[0]
+//             || alignment.z() == triad::unset[0]
+//            )
+//            {
+//                Info<< "Bad alignment = " << vit->info();
+//
+//                vit->alignment() = tensor::I;
+//
+//                Info<< "New alignment = " << vit->info();
+//
+//                continue;
+//            }
+//
+//            meshTools::writeOBJ(str, pt, alignment.x() + pt);
+//            meshTools::writeOBJ(str, pt, alignment.y() + pt);
+//            meshTools::writeOBJ(str, pt, alignment.z() + pt);
         }
     }
 
     mesh.write();
+    sizes.write();
+    alignments.write();
 }
 
 

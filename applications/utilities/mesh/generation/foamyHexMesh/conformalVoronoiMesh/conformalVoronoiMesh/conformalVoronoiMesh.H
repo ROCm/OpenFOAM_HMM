@@ -317,7 +317,7 @@ private:
         void insertPoints
         (
             List<Vb>& vertices,
-            bool distribute = true
+            bool distribute
         );
 
         //- Create a point-pair at a ppDist distance either side of
@@ -734,7 +734,8 @@ private:
         //- edge conformation location
         bool nearFeatureEdgeLocation
         (
-            pointIndexHit& pHit
+            const pointIndexHit& pHit,
+            pointIndexHit& nearestEdgeHit
         ) const;
 
         //- Build or rebuild the edge location tree
@@ -764,6 +765,7 @@ private:
             pointIndexHitAndFeatureDynList& featureEdgeHits,
             DynamicList<label>& surfaceToTreeShape,
             DynamicList<label>& edgeToTreeShape,
+            Map<scalar>& surfacePtToEdgePtDist,
             bool firstPass
         ) const;
 
@@ -1036,6 +1038,10 @@ public:
 
 
     // Member Functions
+
+        void initialiseForMotion();
+
+        void initialiseForConformation();
 
         //- Move the vertices according to the controller, re-conforming to the
         //  surface as required

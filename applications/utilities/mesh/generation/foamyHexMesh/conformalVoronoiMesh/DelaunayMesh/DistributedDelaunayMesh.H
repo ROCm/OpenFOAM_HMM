@@ -135,11 +135,23 @@ public:
     // Constructors
 
         //- Construct from components
-        DistributedDelaunayMesh();
+        explicit DistributedDelaunayMesh(const Time& runTime);
+
+        DistributedDelaunayMesh
+        (
+            const Time& runTime,
+            const word& meshName
+        );
 
 
     //- Destructor
     ~DistributedDelaunayMesh();
+
+
+    // Queries
+
+        //- Use DelaunayMesh timeCheck function
+        using DelaunayMesh<Triangulation>::timeCheck;
 
 
     // Member Functions

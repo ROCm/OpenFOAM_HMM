@@ -247,6 +247,20 @@ Foam::cvControls::cvControls
     }
 
     writeTetDualMesh_ = Switch(filteringDict.lookup("writeTetDualMesh"));
+
+    writeCellShapeControlMesh_ =
+        Switch(filteringDict.lookup("writeCellShapeControlMesh"));
+
+    if (Pstream::parRun())
+    {
+        writeBackgroundMeshDecomposition_ =
+            Switch(filteringDict.lookup("writeBackgroundMeshDecomposition"));
+    }
+    else
+    {
+        writeBackgroundMeshDecomposition_ = Switch(false);
+    }
+
 }
 
 
