@@ -989,8 +989,9 @@ bool Foam::conformalVoronoiMesh::surfaceLocationConformsToInside
     {
         vectorField norm(1);
 
-        allGeometry_[info.second()].getNormal
+        geometryToConformTo_.getNormal
         (
+            info.second(),
             List<pointIndexHit>(1, info.first()),
             norm
         );
@@ -1133,8 +1134,9 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceAllIntersections
         {
             vectorField norm(1);
 
-            allGeometry_[hitSurfaceIntersection].getNormal
+            geometryToConformTo_.getNormal
             (
+                hitSurfaceIntersection,
                 List<pointIndexHit>(1, infoIntersection),
                 norm
             );

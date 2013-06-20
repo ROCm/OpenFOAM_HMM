@@ -240,7 +240,10 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
 
         const Foam::point& surfacePt(surfaceHit.hitPoint());
 
-        if (geometryToConformTo_.isBaffle(featureIndex, surfaceHit))
+        extendedFeatureEdgeMesh::sideVolumeType meshableSide =
+            geometryToConformTo_.meshableSide(featureIndex, surfaceHit);
+
+        if (meshableSide == extendedFeatureEdgeMesh::BOTH)
         {
             createBafflePointPair
             (
@@ -250,7 +253,7 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
                 pts
             );
         }
-        else
+        else if (meshableSide == extendedFeatureEdgeMesh::INSIDE)
         {
             createPointPair
             (
@@ -259,6 +262,25 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
                 normal,
                 pts
             );
+        }
+        else if (meshableSide == extendedFeatureEdgeMesh::OUTSIDE)
+        {
+            createPointPair
+            (
+                pointPairDistance(surfacePt),
+                surfacePt,
+                -normal,
+                pts
+            );
+        }
+        else
+        {
+            WarningIn
+            (
+                "Foam::conformalVoronoiMesh::insertSurfacePointPairs"
+                "(const pointIndexHitAndFeatureList&, const fileName)"
+            )   << meshableSide << ", bad"
+                << endl;
         }
     }
 

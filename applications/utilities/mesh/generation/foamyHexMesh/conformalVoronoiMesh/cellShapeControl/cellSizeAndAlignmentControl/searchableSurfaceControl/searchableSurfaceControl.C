@@ -429,18 +429,21 @@ void Foam::searchableSurfaceControl::initialVertices
 
                 pointAlignment.set(new triad(normals[0]));
 
-                // Limit cell size
-                const vector vN =
-                    infoList[0].hitPoint()
-                  - 2.0*normals[0]*defaultCellSize_;
+                if (infoList[0].hit())
+                {
+                    // Limit cell size
+                    const vector vN =
+                        infoList[0].hitPoint()
+                      - 2.0*normals[0]*defaultCellSize_;
 
-                List<pointIndexHit> intersectionList;
-                searchableSurface_.findLineAny
-                (
-                    ptField,
-                    pointField(1, vN),
-                    intersectionList
-                );
+                    List<pointIndexHit> intersectionList;
+                    searchableSurface_.findLineAny
+                    (
+                        ptField,
+                        pointField(1, vN),
+                        intersectionList
+                    );
+                }
 
 //                if (intersectionList[0].hit())
 //                {
@@ -455,12 +458,13 @@ void Foam::searchableSurfaceControl::initialVertices
         label priority = -1;
         if (!cellSize(pts[pI], sizes[pI], priority))
         {
-            FatalErrorIn
-            (
-                "Foam::searchableSurfaceControl::initialVertices"
-                "(pointField&, scalarField&, tensorField&)"
-            )   << "Could not calculate cell size"
-                << abort(FatalError);
+            sizes[pI] = defaultCellSize_;
+//            FatalErrorIn
+//            (
+//                "Foam::searchableSurfaceControl::initialVertices"
+//                "(pointField&, scalarField&, tensorField&)"
+//            )   << "Could not calculate cell size"
+//                << abort(FatalError);
         }
 
         sizes[pI] = min(limitedCellSize, sizes[pI]);

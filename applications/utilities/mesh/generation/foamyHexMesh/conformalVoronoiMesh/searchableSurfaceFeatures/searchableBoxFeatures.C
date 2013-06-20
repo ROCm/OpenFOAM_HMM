@@ -52,10 +52,16 @@ Foam::searchableBoxFeatures::searchableBoxFeatures
 )
 :
     searchableSurfaceFeatures(surface, dict),
-    mode_(extendedFeatureEdgeMesh::sideVolumeTypeNames_[dict.lookup("mode")])
+    mode_
+    (
+        extendedFeatureEdgeMesh::sideVolumeTypeNames_
+        [
+            dict.lookupOrDefault<word>("meshableSide", "INSIDE")
+        ]
+    )
 {
     Info<< indent
-        << "    Mesh mode = "
+        << "    Meshable region = "
         << extendedFeatureEdgeMesh::sideVolumeTypeNames_[mode_]
         << endl;
 }
