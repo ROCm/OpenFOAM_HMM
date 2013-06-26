@@ -17,6 +17,12 @@ FoamFile
 
 solvers
 {
+    alphaair
+    {
+        nAlphaCorr      1;
+        nAlphaSubCycles 2;
+    }
+
     p
     {
         solver          GAMG;
@@ -55,14 +61,6 @@ solvers
         relTol          0;
     }
 
-    "alpha.*"
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-10;
-        relTol          0;
-    }
-
     "(k|epsilon|Theta).*"
     {
         solver          PBiCG;
@@ -77,8 +75,6 @@ PIMPLE
     nOuterCorrectors 1;
     nCorrectors     2;
     nNonOrthogonalCorrectors 0;
-    nAlphaCorr      1;
-    nAlphaSubCycles 2;
 }
 
 relaxationFactors

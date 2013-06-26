@@ -56,20 +56,7 @@ reconstruct
 
     const fvMesh& mesh = ssf.mesh();
 
-    surfaceVectorField faceVols
-    (
-        mesh.Sf()/(mesh.magSf()*mesh.nonOrthDeltaCoeffs())
-    );
-
-    faceVols.internalField() *= (1.0 -  mesh.weights().internalField());
-    forAll(faceVols.boundaryField(), patchi)
-    {
-        if (faceVols.boundaryField()[patchi].coupled())
-        {
-            faceVols.boundaryField()[patchi] *=
-                (1.0 -  mesh.weights().boundaryField()[patchi]);
-        }
-    }
+    surfaceVectorField SfHat(mesh.Sf()/mesh.magSf());
 
     tmp<GeometricField<GradType, fvPatchField, volMesh> > treconField
     (
@@ -83,7 +70,7 @@ reconstruct
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            inv(surfaceSum(mesh.Sf()*faceVols))&surfaceSum(faceVols*ssf),
+            inv(surfaceSum(SfHat*mesh.Sf()))&surfaceSum(SfHat*ssf),
             zeroGradientFvPatchField<GradType>::typeName
         )
     );

@@ -17,6 +17,13 @@ FoamFile
 
 solvers
 {
+    alpha1
+    {
+        nAlphaCorr      1;
+        nAlphaSubCycles 1;
+        cAlpha          1;
+    }
+
     pcorr
     {
         solver          PCG;
@@ -78,10 +85,6 @@ PIMPLE
 
     nCorrectors     1;
     nNonOrthogonalCorrectors 0;
-
-    nAlphaCorr      1;
-    nAlphaSubCycles 1;
-    cAlpha          1;
 
     maxCo           0.9;
     maxAlphaCo      0.2;

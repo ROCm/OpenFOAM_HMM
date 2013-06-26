@@ -17,6 +17,13 @@ FoamFile
 
 solvers
 {
+    alpha1
+    {
+        nAlphaCorr      1;
+        nAlphaSubCycles 3;
+        cAlpha          1;
+    }
+
     pcorr
     {
         solver          PCG;
@@ -39,14 +46,6 @@ solvers
         maxIter         100;
     }
 
-/*    pcorr
-    {
-        solver          PCG;
-        preconditioner  DIC;
-        tolerance       1e-10;
-        relTol          0;
-    };
-*/
     p_rgh
     {
         $pcorr;
@@ -78,10 +77,6 @@ PIMPLE
     momentumPredictor no;
     nCorrectors     2;
     nNonOrthogonalCorrectors 0;
-
-    nAlphaCorr      1;
-    nAlphaSubCycles 3;
-    cAlpha          1;
 
     maxCo           0.5;
     maxAlphaCo      0.2;

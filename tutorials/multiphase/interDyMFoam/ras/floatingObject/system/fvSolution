@@ -29,6 +29,13 @@ solvers
         mergeLevels     1;
     }
 
+    alpha1
+    {
+        nAlphaCorr      1;
+        nAlphaSubCycles 3;
+        cAlpha          1;
+    }
+
     pcorr
     {
         solver          PCG;
@@ -115,9 +122,6 @@ PIMPLE
     momentumPredictor no;
     nCorrectors     2;
     nNonOrthogonalCorrectors 0;
-    nAlphaCorr      1;
-    nAlphaSubCycles 3;
-    cAlpha          1;
     correctPhi      yes;
 }
 

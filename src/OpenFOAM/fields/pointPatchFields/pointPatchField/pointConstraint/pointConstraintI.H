@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,12 @@ License
 inline Foam::pointConstraint::pointConstraint()
 :
     Tuple2<label, vector>(0, vector::zero)
+{}
+
+
+inline Foam::pointConstraint::pointConstraint(const Tuple2<label, vector>& pc)
+:
+    Tuple2<label, vector>(pc)
 {}
 
 
@@ -127,6 +133,29 @@ Foam::tensor Foam::pointConstraint::constraintTransformation() const
     {
         return tensor::zero;
     }
+}
+
+
+void Foam::combineConstraintsEqOp::operator()
+(
+    pointConstraint& x,
+    const pointConstraint& y
+) const
+{
+    x.combine(y);
+}
+
+
+Foam::pointConstraint Foam::transform
+(
+    const tensor& tt,
+    const pointConstraint& v
+)
+{
+    return pointConstraint
+    (
+        Tuple2<label, vector>(v.first(), transform(tt, v.second()))
+    );
 }
 
 

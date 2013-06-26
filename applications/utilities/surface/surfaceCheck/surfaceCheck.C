@@ -35,6 +35,7 @@ Description
 #include "triSurfaceSearch.H"
 #include "argList.H"
 #include "OFstream.H"
+#include "OBJstream.H"
 #include "surfaceIntersection.H"
 #include "SortableList.H"
 #include "PatchTools.H"
@@ -615,8 +616,6 @@ int main(int argc, char *argv[])
 
             subSurf.write(subFileName);
         }
-
-        return 0;
     }
 
 
@@ -654,61 +653,75 @@ int main(int argc, char *argv[])
 
         triSurfaceSearch querySurf(surf);
 
-        //{
-        //    OBJstream intStream("selfInter2.obj");
-        //    const indexedOctree<treeDataTriSurface>& tree = querySurf.tree();
-        //    forAll(surf.edges(), edgeI)
-        //    {
-        //        const edge& e = surf.edges()[edgeI];
-        //
-        //        pointIndexHit hitInfo
-        //        (
-        //            tree.findLine
-        //            (
-        //                surf.points()[surf.meshPoints()[e[0]]],
-        //                surf.points()[surf.meshPoints()[e[1]]],
-        //                treeDataTriSurface::findSelfIntersectOp
-        //                (
-        //                    tree,
-        //                    edgeI
-        //                )
-        //            )
-        //        );
-        //
-        //        if (hitInfo.hit())
-        //        {
-        //            Pout<< "Found hit:" << hitInfo.hitPoint() << endl;
-        //            intStream.write(hitInfo.hitPoint());
-        //        }
-        //    }
-        //}
+        const indexedOctree<treeDataTriSurface>& tree = querySurf.tree();
 
-        surfaceIntersection inter(querySurf);
+        OBJstream intStream("selfInterPoints.obj");
 
-        if (inter.cutEdges().empty() && inter.cutPoints().empty())
+        label nInt = 0;
+
+        forAll(surf.edges(), edgeI)
+        {
+            const edge& e = surf.edges()[edgeI];
+
+            pointIndexHit hitInfo
+            (
+                tree.findLine
+                (
+                    surf.points()[surf.meshPoints()[e[0]]],
+                    surf.points()[surf.meshPoints()[e[1]]],
+                    treeDataTriSurface::findSelfIntersectOp
+                    (
+                        tree,
+                        edgeI
+                    )
+                )
+            );
+
+            if (hitInfo.hit())
+            {
+                intStream.write(hitInfo.hitPoint());
+                nInt++;
+            }
+        }
+
+        if (nInt == 0)
         {
             Info<< "Surface is not self-intersecting" << endl;
         }
         else
         {
-            Info<< "Surface is self-intersecting" << endl;
-            Info<< "Writing edges of intersection to selfInter.obj" << endl;
-
-            OFstream intStream("selfInter.obj");
-            forAll(inter.cutPoints(), cutPointI)
-            {
-                const point& pt = inter.cutPoints()[cutPointI];
-
-                intStream << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z()
-                    << endl;
-            }
-            forAll(inter.cutEdges(), cutEdgeI)
-            {
-                const edge& e = inter.cutEdges()[cutEdgeI];
-
-                intStream << "l " << e.start()+1 << ' ' << e.end()+1 << endl;
-            }
+            Info<< "Surface is self-intersecting at " << nInt
+                << " locations." << endl;
+            Info<< "Writing intersection points to " << intStream.name()
+                << endl;
         }
+
+        //surfaceIntersection inter(querySurf);
+        //
+        //if (inter.cutEdges().empty() && inter.cutPoints().empty())
+        //{
+        //    Info<< "Surface is not self-intersecting" << endl;
+        //}
+        //else
+        //{
+        //    Info<< "Surface is self-intersecting" << endl;
+        //    Info<< "Writing edges of intersection to selfInter.obj" << endl;
+        //
+        //    OFstream intStream("selfInter.obj");
+        //    forAll(inter.cutPoints(), cutPointI)
+        //    {
+        //        const point& pt = inter.cutPoints()[cutPointI];
+        //
+        //        intStream << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z()
+        //            << endl;
+        //    }
+        //    forAll(inter.cutEdges(), cutEdgeI)
+        //    {
+        //        const edge& e = inter.cutEdges()[cutEdgeI];
+        //
+        //        intStream << "l " << e.start()+1 << ' ' << e.end()+1 << endl;
+        //    }
+        //}
         Info<< endl;
     }
 

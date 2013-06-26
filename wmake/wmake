@@ -50,7 +50,6 @@ The 'target' is a Makefile target:
   e.g., Make/linux64GccDPOpt/fvMesh.o
 
 or a special target:
-  dwim              search up directories tree for Make sub-directory and build
   all               all subdirectories, uses any Allwmake files if they exist
   exe               build statically linked executable
   lib               build statically linked archive lib (.a)
@@ -86,9 +85,11 @@ do
     esac
 done
 
-#
-# check environment variables
-#
+
+#------------------------------------------------------------------------------
+# Check environment variables
+#------------------------------------------------------------------------------
+
 for check in WM_OPTIONS WM_LINK_LANGUAGE WM_DIR
 do
     eval test "\$$check" || {
@@ -103,13 +104,13 @@ done
 [ "$1" = exe -o \( "$WM_PROJECT" -a "$WM_PROJECT_DIR" \) ] || {
     echo "$Script error:" 1>&2
     echo "    environment variable \$WM_PROJECT or \$WM_PROJECT_DIR not set" 1>&2
-    echo  "   while building project library" 1>&2
+    echo "    while building project library" 1>&2
     exit 1
 }
 
 
 #------------------------------------------------------------------------------
-# Select the version of make to be used
+# Select the version of make use
 #------------------------------------------------------------------------------
 
 # set WM_NCOMPPROCS automatically when both WM_HOSTS and WM_SCHEDULER are set
@@ -170,51 +171,6 @@ fi
 
 
 #------------------------------------------------------------------------------
-# Search up directories tree for the Make sub-directory and build there
-#------------------------------------------------------------------------------
-
-unset dir
-MakeDir=Make
-
-expandpath()
-{
-    dir=`dirname $1`
-    cwd=$PWD
-    cd $dir
-    exPath=$PWD
-    cd $cwd
-}
-
-find_target()
-{
-    expandpath $1
-
-    if [ "$exPath" = "$WM_PROJECT_DIR" -o "$exPath" = "$HOME" -o "$exPath" = "/" ]; then
-        echo "$Script error: could not find Make directory"
-    elif [ -d "$1/Make" ]; then
-        echo Target $1
-        dir=$1
-    else
-        find_target "$1/.."
-    fi
-}
-
-if [ "$makeType" = dwim ]
-then
-    find_target .
-    makeType=
-
-    if [ "$dir" ]
-    then
-        cd $dir 2>/dev/null || {
-            echo "$Script error: could not change to directory '$dir'" 1>&2
-            exit 1
-        }
-    fi
-fi
-
-
-#------------------------------------------------------------------------------
 # Recurse the application directories tree
 #------------------------------------------------------------------------------
 
@@ -236,18 +192,64 @@ fi
 
 
 #------------------------------------------------------------------------------
-# Require the existence of the 'Make' directory and 'files' file
+# Search up directories tree for the Make sub-directory and build there
+# Also check the existance of the 'files' file
 #------------------------------------------------------------------------------
 
-[ -d $MakeDir ] || {
-    echo "$Script error: '$MakeDir' directory does not exist in $PWD" 1>&2
-    exit 1
+unset dir
+MakeDir=Make
+
+expandpath()
+{
+    dir=`dirname $1`
+    cwd=$PWD
+    cd $dir
+    exPath=$PWD
+    cd $cwd
 }
+
+find_target()
+{
+    expandpath $1
+
+    if [ "$exPath" = "$WM_PROJECT_DIR" -o "$exPath" = "$HOME" -o "$exPath" = "/" ]
+    then
+        echo "$Script error: could not find Make directory"
+    elif [ -d "$1/Make" ]; then
+        echo "    Found target directory " $1
+        dir=$1
+    else
+        find_target "$1/.."
+    fi
+}
+
+if [ ! -d $MakeDir ]
+then
+    echo "$Script: '$MakeDir' directory does not exist in $PWD" 1>&2
+    echo "    Searching up directories tree for Make directory"
+
+    find_target .
+    makeType=
+
+    if [ "$dir" ]
+    then
+        cd $dir 2>/dev/null || {
+            echo "$Script error: could not change to directory '$dir'" 1>&2
+            exit 1
+        }
+    fi
+fi
+
 
 [ -r $MakeDir/files ] || {
     echo "$Script error: file '$MakeDir/files' does not exist in $PWD" 1>&2
     exit 1
 }
+
+
+#------------------------------------------------------------------------------
+# Transform options
+#------------------------------------------------------------------------------
 
 # transform "all" or no option to "libso" if that looks appropriate or remove it
 # so that the call to make builds the application
@@ -261,8 +263,11 @@ then
 fi
 
 
+#------------------------------------------------------------------------------
 # Spawn a sub-shell and unset MAKEFLAGS in that sub-shell to avoid
 # files and options being built in parallel
+#------------------------------------------------------------------------------
+
 (
     cd $MakeDir
     unset MAKEFLAGS
