@@ -166,6 +166,9 @@
     {
         phaseModel& phase = iter();
 
+        phase.phi().boundaryField() ==
+            (mesh.Sf().boundaryField() & phase.U().boundaryField());
+
         mrfZones.relativeFlux(phase.phi().oldTime());
         mrfZones.relativeFlux(phase.phi());
 
