@@ -1077,7 +1077,7 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
             {
                 // There is no (higher numbered) duplicate triangle
                 label newTriI = newToOldTri.size();
-                newToOldTri.append(triI);
+                newToOldTri.append(triMap[triI]);
                 tris[newTriI] = tris[triI];
             }
         }
