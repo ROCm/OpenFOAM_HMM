@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,10 +41,9 @@ SourceFiles
 #define pointConstraint_H
 
 #include "label.H"
-#include "uLabel.H"
 #include "vector.H"
-#include "tensor.H"
 #include "Tuple2.H"
+#include "transform.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -67,6 +66,9 @@ public:
         //- Construct null
         inline pointConstraint();
 
+        //- Construct from components
+        inline pointConstraint(const Tuple2<label, vector>&);
+
         //- Construct from Istream
         inline pointConstraint(Istream&);
 
@@ -82,6 +84,23 @@ public:
         //- Return the accumulated constraint transformation tensor
         inline tensor constraintTransformation() const;
 };
+
+
+//- reduce operator
+class combineConstraintsEqOp
+{
+public:
+    inline void operator()(pointConstraint&, const pointConstraint&) const;
+};
+
+//- transformation function
+inline pointConstraint transform(const tensor& tt, const pointConstraint& v);
+
+//- contiguous
+template<class T> bool contiguous();
+template<>
+inline bool contiguous<pointConstraint>()                {return true;}
+
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -56,7 +56,7 @@ Foam::searchableBoxFeatures::searchableBoxFeatures
     (
         extendedFeatureEdgeMesh::sideVolumeTypeNames_
         [
-            dict.lookupOrDefault<word>("meshableSide", "INSIDE")
+            dict.lookupOrDefault<word>("meshableSide", "inside")
         ]
     )
 {
@@ -182,7 +182,7 @@ Foam::searchableBoxFeatures::features() const
             8, 8, 8,
             12, 12, 12, 12,
             faceNormals,
-            PackedList<2>(12, mode_), // Need to be input by user
+            List<extendedFeatureEdgeMesh::sideVolumeType>(12, mode_),
             edgeDirections,
             normalDirections,
             edgeNormals,
