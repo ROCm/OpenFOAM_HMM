@@ -1056,6 +1056,16 @@ bool Foam::motionSmoother::scaleMesh
     pointField newPoints;
     {
         // Create overall displacement with same b.c.s as displacement_
+        wordList actualPatchTypes;
+        {
+            const pointBoundaryMesh& pbm = displacement_.mesh().boundary();
+            actualPatchTypes.setSize(pbm.size());
+            forAll(pbm, patchI)
+            {
+                actualPatchTypes[patchI] = pbm[patchI].type();
+            }
+        }
+
         pointVectorField totalDisplacement
         (
             IOobject
@@ -1068,7 +1078,8 @@ bool Foam::motionSmoother::scaleMesh
                 false
             ),
             scale_*displacement_,
-            displacement_.boundaryField().types()
+            displacement_.boundaryField().types(),
+            actualPatchTypes
         );
         correctBoundaryConditions(totalDisplacement);
 
