@@ -506,7 +506,7 @@ void extractSurface
     const polyMesh& mesh,
     const Time& runTime,
     const labelHashSet& includePatches,
-    const word& outFileName
+    const fileName& outFileName
 )
 {
     const polyBoundaryMesh& bMesh = mesh.boundaryMesh();
@@ -751,7 +751,7 @@ int main(int argc, char *argv[])
     Foam::argList::addOption
     (
         "outFile",
-        "word",
+        "fileName",
         "name of the file to save the simplified surface to"
     );
 
