@@ -125,9 +125,9 @@ then
     then
         if [ "$PYTHONPATH" ]
         then
-            export PYTHONPATH=$PYTHONPATH:$paraviewPython:$ParaView_DIR/lib/paraview-$ParaView_MAJOR
+            export PYTHONPATH=$PYTHONPATH:$paraviewPython:$ParaView_LIB_DIR
         else
-            export PYTHONPATH=$paraviewPython:$ParaView_DIR/lib/paraview-$ParaView_MAJOR
+            export PYTHONPATH=$paraviewPython:$ParaView_LIB_DIR
         fi
     fi
 else
