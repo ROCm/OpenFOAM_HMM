@@ -25,7 +25,7 @@
 #     config/paraview.csh
 #
 # Description
-#     Setup file for paraview-3.x
+#     Setup file for paraview-4.x
 #     Sourced from OpenFOAM-<VERSION>/etc/cshrc or from foamPV alias
 #
 # Note
@@ -49,7 +49,7 @@ foreach cmake ( cmake-2.8.4 cmake-2.8.3 cmake-2.8.1 )
 end
 
 #- ParaView version, automatically determine major version:
-setenv ParaView_VERSION 3.12.0
+setenv ParaView_VERSION 4.0.1
 setenv ParaView_MAJOR detect
 
 
@@ -81,7 +81,7 @@ endsw
 
 
 set paraviewInstDir=$WM_THIRD_PARTY_DIR/ParaView-${ParaView_VERSION}
-setenv ParaView_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/paraview-${ParaView_VERSION}
+setenv ParaView_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/ParaView-${ParaView_VERSION}
 
 # set paths if binaries or source are present
 if ( -r $ParaView_DIR || -r $paraviewInstDir ) then

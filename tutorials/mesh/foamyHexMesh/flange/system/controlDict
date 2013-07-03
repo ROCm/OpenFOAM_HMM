@@ -22,7 +22,7 @@ FoamFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     cvMesh;
+application     foamyHexMesh;
 
 startFrom       startTime;
 

@@ -25,7 +25,7 @@
 #     config/paraview.sh
 #
 # Description
-#     Setup file for paraview-3.x
+#     Setup file for paraview-4.x
 #     Sourced from OpenFOAM-<VERSION>/etc/bashrc or from foamPV alias
 #
 # Note
