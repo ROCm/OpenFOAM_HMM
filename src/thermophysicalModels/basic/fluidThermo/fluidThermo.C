@@ -72,4 +72,18 @@ Foam::fluidThermo::~fluidThermo()
 {}
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::tmp<Foam::volScalarField> Foam::fluidThermo::nu() const
+{
+    return mu()/rho();
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::fluidThermo::nu(const label patchi) const
+{
+    return mu(patchi)/rho(patchi);
+}
+
+
 // ************************************************************************* //

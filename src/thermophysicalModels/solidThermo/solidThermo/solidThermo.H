@@ -138,6 +138,9 @@ public:
             //- Density [kg/m^3]
             virtual tmp<volScalarField> rho() const;
 
+            //- Density for patch [kg/m^3]
+            virtual tmp<scalarField> rho(const label patchi) const = 0;
+
             //- Return non-const access to the local density field [kg/m^3]
             virtual volScalarField& rho();
 

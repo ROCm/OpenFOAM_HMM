@@ -260,7 +260,6 @@ public:
             virtual tmp<volScalarField> kappa() const;
 
             //- Thermal diffusivity of mixture for patch [J/m/s/K]
-
             virtual tmp<scalarField> kappa
             (
                 const label patchi
@@ -288,12 +287,6 @@ public:
             (
                 const scalarField& alphat,
                 const label patchi
-            ) const;
-
-             //- Thermal diffusivity for enthalpy of mixture [kg/m/s]
-            virtual tmp<scalarField> alpha
-            (
-                const label patchI
             ) const;
 
 

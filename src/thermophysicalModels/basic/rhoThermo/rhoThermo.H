@@ -127,6 +127,9 @@ public:
             //- Density [kg/m^3]
             virtual tmp<volScalarField> rho() const;
 
+            //- Density for patch [kg/m^3]
+            virtual tmp<scalarField> rho(const label patchi) const;
+
             //- Return non-const access to the local density field [kg/m^3]
             virtual volScalarField& rho();
 
@@ -138,6 +141,9 @@ public:
 
             //- Dynamic viscosity of mixture [kg/m/s]
             virtual const volScalarField& mu() const;
+
+            //- Dynamic viscosity of mixture for patch [kg/m/s]
+            virtual const scalarField& mu(const label patchi) const;
 };
 
 

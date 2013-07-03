@@ -115,6 +115,9 @@ public:
             //- Density [kg/m^3] - uses current value of pressure
             virtual tmp<volScalarField> rho() const;
 
+            //- Density for patch [kg/m^3]
+            virtual tmp<scalarField> rho(const label patchi) const;
+
             //- Compressibility [s^2/m^2]
             virtual const volScalarField& psi() const;
 
@@ -123,6 +126,9 @@ public:
 
             //- Dynamic viscosity of mixture [kg/m/s]
             virtual const volScalarField& mu() const;
+
+            //- Dynamic viscosity of mixture for patch [kg/m/s]
+            virtual const scalarField& mu(const label patchi) const;
 };
 
 

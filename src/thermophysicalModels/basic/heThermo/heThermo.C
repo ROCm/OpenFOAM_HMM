@@ -789,26 +789,6 @@ Foam::heThermo<BasicThermo, MixtureType>::alphaEff
 
 
 template<class BasicThermo, class MixtureType>
-Foam::tmp<Foam::scalarField>
-Foam::heThermo<BasicThermo, MixtureType>::alpha
-(
-    const label patchi
-) const
-{
-    return
-    this->CpByCpv
-    (
-        this->p_.boundaryField()[patchi],
-        this->T_.boundaryField()[patchi],
-        patchi
-    )
-   *(
-        this->alpha_.boundaryField()[patchi]
-    );
-}
-
-
-template<class BasicThermo, class MixtureType>
 bool Foam::heThermo<BasicThermo, MixtureType>::read()
 {
     if (BasicThermo::read())

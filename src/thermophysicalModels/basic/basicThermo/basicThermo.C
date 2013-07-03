@@ -493,6 +493,12 @@ const Foam::volScalarField& Foam::basicThermo::alpha() const
 }
 
 
+const Foam::scalarField& Foam::basicThermo::alpha(const label patchi) const
+{
+    return alpha_.boundaryField()[patchi];
+}
+
+
 bool Foam::basicThermo::read()
 {
     return regIOobject::read();
