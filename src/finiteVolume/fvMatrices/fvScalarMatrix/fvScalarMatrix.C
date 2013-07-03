@@ -118,7 +118,10 @@ Foam::solverPerformance Foam::fvMatrix<Foam::scalar>::fvSolver::solve
         totalSource
     );
 
-    solverPerf.print(Info(fvMat_.mesh().comm()));
+    if (solverPerformance::debug)
+    {
+        solverPerf.print(Info(fvMat_.mesh().comm()));
+    }
 
     fvMat_.diag() = saveDiag;
 
@@ -165,7 +168,10 @@ Foam::solverPerformance Foam::fvMatrix<Foam::scalar>::solveSegregated
         solverControls
     )->solve(psi.internalField(), totalSource);
 
-    solverPerf.print(Info(mesh().comm()));
+    if (solverPerformance::debug)
+    {
+        solverPerf.print(Info(mesh().comm()));
+    }
 
     diag() = saveDiag;
 
