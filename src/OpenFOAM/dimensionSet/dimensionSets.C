@@ -195,7 +195,12 @@ const dimensionSet dimPower(dimEnergy/dimTime);
 const dimensionSet dimPressure(dimForce/dimArea);
 const dimensionSet dimGasConstant(dimEnergy/dimMass/dimTemperature);
 const dimensionSet dimSpecificHeatCapacity(dimGasConstant);
+const dimensionSet dimViscosity(dimArea/dimTime);
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -239,16 +244,6 @@ Foam::dimensionSets::dimensionSets
         }
         conversionPivots_.setSize(conversion_.n());
         LUDecompose(conversion_, conversionPivots_);
-
-        //- possibly some optimisation here to detect identity matri
-        //if
-        //(
-        //    conversionPivots_ == identity(conversionPivots_.size())
-        // && conversion_ == I)
-        //)
-        //{
-        //    identity_ = true;
-        //}
     }
 }
 
@@ -258,9 +253,5 @@ void Foam::dimensionSets::coefficients(scalarField& exponents) const
     LUBacksubstitute(conversion_, conversionPivots_, exponents);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

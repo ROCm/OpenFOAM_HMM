@@ -267,6 +267,9 @@ public:
             //- Density [kg/m^3]
             virtual tmp<volScalarField> rho() const = 0;
 
+            //- Density for patch [kg/m^3]
+            virtual tmp<scalarField> rho(const label patchi) const = 0;
+
             //- Enthalpy/Internal energy [J/kg]
             //  Non-const access allowed for transport equations
             virtual volScalarField& he() = 0;
@@ -389,6 +392,12 @@ public:
 
             //- Thermal diffusivity for enthalpy of mixture [kg/m/s]
             virtual const volScalarField& alpha() const;
+
+            //- Thermal diffusivity for enthalpy of mixture for patch [kg/m/s]
+            virtual const scalarField& alpha
+            (
+                const label patchi
+            ) const;
 
 
         // Fields derived from transport state variables

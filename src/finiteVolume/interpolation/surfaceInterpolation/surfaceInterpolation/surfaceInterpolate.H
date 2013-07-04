@@ -39,6 +39,7 @@ SourceFiles
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
 #include "surfaceInterpolationScheme.H"
+#include "one.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -183,6 +184,12 @@ namespace fvc
     (
         const tmp<FieldField<fvPatchField, Type> >& tfvpff
     );
+
+    //- Interpolate 'one' returning 'one'
+    inline one interpolate(const one&)
+    {
+        return one();
+    }
 }
 
 

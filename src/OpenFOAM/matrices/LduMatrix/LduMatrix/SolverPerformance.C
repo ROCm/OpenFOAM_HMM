@@ -65,8 +65,7 @@ bool Foam::SolverPerformance<Type>::checkConvergence
 {
     if (debug >= 2)
     {
-        //Info<< solverName_
-        Pout<< solverName_
+        Info<< solverName_
             << ":  Iteration " << noIterations_
             << " residual = " << finalResidual_
             << endl;
