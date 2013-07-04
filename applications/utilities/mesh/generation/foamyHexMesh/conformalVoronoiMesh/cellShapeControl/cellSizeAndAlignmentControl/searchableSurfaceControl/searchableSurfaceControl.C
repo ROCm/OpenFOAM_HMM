@@ -174,7 +174,7 @@ Foam::searchableSurfaceControl::searchableSurfaceControl
     searchableSurface_(geometryToConformTo.geometry()[surfaceName_]),
     geometryToConformTo_(geometryToConformTo),
     cellSizeFunctions_(1),
-    regionToCellSizeFunctions_(geometryToConformTo_.patchNames().size(), -1),
+    regionToCellSizeFunctions_(searchableSurface_.regions().size(), -1),
     maxPriority_(-1)
 {
     Info<< indent << "Master settings:" << endl;
@@ -205,7 +205,7 @@ Foam::searchableSurfaceControl::searchableSurfaceControl
     if (controlFunctionDict.found("regions"))
     {
         const dictionary& regionsDict = controlFunctionDict.subDict("regions");
-        const wordList& regionNames = geometryToConformTo_.patchNames();
+        const wordList& regionNames = searchableSurface_.regions();
 
         label nRegions = regionsDict.size();
 
