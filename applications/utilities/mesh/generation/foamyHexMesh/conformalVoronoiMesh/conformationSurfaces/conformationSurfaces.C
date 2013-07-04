@@ -369,13 +369,15 @@ Foam::conformationSurfaces::conformationSurfaces
             featureI
         );
 
+        const wordList& rNames = allGeometry_[surfaces_[surfI]].regions();
+
         if (surfaceSubDict.found("regions"))
         {
             const dictionary& regionsDict = surfaceSubDict.subDict("regions");
 
-            forAll(regionNames, regionI)
+            forAll(rNames, regionI)
             {
-                const word& regionName = regionNames[regionI];
+                const word& regionName = rNames[regionI];
 
                 if (regionsDict.found(regionName))
                 {

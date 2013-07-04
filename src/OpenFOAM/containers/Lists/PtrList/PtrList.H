@@ -173,16 +173,12 @@ public:
 
         // Edit
 
-            //- Reset size of PtrList.  This can only be used to set the size
-            //  of an empty PtrList, extend a PtrList, remove entries from
-            //  the end of a PtrList. If the entries are non-empty they are
+            //- Reset size of PtrList. If extending the PtrList, new entries are
+            //  set to NULL. If truncating the PtrList, removed entries are
             //  deleted.
             void setSize(const label);
 
-            //- Reset size of PtrList.  This can only be used to set the size
-            //  of an empty PtrList, extend a PtrList, remove entries from
-            //  the end of a PtrList. If the entries are non-empty they are
-            //  deleted.
+            //- Alias for setSize(const label)
             inline void resize(const label);
 
             //- Clear the PtrList, i.e. set size to zero deleting all the
@@ -190,7 +186,7 @@ public:
             void clear();
 
             //- Append an element at the end of the list
-            inline void append(const T*);
+            inline void append(T*);
             inline void append(const autoPtr<T>&);
             inline void append(const tmp<T>&);
 
