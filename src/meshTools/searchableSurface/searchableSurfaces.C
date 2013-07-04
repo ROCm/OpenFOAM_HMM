@@ -301,7 +301,7 @@ Foam::label Foam::searchableSurfaces::findSurfaceRegionID
 {
     label surfaceIndex = findSurfaceID(surfaceName);
 
-    return findIndex(regionNames()[surfaceIndex], regionName);
+    return findIndex(this->operator[](surfaceIndex).regions(), regionName);
 }
 
 

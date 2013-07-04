@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -162,10 +162,10 @@ public:
 
         // Edit
 
-            //- Reset size of List.
+            //- Alias for setSize(const label)
             inline void resize(const label);
 
-            //- Reset size of List and value for new elements.
+            //- Alias for setSize(const label, const T&)
             inline void resize(const label, const T&);
 
             //- Reset size of List.
