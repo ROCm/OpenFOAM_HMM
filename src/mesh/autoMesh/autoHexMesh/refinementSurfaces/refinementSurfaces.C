@@ -418,7 +418,7 @@ Foam::refinementSurfaces::refinementSurfaces
     const labelList& maxLevel,
     const labelList& gapLevel,
     const scalarField& perpendicularAngle,
-    const PtrList<dictionary>& patchInfo
+    PtrList<dictionary>& patchInfo
 )
 :
     allGeometry_(allGeometry),
@@ -440,7 +440,7 @@ Foam::refinementSurfaces::refinementSurfaces
     {
         if (patchInfo.set(pI))
         {
-            patchInfo_[pI] = patchInfo[pI];
+            patchInfo_.set(pI, patchInfo.set(pI, NULL));
         }
     }
 }

@@ -169,7 +169,7 @@ public:
             const labelList& maxLevel,
             const labelList& gapLevel,
             const scalarField& perpendicularAngle,
-            const PtrList<dictionary>& patchInfo
+            PtrList<dictionary>& patchInfo
         );
 
 
