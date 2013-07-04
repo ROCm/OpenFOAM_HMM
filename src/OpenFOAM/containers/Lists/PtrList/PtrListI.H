@@ -80,7 +80,7 @@ inline void Foam::PtrList<T>::resize(const label newSize)
 
 
 template<class T>
-inline void Foam::PtrList<T>::append(const T* ptr)
+inline void Foam::PtrList<T>::append(T* ptr)
 {
     label sz = size();
     this->setSize(sz+1);

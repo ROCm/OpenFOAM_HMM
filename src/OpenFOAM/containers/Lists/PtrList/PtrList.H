@@ -190,7 +190,7 @@ public:
             void clear();
 
             //- Append an element at the end of the list
-            inline void append(const T*);
+            inline void append(T*);
             inline void append(const autoPtr<T>&);
             inline void append(const tmp<T>&);
 
