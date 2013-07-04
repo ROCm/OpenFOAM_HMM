@@ -158,7 +158,8 @@ inline const T& Foam::PtrList<T>::operator[](const label i) const
     if (!ptrs_[i])
     {
         FatalErrorIn("PtrList::operator[] const")
-            << "hanging pointer at index " << i
+            << "hanging pointer of type " << typeid(T).name()
+            << " at index " << i
             << " (size " << size()
             << "), cannot dereference"
             << abort(FatalError);
@@ -174,7 +175,8 @@ inline T& Foam::PtrList<T>::operator[](const label i)
     if (!ptrs_[i])
     {
         FatalErrorIn("PtrList::operator[]")
-            << "hanging pointer at index " << i
+            << "hanging pointer of type " << typeid(T).name()
+            << " at index " << i
             << " (size " << size()
             << "), cannot dereference"
             << abort(FatalError);

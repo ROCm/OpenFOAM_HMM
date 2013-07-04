@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -145,6 +145,7 @@ void Foam::PtrList<T>::setSize(const label newSize)
     {
         FatalErrorIn("PtrList<T>::setSize(const label)")
             << "bad set size " << newSize
+            << " for type " << typeid(T).name()
             << abort(FatalError);
     }
 
@@ -211,7 +212,8 @@ void Foam::PtrList<T>::reorder(const labelUList& oldToNew)
         FatalErrorIn("PtrList<T>::reorder(const labelUList&)")
             << "Size of map (" << oldToNew.size()
             << ") not equal to list size (" << size()
-            << ")." << abort(FatalError);
+            << ") for type " << typeid(T).name()
+            << abort(FatalError);
     }
 
     List<T*> newPtrs_(ptrs_.size(), reinterpret_cast<T*>(0));
@@ -225,6 +227,7 @@ void Foam::PtrList<T>::reorder(const labelUList& oldToNew)
             FatalErrorIn("PtrList<T>::reorder(const labelUList&)")
                 << "Illegal index " << newI << nl
                 << "Valid indices are 0.." << size()-1
+                << " for type " << typeid(T).name()
                 << abort(FatalError);
         }
 
@@ -232,7 +235,8 @@ void Foam::PtrList<T>::reorder(const labelUList& oldToNew)
         {
             FatalErrorIn("PtrList<T>::reorder(const labelUList&)")
                 << "reorder map is not unique; element " << newI
-                << " already set." << abort(FatalError);
+                << " already set for type " << typeid(T).name()
+                << abort(FatalError);
         }
         newPtrs_[newI] = ptrs_[i];
     }
@@ -242,8 +246,8 @@ void Foam::PtrList<T>::reorder(const labelUList& oldToNew)
         if (!newPtrs_[i])
         {
             FatalErrorIn("PtrList<T>::reorder(const labelUList&)")
-                << "Element " << i << " not set after reordering." << nl
-                << abort(FatalError);
+                << "Element " << i << " not set after reordering with type "
+                << typeid(T).name() << nl << abort(FatalError);
         }
     }
 
@@ -259,7 +263,7 @@ Foam::PtrList<T>& Foam::PtrList<T>::operator=(const PtrList<T>& a)
     if (this == &a)
     {
         FatalErrorIn("PtrList<T>::operator=(const PtrList<T>&)")
-            << "attempted assignment to self"
+            << "attempted assignment to self for type " << typeid(T).name()
             << abort(FatalError);
     }
 
@@ -283,6 +287,7 @@ Foam::PtrList<T>& Foam::PtrList<T>::operator=(const PtrList<T>& a)
     {
         FatalErrorIn("PtrList::operator=(const PtrList<T>&)")
             << "bad size: " << a.size()
+            << " for type " << typeid(T).name()
             << abort(FatalError);
     }
 
