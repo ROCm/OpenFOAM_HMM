@@ -42,7 +42,11 @@ geometry
         //maxTreeDepth 10;    // optional:depth of octree. Decrease only in case
                               // of memory limitations.
 
-        // Per region the patchname. If not provided will be <name>_<region>.
+        // Per region the patchname. If not provided will be <surface>_<region>.
+        // Note: this name cannot be used to identity this region in any
+        //       other part of this dictionary; it is only a name
+        //       for the combination of surface+region (which is only used
+        //       when creating patches)
         regions
         {
             secondSolid
