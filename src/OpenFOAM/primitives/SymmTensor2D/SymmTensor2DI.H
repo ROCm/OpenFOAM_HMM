@@ -443,7 +443,7 @@ class innerProduct<SymmTensor2D<Cmpt>, SymmTensor2D<Cmpt> >
 {
 public:
 
-    typedef SymmTensor2D<Cmpt> type;
+    typedef Tensor2D<Cmpt> type;
 };
 
 template<class Cmpt>
