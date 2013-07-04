@@ -209,7 +209,7 @@ Foam::searchableSurfaceControl::searchableSurfaceControl
 
         label nRegions = regionsDict.size();
 
-        regionCellSizeFunctions.setSize(nRegions + 1);
+        regionCellSizeFunctions.setSize(nRegions);
         defaultCellSizeRegions.setCapacity(nRegions);
 
         forAll(regionNames, regionI)
@@ -263,6 +263,8 @@ Foam::searchableSurfaceControl::searchableSurfaceControl
     }
     else if (nRegionCellSizeFunctions > 0)
     {
+        regionCellSizeFunctions.setSize(nRegionCellSizeFunctions + 1);
+
         regionCellSizeFunctions.set
         (
             nRegionCellSizeFunctions,
@@ -275,7 +277,7 @@ Foam::searchableSurfaceControl::searchableSurfaceControl
             )
         );
 
-        const wordList& regionNames = geometryToConformTo_.patchNames();
+        const wordList& regionNames = searchableSurface_.regions();
 
         forAll(regionNames, regionI)
         {
@@ -289,7 +291,7 @@ Foam::searchableSurfaceControl::searchableSurfaceControl
     }
     else
     {
-        const wordList& regionNames = geometryToConformTo_.patchNames();
+        const wordList& regionNames = searchableSurface_.regions();
 
         forAll(regionNames, regionI)
         {
