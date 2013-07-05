@@ -56,17 +56,30 @@ Description
 #include "UnsortedMeshedSurface.H"
 #include "MeshedSurface.H"
 #include "globalIndex.H"
+#include "IOmanip.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Convert size (as fraction of defaultCellSize) to refinement level
+label sizeCoeffToRefinement
+(
+    const scalar level0Coeff,   // ratio of hex cell size v.s. defaultCellSize
+    const scalar sizeCoeff
+)
+{
+     return round(::log(level0Coeff/sizeCoeff)/::log(2));
+}
+
 
 autoPtr<refinementSurfaces> createRefinementSurfaces
 (
     const searchableSurfaces& allGeometry,
     const dictionary& surfacesDict,
     const dictionary& shapeControlDict,
-    const label gapLevelIncrement
+    const label gapLevelIncrement,
+    const scalar level0Coeff
 )
 {
     autoPtr<refinementSurfaces> surfacePtr;
@@ -103,7 +116,6 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
     labelList globalMinLevel(surfI, 0);
     labelList globalMaxLevel(surfI, 0);
     labelList globalLevelIncr(surfI, 0);
-    scalarField globalAngle(surfI, -GREAT);
     PtrList<dictionary> globalPatchInfo(surfI);
     List<Map<label> > regionMinLevel(surfI);
     List<Map<label> > regionMaxLevel(surfI);
@@ -116,70 +128,39 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
     {
         const word& geomName = allGeometry.names()[geomI];
 
+
+        // Definition of surfaces to conform to
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
         if (surfacesDict.found(geomName))
         {
-            const dictionary& dict = surfacesDict.subDict(geomName);
-
             names[surfI] = geomName;
             surfaces[surfI] = geomI;
 
+            const dictionary& shapeDict = shapeControlDict.subDict(geomName);
+
             // Find the index in shapeControlDict
             // Invert surfaceCellSize to get the refinementLevel
-            if (shapeControlDict.found(geomName))
-            {
-                const dictionary& shapeDict =
-                    shapeControlDict.subDict(geomName);
 
-                const word scsFuncName =
-                    shapeDict.lookup("surfaceCellSizeFunction");
-                const dictionary& scsDict =
-                    shapeDict.subDict(scsFuncName + "Coeffs");
+            const word scsFuncName =
+                shapeDict.lookup("surfaceCellSizeFunction");
+            const dictionary& scsDict =
+                shapeDict.subDict(scsFuncName + "Coeffs");
 
-                const scalar surfaceCellSize =
-                    readScalar(scsDict.lookup("surfaceCellSizeCoeff"));
+            const scalar surfaceCellSize =
+                readScalar(scsDict.lookup("surfaceCellSizeCoeff"));
 
-                const label calculatedCellLevel =
-                    round(::log(1.0/surfaceCellSize)/::log(2));
-
-                globalMinLevel[surfI] = calculatedCellLevel;
-                globalMaxLevel[surfI] = calculatedCellLevel;
-                globalLevelIncr[surfI] = shapeDict.lookupOrDefault
-                (
-                    "gapLevelIncrement",
-                    gapLevelIncrement
-                );
-            }
-            else
-            {
-                FatalErrorIn
-                (
-                    "createRefinementSurfaces"
-                    "(const searchableSurfaces&, const dictionary>&)"
-                )   << "Illegal level specification for surface "
-                    << names[surfI]
-                    << " not found in shapeControlDict"
-                    << exit(FatalError);
-            }
-
-            if
+            const label refLevel = sizeCoeffToRefinement
             (
-                globalMinLevel[surfI] < 0
-             || globalMaxLevel[surfI] < globalMinLevel[surfI]
-             || globalLevelIncr[surfI] < 0
-            )
-            {
-                FatalErrorIn
-                (
-                    "createRefinementSurfaces"
-                    "(const searchableSurfaces&, const dictionary>&)"
-                )   << "Illegal level specification for surface "
-                    << names[surfI]
-                    << " : minLevel:" << globalMinLevel[surfI]
-                    << " maxLevel:" << globalMaxLevel[surfI]
-                    << " levelIncrement:" << globalLevelIncr[surfI]
-                    << exit(FatalError);
-            }
+                level0Coeff,
+                surfaceCellSize
+            );
 
+            globalMinLevel[surfI] = refLevel;
+            globalMaxLevel[surfI] = refLevel;
+            globalLevelIncr[surfI] = gapLevelIncrement;
+
+            const dictionary& dict = surfacesDict.subDict(geomName);
 
             // Global zone names per surface
             if (dict.readIfPresent("faceZone", faceZoneNames[surfI]))
@@ -264,7 +245,6 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
             }
 
 
-
             // Global perpendicular angle
             if (dict.found("patchInfo"))
             {
@@ -274,7 +254,9 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
                     dict.subDict("patchInfo").clone()
                 );
             }
-            dict.readIfPresent("perpendicularAngle", globalAngle[surfI]);
+
+
+            // Per region override of patchInfo
 
             if (dict.found("regions"))
             {
@@ -292,107 +274,6 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
                             regionNames[regionI]
                         );
 
-                        const dictionary& shapeDict =
-                            shapeControlDict.subDict(geomName);
-
-                        const dictionary& shapeControlRegionsDict =
-                            shapeDict.subDict("regions");
-
-                        if (shapeControlRegionsDict.found(regionNames[regionI]))
-                        {
-                            const dictionary& shapeControlRegionDict =
-                                shapeControlRegionsDict.subDict
-                                (
-                                    regionNames[regionI]
-                                );
-
-                            const word scsFuncName =
-                                shapeControlRegionDict.lookup
-                                (
-                                    "surfaceCellSizeFunction"
-                                );
-                            const dictionary& scsDict =
-                                shapeControlRegionDict.subDict
-                                (
-                                    scsFuncName + "Coeffs"
-                                );
-
-                            const scalar surfaceCellSize =
-                                readScalar
-                                (
-                                    scsDict.lookup("surfaceCellSizeCoeff")
-                                );
-
-                            const label calculatedCellLevel =
-                                round
-                                (
-                                    ::log(1.0/surfaceCellSize)/::log(2)
-                                );
-
-                            globalMinLevel[surfI] = calculatedCellLevel;
-                            globalMaxLevel[surfI] = calculatedCellLevel;
-                            globalLevelIncr[surfI] =
-                                shapeControlRegionDict.lookupOrDefault
-                                (
-                                    "gapLevelIncrement",
-                                    0
-                                );
-                        }
-                        else
-                        {
-                            FatalErrorIn
-                            (
-                                "createRefinementSurfaces"
-                                "(const searchableSurfaces&, const dictionary&)"
-                            )   << "Illegal level specification for surface "
-                                << regionNames[regionI]
-                                << " not found in shapeControlDict"
-                                << exit(FatalError);
-                        }
-
-                        const labelPair refLevel(regionDict.lookup("level"));
-
-                        regionMinLevel[surfI].insert(regionI, refLevel[0]);
-                        regionMaxLevel[surfI].insert(regionI, refLevel[1]);
-                        label levelIncr = regionDict.lookupOrDefault
-                        (
-                            "gapLevelIncrement",
-                            gapLevelIncrement
-                        );
-                        regionLevelIncr[surfI].insert(regionI, levelIncr);
-
-                        if
-                        (
-                            refLevel[0] < 0
-                         || refLevel[1] < refLevel[0]
-                         || levelIncr < 0
-                        )
-                        {
-                            FatalErrorIn
-                            (
-                                "createRefinementSurfaces"
-                                "(const searchableSurfaces&, const dictionary&)"
-                            )   << "Illegal level specification for surface "
-                                << names[surfI] << " region "
-                                << regionNames[regionI]
-                                << " : minLevel:" << refLevel[0]
-                                << " maxLevel:" << refLevel[1]
-                                << " levelIncrement:" << levelIncr
-                                << exit(FatalError);
-                        }
-
-                        if (regionDict.found("perpendicularAngle"))
-                        {
-                            regionAngle[surfI].insert
-                            (
-                                regionI,
-                                readScalar
-                                (
-                                    regionDict.lookup("perpendicularAngle")
-                                )
-                            );
-                        }
-
                         if (regionDict.found("patchInfo"))
                         {
                             regionPatchInfo[surfI].insert
@@ -401,6 +282,54 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
                                 regionDict.subDict("patchInfo").clone()
                             );
                         }
+                    }
+                }
+            }
+
+            // Per region override of cellSize
+            if (shapeDict.found("regions"))
+            {
+                const dictionary& shapeControlRegionsDict =
+                    shapeDict.subDict("regions");
+                const wordList& regionNames =
+                    allGeometry[surfaces[surfI]].regions();
+
+                forAll(regionNames, regionI)
+                {
+                    if (shapeControlRegionsDict.found(regionNames[regionI]))
+                    {
+                        const dictionary& shapeControlRegionDict =
+                            shapeControlRegionsDict.subDict
+                            (
+                                regionNames[regionI]
+                            );
+
+                        const word scsFuncName =
+                            shapeControlRegionDict.lookup
+                            (
+                                "surfaceCellSizeFunction"
+                            );
+                        const dictionary& scsDict =
+                            shapeControlRegionDict.subDict
+                            (
+                                scsFuncName + "Coeffs"
+                            );
+
+                        const scalar surfaceCellSize =
+                            readScalar
+                            (
+                                scsDict.lookup("surfaceCellSizeCoeff")
+                            );
+
+                        const label refLevel = sizeCoeffToRefinement
+                        (
+                            level0Coeff,
+                            surfaceCellSize
+                        );
+
+                        regionMinLevel[surfI].insert(regionI, refLevel);
+                        regionMaxLevel[surfI].insert(regionI, refLevel);
+                        regionLevelIncr[surfI].insert(regionI, 0);
                     }
                 }
             }
@@ -421,7 +350,6 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
     labelList minLevel(nRegions, 0);
     labelList maxLevel(nRegions, 0);
     labelList gapLevel(nRegions, -1);
-    scalarField perpendicularAngle(nRegions, -GREAT);
     PtrList<dictionary> patchInfo(nRegions);
 
     forAll(globalMinLevel, surfI)
@@ -438,7 +366,6 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
                 maxLevel[globalRegionI]
               + globalLevelIncr[surfI];
 
-            perpendicularAngle[globalRegionI] = globalAngle[surfI];
             if (globalPatchInfo.set(surfI))
             {
                 patchInfo.set
@@ -460,18 +387,11 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
                 maxLevel[globalRegionI]
               + regionLevelIncr[surfI][iter.key()];
         }
-        forAllConstIter(Map<scalar>, regionAngle[surfI], iter)
-        {
-            label globalRegionI = regionOffset[surfI] + iter.key();
-
-            perpendicularAngle[globalRegionI] = regionAngle[surfI][iter.key()];
-        }
 
         const Map<autoPtr<dictionary> >& localInfo = regionPatchInfo[surfI];
         forAllConstIter(Map<autoPtr<dictionary> >, localInfo, iter)
         {
             label globalRegionI = regionOffset[surfI] + iter.key();
-
             patchInfo.set(globalRegionI, iter()().clone());
         }
     }
@@ -492,10 +412,42 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
             minLevel,
             maxLevel,
             gapLevel,
-            perpendicularAngle,
+            scalarField(nRegions, -GREAT),  //perpendicularAngle,
             patchInfo
         )
     );
+
+
+    const refinementSurfaces& rf = surfacePtr();
+
+    Info<< setw(20) << "Region"
+        << setw(10) << "Min Level"
+        << setw(10) << "Max Level"
+        << setw(10) << "Gap Level" << nl
+        << setw(20) << "------"
+        << setw(10) << "---------"
+        << setw(10) << "---------"
+        << setw(10) << "---------" << endl;
+
+    forAll(rf.surfaces(), surfI)
+    {
+        label geomI = rf.surfaces()[surfI];
+
+        Info<< rf.names()[surfI] << ':' << nl;
+
+        const wordList& regionNames = allGeometry.regionNames()[geomI];
+
+        forAll(regionNames, regionI)
+        {
+            label globalI = rf.globalRegion(surfI, regionI);
+
+            Info<< setw(20) << regionNames[regionI]
+                << setw(10) << rf.minLevel()[globalI]
+                << setw(10) << rf.maxLevel()[globalI]
+                << setw(10) << rf.gapLevel()[globalI] << endl;
+        }
+    }
+
 
     return surfacePtr;
 }
@@ -1021,11 +973,22 @@ int main(int argc, char *argv[])
                 "geometryToConformTo"
             );
 
+        const dictionary& motionDict =
+            foamyHexMeshDict.subDict("motionControl");
+
         const dictionary& shapeControlDict =
-            foamyHexMeshDict.subDict("motionControl").subDict
-            (
-                "shapeControlFunctions"
-            );
+            motionDict.subDict("shapeControlFunctions");
+
+        // Calculate current ratio of hex cells v.s. wanted cell size
+        const scalar defaultCellSize =
+            readScalar(motionDict.lookup("defaultCellSize"));
+
+        const scalar initialCellSize = ::pow(meshPtr().V()[0], 1.0/3.0);
+
+        //Info<< "Wanted cell size  = " << defaultCellSize << endl;
+        //Info<< "Current cell size = " << initialCellSize << endl;
+        //Info<< "Fraction          = " << initialCellSize/defaultCellSize
+        //    << endl;
 
         surfacesPtr =
             createRefinementSurfaces
@@ -1033,7 +996,8 @@ int main(int argc, char *argv[])
                 allGeometry,
                 conformationDict,
                 shapeControlDict,
-                refineDict.lookupOrDefault("gapLevelIncrement", 0)
+                refineDict.lookupOrDefault("gapLevelIncrement", 0),
+                initialCellSize/defaultCellSize
             );
     }
     else
@@ -1187,9 +1151,12 @@ int main(int argc, char *argv[])
         globalToMasterPatch.setSize(surfaces.nRegions(), -1);
         globalToSlavePatch.setSize(surfaces.nRegions(), -1);
 
-        Info<< "Patch\tType\tRegion" << nl
-            << "-----\t----\t------"
-            << endl;
+        Info<< setw(8) << "Patch"
+            << setw(30) << "Type"
+            << setw(30) << "Region" << nl
+            << setw(8) << "-----"
+            << setw(30) << "----"
+            << setw(30) << "------" << endl;
 
         const labelList& surfaceGeometry = surfaces.surfaces();
         const PtrList<dictionary>& surfacePatchInfo = surfaces.patchInfo();
@@ -1231,8 +1198,9 @@ int main(int argc, char *argv[])
                         );
                     }
 
-                    Info<< patchI << '\t' << mesh.boundaryMesh()[patchI].type()
-                        << '\t' << regNames[i] << nl;
+                    Info<< setw(8) << patchI
+                        << setw(30) << mesh.boundaryMesh()[patchI].type()
+                        << setw(30) << regNames[i] << nl;
 
                     globalToMasterPatch[globalRegionI] = patchI;
                     globalToSlavePatch[globalRegionI] = patchI;
@@ -1269,9 +1237,9 @@ int main(int argc, char *argv[])
                             );
                         }
 
-                        Info<< patchI << '\t'
-                            << mesh.boundaryMesh()[patchI].type()
-                            << '\t' << regNames[i] << nl;
+                        Info<< setw(8) << patchI
+                            << setw(30) << mesh.boundaryMesh()[patchI].type()
+                            << setw(30) << regNames[i] << nl;
 
                         globalToMasterPatch[globalRegionI] = patchI;
                     }
@@ -1300,9 +1268,9 @@ int main(int argc, char *argv[])
                             );
                         }
 
-                        Info<< patchI << '\t'
-                            << mesh.boundaryMesh()[patchI].type()
-                            << '\t' << slaveName << nl;
+                        Info<< setw(8) << patchI
+                            << setw(30) << mesh.boundaryMesh()[patchI].type()
+                            << setw(30) << slaveName << nl;
 
                         globalToSlavePatch[globalRegionI] = patchI;
                     }
