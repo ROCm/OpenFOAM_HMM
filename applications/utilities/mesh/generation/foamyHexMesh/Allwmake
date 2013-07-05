@@ -2,10 +2,13 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-wmake libso conformalVoronoiMesh
-wmake
-#wmake cvMeshBackgroundMesh
-#(cd cvMeshSurfaceSimplify && ./Allwmake)
-#wmake cellSizeAndAlignmentGrid
+if [ -d "$CGAL_ARCH_PATH" ]
+then
+    wmake libso conformalVoronoiMesh
+    wmake
+    #wmake cvMeshBackgroundMesh
+    #(cd cvMeshSurfaceSimplify && ./Allwmake)
+    #wmake cellSizeAndAlignmentGrid
+fi
 
 # ----------------------------------------------------------------- end-of-file
