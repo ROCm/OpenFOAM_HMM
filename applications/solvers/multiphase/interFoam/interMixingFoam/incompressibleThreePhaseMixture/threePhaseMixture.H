@@ -158,6 +158,12 @@ public:
             return U_;
         }
 
+        //- Return the flux
+        const surfaceScalarField& phi() const
+        {
+            return phi_;
+        }
+
         //- Return the dynamic laminar viscosity
         tmp<volScalarField> mu() const;
 
