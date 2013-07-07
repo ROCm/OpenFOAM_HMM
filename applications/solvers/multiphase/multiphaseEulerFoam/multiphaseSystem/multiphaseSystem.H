@@ -43,6 +43,7 @@ SourceFiles
 #define multiphaseSystem_H
 
 #include "incompressible/transportModel/transportModel.H"
+#include "IOdictionary.H"
 #include "phaseModel.H"
 #include "PtrDictionary.H"
 #include "volFields.H"
@@ -61,6 +62,7 @@ namespace Foam
 
 class multiphaseSystem
 :
+    public IOdictionary,
     public transportModel
 {
 
@@ -255,8 +257,14 @@ public:
         //- Return the mixture density
         tmp<volScalarField> rho() const;
 
+        //- Return the mixture density for patch
+        tmp<scalarField> rho(const label patchi) const;
+
         //- Return the mixture laminar viscosity
         tmp<volScalarField> nu() const;
+
+        //- Return the laminar viscosity for patch
+        tmp<scalarField> nu(const label patchi) const;
 
         //- Return the virtual-mass coefficient for the given phase
         tmp<volScalarField> Cvm(const phaseModel& phase) const;

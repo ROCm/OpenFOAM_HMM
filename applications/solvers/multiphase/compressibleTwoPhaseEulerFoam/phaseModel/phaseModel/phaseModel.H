@@ -112,7 +112,13 @@ public:
 
         tmp<volScalarField> nu() const
         {
-            return thermo_->mu()/thermo_->rho();
+            return thermo_->nu();
+        }
+
+        //- Return the laminar viscosity for patch
+        tmp<scalarField> nu(const label patchi) const
+        {
+            return thermo_->nu(patchi);
         }
 
         tmp<volScalarField> kappa() const

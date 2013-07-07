@@ -35,6 +35,7 @@ SourceFiles
 #define threePhaseMixture_H
 
 #include "incompressible/transportModel/transportModel.H"
+#include "IOdictionary.H"
 #include "incompressible/viscosityModels/viscosityModel/viscosityModel.H"
 #include "dimensionedScalar.H"
 #include "volFields.H"
@@ -50,6 +51,7 @@ namespace Foam
 
 class threePhaseMixture
 :
+    public IOdictionary,
     public transportModel
 {
     // Private data
@@ -174,6 +176,12 @@ public:
         tmp<volScalarField> nu() const
         {
             return nu_;
+        }
+
+        //- Return the laminar viscosity for patch
+        tmp<scalarField> nu(const label patchi) const
+        {
+            return nu_.boundaryField()[patchi];
         }
 
         //- Return the face-interpolated dynamic laminar viscosity

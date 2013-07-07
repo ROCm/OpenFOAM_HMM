@@ -129,6 +129,12 @@ public:
             return nuModel_->nu();
         }
 
+        //- Return the laminar viscosity for patch
+        tmp<scalarField> nu(const label patchi) const
+        {
+            return nuModel_->nu(patchi);
+        }
+
         //- Return const-access to phase1 density
         const dimensionedScalar& rho() const
         {

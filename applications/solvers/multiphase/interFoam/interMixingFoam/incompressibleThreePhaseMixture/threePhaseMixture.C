@@ -50,6 +50,18 @@ Foam::threePhaseMixture::threePhaseMixture
     const surfaceScalarField& phi
 )
 :
+    IOdictionary
+    (
+        IOobject
+        (
+            "transportProperties",
+            U.time().constant(),
+            U.db(),
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE
+        )
+    ),
+
     transportModel(U, phi),
 
     phase1Name_("phase1"),

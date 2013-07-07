@@ -58,6 +58,17 @@ Foam::incompressibleTwoPhaseMixture::incompressibleTwoPhaseMixture
     const word& alpha2Name
 )
 :
+    IOdictionary
+    (
+        IOobject
+        (
+            "transportProperties",
+            U.time().constant(),
+            U.db(),
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE
+        )
+    ),
     transportModel(U, phi),
     twoPhaseMixture(U.mesh(), *this, alpha1Name, alpha2Name),
 
