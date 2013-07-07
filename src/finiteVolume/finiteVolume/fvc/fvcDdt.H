@@ -39,6 +39,7 @@ SourceFiles
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
 #include "dimensionedTypes.H"
+#include "geometricZeroField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,6 +78,29 @@ namespace fvc
         const volScalarField&,
         const GeometricField<Type, fvPatchField, volMesh>&
     );
+
+    template<class Type>
+    tmp<GeometricField<Type, fvPatchField, volMesh> > ddt
+    (
+        const one&,
+        const GeometricField<Type, fvPatchField, volMesh>&
+    );
+
+    template<class Type>
+    tmp<GeometricField<Type, fvPatchField, volMesh> > ddt
+    (
+        const GeometricField<Type, fvPatchField, volMesh>&,
+        const one&
+    );
+
+    inline geometricZeroField ddt
+    (
+        const one&,
+        const one&
+    )
+    {
+        return geometricZeroField();
+    }
 
     template<class Type>
     tmp
