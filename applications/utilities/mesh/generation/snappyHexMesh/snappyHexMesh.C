@@ -655,6 +655,7 @@ void writeMesh
 (
     const string& msg,
     const meshRefinement& meshRefiner,
+    const bool writeLevel,
     const label debug
 )
 {
@@ -663,19 +664,19 @@ void writeMesh
     meshRefiner.printMeshInfo(debug, msg);
     Info<< "Writing mesh to time " << meshRefiner.timeName() << endl;
 
-    meshRefiner.write(meshRefinement::MESH|meshRefinement::SCALARLEVELS, "");
+    label flag = meshRefinement::MESH;
+    if (writeLevel)
+    {
+        flag |= meshRefinement::SCALARLEVELS;
+    }
     if (debug & meshRefinement::OBJINTERSECTIONS)
     {
-        meshRefiner.write
-        (
-            meshRefinement::OBJINTERSECTIONS,
-            mesh.time().path()/meshRefiner.timeName()
-        );
+        flag |= meshRefinement::OBJINTERSECTIONS;
     }
+    meshRefiner.write(flag, mesh.time().path()/meshRefiner.timeName());
     Info<< "Wrote mesh in = "
         << mesh.time().cpuTimeIncrement() << " s." << endl;
 }
-
 
 
 int main(int argc, char *argv[])
@@ -692,20 +693,24 @@ int main(int argc, char *argv[])
         "boundBox",
         "simplify the surface using snappyHexMesh starting from a boundBox"
     );
-
+    Foam::argList::addBoolOption
+    (
+        "writeLevel",
+        "write pointLevel and cellLevel postprocessing files"
+    );
     Foam::argList::addOption
     (
         "patches",
         "(patch0 .. patchN)",
         "only triangulate selected patches (wildcards supported)"
     );
-
     Foam::argList::addOption
     (
         "outFile",
         "fileName",
         "name of the file to save the simplified surface to"
     );
+#   include "addDictOption.H"
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -714,6 +719,7 @@ int main(int argc, char *argv[])
     const bool overwrite = args.optionFound("overwrite");
     const bool checkGeometry = args.optionFound("checkGeometry");
     const bool surfaceSimplify = args.optionFound("surfaceSimplify");
+    const bool writeLevel = args.optionFound("writeLevel");
 
     autoPtr<fvMesh> meshPtr;
 
@@ -853,17 +859,10 @@ int main(int argc, char *argv[])
 
 
     // Read meshing dictionary
-    IOdictionary meshDict
-    (
-       IOobject
-       (
-            "snappyHexMeshDict",
-            runTime.system(),
-            mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE
-       )
-    );
+    const word dictName("snappyHexMeshDict");
+    #include "setSystemMeshDictionaryIO.H"
+    const IOdictionary meshDict(dictIO);
+
 
     // all surface geometry
     const dictionary& geometryDict = meshDict.subDict("geometry");
@@ -1360,6 +1359,7 @@ int main(int argc, char *argv[])
         (
             "Refined mesh",
             meshRefiner,
+            writeLevel,
             debug
         );
 
@@ -1392,6 +1392,7 @@ int main(int argc, char *argv[])
         (
             "Snapped mesh",
             meshRefiner,
+            writeLevel,
             debug
         );
 
@@ -1440,6 +1441,7 @@ int main(int argc, char *argv[])
         (
             "Layer mesh",
             meshRefiner,
+            writeLevel,
             debug
         );
 
