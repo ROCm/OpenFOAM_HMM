@@ -80,9 +80,11 @@ makeChemistryReaderType(foamChemistryReader, icoPoly8EThermoPhysics);
 
 makeChemistryReader(hConstSolidThermoPhysics);
 makeChemistryReader(hExponentialSolidThermoPhysics);
+makeChemistryReader(hExpKappaConstSolidThermoPhysics);
 
 makeChemistryReaderType(foamChemistryReader, hConstSolidThermoPhysics);
 makeChemistryReaderType(foamChemistryReader, hExponentialSolidThermoPhysics);
+makeChemistryReaderType(foamChemistryReader, hExpKappaConstSolidThermoPhysics);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
