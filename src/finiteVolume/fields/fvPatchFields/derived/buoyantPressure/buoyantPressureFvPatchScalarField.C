@@ -55,8 +55,19 @@ buoyantPressureFvPatchScalarField
     fixedGradientFvPatchScalarField(p, iF),
     rhoName_(dict.lookupOrDefault<word>("rho", "rho"))
 {
-    fvPatchField<scalar>::operator=(patchInternalField());
-    gradient() = 0.0;
+    if (dict.found("value") && dict.found("gradient"))
+    {
+        fvPatchField<scalar>::operator=
+        (
+            scalarField("value", dict, p.size())
+        );
+        gradient() = scalarField("gradient", dict, p.size());
+    }
+    else
+    {
+        fvPatchField<scalar>::operator=(patchInternalField());
+        gradient() = 0.0;
+    }
 }
 
 

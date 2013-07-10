@@ -77,11 +77,15 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
     DpName_(dict.lookupOrDefault<word>("Dp", "Dp")),
     adjoint_(dict.lookupOrDefault<Switch>("adjoint", false))
 {
-    if (dict.found("gradient"))
+    if (dict.found("value") && dict.found("gradient"))
     {
+        fvPatchField<scalar>::operator=
+        (
+            scalarField("value", dict, p.size())
+        );
         gradient() = scalarField("gradient", dict, p.size());
-        fixedGradientFvPatchScalarField::updateCoeffs();
-        fixedGradientFvPatchScalarField::evaluate();
+        //fixedGradientFvPatchScalarField::updateCoeffs();
+        //fixedGradientFvPatchScalarField::evaluate();
     }
     else
     {
@@ -190,7 +194,7 @@ void Foam::fixedFluxPressureFvPatchScalarField::updateCoeffs()
 
 void Foam::fixedFluxPressureFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fixedGradientFvPatchScalarField::write(os);
     writeEntryIfDifferent<word>(os, "phiHbyA", "phiHbyA", phiHbyAName_);
     writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
     writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
@@ -200,6 +204,7 @@ void Foam::fixedFluxPressureFvPatchScalarField::write(Ostream& os) const
         os.writeKeyword("adjoint") << adjoint_ << token::END_STATEMENT << nl;
     }
     gradient().writeEntry("gradient", os);
+    writeEntry("value", os);
 }
 
 
