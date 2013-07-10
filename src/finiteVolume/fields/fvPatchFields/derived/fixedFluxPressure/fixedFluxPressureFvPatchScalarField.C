@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,8 +84,6 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
             scalarField("value", dict, p.size())
         );
         gradient() = scalarField("gradient", dict, p.size());
-        //fixedGradientFvPatchScalarField::updateCoeffs();
-        //fixedGradientFvPatchScalarField::evaluate();
     }
     else
     {
@@ -203,7 +201,6 @@ void Foam::fixedFluxPressureFvPatchScalarField::write(Ostream& os) const
     {
         os.writeKeyword("adjoint") << adjoint_ << token::END_STATEMENT << nl;
     }
-    gradient().writeEntry("gradient", os);
     writeEntry("value", os);
 }
 
