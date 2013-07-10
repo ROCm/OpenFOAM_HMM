@@ -39,9 +39,10 @@ Ostream& operator<<
     const wallPointData<Type>& wDist
 )
 {
-    operator<<(os, static_cast<const wallPoint&>(wDist));
-
-    return os << wDist.data();
+    return os
+        << static_cast<const wallPoint&>(wDist)
+        << token::SPACE
+        << wDist.data();
 }
 
 
@@ -52,9 +53,7 @@ Istream& operator>>
     wallPointData<Type>& wDist
 )
 {
-    operator>>(is, static_cast<wallPoint&>(wDist));
-
-    return is >> wDist.data_;
+    return is >> static_cast<wallPoint&>(wDist) >> wDist.data_;
 }
 
 
