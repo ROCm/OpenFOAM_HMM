@@ -319,13 +319,6 @@ private:
                 const bool verbose = false
             ) const;
 
-//            bool isLineInsideOrOutside
-//            (
-//                const label nodeI,
-//                const point& start,
-//                const point& end
-//            ) const;
-
             //- Find any or nearest intersection of line between start and end.
             template<class FindIntersectOp>
             pointIndexHit findLine
@@ -548,19 +541,6 @@ public:
 
                 const FindNearestOp& fnOp
             ) const;
-
-//            bool findAnyOverlap
-//            (
-//                const point& sample,
-//                const scalar nearestDistSqr
-//            ) const;
-//
-//            bool findAnyOverlap
-//            (
-//                const label nodeI,
-//                const point& sample,
-//                const scalar nearestDistSqr
-//            ) const;
 
             //- Low level: calculate nearest starting from subnode.
             template<class FindNearestOp>
