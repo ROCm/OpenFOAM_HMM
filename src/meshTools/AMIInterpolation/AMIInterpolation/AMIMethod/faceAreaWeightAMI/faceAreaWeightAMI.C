@@ -481,7 +481,8 @@ Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::faceAreaWeightAMI
     const scalarField& srcMagSf,
     const scalarField& tgtMagSf,
     const faceAreaIntersect::triangulationMode& triMode,
-    const bool reverseTarget
+    const bool reverseTarget,
+    const bool restartUncoveredSourceFace
 )
 :
     AMIMethod<SourcePatch, TargetPatch>
@@ -492,7 +493,8 @@ Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::faceAreaWeightAMI
         tgtMagSf,
         triMode,
         reverseTarget
-    )
+    ),
+    restartUncoveredSourceFace_(restartUncoveredSourceFace)
 {}
 
 
@@ -557,7 +559,7 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
 
 
     // Check for badly covered faces
-    if (debug)
+    if (restartUncoveredSourceFace_)
     {
         restartUncoveredSourceFace
         (
