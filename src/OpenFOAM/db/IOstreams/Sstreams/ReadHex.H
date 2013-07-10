@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,20 +21,43 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+InNamespace
+    Foam
+
 Description
-    Read a non-delimited hex label
+    Read a hex integer from an input stream
+
+SourceFiles
+    ReadHex.C
 
 \*---------------------------------------------------------------------------*/
 
-#include "readHexLabel.H"
-#include "ReadHex.H"
+#ifndef ReadHex_H
+#define ReadHex_H
+
+#include "ISstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::label Foam::readHexLabel(ISstream& is)
+namespace Foam
 {
-    return ReadHex<label>(is);
-}
 
+//- Read a hex label from an input stream
+template<class T>
+T ReadHex(ISstream&);
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "ReadHex.C"
+#endif
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //
