@@ -42,6 +42,7 @@ Description
 #include "treeDataTriSurface.H"
 #include "Random.H"
 #include "volumeType.H"
+#include "plane.H"
 
 using namespace Foam;
 
@@ -275,6 +276,31 @@ int main(int argc, char *argv[])
             }
         }
     }
+
+
+    if (meshSubsetDict.found("plane"))
+    {
+        const dictionary& planeDict = meshSubsetDict.subDict("plane");
+
+        const plane pl(planeDict);
+        const scalar distance(readScalar(planeDict.lookup("distance")));
+        const scalar cosAngle(readScalar(planeDict.lookup("cosAngle")));
+
+        // Select all triangles that are close to the plane and
+        // whose normal aligns with the plane as well.
+
+        forAll(surf1.faceCentres(), faceI)
+        {
+            const point& fc = surf1.faceCentres()[faceI];
+            const point& nf = surf1.faceNormals()[faceI];
+
+            if (pl.distance(fc) < distance && mag(pl.normal() & nf) > cosAngle)
+            {
+                facesToSubset[faceI] = true;
+            }
+        }
+    }
+
 
 
     //
