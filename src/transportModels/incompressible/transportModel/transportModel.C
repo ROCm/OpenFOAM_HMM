@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,29 +24,22 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "transportModel.H"
-#include "viscosityModel.H"
-#include "volFields.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(transportModel, 0);
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::transportModel::transportModel
 (
-    const volVectorField& U,
-    const surfaceScalarField& phi
+    const volVectorField&,
+    const surfaceScalarField&
 )
-:
-    IOdictionary
-    (
-        IOobject
-        (
-            "transportProperties",
-            U.time().constant(),
-            U.db(),
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE
-        )
-    )
 {}
 
 
@@ -60,7 +53,7 @@ Foam::transportModel::~transportModel()
 
 bool Foam::transportModel::read()
 {
-    return regIOobject::read();
+    return true;
 }
 
 

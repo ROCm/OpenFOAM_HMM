@@ -65,6 +65,18 @@ Foam::multiphaseMixture::multiphaseMixture
     const surfaceScalarField& phi
 )
 :
+    IOdictionary
+    (
+        IOobject
+        (
+            "transportProperties",
+            U.time().constant(),
+            U.db(),
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE
+        )
+    ),
+
     transportModel(U, phi),
     phases_(lookup("phases"), phase::iNew(U, phi)),
 
@@ -116,7 +128,8 @@ Foam::multiphaseMixture::multiphaseMixture
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::multiphaseMixture::rho() const
+Foam::tmp<Foam::volScalarField>
+Foam::multiphaseMixture::rho() const
 {
     PtrDictionary<phase>::const_iterator iter = phases_.begin();
 
@@ -131,7 +144,24 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseMixture::rho() const
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::multiphaseMixture::mu() const
+Foam::tmp<Foam::scalarField>
+Foam::multiphaseMixture::rho(const label patchi) const
+{
+    PtrDictionary<phase>::const_iterator iter = phases_.begin();
+
+    tmp<scalarField> trho = iter().boundaryField()[patchi]*iter().rho().value();
+
+    for (++iter; iter != phases_.end(); ++iter)
+    {
+        trho() += iter().boundaryField()[patchi]*iter().rho().value();
+    }
+
+    return trho;
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::multiphaseMixture::mu() const
 {
     PtrDictionary<phase>::const_iterator iter = phases_.begin();
 
@@ -146,7 +176,30 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseMixture::mu() const
 }
 
 
-Foam::tmp<Foam::surfaceScalarField> Foam::multiphaseMixture::muf() const
+Foam::tmp<Foam::scalarField>
+Foam::multiphaseMixture::mu(const label patchi) const
+{
+    PtrDictionary<phase>::const_iterator iter = phases_.begin();
+
+    tmp<scalarField> tmu =
+        iter().boundaryField()[patchi]
+       *iter().rho().value()
+       *iter().nu(patchi);
+
+    for (++iter; iter != phases_.end(); ++iter)
+    {
+        tmu() +=
+            iter().boundaryField()[patchi]
+           *iter().rho().value()
+           *iter().nu(patchi);
+    }
+
+    return tmu;
+}
+
+
+Foam::tmp<Foam::surfaceScalarField>
+Foam::multiphaseMixture::muf() const
 {
     PtrDictionary<phase>::const_iterator iter = phases_.begin();
 
@@ -163,13 +216,22 @@ Foam::tmp<Foam::surfaceScalarField> Foam::multiphaseMixture::muf() const
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::multiphaseMixture::nu() const
+Foam::tmp<Foam::volScalarField>
+Foam::multiphaseMixture::nu() const
 {
     return mu()/rho();
 }
 
 
-Foam::tmp<Foam::surfaceScalarField> Foam::multiphaseMixture::nuf() const
+Foam::tmp<Foam::scalarField>
+Foam::multiphaseMixture::nu(const label patchi) const
+{
+    return mu(patchi)/rho(patchi);
+}
+
+
+Foam::tmp<Foam::surfaceScalarField>
+Foam::multiphaseMixture::nuf() const
 {
     return muf()/fvc::interpolate(rho());
 }

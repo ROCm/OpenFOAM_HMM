@@ -192,9 +192,9 @@ void turbulentHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
         patch().lookupPatchField<volScalarField, scalar>(alphaEffName_);
 
     // retrieve (constant) specific heat capacity from transport dictionary
-    const turbulenceModel& turbulence =
-        db().lookupObject<turbulenceModel>("turbulenceModel");
-    const scalar Cp0(readScalar(turbulence.transport().lookup("Cp0")));
+    const IOdictionary& transportProperties =
+        db().lookupObject<IOdictionary>("transportProperties");
+    const scalar Cp0(readScalar(transportProperties.lookup("Cp0")));
 
     switch (heatSource_)
     {

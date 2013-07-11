@@ -154,6 +154,9 @@ public:
         //- Return the laminar viscosity
         virtual tmp<volScalarField> nu() const = 0;
 
+        //- Return the laminar viscosity for patch
+        virtual tmp<scalarField> nu(const label patchi) const = 0;
+
         //- Correct the laminar viscosity
         virtual void correct() = 0;
 

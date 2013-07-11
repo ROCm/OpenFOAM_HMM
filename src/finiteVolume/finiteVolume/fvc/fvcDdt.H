@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,6 +39,8 @@ SourceFiles
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
 #include "dimensionedTypes.H"
+#include "one.H"
+#include "geometricZeroField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,6 +79,29 @@ namespace fvc
         const volScalarField&,
         const GeometricField<Type, fvPatchField, volMesh>&
     );
+
+    template<class Type>
+    tmp<GeometricField<Type, fvPatchField, volMesh> > ddt
+    (
+        const one&,
+        const GeometricField<Type, fvPatchField, volMesh>&
+    );
+
+    template<class Type>
+    tmp<GeometricField<Type, fvPatchField, volMesh> > ddt
+    (
+        const GeometricField<Type, fvPatchField, volMesh>&,
+        const one&
+    );
+
+    inline geometricZeroField ddt
+    (
+        const one&,
+        const one&
+    )
+    {
+        return geometricZeroField();
+    }
 
     template<class Type>
     tmp

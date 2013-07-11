@@ -33,7 +33,7 @@ License
 #include "fluidThermo.H"
 #include "incompressible/turbulenceModel/turbulenceModel.H"
 #include "compressible/turbulenceModel/turbulenceModel.H"
-#include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
+#include "incompressible/transportModel/transportModel.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -94,12 +94,11 @@ Foam::tmp<Foam::volSymmTensorField> Foam::forces::devRhoReff() const
     }
     else if
     (
-        obr_.foundObject<singlePhaseTransportModel>("transportProperties")
+        obr_.foundObject<transportModel>("transportProperties")
     )
     {
-        const singlePhaseTransportModel& laminarT =
-            obr_.lookupObject<singlePhaseTransportModel>
-            ("transportProperties");
+        const transportModel& laminarT =
+            obr_.lookupObject<transportModel>("transportProperties");
 
         const volVectorField& U = obr_.lookupObject<volVectorField>(UName_);
 
@@ -138,12 +137,11 @@ Foam::tmp<Foam::volScalarField> Foam::forces::mu() const
     }
     else if
     (
-        obr_.foundObject<singlePhaseTransportModel>("transportProperties")
+        obr_.foundObject<transportModel>("transportProperties")
     )
     {
-        const singlePhaseTransportModel& laminarT =
-            obr_.lookupObject<singlePhaseTransportModel>
-            ("transportProperties");
+        const transportModel& laminarT =
+            obr_.lookupObject<transportModel>("transportProperties");
 
         return rho()*laminarT.nu();
     }

@@ -371,6 +371,18 @@ Foam::multiphaseSystem::multiphaseSystem
     const surfaceScalarField& phi
 )
 :
+    IOdictionary
+    (
+        IOobject
+        (
+            "transportProperties",
+            U.time().constant(),
+            U.db(),
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE
+        )
+    ),
+
     transportModel(U, phi),
 
     phases_(lookup("phases"), phaseModel::iNew(U.mesh())),
@@ -482,18 +494,54 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseSystem::rho() const
 }
 
 
+Foam::tmp<Foam::scalarField>
+Foam::multiphaseSystem::rho(const label patchi) const
+{
+    PtrDictionary<phaseModel>::const_iterator iter = phases_.begin();
+
+    tmp<scalarField> trho = iter().boundaryField()[patchi]*iter().rho().value();
+
+    for (++iter; iter != phases_.end(); ++iter)
+    {
+        trho() += iter().boundaryField()[patchi]*iter().rho().value();
+    }
+
+    return trho;
+}
+
+
 Foam::tmp<Foam::volScalarField> Foam::multiphaseSystem::nu() const
 {
     PtrDictionary<phaseModel>::const_iterator iter = phases_.begin();
 
-    tmp<volScalarField> tnu = iter()*iter().nu();
+    tmp<volScalarField> tmu = iter()*(iter().rho()*iter().nu());
 
     for (++iter; iter != phases_.end(); ++iter)
     {
-        tnu() += iter()*iter().nu();
+        tmu() += iter()*(iter().rho()*iter().nu());
     }
 
-    return tnu;
+    return tmu/rho();
+}
+
+
+Foam::tmp<Foam::scalarField>
+Foam::multiphaseSystem::nu(const label patchi) const
+{
+    PtrDictionary<phaseModel>::const_iterator iter = phases_.begin();
+
+    tmp<scalarField> tmu =
+        iter().boundaryField()[patchi]
+       *(iter().rho().value()*iter().nu().value());
+
+    for (++iter; iter != phases_.end(); ++iter)
+    {
+        tmu() +=
+            iter().boundaryField()[patchi]
+           *(iter().rho().value()*iter().nu().value());
+    }
+
+    return tmu/rho(patchi);
 }
 
 

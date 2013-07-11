@@ -32,6 +32,11 @@ Description
 
 #include "addToRunTimeSelectionTable.H"
 
+#include "noChemistrySolver.H"
+#include "EulerImplicit.H"
+#include "ode.H"
+#include "sequential.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -47,7 +52,8 @@ namespace Foam
     defineTemplateTypeNameAndDebugWithName                                    \
     (                                                                         \
         SS##Schem##Comp##SThermo##GThermo,                                    \
-        (#SS"<" + word(Schem::typeName_()) + "<"#Comp"," + SThermo::typeName()\
+        (#SS"<" + word(Schem::typeName_())                                    \
+      + "<"#Comp"," + SThermo::typeName()                                     \
       + "," + GThermo::typeName() + ">>").c_str(),                            \
         0                                                                     \
     );                                                                        \
@@ -57,6 +63,45 @@ namespace Foam
         Comp,                                                                 \
         SS##Schem##Comp##SThermo##GThermo,                                    \
         fvMesh                                                                \
+    );
+
+
+#define makeSolidChemistrySolverTypes(SolidChem, Comp, SThermo, GThermo)      \
+                                                                              \
+    makeSolidChemistrySolverType                                              \
+    (                                                                         \
+        noChemistrySolver,                                                    \
+        SolidChem,                                                            \
+        Comp,                                                                 \
+        SThermo,                                                              \
+        GThermo                                                               \
+    );                                                                        \
+                                                                              \
+    makeSolidChemistrySolverType                                              \
+    (                                                                         \
+        EulerImplicit,                                                        \
+        SolidChem,                                                            \
+        Comp,                                                                 \
+        SThermo,                                                              \
+        GThermo                                                               \
+    );                                                                        \
+                                                                              \
+    makeSolidChemistrySolverType                                              \
+    (                                                                         \
+        ode,                                                                  \
+        SolidChem,                                                            \
+        Comp,                                                                 \
+        SThermo,                                                              \
+        GThermo                                                               \
+    );                                                                        \
+                                                                              \
+    makeSolidChemistrySolverType                                              \
+    (                                                                         \
+        sequential,                                                           \
+        SolidChem,                                                            \
+        Comp,                                                                 \
+        SThermo,                                                              \
+        GThermo                                                               \
     );
 
 

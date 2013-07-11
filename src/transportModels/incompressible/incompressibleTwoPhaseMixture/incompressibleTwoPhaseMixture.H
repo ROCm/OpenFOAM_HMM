@@ -38,6 +38,7 @@ SourceFiles
 #include "incompressible/transportModel/transportModel.H"
 #include "incompressible/viscosityModels/viscosityModel/viscosityModel.H"
 #include "twoPhaseMixture.H"
+#include "IOdictionary.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -51,6 +52,7 @@ namespace Foam
 
 class incompressibleTwoPhaseMixture
 :
+    public IOdictionary,
     public transportModel,
     public twoPhaseMixture
 {
@@ -131,6 +133,12 @@ public:
         virtual tmp<volScalarField> nu() const
         {
             return nu_;
+        }
+
+        //- Return the laminar viscosity for patch
+        virtual tmp<scalarField> nu(const label patchi) const
+        {
+            return nu_.boundaryField()[patchi];
         }
 
         //- Return the face-interpolated kinematic laminar viscosity

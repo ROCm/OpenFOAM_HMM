@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,7 @@ SourceFiles
 #ifndef transportModel_H
 #define transportModel_H
 
-#include "IOdictionary.H"
+#include "primitiveFieldsFwd.H"
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
 
@@ -50,8 +50,6 @@ namespace Foam
 \*---------------------------------------------------------------------------*/
 
 class transportModel
-:
-    public IOdictionary
 {
     // Private Member Functions
 
@@ -64,6 +62,10 @@ class transportModel
 
 public:
 
+    //- Runtime type information
+    TypeName("transportModel");
+
+
     // Constructors
 
         //- Construct from components
@@ -71,7 +73,7 @@ public:
         (
             const volVectorField& U,
             const surfaceScalarField& phi
-        );
+        );\
 
 
     //- Destructor
@@ -82,6 +84,9 @@ public:
 
         //- Return the laminar viscosity
         virtual tmp<volScalarField> nu() const = 0;
+
+        //- Return the laminar viscosity for patch
+        virtual tmp<scalarField> nu(const label patchi) const = 0;
 
         //- Correct the laminar viscosity
         virtual void correct() = 0;

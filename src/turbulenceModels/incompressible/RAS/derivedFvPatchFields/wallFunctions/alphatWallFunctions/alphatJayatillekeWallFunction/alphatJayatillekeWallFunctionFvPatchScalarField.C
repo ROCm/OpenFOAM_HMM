@@ -212,9 +212,14 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::updateCoeffs()
     const tmp<volScalarField> tk = turbModel.k();
     const volScalarField& k = tk();
 
+    const IOdictionary& transportProperties =
+        db().lookupObject<IOdictionary>("transportProperties");
+
     // Molecular Prandtl number
-    const scalar
-        Pr(dimensionedScalar(turbModel.transport().lookup("Pr")).value());
+    const scalar Pr
+    (
+        dimensionedScalar(transportProperties.lookup("Pr")).value()
+    );
 
     // Populate boundary values
     scalarField& alphatw = *this;

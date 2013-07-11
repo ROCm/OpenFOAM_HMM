@@ -43,11 +43,11 @@ SourceFiles
 #define multiphaseMixture_H
 
 #include "incompressible/transportModel/transportModel.H"
+#include "IOdictionary.H"
 #include "phase.H"
 #include "PtrDictionary.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,6 +60,7 @@ namespace Foam
 
 class multiphaseMixture
 :
+    public IOdictionary,
     public transportModel
 {
 public:
@@ -229,14 +230,23 @@ public:
         //- Return the mixture density
         tmp<volScalarField> rho() const;
 
+        //- Return the mixture density for patch
+        tmp<scalarField> rho(const label patchi) const;
+
         //- Return the dynamic laminar viscosity
         tmp<volScalarField> mu() const;
+
+        //- Return the dynamic laminar viscosity for patch
+        tmp<scalarField> mu(const label patchi) const;
 
         //- Return the face-interpolated dynamic laminar viscosity
         tmp<surfaceScalarField> muf() const;
 
         //- Return the kinematic laminar viscosity
         tmp<volScalarField> nu() const;
+
+        //- Return the laminar viscosity for patch
+        tmp<scalarField> nu(const label patchi) const;
 
         //- Return the face-interpolated dynamic laminar viscosity
         tmp<surfaceScalarField> nuf() const;

@@ -102,6 +102,12 @@ public:
             return nu_;
         }
 
+        //- Return the laminar viscosity for patch
+        tmp<scalarField> nu(const label patchi) const
+        {
+            return nu_.boundaryField()[patchi];
+        }
+
         //- Correct the laminar viscosity
         void correct()
         {
