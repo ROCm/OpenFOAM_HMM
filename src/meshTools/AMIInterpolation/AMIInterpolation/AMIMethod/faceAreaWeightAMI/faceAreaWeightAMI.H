@@ -51,6 +51,13 @@ class faceAreaWeightAMI
 :
     public AMIMethod<SourcePatch, TargetPatch>
 {
+private:
+
+    // Private data
+
+        //- Flag to restart uncovered source faces
+        const bool restartUncoveredSourceFace_;
+
 
 protected:
 
@@ -136,7 +143,8 @@ public:
             const scalarField& srcMagSf,
             const scalarField& tgtMagSf,
             const faceAreaIntersect::triangulationMode& triMode,
-            const bool reverseTarget = false
+            const bool reverseTarget = false,
+            const bool restartUncoveredSourceFace = true
         );
 
 
