@@ -371,7 +371,6 @@ void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
         faceList faces;
         labelList owner;
         labelList neighbour;
-        wordList patchTypes;
         wordList patchNames;
         PtrList<dictionary> patchDicts;
         pointField cellCentres;
@@ -385,7 +384,6 @@ void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
             faces,
             owner,
             neighbour,
-            patchTypes,
             patchNames,
             patchDicts,
             cellCentres,
@@ -405,7 +403,6 @@ void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
             faces,
             owner,
             neighbour,
-            patchTypes,
             patchNames,
             patchDicts,
             cellCentres,
@@ -669,7 +666,6 @@ void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
 Foam::autoPtr<Foam::fvMesh> Foam::conformalVoronoiMesh::createDummyMesh
 (
     const IOobject& io,
-    const wordList& patchTypes,
     const wordList& patchNames,
     const PtrList<dictionary>& patchDicts
 ) const
@@ -690,7 +686,14 @@ Foam::autoPtr<Foam::fvMesh> Foam::conformalVoronoiMesh::createDummyMesh
 
     forAll(patches, patchI)
     {
-        if (patchTypes[patchI] == processorPolyPatch::typeName)
+        if
+        (
+            patchDicts.set(patchI)
+         && (
+                word(patchDicts[patchI].lookup("type"))
+             == processorPolyPatch::typeName
+            )
+        )
         {
             patches[patchI] = new processorPolyPatch
             (
@@ -708,7 +711,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::conformalVoronoiMesh::createDummyMesh
         {
             patches[patchI] = polyPatch::New
             (
-                patchTypes[patchI],
+                patchDicts[patchI].lookup("type"),
                 patchNames[patchI],
                 0,          //patchSizes[p],
                 0,          //patchStarts[p],
@@ -726,7 +729,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::conformalVoronoiMesh::createDummyMesh
 
 void Foam::conformalVoronoiMesh::checkProcessorPatchesMatch
 (
-    const wordList& patchTypes,
     const PtrList<dictionary>& patchDicts
 ) const
 {
@@ -737,9 +739,16 @@ void Foam::conformalVoronoiMesh::checkProcessorPatchesMatch
         labelList(Pstream::nProcs(), -1)
     );
 
-    forAll(patchTypes, patchI)
+    forAll(patchDicts, patchI)
     {
-        if (patchTypes[patchI] == processorPolyPatch::typeName)
+        if
+        (
+            patchDicts.set(patchI)
+         && (
+                word(patchDicts[patchI].lookup("type"))
+             == processorPolyPatch::typeName
+            )
+        )
         {
             const label procNeighb =
                 readLabel(patchDicts[patchI].lookup("neighbProcNo"));
@@ -848,7 +857,6 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
     const fileName& instance,
     const pointField& points,
     faceList& faces,
-    const wordList& patchTypes,
     const wordList& patchNames,
     const PtrList<dictionary>& patchDicts
 ) const
@@ -856,7 +864,7 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
     Info<< incrIndent << indent << "Reordering processor patches" << endl;
 
     Info<< incrIndent;
-    checkProcessorPatchesMatch(patchTypes, patchDicts);
+    checkProcessorPatchesMatch(patchDicts);
 
     // Create dummy mesh with correct proc boundaries to do sorting
     autoPtr<fvMesh> sortMeshPtr
@@ -872,7 +880,6 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
                 IOobject::NO_WRITE,
                 false
             ),
-            patchTypes,
             patchNames,
             patchDicts
         )
@@ -1034,7 +1041,6 @@ void Foam::conformalVoronoiMesh::writeMesh
     faceList& faces,
     labelList& owner,
     labelList& neighbour,
-    const wordList& patchTypes,
     const wordList& patchNames,
     const PtrList<dictionary>& patchDicts,
     const pointField& cellCentres,
@@ -1058,7 +1064,6 @@ void Foam::conformalVoronoiMesh::writeMesh
             instance,
             points,
             faces,
-            patchTypes,
             patchNames,
             patchDicts
         );
@@ -1094,7 +1099,14 @@ void Foam::conformalVoronoiMesh::writeMesh
     {
         label totalPatchSize = readLabel(patchDicts[p].lookup("nFaces"));
 
-        if (patchTypes[p] == processorPolyPatch::typeName)
+        if
+        (
+            patchDicts.set(p)
+         && (
+                word(patchDicts[p].lookup("type"))
+             == processorPolyPatch::typeName
+            )
+        )
         {
             const_cast<dictionary&>(patchDicts[p]).set
             (
@@ -1112,7 +1124,7 @@ void Foam::conformalVoronoiMesh::writeMesh
                     patchDicts[p],
                     nValidPatches,
                     mesh.boundaryMesh(),
-                    patchTypes[p]
+                    processorPolyPatch::typeName
                 );
 
                 nValidPatches++;
@@ -1127,7 +1139,6 @@ void Foam::conformalVoronoiMesh::writeMesh
             {
                 patches[nValidPatches] = polyPatch::New
                 (
-                    patchTypes[p],
                     patchNames[p],
                     patchDicts[p],
                     nValidPatches,

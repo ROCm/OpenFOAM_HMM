@@ -514,7 +514,6 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     faceList& faces,
     labelList& owner,
     labelList& neighbour,
-    wordList& patchTypes,
     wordList& patchNames,
     PtrList<dictionary>& patchDicts,
     pointField& cellCentres,
@@ -595,7 +594,6 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         faces,
         owner,
         neighbour,
-        patchTypes,
         patchNames,
         patchDicts,
         patchToDelaunayVertex,  // from patch face to Delaunay vertex (slavePp)
@@ -624,7 +622,6 @@ void Foam::conformalVoronoiMesh::calcTetMesh
     faceList& faces,
     labelList& owner,
     labelList& neighbour,
-    wordList& patchTypes,
     wordList& patchNames,
     PtrList<dictionary>& patchDicts
 )
@@ -679,7 +676,6 @@ void Foam::conformalVoronoiMesh::calcTetMesh
     patchNames.setSize(patchNames.size() + 1);
 
     patchNames[patchNames.size() - 1] = "foamyHexMesh_defaultPatch";
-    patchTypes.setSize(patchNames.size(), wallPolyPatch::typeName);
 
     label nPatches = patchNames.size();
 
@@ -1212,7 +1208,6 @@ Foam::conformalVoronoiMesh::createPolyMeshFromPoints
     faceList faces;
     labelList owner;
     labelList neighbour;
-    wordList patchTypes;
     wordList patchNames;
     PtrList<dictionary> patchDicts;
     pointField cellCentres;
@@ -1229,7 +1224,6 @@ Foam::conformalVoronoiMesh::createPolyMeshFromPoints
         faces,
         owner,
         neighbour,
-        patchTypes,
         patchNames,
         patchDicts,
         patchToDelaunayVertex,
@@ -1272,7 +1266,11 @@ Foam::conformalVoronoiMesh::createPolyMeshFromPoints
     {
         label totalPatchSize = readLabel(patchDicts[p].lookup("nFaces"));
 
-        if (patchTypes[p] == processorPolyPatch::typeName)
+        if
+        (
+            patchDicts.set(p)
+         && word(patchDicts[p].lookup("type")) == processorPolyPatch::typeName
+        )
         {
             // Do not create empty processor patches
             if (totalPatchSize > 0)
@@ -1285,7 +1283,7 @@ Foam::conformalVoronoiMesh::createPolyMeshFromPoints
                     patchDicts[p],
                     nValidPatches,
                     pMesh.boundaryMesh(),
-                    patchTypes[p]
+                    processorPolyPatch::typeName
                 );
 
                 nValidPatches++;
@@ -1300,7 +1298,6 @@ Foam::conformalVoronoiMesh::createPolyMeshFromPoints
             {
                 patches[nValidPatches] = polyPatch::New
                 (
-                    patchTypes[p],
                     patchNames[p],
                     patchDicts[p],
                     nValidPatches,
@@ -2026,13 +2023,11 @@ void Foam::conformalVoronoiMesh::reindexDualVertices
 Foam::label Foam::conformalVoronoiMesh::createPatchInfo
 (
     wordList& patchNames,
-    wordList& patchTypes,
     PtrList<dictionary>& patchDicts
 ) const
 {
     patchNames = geometryToConformTo_.patchNames();
 
-    patchTypes.setSize(patchNames.size() + 1, wallPolyPatch::typeName);
     patchDicts.setSize(patchNames.size() + 1);
 
     const PtrList<dictionary>& patchInfo = geometryToConformTo_.patchInfo();
@@ -2041,18 +2036,16 @@ Foam::label Foam::conformalVoronoiMesh::createPatchInfo
     {
         if (patchInfo.set(patchI))
         {
-            patchTypes[patchI] =
-                patchInfo[patchI].lookupOrDefault<word>
-                (
-                    "type",
-                    wallPolyPatch::typeName
-                );
-
             patchDicts.set(patchI, new dictionary(patchInfo[patchI]));
         }
         else
         {
             patchDicts.set(patchI, new dictionary());
+            patchDicts[patchI].set
+            (
+                "type",
+                wallPolyPatch::typeName
+            );
         }
     }
 
@@ -2060,6 +2053,11 @@ Foam::label Foam::conformalVoronoiMesh::createPatchInfo
     label defaultPatchIndex = patchNames.size() - 1;
     patchNames[defaultPatchIndex] = "foamyHexMesh_defaultPatch";
     patchDicts.set(defaultPatchIndex, new dictionary());
+    patchDicts[defaultPatchIndex].set
+    (
+        "type",
+        wallPolyPatch::typeName
+    );
 
     label nProcPatches = 0;
 
@@ -2117,7 +2115,6 @@ Foam::label Foam::conformalVoronoiMesh::createPatchInfo
         label nTotalPatches = nNonProcPatches + nProcPatches;
 
         patchNames.setSize(nTotalPatches);
-        patchTypes.setSize(nTotalPatches);
         patchDicts.setSize(nTotalPatches);
         for (label pI = nNonProcPatches; pI < nTotalPatches; ++pI)
         {
@@ -2130,9 +2127,6 @@ Foam::label Foam::conformalVoronoiMesh::createPatchInfo
         {
             if (procUsed[pUI])
             {
-                patchTypes[nNonProcPatches + procAddI] =
-                    processorPolyPatch::typeName;
-
                 patchNames[nNonProcPatches + procAddI] =
                     "procBoundary"
                    + name(Pstream::myProcNo())
@@ -2141,9 +2135,16 @@ Foam::label Foam::conformalVoronoiMesh::createPatchInfo
 
                 patchDicts[nNonProcPatches + procAddI].set
                 (
+                    "type",
+                    processorPolyPatch::typeName
+                );
+
+                patchDicts[nNonProcPatches + procAddI].set
+                (
                     "myProcNo",
                     Pstream::myProcNo()
                 );
+
                 patchDicts[nNonProcPatches + procAddI].set("neighbProcNo", pUI);
 
                 procAddI++;
@@ -2221,7 +2222,6 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
     faceList& faces,
     labelList& owner,
     labelList& neighbour,
-    wordList& patchTypes,
     wordList& patchNames,
     PtrList<dictionary>& patchDicts,
     labelListList& patchPointPairSlaves,
@@ -2232,7 +2232,6 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
     const label defaultPatchIndex = createPatchInfo
     (
         patchNames,
-        patchTypes,
         patchDicts
     );
 

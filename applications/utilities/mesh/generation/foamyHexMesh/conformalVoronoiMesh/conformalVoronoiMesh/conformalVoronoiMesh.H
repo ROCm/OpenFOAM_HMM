@@ -793,7 +793,6 @@ private:
             faceList& faces,
             labelList& owner,
             labelList& neighbour,
-            wordList& patchTypes,
             wordList& patchNames,
             PtrList<dictionary>& patchDicts,
             pointField& cellCentres,
@@ -810,7 +809,6 @@ private:
             faceList& faces,
             labelList& owner,
             labelList& neighbour,
-            wordList& patchTypes,
             wordList& patchNames,
             PtrList<dictionary>& patchDicts
         );
@@ -894,7 +892,6 @@ private:
         label createPatchInfo
         (
             wordList& patchNames,
-            wordList& patchTypes,
             PtrList<dictionary>& patchDicts
         ) const;
 
@@ -909,7 +906,6 @@ private:
             faceList& faces,
             labelList& owner,
             labelList& neighbour,
-            wordList& patchTypes,
             wordList& patchNames,
             PtrList<dictionary>& patchDicts,
             labelListList& patchPointPairSlaves,
@@ -976,7 +972,6 @@ private:
         autoPtr<fvMesh> createDummyMesh
         (
             const IOobject& io,
-            const wordList& patchTypes,
             const wordList& patchNames,
             const PtrList<dictionary>& patchDicts
         ) const;
@@ -986,7 +981,6 @@ private:
 
         void checkProcessorPatchesMatch
         (
-            const wordList& patchTypes,
             const PtrList<dictionary>& patchDicts
         ) const;
 
@@ -1005,7 +999,6 @@ private:
             const fileName& instance,
             const pointField& points,
             faceList& faces,
-            const wordList& patchTypes,
             const wordList& patchNames,
             const PtrList<dictionary>& patchDicts
         ) const;
@@ -1176,7 +1169,6 @@ public:
                 faceList& faces,
                 labelList& owner,
                 labelList& neighbour,
-                const wordList& patchTypes,
                 const wordList& patchNames,
                 const PtrList<dictionary>& patchDicts,
                 const pointField& cellCentres,
