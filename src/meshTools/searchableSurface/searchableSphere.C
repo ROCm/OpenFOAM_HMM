@@ -47,13 +47,11 @@ Foam::pointIndexHit Foam::searchableSphere::findNearest
 {
     pointIndexHit info(false, sample, -1);
 
-    const vector n(sample-centre_);
-    scalar magSqrN = magSqr(n);
+    const vector n(sample - centre_);
+    scalar magN = mag(n);
 
-    if (nearestDistSqr >= magSqrN)
+    if (nearestDistSqr >= sqr(magN - radius_))
     {
-        scalar magN = Foam::sqrt(magSqrN);
-
         if (magN < ROOTVSMALL)
         {
             info.rawPoint() = centre_ + vector(1,0,0)*radius_;
