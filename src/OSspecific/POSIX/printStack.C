@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ License
 #include "OStringStream.H"
 #include "OSspecific.H"
 #include "IFstream.H"
-#include "readHexLabel.H"
+#include "ReadHex.H"
 
 #include <cxxabi.h>
 #include <execinfo.h>
@@ -100,8 +100,8 @@ void printSourceFileAndLine
         unsigned long offset = ulong(info.dli_fbase);
 
         IStringStream addressStr(address.substr(2));
-        label addressValue = readHexLabel(addressStr);
-        label relativeAddress = addressValue-offset;
+        long addressValue = ReadHex<long>(addressStr);
+        long relativeAddress = addressValue-offset;
 
         // Reconstruct hex word from address
         OStringStream nStream;
@@ -211,7 +211,7 @@ void error::printStack(Ostream& os)
             {
                 string offsetString(line.substr(0, line.find('-')));
                 IStringStream offsetStr(offsetString);
-                addressMap.insert(libPath, readHexLabel(offsetStr));
+                addressMap.insert(libPath, ReadHex<label>(offsetStr));
             }
         }
     }

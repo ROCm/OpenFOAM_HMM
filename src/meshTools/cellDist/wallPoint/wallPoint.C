@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ License
 
 Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::wallPoint& wDist)
 {
-    return os << wDist.origin() << wDist.distSqr();
+    return os << wDist.origin() << token::SPACE << wDist.distSqr();
 }
 
 Foam::Istream& Foam::operator>>(Foam::Istream& is, Foam::wallPoint& wDist)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,48 +27,13 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "readHexLabel.H"
-#include <cctype>
+#include "ReadHex.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Foam::label Foam::readHexLabel(ISstream& is)
 {
-    // Takes into account that 'a' (or 'A') is 10
-    static const label alphaOffset = toupper('A') - 10;
-    // Takes into account that '0' is 0
-    static const label zeroOffset = int('0');
-
-    char c = 0;
-
-    // Get next non-whitespace character
-    while (is.get(c) && isspace(c))
-    {}
-
-    register label result = 0;
-    do
-    {
-        if (isspace(c) || c == 0) break;
-
-        if (!isxdigit(c))
-        {
-            FatalIOErrorIn("readHexLabel(ISstream&)", is)
-                << "Illegal hex digit: '" << c << "'"
-                << exit(FatalIOError);
-        }
-
-        result <<= 4;
-
-        if (isdigit(c))
-        {
-            result += int(c) - zeroOffset;
-        }
-        else
-        {
-            result += toupper(c) - alphaOffset;
-        }
-    } while (is.get(c));
-
-    return result;
+    return ReadHex<label>(is);
 }
 
 

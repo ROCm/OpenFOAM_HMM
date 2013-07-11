@@ -508,66 +508,6 @@ Foam::volumeType Foam::indexedOctree<Type>::getSide
 //
 
 
-//template<class Type>
-//bool Foam::indexedOctree<Type>::findAnyOverlap
-//(
-//    const label nodeI,
-//    const point& sample,
-//    const scalar nearestDistSqr
-//) const
-//{
-//    const node& nod = nodes_[nodeI];
-//
-//    // Determine order to walk through octants
-//    FixedList<direction, 8> octantOrder;
-//    nod.bb_.searchOrder(sample, octantOrder);
-//
-//    // Go into all suboctants (one containing sample first) and update
-//    // nearest.
-//    for (direction i = 0; i < 8; i++)
-//    {
-//        direction octant = octantOrder[i];
-//
-//        labelBits index = nod.subNodes_[octant];
-//
-//        if (isNode(index))
-//        {
-//            label subNodeI = getNode(index);
-//
-//            const treeBoundBox& subBb = nodes_[subNodeI].bb_;
-//
-//            if (overlaps(subBb.min(), subBb.max(), nearestDistSqr, sample))
-//            {
-//                return findAnyOverlap
-//                (
-//                    subNodeI,
-//                    sample,
-//                    nearestDistSqr
-//                );
-//            }
-//        }
-//        else if (isContent(index))
-//        {
-//            if
-//            (
-//                overlaps
-//                (
-//                    nod.bb_,
-//                    octant,
-//                    nearestDistSqr,
-//                    sample
-//                )
-//            )
-//            {
-//                return true;
-//            }
-//        }
-//    }
-//
-//    return false;
-//}
-
-
 // Find nearest point starting from nodeI
 template<class Type>
 template<class FindNearestOp>
@@ -1819,11 +1759,6 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
     label i = 0;
     for (; i < 100000; i++)
     {
-//        if (isLineInsideOrOutside(nodeI, treeStart, treeEnd))
-//        {
-//            return hitInfo;
-//        }
-
         // Ray-trace to end of current node. Updates point (either on triangle
         // in case of hit or on node bounding box in case of miss)
 
@@ -1979,38 +1914,6 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
 
     return hitInfo;
 }
-
-
-//template<class Type>
-//bool Foam::indexedOctree<Type>::isLineInsideOrOutside
-//(
-//    const label nodeI,
-//    const point& start,
-//    const point& end
-//) const
-//{
-//    const node& nod = nodes_[nodeI];
-//
-//    direction startOctant = nod.bb_.subOctant(start);
-//    direction endOctant = nod.bb_.subOctant(end);
-//
-//    if (startOctant == endOctant)
-//    {
-//        volumeType startOctantType
-//            = volumeType(nodeTypes_.get((nodeI<<3) + startOctant));
-//
-//        if
-//        (
-//            startOctantType == INSIDE || startOctantType == OUTSIDE
-//        )
-//        {
-//            //Info<< nodeI << " | " << start << " " << end << endl;
-//            return true;
-//        }
-//    }
-//
-//    return false;
-//}
 
 
 // Find first intersection

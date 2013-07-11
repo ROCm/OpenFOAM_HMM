@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -847,6 +847,30 @@ void Foam::addPatchCellLayer::setRefinement
                 << " at patch face " << i << abort(FatalError);
         }
     }
+
+    forAll(globalEdgeFaces, edgeI)
+    {
+        if (globalEdgeFaces[edgeI].size() > 2)
+        {
+            const edge& e = pp.edges()[edgeI];
+
+            if (nPointLayers[e[0]] > 0 || nPointLayers[e[1]] > 0)
+            {
+                FatalErrorIn
+                (
+                    "addPatchCellLayer::setRefinement"
+                    "(const scalar, const indirectPrimitivePatch&"
+                    ", const labelList&, const vectorField&, polyTopoChange&)"
+                )   << "Trying to extrude edge "
+                    << e.line(pp.localPoints())
+                    << " which is non-manifold (has "
+                    << globalEdgeFaces[edgeI].size()
+                    << " faces using it)"
+                    << abort(FatalError);
+            }
+        }
+    }
+
 
     const labelList& meshPoints = pp.meshPoints();
 

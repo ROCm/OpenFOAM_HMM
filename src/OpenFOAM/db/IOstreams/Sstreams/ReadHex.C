@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,44 +21,56 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Description
+    Read a non-delimited hex label
+
 \*---------------------------------------------------------------------------*/
 
-#include "wallPointData.H"
+#include "ReadHex.H"
+#include <cctype>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+template<class T>
+T Foam::ReadHex(ISstream& is)
 {
+    // Takes into account that 'a' (or 'A') is 10
+    static const int alphaOffset = toupper('A') - 10;
+    // Takes into account that '0' is 0
+    static const int zeroOffset = int('0');
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+    char c = 0;
 
-template<class Type>
-Ostream& operator<<
-(
-    Ostream& os,
-    const wallPointData<Type>& wDist
-)
-{
-    return os
-        << static_cast<const wallPoint&>(wDist)
-        << token::SPACE
-        << wDist.data();
+    // Get next non-whitespace character
+    while (is.get(c) && isspace(c))
+    {}
+
+    register T result = 0;
+    do
+    {
+        if (isspace(c) || c == 0) break;
+
+        if (!isxdigit(c))
+        {
+            FatalIOErrorIn("ReadHex(ISstream&)", is)
+                << "Illegal hex digit: '" << c << "'"
+                << exit(FatalIOError);
+        }
+
+        result <<= 4;
+
+        if (isdigit(c))
+        {
+            result += int(c) - zeroOffset;
+        }
+        else
+        {
+            result += toupper(c) - alphaOffset;
+        }
+    } while (is.get(c));
+
+    return result;
 }
 
-
-template<class Type>
-Istream& operator>>
-(
-    Istream& is,
-    wallPointData<Type>& wDist
-)
-{
-    return is >> static_cast<wallPoint&>(wDist) >> wDist.data_;
-}
-
-
-// ************************************************************************* //
-
-} // End namespace Foam
 
 // ************************************************************************* //
