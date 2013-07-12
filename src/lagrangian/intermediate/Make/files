@@ -54,12 +54,12 @@ KINEMATICINJECTION=submodels/Kinematic/InjectionModel
 $(KINEMATICINJECTION)/KinematicLookupTableInjection/kinematicParcelInjectionData.C
 $(KINEMATICINJECTION)/KinematicLookupTableInjection/kinematicParcelInjectionDataIO.C
 $(KINEMATICINJECTION)/KinematicLookupTableInjection/kinematicParcelInjectionDataIOList.C
+$(KINEMATICINJECTION)/PatchInjection/patchInjectionBase.C
 
 THERMOINJECTION=submodels/Thermodynamic/InjectionModel
 $(THERMOINJECTION)/ThermoLookupTableInjection/thermoParcelInjectionData.C
 $(THERMOINJECTION)/ThermoLookupTableInjection/thermoParcelInjectionDataIO.C
 $(THERMOINJECTION)/ThermoLookupTableInjection/thermoParcelInjectionDataIOList.C
-
 
 REACTINGINJECTION=submodels/Reacting/InjectionModel
 $(REACTINGINJECTION)/ReactingLookupTableInjection/reactingParcelInjectionData.C

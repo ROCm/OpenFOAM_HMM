@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,7 +33,7 @@ Description
       - Initial parcel velocity
       - Injection volume flow rate
     - Parcel diameters obtained by distribution model
-    - Parcels injected at cell centres adjacent to patch
+    - Parcels injected randomly across the patch
 
 SourceFiles
     PatchInjection.C
@@ -44,6 +44,7 @@ SourceFiles
 #define PatchInjection_H
 
 #include "InjectionModel.H"
+#include "patchInjectionBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -62,15 +63,10 @@ class distributionModel;
 template<class CloudType>
 class PatchInjection
 :
-    public InjectionModel<CloudType>
+    public InjectionModel<CloudType>,
+    public patchInjectionBase
 {
     // Private data
-
-        //- Name of patch
-        const word patchName_;
-
-        //- Id of patch
-        const label patchId_;
 
         //- Injection duration [s]
         scalar duration_;
@@ -86,12 +82,6 @@ class PatchInjection
 
         //- Parcel size distribution model
         const autoPtr<distributionModels::distributionModel> sizeDistribution_;
-
-        //- List of cell labels corresponding to injector positions
-        labelList cellOwners_;
-
-        //- Fraction of injection controlled by this processor
-        scalar fraction_;
 
 
 public:
@@ -133,7 +123,7 @@ public:
         virtual void updateMesh();
 
         //- Return the end-of-injection time
-        scalar timeEnd() const;
+        virtual scalar timeEnd() const;
 
         //- Number of parcels to introduce relative to SOI
         virtual label parcelsToInject(const scalar time0, const scalar time1);
