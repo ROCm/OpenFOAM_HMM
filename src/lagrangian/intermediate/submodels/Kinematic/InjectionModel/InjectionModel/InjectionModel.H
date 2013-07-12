@@ -292,7 +292,7 @@ public:
             );
 
             //- Return the average parcel mass over the injection period
-            scalar averageParcelMass();
+            virtual scalar averageParcelMass();
 
 
             // Counters
