@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -142,6 +142,18 @@ Foam::scalar Foam::distributionModels::multiNormal::minValue() const
 Foam::scalar Foam::distributionModels::multiNormal::maxValue() const
 {
     return maxValue_;
+}
+
+
+Foam::scalar Foam::distributionModels::multiNormal::meanValue() const
+{
+    scalar mean = 0.0;
+    forAll(strength_, i)
+    {
+        mean += strength_[i]*expectation_[i];
+    }
+
+    return mean;
 }
 
 

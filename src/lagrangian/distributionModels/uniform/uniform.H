@@ -96,6 +96,9 @@ public:
 
         //- Return the maximum value
         virtual scalar maxValue() const;
+
+        //- Return the mean value
+        virtual scalar meanValue() const;
 };
 
 

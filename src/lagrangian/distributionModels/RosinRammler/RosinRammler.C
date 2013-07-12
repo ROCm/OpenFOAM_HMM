@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -91,6 +91,12 @@ Foam::scalar Foam::distributionModels::RosinRammler::minValue() const
 Foam::scalar Foam::distributionModels::RosinRammler::maxValue() const
 {
     return maxValue_;
+}
+
+
+Foam::scalar Foam::distributionModels::RosinRammler::meanValue() const
+{
+    return d_;
 }
 
 
