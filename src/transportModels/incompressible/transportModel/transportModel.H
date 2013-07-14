@@ -70,10 +70,7 @@ public:
 
         //- Construct from components
         transportModel
-        (
-            const volVectorField& U,
-            const surfaceScalarField& phi
-        );\
+        ();
 
 
     //- Destructor
