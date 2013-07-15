@@ -38,6 +38,7 @@ Description
 #define geometricOneField_H
 
 #include "oneFieldField.H"
+#include "dimensionSet.H"
 #include "scalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -64,6 +65,8 @@ public:
 
 
     // Member Operators
+
+        inline const dimensionSet& dimensions() const;
 
         inline scalar operator[](const label) const;
 

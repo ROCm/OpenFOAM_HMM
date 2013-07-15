@@ -27,6 +27,11 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+inline const Foam::dimensionSet& Foam::geometricOneField::dimensions() const
+{
+    return dimless;
+}
+
 inline Foam::scalar Foam::geometricOneField::operator[](const label) const
 {
     return scalar(1);

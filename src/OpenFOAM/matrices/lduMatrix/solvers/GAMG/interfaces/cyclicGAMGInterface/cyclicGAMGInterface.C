@@ -62,8 +62,6 @@ namespace Foam
         Istream,
         cyclicSlip
     );
-
-
 }
 
 

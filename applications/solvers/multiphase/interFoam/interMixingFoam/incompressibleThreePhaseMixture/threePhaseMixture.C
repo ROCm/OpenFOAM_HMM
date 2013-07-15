@@ -62,8 +62,6 @@ Foam::threePhaseMixture::threePhaseMixture
         )
     ),
 
-    transportModel(U, phi),
-
     phase1Name_("phase1"),
     phase2Name_("phase2"),
     phase3Name_("phase3"),
