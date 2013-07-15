@@ -54,10 +54,6 @@ class cyclicGAMGInterface
 {
     // Private data
 
-//        //- Reference tor the cyclicLduInterface from which this is
-//        //  agglomerated
-//        const cyclicLduInterface& fineCyclicInterface_;
-
         //- Neigbour patch number
         label neighbPatchID_;
 
@@ -131,13 +127,11 @@ public:
             //- Return neigbour processor number
             virtual label neighbPatchID() const
             {
-                //return fineCyclicInterface_.neighbPatchID();
                 return neighbPatchID_;
             }
 
             virtual bool owner() const
             {
-                //return fineCyclicInterface_.owner();
                 return owner_;
             }
 
@@ -152,14 +146,12 @@ public:
             //- Return face transformation tensor
             virtual const tensorField& forwardT() const
             {
-                //return fineCyclicInterface_.forwardT();
                 return forwardT_;
             }
 
             //- Return neighbour-cell transformation tensor
             virtual const tensorField& reverseT() const
             {
-                //return fineCyclicInterface_.reverseT();
                 return reverseT_;
             }
 
