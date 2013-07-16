@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -86,6 +86,26 @@ Foam::labelList Foam::renumberMethod::renumber
 
     // Renumber based on agglomerated points
     return renumber(cellCells(), points);
+}
+
+
+Foam::labelList Foam::renumberMethod::renumber
+(
+    const labelList& cellCells,
+    const labelList& offsets,
+    const pointField& cc
+) const
+{
+    notImplemented
+    (
+        "renumberMethod::renumber\n"
+        "(\n"
+        "    const labelList&,\n"
+        "    const labelList&,\n"
+        "    const pointField&\n"
+        ") const"
+    );
+    return labelList();
 }
 
 
