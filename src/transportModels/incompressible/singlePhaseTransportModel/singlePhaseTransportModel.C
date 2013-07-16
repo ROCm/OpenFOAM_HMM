@@ -47,7 +47,6 @@ Foam::singlePhaseTransportModel::singlePhaseTransportModel
             IOobject::NO_WRITE
         )
     ),
-    transportModel(U, phi),
     viscosityModelPtr_(viscosityModel::New("nu", *this, U, phi))
 {}
 

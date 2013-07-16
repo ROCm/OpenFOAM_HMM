@@ -27,6 +27,11 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+inline const Foam::dimensionSet& Foam::geometricZeroField::dimensions() const
+{
+    return dimless;
+}
+
 inline Foam::scalar Foam::geometricZeroField::operator[](const label) const
 {
     return scalar(0);

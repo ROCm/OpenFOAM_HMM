@@ -45,6 +45,23 @@ namespace Foam
         cyclicGAMGInterface,
         Istream
     );
+
+
+    // Add under name cyclicSlip
+    addNamedToRunTimeSelectionTable
+    (
+        GAMGInterface,
+        cyclicGAMGInterface,
+        lduInterface,
+        cyclicSlip
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        GAMGInterface,
+        cyclicGAMGInterface,
+        Istream,
+        cyclicSlip
+    );
 }
 
 
@@ -61,15 +78,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
     const label coarseComm
 )
 :
-    GAMGInterface
-    (
-        index,
-        coarseInterfaces
-//        fineInterface,
-//        localRestrictAddressing,
-//        neighbourRestrictAddressing
-    ),
-    //fineCyclicInterface_(refCast<const cyclicLduInterface>(fineInterface))
+    GAMGInterface(index, coarseInterfaces),
     neighbPatchID_
     (
         refCast<const cyclicLduInterface>(fineInterface).neighbPatchID()
@@ -169,11 +178,7 @@ Foam::tmp<Foam::labelField> Foam::cyclicGAMGInterface::internalFieldTransfer
     const labelUList& iF
 ) const
 {
-    const cyclicGAMGInterface& nbr =
-    //dynamic_cast<const cyclicGAMGInterface&>
-    //(
-        neighbPatch();
-    //);
+    const cyclicGAMGInterface& nbr = neighbPatch();
     const labelUList& nbrFaceCells = nbr.faceCells();
 
     tmp<labelField> tpnf(new labelField(size()));

@@ -77,7 +77,6 @@ Foam::multiphaseMixture::multiphaseMixture
         )
     ),
 
-    transportModel(U, phi),
     phases_(lookup("phases"), phase::iNew(U, phi)),
 
     mesh_(U.mesh()),
