@@ -36,10 +36,7 @@ namespace Foam
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::transportModel::transportModel
-(
-    const volVectorField&,
-    const surfaceScalarField&
-)
+()
 {}
 
 

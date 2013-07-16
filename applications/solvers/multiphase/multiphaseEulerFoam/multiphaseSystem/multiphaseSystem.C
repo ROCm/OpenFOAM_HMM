@@ -383,8 +383,6 @@ Foam::multiphaseSystem::multiphaseSystem
         )
     ),
 
-    transportModel(U, phi),
-
     phases_(lookup("phases"), phaseModel::iNew(U.mesh())),
 
     mesh_(U.mesh()),
