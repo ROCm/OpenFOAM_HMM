@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,6 +50,9 @@ namespace Foam
 //  Returns the order in which the cells need to be visited (i.e. ordered to
 //  original)
 labelList bandCompression(const labelListList& addressing);
+
+//- Renumber with addressing in losort form (neighbour + start in neighbour)
+labelList bandCompression(const labelList& cellCells, const labelList& offsets);
 
 } // End namespace Foam
 
