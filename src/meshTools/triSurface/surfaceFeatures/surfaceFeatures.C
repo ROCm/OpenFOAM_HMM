@@ -259,7 +259,7 @@ void Foam::surfaceFeatures::classifyFeatureAngles
         if (eFaces.size() != 2)
         {
             // Non-manifold. What to do here? Is region edge? external edge?
-            edgeStat[edgeI] = NONE;
+            edgeStat[edgeI] = REGION;
         }
         else
         {
