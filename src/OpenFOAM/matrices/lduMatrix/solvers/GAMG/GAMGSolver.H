@@ -222,7 +222,19 @@ class GAMGSolver
             const label levelI
         );
 
-        //-  Interpolate the correction after injected prolongation
+        //- Interpolate the correction after injected prolongation
+        void interpolate
+        (
+            scalarField& psi,
+            scalarField& Apsi,
+            const lduMatrix& m,
+            const FieldField<Field, scalar>& interfaceBouCoeffs,
+            const lduInterfaceFieldPtrsList& interfaces,
+            const direction cmpt
+        ) const;
+
+        //- Interpolate the correction after injected prolongation and
+        /// re-normalise
         void interpolate
         (
             scalarField& psi,
