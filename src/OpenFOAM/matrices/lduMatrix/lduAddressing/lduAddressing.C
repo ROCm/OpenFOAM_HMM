@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ License
 
 #include "lduAddressing.H"
 #include "demandDrivenData.H"
+#include "scalarField.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -245,6 +246,30 @@ Foam::label Foam::lduAddressing::triIndex(const label a, const label b) const
         << abort(FatalError);
 
     return -1;
+}
+
+
+Foam::Tuple2<Foam::label, Foam::scalar> Foam::lduAddressing::band() const
+{
+    const labelUList& owner = lowerAddr();
+    const labelUList& neighbour = upperAddr();
+
+    labelList cellBandwidth(size(), 0);
+
+    forAll(neighbour, faceI)
+    {
+        label own = owner[faceI];
+        label nei = neighbour[faceI];
+
+        // Note: mag not necessary for correct (upper-triangular) ordering.
+        label diff = nei-own;
+        cellBandwidth[nei] = max(cellBandwidth[nei], diff);
+    }
+
+    label bandwidth = max(cellBandwidth);
+    scalar profile = sum(1.0*cellBandwidth);
+
+    return Tuple2<label, scalar>(bandwidth, profile);
 }
 
 

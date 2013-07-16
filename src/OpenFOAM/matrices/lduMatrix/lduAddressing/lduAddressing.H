@@ -98,6 +98,7 @@ SourceFiles
 
 #include "labelList.H"
 #include "lduSchedule.H"
+#include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -196,6 +197,9 @@ public:
 
         //- Return off-diagonal index given owner and neighbour label
         label triIndex(const label a, const label b) const;
+
+        //- Calculate bandwidth and profile of addressing
+        Tuple2<label, scalar> band() const;
 };
 
 
