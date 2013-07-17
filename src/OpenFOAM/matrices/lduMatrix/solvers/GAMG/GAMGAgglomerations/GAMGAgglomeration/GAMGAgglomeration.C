@@ -69,111 +69,132 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
         procAgglomeratorPtr_().agglomerate();
 
 
-        if (debug)
-        {
+    }
 
-            Info<< "GAMGAgglomeration:" << nl
-                << "    local agglomerator     : " << type() << nl
-                << "    processor agglomerator : "
+    // Print a bit
+    if (processorAgglomerate() && debug)
+    {
+        Info<< "GAMGAgglomeration:" << nl
+            << "    local agglomerator     : " << type() << nl;
+        if (processorAgglomerate())
+        {
+            Info<< "    processor agglomerator : "
                 << procAgglomeratorPtr_().type() << nl
                 << nl;
-
-            Info<< setw(40) << "nCells"
-                << setw(24) << "nFaces/nCells"
-                << setw(24) << "nInterfaces"
-                << setw(24) << "nIntFaces/nCells" << nl
-                << setw(8) << "Level"
-                << setw(8) << "nProcs"
-                << "        "
-                << setw(8) << "avg"
-                << setw(8) << "max"
-                << "        "
-                << setw(8) << "avg"
-                << setw(8) << "max"
-                << "        "
-                << setw(8) << "avg"
-                << setw(8) << "max"
-                << "            " << setw(4) << "avg"
-                << "    " << setw(4) << "max"
-                << nl
-                << setw(8) << "-----"
-                << setw(8) << "------"
-                << "        "
-                << setw(8) << "---"
-                << setw(8) << "---"
-                << "        "
-                << setw(8) << "---"
-                << setw(8) << "---"
-                << "            " << setw(4) << "---"
-                << "    " << setw(4) << "---"
-                << nl;
-
-            for (label levelI = 0; levelI <= size(); levelI++)
-            {
-                label nProcs = 0;
-                label nCells = 0;
-                scalar faceCellRatio = 0;
-                label nInterfaces = 0;
-                label nIntFaces = 0;
-                scalar ratio = 0.0;
-
-                if (hasMeshLevel(levelI))
-                {
-                    nProcs = 1;
-
-                    const lduMesh& fineMesh = meshLevel(levelI);
-                    nCells = fineMesh.lduAddr().size();
-                    faceCellRatio =
-                        scalar(fineMesh.lduAddr().lowerAddr().size())/nCells;
-
-                    const lduInterfacePtrsList interfaces =
-                        fineMesh.interfaces();
-                    forAll(interfaces, i)
-                    {
-                        if (interfaces.set(i))
-                        {
-                            nInterfaces++;
-                            nIntFaces += interfaces[i].faceCells().size();
-                        }
-                    }
-                    ratio = scalar(nIntFaces)/nCells;
-                }
-
-                label totNprocs = returnReduce(nProcs, sumOp<label>());
-
-                label maxNCells = returnReduce(nCells, maxOp<label>());
-                label totNCells = returnReduce(nCells, sumOp<label>());
-
-                scalar maxFaceCellRatio =
-                    returnReduce(faceCellRatio, maxOp<scalar>());
-                scalar totFaceCellRatio =
-                    returnReduce(faceCellRatio, sumOp<scalar>());
-
-                label maxNInt = returnReduce(nInterfaces, maxOp<label>());
-                label totNInt = returnReduce(nInterfaces, sumOp<label>());
-
-                scalar maxRatio = returnReduce(ratio, maxOp<scalar>());
-                scalar totRatio = returnReduce(ratio, sumOp<scalar>());
-
-                Info<< setw(8) << levelI
-                    << setw(8) << totNprocs
-
-                    << setw(16) << totNCells/totNprocs
-                    << setw(8) << maxNCells
-
-                    << "        "
-                    << setw(8) << setprecision(4) << totFaceCellRatio/totNprocs
-                    << setw(8) << setprecision(4) << maxFaceCellRatio
-                    << "        "
-                    << setw(8) << scalar(totNInt)/totNprocs
-                    << setw(8) << maxNInt
-                    << "        "
-                    << setw(8) << setprecision(4) << totRatio/totNprocs
-                    << setw(8) << setprecision(4) << maxRatio
-                    << nl;
-            }
-            Info<< endl;
         }
+
+        Info<< setw(36) << "nCells"
+            << setw(20) << "nFaces/nCells"
+            << setw(20) << "nInterfaces"
+            << setw(20) << "nIntFaces/nCells"
+            << setw(12) << "profile"
+            << nl
+            << setw(8) << "Level"
+            << setw(8) << "nProcs"
+            << "    "
+            << setw(8) << "avg"
+            << setw(8) << "max"
+            << "    "
+            << setw(8) << "avg"
+            << setw(8) << "max"
+            << "    "
+            << setw(8) << "avg"
+            << setw(8) << "max"
+            << "    "
+            << setw(8) << "avg"
+            << setw(8) << "max"
+            //<< "    "
+            << setw(12) << "avg"
+            << nl
+            << setw(8) << "-----"
+            << setw(8) << "------"
+            << "    "
+            << setw(8) << "---"
+            << setw(8) << "---"
+            << "    "
+            << setw(8) << "---"
+            << setw(8) << "---"
+            << "    "
+            << setw(8) << "---"
+            << setw(8) << "---"
+            << "    "
+            << setw(8) << "---"
+            << setw(8) << "---"
+            //<< "    "
+            << setw(12) << "---"
+            //<< "    "
+            << nl;
+
+        for (label levelI = 0; levelI <= size(); levelI++)
+        {
+            label nProcs = 0;
+            label nCells = 0;
+            scalar faceCellRatio = 0;
+            label nInterfaces = 0;
+            label nIntFaces = 0;
+            scalar ratio = 0.0;
+            scalar profile = 0.0;
+
+            if (hasMeshLevel(levelI))
+            {
+                nProcs = 1;
+
+                const lduMesh& fineMesh = meshLevel(levelI);
+                nCells = fineMesh.lduAddr().size();
+                faceCellRatio =
+                    scalar(fineMesh.lduAddr().lowerAddr().size())/nCells;
+
+                const lduInterfacePtrsList interfaces =
+                    fineMesh.interfaces();
+                forAll(interfaces, i)
+                {
+                    if (interfaces.set(i))
+                    {
+                        nInterfaces++;
+                        nIntFaces += interfaces[i].faceCells().size();
+                    }
+                }
+                ratio = scalar(nIntFaces)/nCells;
+
+                profile = fineMesh.lduAddr().band().second();
+            }
+
+            label totNprocs = returnReduce(nProcs, sumOp<label>());
+
+            label maxNCells = returnReduce(nCells, maxOp<label>());
+            label totNCells = returnReduce(nCells, sumOp<label>());
+
+            scalar maxFaceCellRatio =
+                returnReduce(faceCellRatio, maxOp<scalar>());
+            scalar totFaceCellRatio =
+                returnReduce(faceCellRatio, sumOp<scalar>());
+
+            label maxNInt = returnReduce(nInterfaces, maxOp<label>());
+            label totNInt = returnReduce(nInterfaces, sumOp<label>());
+
+            scalar maxRatio = returnReduce(ratio, maxOp<scalar>());
+            scalar totRatio = returnReduce(ratio, sumOp<scalar>());
+
+            scalar totProfile = returnReduce(profile, sumOp<scalar>());
+
+            Info<< setw(8) << levelI
+                << setw(8) << totNprocs
+                << "    "
+                << setw(8) << totNCells/totNprocs
+                << setw(8) << maxNCells
+                << "    "
+                << setw(8) << setprecision(4) << totFaceCellRatio/totNprocs
+                << setw(8) << setprecision(4) << maxFaceCellRatio
+                << "    "
+                << setw(8) << scalar(totNInt)/totNprocs
+                << setw(8) << maxNInt
+                << "    "
+                << setw(8) << setprecision(4) << totRatio/totNprocs
+                << setw(8) << setprecision(4) << maxRatio
+                << setw(12) << setprecision(4) << totProfile/totNprocs
+                << nl;
+        }
+        Info<< endl;
     }
 }
 
