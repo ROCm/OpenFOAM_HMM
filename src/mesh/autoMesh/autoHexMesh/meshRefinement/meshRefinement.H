@@ -864,6 +864,9 @@ public:
             //- Get patchIDs for patches added in addMeshedPatch.
             labelList meshedPatches() const;
 
+            //- Select coupled faces that are not collocated
+            void selectSeparatedCoupledFaces(boolList&) const;
+
             //- Split mesh. Keep part containing point.
             autoPtr<mapPolyMesh> splitMeshRegions(const point& keepPoint);
 
