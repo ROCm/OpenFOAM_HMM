@@ -44,6 +44,22 @@ namespace Foam
         cyclicGAMGInterfaceField,
         lduInterfaceField
     );
+
+    // Add under name cyclicSlip
+    addNamedToRunTimeSelectionTable
+    (
+        GAMGInterfaceField,
+        cyclicGAMGInterfaceField,
+        lduInterface,
+        cyclicSlip
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        GAMGInterfaceField,
+        cyclicGAMGInterfaceField,
+        lduInterfaceField,
+        cyclicSlip
+    );
 }
 
 
