@@ -1150,11 +1150,12 @@ int main(int argc, char *argv[])
         globalToMasterPatch.setSize(surfaces.nRegions(), -1);
         globalToSlavePatch.setSize(surfaces.nRegions(), -1);
 
-        Info<< setw(8) << "Patch"
-            << setw(30) << "Type"
+        Info<< setf(ios_base::left)
+            << setw(6) << "Patch"
+            << setw(20) << "Type"
             << setw(30) << "Region" << nl
-            << setw(8) << "-----"
-            << setw(30) << "----"
+            << setw(6) << "-----"
+            << setw(20) << "----"
             << setw(30) << "------" << endl;
 
         const labelList& surfaceGeometry = surfaces.surfaces();
@@ -1197,8 +1198,9 @@ int main(int argc, char *argv[])
                         );
                     }
 
-                    Info<< setw(8) << patchI
-                        << setw(30) << mesh.boundaryMesh()[patchI].type()
+                    Info<< setf(ios_base::left)
+                        << setw(6) << patchI
+                        << setw(20) << mesh.boundaryMesh()[patchI].type()
                         << setw(30) << regNames[i] << nl;
 
                     globalToMasterPatch[globalRegionI] = patchI;
@@ -1236,8 +1238,9 @@ int main(int argc, char *argv[])
                             );
                         }
 
-                        Info<< setw(8) << patchI
-                            << setw(30) << mesh.boundaryMesh()[patchI].type()
+                        Info<< setf(ios_base::left)
+                            << setw(6) << patchI
+                            << setw(20) << mesh.boundaryMesh()[patchI].type()
                             << setw(30) << regNames[i] << nl;
 
                         globalToMasterPatch[globalRegionI] = patchI;
@@ -1267,8 +1270,9 @@ int main(int argc, char *argv[])
                             );
                         }
 
-                        Info<< setw(8) << patchI
-                            << setw(30) << mesh.boundaryMesh()[patchI].type()
+                        Info<< setf(ios_base::left)
+                            << setw(6) << patchI
+                            << setw(20) << mesh.boundaryMesh()[patchI].type()
                             << setw(30) << slaveName << nl;
 
                         globalToSlavePatch[globalRegionI] = patchI;
