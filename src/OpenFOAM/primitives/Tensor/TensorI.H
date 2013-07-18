@@ -118,21 +118,39 @@ inline Tensor<Cmpt>::Tensor(Istream& is)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline const Vector<Cmpt> Tensor<Cmpt>::x() const
+inline Vector<Cmpt> Tensor<Cmpt>::x() const
 {
     return Vector<Cmpt>(this->v_[XX], this->v_[XY], this->v_[XZ]);
 }
 
 template<class Cmpt>
-inline const Vector<Cmpt> Tensor<Cmpt>::y() const
+inline Vector<Cmpt> Tensor<Cmpt>::y() const
 {
     return Vector<Cmpt>(this->v_[YX], this->v_[YY], this->v_[YZ]);
 }
 
 template<class Cmpt>
-inline const Vector<Cmpt>  Tensor<Cmpt>::z() const
+inline Vector<Cmpt>  Tensor<Cmpt>::z() const
 {
     return Vector<Cmpt>(this->v_[ZX], this->v_[ZY], this->v_[ZZ]);
+}
+
+
+template<class Cmpt>
+inline Vector<Cmpt>  Tensor<Cmpt>::vectorComponent(const direction cmpt) const
+{
+    switch (cmpt)
+    {
+        case 0:
+            return x();
+        break;
+        case 1:
+            return y();
+        break;
+        case 2:
+            return z();
+        break;
+    }
 }
 
 
