@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -826,6 +826,28 @@ Foam::label Foam::face::trianglesQuads
 ) const
 {
     return split(SPLITQUAD, points, triI, quadI, triFaces, quadFaces);
+}
+
+
+Foam::label Foam::longestEdge(const face& f, const pointField& pts)
+{
+    const edgeList& eds = f.edges();
+
+    label longestEdgeI = -1;
+    scalar longestEdgeLength = -SMALL;
+
+    forAll(eds, edI)
+    {
+        scalar edgeLength = eds[edI].mag(pts);
+
+        if (edgeLength > longestEdgeLength)
+        {
+            longestEdgeI = edI;
+            longestEdgeLength = edgeLength;
+        }
+    }
+
+    return longestEdgeI;
 }
 
 
