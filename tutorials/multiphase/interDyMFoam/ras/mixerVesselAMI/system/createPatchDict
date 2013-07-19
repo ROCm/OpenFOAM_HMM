@@ -9,26 +9,19 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       polyBoundaryMesh;
-    location    "constant/polyMesh";
-    object      boundary;
+    class       dictionary;
+    object      createPatchDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-2
+// Do a synchronisation of coupled points after creation of any patches.
+// Note: this does not work with points that are on multiple coupled patches
+//       with transformations (i.e. cyclics).
+pointSync false;
+
+// Patches to create.
+patches
 (
-    stationaryWalls
-    {
-        type            patch;
-        nFaces          666;
-        startFace       3069;
-    }
-    movingBlock
-    {
-        type            patch;
-        nFaces          0;
-        startFace       3735;
-    }
-)
+);
 
 // ************************************************************************* //

@@ -182,7 +182,7 @@ public:
             const word& phaseName
         )
         {
-            return name + phaseName;
+            return IOobject::groupName(name, phaseName);
         }
 
         word phasePropertyName(const word& name) const

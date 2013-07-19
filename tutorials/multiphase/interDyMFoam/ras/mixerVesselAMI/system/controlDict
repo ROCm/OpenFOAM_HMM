@@ -9,45 +9,48 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       polyBoundaryMesh;
-    location    "constant/polyMesh";
-    object      boundary;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-5
-(
-    inlet
-    {
-        type            patch;
-        nFaces          30;
-        startFace       24170;
-    }
-    outlet
-    {
-        type            patch;
-        nFaces          57;
-        startFace       24200;
-    }
-    upperWall
-    {
-        type            wall;
-        nFaces          223;
-        startFace       24257;
-    }
-    lowerWall
-    {
-        type            wall;
-        nFaces          250;
-        startFace       24480;
-    }
-    frontAndBack
-    {
-        type            empty;
-        inGroups        1(empty);
-        nFaces          24450;
-        startFace       24730;
-    }
-)
+application     interDyMFoam;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         5.0;
+
+deltaT          1e-4;
+
+writeControl    adjustableRunTime;
+
+writeInterval   0.025;
+
+purgeWrite      0;
+
+writeFormat     binary;
+
+writePrecision  6;
+
+writeCompression uncompressed;
+
+timeFormat      general;
+
+timePrecision   10;
+
+runTimeModifiable yes;
+
+adjustTimeStep  yes;
+
+maxCo           1.5;
+
+maxAlphaCo      1;
+
+maxDeltaT       1;
 
 // ************************************************************************* //

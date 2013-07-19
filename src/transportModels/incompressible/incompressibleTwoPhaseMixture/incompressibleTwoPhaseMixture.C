@@ -69,7 +69,6 @@ Foam::incompressibleTwoPhaseMixture::incompressibleTwoPhaseMixture
             IOobject::NO_WRITE
         )
     ),
-    transportModel(U, phi),
     twoPhaseMixture(U.mesh(), *this, alpha1Name, alpha2Name),
 
     nuModel1_

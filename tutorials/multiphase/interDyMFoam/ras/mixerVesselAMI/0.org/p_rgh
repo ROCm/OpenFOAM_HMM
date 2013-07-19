@@ -9,50 +9,35 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       polyBoundaryMesh;
-    location    "constant/polyMesh";
-    object      boundary;
+    class       volScalarField;
+    object      p_rgh;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-6
-(
-    maxX
+dimensions       [1 -1 -2 0 0 0 0];
+
+internalField   uniform 1.25e5;
+
+boundaryField
+{
+    ".*"
     {
-        type            patch;
-        nFaces          36;
-        startFace       540;
+        type            fixedFluxPressure;
+        phi             phiAbs;
+        value           $internalField;
     }
-    minZ
+
+    outlet
     {
-        type            patch;
-        nFaces          36;
-        startFace       576;
+        type            fixedValue;
+        value           $internalField;
     }
-    maxZ
+
+    "AMI.*"
     {
-        type            patch;
-        nFaces          36;
-        startFace       612;
+        type            cyclicAMI;
+        value           $internalField;
     }
-    minX
-    {
-        type            patch;
-        nFaces          36;
-        startFace       648;
-    }
-    minY
-    {
-        type            patch;
-        nFaces          36;
-        startFace       684;
-    }
-    maxY
-    {
-        type            patch;
-        nFaces          36;
-        startFace       720;
-    }
-)
+}
 
 // ************************************************************************* //

@@ -83,6 +83,10 @@ public:
 
         //- Return the accumulated constraint transformation tensor
         inline tensor constraintTransformation() const;
+
+        //- Return the accumulated unconstrained directions. Directions
+        //  coded as first n rows of tensor.
+        inline void unconstrainedDirections(label& n, tensor& vecs) const;
 };
 
 

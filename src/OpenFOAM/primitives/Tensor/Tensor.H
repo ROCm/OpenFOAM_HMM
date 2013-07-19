@@ -152,11 +152,11 @@ public:
             inline Cmpt& zz();
 
             // Access vector components.
-            // Note: returning const only to find out lhs usage
 
-            inline const Vector<Cmpt> x() const;
-            inline const Vector<Cmpt> y() const;
-            inline const Vector<Cmpt> z() const;
+            inline Vector<Cmpt> x() const;
+            inline Vector<Cmpt> y() const;
+            inline Vector<Cmpt> z() const;
+            inline Vector<Cmpt> vectorComponent(const direction) const;
 
         //- Transpose
         inline Tensor<Cmpt> T() const;

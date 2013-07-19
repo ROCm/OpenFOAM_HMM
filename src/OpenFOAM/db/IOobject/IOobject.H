@@ -154,6 +154,7 @@ private:
         //- IOobject state
         objectState objState_;
 
+
 protected:
 
     // Protected Member Functions
@@ -186,6 +187,9 @@ public:
             fileName& local,
             word& name
         );
+
+        template<class Name>
+        static inline word groupName(Name name, const word& group);
 
 
     // Constructors
@@ -312,6 +316,9 @@ public:
 
 
         // Path components
+
+            //- Return group (extension part of name)
+            word group() const;
 
             const fileName& rootPath() const;
 

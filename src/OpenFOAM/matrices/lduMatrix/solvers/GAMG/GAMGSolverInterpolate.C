@@ -34,8 +34,6 @@ void Foam::GAMGSolver::interpolate
     const lduMatrix& m,
     const FieldField<Field, scalar>& interfaceBouCoeffs,
     const lduInterfaceFieldPtrsList& interfaces,
-    const labelList& restrictAddressing,
-    const scalarField& psiC,
     const direction cmpt
 ) const
 {
@@ -81,6 +79,34 @@ void Foam::GAMGSolver::interpolate
     {
         psiPtr[celli] = -ApsiPtr[celli]/(diagPtr[celli]);
     }
+}
+
+
+void Foam::GAMGSolver::interpolate
+(
+    scalarField& psi,
+    scalarField& Apsi,
+    const lduMatrix& m,
+    const FieldField<Field, scalar>& interfaceBouCoeffs,
+    const lduInterfaceFieldPtrsList& interfaces,
+    const labelList& restrictAddressing,
+    const scalarField& psiC,
+    const direction cmpt
+) const
+{
+    interpolate
+    (
+        psi,
+        Apsi,
+        m,
+        interfaceBouCoeffs,
+        interfaces,
+        cmpt
+    );
+
+    register const label nCells = m.diag().size();
+    scalar* __restrict__ psiPtr = psi.begin();
+    const scalar* const __restrict__ diagPtr = m.diag().begin();
 
     register const label nCCells = psiC.size();
     scalarField corrC(nCCells, 0);

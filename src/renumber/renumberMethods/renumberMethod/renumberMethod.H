@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -125,6 +125,17 @@ public:
         //  from ordered back to original cell label.
         //  Use the mesh connectivity (if needed)
         virtual labelList renumber(const polyMesh&, const pointField&) const;
+
+        //- Return the order in which cells need to be visited, i.e.
+        //  from ordered back to original cell label.
+        //  Addresing in losort addressing (= neighbour + offsets into
+        //  neighbour)
+        virtual labelList renumber
+        (
+            const labelList& cellCells,
+            const labelList& offsets,
+            const pointField&
+        ) const;
 
         //- Return the order in which cells need to be visited, i.e.
         //  from ordered back to original cell label.

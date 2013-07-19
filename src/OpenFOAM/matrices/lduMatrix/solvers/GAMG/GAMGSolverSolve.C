@@ -315,17 +315,32 @@ void Foam::GAMGSolver::Vcycle
 
             if (interpolateCorrection_) //&& leveli < coarsestLevel - 2)
             {
-                interpolate
-                (
-                    coarseCorrFields[leveli],
-                    ACfRef,
-                    matrixLevels_[leveli],
-                    interfaceLevelsBouCoeffs_[leveli],
-                    interfaceLevels_[leveli],
-                    agglomeration_.restrictAddressing(leveli + 1),
-                    coarseCorrFields[leveli + 1],
-                    cmpt
-                );
+                if (coarseCorrFields.set(leveli+1))
+                {
+                    interpolate
+                    (
+                        coarseCorrFields[leveli],
+                        ACfRef,
+                        matrixLevels_[leveli],
+                        interfaceLevelsBouCoeffs_[leveli],
+                        interfaceLevels_[leveli],
+                        agglomeration_.restrictAddressing(leveli + 1),
+                        coarseCorrFields[leveli + 1],
+                        cmpt
+                    );
+                }
+                else
+                {
+                    interpolate
+                    (
+                        coarseCorrFields[leveli],
+                        ACfRef,
+                        matrixLevels_[leveli],
+                        interfaceLevelsBouCoeffs_[leveli],
+                        interfaceLevels_[leveli],
+                        cmpt
+                    );
+                }
             }
 
             // Scale coarse-grid correction field

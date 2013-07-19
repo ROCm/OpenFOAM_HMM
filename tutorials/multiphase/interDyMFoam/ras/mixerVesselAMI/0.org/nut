@@ -9,50 +9,40 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       polyBoundaryMesh;
-    location    "constant/polyMesh";
-    object      boundary;
+    class       volScalarField;
+    object      nut;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-6
-(
-    down
+dimensions      [0 2 -1 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
+{
+    ".*"
     {
-        type            symmetryPlane;
-        nFaces          60;
-        startFace       3890;
+        type            nutkWallFunction;
+        value           $internalField;
     }
-    right
+
+    gasInlet
     {
-        type            patch;
-        nFaces          30;
-        startFace       3950;
+        type            fixedValue;
+        value           $internalField;
     }
-    up
+
+    outlet
     {
-        type            symmetryPlane;
-        nFaces          60;
-        startFace       3980;
+        type            inletOutlet;
+        inletValue      $internalField;
+        value           $internalField;
     }
-    left
+
+    "AMI.*"
     {
-        type            patch;
-        nFaces          30;
-        startFace       4040;
+        type            cyclicAMI;
     }
-    cylinder
-    {
-        type            symmetryPlane;
-        nFaces          40;
-        startFace       4070;
-    }
-    defaultFaces
-    {
-        type            empty;
-        nFaces          4000;
-        startFace       4110;
-    }
-)
+}
 
 // ************************************************************************* //

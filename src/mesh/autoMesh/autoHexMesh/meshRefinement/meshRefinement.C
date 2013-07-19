@@ -1895,6 +1895,34 @@ Foam::labelList Foam::meshRefinement::meshedPatches() const
 }
 
 
+void Foam::meshRefinement::selectSeparatedCoupledFaces(boolList& selected) const
+{
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        // Check all coupled. Avoid using .coupled() so we also pick up AMI.
+        if (isA<coupledPolyPatch>(patches[patchI]))
+        {
+            const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>
+            (
+                patches[patchI]
+            );
+
+            if (cpp.separated() || !cpp.parallel())
+            {
+                forAll(pp, i)
+                {
+                    selected[pp.start()+i] = true;
+                }
+            }
+        }
+    }
+}
+
+
 Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
 (
     const point& keepPoint

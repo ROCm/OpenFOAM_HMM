@@ -35,7 +35,7 @@ SourceFiles
 #define labelBits_H
 
 #include "label.H"
-#include "uLabel.H"
+//#include "uLabel.H"
 #include "direction.H"
 #include "error.H"
 
@@ -55,15 +55,17 @@ class labelBits
 
         label data_;
 
-        inline static label pack(const uLabel val, const direction bits)
+        inline static label pack(const label val, const direction bits)
         {
 #           ifdef FULLDEBUG
             if (bits > 7 || (((val<<3)>>3) != val))
             {
                 FatalErrorIn
                 (
-                    "labelBits::pack(const uLabel, const direction)"
+                    "labelBits::pack(const label, const direction)"
                 )   << "Direction " << bits << " outside range 0..7"
+                    << " or value " << val << " negative or larger than "
+                    << label(8*sizeof(label)-3) << " bit representation"
                     << abort(FatalError);
             }
 #           endif

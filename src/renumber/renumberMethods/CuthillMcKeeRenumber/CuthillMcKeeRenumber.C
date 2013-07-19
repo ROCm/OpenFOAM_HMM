@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -76,6 +76,24 @@ Foam::labelList Foam::CuthillMcKeeRenumber::renumber
     );
 
     labelList orderedToOld = bandCompression(cellCells());
+
+    if (reverse_)
+    {
+        reverse(orderedToOld);
+    }
+
+    return orderedToOld;
+}
+
+
+Foam::labelList Foam::CuthillMcKeeRenumber::renumber
+(
+    const labelList& cellCells,
+    const labelList& offsets,
+    const pointField& cc
+) const
+{
+    labelList orderedToOld = bandCompression(cellCells, offsets);
 
     if (reverse_)
     {
