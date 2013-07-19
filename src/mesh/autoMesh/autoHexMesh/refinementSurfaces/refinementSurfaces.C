@@ -605,8 +605,10 @@ void Foam::refinementSurfaces::setMinLevelFields
         // searchableBox (size=6)
         if (geom.regions().size() > 1 && geom.globalSize() > 10)
         {
-            // Representative local coordinates
-            const pointField ctrs(geom.coordinates());
+            // Representative local coordinates and bounding sphere
+            pointField ctrs;
+            scalarField radiusSqr;
+            geom.boundingSpheres(ctrs, radiusSqr);
 
             labelList minLevelField(ctrs.size(), -1);
             {
@@ -614,12 +616,7 @@ void Foam::refinementSurfaces::setMinLevelFields
                 // distributed surface where local indices differ from global
                 // ones (needed for getRegion call)
                 List<pointIndexHit> info;
-                geom.findNearest
-                (
-                    ctrs,
-                    scalarField(ctrs.size(), sqr(GREAT)),
-                    info
-                );
+                geom.findNearest(ctrs, radiusSqr, info);
 
                 // Get per element the region
                 labelList region;
@@ -628,7 +625,7 @@ void Foam::refinementSurfaces::setMinLevelFields
                 // From the region get the surface-wise refinement level
                 forAll(minLevelField, i)
                 {
-                    if (info[i].hit())
+                    if (info[i].hit()) //Note: should not be necessary
                     {
                         minLevelField[i] = minLevel(surfI, region[i]);
                     }
