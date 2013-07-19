@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -175,6 +175,14 @@ public:
         //- Get representative set of element coordinates
         //  Usually the element centres (should be of length size()).
         virtual tmp<pointField> coordinates() const;
+
+        //- Get bounding spheres (centre and radius squared), one per element.
+        //  Any point on element is guaranteed to be inside.
+        virtual void boundingSpheres
+        (
+            pointField& centres,
+            scalarField& radiusSqr
+        ) const;
 
         //- Get the points that define the surface.
         virtual tmp<pointField> points() const;

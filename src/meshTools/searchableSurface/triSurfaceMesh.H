@@ -187,6 +187,14 @@ public:
             //  Usually the element centres (should be of length size()).
             virtual tmp<pointField> coordinates() const;
 
+            //- Get bounding spheres (centre and radius squared). Any point
+            //  on surface is guaranteed to be inside.
+            virtual void boundingSpheres
+            (
+                pointField& centres,
+                scalarField& radiusSqr
+            ) const;
+
             //- Get the points that define the surface.
             virtual tmp<pointField> points() const;
 

@@ -47,6 +47,23 @@ Foam::tmp<Foam::pointField> Foam::searchableCylinder::coordinates() const
 }
 
 
+void Foam::searchableCylinder::boundingSpheres
+(
+    pointField& centres,
+    scalarField& radiusSqr
+) const
+{
+    centres.setSize(1);
+    centres[0] = 0.5*(point1_ + point2_);
+
+    radiusSqr.setSize(1);
+    radiusSqr[0] = Foam::magSqr(point1_-centres[0]) + Foam::sqr(radius_);
+
+    // Add a bit to make sure all points are tested inside
+    radiusSqr += Foam::sqr(SMALL);
+}
+
+
 Foam::tmp<Foam::pointField> Foam::searchableCylinder::points() const
 {
     tmp<pointField> tPts(new pointField(2));

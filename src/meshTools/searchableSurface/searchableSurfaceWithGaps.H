@@ -156,6 +156,17 @@ public:
             return surface().coordinates();
         }
 
+        //- Get bounding spheres (centre and radius squared), one per element.
+        //  Any point on element is guaranteed to be inside.
+        virtual void boundingSpheres
+        (
+            pointField& centres,
+            scalarField& radiusSqr
+        ) const
+        {
+            surface().boundingSpheres(centres, radiusSqr);
+        }
+
         //- Get the points that define the surface.
         virtual tmp<pointField> points() const
         {

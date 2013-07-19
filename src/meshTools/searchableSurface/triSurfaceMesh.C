@@ -145,10 +145,12 @@ bool Foam::triSurfaceMesh::addFaceToEdge
 
 bool Foam::triSurfaceMesh::isSurfaceClosed() const
 {
+    const pointField& pts = triSurface::points();
+
     // Construct pointFaces. Let's hope surface has compact point
     // numbering ...
     labelListList pointFaces;
-    invertManyToMany(points()().size(), *this, pointFaces);
+    invertManyToMany(pts.size(), *this, pointFaces);
 
     // Loop over all faces surrounding point. Count edges emanating from point.
     // Every edge should be used by two faces exactly.
@@ -241,7 +243,9 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io, const triSurface& s)
     minQuality_(-1),
     surfaceClosed_(-1)
 {
-    bounds() = boundBox(points());
+    const pointField& pts = triSurface::points();
+
+    bounds() = boundBox(pts);
 }
 
 
@@ -287,7 +291,9 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io)
     minQuality_(-1),
     surfaceClosed_(-1)
 {
-    bounds() = boundBox(points());
+    const pointField& pts = triSurface::points();
+
+    bounds() = boundBox(pts);
 }
 
 
@@ -347,7 +353,9 @@ Foam::triSurfaceMesh::triSurfaceMesh
         triSurface::scalePoints(scaleFactor);
     }
 
-    bounds() = boundBox(points());
+    const pointField& pts = triSurface::points();
+
+    bounds() = boundBox(pts);
 
     // Have optional minimum quality for normal calculation
     if (dict.readIfPresent("minQuality", minQuality_) && minQuality_ > 0)
@@ -390,6 +398,34 @@ Foam::tmp<Foam::pointField> Foam::triSurfaceMesh::coordinates() const
     ).faceCentres();
 
     return tPts;
+}
+
+
+void Foam::triSurfaceMesh::boundingSpheres
+(
+    pointField& centres,
+    scalarField& radiusSqr
+) const
+{
+    centres = coordinates();
+    radiusSqr.setSize(size());
+    radiusSqr = 0.0;
+
+    const pointField& pts = triSurface::points();
+
+    forAll(*this, faceI)
+    {
+        const labelledTri& f = triSurface::operator[](faceI);
+        const point& fc = centres[faceI];
+        forAll(f, fp)
+        {
+            const point& pt = pts[f[fp]];
+            radiusSqr[faceI] = max(radiusSqr[faceI], Foam::magSqr(fc-pt));
+        }
+    }
+
+    // Add a bit to make sure all points are tested inside
+    radiusSqr += Foam::sqr(SMALL);
 }
 
 
@@ -606,6 +642,7 @@ void Foam::triSurfaceMesh::getNormal
 ) const
 {
     const triSurface& s = static_cast<const triSurface&>(*this);
+    const pointField& pts = s.points();
 
     normal.setSize(info.size());
 
@@ -621,9 +658,9 @@ void Foam::triSurfaceMesh::getNormal
             if (info[i].hit())
             {
                 label faceI = info[i].index();
-                normal[i] = s[faceI].normal(points());
+                normal[i] = s[faceI].normal(pts);
 
-                scalar qual = s[faceI].tri(points()).quality();
+                scalar qual = s[faceI].tri(pts).quality();
 
                 if (qual < minQuality_)
                 {
@@ -633,11 +670,11 @@ void Foam::triSurfaceMesh::getNormal
                     forAll(fFaces, j)
                     {
                         label nbrI = fFaces[j];
-                        scalar nbrQual = s[nbrI].tri(points()).quality();
+                        scalar nbrQual = s[nbrI].tri(pts).quality();
                         if (nbrQual > qual)
                         {
                             qual = nbrQual;
-                            normal[i] = s[nbrI].normal(points());
+                            normal[i] = s[nbrI].normal(pts);
                         }
                     }
                 }
@@ -662,7 +699,7 @@ void Foam::triSurfaceMesh::getNormal
                 //normal[i] = faceNormals()[faceI];
 
                 //- Uncached
-                normal[i] = s[faceI].normal(points());
+                normal[i] = s[faceI].normal(pts);
                 normal[i] /= mag(normal[i]) + VSMALL;
             }
             else
