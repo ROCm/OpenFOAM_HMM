@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -492,7 +492,7 @@ bool Foam::ZoneMesh<ZoneType, MeshType>::checkParallelSync
                         << " of type " << zones[zoneI].type()
                         << " is not correctly synchronised"
                         << " across coupled boundaries."
-                        << " (coupled faces are either not both "
+                        << " (coupled faces are either not both"
                         << " present in set or have same flipmap)" << endl;
                 }
             }
