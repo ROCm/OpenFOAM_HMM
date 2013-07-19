@@ -282,6 +282,11 @@ void Foam::triad::align(const vector& v)
 
 Foam::triad Foam::triad::sortxyz() const
 {
+    if (!this->set())
+    {
+        return *this;
+    }
+
     triad t;
 
     if
