@@ -129,7 +129,6 @@ void Foam::Peclet::end()
     // Do nothing - only valid on write
 }
 
-
 void Foam::Peclet::timeSet()
 {
     // Do nothing - only valid on write
@@ -163,16 +162,32 @@ void Foam::Peclet::write()
 
             nuEff = model.nuEff();
         }
-        else if (mesh.foundObject<transportModel>("transportProperties"))
+        else if (mesh.foundObject<dictionary>("transportProperties"))
         {
-            const transportModel& model =
-                mesh.lookupObject<transportModel>("transportProperties");
+            const dictionary& model =
+                mesh.lookupObject<dictionary>("transportProperties");
 
-            nuEff = model.nu();
+            nuEff =
+                tmp<volScalarField>
+                (
+                    new volScalarField
+                    (
+                        IOobject
+                        (
+                            "nuEff",
+                            mesh.time().timeName(),
+                            mesh,
+                            IOobject::NO_READ,
+                            IOobject::NO_WRITE
+                        ),
+                        mesh,
+                        dimensionedScalar(model.lookup("nu"))
+                    )
+                );
         }
         else
         {
-            FatalErrorIn("void Foam::wallShearStress::write()")
+            FatalErrorIn("void Foam::Peclet::write()")
                 << "Unable to determine the viscosity"
                 << exit(FatalError);
         }
