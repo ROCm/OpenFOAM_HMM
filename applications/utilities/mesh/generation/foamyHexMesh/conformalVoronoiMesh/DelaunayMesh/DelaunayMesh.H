@@ -201,7 +201,6 @@ public:
         inline void resetCellCount();
 
         inline label vertexCount() const;
-        inline label& vertexCount();
 
         inline void resetVertexCount();
 

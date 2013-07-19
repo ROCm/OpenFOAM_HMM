@@ -122,7 +122,7 @@ Foam::DelaunayMesh<Triangulation>::DelaunayMesh
             if (indices.headerOk())
             {
                 vh->index() = indices[ptI];
-                vertexCount()++;
+                vertexCount_++;
             }
             else
             {
