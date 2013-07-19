@@ -450,7 +450,7 @@ Foam::Map<Foam::labelPair>  Foam::meshRefinement::getZoneBafflePatches
                     labelPair patches = zPatches;
                     if (fZone.flipMap()[i])
                     {
-                       patches = patches.reversePair();
+                       patches = reverse(patches);
                     }
 
                     if (!bafflePatch.insert(faceI, patches))
