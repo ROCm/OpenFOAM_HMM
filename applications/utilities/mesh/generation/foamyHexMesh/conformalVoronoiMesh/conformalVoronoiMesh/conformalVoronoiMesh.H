@@ -177,19 +177,6 @@ private:
 
         mutable DynamicList<Foam::point> existingSurfacePtLocations_;
 
-        //- Store locations where the cell size and alignments will be
-        //  pre-calculated and looked up
-        pointField sizeAndAlignmentLocations_;
-
-        //- Stored cell size at sizeAndAlignmentLocations_
-        scalarField storedSizes_;
-
-        //- Stored alignments at sizeAndAlignmentLocations_
-        tensorField storedAlignments_;
-
-        //- Search tree for size and alignment lookup points
-        mutable autoPtr<indexedOctree<treeDataPoint> > sizeAndAlignmentTreePtr_;
-
         //- Store the surface and feature edge conformation locations to be
         //  reinserted
         List<Vb> surfaceConformationVertices_;
@@ -270,40 +257,6 @@ private:
 
         //- Return the local maximum surface protrusion distance
         inline scalar maxSurfaceProtrusion(const Foam::point& pt) const;
-
-        //- Insert Point and return its auto-generated index
-        inline bool insertPoint
-        (
-            const Point& P,
-            const indexedVertexEnum::vertexType type
-        );
-
-        //- Insert Foam::point with specified index and type
-        inline bool insertPoint
-        (
-            const Foam::point& p,
-            const indexedVertexEnum::vertexType type
-        );
-
-        //- Insert Point with specified index, type and original processor
-        inline bool insertReferredPoint
-        (
-            const Point& P,
-            const label index,
-            const indexedVertexEnum::vertexType type,
-            const label processor
-        );
-
-        inline bool insertReferredPoint(const Vb& P);
-
-        //- Insert Foam::point with specified index, type and original processor
-        inline bool insertReferredPoint
-        (
-            const Foam::point& p,
-            const label index,
-            const indexedVertexEnum::vertexType type,
-            const label processor
-        );
 
         //- Insert Delaunay vertices using the CGAL range insertion method,
         //  optionally check processor occupancy and distribute to other
@@ -539,22 +492,6 @@ private:
 
         void buildCellSizeAndAlignmentMesh();
 
-        //- Store data for sizeAndAlignmentLocations_, storedSizes_ and
-        //  storedAlignments_ and initialise the sizeAndAlignmentTreePtr_,
-        //  determining the appropriate sizeAndAlignmentLocations_
-        //  automatically
-        void storeSizesAndAlignments();
-
-        //- Store data for sizeAndAlignmentLocations_, storedSizes_ and
-        //  storedAlignments_ and initialise the sizeAndAlignmentTreePtr_
-        void storeSizesAndAlignments(const List<Point>& storePts);
-
-        //- Restore the sizes and alignments if required
-        void updateSizesAndAlignments(const List<Point>& storePts);
-
-        //- Demand driven construction of octree for and alignment points
-        const indexedOctree<treeDataPoint>& sizeAndAlignmentTree() const;
-
         //- Set the size and alignment data for each vertex
         void setVertexSizeAndAlignment();
 
@@ -749,9 +686,6 @@ private:
         (
             const DynamicList<Foam::point>& existingSurfacePtLocations
         ) const;
-
-        //- Build or rebuild the sizeAndAlignmentTree
-        void buildSizeAndAlignmentTree() const;
 
         //- Process the surface conformation locations to decide which surface
         //  and edge conformation locations to add
@@ -1062,10 +996,6 @@ public:
 //            const List<Foam::point>& centres,
 //            const List<scalar>& radiusSqrs
 //        ) const;
-
-        typedef K::Vector_3 CGALVector;
-
-        inline CGALVector toCGALVector(const Foam::vector& v) const;
 
 
         // Access

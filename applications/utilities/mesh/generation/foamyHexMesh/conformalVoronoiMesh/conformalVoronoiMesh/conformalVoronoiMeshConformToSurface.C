@@ -76,10 +76,6 @@ void Foam::conformalVoronoiMesh::conformToSurface()
             {
                 sync(decomposition_().procBounds());
             }
-
-            // Use storeSizesAndAlignments with no feed points because all
-            // background points may have been distributed.
-            storeSizesAndAlignments();
         }
 
         // Do not store the surface conformation until after it has been
@@ -2048,38 +2044,6 @@ void Foam::conformalVoronoiMesh::buildSurfacePtLocationTree
             dynamicTreeDataPoint(existingSurfacePtLocations),
             overallBb,  // overall search domain
             10,         // max levels, n/a
-            20.0,       // maximum ratio of cubes v.s. cells
-            100.0       // max. duplicity; n/a since no bounding boxes.
-        )
-    );
-}
-
-
-void Foam::conformalVoronoiMesh::buildSizeAndAlignmentTree() const
-{
-    if (sizeAndAlignmentLocations_.empty())
-    {
-        FatalErrorIn("buildSizeAndAlignmentTree()")
-            << "sizeAndAlignmentLocations empty, must be populated before "
-            << "sizeAndAlignmentTree can be built."
-            << exit(FatalError);
-    }
-
-    treeBoundBox overallBb
-    (
-        geometryToConformTo_.globalBounds().extend(rndGen_, 1e-4)
-    );
-
-    overallBb.min() -= Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-    overallBb.max() += Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-
-    sizeAndAlignmentTreePtr_.reset
-    (
-        new indexedOctree<treeDataPoint>
-        (
-            treeDataPoint(sizeAndAlignmentLocations_),
-            overallBb,  // overall search domain
-            10,         // max levels
             20.0,       // maximum ratio of cubes v.s. cells
             100.0       // max. duplicity; n/a since no bounding boxes.
         )

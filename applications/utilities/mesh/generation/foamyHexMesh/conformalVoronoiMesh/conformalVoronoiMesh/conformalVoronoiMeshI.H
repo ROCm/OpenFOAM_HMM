@@ -236,94 +236,6 @@ inline Foam::scalar Foam::conformalVoronoiMesh::maxSurfaceProtrusion
 }
 
 
-inline bool Foam::conformalVoronoiMesh::insertPoint
-(
-    const Foam::point& p,
-    const indexedVertexEnum::vertexType type
-)
-{
-    return insertPoint(toPoint<Point>(p), type);
-}
-
-
-inline bool Foam::conformalVoronoiMesh::insertPoint
-(
-    const Point& P,
-    const indexedVertexEnum::vertexType type
-)
-{
-    uint nVert = number_of_vertices();
-
-    Vertex_handle vh = insert(P);
-
-    bool pointInserted = true;
-
-    if (nVert == number_of_vertices())
-    {
-        Pout<< "Failed to insert point : " << topoint(P)
-            << " of type " << type << endl;
-        pointInserted = false;
-    }
-    else
-    {
-        vh->index() = getNewVertexIndex();
-        vh->type() = type;
-    }
-
-    return pointInserted;
-}
-
-
-inline bool Foam::conformalVoronoiMesh::insertReferredPoint(const Vb& P)
-{
-    return insertReferredPoint(P.point(), P.index(), P.type(), P.procIndex());
-}
-
-
-inline bool Foam::conformalVoronoiMesh::insertReferredPoint
-(
-    const Foam::point& p,
-    const label index,
-    const indexedVertexEnum::vertexType type,
-    const label processor
-)
-{
-    return insertReferredPoint(toPoint<Point>(p), index, type, processor);
-}
-
-
-inline bool Foam::conformalVoronoiMesh::insertReferredPoint
-(
-    const Point& P,
-    const label index,
-    const indexedVertexEnum::vertexType type,
-    const label processor
-)
-{
-    uint nVert = number_of_vertices();
-
-    Vertex_handle vh = insert(P);
-
-    bool pointInserted = true;
-
-    if (nVert == number_of_vertices())
-    {
-        Pout<< "Failed to insert point " << topoint(P)
-            << " type: " << type << " index: " << index
-            << " proc: " << processor << endl;
-        pointInserted = false;
-    }
-    else
-    {
-        vh->index() = index;
-        vh->type() = type;
-        vh->procIndex() = processor;
-    }
-
-    return pointInserted;
-}
-
-
 inline void Foam::conformalVoronoiMesh::createPointPair
 (
     const scalar ppDist,
@@ -662,13 +574,6 @@ inline bool Foam::conformalVoronoiMesh::isProcBoundaryEdge
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline Foam::conformalVoronoiMesh::CGALVector
-Foam::conformalVoronoiMesh::toCGALVector(const Foam::vector& v) const
-{
-    return CGALVector(v.x(), v.y(), v.z());
-}
-
 
 inline const Foam::Time& Foam::conformalVoronoiMesh::time() const
 {

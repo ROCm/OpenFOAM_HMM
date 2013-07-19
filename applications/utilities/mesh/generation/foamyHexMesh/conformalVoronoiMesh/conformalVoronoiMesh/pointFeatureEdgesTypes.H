@@ -25,8 +25,7 @@ Class
     pointFeatureEdgesTypes
 
 Description
-    struct for holding information on the types of feature edges attached to
-    feature points
+    Holds information on the types of feature edges attached to feature points.
 
 \*---------------------------------------------------------------------------*/
 
