@@ -1386,16 +1386,10 @@ Foam::Istream& Foam::operator>>
     Foam::extendedFeatureEdgeMesh::sideVolumeType& vt
 )
 {
-    // Read beginning of sideVolumeType
-    is.readBegin("sideVolumeType");
-
-    int type;
+    label type;
     is  >> type;
 
     vt = static_cast<Foam::extendedFeatureEdgeMesh::sideVolumeType>(type);
-
-    // Read end of volumeType
-    is.readEnd("sideVolumeType");
 
     // Check state of Istream
     is.check("operator>>(Istream&, sideVolumeType&)");
@@ -1410,7 +1404,7 @@ Foam::Ostream& Foam::operator<<
     const Foam::extendedFeatureEdgeMesh::sideVolumeType& vt
 )
 {
-    os  << static_cast<int>(vt);
+    os  << static_cast<label>(vt);
 
     return os;
 }
