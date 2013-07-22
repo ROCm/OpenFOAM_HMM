@@ -447,6 +447,21 @@ Foam::plane::side Foam::plane::sideOfPlane(const point& p) const
 }
 
 
+Foam::point Foam::plane::mirror(const point& p) const
+{
+    const vector mirroredPtDir = p - nearestPoint(p);
+
+    if ((normal() & mirroredPtDir) > 0)
+    {
+        return p - 2.0*distance(p)*normal();
+    }
+    else
+    {
+        return p + 2.0*distance(p)*normal();
+    }
+}
+
+
 void Foam::plane::writeDict(Ostream& os) const
 {
     os.writeKeyword("planeType") << "pointAndNormal"

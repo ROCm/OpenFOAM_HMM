@@ -301,8 +301,8 @@ void Foam::conformalVoronoiMesh::createEdgePointGroupByCirculating
                 Foam::point pt1 = edgePt + s + ppDist*normal;
                 Foam::point pt2 = edgePt - s + ppDist*normal;
 
-                Foam::point pt3 = reflectPointInPlane(pt1, facePlane);
-                Foam::point pt4 = reflectPointInPlane(pt2, facePlane);
+                Foam::point pt3 = facePlane.mirror(pt1);
+                Foam::point pt4 = facePlane.mirror(pt2);
 
                 pts.append(Vb(pt1, Vb::vtInternalFeatureEdge));
                 pts.append(Vb(pt2, Vb::vtInternalFeatureEdge));
@@ -449,7 +449,7 @@ void Foam::conformalVoronoiMesh::createEdgePointGroupByCirculating
         if (masterPointReflectionsPrev.found(iter.key()))
         {
             const Foam::point reflectedPt =
-                reflectPointInPlane(pt, masterPointReflectionsPrev[iter.key()]);
+                masterPointReflectionsPrev[iter.key()].mirror(pt);
 
 //            Info<< "        Adding Prev " << reflectedPt << " "
 //                << indexedVertexEnum::vertexTypeNames_[reflectedPtType]
@@ -461,7 +461,7 @@ void Foam::conformalVoronoiMesh::createEdgePointGroupByCirculating
         if (masterPointReflectionsNext.found(iter.key()))
         {
             const Foam::point reflectedPt =
-                reflectPointInPlane(pt, masterPointReflectionsNext[iter.key()]);
+               masterPointReflectionsNext[iter.key()].mirror(pt);
 
 //            Info<< "        Adding Next " << reflectedPt << " "
 //                << indexedVertexEnum::vertexTypeNames_[reflectedPtType]
@@ -815,8 +815,8 @@ void Foam::conformalVoronoiMesh::createOpenEdgePointGroup
         Foam::point pt1 = edgePt + s + ppDist*n;
         Foam::point pt2 = edgePt - s + ppDist*n;
 
-        Foam::point pt3 = reflectPointInPlane(pt1, facePlane);
-        Foam::point pt4 = reflectPointInPlane(pt2, facePlane);
+        Foam::point pt3 = facePlane.mirror(pt1);
+        Foam::point pt4 = facePlane.mirror(pt2);
 
         pts.append(Vb(pt1, Vb::vtInternalSurface));
         pts.append(Vb(pt2, Vb::vtInternalSurface));
@@ -1235,8 +1235,7 @@ void Foam::conformalVoronoiMesh::addMasterAndSlavePoints
 
             const plane& reflPlane = masterPointPlanes[planeI]();
 
-            const Foam::point slavePt =
-                reflectPointInPlane(masterPt, reflPlane);
+            const Foam::point slavePt = reflPlane.mirror(masterPt);
 
 //            Info<< "        Slave " << planeI << " = " << slavePt << endl;
 
@@ -1717,27 +1716,9 @@ Foam::List<Foam::point> Foam::conformalVoronoiMesh::reflectPointInPlanes
 
     forAll(planes, planeI)
     {
-        reflectedPoints[planeI] = reflectPointInPlane(p, planes[planeI]());
+        reflectedPoints[planeI] = planes[planeI]().mirror(p);
     }
 
     return reflectedPoints;
 }
 
-
-Foam::point Foam::conformalVoronoiMesh::reflectPointInPlane
-(
-    const Foam::point p,
-    const plane& planeN
-) const
-{
-    const vector reflectedPtDir = p - planeN.nearestPoint(p);
-
-    if ((planeN.normal() & reflectedPtDir) > 0)
-    {
-        return p - 2.0*planeN.distance(p)*planeN.normal();
-    }
-    else
-    {
-        return p + 2.0*planeN.distance(p)*planeN.normal();
-    }
-}
