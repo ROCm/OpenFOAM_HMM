@@ -108,17 +108,15 @@ int CGAL::indexedCell<Gt, Cb>::cellIndex() const
 
 
 #ifdef CGAL_INEXACT
+
     template<class Gt, class Cb>
     const Foam::point& CGAL::indexedCell<Gt, Cb>::dual()
     {
-    //    if (Foam::foamyHexMeshChecks::coplanarTet(*this, 1e-20) == 0)
-    //    {
-            // Do exact calc
-    //    }
-
         return reinterpret_cast<const Foam::point&>(this->circumcenter());
     }
+
 #else
+
     template<class Gt, class Cb>
     const Foam::point CGAL::indexedCell<Gt, Cb>::dual()
     {
@@ -131,6 +129,7 @@ int CGAL::indexedCell<Gt, Cb>::cellIndex() const
             CGAL::to_double(P.z())
         );
     }
+
 #endif
 
 

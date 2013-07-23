@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,20 +46,6 @@ namespace Foam
 
 template<class Type1, class Type2>
 class Tuple2;
-
-template<class Type1, class Type2>
-inline bool operator==
-(
-    const Tuple2<Type1, Type2>&,
-    const Tuple2<Type1, Type2>&
-);
-
-template<class Type1, class Type2>
-inline bool operator!=
-(
-    const Tuple2<Type1, Type2>&,
-    const Tuple2<Type1, Type2>&
-);
 
 template<class Type1, class Type2>
 inline Istream& operator>>(Istream&, Tuple2<Type1, Type2>&);
@@ -129,27 +115,6 @@ public:
             return s_;
         }
 
-        //- Return reverse pair
-        inline Tuple2<Type2, Type1> reverseTuple2() const
-        {
-            return Tuple2<Type2, Type1>(second(), first());
-        }
-
-
-    // Friend Operators
-
-        friend bool operator== <Type1, Type2>
-        (
-            const Tuple2<Type1, Type2>& a,
-            const Tuple2<Type1, Type2>& b
-        );
-
-        friend bool operator!= <Type1, Type2>
-        (
-            const Tuple2<Type1, Type2>& a,
-            const Tuple2<Type1, Type2>& b
-        );
-
 
     // IOstream operators
 
@@ -167,6 +132,14 @@ public:
             const Tuple2<Type1, Type2>& t2
         );
 };
+
+
+//- Return reverse of a tuple2
+template<class Type1, class Type2>
+inline Tuple2<Type2, Type1> reverse(const Tuple2<Type1, Type2>& t)
+{
+    return Tuple2<Type2, Type1>(t.second(), t.first());
+}
 
 
 template<class Type1, class Type2>

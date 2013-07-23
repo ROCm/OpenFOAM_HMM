@@ -211,11 +211,6 @@ void Foam::conformalVoronoiMesh::checkDuals()
 
     List<Point> duals(number_of_finite_cells());
 
-    typedef CGAL::Exact_predicates_exact_constructions_kernel       EK2;
-    typedef CGAL::Regular_triangulation_euclidean_traits_3<EK2>     EK;
-    typedef CGAL::Cartesian_converter<baseK::Kernel, EK2>  To_exact;
-    typedef CGAL::Cartesian_converter<EK2, baseK::Kernel>  Back_from_exact;
-
 //    PackedBoolList bPoints(number_of_finite_cells());
 
 //    indexDualVertices(duals, bPoints);
@@ -1787,7 +1782,6 @@ void Foam::conformalVoronoiMesh::indexDualVertices
     OBJstream snapping1("snapToSurface1.obj");
     OBJstream snapping2("snapToSurface2.obj");
     OFstream tetToSnapTo("tetsToSnapTo.obj");
-    label offset = 0;
 
     for
     (

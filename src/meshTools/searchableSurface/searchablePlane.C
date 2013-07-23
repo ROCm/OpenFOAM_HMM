@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -131,6 +131,20 @@ const Foam::wordList& Foam::searchablePlane::regions() const
         regions_[0] = "region0";
     }
     return regions_;
+}
+
+
+void Foam::searchablePlane::boundingSpheres
+(
+    pointField& centres,
+    scalarField& radiusSqr
+) const
+{
+    centres.setSize(1);
+    centres[0] = refPoint();
+
+    radiusSqr.setSize(1);
+    radiusSqr[0] = Foam::sqr(GREAT);
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -271,6 +271,71 @@ const Foam::wordList& Foam::searchablePlate::regions() const
         regions_[0] = "region0";
     }
     return regions_;
+}
+
+
+Foam::tmp<Foam::pointField> Foam::searchablePlate::coordinates() const
+{
+    return tmp<pointField>(new pointField(1, origin_ + 0.5*span_));
+}
+
+
+void Foam::searchablePlate::boundingSpheres
+(
+    pointField& centres,
+    scalarField& radiusSqr
+) const
+{
+    centres.setSize(1);
+    centres[0] = origin_ + 0.5*span_;
+
+    radiusSqr.setSize(1);
+    radiusSqr[0] = Foam::magSqr(0.5*span_);
+
+    // Add a bit to make sure all points are tested inside
+    radiusSqr += Foam::sqr(SMALL);
+}
+
+
+Foam::tmp<Foam::pointField> Foam::searchablePlate::points() const
+{
+    tmp<pointField> tPts(new pointField(4));
+    pointField& pts = tPts();
+
+    pts[0] = origin_;
+    pts[2] = origin_ + span_;
+
+    if (span_.x() < span_.y() && span_.x() < span_.z())
+    {
+        pts[1] = origin_ + point(0, span_.y(), 0);
+        pts[3] = origin_ + point(0, 0, span_.z());
+    }
+    else if (span_.y() < span_.z())
+    {
+        pts[1] = origin_ + point(span_.x(), 0, 0);
+        pts[3] = origin_ + point(0, 0, span_.z());
+    }
+    else
+    {
+        pts[1] = origin_ + point(span_.x(), 0, 0);
+        pts[3] = origin_ + point(0, span_.y(), 0);
+    }
+
+    return tPts;
+}
+
+
+bool Foam::searchablePlate::overlaps(const boundBox& bb) const
+{
+    return
+    (
+        (origin_.x() + span_.x()) >= bb.min().x()
+     && origin_.x() <= bb.max().x()
+     && (origin_.y() + span_.y()) >= bb.min().y()
+     && origin_.y() <= bb.max().y()
+     && (origin_.z() + span_.z()) >= bb.min().z()
+     && origin_.z() <= bb.max().z()
+    );
 }
 
 

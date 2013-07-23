@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,7 +60,7 @@ private:
         //- Centre point
         const point centre_;
 
-        //- Radius squared
+        //- Radius
         const scalar radius_;
 
         //- Names of regions
@@ -138,6 +138,14 @@ public:
             tmp<pointField> tCtrs(new pointField(1, centre_));
             return tCtrs;
         }
+
+        //- Get bounding spheres (centre and radius squared), one per element.
+        //  Any point on element is guaranteed to be inside.
+        virtual void boundingSpheres
+        (
+            pointField& centres,
+            scalarField& radiusSqr
+        ) const;
 
         //- Get the points that define the surface.
         virtual tmp<pointField> points() const

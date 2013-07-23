@@ -570,159 +570,8 @@ void Foam::conformalVoronoiMesh::buildCellSizeAndAlignmentMesh()
 }
 
 
-void Foam::conformalVoronoiMesh::storeSizesAndAlignments()
-{
-    DynamicList<Point> storePts(number_of_vertices());
-
-    for
-    (
-        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-        vit != finite_vertices_end();
-        vit++
-    )
-    {
-        if (vit->internalPoint())
-        {
-            storePts.append(vit->point());
-        }
-    }
-
-    storePts.shrink();
-
-    storeSizesAndAlignments(storePts);
-}
-
-
-void Foam::conformalVoronoiMesh::storeSizesAndAlignments
-(
-    const List<Point>& storePts
-)
-{
-//    timeCheck("Start of storeSizesAndAlignments");
-//
-//    Info << nl << "Store size and alignment" << endl;
-//
-//    sizeAndAlignmentLocations_.setSize(storePts.size());
-//
-//    storedSizes_.setSize(sizeAndAlignmentLocations_.size());
-//
-//    storedAlignments_.setSize(sizeAndAlignmentLocations_.size());
-//
-//    label i = 0;
-//
-//    //checkCellSizing();
-//
-//    for
-//    (
-//        List<Point>::const_iterator pit = storePts.begin();
-//        pit != storePts.end();
-//        ++pit
-//    )
-//    {
-//        pointFromPoint pt = topoint(*pit);
-//
-////        storedAlignments_[i] = requiredAlignment(pt);
-////
-////        storedSizes_[i] = cellShapeControls().cellSize(pt);
-//
-//        cellShapeControls().cellSizeAndAlignment
-//        (
-//            pt,
-//            storedSizes_[i],
-//            storedAlignments_[i]
-//        );
-//
-//        i++;
-//    }
-//
-//    timeCheck("Sizes and alignments calculated, build tree");
-//
-//    buildSizeAndAlignmentTree();
-//
-//    timeCheck("Size and alignment tree built");
-}
-
-
-void Foam::conformalVoronoiMesh::updateSizesAndAlignments
-(
-    const List<Point>& storePts
-)
-{
-    // This function is only used in serial, the background redistribution
-    // triggers this when unbalance is detected in parallel.
-
-    if
-    (
-        !Pstream::parRun()
-     && runTime_.run()
-     && runTime_.timeIndex()
-    )
-    {
-        storeSizesAndAlignments(storePts);
-
-        timeCheck("Updated sizes and alignments");
-    }
-}
-
-
-const Foam::indexedOctree<Foam::treeDataPoint>&
-Foam::conformalVoronoiMesh::sizeAndAlignmentTree() const
-{
-    if (sizeAndAlignmentTreePtr_.empty())
-    {
-        buildSizeAndAlignmentTree();
-    }
-
-    return sizeAndAlignmentTreePtr_();
-}
-
-
 void Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()
 {
-//    Info<< nl << "Looking up target cell alignment and size" << endl;
-//
-//    const indexedOctree<treeDataPoint>& tree = sizeAndAlignmentTree();
-//
-//    for
-//    (
-//        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-//        vit != finite_vertices_end();
-//        vit++
-//    )
-//    {
-//        if
-//        (
-//            vit->internalOrBoundaryPoint()
-//         || vit->referredInternalOrBoundaryPoint()
-//        )
-//        {
-//            pointFromPoint pt = topoint(vit->point());
-//
-//            pointIndexHit info = tree.findNearest(pt, sqr(GREAT));
-//
-//            if (info.hit())
-//            {
-//                vit->alignment() = storedAlignments_[info.index()];
-//
-//                vit->targetCellSize() = storedSizes_[info.index()];
-//            }
-//            else
-//            {
-//                WarningIn
-//                (
-//                    "void "
-//                    "Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()"
-//                )
-//                    << "Point " << pt << " did not find a nearest point "
-//                    << " for alignment and size lookup." << endl;
-//
-//                vit->alignment() = cellShapeControls().cellAlignment(pt);
-//
-//                vit->targetCellSize() = cellShapeControls().cellSize(pt);
-//            }
-//        }
-//    }
-
     Info<< nl << "Calculating target cell alignment and size" << endl;
 
     for
@@ -744,44 +593,6 @@ void Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()
             );
         }
     }
-
-//    OFstream str(runTime_.path()/"alignments_internal.obj");
-//
-//    for
-//    (
-//        Finite_vertices_iterator vit = finite_vertices_begin();
-//        vit != finite_vertices_end();
-//        ++vit
-//    )
-//    {
-//        if (!vit->farPoint())
-//        {
-//            // Write alignments
-//            const tensor& alignment = vit->alignment();
-//            pointFromPoint pt = topoint(vit->point());
-//
-//            if
-//            (
-//                alignment.x() == triad::unset[0]
-//             || alignment.y() == triad::unset[0]
-//             || alignment.z() == triad::unset[0]
-//            )
-//            {
-//                Info<< "Bad alignment = " << vit->info();
-//
-//                vit->alignment() = tensor::I;
-//
-//                Info<< "New alignment = " << vit->info();
-//
-//                continue;
-//            }
-//
-//            meshTools::writeOBJ(str, pt, alignment.x() + pt);
-//            meshTools::writeOBJ(str, pt, alignment.y() + pt);
-//            meshTools::writeOBJ(str, pt, alignment.z() + pt);
-//        }
-//    }
-
 }
 
 
@@ -1039,10 +850,6 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     featurePointLocations_(),
     edgeLocationTreePtr_(),
     surfacePtLocationTreePtr_(),
-    sizeAndAlignmentLocations_(),
-    storedSizes_(),
-    storedAlignments_(),
-    sizeAndAlignmentTreePtr_(),
     surfaceConformationVertices_(),
     initialPointsMethod_
     (
@@ -1132,10 +939,6 @@ void Foam::conformalVoronoiMesh::initialiseForMotion()
     // Do not store the surface conformation until after it has been
     // (potentially) redistributed.
     storeSurfaceConformation();
-
-    // Use storeSizesAndAlignments with no feed points because all background
-    // points may have been distributed.
-    storeSizesAndAlignments();
 
     // Report any Delaunay vertices that do not think that they are in the
     // domain the processor they are on.
@@ -1835,8 +1638,6 @@ void Foam::conformalVoronoiMesh::move()
     {
         writeMesh(time().timeName());
     }
-
-    updateSizesAndAlignments(pointsToInsert);
 
     Info<< nl
         << "Total displacement = " << totalDisp << nl

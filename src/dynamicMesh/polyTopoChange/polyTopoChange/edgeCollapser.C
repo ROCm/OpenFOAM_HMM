@@ -42,32 +42,6 @@ defineTypeNameAndDebug(edgeCollapser, 0);
 }
 
 
-Foam::label Foam::edgeCollapser::longestEdge
-(
-    const face& f,
-    const pointField& pts
-)
-{
-    const edgeList& eds = f.edges();
-
-    label longestEdgeI = -1;
-    scalar longestEdgeLength = -SMALL;
-
-    forAll(eds, edI)
-    {
-        scalar edgeLength = eds[edI].mag(pts);
-
-        if (edgeLength > longestEdgeLength)
-        {
-            longestEdgeI = edI;
-            longestEdgeLength = edgeLength;
-        }
-    }
-
-    return longestEdgeI;
-}
-
-
 Foam::HashSet<Foam::label> Foam::edgeCollapser::checkBadFaces
 (
     const polyMesh& mesh,

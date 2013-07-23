@@ -56,7 +56,7 @@ class cellAspectRatioControl
 
         const scalar aspectRatio_;
 
-        const vector aspectRatioDirection_;
+        vector aspectRatioDirection_;
 
 
     // Private Member Functions
@@ -73,10 +73,7 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        cellAspectRatioControl
-        (
-            const dictionary& motionDict
-        );
+        cellAspectRatioControl(const dictionary& motionDict);
 
 
     //- Destructor

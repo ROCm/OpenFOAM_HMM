@@ -40,11 +40,15 @@ Foam::cellAspectRatioControl::cellAspectRatioControl
         aspectRatioDict_.lookupOrDefault<vector>
         (
             "aspectRatioDirection",
-            vector(0, 0, 0)
+            vector::zero
         )
     )
 {
-    Info<< nl << "Cell Aspect Ratio Control" << nl
+    // Normalise the direction
+    aspectRatioDirection_ /= mag(aspectRatioDirection_) + SMALL;
+
+    Info<< nl
+        << "Cell Aspect Ratio Control" << nl
         << "    Ratio     : " << aspectRatio_ << nl
         << "    Direction : " << aspectRatioDirection_
         << endl;
@@ -66,22 +70,20 @@ void Foam::cellAspectRatioControl::updateCellSizeAndFaceArea
     scalar& targetCellSize
 ) const
 {
-    const scalar cosAngle = mag
-    (
-        vectorTools::cosPhi(alignmentDir, aspectRatioDirection_)
-    );
+    const scalar cosAngle =
+        mag(vectorTools::cosPhi(alignmentDir, aspectRatioDirection_));
 
     // Change target face area based on aspect ratio
-    targetFaceArea
-        += targetFaceArea
-          *(aspectRatio_ - 1.0)
-          *(1.0 - cosAngle);
+    targetFaceArea +=
+        targetFaceArea
+       *(aspectRatio_ - 1.0)
+       *(1.0 - cosAngle);
 
     // Change target cell size based on aspect ratio
-    targetCellSize
-        += targetCellSize
-          *(aspectRatio_ - 1.0)
-          *cosAngle;
+    targetCellSize +=
+        targetCellSize
+       *(aspectRatio_ - 1.0)
+       *cosAngle;
 
     alignmentDir *= 0.5*targetCellSize;
 }
@@ -95,16 +97,15 @@ void Foam::cellAspectRatioControl::updateDeltaVector
     vector& delta
 ) const
 {
-    const scalar cosAngle = mag
-    (
-        vectorTools::cosPhi(alignmentDir, aspectRatioDirection_)
-    );
+    const scalar cosAngle =
+        mag(vectorTools::cosPhi(alignmentDir, aspectRatioDirection_));
 
-    delta += 0.5
-            *delta
-            *cosAngle
-            *(targetCellSize/rABMag)
-            *(aspectRatio_ - 1.0);
+    delta +=
+        0.5
+       *delta
+       *cosAngle
+       *(targetCellSize/rABMag)
+       *(aspectRatio_ - 1.0);
 }
 
 

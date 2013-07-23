@@ -145,53 +145,21 @@ public:
 
         //- Get representative set of element coordinates
         //  Usually the element centres (should be of length size()).
-        virtual tmp<pointField> coordinates() const
-        {
-            tmp<pointField> tCtrs(new pointField(1, origin_ + 0.5*span_));
-            return tCtrs;
-        }
+        virtual tmp<pointField> coordinates() const;
+
+        //- Get bounding spheres (centre and radius squared), one per element.
+        //  Any point on element is guaranteed to be inside.
+        virtual void boundingSpheres
+        (
+            pointField& centres,
+            scalarField& radiusSqr
+        ) const;
 
         //- Get the points that define the surface.
-        virtual tmp<pointField> points() const
-        {
-            tmp<pointField> tPts(new pointField(4));
-            pointField& pts = tPts();
-
-            pts[0] = origin_;
-            pts[2] = origin_ + span_;
-
-            if (span_.x() < span_.y() && span_.x() < span_.z())
-            {
-                pts[1] = origin_ + point(0, span_.y(), 0);
-                pts[3] = origin_ + point(0, 0, span_.z());
-            }
-            else if (span_.y() < span_.z())
-            {
-                pts[1] = origin_ + point(span_.x(), 0, 0);
-                pts[3] = origin_ + point(0, 0, span_.z());
-            }
-            else
-            {
-                pts[1] = origin_ + point(span_.x(), 0, 0);
-                pts[3] = origin_ + point(0, span_.y(), 0);
-            }
-
-            return tPts;
-        }
+        virtual tmp<pointField> points() const;
 
         //- Does any part of the surface overlap the supplied bound box?
-        virtual bool overlaps(const boundBox& bb) const
-        {
-            return
-            (
-                (origin_.x() + span_.x()) >= bb.min().x()
-             && origin_.x() <= bb.max().x()
-             && (origin_.y() + span_.y()) >= bb.min().y()
-             && origin_.y() <= bb.max().y()
-             && (origin_.z() + span_.z()) >= bb.min().z()
-             && origin_.z() <= bb.max().z()
-            );
-        }
+        virtual bool overlaps(const boundBox& bb) const;
 
 
         // Multiple point queries.

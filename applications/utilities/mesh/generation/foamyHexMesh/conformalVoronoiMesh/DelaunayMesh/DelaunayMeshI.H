@@ -124,12 +124,6 @@ Foam::label Foam::DelaunayMesh<Triangulation>::vertexCount() const
     return vertexCount_;
 }
 
-template<class Triangulation>
-Foam::label& Foam::DelaunayMesh<Triangulation>::vertexCount()
-{
-    return vertexCount_;
-}
-
 
 template<class Triangulation>
 void Foam::DelaunayMesh<Triangulation>::resetVertexCount()

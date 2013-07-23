@@ -249,6 +249,41 @@ Foam::tmp<Foam::pointField> Foam::searchableBox::coordinates() const
 }
 
 
+void Foam::searchableBox::boundingSpheres
+(
+    pointField& centres,
+    scalarField& radiusSqr
+) const
+{
+    centres.setSize(size());
+    radiusSqr.setSize(size());
+    radiusSqr = 0.0;
+
+    const pointField pts(treeBoundBox::points());
+    const faceList& fcs = treeBoundBox::faces;
+
+    forAll(fcs, i)
+    {
+        const face& f = fcs[i];
+
+        centres[i] = f.centre(pts);
+        forAll(f, fp)
+        {
+            const point& pt = pts[f[fp]];
+
+            radiusSqr[i] = Foam::max
+            (
+                radiusSqr[i],
+                Foam::magSqr(pt-centres[i])
+            );
+        }
+    }
+
+    // Add a bit to make sure all points are tested inside
+    radiusSqr += Foam::sqr(SMALL);
+}
+
+
 Foam::tmp<Foam::pointField> Foam::searchableBox::points() const
 {
     return treeBoundBox::points();
