@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -172,6 +172,8 @@ void Foam::flowRateInletVelocityFvPatchVectorField::updateCoeffs
         // mass flow-rate
         operator==(n*avgU/uniformRho);
     }
+
+    fixedValueFvPatchVectorField::updateCoeffs();
 }
 
 
@@ -223,7 +225,7 @@ void Foam::flowRateInletVelocityFvPatchVectorField::updateCoeffs()
         }
     }
 
-    fixedValueFvPatchField<vector>::updateCoeffs();
+    fixedValueFvPatchVectorField::updateCoeffs();
 }
 
 
