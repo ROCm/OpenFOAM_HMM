@@ -29,7 +29,7 @@ Group
 
 Description
     This boundary condition provides an interface to an external application.
-    Values are transferred as plain text files, where OperFOAM data is written
+    Values are transferred as plain text files, where OpenFOAM data is written
     as:
 
         # Patch: <patch name>

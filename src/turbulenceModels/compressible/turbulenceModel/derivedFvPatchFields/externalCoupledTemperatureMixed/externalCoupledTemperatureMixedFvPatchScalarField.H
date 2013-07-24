@@ -29,7 +29,7 @@ Group
 
 Description
     This boundary condition provides a temperatue interface to an external
-    application.  Values are transferred as plain text files, where OperFOAM
+    application.  Values are transferred as plain text files, where OpenFOAM
     data is written as:
 
         # Patch: <patch name>
@@ -48,13 +48,7 @@ Description
         ...
         <valueN> <gradientN> <valueFracionN>
 
-    Data is either sent/received as one file per patch, or as a single file
-    for all patches, based on the \c collate flag.  In the former case, the
-    folder used for communications is:
-
-        $FOAM_CASE/<commsDir>/patchName
-
-    and when using the \c collate option:
+    Data is sent/received as a single file for all patches from the folder
 
         $FOAM_CASE/<commsDir>
 
@@ -83,7 +77,6 @@ Description
         Property     | Description             | Required    | Default value
         commsDir     | communications folder   | yes         |
         fileName     | transfer file name      | yes         |
-        collate      | collate all patch data into single file | yes |
         waitInterval | interval [s] between file checks | no | 1
         timeOut      | time after which error invoked [s] |no |100*waitInterval
         calcFrequency | calculation frequency  | no          | 1
@@ -97,7 +90,6 @@ Description
         type            externalCoupledTemperature;
         commsDir        "$FOAM_CASE/comms";
         fileName        data;
-        collate         yes;
         calcFrequency   1;
     }
     \endverbatim
