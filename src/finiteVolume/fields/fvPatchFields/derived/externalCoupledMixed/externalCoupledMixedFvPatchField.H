@@ -48,13 +48,7 @@ Description
         ...
         <valueN> <gradientN> <valueFracionN>
 
-    Data is either sent/received as one file per patch, or as a single file
-    for all patches, based on the \c collate flag.  In the former case, the
-    folder used for communications is:
-
-        $FOAM_CASE/<commsDir>/patchName
-
-    and when using the \c collate option:
+    Data is sent/received as a single file for all patches from the folder
 
         $FOAM_CASE/<commsDir>
 
@@ -83,7 +77,6 @@ Description
         Property     | Description             | Required    | Default value
         commsDir     | communications folder   | yes         |
         fileName     | transfer file name      | yes         |
-        collate      | collate all patch data into single file | yes |
         waitInterval | interval [s] between file checks | no | 1
         timeOut      | time after which error invoked [s] |no |100*waitInterval
         calcFrequency | calculation frequency  | no          | 1
@@ -98,7 +91,6 @@ Description
         type            externalCoupled;
         commsDir        "$FOAM_CASE/comms";
         fileName        data;
-        collate         yes;
         calcFrequency   1;
         initByExternal  yes;
     }
@@ -149,9 +141,6 @@ private:
         //- Name of data file
         word fName_;
 
-        //- Flag to collate all data into single transfer file
-        bool collate_;
-
         //- Interval time between checking for return data [s]
         label waitInterval_;
 
@@ -190,7 +179,7 @@ private:
         void setMaster(const labelList& patchIDs);
 
         //- Return the file path to the base communications folder
-        fileName baseDir(const word& patchName = word::null) const;
+        fileName baseDir() const;
 
         //- Write the geometry to the comms dir
         void writeGeometry(OFstream& osPoints, OFstream& osFaces) const;
@@ -314,12 +303,6 @@ public:
             bool log() const
             {
                 return log_;
-            }
-
-            //- Return the collate flag
-            bool collate() const
-            {
-                return collate_;
             }
 
             //- Return the master flag
