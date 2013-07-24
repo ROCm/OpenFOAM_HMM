@@ -220,8 +220,11 @@ public:
 
         // Evaluation functions
 
-            //- Update the coefficients associated with the patch field
-            virtual void updateCoeffs();
+            //- Evaluate the patch field
+            virtual void evaluate
+            (
+                const Pstream::commsTypes commsType=Pstream::blocking
+            );
 
             //- Transfer data for external source
             virtual void transferData(OFstream& os) const;

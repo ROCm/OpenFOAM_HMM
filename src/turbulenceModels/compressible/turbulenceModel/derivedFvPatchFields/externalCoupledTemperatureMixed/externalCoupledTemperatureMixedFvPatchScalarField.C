@@ -116,7 +116,9 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::transferData
 {
     if (log())
     {
-        Info<< type() << ": writing data to " << os.name() << endl;
+        Info<< type() << ": " << this->patch().name()
+            << ": writing data to " << os.name()
+            << endl;
     }
 
     const label patchI = patch().index();
@@ -154,9 +156,9 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::transferData
             "void Foam::externalCoupledTemperatureMixedFvPatchScalarField::"
             "writeData"
             "("
-                "const fileName& transferFile"
+                "OFstream&"
             ") const"
-        )   << "Condition requires either compressibke turbulence and/or "
+        )   << "Condition requires either compressible turbulence and/or "
             << "thermo model to be available" << exit(FatalError);
     }
 
@@ -233,9 +235,12 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::transferData
 }
 
 
-void Foam::externalCoupledTemperatureMixedFvPatchScalarField::updateCoeffs()
+void Foam::externalCoupledTemperatureMixedFvPatchScalarField::evaluate
+(
+    const Pstream::commsTypes comms
+)
 {
-    externalCoupledMixedFvPatchField<scalar>::updateCoeffs();
+    externalCoupledMixedFvPatchField<scalar>::evaluate(comms);
 }
 
 
