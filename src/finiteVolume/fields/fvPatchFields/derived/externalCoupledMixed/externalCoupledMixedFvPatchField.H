@@ -87,6 +87,7 @@ Description
         waitInterval | interval [s] between file checks | no | 1
         timeOut      | time after which error invoked [s] |no |100*waitInterval
         calcFrequency | calculation frequency  | no          | 1
+        initByExternal | external app to initialises values  | yes |
         log          | log program control     | no          | no
     \endtable
 
@@ -99,6 +100,7 @@ Description
         fileName        data;
         collate         yes;
         calcFrequency   1;
+        initByExternal  yes;
     }
     \endverbatim
 
@@ -137,6 +139,10 @@ private:
 
     // Private data
 
+        //- Convenience typedefs
+        typedef externalCoupledMixedFvPatchField<Type> patchType;
+        typedef GeometricField<Type, fvPatchField, volMesh> volFieldType;
+
         //- Path to communications folder
         fileName commsDir_;
 
@@ -155,6 +161,9 @@ private:
         //- Calculation frequency
         label calcFrequency_;
 
+        //- Flag to indicate values are initialised by external application
+        bool initByExternal_;
+
         //- Log flag
         bool log_;
 
@@ -162,11 +171,23 @@ private:
         //  Note: only valid when collate option is selected
         bool master_;
 
+        //- Offsets in data file to start reading at correct position
+        List<List<label> > offsets_;
+
+        //- Initialised flag
+        bool initialised_;
+
+        //- List of coupled patch IDs
+        List<label> coupledPatchIDs_;
+
 
     // Private Member Functions
 
+        //- Initialise
+        void initialise(const fileName& transferFile);
+
         //- Set the master flag when collate option is selected
-        void setMaster();
+        void setMaster(const labelList& patchIDs);
 
         //- Return the file path to the base communications folder
         fileName baseDir(const word& patchName = word::null) const;
@@ -196,6 +217,9 @@ private:
 protected:
 
     // Protected Member Functions
+
+        //- Read data from external source
+        virtual void readData(const fileName& transferFile);
 
         //- Write data for external source - calls transferData
         virtual void writeData(const fileName& transferFile) const;
@@ -313,8 +337,11 @@ public:
 
         // Evaluation functions
 
-            //- Update the coefficients associated with the patch field
-            virtual void updateCoeffs();
+            //- Evaluate the patch field
+            virtual void evaluate
+            (
+                const Pstream::commsTypes commsType=Pstream::blocking
+            );
 
             //- Transfer data for external source
             virtual void transferData(OFstream& os) const;
