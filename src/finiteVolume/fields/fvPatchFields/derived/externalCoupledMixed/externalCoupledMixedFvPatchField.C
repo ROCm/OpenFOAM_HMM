@@ -536,9 +536,10 @@ externalCoupledMixedFvPatchField
         fvPatchField<Type>::operator=(this->patchInternalField());
     }
 
+    commsDir_.expand();
+
     if (Pstream::master())
     {
-        commsDir_.expand();
         mkDir(baseDir());
     }
 
