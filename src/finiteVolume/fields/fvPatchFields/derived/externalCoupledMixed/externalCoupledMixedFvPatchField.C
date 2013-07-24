@@ -27,6 +27,7 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "IFstream.H"
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -329,7 +330,10 @@ void Foam::externalCoupledMixedFvPatchField<Type>::initialiseRead
         FatalErrorIn
         (
             "void Foam::externalCoupledMixedFvPatchField<Type>::"
-            "initialiseRead()"
+            "initialiseRead"
+            "("
+                "IFstream&"
+            ") const"
         )
             << "Unable to open data transfer file " << is.name()
             << " for patch " << this->patch().name()
@@ -351,7 +355,10 @@ void Foam::externalCoupledMixedFvPatchField<Type>::initialiseRead
             FatalErrorIn
             (
                 "void Foam::externalCoupledMixedFvPatchField<Type>::"
-                "initialiseRead()"
+                "initialiseRead"
+                "("
+                    "IFstream&"
+                ") const"
             )
                 << "Unable to scan forward to appropriate read position for "
                 << "data transfer file " << is.name()
@@ -389,8 +396,10 @@ void Foam::externalCoupledMixedFvPatchField<Type>::readData
         {
             FatalErrorIn
             (
-                "void Foam::externalCoupledMixedFvPatchField<Type>::"
-                "updateCoeffs()"
+                "void Foam::externalCoupledMixedFvPatchField<Type>::readData"
+                "("
+                    "const fileName&"
+                ")"
             )
                 << "Insufficient data for patch "
                 << this->patch().name()

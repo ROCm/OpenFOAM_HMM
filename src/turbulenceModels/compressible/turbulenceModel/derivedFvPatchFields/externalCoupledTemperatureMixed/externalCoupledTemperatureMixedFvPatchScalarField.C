@@ -154,7 +154,7 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::transferData
         FatalErrorIn
         (
             "void Foam::externalCoupledTemperatureMixedFvPatchScalarField::"
-            "writeData"
+            "transferData"
             "("
                 "OFstream&"
             ") const"
