@@ -42,7 +42,7 @@ Foam::combustionModels::PaSR<Type>::PaSR
     (
         IOobject
         (
-            "PaSR::kappa",
+            typeName + ":kappa",
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -166,7 +166,7 @@ Foam::combustionModels::PaSR<Type>::dQ() const
         (
             IOobject
             (
-                "dQ",
+                typeName + ":dQ",
                 this->mesh().time().timeName(),
                 this->mesh(),
                 IOobject::NO_READ,
@@ -199,7 +199,7 @@ Foam::combustionModels::PaSR<Type>::Sh() const
         (
             IOobject
             (
-                "Sh",
+                typeName + ":Sh",
                 this->mesh().time().timeName(),
                 this->mesh(),
                 IOobject::NO_READ,
