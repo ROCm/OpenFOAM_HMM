@@ -156,80 +156,82 @@ void Foam::forceCoeffs::timeSet()
 
 void Foam::forceCoeffs::write()
 {
-    if (active_)
+    forces::calcForcesMoment();
+
+    if (!active_)
     {
-        forces::calcForcesMoment();
+        return;
+    }
 
-        if (Pstream::master())
+    if (Pstream::master())
+    {
+        functionObjectFile::write();
+
+        scalar pDyn = 0.5*rhoRef_*magUInf_*magUInf_;
+
+        Field<vector> totForce(force_[0] + force_[1] + force_[2]);
+        Field<vector> totMoment(moment_[0] + moment_[1] + moment_[2]);
+
+        List<Field<scalar> > coeffs(3);
+        coeffs[0].setSize(nBin_);
+        coeffs[1].setSize(nBin_);
+        coeffs[2].setSize(nBin_);
+
+        // lift, drag and moment
+        coeffs[0] = (totForce & liftDir_)/(Aref_*pDyn);
+        coeffs[1] = (totForce & dragDir_)/(Aref_*pDyn);
+        coeffs[2] = (totMoment & pitchAxis_)/(Aref_*lRef_*pDyn);
+
+        scalar Cl = sum(coeffs[0]);
+        scalar Cd = sum(coeffs[1]);
+        scalar Cm = sum(coeffs[2]);
+
+        scalar Clf = Cl/2.0 + Cm;
+        scalar Clr = Cl/2.0 - Cm;
+
+        file(0)
+            << obr_.time().value() << tab
+            << Cm << tab << Cd << tab << Cl << tab << Clf << tab << Clr
+            << endl;
+
+        if (log_)
         {
-            functionObjectFile::write();
+            Info<< type() << " output:" << nl
+                << "    Cm    = " << Cm << nl
+                << "    Cd    = " << Cd << nl
+                << "    Cl    = " << Cl << nl
+                << "    Cl(f) = " << Clf << nl
+                << "    Cl(r) = " << Clr << endl;
+        }
 
-            scalar pDyn = 0.5*rhoRef_*magUInf_*magUInf_;
-
-            Field<vector> totForce(force_[0] + force_[1] + force_[2]);
-            Field<vector> totMoment(moment_[0] + moment_[1] + moment_[2]);
-
-            List<Field<scalar> > coeffs(3);
-            coeffs[0].setSize(nBin_);
-            coeffs[1].setSize(nBin_);
-            coeffs[2].setSize(nBin_);
-
-            // lift, drag and moment
-            coeffs[0] = (totForce & liftDir_)/(Aref_*pDyn);
-            coeffs[1] = (totForce & dragDir_)/(Aref_*pDyn);
-            coeffs[2] = (totMoment & pitchAxis_)/(Aref_*lRef_*pDyn);
-
-            scalar Cl = sum(coeffs[0]);
-            scalar Cd = sum(coeffs[1]);
-            scalar Cm = sum(coeffs[2]);
-
-            scalar Clf = Cl/2.0 + Cm;
-            scalar Clr = Cl/2.0 - Cm;
-
-            file(0)
-                << obr_.time().value() << tab
-                << Cm << tab << Cd << tab << Cl << tab << Clf << tab << Clr
-                << endl;
-
-            if (log_)
+        if (nBin_ > 1)
+        {
+            if (binCumulative_)
             {
-                Info<< type() << " output:" << nl
-                    << "    Cm    = " << Cm << nl
-                    << "    Cd    = " << Cd << nl
-                    << "    Cl    = " << Cl << nl
-                    << "    Cl(f) = " << Clf << nl
-                    << "    Cl(r) = " << Clr << endl;
-            }
-
-            if (nBin_ > 1)
-            {
-                if (binCumulative_)
+                for (label i = 1; i < coeffs[0].size(); i++)
                 {
-                    for (label i = 1; i < coeffs[0].size(); i++)
-                    {
-                        coeffs[0][i] += coeffs[0][i-1];
-                        coeffs[1][i] += coeffs[1][i-1];
-                        coeffs[2][i] += coeffs[2][i-1];
-                    }
+                    coeffs[0][i] += coeffs[0][i-1];
+                    coeffs[1][i] += coeffs[1][i-1];
+                    coeffs[2][i] += coeffs[2][i-1];
                 }
-
-                file(1)<< obr_.time().value();
-
-                forAll(coeffs[0], i)
-                {
-                    file(1)
-                        << tab << coeffs[2][i]
-                        << tab << coeffs[1][i]
-                        << tab << coeffs[0][i];
-                }
-
-                file(1) << endl;
             }
 
-            if (log_)
+            file(1)<< obr_.time().value();
+
+            forAll(coeffs[0], i)
             {
-                Info<< endl;
+                file(1)
+                    << tab << coeffs[2][i]
+                    << tab << coeffs[1][i]
+                    << tab << coeffs[0][i];
             }
+
+            file(1) << endl;
+        }
+
+        if (log_)
+        {
+            Info<< endl;
         }
     }
 }

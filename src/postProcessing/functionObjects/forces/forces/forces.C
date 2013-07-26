@@ -130,6 +130,55 @@ void Foam::forces::writeFileHeader(const label i)
 }
 
 
+void Foam::forces::initialise()
+{
+    if (initialised_ || !active_)
+    {
+        return;
+    }
+
+    if (directForceDensity_)
+    {
+        if (!obr_.foundObject<volVectorField>(fDName_))
+        {
+            active_ = false;
+            WarningIn("void Foam::forces::initialise()")
+                << "Could not find " << fDName_ << " in database." << nl
+                << "    De-activating forces."
+                << endl;
+        }
+    }
+    else
+    {
+        if
+        (
+            !obr_.foundObject<volVectorField>(UName_)
+         || !obr_.foundObject<volScalarField>(pName_)
+         || (
+                rhoName_ != "rhoInf"
+             && !obr_.foundObject<volScalarField>(rhoName_)
+            )
+        )
+        {
+            active_ = false;
+
+            WarningIn("void Foam::forces::initialise()")
+                << "Could not find " << UName_ << ", " << pName_;
+
+            if (rhoName_ != "rhoInf")
+            {
+                Info<< " or " << rhoName_;
+            }
+
+            Info<< " in database." << nl
+                << "    De-activating forces." << endl;
+        }
+    }
+
+    initialised_ = true;
+}
+
+
 Foam::tmp<Foam::volSymmTensorField> Foam::forces::devRhoReff() const
 {
     typedef compressible::turbulenceModel cmpTurbModel;
@@ -474,7 +523,8 @@ Foam::forces::forces
     binMin_(GREAT),
     binPoints_(),
     binFormat_("undefined"),
-    binCumulative_(true)
+    binCumulative_(true),
+    initialised_(false)
 {
     // Check if the available mesh is an fvMesh otherise deactivate
     if (!isA<fvMesh>(obr_))
@@ -534,7 +584,8 @@ Foam::forces::forces
     binMin_(GREAT),
     binPoints_(),
     binFormat_("undefined"),
-    binCumulative_(true)
+    binCumulative_(true),
+    initialised_(false)
 {
     forAll(force_, i)
     {
@@ -556,6 +607,8 @@ void Foam::forces::read(const dictionary& dict)
 {
     if (active_)
     {
+        initialised_ = false;
+
         log_ = dict.lookupOrDefault<Switch>("log", false);
         directForceDensity_ = dict.lookupOrDefault("directForceDensity", false);
 
@@ -568,19 +621,6 @@ void Foam::forces::read(const dictionary& dict)
         {
             // Optional entry for fDName
             fDName_ = dict.lookupOrDefault<word>("fDName", "fD");
-
-            // Check whether fDName exists, if not deactivate forces
-            if
-            (
-                !obr_.foundObject<volVectorField>(fDName_)
-            )
-            {
-                active_ = false;
-                WarningIn("void forces::read(const dictionary&)")
-                    << "Could not find " << fDName_ << " in database." << nl
-                    << "    De-activating forces."
-                    << endl;
-            }
         }
         else
         {
@@ -588,32 +628,6 @@ void Foam::forces::read(const dictionary& dict)
             pName_ = dict.lookupOrDefault<word>("pName", "p");
             UName_ = dict.lookupOrDefault<word>("UName", "U");
             rhoName_ = dict.lookupOrDefault<word>("rhoName", "rho");
-
-            // Check whether UName, pName and rhoName exists,
-            // if not deactivate forces
-            if
-            (
-                !obr_.foundObject<volVectorField>(UName_)
-             || !obr_.foundObject<volScalarField>(pName_)
-             || (
-                    rhoName_ != "rhoInf"
-                 && !obr_.foundObject<volScalarField>(rhoName_)
-                )
-            )
-            {
-                active_ = false;
-
-                WarningIn("void forces::read(const dictionary&)")
-                    << "Could not find " << UName_ << ", " << pName_;
-
-                if (rhoName_ != "rhoInf")
-                {
-                    Info<< " or " << rhoName_;
-                }
-
-                Info<< " in database." << nl
-                    << "    De-activating forces." << endl;
-            }
 
             // Reference density needed for incompressible calculations
             rhoRef_ = readScalar(dict.lookup("rhoInf"));
@@ -745,12 +759,12 @@ void Foam::forces::timeSet()
 
 void Foam::forces::write()
 {
+    calcForcesMoment();
+
     if (!active_)
     {
         return;
     }
-
-    calcForcesMoment();
 
     if (Pstream::master())
     {
@@ -770,6 +784,13 @@ void Foam::forces::write()
 
 void Foam::forces::calcForcesMoment()
 {
+    initialise();
+
+    if (!active_)
+    {
+        return;
+    }
+
     force_[0] = vector::zero;
     force_[1] = vector::zero;
     force_[2] = vector::zero;
