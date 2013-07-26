@@ -218,6 +218,9 @@ protected:
 
     // Protected Member Functions
 
+        //- Create file names for forces and bins
+        wordList createFileNames(const dictionary& dict) const;
+
         //- Output file header information
         virtual void writeFileHeader(const label i);
 
@@ -244,8 +247,11 @@ protected:
             const vectorField& d
         );
 
+        //- Helper function to write force data
+        void writeForces();
+
         //- Helper function to write bin data
-        void writeBins() const;
+        void writeBins();
 
         //- Disallow default bitwise copy construct
         forces(const forces&);

@@ -45,22 +45,88 @@ defineTypeNameAndDebug(forces, 0);
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::forces::writeFileHeader(const label i)
+Foam::wordList Foam::forces::createFileNames(const dictionary& dict) const
 {
-    file()
-        << "# Time" << tab
-        << "forces(pressure, viscous, porous) "
-        << "moment(pressure, viscous, porous)";
+    DynamicList<word> names(1);
 
-    if (localSystem_)
+    const word forceType(dict.lookup("type"));
+
+    if (dict.found("binData"))
     {
-        file()
-            << tab
-            << "local forces(pressure, viscous, porous) "
-            << "local moment(pressure, viscous, porous)";
+        const dictionary& binDict(dict.subDict("binData"));
+        label nb = readLabel(binDict.lookup("nBin"));
+        if (nb > 0)
+        {
+            names.append(forceType + "_bins");
+        }
     }
 
-    file()<< endl;
+    names.append(forceType);
+
+    return names;
+}
+
+
+void Foam::forces::writeFileHeader(const label i)
+{
+    if (i == 0)
+    {
+        // force data
+
+        file(i)
+            << "# Time" << tab
+            << "forces(pressure,viscous,porous) "
+            << "moment(pressure,viscous,porous)";
+
+        if (localSystem_)
+        {
+            file(i)
+                << tab
+                << "localForces(pressure,viscous,porous) "
+                << "localMoments(pressure,viscous,porous)";
+        }
+    }
+    else if (i == 1)
+    {
+        // bin data
+
+        file(i)
+            << "# bins      : " << nBin_ << nl
+            << "# start     : " << binMin_ << nl
+            << "# delta     : " << binDx_ << nl
+            << "# direction : " << binDir_ << nl
+            << "# Time";
+
+        for (label j = 0; j < nBin_; j++)
+        {
+            const word jn = Foam::name(j);
+
+            file(i)
+                << tab
+                << "forces" << jn << "(pressure,viscous,porous) "
+                << "moment" << jn << "(pressure,viscous,porous)";
+        }
+        if (localSystem_)
+        {
+            for (label j = 0; j < nBin_; j++)
+            {
+                const word jn = Foam::name(j);
+
+                file(i)
+                    << tab
+                    << "localForces" << jn << "(pressure,viscous,porous) "
+                    << "localMoments" << jn << "(pressure,viscous,porous)";
+            }
+        }
+    }
+    else
+    {
+        FatalErrorIn("void Foam::forces::writeFileHeader(const label)")
+            << "Unhandled file index: " << i
+            << abort(FatalError);
+    }
+
+    file(i)<< endl;
 }
 
 
@@ -249,25 +315,66 @@ void Foam::forces::applyBins
 }
 
 
-void Foam::forces::writeBins() const
+void Foam::forces::writeForces()
+{
+    if (log_)
+    {
+        Info<< type() << " output:" << nl
+            << "    forces(pressure,viscous,porous) = ("
+            << sum(force_[0]) << ","
+            << sum(force_[1]) << ","
+            << sum(force_[2]) << ")" << nl
+            << "    moment(pressure,viscous,porous) = ("
+            << sum(moment_[0]) << ","
+            << sum(moment_[1]) << ","
+            << sum(moment_[2]) << ")"
+            << nl;
+    }
+
+    file(0) << obr_.time().value() << tab
+        << "("
+        << sum(force_[0]) << ","
+        << sum(force_[1]) << ","
+        << sum(force_[2])
+        << ") "
+        << "("
+        << sum(moment_[0]) << ","
+        << sum(moment_[1]) << ","
+        << sum(moment_[2])
+        << ")"
+        << endl;
+
+    if (localSystem_)
+    {
+        vectorField localForceN(coordSys_.localVector(force_[0]));
+        vectorField localForceT(coordSys_.localVector(force_[1]));
+        vectorField localForceP(coordSys_.localVector(force_[2]));
+        vectorField localMomentN(coordSys_.localVector(moment_[0]));
+        vectorField localMomentT(coordSys_.localVector(moment_[1]));
+        vectorField localMomentP(coordSys_.localVector(moment_[2]));
+
+        file(0) << obr_.time().value() << tab
+            << "("
+            << sum(localForceN) << ","
+            << sum(localForceT) << ","
+            << sum(localForceP)
+            << ") "
+            << "("
+            << sum(localMomentN) << ","
+            << sum(localMomentT) << ","
+            << sum(localMomentP)
+            << ")"
+            << endl;
+    }
+}
+
+
+void Foam::forces::writeBins()
 {
     if (nBin_ == 1)
     {
         return;
     }
-
-    autoPtr<writer<vector> > binWriterPtr(writer<vector>::New(binFormat_));
-    coordSet axis("forces", "distance", binPoints_, mag(binPoints_));
-
-    fileName forcesDir = baseTimeDir();
-    mkDir(forcesDir);
-
-    if (log_)
-    {
-        Info<< "    Writing bins to " << forcesDir << endl;
-    }
-
-    wordList fieldNames(IStringStream("(pressure viscous porous)")());
 
     List<Field<vector> > f(force_);
     List<Field<vector> > m(moment_);
@@ -286,43 +393,50 @@ void Foam::forces::writeBins() const
         }
     }
 
-    OFstream osForce(forcesDir/"force_bins");
-    binWriterPtr->write(axis, fieldNames, f, osForce);
+    file(1) << obr_.time().value();
 
-    OFstream osMoment(forcesDir/"moment_bins");
-    binWriterPtr->write(axis, fieldNames, m, osMoment);
-
+    forAll(f[0], i)
+    {
+        file(1)
+            << tab
+            << "(" << f[0][i] << "," << f[1][i] << "," << f[2][i] << ") "
+            << "(" << m[0][i] << "," << m[1][i] << "," << m[2][i] << ")";
+    }
 
     if (localSystem_)
     {
-        List<Field<vector> > localForce(3);
-        List<Field<vector> > localMoment(3);
-        localForce[0] = coordSys_.localVector(force_[0]);
-        localForce[1] = coordSys_.localVector(force_[1]);
-        localForce[2] = coordSys_.localVector(force_[2]);
-        localMoment[0] = coordSys_.localVector(moment_[0]);
-        localMoment[1] = coordSys_.localVector(moment_[1]);
-        localMoment[2] = coordSys_.localVector(moment_[2]);
+        List<Field<vector> > lf(3);
+        List<Field<vector> > lm(3);
+        lf[0] = coordSys_.localVector(force_[0]);
+        lf[1] = coordSys_.localVector(force_[1]);
+        lf[2] = coordSys_.localVector(force_[2]);
+        lm[0] = coordSys_.localVector(moment_[0]);
+        lm[1] = coordSys_.localVector(moment_[1]);
+        lm[2] = coordSys_.localVector(moment_[2]);
 
         if (binCumulative_)
         {
-            for (label i = 1; i < localForce[0].size(); i++)
+            for (label i = 1; i < lf[0].size(); i++)
             {
-                localForce[0][i] += localForce[0][i-1];
-                localForce[1][i] += localForce[1][i-1];
-                localForce[2][i] += localForce[2][i-1];
-                localMoment[0][i] += localMoment[0][i-1];
-                localMoment[1][i] += localMoment[1][i-1];
-                localMoment[2][i] += localMoment[2][i-1];
+                lf[0][i] += lf[0][i-1];
+                lf[1][i] += lf[1][i-1];
+                lf[2][i] += lf[2][i-1];
+                lm[0][i] += lm[0][i-1];
+                lm[1][i] += lm[1][i-1];
+                lm[2][i] += lm[2][i-1];
             }
         }
 
-        OFstream osLocalForce(forcesDir/"force_local");
-        binWriterPtr->write(axis, fieldNames, localForce, osLocalForce);
-
-        OFstream osLocalMoment(forcesDir/"moment_local");
-        binWriterPtr->write(axis, fieldNames, localMoment, osLocalMoment);
+        forAll(lf[0], i)
+        {
+            file(1)
+                << tab
+                << "(" << lf[0][i] << "," << lf[1][i] << "," << lf[2][i] << ") "
+                << "(" << lm[0][i] << "," << lm[1][i] << "," << lm[2][i] << ")";
+        }
     }
+
+    file(1) << endl;
 }
 
 
@@ -336,7 +450,7 @@ Foam::forces::forces
     const bool loadFromFiles
 )
 :
-    functionObjectFile(obr, name, word(dict.lookup("type"))),
+    functionObjectFile(obr, name, createFileNames(dict)),
     name_(name),
     obr_(obr),
     active_(true),
@@ -642,55 +756,7 @@ void Foam::forces::write()
     {
         functionObjectFile::write();
 
-        if (log_)
-        {
-            Info<< type() << " output:" << nl
-                << "    forces(pressure,viscous,porous) = ("
-                << sum(force_[0]) << ","
-                << sum(force_[1]) << ","
-                << sum(force_[2]) << ")" << nl
-                << "    moment(pressure,viscous,porous) = ("
-                << sum(moment_[0]) << ","
-                << sum(moment_[1]) << ","
-                << sum(moment_[2]) << ")"
-                << nl;
-        }
-
-        file() << obr_.time().value() << tab
-            << "("
-            << sum(force_[0]) << ","
-            << sum(force_[1]) << ","
-            << sum(force_[2])
-            << ") "
-            << "("
-            << sum(moment_[0]) << ","
-            << sum(moment_[1]) << ","
-            << sum(moment_[2])
-            << ")"
-            << endl;
-
-        if (localSystem_)
-        {
-            vectorField localForceN(coordSys_.localVector(force_[0]));
-            vectorField localForceT(coordSys_.localVector(force_[1]));
-            vectorField localForceP(coordSys_.localVector(force_[2]));
-            vectorField localMomentN(coordSys_.localVector(moment_[0]));
-            vectorField localMomentT(coordSys_.localVector(moment_[1]));
-            vectorField localMomentP(coordSys_.localVector(moment_[2]));
-
-            file() << obr_.time().value() << tab
-                << "("
-                << sum(localForceN) << ","
-                << sum(localForceT) << ","
-                << sum(localForceP)
-                << ") "
-                << "("
-                << sum(localMomentN) << ","
-                << sum(localMomentT) << ","
-                << sum(localMomentP)
-                << ")"
-                << endl;
-        }
+        writeForces();
 
         writeBins();
 
