@@ -37,6 +37,54 @@ defineTypeNameAndDebug(forceCoeffs, 0);
 }
 
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void Foam::forceCoeffs::writeFileHeader(const label i)
+{
+    if (i == 0)
+    {
+        // force coeff data
+
+        file(i)
+            << "# liftDir   : " << liftDir_ << nl
+            << "# dragDir   : " << dragDir_ << nl
+            << "# pitchAxis : " << pitchAxis_ << nl
+            << "# magUInf   : " << magUInf_ << nl
+            << "# lRef      : " << lRef_ << nl
+            << "# Aref      : " << Aref_ << nl
+            << "# Time" << tab << "Cm" << tab << "Cd" << tab << "Cl" << tab
+            << "Cl(f)" << tab << "Cl(r)";
+    }
+    else if (i == 1)
+    {
+        // bin coeff data
+
+        file(i)
+            << "# bins      : " << nBin_ << nl
+            << "# start     : " << binMin_ << nl
+            << "# delta     : " << binDx_ << nl
+            << "# direction : " << binDir_ << nl
+            << "# Time";
+
+        for (label j = 0; j < nBin_; j++)
+        {
+            const word jn = Foam::name(j);
+
+            file(i)
+                << tab << "Cm" << jn << tab << "Cd" << jn << tab << "Cl" << jn;
+        }
+    }
+    else
+    {
+        FatalErrorIn("void Foam::forces::writeFileHeader(const label)")
+            << "Unhandled file index: " << i
+            << abort(FatalError);
+    }
+
+    file(i)<< endl;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::forceCoeffs::forceCoeffs
@@ -85,14 +133,6 @@ void Foam::forceCoeffs::read(const dictionary& dict)
         dict.lookup("lRef") >> lRef_;
         dict.lookup("Aref") >> Aref_;
     }
-}
-
-
-void Foam::forceCoeffs::writeFileHeader(const label i)
-{
-    file()
-        << "# Time" << tab << "Cm" << tab << "Cd" << tab << "Cl" << tab
-        << "Cl(f)" << "Cl(r)" << endl;
 }
 
 
@@ -146,7 +186,7 @@ void Foam::forceCoeffs::write()
             scalar Clf = Cl/2.0 + Cm;
             scalar Clr = Cl/2.0 - Cm;
 
-            file()
+            file(0)
                 << obr_.time().value() << tab
                 << Cm << tab << Cd << tab << Cl << tab << Clf << tab << Clr
                 << endl;
@@ -163,28 +203,6 @@ void Foam::forceCoeffs::write()
 
             if (nBin_ > 1)
             {
-                autoPtr<writer<scalar> >
-                    binWriterPtr(writer<scalar>::New(binFormat_));
-                wordList fieldNames(IStringStream("(lift drag moment)")());
-
-                coordSet axis
-                (
-                    "forceCoeffs",
-                    "distance",
-                    binPoints_,
-                    mag(binPoints_)
-                );
-
-                fileName forcesDir = baseTimeDir();
-                mkDir(forcesDir);
-
-                if (log_)
-                {
-                    Info<< "    Writing bins to " << forcesDir << endl;
-                }
-
-                OFstream osCoeffs(forcesDir/"forceCoeffs_bins");
-
                 if (binCumulative_)
                 {
                     for (label i = 1; i < coeffs[0].size(); i++)
@@ -195,7 +213,17 @@ void Foam::forceCoeffs::write()
                     }
                 }
 
-                binWriterPtr->write(axis, fieldNames, coeffs, osCoeffs);
+                file(1)<< obr_.time().value();
+
+                forAll(coeffs[0], i)
+                {
+                    file(1)
+                        << tab << coeffs[2][i]
+                        << tab << coeffs[1][i]
+                        << tab << coeffs[0][i];
+                }
+
+                file(1) << endl;
             }
 
             if (log_)
