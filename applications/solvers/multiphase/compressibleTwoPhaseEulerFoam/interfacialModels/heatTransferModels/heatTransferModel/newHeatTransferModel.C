@@ -37,7 +37,7 @@ Foam::autoPtr<Foam::heatTransferModel> Foam::heatTransferModel::New
 {
     word heatTransferModelType
     (
-        interfaceDict.lookup("heatTransferModel" + phase1.name())
+        interfaceDict.lookup(phase1.name())
     );
 
     Info<< "Selecting heatTransferModel for phase "
