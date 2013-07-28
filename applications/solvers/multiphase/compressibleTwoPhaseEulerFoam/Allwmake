@@ -5,7 +5,7 @@ set -x
 wmakeLnInclude interfacialModels
 wmake libso twoPhaseSystem
 wmake libso interfacialModels
-wmake libso kineticTheoryModels
+wmake libso phaseIncompressibleTurbulenceModels
 wmake
 
 # ----------------------------------------------------------------- end-of-file
