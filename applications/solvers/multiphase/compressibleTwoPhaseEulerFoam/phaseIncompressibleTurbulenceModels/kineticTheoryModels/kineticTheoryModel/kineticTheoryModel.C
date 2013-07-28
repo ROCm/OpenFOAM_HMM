@@ -506,7 +506,8 @@ Foam::tmp<Foam::fvVectorMatrix> Foam::kineticTheoryModel::divDevRhoReff
       - fvc::div
         (
             (this->rho_*this->nut_)*dev2(T(fvc::grad(U)))
-          + ((this->rho_*lambda_)*fvc::div(this->phi_))*symmTensor::I
+          + ((this->rho_*lambda_)*fvc::div(this->phi_))
+           *dimensioned<symmTensor>("I", dimless, symmTensor::I)
         )
     );
 }
