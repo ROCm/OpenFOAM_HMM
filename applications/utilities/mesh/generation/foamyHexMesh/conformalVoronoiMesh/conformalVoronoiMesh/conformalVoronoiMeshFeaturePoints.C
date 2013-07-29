@@ -28,6 +28,7 @@ License
 #include "triangle.H"
 #include "tetrahedron.H"
 #include "const_circulator.H"
+#include "DelaunayMeshTools.H"
 
 using namespace Foam::vectorTools;
 

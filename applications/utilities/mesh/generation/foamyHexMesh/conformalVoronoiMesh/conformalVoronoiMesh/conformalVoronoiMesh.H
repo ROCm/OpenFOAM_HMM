@@ -228,36 +228,6 @@ private:
             const Delaunay::Finite_facets_iterator& fit
         ) const;
 
-        //- Return the local point pair separation at the given location
-        inline scalar pointPairDistance(const Foam::point& pt) const;
-
-        //- Return the local mixed feature point placement distance
-        inline scalar mixedFeaturePointDistance(const Foam::point& pt) const;
-
-        //- Return the square of the local feature point exclusion distance
-        inline scalar featurePointExclusionDistanceSqr
-        (
-            const Foam::point& pt
-        ) const;
-
-        //- Return the square of the local feature edge exclusion distance
-        inline scalar featureEdgeExclusionDistanceSqr
-        (
-            const Foam::point& pt
-        ) const;
-
-        //- Return the square of the local surface point exclusion distance
-        inline scalar surfacePtExclusionDistanceSqr
-        (
-            const Foam::point& pt
-        ) const;
-
-        //- Return the square of the local surface search distance
-        inline scalar surfaceSearchDistanceSqr(const Foam::point& pt) const;
-
-        //- Return the local maximum surface protrusion distance
-        inline scalar maxSurfaceProtrusion(const Foam::point& pt) const;
-
         //- Insert Delaunay vertices using the CGAL range insertion method,
         //  optionally check processor occupancy and distribute to other
         //  processors
@@ -850,9 +820,6 @@ private:
         //- Create the cell centres to use for the mesh
         void createCellCentres(pointField& cellCentres) const;
 
-        //- Extract all points in vertex-index order
-        tmp<pointField> allPoints() const;
-
         //- Sort the faces, owner and neighbour lists into
         //  upper-triangular order.  For internal faces only, use
         //  before adding patch faces
@@ -1022,6 +989,49 @@ public:
             inline const cvControls& foamyHexMeshControls() const;
 
 
+        // Query
+
+            //- Return the local point pair separation at the given location
+            inline scalar pointPairDistance(const Foam::point& pt) const;
+
+            //- Return the local mixed feature point placement distance
+            inline scalar mixedFeaturePointDistance
+            (
+                const Foam::point& pt
+            ) const;
+
+            //- Return the square of the local feature point exclusion distance
+            inline scalar featurePointExclusionDistanceSqr
+            (
+                const Foam::point& pt
+            ) const;
+
+            //- Return the square of the local feature edge exclusion distance
+            inline scalar featureEdgeExclusionDistanceSqr
+            (
+                const Foam::point& pt
+            ) const;
+
+            //- Return the square of the local surface point exclusion distance
+            inline scalar surfacePtExclusionDistanceSqr
+            (
+                const Foam::point& pt
+            ) const;
+
+            //- Return the square of the local surface search distance
+            inline scalar surfaceSearchDistanceSqr(const Foam::point& pt) const;
+
+            //- Return the local maximum surface protrusion distance
+            inline scalar maxSurfaceProtrusion(const Foam::point& pt) const;
+
+            //- Call the appropriate function to conform to an edge
+            void createEdgePointGroup
+            (
+                const extendedFeatureEdgeMesh& feMesh,
+                const pointIndexHit& edHit,
+                DynamicList<Vb>& pts
+            ) const;
+
         // Write
 
             //- Write the elapsedCpuTime and memory usage, with an optional
@@ -1037,53 +1047,6 @@ public:
             (
                 const string& description = string::null
             ) const;
-
-            //- Write the Delaunay cell
-            void drawDelaunayCell
-            (
-                Ostream& os,
-                const Cell_handle& c,
-                label offset = 0
-            ) const;
-
-            //- Write Delaunay points in the range between (and including)
-            //  type startPointType and endPointType to .obj file
-            void writePoints
-            (
-                const fileName& fName,
-                const Foam::indexedVertexEnum::vertexType startPointType,
-                const Foam::indexedVertexEnum::vertexType endPointType
-            ) const;
-
-            //- Write Delaunay points of type pointType to .obj file
-            void writePoints
-            (
-                const fileName& fName,
-                const Foam::indexedVertexEnum::vertexType pointType
-            ) const;
-
-            void writeFixedPoints(const fileName& fName) const;
-
-            //- Write the boundary Delaunay points to .obj file
-            void writeBoundaryPoints(const fileName& fName) const;
-
-            //- Write list of points to file
-            void writePoints
-            (
-                const fileName& fName,
-                const List<Foam::point>& points
-            ) const;
-
-            //- Write list of points to file
-            void writePoints
-            (
-                const fileName& fName,
-                const List<Vb>& points
-            ) const;
-
-            //- Write the internal Delaunay vertices of the tessellation as a
-            //  pointField that may be used to restart the meshing process
-            void writeInternalDelaunayVertices(const fileName& instance) const;
 
             //- Prepare data and call writeMesh for polyMesh and
             //  tetDualMesh
@@ -1105,14 +1068,6 @@ public:
                 const PackedBoolList& boundaryFacesToRemove
             ) const;
 
-            //- Write points and faces as .obj file
-            void writeObjMesh
-            (
-                const pointField& points,
-                const faceList& faces,
-                const fileName& fName
-            ) const;
-
             //- Calculate and write a field of the target cell size,
             //  target cell volume, actual cell volume and equivalent
             //  actual cell size (cbrt(actual cell volume)).
@@ -1126,12 +1081,6 @@ public:
             //- Find the cellSet of the boundary cells which have points that
             //  protrude out of the surface beyond a tolerance.
             labelHashSet findRemainingProtrusionSet(const polyMesh& mesh) const;
-
-            void writeProcessorInterface
-            (
-                const fileName& fName,
-                const faceList& faces
-            ) const;
 };
 
 

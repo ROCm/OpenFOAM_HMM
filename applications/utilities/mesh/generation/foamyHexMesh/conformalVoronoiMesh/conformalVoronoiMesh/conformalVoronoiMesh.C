@@ -34,6 +34,7 @@ License
 #include "controlMeshRefinement.H"
 #include "smoothAlignmentSolver.H"
 #include "OBJstream.H"
+#include "DelaunayMeshTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -288,7 +289,7 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
 
     if (foamyHexMeshControls().objOutput() && fName != fileName::null)
     {
-        writePoints(fName, pts);
+        DelaunayMeshTools::writeOBJ(time().path()/fName, pts);
     }
 }
 
@@ -328,7 +329,7 @@ void Foam::conformalVoronoiMesh::insertEdgePointGroups
 
     if (foamyHexMeshControls().objOutput() && fName != fileName::null)
     {
-        writePoints(fName, pts);
+        DelaunayMeshTools::writeOBJ(time().path()/fName, pts);
     }
 }
 
@@ -381,9 +382,10 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
 
     if (foamyHexMeshControls().objOutput())
     {
-        writePoints
+        DelaunayMeshTools::writeOBJ
         (
-            "initialPoints.obj",
+            time().path()/"initialPoints.obj",
+            *this,
             Foam::indexedVertexEnum::vtInternal
         );
     }
@@ -625,8 +627,8 @@ Foam::face Foam::conformalVoronoiMesh::buildDualFace
             Vertex_handle vA = c->vertex(eit->second);
             Vertex_handle vB = c->vertex(eit->third);
 
-            drawDelaunayCell(Pout, cc1);
-            drawDelaunayCell(Pout, cc2);
+            DelaunayMeshTools::drawDelaunayCell(Pout, cc1);
+            DelaunayMeshTools::drawDelaunayCell(Pout, cc2);
 
             FatalErrorIn("Foam::conformalVoronoiMesh::buildDualFace")
                 << "Dual face uses circumcenter defined by a "
@@ -953,9 +955,10 @@ void Foam::conformalVoronoiMesh::initialiseForMotion()
 
     if (foamyHexMeshControls().objOutput())
     {
-        writePoints
+        DelaunayMeshTools::writeOBJ
         (
-            "internalPoints_" + runTime_.timeName() + ".obj",
+            time().path()/"internalPoints_" + time().timeName() + ".obj",
+            *this,
             Foam::indexedVertexEnum::vtUnassigned,
             Foam::indexedVertexEnum::vtExternalFeaturePoint
         );
@@ -1614,16 +1617,21 @@ void Foam::conformalVoronoiMesh::move()
 
     if (foamyHexMeshControls().objOutput())
     {
-        writePoints
+        DelaunayMeshTools::writeOBJ
         (
-            "internalPoints_" + time().timeName() + ".obj",
+            time().path()/"internalPoints_" + time().timeName() + ".obj",
+            *this,
             Foam::indexedVertexEnum::vtInternal
         );
-    }
 
-    if (foamyHexMeshControls().objOutput() && time().outputTime())
-    {
-        writeBoundaryPoints("boundaryPoints_" + time().timeName() + ".obj");
+        if (reconformToSurface())
+        {
+            DelaunayMeshTools::writeBoundaryPoints
+            (
+                time().path()/"boundaryPoints_" + time().timeName() + ".obj",
+                *this
+            );
+        }
     }
 
     timeCheck("After conformToSurface");
@@ -1776,7 +1784,7 @@ void Foam::conformalVoronoiMesh::checkCoPlanarCells() const
                 << "    quality = " << quality << nl
                 << "    dual    = " << topoint(cit->dual()) << endl;
 
-            drawDelaunayCell(str, cit, badCells++);
+            DelaunayMeshTools::drawDelaunayCell(str, cit, badCells++);
 
             FixedList<PointExact, 4> cellVerticesExact(PointExact(0,0,0));
             forAll(cellVerticesExact, vI)

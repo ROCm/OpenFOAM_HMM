@@ -33,6 +33,7 @@ License
 #include "polyTopoChange.H"
 #include "PrintTable.H"
 #include "pointMesh.H"
+#include "DelaunayMeshTools.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -91,272 +92,9 @@ void Foam::conformalVoronoiMesh::timeCheck
 }
 
 
-void Foam::conformalVoronoiMesh::drawDelaunayCell
-(
-    Ostream& os,
-    const Cell_handle& c,
-    label offset
-) const
-{
-    // Supply offset as tet number
-    offset *= 4;
-
-    os  << "# cell index: " << label(c->cellIndex())
-        << " INT_MIN = " << INT_MIN
-        << endl;
-
-    os  << "# circumradius "
-        << mag(c->dual() - topoint(c->vertex(0)->point()))
-        << endl;
-
-    for (int i = 0; i < 4; i++)
-    {
-        os  << "# index / type / procIndex: "
-            << label(c->vertex(i)->index()) << " "
-            << label(c->vertex(i)->type()) << " "
-            << label(c->vertex(i)->procIndex())
-            << (is_infinite(c->vertex(i)) ? " # This vertex is infinite!" : "")
-            <<
-                (
-                    c->vertex(i)->uninitialised()
-                  ? " # This vertex is uninitialised!"
-                  : ""
-                )
-            << endl;
-
-        meshTools::writeOBJ(os, topoint(c->vertex(i)->point()));
-    }
-
-    os  << "f " << 1 + offset << " " << 3 + offset << " " << 2 + offset << nl
-        << "f " << 2 + offset << " " << 3 + offset << " " << 4 + offset << nl
-        << "f " << 1 + offset << " " << 4 + offset << " " << 3 + offset << nl
-        << "f " << 1 + offset << " " << 2 + offset << " " << 4 + offset << endl;
-
-//    os  << "# cicumcentre " << endl;
-
-//    meshTools::writeOBJ(os, c->dual());
-
-//    os  << "l " << 1 + offset << " " << 5 + offset << endl;
-}
-
-
-void Foam::conformalVoronoiMesh::writePoints
-(
-    const fileName& fName,
-    const Foam::indexedVertexEnum::vertexType startPointType,
-    const Foam::indexedVertexEnum::vertexType endPointType
-) const
-{
-    OFstream str(runTime_.path()/fName);
-
-    Pout<< nl << "Writing points of types:" << nl;
-
-    forAllConstIter
-    (
-        HashTable<int>,
-        Foam::indexedVertexEnum::vertexTypeNames_,
-        iter
-    )
-    {
-        if (iter() >= startPointType && iter() <= endPointType)
-        {
-            Pout<< "    " << iter.key() << nl;
-        }
-    }
-
-    Pout<< "to " << str.name() << endl;
-
-    for
-    (
-        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-        vit != finite_vertices_end();
-        ++vit
-    )
-    {
-        if (vit->type() >= startPointType && vit->type() <= endPointType)
-        {
-            meshTools::writeOBJ(str, topoint(vit->point()));
-        }
-    }
-}
-
-
-void Foam::conformalVoronoiMesh::writePoints
-(
-    const fileName& fName,
-    const Foam::indexedVertexEnum::vertexType pointType
-) const
-{
-    writePoints(fName, pointType, pointType);
-}
-
-
-void Foam::conformalVoronoiMesh::writeFixedPoints
-(
-    const fileName& fName
-) const
-{
-    OFstream str(runTime_.path()/fName);
-
-    Pout<< nl << "Writing fixed points to " << str.name() << endl;
-
-    for
-    (
-        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-        vit != finite_vertices_end();
-        ++vit
-    )
-    {
-        if (vit->fixed())
-        {
-            meshTools::writeOBJ(str, topoint(vit->point()));
-        }
-    }
-}
-
-
-void Foam::conformalVoronoiMesh::writeBoundaryPoints
-(
-    const fileName& fName
-) const
-{
-    OFstream str(runTime_.path()/fName);
-
-    Pout<< nl << "Writing boundary points to " << str.name() << endl;
-
-    for
-    (
-        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-        vit != finite_vertices_end();
-        ++vit
-    )
-    {
-        if (!vit->internalPoint())
-        {
-            meshTools::writeOBJ(str, topoint(vit->point()));
-        }
-    }
-}
-
-
-void Foam::conformalVoronoiMesh::writePoints
-(
-    const fileName& fName,
-    const List<Foam::point>& points
-) const
-{
-    if (points.size())
-    {
-        OFstream str(runTime_.path()/fName);
-
-        Pout<< nl << "Writing " << points.size() << " points from pointList to "
-            << str.name() << endl;
-
-        forAll(points, p)
-        {
-            meshTools::writeOBJ(str, points[p]);
-        }
-    }
-}
-
-
-void Foam::conformalVoronoiMesh::writePoints
-(
-    const fileName& fName,
-    const List<Vb>& points
-) const
-{
-    if (points.size())
-    {
-        OFstream str(runTime_.path()/fName);
-
-        Pout<< nl << "Writing " << points.size() << " points from pointList to "
-            << str.name() << endl;
-
-        forAll(points, p)
-        {
-            meshTools::writeOBJ(str, topoint(points[p].point()));
-        }
-    }
-}
-
-
-void Foam::conformalVoronoiMesh::writeProcessorInterface
-(
-    const fileName& fName,
-    const faceList& faces
-) const
-{
-    OFstream str(runTime_.path()/fName);
-
-    pointField points(number_of_finite_cells(), point::max);
-
-    for
-    (
-        Delaunay::Finite_cells_iterator cit = finite_cells_begin();
-        cit != finite_cells_end();
-        ++cit
-    )
-    {
-        if (!cit->hasFarPoint() && !is_infinite(cit))
-        {
-            points[cit->cellIndex()] = cit->dual();
-        }
-    }
-
-    meshTools::writeOBJ(str, faces, points);
-}
-
-
-void Foam::conformalVoronoiMesh::writeInternalDelaunayVertices
-(
-    const fileName& instance
-) const
-{
-    pointField internalDelaunayVertices(number_of_vertices());
-
-    label vertI = 0;
-
-    for
-    (
-        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-        vit != finite_vertices_end();
-        ++vit
-    )
-    {
-        if (vit->internalPoint())
-        {
-            internalDelaunayVertices[vertI++] = topoint(vit->point());
-        }
-    }
-
-    internalDelaunayVertices.setSize(vertI);
-
-    pointIOField internalDVs
-    (
-        IOobject
-        (
-            "internalDelaunayVertices",
-            instance,
-            runTime_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        internalDelaunayVertices
-    );
-
-    Info<< nl
-        << "Writing " << internalDVs.name()
-        << " to " << internalDVs.instance()
-        << endl;
-
-    internalDVs.write();
-}
-
-
 void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
 {
-    writeInternalDelaunayVertices(instance);
+    DelaunayMeshTools::writeInternalDelaunayVertices(instance, *this);
 
     // Per cell the Delaunay vertex
     labelList cellToDelaunayVertex;
@@ -1049,7 +787,12 @@ void Foam::conformalVoronoiMesh::writeMesh
 {
     if (foamyHexMeshControls().objOutput())
     {
-        writeObjMesh(points, faces, word(meshName + ".obj"));
+        DelaunayMeshTools::writeObjMesh
+        (
+            time().path()/word(meshName + ".obj"),
+            points,
+            faces
+        );
     }
 
     const label nInternalFaces = readLabel(patchDicts[0].lookup("startFace"));
@@ -1401,38 +1144,6 @@ void Foam::conformalVoronoiMesh::writeMesh
 //    writeCellCentres(mesh);
 
 //    findRemainingProtrusionSet(mesh);
-}
-
-
-void Foam::conformalVoronoiMesh::writeObjMesh
-(
-    const pointField& points,
-    const faceList& faces,
-    const fileName& fName
-) const
-{
-    OFstream str(runTime_.path()/fName);
-
-    Pout<< nl << "Writing points and faces to " << str.name() << endl;
-
-    forAll(points, p)
-    {
-        meshTools::writeOBJ(str, points[p]);
-    }
-
-    forAll(faces, f)
-    {
-        str<< 'f';
-
-        const face& fP = faces[f];
-
-        forAll(fP, p)
-        {
-            str<< ' ' << fP[p] + 1;
-        }
-
-        str<< nl;
-    }
 }
 
 
