@@ -29,8 +29,3 @@
     (
         ppProperties.lookup("g0")
     );
-
-    Switch packingLimiter
-    (
-        ppProperties.lookup("packingLimiter")
-    );

@@ -34,21 +34,11 @@ Description
 #include "MULES.H"
 #include "subCycle.H"
 #include "rhoThermo.H"
-#include "nearWallDist.H"
-#include "wallFvPatch.H"
-#include "fixedValueFvsPatchFields.H"
-#include "Switch.H"
-
-#include "IFstream.H"
-#include "OFstream.H"
-
-#include "phaseModel.H"
+#include "twoPhaseSystem.H"
 #include "dragModel.H"
 #include "heatTransferModel.H"
-#include "kineticTheoryModel.H"
-
+#include "PhaseIncompressibleTurbulenceModel.H"
 #include "pimpleControl.H"
-
 #include "IOMRFZoneList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -62,7 +52,6 @@ int main(int argc, char *argv[])
     #include "readGravitationalAcceleration.H"
     #include "createFields.H"
     #include "createMRFZones.H"
-    #include "readPPProperties.H"
     #include "initContinuityErrs.H"
     #include "readTimeControls.H"
     #include "CourantNos.H"
@@ -87,8 +76,6 @@ int main(int argc, char *argv[])
         while (pimple.loop())
         {
             #include "alphaEqn.H"
-            #include "kEpsilon.H"
-            #include "interfacialCoeffs.H"
             #include "EEqns.H"
             #include "UEqns.H"
 
@@ -99,6 +86,12 @@ int main(int argc, char *argv[])
             }
 
             #include "DDtU.H"
+
+            if (pimple.turbCorr())
+            {
+                turbulence1->correct();
+                turbulence2->correct();
+            }
         }
 
         #include "write.H"

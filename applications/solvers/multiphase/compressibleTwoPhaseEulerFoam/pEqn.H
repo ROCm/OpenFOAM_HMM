@@ -3,15 +3,23 @@
     surfaceScalarField alpha2f(scalar(1) - alpha1f);
 
     rAU1 = 1.0/U1Eqn.A();
-    volScalarField rAU2(1.0/U2Eqn.A());
+    rAU2 = 1.0/U2Eqn.A();
 
     surfaceScalarField rAlphaAU1f(fvc::interpolate(alpha1*rAU1));
     surfaceScalarField rAlphaAU2f(fvc::interpolate(alpha2*rAU2));
 
-    volVectorField HbyA1("HbyA" + phase1Name, U1);
+    volVectorField HbyA1
+    (
+        IOobject::groupName("HbyA", phase1.name()),
+        U1
+    );
     HbyA1 = rAU1*U1Eqn.H();
 
-    volVectorField HbyA2("HbyA" + phase2Name, U2);
+    volVectorField HbyA2
+    (
+        IOobject::groupName("HbyA", phase2.name()),
+        U2
+    );
     HbyA2 = rAU2*U2Eqn.H();
 
     mrfZones.absoluteFlux(phi1.oldTime());
@@ -19,30 +27,32 @@
     mrfZones.absoluteFlux(phi2.oldTime());
     mrfZones.absoluteFlux(phi2);
 
-    surfaceScalarField ppDrag("ppDrag", 0.0*phi1);
+    // Phase-1 pressure flux (e.g. due to particle-particle pressure)
+    surfaceScalarField phiP1
+    (
+        "phiP1",
+        fvc::interpolate((1.0/rho1)*rAU1*turbulence1().pPrime())
+       *fvc::snGrad(alpha1)*mesh.magSf()
+    );
 
-    if (g0.value() > 0.0)
-    {
-        ppDrag -= ppMagf*fvc::snGrad(alpha1)*mesh.magSf();
-    }
-
-    if (kineticTheory.on())
-    {
-        ppDrag -=
-            fvc::interpolate(1.0/rho1)*rAlphaAU1f
-           *fvc::snGrad(kineticTheory.pa())*mesh.magSf();
-    }
+    // Phase-2 pressure flux (e.g. due to particle-particle pressure)
+    surfaceScalarField phiP2
+    (
+        "phiP2",
+        fvc::interpolate((1.0/rho2)*rAU2*turbulence2().pPrime())
+       *fvc::snGrad(alpha2)*mesh.magSf()
+    );
 
     surfaceScalarField phiHbyA1
     (
-        "phiHbyA" + phase1Name,
+        IOobject::groupName("phiHbyA", phase1.name()),
         (fvc::interpolate(HbyA1) & mesh.Sf())
       + fvc::ddtPhiCorr(rAU1, alpha1, U1, phi1)
     );
 
     surfaceScalarField phiHbyA2
     (
-        "phiHbyA" + phase2Name,
+        IOobject::groupName("phiHbyA", phase2.name()),
         (fvc::interpolate(HbyA2) & mesh.Sf())
       + fvc::ddtPhiCorr(rAU2, alpha2, U2, phi2)
     );
@@ -53,7 +63,7 @@
     phiHbyA1 +=
     (
         fvc::interpolate((1.0/rho1)*rAU1*dragCoeff)*phi2
-      + ppDrag
+      - phiP1
       + rAlphaAU1f*(g & mesh.Sf())
     );
     mrfZones.relativeFlux(phiHbyA1);
@@ -61,6 +71,7 @@
     phiHbyA2 +=
     (
         fvc::interpolate((1.0/rho2)*rAU2*dragCoeff)*phi1
+      - phiP2
       + rAlphaAU2f*(g & mesh.Sf())
     );
     mrfZones.relativeFlux(phiHbyA2);
@@ -92,12 +103,12 @@
     {
         surfaceScalarField phid1
         (
-            "phid" + phase1Name,
+            IOobject::groupName("phid", phase1.name()),
             fvc::interpolate(psi1)*phi1
         );
         surfaceScalarField phid2
         (
-            "phid" + phase2Name,
+            IOobject::groupName("phid", phase2.name()),
             fvc::interpolate(psi2)*phi2
         );
 
@@ -173,29 +184,30 @@
             mSfGradp = pEqnIncomp.flux()/Dp;
 
             U1 = HbyA1
-               + fvc::reconstruct
-                 (
-                     ppDrag
-                   + rAlphaAU1f
-                    *(
-                         (g & mesh.Sf())
-                       + mSfGradp/fvc::interpolate(rho1)
-                     )
-                 );
+              + fvc::reconstruct
+                (
+                    rAlphaAU1f
+                   *(
+                        (g & mesh.Sf())
+                      + mSfGradp/fvc::interpolate(rho1)
+                    )
+                  - phiP1
+                );
             U1.correctBoundaryConditions();
 
             U2 = HbyA2
-               + fvc::reconstruct
-                 (
-                     rAlphaAU2f
-                    *(
+              + fvc::reconstruct
+                (
+                    rAlphaAU2f
+                   *(
                         (g & mesh.Sf())
                       + mSfGradp/fvc::interpolate(rho2)
                     )
-                 );
+                  - phiP2
+                );
             U2.correctBoundaryConditions();
 
-            U = alpha1*U1 + alpha2*U2;
+            U = fluid.U();
         }
     }
 

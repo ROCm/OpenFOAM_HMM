@@ -26,7 +26,7 @@
         mesh
     );
 
-#   include "createPhi.H"
+    #include "createPhi.H"
 
 
     label pRefCell = 0;
@@ -36,7 +36,13 @@
 
     singlePhaseTransportModel laminarTransport(U, phi);
 
-    autoPtr<incompressible::turbulenceModel> turbulence
+    autoPtr<IncompressibleTurbulenceModel<transportModel> >
+    turbulence
     (
-        incompressible::turbulenceModel::New(U, phi, laminarTransport)
+        IncompressibleTurbulenceModel<transportModel>::New
+        (
+            U,
+            phi,
+            laminarTransport
+        )
     );

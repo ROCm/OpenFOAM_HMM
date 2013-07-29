@@ -1,0 +1,12 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+makeType=${1:-libso}
+set -x
+
+wmake libso turbulenceModel
+wmake libso incompressible
+wmake libso compressible
+wmakeLnInclude phaseIncompressible
+wmakeLnInclude phaseCompressible
+
+# ----------------------------------------------------------------- end-of-file

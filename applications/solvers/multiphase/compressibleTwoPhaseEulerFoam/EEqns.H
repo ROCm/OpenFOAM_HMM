@@ -1,21 +1,11 @@
 {
-    volScalarField k1
-    (
-        "k1",
-        alpha1*(thermo1.alpha()/rho1 + sqr(Ct)*nut2*thermo1.CpByCpv()/Prt)
-    );
-
-    volScalarField k2
-    (
-        "k2",
-        alpha2*(thermo2.alpha()/rho2 + nut2*thermo2.CpByCpv()/Prt)
-    );
-
     volScalarField& he1 = thermo1.he();
     volScalarField& he2 = thermo2.he();
 
     volScalarField Cpv1(thermo1.Cpv());
     volScalarField Cpv2(thermo2.Cpv());
+
+    volScalarField heatTransferCoeff(fluid.heatTransferCoeff());
 
     fvScalarMatrix he1Eqn
     (
@@ -32,7 +22,8 @@
           : -alpha1*dpdt
         )/rho1
 
-      - fvm::laplacian(k1, he1)
+      //***HGW- fvm::laplacian(alpha1*turbulence1->alphaEff(), he1)
+      - fvm::laplacian(alpha1*turbulence1->nuEff(), he1)
      ==
         heatTransferCoeff*(thermo2.T() - thermo1.T())/rho1
       + heatTransferCoeff*he1/Cpv1/rho1
@@ -54,7 +45,8 @@
           : -alpha2*dpdt
         )/rho2
 
-      - fvm::laplacian(k2, he2)
+      //***HGW- fvm::laplacian(alpha2*turbulence2->alphaEff(), he2)
+      - fvm::laplacian(alpha2*turbulence2->nuEff(), he2)
      ==
         heatTransferCoeff*(thermo1.T() - thermo2.T())/rho2
       + heatTransferCoeff*he2/Cpv2/rho2

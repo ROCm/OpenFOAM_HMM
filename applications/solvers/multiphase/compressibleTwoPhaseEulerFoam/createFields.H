@@ -1,64 +1,38 @@
-    Info<< "Reading transportProperties\n" << endl;
+    Info<< "Creating twoPhaseSystem\n" << endl;
 
-    IOdictionary transportProperties
+    twoPhaseSystem fluid(mesh);
+
+    phaseModel& phase1 = fluid.phase1();
+    phaseModel& phase2 = fluid.phase2();
+
+    volScalarField& alpha1 = phase1;
+    volScalarField& alpha2 = phase2;
+
+    volVectorField& U1 = phase1.U();
+    surfaceScalarField& phi1 = phase1.phi();
+    surfaceScalarField alphaPhi1
     (
-        IOobject
-        (
-            "transportProperties",
-            runTime.constant(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
+        IOobject::groupName("alphaPhi", phase1.name()),
+        fvc::interpolate(alpha1)*phi1
     );
 
-    word phase1Name
+    volVectorField& U2 = phase2.U();
+    surfaceScalarField& phi2 = phase2.phi();
+    surfaceScalarField alphaPhi2
     (
-        transportProperties.found("phases")
-      ? wordList(transportProperties.lookup("phases"))[0]
-      : "1"
+        IOobject::groupName("alphaPhi", phase2.name()),
+        fvc::interpolate(alpha2)*phi2
     );
-
-    word phase2Name
-    (
-        transportProperties.found("phases")
-      ? wordList(transportProperties.lookup("phases"))[1]
-      : "2"
-    );
-
-    autoPtr<phaseModel> phase1 = phaseModel::New
-    (
-        mesh,
-        transportProperties,
-        phase1Name
-    );
-
-    autoPtr<phaseModel> phase2 = phaseModel::New
-    (
-        mesh,
-        transportProperties,
-        phase2Name
-    );
-
-    volScalarField& alpha1 = phase1();
-    volScalarField& alpha2 = phase2();
-    alpha2 = scalar(1) - alpha1;
-
-    volVectorField& U1 = phase1->U();
-    surfaceScalarField& phi1 = phase1->phi();
-
-    volVectorField& U2 = phase2->U();
-    surfaceScalarField& phi2 = phase2->phi();
 
     dimensionedScalar pMin
     (
         "pMin",
         dimPressure,
-        transportProperties.lookup("pMin")
+        fluid.lookup("pMin")
     );
 
-    rhoThermo& thermo1 = phase1->thermo();
-    rhoThermo& thermo2 = phase2->thermo();
+    rhoThermo& thermo1 = phase1.thermo();
+    rhoThermo& thermo2 = phase2.thermo();
 
     volScalarField& p = thermo1.p();
 
@@ -78,7 +52,7 @@
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        alpha1*U1 + alpha2*U2
+        fluid.U()
     );
 
     surfaceScalarField phi
@@ -91,7 +65,7 @@
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        fvc::interpolate(alpha1)*phi1 + fvc::interpolate(alpha2)*phi2
+        fluid.phi()
     );
 
     volScalarField rho
@@ -104,7 +78,7 @@
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        alpha1*rho1 + alpha2*rho2
+        fluid.rho()
     );
 
     Info<< "Calculating field DDtU1 and DDtU2\n" << endl;
@@ -127,119 +101,11 @@
     Info<< "Calculating field g.h\n" << endl;
     volScalarField gh("gh", g & mesh.C());
 
-    dimensionedScalar Cvm
-    (
-        "Cvm",
-        dimless,
-        transportProperties.lookup("Cvm")
-    );
-
-    dimensionedScalar Cl
-    (
-        "Cl",
-        dimless,
-        transportProperties.lookup("Cl")
-    );
-
-    dimensionedScalar Ct
-    (
-        "Ct",
-        dimless,
-        transportProperties.lookup("Ct")
-    );
-
-    #include "createRASTurbulence.H"
-
-    IOdictionary interfacialProperties
-    (
-        IOobject
-        (
-            "interfacialProperties",
-            runTime.constant(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
-    );
-
-    autoPtr<dragModel> drag1 = dragModel::New
-    (
-        interfacialProperties,
-        alpha1,
-        phase1,
-        phase2
-    );
-
-    autoPtr<dragModel> drag2 = dragModel::New
-    (
-        interfacialProperties,
-        alpha2,
-        phase2,
-        phase1
-    );
-
-    autoPtr<heatTransferModel> heatTransfer1 = heatTransferModel::New
-    (
-        interfacialProperties,
-        alpha1,
-        phase1,
-        phase2
-    );
-
-    autoPtr<heatTransferModel> heatTransfer2 = heatTransferModel::New
-    (
-        interfacialProperties,
-        alpha2,
-        phase2,
-        phase1
-    );
-
-    word dispersedPhase(interfacialProperties.lookup("dispersedPhase"));
-
-    if
-    (
-        !(
-            dispersedPhase == phase1Name
-         || dispersedPhase == phase2Name
-         || dispersedPhase == "both"
-        )
-    )
-    {
-        FatalErrorIn(args.executable())
-            << "invalid dispersedPhase " << dispersedPhase
-            << exit(FatalError);
-    }
-
-    Info << "dispersedPhase is " << dispersedPhase << endl;
-
-    scalar residualPhaseFraction
-    (
-        readScalar
-        (
-            interfacialProperties.lookup("residualPhaseFraction")
-        )
-    );
-
-    dimensionedScalar residualSlip
-    (
-        "residualSlip",
-        dimVelocity,
-        interfacialProperties.lookup("residualSlip")
-    );
-
-    kineticTheoryModel kineticTheory
-    (
-        phase1,
-        U2,
-        alpha1,
-        drag1
-    );
-
     volScalarField rAU1
     (
         IOobject
         (
-            "rAU" + phase1Name,
+            IOobject::groupName("rAU", phase1.name()),
             runTime.timeName(),
             mesh,
             IOobject::NO_READ,
@@ -249,20 +115,19 @@
         dimensionedScalar("zero", dimensionSet(0, 0, 1, 0, 0), 0.0)
     );
 
-    surfaceScalarField ppMagf
+    volScalarField rAU2
     (
         IOobject
         (
-            "ppMagf",
+            IOobject::groupName("rAU", phase2.name()),
             runTime.timeName(),
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedScalar("zero", dimensionSet(0, 2, -1, 0, 0), 0.0)
+        dimensionedScalar("zero", dimensionSet(0, 0, 1, 0, 0), 0.0)
     );
-
 
     label pRefCell = 0;
     scalar pRefValue = 0.0;
@@ -290,5 +155,31 @@
 
 
     Info<< "Creating field kinetic energy K\n" << endl;
-    volScalarField K1("K" + phase1Name, 0.5*magSqr(U1));
-    volScalarField K2("K" + phase2Name, 0.5*magSqr(U2));
+    volScalarField K1(IOobject::groupName("K", phase1.name()), 0.5*magSqr(U1));
+    volScalarField K2(IOobject::groupName("K", phase2.name()), 0.5*magSqr(U2));
+
+    autoPtr<PhaseIncompressibleTurbulenceModel<phaseModel> >
+    turbulence1
+    (
+        PhaseIncompressibleTurbulenceModel<phaseModel>::New
+        (
+            alpha1,
+            U1,
+            alphaPhi1,
+            phi1,
+            phase1
+        )
+    );
+
+    autoPtr<PhaseIncompressibleTurbulenceModel<phaseModel> >
+    turbulence2
+    (
+        PhaseIncompressibleTurbulenceModel<phaseModel>::New
+        (
+            alpha2,
+            U2,
+            alphaPhi2,
+            phi2,
+            phase2
+        )
+    );
