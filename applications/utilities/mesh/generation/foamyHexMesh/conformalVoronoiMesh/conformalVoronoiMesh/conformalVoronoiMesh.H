@@ -435,10 +435,6 @@ private:
         //  initialPointsMethod
         void insertInitialPoints();
 
-        //- Calculate the worst load balance
-        template<class Triangulation>
-        scalar calculateLoadUnbalance(const Triangulation& mesh) const;
-
         //- In parallel redistribute the backgroundMeshDecomposition and
         //  vertices to balance the number of vertices on each processor.
         //  Returns true if the background mesh changes as this removes all

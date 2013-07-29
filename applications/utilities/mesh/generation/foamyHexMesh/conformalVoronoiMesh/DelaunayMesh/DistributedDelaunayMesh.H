@@ -153,6 +153,8 @@ public:
         //- Use DelaunayMesh timeCheck function
         using DelaunayMesh<Triangulation>::timeCheck;
 
+        scalar calculateLoadUnbalance() const;
+
 
     // Member Functions
 
