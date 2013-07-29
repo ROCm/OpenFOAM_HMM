@@ -23,6 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "indexedVertexOps.H"
+#include "indexedCellOps.H"
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 inline Foam::scalar Foam::conformalVoronoiMesh::defaultCellSize() const
@@ -37,25 +40,6 @@ inline Foam::scalar Foam::conformalVoronoiMesh::targetCellSize
 ) const
 {
     return cellShapeControls().cellSize(pt);
-}
-
-
-inline Foam::scalar Foam::conformalVoronoiMesh::averageCellSize
-(
-    const Vertex_handle& vA,
-    const Vertex_handle& vB
-) const
-{
-    // Arithmetic mean
-    // return 0.5*(vA->targetCellSize() + vB->targetCellSize());
-
-    // Geometric mean
-    return sqrt(vA->targetCellSize()*vB->targetCellSize());
-
-    // Harmonic mean
-    // return
-    //     2.0*(vA->targetCellSize()*vB->targetCellSize())
-    //    /(vA->targetCellSize() + vB->targetCellSize());
 }
 
 
@@ -90,7 +74,7 @@ inline Foam::scalar Foam::conformalVoronoiMesh::averageAnyCellSize
         return vB->targetCellSize();
     }
 
-    return averageCellSize(vA, vB);
+    return CGAL::indexedVertexOps::averageCellSize(vA, vB);
 }
 
 
@@ -507,9 +491,9 @@ inline Foam::List<Foam::label> Foam::conformalVoronoiMesh::processorsAttached
     const int oppositeVertex = fit->second;
     const Cell_handle c2(c1->neighbor(oppositeVertex));
 
-    FixedList<label, 4> c1Procs(c1->processorsAttached());
+    FixedList<label, 4> c1Procs(CGAL::indexedCellOps::processorsAttached(c1));
 
-    FixedList<label, 4> c2Procs(c2->processorsAttached());
+    FixedList<label, 4> c2Procs(CGAL::indexedCellOps::processorsAttached(c2));
 
     forAll(c1Procs, aPI)
     {

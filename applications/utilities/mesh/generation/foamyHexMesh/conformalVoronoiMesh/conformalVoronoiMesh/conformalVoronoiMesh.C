@@ -34,6 +34,7 @@ License
 #include "controlMeshRefinement.H"
 #include "smoothAlignmentSolver.H"
 #include "OBJstream.H"
+#include "indexedVertexOps.H"
 #include "DelaunayMeshTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -153,7 +154,7 @@ void Foam::conformalVoronoiMesh::insertInternalPoints
         ++vit
     )
     {
-        if (vit->uninitialised())
+        if (CGAL::indexedVertexOps::uninitialised(vit))
         {
             vit->index() = getNewVertexIndex();
             vit->type() = Vb::vtInternal;
@@ -1206,7 +1207,8 @@ void Foam::conformalVoronoiMesh::move()
                   > foamyHexMeshControls().cosAlignmentAcceptanceAngle()
                 )
                 {
-                    scalar targetCellSize = averageCellSize(vA, vB);
+                    scalar targetCellSize =
+                        CGAL::indexedVertexOps::averageCellSize(vA, vB);
 
                     scalar targetFaceArea = sqr(targetCellSize);
 
@@ -1538,7 +1540,7 @@ void Foam::conformalVoronoiMesh::move()
              //&& !vit->referred()
             )
             {
-                const Foam::point& pt = topoint(vit->point());
+                const pointFromPoint pt = topoint(vit->point());
 
                 bool inside = geometryToConformTo_.inside(pt);
 

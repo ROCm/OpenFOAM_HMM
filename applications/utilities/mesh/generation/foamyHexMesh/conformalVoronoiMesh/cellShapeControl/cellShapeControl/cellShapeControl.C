@@ -30,6 +30,7 @@ License
 #include "cellSizeAndAlignmentControl.H"
 #include "searchableSurfaceControl.H"
 #include "cellSizeFunction.H"
+#include "indexedVertexOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -152,7 +153,7 @@ Foam::scalar Foam::cellShapeControl::cellSize(const point& pt) const
         {
             for (label pI = 0; pI < 4; ++pI)
             {
-                if (!ch->vertex(pI)->uninitialised())
+                if (!CGAL::indexedVertexOps::uninitialised(ch->vertex(pI)))
                 {
                     size = ch->vertex(pI)->targetCellSize();
                     return size;
@@ -276,7 +277,7 @@ void Foam::cellShapeControl::cellSizeAndAlignment
         {
             for (label pI = 0; pI < 4; ++pI)
             {
-                if (!ch->vertex(pI)->uninitialised())
+                if (!CGAL::indexedVertexOps::uninitialised(ch->vertex(pI)))
                 {
                     size = ch->vertex(pI)->targetCellSize();
                     alignment = ch->vertex(pI)->alignment();

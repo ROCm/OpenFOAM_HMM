@@ -29,6 +29,7 @@ License
 #include "polyMeshGeometry.H"
 #include "indexedCellChecks.H"
 #include "OBJstream.H"
+#include "indexedCellOps.H"
 #include "DelaunayMeshTools.H"
 
 #include "CGAL/Exact_predicates_exact_constructions_kernel.h"

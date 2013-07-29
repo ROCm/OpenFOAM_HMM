@@ -204,14 +204,6 @@ private:
         inline scalar targetCellSize(const Foam::point& pt) const;
 
         //- Return the target cell size from that stored on a pair of
-        //  Delaunay vertices, using a mean function.
-        inline scalar averageCellSize
-        (
-            const Vertex_handle& vA,
-            const Vertex_handle& vB
-        ) const;
-
-        //- Return the target cell size from that stored on a pair of
         //  Delaunay vertices, including the possibility that one of
         //  them is not an internalOrBoundaryPoint, and so will not
         //  have valid data.
