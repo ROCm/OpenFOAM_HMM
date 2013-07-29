@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -131,6 +131,8 @@ class orientedSurface
         //- Make surface surface has consistent orientation across connected
         //  triangles.
         static bool orientConsistent(triSurface& s);
+
+
 public:
 
     ClassName("orientedSurface");
