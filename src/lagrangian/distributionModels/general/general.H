@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,6 +66,8 @@ class general
         scalar minValue_;
         scalar maxValue_;
 
+        scalar meanValue_;
+
         List<scalar> integral_;
 
 
@@ -104,6 +106,9 @@ public:
 
         //- Return the maximum value
         virtual scalar maxValue() const;
+
+        //- Return the mean value
+        virtual scalar meanValue() const;
 };
 
 

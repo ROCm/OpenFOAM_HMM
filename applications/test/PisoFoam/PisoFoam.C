@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,12 +33,7 @@ Description
 
 #include "fvCFD.H"
 #include "singlePhaseTransportModel.H"
-#include "turbulenceModel.H"
-
-#include "LduMatrix.H"
-#include "diagTensorField.H"
-
-typedef LduMatrix<vector, scalar, scalar> lduVectorMatrix;
+#include "IncompressibleTurbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,50 +68,12 @@ int main(int argc, char *argv[])
               + turbulence->divDevReff(U)
             );
 
-            //UEqn.relax();
+            UEqn.relax();
 
-            fvVectorMatrix UEqnp(UEqn == -fvc::grad(p));
-
-            lduVectorMatrix U3Eqnp(mesh);
-            U3Eqnp.diag() = UEqnp.diag();
-            U3Eqnp.upper() = UEqnp.upper();
-            U3Eqnp.lower() = UEqnp.lower();
-            U3Eqnp.source() = UEqnp.source();
-
-            UEqnp.addBoundaryDiag(U3Eqnp.diag(), 0);
-            UEqnp.addBoundarySource(U3Eqnp.source(), false);
-
-            U3Eqnp.interfaces() = U.boundaryField().interfaces();
-            U3Eqnp.interfacesUpper() = UEqnp.boundaryCoeffs().component(0);
-            U3Eqnp.interfacesLower() = UEqnp.internalCoeffs().component(0);
-
-            autoPtr<lduVectorMatrix::solver> U3EqnpSolver =
-            lduVectorMatrix::solver::New
-            (
-                U.name(),
-                U3Eqnp,
-                dictionary
-                (
-                    IStringStream
-                    (
-                        "{"
-                        "    /*solver          SmoothSolver;*/"
-                        "    smoother        GaussSeidel;"
-                        "    solver           PBiCCCG;"
-                        "    preconditioner   none;"
-                        "    tolerance        (1e-7 1e-7 1);"
-                        "    relTol           (0 0 0);"
-                        "}"
-                    )()
-                )
-            );
-
-            //for (int i=0; i<3; i++)
+            if (momentumPredictor)
             {
-                U3EqnpSolver->solve(U).print(Info);
-                U.correctBoundaryConditions();
+                solve(UEqn == -fvc::grad(p));
             }
-            //solve(UEqnp);
 
             // --- PISO loop
 
@@ -173,6 +130,7 @@ int main(int argc, char *argv[])
             }
         }
 
+        laminarTransport.correct();
         turbulence->correct();
 
         runTime.write();

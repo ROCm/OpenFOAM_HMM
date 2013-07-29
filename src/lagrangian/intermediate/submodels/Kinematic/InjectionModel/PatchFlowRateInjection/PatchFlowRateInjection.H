@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,10 +32,10 @@ Description
       - Total mass to inject
       - Name of patch
       - Injection duration
-      - Initial parcel velocity
       - Injection target concentration/carrier volume flow rate
+    - Initial parcel velocity given by local flow velocity
     - Parcel diameters obtained by distribution model
-    - Parcels injected at cell centres adjacent to patch
+    - Parcels injected randomly across the patch
 
 SourceFiles
     PatchFlowRateInjection.C
@@ -46,14 +46,13 @@ SourceFiles
 #define PatchFlowRateInjection_H
 
 #include "InjectionModel.H"
+#include "patchInjectionBase.H"
+#include "TimeDataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-template<class Type>
-class TimeDataEntry;
 
 class distributionModel;
 
@@ -64,21 +63,10 @@ class distributionModel;
 template<class CloudType>
 class PatchFlowRateInjection
 :
-    public InjectionModel<CloudType>
+    public InjectionModel<CloudType>,
+    public patchInjectionBase
 {
     // Private data
-
-        //- Name of patch
-        const word patchName_;
-
-        //- Id of patch
-        const label patchId_;
-
-        //- Patch area
-        scalar patchArea_;
-
-        //- Patch normal direction
-        vector patchNormal_;
 
         //- Name of carrier (mass or volume) flux field
         const word phiName_;
@@ -89,26 +77,14 @@ class PatchFlowRateInjection
         //- Injection duration [s]
         scalar duration_;
 
-        //- Concentration of particles to carrier [] (particles/m3)
-        const scalar concentration_;
+        //- Concentration profile of particle volume to carrier volume [-]
+        const TimeDataEntry<scalar> concentration_;
 
-        //- Number of parcels to introduce per second []
-        const label parcelsPerSecond_;
-
-        //- Initial parcel velocity [m/s]
-        vector U0_;
+        //- Parcels to introduce per unit volume flow rate m3 [n/m3]
+        const scalar parcelConcentration_;
 
         //- Parcel size distribution model
         const autoPtr<distributionModels::distributionModel> sizeDistribution_;
-
-        //- List of cell labels corresponding to injector positions
-        labelList cellOwners_;
-
-        //- Fraction of injection controlled by this processor
-        scalar fraction_;
-
-        //- Mean particle volume TODO: temporary measure - return from PDF
-        scalar pMeanVolume_;
 
 
 public:
@@ -151,6 +127,9 @@ public:
 
         //- Return the end-of-injection time
         scalar timeEnd() const;
+
+        //- Return the total volumetric flow rate across the patch [m3/s]
+        virtual scalar flowRate() const;
 
         //- Number of parcels to introduce relative to SOI
         virtual label parcelsToInject(const scalar time0, const scalar time1);

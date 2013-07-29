@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -119,6 +119,17 @@ Foam::scalar Foam::distributionModels::distributionModel::maxValue() const
     (
         "Foam::scalar "
         "Foam::distributionModels::distributionModel::maxValue() const"
+    );
+    return 0.0;
+}
+
+
+Foam::scalar Foam::distributionModels::distributionModel::meanValue() const
+{
+    notImplemented
+    (
+        "Foam::scalar "
+        "Foam::distributionModels::distributionModel::meanValue() const"
     );
     return 0.0;
 }

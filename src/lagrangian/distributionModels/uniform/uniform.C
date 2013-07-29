@@ -87,4 +87,10 @@ Foam::scalar Foam::distributionModels::uniform::maxValue() const
 }
 
 
+Foam::scalar Foam::distributionModels::uniform::meanValue() const
+{
+    return 0.5*(minValue_ + maxValue_);
+}
+
+
 // ************************************************************************* //

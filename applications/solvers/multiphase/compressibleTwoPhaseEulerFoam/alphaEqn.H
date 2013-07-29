@@ -1,6 +1,3 @@
-surfaceScalarField alphaPhi1("alphaPhi" + phase1Name, phi1);
-surfaceScalarField alphaPhi2("alphaPhi" + phase2Name, phi2);
-
 {
     word alphaScheme("div(phi," + alpha1.name() + ')');
     word alpharScheme("div(phir," + alpha1.name() + ')');
@@ -8,12 +5,23 @@ surfaceScalarField alphaPhi2("alphaPhi" + phase2Name, phi2);
     surfaceScalarField phic("phic", phi);
     surfaceScalarField phir("phir", phi1 - phi2);
 
-    if (g0.value() > 0.0)
+    surfaceScalarField alpha1f(fvc::interpolate(max(alpha1, 0.0)));
+
+    tmp<surfaceScalarField> pPrimeByA;
+
+    if (implicitPhasePressure)
     {
-        surfaceScalarField alpha1f(fvc::interpolate(alpha1));
-        surfaceScalarField phipp(ppMagf*fvc::snGrad(alpha1)*mesh.magSf());
-        phir += phipp;
-        phic += alpha1f*phipp;
+        pPrimeByA =
+            fvc::interpolate((1.0/rho1)*rAU1*turbulence1().pPrime())
+          + fvc::interpolate((1.0/rho2)*rAU2*turbulence2().pPrime());
+
+        surfaceScalarField phiP
+        (
+            pPrimeByA()*fvc::snGrad(alpha1, "bounded")*mesh.magSf()
+        );
+
+        phic += alpha1f*phiP;
+        phir += phiP;
     }
 
     for (int acorr=0; acorr<nAlphaCorr; acorr++)
@@ -92,7 +100,7 @@ surfaceScalarField alphaPhi2("alphaPhi" + phase2Name, phi2);
                 alphaPhic1,
                 Sp,
                 Su,
-                (g0.value() > 0 ? alphaMax : 1),
+                1,
                 0
             );
 
@@ -104,60 +112,18 @@ surfaceScalarField alphaPhi2("alphaPhi" + phase2Name, phi2);
             {
                 alphaPhi1 = alphaPhic1;
             }
-
-            /*
-            // Legacy semi-implicit and potentially unbounded form
-            fvScalarMatrix alpha1Eqn
-            (
-                fvm::ddt(alpha1)
-              + fvm::div(phic, alpha1, alphaScheme)
-              + fvm::div
-                (
-                    -fvc::flux(-phir, alpha2, alpharScheme),
-                    alpha1,
-                    alpharScheme
-                )
-             ==
-               fvm::Sp(Sp, alpha1) + Su
-            );
-
-            alpha1Eqn.relax();
-            alpha1Eqn.solve();
-
-            if (nAlphaSubCycles > 1)
-            {
-                alphaPhi1 += (runTime.deltaT()/totalDeltaT)*alpha1Eqn.flux();
-            }
-            else
-            {
-                alphaPhi1 = alpha1Eqn.flux();
-            }
-            */
         }
 
-        if (g0.value() > 0.0)
+        if (implicitPhasePressure)
         {
-            surfaceScalarField alpha1f(fvc::interpolate(alpha1));
-
-            ppMagf =
-                fvc::interpolate((1.0/rho1)*rAU1)
-               *g0*min(exp(preAlphaExp*(alpha1f - alphaMax)), expMax);
-
             fvScalarMatrix alpha1Eqn
             (
                 fvm::ddt(alpha1) - fvc::ddt(alpha1)
-              - fvm::laplacian
-                (
-                    alpha1f*ppMagf,
-                    alpha1,
-                    "laplacian(alpha1PpMag,alpha1)"
-                )
+              - fvm::laplacian(alpha1f*pPrimeByA, alpha1, "bounded")
             );
 
             alpha1Eqn.relax();
             alpha1Eqn.solve();
-
-            #include "packingLimiter.H"
 
             alphaPhi1 += alpha1Eqn.flux();
         }
@@ -173,4 +139,4 @@ surfaceScalarField alphaPhi2("alphaPhi" + phase2Name, phi2);
     }
 }
 
-rho = alpha1*rho1 + alpha2*rho2;
+rho = fluid.rho();

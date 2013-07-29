@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,6 +50,7 @@ Foam::distributionModels::general::general
     nEntries_(xy_.size()),
     minValue_(xy_[0][0]),
     maxValue_(xy_[nEntries_-1][0]),
+    meanValue_(0.0),
     integral_(nEntries_)
 {
     check();
@@ -69,10 +70,14 @@ Foam::distributionModels::general::general
         integral_[i] = area + integral_[i-1];
     }
 
+    scalar sumArea = integral_.last();
+
+    meanValue_ = sumArea/(maxValue_ - minValue_);
+
     for (label i=0; i<nEntries_; i++)
     {
-        xy_[i][1] /= integral_[nEntries_-1];
-        integral_[i] /= integral_[nEntries_-1];
+        xy_[i][1] /= sumArea;
+        integral_[i] /= sumArea;
     }
 
 }
@@ -150,6 +155,12 @@ Foam::scalar Foam::distributionModels::general::minValue() const
 Foam::scalar Foam::distributionModels::general::maxValue() const
 {
     return maxValue_;
+}
+
+
+Foam::scalar Foam::distributionModels::general::meanValue() const
+{
+    return meanValue_;
 }
 
 
