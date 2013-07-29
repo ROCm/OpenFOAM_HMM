@@ -103,12 +103,6 @@ class conformalVoronoiMesh
 {
 public:
 
-    enum reconformationMode
-    {
-        rmOff,   // Do not rebuild the surface conformation
-        rmOn
-    };
-
     typedef Delaunay::Vertex_handle    Vertex_handle;
     typedef Delaunay::Cell_handle      Cell_handle;
     typedef Delaunay::Edge             Edge;
@@ -125,8 +119,6 @@ public:
 private:
 
     // Static data
-
-        static const scalar tolParallel;
 
         static const scalar searchConeAngle;
 
@@ -492,7 +484,7 @@ private:
 
         //- Decision making function for when to rebuild the surface
         //  conformation
-        reconformationMode reconformationControl() const;
+        bool reconformToSurface() const;
 
         //- Determines geometrically whether a vertex is close to a surface
         //  This is an optimisation

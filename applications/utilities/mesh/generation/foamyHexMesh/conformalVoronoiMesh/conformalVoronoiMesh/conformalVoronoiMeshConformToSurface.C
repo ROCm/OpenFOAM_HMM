@@ -55,7 +55,7 @@ void Foam::conformalVoronoiMesh::conformToSurface()
         cit->cellIndex() = Cb::ctUnassigned;
     }
 
-    if (reconformationControl() == rmOff)
+    if (!reconformToSurface())
     {
         // Reinsert stored surface conformation
         reinsertSurfaceConformation();
@@ -87,8 +87,7 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 }
 
 
-Foam::conformalVoronoiMesh::reconformationMode
-Foam::conformalVoronoiMesh::reconformationControl() const
+bool Foam::conformalVoronoiMesh::reconformToSurface() const
 {
     if
     (
@@ -96,10 +95,10 @@ Foam::conformalVoronoiMesh::reconformationControl() const
       % foamyHexMeshControls().surfaceConformationRebuildFrequency() == 0
     )
     {
-        return rmOn;
+        return true;
     }
 
-    return rmOff;
+    return false;
 }
 
 
@@ -220,19 +219,9 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation()
 {
     timeCheck("Start buildSurfaceConformation");
 
-    if (reconformationControl() == rmOff)
-    {
-        WarningIn("buildSurfaceConformation()")
-            << "reconformationMode rmNone specified, not building conformation"
-            << endl;
-
-        return;
-    }
-    else
-    {
-        Info<< nl << "Rebuilding surface conformation for more iterations"
-            << endl;
-    }
+    Info<< nl
+        << "Rebuilding surface conformation for more iterations"
+        << endl;
 
     existingEdgeLocations_.clearStorage();
     existingSurfacePtLocations_.clearStorage();
