@@ -30,6 +30,9 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "Time.H"
+#include "IOdictionary.H"
+#include "searchableSurfaces.H"
 #include "conformalVoronoiMesh.H"
 #include "vtkSetWriter.H"
 
