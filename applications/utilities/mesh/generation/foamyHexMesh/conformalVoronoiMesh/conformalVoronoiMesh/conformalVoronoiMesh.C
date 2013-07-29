@@ -839,6 +839,21 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
         allGeometry_,
         foamyHexMeshDict.subDict("surfaceConformation")
     ),
+    decomposition_
+    (
+        Pstream::parRun()
+      ? new backgroundMeshDecomposition
+        (
+            runTime_,
+            rndGen_,
+            geometryToConformTo_,
+            foamyHexMeshControls().foamyHexMeshDict().subDict
+            (
+                "backgroundMeshDecomposition"
+            )
+        )
+      : NULL
+    ),
     cellShapeControl_
     (
         runTime_,
@@ -874,8 +889,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
         (
             foamyHexMeshDict.subDict("motionControl")
         )
-    ),
-    decomposition_()
+    )
 {}
 
 
@@ -892,23 +906,6 @@ void Foam::conformalVoronoiMesh::initialiseForMotion()
     if (foamyHexMeshControls().objOutput())
     {
         geometryToConformTo_.writeFeatureObj("foamyHexMesh");
-    }
-
-    if (Pstream::parRun())
-    {
-        decomposition_.reset
-        (
-            new backgroundMeshDecomposition
-            (
-                runTime_,
-                rndGen_,
-                geometryToConformTo_,
-                foamyHexMeshControls().foamyHexMeshDict().subDict
-                (
-                    "backgroundMeshDecomposition"
-                )
-            )
-        );
     }
 
     buildCellSizeAndAlignmentMesh();

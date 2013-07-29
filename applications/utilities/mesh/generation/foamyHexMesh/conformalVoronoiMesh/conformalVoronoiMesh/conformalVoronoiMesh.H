@@ -143,6 +143,9 @@ private:
         //- The surfaces to conform to
         conformationSurfaces geometryToConformTo_;
 
+        //- Background mesh decomposition, only available in parallel.
+        autoPtr<backgroundMeshDecomposition> decomposition_;
+
         //- The cell shape control object
         cellShapeControl cellShapeControl_;
 
@@ -181,9 +184,6 @@ private:
 
         //-  Face area weight function.  Runtime selectable.
         autoPtr<faceAreaWeightModel> faceAreaWeightModel_;
-
-        //- Background mesh decomposition, only available in parallel.
-        autoPtr<backgroundMeshDecomposition> decomposition_;
 
 
     // Private Member Functions
