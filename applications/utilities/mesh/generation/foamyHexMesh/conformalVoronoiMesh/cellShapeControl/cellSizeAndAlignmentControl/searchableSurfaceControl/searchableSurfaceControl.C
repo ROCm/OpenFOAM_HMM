@@ -328,7 +328,7 @@ Foam::searchableSurfaceControl::searchableSurfaceControl
 
     cellSizeFunctions_.reorder(invertedFunctionPriorities);
 
-    Info<< nl << "There are " << cellSizeFunctions_.size()
+    Info<< nl << indent << "There are " << cellSizeFunctions_.size()
         << " region control functions" << endl;
 }
 
@@ -487,24 +487,25 @@ void Foam::searchableSurfaceControl::cellSizeFunctionVertices
 
     const scalar nearFeatDistSqrCoeff = 1e-8;
 
+    pointField ptField(1, vector::min);
+    scalarField distField(1, nearFeatDistSqrCoeff);
+    List<pointIndexHit> infoList(1, pointIndexHit());
+
+    vectorField normals(1);
+    labelList region(1, -1);
+
     forAll(points, pI)
     {
         // Is the point in the extendedFeatureEdgeMesh? If so get the
         // point normal, otherwise get the surface normal from
         // searchableSurface
-
-        pointField ptField(1, points[pI]);
-        scalarField distField(1, nearFeatDistSqrCoeff);
-        List<pointIndexHit> infoList(1, pointIndexHit());
+        ptField[0] = points[pI];
 
         searchableSurface_.findNearest(ptField, distField, infoList);
 
         if (infoList[0].hit())
         {
-            vectorField normals(1);
             searchableSurface_.getNormal(infoList, normals);
-
-            labelList region(1, -1);
             searchableSurface_.getRegion(infoList, region);
 
             const cellSizeFunction& sizeFunc =
