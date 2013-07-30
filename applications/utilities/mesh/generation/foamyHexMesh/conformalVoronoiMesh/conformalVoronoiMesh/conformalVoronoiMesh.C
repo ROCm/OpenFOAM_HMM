@@ -1415,6 +1415,9 @@ void Foam::conformalVoronoiMesh::move()
 
     Info<< "Sum displacements" << endl;
 
+    label nPointsToRetain = 0;
+    label nPointsToRemove = 0;
+
     for
     (
         Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
@@ -1444,21 +1447,23 @@ void Foam::conformalVoronoiMesh::move()
                 if (internalPointIsInside(pt))
                 {
                     pointsToInsert.append(toPoint(pt));
+                    nPointsToRemove++;
                 }
+
+                nPointsToRetain++;
             }
         }
     }
 
     pointsToInsert.shrink();
 
-    Info<< indent
-        << returnReduce
+    Info<< returnReduce
            (
-               pointToBeRetained.count() - pointsToInsert.size(),
+               nPointsToRetain - nPointsToRemove,
                sumOp<label>()
            )
-        << " internal points were inserted outside the domain. "
-        << "They have been removed." << endl;
+        << " internal points are outside the domain. "
+        << "They will not be inserted." << endl;
 
     // Save displacements to file.
     if (foamyHexMeshControls().objOutput() && time().outputTime())
