@@ -1135,7 +1135,7 @@ void Foam::conformalVoronoiMesh::move()
                      && pointToBeRetained[vB->index()] == true
                     )
                     {
-                        Foam::point pt(0.5*(dVA + dVB));
+                        const Foam::point pt(0.5*(dVA + dVB));
 
                         if (internalPointIsInside(pt))
                         {
@@ -1271,7 +1271,7 @@ void Foam::conformalVoronoiMesh::move()
                             )
                         )
                         {
-                            const Foam::point& newPt = 0.5*(dVA + dVB);
+                            const Foam::point newPt(0.5*(dVA + dVB));
 
                             if (positionOnThisProc(newPt))
                             {
@@ -1315,7 +1315,7 @@ void Foam::conformalVoronoiMesh::move()
                              && pointToBeRetained[vB->index()] == true
                             )
                             {
-                                Foam::point pt(0.5*(dVA + dVB));
+                                const Foam::point pt(0.5*(dVA + dVB));
 
                                 if (internalPointIsInside(pt))
                                 {
