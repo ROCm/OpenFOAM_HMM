@@ -226,7 +226,7 @@ inline void Foam::conformalVoronoiMesh::createPointPair
     const Foam::point& surfPt,
     const vector& n,
     DynamicList<Vb>& pts
-)
+) const
 {
     vector ppDistn = ppDist*n;
 
@@ -297,7 +297,7 @@ inline void Foam::conformalVoronoiMesh::createBafflePointPair
     const Foam::point& surfPt,
     const vector& n,
     DynamicList<Vb>& pts
-)
+) const
 {
     vector ppDistn = ppDist*n;
 

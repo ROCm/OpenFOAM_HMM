@@ -763,7 +763,7 @@ Foam::label Foam::controlMeshRefinement::refineMesh
             (
                 Vb
                 (
-                    toPoint<cellShapeControlMesh::Point>(pt),
+                    toPoint(pt),
                     Vb::vtInternal
                 )
             );

@@ -27,8 +27,6 @@ Class
 Description
     Functions for analysing the relationships between vectors
 
-SourceFiles
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef vectorTools_H
@@ -145,6 +143,7 @@ namespace vectorTools
     }
 
 } // End namespace vectorTools
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

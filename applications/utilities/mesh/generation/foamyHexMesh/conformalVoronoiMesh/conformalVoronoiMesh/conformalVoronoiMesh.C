@@ -124,12 +124,13 @@ void Foam::conformalVoronoiMesh::insertInternalPoints
             decomposition_().distributePoints(transferPoints)
         );
 
+        transferPoints.clear();
+
         map().distribute(points);
     }
 
     label nVert = number_of_vertices();
 
-    // using the range insert (faster than inserting points one by one)
     insert(points.begin(), points.end());
 
     label nInserted(number_of_vertices() - nVert);
@@ -169,24 +170,7 @@ void Foam::conformalVoronoiMesh::insertPoints
 {
     if (Pstream::parRun() && distribute)
     {
-        const label preDistributionSize = vertices.size();
-
-        List<Foam::point> pts(preDistributionSize);
-
-        forAll(vertices, vI)
-        {
-            const Foam::point& pt = topoint(vertices[vI].point());
-
-            pts[vI] = pt;
-        }
-
-        // Distribute points to their appropriate processor
-        autoPtr<mapDistribute> map
-        (
-            decomposition_().distributePoints(pts)
-        );
-
-        map().distribute(vertices);
+        decomposition_().distributePoints(vertices);
 
         forAll(vertices, vI)
         {
@@ -196,12 +180,7 @@ void Foam::conformalVoronoiMesh::insertPoints
 
     label preReinsertionSize(number_of_vertices());
 
-    rangeInsertWithInfo
-    (
-        vertices.begin(),
-        vertices.end(),
-        false
-    );
+    this->DelaunayMesh<Delaunay>::insertPoints(vertices);
 
     const label nReinserted = returnReduce
     (
@@ -398,9 +377,6 @@ void Foam::conformalVoronoiMesh::distribute()
         return;
     }
 
-    autoPtr<mapDistribute> mapDist =
-        DistributedDelaunayMesh<Delaunay>::distribute(decomposition_());
-
     DynamicList<Foam::point> points(number_of_vertices());
     DynamicList<Foam::indexedVertexEnum::vertexType> types
     (
@@ -425,7 +401,9 @@ void Foam::conformalVoronoiMesh::distribute()
         }
     }
 
-    mapDist().distribute(points);
+    autoPtr<mapDistribute> mapDist =
+        DistributedDelaunayMesh<Delaunay>::distribute(decomposition_(), points);
+
     mapDist().distribute(types);
     mapDist().distribute(sizes);
     mapDist().distribute(alignments);
@@ -445,7 +423,7 @@ void Foam::conformalVoronoiMesh::distribute()
         (
             Vb
             (
-                toPoint<Point>(points[pI]),
+                toPoint(points[pI]),
                 -1,
                 types[pI],
                 Pstream::myProcNo()
@@ -862,8 +840,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
         geometryToConformTo_
     ),
     limitBounds_(),
-    featureVertices_(),
-    featurePointLocations_(),
+    ftPtConformer_(*this),
     edgeLocationTreePtr_(),
     surfacePtLocationTreePtr_(),
     surfaceConformationVertices_(),
@@ -912,7 +889,7 @@ void Foam::conformalVoronoiMesh::initialiseForMotion()
 
     insertInitialPoints();
 
-    insertFeaturePoints();
+    insertFeaturePoints(true);
 
     setVertexSizeAndAlignment();
 
@@ -1160,7 +1137,7 @@ void Foam::conformalVoronoiMesh::move()
                     {
                         pointsToInsert.append
                         (
-                            toPoint<Point>(0.5*(dVA + dVB))
+                            toPoint(0.5*(dVA + dVB))
                         );
                     }
                 }
@@ -1297,7 +1274,7 @@ void Foam::conformalVoronoiMesh::move()
                             if (positionOnThisProc(newPt))
                             {
                                 // Prevent insertions spanning surfaces
-                                pointsToInsert.append(toPoint<Point>(newPt));
+                                pointsToInsert.append(toPoint(newPt));
                             }
                         }
                     }
@@ -1335,7 +1312,7 @@ void Foam::conformalVoronoiMesh::move()
                             {
                                 pointsToInsert.append
                                 (
-                                    toPoint<Point>(0.5*(dVA + dVB))
+                                    toPoint(0.5*(dVA + dVB))
                                 );
                             }
                         }
@@ -1454,7 +1431,7 @@ void Foam::conformalVoronoiMesh::move()
 
                 pointsToInsert.append
                 (
-                    toPoint<Point>
+                    toPoint
                     (
                         topoint(vit->point())
                       + displacementAccumulator[vit->index()]
@@ -1502,7 +1479,7 @@ void Foam::conformalVoronoiMesh::move()
 
     Info<< nl << "Inserting displaced tessellation" << endl;
 
-    reinsertFeaturePoints(true);
+    insertFeaturePoints(true);
 
     insertInternalPoints(pointsToInsert, true);
 

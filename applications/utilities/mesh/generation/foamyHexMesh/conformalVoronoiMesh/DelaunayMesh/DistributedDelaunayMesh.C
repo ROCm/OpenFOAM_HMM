@@ -814,7 +814,8 @@ template<class Triangulation>
 Foam::autoPtr<Foam::mapDistribute>
 Foam::DistributedDelaunayMesh<Triangulation>::distribute
 (
-    const backgroundMeshDecomposition& decomposition
+    const backgroundMeshDecomposition& decomposition,
+    List<Foam::point>& points
 )
 {
     if (!Pstream::parRun())
@@ -823,21 +824,6 @@ Foam::DistributedDelaunayMesh<Triangulation>::distribute
     }
 
     distributeBoundBoxes(decomposition.procBounds());
-
-    DynamicList<point> points(Triangulation::number_of_vertices());
-
-    for
-    (
-        Finite_vertices_iterator vit = Triangulation::finite_vertices_begin();
-        vit != Triangulation::finite_vertices_end();
-        ++vit
-    )
-    {
-        if (vit->real())
-        {
-            points.append(topoint(vit->point()));
-        }
-    }
 
     autoPtr<mapDistribute> mapDist = decomposition.distributePoints(points);
 

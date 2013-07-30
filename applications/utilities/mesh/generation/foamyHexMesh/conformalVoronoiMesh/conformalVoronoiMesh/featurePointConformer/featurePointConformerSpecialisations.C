@@ -23,39 +23,17 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "conformalVoronoiMesh.H"
+#include "featurePointConformer.H"
 #include "vectorTools.H"
+#include "pointFeatureEdgesTypes.H"
+#include "conformalVoronoiMesh.H"
+#include "pointConversion.H"
 
 using namespace Foam::vectorTools;
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-Foam::List<Foam::extendedFeatureEdgeMesh::edgeStatus>
-Foam::conformalVoronoiMesh::calcPointFeatureEdgesTypes
-(
-    const extendedFeatureEdgeMesh& feMesh,
-    const labelList& pEds,
-    pointFeatureEdgesTypes& pFEdgeTypes
-) const
-{
-    List<extendedFeatureEdgeMesh::edgeStatus> allEdStat(pEds.size());
-
-    forAll(pEds, i)
-    {
-        label edgeI = pEds[i];
-
-        extendedFeatureEdgeMesh::edgeStatus& eS = allEdStat[i];
-
-        eS = feMesh.getEdgeStatus(edgeI);
-
-        pFEdgeTypes(eS)++;
-    }
-
-    return allEdStat;
-}
-
-
-bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
+bool Foam::featurePointConformer::createSpecialisedFeaturePoint
 (
     const extendedFeatureEdgeMesh& feMesh,
     const labelList& pEds,
@@ -63,7 +41,7 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
     const List<extendedFeatureEdgeMesh::edgeStatus>& allEdStat,
     const label ptI,
     DynamicList<Vb>& pts
-)
+) const
 {
     if
     (
@@ -85,16 +63,16 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
 
         const Foam::point& featPt = feMesh.points()[ptI];
 
-        if (!positionOnThisProc(featPt))
+        if (!foamyHexMesh_.positionOnThisProc(featPt))
         {
             return false;
         }
 
-        label nVert = number_of_vertices();
+        label nVert = foamyHexMesh_.number_of_vertices();
 
         const label initialNumOfPoints = pts.size();
 
-        const scalar ppDist = pointPairDistance(featPt);
+        const scalar ppDist = foamyHexMesh_.pointPairDistance(featPt);
 
         const vectorField& normals = feMesh.normals();
 
@@ -204,8 +182,8 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
         Foam::point externalPtD;
         Foam::point externalPtE;
 
-        vector convexEdgePlaneCNormal(0,0,0);
-        vector convexEdgePlaneDNormal(0,0,0);
+        vector convexEdgePlaneCNormal(vector::zero);
+        vector convexEdgePlaneDNormal(vector::zero);
 
         const labelList& concaveEdgeNormals = edgeNormals[concaveEdgeI];
         const labelList& convexEdgeANormals = edgeNormals[convexEdgesI[0]];
@@ -349,7 +327,7 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
           + radAngleBetween(concaveEdgePlaneANormal, concaveEdgePlaneBNormal)
         );
 
-        if (totalAngle > foamyHexMeshControls().maxQuadAngle())
+        if (totalAngle > foamyHexMeshControls_.maxQuadAngle())
         {
             // Add additional mitreing points
             //scalar angleSign = 1.0;
@@ -424,16 +402,16 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
 
         const Foam::point& featPt = feMesh.points()[ptI];
 
-        if (!positionOnThisProc(featPt))
+        if (!foamyHexMesh_.positionOnThisProc(featPt))
         {
             return false;
         }
 
-        label nVert = number_of_vertices();
+        label nVert = foamyHexMesh_.number_of_vertices();
 
         const label initialNumOfPoints = pts.size();
 
-        const scalar ppDist = pointPairDistance(featPt);
+        const scalar ppDist = foamyHexMesh_.pointPairDistance(featPt);
 
         const vectorField& normals = feMesh.normals();
 
@@ -543,8 +521,8 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
         Foam::point externalPtD;
         Foam::point externalPtE;
 
-        vector concaveEdgePlaneCNormal(0,0,0);
-        vector concaveEdgePlaneDNormal(0,0,0);
+        vector concaveEdgePlaneCNormal(vector::zero);
+        vector concaveEdgePlaneDNormal(vector::zero);
 
         const labelList& convexEdgeNormals = edgeNormals[convexEdgeI];
         const labelList& concaveEdgeANormals = edgeNormals[concaveEdgesI[0]];
@@ -691,7 +669,7 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
           + radAngleBetween(convexEdgePlaneANormal, convexEdgePlaneBNormal)
         );
 
-        if (totalAngle > foamyHexMeshControls().maxQuadAngle())
+        if (totalAngle > foamyHexMeshControls_.maxQuadAngle())
         {
             // Add additional mitreing points
             //scalar angleSign = 1.0;
@@ -751,6 +729,7 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
                 Info<< "Point " << ptI << " "
                     << indexedVertexEnum::vertexTypeNames_[pts[ptI].type()]
                     << " : ";
+
                 meshTools::writeOBJ(Info, topoint(pts[ptI].point()));
             }
         }

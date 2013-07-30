@@ -166,7 +166,8 @@ public:
 
         autoPtr<mapDistribute> distribute
         (
-            const backgroundMeshDecomposition& decomposition
+            const backgroundMeshDecomposition& decomposition,
+            List<Foam::point>& points
         );
 
         //- Refer vertices so that the processor interfaces are consistent

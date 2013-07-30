@@ -117,7 +117,7 @@ Foam::DelaunayMesh<Triangulation>::DelaunayMesh
     {
         forAll(pts, ptI)
         {
-            Vertex_handle vh = this->insert(toPoint<Point>(pts[ptI]));
+            Vertex_handle vh = this->insert(toPoint(pts[ptI]));
 
             if (indices.headerOk())
             {

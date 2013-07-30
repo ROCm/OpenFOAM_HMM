@@ -619,7 +619,7 @@ void Foam::cellShapeControlMesh::barycentricCoords
 {
     // Use the previous cell handle as a hint on where to start searching
     // Giving a hint causes strange errors...
-    ch = locate(toPoint<Point>(pt));
+    ch = locate(toPoint(pt));
 
     if (dimension() > 2 && !is_infinite(ch))
     {
@@ -666,14 +666,6 @@ void Foam::cellShapeControlMesh::distribute
     const backgroundMeshDecomposition& decomposition
 )
 {
-    if (!Pstream::parRun())
-    {
-        return;
-    }
-
-    autoPtr<mapDistribute> mapDist =
-        DistributedDelaunayMesh<CellSizeDelaunay>::distribute(decomposition);
-
     DynamicList<Foam::point> points(number_of_vertices());
     DynamicList<scalar> sizes(number_of_vertices());
     DynamicList<tensor> alignments(number_of_vertices());
@@ -711,7 +703,13 @@ void Foam::cellShapeControlMesh::distribute
         }
     }
 
-    mapDist().distribute(points);
+    autoPtr<mapDistribute> mapDist =
+        DistributedDelaunayMesh<CellSizeDelaunay>::distribute
+        (
+            decomposition,
+            points
+        );
+
     mapDist().distribute(sizes);
     mapDist().distribute(alignments);
 
@@ -735,7 +733,7 @@ void Foam::cellShapeControlMesh::distribute
         (
             Vb
             (
-                toPoint<Point>(points[pI]),
+                toPoint(points[pI]),
                 -1,
                 Vb::vtInternal,
                 Pstream::myProcNo()

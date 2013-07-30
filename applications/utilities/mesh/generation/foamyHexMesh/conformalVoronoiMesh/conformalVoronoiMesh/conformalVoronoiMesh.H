@@ -74,9 +74,9 @@ SourceFiles
 #include "globalIndex.H"
 #include "pointFeatureEdgesTypes.H"
 #include "pointConversion.H"
-#include "Tuple2.H"
+#include "Pair.H"
 #include "DistributedDelaunayMesh.H"
-#include "tensorIOField.H"
+#include "featurePointConformer.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -152,13 +152,8 @@ private:
         //- Limiting bound box before infinity begins
         treeBoundBox limitBounds_;
 
-        //- Store the feature constraining points to be reinserted after a
-        //  triangulation clear. Maintained with relative types and indices.
-        List<Vb> featureVertices_;
-
-        //- Storing the locations of all of the features to be conformed to.
-        //  Single pointField required by the featurePointTree.
-        pointField featurePointLocations_;
+        //-
+        featurePointConformer ftPtConformer_;
 
         //- Search tree for edge point locations
         mutable autoPtr<dynamicIndexedOctree<dynamicTreeDataPoint> >
@@ -235,7 +230,7 @@ private:
             const Foam::point& surfPt,
             const vector& n,
             DynamicList<Vb>& pts
-        );
+        ) const;
 
         inline Foam::point perturbPoint(const Foam::point& pt) const;
 
@@ -247,7 +242,7 @@ private:
             const Foam::point& surfPt,
             const vector& n,
             DynamicList<Vb>& pts
-        );
+        ) const;
 
         inline bool isPointPair
         (
@@ -272,20 +267,12 @@ private:
             const fileName fName = fileName::null
         );
 
-        //- Call the appropriate function to conform to an edge
-        void createEdgePointGroup
-        (
-            const extendedFeatureEdgeMesh& feMesh,
-            const pointIndexHit& edHit,
-            DynamicList<Vb>& pts
-        );
-
         void createEdgePointGroupByCirculating
         (
             const extendedFeatureEdgeMesh& feMesh,
             const pointIndexHit& edHit,
             DynamicList<Vb>& pts
-        );
+        ) const;
 
         bool meshableRegion
         (
@@ -308,7 +295,7 @@ private:
             const extendedFeatureEdgeMesh& feMesh,
             const pointIndexHit& edHit,
             DynamicList<Vb>& pts
-        );
+        ) const;
 
         //- Create points to conform to an internal edge
         void createInternalEdgePointGroup
@@ -316,7 +303,7 @@ private:
             const extendedFeatureEdgeMesh& feMesh,
             const pointIndexHit& edHit,
             DynamicList<Vb>& pts
-        );
+        ) const;
 
         //- Create points to conform to a flat edge
         void createFlatEdgePointGroup
@@ -324,7 +311,7 @@ private:
             const extendedFeatureEdgeMesh& feMesh,
             const pointIndexHit& edHit,
             DynamicList<Vb>& pts
-        );
+        ) const;
 
         //- Create points to conform to an open edge
         void createOpenEdgePointGroup
@@ -332,7 +319,7 @@ private:
             const extendedFeatureEdgeMesh& feMesh,
             const pointIndexHit& edHit,
             DynamicList<Vb>& pts
-        );
+        ) const;
 
         //- Create points to conform to multiply connected edge
         void createMultipleEdgePointGroup
@@ -340,85 +327,10 @@ private:
             const extendedFeatureEdgeMesh& feMesh,
             const pointIndexHit& edHit,
             DynamicList<Vb>& pts
-        );
+        ) const;
 
         //- Determine and insert point groups at the feature points
-        void insertFeaturePoints();
-
-        //- Create point groups at mixed feature points
-        void createMixedFeaturePoints(DynamicList<Vb>& pts);
-
-        void addMasterAndSlavePoints
-        (
-            const DynamicList<Foam::point>& masterPoints,
-            const DynamicList<indexedVertexEnum::vertexType>&masterPointsTypes,
-            const Map<DynamicList<autoPtr<plane> > >& masterPointReflections,
-            DynamicList<Vb>& pts,
-            const label ptI
-        ) const;
-
-        label getSign(const extendedFeatureEdgeMesh::edgeStatus eStatus) const;
-
-        void createMasterAndSlavePoints
-        (
-            const extendedFeatureEdgeMesh& feMesh,
-            const label ptI,
-            DynamicList<Vb>& pts
-        ) const;
-
-        void createFeaturePoints(DynamicList<Vb>& pts);
-
-        vector sharedFaceNormal
-        (
-            const extendedFeatureEdgeMesh& feMesh,
-            const label edgeI,
-            const label nextEdgeI
-        ) const;
-
-        List<Foam::point> reflectPointInPlanes
-        (
-            const Foam::point p,
-            const DynamicList<autoPtr<plane> >& planes
-        ) const;
-
-        Foam::point reflectPointInPlane
-        (
-            const Foam::point p,
-            const plane& planeN
-        ) const;
-
-
-        //- Fill the pointFeatureEdgesType struct with the types of feature
-        //  edges that are attached to the point.
-        List<extendedFeatureEdgeMesh::edgeStatus> calcPointFeatureEdgesTypes
-        (
-            const extendedFeatureEdgeMesh& feMesh,
-            const labelList& pEds,
-            pointFeatureEdgesTypes& pFEdgeTypes
-        ) const;
-
-        //- Create feature point groups if a specialisation exists for the
-        //  structure
-        bool createSpecialisedFeaturePoint
-        (
-            const extendedFeatureEdgeMesh& feMesh,
-            const labelList& pEds,
-            const pointFeatureEdgesTypes& pFEdgeTypes,
-            const List<extendedFeatureEdgeMesh::edgeStatus>& allEdStat,
-            const label ptI,
-            DynamicList<Vb>& pts
-        );
-
-        //- Store the locations of all of the features to be conformed to
-        void constructFeaturePointLocations();
-
-        List<pointIndexHit> findSurfacePtLocationsNearFeaturePoint
-        (
-            const Foam::point& featurePoint
-        ) const;
-
-        //- Reinsert stored feature point defining points
-        void reinsertFeaturePoints(bool distribute = false);
+        void insertFeaturePoints(bool distribute = false);
 
         //- Check if a location is in exclusion range around a feature point
         bool nearFeaturePt(const Foam::point& pt) const;
@@ -1011,6 +923,7 @@ public:
                 const pointIndexHit& edHit,
                 DynamicList<Vb>& pts
             ) const;
+
 
         // Write
 

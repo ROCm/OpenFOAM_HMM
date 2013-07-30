@@ -27,10 +27,17 @@ Class
 Description
     Holds information on the types of feature edges attached to feature points.
 
+SourceFiles
+    pointFeatureEdgesTypes.C
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef pointFeatureEdgesTypes_H
 #define pointFeatureEdgesTypes_H
+
+#include "HashTable.H"
+#include "extendedFeatureEdgeMesh.H"
+#include "List.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,38 +53,45 @@ class pointFeatureEdgesTypes
 :
     public HashTable<label, extendedFeatureEdgeMesh::edgeStatus>
 {
-    label pointLabel_;
+    // Private data
+
+        //- Reference to the feature edge mesh
+        const extendedFeatureEdgeMesh& feMesh_;
+
+        //- label of the point
+        label pointLabel_;
+
 
 public:
 
-    pointFeatureEdgesTypes(const label pointLabel)
-    :
-        HashTable<label, extendedFeatureEdgeMesh::edgeStatus>(),
-        pointLabel_(pointLabel)
-    {}
+    // Constructors
 
-
-    friend Ostream& operator<<(Ostream& os, const pointFeatureEdgesTypes& p)
-    {
-        os  << "Point = " << p.pointLabel_ << endl;
-
-        for
+        //- Construct from components
+        pointFeatureEdgesTypes
         (
-            HashTable<label, extendedFeatureEdgeMesh::edgeStatus>
-                ::const_iterator iter = p.cbegin();
-            iter != p.cend();
-            ++iter
-        )
-        {
-            os  << "    "
-                << extendedFeatureEdgeMesh::edgeStatusNames_[iter.key()]
-                << " = "
-                << iter()
-                << endl;
-        }
+            const extendedFeatureEdgeMesh& feMesh,
+            const label pointLabel
+        );
 
-        return os;
-    }
+
+    //- Destructor
+    ~pointFeatureEdgesTypes();
+
+
+    // Member Functions
+
+        //- Fill the pointFeatureEdgesType class with the types of feature
+        //  edges that are attached to the point.
+        List<extendedFeatureEdgeMesh::edgeStatus> calcPointFeatureEdgesTypes();
+
+
+    // Info
+
+        friend Ostream& operator<<
+        (
+            Ostream& os,
+            const pointFeatureEdgesTypes& p
+        );
 };
 
 

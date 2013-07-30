@@ -72,6 +72,7 @@ SourceFiles
 #include "indexedOctree.H"
 #include "treeDataPrimitivePatch.H"
 #include "volumeType.H"
+#include "CGALTriangulation3Ddefs.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -224,7 +225,8 @@ public:
         );
 
         //- Distribute supplied the points to the appropriate processor
-        autoPtr<mapDistribute> distributePoints(List<point>& points) const;
+        template<typename PointType>
+        autoPtr<mapDistribute> distributePoints(List<PointType>& points) const;
 
         //- Is the given position inside the domain of this decomposition
         bool positionOnThisProcessor(const point& pt) const;
@@ -261,7 +263,8 @@ public:
         ) const;
 
         //- What processor is the given position on?
-        labelList processorPosition(const List<point>& pts) const;
+        template<typename PointType>
+        labelList processorPosition(const List<PointType>& pts) const;
 
         //- What is the nearest processor to the given position?
         labelList processorNearestPosition(const List<point>& pts) const;
@@ -333,6 +336,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "backgroundMeshDecompositionI.H"
+
+#ifdef NoRepository
+#   include "backgroundMeshDecompositionTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

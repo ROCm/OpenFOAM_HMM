@@ -25,8 +25,7 @@ Class
     pointConversion
 
 Description
-
-    Conversion functions between point (FOAM::) and Point (CGAL)
+    Conversion functions between point (Foam::) and Point (CGAL::)
 
 \*---------------------------------------------------------------------------*/
 
@@ -61,7 +60,6 @@ namespace Foam
         return reinterpret_cast<pointFromPoint>(P);
     }
 
-    template<typename Point>
     inline PointFrompoint toPoint(const Foam::point& p)
     {
         return reinterpret_cast<PointFrompoint>(p);
@@ -80,13 +78,32 @@ namespace Foam
         );
     }
 
-    template<typename Point>
-    inline Point toPoint(const Foam::point& p)
+    inline PointFrompoint toPoint(const Foam::point& p)
     {
-        return Point(p.x(), p.y(), p.z());
+        return PointFrompoint(p.x(), p.y(), p.z());
     }
 
 #endif
+
+    //- Specialisation for indexedVertex.
+    template<>
+    inline pointFromPoint topoint<CGAL::indexedVertex<K> >
+    (
+        const CGAL::indexedVertex<K>& P
+    )
+    {
+        return topoint(P.point());
+    }
+
+    //- Specialisation for Foam::point. Used only as a dummy.
+    template<>
+    inline pointFromPoint topoint<Foam::point>
+    (
+        const Foam::point& P
+    )
+    {
+        return P;
+    }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
