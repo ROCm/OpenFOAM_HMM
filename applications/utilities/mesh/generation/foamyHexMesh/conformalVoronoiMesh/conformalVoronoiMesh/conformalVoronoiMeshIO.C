@@ -674,6 +674,8 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
 
     pBufs.finishedSends();
 
+    Info<< incrIndent << indent << "    Face ordering initialised..." << endl;
+
     // Receive and calculate ordering
     bool anyChanged = false;
 
@@ -730,6 +732,8 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
             }
         }
     }
+
+    Info<< incrIndent << indent << "    Faces matched." << endl;
 
     reduce(anyChanged, orOp<bool>());
 

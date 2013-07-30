@@ -325,6 +325,24 @@ inline void Foam::conformalVoronoiMesh::createBafflePointPair
 }
 
 
+inline bool Foam::conformalVoronoiMesh::internalPointIsInside
+(
+    const Foam::point& pt
+) const
+{
+    if
+    (
+        !geometryToConformTo_.inside(pt)
+     || !geometryToConformTo_.globalBounds().contains(pt)
+    )
+    {
+        return false;
+    }
+
+    return true;
+}
+
+
 inline bool Foam::conformalVoronoiMesh::isPointPair
 (
     const Vertex_handle& vA,

@@ -562,7 +562,7 @@ void Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()
     {
         if (vit->internalOrBoundaryPoint())
         {
-            pointFromPoint pt = topoint(vit->point());
+            const pointFromPoint pt = topoint(vit->point());
 
             cellShapeControls().cellSizeAndAlignment
             (
@@ -1135,10 +1135,12 @@ void Foam::conformalVoronoiMesh::move()
                      && pointToBeRetained[vB->index()] == true
                     )
                     {
-                        pointsToInsert.append
-                        (
-                            toPoint(0.5*(dVA + dVB))
-                        );
+                        Foam::point pt(0.5*(dVA + dVB));
+
+                        if (internalPointIsInside(pt))
+                        {
+                            pointsToInsert.append(toPoint(pt));
+                        }
                     }
                 }
 
@@ -1274,7 +1276,10 @@ void Foam::conformalVoronoiMesh::move()
                             if (positionOnThisProc(newPt))
                             {
                                 // Prevent insertions spanning surfaces
-                                pointsToInsert.append(toPoint(newPt));
+                                if (internalPointIsInside(newPt))
+                                {
+                                    pointsToInsert.append(toPoint(newPt));
+                                }
                             }
                         }
                     }
@@ -1310,10 +1315,12 @@ void Foam::conformalVoronoiMesh::move()
                              && pointToBeRetained[vB->index()] == true
                             )
                             {
-                                pointsToInsert.append
-                                (
-                                    toPoint(0.5*(dVA + dVB))
-                                );
+                                Foam::point pt(0.5*(dVA + dVB));
+
+                                if (internalPointIsInside(pt))
+                                {
+                                    pointsToInsert.append(toPoint(pt));
+                                }
                             }
                         }
 
@@ -1428,20 +1435,30 @@ void Foam::conformalVoronoiMesh::move()
                 // 14/1/2011.
                 // Only necessary if using an exact constructions kernel
                 // (extended precision)
-
-                pointsToInsert.append
+                Foam::point pt
                 (
-                    toPoint
-                    (
-                        topoint(vit->point())
-                      + displacementAccumulator[vit->index()]
-                    )
+                    topoint(vit->point())
+                  + displacementAccumulator[vit->index()]
                 );
+
+                if (internalPointIsInside(pt))
+                {
+                    pointsToInsert.append(toPoint(pt));
+                }
             }
         }
     }
 
     pointsToInsert.shrink();
+
+    Info<< indent
+        << returnReduce
+           (
+               pointToBeRetained.count() - pointsToInsert.size(),
+               sumOp<label>()
+           )
+        << " internal points were inserted outside the domain. "
+        << "They have been removed." << endl;
 
     // Save displacements to file.
     if (foamyHexMeshControls().objOutput() && time().outputTime())
@@ -1477,72 +1494,11 @@ void Foam::conformalVoronoiMesh::move()
 
     timeCheck("Displacement calculated");
 
-    Info<< nl << "Inserting displaced tessellation" << endl;
+    Info<< nl<< "Inserting displaced tessellation" << endl;
 
     insertFeaturePoints(true);
 
     insertInternalPoints(pointsToInsert, true);
-
-    {
-        // Remove internal points that have been inserted outside the surface.
-        label internalPtIsOutside = 0;
-
-        autoPtr<OBJstream> str;
-
-        if (foamyHexMeshControls().objOutput() && time().outputTime())
-        {
-            str.set
-            (
-                new OBJstream(time().path()/"internalPointsOutsideDomain.obj")
-            );
-        }
-
-        DynamicList<Vertex_handle> pointsToRemove;
-
-        for
-        (
-            Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-            vit != finite_vertices_end();
-            ++vit
-        )
-        {
-            if
-            (
-                (vit->internalPoint() || vit->internalBoundaryPoint())
-             //&& !vit->referred()
-            )
-            {
-                const pointFromPoint pt = topoint(vit->point());
-
-                bool inside = geometryToConformTo_.inside(pt);
-
-                if
-                (
-                    !inside
-                 || !geometryToConformTo_.globalBounds().contains(pt)
-                )
-                {
-                    if
-                    (
-                        foamyHexMeshControls().objOutput()
-                     && time().outputTime()
-                    )
-                    {
-                        str().write(topoint(vit->point()));
-                    }
-
-                    pointsToRemove.append(vit);
-                    internalPtIsOutside++;
-                }
-            }
-        }
-
-        remove(pointsToRemove.begin(), pointsToRemove.end());
-
-        Info<< "    " << returnReduce(internalPtIsOutside, sumOp<label>())
-            << " internal points were inserted outside the domain. "
-            << "They have been removed." << endl;
-    }
 
     // Fix points that have not been significantly displaced
 //    for

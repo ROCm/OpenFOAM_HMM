@@ -244,6 +244,9 @@ private:
             DynamicList<Vb>& pts
         ) const;
 
+        //- Check internal point is completely inside the meshable region
+        inline bool internalPointIsInside(const Foam::point& pt) const;
+
         inline bool isPointPair
         (
             const Vertex_handle& vA,
