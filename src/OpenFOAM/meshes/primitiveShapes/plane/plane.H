@@ -194,6 +194,9 @@ public:
         //  If the point is on the plane, then returns NORMAL.
         side sideOfPlane(const point& p) const;
 
+        //- Mirror the supplied point in the plane. Return the mirrored point.
+        point mirror(const point& p) const;
+
         //- Write to dictionary
         void writeDict(Ostream&) const;
 
