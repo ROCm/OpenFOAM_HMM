@@ -266,11 +266,10 @@ template<class CloudType>
 Foam::label Foam::ParticleCollector<CloudType>::collectParcelPolygon
 (
     const point& position,
-    const vector& U
+    const vector& U,
+    const scalar dt
 ) const
 {
-    scalar dt = this->owner().db().time().deltaTValue();
-
     point end(position + dt*U);
 
     label dummyNearType = -1;
@@ -322,12 +321,11 @@ template<class CloudType>
 Foam::label Foam::ParticleCollector<CloudType>::collectParcelConcentricCircles
 (
     const point& position,
-    const vector& U
+    const vector& U,
+    const scalar dt
 ) const
 {
     label secI = -1;
-
-    scalar dt = this->owner().db().time().deltaTValue();
 
     point end(position + dt*U);
 
@@ -636,12 +634,12 @@ void Foam::ParticleCollector<CloudType>::postMove
     {
         case mtPolygon:
         {
-            faceI = collectParcelPolygon(p.position(), p.U());
+            faceI = collectParcelPolygon(p.position(), p.U(), dt);
             break;
         }
         case mtConcentricCircle:
         {
-            faceI = collectParcelConcentricCircles(p.position(), p.U());
+            faceI = collectParcelConcentricCircles(p.position(), p.U(), dt);
             break;
         }
         default:
