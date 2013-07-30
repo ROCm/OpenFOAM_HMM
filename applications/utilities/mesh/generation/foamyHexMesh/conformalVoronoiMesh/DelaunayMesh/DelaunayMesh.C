@@ -219,7 +219,7 @@ void Foam::DelaunayMesh<Triangulation>::insertPoints(const List<Vb>& vertices)
     (
         vertices.begin(),
         vertices.end(),
-        true
+        false
     );
 }
 
