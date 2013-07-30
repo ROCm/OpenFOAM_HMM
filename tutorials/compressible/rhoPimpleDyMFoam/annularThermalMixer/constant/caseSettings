@@ -33,7 +33,7 @@ outerInlet
 
 meshMotionProperties
 {
-    radialVelocity (0 0 1440); // deg/s
+    omega 25; // rad/s
 }
 
 #include "${FOAM_CASE}/constant/boundaryConditions"
