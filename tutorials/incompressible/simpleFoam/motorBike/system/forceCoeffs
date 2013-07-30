@@ -12,7 +12,8 @@ forceCoeffs1
 
     functionObjectLibs ( "libforces.so" );
 
-    outputControl   outputTime;
+    outputControl   timeStep;
+    timeInterval    1;
 
     log         yes;
 
@@ -30,15 +31,12 @@ forceCoeffs1
     lRef        1.42;        // Wheelbase length
     Aref        0.75;        // Estimated
 
-/* - Uncomment to have forceCoeffs calculated in 20 bins
     binData
     {
         nBin        20;          // output data into 20 bins
         direction   (1 0 0);     // bin direction
-        format      gnuplot;
         cumulative  yes;
     }
-*/
 }
 
 

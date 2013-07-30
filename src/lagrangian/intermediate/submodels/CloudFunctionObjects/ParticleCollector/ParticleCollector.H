@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -170,14 +170,16 @@ private:
         label collectParcelPolygon
         (
             const point& position,
-            const vector& U
+            const vector& U,
+            const scalar dt
         ) const;
 
         //- Collect parcels in concentric circle collectors
         label collectParcelConcentricCircles
         (
             const point& position,
-            const vector& U
+            const vector& U,
+            const scalar dt
         ) const;
 
 
