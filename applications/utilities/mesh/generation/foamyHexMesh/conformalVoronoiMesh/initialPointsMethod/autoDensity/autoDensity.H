@@ -119,7 +119,8 @@ private:
             DynamicList<Vb::Point>& initialPoints,
             const treeBoundBox& bb,
             label levelLimit,
-            word recursionName
+            word recursionName,
+            label& nRecursionLevels
         ) const;
 
         //- Fill the given box, optionally filling surface overlapping boxes.
@@ -144,7 +145,11 @@ public:
         autoDensity
         (
             const dictionary& initialPointsDict,
-            const conformalVoronoiMesh& foamyHexMesh
+            const Time& runTime,
+            Random& rndGen,
+            const conformationSurfaces& geometryToConformTo,
+            const cellShapeControl& cellShapeControls,
+            const autoPtr<backgroundMeshDecomposition>& decomposition
         );
 
 

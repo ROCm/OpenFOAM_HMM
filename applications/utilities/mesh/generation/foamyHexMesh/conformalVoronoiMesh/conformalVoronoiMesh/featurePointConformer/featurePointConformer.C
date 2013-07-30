@@ -202,7 +202,10 @@ void Foam::featurePointConformer::createMasterAndSlavePoints
 
     if
     (
-        !foamyHexMesh_.positionOnThisProc(featPt)
+        (
+            Pstream::parRun()
+         && !foamyHexMesh_.decomposition().positionOnThisProcessor(featPt)
+        )
      || geometryToConformTo_.outside(featPt)
     )
     {
@@ -378,7 +381,10 @@ void Foam::featurePointConformer::createMixedFeaturePoints
         {
             const Foam::point& featPt = points[ptI];
 
-            if (!foamyHexMesh_.positionOnThisProc(featPt))
+            if
+            (
+                Pstream::parRun()
+             && !foamyHexMesh_.decomposition().positionOnThisProcessor(featPt))
             {
                 continue;
             }

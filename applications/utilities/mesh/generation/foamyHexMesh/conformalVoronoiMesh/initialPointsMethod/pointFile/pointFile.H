@@ -73,7 +73,11 @@ public:
         pointFile
         (
             const dictionary& initialPointsDict,
-            const conformalVoronoiMesh& foamyHexMesh
+            const Time& runTime,
+            Random& rndGen,
+            const conformationSurfaces& geometryToConformTo,
+            const cellShapeControl& cellShapeControls,
+            const autoPtr<backgroundMeshDecomposition>& decomposition
         );
 
 

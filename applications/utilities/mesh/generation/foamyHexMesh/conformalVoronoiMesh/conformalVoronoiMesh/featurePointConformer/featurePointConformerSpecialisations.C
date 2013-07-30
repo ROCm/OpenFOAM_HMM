@@ -63,7 +63,11 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
 
         const Foam::point& featPt = feMesh.points()[ptI];
 
-        if (!foamyHexMesh_.positionOnThisProc(featPt))
+        if
+        (
+            Pstream::parRun()
+         && !foamyHexMesh_.decomposition().positionOnThisProcessor(featPt)
+        )
         {
             return false;
         }
@@ -402,7 +406,11 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
 
         const Foam::point& featPt = feMesh.points()[ptI];
 
-        if (!foamyHexMesh_.positionOnThisProc(featPt))
+        if
+        (
+            Pstream::parRun()
+         && !foamyHexMesh_.decomposition().positionOnThisProcessor(featPt)
+        )
         {
             return false;
         }

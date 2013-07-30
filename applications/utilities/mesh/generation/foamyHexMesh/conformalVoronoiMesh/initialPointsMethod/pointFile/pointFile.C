@@ -41,10 +41,23 @@ addToRunTimeSelectionTable(initialPointsMethod, pointFile, dictionary);
 pointFile::pointFile
 (
     const dictionary& initialPointsDict,
-    const conformalVoronoiMesh& foamyHexMesh
+    const Time& runTime,
+    Random& rndGen,
+    const conformationSurfaces& geometryToConformTo,
+    const cellShapeControl& cellShapeControls,
+    const autoPtr<backgroundMeshDecomposition>& decomposition
 )
 :
-    initialPointsMethod(typeName, initialPointsDict, foamyHexMesh),
+    initialPointsMethod
+    (
+        typeName,
+        initialPointsDict,
+        runTime,
+        rndGen,
+        geometryToConformTo,
+        cellShapeControls,
+        decomposition
+    ),
     pointFileName_(detailsDict().lookup("pointFile"))
 {}
 
@@ -58,8 +71,8 @@ List<Vb::Point> pointFile::initialPoints() const
         IOobject
         (
             pointFileName_.name(),
-            foamyHexMesh_.time().timeName(),
-            foamyHexMesh_.time(),
+            time().timeName(),
+            time(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
@@ -85,13 +98,13 @@ List<Vb::Point> pointFile::initialPoints() const
 
         if (!isParentFile)
         {
-            foamyHexMesh_.decomposition().distributePoints(points);
+            decomposition().distributePoints(points);
         }
         else
         {
             // Otherwise, this is assumed to be points covering the whole
             // domain, so filter the points to be only those on this processor
-            boolList procPt(foamyHexMesh_.positionOnThisProc(points));
+            boolList procPt(decomposition().positionOnThisProcessor(points));
 
             List<boolList> allProcPt(Pstream::nProcs());
 
@@ -126,14 +139,11 @@ List<Vb::Point> pointFile::initialPoints() const
         }
     }
 
-    Field<bool> insidePoints = foamyHexMesh_.geometryToConformTo().wellInside
+    Field<bool> insidePoints = geometryToConformTo().wellInside
     (
         points,
         minimumSurfaceDistanceCoeffSqr_
-       *sqr
-        (
-            foamyHexMesh_.cellShapeControls().cellSize(points)
-        )
+       *sqr(cellShapeControls().cellSize(points))
     );
 
     DynamicList<Vb::Point> initialPoints(insidePoints.size()/10);

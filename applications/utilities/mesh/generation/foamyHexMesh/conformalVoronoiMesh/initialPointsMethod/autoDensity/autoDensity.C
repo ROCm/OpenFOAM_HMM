@@ -49,7 +49,7 @@ void Foam::autoDensity::writeOBJ
     fileName name
 ) const
 {
-    OFstream str(foamyHexMesh_.time().path()/name + ".obj");
+    OFstream str(time().path()/name + ".obj");
 
     Pout<< "Writing " << str.name() << endl;
 
@@ -74,11 +74,11 @@ bool Foam::autoDensity::combinedOverlaps(const treeBoundBox& box) const
     if (Pstream::parRun())
     {
         return
-            foamyHexMesh_.decomposition().overlapsThisProcessor(box)
-         || foamyHexMesh_.geometryToConformTo().overlaps(box);
+            decomposition().overlapsThisProcessor(box)
+         || geometryToConformTo().overlaps(box);
     }
 
-    return foamyHexMesh_.geometryToConformTo().overlaps(box);
+    return geometryToConformTo().overlaps(box);
 }
 
 
@@ -87,11 +87,11 @@ bool Foam::autoDensity::combinedInside(const point& p) const
     if (Pstream::parRun())
     {
         return
-            foamyHexMesh_.decomposition().positionOnThisProcessor(p)
-         && foamyHexMesh_.geometryToConformTo().inside(p);
+            decomposition().positionOnThisProcessor(p)
+         && geometryToConformTo().inside(p);
     }
 
-    return foamyHexMesh_.geometryToConformTo().inside(p);
+    return geometryToConformTo().inside(p);
 }
 
 
@@ -103,7 +103,7 @@ Foam::Field<bool> Foam::autoDensity::combinedWellInside
 {
     if (!Pstream::parRun())
     {
-        return foamyHexMesh_.geometryToConformTo().wellInside
+        return geometryToConformTo().wellInside
         (
             pts,
             minimumSurfaceDistanceCoeffSqr_*sqr(sizes)
@@ -117,7 +117,7 @@ Foam::Field<bool> Foam::autoDensity::combinedWellInside
 
     Field<bool> insideA
     (
-        foamyHexMesh_.geometryToConformTo().wellInside
+        geometryToConformTo().wellInside
         (
             pts,
             minimumSurfaceDistanceCoeffSqr_*sqr(sizes)
@@ -126,7 +126,7 @@ Foam::Field<bool> Foam::autoDensity::combinedWellInside
 
     Field<bool> insideB
     (
-        foamyHexMesh_.decomposition().positionOnThisProcessor(pts)
+        decomposition().positionOnThisProcessor(pts)
     );
 
     // inside = insideA && insideB;
@@ -162,14 +162,14 @@ bool Foam::autoDensity::combinedWellInside
 
     if (Pstream::parRun())
     {
-        inside = foamyHexMesh_.decomposition().positionOnThisProcessor(p);
+        inside = decomposition().positionOnThisProcessor(p);
     }
 
     // Perform AND operation between testing the surfaces and the previous
     // result, i.e the parallel result, or in serial, with true.
     inside =
         inside
-     && foamyHexMesh_.geometryToConformTo().wellInside
+     && geometryToConformTo().wellInside
         (
             p,
             minimumSurfaceDistanceCoeffSqr_*sqr(size)
@@ -184,16 +184,19 @@ void Foam::autoDensity::recurseAndFill
     DynamicList<Vb::Point>& initialPoints,
     const treeBoundBox& bb,
     label levelLimit,
-    word recursionName
+    word recursionName,
+    label& nRecursionLevels
 ) const
 {
+    nRecursionLevels++;
+
     for (direction i = 0; i < 8; i++)
     {
         treeBoundBox subBB = bb.subBbox(i);
 
         word newName = recursionName + "_" + Foam::name(i);
 
-        conformalVoronoiMesh::timeCheck(foamyHexMesh_.time(), newName, debug);
+        conformalVoronoiMesh::timeCheck(time(), newName, debug);
 
         if (combinedOverlaps(subBB))
         {
@@ -204,7 +207,8 @@ void Foam::autoDensity::recurseAndFill
                     initialPoints,
                     subBB,
                     levelLimit - 1,
-                    newName
+                    newName,
+                    nRecursionLevels
                 );
             }
             else
@@ -227,7 +231,8 @@ void Foam::autoDensity::recurseAndFill
                         initialPoints,
                         subBB,
                         levelLimit - 1,
-                        newName
+                        newName,
+                        nRecursionLevels
                     );
                 }
             }
@@ -252,7 +257,8 @@ void Foam::autoDensity::recurseAndFill
                     initialPoints,
                     subBB,
                     levelLimit - 1,
-                    newName
+                    newName,
+                    nRecursionLevels
                 );
             }
         }
@@ -278,9 +284,7 @@ bool Foam::autoDensity::fillBox
     bool overlapping
 ) const
 {
-    const conformationSurfaces& geometry(foamyHexMesh_.geometryToConformTo());
-
-    Random& rnd = foamyHexMesh_.rndGen();
+    const conformationSurfaces& geometry = geometryToConformTo();
 
     unsigned int initialSize = initialPoints.size();
 
@@ -340,8 +344,7 @@ bool Foam::autoDensity::fillBox
 
         pointField corners(bb.points());
 
-        scalarField cornerSizes =
-            foamyHexMesh_.cellShapeControls().cellSize(corners);
+        scalarField cornerSizes = cellShapeControls().cellSize(corners);
 
         Field<bool> insideCorners = combinedWellInside(corners, cornerSizes);
 
@@ -450,8 +453,7 @@ bool Foam::autoDensity::fillBox
                         );
                 }
 
-                lineSizes =
-                    foamyHexMesh_.cellShapeControls().cellSize(linePoints);
+                lineSizes = cellShapeControls().cellSize(linePoints);
 
                 Field<bool> insideLines = combinedWellInside
                 (
@@ -537,9 +539,9 @@ bool Foam::autoDensity::fillBox
                         min
                       + vector
                         (
-                            delta.x()*(i + 0.5 + 0.1*(rnd.scalar01() - 0.5)),
-                            delta.y()*(j + 0.5 + 0.1*(rnd.scalar01() - 0.5)),
-                            delta.z()*(k + 0.5 + 0.1*(rnd.scalar01() - 0.5))
+                            delta.x()*(i + 0.5 + 0.1*(rndGen().scalar01() - 0.5)),
+                            delta.y()*(j + 0.5 + 0.1*(rndGen().scalar01() - 0.5)),
+                            delta.z()*(k + 0.5 + 0.1*(rndGen().scalar01() - 0.5))
                         );
                 }
             }
@@ -550,10 +552,7 @@ bool Foam::autoDensity::fillBox
         // corner when only some these points are required.
         shuffle(samplePoints);
 
-        scalarField sampleSizes = foamyHexMesh_.cellShapeControls().cellSize
-        (
-            samplePoints
-        );
+        scalarField sampleSizes = cellShapeControls().cellSize(samplePoints);
 
         Field<bool> insidePoints = combinedWellInside
         (
@@ -647,7 +646,7 @@ bool Foam::autoDensity::fillBox
                 // TODO - is there a lot of cost in the 1/density calc?  Could
                 // assess on
                 //    (1/maxDensity)/(1/localDensity) = minVolume/localVolume
-                if (localDensity/maxDensity > rnd.scalar01())
+                if (localDensity/maxDensity > rndGen().scalar01())
                 {
                     scalar localVolume = 1/localDensity;
 
@@ -660,7 +659,7 @@ bool Foam::autoDensity::fillBox
                         scalar addProbability =
                            (totalVolume - volumeAdded)/localVolume;
 
-                        scalar r = rnd.scalar01();
+                        scalar r = rndGen().scalar01();
 
                         if (debug)
                         {
@@ -714,9 +713,9 @@ bool Foam::autoDensity::fillBox
         {
             trialPoints++;
 
-            point p = min + cmptMultiply(span, rnd.vector01());
+            point p = min + cmptMultiply(span, rndGen().vector01());
 
-            scalar localSize = foamyHexMesh_.cellShapeControls().cellSize(p);
+            scalar localSize = cellShapeControls().cellSize(p);
 
             bool insidePoint = false;
 
@@ -770,7 +769,7 @@ bool Foam::autoDensity::fillBox
 
                 // Accept possible placements proportional to the relative local
                 // density
-                if (localDensity/maxDensity > rnd.scalar01())
+                if (localDensity/maxDensity > rndGen().scalar01())
                 {
                     scalar localVolume = 1/localDensity;
 
@@ -783,7 +782,7 @@ bool Foam::autoDensity::fillBox
                         scalar addProbability =
                             (totalVolume - volumeAdded)/localVolume;
 
-                        scalar r = rnd.scalar01();
+                        scalar r = rndGen().scalar01();
 
                         if (debug)
                         {
@@ -847,10 +846,23 @@ bool Foam::autoDensity::fillBox
 autoDensity::autoDensity
 (
     const dictionary& initialPointsDict,
-    const conformalVoronoiMesh& foamyHexMesh
+    const Time& runTime,
+    Random& rndGen,
+    const conformationSurfaces& geometryToConformTo,
+    const cellShapeControl& cellShapeControls,
+    const autoPtr<backgroundMeshDecomposition>& decomposition
 )
 :
-    initialPointsMethod(typeName, initialPointsDict, foamyHexMesh),
+    initialPointsMethod
+    (
+        typeName,
+        initialPointsDict,
+        runTime,
+        rndGen,
+        geometryToConformTo,
+        cellShapeControls,
+        decomposition
+    ),
     globalTrialPoints_(0),
     minCellSizeLimit_
     (
@@ -875,8 +887,7 @@ autoDensity::autoDensity
                 "const dictionary& initialPointsDict,"
                 "const conformalVoronoiMesh& foamyHexMesh"
             ")"
-        )
-            << "The maxSizeRatio must be greater than one to be sensible, "
+        )   << "The maxSizeRatio must be greater than one to be sensible, "
             << "setting to " << maxSizeRatio_
             << endl;
     }
@@ -893,14 +904,14 @@ List<Vb::Point> autoDensity::initialPoints() const
     // on whether this is a parallel run.
     if (Pstream::parRun())
     {
-        hierBB = foamyHexMesh_.decomposition().procBounds();
+        hierBB = decomposition().procBounds();
     }
     else
     {
         // Extend the global box to move it off large plane surfaces
-        hierBB = foamyHexMesh_.geometryToConformTo().globalBounds().extend
+        hierBB = geometryToConformTo().globalBounds().extend
         (
-            foamyHexMesh_.rndGen(),
+            rndGen(),
             1e-6
         );
     }
@@ -914,12 +925,15 @@ List<Vb::Point> autoDensity::initialPoints() const
         Pout<< "    Filling box " << hierBB << endl;
     }
 
+    label nRecursionLevels = 0;
+
     recurseAndFill
     (
         initialPoints,
         hierBB,
         minLevels_ - 1,
-        "recursionBox"
+        "recursionBox",
+        nRecursionLevels
     );
 
     initialPoints.shrink();
@@ -932,11 +946,16 @@ List<Vb::Point> autoDensity::initialPoints() const
         reduce(globalTrialPoints_, sumOp<label>());
     }
 
-    Info<< "        " << nInitialPoints << " points placed" << nl
-        << "        " << globalTrialPoints_ << " locations queried" << nl
-        << "        "
+    Info<< incrIndent << incrIndent
+        << indent << nInitialPoints << " points placed" << nl
+        << indent << globalTrialPoints_ << " locations queried" << nl
+        << indent
         << scalar(nInitialPoints)/scalar(max(globalTrialPoints_, 1))
-        << " success rate"
+        << " success rate" << nl
+        << indent
+        << returnReduce(nRecursionLevels, maxOp<label>())
+        << " levels of recursion (maximum)"
+        << decrIndent << decrIndent
         << endl;
 
     return initialPoints;

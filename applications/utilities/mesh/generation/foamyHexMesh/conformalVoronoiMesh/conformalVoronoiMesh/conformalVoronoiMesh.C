@@ -849,7 +849,11 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
         initialPointsMethod::New
         (
             foamyHexMeshDict.subDict("initialPoints"),
-            *this
+            runTime_,
+            rndGen_,
+            geometryToConformTo_,
+            cellShapeControl_,
+            decomposition_
         )
     ),
     relaxationModel_
@@ -1273,7 +1277,11 @@ void Foam::conformalVoronoiMesh::move()
                         {
                             const Foam::point newPt(0.5*(dVA + dVB));
 
-                            if (positionOnThisProc(newPt))
+                            if
+                            (
+                                Pstream::parRun()
+                             && decomposition().positionOnThisProcessor(newPt)
+                            )
                             {
                                 // Prevent insertions spanning surfaces
                                 if (internalPointIsInside(newPt))
@@ -1586,64 +1594,6 @@ void Foam::conformalVoronoiMesh::move()
         << "Total displacement = " << totalDisp << nl
         << "Total distance = " << totalDist << nl
         << endl;
-}
-
-
-bool Foam::conformalVoronoiMesh::positionOnThisProc
-(
-    const Foam::point& pt
-) const
-{
-    if (Pstream::parRun())
-    {
-        return decomposition_().positionOnThisProcessor(pt);
-    }
-
-    return true;
-}
-
-
-Foam::boolList Foam::conformalVoronoiMesh::positionOnThisProc
-(
-    const Foam::List<Foam::point>& pts
-) const
-{
-    if (Pstream::parRun())
-    {
-        return decomposition_().positionOnThisProcessor(pts);
-    }
-
-    return boolList(pts.size(), true);
-}
-
-
-Foam::labelList Foam::conformalVoronoiMesh::positionProc
-(
-    const Foam::List<Foam::point>& pts
-) const
-{
-    if (!Pstream::parRun())
-    {
-        return labelList(pts.size(), -1);
-    }
-
-    return decomposition_().processorPosition(pts);
-}
-
-
-Foam::List<Foam::List<Foam::pointIndexHit> >
-Foam::conformalVoronoiMesh::intersectsProc
-(
-    const List<Foam::point>& starts,
-    const List<Foam::point>& ends
-) const
-{
-    if (!Pstream::parRun())
-    {
-        return List<List<pointIndexHit> >(starts.size());
-    }
-
-    return decomposition_().intersectsProcessors(starts, ends, false);
 }
 
 

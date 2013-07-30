@@ -1336,7 +1336,10 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
     if
     (
         surfHitLargest.hit()
-     && !positionOnThisProc(surfHitLargest.hitPoint())
+     && (
+            Pstream::parRun()
+         && !decomposition().positionOnThisProcessor(surfHitLargest.hitPoint())
+        )
     )
     {
         // A protrusion was identified, but not penetrating on this processor,
@@ -1434,7 +1437,10 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceIncursion
     if
     (
         surfHitLargest.hit()
-     && !positionOnThisProc(surfHitLargest.hitPoint())
+     && (
+            Pstream::parRun()
+         && !decomposition().positionOnThisProcessor(surfHitLargest.hitPoint())
+        )
     )
     {
         // A protrusion was identified, but not penetrating on this processor,
@@ -1457,7 +1463,11 @@ void Foam::conformalVoronoiMesh::reportProcessorOccupancy()
     {
         if (vit->real())
         {
-            if (!positionOnThisProc(topoint(vit->point())))
+            if
+            (
+                Pstream::parRun()
+             && !decomposition().positionOnThisProcessor(topoint(vit->point()))
+            )
             {
                 Pout<< topoint(vit->point()) << " is not on this processor "
                     << endl;

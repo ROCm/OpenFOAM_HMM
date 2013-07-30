@@ -836,22 +836,6 @@ public:
         //  surface as required
         void move();
 
-        //- Check if the point is in the domain handled by this processor
-        bool positionOnThisProc(const Foam::point& pt) const;
-
-        //- Check if the point is in the domain handled by this processor
-        boolList positionOnThisProc(const Foam::List<Foam::point>& pts) const;
-
-        //- Which processor's domain handles this point
-        labelList positionProc(const Foam::List<Foam::point>& pts) const;
-
-        //- Which other processors does each line segment intersect
-        List<List<pointIndexHit> > intersectsProc
-        (
-            const List<Foam::point>& starts,
-            const List<Foam::point>& ends
-        ) const;
-
 //        //- Which other processors does each sphere overlap
 //        labelListList overlapsProc
 //        (
