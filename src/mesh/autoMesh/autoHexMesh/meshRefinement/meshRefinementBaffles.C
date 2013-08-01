@@ -1411,6 +1411,7 @@ void Foam::meshRefinement::findCellZoneInsideWalk
 {
     // Analyse regions. Reuse regionsplit
     boolList blockedFace(mesh_.nFaces());
+    //selectSeparatedCoupledFaces(blockedFace);
 
     forAll(namedSurfaceIndex, faceI)
     {
@@ -2055,7 +2056,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
         runTime++;
     }
 
-    splitMeshRegions(keepPoint);
+    splitMeshRegions(globalToMasterPatch, globalToSlavePatch, keepPoint);
 
     if (debug)
     {
