@@ -1047,7 +1047,12 @@ void Foam::autoRefineDriver::splitAndMergeBaffles
         }
 
         // Remove any now dangling parts
-        meshRefiner_.splitMeshRegions(refineParams.keepPoints()[0]);
+        meshRefiner_.splitMeshRegions
+        (
+            globalToMasterPatch_,
+            globalToSlavePatch_,
+            refineParams.keepPoints()[0]
+        );
 
         if (debug)
         {

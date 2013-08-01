@@ -34,10 +34,11 @@ SourceFiles
     PatchToolsCheck.C
     PatchToolsEdgeOwner.C
     PatchToolsGatherAndMerge.C
+    PatchToolsMatch.C
+    PatchToolsNormals.C
     PatchToolsSearch.C
     PatchToolsSortEdges.C
-    PatchToolsNormals.C
-    PatchToolsMatch.C
+    PatchToolsSortPoints.C
 
 \*---------------------------------------------------------------------------*/
 
