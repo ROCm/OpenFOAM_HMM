@@ -24,9 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "CompressibleTurbulenceModel.H"
-#include "laminar.H"
-#include "RASModel.H"
-#include "kEpsilon.H"
 #include "fluidThermo.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -49,7 +46,13 @@ namespace Foam
 
     typedef CompressibleTurbulenceModel<fluidThermo>
         compressibleFluidThermoTurbulenceModel;
+}
 
+
+#include "laminar.H"
+
+namespace Foam
+{
     typedef laminar<compressibleFluidThermoTurbulenceModel> compressibleLaminar;
 
     defineNamedTemplateTypeNameAndDebug(compressibleLaminar, 0);
@@ -60,8 +63,14 @@ namespace Foam
         compressibleLaminar,
         dictionary
     );
+}
 
 
+#include "RASModel.H"
+#include "kEpsilon.H"
+
+namespace Foam
+{
     typedef RASModel<compressibleFluidThermoTurbulenceModel>
         compressibleRASModel;
 
@@ -76,7 +85,6 @@ namespace Foam
         dictionary
     );
 
-
     namespace RASModels
     {
         typedef kEpsilon<compressibleFluidThermoTurbulenceModel>
@@ -88,6 +96,42 @@ namespace Foam
         (
             compressibleRASModel,
             compressibleKEpsilon,
+            dictionary
+        );
+    }
+}
+
+
+#include "LESModel.H"
+#include "Smagorinsky.H"
+
+namespace Foam
+{
+    typedef LESModel<compressibleFluidThermoTurbulenceModel>
+        compressibleLESModel;
+
+    defineNamedTemplateTypeNameAndDebug(compressibleLESModel, 0);
+
+    defineTemplateRunTimeSelectionTable(compressibleLESModel, dictionary);
+
+    addToRunTimeSelectionTable
+    (
+        baseCompressibleFluidThermoTurbulenceModel,
+        compressibleLESModel,
+        dictionary
+    );
+
+    namespace LESModels
+    {
+        typedef Smagorinsky<compressibleFluidThermoTurbulenceModel>
+            compressibleSmagorinsky;
+
+        defineNamedTemplateTypeNameAndDebug(compressibleSmagorinsky, 0);
+
+        addToRunTimeSelectionTable
+        (
+            compressibleLESModel,
+            compressibleSmagorinsky,
             dictionary
         );
     }
