@@ -179,16 +179,15 @@ bool Foam::autoDensity::combinedWellInside
 }
 
 
-void Foam::autoDensity::recurseAndFill
+Foam::label Foam::autoDensity::recurseAndFill
 (
     DynamicList<Vb::Point>& initialPoints,
     const treeBoundBox& bb,
     label levelLimit,
-    word recursionName,
-    label& nRecursionLevels
+    word recursionName
 ) const
 {
-    nRecursionLevels++;
+    label maxDepth = 0;
 
     for (direction i = 0; i < 8; i++)
     {
@@ -202,14 +201,18 @@ void Foam::autoDensity::recurseAndFill
         {
             if (levelLimit > 0)
             {
-                recurseAndFill
-                (
-                    initialPoints,
-                    subBB,
-                    levelLimit - 1,
-                    newName,
-                    nRecursionLevels
-                );
+                maxDepth =
+                    max
+                    (
+                        maxDepth,
+                        recurseAndFill
+                        (
+                            initialPoints,
+                            subBB,
+                            levelLimit - 1,
+                            newName
+                        )
+                    );
             }
             else
             {
@@ -226,14 +229,18 @@ void Foam::autoDensity::recurseAndFill
 
                 if (!fillBox(initialPoints, subBB, true))
                 {
-                    recurseAndFill
-                    (
-                        initialPoints,
-                        subBB,
-                        levelLimit - 1,
-                        newName,
-                        nRecursionLevels
-                    );
+                    maxDepth =
+                        max
+                        (
+                            maxDepth,
+                            recurseAndFill
+                            (
+                                initialPoints,
+                                subBB,
+                                levelLimit - 1,
+                                newName
+                            )
+                        );
                 }
             }
         }
@@ -252,14 +259,18 @@ void Foam::autoDensity::recurseAndFill
 
             if (!fillBox(initialPoints, subBB, false))
             {
-                recurseAndFill
-                (
-                    initialPoints,
-                    subBB,
-                    levelLimit - 1,
-                    newName,
-                    nRecursionLevels
-                );
+                maxDepth =
+                    max
+                    (
+                        maxDepth,
+                        recurseAndFill
+                        (
+                            initialPoints,
+                            subBB,
+                            levelLimit - 1,
+                            newName
+                        )
+                    );
             }
         }
         else
@@ -274,6 +285,8 @@ void Foam::autoDensity::recurseAndFill
             }
         }
     }
+
+    return maxDepth + 1;
 }
 
 
@@ -925,15 +938,12 @@ List<Vb::Point> autoDensity::initialPoints() const
         Pout<< "    Filling box " << hierBB << endl;
     }
 
-    label nRecursionLevels = 0;
-
-    recurseAndFill
+    label maxDepth = recurseAndFill
     (
         initialPoints,
         hierBB,
         minLevels_ - 1,
-        "recursionBox",
-        nRecursionLevels
+        "recursionBox"
     );
 
     initialPoints.shrink();
@@ -953,7 +963,7 @@ List<Vb::Point> autoDensity::initialPoints() const
         << scalar(nInitialPoints)/scalar(max(globalTrialPoints_, 1))
         << " success rate" << nl
         << indent
-        << returnReduce(nRecursionLevels, maxOp<label>())
+        << returnReduce(maxDepth, maxOp<label>())
         << " levels of recursion (maximum)"
         << decrIndent << decrIndent
         << endl;
