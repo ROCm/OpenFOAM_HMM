@@ -166,6 +166,11 @@ tmp<fvScalarMatrix> kEqn<BasicTurbulenceModel>::kSource() const
 template<class BasicTurbulenceModel>
 void kEqn<BasicTurbulenceModel>::correct()
 {
+    if (!this->turbulence_)
+    {
+        return;
+    }
+
     // Local references
     const alphaField& alpha = this->alpha_;
     const rhoField& rho = this->rho_;
@@ -173,12 +178,6 @@ void kEqn<BasicTurbulenceModel>::correct()
     const surfaceScalarField& phi = this->phi_;
     const volVectorField& U = this->U_;
     volScalarField& nut = this->nut_;
-
-    if (!this->turbulence_)
-    {
-        correctNut();
-        return;
-    }
 
     eddyViscosity<LESModel<BasicTurbulenceModel> >::correct();
 
