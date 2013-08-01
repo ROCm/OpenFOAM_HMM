@@ -34,11 +34,11 @@ SourceFiles
 #ifndef kineticTheoryModel_H
 #define kineticTheoryModel_H
 
+#include "RASModel.H"
 #include "eddyViscosity.H"
 #include "PhaseIncompressibleTurbulenceModel.H"
-#include "dragModel.H"
 #include "phaseModel.H"
-#include "autoPtr.H"
+#include "dragModel.H"
 #include "viscosityModel.H"
 #include "conductivityModel.H"
 #include "radialModel.H"
@@ -57,9 +57,9 @@ namespace Foam
 
 class kineticTheoryModel
 :
-    public RASModels::eddyViscosity
+    public eddyViscosity
     <
-        PhaseIncompressibleTurbulenceModel<phaseModel>
+        RASModel<PhaseIncompressibleTurbulenceModel<phaseModel> >
     >
 {
     // Private data

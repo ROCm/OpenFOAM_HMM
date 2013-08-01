@@ -24,5 +24,21 @@ RAS
     turbulence on;
 }
 
+LES
+{
+    LESModel Smagorinsky;
+
+    turbulence      on;
+
+    printCoeffs     on;
+
+    delta cubeRootVol;
+
+    cubeRootVolCoeffs
+    {
+        deltaCoeff 1;
+    }
+}
+
 
 // ************************************************************************* //

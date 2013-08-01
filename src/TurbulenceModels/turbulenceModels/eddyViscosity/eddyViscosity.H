@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::RASModels::eddyViscosity
+    Foam::eddyViscosity
 
 Group
     grpRASTurbulence
@@ -38,13 +38,9 @@ SourceFiles
 #ifndef eddyViscosity_H
 #define eddyViscosity_H
 
-#include "RASModel.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
-{
-namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -54,7 +50,7 @@ namespace RASModels
 template<class BasicTurbulenceModel>
 class eddyViscosity
 :
-    public RASModel<BasicTurbulenceModel>
+    public BasicTurbulenceModel
 {
 
 protected:
@@ -128,14 +124,13 @@ public:
         //- Solve the turbulence equations and correct the turbulence viscosity
         virtual void correct() = 0;
 
-        //- Read RASProperties dictionary
+        //- Re-read model coefficients if they have changed
         virtual bool read() = 0;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

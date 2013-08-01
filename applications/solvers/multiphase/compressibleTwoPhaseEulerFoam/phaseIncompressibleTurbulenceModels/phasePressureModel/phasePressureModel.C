@@ -24,9 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "phasePressureModel.H"
-#include "surfaceInterpolate.H"
 #include "twoPhaseSystem.H"
-#include "dimensionedType.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -42,7 +40,7 @@ Foam::phasePressureModel::phasePressureModel
     const word& type
 )
 :
-    RASModels::eddyViscosity<PhaseIncompressibleTurbulenceModel<phaseModel> >
+    eddyViscosity<RASModel<PhaseIncompressibleTurbulenceModel<phaseModel> > >
     (
         type,
         alpha,
@@ -196,9 +194,9 @@ bool Foam::phasePressureModel::read()
 {
     if
     (
-        RASModels::eddyViscosity
+        eddyViscosity
         <
-            PhaseIncompressibleTurbulenceModel<phaseModel>
+            RASModel<PhaseIncompressibleTurbulenceModel<phaseModel> >
         >::read()
     )
     {

@@ -1,5 +1,21 @@
 turbulenceModel.C
 
+LESdelta = LES/LESdeltas
+
+$(LESdelta)/LESdelta/LESdelta.C
+$(LESdelta)/cubeRootVolDelta/cubeRootVolDelta.C
+$(LESdelta)/PrandtlDelta/PrandtlDelta.C
+$(LESdelta)/smoothDelta/smoothDelta.C
+$(LESdelta)/maxDeltaxyz/maxDeltaxyz.C
+
+LESfilters = LES/LESfilters
+
+$(LESfilters)/LESfilter/LESfilter.C
+$(LESfilters)/simpleFilter/simpleFilter.C
+$(LESfilters)/laplaceFilter/laplaceFilter.C
+$(LESfilters)/anisotropicFilter/anisotropicFilter.C
+
+
 derivedFvPatchFields/fixedShearStress/fixedShearStressFvPatchVectorField.C
 derivedFvPatchFields/porousBafflePressure/porousBafflePressureFvPatchField.C
 
@@ -43,7 +59,5 @@ RAS/derivedFvPatchFields/turbulentMixingLengthDissipationRateInlet/turbulentMixi
 RAS/derivedFvPatchFields/turbulentMixingLengthFrequencyInlet/turbulentMixingLengthFrequencyInletFvPatchScalarField.C
 RAS/derivedFvPatchFields/atmBoundaryLayerInletEpsilon/atmBoundaryLayerInletEpsilonFvPatchScalarField.C
 RAS/derivedFvPatchFields/atmBoundaryLayerInletVelocity/atmBoundaryLayerInletVelocityFvPatchVectorField.C
-
-/* backwardsCompatibility/wallFunctions/backwardsCompatibilityWallFunctions.C */
 
 LIB = $(FOAM_LIBBIN)/libturbulenceModels

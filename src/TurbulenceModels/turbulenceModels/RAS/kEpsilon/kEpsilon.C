@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "kEpsilon.H"
-#include "addToRunTimeSelectionTable.H"
+#include "bound.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,7 +48,7 @@ kEpsilon<BasicTurbulenceModel>::kEpsilon
     const word& type
 )
 :
-    eddyViscosity<BasicTurbulenceModel>
+    eddyViscosity<RASModel<BasicTurbulenceModel> >
     (
         type,
         alpha,
@@ -156,7 +156,7 @@ kEpsilon<BasicTurbulenceModel>::kEpsilon
 template<class BasicTurbulenceModel>
 bool kEpsilon<BasicTurbulenceModel>::read()
 {
-    if (eddyViscosity<BasicTurbulenceModel>::read())
+    if (eddyViscosity<RASModel<BasicTurbulenceModel> >::read())
     {
         Cmu_.readIfPresent(this->coeffDict());
         C1_.readIfPresent(this->coeffDict());
@@ -229,7 +229,7 @@ void kEpsilon<BasicTurbulenceModel>::correct()
         return;
     }
 
-    eddyViscosity<BasicTurbulenceModel>::correct();
+    eddyViscosity<RASModel<BasicTurbulenceModel> >::correct();
 
     volScalarField divU(fvc::div(fvc::absolute(phi/fvc::interpolate(rho), U)));
 

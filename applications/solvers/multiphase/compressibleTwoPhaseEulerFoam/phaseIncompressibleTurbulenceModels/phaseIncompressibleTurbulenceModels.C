@@ -24,13 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "PhaseIncompressibleTurbulenceModel.H"
-#include "laminar.H"
-#include "RASModel.H"
-#include "kEpsilon.H"
-#include "LaheyKEpsilon.H"
-#include "continuousGasKEpsilon.H"
-#include "kineticTheoryModel.H"
-#include "phasePressureModel.H"
 #include "phaseModel.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -52,7 +45,13 @@ namespace Foam
 
     typedef PhaseIncompressibleTurbulenceModel<phaseModel>
         incompressibleTransportTurbulenceModel;
+}
 
+
+#include "laminar.H"
+
+namespace Foam
+{
     typedef laminar<incompressibleTransportTurbulenceModel>
         incompressibleLaminar;
 
@@ -64,8 +63,16 @@ namespace Foam
         incompressibleLaminar,
         dictionary
     );
+}
 
 
+#include "RASModel.H"
+#include "kEpsilon.H"
+#include "LaheyKEpsilon.H"
+#include "continuousGasKEpsilon.H"
+
+namespace Foam
+{
     typedef RASModel<incompressibleTransportTurbulenceModel>
         incompressibleRASModel;
 
@@ -131,6 +138,8 @@ namespace Foam
 }
 
 
+#include "kineticTheoryModel.H"
+
 namespace Foam
 {
     typedef PhaseIncompressibleTurbulenceModel<phaseModel>
@@ -150,6 +159,8 @@ namespace Foam
 }
 
 
+#include "phasePressureModel.H"
+
 namespace Foam
 {
     typedef PhaseIncompressibleTurbulenceModel<phaseModel>
@@ -166,6 +177,42 @@ namespace Foam
         phasePressureModel,
         dictionary
     );
+}
+
+
+#include "LESModel.H"
+#include "Smagorinsky.H"
+
+namespace Foam
+{
+    typedef LESModel<incompressibleTransportTurbulenceModel>
+        incompressibleLESModel;
+
+    defineNamedTemplateTypeNameAndDebug(incompressibleLESModel, 0);
+
+    defineTemplateRunTimeSelectionTable(incompressibleLESModel, dictionary);
+
+    addToRunTimeSelectionTable
+    (
+        basePhaseIncompressibleTransportTurbulenceModel,
+        incompressibleLESModel,
+        dictionary
+    );
+
+    namespace LESModels
+    {
+        typedef Smagorinsky<incompressibleTransportTurbulenceModel>
+            incompressibleSmagorinsky;
+
+        defineNamedTemplateTypeNameAndDebug(incompressibleSmagorinsky, 0);
+
+        addToRunTimeSelectionTable
+        (
+            incompressibleLESModel,
+            incompressibleSmagorinsky,
+            dictionary
+        );
+    }
 }
 
 

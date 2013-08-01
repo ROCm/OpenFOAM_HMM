@@ -24,9 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "IncompressibleTurbulenceModel.H"
-#include "laminar.H"
-#include "RASModel.H"
-#include "kEpsilon.H"
 #include "transportModel.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -50,7 +47,13 @@ namespace Foam
     <
         transportModel
     > incompressibleTransportTurbulenceModel;
+}
 
+
+#include "laminar.H"
+
+namespace Foam
+{
     typedef laminar<incompressibleTransportTurbulenceModel>
         incompressibleLaminar;
 
@@ -62,8 +65,15 @@ namespace Foam
         incompressibleLaminar,
         dictionary
     );
+}
 
 
+
+#include "RASModel.H"
+#include "kEpsilon.H"
+
+namespace Foam
+{
     typedef RASModel<incompressibleTransportTurbulenceModel>
         incompressibleRASModel;
 
@@ -89,6 +99,42 @@ namespace Foam
         (
             incompressibleRASModel,
             incompressibleKEpsilon,
+            dictionary
+        );
+    }
+}
+
+
+#include "LESModel.H"
+#include "Smagorinsky.H"
+
+namespace Foam
+{
+    typedef LESModel<incompressibleTransportTurbulenceModel>
+        incompressibleLESModel;
+
+    defineNamedTemplateTypeNameAndDebug(incompressibleLESModel, 0);
+
+    defineTemplateRunTimeSelectionTable(incompressibleLESModel, dictionary);
+
+    addToRunTimeSelectionTable
+    (
+        baseIncompressibleTransportTurbulenceModel,
+        incompressibleLESModel,
+        dictionary
+    );
+
+    namespace LESModels
+    {
+        typedef Smagorinsky<incompressibleTransportTurbulenceModel>
+            incompressibleSmagorinsky;
+
+        defineNamedTemplateTypeNameAndDebug(incompressibleSmagorinsky, 0);
+
+        addToRunTimeSelectionTable
+        (
+            incompressibleLESModel,
+            incompressibleSmagorinsky,
             dictionary
         );
     }

@@ -24,10 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "kineticTheoryModel.H"
-#include "surfaceInterpolate.H"
 #include "mathematicalConstants.H"
 #include "twoPhaseSystem.H"
-#include "fvcDiv.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -43,7 +41,7 @@ Foam::kineticTheoryModel::kineticTheoryModel
     const word& type
 )
 :
-    RASModels::eddyViscosity<PhaseIncompressibleTurbulenceModel<phaseModel> >
+    eddyViscosity<RASModel<PhaseIncompressibleTurbulenceModel<phaseModel> > >
     (
         type,
         alpha,
@@ -517,9 +515,9 @@ bool Foam::kineticTheoryModel::read()
 {
     if
     (
-        RASModels::eddyViscosity
+        eddyViscosity
         <
-            PhaseIncompressibleTurbulenceModel<phaseModel>
+            RASModel<PhaseIncompressibleTurbulenceModel<phaseModel> >
         >::read()
     )
     {

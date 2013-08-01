@@ -23,12 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "RASModel.H"
+#include "LESModel.H"
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-void Foam::RASModel<BasicTurbulenceModel>::printCoeffs(const word& type)
+void Foam::LESModel<BasicTurbulenceModel>::printCoeffs(const word& type)
 {
     if (printCoeffs_)
     {
@@ -40,7 +40,7 @@ void Foam::RASModel<BasicTurbulenceModel>::printCoeffs(const word& type)
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-Foam::RASModel<BasicTurbulenceModel>::RASModel
+Foam::LESModel<BasicTurbulenceModel>::LESModel
 (
     const word& type,
     const alphaField& alpha,
@@ -63,19 +63,24 @@ Foam::RASModel<BasicTurbulenceModel>::RASModel
         propertiesName
     ),
 
-    RASDict_(this->subOrEmptyDict("RAS")),
-    turbulence_(RASDict_.lookup("turbulence")),
-    printCoeffs_(RASDict_.lookupOrDefault<Switch>("printCoeffs", false)),
-    coeffDict_(RASDict_.subOrEmptyDict(type + "Coeffs")),
+    LESDict_(this->subOrEmptyDict("LES")),
+    turbulence_(LESDict_.lookup("turbulence")),
+    printCoeffs_(LESDict_.lookupOrDefault<Switch>("printCoeffs", false)),
+    coeffDict_(LESDict_.subOrEmptyDict(type + "Coeffs")),
 
-    kMin_("kMin", sqr(dimVelocity), SMALL),
-    epsilonMin_("epsilonMin", kMin_.dimensions()/dimTime, SMALL),
-    omegaMin_("omegaMin", dimless/dimTime, SMALL)
+    kMin_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "kMin",
+            LESDict_,
+            SMALL,
+            sqr(dimVelocity)
+        )
+    ),
+
+    delta_(LESdelta::New("delta", U.mesh(), LESDict_))
 {
-    kMin_.readIfPresent(RASDict_);
-    epsilonMin_.readIfPresent(RASDict_);
-    omegaMin_.readIfPresent(RASDict_);
-
     // Force the construction of the mesh deltaCoeffs which may be needed
     // for the construction of the derived models and BCs
     this->mesh_.deltaCoeffs();
@@ -85,8 +90,8 @@ Foam::RASModel<BasicTurbulenceModel>::RASModel
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-Foam::autoPtr<Foam::RASModel<BasicTurbulenceModel> >
-Foam::RASModel<BasicTurbulenceModel>::New
+Foam::autoPtr<Foam::LESModel<BasicTurbulenceModel> >
+Foam::LESModel<BasicTurbulenceModel>::New
 (
     const alphaField& alpha,
     const rhoField& rho,
@@ -112,10 +117,10 @@ Foam::RASModel<BasicTurbulenceModel>::New
                 IOobject::NO_WRITE,
                 false
             )
-        ).subDict("RAS").lookup("RASModel")
+        ).subDict("LES").lookup("LESModel")
     );
 
-    Info<< "Selecting RAS turbulence model " << modelType << endl;
+    Info<< "Selecting LES turbulence model " << modelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
@@ -124,7 +129,7 @@ Foam::RASModel<BasicTurbulenceModel>::New
     {
         FatalErrorIn
         (
-            "RASModel::New"
+            "LESModel::New"
             "("
                 "const volScalarField&, "
                 "const volVectorField&, "
@@ -132,14 +137,14 @@ Foam::RASModel<BasicTurbulenceModel>::New
                 "transportModel&, "
                 "const word&"
             ")"
-        )   << "Unknown RASModel type "
+        )   << "Unknown LESModel type "
             << modelType << nl << nl
-            << "Valid RASModel types:" << endl
+            << "Valid LESModel types:" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
-    return autoPtr<RASModel>
+    return autoPtr<LESModel>
     (
         cstrIter()(alpha, rho, U, alphaPhi, phi, transport, propertiesName)
     );
@@ -149,28 +154,26 @@ Foam::RASModel<BasicTurbulenceModel>::New
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-void Foam::RASModel<BasicTurbulenceModel>::correct()
+void Foam::LESModel<BasicTurbulenceModel>::correct()
 {
     BasicTurbulenceModel::correct();
 }
 
 
 template<class BasicTurbulenceModel>
-bool Foam::RASModel<BasicTurbulenceModel>::read()
+bool Foam::LESModel<BasicTurbulenceModel>::read()
 {
     if (turbulenceModel::read())
     {
-        RASDict_ <<= this->subDict("RAS");
-        RASDict_.lookup("turbulence") >> turbulence_;
+        LESDict_ <<= this->subDict("LES");
+        LESDict_.lookup("turbulence") >> turbulence_;
 
-        if (const dictionary* dictPtr = RASDict_.subDictPtr(type() + "Coeffs"))
+        if (const dictionary* dictPtr = LESDict_.subDictPtr(type() + "Coeffs"))
         {
             coeffDict_ <<= *dictPtr;
         }
 
-        kMin_.readIfPresent(RASDict_);
-        epsilonMin_.readIfPresent(RASDict_);
-        omegaMin_.readIfPresent(RASDict_);
+        kMin_.readIfPresent(LESDict_);
 
         return true;
     }

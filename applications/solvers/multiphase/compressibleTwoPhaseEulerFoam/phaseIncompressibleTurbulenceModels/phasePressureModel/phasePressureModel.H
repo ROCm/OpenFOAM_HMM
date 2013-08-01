@@ -34,16 +34,10 @@ SourceFiles
 #ifndef phasePressureModel_H
 #define phasePressureModel_H
 
+#include "RASModel.H"
 #include "eddyViscosity.H"
 #include "PhaseIncompressibleTurbulenceModel.H"
-#include "dragModel.H"
 #include "phaseModel.H"
-#include "autoPtr.H"
-#include "viscosityModel.H"
-#include "conductivityModel.H"
-#include "radialModel.H"
-#include "granularPressureModel.H"
-#include "frictionalStressModel.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -57,9 +51,9 @@ namespace Foam
 
 class phasePressureModel
 :
-    public RASModels::eddyViscosity
+    public eddyViscosity
     <
-        PhaseIncompressibleTurbulenceModel<phaseModel>
+        RASModel<PhaseIncompressibleTurbulenceModel<phaseModel> >
     >
 {
     // Private data

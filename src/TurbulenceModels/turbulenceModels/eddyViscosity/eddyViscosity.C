@@ -24,19 +24,13 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "eddyViscosity.H"
-#include "addToRunTimeSelectionTable.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-namespace RASModels
-{
+#include "fvc.H"
+#include "fvm.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-eddyViscosity<BasicTurbulenceModel>::eddyViscosity
+Foam::eddyViscosity<BasicTurbulenceModel>::eddyViscosity
 (
     const word& modelName,
     const alphaField& alpha,
@@ -48,7 +42,7 @@ eddyViscosity<BasicTurbulenceModel>::eddyViscosity
     const word& propertiesName
 )
 :
-    RASModel<BasicTurbulenceModel>
+    BasicTurbulenceModel
     (
         modelName,
         alpha,
@@ -78,7 +72,8 @@ eddyViscosity<BasicTurbulenceModel>::eddyViscosity
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-tmp<volSymmTensorField> eddyViscosity<BasicTurbulenceModel>::R() const
+Foam::tmp<Foam::volSymmTensorField>
+Foam::eddyViscosity<BasicTurbulenceModel>::R() const
 {
     tmp<volScalarField> tk(k());
 
@@ -102,7 +97,8 @@ tmp<volSymmTensorField> eddyViscosity<BasicTurbulenceModel>::R() const
 
 
 template<class BasicTurbulenceModel>
-tmp<volSymmTensorField> eddyViscosity<BasicTurbulenceModel>::devRhoReff() const
+Foam::tmp<Foam::volSymmTensorField>
+Foam::eddyViscosity<BasicTurbulenceModel>::devRhoReff() const
 {
     return tmp<volSymmTensorField>
     (
@@ -124,7 +120,8 @@ tmp<volSymmTensorField> eddyViscosity<BasicTurbulenceModel>::devRhoReff() const
 
 
 template<class BasicTurbulenceModel>
-tmp<fvVectorMatrix> eddyViscosity<BasicTurbulenceModel>::divDevRhoReff
+Foam::tmp<Foam::fvVectorMatrix>
+Foam::eddyViscosity<BasicTurbulenceModel>::divDevRhoReff
 (
     volVectorField& U
 ) const
@@ -138,22 +135,17 @@ tmp<fvVectorMatrix> eddyViscosity<BasicTurbulenceModel>::divDevRhoReff
 
 
 template<class BasicTurbulenceModel>
-bool eddyViscosity<BasicTurbulenceModel>::read()
+bool Foam::eddyViscosity<BasicTurbulenceModel>::read()
 {
-    return RASModel<BasicTurbulenceModel>::read();
+    return BasicTurbulenceModel::read();
 }
 
 
 template<class BasicTurbulenceModel>
-void eddyViscosity<BasicTurbulenceModel>::correct()
+void Foam::eddyViscosity<BasicTurbulenceModel>::correct()
 {
-    RASModel<BasicTurbulenceModel>::correct();
+    BasicTurbulenceModel::correct();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace RASModels
-} // End namespace Foam
 
 // ************************************************************************* //

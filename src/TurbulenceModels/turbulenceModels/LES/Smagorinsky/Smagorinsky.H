@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,78 +22,81 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::RASModels::kEpsilon
+    Foam::LESModels::Smagorinsky
 
 Group
-    grpRASTurbulence
+    grpLESTurbulence
 
 Description
-    Standard k-epsilon turbulence model
+    The Smagorinsky Model.
 
-    The default model coefficients correspond to the following:
+    Algebraic eddy viscosity SGS model founded on the assumption that
+    local equilibrium prevails.
+    Thus,
     \verbatim
-        kEpsilonCoeffs
-        {
-            Cmu         0.09;
-            C1          1.44;
-            C2          1.92;
-            C3          -0.33;
-            sigmak      1.0;
-            sigmaEps    1.3;
-        }
+
+        B = 2/3*k*I - 2*nuSgs*dev(D)
+
+    where
+
+        D = symm(grad(U));
+        k from D:B + ce*k^3/2/delta = 0
+        nuSgs = ck*sqrt(k)*delta
     \endverbatim
 
 SourceFiles
-    kEpsilon.C
+    Smagorinsky.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef kEpsilon_H
-#define kEpsilon_H
+#ifndef Smagorinsky_H
+#define Smagorinsky_H
 
+#include "LESModel.H"
 #include "eddyViscosity.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace RASModels
+namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class kEpsilon Declaration
+                           Class Smagorinsky Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class BasicTurbulenceModel>
-class kEpsilon
+class Smagorinsky
 :
-    public eddyViscosity<BasicTurbulenceModel>
+    public eddyViscosity<LESModel<BasicTurbulenceModel> >
 {
 
 protected:
 
     // Protected data
 
-        // Model coefficients
+        dimensionedScalar ck_;
+        dimensionedScalar ce_;
 
-            dimensionedScalar Cmu_;
-            dimensionedScalar C1_;
-            dimensionedScalar C2_;
-            dimensionedScalar C3_;
-            dimensionedScalar sigmak_;
-            dimensionedScalar sigmaEps_;
 
-        // Fields
+    // Private Member Functions
 
-            volScalarField k_;
-            volScalarField epsilon_;
+        //- Update sub-grid scale fields
+        void updateSubGridScaleFields(const volTensorField& gradU);
+
+        // Disallow default bitwise copy construct and assignment
+        Smagorinsky(const Smagorinsky&);
+        Smagorinsky& operator=(const Smagorinsky&);
 
 
     // Protected member functions
 
+        //- Return SGS kinetic energy
+        //  calculated from the given velocity gradient
+        tmp<volScalarField> k(const tmp<volTensorField>& gradU) const;
+
         virtual void correctNut();
-        virtual tmp<fvScalarMatrix> kSource() const;
-        virtual tmp<fvScalarMatrix> epsilonSource() const;
 
 
 public:
@@ -104,13 +107,13 @@ public:
 
 
     //- Runtime type information
-    TypeName("kEpsilon");
+    TypeName("Smagorinsky");
 
 
     // Constructors
 
         //- Construct from components
-        kEpsilon
+        Smagorinsky
         (
             const alphaField& alpha,
             const rhoField& rho,
@@ -124,51 +127,22 @@ public:
 
 
     //- Destructor
-    virtual ~kEpsilon()
+    virtual ~Smagorinsky()
     {}
 
 
     // Member Functions
 
-        //- Return the effective diffusivity for k
-        tmp<volScalarField> DkEff() const
-        {
-            return tmp<volScalarField>
-            (
-                new volScalarField
-                (
-                    "DkEff",
-                    (this->nut_/sigmak_ + this->nu())
-                )
-            );
-        }
-
-        //- Return the effective diffusivity for epsilon
-        tmp<volScalarField> DepsilonEff() const
-        {
-            return tmp<volScalarField>
-            (
-                new volScalarField
-                (
-                    "DepsilonEff",
-                    (this->nut_/sigmaEps_ + this->nu())
-                )
-            );
-        }
-
-        //- Return the turbulence kinetic energy
+        //- Return SGS kinetic energy
         virtual tmp<volScalarField> k() const
         {
-            return k_;
+            return k(fvc::grad(this->U_));
         }
 
-        //- Return the turbulence kinetic energy dissipation rate
-        virtual tmp<volScalarField> epsilon() const
-        {
-            return epsilon_;
-        }
+        //- Return sub-grid disipation rate
+        virtual tmp<volScalarField> epsilon() const;
 
-        //- Solve the turbulence equations and correct the turbulence viscosity
+        //- Correct Eddy-Viscosity and related properties
         virtual void correct();
 
         //- Re-read model coefficients if they have changed
@@ -178,13 +152,13 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
+} // End namespace LESModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "kEpsilon.C"
+#   include "Smagorinsky.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
