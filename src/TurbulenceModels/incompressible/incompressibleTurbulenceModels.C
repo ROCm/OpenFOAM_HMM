@@ -107,6 +107,7 @@ namespace Foam
 
 #include "LESModel.H"
 #include "Smagorinsky.H"
+#include "kEqn.H"
 
 namespace Foam
 {
@@ -135,6 +136,22 @@ namespace Foam
         (
             incompressibleLESModel,
             incompressibleSmagorinsky,
+            dictionary
+        );
+    }
+
+
+    namespace LESModels
+    {
+        typedef kEqn<incompressibleTransportTurbulenceModel>
+            incompressiblekEqn;
+
+        defineNamedTemplateTypeNameAndDebug(incompressiblekEqn, 0);
+
+        addToRunTimeSelectionTable
+        (
+            incompressibleLESModel,
+            incompressiblekEqn,
             dictionary
         );
     }
