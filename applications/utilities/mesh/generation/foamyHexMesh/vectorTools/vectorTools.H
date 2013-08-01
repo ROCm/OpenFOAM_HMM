@@ -47,7 +47,7 @@ namespace Foam
 //- Collection of functions for testing relationships between two vectors.
 namespace vectorTools
 {
-    //- Test if a and b are parallel: a.b = 1
+    //- Test if a and b are parallel: a^b = 0
     //  Uses the cross product, so the tolerance is proportional to
     //  the sine of the angle between a and b in radians
     template<typename T>

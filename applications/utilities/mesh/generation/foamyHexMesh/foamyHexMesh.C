@@ -140,9 +140,10 @@ int main(int argc, char *argv[])
 
             mesh.move();
 
-            Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+            Info<< nl
+                << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
                 << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-                << endl;
+                << nl << endl;
         }
     }
 

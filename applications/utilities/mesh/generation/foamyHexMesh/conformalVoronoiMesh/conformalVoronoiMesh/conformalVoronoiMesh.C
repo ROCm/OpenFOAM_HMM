@@ -1277,14 +1277,23 @@ void Foam::conformalVoronoiMesh::move()
                         {
                             const Foam::point newPt(0.5*(dVA + dVB));
 
-                            if
-                            (
-                                Pstream::parRun()
-                             && decomposition().positionOnThisProcessor(newPt)
-                            )
+                            // Prevent insertions spanning surfaces
+                            if (internalPointIsInside(newPt))
                             {
-                                // Prevent insertions spanning surfaces
-                                if (internalPointIsInside(newPt))
+                                if (Pstream::parRun())
+                                {
+                                    if
+                                    (
+                                        decomposition().positionOnThisProcessor
+                                        (
+                                            newPt
+                                        )
+                                    )
+                                    {
+                                        pointsToInsert.append(toPoint(newPt));
+                                    }
+                                }
+                                else
                                 {
                                     pointsToInsert.append(toPoint(newPt));
                                 }
