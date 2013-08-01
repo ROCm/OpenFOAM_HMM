@@ -49,7 +49,7 @@ Foam::PatchTools::sortedPointEdges
     const labelListList& faceEdges = p.faceEdges();
 
     // create the lists for the various results. (resized on completion)
-    labelListList sortedPointEdges(pointEdges.size());
+    labelListList sortedPointEdges(pointEdges);
 
     DynamicList<label> newEdgeList;
 
@@ -57,12 +57,16 @@ Foam::PatchTools::sortedPointEdges
     {
         const labelList& pEdges = pointEdges[pointI];
 
+        label nPointEdges = pEdges.size();
+
         label edgeI = pEdges[0];
 
         label prevFaceI = edgeFaces[edgeI][0];
 
         newEdgeList.clear();
-        newEdgeList.setCapacity(pEdges.size());
+        newEdgeList.setCapacity(nPointEdges);
+
+        label nVisitedEdges = 0;
 
         do
         {
@@ -103,10 +107,42 @@ Foam::PatchTools::sortedPointEdges
 
             prevFaceI = faceI;
 
+            nVisitedEdges++;
+            if (nVisitedEdges > nPointEdges)
+            {
+                WarningIn("Foam::PatchTools::sortedPointEdges()")
+                    << "Unable to order pointEdges as the face connections "
+                    << "are not circular" << nl
+                    << "    Original pointEdges = " << pEdges << nl
+                    << "    New pointEdges = " << newEdgeList
+                    << endl;
+
+                newEdgeList = pEdges;
+
+                break;
+            }
+
         } while (edgeI != pEdges[0]);
 
-        if (newEdgeList.size() == pEdges.size())
+        if (newEdgeList.size() == nPointEdges)
         {
+            forAll(pEdges, eI)
+            {
+                if (findIndex(newEdgeList, pEdges[eI]) == -1)
+                {
+                    WarningIn("Foam::PatchTools::sortedPointEdges()")
+                        << "Cannot find all original edges in the new list"
+                        << nl
+                        << "    Original pointEdges = " << pEdges << nl
+                        << "    New pointEdges = " << newEdgeList
+                        << endl;
+
+                    newEdgeList = pEdges;
+
+                    break;
+                }
+            }
+
             sortedPointEdges[pointI] = newEdgeList;
         }
     }
