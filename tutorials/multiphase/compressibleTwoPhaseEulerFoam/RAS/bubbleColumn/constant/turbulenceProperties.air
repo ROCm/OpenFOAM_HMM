@@ -22,7 +22,6 @@ RAS
     RASModel continuousGasKEpsilon;
 
     turbulence      on;
-
     printCoeffs     on;
 }
 
