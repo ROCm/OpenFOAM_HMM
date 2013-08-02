@@ -96,7 +96,7 @@ public:
     {}
 
 
-    // Member Functions
+    // Member functions
 
         //- Return the effective stress tensor including the laminar stress
         virtual tmp<volSymmTensorField> devRhoReff() const = 0;

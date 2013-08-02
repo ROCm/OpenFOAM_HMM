@@ -114,6 +114,9 @@ public:
 
     // Member Functions
 
+        //- Read model coefficients if they have changed
+        virtual bool read() = 0;
+
         const Time& time() const
         {
             return runTime_;
@@ -204,9 +207,6 @@ public:
 
         //- Solve the turbulence equations and correct the turbulence viscosity
         virtual void correct() = 0;
-
-        //- Read LESProperties or RASProperties dictionary
-        virtual bool read() = 0;
 
         //- Default dummy write function
         virtual bool writeData(Ostream&) const

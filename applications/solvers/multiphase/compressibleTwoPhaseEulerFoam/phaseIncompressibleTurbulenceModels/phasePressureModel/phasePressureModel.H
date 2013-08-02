@@ -25,6 +25,23 @@ Class
     Foam::phasePressureModel
 
 Description
+    Particle-particle phase-pressure RAS model
+
+    The derivative of the phase-pressure with respect to the phase-fraction
+    is evaluated as
+
+        g0*min(exp(preAlphaExp*(alpha - alphaMax)), expMax)
+
+    The default model coefficients correspond to the following:
+    \verbatim
+        phasePressureCoeffs
+        {
+            preAlphaExp     500;
+            expMax          1000;
+            alphaMax        0.62;
+            g0              1000;
+        }
+    \endverbatim
 
 SourceFiles
     phasePressureModel.C
@@ -38,7 +55,6 @@ SourceFiles
 #include "eddyViscosity.H"
 #include "PhaseIncompressibleTurbulenceModel.H"
 #include "phaseModel.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,18 +96,14 @@ class phasePressureModel
 
     // Private Member Functions
 
+        void correctNut()
+        {}
+
         //- Disallow default bitwise copy construct
         phasePressureModel(const phasePressureModel&);
 
         //- Disallow default bitwise assignment
         void operator=(const phasePressureModel&);
-
-
-protected:
-
-    // Protected member functions
-
-        virtual void correctNut();
 
 
 public:
@@ -121,6 +133,9 @@ public:
 
 
     // Member Functions
+
+        //- Re-read model coefficients if they have changed
+        virtual bool read();
 
         //- Return the effective viscosity
         virtual tmp<volScalarField> nuEff() const
@@ -159,9 +174,6 @@ public:
 
         //- Solve the kinetic theory equations and correct the viscosity
         virtual void correct();
-
-        //- Re-read model coefficients if they have changed
-        virtual bool read();
 };
 
 

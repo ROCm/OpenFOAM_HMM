@@ -182,7 +182,10 @@ namespace Foam
 
 #include "LESModel.H"
 #include "Smagorinsky.H"
+#include "SmagorinskyZhang.H"
 #include "kEqn.H"
+#include "NicenoKEqn.H"
+#include "continuousGasKEqn.H"
 
 namespace Foam
 {
@@ -217,6 +220,21 @@ namespace Foam
 
     namespace LESModels
     {
+        typedef SmagorinskyZhang<incompressibleTransportTurbulenceModel>
+            incompressibleSmagorinskyZhang;
+
+        defineNamedTemplateTypeNameAndDebug(incompressibleSmagorinskyZhang, 0);
+
+        addToRunTimeSelectionTable
+        (
+            incompressibleLESModel,
+            incompressibleSmagorinskyZhang,
+            dictionary
+        );
+    }
+
+    namespace LESModels
+    {
         typedef kEqn<incompressibleTransportTurbulenceModel>
             incompressiblekEqn;
 
@@ -226,6 +244,36 @@ namespace Foam
         (
             incompressibleLESModel,
             incompressiblekEqn,
+            dictionary
+        );
+    }
+
+    namespace LESModels
+    {
+        typedef NicenoKEqn<incompressibleTransportTurbulenceModel>
+            incompressibleNicenoKEqn;
+
+        defineNamedTemplateTypeNameAndDebug(incompressibleNicenoKEqn, 0);
+
+        addToRunTimeSelectionTable
+        (
+            incompressibleLESModel,
+            incompressibleNicenoKEqn,
+            dictionary
+        );
+    }
+
+    namespace LESModels
+    {
+        typedef continuousGasKEqn<incompressibleTransportTurbulenceModel>
+            incompressiblecontinuousGasKEqn;
+
+        defineNamedTemplateTypeNameAndDebug(incompressiblecontinuousGasKEqn, 0);
+
+        addToRunTimeSelectionTable
+        (
+            incompressibleLESModel,
+            incompressiblecontinuousGasKEqn,
             dictionary
         );
     }

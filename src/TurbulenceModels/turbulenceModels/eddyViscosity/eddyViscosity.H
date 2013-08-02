@@ -62,7 +62,7 @@ protected:
             volScalarField nut_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         virtual void correctNut() = 0;
 
@@ -97,6 +97,9 @@ public:
 
     // Member Functions
 
+        //- Re-read model coefficients if they have changed
+        virtual bool read() = 0;
+
         //- Return the turbulence viscosity
         virtual tmp<volScalarField> nut() const
         {
@@ -123,9 +126,6 @@ public:
 
         //- Solve the turbulence equations and correct the turbulence viscosity
         virtual void correct() = 0;
-
-        //- Re-read model coefficients if they have changed
-        virtual bool read() = 0;
 };
 
 

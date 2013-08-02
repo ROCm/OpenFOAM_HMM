@@ -28,7 +28,7 @@ Group
     grpLESTurbulence
 
 Description
-    The Smagorinsky Model.
+    The Smagorinsky SGS model.
 
     Algebraic eddy viscosity SGS model founded on the assumption that
     local equilibrium prevails.
@@ -40,8 +40,17 @@ Description
     where
 
         D = symm(grad(U));
-        k from D:B + ce*k^3/2/delta = 0
-        nuSgs = ck*sqrt(k)*delta
+        k from D:B + Ce*k^3/2/delta = 0
+        nuSgs = Ck*sqrt(k)*delta
+    \endverbatim
+
+    The default model coefficients correspond to the following:
+    \verbatim
+        SmagorinskyCoeffs
+        {
+            Ck                  0.094;
+            Ce                  1.048;
+        }
     \endverbatim
 
 SourceFiles
@@ -71,26 +80,22 @@ class Smagorinsky
 :
     public eddyViscosity<LESModel<BasicTurbulenceModel> >
 {
-
-protected:
-
-    // Protected data
-
-        dimensionedScalar ck_;
-        dimensionedScalar ce_;
-
-
     // Private Member Functions
-
-        //- Update sub-grid scale fields
-        void updateSubGridScaleFields(const volTensorField& gradU);
 
         // Disallow default bitwise copy construct and assignment
         Smagorinsky(const Smagorinsky&);
         Smagorinsky& operator=(const Smagorinsky&);
 
 
-    // Protected member functions
+protected:
+
+    // Protected data
+
+        dimensionedScalar Ck_;
+        dimensionedScalar Ce_;
+
+
+    // Protected Member Functions
 
         //- Return SGS kinetic energy
         //  calculated from the given velocity gradient
@@ -133,6 +138,9 @@ public:
 
     // Member Functions
 
+        //- Read model coefficients if they have changed
+        virtual bool read();
+
         //- Return SGS kinetic energy
         virtual tmp<volScalarField> k() const
         {
@@ -144,9 +152,6 @@ public:
 
         //- Correct Eddy-Viscosity and related properties
         virtual void correct();
-
-        //- Read model coefficients if they have changed
-        virtual bool read();
 };
 
 

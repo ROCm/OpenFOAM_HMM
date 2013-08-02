@@ -35,7 +35,7 @@ Description
     \verbatim
         d/dt(rho*k) + div(rho*U*k) - div(rho*nuEff*grad(k))
         =
-        -rho*D:B - ce*rho*k^(3/2)/delta
+        -rho*D:B - Ce*rho*k^(3/2)/delta
 
     and
 
@@ -44,8 +44,17 @@ Description
     where
 
         D = symm(grad(U));
-        nuSgs = ck*sqrt(k)*delta
+        nuSgs = Ck*sqrt(k)*delta
         nuEff = nuSgs + nu
+    \endverbatim
+
+    The default model coefficients correspond to the following:
+    \verbatim
+        NicenoKEqnCoeffs
+        {
+            Ck                  0.094;
+            Ce                  1.048;
+        }
     \endverbatim
 
 SourceFiles
@@ -75,6 +84,12 @@ class kEqn
 :
     public eddyViscosity<LESModel<BasicTurbulenceModel> >
 {
+    // Private Member Functions
+
+        // Disallow default bitwise copy construct and assignment
+        kEqn(const kEqn&);
+        kEqn& operator=(const kEqn&);
+
 
 protected:
 
@@ -82,21 +97,11 @@ protected:
 
         volScalarField k_;
 
-        dimensionedScalar ck_;
-        dimensionedScalar ce_;
+        dimensionedScalar Ck_;
+        dimensionedScalar Ce_;
 
 
-    // Private Member Functions
-
-        //- Update sub-grid scale fields
-        void updateSubGridScaleFields();
-
-        // Disallow default bitwise copy construct and assignment
-        kEqn(const kEqn&);
-        kEqn& operator=(const kEqn&);
-
-
-    // Protected member functions
+    // Protected Member Functions
 
         virtual void correctNut();
         virtual tmp<fvScalarMatrix> kSource() const;
@@ -136,6 +141,9 @@ public:
 
     // Member Functions
 
+        //- Read model coefficients if they have changed
+        virtual bool read();
+
         //- Return SGS kinetic energy
         virtual tmp<volScalarField> k() const
         {
@@ -156,9 +164,6 @@ public:
 
         //- Correct Eddy-Viscosity and related properties
         virtual void correct();
-
-        //- Read model coefficients if they have changed
-        virtual bool read();
 };
 
 

@@ -28,6 +28,31 @@ Group
     grpRASTurbulence
 
 Description
+    Continuous-phase k-epsilon model including bubble-generated turbulence.
+
+    Reference:
+    \verbatim
+        "The simulation of multidimensional multiphase flows",
+        Lahey R.T.,
+        Nucl. Eng. & Design
+        2005 (235) pp.1043-1060.
+    \endverbatim
+
+    The default model coefficients correspond to the following:
+    \verbatim
+        LaheyKEpsilonCoeffs
+        {
+            Cmu             0.09;
+            C1              1.44;
+            C2              1.92;
+            C3              -0.33;
+            sigmak          1.0;
+            sigmaEps        1.3;
+            Cp              0.25;
+            Cmub            0.6;
+            alphaInversion  0.3;
+        }
+    \endverbatim
 
 SourceFiles
     LaheyKEpsilon.C
@@ -63,6 +88,20 @@ class LaheyKEpsilon
         > *gasTurbulencePtr_;
 
 
+    // Private Member Functions
+
+        //- Return the turbulence model for the gas phase
+        const PhaseIncompressibleTurbulenceModel
+        <
+            typename BasicTurbulenceModel::transportModel
+        >&
+        gasTurbulence() const;
+
+        // Disallow default bitwise copy construct and assignment
+        LaheyKEpsilon(const LaheyKEpsilon&);
+        LaheyKEpsilon& operator=(const LaheyKEpsilon&);
+
+
 protected:
 
     // Protected data
@@ -74,13 +113,14 @@ protected:
             dimensionedScalar Cmub_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         virtual void correctNut();
         tmp<volScalarField> bubbleG() const;
         tmp<volScalarField> phaseTransferCoeff() const;
         virtual tmp<fvScalarMatrix> kSource() const;
         virtual tmp<fvScalarMatrix> epsilonSource() const;
+
 
 public:
 
@@ -116,15 +156,11 @@ public:
 
     // Member Functions
 
-        //- Return the turbulence model for the gas phase
-        const PhaseIncompressibleTurbulenceModel<transportModel>&
-        gasTurbulence() const;
+        //- Read model coefficients if they have changed
+        virtual bool read();
 
         //- Solve the turbulence equations and correct the turbulence viscosity
         virtual void correct();
-
-        //- Read RASProperties dictionary
-        virtual bool read();
 };
 
 

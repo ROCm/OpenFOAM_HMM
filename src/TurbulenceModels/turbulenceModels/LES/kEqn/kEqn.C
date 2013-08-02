@@ -72,21 +72,21 @@ kEqn<BasicTurbulenceModel>::kEqn
         this->mesh_
     ),
 
-    ck_
+    Ck_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "ck",
+            "Ck",
             this->coeffDict_,
             0.094
         )
     ),
 
-    ce_
+    Ce_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "ce",
+            "Ce",
             this->coeffDict_,
             1.048
         )
@@ -107,8 +107,8 @@ bool kEqn<BasicTurbulenceModel>::read()
 {
     if (eddyViscosity<LESModel<BasicTurbulenceModel> >::read())
     {
-        ck_.readIfPresent(this->coeffDict());
-        ce_.readIfPresent(this->coeffDict());
+        Ck_.readIfPresent(this->coeffDict());
+        Ce_.readIfPresent(this->coeffDict());
 
         return true;
     }
@@ -134,7 +134,7 @@ tmp<volScalarField> kEqn<BasicTurbulenceModel>::epsilon() const
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            ce_*k()*sqrt(k())/this->delta()
+            Ce_*k()*sqrt(k())/this->delta()
         )
     );
 }
@@ -143,7 +143,7 @@ tmp<volScalarField> kEqn<BasicTurbulenceModel>::epsilon() const
 template<class BasicTurbulenceModel>
 void kEqn<BasicTurbulenceModel>::correctNut()
 {
-    this->nut_ = ck_*sqrt(k_)*this->delta();
+    this->nut_ = Ck_*sqrt(k_)*this->delta();
     this->nut_.correctBoundaryConditions();
 }
 
@@ -196,7 +196,7 @@ void kEqn<BasicTurbulenceModel>::correct()
      ==
         alpha*rho*G
       - fvm::SuSp((2.0/3.0)*alpha*rho*divU, k_)
-      - fvm::Sp(ce_*alpha*rho*sqrt(k_)/this->delta(), k_)
+      - fvm::Sp(Ce_*alpha*rho*sqrt(k_)/this->delta(), k_)
       + kSource()
     );
 

@@ -59,21 +59,21 @@ Smagorinsky<BasicTurbulenceModel>::Smagorinsky
         propertiesName
     ),
 
-    ck_
+    Ck_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "ck",
+            "Ck",
             this->coeffDict_,
-            0.02
+            0.094
         )
     ),
 
-    ce_
+    Ce_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "ce",
+            "Ce",
             this->coeffDict_,
             1.048
         )
@@ -94,8 +94,8 @@ bool Smagorinsky<BasicTurbulenceModel>::read()
 {
     if (eddyViscosity<LESModel<BasicTurbulenceModel> >::read())
     {
-        ck_.readIfPresent(this->coeffDict());
-        ce_.readIfPresent(this->coeffDict());
+        Ck_.readIfPresent(this->coeffDict());
+        Ce_.readIfPresent(this->coeffDict());
 
         return true;
     }
@@ -105,6 +105,7 @@ bool Smagorinsky<BasicTurbulenceModel>::read()
     }
 }
 
+
 template<class BasicTurbulenceModel>
 tmp<volScalarField> Smagorinsky<BasicTurbulenceModel>::k
 (
@@ -113,9 +114,9 @@ tmp<volScalarField> Smagorinsky<BasicTurbulenceModel>::k
 {
     volSymmTensorField D(symm(gradU));
 
-    volScalarField a(ce_/this->delta());
+    volScalarField a(Ce_/this->delta());
     volScalarField b((2.0/3.0)*tr(D));
-    volScalarField c(2*ck_*this->delta()*(dev(D) && D));
+    volScalarField c(2*Ck_*this->delta()*(dev(D) && D));
 
     return sqr((-b + sqrt(sqr(b) + 4*a*c))/(2*a));
 }
@@ -136,7 +137,7 @@ tmp<volScalarField> Smagorinsky<BasicTurbulenceModel>::epsilon() const
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            ce_*k()*sqrt(k())/this->delta()
+            Ce_*k()*sqrt(k())/this->delta()
         )
     );
 }
@@ -147,7 +148,7 @@ void Smagorinsky<BasicTurbulenceModel>::correctNut()
 {
     volScalarField k(this->k(fvc::grad(this->U_)));
 
-    this->nut_ = ck_*this->delta()*sqrt(k);
+    this->nut_ = Ck_*this->delta()*sqrt(k);
     this->nut_.correctBoundaryConditions();
 }
 
