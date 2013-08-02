@@ -9,21 +9,41 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      turbulenceProperties.air;
+    class       volScalarField;
+    object      epsilon;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-simulationType  RAS;
+dimensions      [0 2 -3 0 0 0 0];
 
-RAS
+internalField   uniform 1.5e-4;
+
+boundaryField
 {
-    RASModel continuousGasKEpsilon;
+    inlet
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
 
-    turbulence      on;
+    outlet
+    {
+        type            inletOutlet;
+        phi             phi.water;
+        inletValue      $internalField;
+        value           $internalField;
+    }
 
-    printCoeffs     on;
+    walls
+    {
+        type            epsilonWallFunction;
+        value           $internalField;
+    }
+
+    defaultFaces
+    {
+        type            empty;
+    }
 }
 
 // ************************************************************************* //

@@ -11,7 +11,7 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      turbulenceProperties.particles;
+    object      turbulenceProperties.water;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -19,42 +19,10 @@ simulationType  RAS;
 
 RAS
 {
-    RASModel phasePressure;
+    RASModel LaheyKEpsilon;
 
     turbulence      on;
     printCoeffs     on;
-
-    kineticTheoryCoeffs
-    {
-        equilibrium             on;
-
-        e                       0.8;
-        alphaMax                0.62;
-        alphaMinFriction        0.5;
-
-        viscosityModel          Gidaspow;
-        conductivityModel       Gidaspow;
-        granularPressureModel   Lun;
-        frictionalStressModel   JohnsonJackson;
-        radialModel             SinclairJackson;
-
-        JohnsonJacksonCoeffs
-        {
-            Fr                      0.05;
-            eta                     2;
-            p                       5;
-            phi                     28.5;
-        }
-    }
-
-    phasePressureCoeffs
-    {
-        preAlphaExp     500;
-        expMax          1000;
-        alphaMax        0.62;
-        g0              1000;
-    }
 }
-
 
 // ************************************************************************* //

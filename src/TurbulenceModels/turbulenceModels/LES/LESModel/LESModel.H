@@ -168,6 +168,10 @@ public:
 
     // Member Functions
 
+        //- Read model coefficients if they have changed
+        virtual bool read();
+
+
         // Access
 
             //- Const access to the coefficients dictionary
@@ -216,9 +220,6 @@ public:
 
         //- Solve the turbulence equations and correct the turbulence viscosity
         virtual void correct();
-
-        //- Read LESProperties dictionary
-        virtual bool read();
 };
 
 

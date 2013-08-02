@@ -70,6 +70,12 @@ class kEpsilon
 :
     public eddyViscosity<RASModel<BasicTurbulenceModel> >
 {
+    // Private Member Functions
+
+        // Disallow default bitwise copy construct and assignment
+        kEpsilon(const kEpsilon&);
+        kEpsilon& operator=(const kEpsilon&);
+
 
 protected:
 
@@ -90,7 +96,7 @@ protected:
             volScalarField epsilon_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         virtual void correctNut();
         virtual tmp<fvScalarMatrix> kSource() const;
@@ -130,6 +136,9 @@ public:
 
 
     // Member Functions
+
+        //- Re-read model coefficients if they have changed
+        virtual bool read();
 
         //- Return the effective diffusivity for k
         tmp<volScalarField> DkEff() const
@@ -171,9 +180,6 @@ public:
 
         //- Solve the turbulence equations and correct the turbulence viscosity
         virtual void correct();
-
-        //- Re-read model coefficients if they have changed
-        virtual bool read();
 };
 
 

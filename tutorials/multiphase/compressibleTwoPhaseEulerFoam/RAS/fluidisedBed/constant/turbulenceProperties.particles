@@ -21,7 +21,8 @@ RAS
 {
     RASModel kineticTheory;
 
-    turbulence on;
+    turbulence      on;
+    printCoeffs     on;
 
     kineticTheoryCoeffs
     {

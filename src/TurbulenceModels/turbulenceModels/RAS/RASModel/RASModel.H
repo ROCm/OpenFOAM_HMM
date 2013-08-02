@@ -170,6 +170,10 @@ public:
 
     // Member Functions
 
+        //- Read model coefficients if they have changed
+        virtual bool read();
+
+
         // Access
 
             //- Return the lower allowable limit for k (default: SMALL)
@@ -236,9 +240,6 @@ public:
 
         //- Solve the turbulence equations and correct the turbulence viscosity
         virtual void correct();
-
-        //- Read RASProperties dictionary
-        virtual bool read();
 };
 
 

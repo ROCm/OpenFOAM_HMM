@@ -9,36 +9,37 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      turbulenceProperties.air;
+    class       volScalarField;
+    object      Twater;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-simulationType  RAS;
+dimensions          [0 0 0 1 0 0 0];
 
-RAS
+internalField       uniform 350;
+
+boundaryField
 {
-    RASModel kEpsilon;
-
-    turbulence on;
-}
-
-LES
-{
-    LESModel Smagorinsky;
-
-    turbulence      on;
-
-    printCoeffs     on;
-
-    delta cubeRootVol;
-
-    cubeRootVolCoeffs
+    walls
     {
-        deltaCoeff 1;
+        type               zeroGradient;
+    }
+    outlet
+    {
+        type               inletOutlet;
+        phi                phi.water;
+        inletValue         uniform 300;
+        value              $internalField;
+    }
+    inlet
+    {
+        type               fixedValue;
+        value              $internalField;
+    }
+    frontAndBackPlanes
+    {
+        type               empty;
     }
 }
 
-
-// ************************************************************************* //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

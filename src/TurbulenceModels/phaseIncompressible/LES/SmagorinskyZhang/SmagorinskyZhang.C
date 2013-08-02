@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Smagorinsky.H"
+#include "SmagorinskyZhang.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -35,7 +35,7 @@ namespace LESModels
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-Smagorinsky<BasicTurbulenceModel>::Smagorinsky
+SmagorinskyZhang<BasicTurbulenceModel>::SmagorinskyZhang
 (
     const alphaField& alpha,
     const rhoField& rho,
@@ -47,35 +47,27 @@ Smagorinsky<BasicTurbulenceModel>::Smagorinsky
     const word& type
 )
 :
-    eddyViscosity<LESModel<BasicTurbulenceModel> >
+    Smagorinsky<BasicTurbulenceModel>
     (
-        type,
         alpha,
         rho,
         U,
         alphaPhi,
         phi,
         transport,
-        propertiesName
+        propertiesName,
+        type
     ),
 
-    Ck_
+    gasTurbulencePtr_(NULL),
+
+    Cmub_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "Ck",
+            "Cmub",
             this->coeffDict_,
-            0.094
-        )
-    ),
-
-    Ce_
-    (
-        dimensioned<scalar>::lookupOrAddToDict
-        (
-            "Ce",
-            this->coeffDict_,
-            1.048
+            0.6
         )
     )
 {
@@ -90,12 +82,11 @@ Smagorinsky<BasicTurbulenceModel>::Smagorinsky
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-bool Smagorinsky<BasicTurbulenceModel>::read()
+bool SmagorinskyZhang<BasicTurbulenceModel>::read()
 {
-    if (eddyViscosity<LESModel<BasicTurbulenceModel> >::read())
+    if (Smagorinsky<BasicTurbulenceModel>::read())
     {
-        Ck_.readIfPresent(this->coeffDict());
-        Ce_.readIfPresent(this->coeffDict());
+        Cmub_.readIfPresent(this->coeffDict());
 
         return true;
     }
@@ -107,57 +98,50 @@ bool Smagorinsky<BasicTurbulenceModel>::read()
 
 
 template<class BasicTurbulenceModel>
-tmp<volScalarField> Smagorinsky<BasicTurbulenceModel>::k
-(
-    const tmp<volTensorField>& gradU
-) const
+const PhaseIncompressibleTurbulenceModel
+<
+    typename BasicTurbulenceModel::transportModel
+>&
+SmagorinskyZhang<BasicTurbulenceModel>::gasTurbulence() const
 {
-    volSymmTensorField D(symm(gradU));
+    if (!gasTurbulencePtr_)
+    {
+        const volVectorField& U = this->U_;
 
-    volScalarField a(Ce_/this->delta());
-    volScalarField b((2.0/3.0)*tr(D));
-    volScalarField c(2*Ck_*this->delta()*(dev(D) && D));
+        const transportModel& liquid = this->transport();
+        const twoPhaseSystem& fluid = liquid.fluid();
+        const transportModel& gas = fluid.otherPhase(liquid);
 
-    return sqr((-b + sqrt(sqr(b) + 4*a*c))/(2*a));
-}
-
-
-template<class BasicTurbulenceModel>
-tmp<volScalarField> Smagorinsky<BasicTurbulenceModel>::epsilon() const
-{
-    return tmp<volScalarField>
-    (
-        new volScalarField
-        (
-            IOobject
+        gasTurbulencePtr_ =
+           &U.db()
+           .lookupObject<PhaseIncompressibleTurbulenceModel<transportModel> >
             (
-                IOobject::groupName("epsilon", this->U_.group()),
-                this->runTime_.timeName(),
-                this->mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            Ce_*k()*sqrt(k())/this->delta()
-        )
-    );
+                IOobject::groupName
+                (
+                    turbulenceModel::propertiesName,
+                    gas.name()
+                )
+            );
+    }
+
+    return *gasTurbulencePtr_;
 }
 
 
 template<class BasicTurbulenceModel>
-void Smagorinsky<BasicTurbulenceModel>::correctNut()
+void SmagorinskyZhang<BasicTurbulenceModel>::correctNut()
 {
+    const PhaseIncompressibleTurbulenceModel<transportModel>& gasTurbulence =
+        this->gasTurbulence();
+
     volScalarField k(this->k(fvc::grad(this->U_)));
 
-    this->nut_ = Ck_*this->delta()*sqrt(k);
+    this->nut_ =
+        this->Ck_*sqrt(k)*this->delta()
+      + Cmub_*gasTurbulence.transport().d()*gasTurbulence.alpha()
+       *(mag(this->U_ - gasTurbulence.U()));
+
     this->nut_.correctBoundaryConditions();
-}
-
-
-template<class BasicTurbulenceModel>
-void Smagorinsky<BasicTurbulenceModel>::correct()
-{
-    eddyViscosity<LESModel<BasicTurbulenceModel> >::correct();
-    correctNut();
 }
 
 

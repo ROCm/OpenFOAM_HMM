@@ -22,49 +22,102 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::eddyViscosity
+    Foam::LESModels::NicenoKEqn
 
 Group
-    grpRASTurbulence
+    grpLESTurbulence
 
 Description
-    Eddy viscosity turbulence model base class
+    One-equation SGS model for the continuous phase in a two-phase system
+    including bubble-generated turbulence.
+
+    Reference:
+    \verbatim
+        "One-equation sub-grid scale (SGS) modelling for Euler-Euler
+        large eddy simulation (EELES) of dispersed bubbly flow"
+        B. Niceno,
+        M.T. Dhotre,
+        N.G. Dee
+        Chemical Engineering Science 63 (2008) pp. 3923-3931.
+    \endverbatim
+
+    The default model coefficients correspond to the following:
+    \verbatim
+        NicenoKEqnCoeffs
+        {
+            Ck              0.094;
+            Ce              1.048;
+            alphaInversion  0.3;
+            Cp              Ck;
+            Cmub            0.6;
+        }
+    \endverbatim
 
 SourceFiles
-    eddyViscosity.C
+    NicenoKEqn.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef eddyViscosity_H
-#define eddyViscosity_H
+#ifndef NicenoKEqn_H
+#define NicenoKEqn_H
+
+#include "kEqn.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace LESModels
+{
 
 /*---------------------------------------------------------------------------*\
-                           Class eddyViscosity Declaration
+                           Class NicenoKEqn Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class BasicTurbulenceModel>
-class eddyViscosity
+class NicenoKEqn
 :
-    public BasicTurbulenceModel
+    public kEqn<BasicTurbulenceModel>
 {
+    // Private data
+
+        mutable const PhaseIncompressibleTurbulenceModel
+        <
+            typename BasicTurbulenceModel::transportModel
+        > *gasTurbulencePtr_;
+
+
+    // Private Member Functions
+
+        //- Return the turbulence model for the gas phase
+        const PhaseIncompressibleTurbulenceModel
+        <
+            typename BasicTurbulenceModel::transportModel
+        >&
+        gasTurbulence() const;
+
+        // Disallow default bitwise copy construct and assignment
+        NicenoKEqn(const NicenoKEqn&);
+        NicenoKEqn& operator=(const NicenoKEqn&);
+
 
 protected:
 
     // Protected data
 
-        // Fields
+        // Model coefficients
 
-            volScalarField nut_;
+            dimensionedScalar alphaInversion_;
+            dimensionedScalar Cp_;
+            dimensionedScalar Cmub_;
 
 
     // Protected Member Functions
 
-        virtual void correctNut() = 0;
+        virtual void correctNut();
+        tmp<volScalarField> bubbleG() const;
+        tmp<volScalarField> phaseTransferCoeff() const;
+        virtual tmp<fvScalarMatrix> kSource() const;
 
 
 public:
@@ -74,69 +127,47 @@ public:
     typedef typename BasicTurbulenceModel::transportModel transportModel;
 
 
+    //- Runtime type information
+    TypeName("NicenoKEqn");
+
+
     // Constructors
 
         //- Construct from components
-        eddyViscosity
+        NicenoKEqn
         (
-            const word& modelName,
             const alphaField& alpha,
             const rhoField& rho,
             const volVectorField& U,
             const surfaceScalarField& alphaPhi,
             const surfaceScalarField& phi,
             const transportModel& transport,
-            const word& propertiesName
+            const word& propertiesName = turbulenceModel::propertiesName,
+            const word& type = typeName
         );
 
 
     //- Destructor
-    virtual ~eddyViscosity()
+    virtual ~NicenoKEqn()
     {}
 
 
     // Member Functions
 
-        //- Re-read model coefficients if they have changed
-        virtual bool read() = 0;
-
-        //- Return the turbulence viscosity
-        virtual tmp<volScalarField> nut() const
-        {
-            return nut_;
-        }
-
-        //- Return the turbulence viscosity on patch
-        virtual tmp<scalarField> nut(const label patchi) const
-        {
-            return nut_.boundaryField()[patchi];
-        }
-
-        //- Return the turbulence kinetic energy
-        virtual tmp<volScalarField> k() const = 0;
-
-        //- Return the Reynolds stress tensor
-        virtual tmp<volSymmTensorField> R() const;
-
-        //- Return the effective stress tensor
-        virtual tmp<volSymmTensorField> devRhoReff() const;
-
-        //- Return the source term for the momentum equation
-        virtual tmp<fvVectorMatrix> divDevRhoReff(volVectorField& U) const;
-
-        //- Solve the turbulence equations and correct the turbulence viscosity
-        virtual void correct() = 0;
+        //- Read model coefficients if they have changed
+        virtual bool read();
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace LESModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "eddyViscosity.C"
+#   include "NicenoKEqn.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
