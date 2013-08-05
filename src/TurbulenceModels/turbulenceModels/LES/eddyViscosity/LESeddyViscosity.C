@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "kEqn.H"
+#include "LESeddyViscosity.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -35,19 +35,19 @@ namespace LESModels
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-kEqn<BasicTurbulenceModel>::kEqn
+LESeddyViscosity<BasicTurbulenceModel>::LESeddyViscosity
 (
+    const word& type,
     const alphaField& alpha,
     const rhoField& rho,
     const volVectorField& U,
     const surfaceScalarField& alphaPhi,
     const surfaceScalarField& phi,
     const transportModel& transport,
-    const word& propertiesName,
-    const word& type
+    const word& propertiesName
 )
 :
-    LESeddyViscosity<BasicTurbulenceModel>
+    eddyViscosity<LESModel<BasicTurbulenceModel> >
     (
         type,
         alpha,
@@ -59,45 +59,26 @@ kEqn<BasicTurbulenceModel>::kEqn
         propertiesName
     ),
 
-    k_
-    (
-        IOobject
-        (
-            IOobject::groupName("k", this->U_.group()),
-            this->runTime_.timeName(),
-            this->mesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        this->mesh_
-    ),
-
-    Ck_
+    Ce_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "Ck",
+            "Ce",
             this->coeffDict_,
-            0.094
+            1.048
         )
     )
-{
-    if (type == typeName)
-    {
-        correctNut();
-        this->printCoeffs(type);
-    }
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-bool kEqn<BasicTurbulenceModel>::read()
+bool LESeddyViscosity<BasicTurbulenceModel>::read()
 {
-    if (LESeddyViscosity<BasicTurbulenceModel>::read())
+    if (eddyViscosity<LESModel<BasicTurbulenceModel> >::read())
     {
-        Ck_.readIfPresent(this->coeffDict());
+        Ce_.readIfPresent(this->coeffDict());
 
         return true;
     }
@@ -109,7 +90,7 @@ bool kEqn<BasicTurbulenceModel>::read()
 
 
 template<class BasicTurbulenceModel>
-tmp<volScalarField> kEqn<BasicTurbulenceModel>::epsilon() const
+tmp<volScalarField> LESeddyViscosity<BasicTurbulenceModel>::epsilon() const
 {
     return tmp<volScalarField>
     (
@@ -123,77 +104,9 @@ tmp<volScalarField> kEqn<BasicTurbulenceModel>::epsilon() const
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            this->Ce_*k()*sqrt(k())/this->delta()
+            Ce_*this->k()*sqrt(this->k())/this->delta()
         )
     );
-}
-
-
-template<class BasicTurbulenceModel>
-void kEqn<BasicTurbulenceModel>::correctNut()
-{
-    this->nut_ = Ck_*sqrt(k_)*this->delta();
-    this->nut_.correctBoundaryConditions();
-}
-
-
-template<class BasicTurbulenceModel>
-tmp<fvScalarMatrix> kEqn<BasicTurbulenceModel>::kSource() const
-{
-    return tmp<fvScalarMatrix>
-    (
-        new fvScalarMatrix
-        (
-            k_,
-            dimVolume*this->rho_.dimensions()*k_.dimensions()
-            /dimTime
-        )
-    );
-}
-
-
-template<class BasicTurbulenceModel>
-void kEqn<BasicTurbulenceModel>::correct()
-{
-    if (!this->turbulence_)
-    {
-        return;
-    }
-
-    // Local references
-    const alphaField& alpha = this->alpha_;
-    const rhoField& rho = this->rho_;
-    const surfaceScalarField& alphaPhi = this->alphaPhi_;
-    const surfaceScalarField& phi = this->phi_;
-    const volVectorField& U = this->U_;
-    volScalarField& nut = this->nut_;
-
-    LESeddyViscosity<BasicTurbulenceModel>::correct();
-
-    volScalarField divU(fvc::div(fvc::absolute(phi/fvc::interpolate(rho), U)));
-
-    tmp<volTensorField> tgradU(fvc::grad(U));
-    volScalarField G(this->GName(), nut*(tgradU() && dev(twoSymm(tgradU()))));
-    tgradU.clear();
-
-    tmp<fvScalarMatrix> kEqn
-    (
-        fvm::ddt(alpha, rho, k_)
-      + fvm::div(alphaPhi, k_)
-      - fvm::Sp(fvc::ddt(alpha, rho) + fvc::div(alphaPhi), k_)
-      - fvm::laplacian(alpha*rho*DkEff(), k_)
-     ==
-        alpha*rho*G
-      - fvm::SuSp((2.0/3.0)*alpha*rho*divU, k_)
-      - fvm::Sp(this->Ce_*alpha*rho*sqrt(k_)/this->delta(), k_)
-      + kSource()
-    );
-
-    kEqn().relax();
-    solve(kEqn);
-    bound(k_, this->kMin_);
-
-    correctNut();
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,51 +22,24 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::LESModels::kEqn
+    Foam::LESModels::LESeddyViscosity
 
 Group
     grpLESTurbulence
 
 Description
-    One Equation Eddy Viscosity Model
-
-    Eddy viscosity SGS model using a modeled balance equation to simulate the
-    behaviour of k, hence,
-    \verbatim
-        d/dt(rho*k) + div(rho*U*k) - div(rho*nuEff*grad(k))
-        =
-        -rho*D:B - Ce*rho*k^(3/2)/delta
-
-    and
-
-        B = 2/3*k*I - 2*nuSgs*dev(D)
-
-    where
-
-        D = symm(grad(U));
-        nuSgs = Ck*sqrt(k)*delta
-        nuEff = nuSgs + nu
-    \endverbatim
-
-    The default model coefficients correspond to the following:
-    \verbatim
-        NicenoKEqnCoeffs
-        {
-            Ck                  0.094;
-            Ce                  1.048;
-        }
-    \endverbatim
+    Eddy viscosity LES SGS model base class
 
 SourceFiles
-    kEqn.C
+    LESeddyViscosity.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef kEqn_H
-#define kEqn_H
+#ifndef LESeddyViscosity_H
+#define LESeddyViscosity_H
 
 #include "LESModel.H"
-#include "LESeddyViscosity.H"
+#include "eddyViscosity.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -76,34 +49,26 @@ namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class kEqn Declaration
+                           Class LESeddyViscosity Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class BasicTurbulenceModel>
-class kEqn
+class LESeddyViscosity
 :
-    public LESeddyViscosity<BasicTurbulenceModel>
+    public eddyViscosity<LESModel<BasicTurbulenceModel> >
 {
     // Private Member Functions
 
         // Disallow default bitwise copy construct and assignment
-        kEqn(const kEqn&);
-        kEqn& operator=(const kEqn&);
+        LESeddyViscosity(const LESeddyViscosity&);
+        LESeddyViscosity& operator=(const LESeddyViscosity&);
 
 
 protected:
 
     // Protected data
 
-        volScalarField k_;
-
-        dimensionedScalar Ck_;
-
-
-    // Protected Member Functions
-
-        virtual void correctNut();
-        virtual tmp<fvScalarMatrix> kSource() const;
+        dimensionedScalar Ce_;
 
 
 public:
@@ -113,28 +78,24 @@ public:
     typedef typename BasicTurbulenceModel::transportModel transportModel;
 
 
-    //- Runtime type information
-    TypeName("kEqn");
-
-
     // Constructors
 
-        //- Constructor from components
-        kEqn
+        //- Construct from components
+        LESeddyViscosity
         (
+            const word& type,
             const alphaField& alpha,
             const rhoField& rho,
             const volVectorField& U,
             const surfaceScalarField& alphaPhi,
             const surfaceScalarField& phi,
             const transportModel& transport,
-            const word& propertiesName = turbulenceModel::propertiesName,
-            const word& type = typeName
+            const word& propertiesName = turbulenceModel::propertiesName
         );
 
 
     //- Destructor
-    virtual ~kEqn()
+    virtual ~LESeddyViscosity()
     {}
 
 
@@ -143,26 +104,8 @@ public:
         //- Read model coefficients if they have changed
         virtual bool read();
 
-        //- Return SGS kinetic energy
-        virtual tmp<volScalarField> k() const
-        {
-            return k_;
-        }
-
         //- Return sub-grid disipation rate
         virtual tmp<volScalarField> epsilon() const;
-
-        //- Return the effective diffusivity for k
-        tmp<volScalarField> DkEff() const
-        {
-            return tmp<volScalarField>
-            (
-                new volScalarField("DkEff", this->nut_ + this->nu())
-            );
-        }
-
-        //- Correct Eddy-Viscosity and related properties
-        virtual void correct();
 };
 
 
@@ -174,7 +117,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "kEqn.C"
+#   include "LESeddyViscosity.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
