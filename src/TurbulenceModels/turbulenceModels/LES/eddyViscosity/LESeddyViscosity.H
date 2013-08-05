@@ -71,20 +71,11 @@ protected:
         dimensionedScalar Ce_;
 
 
-    // Protected Member Functions
-
-        virtual void correctNut() = 0;
-
-
 public:
 
     typedef typename BasicTurbulenceModel::alphaField alphaField;
     typedef typename BasicTurbulenceModel::rhoField rhoField;
     typedef typename BasicTurbulenceModel::transportModel transportModel;
-
-
-    //- Runtime type information
-    TypeName("LESeddyViscosity");
 
 
     // Constructors
@@ -115,9 +106,6 @@ public:
 
         //- Return sub-grid disipation rate
         virtual tmp<volScalarField> epsilon() const;
-
-        //- Correct Eddy-Viscosity and related properties
-        virtual void correct() = 0;
 };
 
 
