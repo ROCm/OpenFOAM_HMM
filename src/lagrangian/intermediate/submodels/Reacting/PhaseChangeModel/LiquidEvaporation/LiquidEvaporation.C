@@ -247,7 +247,7 @@ Foam::scalar Foam::LiquidEvaporation<CloudType>::TMax(const scalar pIn) const
     scalar T = -GREAT;
     forAll(liquids_, i)
     {
-        T = max(T, liquids_.properties()[i].pv(pIn));
+        T = max(T, liquids_.properties()[i].pvInvert(pIn));
     }
 
     return T;

@@ -349,7 +349,7 @@ Foam::scalar Foam::LiquidEvaporationBoil<CloudType>::TMax
     scalar T = -GREAT;
     forAll(liquids_, i)
     {
-        T = max(T, liquids_.properties()[i].pv(pIn));
+        T = max(T, liquids_.properties()[i].pvInvert(pIn));
     }
 
     return T;
