@@ -62,7 +62,7 @@ SourceFiles
 #define Smagorinsky_H
 
 #include "LESModel.H"
-#include "eddyViscosity.H"
+#include "LESeddyViscosity.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -78,7 +78,7 @@ namespace LESModels
 template<class BasicTurbulenceModel>
 class Smagorinsky
 :
-    public eddyViscosity<LESModel<BasicTurbulenceModel> >
+    public LESeddyViscosity<BasicTurbulenceModel>
 {
     // Private Member Functions
 
@@ -92,7 +92,6 @@ protected:
     // Protected data
 
         dimensionedScalar Ck_;
-        dimensionedScalar Ce_;
 
 
     // Protected Member Functions
