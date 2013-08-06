@@ -34,10 +34,6 @@ License
 #include "mappedWallPolyPatch.H"
 #include "mapDistribute.H"
 
-#include "cachedRandom.H"
-#include "normal.H"
-#include "mathematicalConstants.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
