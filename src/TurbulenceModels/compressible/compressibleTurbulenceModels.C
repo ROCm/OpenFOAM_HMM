@@ -26,116 +26,37 @@ License
 #include "CompressibleTurbulenceModel.H"
 #include "fluidThermo.H"
 #include "addToRunTimeSelectionTable.H"
-
-namespace Foam
-{
-    typedef TurbulenceModel
-    <
-        geometricOneField,
-        volScalarField,
-        compressibleTurbulenceModel,
-        fluidThermo
-    > baseCompressibleFluidThermoTurbulenceModel;
-
-    defineTemplateRunTimeSelectionTable
-    (
-        baseCompressibleFluidThermoTurbulenceModel,
-        dictionary
-    );
-
-
-    typedef CompressibleTurbulenceModel<fluidThermo>
-        compressibleFluidThermoTurbulenceModel;
-}
-
+#include "makeTurbulenceModel.H"
 
 #include "laminar.H"
-
-namespace Foam
-{
-    typedef laminar<compressibleFluidThermoTurbulenceModel> compressibleLaminar;
-
-    defineNamedTemplateTypeNameAndDebug(compressibleLaminar, 0);
-
-    addToRunTimeSelectionTable
-    (
-        baseCompressibleFluidThermoTurbulenceModel,
-        compressibleLaminar,
-        dictionary
-    );
-}
-
-
 #include "RASModel.H"
-#include "kEpsilon.H"
-
-namespace Foam
-{
-    typedef RASModel<compressibleFluidThermoTurbulenceModel>
-        compressibleRASModel;
-
-    defineNamedTemplateTypeNameAndDebug(compressibleRASModel, 0);
-
-    defineTemplateRunTimeSelectionTable(compressibleRASModel, dictionary);
-
-    addToRunTimeSelectionTable
-    (
-        baseCompressibleFluidThermoTurbulenceModel,
-        compressibleRASModel,
-        dictionary
-    );
-
-    namespace RASModels
-    {
-        typedef kEpsilon<compressibleFluidThermoTurbulenceModel>
-            compressibleKEpsilon;
-
-        defineNamedTemplateTypeNameAndDebug(compressibleKEpsilon, 0);
-
-        addToRunTimeSelectionTable
-        (
-            compressibleRASModel,
-            compressibleKEpsilon,
-            dictionary
-        );
-    }
-}
-
-
 #include "LESModel.H"
+
+makeBaseTurbulenceModel
+(
+    geometricOneField,
+    volScalarField,
+    compressibleTurbulenceModel,
+    CompressibleTurbulenceModel,
+    fluidThermo
+);
+
+#define makeRASModel(Type)                                                     \
+    makeTemplatedTurbulenceModel                                               \
+    (fluidThermoCompressibleTurbulenceModel, RAS, Type)
+
+#define makeLESModel(Type)                                                     \
+    makeTemplatedTurbulenceModel                                               \
+    (fluidThermoCompressibleTurbulenceModel, LES, Type)
+
+#include "kEpsilon.H"
+makeRASModel(kEpsilon);
+
 #include "Smagorinsky.H"
+makeLESModel(Smagorinsky);
 
-namespace Foam
-{
-    typedef LESModel<compressibleFluidThermoTurbulenceModel>
-        compressibleLESModel;
-
-    defineNamedTemplateTypeNameAndDebug(compressibleLESModel, 0);
-
-    defineTemplateRunTimeSelectionTable(compressibleLESModel, dictionary);
-
-    addToRunTimeSelectionTable
-    (
-        baseCompressibleFluidThermoTurbulenceModel,
-        compressibleLESModel,
-        dictionary
-    );
-
-    namespace LESModels
-    {
-        typedef Smagorinsky<compressibleFluidThermoTurbulenceModel>
-            compressibleSmagorinsky;
-
-        defineNamedTemplateTypeNameAndDebug(compressibleSmagorinsky, 0);
-
-        addToRunTimeSelectionTable
-        (
-            compressibleLESModel,
-            compressibleSmagorinsky,
-            dictionary
-        );
-    }
-}
+#include "kEqn.H"
+makeLESModel(kEqn);
 
 
 // ************************************************************************* //

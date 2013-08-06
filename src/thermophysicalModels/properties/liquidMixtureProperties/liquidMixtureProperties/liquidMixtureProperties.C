@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -100,6 +100,18 @@ Foam::scalar Foam::liquidMixtureProperties::Tc(const scalarField& x) const
     }
 
     return vTc/vc;
+}
+
+
+Foam::scalar Foam::liquidMixtureProperties::TMax(const scalar p) const
+{
+    scalar T = -GREAT;
+    forAll(properties_, i)
+    {
+        T = max(T, properties_[i].pvInvert(p));
+    }
+
+    return T;
 }
 
 

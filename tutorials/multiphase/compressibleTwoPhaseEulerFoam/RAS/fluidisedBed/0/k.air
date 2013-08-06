@@ -37,6 +37,7 @@ boundaryField
     walls
     {
         type               kqRWallFunction;
+        value              $internalField;
     }
 
     frontAndBackPlanes

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -211,6 +211,14 @@ Foam::ThermoParcel<ParcelType>::constantProperties::TMin() const
 template<class ParcelType>
 inline Foam::scalar
 Foam::ThermoParcel<ParcelType>::constantProperties::TMax() const
+{
+    return TMax_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar&
+Foam::ThermoParcel<ParcelType>::constantProperties::TMax()
 {
     return TMax_;
 }

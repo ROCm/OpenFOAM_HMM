@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,6 +36,14 @@ Foam::ReactingMultiphaseCloud<CloudType>::cloudCopy() const
 template<class CloudType>
 inline const typename CloudType::particleType::constantProperties&
 Foam::ReactingMultiphaseCloud<CloudType>::constProps() const
+{
+    return constProps_;
+}
+
+
+template<class CloudType>
+inline typename CloudType::particleType::constantProperties&
+Foam::ReactingMultiphaseCloud<CloudType>::constProps()
 {
     return constProps_;
 }

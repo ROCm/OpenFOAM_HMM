@@ -28,7 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::phasePressureModel::phasePressureModel
+Foam::RASModels::phasePressureModel::phasePressureModel
 (
     const volScalarField& alpha,
     const geometricOneField& rho,
@@ -75,13 +75,13 @@ Foam::phasePressureModel::phasePressureModel
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::phasePressureModel::~phasePressureModel()
+Foam::RASModels::phasePressureModel::~phasePressureModel()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::phasePressureModel::read()
+bool Foam::RASModels::phasePressureModel::read()
 {
     if
     (
@@ -105,21 +105,24 @@ bool Foam::phasePressureModel::read()
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phasePressureModel::k() const
+Foam::tmp<Foam::volScalarField>
+Foam::RASModels::phasePressureModel::k() const
 {
     notImplemented("phasePressureModel::k()");
     return nut_;
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phasePressureModel::epsilon() const
+Foam::tmp<Foam::volScalarField>
+Foam::RASModels::phasePressureModel::epsilon() const
 {
     notImplemented("phasePressureModel::epsilon()");
     return nut_;
 }
 
 
-Foam::tmp<Foam::volSymmTensorField> Foam::phasePressureModel::R() const
+Foam::tmp<Foam::volSymmTensorField>
+Foam::RASModels::phasePressureModel::R() const
 {
     return tmp<volSymmTensorField>
     (
@@ -145,7 +148,8 @@ Foam::tmp<Foam::volSymmTensorField> Foam::phasePressureModel::R() const
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phasePressureModel::pPrime() const
+Foam::tmp<Foam::volScalarField>
+Foam::RASModels::phasePressureModel::pPrime() const
 {
     return
         g0_
@@ -157,7 +161,8 @@ Foam::tmp<Foam::volScalarField> Foam::phasePressureModel::pPrime() const
 }
 
 
-Foam::tmp<Foam::surfaceScalarField> Foam::phasePressureModel::pPrimef() const
+Foam::tmp<Foam::surfaceScalarField>
+Foam::RASModels::phasePressureModel::pPrimef() const
 {
     return
         g0_
@@ -169,7 +174,8 @@ Foam::tmp<Foam::surfaceScalarField> Foam::phasePressureModel::pPrimef() const
 }
 
 
-Foam::tmp<Foam::volSymmTensorField> Foam::phasePressureModel::devRhoReff() const
+Foam::tmp<Foam::volSymmTensorField>
+Foam::RASModels::phasePressureModel::devRhoReff() const
 {
     return tmp<volSymmTensorField>
     (
@@ -195,7 +201,8 @@ Foam::tmp<Foam::volSymmTensorField> Foam::phasePressureModel::devRhoReff() const
 }
 
 
-Foam::tmp<Foam::fvVectorMatrix> Foam::phasePressureModel::divDevRhoReff
+Foam::tmp<Foam::fvVectorMatrix>
+Foam::RASModels::phasePressureModel::divDevRhoReff
 (
     volVectorField& U
 ) const
@@ -211,7 +218,7 @@ Foam::tmp<Foam::fvVectorMatrix> Foam::phasePressureModel::divDevRhoReff
 }
 
 
-void Foam::phasePressureModel::correct()
+void Foam::RASModels::phasePressureModel::correct()
 {}
 
 
