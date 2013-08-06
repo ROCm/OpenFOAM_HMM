@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -126,7 +126,7 @@ do
     if [ -e "$dir" ]
     then
         #- no duplicate dirs
-        duplicate=$(echo " $dirList " | sed -ne "s@ $dir @DUP@p")
+        duplicate=$(echo " $dirList " | sed -ne "s: $dir :DUP:p")
 
         if [ ! "$duplicate" ]
         then

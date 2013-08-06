@@ -58,7 +58,6 @@
         {
             tphiAlphaCorr() -= tphiAlpha();
 
-
             volScalarField alpha100("alpha100", alpha10);
             alpha10 = alpha1;
 

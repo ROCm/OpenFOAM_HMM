@@ -24,149 +24,64 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "PhaseIncompressibleTurbulenceModel.H"
-#include "laminar.H"
-#include "RASModel.H"
-#include "kEpsilon.H"
-#include "LaheyKEpsilon.H"
-#include "continuousGasKEpsilon.H"
-#include "kineticTheoryModel.H"
-#include "phasePressureModel.H"
 #include "phaseModel.H"
 #include "addToRunTimeSelectionTable.H"
+#include "makeTurbulenceModel.H"
 
-namespace Foam
-{
-    typedef TurbulenceModel
-    <
-        volScalarField,
-        geometricOneField,
-        incompressibleTurbulenceModel,
-        phaseModel
-    > basePhaseIncompressibleTransportTurbulenceModel;
+#include "laminar.H"
+#include "RASModel.H"
+#include "LESModel.H"
 
-    defineTemplateRunTimeSelectionTable
-    (
-        basePhaseIncompressibleTransportTurbulenceModel,
-        dictionary
-    );
+makeBaseTurbulenceModel
+(
+    volScalarField,
+    geometricOneField,
+    incompressibleTurbulenceModel,
+    PhaseIncompressibleTurbulenceModel,
+    phaseModel
+);
 
-    typedef PhaseIncompressibleTurbulenceModel<phaseModel>
-        incompressibleTransportTurbulenceModel;
+#define makeRASModel(Type)                                                     \
+    makeTemplatedTurbulenceModel                                               \
+    (phaseModelPhaseIncompressibleTurbulenceModel, RAS, Type)
 
-    typedef laminar<incompressibleTransportTurbulenceModel>
-        incompressibleLaminar;
+#define makeLESModel(Type)                                                     \
+    makeTemplatedTurbulenceModel                                               \
+    (phaseModelPhaseIncompressibleTurbulenceModel, LES, Type)
 
-    defineNamedTemplateTypeNameAndDebug(incompressibleLaminar, 0);
+#include "kEpsilon.H"
+makeRASModel(kEpsilon);
 
-    addToRunTimeSelectionTable
-    (
-        basePhaseIncompressibleTransportTurbulenceModel,
-        incompressibleLaminar,
-        dictionary
-    );
+#include "LaheyKEpsilon.H"
+makeRASModel(LaheyKEpsilon);
 
+#include "continuousGasKEpsilon.H"
+makeRASModel(continuousGasKEpsilon);
 
-    typedef RASModel<incompressibleTransportTurbulenceModel>
-        incompressibleRASModel;
+#include "Smagorinsky.H"
+makeLESModel(Smagorinsky);
 
-    defineNamedTemplateTypeNameAndDebug(incompressibleRASModel, 0);
+#include "kEqn.H"
+makeLESModel(kEqn);
 
-    defineTemplateRunTimeSelectionTable(incompressibleRASModel, dictionary);
+#include "SmagorinskyZhang.H"
+makeLESModel(SmagorinskyZhang);
 
-    addToRunTimeSelectionTable
-    (
-        basePhaseIncompressibleTransportTurbulenceModel,
-        incompressibleRASModel,
-        dictionary
-    );
+#include "NicenoKEqn.H"
+makeLESModel(NicenoKEqn);
 
-    namespace RASModels
-    {
-        typedef kEpsilon<incompressibleTransportTurbulenceModel>
-            incompressiblekEpsilon;
-
-        defineNamedTemplateTypeNameAndDebug(incompressiblekEpsilon, 0);
-
-        addToRunTimeSelectionTable
-        (
-            incompressibleRASModel,
-            incompressiblekEpsilon,
-            dictionary
-        );
-    }
-
-    namespace RASModels
-    {
-        typedef LaheyKEpsilon<incompressibleTransportTurbulenceModel>
-            incompressibleLaheyKEpsilon;
-
-        defineNamedTemplateTypeNameAndDebug(incompressibleLaheyKEpsilon, 0);
-
-        addToRunTimeSelectionTable
-        (
-            incompressibleRASModel,
-            incompressibleLaheyKEpsilon,
-            dictionary
-        );
-    }
-
-    namespace RASModels
-    {
-        typedef continuousGasKEpsilon<incompressibleTransportTurbulenceModel>
-            incompressiblecontinuousGasKEpsilon;
-
-        defineNamedTemplateTypeNameAndDebug
-        (
-            incompressiblecontinuousGasKEpsilon,
-            0
-        );
-
-        addToRunTimeSelectionTable
-        (
-            incompressibleRASModel,
-            incompressiblecontinuousGasKEpsilon,
-            dictionary
-        );
-    }
-}
+#include "continuousGasKEqn.H"
+makeLESModel(continuousGasKEqn);
 
 
-namespace Foam
-{
-    typedef PhaseIncompressibleTurbulenceModel<phaseModel>
-        incompressibleTransportTurbulenceModel;
-
-    typedef RASModel<incompressibleTransportTurbulenceModel>
-        incompressibleRASModel;
-
-    defineTypeNameAndDebug(kineticTheoryModel, 0);
-
-    addToRunTimeSelectionTable
-    (
-        incompressibleRASModel,
-        kineticTheoryModel,
-        dictionary
-    );
-}
+#include "kineticTheoryModel.H"
+makeTurbulenceModel
+(phaseModelPhaseIncompressibleTurbulenceModel, RAS, kineticTheoryModel);
 
 
-namespace Foam
-{
-    typedef PhaseIncompressibleTurbulenceModel<phaseModel>
-        incompressibleTransportTurbulenceModel;
-
-    typedef RASModel<incompressibleTransportTurbulenceModel>
-        incompressibleRASModel;
-
-    defineTypeNameAndDebug(phasePressureModel, 0);
-
-    addToRunTimeSelectionTable
-    (
-        incompressibleRASModel,
-        phasePressureModel,
-        dictionary
-    );
-}
+#include "phasePressureModel.H"
+makeTurbulenceModel
+(phaseModelPhaseIncompressibleTurbulenceModel, RAS, phasePressureModel);
 
 
 // ************************************************************************* //

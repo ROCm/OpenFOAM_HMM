@@ -868,7 +868,12 @@ public:
             void selectSeparatedCoupledFaces(boolList&) const;
 
             //- Split mesh. Keep part containing point.
-            autoPtr<mapPolyMesh> splitMeshRegions(const point& keepPoint);
+            autoPtr<mapPolyMesh> splitMeshRegions
+            (
+                const labelList& globalToMasterPatch,
+                const labelList& globalToSlavePatch,
+                const point& keepPoint
+            );
 
             //- Update local numbering for mesh redistribution
             void distribute(const mapDistributePolyMesh&);

@@ -24,13 +24,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "phasePressureModel.H"
-#include "surfaceInterpolate.H"
 #include "twoPhaseSystem.H"
-#include "dimensionedType.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::phasePressureModel::phasePressureModel
+Foam::RASModels::phasePressureModel::phasePressureModel
 (
     const volScalarField& alpha,
     const geometricOneField& rho,
@@ -42,7 +40,7 @@ Foam::phasePressureModel::phasePressureModel
     const word& type
 )
 :
-    RASModels::eddyViscosity<PhaseIncompressibleTurbulenceModel<phaseModel> >
+    eddyViscosity<RASModel<PhaseIncompressibleTurbulenceModel<phaseModel> > >
     (
         type,
         alpha,
@@ -67,64 +65,64 @@ Foam::phasePressureModel::phasePressureModel
     )
 {
     this->nut_ == dimensionedScalar("zero", this->nut_.dimensions(), 0.0);
+
+    if (type == typeName)
+    {
+        this->printCoeffs(type);
+    }
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::phasePressureModel::~phasePressureModel()
+Foam::RASModels::phasePressureModel::~phasePressureModel()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::phasePressureModel::correct()
-{}
-
-
-void Foam::phasePressureModel::correctNut()
-{}
-
-
-Foam::tmp<Foam::volScalarField> Foam::phasePressureModel::pPrime() const
+bool Foam::RASModels::phasePressureModel::read()
 {
-    return
-        g0_
-       *min
-        (
-            exp(preAlphaExp_*(this->alpha_ - alphaMax_)),
-            expMax_
-        );
+    if
+    (
+        eddyViscosity
+        <
+            RASModel<PhaseIncompressibleTurbulenceModel<phaseModel> >
+        >::read()
+    )
+    {
+        this->coeffDict().lookup("alphaMax") >> alphaMax_;
+        this->coeffDict().lookup("preAlphaExp") >> preAlphaExp_;
+        this->coeffDict().lookup("expMax") >> expMax_;
+        g0_.readIfPresent(this->coeffDict());
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 
-Foam::tmp<Foam::surfaceScalarField> Foam::phasePressureModel::pPrimef() const
-{
-    return
-        g0_
-       *min
-        (
-            exp(preAlphaExp_*(fvc::interpolate(this->alpha_) - alphaMax_)),
-            expMax_
-        );
-}
-
-
-Foam::tmp<Foam::volScalarField> Foam::phasePressureModel::k() const
+Foam::tmp<Foam::volScalarField>
+Foam::RASModels::phasePressureModel::k() const
 {
     notImplemented("phasePressureModel::k()");
     return nut_;
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phasePressureModel::epsilon() const
+Foam::tmp<Foam::volScalarField>
+Foam::RASModels::phasePressureModel::epsilon() const
 {
     notImplemented("phasePressureModel::epsilon()");
     return nut_;
 }
 
 
-Foam::tmp<Foam::volSymmTensorField> Foam::phasePressureModel::R() const
+Foam::tmp<Foam::volSymmTensorField>
+Foam::RASModels::phasePressureModel::R() const
 {
     return tmp<volSymmTensorField>
     (
@@ -150,7 +148,34 @@ Foam::tmp<Foam::volSymmTensorField> Foam::phasePressureModel::R() const
 }
 
 
-Foam::tmp<Foam::volSymmTensorField> Foam::phasePressureModel::devRhoReff() const
+Foam::tmp<Foam::volScalarField>
+Foam::RASModels::phasePressureModel::pPrime() const
+{
+    return
+        g0_
+       *min
+        (
+            exp(preAlphaExp_*(this->alpha_ - alphaMax_)),
+            expMax_
+        );
+}
+
+
+Foam::tmp<Foam::surfaceScalarField>
+Foam::RASModels::phasePressureModel::pPrimef() const
+{
+    return
+        g0_
+       *min
+        (
+            exp(preAlphaExp_*(fvc::interpolate(this->alpha_) - alphaMax_)),
+            expMax_
+        );
+}
+
+
+Foam::tmp<Foam::volSymmTensorField>
+Foam::RASModels::phasePressureModel::devRhoReff() const
 {
     return tmp<volSymmTensorField>
     (
@@ -176,7 +201,8 @@ Foam::tmp<Foam::volSymmTensorField> Foam::phasePressureModel::devRhoReff() const
 }
 
 
-Foam::tmp<Foam::fvVectorMatrix> Foam::phasePressureModel::divDevRhoReff
+Foam::tmp<Foam::fvVectorMatrix>
+Foam::RASModels::phasePressureModel::divDevRhoReff
 (
     volVectorField& U
 ) const
@@ -192,28 +218,8 @@ Foam::tmp<Foam::fvVectorMatrix> Foam::phasePressureModel::divDevRhoReff
 }
 
 
-bool Foam::phasePressureModel::read()
-{
-    if
-    (
-        RASModels::eddyViscosity
-        <
-            PhaseIncompressibleTurbulenceModel<phaseModel>
-        >::read()
-    )
-    {
-        this->coeffDict().lookup("alphaMax") >> alphaMax_;
-        this->coeffDict().lookup("preAlphaExp") >> preAlphaExp_;
-        this->coeffDict().lookup("expMax") >> expMax_;
-        g0_.readIfPresent(this->coeffDict());
-
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
+void Foam::RASModels::phasePressureModel::correct()
+{}
 
 
 // ************************************************************************* //

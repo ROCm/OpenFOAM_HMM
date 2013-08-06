@@ -131,7 +131,7 @@ void Foam::meshRefinement::calcNeighbourData
                     // Other cell more refined. Adjust normal distance
                     d *= 0.5;
                 }
-                neiLevel[bFaceI] = cellLevel[ownLevel];
+                neiLevel[bFaceI] = faceLevel;
                 // Calculate other cell centre by extrapolation
                 neiCc[bFaceI] = faceCentres[i] + d*fn;
                 bFaceI++;
@@ -1901,8 +1901,6 @@ void Foam::meshRefinement::selectSeparatedCoupledFaces(boolList& selected) const
 
     forAll(patches, patchI)
     {
-        const polyPatch& pp = patches[patchI];
-
         // Check all coupled. Avoid using .coupled() so we also pick up AMI.
         if (isA<coupledPolyPatch>(patches[patchI]))
         {
@@ -1913,9 +1911,9 @@ void Foam::meshRefinement::selectSeparatedCoupledFaces(boolList& selected) const
 
             if (cpp.separated() || !cpp.parallel())
             {
-                forAll(pp, i)
+                forAll(cpp, i)
                 {
-                    selected[pp.start()+i] = true;
+                    selected[cpp.start()+i] = true;
                 }
             }
         }
@@ -1925,6 +1923,8 @@ void Foam::meshRefinement::selectSeparatedCoupledFaces(boolList& selected) const
 
 Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
 (
+    const labelList& globalToMasterPatch,
+    const labelList& globalToSlavePatch,
     const point& keepPoint
 )
 {
@@ -1933,7 +1933,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
 
     // Determine connected regions. regionSplit is the labelList with the
     // region per cell.
-    regionSplit cellRegion(mesh_);
+
+    boolList blockedFace(mesh_.nFaces(), false);
+    selectSeparatedCoupledFaces(blockedFace);
+
+    regionSplit cellRegion(mesh_, blockedFace);
 
     label regionI = -1;
 
@@ -1985,22 +1989,39 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
     removeCells cellRemover(mesh_);
 
     labelList exposedFaces(cellRemover.getExposedFaces(cellsToRemove));
+    labelList exposedPatch;
 
-    if (exposedFaces.size())
+    label nExposedFaces = returnReduce(exposedFaces.size(), sumOp<label>());
+    if (nExposedFaces)
     {
-        FatalErrorIn
+        //FatalErrorIn
+        //(
+        //    "meshRefinement::splitMeshRegions(const point&)"
+        //)   << "Removing non-reachable cells should only expose"
+        //    << " boundary faces" << nl
+        //    << "ExposedFaces:" << exposedFaces << abort(FatalError);
+
+        // Patch for exposed faces for lack of anything sensible.
+        label defaultPatch = 0;
+        if (globalToMasterPatch.size())
+        {
+            defaultPatch = globalToMasterPatch[0];
+        }
+
+        WarningIn
         (
             "meshRefinement::splitMeshRegions(const point&)"
-        )   << "Removing non-reachable cells should only expose boundary faces"
-            << nl
-            << "ExposedFaces:" << exposedFaces << abort(FatalError);
+        )   << "Removing non-reachable cells exposes "
+            << nExposedFaces << " internal or coupled faces." << endl
+            << "    These get put into patch " << defaultPatch << endl;
+        exposedPatch.setSize(exposedFaces.size(), defaultPatch);
     }
 
     return doRemoveCells
     (
         cellsToRemove,
         exposedFaces,
-        labelList(exposedFaces.size(),-1),  // irrelevant since 0 size.
+        exposedPatch,
         cellRemover
     );
 }

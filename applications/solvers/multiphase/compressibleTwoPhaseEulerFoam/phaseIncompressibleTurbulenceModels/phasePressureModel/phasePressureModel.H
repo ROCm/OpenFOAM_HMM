@@ -25,6 +25,23 @@ Class
     Foam::phasePressureModel
 
 Description
+    Particle-particle phase-pressure RAS model
+
+    The derivative of the phase-pressure with respect to the phase-fraction
+    is evaluated as
+
+        g0*min(exp(preAlphaExp*(alpha - alphaMax)), expMax)
+
+    The default model coefficients correspond to the following:
+    \verbatim
+        phasePressureCoeffs
+        {
+            preAlphaExp     500;
+            expMax          1000;
+            alphaMax        0.62;
+            g0              1000;
+        }
+    \endverbatim
 
 SourceFiles
     phasePressureModel.C
@@ -34,21 +51,16 @@ SourceFiles
 #ifndef phasePressureModel_H
 #define phasePressureModel_H
 
+#include "RASModel.H"
 #include "eddyViscosity.H"
 #include "PhaseIncompressibleTurbulenceModel.H"
-#include "dragModel.H"
 #include "phaseModel.H"
-#include "autoPtr.H"
-#include "viscosityModel.H"
-#include "conductivityModel.H"
-#include "radialModel.H"
-#include "granularPressureModel.H"
-#include "frictionalStressModel.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -57,9 +69,9 @@ namespace Foam
 
 class phasePressureModel
 :
-    public RASModels::eddyViscosity
+    public eddyViscosity
     <
-        PhaseIncompressibleTurbulenceModel<phaseModel>
+        RASModel<PhaseIncompressibleTurbulenceModel<phaseModel> >
     >
 {
     // Private data
@@ -86,18 +98,14 @@ class phasePressureModel
 
     // Private Member Functions
 
+        void correctNut()
+        {}
+
         //- Disallow default bitwise copy construct
         phasePressureModel(const phasePressureModel&);
 
         //- Disallow default bitwise assignment
         void operator=(const phasePressureModel&);
-
-
-protected:
-
-    // Protected member functions
-
-        virtual void correctNut();
 
 
 public:
@@ -127,6 +135,9 @@ public:
 
 
     // Member Functions
+
+        //- Re-read model coefficients if they have changed
+        virtual bool read();
 
         //- Return the effective viscosity
         virtual tmp<volScalarField> nuEff() const
@@ -165,14 +176,12 @@ public:
 
         //- Solve the kinetic theory equations and correct the viscosity
         virtual void correct();
-
-        //- Re-read model coefficients if they have changed
-        virtual bool read();
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace RASModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

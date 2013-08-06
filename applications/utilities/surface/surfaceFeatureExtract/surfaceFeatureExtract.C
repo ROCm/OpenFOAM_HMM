@@ -974,28 +974,6 @@ int main(int argc, char *argv[])
         const word extractionMethod = surfaceDict.lookup("extractionMethod");
 
 
-#ifndef ENABLE_CURVATURE
-        if (curvature)
-        {
-            WarningIn(args.executable())
-                << "Curvature calculation has been requested but "
-                << args.executable() << " has not " << nl
-                << "    been compiled with CGAL. "
-                << "Skipping the curvature calculation." << endl;
-        }
-#else
-        if (curvature && env("FOAM_SIGFPE"))
-        {
-            WarningIn(args.executable())
-                << "Detected floating point exception trapping (FOAM_SIGFPE)."
-                << " This might give" << nl
-                << "    problems when calculating curvature on straight angles"
-                << " (infinite curvature)" << nl
-                << "    Switch it off in case of problems." << endl;
-        }
-#endif
-
-
         Info<< nl << "Feature line extraction is only valid on closed manifold "
             << "surfaces." << endl;
 

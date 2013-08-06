@@ -21,7 +21,8 @@ RAS
 {
     RASModel phasePressure;
 
-    turbulence on;
+    turbulence      on;
+    printCoeffs     on;
 
     kineticTheoryCoeffs
     {

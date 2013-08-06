@@ -25,6 +25,17 @@ Class
     Foam::kineticTheoryModel
 
 Description
+    Kinetic theory particle phase RAS model
+
+    Reference:
+    \verbatim
+        "Derivation, implementation, and validation of computer simulation
+        models for gas-solid fluidized beds",
+        B.G.M. van Wachem,
+        Ph.D. Thesis, Delft University of Technology, Amsterdam, 2000.
+    \endverbatim
+
+    There are no default model coefficients.
 
 SourceFiles
     kineticTheoryModel.C
@@ -34,11 +45,11 @@ SourceFiles
 #ifndef kineticTheoryModel_H
 #define kineticTheoryModel_H
 
+#include "RASModel.H"
 #include "eddyViscosity.H"
 #include "PhaseIncompressibleTurbulenceModel.H"
-#include "dragModel.H"
 #include "phaseModel.H"
-#include "autoPtr.H"
+#include "dragModel.H"
 #include "viscosityModel.H"
 #include "conductivityModel.H"
 #include "radialModel.H"
@@ -50,6 +61,8 @@ SourceFiles
 
 namespace Foam
 {
+namespace RASModels
+{
 
 /*---------------------------------------------------------------------------*\
                            Class kineticTheoryModel Declaration
@@ -57,9 +70,9 @@ namespace Foam
 
 class kineticTheoryModel
 :
-    public RASModels::eddyViscosity
+    public eddyViscosity
     <
-        PhaseIncompressibleTurbulenceModel<phaseModel>
+        RASModel<PhaseIncompressibleTurbulenceModel<phaseModel> >
     >
 {
     // Private data
@@ -118,18 +131,14 @@ class kineticTheoryModel
 
     // Private Member Functions
 
+        void correctNut()
+        {}
+
         //- Disallow default bitwise copy construct
         kineticTheoryModel(const kineticTheoryModel&);
 
         //- Disallow default bitwise assignment
         void operator=(const kineticTheoryModel&);
-
-
-protected:
-
-    // Protected member functions
-
-        virtual void correctNut();
 
 
 public:
@@ -159,6 +168,9 @@ public:
 
 
     // Member Functions
+
+        //- Re-read model coefficients if they have changed
+        virtual bool read();
 
         //- Return the effective viscosity
         virtual tmp<volScalarField> nuEff() const
@@ -197,14 +209,12 @@ public:
 
         //- Solve the kinetic theory equations and correct the viscosity
         virtual void correct();
-
-        //- Re-read model coefficients if they have changed
-        virtual bool read();
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace RASModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -231,6 +231,42 @@ public:
                 const label nCoarse,
                 const bool global,
                 CompactListList<label>& cellCells
+            );
+
+            //- Helper: determine (local or global) cellCells from mesh
+            //  agglomeration and additional specification:
+            //  - any additional connections between non-coupled internal
+            //    or boundary faces.
+            //  - any internal or coupled faces (or additional connections)
+            //    are blocked
+            //
+            //  local  : connections are in local indices. Coupled across
+            //           cyclics but not processor patches.
+            //  global : connections are in global indices. Coupled across
+            //            cyclics and processor patches.
+            //static void calcCellCells
+            //(
+            //    const polyMesh& mesh,
+            //    const boolList& blockedFace,
+            //    const List<labelPair>& explicitConnections,
+            //    const labelList& agglom,
+            //    const label nCoarse,
+            //    const bool global,
+            //    CompactListList<label>& cellCells
+            //);
+
+            //- Decompose a mesh. Apply all constraints from decomposeParDict
+            //  ('preserveFaceZones' etc). Calls either
+            //  - no constraints, empty weights:
+            //      decompose(mesh, cellCentres())
+            //  - no constraints, set weights:
+            //      decompose(mesh, cellCentres(), cellWeights)
+            //  - valid constraints:
+            //      decompose(mesh, cellToRegion, regionPoints, regionWeights)
+            labelList decompose
+            (
+                const polyMesh& mesh,
+                const scalarField& cWeights
             );
 
 };

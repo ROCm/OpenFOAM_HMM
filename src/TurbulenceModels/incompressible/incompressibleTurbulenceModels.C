@@ -24,75 +24,39 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "IncompressibleTurbulenceModel.H"
-#include "laminar.H"
-#include "RASModel.H"
-#include "kEpsilon.H"
 #include "transportModel.H"
 #include "addToRunTimeSelectionTable.H"
+#include "makeTurbulenceModel.H"
 
-namespace Foam
-{
-    typedef TurbulenceModel
-    <
-        geometricOneField,
-        geometricOneField,
-        incompressibleTurbulenceModel,
-        transportModel
-    > baseIncompressibleTransportTurbulenceModel;
+#include "laminar.H"
+#include "RASModel.H"
+#include "LESModel.H"
 
-    defineTemplateRunTimeSelectionTable
-    (
-        baseIncompressibleTransportTurbulenceModel,
-        dictionary
-    );
+makeBaseTurbulenceModel
+(
+    geometricOneField,
+    geometricOneField,
+    incompressibleTurbulenceModel,
+    IncompressibleTurbulenceModel,
+    transportModel
+);
 
-    typedef IncompressibleTurbulenceModel
-    <
-        transportModel
-    > incompressibleTransportTurbulenceModel;
+#define makeRASModel(Type)                                                     \
+    makeTemplatedTurbulenceModel                                               \
+    (transportModelIncompressibleTurbulenceModel, RAS, Type)
 
-    typedef laminar<incompressibleTransportTurbulenceModel>
-        incompressibleLaminar;
+#define makeLESModel(Type)                                                     \
+    makeTemplatedTurbulenceModel                                               \
+    (transportModelIncompressibleTurbulenceModel, LES, Type)
 
-    defineNamedTemplateTypeNameAndDebug(incompressibleLaminar, 0);
+#include "kEpsilon.H"
+makeRASModel(kEpsilon);
 
-    addToRunTimeSelectionTable
-    (
-        baseIncompressibleTransportTurbulenceModel,
-        incompressibleLaminar,
-        dictionary
-    );
+#include "Smagorinsky.H"
+makeLESModel(Smagorinsky);
 
-
-    typedef RASModel<incompressibleTransportTurbulenceModel>
-        incompressibleRASModel;
-
-    defineNamedTemplateTypeNameAndDebug(incompressibleRASModel, 0);
-
-    defineTemplateRunTimeSelectionTable(incompressibleRASModel, dictionary);
-
-    addToRunTimeSelectionTable
-    (
-        baseIncompressibleTransportTurbulenceModel,
-        incompressibleRASModel,
-        dictionary
-    );
-
-    namespace RASModels
-    {
-        typedef kEpsilon<incompressibleTransportTurbulenceModel>
-            incompressibleKEpsilon;
-
-        defineNamedTemplateTypeNameAndDebug(incompressibleKEpsilon, 0);
-
-        addToRunTimeSelectionTable
-        (
-            incompressibleRASModel,
-            incompressibleKEpsilon,
-            dictionary
-        );
-    }
-}
+#include "kEqn.H"
+makeLESModel(kEqn);
 
 
 // ************************************************************************* //
