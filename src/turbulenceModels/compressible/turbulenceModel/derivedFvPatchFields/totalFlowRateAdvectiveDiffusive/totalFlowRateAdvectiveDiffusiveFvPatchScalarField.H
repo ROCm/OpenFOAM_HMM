@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,10 @@ Class
     Foam::totalFlowRateAdvectiveDiffusiveFvPatchScalarField
 
 Description
-    Foam::totalFlowRateAdvectiveDiffusiveFvPatchScalarField
+    This BC is used for species inlets. The diffusion and advection fluxes are
+    considered to calculate the inlet value for the species
+    The massFluxFraction sets the fraction of the flux of each particular
+    species.
 
 SourceFiles
     totalFlowRateAdvectiveDiffusiveFvPatchScalarField.C
@@ -59,6 +62,8 @@ class totalFlowRateAdvectiveDiffusiveFvPatchScalarField
         //  if neccessary
         word rhoName_;
 
+        //- Mass flux fraction
+        scalar massFluxFraction_;
 
 public:
 
@@ -137,13 +142,6 @@ public:
 
     // Member functions
 
-        // Access
-
-            //- Return reference to the name of the flux field
-            word& phiName()
-            {
-                return phiName_;
-            }
 
 
         // Mapping functions
