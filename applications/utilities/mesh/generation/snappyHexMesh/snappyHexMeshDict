@@ -196,6 +196,8 @@ castellatedMeshControls
     // - used to determine if surface normals
     //   are roughly the same or opposite. Used e.g. in proximity refinement
     //   and to decide when to merge free-standing baffles
+    //   If e.g. running in surfaceSimplify mode set this to 180 to
+    //   merge all baffles
     //
     // If not specified same as resolveFeatureAngle
     planarAngle 30;
