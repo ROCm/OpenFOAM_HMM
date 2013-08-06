@@ -255,6 +255,34 @@ public:
             //    CompactListList<label>& cellCells
             //);
 
+
+            //- Helper: extract constraints
+            void setConstraints
+            (
+                const polyMesh& mesh,
+                boolList& blockedFace,
+                PtrList<labelList>& specifiedProcessorFaces,
+                labelList& specifiedProcessor
+            );
+
+            // Decompose a mesh with constraints:
+            // - blockedFace : whether owner and neighbour should be on
+            // - specifiedProcessorFaces, specifiedProcessor : sets of faces
+            //   that should go to same processor (as specified in
+            //   specifiedProcessor, can be -1)
+            // - explicitConnections : connections between baffle faces
+            // Set all to zero size to have unconstrained decomposition.
+            labelList decompose
+            (
+                const polyMesh& mesh,
+                const scalarField& cellWeights,
+                const boolList& blockedFace,
+                const PtrList<labelList>& specifiedProcessorFaces,
+                const labelList& specifiedProcessor,
+                const List<labelPair>& explicitConnections
+            );
+
+
             //- Decompose a mesh. Apply all constraints from decomposeParDict
             //  ('preserveFaceZones' etc). Calls either
             //  - no constraints, empty weights:
