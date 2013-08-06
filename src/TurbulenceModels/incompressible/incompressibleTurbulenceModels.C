@@ -26,136 +26,37 @@ License
 #include "IncompressibleTurbulenceModel.H"
 #include "transportModel.H"
 #include "addToRunTimeSelectionTable.H"
-
-namespace Foam
-{
-    typedef TurbulenceModel
-    <
-        geometricOneField,
-        geometricOneField,
-        incompressibleTurbulenceModel,
-        transportModel
-    > baseIncompressibleTransportTurbulenceModel;
-
-    defineTemplateRunTimeSelectionTable
-    (
-        baseIncompressibleTransportTurbulenceModel,
-        dictionary
-    );
-
-    typedef IncompressibleTurbulenceModel
-    <
-        transportModel
-    > incompressibleTransportTurbulenceModel;
-}
-
+#include "makeTurbulenceModel.H"
 
 #include "laminar.H"
-
-namespace Foam
-{
-    typedef laminar<incompressibleTransportTurbulenceModel>
-        incompressibleLaminar;
-
-    defineNamedTemplateTypeNameAndDebug(incompressibleLaminar, 0);
-
-    addToRunTimeSelectionTable
-    (
-        baseIncompressibleTransportTurbulenceModel,
-        incompressibleLaminar,
-        dictionary
-    );
-}
-
-
-
 #include "RASModel.H"
-#include "kEpsilon.H"
-
-namespace Foam
-{
-    typedef RASModel<incompressibleTransportTurbulenceModel>
-        incompressibleRASModel;
-
-    defineNamedTemplateTypeNameAndDebug(incompressibleRASModel, 0);
-
-    defineTemplateRunTimeSelectionTable(incompressibleRASModel, dictionary);
-
-    addToRunTimeSelectionTable
-    (
-        baseIncompressibleTransportTurbulenceModel,
-        incompressibleRASModel,
-        dictionary
-    );
-
-    namespace RASModels
-    {
-        typedef kEpsilon<incompressibleTransportTurbulenceModel>
-            incompressibleKEpsilon;
-
-        defineNamedTemplateTypeNameAndDebug(incompressibleKEpsilon, 0);
-
-        addToRunTimeSelectionTable
-        (
-            incompressibleRASModel,
-            incompressibleKEpsilon,
-            dictionary
-        );
-    }
-}
-
-
 #include "LESModel.H"
+
+makeBaseTurbulenceModel
+(
+    geometricOneField,
+    geometricOneField,
+    incompressibleTurbulenceModel,
+    IncompressibleTurbulenceModel,
+    transportModel
+);
+
+#define makeRASModel(Type)                                                     \
+    makeTemplatedTurbulenceModel                                               \
+    (transportModelIncompressibleTurbulenceModel, RAS, Type)
+
+#define makeLESModel(Type)                                                     \
+    makeTemplatedTurbulenceModel                                               \
+    (transportModelIncompressibleTurbulenceModel, LES, Type)
+
+#include "kEpsilon.H"
+makeRASModel(kEpsilon);
+
 #include "Smagorinsky.H"
+makeLESModel(Smagorinsky);
+
 #include "kEqn.H"
-
-namespace Foam
-{
-    typedef LESModel<incompressibleTransportTurbulenceModel>
-        incompressibleLESModel;
-
-    defineNamedTemplateTypeNameAndDebug(incompressibleLESModel, 0);
-
-    defineTemplateRunTimeSelectionTable(incompressibleLESModel, dictionary);
-
-    addToRunTimeSelectionTable
-    (
-        baseIncompressibleTransportTurbulenceModel,
-        incompressibleLESModel,
-        dictionary
-    );
-
-    namespace LESModels
-    {
-        typedef Smagorinsky<incompressibleTransportTurbulenceModel>
-            incompressibleSmagorinsky;
-
-        defineNamedTemplateTypeNameAndDebug(incompressibleSmagorinsky, 0);
-
-        addToRunTimeSelectionTable
-        (
-            incompressibleLESModel,
-            incompressibleSmagorinsky,
-            dictionary
-        );
-    }
-
-
-    namespace LESModels
-    {
-        typedef kEqn<incompressibleTransportTurbulenceModel>
-            incompressiblekEqn;
-
-        defineNamedTemplateTypeNameAndDebug(incompressiblekEqn, 0);
-
-        addToRunTimeSelectionTable
-        (
-            incompressibleLESModel,
-            incompressiblekEqn,
-            dictionary
-        );
-    }
-}
+makeLESModel(kEqn);
 
 
 // ************************************************************************* //

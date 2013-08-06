@@ -60,6 +60,8 @@ SourceFiles
 
 namespace Foam
 {
+namespace RASModels
+{
 
 /*---------------------------------------------------------------------------*\
                            Class phasePressureModel Declaration
@@ -179,6 +181,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace RASModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

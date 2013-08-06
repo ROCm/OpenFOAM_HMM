@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::kineticTheoryModel::kineticTheoryModel
+Foam::RASModels::kineticTheoryModel::kineticTheoryModel
 (
     const volScalarField& alpha,
     const geometricOneField& rho,
@@ -139,13 +139,13 @@ Foam::kineticTheoryModel::kineticTheoryModel
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::kineticTheoryModel::~kineticTheoryModel()
+Foam::RASModels::kineticTheoryModel::~kineticTheoryModel()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::kineticTheoryModel::read()
+bool Foam::RASModels::kineticTheoryModel::read()
 {
     if
     (
@@ -175,21 +175,24 @@ bool Foam::kineticTheoryModel::read()
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::kineticTheoryModel::k() const
+Foam::tmp<Foam::volScalarField>
+Foam::RASModels::kineticTheoryModel::k() const
 {
     notImplemented("kineticTheoryModel::k()");
     return nut_;
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::kineticTheoryModel::epsilon() const
+Foam::tmp<Foam::volScalarField>
+Foam::RASModels::kineticTheoryModel::epsilon() const
 {
     notImplemented("kineticTheoryModel::epsilon()");
     return nut_;
 }
 
 
-Foam::tmp<Foam::volSymmTensorField> Foam::kineticTheoryModel::R() const
+Foam::tmp<Foam::volSymmTensorField>
+Foam::RASModels::kineticTheoryModel::R() const
 {
     return tmp<volSymmTensorField>
     (
@@ -211,7 +214,8 @@ Foam::tmp<Foam::volSymmTensorField> Foam::kineticTheoryModel::R() const
 
 
 /*
-Foam::tmp<Foam::volScalarField> Foam::kineticTheoryModel::pp() const
+Foam::tmp<Foam::volScalarField>
+Foam::RASModels::kineticTheoryModel::pp() const
 {
 
     // Particle pressure coefficient
@@ -244,7 +248,8 @@ Foam::tmp<Foam::volScalarField> Foam::kineticTheoryModel::pp() const
 */
 
 
-Foam::tmp<Foam::volScalarField> Foam::kineticTheoryModel::pPrime() const
+Foam::tmp<Foam::volScalarField>
+Foam::RASModels::kineticTheoryModel::pPrime() const
 {
     // Local references
     const volScalarField& alpha = this->alpha_;
@@ -271,7 +276,8 @@ Foam::tmp<Foam::volScalarField> Foam::kineticTheoryModel::pPrime() const
 }
 
 
-Foam::tmp<Foam::surfaceScalarField> Foam::kineticTheoryModel::pPrimef() const
+Foam::tmp<Foam::surfaceScalarField>
+Foam::RASModels::kineticTheoryModel::pPrimef() const
 {
     // Local references
     const volScalarField& alpha = this->alpha_;
@@ -298,7 +304,8 @@ Foam::tmp<Foam::surfaceScalarField> Foam::kineticTheoryModel::pPrimef() const
 }
 
 
-Foam::tmp<Foam::volSymmTensorField> Foam::kineticTheoryModel::devRhoReff() const
+Foam::tmp<Foam::volSymmTensorField>
+Foam::RASModels::kineticTheoryModel::devRhoReff() const
 {
     return tmp<volSymmTensorField>
     (
@@ -320,7 +327,8 @@ Foam::tmp<Foam::volSymmTensorField> Foam::kineticTheoryModel::devRhoReff() const
 }
 
 
-Foam::tmp<Foam::fvVectorMatrix> Foam::kineticTheoryModel::divDevRhoReff
+Foam::tmp<Foam::fvVectorMatrix>
+Foam::RASModels::kineticTheoryModel::divDevRhoReff
 (
     volVectorField& U
 ) const
@@ -338,7 +346,7 @@ Foam::tmp<Foam::fvVectorMatrix> Foam::kineticTheoryModel::divDevRhoReff
 }
 
 
-void Foam::kineticTheoryModel::correct()
+void Foam::RASModels::kineticTheoryModel::correct()
 {
     // Local references
     volScalarField alpha(max(this->alpha_, 0.0));

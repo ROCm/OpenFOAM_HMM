@@ -61,6 +61,8 @@ SourceFiles
 
 namespace Foam
 {
+namespace RASModels
+{
 
 /*---------------------------------------------------------------------------*\
                            Class kineticTheoryModel Declaration
@@ -212,6 +214,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace RASModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
