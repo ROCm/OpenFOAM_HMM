@@ -96,7 +96,8 @@ Foam::cachedRandom::cachedRandom(const cachedRandom& cr, const bool reset)
 
         osRandomSeed(seed_);
     }
-    else if (reset)
+
+    if (reset && samples_.size())
     {
         sampleI_ = 0;
     }
