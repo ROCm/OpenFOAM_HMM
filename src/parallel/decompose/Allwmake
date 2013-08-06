@@ -64,7 +64,7 @@ fi
 
 
 # Try and build metisDecomp (has own logic)
-(cd metisDecomp && Allwmake)
+(cd metisDecomp && ./Allwmake $makeType)
 
 
 wmake $makeType decompositionMethods
