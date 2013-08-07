@@ -178,6 +178,7 @@ Op(greaterEq, x >= y)
 weightedOp(multiply, (weight*y))
 
 #undef Op
+#undef weightedOp
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
