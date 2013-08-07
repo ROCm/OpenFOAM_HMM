@@ -94,9 +94,11 @@ dictionaryReplacement
                 type                compressible::thermalBaffle;
 
                 // Coupled BC.
-                neighbourFieldName  T;
+                Tnbr                T;
                 kappa               fluidThermo;
                 kappaName           none;
+                QrNbr               none;
+                Qr                  none;
 
                 // Thermo baffle model
                 thermalBaffleModel   thermalBaffle;

@@ -50,9 +50,11 @@ Description
         type                compressible::temperatureThermoBaffle;
 
         // Coupled boundary condition
-        neighbourFieldName  T;
-        kappa               fluidThermo;
-        KName               none;
+        Tnbr                T;
+        kappa               fluidThermo; // or solidThermo
+        KappaName           none;
+        QrNbr               Qr; // or none.Name of Qr field on neighbour region
+        Qr                  Qr; // or none.Name of Qr field on local region
 
 
         // Thermo baffle model
@@ -111,7 +113,7 @@ Description
     \endverbatim
 
 SeeAlso
-    Foam::turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
+    Foam::turbulentTemperatureRadCoupledMixedFvPatchScalarField
     Foam::regionModels::thermalBaffleModels::thermalBaffleModel
 
 SourceFiles
@@ -126,7 +128,7 @@ SourceFiles
 #include "autoPtr.H"
 #include "regionModel.H"
 #include "thermalBaffleModel.H"
-#include "turbulentTemperatureCoupledBaffleMixedFvPatchScalarField.H"
+#include "turbulentTemperatureRadCoupledMixedFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -142,7 +144,7 @@ namespace compressible
 
 class thermalBaffleFvPatchScalarField
 :
-    public turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
+    public turbulentTemperatureRadCoupledMixedFvPatchScalarField
 {
     // Private data
 
