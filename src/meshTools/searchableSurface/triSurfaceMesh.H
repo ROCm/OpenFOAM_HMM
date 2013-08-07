@@ -262,19 +262,6 @@ public:
 
         // Other
 
-            //- Set bounds of surface. Bounds currently set as list of
-            //  bounding boxes. The bounds are hints to the surface as for
-            //  the range of queries it can expect. faceMap/pointMap can be
-            //  set if the surface has done any redistribution.
-            virtual void distribute
-            (
-                const List<treeBoundBox>&,
-                const bool keepNonLocal,
-                autoPtr<mapDistribute>& faceMap,
-                autoPtr<mapDistribute>& pointMap
-            )
-            {}
-
             //- WIP. Store element-wise field.
             virtual void setField(const labelList& values);
 
