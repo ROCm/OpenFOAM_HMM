@@ -33,6 +33,11 @@ numberOfSubdomains  2;
 //singleProcessorFaceSets ((f0 -1));
 
 
+//- Keep owner and neighbour of baffles on same processor (i.e. keep it
+//  detectable as a baffle). Baffles are two boundary face sharing the
+//  same points.
+//preserveBaffles true;
+
 //- Use the volScalarField named here as a weight for each cell in the
 //  decomposition.  For example, use a particle population field to decompose
 //  for a balanced number of particles in a lagrangian simulation.

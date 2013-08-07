@@ -256,13 +256,19 @@ public:
             //);
 
 
-            //- Helper: extract constraints
+            //- Helper: extract constraints:
+            //  blockedface: existing faces where owner and neighbour on same
+            //               proc
+            //  explicitConnections: sets of boundary faces  ,,     ,,
+            //  specifiedProcessorFaces: groups of faces with all cells on
+            //  same processor.
             void setConstraints
             (
                 const polyMesh& mesh,
                 boolList& blockedFace,
                 PtrList<labelList>& specifiedProcessorFaces,
-                labelList& specifiedProcessor
+                labelList& specifiedProcessor,
+                List<labelPair>& explicitConnections
             );
 
             // Decompose a mesh with constraints:
