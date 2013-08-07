@@ -32,6 +32,7 @@ InClass
 #include "Tuple2.H"
 #include "faceSet.H"
 #include "regionSplit.H"
+#include "localPointRegion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -884,6 +885,51 @@ Foam::labelList Foam::decompositionMethod::decompose
         );
 
 
+
+        // Implement the explicitConnections since above decompose
+        // does not know about them
+        forAll(explicitConnections, i)
+        {
+            const labelPair& baffle = explicitConnections[i];
+            label f0 = baffle.first();
+            label f1 = baffle.second();
+
+            if (!blockedFace[f0] && !blockedFace[f1])
+            {
+                // Note: what if internal faces and owner and neighbour on
+                // different processor? So for now just push owner side
+                // proc
+
+                const label procI = finalDecomp[mesh.faceOwner()[f0]];
+
+                finalDecomp[mesh.faceOwner()[f1]] = procI;
+                if (mesh.isInternalFace(f1))
+                {
+                    finalDecomp[mesh.faceNeighbour()[f1]] = procI;
+                }
+            }
+            else if (blockedFace[f0] != blockedFace[f1])
+            {
+                FatalErrorIn
+                (
+                    "labelList decompose\n"
+                    "(\n"
+                    "    const polyMesh&,\n"
+                    "    const scalarField&,\n"
+                    "    const boolList&,\n"
+                    "    const PtrList<labelList>&,\n"
+                    "    const labelList&,\n"
+                    "    const List<labelPair>&\n"
+                    ")"
+                )   << "On explicit connection between faces " << f0
+                    << " and " << f1
+                    << " the two blockedFace status are not equal : "
+                    << blockedFace[f0] << " and " << blockedFace[f1]
+                    << exit(FatalError);
+            }
+        }
+
+
         // For specifiedProcessorFaces rework the cellToProc to enforce
         // all on one processor since we can't guarantee that the input
         // to regionSplit was a single region.
@@ -939,15 +985,16 @@ void Foam::decompositionMethod::setConstraints
     const polyMesh& mesh,
     boolList& blockedFace,
     PtrList<labelList>& specifiedProcessorFaces,
-    labelList& specifiedProcessor
+    labelList& specifiedProcessor,
+    List<labelPair>& explicitConnections
 )
 {
     blockedFace.setSize(mesh.nFaces());
     blockedFace = true;
-    label nUnblocked = 0;
+    //label nUnblocked = 0;
 
     specifiedProcessorFaces.clear();
-    specifiedProcessor.setSize(0);
+    explicitConnections.clear();
 
 
     if (decompositionDict_.found("preservePatches"))
@@ -979,7 +1026,7 @@ void Foam::decompositionMethod::setConstraints
                 if (blockedFace[pp.start() + i])
                 {
                     blockedFace[pp.start() + i] = false;
-                    nUnblocked++;
+                    //nUnblocked++;
                 }
             }
         }
@@ -1013,20 +1060,103 @@ void Foam::decompositionMethod::setConstraints
                 if (blockedFace[fz[i]])
                 {
                     blockedFace[fz[i]] = false;
-                    nUnblocked++;
+                    //nUnblocked++;
                 }
             }
         }
+    }
+
+    bool preserveBaffles = decompositionDict_.lookupOrDefault
+    (
+        "preserveBaffles",
+        false
+    );
+    if (preserveBaffles)
+    {
+        Info<< nl
+            << "Keeping owner of faces in baffles "
+            << " on same processor." << endl;
+
+        // Faces to test: all boundary faces
+        labelList testFaces
+        (
+            identity(mesh.nFaces()-mesh.nInternalFaces())
+          + mesh.nInternalFaces()
+        );
+
+        // Find correspondencing baffle face (or -1)
+        labelList duplicateFace
+        (
+            localPointRegion::findDuplicateFaces
+            (
+                mesh,
+                testFaces
+            )
+        );
+
+        const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+        // Convert into list of coupled face pairs (mesh face labels).
+        explicitConnections.setSize(testFaces.size());
+        label dupI = 0;
+
+        forAll(duplicateFace, i)
+        {
+            label otherFaceI = duplicateFace[i];
+
+            if (otherFaceI != -1 && i < otherFaceI)
+            {
+                label meshFace0 = testFaces[i];
+                label patch0 = patches.whichPatch(meshFace0);
+                label meshFace1 = testFaces[otherFaceI];
+                label patch1 = patches.whichPatch(meshFace1);
+
+                // Check for illegal topology. Should normally not happen!
+                if
+                (
+                    (patch0 != -1 && isA<processorPolyPatch>(patches[patch0]))
+                 || (patch1 != -1 && isA<processorPolyPatch>(patches[patch1]))
+                )
+                {
+                    FatalErrorIn
+                    (
+                        "decompositionMethod::decompose(const polyMesh&)"
+                    )   << "One of two duplicate faces is on"
+                        << " processorPolyPatch."
+                        << "This is not allowed." << nl
+                        << "Face:" << meshFace0
+                        << " is on patch:" << patches[patch0].name()
+                        << nl
+                        << "Face:" << meshFace1
+                        << " is on patch:" << patches[patch1].name()
+                        << abort(FatalError);
+                }
+
+                explicitConnections[dupI++] = labelPair(meshFace0, meshFace1);
+                if (blockedFace[meshFace0])
+                {
+                    blockedFace[meshFace0] = false;
+                    //nUnblocked++;
+                }
+                if (blockedFace[meshFace1])
+                {
+                    blockedFace[meshFace1] = false;
+                    //nUnblocked++;
+                }
+            }
+        }
+        explicitConnections.setSize(dupI);
     }
 
     if
     (
         decompositionDict_.found("preservePatches")
      || decompositionDict_.found("preserveFaceZones")
+     || preserveBaffles
     )
     {
         syncTools::syncFaceList(mesh, blockedFace, andEqOp<bool>());
-        reduce(nUnblocked, sumOp<label>());
+        //reduce(nUnblocked, sumOp<label>());
     }
 
 
@@ -1258,12 +1388,14 @@ Foam::labelList Foam::decompositionMethod::decompose
     boolList blockedFace;
     PtrList<labelList> specifiedProcessorFaces;
     labelList specifiedProcessor;
+    List<labelPair> explicitConnections;
     setConstraints
     (
         mesh,
         blockedFace,
         specifiedProcessorFaces,
-        specifiedProcessor
+        specifiedProcessor,
+        explicitConnections
     );
 
 
@@ -1277,7 +1409,7 @@ Foam::labelList Foam::decompositionMethod::decompose
         blockedFace,            // any cells to be combined
         specifiedProcessorFaces,// any whole cluster of cells to be kept
         specifiedProcessor,
-        List<labelPair>()       // no baffles
+        explicitConnections     // baffles
     );
 
     return finalDecomp;

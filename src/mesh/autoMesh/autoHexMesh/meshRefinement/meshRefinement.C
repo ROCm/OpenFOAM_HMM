@@ -1209,17 +1209,18 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
         PtrList<labelList> specifiedProcessorFaces;
         labelList specifiedProcessor;
 
+        // Pairs of baffles
+        List<labelPair> couples;
+
         // Constraints from decomposeParDict
         decomposer.setConstraints
         (
             mesh_,
             blockedFace,
             specifiedProcessorFaces,
-            specifiedProcessor
+            specifiedProcessor,
+            couples
         );
-
-        // Pairs of baffles
-        List<labelPair> couples;
 
 
         if (keepZoneFaces || keepBaffles)
@@ -1314,12 +1315,43 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
 
             if (keepBaffles)
             {
-                // Get boundary baffles that need to stay together.
-                couples = getDuplicateFaces   // all baffles
-                (
-                    identity(mesh_.nFaces()-mesh_.nInternalFaces())
-                   +mesh_.nInternalFaces()
-                );
+                label nBnd = mesh_.nFaces()-mesh_.nInternalFaces();
+
+                labelList coupledFace(mesh_.nFaces(), -1);
+                {
+                    // Get boundary baffles that need to stay together
+                    List<labelPair> allCouples = getDuplicateFaces
+                    (
+                        identity(nBnd)
+                       +mesh_.nInternalFaces()
+                    );
+
+                    // Merge with any couples from
+                    // decompositionMethod::setConstraints
+                    forAll(couples, i)
+                    {
+                        const labelPair& baffle = couples[i];
+                        coupledFace[baffle.first()] = baffle.second();
+                        coupledFace[baffle.second()] = baffle.first();
+                    }
+                    forAll(allCouples, i)
+                    {
+                        const labelPair& baffle = allCouples[i];
+                        coupledFace[baffle.first()] = baffle.second();
+                        coupledFace[baffle.second()] = baffle.first();
+                    }
+                }
+
+                couples.setSize(nBnd);
+                label nCpl = 0;
+                forAll(coupledFace, faceI)
+                {
+                    if (coupledFace[faceI] != -1 && faceI < coupledFace[faceI])
+                    {
+                        couples[nCpl++] = labelPair(faceI, coupledFace[faceI]);
+                    }
+                }
+                couples.setSize(nCpl);
             }
             label nCouples = returnReduce(couples.size(), sumOp<label>());
 
@@ -1374,6 +1406,15 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
         //        cellWeights
         //    );
         //}
+
+
+        // Make sure blockedFace not set on couples
+        forAll(couples, i)
+        {
+            const labelPair& baffle = couples[i];
+            blockedFace[baffle.first()] = false;
+            blockedFace[baffle.second()] = false;
+        }
 
         distribution = decomposer.decompose
         (
