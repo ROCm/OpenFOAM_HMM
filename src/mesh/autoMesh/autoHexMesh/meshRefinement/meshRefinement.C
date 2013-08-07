@@ -1375,6 +1375,15 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
         //    );
         //}
 
+
+        // Make sure blockedFace not set on couples
+        forAll(couples, i)
+        {
+            const labelPair& baffle = couples[i];
+            blockedFace[baffle.first()] = false;
+            blockedFace[baffle.second()] = false;
+        }
+
         distribution = decomposer.decompose
         (
             mesh_,
