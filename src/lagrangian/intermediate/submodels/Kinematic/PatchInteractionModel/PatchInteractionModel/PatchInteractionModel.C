@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -151,31 +151,6 @@ template<class CloudType>
 const Foam::word& Foam::PatchInteractionModel<CloudType>::UName() const
 {
     return UName_;
-}
-
-
-template<class CloudType>
-bool Foam::PatchInteractionModel<CloudType>::correct
-(
-    typename CloudType::parcelType&,
-    const polyPatch&,
-    bool&,
-    const scalar,
-    const tetIndices&
-)
-{
-    notImplemented
-    (
-        "bool Foam::PatchInteractionModel<CloudType>::correct"
-        "("
-            "typename CloudType::parcelType&, "
-            "const polyPatch&, "
-            "bool&, "
-            "const scalar, "
-            "const tetIndices& "
-        ") const"
-    );
-    return false;
 }
 
 

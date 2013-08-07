@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -118,13 +118,7 @@ public:
         PatchInteractionModel(const PatchInteractionModel<CloudType>& pim);
 
         //- Construct and return a clone
-        virtual autoPtr<PatchInteractionModel<CloudType> > clone() const
-        {
-            return autoPtr<PatchInteractionModel<CloudType> >
-            (
-                new PatchInteractionModel<CloudType>(*this)
-            );
-        }
+        virtual autoPtr<PatchInteractionModel<CloudType> > clone() const = 0;
 
 
     //- Destructor
@@ -162,7 +156,7 @@ public:
             bool& keepParticle,
             const scalar trackFraction,
             const tetIndices& tetIs
-        );
+        ) = 0;
 
 
         // I-O

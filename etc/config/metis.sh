@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -22,31 +22,18 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
-#     config/example/prefs.csh
+#     config/metis.sh
 #
 # Description
-#     Preset variables for the OpenFOAM configuration - C-Shell shell syntax.
+#     Setup file for metis include/libraries.
+#     Sourced during wmake process only.
 #
-#     The prefs.csh file will be sourced by the OpenFOAM etc/cshrc when it is
-#     found by foamEtcFile.
-#
-# See Also
-#     'foamEtcFile -help' or 'foamEtcFile -list' for information about the
-#     paths searched
-#
+# Note
+#     A csh version is not needed, since the values here are only sourced
+#     during the wmake process
 #------------------------------------------------------------------------------
 
-## Specify OpenFOAM ThirdParty compiler
-## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# set foamCompiler=ThirdParty
+export METIS_VERSION=metis-5.1.0
+export METIS_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$METIS_VERSION
 
-## Specify compiler type
-## ~~~~~~~~~~~~~~~~~~~~~
-#setenv WM_COMPILER Clang
-
-## Specify system openmpi
-## ~~~~~~~~~~~~~~~~~~~~~~
-# setenv WM_MPLIB SYSTEMOPENMPI
-
-
-# ----------------------------------------------------------------- end-of-file
+# -----------------------------------------------------------------------------

@@ -62,6 +62,11 @@ else
     echo
 fi
 
+
+# Try and build metisDecomp (has own logic)
+(cd metisDecomp && ./Allwmake $makeType)
+
+
 wmake $makeType decompositionMethods
 
 wmake $makeType decompose

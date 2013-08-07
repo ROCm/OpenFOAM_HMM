@@ -745,133 +745,64 @@ void Foam::decompositionMethod::calcCellCells
 Foam::labelList Foam::decompositionMethod::decompose
 (
     const polyMesh& mesh,
-    const scalarField& cellWeights
+    const scalarField& cellWeights,
+
+    //- Whether owner and neighbour should be on same processor
+    //  (takes priority over explicitConnections)
+    const boolList& blockedFace,
+
+    //- Whether whole sets of faces (and point neighbours) need to be kept
+    //  on single processor
+    const PtrList<labelList>& specifiedProcessorFaces,
+    const labelList& specifiedProcessor,
+
+    //- Additional connections between boundary faces
+    const List<labelPair>& explicitConnections
 )
 {
-    labelHashSet sameProcFaces;
+    // Any weights specified?
+    label nWeights = returnReduce(cellWeights.size(), sumOp<label>());
 
-    if (decompositionDict_.found("preservePatches"))
+    // Any processor sets?
+    label nProcSets = 0;
+    forAll(specifiedProcessorFaces, setI)
     {
-        wordList pNames(decompositionDict_.lookup("preservePatches"));
-
-        Info<< nl
-            << "Keeping owner of faces in patches " << pNames
-            << " on same processor. This only makes sense for cyclics." << endl;
-
-        const polyBoundaryMesh& patches = mesh.boundaryMesh();
-
-        forAll(pNames, i)
-        {
-            const label patchI = patches.findPatchID(pNames[i]);
-
-            if (patchI == -1)
-            {
-                FatalErrorIn("decompositionMethod::decompose(const polyMesh&)")
-                    << "Unknown preservePatch " << pNames[i]
-                    << endl << "Valid patches are " << patches.names()
-                    << exit(FatalError);
-            }
-
-            const polyPatch& pp = patches[patchI];
-
-            forAll(pp, i)
-            {
-                sameProcFaces.insert(pp.start() + i);
-            }
-        }
+        nProcSets += specifiedProcessorFaces[setI].size();
     }
-    if (decompositionDict_.found("preserveFaceZones"))
-    {
-        wordList zNames(decompositionDict_.lookup("preserveFaceZones"));
+    reduce(nProcSets, sumOp<label>());
 
-        Info<< nl
-            << "Keeping owner and neighbour of faces in zones " << zNames
-            << " on same processor" << endl;
-
-        const faceZoneMesh& fZones = mesh.faceZones();
-
-        forAll(zNames, i)
-        {
-            label zoneI = fZones.findZoneID(zNames[i]);
-
-            if (zoneI == -1)
-            {
-                FatalErrorIn("decompositionMethod::decompose(const polyMesh&)")
-                    << "Unknown preserveFaceZone " << zNames[i]
-                    << endl << "Valid faceZones are " << fZones.names()
-                    << exit(FatalError);
-            }
-
-            const faceZone& fz = fZones[zoneI];
-
-            forAll(fz, i)
-            {
-                sameProcFaces.insert(fz[i]);
-            }
-        }
-    }
-
-
-    // Specified processor for group of cells connected to faces
-
-    //- Sets of faces to move together
-    PtrList<labelList> specifiedProcessorFaces;
-    //- Destination processor
-    labelList specifiedProcessor;
-
-    if (decompositionDict_.found("singleProcessorFaceSets"))
-    {
-        List<Tuple2<word, label> > zNameAndProcs
-        (
-            decompositionDict_.lookup("singleProcessorFaceSets")
-        );
-
-        specifiedProcessorFaces.setSize(zNameAndProcs.size());
-        specifiedProcessor.setSize(zNameAndProcs.size());
-
-        forAll(zNameAndProcs, setI)
-        {
-            Info<< "Keeping all cells connected to faceSet "
-                << zNameAndProcs[setI].first()
-                << " on processor " << zNameAndProcs[setI].second() << endl;
-
-            // Read faceSet
-            faceSet fz(mesh, zNameAndProcs[setI].first());
-
-            specifiedProcessorFaces.set(setI, new labelList(fz.sortedToc()));
-            specifiedProcessor[setI] = zNameAndProcs[setI].second();
-        }
-    }
-
-
-    // Construct decomposition method and either do decomposition on
-    // cell centres or on agglomeration
-
-
-    autoPtr<decompositionMethod> decomposePtr = decompositionMethod::New
+    // Any non-mesh connections?
+    label nConnections = returnReduce
     (
-        decompositionDict_
+        explicitConnections.size(),
+        sumOp<label>()
     );
 
+    // Any faces not blocked?
+    label nUnblocked = 0;
+    forAll(blockedFace, faceI)
+    {
+        if (!blockedFace[faceI])
+        {
+            nUnblocked++;
+        }
+    }
+    reduce(nUnblocked, sumOp<label>());
+
+
+
+    // Either do decomposition on cell centres or on agglomeration
 
     labelList finalDecomp;
 
 
-    label nConstraints = returnReduce
-    (
-        sameProcFaces.size()
-      + specifiedProcessorFaces.size(),
-        sumOp<label>()
-    );
-
-
-    label nWeights = returnReduce(cellWeights.size(), sumOp<label>());
-
-    if (nConstraints == 0)
+    if (nProcSets+nConnections+nUnblocked == 0)
     {
+        // No constraints, possibly weights
+
         if (nWeights > 0)
         {
-            finalDecomp = decomposePtr().decompose
+            finalDecomp = decompose
             (
                 mesh,
                 mesh.cellCentres(),
@@ -880,65 +811,24 @@ Foam::labelList Foam::decompositionMethod::decompose
         }
         else
         {
-            finalDecomp = decomposePtr().decompose(mesh, mesh.cellCentres());
+            finalDecomp = decompose(mesh, mesh.cellCentres());
         }
-
     }
     else
     {
-        Info<< "Constrained decomposition:" << endl
-            << "    faces with same processor owner and neighbour : "
-            << sameProcFaces.size() << endl
-            << "    faces all on same processor                   : "
-            << specifiedProcessorFaces.size() << endl << endl;
-
-        // Faces where owner and neighbour are not 'connected' (= all except
-        // sameProcFaces)
-        boolList blockedFace(mesh.nFaces(), true);
-
-        forAllConstIter(labelHashSet, sameProcFaces, iter)
+        if (debug)
         {
-            blockedFace[iter.key()] = false;
-        }
-
-
-        // For specifiedProcessorFaces add all point connected faces
-        forAll(specifiedProcessorFaces, setI)
-        {
-            const labelList& set = specifiedProcessorFaces[setI];
-            forAll(set, fI)
-            {
-                const face& f = mesh.faces()[set[fI]];
-                forAll(f, fp)
-                {
-                    const labelList& pFaces = mesh.pointFaces()[f[fp]];
-                    forAll(pFaces, i)
-                    {
-                        blockedFace[pFaces[i]] = false;
-                    }
-                }
-            }
-        }
-
-
-        // Connect coupled boundary faces
-        const polyBoundaryMesh& patches = mesh.boundaryMesh();
-
-        forAll(patches, patchI)
-        {
-            const polyPatch& pp = patches[patchI];
-
-            if (pp.coupled())
-            {
-                forAll(pp, i)
-                {
-                    blockedFace[pp.start()+i] = false;
-                }
-            }
+            Info<< "Constrained decomposition:" << endl
+                << "    faces with same owner and neighbour processor : "
+                << nUnblocked << endl
+                << "    baffle faces with same owner processor        : "
+                << nConnections << endl
+                << "    faces all on same processor                   : "
+                << nProcSets << endl << endl;
         }
 
         // Determine global regions, separated by blockedFaces
-        regionSplit globalRegion(mesh, blockedFace);
+        regionSplit globalRegion(mesh, blockedFace, explicitConnections);
 
 
         // Determine region cell centres
@@ -1039,6 +929,356 @@ Foam::labelList Foam::decompositionMethod::decompose
             }
         }
     }
+
+    return finalDecomp;
+}
+
+
+void Foam::decompositionMethod::setConstraints
+(
+    const polyMesh& mesh,
+    boolList& blockedFace,
+    PtrList<labelList>& specifiedProcessorFaces,
+    labelList& specifiedProcessor
+)
+{
+    blockedFace.setSize(mesh.nFaces());
+    blockedFace = true;
+    label nUnblocked = 0;
+
+    specifiedProcessorFaces.clear();
+    specifiedProcessor.setSize(0);
+
+
+    if (decompositionDict_.found("preservePatches"))
+    {
+        wordList pNames(decompositionDict_.lookup("preservePatches"));
+
+        Info<< nl
+            << "Keeping owner of faces in patches " << pNames
+            << " on same processor. This only makes sense for cyclics." << endl;
+
+        const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+        forAll(pNames, i)
+        {
+            const label patchI = patches.findPatchID(pNames[i]);
+
+            if (patchI == -1)
+            {
+                FatalErrorIn("decompositionMethod::decompose(const polyMesh&)")
+                    << "Unknown preservePatch " << pNames[i]
+                    << endl << "Valid patches are " << patches.names()
+                    << exit(FatalError);
+            }
+
+            const polyPatch& pp = patches[patchI];
+
+            forAll(pp, i)
+            {
+                if (blockedFace[pp.start() + i])
+                {
+                    blockedFace[pp.start() + i] = false;
+                    nUnblocked++;
+                }
+            }
+        }
+    }
+    if (decompositionDict_.found("preserveFaceZones"))
+    {
+        wordList zNames(decompositionDict_.lookup("preserveFaceZones"));
+
+        Info<< nl
+            << "Keeping owner and neighbour of faces in zones " << zNames
+            << " on same processor" << endl;
+
+        const faceZoneMesh& fZones = mesh.faceZones();
+
+        forAll(zNames, i)
+        {
+            label zoneI = fZones.findZoneID(zNames[i]);
+
+            if (zoneI == -1)
+            {
+                FatalErrorIn("decompositionMethod::decompose(const polyMesh&)")
+                    << "Unknown preserveFaceZone " << zNames[i]
+                    << endl << "Valid faceZones are " << fZones.names()
+                    << exit(FatalError);
+            }
+
+            const faceZone& fz = fZones[zoneI];
+
+            forAll(fz, i)
+            {
+                if (blockedFace[fz[i]])
+                {
+                    blockedFace[fz[i]] = false;
+                    nUnblocked++;
+                }
+            }
+        }
+    }
+
+    if
+    (
+        decompositionDict_.found("preservePatches")
+     || decompositionDict_.found("preserveFaceZones")
+    )
+    {
+        syncTools::syncFaceList(mesh, blockedFace, andEqOp<bool>());
+        reduce(nUnblocked, sumOp<label>());
+    }
+
+
+
+    // Specified processor for group of cells connected to faces
+
+    label nProcSets = 0;
+    if (decompositionDict_.found("singleProcessorFaceSets"))
+    {
+        List<Tuple2<word, label> > zNameAndProcs
+        (
+            decompositionDict_.lookup("singleProcessorFaceSets")
+        );
+
+        specifiedProcessorFaces.setSize(zNameAndProcs.size());
+        specifiedProcessor.setSize(zNameAndProcs.size());
+
+        forAll(zNameAndProcs, setI)
+        {
+            Info<< "Keeping all cells connected to faceSet "
+                << zNameAndProcs[setI].first()
+                << " on processor " << zNameAndProcs[setI].second() << endl;
+
+            // Read faceSet
+            faceSet fz(mesh, zNameAndProcs[setI].first());
+
+            specifiedProcessorFaces.set(setI, new labelList(fz.sortedToc()));
+            specifiedProcessor[setI] = zNameAndProcs[setI].second();
+            nProcSets += fz.size();
+        }
+        reduce(nProcSets, sumOp<label>());
+
+
+        // Unblock all point connected faces
+        // 1. Mark all points on specifiedProcessorFaces
+        boolList procFacePoint(mesh.nPoints(), false);
+        forAll(specifiedProcessorFaces, setI)
+        {
+            const labelList& set = specifiedProcessorFaces[setI];
+            forAll(set, fI)
+            {
+                const face& f = mesh.faces()[set[fI]];
+                forAll(f, fp)
+                {
+                    procFacePoint[f[fp]] = true;
+                }
+            }
+        }
+        syncTools::syncPointList(mesh, procFacePoint, orEqOp<bool>(), false);
+
+        // 2. Unblock all faces on procFacePoint
+        forAll(procFacePoint, pointI)
+        {
+            if (procFacePoint[pointI])
+            {
+                const labelList& pFaces = mesh.pointFaces()[pointI];
+                forAll(pFaces, i)
+                {
+                    blockedFace[pFaces[i]] = false;
+                }
+            }
+        }
+        syncTools::syncFaceList(mesh, blockedFace, andEqOp<bool>());
+    }
+}
+
+
+Foam::labelList Foam::decompositionMethod::decompose
+(
+    const polyMesh& mesh,
+    const scalarField& cellWeights
+)
+{
+    //labelHashSet sameProcFaces;
+    //
+    //if (decompositionDict_.found("preservePatches"))
+    //{
+    //    wordList pNames(decompositionDict_.lookup("preservePatches"));
+    //
+    //    Info<< nl
+    //        << "Keeping owner of faces in patches " << pNames
+    //        << " on same processor. This only makes sense for cyclics."
+    //        << endl;
+    //
+    //    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+    //
+    //    forAll(pNames, i)
+    //    {
+    //        const label patchI = patches.findPatchID(pNames[i]);
+    //
+    //        if (patchI == -1)
+    //        {
+    //            FatalErrorIn
+    //            (
+    //                "decompositionMethod::decompose(const polyMesh&)")
+    //                << "Unknown preservePatch " << pNames[i]
+    //                << endl << "Valid patches are " << patches.names()
+    //                << exit(FatalError);
+    //        }
+    //
+    //        const polyPatch& pp = patches[patchI];
+    //
+    //        forAll(pp, i)
+    //        {
+    //            sameProcFaces.insert(pp.start() + i);
+    //        }
+    //    }
+    //}
+    //if (decompositionDict_.found("preserveFaceZones"))
+    //{
+    //    wordList zNames(decompositionDict_.lookup("preserveFaceZones"));
+    //
+    //    Info<< nl
+    //        << "Keeping owner and neighbour of faces in zones " << zNames
+    //        << " on same processor" << endl;
+    //
+    //    const faceZoneMesh& fZones = mesh.faceZones();
+    //
+    //    forAll(zNames, i)
+    //    {
+    //        label zoneI = fZones.findZoneID(zNames[i]);
+    //
+    //        if (zoneI == -1)
+    //        {
+    //            FatalErrorIn
+    //            ("decompositionMethod::decompose(const polyMesh&)")
+    //                << "Unknown preserveFaceZone " << zNames[i]
+    //                << endl << "Valid faceZones are " << fZones.names()
+    //                << exit(FatalError);
+    //        }
+    //
+    //        const faceZone& fz = fZones[zoneI];
+    //
+    //        forAll(fz, i)
+    //        {
+    //            sameProcFaces.insert(fz[i]);
+    //        }
+    //    }
+    //}
+    //
+    //
+    //// Specified processor for group of cells connected to faces
+    //
+    ////- Sets of faces to move together
+    //PtrList<labelList> specifiedProcessorFaces;
+    ////- Destination processor
+    //labelList specifiedProcessor;
+    //
+    //label nProcSets = 0;
+    //if (decompositionDict_.found("singleProcessorFaceSets"))
+    //{
+    //    List<Tuple2<word, label> > zNameAndProcs
+    //    (
+    //        decompositionDict_.lookup("singleProcessorFaceSets")
+    //    );
+    //
+    //    specifiedProcessorFaces.setSize(zNameAndProcs.size());
+    //    specifiedProcessor.setSize(zNameAndProcs.size());
+    //
+    //    forAll(zNameAndProcs, setI)
+    //    {
+    //        Info<< "Keeping all cells connected to faceSet "
+    //            << zNameAndProcs[setI].first()
+    //            << " on processor " << zNameAndProcs[setI].second() << endl;
+    //
+    //        // Read faceSet
+    //        faceSet fz(mesh, zNameAndProcs[setI].first());
+    //
+    //        specifiedProcessorFaces.set(setI, new labelList(fz.sortedToc()));
+    //        specifiedProcessor[setI] = zNameAndProcs[setI].second();
+    //        nProcSets += fz.size();
+    //    }
+    //    reduce(nProcSets, sumOp<label>());
+    //}
+    //
+    //
+    //label nUnblocked = returnReduce(sameProcFaces.size(), sumOp<label>());
+    //
+    //if (nProcSets+nUnblocked > 0)
+    //{
+    //    Info<< "Constrained decomposition:" << endl
+    //        << "    faces with same owner and neighbour processor : "
+    //        << nUnblocked << endl
+    //        << "    faces all on same processor                   : "
+    //        << nProcSets << endl << endl;
+    //}
+    //
+    //
+    //// Faces where owner and neighbour are not 'connected' (= all except
+    //// sameProcFaces)
+    //boolList blockedFace(mesh.nFaces(), true);
+    //{
+    //    forAllConstIter(labelHashSet, sameProcFaces, iter)
+    //    {
+    //        blockedFace[iter.key()] = false;
+    //    }
+    //    syncTools::syncFaceList(mesh, blockedFace, andEqOp<bool>());
+    //
+    //    // Add all point connected faces
+    //    boolList procFacePoint(mesh.nPoints(), false);
+    //    forAll(specifiedProcessorFaces, setI)
+    //    {
+    //        const labelList& set = specifiedProcessorFaces[setI];
+    //        forAll(set, fI)
+    //        {
+    //            const face& f = mesh.faces()[set[fI]];
+    //            forAll(f, fp)
+    //            {
+    //                procFacePoint[f[fp]] = true;
+    //            }
+    //        }
+    //    }
+    //    syncTools::syncPointList(mesh, procFacePoint, orEqOp<bool>(), false);
+    //
+    //    forAll(procFacePoint, pointI)
+    //    {
+    //        if (procFacePoint[pointI])
+    //        {
+    //            const labelList& pFaces = mesh.pointFaces()[pointI];
+    //            forAll(pFaces, i)
+    //            {
+    //                blockedFace[pFaces[i]] = false;
+    //            }
+    //        }
+    //    }
+    //    syncTools::syncFaceList(mesh, blockedFace, andEqOp<bool>());
+    //}
+
+    boolList blockedFace;
+    PtrList<labelList> specifiedProcessorFaces;
+    labelList specifiedProcessor;
+    setConstraints
+    (
+        mesh,
+        blockedFace,
+        specifiedProcessorFaces,
+        specifiedProcessor
+    );
+
+
+    // Construct decomposition method and either do decomposition on
+    // cell centres or on agglomeration
+
+    labelList finalDecomp = decompose
+    (
+        mesh,
+        cellWeights,            // optional weights
+        blockedFace,            // any cells to be combined
+        specifiedProcessorFaces,// any whole cluster of cells to be kept
+        specifiedProcessor,
+        List<labelPair>()       // no baffles
+    );
 
     return finalDecomp;
 }

@@ -193,54 +193,6 @@ private:
             const label exposedPatchI
         );
 
-        // For decomposeCombineRegions
-
-            //- Used in decomposeCombineRegions. Given global region per cell
-            //  determines master processor/cell for regions straddling
-            //  procboundaries.
-            void getCoupledRegionMaster
-            (
-                const globalIndex& globalCells,
-                const boolList& blockedFace,
-                const regionSplit& globalRegion,
-                Map<label>& regionToMaster
-            ) const;
-
-            //- Determine regions that are local to me or coupled ones that
-            //  are owned by me. Determine representative location.
-            void calcLocalRegions
-            (
-                const globalIndex& globalCells,
-                const labelList& globalRegion,
-                const Map<label>& coupledRegionToMaster,
-                const scalarField& cellWeights,
-
-                Map<label>& globalToLocalRegion,
-                pointField& localPoints,
-                scalarField& localWeights
-            ) const;
-
-            //- Convert region into global index.
-            static label getShiftedRegion
-            (
-                const globalIndex& indexer,
-                const Map<label>& globalToLocalRegion,
-                const Map<label>& coupledRegionToShifted,
-                const label globalRegion
-            );
-
-            //- helper: add element if not in list. Linear search.
-            static void addUnique(const label, labelList&);
-
-            //- Calculate region connectivity. Major communication.
-            void calcRegionRegions
-            (
-                const labelList& globalRegion,
-                const Map<label>& globalToLocalRegion,
-                const Map<label>& coupledRegionToMaster,
-                labelListList& regionRegions
-            ) const;
-
 
         // Refinement candidate selection
 
@@ -668,19 +620,6 @@ public:
             //- Count number of intersections (local)
             label countHits() const;
 
-            //- Helper function to get decomposition such that all connected
-            //  regions get moved onto one processor. Used to prevent baffles
-            //  straddling processor boundaries. explicitConnections is to
-            //  keep pairs of non-coupled boundary faces together
-            //  (e.g. to keep baffles together)
-            labelList decomposeCombineRegions
-            (
-                const scalarField& cellWeights,
-                const boolList& blockedFace,
-                const List<labelPair>& explicitConnections,
-                decompositionMethod&
-            ) const;
-
             //- Redecompose according to cell count
             //  keepZoneFaces : find all faceZones from zoned surfaces and keep
             //                  owner and neighbour together
@@ -920,6 +859,8 @@ public:
 
             // Merging coplanar faces and edges
 
+                //- Merge coplanar faces. preserveFaces is != -1 for faces
+                //  to be preserved
                 label mergePatchFacesUndo
                 (
                     const scalar minCos,

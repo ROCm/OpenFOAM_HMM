@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,17 +58,18 @@ Foam::label Foam::metisDecomp::decompose
 )
 {
     // C style numbering
-    int numFlag = 0;
+    //int numFlag = 0;
 
     // Method of decomposition
     // recursive: multi-level recursive bisection (default)
     // k-way: multi-level k-way
-    word method("k-way");
+    word method("recursive");
 
     int numCells = xadj.size()-1;
 
-    // decomposition options. 0 = use defaults
-    List<int> options(5, 0);
+    // decomposition options
+    List<int> options(METIS_NOPTIONS);
+    METIS_SetDefaultOptions(options.begin());
 
     // processor weights initialised with no size, only used if specified in
     // a file
@@ -138,12 +139,12 @@ Foam::label Foam::metisDecomp::decompose
 
         if (metisCoeffs.readIfPresent("options", options))
         {
-            if (options.size() != 5)
+            if (options.size() != METIS_NOPTIONS)
             {
                 FatalErrorIn("metisDecomp::decompose()")
                     << "Number of options in metisCoeffs in dictionary : "
                     << decompositionDict_.name()
-                    << " should be 5"
+                    << " should be " << METIS_NOPTIONS
                     << exit(FatalError);
             }
 
@@ -192,6 +193,8 @@ Foam::label Foam::metisDecomp::decompose
         //}
     }
 
+    int ncon = 1;
+
     int nProcs = nProcessors_;
 
     // output: cell -> processor addressing
@@ -201,96 +204,56 @@ Foam::label Foam::metisDecomp::decompose
     int edgeCut = 0;
 
     // Vertex weight info
-    int wgtFlag = 0;
     int* vwgtPtr = NULL;
     int* adjwgtPtr = NULL;
 
     if (cellWeights.size())
     {
         vwgtPtr = cellWeights.begin();
-        wgtFlag += 2;       // Weights on vertices
     }
     if (faceWeights.size())
     {
         adjwgtPtr = faceWeights.begin();
-        wgtFlag += 1;       // Weights on edges
     }
+
 
     if (method == "recursive")
     {
-        if (processorWeights.size())
-        {
-            METIS_WPartGraphRecursive
-            (
-                &numCells,         // num vertices in graph
-                const_cast<List<int>&>(xadj).begin(),   // indexing into adjncy
-                const_cast<List<int>&>(adjncy).begin(), // neighbour info
-                vwgtPtr,           // vertexweights
-                adjwgtPtr,         // no edgeweights
-                &wgtFlag,
-                &numFlag,
-                &nProcs,
-                processorWeights.begin(),
-                options.begin(),
-                &edgeCut,
-                finalDecomp.begin()
-            );
-        }
-        else
-        {
-            METIS_PartGraphRecursive
-            (
-                &numCells,         // num vertices in graph
-                const_cast<List<int>&>(xadj).begin(),   // indexing into adjncy
-                const_cast<List<int>&>(adjncy).begin(), // neighbour info
-                vwgtPtr,           // vertexweights
-                adjwgtPtr,         // no edgeweights
-                &wgtFlag,
-                &numFlag,
-                &nProcs,
-                options.begin(),
-                &edgeCut,
-                finalDecomp.begin()
-            );
-        }
+        METIS_PartGraphRecursive
+        (
+            &numCells,          // num vertices in graph
+            &ncon,              // num balancing constraints
+            const_cast<List<int>&>(xadj).begin(),   // indexing into adjncy
+            const_cast<List<int>&>(adjncy).begin(), // neighbour info
+            cellWeights.begin(),// vertexweights
+            NULL,               // vsize: total communication vol
+            faceWeights.begin(),// edgeweights
+            &nProcs,            // nParts
+            processorWeights.begin(),   // tpwgts
+            NULL,               // ubvec: processor imbalance (default)
+            options.begin(),
+            &edgeCut,
+            finalDecomp.begin()
+        );
     }
     else
     {
-        if (processorWeights.size())
-        {
-            METIS_WPartGraphKway
-            (
-                &numCells,         // num vertices in graph
-                const_cast<List<int>&>(xadj).begin(),   // indexing into adjncy
-                const_cast<List<int>&>(adjncy).begin(), // neighbour info
-                vwgtPtr,           // vertexweights
-                adjwgtPtr,         // no edgeweights
-                &wgtFlag,
-                &numFlag,
-                &nProcs,
-                processorWeights.begin(),
-                options.begin(),
-                &edgeCut,
-                finalDecomp.begin()
-            );
-        }
-        else
-        {
-            METIS_PartGraphKway
-            (
-                &numCells,         // num vertices in graph
-                const_cast<List<int>&>(xadj).begin(),   // indexing into adjncy
-                const_cast<List<int>&>(adjncy).begin(), // neighbour info
-                vwgtPtr,           // vertexweights
-                adjwgtPtr,         // no edgeweights
-                &wgtFlag,
-                &numFlag,
-                &nProcs,
-                options.begin(),
-                &edgeCut,
-                finalDecomp.begin()
-            );
-        }
+        METIS_PartGraphKway
+        (
+            &numCells,         // num vertices in graph
+            &ncon,              // num balancing constraints
+            const_cast<List<int>&>(xadj).begin(),   // indexing into adjncy
+            const_cast<List<int>&>(adjncy).begin(), // neighbour info
+            cellWeights.begin(),// vertexweights
+            NULL,               // vsize: total communication vol
+            faceWeights.begin(),// edgeweights
+            &nProcs,            // nParts
+            processorWeights.begin(),   // tpwgts
+            NULL,               // ubvec: processor imbalance (default)
+            options.begin(),
+            &edgeCut,
+            finalDecomp.begin()
+        );
     }
 
     return edgeCut;
@@ -328,7 +291,14 @@ Foam::labelList Foam::metisDecomp::decompose
     }
 
     CompactListList<label> cellCells;
-    calcCellCells(mesh, identity(mesh.nCells()), mesh.nCells(), cellCells);
+    calcCellCells
+    (
+        mesh,
+        identity(mesh.nCells()),
+        mesh.nCells(),
+        false,
+        cellCells
+    );
 
     // Decompose using default weights
     labelList decomp;
@@ -362,7 +332,7 @@ Foam::labelList Foam::metisDecomp::decompose
     //   xadj(celli) : start of information in adjncy for celli
 
     CompactListList<label> cellCells;
-    calcCellCells(mesh, agglom, agglomPoints.size(), cellCells);
+    calcCellCells(mesh, agglom, agglomPoints.size(), false, cellCells);
 
     // Decompose using default weights
     labelList finalDecomp;
