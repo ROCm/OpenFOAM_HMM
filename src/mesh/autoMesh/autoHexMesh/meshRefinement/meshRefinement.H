@@ -859,6 +859,8 @@ public:
 
             // Merging coplanar faces and edges
 
+                //- Merge coplanar faces. preserveFaces is != -1 for faces
+                //  to be preserved
                 label mergePatchFacesUndo
                 (
                     const scalar minCos,
