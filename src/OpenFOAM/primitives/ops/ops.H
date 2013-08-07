@@ -90,6 +90,12 @@ EqOp(nopEq, (void)x)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#if __GNUC__
+#define WARNRETURN __attribute__((warn_unused_result))
+#else
+#define WARNRETURN
+#endif
+
 #define Op(opName, op)                                                        \
                                                                               \
     template<class T, class T1, class T2>                                     \
@@ -97,7 +103,7 @@ EqOp(nopEq, (void)x)
     {                                                                         \
     public:                                                                   \
                                                                               \
-        T operator()(const T1& x, const T2& y) const                          \
+        T operator()(const T1& x, const T2& y) const WARNRETURN               \
         {                                                                     \
             return op;                                                        \
         }                                                                     \
@@ -108,7 +114,7 @@ EqOp(nopEq, (void)x)
     {                                                                         \
     public:                                                                   \
                                                                               \
-        T1 operator()(const T1& x, const T2& y) const                         \
+        T1 operator()(const T1& x, const T2& y) const WARNRETURN              \
         {                                                                     \
             return op;                                                        \
         }                                                                     \
@@ -119,7 +125,7 @@ EqOp(nopEq, (void)x)
     {                                                                         \
     public:                                                                   \
                                                                               \
-        T operator()(const T& x, const T& y) const                            \
+        T operator()(const T& x, const T& y) const WARNRETURN                 \
         {                                                                     \
             return op;                                                        \
         }                                                                     \
@@ -179,7 +185,7 @@ weightedOp(multiply, (weight*y))
 
 #undef Op
 #undef weightedOp
-
+#undef WARNRETURN
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
