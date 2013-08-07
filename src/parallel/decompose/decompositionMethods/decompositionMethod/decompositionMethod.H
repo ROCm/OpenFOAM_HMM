@@ -266,13 +266,16 @@ public:
             );
 
             // Decompose a mesh with constraints:
-            // - blockedFace : whether owner and neighbour should be on
+            // - blockedFace : whether owner and neighbour should be on same
+            //   processor
             // - specifiedProcessorFaces, specifiedProcessor : sets of faces
             //   that should go to same processor (as specified in
             //   specifiedProcessor, can be -1)
             // - explicitConnections : connections between baffle faces
+            //   (blockedFace should be false on these). Owner and
+            //   neighbour on same processor.
             // Set all to zero size to have unconstrained decomposition.
-            labelList decompose
+            virtual labelList decompose
             (
                 const polyMesh& mesh,
                 const scalarField& cellWeights,

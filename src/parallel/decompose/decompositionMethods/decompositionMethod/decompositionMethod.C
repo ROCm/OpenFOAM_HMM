@@ -884,6 +884,51 @@ Foam::labelList Foam::decompositionMethod::decompose
         );
 
 
+
+        // Implement the explicitConnections since above decompose
+        // does not know about them
+        forAll(explicitConnections, i)
+        {
+            const labelPair& baffle = explicitConnections[i];
+            label f0 = baffle.first();
+            label f1 = baffle.second();
+
+            if (!blockedFace[f0] && !blockedFace[f1])
+            {
+                // Note: what if internal faces and owner and neighbour on
+                // different processor? So for now just push owner side
+                // proc
+
+                const label procI = finalDecomp[mesh.faceOwner()[f0]];
+
+                finalDecomp[mesh.faceOwner()[f1]] = procI;
+                if (mesh.isInternalFace(f1))
+                {
+                    finalDecomp[mesh.faceNeighbour()[f1]] = procI;
+                }
+            }
+            else if (blockedFace[f0] != blockedFace[f1])
+            {
+                FatalErrorIn
+                (
+                    "labelList decompose\n"
+                    "(\n"
+                    "    const polyMesh&,\n"
+                    "    const scalarField&,\n"
+                    "    const boolList&,\n"
+                    "    const PtrList<labelList>&,\n"
+                    "    const labelList&,\n"
+                    "    const List<labelPair>&\n"
+                    ")"
+                )   << "On explicit connection between faces " << f0
+                    << " and " << f1
+                    << " the two blockedFace status are not equal : "
+                    << blockedFace[f0] << " and " << blockedFace[f1]
+                    << exit(FatalError);
+            }
+        }
+
+
         // For specifiedProcessorFaces rework the cellToProc to enforce
         // all on one processor since we can't guarantee that the input
         // to regionSplit was a single region.
