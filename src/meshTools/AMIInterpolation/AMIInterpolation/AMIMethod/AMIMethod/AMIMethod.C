@@ -273,9 +273,8 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::appendNbrFaces
 ) const
 {
     const labelList& nbrFaces = patch.faceFaces()[faceI];
-    const pointField& points = patch.points();
 
-    // filter out faces already visited from src face neighbours
+    // filter out faces already visited from face neighbours
     forAll(nbrFaces, i)
     {
         label nbrFaceI = nbrFaces[i];
@@ -301,15 +300,15 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::appendNbrFaces
             }
         }
 
+        // prevent addition of face if it is not on the same plane-ish
         if (valid)
         {
-            const face& f = patch[faceI];
-            const face& nbrF = patch[nbrFaceI];
-            const vector& n = f.normal(points);
-            const vector& nbrN = nbrF.normal(points);
-            scalar cosI = mag(nbrN & n);
+            const vector& n1 = patch.faceNormals()[faceI];
+            const vector& n2 = patch.faceNormals()[nbrFaceI];
 
-            if (cosI < Foam::cos(degToRad(89.0)))
+            scalar cosI = n1 & n2;
+
+            if (cosI > Foam::cos(degToRad(89.0)))
             {
                 faceIDs.append(nbrFaceI);
             }
