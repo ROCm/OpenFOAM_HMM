@@ -1541,14 +1541,15 @@ void Foam::autoSnapDriver::doSnap
         baffles
     );
 
-    // Keep copy of baffles
-    labelList origBaffles(mesh.nFaces(), -1);
+    // Maintain map from face to baffle face (-1 for non-baffle faces). Used
+    // later on to prevent patchface merging.
+    labelList duplicateFace(mesh.nFaces(), -1);
 
     forAll(baffles, i)
     {
         const labelPair& baffle = baffles[i];
-        origBaffles[baffle.first()] = baffle.second();
-        origBaffles[baffle.second()] = baffle.first();
+        duplicateFace[baffle.first()] = baffle.second();
+        duplicateFace[baffle.second()] = baffle.first();
     }
 
     // Selectively 'forget' about the baffles, i.e. not check across them
@@ -1637,17 +1638,19 @@ void Foam::autoSnapDriver::doSnap
             );
             meshRefinement::updateList(mapPtr().faceMap(), -1, filterFace);
 
+            // Update baffles and baffle-to-baffle addressing
+
             const labelList& reverseFaceMap = mapPtr().reverseFaceMap();
-            origBaffles.setSize(mesh.nFaces());
-            origBaffles = -1;
+            duplicateFace.setSize(mesh.nFaces());
+            duplicateFace = -1;
 
             forAll(baffles, i)
             {
                 labelPair& baffle = baffles[i];
                 baffle.first() = reverseFaceMap[baffle.first()];
                 baffle.second() = reverseFaceMap[baffle.second()];
-                origBaffles[baffle.first()] = baffle.second();
-                origBaffles[baffle.second()] = baffle.first();
+                duplicateFace[baffle.first()] = baffle.second();
+                duplicateFace[baffle.second()] = baffle.first();
             }
 
             if (debug&meshRefinement::MESH)
@@ -1871,28 +1874,29 @@ void Foam::autoSnapDriver::doSnap
 
         if (mapPtr.valid())
         {
-            forAll(origBaffles, faceI)
+            forAll(duplicateFace, faceI)
             {
-                if (origBaffles[faceI] != -1)
+                if (duplicateFace[faceI] != -1)
                 {
-                    origBaffles[faceI] = mapPtr->reverseFaceMap()[faceI];
+                    duplicateFace[faceI] = mapPtr().reverseFaceMap()[faceI];
                 }
             }
         }
     }
 
-    // Repatch faces according to nearest.
-    repatchToSurface(snapParams, adaptPatchIDs, origBaffles);
+    // Repatch faces according to nearest. Do not repatch baffle faces.
+    repatchToSurface(snapParams, adaptPatchIDs, duplicateFace);
 
     // Repatching might have caused faces to be on same patch and hence
-    // mergeable so try again to merge coplanar faces
+    // mergeable so try again to merge coplanar faces. Do not merge baffle
+    // faces to ensure they both stay the same.
     label nChanged = meshRefiner_.mergePatchFacesUndo
     (
-        featureCos,  // minCos
-        featureCos,  // concaveCos
+        featureCos,     // minCos
+        featureCos,     // concaveCos
         meshRefiner_.meshedPatches(),
         motionDict,
-        origBaffles
+        duplicateFace   // faces not to merge
     );
 
     nChanged += meshRefiner_.mergeEdgesUndo
