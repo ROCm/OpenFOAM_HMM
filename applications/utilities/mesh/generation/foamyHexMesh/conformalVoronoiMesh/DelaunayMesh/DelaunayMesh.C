@@ -55,6 +55,8 @@ Foam::DelaunayMesh<Triangulation>::DelaunayMesh
     cellCount_(0),
     runTime_(runTime)
 {
+    Info<< "Reading " << meshName << " from " << runTime.timeName() << endl;
+
     pointIOField pts
     (
         IOobject
@@ -109,42 +111,35 @@ Foam::DelaunayMesh<Triangulation>::DelaunayMesh
 
     if (pts.headerOk())
     {
-        forAll(pts, ptI)
+        List<Vb> pointsToInsert(pts.size());
+
+        forAll(pointsToInsert, pI)
         {
-            Vertex_handle vh = this->insert(toPoint(pts[ptI]));
-
-            if (indices.headerOk())
-            {
-                vh->index() = indices[ptI];
-                vertexCount_++;
-            }
-            else
-            {
-                vh->index() = getNewVertexIndex();
-            }
-
-            if (processorIndices.headerOk())
-            {
-                vh->procIndex() = processorIndices[ptI];
-            }
-            else
-            {
-                vh->procIndex() = Pstream::myProcNo();
-            }
-
-            if (types.headerOk())
-            {
-                vh->type() =
-                    static_cast<Foam::indexedVertexEnum::vertexType>
+            pointsToInsert[pI] =
+                Vb
+                (
+                    toPoint(pts[pI]),
+                    (indices.headerOk() ? indices[pI] : -1),
                     (
-                        types[ptI]
-                    );
-            }
-            else
-            {
-                vh->type() = Vb::vtUnassigned;
-            }
+                        types.headerOk()
+                      ? static_cast<indexedVertexEnum::vertexType>(types[pI])
+                      : Vb::vtInternal
+                    ),
+                    (
+                        processorIndices.headerOk()
+                      ? processorIndices[pI]
+                      : Pstream::myProcNo()
+                    )
+                );
         }
+
+        rangeInsertWithInfo
+        (
+            pointsToInsert.begin(),
+            pointsToInsert.end(),
+            false,
+            false
+        );
     }
 }
 
@@ -282,7 +277,8 @@ void Foam::DelaunayMesh<Triangulation>::rangeInsertWithInfo
 (
     PointIterator begin,
     PointIterator end,
-    bool printErrors
+    bool printErrors,
+    bool reIndex
 )
 {
     typedef DynamicList
@@ -342,7 +338,14 @@ void Foam::DelaunayMesh<Triangulation>::rangeInsertWithInfo
         }
         else
         {
-            hint->index() = getNewVertexIndex();
+            if (reIndex)
+            {
+                hint->index() = getNewVertexIndex();
+            }
+            else
+            {
+                hint->index() = vert.index();
+            }
             hint->type() = vert.type();
             hint->procIndex() = vert.procIndex();
             hint->targetCellSize() = vert.targetCellSize();

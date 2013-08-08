@@ -60,7 +60,10 @@ pointFile::pointFile
     ),
     pointFileName_(detailsDict().lookup("pointFile")),
     insideOutsideCheck_(detailsDict().lookup("insideOutsideCheck"))
-{}
+{
+    Info<< "    Inside/Outside check is " << insideOutsideCheck_.asText()
+        << endl;
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

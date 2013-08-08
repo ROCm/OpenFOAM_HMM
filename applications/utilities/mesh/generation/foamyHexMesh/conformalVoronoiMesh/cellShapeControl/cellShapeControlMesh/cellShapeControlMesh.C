@@ -425,7 +425,6 @@ Foam::cellShapeControlMesh::cellShapeControlMesh(const Time& runTime)
              && alignments.size() == this->vertexCount()
             )
             {
-                label count = 0;
                 for
                 (
                     Finite_vertices_iterator vit = finite_vertices_begin();
@@ -433,9 +432,8 @@ Foam::cellShapeControlMesh::cellShapeControlMesh(const Time& runTime)
                     ++vit
                 )
                 {
-                    vit->targetCellSize() = sizes[count];
-                    vit->alignment() = alignments[count];
-                    count++;
+                    vit->targetCellSize() = sizes[vit->index()];
+                    vit->alignment() = alignments[vit->index()];
                 }
             }
             else

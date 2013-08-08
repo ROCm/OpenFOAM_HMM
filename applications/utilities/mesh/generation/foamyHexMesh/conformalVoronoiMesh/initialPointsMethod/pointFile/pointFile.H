@@ -38,6 +38,7 @@ SourceFiles
 
 #include "fileName.H"
 #include "pointIOField.H"
+#include "Switch.H"
 #include "initialPointsMethod.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -62,7 +63,7 @@ private:
         fileName pointFileName_;
 
         //- Check if inserted points are inside or outside
-        bool insideOutsideCheck_;
+        Switch insideOutsideCheck_;
 
 
 public:

@@ -241,7 +241,8 @@ public:
             (
                 PointIterator begin,
                 PointIterator end,
-                bool printErrors = false
+                bool printErrors = false,
+                bool reIndex = true
             );
 
 
