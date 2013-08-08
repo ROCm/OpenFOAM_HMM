@@ -61,6 +61,9 @@ private:
         //- The initial cell spacing
         fileName pointFileName_;
 
+        //- Check if inserted points are inside or outside
+        bool insideOutsideCheck_;
+
 
 public:
 

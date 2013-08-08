@@ -58,7 +58,8 @@ pointFile::pointFile
         cellShapeControls,
         decomposition
     ),
-    pointFileName_(detailsDict().lookup("pointFile"))
+    pointFileName_(detailsDict().lookup("pointFile")),
+    insideOutsideCheck_(detailsDict().lookup("insideOutsideCheck"))
 {}
 
 
@@ -139,12 +140,17 @@ List<Vb::Point> pointFile::initialPoints() const
         }
     }
 
-    Field<bool> insidePoints = geometryToConformTo().wellInside
-    (
-        points,
-        minimumSurfaceDistanceCoeffSqr_
-       *sqr(cellShapeControls().cellSize(points))
-    );
+    Field<bool> insidePoints(points.size(), true);
+
+    if (insideOutsideCheck_)
+    {
+        insidePoints = geometryToConformTo().wellInside
+        (
+            points,
+            minimumSurfaceDistanceCoeffSqr_
+           *sqr(cellShapeControls().cellSize(points))
+        );
+    }
 
     DynamicList<Vb::Point> initialPoints(insidePoints.size()/10);
 

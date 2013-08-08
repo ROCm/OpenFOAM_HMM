@@ -1521,6 +1521,21 @@ int main(int argc, char *argv[])
             includePatches,
             outFileName
         );
+
+        pointIOField cellCentres
+        (
+            IOobject
+            (
+                "internalCellCentres",
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh.cellCentres()
+        );
+
+        cellCentres.write();
     }
 
 
