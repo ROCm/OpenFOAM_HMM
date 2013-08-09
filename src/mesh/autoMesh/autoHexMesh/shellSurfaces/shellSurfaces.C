@@ -387,15 +387,21 @@ Foam::shellSurfaces::shellSurfaces
     distances_.setSize(shellI);
     levels_.setSize(shellI);
 
+    HashSet<word> unmatchedKeys(shellsDict.toc());
     shellI = 0;
-    forAll(allGeometry.names(), geomI)
+
+    forAll(allGeometry_.names(), geomI)
     {
         const word& geomName = allGeometry_.names()[geomI];
 
-        if (shellsDict.found(geomName))
+        const entry* ePtr = shellsDict.lookupEntryPtr(geomName, false, true);
+
+        if (ePtr)
         {
+            const dictionary& dict = ePtr->dict();
+            unmatchedKeys.erase(ePtr->keyword());
+
             shells_[shellI] = geomI;
-            const dictionary& dict = shellsDict.subDict(geomName);
             modes_[shellI] = refineModeNames_.read(dict.lookup("mode"));
 
             // Read pairs of distance+level
@@ -403,6 +409,18 @@ Foam::shellSurfaces::shellSurfaces
 
             shellI++;
         }
+    }
+
+    if (unmatchedKeys.size() > 0)
+    {
+        IOWarningIn
+        (
+            "shellSurfaces::shellSurfaces(..)",
+            shellsDict
+        )   << "Not all entries in refinementRegions dictionary were used."
+            << " The following entries were not used : "
+            << unmatchedKeys.sortedToc()
+            << endl;
     }
 
     // Orient shell surfaces before any searching is done. Note that this

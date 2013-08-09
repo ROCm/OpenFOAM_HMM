@@ -126,14 +126,20 @@ Foam::refinementSurfaces::refinementSurfaces
     List<Map<scalar> > regionAngle(surfI);
     List<Map<autoPtr<dictionary> > > regionPatchInfo(surfI);
 
+
+    HashSet<word> unmatchedKeys(surfacesDict.toc());
+
     surfI = 0;
     forAll(allGeometry.names(), geomI)
     {
         const word& geomName = allGeometry_.names()[geomI];
 
-        if (surfacesDict.found(geomName))
+        const entry* ePtr = surfacesDict.lookupEntryPtr(geomName, false, true);
+
+        if (ePtr)
         {
-            const dictionary& dict = surfacesDict.subDict(geomName);
+            const dictionary& dict = ePtr->dict();
+            unmatchedKeys.erase(ePtr->keyword());
 
             names_[surfI] = geomName;
             surfaces_[surfI] = geomI;
@@ -154,16 +160,17 @@ Foam::refinementSurfaces::refinementSurfaces
              || globalLevelIncr[surfI] < 0
             )
             {
-                FatalErrorIn
+                FatalIOErrorIn
                 (
                     "refinementSurfaces::refinementSurfaces"
-                    "(const searchableSurfaces&, const dictionary>&"
+                    "(const searchableSurfaces&, const dictionary>&",
+                    dict
                 )   << "Illegal level specification for surface "
                     << names_[surfI]
                     << " : minLevel:" << globalMinLevel[surfI]
                     << " maxLevel:" << globalMaxLevel[surfI]
                     << " levelIncrement:" << globalLevelIncr[surfI]
-                    << exit(FatalError);
+                    << exit(FatalIOError);
             }
 
 
@@ -286,17 +293,18 @@ Foam::refinementSurfaces::refinementSurfaces
                          || levelIncr < 0
                         )
                         {
-                            FatalErrorIn
+                            FatalIOErrorIn
                             (
                                 "refinementSurfaces::refinementSurfaces"
-                                "(const searchableSurfaces&, const dictionary>&"
+                                "(const searchableSurfaces&, const dictionary&",
+                                dict
                             )   << "Illegal level specification for surface "
                                 << names_[surfI] << " region "
                                 << regionNames[regionI]
                                 << " : minLevel:" << refLevel[0]
                                 << " maxLevel:" << refLevel[1]
                                 << " levelIncrement:" << levelIncr
-                                << exit(FatalError);
+                                << exit(FatalIOError);
                         }
 
 
@@ -327,6 +335,19 @@ Foam::refinementSurfaces::refinementSurfaces
             surfI++;
         }
     }
+
+    if (unmatchedKeys.size() > 0)
+    {
+        IOWarningIn
+        (
+            "refinementSurfaces::refinementSurfaces(..)",
+            surfacesDict
+        )   << "Not all entries in refinementSurfaces dictionary were used."
+            << " The following entries were not used : "
+            << unmatchedKeys.sortedToc()
+            << endl;
+    }
+
 
     // Calculate local to global region offset
     label nRegions = 0;
