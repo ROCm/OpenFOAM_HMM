@@ -528,7 +528,7 @@ void Foam::conformalVoronoiMesh::buildCellSizeAndAlignmentMesh()
         << (cellSizeMesh.is_valid() ? "valid" : "not valid!" )
         << endl;
 
-    if (!Pstream::parRun() && foamyHexMeshControls().objOutput())
+    if (foamyHexMeshControls().writeCellShapeControlMesh())
     {
         //cellSizeMesh.writeTriangulation();
         cellSizeMesh.write();

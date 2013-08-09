@@ -70,47 +70,48 @@ Foam::DelaunayMesh<Triangulation>::DelaunayMesh
         )
     );
 
-    labelIOField types
-    (
-        IOobject
-        (
-            "types",
-            runTime.timeName(),
-            meshName,
-            runTime,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE
-        )
-    );
-
-    labelIOField indices
-    (
-        IOobject
-        (
-            "indices",
-            runTime.timeName(),
-            meshName,
-            runTime,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE
-        )
-    );
-
-    labelIOField processorIndices
-    (
-        IOobject
-        (
-            "processorIndices",
-            runTime.timeName(),
-            meshName,
-            runTime,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE
-        )
-    );
-
     if (pts.headerOk())
     {
+        labelIOField types
+        (
+            IOobject
+            (
+                "types",
+                runTime.timeName(),
+                meshName,
+                runTime,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        );
+
+// Do not read in indices
+//        labelIOField indices
+//        (
+//            IOobject
+//            (
+//                "indices",
+//                runTime.timeName(),
+//                meshName,
+//                runTime,
+//                IOobject::MUST_READ,
+//                IOobject::NO_WRITE
+//            )
+//        );
+
+        labelIOField processorIndices
+        (
+            IOobject
+            (
+                "processorIndices",
+                runTime.timeName(),
+                meshName,
+                runTime,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        );
+
         List<Vb> pointsToInsert(pts.size());
 
         forAll(pointsToInsert, pI)
@@ -119,17 +120,9 @@ Foam::DelaunayMesh<Triangulation>::DelaunayMesh
                 Vb
                 (
                     toPoint(pts[pI]),
-                    (indices.headerOk() ? indices[pI] : -1),
-                    (
-                        types.headerOk()
-                      ? static_cast<indexedVertexEnum::vertexType>(types[pI])
-                      : Vb::vtInternal
-                    ),
-                    (
-                        processorIndices.headerOk()
-                      ? processorIndices[pI]
-                      : Pstream::myProcNo()
-                    )
+                    pI,
+                    static_cast<indexedVertexEnum::vertexType>(types[pI]),
+                    processorIndices[pI]
                 );
         }
 
@@ -140,6 +133,8 @@ Foam::DelaunayMesh<Triangulation>::DelaunayMesh
             false,
             false
         );
+
+        vertexCount_ = Triangulation::number_of_vertices();
     }
 }
 
