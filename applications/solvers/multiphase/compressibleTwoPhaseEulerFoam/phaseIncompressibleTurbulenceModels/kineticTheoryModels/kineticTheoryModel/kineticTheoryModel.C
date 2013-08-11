@@ -349,7 +349,7 @@ Foam::RASModels::kineticTheoryModel::divDevRhoReff
 void Foam::RASModels::kineticTheoryModel::correct()
 {
     // Local references
-    volScalarField alpha(max(this->alpha_, 0.0));
+    volScalarField alpha(max(this->alpha_, scalar(0)));
     const volScalarField& rho = phase_.rho();
     const surfaceScalarField& alphaPhi = this->alphaPhi_;
     const volVectorField& U = this->U_;

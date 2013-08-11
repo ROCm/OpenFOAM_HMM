@@ -83,6 +83,16 @@ LaheyKEpsilon<BasicTurbulenceModel>::LaheyKEpsilon
         )
     ),
 
+    C3_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cp",
+            this->coeffDict_,
+            this->C2_.value()
+        )
+    ),
+
     Cmub_
     (
         dimensioned<scalar>::lookupOrAddToDict
@@ -110,6 +120,7 @@ bool LaheyKEpsilon<BasicTurbulenceModel>::read()
     {
         alphaInversion_.readIfPresent(this->coeffDict());
         Cp_.readIfPresent(this->coeffDict());
+        C3_.readIfPresent(this->coeffDict());
         Cmub_.readIfPresent(this->coeffDict());
 
         return true;
@@ -207,7 +218,7 @@ LaheyKEpsilon<BasicTurbulenceModel>::phaseTransferCoeff() const
 
     return
     (
-        max(alphaInversion_ - alpha, 0.0)
+        max(alphaInversion_ - alpha, scalar(0))
        *rho
        *min(gasTurbulence.epsilon()/gasTurbulence.k(), 1.0/U.time().deltaT())
     );
@@ -244,7 +255,7 @@ tmp<fvScalarMatrix> LaheyKEpsilon<BasicTurbulenceModel>::epsilonSource() const
     const volScalarField phaseTransferCoeff(this->phaseTransferCoeff());
 
     return
-        alpha*rho*this->C2_*this->epsilon_*bubbleG()/this->k_
+        alpha*rho*this->C3_*this->epsilon_*bubbleG()/this->k_
       + phaseTransferCoeff*gasTurbulence.epsilon()
       - fvm::Sp(phaseTransferCoeff, this->epsilon_);
 }

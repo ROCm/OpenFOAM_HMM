@@ -5,7 +5,7 @@
     surfaceScalarField phic("phic", phi);
     surfaceScalarField phir("phir", phi1 - phi2);
 
-    surfaceScalarField alpha1f(fvc::interpolate(max(alpha1, 0.0)));
+    surfaceScalarField alpha1f(fvc::interpolate(max(alpha1, scalar(0))));
 
     tmp<surfaceScalarField> pPrimeByA;
 
