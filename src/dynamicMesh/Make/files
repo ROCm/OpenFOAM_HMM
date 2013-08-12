@@ -36,7 +36,6 @@ polyTopoChange/polyTopoChange/refinementDistanceData.C
 polyTopoChange/polyTopoChange/refinementHistory.C
 polyTopoChange/polyTopoChange/removePoints.C
 polyTopoChange/polyTopoChange/combineFaces.C
-polyTopoChange/polyTopoChange/localPointRegion.C
 polyTopoChange/polyTopoChange/duplicatePoints.C
 polyTopoChange/polyTopoChange/tetDecomposer.C
 
