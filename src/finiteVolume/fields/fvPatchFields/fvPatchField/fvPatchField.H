@@ -308,6 +308,18 @@ public:
                 return internalField_;
             }
 
+            //- Optional patch type
+            const word& patchType() const
+            {
+                return patchType_;
+            }
+
+            //- Optional patch type
+            word& patchType()
+            {
+                return patchType_;
+            }
+
             //- Return the type of the calculated for of fvPatchField
             static const word& calculatedType();
 

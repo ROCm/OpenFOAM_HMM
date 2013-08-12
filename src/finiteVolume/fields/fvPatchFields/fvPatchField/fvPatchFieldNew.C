@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,15 +60,15 @@ Foam::tmp<Foam::fvPatchField<Type> > Foam::fvPatchField<Type>::New
             << exit(FatalError);
     }
 
+    typename patchConstructorTable::iterator patchTypeCstrIter =
+        patchConstructorTablePtr_->find(p.type());
+
     if
     (
         actualPatchType == word::null
      || actualPatchType != p.type()
     )
     {
-        typename patchConstructorTable::iterator patchTypeCstrIter =
-            patchConstructorTablePtr_->find(p.type());
-
         if (patchTypeCstrIter != patchConstructorTablePtr_->end())
         {
             return patchTypeCstrIter()(p, iF);
@@ -80,7 +80,14 @@ Foam::tmp<Foam::fvPatchField<Type> > Foam::fvPatchField<Type>::New
     }
     else
     {
-        return cstrIter()(p, iF);
+        tmp<fvPatchField<Type> > tfvp = cstrIter()(p, iF);
+
+        // Check if constraint type override and store patchType if so
+        if ((patchTypeCstrIter != patchConstructorTablePtr_->end()))
+        {
+            tfvp().patchType() = actualPatchType;
+        }
+        return tfvp;
     }
 }
 

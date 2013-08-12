@@ -205,7 +205,7 @@ void Foam::patchInjectionBase::setPositionAndCell
             const point pf(tri.randomPoint(rnd));
 
             // position perturbed away from face (into domain)
-            const scalar a = rnd.position(0.1, 0.5);
+            const scalar a = rnd.position(scalar(0.1), scalar(0.5));
             const vector& pc = mesh.cellCentres()[cellOwner];
             const vector d = mag(pf - pc)*patchNormal_[faceI];
 
