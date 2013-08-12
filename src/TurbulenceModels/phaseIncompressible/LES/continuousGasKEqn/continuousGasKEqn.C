@@ -137,7 +137,7 @@ continuousGasKEqn<BasicTurbulenceModel>::phaseTransferCoeff() const
 
     return
     (
-        max(alphaInversion_ - alpha, 0.0)
+        max(alphaInversion_ - alpha, scalar(0))
        *rho
        *min
         (

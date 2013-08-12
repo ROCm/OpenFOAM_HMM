@@ -52,6 +52,9 @@ makeBaseTurbulenceModel
 #include "kEpsilon.H"
 makeRASModel(kEpsilon);
 
+#include "mixtureKEpsilon.H"
+makeRASModel(mixtureKEpsilon);
+
 #include "LaheyKEpsilon.H"
 makeRASModel(LaheyKEpsilon);
 

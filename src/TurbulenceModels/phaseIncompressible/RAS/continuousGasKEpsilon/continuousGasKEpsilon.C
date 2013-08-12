@@ -123,7 +123,7 @@ void continuousGasKEpsilon<BasicTurbulenceModel>::correctNut()
 
     volScalarField thetal(liquidTurbulence.k()/liquidTurbulence.epsilon());
     volScalarField thetag((1.0/(18*liquid.nu()))*sqr(gas.d()));
-    volScalarField expThetar(exp(min(thetal/thetag, 50.0)));
+    volScalarField expThetar(exp(min(thetal/thetag, scalar(50))));
     volScalarField omega(sqr(expThetar - 1)/(sqr(expThetar) - 1));
 
     nutEff_ = omega*liquidTurbulence.nut();
@@ -163,7 +163,15 @@ continuousGasKEpsilon<BasicTurbulenceModel>::nuEff() const
 {
     volScalarField blend
     (
-        max(min((this->alpha_ - 0.5)/(alphaInversion_ - 0.5), 1.0), 0.0)
+        max
+        (
+            min
+            (
+                (this->alpha_ - scalar(0.5))/(alphaInversion_ - 0.5),
+                scalar(1)
+            ),
+            scalar(0)
+        )
     );
 
     return tmp<volScalarField>
@@ -210,7 +218,7 @@ continuousGasKEpsilon<BasicTurbulenceModel>::phaseTransferCoeff() const
 
     return
     (
-        max(alphaInversion_ - alpha, 0.0)
+        max(alphaInversion_ - alpha, scalar(0))
        *rho
        *min
         (

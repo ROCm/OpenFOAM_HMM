@@ -110,6 +110,7 @@ protected:
 
             dimensionedScalar alphaInversion_;
             dimensionedScalar Cp_;
+            dimensionedScalar C3_;
             dimensionedScalar Cmub_;
 
 
