@@ -59,7 +59,12 @@ pointFile::pointFile
         decomposition
     ),
     pointFileName_(detailsDict().lookup("pointFile")),
-    insideOutsideCheck_(detailsDict().lookup("insideOutsideCheck"))
+    insideOutsideCheck_(detailsDict().lookup("insideOutsideCheck")),
+    randomiseInitialGrid_(detailsDict().lookup("randomiseInitialGrid")),
+    randomPerturbationCoeff_
+    (
+        readScalar(detailsDict().lookup("randomPerturbationCoeff"))
+    )
 {
     Info<< "    Inside/Outside check is " << insideOutsideCheck_.asText()
         << endl;
@@ -161,7 +166,14 @@ List<Vb::Point> pointFile::initialPoints() const
     {
         if (insidePoints[i])
         {
-            const point& p(points[i]);
+            point& p = points[i];
+
+            if (randomiseInitialGrid_)
+            {
+                p.x() += randomPerturbationCoeff_*(rndGen().scalar01() - 0.5);
+                p.y() += randomPerturbationCoeff_*(rndGen().scalar01() - 0.5);
+                p.z() += randomPerturbationCoeff_*(rndGen().scalar01() - 0.5);
+            }
 
             initialPoints.append(Vb::Point(p.x(), p.y(), p.z()));
         }

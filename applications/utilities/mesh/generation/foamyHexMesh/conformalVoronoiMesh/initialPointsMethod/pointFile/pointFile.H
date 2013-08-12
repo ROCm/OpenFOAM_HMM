@@ -65,6 +65,12 @@ private:
         //- Check if inserted points are inside or outside
         Switch insideOutsideCheck_;
 
+        //- Should the initial positions be randomised
+        Switch randomiseInitialGrid_;
+
+        //- Randomise the initial positions by fraction of the initialCellSize_
+        scalar randomPerturbationCoeff_;
+
 
 public:
 
