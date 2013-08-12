@@ -30,6 +30,7 @@ inline Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
 constantProperties()
 :
     ParcelType::constantProperties(),
+    TDevol_(0.0),
     LDevol_(0.0),
     hRetentionCoeff_(0.0)
 {}
@@ -43,6 +44,7 @@ constantProperties
 )
 :
     ParcelType::constantProperties(cp),
+    TDevol_(cp.TDevol_),
     LDevol_(cp.LDevol_),
     hRetentionCoeff_(cp.hRetentionCoeff_)
 {}
@@ -57,11 +59,13 @@ constantProperties
 )
 :
     ParcelType::constantProperties(parentDict, readFields),
+    TDevol_(0.0),
     LDevol_(0.0),
     hRetentionCoeff_(0.0)
 {
     if (readFields)
     {
+        this->dict().lookup("TDevol") >> TDevol_;
         this->dict().lookup("LDevol") >> LDevol_;
         this->dict().lookup("hRetentionCoeff") >> hRetentionCoeff_;
 
@@ -78,6 +82,50 @@ constantProperties
         hRetentionCoeff_ = max(1e-06, hRetentionCoeff_);
     }
 }
+
+
+template<class ParcelType>
+inline Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
+constantProperties
+(
+    const label parcelTypeId,
+    const scalar rhoMin,
+    const scalar rho0,
+    const scalar minParticleMass,
+    const scalar youngsModulus,
+    const scalar poissonsRatio,
+    const scalar T0,
+    const scalar TMin,
+    const scalar TMax,
+    const scalar Cp0,
+    const scalar epsilon0,
+    const scalar f0,
+    const scalar Pr,
+    const scalar pMin,
+    const Switch& constantVolume,
+    const scalar TDevol
+)
+:
+    ParcelType::constantProperties
+    (
+        parcelTypeId,
+        rhoMin,
+        rho0,
+        minParticleMass,
+        youngsModulus,
+        poissonsRatio,
+        T0,
+        TMin,
+        TMax,
+        Cp0,
+        epsilon0,
+        f0,
+        Pr,
+        pMin,
+        constantVolume
+    ),
+    TDevol_(TDevol)
+{}
 
 
 template<class ParcelType>
@@ -147,6 +195,14 @@ inline Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
 
 
 // * * * * * * * * * constantProperties Member Functions * * * * * * * * * * //
+
+template<class ParcelType>
+inline Foam::scalar
+Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::TDevol() const
+{
+    return TDevol_;
+}
+
 
 template<class ParcelType>
 inline Foam::scalar
