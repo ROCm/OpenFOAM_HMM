@@ -143,7 +143,7 @@ void Foam::PrintTable<KeyType, DataType>::print
         os  << nl << indent << tab << "# " << title_.c_str() << endl;
 
         os.width(largestKeyLength);
-        os  << indent << "# Proc No";
+        os  << indent << "# Proc";
 
         forAll(procData, procI)
         {

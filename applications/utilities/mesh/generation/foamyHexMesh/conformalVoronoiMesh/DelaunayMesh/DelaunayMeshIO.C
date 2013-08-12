@@ -146,7 +146,8 @@ void Foam::DelaunayMesh<Triangulation>::printInfo(Ostream& os) const
         ++vit
     )
     {
-        if (!vit->farPoint())
+        // Only internal or boundary vertices have a size
+        if (vit->internalOrBoundaryPoint())
         {
             minSize = min(vit->targetCellSize(), minSize);
             maxSize = max(vit->targetCellSize(), maxSize);
