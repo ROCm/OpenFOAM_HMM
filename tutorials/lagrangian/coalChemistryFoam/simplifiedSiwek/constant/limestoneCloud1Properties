@@ -38,6 +38,7 @@ solution
         thermo:mu       cell;
         U               cellPoint;
         Cp              cell;
+        kappa           cell;
         T               cell;
         G               cell;
     }
@@ -62,8 +63,6 @@ constantProperties
 
     epsilon0        1;
     f0              0.5;
-
-    Pr              0.7;
 }
 
 subModels
