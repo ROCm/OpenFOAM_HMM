@@ -52,12 +52,8 @@ void triSurface::writeOBJ(const bool writeSorted, Ostream& os) const
     // Print patch names as comment
     forAll(myPatches, patchI)
     {
-        const surfacePatch& patch = myPatches[patchI];
-
-        if (patch.size() > 0)
-        {
-            os  << "#     " << patchI << "    " << patch.name() << nl;
-        }
+        os  << "#     " << patchI << "    "
+            << myPatches[patchI].name() << nl;
     }
     os  << "#" << nl;
 
@@ -81,29 +77,25 @@ void triSurface::writeOBJ(const bool writeSorted, Ostream& os) const
 
         forAll(myPatches, patchI)
         {
-            const surfacePatch& patch = myPatches[patchI];
-
             // Print all faces belonging to this patch
-            if (patch.size() > 0)
+
+            os  << "g " << myPatches[patchI].name() << nl;
+
+            for
+            (
+                label patchFaceI = 0;
+                patchFaceI < myPatches[patchI].size();
+                patchFaceI++
+            )
             {
-                os  << "g " << patch.name() << nl;
+                const label faceI = faceMap[faceIndex++];
 
-                for
-                (
-                    label patchFaceI = 0;
-                    patchFaceI < patch.size();
-                    patchFaceI++
-                )
-                {
-                    const label faceI = faceMap[faceIndex++];
-
-                    os  << "f "
-                        << operator[](faceI)[0] + 1 << ' '
-                        << operator[](faceI)[1] + 1 << ' '
-                        << operator[](faceI)[2] + 1
-                        //<< "  # " << operator[](faceI).region()
-                        << nl;
-                }
+                os  << "f "
+                    << operator[](faceI)[0] + 1 << ' '
+                    << operator[](faceI)[1] + 1 << ' '
+                    << operator[](faceI)[2] + 1
+                    //<< "  # " << operator[](faceI).region()
+                    << nl;
             }
         }
     }
