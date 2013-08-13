@@ -53,9 +53,7 @@ void Foam::incompressibleTwoPhaseMixture::calcNu()
 Foam::incompressibleTwoPhaseMixture::incompressibleTwoPhaseMixture
 (
     const volVectorField& U,
-    const surfaceScalarField& phi,
-    const word& alpha1Name,
-    const word& alpha2Name
+    const surfaceScalarField& phi
 )
 :
     IOdictionary
@@ -69,14 +67,14 @@ Foam::incompressibleTwoPhaseMixture::incompressibleTwoPhaseMixture
             IOobject::NO_WRITE
         )
     ),
-    twoPhaseMixture(U.mesh(), *this, alpha1Name, alpha2Name),
+    twoPhaseMixture(U.mesh(), *this),
 
     nuModel1_
     (
         viscosityModel::New
         (
             "nu1",
-            subDict(phase1Name_ == "1" ? "phase1": phase1Name_),
+            subDict(phase1Name_),
             U,
             phi
         )
@@ -86,7 +84,7 @@ Foam::incompressibleTwoPhaseMixture::incompressibleTwoPhaseMixture
         viscosityModel::New
         (
             "nu2",
-            subDict(phase2Name_ == "2" ? "phase2": phase2Name_),
+            subDict(phase2Name_),
             U,
             phi
         )

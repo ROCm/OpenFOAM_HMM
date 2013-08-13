@@ -56,7 +56,7 @@ fluxRequired
     default              none;
     p_rgh;
     pcorr;
-    alpha1;
+    alpha.water;
 }
 
 // ************************************************************************* //

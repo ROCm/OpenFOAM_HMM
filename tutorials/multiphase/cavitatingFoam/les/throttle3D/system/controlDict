@@ -73,7 +73,7 @@ functions
                 base        time;
             }
 
-            gamma
+            alpha.vapour
             {
                 mean        on;
                 prime2Mean  off;

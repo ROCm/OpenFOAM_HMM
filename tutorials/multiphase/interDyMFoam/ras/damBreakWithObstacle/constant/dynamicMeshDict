@@ -22,7 +22,7 @@ dynamicRefineFvMeshCoeffs
     // How often to refine
     refineInterval  1;
     // Field to be refinement on
-    field           alpha1;
+    field           alpha.water;
     // Refine field inbetween lower..upper
     lowerRefineLevel 0.001;
     upperRefineLevel 0.999;

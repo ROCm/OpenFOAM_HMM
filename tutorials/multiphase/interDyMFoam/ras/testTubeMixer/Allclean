@@ -5,6 +5,6 @@ cd ${0%/*} || exit 1    # run from this directory
 . $WM_PROJECT_DIR/bin/tools/CleanFunctions
 
 cleanCase
-rm -rf 0/alpha1
+rm -rf 0/alpha.water
 
 # ----------------------------------------------------------------- end-of-file

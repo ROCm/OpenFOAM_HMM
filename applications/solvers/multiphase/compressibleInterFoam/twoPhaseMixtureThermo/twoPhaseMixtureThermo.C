@@ -49,12 +49,12 @@ Foam::twoPhaseMixtureThermo::twoPhaseMixtureThermo
     thermo2_(NULL)
 {
     {
-        volScalarField T1("T" + phase1Name(), T_);
+        volScalarField T1(IOobject::groupName("T", phase1Name()), T_);
         T1.write();
     }
 
     {
-        volScalarField T2("T" + phase2Name(), T_);
+        volScalarField T2(IOobject::groupName("T", phase2Name()), T_);
         T2.write();
     }
 

@@ -44,19 +44,19 @@
 
     Info<< "Reading transportProperties\n" << endl;
 
-    incompressibleTwoPhaseMixture twoPhaseProperties(U, phiv, "gamma");
+    incompressibleTwoPhaseMixture twoPhaseProperties(U, phiv);
 
-    volScalarField& gamma(twoPhaseProperties.alpha1());
-    gamma.oldTime();
+    volScalarField& alphav(twoPhaseProperties.alpha1());
+    alphav.oldTime();
 
-    volScalarField& gamma2(twoPhaseProperties.alpha2());
+    volScalarField& alphal(twoPhaseProperties.alpha2());
 
     Info<< "Creating compressibilityModel\n" << endl;
     autoPtr<barotropicCompressibilityModel> psiModel =
         barotropicCompressibilityModel::New
         (
             thermodynamicProperties,
-            gamma
+            alphav
         );
 
     const volScalarField& psi = psiModel->psi();
@@ -64,8 +64,8 @@
     rho == max
     (
         psi*p
-      + gamma2*rhol0
-      + ((gamma*psiv + gamma2*psil) - psi)*pSat,
+      + alphal*rhol0
+      + ((alphav*psiv + alphal*psil) - psi)*pSat,
         rhoMin
     );
 

@@ -42,11 +42,10 @@ namespace phaseChangeTwoPhaseMixtures
 Foam::phaseChangeTwoPhaseMixtures::Kunz::Kunz
 (
     const volVectorField& U,
-    const surfaceScalarField& phi,
-    const word& alpha1Name
+    const surfaceScalarField& phi
 )
 :
-    phaseChangeTwoPhaseMixture(typeName, U, phi, alpha1Name),
+    phaseChangeTwoPhaseMixture(typeName, U, phi),
 
     UInf_(phaseChangeTwoPhaseMixtureCoeffs_.lookup("UInf")),
     tInf_(phaseChangeTwoPhaseMixtureCoeffs_.lookup("tInf")),

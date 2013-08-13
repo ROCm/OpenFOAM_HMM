@@ -1,5 +1,5 @@
 {
-    word alphaScheme("div(phi,alpha1)");
+    word alphaScheme("div(phi,alpha)");
 
     surfaceScalarField phiAlpha
     (
