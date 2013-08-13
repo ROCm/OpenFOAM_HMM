@@ -511,7 +511,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
     if
     (
         !td.cloud().devolatilisation().active()
-     || T < td.cloud().constProps().Tvap()
+     || T < td.cloud().constProps().TDevol()
      || canCombust == -1
     )
     {

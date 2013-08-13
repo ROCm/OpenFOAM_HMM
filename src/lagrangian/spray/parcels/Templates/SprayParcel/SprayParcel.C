@@ -64,47 +64,62 @@ void Foam::SprayParcel<ParcelType>::calc
     const label cellI
 )
 {
+    typedef typename TrackData::cloudType::reactingCloudType reactingCloudType;
+    const CompositionModel<reactingCloudType>& composition =
+        td.cloud().composition();
+
     bool coupled = td.cloud().solution().coupled();
 
     // check if parcel belongs to liquid core
     if (liquidCore() > 0.5)
     {
         // liquid core parcels should not interact with the gas
-        if (td.cloud().solution().coupled())
-        {
-            td.cloud().solution().coupled() = false;
-        }
+        td.cloud().solution().coupled() = false;
+    }
+
+    // get old mixture composition
+    const scalarField& Y0(this->Y());
+    scalarField X0(composition.liquids().X(Y0));
+
+    // check if we have critical or boiling conditions
+    scalar TMax = composition.liquids().Tc(X0);
+    const scalar T0 = this->T();
+    const scalar pc0 = this->pc_;
+    if (composition.liquids().pv(pc0, T0, X0) >= pc0*0.999)
+    {
+        // set TMax to boiling temperature
+        TMax = composition.liquids().pvInvert(pc0, X0);
     }
 
     // set the maximum temperature limit
-    const scalar TMax = td.cloud().composition().liquids().TMax(this->pc_);
     td.cloud().constProps().TMax() = TMax;
 
     // store the parcel properties
     const scalarField& Y(this->Y());
-    scalarField X(td.cloud().composition().liquids().X(Y));
+    scalarField X(composition.liquids().X(Y));
 
-    scalar T0 = this->T();
-    this->Cp() = td.cloud().composition().liquids().Cp(this->pc_, T0, X);
-    sigma_ = td.cloud().composition().liquids().sigma(this->pc_, T0, X);
-    scalar rho0 = td.cloud().composition().liquids().rho(this->pc_, T0, X);
+    this->Cp() = composition.liquids().Cp(this->pc_, T0, X);
+    sigma_ = composition.liquids().sigma(this->pc_, T0, X);
+    scalar rho0 = composition.liquids().rho(this->pc_, T0, X);
     this->rho() = rho0;
 
     ParcelType::calc(td, dt, cellI);
 
     if (td.keepParticle)
     {
-        // update Cp, sigma, diameter and density due to change in temperature
+        // update Cp, sigma, density and diameter due to change in temperature
         // and/or composition
         scalar T1 = this->T();
         const scalarField& Y1(this->Y());
-        scalarField X1(td.cloud().composition().liquids().X(Y1));
+        scalarField X1(composition.liquids().X(Y1));
 
-        this->Cp() = td.cloud().composition().liquids().Cp(this->pc_, T1, X1);
-        sigma_ = td.cloud().composition().liquids().sigma(this->pc_, T1, X);
+        this->Cp() = composition.liquids().Cp(this->pc_, T1, X1);
 
-        scalar rho1 = td.cloud().composition().liquids().rho(this->pc_, T1, X1);
+        sigma_ = composition.liquids().sigma(this->pc_, T1, X);
+
+        scalar rho1 = composition.liquids().rho(this->pc_, T1, X1);
         this->rho() = rho1;
+
         scalar d1 = this->d()*cbrt(rho0/rho1);
         this->d() = d1;
 
