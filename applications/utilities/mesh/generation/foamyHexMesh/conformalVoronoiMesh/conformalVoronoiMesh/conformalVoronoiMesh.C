@@ -604,29 +604,31 @@ Foam::face Foam::conformalVoronoiMesh::buildDualFace
             Vertex_handle vA = c->vertex(eit->second);
             Vertex_handle vB = c->vertex(eit->third);
 
-            DelaunayMeshTools::drawDelaunayCell(Pout, cc1);
-            DelaunayMeshTools::drawDelaunayCell(Pout, cc2);
+//            DelaunayMeshTools::drawDelaunayCell(Pout, cc1);
+//            DelaunayMeshTools::drawDelaunayCell(Pout, cc2);
 
-            FatalErrorIn("Foam::conformalVoronoiMesh::buildDualFace")
+            WarningIn("Foam::conformalVoronoiMesh::buildDualFace")
                 << "Dual face uses circumcenter defined by a "
                 << "Delaunay tetrahedron with no internal "
                 << "or boundary points.  Defining Delaunay edge ends: "
                 << vA->info() << " "
                 << vB->info() << nl
-                << exit(FatalError);
+                <<endl;//<< exit(FatalError);
         }
-
-        label cc1I = cc1->cellIndex();
-        label cc2I = cc2->cellIndex();
-
-        if (cc1I != cc2I)
+        else
         {
-            if (findIndex(verticesOnFace, cc1I) == -1)
-            {
-                nUniqueVertices++;
-            }
+            label cc1I = cc1->cellIndex();
+            label cc2I = cc2->cellIndex();
 
-            verticesOnFace.append(cc1I);
+            if (cc1I != cc2I)
+            {
+                if (findIndex(verticesOnFace, cc1I) == -1)
+                {
+                    nUniqueVertices++;
+                }
+
+                verticesOnFace.append(cc1I);
+            }
         }
 
         cc1++;

@@ -284,13 +284,8 @@ void Foam::controlMeshRefinement::initialMeshPopulation
         {
             vertices[vI] = Vb(pts[vI], Vb::vtInternalNearBoundary);
 
-//            Info<< "Find size of vertex " << vI << endl;
-
             label maxPriority = -1;
             scalar size = sizeControls_.cellSize(pts[vI], maxPriority);
-
-//            Info<< "    Size = " << size << ", priority = " << maxPriority
-//                << endl;
 
             if (maxPriority > controlFunction.maxPriority())
             {

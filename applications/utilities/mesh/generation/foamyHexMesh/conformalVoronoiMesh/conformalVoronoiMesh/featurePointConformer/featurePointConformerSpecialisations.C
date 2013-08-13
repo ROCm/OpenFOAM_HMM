@@ -59,7 +59,7 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
      && pEds.size() == 3
     )
     {
-        Info<< "nExternal == 2 && nInternal == 1" << endl;
+        if (debug) Info<< "nExternal == 2 && nInternal == 1" << endl;
 
         const Foam::point& featPt = feMesh.points()[ptI];
 
@@ -205,8 +205,11 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
                 const vector& convexNormal
                     = normals[convexEdgeANormals[edgeAnormalI]];
 
-                Info<< "Angle between vectors = "
-                    << degAngleBetween(concaveNormal, convexNormal) << endl;
+                if (debug)
+                {
+                    Info<< "Angle between vectors = "
+                        << degAngleBetween(concaveNormal, convexNormal) << endl;
+                }
 
                 // Need a looser tolerance, because sometimes adjacent triangles
                 // on the same surface will be slightly out of alignment.
@@ -223,8 +226,11 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
                 const vector& convexNormal
                     = normals[convexEdgeBNormals[edgeBnormalI]];
 
-                Info<< "Angle between vectors = "
-                    << degAngleBetween(concaveNormal, convexNormal) << endl;
+                if (debug)
+                {
+                    Info<< "Angle between vectors = "
+                        << degAngleBetween(concaveNormal, convexNormal) << endl;
+                }
 
                 // Need a looser tolerance, because sometimes adjacent triangles
                 // on the same surface will be slightly out of alignment.
@@ -402,7 +408,10 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
      && pEds.size() == 3
     )
     {
-        Info<< "nExternal == 1 && nInternal == 2" << endl;
+        if (debug)
+        {
+            Info<< "nExternal == 1 && nInternal == 2" << endl;
+        }
 
         const Foam::point& featPt = feMesh.points()[ptI];
 
@@ -548,8 +557,11 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
                 const vector& concaveNormal
                     = normals[concaveEdgeANormals[edgeAnormalI]];
 
-                Info<< "Angle between vectors = "
-                    << degAngleBetween(convexNormal, concaveNormal) << endl;
+                if (debug)
+                {
+                    Info<< "Angle between vectors = "
+                        << degAngleBetween(convexNormal, concaveNormal) << endl;
+                }
 
                 // Need a looser tolerance, because sometimes adjacent triangles
                 // on the same surface will be slightly out of alignment.
@@ -566,8 +578,11 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
                 const vector& concaveNormal
                     = normals[concaveEdgeBNormals[edgeBnormalI]];
 
-                Info<< "Angle between vectors = "
-                    << degAngleBetween(convexNormal, concaveNormal) << endl;
+                if (debug)
+                {
+                    Info<< "Angle between vectors = "
+                        << degAngleBetween(convexNormal, concaveNormal) << endl;
+                }
 
                 // Need a looser tolerance, because sometimes adjacent triangles
                 // on the same surface will be slightly out of alignment.
