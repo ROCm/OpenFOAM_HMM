@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -296,7 +296,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
             buf[nChar++] = c;
 
             // get everything that could resemble a number and let
-            // strtod() determine the validity
+            // readScalar determine the validity
             while
             (
                 is_.get(c)
@@ -348,24 +348,25 @@ Foam::Istream& Foam::ISstream::read(token& t)
                 }
                 else
                 {
-                    char *endptr = NULL;
-
                     if (asLabel)
                     {
-                        long longVal(strtol(buf, &endptr, 10));
-                        t = label(longVal);
-
-                        // return as a scalar if doesn't fit in a label
-                        if (*endptr || t.labelToken() != longVal)
+                        label labelVal;
+                        if (readLabel(buf, labelVal))
                         {
-                            t = scalar(strtod(buf, &endptr));
+                            t = labelVal;
                         }
-                    }
-                    else
-                    {
-                        scalar scalarVal(strtod(buf, &endptr));
-                        t = scalarVal;
-
+                        else
+                        {
+                            // Maybe too big? Try as scalar
+                            scalar scalarVal;
+                            if (readScalar(buf, scalarVal))
+                            {
+                                t = scalarVal;
+                            }
+                            else
+                            {
+                                t.setBad();
+                            }
 // ---------------------------------------
 // this would also be possible if desired:
 // ---------------------------------------
@@ -380,12 +381,20 @@ Foam::Istream& Foam::ISstream::read(token& t)
 //                                t = labelVal;
 //                            }
 //                        }
-                    }
 
-                    // not everything converted: bad format or trailing junk
-                    if (*endptr)
+                        }
+                    }
+                    else
                     {
-                        t.setBad();
+                        scalar scalarVal;
+                        if (readScalar(buf, scalarVal))
+                        {
+                            t = scalarVal;
+                        }
+                        else
+                        {
+                            t.setBad();
+                        }
                     }
                 }
             }
