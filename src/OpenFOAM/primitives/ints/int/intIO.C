@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,6 +85,15 @@ int Foam::readInt(Istream& is)
     is >> val;
 
     return val;
+}
+
+
+bool Foam::readInt(const char* buf, int& s)
+{
+    char *endptr = NULL;
+    long l = strtol(buf, &endptr, 10);
+    s = int(l);
+    return (*endptr == 0);
 }
 
 
