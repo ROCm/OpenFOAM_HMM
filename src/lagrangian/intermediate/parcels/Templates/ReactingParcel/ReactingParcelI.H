@@ -85,7 +85,6 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
     const scalar Cp0,
     const scalar epsilon0,
     const scalar f0,
-    const scalar Pr,
     const scalar pMin,
     const Switch& constantVolume
 )
@@ -103,8 +102,7 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
         TMax,
         Cp0,
         epsilon0,
-        f0,
-        Pr
+        f0
     ),
     pMin_(pMin),
     constantVolume_(constantVolume)

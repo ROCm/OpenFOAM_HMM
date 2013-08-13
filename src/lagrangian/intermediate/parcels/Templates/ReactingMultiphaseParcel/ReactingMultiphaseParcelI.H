@@ -100,7 +100,6 @@ constantProperties
     const scalar Cp0,
     const scalar epsilon0,
     const scalar f0,
-    const scalar Pr,
     const scalar pMin,
     const Switch& constantVolume,
     const scalar TDevol
@@ -120,7 +119,6 @@ constantProperties
         Cp0,
         epsilon0,
         f0,
-        Pr,
         pMin,
         constantVolume
     ),
