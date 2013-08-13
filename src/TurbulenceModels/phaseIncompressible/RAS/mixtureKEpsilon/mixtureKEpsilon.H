@@ -28,7 +28,23 @@ Group
     grpRASTurbulence
 
 Description
-    Standard k-epsilon turbulence model
+    Mixture k-epsilon turbulence model for two-phase gas-liquid systems
+
+    The basic structure of the model is based on:
+    \verbatim
+        "Modelling of dispersed bubble and droplet ow at high phase fractions"
+        A. Behzadi, R.I. Issa , H. Rusche,
+        Chemical Engineering Science (59) 2004 pp.759-770.
+    \endverbatim
+
+    but an effective density for the gas is used in the averaging and an
+    alternative model for bubble-generated turbulence from:
+    \verbatim
+        "The simulation of multidimensional multiphase flows",
+        Lahey R.T.,
+        Nucl. Eng. & Design
+        (235) 2005 pp.1043-1060.
+    \endverbatim
 
     The default model coefficients correspond to the following:
     \verbatim
@@ -37,7 +53,7 @@ Description
             Cmu         0.09;
             C1          1.44;
             C2          1.92;
-            C3          -0.33;
+            C3          C2;
             sigmak      1.0;
             sigmaEps    1.3;
         }
