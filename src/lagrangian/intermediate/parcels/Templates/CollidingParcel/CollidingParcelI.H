@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,6 +36,9 @@ inline Foam::CollidingParcel<ParcelType>::CollidingParcel
 )
 :
     ParcelType(owner, position, cellI, tetFaceI, tetPtI),
+    f_(vector::zero),
+    angularMomentum_(vector::zero),
+    torque_(vector::zero),
     collisionRecords_()
 {}
 
@@ -70,17 +73,38 @@ inline Foam::CollidingParcel<ParcelType>::CollidingParcel
         nParticle0,
         d0,
         dTarget0,
-        U0,
-        f0,
-        angularMomentum0,
         torque0,
         constProps
     ),
+    f_(f0),
+    angularMomentum_(angularMomentum0),
+    torque_(torque0),
     collisionRecords_()
 {}
 
 
 // * * * * * * * CollidingParcel Member Functions  * * * * * * * //
+
+template<class ParcelType>
+inline const Foam::vector& Foam::CollidingParcel<ParcelType>::f() const
+{
+    return f_;
+}
+
+
+template<class ParcelType>
+inline const Foam::vector&
+Foam::CollidingParcel<ParcelType>::angularMomentum() const
+{
+    return angularMomentum_;
+}
+
+
+template<class ParcelType>
+inline const Foam::vector& Foam::CollidingParcel<ParcelType>::torque() const
+{
+    return torque_;
+}
 
 
 template<class ParcelType>
@@ -92,10 +116,38 @@ Foam::CollidingParcel<ParcelType>::collisionRecords() const
 
 
 template<class ParcelType>
+inline Foam::vector& Foam::CollidingParcel<ParcelType>::f()
+{
+    return f_;
+}
+
+
+template<class ParcelType>
+inline Foam::vector& Foam::CollidingParcel<ParcelType>::angularMomentum()
+{
+    return angularMomentum_;
+}
+
+
+template<class ParcelType>
+inline Foam::vector& Foam::CollidingParcel<ParcelType>::torque()
+{
+    return torque_;
+}
+
+
+template<class ParcelType>
 inline Foam::collisionRecordList&
 Foam::CollidingParcel<ParcelType>::collisionRecords()
 {
     return collisionRecords_;
+}
+
+
+template<class ParcelType>
+inline Foam::vector Foam::CollidingParcel<ParcelType>::omega() const
+{
+    return angularMomentum_/this->momentOfInertia();
 }
 
 

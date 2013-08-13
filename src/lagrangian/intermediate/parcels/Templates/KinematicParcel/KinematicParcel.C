@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -213,9 +213,6 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
     d_(p.d_),
     dTarget_(p.dTarget_),
     U_(p.U_),
-    f_(p.f_),
-    angularMomentum_(p.angularMomentum_),
-    torque_(p.torque_),
     rho_(p.rho_),
     age_(p.age_),
     tTurb_(p.tTurb_),
@@ -240,9 +237,6 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
     d_(p.d_),
     dTarget_(p.dTarget_),
     U_(p.U_),
-    f_(p.f_),
-    angularMomentum_(p.angularMomentum_),
-    torque_(p.torque_),
     rho_(p.rho_),
     age_(p.age_),
     tTurb_(p.tTurb_),
@@ -437,12 +431,6 @@ void Foam::KinematicParcel<ParcelType>::transformProperties(const tensor& T)
     ParcelType::transformProperties(T);
 
     U_ = transform(T, U_);
-
-    f_ = transform(T, f_);
-
-    angularMomentum_ = transform(T, angularMomentum_);
-
-    torque_ = transform(T, torque_);
 }
 
 
