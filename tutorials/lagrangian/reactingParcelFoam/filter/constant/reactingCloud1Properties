@@ -65,8 +65,7 @@ constantProperties
     f0              0.5;
 
     Pr              0.7;
-    Tvap            273;
-    Tbp             373;
+    TDevol          273;
     LDevol          0;
     hRetentionCoeff 1;
 
