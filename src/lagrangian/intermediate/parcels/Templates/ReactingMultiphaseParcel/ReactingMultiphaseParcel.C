@@ -372,7 +372,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
 
             td.cloud().hsTrans()[cellI] += dm*HsEff(td, pc, T0, idG, idL, idS);
 
-            td.cloud().phaseChange().addToPhaseChangeMass(dm);
+            td.cloud().phaseChange().addToPhaseChangeMass(np0*mass1);
         }
 
         return;
