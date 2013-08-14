@@ -136,7 +136,7 @@ void Foam::DESModelRegions::write()
 
         if (log_)
         {
-            Info<< type() << " output:" << nl;
+            Info<< type() << " " << name_ << " output:" << nl;
         }
 
         tmp<volScalarField> tresult;
@@ -186,6 +186,7 @@ void Foam::DESModelRegions::write()
             {
                 Info<< "    LES = " << prc << " % (volume)" << nl
                     << "    RAS = " << 100.0 - prc << " % (volume)" << nl
+                    << "    writing field " << result.name() << nl
                     << endl;
             }
 

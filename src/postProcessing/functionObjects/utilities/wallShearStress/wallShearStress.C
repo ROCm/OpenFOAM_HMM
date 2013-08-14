@@ -234,7 +234,7 @@ void Foam::wallShearStress::write()
 
         if (log_)
         {
-            Info<< type() << " output:" << nl;
+            Info<< type() << " " << name_ << " output:" << nl;
         }
 
 
@@ -265,7 +265,8 @@ void Foam::wallShearStress::write()
 
         if (log_)
         {
-            Info<< endl;
+            Info<< "    writing field " << wallShearStress.name() << nl
+                << endl;
         }
 
         wallShearStress.write();

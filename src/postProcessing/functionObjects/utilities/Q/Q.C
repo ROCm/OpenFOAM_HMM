@@ -150,10 +150,11 @@ void Foam::Q::write()
 
         Q = 0.5*(sqr(tr(gradU)) - tr(((gradU) & (gradU))));
 
-        Q.write();
+        Info<< type() << " " << name_ << " output:" << nl
+            << "    writing field " << Q.name() << nl
+            << endl;
 
-        Info<< type() << " output:" << nl
-            << "    writing " << Q.name() << " field" << nl << endl;
+        Q.write();
     }
 }
 

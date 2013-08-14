@@ -322,6 +322,10 @@ void Foam::pressureTools::write()
 
         pResult == convertToCoeff(rhoScale(p)*p + pDyn(p) + pRef());
 
+        Info<< type() << " " << name_ << " output:" << nl
+            << "    writing field " << pResult.name() << nl
+            << endl;
+
         pResult.write();
     }
 }

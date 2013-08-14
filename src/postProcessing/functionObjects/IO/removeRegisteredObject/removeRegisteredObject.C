@@ -78,6 +78,10 @@ void Foam::removeRegisteredObject::execute()
 
             if (obj.ownedByRegistry())
             {
+                Info<< type() << " " << name_ << " output:" << nl
+                    << "    removing object " << obj.name() << nl
+                    << endl;
+
                 const_cast<regIOobject&>(obj).release();
                 delete &obj;
             }
