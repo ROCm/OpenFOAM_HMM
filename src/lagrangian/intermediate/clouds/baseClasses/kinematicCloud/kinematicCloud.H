@@ -86,7 +86,7 @@ public:
             virtual scalar linearKineticEnergyOfSystem() const = 0;
 
             //- Total rotational kinetic energy in the system
-            virtual scalar rotationalKineticEnergyOfSystem() const = 0;
+//            virtual scalar rotationalKineticEnergyOfSystem() const = 0;
 
             //- Penetration for percentage of the current total mass
 //            virtual scalar penetration(const scalar& fraction) const = 0;

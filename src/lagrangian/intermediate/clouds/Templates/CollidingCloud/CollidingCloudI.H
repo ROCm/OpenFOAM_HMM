@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,6 +46,24 @@ inline Foam::CollisionModel<Foam::CollidingCloud<CloudType> >&
 Foam::CollidingCloud<CloudType>::collision()
 {
     return collisionModel_();
+}
+
+
+template<class CloudType>
+inline Foam::scalar
+Foam::CollidingCloud<CloudType>::rotationalKineticEnergyOfSystem() const
+{
+    scalar rotationalKineticEnergy = 0.0;
+
+    forAllConstIter(typename CollidingCloud<CloudType>, *this, iter)
+    {
+        const parcelType& p = iter();
+
+        rotationalKineticEnergy +=
+            p.nParticle()*0.5*p.momentOfInertia()*(p.omega() & p.omega());
+    }
+
+    return rotationalKineticEnergy;
 }
 
 

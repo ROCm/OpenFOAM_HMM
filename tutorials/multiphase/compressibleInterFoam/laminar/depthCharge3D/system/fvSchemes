@@ -31,8 +31,8 @@ divSchemes
     div(phirb,alpha) Gauss interfaceCompression 1;
 
     div(rho*phi,U)  Gauss upwind;
-    div(phi,thermo:rhowater) Gauss upwind;
-    div(phi,thermo:rhoair) Gauss upwind;
+    div(phi,thermo:rho.water) Gauss upwind;
+    div(phi,thermo:rho.air) Gauss upwind;
     div(rho*phi,T)  Gauss upwind;
     div(rho*phi,K)  Gauss upwind;
     div(phi,p)      Gauss upwind;

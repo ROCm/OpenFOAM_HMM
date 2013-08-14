@@ -19,14 +19,9 @@ mul             mul [ 1 -1 -1 0 0 ] 0.0065;
 
 muv             muv [ 1 -1 -1 0 0 ] 5.953e-06;
 
-twoPhase
-{
-    transportModel  twoPhase;
-    phase1          phase1;
-    phase2          phase2;
-}
+phases (vapour water);
 
-phase1
+water
 {
     transportModel  Newtonian;
     nu              nu [ 0 2 -1 0 0 0 0 ] 7.831e-06;
@@ -48,7 +43,7 @@ phase1
     }
 }
 
-phase2
+vapour
 {
     transportModel  Newtonian;
     nu              nu [ 0 2 -1 0 0 0 0 ] 4.252e-05;

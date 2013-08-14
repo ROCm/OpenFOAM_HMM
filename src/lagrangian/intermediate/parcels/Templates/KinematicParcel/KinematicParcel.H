@@ -261,17 +261,6 @@ protected:
             //- Velocity of Parcel [m/s]
             vector U_;
 
-            //- Force on particle due to collisions [N]
-            vector f_;
-
-            //- Angular momentum of Parcel in global reference frame
-            // [kg m2/s]
-            vector angularMomentum_;
-
-            //- Torque on particle due to collisions in global
-            //  reference frame [Nm]
-            vector torque_;
-
             //- Density [kg/m3]
             scalar rho_;
 
@@ -332,9 +321,6 @@ public:
           + " d"
           + " dTarget "
           + " (Ux Uy Uz)"
-          + " (fx fy fz)"
-          + " (angularMomentumx angularMomentumy angularMomentumz)"
-          + " (torquex torquey torquez)"
           + " rho"
           + " age"
           + " tTurb"
@@ -367,9 +353,6 @@ public:
             const scalar nParticle0,
             const scalar d0,
             const scalar dTarget0,
-            const vector& U0,
-            const vector& f0,
-            const vector& angularMomentum0,
             const vector& torque0,
             const constantProperties& constProps
         );
@@ -445,15 +428,6 @@ public:
             //- Return const access to velocity
             inline const vector& U() const;
 
-            //- Return const access to force
-            inline const vector& f() const;
-
-            //- Return const access to angular momentum
-            inline const vector& angularMomentum() const;
-
-            //- Return const access to torque
-            inline const vector& torque() const;
-
             //- Return const access to density
             inline scalar rho() const;
 
@@ -496,15 +470,6 @@ public:
             //- Return access to velocity
             inline vector& U();
 
-            //- Return access to force
-            inline vector& f();
-
-            //- Return access to angular momentum
-            inline vector& angularMomentum();
-
-            //- Return access to torque
-            inline vector& torque();
-
             //- Return access to density
             inline scalar& rho();
 
@@ -531,9 +496,6 @@ public:
 
             //- Particle moment of inertia around diameter axis
             inline scalar momentOfInertia() const;
-
-            //- Particle angular velocity
-            inline vector omega() const;
 
             //- Particle volume
             inline scalar volume() const;

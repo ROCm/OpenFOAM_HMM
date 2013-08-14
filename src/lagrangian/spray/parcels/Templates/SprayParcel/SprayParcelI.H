@@ -82,8 +82,6 @@ inline Foam::SprayParcel<ParcelType>::constantProperties::constantProperties
     const scalar Pr,
     const scalar pMin,
     const Switch& constantVolume,
-    const scalar Tvap,
-    const scalar Tbp,
     const scalar sigma0,
     const scalar mu0
 )
@@ -104,9 +102,7 @@ inline Foam::SprayParcel<ParcelType>::constantProperties::constantProperties
         f0,
         Pr,
         pMin,
-        constantVolume,
-        Tvap,
-        Tbp
+        constantVolume
     ),
     sigma0_(sigma0),
     mu0_(mu0)

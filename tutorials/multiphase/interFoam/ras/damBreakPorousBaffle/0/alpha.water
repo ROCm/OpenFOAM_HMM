@@ -11,35 +11,45 @@ FoamFile
     format      ascii;
     class       volScalarField;
     location    "0";
-    object      nuSgs;
+    object      alpha.water.org;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -1 0 0 0 0];
+dimensions      [0 0 0 0 0 0 0];
 
 internalField   uniform 0;
 
 boundaryField
 {
-    inlet
+    leftWall
     {
-        type            calculated;
+        type            zeroGradient;
+    }
+    rightWall
+    {
+        type            zeroGradient;
+    }
+    lowerWall
+    {
+        type            zeroGradient;
+    }
+    atmosphere
+    {
+        type            inletOutlet;
+        inletValue      uniform 0;
         value           uniform 0;
     }
-    outlet
+    defaultFaces
     {
-        type            calculated;
-        value           uniform 0;
+        type            empty;
     }
-    walls
+    porous_half0
     {
-        type            nutUSpaldingWallFunction;
-        value           uniform 0;
+        type            cyclic;
     }
-    frontBack
+    porous_half1
     {
-        type            nutUSpaldingWallFunction;
-        value           uniform 0;
+        type            cyclic;
     }
 }
 

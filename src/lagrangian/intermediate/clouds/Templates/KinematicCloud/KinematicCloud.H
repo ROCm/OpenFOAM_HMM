@@ -487,9 +487,6 @@ public:
             //- Total linear kinetic energy in the system
             inline scalar linearKineticEnergyOfSystem() const;
 
-            //- Total rotational kinetic energy in the system
-            inline scalar rotationalKineticEnergyOfSystem() const;
-
             //- Penetration for fraction [0-1] of the current total mass
             inline scalar penetration(const scalar fraction) const;
 

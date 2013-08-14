@@ -135,9 +135,6 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     d_(0.0),
     dTarget_(0.0),
     U_(vector::zero),
-    f_(vector::zero),
-    angularMomentum_(vector::zero),
-    torque_(vector::zero),
     rho_(0.0),
     age_(0.0),
     tTurb_(0.0),
@@ -161,9 +158,6 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     const scalar d0,
     const scalar dTarget0,
     const vector& U0,
-    const vector& f0,
-    const vector& angularMomentum0,
-    const vector& torque0,
     const constantProperties& constProps
 )
 :
@@ -174,9 +168,6 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     d_(d0),
     dTarget_(dTarget0),
     U_(U0),
-    f_(f0),
-    angularMomentum_(angularMomentum0),
-    torque_(torque0),
     rho_(constProps.rho0()),
     age_(0.0),
     tTurb_(0.0),
@@ -290,30 +281,6 @@ inline const Foam::vector& Foam::KinematicParcel<ParcelType>::U() const
 
 
 template<class ParcelType>
-inline const Foam::vector&
-Foam::KinematicParcel<ParcelType>::f() const
-{
-    return f_;
-}
-
-
-template<class ParcelType>
-inline const Foam::vector&
-Foam::KinematicParcel<ParcelType>::angularMomentum() const
-{
-    return angularMomentum_;
-}
-
-
-template<class ParcelType>
-inline const Foam::vector&
-Foam::KinematicParcel<ParcelType>::torque() const
-{
-    return torque_;
-}
-
-
-template<class ParcelType>
 inline Foam::scalar Foam::KinematicParcel<ParcelType>::rho() const
 {
     return rho_;
@@ -405,27 +372,6 @@ inline Foam::vector& Foam::KinematicParcel<ParcelType>::U()
 
 
 template<class ParcelType>
-inline Foam::vector& Foam::KinematicParcel<ParcelType>::f()
-{
-    return f_;
-}
-
-
-template<class ParcelType>
-inline Foam::vector& Foam::KinematicParcel<ParcelType>::angularMomentum()
-{
-    return angularMomentum_;
-}
-
-
-template<class ParcelType>
-inline Foam::vector& Foam::KinematicParcel<ParcelType>::torque()
-{
-    return torque_;
-}
-
-
-template<class ParcelType>
 inline Foam::scalar& Foam::KinematicParcel<ParcelType>::rho()
 {
     return rho_;
@@ -489,13 +435,6 @@ template<class ParcelType>
 inline Foam::scalar Foam::KinematicParcel<ParcelType>::momentOfInertia() const
 {
     return 0.1*mass()*sqr(d_);
-}
-
-
-template<class ParcelType>
-inline Foam::vector Foam::KinematicParcel<ParcelType>::omega() const
-{
-    return angularMomentum_/momentOfInertia();
 }
 
 

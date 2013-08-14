@@ -24,6 +24,7 @@ boundaryField
     leftWall
     {
         type            epsilonWallFunction;
+        value           uniform 0.1;
         Cmu             0.09;
         kappa           0.41;
         E               9.8;
@@ -32,6 +33,7 @@ boundaryField
     rightWall
     {
         type            epsilonWallFunction;
+        value           uniform 0.1;
         Cmu             0.09;
         kappa           0.41;
         E               9.8;
@@ -40,6 +42,7 @@ boundaryField
     lowerWall
     {
         type            epsilonWallFunction;
+        value           uniform 0.1;
         Cmu             0.09;
         kappa           0.41;
         E               9.8;

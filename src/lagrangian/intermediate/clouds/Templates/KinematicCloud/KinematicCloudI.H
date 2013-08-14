@@ -308,24 +308,6 @@ Foam::KinematicCloud<CloudType>::linearKineticEnergyOfSystem() const
 
 
 template<class CloudType>
-inline Foam::scalar
-Foam::KinematicCloud<CloudType>::rotationalKineticEnergyOfSystem() const
-{
-    scalar rotationalKineticEnergy = 0.0;
-
-    forAllConstIter(typename KinematicCloud<CloudType>, *this, iter)
-    {
-        const parcelType& p = iter();
-
-        rotationalKineticEnergy +=
-            p.nParticle()*0.5*p.momentOfInertia()*(p.omega() & p.omega());
-    }
-
-    return rotationalKineticEnergy;
-}
-
-
-template<class CloudType>
 inline Foam::scalar Foam::KinematicCloud<CloudType>::Dij
 (
     const label i,

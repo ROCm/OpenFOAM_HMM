@@ -23,9 +23,6 @@ setDamBreakFine ()
     mv temp.$$ $controlDict
 }
 
-# Do damBreakPorousBaffle
-(cd damBreakPorousBaffle && foamRunTutorials)
-
 # Do damBreak
 (cd damBreak && foamRunTutorials)
 
@@ -37,7 +34,7 @@ cloneCase damBreak damBreakFine
 
     # Modify case
     setDamBreakFine
-    cp ../damBreak/0/alpha1.org 0/alpha1
+    cp ../damBreak/0/alpha.water.org 0/alpha.water
     # And execute
     runApplication blockMesh
     runApplication setFields

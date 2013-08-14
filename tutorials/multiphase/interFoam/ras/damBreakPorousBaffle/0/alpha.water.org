@@ -10,7 +10,8 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      alpha1;
+    location    "0";
+    object      alpha.water.org;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -20,28 +21,37 @@ internalField   uniform 0;
 
 boundaryField
 {
-    ".*"
+    leftWall
     {
         type            zeroGradient;
     }
-
-    gasInlet
+    rightWall
     {
-        type            fixedValue;
-        value           uniform 1;
+        type            zeroGradient;
     }
-
-    outlet
+    lowerWall
+    {
+        type            zeroGradient;
+    }
+    atmosphere
     {
         type            inletOutlet;
         inletValue      uniform 0;
-        value           $internalField;
+        value           uniform 0;
     }
-
-    "AMI.*"
+    defaultFaces
     {
-        type            cyclicAMI;
+        type            empty;
+    }
+    porous_half0
+    {
+        type            cyclic;
+    }
+    porous_half1
+    {
+        type            cyclic;
     }
 }
+
 
 // ************************************************************************* //

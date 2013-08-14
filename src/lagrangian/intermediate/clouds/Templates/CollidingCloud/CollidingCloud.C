@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -233,5 +233,17 @@ void  Foam::CollidingCloud<CloudType>::motion(TrackData& td)
     }
 }
 
+
+template<class CloudType>
+void Foam::CollidingCloud<CloudType>::info()
+{
+    CloudType::info();
+
+    scalar rotationalKineticEnergy = rotationalKineticEnergyOfSystem();
+    reduce(rotationalKineticEnergy, sumOp<scalar>());
+
+    Info<< "    Rotational kinetic energy       = "
+        << rotationalKineticEnergy << nl;
+}
 
 // ************************************************************************* //

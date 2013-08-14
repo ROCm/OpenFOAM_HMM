@@ -13,12 +13,12 @@ do
 
     if [ "$case" = "damBreak" ]
     then
-        cp $case/0/alpha1.org $case/0/alpha1
+        cp $case/0/alpha.water.org $case/0/alpha.water
     fi
 
     if [ "$case" = "damBreakPorousBaffle" ]
     then
-        cp $case/0/alpha1.org $case/0/alpha1
+        cp $case/0/alpha.water.org $case/0/alpha.water
     fi
 
 done

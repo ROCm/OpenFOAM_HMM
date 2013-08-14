@@ -86,9 +86,7 @@ public:
         incompressibleTwoPhaseMixture
         (
             const volVectorField& U,
-            const surfaceScalarField& phi,
-            const word& alpha1Name = "alpha1",
-            const word& alpha2Name = "alpha2"
+            const surfaceScalarField& phi
         );
 
 
