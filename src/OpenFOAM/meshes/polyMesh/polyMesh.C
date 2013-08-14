@@ -170,7 +170,7 @@ Foam::polyMesh::polyMesh(const IOobject& io)
         IOobject
         (
             "owner",
-            time().findInstance(meshDir(), "faces"),
+            faces_.instance(),
             meshSubDir,
             *this,
             IOobject::READ_IF_PRESENT,
@@ -182,7 +182,7 @@ Foam::polyMesh::polyMesh(const IOobject& io)
         IOobject
         (
             "neighbour",
-            time().findInstance(meshDir(), "faces"),
+            faces_.instance(),
             meshSubDir,
             *this,
             IOobject::READ_IF_PRESENT,
