@@ -350,7 +350,7 @@ bool Foam::autoDensity::fillBox
 
     if (!overlapping && !wellInside)
     {
-        // If this is an inside box then then it is possible to fill points very
+        // If this is an inside box then it is possible to fill points very
         // close to the boundary, to prevent this, check the corners and sides
         // of the box so ensure that they are "wellInside".  If not, set as an
         // overlapping box.
@@ -644,7 +644,7 @@ bool Foam::autoDensity::fillBox
             {
                 trialPoints++;
 
-                point p = samplePoints[i];
+                const point& p = samplePoints[i];
 
                 scalar localSize = sampleSizes[i];
 
