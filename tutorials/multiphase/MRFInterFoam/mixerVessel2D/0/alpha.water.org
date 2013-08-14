@@ -10,7 +10,7 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      alpha1;
+    object      alpha.water;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -20,29 +20,22 @@ internalField   uniform 0;
 
 boundaryField
 {
-    leftWall
+    rotor
     {
         type            zeroGradient;
     }
 
-    rightWall
+    stator
     {
         type            zeroGradient;
     }
 
-    lowerWall
+    front
     {
-        type            zeroGradient;
+        type            empty;
     }
 
-    atmosphere
-    {
-        type            inletOutlet;
-        inletValue      uniform 0;
-        value           uniform 0;
-    }
-
-    defaultFaces
+    back
     {
         type            empty;
     }

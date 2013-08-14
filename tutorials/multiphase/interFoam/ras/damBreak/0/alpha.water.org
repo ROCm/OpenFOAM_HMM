@@ -10,39 +10,41 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
-    object      alpha1;
+    object      alpha.water;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 0 0 0 0];
+dimensions      [0 0 0 0 0 0 0];
 
-internalField   uniform 1;
+internalField   uniform 0;
 
 boundaryField
 {
-    inlet
+    leftWall
     {
-        type            fixedValue;
-        value           $internalField;
+        type            zeroGradient;
     }
 
-    outlet
+    rightWall
+    {
+        type            zeroGradient;
+    }
+
+    lowerWall
+    {
+        type            zeroGradient;
+    }
+
+    atmosphere
     {
         type            inletOutlet;
-        inletValue      $internalField;
+        inletValue      uniform 0;
+        value           uniform 0;
     }
 
-    outerCylinder
+    defaultFaces
     {
-        type            zeroGradient;
-        value           $internalField;
-    }
-
-    "propeller.*"
-    {
-        type            zeroGradient;
-        value           $internalField;
+        type            empty;
     }
 }
 

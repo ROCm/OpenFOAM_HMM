@@ -9,7 +9,7 @@ loseCases="damBreakFine"
 
 for case in $keepCases
 do
-    (cd $case && foamCleanTutorials && rm -rf 0/alpha1)
+    (cd $case && foamCleanTutorials && rm -rf 0/alpha.water)
 done
 
 for case in $loseCases

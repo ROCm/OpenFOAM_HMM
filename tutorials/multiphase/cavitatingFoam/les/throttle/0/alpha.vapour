@@ -10,32 +10,35 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      alpha1;
+    object      alpha.vapour;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 0 0 0 0 0 0];
+dimensions      [0 0 0 0 0];
 
 internalField   uniform 0;
 
 boundaryField
 {
-    rotor
+    inlet
     {
-        type            zeroGradient;
+        type            calculated;
+        value           uniform 0;
     }
 
-    stator
+    outlet
     {
-        type            zeroGradient;
+        type            calculated;
+        value           uniform 0;
     }
 
-    front
+    walls
     {
-        type            empty;
+        type            calculated;
+        value           uniform 0;
     }
 
-    back
+    frontBack
     {
         type            empty;
     }

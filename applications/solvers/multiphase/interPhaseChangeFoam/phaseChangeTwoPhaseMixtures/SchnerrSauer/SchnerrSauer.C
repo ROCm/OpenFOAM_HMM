@@ -49,11 +49,10 @@ namespace phaseChangeTwoPhaseMixtures
 Foam::phaseChangeTwoPhaseMixtures::SchnerrSauer::SchnerrSauer
 (
     const volVectorField& U,
-    const surfaceScalarField& phi,
-    const word& alpha1Name
+    const surfaceScalarField& phi
 )
 :
-    phaseChangeTwoPhaseMixture(typeName, U, phi, alpha1Name),
+    phaseChangeTwoPhaseMixture(typeName, U, phi),
 
     n_(phaseChangeTwoPhaseMixtureCoeffs_.lookup("n")),
     dNuc_(phaseChangeTwoPhaseMixtureCoeffs_.lookup("dNuc")),

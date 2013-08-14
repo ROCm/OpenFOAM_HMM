@@ -16,7 +16,7 @@ FoamFile
 
 solvers
 {
-    alpha1
+    alpha.water
     {
         nAlphaCorr      1;
         nAlphaSubCycles 2;

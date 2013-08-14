@@ -17,7 +17,7 @@ while [ "$i" -lt 3 ] ; do
     i=`expr $i + 1`
 done
 
-cp 0/alpha1.org 0/alpha1
+cp 0/alpha.water.org 0/alpha.water
 runApplication setFields
 
 runApplication $application

@@ -10,38 +10,27 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      gamma;
+    object      alpha.water;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 0 0 0 0];
+dimensions      [0 0 0 0 0 0 0];
 
 internalField   uniform 0;
 
 boundaryField
 {
-    inlet
+    front
     {
-        type            calculated;
-        value           uniform 0;
+        type            empty;
     }
-
-    outlet
+    back
     {
-        type            calculated;
-        value           uniform 0;
+        type            empty;
     }
-
     walls
     {
-        type            calculated;
-        value           uniform 0;
-    }
-
-    frontBack
-    {
-        type            calculated;
-        value           uniform 0;
+        type            zeroGradient;
     }
 }
 

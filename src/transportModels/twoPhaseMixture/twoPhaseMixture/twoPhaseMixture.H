@@ -67,9 +67,7 @@ public:
         twoPhaseMixture
         (
             const fvMesh& mesh,
-            const dictionary& dict,
-            const word& alpha1Name = "alpha1",
-            const word& alpha2Name = "alpha2"
+            const dictionary& dict
         );
 
 

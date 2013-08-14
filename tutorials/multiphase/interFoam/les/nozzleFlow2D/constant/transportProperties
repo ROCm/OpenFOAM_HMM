@@ -15,14 +15,9 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-twoPhase
-{
-    transportModel  twoPhase;
-    phase1          phase1;
-    phase2          phase2;
-}
+phases (fuel air);
 
-phase1
+fuel
 {
     transportModel  Newtonian;
     nu              nu [ 0 2 -1 0 0 0 0 ] 5.952e-06;
@@ -44,7 +39,7 @@ phase1
     }
 }
 
-phase2
+air
 {
     transportModel  Newtonian;
     nu              nu [ 0 2 -1 0 0 0 0 ] 8.5e-07;

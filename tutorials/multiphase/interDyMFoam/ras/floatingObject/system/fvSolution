@@ -29,7 +29,7 @@ solvers
         mergeLevels     1;
     }
 
-    alpha1
+    alpha.water
     {
         nAlphaCorr      1;
         nAlphaSubCycles 3;

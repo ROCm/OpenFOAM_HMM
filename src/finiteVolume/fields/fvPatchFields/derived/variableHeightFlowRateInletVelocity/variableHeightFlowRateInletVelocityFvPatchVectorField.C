@@ -39,7 +39,8 @@ Foam::variableHeightFlowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF),
-    flowRate_(0)
+    flowRate_(0),
+    alphaName_("none")
 {}
 
 
@@ -53,7 +54,8 @@ Foam::variableHeightFlowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf, p, iF, mapper),
-    flowRate_(ptf.flowRate_)
+    flowRate_(ptf.flowRate_),
+    alphaName_(ptf.alphaName_)
 {}
 
 
@@ -66,7 +68,8 @@ Foam::variableHeightFlowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF, dict),
-    flowRate_(readScalar(dict.lookup("flowRate")))
+    flowRate_(readScalar(dict.lookup("flowRate"))),
+    alphaName_(dict.lookup("alpha"))
 {}
 
 
@@ -77,7 +80,8 @@ Foam::variableHeightFlowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf),
-    flowRate_(ptf.flowRate_)
+    flowRate_(ptf.flowRate_),
+    alphaName_(ptf.alphaName_)
 {}
 
 
@@ -89,7 +93,8 @@ Foam::variableHeightFlowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf, iF),
-    flowRate_(ptf.flowRate_)
+    flowRate_(ptf.flowRate_),
+    alphaName_(ptf.alphaName_)
 {}
 
 
@@ -104,7 +109,7 @@ void Foam::variableHeightFlowRateInletVelocityFvPatchVectorField
     }
 
     scalarField alphap =
-        patch().lookupPatchField<volScalarField, scalar>("alpha1");
+        patch().lookupPatchField<volScalarField, scalar>(alphaName_);
 
     alphap = max(alphap, scalar(0));
     alphap = min(alphap, scalar(1));
@@ -128,6 +133,8 @@ void Foam::variableHeightFlowRateInletVelocityFvPatchVectorField::write
     fvPatchField<vector>::write(os);
 
     os.writeKeyword("flowRate") << flowRate_
+        << token::END_STATEMENT << nl;
+    os.writeKeyword("alpha") << alphaName_
         << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }

@@ -1,5 +1,5 @@
 {
-    volScalarField thermoRho = psi*p + gamma2*rhol0;
+    volScalarField thermoRho = psi*p + alphal*rhol0;
 
     dimensionedScalar totalMass = fvc::domainIntegrate(rho);
 
