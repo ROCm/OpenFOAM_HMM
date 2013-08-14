@@ -62,9 +62,64 @@ Foam::threePhaseMixture::threePhaseMixture
         )
     ),
 
-    phase1Name_("phase1"),
-    phase2Name_("phase2"),
-    phase3Name_("phase3"),
+    phase1Name_(wordList(lookup("phases"))[0]),
+    phase2Name_(wordList(lookup("phases"))[1]),
+    phase3Name_(wordList(lookup("phases"))[2]),
+
+    alpha1_
+    (
+        IOobject
+        (
+            IOobject::groupName("alpha", phase1Name_),
+            U.time().timeName(),
+            U.mesh(),
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        U.mesh()
+    ),
+
+    alpha2_
+    (
+        IOobject
+        (
+            IOobject::groupName("alpha", phase2Name_),
+            U.time().timeName(),
+            U.mesh(),
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        U.mesh()
+    ),
+
+    alpha3_
+    (
+        IOobject
+        (
+            IOobject::groupName("alpha", phase3Name_),
+            U.time().timeName(),
+            U.mesh(),
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        U.mesh()
+    ),
+
+    U_(U),
+    phi_(phi),
+
+    nu_
+    (
+        IOobject
+        (
+            "nu",
+            U.time().timeName(),
+            U.db()
+        ),
+        U.mesh(),
+        dimensionedScalar("nu", dimensionSet(0, 2, -1, 0, 0), 0),
+        calculatedFvPatchScalarField::typeName
+    ),
 
     nuModel1_
     (
@@ -99,28 +154,9 @@ Foam::threePhaseMixture::threePhaseMixture
 
     rho1_(nuModel1_->viscosityProperties().lookup("rho")),
     rho2_(nuModel2_->viscosityProperties().lookup("rho")),
-    rho3_(nuModel3_->viscosityProperties().lookup("rho")),
-
-    U_(U),
-    phi_(phi),
-
-    alpha1_(U_.db().lookupObject<const volScalarField> ("alpha1")),
-    alpha2_(U_.db().lookupObject<const volScalarField> ("alpha2")),
-    alpha3_(U_.db().lookupObject<const volScalarField> ("alpha3")),
-
-    nu_
-    (
-        IOobject
-        (
-            "nu",
-            U_.time().timeName(),
-            U_.db()
-        ),
-        U_.mesh(),
-        dimensionedScalar("nu", dimensionSet(0, 2, -1, 0, 0), 0),
-        calculatedFvPatchScalarField::typeName
-    )
+    rho3_(nuModel3_->viscosityProperties().lookup("rho"))
 {
+    alpha3_ == 1.0 - alpha1_ - alpha2_;
     calcNu();
 }
 
