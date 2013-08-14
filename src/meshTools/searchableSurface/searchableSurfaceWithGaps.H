@@ -261,16 +261,16 @@ public:
             //  bounding boxes. The bounds are hints to the surface as for
             //  the range of queries it can expect. faceMap/pointMap can be
             //  set if the surface has done any redistribution.
-            virtual void distribute
-            (
-                const List<treeBoundBox>& bbs,
-                const bool keepNonLocal,
-                autoPtr<mapDistribute>& faceMap,
-                autoPtr<mapDistribute>& pointMap
-            )
-            {
-                subGeom_[0].distribute(bbs, keepNonLocal, faceMap, pointMap);
-            }
+            //virtual void distribute
+            //(
+            //    const List<treeBoundBox>& bbs,
+            //    const bool keepNonLocal,
+            //    autoPtr<mapDistribute>& faceMap,
+            //    autoPtr<mapDistribute>& pointMap
+            //)
+            //{
+            //    subGeom_[0].distribute(bbs, keepNonLocal, faceMap, pointMap);
+            //}
 
             //- WIP. Store element-wise field.
             virtual void setField(const labelList& values)

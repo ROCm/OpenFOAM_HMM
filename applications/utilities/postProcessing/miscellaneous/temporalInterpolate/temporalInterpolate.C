@@ -112,7 +112,7 @@ void fieldInterpolator::interpolate()
                 {
                     instant timej = instant(ti_.value() + (j + 1)*deltaT);
 
-                    runTime_.setTime(timej.name(), 0);
+                    runTime_.setTime(instant(timej.name()), 0);
 
                     Info<< timej.name();
 

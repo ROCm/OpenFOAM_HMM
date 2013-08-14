@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,6 +53,7 @@ word name(long long);
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 long long readLongLong(Istream&);
+bool readLongLong(const char*, long long&);
 Istream& operator>>(Istream&, long long&);
 Ostream& operator<<(Ostream&, const long long);
 

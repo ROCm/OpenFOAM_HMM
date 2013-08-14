@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -72,6 +72,11 @@ namespace Foam
         return readInt(is);
     }
 
+    inline bool readLabel(const char* buf, label& s)
+    {
+        return readInt(buf, s);
+    }
+
 } // End namespace Foam
 
 
@@ -94,6 +99,11 @@ namespace Foam
     inline label readLabel(Istream& is)
     {
         return readLong(is);
+    }
+
+    inline bool readLabel(const char* buf, label& s)
+    {
+        return readLong(buf, s);
     }
 
 } // End namespace Foam
@@ -120,6 +130,11 @@ namespace Foam
     inline label readLabel(Istream& is)
     {
         return readLongLong(is);
+    }
+
+    inline bool readLabel(const char* buf, label& s)
+    {
+        return readLongLong(buf, s);
     }
 
 } // End namespace Foam

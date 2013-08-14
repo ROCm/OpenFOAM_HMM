@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,48 +21,26 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Primitive
-    long
-
-Description
-    A long integer
-
-SourceFiles
-    longIO.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef long_H
-#define long_H
+#include "ensightPTraits.H"
 
-#include "word.H"
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+const char* const Foam::ensightPTraits<Foam::scalar>::typeName =
+    Foam::pTraits<Foam::scalar>::typeName;
 
-namespace Foam
-{
+const char* const Foam::ensightPTraits<Foam::vector>::typeName =
+    Foam::pTraits<Foam::vector>::typeName;
 
-class Istream;
-class Ostream;
+const char* const Foam::ensightPTraits<Foam::sphericalTensor>::typeName =
+    Foam::pTraits<Foam::scalar>::typeName;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+const char* const Foam::ensightPTraits<Foam::symmTensor>::typeName =
+    "tensor symm";
 
-//- Return a string representation of a long
-word name(const long);
+const char* const Foam::ensightPTraits<Foam::tensor>::typeName =
+    Foam::pTraits<Foam::tensor>::typeName;
 
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-long readLong(Istream&);
-bool readLong(const char*, long&);
-Istream& operator>>(Istream&, long&);
-Ostream& operator<<(Ostream&, const long);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

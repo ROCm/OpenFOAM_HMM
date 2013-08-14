@@ -376,7 +376,7 @@ void Foam::searchableSurfaceCollection::boundingSpheres
 
         forAll(subCentres, i)
         {
-            centres[coordI++] = transform_[surfI].globalPosition
+            centres[coordI] = transform_[surfI].globalPosition
             (
                 cmptMultiply
                 (
@@ -384,7 +384,8 @@ void Foam::searchableSurfaceCollection::boundingSpheres
                     scale_[surfI]
                 )
             );
-            radiusSqr[coordI++] = maxScale*subRadiusSqr[i];
+            radiusSqr[coordI] = maxScale*subRadiusSqr[i];
+            coordI++;
         }
     }
 }

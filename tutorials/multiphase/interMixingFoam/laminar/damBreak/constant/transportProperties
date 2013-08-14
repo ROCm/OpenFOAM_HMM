@@ -15,24 +15,23 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Air
-phase1
+phases (air other water);
+
+air
 {
     transportModel  Newtonian;
     nu              nu [0 2 -1 0 0 0 0] 1.48e-05;
     rho             rho [1 -3 0 0 0 0 0] 1;
 }
 
-// Other Liquid
-phase2
+other
 {
     transportModel  Newtonian;
     nu              nu [0 2 -1 0 0 0 0]  1e-6;
     rho             rho [1 -3 0 0 0 0 0] 1010;
 }
 
-// Water
-phase3
+water
 {
     transportModel  Newtonian;
     nu              nu [0 2 -1 0 0 0 0]  1e-6;

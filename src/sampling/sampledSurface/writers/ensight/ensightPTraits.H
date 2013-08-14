@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,41 +21,81 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Primitive
-    long
+Class
+    Foam::ensightPTraits
 
 Description
-    A long integer
-
-SourceFiles
-    longIO.C
+    Conversion of OpenFOAM pTraits into the Ensight equivalent
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef long_H
-#define long_H
+#ifndef ensightPTraits_H
+#define ensightPTraits_H
 
-#include "word.H"
+#include "pTraits.H"
+#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class Istream;
-class Ostream;
+/*---------------------------------------------------------------------------*\
+                         Class ensightPTraits Declaration
+\*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class PrimitiveType>
+class ensightPTraits
+{
+public:
 
-//- Return a string representation of a long
-word name(const long);
+    // Static data members
 
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+        static const char* const typeName;
 
-long readLong(Istream&);
-bool readLong(const char*, long&);
-Istream& operator>>(Istream&, long&);
-Ostream& operator<<(Ostream&, const long);
+};
+
+
+template<>
+class ensightPTraits<scalar>
+{
+public:
+
+    static const char* const typeName;
+};
+
+template<>
+class ensightPTraits<vector>
+{
+public:
+
+    static const char* const typeName;
+};
+
+template<>
+class ensightPTraits<sphericalTensor>
+{
+public:
+
+    static const char* const typeName;
+};
+
+template<>
+class ensightPTraits<symmTensor>
+{
+public:
+
+    static const char* const typeName;
+};
+
+template<>
+class ensightPTraits<tensor>
+{
+public:
+
+    static const char* const typeName;
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
