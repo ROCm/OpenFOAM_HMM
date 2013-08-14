@@ -255,6 +255,7 @@ Foam::fv::option::option
 )
 :
     name_(name),
+    modelType_(modelType),
     mesh_(mesh),
     dict_(dict),
     coeffs_(dict.subDict(modelType + "Coeffs")),

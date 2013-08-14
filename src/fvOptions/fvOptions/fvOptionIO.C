@@ -96,7 +96,7 @@ bool Foam::fv::option::read(const dictionary& dict)
         dict.lookup("duration") >> duration_;
     }
 
-    coeffs_ = dict.subDict(type() + "Coeffs");
+    coeffs_ = dict.subDict(modelType_ + "Coeffs");
 
     return true;
 }

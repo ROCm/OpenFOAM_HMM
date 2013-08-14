@@ -94,7 +94,10 @@ protected:
     // Protected data
 
         //- Source name
-        word name_;
+        const word name_;
+
+        //- Model type
+        const word modelType_;
 
         //- Reference to the mesh database
         const fvMesh& mesh_;
