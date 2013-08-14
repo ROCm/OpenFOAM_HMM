@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
         while (pimple.loop())
         {
             #include "rhoEqn.H"
-            #include "gammaPsi.H"
+            #include "alphavPsi.H"
             #include "UEqn.H"
 
             // --- Pressure corrector loop

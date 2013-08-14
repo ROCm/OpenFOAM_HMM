@@ -53,7 +53,7 @@ fluxRequired
     default         no;
     p_rgh;
     pcorr;
-    "alpha.";
+    "alpha.*";
 }
 
 

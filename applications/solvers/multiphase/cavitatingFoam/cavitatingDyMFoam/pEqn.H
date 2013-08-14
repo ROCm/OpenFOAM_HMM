@@ -4,8 +4,8 @@
         p =
         (
             rho
-          - gamma2*rhol0
-          - ((gamma*psiv + gamma2*psil) - psi)*pSat
+          - alphal*rhol0
+          - ((alphav*psiv + alphal*psil) - psi)*pSat
         )/psi;
     }
 
@@ -52,13 +52,13 @@
 
     rho == max(rho0 + psi*p, rhoMin);
 
-    #include "gammaPsi.H"
+    #include "alphavPsi.H"
 
     p =
     (
         rho
-      - gamma2*rhol0
-      - ((gamma*psiv + gamma2*psil) - psi)*pSat
+      - alphal*rhol0
+      - ((alphav*psiv + alphal*psil) - psi)*pSat
     )/psi;
 
     p.correctBoundaryConditions();
