@@ -257,6 +257,15 @@ protected:
         template<class TrackData>
         void hitCyclicPatch(const cyclicPolyPatch&, TrackData& td);
 
+        //- Overridable function to handle the particle hitting a cyclicAMIPatch
+        template<class TrackData>
+        void hitCyclicAMIPatch
+        (
+            const cyclicAMIPolyPatch&,
+            TrackData& td,
+            const vector& direction
+        );
+
         //- Overridable function to handle the particle hitting a
         //  processorPatch
         template<class TrackData>
