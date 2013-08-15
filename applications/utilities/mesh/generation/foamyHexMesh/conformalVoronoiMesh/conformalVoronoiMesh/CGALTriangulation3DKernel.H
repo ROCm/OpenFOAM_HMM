@@ -38,12 +38,14 @@ Description
 #ifdef CGAL_INEXACT
 
     // Fast kernel using a double as the storage type but the triangulation may
-    // fail. Adding robust circumcentre traits
+    // fail. Adding robust circumcentre traits.
     #include "CGAL/Exact_predicates_inexact_constructions_kernel.h"
     typedef CGAL::Exact_predicates_inexact_constructions_kernel baseK;
+
 //    #include <CGAL/Robust_circumcenter_traits_3.h>
-    #include <CGAL/Robust_circumcenter_filtered_traits_3.h>
 //    typedef CGAL::Robust_circumcenter_traits_3<baseK>           K;
+
+    #include <CGAL/Robust_circumcenter_filtered_traits_3.h>
     typedef CGAL::Robust_circumcenter_filtered_traits_3<baseK>  K;
 
 #else
@@ -54,6 +56,7 @@ Description
     typedef CGAL::Exact_predicates_exact_constructions_kernel K;
 
 #endif
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

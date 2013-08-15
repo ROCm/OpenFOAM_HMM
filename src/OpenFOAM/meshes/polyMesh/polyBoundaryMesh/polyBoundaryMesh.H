@@ -78,9 +78,6 @@ class polyBoundaryMesh
 
     // Private Member Functions
 
-        //- Create identity map
-        static labelList ident(const label len);
-
         //- Calculate the geometry for the patches (transformation tensors etc.)
         void calcGeometry();
 

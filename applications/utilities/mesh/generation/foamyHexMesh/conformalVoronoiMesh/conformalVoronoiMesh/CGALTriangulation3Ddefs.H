@@ -53,6 +53,7 @@ typedef CGAL::Triangulation_data_structure_3<Vb, Cb>           Tds;
 typedef CGAL::Delaunay_triangulation_3<K, Tds, CompactLocator> Delaunay;
 typedef CGAL::Delaunay_triangulation_3<K, Tds, FastLocator>    CellSizeDelaunay;
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif

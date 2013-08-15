@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,6 +30,8 @@ License
 
 namespace Foam
 {
+namespace dragModels
+{
     defineTypeNameAndDebug(GidaspowSchillerNaumann, 0);
 
     addToRunTimeSelectionTable
@@ -39,11 +41,12 @@ namespace Foam
         dictionary
     );
 }
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::GidaspowSchillerNaumann::GidaspowSchillerNaumann
+Foam::dragModels::GidaspowSchillerNaumann::GidaspowSchillerNaumann
 (
     const dictionary& interfaceDict,
     const volScalarField& alpha1,
@@ -57,13 +60,13 @@ Foam::GidaspowSchillerNaumann::GidaspowSchillerNaumann
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::GidaspowSchillerNaumann::~GidaspowSchillerNaumann()
+Foam::dragModels::GidaspowSchillerNaumann::~GidaspowSchillerNaumann()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::GidaspowSchillerNaumann::K
+Foam::tmp<Foam::volScalarField> Foam::dragModels::GidaspowSchillerNaumann::K
 (
     const volScalarField& Ur
 ) const
@@ -72,7 +75,6 @@ Foam::tmp<Foam::volScalarField> Foam::GidaspowSchillerNaumann::K
     volScalarField bp(pow(alpha2, -2.65));
 
     volScalarField Re(max(alpha2*Ur*phase1_.d()/phase2_.nu(), scalar(1.0e-3)));
-
     volScalarField Cds
     (
         neg(Re - 1000)*(24.0*(1.0 + 0.15*pow(Re, 0.687))/Re)

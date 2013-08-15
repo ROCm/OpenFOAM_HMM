@@ -597,175 +597,13 @@ bool Foam::conformationSurfaces::outside
 }
 
 
-Foam::Field<bool> Foam::conformationSurfaces::wellInside
+Foam::Field<bool> Foam::conformationSurfaces::wellInOutSide
 (
     const pointField& samplePts,
-    const scalarField& testDistSqr
+    const scalarField& testDistSqr,
+    const bool testForInside
 ) const
 {
-    List<List<volumeType> > surfaceVolumeTests
-    (
-        surfaces_.size(),
-        List<volumeType>
-        (
-            samplePts.size(),
-            volumeType::UNKNOWN
-        )
-    );
-
-    // Get lists for the volumeTypes for each sample wrt each surface
-    forAll(surfaces_, s)
-    {
-        const searchableSurface& surface(allGeometry_[surfaces_[s]]);
-
-        const label regionI = regionOffset_[s];
-
-        if (normalVolumeTypes_[regionI] != extendedFeatureEdgeMesh::BOTH)
-        {
-//            if (surface.hasVolumeType())
-//            {
-//                List<List<pointIndexHit> > info;
-//
-//                // Count number of intersections
-//                surface.findLineAll
-//                (
-//                    samplePts,
-//                    pointField(samplePts.size(), locationInMesh()),
-//                    info
-//                );
-//
-//                forAll(info, ptI)
-//                {
-//                    if (info[ptI].size() % 2 == 0)
-//                    {
-//                        surfaceVolumeTests[s][ptI] = volumeType::INSIDE;
-//                    }
-//                    else
-//                    {
-//                        surfaceVolumeTests[s][ptI] = volumeType::OUTSIDE;
-//                    }
-//                }
-//            }
-//            else
-            {
-                surface.getVolumeType(samplePts, surfaceVolumeTests[s]);
-            }
-        }
-    }
-
-    // Compare the volumeType result for each point wrt to each surface with the
-    // reference value and if the points are inside the surface by a given
-    // distanceSquared
-
-    // Assume that the point is wellInside until demonstrated otherwise.
-    Field<bool> insidePoint(samplePts.size(), true);
-
-    //Check if the points are inside the surface by the given distance squared
-
-    labelList hitSurfaces;
-    List<pointIndexHit> hitInfo;
-    searchableSurfacesQueries::findNearest
-    (
-        allGeometry_,
-        surfaces_,
-        samplePts,
-        testDistSqr,
-        hitSurfaces,
-        hitInfo
-    );
-
-    forAll(samplePts, i)
-    {
-        const pointIndexHit& pHit = hitInfo[i];
-
-        if (pHit.hit())
-        {
-            // If the point is within range of the surface, then it can't be
-            // well (in|out)side
-            insidePoint[i] = false;
-
-            continue;
-        }
-
-        forAll(surfaces_, s)
-        {
-            const label regionI = regionOffset_[s];
-
-//            const searchableSurface& surface(allGeometry_[surfaces_[s]]);
-
-//            if
-//            (
-//                !surface.hasVolumeType()
-//             //&& !surface.bounds().contains(samplePts[i])
-//            )
-//            {
-//                continue;
-//            }
-
-            // If one of the pattern tests is failed, then the point cannot be
-            // inside, therefore, if this is a testForInside = true call, the
-            // result is false.  If this is a testForInside = false call, then
-            // the result is true.
-            if (normalVolumeTypes_[regionI] == extendedFeatureEdgeMesh::BOTH)
-            {
-                continue;
-            }
-
-//            Info<< surface.name() << " = "
-//                << volumeType::names[surfaceVolumeTests[s][i]] << endl;
-
-            if (surfaceVolumeTests[s][i] == volumeType::OUTSIDE)
-//            if (surfaceVolumeTests[s][i] != volumeType::INSIDE)
-            {
-                if
-                (
-                    normalVolumeTypes_[regionI]
-                 == extendedFeatureEdgeMesh::INSIDE
-                )
-                {
-                    insidePoint[i] = false;
-                    break;
-                }
-            }
-            else if (surfaceVolumeTests[s][i] == volumeType::INSIDE)
-            {
-                if
-                (
-                    normalVolumeTypes_[regionI]
-                 == extendedFeatureEdgeMesh::OUTSIDE
-                )
-                {
-                    insidePoint[i] = false;
-                    break;
-                }
-            }
-        }
-    }
-
-    return insidePoint;
-
-    //return wellInOutSide(samplePts, testDistSqr, true);
-}
-
-
-bool Foam::conformationSurfaces::wellInside
-(
-    const point& samplePt,
-    scalar testDistSqr
-) const
-{
-    return wellInside(pointField(1, samplePt), scalarField(1, testDistSqr))[0];
-}
-
-
-Foam::Field<bool> Foam::conformationSurfaces::wellOutside
-(
-    const pointField& samplePts,
-    const scalarField& testDistSqr
-) const
-{
-    // First check if it is outside any closed surface
-
     List<List<volumeType> > surfaceVolumeTests
     (
         surfaces_.size(),
@@ -794,7 +632,7 @@ Foam::Field<bool> Foam::conformationSurfaces::wellOutside
     // distanceSquared
 
     // Assume that the point is wellInside until demonstrated otherwise.
-    Field<bool> outsidePoint(samplePts.size(), false);
+    Field<bool> insideOutsidePoint(samplePts.size(), testForInside);
 
     //Check if the points are inside the surface by the given distance squared
 
@@ -818,33 +656,15 @@ Foam::Field<bool> Foam::conformationSurfaces::wellOutside
         {
             // If the point is within range of the surface, then it can't be
             // well (in|out)side
-            outsidePoint[i] = false;
-            //continue;
+            insideOutsidePoint[i] = false;
+
+            continue;
         }
 
         forAll(surfaces_, s)
         {
-            const searchableSurface& surface(allGeometry_[surfaces_[s]]);
-
-//            if
-//            (
-//                !surface.hasVolumeType()
-//             //&& !surface.bounds().contains(samplePts[i])
-//            )
-//            {
-//                continue;
-//            }
-
             const label regionI = regionOffset_[s];
 
-//            Info<< s << " " << surfaces_[s] << " " << surface.name() << " "
-//                << normalVolumeTypes_[regionI] << " "
-//                << surfaceVolumeTests[s][i] << endl;
-
-            // If one of the pattern tests is failed, then the point cannot be
-            // inside, therefore, if this is a testForInside = true call, the
-            // result is false.  If this is a testForInside = false call, then
-            // the result is true.
             if (normalVolumeTypes_[regionI] == extendedFeatureEdgeMesh::BOTH)
             {
                 continue;
@@ -858,7 +678,7 @@ Foam::Field<bool> Foam::conformationSurfaces::wellOutside
                  == extendedFeatureEdgeMesh::INSIDE
                 )
                 {
-                    outsidePoint[i] = true;
+                    insideOutsidePoint[i] = !testForInside;
                     break;
                 }
             }
@@ -870,16 +690,82 @@ Foam::Field<bool> Foam::conformationSurfaces::wellOutside
                  == extendedFeatureEdgeMesh::OUTSIDE
                 )
                 {
-                    outsidePoint[i] = true;
+                    insideOutsidePoint[i] = !testForInside;
                     break;
                 }
             }
+//            else
+//            {
+//                // Surface volume type is unknown
+//                Info<< "UNKNOWN" << endl;
+//                // Get nearest face normal
+//
+//                pointField sample(1, samplePts[i]);
+//                scalarField nearestDistSqr(1, GREAT);
+//                List<pointIndexHit> info;
+//                vectorField norms(1);
+//
+//                surface.findNearest(sample, nearestDistSqr, info);
+//                surface.getNormal(info, norms);
+//
+//                vector fN = norms[0];
+//                fN /= mag(fN);
+//
+//                vector hitDir = info[0].rawPoint() - samplePts[i];
+//                hitDir /= mag(hitDir);
+//
+//                if ((fN & hitDir) < 0)
+//                {
+//                    // Point is OUTSIDE
+//
+//                    if
+//                    (
+//                        normalVolumeTypes_[regionI]
+//                     == extendedFeatureEdgeMesh::OUTSIDE
+//                    )
+//                    {
+//                    }
+//                    else
+//                    {
+//                        insidePoint[i] = false;
+//                        break;
+//                    }
+//                }
+//            }
         }
     }
 
-    return outsidePoint;
+    return insideOutsidePoint;
+}
 
-    //return wellInOutSide(samplePts, testDistSqr, false);
+
+Foam::Field<bool> Foam::conformationSurfaces::wellInside
+(
+    const pointField& samplePts,
+    const scalarField& testDistSqr
+) const
+{
+    return wellInOutSide(samplePts, testDistSqr, true);
+}
+
+
+bool Foam::conformationSurfaces::wellInside
+(
+    const point& samplePt,
+    scalar testDistSqr
+) const
+{
+    return wellInside(pointField(1, samplePt), scalarField(1, testDistSqr))[0];
+}
+
+
+Foam::Field<bool> Foam::conformationSurfaces::wellOutside
+(
+    const pointField& samplePts,
+    const scalarField& testDistSqr
+) const
+{
+    return wellInOutSide(samplePts, testDistSqr, false);
 }
 
 

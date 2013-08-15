@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,6 +30,8 @@ License
 
 namespace Foam
 {
+namespace dragModels
+{
     defineTypeNameAndDebug(SchillerNaumann, 0);
 
     addToRunTimeSelectionTable
@@ -39,11 +41,12 @@ namespace Foam
         dictionary
     );
 }
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::SchillerNaumann::SchillerNaumann
+Foam::dragModels::SchillerNaumann::SchillerNaumann
 (
     const dictionary& interfaceDict,
     const volScalarField& alpha1,
@@ -57,19 +60,18 @@ Foam::SchillerNaumann::SchillerNaumann
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::SchillerNaumann::~SchillerNaumann()
+Foam::dragModels::SchillerNaumann::~SchillerNaumann()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::SchillerNaumann::K
+Foam::tmp<Foam::volScalarField> Foam::dragModels::SchillerNaumann::K
 (
     const volScalarField& Ur
 ) const
 {
     volScalarField Re(max(Ur*phase1_.d()/phase2_.nu(), scalar(1.0e-3)));
-
     volScalarField Cds
     (
         neg(Re - 1000)*(24.0*(1.0 + 0.15*pow(Re, 0.687))/Re)

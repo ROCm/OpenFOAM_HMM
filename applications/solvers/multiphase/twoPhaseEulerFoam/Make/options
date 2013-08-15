@@ -1,16 +1,23 @@
 EXE_INC = \
+    -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/transportModels/incompressible/lnInclude \
-    -IturbulenceModel \
-    -IkineticTheoryModels/lnInclude \
+    -I$(LIB_SRC)/TurbulenceModels/turbulenceModels/lnInclude \
+    -I$(LIB_SRC)/TurbulenceModels/incompressible/lnInclude \
+    -I$(LIB_SRC)/TurbulenceModels/phaseIncompressible/lnInclude \
+    -IphaseIncompressibleTurbulenceModels/lnInclude \
     -IinterfacialModels/lnInclude \
-    -IphaseModel/lnInclude \
+    -ItwoPhaseSystem/lnInclude \
     -Iaveraging
 
 EXE_LIBS = \
-    -lEulerianInterfacialModels \
-    -lfiniteVolume \
-    -lmeshTools \
+    -lfluidThermophysicalModels \
+    -lspecie \
+    -lturbulenceModels \
+    -lincompressibleTurbulenceModels \
+    -lphaseIncompressibleTurbulenceModels \
     -lincompressibleTransportModels \
-    -lphaseModel \
-    -lkineticTheoryModel
+    -lcompressibleTwoPhaseSystem \
+    -lcompressibleEulerianInterfacialModels \
+    -lfiniteVolume \
+    -lmeshTools

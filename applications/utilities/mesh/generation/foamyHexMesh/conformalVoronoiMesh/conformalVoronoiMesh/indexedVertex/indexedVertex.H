@@ -95,7 +95,7 @@ namespace CGAL
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class indexedVertex Declaration
+                       Class indexedVertex Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Gt, class Vb = CGAL::Triangulation_vertex_base_3<Gt> >
@@ -189,8 +189,6 @@ public:
         inline Foam::scalar& targetCellSize();
 
         inline Foam::scalar targetCellSize() const;
-
-        inline bool uninitialised() const;
 
         //- Is point a far-point
         inline bool farPoint() const;

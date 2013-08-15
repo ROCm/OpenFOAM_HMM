@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,6 +30,8 @@ License
 
 namespace Foam
 {
+namespace dragModels
+{
     defineTypeNameAndDebug(GidaspowErgunWenYu, 0);
 
     addToRunTimeSelectionTable
@@ -39,11 +41,12 @@ namespace Foam
         dictionary
     );
 }
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::GidaspowErgunWenYu::GidaspowErgunWenYu
+Foam::dragModels::GidaspowErgunWenYu::GidaspowErgunWenYu
 (
     const dictionary& interfaceDict,
     const volScalarField& alpha1,
@@ -57,21 +60,21 @@ Foam::GidaspowErgunWenYu::GidaspowErgunWenYu
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::GidaspowErgunWenYu::~GidaspowErgunWenYu()
+Foam::dragModels::GidaspowErgunWenYu::~GidaspowErgunWenYu()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::GidaspowErgunWenYu::K
+Foam::tmp<Foam::volScalarField> Foam::dragModels::GidaspowErgunWenYu::K
 (
     const volScalarField& Ur
 ) const
 {
     volScalarField alpha2(max(scalar(1) - alpha1_, scalar(1.0e-6)));
-
+    volScalarField d(phase1_.d());
     volScalarField bp(pow(alpha2, -2.65));
-    volScalarField Re(max(Ur*phase1_.d()/phase2_.nu(), scalar(1.0e-3)));
+    volScalarField Re(max(Ur*d/phase2_.nu(), scalar(1.0e-3)));
 
     volScalarField Cds
     (
@@ -83,11 +86,11 @@ Foam::tmp<Foam::volScalarField> Foam::GidaspowErgunWenYu::K
     return
     (
         pos(alpha2 - 0.8)
-       *(0.75*Cds*phase2_.rho()*Ur*bp/phase1_.d())
+       *(0.75*Cds*phase2_.rho()*Ur*bp/d)
       + neg(alpha2 - 0.8)
        *(
-           150.0*alpha1_*phase2_.nu()*phase2_.rho()/(sqr(alpha2*phase1_.d()))
-         + 1.75*phase2_.rho()*Ur/(alpha2*phase1_.d())
+           150.0*alpha1_*phase2_.nu()*phase2_.rho()/(sqr(alpha2*d))
+         + 1.75*phase2_.rho()*Ur/(alpha2*d)
         )
     );
 }

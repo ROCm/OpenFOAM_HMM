@@ -109,7 +109,7 @@ Foam::scalar Foam::nonUniformField::interpolate
     const face& faceHitByPt = surfaceTriMesh_.triSurface::operator[](index);
 
     const pointField& pts = surfaceTriMesh_.points();
-    const Map<label>& pMap = surfaceTriMesh_.meshPointMap();
+//    const Map<label>& pMap = surfaceTriMesh_.meshPointMap();
 
     triPointRef tri
     (
@@ -122,9 +122,12 @@ Foam::scalar Foam::nonUniformField::interpolate
 
     tri.barycentric(pt, bary);
 
-    return pointCellSize_[pMap[faceHitByPt[0]]]*bary[0]
-         + pointCellSize_[pMap[faceHitByPt[1]]]*bary[1]
-         + pointCellSize_[pMap[faceHitByPt[2]]]*bary[2];
+//    return pointCellSize_[pMap[faceHitByPt[0]]]*bary[0]
+//         + pointCellSize_[pMap[faceHitByPt[1]]]*bary[1]
+//         + pointCellSize_[pMap[faceHitByPt[2]]]*bary[2];
+    return pointCellSize_[faceHitByPt[0]]*bary[0]
+         + pointCellSize_[faceHitByPt[1]]*bary[1]
+         + pointCellSize_[faceHitByPt[2]]*bary[2];
 }
 
 

@@ -58,9 +58,15 @@ private:
 
     // Private data
 
+        //- Dictionary of coefficients for automatic cell sizing
+        const dictionary& coeffsDict_;
+
         //- Name of the triSurfaceScalarField file to load in. Must be in
         //  constant/triSurface
         const word fileName_;
+
+        //- Multiply all the point sizes by this value
+        const scalar cellSizeMultipleCoeff_;
 
 
 public:

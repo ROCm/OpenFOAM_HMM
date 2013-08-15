@@ -8,4 +8,8 @@ dragModels/Gibilaro/Gibilaro.C
 dragModels/WenYu/WenYu.C
 dragModels/SyamlalOBrien/SyamlalOBrien.C
 
-LIB = $(FOAM_LIBBIN)/libEulerianInterfacialModels
+heatTransferModels/heatTransferModel/heatTransferModel.C
+heatTransferModels/heatTransferModel/newHeatTransferModel.C
+heatTransferModels/RanzMarshall/RanzMarshall.C
+
+LIB = $(FOAM_LIBBIN)/libcompressibleEulerianInterfacialModels
