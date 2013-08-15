@@ -420,11 +420,24 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
 
     const refinementSurfaces& rf = surfacePtr();
 
-    Info<< setw(20) << "Region"
+    // Determine maximum region name length
+    label maxLen = 0;
+    forAll(rf.surfaces(), surfI)
+    {
+        label geomI = rf.surfaces()[surfI];
+        const wordList& regionNames = allGeometry.regionNames()[geomI];
+        forAll(regionNames, regionI)
+        {
+            maxLen = Foam::max(maxLen, label(regionNames[regionI].size()));
+        }
+    }
+
+
+    Info<< setw(maxLen) << "Region"
         << setw(10) << "Min Level"
         << setw(10) << "Max Level"
         << setw(10) << "Gap Level" << nl
-        << setw(20) << "------"
+        << setw(maxLen) << "------"
         << setw(10) << "---------"
         << setw(10) << "---------"
         << setw(10) << "---------" << endl;
@@ -441,7 +454,7 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
         {
             label globalI = rf.globalRegion(surfI, regionI);
 
-            Info<< setw(20) << regionNames[regionI]
+            Info<< setw(maxLen) << regionNames[regionI]
                 << setw(10) << rf.minLevel()[globalI]
                 << setw(10) << rf.maxLevel()[globalI]
                 << setw(10) << rf.gapLevel()[globalI] << endl;
