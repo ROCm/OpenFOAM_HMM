@@ -478,8 +478,8 @@ Foam::DelaunayMesh<Triangulation>::createMesh
         bool c1Real = false;
         if
         (
-            !c1->hasFarPoint()
-         && !Triangulation::is_infinite(c1)
+            !Triangulation::is_infinite(c1)
+         && !c1->hasFarPoint()
          && c1->real()
         )
         {
@@ -491,8 +491,8 @@ Foam::DelaunayMesh<Triangulation>::createMesh
         bool c2Real = false;
         if
         (
-            !c2->hasFarPoint()
-         && !Triangulation::is_infinite(c2)
+            !Triangulation::is_infinite(c2)
+         && !c2->hasFarPoint()
          && c2->real()
         )
         {
