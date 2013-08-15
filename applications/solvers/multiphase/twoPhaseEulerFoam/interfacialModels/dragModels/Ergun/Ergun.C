@@ -30,6 +30,8 @@ License
 
 namespace Foam
 {
+namespace dragModels
+{
     defineTypeNameAndDebug(Ergun, 0);
 
     addToRunTimeSelectionTable
@@ -39,11 +41,12 @@ namespace Foam
         dictionary
     );
 }
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::Ergun::Ergun
+Foam::dragModels::Ergun::Ergun
 (
     const dictionary& interfaceDict,
     const volScalarField& alpha1,
@@ -57,13 +60,13 @@ Foam::Ergun::Ergun
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::Ergun::~Ergun()
+Foam::dragModels::Ergun::~Ergun()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::Ergun::K
+Foam::tmp<Foam::volScalarField> Foam::dragModels::Ergun::K
 (
     const volScalarField& Ur
 ) const

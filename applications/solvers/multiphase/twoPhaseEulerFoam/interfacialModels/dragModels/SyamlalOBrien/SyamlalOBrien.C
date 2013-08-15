@@ -30,6 +30,8 @@ License
 
 namespace Foam
 {
+namespace dragModels
+{
     defineTypeNameAndDebug(SyamlalOBrien, 0);
 
     addToRunTimeSelectionTable
@@ -39,11 +41,12 @@ namespace Foam
         dictionary
     );
 }
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::SyamlalOBrien::SyamlalOBrien
+Foam::dragModels::SyamlalOBrien::SyamlalOBrien
 (
     const dictionary& interfaceDict,
     const volScalarField& alpha1,
@@ -57,13 +60,13 @@ Foam::SyamlalOBrien::SyamlalOBrien
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::SyamlalOBrien::~SyamlalOBrien()
+Foam::dragModels::SyamlalOBrien::~SyamlalOBrien()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::SyamlalOBrien::K
+Foam::tmp<Foam::volScalarField> Foam::dragModels::SyamlalOBrien::K
 (
     const volScalarField& Ur
 ) const
