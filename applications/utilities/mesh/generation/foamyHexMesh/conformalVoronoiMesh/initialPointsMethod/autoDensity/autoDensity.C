@@ -552,9 +552,12 @@ bool Foam::autoDensity::fillBox
                         min
                       + vector
                         (
-                            delta.x()*(i + 0.5 + 0.1*(rndGen().scalar01() - 0.5)),
-                            delta.y()*(j + 0.5 + 0.1*(rndGen().scalar01() - 0.5)),
-                            delta.z()*(k + 0.5 + 0.1*(rndGen().scalar01() - 0.5))
+                            delta.x()
+                           *(i + 0.5 + 0.1*(rndGen().scalar01() - 0.5)),
+                            delta.y()
+                           *(j + 0.5 + 0.1*(rndGen().scalar01() - 0.5)),
+                            delta.z()
+                           *(k + 0.5 + 0.1*(rndGen().scalar01() - 0.5))
                         );
                 }
             }

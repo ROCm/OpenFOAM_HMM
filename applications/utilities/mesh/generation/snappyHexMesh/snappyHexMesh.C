@@ -807,10 +807,15 @@ int main(int argc, char *argv[])
 //                polyTopoChange meshMod(meshPtr(), true);
 //
 //                // Play refinement commands into mesh changer.
-//                meshCutter.setRefinement(identity(meshPtr().nCells()), meshMod);
+//                meshCutter.setRefinement
+//                (
+//                    identity(meshPtr().nCells()),
+//                    meshMod
+//                );
 //
-//                // Create mesh (no inflation), return map from old to new mesh.
-//                autoPtr<mapPolyMesh> map = meshMod.changeMesh(meshPtr(), false);
+//                // Create mesh (no inflation), return map from old to new mesh
+//                autoPtr<mapPolyMesh> map =
+//                    meshMod.changeMesh(meshPtr(), false);
 //
 //                // Update fields
 //                meshPtr().updateMesh(map);
