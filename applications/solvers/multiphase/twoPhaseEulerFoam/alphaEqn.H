@@ -92,6 +92,12 @@
                 )
             );
 
+            alphaPhic1.boundaryField() = min
+            (
+                phi1.boundaryField()*alpha1.boundaryField(),
+                alphaPhic1.boundaryField()
+            );
+
             MULES::explicitSolve
             (
                 geometricOneField(),

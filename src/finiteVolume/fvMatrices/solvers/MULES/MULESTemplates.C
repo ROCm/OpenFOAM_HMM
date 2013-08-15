@@ -485,11 +485,12 @@ void Foam::MULES::limiter
                 const labelList& pFaceCells =
                     mesh.boundary()[patchi].faceCells();
                 const scalarField& phiBDPf = phiBDBf[patchi];
+                const scalarField& phiCorrPf = phiCorrBf[patchi];
 
                 forAll(lambdaPf, pFacei)
                 {
                     // Limit outlet faces only
-                    if (phiBDPf[pFacei] > 0)
+                    if ((phiBDPf[pFacei] + phiCorrPf[pFacei]) > SMALL*SMALL)
                     {
                         label pfCelli = pFaceCells[pFacei];
 
@@ -862,7 +863,7 @@ void Foam::MULES::limiterCorr
                 forAll(lambdaPf, pFacei)
                 {
                     // Limit outlet faces only
-                    if (phiCorrPf[pFacei] > 0)
+                    if (phiCorrPf[pFacei] > SMALL*SMALL)
                     {
                         label pfCelli = pFaceCells[pFacei];
 
