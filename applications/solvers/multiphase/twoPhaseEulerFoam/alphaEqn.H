@@ -92,6 +92,7 @@
                 )
             );
 
+            // Ensure that the flux at inflow BCs is preserved
             alphaPhic1.boundaryField() = min
             (
                 phi1.boundaryField()*alpha1.boundaryField(),
