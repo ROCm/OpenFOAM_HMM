@@ -41,10 +41,23 @@ addToRunTimeSelectionTable(initialPointsMethod, faceCentredCubic, dictionary);
 faceCentredCubic::faceCentredCubic
 (
     const dictionary& initialPointsDict,
-    const conformalVoronoiMesh& foamyHexMesh
+    const Time& runTime,
+    Random& rndGen,
+    const conformationSurfaces& geometryToConformTo,
+    const cellShapeControl& cellShapeControls,
+    const autoPtr<backgroundMeshDecomposition>& decomposition
 )
 :
-    initialPointsMethod(typeName, initialPointsDict, foamyHexMesh),
+    initialPointsMethod
+    (
+        typeName,
+        initialPointsDict,
+        runTime,
+        rndGen,
+        geometryToConformTo,
+        cellShapeControls,
+        decomposition
+    ),
     initialCellSize_(readScalar(detailsDict().lookup("initialCellSize"))),
     randomiseInitialGrid_(detailsDict().lookup("randomiseInitialGrid")),
     randomPerturbationCoeff_
@@ -64,11 +77,11 @@ List<Vb::Point> faceCentredCubic::initialPoints() const
     // on whether this is a parallel run.
     if (Pstream::parRun())
     {
-        bb = foamyHexMesh_.decomposition().procBounds();
+        bb = decomposition().procBounds();
     }
     else
     {
-        bb = foamyHexMesh_.geometryToConformTo().globalBounds();
+        bb = geometryToConformTo().globalBounds();
     }
 
     scalar x0 = bb.min().x();
@@ -86,8 +99,6 @@ List<Vb::Point> faceCentredCubic::initialPoints() const
     vector delta(xR/ni, yR/nj, zR/nk);
 
     delta *= pow((1.0/4.0),-(1.0/3.0));
-
-    Random& rndGen = foamyHexMesh_.rndGen();
 
     scalar pert = randomPerturbationCoeff_*cmptMin(delta);
 
@@ -116,17 +127,14 @@ List<Vb::Point> faceCentredCubic::initialPoints() const
 
                 if (randomiseInitialGrid_)
                 {
-                    p.x() += pert*(rndGen.scalar01() - 0.5);
-                    p.y() += pert*(rndGen.scalar01() - 0.5);
-                    p.z() += pert*(rndGen.scalar01() - 0.5);
+                    p.x() += pert*(rndGen().scalar01() - 0.5);
+                    p.y() += pert*(rndGen().scalar01() - 0.5);
+                    p.z() += pert*(rndGen().scalar01() - 0.5);
                 }
-
-                const backgroundMeshDecomposition& decomp =
-                    foamyHexMesh_.decomposition();
 
                 if (Pstream::parRun())
                 {
-                    if (decomp.positionOnThisProcessor(p))
+                    if (decomposition().positionOnThisProcessor(p))
                     {
                         // Add this point in parallel only if this position is
                         // on this processor.
@@ -147,14 +155,14 @@ List<Vb::Point> faceCentredCubic::initialPoints() const
 
                 if (randomiseInitialGrid_)
                 {
-                    p.x() += pert*(rndGen.scalar01() - 0.5);
-                    p.y() += pert*(rndGen.scalar01() - 0.5);
-                    p.z() += pert*(rndGen.scalar01() - 0.5);
+                    p.x() += pert*(rndGen().scalar01() - 0.5);
+                    p.y() += pert*(rndGen().scalar01() - 0.5);
+                    p.z() += pert*(rndGen().scalar01() - 0.5);
                 }
 
                 if (Pstream::parRun())
                 {
-                    if (decomp.positionOnThisProcessor(p))
+                    if (decomposition().positionOnThisProcessor(p))
                     {
                         // Add this point in parallel only if this position is
                         // on this processor.
@@ -175,14 +183,14 @@ List<Vb::Point> faceCentredCubic::initialPoints() const
 
                 if (randomiseInitialGrid_)
                 {
-                    p.x() += pert*(rndGen.scalar01() - 0.5);
-                    p.y() += pert*(rndGen.scalar01() - 0.5);
-                    p.z() += pert*(rndGen.scalar01() - 0.5);
+                    p.x() += pert*(rndGen().scalar01() - 0.5);
+                    p.y() += pert*(rndGen().scalar01() - 0.5);
+                    p.z() += pert*(rndGen().scalar01() - 0.5);
                 }
 
                 if (Pstream::parRun())
                 {
-                    if (decomp.positionOnThisProcessor(p))
+                    if (decomposition().positionOnThisProcessor(p))
                     {
                         // Add this point in parallel only if this position is
                         // on this processor.
@@ -203,14 +211,14 @@ List<Vb::Point> faceCentredCubic::initialPoints() const
 
                 if (randomiseInitialGrid_)
                 {
-                    p.x() += pert*(rndGen.scalar01() - 0.5);
-                    p.y() += pert*(rndGen.scalar01() - 0.5);
-                    p.z() += pert*(rndGen.scalar01() - 0.5);
+                    p.x() += pert*(rndGen().scalar01() - 0.5);
+                    p.y() += pert*(rndGen().scalar01() - 0.5);
+                    p.z() += pert*(rndGen().scalar01() - 0.5);
                 }
 
                 if (Pstream::parRun())
                 {
-                    if (decomp.positionOnThisProcessor(p))
+                    if (decomposition().positionOnThisProcessor(p))
                     {
                         // Add this point in parallel only if this position is
                         // on this processor.
@@ -226,14 +234,11 @@ List<Vb::Point> faceCentredCubic::initialPoints() const
             points.setSize(pI);
 
             Field<bool> insidePoints =
-                foamyHexMesh_.geometryToConformTo().wellInside
+                geometryToConformTo().wellInside
                 (
                     points,
                     minimumSurfaceDistanceCoeffSqr_
-                   *sqr
-                    (
-                        foamyHexMesh_.cellShapeControls().cellSize(points)
-                    )
+                   *sqr(cellShapeControls().cellSize(points))
                 );
 
             forAll(insidePoints, i)

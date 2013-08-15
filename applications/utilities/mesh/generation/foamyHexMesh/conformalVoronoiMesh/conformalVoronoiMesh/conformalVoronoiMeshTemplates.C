@@ -28,47 +28,6 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Triangulation>
-Foam::scalar Foam::conformalVoronoiMesh::calculateLoadUnbalance
-(
-    const Triangulation& mesh
-) const
-{
-    label nRealVertices = 0;
-
-    for
-    (
-        typename Triangulation::Finite_vertices_iterator vit
-            = mesh.finite_vertices_begin();
-        vit != mesh.finite_vertices_end();
-        ++vit
-    )
-    {
-        // Only store real vertices that are not feature vertices
-        if (vit->real() && !vit->featurePoint())
-        {
-            nRealVertices++;
-        }
-    }
-
-    scalar globalNRealVertices = returnReduce
-    (
-        nRealVertices,
-        sumOp<label>()
-    );
-
-    scalar unbalance = returnReduce
-    (
-        mag(1.0 - nRealVertices/(globalNRealVertices/Pstream::nProcs())),
-        maxOp<scalar>()
-    );
-
-    Info<< "    Processor unbalance " << unbalance << endl;
-
-    return unbalance;
-}
-
-
-template<class Triangulation>
 bool Foam::conformalVoronoiMesh::distributeBackground(const Triangulation& mesh)
 {
     if (!Pstream::parRun())
@@ -86,7 +45,7 @@ bool Foam::conformalVoronoiMesh::distributeBackground(const Triangulation& mesh)
 
     while (true)
     {
-        scalar maxLoadUnbalance = calculateLoadUnbalance(mesh);
+        scalar maxLoadUnbalance = mesh.calculateLoadUnbalance();
 
         if
         (

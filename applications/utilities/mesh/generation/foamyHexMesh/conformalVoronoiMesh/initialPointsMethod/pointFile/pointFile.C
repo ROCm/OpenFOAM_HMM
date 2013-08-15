@@ -41,12 +41,34 @@ addToRunTimeSelectionTable(initialPointsMethod, pointFile, dictionary);
 pointFile::pointFile
 (
     const dictionary& initialPointsDict,
-    const conformalVoronoiMesh& foamyHexMesh
+    const Time& runTime,
+    Random& rndGen,
+    const conformationSurfaces& geometryToConformTo,
+    const cellShapeControl& cellShapeControls,
+    const autoPtr<backgroundMeshDecomposition>& decomposition
 )
 :
-    initialPointsMethod(typeName, initialPointsDict, foamyHexMesh),
-    pointFileName_(detailsDict().lookup("pointFile"))
-{}
+    initialPointsMethod
+    (
+        typeName,
+        initialPointsDict,
+        runTime,
+        rndGen,
+        geometryToConformTo,
+        cellShapeControls,
+        decomposition
+    ),
+    pointFileName_(detailsDict().lookup("pointFile")),
+    insideOutsideCheck_(detailsDict().lookup("insideOutsideCheck")),
+    randomiseInitialGrid_(detailsDict().lookup("randomiseInitialGrid")),
+    randomPerturbationCoeff_
+    (
+        readScalar(detailsDict().lookup("randomPerturbationCoeff"))
+    )
+{
+    Info<< "    Inside/Outside check is " << insideOutsideCheck_.asText()
+        << endl;
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -58,8 +80,8 @@ List<Vb::Point> pointFile::initialPoints() const
         IOobject
         (
             pointFileName_.name(),
-            foamyHexMesh_.time().timeName(),
-            foamyHexMesh_.time(),
+            time().timeName(),
+            time(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
@@ -85,13 +107,13 @@ List<Vb::Point> pointFile::initialPoints() const
 
         if (!isParentFile)
         {
-            foamyHexMesh_.decomposition().distributePoints(points);
+            decomposition().distributePoints(points);
         }
         else
         {
             // Otherwise, this is assumed to be points covering the whole
             // domain, so filter the points to be only those on this processor
-            boolList procPt(foamyHexMesh_.positionOnThisProc(points));
+            boolList procPt(decomposition().positionOnThisProcessor(points));
 
             List<boolList> allProcPt(Pstream::nProcs());
 
@@ -126,15 +148,17 @@ List<Vb::Point> pointFile::initialPoints() const
         }
     }
 
-    Field<bool> insidePoints = foamyHexMesh_.geometryToConformTo().wellInside
-    (
-        points,
-        minimumSurfaceDistanceCoeffSqr_
-       *sqr
+    Field<bool> insidePoints(points.size(), true);
+
+    if (insideOutsideCheck_)
+    {
+        insidePoints = geometryToConformTo().wellInside
         (
-            foamyHexMesh_.cellShapeControls().cellSize(points)
-        )
-    );
+            points,
+            minimumSurfaceDistanceCoeffSqr_
+           *sqr(cellShapeControls().cellSize(points))
+        );
+    }
 
     DynamicList<Vb::Point> initialPoints(insidePoints.size()/10);
 
@@ -142,7 +166,14 @@ List<Vb::Point> pointFile::initialPoints() const
     {
         if (insidePoints[i])
         {
-            const point& p(points[i]);
+            point& p = points[i];
+
+            if (randomiseInitialGrid_)
+            {
+                p.x() += randomPerturbationCoeff_*(rndGen().scalar01() - 0.5);
+                p.y() += randomPerturbationCoeff_*(rndGen().scalar01() - 0.5);
+                p.z() += randomPerturbationCoeff_*(rndGen().scalar01() - 0.5);
+            }
 
             initialPoints.append(Vb::Point(p.x(), p.y(), p.z()));
         }

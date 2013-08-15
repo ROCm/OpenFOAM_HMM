@@ -41,19 +41,6 @@ defineTypeNameAndDebug(polyBoundaryMesh, 0);
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-Foam::labelList Foam::polyBoundaryMesh::ident(const label len)
-{
-    labelList elems(len);
-    forAll(elems, elemI)
-    {
-        elems[elemI] = elemI;
-    }
-    return elems;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::polyBoundaryMesh::polyBoundaryMesh

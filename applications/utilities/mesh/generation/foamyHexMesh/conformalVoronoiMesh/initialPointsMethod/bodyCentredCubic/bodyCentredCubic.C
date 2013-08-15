@@ -41,10 +41,23 @@ addToRunTimeSelectionTable(initialPointsMethod, bodyCentredCubic, dictionary);
 bodyCentredCubic::bodyCentredCubic
 (
     const dictionary& initialPointsDict,
-    const conformalVoronoiMesh& foamyHexMesh
+    const Time& runTime,
+    Random& rndGen,
+    const conformationSurfaces& geometryToConformTo,
+    const cellShapeControl& cellShapeControls,
+    const autoPtr<backgroundMeshDecomposition>& decomposition
 )
 :
-    initialPointsMethod(typeName, initialPointsDict, foamyHexMesh),
+    initialPointsMethod
+    (
+        typeName,
+        initialPointsDict,
+        runTime,
+        rndGen,
+        geometryToConformTo,
+        cellShapeControls,
+        decomposition
+    ),
     initialCellSize_(readScalar(detailsDict().lookup("initialCellSize"))),
     randomiseInitialGrid_(detailsDict().lookup("randomiseInitialGrid")),
     randomPerturbationCoeff_
@@ -64,11 +77,11 @@ List<Vb::Point> bodyCentredCubic::initialPoints() const
     // on whether this is a parallel run.
     if (Pstream::parRun())
     {
-        bb = foamyHexMesh_.decomposition().procBounds();
+        bb = decomposition().procBounds();
     }
     else
     {
-        bb = foamyHexMesh_.geometryToConformTo().globalBounds();
+        bb = geometryToConformTo().globalBounds();
     }
 
     scalar x0 = bb.min().x();
@@ -86,8 +99,6 @@ List<Vb::Point> bodyCentredCubic::initialPoints() const
     vector delta(xR/ni, yR/nj, zR/nk);
 
     delta *= pow((1.0/2.0),-(1.0/3.0));
-
-    Random& rndGen = foamyHexMesh_.rndGen();
 
     scalar pert = randomPerturbationCoeff_*cmptMin(delta);
 
@@ -118,17 +129,14 @@ List<Vb::Point> bodyCentredCubic::initialPoints() const
 
                 if (randomiseInitialGrid_)
                 {
-                    pA.x() += pert*(rndGen.scalar01() - 0.5);
-                    pA.y() += pert*(rndGen.scalar01() - 0.5);
-                    pA.z() += pert*(rndGen.scalar01() - 0.5);
+                    pA.x() += pert*(rndGen().scalar01() - 0.5);
+                    pA.y() += pert*(rndGen().scalar01() - 0.5);
+                    pA.z() += pert*(rndGen().scalar01() - 0.5);
                 }
-
-                const backgroundMeshDecomposition& decomp =
-                    foamyHexMesh_.decomposition();
 
                 if (Pstream::parRun())
                 {
-                    if (decomp.positionOnThisProcessor(pA))
+                    if (decomposition().positionOnThisProcessor(pA))
                     {
                         // Add this point in parallel only if this position is
                         // on this processor.
@@ -142,14 +150,14 @@ List<Vb::Point> bodyCentredCubic::initialPoints() const
 
                 if (randomiseInitialGrid_)
                 {
-                    pB.x() += pert*(rndGen.scalar01() - 0.5);
-                    pB.y() += pert*(rndGen.scalar01() - 0.5);
-                    pB.z() += pert*(rndGen.scalar01() - 0.5);
+                    pB.x() += pert*(rndGen().scalar01() - 0.5);
+                    pB.y() += pert*(rndGen().scalar01() - 0.5);
+                    pB.z() += pert*(rndGen().scalar01() - 0.5);
                 }
 
                 if (Pstream::parRun())
                 {
-                    if (decomp.positionOnThisProcessor(pB))
+                    if (decomposition().positionOnThisProcessor(pB))
                     {
                         // Add this point in parallel only if this position is
                         // on this processor.
@@ -165,14 +173,11 @@ List<Vb::Point> bodyCentredCubic::initialPoints() const
             points.setSize(pI);
 
             Field<bool> insidePoints =
-                foamyHexMesh_.geometryToConformTo().wellInside
+                geometryToConformTo().wellInside
                 (
                     points,
                     minimumSurfaceDistanceCoeffSqr_
-                   *sqr
-                    (
-                        foamyHexMesh_.cellShapeControls().cellSize(points)
-                    )
+                   *sqr(cellShapeControls().cellSize(points))
                 );
 
             forAll(insidePoints, i)

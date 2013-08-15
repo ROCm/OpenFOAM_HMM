@@ -90,6 +90,7 @@ public:
             FixedList<label, 2>::Hash<>
         > labelTolabelPairHashTable;
 
+
 private:
 
     // Private data
@@ -184,62 +185,84 @@ public:
 
     // Member Functions
 
-        inline const Time& time() const;
+        // Access
 
-        inline void timeCheck
-        (
-            const string& description,
-            const bool check = true
-        ) const;
-
-        inline label getNewVertexIndex() const;
-
-        inline label getNewCellIndex() const;
-
-        inline label cellCount() const;
-
-        inline void resetCellCount();
-
-        inline label vertexCount() const;
-
-        inline void resetVertexCount();
+            //- Return a reference to the Time object
+            inline const Time& time() const;
 
 
-        //- Remove the entire triangulation
-        void reset();
+        // Check
 
-        void insertPoints(const List<Vb>& vertices);
-
-        //- Function inserting points into a triangulation and setting the
-        //  index and type data of the point in the correct order. This is
-        //  faster than inserting points individually.
-        //
-        //  Adapted from a post on the CGAL lists: 2010-01/msg00004.html by
-        //  Sebastien Loriot (Geometry Factory).
-        template<class PointIterator>
-        void rangeInsertWithInfo
-        (
-            PointIterator begin,
-            PointIterator end,
-            bool printErrors = true
-        );
+            //- Write the cpuTime to screen
+            inline void timeCheck
+            (
+                const string& description,
+                const bool check = true
+            ) const;
 
 
-    // Queries
+        // Indexing functions
 
-        void printInfo(Ostream& os) const;
+            //- Create a new unique cell index and return
+            inline label getNewCellIndex() const;
 
-        void printVertexInfo(Ostream& os) const;
+            //- Create a new unique vertex index and return
+            inline label getNewVertexIndex() const;
 
-        //- Create an fvMesh from the triangulation.
-        //  The mesh is not parallel consistent - only used for viewing
-        autoPtr<polyMesh> createMesh
-        (
-            const fileName& name,
-            labelTolabelPairHashTable& vertexMap,
-            labelList& cellMap,
-            const bool writeDelaunayData = true
-        ) const;
+            //- Return the cell count (the next unique cell index)
+            inline label cellCount() const;
+
+            //- Return the vertex count (the next unique vertex index)
+            inline label vertexCount() const;
+
+            //- Set the cell count to zero
+            inline void resetCellCount();
+
+            //- Set the vertex count to zero
+            inline void resetVertexCount();
+
+
+        // Triangulation manipulation functions
+
+            //- Clear the entire triangulation
+            void reset();
+
+            //- Insert the list of vertices (calls rangeInsertWithInfo)
+            void insertPoints(const List<Vb>& vertices);
+
+            //- Function inserting points into a triangulation and setting the
+            //  index and type data of the point in the correct order. This is
+            //  faster than inserting points individually.
+            //
+            //  Adapted from a post on the CGAL lists: 2010-01/msg00004.html by
+            //  Sebastien Loriot (Geometry Factory).
+            template<class PointIterator>
+            void rangeInsertWithInfo
+            (
+                PointIterator begin,
+                PointIterator end,
+                bool printErrors = false,
+                bool reIndex = true
+            );
+
+
+        // Write
+
+            //- Write mesh statistics to stream
+            void printInfo(Ostream& os) const;
+
+            //- Write vertex statistics in the form of a table to stream
+            void printVertexInfo(Ostream& os) const;
+
+            //- Create an fvMesh from the triangulation.
+            //  The mesh is not parallel consistent - only used for viewing
+            autoPtr<polyMesh> createMesh
+            (
+                const fileName& name,
+                labelTolabelPairHashTable& vertexMap,
+                labelList& cellMap,
+                const bool writeDelaunayData = true
+            ) const;
 };
 
 

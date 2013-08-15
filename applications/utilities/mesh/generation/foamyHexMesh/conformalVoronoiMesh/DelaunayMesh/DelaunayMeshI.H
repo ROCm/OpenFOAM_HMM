@@ -25,17 +25,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 template<class Triangulation>
 inline const Foam::Time& Foam::DelaunayMesh<Triangulation>::time() const
 {
@@ -71,23 +60,6 @@ void Foam::DelaunayMesh<Triangulation>::timeCheck
 
 
 template<class Triangulation>
-inline Foam::label Foam::DelaunayMesh<Triangulation>::getNewVertexIndex() const
-{
-    label id = vertexCount_++;
-
-    if (id == labelMax)
-    {
-        WarningIn
-        (
-            "Foam::DelaunayMesh<Triangulation>::getNewVertexIndex() const"
-        )   << "Vertex counter has overflowed." << endl;
-    }
-
-    return id;
-}
-
-
-template<class Triangulation>
 inline Foam::label Foam::DelaunayMesh<Triangulation>::getNewCellIndex() const
 {
     label id = cellCount_++;
@@ -105,16 +77,26 @@ inline Foam::label Foam::DelaunayMesh<Triangulation>::getNewCellIndex() const
 
 
 template<class Triangulation>
-Foam::label Foam::DelaunayMesh<Triangulation>::cellCount() const
+inline Foam::label Foam::DelaunayMesh<Triangulation>::getNewVertexIndex() const
 {
-    return cellCount_;
+    label id = vertexCount_++;
+
+    if (id == labelMax)
+    {
+        WarningIn
+        (
+            "Foam::DelaunayMesh<Triangulation>::getNewVertexIndex() const"
+        )   << "Vertex counter has overflowed." << endl;
+    }
+
+    return id;
 }
 
 
 template<class Triangulation>
-void Foam::DelaunayMesh<Triangulation>::resetCellCount()
+Foam::label Foam::DelaunayMesh<Triangulation>::cellCount() const
 {
-    cellCount_ = 0;
+    return cellCount_;
 }
 
 
@@ -126,28 +108,17 @@ Foam::label Foam::DelaunayMesh<Triangulation>::vertexCount() const
 
 
 template<class Triangulation>
+void Foam::DelaunayMesh<Triangulation>::resetCellCount()
+{
+    cellCount_ = 0;
+}
+
+
+template<class Triangulation>
 void Foam::DelaunayMesh<Triangulation>::resetVertexCount()
 {
     vertexCount_ = 0;
 }
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

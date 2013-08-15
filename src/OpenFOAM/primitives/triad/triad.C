@@ -66,6 +66,13 @@ const triad triad::min
     vector(-VGREAT, -VGREAT, -VGREAT)
 );
 
+const triad triad::I
+(
+    vector(1, 0, 0),
+    vector(0, 1, 0),
+    vector(0, 0, 1)
+);
+
 const triad triad::unset
 (
     vector(VGREAT, VGREAT, VGREAT),

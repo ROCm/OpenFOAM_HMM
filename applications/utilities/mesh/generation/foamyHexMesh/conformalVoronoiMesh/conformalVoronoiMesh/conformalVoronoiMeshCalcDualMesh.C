@@ -29,6 +29,8 @@ License
 #include "polyMeshGeometry.H"
 #include "indexedCellChecks.H"
 #include "OBJstream.H"
+#include "indexedCellOps.H"
+#include "DelaunayMeshTools.H"
 
 #include "CGAL/Exact_predicates_exact_constructions_kernel.h"
 #include "CGAL/Gmpq.h"
@@ -598,7 +600,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     // deferredCollapseFaceSet(owner, neighbour, deferredCollapseFaces);
 
-    cellCentres = allPoints();
+    cellCentres = DelaunayMeshTools::allPoints(*this);
 
     cellToDelaunayVertex = removeUnusedCells(owner, neighbour);
 
@@ -1227,7 +1229,7 @@ Foam::conformalVoronoiMesh::createPolyMeshFromPoints
     );
 
     //createCellCentres(cellCentres);
-    cellCentres = allPoints();
+    cellCentres = DelaunayMeshTools::allPoints(*this);
 
     labelList cellToDelaunayVertex(removeUnusedCells(owner, neighbour));
     cellCentres = pointField(cellCentres, cellToDelaunayVertex);
@@ -2443,7 +2445,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                          && vc2->neighbor(cI)->hasConstrainedPoint()
                         )
                         {
-                            drawDelaunayCell
+                            DelaunayMeshTools::drawDelaunayCell
                             (
                                 cellStr,
                                 vc2->neighbor(cI),
@@ -2837,7 +2839,12 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                       + name(neighbour)
                       + "_interface.obj";
 
-                    writeProcessorInterface(fName, procPatchFaces);
+                    DelaunayMeshTools::writeProcessorInterface
+                    (
+                        time().path()/fName,
+                        *this,
+                        procPatchFaces
+                    );
                 }
             }
         }
@@ -2868,30 +2875,6 @@ void Foam::conformalVoronoiMesh::createCellCentres
     }
 
     cellCentres.setSize(vertI);
-}
-
-
-Foam::tmp<Foam::pointField> Foam::conformalVoronoiMesh::allPoints() const
-{
-    tmp<pointField> tpts(new pointField(number_of_vertices(), point::max));
-    pointField& pts = tpts();
-
-    label nVert = 0;
-
-    for
-    (
-        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-        vit != finite_vertices_end();
-        ++vit
-    )
-    {
-        if (vit->internalOrBoundaryPoint())
-        {
-            pts[nVert++] = topoint(vit->point());
-        }
-    }
-
-    return tpts;
 }
 
 

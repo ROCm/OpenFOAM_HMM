@@ -114,7 +114,7 @@ private:
         ) const;
 
         //- Descend into octants of the supplied bound box
-        void recurseAndFill
+        label recurseAndFill
         (
             DynamicList<Vb::Point>& initialPoints,
             const treeBoundBox& bb,
@@ -144,7 +144,11 @@ public:
         autoDensity
         (
             const dictionary& initialPointsDict,
-            const conformalVoronoiMesh& foamyHexMesh
+            const Time& runTime,
+            Random& rndGen,
+            const conformationSurfaces& geometryToConformTo,
+            const cellShapeControl& cellShapeControls,
+            const autoPtr<backgroundMeshDecomposition>& decomposition
         );
 
 

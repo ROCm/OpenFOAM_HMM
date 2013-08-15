@@ -29,6 +29,7 @@ License
 #include "zeroGradientFvPatchFields.H"
 #include "Time.H"
 #include "Random.H"
+#include "pointConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -1043,22 +1044,6 @@ Foam::backgroundMeshDecomposition::distribute
 }
 
 
-Foam::autoPtr<Foam::mapDistribute>
-Foam::backgroundMeshDecomposition::distributePoints
-(
-    List<point>& points
-) const
-{
-    labelList toProc(processorPosition(points));
-
-    autoPtr<mapDistribute> map(buildMap(toProc));
-
-    map().distribute(points);
-
-    return map;
-}
-
-
 bool Foam::backgroundMeshDecomposition::positionOnThisProcessor
 (
     const point& pt
@@ -1125,141 +1110,6 @@ Foam::pointIndexHit Foam::backgroundMeshDecomposition::findLineAny
 ) const
 {
     return bFTreePtr_().findLineAny(start, end);
-}
-
-
-Foam::labelList Foam::backgroundMeshDecomposition::processorPosition
-(
-    const List<point>& pts
-) const
-{
-    DynamicList<label> toCandidateProc;
-    DynamicList<point> testPoints;
-    labelList ptBlockStart(pts.size(), -1);
-    labelList ptBlockSize(pts.size(), -1);
-
-    label nTotalCandidates = 0;
-
-    forAll(pts, pI)
-    {
-        const point& pt = pts[pI];
-
-        label nCandidates = 0;
-
-        forAll(allBackgroundMeshBounds_, procI)
-        {
-            if (allBackgroundMeshBounds_[procI].contains(pt))
-            {
-                toCandidateProc.append(procI);
-                testPoints.append(pt);
-
-                nCandidates++;
-            }
-        }
-
-        ptBlockStart[pI] = nTotalCandidates;
-        ptBlockSize[pI] = nCandidates;
-
-        nTotalCandidates += nCandidates;
-    }
-
-    // Needed for reverseDistribute
-    label preDistributionToCandidateProcSize = toCandidateProc.size();
-
-    autoPtr<mapDistribute> map(buildMap(toCandidateProc));
-
-    map().distribute(testPoints);
-
-    List<bool> pointOnCandidate(testPoints.size(), false);
-
-    // Test candidate points on candidate processors
-    forAll(testPoints, tPI)
-    {
-        pointOnCandidate[tPI] = positionOnThisProcessor(testPoints[tPI]);
-    }
-
-    map().reverseDistribute
-    (
-        preDistributionToCandidateProcSize,
-        pointOnCandidate
-    );
-
-    labelList ptProc(pts.size(), -1);
-
-    DynamicList<label> failedPointIndices;
-    DynamicList<point> failedPoints;
-
-    forAll(pts, pI)
-    {
-        // Extract the sub list of results for this point
-
-        SubList<bool> ptProcResults
-        (
-            pointOnCandidate,
-            ptBlockSize[pI],
-            ptBlockStart[pI]
-        );
-
-        forAll(ptProcResults, pPRI)
-        {
-            if (ptProcResults[pPRI])
-            {
-                ptProc[pI] = toCandidateProc[ptBlockStart[pI] + pPRI];
-
-                break;
-            }
-        }
-
-        if (ptProc[pI] < 0)
-        {
-            if (!globalBackgroundBounds_.contains(pts[pI]))
-            {
-                FatalErrorIn
-                (
-                    "Foam::labelList"
-                    "Foam::backgroundMeshDecomposition::processorPosition"
-                    "("
-                        "const List<point>&"
-                    ") const"
-                )
-                    << "The position " << pts[pI]
-                    << " is not in any part of the background mesh "
-                    << globalBackgroundBounds_ << endl
-                    << "A background mesh with a wider margin around "
-                    << "the geometry may help."
-                    << exit(FatalError);
-            }
-
-            if (debug)
-            {
-                WarningIn
-                (
-                    "Foam::labelList"
-                    "Foam::backgroundMeshDecomposition::processorPosition"
-                    "("
-                        "const List<point>&"
-                    ") const"
-                )   << "The position " << pts[pI]
-                    << " was not found in the background mesh "
-                    << globalBackgroundBounds_ << ", finding nearest."
-                    << endl;
-            }
-
-            failedPointIndices.append(pI);
-            failedPoints.append(pts[pI]);
-        }
-    }
-
-    labelList ptNearestProc(processorNearestPosition(failedPoints));
-
-    forAll(failedPoints, fPI)
-    {
-        label pI = failedPointIndices[fPI];
-
-        ptProc[pI] = ptNearestProc[fPI];
-    }
-
-    return ptProc;
 }
 
 

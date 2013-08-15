@@ -146,7 +146,8 @@ void Foam::DelaunayMesh<Triangulation>::printInfo(Ostream& os) const
         ++vit
     )
     {
-        if (!vit->farPoint())
+        // Only internal or boundary vertices have a size
+        if (vit->internalOrBoundaryPoint())
         {
             minSize = min(vit->targetCellSize(), minSize);
             maxSize = max(vit->targetCellSize(), maxSize);
@@ -361,19 +362,19 @@ Foam::DelaunayMesh<Triangulation>::createMesh
     // Calculate pts and a map of point index to location in pts.
     label vertI = 0;
 
-    labelIOField indices
-    (
-        IOobject
-        (
-            "indices",
-            time().timeName(),
-            name,
-            time(),
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        Triangulation::number_of_vertices()
-    );
+//    labelIOField indices
+//    (
+//        IOobject
+//        (
+//            "indices",
+//            time().timeName(),
+//            name,
+//            time(),
+//            IOobject::NO_READ,
+//            IOobject::AUTO_WRITE
+//        ),
+//        Triangulation::number_of_vertices()
+//    );
 
     labelIOField types
     (
@@ -414,7 +415,7 @@ Foam::DelaunayMesh<Triangulation>::createMesh
         {
             vertexMap(labelPair(vit->index(), vit->procIndex())) = vertI;
             points[vertI] = topoint(vit->point());
-            indices[vertI] = vit->index();
+//            indices[vertI] = vit->index();
             types[vertI] = static_cast<label>(vit->type());
             processorIndices[vertI] = vit->procIndex();
             vertI++;
@@ -422,7 +423,7 @@ Foam::DelaunayMesh<Triangulation>::createMesh
     }
 
     points.setSize(vertI);
-    indices.setSize(vertI);
+//    indices.setSize(vertI);
     types.setSize(vertI);
     processorIndices.setSize(vertI);
 
@@ -477,8 +478,8 @@ Foam::DelaunayMesh<Triangulation>::createMesh
         bool c1Real = false;
         if
         (
-            !c1->hasFarPoint()
-         && !Triangulation::is_infinite(c1)
+            !Triangulation::is_infinite(c1)
+         && !c1->hasFarPoint()
          && c1->real()
         )
         {
@@ -490,8 +491,8 @@ Foam::DelaunayMesh<Triangulation>::createMesh
         bool c2Real = false;
         if
         (
-            !c2->hasFarPoint()
-         && !Triangulation::is_infinite(c2)
+            !Triangulation::is_infinite(c2)
+         && !c2->hasFarPoint()
          && c2->real()
         )
         {
@@ -637,7 +638,7 @@ Foam::DelaunayMesh<Triangulation>::createMesh
 
     if (writeDelaunayData)
     {
-        indices.write();
+//        indices.write();
         types.write();
         processorIndices.write();
     }

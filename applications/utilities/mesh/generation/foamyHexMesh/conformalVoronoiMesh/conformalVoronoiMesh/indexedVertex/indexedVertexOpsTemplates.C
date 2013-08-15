@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,41 +21,37 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedefs
-    CGALTriangulation3Ddefs
-
-Description
-    CGAL data structures used for 3D Delaunay meshing.
-
-    Define CGAL_INEXACT to use Exact_predicates_inexact_constructions kernel
-    otherwise the more robust but much less efficient
-    Exact_predicates_exact_constructions will be used.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef CGALTriangulation3Ddefs_H
-#define CGALTriangulation3Ddefs_H
+#include "indexedVertexOps.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-#include "CGALTriangulation3DKernel.H"
+template<typename VertexType>
+Foam::scalar CGAL::indexedVertexOps::averageCellSize
+(
+    const VertexType& vA,
+    const VertexType& vB
+)
+{
+    // Arithmetic mean
+    // return 0.5*(vA->targetCellSize() + vB->targetCellSize());
 
-#include "indexedVertex.H"
-#include "indexedCell.H"
+    // Geometric mean
+    return sqrt(vA->targetCellSize()*vB->targetCellSize());
 
-typedef CGAL::indexedVertex<K>     Vb;
-typedef CGAL::indexedCell<K>       Cb;
-
-typedef CGAL::Compact_location     CompactLocator;
-typedef CGAL::Fast_location        FastLocator;
-
-typedef CGAL::Triangulation_data_structure_3<Vb, Cb>           Tds;
-typedef CGAL::Delaunay_triangulation_3<K, Tds, CompactLocator> Delaunay;
-typedef CGAL::Delaunay_triangulation_3<K, Tds, FastLocator>    CellSizeDelaunay;
+    // Harmonic mean
+    // return
+    //     2.0*(vA->targetCellSize()*vB->targetCellSize())
+    //    /(vA->targetCellSize() + vB->targetCellSize());
+}
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<typename VertexType>
+inline bool CGAL::indexedVertexOps::uninitialised(const VertexType& v)
+{
+    return v->type() == Foam::indexedVertexEnum::vtUnassigned;
+}
 
-#endif
 
 // ************************************************************************* //

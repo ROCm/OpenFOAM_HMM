@@ -1,5 +1,7 @@
 #include CGAL_FILES
 
+DelaunayMeshTools/DelaunayMeshTools.C
+
 conformalVoronoiMesh/indexedVertex/indexedVertexEnum.C
 conformalVoronoiMesh/indexedCell/indexedCellEnum.C
 
@@ -8,7 +10,10 @@ conformalVoronoiMesh/conformalVoronoiMeshCalcDualMesh.C
 conformalVoronoiMesh/conformalVoronoiMeshConformToSurface.C
 conformalVoronoiMesh/conformalVoronoiMeshIO.C
 conformalVoronoiMesh/conformalVoronoiMeshFeaturePoints.C
-conformalVoronoiMesh/conformalVoronoiMeshFeaturePointSpecialisations.C
+
+conformalVoronoiMesh/featurePointConformer/pointFeatureEdgesTypes.C
+conformalVoronoiMesh/featurePointConformer/featurePointConformer.C
+conformalVoronoiMesh/featurePointConformer/featurePointConformerSpecialisations.C
 
 cvControls/cvControls.C
 

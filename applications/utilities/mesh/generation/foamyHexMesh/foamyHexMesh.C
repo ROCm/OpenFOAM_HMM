@@ -30,6 +30,9 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "Time.H"
+#include "IOdictionary.H"
+#include "searchableSurfaces.H"
 #include "conformalVoronoiMesh.H"
 #include "vtkSetWriter.H"
 
@@ -137,9 +140,10 @@ int main(int argc, char *argv[])
 
             mesh.move();
 
-            Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+            Info<< nl
+                << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
                 << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-                << endl;
+                << nl << endl;
         }
     }
 
