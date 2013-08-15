@@ -34,6 +34,8 @@ License
 #include "controlMeshRefinement.H"
 #include "smoothAlignmentSolver.H"
 #include "OBJstream.H"
+#include "indexedVertexOps.H"
+#include "DelaunayMeshTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -41,8 +43,6 @@ namespace Foam
 {
 defineTypeNameAndDebug(conformalVoronoiMesh, 0);
 }
-
-const Foam::scalar Foam::conformalVoronoiMesh::tolParallel = 1e-3;
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -124,12 +124,13 @@ void Foam::conformalVoronoiMesh::insertInternalPoints
             decomposition_().distributePoints(transferPoints)
         );
 
+        transferPoints.clear();
+
         map().distribute(points);
     }
 
     label nVert = number_of_vertices();
 
-    // using the range insert (faster than inserting points one by one)
     insert(points.begin(), points.end());
 
     label nInserted(number_of_vertices() - nVert);
@@ -152,7 +153,7 @@ void Foam::conformalVoronoiMesh::insertInternalPoints
         ++vit
     )
     {
-        if (vit->uninitialised())
+        if (CGAL::indexedVertexOps::uninitialised(vit))
         {
             vit->index() = getNewVertexIndex();
             vit->type() = Vb::vtInternal;
@@ -169,24 +170,7 @@ void Foam::conformalVoronoiMesh::insertPoints
 {
     if (Pstream::parRun() && distribute)
     {
-        const label preDistributionSize = vertices.size();
-
-        List<Foam::point> pts(preDistributionSize);
-
-        forAll(vertices, vI)
-        {
-            const Foam::point& pt = topoint(vertices[vI].point());
-
-            pts[vI] = pt;
-        }
-
-        // Distribute points to their appropriate processor
-        autoPtr<mapDistribute> map
-        (
-            decomposition_().distributePoints(pts)
-        );
-
-        map().distribute(vertices);
+        decomposition_().distributePoints(vertices);
 
         forAll(vertices, vI)
         {
@@ -196,12 +180,7 @@ void Foam::conformalVoronoiMesh::insertPoints
 
     label preReinsertionSize(number_of_vertices());
 
-    rangeInsertWithInfo
-    (
-        vertices.begin(),
-        vertices.end(),
-        false
-    );
+    this->DelaunayMesh<Delaunay>::insertPoints(vertices);
 
     const label nReinserted = returnReduce
     (
@@ -288,7 +267,7 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
 
     if (foamyHexMeshControls().objOutput() && fName != fileName::null)
     {
-        writePoints(fName, pts);
+        DelaunayMeshTools::writeOBJ(time().path()/fName, pts);
     }
 }
 
@@ -328,7 +307,7 @@ void Foam::conformalVoronoiMesh::insertEdgePointGroups
 
     if (foamyHexMeshControls().objOutput() && fName != fileName::null)
     {
-        writePoints(fName, pts);
+        DelaunayMeshTools::writeOBJ(time().path()/fName, pts);
     }
 }
 
@@ -381,9 +360,10 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
 
     if (foamyHexMeshControls().objOutput())
     {
-        writePoints
+        DelaunayMeshTools::writeOBJ
         (
-            "initialPoints.obj",
+            time().path()/"initialPoints.obj",
+            *this,
             Foam::indexedVertexEnum::vtInternal
         );
     }
@@ -396,9 +376,6 @@ void Foam::conformalVoronoiMesh::distribute()
     {
         return;
     }
-
-    autoPtr<mapDistribute> mapDist =
-        DistributedDelaunayMesh<Delaunay>::distribute(decomposition_());
 
     DynamicList<Foam::point> points(number_of_vertices());
     DynamicList<Foam::indexedVertexEnum::vertexType> types
@@ -424,7 +401,9 @@ void Foam::conformalVoronoiMesh::distribute()
         }
     }
 
-    mapDist().distribute(points);
+    autoPtr<mapDistribute> mapDist =
+        DistributedDelaunayMesh<Delaunay>::distribute(decomposition_(), points);
+
     mapDist().distribute(types);
     mapDist().distribute(sizes);
     mapDist().distribute(alignments);
@@ -444,7 +423,7 @@ void Foam::conformalVoronoiMesh::distribute()
         (
             Vb
             (
-                toPoint<Point>(points[pI]),
+                toPoint(points[pI]),
                 -1,
                 types[pI],
                 Pstream::myProcNo()
@@ -549,7 +528,7 @@ void Foam::conformalVoronoiMesh::buildCellSizeAndAlignmentMesh()
         << (cellSizeMesh.is_valid() ? "valid" : "not valid!" )
         << endl;
 
-    if (!Pstream::parRun() && foamyHexMeshControls().objOutput())
+    if (foamyHexMeshControls().writeCellShapeControlMesh())
     {
         //cellSizeMesh.writeTriangulation();
         cellSizeMesh.write();
@@ -583,7 +562,7 @@ void Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()
     {
         if (vit->internalOrBoundaryPoint())
         {
-            pointFromPoint pt = topoint(vit->point());
+            const pointFromPoint pt = topoint(vit->point());
 
             cellShapeControls().cellSizeAndAlignment
             (
@@ -625,29 +604,31 @@ Foam::face Foam::conformalVoronoiMesh::buildDualFace
             Vertex_handle vA = c->vertex(eit->second);
             Vertex_handle vB = c->vertex(eit->third);
 
-            drawDelaunayCell(Pout, cc1);
-            drawDelaunayCell(Pout, cc2);
+//            DelaunayMeshTools::drawDelaunayCell(Pout, cc1);
+//            DelaunayMeshTools::drawDelaunayCell(Pout, cc2);
 
-            FatalErrorIn("Foam::conformalVoronoiMesh::buildDualFace")
+            WarningIn("Foam::conformalVoronoiMesh::buildDualFace")
                 << "Dual face uses circumcenter defined by a "
                 << "Delaunay tetrahedron with no internal "
                 << "or boundary points.  Defining Delaunay edge ends: "
                 << vA->info() << " "
                 << vB->info() << nl
-                << exit(FatalError);
+                <<endl;//<< exit(FatalError);
         }
-
-        label cc1I = cc1->cellIndex();
-        label cc2I = cc2->cellIndex();
-
-        if (cc1I != cc2I)
+        else
         {
-            if (findIndex(verticesOnFace, cc1I) == -1)
-            {
-                nUniqueVertices++;
-            }
+            label cc1I = cc1->cellIndex();
+            label cc2I = cc2->cellIndex();
 
-            verticesOnFace.append(cc1I);
+            if (cc1I != cc2I)
+            {
+                if (findIndex(verticesOnFace, cc1I) == -1)
+                {
+                    nUniqueVertices++;
+                }
+
+                verticesOnFace.append(cc1I);
+            }
         }
 
         cc1++;
@@ -838,6 +819,21 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
         allGeometry_,
         foamyHexMeshDict.subDict("surfaceConformation")
     ),
+    decomposition_
+    (
+        Pstream::parRun()
+      ? new backgroundMeshDecomposition
+        (
+            runTime_,
+            rndGen_,
+            geometryToConformTo_,
+            foamyHexMeshControls().foamyHexMeshDict().subDict
+            (
+                "backgroundMeshDecomposition"
+            )
+        )
+      : NULL
+    ),
     cellShapeControl_
     (
         runTime_,
@@ -846,8 +842,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
         geometryToConformTo_
     ),
     limitBounds_(),
-    featureVertices_(),
-    featurePointLocations_(),
+    ftPtConformer_(*this),
     edgeLocationTreePtr_(),
     surfacePtLocationTreePtr_(),
     surfaceConformationVertices_(),
@@ -856,7 +851,11 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
         initialPointsMethod::New
         (
             foamyHexMeshDict.subDict("initialPoints"),
-            *this
+            runTime_,
+            rndGen_,
+            geometryToConformTo_,
+            cellShapeControl_,
+            decomposition_
         )
     ),
     relaxationModel_
@@ -873,8 +872,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
         (
             foamyHexMeshDict.subDict("motionControl")
         )
-    ),
-    decomposition_()
+    )
 {}
 
 
@@ -893,28 +891,11 @@ void Foam::conformalVoronoiMesh::initialiseForMotion()
         geometryToConformTo_.writeFeatureObj("foamyHexMesh");
     }
 
-    if (Pstream::parRun())
-    {
-        decomposition_.reset
-        (
-            new backgroundMeshDecomposition
-            (
-                runTime_,
-                rndGen_,
-                geometryToConformTo_,
-                foamyHexMeshControls().foamyHexMeshDict().subDict
-                (
-                    "backgroundMeshDecomposition"
-                )
-            )
-        );
-    }
-
     buildCellSizeAndAlignmentMesh();
 
     insertInitialPoints();
 
-    insertFeaturePoints();
+    insertFeaturePoints(true);
 
     setVertexSizeAndAlignment();
 
@@ -953,9 +934,10 @@ void Foam::conformalVoronoiMesh::initialiseForMotion()
 
     if (foamyHexMeshControls().objOutput())
     {
-        writePoints
+        DelaunayMeshTools::writeOBJ
         (
-            "internalPoints_" + runTime_.timeName() + ".obj",
+            time().path()/"internalPoints_" + time().timeName() + ".obj",
+            *this,
             Foam::indexedVertexEnum::vtUnassigned,
             Foam::indexedVertexEnum::vtExternalFeaturePoint
         );
@@ -1159,10 +1141,12 @@ void Foam::conformalVoronoiMesh::move()
                      && pointToBeRetained[vB->index()] == true
                     )
                     {
-                        pointsToInsert.append
-                        (
-                            toPoint<Point>(0.5*(dVA + dVB))
-                        );
+                        const Foam::point pt(0.5*(dVA + dVB));
+
+                        if (internalPointIsInside(pt))
+                        {
+                            pointsToInsert.append(toPoint(pt));
+                        }
                     }
                 }
 
@@ -1203,7 +1187,8 @@ void Foam::conformalVoronoiMesh::move()
                   > foamyHexMeshControls().cosAlignmentAcceptanceAngle()
                 )
                 {
-                    scalar targetCellSize = averageCellSize(vA, vB);
+                    scalar targetCellSize =
+                        CGAL::indexedVertexOps::averageCellSize(vA, vB);
 
                     scalar targetFaceArea = sqr(targetCellSize);
 
@@ -1292,12 +1277,28 @@ void Foam::conformalVoronoiMesh::move()
                             )
                         )
                         {
-                            const Foam::point& newPt = 0.5*(dVA + dVB);
+                            const Foam::point newPt(0.5*(dVA + dVB));
 
-                            if (positionOnThisProc(newPt))
+                            // Prevent insertions spanning surfaces
+                            if (internalPointIsInside(newPt))
                             {
-                                // Prevent insertions spanning surfaces
-                                pointsToInsert.append(toPoint<Point>(newPt));
+                                if (Pstream::parRun())
+                                {
+                                    if
+                                    (
+                                        decomposition().positionOnThisProcessor
+                                        (
+                                            newPt
+                                        )
+                                    )
+                                    {
+                                        pointsToInsert.append(toPoint(newPt));
+                                    }
+                                }
+                                else
+                                {
+                                    pointsToInsert.append(toPoint(newPt));
+                                }
                             }
                         }
                     }
@@ -1333,10 +1334,12 @@ void Foam::conformalVoronoiMesh::move()
                              && pointToBeRetained[vB->index()] == true
                             )
                             {
-                                pointsToInsert.append
-                                (
-                                    toPoint<Point>(0.5*(dVA + dVB))
-                                );
+                                const Foam::point pt(0.5*(dVA + dVB));
+
+                                if (internalPointIsInside(pt))
+                                {
+                                    pointsToInsert.append(toPoint(pt));
+                                }
                             }
                         }
 
@@ -1431,6 +1434,9 @@ void Foam::conformalVoronoiMesh::move()
 
     Info<< "Sum displacements" << endl;
 
+    label nPointsToRetain = 0;
+    label nPointsToRemove = 0;
+
     for
     (
         Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
@@ -1451,20 +1457,32 @@ void Foam::conformalVoronoiMesh::move()
                 // 14/1/2011.
                 // Only necessary if using an exact constructions kernel
                 // (extended precision)
-
-                pointsToInsert.append
+                Foam::point pt
                 (
-                    toPoint<Point>
-                    (
-                        topoint(vit->point())
-                      + displacementAccumulator[vit->index()]
-                    )
+                    topoint(vit->point())
+                  + displacementAccumulator[vit->index()]
                 );
+
+                if (internalPointIsInside(pt))
+                {
+                    pointsToInsert.append(toPoint(pt));
+                    nPointsToRemove++;
+                }
+
+                nPointsToRetain++;
             }
         }
     }
 
     pointsToInsert.shrink();
+
+    Info<< returnReduce
+           (
+               nPointsToRetain - nPointsToRemove,
+               sumOp<label>()
+           )
+        << " internal points are outside the domain. "
+        << "They will not be inserted." << endl;
 
     // Save displacements to file.
     if (foamyHexMeshControls().objOutput() && time().outputTime())
@@ -1500,72 +1518,11 @@ void Foam::conformalVoronoiMesh::move()
 
     timeCheck("Displacement calculated");
 
-    Info<< nl << "Inserting displaced tessellation" << endl;
+    Info<< nl<< "Inserting displaced tessellation" << endl;
 
-    reinsertFeaturePoints(true);
+    insertFeaturePoints(true);
 
     insertInternalPoints(pointsToInsert, true);
-
-    {
-        // Remove internal points that have been inserted outside the surface.
-        label internalPtIsOutside = 0;
-
-        autoPtr<OBJstream> str;
-
-        if (foamyHexMeshControls().objOutput() && time().outputTime())
-        {
-            str.set
-            (
-                new OBJstream(time().path()/"internalPointsOutsideDomain.obj")
-            );
-        }
-
-        DynamicList<Vertex_handle> pointsToRemove;
-
-        for
-        (
-            Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-            vit != finite_vertices_end();
-            ++vit
-        )
-        {
-            if
-            (
-                (vit->internalPoint() || vit->internalBoundaryPoint())
-             //&& !vit->referred()
-            )
-            {
-                const Foam::point& pt = topoint(vit->point());
-
-                bool inside = geometryToConformTo_.inside(pt);
-
-                if
-                (
-                    !inside
-                 || !geometryToConformTo_.globalBounds().contains(pt)
-                )
-                {
-                    if
-                    (
-                        foamyHexMeshControls().objOutput()
-                     && time().outputTime()
-                    )
-                    {
-                        str().write(topoint(vit->point()));
-                    }
-
-                    pointsToRemove.append(vit);
-                    internalPtIsOutside++;
-                }
-            }
-        }
-
-        remove(pointsToRemove.begin(), pointsToRemove.end());
-
-        Info<< "    " << returnReduce(internalPtIsOutside, sumOp<label>())
-            << " internal points were inserted outside the domain. "
-            << "They have been removed." << endl;
-    }
 
     // Fix points that have not been significantly displaced
 //    for
@@ -1614,16 +1571,21 @@ void Foam::conformalVoronoiMesh::move()
 
     if (foamyHexMeshControls().objOutput())
     {
-        writePoints
+        DelaunayMeshTools::writeOBJ
         (
-            "internalPoints_" + time().timeName() + ".obj",
+            time().path()/"internalPoints_" + time().timeName() + ".obj",
+            *this,
             Foam::indexedVertexEnum::vtInternal
         );
-    }
 
-    if (foamyHexMeshControls().objOutput() && time().outputTime())
-    {
-        writeBoundaryPoints("boundaryPoints_" + time().timeName() + ".obj");
+        if (reconformToSurface())
+        {
+            DelaunayMeshTools::writeBoundaryPoints
+            (
+                time().path()/"boundaryPoints_" + time().timeName() + ".obj",
+                *this
+            );
+        }
     }
 
     timeCheck("After conformToSurface");
@@ -1643,64 +1605,6 @@ void Foam::conformalVoronoiMesh::move()
         << "Total displacement = " << totalDisp << nl
         << "Total distance = " << totalDist << nl
         << endl;
-}
-
-
-bool Foam::conformalVoronoiMesh::positionOnThisProc
-(
-    const Foam::point& pt
-) const
-{
-    if (Pstream::parRun())
-    {
-        return decomposition_().positionOnThisProcessor(pt);
-    }
-
-    return true;
-}
-
-
-Foam::boolList Foam::conformalVoronoiMesh::positionOnThisProc
-(
-    const Foam::List<Foam::point>& pts
-) const
-{
-    if (Pstream::parRun())
-    {
-        return decomposition_().positionOnThisProcessor(pts);
-    }
-
-    return boolList(pts.size(), true);
-}
-
-
-Foam::labelList Foam::conformalVoronoiMesh::positionProc
-(
-    const Foam::List<Foam::point>& pts
-) const
-{
-    if (!Pstream::parRun())
-    {
-        return labelList(pts.size(), -1);
-    }
-
-    return decomposition_().processorPosition(pts);
-}
-
-
-Foam::List<Foam::List<Foam::pointIndexHit> >
-Foam::conformalVoronoiMesh::intersectsProc
-(
-    const List<Foam::point>& starts,
-    const List<Foam::point>& ends
-) const
-{
-    if (!Pstream::parRun())
-    {
-        return List<List<pointIndexHit> >(starts.size());
-    }
-
-    return decomposition_().intersectsProcessors(starts, ends, false);
 }
 
 
@@ -1776,7 +1680,7 @@ void Foam::conformalVoronoiMesh::checkCoPlanarCells() const
                 << "    quality = " << quality << nl
                 << "    dual    = " << topoint(cit->dual()) << endl;
 
-            drawDelaunayCell(str, cit, badCells++);
+            DelaunayMeshTools::drawDelaunayCell(str, cit, badCells++);
 
             FixedList<PointExact, 4> cellVerticesExact(PointExact(0,0,0));
             forAll(cellVerticesExact, vI)

@@ -58,9 +58,14 @@ Foam::fieldFromFile::fieldFromFile
         surface,
         defaultCellSize
     ),
+    coeffsDict_(cellSizeCalcTypeDict.subDict(typeName + "Coeffs")),
     fileName_
     (
         cellSizeCalcTypeDict.subDict(typeName + "Coeffs").lookup("fieldFile")
+    ),
+    cellSizeMultipleCoeff_
+    (
+        coeffsDict_.lookupOrDefault<scalar>("cellSizeMultipleCoeff", 1)
     )
 {}
 
@@ -89,6 +94,8 @@ Foam::tmp<Foam::triSurfacePointScalarField> Foam::fieldFromFile::load()
             true
         )
     );
+
+    pointCellSize() *= cellSizeMultipleCoeff_;
 
     return pointCellSize;
 }

@@ -100,6 +100,7 @@ public:
         static const triad one;
         static const triad max;
         static const triad min;
+        static const triad I;
         static const triad unset;
 
 

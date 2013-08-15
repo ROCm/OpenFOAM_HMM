@@ -425,7 +425,6 @@ Foam::cellShapeControlMesh::cellShapeControlMesh(const Time& runTime)
              && alignments.size() == this->vertexCount()
             )
             {
-                label count = 0;
                 for
                 (
                     Finite_vertices_iterator vit = finite_vertices_begin();
@@ -433,9 +432,8 @@ Foam::cellShapeControlMesh::cellShapeControlMesh(const Time& runTime)
                     ++vit
                 )
                 {
-                    vit->targetCellSize() = sizes[count];
-                    vit->alignment() = alignments[count];
-                    count++;
+                    vit->targetCellSize() = sizes[vit->index()];
+                    vit->alignment() = alignments[vit->index()];
                 }
             }
             else
@@ -451,155 +449,6 @@ Foam::cellShapeControlMesh::cellShapeControlMesh(const Time& runTime)
         }
     }
 }
-
-
-//Foam::triangulatedMesh::triangulatedMesh
-//(
-//    const Time& runTime,
-//    const fileName& pointsFile,
-//    const fileName& sizesFile,
-//    const fileName& alignmentsFile,
-//    const scalar& defaultCellSize
-//)
-//:
-//    defaultCellSize_(defaultCellSize)
-//{
-//    Info<< "    Reading points from file     : " << pointsFile << endl;
-//
-//    pointIOField points
-//    (
-//        IOobject
-//        (
-//            pointsFile,
-//            runTime.constant(),
-//            runTime,
-//            IOobject::MUST_READ,
-//            IOobject::NO_WRITE
-//        )
-//    );
-//
-//    Info<< "    Reading sizes from file      : " << sizesFile << endl;
-//
-//    scalarIOField sizes
-//    (
-//        IOobject
-//        (
-//            sizesFile,
-//            runTime.constant(),
-//            runTime,
-//            IOobject::MUST_READ,
-//            IOobject::NO_WRITE
-//        )
-//    );
-//
-//    Info<< "    Reading alignments from file : " << alignmentsFile << endl;
-//
-//    tensorIOField alignments
-//    (
-//        IOobject
-//        (
-//            alignmentsFile,
-//            runTime.constant(),
-//            runTime,
-//            IOobject::MUST_READ,
-//            IOobject::NO_WRITE
-//        )
-//    );
-//
-//    Info<< "    Number of points : " << points.size() << endl;
-//    Info<< "    Minimum size     : " << min(sizes) << endl;
-//    Info<< "    Average size     : " << average(sizes) << endl;
-//    Info<< "    Maximum size     : " << max(sizes) << endl;
-//
-//    forAll(points, pI)
-//    {
-//        size_t nVert = number_of_vertices();
-//
-//        Vertex_handle v = insert
-//        (
-//            Point(points[pI].x(), points[pI].y(), points[pI].z())
-//        );
-//
-//        if (number_of_vertices() == nVert)
-//        {
-//            Info<< "    Failed to insert point : " << points[pI] << endl;
-//        }
-//
-//        v->targetCellSize() = sizes[pI];
-//
-//        const tensor& alignment = alignments[pI];
-//
-//
-//
-//        v->alignment() = alignment;
-//    }
-//
-////    scalar factor = 1.0;
-////    label maxIteration = 1;
-////
-////    for (label iteration = 0; iteration < maxIteration; ++iteration)
-////    {
-////        Info<< "Iteration : " << iteration << endl;
-////
-////        label nRefined = refineTriangulation(factor);
-////
-////        Info<< "    Number of cells refined in refinement iteration : "
-////            << nRefined << nl << endl;
-////
-////        if (nRefined <= 0 && iteration != 0)
-////        {
-////            break;
-////        }
-////
-////        factor *= 1.5;
-////    }
-//
-//    //writeRefinementTriangulation();
-//}
-
-
-//Foam::triangulatedMesh::triangulatedMesh
-//(
-//    const Time& runTime,
-//    const DynamicList<Foam::point>& points,
-//    const DynamicList<scalar>& sizes,
-//    const DynamicList<tensor>& alignments,
-//    const scalar& defaultCellSize
-//)
-//:
-//    defaultCellSize_(defaultCellSize)
-//{
-//    forAll(points, pI)
-//    {
-//        size_t nVert = number_of_vertices();
-//
-//        Vertex_handle v = insert
-//        (
-//            Point(points[pI].x(), points[pI].y(), points[pI].z())
-//        );
-//
-//        if (number_of_vertices() == nVert)
-//        {
-//            Info<< "Failed to insert point : " << points[pI] << endl;
-//        }
-//
-//        v->targetCellSize() = sizes[pI];
-//
-//        v->alignment() = alignments[pI];
-//    }
-//
-//    //writeRefinementTriangulation();
-//
-//    Info<< nl << "Refinement triangulation information: " << endl;
-//    Info<< "    Number of vertices: " << label(number_of_vertices()) << endl;
-//    Info<< "    Number of cells   : "
-//        << label(number_of_finite_cells()) << endl;
-//    Info<< "    Number of faces   : "
-//        << label(number_of_finite_facets()) << endl;
-//    Info<< "    Number of edges   : "
-//        << label(number_of_finite_edges()) << endl;
-//    Info<< "    Dimensionality    : " << label(dimension()) << nl << endl;
-//}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -619,7 +468,7 @@ void Foam::cellShapeControlMesh::barycentricCoords
 {
     // Use the previous cell handle as a hint on where to start searching
     // Giving a hint causes strange errors...
-    ch = locate(toPoint<Point>(pt));
+    ch = locate(toPoint(pt));
 
     if (dimension() > 2 && !is_infinite(ch))
     {
@@ -666,14 +515,6 @@ void Foam::cellShapeControlMesh::distribute
     const backgroundMeshDecomposition& decomposition
 )
 {
-    if (!Pstream::parRun())
-    {
-        return;
-    }
-
-    autoPtr<mapDistribute> mapDist =
-        DistributedDelaunayMesh<CellSizeDelaunay>::distribute(decomposition);
-
     DynamicList<Foam::point> points(number_of_vertices());
     DynamicList<scalar> sizes(number_of_vertices());
     DynamicList<tensor> alignments(number_of_vertices());
@@ -711,7 +552,13 @@ void Foam::cellShapeControlMesh::distribute
         }
     }
 
-    mapDist().distribute(points);
+    autoPtr<mapDistribute> mapDist =
+        DistributedDelaunayMesh<CellSizeDelaunay>::distribute
+        (
+            decomposition,
+            points
+        );
+
     mapDist().distribute(sizes);
     mapDist().distribute(alignments);
 
@@ -735,7 +582,7 @@ void Foam::cellShapeControlMesh::distribute
         (
             Vb
             (
-                toPoint<Point>(points[pI]),
+                toPoint(points[pI]),
                 -1,
                 Vb::vtInternal,
                 Pstream::myProcNo()

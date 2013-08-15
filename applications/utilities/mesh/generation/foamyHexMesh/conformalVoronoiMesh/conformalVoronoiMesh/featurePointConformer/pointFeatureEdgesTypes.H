@@ -22,24 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::pointFile
+    pointFeatureEdgesTypes
 
 Description
-    Inserts points at locations specified in a pointFile into the surfaces to
-    be conformed to of the conformalVoronoiMesh
+    Holds information on the types of feature edges attached to feature points.
 
 SourceFiles
-    pointFile.C
+    pointFeatureEdgesTypes.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointFile_H
-#define pointFile_H
+#ifndef pointFeatureEdgesTypes_H
+#define pointFeatureEdgesTypes_H
 
-#include "fileName.H"
-#include "pointIOField.H"
-#include "Switch.H"
-#include "initialPointsMethod.H"
+#include "HashTable.H"
+#include "extendedFeatureEdgeMesh.H"
+#include "List.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,59 +45,53 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class pointFile Declaration
+                   Class pointFeatureEdgesTypes Declaration
 \*---------------------------------------------------------------------------*/
 
-class pointFile
+//- Hold the types of feature edges attached to the point.
+class pointFeatureEdgesTypes
 :
-    public initialPointsMethod
+    public HashTable<label, extendedFeatureEdgeMesh::edgeStatus>
 {
-
-private:
-
     // Private data
 
-        //- The initial cell spacing
-        fileName pointFileName_;
+        //- Reference to the feature edge mesh
+        const extendedFeatureEdgeMesh& feMesh_;
 
-        //- Check if inserted points are inside or outside
-        Switch insideOutsideCheck_;
-
-        //- Should the initial positions be randomised
-        Switch randomiseInitialGrid_;
-
-        //- Randomise the initial positions by fraction of the initialCellSize_
-        scalar randomPerturbationCoeff_;
+        //- label of the point
+        label pointLabel_;
 
 
 public:
 
-    //- Runtime type information
-    TypeName("pointFile");
-
     // Constructors
 
         //- Construct from components
-        pointFile
+        pointFeatureEdgesTypes
         (
-            const dictionary& initialPointsDict,
-            const Time& runTime,
-            Random& rndGen,
-            const conformationSurfaces& geometryToConformTo,
-            const cellShapeControl& cellShapeControls,
-            const autoPtr<backgroundMeshDecomposition>& decomposition
+            const extendedFeatureEdgeMesh& feMesh,
+            const label pointLabel
         );
 
 
     //- Destructor
-    virtual ~pointFile()
-    {}
+    ~pointFeatureEdgesTypes();
 
 
     // Member Functions
 
-        //- Return the initial points for the conformalVoronoiMesh
-        virtual List<Vb::Point> initialPoints() const;
+        //- Fill the pointFeatureEdgesType class with the types of feature
+        //  edges that are attached to the point.
+        List<extendedFeatureEdgeMesh::edgeStatus> calcPointFeatureEdgesTypes();
+
+
+    // Info
+
+        friend Ostream& operator<<
+        (
+            Ostream& os,
+            const pointFeatureEdgesTypes& p
+        );
 };
 
 

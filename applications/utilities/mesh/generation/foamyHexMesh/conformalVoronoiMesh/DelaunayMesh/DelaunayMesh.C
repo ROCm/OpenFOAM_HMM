@@ -31,12 +31,6 @@ License
 #include "labelIOField.H"
 #include "pointConversion.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Triangulation>
@@ -61,6 +55,8 @@ Foam::DelaunayMesh<Triangulation>::DelaunayMesh
     cellCount_(0),
     runTime_(runTime)
 {
+    Info<< "Reading " << meshName << " from " << runTime.timeName() << endl;
+
     pointIOField pts
     (
         IOobject
@@ -74,83 +70,71 @@ Foam::DelaunayMesh<Triangulation>::DelaunayMesh
         )
     );
 
-    labelIOField types
-    (
-        IOobject
-        (
-            "types",
-            runTime.timeName(),
-            meshName,
-            runTime,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE
-        )
-    );
-
-    labelIOField indices
-    (
-        IOobject
-        (
-            "indices",
-            runTime.timeName(),
-            meshName,
-            runTime,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE
-        )
-    );
-
-    labelIOField processorIndices
-    (
-        IOobject
-        (
-            "processorIndices",
-            runTime.timeName(),
-            meshName,
-            runTime,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE
-        )
-    );
-
     if (pts.headerOk())
     {
-        forAll(pts, ptI)
+        labelIOField types
+        (
+            IOobject
+            (
+                "types",
+                runTime.timeName(),
+                meshName,
+                runTime,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        );
+
+// Do not read in indices
+//        labelIOField indices
+//        (
+//            IOobject
+//            (
+//                "indices",
+//                runTime.timeName(),
+//                meshName,
+//                runTime,
+//                IOobject::MUST_READ,
+//                IOobject::NO_WRITE
+//            )
+//        );
+
+        labelIOField processorIndices
+        (
+            IOobject
+            (
+                "processorIndices",
+                runTime.timeName(),
+                meshName,
+                runTime,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        );
+
+        List<Vb> pointsToInsert(pts.size());
+
+        forAll(pointsToInsert, pI)
         {
-            Vertex_handle vh = this->insert(toPoint<Point>(pts[ptI]));
-
-            if (indices.headerOk())
-            {
-                vh->index() = indices[ptI];
-                vertexCount_++;
-            }
-            else
-            {
-                vh->index() = getNewVertexIndex();
-            }
-
-            if (processorIndices.headerOk())
-            {
-                vh->procIndex() = processorIndices[ptI];
-            }
-            else
-            {
-                vh->procIndex() = Pstream::myProcNo();
-            }
-
-            if (types.headerOk())
-            {
-                vh->type() =
-                    static_cast<Foam::indexedVertexEnum::vertexType>
-                    (
-                        types[ptI]
-                    );
-            }
-            else
-            {
-                vh->type() = Vb::vtUnassigned;
-            }
+            pointsToInsert[pI] =
+                Vb
+                (
+                    toPoint(pts[pI]),
+                    pI,
+                    static_cast<indexedVertexEnum::vertexType>(types[pI]),
+                    processorIndices[pI]
+                );
         }
+
+        rangeInsertWithInfo
+        (
+            pointsToInsert.begin(),
+            pointsToInsert.end(),
+            false,
+            false
+        );
+
+        vertexCount_ = Triangulation::number_of_vertices();
     }
 }
 
@@ -219,7 +203,7 @@ void Foam::DelaunayMesh<Triangulation>::insertPoints(const List<Vb>& vertices)
     (
         vertices.begin(),
         vertices.end(),
-        true
+        false
     );
 }
 
@@ -288,7 +272,8 @@ void Foam::DelaunayMesh<Triangulation>::rangeInsertWithInfo
 (
     PointIterator begin,
     PointIterator end,
-    bool printErrors
+    bool printErrors,
+    bool reIndex
 )
 {
     typedef DynamicList
@@ -348,7 +333,14 @@ void Foam::DelaunayMesh<Triangulation>::rangeInsertWithInfo
         }
         else
         {
-            hint->index() = getNewVertexIndex();
+            if (reIndex)
+            {
+                hint->index() = getNewVertexIndex();
+            }
+            else
+            {
+                hint->index() = vert.index();
+            }
             hint->type() = vert.type();
             hint->procIndex() = vert.procIndex();
             hint->targetCellSize() = vert.targetCellSize();
@@ -356,15 +348,6 @@ void Foam::DelaunayMesh<Triangulation>::rangeInsertWithInfo
         }
     }
 }
-
-
-// * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * Friend Operators * * * * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

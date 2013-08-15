@@ -266,60 +266,6 @@ inline bool CGAL::indexedCell<Gt, Cb>::parallelDualVertex() const
 
 
 template<class Gt, class Cb>
-inline Foam::label CGAL::indexedCell<Gt, Cb>::dualVertexMasterProc() const
-{
-    if (!parallelDualVertex())
-    {
-        return -1;
-    }
-
-    // The master processor is the lowest numbered of the four on this tet.
-
-    int masterProc = Foam::Pstream::nProcs() + 1;
-
-    for (int i = 0; i < 4; i++)
-    {
-        if (this->vertex(i)->referred())
-        {
-            masterProc = min(masterProc, this->vertex(i)->procIndex());
-        }
-        else
-        {
-            masterProc = min(masterProc, Foam::Pstream::myProcNo());
-        }
-    }
-
-    return masterProc;
-}
-
-
-template<class Gt, class Cb>
-inline Foam::FixedList<Foam::label, 4>
-CGAL::indexedCell<Gt, Cb>::processorsAttached() const
-{
-    if (!parallelDualVertex())
-    {
-        return Foam::FixedList<Foam::label, 4>(Foam::Pstream::myProcNo());
-    }
-
-    Foam::FixedList<Foam::label, 4> procsAttached
-    (
-        Foam::Pstream::myProcNo()
-    );
-
-    for (int i = 0; i < 4; i++)
-    {
-        if (this->vertex(i)->referred())
-        {
-            procsAttached[i] = this->vertex(i)->procIndex();
-        }
-    }
-
-    return procsAttached;
-}
-
-
-template<class Gt, class Cb>
 inline Foam::tetCell CGAL::indexedCell<Gt, Cb>::vertexGlobalIndices
 (
     const Foam::globalIndex& globalDelaunayVertexIndices

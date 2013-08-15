@@ -212,13 +212,6 @@ inline Foam::scalar CGAL::indexedVertex<Gt, Vb>::targetCellSize() const
 
 
 template<class Gt, class Vb>
-inline bool CGAL::indexedVertex<Gt, Vb>::uninitialised() const
-{
-    return type_ == vtUnassigned;
-}
-
-
-template<class Gt, class Vb>
 inline bool CGAL::indexedVertex<Gt, Vb>::farPoint() const
 {
     return type_ == vtFar;

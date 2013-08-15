@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,90 +22,52 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::pointFile
+    indexedCellOps
 
 Description
-    Inserts points at locations specified in a pointFile into the surfaces to
-    be conformed to of the conformalVoronoiMesh
 
 SourceFiles
-    pointFile.C
+    indexedCellOpsTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointFile_H
-#define pointFile_H
+#ifndef indexedCellOps_H
+#define indexedCellOps_H
 
-#include "fileName.H"
-#include "pointIOField.H"
-#include "Switch.H"
-#include "initialPointsMethod.H"
+#include "label.H"
+#include "FixedList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+namespace CGAL
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class pointFile Declaration
+                     Namespace indexedCellOps Declaration
 \*---------------------------------------------------------------------------*/
 
-class pointFile
-:
-    public initialPointsMethod
+namespace indexedCellOps
 {
 
-private:
+//- Does the Dual vertex form part of a processor patch
+template<typename CellType>
+Foam::label dualVertexMasterProc(const CellType& c);
 
-    // Private data
+template<typename CellType>
+Foam::FixedList<Foam::label, 4> processorsAttached(const CellType& c);
 
-        //- The initial cell spacing
-        fileName pointFileName_;
-
-        //- Check if inserted points are inside or outside
-        Switch insideOutsideCheck_;
-
-        //- Should the initial positions be randomised
-        Switch randomiseInitialGrid_;
-
-        //- Randomise the initial positions by fraction of the initialCellSize_
-        scalar randomPerturbationCoeff_;
-
-
-public:
-
-    //- Runtime type information
-    TypeName("pointFile");
-
-    // Constructors
-
-        //- Construct from components
-        pointFile
-        (
-            const dictionary& initialPointsDict,
-            const Time& runTime,
-            Random& rndGen,
-            const conformationSurfaces& geometryToConformTo,
-            const cellShapeControl& cellShapeControls,
-            const autoPtr<backgroundMeshDecomposition>& decomposition
-        );
-
-
-    //- Destructor
-    virtual ~pointFile()
-    {}
-
-
-    // Member Functions
-
-        //- Return the initial points for the conformalVoronoiMesh
-        virtual List<Vb::Point> initialPoints() const;
-};
+} // End namespace indexedCellOps
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+} // End namespace CGAL
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "indexedCellOpsTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

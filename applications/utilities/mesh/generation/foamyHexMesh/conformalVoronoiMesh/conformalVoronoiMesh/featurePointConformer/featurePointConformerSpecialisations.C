@@ -23,39 +23,17 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "conformalVoronoiMesh.H"
+#include "featurePointConformer.H"
 #include "vectorTools.H"
+#include "pointFeatureEdgesTypes.H"
+#include "conformalVoronoiMesh.H"
+#include "pointConversion.H"
 
 using namespace Foam::vectorTools;
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-Foam::List<Foam::extendedFeatureEdgeMesh::edgeStatus>
-Foam::conformalVoronoiMesh::calcPointFeatureEdgesTypes
-(
-    const extendedFeatureEdgeMesh& feMesh,
-    const labelList& pEds,
-    pointFeatureEdgesTypes& pFEdgeTypes
-) const
-{
-    List<extendedFeatureEdgeMesh::edgeStatus> allEdStat(pEds.size());
-
-    forAll(pEds, i)
-    {
-        label edgeI = pEds[i];
-
-        extendedFeatureEdgeMesh::edgeStatus& eS = allEdStat[i];
-
-        eS = feMesh.getEdgeStatus(edgeI);
-
-        pFEdgeTypes(eS)++;
-    }
-
-    return allEdStat;
-}
-
-
-bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
+bool Foam::featurePointConformer::createSpecialisedFeaturePoint
 (
     const extendedFeatureEdgeMesh& feMesh,
     const labelList& pEds,
@@ -63,7 +41,7 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
     const List<extendedFeatureEdgeMesh::edgeStatus>& allEdStat,
     const label ptI,
     DynamicList<Vb>& pts
-)
+) const
 {
     if
     (
@@ -81,20 +59,24 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
      && pEds.size() == 3
     )
     {
-        Info<< "nExternal == 2 && nInternal == 1" << endl;
+        if (debug) Info<< "nExternal == 2 && nInternal == 1" << endl;
 
         const Foam::point& featPt = feMesh.points()[ptI];
 
-        if (!positionOnThisProc(featPt))
+        if
+        (
+            Pstream::parRun()
+         && !foamyHexMesh_.decomposition().positionOnThisProcessor(featPt)
+        )
         {
             return false;
         }
 
-        label nVert = number_of_vertices();
+        label nVert = foamyHexMesh_.number_of_vertices();
 
         const label initialNumOfPoints = pts.size();
 
-        const scalar ppDist = pointPairDistance(featPt);
+        const scalar ppDist = foamyHexMesh_.pointPairDistance(featPt);
 
         const vectorField& normals = feMesh.normals();
 
@@ -204,8 +186,8 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
         Foam::point externalPtD;
         Foam::point externalPtE;
 
-        vector convexEdgePlaneCNormal(0,0,0);
-        vector convexEdgePlaneDNormal(0,0,0);
+        vector convexEdgePlaneCNormal(vector::zero);
+        vector convexEdgePlaneDNormal(vector::zero);
 
         const labelList& concaveEdgeNormals = edgeNormals[concaveEdgeI];
         const labelList& convexEdgeANormals = edgeNormals[convexEdgesI[0]];
@@ -223,8 +205,11 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
                 const vector& convexNormal
                     = normals[convexEdgeANormals[edgeAnormalI]];
 
-                Info<< "Angle between vectors = "
-                    << degAngleBetween(concaveNormal, convexNormal) << endl;
+                if (debug)
+                {
+                    Info<< "Angle between vectors = "
+                        << degAngleBetween(concaveNormal, convexNormal) << endl;
+                }
 
                 // Need a looser tolerance, because sometimes adjacent triangles
                 // on the same surface will be slightly out of alignment.
@@ -241,8 +226,11 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
                 const vector& convexNormal
                     = normals[convexEdgeBNormals[edgeBnormalI]];
 
-                Info<< "Angle between vectors = "
-                    << degAngleBetween(concaveNormal, convexNormal) << endl;
+                if (debug)
+                {
+                    Info<< "Angle between vectors = "
+                        << degAngleBetween(concaveNormal, convexNormal) << endl;
+                }
 
                 // Need a looser tolerance, because sometimes adjacent triangles
                 // on the same surface will be slightly out of alignment.
@@ -349,7 +337,7 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
           + radAngleBetween(concaveEdgePlaneANormal, concaveEdgePlaneBNormal)
         );
 
-        if (totalAngle > foamyHexMeshControls().maxQuadAngle())
+        if (totalAngle > foamyHexMeshControls_.maxQuadAngle())
         {
             // Add additional mitreing points
             //scalar angleSign = 1.0;
@@ -420,20 +408,27 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
      && pEds.size() == 3
     )
     {
-        Info<< "nExternal == 1 && nInternal == 2" << endl;
+        if (debug)
+        {
+            Info<< "nExternal == 1 && nInternal == 2" << endl;
+        }
 
         const Foam::point& featPt = feMesh.points()[ptI];
 
-        if (!positionOnThisProc(featPt))
+        if
+        (
+            Pstream::parRun()
+         && !foamyHexMesh_.decomposition().positionOnThisProcessor(featPt)
+        )
         {
             return false;
         }
 
-        label nVert = number_of_vertices();
+        label nVert = foamyHexMesh_.number_of_vertices();
 
         const label initialNumOfPoints = pts.size();
 
-        const scalar ppDist = pointPairDistance(featPt);
+        const scalar ppDist = foamyHexMesh_.pointPairDistance(featPt);
 
         const vectorField& normals = feMesh.normals();
 
@@ -543,8 +538,8 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
         Foam::point externalPtD;
         Foam::point externalPtE;
 
-        vector concaveEdgePlaneCNormal(0,0,0);
-        vector concaveEdgePlaneDNormal(0,0,0);
+        vector concaveEdgePlaneCNormal(vector::zero);
+        vector concaveEdgePlaneDNormal(vector::zero);
 
         const labelList& convexEdgeNormals = edgeNormals[convexEdgeI];
         const labelList& concaveEdgeANormals = edgeNormals[concaveEdgesI[0]];
@@ -562,8 +557,11 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
                 const vector& concaveNormal
                     = normals[concaveEdgeANormals[edgeAnormalI]];
 
-                Info<< "Angle between vectors = "
-                    << degAngleBetween(convexNormal, concaveNormal) << endl;
+                if (debug)
+                {
+                    Info<< "Angle between vectors = "
+                        << degAngleBetween(convexNormal, concaveNormal) << endl;
+                }
 
                 // Need a looser tolerance, because sometimes adjacent triangles
                 // on the same surface will be slightly out of alignment.
@@ -580,8 +578,11 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
                 const vector& concaveNormal
                     = normals[concaveEdgeBNormals[edgeBnormalI]];
 
-                Info<< "Angle between vectors = "
-                    << degAngleBetween(convexNormal, concaveNormal) << endl;
+                if (debug)
+                {
+                    Info<< "Angle between vectors = "
+                        << degAngleBetween(convexNormal, concaveNormal) << endl;
+                }
 
                 // Need a looser tolerance, because sometimes adjacent triangles
                 // on the same surface will be slightly out of alignment.
@@ -691,7 +692,7 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
           + radAngleBetween(convexEdgePlaneANormal, convexEdgePlaneBNormal)
         );
 
-        if (totalAngle > foamyHexMeshControls().maxQuadAngle())
+        if (totalAngle > foamyHexMeshControls_.maxQuadAngle())
         {
             // Add additional mitreing points
             //scalar angleSign = 1.0;
@@ -751,6 +752,7 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
                 Info<< "Point " << ptI << " "
                     << indexedVertexEnum::vertexTypeNames_[pts[ptI].type()]
                     << " : ";
+
                 meshTools::writeOBJ(Info, topoint(pts[ptI].point()));
             }
         }

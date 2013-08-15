@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,68 +22,53 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    pointFeatureEdgesTypes
+    indexedVertexOps
 
 Description
-    Holds information on the types of feature edges attached to feature points.
+
+SourceFiles
+    indexedVertexOpsTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointFeatureEdgesTypes_H
-#define pointFeatureEdgesTypes_H
+#ifndef indexedVertexOps_H
+#define indexedVertexOps_H
+
+#include "scalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+namespace CGAL
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class pointFeatureEdgesTypes Declaration
+                    Namespace indexedVertexOps Declaration
 \*---------------------------------------------------------------------------*/
 
-//- Hold the types of feature edges attached to the point.
-class pointFeatureEdgesTypes
-:
-    public HashTable<label, extendedFeatureEdgeMesh::edgeStatus>
+namespace indexedVertexOps
 {
-    label pointLabel_;
 
-public:
-
-    pointFeatureEdgesTypes(const label pointLabel)
-    :
-        HashTable<label, extendedFeatureEdgeMesh::edgeStatus>(),
-        pointLabel_(pointLabel)
-    {}
+//- Return the target cell size from that stored on a pair of Delaunay vertices,
+//  using a mean function.
+template<typename VertexType>
+Foam::scalar averageCellSize(const VertexType& vA, const VertexType& vB);
 
 
-    friend Ostream& operator<<(Ostream& os, const pointFeatureEdgesTypes& p)
-    {
-        os  << "Point = " << p.pointLabel_ << endl;
+template<typename VertexType>
+inline bool uninitialised(const VertexType& v);
 
-        for
-        (
-            HashTable<label, extendedFeatureEdgeMesh::edgeStatus>
-                ::const_iterator iter = p.cbegin();
-            iter != p.cend();
-            ++iter
-        )
-        {
-            os  << "    "
-                << extendedFeatureEdgeMesh::edgeStatusNames_[iter.key()]
-                << " = "
-                << iter()
-                << endl;
-        }
-
-        return os;
-    }
-};
+} // End namespace indexedVertexOps
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+} // End namespace CGAL
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "indexedVertexOpsTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

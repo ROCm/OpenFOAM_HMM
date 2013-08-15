@@ -748,6 +748,44 @@ void Foam::DistributedDelaunayMesh<Triangulation>::sync
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class Triangulation>
+Foam::scalar
+Foam::DistributedDelaunayMesh<Triangulation>::calculateLoadUnbalance() const
+{
+    label nRealVertices = 0;
+
+    for
+    (
+        Finite_vertices_iterator vit = Triangulation::finite_vertices_begin();
+        vit != Triangulation::finite_vertices_end();
+        ++vit
+    )
+    {
+        // Only store real vertices that are not feature vertices
+        if (vit->real() && !vit->featurePoint())
+        {
+            nRealVertices++;
+        }
+    }
+
+    scalar globalNRealVertices = returnReduce
+    (
+        nRealVertices,
+        sumOp<label>()
+    );
+
+    scalar unbalance = returnReduce
+    (
+        mag(1.0 - nRealVertices/(globalNRealVertices/Pstream::nProcs())),
+        maxOp<scalar>()
+    );
+
+    Info<< "    Processor unbalance " << unbalance << endl;
+
+    return unbalance;
+}
+
+
+template<class Triangulation>
 bool Foam::DistributedDelaunayMesh<Triangulation>::distribute
 (
     const boundBox& bb
@@ -776,7 +814,8 @@ template<class Triangulation>
 Foam::autoPtr<Foam::mapDistribute>
 Foam::DistributedDelaunayMesh<Triangulation>::distribute
 (
-    const backgroundMeshDecomposition& decomposition
+    const backgroundMeshDecomposition& decomposition,
+    List<Foam::point>& points
 )
 {
     if (!Pstream::parRun())
@@ -785,21 +824,6 @@ Foam::DistributedDelaunayMesh<Triangulation>::distribute
     }
 
     distributeBoundBoxes(decomposition.procBounds());
-
-    DynamicList<point> points(Triangulation::number_of_vertices());
-
-    for
-    (
-        Finite_vertices_iterator vit = Triangulation::finite_vertices_begin();
-        vit != Triangulation::finite_vertices_end();
-        ++vit
-    )
-    {
-        if (vit->real())
-        {
-            points.append(topoint(vit->point()));
-        }
-    }
 
     autoPtr<mapDistribute> mapDist = decomposition.distributePoints(points);
 
