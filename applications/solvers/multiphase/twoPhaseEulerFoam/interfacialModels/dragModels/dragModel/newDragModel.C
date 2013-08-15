@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,7 @@ Foam::autoPtr<Foam::dragModel> Foam::dragModel::New
 {
     word dragModelType
     (
-        interfaceDict.lookup("dragModel" + phase1.name())
+        interfaceDict.lookup(phase1.name())
     );
 
     Info << "Selecting dragModel for phase "
@@ -50,14 +50,12 @@ Foam::autoPtr<Foam::dragModel> Foam::dragModel::New
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalError
-            << "dragModel::New : " << endl
-                << "    unknown dragModelType type "
-                << dragModelType
-                << ", constructor not in hash table" << endl << endl
-                << "    Valid dragModel types are : " << endl;
-        Info << dictionaryConstructorTablePtr_->sortedToc()
-             << abort(FatalError);
+        FatalErrorIn("dragModel::New")
+            << "Unknown dragModelType type "
+            << dragModelType << endl << endl
+            << "Valid dragModel types are : " << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return cstrIter()(interfaceDict, alpha1, phase1, phase2);

@@ -1,4 +1,7 @@
     #include "readTimeControls.H"
     #include "alphaControls.H"
 
-    Switch correctAlpha(pimple.dict().lookup("correctAlpha"));
+    Switch implicitPhasePressure
+    (
+        alphaControls.lookupOrDefault<Switch>("implicitPhasePressure", false)
+    );

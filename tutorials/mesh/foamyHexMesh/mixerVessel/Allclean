@@ -6,6 +6,23 @@ cd ${0%/*} || exit 1    # run from this directory
 
 rm -r constant/internalDelaunayVertices constant/targetCellSize > /dev/null 2>&1
 
+rm -r snapToSurface?.obj subsetBox.obj surf1.obj tetsToSnapTo.obj > /dev/null 2>&1
+
+rm -r constant/backgroundMeshDecomposition/polyMesh/boundary > /dev/null 2>&1
+rm -r constant/backgroundMeshDecomposition/polyMesh/faces > /dev/null 2>&1
+rm -r constant/backgroundMeshDecomposition/polyMesh/neighbour > /dev/null 2>&1
+rm -r constant/backgroundMeshDecomposition/polyMesh/owner > /dev/null 2>&1
+rm -r constant/backgroundMeshDecomposition/polyMesh/points > /dev/null 2>&1
+
+rm -rf constant/extendedFeatureEdgeMesh > /dev/null 2>&1
+
+rm -r constant/triSurface/rawSurfaces/*.stl > /dev/null 2>&1
+
+rm -r constant/triSurface/*.stl > /dev/null 2>&1
+rm -r constant/triSurface/*.obj > /dev/null 2>&1
+rm -r constant/triSurface/*.eMesh > /dev/null 2>&1
+rm -r constant/triSurface/problemFaces > /dev/null 2>&1
+
 cleanCase
 
 # ----------------------------------------------------------------- end-of-file

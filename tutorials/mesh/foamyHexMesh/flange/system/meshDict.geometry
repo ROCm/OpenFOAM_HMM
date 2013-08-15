@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-flange.obj
+flange.stl
 {
     name flange;
     type triSurfaceMesh;

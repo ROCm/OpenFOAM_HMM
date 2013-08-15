@@ -12,53 +12,6 @@
         mesh
     );
 
-    Info<< "Reading field alpha1\n" << endl;
-    volScalarField alpha1
-    (
-        IOobject
-        (
-            "alpha1",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
-
-
-    Info<< "Reading field alpha2\n" << endl;
-    volScalarField alpha2
-    (
-        IOobject
-        (
-            "alpha2",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
-
-
-    Info<< "Reading field alpha3\n" << endl;
-    volScalarField alpha3
-    (
-        IOobject
-        (
-            "alpha3",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
-
-    alpha3 == 1.0 - alpha1 - alpha2;
-
-
     Info<< "Reading field U\n" << endl;
     volVectorField U
     (
@@ -76,6 +29,10 @@
     #include "createPhi.H"
 
     threePhaseMixture threePhaseProperties(U, phi);
+
+    volScalarField& alpha1(threePhaseProperties.alpha1());
+    volScalarField& alpha2(threePhaseProperties.alpha2());
+    volScalarField& alpha3(threePhaseProperties.alpha3());
 
     const dimensionedScalar& rho1 = threePhaseProperties.rho1();
     const dimensionedScalar& rho2 = threePhaseProperties.rho2();
