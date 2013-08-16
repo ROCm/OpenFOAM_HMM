@@ -62,8 +62,15 @@ protected:
 
     // Protected data
 
-        //- Reference to the conformalVoronoiMesh holding this object
-        const conformalVoronoiMesh& foamyHexMesh_;
+        const Time& runTime_;
+
+        Random& rndGen_;
+
+        const conformationSurfaces& geometryToConformTo_;
+
+        const cellShapeControl& cellShapeControls_;
+
+        const autoPtr<backgroundMeshDecomposition>& decomposition_;
 
         //- Method details dictionary
         dictionary detailsDict_;
@@ -102,9 +109,20 @@ public:
             dictionary,
             (
                 const dictionary& initialPointsDict,
-                const conformalVoronoiMesh& foamyHexMesh
+                const Time& runTime,
+                Random& rndGen,
+                const conformationSurfaces& geometryToConformTo,
+                const cellShapeControl& cellShapeControls,
+                const autoPtr<backgroundMeshDecomposition>& decomposition
             ),
-            (initialPointsDict, foamyHexMesh)
+            (
+                initialPointsDict,
+                runTime,
+                rndGen,
+                geometryToConformTo,
+                cellShapeControls,
+                decomposition
+            )
         );
 
 
@@ -115,7 +133,11 @@ public:
         (
             const word& type,
             const dictionary& initialPointsDict,
-            const conformalVoronoiMesh& foamyHexMesh
+            const Time& runTime,
+            Random& rndGen,
+            const conformationSurfaces& geometryToConformTo,
+            const cellShapeControl& cellShapeControls,
+            const autoPtr<backgroundMeshDecomposition>& decomposition
         );
 
 
@@ -125,7 +147,11 @@ public:
         static autoPtr<initialPointsMethod> New
         (
             const dictionary& initialPointsDict,
-            const conformalVoronoiMesh& foamyHexMesh
+            const Time& runTime,
+            Random& rndGen,
+            const conformationSurfaces& geometryToConformTo,
+            const cellShapeControl& cellShapeControls,
+            const autoPtr<backgroundMeshDecomposition>& decomposition
         );
 
 
@@ -135,19 +161,49 @@ public:
 
     // Member Functions
 
-        //- Const access to the details dictionary
-        const dictionary& detailsDict() const
-        {
-            return detailsDict_;
-        }
+        // Access
 
-        Switch fixInitialPoints() const
-        {
-            return fixInitialPoints_;
-        }
+            const Time& time() const
+            {
+                return runTime_;
+            }
 
-        //- Return the initial points for the conformalVoronoiMesh
-        virtual List<Vb::Point> initialPoints() const = 0;
+            Random& rndGen() const
+            {
+                return rndGen_;
+            }
+
+            const conformationSurfaces& geometryToConformTo() const
+            {
+                return geometryToConformTo_;
+            }
+
+            const cellShapeControl& cellShapeControls() const
+            {
+                return cellShapeControls_;
+            }
+
+            const backgroundMeshDecomposition& decomposition() const
+            {
+                return decomposition_;
+            }
+
+            //- Const access to the details dictionary
+            const dictionary& detailsDict() const
+            {
+                return detailsDict_;
+            }
+
+            Switch fixInitialPoints() const
+            {
+                return fixInitialPoints_;
+            }
+
+
+        // Queries
+
+            //- Return the initial points for the conformalVoronoiMesh
+            virtual List<Vb::Point> initialPoints() const = 0;
 };
 
 

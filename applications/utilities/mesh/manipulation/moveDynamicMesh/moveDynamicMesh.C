@@ -79,8 +79,13 @@ void writeWeights(const polyMesh& mesh)
 
             if (cpp.owner())
             {
+                Info<< "Calculating AMI weights between owner patch: "
+                    << cpp.name() << " and neighbour patch: "
+                    << cpp.neighbPatch().name() << endl;
+
                 const AMIPatchToPatchInterpolation& ami =
                     cpp.AMI();
+
                 writeWeights
                 (
                     ami.tgtWeightsSum(),

@@ -25,16 +25,19 @@ boundaryField
     {
         type            fixedFluxPressure;
         gradient        uniform 0;
+        value           uniform 0;
     }
     rightWall
     {
         type            fixedFluxPressure;
         gradient        uniform 0;
+        value           uniform 0;
     }
     lowerWall
     {
         type            fixedFluxPressure;
         gradient        uniform 0;
+        value           uniform 0;
     }
     atmosphere
     {

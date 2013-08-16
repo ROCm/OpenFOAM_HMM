@@ -2,9 +2,9 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-wclean libso phaseModel
+wclean libso twoPhaseSystem
 wclean libso interfacialModels
-wclean libso kineticTheoryModels
+wclean libso phaseIncompressibleTurbulenceModels
 wclean
 
 # ----------------------------------------------------------------- end-of-file

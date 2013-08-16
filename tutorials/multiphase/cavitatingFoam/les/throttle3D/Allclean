@@ -6,7 +6,6 @@ cd ${0%/*} || exit 1    # run from this directory
 
 rm -rf constant/polyMesh/sets > /dev/null 2>&1
 rm -rf 0 > /dev/null 2>&1
-cp -r 0.org 0
 rm system/topoSetDict > /dev/null 2>&1
 rm -rf processor[0-9] > /dev/null 2>&1
 cleanCase

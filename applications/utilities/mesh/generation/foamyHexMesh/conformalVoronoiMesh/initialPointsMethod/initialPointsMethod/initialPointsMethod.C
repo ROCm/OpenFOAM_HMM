@@ -43,11 +43,19 @@ initialPointsMethod::initialPointsMethod
 (
     const word& type,
     const dictionary& initialPointsDict,
-    const conformalVoronoiMesh& foamyHexMesh
+    const Time& runTime,
+    Random& rndGen,
+    const conformationSurfaces& geometryToConformTo,
+    const cellShapeControl& cellShapeControls,
+    const autoPtr<backgroundMeshDecomposition>& decomposition
 )
 :
     dictionary(initialPointsDict),
-    foamyHexMesh_(foamyHexMesh),
+    runTime_(runTime),
+    rndGen_(rndGen),
+    geometryToConformTo_(geometryToConformTo),
+    cellShapeControls_(cellShapeControls),
+    decomposition_(decomposition),
     detailsDict_(subDict(type + "Coeffs")),
     minimumSurfaceDistanceCoeffSqr_
     (
@@ -68,7 +76,11 @@ initialPointsMethod::initialPointsMethod
 autoPtr<initialPointsMethod> initialPointsMethod::New
 (
     const dictionary& initialPointsDict,
-    const conformalVoronoiMesh& foamyHexMesh
+    const Time& runTime,
+    Random& rndGen,
+    const conformationSurfaces& geometryToConformTo,
+    const cellShapeControl& cellShapeControls,
+    const autoPtr<backgroundMeshDecomposition>& decomposition
 )
 {
     word initialPointsMethodTypeName
@@ -99,7 +111,15 @@ autoPtr<initialPointsMethod> initialPointsMethod::New
     return
         autoPtr<initialPointsMethod>
         (
-            cstrIter()(initialPointsDict, foamyHexMesh)
+            cstrIter()
+            (
+                initialPointsDict,
+                runTime,
+                rndGen,
+                geometryToConformTo,
+                cellShapeControls,
+                decomposition
+            )
         );
 }
 

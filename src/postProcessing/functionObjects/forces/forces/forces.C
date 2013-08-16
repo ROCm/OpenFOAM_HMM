@@ -512,7 +512,6 @@ Foam::forces::forces
     binDx_(0.0),
     binMin_(GREAT),
     binPoints_(),
-    binFormat_("undefined"),
     binCumulative_(true),
     initialised_(false)
 {
@@ -573,7 +572,6 @@ Foam::forces::forces
     binDx_(0.0),
     binMin_(GREAT),
     binPoints_(),
-    binFormat_("undefined"),
     binCumulative_(true),
     initialised_(false)
 {
@@ -701,8 +699,6 @@ void Foam::forces::read(const dictionary& dict)
                 {
                     binPoints_[i] = (i + 0.5)*binDir_*binDx_;
                 }
-
-                binDict.lookup("format") >> binFormat_;
 
                 binDict.lookup("cumulative") >> binCumulative_;
 

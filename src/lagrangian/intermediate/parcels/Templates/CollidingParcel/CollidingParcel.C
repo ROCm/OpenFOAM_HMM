@@ -34,6 +34,9 @@ Foam::CollidingParcel<ParcelType>::CollidingParcel
 )
 :
     ParcelType(p),
+    f_(p.f_),
+    angularMomentum_(p.angularMomentum_),
+    torque_(p.torque_),
     collisionRecords_(p.collisionRecords_)
 {}
 
@@ -46,6 +49,9 @@ Foam::CollidingParcel<ParcelType>::CollidingParcel
 )
 :
     ParcelType(p, mesh),
+    f_(p.f_),
+    angularMomentum_(p.angularMomentum_),
+    torque_(p.torque_),
     collisionRecords_(p.collisionRecords_)
 {}
 
@@ -163,6 +169,29 @@ bool Foam::CollidingParcel<ParcelType>::move
     }
 
     return td.keepParticle;
+}
+
+
+template<class ParcelType>
+void Foam::CollidingParcel<ParcelType>::transformProperties(const tensor& T)
+{
+    ParcelType::transformProperties(T);
+
+    f_ = transform(T, f_);
+
+    angularMomentum_ = transform(T, angularMomentum_);
+
+    torque_ = transform(T, torque_);
+}
+
+
+template<class ParcelType>
+void Foam::CollidingParcel<ParcelType>::transformProperties
+(
+    const vector& separation
+)
+{
+    ParcelType::transformProperties(separation);
 }
 
 

@@ -138,7 +138,7 @@ class triSurface
 
         //- Write to Ostream in ASCII STL format.
         //  Each region becomes 'solid' 'endsolid' block.
-        void writeSTLASCII(Ostream&) const;
+        void writeSTLASCII(const bool writeSorted, Ostream&) const;
 
         //- Write to std::ostream in BINARY STL format
         void writeSTLBINARY(std::ostream&) const;

@@ -81,6 +81,9 @@ public:
     {
         // Private data
 
+            //- Devolatilisation activation temperature [K]
+            scalar TDevol_;
+
             //- Latent heat of devolatilisation [J/kg]
             scalar LDevol_;
 
@@ -106,8 +109,30 @@ public:
                 const bool readFields = true
             );
 
+            //- Construct from components
+            constantProperties
+            (
+                const label parcelTypeId,
+                const scalar rhoMin,
+                const scalar rho0,
+                const scalar minParticleMass,
+                const scalar youngsModulus,
+                const scalar poissonsRatio,
+                const scalar T0,
+                const scalar TMin,
+                const scalar TMax,
+                const scalar Cp0,
+                const scalar epsilon0,
+                const scalar f0,
+                const scalar pMin,
+                const Switch& constantVolume,
+                const scalar TDevol
+            );
 
         // Access
+
+            //- Return const access to the devolatilisation temperature
+            inline scalar TDevol() const;
 
             //- Return const access to the latent heat of devolatilisation
             inline scalar LDevol() const;

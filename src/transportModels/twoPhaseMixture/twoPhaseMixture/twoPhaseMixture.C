@@ -31,29 +31,17 @@ License
 Foam::twoPhaseMixture::twoPhaseMixture
 (
     const fvMesh& mesh,
-    const dictionary& dict,
-    const word& alpha1Name,
-    const word& alpha2Name
+    const dictionary& dict
 )
 :
-    phase1Name_
-    (
-        dict.found("phases")
-      ? wordList(dict.lookup("phases"))[0]
-      : "1"
-    ),
-    phase2Name_
-    (
-        dict.found("phases")
-      ? wordList(dict.lookup("phases"))[1]
-      : "2"
-    ),
+    phase1Name_(wordList(dict.lookup("phases"))[0]),
+    phase2Name_(wordList(dict.lookup("phases"))[1]),
 
     alpha1_
     (
         IOobject
         (
-            dict.found("phases") ? word("alpha" + phase1Name_) : alpha1Name,
+            IOobject::groupName("alpha", phase1Name_),
             mesh.time().timeName(),
             mesh,
             IOobject::MUST_READ,
@@ -66,7 +54,7 @@ Foam::twoPhaseMixture::twoPhaseMixture
     (
         IOobject
         (
-            dict.found("phases") ? word("alpha" + phase2Name_) : alpha2Name,
+            IOobject::groupName("alpha", phase2Name_),
             mesh.time().timeName(),
             mesh
         ),

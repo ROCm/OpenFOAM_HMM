@@ -39,6 +39,7 @@ Description
     \table
         Property     | Description             | Required    | Default value
         flowRate     | volumetric flow rate [m3/s] | yes |
+        alpha        | phase-fraction field    | yes |
     \endtable
 
     Example of the boundary condition specification:
@@ -47,6 +48,7 @@ Description
     {
         type            variableHeightFlowRateInletVelocity;
         flowRate        0.2;
+        alpha           alpha.water;
         value           uniform (0 0 0); // placeholder
     }
     \endverbatim
@@ -86,6 +88,9 @@ class variableHeightFlowRateInletVelocityFvPatchVectorField
 
         //- Inlet integral flow rate
         scalar flowRate_;
+
+        //- Name of the phase-fraction field
+        word alphaName_;
 
 
 public:

@@ -448,7 +448,7 @@ void Foam::triSurface::write
     }
     else if (ext == "stl")
     {
-        return writeSTLASCII(OFstream(name)());
+        return writeSTLASCII(sort, OFstream(name)());
     }
     else if (ext == "stlb")
     {

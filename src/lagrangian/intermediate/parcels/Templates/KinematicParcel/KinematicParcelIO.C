@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,9 +51,6 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
     d_(0.0),
     dTarget_(0.0),
     U_(vector::zero),
-    f_(vector::zero),
-    angularMomentum_(vector::zero),
-    torque_(vector::zero),
     rho_(0.0),
     age_(0.0),
     tTurb_(0.0),
@@ -72,9 +69,6 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
             d_ = readScalar(is);
             dTarget_ = readScalar(is);
             is >> U_;
-            is >> f_;
-            is >> angularMomentum_;
-            is >> torque_;
             rho_ = readScalar(is);
             age_ = readScalar(is);
             tTurb_ = readScalar(is);
@@ -91,9 +85,6 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
               + sizeof(d_)
               + sizeof(dTarget_)
               + sizeof(U_)
-              + sizeof(f_)
-              + sizeof(angularMomentum_)
-              + sizeof(torque_)
               + sizeof(rho_)
               + sizeof(age_)
               + sizeof(tTurb_)
@@ -141,18 +132,6 @@ void Foam::KinematicParcel<ParcelType>::readFields(CloudType& c)
     IOField<vector> U(c.fieldIOobject("U", IOobject::MUST_READ));
     c.checkFieldIOobject(c, U);
 
-    IOField<vector> f(c.fieldIOobject("f", IOobject::MUST_READ));
-    c.checkFieldIOobject(c, f);
-
-    IOField<vector> angularMomentum
-    (
-        c.fieldIOobject("angularMomentum", IOobject::MUST_READ)
-    );
-    c.checkFieldIOobject(c, angularMomentum);
-
-    IOField<vector> torque(c.fieldIOobject("torque", IOobject::MUST_READ));
-    c.checkFieldIOobject(c, torque);
-
     IOField<scalar> rho(c.fieldIOobject("rho", IOobject::MUST_READ));
     c.checkFieldIOobject(c, rho);
 
@@ -177,8 +156,6 @@ void Foam::KinematicParcel<ParcelType>::readFields(CloudType& c)
         p.d_ = d[i];
         p.dTarget_ = dTarget[i];
         p.U_ = U[i];
-        p.f_ = f[i];
-        p.angularMomentum_ = angularMomentum[i];
         p.rho_ = rho[i];
         p.age_ = age[i];
         p.tTurb_ = tTurb[i];
@@ -207,13 +184,6 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const CloudType& c)
     IOField<scalar> d(c.fieldIOobject("d", IOobject::NO_READ), np);
     IOField<scalar> dTarget(c.fieldIOobject("dTarget", IOobject::NO_READ), np);
     IOField<vector> U(c.fieldIOobject("U", IOobject::NO_READ), np);
-    IOField<vector> f(c.fieldIOobject("f", IOobject::NO_READ), np);
-    IOField<vector> angularMomentum
-    (
-        c.fieldIOobject("angularMomentum", IOobject::NO_READ),
-        np
-    );
-    IOField<vector> torque(c.fieldIOobject("torque", IOobject::NO_READ), np);
     IOField<scalar> rho(c.fieldIOobject("rho", IOobject::NO_READ), np);
     IOField<scalar> age(c.fieldIOobject("age", IOobject::NO_READ), np);
     IOField<scalar> tTurb(c.fieldIOobject("tTurb", IOobject::NO_READ), np);
@@ -231,9 +201,6 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const CloudType& c)
         d[i] = p.d();
         dTarget[i] = p.dTarget();
         U[i] = p.U();
-        f[i] = p.f();
-        angularMomentum[i] = p.angularMomentum();
-        torque[i] = p.torque();
         rho[i] = p.rho();
         age[i] = p.age();
         tTurb[i] = p.tTurb();
@@ -248,9 +215,6 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const CloudType& c)
     d.write();
     dTarget.write();
     U.write();
-    f.write();
-    angularMomentum.write();
-    torque.write();
     rho.write();
     age.write();
     tTurb.write();
@@ -276,9 +240,6 @@ Foam::Ostream& Foam::operator<<
             << token::SPACE << p.d()
             << token::SPACE << p.dTarget()
             << token::SPACE << p.U()
-            << token::SPACE << p.f()
-            << token::SPACE << p.angularMomentum()
-            << token::SPACE << p.torque()
             << token::SPACE << p.rho()
             << token::SPACE << p.age()
             << token::SPACE << p.tTurb()
@@ -296,9 +257,6 @@ Foam::Ostream& Foam::operator<<
           + sizeof(p.d())
           + sizeof(p.dTarget())
           + sizeof(p.U())
-          + sizeof(p.f())
-          + sizeof(p.angularMomentum())
-          + sizeof(p.torque())
           + sizeof(p.rho())
           + sizeof(p.age())
           + sizeof(p.tTurb())

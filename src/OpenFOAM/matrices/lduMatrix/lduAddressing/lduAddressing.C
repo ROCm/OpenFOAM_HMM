@@ -267,7 +267,13 @@ Foam::Tuple2<Foam::label, Foam::scalar> Foam::lduAddressing::band() const
     }
 
     label bandwidth = max(cellBandwidth);
-    scalar profile = sum(1.0*cellBandwidth);
+
+    // Do not use field algebra because of conversion label to scalar
+    scalar profile = 0.0;
+    forAll(cellBandwidth, cellI)
+    {
+        profile += 1.0*cellBandwidth[cellI];
+    }
 
     return Tuple2<label, scalar>(bandwidth, profile);
 }

@@ -55,7 +55,7 @@ void Foam::conformalVoronoiMesh::conformToSurface()
         cit->cellIndex() = Cb::ctUnassigned;
     }
 
-    if (reconformationControl() == rmOff)
+    if (!reconformToSurface())
     {
         // Reinsert stored surface conformation
         reinsertSurfaceConformation();
@@ -87,8 +87,7 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 }
 
 
-Foam::conformalVoronoiMesh::reconformationMode
-Foam::conformalVoronoiMesh::reconformationControl() const
+bool Foam::conformalVoronoiMesh::reconformToSurface() const
 {
     if
     (
@@ -96,10 +95,10 @@ Foam::conformalVoronoiMesh::reconformationControl() const
       % foamyHexMeshControls().surfaceConformationRebuildFrequency() == 0
     )
     {
-        return rmOn;
+        return true;
     }
 
-    return rmOff;
+    return false;
 }
 
 
@@ -220,19 +219,9 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation()
 {
     timeCheck("Start buildSurfaceConformation");
 
-    if (reconformationControl() == rmOff)
-    {
-        WarningIn("buildSurfaceConformation()")
-            << "reconformationMode rmNone specified, not building conformation"
-            << endl;
-
-        return;
-    }
-    else
-    {
-        Info<< nl << "Rebuilding surface conformation for more iterations"
-            << endl;
-    }
+    Info<< nl
+        << "Rebuilding surface conformation for more iterations"
+        << endl;
 
     existingEdgeLocations_.clearStorage();
     existingSurfacePtLocations_.clearStorage();
@@ -1297,14 +1286,24 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
         if
         (
             is_infinite(c1) || is_infinite(c2)
-         || !c1->hasInternalPoint() || !c2->hasInternalPoint()
+         || (!c1->hasInternalPoint() && !c2->hasInternalPoint())
          || !c1->real() || !c2->real()
         )
         {
             continue;
         }
 
-        Foam::point edgeMid = 0.5*(c1->dual() + c2->dual());
+//        Foam::point endPt = 0.5*(c1->dual() + c2->dual());
+        Foam::point endPt = c1->dual();
+
+        if
+        (
+            magSqr(vert - c1->dual())
+          < magSqr(vert - c2->dual())
+        )
+        {
+            endPt = c2->dual();
+        }
 
         pointIndexHit surfHit;
         label hitSurface;
@@ -1312,7 +1311,7 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
         geometryToConformTo_.findSurfaceAnyIntersection
         (
             vert,
-            edgeMid,
+            endPt,
             surfHit,
             hitSurface
         );
@@ -1330,7 +1329,7 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
             const vector& n = norm[0];
 
             const scalar normalProtrusionDistance =
-                (edgeMid - surfHit.hitPoint()) & n;
+                (endPt - surfHit.hitPoint()) & n;
 
             if (normalProtrusionDistance > maxProtrusionDistance)
             {
@@ -1347,7 +1346,10 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
     if
     (
         surfHitLargest.hit()
-     && !positionOnThisProc(surfHitLargest.hitPoint())
+     && (
+            Pstream::parRun()
+         && !decomposition().positionOnThisProcessor(surfHitLargest.hitPoint())
+        )
     )
     {
         // A protrusion was identified, but not penetrating on this processor,
@@ -1390,14 +1392,24 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceIncursion
         if
         (
             is_infinite(c1) || is_infinite(c2)
-         || !c1->hasInternalPoint() || !c2->hasInternalPoint()
+         || (!c1->hasInternalPoint() && !c2->hasInternalPoint())
          || !c1->real() || !c2->real()
         )
         {
             continue;
         }
 
-        Foam::point edgeMid = 0.5*(c1->dual() + c2->dual());
+//        Foam::point endPt = 0.5*(c1->dual() + c2->dual());
+        Foam::point endPt = c1->dual();
+
+        if
+        (
+            magSqr(vert - c1->dual())
+          < magSqr(vert - c2->dual())
+        )
+        {
+            endPt = c2->dual();
+        }
 
         pointIndexHit surfHit;
         label hitSurface;
@@ -1405,7 +1417,7 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceIncursion
         geometryToConformTo_.findSurfaceAnyIntersection
         (
             vert,
-            edgeMid,
+            endPt,
             surfHit,
             hitSurface
         );
@@ -1422,8 +1434,7 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceIncursion
 
             const vector& n = norm[0];
 
-            scalar normalIncursionDistance =
-                (edgeMid - surfHit.hitPoint()) & n;
+            scalar normalIncursionDistance = (endPt - surfHit.hitPoint()) & n;
 
             if (normalIncursionDistance < minIncursionDistance)
             {
@@ -1445,7 +1456,10 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceIncursion
     if
     (
         surfHitLargest.hit()
-     && !positionOnThisProc(surfHitLargest.hitPoint())
+     && (
+            Pstream::parRun()
+         && !decomposition().positionOnThisProcessor(surfHitLargest.hitPoint())
+        )
     )
     {
         // A protrusion was identified, but not penetrating on this processor,
@@ -1468,7 +1482,11 @@ void Foam::conformalVoronoiMesh::reportProcessorOccupancy()
     {
         if (vit->real())
         {
-            if (!positionOnThisProc(topoint(vit->point())))
+            if
+            (
+                Pstream::parRun()
+             && !decomposition().positionOnThisProcessor(topoint(vit->point()))
+            )
             {
                 Pout<< topoint(vit->point()) << " is not on this processor "
                     << endl;

@@ -26,6 +26,7 @@ License
 #include "ReactingParcel.H"
 #include "specie.H"
 #include "CompositionModel.H"
+#include "PhaseChangeModel.H"
 #include "mathematicalConstants.H"
 
 using namespace Foam::constant::mathematical;
@@ -56,26 +57,22 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     scalarField& Cs
 )
 {
-    if
-    (
-        !td.cloud().phaseChange().active()
-     || T < td.cloud().constProps().Tvap()
-     || YPhase < SMALL
-    )
+    typedef typename TrackData::cloudType::reactingCloudType reactingCloudType;
+    PhaseChangeModel<reactingCloudType>& phaseChange = td.cloud().phaseChange();
+
+    scalar Tvap = phaseChange.Tvap(YComponents);
+
+    if (!phaseChange.active() || T < Tvap || YPhase < SMALL)
     {
         return;
     }
 
-    typedef typename TrackData::cloudType::reactingCloudType reactingCloudType;
-    const CompositionModel<reactingCloudType>& composition =
-        td.cloud().composition();
-
-    const scalar TMax = td.cloud().phaseChange().TMax(pc_);
+    const scalar TMax = phaseChange.TMax(pc_, YComponents);
     const scalar Tdash = min(T, TMax);
     const scalar Tsdash = min(Ts, TMax);
 
     // Calculate mass transfer due to phase change
-    td.cloud().phaseChange().calculate
+    phaseChange.calculate
     (
         dt,
         cellI,
@@ -97,14 +94,17 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     const scalar dMassTot = sum(dMassPC);
 
     // Add to cumulative phase change mass
-    td.cloud().phaseChange().addToPhaseChangeMass(this->nParticle_*dMassTot);
+    phaseChange.addToPhaseChangeMass(this->nParticle_*dMassTot);
+
+    const CompositionModel<reactingCloudType>& composition =
+        td.cloud().composition();
 
     forAll(dMassPC, i)
     {
         const label idc = composition.localToGlobalCarrierId(idPhase, i);
         const label idl = composition.globalIds(idPhase)[i];
 
-        const scalar dh = td.cloud().phaseChange().dh(idc, idl, pc_, Tdash);
+        const scalar dh = phaseChange.dh(idc, idl, pc_, Tdash);
         Sh -= dMassPC[i]*dh/dt;
     }
 
@@ -516,7 +516,7 @@ void Foam::ReactingParcel<ParcelType>::calc
 
         if (td.cloud().solution().coupled())
         {
-            scalar dm = np0*mass1;
+            scalar dm = np0*mass0;
 
             // Absorb parcel into carrier phase
             forAll(Y_, i)

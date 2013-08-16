@@ -91,8 +91,7 @@ public:
         Kunz
         (
             const volVectorField& U,
-            const surfaceScalarField& phi,
-            const word& alpha1Name = "alpha1"
+            const surfaceScalarField& phi
         );
 
 

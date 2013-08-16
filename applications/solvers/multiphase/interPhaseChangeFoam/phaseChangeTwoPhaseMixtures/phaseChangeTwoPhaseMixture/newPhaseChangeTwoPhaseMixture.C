@@ -32,8 +32,7 @@ Foam::autoPtr<Foam::phaseChangeTwoPhaseMixture>
 Foam::phaseChangeTwoPhaseMixture::New
 (
     const volVectorField& U,
-    const surfaceScalarField& phi,
-    const word& alpha1Name
+    const surfaceScalarField& phi
 )
 {
     IOdictionary transportPropertiesDict
@@ -73,7 +72,7 @@ Foam::phaseChangeTwoPhaseMixture::New
             << exit(FatalError);
     }
 
-    return autoPtr<phaseChangeTwoPhaseMixture>(cstrIter()(U, phi, alpha1Name));
+    return autoPtr<phaseChangeTwoPhaseMixture>(cstrIter()(U, phi));
 }
 
 

@@ -39,11 +39,10 @@ Foam::phaseChangeTwoPhaseMixture::phaseChangeTwoPhaseMixture
 (
     const word& type,
     const volVectorField& U,
-    const surfaceScalarField& phi,
-    const word& alpha1Name
+    const surfaceScalarField& phi
 )
 :
-    incompressibleTwoPhaseMixture(U, phi, alpha1Name),
+    incompressibleTwoPhaseMixture(U, phi),
     phaseChangeTwoPhaseMixtureCoeffs_(subDict(type + "Coeffs")),
     pSat_(lookup("pSat"))
 {}

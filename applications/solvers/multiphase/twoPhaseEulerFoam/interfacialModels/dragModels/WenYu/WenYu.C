@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,6 +30,8 @@ License
 
 namespace Foam
 {
+namespace dragModels
+{
     defineTypeNameAndDebug(WenYu, 0);
 
     addToRunTimeSelectionTable
@@ -39,11 +41,12 @@ namespace Foam
         dictionary
     );
 }
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::WenYu::WenYu
+Foam::dragModels::WenYu::WenYu
 (
     const dictionary& interfaceDict,
     const volScalarField& alpha1,
@@ -57,18 +60,19 @@ Foam::WenYu::WenYu
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::WenYu::~WenYu()
+Foam::dragModels::WenYu::~WenYu()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::WenYu::K
+Foam::tmp<Foam::volScalarField> Foam::dragModels::WenYu::K
 (
     const volScalarField& Ur
 ) const
 {
     volScalarField alpha2(max(scalar(1) - alpha1_, scalar(1.0e-6)));
+    volScalarField bp(pow(alpha2, -2.65));
 
     volScalarField Re(max(Ur*phase1_.d()/phase2_.nu(), scalar(1.0e-3)));
     volScalarField Cds
@@ -77,7 +81,7 @@ Foam::tmp<Foam::volScalarField> Foam::WenYu::K
       + pos(Re - 1000)*0.44
     );
 
-    return 0.75*Cds*phase2_.rho()*Ur*pow(alpha2, -2.65)/phase1_.d();
+    return 0.75*Cds*phase2_.rho()*Ur*bp/phase1_.d();
 }
 
 

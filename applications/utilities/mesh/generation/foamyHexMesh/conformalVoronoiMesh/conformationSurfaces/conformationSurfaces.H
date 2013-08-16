@@ -198,12 +198,12 @@ public:
             //- Check if point is closer to the surfaces to conform to than
             //  testDistSqr, in which case return false, otherwise assess in or
             //  outside and return a result depending on the testForInside flag
-//            Field<bool> wellInOutSide
-//            (
-//                const pointField& samplePts,
-//                const scalarField& testDistSqr,
-//                bool testForInside
-//            ) const;
+            Field<bool> wellInOutSide
+            (
+                const pointField& samplePts,
+                const scalarField& testDistSqr,
+                bool testForInside
+            ) const;
 
             //- Check if point is inside surfaces to conform to by at least
             //  testDistSqr

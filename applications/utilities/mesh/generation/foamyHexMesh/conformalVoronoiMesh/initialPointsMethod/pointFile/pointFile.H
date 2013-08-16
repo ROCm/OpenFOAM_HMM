@@ -38,6 +38,7 @@ SourceFiles
 
 #include "fileName.H"
 #include "pointIOField.H"
+#include "Switch.H"
 #include "initialPointsMethod.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -61,6 +62,15 @@ private:
         //- The initial cell spacing
         fileName pointFileName_;
 
+        //- Check if inserted points are inside or outside
+        Switch insideOutsideCheck_;
+
+        //- Should the initial positions be randomised
+        Switch randomiseInitialGrid_;
+
+        //- Randomise the initial positions by fraction of the initialCellSize_
+        scalar randomPerturbationCoeff_;
+
 
 public:
 
@@ -73,7 +83,11 @@ public:
         pointFile
         (
             const dictionary& initialPointsDict,
-            const conformalVoronoiMesh& foamyHexMesh
+            const Time& runTime,
+            Random& rndGen,
+            const conformationSurfaces& geometryToConformTo,
+            const cellShapeControl& cellShapeControls,
+            const autoPtr<backgroundMeshDecomposition>& decomposition
         );
 
 

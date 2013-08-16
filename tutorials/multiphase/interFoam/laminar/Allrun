@@ -28,7 +28,7 @@ setDamBreakFine ()
     cd damBreak || exit
 
     runApplication blockMesh
-    cp 0/alpha1.org 0/alpha1
+    cp 0/alpha.water.org 0/alpha.water
     runApplication setFields
     runApplication `getApplication`
 )
@@ -44,7 +44,7 @@ cloneCase damBreak damBreakFine
 
     # And execute
     runApplication blockMesh
-    cp ../damBreak/0/alpha1.org 0/alpha1
+    cp ../damBreak/0/alpha.water.org 0/alpha.water
     runApplication setFields
     runApplication decomposePar
     runParallel `getApplication` 4
@@ -56,7 +56,7 @@ cloneCase damBreak damBreakFine
     cd capillaryRise || exit
 
     runApplication blockMesh
-    cp 0/alpha1.org 0/alpha1
+    cp 0/alpha.water.org 0/alpha.water
     runApplication setFields
     runApplication `getApplication`
 )

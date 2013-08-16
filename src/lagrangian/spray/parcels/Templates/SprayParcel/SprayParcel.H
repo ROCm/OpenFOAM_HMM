@@ -110,8 +110,6 @@ public:
                 const scalar Pr,
                 const scalar pMin,
                 const Switch& constantVolume,
-                const scalar Tvap,
-                const scalar Tbp,
                 const scalar sigma0,
                 const scalar mu0
             );

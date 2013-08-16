@@ -41,6 +41,7 @@ solution
         thermo:mu       cell;
         T               cell;
         Cp              cell;
+        kappa           cell;
         p               cell;
         G               cell;
     }
@@ -64,9 +65,7 @@ constantProperties
     epsilon0        1;
     f0              0.5;
 
-    Pr              0.7;
-    Tvap            400;
-    Tbp             400;
+    TDevol          400;
     LDevol          0;
     hRetentionCoeff 1;
 

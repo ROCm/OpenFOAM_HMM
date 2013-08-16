@@ -8,7 +8,7 @@ cd ${0%/*} || exit 1    # run from this directory
 \rm -f constant/triSurface/wigley-scaled-oriented.stl.gz
 
 cleanCase
-rm 0/alpha1.gz 0/cellLevel.gz 0/pointLevel.gz constant/polyMesh/boundary \
+rm 0/alpha.water.gz 0/cellLevel.gz 0/pointLevel.gz constant/polyMesh/boundary \
     > /dev/null 2>&1
 
 # ----------------------------------------------------------------- end-of-file

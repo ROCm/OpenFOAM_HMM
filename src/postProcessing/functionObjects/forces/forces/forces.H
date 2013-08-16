@@ -208,9 +208,6 @@ protected:
                 //- Bin positions along binDir
                 List<point> binPoints_;
 
-                //- Write format for bin data
-                word binFormat_;
-
                 //- Should bin data be cumulative?
                 bool binCumulative_;
 

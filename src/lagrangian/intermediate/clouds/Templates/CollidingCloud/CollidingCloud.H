@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -197,8 +197,13 @@ public:
                 inline CollisionModel<CollidingCloud<CloudType> >&
                     collision();
 
+        // Check
 
-        // Evolution
+            //- Total rotational kinetic energy in the system
+            inline scalar rotationalKineticEnergyOfSystem() const;
+
+
+        // Cloud evolution functions
 
             //- Store the current cloud state
             void storeState();
@@ -212,6 +217,12 @@ public:
             //- Particle motion
             template<class TrackData>
             void motion(TrackData& td);
+
+
+        // I-O
+
+            //- Print cloud information
+            void info();
 };
 
 

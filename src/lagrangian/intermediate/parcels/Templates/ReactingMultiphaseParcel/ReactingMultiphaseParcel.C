@@ -347,7 +347,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
 
         if (td.cloud().solution().coupled())
         {
-            scalar dm = np0*mass1;
+            scalar dm = np0*mass0;
 
             // Absorb parcel into carrier phase
             forAll(YGas_, i)
@@ -511,7 +511,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
     if
     (
         !td.cloud().devolatilisation().active()
-     || T < td.cloud().constProps().Tvap()
+     || T < td.cloud().constProps().TDevol()
      || canCombust == -1
     )
     {

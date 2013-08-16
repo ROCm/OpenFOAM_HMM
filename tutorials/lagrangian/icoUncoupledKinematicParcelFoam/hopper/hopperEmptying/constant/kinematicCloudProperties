@@ -68,6 +68,8 @@ subModels
 
     surfaceFilmModel none;
 
+    stochasticCollisionModel none;
+
     collisionModel pairCollision;
 
     pairCollisionCoeffs

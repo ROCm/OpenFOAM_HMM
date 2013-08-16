@@ -4,8 +4,8 @@
         p =
         (
             rho
-          - gamma2*rhol0
-          - ((gamma*psiv + gamma2*psil) - psi)*pSat
+          - alphal*rhol0
+          - ((alphav*psiv + alphal*psil) - psi)*pSat
         )/psi;
     }
 
@@ -29,7 +29,7 @@
         fvScalarMatrix pEqn
         (
             fvm::ddt(psi, p)
-          - (rhol0 + (psil - psiv)*pSat)*fvc::ddt(gamma) - pSat*fvc::ddt(psi)
+          - (rhol0 + (psil - psiv)*pSat)*fvc::ddt(alphav) - pSat*fvc::ddt(psi)
           + fvc::div(phiv, rho)
           + fvc::div(phiGradp)
           - fvm::laplacian(rAUf, p)
@@ -49,18 +49,18 @@
     rho == max
     (
         psi*p
-      + gamma2*rhol0
-      + ((gamma*psiv + gamma2*psil) - psi)*pSat,
+      + alphal*rhol0
+      + ((alphav*psiv + alphal*psil) - psi)*pSat,
         rhoMin
     );
 
-    #include "gammaPsi.H"
+    #include "alphavPsi.H"
 
     p =
     (
         rho
-      - gamma2*rhol0
-      - ((gamma*psiv + gamma2*psil) - psi)*pSat
+      - alphal*rhol0
+      - ((alphav*psiv + alphal*psil) - psi)*pSat
     )/psi;
 
     p.correctBoundaryConditions();
