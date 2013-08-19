@@ -8,6 +8,10 @@
     surfaceScalarField rAlphaAU1f(fvc::interpolate(alpha1*rAU1));
     surfaceScalarField rAlphaAU2f(fvc::interpolate(alpha2*rAU2));
 
+    // Update the phi BCs from U before p BCs are updated
+    phi1.boundaryField() == (mesh.Sf().boundaryField() & U1.boundaryField());
+    phi2.boundaryField() == (mesh.Sf().boundaryField() & U2.boundaryField());
+
     volVectorField HbyA1
     (
         IOobject::groupName("HbyA", phase1.name()),
