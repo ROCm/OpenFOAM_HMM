@@ -282,7 +282,7 @@ void Foam::yPlusLES::write()
 
         if (log_)
         {
-            Info<< type() << " output:" << nl;
+            Info<< type() << " " << name_ << " output:" << nl;
         }
 
         if (phi.dimensions() == dimMass/dimTime)
@@ -296,7 +296,8 @@ void Foam::yPlusLES::write()
 
         if (log_)
         {
-            Info<< endl;
+            Info<< "    writing field " << yPlusLES.name() << nl
+                << endl;
         }
 
         yPlusLES.write();

@@ -267,7 +267,7 @@ void Foam::yPlusRAS::write()
 
         if (log_)
         {
-            Info<< type() << " output:" << nl;
+            Info<< type() << " " << name_ << " output:" << nl;
         }
 
         if (phi.dimensions() == dimMass/dimTime)
@@ -281,7 +281,8 @@ void Foam::yPlusRAS::write()
 
         if (log_)
         {
-            Info<< endl;
+            Info<< "    writing field " << yPlusRAS.name() << nl
+                << endl;
         }
 
         yPlusRAS.write();

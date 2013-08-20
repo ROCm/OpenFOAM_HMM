@@ -50,7 +50,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class ParticleCollector Declaration
+                      Class ParticleCollector Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
@@ -169,17 +169,15 @@ private:
         //- Collect parcels in polygon collectors
         label collectParcelPolygon
         (
-            const point& position,
-            const vector& U,
-            const scalar dt
+            const point& p1,
+            const point& p2
         ) const;
 
         //- Collect parcels in concentric circle collectors
         label collectParcelConcentricCircles
         (
-            const point& position,
-            const vector& U,
-            const scalar dt
+            const point& p1,
+            const point& p2
         ) const;
 
 
@@ -235,6 +233,7 @@ public:
                 const parcelType& p,
                 const label cellI,
                 const scalar dt,
+                const point& position0,
                 bool& keepParticle
             );
 };

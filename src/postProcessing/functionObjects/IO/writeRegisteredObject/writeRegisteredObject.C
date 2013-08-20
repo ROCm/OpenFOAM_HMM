@@ -98,6 +98,11 @@ void Foam::writeRegisteredObject::write()
                 );
             // Switch off automatic writing to prevent double write
             obj.writeOpt() = IOobject::NO_WRITE;
+
+            Info<< type() << " " << name_ << " output:" << nl
+                << "    writing object " << obj.name() << nl
+                << endl;
+
             obj.write();
         }
         else

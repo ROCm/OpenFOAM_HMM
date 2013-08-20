@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,15 +35,6 @@ License
             IOobject::NO_WRITE
         ),
         mesh
-    );
-
-    #include "createPhi.H"
-
-    singlePhaseTransportModel laminarTransport(U, phi);
-
-    autoPtr<incompressible::turbulenceModel> turbulence
-    (
-        incompressible::turbulenceModel::New(U, phi, laminarTransport)
     );
 
     Info<< "Calculating wall distance field" << endl;

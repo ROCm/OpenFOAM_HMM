@@ -52,5 +52,6 @@ runParallel collapseEdges $nProcs -collapseFaces -latestTime
 
 runParallel checkMesh $nProcs -latestTime -allTopology -allGeometry
 
+runApplication reconstructParMesh -latestTime
 
 # ----------------------------------------------------------------- end-of-file

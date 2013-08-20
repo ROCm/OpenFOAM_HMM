@@ -157,10 +157,11 @@ void Foam::Lambda2::write()
 
         Lambda2 = -eigenValues(SSplusWW)().component(vector::Y);
 
-        Lambda2.write();
+        Info<< type() << " " << name_ << " output:" << nl
+            << "    writing field " << Lambda2.name() << nl
+            << endl;
 
-        Info<< type() << " output:" << nl
-            << "    writing " << Lambda2.name() << " field" << nl << endl;
+        Lambda2.write();
     }
 }
 

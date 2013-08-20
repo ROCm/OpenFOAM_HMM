@@ -198,10 +198,11 @@ void Foam::CourantNo::write()
 
         CourantNo.correctBoundaryConditions();
 
-        CourantNo.write();
+        Info<< type() << " " << name_ << " output:" << nl
+            << "    writing field " << CourantNo.name() << nl
+            << endl;
 
-        Info<< type() << " output:" << nl
-            << "    writing " << CourantNo.name() << " field" << nl << endl;
+        CourantNo.write();
     }
 }
 

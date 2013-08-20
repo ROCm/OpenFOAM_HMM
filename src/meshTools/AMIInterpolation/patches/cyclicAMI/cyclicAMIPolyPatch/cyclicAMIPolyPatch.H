@@ -367,6 +367,15 @@ public:
             labelList& rotation
         ) const;
 
+        //- Return face index on neighbour patch which shares point p
+        //  following trajectory vector n
+        label pointFace
+        (
+            const label faceI,
+            const vector& n,
+            point& p
+        ) const;
+
         //- Write the polyPatch data as a dictionary
         virtual void write(Ostream&) const;
 };

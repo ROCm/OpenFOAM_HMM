@@ -63,7 +63,7 @@ bool Foam::writeDictionary::tryFolder
         {
             if (firstDict)
             {
-                Info<< type() << " output:" << nl << endl;
+                Info<< type() << " " << name_ << " output:" << nl << endl;
 
                 IOobject::writeDivider(Info);
                 Info<< endl;
