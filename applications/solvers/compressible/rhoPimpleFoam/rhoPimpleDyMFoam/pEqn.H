@@ -24,7 +24,7 @@ if (pimple.transonic())
         )
     );
 
-    fvOptions.relativeFlux(fvc::interpolate(psi), phid);
+    fvOptions.makeRelative(fvc::interpolate(psi), phid);
 
     volScalarField Dp("Dp", rho*rAU);
 
@@ -62,7 +62,7 @@ else
         )
     );
 
-    fvOptions.relativeFlux(fvc::interpolate(rho), phiHbyA);
+    fvOptions.makeRelative(fvc::interpolate(rho), phiHbyA);
 
     volScalarField Dp("Dp", rho*rAU);
 

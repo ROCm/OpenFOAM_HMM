@@ -474,13 +474,13 @@ void Foam::fv::option::setValue(fvMatrix<tensor>& eqn, const label fieldI)
 }
 
 
-void Foam::fv::option::relativeFlux(surfaceScalarField& phi) const
+void Foam::fv::option::makeRelative(surfaceScalarField& phi) const
 {
     // do nothing
 }
 
 
-void Foam::fv::option::relativeFlux
+void Foam::fv::option::makeRelative
 (
     const surfaceScalarField& rho,
     surfaceScalarField& phi
@@ -490,13 +490,13 @@ void Foam::fv::option::relativeFlux
 }
 
 
-void Foam::fv::option::absoluteFlux(surfaceScalarField& phi) const
+void Foam::fv::option::makeAbsolute(surfaceScalarField& phi) const
 {
     // do nothing
 }
 
 
-void Foam::fv::option::absoluteFlux
+void Foam::fv::option::makeAbsolute
 (
     const surfaceScalarField& rho,
     surfaceScalarField& phi

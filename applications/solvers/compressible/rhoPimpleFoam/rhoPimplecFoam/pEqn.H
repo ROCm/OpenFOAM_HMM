@@ -25,7 +25,7 @@ if (pimple.transonic())
         )
     );
 
-    fvOptions.relativeFlux(fvc::interpolate(psi), phid);
+    fvOptions.makeRelative(fvc::interpolate(psi), phid);
 
     surfaceScalarField phic
     (
@@ -71,7 +71,7 @@ else
         )
     );
 
-    fvOptions.relativeFlux(fvc::interpolate(rho), phiHbyA);
+    fvOptions.makeRelative(fvc::interpolate(rho), phiHbyA);
 
     phiHbyA += fvc::interpolate(rho*(rAtU - rAU))*fvc::snGrad(p)*mesh.magSf();
     HbyA -= (rAU - rAtU)*fvc::grad(p);

@@ -18,7 +18,7 @@ surfaceScalarField phiHbyA
 
 adjustPhi(phiHbyA, U, p_gh);
 
-fvOptions.relativeFlux(phiHbyA);
+fvOptions.makeRelative(phiHbyA);
 
 // Update the phi BCs from U before p BCs are updated
 phi.boundaryField() = mesh.Sf().boundaryField() & U.boundaryField();

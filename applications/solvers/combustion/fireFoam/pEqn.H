@@ -21,7 +21,7 @@ surfaceScalarField phiHbyA
   + phig
 );
 
-fvOptions.relativeFlux(phiHbyA);
+fvOptions.makeRelative(phiHbyA);
 
 while (pimple.correctNonOrthogonal())
 {

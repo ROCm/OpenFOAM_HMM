@@ -157,20 +157,20 @@ public:
         // Flux manipulations
 
             //- Make the given absolute flux relative
-            void relativeFlux(surfaceScalarField& phi) const;
+            void makeRelative(surfaceScalarField& phi) const;
 
             //- Make the given absolute mass-flux relative
-            void relativeFlux
+            void makeRelative
             (
                 const surfaceScalarField& rho,
                 surfaceScalarField& phi
             ) const;
 
             //- Make the given relative flux absolute
-            void absoluteFlux(surfaceScalarField& phi) const;
+            void makeAbsolute(surfaceScalarField& phi) const;
 
             //- Make the given relative mass-flux absolute
-            void absoluteFlux
+            void makeAbsolute
             (
                 const surfaceScalarField& rho,
                 surfaceScalarField& phi

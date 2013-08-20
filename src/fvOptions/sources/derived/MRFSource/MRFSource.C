@@ -120,35 +120,35 @@ void Foam::fv::MRFSource::addSup
 }
 
 
-void Foam::fv::MRFSource::relativeFlux(surfaceScalarField& phi) const
+void Foam::fv::MRFSource::makeRelative(surfaceScalarField& phi) const
 {
-    mrfPtr_->relativeFlux(phi);
+    mrfPtr_->makeRelative(phi);
 }
 
 
-void Foam::fv::MRFSource::relativeFlux
+void Foam::fv::MRFSource::makeRelative
 (
     const surfaceScalarField& rho,
     surfaceScalarField& phi
 ) const
 {
-    mrfPtr_->relativeFlux(rho, phi);
+    mrfPtr_->makeRelative(rho, phi);
 }
 
 
-void Foam::fv::MRFSource::absoluteFlux(surfaceScalarField& phi) const
+void Foam::fv::MRFSource::makeAbsolute(surfaceScalarField& phi) const
 {
-    mrfPtr_->absoluteFlux(phi);
+    mrfPtr_->makeAbsolute(phi);
 }
 
 
-void Foam::fv::MRFSource::absoluteFlux
+void Foam::fv::MRFSource::makeAbsolute
 (
     const surfaceScalarField& rho,
     surfaceScalarField& phi
 ) const
 {
-    mrfPtr_->absoluteFlux(rho, phi);
+    mrfPtr_->makeAbsolute(rho, phi);
 }
 
 

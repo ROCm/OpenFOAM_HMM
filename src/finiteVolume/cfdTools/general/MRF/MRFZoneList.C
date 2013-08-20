@@ -178,16 +178,16 @@ void Foam::MRFZoneList::absoluteVelocity(volVectorField& U) const
 }
 
 
-void Foam::MRFZoneList::relativeFlux(surfaceScalarField& phi) const
+void Foam::MRFZoneList::makeRelative(surfaceScalarField& phi) const
 {
     forAll(*this, i)
     {
-        operator[](i).relativeFlux(phi);
+        operator[](i).makeRelative(phi);
     }
 }
 
 
-void Foam::MRFZoneList::relativeFlux
+void Foam::MRFZoneList::makeRelative
 (
     const surfaceScalarField& rho,
     surfaceScalarField& phi
@@ -195,21 +195,21 @@ void Foam::MRFZoneList::relativeFlux
 {
     forAll(*this, i)
     {
-        operator[](i).relativeFlux(rho, phi);
+        operator[](i).makeRelative(rho, phi);
     }
 }
 
 
-void Foam::MRFZoneList::absoluteFlux(surfaceScalarField& phi) const
+void Foam::MRFZoneList::makeAbsolute(surfaceScalarField& phi) const
 {
     forAll(*this, i)
     {
-        operator[](i).absoluteFlux(phi);
+        operator[](i).makeAbsolute(phi);
     }
 }
 
 
-void Foam::MRFZoneList::absoluteFlux
+void Foam::MRFZoneList::makeAbsolute
 (
     const surfaceScalarField& rho,
     surfaceScalarField& phi
@@ -217,7 +217,7 @@ void Foam::MRFZoneList::absoluteFlux
 {
     forAll(*this, i)
     {
-        operator[](i).absoluteFlux(rho, phi);
+        operator[](i).makeAbsolute(rho, phi);
     }
 }
 

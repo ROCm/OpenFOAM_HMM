@@ -35,8 +35,8 @@
     {
         phaseModel& phase = iter();
 
-        mrfZones.absoluteFlux(phase.phi().oldTime());
-        mrfZones.absoluteFlux(phase.phi());
+        mrfZones.makeAbsolute(phase.phi().oldTime());
+        mrfZones.makeAbsolute(phase.phi());
 
         HbyAs.set(phasei, new volVectorField(phase.U()));
         phiHbyAs.set(phasei, new surfaceScalarField(1.0*phase.phi()));
@@ -96,7 +96,7 @@
             (fvc::interpolate(HbyAs[phasei]) & mesh.Sf())
           + fvc::ddtPhiCorr(rAUs[phasei], alpha, phase.U(), phase.phi())
         );
-        mrfZones.relativeFlux(phiHbyAs[phasei]);
+        mrfZones.makeRelative(phiHbyAs[phasei]);
 
         phiHbyAs[phasei] +=
             rAlphaAUfs[phasei]
@@ -168,8 +168,8 @@
         phase.phi().boundaryField() ==
             (mesh.Sf().boundaryField() & phase.U().boundaryField());
 
-        mrfZones.relativeFlux(phase.phi().oldTime());
-        mrfZones.relativeFlux(phase.phi());
+        mrfZones.makeRelative(phase.phi().oldTime());
+        mrfZones.makeRelative(phase.phi());
 
         // Update phi BCs before pEqn
         phi.boundaryField() +=
