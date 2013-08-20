@@ -7,17 +7,26 @@ cd ${0%/*} || exit 1    # run from this directory
 # copy flange surface from resources folder
 cp $FOAM_TUTORIALS/resources/geometry/flange.stl.gz constant/triSurface/
 
-# Create tight-fitting background mesh
-runApplication blockMesh
+cp system/controlDict system/controlDict.org
+
+sed -e s/"\(endTime[ \t]*\)\([0-9]*\);"/"\1 10;"/g \
+    -e s/"\(writeInterval[ \t]*\)\([0-9]*\);"/"\1 10;"/g \
+    system/controlDict.org > system/controlDict
+
 runApplication foamyHexMesh
 
 # Change collapseEdges to only do one iteration
 cp system/collapseDict system/collapseDict.org
 
 sed -e s/"\(maximumIterations[ \t]*\)\([0-9]*\);"/"\1 1;"/g \
-system/collapseDict.org > system/collapseDict
+    system/collapseDict.org > system/collapseDict
 
 runApplication collapseEdges -latestTime -collapseFaces
+
+cp system/controlDict.org system/controlDict
+cp system/collapseDict.org system/collapseDict
+
+rm -f system/controlDict.org system/collapseDict.org
 
 
 # ----------------------------------------------------------------- end-of-file
