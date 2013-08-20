@@ -22,8 +22,17 @@ boundaryField
 {
     movingWall
     {
-        type            fixedValue;
-        value           uniform (1 0 0);
+        type            uniformFixedValue;
+        uniformValue    csvFile;
+        csvFileCoeffs
+        {
+            nHeaderLine     1;
+            refColumn       0;
+            componentColumns (1 2 3);
+            mergeSeparators no;
+            fileName        "$FOAM_CASE/csvData";
+            separator       " ";
+        }
     }
 
     fixedWalls
