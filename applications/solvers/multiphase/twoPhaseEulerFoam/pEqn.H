@@ -8,9 +8,12 @@
     surfaceScalarField rAlphaAU1f(fvc::interpolate(alpha1*rAU1));
     surfaceScalarField rAlphaAU2f(fvc::interpolate(alpha2*rAU2));
 
-    // Update the phi BCs from U before p BCs are updated
-    phi1.boundaryField() == (mesh.Sf().boundaryField() & U1.boundaryField());
-    phi2.boundaryField() == (mesh.Sf().boundaryField() & U2.boundaryField());
+    // Update the phi BCs from Us before p BCs are updated
+    phi.boundaryField() =
+        alpha1f.boundaryField()
+       *(mesh.Sf().boundaryField() & U1.boundaryField())
+      + alpha2f.boundaryField()
+       *(mesh.Sf().boundaryField() & U2.boundaryField());
 
     volVectorField HbyA1
     (
@@ -174,8 +177,14 @@
         {
             surfaceScalarField mSfGradp(pEqnIncomp.flux()/Dp);
 
+            phi1.boundaryField() ==
+                (mesh.Sf().boundaryField() & U1.boundaryField());
             phi1 = phiHbyA1 + rAlphaAU1f*mSfGradp/fvc::interpolate(rho1);
+
+            phi2.boundaryField() ==
+                (mesh.Sf().boundaryField() & U2.boundaryField());
             phi2 = phiHbyA2 + rAlphaAU2f*mSfGradp/fvc::interpolate(rho2);
+
             phi = alpha1f*phi1 + alpha2f*phi2;
 
             dgdt =

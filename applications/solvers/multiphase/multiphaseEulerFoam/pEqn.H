@@ -58,8 +58,6 @@
         dimensionedScalar("phiHbyA", dimArea*dimVelocity, 0)
     );
 
-    phi = dimensionedScalar("phi", phi.dimensions(), 0);
-
     phasei = 0;
     forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
     {
@@ -99,8 +97,6 @@
           + fvc::ddtPhiCorr(rAUs[phasei], alpha, phase.U(), phase.phi())
         );
         mrfZones.relativeFlux(phiHbyAs[phasei]);
-
-        phi += alphafs[phasei]*phiHbyAs[phasei];
 
         phiHbyAs[phasei] +=
             rAlphaAUfs[phasei]
@@ -161,6 +157,9 @@
         phasei++;
     }
 
+    // Reset phi BCs
+    phi.boundaryField() = 0;
+
     phasei = 0;
     forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
     {
@@ -171,6 +170,10 @@
 
         mrfZones.relativeFlux(phase.phi().oldTime());
         mrfZones.relativeFlux(phase.phi());
+
+        // Update phi BCs before pEqn
+        phi.boundaryField() +=
+            alphafs[phasei].boundaryField()*phase.phi().boundaryField();
 
         phasei++;
     }
