@@ -13,7 +13,7 @@ surfaceScalarField phiHbyA
   + fvc::ddtPhiCorr(rAU, U, phi)
 );
 
-fvOptions.relativeFlux(phiHbyA);
+fvOptions.makeRelative(phiHbyA);
 
 adjustPhi(phiHbyA, U, p);
 

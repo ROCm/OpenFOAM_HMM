@@ -19,7 +19,7 @@
         fvc::interpolate(rho)*(fvc::interpolate(HbyA) & mesh.Sf())
     );
 
-    fvOptions.relativeFlux(fvc::interpolate(rho), phiHbyA);
+    fvOptions.makeRelative(fvc::interpolate(rho), phiHbyA);
 
     bool closedVolume = adjustPhi(phiHbyA, U, p_rgh);
 

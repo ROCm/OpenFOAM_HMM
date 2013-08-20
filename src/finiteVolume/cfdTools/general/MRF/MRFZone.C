@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -499,13 +499,13 @@ void Foam::MRFZone::absoluteVelocity(volVectorField& U) const
 }
 
 
-void Foam::MRFZone::relativeFlux(surfaceScalarField& phi) const
+void Foam::MRFZone::makeRelative(surfaceScalarField& phi) const
 {
     relativeRhoFlux(geometricOneField(), phi);
 }
 
 
-void Foam::MRFZone::relativeFlux
+void Foam::MRFZone::makeRelative
 (
     const surfaceScalarField& rho,
     surfaceScalarField& phi
@@ -515,13 +515,13 @@ void Foam::MRFZone::relativeFlux
 }
 
 
-void Foam::MRFZone::absoluteFlux(surfaceScalarField& phi) const
+void Foam::MRFZone::makeAbsolute(surfaceScalarField& phi) const
 {
     absoluteRhoFlux(geometricOneField(), phi);
 }
 
 
-void Foam::MRFZone::absoluteFlux
+void Foam::MRFZone::makeAbsolute
 (
     const surfaceScalarField& rho,
     surfaceScalarField& phi
