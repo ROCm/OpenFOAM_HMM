@@ -103,13 +103,20 @@ public:
         void addCoriolis(const volScalarField& rho, fvVectorMatrix& UEqn) const;
 
         //- Make the given absolute velocity relative within the MRF region
-        void relativeVelocity(volVectorField& U) const;
+        void makeRelative(volVectorField& U) const;
 
         //- Make the given relative velocity absolute within the MRF region
-        void absoluteVelocity(volVectorField& U) const;
+        void makeAbsolute(volVectorField& U) const;
 
         //- Make the given absolute flux relative within the MRF region
         void makeRelative(surfaceScalarField& phi) const;
+
+        //- Return the given absolute boundary flux relative within
+        //  the MRF region
+        tmp<FieldField<fvsPatchField, scalar> > relative
+        (
+            const tmp<FieldField<fvsPatchField, scalar> >& tphi
+        ) const;
 
         //- Make the given absolute mass-flux relative within the MRF region
         void makeRelative
