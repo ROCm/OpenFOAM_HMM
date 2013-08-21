@@ -54,30 +54,7 @@ void Foam::MRFZone::makeRelativeRhoFlux
         phii[facei] -= rho[facei]*(Omega ^ (Cfi[facei] - origin_)) & Sfi[facei];
     }
 
-    // Included patches
-    forAll(includedFaces_, patchi)
-    {
-        forAll(includedFaces_[patchi], i)
-        {
-            label patchFacei = includedFaces_[patchi][i];
-
-            phi.boundaryField()[patchi][patchFacei] = 0.0;
-        }
-    }
-
-    // Excluded patches
-    forAll(excludedFaces_, patchi)
-    {
-        forAll(excludedFaces_[patchi], i)
-        {
-            label patchFacei = excludedFaces_[patchi][i];
-
-            phi.boundaryField()[patchi][patchFacei] -=
-                rho.boundaryField()[patchi][patchFacei]
-              * (Omega ^ (Cf.boundaryField()[patchi][patchFacei] - origin_))
-              & Sf.boundaryField()[patchi][patchFacei];
-        }
-    }
+    makeRelativeRhoFlux(rho.boundaryField(), phi.boundaryField());
 }
 
 
