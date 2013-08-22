@@ -86,9 +86,9 @@ PIMPLE
     rhoMin          0.1;
     rhoMax          1.5;
 
-    maxCo           0.5;
+    maxCo           0.1;
     rDeltaTSmoothingCoeff 0.1;
-    maxDeltaT       1;
+    maxDeltaT       2e-4;
     alphaTemp       0.005;
 }
 

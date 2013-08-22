@@ -9,21 +9,39 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      combustionProperties;
+    class       volScalarField;
+    location    "0";
+    object      CO2;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-combustionModel  PaSR<rhoChemistryCombustion>;
+dimensions      [0 0 0 0 0 0 0];
 
-active  true;
+internalField   uniform 0;
 
-PaSRCoeffs
+boundaryField
 {
-    Cmix                0.1;
-    turbulentReaction   off;
-    useReactionRate     true;
+    fuel
+    {
+        type            fixedValue;
+        value           uniform 0;
+    }
+    air
+    {
+        type            fixedValue;
+        value           uniform 0;
+    }
+    outlet
+    {
+        type            inletOutlet;
+        inletValue      uniform 0;
+        value           uniform 0;
+
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
 }
 
 

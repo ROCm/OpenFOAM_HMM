@@ -17,19 +17,19 @@ FoamFile
 
 dimensions      [1 -1 -1 0 0 0 0];
 
-internalField   uniform 0.0;
+internalField   uniform 0;
 
 boundaryField
 {
     fuel
     {
         type            fixedValue;
-        value           uniform 0.0;
+        value           uniform 0;
     }
     air
     {
         type            fixedValue;
-        value           uniform 0.0;
+        value           uniform 0;
     }
     outlet
     {
