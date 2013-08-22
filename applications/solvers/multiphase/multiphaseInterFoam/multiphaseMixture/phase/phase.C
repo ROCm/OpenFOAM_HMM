@@ -29,7 +29,7 @@ License
 
 Foam::phase::phase
 (
-    const word& name,
+    const word& phaseName,
     const dictionary& phaseDict,
     const volVectorField& U,
     const surfaceScalarField& phi
@@ -39,7 +39,7 @@ Foam::phase::phase
     (
         IOobject
         (
-            "alpha" + name,
+            IOobject::groupName("alpha", phaseName),
             U.mesh().time().timeName(),
             U.mesh(),
             IOobject::MUST_READ,
@@ -47,9 +47,18 @@ Foam::phase::phase
         ),
         U.mesh()
     ),
-    name_(name),
+    name_(phaseName),
     phaseDict_(phaseDict),
-    nuModel_(viscosityModel::New("nu" + name, phaseDict_, U, phi)),
+    nuModel_
+    (
+        viscosityModel::New
+        (
+            IOobject::groupName("nu", phaseName),
+            phaseDict_,
+            U,
+            phi
+        )
+    ),
     rho_(phaseDict_.lookup("rho"))
 {}
 

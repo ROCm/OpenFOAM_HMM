@@ -1,5 +1,4 @@
 EXE_INC = \
-    -IphaseModel/lnInclude \
     -ImultiphaseSystem/lnInclude \
     -ImultiphaseFixedFluxPressure \
     -IinterfacialModels/lnInclude \
@@ -15,7 +14,6 @@ EXE_INC = \
 
 EXE_LIBS = \
     -lmultiphaseSystem \
-    -lcompressibleMultiPhaseModel \
     -linterfaceProperties \
     -lincompressibleTransportModels \
     -lcompressibleMultiphaseEulerianInterfacialModels \

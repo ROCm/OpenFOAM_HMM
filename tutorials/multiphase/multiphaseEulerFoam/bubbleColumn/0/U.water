@@ -8,31 +8,34 @@
 FoamFile
 {
     version     2.0;
-    format      ascii;
-    class       dictionary;
-    location    "system";
-    object      setFieldsDict;
+    format      binary;
+    class       volVectorField;
+    object      U.water;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-defaultFieldValues
-(
-    volScalarFieldValue alpha.air 1
-    volScalarFieldValue alpha.water 0
-);
+dimensions      [0 1 -1 0 0 0 0];
 
-regions
-(
-    boxToCell
+internalField   uniform (0 0 0);
+
+boundaryField
+{
+    inlet
     {
-        box (0 0 -0.1) (0.15 0.701 0.1);
-        fieldValues
-        (
-            volScalarFieldValue alpha.air 0
-            volScalarFieldValue alpha.water 1
-        );
+        type               fixedValue;
+        value              $internalField;
     }
-);
-
+    outlet
+    {
+        type               pressureInletOutletVelocity;
+        phi                phi.water;
+        value              $internalField;
+    }
+    walls
+    {
+        type               fixedValue;
+        value              uniform (0 0 0);
+    }
+}
 
 // ************************************************************************* //

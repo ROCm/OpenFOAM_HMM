@@ -8,7 +8,6 @@ EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude
 
 LIB_LIBS = \
-    -lcompressibleMultiPhaseModel \
     -linterfaceProperties \
     -lincompressibleTransportModels \
     -lcompressibleMultiphaseEulerianInterfacialModels \
