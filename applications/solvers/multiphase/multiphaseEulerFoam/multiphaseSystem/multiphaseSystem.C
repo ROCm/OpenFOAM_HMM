@@ -125,6 +125,13 @@ void Foam::multiphaseSystem::solveAlphas()
             );
         }
 
+        // Ensure that the flux at inflow BCs is preserved
+        phiAlphaCorr.boundaryField() = min
+        (
+            phase1.phi().boundaryField()*alpha1.boundaryField(),
+            phiAlphaCorr.boundaryField()
+        );
+
         MULES::limit
         (
             geometricOneField(),

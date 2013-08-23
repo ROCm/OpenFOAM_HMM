@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,7 +35,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(MRFZone, 0);
+    defineTypeNameAndDebug(MRFZone, 0);
 }
 
 
@@ -423,7 +423,7 @@ void Foam::MRFZone::addCoriolis
 }
 
 
-void Foam::MRFZone::relativeVelocity(volVectorField& U) const
+void Foam::MRFZone::makeRelative(volVectorField& U) const
 {
     const volVectorField& C = mesh_.C();
 
@@ -461,7 +461,7 @@ void Foam::MRFZone::relativeVelocity(volVectorField& U) const
 }
 
 
-void Foam::MRFZone::absoluteVelocity(volVectorField& U) const
+void Foam::MRFZone::makeAbsolute(volVectorField& U) const
 {
     const volVectorField& C = mesh_.C();
 
@@ -499,35 +499,41 @@ void Foam::MRFZone::absoluteVelocity(volVectorField& U) const
 }
 
 
-void Foam::MRFZone::relativeFlux(surfaceScalarField& phi) const
+void Foam::MRFZone::makeRelative(surfaceScalarField& phi) const
 {
-    relativeRhoFlux(geometricOneField(), phi);
+    makeRelativeRhoFlux(geometricOneField(), phi);
 }
 
 
-void Foam::MRFZone::relativeFlux
+void Foam::MRFZone::makeRelative(FieldField<fvsPatchField, scalar>& phi) const
+{
+    return makeRelativeRhoFlux(oneFieldField(), phi);
+}
+
+
+void Foam::MRFZone::makeRelative
 (
     const surfaceScalarField& rho,
     surfaceScalarField& phi
 ) const
 {
-    relativeRhoFlux(rho, phi);
+    makeRelativeRhoFlux(rho, phi);
 }
 
 
-void Foam::MRFZone::absoluteFlux(surfaceScalarField& phi) const
+void Foam::MRFZone::makeAbsolute(surfaceScalarField& phi) const
 {
-    absoluteRhoFlux(geometricOneField(), phi);
+    makeAbsoluteRhoFlux(geometricOneField(), phi);
 }
 
 
-void Foam::MRFZone::absoluteFlux
+void Foam::MRFZone::makeAbsolute
 (
     const surfaceScalarField& rho,
     surfaceScalarField& phi
 ) const
 {
-    absoluteRhoFlux(rho, phi);
+    makeAbsoluteRhoFlux(rho, phi);
 }
 
 

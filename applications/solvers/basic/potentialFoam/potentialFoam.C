@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
     // function objects so do it ourselves
     runTime.functionObjects().start();
 
-    fvOptions.relativeFlux(phi);
+    fvOptions.makeRelative(phi);
 
     adjustPhi(phi, U, p);
 
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    fvOptions.absoluteFlux(phi);
+    fvOptions.makeAbsolute(phi);
 
     Info<< "continuity error = "
         << mag(fvc::div(phi))().weightedAverage(mesh.V()).value()

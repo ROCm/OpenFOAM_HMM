@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -160,34 +160,51 @@ void Foam::MRFZoneList::addCoriolis
 }
 
 
-void Foam::MRFZoneList::relativeVelocity(volVectorField& U) const
+void Foam::MRFZoneList::makeRelative(volVectorField& U) const
 {
     forAll(*this, i)
     {
-        operator[](i).relativeVelocity(U);
+        operator[](i).makeRelative(U);
     }
 }
 
 
-void Foam::MRFZoneList::absoluteVelocity(volVectorField& U) const
+void Foam::MRFZoneList::makeAbsolute(volVectorField& U) const
 {
     forAll(*this, i)
     {
-        operator[](i).absoluteVelocity(U);
+        operator[](i).makeAbsolute(U);
     }
 }
 
 
-void Foam::MRFZoneList::relativeFlux(surfaceScalarField& phi) const
+void Foam::MRFZoneList::makeRelative(surfaceScalarField& phi) const
 {
     forAll(*this, i)
     {
-        operator[](i).relativeFlux(phi);
+        operator[](i).makeRelative(phi);
     }
 }
 
 
-void Foam::MRFZoneList::relativeFlux
+Foam::tmp<Foam::FieldField<Foam::fvsPatchField, Foam::scalar> >
+Foam::MRFZoneList::relative
+(
+    const tmp<FieldField<fvsPatchField, scalar> >& phi
+) const
+{
+    tmp<FieldField<fvsPatchField, scalar> > rphi(phi);
+
+    forAll(*this, i)
+    {
+        operator[](i).makeRelative(rphi());
+    }
+
+    return rphi;
+}
+
+
+void Foam::MRFZoneList::makeRelative
 (
     const surfaceScalarField& rho,
     surfaceScalarField& phi
@@ -195,21 +212,21 @@ void Foam::MRFZoneList::relativeFlux
 {
     forAll(*this, i)
     {
-        operator[](i).relativeFlux(rho, phi);
+        operator[](i).makeRelative(rho, phi);
     }
 }
 
 
-void Foam::MRFZoneList::absoluteFlux(surfaceScalarField& phi) const
+void Foam::MRFZoneList::makeAbsolute(surfaceScalarField& phi) const
 {
     forAll(*this, i)
     {
-        operator[](i).absoluteFlux(phi);
+        operator[](i).makeAbsolute(phi);
     }
 }
 
 
-void Foam::MRFZoneList::absoluteFlux
+void Foam::MRFZoneList::makeAbsolute
 (
     const surfaceScalarField& rho,
     surfaceScalarField& phi
@@ -217,7 +234,7 @@ void Foam::MRFZoneList::absoluteFlux
 {
     forAll(*this, i)
     {
-        operator[](i).absoluteFlux(rho, phi);
+        operator[](i).makeAbsolute(rho, phi);
     }
 }
 

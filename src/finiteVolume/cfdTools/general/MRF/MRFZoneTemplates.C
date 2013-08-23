@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,7 +32,7 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class RhoFieldType>
-void Foam::MRFZone::relativeRhoFlux
+void Foam::MRFZone::makeRelativeRhoFlux
 (
     const RhoFieldType& rho,
     surfaceScalarField& phi
@@ -54,6 +54,22 @@ void Foam::MRFZone::relativeRhoFlux
         phii[facei] -= rho[facei]*(Omega ^ (Cfi[facei] - origin_)) & Sfi[facei];
     }
 
+    makeRelativeRhoFlux(rho.boundaryField(), phi.boundaryField());
+}
+
+
+template<class RhoFieldType>
+void Foam::MRFZone::makeRelativeRhoFlux
+(
+    const RhoFieldType& rho,
+    FieldField<fvsPatchField, scalar>& phi
+) const
+{
+    const surfaceVectorField& Cf = mesh_.Cf();
+    const surfaceVectorField& Sf = mesh_.Sf();
+
+    const vector Omega = omega_->value(mesh_.time().timeOutputValue())*axis_;
+
     // Included patches
     forAll(includedFaces_, patchi)
     {
@@ -61,7 +77,7 @@ void Foam::MRFZone::relativeRhoFlux
         {
             label patchFacei = includedFaces_[patchi][i];
 
-            phi.boundaryField()[patchi][patchFacei] = 0.0;
+            phi[patchi][patchFacei] = 0.0;
         }
     }
 
@@ -72,8 +88,8 @@ void Foam::MRFZone::relativeRhoFlux
         {
             label patchFacei = excludedFaces_[patchi][i];
 
-            phi.boundaryField()[patchi][patchFacei] -=
-                rho.boundaryField()[patchi][patchFacei]
+            phi[patchi][patchFacei] -=
+                rho[patchi][patchFacei]
               * (Omega ^ (Cf.boundaryField()[patchi][patchFacei] - origin_))
               & Sf.boundaryField()[patchi][patchFacei];
         }
@@ -82,7 +98,7 @@ void Foam::MRFZone::relativeRhoFlux
 
 
 template<class RhoFieldType>
-void Foam::MRFZone::absoluteRhoFlux
+void Foam::MRFZone::makeAbsoluteRhoFlux
 (
     const RhoFieldType& rho,
     surfaceScalarField& phi

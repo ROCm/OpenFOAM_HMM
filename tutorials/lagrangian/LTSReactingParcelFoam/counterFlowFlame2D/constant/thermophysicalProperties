@@ -19,10 +19,10 @@ thermoType
 {
     type            heRhoThermo;
     mixture         reactingMixture;
-    transport       polynomial;
-    thermo          hPolynomial;
+    transport       sutherland;
+    thermo          janaf;
     energy          sensibleEnthalpy;
-    equationOfState icoPolynomial;
+    equationOfState perfectGas;
     specie          specie;
 }
 
@@ -32,7 +32,7 @@ chemistryReader foamChemistryReader;
 
 foamChemistryFile "$FOAM_CASE/constant/reactions";
 
-foamChemistryThermoFile "$FOAM_CASE/constant/thermo.icoPoly8";
+foamChemistryThermoFile "$FOAM_CASE/constant/thermo.compressibleGas";
 
 
 // ************************************************************************* //

@@ -13,7 +13,7 @@ if (pimple.transonic())
        *((fvc::interpolate(HbyA) & mesh.Sf()) - fvc::meshPhi(rho, U))
     );
 
-    fvOptions.relativeFlux(fvc::interpolate(psi), phid);
+    fvOptions.makeRelative(fvc::interpolate(psi), phid);
 
     while (pimple.correctNonOrthogonal())
     {
@@ -45,7 +45,7 @@ else
        *((fvc::interpolate(HbyA) & mesh.Sf()) - fvc::meshPhi(rho, U))
     );
 
-    fvOptions.relativeFlux(fvc::interpolate(rho), phiHbyA);
+    fvOptions.makeRelative(fvc::interpolate(rho), phiHbyA);
 
     while (pimple.correctNonOrthogonal())
     {

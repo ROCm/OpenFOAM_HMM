@@ -12,7 +12,7 @@
       + fvc::ddtPhiCorr(rAU, rho, U, phi)
     );
     adjustPhi(phiHbyA, U, p_rgh);
-    mrfZones.relativeFlux(phiHbyA);
+    mrfZones.makeRelative(phiHbyA);
     phi = phiHbyA;
 
     surfaceScalarField phig

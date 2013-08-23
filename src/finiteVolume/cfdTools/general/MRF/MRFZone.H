@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,7 @@ SourceFiles
 #include "dimensionedScalar.H"
 #include "dimensionedVector.H"
 #include "volFieldsFwd.H"
-#include "surfaceFieldsFwd.H"
+#include "surfaceFields.H"
 #include "fvMatricesFwd.H"
 #include "mapPolyMesh.H"
 #include "DataEntry.H"
@@ -114,15 +114,23 @@ class MRFZone
 
         //- Make the given absolute mass/vol flux relative within the MRF region
         template<class RhoFieldType>
-        void relativeRhoFlux
+        void makeRelativeRhoFlux
         (
             const RhoFieldType& rho,
             surfaceScalarField& phi
         ) const;
 
+        //- Make the given absolute mass/vol flux relative within the MRF region
+        template<class RhoFieldType>
+        void makeRelativeRhoFlux
+        (
+            const RhoFieldType& rho,
+            FieldField<fvsPatchField, scalar>& phi
+        ) const;
+
         //- Make the given relative mass/vol flux absolute within the MRF region
         template<class RhoFieldType>
-        void absoluteRhoFlux
+        void makeAbsoluteRhoFlux
         (
             const RhoFieldType& rho,
             surfaceScalarField& phi
@@ -208,26 +216,30 @@ public:
             ) const;
 
             //- Make the given absolute velocity relative within the MRF region
-            void relativeVelocity(volVectorField& U) const;
+            void makeRelative(volVectorField& U) const;
 
             //- Make the given relative velocity absolute within the MRF region
-            void absoluteVelocity(volVectorField& U) const;
+            void makeAbsolute(volVectorField& U) const;
 
             //- Make the given absolute flux relative within the MRF region
-            void relativeFlux(surfaceScalarField& phi) const;
+            void makeRelative(surfaceScalarField& phi) const;
+
+            //- Make the given absolute boundary flux relative
+            //  within the MRF region
+            void makeRelative(FieldField<fvsPatchField, scalar>& phi) const;
 
             //- Make the given absolute mass-flux relative within the MRF region
-            void relativeFlux
+            void makeRelative
             (
                 const surfaceScalarField& rho,
                 surfaceScalarField& phi
             ) const;
 
             //- Make the given relative flux absolute within the MRF region
-            void absoluteFlux(surfaceScalarField& phi) const;
+            void makeAbsolute(surfaceScalarField& phi) const;
 
             //- Make the given relative mass-flux absolute within the MRF region
-            void absoluteFlux
+            void makeAbsolute
             (
                 const surfaceScalarField& rho,
                 surfaceScalarField& phi
