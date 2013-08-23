@@ -42,8 +42,8 @@ boundaryField
     {
         type            totalPressure;
         p0              uniform 0;
-        U               Uair;
-        phi             phiair;
+        U               U.air;
+        phi             phi.air;
         rho             rho;
         psi             none;
         gamma           1;

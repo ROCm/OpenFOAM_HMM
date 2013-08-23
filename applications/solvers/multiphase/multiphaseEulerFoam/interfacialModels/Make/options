@@ -1,6 +1,6 @@
 EXE_INC = \
-    -I$(LIB_SRC)/finiteVolume/lnInclude \
-    -I../phaseModel/lnInclude
+    -I../multiphaseSystem/lnInclude \
+    -I$(LIB_SRC)/finiteVolume/lnInclude
 
 LIB_LIBS = \
-    -lcompressibleMultiPhaseModel
+    -lmultiphaseSystem

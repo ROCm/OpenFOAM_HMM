@@ -160,20 +160,20 @@ void Foam::MRFZoneList::addCoriolis
 }
 
 
-void Foam::MRFZoneList::relativeVelocity(volVectorField& U) const
+void Foam::MRFZoneList::makeRelative(volVectorField& U) const
 {
     forAll(*this, i)
     {
-        operator[](i).relativeVelocity(U);
+        operator[](i).makeRelative(U);
     }
 }
 
 
-void Foam::MRFZoneList::absoluteVelocity(volVectorField& U) const
+void Foam::MRFZoneList::makeAbsolute(volVectorField& U) const
 {
     forAll(*this, i)
     {
-        operator[](i).absoluteVelocity(U);
+        operator[](i).makeAbsolute(U);
     }
 }
 
@@ -184,6 +184,23 @@ void Foam::MRFZoneList::makeRelative(surfaceScalarField& phi) const
     {
         operator[](i).makeRelative(phi);
     }
+}
+
+
+Foam::tmp<Foam::FieldField<Foam::fvsPatchField, Foam::scalar> >
+Foam::MRFZoneList::relative
+(
+    const tmp<FieldField<fvsPatchField, scalar> >& phi
+) const
+{
+    tmp<FieldField<fvsPatchField, scalar> > rphi(phi);
+
+    forAll(*this, i)
+    {
+        operator[](i).makeRelative(rphi());
+    }
+
+    return rphi;
 }
 
 
