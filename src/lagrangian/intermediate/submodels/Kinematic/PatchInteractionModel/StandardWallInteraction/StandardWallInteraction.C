@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,7 +57,7 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
                 "StandardWallInteraction<CloudType>::StandardWallInteraction"
                 "("
                     "const dictionary&, "
-                    "CloudType& cloud"
+                    "CloudType&"
                 ")"
             )   << "Unknown interaction result type "
                 << interactionTypeName
@@ -174,10 +174,11 @@ bool Foam::StandardWallInteraction<CloudType>::correct
                 (
                     "bool StandardWallInteraction<CloudType>::correct"
                     "("
+                        "typename CloudType::parcelType&, "
                         "const polyPatch&, "
-                        "const label, "
-                        "bool&, "
-                        "vector&"
+                        "bool& keepParticle, "
+                        "const scalar, "
+                        "const tetIndices&"
                     ") const"
                 )   << "Unknown interaction type "
                     << this->interactionTypeToWord(interactionType_)
