@@ -670,6 +670,32 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInOutSide
                 continue;
             }
 
+            const searchableSurface& surface(allGeometry_[surfaces_[s]]);
+
+            if (!surface.hasVolumeType())
+            {
+                pointField sample(1, samplePts[i]);
+                scalarField nearestDistSqr(1, GREAT);
+                List<pointIndexHit> info;
+
+                surface.findNearest(sample, nearestDistSqr, info);
+
+                vector hitDir = info[0].rawPoint() - samplePts[i];
+                hitDir /= mag(hitDir) + SMALL;
+
+                if
+                (
+                    findSurfaceAnyIntersection
+                    (
+                        samplePts[i],
+                        info[0].rawPoint() - 1e-3*mag(hitDir)*(hitDir)
+                    )
+                )
+                {
+                    continue;
+                }
+            }
+
             if (surfaceVolumeTests[s][i] == volumeType::OUTSIDE)
             {
                 if
@@ -694,44 +720,6 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInOutSide
                     break;
                 }
             }
-//            else
-//            {
-//                // Surface volume type is unknown
-//                Info<< "UNKNOWN" << endl;
-//                // Get nearest face normal
-//
-//                pointField sample(1, samplePts[i]);
-//                scalarField nearestDistSqr(1, GREAT);
-//                List<pointIndexHit> info;
-//                vectorField norms(1);
-//
-//                surface.findNearest(sample, nearestDistSqr, info);
-//                surface.getNormal(info, norms);
-//
-//                vector fN = norms[0];
-//                fN /= mag(fN);
-//
-//                vector hitDir = info[0].rawPoint() - samplePts[i];
-//                hitDir /= mag(hitDir);
-//
-//                if ((fN & hitDir) < 0)
-//                {
-//                    // Point is OUTSIDE
-//
-//                    if
-//                    (
-//                        normalVolumeTypes_[regionI]
-//                     == extendedFeatureEdgeMesh::OUTSIDE
-//                    )
-//                    {
-//                    }
-//                    else
-//                    {
-//                        insidePoint[i] = false;
-//                        break;
-//                    }
-//                }
-//            }
         }
     }
 
