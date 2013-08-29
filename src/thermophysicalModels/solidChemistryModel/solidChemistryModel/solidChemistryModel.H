@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,6 +64,9 @@ class solidChemistryModel
     public ODE
 {
     // Private Member Functions
+
+        //- Disallow copy constructor
+        solidChemistryModel(const solidChemistryModel&);
 
         //- Disallow default bitwise assignment
         void operator=(const solidChemistryModel&);
@@ -151,6 +154,7 @@ public:
             label& rRef
         ) const = 0;
 
+
         //- Return the reaction rate for iReaction and the reference
         //  species and charateristic times
         virtual scalar omegaI
@@ -166,6 +170,10 @@ public:
             scalar& cr,
             label& rRef
         ) const = 0;
+
+        //- Calculates the reaction rates
+        virtual void calculate() = 0;
+
 
         //- Update concentrations in reaction i given dt and reaction rate
         // omega used by sequential solver
@@ -194,11 +202,8 @@ public:
             simpleMatrix<scalar>& RR
         ) const = 0;
 
-        //- Calculates the reaction rates
-        virtual void calculate() = 0;
 
-
-        // Chemistry model functions
+        // Solid Chemistry model functions
 
             //- Return const access to the chemical source terms for solids
             inline const DimensionedField<scalar, volMesh>& RRs
@@ -208,13 +213,6 @@ public:
 
             //- Return total solid source term
             inline tmp<DimensionedField<scalar, volMesh> > RRs() const;
-
-            //- Return const access to the total source terms
-            inline const DimensionedField<scalar, volMesh>& RR
-            (
-                const label i
-            ) const;
-
 
             //- Solve the reaction system for the given start time and time
             //  step and return the characteristic time

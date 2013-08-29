@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -92,18 +92,6 @@ Foam::solidChemistryModel<CompType, SolidThermo>::RRs() const
         }
     }
     return tRRs;
-}
-
-
-template<class CompType, class SolidThermo>
-inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
-Foam::solidChemistryModel<CompType, SolidThermo>::RR
-(
-    const label i
-) const
-{
-    notImplemented("solidChemistryModel::RR(const label)");
-    return (DimensionedField<scalar, volMesh>::null());
 }
 
 
