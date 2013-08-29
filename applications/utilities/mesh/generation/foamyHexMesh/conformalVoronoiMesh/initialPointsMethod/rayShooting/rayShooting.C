@@ -121,7 +121,7 @@ List<Vb::Point> rayShooting::initialPoints() const
             geometryToConformTo().findSurfaceNearest
             (
                  fC,
-                 sqr(SMALL),
+                 sqr(pert),
                  surfHitStart,
                  hitSurfaceStart
             );
@@ -145,63 +145,62 @@ List<Vb::Point> rayShooting::initialPoints() const
                 hitSurfaceEnd
             );
 
-            vectorField normEnd(1, vector::min);
-            geometryToConformTo().getNormal
-            (
-                hitSurfaceEnd,
-                List<pointIndexHit>(1, surfHitEnd),
-                normEnd
-            );
-
-            if
-            (
-                surfHitEnd.hit()
-             && ((normStart[0] & normEnd[0]) < 0)
-            )
+            if (surfHitEnd.hit())
             {
-                line<point, point> l(fC, surfHitEnd.hitPoint());
-
-                if (Pstream::parRun())
-                {
-                    // Clip the line in parallel
-                    pointIndexHit procIntersection =
-                        decomposition().findLine
-                        (
-                            l.start() + l.vec()*SMALL,
-                            l.end() - l.vec()*maxRayLength_
-                        );
-
-                    if (procIntersection.hit())
-                    {
-                        l =
-                            line<point, point>
-                            (
-                                l.start(),
-                                procIntersection.hitPoint()
-                            );
-                    }
-                }
-
-                Foam::point midPoint(l.centre());
-
-                const scalar minDistFromSurfaceSqr =
-                    minimumSurfaceDistanceCoeffSqr_
-                   *sqr(cellShapeControls().cellSize(midPoint));
-
-                if
+                vectorField normEnd(1, vector::min);
+                geometryToConformTo().getNormal
                 (
-                    magSqr(midPoint - l.start()) > minDistFromSurfaceSqr
-                 && magSqr(midPoint - l.end()) > minDistFromSurfaceSqr
-                )
+                    hitSurfaceEnd,
+                    List<pointIndexHit>(1, surfHitEnd),
+                    normEnd
+                );
+
+                if ((normStart[0] & normEnd[0]) < 0)
                 {
-                    if (randomiseInitialGrid_)
+                    line<point, point> l(fC, surfHitEnd.hitPoint());
+
+                    if (Pstream::parRun())
                     {
-                        midPoint.x() += pert*(rndGen().scalar01() - 0.5);
-                        midPoint.y() += pert*(rndGen().scalar01() - 0.5);
-                        midPoint.z() += pert*(rndGen().scalar01() - 0.5);
+                        // Clip the line in parallel
+                        pointIndexHit procIntersection =
+                            decomposition().findLine
+                            (
+                                l.start() + l.vec()*SMALL,
+                                l.end() - l.vec()*maxRayLength_
+                            );
+
+                        if (procIntersection.hit())
+                        {
+                            l =
+                                line<point, point>
+                                (
+                                    l.start(),
+                                    procIntersection.hitPoint()
+                                );
+                        }
                     }
 
-                    initialPoints.append(toPoint(midPoint));
+                    Foam::point midPoint(l.centre());
+
+                    const scalar minDistFromSurfaceSqr =
+                        minimumSurfaceDistanceCoeffSqr_
+                       *sqr(cellShapeControls().cellSize(midPoint));
+
+                    if
+                    (
+                        magSqr(midPoint - l.start()) > minDistFromSurfaceSqr
+                     && magSqr(midPoint - l.end()) > minDistFromSurfaceSqr
+                    )
+                    {
+                        if (randomiseInitialGrid_)
+                        {
+                            midPoint.x() += pert*(rndGen().scalar01() - 0.5);
+                            midPoint.y() += pert*(rndGen().scalar01() - 0.5);
+                            midPoint.z() += pert*(rndGen().scalar01() - 0.5);
+                        }
+
+                        initialPoints.append(toPoint(midPoint));
+                    }
                 }
             }
         }
