@@ -54,8 +54,6 @@ private:
 
     // Private data
 
-        const scalar maxRayLength_;
-
         //- Should the initial positions be randomised
         Switch randomiseInitialGrid_;
 
