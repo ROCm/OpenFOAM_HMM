@@ -59,7 +59,6 @@ rayShooting::rayShooting
         cellShapeControls,
         decomposition
     ),
-    maxRayLength_(readScalar(detailsDict().lookup("maxRayLength"))),
     randomiseInitialGrid_(detailsDict().lookup("randomiseInitialGrid")),
     randomPerturbationCoeff_
     (
@@ -75,6 +74,8 @@ List<Vb::Point> rayShooting::initialPoints() const
     // Loop over surface faces
     const searchableSurfaces& surfaces = geometryToConformTo().geometry();
     const labelList& surfacesToConformTo = geometryToConformTo().surfaces();
+
+    const scalar maxRayLength = surfaces.bounds().mag();
 
     // Initialise points list
     label initialPointsSize = 0;
@@ -140,7 +141,7 @@ List<Vb::Point> rayShooting::initialPoints() const
             geometryToConformTo().findSurfaceNearestIntersection
             (
                 fC - normStart[0]*SMALL,
-                fC - normStart[0]*maxRayLength_,
+                fC - normStart[0]*maxRayLength,
                 surfHitEnd,
                 hitSurfaceEnd
             );
@@ -166,7 +167,7 @@ List<Vb::Point> rayShooting::initialPoints() const
                             decomposition().findLine
                             (
                                 l.start() + l.vec()*SMALL,
-                                l.end() - l.vec()*maxRayLength_
+                                l.end() - l.vec()*maxRayLength
                             );
 
                         if (procIntersection.hit())
