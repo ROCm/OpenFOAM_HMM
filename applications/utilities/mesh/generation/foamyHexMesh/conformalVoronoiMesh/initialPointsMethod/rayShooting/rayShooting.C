@@ -140,7 +140,7 @@ List<Vb::Point> rayShooting::initialPoints() const
 
             geometryToConformTo().findSurfaceNearestIntersection
             (
-                fC - normStart[0]*SMALL,
+                fC - normStart[0]*pert,
                 fC - normStart[0]*maxRayLength,
                 surfHitEnd,
                 hitSurfaceEnd
@@ -166,8 +166,8 @@ List<Vb::Point> rayShooting::initialPoints() const
                         pointIndexHit procIntersection =
                             decomposition().findLine
                             (
-                                l.start() + l.vec()*SMALL,
-                                l.end() - l.vec()*maxRayLength
+                                l.start(),
+                                l.end()
                             );
 
                         if (procIntersection.hit())
@@ -187,19 +187,19 @@ List<Vb::Point> rayShooting::initialPoints() const
                         minimumSurfaceDistanceCoeffSqr_
                        *sqr(cellShapeControls().cellSize(midPoint));
 
+                    if (randomiseInitialGrid_)
+                    {
+                        midPoint.x() += pert*(rndGen().scalar01() - 0.5);
+                        midPoint.y() += pert*(rndGen().scalar01() - 0.5);
+                        midPoint.z() += pert*(rndGen().scalar01() - 0.5);
+                    }
+
                     if
                     (
                         magSqr(midPoint - l.start()) > minDistFromSurfaceSqr
                      && magSqr(midPoint - l.end()) > minDistFromSurfaceSqr
                     )
                     {
-                        if (randomiseInitialGrid_)
-                        {
-                            midPoint.x() += pert*(rndGen().scalar01() - 0.5);
-                            midPoint.y() += pert*(rndGen().scalar01() - 0.5);
-                            midPoint.z() += pert*(rndGen().scalar01() - 0.5);
-                        }
-
                         initialPoints.append(toPoint(midPoint));
                     }
                 }
