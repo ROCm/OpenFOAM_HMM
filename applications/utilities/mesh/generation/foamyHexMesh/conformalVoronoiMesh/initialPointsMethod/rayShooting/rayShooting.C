@@ -37,6 +37,90 @@ namespace Foam
 defineTypeNameAndDebug(rayShooting, 0);
 addToRunTimeSelectionTable(initialPointsMethod, rayShooting, dictionary);
 
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void rayShooting::splitLine
+(
+    const line<point, point>& l,
+    const scalar& pert,
+    DynamicList<Vb::Point>& initialPoints
+) const
+{
+    Foam::point midPoint(l.centre());
+    const scalar localCellSize(cellShapeControls().cellSize(midPoint));
+    const scalar lineLength(l.mag());
+
+    const scalar minDistFromSurfaceSqr
+    (
+        minimumSurfaceDistanceCoeffSqr_
+       *sqr(localCellSize)
+    );
+
+    if
+    (
+        magSqr(midPoint - l.start()) > minDistFromSurfaceSqr
+     && magSqr(midPoint - l.end()) > minDistFromSurfaceSqr
+    )
+    {
+        // Add extra points if line length is much bigger than local cell size
+//        if (lineLength > 4.0*localCellSize)
+//        {
+//            splitLine
+//            (
+//                line<point, point>(l.start(), midPoint),
+//                pert,
+//                initialPoints
+//            );
+//
+//            splitLine
+//            (
+//                line<point, point>(midPoint, l.end()),
+//                pert,
+//                initialPoints
+//            );
+//        }
+
+        if (randomiseInitialGrid_)
+        {
+            Foam::point newPt
+            (
+                midPoint.x() + pert*(rndGen().scalar01() - 0.5),
+                midPoint.y() + pert*(rndGen().scalar01() - 0.5),
+                midPoint.z() + pert*(rndGen().scalar01() - 0.5)
+            );
+
+            if
+            (
+                !geometryToConformTo().findSurfaceAnyIntersection
+                (
+                    midPoint,
+                    newPt
+                )
+            )
+            {
+                midPoint = newPt;
+            }
+            else
+            {
+                WarningIn
+                (
+                    "rayShooting::splitLine"
+                    "("
+                    "   const line<point,point>&,"
+                    "   const scalar&,"
+                    "   DynamicList<Vb::Point>&"
+                    ")"
+                )   << "Point perturbation crosses a surface. Not inserting."
+                    << endl;
+            }
+        }
+
+        initialPoints.append(toPoint(midPoint));
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 rayShooting::rayShooting
@@ -75,7 +159,7 @@ List<Vb::Point> rayShooting::initialPoints() const
     const searchableSurfaces& surfaces = geometryToConformTo().geometry();
     const labelList& surfacesToConformTo = geometryToConformTo().surfaces();
 
-    const scalar maxRayLength = surfaces.bounds().mag();
+    const scalar maxRayLength(surfaces.bounds().mag());
 
     // Initialise points list
     label initialPointsSize = 0;
@@ -94,8 +178,7 @@ List<Vb::Point> rayShooting::initialPoints() const
         const pointField& faceCentres = faceCentresTmp();
 
         Info<< "    Shoot rays from " << s.name() << nl
-            << "    nRays = " << faceCentres.size() << endl;
-
+            << "        nRays = " << faceCentres.size() << endl;
 
         forAll(faceCentres, fcI)
         {
@@ -110,9 +193,11 @@ List<Vb::Point> rayShooting::initialPoints() const
                 continue;
             }
 
-            const scalar pert =
+            const scalar pert
+            (
                 randomPerturbationCoeff_
-               *cellShapeControls().cellSize(fC);
+               *cellShapeControls().cellSize(fC)
+            );
 
             pointIndexHit surfHitStart;
             label hitSurfaceStart;
@@ -181,27 +266,12 @@ List<Vb::Point> rayShooting::initialPoints() const
                         }
                     }
 
-                    Foam::point midPoint(l.centre());
-
-                    const scalar minDistFromSurfaceSqr =
-                        minimumSurfaceDistanceCoeffSqr_
-                       *sqr(cellShapeControls().cellSize(midPoint));
-
-                    if (randomiseInitialGrid_)
-                    {
-                        midPoint.x() += pert*(rndGen().scalar01() - 0.5);
-                        midPoint.y() += pert*(rndGen().scalar01() - 0.5);
-                        midPoint.z() += pert*(rndGen().scalar01() - 0.5);
-                    }
-
-                    if
+                    splitLine
                     (
-                        magSqr(midPoint - l.start()) > minDistFromSurfaceSqr
-                     && magSqr(midPoint - l.end()) > minDistFromSurfaceSqr
-                    )
-                    {
-                        initialPoints.append(toPoint(midPoint));
-                    }
+                        l,
+                        pert,
+                        initialPoints
+                    );
                 }
             }
         }
