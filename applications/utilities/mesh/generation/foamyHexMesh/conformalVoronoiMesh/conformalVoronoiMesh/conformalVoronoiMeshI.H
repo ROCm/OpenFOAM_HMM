@@ -225,18 +225,19 @@ inline void Foam::conformalVoronoiMesh::createPointPair
     const scalar ppDist,
     const Foam::point& surfPt,
     const vector& n,
+    const bool ptPair,
     DynamicList<Vb>& pts
 ) const
 {
     vector ppDistn = ppDist*n;
 
-    const Foam::point internalPt = surfPt - ppDistn;
-    const Foam::point externalPt = surfPt + ppDistn;
+//    const Foam::point internalPt = surfPt - ppDistn;
+//    const Foam::point externalPt = surfPt + ppDistn;
 
-    bool internalInside = geometryToConformTo_.inside(internalPt);
-    bool externalOutside = geometryToConformTo_.outside(externalPt);
+//    bool internalInside = geometryToConformTo_.inside(internalPt);
+//    bool externalOutside = geometryToConformTo_.outside(externalPt);
 
-    if (internalInside && externalOutside)
+//    if (internalInside && externalOutside)
     {
         pts.append
         (
@@ -259,15 +260,24 @@ inline void Foam::conformalVoronoiMesh::createPointPair
                 Pstream::myProcNo()
             )
         );
+
+        if (ptPair)
+        {
+            ptPairs_.addPointPair
+            (
+                pts[pts.size() - 2].index(),
+                pts[pts.size() - 1].index() // external 0 -> slave
+            );
+        }
     }
-    else
-    {
-        Info<< "Warning: point pair not inside/outside" << nl
-            << "    surfPt = " << surfPt << nl
-            << "    internal = " << internalPt << " " << internalInside << nl
-            << "    external = " << externalPt << " " << externalOutside
-            << endl;
-    }
+//    else
+//    {
+//        Info<< "Warning: point pair not inside/outside" << nl
+//            << "    surfPt = " << surfPt << nl
+//            << "    internal = " << internalPt << " " << internalInside << nl
+//            << "    external = " << externalPt << " " << externalOutside
+//            << endl;
+//    }
 }
 
 
