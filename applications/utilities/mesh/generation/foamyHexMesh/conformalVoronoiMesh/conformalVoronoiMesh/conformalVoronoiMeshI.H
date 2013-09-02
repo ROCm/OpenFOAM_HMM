@@ -225,7 +225,6 @@ inline void Foam::conformalVoronoiMesh::createPointPair
     const scalar ppDist,
     const Foam::point& surfPt,
     const vector& n,
-    const bool ptPair,
     DynamicList<Vb>& pts
 ) const
 {
