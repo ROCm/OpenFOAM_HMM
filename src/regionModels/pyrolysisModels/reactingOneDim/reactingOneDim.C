@@ -61,6 +61,9 @@ void reactingOneDim::readReactingOneDimControls()
 
     coeffs().lookup("gasHSource") >> gasHSource_;
     coeffs().lookup("QrHSource") >> QrHSource_;
+    useChemistrySolvers_ =
+        coeffs().lookupOrDefault<bool>("useChemistrySolvers", true);
+
 }
 
 
@@ -321,6 +324,8 @@ void reactingOneDim::solveEnergy()
     (
         fvm::ddt(rho_, h_)
       - fvm::laplacian(alpha, h_)
+      + fvc::laplacian(alpha, h_)
+      - fvc::laplacian(kappa(), T())
      ==
         chemistrySh_
       - fvm::Sp(solidChemistry_->RRg(), h_)
@@ -462,7 +467,8 @@ reactingOneDim::reactingOneDim(const word& modelType, const fvMesh& mesh)
     totalGasMassFlux_(0.0),
     totalHeatRR_(dimensionedScalar("zero", dimEnergy/dimTime, 0.0)),
     gasHSource_(false),
-    QrHSource_(false)
+    QrHSource_(false),
+    useChemistrySolvers_(true)
 {
     if (active_)
     {
@@ -560,7 +566,8 @@ reactingOneDim::reactingOneDim
     totalGasMassFlux_(0.0),
     totalHeatRR_(dimensionedScalar("zero", dimEnergy/dimTime, 0.0)),
     gasHSource_(false),
-    QrHSource_(false)
+    QrHSource_(false),
+    useChemistrySolvers_(true)
 {
     if (active_)
     {
@@ -681,11 +688,18 @@ void reactingOneDim::evolveRegion()
 {
     Info<< "\nEvolving pyrolysis in region: " << regionMesh().name() << endl;
 
-    solidChemistry_->solve
-    (
-        time().value() - time().deltaTValue(),
-        time().deltaTValue()
-    );
+    if (useChemistrySolvers_)
+    {
+        solidChemistry_->solve
+        (
+            time().value() - time().deltaTValue(),
+            time().deltaTValue()
+        );
+    }
+    else
+    {
+        solidChemistry_->calculate();
+    }
 
     solveContinuity();
 
