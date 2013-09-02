@@ -295,14 +295,14 @@ void Foam::controlMeshRefinement::initialMeshPopulation
                     shapeController_.minimumCellSize()
                 );
             }
-            else if (maxPriority == controlFunction.maxPriority())
-            {
-                vertices[vI].targetCellSize() = max
-                (
-                    min(sizes[vI], size),
-                    shapeController_.minimumCellSize()
-                );
-            }
+//            else if (maxPriority == controlFunction.maxPriority())
+//            {
+//                vertices[vI].targetCellSize() = max
+//                (
+//                    min(sizes[vI], size),
+//                    shapeController_.minimumCellSize()
+//                );
+//            }
             else
             {
                 vertices[vI].targetCellSize() = max
