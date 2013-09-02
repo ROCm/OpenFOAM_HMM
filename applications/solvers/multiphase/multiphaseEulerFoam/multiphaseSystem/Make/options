@@ -10,5 +10,4 @@ EXE_INC = \
 LIB_LIBS = \
     -linterfaceProperties \
     -lincompressibleTransportModels \
-    -lcompressibleMultiphaseEulerianInterfacialModels \
     -lfiniteVolume
