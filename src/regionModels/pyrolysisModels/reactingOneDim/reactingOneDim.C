@@ -32,6 +32,7 @@ License
 #include "fvcVolumeIntegrate.H"
 #include "fvMatrices.H"
 #include "absorptionEmissionModel.H"
+#include "fvcLaplacian.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
