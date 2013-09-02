@@ -550,53 +550,130 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation()
             }
         }
 
+//        for
+//        (
+//            Delaunay::Finite_edges_iterator eit = finite_edges_begin();
+//            eit != finite_edges_end();
+//            ++eit
+//        )
+//        {
+//            Cell_handle c = eit->first;
+//            Vertex_handle vA = c->vertex(eit->second);
+//            Vertex_handle vB = c->vertex(eit->third);
+//
+//            if
+//            (
+//                vA->referred()
+//             || vB->referred()
+//            )
+//            {
+//                continue;
+//            }
+//
+//            if
+//            (
+//                (vA->internalPoint() && vA->referred())
+//             || (vB->internalPoint() && vB->referred())
+//            )
+//            {
+//                continue;
+//            }
+//
+//            if
+//            (
+//                (vA->internalPoint() && vB->externalBoundaryPoint())
+//             || (vB->internalPoint() && vA->externalBoundaryPoint())
+//             || (vA->internalBoundaryPoint() && vB->internalBoundaryPoint())
+//            )
+//            {
+//                pointIndexHitAndFeatureDynList surfaceIntersections(0.5*AtoV);
+//                pointIndexHit surfHit;
+//                label hitSurface;
+//
+//                geometryToConformTo_.findSurfaceNearest
+//                (
+//                    (
+//                        vA->internalPoint()
+//                      ? topoint(vA->point())
+//                      : topoint(vB->point())
+//                    ),
+//                    magSqr(topoint(vA->point()) - topoint(vB->point())),
+//                    surfHit,
+//                    hitSurface
+//                );
+//
+//                if (surfHit.hit())
+//                {
+//                    surfaceIntersections.append
+//                    (
+//                        pointIndexHitAndFeature(surfHit, hitSurface)
+//                    );
+//
+//                    addSurfaceAndEdgeHits
+//                    (
+//                        (
+//                            vA->internalPoint()
+//                          ? topoint(vA->point())
+//                          : topoint(vB->point())
+//                        ),
+//                        surfaceIntersections,
+//                        surfacePtReplaceDistCoeffSqr,
+//                        edgeSearchDistCoeffSqr,
+//                        surfaceHits,
+//                        featureEdgeHits,
+//                        surfaceToTreeShape,
+//                        edgeToTreeShape,
+//                        surfacePtToEdgePtDist,
+//                        false
+//                    );
+//                }
+//            }
+//        }
+
         for
         (
-            Delaunay::Finite_edges_iterator eit = finite_edges_begin();
-            eit != finite_edges_end();
-            ++eit
+            Delaunay::Finite_cells_iterator cit = finite_cells_begin();
+            cit != finite_cells_end();
+            ++cit
         )
         {
-            Cell_handle c = eit->first;
-            Vertex_handle vA = c->vertex(eit->second);
-            Vertex_handle vB = c->vertex(eit->third);
-
-            if
-            (
-                vA->referred()
-             || vB->referred()
-            )
+            label nInternal = 0;
+            for (label vI = 0; vI < 4; vI++)
             {
-                continue;
+                if (cit->vertex(vI)->internalPoint())
+                {
+                    nInternal++;
+                }
             }
 
-            if
-            (
-                (vA->internalPoint() && vA->referred())
-             || (vB->internalPoint() && vB->referred())
-            )
+            if (nInternal == 1 && cit->hasBoundaryPoint())
+            //if (cit->boundaryDualVertex() && !cit->hasReferredPoint())
             {
-                continue;
-            }
+                const Foam::point& pt = cit->dual();
 
-            if
-            (
-                (vA->internalPoint() && vB->externalBoundaryPoint())
-             || (vB->internalPoint() && vA->externalBoundaryPoint())
-            )
-            {
+                const Foam::point cellCentre =
+                    topoint
+                    (
+                        CGAL::centroid
+                        (
+                            CGAL::Tetrahedron_3<baseK>
+                            (
+                                cit->vertex(0)->point(),
+                                cit->vertex(1)->point(),
+                                cit->vertex(2)->point(),
+                                cit->vertex(3)->point()
+                            )
+                        )
+                    );
+
                 pointIndexHitAndFeatureDynList surfaceIntersections(0.5*AtoV);
                 pointIndexHit surfHit;
                 label hitSurface;
 
-                geometryToConformTo_.findSurfaceNearest
+                geometryToConformTo_.findSurfaceNearestIntersection
                 (
-                    (
-                        vA->internalPoint()
-                      ? topoint(vA->point())
-                      : topoint(vB->point())
-                    ),
-                    magSqr(topoint(vA->point()) - topoint(vB->point())),
+                    cellCentre,
+                    pt,
                     surfHit,
                     hitSurface
                 );
@@ -610,11 +687,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation()
 
                     addSurfaceAndEdgeHits
                     (
-                        (
-                            vA->internalPoint()
-                          ? topoint(vA->point())
-                          : topoint(vB->point())
-                        ),
+                        pt,
                         surfaceIntersections,
                         surfacePtReplaceDistCoeffSqr,
                         edgeSearchDistCoeffSqr,
