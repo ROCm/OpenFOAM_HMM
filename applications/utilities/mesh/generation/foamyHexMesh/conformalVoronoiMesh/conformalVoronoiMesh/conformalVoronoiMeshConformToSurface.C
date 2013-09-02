@@ -1750,17 +1750,19 @@ bool Foam::conformalVoronoiMesh::nearSurfacePoint
     const Foam::point& pt = pHit.first().hitPoint();
 
     pointIndexHit closePoint;
-
     const bool closeToSurfacePt = pointIsNearSurfaceLocation(pt, closePoint);
 
     if
     (
         closeToSurfacePt
-     && mag(pt - closePoint.hitPoint()) > pointPairDistance(pt)
+     && (
+            magSqr(pt - closePoint.hitPoint())
+          > sqr(pointPairDistance(pt))
+        )
     )
     {
-        const scalar cosAngle
-            = angleBetweenSurfacePoints(pt, closePoint.hitPoint());
+        const scalar cosAngle =
+            angleBetweenSurfacePoints(pt, closePoint.hitPoint());
 
         // @todo make this tolerance run-time selectable?
         if (cosAngle < searchAngleOppositeSurface)
@@ -1769,11 +1771,6 @@ bool Foam::conformalVoronoiMesh::nearSurfacePoint
             label pCloseSurfaceHit = -1;
 
             const scalar searchDist = targetCellSize(closePoint.hitPoint());
-
-            if (searchDist < SMALL)
-            {
-                Pout<< "WARNING: SMALL CELL SIZE" << endl;
-            }
 
             geometryToConformTo_.findSurfaceNearest
             (
@@ -1791,15 +1788,15 @@ bool Foam::conformalVoronoiMesh::nearSurfacePoint
                 norm
             );
 
-            const vector nA = norm[0];
+            const vector& nA = norm[0];
 
             pointIndexHit oppositeHit;
             label oppositeSurfaceHit = -1;
 
             geometryToConformTo_.findSurfaceNearestIntersection
             (
-                closePoint.hitPoint() + SMALL*nA,
-                closePoint.hitPoint() + mag(pt - closePoint.hitPoint())*nA,
+                closePoint.hitPoint() + 0.5*pointPairDistance(pt)*nA,
+                closePoint.hitPoint() + 5*targetCellSize(pt)*nA,
                 oppositeHit,
                 oppositeSurfaceHit
             );
@@ -1810,20 +1807,9 @@ bool Foam::conformalVoronoiMesh::nearSurfacePoint
                 pHit.first() = oppositeHit;
                 pHit.second() = oppositeSurfaceHit;
 
-//                appendToSurfacePtTree(pHit.first().hitPoint());
-//                surfaceToTreeShape.append
-//                (
-//                    existingSurfacePtLocations_.size() - 1
-//                );
-
                 return !closeToSurfacePt;
             }
         }
-    }
-    else
-    {
-//        appendToSurfacePtTree(pt);
-//        surfaceToTreeShape.append(existingSurfacePtLocations_.size() - 1);
     }
 
     return closeToSurfacePt;
