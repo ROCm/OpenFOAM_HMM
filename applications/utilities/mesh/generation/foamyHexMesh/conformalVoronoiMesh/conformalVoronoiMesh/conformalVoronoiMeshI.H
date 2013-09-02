@@ -260,14 +260,14 @@ inline void Foam::conformalVoronoiMesh::createPointPair
             )
         );
 
-        if (ptPair)
-        {
-            ptPairs_.addPointPair
-            (
-                pts[pts.size() - 2].index(),
-                pts[pts.size() - 1].index() // external 0 -> slave
-            );
-        }
+//        if (ptPair)
+//        {
+//            ptPairs_.addPointPair
+//            (
+//                pts[pts.size() - 2].index(),
+//                pts[pts.size() - 1].index() // external 0 -> slave
+//            );
+//        }
     }
 //    else
 //    {
