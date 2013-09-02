@@ -21,6 +21,7 @@ solution
     coupled         no;
     transient       yes;
     cellValueSourceCorrection no;
+    maxCo           0.3;
 
     sourceTerms
     {

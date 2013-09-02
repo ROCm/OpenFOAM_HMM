@@ -271,6 +271,8 @@ bool Foam::KinematicParcel<ParcelType>::move
     scalar tEnd = (1.0 - p.stepFraction())*trackTime;
     const scalar dtMax = tEnd;
 
+    bool moving = true;
+
     while (td.keepParticle && !td.switchProcessor && tEnd > ROOTVSMALL)
     {
         // Apply correction to position for reduced-D cases
@@ -281,12 +283,11 @@ bool Foam::KinematicParcel<ParcelType>::move
         // Set the Lagrangian time-step
         scalar dt = min(dtMax, tEnd);
 
-        // Remember which cell the parcel is in since this will change if
-        // a face is hit
+        // Cache the parcel current cell as this will change if a face is hit
         const label cellI = p.cell();
 
         const scalar magU = mag(U_);
-        if (p.active() && magU > ROOTVSMALL)
+        if (p.active() && moving && (magU > ROOTVSMALL))
         {
             const scalar d = dt*magU;
             const scalar dCorr = min(d, maxCo*cbrt(V[cellI]));
@@ -296,7 +297,19 @@ bool Foam::KinematicParcel<ParcelType>::move
         }
 
         tEnd -= dt;
-        p.stepFraction() = 1.0 - tEnd/trackTime;
+
+        scalar newStepFraction = 1.0 - tEnd/trackTime;
+
+        if
+        (
+            mag(p.stepFraction() - newStepFraction)
+          < particle::minStepFractionTol
+        )
+        {
+            moving = false;
+        }
+
+        p.stepFraction() = newStepFraction;
 
         // Avoid problems with extremely small timesteps
         if (dt > ROOTVSMALL)

@@ -21,6 +21,7 @@ solution
     coupled         true;
     transient       yes;
     cellValueSourceCorrection on;
+    maxCo           0.3;
 
     sourceTerms
     {
@@ -41,7 +42,7 @@ solution
         thermo:mu       cell;
         T               cell;
         Cp              cell;
-        kapppa          cell;
+        kappa           cell;
         p               cell;
     }
 

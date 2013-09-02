@@ -472,7 +472,6 @@ void Foam::topoSet::invert(const label maxLen)
             insert(cellI);
         }
     }
-
 }
 
 
@@ -550,20 +549,6 @@ void Foam::topoSet::writeDebug(Ostream& os, const label maxLen) const
 }
 
 
-//void Foam::topoSet::writeDebug
-//(
-//    Ostream&,
-//    const primitiveMesh&,
-//    const label
-//) const
-//{
-//    notImplemented
-//    (
-//        "topoSet::writeDebug(Ostream&, const primitiveMesh&, const label)"
-//    );
-//}
-
-
 bool Foam::topoSet::writeData(Ostream& os) const
 {
     return (os << *this).good();
@@ -575,14 +560,6 @@ void Foam::topoSet::updateMesh(const mapPolyMesh&)
     notImplemented("topoSet::updateMesh(const mapPolyMesh&)");
 }
 
-
-////- Return max index+1.
-//label topoSet::maxSize(const polyMesh&) const
-//{
-//    notImplemented("topoSet::maxSize(const polyMesh&)");
-//
-//    return -1;
-//}
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -96,6 +96,7 @@ void Foam::layerAdditionRemoval::checkDefinition()
     }
 }
 
+
 Foam::scalar Foam::layerAdditionRemoval::readOldThickness
 (
     const dictionary& dict
@@ -115,7 +116,6 @@ void Foam::layerAdditionRemoval::clearAddressing() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::layerAdditionRemoval::layerAdditionRemoval
 (
     const word& name,
@@ -140,7 +140,6 @@ Foam::layerAdditionRemoval::layerAdditionRemoval
 }
 
 
-// Construct from dictionary
 Foam::layerAdditionRemoval::layerAdditionRemoval
 (
     const word& name,
@@ -377,7 +376,7 @@ void Foam::layerAdditionRemoval::setRefinement(polyTopoChange& ref) const
         // Clear addressing.  This also resets the addition/removal data
         if (debug)
         {
-            Pout<< "layerAdditionRemoval::setRefinement(polyTopoChange& ref) "
+            Pout<< "layerAdditionRemoval::setRefinement(polyTopoChange&) "
                 << " for object " << name() << " : "
                 << "Clearing addressing after layer removal. " << endl;
         }
@@ -393,7 +392,7 @@ void Foam::layerAdditionRemoval::setRefinement(polyTopoChange& ref) const
         // Clear addressing.  This also resets the addition/removal data
         if (debug)
         {
-            Pout<< "layerAdditionRemoval::setRefinement(polyTopoChange& ref) "
+            Pout<< "layerAdditionRemoval::setRefinement(polyTopoChange&) "
                 << " for object " << name() << " : "
                 << "Clearing addressing after layer addition. " << endl;
         }
@@ -431,16 +430,14 @@ void Foam::layerAdditionRemoval::updateMesh(const mapPolyMesh&)
 
 void Foam::layerAdditionRemoval::setMinLayerThickness(const scalar t) const
 {
-    if
-    (
-        t < VSMALL
-     || maxLayerThickness_ < t
-    )
+    if (t < VSMALL || maxLayerThickness_ < t)
     {
         FatalErrorIn
         (
-            "void layerAdditionRemoval::setMinLayerThickness("
-            "const scalar t) const"
+            "void layerAdditionRemoval::setMinLayerThickness"
+            "("
+                "const scalar"
+            ") const"
         )   << "Incorrect layer thickness definition."
             << abort(FatalError);
     }
@@ -451,15 +448,14 @@ void Foam::layerAdditionRemoval::setMinLayerThickness(const scalar t) const
 
 void Foam::layerAdditionRemoval::setMaxLayerThickness(const scalar t) const
 {
-    if
-    (
-        t < minLayerThickness_
-    )
+    if (t < minLayerThickness_)
     {
         FatalErrorIn
         (
-            "void layerAdditionRemoval::setMaxLayerThickness("
-            "const scalar t) const"
+            "void layerAdditionRemoval::setMaxLayerThickness"
+            "("
+                "const scalar"
+            ") const"
         )   << "Incorrect layer thickness definition."
             << abort(FatalError);
     }

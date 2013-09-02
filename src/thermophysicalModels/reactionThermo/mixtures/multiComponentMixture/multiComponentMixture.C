@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,12 +49,23 @@ const ThermoType& Foam::multiComponentMixture<ThermoType>::constructSpeciesData
 template<class ThermoType>
 void Foam::multiComponentMixture<ThermoType>::correctMassFractions()
 {
-    // It changes Yt patches to "calculated"
+    // Multiplication by 1.0 changes Yt patches to "calculated"
     volScalarField Yt("Yt", 1.0*Y_[0]);
 
     for (label n=1; n<Y_.size(); n++)
     {
         Yt += Y_[n];
+    }
+
+    if (mag(max(Yt).value()) < ROOTVSMALL)
+    {
+        FatalErrorIn
+        (
+            "void Foam::multiComponentMixture<ThermoType>::"
+            "correctMassFractions()"
+        )
+            << "Sum of mass fractions is zero for species " << this->species()
+            << exit(FatalError);
     }
 
     forAll(Y_, n)

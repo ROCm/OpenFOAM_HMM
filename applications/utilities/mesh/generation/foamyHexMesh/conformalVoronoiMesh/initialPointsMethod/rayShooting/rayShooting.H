@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,70 +21,80 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::rayShooting
+
+Description
+
+SourceFiles
+    rayShooting.C
+
 \*---------------------------------------------------------------------------*/
 
-#ifndef steadyParticleTracksTemplates_H
-#define steadyParticleTracksTemplates_H
+#ifndef rayShooting_H
+#define rayShooting_H
 
-#include "OFstream.H"
-#include "SortableList.H"
-#include "IOobjectList.H"
-#include "PtrList.H"
-#include "Field.H"
+#include "initialPointsMethod.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+/*---------------------------------------------------------------------------*\
+                        Class rayShooting Declaration
+\*---------------------------------------------------------------------------*/
 
-    bool fieldOk(const IOobjectList& cloudObjs, const word& name);
+class rayShooting
+:
+    public initialPointsMethod
+{
 
-    template<class Type>
-    tmp<Field<Type> > readParticleField
-    (
-        const word& name,
-        const IOobjectList cloudObjs
-    );
+private:
 
-    template<class Type>
-    void readFields
-    (
-        PtrList<List<Type> >& values,
-        const List<word>& fields,
-        const IOobjectList& cloudObjs
-    );
+    // Private data
 
-    template<class Type>
-    void writeVTK(OFstream& os, const Type& value);
+        //- Should the initial positions be randomised
+        Switch randomiseInitialGrid_;
 
-    template<class Type>
-    void writeVTKFields
-    (
-        OFstream& os,
-        const PtrList<List<Type> >& values,
-        const List<SortableList<scalar> >& agePerTrack,
-        const List<word>& fieldNames
-    );
+        //- Randomise the initial positions by fraction of the initialCellSize_
+        scalar randomPerturbationCoeff_;
 
-    void processFields
-    (
-        OFstream& os,
-        const List<SortableList<scalar> >& agePerTrack,
-        const List<word>& userFieldNames,
-        const IOobjectList& cloudObjs
-    );
+
+public:
+
+    //- Runtime type information
+    TypeName("rayShooting");
+
+    // Constructors
+
+        //- Construct from components
+        rayShooting
+        (
+            const dictionary& initialPointsDict,
+            const Time& runTime,
+            Random& rndGen,
+            const conformationSurfaces& geometryToConformTo,
+            const cellShapeControl& cellShapeControls,
+            const autoPtr<backgroundMeshDecomposition>& decomposition
+        );
+
+
+    //- Destructor
+    virtual ~rayShooting()
+    {}
+
+
+    // Member Functions
+
+        //- Return the initial points for the conformalVoronoiMesh
+        virtual List<Vb::Point> initialPoints() const;
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "steadyParticleTracksTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -52,9 +52,8 @@ namespace Foam
     defineTemplateTypeNameAndDebugWithName                                    \
     (                                                                         \
         SS##Schem##Comp##SThermo##GThermo,                                    \
-        (#SS"<" + word(Schem::typeName_())                                    \
-      + "<"#Comp"," + SThermo::typeName()                                     \
-      + "," + GThermo::typeName() + ">>").c_str(),                            \
+        (#SS"<"#Schem"<"#Comp"," + SThermo::typeName() + ","                  \
+      + GThermo::typeName() + ">>").c_str(),                                  \
         0                                                                     \
     );                                                                        \
                                                                               \
@@ -77,14 +76,6 @@ namespace Foam
         GThermo                                                               \
     );                                                                        \
                                                                               \
-    makeSolidChemistrySolverType                                              \
-    (                                                                         \
-        EulerImplicit,                                                        \
-        SolidChem,                                                            \
-        Comp,                                                                 \
-        SThermo,                                                              \
-        GThermo                                                               \
-    );                                                                        \
                                                                               \
     makeSolidChemistrySolverType                                              \
     (                                                                         \
@@ -103,7 +94,6 @@ namespace Foam
         SThermo,                                                              \
         GThermo                                                               \
     );
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
