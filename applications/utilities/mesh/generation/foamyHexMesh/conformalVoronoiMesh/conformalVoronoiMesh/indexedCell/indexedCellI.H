@@ -229,6 +229,19 @@ inline bool CGAL::indexedCell<Gt, Cb>::hasInternalPoint() const
 
 
 template<class Gt, class Cb>
+inline bool CGAL::indexedCell<Gt, Cb>::hasBoundaryPoint() const
+{
+    return
+    (
+        this->vertex(0)->boundaryPoint()
+     || this->vertex(1)->boundaryPoint()
+     || this->vertex(2)->boundaryPoint()
+     || this->vertex(3)->boundaryPoint()
+    );
+}
+
+
+template<class Gt, class Cb>
 inline bool CGAL::indexedCell<Gt, Cb>::hasConstrainedPoint() const
 {
     return

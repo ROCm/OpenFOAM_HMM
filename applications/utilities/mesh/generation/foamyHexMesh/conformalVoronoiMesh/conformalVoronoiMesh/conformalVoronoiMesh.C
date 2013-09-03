@@ -1487,8 +1487,13 @@ void Foam::conformalVoronoiMesh::move()
     // Save displacements to file.
     if (foamyHexMeshControls().objOutput() && time().outputTime())
     {
-        Pout<< "Writing point displacement vectors to file." << endl;
-        OFstream str("displacements_" + runTime_.timeName() + ".obj");
+        Info<< "Writing point displacement vectors to file." << endl;
+        OFstream str
+        (
+            time().path()
+          + "displacements_" + runTime_.timeName()
+          + ".obj"
+        );
 
         for
         (
