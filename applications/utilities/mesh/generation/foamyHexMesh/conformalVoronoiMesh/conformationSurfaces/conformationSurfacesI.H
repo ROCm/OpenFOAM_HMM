@@ -56,6 +56,13 @@ const Foam::List<Foam::word>& Foam::conformationSurfaces::patchNames() const
 }
 
 
+const Foam::PtrList<Foam::surfaceZonesInfo>&
+Foam::conformationSurfaces::surfZones() const
+{
+    return surfZones_;
+}
+
+
 const Foam::PtrList<Foam::dictionary>&
 Foam::conformationSurfaces::patchInfo() const
 {

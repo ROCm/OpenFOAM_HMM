@@ -927,7 +927,10 @@ void Foam::autoRefineDriver::zonify
     // into that surface's faceZone. All cells inside faceZone get given the
     // same cellZone.
 
-    if (meshRefiner_.surfaces().getNamedSurfaces().size())
+    const labelList namedSurfaces =
+        surfaceZonesInfo::getNamedSurfaces(meshRefiner_.surfaces().surfZones());
+
+    if (namedSurfaces.size())
     {
         Info<< nl
             << "Introducing zones for interfaces" << nl

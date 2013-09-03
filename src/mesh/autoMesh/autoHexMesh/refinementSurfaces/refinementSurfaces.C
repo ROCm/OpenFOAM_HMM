@@ -33,45 +33,6 @@ License
 #include "UPtrList.H"
 #include "volumeType.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::refinementSurfaces::areaSelectionAlgo,
-        4
-    >::names[] =
-    {
-        "inside",
-        "outside",
-        "insidePoint",
-        "none"
-    };
-}
-const Foam::NamedEnum<Foam::refinementSurfaces::areaSelectionAlgo, 4>
-    Foam::refinementSurfaces::areaSelectionAlgoNames;
-
-
-namespace Foam
-{
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::refinementSurfaces::faceZoneType,
-        3
-    >::names[] =
-    {
-        "internal",
-        "baffle",
-        "boundary"
-    };
-}
-const Foam::NamedEnum<Foam::refinementSurfaces::faceZoneType, 3>
-    Foam::refinementSurfaces::faceZoneTypeNames;
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::refinementSurfaces::refinementSurfaces
@@ -84,19 +45,15 @@ Foam::refinementSurfaces::refinementSurfaces
     allGeometry_(allGeometry),
     surfaces_(surfacesDict.size()),
     names_(surfacesDict.size()),
-    faceZoneNames_(surfacesDict.size()),
-    cellZoneNames_(surfacesDict.size()),
-    zoneInside_(surfacesDict.size(), NONE),
-    zoneInsidePoints_(surfacesDict.size()),
-    faceType_(surfacesDict.size(), INTERNAL),
+    surfZones_(surfacesDict.size()),
     regionOffset_(surfacesDict.size())
 {
-    // Wilcard specification : loop over all surface, all regions
+    // Wildcard specification : loop over all surface, all regions
     // and try to find a match.
 
     // Count number of surfaces.
     label surfI = 0;
-    forAll(allGeometry.names(), geomI)
+    forAll(allGeometry_.names(), geomI)
     {
         const word& geomName = allGeometry_.names()[geomI];
 
@@ -109,10 +66,7 @@ Foam::refinementSurfaces::refinementSurfaces
     // Size lists
     surfaces_.setSize(surfI);
     names_.setSize(surfI);
-    faceZoneNames_.setSize(surfI);
-    cellZoneNames_.setSize(surfI);
-    zoneInside_.setSize(surfI, NONE);
-    faceType_.setSize(surfI, INTERNAL),
+    surfZones_.setSize(surfI);
     regionOffset_.setSize(surfI);
 
     labelList globalMinLevel(surfI, 0);
@@ -130,7 +84,7 @@ Foam::refinementSurfaces::refinementSurfaces
     HashSet<word> unmatchedKeys(surfacesDict.toc());
 
     surfI = 0;
-    forAll(allGeometry.names(), geomI)
+    forAll(allGeometry_.names(), geomI)
     {
         const word& geomName = allGeometry_.names()[geomI];
 
@@ -173,80 +127,10 @@ Foam::refinementSurfaces::refinementSurfaces
                     << exit(FatalIOError);
             }
 
+            const searchableSurface& surface = allGeometry_[surfaces_[surfI]];
 
-            // Global zone names per surface
-            if (dict.readIfPresent("faceZone", faceZoneNames_[surfI]))
-            {
-                // Read optional entry to determine inside of faceZone
-
-                word method;
-                bool hasSide = dict.readIfPresent("cellZoneInside", method);
-                if (hasSide)
-                {
-                    zoneInside_[surfI] = areaSelectionAlgoNames[method];
-                    if (zoneInside_[surfI] == INSIDEPOINT)
-                    {
-                        dict.lookup("insidePoint") >> zoneInsidePoints_[surfI];
-                    }
-
-                }
-                else
-                {
-                    // Check old syntax
-                    bool inside;
-                    if (dict.readIfPresent("zoneInside", inside))
-                    {
-                        hasSide = true;
-                        zoneInside_[surfI] = (inside ? INSIDE : OUTSIDE);
-                    }
-                }
-
-                // Read optional cellZone name
-
-                if (dict.readIfPresent("cellZone", cellZoneNames_[surfI]))
-                {
-                    if
-                    (
-                        (
-                            zoneInside_[surfI] == INSIDE
-                         || zoneInside_[surfI] == OUTSIDE
-                        )
-                    && !allGeometry_[surfaces_[surfI]].hasVolumeType()
-                    )
-                    {
-                        IOWarningIn
-                        (
-                            "refinementSurfaces::refinementSurfaces(..)",
-                            dict
-                        )   << "Illegal entry zoneInside "
-                            << areaSelectionAlgoNames[zoneInside_[surfI]]
-                            << " for faceZone "
-                            << faceZoneNames_[surfI]
-                            << " since surface " << names_[surfI]
-                            << " is not closed." << endl;
-                    }
-                }
-                else if (hasSide)
-                {
-                    IOWarningIn
-                    (
-                        "refinementSurfaces::refinementSurfaces(..)",
-                        dict
-                    )   << "Unused entry zoneInside for faceZone "
-                        << faceZoneNames_[surfI]
-                        << " since no cellZone specified."
-                        << endl;
-                }
-
-                // How to handle faces on faceZone
-                word faceTypeMethod;
-                if (dict.readIfPresent("faceType", faceTypeMethod))
-                {
-                    faceType_[surfI] = faceZoneTypeNames[faceTypeMethod];
-                }
-            }
-
-
+            // Surface zones
+            surfZones_.set(surfI, new surfaceZonesInfo(surface, dict));
 
             // Global perpendicular angle
             if (dict.found("patchInfo"))
@@ -262,8 +146,7 @@ Foam::refinementSurfaces::refinementSurfaces
             if (dict.found("regions"))
             {
                 const dictionary& regionsDict = dict.subDict("regions");
-                const wordList& regionNames =
-                    allGeometry_[surfaces_[surfI]].regions();
+                const wordList& regionNames = surface.regions();
 
                 forAll(regionNames, regionI)
                 {
@@ -306,8 +189,6 @@ Foam::refinementSurfaces::refinementSurfaces
                                 << " levelIncrement:" << levelIncr
                                 << exit(FatalIOError);
                         }
-
-
 
                         if (regionDict.found("perpendicularAngle"))
                         {
@@ -429,11 +310,7 @@ Foam::refinementSurfaces::refinementSurfaces
     const searchableSurfaces& allGeometry,
     const labelList& surfaces,
     const wordList& names,
-    const wordList& faceZoneNames,
-    const wordList& cellZoneNames,
-    const List<areaSelectionAlgo>& zoneInside,
-    const pointField& zoneInsidePoints,
-    const List<faceZoneType>& faceType,
+    const PtrList<surfaceZonesInfo>& surfZones,
     const labelList& regionOffset,
     const labelList& minLevel,
     const labelList& maxLevel,
@@ -445,11 +322,7 @@ Foam::refinementSurfaces::refinementSurfaces
     allGeometry_(allGeometry),
     surfaces_(surfaces),
     names_(names),
-    faceZoneNames_(faceZoneNames),
-    cellZoneNames_(cellZoneNames),
-    zoneInside_(zoneInside),
-    zoneInsidePoints_(zoneInsidePoints),
-    faceType_(faceType),
+    surfZones_(surfZones),
     regionOffset_(regionOffset),
     minLevel_(minLevel),
     maxLevel_(maxLevel),
@@ -468,90 +341,6 @@ Foam::refinementSurfaces::refinementSurfaces
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-// Get indices of unnamed surfaces (surfaces without faceZoneName)
-Foam::labelList Foam::refinementSurfaces::getUnnamedSurfaces() const
-{
-    labelList anonymousSurfaces(faceZoneNames_.size());
-
-    label i = 0;
-    forAll(faceZoneNames_, surfI)
-    {
-        if (faceZoneNames_[surfI].empty())
-        {
-            anonymousSurfaces[i++] = surfI;
-        }
-    }
-    anonymousSurfaces.setSize(i);
-
-    return anonymousSurfaces;
-}
-
-
-// Get indices of named surfaces (surfaces with faceZoneName)
-Foam::labelList Foam::refinementSurfaces::getNamedSurfaces() const
-{
-   labelList namedSurfaces(faceZoneNames_.size());
-
-    label namedI = 0;
-    forAll(faceZoneNames_, surfI)
-    {
-        if (faceZoneNames_[surfI].size())
-        {
-            namedSurfaces[namedI++] = surfI;
-        }
-    }
-    namedSurfaces.setSize(namedI);
-
-    return namedSurfaces;
-}
-
-
-// Get indices of closed named surfaces
-Foam::labelList Foam::refinementSurfaces::getClosedNamedSurfaces() const
-{
-    labelList closed(cellZoneNames_.size());
-
-    label closedI = 0;
-    forAll(cellZoneNames_, surfI)
-    {
-        if
-        (
-            cellZoneNames_[surfI].size()
-         && (
-                zoneInside_[surfI] == INSIDE
-             || zoneInside_[surfI] == OUTSIDE
-            )
-         && allGeometry_[surfaces_[surfI]].hasVolumeType()
-        )
-        {
-            closed[closedI++] = surfI;
-        }
-    }
-    closed.setSize(closedI);
-
-    return closed;
-}
-
-
-// Get indices of named surfaces with a
-Foam::labelList Foam::refinementSurfaces::getInsidePointNamedSurfaces() const
-{
-    labelList closed(cellZoneNames_.size());
-
-    label closedI = 0;
-    forAll(cellZoneNames_, surfI)
-    {
-        if (cellZoneNames_[surfI].size() && zoneInside_[surfI] == INSIDEPOINT)
-        {
-            closed[closedI++] = surfI;
-        }
-    }
-    closed.setSize(closedI);
-
-    return closed;
-}
-
 
 // // Count number of triangles per surface region
 // Foam::labelList Foam::refinementSurfaces::countRegions(const triSurface& s)
@@ -843,7 +632,9 @@ void Foam::refinementSurfaces::findAllHigherIntersections
 
     forAll(surfaces_, surfI)
     {
-        allGeometry_[surfaces_[surfI]].findLineAll(start, end, hitInfo);
+        const searchableSurface& surface = allGeometry_[surfaces_[surfI]];
+
+        surface.findLineAll(start, end, hitInfo);
 
         // Repack hits for surface into flat list
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -873,8 +664,8 @@ void Foam::refinementSurfaces::findAllHigherIntersections
 
         labelList surfRegion(n);
         vectorField surfNormal(n);
-        allGeometry_[surfaces_[surfI]].getRegion(surfInfo, surfRegion);
-        allGeometry_[surfaces_[surfI]].getNormal(surfInfo, surfNormal);
+        surface.getRegion(surfInfo, surfRegion);
+        surface.getNormal(surfInfo, surfNormal);
 
         surfInfo.clear();
 
@@ -929,9 +720,11 @@ void Foam::refinementSurfaces::findAllHigherIntersections
     labelList pRegions;
     vectorField pNormals;
 
-    forAll(surfaces_, surfI)
+    forAll(surfaces(), surfI)
     {
-        allGeometry_[surfaces_[surfI]].findLineAll(start, end, hitInfo);
+        const searchableSurface& surface = allGeometry_[surfaces_[surfI]];
+
+        surface.findLineAll(start, end, hitInfo);
 
         // Repack hits for surface into flat list
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -961,8 +754,8 @@ void Foam::refinementSurfaces::findAllHigherIntersections
 
         labelList surfRegion(n);
         vectorField surfNormal(n);
-        allGeometry_[surfaces_[surfI]].getRegion(surfInfo, surfRegion);
-        allGeometry_[surfaces_[surfI]].getNormal(surfInfo, surfNormal);
+        surface.getRegion(surfInfo, surfRegion);
+        surface.getNormal(surfInfo, surfNormal);
 
         // Extract back into pointwise
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1023,14 +816,16 @@ void Foam::refinementSurfaces::findNearestIntersection
     {
         label surfI = surfacesToTest[testI];
 
+        const searchableSurface& surface = allGeometry_[surfaces_[surfI]];
+
         // See if any intersection between start and current nearest
-        allGeometry_[surfaces_[surfI]].findLine
+        surface.findLine
         (
             start,
             nearest,
             nearestInfo
         );
-        allGeometry_[surfaces_[surfI]].getRegion
+        surface.getRegion
         (
             nearestInfo,
             region
@@ -1076,14 +871,16 @@ void Foam::refinementSurfaces::findNearestIntersection
     {
         label surfI = surfacesToTest[testI];
 
+        const searchableSurface& surface = allGeometry_[surfaces_[surfI]];
+
         // See if any intersection between end and current nearest
-        allGeometry_[surfaces_[surfI]].findLine
+        surface.findLine
         (
             end,
             nearest,
             nearestInfo
         );
-        allGeometry_[surfaces_[surfI]].getRegion
+        surface.getRegion
         (
             nearestInfo,
             region
@@ -1489,20 +1286,29 @@ void Foam::refinementSurfaces::findInside
     {
         label surfI = testSurfaces[i];
 
-        if (zoneInside_[surfI] != INSIDE && zoneInside_[surfI] != OUTSIDE)
+        const searchableSurface& surface = allGeometry_[surfaces_[surfI]];
+
+        const surfaceZonesInfo::areaSelectionAlgo selectionMethod =
+            surfZones_[surfI].zoneInside();
+
+        if
+        (
+            selectionMethod != surfaceZonesInfo::INSIDE
+         && selectionMethod != surfaceZonesInfo::OUTSIDE
+        )
         {
             FatalErrorIn("refinementSurfaces::findInside(..)")
                 << "Trying to use surface "
-                << allGeometry_[surfaces_[surfI]].name()
+                << surface.name()
                 << " which has non-geometric inside selection method "
-                << areaSelectionAlgoNames[zoneInside_[surfI]]
+                << surfaceZonesInfo::areaSelectionAlgoNames[selectionMethod]
                 << exit(FatalError);
         }
 
-        if (allGeometry_[surfaces_[surfI]].hasVolumeType())
+        if (surface.hasVolumeType())
         {
             List<volumeType> volType;
-            allGeometry_[surfaces_[surfI]].getVolumeType(pt, volType);
+            surface.getVolumeType(pt, volType);
 
             forAll(volType, pointI)
             {
@@ -1512,11 +1318,11 @@ void Foam::refinementSurfaces::findInside
                     (
                         (
                             volType[pointI] == volumeType::INSIDE
-                         && zoneInside_[surfI] == INSIDE
+                         && selectionMethod == surfaceZonesInfo::INSIDE
                         )
                      || (
                             volType[pointI] == volumeType::OUTSIDE
-                         && zoneInside_[surfI] == OUTSIDE
+                         && selectionMethod == surfaceZonesInfo::OUTSIDE
                         )
                     )
                     {
