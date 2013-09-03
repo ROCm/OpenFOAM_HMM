@@ -61,6 +61,16 @@ private:
         scalar randomPerturbationCoeff_;
 
 
+    // Private Member Functions
+
+        void splitLine
+        (
+            const line<point, point>& l,
+            const scalar& pert,
+            DynamicList<Vb::Point>& initialPoints
+        ) const;
+
+
 public:
 
     //- Runtime type information

@@ -683,14 +683,18 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInOutSide
                 vector hitDir = info[0].rawPoint() - samplePts[i];
                 hitDir /= mag(hitDir) + SMALL;
 
-                if
+                pointIndexHit surfHit;
+                label hitSurface;
+
+                findSurfaceNearestIntersection
                 (
-                    findSurfaceAnyIntersection
-                    (
-                        samplePts[i],
-                        info[0].rawPoint() - 1e-3*mag(hitDir)*(hitDir)
-                    )
-                )
+                    samplePts[i],
+                    info[0].rawPoint(),
+                    surfHit,
+                    hitSurface
+                );
+
+                if (surfHit.hit() && hitSurface != surfaces_[s])
                 {
                     continue;
                 }

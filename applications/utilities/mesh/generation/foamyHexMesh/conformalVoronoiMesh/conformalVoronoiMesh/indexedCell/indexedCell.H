@@ -183,6 +183,7 @@ public:
         inline bool hasSeedPoint() const;
 
         inline bool hasInternalPoint() const;
+        inline bool hasBoundaryPoint() const;
 
         inline bool hasConstrainedPoint() const;
 
