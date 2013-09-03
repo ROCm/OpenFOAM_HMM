@@ -579,30 +579,6 @@ Foam::conformationSurfaces::conformationSurfaces
             Info<< features_[fI].name() << endl;
         }
     }
-
-    Info<< "ZONES" << endl;
-    forAll(surfZones_, surfI)
-    {
-        if (surfZones_.set(surfI))
-        {
-            const surfaceZonesInfo& sInfo = surfZones_[surfI];
-
-            Info<< "    " << surfI << nl
-                << "    faceZoneName    = " << sInfo.faceZoneName() << nl
-                << "    cellZoneName    = " << sInfo.cellZoneName() << nl
-                << "    zoneInside      = "
-                << surfaceZonesInfo::areaSelectionAlgoNames[sInfo.zoneInside()]
-                << nl
-                << "    zoneInsidePoint = " << sInfo.zoneInsidePoint() << nl
-                << "    faceType        = "
-                << surfaceZonesInfo::faceZoneTypeNames[sInfo.faceType()]
-                << endl;
-        }
-        else
-        {
-            Info<< "    " << surfI << " EMPTY" << endl;
-        }
-    }
 }
 
 

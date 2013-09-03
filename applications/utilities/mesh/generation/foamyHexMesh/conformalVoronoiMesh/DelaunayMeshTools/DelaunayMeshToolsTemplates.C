@@ -279,10 +279,8 @@ Foam::tmp<Foam::pointField> Foam::DelaunayMeshTools::allPoints
     const Triangulation& t
 )
 {
-    tmp<pointField> tpts(new pointField(t.number_of_vertices(), point::max));
+    tmp<pointField> tpts(new pointField(t.vertexCount(), point::max));
     pointField& pts = tpts();
-
-    label nVert = 0;
 
     for
     (
@@ -292,9 +290,9 @@ Foam::tmp<Foam::pointField> Foam::DelaunayMeshTools::allPoints
         ++vit
     )
     {
-        if (vit->internalOrBoundaryPoint())
+        if (vit->internalOrBoundaryPoint() && !vit->referred())
         {
-            pts[nVert++] = topoint(vit->point());
+            pts[vit->index()] = topoint(vit->point());
         }
     }
 

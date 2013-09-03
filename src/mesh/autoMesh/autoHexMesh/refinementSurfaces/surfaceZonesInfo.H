@@ -199,6 +199,14 @@ public:
                 const labelList& surfaces
             );
 
+            //- Get indices of surfaces with a cellZone that are closed.
+            static labelList getAllClosedNamedSurfaces
+            (
+                const PtrList<surfaceZonesInfo>& surfList,
+                const searchableSurfaces& allGeometry,
+                const labelList& surfaces
+            );
+
             //- Get indices of surfaces with a cellZone that have 'insidePoint'
             //  section.
             static labelList getInsidePointNamedSurfaces

@@ -124,7 +124,7 @@ Foam::surfaceZonesInfo::surfaceZonesInfo
             {
                 IOWarningIn
                 (
-                    "refinementSurfaces::refinementSurfaces(..)",
+                    "surfaceZonesInfo::surfaceZonesInfo(..)",
                     surfacesDict
                 )   << "Illegal entry zoneInside "
                     << areaSelectionAlgoNames[zoneInside_]
@@ -137,7 +137,7 @@ Foam::surfaceZonesInfo::surfaceZonesInfo
         {
             IOWarningIn
             (
-                "refinementSurfaces::refinementSurfaces(..)",
+                "surfaceZonesInfo::surfaceZonesInfo(..)",
                 surfacesDict
             )   << "Unused entry zoneInside for faceZone "
                 << faceZoneName_
@@ -215,7 +215,11 @@ Foam::labelList Foam::surfaceZonesInfo::getNamedSurfaces
     label namedI = 0;
     forAll(surfList, surfI)
     {
-        if (surfList[surfI].faceZoneName().size())
+        if
+        (
+            surfList.set(surfI)
+         && surfList[surfI].faceZoneName().size()
+        )
         {
             namedSurfaces[namedI++] = surfI;
         }
@@ -241,11 +245,41 @@ Foam::labelList Foam::surfaceZonesInfo::getClosedNamedSurfaces
     {
         if
         (
-            surfList[surfI].cellZoneName().size()
+            surfList.set(surfI)
+         && surfList[surfI].cellZoneName().size()
          && (
                 surfList[surfI].zoneInside() == surfaceZonesInfo::INSIDE
              || surfList[surfI].zoneInside() == surfaceZonesInfo::OUTSIDE
             )
+         && allGeometry[surfaces[surfI]].hasVolumeType()
+        )
+        {
+            closed[closedI++] = surfI;
+        }
+    }
+    closed.setSize(closedI);
+
+    return closed;
+}
+
+
+// Get indices of closed named surfaces
+Foam::labelList Foam::surfaceZonesInfo::getAllClosedNamedSurfaces
+(
+    const PtrList<surfaceZonesInfo>& surfList,
+    const searchableSurfaces& allGeometry,
+    const labelList& surfaces
+)
+{
+    labelList closed(surfList.size());
+
+    label closedI = 0;
+    forAll(surfList, surfI)
+    {
+        if
+        (
+            surfList.set(surfI)
+         && surfList[surfI].cellZoneName().size()
          && allGeometry[surfaces[surfI]].hasVolumeType()
         )
         {
@@ -271,7 +305,8 @@ Foam::labelList Foam::surfaceZonesInfo::getInsidePointNamedSurfaces
     {
         if
         (
-            surfList[surfI].cellZoneName().size()
+            surfList.set(surfI)
+         && surfList[surfI].cellZoneName().size()
          && surfList[surfI].zoneInside() == surfaceZonesInfo::INSIDEPOINT
         )
         {
