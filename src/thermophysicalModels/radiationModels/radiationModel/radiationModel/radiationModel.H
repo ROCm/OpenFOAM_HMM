@@ -231,7 +231,7 @@ public:
                 volScalarField& T
             ) const;
 
-            //- Access to absorptionEmissionModel
+            //- Access to absorptionEmission model
             const absorptionEmissionModel& absorptionEmission() const;
 };
 
