@@ -18,6 +18,7 @@ $(autoHexMesh)/meshRefinement/meshRefinementMerge.C
 $(autoHexMesh)/meshRefinement/meshRefinementProblemCells.C
 $(autoHexMesh)/meshRefinement/meshRefinementRefine.C
 $(autoHexMesh)/refinementFeatures/refinementFeatures.C
+$(autoHexMesh)/refinementSurfaces/surfaceZonesInfo.C
 $(autoHexMesh)/refinementSurfaces/refinementSurfaces.C
 $(autoHexMesh)/shellSurfaces/shellSurfaces.C
 $(autoHexMesh)/trackedParticle/trackedParticle.C

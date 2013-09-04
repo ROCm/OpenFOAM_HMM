@@ -1235,19 +1235,22 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
                 // keep owner&neighbour of such a surface zone on the same
                 // processor.
 
-                const wordList& fzNames = surfaces().faceZoneNames();
+                const PtrList<surfaceZonesInfo>& surfZones =
+                    surfaces().surfZones();
                 const faceZoneMesh& fZones = mesh_.faceZones();
                 const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
 
                 // Get faces whose owner and neighbour should stay together,
                 // i.e. they are not 'blocked'.
 
-                forAll(fzNames, surfI)
+                forAll(surfZones, surfI)
                 {
-                    if (fzNames[surfI].size())
+                    const word& fzName = surfZones[surfI].faceZoneName();
+
+                    if (fzName.size())
                     {
                         // Get zone
-                        const faceZone& fZone = fZones[fzNames[surfI]];
+                        const faceZone& fZone = fZones[fzName];
 
                         forAll(fZone, i)
                         {

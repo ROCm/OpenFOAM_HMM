@@ -40,6 +40,7 @@ SourceFiles
 #include "extendedFeatureEdgeMesh.H"
 #include "boolList.H"
 #include "volumeType.H"
+#include "surfaceZonesInfo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class conformationSurfaces Declaration
+                    Class conformationSurfaces Declaration
 \*---------------------------------------------------------------------------*/
 
 class conformationSurfaces
@@ -85,6 +86,9 @@ class conformationSurfaces
         //- A flat list of all of the names of the patches from all of the
         //  surfaces to be reproduced in the meshed geometry
         List<word> patchNames_;
+
+        //- List of surface zone (face and cell zone) information
+        PtrList<surfaceZonesInfo> surfZones_;
 
         //- The offset between the patch indices of the individual surface and
         //  the entry in the overall patch list
@@ -169,6 +173,9 @@ public:
 
             //- Return the patch names
             inline const List<word>& patchNames() const;
+
+            //- Return the surfaceZonesInfo
+            inline const PtrList<surfaceZonesInfo>& surfZones() const;
 
             //- Return the patch info
             inline const PtrList<dictionary>& patchInfo() const;

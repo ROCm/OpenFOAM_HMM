@@ -600,6 +600,29 @@ private:
             PackedBoolList& boundaryFacesToRemove
         );
 
+        //- From meshRefinementBaffles.C. Use insidePoint for a surface to
+        //  determine the cell zone.
+        void findCellZoneInsideWalk
+        (
+            const polyMesh& mesh,
+            const labelList& locationSurfaces,
+            const labelList& faceToSurface,
+            labelList& cellToSurface
+        ) const;
+
+        //- Calculate the cell zones from cellCentres using all closed surfaces
+        labelList calcCellZones(const pointField& cellCentres) const;
+
+        //- Calculate the face zones
+        void calcFaceZones
+        (
+            const polyMesh& mesh,
+            const pointField& cellCentres,
+            const labelList& cellToSurface,
+            labelList& faceToSurface,
+            boolList& flipMap
+        ) const;
+
         //- Tet mesh calculation
         void calcTetMesh
         (
@@ -711,9 +734,6 @@ private:
             PackedBoolList& boundaryFacesToRemove,
             bool includeEmptyPatches = false
         ) const;
-
-        //- Create the cell centres to use for the mesh
-        void createCellCentres(pointField& cellCentres) const;
 
         //- Sort the faces, owner and neighbour lists into
         //  upper-triangular order.  For internal faces only, use

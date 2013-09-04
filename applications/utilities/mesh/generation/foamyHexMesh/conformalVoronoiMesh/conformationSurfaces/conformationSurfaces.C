@@ -265,6 +265,7 @@ Foam::conformationSurfaces::conformationSurfaces
     allGeometryToSurfaces_(),
     normalVolumeTypes_(),
     patchNames_(),
+    surfZones_(),
     regionOffset_(),
     patchInfo_(),
     globalBounds_(),
@@ -275,149 +276,188 @@ Foam::conformationSurfaces::conformationSurfaces
         surfaceConformationDict.subDict("geometryToConformTo")
     );
 
-    const label nSurf = surfacesDict.size();
-
     const dictionary& additionalFeaturesDict
     (
         surfaceConformationDict.subDict("additionalFeatures")
     );
 
+
+    // Wildcard specification : loop over all surface, all regions
+    // and try to find a match.
+
+    // Count number of surfaces.
+    label surfI = 0;
+    forAll(allGeometry.names(), geomI)
+    {
+        const word& geomName = allGeometry_.names()[geomI];
+
+        if (surfacesDict.found(geomName))
+        {
+            surfI++;
+        }
+    }
+
     const label nAddFeat = additionalFeaturesDict.size();
 
     Info<< nl << "Reading geometryToConformTo" << endl;
 
-    surfaces_.setSize(nSurf, -1);
-
     allGeometryToSurfaces_.setSize(allGeometry_.size(), -1);
 
-    normalVolumeTypes_.setSize(nSurf);
+    normalVolumeTypes_.setSize(surfI);
+    surfaces_.setSize(surfI);
+    surfZones_.setSize(surfI);
 
     // Features may be attached to host surfaces or independent
-    features_.setSize(nSurf + nAddFeat);
+    features_.setSize(surfI + nAddFeat);
 
     label featureI = 0;
 
-    regionOffset_.setSize(nSurf, 0);
+    regionOffset_.setSize(surfI, 0);
 
-    PtrList<dictionary> globalPatchInfo(nSurf);
-    List<Map<autoPtr<dictionary> > > regionPatchInfo(nSurf);
-    List<sideVolumeType> globalVolumeTypes(nSurf);
-    List<Map<sideVolumeType> > regionVolumeTypes(nSurf);
+    PtrList<dictionary> globalPatchInfo(surfI);
+    List<Map<autoPtr<dictionary> > > regionPatchInfo(surfI);
+    List<sideVolumeType> globalVolumeTypes(surfI);
+    List<Map<sideVolumeType> > regionVolumeTypes(surfI);
 
-    label surfI = 0;
+    HashSet<word> unmatchedKeys(surfacesDict.toc());
 
-    forAllConstIter(dictionary, surfacesDict, iter)
+    surfI = 0;
+    forAll(allGeometry_.names(), geomI)
     {
-        word surfaceName = iter().keyword();
+        const word& geomName = allGeometry_.names()[geomI];
 
-        surfaces_[surfI] = allGeometry_.findSurfaceID(surfaceName);
+        const entry* ePtr = surfacesDict.lookupEntryPtr(geomName, false, true);
 
-        if (surfaces_[surfI] < 0)
+        if (ePtr)
         {
-            FatalErrorIn("Foam::conformationSurfaces::conformationSurfaces")
-                << "No surface " << surfaceName << " found. "
-                << "Valid geometry is " << nl << allGeometry_.names()
-                << exit(FatalError);
-        }
+            const dictionary& dict = ePtr->dict();
+            unmatchedKeys.erase(ePtr->keyword());
 
-        allGeometryToSurfaces_[surfaces_[surfI]] = surfI;
+            surfaces_[surfI] = geomI;
 
-        Info<< nl << "    " << surfaceName << endl;
+            const searchableSurface& surface = allGeometry_[surfaces_[surfI]];
 
-        const wordList& regionNames =
-            allGeometry_.regionNames()[surfaces_[surfI]];
-
-        patchNames_.append(regionNames);
-
-        const dictionary& surfaceSubDict(surfacesDict.subDict(surfaceName));
-
-        globalVolumeTypes[surfI] =
-        (
-            extendedFeatureEdgeMesh::sideVolumeTypeNames_
-            [
-                surfaceSubDict.lookupOrDefault<word>("meshableSide", "inside")
-            ]
-        );
-
-        if (!globalVolumeTypes[surfI])
-        {
-            if (!allGeometry_[surfaces_[surfI]].hasVolumeType())
+            // Surface zones
+            if (dict.found("faceZone"))
             {
-                WarningIn("conformationSurfaces::conformationSurfaces(..)")
-                    << "Non-baffle surface "
-                    << allGeometry_[surfaces_[surfI]].name()
-                    << " does not allow inside/outside queries."
-                    << " This usually is an error." << endl;
+                surfZones_.set(surfI, new surfaceZonesInfo(surface, dict));
             }
-        }
 
-        // Load patch info
-        if (surfaceSubDict.found("patchInfo"))
-        {
-            globalPatchInfo.set
+            allGeometryToSurfaces_[surfaces_[surfI]] = surfI;
+
+            Info<< nl << "    " << geomName << endl;
+
+            const wordList& regionNames =
+                allGeometry_.regionNames()[surfaces_[surfI]];
+
+            patchNames_.append(regionNames);
+
+            globalVolumeTypes[surfI] =
             (
-                surfI,
-                surfaceSubDict.subDict("patchInfo").clone()
+                extendedFeatureEdgeMesh::sideVolumeTypeNames_
+                [
+                    dict.lookupOrDefault<word>
+                    (
+                        "meshableSide",
+                        "inside"
+                    )
+                ]
             );
-        }
 
-        readFeatures
-        (
-            surfI,
-            surfaceSubDict,
-            surfaceName,
-            featureI
-        );
-
-        const wordList& rNames = allGeometry_[surfaces_[surfI]].regions();
-
-        if (surfaceSubDict.found("regions"))
-        {
-            const dictionary& regionsDict = surfaceSubDict.subDict("regions");
-
-            forAll(rNames, regionI)
+            if (!globalVolumeTypes[surfI])
             {
-                const word& regionName = rNames[regionI];
-
-                if (regionsDict.found(regionName))
+                if (!surface.hasVolumeType())
                 {
-                    Info<< "        region " << regionName << endl;
-
-                    // Get the dictionary for region
-                    const dictionary& regionDict = regionsDict.subDict
-                    (
-                        regionName
-                    );
-
-                    if (regionDict.found("patchInfo"))
-                    {
-                        regionPatchInfo[surfI].insert
-                        (
-                            regionI,
-                            regionDict.subDict("patchInfo").clone()
-                        );
-                    }
-
-                    regionVolumeTypes[surfI].insert
-                    (
-                        regionI,
-                        extendedFeatureEdgeMesh::sideVolumeTypeNames_
-                        [
-                             regionDict.lookupOrDefault<word>
-                             (
-                                 "meshableSide",
-                                 "inside"
-                             )
-                        ]
-                    );
-
-                    readFeatures(regionDict, regionName, featureI);
+                    WarningIn("conformationSurfaces::conformationSurfaces(..)")
+                        << "Non-baffle surface "
+                        << surface.name()
+                        << " does not allow inside/outside queries."
+                        << " This usually is an error." << endl;
                 }
             }
-        }
 
-        surfI++;
+            // Load patch info
+            if (dict.found("patchInfo"))
+            {
+                globalPatchInfo.set
+                (
+                    surfI,
+                    dict.subDict("patchInfo").clone()
+                );
+            }
+
+            readFeatures
+            (
+                surfI,
+                dict,
+                geomName,
+                featureI
+            );
+
+            const wordList& rNames = surface.regions();
+
+            if (dict.found("regions"))
+            {
+                const dictionary& regionsDict = dict.subDict("regions");
+
+                forAll(rNames, regionI)
+                {
+                    const word& regionName = rNames[regionI];
+
+                    if (regionsDict.found(regionName))
+                    {
+                        Info<< "        region " << regionName << endl;
+
+                        // Get the dictionary for region
+                        const dictionary& regionDict = regionsDict.subDict
+                        (
+                            regionName
+                        );
+
+                        if (regionDict.found("patchInfo"))
+                        {
+                            regionPatchInfo[surfI].insert
+                            (
+                                regionI,
+                                regionDict.subDict("patchInfo").clone()
+                            );
+                        }
+
+                        regionVolumeTypes[surfI].insert
+                        (
+                            regionI,
+                            extendedFeatureEdgeMesh::sideVolumeTypeNames_
+                            [
+                                 regionDict.lookupOrDefault<word>
+                                 (
+                                     "meshableSide",
+                                     "inside"
+                                 )
+                            ]
+                        );
+
+                        readFeatures(regionDict, regionName, featureI);
+                    }
+                }
+            }
+
+            surfI++;
+        }
     }
+
+
+    if (unmatchedKeys.size() > 0)
+    {
+        IOWarningIn
+        (
+            "conformationSurfaces::conformationSurfaces(..)",
+            surfacesDict
+        )   << "Not all entries in conformationSurfaces dictionary were used."
+            << " The following entries were not used : "
+            << unmatchedKeys.sortedToc()
+            << endl;
+    }
+
 
     // Calculate local to global region offset
     label nRegions = 0;
@@ -425,7 +465,9 @@ Foam::conformationSurfaces::conformationSurfaces
     forAll(surfaces_, surfI)
     {
         regionOffset_[surfI] = nRegions;
-        nRegions += allGeometry_[surfaces_[surfI]].regions().size();
+
+        const searchableSurface& surface = allGeometry_[surfaces_[surfI]];
+        nRegions += surface.regions().size();
     }
 
     // Rework surface specific information into information per global region
@@ -434,7 +476,9 @@ Foam::conformationSurfaces::conformationSurfaces
 
     forAll(surfaces_, surfI)
     {
-        label nRegions = allGeometry_[surfaces_[surfI]].regions().size();
+        const searchableSurface& surface = allGeometry_[surfaces_[surfI]];
+
+        label nRegions = surface.regions().size();
 
         // Initialise to global (i.e. per surface)
         for (label i = 0; i < nRegions; i++)
@@ -1165,13 +1209,7 @@ Foam::label Foam::conformationSurfaces::findPatch(const point& pt) const
     pointIndexHit surfHit;
     label hitSurface;
 
-    findSurfaceNearest
-    (
-        pt,
-        sqr(GREAT),
-        surfHit,
-        hitSurface
-    );
+    findSurfaceNearest(pt, sqr(GREAT), surfHit, hitSurface);
 
     return getPatchID(hitSurface, surfHit);
 }
@@ -1229,11 +1267,7 @@ void Foam::conformationSurfaces::getNormal
     vectorField& normal
 ) const
 {
-    allGeometry_[hitSurface].getNormal
-    (
-        surfHit,
-        normal
-    );
+    allGeometry_[hitSurface].getNormal(surfHit, normal);
 
     const label patchID = regionOffset_[allGeometryToSurfaces_[hitSurface]];
 
