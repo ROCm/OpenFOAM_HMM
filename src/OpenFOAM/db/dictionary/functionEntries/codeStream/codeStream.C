@@ -65,30 +65,12 @@ const Foam::word Foam::functionEntries::codeStream::codeTemplateC
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-const Foam::dictionary& Foam::functionEntries::codeStream::topDict
-(
-    const dictionary& dict
-)
-{
-    const dictionary& p = dict.parent();
-
-    if (&p != &dict && !p.name().empty())
-    {
-        return topDict(p);
-    }
-    else
-    {
-        return dict;
-    }
-}
-
-
 Foam::dlLibraryTable& Foam::functionEntries::codeStream::libs
 (
     const dictionary& dict
 )
 {
-    const IOdictionary& d = static_cast<const IOdictionary&>(topDict(dict));
+    const IOdictionary& d = static_cast<const IOdictionary&>(dict.topDict());
     return const_cast<Time&>(d.time()).libs();
 }
 
@@ -114,7 +96,7 @@ Foam::functionEntries::codeStream::getFunction
 
     // see if library is loaded
     void* lib = NULL;
-    if (isA<IOdictionary>(topDict(parentDict)))
+    if (isA<IOdictionary>(parentDict.topDict()))
     {
         lib = libs(parentDict).findLibrary(libPath);
     }
@@ -129,7 +111,7 @@ Foam::functionEntries::codeStream::getFunction
     // avoid compilation if possible by loading an existing library
     if (!lib)
     {
-        if (isA<IOdictionary>(topDict(parentDict)))
+        if (isA<IOdictionary>(parentDict.topDict()))
         {
             // Cached access to dl libs. Guarantees clean up upon destruction
             // of Time.
@@ -267,7 +249,7 @@ Foam::functionEntries::codeStream::getFunction
             }
         }
 
-        if (isA<IOdictionary>(topDict(parentDict)))
+        if (isA<IOdictionary>(parentDict.topDict()))
         {
             // Cached access to dl libs. Guarantees clean up upon destruction
             // of Time.

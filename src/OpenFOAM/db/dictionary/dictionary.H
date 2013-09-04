@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -249,6 +249,9 @@ public:
         {
             return parent_;
         }
+
+        //- Return the top of the tree
+        const dictionary& topDict() const;
 
         //- Return line number of first token in dictionary
         label startLineNumber() const;
