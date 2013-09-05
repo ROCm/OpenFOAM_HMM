@@ -30,6 +30,9 @@ sh/csh variants:
 * scotch.sh
   application settings for compiling against scotch
 
+* metis.sh
+  application settings for compiling against metis 5
+
 ---
 
 The config/example directory contains various example configuration files
