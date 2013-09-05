@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -244,17 +244,10 @@ private:
             ensightStream& ensightGeometryFile
         ) const;
 
-        void writeAllInternalPoints
+        void writeAllPoints
         (
-            const pointField& uniquePoints,
-            const label nPoints,
-            ensightStream& ensightGeometryFile
-        ) const;
-
-        void writeAllPatchPoints
-        (
-            label ensightPatchI,
-            const word& patchName,
+            const label ensightPartI,
+            const word& ensightPartName,
             const pointField& uniquePoints,
             const label nPoints,
             ensightStream& ensightGeometryFile

@@ -57,14 +57,6 @@ void Foam::ensightMesh::correct()
     nFaceZonePrims_ = 0;
     boundaryFaceToBeIncluded_.clear();
 
-    const cellShapeList& cellShapes = mesh_.cellShapes();
-
-    const cellModel& tet = *(cellModeller::lookup("tet"));
-    const cellModel& pyr = *(cellModeller::lookup("pyr"));
-    const cellModel& prism = *(cellModeller::lookup("prism"));
-    const cellModel& wedge = *(cellModeller::lookup("wedge"));
-    const cellModel& hex = *(cellModeller::lookup("hex"));
-
     if (!noPatches_)
     {
         // Patches are output. Check that they're synced.
@@ -111,6 +103,16 @@ void Foam::ensightMesh::correct()
     }
     else
     {
+        const cellShapeList& cellShapes = mesh_.cellShapes();
+
+        const cellModel& tet = *(cellModeller::lookup("tet"));
+        const cellModel& pyr = *(cellModeller::lookup("pyr"));
+        const cellModel& prism = *(cellModeller::lookup("prism"));
+        const cellModel& wedge = *(cellModeller::lookup("wedge"));
+        const cellModel& hex = *(cellModeller::lookup("hex"));
+
+
+
         // Count the shapes
         labelList& tets = meshCellSets_.tets;
         labelList& pyrs = meshCellSets_.pyrs;
@@ -926,8 +928,10 @@ void Foam::ensightMesh::writeAllNSided
 }
 
 
-void Foam::ensightMesh::writeAllInternalPoints
+void Foam::ensightMesh::writeAllPoints
 (
+    const label ensightPartI,
+    const word& ensightPartName,
     const pointField& uniquePoints,
     const label nPoints,
     ensightStream& ensightGeometryFile
@@ -937,49 +941,8 @@ void Foam::ensightMesh::writeAllInternalPoints
 
     if (Pstream::master())
     {
-        ensightGeometryFile.writePartHeader(1);
-        ensightGeometryFile.write("internalMesh");
-        ensightGeometryFile.write("coordinates");
-        ensightGeometryFile.write(nPoints);
-
-        for (direction d=0; d<vector::nComponents; d++)
-        {
-            ensightGeometryFile.write(uniquePoints.component(d));
-
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
-            {
-                IPstream fromSlave(Pstream::scheduled, slave);
-                scalarField pointsComponent(fromSlave);
-                ensightGeometryFile.write(pointsComponent);
-            }
-        }
-    }
-    else
-    {
-        for (direction d=0; d<vector::nComponents; d++)
-        {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< uniquePoints.component(d);
-        }
-    }
-}
-
-
-void Foam::ensightMesh::writeAllPatchPoints
-(
-    const label ensightPatchI,
-    const word& patchName,
-    const pointField& uniquePoints,
-    const label nPoints,
-    ensightStream& ensightGeometryFile
-) const
-{
-    barrier();
-
-    if (Pstream::master())
-    {
-        ensightGeometryFile.writePartHeader(ensightPatchI);
-        ensightGeometryFile.write(patchName.c_str());
+        ensightGeometryFile.writePartHeader(ensightPartI);
+        ensightGeometryFile.write(ensightPartName.c_str());
         ensightGeometryFile.write("coordinates");
         ensightGeometryFile.write(nPoints);
 
@@ -998,11 +961,7 @@ void Foam::ensightMesh::writeAllPatchPoints
     {
         for (direction d=0; d<vector::nComponents; d++)
         {
-            OPstream toMaster
-            (
-                Pstream::scheduled,
-                Pstream::masterNo()
-            );
+            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
             toMaster<< uniquePoints.component(d);
         }
     }
@@ -1076,8 +1035,10 @@ void Foam::ensightMesh::write
 
         const pointField uniquePoints(mesh_.points(), uniquePointMap_);
 
-        writeAllInternalPoints
+        writeAllPoints
         (
+            1,
+            "internalMesh",
             uniquePoints,
             nPoints,
             ensightGeometryFile
@@ -1166,7 +1127,7 @@ void Foam::ensightMesh::write
                     inplaceRenumber(pointToGlobal, patchFaces[i]);
                 }
 
-                writeAllPatchPoints
+                writeAllPoints
                 (
                     ensightPatchI++,
                     patchName,
@@ -1271,7 +1232,7 @@ void Foam::ensightMesh::write
                 inplaceRenumber(pointToGlobal, faceZoneMasterFaces[i]);
             }
 
-            writeAllPatchPoints
+            writeAllPoints
             (
                 ensightPatchI++,
                 faceZoneName,
