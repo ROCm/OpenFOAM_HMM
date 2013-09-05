@@ -272,10 +272,8 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > fvMeshSubset::interpolate
                 {
                     // Mapped from internal face. Do what? Leave up to
                     // patchField. This would require also to pass in
-                    // original internal field so for now keep original
-                    // behaviour of mapping original patch face 0
-                    //directAddressing[i] = -1;
-                    directAddressing[i] = 0;
+                    // original internal field so for now do as postprocessing
+                    directAddressing[i] = -1;
                 }
             }
 
@@ -290,27 +288,32 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > fvMeshSubset::interpolate
                     patchFieldSubset(directAddressing)
                 )
             );
-        }
-    }
 
 
-    // Map exposed internal faces. Note: Only necessary if exposed faces added
-    // into existing patch but since we don't know that at this point...
-    // Ideally the vf.internalField should be passed in to the mapper
-    // constructor above so it can handle this.
-    forAll(bf, patchI)
-    {
-        fvsPatchField<Type>& pfld = bf[patchI];
+            // Postprocess patch field for exposed faces
 
-        label meshFaceI = pfld.patch().start();
+            fvsPatchField<Type>& pfld = bf[patchI];
 
-        forAll(pfld, i)
-        {
-            label oldFaceI = faceMap[meshFaceI++];
-
-            if (oldFaceI < vf.internalField().size())
+            forAll(pfld, i)
             {
-                pfld[i] = vf.internalField()[oldFaceI];
+                label baseFaceI = faceMap[subPatch.start()+i];
+                if (baseFaceI < vf.internalField().size())
+                {
+                    // Exposed internal face
+                    pfld[i] = vf.internalField()[baseFaceI];
+                }
+                else
+                {
+                    // Exposed face from other patch.
+                    // Only possible in case of a coupled boundary
+                    label patchI = vf.mesh().boundaryMesh().whichPatch
+                    (
+                        baseFaceI
+                    );
+                    const fvPatch& otherPatch = vf.mesh().boundary()[patchI];
+                    label patchFaceI = otherPatch.patch().whichFace(baseFaceI);
+                    pfld[i] = vf.boundaryField()[patchI][patchFaceI];
+                }
             }
         }
     }
