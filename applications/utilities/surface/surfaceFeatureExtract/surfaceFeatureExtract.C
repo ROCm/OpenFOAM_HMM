@@ -959,7 +959,7 @@ int main(int argc, char *argv[])
 
         const dictionary& surfaceDict = iter().dict();
 
-        if (surfaceDict.found("extractionMethod"))
+        if (!surfaceDict.found("extractionMethod"))
         {
             continue;
         }
