@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,10 +45,7 @@ tmp<GeometricField<Type, fvPatchField, volMesh> > fvMeshSubset::interpolate
     const labelList& faceMap
 )
 {
-    // Create and map the internal-field values
-    Field<Type> internalField(vf.internalField(), cellMap);
-
-    // Create and map the patch field values
+    // 1. Create the complete field with dummy patch fields
     PtrList<fvPatchField<Type> > patchFields(patchMap.size());
 
     forAll(patchFields, patchI)
@@ -70,6 +67,49 @@ tmp<GeometricField<Type, fvPatchField, volMesh> > fvMeshSubset::interpolate
         }
         else
         {
+            patchFields.set
+            (
+                patchI,
+                new calculatedFvPatchField<Type>
+                (
+                    sMesh.boundary()[patchI],
+                    DimensionedField<Type, volMesh>::null()
+                )
+            );
+        }
+    }
+
+    tmp<GeometricField<Type, fvPatchField, volMesh> > tresF
+    (
+        new GeometricField<Type, fvPatchField, volMesh>
+        (
+            IOobject
+            (
+                "subset"+vf.name(),
+                sMesh.time().timeName(),
+                sMesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            sMesh,
+            vf.dimensions(),
+            Field<Type>(vf.internalField(), cellMap),
+            patchFields
+        )
+    );
+    GeometricField<Type, fvPatchField, volMesh>& resF = tresF();
+
+
+    // 2. Change the fvPatchFields to the correct type using a mapper
+    //  constructor (with reference to the now correct internal field)
+
+    typename GeometricField<Type, fvPatchField, volMesh>::
+        GeometricBoundaryField& bf = resF.boundaryField();
+
+    forAll(bf, patchI)
+    {
+        if (patchMap[patchI] != -1)
+        {
             // Construct addressing
             const fvPatch& subPatch = sMesh.boundary()[patchI];
             const fvPatch& basePatch = vf.mesh().boundary()[patchMap[patchI]];
@@ -88,48 +128,25 @@ tmp<GeometricField<Type, fvPatchField, volMesh> > fvMeshSubset::interpolate
                 }
                 else
                 {
-                    // Mapped from internal face. Do what? Map from element
-                    // 0 for now.
-                    directAddressing[i] = 0;
+                    // Mapped from internal face. Do what? Leave up to
+                    // fvPatchField
+                    directAddressing[i] = -1;
                 }
             }
 
-            patchFields.set
+            bf.set
             (
                 patchI,
                 fvPatchField<Type>::New
                 (
                     vf.boundaryField()[patchMap[patchI]],
-                    sMesh.boundary()[patchI],
-                    DimensionedField<Type, volMesh>::null(),
+                    subPatch,
+                    resF.dimensionedInternalField(),
                     patchFieldSubset(directAddressing)
                 )
             );
-
-            // What to do with exposed internal faces if put into this patch?
         }
     }
-
-
-    // Create the complete field from the pieces
-    tmp<GeometricField<Type, fvPatchField, volMesh> > tresF
-    (
-        new GeometricField<Type, fvPatchField, volMesh>
-        (
-            IOobject
-            (
-                "subset"+vf.name(),
-                sMesh.time().timeName(),
-                sMesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            sMesh,
-            vf.dimensions(),
-            internalField,
-            patchFields
-        )
-    );
 
     return tresF;
 }
@@ -212,9 +229,9 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > fvMeshSubset::interpolate
                 }
                 else
                 {
-                    // Mapped from internal face. Do what? Map from element
-                    // 0 for now.
-                    directAddressing[i] = 0;
+                    // Mapped from internal face. Do what? Leave up to
+                    // patchField
+                    directAddressing[i] = -1;
                 }
             }
 
@@ -344,8 +361,8 @@ fvMeshSubset::interpolate
             const pointPatch& subPatch = sMesh.boundary()[patchI];
             const labelList& subMeshPoints = subPatch.meshPoints();
 
-            // If mapped from outside patch use point 0 for lack of better.
-            labelList directAddressing(subPatch.size(), 0);
+            // If mapped from outside patch leave handling up to patchField
+            labelList directAddressing(subPatch.size(), -1);
 
             forAll(subMeshPoints, localI)
             {
