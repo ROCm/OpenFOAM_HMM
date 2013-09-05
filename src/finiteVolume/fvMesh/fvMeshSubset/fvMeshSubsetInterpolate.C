@@ -271,8 +271,11 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > fvMeshSubset::interpolate
                 else
                 {
                     // Mapped from internal face. Do what? Leave up to
-                    // patchField
-                    directAddressing[i] = -1;
+                    // patchField. This would require also to pass in
+                    // original internal field so for now keep original
+                    // behaviour of mapping original patch face 0
+                    //directAddressing[i] = -1;
+                    directAddressing[i] = 0;
                 }
             }
 
