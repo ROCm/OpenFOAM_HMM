@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,11 +26,8 @@ License
 #include "mapPolyMesh.H"
 #include "polyMesh.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::mapPolyMesh::mapPolyMesh
 (
     const polyMesh& mesh,
@@ -115,7 +112,6 @@ Foam::mapPolyMesh::mapPolyMesh
 }
 
 
-// Construct from components and optionally reuse storage
 Foam::mapPolyMesh::mapPolyMesh
 (
     const polyMesh& mesh,
@@ -177,31 +173,32 @@ Foam::mapPolyMesh::mapPolyMesh
     oldPatchStarts_(oldPatchStarts, reUse),
     oldPatchNMeshPoints_(oldPatchNMeshPoints, reUse)
 {
-    // Calculate old patch sizes
-    for (label patchI = 0; patchI < oldPatchStarts_.size() - 1; patchI++)
+    if (oldPatchStarts_.size() > 0)
     {
-        oldPatchSizes_[patchI] =
-            oldPatchStarts_[patchI + 1] - oldPatchStarts_[patchI];
-    }
-
-    // Set the last one by hand
-    const label lastPatchID = oldPatchStarts_.size() - 1;
-
-    oldPatchSizes_[lastPatchID] = nOldFaces_ - oldPatchStarts_[lastPatchID];
-
-    if (polyMesh::debug)
-    {
-        if (min(oldPatchSizes_) < 0)
+        // Calculate old patch sizes
+        for (label patchI = 0; patchI < oldPatchStarts_.size() - 1; patchI++)
         {
-            FatalErrorIn("mapPolyMesh::mapPolyMesh(...)")
-                << "Calculated negative old patch size.  Error in mapping data"
-                << abort(FatalError);
+            oldPatchSizes_[patchI] =
+                oldPatchStarts_[patchI + 1] - oldPatchStarts_[patchI];
+        }
+
+        // Set the last one by hand
+        const label lastPatchID = oldPatchStarts_.size() - 1;
+
+        oldPatchSizes_[lastPatchID] = nOldFaces_ - oldPatchStarts_[lastPatchID];
+
+        if (polyMesh::debug)
+        {
+            if (min(oldPatchSizes_) < 0)
+            {
+                FatalErrorIn("mapPolyMesh::mapPolyMesh(...)")
+                    << "Calculated negative old patch size."
+                    << "  Error in mapping data"
+                    << abort(FatalError);
+            }
         }
     }
 }
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

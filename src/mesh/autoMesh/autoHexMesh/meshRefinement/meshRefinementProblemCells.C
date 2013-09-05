@@ -568,7 +568,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
         labelList hitSurface;
         surfaces_.findNearest
         (
-            surfaces_.getUnnamedSurfaces(),
+            surfaceZonesInfo::getUnnamedSurfaces(surfaces_.surfZones()),
             localPoints,
             scalarField(localPoints.size(), sqr(GREAT)),    // sqr of attraction
             hitSurface,

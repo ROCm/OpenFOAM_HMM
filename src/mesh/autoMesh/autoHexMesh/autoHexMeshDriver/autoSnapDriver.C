@@ -590,7 +590,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::mergeZoneBaffles
     const List<labelPair>& baffles
 )
 {
-    labelList zonedSurfaces = meshRefiner_.surfaces().getNamedSurfaces();
+    labelList zonedSurfaces =
+        surfaceZonesInfo::getNamedSurfaces(meshRefiner_.surfaces().surfZones());
 
     autoPtr<mapPolyMesh> map;
 
@@ -815,9 +816,15 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
 
         // Divide surfaces into zoned and unzoned
         labelList zonedSurfaces =
-            meshRefiner.surfaces().getNamedSurfaces();
+            surfaceZonesInfo::getNamedSurfaces
+            (
+                meshRefiner.surfaces().surfZones()
+            );
         labelList unzonedSurfaces =
-            meshRefiner.surfaces().getUnnamedSurfaces();
+            surfaceZonesInfo::getUnnamedSurfaces
+            (
+                meshRefiner.surfaces().surfZones()
+            );
 
 
         // 1. All points to non-interface surfaces
@@ -854,7 +861,7 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         // Surfaces with zone information
-        const wordList& faceZoneNames = surfaces.faceZoneNames();
+        const PtrList<surfaceZonesInfo>& surfZones = surfaces.surfZones();
 
         // Current best snap distance
         scalarField minSnapDist(snapDist);
@@ -862,6 +869,8 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
         forAll(zonedSurfaces, i)
         {
             label zoneSurfI = zonedSurfaces[i];
+
+            const word& faceZoneName = surfZones[zoneSurfI].faceZoneName();
 
             const labelList surfacesToTest(1, zoneSurfI);
 
@@ -872,7 +881,7 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
                 (
                     mesh,
                     pp,
-                    faceZoneNames[zoneSurfI]
+                    faceZoneName
                 )
             );
 
@@ -1369,8 +1378,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::repatchToSurface
     indirectPrimitivePatch& pp = ppPtr();
 
     // Divide surfaces into zoned and unzoned
-    labelList zonedSurfaces = surfaces.getNamedSurfaces();
-    labelList unzonedSurfaces = surfaces.getUnnamedSurfaces();
+    labelList zonedSurfaces =
+        surfaceZonesInfo::getNamedSurfaces(surfaces.surfZones());
+    labelList unzonedSurfaces =
+        surfaceZonesInfo::getUnnamedSurfaces(surfaces.surfZones());
 
 
     // Faces that do not move
@@ -1386,13 +1397,13 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::repatchToSurface
         }
 
         // 2. All faces on zoned surfaces
-        const wordList& faceZoneNames = surfaces.faceZoneNames();
+        const PtrList<surfaceZonesInfo>& surfZones = surfaces.surfZones();
         const faceZoneMesh& fZones = mesh.faceZones();
 
         forAll(zonedSurfaces, i)
         {
             const label zoneSurfI = zonedSurfaces[i];
-            const faceZone& fZone = fZones[faceZoneNames[zoneSurfI]];
+            const faceZone& fZone = fZones[surfZones[zoneSurfI].faceZoneName()];
 
             forAll(fZone, i)
             {
@@ -1557,9 +1568,7 @@ void Foam::autoSnapDriver::doSnap
     {
         const faceZoneMesh& fZones = mesh.faceZones();
         const refinementSurfaces& surfaces = meshRefiner_.surfaces();
-        const wordList& faceZoneNames = surfaces.faceZoneNames();
-        const List<refinementSurfaces::faceZoneType>& faceType =
-            surfaces.faceType();
+        const PtrList<surfaceZonesInfo>& surfZones = surfaces.surfZones();
 
         // Determine which
         //  - faces to remove from list of baffles (so not merge)
@@ -1568,18 +1577,23 @@ void Foam::autoSnapDriver::doSnap
         label nFilterFaces = 0;
         PackedBoolList duplicatePoint(mesh.nPoints());
         label nDuplicatePoints = 0;
-        forAll(faceZoneNames, surfI)
+        forAll(surfZones, surfI)
         {
+            const word& faceZoneName = surfZones[surfI].faceZoneName();
+
+            const surfaceZonesInfo::faceZoneType& faceType =
+                surfZones[surfI].faceType();
+
             if
             (
-                faceType[surfI] == refinementSurfaces::BAFFLE
-             || faceType[surfI] == refinementSurfaces::BOUNDARY
+                faceType == surfaceZonesInfo::BAFFLE
+             || faceType == surfaceZonesInfo::BOUNDARY
             )
             {
-                if (faceZoneNames[surfI].size())
+                if (faceZoneName.size())
                 {
                     // Filter out all faces for this zone.
-                    label zoneI = fZones.findZoneID(faceZoneNames[surfI]);
+                    label zoneI = fZones.findZoneID(faceZoneName);
                     const faceZone& fZone = fZones[zoneI];
                     forAll(fZone, i)
                     {
@@ -1588,7 +1602,7 @@ void Foam::autoSnapDriver::doSnap
                         nFilterFaces++;
                     }
 
-                    if (faceType[surfI] == refinementSurfaces::BOUNDARY)
+                    if (faceType == surfaceZonesInfo::BOUNDARY)
                     {
                         forAll(fZone, i)
                         {
@@ -1835,7 +1849,8 @@ void Foam::autoSnapDriver::doSnap
             {
                 WarningIn("autoSnapDriver::doSnap(..)")
                     << "Did not succesfully snap mesh."
-                    << " Continuing to snap to resolve easy surfaces but the"
+                    << " Continuing to snap to resolve easy" << nl
+                    << "    surfaces but the"
                     << " resulting mesh will not satisfy your quality"
                     << " constraints" << nl << endl;
                 //Info<< "Did not succesfully snap mesh. Giving up."

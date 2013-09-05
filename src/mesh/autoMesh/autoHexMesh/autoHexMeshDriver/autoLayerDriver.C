@@ -2450,17 +2450,17 @@ void Foam::autoLayerDriver::mergePatchFacesUndo
     const dictionary& motionDict
 )
 {
-    scalar minCos =
-        Foam::cos(degToRad(layerParams.featureAngle()));
+    // Clip to 45 degrees
+    scalar planarAngle = min(45.0, layerParams.featureAngle());
+    scalar minCos = Foam::cos(degToRad(planarAngle));
 
-    scalar concaveCos =
-        Foam::cos(degToRad(layerParams.concaveAngle()));
+    scalar concaveCos = Foam::cos(degToRad(layerParams.concaveAngle()));
 
     Info<< nl
         << "Merging all faces of a cell" << nl
         << "---------------------------" << nl
         << "    - which are on the same patch" << nl
-        << "    - which make an angle < " << layerParams.featureAngle()
+        << "    - which make an angle < " << planarAngle
         << " degrees"
         << nl
         << "      (cos:" << minCos << ')' << nl
@@ -2478,7 +2478,7 @@ void Foam::autoLayerDriver::mergePatchFacesUndo
         concaveCos,
         meshRefiner_.meshedPatches(),
         motionDict,
-        labelList(mesh.nFaces() -1)
+        labelList(mesh.nFaces(), -1)
     );
 
     nChanged += meshRefiner_.mergeEdgesUndo(minCos, motionDict);

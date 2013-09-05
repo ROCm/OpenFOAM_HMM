@@ -35,6 +35,11 @@ License
 #include "pointMesh.H"
 #include "indexedVertexOps.H"
 #include "DelaunayMeshTools.H"
+#include "surfaceZonesInfo.H"
+#include "polyModifyCell.H"
+#include "polyModifyFace.H"
+#include "syncTools.H"
+#include "regionSplit.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -399,6 +404,376 @@ void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
 //            boundaryFacesToRemove
 //        );
     }
+}
+
+
+void Foam::conformalVoronoiMesh::findCellZoneInsideWalk
+(
+    const polyMesh& mesh,
+    const labelList& locationSurfaces,  // indices of surfaces with inside point
+    const labelList& faceToSurface, // per face index of named surface
+    labelList& cellToSurface
+) const
+{
+    // Analyse regions. Reuse regionsplit
+    boolList blockedFace(mesh.nFaces());
+    //selectSeparatedCoupledFaces(blockedFace);
+
+    forAll(faceToSurface, faceI)
+    {
+        if (faceToSurface[faceI] == -1)
+        {
+            blockedFace[faceI] = false;
+        }
+        else
+        {
+            blockedFace[faceI] = true;
+        }
+    }
+    // No need to sync since namedSurfaceIndex already is synced
+
+    // Set region per cell based on walking
+    regionSplit cellRegion(mesh, blockedFace);
+    blockedFace.clear();
+
+
+    // Force calculation of face decomposition (used in findCell)
+    (void)mesh.tetBasePtIs();
+
+    const PtrList<surfaceZonesInfo>& surfZones =
+        geometryToConformTo().surfZones();
+
+    // For all locationSurface find the cell
+    forAll(locationSurfaces, i)
+    {
+        label surfI = locationSurfaces[i];
+
+        const Foam::point& insidePoint = surfZones[surfI].zoneInsidePoint();
+
+        const word& surfName = geometryToConformTo().geometry().names()[surfI];
+
+        Info<< "    For surface " << surfName
+            << " finding inside point " << insidePoint
+            << endl;
+
+        // Find the region containing the insidePoint
+        label keepRegionI = -1;
+
+        label cellI = mesh.findCell(insidePoint);
+
+        if (cellI != -1)
+        {
+            keepRegionI = cellRegion[cellI];
+        }
+        reduce(keepRegionI, maxOp<label>());
+
+        Info<< "    For surface " << surfName
+            << " found point " << insidePoint << " in cell " << cellI
+            << " in global region " << keepRegionI
+            << " out of " << cellRegion.nRegions() << " regions." << endl;
+
+        if (keepRegionI == -1)
+        {
+            FatalErrorIn
+            (
+                "conformalVoronoiMesh::findCellZoneInsideWalk"
+                "(const polyMesh&, const labelList&"
+                ", const labelList&, labelList&)"
+            )   << "Point " << insidePoint
+                << " is not inside the mesh." << nl
+                << "Bounding box of the mesh:" << mesh.bounds()
+                << exit(FatalError);
+        }
+
+        // Set all cells with this region
+        forAll(cellRegion, cellI)
+        {
+            if (cellRegion[cellI] == keepRegionI)
+            {
+                if (cellToSurface[cellI] == -2)
+                {
+                    cellToSurface[cellI] = surfI;
+                }
+                else if (cellToSurface[cellI] != surfI)
+                {
+                    WarningIn
+                    (
+                        "conformalVoronoiMesh::findCellZoneInsideWalk"
+                        "(const labelList&, const labelList&"
+                        ", const labelList&, const labelList&)"
+                    )   << "Cell " << cellI
+                        << " at " << mesh.cellCentres()[cellI]
+                        << " is inside surface " << surfName
+                        << " but already marked as being in zone "
+                        << cellToSurface[cellI] << endl
+                        << "This can happen if your surfaces are not"
+                        << " (sufficiently) closed."
+                        << endl;
+                }
+            }
+        }
+    }
+}
+
+
+Foam::labelList Foam::conformalVoronoiMesh::calcCellZones
+(
+    const pointField& cellCentres
+) const
+{
+    labelList cellToSurface(cellCentres.size(), -1);
+
+    const PtrList<surfaceZonesInfo>& surfZones =
+        geometryToConformTo().surfZones();
+
+    // Get list of closed surfaces
+    labelList closedNamedSurfaces
+    (
+        surfaceZonesInfo::getAllClosedNamedSurfaces
+        (
+            surfZones,
+            geometryToConformTo().geometry(),
+            geometryToConformTo().surfaces()
+        )
+    );
+
+    forAll(closedNamedSurfaces, i)
+    {
+        label surfI = closedNamedSurfaces[i];
+
+        const searchableSurface& surface =
+            allGeometry()[geometryToConformTo().surfaces()[surfI]];
+
+        const surfaceZonesInfo::areaSelectionAlgo selectionMethod =
+            surfZones[surfI].zoneInside();
+
+        if
+        (
+            selectionMethod != surfaceZonesInfo::INSIDE
+         && selectionMethod != surfaceZonesInfo::OUTSIDE
+         && selectionMethod != surfaceZonesInfo::INSIDEPOINT
+        )
+        {
+            FatalErrorIn("conformalVoronoiMesh::calcCellZones(..)")
+                << "Trying to use surface "
+                << surface.name()
+                << " which has non-geometric inside selection method "
+                << surfaceZonesInfo::areaSelectionAlgoNames[selectionMethod]
+                << exit(FatalError);
+        }
+
+        if (surface.hasVolumeType())
+        {
+            List<volumeType> volType;
+            surface.getVolumeType(cellCentres, volType);
+
+            bool selectInside = true;
+            if (selectionMethod == surfaceZonesInfo::INSIDEPOINT)
+            {
+                List<volumeType> volTypeInsidePoint;
+                surface.getVolumeType
+                (
+                    pointField(1, surfZones[surfI].zoneInsidePoint()),
+                    volTypeInsidePoint
+                );
+
+                if (volTypeInsidePoint[0] == volumeType::OUTSIDE)
+                {
+                    selectInside = false;
+                }
+            }
+            else if (selectionMethod == surfaceZonesInfo::OUTSIDE)
+            {
+                selectInside = false;
+            }
+
+            forAll(volType, pointI)
+            {
+                if (cellToSurface[pointI] == -1)
+                {
+                    if
+                    (
+                        (
+                            volType[pointI] == volumeType::INSIDE
+                         && selectInside
+                        )
+                     || (
+                            volType[pointI] == volumeType::OUTSIDE
+                         && !selectInside
+                        )
+                    )
+                    {
+                        cellToSurface[pointI] = surfI;
+                    }
+                }
+            }
+        }
+    }
+
+    return cellToSurface;
+}
+
+
+void Foam::conformalVoronoiMesh::calcFaceZones
+(
+    const polyMesh& mesh,
+    const pointField& cellCentres,
+    const labelList& cellToSurface,
+    labelList& faceToSurface,
+    boolList& flipMap
+) const
+{
+    faceToSurface.setSize(mesh.nFaces(), -1);
+    flipMap.setSize(mesh.nFaces(), false);
+
+    const faceList& faces = mesh.faces();
+    const labelList& faceOwner = mesh.faceOwner();
+    const labelList& faceNeighbour = mesh.faceNeighbour();
+
+    forAll(faces, faceI)
+    {
+        const label ownerSurfaceI = cellToSurface[faceOwner[faceI]];
+
+        if (mesh.isInternalFace(faceI))
+        {
+            const label neiSurfaceI = cellToSurface[faceNeighbour[faceI]];
+
+            flipMap[faceI] =
+                (
+                    ownerSurfaceI == max(ownerSurfaceI, neiSurfaceI)
+                  ? false
+                  : true
+                );
+
+            if
+            (
+                (ownerSurfaceI >= 0 || neiSurfaceI >= 0)
+             && ownerSurfaceI != neiSurfaceI
+            )
+            {
+                if (ownerSurfaceI > neiSurfaceI)
+                {
+                    faceToSurface[faceI] = ownerSurfaceI;
+                }
+                else
+                {
+                    faceToSurface[faceI] = neiSurfaceI;
+                }
+            }
+        }
+        else
+        {
+            if (ownerSurfaceI >= 0)
+            {
+                faceToSurface[faceI] = ownerSurfaceI;
+            }
+        }
+    }
+
+
+    const PtrList<surfaceZonesInfo>& surfZones =
+        geometryToConformTo().surfZones();
+
+    labelList insidePointNamedSurfaces
+    (
+        surfaceZonesInfo::getInsidePointNamedSurfaces(surfZones)
+    );
+
+    // Use intersection of cellCentre connections
+    forAll(faces, faceI)
+    {
+        if
+        (
+            mesh.isInternalFace(faceI)
+         && faceToSurface[faceI] < 0
+        )
+        {
+            const label own = faceOwner[faceI];
+            const label nei = faceNeighbour[faceI];
+
+            pointIndexHit surfHit;
+            label hitSurface;
+
+            geometryToConformTo().findSurfaceAnyIntersection
+            (
+                cellCentres[own],
+                cellCentres[nei],
+                surfHit,
+                hitSurface
+            );
+
+            if (surfHit.hit())
+            {
+                if (findIndex(insidePointNamedSurfaces, hitSurface) != -1)
+                {
+                    faceToSurface[faceI] = hitSurface;
+
+                    vectorField norm;
+                    geometryToConformTo().getNormal
+                    (
+                        hitSurface,
+                        List<pointIndexHit>(1, surfHit),
+                        norm
+                    );
+
+                    const vector fN = faces[faceI].normal(mesh.points());
+
+                    if ((norm[0] & fN/(mag(fN) + SMALL)) < 0)
+                    {
+                        flipMap[faceI] = true;
+                    }
+                    else
+                    {
+                        flipMap[faceI] = false;
+                    }
+                }
+            }
+        }
+    }
+
+
+    labelList neiCellSurface(mesh.nFaces()-mesh.nInternalFaces());
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        if (pp.coupled())
+        {
+            forAll(pp, i)
+            {
+                label faceI = pp.start()+i;
+                label ownSurface = cellToSurface[faceOwner[faceI]];
+                neiCellSurface[faceI - mesh.nInternalFaces()] = ownSurface;
+            }
+        }
+    }
+    syncTools::swapBoundaryFaceList(mesh, neiCellSurface);
+
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        if (pp.coupled())
+        {
+            forAll(pp, i)
+            {
+                label faceI = pp.start()+i;
+                label ownSurface = cellToSurface[faceOwner[faceI]];
+                label neiSurface = neiCellSurface[faceI-mesh.nInternalFaces()];
+
+                if (faceToSurface[faceI] == -1 && (ownSurface != neiSurface))
+                {
+                    // Give face the max cell zone
+                    faceToSurface[faceI] =  max(ownSurface, neiSurface);
+                }
+            }
+        }
+    }
+
+    // Sync
+    syncTools::syncFaceList(mesh, faceToSurface, maxEqOp<label>());
 }
 
 
@@ -883,7 +1258,11 @@ void Foam::conformalVoronoiMesh::writeMesh
             // Check that the patch is not empty on every processor
             reduce(totalPatchSize, sumOp<label>());
 
-            if (totalPatchSize > 0)
+            if
+            (
+                totalPatchSize > 0
+//             && !geometryToConformTo().surfZones().set(p)
+            )
             {
                 patches[nValidPatches] = polyPatch::New
                 (
@@ -897,6 +1276,145 @@ void Foam::conformalVoronoiMesh::writeMesh
             }
         }
     }
+
+    patches.setSize(nValidPatches);
+
+    mesh.addFvPatches(patches);
+
+
+    // Add zones to mesh
+    {
+        Info<< "    Adding zones to mesh" << endl;
+
+        const PtrList<surfaceZonesInfo>& surfZones =
+            geometryToConformTo().surfZones();
+
+        labelList cellToSurface(calcCellZones(cellCentres));
+
+        labelList faceToSurface;
+        boolList flipMap;
+
+        calcFaceZones
+        (
+            mesh,
+            cellCentres,
+            cellToSurface,
+            faceToSurface,
+            flipMap
+        );
+
+        labelList insidePointNamedSurfaces
+        (
+            surfaceZonesInfo::getInsidePointNamedSurfaces(surfZones)
+        );
+
+        findCellZoneInsideWalk
+        (
+            mesh,
+            insidePointNamedSurfaces,
+            faceToSurface,
+            cellToSurface
+        );
+
+        labelList namedSurfaces(surfaceZonesInfo::getNamedSurfaces(surfZones));
+
+        forAll(namedSurfaces, i)
+        {
+            label surfI = namedSurfaces[i];
+
+            Info<< incrIndent << indent << "Surface : "
+                << geometryToConformTo().geometry().names()[surfI] << nl
+                << indent << "    faceZone : "
+                << surfZones[surfI].faceZoneName() << nl
+                << indent << "    cellZone : "
+                << surfZones[surfI].cellZoneName()
+                << decrIndent << endl;
+        }
+
+        // Add zones to mesh
+        labelList surfaceToFaceZone =
+            surfaceZonesInfo::addFaceZonesToMesh
+            (
+                surfZones,
+                namedSurfaces,
+                mesh
+            );
+
+        labelList surfaceToCellZone =
+            surfaceZonesInfo::addCellZonesToMesh
+            (
+                surfZones,
+                namedSurfaces,
+                mesh
+            );
+
+        // Topochange container
+        polyTopoChange meshMod(mesh);
+
+        forAll(cellToSurface, cellI)
+        {
+            label surfaceI = cellToSurface[cellI];
+
+            if (surfaceI >= 0)
+            {
+                label zoneI = surfaceToCellZone[surfaceI];
+
+                if (zoneI >= 0)
+                {
+                    meshMod.setAction
+                    (
+                        polyModifyCell
+                        (
+                            cellI,
+                            false,          // removeFromZone
+                            zoneI
+                        )
+                    );
+                }
+            }
+        }
+
+        const labelList& faceOwner = mesh.faceOwner();
+        const labelList& faceNeighbour = mesh.faceNeighbour();
+
+        forAll(faceToSurface, faceI)
+        {
+            if (!mesh.isInternalFace(faceI))
+            {
+                continue;
+            }
+
+            label surfaceI = faceToSurface[faceI];
+
+            if (surfaceI >= 0)
+            {
+                label own = faceOwner[faceI];
+                label nei = faceNeighbour[faceI];
+
+                meshMod.setAction
+                (
+                    polyModifyFace
+                    (
+                        mesh.faces()[faceI],            // modified face
+                        faceI,                          // label of face
+                        own,                            // owner
+                        nei,                            // neighbour
+                        false,                          // face flip
+                        -1,                             // patch for face
+                        false,                          // remove from zone
+                        surfaceToFaceZone[surfaceI],    // zone for face
+                        flipMap[faceI]                  // face flip in zone
+                    )
+                );
+            }
+        }
+
+        // Change the mesh (no inflation, parallel sync)
+        autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false, true);
+    }
+
+
+
 
     // Add indirectPatchFaces to a face zone
     {
@@ -927,10 +1445,6 @@ void Foam::conformalVoronoiMesh::writeMesh
             )
         );
     }
-
-    patches.setSize(nValidPatches);
-
-    mesh.addFvPatches(patches);
 
     timeCheck("Before fvMesh filtering");
 

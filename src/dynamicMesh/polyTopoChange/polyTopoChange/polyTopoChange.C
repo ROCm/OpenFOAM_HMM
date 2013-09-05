@@ -818,22 +818,25 @@ void Foam::polyTopoChange::getFaceOrder
     patchSizes.setSize(nPatches_);
     patchSizes = 0;
 
-    patchStarts[0] = newFaceI;
-
-    for (label faceI = 0; faceI < nActiveFaces; faceI++)
+    if (nPatches_ > 0)
     {
-        if (region_[faceI] >= 0)
+        patchStarts[0] = newFaceI;
+
+        for (label faceI = 0; faceI < nActiveFaces; faceI++)
         {
-            patchSizes[region_[faceI]]++;
+            if (region_[faceI] >= 0)
+            {
+                patchSizes[region_[faceI]]++;
+            }
         }
-    }
 
-    label faceI = patchStarts[0];
+        label faceI = patchStarts[0];
 
-    forAll(patchStarts, patchI)
-    {
-        patchStarts[patchI] = faceI;
-        faceI += patchSizes[patchI];
+        forAll(patchStarts, patchI)
+        {
+            patchStarts[patchI] = faceI;
+            faceI += patchSizes[patchI];
+        }
     }
 
     //if (debug)

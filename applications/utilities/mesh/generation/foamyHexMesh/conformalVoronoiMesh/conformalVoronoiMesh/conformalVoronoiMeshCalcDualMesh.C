@@ -2852,32 +2852,6 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 }
 
 
-void Foam::conformalVoronoiMesh::createCellCentres
-(
-    pointField& cellCentres
-) const
-{
-    cellCentres.setSize(number_of_vertices(), point::max);
-
-    label vertI = 0;
-
-    for
-    (
-        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-        vit != finite_vertices_end();
-        ++vit
-    )
-    {
-        if (vit->internalOrBoundaryPoint())
-        {
-            cellCentres[vertI++] = topoint(vit->point());
-        }
-    }
-
-    cellCentres.setSize(vertI);
-}
-
-
 void Foam::conformalVoronoiMesh::sortFaces
 (
     faceList& faces,
@@ -3095,7 +3069,7 @@ Foam::labelList Foam::conformalVoronoiMesh::removeUnusedCells
 {
     Info<< nl << "Removing unused cells" << endl;
 
-    PackedBoolList cellUsed(number_of_vertices(), false);
+    PackedBoolList cellUsed(vertexCount(), false);
 
     // Scan all faces to find all of the cells that are used
 

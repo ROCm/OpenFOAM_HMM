@@ -337,8 +337,10 @@ void Foam::autoSnapDriver::calcNearestFace
     faceSurfaceGlobalRegion = -1;
 
     // Divide surfaces into zoned and unzoned
-    labelList zonedSurfaces = surfaces.getNamedSurfaces();
-    labelList unzonedSurfaces = surfaces.getUnnamedSurfaces();
+    const labelList zonedSurfaces =
+        surfaceZonesInfo::getNamedSurfaces(surfaces.surfZones());
+    const labelList unzonedSurfaces =
+        surfaceZonesInfo::getUnnamedSurfaces(surfaces.surfZones());
 
     // Per pp face the current surface snapped to
     labelList snapSurf(pp.size(), -1);
@@ -349,20 +351,22 @@ void Foam::autoSnapDriver::calcNearestFace
     // Zoned faces only attract to corresponding surface
 
     // Extract faces per zone
-    const wordList& faceZoneNames = surfaces.faceZoneNames();
+    const PtrList<surfaceZonesInfo>& surfZones = surfaces.surfZones();
 
     forAll(zonedSurfaces, i)
     {
         label zoneSurfI = zonedSurfaces[i];
 
+        const word& faceZoneName = surfZones[zoneSurfI].faceZoneName();
+
         // Get indices of faces on pp that are also in zone
-        label zoneI = mesh.faceZones().findZoneID(faceZoneNames[zoneSurfI]);
+        label zoneI = mesh.faceZones().findZoneID(faceZoneName);
         if (zoneI == -1)
         {
             FatalErrorIn
             (
                 "autoSnapDriver::calcNearestFace(..)"
-            )   << "Problem. Cannot find zone " << faceZoneNames[zoneSurfI]
+            )   << "Problem. Cannot find zone " << faceZoneName
                 << exit(FatalError);
         }
         const faceZone& fZone = mesh.faceZones()[zoneI];

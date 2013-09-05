@@ -98,19 +98,8 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
 
     labelList surfaces(surfI);
     wordList names(surfI);
-    wordList faceZoneNames(surfI);
-    wordList cellZoneNames(surfI);
-    List<refinementSurfaces::areaSelectionAlgo> zoneInside
-    (
-        surfI,
-        refinementSurfaces::NONE
-    );
-    pointField zoneInsidePoints(surfI);
-    List<refinementSurfaces::faceZoneType> faceType
-    (
-        surfI,
-        refinementSurfaces::INTERNAL
-    );
+    PtrList<surfaceZonesInfo> surfZones(surfI);
+
     labelList regionOffset(surfI);
 
     labelList globalMinLevel(surfI, 0);
@@ -123,21 +112,24 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
     List<Map<scalar> > regionAngle(surfI);
     List<Map<autoPtr<dictionary> > > regionPatchInfo(surfI);
 
+    HashSet<word> unmatchedKeys(surfacesDict.toc());
+
     surfI = 0;
     forAll(allGeometry.names(), geomI)
     {
         const word& geomName = allGeometry.names()[geomI];
 
+        const entry* ePtr = surfacesDict.lookupEntryPtr(geomName, false, true);
 
-        // Definition of surfaces to conform to
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        if (surfacesDict.found(geomName))
+        if (ePtr)
         {
+            const dictionary& shapeDict = ePtr->dict();
+            unmatchedKeys.erase(ePtr->keyword());
+
             names[surfI] = geomName;
             surfaces[surfI] = geomI;
 
-            const dictionary& shapeDict = shapeControlDict.subDict(geomName);
+            const searchableSurface& surface = allGeometry[geomI];
 
             // Find the index in shapeControlDict
             // Invert surfaceCellSize to get the refinementLevel
@@ -160,107 +152,26 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
             globalMaxLevel[surfI] = refLevel;
             globalLevelIncr[surfI] = gapLevelIncrement;
 
-            const dictionary& dict = surfacesDict.subDict(geomName);
-
-            // Global zone names per surface
-            if (dict.readIfPresent("faceZone", faceZoneNames[surfI]))
-            {
-                // Read optional entry to determine inside of faceZone
-
-                word method;
-                bool hasSide = dict.readIfPresent("cellZoneInside", method);
-                if (hasSide)
-                {
-                    zoneInside[surfI] =
-                        refinementSurfaces::areaSelectionAlgoNames[method];
-                    if (zoneInside[surfI] == refinementSurfaces::INSIDEPOINT)
-                    {
-                        dict.lookup("insidePoint") >> zoneInsidePoints[surfI];
-                    }
-
-                }
-                else
-                {
-                    // Check old syntax
-                    bool inside;
-                    if (dict.readIfPresent("zoneInside", inside))
-                    {
-                        hasSide = true;
-                        zoneInside[surfI] =
-                            (
-                                inside
-                              ? refinementSurfaces::INSIDE
-                              : refinementSurfaces::OUTSIDE
-                            );
-                    }
-                }
-
-                // Read optional cellZone name
-
-                if (dict.readIfPresent("cellZone", cellZoneNames[surfI]))
-                {
-                    if
-                    (
-                        (
-                            zoneInside[surfI] == refinementSurfaces::INSIDE
-                         || zoneInside[surfI] == refinementSurfaces::OUTSIDE
-                        )
-                    && !allGeometry[surfaces[surfI]].hasVolumeType()
-                    )
-                    {
-                        IOWarningIn
-                        (
-                            "createRefinementSurfaces(..)",
-                            dict
-                        )   << "Illegal entry zoneInside "
-                            << refinementSurfaces::areaSelectionAlgoNames
-                               [
-                                   zoneInside[surfI]
-                               ]
-                            << " for faceZone "
-                            << faceZoneNames[surfI]
-                            << " since surface " << names[surfI]
-                            << " is not closed." << endl;
-                    }
-                }
-                else if (hasSide)
-                {
-                    IOWarningIn
-                    (
-                        "createRefinementSurfaces(..)",
-                        dict
-                    )   << "Unused entry zoneInside for faceZone "
-                        << faceZoneNames[surfI]
-                        << " since no cellZone specified."
-                        << endl;
-                }
-
-                // How to handle faces on faceZone
-                word faceTypeMethod;
-                if (dict.readIfPresent("faceType", faceTypeMethod))
-                {
-                    faceType[surfI] =
-                        refinementSurfaces::faceZoneTypeNames[faceTypeMethod];
-                }
-            }
+            // Surface zones
+            surfZones.set(surfI, new surfaceZonesInfo(surface, shapeDict));
 
 
             // Global perpendicular angle
-            if (dict.found("patchInfo"))
+            if (shapeDict.found("patchInfo"))
             {
                 globalPatchInfo.set
                 (
                     surfI,
-                    dict.subDict("patchInfo").clone()
+                    shapeDict.subDict("patchInfo").clone()
                 );
             }
 
 
             // Per region override of patchInfo
 
-            if (dict.found("regions"))
+            if (shapeDict.found("regions"))
             {
-                const dictionary& regionsDict = dict.subDict("regions");
+                const dictionary& regionsDict = shapeDict.subDict("regions");
                 const wordList& regionNames =
                     allGeometry[surfaces[surfI]].regions();
 
@@ -333,6 +244,7 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
                     }
                 }
             }
+
             surfI++;
         }
     }
@@ -403,11 +315,7 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
             allGeometry,
             surfaces,
             names,
-            faceZoneNames,
-            cellZoneNames,
-            zoneInside,
-            zoneInsidePoints,
-            faceType,
+            surfZones,
             regionOffset,
             minLevel,
             maxLevel,
@@ -706,11 +614,6 @@ int main(int argc, char *argv[])
         "boundBox",
         "simplify the surface using snappyHexMesh starting from a boundBox"
     );
-    Foam::argList::addBoolOption
-    (
-        "writeLevel",
-        "write pointLevel and cellLevel postprocessing files"
-    );
     Foam::argList::addOption
     (
         "patches",
@@ -732,7 +635,6 @@ int main(int argc, char *argv[])
     const bool overwrite = args.optionFound("overwrite");
     const bool checkGeometry = args.optionFound("checkGeometry");
     const bool surfaceSimplify = args.optionFound("surfaceSimplify");
-    const bool writeLevel = args.optionFound("writeLevel");
 
     autoPtr<fvMesh> meshPtr;
 
@@ -943,6 +845,8 @@ int main(int argc, char *argv[])
         autoSnapDriver::debug   = debug;
         autoLayerDriver::debug  = debug;
     }
+
+    const bool writeLevel = meshDict.lookupOrDefault<bool>("writeLevel", false);
 
 
     // Read geometry
@@ -1188,7 +1092,7 @@ int main(int argc, char *argv[])
 
             Info<< surfaces.names()[surfI] << ':' << nl << nl;
 
-            if (surfaces.faceZoneNames()[surfI].empty())
+            if (surfaces.surfZones()[surfI].faceZoneName().empty())
             {
                 // 'Normal' surface
                 forAll(regNames, i)

@@ -40,6 +40,31 @@ using namespace Foam;
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class Type>
+tmp<GeometricField<Type, fvPatchField, volMesh> >
+volField
+(
+    const fvMeshSubset& meshSubsetter,
+    const GeometricField<Type, fvPatchField, volMesh>& vf
+)
+{
+    if (meshSubsetter.hasSubMesh())
+    {
+        tmp<GeometricField<Type, fvPatchField, volMesh> > tfld
+        (
+            meshSubsetter.interpolate(vf)
+        );
+        tfld().checkOut();
+        tfld().rename(vf.name());
+        return tfld;
+    }
+    else
+    {
+        return vf;
+    }
+}
+
+
+template<class Type>
 Field<Type> map
 (
     const Field<Type>& vf,
@@ -680,7 +705,7 @@ void ensightPointField
 template<class Type>
 void ensightField
 (
-    const IOobject& fieldObject,
+    const GeometricField<Type, fvPatchField, volMesh>& vf,
     const ensightMesh& eMesh,
     const fileName& postProcPath,
     const word& prepend,
@@ -690,14 +715,11 @@ void ensightField
     Ostream& ensightCaseFile
 )
 {
-    // Read field
-    GeometricField<Type, fvPatchField, volMesh> vf(fieldObject, eMesh.mesh());
-
     if (nodeValues)
     {
         tmp<GeometricField<Type, pointPatchField, pointMesh> > pfld
         (
-            volPointInterpolation::New(eMesh.mesh()).interpolate(vf)
+            volPointInterpolation::New(vf.mesh()).interpolate(vf)
         );
         pfld().rename(vf.name());
 
