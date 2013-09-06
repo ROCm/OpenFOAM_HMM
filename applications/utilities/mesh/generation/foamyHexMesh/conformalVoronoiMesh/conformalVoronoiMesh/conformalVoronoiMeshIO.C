@@ -928,7 +928,8 @@ void Foam::conformalVoronoiMesh::calcFaceZones
 //            {
 //                label faceI = pp.start()+i;
 //                label ownSurface = cellToSurface[faceOwner[faceI]];
-//                label neiSurface = neiCellSurface[faceI-mesh.nInternalFaces()];
+//                label neiSurface =
+//                    neiCellSurface[faceI-mesh.nInternalFaces()];
 //
 //                if (faceToSurface[faceI] == -1 && (ownSurface != neiSurface))
 //                {
@@ -1542,28 +1543,6 @@ void Foam::conformalVoronoiMesh::writeMesh
         const labelList& faceOwner = mesh.faceOwner();
         const labelList& faceNeighbour = mesh.faceNeighbour();
 
-//        // Get coupled neighbour cellZone. Set to -1 on non-coupled patches.
-//        labelList neiCellZone(mesh.nFaces() - mesh.nInternalFaces(), -1);
-//
-//        const polyBoundaryMesh& patches = mesh.boundaryMesh();
-//
-//        forAll(patches, patchI)
-//        {
-//            const polyPatch& pp = patches[patchI];
-//
-//            if (pp.coupled())
-//            {
-//                forAll(pp, i)
-//                {
-//                    label faceI = pp.start()+i;
-//                    neiCellZone[faceI - mesh.nInternalFaces()] =
-//                        surfaceToCellZone[cellToSurface[faceOwner[faceI]]];
-//                }
-//            }
-//        }
-//
-//        syncTools::swapBoundaryFaceList(mesh, neiCellZone);
-
         forAll(faceToSurface, faceI)
         {
             label surfaceI = faceToSurface[faceI];
@@ -1604,15 +1583,15 @@ void Foam::conformalVoronoiMesh::writeMesh
                 (
                     polyModifyFace
                     (
-                        mesh.faces()[faceI],           // modified face
+                        mesh.faces()[faceI],            // modified face
                         faceI,                          // label of face
-                        own,               // owner
+                        own,                            // owner
                         -1,                             // neighbour
                         false,                          // face flip
-                        patchID,                         // patch for face
+                        patchID,                        // patch for face
                         false,                          // remove from zone
-                        surfaceToFaceZone[surfaceI],       // zone for face
-                        flipMap[faceI]                            // face flip in zone
+                        surfaceToFaceZone[surfaceI],    // zone for face
+                        flipMap[faceI]                  // face flip in zone
                     )
                 );
             }
