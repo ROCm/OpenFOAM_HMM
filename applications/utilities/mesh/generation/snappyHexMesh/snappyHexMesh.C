@@ -614,11 +614,6 @@ int main(int argc, char *argv[])
         "boundBox",
         "simplify the surface using snappyHexMesh starting from a boundBox"
     );
-    Foam::argList::addBoolOption
-    (
-        "writeLevel",
-        "write pointLevel and cellLevel postprocessing files"
-    );
     Foam::argList::addOption
     (
         "patches",
@@ -640,7 +635,6 @@ int main(int argc, char *argv[])
     const bool overwrite = args.optionFound("overwrite");
     const bool checkGeometry = args.optionFound("checkGeometry");
     const bool surfaceSimplify = args.optionFound("surfaceSimplify");
-    const bool writeLevel = args.optionFound("writeLevel");
 
     autoPtr<fvMesh> meshPtr;
 
@@ -851,6 +845,8 @@ int main(int argc, char *argv[])
         autoSnapDriver::debug   = debug;
         autoLayerDriver::debug  = debug;
     }
+
+    const bool writeLevel = meshDict.lookupOrDefault<bool>("writeLevel", false);
 
 
     // Read geometry
