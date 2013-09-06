@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,7 +69,7 @@ Description
     \table
         Property     | Description             | Required    | Default value
         n            | flow direction          | yes         |
-        z            | vertical co-ordinate [m] | yes        |
+        z            | vertical direction of z-axis | yes    |
         kappa        | Karman's constanat      | no          | 0.41
         Uref         | reference velocity [m/s] | yes        |
         Href         | reference height [m]    | yes         |
@@ -83,7 +83,7 @@ Description
     {
         type            atmBoundaryLayerInletVelocity;
         n               (0 1 0);
-        z               1.0;
+        z               (0 1 0);
         kappa           0.41;
         Uref            1.0;
         Href            0.0;
@@ -135,7 +135,7 @@ class atmBoundaryLayerInletVelocityFvPatchVectorField
         //- Direction of the z-coordinate
         vector z_;
 
-        //- Surface roughness lenght
+        //- Surface roughness length
         scalarField z0_;
 
         //- Von Karman constant

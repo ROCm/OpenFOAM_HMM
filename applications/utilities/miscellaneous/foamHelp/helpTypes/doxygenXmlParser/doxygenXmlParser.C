@@ -213,25 +213,21 @@ void Foam::doxygenXmlParser::skipForward
 ) const
 {
     // recurse to move forward in 'is' until come across <blockName>
-
-    // fast-forward until we reach a '<'
-    char c;
-    while (is.get(c) && c != '<')
-    {}
-    
     string entryName = "";
-    while (is.get(c) && c  != '>')
-    {
-        entryName = entryName + c;
-    }
+    char c;
 
-    if (entryName == blockName)
+    while (is.good() && (entryName != blockName))
     {
-        return;
-    }
-    else
-    {
-        skipForward(is, blockName);
+        entryName = "";
+
+        // fast-forward until we reach a '<'
+        while (is.get(c) && c != '<')
+        {}
+
+        while (is.get(c) && c  != '>')
+        {
+            entryName = entryName + c;
+        }
     }
 }
 
