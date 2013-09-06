@@ -257,6 +257,14 @@ public:
                 label& hitSurface
             ) const;
 
+            void findSurfaceAllIntersections
+            (
+                const point& start,
+                const point& end,
+                List<pointIndexHit>& surfHit,
+                labelList& hitSurface
+            ) const;
+
             //- Finding the nearestIntersection of the surface to start
             void findSurfaceNearestIntersection
             (
