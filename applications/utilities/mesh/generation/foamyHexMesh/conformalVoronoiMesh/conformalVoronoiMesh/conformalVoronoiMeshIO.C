@@ -40,6 +40,7 @@ License
 #include "polyModifyFace.H"
 #include "syncTools.H"
 #include "regionSplit.H"
+#include "OBJstream.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
