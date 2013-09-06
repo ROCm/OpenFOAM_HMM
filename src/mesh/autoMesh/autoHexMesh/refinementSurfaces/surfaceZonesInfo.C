@@ -182,7 +182,6 @@ Foam::surfaceZonesInfo::surfaceZonesInfo(const surfaceZonesInfo& surfZone)
 {}
 
 
-// Get indices of unnamed surfaces (surfaces without faceZoneName)
 Foam::labelList Foam::surfaceZonesInfo::getUnnamedSurfaces
 (
     const PtrList<surfaceZonesInfo>& surfList
@@ -204,7 +203,6 @@ Foam::labelList Foam::surfaceZonesInfo::getUnnamedSurfaces
 }
 
 
-// Get indices of named surfaces (surfaces with faceZoneName)
 Foam::labelList Foam::surfaceZonesInfo::getNamedSurfaces
 (
     const PtrList<surfaceZonesInfo>& surfList
@@ -230,7 +228,6 @@ Foam::labelList Foam::surfaceZonesInfo::getNamedSurfaces
 }
 
 
-// Get indices of closed named surfaces
 Foam::labelList Foam::surfaceZonesInfo::getClosedNamedSurfaces
 (
     const PtrList<surfaceZonesInfo>& surfList,
@@ -263,7 +260,33 @@ Foam::labelList Foam::surfaceZonesInfo::getClosedNamedSurfaces
 }
 
 
-// Get indices of closed named surfaces
+Foam::labelList Foam::surfaceZonesInfo::getUnclosedNamedSurfaces
+(
+    const PtrList<surfaceZonesInfo>& surfList,
+    const searchableSurfaces& allGeometry,
+    const labelList& surfaces
+)
+{
+    labelList unclosed(surfList.size());
+
+    label unclosedI = 0;
+    forAll(surfList, surfI)
+    {
+        if
+        (
+            surfList.set(surfI)
+         && !allGeometry[surfaces[surfI]].hasVolumeType()
+        )
+        {
+            unclosed[unclosedI++] = surfI;
+        }
+    }
+    unclosed.setSize(unclosedI);
+
+    return unclosed;
+}
+
+
 Foam::labelList Foam::surfaceZonesInfo::getAllClosedNamedSurfaces
 (
     const PtrList<surfaceZonesInfo>& surfList,
@@ -292,7 +315,6 @@ Foam::labelList Foam::surfaceZonesInfo::getAllClosedNamedSurfaces
 }
 
 
-// Get indices of named surfaces with a
 Foam::labelList Foam::surfaceZonesInfo::getInsidePointNamedSurfaces
 (
     const PtrList<surfaceZonesInfo>& surfList
