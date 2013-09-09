@@ -872,6 +872,42 @@ void Foam::conformationSurfaces::findSurfaceAnyIntersection
 }
 
 
+void Foam::conformationSurfaces::findSurfaceAllIntersections
+(
+    const point& start,
+    const point& end,
+    List<pointIndexHit>& surfHit,
+    labelList& hitSurface
+) const
+{
+    labelListList hitSurfaces;
+    List<List<pointIndexHit> > hitInfo;
+
+    searchableSurfacesQueries::findAllIntersections
+    (
+        allGeometry_,
+        surfaces_,
+        pointField(1, start),
+        pointField(1, end),
+        hitSurfaces,
+        hitInfo
+    );
+
+    surfHit = hitInfo[0];
+
+    hitSurface.setSize(hitSurfaces[0].size());
+
+    forAll(hitSurfaces[0], surfI)
+    {
+        // hitSurfaces has returned the index of the entry in surfaces_ that was
+        // found, not the index of the surface in allGeometry_, translating this
+        // to allGeometry_
+
+        hitSurface[surfI] = surfaces_[hitSurfaces[0][surfI]];
+    }
+}
+
+
 void Foam::conformationSurfaces::findSurfaceNearestIntersection
 (
     const point& start,

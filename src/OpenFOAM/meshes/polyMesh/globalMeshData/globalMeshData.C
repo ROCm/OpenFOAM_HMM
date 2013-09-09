@@ -847,7 +847,9 @@ Foam::label Foam::globalMeshData::findTransform
     {
         FatalErrorIn("globalMeshData::findTransform(..)")
             << "Problem. Cannot find " << remotePoint
-            << " or " << localPoint << " in " << info
+            << " or " << localPoint  << " "
+            << coupledPatch().localPoints()[localPoint]
+            << " in " << info
             << endl
             << "remoteTransformI:" << remoteTransformI << endl
             << "localTransformI:" << localTransformI
