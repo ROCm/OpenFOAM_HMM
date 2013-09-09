@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -124,14 +124,13 @@ boundedDdtScheme<Type>::fvmDdt
 
 template<class Type>
 tmp<typename boundedDdtScheme<Type>::fluxFieldType>
-boundedDdtScheme<Type>::fvcDdtPhiCorr
+boundedDdtScheme<Type>::fvcDdtUfCorr
 (
-    const volScalarField& rA,
     const GeometricField<Type, fvPatchField, volMesh>& U,
-    const fluxFieldType& phi
+    const GeometricField<Type, fvsPatchField, surfaceMesh>& Uf
 )
 {
-    return scheme_().fvcDdtPhiCorr(rA, U, phi);
+    return scheme_().fvcDdtUfCorr(U, Uf);
 }
 
 
@@ -139,13 +138,37 @@ template<class Type>
 tmp<typename boundedDdtScheme<Type>::fluxFieldType>
 boundedDdtScheme<Type>::fvcDdtPhiCorr
 (
-    const volScalarField& rA,
+    const GeometricField<Type, fvPatchField, volMesh>& U,
+    const fluxFieldType& phi
+)
+{
+    return scheme_().fvcDdtPhiCorr(U, phi);
+}
+
+
+template<class Type>
+tmp<typename boundedDdtScheme<Type>::fluxFieldType>
+boundedDdtScheme<Type>::fvcDdtUfCorr
+(
+    const volScalarField& rho,
+    const GeometricField<Type, fvPatchField, volMesh>& U,
+    const GeometricField<Type, fvsPatchField, surfaceMesh>& Uf
+)
+{
+    return scheme_().fvcDdtUfCorr(rho, U, Uf);
+}
+
+
+template<class Type>
+tmp<typename boundedDdtScheme<Type>::fluxFieldType>
+boundedDdtScheme<Type>::fvcDdtPhiCorr
+(
     const volScalarField& rho,
     const GeometricField<Type, fvPatchField, volMesh>& U,
     const fluxFieldType& phi
 )
 {
-    return scheme_().fvcDdtPhiCorr(rA, rho, U, phi);
+    return scheme_().fvcDdtPhiCorr(rho, U, phi);
 }
 
 

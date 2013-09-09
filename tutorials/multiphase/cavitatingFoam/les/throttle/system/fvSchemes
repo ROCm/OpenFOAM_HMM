@@ -41,18 +41,12 @@ gradSchemes
 
 laplacianSchemes
 {
-    default         none;
-    laplacian(nuf,rhoU) Gauss linear corrected;
-    laplacian(muEff,U) Gauss linear corrected;
-    laplacian(Dp,p) Gauss linear corrected;
-    laplacian(DkEff,k) Gauss linear corrected;
-    laplacian(1,p)  Gauss linear corrected;
+    default         Gauss linear corrected;
 }
 
 snGradSchemes
 {
-    default         none;
-    snGrad(p)       corrected;
+    default         corrected;
 }
 
 fluxRequired

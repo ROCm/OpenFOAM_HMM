@@ -1,20 +1,27 @@
+if (mesh.changing())
 {
-    #include "continuityErrs.H"
-
-    wordList pcorrTypes
-    (
-        p_rgh.boundaryField().size(),
-        zeroGradientFvPatchScalarField::typeName
-    );
-
-    forAll (p_rgh.boundaryField(), i)
+    forAll(U.boundaryField(), patchI)
     {
-        if (p_rgh.boundaryField()[i].fixesValue())
+        if (U.boundaryField()[patchI].fixesValue())
         {
-            pcorrTypes[i] = fixedValueFvPatchScalarField::typeName;
+            U.boundaryField()[patchI].initEvaluate();
         }
     }
 
+    forAll(U.boundaryField(), patchI)
+    {
+        if (U.boundaryField()[patchI].fixesValue())
+        {
+            U.boundaryField()[patchI].evaluate();
+
+            phi.boundaryField()[patchI] =
+                U.boundaryField()[patchI]
+              & mesh.Sf().boundaryField()[patchI];
+        }
+    }
+}
+
+{
     volScalarField pcorr
     (
         IOobject
@@ -30,17 +37,13 @@
         pcorrTypes
     );
 
-    dimensionedScalar rAUf("(1|A(U))", dimTime/rho.dimensions(), 1.0);
-
-    adjustPhi(phi, U, pcorr);
-
-    fvc::makeAbsolute(phi, U);
+    dimensionedScalar Dp("Dp", dimTime/rho.dimensions(), 1.0);
 
     while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix pcorrEqn
         (
-            fvm::laplacian(rAUf, pcorr) == fvc::div(phi)
+            fvm::laplacian(Dp, pcorr) == fvc::div(phi)
         );
 
         pcorrEqn.setReference(pRefCell, pRefValue);
@@ -49,9 +52,6 @@
         if (pimple.finalNonOrthogonalIter())
         {
             phi -= pcorrEqn.flux();
-            phiAbs = phi;
-            phiAbs.oldTime() = phi;
-            fvc::makeRelative(phi, U);
         }
     }
 }

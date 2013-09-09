@@ -23,8 +23,6 @@ ddtSchemes
 gradSchemes
 {
     default         Gauss linear;
-    grad(p)         Gauss linear;
-    grad(Urel)      Gauss linear;
 }
 
 divSchemes
@@ -42,14 +40,7 @@ divSchemes
 
 laplacianSchemes
 {
-    default         none;
-    laplacian(nuEff,Urel) Gauss linear corrected;
-    laplacian((1|A(Urel)),p) Gauss linear corrected;
-    laplacian(DkEff,k) Gauss linear corrected;
-    laplacian(DepsilonEff,epsilon) Gauss linear corrected;
-    laplacian(DomegaEff,omega) Gauss linear corrected;
-    laplacian(DREff,R) Gauss linear corrected;
-    laplacian(DnuTildaEff,nuTilda) Gauss linear corrected;
+    default        Gauss linear corrected;
 }
 
 interpolationSchemes

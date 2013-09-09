@@ -54,16 +54,7 @@ divSchemes
 
 laplacianSchemes
 {
-    default         none;
-    laplacian(muEff,U) Gauss linear corrected;
-    laplacian(DkEff,k) Gauss linear corrected;
-    laplacian(DepsilonEff,epsilon) Gauss linear corrected;
-    laplacian(DREff,R) Gauss linear corrected;
-    laplacian((rho*(1|A(U))),p) Gauss linear corrected;
-    laplacian(alphaEff,b) Gauss linear corrected;
-    laplacian(alphaEff,ft) Gauss linear corrected;
-    laplacian(alphaEff,ha) Gauss linear corrected;
-    laplacian(alphaEff,hau) Gauss linear corrected;
+    default         Gauss linear corrected;
 }
 
 interpolationSchemes

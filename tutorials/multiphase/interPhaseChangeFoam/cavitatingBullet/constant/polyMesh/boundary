@@ -32,13 +32,14 @@ FoamFile
     walls
     {
         type            symmetryPlane;
+        inGroups        1(symmetryPlane);
         nFaces          3000;
         startFace       1130431;
     }
     bullet
     {
         type            wall;
-        nFaces          37743;
+        nFaces          37752;
         startFace       1133431;
     }
 )

@@ -27,7 +27,7 @@ gradSchemes
 divSchemes
 {
     default         none;
-    div(phiv,hU)    Gauss linear;
+    div(phiv,hU)    Gauss LUST un;
 }
 
 laplacianSchemes

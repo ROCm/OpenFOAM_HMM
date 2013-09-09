@@ -22,77 +22,77 @@ FoamFile
         type            patch;
         inGroups        1(inlet);
         nFaces          544;
-        startFace       244948;
+        startFace       245836;
     }
     outerInlet
     {
         type            patch;
         inGroups        1(inlet);
-        nFaces          1396;
-        startFace       245492;
+        nFaces          1404;
+        startFace       246380;
     }
     innerOutlet
     {
         type            patch;
         inGroups        1(outlet);
         nFaces          544;
-        startFace       246888;
+        startFace       247784;
     }
     outerOutlet
     {
         type            patch;
         inGroups        1(outlet);
-        nFaces          1396;
-        startFace       247432;
+        nFaces          1404;
+        startFace       248328;
     }
     rotorBlades
     {
         type            wall;
         inGroups        1(movingWalls);
         nFaces          540;
-        startFace       248828;
+        startFace       249732;
     }
     rotorBlades_slave
     {
         type            wall;
         inGroups        1(movingWalls);
         nFaces          540;
-        startFace       249368;
+        startFace       250272;
     }
     shaft
     {
         type            wall;
         inGroups        1(movingWalls);
-        nFaces          1052;
-        startFace       249908;
+        nFaces          1044;
+        startFace       250812;
     }
     statorBlades
     {
         type            wall;
         inGroups        1(staticWalls);
         nFaces          2128;
-        startFace       250960;
+        startFace       251856;
     }
     statorBlades_slave
     {
         type            wall;
         inGroups        1(staticWalls);
         nFaces          2128;
-        startFace       253088;
+        startFace       253984;
     }
     wall
     {
         type            wall;
         inGroups        1(staticWalls);
-        nFaces          5808;
-        startFace       255216;
+        nFaces          6165;
+        startFace       256112;
     }
     AMI1
     {
         type            cyclicAMI;
         inGroups        1(cyclicAMI);
         nFaces          10944;
-        startFace       261024;
+        startFace       262277;
         matchTolerance  0.0001;
         transform       noOrdering;
         neighbourPatch  AMI2;
@@ -102,7 +102,7 @@ FoamFile
         type            cyclicAMI;
         inGroups        1(cyclicAMI);
         nFaces          10944;
-        startFace       271968;
+        startFace       273221;
         matchTolerance  0.0001;
         transform       noOrdering;
         neighbourPatch  AMI1;

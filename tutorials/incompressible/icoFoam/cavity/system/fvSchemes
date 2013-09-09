@@ -34,15 +34,12 @@ divSchemes
 
 laplacianSchemes
 {
-    default         none;
-    laplacian(nu,U) Gauss linear orthogonal;
-    laplacian((1|A(U)),p) Gauss linear orthogonal;
+    default         Gauss linear orthogonal;
 }
 
 interpolationSchemes
 {
     default         linear;
-    interpolate(HbyA) linear;
 }
 
 snGradSchemes

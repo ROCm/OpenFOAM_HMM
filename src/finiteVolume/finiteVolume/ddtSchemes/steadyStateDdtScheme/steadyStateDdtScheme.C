@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -221,11 +221,10 @@ steadyStateDdtScheme<Type>::fvmDdt
 
 template<class Type>
 tmp<typename steadyStateDdtScheme<Type>::fluxFieldType>
-steadyStateDdtScheme<Type>::fvcDdtPhiCorr
+steadyStateDdtScheme<Type>::fvcDdtUfCorr
 (
-    const volScalarField& rA,
     const GeometricField<Type, fvPatchField, volMesh>& U,
-    const fluxFieldType& phi
+    const GeometricField<Type, fvsPatchField, surfaceMesh>& Uf
 )
 {
     return tmp<fluxFieldType>
@@ -234,8 +233,7 @@ steadyStateDdtScheme<Type>::fvcDdtPhiCorr
         (
             IOobject
             (
-                "ddtPhiCorr("
-              + rA.name() + ',' + U.name() + ',' + phi.name() + ')',
+                "ddtCorr(" + U.name() + ',' + Uf.name() + ')',
                 mesh().time().timeName(),
                 mesh()
             ),
@@ -243,7 +241,7 @@ steadyStateDdtScheme<Type>::fvcDdtPhiCorr
             dimensioned<typename flux<Type>::type>
             (
                 "0",
-                rA.dimensions()*phi.dimensions()/dimTime,
+                mesh().Sf().dimensions()*Uf.dimensions()*dimArea/dimTime,
                 pTraits<typename flux<Type>::type>::zero
             )
         )
@@ -255,7 +253,69 @@ template<class Type>
 tmp<typename steadyStateDdtScheme<Type>::fluxFieldType>
 steadyStateDdtScheme<Type>::fvcDdtPhiCorr
 (
-    const volScalarField& rA,
+    const GeometricField<Type, fvPatchField, volMesh>& U,
+    const fluxFieldType& phi
+)
+{
+    return tmp<fluxFieldType>
+    (
+        new fluxFieldType
+        (
+            IOobject
+            (
+                "ddtCorr(" + U.name() + ',' + phi.name() + ')',
+                mesh().time().timeName(),
+                mesh()
+            ),
+            mesh(),
+            dimensioned<typename flux<Type>::type>
+            (
+                "0",
+                phi.dimensions()/dimTime,
+                pTraits<typename flux<Type>::type>::zero
+            )
+        )
+    );
+}
+
+
+template<class Type>
+tmp<typename steadyStateDdtScheme<Type>::fluxFieldType>
+steadyStateDdtScheme<Type>::fvcDdtUfCorr
+(
+    const volScalarField& rho,
+    const GeometricField<Type, fvPatchField, volMesh>& U,
+    const GeometricField<Type, fvsPatchField, surfaceMesh>& Uf
+)
+{
+    return tmp<fluxFieldType>
+    (
+        new fluxFieldType
+        (
+            IOobject
+            (
+                "ddtCorr("
+              + rho.name()
+              + ',' + U.name() + ',' + Uf.name() + ')',
+                mesh().time().timeName(),
+                mesh()
+            ),
+            mesh(),
+            dimensioned<typename flux<Type>::type>
+            (
+                "0",
+                rho.dimensions()*Uf.dimensions()*dimArea/dimTime,
+                pTraits<typename flux<Type>::type>::zero
+            )
+        )
+    );
+}
+
+
+template<class Type>
+tmp<typename steadyStateDdtScheme<Type>::fluxFieldType>
+steadyStateDdtScheme<Type>::fvcDdtPhiCorr
+(
     const volScalarField& rho,
     const GeometricField<Type, fvPatchField, volMesh>& U,
     const fluxFieldType& phi
@@ -267,8 +327,8 @@ steadyStateDdtScheme<Type>::fvcDdtPhiCorr
         (
             IOobject
             (
-                "ddtPhiCorr("
-              + rA.name() + ',' + rho.name()
+                "ddtCorr("
+              + rho.name()
               + ',' + U.name() + ',' + phi.name() + ')',
                 mesh().time().timeName(),
                 mesh()
@@ -277,7 +337,7 @@ steadyStateDdtScheme<Type>::fvcDdtPhiCorr
             dimensioned<typename flux<Type>::type>
             (
                 "0",
-                rA.dimensions()*rho.dimensions()*phi.dimensions()/dimTime,
+                rho.dimensions()*phi.dimensions()/dimTime,
                 pTraits<typename flux<Type>::type>::zero
             )
         )

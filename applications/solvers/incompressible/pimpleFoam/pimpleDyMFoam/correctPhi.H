@@ -1,27 +1,27 @@
+if (mesh.changing())
 {
-    if (mesh.changing())
+    forAll(U.boundaryField(), patchI)
     {
-        forAll(U.boundaryField(), patchI)
+        if (U.boundaryField()[patchI].fixesValue())
         {
-            if (U.boundaryField()[patchI].fixesValue())
-            {
-                U.boundaryField()[patchI].initEvaluate();
-            }
-        }
-
-        forAll(U.boundaryField(), patchI)
-        {
-            if (U.boundaryField()[patchI].fixesValue())
-            {
-                U.boundaryField()[patchI].evaluate();
-
-                phi.boundaryField()[patchI] =
-                    U.boundaryField()[patchI]
-                  & mesh.Sf().boundaryField()[patchI];
-            }
+            U.boundaryField()[patchI].initEvaluate();
         }
     }
 
+    forAll(U.boundaryField(), patchI)
+    {
+        if (U.boundaryField()[patchI].fixesValue())
+        {
+            U.boundaryField()[patchI].evaluate();
+
+            phi.boundaryField()[patchI] =
+                U.boundaryField()[patchI]
+              & mesh.Sf().boundaryField()[patchI];
+        }
+    }
+}
+
+{
     volScalarField pcorr
     (
         IOobject

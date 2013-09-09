@@ -20,7 +20,7 @@ if (pimple.transonic())
         fvc::interpolate(psi)
        *(
             (fvc::interpolate(HbyA) & mesh.Sf())
-          + fvc::ddtPhiCorr(rAU, rho, U, phi)
+          + fvc::ddtCorr(rAU, rho, U, phi)
         )
     );
 
@@ -57,7 +57,7 @@ else
         fvc::interpolate(rho)
        *(
             (fvc::interpolate(HbyA) & mesh.Sf())
-          + fvc::ddtPhiCorr(rAU, rho, U, phi)
+          + fvc::ddtCorr(rAU, rho, U, phi)
         )
     );
 

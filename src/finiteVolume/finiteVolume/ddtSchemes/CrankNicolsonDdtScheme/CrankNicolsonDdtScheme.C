@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -646,7 +646,6 @@ CrankNicolsonDdtScheme<Type>::fvmDdt
     fvMatrix<Type>& fvm = tfvm();
 
     scalar rDtCoef = rDtCoef_(ddt0).value();
-
     fvm.diag() = rDtCoef*mesh().V();
 
     vf.oldTime().oldTime();
@@ -875,90 +874,197 @@ CrankNicolsonDdtScheme<Type>::fvmDdt
 }
 
 
-
 template<class Type>
 tmp<typename CrankNicolsonDdtScheme<Type>::fluxFieldType>
-CrankNicolsonDdtScheme<Type>::fvcDdtPhiCorr
+CrankNicolsonDdtScheme<Type>::fvcDdtUfCorr
 (
-    const volScalarField& rA,
     const GeometricField<Type, fvPatchField, volMesh>& U,
-    const fluxFieldType& phi
+    const GeometricField<Type, fvsPatchField, surfaceMesh>& Uf
 )
 {
-    DDt0Field<GeometricField<Type, fvPatchField, volMesh> >& dUdt0 =
+    DDt0Field<GeometricField<Type, fvPatchField, volMesh> >& ddt0 =
         ddt0_<GeometricField<Type, fvPatchField, volMesh> >
         (
             "ddt0(" + U.name() + ')',
             U.dimensions()
         );
 
-    DDt0Field<fluxFieldType>& dphidt0 =
-        ddt0_<fluxFieldType>
-        (
-            "ddt0(" + phi.name() + ')',
-            phi.dimensions()
-        );
+    dimensionedScalar rDeltaT = rDtCoef_(ddt0);
 
     IOobject ddtIOobject
     (
-        "ddtPhiCorr(" + rA.name() + ',' + U.name() + ',' + phi.name() + ')',
+        "ddtCorr(" + U.name() + ',' + Uf.name() + ')',
         mesh().time().timeName(),
         mesh()
     );
 
-    dimensionedScalar rDtCoef = rDtCoef_(dUdt0);
+    fluxFieldType phiCorr
+    (
+        mesh().Sf() & (Uf.oldTime() - fvc::interpolate(U.oldTime()))
+    );
 
-    if (mesh().moving())
+    return tmp<fluxFieldType>
+    (
+        new fluxFieldType
+        (
+            ddtIOobject,
+            this->fvcDdtPhiCoeff
+            (
+                U.oldTime(),
+                mesh().Sf() & Uf.oldTime(),
+                phiCorr
+            )
+           *rDeltaT*phiCorr
+        )
+    );
+}
+
+
+template<class Type>
+tmp<typename CrankNicolsonDdtScheme<Type>::fluxFieldType>
+CrankNicolsonDdtScheme<Type>::fvcDdtPhiCorr
+(
+    const GeometricField<Type, fvPatchField, volMesh>& U,
+    const fluxFieldType& phi
+)
+{
+    DDt0Field<GeometricField<Type, fvPatchField, volMesh> >& ddt0 =
+        ddt0_<GeometricField<Type, fvPatchField, volMesh> >
+        (
+            "ddt0(" + U.name() + ')',
+            U.dimensions()
+        );
+
+    dimensionedScalar rDeltaT = rDtCoef_(ddt0);
+
+    IOobject ddtIOobject
+    (
+        "ddtCorr(" + U.name() + ',' + phi.name() + ')',
+        mesh().time().timeName(),
+        mesh()
+    );
+
+    fluxFieldType phiCorr
+    (
+        phi.oldTime() - (mesh().Sf() & fvc::interpolate(U.oldTime()))
+    );
+
+    return tmp<fluxFieldType>
+    (
+        new fluxFieldType
+        (
+            ddtIOobject,
+            this->fvcDdtPhiCoeff(U.oldTime(), phi.oldTime(), phiCorr)
+           *rDeltaT*phiCorr
+        )
+    );
+}
+
+
+template<class Type>
+tmp<typename CrankNicolsonDdtScheme<Type>::fluxFieldType>
+CrankNicolsonDdtScheme<Type>::fvcDdtUfCorr
+(
+    const volScalarField& rho,
+    const GeometricField<Type, fvPatchField, volMesh>& U,
+    const GeometricField<Type, fvsPatchField, surfaceMesh>& Uf
+)
+{
+    IOobject ddtIOobject
+    (
+        "ddtCorr(" + rho.name() + ',' + U.name() + ',' + Uf.name() + ')',
+        mesh().time().timeName(),
+        mesh()
+    );
+
+    if
+    (
+        U.dimensions() == dimVelocity
+     && Uf.dimensions() == rho.dimensions()*dimVelocity
+    )
     {
-        return tmp<fluxFieldType>
+        DDt0Field<GeometricField<Type, fvPatchField, volMesh> >& ddt0 =
+            ddt0_<GeometricField<Type, fvPatchField, volMesh> >
+            (
+                "ddt0(" + rho.name() + ',' + U.name() + ')',
+                U.dimensions()
+            );
+
+        dimensionedScalar rDeltaT = rDtCoef_(ddt0);
+
+        GeometricField<Type, fvPatchField, volMesh> rhoU0
+        (
+            rho.oldTime()*U.oldTime()
+        );
+
+        fluxFieldType phiCorr
+        (
+            mesh().Sf() & (Uf.oldTime() - fvc::interpolate(rhoU0))
+        );
+
+        tmp<fluxFieldType> ddtCorr
         (
             new fluxFieldType
             (
                 ddtIOobject,
-                mesh(),
-                dimensioned<typename flux<Type>::type>
+                this->fvcDdtPhiCoeff
                 (
-                    "0",
-                    rDtCoef.dimensions()*rA.dimensions()*phi.dimensions(),
-                    pTraits<typename flux<Type>::type>::zero
+                    rhoU0,
+                    mesh().Sf() & Uf.oldTime(),
+                    phiCorr
                 )
+               *rDeltaT*phiCorr
             )
         );
+
+        return ddtCorr;
+    }
+    else if
+    (
+        U.dimensions() == rho.dimensions()*dimVelocity
+     && Uf.dimensions() == rho.dimensions()*dimVelocity
+    )
+    {
+        DDt0Field<GeometricField<Type, fvPatchField, volMesh> >& ddt0 =
+            ddt0_<GeometricField<Type, fvPatchField, volMesh> >
+            (
+                "ddt0(" + U.name() + ')',
+                U.dimensions()
+            );
+
+        dimensionedScalar rDeltaT = rDtCoef_(ddt0);
+
+        fluxFieldType phiCorr
+        (
+             mesh().Sf() & (Uf.oldTime() - fvc::interpolate(U.oldTime()))
+        );
+
+        tmp<fluxFieldType> ddtCorr
+        (
+            new fluxFieldType
+            (
+                ddtIOobject,
+                this->fvcDdtPhiCoeff
+                (
+                    U.oldTime(),
+                    mesh().Sf() & Uf.oldTime(),
+                    phiCorr
+                )
+               *rDeltaT*phiCorr
+            )
+        );
+
+        return ddtCorr;
     }
     else
     {
-        if (evaluate(dUdt0))
-        {
-            dUdt0 =
-                rDtCoef0_(dUdt0)*(U.oldTime() - U.oldTime().oldTime())
-              - offCentre_(dUdt0());
-        }
-
-        if (evaluate(dphidt0))
-        {
-            dphidt0 =
-                rDtCoef0_(dphidt0)*(phi.oldTime() - phi.oldTime().oldTime())
-              - offCentre_(dphidt0());
-        }
-
-        return tmp<fluxFieldType>
+        FatalErrorIn
         (
-            new fluxFieldType
-            (
-                ddtIOobject,
-                this->fvcDdtPhiCoeff(U.oldTime(), phi.oldTime())
-               *fvc::interpolate(rA)
-               *(
-                    (rDtCoef*phi.oldTime() + offCentre_(dphidt0()))
-                  - (
-                        fvc::interpolate
-                        (
-                            (rDtCoef*U.oldTime() + offCentre_(dUdt0()))
-                        ) & mesh().Sf()
-                    )
-                )
-            )
-        );
+            "CrankNicolsonDdtScheme<Type>::fvcDdtPhiCorr"
+        )   << "dimensions of Uf are not correct"
+            << abort(FatalError);
+
+        return fluxFieldType::null();
     }
 }
 
@@ -967,203 +1073,96 @@ template<class Type>
 tmp<typename CrankNicolsonDdtScheme<Type>::fluxFieldType>
 CrankNicolsonDdtScheme<Type>::fvcDdtPhiCorr
 (
-    const volScalarField& rA,
     const volScalarField& rho,
     const GeometricField<Type, fvPatchField, volMesh>& U,
     const fluxFieldType& phi
 )
 {
-    DDt0Field<GeometricField<Type, fvPatchField, volMesh> >& dUdt0 =
-        ddt0_<GeometricField<Type, fvPatchField, volMesh> >
-        (
-            "ddt0(" + U.name() + ')',
-            U.dimensions()
-        );
-
-    DDt0Field<fluxFieldType>& dphidt0 =
-        ddt0_<fluxFieldType>
-        (
-            "ddt0(" + phi.name() + ')',
-            U.dimensions()*dimArea
-        );
-
     IOobject ddtIOobject
     (
-        "ddtPhiCorr("
-      + rA.name() + ',' + rho.name() + ',' + U.name() + ',' + phi.name() + ')',
+        "ddtCorr(" + rho.name() + ',' + U.name() + ',' + phi.name() + ')',
         mesh().time().timeName(),
         mesh()
     );
 
-    dimensionedScalar rDtCoef = rDtCoef_(dUdt0);
-
-    if (mesh().moving())
+    if
+    (
+        U.dimensions() == dimVelocity
+     && phi.dimensions() == rho.dimensions()*dimVelocity*dimArea
+    )
     {
-        return tmp<fluxFieldType>
+        DDt0Field<GeometricField<Type, fvPatchField, volMesh> >& ddt0 =
+            ddt0_<GeometricField<Type, fvPatchField, volMesh> >
+            (
+                "ddt0(" + rho.name() + ',' + U.name() + ')',
+                U.dimensions()
+            );
+
+        dimensionedScalar rDeltaT = rDtCoef_(ddt0);
+
+        GeometricField<Type, fvPatchField, volMesh> rhoU0
+        (
+            rho.oldTime()*U.oldTime()
+        );
+
+        fluxFieldType phiCorr
+        (
+            phi.oldTime() - (mesh().Sf() & fvc::interpolate(rhoU0))
+        );
+
+        tmp<fluxFieldType> ddtCorr
         (
             new fluxFieldType
             (
                 ddtIOobject,
-                mesh(),
-                dimensioned<typename flux<Type>::type>
-                (
-                    "0",
-                    rA.dimensions()*rho.dimensions()*phi.dimensions()/dimTime,
-                    pTraits<typename flux<Type>::type>::zero
-                )
+                this->fvcDdtPhiCoeff(rhoU0, phi.oldTime(), phiCorr)
+               *rDeltaT*phiCorr
             )
         );
+
+        return ddtCorr;
+    }
+    else if
+    (
+        U.dimensions() == rho.dimensions()*dimVelocity
+     && phi.dimensions() == rho.dimensions()*dimVelocity*dimArea
+    )
+    {
+        DDt0Field<GeometricField<Type, fvPatchField, volMesh> >& ddt0 =
+            ddt0_<GeometricField<Type, fvPatchField, volMesh> >
+            (
+                "ddt0(" + U.name() + ')',
+                U.dimensions()
+            );
+
+        dimensionedScalar rDeltaT = rDtCoef_(ddt0);
+
+        fluxFieldType phiCorr
+        (
+            phi.oldTime() - (mesh().Sf() & fvc::interpolate(U.oldTime()))
+        );
+
+        tmp<fluxFieldType> ddtCorr
+        (
+            new fluxFieldType
+            (
+                ddtIOobject,
+                this->fvcDdtPhiCoeff(U.oldTime(), phi.oldTime(), phiCorr)
+               *rDeltaT*phiCorr
+            )
+        );
+
+        return ddtCorr;
     }
     else
     {
-        if
+        FatalErrorIn
         (
-            U.dimensions() == dimVelocity
-         && phi.dimensions() == dimVelocity*dimArea
-        )
-        {
-            if (evaluate(dUdt0))
-            {
-                dUdt0 = rDtCoef0_(dUdt0)*
-                (
-                    U.oldTime() - U.oldTime().oldTime()
-                ) - offCentre_(dUdt0());
-            }
+            "CrankNicolsonDdtScheme<Type>::fvcDdtPhiCorr"
+        )   << "dimensions of phi are not correct"
+            << abort(FatalError);
 
-            if (evaluate(dphidt0))
-            {
-                dphidt0 = rDtCoef0_(dphidt0)*
-                (
-                    phi.oldTime()
-                  - fvc::interpolate(rho.oldTime().oldTime()/rho.oldTime())
-                   *phi.oldTime().oldTime()
-                ) - offCentre_(dphidt0());
-            }
-
-            return tmp<fluxFieldType>
-            (
-                new fluxFieldType
-                (
-                    ddtIOobject,
-                    this->fvcDdtPhiCoeff(U.oldTime(), phi.oldTime())*
-                    (
-                        fvc::interpolate(rA*rho.oldTime())
-                       *(rDtCoef*phi.oldTime() + offCentre_(dphidt0()))
-                      - (
-                            fvc::interpolate
-                            (
-                                rA*rho.oldTime()
-                               *(rDtCoef*U.oldTime() + offCentre_(dUdt0()))
-                            ) & mesh().Sf()
-                        )
-                    )
-                )
-            );
-        }
-        else if
-        (
-            U.dimensions() == dimVelocity
-         && phi.dimensions() == rho.dimensions()*dimVelocity*dimArea
-        )
-        {
-            if (evaluate(dUdt0))
-            {
-                dUdt0 = rDtCoef0_(dUdt0)*
-                (
-                    U.oldTime() - U.oldTime().oldTime()
-                ) - offCentre_(dUdt0());
-            }
-
-            if (evaluate(dphidt0))
-            {
-                dphidt0 = rDtCoef0_(dphidt0)*
-                (
-                    phi.oldTime()
-                   /fvc::interpolate(rho.oldTime())
-                  - phi.oldTime().oldTime()
-                   /fvc::interpolate(rho.oldTime().oldTime())
-                ) - offCentre_(dphidt0());
-            }
-
-            return tmp<fluxFieldType>
-            (
-                new fluxFieldType
-                (
-                    ddtIOobject,
-                    this->fvcDdtPhiCoeff
-                    (
-                        U.oldTime(),
-                        phi.oldTime()/fvc::interpolate(rho.oldTime())
-                    )
-                   *(
-                        fvc::interpolate(rA*rho.oldTime())
-                       *(
-                           rDtCoef*phi.oldTime()/fvc::interpolate(rho.oldTime())
-                         + offCentre_(dphidt0())
-                        )
-                      - (
-                            fvc::interpolate
-                            (
-                                rA*rho.oldTime()
-                               *(rDtCoef*U.oldTime() + offCentre_(dUdt0()))
-                            ) & mesh().Sf()
-                        )
-                    )
-                )
-            );
-        }
-        else if
-        (
-            U.dimensions() == rho.dimensions()*dimVelocity
-         && phi.dimensions() == rho.dimensions()*dimVelocity*dimArea
-        )
-        {
-            if (evaluate(dUdt0))
-            {
-                dUdt0 = rDtCoef0_(dUdt0)*
-                (
-                    U.oldTime() - U.oldTime().oldTime()
-                ) - offCentre_(dUdt0());
-            }
-
-            if (evaluate(dphidt0))
-            {
-                dphidt0 = rDtCoef0_(dphidt0)*
-                (
-                    phi.oldTime() - phi.oldTime().oldTime()
-                ) - offCentre_(dphidt0());
-            }
-
-            return tmp<fluxFieldType>
-            (
-                new fluxFieldType
-                (
-                    ddtIOobject,
-                    this->fvcDdtPhiCoeff
-                    (rho.oldTime(), U.oldTime(), phi.oldTime())
-                  * (
-                        fvc::interpolate(rA)
-                       *(rDtCoef*phi.oldTime() + offCentre_(dphidt0()))
-                      - (
-                            fvc::interpolate
-                            (
-                                rA*(rDtCoef*U.oldTime() + offCentre_(dUdt0()))
-                            ) & mesh().Sf()
-                        )
-                    )
-                )
-            );
-        }
-        else
-        {
-            FatalErrorIn
-            (
-                "CrankNicolsonDdtScheme<Type>::fvcDdtPhiCorr"
-            )   << "dimensions of phi are not correct"
-                << abort(FatalError);
-
-            return fluxFieldType::null();
-        }
+        return fluxFieldType::null();
     }
 }
 
