@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
     #include "createFields.H"
+    #include "createRhoUf.H"
     #include "initContinuityErrs.H"
 
     pimpleControl pimple(mesh);
@@ -62,6 +63,12 @@ int main(int argc, char *argv[])
         #include "compressibleCourantNo.H"
 
         mesh.movePoints(motionPtr->newPoints());
+
+        // Calculate absolute flux from the mapped surface velocity
+        phi = mesh.Sf() & rhoUf;
+
+        // Make the flux relative to the mesh motion
+        fvc::makeRelative(phi, rho, U);
 
         #include "rhoEqn.H"
 

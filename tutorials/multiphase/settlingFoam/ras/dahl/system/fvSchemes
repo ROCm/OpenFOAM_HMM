@@ -28,6 +28,7 @@ gradSchemes
 divSchemes
 {
     default         none;
+
     div(phi,U)      Gauss linearUpwind grad(U);
     div(phi,k)      Gauss upwind;
     div(phi,epsilon) Gauss upwind;
@@ -37,12 +38,7 @@ divSchemes
 
 laplacianSchemes
 {
-    default         none;
-    laplacian(muEff,U) Gauss linear corrected;
-    laplacian(Dp,p_rgh) Gauss linear corrected;
-    laplacian(DkEff,k) Gauss linear corrected;
-    laplacian(DepsilonEff,epsilon) Gauss linear corrected;
-    laplacian(mut,Alpha) Gauss linear corrected;
+    default         Gauss linear corrected;
 }
 
 interpolationSchemes

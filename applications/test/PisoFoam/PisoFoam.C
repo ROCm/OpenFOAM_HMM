@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
                 (
                     "phiHbyA",
                     (fvc::interpolate(HbyA) & mesh.Sf())
-                  + fvc::ddtPhiCorr(rAU, U, phi)
+                  + fvc::ddtCorr(rAU, U, phi)
                 );
 
                 adjustPhi(phiHbyA, U, p);

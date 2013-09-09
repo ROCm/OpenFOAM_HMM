@@ -60,14 +60,13 @@ int main(int argc, char *argv[])
     #include "createDynamicFvMesh.H"
     #include "readGravitationalAcceleration.H"
     #include "initContinuityErrs.H"
-    #include "createFields.H"
-    #include "readTimeControls.H"
 
     pimpleControl pimple(mesh);
 
-    surfaceScalarField phiAbs("phiAbs", phi);
-    fvc::makeAbsolute(phiAbs, U);
-
+    #include "createFields.H"
+    #include "../interFoam/interDyMFoam/createUf.H"
+    #include "readTimeControls.H"
+    #include "../interFoam/interDyMFoam/createPcorrTypes.H"
     #include "../interFoam/interDyMFoam/correctPhi.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
@@ -88,21 +87,7 @@ int main(int argc, char *argv[])
 
         scalar timeBeforeMeshUpdate = runTime.elapsedCpuTime();
 
-        {
-            // Ensure old-time U exists for mapping
-            U.oldTime();
-
-            // Calculate the relative velocity used to map the relative flux phi
-            volVectorField Urel("Urel", U);
-
-            if (mesh.moving())
-            {
-                Urel -= fvc::reconstruct(fvc::meshPhi(U));
-            }
-
-            // Do any mesh changes
-            mesh.update();
-        }
+        mesh.update();
 
         if (mesh.changing())
         {
@@ -116,7 +101,13 @@ int main(int argc, char *argv[])
 
         if (mesh.changing() && correctPhi)
         {
+            // Calculate absolute flux from the mapped surface velocity
+            phi = mesh.Sf() & Uf;
+
             #include "../interFoam/interDyMFoam/correctPhi.H"
+
+            // Make the flux relative to the mesh motion
+            fvc::makeRelative(phi, U);
         }
 
         if (mesh.changing() && checkMeshCourantNo)

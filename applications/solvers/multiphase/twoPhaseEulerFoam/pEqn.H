@@ -47,14 +47,14 @@
     (
         IOobject::groupName("phiHbyA", phase1.name()),
         (fvc::interpolate(HbyA1) & mesh.Sf())
-      + fvc::ddtPhiCorr(rAU1, alpha1, U1, phi1)
+      + rAlphaAU1f*fvc::ddtCorr(U1, phi1)
     );
 
     surfaceScalarField phiHbyA2
     (
         IOobject::groupName("phiHbyA", phase2.name()),
         (fvc::interpolate(HbyA2) & mesh.Sf())
-      + fvc::ddtPhiCorr(rAU2, alpha2, U2, phi2)
+      + rAlphaAU2f*fvc::ddtCorr(U2, phi2)
     );
 
     phiHbyA1 +=

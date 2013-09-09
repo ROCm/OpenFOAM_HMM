@@ -27,6 +27,7 @@ gradSchemes
 divSchemes
 {
     default         none;
+
     div(phi,U)      bounded Gauss limitedLinear 0.2;
     div(phi,K)      bounded Gauss limitedLinear 0.2;
     div(phi,h)      bounded Gauss limitedLinear 0.2;
@@ -38,13 +39,7 @@ divSchemes
 
 laplacianSchemes
 {
-    default         none;
-    laplacian(muEff,U) Gauss linear uncorrected;
-    laplacian(Dp,p_rgh) Gauss linear uncorrected;
-    laplacian(alphaEff,h) Gauss linear uncorrected;
-    laplacian(DkEff,k) Gauss linear uncorrected;
-    laplacian(DepsilonEff,epsilon) Gauss linear uncorrected;
-    laplacian(DomegaEff,omega) Gauss linear uncorrected;
+    default         Gauss linear uncorrected;
 }
 
 interpolationSchemes

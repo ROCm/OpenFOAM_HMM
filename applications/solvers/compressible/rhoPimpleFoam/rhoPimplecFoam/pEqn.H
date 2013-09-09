@@ -20,9 +20,9 @@ if (pimple.transonic())
         "phid",
         fvc::interpolate(psi)
        *(
-            (fvc::interpolate(HbyA) & mesh.Sf())
-          + fvc::ddtPhiCorr(rAU, rho, U, phi)
-        )
+            (fvc::interpolate(rho*HbyA) & mesh.Sf())
+          + fvc::interpolate(rho*rAU)*fvc::ddtCorr(rho, U, phi)
+        )/fvc::interpolate(rho)
     );
 
     fvOptions.makeRelative(fvc::interpolate(psi), phid);
@@ -64,10 +64,9 @@ else
     surfaceScalarField phiHbyA
     (
         "phiHbyA",
-        fvc::interpolate(rho)
-       *(
-            (fvc::interpolate(HbyA) & mesh.Sf())
-          + fvc::ddtPhiCorr(rAU, rho, U, phi)
+        (
+            (fvc::interpolate(rho*HbyA) & mesh.Sf())
+          + fvc::interpolate(rho*rAU)*fvc::ddtCorr(rho, U, phi)
         )
     );
 

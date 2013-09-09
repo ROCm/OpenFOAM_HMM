@@ -50,15 +50,13 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
     #include "initContinuityErrs.H"
-    #include "createFields.H"
 
     pimpleControl pimple(mesh);
 
+    #include "createFields.H"
+    #include "createUf.H"
     #include "readTimeControls.H"
-
-    surfaceScalarField phiAbs("phiAbs", phi);
-    fvc::makeAbsolute(phiAbs, U);
-
+    #include "createPcorrTypes.H"
     #include "correctPhi.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
@@ -80,21 +78,7 @@ int main(int argc, char *argv[])
 
         scalar timeBeforeMeshUpdate = runTime.elapsedCpuTime();
 
-        {
-            // Ensure old-time U exists for mapping
-            U.oldTime();
-
-            // Calculate the relative velocity used to map the relative flux phi
-            volVectorField Urel("Urel", U);
-
-            if (mesh.moving())
-            {
-                Urel -= fvc::reconstruct(fvc::meshPhi(U));
-            }
-
-            // Do any mesh changes
-            mesh.update();
-        }
+        mesh.update();
 
         if (mesh.changing())
         {
@@ -108,7 +92,13 @@ int main(int argc, char *argv[])
 
         if (mesh.changing() && correctPhi)
         {
+            // Calculate absolute flux from the mapped surface velocity
+            phi = mesh.Sf() & Uf;
+
             #include "correctPhi.H"
+
+            // Make the flux relative to the mesh motion
+            fvc::makeRelative(phi, U);
         }
 
         if (mesh.changing() && checkMeshCourantNo)

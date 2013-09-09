@@ -94,7 +94,7 @@
         phiHbyAs[phasei] =
         (
             (fvc::interpolate(HbyAs[phasei]) & mesh.Sf())
-          + fvc::ddtPhiCorr(rAUs[phasei], alpha, phase.U(), phase.phi())
+          + rAlphaAUfs[phasei]*fvc::ddtCorr(phase.U(), phase.phi())
         );
         mrfZones.makeRelative(phiHbyAs[phasei]);
 

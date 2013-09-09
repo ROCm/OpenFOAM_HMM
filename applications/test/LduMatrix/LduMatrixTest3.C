@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 
             U = rAU*UEqn.H();
             phi = (fvc::interpolate(U) & mesh.Sf())
-                + fvc::ddtPhiCorr(rAU, U, phi);
+                + fvc::ddtCorr(rAU, U, phi);
 
             adjustPhi(phi, U, p);
 

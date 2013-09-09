@@ -1,22 +1,22 @@
 rho = thermo.rho();
 
 volScalarField rAU(1.0/UEqn.A());
-surfaceScalarField rhorAUf("Dp", fvc::interpolate(rho*rAU));
+surfaceScalarField Dp("Dp", fvc::interpolate(rho*rAU));
+
 volVectorField HbyA("HbyA", U);
 HbyA = rAU*UEqn.H();
 phi.boundaryField() =
     fvc::interpolate(rho.boundaryField()*U.boundaryField())
   & mesh.Sf().boundaryField();
 
-surfaceScalarField phig(-rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf());
+surfaceScalarField phig(-Dp*ghf*fvc::snGrad(rho)*mesh.magSf());
 
 surfaceScalarField phiHbyA
 (
     "phiHbyA",
-    fvc::interpolate(rho)
-   *(
-        (fvc::interpolate(HbyA) & mesh.Sf())
-      + fvc::ddtPhiCorr(rAU, rho, U, phi)
+    (
+        (fvc::interpolate(rho*HbyA) & mesh.Sf())
+      + Dp*fvc::ddtCorr(rho, U, phi)
     )
   + phig
 );
@@ -30,7 +30,7 @@ while (pimple.correctNonOrthogonal())
         fvc::ddt(psi, rho)*gh
       + fvc::div(phiHbyA)
       + fvm::ddt(psi, p_rgh)
-      - fvm::laplacian(rhorAUf, p_rgh)
+      - fvm::laplacian(Dp, p_rgh)
      ==
         parcels.Srho()
       + surfaceFilm.Srho()
@@ -44,7 +44,7 @@ while (pimple.correctNonOrthogonal())
     if (pimple.finalNonOrthogonalIter())
     {
         phi = phiHbyA + p_rghEqn.flux();
-        U = HbyA + rAU*fvc::reconstruct((p_rghEqn.flux() + phig)/rhorAUf);
+        U = HbyA + rAU*fvc::reconstruct((p_rghEqn.flux() + phig)/Dp);
         U.correctBoundaryConditions();
         fvOptions.correct(U);
     }
