@@ -97,34 +97,35 @@ void Foam::patchToPoly2DMesh::createNeighbours()
 
 Foam::labelList Foam::patchToPoly2DMesh::internalFaceOrder()
 {
-    const labelListList& cellFaces = patch_.faceEdges();
+    const labelListList& faceEdges = patch_.faceEdges();
 
     labelList oldToNew(owner_.size(), -1);
 
     label newFaceI = 0;
 
-    forAll(cellFaces, cellI)
+    forAll(faceEdges, faceI)
     {
-        const labelList& cFaces = cellFaces[cellI];
-        // Neighbouring cells
-        SortableList<label> nbr(cFaces.size(), -1);
+        const labelList& fEdges = faceEdges[faceI];
+        // Neighbouring faces
+        SortableList<label> nbr(fEdges.size(), -1);
 
-        forAll(cFaces, cfI)
+        forAll(fEdges, feI)
         {
-            if (cFaces[cfI] < neighbour_.size())
+            if (fEdges[feI] < neighbour_.size())
             {
-                label nbrFaceI = neighbour_[cFaces[cfI]];
+                // Internal edge. Get the face on other side.
 
-                // Internal face. Get cell on other side.
-                if (nbrFaceI == cellI)
+                label nbrFaceI = neighbour_[fEdges[feI]];
+
+                if (nbrFaceI == faceI)
                 {
-                    nbrFaceI = owner_[cellI];
+                    nbrFaceI = owner_[fEdges[feI]];
                 }
 
-                if (cellI < nbrFaceI)
+                if (faceI < nbrFaceI)
                 {
-                    // CellI is master
-                    nbr[cfI] = nbrFaceI;
+                    // faceI is master
+                    nbr[feI] = nbrFaceI;
                 }
             }
         }
@@ -135,7 +136,7 @@ Foam::labelList Foam::patchToPoly2DMesh::internalFaceOrder()
         {
             if (nbr[i] != -1)
             {
-                oldToNew[cFaces[nbr.indices()[i]]] = newFaceI++;
+                oldToNew[fEdges[nbr.indices()[i]]] = newFaceI++;
             }
         }
     }
