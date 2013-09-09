@@ -57,8 +57,7 @@ namespace Foam
     (                                                                         \
         SS##Comp##SThermo##GThermo,                                           \
         (word(SS::typeName_()) + "<"#Comp"," + SThermo::typeName() + "," +    \
-        GThermo::typeName() +                                                 \
-        ">").c_str(),                                                         \
+        GThermo::typeName() + ">").c_str(),                                   \
         0                                                                     \
     );
 

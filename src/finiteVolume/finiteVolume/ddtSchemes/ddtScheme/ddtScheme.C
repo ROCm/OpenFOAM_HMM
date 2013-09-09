@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -141,82 +141,7 @@ tmp<surfaceScalarField> ddtScheme<Type>::fvcDdtPhiCoeff
     const fluxFieldType& phi
 )
 {
-    dimensionedScalar rDeltaT = 1.0/mesh().time().deltaT();
-
-    tmp<surfaceScalarField> tddtCouplingCoeff = scalar(1)
-      - min
-        (
-            mag(phi - (mesh().Sf() & fvc::interpolate(U)))
-           /(mag(phi) + dimensionedScalar("small", phi.dimensions(), VSMALL)),
-           //(rDeltaT*mesh().magSf()/mesh().deltaCoeffs()),
-            scalar(1)
-        );
-
-    surfaceScalarField& ddtCouplingCoeff = tddtCouplingCoeff();
-
-    forAll(U.boundaryField(), patchi)
-    {
-        if (U.boundaryField()[patchi].fixesValue())
-        {
-            ddtCouplingCoeff.boundaryField()[patchi] = 0.0;
-        }
-    }
-
-    if (debug > 1)
-    {
-        Info<< "ddtCouplingCoeff mean max min = "
-            << gAverage(ddtCouplingCoeff.internalField())
-            << " " << gMax(ddtCouplingCoeff.internalField())
-            << " " << gMin(ddtCouplingCoeff.internalField())
-            << endl;
-    }
-
-    return tddtCouplingCoeff;
-}
-
-
-template<class Type>
-tmp<surfaceScalarField> ddtScheme<Type>::fvcDdtPhiCoeff
-(
-    const volScalarField& rho,
-    const GeometricField<Type, fvPatchField, volMesh>& rhoU,
-    const fluxFieldType& phi
-)
-{
-    dimensionedScalar rDeltaT = 1.0/mesh().time().deltaT();
-
-    tmp<surfaceScalarField> tddtCouplingCoeff = scalar(1)
-      - min
-        (
-            mag(phi - (mesh().Sf() & fvc::interpolate(rhoU)))
-           /(
-                mag(phi) + dimensionedScalar("small", phi.dimensions(), VSMALL)
-                //fvc::interpolate(rho)*rDeltaT
-                //*mesh().magSf()/mesh().deltaCoeffs()
-            ),
-            scalar(1)
-        );
-
-    surfaceScalarField& ddtCouplingCoeff = tddtCouplingCoeff();
-
-    forAll(rhoU.boundaryField(), patchi)
-    {
-        if (rhoU.boundaryField()[patchi].fixesValue())
-        {
-            ddtCouplingCoeff.boundaryField()[patchi] = 0.0;
-        }
-    }
-
-    if (debug > 1)
-    {
-        Info<< "ddtCouplingCoeff mean max min = "
-            << gAverage(ddtCouplingCoeff.internalField())
-            << " " << gMax(ddtCouplingCoeff.internalField())
-            << " " << gMin(ddtCouplingCoeff.internalField())
-            << endl;
-    }
-
-    return tddtCouplingCoeff;
+    return fvcDdtPhiCoeff(U, phi, phi - (mesh().Sf() & fvc::interpolate(U)));
 }
 
 

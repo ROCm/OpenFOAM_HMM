@@ -2744,12 +2744,45 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                 }
                 else
                 {
-                    // internal face
-                    faces[dualFaceI] = newDualFace;
-                    owner[dualFaceI] = own;
-                    neighbour[dualFaceI] = nei;
+//                    if
+//                    (
+//                        ptPairs_.isPointPair(vA, vB)
+//                     || ftPtConformer_.featurePointPairs().isPointPair(vA, vB)
+//                    )
+//                    {
+                        patchIndex = geometryToConformTo_.findPatch(ptA, ptB);
+//                    }
 
-                    dualFaceI++;
+                    if (patchIndex != -1)
+                    {
+//                        patchFaces[patchIndex].append(newDualFace);
+//                        patchOwners[patchIndex].append(own);
+//                        indirectPatchFace[patchIndex].append(false);
+//
+//                        if
+//                        (
+//                            labelPair(vB->index(), vB->procIndex())
+//                          < labelPair(vA->index(), vA->procIndex())
+//                        )
+//                        {
+//                            patchPPSlaves[patchIndex].append(vB->index());
+//                        }
+//                        else
+//                        {
+//                            patchPPSlaves[patchIndex].append(vA->index());
+//                        }
+
+//                        baffleFaces[dualFaceI] = patchIndex;
+                    }
+//                    else
+                    {
+                        // internal face
+                        faces[dualFaceI] = newDualFace;
+                        owner[dualFaceI] = own;
+                        neighbour[dualFaceI] = nei;
+
+                        dualFaceI++;
+                    }
                 }
             }
         }

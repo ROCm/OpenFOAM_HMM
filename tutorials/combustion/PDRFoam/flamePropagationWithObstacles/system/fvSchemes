@@ -56,15 +56,7 @@ divSchemes
 
 laplacianSchemes
 {
-    default         none;
-    laplacian(muEff,U) Gauss linear limited corrected 0.333;
-    laplacian(DkEff,k) Gauss linear limited corrected 0.333;
-    laplacian(DepsilonEff,epsilon) Gauss linear limited corrected 0.333;
-    laplacian((rho*inv((((1)*A(U))+tDragDcu))),p) Gauss linear limited corrected 0.333;
-    laplacian(Db,b) Gauss linear limited corrected 0.333;
-    laplacian(Db,ft) Gauss linear limited corrected 0.333;
-    laplacian(Db,ha) Gauss linear limited corrected 0.333;
-    laplacian(Db,hau) Gauss linear limited corrected 0.333;
+    default         Gauss linear limited corrected 0.333;
 }
 
 interpolationSchemes

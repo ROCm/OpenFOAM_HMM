@@ -12,7 +12,9 @@
         surfaceScalarField phid
         (
             "phid",
-            fvc::interpolate(psi)*(fvc::interpolate(HbyA) & mesh.Sf())
+            fvc::interpolate(psi)
+           *(fvc::interpolate(rho*HbyA) & mesh.Sf())
+           /fvc::interpolate(rho)
         );
 
         fvOptions.makeRelative(fvc::interpolate(psi), phid);
@@ -47,7 +49,7 @@
         surfaceScalarField phiHbyA
         (
             "phiHbyA",
-            fvc::interpolate(rho)*(fvc::interpolate(HbyA) & mesh.Sf())
+            fvc::interpolate(rho*HbyA) & mesh.Sf()
         );
 
         fvOptions.makeRelative(fvc::interpolate(rho), phiHbyA);

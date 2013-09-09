@@ -20,14 +20,14 @@ solvers
     {
         solver          PCG;
         preconditioner  DIC;
-        tolerance       1e-6;
+        tolerance       1e-10;
         relTol          0.01;
     }
 
     hFinal
     {
         $h;
-        tolerance       1e-8;
+        tolerance       1e-10;
         relTol          0;
     }
 
@@ -35,14 +35,14 @@ solvers
     {
         solver          PBiCG;
         preconditioner  DILU;
-        tolerance       1e-6;
+        tolerance       1e-10;
         relTol          0.1;
     }
 
     hUFinal
     {
         $hU;
-        tolerance       1e-6;
+        tolerance       1e-10;
         relTol          0;
     }
 }

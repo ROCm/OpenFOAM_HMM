@@ -113,9 +113,24 @@ namespace fvc
             surfaceMesh
         >
     >
-    ddtPhiCorr
+    ddtCorr
     (
-        const volScalarField& rA,
+        const GeometricField<Type, fvPatchField, volMesh>& U,
+        const GeometricField<Type, fvsPatchField, surfaceMesh>& Uf
+    );
+
+    template<class Type>
+    tmp
+    <
+        GeometricField
+        <
+            typename Foam::flux<Type>::type,
+            fvsPatchField,
+            surfaceMesh
+        >
+    >
+    ddtCorr
+    (
         const GeometricField<Type, fvPatchField, volMesh>& U,
         const GeometricField
         <
@@ -135,9 +150,25 @@ namespace fvc
             surfaceMesh
         >
     >
-    ddtPhiCorr
+    ddtCorr
     (
-        const volScalarField& rA,
+        const volScalarField& rho,
+        const GeometricField<Type, fvPatchField, volMesh>& U,
+        const GeometricField<Type, fvsPatchField, surfaceMesh>& Uf
+    );
+
+    template<class Type>
+    tmp
+    <
+        GeometricField
+        <
+            typename Foam::flux<Type>::type,
+            fvsPatchField,
+            surfaceMesh
+        >
+    >
+    ddtCorr
+    (
         const volScalarField& rho,
         const GeometricField<Type, fvPatchField, volMesh>& U,
         const GeometricField

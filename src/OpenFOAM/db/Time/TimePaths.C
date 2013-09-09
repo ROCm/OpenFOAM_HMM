@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,8 +35,38 @@ Foam::TimePaths::TimePaths
     const word& constantName
 )
 :
-    processorCase_(caseName.find("processor") != string::npos),
+    processorCase_(false),
     rootPath_(rootPath),
+    case_(caseName),
+    system_(systemName),
+    constant_(constantName)
+{
+    std::string::size_type pos = caseName.find("processor");
+    if (pos != string::npos)
+    {
+        processorCase_ = true;
+        globalCaseName_ = caseName(pos-1);
+    }
+    else
+    {
+        globalCaseName_ = caseName;
+    }
+}
+
+
+Foam::TimePaths::TimePaths
+(
+    const bool processorCase,
+    const fileName& rootPath,
+    const fileName& globalCaseName,
+    const fileName& caseName,
+    const word& systemName,
+    const word& constantName
+)
+:
+    processorCase_(processorCase),
+    rootPath_(rootPath),
+    globalCaseName_(globalCaseName),
     case_(caseName),
     system_(systemName),
     constant_(constantName)

@@ -30,9 +30,6 @@ Description
     parcels and porous media, including run-time selectable finitite volume
     options, e.g. sources, constraints
 
-    Note: ddtPhiCorr not used here when porous zones are active
-    - not well defined for porous calculations
-
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"

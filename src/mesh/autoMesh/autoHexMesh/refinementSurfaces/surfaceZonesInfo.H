@@ -199,6 +199,14 @@ public:
                 const labelList& surfaces
             );
 
+            //- Get indices of surfaces with a cellZone that are unclosed
+            static labelList getUnclosedNamedSurfaces
+            (
+                const PtrList<surfaceZonesInfo>& surfList,
+                const searchableSurfaces& allGeometry,
+                const labelList& surfaces
+            );
+
             //- Get indices of surfaces with a cellZone that are closed.
             static labelList getAllClosedNamedSurfaces
             (

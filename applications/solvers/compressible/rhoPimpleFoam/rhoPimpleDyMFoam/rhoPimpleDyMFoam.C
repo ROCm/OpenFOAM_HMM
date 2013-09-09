@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
 
-    // Create old-time absolute flux for ddtPhiCorr
+    // Create old-time absolute flux for ddtCorr
     surfaceScalarField phiAbs("phiAbs", phi);
 
 
@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
         // Make the fluxes absolute before mesh-motion
         fvc::makeAbsolute(phi, rho, U);
 
-        // Update absolute flux for ddtPhiCorr
+        // Update absolute flux for ddtCorr
         phiAbs = phi;
 
         #include "setDeltaT.H"

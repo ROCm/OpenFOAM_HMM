@@ -600,6 +600,19 @@ private:
             PackedBoolList& boundaryFacesToRemove
         );
 
+        void calcNeighbourCellCentres
+        (
+            const polyMesh& mesh,
+            const pointField& cellCentres,
+            pointField& neiCc
+        ) const;
+
+        void selectSeparatedCoupledFaces
+        (
+            const polyMesh& mesh,
+            boolList& selected
+        ) const;
+
         //- From meshRefinementBaffles.C. Use insidePoint for a surface to
         //  determine the cell zone.
         void findCellZoneInsideWalk

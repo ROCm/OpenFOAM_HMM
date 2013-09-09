@@ -51,14 +51,12 @@ int main(int argc, char *argv[])
     pimpleControl pimple(mesh);
 
     #include "createFields.H"
+    #include "createUf.H"
     #include "createFvOptions.H"
     #include "readTimeControls.H"
     #include "createPcorrTypes.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
-
-    // Create old-time absolute flux for ddtPhiCorr
-    surfaceScalarField phiAbs("phiAbs", phi);
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -69,12 +67,6 @@ int main(int argc, char *argv[])
         #include "readControls.H"
         #include "CourantNo.H"
 
-        // Make the fluxes absolute
-        fvc::makeAbsolute(phi, U);
-
-        // Update absolute flux for ddtPhiCorr
-        phiAbs = phi;
-
         #include "setDeltaT.H"
 
         runTime++;
@@ -83,12 +75,15 @@ int main(int argc, char *argv[])
 
         mesh.update();
 
+        // Calculate absolute flux from the mapped surface velocity
+        phi = mesh.Sf() & Uf;
+
         if (mesh.changing() && correctPhi)
         {
             #include "correctPhi.H"
         }
 
-        // Make the fluxes relative to the mesh motion
+        // Make the flux relative to the mesh motion
         fvc::makeRelative(phi, U);
 
         if (mesh.changing() && checkMeshCourantNo)
