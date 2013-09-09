@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -229,8 +229,24 @@ curvatureSeparation::curvatureSeparation
     deltaByR1Min_(coeffs().lookupOrDefault<scalar>("deltaByR1Min", 0.0)),
     definedPatchRadii_(),
     magG_(mag(owner.g().value())),
-    gHat_(owner.g().value()/magG_)
+    gHat_(vector::zero)
 {
+    if (magG_ < ROOTVSMALL)
+    {
+        FatalErrorIn
+        (
+            "curvatureSeparation::curvatureSeparation"
+            "("
+                "const surfaceFilmModel&, "
+                "const dictionary&"
+            ")"
+        )
+            << "Acceleration due to gravity must be non-zero"
+            << exit(FatalError);
+    }
+
+    gHat_ = owner.g().value()/magG_;
+
     List<Tuple2<word, scalar> > prIn(coeffs().lookup("definedPatchRadii"));
     const wordList& allPatchNames = owner.regionMesh().boundaryMesh().names();
 
