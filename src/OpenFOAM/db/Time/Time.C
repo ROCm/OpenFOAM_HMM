@@ -386,7 +386,9 @@ Foam::Time::Time
 :
     TimePaths
     (
+        args.parRunControl().parRun(),
         args.rootPath(),
+        args.globalCaseName(),
         args.caseName(),
         systemName,
         constantName
@@ -702,13 +704,27 @@ Foam::instantList Foam::Time::times() const
 
 Foam::word Foam::Time::findInstancePath(const instant& t) const
 {
-    instantList timeDirs = findTimes(path(), constant());
+    const fileName directory = path();
+    const word& constantName = constant();
 
-    forAllReverse(timeDirs, timeI)
+    // Read directory entries into a list
+    fileNameList dirEntries(readDir(directory, fileName::DIRECTORY));
+
+    forAll(dirEntries, i)
     {
-        if (timeDirs[timeI] == t)
+        scalar timeValue;
+        if (readScalar(dirEntries[i].c_str(), timeValue) && t.equal(timeValue))
         {
-            return timeDirs[timeI].name();
+            return dirEntries[i];
+        }
+    }
+
+    if (t.equal(0.0))
+    {
+        // Looking for 0 or constant. 0 already checked above.
+        if (isDir(directory/constantName))
+        {
+            return constantName;
         }
     }
 

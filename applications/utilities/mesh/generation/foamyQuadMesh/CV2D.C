@@ -542,7 +542,7 @@ void Foam::CV2D::newPoints()
             alignmentDirsB[0].x()
         );
 
-        Field<vector2D> alignmentDirs(2);
+        Field<vector2D> alignmentDirs(alignmentDirsA);
 
         forAll(alignmentDirsA, aA)
         {

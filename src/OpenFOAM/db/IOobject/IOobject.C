@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -323,8 +323,8 @@ Foam::fileName Foam::IOobject::filePath() const
             )
             {
                 fileName parentObjectPath =
-                    rootPath()/caseName()
-                   /".."/instance()/db_.dbDir()/local()/name();
+                    rootPath()/time().globalCaseName()
+                   /instance()/db_.dbDir()/local()/name();
 
                 if (isFile(parentObjectPath))
                 {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,15 +54,19 @@ Foam::instant::instant(const word& tname)
 {}
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::instant::equal(const scalar b) const
+{
+    return (value_ < b + SMALL  && value_ > b - SMALL);
+}
+
+
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 bool Foam::operator==(const instant& a, const instant& b)
 {
-    return
-    (
-        a.value_ < b.value_ + SMALL
-     && a.value_ > b.value_ - SMALL
-    );
+    return a.equal(b.value_);
 }
 
 
