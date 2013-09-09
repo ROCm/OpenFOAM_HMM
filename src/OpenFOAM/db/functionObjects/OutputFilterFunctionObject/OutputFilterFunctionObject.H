@@ -90,6 +90,10 @@ class OutputFilterFunctionObject
             //- De-activation time - defaults to VGREAT
             scalar timeEnd_;
 
+            //- Number of steps before the dumping time in which the deltaT
+            // will start to change (valid for ocAdjustableTime)
+            label nStepsToStartTimeChange_;
+
 
         //- Output controls
         outputFilterOutputControl outputControl_;
@@ -203,6 +207,9 @@ public:
 
             //- Called when time was set at the end of the Time::operator++
             virtual bool timeSet();
+
+            //- Called at the end of Time::adjustDeltaT() if adjustTime is true
+            virtual bool adjustTimeStep();
 
             //- Read and set the function object if its data have changed
             virtual bool read(const dictionary&);

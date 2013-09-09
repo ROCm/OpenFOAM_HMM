@@ -64,14 +64,24 @@ functions
         // region allowed.
         region wallFilmRegion;
 
-        // Execute upon outputTime
+        // Execute upon options:
+        //  timeStep
+        //  outputTime
+        //  adjustableTime
+        //  runTime
+        //  clockTime
+        //  cpuTime
         outputControl   outputTime;
 
         // Objects (fields or lagrangian fields in any of the clouds)
         // to write every outputTime
         objectNames    (p positions nParticle);
+
         // Write as normal every writeInterval'th outputTime.
-        writeInterval   3;
+        outputInterval  1; // (timeStep, outputTime)
+
+        // Interval of time (sec) to write down(
+        writeInterval   10.5 //(adjustableTime, runTime, clockTime, cpuTime)
     }
 
     dumpObjects
@@ -84,8 +94,23 @@ functions
         // Where to load it from
         functionObjectLibs ("libIOFunctionObjects.so");
 
-        // Execute upon outputTime
+        // Execute upon outputTime:
+        //  timeStep
+        //  outputTime
+        //  adjustableTime
+        //  runTime
+        //  clockTime
+        //  cpuTime
         outputControl   outputTime;
+
+        // Is the object written by this function Object alone
+        exclusiveWriting       true;
+
+         // Interval of time (sec) to write down(
+        writeInterval   10.5 //(adjustableTime, runTime, clockTime, cpuTime)
+
+         // Write as normal every writeInterval'th outputTime.
+        outputInterval  1; // (timeStep, outputTime)
 
         // Objects to write
         objectNames    ();
