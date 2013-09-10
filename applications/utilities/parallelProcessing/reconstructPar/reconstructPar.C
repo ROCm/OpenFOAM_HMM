@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
     // Set all times on processor meshes equal to reconstructed mesh
     forAll(databases, procI)
     {
-        databases[procI].setTime(runTime.timeName(), runTime.timeIndex());
+        databases[procI].setTime(runTime);
     }
 
 
