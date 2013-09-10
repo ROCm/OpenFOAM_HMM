@@ -37,6 +37,7 @@ Description
 #include "incompressibleTwoPhaseMixture.H"
 #include "turbulenceModel.H"
 #include "pimpleControl.H"
+#include "fixedFluxPressureFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

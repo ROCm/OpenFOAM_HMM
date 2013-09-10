@@ -80,27 +80,33 @@
 
     surfaceScalarField phiHbyA("phiHbyA", alpha1f*phiHbyA1 + alpha2f*phiHbyA2);
 
-    // Update phi BCs before pEqn
-    phi.boundaryField() =
-        mrfZones.relative
-        (
-            alpha1f.boundaryField()
-           *(mesh.Sf().boundaryField() & U1.boundaryField())
-          + alpha2f.boundaryField()
-           *(mesh.Sf().boundaryField() & U2.boundaryField())
-        );
-
     HbyA1 += (1.0/rho1)*rAU1*dragCoeff*U2;
     HbyA2 += (1.0/rho2)*rAU2*dragCoeff*U1;
 
-    surfaceScalarField Dp
+    surfaceScalarField rAUf
     (
-        "Dp",
+        "rAUf",
         mag
         (
             alpha1f*rAlphaAU1f/fvc::interpolate(rho1)
           + alpha2f*rAlphaAU2f/fvc::interpolate(rho2)
         )
+    );
+
+    // Update the fixedFluxPressure BCs to ensure flux consistency
+    setSnGrad<fixedFluxPressureFvPatchScalarField>
+    (
+        p.boundaryField(),
+        (
+            phiHbyA.boundaryField()
+          - mrfZones.relative
+            (
+                alpha1f.boundaryField()
+               *(mesh.Sf().boundaryField() & U1.boundaryField())
+              + alpha2f.boundaryField()
+               *(mesh.Sf().boundaryField() & U2.boundaryField())
+            )
+        )/(mesh.magSf().boundaryField()*rAUf.boundaryField())
     );
 
     tmp<fvScalarMatrix> pEqnComp1;
@@ -160,7 +166,7 @@
         fvScalarMatrix pEqnIncomp
         (
             fvc::div(phiHbyA)
-          - fvm::laplacian(Dp, p)
+          - fvm::laplacian(rAUf, p)
         );
 
         solve
@@ -175,7 +181,7 @@
 
         if (pimple.finalNonOrthogonalIter())
         {
-            surfaceScalarField mSfGradp(pEqnIncomp.flux()/Dp);
+            surfaceScalarField mSfGradp(pEqnIncomp.flux()/rAUf);
 
             phi1.boundaryField() ==
                 mrfZones.relative
@@ -200,7 +206,7 @@
             );
 
             p.relax();
-            mSfGradp = pEqnIncomp.flux()/Dp;
+            mSfGradp = pEqnIncomp.flux()/rAUf;
 
             U1 = HbyA1
               + fvc::reconstruct

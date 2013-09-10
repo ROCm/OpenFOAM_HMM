@@ -35,12 +35,12 @@ Description
 #include "phaseModel.H"
 #include "dragModel.H"
 #include "heatTransferModel.H"
-#include "pimpleControl.H"
-
 #include "singlePhaseTransportModel.H"
 #include "LESModel.H"
-
+#include "pimpleControl.H"
 #include "IOMRFZoneList.H"
+#include "fixedFluxPressureFvPatchScalarField.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -50,6 +50,7 @@ Description
 #include "RASModel.H"
 #include "fvIOoptionList.H"
 #include "simpleControl.H"
+#include "fixedFluxPressureFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

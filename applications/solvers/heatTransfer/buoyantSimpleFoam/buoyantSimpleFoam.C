@@ -36,6 +36,7 @@ Description
 #include "radiationModel.H"
 #include "simpleControl.H"
 #include "fvIOoptionList.H"
+#include "fixedFluxPressureFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

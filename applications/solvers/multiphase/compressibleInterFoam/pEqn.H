@@ -1,6 +1,6 @@
 {
     volScalarField rAU("rAU", 1.0/UEqn.A());
-    surfaceScalarField Dp("Dp", fvc::interpolate(rAU));
+    surfaceScalarField rAUf("rAUf", fvc::interpolate(rAU));
 
     volVectorField HbyA("HbyA", U);
     HbyA = rAU*UEqn.H();
@@ -11,17 +11,26 @@
         (fvc::interpolate(HbyA) & mesh.Sf())
       + fvc::interpolate(rho*rAU)*fvc::ddtCorr(U, phi)
     );
-    phi = phiHbyA;
 
     surfaceScalarField phig
     (
         (
             fvc::interpolate(interface.sigmaK())*fvc::snGrad(alpha1)
           - ghf*fvc::snGrad(rho)
-        )*Dp*mesh.magSf()
+        )*rAUf*mesh.magSf()
     );
 
     phiHbyA += phig;
+
+    // Update the fixedFluxPressure BCs to ensure flux consistency
+    setSnGrad<fixedFluxPressureFvPatchScalarField>
+    (
+        p_rgh.boundaryField(),
+        (
+            phiHbyA.boundaryField()
+          - (mesh.Sf().boundaryField() & U.boundaryField())
+        )/(mesh.magSf().boundaryField()*rAUf.boundaryField())
+    );
 
     tmp<fvScalarMatrix> p_rghEqnComp1;
     tmp<fvScalarMatrix> p_rghEqnComp2;
@@ -70,7 +79,7 @@
         fvScalarMatrix p_rghEqnIncomp
         (
             fvc::div(phiHbyA)
-          - fvm::laplacian(Dp, p_rgh)
+          - fvm::laplacian(rAUf, p_rgh)
         );
 
         solve
@@ -97,7 +106,7 @@
             phi = phiHbyA + p_rghEqnIncomp.flux();
 
             U = HbyA
-              + rAU*fvc::reconstruct((phig + p_rghEqnIncomp.flux())/Dp);
+              + rAU*fvc::reconstruct((phig + p_rghEqnIncomp.flux())/rAUf);
             U.correctBoundaryConditions();
         }
     }

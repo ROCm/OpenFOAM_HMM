@@ -44,6 +44,7 @@ Description
 #include "twoPhaseMixtureThermo.H"
 #include "turbulenceModel.H"
 #include "pimpleControl.H"
+#include "fixedFluxPressureFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

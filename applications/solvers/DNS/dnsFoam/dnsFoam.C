@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
         for (int corr=1; corr<=1; corr++)
         {
             volScalarField rAU(1.0/UEqn.A());
-            surfaceScalarField Dp("Dp", fvc::interpolate(rAU));
+            surfaceScalarField rAUf("rAUf", fvc::interpolate(rAU));
             volVectorField HbyA("HbyA", U);
             HbyA = rAU*UEqn.H();
 
@@ -94,12 +94,12 @@ int main(int argc, char *argv[])
             (
                 "phiHbyA",
                 (fvc::interpolate(HbyA) & mesh.Sf())
-              + Dp*fvc::ddtCorr(U, phi)
+              + rAUf*fvc::ddtCorr(U, phi)
             );
 
             fvScalarMatrix pEqn
             (
-                fvm::laplacian(Dp, p) == fvc::div(phiHbyA)
+                fvm::laplacian(rAUf, p) == fvc::div(phiHbyA)
             );
 
             pEqn.solve();
