@@ -140,6 +140,12 @@ public:
             //- Make the given absolute flux relative
             virtual void makeRelative(surfaceScalarField& phi) const;
 
+            //- Make the given absolute boundary flux relative
+            virtual void makeRelative
+            (
+                FieldField<fvsPatchField, scalar>& phi
+            ) const;
+
             //- Make the given absolute mass-flux relative
             virtual void makeRelative
             (
