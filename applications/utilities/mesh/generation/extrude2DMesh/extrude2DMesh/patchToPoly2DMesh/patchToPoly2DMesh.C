@@ -303,6 +303,33 @@ Foam::patchToPoly2DMesh::~patchToPoly2DMesh()
 
 void Foam::patchToPoly2DMesh::createMesh()
 {
+    for (label edgeI = 0; edgeI < patch_.nInternalEdges(); edgeI++)
+    {
+        if (patch_.edgeFaces()[edgeI].size() != 2)
+        {
+            FatalErrorIn("patchToPoly2DMesh::patchToPoly2DMesh(..)")
+                << "internal edge:" << edgeI
+                << " patch.edgeFaces()[edgeI]:" << patch_.edgeFaces()[edgeI]
+                << abort(FatalError);
+        }
+    }
+
+    for
+    (
+        label edgeI = patch_.nInternalEdges();
+        edgeI < patch_.nEdges();
+        edgeI++
+    )
+    {
+        if (patch_.edgeFaces()[edgeI].size() != 1)
+        {
+            FatalErrorIn("patchToPoly2DMesh::patchToPoly2DMesh(..)")
+                << "boundary edge:" << edgeI
+                << " patch.edgeFaces()[edgeI]:" << patch_.edgeFaces()[edgeI]
+                << abort(FatalError);
+        }
+    }
+
     createPolyMeshComponents();
 
     label startFace = patch_.nInternalEdges();
