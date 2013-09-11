@@ -53,6 +53,7 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "createMRFZones.H"
     #include "readTimeControls.H"
+    #include "createPrghCorrTypes.H"
     #include "correctPhi.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
