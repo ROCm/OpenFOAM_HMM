@@ -70,6 +70,26 @@ class shortEdgeFilter2D
 
     // Private Member Functions
 
+        void addRegion
+        (
+            const label regionI,
+            DynamicList<label>& bPointRegions
+        ) const;
+
+        void assignBoundaryPointRegions
+        (
+            List<DynamicList<label> >& boundaryPointRegions
+        ) const;
+
+        void updateEdgeRegionMap
+        (
+            const MeshedSurface<face>& surfMesh,
+            const List<DynamicList<label> >& boundaryPtRegions,
+            const labelList& surfPtToBoundaryPt,
+            EdgeMap<label>& mapEdgesRegion,
+            labelList& patchSizes
+        ) const;
+
         //- Disallow default bitwise copy construct
         shortEdgeFilter2D(const shortEdgeFilter2D&);
 
