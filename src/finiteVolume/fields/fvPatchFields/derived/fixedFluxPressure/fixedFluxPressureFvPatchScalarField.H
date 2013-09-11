@@ -169,7 +169,7 @@ namespace Foam
     inline void setSnGrad
     (
         volScalarField::GeometricBoundaryField& bf,
-        const FieldField<fvsPatchField, double>& snGrad
+        const FieldField<fvsPatchField, scalar>& snGrad
     )
     {
         forAll(bf, patchi)
@@ -185,7 +185,7 @@ namespace Foam
     inline void setSnGrad
     (
         volScalarField::GeometricBoundaryField& bf,
-        const tmp<FieldField<fvsPatchField, double> >& tsnGrad
+        const tmp<FieldField<fvsPatchField, scalar> >& tsnGrad
     )
     {
         setSnGrad<GradBC>(bf, tsnGrad());
