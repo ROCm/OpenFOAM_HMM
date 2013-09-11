@@ -57,6 +57,7 @@ int main(int argc, char *argv[])
     #include "createMRFZones.H"
     #include "initContinuityErrs.H"
     #include "readTimeControls.H"
+    #include "createPcorrTypes.H"
     #include "correctPhi.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
