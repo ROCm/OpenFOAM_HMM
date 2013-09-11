@@ -40,8 +40,6 @@
 
     dimensionedScalar Dp("Dp", dimTime/rho.dimensions(), 1.0);
 
-    adjustPhi(phi, U, pcorr);
-
     while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix pcorrEqn
