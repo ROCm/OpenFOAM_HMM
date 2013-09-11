@@ -23,8 +23,6 @@ boundaryField
     ".*"
     {
         type            fixedFluxPressure;
-        phi             phiAbs;
-        value           $internalField;
     }
 
     outlet
