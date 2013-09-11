@@ -38,6 +38,7 @@ Description
 #include "plasticViscosity.H"
 #include "yieldStress.H"
 #include "pimpleControl.H"
+#include "fixedFluxPressureFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

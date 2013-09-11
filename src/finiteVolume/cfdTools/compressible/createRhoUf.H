@@ -22,31 +22,31 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Global
-    createUf
+    createRhoUf
 
 Description
-    Creates and initialises the velocity velocity field Uf.
+    Creates and initialises the velocity velocity field rhoUf.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef createUf_H
-#define createUf_H
+#ifndef createRhoUf_H
+#define createRhoUf_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Info<< "Reading/calculating face velocity Uf\n" << endl;
+Info<< "Reading/calculating face velocity rhoUf\n" << endl;
 
-surfaceVectorField Uf
+surfaceVectorField rhoUf
 (
     IOobject
     (
-        "Uf",
+        "rhoUf",
         runTime.timeName(),
         mesh,
         IOobject::READ_IF_PRESENT,
         IOobject::AUTO_WRITE
     ),
-    linearInterpolate(U)
+    linearInterpolate(rho*U)
 );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

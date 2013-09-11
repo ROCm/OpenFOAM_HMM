@@ -41,6 +41,7 @@ Description
 #include "turbulenceModel.H"
 #include "pimpleControl.H"
 #include "fvIOoptionList.H"
+#include "fixedFluxPressureFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,7 +57,7 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "createUf.H"
     #include "readTimeControls.H"
-    #include "createPcorrTypes.H"
+    #include "createPrghCorrTypes.H"
     #include "correctPhi.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"

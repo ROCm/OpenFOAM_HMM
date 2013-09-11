@@ -30,14 +30,3 @@ boundaryField
         p0              uniform 0;
         value           uniform 0;
     }
-    walls
-    {
-        type            fixedFluxPressure;
-        gradient        uniform 0;
-        phi             phiAbs;
-        value           uniform 0;
-    }
-}
-
-
-// ************************************************************************* //

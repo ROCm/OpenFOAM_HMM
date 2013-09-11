@@ -28,44 +28,15 @@ Group
     grpInletBoundaryConditions grpWallBoundaryConditions
 
 Description
-    This boundary condition adjusts the pressure gradient such that the flux
-    on the boundary is that specified by the velocity boundary condition.
-
-    The predicted flux to be compensated by the pressure gradient is evaluated
-    as \f$(\phi - \phi_{H/A})\f$, both of which are looked-up from the database,
-    as is the pressure diffusivity used to calculate the gradient using:
-
-        \f[
-            \nabla(p) = \frac{\phi_{H/A} - \phi}{|Sf| D_p}
-        \f]
-
-    where
-
-    \vartable
-        phi     | flux
-        D_p     | pressure diffusivity
-        Sf      | patch face areas [m2]
-    \endvartable
-
-    \heading Patch usage
-
-    \table
-        Property     | Description             | Required    | Default value
-        phiHbyA      | name of predicted flux field | no | phiHbyA
-        phi          | name of flux field      | no |   phi
-        rho          | name of density field   | no |   rho
-        Dp           | name of pressure diffusivity field | no |   Dp
-    \endtable
+    This boundary condition sets the pressure gradient to the provided value
+    such that the flux on the boundary is that specified by the velocity
+    boundary condition.
 
     Example of the boundary condition specification:
     \verbatim
     myPatch
     {
         type            fixedFluxPressure;
-        phiHbyA         phiHbyA;
-        phi             phi;
-        rho             rho;
-        Dp              Dp;
     }
     \endverbatim
 
@@ -99,21 +70,8 @@ class fixedFluxPressureFvPatchScalarField
 {
     // Private data
 
-        //- Name of the predicted flux transporting the field
-        word phiHbyAName_;
-
-        //- Name of the flux transporting the field
-        word phiName_;
-
-        //- Name of the density field used to normalise the mass flux
-        //  if neccessary
-        word rhoName_;
-
-        //- Name of the pressure diffusivity field
-        word DpName_;
-
-        //- Is the pressure adjoint, i.e. has the opposite sign
-        Switch adjoint_;
+        //- Current time index (used for updating)
+        label curTimeIndex_;
 
 
 public:
@@ -186,7 +144,10 @@ public:
 
     // Member functions
 
-        //- Update the coefficients associated with the patch field
+        //- Update the patch pressure gradient field from the given snGradp
+        virtual void updateCoeffs(const scalarField& snGradp);
+
+        //- Update the patch pressure gradient field
         virtual void updateCoeffs();
 
         //- Write
@@ -197,6 +158,39 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "volFields.H"
+
+namespace Foam
+{
+    template<class GradBC>
+    inline void setSnGrad
+    (
+        volScalarField::GeometricBoundaryField& bf,
+        const FieldField<fvsPatchField, scalar>& snGrad
+    )
+    {
+        forAll(bf, patchi)
+        {
+            if (isA<GradBC>(bf[patchi]))
+            {
+                refCast<GradBC>(bf[patchi]).updateCoeffs(snGrad[patchi]);
+            }
+        }
+    }
+
+    template<class GradBC>
+    inline void setSnGrad
+    (
+        volScalarField::GeometricBoundaryField& bf,
+        const tmp<FieldField<fvsPatchField, scalar> >& tsnGrad
+    )
+    {
+        setSnGrad<GradBC>(bf, tsnGrad());
+    }
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

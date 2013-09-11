@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
             for (int corr=0; corr<nCorr; corr++)
             {
                 volScalarField rAU(1.0/UEqn.A());
-                surfaceScalarField Dp("Dp", fvc::interpolate(rAU));
+                surfaceScalarField rAUf("rAUf", fvc::interpolate(rAU));
 
                 volVectorField HbyA("HbyA", U);
                 HbyA = rAU*UEqn.H();
@@ -102,14 +102,14 @@ int main(int argc, char *argv[])
                 (
                     "phiHbyA",
                     (fvc::interpolate(HbyA) & mesh.Sf())
-                  + Dp*fvc::ddtCorr(U, phi)
+                  + rAUf*fvc::ddtCorr(U, phi)
                 );
 
                 for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
                 {
                     fvScalarMatrix pEqn
                     (
-                        fvm::laplacian(Dp, p) == fvc::div(phiHbyA)
+                        fvm::laplacian(rAUf, p) == fvc::div(phiHbyA)
                     );
 
                     pEqn.setReference(pRefCell, pRefValue);
@@ -143,14 +143,14 @@ int main(int argc, char *argv[])
             BEqn.solve();
 
             volScalarField rAB(1.0/BEqn.A());
-            surfaceScalarField DpB("DpB", fvc::interpolate(rAB));
+            surfaceScalarField rABf("rABf", fvc::interpolate(rAB));
 
             phiB = (fvc::interpolate(B) & mesh.Sf())
-                + DpB*fvc::ddtCorr(B, phiB);
+                + rABf*fvc::ddtCorr(B, phiB);
 
             fvScalarMatrix pBEqn
             (
-                fvm::laplacian(DpB, pB) == fvc::div(phiB)
+                fvm::laplacian(rABf, pB) == fvc::div(phiB)
             );
             pBEqn.solve();
 

@@ -40,6 +40,7 @@ Description
 #include "PhaseIncompressibleTurbulenceModel.H"
 #include "pimpleControl.H"
 #include "IOMRFZoneList.H"
+#include "fixedFluxPressureFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

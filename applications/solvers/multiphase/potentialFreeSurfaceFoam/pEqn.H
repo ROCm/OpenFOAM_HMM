@@ -20,8 +20,15 @@ adjustPhi(phiHbyA, U, p_gh);
 
 fvOptions.makeRelative(phiHbyA);
 
-// Update the phi BCs from U before p BCs are updated
-phi.boundaryField() = mesh.Sf().boundaryField() & U.boundaryField();
+// Update the fixedFluxPressure BCs to ensure flux consistency
+setSnGrad<fixedFluxPressureFvPatchScalarField>
+(
+    p_gh.boundaryField(),
+    (
+        phiHbyA.boundaryField()
+      - (mesh.Sf().boundaryField() & U.boundaryField())
+    )/(mesh.magSf().boundaryField()*rAUf.boundaryField())
+);
 
 // Non-orthogonal pressure corrector loop
 while (pimple.correctNonOrthogonal())

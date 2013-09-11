@@ -75,8 +75,12 @@ int main(int argc, char *argv[])
             // --- Pressure corrector loop
             while (pimple.correct())
             {
-                volScalarField rAU(1.0/UEqn.A());
-                surfaceScalarField Dp("Dp", fvc::interpolate(rho*rAU));
+                volScalarField rAU("rAU", 1.0/UEqn.A());
+                surfaceScalarField rhorAUf
+                (
+                    "rhorAUf",
+                    fvc::interpolate(rho*rAU)
+                );
 
                 U = rAU*UEqn.H();
 
@@ -86,7 +90,7 @@ int main(int argc, char *argv[])
                     psi
                    *(
                        (fvc::interpolate(rho*U) & mesh.Sf())
-                     + Dp*fvc::ddtCorr(rho, U, phi)
+                     + rhorAUf*fvc::ddtCorr(rho, U, phi)
                     )/fvc::interpolate(rho)
                 );
 
@@ -97,7 +101,7 @@ int main(int argc, char *argv[])
                     fvm::ddt(psi, p)
                   + fvc::div(phi)
                   + fvm::div(phid, p)
-                  - fvm::laplacian(Dp, p)
+                  - fvm::laplacian(rhorAUf, p)
                 );
 
                 pEqn.solve();
