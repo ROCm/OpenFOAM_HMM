@@ -47,16 +47,15 @@ int main(int argc, char *argv[])
 
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
-    #include "readThermodynamicProperties.H"
-    #include "readControls.H"
-    #include "createFields.H"
     #include "initContinuityErrs.H"
 
     pimpleControl pimple(mesh);
 
-    surfaceScalarField phivAbs("phivAbs", phiv);
-    fvc::makeAbsolute(phivAbs, U);
-
+    #include "readThermodynamicProperties.H"
+    #include "readControls.H"
+    #include "createFields.H"
+    #include "createUf.H"
+    #include "createPcorrTypes.H"
     #include "compressibleCourantNo.H"
     #include "setInitialDeltaT.H"
 
@@ -75,18 +74,8 @@ int main(int argc, char *argv[])
 
         scalar timeBeforeMeshUpdate = runTime.elapsedCpuTime();
 
-        {
-            // Calculate the relative velocity used to map relative flux phiv
-            volVectorField Urel("Urel", U);
-
-            if (mesh.moving())
-            {
-                Urel -= fvc::reconstruct(fvc::meshPhi(U));
-            }
-
-            // Do any mesh changes
-            mesh.update();
-        }
+        // Do any mesh changes
+        mesh.update();
 
         if (mesh.changing())
         {
@@ -94,7 +83,16 @@ int main(int argc, char *argv[])
                 << runTime.elapsedCpuTime() - timeBeforeMeshUpdate
                 << " s" << endl;
 
-            #include "correctPhi.H"
+            if (correctPhi)
+            {
+                // Calculate absolute flux from the mapped surface velocity
+                phiv = mesh.Sf() & Uf;
+
+                #include "correctPhi.H"
+
+                // Make the flux relative to the mesh motion
+                fvc::makeRelative(phiv, U);
+            }
         }
 
         // --- Pressure-velocity PIMPLE corrector loop
