@@ -38,6 +38,7 @@ Description
 #include "radiationModel.H"
 #include "fvIOoptionList.H"
 #include "coordinateSystem.H"
+#include "fixedFluxPressureFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -169,15 +169,6 @@ void Foam::MRFZoneList::makeRelative(volVectorField& U) const
 }
 
 
-void Foam::MRFZoneList::makeAbsolute(volVectorField& U) const
-{
-    forAll(*this, i)
-    {
-        operator[](i).makeAbsolute(U);
-    }
-}
-
-
 void Foam::MRFZoneList::makeRelative(surfaceScalarField& phi) const
 {
     forAll(*this, i)
@@ -193,7 +184,7 @@ Foam::MRFZoneList::relative
     const tmp<FieldField<fvsPatchField, scalar> >& phi
 ) const
 {
-    tmp<FieldField<fvsPatchField, scalar> > rphi(phi);
+    tmp<FieldField<fvsPatchField, scalar> > rphi(phi.ptr());
 
     forAll(*this, i)
     {
@@ -213,6 +204,15 @@ void Foam::MRFZoneList::makeRelative
     forAll(*this, i)
     {
         operator[](i).makeRelative(rho, phi);
+    }
+}
+
+
+void Foam::MRFZoneList::makeAbsolute(volVectorField& U) const
+{
+    forAll(*this, i)
+    {
+        operator[](i).makeAbsolute(U);
     }
 }
 

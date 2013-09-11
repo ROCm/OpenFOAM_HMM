@@ -1,7 +1,7 @@
 rho = thermo.rho();
 
 volScalarField rAU(1.0/UEqn.A());
-surfaceScalarField Dp("Dp", fvc::interpolate(rho*rAU));
+surfaceScalarField rhorAUf("rhorAUf", fvc::interpolate(rho*rAU));
 
 volVectorField HbyA("HbyA", U);
 HbyA = rAU*UEqn.H();
@@ -15,7 +15,7 @@ if (pimple.transonic())
        *(
             (
                 (fvc::interpolate(rho*HbyA) & mesh.Sf())
-              //***HGW + Dp*fvc::ddtCorr(rho, U, phi)
+              //***HGW + rhorAUf*fvc::ddtCorr(rho, U, phi)
             )/fvc::interpolate(rho)
           - fvc::meshPhi(rho, U)
         )
@@ -51,7 +51,7 @@ else
         "phiHbyA",
         (
             (fvc::interpolate(rho*HbyA) & mesh.Sf())
-          //***HGW + Dp*fvc::ddtCorr(rho, U, phi)
+          //***HGW + rhorAUf*fvc::ddtCorr(rho, U, phi)
         )
       - fvc::interpolate(rho)*fvc::meshPhi(rho, U)
     );

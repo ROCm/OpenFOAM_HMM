@@ -37,6 +37,7 @@ Description
 #include "turbulenceModel.H"
 #include "IOMRFZoneList.H"
 #include "pimpleControl.H"
+#include "fixedFluxPressureFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

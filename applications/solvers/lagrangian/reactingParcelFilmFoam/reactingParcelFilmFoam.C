@@ -39,6 +39,7 @@ Description
 #include "SLGThermo.H"
 #include "fvIOoptionList.H"
 #include "pimpleControl.H"
+#include "fixedFluxPressureFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

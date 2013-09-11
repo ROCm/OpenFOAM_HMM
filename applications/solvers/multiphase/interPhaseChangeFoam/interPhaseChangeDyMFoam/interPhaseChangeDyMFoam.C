@@ -50,6 +50,7 @@ Description
 #include "turbulenceModel.H"
 #include "pimpleControl.H"
 #include "fvIOoptionList.H"
+#include "fixedFluxPressureFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,9 +65,9 @@ int main(int argc, char *argv[])
     pimpleControl pimple(mesh);
 
     #include "createFields.H"
-    #include "../interFoam/interDyMFoam/createUf.H"
+    #include "createUf.H"
     #include "readTimeControls.H"
-    #include "../interFoam/interDyMFoam/createPcorrTypes.H"
+    #include "createPcorrTypes.H"
     #include "../interFoam/interDyMFoam/correctPhi.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"

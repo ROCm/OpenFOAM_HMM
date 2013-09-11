@@ -166,6 +166,12 @@ public:
                 surfaceScalarField& phi
             ) const;
 
+            //- Return the given absolute boundary flux relative
+            tmp<FieldField<fvsPatchField, scalar> > relative
+            (
+                const tmp<FieldField<fvsPatchField, scalar> >& tphi
+            ) const;
+
             //- Make the given relative flux absolute
             void makeAbsolute(surfaceScalarField& phi) const;
 

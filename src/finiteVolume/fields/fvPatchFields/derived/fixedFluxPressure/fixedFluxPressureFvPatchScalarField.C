@@ -38,11 +38,7 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
 )
 :
     fixedGradientFvPatchScalarField(p, iF),
-    phiHbyAName_("phiHbyA"),
-    phiName_("phi"),
-    rhoName_("rho"),
-    DpName_("Dp"),
-    adjoint_(false)
+    curTimeIndex_(-1)
 {}
 
 
@@ -54,13 +50,12 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedGradientFvPatchScalarField(ptf, p, iF, mapper),
-    phiHbyAName_(ptf.phiHbyAName_),
-    phiName_(ptf.phiName_),
-    rhoName_(ptf.rhoName_),
-    DpName_(ptf.DpName_),
-    adjoint_(ptf.adjoint_)
-{}
+    fixedGradientFvPatchScalarField(p, iF),
+    curTimeIndex_(-1)
+{
+    gradient() = 0.0;
+    map(gradient(), mapper);
+}
 
 
 Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
@@ -71,11 +66,7 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
 )
 :
     fixedGradientFvPatchScalarField(p, iF),
-    phiHbyAName_(dict.lookupOrDefault<word>("phiHbyA", "phiHbyA")),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
-    DpName_(dict.lookupOrDefault<word>("Dp", "Dp")),
-    adjoint_(dict.lookupOrDefault<Switch>("adjoint", false))
+    curTimeIndex_(-1)
 {
     if (dict.found("value") && dict.found("gradient"))
     {
@@ -99,11 +90,7 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
 )
 :
     fixedGradientFvPatchScalarField(wbppsf),
-    phiHbyAName_(wbppsf.phiHbyAName_),
-    phiName_(wbppsf.phiName_),
-    rhoName_(wbppsf.rhoName_),
-    DpName_(wbppsf.DpName_),
-    adjoint_(wbppsf.adjoint_)
+    curTimeIndex_(-1)
 {}
 
 
@@ -114,15 +101,28 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
 )
 :
     fixedGradientFvPatchScalarField(wbppsf, iF),
-    phiHbyAName_(wbppsf.phiHbyAName_),
-    phiName_(wbppsf.phiName_),
-    rhoName_(wbppsf.rhoName_),
-    DpName_(wbppsf.DpName_),
-    adjoint_(wbppsf.adjoint_)
+    curTimeIndex_(-1)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::fixedFluxPressureFvPatchScalarField::updateCoeffs
+(
+    const scalarField& snGradp
+)
+{
+    if (updated())
+    {
+        return;
+    }
+
+    curTimeIndex_ = this->db().time().timeIndex();
+
+    gradient() = snGradp;
+    fixedGradientFvPatchScalarField::updateCoeffs();
+}
+
 
 void Foam::fixedFluxPressureFvPatchScalarField::updateCoeffs()
 {
@@ -131,76 +131,19 @@ void Foam::fixedFluxPressureFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const surfaceScalarField& phiHbyA =
-        db().lookupObject<surfaceScalarField>(phiHbyAName_);
-
-    const surfaceScalarField& phi =
-        db().lookupObject<surfaceScalarField>(phiName_);
-
-    fvsPatchField<scalar> phiHbyAp =
-        patch().patchField<surfaceScalarField, scalar>(phiHbyA);
-
-    fvsPatchField<scalar> phip =
-        patch().patchField<surfaceScalarField, scalar>(phi);
-
-    /*
-    if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+    if (curTimeIndex_ != this->db().time().timeIndex())
     {
-        const fvPatchField<scalar>& rhop =
-            patch().lookupPatchField<volScalarField, scalar>(rhoName_);
-
-        phip /= rhop;
+        FatalErrorIn("fixedFluxPressureFvPatchScalarField::updateCoeffs()")
+            << "updateCoeffs(const scalarField& snGradp) MUST be called before"
+               " updateCoeffs() or evaluate() to set the boundary gradient."
+            << exit(FatalError);
     }
-
-    if (phiHbyA.dimensions() == dimDensity*dimVelocity*dimArea)
-    {
-        const fvPatchField<scalar>& rhop =
-            patch().lookupPatchField<volScalarField, scalar>(rhoName_);
-
-        phiHbyAp /= rhop;
-    }
-    */
-
-    const scalarField *DppPtr = NULL;
-
-    if (db().foundObject<volScalarField>(DpName_))
-    {
-        DppPtr =
-            &patch().lookupPatchField<volScalarField, scalar>(DpName_);
-    }
-    else if (db().foundObject<surfaceScalarField>(DpName_))
-    {
-        const surfaceScalarField& Dp =
-            db().lookupObject<surfaceScalarField>(DpName_);
-
-        DppPtr =
-            &patch().patchField<surfaceScalarField, scalar>(Dp);
-    }
-
-    if (adjoint_)
-    {
-        gradient() = (phip - phiHbyAp)/patch().magSf()/(*DppPtr);
-    }
-    else
-    {
-        gradient() = (phiHbyAp - phip)/patch().magSf()/(*DppPtr);
-    }
-
-    fixedGradientFvPatchScalarField::updateCoeffs();
 }
 
 
 void Foam::fixedFluxPressureFvPatchScalarField::write(Ostream& os) const
 {
     fixedGradientFvPatchScalarField::write(os);
-    writeEntryIfDifferent<word>(os, "phiHbyA", "phiHbyA", phiHbyAName_);
-    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
-    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
-    writeEntryIfDifferent<word>(os, "Dp", "Dp", DpName_);
-    if (adjoint_)
-    {
-        os.writeKeyword("adjoint") << adjoint_ << token::END_STATEMENT << nl;
-    }
     writeEntry("value", os);
 }
 
@@ -215,5 +158,6 @@ namespace Foam
         fixedFluxPressureFvPatchScalarField
     );
 }
+
 
 // ************************************************************************* //

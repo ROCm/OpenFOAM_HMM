@@ -23,8 +23,6 @@ boundaryField
     stationaryWalls
     {
         type            fixedFluxPressure;
-        phi             phiAbs;
-        value           uniform 0;
     }
     atmosphere
     {
@@ -40,8 +38,6 @@ boundaryField
     floatingObject
     {
         type            fixedFluxPressure;
-        phi             phiAbs;
-        value           uniform 0;
     }
 }
 

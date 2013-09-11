@@ -35,7 +35,7 @@ if (pimple.transonic())
 
     HbyA -= (rAU - rAtU)*fvc::grad(p);
 
-    volScalarField Dp("Dp", rho*rAtU);
+    volScalarField rhorAtU("rhorAtU", rho*rAtU);
 
     while (pimple.correctNonOrthogonal())
     {
@@ -44,7 +44,7 @@ if (pimple.transonic())
             fvm::ddt(psi, p)
           + fvm::div(phid, p)
           + fvc::div(phic)
-          - fvm::laplacian(Dp, p)
+          - fvm::laplacian(rhorAtU, p)
          ==
             fvOptions(psi, p, rho.name())
         );
@@ -75,7 +75,7 @@ else
     phiHbyA += fvc::interpolate(rho*(rAtU - rAU))*fvc::snGrad(p)*mesh.magSf();
     HbyA -= (rAU - rAtU)*fvc::grad(p);
 
-    volScalarField Dp("Dp", rho*rAtU);
+    volScalarField rhorAtU("rhorAtU", rho*rAtU);
 
     while (pimple.correctNonOrthogonal())
     {
@@ -83,7 +83,7 @@ else
         (
             fvm::ddt(psi, p)
           + fvc::div(phiHbyA)
-          - fvm::laplacian(Dp, p)
+          - fvm::laplacian(rhorAtU, p)
          ==
             fvOptions(psi, p, rho.name())
         );

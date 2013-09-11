@@ -27,6 +27,7 @@ License
 #include "fvMesh.H"
 #include "fvMatrices.H"
 #include "volFields.H"
+#include "fvsPatchFields.H"
 #include "ListOps.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -475,6 +476,15 @@ void Foam::fv::option::setValue(fvMatrix<tensor>& eqn, const label fieldI)
 
 
 void Foam::fv::option::makeRelative(surfaceScalarField& phi) const
+{
+    // do nothing
+}
+
+
+void Foam::fv::option::makeRelative
+(
+    FieldField<fvsPatchField, scalar>& phi
+) const
 {
     // do nothing
 }

@@ -1,7 +1,7 @@
 rho = thermo.rho();
 
 volScalarField rAU(1.0/UEqn.A());
-surfaceScalarField Dp("Dp", fvc::interpolate(rho*rAU));
+surfaceScalarField rhorAUf("rhorAUf", fvc::interpolate(rho*rAU));
 
 volVectorField HbyA("HbyA", U);
 HbyA = rAU*UEqn.H();
@@ -13,7 +13,7 @@ surfaceScalarField phid
    *(
         (
             (fvc::interpolate(rho*HbyA) & mesh.Sf())
-          //***HGW + Dp*fvc::ddtCorr(rho, U, phi)
+          //***HGW + rhorAUf*fvc::ddtCorr(rho, U, phi)
         )/fvc::interpolate(rho)
       - fvc::meshPhi(rho, U)
     )
@@ -25,7 +25,7 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     (
         fvm::ddt(psi, p)
       + fvm::div(phid, p)
-      - fvm::laplacian(Dp, p)
+      - fvm::laplacian(rhorAUf, p)
     );
 
     pEqn.solve();

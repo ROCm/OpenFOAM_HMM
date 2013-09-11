@@ -46,6 +46,7 @@ Description
 #include "twoPhaseMixtureThermo.H"
 #include "turbulenceModel.H"
 #include "pimpleControl.H"
+#include "fixedFluxPressureFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,7 +62,7 @@ int main(int argc, char *argv[])
     #include "readControls.H"
     #include "initContinuityErrs.H"
     #include "createFields.H"
-    #include "createPcorrTypes.H"
+    #include "createPrghCorrTypes.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
 

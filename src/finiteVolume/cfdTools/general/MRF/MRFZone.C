@@ -461,6 +461,28 @@ void Foam::MRFZone::makeRelative(volVectorField& U) const
 }
 
 
+void Foam::MRFZone::makeRelative(surfaceScalarField& phi) const
+{
+    makeRelativeRhoFlux(geometricOneField(), phi);
+}
+
+
+void Foam::MRFZone::makeRelative(FieldField<fvsPatchField, scalar>& phi) const
+{
+    makeRelativeRhoFlux(oneFieldField(), phi);
+}
+
+
+void Foam::MRFZone::makeRelative
+(
+    const surfaceScalarField& rho,
+    surfaceScalarField& phi
+) const
+{
+    makeRelativeRhoFlux(rho, phi);
+}
+
+
 void Foam::MRFZone::makeAbsolute(volVectorField& U) const
 {
     const volVectorField& C = mesh_.C();
@@ -496,28 +518,6 @@ void Foam::MRFZone::makeAbsolute(volVectorField& U) const
                 (Omega ^ (C.boundaryField()[patchi][patchFacei] - origin_));
         }
     }
-}
-
-
-void Foam::MRFZone::makeRelative(surfaceScalarField& phi) const
-{
-    makeRelativeRhoFlux(geometricOneField(), phi);
-}
-
-
-void Foam::MRFZone::makeRelative(FieldField<fvsPatchField, scalar>& phi) const
-{
-    return makeRelativeRhoFlux(oneFieldField(), phi);
-}
-
-
-void Foam::MRFZone::makeRelative
-(
-    const surfaceScalarField& rho,
-    surfaceScalarField& phi
-) const
-{
-    makeRelativeRhoFlux(rho, phi);
 }
 
 

@@ -26,6 +26,7 @@ License
 #include "fvOptionList.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvMesh.H"
+#include "surfaceFields.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -126,6 +127,23 @@ void Foam::fv::optionList::makeRelative
     {
         this->operator[](i).makeRelative(rho, phi);
     }
+}
+
+
+Foam::tmp<Foam::FieldField<Foam::fvsPatchField, Foam::scalar> >
+Foam::fv::optionList::relative
+(
+    const tmp<FieldField<fvsPatchField, scalar> >& phi
+) const
+{
+    tmp<FieldField<fvsPatchField, scalar> > rphi(phi.ptr());
+
+    forAll(*this, i)
+    {
+        operator[](i).makeRelative(rphi());
+    }
+
+    return rphi;
 }
 
 

@@ -128,6 +128,15 @@ void Foam::fv::MRFSource::makeRelative(surfaceScalarField& phi) const
 
 void Foam::fv::MRFSource::makeRelative
 (
+    FieldField<fvsPatchField, scalar>& phi
+) const
+{
+    mrfPtr_->makeRelative(phi);
+}
+
+
+void Foam::fv::MRFSource::makeRelative
+(
     const surfaceScalarField& rho,
     surfaceScalarField& phi
 ) const
