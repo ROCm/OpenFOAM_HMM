@@ -50,9 +50,12 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedGradientFvPatchScalarField(ptf, p, iF, mapper),
+    fixedGradientFvPatchScalarField(p, iF),
     curTimeIndex_(-1)
-{}
+{
+    gradient() = 0.0;
+    map(gradient(), mapper);
+}
 
 
 Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField

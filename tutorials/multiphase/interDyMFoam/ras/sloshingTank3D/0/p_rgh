@@ -23,8 +23,6 @@ boundaryField
     walls
     {
         type            fixedFluxPressure;
-        phi             phiAbs;
-        value           uniform 0;
     }
 }
 

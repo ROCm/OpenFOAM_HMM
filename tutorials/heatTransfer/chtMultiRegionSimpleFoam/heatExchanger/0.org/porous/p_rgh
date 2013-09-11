@@ -23,9 +23,7 @@ boundaryField
 {
     inlet
     {
-        type            buoyantPressure;
-        gradient        uniform 0;
-        value           uniform 100000;
+        type            fixedFluxPressure;
     }
     outlet
     {
@@ -34,9 +32,7 @@ boundaryField
     }
     fixedWalls
     {
-        type            buoyantPressure;
-        gradient        uniform 0;
-        value           uniform 100000;
+        type            fixedFluxPressure;
     }
 }
 
