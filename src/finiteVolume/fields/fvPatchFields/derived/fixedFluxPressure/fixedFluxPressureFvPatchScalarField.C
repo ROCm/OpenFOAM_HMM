@@ -62,7 +62,10 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
     // Evaluate the value field from the gradient if the internal field is valid
     if (&iF && iF.size())
     {
-        evaluate();
+        scalarField::operator=
+        (
+            patchInternalField() + gradient()/patch().deltaCoeffs()
+        );
     }
 }
 
