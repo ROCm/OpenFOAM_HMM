@@ -15,12 +15,12 @@ if (pimple.transonic())
        *(
             (
                 (fvc::interpolate(rho*HbyA) & mesh.Sf())
-              //***HGW + rhorAUf*fvc::ddtCorr(rho, U, phi)
+              + rhorAUf*fvc::ddtCorr(rho, U, rhoUf)
             )/fvc::interpolate(rho)
-          - fvc::meshPhi(rho, U)
         )
     );
 
+    fvc::makeRelative(phid, psi, U);
     fvOptions.makeRelative(fvc::interpolate(psi), phid);
 
     while (pimple.correctNonOrthogonal())
@@ -51,11 +51,11 @@ else
         "phiHbyA",
         (
             (fvc::interpolate(rho*HbyA) & mesh.Sf())
-          //***HGW + rhorAUf*fvc::ddtCorr(rho, U, phi)
+          + rhorAUf*fvc::ddtCorr(rho, U, rhoUf)
         )
-      - fvc::interpolate(rho)*fvc::meshPhi(rho, U)
     );
 
+    fvc::makeRelative(phiHbyA, rho, U);
     fvOptions.makeRelative(fvc::interpolate(rho), phiHbyA);
 
     while (pimple.correctNonOrthogonal())
@@ -87,6 +87,15 @@ U = HbyA - rAU*fvc::grad(p);
 U.correctBoundaryConditions();
 fvOptions.correct(U);
 K = 0.5*magSqr(U);
+
+{
+    rhoUf = fvc::interpolate(rho*U);
+    surfaceVectorField n(mesh.Sf()/mesh.magSf());
+    rhoUf +=
+        mesh.Sf()
+       *(fvc::absolute(phi, rho, U) - (mesh.Sf() & rhoUf))
+       /sqr(mesh.magSf());
+}
 
 if (thermo.dpdt())
 {
