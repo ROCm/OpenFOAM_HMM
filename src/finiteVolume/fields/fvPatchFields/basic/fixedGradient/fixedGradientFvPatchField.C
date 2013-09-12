@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,7 +56,25 @@ fixedGradientFvPatchField<Type>::fixedGradientFvPatchField
 :
     fvPatchField<Type>(ptf, p, iF, mapper),
     gradient_(ptf.gradient_, mapper)
-{}
+{
+    if (mapper.hasUnmapped())
+    {
+        WarningIn
+        (
+            "fixedGradientFvPatchField<Type>::fixedGradientFvPatchField\n"
+            "(\n"
+            "    const fixedGradientFvPatchField<Type>&,\n"
+            "    const fvPatch&,\n"
+            "    const DimensionedField<Type, volMesh>&,\n"
+            "    const fvPatchFieldMapper&\n"
+            ")\n"
+        )   << "On field " << iF.name() << " patch " << p.name()
+            << " patchField " << this->type()
+            << " : mapper does not map all values." << nl
+            << "    To avoid this warning fully specify the mapping in derived"
+            << " patch fields." << endl;
+    }
+}
 
 
 template<class Type>

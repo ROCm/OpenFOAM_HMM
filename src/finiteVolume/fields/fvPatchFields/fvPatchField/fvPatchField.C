@@ -52,6 +52,23 @@ Foam::fvPatchField<Type>::fvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
+    const word& patchType
+)
+:
+    Field<Type>(p.size()),
+    patch_(p),
+    internalField_(iF),
+    updated_(false),
+    manipulatedMatrix_(false),
+    patchType_(patchType)
+{}
+
+
+template<class Type>
+Foam::fvPatchField<Type>::fvPatchField
+(
+    const fvPatch& p,
+    const DimensionedField<Type, volMesh>& iF,
     const Field<Type>& f
 )
 :
@@ -73,7 +90,7 @@ Foam::fvPatchField<Type>::fvPatchField
     const fvPatchFieldMapper& mapper
 )
 :
-    Field<Type>(ptf, mapper),
+    Field<Type>(p.size()),
     patch_(p),
     internalField_(iF),
     updated_(false),
@@ -83,44 +100,9 @@ Foam::fvPatchField<Type>::fvPatchField
     // For unmapped faces set to internal field value (zero-gradient)
     if (&iF && iF.size())
     {
-        Field<Type>& f = *this;
-
-        if
-        (
-            mapper.direct()
-         && &mapper.directAddressing()
-         && mapper.directAddressing().size()
-        )
-        {
-            Field<Type> pif(this->patchInternalField());
-
-            const labelList& mapAddressing = mapper.directAddressing();
-
-            forAll(mapAddressing, i)
-            {
-                if (mapAddressing[i] < 0)
-                {
-                    f[i] = pif[i];
-                }
-            }
-        }
-        else if (!mapper.direct() && mapper.addressing().size())
-        {
-            Field<Type> pif(this->patchInternalField());
-
-            const labelListList& mapAddressing = mapper.addressing();
-
-            forAll(mapAddressing, i)
-            {
-                const labelList& localAddrs = mapAddressing[i];
-
-                if (!localAddrs.size())
-                {
-                    f[i] = pif[i];
-                }
-            }
-        }
+        fvPatchField<Type>::operator=(this->patchInternalField());
     }
+    this->map(ptf, mapper);
 }
 
 

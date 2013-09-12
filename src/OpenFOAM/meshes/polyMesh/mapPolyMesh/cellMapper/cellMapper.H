@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -130,6 +130,11 @@ public:
             return direct_;
         }
 
+        virtual bool hasUnmapped() const
+        {
+            return insertedObjects();
+        }
+
         //- Return direct addressing
         virtual const labelUList& directAddressing() const;
 
@@ -140,13 +145,13 @@ public:
         virtual const scalarListList& weights() const;
 
         //- Are there any inserted cells
-        bool insertedObjects() const
+        virtual bool insertedObjects() const
         {
             return insertedCells_;
         }
 
         //- Return list of inserted cells
-        const labelList& insertedObjectLabels() const;
+        const virtual labelList& insertedObjectLabels() const;
 };
 
 

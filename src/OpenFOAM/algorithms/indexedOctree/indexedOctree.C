@@ -27,6 +27,7 @@ License
 #include "linePointRef.H"
 #include "OFstream.H"
 #include "ListOps.H"
+#include "memInfo.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -2383,12 +2384,14 @@ Foam::indexedOctree<Type>::indexedOctree
     contents_(0),
     nodeTypes_(0)
 {
+    int oldMemSize = 0;
     if (debug)
     {
         Pout<< "indexedOctree<Type>::indexedOctree:" << nl
             << "    shapes:" << shapes.size() << nl
             << "    bb:" << bb << nl
             << endl;
+        oldMemSize = memInfo().size();
     }
 
     if (shapes.size() == 0)
@@ -2503,6 +2506,9 @@ Foam::indexedOctree<Type>::indexedOctree
             nEntries += contents_[i].size();
         }
 
+        label memSize = memInfo().size();
+
+
         Pout<< "indexedOctree<Type>::indexedOctree"
             << " : finished construction of tree of:" << shapes.typeName
             << nl
@@ -2515,6 +2521,7 @@ Foam::indexedOctree<Type>::indexedOctree
             << scalar(nEntries)/contents.size() << nl
             << "        per shape (duplicity):"
             << scalar(nEntries)/shapes.size() << nl
+            << "    total memory:" << memSize-oldMemSize
             << endl;
     }
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,7 +55,25 @@ Foam::directionMixedFvPatchField<Type>::directionMixedFvPatchField
     refValue_(ptf.refValue_, mapper),
     refGrad_(ptf.refGrad_, mapper),
     valueFraction_(ptf.valueFraction_, mapper)
-{}
+{
+    if (mapper.hasUnmapped())
+    {
+        WarningIn
+        (
+            "directionMixedFvPatchField<Type>::directionMixedFvPatchField\n"
+            "(\n"
+            "    const directionMixedFvPatchField<Type>&,\n"
+            "    const fvPatch&,\n"
+            "    const DimensionedField<Type, volMesh>&,\n"
+            "    const fvPatchFieldMapper&\n"
+            ")\n"
+        )   << "On field " << iF.name() << " patch " << p.name()
+            << " patchField " << this->type()
+            << " : mapper does not map all values." << nl
+            << "    To avoid this warning fully specify the mapping in derived"
+            << " patch fields." << endl;
+    }
+}
 
 
 template<class Type>

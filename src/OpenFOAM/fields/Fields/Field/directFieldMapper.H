@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,15 +22,15 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::FieldMapper
+    Foam::directFieldMapper
 
 Description
-    Abstract base class to hold the Field mapping addressing and weights.
+    FieldMapper with direct mapping.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef FieldMapper_H
-#define FieldMapper_H
+#ifndef directFieldMapper_H
+#define directFieldMapper_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -38,73 +38,60 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class FieldMapper Declaration
+                           Class directFieldMapper Declaration
 \*---------------------------------------------------------------------------*/
 
-class FieldMapper
+class directFieldMapper
+:
+    public FieldMapper
 {
+    const labelUList& directAddressing_;
+
+    bool hasUnmapped_;
 
 public:
 
     // Constructors
 
-        //- Null constructor
-        FieldMapper()
-        {}
-
+        //- Construct given addressing
+        patchFieldSubset(const labelUList& directAddressing)
+        :
+            directAddressing_(directAddressing),
+            hasUnmapped_(false)
+        {
+            if (directAddressing_.size() && min(directAddressing_) < 0)
+            {
+                hasUnmapped_ = true;
+            }
+        }
 
     //- Destructor
-    virtual ~FieldMapper()
+    virtual ~directFieldMapper()
     {}
 
 
     // Member Functions
 
-        virtual label size() const = 0;
-
-        virtual bool direct() const = 0;
-
-        //- Are there unmapped values? I.e. do all size() elements get
-        //  get value
-        virtual bool hasUnmapped() const = 0;
-
-        virtual const labelUList& directAddressing() const
+        label size() const
         {
-            FatalErrorIn("FieldMapper::directAddressing() const")
-                << "attempt to access null direct addressing"
-                << abort(FatalError);
-
-            return labelUList::null();
+            return directAddressing_.size();
         }
 
-        virtual const labelListList& addressing() const
+        bool direct() const
         {
-            FatalErrorIn("FieldMapper::addressing() const")
-                << "attempt to access null interpolation addressing"
-                << abort(FatalError);
-
-            return labelListList::null();
+            return true;
         }
 
-        virtual const scalarListList& weights() const
+        bool hasUnmapped() const
         {
-            FatalErrorIn("FieldMapper::weights() const")
-                << "attempt to access null interpolation weights"
-                << abort(FatalError);
-
-            return scalarListList::null();
+            return hasUnmapped_;
         }
 
-
-    // Member Operators
-
-        template<class Type>
-        tmp<Field<Type> > operator()(const Field<Type>& f) const
+        const labelUList& directAddressing() const
         {
-            return tmp<Field<Type> >(new Field<Type>(f, *this));
+            return directAddressing_;
         }
 };
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

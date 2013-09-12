@@ -26,6 +26,7 @@ License
 #include "thermoSingleLayer.H"
 #include "heatTransferModel.H"
 #include "filmRadiationModel.H"
+#include "phaseChangeModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
