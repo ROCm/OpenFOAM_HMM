@@ -174,7 +174,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::fvc::absolute
 {
     if (tphi().mesh().moving())
     {
-        return tphi + fvc::meshPhi(rho, U);
+        return tphi + fvc::interpolate(rho)*fvc::meshPhi(rho, U);
     }
     else
     {
