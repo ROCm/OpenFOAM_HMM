@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -160,11 +160,45 @@ public:
             const FieldMapper& map
         );
 
+        //- Construct by mapping from the given field
+        Field
+        (
+            const UList<Type>& mapF,
+            const FieldMapper& map,
+            const Type& defaultValue
+        );
+
+        //- Construct by mapping from the given field
+        Field
+        (
+            const UList<Type>& mapF,
+            const FieldMapper& map,
+            const UList<Type>& defaultValues
+        );
+
         //- Construct by mapping from the given tmp field
         Field
         (
             const tmp<Field<Type> >& tmapF,
             const FieldMapper& map
+        );
+
+        //- Construct by mapping from the given tmp field. Supplied uniform
+        //  value for unmapped items
+        Field
+        (
+            const tmp<Field<Type> >& tmapF,
+            const FieldMapper& map,
+            const Type& defaultValue
+        );
+
+        //- Construct by mapping from the given tmp field. Supplied values
+        //  for unmapped items
+        Field
+        (
+            const tmp<Field<Type> >& tmapF,
+            const FieldMapper& map,
+            const UList<Type>& defaultValues
         );
 
         //- Construct as copy
