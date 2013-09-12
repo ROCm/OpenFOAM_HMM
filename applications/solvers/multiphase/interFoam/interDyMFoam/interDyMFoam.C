@@ -100,6 +100,8 @@ int main(int argc, char *argv[])
 
             // Make the flux relative to the mesh motion
             fvc::makeRelative(phi, U);
+
+            interface.correct();
         }
 
         if (mesh.changing() && checkMeshCourantNo)
