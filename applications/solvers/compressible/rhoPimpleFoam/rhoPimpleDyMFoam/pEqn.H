@@ -22,7 +22,7 @@ if (pimple.transonic())
         fvc::interpolate(psi)
        *(
             (fvc::interpolate(rho*HbyA) & mesh.Sf())
-          + rhorAUf*fvc::ddtCorr(rho, U, phiAbs)
+          + rhorAUf*fvc::ddtCorr(rho, U, rhoUf)
         )/fvc::interpolate(rho)
     );
 
@@ -55,7 +55,7 @@ else
     (
         "phiHbyA",
         (fvc::interpolate(rho*HbyA) & mesh.Sf())
-      + rhorAUf*fvc::ddtCorr(rho, U, phiAbs)
+      + rhorAUf*fvc::ddtCorr(rho, U, rhoUf)
     );
 
     fvOptions.makeRelative(fvc::interpolate(rho), phiHbyA);

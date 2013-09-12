@@ -1,30 +1,30 @@
+if (mesh.changing())
 {
-    if (mesh.changing())
+    forAll(U.boundaryField(), patchi)
     {
-        forAll(U.boundaryField(), patchi)
+        if (U.boundaryField()[patchi].fixesValue())
         {
-            if (U.boundaryField()[patchi].fixesValue())
-            {
-                U.boundaryField()[patchi].initEvaluate();
-            }
-        }
-
-        forAll(U.boundaryField(), patchi)
-        {
-            if (U.boundaryField()[patchi].fixesValue())
-            {
-                U.boundaryField()[patchi].evaluate();
-
-                phi.boundaryField()[patchi] =
-                    rho.boundaryField()[patchi]
-                   *(
-                       U.boundaryField()[patchi]
-                     & mesh.Sf().boundaryField()[patchi]
-                    );
-            }
+            U.boundaryField()[patchi].initEvaluate();
         }
     }
 
+    forAll(U.boundaryField(), patchi)
+    {
+        if (U.boundaryField()[patchi].fixesValue())
+        {
+            U.boundaryField()[patchi].evaluate();
+
+            phi.boundaryField()[patchi] =
+                rho.boundaryField()[patchi]
+               *(
+                   U.boundaryField()[patchi]
+                 & mesh.Sf().boundaryField()[patchi]
+               );
+        }
+    }
+}
+
+{
     volScalarField pcorr
     (
         IOobject
@@ -40,13 +40,13 @@
         pcorrTypes
     );
 
-    dimensionedScalar Dp("Dp", dimTime, 1.0);
+    dimensionedScalar rAUf("rAUf", dimTime, 1.0);
 
     while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix pcorrEqn
         (
-            fvm::laplacian(Dp, pcorr) == fvc::div(phi) - divrhoU
+            fvm::laplacian(rAUf, pcorr) == fvc::div(phi) - divrhoU
         );
 
         pcorrEqn.solve();

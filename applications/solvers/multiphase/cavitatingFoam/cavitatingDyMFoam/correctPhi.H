@@ -1,18 +1,27 @@
+if (mesh.changing())
 {
-    wordList pcorrTypes
-    (
-        p.boundaryField().size(),
-        zeroGradientFvPatchScalarField::typeName
-    );
-
-    forAll (p.boundaryField(), i)
+    forAll(U.boundaryField(), patchI)
     {
-        if (p.boundaryField()[i].fixesValue())
+        if (U.boundaryField()[patchI].fixesValue())
         {
-            pcorrTypes[i] = fixedValueFvPatchScalarField::typeName;
+            U.boundaryField()[patchI].initEvaluate();
         }
     }
 
+    forAll(U.boundaryField(), patchI)
+    {
+        if (U.boundaryField()[patchI].fixesValue())
+        {
+            U.boundaryField()[patchI].evaluate();
+
+            phiv.boundaryField()[patchI] =
+                U.boundaryField()[patchI]
+              & mesh.Sf().boundaryField()[patchI];
+        }
+    }
+}
+
+{
     volScalarField pcorr
     (
         IOobject
@@ -29,7 +38,7 @@
     );
 
     surfaceScalarField rhof(fvc::interpolate(rho, "div(phiv,rho)"));
-    dimensionedScalar rAUf("(1|A(U))", dimTime, 1.0);
+    dimensionedScalar rAUf("rAUf", dimTime, 1.0);
 
     while (pimple.correctNonOrthogonal())
     {
