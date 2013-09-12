@@ -176,8 +176,7 @@ ddtCorr
     (
         U.mesh(),
         U.mesh().ddtScheme("ddt(" + U.name() + ')')
-    )().fvcDdtPhiCorr(rho, U, U.mesh().Sf() & Uf);
-    //***HGW fvcDdtUfCorr(rho, U, Uf);
+    )().fvcDdtUfCorr(rho, U, Uf);
 }
 
 
