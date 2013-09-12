@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -88,6 +88,12 @@ public:
                     return true;
                 }
 
+                //- Are there unmapped values
+                bool hasUnmapped() const
+                {
+                    return false;
+                }
+
                 const labelUList& directAddressing() const
                 {
                     return directAddressing_;
@@ -128,6 +134,12 @@ public:
                     return true;
                 }
 
+                //- Are there unmapped values
+                bool hasUnmapped() const
+                {
+                    return false;
+                }
+
                 const labelUList& directAddressing() const
                 {
                     return directAddressing_;
@@ -161,6 +173,12 @@ public:
                 }
 
                 bool direct() const
+                {
+                    return false;
+                }
+
+                //- Are there unmapped values
+                bool hasUnmapped() const
                 {
                     return false;
                 }

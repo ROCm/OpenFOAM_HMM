@@ -56,12 +56,9 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "createFvOptions.H"
     #include "createPcorrTypes.H"
+    #include "createRhoUf.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
-
-    // Create old-time absolute flux for ddtCorr
-    surfaceScalarField phiAbs("phiAbs", phi);
-
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -72,12 +69,6 @@ int main(int argc, char *argv[])
         #include "readControls.H"
         #include "compressibleCourantNo.H"
 
-        // Make the fluxes absolute before mesh-motion
-        fvc::makeAbsolute(phi, rho, U);
-
-        // Update absolute flux for ddtCorr
-        phiAbs = phi;
-
         #include "setDeltaT.H"
 
         runTime++;
@@ -85,20 +76,26 @@ int main(int argc, char *argv[])
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
         {
+            // Store momentum to set rhoUf for introduced faces.
+            volVectorField rhoU("rhoU", rho*U);
+
             // Store divrhoU from the previous time-step/mesh for the correctPhi
-            volScalarField divrhoU(fvc::div(phi));
+            volScalarField divrhoU(fvc::div(fvc::absolute(phi, rho, U)));
 
             // Do any mesh changes
             mesh.update();
 
             if (mesh.changing() && correctPhi)
             {
+                // Calculate absolute flux from the mapped surface velocity
+                phi = mesh.Sf() & rhoUf;
+
                 #include "correctPhi.H"
+
+                // Make the fluxes relative to the mesh-motion
+                fvc::makeRelative(phi, rho, U);
             }
         }
-
-        // Make the fluxes relative to the mesh-motion
-        fvc::makeRelative(phi, rho, U);
 
         if (mesh.changing() && checkMeshCourantNo)
         {

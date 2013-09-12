@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,8 @@ Foam::pointFieldDecomposer::patchFieldDecomposer::patchFieldDecomposer
         completeMeshPatch,
         procMeshPatch
     ),
-    directAddressing_(procMeshPatch.size(), -1)
+    directAddressing_(procMeshPatch.size(), -1),
+    hasUnmapped_(false)
 {
     // Create the inverse-addressing of the patch point labels.
     labelList pointMap(completeMeshPatch.boundaryMesh().mesh().size(), -1);
@@ -64,6 +65,8 @@ Foam::pointFieldDecomposer::patchFieldDecomposer::patchFieldDecomposer
     // Check that all the patch point addresses are set
     if (directAddressing_.size() && min(directAddressing_) < 0)
     {
+        hasUnmapped_ = true;
+
         FatalErrorIn
         (
             "pointFieldDecomposer::patchFieldDecomposer()"

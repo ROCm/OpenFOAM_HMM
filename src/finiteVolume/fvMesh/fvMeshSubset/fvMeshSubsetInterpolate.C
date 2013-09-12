@@ -27,6 +27,8 @@ License
 #include "emptyFvsPatchField.H"
 #include "emptyPointPatchField.H"
 #include "emptyFvPatchFields.H"
+#include "directFvPatchFieldMapper.H"
+#include "directPointPatchFieldMapper.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,8 +72,9 @@ tmp<GeometricField<Type, fvPatchField, volMesh> > fvMeshSubset::interpolate
             patchFields.set
             (
                 patchI,
-                new calculatedFvPatchField<Type>
+                fvPatchField<Type>::New
                 (
+                    calculatedFvPatchField<Type>::typeName,
                     sMesh.boundary()[patchI],
                     DimensionedField<Type, volMesh>::null()
                 )
@@ -142,7 +145,7 @@ tmp<GeometricField<Type, fvPatchField, volMesh> > fvMeshSubset::interpolate
                     vf.boundaryField()[patchMap[patchI]],
                     subPatch,
                     resF.dimensionedInternalField(),
-                    patchFieldSubset(directAddressing)
+                    directFvPatchFieldMapper(directAddressing)
                 )
             );
         }
@@ -203,8 +206,9 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > fvMeshSubset::interpolate
             patchFields.set
             (
                 patchI,
-                new calculatedFvsPatchField<Type>
+                fvsPatchField<Type>::New
                 (
+                    calculatedFvsPatchField<Type>::typeName,
                     sMesh.boundary()[patchI],
                     DimensionedField<Type, surfaceMesh>::null()
                 )
@@ -285,7 +289,7 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > fvMeshSubset::interpolate
                     vf.boundaryField()[patchMap[patchI]],
                     subPatch,
                     resF.dimensionedInternalField(),
-                    patchFieldSubset(directAddressing)
+                    directFvPatchFieldMapper(directAddressing)
                 )
             );
 
@@ -348,10 +352,7 @@ fvMeshSubset::interpolate
     const labelList& pointMap
 )
 {
-    // Create and map the internal-field values
-    Field<Type> internalField(vf.internalField(), pointMap);
-
-    // Create and map the patch field values
+    // 1. Create the complete field with dummy patch fields
     PtrList<pointPatchField<Type> > patchFields(patchMap.size());
 
     forAll(patchFields, patchI)
@@ -372,6 +373,54 @@ fvMeshSubset::interpolate
             );
         }
         else
+        {
+            patchFields.set
+            (
+                patchI,
+                pointPatchField<Type>::New
+                (
+                    calculatedPointPatchField<Type>::typeName,
+                    sMesh.boundary()[patchI],
+                    DimensionedField<Type, pointMesh>::null()
+                )
+            );
+        }
+    }
+
+    // Create the complete field from the pieces
+    tmp<GeometricField<Type, pointPatchField, pointMesh> > tresF
+    (
+        new GeometricField<Type, pointPatchField, pointMesh>
+        (
+            IOobject
+            (
+                "subset"+vf.name(),
+                sMesh.time().timeName(),
+                sMesh.thisDb(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            sMesh,
+            vf.dimensions(),
+            Field<Type>(vf.internalField(), pointMap),
+            patchFields
+        )
+    );
+    GeometricField<Type, pointPatchField, pointMesh>& resF = tresF();
+
+
+    // 2. Change the pointPatchFields to the correct type using a mapper
+    //  constructor (with reference to the now correct internal field)
+
+    typename GeometricField<Type, pointPatchField, pointMesh>::
+        GeometricBoundaryField& bf = resF.boundaryField();
+
+    forAll(bf, patchI)
+    {
+        // Set the first one by hand as it corresponds to the
+        // exposed internal faces.  Additional interpolation can be put here
+        // as necessary.
+        if (patchMap[patchI] != -1)
         {
             // Construct addressing
             const pointPatch& basePatch =
@@ -406,39 +455,19 @@ fvMeshSubset::interpolate
                 }
             }
 
-            patchFields.set
+            bf.set
             (
                 patchI,
                 pointPatchField<Type>::New
                 (
                     vf.boundaryField()[patchMap[patchI]],
                     subPatch,
-                    DimensionedField<Type, pointMesh>::null(),
-                    pointPatchFieldSubset(directAddressing)
+                    resF.dimensionedInternalField(),
+                    directPointPatchFieldMapper(directAddressing)
                 )
             );
         }
     }
-
-    // Create the complete field from the pieces
-    tmp<GeometricField<Type, pointPatchField, pointMesh> > tresF
-    (
-        new GeometricField<Type, pointPatchField, pointMesh>
-        (
-            IOobject
-            (
-                "subset"+vf.name(),
-                vf.time().timeName(),
-                sMesh.thisDb(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            sMesh,
-            vf.dimensions(),
-            internalField,
-            patchFields
-        )
-    );
 
     return tresF;
 }

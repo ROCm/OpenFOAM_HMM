@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,7 @@ License
 #include "interpolationCellPoint.H"
 #include "SubField.H"
 #include "mixedFvPatchField.H"
+#include "directFvPatchFieldMapper.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -408,7 +409,7 @@ Foam::meshToMesh::interpolate
             << exit(FatalError);
     }
 
-    // Create and map the patch field values
+    // 1. Create the complete field with dummy patch fields
     PtrList<fvPatchField<Type> > patchFields
     (
         boundaryAddressing_.size()
@@ -421,13 +422,9 @@ Foam::meshToMesh::interpolate
             patchI,
             fvPatchField<Type>::New
             (
-                fromVf.boundaryField()[patchI],
+                calculatedFvPatchField<Type>::typeName,
                 toMesh_.boundary()[patchI],
-                DimensionedField<Type, volMesh>::null(),
-                patchFieldInterpolator
-                (
-                    boundaryAddressing_[patchI]
-                )
+                DimensionedField<Type, volMesh>::null()
             )
         );
     }
@@ -452,6 +449,31 @@ Foam::meshToMesh::interpolate
             patchFields
         )
     );
+    GeometricField<Type, fvPatchField, volMesh>& toF = ttoF();
+
+    // 2. Change the fvPatchFields to the correct type using a mapper
+    //  constructor (with reference to the now correct internal field)
+
+    typename GeometricField<Type, fvPatchField, volMesh>::
+        GeometricBoundaryField& bf = toF.boundaryField();
+
+    forAll(boundaryAddressing_, patchI)
+    {
+        bf.set
+        (
+            patchI,
+            fvPatchField<Type>::New
+            (
+                fromVf.boundaryField()[patchI],
+                toMesh_.boundary()[patchI],
+                toF.dimensionedInternalField(),
+                directFvPatchFieldMapper
+                (
+                    boundaryAddressing_[patchI]
+                )
+            )
+        );
+    }
 
     return ttoF;
 }

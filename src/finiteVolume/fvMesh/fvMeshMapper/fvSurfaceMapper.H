@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -131,6 +131,12 @@ public:
         virtual bool direct() const
         {
             return faceMap_.direct();
+        }
+
+        //- Has unmapped elements
+        virtual bool hasUnmapped() const
+        {
+            return insertedObjects();
         }
 
         //- Return direct addressing

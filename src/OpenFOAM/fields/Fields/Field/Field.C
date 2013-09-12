@@ -127,11 +127,67 @@ Foam::Field<Type>::Field
 template<class Type>
 Foam::Field<Type>::Field
 (
+    const UList<Type>& mapF,
+    const FieldMapper& mapper,
+    const Type& defaultValue
+)
+:
+    List<Type>(mapper.size(), defaultValue)
+{
+    map(mapF, mapper);
+}
+
+
+template<class Type>
+Foam::Field<Type>::Field
+(
+    const UList<Type>& mapF,
+    const FieldMapper& mapper,
+    const UList<Type>& defaultValues
+)
+:
+    List<Type>(defaultValues)
+{
+    map(mapF, mapper);
+}
+
+
+template<class Type>
+Foam::Field<Type>::Field
+(
     const tmp<Field<Type> >& tmapF,
     const FieldMapper& mapper
 )
 :
     List<Type>(mapper.size())
+{
+    map(tmapF, mapper);
+}
+
+
+template<class Type>
+Foam::Field<Type>::Field
+(
+    const tmp<Field<Type> >& tmapF,
+    const FieldMapper& mapper,
+    const Type& defaultValue
+)
+:
+    List<Type>(mapper.size(), defaultValue)
+{
+    map(tmapF, mapper);
+}
+
+
+template<class Type>
+Foam::Field<Type>::Field
+(
+    const tmp<Field<Type> >& tmapF,
+    const FieldMapper& mapper,
+    const UList<Type>& defaultValues
+)
+:
+    List<Type>(defaultValues)
 {
     map(tmapF, mapper);
 }

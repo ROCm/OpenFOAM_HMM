@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,6 +71,8 @@ class fvPatchMapper
 
     // Demand-driven private data
 
+        mutable bool hasUnmapped_;
+
         //- Direct addressing (only one for of addressing is used)
         mutable labelList* directAddrPtr_;
 
@@ -136,6 +138,11 @@ public:
         virtual bool direct() const
         {
             return faceMap_.direct();
+        }
+
+        virtual bool hasUnmapped() const
+        {
+            return hasUnmapped_;
         }
 
         //- Return direct addressing
