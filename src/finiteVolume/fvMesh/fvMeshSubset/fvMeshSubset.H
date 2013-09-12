@@ -56,8 +56,6 @@ SourceFiles
 
 #include "fvMesh.H"
 #include "pointMesh.H"
-#include "fvPatchFieldMapper.H"
-#include "pointPatchFieldMapper.H"
 #include "GeometricField.H"
 #include "HashSet.H"
 #include "surfaceMesh.H"
@@ -73,90 +71,6 @@ namespace Foam
 
 class fvMeshSubset
 {
-
-public:
-
-    //- Patch-field subset interpolation class
-    class patchFieldSubset
-    :
-        public fvPatchFieldMapper
-    {
-        const labelList& directAddressing_;
-
-    public:
-
-        // Constructors
-
-            //- Construct given addressing
-            patchFieldSubset(const labelList& directAddressing)
-            :
-                directAddressing_(directAddressing)
-            {}
-
-        //- Destructor
-        virtual ~patchFieldSubset()
-        {}
-
-
-        // Member Functions
-
-            label size() const
-            {
-                return directAddressing_.size();
-            }
-
-            bool direct() const
-            {
-                return true;
-            }
-
-            const labelUList& directAddressing() const
-            {
-                return directAddressing_;
-            }
-    };
-
-
-    //- Patch-field subset interpolation class
-    class pointPatchFieldSubset
-    :
-        public pointPatchFieldMapper
-    {
-        const labelList& directAddressing_;
-
-    public:
-
-        // Constructors
-
-            //- Construct given addressing
-            pointPatchFieldSubset(const labelList& directAddressing)
-            :
-                directAddressing_(directAddressing)
-            {}
-
-        //- Destructor
-        virtual ~pointPatchFieldSubset()
-        {}
-
-
-        // Member Functions
-
-            label size() const
-            {
-                return directAddressing_.size();
-            }
-
-            bool direct() const
-            {
-                return true;
-            }
-
-            const labelUList& directAddressing() const
-            {
-                return directAddressing_;
-            }
-    };
-
 
 private:
 

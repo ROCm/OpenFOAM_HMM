@@ -53,8 +53,13 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
     fixedGradientFvPatchScalarField(p, iF),
     curTimeIndex_(-1)
 {
+    patchType() = ptf.patchType();
+
     // Map value. Set unmapped values and overwrite with mapped ptf
-    fvPatchField<scalar>::operator=(patchInternalField());
+    if (&iF && iF.size())
+    {
+        fvPatchField<scalar>::operator=(patchInternalField());
+    }
     map(ptf, mapper);
     // Map gradient. Set unmapped values and overwrite with mapped ptf
     gradient() = 0.0;

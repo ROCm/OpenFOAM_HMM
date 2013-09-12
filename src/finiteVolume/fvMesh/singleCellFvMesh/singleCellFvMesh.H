@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -87,39 +87,6 @@ class singleCellFvMesh
 
 public:
 
-        //- Patch field mapper class for non-agglomerated meshes
-        class directPatchFieldMapper
-        :
-            public fvPatchFieldMapper
-        {
-            // Private data
-
-                const labelUList& directAddressing_;
-
-        public:
-
-                //- Construct given addressing
-                directPatchFieldMapper(const labelUList& directAddressing)
-                :
-                    directAddressing_(directAddressing)
-                {}
-
-                virtual label size() const
-                {
-                    return directAddressing_.size();
-                }
-
-                virtual bool direct() const
-                {
-                    return true;
-                }
-
-                virtual const labelUList& directAddressing() const
-                {
-                    return directAddressing_;
-                }
-        };
-
         //- Patch field mapper class for agglomerated meshes
         class agglomPatchFieldMapper
         :
@@ -129,6 +96,7 @@ public:
 
                 const labelListList& addressing_;
                 const scalarListList& weights_;
+                bool hasUnmapped_;
 
         public:
 
@@ -140,8 +108,18 @@ public:
                 )
                 :
                     addressing_(addressing),
-                    weights_(weights)
-                {}
+                    weights_(weights),
+                    hasUnmapped_(false)
+                {
+                    forAll(addressing_, i)
+                    {
+                        if (addressing_[i].empty())
+                        {
+                            hasUnmapped_ = true;
+                            break;
+                        }
+                    }
+                }
 
                 virtual label size() const
                 {
@@ -151,6 +129,11 @@ public:
                 virtual bool direct() const
                 {
                     return false;
+                }
+
+                bool hasUnmapped() const
+                {
+                    return hasUnmapped_;
                 }
 
                 virtual const labelListList& addressing() const

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,6 +47,8 @@ void Foam::pointPatchMapper::calcAddressing() const
             << abort(FatalError);
     }
 
+    hasUnmapped_ = false;
+
     if (direct())
     {
         // Direct mapping.
@@ -57,7 +59,7 @@ void Foam::pointPatchMapper::calcAddressing() const
         {
             if (addr[i] < 0)
             {
-                addr[i] = 0;
+                hasUnmapped_ = true;
             }
         }
     }
@@ -87,9 +89,11 @@ void Foam::pointPatchMapper::calcAddressing() const
             }
             else
             {
-                // Inserted point. Map from point0 (arbitrary choice)
-                addr[i] = labelList(1, label(0));
-                w[i] = scalarList(1, 1.0);
+                // Inserted point.
+                ///// Map from point0 (arbitrary choice)
+                //addr[i] = labelList(1, label(0));
+                //w[i] = scalarList(1, 1.0);
+                hasUnmapped_ = true;
             }
         }
     }
@@ -101,6 +105,7 @@ void Foam::pointPatchMapper::clearOut()
     deleteDemandDrivenData(directAddrPtr_);
     deleteDemandDrivenData(interpolationAddrPtr_);
     deleteDemandDrivenData(weightsPtr_);
+    hasUnmapped_ = false;
 }
 
 
@@ -124,6 +129,7 @@ Foam::pointPatchMapper::pointPatchMapper
       ? mpm_.oldPatchNMeshPoints()[patch_.index()]
       : 0
     ),
+    hasUnmapped_(false),
     directAddrPtr_(NULL),
     interpolationAddrPtr_(NULL),
     weightsPtr_(NULL)

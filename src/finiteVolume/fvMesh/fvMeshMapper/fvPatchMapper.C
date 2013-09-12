@@ -55,6 +55,8 @@ void Foam::fvPatchMapper::calcAddressing() const
     const label oldPatchEnd =
         oldPatchStart + faceMap_.oldPatchSizes()[patch_.index()];
 
+    hasUnmapped_ = false;
+
     // Assemble the maps: slice to patch
     if (direct())
     {
@@ -84,6 +86,7 @@ void Foam::fvPatchMapper::calcAddressing() const
             {
                 //addr[faceI] = 0;
                 addr[faceI] = -1;
+                hasUnmapped_ = true;
             }
         }
 
@@ -175,6 +178,10 @@ void Foam::fvPatchMapper::calcAddressing() const
                 {
                     newWeights /= sum(newWeights);
                 }
+                else
+                {
+                    hasUnmapped_ = true;
+                }
 
                 // Reset addressing and weights
                 curAddr = newAddr;
@@ -206,6 +213,7 @@ void Foam::fvPatchMapper::clearOut()
     deleteDemandDrivenData(directAddrPtr_);
     deleteDemandDrivenData(interpolationAddrPtr_);
     deleteDemandDrivenData(weightsPtr_);
+    hasUnmapped_ = false;
 }
 
 
@@ -221,6 +229,7 @@ Foam::fvPatchMapper::fvPatchMapper
     patch_(patch),
     faceMap_(faceMap),
     sizeBeforeMapping_(faceMap.oldPatchSizes()[patch_.index()]),
+    hasUnmapped_(false),
     directAddrPtr_(NULL),
     interpolationAddrPtr_(NULL),
     weightsPtr_(NULL)
