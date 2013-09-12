@@ -46,7 +46,7 @@ Foam::writeRegisteredObject::writeRegisteredObject
 )
 :
     name_(name),
-    exclusiveWriting_(true),
+    exclusiveWriting_(false),
     obr_(obr),
     objectNames_()
 {
