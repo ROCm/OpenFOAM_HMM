@@ -322,7 +322,7 @@ void Foam::multiphaseMixture::solve()
                 mesh_
             ),
             mesh_,
-            dimensionedScalar("0", dimDensity, 0)
+            dimensionedScalar("0", rhoPhi_.dimensions(), 0)
         );
 
         dimensionedScalar totalDeltaT = runTime.deltaT();

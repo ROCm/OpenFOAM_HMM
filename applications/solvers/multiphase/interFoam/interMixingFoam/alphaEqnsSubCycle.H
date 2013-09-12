@@ -12,7 +12,7 @@ if (nAlphaSubCycles > 1)
             mesh
         ),
         mesh,
-        dimensionedScalar("0", dimDensity, 0)
+        dimensionedScalar("0", rhoPhi.dimensions(), 0)
     );
 
     for
