@@ -37,13 +37,13 @@ if (mesh.changing())
         pcorrTypes
     );
 
-    dimensionedScalar Dp("Dp", dimTime, 1.0);
+    dimensionedScalar rAUf("rAUf", dimTime, 1.0);
 
     while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix pcorrEqn
         (
-            fvm::laplacian(Dp, pcorr) == fvc::div(phi)
+            fvm::laplacian(rAUf, pcorr) == fvc::div(phi)
         );
 
         pcorrEqn.setReference(pRefCell, pRefValue);
@@ -54,6 +54,6 @@ if (mesh.changing())
             phi -= pcorrEqn.flux();
         }
     }
-}
 
-#include "continuityErrs.H"
+    #include "continuityErrs.H"
+}

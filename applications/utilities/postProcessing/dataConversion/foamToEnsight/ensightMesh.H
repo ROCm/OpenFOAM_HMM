@@ -192,6 +192,7 @@ private:
             const labelList& polys,
             const cellList& cellFaces,
             const faceList& faces,
+            const labelList& faceOwner,
             ensightStream& ensightGeometryFile
         ) const;
 

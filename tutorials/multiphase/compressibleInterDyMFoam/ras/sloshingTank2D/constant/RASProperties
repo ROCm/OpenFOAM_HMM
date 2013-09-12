@@ -9,29 +9,17 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volVectorField;
-    location    "0";
-    object      U;
+    class       dictionary;
+    location    "constant";
+    object      RASProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 1 -1 0 0 0 0];
+RASModel        laminar;
 
-internalField   uniform (0 0 0);
+turbulence      off;
 
-boundaryField
-{
-    atmosphere
-    {
-        type            pressureInletOutletVelocity;
-        value           uniform (0 0 0);
-    }
-    walls
-    {
-        type            uniformFixedValue;
-        uniformValue    (0 0 0);
-    }
-}
+printCoeffs     on;
 
 
 // ************************************************************************* //

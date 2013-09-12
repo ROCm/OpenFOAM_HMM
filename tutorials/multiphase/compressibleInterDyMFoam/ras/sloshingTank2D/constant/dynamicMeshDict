@@ -9,27 +9,30 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volVectorField;
-    location    "0";
-    object      U;
+    class       dictionary;
+    location    "constant";
+    object      dynamicMeshDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 1 -1 0 0 0 0];
+dynamicFvMesh   solidBodyMotionFvMesh;
 
-internalField   uniform (0 0 0);
-
-boundaryField
+solidBodyMotionFvMeshCoeffs
 {
-    atmosphere
+    solidBodyMotionFunction SDA;
+    SDACoeffs
     {
-        type            pressureInletOutletVelocity;
-        value           uniform (0 0 0);
-    }
-    walls
-    {
-        type            uniformFixedValue;
-        uniformValue    (0 0 0);
+        CofG            ( 0 0 0 );
+        lamda           50;
+        rollAmax        0.22654;
+        rollAmin        0.10472;
+        heaveA          3.79;
+        swayA           2.34;
+        Q               2;
+        Tp              13.93;
+        Tpn             11.93;
+        dTi             0.059;
+        dTp             -0.001;
     }
 }
 

@@ -18,7 +18,7 @@
     HbyA = rAU*UEqn.H();
 
     phiv = (fvc::interpolate(HbyA) & mesh.Sf())
-         + rhorAUf*fvc::ddtCorr(U, phivAbs);
+         + rhorAUf*fvc::ddtCorr(U, Uf);
     fvc::makeRelative(phiv, U);
 
     surfaceScalarField phiGradp(rhorAUf*mesh.magSf()*fvc::snGrad(p));
@@ -43,7 +43,6 @@
         if (pimple.finalNonOrthogonalIter())
         {
             phiv += (phiGradp + pEqn.flux())/rhof;
-            phivAbs = fvc::absolute(phiv, U);
         }
     }
 
@@ -82,4 +81,10 @@
     U.correctBoundaryConditions();
 
     Info<< "max(U) " << max(mag(U)).value() << endl;
+
+    {
+        Uf = fvc::interpolate(U);
+        surfaceVectorField n(mesh.Sf()/mesh.magSf());
+        Uf += mesh.Sf()*(phiv - (mesh.Sf() & Uf))/sqr(mesh.magSf());
+    }
 }

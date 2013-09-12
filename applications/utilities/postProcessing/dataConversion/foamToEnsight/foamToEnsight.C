@@ -136,6 +136,12 @@ int main(int argc, char *argv[])
     );
     argList::addOption
     (
+        "fields",
+        "wordReList",
+        "specify fields to export (all by default) - eg '( \"U.*\" )'."
+    );
+    argList::addOption
+    (
         "cellZone",
         "word",
         "specify cellZone to write"
@@ -222,6 +228,13 @@ int main(int argc, char *argv[])
     if (selectedZones)
     {
         zonePatterns = wordReList(args.optionLookup("faceZones")());
+    }
+
+    const bool selectedFields = args.optionFound("fields");
+    wordReList fieldPatterns;
+    if (selectedFields)
+    {
+        fieldPatterns = wordReList(args.optionLookup("fields")());
     }
 
     word cellZoneName;
@@ -429,6 +442,15 @@ int main(int argc, char *argv[])
             forAll(fieldNames, j)
             {
                 const word& fieldName = fieldNames[j];
+
+                // Check if the field has to be exported
+                if (selectedFields)
+                {
+                    if (!findStrings(fieldPatterns, fieldName))
+                    {
+                        continue;
+                    }
+                }
 
                 #include "checkData.H"
 

@@ -9,29 +9,29 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volVectorField;
-    location    "0";
-    object      U;
+    class       volScalarField;
+    object      alpha.water;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 1 -1 0 0 0 0];
+dimensions      [0 0 0 0 0 0 0];
 
-internalField   uniform (0 0 0);
+internalField   uniform 0;
 
 boundaryField
 {
-    atmosphere
+    front
     {
-        type            pressureInletOutletVelocity;
-        value           uniform (0 0 0);
+        type            empty;
+    }
+    back
+    {
+        type            empty;
     }
     walls
     {
-        type            uniformFixedValue;
-        uniformValue    (0 0 0);
+        type            zeroGradient;
     }
 }
-
 
 // ************************************************************************* //

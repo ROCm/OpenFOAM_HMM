@@ -56,12 +56,13 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
     #include "readGravitationalAcceleration.H"
+    #include "initContinuityErrs.H"
 
     pimpleControl pimple(mesh);
 
-    #include "readControls.H"
-    #include "initContinuityErrs.H"
     #include "createFields.H"
+    #include "createUf.H"
+    #include "readControls.H"
     #include "createPrghCorrTypes.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
@@ -74,9 +75,6 @@ int main(int argc, char *argv[])
         #include "readControls.H"
         #include "CourantNo.H"
 
-        // Make the fluxes absolute
-        fvc::makeAbsolute(phi, U);
-
         #include "setDeltaT.H"
 
         runTime++;
@@ -85,7 +83,7 @@ int main(int argc, char *argv[])
 
         {
             // Store divU from the previous mesh for the correctPhi
-            volScalarField divU(fvc::div(phi));
+            volScalarField divU(fvc::div(fvc::absolute(phi, U)));
 
             scalar timeBeforeMeshUpdate = runTime.elapsedCpuTime();
 
@@ -104,12 +102,15 @@ int main(int argc, char *argv[])
 
             if (mesh.changing() && correctPhi)
             {
+                // Calculate absolute flux from the mapped surface velocity
+                phi = mesh.Sf() & Uf;
+
                 #include "correctPhi.H"
+
+                // Make the fluxes relative to the mesh motion
+                fvc::makeRelative(phi, U);
             }
         }
-
-        // Make the fluxes relative to the mesh motion
-        fvc::makeRelative(phi, U);
 
         if (mesh.changing() && checkMeshCourantNo)
         {

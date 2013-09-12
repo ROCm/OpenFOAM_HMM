@@ -9,29 +9,16 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volVectorField;
-    location    "0";
-    object      U;
+    class       dictionary;
+    location    "constant";
+    object      thermophysicalProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 1 -1 0 0 0 0];
+phases (water air);
 
-internalField   uniform (0 0 0);
+pMin            pMin [ 1 -1 -2 0 0 0 0 ] 1000;
 
-boundaryField
-{
-    atmosphere
-    {
-        type            pressureInletOutletVelocity;
-        value           uniform (0 0 0);
-    }
-    walls
-    {
-        type            uniformFixedValue;
-        uniformValue    (0 0 0);
-    }
-}
-
+sigma           sigma [ 1 0 -2 0 0 0 0 ] 0;
 
 // ************************************************************************* //

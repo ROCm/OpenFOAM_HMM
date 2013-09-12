@@ -356,25 +356,29 @@ void ensightField
 
     ensightStream& ensightFile = *ensightFilePtr;
 
+    if (Pstream::master())
+    {
+        if (timeIndex == 0)
+        {
+            ensightCaseFile.setf(ios_base::left);
+
+            ensightCaseFile
+                << ensightPTraits<Type>::typeName
+                << " per element:            1       "
+                << setw(15) << vf.name()
+                << (' ' + prepend + "****." + vf.name()).c_str()
+                << nl;
+        }
+
+        ensightFile.write(ensightPTraits<Type>::typeName);
+    }
+
     if (patchNames.empty())
     {
         eMesh.barrier();
 
         if (Pstream::master())
         {
-            if (timeIndex == 0)
-            {
-                ensightCaseFile.setf(ios_base::left);
-
-                ensightCaseFile
-                    << ensightPTraits<Type>::typeName
-                    << " per element:            1       "
-                    << setw(15) << vf.name()
-                    << (' ' + prepend + "****." + vf.name()).c_str()
-                    << nl;
-            }
-
-            ensightFile.write(ensightPTraits<Type>::typeName);
             ensightFile.writePartHeader(1);
         }
 
@@ -570,25 +574,29 @@ void ensightPointField
 
     ensightStream& ensightFile = *ensightFilePtr;
 
+    if (Pstream::master())
+    {
+        if (timeIndex == 0)
+        {
+            ensightCaseFile.setf(ios_base::left);
+
+            ensightCaseFile
+                << ensightPTraits<Type>::typeName
+                << " per node:            1       "
+                << setw(15) << pf.name()
+                << (' ' + prepend + "****." + pf.name()).c_str()
+                << nl;
+        }
+
+        ensightFile.write(ensightPTraits<Type>::typeName);
+    }
+
     if (eMesh.patchNames().empty())
     {
         eMesh.barrier();
 
         if (Pstream::master())
         {
-            if (timeIndex == 0)
-            {
-                ensightCaseFile.setf(ios_base::left);
-
-                ensightCaseFile
-                    << ensightPTraits<Type>::typeName
-                    << " per node:            1       "
-                    << setw(15) << pf.name()
-                    << (' ' + prepend + "****." + pf.name()).c_str()
-                    << nl;
-            }
-
-            ensightFile.write(ensightPTraits<Type>::typeName);
             ensightFile.writePartHeader(1);
         }
 

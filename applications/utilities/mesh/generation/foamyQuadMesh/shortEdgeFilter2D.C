@@ -31,6 +31,118 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::shortEdgeFilter2D::addRegion
+(
+    const label regionI,
+    DynamicList<label>& bPointRegions
+) const
+{
+    if (bPointRegions.empty())
+    {
+        bPointRegions.append(regionI);
+    }
+    else if (findIndex(bPointRegions, regionI) == -1)
+    {
+        bPointRegions.append(regionI);
+    }
+}
+
+
+void Foam::shortEdgeFilter2D::assignBoundaryPointRegions
+(
+    List<DynamicList<label> >& boundaryPointRegions
+) const
+{
+    forAllConstIter(EdgeMap<label>, mapEdgesRegion_, iter)
+    {
+        const edge& e = iter.key();
+        const label& regionI = iter();
+
+        const label startI = e.start();
+        const label endI = e.end();
+
+        addRegion(regionI, boundaryPointRegions[startI]);
+        addRegion(regionI, boundaryPointRegions[endI]);
+    }
+}
+
+
+void Foam::shortEdgeFilter2D::updateEdgeRegionMap
+(
+    const MeshedSurface<face>& surfMesh,
+    const List<DynamicList<label> >& boundaryPtRegions,
+    const labelList& surfPtToBoundaryPt,
+    EdgeMap<label>& mapEdgesRegion,
+    labelList& patchSizes
+) const
+{
+    EdgeMap<label> newMapEdgesRegion(mapEdgesRegion.size());
+
+    const edgeList& edges = surfMesh.edges();
+    const labelList& meshPoints = surfMesh.meshPoints();
+
+    patchSizes.setSize(patchNames_.size(), 0);
+    patchSizes = 0;
+
+    forAll(edges, edgeI)
+    {
+        if (surfMesh.isInternalEdge(edgeI))
+        {
+            continue;
+        }
+
+        const edge& e = edges[edgeI];
+
+        const label startI = meshPoints[e[0]];
+        const label endI = meshPoints[e[1]];
+
+        label region = -1;
+
+        const DynamicList<label> startPtRegions =
+            boundaryPtRegions[surfPtToBoundaryPt[startI]];
+        const DynamicList<label> endPtRegions =
+            boundaryPtRegions[surfPtToBoundaryPt[endI]];
+
+        if (startPtRegions.size() > 1 && endPtRegions.size() > 1)
+        {
+            region = startPtRegions[0];
+
+            WarningIn("shortEdgeFilter2D()")
+                << "Both points in edge are in different regions."
+                << " Assigning edge to region " << region
+                << endl;
+        }
+        else if (startPtRegions.size() > 1 || endPtRegions.size() > 1)
+        {
+            region =
+            (
+                startPtRegions.size() > 1
+              ? endPtRegions[0]
+              : startPtRegions[0]
+            );
+        }
+        else if
+        (
+            startPtRegions[0] == endPtRegions[0]
+         && startPtRegions[0] != -1
+        )
+        {
+            region = startPtRegions[0];
+        }
+
+        if (region != -1)
+        {
+            newMapEdgesRegion.insert(e, region);
+            patchSizes[region]++;
+        }
+    }
+
+    mapEdgesRegion.transfer(newMapEdgesRegion);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::shortEdgeFilter2D::shortEdgeFilter2D
@@ -138,19 +250,12 @@ Foam::shortEdgeFilter2D::filter()
 
     // Check if the point is a boundary point. Flag if it is so that
     // it will not be deleted.
-    boolList boundaryPointFlags(points.size(), false);
-    // This has been removed, otherwise small edges on the boundary are not
-    // removed.
-    /*  forAll(boundaryPointFlags, pointI)
-    {
-        forAll(boundaryPoints, bPoint)
-        {
-            if (meshPoints[boundaryPoints[bPoint]] == pointI)
-            {
-                boundaryPointFlags[pointI] = true;
-            }
-        }
-    }*/
+    List<DynamicList<label> > boundaryPointRegions
+    (
+        points.size(),
+        DynamicList<label>()
+    );
+    assignBoundaryPointRegions(boundaryPointRegions);
 
     // Check if an edge has a boundary point. It it does the edge length
     // will be doubled when working out its length.
@@ -232,7 +337,6 @@ Foam::shortEdgeFilter2D::filter()
             shortEdgeFilterFactor_
            /(psEdges.size() + peEdges.size() - 2);
 
-
         edge lookupInPatchEdge
         (
             meshPoints[startVertex],
@@ -283,11 +387,38 @@ Foam::shortEdgeFilter2D::filter()
             (
                 pointsToRemove[meshPoints[startVertex]] == -1
              && pointsToRemove[meshPoints[endVertex]] == -1
-             && !boundaryPointFlags[meshPoints[startVertex]]
              && !flagDegenerateFace
             )
             {
-                pointsToRemove[meshPoints[startVertex]] = meshPoints[endVertex];
+                const DynamicList<label>& startVertexRegions =
+                    boundaryPointRegions[meshPoints[startVertex]];
+                const DynamicList<label>& endVertexRegions =
+                    boundaryPointRegions[meshPoints[endVertex]];
+
+                if (startVertexRegions.size() && endVertexRegions.size())
+                {
+                    if (startVertexRegions.size() > 1)
+                    {
+                        pointsToRemove[meshPoints[endVertex]] =
+                            meshPoints[startVertex];
+                    }
+                    else
+                    {
+                        pointsToRemove[meshPoints[startVertex]] =
+                            meshPoints[endVertex];
+                    }
+                }
+                else if (startVertexRegions.size())
+                {
+                    pointsToRemove[meshPoints[endVertex]] =
+                        meshPoints[startVertex];
+                }
+                else
+                {
+                    pointsToRemove[meshPoints[startVertex]] =
+                        meshPoints[endVertex];
+                }
+
                 ++nPointsToRemove;
             }
         }
@@ -299,6 +430,9 @@ Foam::shortEdgeFilter2D::filter()
     labelList newPointNumbers(points.size(), -1);
     label numberRemoved = 0;
 
+    // Maintain addressing from new to old point field
+    labelList newPtToOldPt(totalNewPoints, -1);
+
     forAll(points, pointI)
     {
         // If the point is NOT going to be removed.
@@ -306,6 +440,7 @@ Foam::shortEdgeFilter2D::filter()
         {
             newPoints[pointI - numberRemoved] = points[pointI];
             newPointNumbers[pointI] =  pointI - numberRemoved;
+            newPtToOldPt[pointI - numberRemoved] = pointI;
         }
         else
         {
@@ -405,16 +540,14 @@ Foam::shortEdgeFilter2D::filter()
         xferCopy(List<surfZone>())
     );
 
-    const Map<int>& fMeshPointMap = fMesh.meshPointMap();
-
-    // Reset patchSizes_
-    patchSizes_.clear();
-    patchSizes_.setSize(patchNames_.size(), 0);
-
-    label equalEdges = 0;
-    label notFound = 0;
-    label matches = 0;
-    label negativeLabels = 0;
+    updateEdgeRegionMap
+    (
+        fMesh,
+        boundaryPointRegions,
+        newPtToOldPt,
+        mapEdgesRegion_,
+        patchSizes_
+    );
 
     forAll(newPointNumbers, pointI)
     {
@@ -427,78 +560,12 @@ Foam::shortEdgeFilter2D::filter()
         }
     }
 
-    // Create new EdgeMap.
-    Info<< "Creating new EdgeMap." << endl;
-    EdgeMap<label> newMapEdgesRegion(mapEdgesRegion_.size());
-
-    for
-    (
-        label bEdgeI = ms_.nInternalEdges();
-        bEdgeI < edges.size();
-        ++bEdgeI
-    )
-    {
-        label p1 = meshPoints[edges[bEdgeI][0]];
-        label p2 = meshPoints[edges[bEdgeI][1]];
-
-        edge e(p1, p2);
-
-        if (mapEdgesRegion_.found(e))
-        {
-            if
-            (
-                newPointNumbers[p1] != -1
-             && newPointNumbers[p2] != -1
-            )
-            {
-                if (newPointNumbers[p1] != newPointNumbers[p2])
-                {
-                    label region = mapEdgesRegion_.find(e)();
-                    newMapEdgesRegion.insert
-                    (
-                        edge
-                        (
-                            fMeshPointMap[newPointNumbers[p1]],
-                            fMeshPointMap[newPointNumbers[p2]]
-                        ),
-                        region
-                    );
-                    patchSizes_[region]++;
-                    matches++;
-                }
-                else
-                {
-                    equalEdges++;
-                }
-            }
-            else
-            {
-                negativeLabels++;
-            }
-        }
-        else
-        {
-            notFound++;
-        }
-    }
-
-    if (debug)
-    {
-        Info<< "EdgeMapping  :" << nl
-            << "    Matches  : " << matches << nl
-            << "    Equal    : " << equalEdges << nl
-            << "    Negative : " << negativeLabels << nl
-            << "    Not Found: " << notFound << endl;
-    }
-
-    mapEdgesRegion_.transfer(newMapEdgesRegion);
-
     ms_.transfer(fMesh);
 
-    Info<< "    Maximum number of chained collapses = " << maxChain << endl;
-
     if (debug)
     {
+        Info<< "    Maximum number of chained collapses = " << maxChain << endl;
+
         writeInfo(Info);
     }
 }
