@@ -54,6 +54,8 @@ class orientedSurface
 :
     public triSurface
 {
+public:
+
     // Data types
 
         //- Enumeration listing whether face needs to be flipped.
@@ -64,6 +66,7 @@ class orientedSurface
             NOFLIP
         };
 
+private:
 
     // Private Member Functions
 
