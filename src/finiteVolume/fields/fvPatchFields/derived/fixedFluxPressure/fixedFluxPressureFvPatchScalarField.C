@@ -59,14 +59,17 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
     gradient() = 0.0;
     gradient().map(ptf.gradient(), mapper);
 
-    // Evaluate the value field from the gradient if the internal field is valid
-    if (&iF && iF.size())
+    // Unfortunately we cannot use the deltaCoeffs in a mapper constructor
+    // since this triggers AMI construction which is a problem in decomposing
+    // cases (the individual processor does not make sense)
+    // So for now map the values
+
+    if (&iF)
     {
-        scalarField::operator=
-        (
-            patchInternalField() + gradient()/patch().deltaCoeffs()
-        );
+        scalarField::operator=(patchInternalField());
     }
+    map(ptf, mapper);
+
 }
 
 
