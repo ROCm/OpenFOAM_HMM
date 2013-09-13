@@ -1312,8 +1312,16 @@ int main(int argc, char *argv[])
 
         // Use the resolveFeatureAngle from the refinement parameters
         scalar curvature = refineParams.curvature();
+        scalar planarAngle = refineParams.planarAngle();
 
-        snapDriver.doSnap(snapDict, motionDict, curvature, snapParams);
+        snapDriver.doSnap
+        (
+            snapDict,
+            motionDict,
+            curvature,
+            planarAngle,
+            snapParams
+        );
 
         writeMesh
         (
