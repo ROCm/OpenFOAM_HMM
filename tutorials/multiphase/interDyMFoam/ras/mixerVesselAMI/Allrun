@@ -4,25 +4,18 @@ cd ${0%/*} || exit 1    # run from this directory
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
-# Set application name
 application=`getApplication`
 
-\rm -rf 0
 
-# Meshing
-runApplication blockMesh
-runApplication surfaceFeatureExtract
-runApplication snappyHexMesh -overwrite
-runApplication createBaffles -overwrite
-runApplication mergeOrSplitBaffles -split -overwrite
+./Allrun.pre
 
-# Get rid of zero faced patches
-runApplication createPatch -overwrite
+# Decompose
+runApplication decomposePar -force
 
-# Copy fields after meshing to avoind the generation of unnecessary patch fields
-\cp -r 0.org 0
+# Run
+runParallel $application 6
 
-# Initialize alpha
-runApplication setFields
+# Reconstruct
+runApplication reconstructPar -noFunctionObjects
 
 # ----------------------------------------------------------------- end-of-file
