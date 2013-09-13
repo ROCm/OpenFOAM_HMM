@@ -13,11 +13,12 @@ surfaceScalarField phid
    *(
         (
             (fvc::interpolate(rho*HbyA) & mesh.Sf())
-          //***HGW + rhorAUf*fvc::ddtCorr(rho, U, phi)
+          + rhorAUf*fvc::ddtCorr(rho, U, rhoUf)
         )/fvc::interpolate(rho)
-      - fvc::meshPhi(rho, U)
     )
 );
+
+fvc::makeRelative(phid, psi, U);
 
 for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
 {
@@ -37,3 +38,12 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
 
 U = HbyA - rAU*fvc::grad(p);
 U.correctBoundaryConditions();
+
+{
+    rhoUf = fvc::interpolate(rho*U);
+    surfaceVectorField n(mesh.Sf()/mesh.magSf());
+    rhoUf +=
+        mesh.Sf()
+       *(fvc::absolute(phi, rho, U) - (mesh.Sf() & rhoUf))
+       /sqr(mesh.magSf());
+}

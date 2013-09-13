@@ -313,7 +313,18 @@ void Foam::multiphaseMixture::solve()
 
     if (nAlphaSubCycles > 1)
     {
-        surfaceScalarField rhoPhiSum(0.0*rhoPhi_);
+        surfaceScalarField rhoPhiSum
+        (
+            IOobject
+            (
+                "rhoPhiSum",
+                runTime.timeName(),
+                mesh_
+            ),
+            mesh_,
+            dimensionedScalar("0", rhoPhi_.dimensions(), 0)
+        );
+
         dimensionedScalar totalDeltaT = runTime.deltaT();
 
         for
