@@ -45,6 +45,28 @@ dictionaryReplacement
             }
         }
     }
+
+    "mut"
+    {
+        boundaryField
+        {
+            wallFilm
+            {
+                value           uniform 0;
+            }
+        }
+    }
+
+    "alphat"
+    {
+        boundaryField
+        {
+            wallFilm
+            {
+                value           uniform 0;
+            }
+        }
+    }
 }
 
 // ************************************************************************* //
