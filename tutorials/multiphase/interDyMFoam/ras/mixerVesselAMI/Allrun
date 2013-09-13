@@ -25,13 +25,4 @@ runApplication createPatch -overwrite
 # Initialize alpha
 runApplication setFields
 
-# Decompose
-runApplication decomposePar -force
-
-# Run
-runParallel $application 6
-
-# Reconstruct
-runApplication reconstructPar -noFunctionObjects
-
 # ----------------------------------------------------------------- end-of-file
