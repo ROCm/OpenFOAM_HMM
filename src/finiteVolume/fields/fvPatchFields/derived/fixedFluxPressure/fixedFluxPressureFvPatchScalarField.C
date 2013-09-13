@@ -59,17 +59,17 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
     gradient() = 0.0;
     gradient().map(ptf.gradient(), mapper);
 
-    // Unfortunately we cannot use the deltaCoeffs in a mapper constructor
-    // since this triggers AMI construction which is a problem in decomposing
-    // cases (the individual processor does not make sense)
-    // So for now map the values
-
-    if (&iF)
+    // Evaluate the value field from the gradient if the internal field is valid
+    if (&iF && iF.size())
     {
-        scalarField::operator=(patchInternalField());
+        scalarField::operator=
+        (
+            //patchInternalField() + gradient()/patch().deltaCoeffs()
+            // ***HGW Hack to avoid the construction of mesh.deltaCoeffs
+            // which fails for AMI patches for some mapping operations
+            patchInternalField() + gradient()*(patch().nf() & patch().delta())
+        );
     }
-    map(ptf, mapper);
-
 }
 
 
