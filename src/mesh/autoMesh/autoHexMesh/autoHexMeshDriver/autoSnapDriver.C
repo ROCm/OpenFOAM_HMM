@@ -792,11 +792,636 @@ Foam::labelList Foam::autoSnapDriver::getZoneSurfacePoints
 }
 
 
+Foam::tmp<Foam::pointField> Foam::autoSnapDriver::avgCellCentres
+(
+    const fvMesh& mesh,
+    const indirectPrimitivePatch& pp
+)
+{
+    const labelListList& pointFaces = pp.pointFaces();
+
+
+    tmp<pointField> tavgBoundary
+    (
+        new pointField(pointFaces.size(), vector::zero)
+    );
+    pointField& avgBoundary = tavgBoundary();
+    labelList nBoundary(pointFaces.size(), 0);
+
+    forAll(pointFaces, pointI)
+    {
+        const labelList& pFaces = pointFaces[pointI];
+
+        forAll(pFaces, pfI)
+        {
+            label faceI = pFaces[pfI];
+            label meshFaceI = pp.addressing()[faceI];
+
+            label own = mesh.faceOwner()[meshFaceI];
+            avgBoundary[pointI] += mesh.cellCentres()[own];
+            nBoundary[pointI]++;
+        }
+    }
+
+    syncTools::syncPointList
+    (
+        mesh,
+        pp.meshPoints(),
+        avgBoundary,
+        plusEqOp<point>(),  // combine op
+        vector::zero        // null value
+    );
+    syncTools::syncPointList
+    (
+        mesh,
+        pp.meshPoints(),
+        nBoundary,
+        plusEqOp<label>(),  // combine op
+        label(0)            // null value
+    );
+
+    forAll(avgBoundary, i)
+    {
+        avgBoundary[i] /= nBoundary[i];
+    }
+    return tavgBoundary;
+}
+
+
+//Foam::tmp<Foam::scalarField> Foam::autoSnapDriver::calcEdgeLen
+//(
+//    const indirectPrimitivePatch& pp
+//) const
+//{
+//    // Get local edge length based on refinement level
+//    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//    // (Ripped from autoLayerDriver)
+//
+//    tmp<scalarField> tedgeLen(new scalarField(pp.nPoints()));
+//    scalarField& edgeLen = tedgeLen();
+//    {
+//        const fvMesh& mesh = meshRefiner_.mesh();
+//        const scalar edge0Len = meshRefiner_.meshCutter().level0EdgeLength();
+//        const labelList& cellLevel = meshRefiner_.meshCutter().cellLevel();
+//
+//        labelList maxPointLevel(pp.nPoints(), labelMin);
+//
+//        forAll(pp, i)
+//        {
+//            label ownLevel = cellLevel[mesh.faceOwner()[pp.addressing()[i]]];
+//            const face& f = pp.localFaces()[i];
+//            forAll(f, fp)
+//            {
+//                maxPointLevel[f[fp]] = max(maxPointLevel[f[fp]], ownLevel);
+//            }
+//        }
+//
+//        syncTools::syncPointList
+//        (
+//            mesh,
+//            pp.meshPoints(),
+//            maxPointLevel,
+//            maxEqOp<label>(),
+//            labelMin            // null value
+//        );
+//
+//
+//        forAll(maxPointLevel, pointI)
+//        {
+//            // Find undistorted edge size for this level.
+//            edgeLen[pointI] = edge0Len/(1<<maxPointLevel[pointI]);
+//        }
+//    }
+//    return tedgeLen;
+//}
+
+
+void Foam::autoSnapDriver::detectNearSurfaces
+(
+    const scalar planarCos,
+    const indirectPrimitivePatch& pp,
+    const pointField& nearestPoint,
+    const vectorField& nearestNormal,
+
+    vectorField& disp
+) const
+{
+    Info<< "Detecting near surfaces ..." << endl;
+
+    const pointField& localPoints = pp.localPoints();
+    const refinementSurfaces& surfaces = meshRefiner_.surfaces();
+    const fvMesh& mesh = meshRefiner_.mesh();
+
+    //// Get local edge length based on refinement level
+    //const scalarField edgeLen(calcEdgeLen(pp));
+    //
+    //// Generate rays for every surface point
+    //// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //
+    //{
+    //    const scalar cos45 = Foam::cos(degToRad(45));
+    //    vector n(cos45, cos45, cos45);
+    //    n /= mag(n);
+    //
+    //    pointField start(14*pp.nPoints());
+    //    pointField end(start.size());
+    //
+    //    label rayI = 0;
+    //    forAll(localPoints, pointI)
+    //    {
+    //        const point& pt = localPoints[pointI];
+    //
+    //        // Along coordinate axes
+    //
+    //        {
+    //            start[rayI] = pt;
+    //            point& endPt = end[rayI++];
+    //            endPt = pt;
+    //            endPt.x() -= edgeLen[pointI];
+    //        }
+    //        {
+    //            start[rayI] = pt;
+    //            point& endPt = end[rayI++];
+    //            endPt = pt;
+    //            endPt.x() += edgeLen[pointI];
+    //        }
+    //        {
+    //            start[rayI] = pt;
+    //            point& endPt = end[rayI++];
+    //            endPt = pt;
+    //            endPt.y() -= edgeLen[pointI];
+    //        }
+    //        {
+    //            start[rayI] = pt;
+    //            point& endPt = end[rayI++];
+    //            endPt = pt;
+    //            endPt.y() += edgeLen[pointI];
+    //        }
+    //        {
+    //            start[rayI] = pt;
+    //            point& endPt = end[rayI++];
+    //            endPt = pt;
+    //            endPt.z() -= edgeLen[pointI];
+    //        }
+    //        {
+    //            start[rayI] = pt;
+    //            point& endPt = end[rayI++];
+    //            endPt = pt;
+    //            endPt.z() += edgeLen[pointI];
+    //        }
+    //
+    //        // At 45 degrees
+    //
+    //        const vector vec(edgeLen[pointI]*n);
+    //
+    //        {
+    //            start[rayI] = pt;
+    //            point& endPt = end[rayI++];
+    //            endPt = pt;
+    //            endPt.x() += vec.x();
+    //            endPt.y() += vec.y();
+    //            endPt.z() += vec.z();
+    //        }
+    //        {
+    //            start[rayI] = pt;
+    //            point& endPt = end[rayI++];
+    //            endPt = pt;
+    //            endPt.x() -= vec.x();
+    //            endPt.y() += vec.y();
+    //            endPt.z() += vec.z();
+    //        }
+    //        {
+    //            start[rayI] = pt;
+    //            point& endPt = end[rayI++];
+    //            endPt = pt;
+    //            endPt.x() += vec.x();
+    //            endPt.y() -= vec.y();
+    //            endPt.z() += vec.z();
+    //        }
+    //        {
+    //            start[rayI] = pt;
+    //            point& endPt = end[rayI++];
+    //            endPt = pt;
+    //            endPt.x() -= vec.x();
+    //            endPt.y() -= vec.y();
+    //            endPt.z() += vec.z();
+    //        }
+    //        {
+    //            start[rayI] = pt;
+    //            point& endPt = end[rayI++];
+    //            endPt = pt;
+    //            endPt.x() += vec.x();
+    //            endPt.y() += vec.y();
+    //            endPt.z() -= vec.z();
+    //        }
+    //        {
+    //            start[rayI] = pt;
+    //            point& endPt = end[rayI++];
+    //            endPt = pt;
+    //            endPt.x() -= vec.x();
+    //            endPt.y() += vec.y();
+    //            endPt.z() -= vec.z();
+    //        }
+    //        {
+    //            start[rayI] = pt;
+    //            point& endPt = end[rayI++];
+    //            endPt = pt;
+    //            endPt.x() += vec.x();
+    //            endPt.y() -= vec.y();
+    //            endPt.z() -= vec.z();
+    //        }
+    //        {
+    //            start[rayI] = pt;
+    //            point& endPt = end[rayI++];
+    //            endPt = pt;
+    //            endPt.x() -= vec.x();
+    //            endPt.y() -= vec.y();
+    //            endPt.z() -= vec.z();
+    //        }
+    //    }
+    //
+    //    labelList surface1;
+    //    List<pointIndexHit> hit1;
+    //    labelList region1;
+    //    vectorField normal1;
+    //
+    //    labelList surface2;
+    //    List<pointIndexHit> hit2;
+    //    labelList region2;
+    //    vectorField normal2;
+    //    surfaces.findNearestIntersection
+    //    (
+    //        unzonedSurfaces,    // surfacesToTest,
+    //        start,
+    //        end,
+    //
+    //        surface1,
+    //        hit1,
+    //        region1,
+    //        normal1,
+    //
+    //        surface2,
+    //        hit2,
+    //        region2,
+    //        normal2
+    //    );
+    //
+    //    // All intersections
+    //    {
+    //        OBJstream str
+    //        (
+    //            mesh.time().path()
+    //          / "surfaceHits_" + meshRefiner_.timeName() + ".obj"
+    //        );
+    //
+    //        Info<< "Dumping intersections with rays to " << str.name()
+    //            << endl;
+    //
+    //        forAll(hit1, i)
+    //        {
+    //            if (hit1[i].hit())
+    //            {
+    //                str.write(linePointRef(start[i], hit1[i].hitPoint()));
+    //            }
+    //            if (hit2[i].hit())
+    //            {
+    //                str.write(linePointRef(start[i], hit2[i].hitPoint()));
+    //            }
+    //        }
+    //    }
+    //
+    //    // Co-planar intersections
+    //    {
+    //        OBJstream str
+    //        (
+    //            mesh.time().path()
+    //          / "coplanarHits_" + meshRefiner_.timeName() + ".obj"
+    //        );
+    //
+    //        Info<< "Dumping intersections with co-planar surfaces to "
+    //            << str.name() << endl;
+    //
+    //        forAll(localPoints, pointI)
+    //        {
+    //            bool hasNormal = false;
+    //            point surfPointA;
+    //            vector surfNormalA;
+    //            point surfPointB;
+    //            vector surfNormalB;
+    //
+    //            bool isCoplanar = false;
+    //
+    //            label rayI = 14*pointI;
+    //            for (label i = 0; i < 14; i++)
+    //            {
+    //                if (hit1[rayI].hit())
+    //                {
+    //                    const point& pt = hit1[rayI].hitPoint();
+    //                    const vector& n = normal1[rayI];
+    //
+    //                    if (!hasNormal)
+    //                    {
+    //                        hasNormal = true;
+    //                        surfPointA = pt;
+    //                        surfNormalA = n;
+    //                    }
+    //                    else
+    //                    {
+    //                        if
+    //                        (
+    //                            meshRefiner_.isGap
+    //                            (
+    //                                planarCos,
+    //                                surfPointA,
+    //                                surfNormalA,
+    //                                pt,
+    //                                n
+    //                            )
+    //                        )
+    //                        {
+    //                            isCoplanar = true;
+    //                            surfPointB = pt;
+    //                            surfNormalB = n;
+    //                            break;
+    //                        }
+    //                    }
+    //                }
+    //                if (hit2[rayI].hit())
+    //                {
+    //                    const point& pt = hit2[rayI].hitPoint();
+    //                    const vector& n = normal2[rayI];
+    //
+    //                    if (!hasNormal)
+    //                    {
+    //                        hasNormal = true;
+    //                        surfPointA = pt;
+    //                        surfNormalA = n;
+    //                    }
+    //                    else
+    //                    {
+    //                        if
+    //                        (
+    //                            meshRefiner_.isGap
+    //                            (
+    //                                planarCos,
+    //                                surfPointA,
+    //                                surfNormalA,
+    //                                pt,
+    //                                n
+    //                            )
+    //                        )
+    //                        {
+    //                            isCoplanar = true;
+    //                            surfPointB = pt;
+    //                            surfNormalB = n;
+    //                            break;
+    //                        }
+    //                    }
+    //                }
+    //
+    //                rayI++;
+    //            }
+    //
+    //            if (isCoplanar)
+    //            {
+    //                str.write(linePointRef(surfPointA, surfPointB));
+    //            }
+    //        }
+    //    }
+    //}
+
+
+    const pointField avgCc(avgCellCentres(mesh, pp));
+
+    // Construct rays from localPoints to beyond cell centre
+    pointField end(pp.nPoints());
+    forAll(localPoints, pointI)
+    {
+        const point& pt = localPoints[pointI];
+        end[pointI] = pt + 2*(avgCc[pointI]-pt);
+    }
+
+
+    label nOverride = 0;
+
+    // 1. All points to non-interface surfaces
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    {
+        const labelList unzonedSurfaces =
+            surfaceZonesInfo::getUnnamedSurfaces
+            (
+                meshRefiner_.surfaces().surfZones()
+            );
+
+        // Do intersection test
+        labelList surface1;
+        List<pointIndexHit> hit1;
+        labelList region1;
+        vectorField normal1;
+
+        labelList surface2;
+        List<pointIndexHit> hit2;
+        labelList region2;
+        vectorField normal2;
+        surfaces.findNearestIntersection
+        (
+            unzonedSurfaces,
+            localPoints,
+            end,
+
+            surface1,
+            hit1,
+            region1,
+            normal1,
+
+            surface2,
+            hit2,
+            region2,
+            normal2
+        );
+
+
+        forAll(localPoints, pointI)
+        {
+            // Current location
+            const point& pt = localPoints[pointI];
+
+            bool override = false;
+
+            if (hit1[pointI].hit())
+            {
+                if
+                (
+                    meshRefiner_.isGap
+                    (
+                        planarCos,
+                        nearestPoint[pointI],
+                        nearestNormal[pointI],
+                        hit1[pointI].hitPoint(),
+                        normal1[pointI]
+                    )
+                )
+                {
+                    disp[pointI] = hit1[pointI].hitPoint()-pt;
+                    override = true;
+                }
+            }
+            if (hit2[pointI].hit())
+            {
+                if
+                (
+                    meshRefiner_.isGap
+                    (
+                        planarCos,
+                        nearestPoint[pointI],
+                        nearestNormal[pointI],
+                        hit2[pointI].hitPoint(),
+                        normal2[pointI]
+                    )
+                )
+                {
+                    disp[pointI] = hit2[pointI].hitPoint()-pt;
+                    override = true;
+                }
+            }
+
+            if (override)
+            {
+                nOverride++;
+            }
+        }
+    }
+
+
+    // 2. All points on zones to their respective surface
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    {
+        // Surfaces with zone information
+        const PtrList<surfaceZonesInfo>& surfZones = surfaces.surfZones();
+
+        const labelList zonedSurfaces = surfaceZonesInfo::getNamedSurfaces
+        (
+            surfZones
+        );
+
+        forAll(zonedSurfaces, i)
+        {
+            label zoneSurfI = zonedSurfaces[i];
+
+            const word& faceZoneName = surfZones[zoneSurfI].faceZoneName();
+
+            const labelList surfacesToTest(1, zoneSurfI);
+
+            // Get indices of points both on faceZone and on pp.
+            labelList zonePointIndices
+            (
+                getZoneSurfacePoints
+                (
+                    mesh,
+                    pp,
+                    faceZoneName
+                )
+            );
+
+            // Do intersection test
+            labelList surface1;
+            List<pointIndexHit> hit1;
+            labelList region1;
+            vectorField normal1;
+
+            labelList surface2;
+            List<pointIndexHit> hit2;
+            labelList region2;
+            vectorField normal2;
+            surfaces.findNearestIntersection
+            (
+                surfacesToTest,
+                pointField(localPoints, zonePointIndices),
+                pointField(end, zonePointIndices),
+
+                surface1,
+                hit1,
+                region1,
+                normal1,
+
+                surface2,
+                hit2,
+                region2,
+                normal2
+            );
+
+
+            label nOverride = 0;
+
+            forAll(hit1, i)
+            {
+                label pointI = zonePointIndices[i];
+
+                // Current location
+                const point& pt = localPoints[pointI];
+
+                bool override = false;
+
+                if (hit1[i].hit())
+                {
+                    if
+                    (
+                        meshRefiner_.isGap
+                        (
+                            planarCos,
+                            nearestPoint[pointI],
+                            nearestNormal[pointI],
+                            hit1[i].hitPoint(),
+                            normal1[i]
+                        )
+                    )
+                    {
+                        disp[pointI] = hit1[i].hitPoint()-pt;
+                        override = true;
+                    }
+                }
+                if (hit2[i].hit())
+                {
+                    if
+                    (
+                        meshRefiner_.isGap
+                        (
+                            planarCos,
+                            nearestPoint[pointI],
+                            nearestNormal[pointI],
+                            hit2[i].hitPoint(),
+                            normal2[i]
+                        )
+                    )
+                    {
+                        disp[pointI] = hit2[i].hitPoint()-pt;
+                        override = true;
+                    }
+                }
+
+                if (override)
+                {
+                    nOverride++;
+                }
+            }
+        }
+    }
+
+    Info<< "Overriding nearest with intersection of close gaps at "
+        << returnReduce(nOverride, sumOp<label>())
+        << " out of " << returnReduce(pp.nPoints(), sumOp<label>())
+        << " points." << endl;
+}
+
+
 Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
 (
     const meshRefinement& meshRefiner,
     const scalarField& snapDist,
-    const indirectPrimitivePatch& pp
+    const indirectPrimitivePatch& pp,
+    pointField& nearestPoint,
+    vectorField& nearestNormal
 )
 {
     Info<< "Calculating patchDisplacement as distance to nearest surface"
@@ -815,12 +1440,12 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
         labelList snapSurf(localPoints.size(), -1);
 
         // Divide surfaces into zoned and unzoned
-        labelList zonedSurfaces =
+        const labelList zonedSurfaces =
             surfaceZonesInfo::getNamedSurfaces
             (
                 meshRefiner.surfaces().surfZones()
             );
-        labelList unzonedSurfaces =
+        const labelList unzonedSurfaces =
             surfaceZonesInfo::getUnnamedSurfaces
             (
                 meshRefiner.surfaces().surfZones()
@@ -833,14 +1458,42 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
         {
             List<pointIndexHit> hitInfo;
             labelList hitSurface;
-            surfaces.findNearest
-            (
-                unzonedSurfaces,
-                localPoints,
-                sqr(snapDist),        // sqr of attract distance
-                hitSurface,
-                hitInfo
-            );
+
+            if (nearestNormal.size() == localPoints.size())
+            {
+                labelList hitRegion;
+                vectorField hitNormal;
+                surfaces.findNearestRegion
+                (
+                    unzonedSurfaces,
+                    localPoints,
+                    sqr(snapDist),
+                    hitSurface,
+                    hitInfo,
+                    hitRegion,
+                    hitNormal
+                );
+
+                forAll(hitInfo, pointI)
+                {
+                    if (hitInfo[pointI].hit())
+                    {
+                        nearestPoint[pointI] = hitInfo[pointI].hitPoint();
+                        nearestNormal[pointI] = hitNormal[pointI];
+                    }
+                }
+            }
+            else
+            {
+                surfaces.findNearest
+                (
+                    unzonedSurfaces,
+                    localPoints,
+                    sqr(snapDist),        // sqr of attract distance
+                    hitSurface,
+                    hitInfo
+                );
+            }
 
             forAll(hitInfo, pointI)
             {
@@ -888,14 +1541,43 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
             // Find nearest for points both on faceZone and pp.
             List<pointIndexHit> hitInfo;
             labelList hitSurface;
-            surfaces.findNearest
-            (
-                labelList(1, zoneSurfI),
-                pointField(localPoints, zonePointIndices),
-                sqr(scalarField(minSnapDist, zonePointIndices)),
-                hitSurface,
-                hitInfo
-            );
+
+            if (nearestNormal.size() == localPoints.size())
+            {
+                labelList hitRegion;
+                vectorField hitNormal;
+                surfaces.findNearestRegion
+                (
+                    surfacesToTest,
+                    pointField(localPoints, zonePointIndices),
+                    sqr(scalarField(minSnapDist, zonePointIndices)),
+                    hitSurface,
+                    hitInfo,
+                    hitRegion,
+                    hitNormal
+                );
+
+                forAll(hitInfo, i)
+                {
+                    if (hitInfo[i].hit())
+                    {
+                        label pointI = zonePointIndices[i];
+                        nearestPoint[pointI] = hitInfo[i].hitPoint();
+                        nearestNormal[pointI] = hitNormal[i];
+                    }
+                }
+            }
+            else
+            {
+                surfaces.findNearest
+                (
+                    surfacesToTest,
+                    pointField(localPoints, zonePointIndices),
+                    sqr(scalarField(minSnapDist, zonePointIndices)),
+                    hitSurface,
+                    hitInfo
+                );
+            }
 
             forAll(hitInfo, i)
             {
@@ -1529,6 +2211,7 @@ void Foam::autoSnapDriver::doSnap
     const dictionary& snapDict,
     const dictionary& motionDict,
     const scalar featureCos,
+    const scalar planarAngle,
     const snapParameters& snapParams
 )
 {
@@ -1791,12 +2474,39 @@ void Foam::autoSnapDriver::doSnap
 
             // Calculate displacement at every patch point. Insert into
             // meshMover.
+            // Calculate displacement at every patch point
+            pointField nearestPoint;
+            vectorField nearestNormal;
+
+            if (snapParams.detectNearSurfacesSnap())
+            {
+                nearestPoint.setSize(pp.nPoints(), vector::max);
+                nearestNormal.setSize(pp.nPoints(), vector::zero);
+            }
+
             vectorField disp = calcNearestSurface
             (
                 meshRefiner_,
                 snapDist,
-                meshMover.patch()
+                pp,
+                nearestPoint,
+                nearestNormal
             );
+
+
+            // Override displacement at thin gaps
+            if (snapParams.detectNearSurfacesSnap())
+            {
+                detectNearSurfaces
+                (
+                    Foam::cos(degToRad(planarAngle)),// planar cos for gaps
+                    pp,
+                    nearestPoint,   // surfacepoint from nearest test
+                    nearestNormal,  // surfacenormal from nearest test
+
+                    disp
+                );
+            }
 
             // Override displacement with feature edge attempt
             if (doFeatures)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,6 +69,8 @@ class snapParameters
         const Switch implicitFeatureSnap_;
 
         const Switch multiRegionFeatureSnap_;
+
+        const Switch detectNearSurfacesSnap_;
 
 
     // Private Member Functions
@@ -139,6 +141,11 @@ public:
             Switch multiRegionFeatureSnap() const
             {
                 return multiRegionFeatureSnap_;
+            }
+
+            Switch detectNearSurfacesSnap() const
+            {
+                return detectNearSurfacesSnap_;
             }
 
 };

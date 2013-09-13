@@ -1061,13 +1061,17 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
             meshMover
         );
 
+        pointField nearestPoint;
+        vectorField nearestNormal;
         const vectorField disp
         (
             autoSnapDriver::calcNearestSurface
             (
                 *this,
                 snapDist,   // attraction
-                pp
+                pp,
+                nearestPoint,
+                nearestNormal
             )
         );
 
