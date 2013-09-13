@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,7 +34,7 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(vtkUnstructuredReader, 0);
+    defineTypeNameAndDebug(vtkUnstructuredReader, 1);   //0);
 
     template<>
     const char*
@@ -115,18 +115,19 @@ void Foam::vtkUnstructuredReader::extractCells
     labelList prismPoints(6);
     labelList hexPoints(8);
 
+    label cellI = cells_.size();
+    cells_.setSize(cellI+cellTypes.size());
+    cellMap_.setSize(cells_.size(), -1);
 
-    cells_.setSize(cellTypes.size());
-    cellMap_.setSize(cellTypes.size(), -1);
-    faces_.setSize(cellTypes.size());
-    faceMap_.setSize(cellTypes.size(), -1);
-    lines_.setSize(cellTypes.size());
-    lineMap_.setSize(cellTypes.size(), -1);
+    label faceI = faces_.size();
+    faces_.setSize(faceI+cellTypes.size());
+    faceMap_.setSize(faces_.size(), -1);
+
+    label lineI = lines_.size();
+    lines_.setSize(lineI+cellTypes.size());
+    lineMap_.setSize(lines_.size(), -1);
 
     label dataIndex = 0;
-    label cellI = 0;
-    label faceI = 0;
-    label lineI = 0;
 
 
     // To mark whether unhandled type has been visited.
@@ -672,10 +673,13 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
             }
             labelList lineVerts;
             readBlock(inFile, nNumbers, lineVerts);
-            lines_.setSize(nLines);
-            lineMap_.setSize(nLines);
+
+            label lineI = lines_.size();
+            lines_.setSize(lineI+nLines);
+            lineMap_.setSize(lines_.size());
+
             label elemI = 0;
-            forAll(lines_, lineI)
+            for (label i = 0; i < nLines; i++)
             {
                 lineMap_[lineI] = lineI;
                 labelList& f = lines_[lineI];
@@ -684,6 +688,7 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
                 {
                     f[fp] = lineVerts[elemI++];
                 }
+                lineI++;
             }
         }
         else if (tag == "POLYGONS")
@@ -698,10 +703,13 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
             }
             labelList faceVerts;
             readBlock(inFile, nNumbers, faceVerts);
-            faces_.setSize(nFaces);
-            faceMap_.setSize(nFaces);
+
+            label faceI = faces_.size();
+            faces_.setSize(faceI+nFaces);
+            faceMap_.setSize(faces_.size());
+
             label elemI = 0;
-            forAll(faces_, faceI)
+            for (label i = 0; i < nFaces; i++)
             {
                 faceMap_[faceI] = faceI;
                 face& f = faces_[faceI];
@@ -710,6 +718,7 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
                 {
                     f[fp] = faceVerts[elemI++];
                 }
+                faceI++;
             }
         }
         else if (tag == "POINT_DATA")
@@ -858,6 +867,56 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
 
             scalarField coords(dim*points_.size());
             readBlock(inFile, coords.size(), coords);
+        }
+        else if (tag == "TRIANGLE_STRIPS")
+        {
+            label nStrips(readLabel(inFile));
+            label nNumbers(readLabel(inFile));
+            if (debug)
+            {
+                Info<< "Reading " << nStrips << " triangle strips." << endl;
+            }
+            labelList faceVerts;
+            readBlock(inFile, nNumbers, faceVerts);
+
+            // Count number of triangles
+            label elemI = 0;
+            label nTris = 0;
+            for (label i = 0; i < nStrips; i++)
+            {
+                label nVerts = faceVerts[elemI++];
+                nTris += nVerts-2;
+                elemI += nVerts;
+            }
+
+
+            // Store
+            label faceI = faces_.size();
+            faces_.setSize(faceI+nTris);
+            faceMap_.setSize(faces_.size());
+            elemI = 0;
+            for (label i = 0; i < nStrips; i++)
+            {
+                label nVerts = faceVerts[elemI++];
+                label nTris = nVerts-2;
+
+                // Read first triangle
+                faceMap_[faceI] = faceI;
+                face& f = faces_[faceI++];
+                f.setSize(3);
+                f[0] = faceVerts[elemI++];
+                f[1] = faceVerts[elemI++];
+                f[2] = faceVerts[elemI++];
+                for (label triI = 1; triI < nTris; triI++)
+                {
+                    faceMap_[faceI] = faceI;
+                    face& f = faces_[faceI++];
+                    f.setSize(3);
+                    f[0] = faceVerts[elemI-1];
+                    f[1] = faceVerts[elemI-2];
+                    f[2] = faceVerts[elemI++];
+                }
+            }
         }
         else
         {
