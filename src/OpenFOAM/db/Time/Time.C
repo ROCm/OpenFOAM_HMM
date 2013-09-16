@@ -384,11 +384,18 @@ Foam::Time::Time
     const word& constantName
 )
 :
+    //TimePaths
+    //(
+    //    args.parRunControl().parRun(),
+    //    args.rootPath(),
+    //    args.globalCaseName(),
+    //    args.caseName(),
+    //    systemName,
+    //    constantName
+    //),
     TimePaths
     (
-        args.parRunControl().parRun(),
         args.rootPath(),
-        args.globalCaseName(),
         args.caseName(),
         systemName,
         constantName

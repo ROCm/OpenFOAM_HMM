@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "TimePaths.H"
+#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -41,11 +42,20 @@ Foam::TimePaths::TimePaths
     system_(systemName),
     constant_(constantName)
 {
+    // Find out from case name whether a processor directory
     std::string::size_type pos = caseName.find("processor");
     if (pos != string::npos)
     {
         processorCase_ = true;
-        globalCaseName_ = caseName(pos-1);
+
+        if (pos == 0)
+        {
+            globalCaseName_ = ".";
+        }
+        else
+        {
+            globalCaseName_ = caseName(pos-1);
+        }
     }
     else
     {
