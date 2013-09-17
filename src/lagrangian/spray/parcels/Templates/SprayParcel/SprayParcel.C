@@ -246,7 +246,7 @@ void Foam::SprayParcel<ParcelType>::calcBreakup
     const scalar mass = p.mass();
     const forceSuSp Fcp = forces.calcCoupled(p, dt, mass, Re, muAv);
     const forceSuSp Fncp = forces.calcNonCoupled(p, dt, mass, Re, muAv);
-    scalar tMom = mass/(Fcp.Sp() + Fncp.Sp());
+    this->tMom() = mass/(Fcp.Sp() + Fncp.Sp());
 
     const vector g = td.cloud().g().value();
 
@@ -274,7 +274,7 @@ void Foam::SprayParcel<ParcelType>::calcBreakup
             muAv,
             Urel,
             Urmag,
-            tMom,
+            this->tMom(),
             dChild,
             massChild
         )
