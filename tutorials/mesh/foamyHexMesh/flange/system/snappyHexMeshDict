@@ -12,12 +12,20 @@ FoamFile
     class       dictionary;
     object      snappyHexMeshDict;
 }
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Which of the steps to run
-castellatedMesh false;
-snap            false;
-addLayers       true;
+castellatedMesh true;
+snap            true;
+addLayers       false;
+
+
+foamyHexMesh
+{
+    #include "foamyHexMeshDict"
+}
+
 
 
 // Geometry. Definition of all surfaces. All surfaces are of class
@@ -28,20 +36,8 @@ addLayers       true;
 // - to 'snap' the mesh boundary to the surface
 geometry
 {
-//    motorBike.obj
-//    {
-//        type triSurfaceMesh;
-//        name motorBike;
-//    }
-//
-//    refinementBox
-//    {
-//        type searchableBox;
-//        min (-1.0 -0.7 0.0);
-//        max ( 8.0  0.7 2.5);
-//    }
-};
-
+    ${:foamyHexMesh.geometry};
+}
 
 
 // Settings for the castellatedMesh generation.
@@ -67,19 +63,12 @@ castellatedMeshControls
     // few cells. This setting will cause refinement to stop if <= minimumRefine
     // are selected for refinement. Note: it will at least do one iteration
     // (unless the number of cells to refine is 0)
-    minRefinementCells 10;
-
-    // Allow a certain level of imbalance during refining
-    // (since balancing is quite expensive)
-    // Expressed as fraction of perfect balance (= overall number of cells /
-    // nProcs). 0=balance always.
-    maxLoadUnbalance 0.10;
-
+    minRefinementCells 0;
 
     // Number of buffer layers between different levels.
     // 1 means normal 2:1 refinement restriction, larger means slower
     // refinement.
-    nCellsBetweenLevels 3;
+    nCellsBetweenLevels 1;
 
 
 
@@ -90,10 +79,10 @@ castellatedMeshControls
     // This is a featureEdgeMesh, read from constant/triSurface for now.
     features
     (
-        //{
-        //    file "someLine.eMesh";
-        //    level 2;
-        //}
+        {
+            file "flange.eMesh";
+            level 0;
+        }
     );
 
 
@@ -109,19 +98,11 @@ castellatedMeshControls
 
     refinementSurfaces
     {
-//        motorBike
-//        {
-//            // Surface-wise min and max refinement level
-//            level (5 6);
-//
-//            // Optional specification of patch type (default is wall). No
-//            // constraint types (cyclic, symmetry) etc. are allowed.
-//            patchInfo
-//            {
-//                type wall;
-//                inGroups (motorBike);
-//            }
-//        }
+        flange
+        {
+            // Surface-wise min and max refinement level
+            level (2 2);
+        }
     }
 
     // Resolve sharp angles
@@ -143,11 +124,11 @@ castellatedMeshControls
 
     refinementRegions
     {
-//        refinementBox
-//        {
-//            mode inside;
-//            levels ((1E15 4));
-//        }
+        refineHole
+        {
+            mode inside;
+            levels ((1E15 3));
+        }
     }
 
 
@@ -159,7 +140,7 @@ castellatedMeshControls
     // section reachable from the locationInMesh is kept.
     // NOTE: This point should never be on a face, always inside a cell, even
     // after refinement.
-    locationInMesh (-1 0 0);
+    locationInMesh ${:foamyHexMesh.surfaceConformation.locationInMesh};
 
 
     // Whether any faceZones (as specified in the refinementSurfaces)
@@ -180,19 +161,31 @@ snapControls
     //- Relative distance for points to be attracted by surface feature point
     //  or edge. True distance is this factor times local
     //  maximum edge length.
-    tolerance 4.0;
+    tolerance 1.0;
 
     //- Number of mesh displacement relaxation iterations.
-    nSolveIter 0;
+    nSolveIter 300;
 
     //- Maximum number of snapping relaxation iterations. Should stop
     //  before upon reaching a correct mesh.
     nRelaxIter 5;
 
-    //- Highly experimental and wip: number of feature edge snapping
-    //  iterations. Leave out altogether to disable.
-    //  Do not use here since mesh resolution too low and baffles present
-    //nFeatureSnapIter 10;
+    // Feature snapping
+
+        // Number of feature edge snapping iterations.
+        // Leave out altogether to disable.
+        nFeatureSnapIter 10;
+
+        // Detect (geometric only) features by sampling the surface
+        // (default=false).
+        implicitFeatureSnap true;
+
+        // Use castellatedMeshControls::features (default = true)
+        explicitFeatureSnap false;
+
+        // Detect features between multiple surfaces
+        // (only for explicitFeatureSnap, default = false)
+        multiRegionFeatureSnap true;
 }
 
 
@@ -207,14 +200,15 @@ addLayersControls
     // Per final patch (so not geometry!) the layer information
     layers
     {
-        "flange.obj.*"
+        "flange_.*"
         {
             nSurfaceLayers 1;
         }
     }
 
     // Expansion factor for layer mesh
-    expansionRatio 1.5;
+    expansionRatio 1.0;
+
 
     // Wanted thickness of final added cell layer. If multiple layers
     // is the thickness of the layer furthest away from the wall.
@@ -231,8 +225,8 @@ addLayersControls
     // If points get not extruded do nGrow layers of connected faces that are
     // also not grown. This helps convergence of the layer addition process
     // close to features.
-    // Note: changed(corrected) w.r.t 17x! (didn't do anything in 17x)
     nGrow 0;
+
 
     // Advanced settings
 
@@ -261,9 +255,7 @@ addLayersControls
     maxThicknessToMedialRatio 0.3;
 
     // Angle used to pick up medial axis points
-    // Note: changed(corrected) w.r.t 17x! 90 degrees corresponds to 130 in 17x.
     minMedianAxisAngle 90;
-
 
     // Create buffer region for new layer terminations
     nBufferCellsNoExtrude 0;
@@ -273,15 +265,34 @@ addLayersControls
     // if it reaches this number of iterations; possibly with an illegal
     // mesh.
     nLayerIter 50;
+
+    // Max number of iterations after which relaxed meshQuality controls
+    // get used. Up to nRelaxIter it uses the settings in meshQualityControls,
+    // after nRelaxIter it uses the values in meshQualityControls::relaxed.
+    nRelaxedIter 20;
 }
 
 
 
+// Generic mesh quality settings. At any undoable phase these determine
+// where to undo.
 meshQualityControls
 {
     // Generic mesh quality settings. At any undoable phase these determine
     // where to undo.
     #include "meshQualityDict"
+
+    maxNonOrtho 65;
+
+    // Optional : some meshing phases allow usage of relaxed rules.
+    // See e.g. addLayersControls::nRelaxedIter.
+    relaxed
+    {
+        //- Maximum non-orthogonality allowed. Set to 180 to disable.
+        maxNonOrtho 75;
+    }
+
+    // Advanced
 
     //- Number of error distribution iterations
     nSmoothScale 4;
@@ -302,7 +313,7 @@ debug 0;
 
 // Merge tolerance. Is fraction of overall bounding box of initial mesh.
 // Note: the write tolerance needs to be higher than this.
-mergeTolerance 1e-6;
+mergeTolerance 1E-6;
 
 
 // ************************************************************************* //
