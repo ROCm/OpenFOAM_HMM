@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,29 +23,28 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "snapParameters.H"
+#include "patchFaceOrientation.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-// Construct from dictionary
-Foam::snapParameters::snapParameters(const dictionary& dict)
-:
-    nSmoothPatch_(readLabel(dict.lookup("nSmoothPatch"))),
-    snapTol_(readScalar(dict.lookup("tolerance"))),
-    nSmoothDispl_(readLabel(dict.lookup("nSolveIter"))),
-    nSnap_(readLabel(dict.lookup("nRelaxIter"))),
-    nFeatureSnap_(dict.lookupOrDefault("nFeatureSnapIter", -1)),
-    explicitFeatureSnap_(dict.lookupOrDefault("explicitFeatureSnap", true)),
-    implicitFeatureSnap_(dict.lookupOrDefault("implicitFeatureSnap", false)),
-    multiRegionFeatureSnap_
-    (
-        dict.lookupOrDefault("multiRegionFeatureSnap", false)
-    ),
-    detectNearSurfacesSnap_
-    (
-        dict.lookupOrDefault("detectNearSurfacesSnap", true)
-    )
-{}
+Foam::Ostream& Foam::operator<<
+(
+    Foam::Ostream& os,
+    const Foam::patchFaceOrientation& wDist
+)
+{
+    return os << wDist.flipStatus_;
+}
+
+
+Foam::Istream& Foam::operator>>
+(
+    Foam::Istream& is,
+    Foam::patchFaceOrientation& wDist
+)
+{
+    return is >> wDist.flipStatus_;
+}
 
 
 // ************************************************************************* //

@@ -289,16 +289,6 @@ private:
                 label& nRefine
             ) const;
 
-            //- Is local topology a small gap?
-            bool isGap
-            (
-                const scalar,
-                const vector&,
-                const vector&,
-                const vector&,
-                const vector&
-            ) const;
-
             //- Mark cell if local a gap topology or
             bool checkProximity
             (
@@ -663,6 +653,26 @@ public:
 
 
         // Refinement
+
+            //- Is local topology a small gap?
+            bool isGap
+            (
+                const scalar,
+                const vector&,
+                const vector&,
+                const vector&,
+                const vector&
+            ) const;
+
+            //- Is local topology a small gap normal to the test vector
+            bool isNormalGap
+            (
+                const scalar,
+                const vector&,
+                const vector&,
+                const vector&,
+                const vector&
+            ) const;
 
             //- Calculate list of cells to refine.
             labelList refineCandidates

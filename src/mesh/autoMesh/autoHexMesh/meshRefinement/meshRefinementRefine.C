@@ -1214,7 +1214,6 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
 }
 
 
-// Mark small gaps
 bool Foam::meshRefinement::isGap
 (
     const scalar planarCos,
@@ -1225,12 +1224,53 @@ bool Foam::meshRefinement::isGap
     const vector& normal1
 ) const
 {
-    ////- hits differ and angles are oppositeish
-    //return
-    //    (mag(point0-point1) > mergeDistance())
-    // && ((normal0 & normal1) < (-1+planarCos));
+    //- hits differ and angles are oppositeish and
+    //  hits have a normal distance
+    vector d = point1-point0;
+    scalar magD = mag(d);
+
+    if (magD > mergeDistance())
+    {
+        scalar cosAngle = (normal0 & normal1);
+
+        vector avg = vector::zero;
+        if (cosAngle < (-1+planarCos))
+        {
+            // Opposite normals
+            avg = 0.5*(normal0-normal1);
+        }
+        else if (cosAngle > (1-planarCos))
+        {
+            avg = 0.5*(normal0+normal1);
+        }
+
+        if (avg != vector::zero)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
+}
 
 
+// Mark small gaps
+bool Foam::meshRefinement::isNormalGap
+(
+    const scalar planarCos,
+    const vector& point0,
+    const vector& normal0,
+
+    const vector& point1,
+    const vector& normal1
+) const
+{
     //- hits differ and angles are oppositeish and
     //  hits have a normal distance
     vector d = point1-point0;
@@ -1316,7 +1356,7 @@ bool Foam::meshRefinement::checkProximity
             //  - different location
             //  - opposite surface
 
-            bool closeSurfaces = isGap
+            bool closeSurfaces = isNormalGap
             (
                 planarCos,
                 cellMaxLocation,
@@ -1565,7 +1605,7 @@ Foam::label Foam::meshRefinement::markProximityRefinement
             // Have valid data on both sides. Check planarCos.
             if
             (
-                isGap
+                isNormalGap
                 (
                     planarCos,
                     cellMaxLocation[own],
@@ -1635,7 +1675,7 @@ Foam::label Foam::meshRefinement::markProximityRefinement
             // Have valid data on both sides. Check planarCos.
             if
             (
-                isGap
+                isNormalGap
                 (
                     planarCos,
                     cellMaxLocation[own],
