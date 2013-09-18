@@ -176,6 +176,9 @@ public:
         //- Does the Delaunay cell have a far point
         inline bool hasFarPoint() const;
 
+        //- Does the Delaunay cell have a referred point
+        inline bool hasReferredPoint() const;
+
         //- Does the Delaunay cell have a feature point
         inline bool hasFeaturePoint() const;
 
@@ -215,6 +218,8 @@ public:
         //- A dual vertex on the boundary will result from a Delaunay cell with
         //  least one Delaunay vertex outside and at least one inside
         inline bool boundaryDualVertex() const;
+
+        inline bool baffleBoundaryDualVertex() const;
 
         //- A dual vertex on a feature edge will result from this Delaunay cell
         inline bool featureEdgeDualVertex() const;

@@ -120,6 +120,17 @@ private:
 
     // Static data
 
+        enum dualMeshPointType
+        {
+            internal     = 0,
+            surface      = 1,
+            featureEdge  = 2,
+            featurePoint = 3,
+            constrained  = 4
+        };
+
+        static const NamedEnum<dualMeshPointType, 5> dualMeshPointTypeNames_;
+
         static const scalar searchConeAngle;
 
         static const scalar searchAngleOppositeSurface;
@@ -682,14 +693,12 @@ private:
         //- Merge vertices that are identical
         void mergeIdenticalDualVertices
         (
-            const pointField& pts,
-            const labelList& boundaryPts
+            const pointField& pts
         );
 
         label mergeIdenticalDualVertices
         (
             const pointField& pts,
-            const labelList& boundaryPts,
             Map<label>& dualPtIndexMap
         ) const;
 

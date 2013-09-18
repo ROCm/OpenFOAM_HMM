@@ -958,7 +958,7 @@ void Foam::conformalVoronoiMesh::writeMesh
     {
         Info<< nl << "Filtering edges on polyMesh" << nl << endl;
 
-        meshFilter.reset(new polyMeshFilter(mesh));
+        meshFilter.reset(new polyMeshFilter(mesh, boundaryPts));
 
         // Filter small edges only. This reduces the number of faces so that
         // the face filtering is sped up.
@@ -974,9 +974,28 @@ void Foam::conformalVoronoiMesh::writeMesh
 
     if (foamyHexMeshControls().filterFaces())
     {
+        labelIOList boundaryPtsIO
+        (
+            IOobject
+            (
+                "pointPriority",
+                instance,
+                time(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            labelList(mesh.nPoints(), labelMin)
+        );
+
+        forAll(mesh.points(), ptI)
+        {
+            boundaryPtsIO[ptI] = mesh.pointZones().whichZone(ptI);
+        }
+
+
         Info<< nl << "Filtering faces on polyMesh" << nl << endl;
 
-        meshFilter.reset(new polyMeshFilter(mesh));
+        meshFilter.reset(new polyMeshFilter(mesh, boundaryPtsIO));
 
         meshFilter().filter(nInitialBadFaces);
         {
@@ -1005,158 +1024,43 @@ void Foam::conformalVoronoiMesh::writeMesh
             << endl;
     }
 
-
-//    volTensorField alignments
-//    (
-//        IOobject
-//        (
-//            "alignmentsField",
-//            runTime_.timeName(),
-//            runTime_,
-//            IOobject::NO_READ,
-//            IOobject::AUTO_WRITE
-//        ),
-//        mesh,
-//        tensor::zero
-//    );
-//
-//    forAll(mesh.cellCentres(), pI)
-//    {
-//        Vertex_handle nearV =
-//            nearest_vertex
-//            (
-//                toPoint<Point>(mesh.cellCentres()[pI])
-//            );
-//        alignments[pI] = nearV->alignment();
-//    }
-//    alignments.write();
-//
-//    {
-//        volVectorField alignmentx
-//        (
-//            IOobject
-//            (
-//                "alignmentsx",
-//                runTime_.timeName(),
-//                runTime_,
-//                IOobject::NO_READ,
-//                IOobject::AUTO_WRITE
-//            ),
-//            mesh,
-//            vector::zero
-//        );
-//        forAll(alignmentx, aI)
-//        {
-//            alignmentx[aI] = alignments[aI].x();
-//        }
-//        alignmentx.write();
-//    }
-//    {
-//        volVectorField alignmenty
-//        (
-//            IOobject
-//            (
-//                "alignmentsy",
-//                runTime_.timeName(),
-//                runTime_,
-//                IOobject::NO_READ,
-//                IOobject::AUTO_WRITE
-//            ),
-//            mesh,
-//            vector::zero
-//        );
-//        forAll(alignmenty, aI)
-//        {
-//            alignmenty[aI] = alignments[aI].y();
-//        }
-//        alignmenty.write();
-//    }
-//    {
-//        volVectorField alignmentz
-//        (
-//            IOobject
-//            (
-//                "alignmentsz",
-//                runTime_.timeName(),
-//                runTime_,
-//                IOobject::NO_READ,
-//                IOobject::AUTO_WRITE
-//            ),
-//            mesh,
-//            vector::zero
-//        );
-//        forAll(alignmentz, aI)
-//        {
-//            alignmentz[aI] = alignments[aI].z();
-//        }
-//        alignmentz.write();
-//    }
-
-
-    labelIOList boundaryIOPts
-    (
-        IOobject
-        (
-            "boundaryPoints",
-            instance,
-            runTime_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        boundaryPts
-    );
-
-    // Dump list of boundary points
-    forAll(mesh.boundaryMesh(), patchI)
     {
-        const polyPatch& pp = mesh.boundaryMesh()[patchI];
+        pointScalarField boundaryPtsScalarField
+        (
+            IOobject
+            (
+                "boundaryPoints_collapsed",
+                instance,
+                time(),
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            pointMesh::New(mesh),
+            scalar(labelMin)
+        );
 
-        if (!isA<coupledPolyPatch>(pp))
+        labelIOList boundaryPtsIO
+        (
+            IOobject
+            (
+                "pointPriority",
+                instance,
+                time(),
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            labelList(mesh.nPoints(), labelMin)
+        );
+
+        forAll(mesh.points(), ptI)
         {
-            forAll(pp, fI)
-            {
-                const face& boundaryFace = pp[fI];
-
-                forAll(boundaryFace, pI)
-                {
-                    const label boundaryPointI = boundaryFace[pI];
-
-                    boundaryIOPts[boundaryPointI] = boundaryPts[boundaryPointI];
-                }
-            }
+            boundaryPtsScalarField[ptI] = mesh.pointZones().whichZone(ptI);
+            boundaryPtsIO[ptI] = mesh.pointZones().whichZone(ptI);
         }
+
+        boundaryPtsScalarField.write();
+        boundaryPtsIO.write();
     }
-
-    boundaryIOPts.write();
-
-//    forAllConstIter(labelHashSet, pointsInPatch, pI)
-//    {
-//        const Foam::point& ptMaster = mesh.points()[pI.key()];
-//
-//        forAllConstIter(labelHashSet, pointsInPatch, ptI)
-//        {
-//            if (ptI.key() != pI.key())
-//            {
-//                const Foam::point& ptSlave = mesh.points()[ptI.key()];
-//
-//                const scalar dist = mag(ptMaster - ptSlave);
-//                if (ptMaster == ptSlave)
-//                {
-//                    Pout<< "Point(" << pI.key() << ") " << ptMaster
-//                        << " == "
-//                        << "(" << ptI.key() << ") " << ptSlave
-//                        << endl;
-//                }
-//                else if (dist == 0)
-//                {
-//                    Pout<< "Point(" << pI.key() << ") " << ptMaster
-//                        << " ~= "
-//                        << "(" << ptI.key() << ") " << ptSlave
-//                        << endl;
-//                }
-//            }
-//        }
-//    }
 
 //    writeCellSizes(mesh);
 

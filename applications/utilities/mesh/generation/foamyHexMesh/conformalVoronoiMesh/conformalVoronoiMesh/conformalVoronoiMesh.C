@@ -41,8 +41,25 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(conformalVoronoiMesh, 0);
+    defineTypeNameAndDebug(conformalVoronoiMesh, 0);
+
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::conformalVoronoiMesh::dualMeshPointType,
+        5
+    >::names[] =
+    {
+        "internal",
+        "surface",
+        "featureEdge",
+        "featurePoint",
+        "constrained"
+    };
 }
+
+const Foam::NamedEnum<Foam::conformalVoronoiMesh::dualMeshPointType, 5>
+    Foam::conformalVoronoiMesh::dualMeshPointTypeNames_;
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -1600,7 +1617,6 @@ void Foam::conformalVoronoiMesh::move()
         printVertexInfo(Info);
     }
 
-    // Write the intermediate mesh, do not filter the dual faces.
     if (time().outputTime())
     {
         writeMesh(time().timeName());

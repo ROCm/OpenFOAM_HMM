@@ -99,6 +99,7 @@ createShellMesh/createShellMesh.C
 
 extrudePatchMesh/extrudePatchMesh.C
 
+polyMeshFilter/polyMeshFilterSettings.C
 polyMeshFilter/polyMeshFilter.C
 
 LIB = $(FOAM_LIBBIN)/libdynamicMesh

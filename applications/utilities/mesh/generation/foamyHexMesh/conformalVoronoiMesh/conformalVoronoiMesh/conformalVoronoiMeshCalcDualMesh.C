@@ -207,209 +207,214 @@ void Foam::conformalVoronoiMesh::checkCells()
 }
 
 
-void Foam::conformalVoronoiMesh::checkDuals()
-{
-    List<List<Point> > pointFieldList(Pstream::nProcs());
-
-    List<Point> duals(number_of_finite_cells());
-
-//    PackedBoolList bPoints(number_of_finite_cells());
-
-//    indexDualVertices(duals, bPoints);
-
-    label count = 0;//duals.size();
-
-    duals.setSize(number_of_finite_cells());
-
-    globalIndex gIndex(number_of_vertices());
-
-    for
-    (
-        Delaunay::Finite_cells_iterator cit = finite_cells_begin();
-        cit != finite_cells_end();
-        ++cit
-    )
-    {
-        if (cit->hasFarPoint())
-        {
-            continue;
-        }
-
-        duals[count++] = cit->circumcenter();
-
-//        List<labelPair> cellVerticesPair(4);
-//        List<Point> cellVertices(4);
+//void Foam::conformalVoronoiMesh::checkDuals()
+//{
+//    List<List<Point> > pointFieldList(Pstream::nProcs());
 //
-//        for (label vI = 0; vI < 4; ++vI)
+//    List<Point> duals(number_of_finite_cells());
+//
+//    typedef CGAL::Exact_predicates_exact_constructions_kernel       EK2;
+//    typedef CGAL::Regular_triangulation_euclidean_traits_3<EK2>     EK;
+//    typedef CGAL::Cartesian_converter<baseK::Kernel, EK2>  To_exact;
+//    typedef CGAL::Cartesian_converter<EK2, baseK::Kernel>  Back_from_exact;
+//
+////    PackedBoolList bPoints(number_of_finite_cells());
+//
+////    indexDualVertices(duals, bPoints);
+//
+//    label count = 0;//duals.size();
+//
+//    duals.setSize(number_of_finite_cells());
+//
+//    globalIndex gIndex(number_of_vertices());
+//
+//    for
+//    (
+//        Delaunay::Finite_cells_iterator cit = finite_cells_begin();
+//        cit != finite_cells_end();
+//        ++cit
+//    )
+//    {
+//        if (cit->hasFarPoint())
 //        {
-//            cellVerticesPair[vI] = labelPair
-//            (
-//                cit->vertex(vI)->procIndex(),
-//                cit->vertex(vI)->index()
-//            );
-//            cellVertices[vI] = cit->vertex(vI)->point();
+//            continue;
 //        }
 //
-//        labelList oldToNew;
-//        sortedOrder(cellVerticesPair, oldToNew);
-//        oldToNew = invert(oldToNew.size(), oldToNew);
-//        inplaceReorder(oldToNew, cellVerticesPair);
-//        inplaceReorder(oldToNew, cellVertices);
+//        duals[count++] = cit->circumcenter();
 //
-//        duals[count++] = CGAL::circumcenter
-//        (
-//            cellVertices[0],
-//            cellVertices[1],
-//            cellVertices[2],
-//            cellVertices[3]
-//        );
-
-//        To_exact to_exact;
-//        Back_from_exact back_from_exact;
-//        EK::Construct_circumcenter_3 exact_circumcenter =
-//            EK().construct_circumcenter_3_object();
+////        List<labelPair> cellVerticesPair(4);
+////        List<Point> cellVertices(4);
+////
+////        for (label vI = 0; vI < 4; ++vI)
+////        {
+////            cellVerticesPair[vI] = labelPair
+////            (
+////                cit->vertex(vI)->procIndex(),
+////                cit->vertex(vI)->index()
+////            );
+////            cellVertices[vI] = cit->vertex(vI)->point();
+////        }
+////
+////        labelList oldToNew;
+////        sortedOrder(cellVerticesPair, oldToNew);
+////        oldToNew = invert(oldToNew.size(), oldToNew);
+////        inplaceReorder(oldToNew, cellVerticesPair);
+////        inplaceReorder(oldToNew, cellVertices);
+////
+////        duals[count++] = CGAL::circumcenter
+////        (
+////            cellVertices[0],
+////            cellVertices[1],
+////            cellVertices[2],
+////            cellVertices[3]
+////        );
 //
-//        duals[count++] = topoint
-//        (
-//            back_from_exact
-//            (
-//                exact_circumcenter
-//                (
-//                    to_exact(cit->vertex(0)->point()),
-//                    to_exact(cit->vertex(1)->point()),
-//                    to_exact(cit->vertex(2)->point()),
-//                    to_exact(cit->vertex(3)->point())
-//                )
-//            )
-//        );
-    }
-
-    Pout<< "Duals Calculated " << count << endl;
-
-    duals.setSize(count);
-
-    pointFieldList[Pstream::myProcNo()] = duals;
-
-    Pstream::gatherList(pointFieldList);
-
-    if (Pstream::master())
-    {
-        Info<< "Checking on master processor the dual locations of each " << nl
-            << "processor point list against the master dual list." << nl
-            << "There are " << pointFieldList.size() << " processors" << nl
-            << "The size of each processor's dual list is:" << endl;
-
-        forAll(pointFieldList, pfI)
-        {
-            Info<< "    Proc " << pfI << " has " << pointFieldList[pfI].size()
-                << " duals" << endl;
-        }
-
-        label nNonMatches = 0;
-        label nNearMatches = 0;
-        label nExactMatches = 0;
-
-        forAll(pointFieldList[0], pI)
-        {
-            const Point& masterPoint = pointFieldList[0][pI];
-
-            bool foundMatch = false;
-            bool foundNearMatch = false;
-
-            scalar minCloseness = GREAT;
-            Point closestPoint(0, 0, 0);
-
-            forAll(pointFieldList, pfI)
-            {
-                if (pfI == 0)
-                {
-                    continue;
-                }
-
-//                label pfI = 1;
-
-                forAll(pointFieldList[pfI], pISlave)
-                {
-                    const Point& slavePoint
-                        = pointFieldList[pfI][pISlave];
-
-                    if (masterPoint == slavePoint)
-                    {
-                        foundMatch = true;
-                        break;
-                    }
-
-                    const scalar closeness = mag
-                    (
-                        topoint(masterPoint) - topoint(slavePoint)
-                    );
-
-                    if (closeness < 1e-12)
-                    {
-                        foundNearMatch = true;
-                    }
-                    else
-                    {
-                        if (closeness < minCloseness)
-                        {
-                            minCloseness = closeness;
-                            closestPoint = slavePoint;
-                        }
-                    }
-                }
-
-                if (!foundMatch)
-                {
-                    if (foundNearMatch)
-                    {
-                        CGAL::Gmpq x(CGAL::to_double(masterPoint.x()));
-                        CGAL::Gmpq y(CGAL::to_double(masterPoint.y()));
-                        CGAL::Gmpq z(CGAL::to_double(masterPoint.z()));
-
-                        std::cout<< "master = " << x << " " << y << " " << z
-                            << std::endl;
-
-                        CGAL::Gmpq xs(CGAL::to_double(closestPoint.x()));
-                        CGAL::Gmpq ys(CGAL::to_double(closestPoint.y()));
-                        CGAL::Gmpq zs(CGAL::to_double(closestPoint.z()));
-                        std::cout<< "slave  = " << xs << " " << ys << " " << zs
-                            << std::endl;
-
-                        nNearMatches++;
-                    }
-                    else
-                    {
-                        nNonMatches++;
-                        Info<< "    Closest point to " << masterPoint << " is "
-                            << closestPoint << nl
-                            << "    Separation is " << minCloseness << endl;
-
-                        CGAL::Gmpq x(CGAL::to_double(masterPoint.x()));
-                        CGAL::Gmpq y(CGAL::to_double(masterPoint.y()));
-                        CGAL::Gmpq z(CGAL::to_double(masterPoint.z()));
-
-                        std::cout<< "master = " << x << " " << y << " " << z
-                                 << std::endl;
-
-                        CGAL::Gmpq xs(CGAL::to_double(closestPoint.x()));
-                        CGAL::Gmpq ys(CGAL::to_double(closestPoint.y()));
-                        CGAL::Gmpq zs(CGAL::to_double(closestPoint.z()));
-                        std::cout<< "slave  = " << xs << " " << ys << " " << zs
-                                 << std::endl;
-                    }
-                }
-                else
-                {
-                    nExactMatches++;
-                }
-            }
-        }
-
-        Info<< "Found " << nNonMatches << " non-matching duals" << nl
-            << " and " << nNearMatches << " near matches"
-            << " and " << nExactMatches << " exact matches" << endl;
-    }
-}
+////        To_exact to_exact;
+////        Back_from_exact back_from_exact;
+////        EK::Construct_circumcenter_3 exact_circumcenter =
+////            EK().construct_circumcenter_3_object();
+////
+////        duals[count++] = topoint
+////        (
+////            back_from_exact
+////            (
+////                exact_circumcenter
+////                (
+////                    to_exact(cit->vertex(0)->point()),
+////                    to_exact(cit->vertex(1)->point()),
+////                    to_exact(cit->vertex(2)->point()),
+////                    to_exact(cit->vertex(3)->point())
+////                )
+////            )
+////        );
+//    }
+//
+//    Pout<< "Duals Calculated " << count << endl;
+//
+//    duals.setSize(count);
+//
+//    pointFieldList[Pstream::myProcNo()] = duals;
+//
+//    Pstream::gatherList(pointFieldList);
+//
+//    if (Pstream::master())
+//    {
+//        Info<< "Checking on master processor the dual locations of each " << nl
+//            << "processor point list against the master dual list." << nl
+//            << "There are " << pointFieldList.size() << " processors" << nl
+//            << "The size of each processor's dual list is:" << endl;
+//
+//        forAll(pointFieldList, pfI)
+//        {
+//            Info<< "    Proc " << pfI << " has " << pointFieldList[pfI].size()
+//                << " duals" << endl;
+//        }
+//
+//        label nNonMatches = 0;
+//        label nNearMatches = 0;
+//        label nExactMatches = 0;
+//
+//        forAll(pointFieldList[0], pI)
+//        {
+//            const Point& masterPoint = pointFieldList[0][pI];
+//
+//            bool foundMatch = false;
+//            bool foundNearMatch = false;
+//
+//            scalar minCloseness = GREAT;
+//            Point closestPoint(0, 0, 0);
+//
+//            forAll(pointFieldList, pfI)
+//            {
+//                if (pfI == 0)
+//                {
+//                    continue;
+//                }
+//
+////                label pfI = 1;
+//
+//                forAll(pointFieldList[pfI], pISlave)
+//                {
+//                    const Point& slavePoint
+//                        = pointFieldList[pfI][pISlave];
+//
+//                    if (masterPoint == slavePoint)
+//                    {
+//                        foundMatch = true;
+//                        break;
+//                    }
+//
+//                    const scalar closeness = mag
+//                    (
+//                        topoint(masterPoint) - topoint(slavePoint)
+//                    );
+//
+//                    if (closeness < 1e-12)
+//                    {
+//                        foundNearMatch = true;
+//                    }
+//                    else
+//                    {
+//                        if (closeness < minCloseness)
+//                        {
+//                            minCloseness = closeness;
+//                            closestPoint = slavePoint;
+//                        }
+//                    }
+//                }
+//
+//                if (!foundMatch)
+//                {
+//                    if (foundNearMatch)
+//                    {
+//                        CGAL::Gmpq x(CGAL::to_double(masterPoint.x()));
+//                        CGAL::Gmpq y(CGAL::to_double(masterPoint.y()));
+//                        CGAL::Gmpq z(CGAL::to_double(masterPoint.z()));
+//
+//                        std::cout<< "master = " << x << " " << y << " " << z
+//                            << std::endl;
+//
+//                        CGAL::Gmpq xs(CGAL::to_double(closestPoint.x()));
+//                        CGAL::Gmpq ys(CGAL::to_double(closestPoint.y()));
+//                        CGAL::Gmpq zs(CGAL::to_double(closestPoint.z()));
+//                        std::cout<< "slave  = " << xs << " " << ys << " " << zs
+//                            << std::endl;
+//
+//                        nNearMatches++;
+//                    }
+//                    else
+//                    {
+//                        nNonMatches++;
+//                        Info<< "    Closest point to " << masterPoint << " is "
+//                            << closestPoint << nl
+//                            << "    Separation is " << minCloseness << endl;
+//
+//                        CGAL::Gmpq x(CGAL::to_double(masterPoint.x()));
+//                        CGAL::Gmpq y(CGAL::to_double(masterPoint.y()));
+//                        CGAL::Gmpq z(CGAL::to_double(masterPoint.z()));
+//
+//                        std::cout<< "master = " << x << " " << y << " " << z
+//                                 << std::endl;
+//
+//                        CGAL::Gmpq xs(CGAL::to_double(closestPoint.x()));
+//                        CGAL::Gmpq ys(CGAL::to_double(closestPoint.y()));
+//                        CGAL::Gmpq zs(CGAL::to_double(closestPoint.z()));
+//                        std::cout<< "slave  = " << xs << " " << ys << " " << zs
+//                                 << std::endl;
+//                    }
+//                }
+//                else
+//                {
+//                    nExactMatches++;
+//                }
+//            }
+//        }
+//
+//        Info<< "Found " << nNonMatches << " non-matching duals" << nl
+//            << " and " << nNearMatches << " near matches"
+//            << " and " << nExactMatches << " exact matches" << endl;
+//    }
+//}
 
 
 void Foam::conformalVoronoiMesh::checkVertices()
@@ -578,7 +583,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         Info<< nl << "Merging identical points" << endl;
 
         // There is no guarantee that a merge of close points is no-risk
-        mergeIdenticalDualVertices(points, boundaryPts);
+        mergeIdenticalDualVertices(points);
     }
 
     // Final dual face and owner neighbour construction
@@ -813,8 +818,7 @@ void Foam::conformalVoronoiMesh::calcTetMesh
 
 void Foam::conformalVoronoiMesh::mergeIdenticalDualVertices
 (
-    const pointField& pts,
-    const labelList& boundaryPts
+    const pointField& pts
 )
 {
     // Assess close points to be merged
@@ -829,7 +833,6 @@ void Foam::conformalVoronoiMesh::mergeIdenticalDualVertices
         nPtsMerged = mergeIdenticalDualVertices
         (
             pts,
-            boundaryPts,
             dualPtIndexMap
         );
 
@@ -851,7 +854,6 @@ void Foam::conformalVoronoiMesh::mergeIdenticalDualVertices
 Foam::label Foam::conformalVoronoiMesh::mergeIdenticalDualVertices
 (
     const pointField& pts,
-    const labelList& boundaryPts,
     Map<label>& dualPtIndexMap
 ) const
 {
@@ -883,6 +885,19 @@ Foam::label Foam::conformalVoronoiMesh::mergeIdenticalDualVertices
 
             if (p1 == p2)
             {
+//                if (c1->parallelDualVertex() || c2->parallelDualVertex())
+//                {
+//                    if (c1->vertexLowestProc() < c2->vertexLowestProc())
+//                    {
+//                        dualPtIndexMap.insert(c1I, c1I);
+//                        dualPtIndexMap.insert(c2I, c1I);
+//                    }
+//                    else
+//                    {
+//                        dualPtIndexMap.insert(c1I, c2I);
+//                        dualPtIndexMap.insert(c2I, c2I);
+//                    }
+//                }
                 if (c1I < c2I)
                 {
                     dualPtIndexMap.insert(c1I, c1I);
@@ -1338,13 +1353,13 @@ void Foam::conformalVoronoiMesh::checkCellSizing()
 
     timeCheck("Start of Cell Sizing");
 
-    labelList boundaryPts(number_of_finite_cells(), -1);
+    labelList boundaryPts(number_of_finite_cells(), internal);
     pointField ptsField;
 
     indexDualVertices(ptsField, boundaryPts);
 
     // Merge close dual vertices.
-    mergeIdenticalDualVertices(ptsField, boundaryPts);
+    mergeIdenticalDualVertices(ptsField);
 
     autoPtr<polyMesh> meshPtr = createPolyMeshFromPoints(ptsField);
     const polyMesh& pMesh = meshPtr();
@@ -1755,7 +1770,7 @@ void Foam::conformalVoronoiMesh::indexDualVertices
     boundaryPts.setSize
     (
         number_of_finite_cells() + nConstrainedVertices,
-        -1
+        internal
     );
 
     if (foamyHexMeshControls().guardFeaturePoints())
@@ -1774,7 +1789,7 @@ void Foam::conformalVoronoiMesh::indexDualVertices
                     topoint(vit->point());
 
                 boundaryPts[number_of_finite_cells() + nConstrainedVertices] =
-                    1;
+                    constrained;
 
                 nConstrainedVertices++;
             }
@@ -1974,14 +1989,39 @@ void Foam::conformalVoronoiMesh::indexDualVertices
 
             if (cit->boundaryDualVertex())
             {
-                if (cit->featureEdgeDualVertex())
+                if (cit->featurePointDualVertex())
                 {
-                    boundaryPts[cit->cellIndex()] = 1;
+                    boundaryPts[cit->cellIndex()] = featurePoint;
+                }
+                else if (cit->featureEdgeDualVertex())
+                {
+                    boundaryPts[cit->cellIndex()] = featureEdge;
                 }
                 else
                 {
-                    boundaryPts[cit->cellIndex()] = 0;
+                    boundaryPts[cit->cellIndex()] = surface;
                 }
+            }
+            else if
+            (
+                cit->baffleBoundaryDualVertex()
+            )
+            {
+                boundaryPts[cit->cellIndex()] = surface;
+            }
+            else if
+            (
+                cit->vertex(0)->featureEdgePoint()
+             && cit->vertex(1)->featureEdgePoint()
+             && cit->vertex(2)->featureEdgePoint()
+             && cit->vertex(3)->featureEdgePoint()
+            )
+            {
+                boundaryPts[cit->cellIndex()] = featureEdge;
+            }
+            else
+            {
+                boundaryPts[cit->cellIndex()] = internal;
             }
         }
         else
