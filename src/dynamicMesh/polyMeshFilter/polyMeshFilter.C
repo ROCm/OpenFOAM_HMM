@@ -869,18 +869,7 @@ Foam::polyMeshFilter::polyMeshFilter(const fvMesh& mesh)
     ),
     mesh_(mesh),
     newMeshPtr_(),
-    originalPointPriority_
-    (
-        IOobject
-        (
-            "pointPriority",
-            mesh.time().timeName(),
-            mesh.time(),
-            IOobject::READ_IF_PRESENT,
-            IOobject::AUTO_WRITE
-        ),
-        labelList(mesh.nPoints(), labelMin)
-    ),
+    originalPointPriority_(mesh.nPoints(), labelMin),
     pointPriority_(),
     minEdgeLen_(),
     faceFilterFactor_()
