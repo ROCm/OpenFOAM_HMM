@@ -110,7 +110,7 @@ void Foam::cloudSolution::read()
     dict_.lookup("transient") >> transient_;
     dict_.lookup("coupled") >> coupled_;
     dict_.lookup("cellValueSourceCorrection") >> cellValueSourceCorrection_;
-    dict_.lookup("maxCo") >> maxCo_;
+    dict_.readIfPresent("maxCo", maxCo_);
 
     if (steadyState())
     {
