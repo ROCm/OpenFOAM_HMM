@@ -8,6 +8,7 @@ conformalVoronoiMesh/indexedCell/indexedCellEnum.C
 conformalVoronoiMesh/conformalVoronoiMesh.C
 conformalVoronoiMesh/conformalVoronoiMeshCalcDualMesh.C
 conformalVoronoiMesh/conformalVoronoiMeshConformToSurface.C
+conformalVoronoiMesh/conformalVoronoiMeshZones.C
 conformalVoronoiMesh/conformalVoronoiMeshIO.C
 conformalVoronoiMesh/conformalVoronoiMeshFeaturePoints.C
 
