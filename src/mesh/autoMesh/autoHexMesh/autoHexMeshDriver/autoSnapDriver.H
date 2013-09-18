@@ -148,6 +148,7 @@ class autoSnapDriver
                 (
                     const label iter,
                     const indirectPrimitivePatch& pp,
+                    const scalarField& faceSnapDist,
                     vectorField& faceDisp,
                     vectorField& faceSurfaceNormal,
                     labelList& faceSurfaceRegion,
@@ -432,6 +433,23 @@ public:
                 const word& zoneName
             );
 
+            //- Helper: calculate average cell centre per point
+            static tmp<pointField> avgCellCentres
+            (
+                const fvMesh& mesh,
+                const indirectPrimitivePatch&
+            );
+
+            //- Per patch point override displacement if in gap situation
+            void detectNearSurfaces
+            (
+                const scalar planarCos,
+                const indirectPrimitivePatch&,
+                const pointField& nearestPoint,
+                const vectorField& nearestNormal,
+                vectorField& disp
+            ) const;
+
             //- Per patch point calculate point on nearest surface. Set as
             //  boundary conditions of motionSmoother displacement field. Return
             //  displacement of patch points.
@@ -439,7 +457,9 @@ public:
             (
                 const meshRefinement& meshRefiner,
                 const scalarField& snapDist,
-                const indirectPrimitivePatch&
+                const indirectPrimitivePatch&,
+                pointField& nearestPoint,
+                vectorField& nearestNormal
             );
 
             ////- Per patch point calculate point on nearest surface. Set as
@@ -483,6 +503,7 @@ public:
                 const dictionary& snapDict,
                 const dictionary& motionDict,
                 const scalar featureCos,
+                const scalar planarAngle,
                 const snapParameters& snapParams
             );
 

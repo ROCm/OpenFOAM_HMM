@@ -319,6 +319,7 @@ void Foam::autoSnapDriver::calcNearestFace
 (
     const label iter,
     const indirectPrimitivePatch& pp,
+    const scalarField& faceSnapDist,
     vectorField& faceDisp,
     vectorField& faceSurfaceNormal,
     labelList& faceSurfaceGlobalRegion,
@@ -409,7 +410,7 @@ void Foam::autoSnapDriver::calcNearestFace
         (
             labelList(1, zoneSurfI),
             fc,
-            sqr(scalarField(fc.size(), GREAT)),// sqr of attract dist
+            sqr(faceSnapDist),// sqr of attract dist
             hitSurface,
             hitInfo,
             hitRegion,
@@ -428,6 +429,14 @@ void Foam::autoSnapDriver::calcNearestFace
                     hitSurface[hitI],
                     hitRegion[hitI]
                 );
+            }
+            else
+            {
+                WarningIn
+                (
+                    "autoSnapDriver::calcNearestFace(..)"
+                )   << "Did not find surface near face centre " << fc[hitI]
+                    << endl;
             }
         }
     }
@@ -467,7 +476,7 @@ void Foam::autoSnapDriver::calcNearestFace
     (
         unzonedSurfaces,
         fc,
-        sqr(scalarField(fc.size(), GREAT)),// sqr of attract dist
+        sqr(faceSnapDist),// sqr of attract dist
         hitSurface,
         hitInfo,
         hitRegion,
@@ -486,6 +495,14 @@ void Foam::autoSnapDriver::calcNearestFace
                 hitSurface[hitI],
                 hitRegion[hitI]
             );
+        }
+        else
+        {
+            WarningIn
+            (
+                "autoSnapDriver::calcNearestFace(..)"
+            )   << "Did not find surface near face centre " << fc[hitI]
+                << endl;
         }
     }
 
@@ -560,24 +577,44 @@ void Foam::autoSnapDriver::calcNearestFacePointProperties
     forAll(pp.pointFaces(), pointI)
     {
         const labelList& pFaces = pp.pointFaces()[pointI];
-        List<point>& pNormals = pointFaceSurfNormals[pointI];
-        pNormals.setSize(pFaces.size());
-        List<point>& pDisp = pointFaceDisp[pointI];
-        pDisp.setSize(pFaces.size());
-        List<point>& pFc = pointFaceCentres[pointI];
-        pFc.setSize(pFaces.size());
-        labelList& pFid = pointFacePatchID[pointI];
-        pFid.setSize(pFaces.size());
 
+        // Count valid face normals
+        label nFaces = 0;
         forAll(pFaces, i)
         {
             label faceI = pFaces[i];
-            pNormals[i] = faceSurfaceNormal[faceI];
-            pDisp[i] = faceDisp[faceI];
-            pFc[i] = pp.faceCentres()[faceI];
-            //label meshFaceI = pp.addressing()[faceI];
-            //pFid[i] = mesh.boundaryMesh().whichPatch(meshFaceI);
-            pFid[i] = globalToMasterPatch_[faceSurfaceGlobalRegion[faceI]];
+            if (faceSurfaceGlobalRegion[faceI] != -1)
+            {
+                nFaces++;
+            }
+        }
+
+
+        List<point>& pNormals = pointFaceSurfNormals[pointI];
+        pNormals.setSize(nFaces);
+        List<point>& pDisp = pointFaceDisp[pointI];
+        pDisp.setSize(nFaces);
+        List<point>& pFc = pointFaceCentres[pointI];
+        pFc.setSize(nFaces);
+        labelList& pFid = pointFacePatchID[pointI];
+        pFid.setSize(nFaces);
+
+        nFaces = 0;
+        forAll(pFaces, i)
+        {
+            label faceI = pFaces[i];
+            label globalRegionI = faceSurfaceGlobalRegion[faceI];
+
+            if (globalRegionI != -1)
+            {
+                pNormals[nFaces] = faceSurfaceNormal[faceI];
+                pDisp[nFaces] = faceDisp[faceI];
+                pFc[nFaces] = pp.faceCentres()[faceI];
+                //label meshFaceI = pp.addressing()[faceI];
+                //pFid[nFaces] = mesh.boundaryMesh().whichPatch(meshFaceI);
+                pFid[nFaces] = globalToMasterPatch_[globalRegionI];
+                nFaces++;
+            }
         }
     }
 
@@ -2123,9 +2160,85 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
         bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
     }
 
+    // Collect candidate points for attraction
+    DynamicList<label> attractPoints(pp.nPoints());
+    {
+        const fvMesh& mesh = meshRefiner_.mesh();
+
+        boolList isFeatureEdgeOrPoint(pp.nPoints(), false);
+        label nFeats = 0;
+        forAll(rawPatchConstraints, pointI)
+        {
+            if (rawPatchConstraints[pointI].first() >= 2)
+            {
+                isFeatureEdgeOrPoint[pointI] = true;
+                nFeats++;
+            }
+        }
+
+        Info<< "Intially selected " << returnReduce(nFeats, sumOp<label>())
+            << " points out of " << returnReduce(pp.nPoints(), sumOp<label>())
+            << " for reverse attraction." << endl;
+
+        // Make sure is synchronised (note: check if constraint is already
+        // synced in which case this is not needed here)
+        syncTools::syncPointList
+        (
+            mesh,
+            pp.meshPoints(),
+            isFeatureEdgeOrPoint,
+            orEqOp<bool>(),         // combine op
+            false
+        );
+
+        for (label nGrow = 0; nGrow < 1; nGrow++)
+        {
+            forAll(pp.localFaces(), faceI)
+            {
+                const face& f = pp.localFaces()[faceI];
+
+                forAll(f, fp)
+                {
+                    if (isFeatureEdgeOrPoint[f[fp]])
+                    {
+                        // Mark all points on face
+                        forAll(f, fp)
+                        {
+                            isFeatureEdgeOrPoint[f[fp]] = true;
+                        }
+                        break;
+                    }
+                }
+            }
+            syncTools::syncPointList
+            (
+                mesh,
+                pp.meshPoints(),
+                isFeatureEdgeOrPoint,
+                orEqOp<bool>(),         // combine op
+                false
+            );
+        }
+
+
+        // Collect attractPoints
+        forAll(isFeatureEdgeOrPoint, pointI)
+        {
+            if (isFeatureEdgeOrPoint[pointI])
+            {
+                attractPoints.append(pointI);
+            }
+        }
+
+        Info<< "Selected " << returnReduce(attractPoints.size(), sumOp<label>())
+            << " points out of " << returnReduce(pp.nPoints(), sumOp<label>())
+            << " for reverse attraction." << endl;
+    }
+
+
     indexedOctree<treeDataPoint> ppTree
     (
-        treeDataPoint(pp.localPoints()),
+        treeDataPoint(pp.localPoints(), attractPoints),
         bb,                             // overall search domain
         8,                              // maxLevel
         10,                             // leafsize
@@ -2159,7 +2272,8 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
 
                 if (nearInfo.hit())
                 {
-                    label pointI = nearInfo.index();
+                    label pointI =
+                        ppTree.shapes().pointLabels()[nearInfo.index()];
                     const point attraction = featPt-pp.localPoints()[pointI];
 
                     // Check if this point is already being attracted. If so
@@ -2220,7 +2334,9 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
 
                 if (nearInfo.hit())
                 {
-                    label pointI = nearInfo.index();
+                    label pointI =
+                        ppTree.shapes().pointLabels()[nearInfo.index()];
+
                     const point& pt = pp.localPoints()[pointI];
                     const point attraction = featPt-pt;
 
@@ -2681,6 +2797,19 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
     const fvMesh& mesh = meshRefiner_.mesh();
 
 
+    // Calculate attraction distance per face (from the attraction distance
+    // per point)
+    scalarField faceSnapDist(pp.size(), -GREAT);
+    forAll(pp.localFaces(), faceI)
+    {
+        const face& f = pp.localFaces()[faceI];
+        forAll(f, fp)
+        {
+            faceSnapDist[faceI] = max(faceSnapDist[faceI], snapDist[f[fp]]);
+        }
+    }
+
+
     // Displacement and orientation per pp face
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -2695,6 +2824,7 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
     (
         iter,
         pp,
+        faceSnapDist,
         faceDisp,
         faceSurfaceNormal,
         faceSurfaceGlobalRegion,

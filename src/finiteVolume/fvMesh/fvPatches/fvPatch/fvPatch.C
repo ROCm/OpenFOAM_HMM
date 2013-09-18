@@ -161,7 +161,6 @@ void Foam::fvPatch::movePoints()
 const Foam::scalarField& Foam::fvPatch::deltaCoeffs() const
 {
     return boundaryMesh().mesh().deltaCoeffs().boundaryField()[index()];
-  //return boundaryMesh().mesh().nonOrthDeltaCoeffs().boundaryField()[index()];
 }
 
 

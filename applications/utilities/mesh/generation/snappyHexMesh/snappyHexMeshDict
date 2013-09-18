@@ -194,10 +194,13 @@ castellatedMeshControls
 
     // Planar angle:
     // - used to determine if surface normals
-    //   are roughly the same or opposite. Used e.g. in proximity refinement
-    //   and to decide when to merge free-standing baffles
-    //   If e.g. running in surfaceSimplify mode set this to 180 to
-    //   merge all baffles
+    //   are roughly the same or opposite. Used
+    //      - in proximity refinement
+    //      - to decide when to merge free-standing baffles
+    //        (if e.g. running in surfaceSimplify mode set this to 180 to
+    //         merge all baffles)
+    //      - in snapping to avoid snapping to nearest on 'wrong' side
+    //        of thin gap
     //
     // If not specified same as resolveFeatureAngle
     planarAngle 30;
@@ -284,6 +287,10 @@ snapControls
         // Detect features between multiple surfaces
         // (only for explicitFeatureSnap, default = false)
         multiRegionFeatureSnap false;
+
+
+    // wip: disable snapping to opposite near surfaces (revert to 22x behaviour)
+    // detectNearSurfacesSnap false;
 }
 
 // Settings for the layer addition.
