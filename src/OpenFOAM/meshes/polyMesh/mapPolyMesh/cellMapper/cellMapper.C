@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,9 +27,6 @@ License
 #include "demandDrivenData.H"
 #include "polyMesh.H"
 #include "mapPolyMesh.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -154,6 +151,18 @@ void Foam::cellMapper::calcAddressing() const
 
         const List<objectMap>& cfc = mpm_.cellsFromCellsMap();
 
+        const scalarField& V = mesh_.cellVolumes();
+
+        if (V.size() != sizeBeforeMapping())
+        {
+            FatalErrorIn("void cellMapper::calcAddressing() const")
+                << "cellVolumes size " << V.size()
+                << " is not the old number of cells " << sizeBeforeMapping()
+                << ". Are your cellVolumes already mapped?"
+                << " (new number of cells " << size() << ")"
+                << abort(FatalError);
+        }
+
         forAll(cfc, cfcI)
         {
             // Get addressing
@@ -169,9 +178,28 @@ void Foam::cellMapper::calcAddressing() const
                     << " already destination of mapping." << abort(FatalError);
             }
 
-            // Map from masters, uniform weights
+            // Map from masters
             addr[cellI] = mo;
-            w[cellI] = scalarList(mo.size(), 1.0/mo.size());
+
+            //- uniform weights
+            //w[cellI] = scalarList(mo.size(), 1.0/mo.size());
+
+            //- volume based
+            w[cellI].setSize(mo.size());
+
+            if (mo.size())
+            {
+                scalar sumV = 0;
+                forAll(mo, ci)
+                {
+                    w[cellI][ci] = V[mo[ci]];
+                    sumV += V[mo[ci]];
+                }
+                forAll(mo, ci)
+                {
+                    w[cellI][ci] /= sumV;
+                }
+            }
         }
 
 
@@ -411,15 +439,6 @@ const Foam::labelList& Foam::cellMapper::insertedObjectLabels() const
 
     return *insertedCellLabelsPtr_;
 }
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //
