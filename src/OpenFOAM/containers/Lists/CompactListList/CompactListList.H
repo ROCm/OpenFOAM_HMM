@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,7 @@ Description
 
     Storage is allocated on free-store during construction.
 
-    As a special case a null-contructed CompactListList has an empty
+    As a special case a null-constructed CompactListList has an empty
     offsets_ (instead of size 1).
 
 SourceFiles
