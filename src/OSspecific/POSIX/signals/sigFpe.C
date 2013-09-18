@@ -51,6 +51,31 @@ License
 struct sigaction Foam::sigFpe::oldAction_;
 
 
+void Foam::sigFpe::fillSignallingNan(UList<scalar>& lst)
+{
+#ifdef LINUX
+
+    // initialize to signalling NaN
+#   ifdef WM_SP
+
+    const uint32_t sNAN = 0x7ff7fffflu;
+    uint32_t* dPtr = reinterpret_cast<uint32_t*>(lst.begin());
+
+#   else
+
+    const uint64_t sNAN = 0x7ff7ffffffffffffllu;
+    uint64_t* dPtr = reinterpret_cast<uint64_t*>(lst.begin());
+
+#   endif
+
+    forAll(lst, i)
+    {
+        *dPtr++ = sNAN;
+    }
+#endif
+}
+
+
 #ifdef LINUX
 
 void *(*Foam::sigFpe::oldMallocHook_)(size_t, const void *) = NULL;
@@ -66,24 +91,8 @@ void* Foam::sigFpe::nanMallocHook_(size_t size, const void *caller)
     result = malloc(size);
 
     // initialize to signalling NaN
-#   ifdef WM_SP
-
-    const uint32_t sNAN = 0x7ff7fffflu;
-    uint32_t* dPtr = reinterpret_cast<uint32_t*>(result);
-
-#   else
-
-    const uint64_t sNAN = 0x7ff7ffffffffffffllu;
-    uint64_t* dPtr = reinterpret_cast<uint64_t*>(result);
-
-#   endif
-
-    const size_t nScalars = size/sizeof(scalar);
-    for (size_t i = 0; i < nScalars; ++i)
-    {
-        *dPtr++ = sNAN;
-    }
-
+    UList<scalar> lst(reinterpret_cast<scalar*>(result), size/sizeof(scalar));
+    fillSignallingNan(lst);
 
     // Restore our own hooks
     __malloc_hook = nanMallocHook_;
