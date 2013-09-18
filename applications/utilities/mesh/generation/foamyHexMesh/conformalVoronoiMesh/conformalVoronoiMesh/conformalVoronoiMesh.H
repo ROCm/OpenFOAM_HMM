@@ -115,9 +115,6 @@ public:
     typedef List<pointIndexHitAndFeature>        pointIndexHitAndFeatureList;
     typedef DynamicList<pointIndexHitAndFeature> pointIndexHitAndFeatureDynList;
 
-
-private:
-
     // Static data
 
         enum dualMeshPointType
@@ -130,6 +127,11 @@ private:
         };
 
         static const NamedEnum<dualMeshPointType, 5> dualMeshPointTypeNames_;
+
+
+private:
+
+    // Static data
 
         static const scalar searchConeAngle;
 

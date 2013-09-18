@@ -44,9 +44,9 @@ namespace Foam
     defineTypeNameAndDebug(conformalVoronoiMesh, 0);
 
     template<>
-    const char* Foam::NamedEnum
+    const char* NamedEnum
     <
-        Foam::conformalVoronoiMesh::dualMeshPointType,
+        conformalVoronoiMesh::dualMeshPointType,
         5
     >::names[] =
     {
