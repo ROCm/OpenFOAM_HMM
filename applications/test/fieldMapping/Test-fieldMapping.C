@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
 
 
     // Force allocation of V. Important for any mesh changes since otherwise
-    // old time volumes cannot
+    // old time volumes are not stored
     const scalar totalVol = gSum(mesh.V());
 
     // Face removal engine. No checking for not merging boundary faces.
@@ -285,7 +285,7 @@ int main(int argc, char *argv[])
             if (notEqual(max, 0.0, 1e-10) || notEqual(min, 0.0, 1e-10))
             {
                 FatalErrorIn(args.executable())
-                    << "Uniform field not preserved."
+                    << "Linear profile not preserved."
                     << " Min and max should both be 0.0. min:" << min
                     << " max:" << max
                     << exit(FatalError);
