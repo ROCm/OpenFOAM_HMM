@@ -128,7 +128,7 @@ dimensionedSymmTensor cof(const dimensionedSymmTensor& dt)
     return dimensionedSymmTensor
     (
         "cof("+dt.name()+')',
-        dt.dimensions(),
+        pow(dt.dimensions(), symmTensor::dim - 1),
         cof(dt.value())
     );
 }
