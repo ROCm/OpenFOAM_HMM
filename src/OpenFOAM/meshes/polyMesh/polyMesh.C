@@ -1183,8 +1183,7 @@ const Foam::globalMeshData& Foam::polyMesh::globalData() const
         if (debug)
         {
             Pout<< "polyMesh::globalData() const : "
-                << "Constructing parallelData from processor topology" << nl
-                << "This needs the patch faces to be correctly matched"
+                << "Constructing parallelData from processor topology"
                 << endl;
         }
         // Construct globalMeshData using processorPatch information only.
