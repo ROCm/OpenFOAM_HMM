@@ -202,6 +202,30 @@ Foam::yPlusRAS::yPlusRAS
         )   << "No fvMesh available, deactivating." << nl
             << endl;
     }
+
+    if (active_)
+    {
+        const fvMesh& mesh = refCast<const fvMesh>(obr_);
+
+        volScalarField* yPlusRASPtr
+        (
+            new volScalarField
+            (
+                IOobject
+                (
+                    type(),
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensionedScalar("0", dimless, 0.0)
+            )
+        );
+
+        mesh.objectRegistry::store(yPlusRASPtr);
+    }
 }
 
 
@@ -252,18 +276,11 @@ void Foam::yPlusRAS::write()
 
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
 
-        volScalarField yPlusRAS
-        (
-            IOobject
+        volScalarField& yPlusRAS =
+            const_cast<volScalarField&>
             (
-                "yPlusRAS",
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ
-            ),
-            mesh,
-            dimensionedScalar("0", dimless, 0.0)
-        );
+                mesh.lookupObject<volScalarField>(type())
+            );
 
         if (log_)
         {
@@ -281,7 +298,8 @@ void Foam::yPlusRAS::write()
 
         if (log_)
         {
-            Info<< "    writing field " << yPlusRAS.name() << nl
+            Info<< type() << " " << name_ << " output:" << nl
+                << "    writing field " << yPlusRAS.name() << nl
                 << endl;
         }
 
