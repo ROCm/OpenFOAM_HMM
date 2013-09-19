@@ -299,8 +299,8 @@ void Foam::conformalVoronoiMesh::checkCells()
 //
 //    if (Pstream::master())
 //    {
-//        Info<< "Checking on master processor the dual locations of each " << nl
-//            << "processor point list against the master dual list." << nl
+//        Info<< "Checking on master processor the dual locations of each" << nl
+//            << " processor point list against the master dual list." << nl
 //            << "There are " << pointFieldList.size() << " processors" << nl
 //            << "The size of each processor's dual list is:" << endl;
 //
@@ -377,7 +377,8 @@ void Foam::conformalVoronoiMesh::checkCells()
 //                        CGAL::Gmpq xs(CGAL::to_double(closestPoint.x()));
 //                        CGAL::Gmpq ys(CGAL::to_double(closestPoint.y()));
 //                        CGAL::Gmpq zs(CGAL::to_double(closestPoint.z()));
-//                        std::cout<< "slave  = " << xs << " " << ys << " " << zs
+//                        std::cout<< "slave  = " << xs << " " << ys << " "
+//                                 << zs
 //                            << std::endl;
 //
 //                        nNearMatches++;
@@ -385,7 +386,7 @@ void Foam::conformalVoronoiMesh::checkCells()
 //                    else
 //                    {
 //                        nNonMatches++;
-//                        Info<< "    Closest point to " << masterPoint << " is "
+//                        Info<< "Closest point to " << masterPoint << " is "
 //                            << closestPoint << nl
 //                            << "    Separation is " << minCloseness << endl;
 //
@@ -399,7 +400,8 @@ void Foam::conformalVoronoiMesh::checkCells()
 //                        CGAL::Gmpq xs(CGAL::to_double(closestPoint.x()));
 //                        CGAL::Gmpq ys(CGAL::to_double(closestPoint.y()));
 //                        CGAL::Gmpq zs(CGAL::to_double(closestPoint.z()));
-//                        std::cout<< "slave  = " << xs << " " << ys << " " << zs
+//                        std::cout<< "slave  = " << xs << " " << ys << " "
+//                                 << zs
 //                                 << std::endl;
 //                    }
 //                }
