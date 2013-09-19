@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    volFieldTest
+    Test-volField
 
 \*---------------------------------------------------------------------------*/
 
@@ -51,8 +51,6 @@ int main(int argc, char *argv[])
         ),
         mesh
     );
-
-    //Info<< min(p, p);
 
     Info<< "Reading field U\n" << endl;
     volVectorField U
@@ -85,9 +83,12 @@ int main(int argc, char *argv[])
         zeroGradientFvPatchSymmTensorField::typeName
     );
 
-    //Info<< fvc::div(st) << endl;
-
-    solve(fvm::ddt(st) + fvm::div(phi, st) - fvm::laplacian(st));
+    solve
+    (
+        fvm::ddt(st)
+      + fvm::div(phi, st)
+      - fvm::laplacian(dimensionedScalar("D", sqr(dimLength)/dimTime, 1), st)
+    );
 
     return 0;
 }
