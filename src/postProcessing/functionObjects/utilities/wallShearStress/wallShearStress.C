@@ -121,6 +121,35 @@ Foam::wallShearStress::wallShearStress
             << endl;
     }
 
+    if (active_)
+    {
+        const fvMesh& mesh = refCast<const fvMesh>(obr_);
+
+        volVectorField* wallShearStressPtr
+        (
+            new volVectorField
+            (
+                IOobject
+                (
+                    type(),
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensionedVector
+                (
+                    "0",
+                    sqr(dimLength)/sqr(dimTime),
+                    vector::zero
+                )
+            )
+        );
+
+        mesh.objectRegistry::store(wallShearStressPtr);
+    }
+
     read(dict);
 }
 
@@ -219,18 +248,11 @@ void Foam::wallShearStress::write()
 
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
 
-        volVectorField wallShearStress
-        (
-            IOobject
+        volVectorField& wallShearStress =
+            const_cast<volVectorField&>
             (
-                "wallShearStress",
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ
-            ),
-            mesh,
-            dimensionedVector("0", sqr(dimLength)/sqr(dimTime), vector::zero)
-        );
+                mesh.lookupObject<volVectorField>(type())
+            );
 
         if (log_)
         {
@@ -256,7 +278,7 @@ void Foam::wallShearStress::write()
         else
         {
             FatalErrorIn("void Foam::wallShearStress::write()")
-                << "Unable to find incompressible turbulence model in the "
+                << "Unable to find turbulence model in the "
                 << "database" << exit(FatalError);
         }
 
@@ -265,7 +287,8 @@ void Foam::wallShearStress::write()
 
         if (log_)
         {
-            Info<< "    writing field " << wallShearStress.name() << nl
+            Info<< type() << " " << name_ << " output:" << nl
+                << "    writing field " << wallShearStress.name() << nl
                 << endl;
         }
 
