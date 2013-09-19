@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
         // Remove face
         label candidateFaceI = rndGen.integer(0, mesh.nInternalFaces()-1);
         Info<< "Wanting to delete face " << mesh.faceCentres()[candidateFaceI]
-            << endl;
+            << nl << endl;
 
         labelList candidates(1, candidateFaceI);
 
@@ -195,16 +195,16 @@ int main(int argc, char *argv[])
         );
 
         // Change mesh and inflate
-        Info<< "Actually changing mesh" << endl;
+        Info<< "Actually changing mesh" << nl << endl;
         autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh, inflate);
 
-        Info<< "Mapping fields" << endl;
+        Info<< "Mapping fields" << nl << endl;
         mesh.updateMesh(morphMap);
 
         // Move mesh (since morphing does not do this)
         if (morphMap().hasMotionPoints())
         {
-            Info<< "Moving mesh" << endl;
+            Info<< "Moving mesh" << nl << endl;
             mesh.movePoints(morphMap().preMotionPoints());
         }
 
@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
         faceRemover.updateMesh(morphMap);
 
 
-        Info<< "Writing fields" << endl;
+        Info<< "Writing fields" << nl << endl;
         runTime.write();
 
 
@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                Info<< "Volume check OK" << endl;
+                Info<< "Volume check OK" << nl << endl;
             }
         }
 
@@ -268,7 +268,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                Info<< "Uniform field mapping check OK" << endl;
+                Info<< "Uniform field mapping check OK" << nl << endl;
             }
         }
 
@@ -292,7 +292,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                Info<< "Linear profile mapping check OK" << endl;
+                Info<< "Linear profile mapping check OK" << nl << endl;
             }
         }
 
@@ -315,7 +315,8 @@ int main(int argc, char *argv[])
             }
             else
             {
-                Info<< "Uniform surfaceScalarField mapping check OK" << endl;
+                Info<< "Uniform surfaceScalarField mapping check OK" << nl
+                    << endl;
             }
         }
 

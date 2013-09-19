@@ -17,7 +17,7 @@ runApplication $application true
 mv "log.$application" "log.$application-inflate"
 
 # Run without inflation
-runApplication $application true
+runApplication $application false
 
 
 # ----------------------------------------------------------------- end-of-file
