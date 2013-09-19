@@ -927,6 +927,19 @@ Foam::word Foam::GeometricField<Type, PatchField, GeoMesh>::select
 }
 
 
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::GeometricField<Type, PatchField, GeoMesh>::writeMinMax
+(
+    Ostream& os
+) const
+{
+    os  << "min/max(" << this->name() << ") = "
+        << min(*this).value() << ", "
+        << max(*this).value()
+        << endl;
+}
+
+
 // writeData member function required by regIOobject
 template<class Type, template<class> class PatchField, class GeoMesh>
 bool Foam::GeometricField<Type, PatchField, GeoMesh>::
