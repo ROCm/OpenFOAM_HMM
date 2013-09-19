@@ -23,26 +23,22 @@ ddtSchemes
 gradSchemes
 {
     default         Gauss linear;
-    grad(p)         Gauss linear;
 }
 
 divSchemes
 {
     default         none;
-    div(phi,U)      Gauss linear;
+    div(phi,st)     Gauss linear;
 }
 
 laplacianSchemes
 {
-    default         none;
-    laplacian(nu,U) Gauss linear orthogonal;
-    laplacian((1|A(U)),p) Gauss linear orthogonal;
+    default         Gauss linear orthogonal;
 }
 
 interpolationSchemes
 {
     default         linear;
-    interpolate(HbyA) linear;
 }
 
 snGradSchemes
