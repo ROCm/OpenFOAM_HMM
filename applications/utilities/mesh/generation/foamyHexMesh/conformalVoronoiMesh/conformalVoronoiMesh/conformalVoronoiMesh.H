@@ -29,10 +29,10 @@ Description
 SourceFiles
     conformalVoronoiMeshI.H
     conformalVoronoiMesh.C
+    conformalVoronoiMeshZones.C
     conformalVoronoiMeshIO.C
     conformalVoronoiMeshConformToSurface.C
     conformalVoronoiMeshFeaturePoints.C
-    conformalVoronoiMeshFeaturePointSpecialisations.C
     conformalVoronoiMeshCalcDualMesh.C
     conformalVoronoiMeshTemplates.C
 
@@ -635,6 +635,9 @@ private:
             labelList& faceToSurface,
             boolList& flipMap
         ) const;
+
+        //- Add zones to the polyMesh
+        void addZones(polyMesh& mesh, const pointField& cellCentres) const;
 
         //- Tet mesh calculation
         void calcTetMesh

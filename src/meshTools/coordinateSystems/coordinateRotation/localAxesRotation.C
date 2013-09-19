@@ -52,7 +52,8 @@ namespace Foam
 
 Foam::localAxesRotation::localAxesRotation
 (
-    const dictionary& dict, const objectRegistry& orb
+    const dictionary& dict,
+    const objectRegistry& orb
 )
 :
     Rptr_(),
@@ -88,10 +89,10 @@ Foam::localAxesRotation::localAxesRotation
     e3_()
 {
     FatalErrorIn("localAxesRotation(const dictionary&)")
-        << " localAxesRotation can not be contructed from  dictionary "
+        << " localAxesRotation can not be constructed from  dictionary "
         << " use the construtctor : "
            "("
-           "    const dictionary& dict, const objectRegistry& orb"
+           "    const dictionary&, const objectRegistry&"
            ")"
         << exit(FatalIOError);
 }
@@ -112,7 +113,7 @@ Foam::vector Foam::localAxesRotation::transform(const vector& st) const
 {
     notImplemented
     (
-        "vector Foam::localAxesRotation::transform(const vector&) const"
+        "vector localAxesRotation::transform(const vector&) const"
     );
     return vector::zero;
 }
@@ -122,7 +123,7 @@ Foam::vector Foam::localAxesRotation::invTransform(const vector& st) const
 {
     notImplemented
     (
-        "vector Foam::localAxesRotation::invTransform(const vector&) const"
+        "vector localAxesRotation::invTransform(const vector&) const"
     );
     return vector::zero;
 }
@@ -135,7 +136,10 @@ Foam::tmp<Foam::vectorField> Foam::localAxesRotation::transform
 {
     if (Rptr_->size() != st.size())
     {
-        FatalErrorIn("localAxesRotation::transform(const vectorField&)")
+        FatalErrorIn
+        (
+            "tmp<vectorField> localAxesRotation::transform(const vectorField&)"
+        )
             << "vectorField st has different size to tensorField "
             << abort(FatalError);
     }
@@ -160,7 +164,13 @@ Foam::tmp<Foam::tensorField> Foam::localAxesRotation::transformTensor
 {
     if (Rptr_->size() != st.size())
     {
-        FatalErrorIn("localAxesRotation::transformTensor(const tensorField&)")
+        FatalErrorIn
+        (
+            "tmp<tensorField> localAxesRotation::transformTensor"
+            "("
+                "const tensorField&"
+            ")"
+        )
             << "tensorField st has different size to tensorField Tr"
             << abort(FatalError);
     }
@@ -173,7 +183,11 @@ Foam::tensor Foam::localAxesRotation::transformTensor
     const tensor& st
 ) const
 {
-    notImplemented("tensor localAxesRotation::transformTensor() const");
+    notImplemented
+    (
+        "tensor localAxesRotation::transformTensor(const tensor&) const"
+    );
+
     return tensor::zero;
 }
 
@@ -186,7 +200,14 @@ Foam::tmp<Foam::tensorField> Foam::localAxesRotation::transformTensor
 {
     if (cellMap.size() != st.size())
     {
-        FatalErrorIn("localAxesRotation::transformTensor(const tensorField&)")
+        FatalErrorIn
+        (
+            "tmp<tensorField> localAxesRotation::transformTensor"
+            "("
+                "const tensorField&"
+                "const labelList&"
+            ")"
+        )
             << "tensorField st has different size to tensorField Tr"
             << abort(FatalError);
     }

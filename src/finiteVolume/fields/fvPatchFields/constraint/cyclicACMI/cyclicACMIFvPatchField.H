@@ -206,6 +206,12 @@ public:
             //- Update the coefficients associated with the patch field
             void updateCoeffs();
 
+            //- Initialise the evaluation of the patch field
+            virtual void initEvaluate
+            (
+                const Pstream::commsTypes commsType
+            );
+
             //- Evaluate the patch field
             virtual void evaluate
             (

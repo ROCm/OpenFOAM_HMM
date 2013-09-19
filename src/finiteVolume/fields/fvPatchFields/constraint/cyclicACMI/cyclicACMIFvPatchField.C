@@ -295,14 +295,25 @@ void Foam::cyclicACMIFvPatchField<Type>::updateCoeffs()
 
 
 template<class Type>
+void Foam::cyclicACMIFvPatchField<Type>::initEvaluate
+(
+    const Pstream::commsTypes comms
+)
+{
+    // update non-overlap patch
+    const fvPatchField<Type>& npf = nonOverlapPatchField();
+    const_cast<fvPatchField<Type>&>(npf).evaluate(comms);
+}
+
+
+template<class Type>
 void Foam::cyclicACMIFvPatchField<Type>::evaluate
 (
     const Pstream::commsTypes comms
 )
 {
-    // blend contrubutions from the coupled and non-overlap patches
+    // blend contributions from the coupled and non-overlap patches
     const fvPatchField<Type>& npf = nonOverlapPatchField();
-    const_cast<fvPatchField<Type>&>(npf).evaluate();
 
     coupledFvPatchField<Type>::evaluate(comms);
     const Field<Type>& cpf = *this;
@@ -392,7 +403,7 @@ void Foam::cyclicACMIFvPatchField<Type>::manipulateMatrix
     fvMatrix<Type>& matrix
 )
 {
-    // blend contrubutions from the coupled and non-overlap patches
+    // blend contributions from the coupled and non-overlap patches
     const fvPatchField<Type>& npf = nonOverlapPatchField();
 
     const scalarField& mask = cyclicACMIPatch_.cyclicACMIPatch().mask();

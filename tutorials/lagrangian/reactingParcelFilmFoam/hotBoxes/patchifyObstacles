@@ -155,7 +155,7 @@ createSetsAndZone floor -$tol $floorMax -$tol $floorMax -$tol $tol
 echo "cellSet floorCells new faceToCell floorFaces owner" >> $tmpSetSet
 echo "faceZoneSet floorFaces new setsToFaceZone floorFaces floorCells" >> $tmpSetSet
 
-setSet -batch $tmpSetSet > log.setSet.patchifyObstacles >/dev/null 2>&1
+setSet -batch $tmpSetSet > log.setSet.patchifyObstacles 2>&1
 
 
 # *************************************************************************

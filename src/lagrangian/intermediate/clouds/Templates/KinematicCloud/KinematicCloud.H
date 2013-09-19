@@ -397,6 +397,9 @@ public:
 //            inline const typename parcelType::forceType& forces() const;
             inline const forceType& forces() const;
 
+            //- Return the optional particle forces
+            inline forceType& forces();
+
             //- Optional cloud function objects
             inline functionType& functions();
 
@@ -486,6 +489,9 @@ public:
 
             //- Total linear kinetic energy in the system
             inline scalar linearKineticEnergyOfSystem() const;
+
+            //- Total rotational kinetic energy in the system
+            inline scalar rotationalKineticEnergyOfSystem() const;
 
             //- Penetration for fraction [0-1] of the current total mass
             inline scalar penetration(const scalar fraction) const;
