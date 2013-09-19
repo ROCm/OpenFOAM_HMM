@@ -200,6 +200,13 @@ const volScalarField::DimensionedInternalField& fvMesh::V() const
 {
     if (!VPtr_)
     {
+        if (debug)
+        {
+            Info<< "fvMesh::V() const: "
+                << "constructing from primitiveMesh::cellVolumes()"
+                << endl;
+        }
+
         VPtr_ = new slicedVolScalarField::DimensionedInternalField
         (
             IOobject
@@ -251,6 +258,13 @@ const volScalarField::DimensionedInternalField& fvMesh::V00() const
 {
     if (!V00Ptr_)
     {
+        if (debug)
+        {
+            Info<< "fvMesh::V00() const: "
+                << "constructing from V0"
+                << endl;
+        }
+
         V00Ptr_ = new DimensionedField<scalar, volMesh>
         (
             IOobject
