@@ -37,7 +37,7 @@ namespace Foam
 
 UNARY_FUNCTION(scalar, sphericalTensor, tr, transform)
 UNARY_FUNCTION(sphericalTensor, sphericalTensor, sph, transform)
-UNARY_FUNCTION(scalar, sphericalTensor, det, transform)
+UNARY_FUNCTION(scalar, sphericalTensor, det, pow3)
 UNARY_FUNCTION(sphericalTensor, sphericalTensor, inv, inv)
 
 BINARY_OPERATOR(sphericalTensor, scalar, sphericalTensor, /, '|', divide)
