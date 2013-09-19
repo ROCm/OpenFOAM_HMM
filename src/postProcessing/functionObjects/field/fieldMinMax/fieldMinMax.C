@@ -76,7 +76,12 @@ Foam::fieldMinMax::fieldMinMax
         WarningIn
         (
             "fieldMinMax::fieldMinMax"
-            "(const objectRegistry& obr, const dictionary& dict)"
+            "("
+                "const word&, "
+                "const objectRegistry&, "
+                "const dictionary&, "
+                "const bool"
+            ")"
         )   << "No fvMesh available, deactivating."
             << endl;
     }
