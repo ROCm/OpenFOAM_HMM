@@ -2487,6 +2487,12 @@ Foam::indexedOctree<Type>::indexedOctree
             compactI
         );
 
+        if (compactI == 0)
+        {
+            // Did not put contents anywhere - are outside bb!
+            break;
+        }
+
         if (compactI == contents_.size())
         {
             // Transferred all contents to contents_ (in order breadth first)
