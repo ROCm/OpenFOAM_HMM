@@ -31,6 +31,7 @@ License
 #include "surfaceFields.H"
 #include "syncTools.H"
 #include "pointFields.H"
+#include "sigFpe.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -326,6 +327,18 @@ Foam::dynamicRefineFvMesh::refine
 
             if (UName == "none")
             {
+                continue;
+            }
+
+            if (UName == "NaN")
+            {
+                Pout<< "Setting surfaceScalarField " << iter.key()
+                    << " to NaN" << endl;
+
+                surfaceScalarField& phi = *iter();
+
+                sigFpe::fillSignallingNan(phi.internalField());
+
                 continue;
             }
 
