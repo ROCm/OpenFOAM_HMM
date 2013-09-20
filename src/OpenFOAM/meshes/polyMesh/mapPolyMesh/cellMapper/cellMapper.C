@@ -149,19 +149,9 @@ void Foam::cellMapper::calcAddressing() const
             w[cellI] = scalarList(mo.size(), 1.0/mo.size());
         }
 
+        // Volume conservative mapping if possible
+
         const List<objectMap>& cfc = mpm_.cellsFromCellsMap();
-
-        const scalarField& V = mesh_.cellVolumes();
-
-        if (V.size() != sizeBeforeMapping())
-        {
-            FatalErrorIn("void cellMapper::calcAddressing() const")
-                << "cellVolumes size " << V.size()
-                << " is not the old number of cells " << sizeBeforeMapping()
-                << ". Are your cellVolumes already mapped?"
-                << " (new number of cells " << size() << ")"
-                << abort(FatalError);
-        }
 
         forAll(cfc, cfcI)
         {
@@ -175,30 +165,72 @@ void Foam::cellMapper::calcAddressing() const
                 FatalErrorIn("void cellMapper::calcAddressing() const")
                     << "Master cell " << cellI
                     << " mapped from cell cells " << mo
-                    << " already destination of mapping." << abort(FatalError);
+                    << " already destination of mapping."
+                    << abort(FatalError);
             }
 
             // Map from masters
             addr[cellI] = mo;
+        }
 
-            //- uniform weights
-            //w[cellI] = scalarList(mo.size(), 1.0/mo.size());
+        if (mpm_.hasOldCellVolumes())
+        {
+            // Volume weighted
 
-            //- volume based
-            w[cellI].setSize(mo.size());
+            const scalarField& V = mpm_.oldCellVolumes();
 
-            if (mo.size())
+            if (V.size() != sizeBeforeMapping())
             {
-                scalar sumV = 0;
-                forAll(mo, ci)
+                FatalErrorIn("void cellMapper::calcAddressing() const")
+                    << "cellVolumes size " << V.size()
+                    << " is not the old number of cells " << sizeBeforeMapping()
+                    << ". Are your cellVolumes already mapped?"
+                    << " (new number of cells " << size() << ")"
+                    << abort(FatalError);
+            }
+
+            forAll(cfc, cfcI)
+            {
+                const labelList& mo = cfc[cfcI].masterObjects();
+
+                label cellI = cfc[cfcI].index();
+
+                w[cellI].setSize(mo.size());
+
+                if (mo.size())
                 {
-                    w[cellI][ci] = V[mo[ci]];
-                    sumV += V[mo[ci]];
+                    scalar sumV = 0;
+                    forAll(mo, ci)
+                    {
+                        w[cellI][ci] = V[mo[ci]];
+                        sumV += V[mo[ci]];
+                    }
+                    if (sumV > VSMALL)
+                    {
+                        forAll(mo, ci)
+                        {
+                            w[cellI][ci] /= sumV;
+                        }
+                    }
+                    else
+                    {
+                        // Exception: zero volume. Use uniform mapping
+                        w[cellI] = scalarList(mo.size(), 1.0/mo.size());
+                    }
                 }
-                forAll(mo, ci)
-                {
-                    w[cellI][ci] /= sumV;
-                }
+            }
+        }
+        else
+        {
+            // Uniform weighted
+
+            forAll(cfc, cfcI)
+            {
+                const labelList& mo = cfc[cfcI].masterObjects();
+
+                label cellI = cfc[cfcI].index();
+
+                w[cellI] = scalarList(mo.size(), 1.0/mo.size());
             }
         }
 

@@ -143,6 +143,9 @@ class fvMesh
             //- Clear addressing
             void clearAddressing();
 
+            //- Preserve old volume(s)
+            void storeOldVol(const scalarField&);
+
 
        // Make geometric data
 
