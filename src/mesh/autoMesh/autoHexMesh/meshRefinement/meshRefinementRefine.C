@@ -1246,7 +1246,17 @@ bool Foam::meshRefinement::isGap
 
         if (avg != vector::zero)
         {
-            return true;
+            avg /= mag(avg);
+
+            // Check normal distance of intersection locations
+            if (mag(avg&d) > mergeDistance())
+            {
+                return true;
+            }
+            else
+            {
+                return  false;
+            }
         }
         else
         {
