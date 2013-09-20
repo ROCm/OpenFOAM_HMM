@@ -190,6 +190,19 @@ inline bool CGAL::indexedCell<Gt, Cb>::hasFarPoint() const
 
 
 template<class Gt, class Cb>
+inline bool CGAL::indexedCell<Gt, Cb>::hasReferredPoint() const
+{
+    return
+    (
+        this->vertex(0)->referred()
+     || this->vertex(1)->referred()
+     || this->vertex(2)->referred()
+     || this->vertex(3)->referred()
+    );
+}
+
+
+template<class Gt, class Cb>
 inline bool CGAL::indexedCell<Gt, Cb>::hasFeaturePoint() const
 {
     return
@@ -372,6 +385,14 @@ inline bool CGAL::indexedCell<Gt, Cb>::anyInternalOrBoundaryDualVertex() const
 template<class Gt, class Cb>
 inline bool CGAL::indexedCell<Gt, Cb>::boundaryDualVertex() const
 {
+//    return
+//    (
+//        this->vertex(0)->boundaryPoint()
+//     && this->vertex(1)->boundaryPoint()
+//     && this->vertex(2)->boundaryPoint()
+//     && this->vertex(3)->boundaryPoint()
+//    );
+
     return
     (
         (
@@ -387,6 +408,41 @@ inline bool CGAL::indexedCell<Gt, Cb>::boundaryDualVertex() const
         || this->vertex(3)->externalBoundaryPoint()
         )
     );
+
+//    Foam::label nBoundaryPoints = 0;
+//
+//    for (Foam::label i = 0; i < 4; ++i)
+//    {
+//        Vertex_handle v = this->vertex(i);
+//
+//        if (v->boundaryPoint())
+//        {
+//            nBoundaryPoints++;
+//        }
+//    }
+//
+//    return (nBoundaryPoints > 1);
+}
+
+
+template<class Gt, class Cb>
+inline bool CGAL::indexedCell<Gt, Cb>::baffleBoundaryDualVertex() const
+{
+    return
+    (
+        (
+           this->vertex(0)->internalBafflePoint()
+        || this->vertex(1)->internalBafflePoint()
+        || this->vertex(2)->internalBafflePoint()
+        || this->vertex(3)->internalBafflePoint()
+        )
+     && (
+           this->vertex(0)->externalBafflePoint()
+        || this->vertex(1)->externalBafflePoint()
+        || this->vertex(2)->externalBafflePoint()
+        || this->vertex(3)->externalBafflePoint()
+        )
+    );
 }
 
 
@@ -400,6 +456,31 @@ inline bool CGAL::indexedCell<Gt, Cb>::featureEdgeDualVertex() const
      && this->vertex(2)->featureEdgePoint()
      && this->vertex(3)->featureEdgePoint()
     );
+//        (
+//            this->vertex(0)->featureEdgePoint()
+//         || this->vertex(1)->featureEdgePoint()
+//         || this->vertex(2)->featureEdgePoint()
+//         || this->vertex(3)->featureEdgePoint()
+//        )
+//     && (
+//            (
+//                this->vertex(0)->featureEdgePoint()
+//             || this->vertex(0)->featurePoint()
+//            )
+//         && (
+//                this->vertex(1)->featureEdgePoint()
+//             || this->vertex(1)->featurePoint()
+//            )
+//         && (
+//                this->vertex(2)->featureEdgePoint()
+//             || this->vertex(2)->featurePoint()
+//            )
+//         && (
+//                this->vertex(3)->featureEdgePoint()
+//             || this->vertex(3)->featurePoint()
+//            )
+//        )
+//    );
 }
 
 

@@ -95,24 +95,56 @@ int main(int argc, char *argv[])
     const bool collapseFaces = args.optionFound("collapseFaces");
     const bool collapseFaceZone = args.optionFound("collapseFaceZone");
 
+    if (collapseFaces && collapseFaceZone)
+    {
+        FatalErrorIn("main(int, char*[])")
+            << "Both face zone collapsing and face collapsing have been"
+            << "selected. Choose only one of:" << nl
+            << "    -collapseFaces" << nl
+            << "    -collapseFaceZone <faceZoneName>"
+            << abort(FatalError);
+    }
+
+    labelIOList pointPriority
+    (
+        IOobject
+        (
+            "pointPriority",
+            runTime.timeName(),
+            runTime,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        labelList(mesh.nPoints(), labelMin)
+    );
+
     forAll(timeDirs, timeI)
     {
         runTime.setTime(timeDirs[timeI], timeI);
 
         Info<< "Time = " << runTime.timeName() << endl;
 
-        polyMeshFilter meshFilter(mesh);
+        autoPtr<polyMeshFilter> meshFilterPtr;
 
-        // newMesh will be empty until it is filtered
-        const autoPtr<fvMesh>& newMesh = meshFilter.filteredMesh();
+        label nBadFaces = 0;
 
-        // Filter small edges only. This reduces the number of faces so that
-        // the face filtering is sped up.
-        label nBadFaces = meshFilter.filterEdges(0);
         {
-            polyTopoChange meshMod(newMesh);
+            meshFilterPtr.set(new polyMeshFilter(mesh, pointPriority));
+            polyMeshFilter& meshFilter = meshFilterPtr();
 
-            meshMod.changeMesh(mesh, false);
+            // newMesh will be empty until it is filtered
+            const autoPtr<fvMesh>& newMesh = meshFilter.filteredMesh();
+
+            // Filter small edges only. This reduces the number of faces so that
+            // the face filtering is sped up.
+            nBadFaces = meshFilter.filterEdges(0);
+            {
+                polyTopoChange meshMod(newMesh);
+
+                meshMod.changeMesh(mesh, false);
+            }
+
+            pointPriority = meshFilter.pointPriority();
         }
 
         if (collapseFaceZone)
@@ -121,18 +153,30 @@ int main(int argc, char *argv[])
 
             const faceZone& fZone = mesh.faceZones()[faceZoneName];
 
+            meshFilterPtr.reset(new polyMeshFilter(mesh, pointPriority));
+            polyMeshFilter& meshFilter = meshFilterPtr();
+
+            const autoPtr<fvMesh>& newMesh = meshFilter.filteredMesh();
+
             // Filter faces. Pass in the number of bad faces that are present
             // from the previous edge filtering to use as a stopping criterion.
-            meshFilter.filterFaceZone(fZone);
+            meshFilter.filter(fZone);
             {
                 polyTopoChange meshMod(newMesh);
 
                 meshMod.changeMesh(mesh, false);
             }
+
+            pointPriority = meshFilter.pointPriority();
         }
 
         if (collapseFaces)
         {
+            meshFilterPtr.reset(new polyMeshFilter(mesh, pointPriority));
+            polyMeshFilter& meshFilter = meshFilterPtr();
+
+            const autoPtr<fvMesh>& newMesh = meshFilter.filteredMesh();
+
             // Filter faces. Pass in the number of bad faces that are present
             // from the previous edge filtering to use as a stopping criterion.
             meshFilter.filter(nBadFaces);
@@ -141,6 +185,8 @@ int main(int argc, char *argv[])
 
                 meshMod.changeMesh(mesh, false);
             }
+
+            pointPriority = meshFilter.pointPriority();
         }
 
         // Write resulting mesh
@@ -157,6 +203,7 @@ int main(int argc, char *argv[])
             << runTime.timeName() << nl << endl;
 
         mesh.write();
+        pointPriority.write();
     }
 
     Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"

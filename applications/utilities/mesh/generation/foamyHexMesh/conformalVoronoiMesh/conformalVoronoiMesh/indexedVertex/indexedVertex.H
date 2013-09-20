@@ -243,8 +243,10 @@ public:
         inline bool surfacePoint() const;
 
         inline bool internalBoundaryPoint() const;
+        inline bool internalBafflePoint() const;
 
         inline bool externalBoundaryPoint() const;
+        inline bool externalBafflePoint() const;
 
         inline bool constrained() const;
 

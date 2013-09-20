@@ -182,53 +182,46 @@ void Foam::edgeCollapser::collapseToEdge
     Map<point>& collapsePointToLocation
 ) const
 {
-    const face& f = mesh_.faces()[faceI];
-
     // Negative half
 
-    Foam::point collapseToPtA =
-        collapseAxis*(sum(dNeg)/dNeg.size() - dShift) + fC;
+    Foam::point collapseToPtA(GREAT, GREAT, GREAT);
+        //collapseAxis*(sum(dNeg)/dNeg.size() - dShift) + fC;
 
-    DynamicList<label> faceBoundaryPts(f.size());
-    DynamicList<label> faceFeaturePts(f.size());
+    label maxPriority = labelMin;
+    DynamicList<label> maxPriorityPts(max(dNeg.size(), dPos.size()));
 
     forAll(facePtsNeg, fPtI)
     {
-        if (pointPriority[facePtsNeg[fPtI]] == 1)
+        const label facePointI = facePtsNeg[fPtI];
+        const label facePtPriority = pointPriority[facePointI];
+
+        if (facePtPriority > maxPriority)
         {
-            faceFeaturePts.append(facePtsNeg[fPtI]);
+            maxPriority = facePtPriority;
+            maxPriorityPts.clear();
+            maxPriorityPts.append(facePointI);
         }
-        else if (pointPriority[facePtsNeg[fPtI]] == 0)
+        else if (facePtPriority == maxPriority)
         {
-            faceBoundaryPts.append(facePtsNeg[fPtI]);
+            maxPriorityPts.append(facePointI);
         }
     }
 
-    if (!faceBoundaryPts.empty() || !faceFeaturePts.empty())
+    if (!maxPriorityPts.empty())
     {
-        if (!faceFeaturePts.empty())
-        {
-            collapseToPtA = pts[faceFeaturePts.first()];
-        }
-        else if (faceBoundaryPts.size() == 2)
-        {
-            collapseToPtA =
-                0.5
-               *(
-                    pts[faceBoundaryPts[0]]
-                  + pts[faceBoundaryPts[1]]
-                );
-        }
-        else if (faceBoundaryPts.size() <= f.size())
-        {
-            face bFace(faceBoundaryPts);
+        Foam::point averagePt(vector::zero);
 
-            collapseToPtA = bFace.centre(pts);
+        forAll(maxPriorityPts, ptI)
+        {
+            averagePt += pts[maxPriorityPts[ptI]];
         }
+
+        collapseToPtA = averagePt/maxPriorityPts.size();
+//        collapseToPtA = pts[maxPriorityPts.first()];
     }
 
-    faceFeaturePts.clear();
-    faceBoundaryPts.clear();
+    maxPriority = labelMin;
+    maxPriorityPts.clear();
 
     labelList faceEdgesNeg = edgesFromPoints(faceI, facePtsNeg);
 
@@ -244,47 +237,37 @@ void Foam::edgeCollapser::collapseToEdge
 
 
     // Positive half
-
-    Foam::point collapseToPtB
-        = collapseAxis*(sum(dPos)/dPos.size() - dShift) + fC;
+    Foam::point collapseToPtB(GREAT, GREAT, GREAT);
+//        = collapseAxis*(sum(dPos)/dPos.size() - dShift) + fC;
 
     forAll(facePtsPos, fPtI)
     {
-        if (pointPriority[facePtsPos[fPtI]] == 1)
+        const label facePointI = facePtsPos[fPtI];
+        const label facePtPriority = pointPriority[facePointI];
+
+        if (facePtPriority > maxPriority)
         {
-            faceFeaturePts.append(facePtsPos[fPtI]);
+            maxPriority = facePtPriority;
+            maxPriorityPts.clear();
+            maxPriorityPts.append(facePointI);
         }
-        else if (pointPriority[facePtsPos[fPtI]] == 0)
+        else if (facePtPriority == maxPriority)
         {
-            // If there is a point which is on the boundary,
-            // use it as the point to collapse others to, will
-            // use the first boundary point encountered if
-            // there are multiple boundary points.
-            faceBoundaryPts.append(facePtsPos[fPtI]);
+            maxPriorityPts.append(facePointI);
         }
     }
 
-    if (!faceBoundaryPts.empty() || !faceFeaturePts.empty())
+    if (!maxPriorityPts.empty())
     {
-        if (!faceFeaturePts.empty())
-        {
-            collapseToPtB = pts[faceFeaturePts.first()];
-        }
-        else if (faceBoundaryPts.size() == 2)
-        {
-            collapseToPtB =
-                0.5
-               *(
-                    pts[faceBoundaryPts[0]]
-                  + pts[faceBoundaryPts[1]]
-                );
-        }
-        else if (faceBoundaryPts.size() <= f.size())
-        {
-            face bFace(faceBoundaryPts);
+        Foam::point averagePt(vector::zero);
 
-            collapseToPtB = bFace.centre(pts);
+        forAll(maxPriorityPts, ptI)
+        {
+            averagePt += pts[maxPriorityPts[ptI]];
         }
+
+        collapseToPtB = averagePt/maxPriorityPts.size();
+//        collapseToPtB = pts[maxPriorityPts.first()];
     }
 
     labelList faceEdgesPos = edgesFromPoints(faceI, facePtsPos);
@@ -316,45 +299,79 @@ void Foam::edgeCollapser::collapseToPoint
 
     Foam::point collapseToPt = fC;
 
-    DynamicList<label> faceBoundaryPts(f.size());
-    DynamicList<label> faceFeaturePts(f.size());
+    label maxPriority = labelMin;
+    DynamicList<label> maxPriorityPts(f.size());
 
     forAll(facePts, fPtI)
     {
-        if (pointPriority[facePts[fPtI]] == 1)
+        const label facePointI = facePts[fPtI];
+        const label facePtPriority = pointPriority[facePointI];
+
+        if (facePtPriority > maxPriority)
         {
-            faceFeaturePts.append(facePts[fPtI]);
+            maxPriority = facePtPriority;
+            maxPriorityPts.clear();
+            maxPriorityPts.append(facePointI);
         }
-        else if (pointPriority[facePts[fPtI]] == 0)
+        else if (facePtPriority == maxPriority)
         {
-            faceBoundaryPts.append(facePts[fPtI]);
+            maxPriorityPts.append(facePointI);
         }
     }
 
-    if (!faceBoundaryPts.empty() || !faceFeaturePts.empty())
+    if (!maxPriorityPts.empty())
     {
-        if (!faceFeaturePts.empty())
-        {
-            collapseToPt = pts[faceFeaturePts.first()];
-        }
-        else if (faceBoundaryPts.size() == 2)
-        {
-            collapseToPt =
-                0.5
-               *(
-                    pts[faceBoundaryPts[0]]
-                  + pts[faceBoundaryPts[1]]
-                );
-        }
-        else if (faceBoundaryPts.size() <= f.size())
-        {
-            face bFace(faceBoundaryPts);
+        Foam::point averagePt(vector::zero);
 
-            collapseToPt = bFace.centre(pts);
+        forAll(maxPriorityPts, ptI)
+        {
+            averagePt += pts[maxPriorityPts[ptI]];
         }
+
+        collapseToPt = averagePt/maxPriorityPts.size();
+
+//        collapseToPt = pts[maxPriorityPts.first()];
     }
 
-    const labelList faceEdges = mesh_.faceEdges()[faceI];
+//    DynamicList<label> faceBoundaryPts(f.size());
+//    DynamicList<label> faceFeaturePts(f.size());
+//
+//    forAll(facePts, fPtI)
+//    {
+//        if (pointPriority[facePts[fPtI]] == 1)
+//        {
+//            faceFeaturePts.append(facePts[fPtI]);
+//        }
+//        else if (pointPriority[facePts[fPtI]] == 0)
+//        {
+//            faceBoundaryPts.append(facePts[fPtI]);
+//        }
+//    }
+//
+//    if (!faceBoundaryPts.empty() || !faceFeaturePts.empty())
+//    {
+//        if (!faceFeaturePts.empty())
+//        {
+//            collapseToPt = pts[faceFeaturePts.first()];
+//        }
+//        else if (faceBoundaryPts.size() == 2)
+//        {
+//            collapseToPt =
+//                0.5
+//               *(
+//                    pts[faceBoundaryPts[0]]
+//                  + pts[faceBoundaryPts[1]]
+//                );
+//        }
+//        else if (faceBoundaryPts.size() <= f.size())
+//        {
+//            face bFace(faceBoundaryPts);
+//
+//            collapseToPt = bFace.centre(pts);
+//        }
+//    }
+
+    const labelList& faceEdges = mesh_.faceEdges()[faceI];
 
     forAll(faceEdges, eI)
     {
@@ -740,35 +757,51 @@ Foam::label Foam::edgeCollapser::edgeMaster
 {
     label masterPoint = -1;
 
-    label e0 = e.start();
-    label e1 = e.end();
+    const label e0 = e.start();
+    const label e1 = e.end();
 
-    // Collapse edge to point with higher priority.
-    if (pointPriority[e0] >= 0)
+    const label e0Priority = pointPriority[e0];
+    const label e1Priority = pointPriority[e1];
+
+    if (e0Priority > e1Priority)
     {
-        if (pointPriority[e1] >= 0)
-        {
-            // Both points have high priority. Choose one to collapse to.
-            // Note: should look at feature edges/points!
-            masterPoint = e0;
-        }
-        else
-        {
-            masterPoint = e0;
-        }
+        masterPoint = e0;
     }
-    else
+    else if (e0Priority < e1Priority)
     {
-        if (pointPriority[e1] >= 0)
-        {
-            masterPoint = e1;
-        }
-        else
-        {
-            // None on boundary. Neither is a master.
-            return -1;
-        }
+        masterPoint = e1;
     }
+    else if (e0Priority == e1Priority)
+    {
+        masterPoint = e0;
+    }
+
+//    // Collapse edge to point with higher priority.
+//    if (pointPriority[e0] >= 0)
+//    {
+//        if (pointPriority[e1] >= 0)
+//        {
+//            // Both points have high priority. Choose one to collapse to.
+//            // Note: should look at feature edges/points!
+//            masterPoint = e0;
+//        }
+//        else
+//        {
+//            masterPoint = e0;
+//        }
+//    }
+//    else
+//    {
+//        if (pointPriority[e1] >= 0)
+//        {
+//            masterPoint = e1;
+//        }
+//        else
+//        {
+//            // None on boundary. Neither is a master.
+//            return -1;
+//        }
+//    }
 
     return masterPoint;
 }
@@ -784,7 +817,10 @@ void Foam::edgeCollapser::checkBoundaryPointMergeEdges
 {
    const pointField& points = mesh_.points();
 
-   if (pointPriority[pointI] >= 0 && pointPriority[otherPointI] < 0)
+   const label e0Priority = pointPriority[pointI];
+   const label e1Priority = pointPriority[otherPointI];
+
+   if (e0Priority > e1Priority)
    {
        collapsePointToLocation.set
        (
@@ -792,13 +828,29 @@ void Foam::edgeCollapser::checkBoundaryPointMergeEdges
            points[pointI]
        );
    }
-   else
+   else if (e0Priority < e1Priority)
    {
        collapsePointToLocation.set
        (
            pointI,
            points[otherPointI]
        );
+   }
+   else // e0Priority == e1Priority
+   {
+       collapsePointToLocation.set
+       (
+           pointI,
+           points[otherPointI]
+       );
+
+//       Foam::point averagePt
+//       (
+//           0.5*(points[otherPointI] + points[pointI])
+//       );
+//
+//       collapsePointToLocation.set(pointI, averagePt);
+//       collapsePointToLocation.set(otherPointI, averagePt);
    }
 }
 
@@ -1963,7 +2015,7 @@ Foam::labelPair Foam::edgeCollapser::markSmallSliverFaces
     {
         const face& f = faces[fI];
 
-        if (faceFilterFactor[fI] == 0)
+        if (faceFilterFactor[fI] <= 0)
         {
             continue;
         }
@@ -2030,7 +2082,7 @@ Foam::labelPair Foam::edgeCollapser::markFaceZoneEdges
 
         const face& f = faces[fI];
 
-        if (faceFilterFactor[fI] == 0)
+        if (faceFilterFactor[fI] <= 0)
         {
             continue;
         }

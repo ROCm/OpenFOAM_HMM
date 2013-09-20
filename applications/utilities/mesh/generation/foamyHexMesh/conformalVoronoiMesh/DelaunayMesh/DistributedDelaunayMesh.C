@@ -966,6 +966,15 @@ Foam::DistributedDelaunayMesh<Triangulation>::rangeInsertReferredWithInfo
             )   << "Point is outside affine hull! pt = " << pointToInsert
                 << endl;
         }
+        else if (lt == Triangulation::OUTSIDE_CONVEX_HULL)
+        {
+            // @todo Can this be optimised?
+            //
+            // Only want to insert if a connection is formed between
+            // pointToInsert and an internal or internal boundary point.
+            hint = Triangulation::insert(pointToInsert, c);
+            inserted = true;
+        }
         else
         {
             // Get the cells that conflict with p in a vector V,
