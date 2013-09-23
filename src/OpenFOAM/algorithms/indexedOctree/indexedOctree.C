@@ -2476,7 +2476,7 @@ Foam::indexedOctree<Type>::indexedOctree
 
     while (true)
     {
-        compactContents
+        label nNodes = compactContents
         (
             nodes,
             contents,
@@ -2487,7 +2487,7 @@ Foam::indexedOctree<Type>::indexedOctree
             compactI
         );
 
-        if (compactI == 0)
+        if (compactI == 0 && nNodes == 0)
         {
             // Did not put contents anywhere - are outside bb!
             break;
