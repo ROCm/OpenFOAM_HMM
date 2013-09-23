@@ -8,7 +8,7 @@ cd ${0%/*} || exit 1    # run from this directory
 application=Test-hexRef8
 
 # Compile
-wmake ..
+runApplication wmake ..
 
 runApplication blockMesh
 
