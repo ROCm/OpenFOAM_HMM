@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -79,9 +79,6 @@ class block
 
     // Private Member Functions
 
-        //- Vertex label offset for a particular i,j,k position
-        label vtxLabel(label i, label j, label k) const;
-
         //- Creates vertices for cells filling the block
         void createPoints() const;
 
@@ -133,6 +130,9 @@ public:
             {
                 return *this;
             }
+
+            //- Vertex label offset for a particular i,j,k position
+            label vtxLabel(label i, label j, label k) const;
 
             //- Return the points for filling the block
             const pointField& points() const;
