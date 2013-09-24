@@ -8,7 +8,7 @@
 #
 cd ${0%/*} || exit 1    # run from this directory
 
-echo "*** Executing dummy external solver"
+echo "Executing dummy external solver"
 
 commsDir="comms"
 lockFile="${commsDir}/OpenFOAM.lock"
