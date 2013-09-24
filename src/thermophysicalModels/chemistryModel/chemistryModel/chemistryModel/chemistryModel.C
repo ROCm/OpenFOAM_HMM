@@ -358,15 +358,12 @@ void Foam::chemistryModel<CompType, ThermoType>::derivatives
         cSum += c[i];
         rho += W*c[i];
     }
-    const scalar mw = rho/cSum;
     scalar cp = 0.0;
     for (label i=0; i<nSpecie_; i++)
     {
-        const scalar cpi = specieThermo_[i].cp(p, T);
-        const scalar Xi = c[i]/rho;
-        cp += Xi*cpi;
+        cp += c[i]*specieThermo_[i].cp(p, T);
     }
-    cp /= mw;
+    cp /= rho;
 
     scalar dT = 0.0;
     for (label i = 0; i < nSpecie_; i++)
