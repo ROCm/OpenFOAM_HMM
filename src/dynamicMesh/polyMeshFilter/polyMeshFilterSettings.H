@@ -29,6 +29,7 @@ Description
 
 SourceFiles
     polyMeshFilterSettings.C
+    polyMeshFilterSettingsI.H
 
 \*---------------------------------------------------------------------------*/
 
