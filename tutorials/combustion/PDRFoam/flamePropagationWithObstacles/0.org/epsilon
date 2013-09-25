@@ -23,9 +23,9 @@ boundaryField
 {
     outer
     {
-        type            inletOutlet;
-        inletValue      uniform 0.1;
-        value           uniform 0.1;
+        type                uniformInletOutlet;
+        uniformInletValue   0.1;
+        value               uniform 0.1;
     }
     ground
     {
