@@ -78,10 +78,78 @@ Description
 #include "booleanSurface.H"
 #include "edgeIntersections.H"
 #include "meshTools.H"
+#include "labelPair.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+bool intersectSurfaces
+(
+    triSurface& surf,
+    edgeIntersections& edgeCuts
+)
+{
+    bool hasMoved = false;
+
+    for (label iter = 0; iter < 10; iter++)
+    {
+        Info<< "Determining intersections of surface edges with itself" << endl;
+
+        // Determine surface edge intersections. Allow surface to be moved.
+
+        // Number of iterations needed to resolve degenerates
+        label nIters = 0;
+        {
+            triSurfaceSearch querySurf(surf);
+
+            scalarField surfPointTol
+            (
+                1e-3*edgeIntersections::minEdgeLength(surf)
+            );
+
+            // Determine raw intersections
+            edgeCuts = edgeIntersections
+            (
+                surf,
+                querySurf,
+                surfPointTol
+            );
+
+            // Shuffle a bit to resolve degenerate edge-face hits
+            {
+                pointField points(surf.points());
+
+                nIters =
+                    edgeCuts.removeDegenerates
+                    (
+                        5,              // max iterations
+                        surf,
+                        querySurf,
+                        surfPointTol,
+                        points         // work array
+                    );
+
+                if (nIters != 0)
+                {
+                    // Update geometric quantities
+                    surf.movePoints(points);
+                    hasMoved = true;
+                }
+            }
+        }
+    }
+
+    if (hasMoved)
+    {
+        fileName newFile("surf.obj");
+        Info<< "Surface has been moved. Writing to " << newFile << endl;
+        surf.write(newFile);
+    }
+
+    return hasMoved;
+}
+
 
 // Keep on shuffling surface points until no more degenerate intersections.
 // Moves both surfaces and updates set of edge cuts.
@@ -238,6 +306,106 @@ label calcNormalDirection
 }
 
 
+void calcEdgeCuts
+(
+    triSurface& surf1,
+    triSurface& surf2,
+    const bool perturb,
+    edgeIntersections& edge1Cuts,
+    edgeIntersections& edge2Cuts
+)
+{
+    if (perturb)
+    {
+        intersectSurfaces
+        (
+            surf1,
+            edge1Cuts,
+            surf2,
+            edge2Cuts
+        );
+    }
+    else
+    {
+        triSurfaceSearch querySurf2(surf2);
+
+        Info<< "Determining intersections of surf1 edges with surf2 faces"
+            << endl;
+
+        edge1Cuts = edgeIntersections
+        (
+            surf1,
+            querySurf2,
+            1e-3*edgeIntersections::minEdgeLength(surf1)
+        );
+
+        triSurfaceSearch querySurf1(surf1);
+
+        Info<< "Determining intersections of surf2 edges with surf1 faces"
+            << endl;
+
+        edge2Cuts = edgeIntersections
+        (
+            surf2,
+            querySurf1,
+            1e-3*edgeIntersections::minEdgeLength(surf2)
+        );
+    }
+}
+
+
+void calcFeaturePoints(const pointField& points, const edgeList& edges)
+{
+    edgeMesh eMesh(points, edges);
+
+    const labelListList& pointEdges = eMesh.pointEdges();
+
+
+    // Get total number of feature points
+    label nFeaturePoints = 0;
+    forAll(pointEdges, pI)
+    {
+        const labelList& pEdges = pointEdges[pI];
+
+        if (pEdges.size() == 1)
+        {
+            nFeaturePoints++;
+        }
+    }
+
+
+    // Calculate addressing from feature point to cut point and cut edge
+    labelList featurePointToCutPoint(nFeaturePoints);
+    labelList featurePointToCutEdge(nFeaturePoints);
+
+    label nFeatPts = 0;
+    forAll(pointEdges, pI)
+    {
+        const labelList& pEdges = pointEdges[pI];
+
+        if (pEdges.size() == 1)
+        {
+            featurePointToCutPoint[nFeatPts] = pI;
+            featurePointToCutEdge[nFeatPts] = pEdges[0];
+            nFeatPts++;
+        }
+    }
+
+
+
+    label concaveStart = 0;
+    label mixedStart = 0;
+    label nonFeatureStart = nFeaturePoints;
+
+
+    labelListList featurePointNormals(nFeaturePoints);
+    labelListList featurePointEdges(nFeaturePoints);
+    labelList regionEdges;
+
+
+}
+
+
 int main(int argc, char *argv[])
 {
     argList::noParallel();
@@ -319,52 +487,33 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    if (args.optionFound("perturb"))
-    {
-        intersectSurfaces
-        (
-            surf1,
-            edge1Cuts,
-            surf2,
-            edge2Cuts
-        );
-    }
-    else
-    {
-        triSurfaceSearch querySurf2(surf2);
+    // Calculate the points where the edges are cut by the other surface
+    calcEdgeCuts
+    (
+        surf1,
+        surf2,
+        args.optionFound("perturb"),
+        edge1Cuts,
+        edge2Cuts
+    );
 
-        Info<< "Determining intersections of surf1 edges with surf2 faces"
-            << endl;
+    // Determine intersection edges from the edge cuts
+    surfaceIntersection inter
+    (
+        surf1,
+        edge1Cuts,
+        surf2,
+        edge2Cuts
+    );
 
-        edge1Cuts = edgeIntersections
-        (
-            surf1,
-            querySurf2,
-            1e-3*edgeIntersections::minEdgeLength(surf1)
-        );
-
-        triSurfaceSearch querySurf1(surf1);
-
-        Info<< "Determining intersections of surf2 edges with surf1 faces"
-            << endl;
-
-        edge2Cuts = edgeIntersections
-        (
-            surf2,
-            querySurf1,
-            1e-3*edgeIntersections::minEdgeLength(surf2)
-        );
-    }
-
-    // Determine intersection edges
-    surfaceIntersection inter(surf1, edge1Cuts, surf2, edge2Cuts);
-
-    fileName sFeatFileName =
+    fileName sFeatFileName
+    (
         surf1Name.lessExt().name()
       + "_"
       + surf2Name.lessExt().name()
       + "_"
-      + action;
+      + action
+    );
 
     label nFeatEds = inter.cutEdges().size();
 
@@ -393,6 +542,7 @@ int main(int argc, char *argv[])
         edgeDirections[cutEdgeI] = fE.vec(inter.cutPoints());
 
         normals.append(norm1);
+        eNormals.append(normals.size() - 1);
 
         if (surf1Baffle)
         {
@@ -416,9 +566,8 @@ int main(int argc, char *argv[])
             );
         }
 
-        eNormals.append(normals.size() - 1);
-
         normals.append(norm2);
+        eNormals.append(normals.size() - 1);
 
         if (surf2Baffle)
         {
@@ -442,8 +591,6 @@ int main(int argc, char *argv[])
                 )
             );
         }
-
-        eNormals.append(normals.size() - 1);
 
 
         if (surf1Baffle)
@@ -509,6 +656,38 @@ int main(int argc, char *argv[])
 
 
     label internalStart = -1;
+    label nIntOrExt = 0;
+    label nFlat = 0;
+    label nOpen = 0;
+    label nMultiple = 0;
+
+    forAll(edgeNormals, eI)
+    {
+        label nEdNorms = edgeNormals[eI].size();
+
+        if (nEdNorms == 1)
+        {
+            nOpen++;
+        }
+        else if (nEdNorms == 2)
+        {
+            const vector& n0(normals[edgeNormals[eI][0]]);
+            const vector& n1(normals[edgeNormals[eI][1]]);
+
+            if ((n0 & n1) > extendedFeatureEdgeMesh::cosNormalAngleTol_)
+            {
+                nFlat++;
+            }
+            else
+            {
+                nIntOrExt++;
+            }
+        }
+        else if (nEdNorms > 2)
+        {
+            nMultiple++;
+        }
+    }
 
     if (validActions[action] == booleanSurface::UNION)
     {
@@ -520,7 +699,7 @@ int main(int argc, char *argv[])
         else
         {
             // All edges are external
-            internalStart = nFeatEds;
+            internalStart = nIntOrExt;
         }
     }
     else if (validActions[action] == booleanSurface::INTERSECTION)
@@ -528,7 +707,7 @@ int main(int argc, char *argv[])
         if (!invertedSpace)
         {
             // All edges are external
-            internalStart = nFeatEds;
+            internalStart = nIntOrExt;
         }
         else
         {
@@ -539,7 +718,7 @@ int main(int argc, char *argv[])
     else if (validActions[action] == booleanSurface::DIFFERENCE)
     {
         // All edges are external
-        internalStart = nFeatEds;
+        internalStart = nIntOrExt;
     }
     else
     {
@@ -569,6 +748,8 @@ int main(int argc, char *argv[])
         normalDirectionsTmp[i] = normalDirections[i];
     }
 
+    calcFeaturePoints(inter.cutPoints(), inter.cutEdges());
+
     extendedFeatureEdgeMesh feMesh
     (
         IOobject
@@ -582,18 +763,22 @@ int main(int argc, char *argv[])
         ),
         inter.cutPoints(),
         inter.cutEdges(),
+
         0,                  // concaveStart,
         0,                  // mixedStart,
         0,                  // nonFeatureStart,
+
         internalStart,      // internalStart,
-        nFeatEds,           // flatStart,
-        nFeatEds,           // openStart,
-        nFeatEds,           // multipleStart,
+        nIntOrExt,           // flatStart,
+        nIntOrExt + nFlat,   // openStart,
+        nIntOrExt + nFlat + nOpen,   // multipleStart,
+
         normalsTmp,
         normalVolumeTypesTmp,
         edgeDirections,
         normalDirectionsTmp,
         edgeNormalsTmp,
+
         labelListList(0),   // featurePointNormals,
         labelListList(0),   // featurePointEdges,
         labelList(0)        // regionEdges

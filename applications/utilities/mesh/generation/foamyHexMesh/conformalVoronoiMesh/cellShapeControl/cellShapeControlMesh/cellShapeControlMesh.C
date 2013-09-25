@@ -628,49 +628,6 @@ Foam::tensorField Foam::cellShapeControlMesh::dumpAlignments() const
 }
 
 
-void Foam::cellShapeControlMesh::insertBoundingPoints
-(
-    const boundBox& bb,
-    const cellSizeAndAlignmentControls& sizeControls
-)
-{
-    // Loop over bound box points and get cell size and alignment
-    const pointField bbPoints(bb.points());
-
-    forAll(bbPoints, pI)
-    {
-        const Foam::point& pt = bbPoints[pI];
-
-        // Cell size here will return default cell size
-        const scalar cellSize = sizeControls.cellSize(pt);
-
-        if (debug)
-        {
-            Info<< "Insert Bounding Point: " << pt << " " << cellSize << endl;
-        }
-
-        // Get the cell size of the nearest surface.
-//        geometryToConformTo_.findSurfaceNearest
-//        (
-//            pt,
-//            GREAT,
-//            surfHit,
-//            hitSurface
-//        );
-
-        const tensor alignment = tensor::I;
-
-        insert
-        (
-            pt,
-            cellSize,
-            alignment,
-            Vb::vtInternalNearBoundary
-        );
-    }
-}
-
-
 void Foam::cellShapeControlMesh::write() const
 {
     Info<< "Writing " << meshSubDir << endl;
@@ -778,6 +735,80 @@ void Foam::cellShapeControlMesh::write() const
     mesh.write();
     sizes.write();
     alignments.write();
+}
+
+
+Foam::label Foam::cellShapeControlMesh::estimateCellCount
+(
+    const autoPtr<backgroundMeshDecomposition>& decomposition
+) const
+{
+    // Loop over all the tets and estimate the cell count in each one
+
+    scalar cellCount = 0;
+
+    for
+    (
+        Finite_cells_iterator cit = finite_cells_begin();
+        cit != finite_cells_end();
+        ++cit
+    )
+    {
+        if (!cit->hasFarPoint() && !is_infinite(cit))
+        {
+            // @todo Check if tet centre is on the processor..
+            CGAL::Tetrahedron_3<baseK> tet
+            (
+                cit->vertex(0)->point(),
+                cit->vertex(1)->point(),
+                cit->vertex(2)->point(),
+                cit->vertex(3)->point()
+            );
+
+            pointFromPoint centre = topoint(CGAL::centroid(tet));
+
+            if
+            (
+                Pstream::parRun()
+             && !decomposition().positionOnThisProcessor(centre)
+            )
+            {
+                continue;
+            }
+
+            scalar volume = CGAL::to_double(tet.volume());
+
+            scalar averagedPointCellSize = 0;
+            //scalar averagedPointCellSize = 1;
+
+            // Get an average volume by averaging the cell size of the vertices
+            for (label vI = 0; vI < 4; ++vI)
+            {
+                averagedPointCellSize += cit->vertex(vI)->targetCellSize();
+                //averagedPointCellSize *= cit->vertex(vI)->targetCellSize();
+            }
+
+            averagedPointCellSize /= 4;
+            //averagedPointCellSize = ::sqrt(averagedPointCellSize);
+
+//            if (averagedPointCellSize < SMALL)
+//            {
+//                Pout<< "Volume = " << volume << endl;
+//
+//                for (label vI = 0; vI < 4; ++vI)
+//                {
+//                    Pout<< "Point " << vI
+//                        << ", point = " << topoint(cit->vertex(vI)->point())
+//                        << ", size = " << cit->vertex(vI)->targetCellSize()
+//                        << endl;
+//                }
+//            }
+
+            cellCount += volume/pow(averagedPointCellSize, 3);
+        }
+    }
+
+    return cellCount;
 }
 
 

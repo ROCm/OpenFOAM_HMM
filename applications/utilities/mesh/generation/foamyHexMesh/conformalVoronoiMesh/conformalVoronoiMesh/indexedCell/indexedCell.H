@@ -193,6 +193,8 @@ public:
         //- Does the Dual vertex form part of a processor patch
         inline bool parallelDualVertex() const;
 
+        inline Foam::label vertexLowestProc() const;
+
         //- Using the globalIndex object, return a list of four (sorted) global
         //  Delaunay vertex indices that uniquely identify this tet in parallel
         inline Foam::tetCell vertexGlobalIndices

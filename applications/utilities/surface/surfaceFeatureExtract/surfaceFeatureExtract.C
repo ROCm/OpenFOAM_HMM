@@ -925,7 +925,7 @@ void writeStats(const extendedFeatureEdgeMesh& fem, Ostream& os)
         << "        open edges         : "
         << (fem.multipleStart()- fem.openStart()) << nl
         << "        multiply connected : "
-        << (fem.edges().size()- fem.multipleStart()) << nl;
+        << (fem.edges().size()- fem.multipleStart()) << endl;
 }
 
 
@@ -1223,17 +1223,34 @@ int main(int argc, char *argv[])
             << "        internal edges : " << newSet.nInternalEdges() << nl
             << endl;
 
-        //if (writeObj)
-        //{
-        //    newSet.writeObj("final");
-        //}
+        if (writeObj)
+        {
+            newSet.writeObj("final");
+        }
+
+        boolList surfBaffleRegions(surf.patches().size(), false);
+
+        wordList surfBaffleNames;
+        surfaceDict.readIfPresent("baffles", surfBaffleNames);
+
+        forAll(surf.patches(), pI)
+        {
+            const word& name = surf.patches()[pI].name();
+
+            if (findIndex(surfBaffleNames, name) != -1)
+            {
+                Info<< "Adding baffle region " << name << endl;
+                surfBaffleRegions[pI] = true;
+            }
+        }
 
         // Extracting and writing a extendedFeatureEdgeMesh
         extendedFeatureEdgeMesh feMesh
         (
             newSet,
             runTime,
-            sFeatFileName + ".extendedFeatureEdgeMesh"
+            sFeatFileName + ".extendedFeatureEdgeMesh",
+            surfBaffleRegions
         );
 
 

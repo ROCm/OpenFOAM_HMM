@@ -22,17 +22,17 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::triSurfaceMeshFeatures
+    Foam::searchablePlateFeatures
 
 Description
 
 SourceFiles
-    triSurfaceMeshFeatures.C
+    searchablePlateFeatures.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef triSurfaceMeshFeatures_H
-#define triSurfaceMeshFeatures_H
+#ifndef searchablePlateFeatures_H
+#define searchablePlateFeatures_H
 
 #include "searchableSurfaceFeatures.H"
 
@@ -42,42 +42,50 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class triSurfaceMeshFeatures Declaration
+                   Class searchablePlateFeatures Declaration
 \*---------------------------------------------------------------------------*/
 
-class triSurfaceMeshFeatures
+class searchablePlateFeatures
 :
     public searchableSurfaceFeatures
 {
 private:
 
+        //- To initialise edges.
+        static edgeList calcEdges(const label[4][2]);
+
+
     // Private Member Data
 
-        const scalar includedAngle_;
-
-        //- Which side of the surface to mesh
+        //- Which side of the plate to mesh
         const extendedFeatureEdgeMesh::sideVolumeType mode_;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        triSurfaceMeshFeatures(const triSurfaceMeshFeatures&);
+        searchablePlateFeatures(const searchablePlateFeatures&);
 
         //- Disallow default bitwise assignment
-        void operator=(const triSurfaceMeshFeatures&);
+        void operator=(const searchablePlateFeatures&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("triSurfaceMeshFeatures");
+    TypeName("searchablePlateFeatures");
+
+
+    // Static data members
+
+        //- Edge to point addressing
+        static const edgeList edges;
 
 
     // Constructors
 
-        //- Construct from dictionary (used by searchableSurface)
-        triSurfaceMeshFeatures
+        //- Construct from searchable surface and dictionary
+        searchablePlateFeatures
         (
             const searchableSurface& surface,
             const dictionary& dict
@@ -85,12 +93,12 @@ public:
 
 
     //- Destructor
-    virtual ~triSurfaceMeshFeatures();
+    virtual ~searchablePlateFeatures();
 
 
     // Member Functions
 
-        //- Return true for a triSurfaceMesh having features
+        //- Return true for a searchable plate having features
         virtual bool hasFeatures() const
         {
             return true;

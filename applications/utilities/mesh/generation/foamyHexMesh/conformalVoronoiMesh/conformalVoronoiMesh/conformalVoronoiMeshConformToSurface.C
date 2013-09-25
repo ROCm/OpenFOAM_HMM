@@ -62,11 +62,13 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 
         if (Pstream::parRun())
         {
-            sync(decomposition_().procBounds());
+            sync(decomposition().procBounds());
         }
     }
     else
     {
+        ptPairs_.clear();
+
         // Rebuild, insert and store new surface conformation
         buildSurfaceConformation();
 
@@ -74,7 +76,7 @@ void Foam::conformalVoronoiMesh::conformToSurface()
         {
             if (Pstream::parRun())
             {
-                sync(decomposition_().procBounds());
+                sync(decomposition().procBounds());
             }
         }
 
@@ -358,10 +360,13 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation()
             synchroniseSurfaceTrees(surfaceToTreeShape, surfaceHits);
         }
 
+        DynamicList<Vb> pts(2*surfaceHits.size() + 3*featureEdgeHits.size());
+
         insertSurfacePointPairs
         (
             surfaceHits,
-            "surfaceConformationLocations_initial.obj"
+            "surfaceConformationLocations_initial.obj",
+            pts
         );
 
         // In parallel, synchronise the edge trees
@@ -373,8 +378,20 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation()
         insertEdgePointGroups
         (
             featureEdgeHits,
-            "edgeConformationLocations_initial.obj"
+            "edgeConformationLocations_initial.obj",
+            pts
         );
+
+        pts.shrink();
+
+        Map<label> oldToNewIndices = insertPointPairs(pts, true, true);
+
+        // Re-index the point pairs
+        ptPairs_.reIndex(oldToNewIndices);
+
+        writePointPairs("pointPairs_initial.obj");
+
+        // Remove location from surface/edge tree
 
         timeCheck("After initial conformation");
 
@@ -550,215 +567,6 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation()
             }
         }
 
-//        for
-//        (
-//            Delaunay::Finite_edges_iterator eit = finite_edges_begin();
-//            eit != finite_edges_end();
-//            ++eit
-//        )
-//        {
-//            Cell_handle c = eit->first;
-//            Vertex_handle vA = c->vertex(eit->second);
-//            Vertex_handle vB = c->vertex(eit->third);
-//
-//            if
-//            (
-//                vA->referred()
-//             || vB->referred()
-//            )
-//            {
-//                continue;
-//            }
-//
-//            if
-//            (
-//                (vA->internalPoint() && vA->referred())
-//             || (vB->internalPoint() && vB->referred())
-//            )
-//            {
-//                continue;
-//            }
-//
-//            if
-//            (
-//                (vA->internalPoint() && vB->externalBoundaryPoint())
-//             || (vB->internalPoint() && vA->externalBoundaryPoint())
-//             || (vA->internalBoundaryPoint() && vB->internalBoundaryPoint())
-//            )
-//            {
-//                pointIndexHitAndFeatureDynList surfaceIntersections(0.5*AtoV);
-//                pointIndexHit surfHit;
-//                label hitSurface;
-//
-//                geometryToConformTo_.findSurfaceNearest
-//                (
-//                    (
-//                        vA->internalPoint()
-//                      ? topoint(vA->point())
-//                      : topoint(vB->point())
-//                    ),
-//                    magSqr(topoint(vA->point()) - topoint(vB->point())),
-//                    surfHit,
-//                    hitSurface
-//                );
-//
-//                if (surfHit.hit())
-//                {
-//                    surfaceIntersections.append
-//                    (
-//                        pointIndexHitAndFeature(surfHit, hitSurface)
-//                    );
-//
-//                    addSurfaceAndEdgeHits
-//                    (
-//                        (
-//                            vA->internalPoint()
-//                          ? topoint(vA->point())
-//                          : topoint(vB->point())
-//                        ),
-//                        surfaceIntersections,
-//                        surfacePtReplaceDistCoeffSqr,
-//                        edgeSearchDistCoeffSqr,
-//                        surfaceHits,
-//                        featureEdgeHits,
-//                        surfaceToTreeShape,
-//                        edgeToTreeShape,
-//                        surfacePtToEdgePtDist,
-//                        false
-//                    );
-//                }
-//            }
-//        }
-
-        for
-        (
-            Delaunay::Finite_cells_iterator cit = finite_cells_begin();
-            cit != finite_cells_end();
-            ++cit
-        )
-        {
-            label nInternal = 0;
-            for (label vI = 0; vI < 4; vI++)
-            {
-                if (cit->vertex(vI)->internalPoint())
-                {
-                    nInternal++;
-                }
-            }
-
-            if (nInternal == 1 && cit->hasBoundaryPoint())
-            //if (cit->boundaryDualVertex() && !cit->hasReferredPoint())
-            {
-                const Foam::point& pt = cit->dual();
-
-                const Foam::point cellCentre =
-                    topoint
-                    (
-                        CGAL::centroid
-                        (
-                            CGAL::Tetrahedron_3<baseK>
-                            (
-                                cit->vertex(0)->point(),
-                                cit->vertex(1)->point(),
-                                cit->vertex(2)->point(),
-                                cit->vertex(3)->point()
-                            )
-                        )
-                    );
-
-                pointIndexHitAndFeatureDynList surfaceIntersections(0.5*AtoV);
-                pointIndexHit surfHit;
-                label hitSurface;
-
-                geometryToConformTo_.findSurfaceNearestIntersection
-                (
-                    cellCentre,
-                    pt,
-                    surfHit,
-                    hitSurface
-                );
-
-                if (surfHit.hit())
-                {
-                    surfaceIntersections.append
-                    (
-                        pointIndexHitAndFeature(surfHit, hitSurface)
-                    );
-
-                    addSurfaceAndEdgeHits
-                    (
-                        pt,
-                        surfaceIntersections,
-                        surfacePtReplaceDistCoeffSqr,
-                        edgeSearchDistCoeffSqr,
-                        surfaceHits,
-                        featureEdgeHits,
-                        surfaceToTreeShape,
-                        edgeToTreeShape,
-                        surfacePtToEdgePtDist,
-                        false
-                    );
-                }
-            }
-        }
-
-//        for
-//        (
-//            Delaunay::Finite_cells_iterator cit = finite_cells_begin();
-//            cit != finite_cells_end();
-//            ++cit
-//        )
-//        {
-//            if (cit->boundaryDualVertex() && !cit->hasReferredPoint())
-//            {
-//                const Foam::point& pt = cit->dual();
-//
-//                pointIndexHitAndFeatureDynList surfaceIntersections(0.5*AtoV);
-//                pointIndexHit surfHit;
-//                label hitSurface;
-//
-//                geometryToConformTo_.findSurfaceNearest
-//                (
-//                    pt,
-//                    sqr(0.1*targetCellSize(pt)),
-//                    surfHit,
-//                    hitSurface
-//                );
-//
-//                if (!surfHit.hit())
-//                {
-//                    geometryToConformTo_.findSurfaceNearest
-//                    (
-//                        pt,
-//                        GREAT,
-//                        surfHit,
-//                        hitSurface
-//                    );
-//
-//                    if (surfHit.hit())
-//                    {
-//                        surfaceIntersections.append
-//                        (
-//                            pointIndexHitAndFeature(surfHit, hitSurface)
-//                        );
-//
-//                        addSurfaceAndEdgeHits
-//                        (
-//                            pt,
-//                            surfaceIntersections,
-//                            surfacePtReplaceDistCoeffSqr,
-//                            edgeSearchDistCoeffSqr,
-//                            surfaceHits,
-//                            featureEdgeHits,
-//                            surfaceToTreeShape,
-//                            edgeToTreeShape,
-//                            false
-//                        );
-//                    }
-//                }
-//            }
-//        }
-
         label nVerts = number_of_vertices();
         label nSurfHits = surfaceHits.size();
         label nFeatEdHits = featureEdgeHits.size();
@@ -789,10 +597,16 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation()
                     synchroniseSurfaceTrees(surfaceToTreeShape, surfaceHits);
             }
 
+            DynamicList<Vb> pts
+            (
+                2*surfaceHits.size() + 3*featureEdgeHits.size()
+            );
+
             insertSurfacePointPairs
             (
                 surfaceHits,
-                "surfaceConformationLocations_" + name(iterationNo) + ".obj"
+                "surfaceConformationLocations_" + name(iterationNo) + ".obj",
+                pts
             );
 
             // In parallel, synchronise the edge trees
@@ -805,8 +619,18 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation()
             insertEdgePointGroups
             (
                 featureEdgeHits,
-                "edgeConformationLocations_" + name(iterationNo) + ".obj"
+                "edgeConformationLocations_" + name(iterationNo) + ".obj",
+                pts
             );
+
+            pts.shrink();
+
+            Map<label> oldToNewIndices = insertPointPairs(pts, true, true);
+
+            // Reindex the point pairs
+            ptPairs_.reIndex(oldToNewIndices);
+
+            writePointPairs("pointPairs_" + name(iterationNo) + ".obj");
 
             if (Pstream::parRun())
             {
@@ -1155,8 +979,6 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceAllIntersections
          || is_infinite(fit->first->neighbor(fit->second))
          || !fit->first->hasInternalPoint()
          || !fit->first->neighbor(fit->second)->hasInternalPoint()
-//         || fit->first->hasFarPoint()
-//         || fit->first->neighbor(fit->second)->hasFarPoint()
         )
         {
             continue;
@@ -1209,14 +1031,13 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceAllIntersections
 
             const scalar d = p.normalIntersect(r);
 
-            const Foam::point newPoint = vertex + d*n;
+            Foam::point newPoint = vertex + d*n;
 
             pointIndexHitAndFeature info;
-
             geometryToConformTo_.findSurfaceNearest
             (
                 newPoint,
-                surfaceSearchDistanceSqr(newPoint),
+                4.0*magSqr(newPoint - vertex),
                 info.first(),
                 info.second()
             );
@@ -1359,7 +1180,10 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
         if
         (
             is_infinite(c1) || is_infinite(c2)
-         || (!c1->hasInternalPoint() && !c2->hasInternalPoint())
+         || (
+                !c1->internalOrBoundaryDualVertex()
+             || !c2->internalOrBoundaryDualVertex()
+            )
          || !c1->real() || !c2->real()
         )
         {
@@ -1369,19 +1193,24 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
 //        Foam::point endPt = 0.5*(c1->dual() + c2->dual());
         Foam::point endPt = c1->dual();
 
-        if
-        (
-            magSqr(vert - c1->dual())
-          < magSqr(vert - c2->dual())
-        )
+        if (magSqr(vert - c1->dual()) < magSqr(vert - c2->dual()))
         {
             endPt = c2->dual();
+        }
+
+        if
+        (
+            magSqr(vert - endPt)
+          > magSqr(geometryToConformTo().globalBounds().mag())
+        )
+        {
+            continue;
         }
 
         pointIndexHit surfHit;
         label hitSurface;
 
-        geometryToConformTo_.findSurfaceAnyIntersection
+        geometryToConformTo_.findSurfaceNearestIntersection
         (
             vert,
             endPt,
@@ -1401,15 +1230,46 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
 
             const vector& n = norm[0];
 
-            const scalar normalProtrusionDistance =
-                (endPt - surfHit.hitPoint()) & n;
+            const scalar normalProtrusionDistance
+            (
+                (endPt - surfHit.hitPoint()) & n
+            );
 
             if (normalProtrusionDistance > maxProtrusionDistance)
             {
-                surfHitLargest = surfHit;
-                hitSurfaceLargest = hitSurface;
+                const plane p(surfHit.hitPoint(), n);
 
-                maxProtrusionDistance = normalProtrusionDistance;
+                const plane::ray r(endPt, -n);
+
+                const scalar d = p.normalIntersect(r);
+
+                Foam::point newPoint = endPt - d*n;
+
+                pointIndexHitAndFeature info;
+                geometryToConformTo_.findSurfaceNearest
+                (
+                    newPoint,
+                    4.0*magSqr(newPoint - endPt),
+                    info.first(),
+                    info.second()
+                );
+
+                if (info.first().hit())
+                {
+                    if
+                    (
+                        surfaceLocationConformsToInside
+                        (
+                            pointIndexHitAndFeature(info.first(), info.second())
+                        )
+                    )
+                    {
+                        surfHitLargest = info.first();
+                        hitSurfaceLargest = info.second();
+
+                        maxProtrusionDistance = normalProtrusionDistance;
+                    }
+                }
             }
         }
     }
@@ -1465,7 +1325,10 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceIncursion
         if
         (
             is_infinite(c1) || is_infinite(c2)
-         || (!c1->hasInternalPoint() && !c2->hasInternalPoint())
+         || (
+                !c1->internalOrBoundaryDualVertex()
+             || !c2->internalOrBoundaryDualVertex()
+            )
          || !c1->real() || !c2->real()
         )
         {
@@ -1475,19 +1338,24 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceIncursion
 //        Foam::point endPt = 0.5*(c1->dual() + c2->dual());
         Foam::point endPt = c1->dual();
 
-        if
-        (
-            magSqr(vert - c1->dual())
-          < magSqr(vert - c2->dual())
-        )
+        if (magSqr(vert - c1->dual()) < magSqr(vert - c2->dual()))
         {
             endPt = c2->dual();
+        }
+
+        if
+        (
+            magSqr(vert - endPt)
+          > magSqr(geometryToConformTo().globalBounds().mag())
+        )
+        {
+            continue;
         }
 
         pointIndexHit surfHit;
         label hitSurface;
 
-        geometryToConformTo_.findSurfaceAnyIntersection
+        geometryToConformTo_.findSurfaceNearestIntersection
         (
             vert,
             endPt,
@@ -1507,19 +1375,46 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceIncursion
 
             const vector& n = norm[0];
 
-            scalar normalIncursionDistance = (endPt - surfHit.hitPoint()) & n;
+            scalar normalIncursionDistance
+            (
+                (endPt - surfHit.hitPoint()) & n
+            );
 
             if (normalIncursionDistance < minIncursionDistance)
             {
-                surfHitLargest = surfHit;
-                hitSurfaceLargest = hitSurface;
+                const plane p(surfHit.hitPoint(), n);
 
-                minIncursionDistance = normalIncursionDistance;
+                const plane::ray r(endPt, n);
 
-                // Info<< nl << "# Incursion: " << endl;
-                // meshTools::writeOBJ(Info, vert);
-                // meshTools::writeOBJ(Info, edgeMid);
-                // Info<< "l Na Nb" << endl;
+                const scalar d = p.normalIntersect(r);
+
+                Foam::point newPoint = endPt + d*n;
+
+                pointIndexHitAndFeature info;
+                geometryToConformTo_.findSurfaceNearest
+                (
+                    newPoint,
+                    4.0*magSqr(newPoint - endPt),
+                    info.first(),
+                    info.second()
+                );
+
+                if (info.first().hit())
+                {
+                    if
+                    (
+                        surfaceLocationConformsToInside
+                        (
+                            pointIndexHitAndFeature(info.first(), info.second())
+                        )
+                    )
+                    {
+                        surfHitLargest = info.first();
+                        hitSurfaceLargest = info.second();
+
+                        minIncursionDistance = normalIncursionDistance;
+                    }
+                }
             }
         }
     }
@@ -2219,6 +2114,9 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
                             // feature edge, give control to edge control points
                             // instead, this will prevent "pits" forming.
 
+                            // Allow if different surfaces
+
+
                             keepSurfacePoint = false;
                         }
 
@@ -2298,11 +2196,13 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
             surfaceHits.append(surfHitI);
             appendToSurfacePtTree(surfPt);
             surfaceToTreeShape.append(existingSurfacePtLocations_.size() - 1);
+
+//            addedPoints.write(surfPt);
         }
-//        else
-//        {
-//            surfaceToTreeShape.remove();
-//        }
+        else
+        {
+//            removedPoints.write(surfPt);
+        }
     }
 }
 
@@ -2338,7 +2238,9 @@ void Foam::conformalVoronoiMesh::storeSurfaceConformation()
                 Vb
                 (
                     vit->point(),
-                    vit->type()
+                    vit->index(),
+                    vit->type(),
+                    Pstream::myProcNo()
                 )
             );
         }
@@ -2362,24 +2264,40 @@ void Foam::conformalVoronoiMesh::reinsertSurfaceConformation()
 {
     Info<< nl << "Reinserting stored surface conformation" << endl;
 
-    const label preReinsertionSize(number_of_vertices());
+    Map<label> oldToNewIndices =
+        insertPointPairs(surfaceConformationVertices_, true, true);
 
-    // It is assumed that the stored surface conformation is on the correct
-    // processor and does not need distributed
-    rangeInsertWithInfo
+    ptPairs_.reIndex(oldToNewIndices);
+
+    PackedBoolList selectedElems(surfaceConformationVertices_.size(), true);
+
+    forAll(surfaceConformationVertices_, vI)
+    {
+        Vb& v = surfaceConformationVertices_[vI];
+        label& vIndex = v.index();
+
+        Map<label>::const_iterator iter = oldToNewIndices.find(vIndex);
+
+        if (iter != oldToNewIndices.end())
+        {
+            const label newIndex = iter();
+
+            if (newIndex != -1)
+            {
+                vIndex = newIndex;
+            }
+            else
+            {
+                selectedElems[vI] = false;
+            }
+        }
+    }
+
+    inplaceSubset<PackedBoolList, List<Vb> >
     (
-        surfaceConformationVertices_.begin(),
-        surfaceConformationVertices_.end(),
-        true
+        selectedElems,
+        surfaceConformationVertices_
     );
-
-    const label nInserted = label(number_of_vertices()) - preReinsertionSize;
-    const label nFailed = surfaceConformationVertices_.size() - nInserted;
-
-    Info<< "    " << returnReduce(nInserted, sumOp<label>())
-        << " points reinserted, failed to insert "
-        << returnReduce(nFailed, sumOp<label>())
-        << endl;
 }
 
 

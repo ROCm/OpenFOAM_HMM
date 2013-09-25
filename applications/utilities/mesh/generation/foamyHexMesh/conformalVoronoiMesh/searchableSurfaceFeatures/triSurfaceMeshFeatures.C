@@ -57,10 +57,19 @@ Foam::triSurfaceMeshFeatures::triSurfaceMeshFeatures
 )
 :
     searchableSurfaceFeatures(surface, dict),
-    includedAngle_(readScalar(dict.lookup("includedAngle")))
+    includedAngle_(readScalar(dict.lookup("includedAngle"))),
+    mode_
+    (
+        extendedFeatureEdgeMesh::sideVolumeTypeNames_
+        [
+            dict.lookupOrDefault<word>("meshableSide", "inside")
+        ]
+    )
 {
     Info<< indent
-        << "    Included angle = " << includedAngle_
+        << "    Included angle = " << includedAngle_ << nl
+        << "    Meshable region = "
+        << extendedFeatureEdgeMesh::sideVolumeTypeNames_[mode_]
         << endl;
 }
 
@@ -82,7 +91,12 @@ Foam::triSurfaceMeshFeatures::features() const
 
     surfaceFeatures sFeat(surfMesh, includedAngle_);
 
-    boolList surfBaffleRegions(surfMesh.patches().size(), false);
+    // @todo Need to read on a per region basis
+    boolList surfBaffleRegions
+    (
+        surfMesh.patches().size(),
+        (mode_ == extendedFeatureEdgeMesh::BOTH ? true : false)
+    );
 
     features.set
     (
@@ -90,8 +104,8 @@ Foam::triSurfaceMeshFeatures::features() const
         (
             sFeat,
             surface().db(),
-            surface().name() + ".extendedFeatureEdgeMesh"//,
-            //surfBaffleRegions
+            surface().name() + ".extendedFeatureEdgeMesh",
+            surfBaffleRegions
         )
     );
 
