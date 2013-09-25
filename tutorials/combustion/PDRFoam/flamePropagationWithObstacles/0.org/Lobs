@@ -8052,9 +8052,9 @@ boundaryField
 {
     outer
     {
-        type            inletOutlet;
-        inletValue      uniform 0;
-        value           uniform 0;
+        type                uniformInletOutlet;
+        uniformInletValue   0;
+        value               uniform 0;
     }
     ground
     {
