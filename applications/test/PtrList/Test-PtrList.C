@@ -32,6 +32,8 @@ Description
 #include "scalar.H"
 #include "IOstreams.H"
 #include "PtrList.H"
+#include "plane.H"
+#include "DynamicList.H"
 
 using namespace Foam;
 
@@ -76,6 +78,7 @@ int main(int argc, char *argv[])
 {
     PtrList<Scalar> list1(10);
     PtrList<Scalar> list2(15);
+    PtrList<Scalar> listApp;
 
     forAll(list1, i)
     {
@@ -87,9 +90,14 @@ int main(int argc, char *argv[])
         list2.set(i, new Scalar(10 + 1.3*i));
     }
 
+    for (label i = 0; i < 5; ++i)
+    {
+        listApp.append(new Scalar(1.3*i));
+    }
 
     Info<<"list1: " << list1 << endl;
     Info<<"list2: " << list2 << endl;
+    Info<<"listApp: " << listApp << endl;
 
     Info<<"indirectly delete some items via set(.., 0) :" << endl;
     for (label i = 0; i < 3; i++)
@@ -114,6 +122,13 @@ int main(int argc, char *argv[])
     Info<<"list1: " << list1 << endl;
     Info<<"list2: " << list2 << endl;
     Info<<"list3: " << list3 << endl;
+
+    PtrList<plane> planes;
+    planes.append(new plane(vector::one, vector::one));
+    planes.append(new plane(vector(1,2,3), vector::one));
+
+    forAll(planes, p)
+        Info<< "plane " << planes[p] << endl;
 
     Info<< nl << "Done." << endl;
     return 0;
