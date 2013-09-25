@@ -94,19 +94,29 @@ void Foam::forces::writeFileHeader(const label i)
             << "# bins      : " << nBin_ << nl
             << "# start     : " << binMin_ << nl
             << "# delta     : " << binDx_ << nl
-            << "# direction : " << binDir_ << nl;
+            << "# direction : " << binDir_ << nl
+            << "# Time";
 
-        file(i)
-            << "# Time"
-            << tab << "bin"
-            << tab << "forces(pressure,viscous,porous)"
-            << tab << "moment(pressure,viscous,porous)";
+        for (label j = 0; j < nBin_; j++)
+        {
+            const word jn = Foam::name(j);
 
+            file(i)
+                << tab
+                << "forces" << jn << "(pressure,viscous,porous) "
+                << "moment" << jn << "(pressure,viscous,porous)";
+        }
         if (localSystem_)
         {
-            file(i)
-                << tab << "localForces(pressure,viscous,porous)"
-                << tab << "localMoment(pressure,viscous,porous)";
+            for (label j = 0; j < nBin_; j++)
+            {
+                const word jn = Foam::name(j);
+
+                file(i)
+                    << tab
+                    << "localForces" << jn << "(pressure,viscous,porous) "
+                    << "localMoments" << jn << "(pressure,viscous,porous)";
+            }
         }
     }
     else
@@ -425,17 +435,27 @@ void Foam::forces::writeBins()
             f[0][i] += f[0][i-1];
             f[1][i] += f[1][i-1];
             f[2][i] += f[2][i-1];
+
             m[0][i] += m[0][i-1];
             m[1][i] += m[1][i-1];
             m[2][i] += m[2][i-1];
         }
     }
 
-    List<Field<vector> > lf(3);
-    List<Field<vector> > lm(3);
+    file(1) << obr_.time().value();
+
+    forAll(f[0], i)
+    {
+        file(1)
+            << tab
+            << "(" << f[0][i] << "," << f[1][i] << "," << f[2][i] << ") "
+            << "(" << m[0][i] << "," << m[1][i] << "," << m[2][i] << ")";
+    }
 
     if (localSystem_)
     {
+        List<Field<vector> > lf(3);
+        List<Field<vector> > lm(3);
         lf[0] = coordSys_.localVector(force_[0]);
         lf[1] = coordSys_.localVector(force_[1]);
         lf[2] = coordSys_.localVector(force_[2]);
@@ -455,27 +475,17 @@ void Foam::forces::writeBins()
                 lm[2][i] += lm[2][i-1];
             }
         }
-    }
 
-    forAll(f[0], i)
-    {
-        file(1)
-            << obr_.time().value()
-            << tab << i
-            << tab << "(" << f[0][i] << "," << f[1][i] << "," << f[2][i] << ")"
-            << tab << "(" << m[0][i] << "," << m[1][i] << "," << m[2][i] << ")";
-
-        if (localSystem_)
+        forAll(lf[0], i)
         {
             file(1)
                 << tab
-                << "(" << lf[0][i] << "," << lf[1][i] << "," << lf[2][i] << ")"
-                << tab
+                << "(" << lf[0][i] << "," << lf[1][i] << "," << lf[2][i] << ") "
                 << "(" << lm[0][i] << "," << lm[1][i] << "," << lm[2][i] << ")";
         }
-
-        file(1) << endl;
     }
+
+    file(1) << endl;
 }
 
 

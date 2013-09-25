@@ -63,14 +63,16 @@ void Foam::forceCoeffs::writeFileHeader(const label i)
             << "# bins      : " << nBin_ << nl
             << "# start     : " << binMin_ << nl
             << "# delta     : " << binDx_ << nl
-            << "# direction : " << binDir_ << nl;
+            << "# direction : " << binDir_ << nl
+            << "# Time";
 
-        file(i)
-            << "# Time"
-            << tab << "bin"
-            << tab << "Cm"
-            << tab << "Cd"
-            << tab << "Cl";
+        for (label j = 0; j < nBin_; j++)
+        {
+            const word jn = Foam::name(j);
+
+            file(i)
+                << tab << "Cm" << jn << tab << "Cd" << jn << tab << "Cl" << jn;
+        }
     }
     else
     {
@@ -214,16 +216,17 @@ void Foam::forceCoeffs::write()
                 }
             }
 
+            file(1)<< obr_.time().value();
+
             forAll(coeffs[0], i)
             {
                 file(1)
-                    << obr_.time().value()
-                    << tab << i
                     << tab << coeffs[2][i]
                     << tab << coeffs[1][i]
-                    << tab << coeffs[0][i]
-                    << endl;
+                    << tab << coeffs[0][i];
             }
+
+            file(1) << endl;
         }
 
         if (log_)
