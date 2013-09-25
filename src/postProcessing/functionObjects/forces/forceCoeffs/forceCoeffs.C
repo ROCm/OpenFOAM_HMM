@@ -196,7 +196,7 @@ void Foam::forceCoeffs::write()
 
         if (log_)
         {
-            Info<< type() << " output:" << nl
+            Info<< type() << " " << name_ << " output:" << nl
                 << "    Cm    = " << Cm << nl
                 << "    Cd    = " << Cd << nl
                 << "    Cl    = " << Cl << nl

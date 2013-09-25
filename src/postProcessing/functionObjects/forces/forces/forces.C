@@ -368,7 +368,7 @@ void Foam::forces::writeForces()
 {
     if (log_)
     {
-        Info<< type() << " output:" << nl
+        Info<< type() << " " << name_ << " output:" << nl
             << "    forces(pressure,viscous,porous) = ("
             << sum(force_[0]) << ","
             << sum(force_[1]) << ","
