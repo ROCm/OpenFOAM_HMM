@@ -27,7 +27,7 @@ wmake $makeType pairPatchAgglomeration
 #if [ -n "$SCOTCH_ARCH_PATH" ]
 #then
 #    wmake $makeType scotchGamgAgglomeration
-fi
+#fi
 
 
 # ----------------------------------------------------------------- end-of-file
