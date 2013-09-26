@@ -744,7 +744,6 @@ void Foam::chemistryModel<CompType, ThermoType>::calculate()
 template<class CompType, class ThermoType>
 Foam::scalar Foam::chemistryModel<CompType, ThermoType>::solve
 (
-    const scalar t0,
     const scalar deltaT
 )
 {
@@ -795,7 +794,7 @@ Foam::scalar Foam::chemistryModel<CompType, ThermoType>::solve
         c0 = c;
 
         // initialise timing parameters
-        scalar t = t0;
+        scalar t = 0;
         scalar tauC = this->deltaTChem_[celli];
         scalar dt = min(deltaT, tauC);
         scalar timeLeft = deltaT;

@@ -224,9 +224,9 @@ public:
                 const label i
             ) const;
 
-            //- Solve the reaction system for the given start time and time
-            //  step and return the characteristic time
-            virtual scalar solve(const scalar t0, const scalar deltaT) ;
+            //- Solve the reaction system for the given time step
+            //  and return the characteristic time
+            virtual scalar solve(const scalar deltaT);
 
 
         // ODE functions (overriding abstract functions in ODE.H)

@@ -81,16 +81,15 @@ void Foam::combustionModels::PaSR<Type>::correct()
 {
     if (this->active())
     {
-        const scalar t = this->mesh().time().value();
         const scalar dt = this->mesh().time().deltaTValue();
 
-        if (!useReactionRate_)
+        if (useReactionRate_)
         {
-            this->chemistryPtr_->solve(t - dt, dt);
+            this->chemistryPtr_->calculate();
         }
         else
         {
-            this->chemistryPtr_->calculate();
+            this->chemistryPtr_->solve(dt);
         }
 
         if (turbulentReaction_)
@@ -107,24 +106,15 @@ void Foam::combustionModels::PaSR<Type>::correct()
 
             forAll(epsilon, i)
             {
-                if (epsilon[i] > 0)
-                {
-                    scalar tk =
-                        Cmix_*Foam::sqrt(muEff[i]/rho[i]/(epsilon[i] + SMALL));
+                scalar tk =
+                    Cmix_*Foam::sqrt(muEff[i]/rho[i]/(epsilon[i] + SMALL));
 
-                    // Chalmers PaSR model
-                    if (!useReactionRate_)
-                    {
-                        kappa_[i] = (dt + tc[i])/(dt + tc[i] + tk);
-                    }
-                    else
-                    {
-                        kappa_[i] = tc[i]/(tc[i] + tk);
-                    }
+                if (tk > SMALL)
+                {
+                    kappa_[i] = tc[i]/(tc[i] + tk);
                 }
                 else
                 {
-                    // Return to laminar combustion
                     kappa_[i] = 1.0;
                 }
             }
