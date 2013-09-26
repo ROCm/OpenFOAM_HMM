@@ -32,13 +32,35 @@ License
 #include "polyTopoChange.H"
 #include "globalIndex.H"
 #include "PackedBoolList.H"
-#include "faceZone.H"
+#include "pointSet.H"
+#include "faceSet.H"
+#include "cellSet.H"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 namespace Foam
 {
 defineTypeNameAndDebug(polyMeshFilter, 0);
+}
+
+
+void Foam::polyMeshFilter::updateSets(const mapPolyMesh& map)
+{
+    updateSets<pointSet>(map);
+    updateSets<faceSet>(map);
+    updateSets<cellSet>(map);
+}
+
+
+void Foam::polyMeshFilter::copySets
+(
+    const polyMesh& oldMesh,
+    const polyMesh& newMesh
+)
+{
+    copySets<pointSet>(oldMesh, newMesh);
+    copySets<faceSet>(oldMesh, newMesh);
+    copySets<cellSet>(oldMesh, newMesh);
 }
 
 
@@ -71,6 +93,8 @@ Foam::autoPtr<Foam::fvMesh> Foam::polyMeshFilter::copyMesh(const fvMesh& mesh)
     {
         meshCopy().movePoints(map.preMotionPoints());
     }
+
+    copySets(mesh, meshCopy());
 
     return meshCopy;
 }
@@ -359,6 +383,7 @@ Foam::label Foam::polyMeshFilter::filterFaces
         {
             newMesh.movePoints(newMap.preMotionPoints());
         }
+        updateSets(newMap);
 
         updatePointPriorities(newMesh, newMap.pointMap());
 
@@ -475,6 +500,7 @@ Foam::label Foam::polyMeshFilter::filterEdges
     {
         newMesh.movePoints(newMap.preMotionPoints());
     }
+    updateSets(newMap);
 
     // Synchronise the factors
     mapOldMeshEdgeFieldToNewMesh
@@ -926,14 +952,14 @@ Foam::label Foam::polyMeshFilter::filter(const label nOriginalBadFaces)
 }
 
 
-Foam::label Foam::polyMeshFilter::filter(const faceZone& fZone)
+Foam::label Foam::polyMeshFilter::filter(const faceSet& fSet)
 {
     minEdgeLen_.resize(mesh_.nEdges(), minLen());
     faceFilterFactor_.resize(mesh_.nFaces(), initialFaceLengthFactor());
 
     forAll(faceFilterFactor_, fI)
     {
-        if (fZone.whichFace(fI) == -1)
+        if (!fSet.found(fI))
         {
             faceFilterFactor_[fI] = -1;
         }

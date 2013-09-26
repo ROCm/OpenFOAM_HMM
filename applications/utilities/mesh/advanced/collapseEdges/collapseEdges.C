@@ -52,6 +52,7 @@ Usage
 #include "polyTopoChange.H"
 #include "fvMesh.H"
 #include "polyMeshFilter.H"
+#include "faceSet.H"
 
 using namespace Foam;
 
@@ -74,9 +75,9 @@ int main(int argc, char *argv[])
 
     argList::addOption
     (
-        "collapseFaceZone",
-        "zoneName",
-        "Collapse faces that are in the supplied face zone"
+        "collapseFaceSet",
+        "faceSet",
+        "Collapse faces that are in the supplied face set"
     );
 
 #   include "addOverwriteOption.H"
@@ -93,15 +94,15 @@ int main(int argc, char *argv[])
     const bool overwrite = args.optionFound("overwrite");
 
     const bool collapseFaces = args.optionFound("collapseFaces");
-    const bool collapseFaceZone = args.optionFound("collapseFaceZone");
+    const bool collapseFaceSet = args.optionFound("collapseFaceSet");
 
-    if (collapseFaces && collapseFaceZone)
+    if (collapseFaces && collapseFaceSet)
     {
         FatalErrorIn("main(int, char*[])")
             << "Both face zone collapsing and face collapsing have been"
             << "selected. Choose only one of:" << nl
             << "    -collapseFaces" << nl
-            << "    -collapseFaceZone <faceZoneName>"
+            << "    -collapseFaceSet <faceSet>"
             << abort(FatalError);
     }
 
@@ -117,7 +118,6 @@ int main(int argc, char *argv[])
         ),
         labelList(mesh.nPoints(), labelMin)
     );
-
     forAll(timeDirs, timeI)
     {
         runTime.setTime(timeDirs[timeI], timeI);
@@ -127,6 +127,14 @@ int main(int argc, char *argv[])
         autoPtr<polyMeshFilter> meshFilterPtr;
 
         label nBadFaces = 0;
+
+        faceSet indirectPatchFaces
+        (
+            mesh,
+            "indirectPatchFaces",
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        );
 
         {
             meshFilterPtr.set(new polyMeshFilter(mesh, pointPriority));
@@ -139,19 +147,26 @@ int main(int argc, char *argv[])
             // the face filtering is sped up.
             nBadFaces = meshFilter.filterEdges(0);
             {
-                polyTopoChange meshMod(newMesh);
+                polyTopoChange meshMod(newMesh());
 
                 meshMod.changeMesh(mesh, false);
+
+                polyMeshFilter::copySets(newMesh(), mesh);
             }
 
             pointPriority = meshFilter.pointPriority();
         }
 
-        if (collapseFaceZone)
+        if (collapseFaceSet)
         {
-            const word faceZoneName = args.optionRead<word>("collapseFaceZone");
-
-            const faceZone& fZone = mesh.faceZones()[faceZoneName];
+            const word faceSetName(args.optionRead<word>("collapseFaceSet"));
+            faceSet fSet
+            (
+                mesh,
+                faceSetName,
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE
+            );
 
             meshFilterPtr.reset(new polyMeshFilter(mesh, pointPriority));
             polyMeshFilter& meshFilter = meshFilterPtr();
@@ -160,11 +175,13 @@ int main(int argc, char *argv[])
 
             // Filter faces. Pass in the number of bad faces that are present
             // from the previous edge filtering to use as a stopping criterion.
-            meshFilter.filter(fZone);
+            meshFilter.filter(fSet);
             {
                 polyTopoChange meshMod(newMesh);
 
                 meshMod.changeMesh(mesh, false);
+
+                polyMeshFilter::copySets(newMesh(), mesh);
             }
 
             pointPriority = meshFilter.pointPriority();
@@ -184,6 +201,8 @@ int main(int argc, char *argv[])
                 polyTopoChange meshMod(newMesh);
 
                 meshMod.changeMesh(mesh, false);
+
+                polyMeshFilter::copySets(newMesh(), mesh);
             }
 
             pointPriority = meshFilter.pointPriority();

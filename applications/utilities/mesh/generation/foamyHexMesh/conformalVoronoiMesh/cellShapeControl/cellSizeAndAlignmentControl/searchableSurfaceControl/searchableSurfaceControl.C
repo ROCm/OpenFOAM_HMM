@@ -429,6 +429,11 @@ void Foam::searchableSurfaceControl::initialVertices
                 vectorField normals(1);
                 searchableSurface_.getNormal(infoList, normals);
 
+                if (mag(normals[0]) < SMALL)
+                {
+                    normals[0] = vector(1, 1, 1);
+                }
+
                 pointAlignment.set(new triad(normals[0]));
 
                 if (infoList[0].hit())

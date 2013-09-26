@@ -292,6 +292,23 @@ inline bool CGAL::indexedCell<Gt, Cb>::parallelDualVertex() const
 
 
 template<class Gt, class Cb>
+inline Foam::label CGAL::indexedCell<Gt, Cb>::vertexLowestProc() const
+{
+    Foam::label lowestProc = -1;
+
+    for (int i = 0; i < 4; ++i)
+    {
+        if (this->vertex(i)->referred())
+        {
+            lowestProc = min(lowestProc, this->vertex(i)->procIndex());
+        }
+    }
+
+    return lowestProc;
+}
+
+
+template<class Gt, class Cb>
 inline Foam::tetCell CGAL::indexedCell<Gt, Cb>::vertexGlobalIndices
 (
     const Foam::globalIndex& globalDelaunayVertexIndices

@@ -202,7 +202,6 @@ void Foam::surfaceIntersection::storeIntersection
     DynamicList<point>& allCutPoints
 )
 {
-
     forAll(facesA, facesAI)
     {
         label faceA = facesA[facesAI];
@@ -1144,6 +1143,12 @@ const Foam::pointField& Foam::surfaceIntersection::cutPoints() const
 const Foam::edgeList& Foam::surfaceIntersection::cutEdges() const
 {
     return cutEdges_;
+}
+
+
+const Foam::labelPairLookup& Foam::surfaceIntersection::facePairToVertex() const
+{
+    return facePairToVertex_;
 }
 
 

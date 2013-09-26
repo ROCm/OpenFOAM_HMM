@@ -536,7 +536,8 @@ Foam::label Foam::DistributedDelaunayMesh<Triangulation>::referVertices
     labelPairHashSet pointsNotInserted = rangeInsertReferredWithInfo
     (
         referredVertices.begin(),
-        referredVertices.end()
+        referredVertices.end(),
+        true
     );
 
     if (!pointsNotInserted.empty())

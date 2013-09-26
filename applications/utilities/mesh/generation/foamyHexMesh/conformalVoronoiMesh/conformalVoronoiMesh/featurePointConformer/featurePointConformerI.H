@@ -28,5 +28,11 @@ const Foam::List<Vb>& Foam::featurePointConformer::featurePointVertices() const
     return featurePointVertices_;
 }
 
+const Foam::pointPairs<Delaunay>&
+Foam::featurePointConformer::featurePointPairs() const
+{
+    return ftPtPairs_;
+}
+
 
 // ************************************************************************* //

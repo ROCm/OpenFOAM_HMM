@@ -179,15 +179,23 @@ void Foam::conformalVoronoiMesh::insertInternalPoints
 }
 
 
-void Foam::conformalVoronoiMesh::insertPoints
+Foam::Map<Foam::label> Foam::conformalVoronoiMesh::insertPointPairs
 (
     List<Vb>& vertices,
-    bool distribute
+    bool distribute,
+    bool reIndex
 )
 {
     if (Pstream::parRun() && distribute)
     {
-        decomposition_().distributePoints(vertices);
+        autoPtr<mapDistribute> mapDist =
+            decomposition_().distributePoints(vertices);
+
+        // Re-index the point pairs if one or both have been distributed.
+        // If both, remove
+
+        // If added a point, then need to know its point pair
+        // If one moved, then update procIndex locally
 
         forAll(vertices, vI)
         {
@@ -197,7 +205,8 @@ void Foam::conformalVoronoiMesh::insertPoints
 
     label preReinsertionSize(number_of_vertices());
 
-    this->DelaunayMesh<Delaunay>::insertPoints(vertices);
+    Map<label> oldToNewIndices =
+        this->DelaunayMesh<Delaunay>::insertPoints(vertices, reIndex);
 
     const label nReinserted = returnReduce
     (
@@ -208,17 +217,18 @@ void Foam::conformalVoronoiMesh::insertPoints
     Info<< "    Reinserted " << nReinserted << " vertices out of "
         << returnReduce(vertices.size(), sumOp<label>())
         << endl;
+
+    return oldToNewIndices;
 }
 
 
 void Foam::conformalVoronoiMesh::insertSurfacePointPairs
 (
     const pointIndexHitAndFeatureList& surfaceHits,
-    const fileName fName
+    const fileName fName,
+    DynamicList<Vb>& pts
 )
 {
-    DynamicList<Vb> pts(2.0*surfaceHits.size());
-
     forAll(surfaceHits, i)
     {
         vectorField norm(1);
@@ -246,6 +256,7 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
                 pointPairDistance(surfacePt),
                 surfacePt,
                 normal,
+                true,
                 pts
             );
         }
@@ -256,6 +267,7 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
                 pointPairDistance(surfacePt),
                 surfacePt,
                 normal,
+                true,
                 pts
             );
         }
@@ -266,6 +278,7 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
                 pointPairDistance(surfacePt),
                 surfacePt,
                 -normal,
+                true,
                 pts
             );
         }
@@ -280,8 +293,6 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
         }
     }
 
-    insertPoints(pts, true);
-
     if (foamyHexMeshControls().objOutput() && fName != fileName::null)
     {
         DelaunayMeshTools::writeOBJ(time().path()/fName, pts);
@@ -292,11 +303,10 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
 void Foam::conformalVoronoiMesh::insertEdgePointGroups
 (
     const pointIndexHitAndFeatureList& edgeHits,
-    const fileName fName
+    const fileName fName,
+    DynamicList<Vb>& pts
 )
 {
-    DynamicList<Vb> pts(3.0*edgeHits.size());
-
     forAll(edgeHits, i)
     {
         if (edgeHits[i].first().hit())
@@ -317,10 +327,6 @@ void Foam::conformalVoronoiMesh::insertEdgePointGroups
             );
         }
     }
-
-    pts.shrink();
-
-    insertPoints(pts, true);
 
     if (foamyHexMeshControls().objOutput() && fName != fileName::null)
     {
@@ -859,6 +865,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
         geometryToConformTo_
     ),
     limitBounds_(),
+    ptPairs_(*this),
     ftPtConformer_(*this),
     edgeLocationTreePtr_(),
     surfacePtLocationTreePtr_(),
@@ -1108,7 +1115,7 @@ void Foam::conformalVoronoiMesh::move()
                 vB->alignment().T() & cartesianDirections
             );
 
-            Field<vector> alignmentDirs(3);
+            Field<vector> alignmentDirs(alignmentDirsA);
 
             forAll(alignmentDirsA, aA)
             {
@@ -1333,12 +1340,17 @@ void Foam::conformalVoronoiMesh::move()
                         // Point removal
                         if
                         (
-                            vA->internalPoint()
-                         && !vA->referred()
-                         && !vA->fixed()
-                         && vB->internalPoint()
-                         && !vB->referred()
-                         && !vB->fixed()
+                            (
+                                vA->internalPoint()
+                             && !vA->referred()
+                             && !vA->fixed()
+                            )
+                         &&
+                            (
+                                vB->internalPoint()
+                             && !vB->referred()
+                             && !vB->fixed()
+                            )
                         )
                         {
                             // Only insert a point at the midpoint of
@@ -1507,9 +1519,7 @@ void Foam::conformalVoronoiMesh::move()
         Info<< "Writing point displacement vectors to file." << endl;
         OFstream str
         (
-            time().path()
-          + "displacements_" + runTime_.timeName()
-          + ".obj"
+            time().path()/"displacements_" + runTime_.timeName() + ".obj"
         );
 
         for
@@ -1607,6 +1617,74 @@ void Foam::conformalVoronoiMesh::move()
                 time().path()/"boundaryPoints_" + time().timeName() + ".obj",
                 *this
             );
+
+            DelaunayMeshTools::writeOBJ
+            (
+                time().path()/"internalBoundaryPoints_" + time().timeName()
+              + ".obj",
+                *this,
+                Foam::indexedVertexEnum::vtInternalSurface,
+                Foam::indexedVertexEnum::vtInternalFeaturePoint
+            );
+
+            DelaunayMeshTools::writeOBJ
+            (
+                time().path()/"externalBoundaryPoints_" + time().timeName()
+              + ".obj",
+                *this,
+                Foam::indexedVertexEnum::vtExternalSurface,
+                Foam::indexedVertexEnum::vtExternalFeaturePoint
+            );
+
+            OBJstream multipleIntersections
+            (
+                "multipleIntersections_"
+              + time().timeName()
+              + ".obj"
+            );
+
+            for
+            (
+                Delaunay::Finite_edges_iterator eit = finite_edges_begin();
+                eit != finite_edges_end();
+                ++eit
+            )
+            {
+                Cell_handle c = eit->first;
+                Vertex_handle vA = c->vertex(eit->second);
+                Vertex_handle vB = c->vertex(eit->third);
+
+                Foam::point ptA(topoint(vA->point()));
+                Foam::point ptB(topoint(vB->point()));
+
+                List<pointIndexHit> surfHits;
+                labelList hitSurfaces;
+
+                geometryToConformTo().findSurfaceAllIntersections
+                (
+                    ptA,
+                    ptB,
+                    surfHits,
+                    hitSurfaces
+                );
+
+                if
+                (
+                    surfHits.size() >= 2
+                 || (
+                     surfHits.size() == 0
+                  && (
+                          (vA->externalBoundaryPoint()
+                       && vB->internalBoundaryPoint())
+                       || (vB->externalBoundaryPoint()
+                       && vA->internalBoundaryPoint())
+                     )
+                    )
+                )
+                {
+                    multipleIntersections.write(linePointRef(ptA, ptB));
+                }
+            }
         }
     }
 
@@ -1627,49 +1705,6 @@ void Foam::conformalVoronoiMesh::move()
         << "Total distance = " << totalDist << nl
         << endl;
 }
-
-
-//Foam::labelListList Foam::conformalVoronoiMesh::overlapsProc
-//(
-//    const List<Foam::point>& centres,
-//    const List<scalar>& radiusSqrs
-//) const
-//{
-//    if (!Pstream::parRun())
-//    {
-//        return labelListList(centres.size(), labelList(0));
-//    }
-//
-////    DynamicList<Foam::point> pts(number_of_vertices());
-//
-////    for
-////    (
-////        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-////        vit != finite_vertices_end();
-////        vit++
-////    )
-////    {
-////        pts.append(topoint(vit->point()));
-////    }
-////
-////    dynamicIndexedOctree<dynamicTreeDataPoint> vertexOctree
-////    (
-////        dynamicTreeDataPoint(pts),
-////        treeBoundBox(min(pts), max(pts)),
-////        10, // maxLevel
-////        10, // leafSize
-////        3.0 // duplicity
-////    );
-//
-//    return decomposition_().overlapsProcessors
-//    (
-//        centres,
-//        radiusSqrs,
-//        *this,
-//        false//,
-////        vertexOctree
-//    );
-//}
 
 
 void Foam::conformalVoronoiMesh::checkCoPlanarCells() const

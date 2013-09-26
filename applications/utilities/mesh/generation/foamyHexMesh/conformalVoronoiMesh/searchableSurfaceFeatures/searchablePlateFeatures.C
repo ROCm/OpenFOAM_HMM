@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "searchableBoxFeatures.H"
+#include "searchablePlateFeatures.H"
 #include "addToRunTimeSelectionTable.H"
 #include "treeBoundBox.H"
 
@@ -32,20 +32,49 @@ License
 namespace Foam
 {
 
-defineTypeNameAndDebug(searchableBoxFeatures, 0);
+defineTypeNameAndDebug(searchablePlateFeatures, 0);
 addToRunTimeSelectionTable
 (
     searchableSurfaceFeatures,
-    searchableBoxFeatures,
+    searchablePlateFeatures,
     dict
 );
 
+//! \cond - skip documentation : local scope only
+const Foam::label edgesArray[4][2] =
+{
+    {0, 1}, // 0
+    {0, 3},
+    {2, 1}, // 2
+    {2, 3}
+};
+//! \endcond
+
+const edgeList searchablePlateFeatures::edges(calcEdges(edgesArray));
+
+}
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::edgeList Foam::searchablePlateFeatures::calcEdges
+(
+    const label edgesArray[4][2]
+)
+{
+    edgeList edges(4);
+    forAll(edges, edgeI)
+    {
+        edges[edgeI][0] = edgesArray[edgeI][0];
+        edges[edgeI][1] = edgesArray[edgeI][1];
+    }
+    return edges;
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::searchableBoxFeatures::searchableBoxFeatures
+Foam::searchablePlateFeatures::searchablePlateFeatures
 (
     const searchableSurface& surface,
     const dictionary& dict
@@ -69,49 +98,38 @@ Foam::searchableBoxFeatures::searchableBoxFeatures
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::searchableBoxFeatures::~searchableBoxFeatures()
+Foam::searchablePlateFeatures::~searchablePlateFeatures()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::autoPtr<Foam::extendedFeatureEdgeMesh>
-Foam::searchableBoxFeatures::features() const
+Foam::searchablePlateFeatures::features() const
 {
     autoPtr<extendedFeatureEdgeMesh> features;
 
-    List<vector> faceNormalsList(treeBoundBox::faceNormals);
-    vectorField faceNormals(faceNormalsList);
+    vectorField faceNormals(1);
+    surface().getNormal(List<pointIndexHit>(1), faceNormals);
 
-    vectorField edgeDirections(12);
-    labelListList normalDirections(12);
+    vectorField edgeDirections(4);
+    labelListList normalDirections(4);
 
-    labelListList edgeNormals(12);
+    labelListList edgeNormals(4);
     forAll(edgeNormals, eI)
     {
         edgeNormals[eI].setSize(2, 0);
     }
-    edgeNormals[0][0] = 2; edgeNormals[0][1] = 4;
-    edgeNormals[1][0] = 1; edgeNormals[1][1] = 4;
-    edgeNormals[2][0] = 3; edgeNormals[2][1] = 4;
-    edgeNormals[3][0] = 0; edgeNormals[3][1] = 4;
-    edgeNormals[4][0] = 2; edgeNormals[4][1] = 5;
-    edgeNormals[5][0] = 1; edgeNormals[5][1] = 5;
-    edgeNormals[6][0] = 3; edgeNormals[6][1] = 5;
-    edgeNormals[7][0] = 0; edgeNormals[7][1] = 5;
-    edgeNormals[8][0] = 0; edgeNormals[8][1] = 2;
-    edgeNormals[9][0] = 2; edgeNormals[9][1] = 1;
-    edgeNormals[10][0] = 1; edgeNormals[10][1] = 3;
-    edgeNormals[11][0] = 3; edgeNormals[11][1] = 0;
-
-    tmp<pointField> surfacePointsTmp(surface().points());
-    pointField& surfacePoints = surfacePointsTmp();
+    edgeNormals[0][0] = 0; edgeNormals[0][1] = 0;
+    edgeNormals[1][0] = 0; edgeNormals[1][1] = 0;
+    edgeNormals[2][0] = 0; edgeNormals[2][1] = 0;
+    edgeNormals[3][0] = 0; edgeNormals[3][1] = 0;
 
     forAll(edgeDirections, eI)
     {
         edgeDirections[eI] =
-            surfacePoints[treeBoundBox::edges[eI].end()]
-          - surfacePoints[treeBoundBox::edges[eI].start()];
+            surface().points()()[edges[eI].end()]
+          - surface().points()()[edges[eI].start()];
 
         normalDirections[eI] = labelList(2, 0);
         for (label j = 0; j < 2; ++j)
@@ -119,8 +137,8 @@ Foam::searchableBoxFeatures::features() const
             const vector cross =
                 (faceNormals[edgeNormals[eI][j]] ^ edgeDirections[eI]);
             const vector fC0tofE0 =
-                0.5*(max(surfacePoints + min(surfacePoints)))
-              - surfacePoints[treeBoundBox::edges[eI].start()];
+                0.5*(max(surface().points()() + min(surface().points()())))
+              - surface().points()()[edges[eI].start()];
 
             normalDirections[eI][j] =
                 (
@@ -135,17 +153,17 @@ Foam::searchableBoxFeatures::features() const
         }
     }
 
-    labelListList featurePointNormals(8);
-    labelListList featurePointEdges(8);
+    labelListList featurePointNormals(4);
+    labelListList featurePointEdges(4);
     forAll(featurePointNormals, pI)
     {
         labelList& ftPtEdges = featurePointEdges[pI];
-        ftPtEdges.setSize(3, 0);
+        ftPtEdges.setSize(2, 0);
 
         label edgeI = 0;
-        forAll(treeBoundBox::edges, eI)
+        forAll(edges, eI)
         {
-            const edge& e = treeBoundBox::edges[eI];
+            const edge& e = edges[eI];
 
             if (e.start() == pI)
             {
@@ -158,11 +176,9 @@ Foam::searchableBoxFeatures::features() const
         }
 
         labelList& ftPtNormals = featurePointNormals[pI];
-        ftPtNormals.setSize(3, 0);
+        ftPtNormals.setSize(1, 0);
 
         ftPtNormals[0] = edgeNormals[ftPtEdges[0]][0];
-        ftPtNormals[1] = edgeNormals[ftPtEdges[0]][1];
-        ftPtNormals[2] = edgeNormals[ftPtEdges[1]][0];
     }
 
     labelList regionEdges;
@@ -181,11 +197,11 @@ Foam::searchableBoxFeatures::features() const
                 IOobject::AUTO_WRITE
             ),
             surface().points(),
-            treeBoundBox::edges,
-            8, 8, 8,
-            12, 12, 12, 12,
+            edges,
+            4, 4, 4,
+            0, 0, 4, 4, // 4 flat edges
             faceNormals,
-            List<extendedFeatureEdgeMesh::sideVolumeType>(12, mode_),
+            List<extendedFeatureEdgeMesh::sideVolumeType>(4, mode_),
             edgeDirections,
             normalDirections,
             edgeNormals,

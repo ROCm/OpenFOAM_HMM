@@ -25,13 +25,14 @@ Class
     Foam::polyMeshFilter
 
 Description
-    Filter the edges and faces of a polyMesh whilst satisfying the given mesh
+    Remove the edges and faces of a polyMesh whilst satisfying the given mesh
     quality criteria.
 
     Works on a copy of the mesh.
 
 SourceFiles
     polyMeshFilter.C
+    polyMeshFilterTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -53,7 +54,7 @@ namespace Foam
 class polyMesh;
 class fvMesh;
 class PackedBoolList;
-class faceZone;
+class faceSet;
 
 /*---------------------------------------------------------------------------*\
                        Class polyMeshFilter Declaration
@@ -71,8 +72,12 @@ class polyMeshFilter
         //- Copy of the original mesh to perform the filtering on
         autoPtr<fvMesh> newMeshPtr_;
 
-        //-
+        //- Original point priorities. If a point has a higher priority than
+        //  another point then the edge between them collapses towards the
+        //  point with the higher priority. (e.g. 2 is a higher priority than 1)
         labelList originalPointPriority_;
+
+        //- Point priority associated with the new mesh
         autoPtr<labelList> pointPriority_;
 
         //- The minimum edge length for each edge
@@ -83,6 +88,12 @@ class polyMeshFilter
 
 
     // Private Member Functions
+
+        template<typename T>
+        static void updateSets(const mapPolyMesh& map);
+
+        template<typename T>
+        static void copySets(const polyMesh& oldMesh, const polyMesh& newMesh);
 
         label filterFacesLoop(const label nOriginalBadFaces);
 
@@ -209,6 +220,7 @@ public:
             //  mesh has actually been filtered.
             const autoPtr<fvMesh>& filteredMesh() const;
 
+            //- Return the new pointPriority list.
             const autoPtr<labelList>& pointPriority() const;
 
 
@@ -217,11 +229,21 @@ public:
             //- Return a copy of an fvMesh
             static autoPtr<fvMesh> copyMesh(const fvMesh& mesh);
 
+            //- Copy loaded topoSets from the old mesh to the new mesh
+            static void copySets
+            (
+                const polyMesh& oldMesh,
+                const polyMesh& newMesh
+            );
+
+            //- Update the loaded topoSets
+            static void updateSets(const mapPolyMesh& map);
+
             //- Filter edges and faces
             label filter(const label nOriginalBadFaces);
 
-            //- Filter all faces that are in the face zone indirectPatchFaces
-            label filter(const faceZone& fZone);
+            //- Filter all faces that are in the face set
+            label filter(const faceSet& fSet);
 
             //- Filter edges only.
             label filterEdges(const label nOriginalBadFaces);
@@ -231,6 +253,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "polyMeshFilterTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

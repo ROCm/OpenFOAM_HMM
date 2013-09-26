@@ -50,10 +50,17 @@ int main(int argc, char *argv[])
     labelList a(orig);
     sortedOrder(a, order);
 
+    SortableList<label> aReverse(a.size());
+    aReverse = a;
+
     Info<< "unsorted: " << a << endl;
     sort(a);
     Info<< "sorted:   " << a << endl;
     Info<< "indices:  " << order << endl;
+
+    aReverse.reverseSort();
+    Info<< "reverse sorted:   " << aReverse << endl;
+    Info<< "reverse indices:  " << aReverse.indices() << endl;
 
     SortableList<label> b(orig);
     Info<< "unsorted: " << orig << endl;

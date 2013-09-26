@@ -76,6 +76,7 @@ faceAreaWeightModel/piecewiseLinearRamp/piecewiseLinearRamp.C
 
 searchableSurfaceFeatures/searchableSurfaceFeatures.C
 searchableSurfaceFeatures/searchableBoxFeatures.C
+searchableSurfaceFeatures/searchablePlateFeatures.C
 searchableSurfaceFeatures/triSurfaceMeshFeatures.C
 
 LIB = $(FOAM_LIBBIN)/libconformalVoronoiMesh

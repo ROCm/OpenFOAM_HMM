@@ -768,7 +768,7 @@ Foam::label Foam::controlMeshRefinement::refineMesh
         }
     }
 
-    mesh_.insertPoints(verts);
+    mesh_.insertPoints(verts, false);
 
     return verts.size();
 }

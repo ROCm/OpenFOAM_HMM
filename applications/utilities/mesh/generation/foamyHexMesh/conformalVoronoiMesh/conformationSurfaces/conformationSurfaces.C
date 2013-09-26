@@ -83,6 +83,13 @@ void Foam::conformationSurfaces::hasBoundedVolume
 
             const pointField& surfPts = triSurf.points();
 
+            Info<< "    Checking " << surface.name() << endl;
+
+            label nBaffles = 0;
+
+            Info<< "        Index = " << surfaces_[s] << endl;
+            Info<< "        Offset = " << regionOffset_[s] << endl;
+
             forAll(triSurf, sI)
             {
                 const label patchID =
@@ -98,7 +105,13 @@ void Foam::conformationSurfaces::hasBoundedVolume
                 {
                     sum += triSurf[sI].normal(surfPts);
                 }
+                else
+                {
+                    nBaffles++;
+                }
             }
+            Info<< "        has " << nBaffles << " baffles out of "
+                << triSurf.size() << " triangles" << endl;
 
             totalTriangles += triSurf.size();
         }
@@ -153,8 +166,9 @@ void Foam::conformationSurfaces::readFeatures
     {
         const searchableSurface& surface = allGeometry_[surfaces_[surfI]];
 
-        Info<< "    features: " << surface.name() << " of type "
-            << surface.type() << endl;
+        Info<< "    features: " << surface.name()
+            << " of type " << surface.type()
+            << ", id: " << featureIndex << endl;
 
         autoPtr<searchableSurfaceFeatures> ssFeatures
         (
@@ -210,7 +224,8 @@ void Foam::conformationSurfaces::readFeatures
     {
         fileName feMeshName(featureDict.lookup("extendedFeatureEdgeMesh"));
 
-        Info<< "    features: " << feMeshName << endl;
+        Info<< "    features: " << feMeshName << ", id: " << featureIndex
+            << endl;
 
         features_.set
         (
@@ -716,7 +731,11 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInOutSide
 
             const searchableSurface& surface(allGeometry_[surfaces_[s]]);
 
-            if (!surface.hasVolumeType())
+            if
+            (
+                !surface.hasVolumeType()
+             //&& surfaceVolumeTests[s][i] == volumeType::UNKNOWN
+            )
             {
                 pointField sample(1, samplePts[i]);
                 scalarField nearestDistSqr(1, GREAT);
@@ -733,7 +752,7 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInOutSide
                 findSurfaceNearestIntersection
                 (
                     samplePts[i],
-                    info[0].rawPoint(),
+                    info[0].rawPoint() - 1e-3*mag(hitDir)*hitDir,
                     surfHit,
                     hitSurface
                 );
