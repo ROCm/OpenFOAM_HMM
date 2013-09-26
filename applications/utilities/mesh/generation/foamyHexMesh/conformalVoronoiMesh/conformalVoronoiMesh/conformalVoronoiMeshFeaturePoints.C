@@ -1160,23 +1160,6 @@ void Foam::conformalVoronoiMesh::insertFeaturePoints(bool distribute)
     Info<< nl
         << "Inserting feature points" << endl;
 
-
-//    Map<label> oldToNewIndices = insertPoints(featureVertices_, distribute);
-
-//    featurePtPairs_.reIndex(oldToNewIndices);
-
-//    forAll(featureVertices_, vI)
-//    {
-//        Map<label>::const_iterator iter =
-//            oldToNewIndices.find(featureVertices_[vI].index());
-
-//        if (iter != oldToNewIndices.end())
-//        {
-//            featureVertices_[vI].index() = iter();
-//        }
-//    }
-
-
     const label preFeaturePointSize(number_of_vertices());
 
     if (Pstream::parRun() && distribute)
@@ -1187,7 +1170,10 @@ void Foam::conformalVoronoiMesh::insertFeaturePoints(bool distribute)
     const List<Vb>& ftPtVertices = ftPtConformer_.featurePointVertices();
 
     // Insert the created points directly as already distributed.
-    this->DelaunayMesh<Delaunay>::insertPoints(ftPtVertices, true);
+    Map<label> oldToNewIndices =
+        this->DelaunayMesh<Delaunay>::insertPoints(ftPtVertices, true);
+
+    ftPtConformer_.reIndexPointPairs(oldToNewIndices);
 
     label nFeatureVertices = number_of_vertices() - preFeaturePointSize;
     reduce(nFeatureVertices, sumOp<label>());

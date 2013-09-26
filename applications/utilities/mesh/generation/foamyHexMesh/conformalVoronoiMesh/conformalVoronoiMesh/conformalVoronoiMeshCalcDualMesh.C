@@ -2231,7 +2231,6 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                     if
                     (
                         vA->boundaryPoint() && vB->boundaryPoint()
-                     && !isProcBoundaryEdge(eit)
                      && !ptPairs_.isPointPair(vA, vB)
                      && !ftPtConformer_.featurePointPairs().isPointPair(vA, vB)
                     )

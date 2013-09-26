@@ -968,10 +968,10 @@ Foam::surfaceIntersection::surfaceIntersection
 
             if (!usedPoints.found(pointI))
             {
-                FatalErrorIn("surfaceIntersection::surfaceIntersection")
+                WarningIn("surfaceIntersection::surfaceIntersection")
                     << "Problem: cut point:" << pointI
                     << " coord:" << cutPoints_[pointI]
-                    << " not used by any edge" << abort(FatalError);
+                    << " not used by any edge" << endl;
             }
         }
     }
