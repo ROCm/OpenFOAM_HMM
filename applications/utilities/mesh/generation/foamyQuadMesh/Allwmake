@@ -4,6 +4,7 @@ set -x
 
 if [ -d "$CGAL_ARCH_PATH" ]
 then
+    wmake libso ../foamyHexMesh/conformalVoronoiMesh
     wmake libso conformalVoronoi2DMesh
     wmake
 fi

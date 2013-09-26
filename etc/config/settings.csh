@@ -226,10 +226,10 @@ case ThirdParty:
         breaksw
     case Gcc48:
     case Gcc48++0x:
-        set gcc_version=gcc-4.8.0
-        set gmp_version=gmp-5.0.4
-        set mpfr_version=mpfr-3.1.0
-        set mpc_version=mpc-0.9
+        set gcc_version=gcc-4.8.1
+        set gmp_version=gmp-5.1.2
+        set mpfr_version=mpfr-3.1.2
+        set mpc_version=mpc-1.0.1
         breaksw
     case Gcc47:
     case Gcc47++0x:
@@ -397,7 +397,7 @@ case SYSTEMOPENMPI:
     breaksw
 
 case OPENMPI:
-    setenv FOAM_MPI openmpi-1.6.3
+    setenv FOAM_MPI openmpi-1.6.5
     # optional configuration tweaks:
     _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config/openmpi.csh`
 
