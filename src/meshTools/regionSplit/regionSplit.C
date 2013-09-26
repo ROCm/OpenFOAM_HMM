@@ -379,6 +379,7 @@ Foam::label Foam::regionSplit::calcLocalRegionSplit
 
 Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
 (
+    const bool doGlobalRegions,
     const boolList& blockedFace,
     const List<labelPair>& explicitConnections,
 
@@ -395,7 +396,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
         cellRegion
     );
 
-    if (!Pstream::parRun())
+    if (!doGlobalRegions)
     {
         return autoPtr<globalIndex>(new globalIndex(nLocalRegions));
     }
@@ -422,7 +423,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
     // (this will create gaps in the global region list so they will get
     // merged later on)
 
-    while (Pstream::parRun())
+    while (true)
     {
         if (debug)
         {
@@ -690,13 +691,14 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::regionSplit::regionSplit(const polyMesh& mesh)
+Foam::regionSplit::regionSplit(const polyMesh& mesh, const bool doGlobalRegions)
 :
     MeshObject<polyMesh, Foam::TopologicalMeshObject, regionSplit>(mesh),
     labelList(mesh.nCells(), -1)
 {
     globalNumberingPtr_ = calcRegionSplit
     (
+        doGlobalRegions,    //do global regions
         boolList(0, false), //blockedFaces
         List<labelPair>(0), //explicitConnections,
         *this
@@ -707,7 +709,8 @@ Foam::regionSplit::regionSplit(const polyMesh& mesh)
 Foam::regionSplit::regionSplit
 (
     const polyMesh& mesh,
-    const boolList& blockedFace
+    const boolList& blockedFace,
+    const bool doGlobalRegions
 )
 :
     MeshObject<polyMesh, Foam::TopologicalMeshObject, regionSplit>(mesh),
@@ -715,6 +718,7 @@ Foam::regionSplit::regionSplit
 {
     globalNumberingPtr_ = calcRegionSplit
     (
+        doGlobalRegions,
         blockedFace,        //blockedFaces
         List<labelPair>(0), //explicitConnections,
         *this
@@ -726,7 +730,8 @@ Foam::regionSplit::regionSplit
 (
     const polyMesh& mesh,
     const boolList& blockedFace,
-    const List<labelPair>& explicitConnections
+    const List<labelPair>& explicitConnections,
+    const bool doGlobalRegions
 )
 :
     MeshObject<polyMesh, Foam::TopologicalMeshObject, regionSplit>(mesh),
@@ -734,6 +739,7 @@ Foam::regionSplit::regionSplit
 {
     globalNumberingPtr_ = calcRegionSplit
     (
+        doGlobalRegions,
         blockedFace,            //blockedFaces
         explicitConnections,    //explicitConnections,
         *this
