@@ -176,6 +176,9 @@ public:
             //- Distribute the feature point vertices according to the
             //  supplied background mesh
             void distribute(const backgroundMeshDecomposition& decomposition);
+
+            //- Reindex the feature point pairs using the map.
+            void reIndexPointPairs(const Map<label>& oldToNewIndices);
 };
 
 

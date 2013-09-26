@@ -609,4 +609,26 @@ void Foam::featurePointConformer::distribute
 }
 
 
+void Foam::featurePointConformer::reIndexPointPairs
+(
+    const Map<label>& oldToNewIndices
+)
+{
+    forAll(featurePointVertices_, vI)
+    {
+        const label currentIndex = featurePointVertices_[vI].index();
+
+        Map<label>::const_iterator newIndexIter =
+            oldToNewIndices.find(currentIndex);
+
+        if (newIndexIter != oldToNewIndices.end())
+        {
+            featurePointVertices_[vI].index() = newIndexIter();
+        }
+    }
+
+    ftPtPairs_.reIndex(oldToNewIndices);
+}
+
+
 // ************************************************************************* //
