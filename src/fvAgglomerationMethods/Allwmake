@@ -12,4 +12,22 @@ fi
 
 wmake $makeType pairPatchAgglomeration
 
+
+## get SCOTCH_VERSION, SCOTCH_ARCH_PATH
+#if settings=`$WM_PROJECT_DIR/bin/foamEtcFile config/scotch.sh`
+#then
+#    . $settings
+#    echo "using SCOTCH_ARCH_PATH=$SCOTCH_ARCH_PATH"
+#else
+#    echo
+#    echo "Error: no config/scotch.sh settings"
+#    echo
+#fi
+#
+#if [ -n "$SCOTCH_ARCH_PATH" ]
+#then
+#    wmake $makeType scotchGamgAgglomeration
+#fi
+
+
 # ----------------------------------------------------------------- end-of-file

@@ -112,8 +112,6 @@ const
 
         if (localCellI != -1)
         {
-            Pout<< "Found point " << keepPoint << " in cell " << localCellI
-                << " on processor " << Pstream::myProcNo() << endl;
             globalCellI = globalCells.toGlobal(localCellI);
         }
 
@@ -129,6 +127,14 @@ const
                 << "Bounding box of the mesh:" << mesh.bounds()
                 << exit(FatalError);
         }
+
+
+        label procI = globalCells.whichProcID(globalCellI);
+        label procCellI = globalCells.toLocal(procI, globalCellI);
+
+        Info<< "Found point " << keepPoint << " in cell " << procCellI
+            << " on processor " << procI << endl;
+
 
         if (globalCells.isLocal(globalCellI))
         {

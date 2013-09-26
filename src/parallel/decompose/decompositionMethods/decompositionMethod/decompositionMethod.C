@@ -167,7 +167,7 @@ void Foam::decompositionMethod::calcCellCells
 (
     const polyMesh& mesh,
     const labelList& agglom,
-    const label nCoarse,
+    const label nLocalCoarse,
     const bool parallel,
     CompactListList<label>& cellCells
 )
@@ -182,7 +182,7 @@ void Foam::decompositionMethod::calcCellCells
 
     globalIndex globalAgglom
     (
-        nCoarse,
+        nLocalCoarse,
         Pstream::msgType(),
         Pstream::worldComm,
         parallel
@@ -224,7 +224,7 @@ void Foam::decompositionMethod::calcCellCells
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Number of faces per coarse cell
-    labelList nFacesPerCell(nCoarse, 0);
+    labelList nFacesPerCell(nLocalCoarse, 0);
 
     for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
     {
@@ -374,7 +374,7 @@ void Foam::decompositionMethod::calcCellCells
 //    const boolList& blockedFace,
 //    const List<labelPair>& explicitConnections,
 //    const labelList& agglom,
-//    const label nCoarse,
+//    const label nLocalCoarse,
 //    const bool parallel,
 //    CompactListList<label>& cellCells
 //)
@@ -389,7 +389,7 @@ void Foam::decompositionMethod::calcCellCells
 //
 //    globalIndex globalAgglom
 //    (
-//        nCoarse,
+//        nLocalCoarse,
 //        Pstream::msgType(),
 //        Pstream::worldComm,
 //        parallel
@@ -431,7 +431,7 @@ void Foam::decompositionMethod::calcCellCells
 //    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //    // Number of faces per coarse cell
-//    labelList nFacesPerCell(nCoarse, 0);
+//    labelList nFacesPerCell(nLocalCoarse, 0);
 //
 //    // 1. Internal faces
 //    for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
@@ -764,6 +764,24 @@ Foam::labelList Foam::decompositionMethod::decompose
     // Any weights specified?
     label nWeights = returnReduce(cellWeights.size(), sumOp<label>());
 
+    if (nWeights > 0 && cellWeights.size() != mesh.nCells())
+    {
+        FatalErrorIn
+        (
+            "decompositionMethod::decompose\n"
+            "(\n"
+            "   const polyMesh&,\n"
+            "   const scalarField&,\n"
+            "   const boolList&,\n"
+            "   const PtrList<labelList>&,\n"
+            "   const labelList&,\n"
+            "   const List<labelPair>&\n"
+        )   << "Number of weights " << cellWeights.size()
+            << " differs from number of cells " << mesh.nCells()
+            << exit(FatalError);
+    }
+
+
     // Any processor sets?
     label nProcSets = 0;
     forAll(specifiedProcessorFaces, setI)
@@ -828,9 +846,17 @@ Foam::labelList Foam::decompositionMethod::decompose
                 << nProcSets << endl << endl;
         }
 
-        // Determine global regions, separated by blockedFaces
-        regionSplit globalRegion(mesh, blockedFace, explicitConnections);
+        // Determine local regions, separated by blockedFaces
+        regionSplit localRegion(mesh, blockedFace, explicitConnections, false);
 
+
+        if (debug)
+        {
+            Info<< "Constrained decomposition:" << endl
+                << "    split into " << localRegion.nLocalRegions()
+                << " regions."
+                << endl;
+        }
 
         // Determine region cell centres
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -840,11 +866,11 @@ Foam::labelList Foam::decompositionMethod::decompose
         // somewhere in the middle of the domain which might not be anywhere
         // near any of the cells.
 
-        pointField regionCentres(globalRegion.nRegions(), point::max);
+        pointField regionCentres(localRegion.nLocalRegions(), point::max);
 
-        forAll(globalRegion, cellI)
+        forAll(localRegion, cellI)
         {
-            label regionI = globalRegion[cellI];
+            label regionI = localRegion[cellI];
 
             if (regionCentres[regionI] == point::max)
             {
@@ -855,22 +881,22 @@ Foam::labelList Foam::decompositionMethod::decompose
         // Do decomposition on agglomeration
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        scalarField regionWeights(globalRegion.nRegions(), 0);
+        scalarField regionWeights(localRegion.nLocalRegions(), 0);
 
         if (nWeights > 0)
         {
-            forAll(globalRegion, cellI)
+            forAll(localRegion, cellI)
             {
-                label regionI = globalRegion[cellI];
+                label regionI = localRegion[cellI];
 
                 regionWeights[regionI] += cellWeights[cellI];
             }
         }
         else
         {
-            forAll(globalRegion, cellI)
+            forAll(localRegion, cellI)
             {
-                label regionI = globalRegion[cellI];
+                label regionI = localRegion[cellI];
 
                 regionWeights[regionI] += 1.0;
             }
@@ -879,7 +905,7 @@ Foam::labelList Foam::decompositionMethod::decompose
         finalDecomp = decompose
         (
             mesh,
-            globalRegion,
+            localRegion,
             regionCentres,
             regionWeights
         );
