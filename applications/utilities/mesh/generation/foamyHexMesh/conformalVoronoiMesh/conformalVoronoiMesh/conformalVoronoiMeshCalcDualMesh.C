@@ -1199,6 +1199,41 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 }
 
 
+Foam::label Foam::conformalVoronoiMesh::classifyBoundaryPoint
+(
+    Cell_handle cit
+) const
+{
+    if (cit->boundaryDualVertex())
+    {
+        if (cit->featurePointDualVertex())
+        {
+            return featurePoint;
+        }
+        else if (cit->featureEdgeDualVertex())
+        {
+            return featureEdge;
+        }
+        else
+        {
+            return surface;
+        }
+    }
+    else if (cit->baffleSurfaceDualVertex())
+    {
+        return surface;
+    }
+    else if (cit->baffleEdgeDualVertex())
+    {
+        return featureEdge;
+    }
+    else
+    {
+        return internal;
+    }
+}
+
+
 void Foam::conformalVoronoiMesh::indexDualVertices
 (
     pointField& pts,
@@ -1448,29 +1483,7 @@ void Foam::conformalVoronoiMesh::indexDualVertices
 //                }
 //            }
 
-            if (cit->boundaryDualVertex())
-            {
-                if (cit->featurePointDualVertex())
-                {
-                    boundaryPts[cit->cellIndex()] = featurePoint;
-                }
-                else if (cit->featureEdgeDualVertex())
-                {
-                    boundaryPts[cit->cellIndex()] = featureEdge;
-                }
-                else
-                {
-                    boundaryPts[cit->cellIndex()] = surface;
-                }
-            }
-            else if (cit->baffleBoundaryDualVertex())
-            {
-                boundaryPts[cit->cellIndex()] = surface;
-            }
-            else
-            {
-                boundaryPts[cit->cellIndex()] = internal;
-            }
+            boundaryPts[cit->cellIndex()] = classifyBoundaryPoint(cit);
         }
         else
         {

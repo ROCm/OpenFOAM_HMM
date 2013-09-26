@@ -221,7 +221,9 @@ public:
         //  least one Delaunay vertex outside and at least one inside
         inline bool boundaryDualVertex() const;
 
-        inline bool baffleBoundaryDualVertex() const;
+        inline bool baffleSurfaceDualVertex() const;
+
+        inline bool baffleEdgeDualVertex() const;
 
         //- A dual vertex on a feature edge will result from this Delaunay cell
         inline bool featureEdgeDualVertex() const;

@@ -443,21 +443,42 @@ inline bool CGAL::indexedCell<Gt, Cb>::boundaryDualVertex() const
 
 
 template<class Gt, class Cb>
-inline bool CGAL::indexedCell<Gt, Cb>::baffleBoundaryDualVertex() const
+inline bool CGAL::indexedCell<Gt, Cb>::baffleSurfaceDualVertex() const
 {
     return
     (
         (
-           this->vertex(0)->internalBafflePoint()
-        || this->vertex(1)->internalBafflePoint()
-        || this->vertex(2)->internalBafflePoint()
-        || this->vertex(3)->internalBafflePoint()
+           this->vertex(0)->internalBaffleSurfacePoint()
+        || this->vertex(1)->internalBaffleSurfacePoint()
+        || this->vertex(2)->internalBaffleSurfacePoint()
+        || this->vertex(3)->internalBaffleSurfacePoint()
         )
      && (
-           this->vertex(0)->externalBafflePoint()
-        || this->vertex(1)->externalBafflePoint()
-        || this->vertex(2)->externalBafflePoint()
-        || this->vertex(3)->externalBafflePoint()
+           this->vertex(0)->externalBaffleSurfacePoint()
+        || this->vertex(1)->externalBaffleSurfacePoint()
+        || this->vertex(2)->externalBaffleSurfacePoint()
+        || this->vertex(3)->externalBaffleSurfacePoint()
+        )
+    );
+}
+
+
+template<class Gt, class Cb>
+inline bool CGAL::indexedCell<Gt, Cb>::baffleEdgeDualVertex() const
+{
+    return
+    (
+        (
+           this->vertex(0)->internalBaffleEdgePoint()
+        || this->vertex(1)->internalBaffleEdgePoint()
+        || this->vertex(2)->internalBaffleEdgePoint()
+        || this->vertex(3)->internalBaffleEdgePoint()
+        )
+     && (
+           this->vertex(0)->externalBaffleEdgePoint()
+        || this->vertex(1)->externalBaffleEdgePoint()
+        || this->vertex(2)->externalBaffleEdgePoint()
+        || this->vertex(3)->externalBaffleEdgePoint()
         )
     );
 }

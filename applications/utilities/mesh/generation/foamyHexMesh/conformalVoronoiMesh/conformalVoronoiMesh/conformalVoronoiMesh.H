@@ -728,6 +728,8 @@ private:
         //  elements damage the mesh quality, allowing backtracking.
         labelHashSet checkPolyMeshQuality(const pointField& pts) const;
 
+        label classifyBoundaryPoint(Cell_handle cit) const;
+
         //- Index all of the the Delaunay cells and calculate their
         //- dual points
         void indexDualVertices

@@ -308,15 +308,16 @@ inline bool CGAL::indexedVertex<Gt, Vb>::internalBoundaryPoint() const
 }
 
 template<class Gt, class Vb>
-inline bool CGAL::indexedVertex<Gt, Vb>::internalBafflePoint() const
+inline bool CGAL::indexedVertex<Gt, Vb>::internalBaffleSurfacePoint() const
 {
-    return
-    (
-        type_ == vtInternalSurfaceBaffle
-     || type_ == vtInternalFeatureEdgeBaffle
-    );
+    return (type_ == vtInternalSurfaceBaffle);
 }
 
+template<class Gt, class Vb>
+inline bool CGAL::indexedVertex<Gt, Vb>::internalBaffleEdgePoint() const
+{
+    return (type_ == vtInternalFeatureEdgeBaffle);
+}
 
 template<class Gt, class Vb>
 inline bool CGAL::indexedVertex<Gt, Vb>::externalBoundaryPoint() const
@@ -325,13 +326,15 @@ inline bool CGAL::indexedVertex<Gt, Vb>::externalBoundaryPoint() const
 }
 
 template<class Gt, class Vb>
-inline bool CGAL::indexedVertex<Gt, Vb>::externalBafflePoint() const
+inline bool CGAL::indexedVertex<Gt, Vb>::externalBaffleSurfacePoint() const
 {
-    return
-    (
-        type_ == vtExternalSurfaceBaffle
-     || type_ == vtExternalFeatureEdgeBaffle
-    );
+    return (type_ == vtExternalSurfaceBaffle);
+}
+
+template<class Gt, class Vb>
+inline bool CGAL::indexedVertex<Gt, Vb>::externalBaffleEdgePoint() const
+{
+    return (type_ == vtExternalFeatureEdgeBaffle);
 }
 
 
