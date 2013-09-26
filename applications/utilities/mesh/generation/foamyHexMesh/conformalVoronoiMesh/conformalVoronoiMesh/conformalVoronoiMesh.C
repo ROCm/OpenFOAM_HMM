@@ -1273,7 +1273,7 @@ void Foam::conformalVoronoiMesh::move()
                     if
                     (
                         (
-                            (vA->internalPoint() || vB->internalPoint())
+                            (vA->internalPoint() && vB->internalPoint())
                          && (!vA->referred() || !vB->referred())
 //                         ||
 //                            (
