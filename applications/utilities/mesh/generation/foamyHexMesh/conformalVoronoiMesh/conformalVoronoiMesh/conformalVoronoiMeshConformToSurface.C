@@ -2057,9 +2057,11 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
 
         bool isNearFeaturePt = nearFeaturePt(surfPt);
 
+        bool isNearFeatureEdge = surfacePtNearFeatureEdge(surfPt);
+
         bool isNearSurfacePt = nearSurfacePoint(surfHitI);
 
-        if (isNearFeaturePt || isNearSurfacePt)
+        if (isNearFeaturePt || isNearSurfacePt || isNearFeatureEdge)
         {
             keepSurfacePoint = false;
         }

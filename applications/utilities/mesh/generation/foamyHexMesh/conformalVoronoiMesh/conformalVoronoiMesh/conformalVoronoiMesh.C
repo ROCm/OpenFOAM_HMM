@@ -354,6 +354,28 @@ bool Foam::conformalVoronoiMesh::nearFeaturePt(const Foam::point& pt) const
 }
 
 
+bool Foam::conformalVoronoiMesh::surfacePtNearFeatureEdge
+(
+    const Foam::point& pt
+) const
+{
+    scalar exclusionRangeSqr = surfacePtExclusionDistanceSqr(pt);
+
+    pointIndexHit info;
+    label featureHit;
+
+    geometryToConformTo_.findEdgeNearest
+    (
+        pt,
+        exclusionRangeSqr,
+        info,
+        featureHit
+    );
+
+    return info.hit();
+}
+
+
 void Foam::conformalVoronoiMesh::insertInitialPoints()
 {
     Info<< nl << "Inserting initial points" << endl;

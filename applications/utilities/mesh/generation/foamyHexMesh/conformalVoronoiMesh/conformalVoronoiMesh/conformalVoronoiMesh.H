@@ -351,6 +351,9 @@ private:
         //- Check if a location is in exclusion range around a feature point
         bool nearFeaturePt(const Foam::point& pt) const;
 
+        //- Check if a surface point is in exclusion range around a feature edge
+        bool surfacePtNearFeatureEdge(const Foam::point& pt) const;
+
         //- Insert the initial points into the triangulation, based on the
         //  initialPointsMethod
         void insertInitialPoints();
