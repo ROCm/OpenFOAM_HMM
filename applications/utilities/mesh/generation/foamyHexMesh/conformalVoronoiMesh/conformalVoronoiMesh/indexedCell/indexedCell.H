@@ -193,6 +193,8 @@ public:
         //- Does the Dual vertex form part of a processor patch
         inline bool parallelDualVertex() const;
 
+        inline Foam::label vertexLowestProc() const;
+
         //- Using the globalIndex object, return a list of four (sorted) global
         //  Delaunay vertex indices that uniquely identify this tet in parallel
         inline Foam::tetCell vertexGlobalIndices
@@ -219,7 +221,9 @@ public:
         //  least one Delaunay vertex outside and at least one inside
         inline bool boundaryDualVertex() const;
 
-        inline bool baffleBoundaryDualVertex() const;
+        inline bool baffleSurfaceDualVertex() const;
+
+        inline bool baffleEdgeDualVertex() const;
 
         //- A dual vertex on a feature edge will result from this Delaunay cell
         inline bool featureEdgeDualVertex() const;

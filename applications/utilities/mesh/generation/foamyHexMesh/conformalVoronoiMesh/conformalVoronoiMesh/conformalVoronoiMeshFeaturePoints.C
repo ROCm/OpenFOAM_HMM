@@ -29,6 +29,7 @@ License
 #include "tetrahedron.H"
 #include "const_circulator.H"
 #include "DelaunayMeshTools.H"
+#include "OBJstream.H"
 
 using namespace Foam::vectorTools;
 
@@ -225,54 +226,53 @@ void Foam::conformalVoronoiMesh::createEdgePointGroupByCirculating
         vector masterPtVec(normalDir + nextNormalDir);
         masterPtVec /= mag(masterPtVec) + SMALL;
 
-        if (((normalDir ^ nextNormalDir) & edDir) < SMALL)
+        if
+        (
+            ((normalDir ^ nextNormalDir) & edDir) < SMALL
+         || mag(masterPtVec) < SMALL
+        )
         {
 //            Info<< "    IGNORE REGION" << endl;
             addedMasterPreviously = false;
 
-            if (circ.size() == 2 && mag((normal & nextNormal) - 1) < SMALL)
+            if
+            (
+                circ.size() == 2
+             && mag((normal & nextNormal) - 1) < SMALL
+            )
             {
-                // Add an extra point
-
                 const vector n = 0.5*(normal + nextNormal);
 
-                vector s = ppDist*(edDir ^ n);
+                const vector s = ppDist*(edDir ^ n);
 
-                createPointPair(ppDist, edgePt + s, n, pts);
-                createPointPair(ppDist, edgePt - s, n, pts);
+                if (volType == extendedFeatureEdgeMesh::BOTH)
+                {
+                    createBafflePointPair(ppDist, edgePt + s, n, true, pts);
+                    createBafflePointPair(ppDist, edgePt - s, n, true, pts);
+                }
+                else
+                {
+                    WarningIn
+                    (
+                        "Foam::conformalVoronoiMesh::"
+                        "createEdgePointGroupByCirculating"
+                        "("
+                        "    const extendedFeatureEdgeMesh&,"
+                        "    const pointIndexHit&,"
+                        "    DynamicList<Vb>&"
+                        ")"
+                    )   << "Failed to insert flat/open edge as volType is "
+                        << extendedFeatureEdgeMesh::sideVolumeTypeNames_
+                           [
+                               volType
+                           ]
+                        << endl;
+                }
 
                 break;
             }
 
             continue;
-        }
-
-        if (mag(masterPtVec) < SMALL)
-        {
-            if (circ.size() == 2)
-            {
-                // Add an extra point
-
-                // Average normal to remove any bias to one side, although as
-                // it is a flat edge, the normals should be essentially the same
-                const vector n = 0.5*(normal + nextNormal);
-
-                // Direction along the surface to the control point, sense of
-                // direction not important, as +s and -s can be used because it
-                // is a flat edge
-                vector s = ppDist*(edDir ^ n);
-
-                createPointPair(ppDist, edgePt + s, n, pts);
-                createPointPair(ppDist, edgePt - s, n, pts);
-
-                break;
-            }
-            else
-            {
-//                Info<< "    IGNORE REGION" << endl;
-                addedMasterPreviously = false;
-                continue;
-            }
         }
 
         const Foam::point masterPt = edgePt + ppDist*masterPtVec;
@@ -490,10 +490,18 @@ void Foam::conformalVoronoiMesh::createExternalEdgePointGroup
 
     const vectorField& feNormals = feMesh.normals();
     const labelList& edNormalIs = feMesh.edgeNormals()[edHit.index()];
+    const List<extendedFeatureEdgeMesh::sideVolumeType>& normalVolumeTypes =
+        feMesh.normalVolumeTypes();
 
     // As this is an external edge, there are two normals by definition
     const vector& nA = feNormals[edNormalIs[0]];
     const vector& nB = feNormals[edNormalIs[1]];
+
+    const extendedFeatureEdgeMesh::sideVolumeType& volTypeA =
+        normalVolumeTypes[edNormalIs[0]];
+
+    const extendedFeatureEdgeMesh::sideVolumeType& volTypeB =
+        normalVolumeTypes[edNormalIs[1]];
 
     if (areParallel(nA, nB))
     {
@@ -524,13 +532,6 @@ void Foam::conformalVoronoiMesh::createExternalEdgePointGroup
     // Convex. So refPt will be inside domain and hence a master point
     Foam::point refPt = edgePt - ppDist*refVec;
 
-    // Result when the points are eventually inserted.
-    // Add number_of_vertices() at insertion of first vertex to all numbers:
-    // pt           index type
-    // refPt        0     1
-    // reflectedA   1     0
-    // reflectedB   2     0
-
     // Insert the master point pairing the the first slave
 
     if (!geometryToConformTo_.inside(refPt))
@@ -559,7 +560,11 @@ void Foam::conformalVoronoiMesh::createExternalEdgePointGroup
         (
             reflectedA,
             vertexCount() + pts.size(),
-            Vb::vtExternalFeatureEdge,
+            (
+                volTypeA == extendedFeatureEdgeMesh::BOTH
+              ? Vb::vtInternalFeatureEdge
+              : Vb::vtExternalFeatureEdge
+            ),
             Pstream::myProcNo()
         )
     );
@@ -571,9 +576,25 @@ void Foam::conformalVoronoiMesh::createExternalEdgePointGroup
         (
             reflectedB,
             vertexCount() + pts.size(),
-            Vb::vtExternalFeatureEdge,
+            (
+                volTypeB == extendedFeatureEdgeMesh::BOTH
+              ? Vb::vtInternalFeatureEdge
+              : Vb::vtExternalFeatureEdge
+            ),
             Pstream::myProcNo()
         )
+    );
+
+    ptPairs_.addPointPair
+    (
+        pts[pts.size() - 3].index(),
+        pts[pts.size() - 1].index()
+    );
+
+    ptPairs_.addPointPair
+    (
+        pts[pts.size() - 3].index(),
+        pts[pts.size() - 2].index()
     );
 }
 
@@ -591,10 +612,18 @@ void Foam::conformalVoronoiMesh::createInternalEdgePointGroup
 
     const vectorField& feNormals = feMesh.normals();
     const labelList& edNormalIs = feMesh.edgeNormals()[edHit.index()];
+    const List<extendedFeatureEdgeMesh::sideVolumeType>& normalVolumeTypes =
+        feMesh.normalVolumeTypes();
 
     // As this is an external edge, there are two normals by definition
     const vector& nA = feNormals[edNormalIs[0]];
     const vector& nB = feNormals[edNormalIs[1]];
+
+    const extendedFeatureEdgeMesh::sideVolumeType& volTypeA =
+        normalVolumeTypes[edNormalIs[0]];
+
+//    const extendedFeatureEdgeMesh::sideVolumeType& volTypeB =
+//        normalVolumeTypes[edNormalIs[1]];
 
     if (areParallel(nA, nB))
     {
@@ -705,14 +734,30 @@ void Foam::conformalVoronoiMesh::createInternalEdgePointGroup
         (
             reflMasterPt,
             vertexCount() + pts.size(),
-            Vb::vtExternalFeatureEdge,
+            (
+                volTypeA == extendedFeatureEdgeMesh::BOTH
+              ? Vb::vtInternalFeatureEdge
+              : Vb::vtExternalFeatureEdge
+            ),
             Pstream::myProcNo()
         )
     );
 
+    ptPairs_.addPointPair
+    (
+        pts[pts.size() - 2].index(),
+        pts[pts.size() - 1].index()
+    );
+
+    ptPairs_.addPointPair
+    (
+        pts[pts.size() - 3].index(),
+        pts[pts.size() - 1].index()
+    );
+
     if (nAddPoints == 1)
     {
-        // One additinal point is the reflection of the slave point,
+        // One additional point is the reflection of the slave point,
         // i.e. the original reference point
         pts.append
         (
@@ -767,6 +812,8 @@ void Foam::conformalVoronoiMesh::createFlatEdgePointGroup
 
     const vectorField& feNormals = feMesh.normals();
     const labelList& edNormalIs = feMesh.edgeNormals()[edHit.index()];
+    const List<extendedFeatureEdgeMesh::sideVolumeType>& normalVolumeTypes =
+        feMesh.normalVolumeTypes();
 
     // As this is a flat edge, there are two normals by definition
     const vector& nA = feNormals[edNormalIs[0]];
@@ -781,8 +828,21 @@ void Foam::conformalVoronoiMesh::createFlatEdgePointGroup
     // is a flat edge
     vector s = ppDist*(feMesh.edgeDirections()[edHit.index()] ^ n);
 
-    createPointPair(ppDist, edgePt + s, n, pts);
-    createPointPair(ppDist, edgePt - s, n, pts);
+    if (normalVolumeTypes[edNormalIs[0]] == extendedFeatureEdgeMesh::OUTSIDE)
+    {
+        createPointPair(ppDist, edgePt + s, -n, true, pts);
+        createPointPair(ppDist, edgePt - s, -n, true, pts);
+    }
+    else if (normalVolumeTypes[edNormalIs[0]] == extendedFeatureEdgeMesh::BOTH)
+    {
+        createBafflePointPair(ppDist, edgePt + s, n, true, pts);
+        createBafflePointPair(ppDist, edgePt - s, n, true, pts);
+    }
+    else
+    {
+        createPointPair(ppDist, edgePt + s, n, true, pts);
+        createPointPair(ppDist, edgePt - s, n, true, pts);
+    }
 }
 
 
@@ -814,16 +874,23 @@ void Foam::conformalVoronoiMesh::createOpenEdgePointGroup
 
         plane facePlane(edgePt, n);
 
-        Foam::point pt1 = edgePt + s + ppDist*n;
-        Foam::point pt2 = edgePt - s + ppDist*n;
+        const label initialPtsSize = pts.size();
 
-        Foam::point pt3 = facePlane.mirror(pt1);
-        Foam::point pt4 = facePlane.mirror(pt2);
+        if
+        (
+            !geometryToConformTo_.inside(edgePt)
+        )
+        {
+            return;
+        }
 
-        pts.append(Vb(pt1, Vb::vtInternalSurface));
-        pts.append(Vb(pt2, Vb::vtInternalSurface));
-        pts.append(Vb(pt3, Vb::vtInternalSurface));
-        pts.append(Vb(pt4, Vb::vtInternalSurface));
+        createBafflePointPair(ppDist, edgePt - s, n, true, pts);
+        createBafflePointPair(ppDist, edgePt + s, n, false, pts);
+
+        for (label ptI = initialPtsSize; ptI < pts.size(); ++ptI)
+        {
+            pts[ptI].type() = Vb::vtInternalFeatureEdge;
+        }
     }
     else
     {
@@ -846,26 +913,245 @@ void Foam::conformalVoronoiMesh::createMultipleEdgePointGroup
 
     const scalar ppDist = pointPairDistance(edgePt);
 
+    const vector edDir = feMesh.edgeDirections()[edHit.index()];
+
     const vectorField& feNormals = feMesh.normals();
     const labelList& edNormalIs = feMesh.edgeNormals()[edHit.index()];
+    const labelList& normalDirs = feMesh.normalDirections()[edHit.index()];
 
-    Info<< edNormalIs.size() << endl;
+    const List<extendedFeatureEdgeMesh::sideVolumeType>& normalVolumeTypes =
+        feMesh.normalVolumeTypes();
 
-    // As this is a flat edge, there are two normals by definition
-    const vector& nA = feNormals[edNormalIs[0]];
-    const vector& nB = feNormals[edNormalIs[1]];
+    labelList nNormalTypes(4, 0);
 
-    // Average normal to remove any bias to one side, although as this
-    // is a flat edge, the normals should be essentially the same
-    const vector n = 0.5*(nA + nB);
+    forAll(edNormalIs, edgeNormalI)
+    {
+        const extendedFeatureEdgeMesh::sideVolumeType sType =
+            normalVolumeTypes[edNormalIs[edgeNormalI]];
 
-    // Direction along the surface to the control point, sense of edge
-    // direction not important, as +s and -s can be used because this
-    // is a flat edge
-    vector s = ppDist*(feMesh.edgeDirections()[edHit.index()] ^ n);
+        nNormalTypes[sType]++;
+    }
 
-    createPointPair(ppDist, edgePt + s, n, pts);
-    createPointPair(ppDist, edgePt - s, n, pts);
+    if (nNormalTypes[extendedFeatureEdgeMesh::BOTH] == 4)
+    {
+        label masterEdgeNormalIndex = -1;
+
+        forAll(edNormalIs, edgeNormalI)
+        {
+            const extendedFeatureEdgeMesh::sideVolumeType sType =
+                normalVolumeTypes[edNormalIs[edgeNormalI]];
+
+            if (sType == extendedFeatureEdgeMesh::BOTH)
+            {
+                masterEdgeNormalIndex = edgeNormalI;
+                break;
+            }
+        }
+
+        const vector& n = feNormals[edNormalIs[masterEdgeNormalIndex]];
+
+        label nDir = normalDirs[masterEdgeNormalIndex];
+
+        vector normalDir =
+            (feNormals[edNormalIs[masterEdgeNormalIndex]] ^ edDir);
+        normalDir *= nDir/mag(normalDir);
+
+        Foam::point pt1 = edgePt + ppDist*normalDir + ppDist*n;
+        Foam::point pt2 = edgePt + ppDist*normalDir - ppDist*n;
+
+        plane plane3(edgePt, normalDir);
+
+        Foam::point pt3 = plane3.mirror(pt1);
+        Foam::point pt4 = plane3.mirror(pt2);
+
+        pts.append
+        (
+            Vb
+            (
+                pt1,
+                vertexCount() + pts.size(),
+                Vb::vtInternalSurface,
+                Pstream::myProcNo()
+            )
+        );
+        pts.append
+        (
+            Vb
+            (
+                pt2,
+                vertexCount() + pts.size(),
+                Vb::vtInternalSurface,
+                Pstream::myProcNo()
+            )
+        );
+
+        ptPairs_.addPointPair
+        (
+            pts[pts.size() - 2].index(), // external 0 -> slave
+            pts[pts.size() - 1].index()
+        );
+
+        pts.append
+        (
+            Vb
+            (
+                pt3,
+                vertexCount() + pts.size(),
+                Vb::vtInternalSurface,
+                Pstream::myProcNo()
+            )
+        );
+
+        ptPairs_.addPointPair
+        (
+            pts[pts.size() - 3].index(), // external 0 -> slave
+            pts[pts.size() - 1].index()
+        );
+
+        pts.append
+        (
+            Vb
+            (
+                pt4,
+                vertexCount() + pts.size(),
+                Vb::vtInternalSurface,
+                Pstream::myProcNo()
+            )
+        );
+
+        ptPairs_.addPointPair
+        (
+            pts[pts.size() - 3].index(), // external 0 -> slave
+            pts[pts.size() - 1].index()
+        );
+
+        ptPairs_.addPointPair
+        (
+            pts[pts.size() - 2].index(), // external 0 -> slave
+            pts[pts.size() - 1].index()
+        );
+    }
+    else if
+    (
+        nNormalTypes[extendedFeatureEdgeMesh::BOTH] == 1
+     && nNormalTypes[extendedFeatureEdgeMesh::INSIDE] == 2
+    )
+    {
+        label masterEdgeNormalIndex = -1;
+
+        forAll(edNormalIs, edgeNormalI)
+        {
+            const extendedFeatureEdgeMesh::sideVolumeType sType =
+                normalVolumeTypes[edNormalIs[edgeNormalI]];
+
+            if (sType == extendedFeatureEdgeMesh::BOTH)
+            {
+                masterEdgeNormalIndex = edgeNormalI;
+                break;
+            }
+        }
+
+        const vector& n = feNormals[edNormalIs[masterEdgeNormalIndex]];
+
+        label nDir = normalDirs[masterEdgeNormalIndex];
+
+        vector normalDir =
+            (feNormals[edNormalIs[masterEdgeNormalIndex]] ^ edDir);
+        normalDir *= nDir/mag(normalDir);
+
+        const label nextNormalI =
+            (masterEdgeNormalIndex + 1) % edNormalIs.size();
+        if ((normalDir & feNormals[edNormalIs[nextNormalI]]) > 0)
+        {
+            normalDir *= -1;
+        }
+
+        Foam::point pt1 = edgePt + ppDist*normalDir + ppDist*n;
+        Foam::point pt2 = edgePt + ppDist*normalDir - ppDist*n;
+
+        plane plane3(edgePt, normalDir);
+
+        Foam::point pt3 = plane3.mirror(pt1);
+        Foam::point pt4 = plane3.mirror(pt2);
+
+        pts.append
+        (
+            Vb
+            (
+                pt1,
+                vertexCount() + pts.size(),
+                Vb::vtInternalSurface,
+                Pstream::myProcNo()
+            )
+        );
+        pts.append
+        (
+            Vb
+            (
+                pt2,
+                vertexCount() + pts.size(),
+                Vb::vtInternalSurface,
+                Pstream::myProcNo()
+            )
+        );
+
+        ptPairs_.addPointPair
+        (
+            pts[pts.size() - 2].index(), // external 0 -> slave
+            pts[pts.size() - 1].index()
+        );
+
+        pts.append
+        (
+            Vb
+            (
+                pt3,
+                vertexCount() + pts.size(),
+                Vb::vtExternalSurface,
+                Pstream::myProcNo()
+            )
+        );
+
+        ptPairs_.addPointPair
+        (
+            pts[pts.size() - 3].index(), // external 0 -> slave
+            pts[pts.size() - 1].index()
+        );
+
+        pts.append
+        (
+            Vb
+            (
+                pt4,
+                vertexCount() + pts.size(),
+                Vb::vtExternalSurface,
+                Pstream::myProcNo()
+            )
+        );
+
+        ptPairs_.addPointPair
+        (
+            pts[pts.size() - 3].index(), // external 0 -> slave
+            pts[pts.size() - 1].index()
+        );
+    }
+
+
+//    // As this is a flat edge, there are two normals by definition
+//    const vector& nA = feNormals[edNormalIs[0]];
+//    const vector& nB = feNormals[edNormalIs[1]];
+//
+//    // Average normal to remove any bias to one side, although as this
+//    // is a flat edge, the normals should be essentially the same
+//    const vector n = 0.5*(nA + nB);
+//
+//    // Direction along the surface to the control point, sense of edge
+//    // direction not important, as +s and -s can be used because this
+//    // is a flat edge
+//    vector s = ppDist*(feMesh.edgeDirections()[edHit.index()] ^ n);
+//
+//    createBafflePointPair(ppDist, edgePt + s, n, true, pts);
+//    createBafflePointPair(ppDist, edgePt - s, n, true, pts);
 }
 
 
@@ -884,7 +1170,10 @@ void Foam::conformalVoronoiMesh::insertFeaturePoints(bool distribute)
     const List<Vb>& ftPtVertices = ftPtConformer_.featurePointVertices();
 
     // Insert the created points directly as already distributed.
-    this->DelaunayMesh<Delaunay>::insertPoints(ftPtVertices);
+    Map<label> oldToNewIndices =
+        this->DelaunayMesh<Delaunay>::insertPoints(ftPtVertices, true);
+
+    ftPtConformer_.reIndexPointPairs(oldToNewIndices);
 
     label nFeatureVertices = number_of_vertices() - preFeaturePointSize;
     reduce(nFeatureVertices, sumOp<label>());

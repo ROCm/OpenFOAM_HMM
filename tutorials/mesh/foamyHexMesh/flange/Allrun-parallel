@@ -15,7 +15,13 @@ runApplication blockMesh -region backgroundMeshDecomposition
 runApplication decomposePar -region backgroundMeshDecomposition
 
 runParallel foamyHexMesh $nProc
+
 runParallel collapseEdges $nProc -latestTime -collapseFaces
+mv log.collapseEdges log.collapseFaces
+
+runParallel collapseEdges $nProc -latestTime -collapseFaceSet indirectPatchFaces
+mv log.collapseEdges log.collapseFaceSet
+
 runParallel checkMesh $nProc -latestTime -allTopology -allGeometry
 
 runApplication reconstructParMesh -latestTime

@@ -1,5 +1,4 @@
 CGAL_INC = \
-    -Wno-old-style-cast \
     -I$(CGAL_ARCH_PATH)/include \
     -I$(MPFR_ARCH_PATH)/include \
     -I$(GMP_ARCH_PATH)/include \

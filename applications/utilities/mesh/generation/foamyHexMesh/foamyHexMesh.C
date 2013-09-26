@@ -54,8 +54,6 @@ int main(int argc, char *argv[])
         "conform to the initial points without any point motion"
     );
 
-    #include "addOverwriteOption.H"
-
     #include "setRootCase.H"
     #include "createTime.H"
 
@@ -63,7 +61,6 @@ int main(int argc, char *argv[])
 
     const bool checkGeometry = args.optionFound("checkGeometry");
     const bool conformationOnly = args.optionFound("conformationOnly");
-    const bool overwrite = args.optionFound("overwrite");
 
     IOdictionary foamyHexMeshDict
     (
@@ -123,10 +120,7 @@ int main(int argc, char *argv[])
     {
         mesh.initialiseForConformation();
 
-        if (!overwrite)
-        {
-            runTime++;
-        }
+        runTime++;
 
         mesh.writeMesh(runTime.timeName());
     }
@@ -134,8 +128,10 @@ int main(int argc, char *argv[])
     {
         mesh.initialiseForMotion();
 
-        while (runTime.loop())
+        while (runTime.run())
         {
+            runTime++;
+
             Info<< nl << "Time = " << runTime.timeName() << endl;
 
             mesh.move();

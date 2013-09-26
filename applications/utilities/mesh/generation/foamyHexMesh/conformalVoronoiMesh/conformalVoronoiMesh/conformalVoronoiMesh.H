@@ -77,7 +77,7 @@ SourceFiles
 #include "Pair.H"
 #include "DistributedDelaunayMesh.H"
 #include "featurePointConformer.H"
-
+#include "pointPairs.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -86,12 +86,10 @@ namespace Foam
 
 // Forward declaration of classes
 class initialPointsMethod;
-
 class relaxationModel;
-
 class faceAreaWeightModel;
-
 class backgroundMeshDecomposition;
+class OBJstream;
 
 /*---------------------------------------------------------------------------*\
                     Class conformalVoronoiMesh Declaration
@@ -166,6 +164,9 @@ private:
         treeBoundBox limitBounds_;
 
         //-
+        mutable pointPairs<Delaunay> ptPairs_;
+
+        //-
         featurePointConformer ftPtConformer_;
 
         //- Search tree for edge point locations
@@ -229,10 +230,11 @@ private:
             const bool distribute = false
         );
 
-        void insertPoints
+        Map<label> insertPointPairs
         (
             List<Vb>& vertices,
-            bool distribute
+            bool distribute,
+            bool reIndex
         );
 
         //- Create a point-pair at a ppDist distance either side of
@@ -242,6 +244,7 @@ private:
             const scalar ppDist,
             const Foam::point& surfPt,
             const vector& n,
+            const bool ptPair,
             DynamicList<Vb>& pts
         ) const;
 
@@ -254,24 +257,20 @@ private:
             const scalar ppDist,
             const Foam::point& surfPt,
             const vector& n,
+            const bool ptPair,
             DynamicList<Vb>& pts
         ) const;
 
         //- Check internal point is completely inside the meshable region
         inline bool internalPointIsInside(const Foam::point& pt) const;
 
-        inline bool isPointPair
-        (
-            const Vertex_handle& vA,
-            const Vertex_handle& vB
-        ) const;
-
         //- Insert pairs of points on the surface with the given normals, at the
         //  specified spacing
         void insertSurfacePointPairs
         (
             const pointIndexHitAndFeatureList& surfaceHits,
-            const fileName fName = fileName::null
+            const fileName fName,
+            DynamicList<Vb>& pts
         );
 
         //- Insert groups of points to conform to an edge given a list of
@@ -280,7 +279,8 @@ private:
         void insertEdgePointGroups
         (
             const pointIndexHitAndFeatureList& edgeHits,
-            const fileName fName = fileName::null
+            const fileName fName,
+            DynamicList<Vb>& pts
         );
 
         void createEdgePointGroupByCirculating
@@ -350,6 +350,9 @@ private:
 
         //- Check if a location is in exclusion range around a feature point
         bool nearFeaturePt(const Foam::point& pt) const;
+
+        //- Check if a surface point is in exclusion range around a feature edge
+        bool surfacePtNearFeatureEdge(const Foam::point& pt) const;
 
         //- Insert the initial points into the triangulation, based on the
         //  initialPointsMethod
@@ -474,14 +477,11 @@ private:
             label& hitSurface
         ) const;
 
-        //- Find the "worst" incursion of the dual cell of a non-internal or
-        //  boundary point through the surface, subject to the
-        //  maxSurfaceProtrusion tolerance
         void dualCellLargestSurfaceIncursion
         (
             const Delaunay::Finite_vertices_iterator& vit,
-            pointIndexHit& surfHitLargest,
-            label& hitSurfaceLargest
+            pointIndexHit& surfHit,
+            label& hitSurface
         ) const;
 
         //- Write out vertex-processor occupancy information for debugging
@@ -695,7 +695,8 @@ private:
         //- Merge vertices that are identical
         void mergeIdenticalDualVertices
         (
-            const pointField& pts
+            const pointField& pts,
+            labelList& boundaryPts
         );
 
         label mergeIdenticalDualVertices
@@ -727,6 +728,8 @@ private:
         //  elements damage the mesh quality, allowing backtracking.
         labelHashSet checkPolyMeshQuality(const pointField& pts) const;
 
+        label classifyBoundaryPoint(Cell_handle cit) const;
+
         //- Index all of the the Delaunay cells and calculate their
         //- dual points
         void indexDualVertices
@@ -736,7 +739,11 @@ private:
         );
 
         //- Re-index all of the Delaunay cells
-        void reindexDualVertices(const Map<label>& dualPtIndexMap);
+        void reindexDualVertices
+        (
+            const Map<label>& dualPtIndexMap,
+            labelList& boundaryPts
+        );
 
         label createPatchInfo
         (
@@ -845,6 +852,8 @@ private:
             const wordList& patchNames,
             const PtrList<dictionary>& patchDicts
         ) const;
+
+        void writePointPairs(const fileName& fName) const;
 
         //- Disallow default bitwise copy construct
         conformalVoronoiMesh(const conformalVoronoiMesh&);
@@ -992,7 +1001,7 @@ public:
                 const wordList& patchNames,
                 const PtrList<dictionary>& patchDicts,
                 const pointField& cellCentres,
-                const PackedBoolList& boundaryFacesToRemove
+                PackedBoolList& boundaryFacesToRemove
             ) const;
 
             //- Calculate and write a field of the target cell size,

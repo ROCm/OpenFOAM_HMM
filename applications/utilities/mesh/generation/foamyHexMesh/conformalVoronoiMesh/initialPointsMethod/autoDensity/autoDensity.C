@@ -187,7 +187,7 @@ Foam::label Foam::autoDensity::recurseAndFill
     word recursionName
 ) const
 {
-    label maxDepth = 0;
+    label treeDepth = 0;
 
     for (direction i = 0; i < 8; i++)
     {
@@ -201,10 +201,10 @@ Foam::label Foam::autoDensity::recurseAndFill
         {
             if (levelLimit > 0)
             {
-                maxDepth =
+                treeDepth =
                     max
                     (
-                        maxDepth,
+                        treeDepth,
                         recurseAndFill
                         (
                             initialPoints,
@@ -229,10 +229,10 @@ Foam::label Foam::autoDensity::recurseAndFill
 
                 if (!fillBox(initialPoints, subBB, true))
                 {
-                    maxDepth =
+                    treeDepth =
                         max
                         (
-                            maxDepth,
+                            treeDepth,
                             recurseAndFill
                             (
                                 initialPoints,
@@ -259,10 +259,10 @@ Foam::label Foam::autoDensity::recurseAndFill
 
             if (!fillBox(initialPoints, subBB, false))
             {
-                maxDepth =
+                treeDepth =
                     max
                     (
-                        maxDepth,
+                        treeDepth,
                         recurseAndFill
                         (
                             initialPoints,
@@ -286,7 +286,7 @@ Foam::label Foam::autoDensity::recurseAndFill
         }
     }
 
-    return maxDepth + 1;
+    return treeDepth + 1;
 }
 
 
@@ -941,7 +941,7 @@ List<Vb::Point> autoDensity::initialPoints() const
         Pout<< "    Filling box " << hierBB << endl;
     }
 
-    label maxDepth = recurseAndFill
+    label treeDepth = recurseAndFill
     (
         initialPoints,
         hierBB,
@@ -966,7 +966,7 @@ List<Vb::Point> autoDensity::initialPoints() const
         << scalar(nInitialPoints)/scalar(max(globalTrialPoints_, 1))
         << " success rate" << nl
         << indent
-        << returnReduce(maxDepth, maxOp<label>())
+        << returnReduce(treeDepth, maxOp<label>())
         << " levels of recursion (maximum)"
         << decrIndent << decrIndent
         << endl;

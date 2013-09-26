@@ -59,9 +59,9 @@ surfaceConformation
             extendedFeatureEdgeMesh "vessel.extendedFeatureEdgeMesh";
             regions
             {
+                patch0  {}
                 patch1  {}
                 patch2  {}
-                patch3  {}
             }
         }
 
@@ -118,7 +118,7 @@ motionControl
 
     minimumCellSizeCoeff            0.1;
 
-    maxRefinementIterations         0;
+    maxRefinementIterations         1;
 
     maxSmoothingIterations          100;
 
@@ -142,7 +142,7 @@ motionControl
 
             regions
             {
-                patch1
+                patch0
                 {
                     surfaceCellSizeFunction     uniformValue;
                     uniformValueCoeffs
@@ -154,7 +154,7 @@ motionControl
                     uniformCoeffs{}
                 }
 
-                patch2
+                patch1
                 {
                     priority                    2;
                     surfaceCellSizeFunction     uniformValue;
@@ -170,7 +170,7 @@ motionControl
                     }
                 }
 
-                patch3
+                patch2
                 {
                     priority                    2;
                     surfaceCellSizeFunction     uniformValue;

@@ -119,13 +119,13 @@ public:
 
     static const Foam::NamedEnum<sideVolumeType, 4> sideVolumeTypeNames_;
 
+    //- Angular closeness tolerance for treating normals as the same
+    static scalar cosNormalAngleTol_;
+
 
 private:
 
     // Static data
-
-        //- Angular closeness tolerance for treating normals as the same
-        static scalar cosNormalAngleTol_;
 
         //- Index of the start of the convex feature points - static as 0
         static label convexStart_;
@@ -202,15 +202,6 @@ private:
         //  data for edges and normals.
         pointStatus classifyFeaturePoint(label ptI) const;
 
-        //- Classify the type of feature edge.  Requires face centre 0 to face
-        //  centre 1 vector to distinguish internal from external
-        edgeStatus classifyEdge
-        (
-            const List<vector>& norms,
-            const labelList& edNorms,
-            const vector& fC0tofC1
-        ) const;
-
         template<class Patch>
         void sortPointsAndEdges
         (
@@ -259,7 +250,8 @@ public:
         (
             const surfaceFeatures& sFeat,
             const objectRegistry& obr,
-            const fileName& sFeatFileName
+            const fileName& sFeatFileName,
+            const boolList& surfBaffleRegions
         );
 
         //- Construct from PrimitivePatch
@@ -434,6 +426,9 @@ public:
             //- Return the edgeStatus of a specified edge
             inline edgeStatus getEdgeStatus(label edgeI) const;
 
+            //- Return the baffle faces of a specified edge
+            inline PackedList<2> edgeBaffles(label edgeI) const;
+
             //- Demand driven construction of octree for feature points
             const indexedOctree<treeDataPoint>& pointTree() const;
 
@@ -468,6 +463,16 @@ public:
 
             friend Istream& operator>>(Istream& is, sideVolumeType& vt);
             friend Ostream& operator<<(Ostream& os, const sideVolumeType& vt);
+
+
+        //- Classify the type of feature edge.  Requires face centre 0 to face
+        //  centre 1 vector to distinguish internal from external
+        static edgeStatus classifyEdge
+        (
+            const List<vector>& norms,
+            const labelList& edNorms,
+            const vector& fC0tofC1
+        );
 };
 
 

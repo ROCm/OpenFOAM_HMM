@@ -228,7 +228,11 @@ public:
             void reset();
 
             //- Insert the list of vertices (calls rangeInsertWithInfo)
-            void insertPoints(const List<Vb>& vertices);
+            Map<label> insertPoints
+            (
+                const List<Vb>& vertices,
+                const bool reIndex
+            );
 
             //- Function inserting points into a triangulation and setting the
             //  index and type data of the point in the correct order. This is
@@ -237,7 +241,7 @@ public:
             //  Adapted from a post on the CGAL lists: 2010-01/msg00004.html by
             //  Sebastien Loriot (Geometry Factory).
             template<class PointIterator>
-            void rangeInsertWithInfo
+            Map<label> rangeInsertWithInfo
             (
                 PointIterator begin,
                 PointIterator end,

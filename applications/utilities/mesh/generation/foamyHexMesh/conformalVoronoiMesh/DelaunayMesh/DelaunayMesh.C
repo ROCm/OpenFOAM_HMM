@@ -190,20 +190,25 @@ void Foam::DelaunayMesh<Triangulation>::reset()
     resetVertexCount();
     resetCellCount();
 
-    insertPoints(vertices);
+    insertPoints(vertices, false);
 
     Info<< "Inserted " << vertexCount() << " fixed points" << endl;
 }
 
 
 template<class Triangulation>
-void Foam::DelaunayMesh<Triangulation>::insertPoints(const List<Vb>& vertices)
+Foam::Map<Foam::label> Foam::DelaunayMesh<Triangulation>::insertPoints
+(
+    const List<Vb>& vertices,
+    const bool reIndex
+)
 {
-    rangeInsertWithInfo
+    return rangeInsertWithInfo
     (
         vertices.begin(),
         vertices.end(),
-        false
+        false,
+        reIndex
     );
 }
 
@@ -268,7 +273,7 @@ const
 
 template<class Triangulation>
 template<class PointIterator>
-void Foam::DelaunayMesh<Triangulation>::rangeInsertWithInfo
+Foam::Map<Foam::label> Foam::DelaunayMesh<Triangulation>::rangeInsertWithInfo
 (
     PointIterator begin,
     PointIterator end,
@@ -307,6 +312,10 @@ void Foam::DelaunayMesh<Triangulation>::rangeInsertWithInfo
 
     Vertex_handle hint;
 
+    Map<label> oldToNewIndex(points.size());
+
+    label maxIndex = -1;
+
     for
     (
         typename vectorPairPointIndex::const_iterator p = points.begin();
@@ -335,11 +344,14 @@ void Foam::DelaunayMesh<Triangulation>::rangeInsertWithInfo
         {
             if (reIndex)
             {
+                const label oldIndex = vert.index();
                 hint->index() = getNewVertexIndex();
+                oldToNewIndex.insert(oldIndex, hint->index());
             }
             else
             {
                 hint->index() = vert.index();
+                maxIndex = max(maxIndex, vert.index());
             }
             hint->type() = vert.type();
             hint->procIndex() = vert.procIndex();
@@ -347,6 +359,13 @@ void Foam::DelaunayMesh<Triangulation>::rangeInsertWithInfo
             hint->alignment() = vert.alignment();
         }
     }
+
+    if (!reIndex)
+    {
+        vertexCount_ = maxIndex + 1;
+    }
+
+    return oldToNewIndex;
 }
 
 

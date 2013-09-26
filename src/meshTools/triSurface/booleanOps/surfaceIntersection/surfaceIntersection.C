@@ -202,7 +202,6 @@ void Foam::surfaceIntersection::storeIntersection
     DynamicList<point>& allCutPoints
 )
 {
-
     forAll(facesA, facesAI)
     {
         label faceA = facesA[facesAI];
@@ -969,10 +968,10 @@ Foam::surfaceIntersection::surfaceIntersection
 
             if (!usedPoints.found(pointI))
             {
-                FatalErrorIn("surfaceIntersection::surfaceIntersection")
+                WarningIn("surfaceIntersection::surfaceIntersection")
                     << "Problem: cut point:" << pointI
                     << " coord:" << cutPoints_[pointI]
-                    << " not used by any edge" << abort(FatalError);
+                    << " not used by any edge" << endl;
             }
         }
     }
@@ -1144,6 +1143,12 @@ const Foam::pointField& Foam::surfaceIntersection::cutPoints() const
 const Foam::edgeList& Foam::surfaceIntersection::cutEdges() const
 {
     return cutEdges_;
+}
+
+
+const Foam::labelPairLookup& Foam::surfaceIntersection::facePairToVertex() const
+{
+    return facePairToVertex_;
 }
 
 

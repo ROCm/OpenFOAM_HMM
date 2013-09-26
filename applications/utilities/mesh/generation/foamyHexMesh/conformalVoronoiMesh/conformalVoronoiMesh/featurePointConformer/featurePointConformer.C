@@ -146,7 +146,7 @@ void Foam::featurePointConformer::addMasterAndSlavePoints
             )
         );
 
-//        const label masterIndex = pts[pts.size() - 1].index();
+        const label masterIndex = pts.last().index();
 
         //meshTools::writeOBJ(strMasters, masterPt);
 
@@ -180,6 +180,11 @@ void Foam::featurePointConformer::addMasterAndSlavePoints
                 )
             );
 
+            ftPtPairs_.addPointPair
+            (
+                masterIndex,
+                pts.last().index()
+            );
 
             //meshTools::writeOBJ(strSlaves, slavePt);
         }
@@ -525,7 +530,8 @@ Foam::featurePointConformer::featurePointConformer
     foamyHexMesh_(foamyHexMesh),
     foamyHexMeshControls_(foamyHexMesh.foamyHexMeshControls()),
     geometryToConformTo_(foamyHexMesh.geometryToConformTo()),
-    featurePointVertices_()
+    featurePointVertices_(),
+    ftPtPairs_(foamyHexMesh)
 {
     Info<< nl
         << "Conforming to feature points" << endl;
@@ -598,6 +604,30 @@ void Foam::featurePointConformer::distribute
     {
         featurePointVertices_[vI].procIndex() = Pstream::myProcNo();
     }
+
+    // Also update the feature point pairs
+}
+
+
+void Foam::featurePointConformer::reIndexPointPairs
+(
+    const Map<label>& oldToNewIndices
+)
+{
+    forAll(featurePointVertices_, vI)
+    {
+        const label currentIndex = featurePointVertices_[vI].index();
+
+        Map<label>::const_iterator newIndexIter =
+            oldToNewIndices.find(currentIndex);
+
+        if (newIndexIter != oldToNewIndices.end())
+        {
+            featurePointVertices_[vI].index() = newIndexIter();
+        }
+    }
+
+    ftPtPairs_.reIndex(oldToNewIndices);
 }
 
 

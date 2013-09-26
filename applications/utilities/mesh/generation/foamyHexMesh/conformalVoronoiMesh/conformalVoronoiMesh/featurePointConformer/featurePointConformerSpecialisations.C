@@ -168,8 +168,16 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
 
         pts.append
         (
-            Vb(internalPtA, Vb::vtInternalFeaturePoint)
+            Vb
+            (
+                internalPtA,
+                foamyHexMesh_.vertexCount() + pts.size(),
+                Vb::vtInternalFeaturePoint,
+                Pstream::myProcNo()
+            )
         );
+
+        const label internalPtAIndex(pts.last().index());
 
         const Foam::point internalPtB =
             concaveEdgeExternalPt
@@ -178,8 +186,16 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
 
         pts.append
         (
-            Vb(internalPtB, Vb::vtInternalFeaturePoint)
+            Vb
+            (
+                internalPtB,
+                foamyHexMesh_.vertexCount() + pts.size(),
+                Vb::vtInternalFeaturePoint,
+                Pstream::myProcNo()
+            )
         );
+
+        const label internalPtBIndex(pts.last().index());
 
         // Add the external points
 
@@ -288,7 +304,19 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
 
                         pts.append
                         (
-                            Vb(externalPtD, Vb::vtExternalFeaturePoint)
+                            Vb
+                            (
+                                externalPtD,
+                                foamyHexMesh_.vertexCount() + pts.size(),
+                                Vb::vtExternalFeaturePoint,
+                                Pstream::myProcNo()
+                            )
+                        );
+
+                        ftPtPairs_.addPointPair
+                        (
+                            internalPtAIndex,
+                            pts.last().index()
                         );
                     }
                 }
@@ -319,7 +347,19 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
 
                         pts.append
                         (
-                            Vb(externalPtE, Vb::vtExternalFeaturePoint)
+                            Vb
+                            (
+                                externalPtE,
+                                foamyHexMesh_.vertexCount() + pts.size(),
+                                Vb::vtExternalFeaturePoint,
+                                Pstream::myProcNo()
+                            )
+                        );
+
+                        ftPtPairs_.addPointPair
+                        (
+                            internalPtBIndex,
+                            pts.last().index()
                         );
                     }
                 }
@@ -328,8 +368,28 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
 
         pts.append
         (
-            Vb(concaveEdgeExternalPt, Vb::vtExternalFeaturePoint)
+            Vb
+            (
+                concaveEdgeExternalPt,
+                foamyHexMesh_.vertexCount() + pts.size(),
+                Vb::vtExternalFeaturePoint,
+                Pstream::myProcNo()
+            )
         );
+
+        ftPtPairs_.addPointPair
+        (
+            internalPtBIndex,
+            pts.last().index()
+        );
+
+        ftPtPairs_.addPointPair
+        (
+            internalPtAIndex,
+            pts.last().index()
+        );
+
+        const label concaveEdgeExternalPtIndex(pts.last().index());
 
         const scalar totalAngle = radToDeg
         (
@@ -377,7 +437,21 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
 
             pts.append
             (
-                Vb(internalPtF, Vb::vtInternalFeaturePoint)
+                Vb
+                (
+                    internalPtF,
+                    foamyHexMesh_.vertexCount() + pts.size(),
+                    Vb::vtInternalFeaturePoint,
+                    Pstream::myProcNo()
+                )
+            );
+
+            const label internalPtFIndex(pts.last().index());
+
+            ftPtPairs_.addPointPair
+            (
+                concaveEdgeExternalPtIndex,
+                pts.last().index()
             );
 
             const Foam::point externalPtG =
@@ -386,7 +460,19 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
 
             pts.append
             (
-                Vb(externalPtG, Vb::vtExternalFeaturePoint)
+                Vb
+                (
+                    externalPtG,
+                    foamyHexMesh_.vertexCount() + pts.size(),
+                    Vb::vtExternalFeaturePoint,
+                    Pstream::myProcNo()
+                )
+            );
+
+            ftPtPairs_.addPointPair
+            (
+                internalPtFIndex,
+                pts.last().index()
             );
         }
 
@@ -520,8 +606,16 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
 
         pts.append
         (
-            Vb(internalPtA, Vb::vtExternalFeaturePoint)
+            Vb
+            (
+                internalPtA,
+                foamyHexMesh_.vertexCount() + pts.size(),
+                Vb::vtExternalFeaturePoint,
+                Pstream::myProcNo()
+            )
         );
+
+        const label internalPtAIndex(pts.last().index());
 
         const Foam::point internalPtB =
             convexEdgeExternalPt
@@ -530,8 +624,16 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
 
         pts.append
         (
-            Vb(internalPtB, Vb::vtExternalFeaturePoint)
+            Vb
+            (
+                internalPtB,
+                foamyHexMesh_.vertexCount() + pts.size(),
+                Vb::vtExternalFeaturePoint,
+                Pstream::myProcNo()
+            )
         );
+
+        const label internalPtBIndex(pts.last().index());
 
         // Add the internal points
 
@@ -643,7 +745,19 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
 
                         pts.append
                         (
-                            Vb(externalPtD, Vb::vtInternalFeaturePoint)
+                            Vb
+                            (
+                                externalPtD,
+                                foamyHexMesh_.vertexCount() + pts.size(),
+                                Vb::vtInternalFeaturePoint,
+                                Pstream::myProcNo()
+                            )
+                        );
+
+                        ftPtPairs_.addPointPair
+                        (
+                            internalPtAIndex,
+                            pts.last().index()
                         );
                     }
                 }
@@ -674,7 +788,19 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
 
                         pts.append
                         (
-                            Vb(externalPtE, Vb::vtInternalFeaturePoint)
+                            Vb
+                            (
+                                externalPtE,
+                                foamyHexMesh_.vertexCount() + pts.size(),
+                                Vb::vtInternalFeaturePoint,
+                                Pstream::myProcNo()
+                            )
+                        );
+
+                        ftPtPairs_.addPointPair
+                        (
+                            internalPtBIndex,
+                            pts.last().index()
                         );
                     }
                 }
@@ -683,7 +809,25 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
 
         pts.append
         (
-            Vb(convexEdgeExternalPt, Vb::vtInternalFeaturePoint)
+            Vb
+            (
+                convexEdgeExternalPt,
+                foamyHexMesh_.vertexCount() + pts.size(),
+                Vb::vtInternalFeaturePoint,
+                Pstream::myProcNo()
+            )
+        );
+
+        ftPtPairs_.addPointPair
+        (
+            internalPtBIndex,
+            pts.last().index()
+        );
+
+        ftPtPairs_.addPointPair
+        (
+            internalPtAIndex,
+            pts.last().index()
         );
 
         const scalar totalAngle = radToDeg
@@ -732,7 +876,19 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
 
             pts.append
             (
-                Vb(internalPtF, Vb::vtExternalFeaturePoint)
+                Vb
+                (
+                    internalPtF,
+                    foamyHexMesh_.vertexCount() + pts.size(),
+                    Vb::vtExternalFeaturePoint,
+                    Pstream::myProcNo()
+                )
+            );
+
+            ftPtPairs_.addPointPair
+            (
+                pts[pts.size() - 2].index(),
+                pts.last().index()
             );
 
             const Foam::point externalPtG =
@@ -741,7 +897,19 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
 
             pts.append
             (
-                Vb(externalPtG, Vb::vtInternalFeaturePoint)
+                Vb
+                (
+                    externalPtG,
+                    foamyHexMesh_.vertexCount() + pts.size(),
+                    Vb::vtInternalFeaturePoint,
+                    Pstream::myProcNo()
+                )
+            );
+
+            ftPtPairs_.addPointPair
+            (
+                pts[pts.size() - 2].index(),
+                pts.last().index()
             );
         }
 

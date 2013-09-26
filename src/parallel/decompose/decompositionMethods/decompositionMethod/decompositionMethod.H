@@ -219,7 +219,7 @@ public:
         // Other
 
             //- Helper: determine (local or global) cellCells from mesh
-            //  agglomeration.
+            //  agglomeration. Agglomeration is local to the processor.
             //  local  : connections are in local indices. Coupled across
             //           cyclics but not processor patches.
             //  global : connections are in global indices. Coupled across
@@ -228,33 +228,10 @@ public:
             (
                 const polyMesh& mesh,
                 const labelList& agglom,
-                const label nCoarse,
+                const label nLocalCoarse,
                 const bool global,
                 CompactListList<label>& cellCells
             );
-
-            //- Helper: determine (local or global) cellCells from mesh
-            //  agglomeration and additional specification:
-            //  - any additional connections between non-coupled internal
-            //    or boundary faces.
-            //  - any internal or coupled faces (or additional connections)
-            //    are blocked
-            //
-            //  local  : connections are in local indices. Coupled across
-            //           cyclics but not processor patches.
-            //  global : connections are in global indices. Coupled across
-            //            cyclics and processor patches.
-            //static void calcCellCells
-            //(
-            //    const polyMesh& mesh,
-            //    const boolList& blockedFace,
-            //    const List<labelPair>& explicitConnections,
-            //    const labelList& agglom,
-            //    const label nCoarse,
-            //    const bool global,
-            //    CompactListList<label>& cellCells
-            //);
-
 
             //- Helper: extract constraints:
             //  blockedface: existing faces where owner and neighbour on same

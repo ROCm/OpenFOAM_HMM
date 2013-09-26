@@ -153,15 +153,14 @@ public:
 
             tensorField dumpAlignments() const;
 
-            void insertBoundingPoints
-            (
-                const boundBox& bb,
-                const cellSizeAndAlignmentControls& sizeControls
-            );
-
             void writeTriangulation();
 
             void write() const;
+
+            label estimateCellCount
+            (
+                const autoPtr<backgroundMeshDecomposition>& decomposition
+            ) const;
 };
 
 

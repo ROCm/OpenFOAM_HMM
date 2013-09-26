@@ -87,6 +87,9 @@ Description
       proc0 | proc1 | proc2
 
 
+    Can optionally keep all regions local to the processor.
+
+
 SourceFiles
     regionSplit.C
 
@@ -155,6 +158,7 @@ class regionSplit
         //- Calculate global region split. Return globalIndex.
         autoPtr<globalIndex> calcRegionSplit
         (
+            const bool doGlobalRegions,
             const boolList& blockedFace,
             const List<labelPair>& explicitConnections,
             labelList& cellRegion
@@ -170,11 +174,20 @@ public:
     // Constructors
 
         //- Construct from mesh
-        regionSplit(const polyMesh&);
+        regionSplit
+        (
+            const polyMesh&,
+            const bool doGlobalRegions = Pstream::parRun()
+        );
 
         //- Construct from mesh and whether face is blocked
         //  NOTE: blockedFace has to be consistent across coupled faces!
-        regionSplit(const polyMesh&, const boolList& blockedFace);
+        regionSplit
+        (
+            const polyMesh&,
+            const boolList& blockedFace,
+            const bool doGlobalRegions = Pstream::parRun()
+        );
 
         //- Construct from mesh and whether face is blocked. Additional explicit
         //  connections between normal boundary faces.
@@ -183,7 +196,8 @@ public:
         (
             const polyMesh&,
             const boolList& blockedFace,
-            const List<labelPair>&
+            const List<labelPair>&,
+            const bool doGlobalRegions = Pstream::parRun()
         );
 
 
@@ -193,6 +207,12 @@ public:
         const globalIndex& globalNumbering() const
         {
             return globalNumberingPtr_();
+        }
+
+        //- Return local number of regions
+        label nLocalRegions() const
+        {
+            return globalNumbering().localSize(Pstream::myProcNo());
         }
 
         //- Return total number of regions
