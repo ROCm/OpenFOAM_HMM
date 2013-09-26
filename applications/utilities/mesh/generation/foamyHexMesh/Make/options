@@ -12,6 +12,7 @@ EXE_INC = \
     ${EXE_NDEBUG} \
     ${CGAL_INEXACT} \
     ${CGAL_INC} \
+    ${c++CGALWARN} \
     -IconformalVoronoiMesh/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
