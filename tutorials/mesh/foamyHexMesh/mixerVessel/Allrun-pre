@@ -80,6 +80,7 @@ done
 
 # Meshing
 \cp system/controlDict.mesh system/controlDict
+\cp system/collapseDict.collapseFaces system/collapseDict
 
 runApplication blockMesh -region backgroundMeshDecomposition
 
@@ -92,12 +93,16 @@ runParallel foamyHexMesh $nProcs
 runParallel collapseEdges $nProcs -collapseFaces -latestTime
 mv log.collapseEdges log.collapseFaces
 
+\cp system/collapseDict.indirectPatchFaces system/collapseDict
 runParallel collapseEdges $nProcs -collapseFaceSet indirectPatchFaces -latestTime
 mv log.collapseEdges log.collapseFaceSet
 
 runParallel checkMesh $nProcs -allTopology -allGeometry -latestTime
 
 runApplication reconstructParMesh -latestTime
+
+# Copy the mesh into polyMesh
+\cp -r 102/polyMesh constant
 
 
 # ----------------------------------------------------------------- end-of-file
