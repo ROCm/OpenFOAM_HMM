@@ -51,11 +51,18 @@ Foam::combustionModels::PaSR<Type>::PaSR
         mesh,
         dimensionedScalar("kappa", dimless, 0.0)
     ),
-    useReactionRate_(this->coeffs().lookupOrDefault("useReactionRate", false))
+    integrateReactionRate_
+    (
+        this->coeffs().lookupOrDefault("integrateReactionRate", true)
+    )
 {
-    if (useReactionRate_)
+    if (integrateReactionRate_)
     {
-        Info<< "    using reaction rate" << endl;
+        Info<< "    using integrated reaction rate" << endl;
+    }
+    else
+    {
+        Info<< "    using instantaneous reaction rate" << endl;
     }
 }
 
@@ -83,13 +90,13 @@ void Foam::combustionModels::PaSR<Type>::correct()
     {
         const scalar dt = this->mesh().time().deltaTValue();
 
-        if (useReactionRate_)
+        if (integrateReactionRate_)
         {
-            this->chemistryPtr_->calculate();
+            this->chemistryPtr_->solve(dt);
         }
         else
         {
-            this->chemistryPtr_->solve(dt);
+            this->chemistryPtr_->calculate();
         }
 
         if (turbulentReaction_)
@@ -219,7 +226,8 @@ bool Foam::combustionModels::PaSR<Type>::read()
     {
         this->coeffs().lookup("Cmix") >> Cmix_;
         this->coeffs().lookup("turbulentReaction") >> turbulentReaction_;
-        this->coeffs().lookup("useReactionRate") >> useReactionRate_;
+        this->coeffs().lookup("integrateReactionRate")
+            >> integrateReactionRate_;
         return true;
     }
     else

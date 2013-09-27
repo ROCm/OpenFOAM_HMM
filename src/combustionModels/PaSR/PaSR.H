@@ -65,8 +65,9 @@ class PaSR
         //- Mixing parameter
         volScalarField kappa_;
 
-        //- Use reaction rate
-        bool useReactionRate_;
+        //- Integrate reaction rate over the time-step
+        //  using the selected ODE solver
+        bool integrateReactionRate_;
 
 
     // Private Member Functions
