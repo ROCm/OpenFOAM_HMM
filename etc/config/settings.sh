@@ -386,10 +386,12 @@ then
     if [ -d "$BOOST_ARCH_PATH" ]
     then
         _foamAddLib $BOOST_ARCH_PATH/lib
+        _foamAddLib $BOOST_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH
     else
         unset BOOST_ARCH_PATH
     fi
     _foamAddLib $CGAL_ARCH_PATH/lib
+    _foamAddLib $CGAL_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH
 else
     unset BOOST_ARCH_PATH CGAL_ARCH_PATH MPFR_ARCH_PATH GMP_ARCH_PATH
 fi

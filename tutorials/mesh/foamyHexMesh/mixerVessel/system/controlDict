@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     icoFoam;
+application     foamyHexMesh;
 
 startFrom       startTime;
 
@@ -44,6 +44,5 @@ timeFormat      general;
 timePrecision   6;
 
 runTimeModifiable yes;
-
 
 // ************************************************************************* //

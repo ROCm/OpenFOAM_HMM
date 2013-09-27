@@ -4,54 +4,36 @@ cd ${0%/*} || exit 1    # run from this directory
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
+\cp system/controlDict.flow system/controlDict
+
+# Set application name
+application=$(getApplication)
+
+# Get number of processors to run on
 nProcs=$(getNumberOfProcessors)
 
-# copy flange surface from resources folder
-cp $FOAM_TUTORIALS/resources/geometry/mixerVessel.tar.gz constant/triSurface/
-tar zxf constant/triSurface/mixerVessel.tar.gz -C constant/triSurface/rawSurfaces
+\rm -rf 0
 
-# Run the surface preparation script
-./constant/triSurface/surfaceProcess.sh > log.surfaceProcess 2>&1
+runApplication createBaffles -overwrite
+runApplication mergeOrSplitBaffles -split -overwrite
 
-runApplication surfaceBooleanFeatures \
-               intersection \
-               constant/triSurface/vessel.stl \
-               constant/triSurface/spargerShaft.stl -perturb
+# Get rid of zero faced patches
+runApplication createPatch -overwrite
 
-mv log.surfaceBooleanFeatures log.surfaceBooleanFeatures.vessel_spargerShaft
+# Copy fields after meshing to avoind the generation of unnecessary patch fields
+\cp -r 0.org 0
 
-runApplication surfaceBooleanFeatures \
-               intersection \
-               constant/triSurface/vessel.stl \
-               constant/triSurface/shaftStatic.stl -perturb
+# Initialize alpha
+runApplication setFields
 
-mv log.surfaceBooleanFeatures log.surfaceBooleanFeatures.vessel_shaftStatic
+# Decompose
+runApplication decomposePar -force
 
-runApplication surfaceBooleanFeatures \
-               intersection \
-               constant/triSurface/spargerShaft.stl \
-               constant/triSurface/spargerInlet.stl -perturb
+# Run
+runParallel $application 6
 
-mv log.surfaceBooleanFeatures log.surfaceBooleanFeatures.spargerShaft_spargerInlet
+# Reconstruct
+runApplication reconstructPar -noFunctionObjects
 
-runApplication surfaceBooleanFeatures \
-               intersection \
-               constant/triSurface/stirrer.stl \
-               constant/triSurface/shaftRotating.stl -perturb
-
-mv log.surfaceBooleanFeatures log.surfaceBooleanFeatures.stirrer_shaftRotating
-
-runApplication surfaceFeatureExtract
-
-runApplication blockMesh -region backgroundMeshDecomposition
-runApplication decomposePar -region backgroundMeshDecomposition
-
-runParallel foamyHexMesh $nProcs
-
-runParallel collapseEdges $nProcs -collapseFaces -latestTime
-
-runParallel checkMesh $nProcs -latestTime -allTopology -allGeometry
-
-runApplication reconstructParMesh -latestTime
 
 # ----------------------------------------------------------------- end-of-file

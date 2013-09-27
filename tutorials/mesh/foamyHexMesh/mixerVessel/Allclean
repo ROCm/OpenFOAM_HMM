@@ -1,28 +1,24 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
 
-# Source tutorial run functions
+# Source tutorial clean functions
 . $WM_PROJECT_DIR/bin/tools/CleanFunctions
 
-rm -r constant/internalDelaunayVertices constant/targetCellSize > /dev/null 2>&1
-
-rm -r snapToSurface?.obj subsetBox.obj surf1.obj tetsToSnapTo.obj > /dev/null 2>&1
-
-rm -r constant/backgroundMeshDecomposition/polyMesh/boundary > /dev/null 2>&1
-rm -r constant/backgroundMeshDecomposition/polyMesh/faces > /dev/null 2>&1
-rm -r constant/backgroundMeshDecomposition/polyMesh/neighbour > /dev/null 2>&1
-rm -r constant/backgroundMeshDecomposition/polyMesh/owner > /dev/null 2>&1
-rm -r constant/backgroundMeshDecomposition/polyMesh/points > /dev/null 2>&1
-
-rm -rf constant/extendedFeatureEdgeMesh > /dev/null 2>&1
-
-rm -r constant/triSurface/rawSurfaces/*.stl > /dev/null 2>&1
-
-rm -r constant/triSurface/*.stl > /dev/null 2>&1
-rm -r constant/triSurface/*.obj > /dev/null 2>&1
-rm -r constant/triSurface/*.eMesh > /dev/null 2>&1
-rm -r constant/triSurface/problemFaces > /dev/null 2>&1
-
 cleanCase
+
+\rm -rf 0
+\rm -rf constant/extendedFeatureEdgeMesh/
+\rm -f constant/triSurface/*.eMesh*
+\rm -f constant/triSurface/*.stl
+\rm -f constant/triSurface/*.obj
+\rm -f constant/triSurface/problemFaces
+\rm -f *.obj
+
+\rm -f constant/backgroundMeshDecomposition/polyMesh/boundary
+\rm -f constant/backgroundMeshDecomposition/polyMesh/faces
+\rm -f constant/backgroundMeshDecomposition/polyMesh/neighbour
+\rm -f constant/backgroundMeshDecomposition/polyMesh/owner
+\rm -f constant/backgroundMeshDecomposition/polyMesh/points
+
 
 # ----------------------------------------------------------------- end-of-file

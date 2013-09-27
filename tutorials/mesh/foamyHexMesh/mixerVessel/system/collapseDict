@@ -32,7 +32,7 @@ collapseEdgesCoeffs
 collapseFacesCoeffs
 {
     // The initial face length factor
-    initialFaceLengthFactor                 0.3;
+    initialFaceLengthFactor                 1;
 
     // If the face can't be collapsed to an edge, and it has a span less than
     // the target face length multiplied by this coefficient, collapse it
@@ -76,7 +76,7 @@ controlMeshQualityCoeffs
     // Maximum number of outer iterations is mesh quality checking is enabled
     maximumIterations           10;
 
-    maximumSmoothingIterations  2;
+    maximumSmoothingIterations  1;
 
     maxPointErrorCount          3;
 }
