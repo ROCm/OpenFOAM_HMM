@@ -11,58 +11,53 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "system";
-    object      fvSolution;
+    object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-solvers
+ddtSchemes
 {
-    "rho.*"
-    {
-        solver          diagonal;
-    }
-
-    p
-    {
-        solver           PCG;
-        preconditioner   DIC;
-        tolerance        1e-6;
-        relTol           0.1;
-    }
-
-    pFinal
-    {
-        $p;
-        tolerance        1e-6;
-        relTol           0.0;
-    }
-
-    "(U|h|k|epsilon)"
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-6;
-        relTol          0.1;
-    }
-
-    "(U|h|k|epsilon)Final"
-    {
-        $U;
-        relTol          0;
-    }
-
-    Yi
-    {
-        $hFinal;
-    }
+    default         localEuler rDeltaT;
 }
 
-PIMPLE
+gradSchemes
 {
-    momentumPredictor no;
-    nOuterCorrectors  1;
-    nCorrectors     2;
-    nNonOrthogonalCorrectors 0;
+    default         Gauss linear;
+}
+
+divSchemes
+{
+    default         none;
+
+    div(phi,U)      Gauss limitedLinearV 1;
+    div(phi,Yi_h)   Gauss limitedLinear01 1;
+    div(phi,h)      Gauss limitedLinear 1;
+    div(phi,K)      Gauss limitedLinear 1;
+    div(phid,p)     Gauss limitedLinear 1;
+    div(phi,epsilon) Gauss limitedLinear 1;
+    div(phi,k) Gauss limitedLinear 1;
+    div((muEff*dev2(T(grad(U))))) Gauss linear;
+}
+
+laplacianSchemes
+{
+    default         Gauss linear orthogonal;
+}
+
+interpolationSchemes
+{
+    default         linear;
+}
+
+snGradSchemes
+{
+    default         orthogonal;
+}
+
+fluxRequired
+{
+    default         no;
+    p;
 }
 
 

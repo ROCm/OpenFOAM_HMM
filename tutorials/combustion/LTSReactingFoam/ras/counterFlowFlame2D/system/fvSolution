@@ -33,8 +33,7 @@ solvers
     pFinal
     {
         $p;
-        tolerance        1e-6;
-        relTol           0.0;
+        relTol           0;
     }
 
     "(U|h|k|epsilon)"
@@ -48,12 +47,13 @@ solvers
     "(U|h|k|epsilon)Final"
     {
         $U;
-        relTol          0;
+        relTol          0.1;
     }
 
     Yi
     {
-        $hFinal;
+        $U;
+        relTol          0.1;
     }
 }
 
@@ -61,8 +61,25 @@ PIMPLE
 {
     momentumPredictor no;
     nOuterCorrectors  1;
-    nCorrectors     2;
+    nCorrectors     1;
     nNonOrthogonalCorrectors 0;
+
+    maxDeltaT       1e-2;
+    maxCo           0.4;
+    alphaTemp       1;
+    rDeltaTSmoothingCoeff 1;
+    rDeltaTDampingCoeff 1;
+}
+
+relaxationFactors
+{
+    fields
+    {
+    }
+    equations
+    {
+        ".*" 1;
+    }
 }
 
 

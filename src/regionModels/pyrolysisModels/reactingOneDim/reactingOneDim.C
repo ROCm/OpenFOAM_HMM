@@ -691,11 +691,7 @@ void reactingOneDim::evolveRegion()
 
     if (useChemistrySolvers_)
     {
-        solidChemistry_->solve
-        (
-            time().value() - time().deltaTValue(),
-            time().deltaTValue()
-        );
+        solidChemistry_->solve(time().deltaTValue());
     }
     else
     {

@@ -580,7 +580,6 @@ template<class CompType, class SolidThermo, class GasThermo>
 Foam::scalar
 Foam::pyrolysisChemistryModel<CompType, SolidThermo, GasThermo>::solve
 (
-    const scalar t0,
     const scalar deltaT
 )
 {
@@ -638,7 +637,7 @@ Foam::pyrolysisChemistryModel<CompType, SolidThermo, GasThermo>::solve
 
             c0 = c;
 
-            scalar t = t0;
+            scalar t = 0;
             scalar tauC = this->deltaTChem_[celli];
             scalar dt = min(deltaT, tauC);
             scalar timeLeft = deltaT;

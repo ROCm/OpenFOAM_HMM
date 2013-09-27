@@ -152,9 +152,9 @@ public:
                 //- Calculates the reaction rates
                 virtual void calculate() = 0;
 
-                //- Solve the reaction system for the given start time and
-                //  timestep and return the characteristic time
-                virtual scalar solve(const scalar t0, const scalar deltaT) = 0;
+                //- Solve the reaction system for the given time step
+                //  and return the characteristic time
+                virtual scalar solve(const scalar deltaT) = 0;
 
                 //- Return the chemical time scale
                 virtual tmp<volScalarField> tc() const = 0;

@@ -9,60 +9,39 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "system";
-    object      fvSolution;
+    class       volScalarField;
+    location    "0";
+    object      H2O;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-solvers
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
 {
-    "rho.*"
+    fuel
     {
-        solver          diagonal;
+        type            fixedValue;
+        value           uniform 0;
     }
-
-    p
+    air
     {
-        solver           PCG;
-        preconditioner   DIC;
-        tolerance        1e-6;
-        relTol           0.1;
+        type            fixedValue;
+        value           uniform 0;
     }
-
-    pFinal
+    outlet
     {
-        $p;
-        tolerance        1e-6;
-        relTol           0.0;
-    }
+        type            inletOutlet;
+        inletValue      uniform 0;
+        value           uniform 0;
 
-    "(U|h|k|epsilon)"
+    }
+    frontAndBack
     {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-6;
-        relTol          0.1;
+        type            empty;
     }
-
-    "(U|h|k|epsilon)Final"
-    {
-        $U;
-        relTol          0;
-    }
-
-    Yi
-    {
-        $hFinal;
-    }
-}
-
-PIMPLE
-{
-    momentumPredictor no;
-    nOuterCorrectors  1;
-    nCorrectors     2;
-    nNonOrthogonalCorrectors 0;
 }
 
 

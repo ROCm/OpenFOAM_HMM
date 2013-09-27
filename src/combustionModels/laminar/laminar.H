@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,21 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::combustionModels::PaSR
+    Foam::combustionModels::laminar
 
 Description
-    Partially stirred reactor combustion model.  The model calculates a finite
-    rate, based on both turbulence and chemistry time scales.  Depending on
-    mesh resolution, the Cmix parameter can be used to scale the turbulence
-    mixing time scale.
+    Laminar combustion model.
 
 SourceFiles
-    PaSR.C
+    laminar.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PaSR_H
-#define PaSR_H
+#ifndef laminar_H
+#define laminar_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,24 +43,15 @@ namespace combustionModels
 {
 
 /*---------------------------------------------------------------------------*\
-                            Class PaSR Declaration
+                            Class laminar Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class PaSR
+class laminar
 :
     public Type
 {
     // Private data
-
-        //- Mixing constant
-        scalar Cmix_;
-
-        //- Turbulent reaction switch
-        Switch turbulentReaction_;
-
-        //- Mixing parameter
-        volScalarField kappa_;
 
         //- Integrate reaction rate over the time-step
         //  using the selected ODE solver
@@ -76,26 +64,26 @@ class PaSR
         tmp<volScalarField> tc() const;
 
         //- Disallow copy construct
-        PaSR(const PaSR&);
+        laminar(const laminar&);
 
         //- Disallow default bitwise assignment
-        void operator=(const PaSR&);
+        void operator=(const laminar&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("PaSR");
+    TypeName("laminar");
 
 
     // Constructors
 
         //- Construct from components
-        PaSR(const word& modelType, const fvMesh& mesh);
+        laminar(const word& modelType, const fvMesh& mesh);
 
 
     //- Destructor
-    virtual ~PaSR();
+    virtual ~laminar();
 
 
     // Member Functions
@@ -130,7 +118,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "PaSR.C"
+#   include "laminar.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

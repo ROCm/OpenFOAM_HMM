@@ -9,61 +9,39 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "system";
-    object      fvSolution;
+    class       polyBoundaryMesh;
+    location    "constant/polyMesh";
+    object      boundary;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-solvers
-{
-    "rho.*"
+4
+(
+    fuel
     {
-        solver          diagonal;
+        type            patch;
+        nFaces          40;
+        startFace       7860;
     }
-
-    p
+    air
     {
-        solver           PCG;
-        preconditioner   DIC;
-        tolerance        1e-6;
-        relTol           0.1;
+        type            patch;
+        nFaces          40;
+        startFace       7900;
     }
-
-    pFinal
+    outlet
     {
-        $p;
-        tolerance        1e-6;
-        relTol           0.0;
+        type            patch;
+        nFaces          200;
+        startFace       7940;
     }
-
-    "(U|h|k|epsilon)"
+    frontAndBack
     {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-6;
-        relTol          0.1;
+        type            empty;
+        inGroups        1(empty);
+        nFaces          8000;
+        startFace       8140;
     }
-
-    "(U|h|k|epsilon)Final"
-    {
-        $U;
-        relTol          0;
-    }
-
-    Yi
-    {
-        $hFinal;
-    }
-}
-
-PIMPLE
-{
-    momentumPredictor no;
-    nOuterCorrectors  1;
-    nCorrectors     2;
-    nNonOrthogonalCorrectors 0;
-}
-
+)
 
 // ************************************************************************* //

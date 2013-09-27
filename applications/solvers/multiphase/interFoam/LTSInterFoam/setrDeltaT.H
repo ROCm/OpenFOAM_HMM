@@ -121,9 +121,11 @@
      && runTime.timeIndex() > runTime.startTimeIndex() + 1
     )
     {
-        rDeltaT =
-             rDeltaT0
-            *max(rDeltaT/rDeltaT0, scalar(1.0) - rDeltaTDampingCoeff);
+        rDeltaT = max
+        (
+            rDeltaT,
+            (scalar(1.0) - rDeltaTDampingCoeff)*rDeltaT0
+        );
 
         Info<< "Damped flow time scale min/max = "
             << gMin(1/rDeltaT.internalField())
