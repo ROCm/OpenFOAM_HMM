@@ -33,7 +33,8 @@ boundaryField
     }
     outlet
     {
-        type            zeroGradient;
+        type            pressureInletOutletVelocity;
+        value           $internalField;
     }
     frontAndBack
     {

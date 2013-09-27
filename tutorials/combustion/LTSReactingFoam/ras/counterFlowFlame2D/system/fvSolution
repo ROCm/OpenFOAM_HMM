@@ -38,9 +38,9 @@ solvers
 
     "(U|h|k|epsilon)"
     {
-        solver          BICCG;
+        solver          PBiCG;
         preconditioner  DILU;
-        tolerance       1e-06;
+        tolerance       1e-6;
         relTol          0.1;
     }
 
@@ -65,10 +65,10 @@ PIMPLE
     nNonOrthogonalCorrectors 0;
 
     maxDeltaT       1e-2;
-    maxCo           0.2;
+    maxCo           0.4;
     alphaTemp       1;
-    rDeltaTSmoothingCoeff 0.2;
-    rDeltaTDampingCoeff 0.2;
+    rDeltaTSmoothingCoeff 1;
+    rDeltaTDampingCoeff 1;
 }
 
 relaxationFactors
