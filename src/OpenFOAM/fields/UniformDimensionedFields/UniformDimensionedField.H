@@ -94,6 +94,11 @@ public:
 
         void operator=(const UniformDimensionedField<Type>&);
         void operator=(const dimensioned<Type>&);
+
+        Type operator[](const label) const
+        {
+            return this->value();
+        }
 };
 
 
