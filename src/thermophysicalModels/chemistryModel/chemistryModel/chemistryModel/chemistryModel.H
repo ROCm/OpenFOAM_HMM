@@ -70,6 +70,11 @@ class chemistryModel
         //- Disallow default bitwise assignment
         void operator=(const chemistryModel&);
 
+        //- Solve the reaction system for the given time step
+        //  of given type and return the characteristic time
+        template<class DeltaTType>
+        scalar solve(const DeltaTType& deltaT);
+
 
 protected:
 
@@ -220,6 +225,10 @@ public:
             //- Solve the reaction system for the given time step
             //  and return the characteristic time
             virtual scalar solve(const scalar deltaT);
+
+            //- Solve the reaction system for the given time step
+            //  and return the characteristic time
+            virtual scalar solve(const scalarField& deltaT);
 
             //- Return the chemical time scale
             virtual tmp<volScalarField> tc() const;

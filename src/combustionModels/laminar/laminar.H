@@ -57,11 +57,16 @@ class laminar
         //  using the selected ODE solver
         bool integrateReactionRate_;
 
+protected:
 
-    // Private Member Functions
+    // Protected Member Functions
 
         //- Return the chemical time scale
         tmp<volScalarField> tc() const;
+
+private:
+
+    // Private Member Functions
 
         //- Disallow copy construct
         laminar(const laminar&);

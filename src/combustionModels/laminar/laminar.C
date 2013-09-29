@@ -25,6 +25,7 @@ License
 
 #include "laminar.H"
 #include "fvmSup.H"
+#include "localEulerDdtScheme.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -76,7 +77,37 @@ void Foam::combustionModels::laminar<Type>::correct()
     {
         if (integrateReactionRate_)
         {
-            this->chemistryPtr_->solve(this->mesh().time().deltaTValue());
+            word ddtScheme(this->mesh().ddtScheme("Yi"));
+
+            if (ddtScheme == fv::localEulerDdtScheme<scalar>::typeName)
+            {
+                const scalarField& rDeltaT =
+                this->mesh().objectRegistry::lookupObject<volScalarField>
+                (
+                    "rDeltaT"
+                );
+
+                if (this->coeffs().found("maxIntegrationTime"))
+                {
+                    scalar maxIntegrationTime
+                    (
+                        readScalar(this->coeffs().lookup("maxIntegrationTime"))
+                    );
+
+                    this->chemistryPtr_->solve
+                    (
+                        min(1.0/rDeltaT, maxIntegrationTime)()
+                    );
+                }
+                else
+                {
+                    this->chemistryPtr_->solve((1.0/rDeltaT)());
+                }
+            }
+            else
+            {
+                this->chemistryPtr_->solve(this->mesh().time().deltaTValue());
+            }
         }
         else
         {

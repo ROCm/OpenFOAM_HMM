@@ -25,6 +25,7 @@ License
 
 #include "chemistryModel.H"
 #include "reactingMixture.H"
+#include "UniformField.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -742,9 +743,10 @@ void Foam::chemistryModel<CompType, ThermoType>::calculate()
 
 
 template<class CompType, class ThermoType>
+template<class DeltaTType>
 Foam::scalar Foam::chemistryModel<CompType, ThermoType>::solve
 (
-    const scalar deltaT
+    const DeltaTType& deltaT
 )
 {
     CompType::correct();
@@ -795,9 +797,9 @@ Foam::scalar Foam::chemistryModel<CompType, ThermoType>::solve
 
         // initialise timing parameters
         scalar t = 0;
+        scalar timeLeft = deltaT[celli];
         scalar tauC = this->deltaTChem_[celli];
-        scalar dt = min(deltaT, tauC);
-        scalar timeLeft = deltaT;
+        scalar dt = min(timeLeft, tauC);
 
         // calculate the chemical source terms
         while (timeLeft > SMALL)
@@ -823,14 +825,36 @@ Foam::scalar Foam::chemistryModel<CompType, ThermoType>::solve
         dc = c - c0;
         for (label i=0; i<nSpecie_; i++)
         {
-            RR_[i][celli] = dc[i]*specieThermo_[i].W()/deltaT;
+            RR_[i][celli] = dc[i]*specieThermo_[i].W()/deltaT[celli];
         }
     }
 
-    // Don't allow the time-step to change more than a factor of 2
-    deltaTMin = min(deltaTMin, 2*deltaT);
-
     return deltaTMin;
+}
+
+
+template<class CompType, class ThermoType>
+Foam::scalar Foam::chemistryModel<CompType, ThermoType>::solve
+(
+    const scalar deltaT
+)
+{
+    // Don't allow the time-step to change more than a factor of 2
+    return min
+    (
+        this->solve<UniformField<scalar> >(UniformField<scalar>(deltaT)),
+        2*deltaT
+    );
+}
+
+
+template<class CompType, class ThermoType>
+Foam::scalar Foam::chemistryModel<CompType, ThermoType>::solve
+(
+    const scalarField& deltaT
+)
+{
+    return this->solve<scalarField>(deltaT);
 }
 
 
