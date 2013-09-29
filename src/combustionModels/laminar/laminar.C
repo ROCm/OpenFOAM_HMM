@@ -82,10 +82,11 @@ void Foam::combustionModels::laminar<Type>::correct()
             if (ddtScheme == fv::localEulerDdtScheme<scalar>::typeName)
             {
                 const scalarField& rDeltaT =
-                this->mesh().objectRegistry::template lookupObject<volScalarField>
-                (
-                    "rDeltaT"
-                );
+                    this->mesh().objectRegistry::
+                    template lookupObject<volScalarField>
+                    (
+                        "rDeltaT"
+                    );
 
                 if (this->coeffs().found("maxIntegrationTime"))
                 {
