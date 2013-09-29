@@ -82,7 +82,7 @@ void Foam::combustionModels::laminar<Type>::correct()
             if (ddtScheme == fv::localEulerDdtScheme<scalar>::typeName)
             {
                 const scalarField& rDeltaT =
-                this->mesh().objectRegistry::lookupObject<volScalarField>
+                this->mesh().objectRegistry::template lookupObject<volScalarField>
                 (
                     "rDeltaT"
                 );

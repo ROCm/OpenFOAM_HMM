@@ -218,6 +218,10 @@ public:
             //  and return the characteristic time
             virtual scalar solve(const scalar deltaT) = 0;
 
+            //- Solve the reaction system for the given time step
+            //  and return the characteristic time
+            virtual scalar solve(const scalarField& deltaT);
+
             //- Return the chemical time scale
             virtual tmp<volScalarField> tc() const;
 
