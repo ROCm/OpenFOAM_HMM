@@ -778,6 +778,9 @@ Foam::scalar Foam::chemistryModel<CompType, ThermoType>::solve
     const scalarField& T = this->thermo().T();
     const scalarField& p = this->thermo().p();
 
+    scalarField c(nSpecie_);
+    scalarField c0(nSpecie_);
+
     forAll(rho, celli)
     {
         const scalar rhoi = rho[celli];
@@ -785,15 +788,11 @@ Foam::scalar Foam::chemistryModel<CompType, ThermoType>::solve
         const scalar pi = p[celli];
         scalar Ti = T[celli];
 
-        scalarField c(nSpecie_, 0.0);
-        scalarField c0(nSpecie_, 0.0);
-        scalarField dc(nSpecie_, 0.0);
-
         for (label i=0; i<nSpecie_; i++)
         {
             c[i] = rhoi*Y_[i][celli]/specieThermo_[i].W();
+            c0[i] = c[i];
         }
-        c0 = c;
 
         // initialise timing parameters
         scalar t = 0;
@@ -809,8 +808,8 @@ Foam::scalar Foam::chemistryModel<CompType, ThermoType>::solve
 
             // update the temperature
             const scalar cTot = sum(c);
-            ThermoType mixture(0.0*specieThermo_[0]);
-            for (label i=0; i<nSpecie_; i++)
+            ThermoType mixture((c[0]/cTot)*specieThermo_[0]);
+            for (label i=1; i<nSpecie_; i++)
             {
                 mixture += (c[i]/cTot)*specieThermo_[i];
             }
@@ -822,10 +821,9 @@ Foam::scalar Foam::chemistryModel<CompType, ThermoType>::solve
         }
         deltaTMin = min(tauC, deltaTMin);
 
-        dc = c - c0;
         for (label i=0; i<nSpecie_; i++)
         {
-            RR_[i][celli] = dc[i]*specieThermo_[i].W()/deltaT[celli];
+            RR_[i][celli] = (c[i] - c0[i])*specieThermo_[i].W()/deltaT[celli];
         }
     }
 
