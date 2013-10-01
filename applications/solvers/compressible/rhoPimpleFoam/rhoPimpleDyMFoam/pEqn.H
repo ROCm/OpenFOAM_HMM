@@ -115,5 +115,5 @@ K = 0.5*magSqr(U);
 
 if (thermo.dpdt())
 {
-    dpdt = fvc::ddt(p);
+    dpdt = fvc::ddt(p) - fvc::div(fvc::meshPhi(rho, U), p);
 }
