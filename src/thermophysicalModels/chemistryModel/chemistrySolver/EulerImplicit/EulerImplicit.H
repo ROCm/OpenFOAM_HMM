@@ -65,6 +65,9 @@ class EulerImplicit
             //- Equilibrium rate limiter flag (on/off)
             Switch eqRateLimiter_;
 
+        // Solver data
+        mutable scalarField cTp_;
+
 
 public:
 
@@ -85,13 +88,13 @@ public:
     // Member Functions
 
         //- Update the concentrations and return the chemical time
-        virtual scalar solve
+        virtual void solve
         (
-            scalarField &c,
-            const scalar T,
-            const scalar p,
-            const scalar t0,
-            const scalar dt
+            scalarField& c,
+            scalar& T,
+            scalar& p,
+            scalar& deltaT,
+            scalar& subDeltaT
         ) const;
 };
 

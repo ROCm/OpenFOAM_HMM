@@ -17,7 +17,7 @@ FoamFile
 
 chemistryType
 {
-    chemistrySolver   ode;
+    chemistrySolver   EulerImplicit;
     chemistryThermo   psi;
 }
 
@@ -27,12 +27,12 @@ initialChemicalTimeStep 1e-07;
 
 sequentialCoeffs
 {
-    cTauChem        0.001;
+    cTauChem        0.05;
 }
 
 EulerImplicitCoeffs
 {
-    cTauChem        0.05;
+    cTauChem        1;
     equilibriumRateLimiter off;
 }
 
@@ -40,7 +40,6 @@ odeCoeffs
 {
     solver          KRR4;
     eps             0.05;
-    scale           1;
 }
 
 // ************************************************************************* //

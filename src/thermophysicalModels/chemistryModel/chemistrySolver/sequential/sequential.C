@@ -51,42 +51,67 @@ Foam::sequential<ChemistryModel>::~sequential()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ChemistryModel>
-Foam::scalar Foam::sequential<ChemistryModel>::solve
+void Foam::sequential<ChemistryModel>::solve
 (
-    scalarField &c,
-    const scalar T,
-    const scalar p,
-    const scalar t0,
-    const scalar dt
+    scalarField& c,
+    scalar& T,
+    scalar& p,
+    scalar& deltaT,
+    scalar& subDeltaT
 ) const
 {
-    scalar tChemInv = SMALL;
+    deltaT = min(deltaT, subDeltaT);
 
-    scalar pf, cf, pb, cb;
-    label lRef, rRef;
+    const label nSpecie = this->nSpecie();
+
+    // Calculate the absolute enthalpy
+    scalar cTot = sum(c);
+    typename ChemistryModel::thermoType mixture
+    (
+        (c[0]/cTot)*this->specieThermo_[0]
+    );
+    for (label i=1; i<nSpecie; i++)
+    {
+        mixture += (c[i]/cTot)*this->specieThermo_[i];
+    }
+    scalar ha = mixture.Ha(p, T);
+
+    scalar tChemInv = SMALL;
 
     forAll(this->reactions(), i)
     {
+        scalar pf, cf, pb, cb;
+        label lRef, rRef;
+
         scalar omega = this->omegaI(i, c, T, p, pf, cf, lRef, pb, cb, rRef);
 
         if (eqRateLimiter_)
         {
             if (omega < 0.0)
             {
-                omega /= 1.0 + pb*dt;
+                omega /= 1.0 + pb*deltaT;
             }
             else
             {
-                omega /= 1.0 + pf*dt;
+                omega /= 1.0 + pf*deltaT;
             }
         }
 
         tChemInv = max(tChemInv, mag(omega));
 
-        this->updateConcsInReactionI(i, dt, omega, p, T, c);
+        this->updateConcsInReactionI(i, deltaT, omega, p, T, c);
     }
 
-    return cTauChem_/tChemInv;
+    // Update the temperature
+    cTot = sum(c);
+    mixture = (c[0]/cTot)*this->specieThermo_[0];
+    for (label i=1; i<nSpecie; i++)
+    {
+        mixture += (c[i]/cTot)*this->specieThermo_[i];
+    }
+    T = mixture.THa(ha, p, T);
+
+    subDeltaT = cTauChem_/tChemInv;
 }
 
 

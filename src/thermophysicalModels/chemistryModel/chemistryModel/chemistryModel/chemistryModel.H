@@ -78,6 +78,8 @@ class chemistryModel
 
 protected:
 
+    typedef ThermoType thermoType;
+
     // Private data
 
         //- Reference to the field of specie mass fractions
@@ -260,13 +262,13 @@ public:
                 scalarSquareMatrix& dfdc
             ) const;
 
-            virtual scalar solve
+            virtual void solve
             (
                 scalarField &c,
-                const scalar T,
-                const scalar p,
-                const scalar t0,
-                const scalar dt
+                scalar& T,
+                scalar& p,
+                scalar& deltaT,
+                scalar& subDeltaT
             ) const;
 };
 

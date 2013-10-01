@@ -38,7 +38,8 @@ Foam::EulerImplicit<ChemistryModel>::EulerImplicit
     chemistrySolver<ChemistryModel>(mesh),
     coeffsDict_(this->subDict("EulerImplicitCoeffs")),
     cTauChem_(readScalar(coeffsDict_.lookup("cTauChem"))),
-    eqRateLimiter_(coeffsDict_.lookup("equilibriumRateLimiter"))
+    eqRateLimiter_(coeffsDict_.lookup("equilibriumRateLimiter")),
+    cTp_(this->nEqns())
 {}
 
 
@@ -52,33 +53,47 @@ Foam::EulerImplicit<ChemistryModel>::~EulerImplicit()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ChemistryModel>
-Foam::scalar Foam::EulerImplicit<ChemistryModel>::solve
+void Foam::EulerImplicit<ChemistryModel>::solve
 (
-    scalarField &c,
-    const scalar T,
-    const scalar p,
-    const scalar t0,
-    const scalar dt
+    scalarField& c,
+    scalar& T,
+    scalar& p,
+    scalar& deltaT,
+    scalar& subDeltaT
 ) const
 {
-    scalar pf, cf, pr, cr;
-    label lRef, rRef;
+    deltaT = min(deltaT, subDeltaT);
 
     const label nSpecie = this->nSpecie();
     simpleMatrix<scalar> RR(nSpecie, 0, 0);
 
-    for (label i = 0; i < nSpecie; i++)
+    for (label i=0; i<nSpecie; i++)
     {
         c[i] = max(0.0, c[i]);
     }
 
-    for (label i = 0; i < nSpecie; i++)
+    // Calculate the absolute enthalpy
+    scalar cTot = sum(c);
+    typename ChemistryModel::thermoType mixture
+    (
+        (c[0]/cTot)*this->specieThermo_[0]
+    );
+    for (label i=1; i<nSpecie; i++)
     {
-        RR.source()[i] = c[i]/dt;
+        mixture += (c[i]/cTot)*this->specieThermo_[i];
+    }
+    scalar ha = mixture.Ha(p, T);
+
+    for (label i=0; i<nSpecie; i++)
+    {
+        RR.source()[i] = c[i]/deltaT;
     }
 
     forAll(this->reactions(), i)
     {
+        scalar pf, cf, pr, cr;
+        label lRef, rRef;
+
         scalar omegai = this->omegaI(i, c, T, p, pf, cf, lRef, pr, cr, rRef);
 
         scalar corr = 1.0;
@@ -86,11 +101,11 @@ Foam::scalar Foam::EulerImplicit<ChemistryModel>::solve
         {
             if (omegai < 0.0)
             {
-                corr = 1.0/(1.0 + pr*dt);
+                corr = 1.0/(1.0 + pr*deltaT);
             }
             else
             {
-                corr = 1.0/(1.0 + pf*dt);
+                corr = 1.0/(1.0 + pf*deltaT);
             }
         }
 
@@ -98,37 +113,46 @@ Foam::scalar Foam::EulerImplicit<ChemistryModel>::solve
     }
 
 
-    for (label i = 0; i < nSpecie; i++)
+    for (label i=0; i<nSpecie; i++)
     {
-        RR[i][i] += 1.0/dt;
+        RR[i][i] += 1.0/deltaT;
     }
 
     c = RR.LUsolve();
-    for (label i = 0; i < nSpecie; i++)
+    for (label i=0; i<nSpecie; i++)
     {
         c[i] = max(0.0, c[i]);
     }
 
-    // estimate the next time step
+    // Update the temperature
+    cTot = sum(c);
+    mixture = (c[0]/cTot)*this->specieThermo_[0];
+    for (label i=1; i<nSpecie; i++)
+    {
+        mixture += (c[i]/cTot)*this->specieThermo_[i];
+    }
+    T = mixture.THa(ha, p, T);
+
+    // Estimate the next time step
     scalar tMin = GREAT;
     const label nEqns = this->nEqns();
-    scalarField c1(nEqns, 0.0);
 
-    for (label i = 0; i < nSpecie; i++)
+    for (label i=0; i<nSpecie; i++)
     {
-        c1[i] = c[i];
+        cTp_[i] = c[i];
     }
-    c1[nSpecie] = T;
-    c1[nSpecie+1] = p;
+    cTp_[nSpecie] = T;
+    cTp_[nSpecie+1] = p;
 
     scalarField dcdt(nEqns, 0.0);
-    this->derivatives(0.0, c1, dcdt);
+    this->derivatives(0.0, cTp_, dcdt);
 
     const scalar sumC = sum(c);
 
-    for (label i = 0; i < nSpecie; i++)
+    for (label i=0; i<nSpecie; i++)
     {
         scalar d = dcdt[i];
+
         if (d < -SMALL)
         {
             tMin = min(tMin, -(c[i] + SMALL)/d);
@@ -141,7 +165,7 @@ Foam::scalar Foam::EulerImplicit<ChemistryModel>::solve
         }
     }
 
-    return cTauChem_*tMin;
+    subDeltaT = cTauChem_*tMin;
 }
 
 

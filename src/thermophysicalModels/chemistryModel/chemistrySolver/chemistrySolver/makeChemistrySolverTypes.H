@@ -31,9 +31,9 @@ License
 #include "chemistryModel.H"
 
 #include "noChemistrySolver.H"
+#include "sequential.H"
 #include "EulerImplicit.H"
 #include "ode.H"
-#include "sequential.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

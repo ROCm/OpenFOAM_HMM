@@ -34,8 +34,8 @@ Description
 
 #include "noChemistrySolver.H"
 #include "EulerImplicit.H"
-#include "ode.H"
 #include "sequential.H"
+#include "ode.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
