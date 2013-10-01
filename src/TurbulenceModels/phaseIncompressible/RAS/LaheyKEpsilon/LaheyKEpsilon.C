@@ -87,7 +87,7 @@ LaheyKEpsilon<BasicTurbulenceModel>::LaheyKEpsilon
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "Cp",
+            "C3",
             this->coeffDict_,
             this->C2_.value()
         )
