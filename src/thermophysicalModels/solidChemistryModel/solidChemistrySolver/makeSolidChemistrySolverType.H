@@ -35,7 +35,6 @@ Description
 #include "noChemistrySolver.H"
 #include "EulerImplicit.H"
 #include "ode.H"
-#include "sequential.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -84,15 +83,7 @@ namespace Foam
         SThermo,                                                              \
         GThermo                                                               \
     );                                                                        \
-                                                                              \
-    makeSolidChemistrySolverType                                              \
-    (                                                                         \
-        sequential,                                                           \
-        SolidChem,                                                            \
-        Comp,                                                                 \
-        SThermo,                                                              \
-        GThermo                                                               \
-    );
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

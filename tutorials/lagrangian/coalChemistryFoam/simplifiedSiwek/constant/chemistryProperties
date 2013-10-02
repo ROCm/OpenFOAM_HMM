@@ -25,12 +25,6 @@ chemistry       on;
 
 initialChemicalTimeStep 1e-07;
 
-sequentialCoeffs
-{
-    cTauChem        0.001;
-    equilibriumRateLimiter off;
-}
-
 EulerImplicitCoeffs
 {
     cTauChem        0.05;
@@ -41,7 +35,6 @@ odeCoeffs
 {
     solver          SIBS;
     eps             0.05;
-    scale           1;
 }
 
 
