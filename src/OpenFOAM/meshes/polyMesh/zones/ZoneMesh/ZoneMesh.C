@@ -70,20 +70,8 @@ void Foam::ZoneMesh<ZoneType, MeshType>::calcZoneMap() const
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-// Read constructor given IOobject and a MeshType reference
 template<class ZoneType, class MeshType>
-Foam::ZoneMesh<ZoneType, MeshType>::ZoneMesh
-(
-    const IOobject& io,
-    const MeshType& mesh
-)
-:
-    PtrList<ZoneType>(),
-    regIOobject(io),
-    mesh_(mesh),
-    zoneMapPtr_(NULL)
+bool Foam::ZoneMesh<ZoneType, MeshType>::read()
 {
     if
     (
@@ -137,12 +125,33 @@ Foam::ZoneMesh<ZoneType, MeshType>::ZoneMesh
         );
 
         close();
+
+        return true;
     }
     else
     {
-        // No files found.  Force a write of zero-sized zones
-        // write();
+        // Nothing read
+        return false;
     }
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+// Read constructor given IOobject and a MeshType reference
+template<class ZoneType, class MeshType>
+Foam::ZoneMesh<ZoneType, MeshType>::ZoneMesh
+(
+    const IOobject& io,
+    const MeshType& mesh
+)
+:
+    PtrList<ZoneType>(),
+    regIOobject(io),
+    mesh_(mesh),
+    zoneMapPtr_(NULL)
+{
+    read();
 }
 
 
@@ -159,13 +168,16 @@ Foam::ZoneMesh<ZoneType, MeshType>::ZoneMesh
     regIOobject(io),
     mesh_(mesh),
     zoneMapPtr_(NULL)
-{}
+{
+    // Optionally read contents, otherwise keep size
+    read();
+}
 
 
 template<class ZoneType, class MeshType>
 Foam::ZoneMesh<ZoneType, MeshType>::ZoneMesh
 (
-    const IOobject& io ,
+    const IOobject& io,
     const MeshType& mesh,
     const PtrList<ZoneType>& pzm
 )
@@ -175,10 +187,9 @@ Foam::ZoneMesh<ZoneType, MeshType>::ZoneMesh
     mesh_(mesh),
     zoneMapPtr_(NULL)
 {
-    ZoneMesh<ZoneType, MeshType>(io, mesh);
-
-    if (this->size() == 0)
+    if (!read())
     {
+        // Nothing read. Use supplied zones
         PtrList<ZoneType>& zones = *this;
         zones.setSize(pzm.size());
         forAll (zones, zoneI)
@@ -187,6 +198,7 @@ Foam::ZoneMesh<ZoneType, MeshType>::ZoneMesh
         }
     }
 }
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 

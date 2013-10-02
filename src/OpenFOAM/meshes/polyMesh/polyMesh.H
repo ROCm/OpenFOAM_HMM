@@ -309,7 +309,7 @@ public:
         //- Construct from IOobject
         explicit polyMesh(const IOobject& io);
 
-        //- Construct without boundary from components.
+        //- Construct from IOobject or from components.
         //  Boundary is added using addPatches() member function
         polyMesh
         (
