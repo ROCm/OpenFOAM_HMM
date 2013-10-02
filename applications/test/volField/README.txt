@@ -1,1 +1,2 @@
-Test field reading and manipulation. Run on cavity subdirectory.
+Test field reading and manipulation.
+See cavity/Allrun in the subdirectory.
