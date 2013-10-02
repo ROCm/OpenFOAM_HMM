@@ -53,6 +53,41 @@ Foam::EulerImplicit<ChemistryModel>::~EulerImplicit()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ChemistryModel>
+void Foam::EulerImplicit<ChemistryModel>::updateRRInReactionI
+(
+    const label index,
+    const scalar pr,
+    const scalar pf,
+    const scalar corr,
+    const label lRef,
+    const label rRef,
+    const scalar p,
+    const scalar T,
+    simpleMatrix<scalar>& RR
+) const
+{
+    const Reaction<typename ChemistryModel::thermoType>& R =
+        this->reactions_[index];
+
+    forAll(R.lhs(), s)
+    {
+        label si = R.lhs()[s].index;
+        scalar sl = R.lhs()[s].stoichCoeff;
+        RR[si][rRef] -= sl*pr*corr;
+        RR[si][lRef] += sl*pf*corr;
+    }
+
+    forAll(R.rhs(), s)
+    {
+        label si = R.rhs()[s].index;
+        scalar sr = R.rhs()[s].stoichCoeff;
+        RR[si][lRef] -= sr*pf*corr;
+        RR[si][rRef] += sr*pr*corr;
+    }
+}
+
+
+template<class ChemistryModel>
 void Foam::EulerImplicit<ChemistryModel>::solve
 (
     scalarField& c,
@@ -62,8 +97,6 @@ void Foam::EulerImplicit<ChemistryModel>::solve
     scalar& subDeltaT
 ) const
 {
-    deltaT = min(deltaT, subDeltaT);
-
     const label nSpecie = this->nSpecie();
     simpleMatrix<scalar> RR(nSpecie, 0, 0);
 
@@ -84,10 +117,7 @@ void Foam::EulerImplicit<ChemistryModel>::solve
     }
     scalar ha = mixture.Ha(p, T);
 
-    for (label i=0; i<nSpecie; i++)
-    {
-        RR.source()[i] = c[i]/deltaT;
-    }
+    scalar deltaTEst = min(deltaT, subDeltaT);
 
     forAll(this->reactions(), i)
     {
@@ -101,24 +131,54 @@ void Foam::EulerImplicit<ChemistryModel>::solve
         {
             if (omegai < 0.0)
             {
-                corr = 1.0/(1.0 + pr*deltaT);
+                corr = 1.0/(1.0 + pr*deltaTEst);
             }
             else
             {
-                corr = 1.0/(1.0 + pf*deltaT);
+                corr = 1.0/(1.0 + pf*deltaTEst);
             }
         }
 
-        this->updateRRInReactionI(i, pr, pf, corr, lRef, rRef, p, T, RR);
+        updateRRInReactionI(i, pr, pf, corr, lRef, rRef, p, T, RR);
     }
 
+    // Calculate the stable/accurate time-step
+    scalar tMin = GREAT;
 
     for (label i=0; i<nSpecie; i++)
     {
-        RR[i][i] += 1.0/deltaT;
+        scalar d = 0;
+        for (label j=0; j<nSpecie; j++)
+        {
+            d -= RR[i][j]*c[j];
+        }
+
+        if (d < -SMALL)
+        {
+            tMin = min(tMin, -(c[i] + SMALL)/d);
+        }
+        else
+        {
+            d = max(d, SMALL);
+            scalar cm = max(cTot - c[i], 1.0e-5);
+            tMin = min(tMin, cm/d);
+        }
     }
 
+    subDeltaT = cTauChem_*tMin;
+    deltaT = min(deltaT, subDeltaT);
+
+    // Add the diagonal and source contributions from the time-derivative
+    for (label i=0; i<nSpecie; i++)
+    {
+        RR[i][i] += 1.0/deltaT;
+        RR.source()[i] = c[i]/deltaT;
+    }
+
+    // Solve for the new composition
     c = RR.LUsolve();
+
+    // Limit the composition
     for (label i=0; i<nSpecie; i++)
     {
         c[i] = max(0.0, c[i]);
@@ -133,39 +193,14 @@ void Foam::EulerImplicit<ChemistryModel>::solve
     }
     T = mixture.THa(ha, p, T);
 
-    // Estimate the next time step
-    scalar tMin = GREAT;
-    const label nEqns = this->nEqns();
-
+    /*
     for (label i=0; i<nSpecie; i++)
     {
         cTp_[i] = c[i];
     }
     cTp_[nSpecie] = T;
     cTp_[nSpecie+1] = p;
-
-    scalarField dcdt(nEqns, 0.0);
-    this->derivatives(0.0, cTp_, dcdt);
-
-    const scalar sumC = sum(c);
-
-    for (label i=0; i<nSpecie; i++)
-    {
-        scalar d = dcdt[i];
-
-        if (d < -SMALL)
-        {
-            tMin = min(tMin, -(c[i] + SMALL)/d);
-        }
-        else
-        {
-            d = max(d, SMALL);
-            scalar cm = max(sumC - c[i], 1.0e-5);
-            tMin = min(tMin, cm/d);
-        }
-    }
-
-    subDeltaT = cTauChem_*tMin;
+    */
 }
 
 

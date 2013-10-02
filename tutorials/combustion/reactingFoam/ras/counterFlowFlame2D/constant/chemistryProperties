@@ -25,11 +25,6 @@ chemistry           on;
 
 initialChemicalTimeStep 1e-07;
 
-sequentialCoeffs
-{
-    cTauChem        0.05;
-}
-
 EulerImplicitCoeffs
 {
     cTauChem        1;

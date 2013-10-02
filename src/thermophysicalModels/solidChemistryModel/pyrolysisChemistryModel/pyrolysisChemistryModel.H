@@ -176,34 +176,6 @@ public:
         //- Calculates the reaction rates
         virtual void calculate();
 
-        //- Update concentrations in reaction i given dt and reaction rate
-        // omega used by sequential solver
-        virtual void updateConcsInReactionI
-        (
-            const label i,
-            const scalar dt,
-            const scalar omega,
-            const scalar p,
-            const scalar T,
-            scalarField& c
-        ) const;
-
-
-        //- Update matrix RR for reaction i. Used by EulerImplicit
-        // (Not implemented)
-        virtual void updateRRInReactionI
-        (
-            const label i,
-            const scalar pr,
-            const scalar pf,
-            const scalar corr,
-            const label lRef,
-            const label rRef,
-            const scalar p,
-            const scalar T,
-            simpleMatrix<scalar>& RR
-        ) const;
-
 
         // Chemistry model functions
 

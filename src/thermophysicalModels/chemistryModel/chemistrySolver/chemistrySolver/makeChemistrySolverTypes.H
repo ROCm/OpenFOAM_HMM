@@ -31,7 +31,6 @@ License
 #include "chemistryModel.H"
 
 #include "noChemistrySolver.H"
-#include "sequential.H"
 #include "EulerImplicit.H"
 #include "ode.H"
 
@@ -79,13 +78,6 @@ License
         CompChemModel,                                                        \
         Thermo                                                                \
     );                                                                        \
-                                                                              \
-    makeChemistrySolverType                                                   \
-    (                                                                         \
-        sequential,                                                           \
-        CompChemModel,                                                        \
-        Thermo                                                                \
-    );
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

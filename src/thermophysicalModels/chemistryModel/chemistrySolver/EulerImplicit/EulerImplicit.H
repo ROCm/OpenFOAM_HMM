@@ -87,6 +87,19 @@ public:
 
     // Member Functions
 
+    void updateRRInReactionI
+    (
+        const label index,
+        const scalar pr,
+        const scalar pf,
+        const scalar corr,
+        const label lRef,
+        const label rRef,
+        const scalar p,
+        const scalar T,
+        simpleMatrix<scalar>& RR
+    ) const;
+
         //- Update the concentrations and return the chemical time
         virtual void solve
         (

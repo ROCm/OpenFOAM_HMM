@@ -155,70 +155,6 @@ Foam::scalar Foam::chemistryModel<CompType, ThermoType>::omegaI
 
 
 template<class CompType, class ThermoType>
-void Foam::chemistryModel<CompType, ThermoType>::updateConcsInReactionI
-(
-    const label index,
-    const scalar dt,
-    const scalar omeg,
-    const scalar p,
-    const scalar T,
-    scalarField& c
-) const
-{
-     // update species
-    const Reaction<ThermoType>& R = reactions_[index];
-    forAll(R.lhs(), s)
-    {
-        label si = R.lhs()[s].index;
-        scalar sl = R.lhs()[s].stoichCoeff;
-        c[si] -= dt*sl*omeg;
-        c[si] = max(0.0, c[si]);
-    }
-
-    forAll(R.rhs(), s)
-    {
-        label si = R.rhs()[s].index;
-        scalar sr = R.rhs()[s].stoichCoeff;
-        c[si] += dt*sr*omeg;
-        c[si] = max(0.0, c[si]);
-    }
-}
-
-
-template<class CompType, class ThermoType>
-void Foam::chemistryModel<CompType, ThermoType>::updateRRInReactionI
-(
-    const label index,
-    const scalar pr,
-    const scalar pf,
-    const scalar corr,
-    const label lRef,
-    const label rRef,
-    const scalar p,
-    const scalar T,
-    simpleMatrix<scalar>& RR
-) const
-{
-    const Reaction<ThermoType>& R = reactions_[index];
-    forAll(R.lhs(), s)
-    {
-        label si = R.lhs()[s].index;
-        scalar sl = R.lhs()[s].stoichCoeff;
-        RR[si][rRef] -= sl*pr*corr;
-        RR[si][lRef] += sl*pf*corr;
-    }
-
-    forAll(R.rhs(), s)
-    {
-        label si = R.rhs()[s].index;
-        scalar sr = R.rhs()[s].stoichCoeff;
-        RR[si][lRef] -= sr*pf*corr;
-        RR[si][rRef] += sr*pr*corr;
-    }
-}
-
-
-template<class CompType, class ThermoType>
 Foam::scalar Foam::chemistryModel<CompType, ThermoType>::omega
 (
     const Reaction<ThermoType>& R,
@@ -513,7 +449,7 @@ void Foam::chemistryModel<CompType, ThermoType>::jacobian
         }
     }
 
-    // calculate the dcdT elements numerically
+    // Calculate the dcdT elements numerically
     const scalar delta = 1.0e-3;
     const scalarField dcdT0(omega(c2, T - delta, p));
     const scalarField dcdT1(omega(c2, T + delta, p));
@@ -522,7 +458,6 @@ void Foam::chemistryModel<CompType, ThermoType>::jacobian
     {
         dfdc[i][nSpecie()] = 0.5*(dcdT1[i] - dcdT0[i])/delta;
     }
-
 }
 
 
