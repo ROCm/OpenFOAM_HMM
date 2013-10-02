@@ -724,7 +724,7 @@ Foam::labelHashSet Foam::polyBoundaryMesh::patchSet
 
     forAll(patchNames, i)
     {
-         const wordRe& patchName = patchNames[i];
+        const wordRe& patchName = patchNames[i];
 
         // Treat the given patch names as wild-cards and search the set
         // of all patch names for matches
