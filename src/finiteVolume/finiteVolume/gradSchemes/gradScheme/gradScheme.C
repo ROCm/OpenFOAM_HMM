@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -87,25 +87,6 @@ Foam::fv::gradScheme<Type>::~gradScheme()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    template<class Type>
-    inline void cachePrintMessage
-    (
-        const char* message,
-        const word& name,
-        const GeometricField<Type, fvPatchField, volMesh>& vf
-    )
-    {
-        if (solution::debug)
-        {
-            Info<< "Cache: " << message << token::SPACE << name
-                << ", " << vf.name() << " event No. " << vf.eventNo()
-                << endl;
-        }
-    }
-}
-
 template<class Type>
 Foam::tmp
 <
@@ -129,12 +110,12 @@ Foam::fv::gradScheme<Type>::grad
     {
         if (!mesh().objectRegistry::template foundObject<GradFieldType>(name))
         {
-            cachePrintMessage("Calculating and caching", name, vsf);
+            solution::cachePrintMessage("Calculating and caching", name, vsf);
             tmp<GradFieldType> tgGrad = calcGrad(vsf, name);
             regIOobject::store(tgGrad.ptr());
         }
 
-        cachePrintMessage("Retrieving", name, vsf);
+        solution::cachePrintMessage("Retrieving", name, vsf);
         GradFieldType& gGrad = const_cast<GradFieldType&>
         (
             mesh().objectRegistry::template lookupObject<GradFieldType>(name)
@@ -146,14 +127,14 @@ Foam::fv::gradScheme<Type>::grad
         }
         else
         {
-            cachePrintMessage("Deleting", name, vsf);
+            solution::cachePrintMessage("Deleting", name, vsf);
             gGrad.release();
             delete &gGrad;
 
-            cachePrintMessage("Recalculating", name, vsf);
+            solution::cachePrintMessage("Recalculating", name, vsf);
             tmp<GradFieldType> tgGrad = calcGrad(vsf, name);
 
-            cachePrintMessage("Storing", name, vsf);
+            solution::cachePrintMessage("Storing", name, vsf);
             regIOobject::store(tgGrad.ptr());
             GradFieldType& gGrad = const_cast<GradFieldType&>
             (
@@ -180,13 +161,13 @@ Foam::fv::gradScheme<Type>::grad
 
             if (gGrad.ownedByRegistry())
             {
-                cachePrintMessage("Deleting", name, vsf);
+                solution::cachePrintMessage("Deleting", name, vsf);
                 gGrad.release();
                 delete &gGrad;
             }
         }
 
-        cachePrintMessage("Calculating", name, vsf);
+        solution::cachePrintMessage("Calculating", name, vsf);
         return calcGrad(vsf, name);
     }
 }
