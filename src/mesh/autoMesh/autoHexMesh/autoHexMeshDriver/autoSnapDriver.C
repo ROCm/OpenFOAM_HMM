@@ -2371,7 +2371,16 @@ void Foam::autoSnapDriver::doSnap
         // Duplicate points
         if (returnReduce(nDuplicatePoints, sumOp<label>()) > 0)
         {
-            // Collect all points
+            // Collect all points (recount since syncPointList might have
+            // increased set)
+            nDuplicatePoints = 0;
+            forAll(duplicatePoint, pointI)
+            {
+                if (duplicatePoint[pointI])
+                {
+                    nDuplicatePoints++;
+                }
+            }
             labelList candidatePoints(nDuplicatePoints);
             nDuplicatePoints = 0;
             forAll(duplicatePoint, pointI)

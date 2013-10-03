@@ -3323,7 +3323,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     syncTools::swapBoundaryFaceList(mesh_, neiCellZone);
 
     // Get per face whether is it master (of a coupled set of faces)
-    PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh_));
+    const PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh_));
 
 
 
@@ -3404,7 +3404,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
                 if (isMasterFace[meshFaceI])
                 {
                     label n = 1;
-                    if (posOrientation[meshFaceI] == meshFlipMap[meshFaceI])
+                    if
+                    (
+                        bool(posOrientation[meshFaceI])
+                     == meshFlipMap[meshFaceI]
+                    )
                     {
                         n = -1;
                     }
