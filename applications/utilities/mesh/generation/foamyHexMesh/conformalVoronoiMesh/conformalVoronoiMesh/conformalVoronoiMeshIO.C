@@ -962,7 +962,7 @@ void Foam::conformalVoronoiMesh::writeMesh
     (
         mesh,
         boundaryFacesToRemove,
-        orOp<bool>()
+        orEqOp<unsigned int>()
     );
 
     labelList addr(boundaryFacesToRemove.count());
