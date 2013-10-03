@@ -1,0 +1,254 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      reactingCloud1Properties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solution
+{
+    active          false;
+    coupled         yes;
+    transient       yes;
+    cellValueSourceCorrection yes;
+
+    sourceTerms
+    {
+        schemes
+        {
+            rho             explicit 1;
+            U               explicit 1;
+            Yi              explicit 1;
+            hs              explicit 1;
+        }
+    }
+
+    interpolationSchemes
+    {
+        rho             cell;
+        U               cellPoint;
+        mu              cell;
+        T               cell;
+        Cp              cell;
+        p               cell;
+    }
+
+    integrationSchemes
+    {
+        U               Euler;
+        T               analytical;
+    }
+}
+
+constantProperties
+{
+    parcelTypeId    1;
+
+    rhoMin          1e-15;
+    TMin            200;
+    pMin            1000;
+    minParticleMass 1e-15;
+
+    rho0            1000;
+    T0              300;
+    Cp0             4187;
+
+    youngsModulus   1e9;
+    poissonsRatio   0.35;
+
+    epsilon0        1;
+    f0              0.5;
+    Pr              0.7;
+    Tvap            273;
+    Tbp             373;
+
+    constantVolume  false;
+}
+
+subModels
+{
+    particleForces
+    {
+        sphereDrag;
+        gravity;
+    }
+
+    injectionModel none;//coneInjection;
+
+    dispersionModel none;
+
+    patchInteractionModel standardWallInteraction;
+
+    heatTransferModel none;
+
+    compositionModel singlePhaseMixture;
+
+    phaseChangeModel none;
+
+    surfaceFilmModel thermoSurfaceFilm;
+
+    radiation       off;
+
+    coneNozzleInjectionCoeffs
+    {
+        massTotal       massTotal [ 1 0 0 0 0 ] 0.0005;
+        parcelBasisType mass;
+        SOI             0.001;
+        duration        10; //0.005;
+        position        ( 0. 0.0 0.0 );
+        direction       ( 0 -1 0 );
+        parcelsPerSecond 10000;
+        //flowRateProfile  constant 0.01;
+        flowRateProfile  constant 0.01;
+        Umag            constant 50;
+        thetaInner      constant 0;
+        thetaOuter      constant 30;
+
+        parcelPDF
+        {
+            pdfType         RosinRammler;
+            RosinRammlerPDF
+            {
+                minValue        5e-05;
+                maxValue        0.0001;
+                //            d               ( 7.5e-05 );
+                d               7.5e-05;
+                //            n               ( 0.5 );
+                n               0.5;
+            }
+        }
+    }
+
+    coneInjectionCoeffs
+    {
+        SOI             1055.00;//800.000;
+        duration        1000.00;//1800.000;
+        //    positionsFile   "reactingCloud1Positions";
+        //    axesFile        "reactingCloud1Axes";
+        positionAxis
+            (
+             ( (  -2.13360    4.47040     -1.52400)  (    0 -1 0 ) )
+             ( (  -1.52400    4.47040     -1.52400)  (    0 -1 0 ) )
+             ( (  -0.91440    4.47040     -1.52400)  (    0 -1 0 ) )
+             ( (  -0.30480    4.47040     -1.52400)  (    0 -1 0 ) )
+             ( (   0.30480    4.47040     -1.52400)  (    0 -1 0 ) )
+             ( (   0.91440    4.47040     -1.52400)  (    0 -1 0 ) )
+             ( (   1.52400    4.47040     -1.52400)  (    0 -1 0 ) )
+             ( (   2.13360    4.47040     -1.52400)  (    0 -1 0 ) )
+
+             ( (  -2.13360    4.47040     -0.91440)  (    0 -1 0 ) )
+             ( (  -1.52400    4.47040     -0.91440)  (    0 -1 0 ) )
+             ( (  -0.91440    4.47040     -0.91440)  (    0 -1 0 ) )
+             ( (  -0.30480    4.47040     -0.91440)  (    0 -1 0 ) )
+             ( (   0.30480    4.47040     -0.91440)  (    0 -1 0 ) )
+             ( (   0.91440    4.47040     -0.91440)  (    0 -1 0 ) )
+             ( (   1.52400    4.47040     -0.91440)  (    0 -1 0 ) )
+             ( (   2.13360    4.47040     -0.91440)  (    0 -1 0 ) )
+
+             ( (  -2.13360    4.47040     -0.30480)  (    0 -1 0 ) )
+             ( (  -1.52400    4.47040     -0.30480)  (    0 -1 0 ) )
+             ( (  -0.91440    4.47040     -0.30480)  (    0 -1 0 ) )
+             ( (  -0.30480    4.47040     -0.30480)  (    0 -1 0 ) )
+             ( (   0.30480    4.47040     -0.30480)  (    0 -1 0 ) )
+             ( (   0.91440    4.47040     -0.30480)  (    0 -1 0 ) )
+             ( (   1.52400    4.47040     -0.30480)  (    0 -1 0 ) )
+             ( (   2.13360    4.47040     -0.30480)  (    0 -1 0 ) )
+
+             ( (  -2.13360    4.47040      0.30480)  (    0 -1 0 ) )
+             ( (  -1.52400    4.47040      0.30480)  (    0 -1 0 ) )
+             ( (  -0.91440    4.47040      0.30480)  (    0 -1 0 ) )
+             ( (  -0.30480    4.47040      0.30480)  (    0 -1 0 ) )
+             ( (   0.30480    4.47040      0.30480)  (    0 -1 0 ) )
+             ( (   0.91440    4.47040      0.30480)  (    0 -1 0 ) )
+             ( (   1.52400    4.47040      0.30480)  (    0 -1 0 ) )
+             ( (   2.13360    4.47040      0.30480)  (    0 -1 0 ) )
+
+             ( (  -2.13360    4.47040      0.91440)  (    0 -1 0 ) )
+             ( (  -1.52400    4.47040      0.91440)  (    0 -1 0 ) )
+             ( (  -0.91440    4.47040      0.91440)  (    0 -1 0 ) )
+             ( (  -0.30480    4.47040      0.91440)  (    0 -1 0 ) )
+             ( (   0.30480    4.47040      0.91440)  (    0 -1 0 ) )
+             ( (   0.91440    4.47040      0.91440)  (    0 -1 0 ) )
+             ( (   1.52400    4.47040      0.91440)  (    0 -1 0 ) )
+             ( (   2.13360    4.47040      0.91440)  (    0 -1 0 ) )
+
+             ( (  -2.13360    4.47040      1.52400)  (    0 -1 0 ) )
+             ( (  -1.52400    4.47040      1.52400)  (    0 -1 0 ) )
+             ( (  -0.91440    4.47040      1.52400)  (    0 -1 0 ) )
+             ( (  -0.30480    4.47040      1.52400)  (    0 -1 0 ) )
+             ( (   0.30480    4.47040      1.52400)  (    0 -1 0 ) )
+             ( (   0.91440    4.47040      1.52400)  (    0 -1 0 ) )
+             ( (   1.52400    4.47040      1.52400)  (    0 -1 0 ) )
+             ( (   2.13360    4.47040      1.52400)  (    0 -1 0 ) )
+         );
+
+        //massTotal is the total for all injectors
+        massTotal       1211.35; //kg over 1000 seconds (0.1 gpm/ft2)
+        //massTotal       3634.05; //kg over 1000 seconds (0.3 gpm/ft2)
+
+        parcelsPerInjector 30000;
+        parcelsPerSecond 500;
+        parcelBasisType mass;
+        flowRateProfile  constant 0.1;
+        Umag            constant 2.0;
+        thetaInner      constant 5;
+        thetaOuter      constant 120;
+
+        sizeDistribution
+        {
+            type         uniform;
+            uniformDistribution
+            {
+                minValue        0.001;
+                maxValue        0.002;
+                d               ( 7.5e-05 );
+                n               ( 0.5 );
+            }
+        }
+    }
+
+
+    standardWallInteractionCoeffs
+    {
+        type            escape;//stick;//rebound;
+    }
+
+    RanzMarshallCoeffs
+    {
+        // thermal shielding
+        BirdCorrection  true;
+    }
+
+    singlePhaseMixtureCoeffs
+    {
+        phases
+        (
+            liquid
+            {
+                H2O          1;
+            }
+        );
+    }
+
+    thermoSurfaceFilmCoeffs
+    {
+        interactionType splashBai;
+        deltaWet        0.0002;
+        Adry            2630;
+        Awet            1320;
+        Cf              0.6;
+    }
+
+}
+
+// ************************************************************************* //
