@@ -489,8 +489,8 @@ tmp<volScalarField> mixtureKEpsilon<BasicTurbulenceModel>::bubbleG() const
        *sqr(liquid)*liquid.rho()
        *(
             pow3(magUr)
-          + pow(fluid.drag(gas).K(magUr)*gas.d()/liquid.rho(), 3.0/4.0)
-           *pow(magUr, 9.0/4.0)
+          + pow(fluid.drag(gas).K(magUr)*gas.d()/liquid.rho(), 4.0/3.0)
+           *pow(magUr, 5.0/3.0)
         )
        *gas
        /gas.d()
