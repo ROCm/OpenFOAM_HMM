@@ -120,7 +120,7 @@ public:
 
         // Mesh motion
 
-            //- Move points, returns volumes swept by faces in motion
+            //- Move points
             bool movePoints();
 
             //- Update the mesh corresponding to given map

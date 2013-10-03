@@ -2450,8 +2450,8 @@ void Foam::autoLayerDriver::mergePatchFacesUndo
     const dictionary& motionDict
 )
 {
-    // Clip to 45 degrees
-    scalar planarAngle = min(45.0, layerParams.featureAngle());
+    // Clip to 30 degrees
+    scalar planarAngle = min(30.0, layerParams.featureAngle());
     scalar minCos = Foam::cos(degToRad(planarAngle));
 
     scalar concaveCos = Foam::cos(degToRad(layerParams.concaveAngle()));
@@ -2472,13 +2472,30 @@ void Foam::autoLayerDriver::mergePatchFacesUndo
 
     const fvMesh& mesh = meshRefiner_.mesh();
 
+    List<labelPair> couples
+    (
+        meshRefiner_.getDuplicateFaces   // get all baffles
+        (
+            identity(mesh.nFaces()-mesh.nInternalFaces())
+          + mesh.nInternalFaces()
+        )
+    );
+
+    labelList duplicateFace(mesh.nFaces(), -1);
+    forAll(couples, i)
+    {
+        const labelPair& cpl = couples[i];
+        duplicateFace[cpl[0]] = cpl[1];
+        duplicateFace[cpl[1]] = cpl[0];
+    }
+
     label nChanged = meshRefiner_.mergePatchFacesUndo
     (
         minCos,
         concaveCos,
         meshRefiner_.meshedPatches(),
         motionDict,
-        labelList(mesh.nFaces(), -1)
+        duplicateFace
     );
 
     nChanged += meshRefiner_.mergeEdgesUndo(minCos, motionDict);
