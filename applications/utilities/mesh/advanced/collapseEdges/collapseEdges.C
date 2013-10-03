@@ -106,6 +106,19 @@ int main(int argc, char *argv[])
             << abort(FatalError);
     }
 
+
+    // maintain indirectPatchFaces if it is there (default) or force
+    // (if collapseFaceSet option provided)
+    word faceSetName("indirectPatchFaces");
+    IOobject::readOption readFlag = IOobject::READ_IF_PRESENT;
+
+    if (args.optionReadIfPresent("collapseFaceSet", faceSetName))
+    {
+        readFlag = IOobject::MUST_READ;
+    }
+
+
+
     labelIOList pointPriority
     (
         IOobject
@@ -131,10 +144,15 @@ int main(int argc, char *argv[])
         faceSet indirectPatchFaces
         (
             mesh,
-            "indirectPatchFaces",
-            IOobject::MUST_READ,
+            faceSetName,
+            readFlag,
             IOobject::AUTO_WRITE
         );
+        Info<< "Read faceSet " << indirectPatchFaces.name()
+            << " with "
+            << returnReduce(indirectPatchFaces.size(), sumOp<label>())
+            << " faces" << endl;
+
 
         {
             meshFilterPtr.set(new polyMeshFilter(mesh, pointPriority));
@@ -159,15 +177,6 @@ int main(int argc, char *argv[])
 
         if (collapseFaceSet)
         {
-            const word faceSetName(args.optionRead<word>("collapseFaceSet"));
-            faceSet fSet
-            (
-                mesh,
-                faceSetName,
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
-            );
-
             meshFilterPtr.reset(new polyMeshFilter(mesh, pointPriority));
             polyMeshFilter& meshFilter = meshFilterPtr();
 
@@ -175,7 +184,7 @@ int main(int argc, char *argv[])
 
             // Filter faces. Pass in the number of bad faces that are present
             // from the previous edge filtering to use as a stopping criterion.
-            meshFilter.filter(fSet);
+            meshFilter.filter(indirectPatchFaces);
             {
                 polyTopoChange meshMod(newMesh);
 
