@@ -95,6 +95,7 @@ protected:
         //- List of active reacting cells
         List<bool> reactingCells_;
 
+
     // Protected Member Functions
 
         //- Write access to source terms for solids
@@ -224,13 +225,13 @@ public:
                 scalarSquareMatrix& dfdc
             ) const = 0;
 
-            virtual scalar solve
+            virtual void solve
             (
                 scalarField &c,
-                const scalar T,
-                const scalar p,
-                const scalar t0,
-                const scalar dt
+                scalar& T,
+                scalar& p,
+                scalar& deltaT,
+                scalar& subDeltaT
             ) const = 0;
 };
 

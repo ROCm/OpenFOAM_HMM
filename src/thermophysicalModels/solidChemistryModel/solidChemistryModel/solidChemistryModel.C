@@ -193,31 +193,6 @@ Foam::solidChemistryModel<CompType, SolidThermo>::dQ() const
 
 
 template<class CompType, class SolidThermo>
-Foam::scalar Foam::solidChemistryModel<CompType, SolidThermo>::solve
-(
-    scalarField &c,
-    const scalar T,
-    const scalar p,
-    const scalar t0,
-    const scalar dt
-) const
-{
-    notImplemented
-    (
-        "solidChemistryModel::solve"
-        "("
-            "scalarField&, "
-            "const scalar, "
-            "const scalar, "
-            "const scalar, "
-            "const scalar"
-        ") const"
-    );
-    return (0);
-}
-
-
-template<class CompType, class SolidThermo>
 void Foam::solidChemistryModel<CompType, SolidThermo>::setCellReacting
 (
     const label cellI,

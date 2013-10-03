@@ -256,8 +256,6 @@ Foam::pyrolysisChemistryModel<CompType, SolidThermo, GasThermo>::omega
 
     scalar kf = R.kf(p, T, c1);
 
-    //const scalar exponent = R.nReact();
-
     const label Nl = R.lhs().size();
 
     for (label s=0; s<Nl; s++)
@@ -549,6 +547,13 @@ Foam::pyrolysisChemistryModel<CompType, SolidThermo, GasThermo>::solve
         RRg_[i].field() = 0.0;
     }
 
+    const scalarField& T = this->solidThermo().T();
+    const scalarField& p = this->solidThermo().p();
+
+    scalarField c(nSpecie_, 0.0);
+    scalarField c0(nSpecie_, 0.0);
+    scalarField dc(nSpecie_, 0.0);
+    scalarField delta(this->mesh().V());
 
     forAll(rho, celli)
     {
@@ -557,75 +562,38 @@ Foam::pyrolysisChemistryModel<CompType, SolidThermo, GasThermo>::solve
             cellCounter_ = celli;
 
             scalar rhoi = rho[celli];
-            scalar Ti = this->solidThermo().T()[celli];
-            scalar pi = this->solidThermo().p()[celli];
-
-            scalarField c(nSpecie_, 0.0);
-            scalarField c0(nSpecie_, 0.0);
-            scalarField dc(nSpecie_, 0.0);
-
-            scalar delta = this->mesh().V()[celli];
+            scalar pi = p[celli];
+            scalar Ti = T[celli];
 
             for (label i=0; i<this->nSolids_; i++)
             {
-                c[i] = rhoi*this->Ys_[i][celli]*delta;
+                c[i] = rhoi*this->Ys_[i][celli]*delta[celli];
             }
 
             c0 = c;
 
-            scalar t = 0;
-            scalar tauC = this->deltaTChem_[celli];
-            scalar dt = min(deltaT, tauC);
+            // Initialise time progress
             scalar timeLeft = deltaT;
 
             // calculate the chemical source terms
             while (timeLeft > SMALL)
             {
-                tauC = this->solve(c, Ti, pi, t, dt);
-                t += dt;
-
-                // update the temperature
-                scalar cTot = 0.0;
-
-                //Total mass concentration
-                for (label i=0; i<this->nSolids_; i++)
-                {
-                    cTot += c[i];
-                }
-
-                scalar newCp = 0.0;
-                scalar newhi = 0.0;
-                scalarList dcdt = (c - c0)/dt;
-
-                for (label i=0; i<this->nSolids_; i++)
-                {
-                    scalar dYi = dcdt[i]/cTot;
-                    scalar Yi = c[i]/cTot;
-                    newCp += Yi*this->solidThermo_[i].Cp(pi, Ti);
-                    newhi -= dYi*this->solidThermo_[i].Hc();
-                }
-
-                scalar dTi = (newhi/newCp)*dt;
-
-                Ti += dTi;
-
+                scalar dt = timeLeft;
+                this->solve(c, Ti, pi, dt, this->deltaTChem_[celli]);
                 timeLeft -= dt;
-                this->deltaTChem_[celli] = tauC;
-                dt = min(timeLeft, tauC);
-                dt = max(dt, SMALL);
             }
 
-            deltaTMin = min(tauC, deltaTMin);
+            deltaTMin = min(this->deltaTChem_[celli], deltaTMin);
             dc = c - c0;
 
             forAll(this->RRs_, i)
             {
-                this->RRs_[i][celli] = dc[i]/(deltaT*delta);
+                this->RRs_[i][celli] = dc[i]/(deltaT*delta[celli]);
             }
 
             forAll(RRg_, i)
             {
-                RRg_[i][celli] = dc[this->nSolids_ + i]/(deltaT*delta);
+                RRg_[i][celli] = dc[this->nSolids_ + i]/(deltaT*delta[celli]);
             }
 
             // Update Ys0_
@@ -682,14 +650,13 @@ Foam::pyrolysisChemistryModel<CompType, SolidThermo, GasThermo>::gasHs
 
 
 template<class CompType, class SolidThermo, class GasThermo>
-Foam::scalar
-Foam::pyrolysisChemistryModel<CompType, SolidThermo, GasThermo>::solve
+void Foam::pyrolysisChemistryModel<CompType, SolidThermo, GasThermo>::solve
 (
     scalarField &c,
-    const scalar T,
-    const scalar p,
-    const scalar t0,
-    const scalar dt
+    scalar& T,
+    scalar& p,
+    scalar& deltaT,
+    scalar& subDeltaT
 ) const
 {
     notImplemented
@@ -697,12 +664,11 @@ Foam::pyrolysisChemistryModel<CompType, SolidThermo, GasThermo>::solve
         "pyrolysisChemistryModel::solve"
         "("
             "scalarField&, "
-            "const scalar, "
-            "const scalar, "
-            "const scalar, "
-            "const scalar"
+            "scalar&, "
+            "scalar&, "
+            "scalar&, "
+            "scalar&  "
         ") const"
     );
-    return (0);
 }
 // ************************************************************************* //
