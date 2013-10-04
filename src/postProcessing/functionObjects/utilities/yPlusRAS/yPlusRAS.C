@@ -183,7 +183,7 @@ Foam::yPlusRAS::yPlusRAS
     name_(name),
     obr_(obr),
     active_(true),
-    log_(false),
+    log_(true),
     phiName_("phi")
 {
     // Check if the available mesh is an fvMesh, otherwise deactivate
@@ -199,8 +199,32 @@ Foam::yPlusRAS::yPlusRAS
                 "const dictionary&, "
                 "const bool"
             ")"
-        )   << "No fvMesh available, deactivating." << nl
+        )   << "No fvMesh available, deactivating " << name_ << nl
             << endl;
+    }
+
+    if (active_)
+    {
+        const fvMesh& mesh = refCast<const fvMesh>(obr_);
+
+        volScalarField* yPlusRASPtr
+        (
+            new volScalarField
+            (
+                IOobject
+                (
+                    type(),
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensionedScalar("0", dimless, 0.0)
+            )
+        );
+
+        mesh.objectRegistry::store(yPlusRASPtr);
     }
 }
 
@@ -217,7 +241,7 @@ void Foam::yPlusRAS::read(const dictionary& dict)
 {
     if (active_)
     {
-        log_ = dict.lookupOrDefault<Switch>("log", false);
+        log_ = dict.lookupOrDefault<Switch>("log", true);
         phiName_ = dict.lookupOrDefault<word>("phiName", "phi");
     }
 }
@@ -252,18 +276,11 @@ void Foam::yPlusRAS::write()
 
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
 
-        volScalarField yPlusRAS
-        (
-            IOobject
+        volScalarField& yPlusRAS =
+            const_cast<volScalarField&>
             (
-                "yPlusRAS",
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ
-            ),
-            mesh,
-            dimensionedScalar("0", dimless, 0.0)
-        );
+                mesh.lookupObject<volScalarField>(type())
+            );
 
         if (log_)
         {
@@ -281,8 +298,7 @@ void Foam::yPlusRAS::write()
 
         if (log_)
         {
-            Info<< "    writing field " << yPlusRAS.name() << nl
-                << endl;
+            Info<< "    writing field " << yPlusRAS.name() << nl << endl;
         }
 
         yPlusRAS.write();

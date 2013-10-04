@@ -189,7 +189,7 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
 
     UIndirectList<scalar>(Sp, cells_) = injectionRate_[fieldI].second()/VDash_;
 
-    eqn += Su + fvm::Sp(Sp, psi);
+    eqn += Su + fvm::SuSp(Sp, psi);
 }
 
 

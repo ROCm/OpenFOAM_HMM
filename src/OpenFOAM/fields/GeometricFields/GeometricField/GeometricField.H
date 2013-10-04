@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -487,6 +487,9 @@ public:
         //  by returning the field name + "Final"
         //  otherwise the standard parameters by returning the field name
         word select(bool final) const;
+
+        //- Helper function to write the min and max to an Ostream
+        void writeMinMax(Ostream& os) const;
 
 
     // Member function *this operators
