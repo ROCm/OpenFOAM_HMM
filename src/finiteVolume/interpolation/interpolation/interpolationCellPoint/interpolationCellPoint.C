@@ -41,7 +41,7 @@ Foam::interpolationCellPoint<Type>::interpolationCellPoint
         (
             psi,
             "volPointInterpolate(" + psi.name() + ')',
-            true
+            true        // use cache
         )
     )
 {
