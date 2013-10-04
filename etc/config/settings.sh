@@ -247,10 +247,10 @@ OpenFOAM | ThirdParty)
         mpc_version=mpc-0.9
         ;;
     Gcc48 | Gcc48++0x)
-        gcc_version=gcc-4.8.0
-        gmp_version=gmp-5.0.4
-        mpfr_version=mpfr-3.1.0
-        mpc_version=mpc-0.9
+        gcc_version=gcc-4.8.1
+        gmp_version=gmp-5.1.2
+        mpfr_version=mpfr-3.1.2
+        mpc_version=mpc-1.0.1
         ;;
     Gcc47 | Gcc47++0x)
         gcc_version=gcc-4.7.2
@@ -386,10 +386,12 @@ then
     if [ -d "$BOOST_ARCH_PATH" ]
     then
         _foamAddLib $BOOST_ARCH_PATH/lib
+        _foamAddLib $BOOST_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH
     else
         unset BOOST_ARCH_PATH
     fi
     _foamAddLib $CGAL_ARCH_PATH/lib
+    _foamAddLib $CGAL_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH
 else
     unset BOOST_ARCH_PATH CGAL_ARCH_PATH MPFR_ARCH_PATH GMP_ARCH_PATH
 fi
@@ -418,7 +420,7 @@ SYSTEMOPENMPI)
     ;;
 
 OPENMPI)
-    export FOAM_MPI=openmpi-1.6.3
+    export FOAM_MPI=openmpi-1.6.5
     # optional configuration tweaks:
     _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config/openmpi.sh`
 

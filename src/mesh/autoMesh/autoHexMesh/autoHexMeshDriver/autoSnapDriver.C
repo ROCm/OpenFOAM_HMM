@@ -2225,6 +2225,42 @@ void Foam::autoSnapDriver::doSnap
     // Get the labels of added patches.
     labelList adaptPatchIDs(meshRefiner_.meshedPatches());
 
+
+    // faceZone handling
+    // ~~~~~~~~~~~~~~~~~
+    //
+    // We convert all faceZones into baffles during snapping so we can use
+    // a standard mesh motion (except for the mesh checking which for baffles
+    // created from internal faces should check across the baffles). The state
+    // is stored in two variables:
+    //      baffles : pairs of boundary faces
+    //      duplicateFace : from mesh face to its baffle colleague (or -1 for
+    //                      normal faces)
+    // There are three types of faceZones according to the faceType property:
+    //
+    // internal
+    // --------
+    // - baffles: contains all faces on faceZone so
+    //      - mesh checks check across baffles
+    //      - they get back merged into internal faces
+    // - duplicateFace: from face to duplicate face. Contains
+    //   all faces on faceZone to prevents merging patch faces.
+    //
+    // baffle
+    // ------
+    // - baffles: contains no faces on faceZone since need not be merged/checked
+    //   across
+    // - duplicateFace: contains all faces on faceZone to prevent
+    //   merging patch faces.
+    //
+    // boundary
+    // --------
+    // - baffles: contains no faces on faceZone since need not be merged/checked
+    //   across
+    // - duplicateFace: contains no faces on faceZone since both sides can
+    //   merge faces independently.
+
+
     // Create baffles (pairs of faces that share the same points)
     // Baffles stored as owner and neighbour face that have been created.
     List<labelPair> baffles;
@@ -2236,7 +2272,7 @@ void Foam::autoSnapDriver::doSnap
     );
 
     // Maintain map from face to baffle face (-1 for non-baffle faces). Used
-    // later on to prevent patchface merging.
+    // later on to prevent patchface merging if faceType=baffle
     labelList duplicateFace(mesh.nFaces(), -1);
 
     forAll(baffles, i)
@@ -2256,24 +2292,27 @@ void Foam::autoSnapDriver::doSnap
         // Determine which
         //  - faces to remove from list of baffles (so not merge)
         //  - points to duplicate
+
+        // Per face if is on faceType 'baffle' or 'boundary'
         labelList filterFace(mesh.nFaces(), -1);
         label nFilterFaces = 0;
+        // Per point whether it need to be duplicated
         PackedBoolList duplicatePoint(mesh.nPoints());
         label nDuplicatePoints = 0;
         forAll(surfZones, surfI)
         {
             const word& faceZoneName = surfZones[surfI].faceZoneName();
 
-            const surfaceZonesInfo::faceZoneType& faceType =
-                surfZones[surfI].faceType();
-
-            if
-            (
-                faceType == surfaceZonesInfo::BAFFLE
-             || faceType == surfaceZonesInfo::BOUNDARY
-            )
+            if (faceZoneName.size())
             {
-                if (faceZoneName.size())
+                const surfaceZonesInfo::faceZoneType& faceType =
+                    surfZones[surfI].faceType();
+
+                if
+                (
+                    faceType == surfaceZonesInfo::BAFFLE
+                 || faceType == surfaceZonesInfo::BOUNDARY
+                )
                 {
                     // Filter out all faces for this zone.
                     label zoneI = fZones.findZoneID(faceZoneName);
@@ -2290,6 +2329,10 @@ void Foam::autoSnapDriver::doSnap
                         forAll(fZone, i)
                         {
                             label faceI = fZone[i];
+
+                            // Allow combining patch faces across this face
+                            duplicateFace[faceI] = -1;
+
                             const face& f = mesh.faces()[faceI];
                             forAll(f, fp)
                             {
@@ -2312,11 +2355,32 @@ void Foam::autoSnapDriver::doSnap
             }
         }
 
+        // Duplicate points only if all points agree
+        syncTools::syncPointList
+        (
+            mesh,
+            duplicatePoint,
+            andEqOp<unsigned int>(),    // combine op
+            0u                          // null value
+        );
+        // Mark as duplicate (avoids combining patch faces) if one or both
+        syncTools::syncFaceList(mesh, duplicateFace, maxEqOp<label>());
+        // Mark as resulting from baffle/boundary face zone only if both agree
+        syncTools::syncFaceList(mesh, filterFace, minEqOp<label>());
 
         // Duplicate points
         if (returnReduce(nDuplicatePoints, sumOp<label>()) > 0)
         {
-            // Collect all points
+            // Collect all points (recount since syncPointList might have
+            // increased set)
+            nDuplicatePoints = 0;
+            forAll(duplicatePoint, pointI)
+            {
+                if (duplicatePoint[pointI])
+                {
+                    nDuplicatePoints++;
+                }
+            }
             labelList candidatePoints(nDuplicatePoints);
             nDuplicatePoints = 0;
             forAll(duplicatePoint, pointI)
@@ -2334,20 +2398,17 @@ void Foam::autoSnapDriver::doSnap
                 regionSide
             );
             meshRefinement::updateList(mapPtr().faceMap(), -1, filterFace);
+            meshRefinement::updateList(mapPtr().faceMap(), -1, duplicateFace);
 
             // Update baffles and baffle-to-baffle addressing
 
             const labelList& reverseFaceMap = mapPtr().reverseFaceMap();
-            duplicateFace.setSize(mesh.nFaces());
-            duplicateFace = -1;
 
             forAll(baffles, i)
             {
                 labelPair& baffle = baffles[i];
                 baffle.first() = reverseFaceMap[baffle.first()];
                 baffle.second() = reverseFaceMap[baffle.second()];
-                duplicateFace[baffle.first()] = baffle.second();
-                duplicateFace[baffle.second()] = baffle.first();
             }
 
             if (debug&meshRefinement::MESH)
@@ -2593,7 +2654,7 @@ void Foam::autoSnapDriver::doSnap
         }
     }
 
-    // Merge any introduced baffles.
+    // Merge any introduced baffles (from faceZones of faceType 'internal')
     {
         autoPtr<mapPolyMesh> mapPtr = mergeZoneBaffles(baffles);
 
@@ -2610,7 +2671,15 @@ void Foam::autoSnapDriver::doSnap
     }
 
     // Repatch faces according to nearest. Do not repatch baffle faces.
-    repatchToSurface(snapParams, adaptPatchIDs, duplicateFace);
+    {
+        autoPtr<mapPolyMesh> mapPtr = repatchToSurface
+        (
+            snapParams,
+            adaptPatchIDs,
+            duplicateFace
+        );
+        meshRefinement::updateList(mapPtr().faceMap(), -1, duplicateFace);
+    }
 
     // Repatching might have caused faces to be on same patch and hence
     // mergeable so try again to merge coplanar faces. Do not merge baffle
@@ -2624,11 +2693,7 @@ void Foam::autoSnapDriver::doSnap
         duplicateFace   // faces not to merge
     );
 
-    nChanged += meshRefiner_.mergeEdgesUndo
-    (
-        featureCos,
-        motionDict
-    );
+    nChanged += meshRefiner_.mergeEdgesUndo(featureCos, motionDict);
 
     if (nChanged > 0 && debug & meshRefinement::MESH)
     {

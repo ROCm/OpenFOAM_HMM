@@ -38,6 +38,8 @@ SourceFiles
 #ifndef PaSR_H
 #define PaSR_H
 
+#include "laminar.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -52,7 +54,7 @@ namespace combustionModels
 template<class Type>
 class PaSR
 :
-    public Type
+    public laminar<Type>
 {
     // Private data
 
@@ -65,14 +67,8 @@ class PaSR
         //- Mixing parameter
         volScalarField kappa_;
 
-        //- Use reaction rate
-        bool useReactionRate_;
-
 
     // Private Member Functions
-
-        //- Return the chemical time scale
-        tmp<volScalarField> tc() const;
 
         //- Disallow copy construct
         PaSR(const PaSR&);

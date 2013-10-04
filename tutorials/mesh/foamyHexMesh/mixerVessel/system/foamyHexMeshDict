@@ -24,6 +24,7 @@ geometry
 
 initialPoints
 {
+    //initialPointsMethod         pointFile;
     initialPointsMethod         autoDensity;
 
     autoDensityCoeffs
@@ -33,217 +34,51 @@ initialPoints
         sampleResolution        5;
         surfaceSampleResolution 5;
     }
+
+    pointFileCoeffs
+    {
+        insideOutsideCheck off;
+        randomiseInitialGrid off;
+        randomPerturbationCoeff 1e-3;
+        pointFile "0/internalDelaunayVertices";
+    }
 }
 
 
 surfaceConformation
 {
-    locationInMesh                  (200 0 10);
+    locationInMesh                      (0 0.1 1.0);
 
-    geometryToConformTo
+    #include "meshDict.conformationSurfaces"
+
+    featurePointExclusionDistanceCoeff  0.65;
+    featureEdgeExclusionDistanceCoeff   0.5;
+    maxSurfaceProtrusionCoeff           0.1;
+
+    conformationControls
     {
-        spargerInlet
-        {
-            featureMethod           extendedFeatureEdgeMesh;
-            extendedFeatureEdgeMesh "spargerInlet.extendedFeatureEdgeMesh";
-        }
-
-        spargerShaft
-        {
-            featureMethod           none;
-        }
-
-        vessel
-        {
-            featureMethod           extendedFeatureEdgeMesh;
-            extendedFeatureEdgeMesh "vessel.extendedFeatureEdgeMesh";
-            regions
-            {
-                patch1  {}
-                patch2  {}
-                patch3  {}
-            }
-        }
-
-        shaftRotating
-        {
-            featureMethod           extendedFeatureEdgeMesh;
-            extendedFeatureEdgeMesh "shaftRotating.extendedFeatureEdgeMesh";
-        }
-
-        shaftStatic
-        {
-            featureMethod           none;
-        }
-
-        stirrer
-        {
-            featureMethod           extendedFeatureEdgeMesh;
-            extendedFeatureEdgeMesh "stirrer.extendedFeatureEdgeMesh";
-        }
-    }
-
-    additionalFeatures
-    {
-        spargerShaft_spargerInlet_intersection
-        {
-            featureMethod           extendedFeatureEdgeMesh;
-            extendedFeatureEdgeMesh "spargerShaft_spargerInlet_intersection.extendedFeatureEdgeMesh";
-        }
-
-        vessel_shaftStatic_intersection
-        {
-            featureMethod           extendedFeatureEdgeMesh;
-            extendedFeatureEdgeMesh "vessel_shaftStatic_intersection.extendedFeatureEdgeMesh";
-        }
-
-        vessel_spargerShaft_intersection
-        {
-            featureMethod           extendedFeatureEdgeMesh;
-            extendedFeatureEdgeMesh "vessel_spargerShaft_intersection.extendedFeatureEdgeMesh";
-        }
-
-        stirrer_shaftRotating_intersection
-        {
-            featureMethod           extendedFeatureEdgeMesh;
-            extendedFeatureEdgeMesh "stirrer_shaftRotating_intersection.extendedFeatureEdgeMesh";
-        }
+        edgeSearchDistCoeff             5;
+        surfacePtReplaceDistCoeff       0.5;
+        surfacePtExclusionDistanceCoeff 0.5;
+        maxIterations                   15;
+        iterationToInitialHitRatioLimit 0.0001;
     }
 }
 
 
 motionControl
 {
-    defaultCellSize                 10;
+    defaultCellSize             6e-3;
 
-    minimumCellSizeCoeff            0.1;
+    minimumCellSizeCoeff        0.1;
 
-    maxRefinementIterations         0;
+    maxRefinementIterations     1;
 
-    maxSmoothingIterations          100;
+    maxSmoothingIterations      100;
 
     shapeControlFunctions
     {
-        vessel
-        {
-            type                        searchableSurfaceControl;
-            priority                    1;
-            mode                        inside;
-            forceInitialPointInsertion  off;
-
-            surfaceCellSizeFunction     uniformValue;
-            uniformValueCoeffs
-            {
-                surfaceCellSizeCoeff    1;
-            }
-
-            cellSizeFunction            uniform;
-            uniformCoeffs{}
-
-            regions
-            {
-                patch1
-                {
-                    surfaceCellSizeFunction     uniformValue;
-                    uniformValueCoeffs
-                    {
-                        surfaceCellSizeCoeff    1;
-                    }
-
-                    cellSizeFunction            uniform;
-                    uniformCoeffs{}
-                }
-
-                patch2
-                {
-                    priority                    2;
-                    surfaceCellSizeFunction     uniformValue;
-                    uniformValueCoeffs
-                    {
-                        surfaceCellSizeCoeff    0.5;
-                    }
-
-                    cellSizeFunction            uniformDistance;
-                    uniformDistanceCoeffs
-                    {
-                        distanceCoeff           5;
-                    }
-                }
-
-                patch3
-                {
-                    priority                    2;
-                    surfaceCellSizeFunction     uniformValue;
-                    uniformValueCoeffs
-                    {
-                        surfaceCellSizeCoeff    0.5;
-                    }
-
-                    cellSizeFunction            uniformDistance;
-                    uniformDistanceCoeffs
-                    {
-                        distanceCoeff           2;
-                    }
-                }
-            }
-        }
-
-        shaftRotating
-        {
-            type                        searchableSurfaceControl;
-            priority                    2;
-            mode                        inside;
-            forceInitialPointInsertion  off;
-
-            surfaceCellSizeFunction     uniformValue;
-            uniformValueCoeffs
-            {
-                surfaceCellSizeCoeff    0.25;
-            }
-
-            cellSizeFunction            linearDistance;
-            linearDistanceCoeffs
-            {
-                distanceCellSizeCoeff   1;
-                distanceCoeff           4;
-            }
-        }
-
-        shaftStatic
-        {
-            ${shaftRotating};
-        }
-
-        stirrer
-        {
-            ${shaftRotating};
-        }
-
-        spargerInlet
-        {
-            type                        searchableSurfaceControl;
-            priority                    2;
-            mode                        inside;
-            forceInitialPointInsertion  off;
-
-            surfaceCellSizeFunction     uniformValue;
-            uniformValueCoeffs
-            {
-                surfaceCellSizeCoeff    0.25;
-            }
-
-            cellSizeFunction            linearDistance;
-            linearDistanceCoeffs
-            {
-                distanceCellSizeCoeff   1;
-                distanceCoeff           4;
-            }
-        }
-
-        spargerShaft
-        {
-            ${spargerInlet}
-        }
+        #include "meshDict.cellShapeControl"
     }
 
     objOutput                   no;
@@ -263,15 +98,11 @@ backgroundMeshDecomposition
 
 polyMeshFiltering
 {
-    writeTetDualMesh    false;
-    filterEdges         on;
-    filterFaces         off;
-}
-
-
-meshQualityControls
-{
-    #include "meshQualityDict"
+    writeBackgroundMeshDecomposition    true;
+    writeCellShapeControlMesh           true;
+    writeTetDualMesh                    false;
+    filterEdges                         on;
+    filterFaces                         off;
 }
 
 

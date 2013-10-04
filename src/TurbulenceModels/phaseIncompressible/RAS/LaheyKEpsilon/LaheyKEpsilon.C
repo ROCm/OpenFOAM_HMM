@@ -87,7 +87,7 @@ LaheyKEpsilon<BasicTurbulenceModel>::LaheyKEpsilon
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "Cp",
+            "C3",
             this->coeffDict_,
             this->C2_.value()
         )
@@ -195,8 +195,8 @@ tmp<volScalarField> LaheyKEpsilon<BasicTurbulenceModel>::bubbleG() const
         Cp_
        *(
             pow3(magUr)
-          + pow(fluid.drag(gas).K(magUr)*gas.d()/liquid.rho(), 3.0/4.0)
-           *pow(magUr, 9.0/4.0)
+          + pow(fluid.drag(gas).K(magUr)*gas.d()/liquid.rho(), 4.0/3.0)
+           *pow(magUr, 5.0/3.0)
         )
        *gas
        /gas.d()

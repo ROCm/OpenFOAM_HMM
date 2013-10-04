@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -112,6 +112,15 @@ public:
             //- Return true if the given field should be cached
             bool cache(const word& name) const;
 
+            //- Helper for printing cache message
+            template<class FieldType>
+            static void cachePrintMessage
+            (
+                const char* message,
+                const word& name,
+                const FieldType& vf
+            );
+
             //- Return true if the relaxation factor is given for the field
             bool relaxField(const word& name) const;
 
@@ -145,6 +154,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "solutionTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -176,6 +176,9 @@ public:
         //- Does the Delaunay cell have a far point
         inline bool hasFarPoint() const;
 
+        //- Does the Delaunay cell have a referred point
+        inline bool hasReferredPoint() const;
+
         //- Does the Delaunay cell have a feature point
         inline bool hasFeaturePoint() const;
 
@@ -189,6 +192,8 @@ public:
 
         //- Does the Dual vertex form part of a processor patch
         inline bool parallelDualVertex() const;
+
+        inline Foam::label vertexLowestProc() const;
 
         //- Using the globalIndex object, return a list of four (sorted) global
         //  Delaunay vertex indices that uniquely identify this tet in parallel
@@ -215,6 +220,10 @@ public:
         //- A dual vertex on the boundary will result from a Delaunay cell with
         //  least one Delaunay vertex outside and at least one inside
         inline bool boundaryDualVertex() const;
+
+        inline bool baffleSurfaceDualVertex() const;
+
+        inline bool baffleEdgeDualVertex() const;
 
         //- A dual vertex on a feature edge will result from this Delaunay cell
         inline bool featureEdgeDualVertex() const;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -2011,8 +2011,9 @@ Foam::hexRef8::hexRef8(const polyMesh& mesh, const bool readHistory)
         FatalErrorIn
         (
             "hexRef8::hexRef8(const polyMesh&)"
-        )   << "History enabled but number of visible cells in it "
-            << history_.visibleCells().size()
+        )   << "History enabled but number of visible cells "
+            << history_.visibleCells().size() << " in "
+            << history_.objectPath()
             << " is not equal to the number of cells in the mesh "
             << mesh_.nCells()
             << abort(FatalError);
@@ -2029,6 +2030,8 @@ Foam::hexRef8::hexRef8(const polyMesh& mesh, const bool readHistory)
             "hexRef8::hexRef8(const polyMesh&)"
         )   << "Restarted from inconsistent cellLevel or pointLevel files."
             << endl
+            << "cellLevel file " << cellLevel_.objectPath() << endl
+            << "pointLevel file " << pointLevel_.objectPath() << endl
             << "Number of cells in mesh:" << mesh_.nCells()
             << " does not equal size of cellLevel:" << cellLevel_.size() << endl
             << "Number of points in mesh:" << mesh_.nPoints()

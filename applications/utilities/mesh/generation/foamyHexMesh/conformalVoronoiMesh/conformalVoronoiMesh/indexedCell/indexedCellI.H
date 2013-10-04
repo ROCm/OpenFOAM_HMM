@@ -190,6 +190,19 @@ inline bool CGAL::indexedCell<Gt, Cb>::hasFarPoint() const
 
 
 template<class Gt, class Cb>
+inline bool CGAL::indexedCell<Gt, Cb>::hasReferredPoint() const
+{
+    return
+    (
+        this->vertex(0)->referred()
+     || this->vertex(1)->referred()
+     || this->vertex(2)->referred()
+     || this->vertex(3)->referred()
+    );
+}
+
+
+template<class Gt, class Cb>
 inline bool CGAL::indexedCell<Gt, Cb>::hasFeaturePoint() const
 {
     return
@@ -275,6 +288,23 @@ inline bool CGAL::indexedCell<Gt, Cb>::parallelDualVertex() const
          || this->vertex(3)->real()
         )
     );
+}
+
+
+template<class Gt, class Cb>
+inline Foam::label CGAL::indexedCell<Gt, Cb>::vertexLowestProc() const
+{
+    Foam::label lowestProc = -1;
+
+    for (int i = 0; i < 4; ++i)
+    {
+        if (this->vertex(i)->referred())
+        {
+            lowestProc = min(lowestProc, this->vertex(i)->procIndex());
+        }
+    }
+
+    return lowestProc;
 }
 
 
@@ -372,6 +402,14 @@ inline bool CGAL::indexedCell<Gt, Cb>::anyInternalOrBoundaryDualVertex() const
 template<class Gt, class Cb>
 inline bool CGAL::indexedCell<Gt, Cb>::boundaryDualVertex() const
 {
+//    return
+//    (
+//        this->vertex(0)->boundaryPoint()
+//     && this->vertex(1)->boundaryPoint()
+//     && this->vertex(2)->boundaryPoint()
+//     && this->vertex(3)->boundaryPoint()
+//    );
+
     return
     (
         (
@@ -387,6 +425,62 @@ inline bool CGAL::indexedCell<Gt, Cb>::boundaryDualVertex() const
         || this->vertex(3)->externalBoundaryPoint()
         )
     );
+
+//    Foam::label nBoundaryPoints = 0;
+//
+//    for (Foam::label i = 0; i < 4; ++i)
+//    {
+//        Vertex_handle v = this->vertex(i);
+//
+//        if (v->boundaryPoint())
+//        {
+//            nBoundaryPoints++;
+//        }
+//    }
+//
+//    return (nBoundaryPoints > 1);
+}
+
+
+template<class Gt, class Cb>
+inline bool CGAL::indexedCell<Gt, Cb>::baffleSurfaceDualVertex() const
+{
+    return
+    (
+        (
+           this->vertex(0)->internalBaffleSurfacePoint()
+        || this->vertex(1)->internalBaffleSurfacePoint()
+        || this->vertex(2)->internalBaffleSurfacePoint()
+        || this->vertex(3)->internalBaffleSurfacePoint()
+        )
+     && (
+           this->vertex(0)->externalBaffleSurfacePoint()
+        || this->vertex(1)->externalBaffleSurfacePoint()
+        || this->vertex(2)->externalBaffleSurfacePoint()
+        || this->vertex(3)->externalBaffleSurfacePoint()
+        )
+    );
+}
+
+
+template<class Gt, class Cb>
+inline bool CGAL::indexedCell<Gt, Cb>::baffleEdgeDualVertex() const
+{
+    return
+    (
+        (
+           this->vertex(0)->internalBaffleEdgePoint()
+        || this->vertex(1)->internalBaffleEdgePoint()
+        || this->vertex(2)->internalBaffleEdgePoint()
+        || this->vertex(3)->internalBaffleEdgePoint()
+        )
+     && (
+           this->vertex(0)->externalBaffleEdgePoint()
+        || this->vertex(1)->externalBaffleEdgePoint()
+        || this->vertex(2)->externalBaffleEdgePoint()
+        || this->vertex(3)->externalBaffleEdgePoint()
+        )
+    );
 }
 
 
@@ -400,6 +494,31 @@ inline bool CGAL::indexedCell<Gt, Cb>::featureEdgeDualVertex() const
      && this->vertex(2)->featureEdgePoint()
      && this->vertex(3)->featureEdgePoint()
     );
+//        (
+//            this->vertex(0)->featureEdgePoint()
+//         || this->vertex(1)->featureEdgePoint()
+//         || this->vertex(2)->featureEdgePoint()
+//         || this->vertex(3)->featureEdgePoint()
+//        )
+//     && (
+//            (
+//                this->vertex(0)->featureEdgePoint()
+//             || this->vertex(0)->featurePoint()
+//            )
+//         && (
+//                this->vertex(1)->featureEdgePoint()
+//             || this->vertex(1)->featurePoint()
+//            )
+//         && (
+//                this->vertex(2)->featureEdgePoint()
+//             || this->vertex(2)->featurePoint()
+//            )
+//         && (
+//                this->vertex(3)->featureEdgePoint()
+//             || this->vertex(3)->featurePoint()
+//            )
+//        )
+//    );
 }
 
 

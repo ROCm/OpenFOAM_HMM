@@ -21,9 +21,8 @@ vessel.stl
 
     regions
     {
-        patch0 {name vessel_wall;}
-        patch1 {name vessel_outletPipe;}
-        patch2 {name vessel_outlet;}
+        outlet {name outlet;}
+        vessel {name vessel;}
     }
 }
 
@@ -32,6 +31,19 @@ spargerInlet.stl
 {
     name spargerInlet;
     type triSurfaceMesh;
+
+    regions
+    {
+        gasInlet
+        {
+            name gasInlet;
+        }
+
+        sparger
+        {
+            name sparger;
+        }
+    }
 }
 
 
@@ -39,6 +51,14 @@ spargerShaft.stl
 {
     name spargerShaft;
     type triSurfaceMesh;
+
+    regions
+    {
+        sparger
+        {
+            name spargerShaft;
+        }
+    }
 }
 
 
@@ -46,13 +66,44 @@ shaftRotating.stl
 {
     name shaftRotating;
     type triSurfaceMesh;
+
+    regions
+    {
+        shaftRotating
+        {
+            name shaftRotating;
+        }
+    }
 }
 
 
-shaftStatic.stl
+shaft.stl
 {
-    name shaftStatic;
+    name shaft;
     type triSurfaceMesh;
+
+    regions
+    {
+        shaft
+        {
+            name shaft;
+        }
+    }
+}
+
+
+stirrer_baffles.stl
+{
+    name stirrer_baffles;
+    type triSurfaceMesh;
+
+    regions
+    {
+        stirrer
+        {
+            name stirrer_baffles;
+        }
+    }
 }
 
 
@@ -60,6 +111,44 @@ stirrer.stl
 {
     name stirrer;
     type triSurfaceMesh;
+
+    regions
+    {
+        stirrer
+        {
+            name stirrer;
+        }
+    }
+}
+
+
+rotating.stl
+{
+    name rotating;
+    type triSurfaceMesh;
+
+    regions
+    {
+        MRF
+        {
+            name rotating;
+        }
+    }
+}
+
+
+baffles.stl
+{
+    name baffles;
+    type triSurfaceMesh;
+
+    regions
+    {
+        baffles
+        {
+            name baffles;
+        }
+    }
 }
 
 

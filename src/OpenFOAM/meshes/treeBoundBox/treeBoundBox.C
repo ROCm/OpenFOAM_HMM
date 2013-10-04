@@ -269,7 +269,8 @@ bool Foam::treeBoundBox::intersects
     const direction endBits = posBits(end);
     pt = start;
 
-    while (true)
+    // Allow maximum of 3 clips.
+    for (label i = 0; i < 4; ++i)
     {
         direction ptBits = posBits(pt);
 
@@ -380,6 +381,9 @@ bool Foam::treeBoundBox::intersects
             }
         }
     }
+
+    // Can end up here if the end point is on the edge of the boundBox
+    return true;
 }
 
 

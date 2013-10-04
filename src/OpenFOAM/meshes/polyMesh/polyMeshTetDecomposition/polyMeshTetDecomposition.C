@@ -210,6 +210,7 @@ Foam::labelList Foam::polyMeshTetDecomposition::findFaceBasePts
 )
 {
     const labelList& pOwner = mesh.faceOwner();
+    const vectorField& pC = mesh.cellCentres();
 
     // Find a suitable base point for each face, considering both
     // cells for interface faces or those on coupled patches
@@ -228,7 +229,7 @@ Foam::labelList Foam::polyMeshTetDecomposition::findFaceBasePts
     for(label faceI = nInternalFaces; faceI < mesh.nFaces(); faceI++)
     {
         neighbourCellCentres[faceI - nInternalFaces] =
-            mesh.cellCentres()[pOwner[faceI]];
+            pC[pOwner[faceI]];
     }
 
     syncTools::swapBoundaryFacePositions(mesh, neighbourCellCentres);

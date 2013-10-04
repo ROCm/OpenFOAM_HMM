@@ -166,21 +166,6 @@ mappedPatchFieldBase<Type>::sampleField() const
 
 
 template<class Type>
-const interpolation<Type>& mappedPatchFieldBase<Type>::interpolator() const
-{
-    if (!interpolator_.valid())
-    {
-        interpolator_ = interpolation<Type>::New
-        (
-            interpolationScheme_,
-            sampleField()
-        );
-    }
-    return interpolator_();
-}
-
-
-template<class Type>
 tmp<Field<Type> > mappedPatchFieldBase<Type>::mappedField() const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
@@ -218,6 +203,14 @@ tmp<Field<Type> > mappedPatchFieldBase<Type>::mappedField() const
                     samples
                 );
 
+                autoPtr<interpolation<Type> > interpolator
+                (
+                    interpolation<Type>::New
+                    (
+                        interpolationScheme_,
+                        sampleField()
+                    )
+                );
                 const interpolation<Type>& interp = interpolator();
 
                 newValues.setSize(samples.size(), pTraits<Type>::max);

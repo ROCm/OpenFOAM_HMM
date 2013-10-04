@@ -3145,6 +3145,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
     const label nOldPoints(mesh.nPoints());
     const label nOldFaces(mesh.nFaces());
     const label nOldCells(mesh.nCells());
+    autoPtr<scalarField> oldCellVolumes(new scalarField(mesh.cellVolumes()));
 
 
     // Change the mesh
@@ -3323,6 +3324,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
             newPoints,          // if empty signals no inflation.
             oldPatchStarts,
             oldPatchNMeshPoints,
+
+            oldCellVolumes,
+
             true                // steal storage.
         )
     );
@@ -3408,6 +3412,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
     const label nOldPoints(mesh.nPoints());
     const label nOldFaces(mesh.nFaces());
     const label nOldCells(mesh.nCells());
+    autoPtr<scalarField> oldCellVolumes(new scalarField(mesh.cellVolumes()));
 
 
     // Create the mesh
@@ -3617,6 +3622,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
             newPoints,          // if empty signals no inflation.
             oldPatchStarts,
             oldPatchNMeshPoints,
+            oldCellVolumes,
             true                // steal storage.
         )
     );

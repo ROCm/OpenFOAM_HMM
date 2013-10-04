@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -443,30 +443,106 @@ template<class Type>
 tmp<GeometricField<Type, pointPatchField, pointMesh> >
 volPointInterpolation::interpolate
 (
+    const GeometricField<Type, fvPatchField, volMesh>& vf,
+    const word& name,
+    const bool cache
+) const
+{
+    typedef GeometricField<Type, pointPatchField, pointMesh> PointFieldType;
+
+    const pointMesh& pm = pointMesh::New(vf.mesh());
+    const objectRegistry& db = pm.thisDb();
+
+    if (!cache || vf.mesh().changing())
+    {
+        // Delete any old occurences to avoid double registration
+        if (db.objectRegistry::template foundObject<PointFieldType>(name))
+        {
+            PointFieldType& pf = const_cast<PointFieldType&>
+            (
+                db.objectRegistry::template lookupObject<PointFieldType>(name)
+            );
+
+            if (pf.ownedByRegistry())
+            {
+                solution::cachePrintMessage("Deleting", name, vf);
+                pf.release();
+                delete &pf;
+            }
+        }
+
+
+        tmp<GeometricField<Type, pointPatchField, pointMesh> > tpf
+        (
+            new GeometricField<Type, pointPatchField, pointMesh>
+            (
+                IOobject
+                (
+                    name,
+                    vf.instance(),
+                    pm.thisDb()
+                ),
+                pm,
+                vf.dimensions()
+            )
+        );
+
+        interpolateInternalField(vf, tpf());
+        interpolateBoundaryField(vf, tpf(), false);
+
+        return tpf;
+    }
+    else
+    {
+        if (!db.objectRegistry::template foundObject<PointFieldType>(name))
+        {
+            solution::cachePrintMessage("Calculating and caching", name, vf);
+            tmp<PointFieldType> tpf = interpolate(vf, name, false);
+            PointFieldType* pfPtr = tpf.ptr();
+            regIOobject::store(pfPtr);
+            return *pfPtr;
+        }
+        else
+        {
+            PointFieldType& pf = const_cast<PointFieldType&>
+            (
+                db.objectRegistry::template lookupObject<PointFieldType>(name)
+            );
+
+            if (pf.upToDate(vf))    //TBD: , vf.mesh().points()))
+            {
+                solution::cachePrintMessage("Reusing", name, vf);
+                return pf;
+            }
+            else
+            {
+                solution::cachePrintMessage("Deleting", name, vf);
+                pf.release();
+                delete &pf;
+
+                solution::cachePrintMessage("Recalculating", name, vf);
+                tmp<PointFieldType> tpf = interpolate(vf, name, false);
+
+                solution::cachePrintMessage("Storing", name, vf);
+                PointFieldType* pfPtr = tpf.ptr();
+                regIOobject::store(pfPtr);
+
+                // Note: return reference, not pointer
+                return *pfPtr;
+            }
+        }
+    }
+}
+
+
+template<class Type>
+tmp<GeometricField<Type, pointPatchField, pointMesh> >
+volPointInterpolation::interpolate
+(
     const GeometricField<Type, fvPatchField, volMesh>& vf
 ) const
 {
-    const pointMesh& pm = pointMesh::New(vf.mesh());
-
-    tmp<GeometricField<Type, pointPatchField, pointMesh> > tpf
-    (
-        new GeometricField<Type, pointPatchField, pointMesh>
-        (
-            IOobject
-            (
-                "volPointInterpolate(" + vf.name() + ')',
-                vf.instance(),
-                pm.thisDb()
-            ),
-            pm,
-            vf.dimensions()
-        )
-    );
-
-    interpolateInternalField(vf, tpf());
-    interpolateBoundaryField(vf, tpf(), false);
-
-    return tpf;
+    return interpolate(vf, "volPointInterpolate(" + vf.name() + ')', false);
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,6 +52,8 @@ SourceFiles
 #if defined(LINUX) && defined(__GNUC__)
 #    define LINUX_GNUC
 #endif
+
+#include "UList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -108,6 +110,10 @@ public:
         //- Activate SIGFPE signal handler when FOAM_SIGFPE is %set
         //  Fill memory with NaN when FOAM_SETNAN is %set
         void set(const bool verbose);
+
+        //- Helper: fill block of data with NaN
+        static void fillSignallingNan(UList<scalar>&);
+
 };
 
 

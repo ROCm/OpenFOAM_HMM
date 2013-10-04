@@ -44,6 +44,7 @@ SourceFiles
 #include "DynamicList.H"
 #include "List.H"
 #include "extendedFeatureEdgeMesh.H"
+#include "pointPairs.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -82,6 +83,9 @@ class featurePointConformer
         //- Store the feature constraining points, to be reinserted after a
         //  triangulation clear.
         List<Vb> featurePointVertices_;
+
+        //-
+        mutable pointPairs<Delaunay> ftPtPairs_;
 
 
     // Private Member Functions
@@ -163,12 +167,18 @@ public:
             //  triangulation.
             inline const List<Vb>& featurePointVertices() const;
 
+            //- Return the feature point pair table
+            inline const pointPairs<Delaunay>& featurePointPairs() const;
+
 
         // Edit
 
             //- Distribute the feature point vertices according to the
             //  supplied background mesh
             void distribute(const backgroundMeshDecomposition& decomposition);
+
+            //- Reindex the feature point pairs using the map.
+            void reIndexPointPairs(const Map<label>& oldToNewIndices);
 };
 
 

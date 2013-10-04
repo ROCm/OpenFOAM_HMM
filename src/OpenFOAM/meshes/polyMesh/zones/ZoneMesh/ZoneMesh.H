@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,7 @@ SourceFiles
 
 #include "List.H"
 #include "regIOobject.H"
-#include "pointFieldsFwd.H"
+#include "pointField.H"
 #include "Map.H"
 #include "PackedBoolList.H"
 
@@ -75,6 +75,9 @@ class ZoneMesh
 
 
     // Private Member Functions
+
+        //- Read if IOobject flags set. Return true if read.
+        bool read();
 
         //- Disallow construct as copy
         ZoneMesh(const ZoneMesh&);

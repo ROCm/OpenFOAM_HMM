@@ -93,6 +93,20 @@ Foam::solidChemistryModel<CompType, SolidThermo>::
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CompType, class SolidThermo>
+Foam::scalar Foam::solidChemistryModel<CompType, SolidThermo>::solve
+(
+    const scalarField& deltaT
+)
+{
+    notImplemented
+    (
+        "solidChemistryModel::solve(const scalarField& deltaT)"
+    );
+    return 0;
+}
+
+
+template<class CompType, class SolidThermo>
 Foam::tmp<Foam::volScalarField>
 Foam::solidChemistryModel<CompType, SolidThermo>::tc() const
 {
@@ -175,31 +189,6 @@ Foam::solidChemistryModel<CompType, SolidThermo>::dQ() const
     }
 
     return tdQ;
-}
-
-
-template<class CompType, class SolidThermo>
-Foam::scalar Foam::solidChemistryModel<CompType, SolidThermo>::solve
-(
-    scalarField &c,
-    const scalar T,
-    const scalar p,
-    const scalar t0,
-    const scalar dt
-) const
-{
-    notImplemented
-    (
-        "solidChemistryModel::solve"
-        "("
-            "scalarField&, "
-            "const scalar, "
-            "const scalar, "
-            "const scalar, "
-            "const scalar"
-        ") const"
-    );
-    return (0);
 }
 
 

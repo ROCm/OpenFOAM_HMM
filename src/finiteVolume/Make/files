@@ -183,6 +183,7 @@ $(derivedFvPatchFields)/turbulentIntensityKineticEnergyInlet/turbulentIntensityK
 $(derivedFvPatchFields)/uniformDensityHydrostaticPressure/uniformDensityHydrostaticPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/uniformFixedGradient/uniformFixedGradientFvPatchFields.C
 $(derivedFvPatchFields)/uniformFixedValue/uniformFixedValueFvPatchFields.C
+$(derivedFvPatchFields)/uniformInletOutlet/uniformInletOutletFvPatchFields.C
 $(derivedFvPatchFields)/uniformJump/uniformJumpFvPatchFields.C
 $(derivedFvPatchFields)/uniformJumpAMI/uniformJumpAMIFvPatchFields.C
 $(derivedFvPatchFields)/uniformTotalPressure/uniformTotalPressureFvPatchScalarField.C

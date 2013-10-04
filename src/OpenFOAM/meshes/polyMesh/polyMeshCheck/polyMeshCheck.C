@@ -842,7 +842,7 @@ bool Foam::polyMesh::checkMeshMotion
     // Check face areas
     bool areaError = checkFaceAreas
     (
-        faceAreas(),
+        fAreas,
         report,         // report
         detailedReport, // detailedReport,
         NULL            // setPtr

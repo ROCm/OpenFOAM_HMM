@@ -73,6 +73,12 @@ int main(int argc, char *argv[])
         "(patch0 .. patchN)",
         "only triangulate selected patches (wildcards supported)"
     );
+    argList::addOption
+    (
+        "faceZones",
+        "(fz0 .. fzN)",
+        "triangulate selected faceZones (wildcards supported)"
+    );
 
     #include "setRootCase.H"
     #include "createTime.H"
@@ -136,52 +142,132 @@ int main(int argc, char *argv[])
 
 
 
-    // Collect sizes. Hash on names to handle local-only patches (e.g.
-    //  processor patches)
-    HashTable<label> patchSize(1000);
-    label nFaces = 0;
-    forAllConstIter(labelHashSet, includePatches, iter)
+    const faceZoneMesh& fzm = mesh.faceZones();
+    labelHashSet includeFaceZones(fzm.size());
+
+    if (args.optionFound("faceZones"))
     {
-        const polyPatch& pp = bMesh[iter.key()];
-        patchSize.insert(pp.name(), pp.size());
-        nFaces += pp.size();
+        wordReList zoneNames(args.optionLookup("faceZones")());
+        const wordList allZoneNames(fzm.names());
+        forAll(zoneNames, i)
+        {
+            const wordRe& zoneName = zoneNames[i];
+
+            labelList zoneIDs = findStrings(zoneName, allZoneNames);
+
+            forAll(zoneIDs, j)
+            {
+                includeFaceZones.insert(zoneIDs[j]);
+            }
+
+            if (zoneIDs.empty())
+            {
+                WarningIn(args.executable())
+                    << "Cannot find any faceZone name matching "
+                    << zoneName << endl;
+            }
+
+        }
+        Info<< "Additionally triangulating faceZones "
+            << UIndirectList<word>(allZoneNames, includeFaceZones.sortedToc())
+            << endl;
     }
-    Pstream::mapCombineGather(patchSize, plusEqOp<label>());
 
 
-    // Allocate zone/patch for all patches
+
+    // From (name of) patch to compact 'zone' index
     HashTable<label> compactZoneID(1000);
-    forAllConstIter(HashTable<label>, patchSize, iter)
-    {
-        label sz = compactZoneID.size();
-        compactZoneID.insert(iter.key(), sz);
-    }
-    Pstream::mapCombineScatter(compactZoneID);
+    // Mesh face and compact zone indx
+    DynamicList<label> faceLabels;
+    DynamicList<label> compactZones;
 
-
-    // Rework HashTable into labelList just for speed of conversion
-    labelList patchToCompactZone(bMesh.size(), -1);
-    forAllConstIter(HashTable<label>, compactZoneID, iter)
     {
-        label patchI = bMesh.findPatchID(iter.key());
-        if (patchI != -1)
+        // Collect sizes. Hash on names to handle local-only patches (e.g.
+        //  processor patches)
+        HashTable<label> patchSize(1000);
+        label nFaces = 0;
+        forAllConstIter(labelHashSet, includePatches, iter)
         {
-            patchToCompactZone[patchI] = iter();
+            const polyPatch& pp = bMesh[iter.key()];
+            patchSize.insert(pp.name(), pp.size());
+            nFaces += pp.size();
+        }
+
+        HashTable<label> zoneSize(1000);
+        forAllConstIter(labelHashSet, includeFaceZones, iter)
+        {
+            const faceZone& pp = fzm[iter.key()];
+            zoneSize.insert(pp.name(), pp.size());
+            nFaces += pp.size();
+        }
+
+
+        Pstream::mapCombineGather(patchSize, plusEqOp<label>());
+        Pstream::mapCombineGather(zoneSize, plusEqOp<label>());
+
+
+        // Allocate compact numbering for all patches/faceZones
+        forAllConstIter(HashTable<label>, patchSize, iter)
+        {
+            label sz = compactZoneID.size();
+            compactZoneID.insert(iter.key(), sz);
+        }
+
+        forAllConstIter(HashTable<label>, zoneSize, iter)
+        {
+            label sz = compactZoneID.size();
+            //Info<< "For faceZone " << iter.key() << " allocating zoneID "
+            //    << sz << endl;
+            compactZoneID.insert(iter.key(), sz);
+        }
+
+
+        Pstream::mapCombineScatter(compactZoneID);
+
+
+        // Rework HashTable into labelList just for speed of conversion
+        labelList patchToCompactZone(bMesh.size(), -1);
+        labelList faceZoneToCompactZone(bMesh.size(), -1);
+        forAllConstIter(HashTable<label>, compactZoneID, iter)
+        {
+            label patchI = bMesh.findPatchID(iter.key());
+            if (patchI != -1)
+            {
+                patchToCompactZone[patchI] = iter();
+            }
+            else
+            {
+                label zoneI = fzm.findZoneID(iter.key());
+                faceZoneToCompactZone[zoneI] = iter();
+            }
+        }
+
+
+        faceLabels.setCapacity(nFaces);
+        compactZones.setCapacity(nFaces);
+
+        // Collect faces on patches
+        forAllConstIter(labelHashSet, includePatches, iter)
+        {
+            const polyPatch& pp = bMesh[iter.key()];
+            forAll(pp, i)
+            {
+                faceLabels.append(pp.start()+i);
+                compactZones.append(patchToCompactZone[pp.index()]);
+            }
+        }
+        // Collect faces on faceZones
+        forAllConstIter(labelHashSet, includeFaceZones, iter)
+        {
+            const faceZone& pp = fzm[iter.key()];
+            forAll(pp, i)
+            {
+                faceLabels.append(pp[i]);
+                compactZones.append(faceZoneToCompactZone[pp.index()]);
+            }
         }
     }
 
-    // Collect faces on zones
-    DynamicList<label> faceLabels(nFaces);
-    DynamicList<label> compactZones(nFaces);
-    forAllConstIter(labelHashSet, includePatches, iter)
-    {
-        const polyPatch& pp = bMesh[iter.key()];
-        forAll(pp, i)
-        {
-            faceLabels.append(pp.start()+i);
-            compactZones.append(patchToCompactZone[pp.index()]);
-        }
-    }
 
     // Addressing engine for all faces
     uindirectPrimitivePatch allBoundary

@@ -56,7 +56,8 @@ Foam::mapPolyMesh::mapPolyMesh
     const labelListList& cellZoneMap,
     const pointField& preMotionPoints,
     const labelList& oldPatchStarts,
-    const labelList& oldPatchNMeshPoints
+    const labelList& oldPatchNMeshPoints,
+    const autoPtr<scalarField>& oldCellVolumesPtr
 )
 :
     mesh_(mesh),
@@ -86,7 +87,8 @@ Foam::mapPolyMesh::mapPolyMesh
     preMotionPoints_(preMotionPoints),
     oldPatchSizes_(oldPatchStarts.size()),
     oldPatchStarts_(oldPatchStarts),
-    oldPatchNMeshPoints_(oldPatchNMeshPoints)
+    oldPatchNMeshPoints_(oldPatchNMeshPoints),
+    oldCellVolumesPtr_(oldCellVolumesPtr)
 {
     // Calculate old patch sizes
     for (label patchI = 0; patchI < oldPatchStarts_.size() - 1; patchI++)
@@ -141,6 +143,7 @@ Foam::mapPolyMesh::mapPolyMesh
     pointField& preMotionPoints,
     labelList& oldPatchStarts,
     labelList& oldPatchNMeshPoints,
+    autoPtr<scalarField>& oldCellVolumesPtr,
     const bool reUse
 )
 :
@@ -171,7 +174,8 @@ Foam::mapPolyMesh::mapPolyMesh
     preMotionPoints_(preMotionPoints, reUse),
     oldPatchSizes_(oldPatchStarts.size()),
     oldPatchStarts_(oldPatchStarts, reUse),
-    oldPatchNMeshPoints_(oldPatchNMeshPoints, reUse)
+    oldPatchNMeshPoints_(oldPatchNMeshPoints, reUse),
+    oldCellVolumesPtr_(oldCellVolumesPtr, reUse)
 {
     if (oldPatchStarts_.size() > 0)
     {

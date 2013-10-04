@@ -104,11 +104,14 @@ Foam::searchableBoxFeatures::features() const
     edgeNormals[10][0] = 1; edgeNormals[10][1] = 3;
     edgeNormals[11][0] = 3; edgeNormals[11][1] = 0;
 
+    tmp<pointField> surfacePointsTmp(surface().points());
+    pointField& surfacePoints = surfacePointsTmp();
+
     forAll(edgeDirections, eI)
     {
         edgeDirections[eI] =
-            surface().points()()[treeBoundBox::edges[eI].end()]
-          - surface().points()()[treeBoundBox::edges[eI].start()];
+            surfacePoints[treeBoundBox::edges[eI].end()]
+          - surfacePoints[treeBoundBox::edges[eI].start()];
 
         normalDirections[eI] = labelList(2, 0);
         for (label j = 0; j < 2; ++j)
@@ -116,8 +119,8 @@ Foam::searchableBoxFeatures::features() const
             const vector cross =
                 (faceNormals[edgeNormals[eI][j]] ^ edgeDirections[eI]);
             const vector fC0tofE0 =
-                0.5*(max(surface().points()() + min(surface().points()())))
-              - surface().points()()[treeBoundBox::edges[eI].start()];
+                0.5*(max(surfacePoints + min(surfacePoints)))
+              - surfacePoints[treeBoundBox::edges[eI].start()];
 
             normalDirections[eI][j] =
                 (

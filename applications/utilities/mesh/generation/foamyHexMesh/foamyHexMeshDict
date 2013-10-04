@@ -145,9 +145,11 @@ surfaceConformation
         //  not created, only the edge conformation is created
         // - fraction of the local target cell size. Coarse
         // conformation, initial protrusion tests.
-        surfacePtReplaceDistCoeff   0.5;
+        surfacePtReplaceDistCoeff   0.5;    // instead of surface point insert
+                                            // edge-conformation point
 
-        surfacePtExclusionDistanceCoeff 0.5;
+        surfacePtExclusionDistanceCoeff 0.5;    // do not place surface point
+                                                // altogether
 
         // Stop either at maxIterations or if the number of surface pokes
         // is very small (iterationToInitialHitRatioLimit * initial number)

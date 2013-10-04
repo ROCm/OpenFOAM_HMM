@@ -264,4 +264,27 @@ Foam::extendedFeatureEdgeMesh::getEdgeStatus(label edgeI) const
 }
 
 
+inline Foam::PackedList<2> Foam::extendedFeatureEdgeMesh::edgeBaffles
+(
+    label edgeI
+) const
+{
+    const labelList& eNormals = edgeNormals_[edgeI];
+
+    DynamicList<label> edgeBaffles(eNormals.size());
+
+    forAll(eNormals, enI)
+    {
+        const label normI = eNormals[enI];
+
+        if (normalVolumeTypes_[normI])
+        {
+            edgeBaffles.append(normI);
+        }
+    }
+
+    return PackedList<2>(edgeBaffles);
+}
+
+
 // ************************************************************************* //

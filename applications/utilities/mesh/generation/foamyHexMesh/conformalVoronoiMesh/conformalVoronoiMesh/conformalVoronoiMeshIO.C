@@ -36,6 +36,8 @@ License
 #include "indexedVertexOps.H"
 #include "DelaunayMeshTools.H"
 #include "syncTools.H"
+#include "faceSet.H"
+#include "OBJstream.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -114,7 +116,6 @@ void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
         wordList patchNames;
         PtrList<dictionary> patchDicts;
         pointField cellCentres;
-
         PackedBoolList boundaryFacesToRemove;
 
         calcDualMesh
@@ -789,7 +790,7 @@ void Foam::conformalVoronoiMesh::writeMesh
     const wordList& patchNames,
     const PtrList<dictionary>& patchDicts,
     const pointField& cellCentres,
-    const PackedBoolList& boundaryFacesToRemove
+    PackedBoolList& boundaryFacesToRemove
 ) const
 {
     if (foamyHexMeshControls().objOutput())
@@ -912,41 +913,83 @@ void Foam::conformalVoronoiMesh::writeMesh
 
 
 
-    // Add indirectPatchFaces to a face zone
+    Info<< indent << "Add pointZones" << endl;
     {
-        labelList addr(boundaryFacesToRemove.count());
-        label count = 0;
+        label sz = mesh.pointZones().size();
 
-        forAll(boundaryFacesToRemove, faceI)
+        DynamicList<label> bPts(boundaryPts.size());
+
+        forAll(dualMeshPointTypeNames_, typeI)
         {
-            if
-            (
-                boundaryFacesToRemove[faceI]
-             && mesh.faceZones().whichZone(faceI) == -1
-            )
+            forAll(boundaryPts, ptI)
             {
-                addr[count++] = faceI;
+                const label& bPtType = boundaryPts[ptI];
+
+                if (bPtType == typeI)
+                {
+                    bPts.append(ptI);
+                }
             }
-        }
 
-        addr.setSize(count);
+//            syncTools::syncPointList(mesh, bPts, maxEqOp<label>(), -1);
 
-        label sz = mesh.faceZones().size();
-        boolList flip(addr.size(), false);
-        mesh.faceZones().setSize(sz + 1);
-        mesh.faceZones().set
-        (
-            sz,
-            new faceZone
+            Info<< incrIndent << indent
+                << "Adding " << bPts.size()
+                << " points of type " << dualMeshPointTypeNames_.words()[typeI]
+                << decrIndent << endl;
+
+            mesh.pointZones().append
             (
-                "indirectPatchFaces",
-                addr,
-                flip,
-                sz,
-                mesh.faceZones()
-            )
-        );
+                new pointZone
+                (
+                    dualMeshPointTypeNames_.words()[typeI],
+                    bPts,
+                    sz + typeI,
+                    mesh.pointZones()
+                )
+            );
+
+            bPts.clear();
+        }
     }
+
+
+
+    // Add indirectPatchFaces to a face zone
+    Info<< indent << "Adding indirect patch faces set" << endl;
+
+    syncTools::syncFaceList
+    (
+        mesh,
+        boundaryFacesToRemove,
+        orEqOp<unsigned int>()
+    );
+
+    labelList addr(boundaryFacesToRemove.count());
+    label count = 0;
+
+    forAll(boundaryFacesToRemove, faceI)
+    {
+        if (boundaryFacesToRemove[faceI])
+        {
+            addr[count++] = faceI;
+        }
+    }
+
+    addr.setSize(count);
+
+    faceSet indirectPatchFaces
+    (
+        mesh,
+        "indirectPatchFaces",
+        addr,
+        IOobject::AUTO_WRITE
+    );
+
+    indirectPatchFaces.sync(mesh);
+
+
+    Info<< decrIndent;
 
     timeCheck("Before fvMesh filtering");
 
@@ -958,7 +1001,7 @@ void Foam::conformalVoronoiMesh::writeMesh
     {
         Info<< nl << "Filtering edges on polyMesh" << nl << endl;
 
-        meshFilter.reset(new polyMeshFilter(mesh));
+        meshFilter.reset(new polyMeshFilter(mesh, boundaryPts));
 
         // Filter small edges only. This reduces the number of faces so that
         // the face filtering is sped up.
@@ -966,25 +1009,48 @@ void Foam::conformalVoronoiMesh::writeMesh
         {
             const autoPtr<fvMesh>& newMesh = meshFilter().filteredMesh();
 
-            polyTopoChange meshMod(newMesh);
+            polyTopoChange meshMod(newMesh());
 
-            meshMod.changeMesh(mesh, false);
+            autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);
+
+            polyMeshFilter::copySets(newMesh(), mesh);
         }
     }
 
     if (foamyHexMeshControls().filterFaces())
     {
+        labelIOList boundaryPtsIO
+        (
+            IOobject
+            (
+                "pointPriority",
+                instance,
+                time(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            labelList(mesh.nPoints(), labelMin)
+        );
+
+        forAll(mesh.points(), ptI)
+        {
+            boundaryPtsIO[ptI] = mesh.pointZones().whichZone(ptI);
+        }
+
+
         Info<< nl << "Filtering faces on polyMesh" << nl << endl;
 
-        meshFilter.reset(new polyMeshFilter(mesh));
+        meshFilter.reset(new polyMeshFilter(mesh, boundaryPtsIO));
 
         meshFilter().filter(nInitialBadFaces);
         {
             const autoPtr<fvMesh>& newMesh = meshFilter().filteredMesh();
 
-            polyTopoChange meshMod(newMesh);
+            polyTopoChange meshMod(newMesh());
 
-            meshMod.changeMesh(mesh, false);
+            autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);
+
+            polyMeshFilter::copySets(newMesh(), mesh);
         }
     }
 
@@ -1005,158 +1071,43 @@ void Foam::conformalVoronoiMesh::writeMesh
             << endl;
     }
 
-
-//    volTensorField alignments
-//    (
-//        IOobject
-//        (
-//            "alignmentsField",
-//            runTime_.timeName(),
-//            runTime_,
-//            IOobject::NO_READ,
-//            IOobject::AUTO_WRITE
-//        ),
-//        mesh,
-//        tensor::zero
-//    );
-//
-//    forAll(mesh.cellCentres(), pI)
-//    {
-//        Vertex_handle nearV =
-//            nearest_vertex
-//            (
-//                toPoint<Point>(mesh.cellCentres()[pI])
-//            );
-//        alignments[pI] = nearV->alignment();
-//    }
-//    alignments.write();
-//
-//    {
-//        volVectorField alignmentx
-//        (
-//            IOobject
-//            (
-//                "alignmentsx",
-//                runTime_.timeName(),
-//                runTime_,
-//                IOobject::NO_READ,
-//                IOobject::AUTO_WRITE
-//            ),
-//            mesh,
-//            vector::zero
-//        );
-//        forAll(alignmentx, aI)
-//        {
-//            alignmentx[aI] = alignments[aI].x();
-//        }
-//        alignmentx.write();
-//    }
-//    {
-//        volVectorField alignmenty
-//        (
-//            IOobject
-//            (
-//                "alignmentsy",
-//                runTime_.timeName(),
-//                runTime_,
-//                IOobject::NO_READ,
-//                IOobject::AUTO_WRITE
-//            ),
-//            mesh,
-//            vector::zero
-//        );
-//        forAll(alignmenty, aI)
-//        {
-//            alignmenty[aI] = alignments[aI].y();
-//        }
-//        alignmenty.write();
-//    }
-//    {
-//        volVectorField alignmentz
-//        (
-//            IOobject
-//            (
-//                "alignmentsz",
-//                runTime_.timeName(),
-//                runTime_,
-//                IOobject::NO_READ,
-//                IOobject::AUTO_WRITE
-//            ),
-//            mesh,
-//            vector::zero
-//        );
-//        forAll(alignmentz, aI)
-//        {
-//            alignmentz[aI] = alignments[aI].z();
-//        }
-//        alignmentz.write();
-//    }
-
-
-    labelIOList boundaryIOPts
-    (
-        IOobject
-        (
-            "boundaryPoints",
-            instance,
-            runTime_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        boundaryPts
-    );
-
-    // Dump list of boundary points
-    forAll(mesh.boundaryMesh(), patchI)
     {
-        const polyPatch& pp = mesh.boundaryMesh()[patchI];
+        pointScalarField boundaryPtsScalarField
+        (
+            IOobject
+            (
+                "boundaryPoints_collapsed",
+                instance,
+                time(),
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            pointMesh::New(mesh),
+            scalar(labelMin)
+        );
 
-        if (!isA<coupledPolyPatch>(pp))
+        labelIOList boundaryPtsIO
+        (
+            IOobject
+            (
+                "pointPriority",
+                instance,
+                time(),
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            labelList(mesh.nPoints(), labelMin)
+        );
+
+        forAll(mesh.points(), ptI)
         {
-            forAll(pp, fI)
-            {
-                const face& boundaryFace = pp[fI];
-
-                forAll(boundaryFace, pI)
-                {
-                    const label boundaryPointI = boundaryFace[pI];
-
-                    boundaryIOPts[boundaryPointI] = boundaryPts[boundaryPointI];
-                }
-            }
+            boundaryPtsScalarField[ptI] = mesh.pointZones().whichZone(ptI);
+            boundaryPtsIO[ptI] = mesh.pointZones().whichZone(ptI);
         }
+
+        boundaryPtsScalarField.write();
+        boundaryPtsIO.write();
     }
-
-    boundaryIOPts.write();
-
-//    forAllConstIter(labelHashSet, pointsInPatch, pI)
-//    {
-//        const Foam::point& ptMaster = mesh.points()[pI.key()];
-//
-//        forAllConstIter(labelHashSet, pointsInPatch, ptI)
-//        {
-//            if (ptI.key() != pI.key())
-//            {
-//                const Foam::point& ptSlave = mesh.points()[ptI.key()];
-//
-//                const scalar dist = mag(ptMaster - ptSlave);
-//                if (ptMaster == ptSlave)
-//                {
-//                    Pout<< "Point(" << pI.key() << ") " << ptMaster
-//                        << " == "
-//                        << "(" << ptI.key() << ") " << ptSlave
-//                        << endl;
-//                }
-//                else if (dist == 0)
-//                {
-//                    Pout<< "Point(" << pI.key() << ") " << ptMaster
-//                        << " ~= "
-//                        << "(" << ptI.key() << ") " << ptSlave
-//                        << endl;
-//                }
-//            }
-//        }
-//    }
 
 //    writeCellSizes(mesh);
 
@@ -1164,7 +1115,7 @@ void Foam::conformalVoronoiMesh::writeMesh
 
 //    writeCellCentres(mesh);
 
-//    findRemainingProtrusionSet(mesh);
+    findRemainingProtrusionSet(mesh);
 }
 
 
@@ -1468,6 +1419,35 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::findRemainingProtrusionSet
     }
 
     return protrudingCells;
+}
+
+
+void Foam::conformalVoronoiMesh::writePointPairs
+(
+    const fileName& fName
+) const
+{
+    OBJstream os(fName);
+
+    for
+    (
+        Delaunay::Finite_edges_iterator eit = finite_edges_begin();
+        eit != finite_edges_end();
+        ++eit
+    )
+    {
+        Cell_handle c = eit->first;
+        Vertex_handle vA = c->vertex(eit->second);
+        Vertex_handle vB = c->vertex(eit->third);
+
+        if (ptPairs_.isPointPair(vA, vB))
+        {
+            os.write
+            (
+                linePointRef(topoint(vA->point()), topoint(vB->point()))
+            );
+        }
+    }
 }
 
 

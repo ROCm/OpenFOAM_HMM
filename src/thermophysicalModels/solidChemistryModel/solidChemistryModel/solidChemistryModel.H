@@ -95,6 +95,7 @@ protected:
         //- List of active reacting cells
         List<bool> reactingCells_;
 
+
     // Protected Member Functions
 
         //- Write access to source terms for solids
@@ -175,34 +176,6 @@ public:
         virtual void calculate() = 0;
 
 
-        //- Update concentrations in reaction i given dt and reaction rate
-        // omega used by sequential solver
-        virtual void updateConcsInReactionI
-        (
-            const label i,
-            const scalar dt,
-            const scalar omega,
-            const scalar p,
-            const scalar T,
-            scalarField& c
-        ) const = 0;
-
-
-        //- Update matrix RR for reaction i. Used by EulerImplicit
-        virtual void updateRRInReactionI
-        (
-            const label i,
-            const scalar pr,
-            const scalar pf,
-            const scalar corr,
-            const label lRef,
-            const label rRef,
-            const scalar p,
-            const scalar T,
-            simpleMatrix<scalar>& RR
-        ) const = 0;
-
-
         // Solid Chemistry model functions
 
             //- Return const access to the chemical source terms for solids
@@ -214,9 +187,13 @@ public:
             //- Return total solid source term
             inline tmp<DimensionedField<scalar, volMesh> > RRs() const;
 
-            //- Solve the reaction system for the given start time and time
-            //  step and return the characteristic time
-            virtual scalar solve(const scalar t0, const scalar deltaT) = 0;
+            //- Solve the reaction system for the given time step
+            //  and return the characteristic time
+            virtual scalar solve(const scalar deltaT) = 0;
+
+            //- Solve the reaction system for the given time step
+            //  and return the characteristic time
+            virtual scalar solve(const scalarField& deltaT);
 
             //- Return the chemical time scale
             virtual tmp<volScalarField> tc() const;
@@ -248,13 +225,13 @@ public:
                 scalarSquareMatrix& dfdc
             ) const = 0;
 
-            virtual scalar solve
+            virtual void solve
             (
                 scalarField &c,
-                const scalar T,
-                const scalar p,
-                const scalar t0,
-                const scalar dt
+                scalar& T,
+                scalar& p,
+                scalar& deltaT,
+                scalar& subDeltaT
             ) const = 0;
 };
 

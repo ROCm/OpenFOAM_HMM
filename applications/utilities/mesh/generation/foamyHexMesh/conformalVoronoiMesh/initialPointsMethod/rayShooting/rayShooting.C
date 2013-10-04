@@ -49,7 +49,6 @@ void rayShooting::splitLine
 {
     Foam::point midPoint(l.centre());
     const scalar localCellSize(cellShapeControls().cellSize(midPoint));
-    const scalar lineLength(l.mag());
 
     const scalar minDistFromSurfaceSqr
     (
@@ -64,6 +63,8 @@ void rayShooting::splitLine
     )
     {
         // Add extra points if line length is much bigger than local cell size
+//        const scalar lineLength(l.mag());
+//
 //        if (lineLength > 4.0*localCellSize)
 //        {
 //            splitLine

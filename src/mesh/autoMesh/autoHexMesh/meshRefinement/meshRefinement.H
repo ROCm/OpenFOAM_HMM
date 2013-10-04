@@ -498,6 +498,48 @@ private:
                 const labelList& globalToSlavePatch
             );
 
+
+            // Some patch utilities
+
+            //- Get all faces in namedSurfaceIndex that have no cellZone on
+            //  either side.
+            labelList freeStandingBaffleFaces
+            (
+                const labelList& namedSurfaceIndex,
+                const labelList& cellToZone,
+                const labelList& neiCellZone
+            ) const;
+
+            //- Determine per patch edge the number of master faces. Used
+            //  to detect non-manifold situations.
+            void calcPatchNumMasterFaces
+            (
+                const PackedBoolList& isMasterFace,
+                const indirectPrimitivePatch& patch,
+                labelList& nMasterFaces
+            ) const;
+
+            //- Determine per patch face the (singly-) connected zone it
+            //  is in. Return overall number of zones.
+            label markPatchZones
+            (
+                const indirectPrimitivePatch& patch,
+                const labelList& nMasterFaces,
+                labelList& faceToZone
+            ) const;
+
+            //- Make faces consistent.
+            void consistentOrientation
+            (
+                const PackedBoolList& isMasterFace,
+                const indirectPrimitivePatch& patch,
+                const labelList& nMasterFaces,
+                const labelList& faceToZone,
+                const Map<label>& zoneToOrientation,
+                boolList& meshFlipMap
+            ) const;
+
+
         //- Disallow default bitwise copy construct
         meshRefinement(const meshRefinement&);
 

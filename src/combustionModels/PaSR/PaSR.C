@@ -35,7 +35,7 @@ Foam::combustionModels::PaSR<Type>::PaSR
     const fvMesh& mesh
 )
 :
-    Type(modelType, mesh),
+    laminar<Type>(modelType, mesh),
     Cmix_(readScalar(this->coeffs().lookup("Cmix"))),
     turbulentReaction_(this->coeffs().lookup("turbulentReaction")),
     kappa_
@@ -50,14 +50,8 @@ Foam::combustionModels::PaSR<Type>::PaSR
         ),
         mesh,
         dimensionedScalar("kappa", dimless, 0.0)
-    ),
-    useReactionRate_(this->coeffs().lookupOrDefault("useReactionRate", false))
-{
-    if (useReactionRate_)
-    {
-        Info<< "    using reaction rate" << endl;
-    }
-}
+    )
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -70,28 +64,11 @@ Foam::combustionModels::PaSR<Type>::~PaSR()
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::volScalarField> Foam::combustionModels::PaSR<Type>::tc() const
-{
-    return this->chemistryPtr_->tc();
-}
-
-
-template<class Type>
 void Foam::combustionModels::PaSR<Type>::correct()
 {
     if (this->active())
     {
-        const scalar t = this->mesh().time().value();
-        const scalar dt = this->mesh().time().deltaTValue();
-
-        if (!useReactionRate_)
-        {
-            this->chemistryPtr_->solve(t - dt, dt);
-        }
-        else
-        {
-            this->chemistryPtr_->calculate();
-        }
+        laminar<Type>::correct();
 
         if (turbulentReaction_)
         {
@@ -102,29 +79,20 @@ void Foam::combustionModels::PaSR<Type>::correct()
             tmp<volScalarField> tmuEff(this->turbulence().muEff());
             const volScalarField& muEff = tmuEff();
 
-            tmp<volScalarField> ttc(tc());
+            tmp<volScalarField> ttc(this->tc());
             const volScalarField& tc = ttc();
 
             forAll(epsilon, i)
             {
-                if (epsilon[i] > 0)
-                {
-                    scalar tk =
-                        Cmix_*Foam::sqrt(muEff[i]/rho[i]/(epsilon[i] + SMALL));
+                scalar tk =
+                    Cmix_*Foam::sqrt(muEff[i]/rho[i]/(epsilon[i] + SMALL));
 
-                    // Chalmers PaSR model
-                    if (!useReactionRate_)
-                    {
-                        kappa_[i] = (dt + tc[i])/(dt + tc[i] + tk);
-                    }
-                    else
-                    {
-                        kappa_[i] = tc[i]/(tc[i] + tk);
-                    }
+                if (tk > SMALL)
+                {
+                    kappa_[i] = tc[i]/(tc[i] + tk);
                 }
                 else
                 {
-                    // Return to laminar combustion
                     kappa_[i] = 1.0;
                 }
             }
@@ -141,18 +109,7 @@ template<class Type>
 Foam::tmp<Foam::fvScalarMatrix>
 Foam::combustionModels::PaSR<Type>::R(volScalarField& Y) const
 {
-    tmp<fvScalarMatrix> tSu(new fvScalarMatrix(Y, dimMass/dimTime));
-
-    fvScalarMatrix& Su = tSu();
-
-    if (this->active())
-    {
-        const label specieI = this->thermo().composition().species()[Y.name()];
-
-        Su += kappa_*this->chemistryPtr_->RR(specieI);
-    }
-
-    return tSu;
+    return kappa_*laminar<Type>::R(Y);
 }
 
 
@@ -160,32 +117,7 @@ template<class Type>
 Foam::tmp<Foam::volScalarField>
 Foam::combustionModels::PaSR<Type>::dQ() const
 {
-    tmp<volScalarField> tdQ
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                typeName + ":dQ",
-                this->mesh().time().timeName(),
-                this->mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            this->mesh(),
-            dimensionedScalar("dQ", dimEnergy/dimTime, 0.0),
-            zeroGradientFvPatchScalarField::typeName
-        )
-    );
-
-    if (this->active())
-    {
-        volScalarField& dQ = tdQ();
-        dQ = kappa_*this->chemistryPtr_->dQ();
-    }
-
-    return tdQ;
+    return kappa_*laminar<Type>::dQ();
 }
 
 
@@ -193,43 +125,17 @@ template<class Type>
 Foam::tmp<Foam::volScalarField>
 Foam::combustionModels::PaSR<Type>::Sh() const
 {
-    tmp<volScalarField> tSh
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                typeName + ":Sh",
-                this->mesh().time().timeName(),
-                this->mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            this->mesh(),
-            dimensionedScalar("zero", dimEnergy/dimTime/dimVolume, 0.0),
-            zeroGradientFvPatchScalarField::typeName
-        )
-    );
-
-    if (this->active())
-    {
-        scalarField& Sh = tSh();
-        Sh = kappa_*this->chemistryPtr_->Sh();
-    }
-
-    return tSh;
+    return kappa_*laminar<Type>::Sh();
 }
 
 
 template<class Type>
 bool Foam::combustionModels::PaSR<Type>::read()
 {
-    if (Type::read())
+    if (laminar<Type>::read())
     {
         this->coeffs().lookup("Cmix") >> Cmix_;
         this->coeffs().lookup("turbulentReaction") >> turbulentReaction_;
-        this->coeffs().lookup("useReactionRate") >> useReactionRate_;
         return true;
     }
     else

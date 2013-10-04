@@ -25,13 +25,14 @@ Class
     Foam::polyMeshFilter
 
 Description
-    Filter the edges and faces of a polyMesh whilst satisfying the given mesh
+    Remove the edges and faces of a polyMesh whilst satisfying the given mesh
     quality criteria.
 
     Works on a copy of the mesh.
 
 SourceFiles
     polyMeshFilter.C
+    polyMeshFilterTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,6 +44,7 @@ SourceFiles
 #include "List.H"
 #include "autoPtr.H"
 #include "scalarField.H"
+#include "polyMeshFilterSettings.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,13 +54,15 @@ namespace Foam
 class polyMesh;
 class fvMesh;
 class PackedBoolList;
-class faceZone;
+class faceSet;
 
 /*---------------------------------------------------------------------------*\
                        Class polyMeshFilter Declaration
 \*---------------------------------------------------------------------------*/
 
 class polyMeshFilter
+:
+    private polyMeshFilterSettings
 {
     // Private data
 
@@ -68,52 +72,13 @@ class polyMeshFilter
         //- Copy of the original mesh to perform the filtering on
         autoPtr<fvMesh> newMeshPtr_;
 
-        //- Dictionary containing the coefficient sub-dictionaries
-        const IOdictionary dict_;
+        //- Original point priorities. If a point has a higher priority than
+        //  another point then the edge between them collapses towards the
+        //  point with the higher priority. (e.g. 2 is a higher priority than 1)
+        labelList originalPointPriority_;
 
-        //- After collapsing, check the mesh quality and redo the collapsing
-        //  iteration if there are too many bad faces in the mesh
-        Switch controlMeshQuality_;
-
-        //- Coefficients for collapsing edges
-        const dictionary& collapseEdgesCoeffDict_;
-
-        //- Coefficients for collapsing faces
-        dictionary collapseFacesCoeffDict_;
-
-        //- Coefficients for controlling the mesh quality
-        dictionary meshQualityCoeffDict_;
-
-        //- Remove edges shorter than this length
-        const scalar minLen_;
-
-        //- Merge points that are only attached to two edges and have an angle
-        //  between the edge greater than this value
-        const scalar maxCos_;
-
-        //- The amount that the local minimum edge length will be reduced by if
-        //  the edge is part of a collapse string that generates poor quality
-        //  faces
-        const scalar edgeReductionFactor_;
-
-        //- Maximum number of outer iterations
-        const label maxIterations_;
-
-        //- Maximum number of smoothing iterations of minEdgeLen_ and
-        //  faceFilterFactor_
-        const label maxSmoothIters_;
-
-        //- Initialisation value of faceFilterFactor_
-        const scalar initialFaceLengthFactor_;
-
-        //- The amount that the local face size factor will be reduced by if
-        //  the face is part of a collapse string that generates poor quality
-        //  faces
-        const scalar faceReductionFactor_;
-
-        //- Maximum number of times a deleted point can be associated with the
-        //  creation of a bad face it is forced to be kept.
-        const label maxPointErrorCount_;
+        //- Point priority associated with the new mesh
+        autoPtr<labelList> pointPriority_;
 
         //- The minimum edge length for each edge
         scalarField minEdgeLen_;
@@ -123,6 +88,28 @@ class polyMeshFilter
 
 
     // Private Member Functions
+
+        template<typename T>
+        static void updateSets(const mapPolyMesh& map);
+
+        template<typename T>
+        static void copySets(const polyMesh& oldMesh, const polyMesh& newMesh);
+
+        label filterFacesLoop(const label nOriginalBadFaces);
+
+        label filterFaces
+        (
+            polyMesh& newMesh,
+            scalarField& newMeshFaceFilterFactor,
+            labelList& origToCurrentPointMap
+        );
+
+        label filterEdges
+        (
+            polyMesh& newMesh,
+            scalarField& newMeshMinEdgeLen,
+            labelList& origToCurrentPointMap
+        );
 
         //- Increment pointErrorCount for points attached to a bad face
         void updatePointErrorCount
@@ -160,7 +147,11 @@ class polyMeshFilter
         // + >0 : point on a processor patch with that ID
         // @todo Need to mark boundaryEdges as well, as an edge may have two
         //       boundary points but not itself lie on a boundary
-        labelList findBoundaryPoints(const polyMesh& mesh) const;
+        void updatePointPriorities
+        (
+            const polyMesh& newMesh,
+            const labelList& pointMap
+        );
 
         //- Print min/mean/max data for a field
         void printScalarFieldStats
@@ -213,6 +204,9 @@ public:
         //- Construct from fvMesh
         explicit polyMeshFilter(const fvMesh& mesh);
 
+        //- Construct from fvMesh and a label list of point priorities
+        polyMeshFilter(const fvMesh& mesh, const labelList& pointPriority);
+
 
     //- Destructor
     ~polyMeshFilter();
@@ -226,26 +220,45 @@ public:
             //  mesh has actually been filtered.
             const autoPtr<fvMesh>& filteredMesh() const;
 
+            //- Return the new pointPriority list.
+            const autoPtr<labelList>& pointPriority() const;
+
 
         // Edit
 
             //- Return a copy of an fvMesh
             static autoPtr<fvMesh> copyMesh(const fvMesh& mesh);
 
+            //- Copy loaded topoSets from the old mesh to the new mesh
+            static void copySets
+            (
+                const polyMesh& oldMesh,
+                const polyMesh& newMesh
+            );
+
+            //- Update the loaded topoSets
+            static void updateSets(const mapPolyMesh& map);
+
             //- Filter edges and faces
             label filter(const label nOriginalBadFaces);
 
+            //- Filter all faces that are in the face set
+            label filter(const faceSet& fSet);
+
             //- Filter edges only.
             label filterEdges(const label nOriginalBadFaces);
-
-            //- Filter all faces that are in the face zone indirectPatchFaces
-            label filterFaceZone(const faceZone& fZone);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "polyMeshFilterTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

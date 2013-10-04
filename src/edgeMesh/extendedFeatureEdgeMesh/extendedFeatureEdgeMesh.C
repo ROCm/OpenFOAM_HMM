@@ -263,7 +263,8 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
 (
     const surfaceFeatures& sFeat,
     const objectRegistry& obr,
-    const fileName& sFeatFileName
+    const fileName& sFeatFileName,
+    const boolList& surfBaffleRegions
 )
 :
     regIOobject
@@ -337,7 +338,12 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
             // Check to see if the points have been already used
             if (faceMap[eFI] == -1)
             {
-                normalVolumeTypes_[nAdded++] = INSIDE;
+                normalVolumeTypes_[nAdded++] =
+                    (
+                        surfBaffleRegions[surf[eFI].region()]
+                      ? BOTH
+                      : INSIDE
+                    );
 
                 faceMap[eFI] = nAdded - 1;
             }
@@ -492,7 +498,7 @@ Foam::extendedFeatureEdgeMesh::classifyEdge
     const List<vector>& norms,
     const labelList& edNorms,
     const vector& fC0tofC1
-) const
+)
 {
     label nEdNorms = edNorms.size();
 
@@ -502,8 +508,8 @@ Foam::extendedFeatureEdgeMesh::classifyEdge
     }
     else if (nEdNorms == 2)
     {
-        const vector n0(norms[edNorms[0]]);
-        const vector n1(norms[edNorms[1]]);
+        const vector& n0(norms[edNorms[0]]);
+        const vector& n1(norms[edNorms[1]]);
 
         if ((n0 & n1) > cosNormalAngleTol_)
         {
@@ -1341,6 +1347,22 @@ void Foam::extendedFeatureEdgeMesh::writeObj
         meshTools::writeOBJ(regionStr, points()[e[0]]); verti++;
         meshTools::writeOBJ(regionStr, points()[e[1]]); verti++;
         regionStr << "l " << verti-1 << ' ' << verti << endl;
+    }
+
+    OFstream edgeDirsStr(prefix + "_edgeDirections.obj");
+    Info<< "Writing edge directions to " << edgeDirsStr.name() << endl;
+
+    forAll(edgeDirections_, i)
+    {
+        const vector& eVec = edgeDirections_[i];
+        const edge& e = edges()[i];
+
+        meshTools::writeOBJ
+        (
+            edgeDirsStr,
+            points()[e.start()],
+            eVec + points()[e.start()]
+        );
     }
 }
 

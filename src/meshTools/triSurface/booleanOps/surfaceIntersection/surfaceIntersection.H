@@ -273,7 +273,7 @@ public:
 
         const edgeList& cutEdges() const;
 
-        //const labelPairLookup& facePairToVertex() const;
+        const labelPairLookup& facePairToVertex() const;
 
         const labelPairLookup& facePairToEdge() const;
 

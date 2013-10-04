@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,6 +65,9 @@ class EulerImplicit
             //- Equilibrium rate limiter flag (on/off)
             Switch eqRateLimiter_;
 
+        // Solver data
+        mutable scalarField cTp_;
+
 
 public:
 
@@ -84,14 +87,27 @@ public:
 
     // Member Functions
 
+    void updateRRInReactionI
+    (
+        const label index,
+        const scalar pr,
+        const scalar pf,
+        const scalar corr,
+        const label lRef,
+        const label rRef,
+        const scalar p,
+        const scalar T,
+        simpleMatrix<scalar>& RR
+    ) const;
+
         //- Update the concentrations and return the chemical time
-        virtual scalar solve
+        virtual void solve
         (
-            scalarField &c,
-            const scalar T,
-            const scalar p,
-            const scalar t0,
-            const scalar dt
+            scalarField& c,
+            scalar& T,
+            scalar& p,
+            scalar& deltaT,
+            scalar& subDeltaT
         ) const;
 };
 

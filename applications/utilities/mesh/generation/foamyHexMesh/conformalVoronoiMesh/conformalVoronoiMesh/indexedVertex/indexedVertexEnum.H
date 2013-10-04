@@ -49,17 +49,21 @@ public:
 
     enum vertexType
     {
-        vtUnassigned            = 0,
-        vtInternal              = 1,
-        vtInternalNearBoundary  = 2,
-        vtInternalSurface       = 3,
-        vtInternalFeatureEdge   = 4,
-        vtInternalFeaturePoint  = 5,
-        vtExternalSurface       = 6,
-        vtExternalFeatureEdge   = 7,
-        vtExternalFeaturePoint  = 8,
-        vtFar                   = 9,
-        vtConstrained           = 10
+        vtUnassigned                = 0,
+        vtInternal                  = 1,
+        vtInternalNearBoundary      = 2,
+        vtInternalSurface           = 3,
+        vtInternalSurfaceBaffle     = 4,
+        vtExternalSurfaceBaffle     = 5,
+        vtInternalFeatureEdge       = 6,
+        vtInternalFeatureEdgeBaffle = 7,
+        vtExternalFeatureEdgeBaffle = 8,
+        vtInternalFeaturePoint      = 9,
+        vtExternalSurface           = 10,
+        vtExternalFeatureEdge       = 11,
+        vtExternalFeaturePoint      = 12,
+        vtFar                       = 13,
+        vtConstrained               = 14
     };
 
     enum vertexMotion
@@ -68,7 +72,7 @@ public:
         movable = 1
     };
 
-    static const Foam::NamedEnum<vertexType, 11> vertexTypeNames_;
+    static const Foam::NamedEnum<vertexType, 15> vertexTypeNames_;
 
     static const Foam::NamedEnum<vertexMotion, 2> vertexMotionNames_;
 

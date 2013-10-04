@@ -307,11 +307,34 @@ inline bool CGAL::indexedVertex<Gt, Vb>::internalBoundaryPoint() const
     return type_ >= vtInternalSurface && type_ <= vtInternalFeaturePoint;
 }
 
+template<class Gt, class Vb>
+inline bool CGAL::indexedVertex<Gt, Vb>::internalBaffleSurfacePoint() const
+{
+    return (type_ == vtInternalSurfaceBaffle);
+}
+
+template<class Gt, class Vb>
+inline bool CGAL::indexedVertex<Gt, Vb>::internalBaffleEdgePoint() const
+{
+    return (type_ == vtInternalFeatureEdgeBaffle);
+}
 
 template<class Gt, class Vb>
 inline bool CGAL::indexedVertex<Gt, Vb>::externalBoundaryPoint() const
 {
     return type_ >= vtExternalSurface && type_ <= vtExternalFeaturePoint;
+}
+
+template<class Gt, class Vb>
+inline bool CGAL::indexedVertex<Gt, Vb>::externalBaffleSurfacePoint() const
+{
+    return (type_ == vtExternalSurfaceBaffle);
+}
+
+template<class Gt, class Vb>
+inline bool CGAL::indexedVertex<Gt, Vb>::externalBaffleEdgePoint() const
+{
+    return (type_ == vtExternalFeatureEdgeBaffle);
 }
 
 

@@ -52,9 +52,13 @@ inline Foam::autoPtr<T>::autoPtr(const autoPtr<T>& ap, const bool reUse)
         ptr_ = ap.ptr_;
         ap.ptr_ = 0;
     }
-    else
+    else if (ap.valid())
     {
         ptr_ = ap().clone().ptr();
+    }
+    else
+    {
+        ptr_ = NULL;
     }
 }
 

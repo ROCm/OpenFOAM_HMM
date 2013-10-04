@@ -176,34 +176,6 @@ public:
         //- Calculates the reaction rates
         virtual void calculate();
 
-        //- Update concentrations in reaction i given dt and reaction rate
-        // omega used by sequential solver
-        virtual void updateConcsInReactionI
-        (
-            const label i,
-            const scalar dt,
-            const scalar omega,
-            const scalar p,
-            const scalar T,
-            scalarField& c
-        ) const;
-
-
-        //- Update matrix RR for reaction i. Used by EulerImplicit
-        // (Not implemented)
-        virtual void updateRRInReactionI
-        (
-            const label i,
-            const scalar pr,
-            const scalar pf,
-            const scalar corr,
-            const label lRef,
-            const label rRef,
-            const scalar p,
-            const scalar T,
-            simpleMatrix<scalar>& RR
-        ) const;
-
 
         // Chemistry model functions
 
@@ -224,9 +196,9 @@ public:
                 const label i
             ) const;
 
-            //- Solve the reaction system for the given start time and time
-            //  step and return the characteristic time
-            virtual scalar solve(const scalar t0, const scalar deltaT) ;
+            //- Solve the reaction system for the given time step
+            //  and return the characteristic time
+            virtual scalar solve(const scalar deltaT);
 
 
         // ODE functions (overriding abstract functions in ODE.H)
@@ -249,13 +221,13 @@ public:
                 scalarSquareMatrix& dfdc
             ) const;
 
-            virtual scalar solve
+            virtual void solve
             (
                 scalarField &c,
-                const scalar T,
-                const scalar p,
-                const scalar t0,
-                const scalar dt
+                scalar& T,
+                scalar& p,
+                scalar& deltaT,
+                scalar& subDeltaT
             ) const;
 };
 

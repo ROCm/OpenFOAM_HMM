@@ -117,19 +117,16 @@ void Foam::edgeIntersections::intersectEdges
             << " triangles ..." << endl;
     }
 
-    // Construct octree.
-    const indexedOctree<treeDataTriSurface>& tree = querySurf2.tree();
-
-
-    label nHits = 0;
-
+    pointField start(edgeLabels.size());
+    pointField end(edgeLabels.size());
+    vectorField edgeDirs(edgeLabels.size());
 
     // Go through all edges, calculate intersections
     forAll(edgeLabels, i)
     {
         label edgeI = edgeLabels[i];
 
-        if (debug && (i % 1000 == 0))
+        if (debug)// && (i % 1000 == 0))
         {
             Pout<< "Intersecting edge " << edgeI << " with surface" << endl;
         }
@@ -140,85 +137,81 @@ void Foam::edgeIntersections::intersectEdges
         const point& pEnd = points1[meshPoints[e.end()]];
 
         const vector eVec(pEnd - pStart);
-        const scalar eMag = mag(eVec);
-        const vector n(eVec/(eMag + VSMALL));
+        const vector n(eVec/(mag(eVec) + VSMALL));
 
-        // Smallish length for intersection calculation errors.
-        const point tolVec = 1e-6*eVec;
-
-        // Start tracking somewhat before pStart and upto somewhat after p1.
+        // Start tracking somewhat before pStart and up to somewhat after p1.
         // Note that tolerances here are smaller than those used to classify
         // hit below.
         // This will cause this hit to be marked as degenerate and resolved
         // later on.
-        point p0 = pStart - 0.5*surf1PointTol[e[0]]*n;
-        const point p1 = pEnd + 0.5*surf1PointTol[e[1]]*n;
-        const scalar maxS = mag(p1 - pStart);
+        start[i] = pStart - 0.5*surf1PointTol[e[0]]*n;
+        end[i] = pEnd + 0.5*surf1PointTol[e[1]]*n;
 
-        // Get all intersections of the edge with the surface
+        edgeDirs[i] = n;
+    }
 
-        DynamicList<pointIndexHit> currentIntersections(100);
-        DynamicList<label> currentIntersectionTypes(100);
+    List<List<pointIndexHit> > edgeIntersections;
+    querySurf2.findLineAll
+    (
+        start,
+        end,
+        edgeIntersections
+    );
 
-        while (true)
+    label nHits = 0;
+
+    // Classify the hits
+    forAll(edgeLabels, i)
+    {
+        const label edgeI = edgeLabels[i];
+
+        labelList& intersectionTypes = classification_[edgeI];
+        intersectionTypes.setSize(edgeIntersections[i].size(), -1);
+
+        this->operator[](edgeI).transfer(edgeIntersections[i]);
+
+        forAll(intersectionTypes, hitI)
         {
-            pointIndexHit pHit = tree.findLine(p0, p1);
+            const pointIndexHit& pHit = this->operator[](edgeI)[hitI];
+            label& hitType = intersectionTypes[hitI];
 
-            if (pHit.hit())
+            if (!pHit.hit())
             {
-                nHits++;
-
-                currentIntersections.append(pHit);
-
-                // Classify point on surface1 edge.
-                label edgeEnd = -1;
-
-                if (mag(pHit.hitPoint() - pStart) < surf1PointTol[e[0]])
-                {
-                    edgeEnd = 0;
-                }
-                else if (mag(pHit.hitPoint() - pEnd) < surf1PointTol[e[1]])
-                {
-                    edgeEnd = 1;
-                }
-                else if (mag(n & normals2[pHit.index()]) < alignedCos_)
-                {
-                    Pout<< "Flat angle edge:" << edgeI
-                        << " face:" << pHit.index()
-                        << " cos:" << mag(n & normals2[pHit.index()])
-                        << endl;
-                    edgeEnd = 2;
-                }
-
-                currentIntersectionTypes.append(edgeEnd);
-
-                if (edgeEnd == 1)
-                {
-                    // Close to end
-                    break;
-                }
-                else
-                {
-                    // Continue tracking. Shift by a small amount.
-                    p0 = pHit.hitPoint() + tolVec;
-
-                    if (((p0-pStart) & n) >= maxS)
-                    {
-                        break;
-                    }
-                }
+                continue;
             }
-            else
+
+            const edge& e = surf1.edges()[edgeI];
+
+            // Classify point on surface1 edge.
+            if (mag(pHit.hitPoint() - start[i]) < surf1PointTol[e[0]])
             {
-                // No hit.
-                break;
+                // Intersection is close to edge start
+                hitType = 0;
             }
+            else if (mag(pHit.hitPoint() - end[i]) < surf1PointTol[e[1]])
+            {
+                // Intersection is close to edge end
+                hitType = 1;
+            }
+            else if (mag(edgeDirs[i] & normals2[pHit.index()]) < alignedCos_)
+            {
+                // Edge is almost coplanar with the face
+
+                Pout<< "Flat angle edge:" << edgeI
+                    << " face:" << pHit.index()
+                    << " cos:" << mag(edgeDirs[i] & normals2[pHit.index()])
+                    << endl;
+
+                hitType = 2;
+            }
+
+            if (debug)
+            {
+                Info<< "    hit " << pHit << " classify = " << hitType << endl;
+            }
+
+            nHits++;
         }
-
-
-        // Done current edge. Transfer all data into *this
-        operator[](edgeI).transfer(currentIntersections);
-        classification_[edgeI].transfer(currentIntersectionTypes);
     }
 
     if (debug)
@@ -226,7 +219,6 @@ void Foam::edgeIntersections::intersectEdges
         Pout<< "Found " << nHits << " intersections of edges with surface ..."
             << endl;
     }
-
 }
 
 

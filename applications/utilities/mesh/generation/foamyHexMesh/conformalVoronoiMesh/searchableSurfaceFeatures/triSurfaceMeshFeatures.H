@@ -55,6 +55,9 @@ private:
 
         const scalar includedAngle_;
 
+        //- Which side of the surface to mesh
+        const extendedFeatureEdgeMesh::sideVolumeType mode_;
+
 
     // Private Member Functions
 

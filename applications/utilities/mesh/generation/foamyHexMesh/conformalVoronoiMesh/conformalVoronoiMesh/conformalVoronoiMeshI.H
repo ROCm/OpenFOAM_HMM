@@ -225,6 +225,7 @@ inline void Foam::conformalVoronoiMesh::createPointPair
     const scalar ppDist,
     const Foam::point& surfPt,
     const vector& n,
+    const bool ptPair,
     DynamicList<Vb>& pts
 ) const
 {
@@ -260,14 +261,14 @@ inline void Foam::conformalVoronoiMesh::createPointPair
             )
         );
 
-//        if (ptPair)
-//        {
-//            ptPairs_.addPointPair
-//            (
-//                pts[pts.size() - 2].index(),
-//                pts[pts.size() - 1].index() // external 0 -> slave
-//            );
-//        }
+        if (ptPair)
+        {
+            ptPairs_.addPointPair
+            (
+                pts[pts.size() - 2].index(),
+                pts[pts.size() - 1].index() // external 0 -> slave
+            );
+        }
     }
 //    else
 //    {
@@ -305,6 +306,7 @@ inline void Foam::conformalVoronoiMesh::createBafflePointPair
     const scalar ppDist,
     const Foam::point& surfPt,
     const vector& n,
+    const bool ptPair,
     DynamicList<Vb>& pts
 ) const
 {
@@ -315,8 +317,8 @@ inline void Foam::conformalVoronoiMesh::createBafflePointPair
         Vb
         (
             surfPt - ppDistn,
-            vertexCount() + 1 + pts.size(),
-            Vb::vtInternalSurface,
+            vertexCount() + pts.size(),
+            Vb::vtInternalSurfaceBaffle,
             Pstream::myProcNo()
         )
     );
@@ -326,11 +328,20 @@ inline void Foam::conformalVoronoiMesh::createBafflePointPair
         Vb
         (
             surfPt + ppDistn,
-            vertexCount() + 1 + pts.size(),
-            Vb::vtInternalSurface,
+            vertexCount() + pts.size(),
+            Vb::vtExternalSurfaceBaffle,
             Pstream::myProcNo()
         )
     );
+
+    if (ptPair)
+    {
+        ptPairs_.addPointPair
+        (
+            pts[pts.size() - 2].index(), // external 0 -> slave
+            pts[pts.size() - 1].index()
+        );
+    }
 }
 
 
@@ -341,81 +352,11 @@ inline bool Foam::conformalVoronoiMesh::internalPointIsInside
 {
     if
     (
-        !geometryToConformTo_.inside(pt)
-     || !geometryToConformTo_.globalBounds().contains(pt)
+        !geometryToConformTo_.globalBounds().contains(pt)
+     || !geometryToConformTo_.inside(pt)
     )
     {
         return false;
-    }
-
-    return true;
-}
-
-
-inline bool Foam::conformalVoronoiMesh::isPointPair
-(
-    const Vertex_handle& vA,
-    const Vertex_handle& vB
-) const
-{
-    // Want to do this topologically, but problem if vertices are redistributed
-    // so that one of the point pair is one processor and the other is on
-    // another.
-
-    const Foam::point& ptA = topoint(vA->point());
-    const Foam::point& ptB = topoint(vB->point());
-
-    if
-    (
-        (
-            vA->type() == Vb::vtInternalSurface
-         && vB->type() == Vb::vtExternalSurface
-        )
-     ||
-        (
-            vB->type() == Vb::vtInternalSurface
-         && vA->type() == Vb::vtExternalSurface
-        )
-     ||
-        (
-            vA->type() == Vb::vtInternalFeatureEdge
-         && vB->type() == Vb::vtExternalFeatureEdge
-        )
-     ||
-        (
-            vB->type() == Vb::vtInternalFeatureEdge
-         && vA->type() == Vb::vtExternalFeatureEdge
-        )
-     ||
-        (
-            vA->type() == Vb::vtInternalSurface
-         && vB->type() == Vb::vtExternalFeatureEdge
-        )
-     ||
-        (
-            vB->type() == Vb::vtInternalSurface
-         && vA->type() == Vb::vtExternalFeatureEdge
-        )
-     ||
-        (
-            vA->type() == Vb::vtExternalSurface
-         && vB->type() == Vb::vtInternalFeatureEdge
-        )
-     ||
-        (
-            vB->type() == Vb::vtExternalSurface
-         && vA->type() == Vb::vtInternalFeatureEdge
-        )
-    )
-    {
-        const scalar distSqr = magSqr(ptA - ptB);
-
-        const scalar ppDistSqr = sqr(2*pointPairDistance(0.5*(ptA + ptB)));
-
-        if (distSqr > 1.001*ppDistSqr)
-        {
-            return false;
-        }
     }
 
     return true;

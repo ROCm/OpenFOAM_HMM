@@ -20,23 +20,18 @@ shaftRotating.stl
 
     extractFromSurfaceCoeffs
     {
-        // Mark edges whose adjacent surface normals are at an angle less
-        // than includedAngle as features
-        // - 0  : selects no edges
-        // - 180: selects all edges
         includedAngle   100;
     }
 
     subsetFeatures
     {
         // Remove the top feature
-        insideBox       (-100 -100 -100)(100 100 100);
+        insideBox       (-0.1 -0.1 -0.1)(0.1 0.1 0.1);
     }
 
     // Write options
 
-        // Write features to obj format for postprocessing
-        writeObj        no;
+        writeObj        yes;
 }
 
 
@@ -46,10 +41,6 @@ vessel.stl
 
     extractFromSurfaceCoeffs
     {
-        // Mark edges whose adjacent surface normals are at an angle less
-        // than includedAngle as features
-        // - 0  : selects no edges
-        // - 180: selects all edges
         includedAngle       120;
     }
 
@@ -65,7 +56,6 @@ vessel.stl
 
     // Write options
 
-        // Write features to obj format for postprocessing
         writeObj            no;
 }
 
@@ -76,16 +66,11 @@ spargerInlet.stl
 
     extractFromSurfaceCoeffs
     {
-        // Mark edges whose adjacent surface normals are at an angle less
-        // than includedAngle as features
-        // - 0  : selects no edges
-        // - 180: selects all edges
         includedAngle   120;
     }
 
     // Write options
 
-        // Write features to obj format for postprocessing
         writeObj        no;
 }
 
@@ -96,16 +81,62 @@ stirrer.stl
 
     extractFromSurfaceCoeffs
     {
-        // Mark edges whose adjacent surface normals are at an angle less
-        // than includedAngle as features
-        // - 0  : selects no edges
-        // - 180: selects all edges
         includedAngle   120;
     }
 
     // Write options
 
-        // Write features to obj format for postprocessing
+        writeObj        no;
+}
+
+
+stirrer_baffles.stl
+{
+    extractionMethod    extractFromSurface;
+
+    extractFromSurfaceCoeffs
+    {
+        includedAngle   120;
+    }
+
+    baffles (stirrer);
+
+    // Write options
+
+        writeObj        no;
+}
+
+
+rotating.stl
+{
+    extractionMethod    extractFromSurface;
+
+    extractFromSurfaceCoeffs
+    {
+        includedAngle   120;
+    }
+
+    baffles (MRF);
+
+    // Write options
+
+        writeObj        yes;
+}
+
+
+baffles.stl
+{
+    extractionMethod    extractFromSurface;
+
+    extractFromSurfaceCoeffs
+    {
+        includedAngle   120;
+    }
+
+    baffles (baffles);
+
+    // Write options
+
         writeObj        no;
 }
 
