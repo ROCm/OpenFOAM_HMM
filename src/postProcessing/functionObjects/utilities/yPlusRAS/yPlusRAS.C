@@ -183,7 +183,7 @@ Foam::yPlusRAS::yPlusRAS
     name_(name),
     obr_(obr),
     active_(true),
-    log_(false),
+    log_(true),
     phiName_("phi")
 {
     // Check if the available mesh is an fvMesh, otherwise deactivate
@@ -199,7 +199,7 @@ Foam::yPlusRAS::yPlusRAS
                 "const dictionary&, "
                 "const bool"
             ")"
-        )   << "No fvMesh available, deactivating." << nl
+        )   << "No fvMesh available, deactivating " << name_ << nl
             << endl;
     }
 
@@ -241,7 +241,7 @@ void Foam::yPlusRAS::read(const dictionary& dict)
 {
     if (active_)
     {
-        log_ = dict.lookupOrDefault<Switch>("log", false);
+        log_ = dict.lookupOrDefault<Switch>("log", true);
         phiName_ = dict.lookupOrDefault<word>("phiName", "phi");
     }
 }
@@ -298,9 +298,7 @@ void Foam::yPlusRAS::write()
 
         if (log_)
         {
-            Info<< type() << " " << name_ << " output:" << nl
-                << "    writing field " << yPlusRAS.name() << nl
-                << endl;
+            Info<< "    writing field " << yPlusRAS.name() << nl << endl;
         }
 
         yPlusRAS.write();

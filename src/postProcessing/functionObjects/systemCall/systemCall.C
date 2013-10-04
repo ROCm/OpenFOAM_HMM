@@ -113,6 +113,7 @@ void Foam::systemCall::end()
 
 void Foam::systemCall::timeSet()
 {
+    // Do nothing
 }
 
 

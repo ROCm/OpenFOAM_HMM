@@ -76,7 +76,7 @@ void Foam::cloudInfo::read(const dictionary& dict)
     {
         functionObjectFile::resetNames(dict.lookup("clouds"));
 
-        Info<< type() << ": ";
+        Info<< type() << " " << name_ << ": ";
         if (names().size())
         {
             Info<< "applying to clouds:" << nl;

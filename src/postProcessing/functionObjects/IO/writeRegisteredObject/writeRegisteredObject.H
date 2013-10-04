@@ -104,6 +104,7 @@ protected:
         //- Takes over the writing from Db
         bool exclusiveWriting_;
 
+        //- Refererence to Db
         const objectRegistry& obr_;
 
         // Read from dictionary

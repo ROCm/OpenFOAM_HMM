@@ -195,7 +195,7 @@ Foam::yPlusLES::yPlusLES
     name_(name),
     obr_(obr),
     active_(true),
-    log_(false),
+    log_(true),
     phiName_("phi"),
     UName_("U")
 {
@@ -212,7 +212,7 @@ Foam::yPlusLES::yPlusLES
                 "const dictionary&, "
                 "const bool"
             ")"
-        )   << "No fvMesh available, deactivating." << nl
+        )   << "No fvMesh available, deactivating " << name_ << nl
             << endl;
     }
 
@@ -254,7 +254,7 @@ void Foam::yPlusLES::read(const dictionary& dict)
 {
     if (active_)
     {
-        log_ = dict.lookupOrDefault<Switch>("log", false);
+        log_ = dict.lookupOrDefault<Switch>("log", true);
         phiName_ = dict.lookupOrDefault<word>("phiName", "phi");
     }
 }
@@ -313,9 +313,7 @@ void Foam::yPlusLES::write()
 
         if (log_)
         {
-            Info<< type() << " " << name_ << " output:" << nl
-                << "    writing field " << yPlusLES.name() << nl
-                << endl;
+            Info<< "    writing field " << yPlusLES.name() << nl << endl;
         }
 
         yPlusLES.write();

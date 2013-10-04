@@ -74,6 +74,7 @@ void Foam::forces::writeFileHeader(const label i)
         // force data
 
         file(i)
+            << "# CofR      : " << coordSys_.origin() << nl
             << "# Time" << tab
             << "forces(pressure,viscous,porous) "
             << "moment(pressure,viscous,porous)";
@@ -99,7 +100,7 @@ void Foam::forces::writeFileHeader(const label i)
 
         for (label j = 0; j < nBin_; j++)
         {
-            const word jn = Foam::name(j);
+            const word jn('[' + Foam::name(j) + ']');
 
             file(i)
                 << tab
@@ -110,7 +111,7 @@ void Foam::forces::writeFileHeader(const label i)
         {
             for (label j = 0; j < nBin_; j++)
             {
-                const word jn = Foam::name(j);
+                const word jn('[' + Foam::name(j) + ']');
 
                 file(i)
                     << tab
@@ -496,14 +497,15 @@ Foam::forces::forces
     const word& name,
     const objectRegistry& obr,
     const dictionary& dict,
-    const bool loadFromFiles
+    const bool loadFromFiles,
+    const bool readFields
 )
 :
     functionObjectFile(obr, name, createFileNames(dict)),
     name_(name),
     obr_(obr),
     active_(true),
-    log_(false),
+    log_(true),
     force_(3),
     moment_(3),
     patchSet_(),
@@ -526,7 +528,15 @@ Foam::forces::forces
     initialised_(false)
 {
     // Check if the available mesh is an fvMesh otherise deactivate
-    if (!isA<fvMesh>(obr_))
+    if (isA<fvMesh>(obr_))
+    {
+        if (readFields)
+        {
+            read(dict);
+            Info<< endl;
+        }
+    }
+    else
     {
         active_ = false;
         WarningIn
@@ -538,11 +548,10 @@ Foam::forces::forces
                 "const dictionary&, "
                 "const bool"
             ")"
-        )   << "No fvMesh available, deactivating."
+        )   << "No fvMesh available, deactivating " << name_
             << endl;
     }
 
-    read(dict);
 }
 
 
@@ -563,7 +572,7 @@ Foam::forces::forces
     name_(name),
     obr_(obr),
     active_(true),
-    log_(false),
+    log_(true),
     force_(3),
     moment_(3),
     patchSet_(patchSet),
@@ -607,7 +616,13 @@ void Foam::forces::read(const dictionary& dict)
     {
         initialised_ = false;
 
-        log_ = dict.lookupOrDefault<Switch>("log", false);
+        log_ = dict.lookupOrDefault<Switch>("log", true);
+
+        if (log_)
+        {
+            Info<< type() << " " << name_ << ":" << nl;
+        }
+
         directForceDensity_ = dict.lookupOrDefault("directForceDensity", false);
 
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
@@ -644,15 +659,15 @@ void Foam::forces::read(const dictionary& dict)
             localSystem_ = true;
         }
 
-        if (dict.readIfPresent("porosity", porosity_))
+        if (dict.readIfPresent("porosity", porosity_) && log_)
         {
             if (porosity_)
             {
-                Info<< "Including porosity effects" << endl;
+                Info<< "    Including porosity effects" << endl;
             }
             else
             {
-                Info<< "Not including porosity effects" << endl;
+                Info<< "    Not including porosity effects" << endl;
             }
         }
 

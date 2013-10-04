@@ -51,7 +51,15 @@ Foam::fieldCoordinateSystemTransform::fieldCoordinateSystemTransform
     coordSys_(obr, dict)
 {
     // Check if the available mesh is an fvMesh otherise deactivate
-    if (!isA<fvMesh>(obr_))
+    if (isA<fvMesh>(obr_))
+    {
+        read(dict);
+
+        Info<< type() << " " << name_ << ":" << nl
+            << "   Applying transformation from global Cartesian to local "
+            << coordSys_ << nl << endl;
+    }
+    else
     {
         active_ = false;
         WarningIn
@@ -63,15 +71,9 @@ Foam::fieldCoordinateSystemTransform::fieldCoordinateSystemTransform
                 "const dictionary&, "
                 "const bool"
             ")"
-        )   << "No fvMesh available, deactivating."
+        )   << "No fvMesh available, deactivating " << name_
             << endl;
     }
-
-    read(dict);
-
-    Info<< type() << ":" << nl
-        << "   Applying transformation from global Cartesian to local "
-        << coordSys_ << nl << endl;
 }
 
 
@@ -112,6 +114,8 @@ void Foam::fieldCoordinateSystemTransform::timeSet()
 
 void Foam::fieldCoordinateSystemTransform::write()
 {
+    Info<< type() << " " << name_ << " output:" << nl;
+
     forAll(fieldSet_, fieldI)
     {
         // If necessary load field

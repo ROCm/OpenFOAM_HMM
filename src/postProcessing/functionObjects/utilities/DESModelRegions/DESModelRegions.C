@@ -77,7 +77,7 @@ Foam::DESModelRegions::DESModelRegions
                 "const dictionary&, "
                 "const bool"
             ")"
-        )   << "No fvMesh available, deactivating." << nl
+        )   << "No fvMesh available, deactivating " << name_ << nl
             << endl;
     }
 
@@ -160,7 +160,7 @@ void Foam::DESModelRegions::write()
 
         if (log_)
         {
-            Info<< type() << " " << name_ << " output:" << nl;
+            Info<< type() << " " << name_ <<  " output:" << nl;
         }
 
         volScalarField& DESModelRegions =
@@ -204,7 +204,7 @@ void Foam::DESModelRegions::write()
                 gSum(DESModelRegions.internalField()*mesh.V())
                /gSum(mesh.V())*100.0;
 
-            if (Pstream::master())
+            if (Pstream::master() && log_)
             {
                 file() << obr_.time().timeName() << token::TAB
                     << prc << token::TAB << 100.0 - prc << endl;

@@ -52,6 +52,7 @@ void Foam::forceCoeffs::writeFileHeader(const label i)
             << "# magUInf   : " << magUInf_ << nl
             << "# lRef      : " << lRef_ << nl
             << "# Aref      : " << Aref_ << nl
+            << "# CofR      : " << coordSys_.origin() << nl
             << "# Time" << tab << "Cm" << tab << "Cd" << tab << "Cl" << tab
             << "Cl(f)" << tab << "Cl(r)";
     }
@@ -68,7 +69,7 @@ void Foam::forceCoeffs::writeFileHeader(const label i)
 
         for (label j = 0; j < nBin_; j++)
         {
-            const word jn = Foam::name(j);
+            const word jn('[' + Foam::name(j) + ']');
 
             file(i)
                 << tab << "Cm" << jn << tab << "Cd" << jn << tab << "Cl" << jn;
@@ -95,7 +96,7 @@ Foam::forceCoeffs::forceCoeffs
     const bool loadFromFiles
 )
 :
-    forces(name, obr, dict, loadFromFiles),
+    forces(name, obr, dict, loadFromFiles, false),
     liftDir_(vector::zero),
     dragDir_(vector::zero),
     pitchAxis_(vector::zero),
@@ -104,6 +105,8 @@ Foam::forceCoeffs::forceCoeffs
     Aref_(0.0)
 {
     read(dict);
+
+    Info<< endl;
 }
 
 

@@ -65,7 +65,7 @@ Foam::fieldMinMax::fieldMinMax
     name_(name),
     obr_(obr),
     active_(true),
-    log_(false),
+    log_(true),
     mode_(mdMag),
     fieldSet_()
 {
@@ -82,7 +82,7 @@ Foam::fieldMinMax::fieldMinMax
                 "const dictionary&, "
                 "const bool"
             ")"
-        )   << "No fvMesh available, deactivating."
+        )   << "No fvMesh available, deactivating " << name_
             << endl;
     }
 
@@ -102,7 +102,7 @@ void Foam::fieldMinMax::read(const dictionary& dict)
 {
     if (active_)
     {
-        log_ = dict.lookupOrDefault<Switch>("log", false);
+        log_ = dict.lookupOrDefault<Switch>("log", true);
 
         mode_ = modeTypeNames_[dict.lookupOrDefault<word>("mode", "magnitude")];
         dict.lookup("fields") >> fieldSet_;
@@ -158,7 +158,7 @@ void Foam::fieldMinMax::write()
 
         if (log_)
         {
-            Info<< type() << " output:" << nl;
+            Info<< type() << " " << name_ <<  " output:" << nl;
         }
 
         forAll(fieldSet_, fieldI)

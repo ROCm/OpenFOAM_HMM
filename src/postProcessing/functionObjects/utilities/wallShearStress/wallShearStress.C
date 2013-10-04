@@ -101,7 +101,7 @@ Foam::wallShearStress::wallShearStress
     name_(name),
     obr_(obr),
     active_(true),
-    log_(false),
+    log_(true),
     patchSet_()
 {
     // Check if the available mesh is an fvMesh, otherwise deactivate
@@ -117,7 +117,7 @@ Foam::wallShearStress::wallShearStress
                 "const dictionary&, "
                 "const bool"
             ")"
-        )   << "No fvMesh available, deactivating." << nl
+        )   << "No fvMesh available, deactivating " << name_ << nl
             << endl;
     }
 
@@ -166,7 +166,7 @@ void Foam::wallShearStress::read(const dictionary& dict)
 {
     if (active_)
     {
-        log_ = dict.lookupOrDefault<Switch>("log", false);
+        log_ = dict.lookupOrDefault<Switch>("log", true);
 
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
         const polyBoundaryMesh& pbm = mesh.boundaryMesh();
@@ -177,7 +177,7 @@ void Foam::wallShearStress::read(const dictionary& dict)
                 wordReList(dict.lookupOrDefault("patches", wordReList()))
             );
 
-        Info<< type() << " output:" << nl;
+        Info<< type() << " " << name_ << ":" << nl;
 
         if (patchSet_.empty())
         {
