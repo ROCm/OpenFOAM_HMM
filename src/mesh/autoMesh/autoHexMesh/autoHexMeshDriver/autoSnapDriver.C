@@ -33,6 +33,7 @@ Description
 #include "fvMesh.H"
 #include "Time.H"
 #include "OFstream.H"
+#include "OBJstream.H"
 #include "mapPolyMesh.H"
 #include "pointEdgePoint.H"
 #include "PointEdgeWave.H"
@@ -1193,12 +1194,29 @@ void Foam::autoSnapDriver::detectNearSurfaces
 
     const pointField avgCc(avgCellCentres(mesh, pp));
 
-    // Construct rays from localPoints to beyond cell centre
+    // Construct rays through localPoints to beyond cell centre
+    pointField start(pp.nPoints());
     pointField end(pp.nPoints());
     forAll(localPoints, pointI)
     {
         const point& pt = localPoints[pointI];
-        end[pointI] = pt + 2*(avgCc[pointI]-pt);
+        const vector d = 2*(avgCc[pointI]-pt);
+        start[pointI] = pt - d;
+        end[pointI] = pt + d;
+    }
+
+
+    autoPtr<OBJstream> gapStr;
+    if (debug&meshRefinement::OBJINTERSECTIONS)
+    {
+        gapStr.reset
+        (
+            new OBJstream
+            (
+                mesh.time().path()
+              / "detectNearSurfaces_" + meshRefiner_.timeName() + ".obj"
+            )
+        );
     }
 
 
@@ -1226,7 +1244,7 @@ void Foam::autoSnapDriver::detectNearSurfaces
         surfaces.findNearestIntersection
         (
             unzonedSurfaces,
-            localPoints,
+            start,
             end,
 
             surface1,
@@ -1248,38 +1266,67 @@ void Foam::autoSnapDriver::detectNearSurfaces
 
             bool override = false;
 
-            if (hit1[pointI].hit())
+            //if (hit1[pointI].hit())
+            //{
+            //    if
+            //    (
+            //        meshRefiner_.isGap
+            //        (
+            //            planarCos,
+            //            nearestPoint[pointI],
+            //            nearestNormal[pointI],
+            //            hit1[pointI].hitPoint(),
+            //            normal1[pointI]
+            //        )
+            //    )
+            //    {
+            //        disp[pointI] = hit1[pointI].hitPoint()-pt;
+            //        override = true;
+            //    }
+            //}
+            //if (hit2[pointI].hit())
+            //{
+            //    if
+            //    (
+            //        meshRefiner_.isGap
+            //        (
+            //            planarCos,
+            //            nearestPoint[pointI],
+            //            nearestNormal[pointI],
+            //            hit2[pointI].hitPoint(),
+            //            normal2[pointI]
+            //        )
+            //    )
+            //    {
+            //        disp[pointI] = hit2[pointI].hitPoint()-pt;
+            //        override = true;
+            //    }
+            //}
+
+            if (hit1[pointI].hit() && hit2[pointI].hit())
             {
                 if
                 (
                     meshRefiner_.isGap
                     (
                         planarCos,
-                        nearestPoint[pointI],
-                        nearestNormal[pointI],
                         hit1[pointI].hitPoint(),
-                        normal1[pointI]
-                    )
-                )
-                {
-                    disp[pointI] = hit1[pointI].hitPoint()-pt;
-                    override = true;
-                }
-            }
-            if (hit2[pointI].hit())
-            {
-                if
-                (
-                    meshRefiner_.isGap
-                    (
-                        planarCos,
-                        nearestPoint[pointI],
-                        nearestNormal[pointI],
+                        normal1[pointI],
                         hit2[pointI].hitPoint(),
                         normal2[pointI]
                     )
                 )
                 {
+                    // TBD: check if the attraction (to nearest) would attract
+                    // good enough and not override attraction
+
+                    if (gapStr.valid())
+                    {
+                        const point& intPt = hit2[pointI].hitPoint();
+                        gapStr().write(linePointRef(pt, intPt));
+                    }
+
+                    // Choose hit2 : nearest to end point (so inside the domain)
                     disp[pointI] = hit2[pointI].hitPoint()-pt;
                     override = true;
                 }
@@ -1337,7 +1384,7 @@ void Foam::autoSnapDriver::detectNearSurfaces
             surfaces.findNearestIntersection
             (
                 surfacesToTest,
-                pointField(localPoints, zonePointIndices),
+                pointField(start, zonePointIndices),
                 pointField(end, zonePointIndices),
 
                 surface1,
@@ -1363,38 +1410,63 @@ void Foam::autoSnapDriver::detectNearSurfaces
 
                 bool override = false;
 
-                if (hit1[i].hit())
+                //if (hit1[i].hit())
+                //{
+                //    if
+                //    (
+                //        meshRefiner_.isGap
+                //        (
+                //            planarCos,
+                //            nearestPoint[pointI],
+                //            nearestNormal[pointI],
+                //            hit1[i].hitPoint(),
+                //            normal1[i]
+                //        )
+                //    )
+                //    {
+                //        disp[pointI] = hit1[i].hitPoint()-pt;
+                //        override = true;
+                //    }
+                //}
+                //if (hit2[i].hit())
+                //{
+                //    if
+                //    (
+                //        meshRefiner_.isGap
+                //        (
+                //            planarCos,
+                //            nearestPoint[pointI],
+                //            nearestNormal[pointI],
+                //            hit2[i].hitPoint(),
+                //            normal2[i]
+                //        )
+                //    )
+                //    {
+                //        disp[pointI] = hit2[i].hitPoint()-pt;
+                //        override = true;
+                //    }
+                //}
+
+                if (hit1[i].hit() && hit2[i].hit())
                 {
                     if
                     (
                         meshRefiner_.isGap
                         (
                             planarCos,
-                            nearestPoint[pointI],
-                            nearestNormal[pointI],
                             hit1[i].hitPoint(),
-                            normal1[i]
-                        )
-                    )
-                    {
-                        disp[pointI] = hit1[i].hitPoint()-pt;
-                        override = true;
-                    }
-                }
-                if (hit2[i].hit())
-                {
-                    if
-                    (
-                        meshRefiner_.isGap
-                        (
-                            planarCos,
-                            nearestPoint[pointI],
-                            nearestNormal[pointI],
+                            normal1[i],
                             hit2[i].hitPoint(),
                             normal2[i]
                         )
                     )
                     {
+                        if (gapStr.valid())
+                        {
+                            const point& intPt = hit2[i].hitPoint();
+                            gapStr().write(linePointRef(pt, intPt));
+                        }
+
                         disp[pointI] = hit2[i].hitPoint()-pt;
                         override = true;
                     }
