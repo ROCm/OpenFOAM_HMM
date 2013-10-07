@@ -623,6 +623,149 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::doRemoveCells
 }
 
 
+// Split faces
+Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitFaces
+(
+    const labelList& splitFaces,
+    const labelPairList& splits
+)
+{
+    polyTopoChange meshMod(mesh_);
+
+    forAll(splitFaces, i)
+    {
+        label faceI = splitFaces[i];
+        const face& f = mesh_.faces()[faceI];
+
+
+        // Split as start and end index in face
+        const labelPair& split = splits[i];
+
+        label nVerts = split[1]-split[0];
+        if (nVerts < 0)
+        {
+            nVerts += f.size();
+        }
+        nVerts += 1;
+
+
+        // Split into f0, f1
+        face f0(nVerts);
+
+        label fp = split[0];
+        forAll(f0, i)
+        {
+            f0[i] = f[fp];
+            fp = f.fcIndex(fp);
+        }
+
+        face f1(f.size()-f0.size()+2);
+        fp = split[1];
+        forAll(f1, i)
+        {
+            f1[i] = f[fp];
+            fp = f.fcIndex(fp);
+        }
+
+
+        // Determine face properties
+        label own = mesh_.faceOwner()[faceI];
+        label nei = -1;
+        label patchI = -1;
+        if (faceI >= mesh_.nInternalFaces())
+        {
+            patchI = mesh_.boundaryMesh().whichPatch(faceI);
+        }
+        else
+        {
+            nei = mesh_.faceNeighbour()[faceI];
+        }
+
+        label zoneI = mesh_.faceZones().whichZone(faceI);
+        bool zoneFlip = false;
+        if (zoneI != -1)
+        {
+            const faceZone& fz = mesh_.faceZones()[zoneI];
+            zoneFlip = fz.flipMap()[fz.whichFace(faceI)];
+        }
+
+
+Pout<< "face:" << faceI << " verts:" << f
+    << " split into f0:" << f0
+    << " f1:" << f1 << endl;
+
+        // Change/add faces
+        meshMod.modifyFace
+        (
+            f0,                         // modified face
+            faceI,                      // label of face
+            own,                        // owner
+            nei,                        // neighbour
+            false,                      // face flip
+            patchI,                     // patch for face
+            zoneI,                      // zone for face
+            zoneFlip                    // face flip in zone
+        );
+        meshMod.addFace
+        (
+            f1,                         // modified face
+            own,                        // owner
+            nei,                        // neighbour
+            -1,                         // master point
+            -1,                         // master edge
+            faceI,                      // master face
+            false,                      // face flip
+            patchI,                     // patch for face
+            zoneI,                      // zone for face
+            zoneFlip                    // face flip in zone
+        );
+    }
+
+
+
+    // Change the mesh (no inflation)
+    autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, true);
+
+    // Update fields
+    mesh_.updateMesh(map);
+
+    // Move mesh (since morphing might not do this)
+    if (map().hasMotionPoints())
+    {
+        mesh_.movePoints(map().preMotionPoints());
+    }
+    else
+    {
+        // Delete mesh volumes. No other way to do this?
+        mesh_.clearOut();
+    }
+
+    // Reset the instance for if in overwrite mode
+    mesh_.setInstance(timeName());
+    setInstance(mesh_.facesInstance());
+
+    // Update local mesh data
+    const labelList& oldToNew = map().reverseFaceMap();
+    labelList newSplitFaces(renumber(oldToNew, splitFaces));
+    // Add added faces (every splitFaces becomes two faces)
+    label sz = newSplitFaces.size();
+    newSplitFaces.setSize(2*sz);
+    forAll(map().faceMap(), faceI)
+    {
+        label oldFaceI = map().faceMap()[faceI];
+        if (oldToNew[oldFaceI] != faceI)
+        {
+            // Added face
+            newSplitFaces[sz++] = faceI;
+        }
+    }
+
+    updateMesh(map, newSplitFaces);
+
+    return map;
+}
+
+
 //// Determine for multi-processor regions the lowest numbered cell on the
 //// lowest numbered processor.
 //void Foam::meshRefinement::getCoupledRegionMaster
