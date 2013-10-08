@@ -38,6 +38,7 @@ License
 #include "cellSet.H"
 #include "faceSet.H"
 #include "pointSet.H"
+#include "uniformDimensionedFields.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -193,6 +194,60 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
             }
         }
     }
+
+
+    autoPtr<labelIOList> cellLevelPtr;
+    {
+        IOobject io
+        (
+            "cellLevel",
+            facesInstance(),
+            polyMesh::meshSubDir,
+            *this,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        );
+        if (io.headerOk())
+        {
+            Info<< "Reading hexRef8 data : " << io.name() << endl;
+            cellLevelPtr.reset(new labelIOList(io));
+        }
+    }
+    autoPtr<labelIOList> pointLevelPtr;
+    {
+        IOobject io
+        (
+            "pointLevel",
+            facesInstance(),
+            polyMesh::meshSubDir,
+            *this,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        );
+        if (io.headerOk())
+        {
+            Info<< "Reading hexRef8 data : " << io.name() << endl;
+            pointLevelPtr.reset(new labelIOList(io));
+        }
+    }
+    autoPtr<uniformDimensionedScalarField> level0EdgePtr;
+    {
+        IOobject io
+        (
+            "level0Edge",
+            facesInstance(),
+            polyMesh::meshSubDir,
+            *this,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        );
+        if (io.headerOk())
+        {
+            Info<< "Reading hexRef8 data : " << io.name() << endl;
+            level0EdgePtr.reset(new uniformDimensionedScalarField(io));
+        }
+    }
+
 
 
     label maxProcCells = 0;
@@ -767,8 +822,28 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
 
         procMesh.write();
 
+        // Write points if pointsInstance differing from facesInstance
+        if (facesInstancePointsPtr_.valid())
+        {
+            pointIOField pointsInstancePoints
+            (
+                IOobject
+                (
+                    "points",
+                    pointsInstance(),
+                    polyMesh::meshSubDir,
+                    procMesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                xferMove(procPoints)
+            );
+            pointsInstancePoints.write();
+        }
 
 
+        // Decompose any sets
         if (decomposeSets)
         {
             forAll(cellSets, i)
@@ -813,25 +888,67 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
         }
 
 
-        // Write points if pointsInstance differing from facesInstance
-        if (facesInstancePointsPtr_.valid())
+        // hexRef8 data
+        if (cellLevelPtr.valid())
         {
-            pointIOField pointsInstancePoints
+            labelIOList
             (
                 IOobject
                 (
-                    "points",
-                    pointsInstance(),
+                    cellLevelPtr().name(),
+                    facesInstance(),
                     polyMesh::meshSubDir,
                     procMesh,
                     IOobject::NO_READ,
-                    IOobject::NO_WRITE,
-                    false
+                    IOobject::AUTO_WRITE
                 ),
-                xferMove(procPoints)
-            );
-            pointsInstancePoints.write();
+                UIndirectList<label>
+                (
+                    cellLevelPtr(),
+                    procCellAddressing_[procI]
+                )()
+            ).write();
         }
+        if (pointLevelPtr.valid())
+        {
+            labelIOList
+            (
+                IOobject
+                (
+                    pointLevelPtr().name(),
+                    facesInstance(),
+                    polyMesh::meshSubDir,
+                    procMesh,
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                UIndirectList<label>
+                (
+                    pointLevelPtr(),
+                    procPointAddressing_[procI]
+                )()
+            ).write();
+        }
+        if (level0EdgePtr.valid())
+        {
+            uniformDimensionedScalarField
+            (
+                IOobject
+                (
+                    level0EdgePtr().name(),
+                    facesInstance(),
+                    polyMesh::meshSubDir,
+                    procMesh,
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                level0EdgePtr()
+            ).write();
+        }
+
+
+
+        // Statistics
 
         Info<< endl
             << "Processor " << procI << nl
