@@ -6,21 +6,25 @@ cd ${0%/*} || exit 1    # run from this directory
 
 setControlDict()
 {
-    controlDict="system/controlDict"
-
     sed \
-    -e s/"\(deltaT[ \t]*\) 5e-06;"/"\1 1e-05;"/g \
-    -e s/"\(endTime[ \t]*\) 0.005;"/"\1 0.015;"/g \
-    -e s/"\(writeInterval[ \t]*\) 10;"/"\1 50;"/g \
-    $controlDict > temp.$$
-    mv temp.$$ $controlDict
+    -e "s/\(deltaT[ \t]*\) 5e-06;/\1 1e-05;/g" \
+    -e "s/\(endTime[ \t]*\) 0.005;/\1 0.015;/g" \
+    -e "s/\(writeInterval[ \t]*\) 10;/\1 50;/g" \
+    -i system/controlDict
 }
 
+setCombustionProperties()
+{
+    sed \
+    -e "s/\(laminarFlameSpeedCorrelation[ \t]*\) Gulders;/\1 RaviPetersen;/g" \
+    -e "s/\(fuel[ \t]*\) Propane;/\1 HydrogenInAir;/g" \
+    -i constant/combustionProperties
+}
 
 # Do moriyoshiHomogeneous
 ( cd moriyoshiHomogeneous && foamRunTutorials )
 
-# Clone case
+# Clone case for second phase
 cloneCase moriyoshiHomogeneous moriyoshiHomogeneousPart2
 
 # Modify and execute
@@ -29,6 +33,21 @@ cloneCase moriyoshiHomogeneous moriyoshiHomogeneousPart2
 
     cp -r ../moriyoshiHomogeneous/0.005 .
     setControlDict
+    runApplication `getApplication`
+)
+
+# Clone case for hydrogen
+cloneCase moriyoshiHomogeneous moriyoshiHomogeneousHydrogen
+
+# Modify and execute
+(
+    cd moriyoshiHomogeneousHydrogen || exit
+
+    setCombustionProperties
+    mv constant/thermophysicalProperties \
+       constant/thermophysicalProperties.propane
+    mv constant/thermophysicalProperties.hydrogen \
+       constant/thermophysicalProperties
     runApplication `getApplication`
 )
 

@@ -19,9 +19,11 @@ runApplication collapseEdges -collapseFaces -latestTime -overwrite
 
 runApplication checkMesh -allTopology -allGeometry -latestTime
 
+latestTime=`foamInfoExec -latestTime`
+
 # Move the mesh into polyMesh
 \rm -r constant/polyMesh
-\mv 100/polyMesh constant
+\mv "${latestTime}"/polyMesh constant
 
 # Clean up intermediate meshes
 \rm -r [1-9]*

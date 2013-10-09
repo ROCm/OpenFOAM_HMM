@@ -28,43 +28,6 @@ License
 #include "indirectPrimitivePatch.H"
 #include "globalMeshData.H"
 
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    //- Transformation
-    class listTransform
-    {
-    public:
-
-        void operator()
-        (
-            const vectorTensorTransform& vt,
-            const bool forward,
-            List<List<point> >& fld
-        ) const
-        {
-            const tensor T
-            (
-                forward
-              ? vt.R()
-              : vt.R().T()
-            );
-
-            forAll(fld, i)
-            {
-                List<point>& elems = fld[i];
-                forAll(elems, elemI)
-                {
-                    elems[elemI] = transform(T, elems[elemI]);
-                }
-            }
-        }
-    };
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template
@@ -141,7 +104,7 @@ Foam::PatchTools::pointNormals
     (
         transforms,
         pointFaceNormals,
-        listTransform()
+        mapDistribute::transform()
     );
 
 

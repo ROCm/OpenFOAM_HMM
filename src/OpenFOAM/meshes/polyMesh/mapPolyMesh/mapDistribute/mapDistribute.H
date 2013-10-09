@@ -251,27 +251,35 @@ public:
         {
         public:
 
-            template<class T>
+            template<class Type>
             void operator()
             (
                 const vectorTensorTransform& vt,
                 const bool forward,
-                List<T>& fld
+                List<Type>& fld
             ) const
             {
-                if (forward)
+                const tensor T(forward ? vt.R() : vt.R().T());
+                transformList(T, fld);
+            }
+
+            template<class Type>
+            void operator()
+            (
+                const vectorTensorTransform& vt,
+                const bool forward,
+                List<List<Type> >& flds
+            ) const
+            {
+                forAll(flds, i)
                 {
-                    transformList(vt.R(), fld);
-                }
-                else
-                {
-                    transformList(vt.R().T(), fld);
+                    operator()(vt, forward, flds[i]);
                 }
             }
 
             //- Transform patch-based field
-            template<class T>
-            void operator()(const coupledPolyPatch& cpp, UList<T>& fld) const
+            template<class Type>
+            void operator()(const coupledPolyPatch& cpp, UList<Type>& fld) const
             {
                 if (!cpp.parallel())
                 {
@@ -280,8 +288,8 @@ public:
             }
 
             //- Transform sparse field
-            template<class T, template<class> class Container>
-            void operator()(const coupledPolyPatch& cpp, Container<T>& map)
+            template<class Type, template<class> class Container>
+            void operator()(const coupledPolyPatch& cpp, Container<Type>& map)
             const
             {
                 if (!cpp.parallel())
@@ -311,6 +319,18 @@ public:
                 else
                 {
                     fld = vt.invTransformPosition(pfld);
+                }
+            }
+            void operator()
+            (
+                const vectorTensorTransform& vt,
+                const bool forward,
+                List<List<point> >& flds
+            ) const
+            {
+                forAll(flds, i)
+                {
+                    operator()(vt, forward, flds[i]);
                 }
             }
             //- Transform patch-based field

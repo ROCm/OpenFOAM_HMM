@@ -99,6 +99,40 @@ Usage
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+const labelIOList& procAddressing
+(
+    const PtrList<fvMesh>& procMeshList,
+    const label procI,
+    const word& name,
+    PtrList<labelIOList>& procAddressingList
+)
+{
+    const fvMesh& procMesh = procMeshList[procI];
+
+    if (!procAddressingList.set(procI))
+    {
+        procAddressingList.set
+        (
+            procI,
+            new labelIOList
+            (
+                IOobject
+                (
+                    name,
+                    procMesh.facesInstance(),
+                    procMesh.meshSubDir,
+                    procMesh,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                )
+            )
+        );
+    }
+    return procAddressingList[procI];
+}
+
+
+
 int main(int argc, char *argv[])
 {
     argList::addNote
@@ -805,74 +839,29 @@ int main(int argc, char *argv[])
                 }
                 const fvMesh& procMesh = procMeshList[procI];
 
+                const labelIOList& faceProcAddressing = procAddressing
+                (
+                    procMeshList,
+                    procI,
+                    "faceProcAddressing",
+                    faceProcAddressingList
+                );
 
-                if (!faceProcAddressingList.set(procI))
-                {
-                    faceProcAddressingList.set
-                    (
-                        procI,
-                        new labelIOList
-                        (
-                            IOobject
-                            (
-                                "faceProcAddressing",
-                                procMesh.facesInstance(),
-                                procMesh.meshSubDir,
-                                procMesh,
-                                IOobject::MUST_READ,
-                                IOobject::NO_WRITE
-                            )
-                        )
-                    );
-                }
-                const labelIOList& faceProcAddressing =
-                    faceProcAddressingList[procI];
+                const labelIOList& cellProcAddressing = procAddressing
+                (
+                    procMeshList,
+                    procI,
+                    "cellProcAddressing",
+                    cellProcAddressingList
+                );
 
-
-                if (!cellProcAddressingList.set(procI))
-                {
-                    cellProcAddressingList.set
-                    (
-                        procI,
-                        new labelIOList
-                        (
-                            IOobject
-                            (
-                                "cellProcAddressing",
-                                procMesh.facesInstance(),
-                                procMesh.meshSubDir,
-                                procMesh,
-                                IOobject::MUST_READ,
-                                IOobject::NO_WRITE
-                            )
-                        )
-                    );
-                }
-                const labelIOList& cellProcAddressing =
-                    cellProcAddressingList[procI];
-
-
-                if (!boundaryProcAddressingList.set(procI))
-                {
-                    boundaryProcAddressingList.set
-                    (
-                        procI,
-                        new labelIOList
-                        (
-                            IOobject
-                            (
-                                "boundaryProcAddressing",
-                                procMesh.facesInstance(),
-                                procMesh.meshSubDir,
-                                procMesh,
-                                IOobject::MUST_READ,
-                                IOobject::NO_WRITE
-                            )
-                        )
-                    );
-                }
-                const labelIOList& boundaryProcAddressing =
-                    boundaryProcAddressingList[procI];
+                const labelIOList& boundaryProcAddressing = procAddressing
+                (
+                    procMeshList,
+                    procI,
+                    "boundaryProcAddressing",
+                    boundaryProcAddressingList
+                );
 
 
                 // FV fields
@@ -959,27 +948,13 @@ int main(int argc, char *argv[])
                  || pointTensorFields.size()
                 )
                 {
-                    if (!pointProcAddressingList.set(procI))
-                    {
-                        pointProcAddressingList.set
-                        (
-                            procI,
-                            new labelIOList
-                            (
-                                IOobject
-                                (
-                                    "pointProcAddressing",
-                                    procMesh.facesInstance(),
-                                    procMesh.meshSubDir,
-                                    procMesh,
-                                    IOobject::MUST_READ,
-                                    IOobject::NO_WRITE
-                                )
-                            )
-                        );
-                    }
-                    const labelIOList& pointProcAddressing =
-                        pointProcAddressingList[procI];
+                    const labelIOList& pointProcAddressing = procAddressing
+                    (
+                        procMeshList,
+                        procI,
+                        "pointProcAddressing",
+                        pointProcAddressingList
+                    );
 
                     const pointMesh& procPMesh = pointMesh::New(procMesh);
 

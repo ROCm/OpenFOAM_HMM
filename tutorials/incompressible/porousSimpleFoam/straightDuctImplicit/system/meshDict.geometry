@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-angledDuct.stl
+straightDuct.stl
 {
     type triSurfaceMesh;
     name angledDuct;

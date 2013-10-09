@@ -866,6 +866,13 @@ public:
                 const point& keepPoint
             );
 
+            //- Split faces into two
+            autoPtr<mapPolyMesh> splitFaces
+            (
+                const labelList& splitFaces,
+                const labelPairList& splits
+            );
+
             //- Update local numbering for mesh redistribution
             void distribute(const mapDistributePolyMesh&);
 
@@ -1004,6 +1011,26 @@ public:
             //- Do any one of above IO functions. flag is combination of
             //  writeFlag values.
             void write(const label flag, const fileName&) const;
+
+            //- Helper: calculate average
+            template<class T>
+            static T gAverage
+            (
+                const polyMesh& mesh,
+                const PackedBoolList& isMasterElem,
+                const UList<T>& values
+            );
+
+            //- Helper: calculate average over selected elements
+            template<class T>
+            static T gAverage
+            (
+                const polyMesh& mesh,
+                const PackedBoolList& isMasterElem,
+                const labelList& meshPoints,
+                const UList<T>& values
+            );
+
 };
 
 

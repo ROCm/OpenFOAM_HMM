@@ -267,7 +267,12 @@ void Foam::meshRefinement::markFeatureCellLevel
 
 
     // Find all start cells of features. Is done by tracking from keepPoint.
-    Cloud<trackedParticle> cloud(mesh_, IDLList<trackedParticle>());
+    Cloud<trackedParticle> startPointCloud
+    (
+        mesh_,
+        "startPointCloud",
+        IDLList<trackedParticle>()
+    );
 
 
     // Features are identical on all processors. Number them so we know
@@ -315,7 +320,7 @@ void Foam::meshRefinement::markFeatureCellLevel
                     }
 
                     // Non-manifold point. Create particle.
-                    cloud.addParticle
+                    startPointCloud.addParticle
                     (
                         new trackedParticle
                         (
@@ -359,7 +364,7 @@ void Foam::meshRefinement::markFeatureCellLevel
                     }
 
                     // Non-manifold point. Create particle.
-                    cloud.addParticle
+                    startPointCloud.addParticle
                     (
                         new trackedParticle
                         (
@@ -384,12 +389,13 @@ void Foam::meshRefinement::markFeatureCellLevel
     maxFeatureLevel = labelList(mesh_.nCells(), -1);
 
     // Database to pass into trackedParticle::move
-    trackedParticle::trackingData td(cloud, maxFeatureLevel);
+    trackedParticle::trackingData td(startPointCloud, maxFeatureLevel);
 
     // Track all particles to their end position (= starting feature point)
     // Note that the particle might have started on a different processor
     // so this will transfer across nicely until we can start tracking proper.
-    cloud.move(td, GREAT);
+    startPointCloud.move(td, GREAT);
+
 
     // Reset level
     maxFeatureLevel = -1;
@@ -403,8 +409,64 @@ void Foam::meshRefinement::markFeatureCellLevel
         featureEdgeVisited[featI] = 0u;
     }
 
+
+    Cloud<trackedParticle> cloud
+    (
+        mesh_,
+        "featureCloud",
+        IDLList<trackedParticle>()
+    );
+
+    forAllIter(Cloud<trackedParticle>, startPointCloud, iter)
+    {
+        const trackedParticle& startTp = iter();
+
+        label featI = startTp.i();
+        label pointI = startTp.j();
+
+        const featureEdgeMesh& featureMesh = features_[featI];
+        const labelList& pEdges = featureMesh.pointEdges()[pointI];
+
+        // Now shoot particles down all pEdges.
+        forAll(pEdges, pEdgeI)
+        {
+            label edgeI = pEdges[pEdgeI];
+
+            if (featureEdgeVisited[featI].set(edgeI, 1u))
+            {
+                // Unvisited edge. Make the particle go to the other point
+                // on the edge.
+
+                const edge& e = featureMesh.edges()[edgeI];
+                label otherPointI = e.otherVertex(pointI);
+
+                trackedParticle* tp(new trackedParticle(startTp));
+                tp->end() = featureMesh.points()[otherPointI];
+                tp->j() = otherPointI;
+
+                if (debug&meshRefinement::FEATURESEEDS)
+                {
+                    Pout<< "Adding particle for point:" << pointI
+                        << " coord:" << tp->position()
+                        << " feature:" << featI
+                        << " to track to:" << tp->end()
+                        << endl;
+                }
+
+                cloud.addParticle(tp);
+            }
+        }
+    }
+
+    startPointCloud.clear();
+
+
     while (true)
     {
+        // Track all particles to their end position.
+        cloud.move(td, GREAT);
+
+
         label nParticles = 0;
 
         // Make particle follow edge.
@@ -460,10 +522,23 @@ void Foam::meshRefinement::markFeatureCellLevel
         {
             break;
         }
-
-        // Track all particles to their end position.
-        cloud.move(td, GREAT);
     }
+
+
+
+    //if (debug&meshRefinement::FEATURESEEDS)
+    //{
+    //    forAll(maxFeatureLevel, cellI)
+    //    {
+    //        if (maxFeatureLevel[cellI] != -1)
+    //        {
+    //            Pout<< "Feature went through cell:" << cellI
+    //                << " coord:" << mesh_.cellCentres()[cellI]
+    //                << " leve:" << maxFeatureLevel[cellI]
+    //                << endl;
+    //        }
+    //    }
+    //}
 }
 
 

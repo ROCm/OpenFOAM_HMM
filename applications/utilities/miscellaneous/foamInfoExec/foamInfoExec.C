@@ -46,8 +46,8 @@ int main(int argc, char *argv[])
     );
 
     argList::noBanner();
-    argList::noParallel();
     argList::addBoolOption("times", "list available times");
+    argList::addBoolOption("latestTime", "list last time");
     argList::addBoolOption
     (
         "keywords",
@@ -74,6 +74,15 @@ int main(int argc, char *argv[])
         {
             Info<< times[i].name() << endl;
         }
+    }
+    else if (args.optionFound("latestTime"))
+    {
+        instantList times
+        (
+            Foam::Time::findTimes(args.rootPath()/args.caseName())
+        );
+
+        Info<< times.last().name() << endl;
     }
 
     if (args.optionFound("dict"))

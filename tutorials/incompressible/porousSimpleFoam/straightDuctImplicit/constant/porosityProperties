@@ -10,45 +10,35 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      controlDict;
+    location    "constant";
+    object      porosityProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//DebugSwitches
-//{
-//    regIOobject           2;
-//    cellShapeControlMesh  0;
-//}
+porosity1
+{
+    type            DarcyForchheimer;
+    active          yes;
+    cellZone        porosity;
 
-application     foamyHexMesh;
+    DarcyForchheimerCoeffs
+    {
+        d   d [0 -2 0 0 0 0 0] (5e7 -1000 -1000);
+        f   f [0 -1 0 0 0 0 0] (0 0 0);
 
-startFrom       startTime;
-
-startTime       0;
-
-stopAt          endTime;
-
-endTime         100;
-
-deltaT          1;
-
-writeControl    timeStep;
-
-writeInterval   10;
-
-purgeWrite      0;
-
-writeFormat     ascii;
-
-writePrecision  10;
-
-writeCompression uncompressed;
-
-timeFormat      general;
-
-timePrecision   6;
-
-runTimeModifiable yes;
+        coordinateSystem
+        {
+            type    cartesian;
+            origin  (0 0 0);
+            coordinateRotation
+            {
+                type    axesRotation;
+                e1      (1 0 0);    //(0.70710678 0.70710678 0);
+                e2      (0 0 1);
+            }
+        }
+    }
+}
 
 
 // ************************************************************************* //
