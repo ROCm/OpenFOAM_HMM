@@ -36,6 +36,7 @@ SourceFiles
 #define fvScalarMatrix_H
 
 #include "fvMatrix.H"
+#include "fvMatricesFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
