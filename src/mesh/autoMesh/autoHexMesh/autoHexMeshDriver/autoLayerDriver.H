@@ -403,6 +403,7 @@ class autoLayerDriver
                 void smoothField
                 (
                     const motionSmoother& meshMover,
+                    const PackedBoolList& isMasterPoint,
                     const PackedBoolList& isMasterEdge,
                     const labelList& meshEdges,
                     const scalarField& fieldMin,
@@ -414,6 +415,7 @@ class autoLayerDriver
                 void smoothPatchNormals
                 (
                     const motionSmoother& meshMover,
+                    const PackedBoolList& isMasterPoint,
                     const PackedBoolList& isMasterEdge,
                     const labelList& meshEdges,
                     const label nSmoothDisp,
@@ -424,6 +426,7 @@ class autoLayerDriver
                 void smoothNormals
                 (
                     const label nSmoothDisp,
+                    const PackedBoolList& isMasterPoint,
                     const PackedBoolList& isMasterEdge,
                     const labelList& fixedPoints,
                     pointVectorField& normals

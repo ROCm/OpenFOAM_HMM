@@ -103,6 +103,7 @@ void Foam::autoLayerDriver::sumWeights
 void Foam::autoLayerDriver::smoothField
 (
     const motionSmoother& meshMover,
+    const PackedBoolList& isMasterPoint,
     const PackedBoolList& isMasterEdge,
     const labelList& meshEdges,
     const scalarField& fieldMin,
@@ -162,10 +163,14 @@ void Foam::autoLayerDriver::smoothField
         // Do residual calculation every so often.
         if ((iter % 10) == 0)
         {
-            Info<< "    Iteration " << iter << "   residual "
-                <<  gSum(mag(field-average))
-                   /returnReduce(average.size(), sumOp<label>())
-                << endl;
+            scalar resid = meshRefinement::gAverage
+            (
+                meshMover.mesh(),
+                isMasterPoint,
+                meshPoints,
+                mag(field-average)()
+            );
+            Info<< "    Iteration " << iter << "   residual " << resid << endl;
         }
     }
 }
@@ -265,6 +270,7 @@ void Foam::autoLayerDriver::smoothField
 void Foam::autoLayerDriver::smoothPatchNormals
 (
     const motionSmoother& meshMover,
+    const PackedBoolList& isMasterPoint,
     const PackedBoolList& isMasterEdge,
     const labelList& meshEdges,
     const label nSmoothDisp,
@@ -308,10 +314,15 @@ void Foam::autoLayerDriver::smoothPatchNormals
         // Do residual calculation every so often.
         if ((iter % 10) == 0)
         {
-            Info<< "    Iteration " << iter << "   residual "
-                <<  gSum(mag(normals-average))
-                   /returnReduce(average.size(), sumOp<label>())
-                << endl;
+            scalar resid = meshRefinement::gAverage
+            (
+                meshMover.mesh(),
+                isMasterPoint,
+                meshPoints,
+                mag(normals-average)()
+            );
+
+            Info<< "    Iteration " << iter << "   residual " << resid << endl;
         }
 
         // Transfer to normals vector field
@@ -330,6 +341,7 @@ void Foam::autoLayerDriver::smoothPatchNormals
 void Foam::autoLayerDriver::smoothNormals
 (
     const label nSmoothDisp,
+    const PackedBoolList& isMasterPoint,
     const PackedBoolList& isMasterEdge,
     const labelList& fixedPoints,
     pointVectorField& normals
@@ -392,10 +404,14 @@ void Foam::autoLayerDriver::smoothNormals
         // Do residual calculation every so often.
         if ((iter % 10) == 0)
         {
-            Info<< "    Iteration " << iter << "   residual "
-                <<  gSum(mag(normals-average))
-                   /returnReduce(average.size(), sumOp<label>())
-                << endl;
+            scalar resid = meshRefinement::gAverage
+            (
+                mesh,
+                isMasterPoint,
+                mag(normals-average)()
+            );
+
+            Info<< "    Iteration " << iter << "   residual " << resid << endl;
         }
 
 
@@ -802,25 +818,18 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
     // Predetermine mesh edges
     // ~~~~~~~~~~~~~~~~~~~~~~~
 
-    // Precalulate master edge (only relevant for shared edges)
-    PackedBoolList isMasterEdge(syncTools::getMasterEdges(mesh));
+    // Precalulate master point/edge (only relevant for shared points/edges)
+    const PackedBoolList isMasterPoint(syncTools::getMasterPoints(mesh));
+    const PackedBoolList isMasterEdge(syncTools::getMasterEdges(mesh));
     // Precalculate meshEdge per pp edge
-    labelList meshEdges(pp.nEdges());
-
-    forAll(meshEdges, patchEdgeI)
-    {
-        const edge& e = pp.edges()[patchEdgeI];
-
-        label v0 = pp.meshPoints()[e[0]];
-        label v1 = pp.meshPoints()[e[1]];
-        meshEdges[patchEdgeI] = meshTools::findEdge
+    const labelList meshEdges
+    (
+        pp.meshEdges
         (
             mesh.edges(),
-            mesh.pointEdges()[v0],
-            v0,
-            v1
-        );
-    }
+            mesh.pointEdges()
+        )
+    );
 
 
     // Determine pointNormal
@@ -845,6 +854,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
     smoothPatchNormals
     (
         meshMover,
+        isMasterPoint,
         isMasterEdge,
         meshEdges,
         nSmoothSurfaceNormals,
@@ -929,18 +939,18 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
     {
         pointField origin(pointWallDist.size());
         scalarField distSqr(pointWallDist.size());
-        scalarField passiveS(pointWallDist.size());
+        //NA scalarField passiveS(pointWallDist.size());
         pointField passiveV(pointWallDist.size());
         forAll(pointWallDist, pointI)
         {
             origin[pointI] = pointWallDist[pointI].origin();
             distSqr[pointI] = pointWallDist[pointI].distSqr();
-            passiveS[pointI] = pointWallDist[pointI].s();
+            //passiveS[pointI] = pointWallDist[pointI].s();
             passiveV[pointI] = pointWallDist[pointI].v();
         }
         meshRefinement::testSyncPointList("origin", mesh, origin);
         meshRefinement::testSyncPointList("distSqr", mesh, distSqr);
-        meshRefinement::testSyncPointList("passiveS", mesh, passiveS);
+        //meshRefinement::testSyncPointList("passiveS", mesh, passiveS);
         meshRefinement::testSyncPointList("passiveV", mesh, passiveV);
     }
 
@@ -1186,7 +1196,14 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
     }
 
     // Smooth normal vectors. Do not change normals on pp.meshPoints
-    smoothNormals(nSmoothNormals, isMasterEdge, meshPoints, dispVec);
+    smoothNormals
+    (
+        nSmoothNormals,
+        isMasterPoint,
+        isMasterEdge,
+        meshPoints,
+        dispVec
+    );
 
     if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
     {
@@ -1288,25 +1305,18 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
     const indirectPrimitivePatch& pp = meshMover.patch();
     const labelList& meshPoints = pp.meshPoints();
 
-    // Precalulate master edge (only relevant for shared edges)
-    PackedBoolList isMasterEdge(syncTools::getMasterEdges(mesh));
+    // Precalulate master points/edge (only relevant for shared points/edges)
+    const PackedBoolList isMasterPoint(syncTools::getMasterPoints(mesh));
+    const PackedBoolList isMasterEdge(syncTools::getMasterEdges(mesh));
     // Precalculate meshEdge per pp edge
-    labelList meshEdges(pp.nEdges());
-
-    forAll(meshEdges, patchEdgeI)
-    {
-        const edge& e = pp.edges()[patchEdgeI];
-
-        label v0 = pp.meshPoints()[e[0]];
-        label v1 = pp.meshPoints()[e[1]];
-        meshEdges[patchEdgeI] = meshTools::findEdge
+    const labelList meshEdges
+    (
+        pp.meshEdges
         (
             mesh.edges(),
-            mesh.pointEdges()[v0],
-            v0,
-            v1
-        );
-    }
+            mesh.pointEdges()
+        )
+    );
 
 
     scalarField thickness(layerThickness.size());
@@ -1433,6 +1443,17 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
         << numThicknessRatioExclude
         << " nodes where thickness to medial axis distance is large " << endl;
 
+
+{
+    Info<< "** start thickness **" << endl;
+    meshRefinement::collectAndPrint(pp.localPoints(), thickness);
+    Info<< "** end thickness **" << endl;
+    Info<< "** patchDisp **" << endl;
+    meshRefinement::collectAndPrint(pp.localPoints(), patchDisp);
+    Info<< "** end patchDisp **" << endl;
+}
+
+
     // find points where layer growth isolated to a lone point, edge or face
 
     findIsolatedRegions
@@ -1461,6 +1482,7 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
     smoothField
     (
         meshMover,
+        isMasterPoint,
         isMasterEdge,
         meshEdges,
         minThickness,
@@ -1608,10 +1630,19 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
             // Do residual calculation every so often.
             if ((iter % 10) == 0)
             {
+//                Info<< "    Iteration " << iter << "   residual "
+//                    <<  gSum(mag(displacement-average))
+//                       /returnReduce(average.size(), sumOp<label>())
+//                    << endl;
+
+                scalar resid = meshRefinement::gAverage
+                (
+                    mesh,
+                    syncTools::getMasterPoints(mesh),
+                    mag(displacement-average)()
+                );
                 Info<< "    Iteration " << iter << "   residual "
-                    <<  gSum(mag(displacement-average))
-                       /returnReduce(average.size(), sumOp<label>())
-                    << endl;
+                    << resid << endl;
             }
         }
     }
