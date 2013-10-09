@@ -989,6 +989,14 @@ public:
                 const UList<T>&
             ) const;
 
+            //- Print list according to (collected and) sorted coordinate
+            template<class T>
+            static void collectAndPrint
+            (
+                const pointField& points,
+                const UList<T>& data
+            );
+
             //- Print some mesh stats.
             void printMeshInfo(const bool, const string&) const;
 
