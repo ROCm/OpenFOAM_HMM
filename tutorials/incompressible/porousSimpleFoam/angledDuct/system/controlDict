@@ -14,13 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//DebugSwitches
-//{
-//    regIOobject           2;
-//    cellShapeControlMesh  0;
-//}
-
-application     foamyHexMesh;
+application     porousSimpleFoam;
 
 startFrom       startTime;
 
