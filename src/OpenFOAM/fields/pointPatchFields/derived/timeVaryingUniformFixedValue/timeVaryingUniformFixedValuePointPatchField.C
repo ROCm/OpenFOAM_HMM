@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,7 +55,9 @@ timeVaryingUniformFixedValuePointPatchField
 :
     fixedValuePointPatchField<Type>(ptf, p, iF, mapper),
     timeSeries_(ptf.timeSeries_)
-{}
+{
+    updateCoeffs();
+}
 
 
 template<class Type>

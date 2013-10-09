@@ -57,6 +57,108 @@ template<class T> void meshRefinement::updateList
 }
 
 
+template<class T>
+T meshRefinement::gAverage
+(
+    const polyMesh& mesh,
+    const PackedBoolList& isMasterElem,
+    const UList<T>& values
+)
+{
+    if (values.size() != isMasterElem.size())
+    {
+        FatalErrorIn
+        (
+            "meshRefinement::gAverage\n"
+            "(\n"
+            "    const polyMesh&,\n"
+            "    const PackedBoolList& isMasterElem,\n"
+            "    const UList<T>& values\n"
+            ")\n"
+        )   << "Number of elements in list " << values.size()
+            << " does not correspond to number of elements in isMasterElem "
+            << isMasterElem.size()
+            << exit(FatalError);
+    }
+
+    T sum = pTraits<T>::zero;
+    label n = 0;
+
+    forAll(values, i)
+    {
+        if (isMasterElem[i])
+        {
+            sum += values[i];
+            n++;
+        }
+    }
+
+    reduce(sum, sumOp<T>());
+    reduce(n, sumOp<label>());
+
+    if (n > 0)
+    {
+        return sum/n;
+    }
+    else
+    {
+        return pTraits<T>::max;
+    }
+}
+
+
+template<class T>
+T meshRefinement::gAverage
+(
+    const polyMesh& mesh,
+    const PackedBoolList& isMasterElem,
+    const labelList& meshPoints,
+    const UList<T>& values
+)
+{
+    if (values.size() != meshPoints.size())
+    {
+        FatalErrorIn
+        (
+            "meshRefinement::gAverage\n"
+            "(\n"
+            "    const polyMesh&,\n"
+            "    const labelList&,\n"
+            "    const PackedBoolList& isMasterElem,\n"
+            "    const UList<T>& values\n"
+            ")\n"
+        )   << "Number of elements in list " << values.size()
+            << " does not correspond to number of elements in meshPoints "
+            << meshPoints.size()
+            << exit(FatalError);
+    }
+
+    T sum = pTraits<T>::zero;
+    label n = 0;
+
+    forAll(values, i)
+    {
+        if (isMasterElem[meshPoints[i]])
+        {
+            sum += values[i];
+            n++;
+        }
+    }
+
+    reduce(sum, sumOp<T>());
+    reduce(n, sumOp<label>());
+
+    if (n > 0)
+    {
+        return sum/n;
+    }
+    else
+    {
+        return pTraits<T>::max;
+    }
+}
+
+
 // Compare two lists over all boundary faces
 template<class T>
 void meshRefinement::testSyncBoundaryFaceList
