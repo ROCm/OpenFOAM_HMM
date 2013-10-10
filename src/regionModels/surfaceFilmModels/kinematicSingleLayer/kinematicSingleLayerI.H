@@ -23,6 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "filmThermoModel.H"
 #include "surfaceInterpolate.H"
 #include "fvcSurfaceIntegrate.H"
 
@@ -160,6 +161,12 @@ inline const volScalarField& kinematicSingleLayer::rhoPrimary() const
 inline const volScalarField& kinematicSingleLayer::muPrimary() const
 {
     return muPrimary_;
+}
+
+
+inline const filmThermoModel& kinematicSingleLayer::filmThermo() const
+{
+    return filmThermo_();
 }
 
 

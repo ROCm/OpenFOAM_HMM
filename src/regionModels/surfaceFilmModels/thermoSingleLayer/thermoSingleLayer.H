@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -86,11 +86,6 @@ protected:
 
             //- Reference to the SLGThermo
             const SLGThermo& thermo_;
-
-            // Single component
-
-                //- Id of component in thermo database
-                label liquidId_;
 
 
             // Fields
@@ -260,11 +255,6 @@ public:
 
             //- Return const reference to the SLGThermo object
             inline const SLGThermo& thermo() const;
-
-            // Single component
-
-                //- Return the Id of component in thermo database
-                inline label liquidId() const;
 
 
             // Fields

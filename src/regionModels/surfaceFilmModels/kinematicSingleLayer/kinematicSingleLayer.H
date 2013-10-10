@@ -54,6 +54,9 @@ namespace regionModels
 namespace surfaceFilmModels
 {
 
+// Forward class declarations
+class filmThermoModel;
+
 /*---------------------------------------------------------------------------*\
                    Class kinematicSingleLayer Declaration
 \*---------------------------------------------------------------------------*/
@@ -191,6 +194,9 @@ protected:
 
 
         // Sub-models
+
+            //- Film thermo model
+            autoPtr<filmThermoModel> filmThermo_;
 
             //- Available mass for transfer via sub-models
             scalarField availableMass_;
@@ -444,6 +450,9 @@ public:
 
 
         // Sub-models
+
+            //- Film thermo
+            inline const filmThermoModel& filmThermo() const;
 
             //- Injection
             inline injectionModelList& injection();

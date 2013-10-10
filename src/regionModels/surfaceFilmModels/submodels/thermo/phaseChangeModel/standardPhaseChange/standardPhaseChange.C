@@ -97,13 +97,12 @@ void standardPhaseChange::correctModel
     scalarField& dEnergy
 )
 {
-    const thermoSingleLayer& film = refCast<const thermoSingleLayer>(owner_);
+    const thermoSingleLayer& film = filmType<thermoSingleLayer>();
 
     // set local thermo properties
     const SLGThermo& thermo = film.thermo();
-    const label liqId = film.liquidId();
-    const liquidProperties& liq = thermo.liquids().properties()[liqId];
-    const label vapId = thermo.carrierId(thermo.liquids().components()[liqId]);
+    const filmThermoModel& filmThermo = film.filmThermo();
+    const label vapId = thermo.carrierId(filmThermo.name());
 
     // retrieve fields from film model
     const scalarField& delta = film.delta();
@@ -128,22 +127,22 @@ void standardPhaseChange::correctModel
             const scalar pc = pInf[cellI];
 
             // calculate the boiling temperature
-            const scalar Tb = liq.pvInvert(pc);
+            const scalar Tb = filmThermo.Tb(pc);
 
             // local temperature - impose lower limit of 200 K for stability
             const scalar Tloc = min(TbFactor_*Tb, max(200.0, T[cellI]));
 
             // saturation pressure [Pa]
-            const scalar pSat = liq.pv(pc, Tloc);
+            const scalar pSat = filmThermo.pv(pc, Tloc);
 
             // latent heat [J/kg]
-            const scalar hVap = liq.hl(pc, Tloc);
+            const scalar hVap = filmThermo.hl(pc, Tloc);
 
             // calculate mass transfer
             if (pSat >= 0.95*pc)
             {
                 // boiling
-                const scalar Cp = liq.Cp(pc, Tloc);
+                const scalar Cp = filmThermo.Cp(pc, Tloc);
                 const scalar Tcorr = max(0.0, T[cellI] - Tb);
                 const scalar qCorr = limMass[cellI]*Cp*(Tcorr);
                 dMass[cellI] = qCorr/hVap;
@@ -163,13 +162,13 @@ void standardPhaseChange::correctModel
                 const scalar Wvap = thermo.carrier().W(vapId);
 
                 // molecular weight of liquid [kg/kmol]
-                const scalar Wliq = liq.W();
+                const scalar Wliq = filmThermo.W();
 
                 // vapour mass fraction at interface
                 const scalar Ys = Wliq*pSat/(Wliq*pSat + Wvap*(pc - pSat));
 
                 // vapour diffusivity [m2/s]
-                const scalar Dab = liq.D(pc, Tloc);
+                const scalar Dab = filmThermo.D(pc, Tloc);
 
                 // Schmidt number
                 const scalar Sc = muInfc/(rhoInfc*(Dab + ROOTVSMALL));

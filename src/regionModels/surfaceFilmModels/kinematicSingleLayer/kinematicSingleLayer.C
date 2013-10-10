@@ -33,6 +33,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "mappedWallPolyPatch.H"
 #include "mapDistribute.H"
+#include "filmThermoModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -72,22 +73,9 @@ bool kinematicSingleLayer::read()
 
 void kinematicSingleLayer::correctThermoFields()
 {
-    if (thermoModel_ == tmConstant)
-    {
-        const dictionary& constDict(coeffs_.subDict("constantThermoCoeffs"));
-        rho_ == dimensionedScalar(constDict.lookup("rho0"));
-        mu_ == dimensionedScalar(constDict.lookup("mu0"));
-        sigma_ == dimensionedScalar(constDict.lookup("sigma0"));
-    }
-    else
-    {
-        FatalErrorIn
-        (
-            "void Foam::surfaceFilmModels::kinematicSingleLayer::"
-            "correctThermo()"
-        )   << "Kinematic surface film must use "
-            << thermoModelTypeNames_[tmConstant] << "thermodynamics" << endl;
-    }
+    rho_ == filmThermo_->rho();
+    mu_ == filmThermo_->mu();
+    sigma_ == filmThermo_->sigma();
 }
 
 
@@ -771,6 +759,8 @@ kinematicSingleLayer::kinematicSingleLayer
         dimensionedScalar("zero", dimPressure*dimTime, 0.0),
         this->mappedFieldAndInternalPatchTypes<scalar>()
     ),
+
+    filmThermo_(filmThermoModel::New(*this, coeffs_)),
 
     availableMass_(regionMesh().nCells(), 0.0),
 
