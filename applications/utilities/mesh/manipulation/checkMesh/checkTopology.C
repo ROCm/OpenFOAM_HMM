@@ -1,3 +1,28 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+\*---------------------------------------------------------------------------*/
+
 #include "checkTopology.H"
 #include "polyMesh.H"
 #include "Time.H"
@@ -8,6 +33,8 @@
 #include "IOmanip.H"
 #include "emptyPolyPatch.H"
 #include "processorPolyPatch.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Foam::label Foam::checkTopology
 (
@@ -287,6 +314,29 @@ Foam::label Foam::checkTopology
                 rs
             );
             ctr.write();
+
+            for (label i = 0; i < rs.nRegions(); i++)
+            {
+                cellSet rCells
+                (
+                    mesh,
+                    "cellToRegion:" + Foam::name(i),
+                    mesh.nCells()/100
+                );
+
+                forAll(rs, j)
+                {
+                    if (rs[j] == i)
+                    {
+                        rCells.insert(j);
+                    }
+                }
+
+                Info<< "  <<Writing region " << i << " with " << rCells.size()
+                    << " cells to cellSet " << rCells.name() << endl;
+
+                rCells.write();
+            }
         }
     }
 
@@ -437,3 +487,6 @@ Foam::label Foam::checkTopology
 
     return noFailedChecks;
 }
+
+
+// ************************************************************************* //
