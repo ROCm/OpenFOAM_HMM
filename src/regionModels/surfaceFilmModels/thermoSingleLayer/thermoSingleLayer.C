@@ -34,6 +34,7 @@ License
 
 // Sub-models
 #include "filmThermoModel.H"
+#include "filmViscosityModel.H"
 #include "heatTransferModel.H"
 #include "phaseChangeModel.H"
 #include "filmRadiationModel.H"
@@ -298,6 +299,9 @@ void thermoSingleLayer::solveEnergy()
     );
 
     correctThermoFields();
+
+    // evaluate viscosity from user-model
+    viscosity_->correct(pPrimary_, T_);
 }
 
 
@@ -480,6 +484,7 @@ thermoSingleLayer::thermoSingleLayer
 
     YPrimary_(),
 
+    viscosity_(filmViscosityModel::New(*this, coeffs(), mu_)),
     htcs_
     (
         heatTransferModel::New(*this, coeffs().subDict("upperSurfaceModels"))
@@ -548,6 +553,9 @@ thermoSingleLayer::thermoSingleLayer
         hs_ == hs(T_);
         deltaRho_ == delta_*rho_;
         phi_ = fvc::interpolate(deltaRho_*U_) & regionMesh().Sf();
+
+        // evaluate viscosity from user-model
+//        viscosity_->correct(pPrimary_, T_);
     }
 }
 

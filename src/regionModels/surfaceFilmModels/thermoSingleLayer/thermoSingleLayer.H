@@ -52,6 +52,7 @@ namespace surfaceFilmModels
 {
 
 // Forward declaration of classes
+class filmViscosityModel;
 class heatTransferModel;
 class phaseChangeModel;
 class filmRadiationModel;
@@ -164,6 +165,9 @@ protected:
 
 
         // Sub-models
+
+            //- Viscosity model
+            autoPtr<filmViscosityModel> viscosity_;
 
             //- Heat transfer coefficient bewteen film surface and primary
             //  region [W/m2/K]
