@@ -351,6 +351,9 @@ public:
             //- Return the film wall velocity [m/s]
             virtual const volVectorField& Uw() const;
 
+            //- Return the film thickness*density (helper field) [kg/m3]
+            virtual const volScalarField& deltaRho() const;
+
             //- Return the film flux [kg.m/s]
             virtual const surfaceScalarField& phi() const;
 

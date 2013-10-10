@@ -936,6 +936,12 @@ const volVectorField& kinematicSingleLayer::Uw() const
 }
 
 
+const volScalarField& kinematicSingleLayer::deltaRho() const
+{
+    return deltaRho_;
+}
+
+
 const surfaceScalarField& kinematicSingleLayer::phi() const
 {
     return phi_;
