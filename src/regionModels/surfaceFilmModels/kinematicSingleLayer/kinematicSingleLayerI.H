@@ -198,6 +198,12 @@ inline tmp<volScalarField> kinematicSingleLayer::netMass() const
 }
 
 
+inline tmp<volScalarField> kinematicSingleLayer::deltaMass() const
+{
+    return rhoSp_*magSf()*time().deltaT();
+}
+
+
 inline tmp<volScalarField> kinematicSingleLayer::gNorm() const
 {
     tmp<volScalarField> tgNorm

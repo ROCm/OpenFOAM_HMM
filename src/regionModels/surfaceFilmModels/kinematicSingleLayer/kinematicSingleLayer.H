@@ -472,6 +472,9 @@ public:
             //- Return the net film mass available over the next integration
             inline tmp<volScalarField> netMass() const;
 
+            //- Return the change in film mass due to sources/sinks
+            inline tmp<volScalarField> deltaMass() const;
+
             //- Return the gravity normal-to-patch component contribution
             inline tmp<volScalarField> gNorm() const;
 
