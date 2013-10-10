@@ -60,7 +60,11 @@ wordList thermoSingleLayer::hsBoundaryTypes()
     wordList bTypes(T_.boundaryField().types());
     forAll(bTypes, patchI)
     {
-        if (bTypes[patchI] == mappedFieldFvPatchField<scalar>::typeName)
+        if
+        (
+            T_.boundaryField()[patchI].fixesValue()
+         || bTypes[patchI] == mappedFieldFvPatchField<scalar>::typeName
+        )
         {
             bTypes[patchI] = fixedValueFvPatchField<scalar>::typeName;
         }
