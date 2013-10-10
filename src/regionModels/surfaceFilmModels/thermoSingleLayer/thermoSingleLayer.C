@@ -576,6 +576,9 @@ thermoSingleLayer::thermoSingleLayer
     if (readFields)
     {
         transferPrimaryRegionThermoFields();
+
+        correctAlpha();
+
         correctThermoFields();
 
         // Update derived fields

@@ -786,6 +786,8 @@ kinematicSingleLayer::kinematicSingleLayer
     {
         transferPrimaryRegionThermoFields();
 
+        correctAlpha();
+
         correctThermoFields();
 
         deltaRho_ == delta_*rho_;
