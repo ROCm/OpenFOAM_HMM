@@ -24,8 +24,9 @@ $(KINEMATICMODELS)/injectionModel/drippingInjection/drippingInjection.C
 $(KINEMATICMODELS)/injectionModel/removeInjection/removeInjection.C
 $(KINEMATICMODELS)/injectionModel/curvatureSeparation/curvatureSeparation.C
 
-$(KINEMATICMODELS)/filmThermoModel/constantFilmThermo/constantFilmThermo.C
 $(KINEMATICMODELS)/filmThermoModel/filmThermoModel/filmThermoModel.C
+$(KINEMATICMODELS)/filmThermoModel/filmThermoModel/filmThermoModelNew.C
+$(KINEMATICMODELS)/filmThermoModel/constantFilmThermo/constantFilmThermo.C
 $(KINEMATICMODELS)/filmThermoModel/liquidFilmThermo/liquidFilmThermo.C
 
 $(KINEMATICMODELS)/filmTurbulenceModel/filmTurbulenceModel/filmTurbulenceModel.C
@@ -49,6 +50,12 @@ $(THERMOMODELS)/filmRadiationModel/noRadiation/noRadiation.C
 $(THERMOMODELS)/filmRadiationModel/constantRadiation/constantRadiation.C
 $(THERMOMODELS)/filmRadiationModel/primaryRadiation/primaryRadiation.C
 $(THERMOMODELS)/filmRadiationModel/standardRadiation/standardRadiation.C
+
+$(THERMOMODELS)/filmViscosityModel/filmViscosityModel/filmViscosityModel.C
+$(THERMOMODELS)/filmViscosityModel/filmViscosityModel/filmViscosityModelNew.C
+$(THERMOMODELS)/filmViscosityModel/constantViscosity/constantViscosity.C
+$(THERMOMODELS)/filmViscosityModel/liquidViscosity/liquidViscosity.C
+$(THERMOMODELS)/filmViscosityModel/thixotropicViscosity/thixotropicViscosity.C
 
 
 /* Boundary conditions */

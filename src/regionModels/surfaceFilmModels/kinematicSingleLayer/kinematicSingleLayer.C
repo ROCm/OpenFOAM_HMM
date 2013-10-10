@@ -438,6 +438,8 @@ kinematicSingleLayer::kinematicSingleLayer
 
     cumulativeContErr_(0.0),
 
+    deltaSmall_("deltaSmall", dimLength, SMALL),
+
     rho_
     (
         IOobject

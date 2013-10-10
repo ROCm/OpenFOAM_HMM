@@ -97,6 +97,9 @@ protected:
             //- Cumulative continuity error
             scalar cumulativeContErr_;
 
+            //- Small delta
+            const dimensionedScalar deltaSmall_;
+
 
         // Thermo properties
 
@@ -323,6 +326,9 @@ public:
 
             //- Return the number of non-orthogonal correctors
             inline label nNonOrthCorr() const;
+
+            //- Return small delta
+            inline const dimensionedScalar& deltaSmall() const;
 
 
         // Thermo properties

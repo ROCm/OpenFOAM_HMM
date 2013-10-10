@@ -62,6 +62,12 @@ inline label kinematicSingleLayer::nNonOrthCorr() const
 }
 
 
+inline const dimensionedScalar& kinematicSingleLayer::deltaSmall() const
+{
+    return deltaSmall_;
+}
+
+
 inline const volScalarField& kinematicSingleLayer::mu() const
 {
     return mu_;
