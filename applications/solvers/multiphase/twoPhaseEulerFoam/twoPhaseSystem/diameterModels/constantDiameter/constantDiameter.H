@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::constant
+    Foam::diameterModels::constant
 
 Description
     Constant dispersed-phase particle diameter model.
@@ -69,7 +69,7 @@ public:
         //- Construct from components
         constant
         (
-            const dictionary& dict,
+            const dictionary& diameterProperties,
             const phaseModel& phase
         );
 
@@ -80,7 +80,11 @@ public:
 
     // Member Functions
 
-        tmp<volScalarField> d() const;
+        //- Return the diameter as a field
+        virtual tmp<volScalarField> d() const;
+
+        //- Read diameterProperties dictionary
+        virtual bool read(const dictionary& diameterProperties);
 };
 
 

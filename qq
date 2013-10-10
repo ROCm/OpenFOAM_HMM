@@ -1,0 +1,102 @@
+OSspecific/POSIX/POSIX.C:pid_t Foam::pid()
+OSspecific/POSIX/POSIX.C:bool Foam::ping
+OSspecific/POSIX/POSIX.C:            "Foam::ping(const string&, ...)"
+OSspecific/POSIX/POSIX.C:            "Foam::ping(const string&, const label)"
+OSspecific/POSIX/POSIX.C:bool Foam::ping(const string& hostname, const label timeOut)
+OSspecific/POSIX/fileStat.H:    So e.g. Foam::ping first and hope nfs is running.
+OpenFOAM/global/constants/atomic/atomicConstants.C:                4.0*mathematical::pi
+OpenFOAM/global/constants/atomic/atomicConstants.C:                4.0*mathematical::pi
+OpenFOAM/global/constants/electromagnetic/electromagneticConstants.C:        4.0*mathematical::pi*1e-07
+OpenFOAM/global/constants/electromagnetic/electromagneticConstants.C:            1.0/(4.0*mathematical::pi)
+OpenFOAM/global/constants/physicoChemical/physicoChemicalConstants.C:            Foam::sqr(mathematical::pi)/60.0
+OpenFOAM/global/unitConversion/unitConversion.H:    return (deg*constant::mathematical::pi/180.0);
+OpenFOAM/global/unitConversion/unitConversion.H:    return (rad*180.0/constant::mathematical::pi);
+OpenFOAM/meshes/meshShapes/face/face.C:            angle = constant::mathematical::pi + edgeAngle;
+OpenFOAM/meshes/meshShapes/face/face.C:            angle = constant::mathematical::pi - edgeAngle;
+OpenFOAM/meshes/meshShapes/face/face.C:        scalar minDiff = constant::mathematical::pi;
+OpenFOAM/primitives/transform/transform.H:        return (3.0 + cos)*constant::mathematical::piByTwo;
+OpenFOAM/primitives/transform/transform.H:        return (1.0 - cos)*constant::mathematical::piByTwo;
+engine/engineTime/engineTime.C:Foam::scalar Foam::engineTime::pistonPosition(const scalar theta) const
+engine/engineTime/engineTime.C:Foam::dimensionedScalar Foam::engineTime::pistonPosition() const
+engine/engineTime/engineTime.C:Foam::dimensionedScalar Foam::engineTime::pistonDisplacement() const
+engine/engineTime/engineTime.C:Foam::dimensionedScalar Foam::engineTime::pistonSpeed() const
+engine/include/StCorr.H:                    Ak = sphereFraction*4.0*constant::mathematical::pi
+engine/include/StCorr.H:                           /(sphereFraction*4.0*constant::mathematical::pi),
+engine/include/StCorr.H:                    Ak = circleFraction*constant::mathematical::pi*thickness
+engine/include/StCorr.H:                              *constant::mathematical::pi
+finiteVolume/cfdTools/general/solutionControl/pimpleControl/pimpleControl.C:void Foam::pimpleControl::read()
+finiteVolume/cfdTools/general/solutionControl/pimpleControl/pimpleControl.C:bool Foam::pimpleControl::criteriaSatisfied()
+finiteVolume/cfdTools/general/solutionControl/pimpleControl/pimpleControl.C:Foam::pimpleControl::pimpleControl(fvMesh& mesh)
+finiteVolume/cfdTools/general/solutionControl/pimpleControl/pimpleControl.C:Foam::pimpleControl::~pimpleControl()
+finiteVolume/cfdTools/general/solutionControl/pimpleControl/pimpleControl.C:bool Foam::pimpleControl::loop()
+finiteVolume/cfdTools/general/solutionControl/pimpleControl/pimpleControl.H:    Foam::pimpleControl
+finiteVolume/cfdTools/general/solutionControl/pimpleControl/pimpleControlI.H:inline Foam::label Foam::pimpleControl::nCorrPIMPLE() const
+finiteVolume/cfdTools/general/solutionControl/pimpleControl/pimpleControlI.H:inline Foam::label Foam::pimpleControl::nCorrPISO() const
+finiteVolume/cfdTools/general/solutionControl/pimpleControl/pimpleControlI.H:inline Foam::label Foam::pimpleControl::corrPISO() const
+finiteVolume/cfdTools/general/solutionControl/pimpleControl/pimpleControlI.H:inline bool Foam::pimpleControl::correct()
+finiteVolume/cfdTools/general/solutionControl/pimpleControl/pimpleControlI.H:inline bool Foam::pimpleControl::storeInitialResiduals() const
+finiteVolume/cfdTools/general/solutionControl/pimpleControl/pimpleControlI.H:inline bool Foam::pimpleControl::finalIter() const
+finiteVolume/cfdTools/general/solutionControl/pimpleControl/pimpleControlI.H:inline bool Foam::pimpleControl::finalInnerIter() const
+finiteVolume/cfdTools/general/solutionControl/pimpleControl/pimpleControlI.H:inline bool Foam::pimpleControl::turbCorr() const
+finiteVolume/fields/fvPatchFields/derived/cylindricalInletVelocity/cylindricalInletVelocityFvPatchVectorField.C:        (rpm*constant::mathematical::pi/30.0)*(hatAxis) ^ d
+finiteVolume/fields/fvPatchFields/derived/swirlFlowRateInletVelocity/swirlFlowRateInletVelocityFvPatchVectorField.C:            (rpm*constant::mathematical::pi/30.0)
+fvOptions/sources/derived/rotorDiskSource/rotorDiskSource.C:    const scalar diameter = Foam::sqrt(4.0*sumArea/mathematical::pi);
+fvOptions/sources/derived/rotorDiskSource/rotorDiskSource.C:                alphaGeom = mathematical::pi - alphaGeom;
+fvOptions/sources/derived/rotorDiskSource/trimModel/targetCoeff/targetCoeffTrim.C:    scalar coeff1 = alpha_*sqr(rotor_.omega())*mathematical::pi;
+lagrangian/coalCombustion/submodels/surfaceReactionModel/COxidationDiffusionLimitedRate/COxidationDiffusionLimitedRate.C:    scalar dmC = 4.0*mathematical::pi*d*D_*YO2*Tc*rhoc/(Sb_*(T + Tc))*dt;
+lagrangian/coalCombustion/submodels/surfaceReactionModel/COxidationHurtMitchell/COxidationHurtMitchell.C:    const scalar Ap = constant::mathematical::pi*sqr(d);
+lagrangian/coalCombustion/submodels/surfaceReactionModel/COxidationKineticDiffusionLimitedRate/COxidationKineticDiffusionLimitedRate.C:    const scalar Ap = constant::mathematical::pi*sqr(d);
+lagrangian/coalCombustion/submodels/surfaceReactionModel/COxidationMurphyShaddix/COxidationMurphyShaddix.C:    const scalar Ap = constant::mathematical::pi*sqr(d);
+lagrangian/distributionModels/normal/normal.C:    scalar k = 2.0/(constant::mathematical::pi*a_) +  0.5*log(1.0 - y*y);
+lagrangian/dsmc/parcels/Templates/DsmcParcel/DsmcParcelI.H:    return constant::mathematical::pi*d_*d_;
+lagrangian/intermediate/submodels/CloudFunctionObjects/ParticleCollector/ParticleCollector.C:            scalar theta = pCyl[1] + constant::mathematical::pi;
+lagrangian/intermediate/submodels/CloudFunctionObjects/ParticleErosion/ParticleErosion.C:        const scalar alpha = mathematical::pi/2.0 - acos(nw & Udir);
+lagrangian/intermediate/submodels/Kinematic/CollisionModel/PairCollision/PairModel/PairSpringSliderDashpot/PairSpringSliderDashpot.H:                mathematical::pi/4.0
+lagrangian/intermediate/submodels/Kinematic/CollisionModel/PairCollision/WallModel/WallLocalSpringSliderDashpot/WallLocalSpringSliderDashpot.C:           *mathematical::pi*(sqr(pREff) - sqr(r_PW_mag))
+lagrangian/intermediate/submodels/Kinematic/CollisionModel/PairCollision/WallModel/WallSpringSliderDashpot/WallSpringSliderDashpot.C:           *mathematical::pi*(sqr(pREff) - sqr(r_PW_mag))
+lagrangian/intermediate/submodels/Kinematic/InjectionModel/CellZoneInjection/CellZoneInjection.C:    this->volumeTotal_ = sum(pow3(diameters_))*constant::mathematical::pi/6.0;
+lagrangian/intermediate/submodels/Kinematic/InjectionModel/ConeNozzleInjection/ConeNozzleInjection.C:    const scalar deg2Rad = mathematical::pi/180.0;
+lagrangian/intermediate/submodels/Kinematic/InjectionModel/ConeNozzleInjection/ConeNozzleInjection.C:            scalar Ao = 0.25*mathematical::pi*outerDiameter_*outerDiameter_;
+lagrangian/intermediate/submodels/Kinematic/InjectionModel/ConeNozzleInjection/ConeNozzleInjection.C:            scalar Ai = 0.25*mathematical::pi*innerDiameter_*innerDiameter_;
+lagrangian/intermediate/submodels/Kinematic/SurfaceFilmModel/SurfaceFilmModel/SurfaceFilmModel.C:    scalar vol = mathematical::pi/6.0*pow3(diameterParcelPatch_[filmFaceI]);
+lagrangian/intermediate/submodels/Thermodynamic/ParticleForces/BrownianMotion/BrownianMotionForce.C:    scalar k = 2.0/(mathematical::pi*a) +  0.5*log(1.0 - y*y);
+lagrangian/intermediate/submodels/Thermodynamic/ParticleForces/BrownianMotion/BrownianMotionForce.C:        const scalar Dp = sigma*Tc*cc/(3*mathematical::pi*muc*dp);
+lagrangian/intermediate/submodels/Thermodynamic/ParticleForces/BrownianMotion/BrownianMotionForce.C:            216*muc*sigma*Tc/(sqr(mathematical::pi)*pow5(dp)*(rhoRatio)*cc);
+lagrangian/intermediate/submodels/Thermodynamic/ParticleForces/BrownianMotion/BrownianMotionForce.C:        f = eta*sqrt(mathematical::pi*s0/dt);
+lagrangian/molecularDynamics/molecule/molecule/moleculeI.H:inline const Foam::vector& Foam::molecule::pi() const
+lagrangian/molecularDynamics/molecule/molecule/moleculeI.H:inline Foam::vector& Foam::molecule::pi()
+lagrangian/molecularDynamics/potential/electrostaticPotential/electrostaticPotential.C:    prefactor(1.0/(4.0*constant::mathematical::pi*8.854187817e-12))
+lagrangian/molecularDynamics/potential/pairPotential/derived/coulomb/coulomb.C:    1.0/(4.0*constant::mathematical::pi*8.854187817e-12);
+lagrangian/molecularDynamics/potential/pairPotential/derived/dampedCoulomb/dampedCoulomb.C:    1.0/(4.0*constant::mathematical::pi*8.854187817e-12);
+lagrangian/molecularDynamics/potential/tetherPotential/derived/pitchForkRing/pitchForkRing.C:pitchForkRing::pitchForkRing
+lagrangian/molecularDynamics/potential/tetherPotential/derived/pitchForkRing/pitchForkRing.H:    Foam::tetherPotentials::pitchForkRing
+lagrangian/spray/submodels/AtomizationModel/BlobsSheetAtomization/BlobsSheetAtomization.C:            rho*sigma*d*cos(angle_*constant::mathematical::pi/360.0)
+lagrangian/spray/submodels/AtomizationModel/LISAAtomization/LISAAtomization.C:    scalar hSheet = volFlowRate/(constant::mathematical::pi*delta*Urel);
+lagrangian/spray/submodels/AtomizationModel/LISAAtomization/LISAAtomization.C:    scalar dD = cbrt(3.0*constant::mathematical::pi*sqr(dL)/kL);
+lagrangian/spray/submodels/AtomizationModel/LISAAtomization/LISASMDCalcMethod2.H:    // scalar factorGamma = 0.75*sqrt(mathematicalConstant::pi);   //nExp=2
+lagrangian/spray/submodels/BreakupModel/ReitzKHRT/ReitzKHRT.C:    scalar rhopi6 = rho*constant::mathematical::pi/6.0;
+lagrangian/spray/submodels/BreakupModel/ReitzKHRT/ReitzKHRT.C:            //scalar ms0 = rho*pow3(dc)*mathematicalConstant::pi/6.0;
+lagrangian/spray/submodels/BreakupModel/SHF/SHF.C:    scalar rhopi6 = rho*constant::mathematical::pi/6.0;
+lagrangian/spray/submodels/StochasticCollision/ORourkeCollision/ORourkeCollision.C:    scalar nu0 = 0.25*constant::mathematical::pi*sqr(sumD)*magUrel*dt/Vc;
+meshTools/coordinateSystems/coordinateRotation/EulerCoordinateRotation.C:        phi   *= constant::mathematical::pi/180.0;
+meshTools/coordinateSystems/coordinateRotation/EulerCoordinateRotation.C:        theta *= constant::mathematical::pi/180.0;
+meshTools/coordinateSystems/coordinateRotation/EulerCoordinateRotation.C:        psi   *= constant::mathematical::pi/180.0;
+meshTools/coordinateSystems/coordinateRotation/STARCDCoordinateRotation.C:        x *= constant::mathematical::pi/180.0;
+meshTools/coordinateSystems/coordinateRotation/STARCDCoordinateRotation.C:        y *= constant::mathematical::pi/180.0;
+meshTools/coordinateSystems/coordinateRotation/STARCDCoordinateRotation.C:        z *= constant::mathematical::pi/180.0;
+meshTools/coordinateSystems/cylindricalCS.C:        local.y()*(inDegrees_ ? constant::mathematical::pi/180.0 : 1.0)
+meshTools/coordinateSystems/cylindricalCS.C:       *(inDegrees_ ? constant::mathematical::pi/180.0 : 1.0)
+meshTools/coordinateSystems/cylindricalCS.C:        )*(inDegrees_ ? 180.0/constant::mathematical::pi : 1.0),
+meshTools/coordinateSystems/cylindricalCS.C:        )*(inDegrees_ ? 180.0/constant::mathematical::pi : 1.0)
+postProcessing/functionObjects/field/regionSizeDistribution/regionSizeDistribution.C:                   *6/constant::mathematical::pi
+postProcessing/functionObjects/forces/pointPatchFields/derived/sixDoFRigidBodyMotion/sixDoFRigidBodyMotionI.H:inline const Foam::vector& Foam::sixDoFRigidBodyMotion::pi() const
+postProcessing/functionObjects/forces/pointPatchFields/derived/sixDoFRigidBodyMotion/sixDoFRigidBodyMotionI.H:inline Foam::vector& Foam::sixDoFRigidBodyMotion::pi()
+postProcessing/functionObjects/forces/pointPatchFields/derived/sixDoFRigidBodyMotion/sixDoFRigidBodyMotionStateI.H:inline const Foam::vector& Foam::sixDoFRigidBodyMotionState::pi() const
+postProcessing/functionObjects/forces/pointPatchFields/derived/sixDoFRigidBodyMotion/sixDoFRigidBodyMotionStateI.H:inline Foam::vector& Foam::sixDoFRigidBodyMotionState::pi()
+randomProcesses/fft/kShellIntegration.C:    y *= sqr(x)*4.0*constant::mathematical::pi;
+randomProcesses/fft/kShellIntegration.C:    scalar factor = pow((l0/(2.0*constant::mathematical::pi)),3.0);
+regionModels/surfaceFilmModels/submodels/kinematic/injectionModel/drippingInjection/drippingInjection.C:    const scalar pi = constant::mathematical::pi;
+sampling/sampledSet/circle/circleSet.C:    const scalar alpha = constant::mathematical::pi/180.0*dTheta_;
+thermophysicalModels/radiationModels/radiationModel/fvDOM/radiativeIntensityRay/radiativeIntensityRay.C:                1.0/constant::mathematical::pi*omega_
+thermophysicalModels/radiationModels/radiationModel/fvDOM/radiativeIntensityRay/radiativeIntensityRay.C:               1.0/constant::mathematical::pi*omega_
+transportModels/interfaceProperties/interfaceProperties.C:    Foam::constant::mathematical::pi/180.0;
