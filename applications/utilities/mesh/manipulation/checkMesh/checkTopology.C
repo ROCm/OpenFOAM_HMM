@@ -315,27 +315,35 @@ Foam::label Foam::checkTopology
             );
             ctr.write();
 
+
+            // write cellSet for each region
+            PtrList<cellSet> cellRegions(rs.nRegions());
             for (label i = 0; i < rs.nRegions(); i++)
             {
-                cellSet rCells
+                cellRegions.set
                 (
-                    mesh,
-                    "cellToRegion:" + Foam::name(i),
-                    mesh.nCells()/100
+                    i,
+                    new cellSet
+                    (
+                        mesh,
+                        "region" + Foam::name(i),
+                        mesh.nCells()/100
+                    )
                 );
+            }
 
-                forAll(rs, j)
-                {
-                    if (rs[j] == i)
-                    {
-                        rCells.insert(j);
-                    }
-                }
+            forAll(rs, i)
+            {
+                cellRegions[rs[i]].insert(i);
+            }
 
-                Info<< "  <<Writing region " << i << " with " << rCells.size()
-                    << " cells to cellSet " << rCells.name() << endl;
+            for (label i = 0; i < rs.nRegions(); i++)
+            {
+                Info<< "  <<Writing region " << i << " with "
+                    << returnReduce(cellRegions[i].size(), sumOp<scalar>())
+                    << " cells to cellSet " << cellRegions[i].name() << endl;
 
-                rCells.write();
+                cellRegions[i].write();
             }
         }
     }
