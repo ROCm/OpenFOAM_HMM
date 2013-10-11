@@ -1,0 +1,90 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      phaseProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+phases (air water);
+
+air
+{
+    diameterModel   IATE;
+
+    IATECoeffs
+    {
+        dMax 1e-2;
+        dMin 1e-4;
+
+        sources
+        (
+            wakeEntrainmentCoalescence
+            {
+                Cwe         0.002;
+            }
+            randomCoalescence
+            {
+                Crc         0.04;
+                C           3;
+                alphaMax    0.75;
+            }
+            turbulentBreakUp
+            {
+                Cti         0.085;
+                WeCr        6;
+            }
+        );
+    }
+}
+
+water
+{
+    diameterModel constant;
+    constantCoeffs
+    {
+        d               1e-4;
+    }
+}
+
+// Surface tension coefficient
+sigma           0.07;
+
+drag
+{
+    air     SchillerNaumann;
+    water   SchillerNaumann;
+}
+
+heatTransfer
+{
+    air     RanzMarshall;
+    water   RanzMarshall;
+}
+
+dispersedPhase          both;
+
+residualPhaseFraction   1e-3;
+residualSlip            1e-2;
+
+// Virtual-mass ceofficient
+Cvm             0.5;
+
+// Lift coefficient
+Cl              0;
+
+// Minimum allowable pressure
+pMin            10000;
+
+
+
+// ************************************************************************* //

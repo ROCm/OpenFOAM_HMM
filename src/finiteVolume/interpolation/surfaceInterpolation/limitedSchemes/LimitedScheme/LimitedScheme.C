@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,32 +28,16 @@ License
 #include "fvcGrad.H"
 #include "coupledFvPatchFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 template<class Type, class Limiter, template<class> class LimitFunc>
-Foam::tmp<Foam::surfaceScalarField>
-Foam::LimitedScheme<Type, Limiter, LimitFunc>::limiter
+void Foam::LimitedScheme<Type, Limiter, LimitFunc>::calcLimiter
 (
-    const GeometricField<Type, fvPatchField, volMesh>& phi
+    const GeometricField<Type, fvPatchField, volMesh>& phi,
+    surfaceScalarField& limiterField
 ) const
 {
     const fvMesh& mesh = this->mesh();
-
-    tmp<surfaceScalarField> tLimiter
-    (
-        new surfaceScalarField
-        (
-            IOobject
-            (
-                type() + "Limiter(" + phi.name() + ')',
-                mesh.time().timeName(),
-                mesh
-            ),
-            mesh,
-            dimless
-        )
-    );
-    surfaceScalarField& lim = tLimiter();
 
     tmp<GeometricField<typename Limiter::phiType, fvPatchField, volMesh> >
         tlPhi = LimitFunc<Type>()(phi);
@@ -73,7 +57,7 @@ Foam::LimitedScheme<Type, Limiter, LimitFunc>::limiter
 
     const vectorField& C = mesh.C();
 
-    scalarField& pLim = lim.internalField();
+    scalarField& pLim = limiterField.internalField();
 
     forAll(pLim, face)
     {
@@ -92,7 +76,8 @@ Foam::LimitedScheme<Type, Limiter, LimitFunc>::limiter
         );
     }
 
-    surfaceScalarField::GeometricBoundaryField& bLim = lim.boundaryField();
+    surfaceScalarField::GeometricBoundaryField& bLim =
+        limiterField.boundaryField();
 
     forAll(bLim, patchi)
     {
@@ -143,8 +128,80 @@ Foam::LimitedScheme<Type, Limiter, LimitFunc>::limiter
             pLim = 1.0;
         }
     }
+}
 
-    return tLimiter;
+
+// * * * * * * * * * * * * Public Member Functions  * * * * * * * * * * * * //
+
+template<class Type, class Limiter, template<class> class LimitFunc>
+Foam::tmp<Foam::surfaceScalarField>
+Foam::LimitedScheme<Type, Limiter, LimitFunc>::limiter
+(
+    const GeometricField<Type, fvPatchField, volMesh>& phi
+) const
+{
+    const fvMesh& mesh = this->mesh();
+
+    const word limiterFieldName(type() + "Limiter(" + phi.name() + ')');
+
+    if (this->mesh().cache("limiter"))
+    {
+        if (!mesh.foundObject<surfaceScalarField>(limiterFieldName))
+        {
+            surfaceScalarField* limiterField
+            (
+                new surfaceScalarField
+                (
+                    IOobject
+                    (
+                        limiterFieldName,
+                        mesh.time().timeName(),
+                        mesh,
+                        IOobject::NO_READ,
+                        IOobject::NO_WRITE
+                    ),
+                    mesh,
+                    dimless
+                )
+            );
+
+            mesh.objectRegistry::store(limiterField);
+        }
+
+        surfaceScalarField& limiterField =
+            const_cast<surfaceScalarField&>
+            (
+                mesh.lookupObject<surfaceScalarField>
+                (
+                    limiterFieldName
+                )
+            );
+
+        calcLimiter(phi, limiterField);
+
+        return limiterField;
+    }
+    else
+    {
+        tmp<surfaceScalarField> tlimiterField
+        (
+            new surfaceScalarField
+            (
+                IOobject
+                (
+                    limiterFieldName,
+                    mesh.time().timeName(),
+                    mesh
+                ),
+                mesh,
+                dimless
+            )
+        );
+
+        calcLimiter(phi, tlimiterField());
+
+        return tlimiterField;
+    }
 }
 
 

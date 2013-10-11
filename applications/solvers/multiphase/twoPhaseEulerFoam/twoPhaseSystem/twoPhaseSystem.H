@@ -74,6 +74,12 @@ class twoPhaseSystem
         phaseModel phase1_;
         phaseModel phase2_;
 
+        surfaceScalarField phi_;
+
+        volScalarField dgdt_;
+
+        dimensionedScalar sigma_;
+
         dimensionedScalar Cvm_;
         dimensionedScalar Cl_;
 
@@ -86,6 +92,10 @@ class twoPhaseSystem
         word dispersedPhase_;
         scalar residualPhaseFraction_;
         dimensionedScalar residualSlip_;
+
+
+        //- Return the mixture flux
+        tmp<surfaceScalarField> calcPhi() const;
 
 
 public:
@@ -138,6 +148,28 @@ public:
         phaseModel& phase2()
         {
             return phase2_;
+        }
+
+        //- Return the mixture flux
+        const surfaceScalarField& phi() const
+        {
+            return phi_;
+        }
+
+        //- Return the mixture flux
+        surfaceScalarField& phi()
+        {
+            return phi_;
+        }
+
+        const volScalarField& dgdt() const
+        {
+            return dgdt_;
+        }
+
+        volScalarField& dgdt()
+        {
+            return dgdt_;
         }
 
         const dragModel& drag1() const
@@ -193,8 +225,11 @@ public:
         //- Return the mixture velocity
         tmp<volVectorField> U() const;
 
-        //- Return the mixture flux
-        tmp<surfaceScalarField> phi() const;
+        //- Return the surface tension coefficient
+        dimensionedScalar sigma() const
+        {
+            return sigma_;
+        }
 
         //- Return the virtual-mass coefficient
         dimensionedScalar Cvm() const
@@ -208,9 +243,14 @@ public:
             return Cl_;
         }
 
-        //- Dummy correct
-        void correct()
-        {}
+        //- Solve for the two-phase-fractions
+        void solve();
+
+        //- Correct two-phase properties other than turbulence
+        void correct();
+
+        //- Correct two-phase turbulence
+        void correctTurbulence();
 
         //- Read base phaseProperties dictionary
         bool read();

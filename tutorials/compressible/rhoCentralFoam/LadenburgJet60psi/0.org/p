@@ -32,7 +32,7 @@ boundaryField
         field           p;
         phi             phi;
         rho             rho;
-        psi             psi;
+        psi             thermo:psi;
         fieldInf        101325;
         gamma           1.4;
         lInf            0.025;
@@ -47,7 +47,7 @@ boundaryField
         U               U;
         phi             phi;
         rho             none;
-        psi             psi;
+        psi             thermo:psi;
         gamma           1.4;
     }
 

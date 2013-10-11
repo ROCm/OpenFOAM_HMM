@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,13 +39,6 @@ namespace surfaceFilmModels
 inline const Foam::dimensionedVector& surfaceFilmModel::g() const
 {
     return g_;
-}
-
-
-inline const surfaceFilmModel::thermoModelType&
-surfaceFilmModel::thermoModel() const
-{
-    return thermoModel_;
 }
 
 

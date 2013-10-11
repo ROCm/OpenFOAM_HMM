@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,11 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfaceShearForce.H"
+#include "solidification.H"
 #include "addToRunTimeSelectionTable.H"
-#include "fvmSup.H"
-#include "kinematicSingleLayer.H"
-#include "turbulenceModel.H"
+#include "thermoSingleLayer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -40,55 +38,93 @@ namespace surfaceFilmModels
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(surfaceShearForce, 0);
-addToRunTimeSelectionTable(force, surfaceShearForce, dictionary);
+defineTypeNameAndDebug(solidification, 0);
+
+addToRunTimeSelectionTable
+(
+    phaseChangeModel,
+    solidification,
+    dictionary
+);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-surfaceShearForce::surfaceShearForce
+solidification::solidification
 (
     const surfaceFilmModel& owner,
     const dictionary& dict
 )
 :
-    force(typeName, owner, dict),
-    Cf_(readScalar(coeffs_.lookup("Cf")))
+    phaseChangeModel(typeName, owner, dict),
+    T0_(readScalar(coeffs_.lookup("T0"))),
+    L_(readScalar(coeffs_.lookup("L"))),
+    alpha_(readScalar(coeffs_.lookup("alpha"))),
+    mass_
+    (
+        IOobject
+        (
+            typeName + ":mass",
+            owner.regionMesh().time().timeName(),
+            owner.regionMesh(),
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        owner.regionMesh(),
+        dimensionedScalar("zero", dimMass, 0.0),
+        zeroGradientFvPatchScalarField::typeName
+    ),
+    thickness_
+    (
+        IOobject
+        (
+            typeName + ":thickness",
+            owner.regionMesh().time().timeName(),
+            owner.regionMesh(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        owner.regionMesh(),
+        dimensionedScalar("zero", dimLength, 0.0),
+        zeroGradientFvPatchScalarField::typeName
+    )
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-surfaceShearForce::~surfaceShearForce()
+solidification::~solidification()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-tmp<fvVectorMatrix> surfaceShearForce::correct(volVectorField& U)
+void solidification::correctModel
+(
+    const scalar dt,
+    scalarField& availableMass,
+    scalarField& dMass,
+    scalarField& dEnergy
+)
 {
-    // local reference to film model
-    const kinematicSingleLayer& film =
-        static_cast<const kinematicSingleLayer&>(owner_);
+    const thermoSingleLayer& film = filmType<thermoSingleLayer>();
 
-    // local references to film fields
-    const volScalarField& mu = film.mu();
-    const volVectorField& Uw = film.Uw();
-    const volScalarField& delta = film.delta();
-    const volVectorField& Up = film.UPrimary();
+    const scalarField& T = film.T();
+    const scalarField& alpha = film.alpha();
 
-    // laminar case - employ simple coeff-based model
-    const volScalarField& rhop = film.rhoPrimary();
-    volScalarField Cs("Cs", Cf_*rhop*mag(Up - U));
+    forAll(alpha, cellI)
+    {
+        if (alpha[cellI] > 0.5)
+        {
+            if (T[cellI] > T0_)
+            {
+                mass_[cellI] += alpha_*availableMass[cellI];
+                dMass[cellI] += alpha_*availableMass[cellI];
+                dEnergy[cellI] += alpha_*availableMass[cellI]*L_;
+            }
+        }
+    }
 
-    dimensionedScalar d0("SMALL", delta.dimensions(), SMALL);
-    volScalarField Cw("Cw", mu/(0.3333*(delta + d0)));
-    Cw.min(5000.0);
-
-    return
-    (
-       - fvm::Sp(Cs, U) + Cs*Up // surface contribution
-       - fvm::Sp(Cw, U) + Cw*Uw // wall contribution
-    );
+    thickness_ = mass_/film.magSf()/film.rho();
 }
 
 

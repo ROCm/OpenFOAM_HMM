@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,7 +57,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class LimitedScheme Declaration
+                        Class LimitedScheme Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type, class Limiter, template<class> class LimitFunc>
@@ -67,6 +67,13 @@ class LimitedScheme
     public Limiter
 {
     // Private Member Functions
+
+        //- Calculate the limiter
+        void calcLimiter
+        (
+            const GeometricField<Type, fvPatchField, volMesh>& phi,
+            surfaceScalarField& limiterField
+        ) const;
 
         //- Disallow default bitwise copy construct
         LimitedScheme(const LimitedScheme&);
