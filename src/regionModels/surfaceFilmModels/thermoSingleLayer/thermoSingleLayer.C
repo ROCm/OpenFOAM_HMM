@@ -555,7 +555,7 @@ thermoSingleLayer::thermoSingleLayer
         phi_ = fvc::interpolate(deltaRho_*U_) & regionMesh().Sf();
 
         // evaluate viscosity from user-model
-//        viscosity_->correct(pPrimary_, T_);
+        viscosity_->correct(pPrimary_, T_);
     }
 }
 
