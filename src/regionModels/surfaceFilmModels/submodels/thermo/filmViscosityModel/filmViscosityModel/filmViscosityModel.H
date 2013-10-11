@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,21 +22,23 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::subModelBase
+    Foam::filmViscosityModel
 
 Description
-    Base class for surface film sub-models
+    Base class for surface film viscosity models
 
 SourceFiles
-    subModelBaseI.H
-    subModelBase.C
+    filmViscosityModel.C
+    filmViscosityModelNew.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef subModelBase_H
-#define subModelBase_H
+#ifndef filmViscosityModel_H
+#define filmViscosityModel_H
 
-#include "surfaceFilmModel.H"
+#include "subModelBase.H"
+#include "runTimeSelectionTables.H"
+#include "scalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,67 +50,96 @@ namespace surfaceFilmModels
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class subModelBase Declaration
+                     Class filmViscosityModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class subModelBase
+class filmViscosityModel
+:
+    public subModelBase
 {
 private:
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        subModelBase(const subModelBase&);
+        filmViscosityModel(const filmViscosityModel&);
 
         //- Disallow default bitwise assignment
-        void operator=(const subModelBase&);
+        void operator=(const filmViscosityModel&);
 
 
 protected:
 
-    // Protected data
+    // Protected Member Data
 
-        //- Reference to the owner surface film model
-        const surfaceFilmModel& owner_;
-
-        //- Model coefficients dictionary
-        dictionary coeffs_;
+        //- Reference to the viscosity field
+        volScalarField& mu_;
 
 
 public:
 
+    //- Runtime type information
+    TypeName("filmViscosityModel");
+
+
+    // Declare runtime constructor selection table
+
+         declareRunTimeSelectionTable
+         (
+             autoPtr,
+             filmViscosityModel,
+             dictionary,
+             (
+                const surfaceFilmModel& owner,
+                const dictionary& dict,
+                volScalarField& mu
+             ),
+             (owner, dict, mu)
+         );
+
     // Constructors
 
-        //- Construct null
-        subModelBase(const surfaceFilmModel& owner);
-
         //- Construct from type name, dictionary and surface film model
-        subModelBase
+        filmViscosityModel
         (
             const word& type,
             const surfaceFilmModel& owner,
-            const dictionary& dict
+            const dictionary& dict,
+            volScalarField& mu
+        );
+
+
+    // Selectors
+
+        //- Return a reference to the selected phase change model
+        static autoPtr<filmViscosityModel> New
+        (
+            const surfaceFilmModel& owner,
+            const dictionary& dict,
+            volScalarField& mu
         );
 
 
     //- Destructor
-    virtual ~subModelBase();
+    virtual ~filmViscosityModel();
 
 
     // Member Functions
 
-        // Access
+        // Evolution
 
-            virtual const word& type() const = 0;
+            //- Correct
+            virtual void correct
+            (
+                const volScalarField& p,
+                const volScalarField& T
+            ) = 0;
 
-            //- Return the reference to the owner surface film model
-            inline const surfaceFilmModel& owner() const;
 
-            //- Return the model coefficients dictionary
-            inline const dictionary& coeffs() const;
+        // I-O
 
-            template<class FilmType>
-            inline const FilmType& filmType() const;
+            //- Provide some feedback
+            virtual void info(Ostream& os) const;
 };
 
 
@@ -117,16 +148,6 @@ public:
 } // End namespace surfaceFilmModels
 } // End namespace regionModels
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "subModelBaseI.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "subModelBaseTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

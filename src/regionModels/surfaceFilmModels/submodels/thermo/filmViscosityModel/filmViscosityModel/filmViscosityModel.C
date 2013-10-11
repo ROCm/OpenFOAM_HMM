@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "filmTurbulenceModel.H"
+#include "filmViscosityModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -34,44 +34,42 @@ namespace regionModels
 namespace surfaceFilmModels
 {
 
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-autoPtr<filmTurbulenceModel> filmTurbulenceModel::New
+defineTypeNameAndDebug(filmViscosityModel, 0);
+defineRunTimeSelectionTable(filmViscosityModel, dictionary);
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+filmViscosityModel::filmViscosityModel
 (
-    const surfaceFilmModel& model,
-    const dictionary& dict
+    const word& type,
+    const surfaceFilmModel& owner,
+    const dictionary& dict,
+    volScalarField& mu
 )
-{
-    const word modelType(dict.lookup("turbulence"));
+:
+    subModelBase(type, owner, dict),
+    mu_(mu)
+{}
 
-    Info<< "    Selecting filmTurbulenceModel " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
-    {
-        FatalErrorIn
-        (
-            "filmTurbulenceModel::New"
-            "("
-                "const surfaceFilmModel&, "
-                "const dictionary&"
-            ")"
-        )   << "Unknown filmTurbulenceModel type " << modelType
-            << nl << nl << "Valid filmTurbulenceModel types are:" << nl
-            << dictionaryConstructorTablePtr_->toc()
-            << exit(FatalError);
-    }
+filmViscosityModel::~filmViscosityModel()
+{}
 
-    return autoPtr<filmTurbulenceModel>(cstrIter()(model, dict));
-}
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void filmViscosityModel::info(Ostream& os) const
+{}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace surfaceFilmModels
-} // End namespace regionModels
-} // End namespace Foam
+} // end namespace surfaceFilmModels
+} // end namespace regionModels
+} // end namespace Foam
 
 // ************************************************************************* //

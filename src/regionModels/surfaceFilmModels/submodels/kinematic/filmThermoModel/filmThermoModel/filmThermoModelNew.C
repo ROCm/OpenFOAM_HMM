@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "filmTurbulenceModel.H"
+#include "filmThermoModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -36,15 +36,15 @@ namespace surfaceFilmModels
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-autoPtr<filmTurbulenceModel> filmTurbulenceModel::New
+autoPtr<filmThermoModel> filmThermoModel::New
 (
     const surfaceFilmModel& model,
     const dictionary& dict
 )
 {
-    const word modelType(dict.lookup("turbulence"));
+    word modelType(dict.lookup("filmThermoModel"));
 
-    Info<< "    Selecting filmTurbulenceModel " << modelType << endl;
+    Info<< "    Selecting filmThermoModel " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
@@ -53,18 +53,14 @@ autoPtr<filmTurbulenceModel> filmTurbulenceModel::New
     {
         FatalErrorIn
         (
-            "filmTurbulenceModel::New"
-            "("
-                "const surfaceFilmModel&, "
-                "const dictionary&"
-            ")"
-        )   << "Unknown filmTurbulenceModel type " << modelType
-            << nl << nl << "Valid filmTurbulenceModel types are:" << nl
+            "filmThermoModel::New(const surfaceFilmModel&, const dictionary&)"
+        )   << "Unknown filmThermoModel type " << modelType << nl << nl
+            << "Valid filmThermoModel types are:" << nl
             << dictionaryConstructorTablePtr_->toc()
             << exit(FatalError);
     }
 
-    return autoPtr<filmTurbulenceModel>(cstrIter()(model, dict));
+    return autoPtr<filmThermoModel>(cstrIter()(model, dict));
 }
 
 

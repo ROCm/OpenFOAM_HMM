@@ -161,6 +161,9 @@ void Foam::layerAdditionRemoval::addCellLayer
 
     forAll(mf, faceI)
     {
+        label cellI = mc[faceI];
+        label zoneI =  mesh.cellZones().whichZone(cellI);
+
         addedCells[faceI] =
             ref.setAction
             (
@@ -170,7 +173,7 @@ void Foam::layerAdditionRemoval::addCellLayer
                     -1,           // master edge
                     mf[faceI],    // master face
                     -1,           // master cell
-                    -1            // zone for cell
+                    zoneI         // zone for cell
                 )
             );
     }

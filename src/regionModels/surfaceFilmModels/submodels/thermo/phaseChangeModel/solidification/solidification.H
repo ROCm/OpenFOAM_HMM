@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,80 +22,106 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::hePsiThermo
+    Foam::solidification
 
 Description
-    Energy for a mixture based on compressibility
+    Solidification phase change model where all film mass is converted when
+    the local temperature > activation temperature.
 
 SourceFiles
-    hePsiThermo.C
+    solidification.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef hePsiThermo_H
-#define hePsiThermo_H
+#ifndef solidification_H
+#define solidification_H
 
-#include "psiThermo.H"
-#include "heThermo.H"
+#include "phaseChangeModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace regionModels
+{
+namespace surfaceFilmModels
+{
 
 /*---------------------------------------------------------------------------*\
-                         Class hePsiThermo Declaration
+                       Class solidification Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class BasicPsiThermo, class MixtureType>
-class hePsiThermo
+class solidification
 :
-    public heThermo<BasicPsiThermo, MixtureType>
+    public phaseChangeModel
 {
-    // Private Member Functions
+private:
 
-        //- Calculate the thermo variables
-        void calculate();
+    // Private member functions
 
-        //- Construct as copy (not implemented)
-        hePsiThermo(const hePsiThermo<BasicPsiThermo, MixtureType>&);
+        //- Disallow default bitwise copy construct
+        solidification(const solidification&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const solidification&);
+
+
+protected:
+
+    // Protected data
+
+        //- Temperature at which solidification starts
+        scalar T0_;
+
+        //- Latent heat of solidification [J/kg]
+        scalar L_;
+
+        //- Under-relaxation parameter for solidification process (0-1)
+        scalar alpha_;
+
+        //- Accumulated solid mass [kg]
+        volScalarField mass_;
+
+        //- Accumulated solid thickness [m]
+        volScalarField thickness_;
+
 
 public:
 
     //- Runtime type information
-    TypeName("hePsiThermo");
+    TypeName("solidification");
 
 
     // Constructors
 
-        //- Construct from mesh and phase name
-        hePsiThermo
-        (
-            const fvMesh&,
-            const word& phaseName
-        );
+        //- Construct from surface film model
+        solidification(const surfaceFilmModel& owner, const dictionary& dict);
 
 
     //- Destructor
-    virtual ~hePsiThermo();
+    virtual ~solidification();
 
 
-    // Member functions
+    // Member Functions
 
-        //- Update properties
-        virtual void correct();
+        // Evolution
+
+            //- Correct
+            virtual void correctModel
+            (
+                const scalar dt,
+                scalarField& availableMass,
+                scalarField& dMass,
+                scalarField& dEnergy
+            );
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace surfaceFilmModels
+} // End namespace regionModels
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "hePsiThermo.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

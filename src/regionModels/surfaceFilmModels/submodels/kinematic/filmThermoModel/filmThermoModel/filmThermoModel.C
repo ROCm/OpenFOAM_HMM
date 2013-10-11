@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "filmTurbulenceModel.H"
+#include "filmThermoModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -34,38 +34,37 @@ namespace regionModels
 namespace surfaceFilmModels
 {
 
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-autoPtr<filmTurbulenceModel> filmTurbulenceModel::New
+defineTypeNameAndDebug(filmThermoModel, 0);
+defineRunTimeSelectionTable(filmThermoModel, dictionary);
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+filmThermoModel::filmThermoModel
 (
-    const surfaceFilmModel& model,
+    const surfaceFilmModel& owner
+)
+:
+    subModelBase(owner)
+{}
+
+
+filmThermoModel::filmThermoModel
+(
+    const word& type,
+    const surfaceFilmModel& owner,
     const dictionary& dict
 )
-{
-    const word modelType(dict.lookup("turbulence"));
+:
+    subModelBase(type, owner, dict)
+{}
 
-    Info<< "    Selecting filmTurbulenceModel " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
-    {
-        FatalErrorIn
-        (
-            "filmTurbulenceModel::New"
-            "("
-                "const surfaceFilmModel&, "
-                "const dictionary&"
-            ")"
-        )   << "Unknown filmTurbulenceModel type " << modelType
-            << nl << nl << "Valid filmTurbulenceModel types are:" << nl
-            << dictionaryConstructorTablePtr_->toc()
-            << exit(FatalError);
-    }
-
-    return autoPtr<filmTurbulenceModel>(cstrIter()(model, dict));
-}
+filmThermoModel::~filmThermoModel()
+{}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,80 +22,97 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::hePsiThermo
+    Foam::constantViscosity
 
 Description
-    Energy for a mixture based on compressibility
+    Constant viscosity model
 
 SourceFiles
-    hePsiThermo.C
+    constantViscosity.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef hePsiThermo_H
-#define hePsiThermo_H
+#ifndef constantViscosity_H
+#define constantViscosity_H
 
-#include "psiThermo.H"
-#include "heThermo.H"
+#include "filmViscosityModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace regionModels
+{
+namespace surfaceFilmModels
+{
 
 /*---------------------------------------------------------------------------*\
-                         Class hePsiThermo Declaration
+                      Class constantViscosity Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class BasicPsiThermo, class MixtureType>
-class hePsiThermo
+class constantViscosity
 :
-    public heThermo<BasicPsiThermo, MixtureType>
+    public filmViscosityModel
 {
-    // Private Member Functions
+private:
 
-        //- Calculate the thermo variables
-        void calculate();
+    // Private member functions
 
-        //- Construct as copy (not implemented)
-        hePsiThermo(const hePsiThermo<BasicPsiThermo, MixtureType>&);
+        //- Disallow default bitwise copy construct
+        constantViscosity(const constantViscosity&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const constantViscosity&);
+
+
+protected:
+
+    // Protected data
+
+        //- Constant viscosity [Pa.s]
+        scalar mu0_;
+
+
 
 public:
 
     //- Runtime type information
-    TypeName("hePsiThermo");
+    TypeName("constant");
 
 
     // Constructors
 
-        //- Construct from mesh and phase name
-        hePsiThermo
+        //- Construct from surface film model
+        constantViscosity
         (
-            const fvMesh&,
-            const word& phaseName
+            const surfaceFilmModel& owner,
+            const dictionary& dict,
+            volScalarField& mu
         );
 
 
     //- Destructor
-    virtual ~hePsiThermo();
+    virtual ~constantViscosity();
 
 
-    // Member functions
+    // Member Functions
 
-        //- Update properties
-        virtual void correct();
+        // Evolution
+
+            //- Correct
+            virtual void correct
+            (
+                const volScalarField& p,
+                const volScalarField& T
+            );
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace surfaceFilmModels
+} // End namespace regionModels
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "hePsiThermo.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

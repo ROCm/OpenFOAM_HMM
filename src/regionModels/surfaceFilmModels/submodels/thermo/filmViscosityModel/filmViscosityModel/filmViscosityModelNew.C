@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "filmTurbulenceModel.H"
+#include "filmViscosityModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -36,15 +36,16 @@ namespace surfaceFilmModels
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-autoPtr<filmTurbulenceModel> filmTurbulenceModel::New
+autoPtr<filmViscosityModel> filmViscosityModel::New
 (
     const surfaceFilmModel& model,
-    const dictionary& dict
+    const dictionary& dict,
+    volScalarField& mu
 )
 {
-    const word modelType(dict.lookup("turbulence"));
+    word modelType(dict.lookup("filmViscosityModel"));
 
-    Info<< "    Selecting filmTurbulenceModel " << modelType << endl;
+    Info<< "    Selecting filmViscosityModel " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
@@ -53,25 +54,26 @@ autoPtr<filmTurbulenceModel> filmTurbulenceModel::New
     {
         FatalErrorIn
         (
-            "filmTurbulenceModel::New"
+            "filmViscosityModel::New"
             "("
                 "const surfaceFilmModel&, "
-                "const dictionary&"
+                "const dictionary&, "
+                "volScalarField&"
             ")"
-        )   << "Unknown filmTurbulenceModel type " << modelType
-            << nl << nl << "Valid filmTurbulenceModel types are:" << nl
+        )   << "Unknown filmViscosityModel type " << modelType
+            << nl << nl << "Valid filmViscosityModel types are:" << nl
             << dictionaryConstructorTablePtr_->toc()
             << exit(FatalError);
     }
 
-    return autoPtr<filmTurbulenceModel>(cstrIter()(model, dict));
+    return autoPtr<filmViscosityModel>(cstrIter()(model, dict, mu));
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace surfaceFilmModels
-} // End namespace regionModels
-} // End namespace Foam
+} // end namespace surfaceFilmModels
+} // end namespace regionModels
+} // end namespace Foam
 
 // ************************************************************************* //

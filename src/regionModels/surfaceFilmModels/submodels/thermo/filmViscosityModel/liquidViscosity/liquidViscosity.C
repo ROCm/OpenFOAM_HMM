@@ -23,7 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "filmTurbulenceModel.H"
+#include "liquidViscosity.H"
+#include "thermoSingleLayer.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -34,37 +36,47 @@ namespace regionModels
 namespace surfaceFilmModels
 {
 
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-autoPtr<filmTurbulenceModel> filmTurbulenceModel::New
+defineTypeNameAndDebug(liquidViscosity, 0);
+
+addToRunTimeSelectionTable
 (
-    const surfaceFilmModel& model,
-    const dictionary& dict
+    filmViscosityModel,
+    liquidViscosity,
+    dictionary
+);
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+liquidViscosity::liquidViscosity
+(
+    const surfaceFilmModel& owner,
+    const dictionary& dict,
+    volScalarField& mu
+)
+:
+    filmViscosityModel(typeName, owner, dict, mu)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+liquidViscosity::~liquidViscosity()
+{}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void liquidViscosity::correct
+(
+    const volScalarField& p,
+    const volScalarField& T
 )
 {
-    const word modelType(dict.lookup("turbulence"));
+    const thermoSingleLayer& film = filmType<thermoSingleLayer>();
 
-    Info<< "    Selecting filmTurbulenceModel " << modelType << endl;
-
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
-
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
-    {
-        FatalErrorIn
-        (
-            "filmTurbulenceModel::New"
-            "("
-                "const surfaceFilmModel&, "
-                "const dictionary&"
-            ")"
-        )   << "Unknown filmTurbulenceModel type " << modelType
-            << nl << nl << "Valid filmTurbulenceModel types are:" << nl
-            << dictionaryConstructorTablePtr_->toc()
-            << exit(FatalError);
-    }
-
-    return autoPtr<filmTurbulenceModel>(cstrIter()(model, dict));
+    mu_ = film.filmThermo().mu();
 }
 
 

@@ -23,10 +23,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "filmTurbulenceModel.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 namespace Foam
 {
 namespace regionModels
@@ -34,37 +30,20 @@ namespace regionModels
 namespace surfaceFilmModels
 {
 
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-autoPtr<filmTurbulenceModel> filmTurbulenceModel::New
-(
-    const surfaceFilmModel& model,
-    const dictionary& dict
-)
+template<class FilmType>
+const FilmType& subModelBase::filmType() const
 {
-    const word modelType(dict.lookup("turbulence"));
-
-    Info<< "    Selecting filmTurbulenceModel " << modelType << endl;
-
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
-
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!isA<FilmType>(owner_))
     {
-        FatalErrorIn
-        (
-            "filmTurbulenceModel::New"
-            "("
-                "const surfaceFilmModel&, "
-                "const dictionary&"
-            ")"
-        )   << "Unknown filmTurbulenceModel type " << modelType
-            << nl << nl << "Valid filmTurbulenceModel types are:" << nl
-            << dictionaryConstructorTablePtr_->toc()
-            << exit(FatalError);
+        FatalErrorIn("FilmType& subModelBase::film() const")
+            << "Model " << type() << " requested film type "
+            << FilmType::typeName << " but film is type " << owner_.type()
+            << abort(FatalError);
     }
 
-    return autoPtr<filmTurbulenceModel>(cstrIter()(model, dict));
+    return refCast<const FilmType>(owner_);
 }
 
 

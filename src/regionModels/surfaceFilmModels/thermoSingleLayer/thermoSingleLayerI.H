@@ -24,8 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "thermoSingleLayer.H"
-#include "heatTransferModel.H"
 #include "filmRadiationModel.H"
+#include "heatTransferModel.H"
 #include "phaseChangeModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -42,12 +42,6 @@ namespace surfaceFilmModels
 inline const SLGThermo& thermoSingleLayer::thermo() const
 {
     return thermo_;
-}
-
-
-inline label thermoSingleLayer::liquidId() const
-{
-    return liquidId_;
 }
 
 
