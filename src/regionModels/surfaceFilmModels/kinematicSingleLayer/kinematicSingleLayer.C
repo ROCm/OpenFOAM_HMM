@@ -183,7 +183,7 @@ tmp<volScalarField> kinematicSingleLayer::pp()
 
 void kinematicSingleLayer::correctAlpha()
 {
-    alpha_ == pos(delta_ - dimensionedScalar("SMALL", dimLength, SMALL));
+    alpha_ == pos(delta_ - deltaSmall_);
 }
 
 

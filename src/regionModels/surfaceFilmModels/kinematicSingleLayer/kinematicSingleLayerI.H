@@ -196,9 +196,8 @@ inline tmp<volScalarField> kinematicSingleLayer::mass() const
 
 inline tmp<volScalarField> kinematicSingleLayer::netMass() const
 {
-    dimensionedScalar d0("SMALL", dimLength, ROOTVSMALL);
     return
-        fvc::surfaceSum(pos(phi_)*phi_/(fvc::interpolate(delta_) + d0))
+        fvc::surfaceSum(pos(phi_)*phi_/(fvc::interpolate(delta_) + deltaSmall_))
        *time().deltaT()
       + rho_*delta_*magSf();
 }
