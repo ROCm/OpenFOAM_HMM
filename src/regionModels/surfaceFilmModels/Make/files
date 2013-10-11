@@ -37,6 +37,7 @@ $(THERMOMODELS)/phaseChangeModel/phaseChangeModel/phaseChangeModel.C
 $(THERMOMODELS)/phaseChangeModel/phaseChangeModel/phaseChangeModelNew.C
 $(THERMOMODELS)/phaseChangeModel/noPhaseChange/noPhaseChange.C
 $(THERMOMODELS)/phaseChangeModel/standardPhaseChange/standardPhaseChange.C
+$(THERMOMODELS)/phaseChangeModel/solidification/solidification.C
 
 $(THERMOMODELS)/heatTransferModel/heatTransferModel/heatTransferModel.C
 $(THERMOMODELS)/heatTransferModel/heatTransferModel/heatTransferModelNew.C
