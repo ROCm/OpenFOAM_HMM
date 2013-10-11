@@ -48,12 +48,12 @@ namespace diameterModels
 
 Foam::diameterModels::constant::constant
 (
-    const dictionary& dict,
+    const dictionary& diameterProperties,
     const phaseModel& phase
 )
 :
-    diameterModel(dict, phase),
-    d_("d", dimLength, dict.lookup("d"))
+    diameterModel(diameterProperties, phase),
+    d_("d", dimLength, diameterProperties_.lookup("d"))
 {}
 
 
@@ -81,6 +81,16 @@ Foam::tmp<Foam::volScalarField> Foam::diameterModels::constant::d() const
             d_
         )
     );
+}
+
+
+bool Foam::diameterModels::constant::read(const dictionary& phaseProperties)
+{
+    diameterModel::read(phaseProperties);
+
+    diameterProperties_.lookup("d") >> d_;
+
+    return true;
 }
 
 

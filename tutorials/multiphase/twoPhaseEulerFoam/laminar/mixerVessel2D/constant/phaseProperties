@@ -36,6 +36,9 @@ water
     }
 }
 
+// Surface tension coefficient
+sigma           0.07;
+
 drag
 {
     air     SchillerNaumann;

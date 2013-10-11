@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,21 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::surfaceShearForce
-
-Description
-    Film surface shear force
-
-SourceFiles
-    surfaceShearForce.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfaceShearForce_H
-#define surfaceShearForce_H
-
-#include "force.H"
+#include "constantViscosity.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,59 +35,50 @@ namespace regionModels
 namespace surfaceFilmModels
 {
 
-/*---------------------------------------------------------------------------*\
-                      Class surfaceShearForce Declaration
-\*---------------------------------------------------------------------------*/
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-class surfaceShearForce
+defineTypeNameAndDebug(constantViscosity, 0);
+
+addToRunTimeSelectionTable
+(
+    filmViscosityModel,
+    constantViscosity,
+    dictionary
+);
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+constantViscosity::constantViscosity
+(
+    const surfaceFilmModel& owner,
+    const dictionary& dict,
+    volScalarField& mu
+)
 :
-    public force
+    filmViscosityModel(typeName, owner, dict, mu),
+    mu0_(readScalar(coeffs().lookup("mu0")))
 {
-private:
-
-    // Private Data
-
-        //- Surface roughness coefficient
-        scalar Cf_;
+    mu_.internalField() = mu0_;
+    mu_.correctBoundaryConditions();
+}
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-    // Private member functions
-
-        //- Disallow default bitwise copy construct
-        surfaceShearForce(const surfaceShearForce&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const surfaceShearForce&);
+constantViscosity::~constantViscosity()
+{}
 
 
-public:
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-    //- Runtime type information
-    TypeName("surfaceShear");
-
-
-    // Constructors
-
-        //- Construct from surface film model
-        surfaceShearForce
-        (
-            const surfaceFilmModel& owner,
-            const dictionary& dict
-        );
-
-
-    //- Destructor
-    virtual ~surfaceShearForce();
-
-
-    // Member Functions
-
-        // Evolution
-
-            //- Correct
-            virtual tmp<fvVectorMatrix> correct(volVectorField& U);
-};
+void constantViscosity::correct
+(
+    const volScalarField& p,
+    const volScalarField& T
+)
+{
+    // do nothing
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -106,9 +86,5 @@ public:
 } // End namespace surfaceFilmModels
 } // End namespace regionModels
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

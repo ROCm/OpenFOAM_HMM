@@ -44,7 +44,7 @@ autoPtr<filmTurbulenceModel> filmTurbulenceModel::New
 {
     const word modelType(dict.lookup("turbulence"));
 
-    Info<< "        " << modelType << endl;
+    Info<< "    Selecting filmTurbulenceModel " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);

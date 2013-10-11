@@ -24,11 +24,18 @@ active          true;
 
 thermoSingleLayerCoeffs
 {
-    thermoModel singleComponent; // constant
+    filmThermoModel liquid;
 
-    liquid      H2O;
+    liquidCoeffs
+    {
+        useReferenceValues no;
+        liquid      H2O;
+    }
+
+    filmViscosityModel liquid;
 
     deltaWet    1e-4;
+
     hydrophilic no;
 
     radiationModel  none;

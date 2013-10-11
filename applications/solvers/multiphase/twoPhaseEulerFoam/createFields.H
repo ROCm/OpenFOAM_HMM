@@ -10,19 +10,13 @@
 
     volVectorField& U1 = phase1.U();
     surfaceScalarField& phi1 = phase1.phi();
-    surfaceScalarField alphaPhi1
-    (
-        IOobject::groupName("alphaPhi", phase1.name()),
-        fvc::interpolate(alpha1)*phi1
-    );
+    surfaceScalarField& alphaPhi1 = phase1.phiAlpha();
 
     volVectorField& U2 = phase2.U();
     surfaceScalarField& phi2 = phase2.phi();
-    surfaceScalarField alphaPhi2
-    (
-        IOobject::groupName("alphaPhi", phase2.name()),
-        fvc::interpolate(alpha2)*phi2
-    );
+    surfaceScalarField& alphaPhi2 = phase2.phiAlpha();
+
+    surfaceScalarField& phi = fluid.phi();
 
     dimensionedScalar pMin
     (
@@ -53,19 +47,6 @@
             IOobject::AUTO_WRITE
         ),
         fluid.U()
-    );
-
-    surfaceScalarField phi
-    (
-        IOobject
-        (
-            "phi",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        fluid.phi()
     );
 
     volScalarField rho
@@ -133,13 +114,6 @@
     scalar pRefValue = 0.0;
     setRefCell(p, mesh.solutionDict().subDict("PIMPLE"), pRefCell, pRefValue);
 
-
-    volScalarField dgdt
-    (
-        pos(alpha2)*fvc::div(phi)/max(alpha2, scalar(0.0001))
-    );
-
-
     Info<< "Creating field dpdt\n" << endl;
     volScalarField dpdt
     (
@@ -157,29 +131,3 @@
     Info<< "Creating field kinetic energy K\n" << endl;
     volScalarField K1(IOobject::groupName("K", phase1.name()), 0.5*magSqr(U1));
     volScalarField K2(IOobject::groupName("K", phase2.name()), 0.5*magSqr(U2));
-
-    autoPtr<PhaseIncompressibleTurbulenceModel<phaseModel> >
-    turbulence1
-    (
-        PhaseIncompressibleTurbulenceModel<phaseModel>::New
-        (
-            alpha1,
-            U1,
-            alphaPhi1,
-            phi1,
-            phase1
-        )
-    );
-
-    autoPtr<PhaseIncompressibleTurbulenceModel<phaseModel> >
-    turbulence2
-    (
-        PhaseIncompressibleTurbulenceModel<phaseModel>::New
-        (
-            alpha2,
-            U2,
-            alphaPhi2,
-            phi2,
-            phase2
-        )
-    );

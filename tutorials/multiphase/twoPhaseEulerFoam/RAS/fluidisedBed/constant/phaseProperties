@@ -35,6 +35,9 @@ air
     }
 }
 
+// Surface tension coefficient
+sigma           0;
+
 drag
 {
     particles   GidaspowErgunWenYu;

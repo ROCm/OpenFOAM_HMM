@@ -23,10 +23,18 @@ active          true;
 
 thermoSingleLayerCoeffs
 {
-    thermoModel singleComponent;
-    liquid      H2O;
+    filmThermoModel liquid;
+
+    liquidCoeffs
+    {
+        useReferenceValues  no;
+        liquid      H2O;
+    }
+
+    filmViscosityModel liquid;
 
     deltaWet    1e-4;
+
     hydrophilic no;
 
     turbulence  laminar;
