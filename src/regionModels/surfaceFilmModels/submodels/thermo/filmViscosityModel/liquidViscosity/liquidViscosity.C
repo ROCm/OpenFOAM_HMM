@@ -47,8 +47,6 @@ addToRunTimeSelectionTable
     dictionary
 );
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 liquidViscosity::liquidViscosity
