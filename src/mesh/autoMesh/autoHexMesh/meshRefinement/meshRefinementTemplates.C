@@ -224,7 +224,7 @@ void meshRefinement::testSyncBoundaryFaceList
 template<class T>
 void meshRefinement::collectAndPrint
 (
-    const pointField& points,
+    const UList<point>& points,
     const UList<T>& data
 )
 {
@@ -253,7 +253,7 @@ void meshRefinement::collectAndPrint
     );
 
 
-    scalarField magAllPoints(mag(allPoints));
+    scalarField magAllPoints(mag(allPoints-point(-0.317, 0.117, 0.501)));
 
     labelList visitOrder;
     sortedOrder(magAllPoints, visitOrder);

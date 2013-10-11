@@ -993,7 +993,7 @@ public:
             template<class T>
             static void collectAndPrint
             (
-                const pointField& points,
+                const UList<point>& points,
                 const UList<T>& data
             );
 
