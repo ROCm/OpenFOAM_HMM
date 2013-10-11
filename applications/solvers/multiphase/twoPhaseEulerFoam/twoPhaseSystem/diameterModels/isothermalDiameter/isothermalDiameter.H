@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::isothermal
+    Foam::diameterModels::isothermal
 
 Description
     Isothermal dispersed-phase particle diameter model.
@@ -72,7 +72,7 @@ public:
         //- Construct from components
         isothermal
         (
-            const dictionary& dict,
+            const dictionary& diameterProperties,
             const phaseModel& phase
         );
 
@@ -83,7 +83,11 @@ public:
 
     // Member Functions
 
-        tmp<volScalarField> d() const;
+        //- Return the diameter field
+        virtual tmp<volScalarField> d() const;
+
+        //- Read phaseProperties dictionary
+        virtual bool read(const dictionary& phaseProperties);
 };
 
 

@@ -48,6 +48,9 @@ namespace Foam
 class twoPhaseSystem;
 class diameterModel;
 
+template<class Phase>
+class PhaseIncompressibleTurbulenceModel;
+
 
 /*---------------------------------------------------------------------------*\
                            Class phaseModel Declaration
@@ -74,11 +77,17 @@ class phaseModel
         //- Velocity
         volVectorField U_;
 
-        //- Fluxes
+        //- Volumetric flux of the phase
+        surfaceScalarField phiAlpha_;
+
+        //- Volumetric flux of the phase
         autoPtr<surfaceScalarField> phiPtr_;
 
         //- Diameter model
         autoPtr<diameterModel> dPtr_;
+
+        //- turbulence model
+        autoPtr<PhaseIncompressibleTurbulenceModel<phaseModel> > turbulence_;
 
 
 public:
@@ -99,19 +108,47 @@ public:
 
     // Member Functions
 
+        //- Return the name of this phase
+        const word& name() const
+        {
+            return name_;
+        }
+
         //- Return the twoPhaseSystem to which this phase belongs
         const twoPhaseSystem& fluid() const
         {
             return fluid_;
         }
 
-        const word& name() const
-        {
-            return name_;
-        }
+        //- Return the other phase in this two-phase system
+        const phaseModel& otherPhase() const;
 
+        //- Return the Sauter-mean diameter
         tmp<volScalarField> d() const;
 
+        //- Return the turbulence model
+        const PhaseIncompressibleTurbulenceModel<phaseModel>&
+            turbulence() const;
+
+        //- Return non-const access to the turbulence model
+        //  for correction
+        PhaseIncompressibleTurbulenceModel<phaseModel>&
+            turbulence();
+
+        //- Return the thermophysical model
+        const rhoThermo& thermo() const
+        {
+            return thermo_();
+        }
+
+        //- Return non-const access to the thermophysical model
+        //  for correction
+        rhoThermo& thermo()
+        {
+            return thermo_();
+        }
+
+        //- Return the laminar viscosity
         tmp<volScalarField> nu() const
         {
             return thermo_->nu();
@@ -123,57 +160,71 @@ public:
             return thermo_->nu(patchi);
         }
 
+        //- Return the thermal conductivity
         tmp<volScalarField> kappa() const
         {
             return thermo_->kappa();
         }
 
+        //- Return the specific heat capacity
         tmp<volScalarField> Cp() const
         {
             return thermo_->Cp();
         }
 
+        //- Return the density
         const volScalarField& rho() const
         {
             return thermo_->rho();
         }
 
-        const rhoThermo& thermo() const
-        {
-            return thermo_();
-        }
-
-        rhoThermo& thermo()
-        {
-            return thermo_();
-        }
-
+        //- Return the velocity
         const volVectorField& U() const
         {
             return U_;
         }
 
+        //- Return non-const access to the velocity
+        //  Used in the momentum equation
         volVectorField& U()
         {
             return U_;
         }
 
+        //- Return the volumetric flux
         const surfaceScalarField& phi() const
         {
             return phiPtr_();
         }
 
+        //- Return non-const access to the volumetric flux
         surfaceScalarField& phi()
         {
             return phiPtr_();
         }
 
-        //- Dummy correct
-        void correct()
-        {}
+        //- Return the volumetric flux of the phase
+        const surfaceScalarField& phiAlpha() const
+        {
+            return phiAlpha_;
+        }
 
-        //- Dummy read
-        bool read()
+        //- Return non-const access to the volumetric flux of the phase
+        surfaceScalarField& phiAlpha()
+        {
+            return phiAlpha_;
+        }
+
+        //- Correct the phase properties
+        //  other than the thermodynamics and turbulence
+        //  which have special treatment
+        void correct();
+
+        //- Read phaseProperties dictionary
+        virtual bool read(const dictionary& phaseProperties);
+
+        //- Dummy Read for transportModel
+        virtual bool read()
         {
             return true;
         }

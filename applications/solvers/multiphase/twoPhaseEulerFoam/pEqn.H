@@ -31,7 +31,7 @@
     surfaceScalarField phiP1
     (
         "phiP1",
-        fvc::interpolate((1.0/rho1)*rAU1*turbulence1().pPrime())
+        fvc::interpolate((1.0/rho1)*rAU1*phase1.turbulence().pPrime())
        *fvc::snGrad(alpha1)*mesh.magSf()
     );
 
@@ -39,7 +39,7 @@
     surfaceScalarField phiP2
     (
         "phiP2",
-        fvc::interpolate((1.0/rho2)*rAU2*turbulence2().pPrime())
+        fvc::interpolate((1.0/rho2)*rAU2*phase2.turbulence().pPrime())
        *fvc::snGrad(alpha2)*mesh.magSf()
     );
 
@@ -199,7 +199,7 @@
 
             phi = alpha1f*phi1 + alpha2f*phi2;
 
-            dgdt =
+            fluid.dgdt() =
             (
                 pos(alpha2)*(pEqnComp2 & p)/rho2
               - pos(alpha1)*(pEqnComp1 & p)/rho1

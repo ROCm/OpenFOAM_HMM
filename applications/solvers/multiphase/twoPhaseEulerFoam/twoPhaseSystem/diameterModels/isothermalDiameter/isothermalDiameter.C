@@ -48,13 +48,13 @@ namespace diameterModels
 
 Foam::diameterModels::isothermal::isothermal
 (
-    const dictionary& dict,
+    const dictionary& diameterProperties,
     const phaseModel& phase
 )
 :
-    diameterModel(dict, phase),
-    d0_("d0", dimLength, dict.lookup("d0")),
-    p0_("p0", dimPressure, dict.lookup("p0"))
+    diameterModel(diameterProperties, phase),
+    d0_("d0", dimLength, diameterProperties_.lookup("d0")),
+    p0_("p0", dimPressure, diameterProperties_.lookup("p0"))
 {}
 
 
@@ -74,6 +74,17 @@ Foam::tmp<Foam::volScalarField> Foam::diameterModels::isothermal::d() const
     );
 
     return d0_*pow(p0_/p, 1.0/3.0);
+}
+
+
+bool Foam::diameterModels::isothermal::read(const dictionary& phaseProperties)
+{
+    diameterModel::read(phaseProperties);
+
+    diameterProperties_.lookup("d0") >> d0_;
+    diameterProperties_.lookup("p0") >> p0_;
+
+    return true;
 }
 
 
