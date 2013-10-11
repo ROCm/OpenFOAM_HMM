@@ -137,7 +137,7 @@ void Foam::autoLayerDriver::smoothField
             isMasterEdge,
             meshEdges,
             meshPoints,
-            pp.edges(),
+            edges,
             invSumWeight,
             field,
             average
@@ -305,7 +305,7 @@ void Foam::autoLayerDriver::smoothPatchNormals
             isMasterEdge,
             meshEdges,
             meshPoints,
-            pp.edges(),
+            edges,
             invSumWeight,
             normals,
             average
@@ -321,7 +321,6 @@ void Foam::autoLayerDriver::smoothPatchNormals
                 meshPoints,
                 mag(normals-average)()
             );
-
             Info<< "    Iteration " << iter << "   residual " << resid << endl;
         }
 
@@ -384,8 +383,6 @@ void Foam::autoLayerDriver::smoothNormals
         invSumWeight
     );
 
-    Info<< "shrinkMeshDistance : Smoothing normals in interior ..." << endl;
-
     for (label iter = 0; iter < nSmoothDisp; iter++)
     {
         vectorField average(mesh.nPoints());
@@ -410,7 +407,6 @@ void Foam::autoLayerDriver::smoothNormals
                 isMasterPoint,
                 mag(normals-average)()
             );
-
             Info<< "    Iteration " << iter << "   residual " << resid << endl;
         }
 
@@ -495,14 +491,18 @@ bool Foam::autoLayerDriver::isMaxEdge
 // large feature angle
 void Foam::autoLayerDriver::handleFeatureAngleLayerTerminations
 (
-    const indirectPrimitivePatch& pp,
     const scalar minCos,
+    const PackedBoolList& isMasterPoint,
+    const indirectPrimitivePatch& pp,
+    const labelList& meshEdges,
     List<extrudeMode>& extrudeStatus,
     pointField& patchDisp,
     labelList& patchNLayers,
     label& nPointCounter
 ) const
 {
+    const fvMesh& mesh = meshRefiner_.mesh();
+
     // Mark faces that have all points extruded
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -523,15 +523,60 @@ void Foam::autoLayerDriver::handleFeatureAngleLayerTerminations
     }
 
 
+
+    label nOldPointCounter = nPointCounter;
+
     // Detect situation where two featureedge-neighbouring faces are partly or
     // not extruded and the edge itself is extruded. In this case unmark the
     // edge for extrusion.
 
-    forAll(pp.edgeFaces(), edgeI)
-    {
-        const labelList& eFaces = pp.edgeFaces()[edgeI];
 
-        if (eFaces.size() == 2)
+    List<List<point> > edgeFaceNormals(pp.nEdges());
+    List<List<bool> > edgeFaceExtrude(pp.nEdges());
+
+    const labelListList& edgeFaces = pp.edgeFaces();
+    const vectorField& faceNormals = pp.faceNormals();
+    const labelList& meshPoints = pp.meshPoints();
+
+    forAll(edgeFaces, edgeI)
+    {
+        const labelList& eFaces = edgeFaces[edgeI];
+
+        edgeFaceNormals[edgeI].setSize(eFaces.size());
+        edgeFaceExtrude[edgeI].setSize(eFaces.size());
+        forAll(eFaces, i)
+        {
+            label faceI = eFaces[i];
+            edgeFaceNormals[edgeI][i] = faceNormals[faceI];
+            edgeFaceExtrude[edgeI][i] = extrudedFaces[faceI];
+        }
+    }
+
+    syncTools::syncEdgeList
+    (
+        mesh,
+        meshEdges,
+        edgeFaceNormals,
+        globalMeshData::ListPlusEqOp<List<point> >(),   // combine operator
+        List<point>()               // null value
+    );
+
+    syncTools::syncEdgeList
+    (
+        mesh,
+        meshEdges,
+        edgeFaceExtrude,
+        globalMeshData::ListPlusEqOp<List<bool> >(),    // combine operator
+        List<bool>()                // null value
+    );
+
+
+    forAll(edgeFaceNormals, edgeI)
+    {
+        const List<point>& eFaceNormals = edgeFaceNormals[edgeI];
+        const List<bool>& eFaceExtrude = edgeFaceExtrude[edgeI];
+
+        if (eFaceNormals.size() == 2)
         {
             const edge& e = pp.edges()[edgeI];
             label v0 = e[0];
@@ -543,10 +588,10 @@ void Foam::autoLayerDriver::handleFeatureAngleLayerTerminations
              || extrudeStatus[v1] != NOEXTRUDE
             )
             {
-                if (!extrudedFaces[eFaces[0]] || !extrudedFaces[eFaces[1]])
+                if (!eFaceExtrude[0] || !eFaceExtrude[1])
                 {
-                    const vector& n0 = pp.faceNormals()[eFaces[0]];
-                    const vector& n1 = pp.faceNormals()[eFaces[1]];
+                    const vector& n0 = eFaceNormals[0];
+                    const vector& n1 = eFaceNormals[1];
 
                     if ((n0 & n1) < minCos)
                     {
@@ -561,7 +606,10 @@ void Foam::autoLayerDriver::handleFeatureAngleLayerTerminations
                             )
                         )
                         {
-                            nPointCounter++;
+                            if (isMasterPoint[meshPoints[v0]])
+                            {
+                                nPointCounter++;
+                            }
                         }
                         if
                         (
@@ -574,13 +622,20 @@ void Foam::autoLayerDriver::handleFeatureAngleLayerTerminations
                             )
                         )
                         {
-                            nPointCounter++;
+                            if (isMasterPoint[meshPoints[v1]])
+                            {
+                                nPointCounter++;
+                            }
                         }
                     }
                 }
             }
         }
     }
+
+    Info<< "Added "
+        << returnReduce(nPointCounter-nOldPointCounter, sumOp<label>())
+        << " point not to extrude." << endl;
 }
 
 
@@ -588,10 +643,12 @@ void Foam::autoLayerDriver::handleFeatureAngleLayerTerminations
 // in the layer mesh and stop any layer growth at these points.
 void Foam::autoLayerDriver::findIsolatedRegions
 (
-    const indirectPrimitivePatch& pp,
-    const PackedBoolList& isMasterEdge,
-    const labelList& meshEdges,
     const scalar minCosLayerTermination,
+    const PackedBoolList& isMasterPoint,
+    const PackedBoolList& isMasterEdge,
+    const indirectPrimitivePatch& pp,
+    const labelList& meshEdges,
+    const scalarField& minThickness,
     List<extrudeMode>& extrudeStatus,
     pointField& patchDisp,
     labelList& patchNLayers
@@ -610,13 +667,24 @@ void Foam::autoLayerDriver::findIsolatedRegions
         // large feature angle
         handleFeatureAngleLayerTerminations
         (
-            pp,
             minCosLayerTermination,
+            isMasterPoint,
+            pp,
+            meshEdges,
 
             extrudeStatus,
             patchDisp,
             patchNLayers,
             nPointCounter
+        );
+
+        syncPatchDisplacement
+        (
+            pp,
+            minThickness,
+            patchDisp,
+            patchNLayers,
+            extrudeStatus
         );
 
 
@@ -841,7 +909,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
     if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
     {
         pointField meshPointNormals(mesh.nPoints(), point(1, 0, 0));
-        UIndirectList<point>(meshPointNormals, pp.meshPoints()) = pointNormals;
+        UIndirectList<point>(meshPointNormals, meshPoints) = pointNormals;
         meshRefinement::testSyncPointList
         (
             "pointNormals",
@@ -865,7 +933,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
     if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
     {
         pointField meshPointNormals(mesh.nPoints(), point(1, 0, 0));
-        UIndirectList<point>(meshPointNormals, pp.meshPoints()) = pointNormals;
+        UIndirectList<point>(meshPointNormals, meshPoints) = pointNormals;
         meshRefinement::testSyncPointList
         (
             "smoothed pointNormals",
@@ -1059,8 +1127,6 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
              && !adaptPatches.found(patchI)
             )
             {
-                const labelList& meshPoints = pp.meshPoints();
-
                 // Check the type of the patchField. The types are
                 //  - fixedValue (0 or more layers) but the >0 layers have
                 //    already been handled in the adaptPatches loop
@@ -1415,7 +1481,10 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
 
                 patchDisp[patchPointI] = thickness[patchPointI]*n;
 
-                numThicknessRatioExclude++;
+                if (isMasterPoint[pointI])
+                {
+                    numThicknessRatioExclude++;
+                }
 
                 if (str.valid())
                 {
@@ -1444,24 +1513,16 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
         << " nodes where thickness to medial axis distance is large " << endl;
 
 
-{
-    Info<< "** start thickness **" << endl;
-    meshRefinement::collectAndPrint(pp.localPoints(), thickness);
-    Info<< "** end thickness **" << endl;
-    Info<< "** patchDisp **" << endl;
-    meshRefinement::collectAndPrint(pp.localPoints(), patchDisp);
-    Info<< "** end patchDisp **" << endl;
-}
-
-
     // find points where layer growth isolated to a lone point, edge or face
 
     findIsolatedRegions
     (
-        pp,
-        isMasterEdge,
-        meshEdges,
         minCosLayerTermination,
+        isMasterPoint,
+        isMasterEdge,
+        pp,
+        meshEdges,
+        minThickness,
 
         extrudeStatus,
         patchDisp,
@@ -1630,19 +1691,14 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
             // Do residual calculation every so often.
             if ((iter % 10) == 0)
             {
-//                Info<< "    Iteration " << iter << "   residual "
-//                    <<  gSum(mag(displacement-average))
-//                       /returnReduce(average.size(), sumOp<label>())
-//                    << endl;
-
                 scalar resid = meshRefinement::gAverage
                 (
                     mesh,
                     syncTools::getMasterPoints(mesh),
                     mag(displacement-average)()
                 );
-                Info<< "    Iteration " << iter << "   residual "
-                    << resid << endl;
+                Info<< "    Iteration " << iter << "   residual " << resid
+                    << endl;
             }
         }
     }

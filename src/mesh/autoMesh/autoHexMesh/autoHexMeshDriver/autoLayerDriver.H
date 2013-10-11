@@ -257,7 +257,7 @@ class autoLayerDriver
                 //- Synchronize displacement among coupled patches.
                 void syncPatchDisplacement
                 (
-                    const motionSmoother& meshMover,
+                    const indirectPrimitivePatch& pp,
                     const scalarField& minThickness,
                     pointField& patchDisp,
                     labelList& patchNLayers,
@@ -443,8 +443,11 @@ class autoLayerDriver
                 //  large feature angle
                 void handleFeatureAngleLayerTerminations
                 (
-                    const indirectPrimitivePatch& pp,
                     const scalar minCos,
+                    const PackedBoolList& isMasterPoint,
+                    const indirectPrimitivePatch& pp,
+                    const labelList& meshEdges,
+
                     List<extrudeMode>& extrudeStatus,
                     pointField& patchDisp,
                     labelList& patchNLayers,
@@ -456,10 +459,13 @@ class autoLayerDriver
                 // in the layer mesh and stop any layer growth at these points.
                 void findIsolatedRegions
                 (
-                    const indirectPrimitivePatch& pp,
-                    const PackedBoolList& isMasterEdge,
-                    const labelList& meshEdges,
                     const scalar minCosLayerTermination,
+                    const PackedBoolList& isMasterPoint,
+                    const PackedBoolList& isMasterEdge,
+                    const indirectPrimitivePatch& pp,
+                    const labelList& meshEdges,
+                    const scalarField& minThickness,
+
                     List<extrudeMode>& extrudeStatus,
                     pointField& patchDisp,
                     labelList& patchNLayers

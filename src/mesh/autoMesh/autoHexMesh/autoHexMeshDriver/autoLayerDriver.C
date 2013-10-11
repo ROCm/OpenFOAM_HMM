@@ -1328,7 +1328,7 @@ void Foam::autoLayerDriver::calculateLayerThickness
 // Synchronize displacement among coupled patches.
 void Foam::autoLayerDriver::syncPatchDisplacement
 (
-    const motionSmoother& meshMover,
+    const indirectPrimitivePatch& pp,
     const scalarField& minThickness,
     pointField& patchDisp,
     labelList& patchNLayers,
@@ -1336,7 +1336,7 @@ void Foam::autoLayerDriver::syncPatchDisplacement
 ) const
 {
     const fvMesh& mesh = meshRefiner_.mesh();
-    const labelList& meshPoints = meshMover.patch().meshPoints();
+    const labelList& meshPoints = pp.meshPoints();
 
     label nChangedTotal = 0;
 
@@ -1578,7 +1578,7 @@ void Foam::autoLayerDriver::getPatchDisplacement
     // Make sure displacement is equal on both sides of coupled patches.
     syncPatchDisplacement
     (
-        meshMover,
+        pp,
         minThickness,
         patchDisp,
         patchNLayers,
@@ -1776,7 +1776,7 @@ Foam::label Foam::autoLayerDriver::truncateDisplacement
     {
         syncPatchDisplacement
         (
-            meshMover,
+            pp,
             minThickness,
             patchDisp,
             patchNLayers,
@@ -2865,7 +2865,7 @@ void Foam::autoLayerDriver::addLayers
         // Make sure displacement is equal on both sides of coupled patches.
         syncPatchDisplacement
         (
-            meshMover,
+            pp,
             minThickness,
             patchDisp,
             patchNLayers,
