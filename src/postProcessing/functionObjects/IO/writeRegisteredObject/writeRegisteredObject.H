@@ -74,7 +74,7 @@ SourceFiles
 #ifndef writeRegisteredObject_H
 #define writeRegisteredObject_H
 
-#include "wordList.H"
+#include "wordReList.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -110,7 +110,7 @@ protected:
         // Read from dictionary
 
             //- Names of objects to control
-            wordList objectNames_;
+            wordReList objectNames_;
 
 
     // Private Member Functions
