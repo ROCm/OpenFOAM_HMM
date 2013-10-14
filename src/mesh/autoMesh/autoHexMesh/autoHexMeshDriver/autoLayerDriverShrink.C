@@ -1127,6 +1127,8 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
              && !adaptPatches.found(patchI)
             )
             {
+                const labelList& meshPoints = pp.meshPoints();
+
                 // Check the type of the patchField. The types are
                 //  - fixedValue (0 or more layers) but the >0 layers have
                 //    already been handled in the adaptPatches loop
