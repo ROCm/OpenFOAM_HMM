@@ -109,29 +109,6 @@ class globalMeshData
     public processorTopology
 {
 
-    // Private class
-
-        // To combineReduce a pointField. Just appends all lists.
-        template<class T>
-        class plusEqOp
-        {
-
-        public:
-
-            void operator()(T& x, const T& y) const
-            {
-                label n = x.size();
-
-                x.setSize(x.size() + y.size());
-
-                forAll(y, i)
-                {
-                    x[n++] = y[i];
-                }
-            }
-        };
-
-
     // Private data
 
         //- Reference to mesh
@@ -336,6 +313,29 @@ class globalMeshData
 
 
 public:
+
+    // Public class
+
+        // To combineReduce a List. Just appends all lists.
+        template<class T>
+        class ListPlusEqOp
+        {
+
+        public:
+
+            void operator()(T& x, const T& y) const
+            {
+                label n = x.size();
+
+                x.setSize(x.size() + y.size());
+
+                forAll(y, i)
+                {
+                    x[n++] = y[i];
+                }
+            }
+        };
+
 
     //- Runtime type information
     ClassName("globalMeshData");

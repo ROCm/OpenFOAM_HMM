@@ -1963,7 +1963,7 @@ Foam::pointField Foam::globalMeshData::geometricSharedPoints() const
     pointField sharedPoints(mesh_.points(), sharedPointLabels());
 
     // Append from all processors
-    combineReduce(sharedPoints, plusEqOp<pointField>());
+    combineReduce(sharedPoints, ListPlusEqOp<pointField>());
 
     // Merge tolerance
     scalar tolDim = matchTol_ * mesh_.bounds().mag();
