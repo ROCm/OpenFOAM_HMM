@@ -524,7 +524,7 @@ void Foam::autoLayerDriver::handleFeatureAngleLayerTerminations
 
 
 
-    label nOldPointCounter = nPointCounter;
+    //label nOldPointCounter = nPointCounter;
 
     // Detect situation where two featureedge-neighbouring faces are partly or
     // not extruded and the edge itself is extruded. In this case unmark the
@@ -633,9 +633,9 @@ void Foam::autoLayerDriver::handleFeatureAngleLayerTerminations
         }
     }
 
-    Info<< "Added "
-        << returnReduce(nPointCounter-nOldPointCounter, sumOp<label>())
-        << " point not to extrude." << endl;
+    //Info<< "Added "
+    //    << returnReduce(nPointCounter-nOldPointCounter, sumOp<label>())
+    //    << " point not to extrude." << endl;
 }
 
 

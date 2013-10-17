@@ -1446,9 +1446,9 @@ void Foam::autoLayerDriver::syncPatchDisplacement
         }
     }
 
-    Info<< "Prevented extrusion on "
-        << returnReduce(nChangedTotal, sumOp<label>())
-        << " coupled patch points during syncPatchDisplacement." << endl;
+    //Info<< "Prevented extrusion on "
+    //    << returnReduce(nChangedTotal, sumOp<label>())
+    //    << " coupled patch points during syncPatchDisplacement." << endl;
 }
 
 
