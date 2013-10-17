@@ -720,7 +720,7 @@ void Foam::refinementSurfaces::findAllHigherIntersections
     labelList pRegions;
     vectorField pNormals;
 
-    forAll(surfaces(), surfI)
+    forAll(surfaces_, surfI)
     {
         const searchableSurface& surface = allGeometry_[surfaces_[surfI]];
 
