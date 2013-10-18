@@ -579,8 +579,8 @@ void Foam::Time::readModifiedObjects()
 
         if (controlDict_.readIfModified())
         {
-           readDict();
-           functionObjects_.read();
+            readDict();
+            functionObjects_.read();
         }
 
         bool registryModified = objectRegistry::modified();
