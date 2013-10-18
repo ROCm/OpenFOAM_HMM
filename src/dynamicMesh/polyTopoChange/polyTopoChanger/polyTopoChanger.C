@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,7 @@ void Foam::polyTopoChanger::readModifiers()
         {
             WarningIn("polyTopoChanger::readModifiers()")
                 << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
-                << " does not support automatic rereading."
+                << " does not support automatic re-reading."
                 << endl;
         }
 
@@ -80,18 +80,13 @@ void Foam::polyTopoChanger::readModifiers()
         }
 
         // Check state of IOstream
-        is.check
-        (
-            "polyTopoChanger::polyTopoChanger"
-            "(const IOobject&, const polyMesh&)"
-        );
+        is.check("polyTopoChanger::readModifiers()");
 
         close();
     }
 }
 
 
-// Read constructor given IOobject and a polyMesh reference
 Foam::polyTopoChanger::polyTopoChanger
 (
     const IOobject& io,
@@ -106,7 +101,6 @@ Foam::polyTopoChanger::polyTopoChanger
 }
 
 
-// Read constructor given IOobject and a polyMesh reference
 Foam::polyTopoChanger::polyTopoChanger(polyMesh& mesh)
 :
     PtrList<polyMeshModifier>(),
@@ -133,7 +127,6 @@ Foam::polyTopoChanger::polyTopoChanger(polyMesh& mesh)
 }
 
 
-// Return a list of modifier types
 Foam::wordList Foam::polyTopoChanger::types() const
 {
     const PtrList<polyMeshModifier>& modifiers = *this;
@@ -149,7 +142,6 @@ Foam::wordList Foam::polyTopoChanger::types() const
 }
 
 
-// Return a list of modifier names
 Foam::wordList Foam::polyTopoChanger::names() const
 {
     const PtrList<polyMeshModifier>& modifiers = *this;
@@ -165,7 +157,6 @@ Foam::wordList Foam::polyTopoChanger::names() const
 }
 
 
-// Is topology change required
 bool Foam::polyTopoChanger::changeTopology() const
 {
     // Go through all mesh modifiers and accumulate the morphing information
@@ -211,7 +202,6 @@ bool Foam::polyTopoChanger::changeTopology() const
 }
 
 
-// Return topology change request
 Foam::autoPtr<Foam::polyTopoChange>
 Foam::polyTopoChanger::topoChangeRequest() const
 {
@@ -233,7 +223,6 @@ Foam::polyTopoChanger::topoChangeRequest() const
 }
 
 
-// Correct polyTopoChanger after moving points
 void Foam::polyTopoChanger::modifyMotionPoints(pointField& p) const
 {
     const PtrList<polyMeshModifier>& topoChanges = *this;
@@ -248,7 +237,6 @@ void Foam::polyTopoChanger::modifyMotionPoints(pointField& p) const
 }
 
 
-// Force recalculation of locally stored data on topological change
 void Foam::polyTopoChanger::update(const mapPolyMesh& m)
 {
     // Go through all mesh modifiers and accumulate the morphing information
@@ -299,7 +287,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChanger::changeMesh
 }
 
 
-// Add mesh modifiers to the morph engine
 void Foam::polyTopoChanger::addTopologyModifiers
 (
     const List<polyMeshModifier*>& tm
@@ -314,8 +301,10 @@ void Foam::polyTopoChanger::addTopologyModifiers
         {
             FatalErrorIn
             (
-                "void polyTopoChanger::addTopologyModifiers("
-                "const List<polyMeshModifier*>& tm)"
+                "void polyTopoChanger::addTopologyModifiers"
+                "("
+                    "const List<polyMeshModifier*>&"
+                ")"
             )   << "Mesh modifier created with different mesh reference."
                 << abort(FatalError);
         }
@@ -344,8 +333,7 @@ Foam::label Foam::polyTopoChanger::findModifierID
     // Modifier not found
     if (debug)
     {
-        Info<< "label polyTopoChanger::::findModifierID(const word& "
-            << "modName) const"
+        WarningIn("label polyTopoChanger::findModifierID(const word&) const")
             << "Modifier named " << modName << " not found.  "
             << "List of available modifier names: " << names() << endl;
     }
@@ -355,7 +343,6 @@ Foam::label Foam::polyTopoChanger::findModifierID
 }
 
 
-// writeData member function required by regIOobject
 bool Foam::polyTopoChanger::writeData(Ostream& os) const
 {
     os << *this;
