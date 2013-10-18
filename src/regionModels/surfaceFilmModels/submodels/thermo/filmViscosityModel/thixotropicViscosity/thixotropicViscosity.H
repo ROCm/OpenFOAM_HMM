@@ -35,13 +35,13 @@ Description
     The viscosity is then calculated using the expression
 
         \f[
-            \mu = \frac{\mu_{inf}}{{1 - K \lambda}^2}
+            \mu = \frac{\mu_{\infty}}{{1 - K \lambda}^2}
         \f]
 
     Where the parameter K is given by:
 
         \f[
-            K = 1 - \frac{\mu_{\inf}}{\mu_{0}}^0.5
+            K = 1 - \sqrt{\frac{\mu_{\infty}}{\mu_{0}}}
         \f]
 
     Here:
@@ -53,7 +53,7 @@ Description
         d               | model coefficient
         \dot{\gamma}    | stress rate [1/s]
         \mu_{0}         | limiting viscosity when \f$ \lambda = 1 \f$
-        \mu_{\inf}      | limiting viscosity when \f$ \lambda = 0 \f$
+        \mu_{\infty}    | limiting viscosity when \f$ \lambda = 0 \f$
     \endvartable
 
 
