@@ -259,22 +259,13 @@ private:
                 label& nRefine
             ) const;
 
-            //- Mark cell if local curvature > curvature or
-            //  markDifferingRegions = true and intersections with different
-            //  regions.
-            bool checkCurvature
+            //- Helper: count number of normals1 that are in normals2
+            label countMatches
             (
-                const scalar curvature,
-                const label nAllowRefine,
-                const label surfaceLevel,
-                const vector& surfaceNormal,
-                const label cellI,
-                label& cellMaxLevel,
-                vector& cellMaxNormal,
-                labelList& refineCell,
-                label& nRefine
+                const List<point>& normals1,
+                const List<point>& normals2,
+                const scalar tol = 1e-6
             ) const;
-
 
             //- Mark cells for surface curvature based refinement. Marks if
             //  local curvature > curvature or if on different regions
