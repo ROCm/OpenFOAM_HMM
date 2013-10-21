@@ -368,6 +368,8 @@ FoamFile
 //    {
 //        faceSet f0;       // name of faceSet
 //        cellSet c0;       // name of cellSet of slave side
+//        flip    false;    // optional: flip the faceZone (so now the cellSet
+//                          //           is the master side)
 //    }
 //
 //    // Select based on surface. Orientation from normals on surface

@@ -38,50 +38,18 @@ License
 #include "treeDataPoint.H"
 #include "indexedOctree.H"
 #include "snapParameters.H"
+#include "PatchTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    class listTransform
-    {
-    public:
-
-        void operator()
-        (
-            const vectorTensorTransform& vt,
-            const bool forward,
-            List<List<point> >& fld
-        ) const
-        {
-            const tensor T
-            (
-                forward
-              ? vt.R()
-              : vt.R().T()
-            );
-
-            forAll(fld, i)
-            {
-                List<point>& elems = fld[i];
-                forAll(elems, elemI)
-                {
-                    elems[elemI] = transform(T, elems[elemI]);
-                }
-            }
-        }
-    };
-
     template<class T>
     class listPlusEqOp
     {
     public:
 
-        void operator()
-        (
-            List<T>& x,
-            const List<T>& y
-        ) const
+        void operator()(List<T>& x, const List<T>& y) const
         {
             label sz = x.size();
             x.setSize(sz+y.size());
@@ -159,7 +127,9 @@ bool Foam::autoSnapDriver::isFeaturePoint
 
 void Foam::autoSnapDriver::smoothAndConstrain
 (
+    const PackedBoolList& isMasterEdge,
     const indirectPrimitivePatch& pp,
+    const labelList& meshEdges,
     const List<pointConstraint>& constraints,
     vectorField& disp
 ) const
@@ -197,11 +167,16 @@ void Foam::autoSnapDriver::smoothAndConstrain
             {
                 forAll(pEdges, i)
                 {
-                    label nbrPointI = edges[pEdges[i]].otherVertex(pointI);
-                    if (constraints[nbrPointI].first() >= nConstraints)
+                    label edgeI = pEdges[i];
+
+                    if (isMasterEdge[meshEdges[edgeI]])
                     {
-                        dispSum[pointI] += disp[nbrPointI];
-                        dispCount[pointI]++;
+                        label nbrPointI = edges[pEdges[i]].otherVertex(pointI);
+                        if (constraints[nbrPointI].first() >= nConstraints)
+                        {
+                            dispSum[pointI] += disp[nbrPointI];
+                            dispCount[pointI]++;
+                        }
                     }
                 }
             }
@@ -564,6 +539,9 @@ void Foam::autoSnapDriver::calcNearestFacePointProperties
 {
     const fvMesh& mesh = meshRefiner_.mesh();
 
+    const PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh));
+
+
     // For now just get all surrounding face data. Expensive - should just
     // store and sync data on coupled points only
     // (see e.g PatchToolsNormals.C)
@@ -583,7 +561,7 @@ void Foam::autoSnapDriver::calcNearestFacePointProperties
         forAll(pFaces, i)
         {
             label faceI = pFaces[i];
-            if (faceSurfaceGlobalRegion[faceI] != -1)
+            if (isMasterFace[faceI] && faceSurfaceGlobalRegion[faceI] != -1)
             {
                 nFaces++;
             }
@@ -605,7 +583,7 @@ void Foam::autoSnapDriver::calcNearestFacePointProperties
             label faceI = pFaces[i];
             label globalRegionI = faceSurfaceGlobalRegion[faceI];
 
-            if (globalRegionI != -1)
+            if (isMasterFace[faceI] && globalRegionI != -1)
             {
                 pNormals[nFaces] = faceSurfaceNormal[faceI];
                 pDisp[nFaces] = faceDisp[faceI];
@@ -694,7 +672,7 @@ void Foam::autoSnapDriver::calcNearestFacePointProperties
         pointFaceSurfNormals,
         listPlusEqOp<point>(),
         List<point>(),
-        listTransform()
+        mapDistribute::transform()
     );
     syncTools::syncPointList
     (
@@ -703,7 +681,7 @@ void Foam::autoSnapDriver::calcNearestFacePointProperties
         pointFaceDisp,
         listPlusEqOp<point>(),
         List<point>(),
-        listTransform()
+        mapDistribute::transform()
     );
     syncTools::syncPointList
     (
@@ -712,7 +690,7 @@ void Foam::autoSnapDriver::calcNearestFacePointProperties
         pointFaceCentres,
         listPlusEqOp<point>(),
         List<point>(),
-        listTransform()
+        mapDistribute::transformPosition()
     );
     syncTools::syncPointList
     (
@@ -722,6 +700,25 @@ void Foam::autoSnapDriver::calcNearestFacePointProperties
         listPlusEqOp<label>(),
         List<label>()
     );
+
+
+    // Sort the data according to the face centres. This is only so we get
+    // consistent behaviour serial and parallel.
+    labelList visitOrder;
+    forAll(pointFaceDisp, pointI)
+    {
+        List<point>& pNormals = pointFaceSurfNormals[pointI];
+        List<point>& pDisp = pointFaceDisp[pointI];
+        List<point>& pFc = pointFaceCentres[pointI];
+        labelList& pFid = pointFacePatchID[pointI];
+
+        sortedOrder(mag(pFc)(), visitOrder);
+
+        pNormals = List<point>(pNormals, visitOrder);
+        pDisp = List<point>(pDisp, visitOrder);
+        pFc = List<point>(pFc, visitOrder);
+        pFid = UIndirectList<label>(pFid, visitOrder);
+    }
 }
 
 
@@ -1360,6 +1357,70 @@ void Foam::autoSnapDriver::stringFeatureEdges
 }
 
 
+// If only two attractions and across face return the face indices
+Foam::labelPair Foam::autoSnapDriver::findDiagonalAttraction
+(
+    const indirectPrimitivePatch& pp,
+    const vectorField& patchAttraction,
+    const List<pointConstraint>& patchConstraints,
+    const label faceI
+) const
+{
+    const face& f = pp.localFaces()[faceI];
+    // For now just detect any attraction. Improve this to look at
+    // actual attraction position and orientation
+
+    labelPair attractIndices(-1, -1);
+
+    if (f.size() >= 4)
+    {
+        forAll(f, fp)
+        {
+            label pointI = f[fp];
+            if (patchConstraints[pointI].first() >= 2)
+            {
+                // Attract to feature edge or point
+                if (attractIndices[0] == -1)
+                {
+                    // First attraction. Store
+                    attractIndices[0] = fp;
+                }
+                else if (attractIndices[1] == -1)
+                {
+                    // Second attraction. Check if not consecutive to first
+                    // attraction
+                    label fp0 = attractIndices[0];
+                    if (f.fcIndex(fp0) == fp || f.fcIndex(fp) == fp0)
+                    {
+                        // Consecutive. Skip.
+                        attractIndices = labelPair(-1, -1);
+                        break;
+                    }
+                    else
+                    {
+                        attractIndices[1] = fp;
+                    }
+                }
+                else
+                {
+                    // More than two attractions. Skip.
+                    attractIndices = labelPair(-1, -1);
+                    break;
+                }
+            }
+        }
+
+
+        if (attractIndices[1] == -1)
+        {
+            // Found only one attraction. Skip.
+            attractIndices = labelPair(-1, -1);
+        }
+    }
+    return attractIndices;
+}
+
+
 Foam::pointIndexHit Foam::autoSnapDriver::findNearFeatureEdge
 (
     const indirectPrimitivePatch& pp,
@@ -1929,7 +1990,7 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
                 edgeFaceNormals,
                 listPlusEqOp<point>(),
                 List<point>(),
-                listTransform()
+                mapDistribute::transform()
             );
         }
 
@@ -2778,7 +2839,9 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
     const scalar featureAttract,
     const scalarField& snapDist,
     const vectorField& nearestDisp,
-    motionSmoother& meshMover
+    motionSmoother& meshMover,
+    vectorField& patchAttraction,
+    List<pointConstraint>& patchConstraints
 ) const
 {
     const Switch implicitFeatureAttraction = snapParams.implicitFeatureSnap();
@@ -2851,7 +2914,7 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // - faceSurfaceNormal
     // - faceDisp
-    // - faceCentres&faceNormal
+    // - faceCentres
     List<List<point> > pointFaceSurfNormals(pp.nPoints());
     List<List<point> > pointFaceDisp(pp.nPoints());
     List<List<point> > pointFaceCentres(pp.nPoints());
@@ -2884,10 +2947,11 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
     // here.
 
     // Nearest feature
-    vectorField patchAttraction(localPoints.size(), vector::zero);
+    patchAttraction.setSize(localPoints.size());
+    patchAttraction = vector::zero;
     // Constraints at feature
-    List<pointConstraint> patchConstraints(localPoints.size());
-
+    patchConstraints.setSize(localPoints.size());
+    patchConstraints = pointConstraint();
 
     if (implicitFeatureAttraction)
     {
@@ -2951,15 +3015,29 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
         patchConstraints
     );
 
+    const PackedBoolList isMasterPoint(syncTools::getMasterPoints(mesh));
+    {
+        vector avgPatchDisp = meshRefinement::gAverage
+        (
+            mesh,
+            isMasterPoint,
+            pp.meshPoints(),
+            patchDisp
+        );
+        vector avgPatchAttr = meshRefinement::gAverage
+        (
+            mesh,
+            isMasterPoint,
+            pp.meshPoints(),
+            patchAttraction
+        );
 
-    Info<< "Attraction:" << endl
-        << "     linear   : max:" << gMax(patchDisp)
-        << " avg:" << gAverage(patchDisp)
-        << endl
-        << "     feature  : max:" << gMax(patchAttraction)
-        << " avg:" << gAverage(patchAttraction)
-        << endl;
-
+        Info<< "Attraction:" << endl
+            << "     linear   : max:" << gMaxMagSqr(patchDisp)
+            << " avg:" << avgPatchDisp << endl
+            << "     feature  : max:" << gMaxMagSqr(patchAttraction)
+            << " avg:" << avgPatchAttr << endl;
+    }
 
     // So now we have:
     // - patchDisp          : point movement to go to nearest point on surface
@@ -2986,37 +3064,45 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
 
     // Count
     {
+        const labelList& meshPoints = pp.meshPoints();
+
+        label nMasterPoints = 0;
         label nPlanar = 0;
         label nEdge = 0;
         label nPoint = 0;
 
         forAll(patchConstraints, pointI)
         {
-            if (patchConstraints[pointI].first() == 1)
+            if (isMasterPoint[meshPoints[pointI]])
             {
-                nPlanar++;
-            }
-            else if (patchConstraints[pointI].first() == 2)
-            {
-                nEdge++;
-            }
-            else if (patchConstraints[pointI].first() == 3)
-            {
-                nPoint++;
+                nMasterPoints++;
+
+                if (patchConstraints[pointI].first() == 1)
+                {
+                    nPlanar++;
+                }
+                else if (patchConstraints[pointI].first() == 2)
+                {
+                    nEdge++;
+                }
+                else if (patchConstraints[pointI].first() == 3)
+                {
+                    nPoint++;
+                }
             }
         }
 
-        label nTotPoints = returnReduce(pp.nPoints(), sumOp<label>());
+        reduce(nMasterPoints, sumOp<label>());
         reduce(nPlanar, sumOp<label>());
         reduce(nEdge, sumOp<label>());
         reduce(nPoint, sumOp<label>());
-        Info<< "Feature analysis : total points:"
-            << nTotPoints
+        Info<< "Feature analysis : total master points:"
+            << nMasterPoints
             << " attraction to :" << nl
             << "    feature point   : " << nPoint << nl
             << "    feature edge    : " << nEdge << nl
             << "    nearest surface : " << nPlanar << nl
-            << "    rest            : " << nTotPoints-nPoint-nEdge-nPlanar
+            << "    rest            : " << nMasterPoints-nPoint-nEdge-nPlanar
             << nl
             << endl;
     }
@@ -3035,11 +3121,29 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
 
     if (featureAttract < 1-0.001)
     {
+        const PackedBoolList isMasterEdge(syncTools::getMasterEdges(mesh));
+
+        const vectorField pointNormals
+        (
+            PatchTools::pointNormals
+            (
+                mesh,
+                pp
+            )
+        );
+        const labelList meshEdges
+        (
+            pp.meshEdges(mesh.edges(), mesh.pointEdges())
+        );
+
+
         // 1. Smoothed all displacement
         vectorField smoothedPatchDisp = patchDisp;
         smoothAndConstrain
         (
+            isMasterEdge,
             pp,
+            meshEdges,
             patchConstraints,
             smoothedPatchDisp
         );
@@ -3047,16 +3151,18 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
 
         // 2. Smoothed tangential component
         vectorField tangPatchDisp = patchDisp;
-        tangPatchDisp -= (pp.pointNormals() & patchDisp) * pp.pointNormals();
+        tangPatchDisp -= (pointNormals & patchDisp) * pointNormals;
         smoothAndConstrain
         (
+            isMasterEdge,
             pp,
+            meshEdges,
             patchConstraints,
             tangPatchDisp
         );
 
         // Re-add normal component
-        tangPatchDisp += (pp.pointNormals() & patchDisp) * pp.pointNormals();
+        tangPatchDisp += (pointNormals & patchDisp) * pointNormals;
 
         if (debug&meshRefinement::OBJINTERSECTIONS)
         {

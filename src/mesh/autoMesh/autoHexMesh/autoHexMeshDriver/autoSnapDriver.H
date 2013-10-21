@@ -125,7 +125,9 @@ class autoSnapDriver
 
                 void smoothAndConstrain
                 (
+                    const PackedBoolList& isMasterEdge,
                     const indirectPrimitivePatch& pp,
+                    const labelList& meshEdges,
                     const List<pointConstraint>& constraints,
                     vectorField& disp
                 ) const;
@@ -194,6 +196,16 @@ class autoSnapDriver
 
                     vectorField& patchAttraction,
                     List<pointConstraint>& patchConstraints
+                ) const;
+
+                //- Detect any diagonal attraction. Returns indices in face
+                //  or (-1, -1) if none
+                labelPair findDiagonalAttraction
+                (
+                    const indirectPrimitivePatch& pp,
+                    const vectorField& patchAttraction,
+                    const List<pointConstraint>& patchConstraints,
+                    const label faceI
                 ) const;
 
                 //- Return hit if on multiple points
@@ -371,7 +383,9 @@ class autoSnapDriver
                     const scalar featureAttract,
                     const scalarField& snapDist,
                     const vectorField& nearestDisp,
-                    motionSmoother& meshMover
+                    motionSmoother& meshMover,
+                    vectorField& patchAttraction,
+                    List<pointConstraint>& patchConstraints
                 ) const;
 
 

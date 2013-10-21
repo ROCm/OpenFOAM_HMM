@@ -241,7 +241,7 @@ void meshRefinement::collectAndPrint
         Pstream::blocking
     );
 
-    Field<T> allData;
+    List<T> allData;
     globalPoints.gather
     (
         Pstream::worldComm,
