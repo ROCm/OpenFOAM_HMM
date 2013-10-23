@@ -36,26 +36,27 @@ SourceFiles
 #ifndef diameterModel_H
 #define diameterModel_H
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 #include "dictionary.H"
 #include "phaseModel.H"
 #include "runTimeSelectionTables.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class diameterModel Declaration
+                       Class diameterModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class diameterModel
 {
+
 protected:
 
     // Protected data
 
-        const dictionary& dict_;
+        dictionary diameterProperties_;
         const phaseModel& phase_;
 
 
@@ -73,10 +74,10 @@ public:
             diameterModel,
             dictionary,
             (
-                const dictionary& dict,
+                const dictionary& diameterProperties,
                 const phaseModel& phase
             ),
-            (dict, phase)
+            (diameterProperties, phase)
         );
 
 
@@ -84,7 +85,7 @@ public:
 
         diameterModel
         (
-            const dictionary& dict,
+            const dictionary& diameterProperties,
             const phaseModel& phase
         );
 
@@ -97,15 +98,33 @@ public:
 
         static autoPtr<diameterModel> New
         (
-            const dictionary& dict,
+            const dictionary& diameterProperties,
             const phaseModel& phase
         );
 
 
     // Member Functions
 
+        //- Return the phase diameter properties dictionary
+        const dictionary& diameterProperties() const
+        {
+            return diameterProperties_;
+        }
+
+        //- Return the phase
+        const phaseModel& phase() const
+        {
+            return phase_;
+        }
+
         //- Return the phase mean diameter field
         virtual tmp<volScalarField> d() const = 0;
+
+        //- Correct the diameter field
+        virtual void correct();
+
+        //- Read phaseProperties dictionary
+        virtual bool read(const dictionary& phaseProperties) = 0;
 };
 
 

@@ -39,25 +39,9 @@ void Foam::fieldCoordinateSystemTransform::transformField
 {
     const word& fieldName = field.name() + "Transformed";
 
-    dimensionedTensor R("R", field.dimensions(), coordSys_.R().R());
-
-    if (obr_.foundObject<Type>(fieldName))
+    if (!obr_.foundObject<Type>(fieldName))
     {
-        Type& transField =
-            const_cast<Type&>(obr_.lookupObject<Type>(fieldName));
-
-        transField == field;
-
-        forAll(field, i)
-        {
-            Foam::transform(transField, R, transField);
-        }
-
-        transField.write();
-    }
-    else
-    {
-        Type& transField = obr_.store
+        obr_.store
         (
             new Type
             (
@@ -72,14 +56,23 @@ void Foam::fieldCoordinateSystemTransform::transformField
                 field
             )
         );
-
-        forAll(field, i)
-        {
-            Foam::transform(transField, R, transField);
-        }
-
-        transField.write();
     }
+
+    Type& transField =
+        const_cast<Type&>(obr_.lookupObject<Type>(fieldName));
+
+    transField == field;
+
+    dimensionedTensor R("R", field.dimensions(), coordSys_.R().R());
+
+    forAll(field, i)
+    {
+        Foam::transform(transField, R, transField);
+    }
+
+    Info<< "    writing field " << transField.name() << nl << endl;
+
+    transField.write();
 }
 
 

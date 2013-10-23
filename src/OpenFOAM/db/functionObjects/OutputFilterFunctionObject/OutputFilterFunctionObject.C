@@ -179,7 +179,7 @@ bool Foam::OutputFilterFunctionObject<OutputFilter>::execute
 template<class OutputFilter>
 bool Foam::OutputFilterFunctionObject<OutputFilter>::end()
 {
-    if (active())
+    if (enabled_)
     {
         if (!storeFilter_)
         {

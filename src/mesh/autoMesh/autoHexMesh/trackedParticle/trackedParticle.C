@@ -169,7 +169,7 @@ void Foam::trackedParticle::hitProcessorPatch
     trackingData& td
 )
 {
-    // Remove particle
+    // Move to different processor
     td.switchProcessor = true;
 }
 

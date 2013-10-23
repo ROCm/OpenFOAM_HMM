@@ -74,7 +74,7 @@ SourceFiles
 #ifndef writeRegisteredObject_H
 #define writeRegisteredObject_H
 
-#include "wordList.H"
+#include "wordReList.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -104,12 +104,13 @@ protected:
         //- Takes over the writing from Db
         bool exclusiveWriting_;
 
+        //- Refererence to Db
         const objectRegistry& obr_;
 
         // Read from dictionary
 
             //- Names of objects to control
-            wordList objectNames_;
+            wordReList objectNames_;
 
 
     // Private Member Functions

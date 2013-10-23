@@ -47,14 +47,11 @@ SourceFiles
 #ifndef viscosityModel_H
 #define viscosityModel_H
 
-#include "IOdictionary.H"
-#include "typeInfo.H"
-#include "runTimeSelectionTables.H"
+#include "dictionary.H"
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
 #include "dimensionedScalar.H"
-#include "tmp.H"
-#include "autoPtr.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -99,11 +99,16 @@ public:
 
         // Access
 
+            virtual const word& type() const = 0;
+
             //- Return the reference to the owner surface film model
             inline const surfaceFilmModel& owner() const;
 
             //- Return the model coefficients dictionary
             inline const dictionary& coeffs() const;
+
+            template<class FilmType>
+            inline const FilmType& filmType() const;
 };
 
 
@@ -116,6 +121,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "subModelBaseI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "subModelBaseTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

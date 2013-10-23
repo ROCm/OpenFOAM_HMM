@@ -181,6 +181,7 @@ void Foam::abortCalculation::end()
 
 void Foam::abortCalculation::timeSet()
 {
+    // Do nothing - only valid on execute
 }
 
 

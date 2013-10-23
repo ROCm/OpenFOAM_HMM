@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,15 @@ interpolationCellPointFace<Type>::interpolationCellPointFace
 )
 :
     interpolation<Type>(psi),
-    psip_(volPointInterpolation::New(psi.mesh()).interpolate(psi)),
+    psip_
+    (
+        volPointInterpolation::New(psi.mesh()).interpolate
+        (
+            psi,
+            "volPointInterpolate(" + psi.name() + ')',
+            true        // use cache
+        )
+    ),
     psis_(linearInterpolate(psi))
 {}
 

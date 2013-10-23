@@ -23,7 +23,7 @@
         )/rho1
 
       //***HGW- fvm::laplacian(alpha1*turbulence1->alphaEff(), he1)
-      - fvm::laplacian(alpha1*turbulence1->nuEff(), he1)
+      - fvm::laplacian(alpha1*phase1.turbulence().nuEff(), he1)
      ==
         heatTransferCoeff*(thermo2.T() - thermo1.T())/rho1
       + heatTransferCoeff*he1/Cpv1/rho1
@@ -46,7 +46,7 @@
         )/rho2
 
       //***HGW- fvm::laplacian(alpha2*turbulence2->alphaEff(), he2)
-      - fvm::laplacian(alpha2*turbulence2->nuEff(), he2)
+      - fvm::laplacian(alpha2*phase2.turbulence().nuEff(), he2)
      ==
         heatTransferCoeff*(thermo1.T() - thermo2.T())/rho2
       + heatTransferCoeff*he2/Cpv2/rho2

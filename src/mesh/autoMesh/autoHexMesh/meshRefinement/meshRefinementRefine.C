@@ -38,7 +38,74 @@ License
 #include "featureEdgeMesh.H"
 #include "Cloud.H"
 //#include "globalIndex.H"
-//#include "OBJstream.H"
+#include "OBJstream.H"
+#include "cellSet.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    //- To compare normals
+    static bool less(const vector& x, const vector& y)
+    {
+        for (direction i = 0; i < vector::nComponents; i++)
+        {
+            if (x[i] < y[i])
+            {
+                return true;
+            }
+            else if (x[i] > y[i])
+            {
+                return false;
+            }
+        }
+        // All components the same
+        return false;
+    }
+
+
+    //- To compare normals
+    class normalLess
+    {
+        const vectorList& values_;
+
+    public:
+
+        normalLess(const vectorList& values)
+        :
+            values_(values)
+        {}
+
+        bool operator()(const label a, const label b) const
+        {
+            return less(values_[a], values_[b]);
+        }
+    };
+
+
+    //- template specialization for pTraits<labelList> so we can have fields
+    template<>
+    class pTraits<labelList>
+    {
+
+    public:
+
+        //- Component type
+        typedef labelList cmptType;
+    };
+
+    //- template specialization for pTraits<labelList> so we can have fields
+    template<>
+    class pTraits<vectorList>
+    {
+
+    public:
+
+        //- Component type
+        typedef vectorList cmptType;
+    };
+}
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -267,7 +334,12 @@ void Foam::meshRefinement::markFeatureCellLevel
 
 
     // Find all start cells of features. Is done by tracking from keepPoint.
-    Cloud<trackedParticle> cloud(mesh_, IDLList<trackedParticle>());
+    Cloud<trackedParticle> startPointCloud
+    (
+        mesh_,
+        "startPointCloud",
+        IDLList<trackedParticle>()
+    );
 
 
     // Features are identical on all processors. Number them so we know
@@ -315,7 +387,7 @@ void Foam::meshRefinement::markFeatureCellLevel
                     }
 
                     // Non-manifold point. Create particle.
-                    cloud.addParticle
+                    startPointCloud.addParticle
                     (
                         new trackedParticle
                         (
@@ -359,7 +431,7 @@ void Foam::meshRefinement::markFeatureCellLevel
                     }
 
                     // Non-manifold point. Create particle.
-                    cloud.addParticle
+                    startPointCloud.addParticle
                     (
                         new trackedParticle
                         (
@@ -384,12 +456,13 @@ void Foam::meshRefinement::markFeatureCellLevel
     maxFeatureLevel = labelList(mesh_.nCells(), -1);
 
     // Database to pass into trackedParticle::move
-    trackedParticle::trackingData td(cloud, maxFeatureLevel);
+    trackedParticle::trackingData td(startPointCloud, maxFeatureLevel);
 
     // Track all particles to their end position (= starting feature point)
     // Note that the particle might have started on a different processor
     // so this will transfer across nicely until we can start tracking proper.
-    cloud.move(td, GREAT);
+    startPointCloud.move(td, GREAT);
+
 
     // Reset level
     maxFeatureLevel = -1;
@@ -403,8 +476,64 @@ void Foam::meshRefinement::markFeatureCellLevel
         featureEdgeVisited[featI] = 0u;
     }
 
+
+    Cloud<trackedParticle> cloud
+    (
+        mesh_,
+        "featureCloud",
+        IDLList<trackedParticle>()
+    );
+
+    forAllIter(Cloud<trackedParticle>, startPointCloud, iter)
+    {
+        const trackedParticle& startTp = iter();
+
+        label featI = startTp.i();
+        label pointI = startTp.j();
+
+        const featureEdgeMesh& featureMesh = features_[featI];
+        const labelList& pEdges = featureMesh.pointEdges()[pointI];
+
+        // Now shoot particles down all pEdges.
+        forAll(pEdges, pEdgeI)
+        {
+            label edgeI = pEdges[pEdgeI];
+
+            if (featureEdgeVisited[featI].set(edgeI, 1u))
+            {
+                // Unvisited edge. Make the particle go to the other point
+                // on the edge.
+
+                const edge& e = featureMesh.edges()[edgeI];
+                label otherPointI = e.otherVertex(pointI);
+
+                trackedParticle* tp(new trackedParticle(startTp));
+                tp->end() = featureMesh.points()[otherPointI];
+                tp->j() = otherPointI;
+
+                if (debug&meshRefinement::FEATURESEEDS)
+                {
+                    Pout<< "Adding particle for point:" << pointI
+                        << " coord:" << tp->position()
+                        << " feature:" << featI
+                        << " to track to:" << tp->end()
+                        << endl;
+                }
+
+                cloud.addParticle(tp);
+            }
+        }
+    }
+
+    startPointCloud.clear();
+
+
     while (true)
     {
+        // Track all particles to their end position.
+        cloud.move(td, GREAT);
+
+
         label nParticles = 0;
 
         // Make particle follow edge.
@@ -460,10 +589,23 @@ void Foam::meshRefinement::markFeatureCellLevel
         {
             break;
         }
-
-        // Track all particles to their end position.
-        cloud.move(td, GREAT);
     }
+
+
+
+    //if (debug&meshRefinement::FEATURESEEDS)
+    //{
+    //    forAll(maxFeatureLevel, cellI)
+    //    {
+    //        if (maxFeatureLevel[cellI] != -1)
+    //        {
+    //            Pout<< "Feature went through cell:" << cellI
+    //                << " coord:" << mesh_.cellCentres()[cellI]
+    //                << " leve:" << maxFeatureLevel[cellI]
+    //                << endl;
+    //        }
+    //    }
+    //}
 }
 
 
@@ -879,64 +1021,33 @@ Foam::label Foam::meshRefinement::markSurfaceRefinement
 }
 
 
-// Checks if multiple intersections of a cell (by a surface with a higher
-// max than the cell level) and if so if the normals at these intersections
-// make a large angle.
-// Returns false if the nRefine limit has been reached, true otherwise.
-bool Foam::meshRefinement::checkCurvature
+// Count number of matches of first argument in second argument
+Foam::label Foam::meshRefinement::countMatches
 (
-    const scalar curvature,
-    const label nAllowRefine,
-
-    const label surfaceLevel,   // current intersection max level
-    const vector& surfaceNormal,// current intersection normal
-
-    const label cellI,
-
-    label& cellMaxLevel,        // cached max surface level for this cell
-    vector& cellMaxNormal,      // cached surface normal for this cell
-
-    labelList& refineCell,
-    label& nRefine
+    const List<point>& normals1,
+    const List<point>& normals2,
+    const scalar tol
 ) const
 {
-    const labelList& cellLevel = meshCutter_.cellLevel();
+    label nMatches = 0;
 
-    // Test if surface applicable
-    if (surfaceLevel > cellLevel[cellI])
+    forAll(normals1, i)
     {
-        if (cellMaxLevel == -1)
-        {
-            // First visit of cell. Store
-            cellMaxLevel = surfaceLevel;
-            cellMaxNormal = surfaceNormal;
-        }
-        else
-        {
-            // Second or more visit. Check curvature.
-            if ((cellMaxNormal & surfaceNormal) < curvature)
-            {
-                return markForRefine
-                (
-                    surfaceLevel,   // mark with any non-neg number.
-                    nAllowRefine,
-                    refineCell[cellI],
-                    nRefine
-                );
-            }
+        const vector& n1 = normals1[i];
 
-            // Set normal to that of highest surface. Not really necessary
-            // over here but we reuse cellMax info when doing coupled faces.
-            if (surfaceLevel > cellMaxLevel)
+        forAll(normals2, j)
+        {
+            const vector& n2 = normals2[j];
+
+            if (magSqr(n1-n2) < tol)
             {
-                cellMaxLevel = surfaceLevel;
-                cellMaxNormal = surfaceNormal;
+                nMatches++;
+                break;
             }
         }
     }
 
-    // Did not reach refinement limit.
-    return true;
+    return nMatches;
 }
 
 
@@ -962,6 +1073,9 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
 
     // 2. 'global' test: any cell on only one surface with a neighbour
     // on a different surface gets refined (if its current level etc.)
+
+
+    const PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh_));
 
 
     // Collect candidate faces (i.e. intersecting any surface and
@@ -993,6 +1107,12 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
 
             start[i] = cellCentres[own];
             end[i] = neiCc[bFaceI];
+
+            if (!isMasterFace[faceI])
+            {
+                Swap(start[i], end[i]);
+            }
+
             minLevel[i] = min(cellLevel[own], neiLevel[bFaceI]);
         }
     }
@@ -1006,10 +1126,9 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
 
 
     // Test for all intersections (with surfaces of higher max level than
-    // minLevel) and cache per cell the max surface level and the local normal
-    // on that surface.
-    labelList cellMaxLevel(mesh_.nCells(), -1);
-    vectorField cellMaxNormal(mesh_.nCells(), vector::zero);
+    // minLevel) and cache per cell the interesting inter
+    labelListList cellSurfLevels(mesh_.nCells());
+    List<vectorList> cellSurfNormals(mesh_.nCells());
 
     {
         // Per segment the normals of the surfaces
@@ -1029,12 +1148,29 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
             surfaceNormal,
             surfaceLevel
         );
+
+
+        // Sort the data according to surface location. This will guarantee
+        // that on coupled faces both sides visit the intersections in
+        // the same order so will decide the same
+        labelList visitOrder;
+        forAll(surfaceNormal, pointI)
+        {
+            vectorList& pNormals = surfaceNormal[pointI];
+            labelList& pLevel = surfaceLevel[pointI];
+
+            sortedOrder(pNormals, visitOrder, normalLess(pNormals));
+
+            pNormals = List<point>(pNormals, visitOrder);
+            pLevel = UIndirectList<label>(pLevel, visitOrder);
+        }
+
         // Clear out unnecessary data
         start.clear();
         end.clear();
         minLevel.clear();
 
-        // Extract per cell information on the surface with the highest max
+        // Convert face-wise data to cell.
         forAll(testFaces, i)
         {
             label faceI = testFaces[i];
@@ -1043,163 +1179,279 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
             const vectorList& fNormals = surfaceNormal[i];
             const labelList& fLevels = surfaceLevel[i];
 
-            forAll(fLevels, hitI)
+            forAll(fNormals, hitI)
             {
-                checkCurvature
-                (
-                    curvature,
-                    nAllowRefine,
-
-                    fLevels[hitI],
-                    fNormals[hitI],
-
-                    own,
-                    cellMaxLevel[own],
-                    cellMaxNormal[own],
-
-                    refineCell,
-                    nRefine
-                );
-            }
-
-            if (mesh_.isInternalFace(faceI))
-            {
-                label nei = mesh_.faceNeighbour()[faceI];
-
-                forAll(fLevels, hitI)
+                if (fLevels[hitI] > cellLevel[own])
                 {
-                    checkCurvature
-                    (
-                        curvature,
-                        nAllowRefine,
+                    cellSurfLevels[own].append(fLevels[hitI]);
+                    cellSurfNormals[own].append(fNormals[hitI]);
+                }
 
-                        fLevels[hitI],
-                        fNormals[hitI],
-
-                        nei,
-                        cellMaxLevel[nei],
-                        cellMaxNormal[nei],
-
-                        refineCell,
-                        nRefine
-                    );
+                if (mesh_.isInternalFace(faceI))
+                {
+                    label nei = mesh_.faceNeighbour()[faceI];
+                    if (fLevels[hitI] > cellLevel[nei])
+                    {
+                        cellSurfLevels[nei].append(fLevels[hitI]);
+                        cellSurfNormals[nei].append(fNormals[hitI]);
+                    }
                 }
             }
         }
     }
 
-    // 2. Find out a measure of surface curvature and region edges.
-    // Send over surface region and surface normal to neighbour cell.
 
-    labelList neiBndMaxLevel(mesh_.nFaces()-mesh_.nInternalFaces());
-    vectorField neiBndMaxNormal(mesh_.nFaces()-mesh_.nInternalFaces());
 
-    for (label faceI = mesh_.nInternalFaces(); faceI < mesh_.nFaces(); faceI++)
+    // Bit of statistics
     {
-        label bFaceI = faceI-mesh_.nInternalFaces();
-        label own = mesh_.faceOwner()[faceI];
-
-        neiBndMaxLevel[bFaceI] = cellMaxLevel[own];
-        neiBndMaxNormal[bFaceI] = cellMaxNormal[own];
+        label nSet = 0;
+        label nNormals = 9;
+        forAll(cellSurfNormals, cellI)
+        {
+            const vectorList& normals = cellSurfNormals[cellI];
+            if (normals.size())
+            {
+                nSet++;
+                nNormals += normals.size();
+            }
+        }
+        reduce(nSet, sumOp<label>());
+        reduce(nNormals, sumOp<label>());
+        Info<< "markSurfaceCurvatureRefinement :"
+            << " cells:" << mesh_.globalData().nTotalCells()
+            << " of which with normals:" << nSet
+            << " ; total normals stored:" << nNormals
+            << endl;
     }
-    syncTools::swapBoundaryFaceList(mesh_, neiBndMaxLevel);
-    syncTools::swapBoundaryFaceList(mesh_, neiBndMaxNormal);
 
-    // Loop over all faces. Could only be checkFaces.. except if they're coupled
+
+
+    bool reachedLimit = false;
+
+
+    // 1. Check normals per cell
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    for
+    (
+        label cellI = 0;
+        !reachedLimit && cellI < cellSurfNormals.size();
+        cellI++
+    )
+    {
+        const vectorList& normals = cellSurfNormals[cellI];
+        const labelList& levels = cellSurfLevels[cellI];
+
+        // n^2 comparison of all normals in a cell
+        for (label i = 0; !reachedLimit && i < normals.size(); i++)
+        {
+            for (label j = i+1; !reachedLimit && j < normals.size(); j++)
+            {
+                if ((normals[i] & normals[j]) < curvature)
+                {
+                    label maxLevel = max(levels[i], levels[j]);
+
+                    if (cellLevel[cellI] < maxLevel)
+                    {
+                        if
+                        (
+                            !markForRefine
+                            (
+                                maxLevel,
+                                nAllowRefine,
+                                refineCell[cellI],
+                                nRefine
+                            )
+                        )
+                        {
+                            if (debug)
+                            {
+                                Pout<< "Stopped refining since reaching my cell"
+                                    << " limit of " << mesh_.nCells()+7*nRefine
+                                    << endl;
+                            }
+                            reachedLimit = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    // 2. Find out a measure of surface curvature
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Look at normals between neighbouring surfaces
+    // Loop over all faces. Could only be checkFaces, except if they're coupled
 
     // Internal faces
-    for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
+    for
+    (
+        label faceI = 0;
+        !reachedLimit && faceI < mesh_.nInternalFaces();
+        faceI++
+    )
     {
         label own = mesh_.faceOwner()[faceI];
         label nei = mesh_.faceNeighbour()[faceI];
 
-        if (cellMaxLevel[own] != -1 && cellMaxLevel[nei] != -1)
-        {
-            // Have valid data on both sides. Check curvature.
-            if ((cellMaxNormal[own] & cellMaxNormal[nei]) < curvature)
-            {
-                // See which side to refine
-                if (cellLevel[own] < cellMaxLevel[own])
-                {
-                    if
-                    (
-                        !markForRefine
-                        (
-                            cellMaxLevel[own],
-                            nAllowRefine,
-                            refineCell[own],
-                            nRefine
-                        )
-                    )
-                    {
-                        if (debug)
-                        {
-                            Pout<< "Stopped refining since reaching my cell"
-                                << " limit of " << mesh_.nCells()+7*nRefine
-                                << endl;
-                        }
-                        break;
-                    }
-                }
+        const vectorList& ownNormals = cellSurfNormals[own];
+        const labelList& ownLevels = cellSurfLevels[own];
+        const vectorList& neiNormals = cellSurfNormals[nei];
+        const labelList& neiLevels = cellSurfLevels[nei];
 
-                if (cellLevel[nei] < cellMaxLevel[nei])
+
+        // Special case: owner normals set is a subset of the neighbour
+        // normals. Do not do curvature refinement since other cell's normals
+        // do not add any information. Avoids weird corner extensions of
+        // refinement regions.
+        bool ownIsSubset =
+            countMatches(ownNormals, neiNormals)
+         == ownNormals.size();
+
+        bool neiIsSubset =
+            countMatches(neiNormals, ownNormals)
+         == neiNormals.size();
+
+
+        if (!ownIsSubset && !neiIsSubset)
+        {
+            // n^2 comparison of between ownNormals and neiNormals
+            for (label i = 0; !reachedLimit &&  i < ownNormals.size(); i++)
+            {
+                for (label j = 0; !reachedLimit && j < neiNormals.size(); j++)
                 {
-                    if
-                    (
-                        !markForRefine
-                        (
-                            cellMaxLevel[nei],
-                            nAllowRefine,
-                            refineCell[nei],
-                            nRefine
-                        )
-                    )
+                    // Have valid data on both sides. Check curvature.
+                    if ((ownNormals[i] & neiNormals[j]) < curvature)
                     {
-                        if (debug)
+                        // See which side to refine.
+                        if (cellLevel[own] < ownLevels[i])
                         {
-                            Pout<< "Stopped refining since reaching my cell"
-                                << " limit of " << mesh_.nCells()+7*nRefine
-                                << endl;
+                            if
+                            (
+                                !markForRefine
+                                (
+                                    ownLevels[i],
+                                    nAllowRefine,
+                                    refineCell[own],
+                                    nRefine
+                                )
+                            )
+                            {
+                                if (debug)
+                                {
+                                    Pout<< "Stopped refining since reaching"
+                                        << " my cell limit of "
+                                        << mesh_.nCells()+7*nRefine << endl;
+                                }
+                                reachedLimit = true;
+                                break;
+                            }
                         }
-                        break;
+                        if (cellLevel[nei] < neiLevels[j])
+                        {
+                            if
+                            (
+                                !markForRefine
+                                (
+                                    neiLevels[j],
+                                    nAllowRefine,
+                                    refineCell[nei],
+                                    nRefine
+                                )
+                            )
+                            {
+                                if (debug)
+                                {
+                                    Pout<< "Stopped refining since reaching"
+                                        << " my cell limit of "
+                                        << mesh_.nCells()+7*nRefine << endl;
+                                }
+                                reachedLimit = true;
+                                break;
+                            }
+                        }
                     }
                 }
             }
         }
     }
+
+
+    // Send over surface normal to neighbour cell.
+    List<vectorList> neiSurfaceNormals;
+    syncTools::swapBoundaryCellList(mesh_, cellSurfNormals, neiSurfaceNormals);
+
     // Boundary faces
-    for (label faceI = mesh_.nInternalFaces(); faceI < mesh_.nFaces(); faceI++)
+    for
+    (
+        label faceI = mesh_.nInternalFaces();
+        !reachedLimit && faceI < mesh_.nFaces();
+        faceI++
+    )
     {
         label own = mesh_.faceOwner()[faceI];
         label bFaceI = faceI - mesh_.nInternalFaces();
 
-        if (cellLevel[own] < cellMaxLevel[own] && neiBndMaxLevel[bFaceI] != -1)
+        const vectorList& ownNormals = cellSurfNormals[own];
+        const labelList& ownLevels = cellSurfLevels[own];
+        const vectorList& neiNormals = neiSurfaceNormals[bFaceI];
+
+        // Special case: owner normals set is a subset of the neighbour
+        // normals. Do not do curvature refinement since other cell's normals
+        // do not add any information. Avoids weird corner extensions of
+        // refinement regions.
+        bool ownIsSubset =
+            countMatches(ownNormals, neiNormals)
+         == ownNormals.size();
+
+        bool neiIsSubset =
+            countMatches(neiNormals, ownNormals)
+         == neiNormals.size();
+
+
+        if (!ownIsSubset && !neiIsSubset)
         {
-            // Have valid data on both sides. Check curvature.
-            if ((cellMaxNormal[own] & neiBndMaxNormal[bFaceI]) < curvature)
+            // n^2 comparison of between ownNormals and neiNormals
+            for (label i = 0; !reachedLimit &&  i < ownNormals.size(); i++)
             {
-                if
-                (
-                    !markForRefine
-                    (
-                        cellMaxLevel[own],
-                        nAllowRefine,
-                        refineCell[own],
-                        nRefine
-                    )
-                )
+                for (label j = 0; !reachedLimit && j < neiNormals.size(); j++)
                 {
-                    if (debug)
+                    // Have valid data on both sides. Check curvature.
+                    if ((ownNormals[i] & neiNormals[j]) < curvature)
                     {
-                        Pout<< "Stopped refining since reaching my cell"
-                            << " limit of " << mesh_.nCells()+7*nRefine
-                            << endl;
+                        if (cellLevel[own] < ownLevels[i])
+                        {
+                            if
+                            (
+                                !markForRefine
+                                (
+                                    ownLevels[i],
+                                    nAllowRefine,
+                                    refineCell[own],
+                                    nRefine
+                                )
+                            )
+                            {
+                                if (debug)
+                                {
+                                    Pout<< "Stopped refining since reaching"
+                                        << " my cell limit of "
+                                        << mesh_.nCells()+7*nRefine
+                                        << endl;
+                                }
+                                reachedLimit = true;
+                                break;
+                            }
+                        }
                     }
-                    break;
                 }
             }
         }
     }
+
 
     if
     (

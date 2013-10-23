@@ -259,22 +259,13 @@ private:
                 label& nRefine
             ) const;
 
-            //- Mark cell if local curvature > curvature or
-            //  markDifferingRegions = true and intersections with different
-            //  regions.
-            bool checkCurvature
+            //- Helper: count number of normals1 that are in normals2
+            label countMatches
             (
-                const scalar curvature,
-                const label nAllowRefine,
-                const label surfaceLevel,
-                const vector& surfaceNormal,
-                const label cellI,
-                label& cellMaxLevel,
-                vector& cellMaxNormal,
-                labelList& refineCell,
-                label& nRefine
+                const List<point>& normals1,
+                const List<point>& normals2,
+                const scalar tol = 1e-6
             ) const;
-
 
             //- Mark cells for surface curvature based refinement. Marks if
             //  local curvature > curvature or if on different regions
@@ -866,6 +857,13 @@ public:
                 const point& keepPoint
             );
 
+            //- Split faces into two
+            autoPtr<mapPolyMesh> splitFaces
+            (
+                const labelList& splitFaces,
+                const labelPairList& splits
+            );
+
             //- Update local numbering for mesh redistribution
             void distribute(const mapDistributePolyMesh&);
 
@@ -982,6 +980,14 @@ public:
                 const UList<T>&
             ) const;
 
+            //- Print list according to (collected and) sorted coordinate
+            template<class T>
+            static void collectAndPrint
+            (
+                const UList<point>& points,
+                const UList<T>& data
+            );
+
             //- Print some mesh stats.
             void printMeshInfo(const bool, const string&) const;
 
@@ -1004,6 +1010,26 @@ public:
             //- Do any one of above IO functions. flag is combination of
             //  writeFlag values.
             void write(const label flag, const fileName&) const;
+
+            //- Helper: calculate average
+            template<class T>
+            static T gAverage
+            (
+                const polyMesh& mesh,
+                const PackedBoolList& isMasterElem,
+                const UList<T>& values
+            );
+
+            //- Helper: calculate average over selected elements
+            template<class T>
+            static T gAverage
+            (
+                const polyMesh& mesh,
+                const PackedBoolList& isMasterElem,
+                const labelList& meshPoints,
+                const UList<T>& values
+            );
+
 };
 
 

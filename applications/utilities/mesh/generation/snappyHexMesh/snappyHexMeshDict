@@ -474,10 +474,12 @@ meshQualityControls
 // Advanced
 
 // Flags for optional output
-// 0 : only write final meshes
-// 1 : write intermediate meshes
-// 2 : write volScalarField with cellLevel for postprocessing
-// 4 : write current intersections as .obj files
+//  0 : only write final meshes
+//  1 : write intermediate meshes
+//  2 : write volScalarField with cellLevel for postprocessing
+//  4 : write current mesh intersections as .obj files
+//  8 : write information about explicit feature edge refinement
+// 16 : write information about layers
 debug 0;
 
 // Merge tolerance. Is fraction of overall bounding box of initial mesh.

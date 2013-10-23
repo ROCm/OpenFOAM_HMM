@@ -102,7 +102,7 @@ Foam::CourantNo::CourantNo
                 "const dictionary&, "
                 "const bool"
             ")"
-        )   << "No fvMesh available, deactivating." << nl
+        )   << "No fvMesh available, deactivating " << name_ << nl
             << endl;
     }
 

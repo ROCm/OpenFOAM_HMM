@@ -278,7 +278,8 @@ public:
             const word& name,
             const objectRegistry&,
             const dictionary&,
-            const bool loadFromFiles = false
+            const bool loadFromFiles = false,
+            const bool readFields = true
         );
 
 

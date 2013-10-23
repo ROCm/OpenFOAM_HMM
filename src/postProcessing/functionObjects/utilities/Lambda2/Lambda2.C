@@ -65,7 +65,7 @@ Foam::Lambda2::Lambda2
                 "const dictionary&, "
                 "const bool"
             ")"
-        )   << "No fvMesh available, deactivating." << nl
+        )   << "No fvMesh available, deactivating " << name_ << nl
             << endl;
     }
 

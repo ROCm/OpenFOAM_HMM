@@ -89,23 +89,16 @@ void Foam::writeRegisteredObject::timeSet()
 
 void Foam::writeRegisteredObject::write()
 {
+    Info<< type() << " " << name_ << " output:" << nl;
+
+    DynamicList<word> allNames(obr_.toc().size());
     forAll(objectNames_, i)
     {
-        if (obr_.foundObject<regIOobject>(objectNames_[i]))
+        wordList names(obr_.names<regIOobject>(objectNames_[i]));
+
+        if (names.size())
         {
-            regIOobject& obj =
-                const_cast<regIOobject&>
-                (
-                    obr_.lookupObject<regIOobject>(objectNames_[i])
-                );
-
-            if (exclusiveWriting_)
-            {
-                // Switch off automatic writing to prevent double write
-                obj.writeOpt() = IOobject::NO_WRITE;
-            }
-
-            obj.write();
+            allNames.append(names);
         }
         else
         {
@@ -114,6 +107,25 @@ void Foam::writeRegisteredObject::write()
                 << "database. Available objects:" << nl << obr_.sortedToc()
                 << endl;
         }
+    }
+
+    forAll(allNames, i)
+    {
+        regIOobject& obj =
+            const_cast<regIOobject&>
+            (
+                obr_.lookupObject<regIOobject>(allNames[i])
+            );
+
+        if (exclusiveWriting_)
+        {
+            // Switch off automatic writing to prevent double write
+            obj.writeOpt() = IOobject::NO_WRITE;
+        }
+
+        Info<< "    writing object " << obj.name() << nl << endl;
+
+        obj.write();
     }
 }
 

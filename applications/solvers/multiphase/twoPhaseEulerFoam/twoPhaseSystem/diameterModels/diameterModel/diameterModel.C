@@ -38,11 +38,11 @@ namespace Foam
 
 Foam::diameterModel::diameterModel
 (
-    const dictionary& dict,
+    const dictionary& diameterProperties,
     const phaseModel& phase
 )
 :
-    dict_(dict),
+    diameterProperties_(diameterProperties),
     phase_(phase)
 {}
 
@@ -51,6 +51,20 @@ Foam::diameterModel::diameterModel
 
 Foam::diameterModel::~diameterModel()
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::diameterModel::correct()
+{}
+
+
+bool Foam::diameterModel::read(const dictionary& phaseProperties)
+{
+    diameterProperties_ = phaseProperties.subDict(type() + "Coeffs");
+
+    return true;
+}
 
 
 // ************************************************************************* //

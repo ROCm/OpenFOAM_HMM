@@ -1262,6 +1262,9 @@ void Foam::autoLayerDriver::calculateLayerThickness
             << setf(ios_base::left) << setw(maxPatchNameLen) << "-----"
             << setw(0) << " -----    ------ --------- -------" << endl;
 
+
+        const PackedBoolList isMasterPoint(syncTools::getMasterPoints(mesh));
+
         forAll(patchIDs, i)
         {
             label patchI = patchIDs[i];
@@ -1270,23 +1273,29 @@ void Foam::autoLayerDriver::calculateLayerThickness
 
             scalar sumThickness = 0;
             scalar sumNearWallThickness = 0;
+            label nMasterPoints = 0;
 
             forAll(meshPoints, patchPointI)
             {
-                label ppPointI = pp.meshPointMap()[meshPoints[patchPointI]];
+                label meshPointI = meshPoints[patchPointI];
+                if (isMasterPoint[meshPointI])
+                {
+                    label ppPointI = pp.meshPointMap()[meshPointI];
 
-                sumThickness += thickness[ppPointI];
-                sumNearWallThickness += layerParams.firstLayerThickness
-                (
-                    patchNLayers[ppPointI],
-                    firstLayerThickness[ppPointI],
-                    finalLayerThickness[ppPointI],
-                    thickness[ppPointI],
-                    expansionRatio[ppPointI]
-                );
+                    sumThickness += thickness[ppPointI];
+                    sumNearWallThickness += layerParams.firstLayerThickness
+                    (
+                        patchNLayers[ppPointI],
+                        firstLayerThickness[ppPointI],
+                        finalLayerThickness[ppPointI],
+                        thickness[ppPointI],
+                        expansionRatio[ppPointI]
+                    );
+                    nMasterPoints++;
+                }
             }
 
-            label totNPoints = returnReduce(meshPoints.size(), sumOp<label>());
+            label totNPoints = returnReduce(nMasterPoints, sumOp<label>());
 
             // For empty patches, totNPoints is 0.
             scalar avgThickness = 0;
@@ -1319,7 +1328,7 @@ void Foam::autoLayerDriver::calculateLayerThickness
 // Synchronize displacement among coupled patches.
 void Foam::autoLayerDriver::syncPatchDisplacement
 (
-    const motionSmoother& meshMover,
+    const indirectPrimitivePatch& pp,
     const scalarField& minThickness,
     pointField& patchDisp,
     labelList& patchNLayers,
@@ -1327,7 +1336,7 @@ void Foam::autoLayerDriver::syncPatchDisplacement
 ) const
 {
     const fvMesh& mesh = meshRefiner_.mesh();
-    const labelList& meshPoints = meshMover.patch().meshPoints();
+    const labelList& meshPoints = pp.meshPoints();
 
     label nChangedTotal = 0;
 
@@ -1437,9 +1446,9 @@ void Foam::autoLayerDriver::syncPatchDisplacement
         }
     }
 
-    Info<< "Prevented extrusion on "
-        << returnReduce(nChangedTotal, sumOp<label>())
-        << " coupled patch points during syncPatchDisplacement." << endl;
+    //Info<< "Prevented extrusion on "
+    //    << returnReduce(nChangedTotal, sumOp<label>())
+    //    << " coupled patch points during syncPatchDisplacement." << endl;
 }
 
 
@@ -1569,7 +1578,7 @@ void Foam::autoLayerDriver::getPatchDisplacement
     // Make sure displacement is equal on both sides of coupled patches.
     syncPatchDisplacement
     (
-        meshMover,
+        pp,
         minThickness,
         patchDisp,
         patchNLayers,
@@ -1767,7 +1776,7 @@ Foam::label Foam::autoLayerDriver::truncateDisplacement
     {
         syncPatchDisplacement
         (
-            meshMover,
+            pp,
             minThickness,
             patchDisp,
             patchNLayers,
@@ -2856,7 +2865,7 @@ void Foam::autoLayerDriver::addLayers
         // Make sure displacement is equal on both sides of coupled patches.
         syncPatchDisplacement
         (
-            meshMover,
+            pp,
             minThickness,
             patchDisp,
             patchNLayers,

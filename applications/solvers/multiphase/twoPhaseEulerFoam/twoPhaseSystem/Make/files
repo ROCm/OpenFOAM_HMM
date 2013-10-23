@@ -4,6 +4,12 @@ diameterModels/diameterModel/newDiameterModel.C
 diameterModels/constantDiameter/constantDiameter.C
 diameterModels/isothermalDiameter/isothermalDiameter.C
 
+diameterModels/IATE/IATE.C
+diameterModels/IATE/IATEsources/IATEsource/IATEsource.C
+diameterModels/IATE/IATEsources/wakeEntrainmentCoalescence/wakeEntrainmentCoalescence.C
+diameterModels/IATE/IATEsources/turbulentBreakUp/turbulentBreakUp.C
+diameterModels/IATE/IATEsources/randomCoalescence/randomCoalescence.C
+
 twoPhaseSystem.C
 
 LIB = $(FOAM_LIBBIN)/libcompressibleTwoPhaseSystem

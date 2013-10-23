@@ -5,7 +5,7 @@ cd ${0%/*} || exit 1    # run from this directory
 . $WM_PROJECT_DIR/bin/tools/CleanFunctions
 
 keepCases="moriyoshiHomogeneous"
-loseCases="moriyoshiHomogeneousPart2"
+loseCases="moriyoshiHomogeneousPart2 moriyoshiHomogeneousHydrogen"
 
 for caseName in $keepCases
 do

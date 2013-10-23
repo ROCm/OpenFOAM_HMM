@@ -25,6 +25,7 @@ License
 
 #include "meshRefinement.H"
 #include "fvMesh.H"
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,6 +55,108 @@ template<class T> void meshRefinement::updateList
     }
 
     elems.transfer(newElems);
+}
+
+
+template<class T>
+T meshRefinement::gAverage
+(
+    const polyMesh& mesh,
+    const PackedBoolList& isMasterElem,
+    const UList<T>& values
+)
+{
+    if (values.size() != isMasterElem.size())
+    {
+        FatalErrorIn
+        (
+            "meshRefinement::gAverage\n"
+            "(\n"
+            "    const polyMesh&,\n"
+            "    const PackedBoolList& isMasterElem,\n"
+            "    const UList<T>& values\n"
+            ")\n"
+        )   << "Number of elements in list " << values.size()
+            << " does not correspond to number of elements in isMasterElem "
+            << isMasterElem.size()
+            << exit(FatalError);
+    }
+
+    T sum = pTraits<T>::zero;
+    label n = 0;
+
+    forAll(values, i)
+    {
+        if (isMasterElem[i])
+        {
+            sum += values[i];
+            n++;
+        }
+    }
+
+    reduce(sum, sumOp<T>());
+    reduce(n, sumOp<label>());
+
+    if (n > 0)
+    {
+        return sum/n;
+    }
+    else
+    {
+        return pTraits<T>::max;
+    }
+}
+
+
+template<class T>
+T meshRefinement::gAverage
+(
+    const polyMesh& mesh,
+    const PackedBoolList& isMasterElem,
+    const labelList& meshElems,
+    const UList<T>& values
+)
+{
+    if (values.size() != meshElems.size())
+    {
+        FatalErrorIn
+        (
+            "meshRefinement::gAverage\n"
+            "(\n"
+            "    const polyMesh&,\n"
+            "    const labelList&,\n"
+            "    const PackedBoolList& isMasterElem,\n"
+            "    const UList<T>& values\n"
+            ")\n"
+        )   << "Number of elements in list " << values.size()
+            << " does not correspond to number of elements in meshElems "
+            << meshElems.size()
+            << exit(FatalError);
+    }
+
+    T sum = pTraits<T>::zero;
+    label n = 0;
+
+    forAll(values, i)
+    {
+        if (isMasterElem[meshElems[i]])
+        {
+            sum += values[i];
+            n++;
+        }
+    }
+
+    reduce(sum, sumOp<T>());
+    reduce(n, sumOp<label>());
+
+    if (n > 0)
+    {
+        return sum/n;
+    }
+    else
+    {
+        return pTraits<T>::max;
+    }
 }
 
 
@@ -112,6 +215,53 @@ void meshRefinement::testSyncBoundaryFaceList
 
             bFaceI++;
         }
+    }
+}
+
+
+// Print list sorted by coordinates. Used for comparing non-parallel v.s.
+// parallel operation
+template<class T>
+void meshRefinement::collectAndPrint
+(
+    const UList<point>& points,
+    const UList<T>& data
+)
+{
+    globalIndex globalPoints(points.size());
+
+    pointField allPoints;
+    globalPoints.gather
+    (
+        Pstream::worldComm,
+        identity(Pstream::nProcs()),
+        points,
+        allPoints,
+        UPstream::msgType(),
+        Pstream::blocking
+    );
+
+    List<T> allData;
+    globalPoints.gather
+    (
+        Pstream::worldComm,
+        identity(Pstream::nProcs()),
+        data,
+        allData,
+        UPstream::msgType(),
+        Pstream::blocking
+    );
+
+
+    scalarField magAllPoints(mag(allPoints-point(-0.317, 0.117, 0.501)));
+
+    labelList visitOrder;
+    sortedOrder(magAllPoints, visitOrder);
+    forAll(visitOrder, i)
+    {
+        label allPointI = visitOrder[i];
+        Info<< allPoints[allPointI] << " : " << allData[allPointI]
+            << endl;
     }
 }
 
