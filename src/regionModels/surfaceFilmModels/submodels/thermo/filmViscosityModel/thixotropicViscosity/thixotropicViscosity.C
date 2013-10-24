@@ -66,7 +66,11 @@ void thixotropicViscosity::updateMu()
     const volScalarField filmMass("filmMass", film.netMass() + mSMALL);
 
     // weighting field to blend new and existing mass contributions
-    const volScalarField w("w", max(0.0, min(1.0, deltaMass/filmMass)));
+    const volScalarField w
+    (
+        "w",
+        max(scalar(0.0), min(scalar(1.0), deltaMass/filmMass))
+    );
 
     // evaluate thixotropic viscosity
     volScalarField muThx("muThx", muInf_/(sqr(1.0 - K_*lambda_) + ROOTVSMALL));
