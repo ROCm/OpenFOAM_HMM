@@ -70,6 +70,8 @@ inline bool readScalar(const char* buf, doubleScalar& s)
 #define Scalar doubleScalar
 #define ScalarVGREAT doubleScalarVGREAT
 #define ScalarVSMALL doubleScalarVSMALL
+#define ScalarROOTVGREAT doubleScalarROOTVGREAT
+#define ScalarROOTVSMALL doubleScalarROOTVSMALL
 #define readScalar readDoubleScalar
 
 inline Scalar mag(const Scalar s)
@@ -108,6 +110,8 @@ inline Scalar yn(const int n, const Scalar s)
 #undef Scalar
 #undef ScalarVGREAT
 #undef ScalarVSMALL
+#undef ScalarROOTVGREAT
+#undef ScalarROOTVSMALL
 #undef readScalar
 #undef transFunc
 
