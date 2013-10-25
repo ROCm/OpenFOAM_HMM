@@ -34,6 +34,7 @@
         fvc::interpolate((1.0/rho1)*rAU1*phase1.turbulence().pPrime())
        *fvc::snGrad(alpha1)*mesh.magSf()
     );
+    phiP1.boundaryField() == 0;
 
     // Phase-2 pressure flux (e.g. due to particle-particle pressure)
     surfaceScalarField phiP2
@@ -42,6 +43,7 @@
         fvc::interpolate((1.0/rho2)*rAU2*phase2.turbulence().pPrime())
        *fvc::snGrad(alpha2)*mesh.magSf()
     );
+    phiP2.boundaryField() == 0;
 
     surfaceScalarField phiHbyA1
     (
@@ -126,9 +128,11 @@
         );
 
         pEqnComp1 =
-            fvc::ddt(rho1)
-          + fvc::div(phi1, rho1) - fvc::Sp(fvc::div(phi1), rho1)
-          + correction
+            (
+                fvc::ddt(alpha1, rho1) + fvc::div(alphaPhi1, rho1)
+              - fvc::Sp(fvc::ddt(alpha1) + fvc::div(alphaPhi1), rho1)
+            )/rho1
+          + (alpha1/rho1)*correction
             (
                 psi1*fvm::ddt(p)
               + fvm::div(phid1, p) - fvm::Sp(fvc::div(phid1), p)
@@ -137,9 +141,11 @@
         pEqnComp1().relax();
 
         pEqnComp2 =
-            fvc::ddt(rho2)
-          + fvc::div(phi2, rho2) - fvc::Sp(fvc::div(phi2), rho2)
-          + correction
+            (
+                fvc::ddt(alpha2, rho2) + fvc::div(alphaPhi2, rho2)
+              - fvc::Sp(fvc::ddt(alpha2) + fvc::div(alphaPhi2), rho2)
+            )/rho2
+          + (alpha2/rho2)*correction
             (
                 psi2*fvm::ddt(p)
               + fvm::div(phid2, p) - fvm::Sp(fvc::div(phid2), p)
@@ -150,12 +156,18 @@
     else
     {
         pEqnComp1 =
-            fvc::ddt(rho1) + psi1*correction(fvm::ddt(p))
-          + fvc::div(phi1, rho1) - fvc::Sp(fvc::div(phi1), rho1);
+            (
+                fvc::ddt(alpha1, rho1) + fvc::div(alphaPhi1, rho1)
+              - fvc::Sp(fvc::ddt(alpha1) + fvc::div(alphaPhi1), rho1)
+            )/rho1
+          + (alpha1*psi1/rho1)*correction(fvm::ddt(p));
 
         pEqnComp2 =
-            fvc::ddt(rho2) + psi2*correction(fvm::ddt(p))
-          + fvc::div(phi2, rho2) - fvc::Sp(fvc::div(phi2), rho2);
+            (
+                fvc::ddt(alpha2, rho2) + fvc::div(alphaPhi2, rho2)
+              - fvc::Sp(fvc::ddt(alpha2) + fvc::div(alphaPhi2), rho2)
+            )/rho2
+          + (alpha2*psi2/rho2)*correction(fvm::ddt(p));
     }
 
     // Cache p prior to solve for density update
@@ -171,11 +183,7 @@
 
         solve
         (
-            (
-                (alpha1/rho1)*pEqnComp1()
-              + (alpha2/rho2)*pEqnComp2()
-            )
-          + pEqnIncomp,
+            pEqnComp1() + pEqnComp2() + pEqnIncomp,
             mesh.solver(p.select(pimple.finalInnerIter()))
         );
 
@@ -201,8 +209,8 @@
 
             fluid.dgdt() =
             (
-                pos(alpha2)*(pEqnComp2 & p)/rho2
-              - pos(alpha1)*(pEqnComp1 & p)/rho1
+                pos(alpha2)*(pEqnComp2 & p)/max(alpha2, scalar(1e-3))
+              - pos(alpha1)*(pEqnComp1 & p)/max(alpha1, scalar(1e-3))
             );
 
             p.relax();
