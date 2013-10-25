@@ -66,6 +66,20 @@ const triad triad::min
     vector(-VGREAT, -VGREAT, -VGREAT)
 );
 
+const triad triad::rootMax
+(
+    vector(ROOTVGREAT, ROOTVGREAT, ROOTVGREAT),
+    vector(ROOTVGREAT, ROOTVGREAT, ROOTVGREAT),
+    vector(ROOTVGREAT, ROOTVGREAT, ROOTVGREAT)
+);
+
+const triad triad::rootMin
+(
+    vector(-ROOTVGREAT, -ROOTVGREAT, -ROOTVGREAT),
+    vector(-ROOTVGREAT, -ROOTVGREAT, -ROOTVGREAT),
+    vector(-ROOTVGREAT, -ROOTVGREAT, -ROOTVGREAT)
+);
+
 const triad triad::I
 (
     vector(1, 0, 0),

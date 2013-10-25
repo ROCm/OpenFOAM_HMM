@@ -379,7 +379,7 @@ Type maxMagSqr(const UList<Type>& f)
     }
     else
     {
-        return pTraits<Type>::min;
+        return pTraits<Type>::zero;
     }
 }
 
@@ -406,7 +406,7 @@ Type minMagSqr(const UList<Type>& f)
     }
     else
     {
-        return pTraits<Type>::max;
+        return pTraits<Type>::rootMax;
     }
 }
 

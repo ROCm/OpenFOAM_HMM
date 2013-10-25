@@ -82,6 +82,8 @@ public:
         static const Vector one;
         static const Vector max;
         static const Vector min;
+        static const Vector rootMax;
+        static const Vector rootMin;
 
 
     //- Component labeling enumeration
