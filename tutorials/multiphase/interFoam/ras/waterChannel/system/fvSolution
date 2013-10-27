@@ -20,8 +20,16 @@ solvers
     alpha.water
     {
         nAlphaCorr      1;
-        nAlphaSubCycles 3;
+        nAlphaSubCycles 1;
         cAlpha          1;
+
+        MULESCorr       yes;
+        nLimiterIter    3;
+
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-8;
+        relTol          0;
     }
 
     pcorr
@@ -30,9 +38,9 @@ solvers
         preconditioner
         {
             preconditioner  GAMG;
-            tolerance       1e-05;
+            tolerance       1e-5;
             relTol          0;
-            smoother        DICGaussSeidel;
+            smoother        GaussSeidel;
             nPreSweeps      0;
             nPostSweeps     2;
             nFinestSweeps   2;
@@ -41,31 +49,43 @@ solvers
             agglomerator    faceAreaPair;
             mergeLevels     1;
         }
-        tolerance       1e-10;
+        tolerance       1e-5;
         relTol          0;
-        maxIter         100;
+        maxIter         50;
     }
 
     p_rgh
     {
-        $pcorr;
-        tolerance       1e-6;
-        relTol          0.01;
+        solver           GAMG;
+        tolerance        5e-9;
+        relTol           0.01;
+
+        smoother         GaussSeidel;
+        nPreSweeps       0;
+        nPostSweeps      2;
+
+        cacheAgglomeration true;
+
+        nCellsInCoarsestLevel 10;
+        agglomerator     faceAreaPair;
+        mergeLevels      1;
+
+        maxIter          50;
     };
 
     p_rghFinal
     {
         $p_rgh;
-        tolerance       1e-6;
+        tolerance       5e-9;
         relTol          0;
     }
 
     "(U|k|omega).*"
     {
         solver          smoothSolver;
-        smoother        GaussSeidel;
+        smoother        symGaussSeidel;
         nSweeps         1;
-        tolerance       1e-7;
+        tolerance       1e-6;
         relTol          0.1;
     };
 }
@@ -84,6 +104,7 @@ relaxationFactors
     }
     equations
     {
+        ".*" 1;
     }
 }
 

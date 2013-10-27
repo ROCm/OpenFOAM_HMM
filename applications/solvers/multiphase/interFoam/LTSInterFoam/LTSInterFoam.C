@@ -38,7 +38,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "MULES.H"
+#include "CMULES.H"
 #include "subCycle.H"
 #include "interfaceProperties.H"
 #include "incompressibleTwoPhaseMixture.H"
@@ -79,7 +79,10 @@ int main(int argc, char *argv[])
 
         twoPhaseProperties.correct();
 
+        #define LTSSOLVE
         #include "alphaEqnSubCycle.H"
+        #undef LTSSOLVE
+
         interface.correct();
 
         turbulence->correct();
