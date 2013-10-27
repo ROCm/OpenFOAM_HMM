@@ -91,6 +91,13 @@ public:
 
     // Constructors
 
+        //- Construct from mesh and name of the rDeltaT field
+        localEulerDdtScheme(const fvMesh& mesh, const word& rDeltaTName)
+        :
+            ddtScheme<Type>(mesh),
+            rDeltaTName_(rDeltaTName)
+        {}
+
         //- Construct from mesh and Istream
         localEulerDdtScheme(const fvMesh& mesh, Istream& is)
         :
@@ -188,7 +195,6 @@ tmp<surfaceScalarField> localEulerDdtScheme<scalar>::fvcDdtUfCorr
     const GeometricField<scalar, fvsPatchField, surfaceMesh>& Uf
 );
 
-
 template<>
 tmp<surfaceScalarField> localEulerDdtScheme<scalar>::fvcDdtPhiCorr
 (
@@ -196,6 +202,13 @@ tmp<surfaceScalarField> localEulerDdtScheme<scalar>::fvcDdtPhiCorr
     const surfaceScalarField& phi
 );
 
+template<>
+tmp<surfaceScalarField> localEulerDdtScheme<scalar>::fvcDdtUfCorr
+(
+    const volScalarField& rho,
+    const volScalarField& U,
+    const surfaceScalarField& Uf
+);
 
 template<>
 tmp<surfaceScalarField> localEulerDdtScheme<scalar>::fvcDdtPhiCorr

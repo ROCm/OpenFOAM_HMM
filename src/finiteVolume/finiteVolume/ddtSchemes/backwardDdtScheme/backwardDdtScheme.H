@@ -187,7 +187,6 @@ tmp<surfaceScalarField> backwardDdtScheme<scalar>::fvcDdtUfCorr
     const GeometricField<scalar, fvsPatchField, surfaceMesh>& Uf
 );
 
-
 template<>
 tmp<surfaceScalarField> backwardDdtScheme<scalar>::fvcDdtPhiCorr
 (
@@ -195,6 +194,13 @@ tmp<surfaceScalarField> backwardDdtScheme<scalar>::fvcDdtPhiCorr
     const surfaceScalarField& phi
 );
 
+template<>
+tmp<surfaceScalarField> backwardDdtScheme<scalar>::fvcDdtUfCorr
+(
+    const volScalarField& rho,
+    const volScalarField& U,
+    const surfaceScalarField& Uf
+);
 
 template<>
 tmp<surfaceScalarField> backwardDdtScheme<scalar>::fvcDdtPhiCorr

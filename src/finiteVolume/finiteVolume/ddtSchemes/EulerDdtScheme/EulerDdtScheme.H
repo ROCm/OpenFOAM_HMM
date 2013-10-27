@@ -176,7 +176,6 @@ tmp<surfaceScalarField> EulerDdtScheme<scalar>::fvcDdtUfCorr
     const GeometricField<scalar, fvsPatchField, surfaceMesh>& Uf
 );
 
-
 template<>
 tmp<surfaceScalarField> EulerDdtScheme<scalar>::fvcDdtPhiCorr
 (
@@ -184,6 +183,13 @@ tmp<surfaceScalarField> EulerDdtScheme<scalar>::fvcDdtPhiCorr
     const surfaceScalarField& phi
 );
 
+template<>
+tmp<surfaceScalarField> EulerDdtScheme<scalar>::fvcDdtUfCorr
+(
+    const volScalarField& rho,
+    const volScalarField& U,
+    const surfaceScalarField& Uf
+);
 
 template<>
 tmp<surfaceScalarField> EulerDdtScheme<scalar>::fvcDdtPhiCorr

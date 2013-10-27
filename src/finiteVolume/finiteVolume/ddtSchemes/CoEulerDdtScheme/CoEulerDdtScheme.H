@@ -198,7 +198,6 @@ tmp<surfaceScalarField> CoEulerDdtScheme<scalar>::fvcDdtUfCorr
     const GeometricField<scalar, fvsPatchField, surfaceMesh>& Uf
 );
 
-
 template<>
 tmp<surfaceScalarField> CoEulerDdtScheme<scalar>::fvcDdtPhiCorr
 (
@@ -206,6 +205,13 @@ tmp<surfaceScalarField> CoEulerDdtScheme<scalar>::fvcDdtPhiCorr
     const surfaceScalarField& phi
 );
 
+template<>
+tmp<surfaceScalarField> CoEulerDdtScheme<scalar>::fvcDdtUfCorr
+(
+    const volScalarField& rho,
+    const volScalarField& U,
+    const surfaceScalarField& Uf
+);
 
 template<>
 tmp<surfaceScalarField> CoEulerDdtScheme<scalar>::fvcDdtPhiCorr
