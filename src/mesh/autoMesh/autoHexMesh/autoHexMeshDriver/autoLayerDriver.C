@@ -2459,8 +2459,9 @@ void Foam::autoLayerDriver::mergePatchFacesUndo
     const dictionary& motionDict
 )
 {
-    // Clip to 30 degrees
-    scalar planarAngle = min(30.0, layerParams.featureAngle());
+    // Clip to 30 degrees. Not helpful!
+    //scalar planarAngle = min(30.0, layerParams.featureAngle());
+    scalar planarAngle = layerParams.featureAngle();
     scalar minCos = Foam::cos(degToRad(planarAngle));
 
     scalar concaveCos = Foam::cos(degToRad(layerParams.concaveAngle()));
