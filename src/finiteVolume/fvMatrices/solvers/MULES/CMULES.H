@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,67 +25,57 @@ Global
     MULES
 
 Description
-    MULES: Multidimensional universal limiter with explicit solution.
+    CMULES: Multidimensional universal limiter for
+    explicit corrected implicit solution.
 
     Solve a convective-only transport equation using an explicit universal
-    multi-dimensional limiter.
+    multi-dimensional limiter to correct an implicit conservative bounded
+    obtained using rigorously bounded schemes such as Euler-implicit in time
+    upwind in space.
 
     Parameters are the variable to solve, the normal convective flux and the
     actual explicit flux of the variable which is also used to return limited
     flux used in the bounded-solution.
 
 SourceFiles
-    MULES.C
+    CMULES.C
+    CMULESTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef MULES_H
-#define MULES_H
+#ifndef CMULES_H
+#define CMULES_H
 
-#include "volFields.H"
-#include "surfaceFieldsFwd.H"
-#include "primitiveFieldsFwd.H"
-#include "zeroField.H"
-#include "geometricOneField.H"
+#include "MULES.H"
+#include "EulerDdtScheme.H"
+#include "localEulerDdtScheme.H"
+#include "gaussConvectionScheme.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 namespace MULES
 {
 
-template<class RhoType, class SpType, class SuType>
-void explicitLTSSolve
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class RdeltaTType, class RhoType, class SpType, class SuType>
+void correct
 (
+    const RdeltaTType& rDeltaT,
     const RhoType& rho,
     volScalarField& psi,
-    const surfaceScalarField& phiBD,
-    surfaceScalarField& phiPsi,
+    const surfaceScalarField& phiCorr,
     const SpType& Sp,
-    const SuType& Su,
-    const scalar psiMax,
-    const scalar psiMin
-);
-
-void explicitLTSSolve
-(
-    volScalarField& psi,
-    const surfaceScalarField& phiBD,
-    surfaceScalarField& phiPsi,
-    const scalar psiMax,
-    const scalar psiMin
+    const SuType& Su
 );
 
 template<class RhoType, class SpType, class SuType>
-void implicitSolve
+void correct
 (
     const RhoType& rho,
-    volScalarField& gamma,
-    const surfaceScalarField& phi,
+    volScalarField& psi,
     surfaceScalarField& phiCorr,
     const SpType& Sp,
     const SuType& Su,
@@ -93,22 +83,42 @@ void implicitSolve
     const scalar psiMin
 );
 
-void implicitSolve
+void correct
 (
-    volScalarField& gamma,
-    const surfaceScalarField& phi,
+    volScalarField& psi,
     surfaceScalarField& phiCorr,
     const scalar psiMax,
     const scalar psiMin
 );
 
 template<class RhoType, class SpType, class SuType>
-void limiter
+void LTScorrect
+(
+    const RhoType& rho,
+    volScalarField& psi,
+    surfaceScalarField& phiCorr,
+    const SpType& Sp,
+    const SuType& Su,
+    const scalar psiMax,
+    const scalar psiMin
+);
+
+void LTScorrect
+(
+    volScalarField& psi,
+    surfaceScalarField& phiCorr,
+    const scalar psiMax,
+    const scalar psiMin
+);
+
+
+template<class RdeltaTType, class RhoType, class SpType, class SuType>
+void limiterCorr
 (
     scalarField& allLambda,
+    const RdeltaTType& rDeltaT,
     const RhoType& rho,
     const volScalarField& psi,
-    const surfaceScalarField& phiBD,
     const surfaceScalarField& phiCorr,
     const SpType& Sp,
     const SuType& Su,
@@ -117,16 +127,30 @@ void limiter
     const label nLimiterIter
 );
 
-} // End namespace MULES
+template<class RdeltaTType, class RhoType, class SpType, class SuType>
+void limitCorr
+(
+    const RdeltaTType& rDeltaT,
+    const RhoType& rho,
+    const volScalarField& psi,
+    surfaceScalarField& phiCorr,
+    const SpType& Sp,
+    const SuType& Su,
+    const scalar psiMax,
+    const scalar psiMin,
+    const label nLimiterIter
+);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace MULES
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "MULESTemplates.C"
+#   include "CMULESTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

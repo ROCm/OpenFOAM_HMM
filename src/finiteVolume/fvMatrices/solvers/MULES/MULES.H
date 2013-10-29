@@ -25,7 +25,7 @@ Global
     MULES
 
 Description
-    MULES: Multidimensional universal limiter with explicit solution.
+    MULES: Multidimensional universal limiter for explicit solution.
 
     Solve a convective-only transport equation using an explicit universal
     multi-dimensional limiter.
@@ -60,6 +60,17 @@ namespace MULES
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+template<class RdeltaTType, class RhoType, class SpType, class SuType>
+void explicitSolve
+(
+    const RdeltaTType& rDeltaT,
+    const RhoType& rho,
+    volScalarField& psi,
+    const surfaceScalarField& phiPsi,
+    const SpType& Sp,
+    const SuType& Su
+);
+
 template<class RhoType, class SpType, class SuType>
 void explicitSolve
 (
@@ -92,42 +103,34 @@ void explicitSolve
     const scalar psiMin
 );
 
-
 template<class RhoType, class SpType, class SuType>
-void correct
+void explicitLTSSolve
 (
     const RhoType& rho,
     volScalarField& psi,
-    const surfaceScalarField& phiCorr,
-    const SpType& Sp,
-    const SuType& Su
-);
-
-template<class RhoType, class SpType, class SuType>
-void correct
-(
-    const RhoType& rho,
-    volScalarField& psi,
-    surfaceScalarField& phiCorr,
+    const surfaceScalarField& phiBD,
+    surfaceScalarField& phiPsi,
     const SpType& Sp,
     const SuType& Su,
     const scalar psiMax,
     const scalar psiMin
 );
 
-void correct
+void explicitLTSSolve
 (
     volScalarField& psi,
-    surfaceScalarField& phiCorr,
+    const surfaceScalarField& phiBD,
+    surfaceScalarField& phiPsi,
     const scalar psiMax,
     const scalar psiMin
 );
 
 
-template<class RhoType, class SpType, class SuType>
+template<class RdeltaTType, class RhoType, class SpType, class SuType>
 void limiter
 (
     scalarField& allLambda,
+    const RdeltaTType& rDeltaT,
     const RhoType& rho,
     const volScalarField& psi,
     const surfaceScalarField& phiBD,
@@ -139,9 +142,10 @@ void limiter
     const label nLimiterIter
 );
 
-template<class RhoType, class SpType, class SuType>
+template<class RdeltaTType, class RhoType, class SpType, class SuType>
 void limit
 (
+    const RdeltaTType& rDeltaT,
     const RhoType& rho,
     const volScalarField& psi,
     const surfaceScalarField& phi,
@@ -155,38 +159,11 @@ void limit
 );
 
 
-template<class RhoType, class SpType, class SuType>
-void limiterCorr
-(
-    scalarField& allLambda,
-    const RhoType& rho,
-    const volScalarField& psi,
-    const surfaceScalarField& phiCorr,
-    const SpType& Sp,
-    const SuType& Su,
-    const scalar psiMax,
-    const scalar psiMin,
-    const label nLimiterIter
-);
-
-template<class RhoType, class SpType, class SuType>
-void limitCorr
-(
-    const RhoType& rho,
-    const volScalarField& psi,
-    surfaceScalarField& phiCorr,
-    const SpType& Sp,
-    const SuType& Su,
-    const scalar psiMax,
-    const scalar psiMin,
-    const label nLimiterIter
-);
-
-
 void limitSum(UPtrList<scalarField>& phiPsiCorrs);
 
 template<class SurfaceScalarFieldList>
 void limitSum(SurfaceScalarFieldList& phiPsiCorrs);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

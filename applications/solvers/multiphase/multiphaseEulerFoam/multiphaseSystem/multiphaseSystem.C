@@ -148,6 +148,7 @@ void Foam::multiphaseSystem::solveAlphas()
 
         MULES::limit
         (
+            1.0/mesh_.time().deltaT().value(),
             geometricOneField(),
             phase1,
             phi_,
