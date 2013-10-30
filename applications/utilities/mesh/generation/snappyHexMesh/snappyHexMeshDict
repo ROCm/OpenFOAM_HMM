@@ -304,11 +304,13 @@ addLayersControls
     // size of the refined cell outside layer (true) or absolute sizes (false).
     relativeSizes true;
 
-    // Layer thickness specification. This can be specified in one of four ways
+    // Layer thickness specification. This can be specified in one of following
+    // ways:
     // - expansionRatio and finalLayerThickness (cell nearest internal mesh)
     // - expansionRatio and firstLayerThickness (cell on surface)
     // - overall thickness and firstLayerThickness
     // - overall thickness and finalLayerThickness
+    // - overall thickness and expansionRatio
 
         // Expansion factor for layer mesh
         expansionRatio 1.0;

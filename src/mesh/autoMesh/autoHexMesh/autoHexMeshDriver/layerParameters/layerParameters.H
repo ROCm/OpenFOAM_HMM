@@ -64,13 +64,15 @@ public:
         //  - first and expansion ratio specified
         //  - final and total thickness specified
         //  - final and expansion ratio specified
+        //  - total thickness and expansion ratio specified
         enum layerSpecification
         {
             ILLEGAL,
             FIRST_AND_TOTAL,
             FIRST_AND_EXPANSION,
             FINAL_AND_TOTAL,
-            FINAL_AND_EXPANSION
+            FINAL_AND_EXPANSION,
+            TOTAL_AND_EXPANSION
         };
 
 
