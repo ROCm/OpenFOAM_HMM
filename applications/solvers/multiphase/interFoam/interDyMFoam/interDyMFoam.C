@@ -77,46 +77,56 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        scalar timeBeforeMeshUpdate = runTime.elapsedCpuTime();
-
-        mesh.update();
-
-        if (mesh.changing())
-        {
-            Info<< "Execution time for mesh.update() = "
-                << runTime.elapsedCpuTime() - timeBeforeMeshUpdate
-                << " s" << endl;
-
-            gh = g & mesh.C();
-            ghf = g & mesh.Cf();
-        }
-
-        if (mesh.changing() && correctPhi)
-        {
-            // Calculate absolute flux from the mapped surface velocity
-            phi = mesh.Sf() & Uf;
-
-            #include "correctPhi.H"
-
-            // Make the flux relative to the mesh motion
-            fvc::makeRelative(phi, U);
-
-            interface.correct();
-        }
-
-        if (mesh.changing() && checkMeshCourantNo)
-        {
-            #include "meshCourantNo.H"
-        }
-
-        twoPhaseProperties.correct();
-
-        #include "alphaEqnSubCycle.H"
-        interface.correct();
+        tmp<surfaceScalarField> tphiAlpha;
 
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())
         {
+            if (pimple.firstIter() || moveMeshOuterCorrectors)
+            {
+                scalar timeBeforeMeshUpdate = runTime.elapsedCpuTime();
+
+                mesh.update();
+
+                if (mesh.changing())
+                {
+                    Info<< "Execution time for mesh.update() = "
+                        << runTime.elapsedCpuTime() - timeBeforeMeshUpdate
+                        << " s" << endl;
+
+                    gh = g & mesh.C();
+                    ghf = g & mesh.Cf();
+                }
+
+                if (mesh.changing() && correctPhi)
+                {
+                    // Calculate absolute flux from the mapped surface velocity
+                    phi = mesh.Sf() & Uf;
+
+                    #include "correctPhi.H"
+
+                    // Make the flux relative to the mesh motion
+                    fvc::makeRelative(phi, U);
+
+                    interface.correct();
+                }
+
+                if (mesh.changing() && checkMeshCourantNo)
+                {
+                    #include "meshCourantNo.H"
+                }
+            }
+
+            #include "alphaControls.H"
+
+            if (pimple.firstIter() || alphaOuterCorrectors)
+            {
+                twoPhaseProperties.correct();
+
+                #include "alphaEqnSubCycle.H"
+                interface.correct();
+            }
+
             #include "UEqn.H"
 
             // --- Pressure corrector loop
