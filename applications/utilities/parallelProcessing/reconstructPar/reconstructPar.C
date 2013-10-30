@@ -720,6 +720,20 @@ int main(int argc, char *argv[])
                 PtrList<faceSet> faceSets(fSetNames.size());
                 PtrList<pointSet> pointSets(pSetNames.size());
 
+                Info<< "Reconstructing sets:" << endl;
+                if (cSetNames.size())
+                {
+                    Info<< "    cellSets " << cSetNames.sortedToc() << endl;
+                }
+                if (fSetNames.size())
+                {
+                    Info<< "    faceSets " << fSetNames.sortedToc() << endl;
+                }
+                if (pSetNames.size())
+                {
+                    Info<< "    pointSets " << pSetNames.sortedToc() << endl;
+                }
+
                 // Load sets
                 forAll(procMeshes.meshes(), procI)
                 {
