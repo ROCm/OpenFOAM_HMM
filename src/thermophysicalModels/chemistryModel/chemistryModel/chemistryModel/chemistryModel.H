@@ -39,7 +39,7 @@ SourceFiles
 #define chemistryModel_H
 
 #include "Reaction.H"
-#include "ODE.H"
+#include "ODESystem.H"
 #include "volFieldsFwd.H"
 #include "simpleMatrix.H"
 #include "DimensionedField.H"
@@ -60,7 +60,7 @@ template<class CompType, class ThermoType>
 class chemistryModel
 :
     public CompType,
-    public ODE
+    public ODESystem
 {
     // Private Member Functions
 

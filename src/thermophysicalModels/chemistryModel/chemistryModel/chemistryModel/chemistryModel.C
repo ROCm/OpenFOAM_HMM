@@ -36,7 +36,7 @@ Foam::chemistryModel<CompType, ThermoType>::chemistryModel
 )
 :
     CompType(mesh),
-    ODE(),
+    ODESystem(),
     Y_(this->thermo().composition().Y()),
     reactions_
     (

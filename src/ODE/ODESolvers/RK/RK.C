@@ -54,7 +54,7 @@ const scalar
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::RK::RK(const ODE& ode)
+Foam::RK::RK(const ODESystem& ode)
 :
     ODESolver(ode),
     yTemp_(n_, 0.0),
@@ -72,7 +72,7 @@ Foam::RK::RK(const ODE& ode)
 
 void Foam::RK::solve
 (
-    const ODE& ode,
+    const ODESystem& ode,
     const scalar x,
     const scalarField& y,
     const scalarField& dydx,
@@ -142,7 +142,7 @@ void Foam::RK::solve
 
 void Foam::RK::solve
 (
-    const ODE& ode,
+    const ODESystem& ode,
     scalar& x,
     scalarField& y,
     scalarField& dydx,
