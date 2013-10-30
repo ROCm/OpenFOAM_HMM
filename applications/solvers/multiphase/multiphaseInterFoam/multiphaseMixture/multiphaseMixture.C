@@ -87,14 +87,14 @@ Foam::multiphaseMixture::multiphaseMixture
     (
         IOobject
         (
-            "rho*phi",
+            "rhoPhi",
             mesh_.time().timeName(),
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("rho*phi", dimMass/dimTime, 0.0)
+        dimensionedScalar("rhoPhi", dimMass/dimTime, 0.0)
     ),
 
     alphas_

@@ -129,6 +129,9 @@ public:
             //- Helper function to identify when to store the intial residuals
             inline bool storeInitialResiduals() const;
 
+            //- Helper function to identify first PIMPLE (outer) iteration
+            inline bool firstIter() const;
+
             //- Helper function to identify final PIMPLE (outer) iteration
             inline bool finalIter() const;
 
