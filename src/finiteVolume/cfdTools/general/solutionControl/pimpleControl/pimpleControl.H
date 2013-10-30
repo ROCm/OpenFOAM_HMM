@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -128,6 +128,9 @@ public:
 
             //- Helper function to identify when to store the intial residuals
             inline bool storeInitialResiduals() const;
+
+            //- Helper function to identify first PIMPLE (outer) iteration
+            inline bool firstIter() const;
 
             //- Helper function to identify final PIMPLE (outer) iteration
             inline bool finalIter() const;

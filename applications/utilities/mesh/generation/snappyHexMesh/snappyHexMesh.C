@@ -1253,6 +1253,9 @@ int main(int argc, char *argv[])
     // Snap parameters
     const snapParameters snapParams(snapDict);
 
+    // Layer addition parameters
+    const layerParameters layerParams(layerDict, mesh.boundaryMesh());
+
 
     if (wantRefine)
     {
@@ -1345,9 +1348,6 @@ int main(int argc, char *argv[])
             globalToMasterPatch,
             globalToSlavePatch
         );
-
-        // Layer addition parameters
-        layerParameters layerParams(layerDict, mesh.boundaryMesh());
 
         // Use the maxLocalCells from the refinement parameters
         bool preBalance = returnReduce

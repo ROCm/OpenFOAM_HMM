@@ -62,13 +62,14 @@
     (
         IOobject
         (
-            "rho*phi",
+            "rhoPhi",
             runTime.timeName(),
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
-        rho1*phi
+        mesh,
+        dimensionedScalar("0", dimMass/dimTime, 0)
     );
 
 

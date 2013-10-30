@@ -120,6 +120,13 @@ class autoLayerDriver
                 const List<extrudeMode>&
             );
 
+            //- Average point wise data to face wise
+            static tmp<scalarField> avgPointData
+            (
+                const indirectPrimitivePatch&,
+                const scalarField& pointFld
+            );
+
             //- Check that primitivePatch is not multiply connected.
             //  Collect non-manifold points in pointSet.
             static void checkManifold
@@ -367,9 +374,22 @@ class autoLayerDriver
                 (
                     const polyMesh&,
                     const addPatchCellLayer&,
-                    boolList&,
-                    boolList&
+                    const scalarField& oldRealThickness,
+
+                    labelList& cellStatus,
+                    scalarField& faceRealThickness
                 );
+
+                //- Write cellSet,faceSet for layers
+                bool writeLayerData
+                (
+                    const fvMesh& mesh,
+                    const labelList& patchIDs,
+                    const labelList& cellNLayers,
+                    const scalarField& faceWantedThickness,
+                    const scalarField& faceRealThickness
+                ) const;
+
 
             // Mesh shrinking (to create space for layers)
 
