@@ -25,6 +25,7 @@ License
 
 #include "meshRefinement.H"
 #include "fvMesh.H"
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -112,11 +113,11 @@ T meshRefinement::gAverage
 (
     const polyMesh& mesh,
     const PackedBoolList& isMasterElem,
-    const labelList& meshPoints,
+    const labelList& meshElems,
     const UList<T>& values
 )
 {
-    if (values.size() != meshPoints.size())
+    if (values.size() != meshElems.size())
     {
         FatalErrorIn
         (
@@ -128,8 +129,8 @@ T meshRefinement::gAverage
             "    const UList<T>& values\n"
             ")\n"
         )   << "Number of elements in list " << values.size()
-            << " does not correspond to number of elements in meshPoints "
-            << meshPoints.size()
+            << " does not correspond to number of elements in meshElems "
+            << meshElems.size()
             << exit(FatalError);
     }
 
@@ -138,7 +139,7 @@ T meshRefinement::gAverage
 
     forAll(values, i)
     {
-        if (isMasterElem[meshPoints[i]])
+        if (isMasterElem[meshElems[i]])
         {
             sum += values[i];
             n++;
@@ -214,6 +215,53 @@ void meshRefinement::testSyncBoundaryFaceList
 
             bFaceI++;
         }
+    }
+}
+
+
+// Print list sorted by coordinates. Used for comparing non-parallel v.s.
+// parallel operation
+template<class T>
+void meshRefinement::collectAndPrint
+(
+    const UList<point>& points,
+    const UList<T>& data
+)
+{
+    globalIndex globalPoints(points.size());
+
+    pointField allPoints;
+    globalPoints.gather
+    (
+        Pstream::worldComm,
+        identity(Pstream::nProcs()),
+        points,
+        allPoints,
+        UPstream::msgType(),
+        Pstream::blocking
+    );
+
+    List<T> allData;
+    globalPoints.gather
+    (
+        Pstream::worldComm,
+        identity(Pstream::nProcs()),
+        data,
+        allData,
+        UPstream::msgType(),
+        Pstream::blocking
+    );
+
+
+    scalarField magAllPoints(mag(allPoints-point(-0.317, 0.117, 0.501)));
+
+    labelList visitOrder;
+    sortedOrder(magAllPoints, visitOrder);
+    forAll(visitOrder, i)
+    {
+        label allPointI = visitOrder[i];
+        Info<< allPoints[allPointI] << " : " << allData[allPointI]
+            << endl;
     }
 }
 

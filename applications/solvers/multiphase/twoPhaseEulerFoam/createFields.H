@@ -78,10 +78,6 @@
       - fvc::div(phi2)*U2
     );
 
-
-    Info<< "Calculating field g.h\n" << endl;
-    volScalarField gh("gh", g & mesh.C());
-
     volScalarField rAU1
     (
         IOobject

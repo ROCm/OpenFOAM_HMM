@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,6 +52,12 @@ const vector vector::max(VGREAT, VGREAT, VGREAT);
 
 template<>
 const vector vector::min(-VGREAT, -VGREAT, -VGREAT);
+
+template<>
+const vector vector::rootMax(ROOTVGREAT, ROOTVGREAT, ROOTVGREAT);
+
+template<>
+const vector vector::rootMin(-ROOTVGREAT, -ROOTVGREAT, -ROOTVGREAT);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

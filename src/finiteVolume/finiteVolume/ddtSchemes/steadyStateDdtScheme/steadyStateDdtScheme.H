@@ -175,7 +175,6 @@ tmp<surfaceScalarField> steadyStateDdtScheme<scalar>::fvcDdtUfCorr
     const GeometricField<scalar, fvsPatchField, surfaceMesh>& Uf
 );
 
-
 template<>
 tmp<surfaceScalarField> steadyStateDdtScheme<scalar>::fvcDdtPhiCorr
 (
@@ -183,6 +182,13 @@ tmp<surfaceScalarField> steadyStateDdtScheme<scalar>::fvcDdtPhiCorr
     const surfaceScalarField& phi
 );
 
+template<>
+tmp<surfaceScalarField> steadyStateDdtScheme<scalar>::fvcDdtUfCorr
+(
+    const volScalarField& rho,
+    const volScalarField& U,
+    const surfaceScalarField& Uf
+);
 
 template<>
 tmp<surfaceScalarField> steadyStateDdtScheme<scalar>::fvcDdtPhiCorr

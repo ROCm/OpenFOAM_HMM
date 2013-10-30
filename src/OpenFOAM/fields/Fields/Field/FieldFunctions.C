@@ -358,6 +358,59 @@ Type sum(const UList<Type>& f)
 
 TMP_UNARY_FUNCTION(Type, sum)
 
+template<class Type>
+Type maxMagSqr(const UList<Type>& f)
+{
+    if (f.size())
+    {
+        Type Max(f[0]);
+        TFOR_ALL_S_OP_FUNC_F_S
+        (
+            Type,
+            Max,
+            =,
+            maxMagSqrOp<Type>(),
+            Type,
+            f,
+            Type,
+            Max
+        )
+        return Max;
+    }
+    else
+    {
+        return pTraits<Type>::zero;
+    }
+}
+
+TMP_UNARY_FUNCTION(Type, maxMagSqr)
+
+template<class Type>
+Type minMagSqr(const UList<Type>& f)
+{
+    if (f.size())
+    {
+        Type Min(f[0]);
+        TFOR_ALL_S_OP_FUNC_F_S
+        (
+            Type,
+            Min,
+            =,
+            minMagSqrOp<Type>(),
+            Type,
+            f,
+            Type,
+            Min
+        )
+        return Min;
+    }
+    else
+    {
+        return pTraits<Type>::rootMax;
+    }
+}
+
+TMP_UNARY_FUNCTION(Type, minMagSqr)
 
 template<class Type>
 scalar sumProd(const UList<Type>& f1, const UList<Type>& f2)
@@ -488,6 +541,8 @@ TMP_UNARY_FUNCTION(ReturnType, gFunc)
 G_UNARY_FUNCTION(Type, gMax, max, max)
 G_UNARY_FUNCTION(Type, gMin, min, min)
 G_UNARY_FUNCTION(Type, gSum, sum, sum)
+G_UNARY_FUNCTION(Type, gMaxMagSqr, maxMagSqr, maxMagSqr)
+G_UNARY_FUNCTION(Type, gMinMagSqr, minMagSqr, minMagSqr)
 G_UNARY_FUNCTION(scalar, gSumSqr, sumSqr, sum)
 G_UNARY_FUNCTION(scalar, gSumMag, sumMag, sum)
 G_UNARY_FUNCTION(Type, gSumCmptMag, sumCmptMag, sum)

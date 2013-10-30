@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,6 +36,7 @@ SourceFiles
 #define setsToFaceZone_H
 
 #include "topoSetSource.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,10 +57,13 @@ class setsToFaceZone
         static addToUsageTable usage_;
 
         //- Name of set to use
-        word faceSetName_;
+        const word faceSetName_;
 
         //- Name of set to use
-        word cellSetName_;
+        const word cellSetName_;
+
+        //- Whether cellSet is slave cells or master cells
+        const Switch flip_;
 
 public:
 
@@ -73,7 +77,8 @@ public:
         (
             const polyMesh& mesh,
             const word& faceSetName,
-            const word& cellSetName
+            const word& cellSetName,
+            const Switch& flip
         );
 
         //- Construct from dictionary

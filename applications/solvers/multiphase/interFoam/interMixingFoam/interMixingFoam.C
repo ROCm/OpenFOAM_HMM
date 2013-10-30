@@ -31,7 +31,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "MULES.H"
+#include "CMULES.H"
 #include "subCycle.H"
 #include "threePhaseMixture.H"
 #include "threePhaseInterfaceProperties.H"
@@ -74,16 +74,23 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        threePhaseProperties.correct();
-
-        #include "alphaEqnsSubCycle.H"
-        interface.correct();
-
-        #define twoPhaseProperties threePhaseProperties
+        tmp<surfaceScalarField> tphiAlpha;
 
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())
         {
+            #include "alphaControls.H"
+
+            if (pimple.firstIter() || alphaOuterCorrectors)
+            {
+                threePhaseProperties.correct();
+
+                #include "alphaEqnsSubCycle.H"
+                interface.correct();
+
+                #define twoPhaseProperties threePhaseProperties
+            }
+
             #include "UEqn.H"
 
             // --- Pressure corrector loop

@@ -910,6 +910,7 @@ void Foam::autoSnapDriver::detectNearSurfaces
     Info<< "Detecting near surfaces ..." << endl;
 
     const pointField& localPoints = pp.localPoints();
+    const labelList& meshPoints = pp.meshPoints();
     const refinementSurfaces& surfaces = meshRefiner_.surfaces();
     const fvMesh& mesh = meshRefiner_.mesh();
 
@@ -1220,6 +1221,7 @@ void Foam::autoSnapDriver::detectNearSurfaces
     }
 
 
+    const PackedBoolList isMasterPoint(syncTools::getMasterPoints(mesh));
     label nOverride = 0;
 
     // 1. All points to non-interface surfaces
@@ -1332,7 +1334,7 @@ void Foam::autoSnapDriver::detectNearSurfaces
                 }
             }
 
-            if (override)
+            if (override && isMasterPoint[meshPoints[pointI]])
             {
                 nOverride++;
             }
@@ -1398,8 +1400,6 @@ void Foam::autoSnapDriver::detectNearSurfaces
                 normal2
             );
 
-
-            label nOverride = 0;
 
             forAll(hit1, i)
             {
@@ -1472,7 +1472,7 @@ void Foam::autoSnapDriver::detectNearSurfaces
                     }
                 }
 
-                if (override)
+                if (override && isMasterPoint[meshPoints[pointI]])
                 {
                     nOverride++;
                 }
@@ -1690,7 +1690,13 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
             scalarField magDisp(mag(patchDisp));
 
             Info<< "Wanted displacement : average:"
-                << gSum(magDisp)/returnReduce(patchDisp.size(), sumOp<label>())
+                <<  meshRefinement::gAverage
+                    (
+                        mesh,
+                        syncTools::getMasterPoints(mesh),
+                        pp.meshPoints(),
+                        magDisp
+                    )
                 << " min:" << gMin(magDisp)
                 << " max:" << gMax(magDisp) << endl;
         }
@@ -2548,25 +2554,30 @@ void Foam::autoSnapDriver::doSnap
                 adaptPatchIDs
             )
         );
-        indirectPrimitivePatch& pp = ppPtr();
+
 
         // Distance to attract to nearest feature on surface
-        const scalarField snapDist(calcSnapDistance(mesh, snapParams, pp));
+        const scalarField snapDist(calcSnapDistance(mesh, snapParams, ppPtr()));
 
 
         // Construct iterative mesh mover.
         Info<< "Constructing mesh displacer ..." << endl;
         Info<< "Using mesh parameters " << motionDict << nl << endl;
 
-        const pointMesh& pMesh = pointMesh::New(mesh);
-
-        motionSmoother meshMover
+        autoPtr<motionSmoother> meshMoverPtr
         (
-            mesh,
-            pp,
-            adaptPatchIDs,
-            meshRefinement::makeDisplacementField(pMesh, adaptPatchIDs),
-            motionDict
+            new motionSmoother
+            (
+                mesh,
+                ppPtr(),
+                adaptPatchIDs,
+                meshRefinement::makeDisplacementField
+                (
+                    pointMesh::New(mesh),
+                    adaptPatchIDs
+                ),
+                motionDict
+            )
         );
 
 
@@ -2595,8 +2606,16 @@ void Foam::autoSnapDriver::doSnap
             snapParams,
             nInitErrors,
             baffles,
-            meshMover
+            meshMoverPtr()
         );
+
+
+
+        //- Only if in feature attraction mode:
+        // Nearest feature
+        vectorField patchAttraction;
+        // Constraints at feature
+        List<pointConstraint> patchConstraints;
 
 
         for (label iter = 0; iter < nFeatIter; iter++)
@@ -2604,6 +2623,77 @@ void Foam::autoSnapDriver::doSnap
             Info<< nl
                 << "Morph iteration " << iter << nl
                 << "-----------------" << endl;
+
+
+            //if (iter > 0 && iter == nFeatIter/2)
+            //{
+            //    Info<< "Splitting diagonal attractions" << endl;
+            //    const labelList& bFaces = ppPtr().addressing();
+            //
+            //    DynamicList<label> splitFaces(bFaces.size());
+            //    DynamicList<labelPair> splits(bFaces.size());
+            //
+            //    forAll(bFaces, faceI)
+            //    {
+            //        const labelPair split
+            //        (
+            //            findDiagonalAttraction
+            //            (
+            //                ppPtr(),
+            //                patchAttraction,
+            //                patchConstraints,
+            //                faceI
+            //            )
+            //        );
+            //
+            //        if (split != labelPair(-1, -1))
+            //        {
+            //            splitFaces.append(bFaces[faceI]);
+            //            splits.append(split);
+            //        }
+            //    }
+            //
+            //    autoPtr<mapPolyMesh> mapPtr = meshRefiner_.splitFaces
+            //    (
+            //        splitFaces,
+            //        splits
+            //    );
+            //
+            //    const labelList& faceMap = mapPtr().faceMap();
+            //    meshRefinement::updateList(faceMap, -1, duplicateFace);
+            //    const labelList& reverseFaceMap = mapPtr().reverseFaceMap();
+            //    forAll(baffles, i)
+            //    {
+            //        labelPair& baffle = baffles[i];
+            //        baffle.first() = reverseFaceMap[baffle.first()];
+            //        baffle.second() = reverseFaceMap[baffle.second()];
+            //    }
+            //
+            //    meshMoverPtr.clear();
+            //    ppPtr.clear();
+            //
+            //    ppPtr = meshRefinement::makePatch(mesh, adaptPatchIDs);
+            //    meshMoverPtr.reset
+            //    (
+            //        new motionSmoother
+            //        (
+            //            mesh,
+            //            ppPtr(),
+            //            adaptPatchIDs,
+            //            meshRefinement::makeDisplacementField
+            //            (
+            //                pointMesh::New(mesh),
+            //                adaptPatchIDs
+            //            ),
+            //            motionDict
+            //        )
+            //    );
+            //}
+
+
+            indirectPrimitivePatch& pp = ppPtr();
+            motionSmoother& meshMover = meshMoverPtr();
+
 
             // Calculate displacement at every patch point. Insert into
             // meshMover.
@@ -2652,7 +2742,9 @@ void Foam::autoSnapDriver::doSnap
                     scalar(iter+1)/nFeatIter,
                     snapDist,
                     disp,
-                    meshMover
+                    meshMover,
+                    patchAttraction,
+                    patchConstraints
                 );
             }
 

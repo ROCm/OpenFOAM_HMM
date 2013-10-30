@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,12 +56,14 @@ Foam::setsToFaceZone::setsToFaceZone
 (
     const polyMesh& mesh,
     const word& faceSetName,
-    const word& cellSetName
+    const word& cellSetName,
+    const Switch& flip
 )
 :
     topoSetSource(mesh),
     faceSetName_(faceSetName),
-    cellSetName_(cellSetName)
+    cellSetName_(cellSetName),
+    flip_(flip)
 {}
 
 
@@ -74,7 +76,8 @@ Foam::setsToFaceZone::setsToFaceZone
 :
     topoSetSource(mesh),
     faceSetName_(dict.lookup("faceSet")),
-    cellSetName_(dict.lookup("cellSet"))
+    cellSetName_(dict.lookup("cellSet")),
+    flip_(dict.lookupOrDefault("flip", false))
 {}
 
 
@@ -87,7 +90,8 @@ Foam::setsToFaceZone::setsToFaceZone
 :
     topoSetSource(mesh),
     faceSetName_(checkIs(is)),
-    cellSetName_(checkIs(is))
+    cellSetName_(checkIs(is)),
+    flip_(false)
 {}
 
 
@@ -136,7 +140,7 @@ void Foam::setsToFaceZone::applyToSet
 
                 if (!fzSet.found(faceI))
                 {
-                    bool flip = false;
+                    bool flipFace = false;
 
                     label own = mesh_.faceOwner()[faceI];
                     bool ownFound = cSet.found(own);
@@ -148,11 +152,11 @@ void Foam::setsToFaceZone::applyToSet
 
                         if (ownFound && !neiFound)
                         {
-                            flip = false;
+                            flipFace = false;
                         }
                         else if (!ownFound && neiFound)
                         {
-                            flip = true;
+                            flipFace = true;
                         }
                         else
                         {
@@ -174,11 +178,17 @@ void Foam::setsToFaceZone::applyToSet
                     }
                     else
                     {
-                        flip = !ownFound;
+                        flipFace = !ownFound;
+                    }
+
+
+                    if (flip_)
+                    {
+                        flipFace = !flipFace;
                     }
 
                     newAddressing.append(faceI);
-                    newFlipMap.append(flip);
+                    newFlipMap.append(flipFace);
                 }
             }
 

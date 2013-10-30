@@ -38,7 +38,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "MULES.H"
+#include "CMULES.H"
 #include "subCycle.H"
 #include "interfaceProperties.H"
 #include "incompressibleTwoPhaseMixture.H"
@@ -77,16 +77,26 @@ int main(int argc, char *argv[])
 
         #include "setrDeltaT.H"
 
-        twoPhaseProperties.correct();
-
-        #include "alphaEqnSubCycle.H"
-        interface.correct();
-
-        turbulence->correct();
+        tmp<surfaceScalarField> tphiAlpha;
 
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())
         {
+            #include "alphaControls.H"
+
+            if (pimple.firstIter() || alphaOuterCorrectors)
+            {
+                twoPhaseProperties.correct();
+
+                #define LTSSOLVE
+                #include "alphaEqnSubCycle.H"
+                #undef LTSSOLVE
+
+                interface.correct();
+            }
+
+            turbulence->correct();
+
             #include "UEqn.H"
 
             // --- Pressure corrector loop

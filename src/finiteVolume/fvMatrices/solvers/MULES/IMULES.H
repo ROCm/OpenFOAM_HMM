@@ -25,7 +25,14 @@ Global
     IMULES
 
 Description
-    IMULES: Multidimensional universal limiter with implicit solution.
+    IMULES: Multidimensional universal limiter for implicit solution.
+
+    Solve a convective-only transport equation using an explicit universal
+    multi-dimensional limiter applied to an implicit formulation requiring
+    iteration to guarantee boundedness.  The number of iterations required
+    to obtain boundedness increases with the Courant number of the simulation.
+
+    It may be more efficient to use CMULES.
 
 SourceFiles
     IMULES.C
