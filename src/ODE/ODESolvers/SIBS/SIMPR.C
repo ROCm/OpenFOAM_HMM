@@ -29,7 +29,7 @@ License
 
 void Foam::SIBS::SIMPR
 (
-    const ODE& ode,
+    const ODESystem& ode,
     const scalar xStart,
     const scalarField& y,
     const scalarField& dydx,

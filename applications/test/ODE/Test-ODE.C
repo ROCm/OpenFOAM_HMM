@@ -27,7 +27,7 @@ Description
 
 #include "argList.H"
 #include "IOmanip.H"
-#include "ODE.H"
+#include "ODESystem.H"
 #include "ODESolver.H"
 #include "RK.H"
 
@@ -37,7 +37,7 @@ using namespace Foam;
 
 class testODE
 :
-    public ODE
+    public ODESystem
 {
 
 public:
@@ -107,9 +107,13 @@ int main(int argc, char *argv[])
     argList::validArgs.append("ODESolver");
     argList args(argc, argv);
 
+    // Create the ODE system
     testODE ode;
+
+    // Create the selected ODE system solver
     autoPtr<ODESolver> odeSolver = ODESolver::New(args[1], ode);
 
+    // Initialise the ODE system fields
     scalar xStart = 1.0;
     scalarField yStart(ode.nEqns());
     yStart[0] = ::Foam::j0(xStart);
@@ -117,6 +121,7 @@ int main(int argc, char *argv[])
     yStart[2] = ::Foam::jn(2, xStart);
     yStart[3] = ::Foam::jn(3, xStart);
 
+    // Print the evolution of the solution and the time-step
     scalarField dyStart(ode.nEqns());
     ode.derivatives(xStart, yStart, dyStart);
 

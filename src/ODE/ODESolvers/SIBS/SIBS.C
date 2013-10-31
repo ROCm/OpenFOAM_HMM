@@ -47,7 +47,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::SIBS::SIBS(const ODE& ode)
+Foam::SIBS::SIBS(const ODESystem& ode)
 :
     ODESolver(ode),
     a_(iMaxX_, 0.0),
@@ -70,7 +70,7 @@ Foam::SIBS::SIBS(const ODE& ode)
 
 void Foam::SIBS::solve
 (
-    const ODE& ode,
+    const ODESystem& ode,
     scalar& x,
     scalarField& y,
     scalarField& dydx,

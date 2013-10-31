@@ -81,14 +81,14 @@ public:
     // Constructors
 
         //- Construct from ODE
-        RK(const ODE& ode);
+        RK(const ODESystem& ode);
 
 
     // Member Functions
 
         void solve
         (
-            const ODE& ode,
+            const ODESystem& ode,
             const scalar x,
             const scalarField& y,
             const scalarField& dydx,
@@ -100,7 +100,7 @@ public:
 
         void solve
         (
-            const ODE& ode,
+            const ODESystem& ode,
             scalar& x,
             scalarField& y,
             scalarField& dydx,

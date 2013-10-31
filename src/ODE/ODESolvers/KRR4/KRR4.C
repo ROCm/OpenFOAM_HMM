@@ -55,7 +55,7 @@ const scalar
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::KRR4::KRR4(const ODE& ode)
+Foam::KRR4::KRR4(const ODESystem& ode)
 :
     ODESolver(ode),
     yTemp_(n_, 0.0),
@@ -76,7 +76,7 @@ Foam::KRR4::KRR4(const ODE& ode)
 
 void Foam::KRR4::solve
 (
-    const ODE& ode,
+    const ODESystem& ode,
     scalar& x,
     scalarField& y,
     scalarField& dydx,
@@ -168,7 +168,7 @@ void Foam::KRR4::solve
             (
                 "void Foam::KRR4::solve"
                 "("
-                    "const ODE&, "
+                    "const ODESystem&, "
                     "scalar&, "
                     "scalarField&, "
                     "scalarField&, "
@@ -206,7 +206,7 @@ void Foam::KRR4::solve
     (
         "void Foam::KRR4::solve"
         "("
-            "const ODE&, "
+            "const ODESystem&, "
             "scalar&, "
             "scalarField&, "
             "scalarField&, "

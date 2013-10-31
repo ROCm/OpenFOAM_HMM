@@ -37,7 +37,7 @@ solidChemistryModel
 )
 :
     CompType(mesh),
-    ODE(),
+    ODESystem(),
     Ys_(this->solidThermo().composition().Y()),
     reactions_
     (

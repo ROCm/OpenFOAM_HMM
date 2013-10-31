@@ -36,7 +36,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::ODESolver::ODESolver(const ODE& ode)
+Foam::ODESolver::ODESolver(const ODESystem& ode)
 :
     n_(ode.nEqns()),
     yScale_(n_),
@@ -48,7 +48,7 @@ Foam::ODESolver::ODESolver(const ODE& ode)
 
 void Foam::ODESolver::solve
 (
-    const ODE& ode,
+    const ODESystem& ode,
     const scalar xStart,
     const scalar xEnd,
     scalarField& y,
@@ -102,7 +102,7 @@ void Foam::ODESolver::solve
     FatalErrorIn
     (
         "ODESolver::solve"
-        "(const ODE& ode, const scalar xStart, const scalar xEnd,"
+        "(const ODESystem& ode, const scalar xStart, const scalar xEnd,"
         "scalarField& yStart, const scalar eps, scalar& hEst) const"
     )   << "Too many integration steps"
         << exit(FatalError);
