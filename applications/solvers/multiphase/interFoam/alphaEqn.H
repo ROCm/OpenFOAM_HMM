@@ -6,7 +6,8 @@
     phic = min(interface.cAlpha()*phic, max(phic));
     surfaceScalarField phir(phic*interface.nHatf());
 
-    if (pimple.firstIter() && MULESCorr)
+    //***HGW if (pimple.firstIter() && MULESCorr)
+    if (MULESCorr)
     {
         fvScalarMatrix alpha1Eqn
         (
