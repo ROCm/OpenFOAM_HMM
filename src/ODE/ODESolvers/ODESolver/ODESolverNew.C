@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ License
 Foam::autoPtr<Foam::ODESolver> Foam::ODESolver::New
 (
     const Foam::word& ODESolverTypeName,
-    const Foam::ODE& ode
+    const Foam::ODESystem& ode
 )
 {
     Info<< "Selecting ODE solver " << ODESolverTypeName << endl;
@@ -42,7 +42,8 @@ Foam::autoPtr<Foam::ODESolver> Foam::ODESolver::New
     {
         FatalErrorIn
         (
-            "ODESolver::New(const word& ODESolverTypeName, const ODE& ode)"
+            "ODESolver::New"
+            "(const word& ODESolverTypeName, const ODESystem& ode)"
         )   << "Unknown ODESolver type "
             << ODESolverTypeName << nl << nl
             << "Valid ODESolvers are : " << endl

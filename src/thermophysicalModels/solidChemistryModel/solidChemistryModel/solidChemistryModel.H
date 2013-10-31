@@ -40,7 +40,7 @@ SourceFiles
 #define solidChemistryModel_H
 
 #include "Reaction.H"
-#include "ODE.H"
+#include "ODESystem.H"
 #include "volFieldsFwd.H"
 #include "DimensionedField.H"
 #include "simpleMatrix.H"
@@ -61,7 +61,7 @@ template<class CompType, class SolidThermo>
 class solidChemistryModel
 :
     public CompType,
-    public ODE
+    public ODESystem
 {
     // Private Member Functions
 

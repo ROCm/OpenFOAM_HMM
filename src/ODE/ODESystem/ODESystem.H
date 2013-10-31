@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,15 +22,15 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::ODE
+    Foam::ODESystem
 
 Description
-    Abstract base class for the ODE solvers.
+    Abstract base class for the systems of ordinary differential equations.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ODE_H
-#define ODE_H
+#ifndef ODESystem_H
+#define ODESystem_H
 
 #include "scalarField.H"
 #include "scalarMatrices.H"
@@ -41,30 +41,32 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class ODE Declaration
+                       Class ODESystem Declaration
 \*---------------------------------------------------------------------------*/
 
-class ODE
+class ODESystem
 {
 
 public:
 
     // Constructors
 
-        //- Construct null
-        ODE()
+        //- Construct null8
+        ODESystem()
         {}
 
 
     //- Destructor
-    virtual ~ODE()
+    virtual ~ODESystem()
     {}
 
 
     // Member Functions
 
+        //- Return the number of equations in the system
         virtual label nEqns() const = 0;
 
+        //- Calculate the derivatives in dydx
         virtual void derivatives
         (
             const scalar x,
@@ -72,7 +74,8 @@ public:
             scalarField& dydx
         ) const = 0;
 
-
+        //- Calculate the Jacobian of the system
+        //  Need by the stiff-system solvers
         virtual void jacobian
         (
             const scalar x,

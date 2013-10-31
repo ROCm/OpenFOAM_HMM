@@ -52,6 +52,7 @@ Description
 #include "fixedValuePointPatchFields.H"
 #include "calculatedPointPatchFields.H"
 #include "cyclicSlipPointPatchFields.H"
+#include "fixedValueFvPatchFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -107,6 +108,31 @@ void Foam::autoLayerDriver::dumpDisplacement
             illStr << "l " << vertI-1 << ' ' << vertI << nl;
         }
     }
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::autoLayerDriver::avgPointData
+(
+    const indirectPrimitivePatch& pp,
+    const scalarField& pointFld
+)
+{
+    tmp<scalarField> tfaceFld(new scalarField(pp.size(), 0.0));
+    scalarField& faceFld = tfaceFld();
+
+    forAll(pp.localFaces(), faceI)
+    {
+        const face& f = pp.localFaces()[faceI];
+        if (f.size())
+        {
+            forAll(f, fp)
+            {
+                faceFld[faceI] += pointFld[f[fp]];
+            }
+            faceFld[faceI] /= f.size();
+        }
+    }
+    return tfaceFld;
 }
 
 
@@ -2391,19 +2417,21 @@ Foam::label Foam::autoLayerDriver::countExtrusion
 }
 
 
-// Collect layer faces and layer cells into bools for ease of handling
+// Collect layer faces and layer cells into mesh fields for ease of handling
 void Foam::autoLayerDriver::getLayerCellsFaces
 (
     const polyMesh& mesh,
     const addPatchCellLayer& addLayer,
-    boolList& flaggedCells,
-    boolList& flaggedFaces
+    const scalarField& oldRealThickness,
+
+    labelList& cellNLayers,
+    scalarField& faceRealThickness
 )
 {
-    flaggedCells.setSize(mesh.nCells());
-    flaggedCells = false;
-    flaggedFaces.setSize(mesh.nFaces());
-    flaggedFaces = false;
+    cellNLayers.setSize(mesh.nCells());
+    cellNLayers = 0;
+    faceRealThickness.setSize(mesh.nFaces());
+    faceRealThickness = 0;
 
     // Mark all faces in the layer
     const labelListList& layerFaces = addLayer.layerFaces();
@@ -2415,24 +2443,192 @@ void Foam::autoLayerDriver::getLayerCellsFaces
     {
         const labelList& added = addedCells[oldPatchFaceI];
 
-        forAll(added, i)
+        const labelList& layer = layerFaces[oldPatchFaceI];
+
+        if (layer.size())
         {
-            flaggedCells[added[i]] = true;
+            forAll(added, i)
+            {
+                cellNLayers[added[i]] = layer.size()-1;
+            }
         }
     }
 
     forAll(layerFaces, oldPatchFaceI)
     {
         const labelList& layer = layerFaces[oldPatchFaceI];
+        const scalar realThickness = oldRealThickness[oldPatchFaceI];
 
         if (layer.size())
         {
-            for (label i = 1; i < layer.size()-1; i++)
+            // Layer contains both original boundary face and new boundary
+            // face so is nLayers+1
+            forAll(layer, i)
             {
-                flaggedFaces[layer[i]] = true;
+                faceRealThickness[layer[i]] = realThickness;
             }
         }
     }
+}
+
+
+bool Foam::autoLayerDriver::writeLayerData
+(
+    const fvMesh& mesh,
+    const labelList& patchIDs,
+    const labelList& cellNLayers,
+    const scalarField& faceWantedThickness,
+    const scalarField& faceRealThickness
+) const
+{
+    bool allOk = true;
+
+    {
+        label nAdded = 0;
+        forAll(cellNLayers, cellI)
+        {
+            if (cellNLayers[cellI] > 0)
+            {
+                nAdded++;
+            }
+        }
+        cellSet addedCellSet(mesh, "addedCells", nAdded);
+        forAll(cellNLayers, cellI)
+        {
+            if (cellNLayers[cellI] > 0)
+            {
+                addedCellSet.insert(cellI);
+            }
+        }
+        addedCellSet.instance() = meshRefiner_.timeName();
+        Info<< "Writing "
+            << returnReduce(addedCellSet.size(), sumOp<label>())
+            << " added cells to cellSet "
+            << addedCellSet.name() << endl;
+        bool ok = addedCellSet.write();
+        allOk = allOk & ok;
+    }
+    {
+        label nAdded = 0;
+        forAll(faceRealThickness, faceI)
+        {
+            if (faceRealThickness[faceI] > 0)
+            {
+                nAdded++;
+            }
+        }
+
+        faceSet layerFacesSet(mesh, "layerFaces", nAdded);
+        forAll(faceRealThickness, faceI)
+        {
+            if (faceRealThickness[faceI] > 0)
+            {
+                layerFacesSet.insert(faceI);
+            }
+        }
+        layerFacesSet.instance() = meshRefiner_.timeName();
+        Info<< "Writing "
+            << returnReduce(layerFacesSet.size(), sumOp<label>())
+            << " faces inside added layer to faceSet "
+            << layerFacesSet.name() << endl;
+        bool ok = layerFacesSet.write();
+        allOk = allOk & ok;
+    }
+    {
+        volScalarField fld
+        (
+            IOobject
+            (
+                "nSurfaceLayers",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            mesh,
+            dimensionedScalar("zero", dimless, 0),
+            fixedValueFvPatchScalarField::typeName
+        );
+        const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+        forAll(patchIDs, i)
+        {
+            label patchI = patchIDs[i];
+            const polyPatch& pp = pbm[patchI];
+            const labelList& faceCells = pp.faceCells();
+            scalarField pfld(faceCells.size());
+            forAll(faceCells, i)
+            {
+                pfld[i] = cellNLayers[faceCells[i]];
+            }
+            fld.boundaryField()[patchI] == pfld;
+        }
+        Info<< "Writing volScalarField " << fld.name()
+            << " with actual number of layers" << endl;
+        bool ok = fld.write();
+        allOk = allOk & ok;
+    }
+    {
+        volScalarField fld
+        (
+            IOobject
+            (
+                "wantedThickness",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            mesh,
+            dimensionedScalar("zero", dimless, 0),
+            fixedValueFvPatchScalarField::typeName
+        );
+        const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+        forAll(patchIDs, i)
+        {
+            label patchI = patchIDs[i];
+            fld.boundaryField()[patchI] == pbm[patchI].patchSlice
+            (
+                faceWantedThickness
+            );
+        }
+        Info<< "Writing volScalarField " << fld.name()
+            << " with wanted thickness" << endl;
+        bool ok = fld.write();
+        allOk = allOk & ok;
+    }
+    {
+        volScalarField fld
+        (
+            IOobject
+            (
+                "thickness",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            mesh,
+            dimensionedScalar("zero", dimless, 0),
+            fixedValueFvPatchScalarField::typeName
+        );
+        const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+        forAll(patchIDs, i)
+        {
+            label patchI = patchIDs[i];
+            fld.boundaryField()[patchI] == pbm[patchI].patchSlice
+            (
+                faceRealThickness
+            );
+        }
+        Info<< "Writing volScalarField " << fld.name()
+            << " with layer thickness" << endl;
+        bool ok = fld.write();
+        allOk = allOk & ok;
+    }
+    return allOk;
 }
 
 
@@ -2618,7 +2814,7 @@ void Foam::autoLayerDriver::addLayers
     labelList patchNLayers(pp().nPoints(), 0);
 
     // Ideal number of cells added
-    label nIdealAddedCells = 0;
+    label nIdealTotAddedCells = 0;
 
     // Whether to add edge for all pp.localPoints.
     List<extrudeMode> extrudeStatus(pp().nPoints(), EXTRUDE);
@@ -2637,7 +2833,7 @@ void Foam::autoLayerDriver::addLayers
             patchDisp,
             patchNLayers,
             extrudeStatus,
-            nIdealAddedCells
+            nIdealTotAddedCells
         );
 
         // Precalculate mesh edge labels for patch edges
@@ -2835,11 +3031,20 @@ void Foam::autoLayerDriver::addLayers
     // Saved old points
     pointField oldPoints(mesh.points());
 
-    // Last set of topology changes. (changing mesh clears out polyTopoChange)
+    // Current set of topology changes. (changing mesh clears out
+    // polyTopoChange)
     polyTopoChange savedMeshMod(mesh.boundaryMesh().size());
+    // Per cell 0 or number of layers in the cell column it is part of
+    labelList cellNLayers;
+    // Per face actual overall layer thickness
+    scalarField faceRealThickness;
+    // Per face wanted overall layer thickness
+    scalarField faceWantedThickness(mesh.nFaces(), 0.0);
+    {
+        UIndirectList<scalar>(faceWantedThickness, pp().addressing()) =
+            avgPointData(pp, thickness);
+    }
 
-    boolList flaggedCells;
-    boolList flaggedFaces;
 
     for (label iteration = 0; iteration < layerParams.nLayerIter(); iteration++)
     {
@@ -3088,9 +3293,22 @@ void Foam::autoLayerDriver::addLayers
         (
             newMesh,
             addLayer,
-            flaggedCells,
-            flaggedFaces
+            avgPointData(pp, mag(patchDisp))(), // current thickness
+
+            cellNLayers,
+            faceRealThickness
         );
+
+
+        // Count number of added cells
+        label nAddedCells = 0;
+        forAll(cellNLayers, cellI)
+        {
+            if (cellNLayers[cellI] > 0)
+            {
+                nAddedCells++;
+            }
+        }
 
 
         if (debug&meshRefinement::MESH)
@@ -3098,25 +3316,29 @@ void Foam::autoLayerDriver::addLayers
             Info<< "Writing layer mesh to time " << meshRefiner_.timeName()
                 << endl;
             newMesh.write();
-            cellSet addedCellSet
-            (
-                newMesh,
-                "addedCells",
-                findIndices(flaggedCells, true)
-            );
+
+            cellSet addedCellSet(newMesh," addedCells", nAddedCells);
+            forAll(cellNLayers, cellI)
+            {
+                if (cellNLayers[cellI] > 0)
+                {
+                    addedCellSet.insert(cellI);
+                }
+            }
             addedCellSet.instance() = meshRefiner_.timeName();
             Info<< "Writing "
                 << returnReduce(addedCellSet.size(), sumOp<label>())
-                << " added cells to cellSet "
-                << addedCellSet.name() << endl;
+                << " added cells to cellSet " << addedCellSet.name() << endl;
             addedCellSet.write();
 
-            faceSet layerFacesSet
-            (
-                newMesh,
-                "layerFaces",
-                findIndices(flaggedCells, true)
-            );
+            faceSet layerFacesSet(newMesh, "layerFaces", newMesh.nFaces()/100);
+            forAll(faceRealThickness, faceI)
+            {
+                if (faceRealThickness[faceI] > 0)
+                {
+                    layerFacesSet.insert(faceI);
+                }
+            }
             layerFacesSet.instance() = meshRefiner_.timeName();
             Info<< "Writing "
                 << returnReduce(layerFacesSet.size(), sumOp<label>())
@@ -3140,26 +3362,17 @@ void Foam::autoLayerDriver::addLayers
             extrudeStatus
         );
 
-        label nExtruded = countExtrusion(pp, extrudeStatus);
+        label nTotExtruded = countExtrusion(pp, extrudeStatus);
         label nTotFaces = returnReduce(pp().size(), sumOp<label>());
-        label nAddedCells = 0;
-        {
-            forAll(flaggedCells, cellI)
-            {
-                if (flaggedCells[cellI])
-                {
-                    nAddedCells++;
-                }
-            }
-            reduce(nAddedCells, sumOp<label>());
-        }
-        Info<< "Extruding " << nExtruded
+        label nTotAddedCells = returnReduce(nAddedCells, sumOp<label>());
+
+        Info<< "Extruding " << nTotExtruded
             << " out of " << nTotFaces
-            << " faces (" << 100.0*nExtruded/nTotFaces << "%)."
+            << " faces (" << 100.0*nTotExtruded/nTotFaces << "%)."
             << " Removed extrusion at " << nTotChanged << " faces."
             << endl
-            << "Added " << nAddedCells << " out of " << nIdealAddedCells
-            << " cells (" << 100.0*nAddedCells/nIdealAddedCells << "%)."
+            << "Added " << nTotAddedCells << " out of " << nIdealTotAddedCells
+            << " cells (" << 100.0*nTotAddedCells/nIdealTotAddedCells << "%)."
             << endl;
 
         if (nTotChanged == 0)
@@ -3217,6 +3430,8 @@ void Foam::autoLayerDriver::addLayers
 
     meshRefiner_.updateMesh(map, labelList(0));
 
+    // Update numbering of faceWantedThickness
+    meshRefinement::updateList(map().faceMap(), 0.0, faceWantedThickness);
 
     // Update numbering on baffles
     forAll(baffles, i)
@@ -3237,8 +3452,9 @@ void Foam::autoLayerDriver::addLayers
 
         autoPtr<mapPolyMesh> map = meshRefiner_.mergeBaffles(baffles);
 
-        inplaceReorder(map().reverseCellMap(), flaggedCells);
-        inplaceReorder(map().reverseFaceMap(), flaggedFaces);
+        inplaceReorder(map().reverseCellMap(), cellNLayers);
+        inplaceReorder(map().reverseFaceMap(), faceWantedThickness);
+        inplaceReorder(map().reverseFaceMap(), faceRealThickness);
 
         Info<< "Converted baffles in = "
             << meshRefiner_.mesh().time().cpuTimeIncrement()
@@ -3272,29 +3488,23 @@ void Foam::autoLayerDriver::addLayers
         );
 
         // Re-distribute flag of layer faces and cells
-        map().distributeCellData(flaggedCells);
-        map().distributeFaceData(flaggedFaces);
+        map().distributeCellData(cellNLayers);
+        map().distributeFaceData(faceWantedThickness);
+        map().distributeFaceData(faceRealThickness);
     }
 
 
-    // Write mesh
-    // ~~~~~~~~~~
+    // Write mesh data
+    // ~~~~~~~~~~~~~~~
 
-    cellSet addedCellSet(mesh, "addedCells", findIndices(flaggedCells, true));
-    addedCellSet.instance() = meshRefiner_.timeName();
-    Info<< "Writing "
-        << returnReduce(addedCellSet.size(), sumOp<label>())
-        << " added cells to cellSet "
-        << addedCellSet.name() << endl;
-    addedCellSet.write();
-
-    faceSet layerFacesSet(mesh, "layerFaces", findIndices(flaggedFaces, true));
-    layerFacesSet.instance() = meshRefiner_.timeName();
-    Info<< "Writing "
-        << returnReduce(layerFacesSet.size(), sumOp<label>())
-        << " faces inside added layer to faceSet "
-        << layerFacesSet.name() << endl;
-    layerFacesSet.write();
+    writeLayerData
+    (
+        mesh,
+        patchIDs,
+        cellNLayers,
+        faceWantedThickness,
+        faceRealThickness
+    );
 }
 
 

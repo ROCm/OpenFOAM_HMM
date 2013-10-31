@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Class
     Foam::ODESolver
 
 Description
-    Selection for ODE solver
+    Abstract base-class for ODE system solvers
 
 SourceFiles
     ODESolver.C
@@ -35,7 +35,7 @@ SourceFiles
 #ifndef ODESolver_H
 #define ODESolver_H
 
-#include "ODE.H"
+#include "ODESystem.H"
 #include "typeInfo.H"
 #include "autoPtr.H"
 
@@ -82,7 +82,7 @@ public:
             autoPtr,
             ODESolver,
             ODE,
-            (const ODE& ode),
+            (const ODESystem& ode),
             (ode)
         );
 
@@ -90,7 +90,7 @@ public:
     // Constructors
 
         //- Construct for given ODE
-        ODESolver(const ODE& ode);
+        ODESolver(const ODESystem& ode);
 
 
     // Selectors
@@ -99,7 +99,7 @@ public:
         static autoPtr<ODESolver> New
         (
             const word& ODESolverTypeName,
-            const ODE& ode
+            const ODESystem& ode
         );
 
 
@@ -112,7 +112,7 @@ public:
 
         virtual void solve
         (
-            const ODE& ode,
+            const ODESystem& ode,
             scalar& x,
             scalarField& y,
             scalarField& dydx,
@@ -126,7 +126,7 @@ public:
 
         virtual void solve
         (
-            const ODE& ode,
+            const ODESystem& ode,
             const scalar xStart,
             const scalar xEnd,
             scalarField& y,

@@ -88,14 +88,14 @@ public:
     // Constructors
 
         //- Construct from ODE
-        KRR4(const ODE& ode);
+        KRR4(const ODESystem& ode);
 
 
     // Member Functions
 
         void solve
         (
-            const ODE& ode,
+            const ODESystem& ode,
             scalar& x,
             scalarField& y,
             scalarField& dydx,
