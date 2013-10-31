@@ -17,7 +17,7 @@ FoamFile
 
 solvers
 {
-    cellDisplacement
+    "cellDisplacement.*"
     {
         solver          GAMG;
         tolerance       1e-5;
@@ -29,14 +29,24 @@ solvers
         mergeLevels     1;
     }
 
-    alpha.water
+    "alpha.water.*"
     {
         nAlphaCorr      1;
-        nAlphaSubCycles 3;
+        nAlphaSubCycles 1;
         cAlpha          1;
+
+        alphaOuterCorrectors  yes;
+
+        MULESCorr       yes;
+        nLimiterIter    5;
+
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-8;
+        relTol          0;
     }
 
-    pcorr
+    "pcorr.*"
     {
         solver          PCG;
         preconditioner
@@ -120,9 +130,11 @@ solvers
 PIMPLE
 {
     momentumPredictor no;
-    nCorrectors     2;
+    nOuterCorrectors 6;
+    nCorrectors      1;
     nNonOrthogonalCorrectors 0;
     correctPhi      yes;
+    moveMeshOuterCorrectors yes;
 }
 
 relaxationFactors
@@ -132,7 +144,7 @@ relaxationFactors
     }
     equations
     {
-        "(U|k|epsilon|omega|R|nuTilda).*" 1;
+        ".*" 1;
     }
 }
 
