@@ -56,7 +56,6 @@ protected:
     // Private data
 
         label n_;
-        mutable scalarField yScale_;
         mutable scalarField dydx_;
 
 
@@ -117,7 +116,6 @@ public:
             scalarField& y,
             scalarField& dydx,
             const scalar eps,
-            const scalarField& yScale,
             const scalar hTry,
             scalar& hDid,
             scalar& hNext

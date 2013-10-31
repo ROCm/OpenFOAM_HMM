@@ -75,7 +75,6 @@ void Foam::SIBS::solve
     scalarField& y,
     scalarField& dydx,
     const scalar eps,
-    const scalarField& yScale,
     const scalar hTry,
     scalar& hDid,
     scalar& hNext
@@ -164,7 +163,11 @@ void Foam::SIBS::solve
                 maxErr = SMALL;
                 for (register label i=0; i<n_; i++)
                 {
-                    maxErr = max(maxErr, mag(yErr_[i]/yScale[i]));
+                    maxErr = max
+                    (
+                        maxErr,
+                        mag(yErr_[i])/(mag(yTemp_[i]) + SMALL)
+                    );
                 }
                 maxErr /= eps;
                 km = k - 1;

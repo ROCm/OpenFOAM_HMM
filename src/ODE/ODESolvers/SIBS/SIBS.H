@@ -122,7 +122,6 @@ public:
             scalarField& y,
             scalarField& dydx,
             const scalar eps,
-            const scalarField& yScale,
             const scalar hTry,
             scalar& hDid,
             scalar& hNext

@@ -39,7 +39,6 @@ namespace Foam
 Foam::ODESolver::ODESolver(const ODESystem& ode)
 :
     n_(ode.nEqns()),
-    yScale_(n_),
     dydx_(n_)
 {}
 
@@ -67,11 +66,6 @@ void Foam::ODESolver::solve
     {
         ode.derivatives(x, y, dydx_);
 
-        for (label i=0; i<n_; i++)
-        {
-            yScale_[i] = mag(y[i]) + mag(dydx_[i]*h) + SMALL;
-        }
-
         if ((x + h - xEnd)*(x + h - xStart) > 0.0)
         {
             h = xEnd - x;
@@ -80,7 +74,7 @@ void Foam::ODESolver::solve
 
         hNext = 0;
         scalar hDid;
-        solve(ode, x, y, dydx_, eps, yScale_, h, hDid, hNext);
+        solve(ode, x, y, dydx_, eps, h, hDid, hNext);
 
         if ((x - xEnd)*(xEnd - xStart) >= 0.0)
         {

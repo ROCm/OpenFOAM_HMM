@@ -29,7 +29,6 @@ Description
 #include "IOmanip.H"
 #include "ODESystem.H"
 #include "ODESolver.H"
-#include "RK.H"
 
 using namespace Foam;
 
@@ -137,11 +136,10 @@ int main(int argc, char *argv[])
         scalarField y(yStart);
         scalarField dydx(dyStart);
 
-        scalarField yScale(ode.nEqns(), 1.0);
         scalar hEst = 0.6;
         scalar hDid, hNext;
 
-        odeSolver->solve(ode, x, y, dydx, eps, yScale, hEst, hDid, hNext);
+        odeSolver->solve(ode, x, y, dydx, eps, hEst, hDid, hNext);
 
         Info<< scientific << setw(13) << eps;
         Info<< fixed << setw(11) << hEst;

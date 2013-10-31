@@ -22,19 +22,27 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::RK
+    Foam::adaptiveSolver
 
 Description
-    Runge-Kutta ODE solver
+    5th Order Cash-Karp Runge-Kutta ODE solver
+
+    References:
+    \verbatim
+        "A variable order Runge-Kutta method for initial value problems
+         with rapidly varying right-hand sides"
+        Cash, J.R.,
+        Karp, A.H.
+        ACM Transactions on Mathematical Software, vol. 16, 1990, pp. 201–222.
+    \endverbatim
 
 SourceFiles
-    RKCK.C
-    RKQS.C
+    adaptiveSolver.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef RK_H
-#define RK_H
+#ifndef adaptiveSolver_H
+#define adaptiveSolver_H
 
 #include "ODESolver.H"
 
@@ -44,60 +52,56 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class RK Declaration
+                           Class adaptiveSolver Declaration
 \*---------------------------------------------------------------------------*/
 
-class RK
-:
-    public ODESolver
+class adaptiveSolver
 {
     // Private data
-        static const scalar safety, pGrow, pShrink, errCon;
 
-        static const scalar
-            a2, a3, a4, a5, a6,
-            b21, b31, b32, b41, b42, b43,
-            b51, b52, b53, b54, b61, b62, b63, b64, b65,
-            c1, c3, c4, c6,
-            dc1, dc3, dc4, dc5, dc6;
-
+        //- Step-size adjustment controls
+        static const scalar safeScale, alphaInc, alphaDec, minScale, maxScale;
 
         mutable scalarField yTemp_;
-        mutable scalarField ak2_;
-        mutable scalarField ak3_;
-        mutable scalarField ak4_;
-        mutable scalarField ak5_;
-        mutable scalarField ak6_;
 
-        mutable scalarField yErr_;
-        mutable scalarField yTemp2_;
 
 public:
 
-    //- Runtime type information
-    TypeName("RK");
-
-
     // Constructors
 
-        //- Construct from ODE
-        RK(const ODESystem& ode);
+        //- Construct from ODESystem
+        adaptiveSolver(const ODESystem& ode);
+
+
+    //- Destructor
+    virtual ~adaptiveSolver()
+    {}
 
 
     // Member Functions
 
-        void solve
+        //- Return the nomalized scalar error
+        scalar normalizeError
         (
-            const ODESystem& ode,
-            const scalar x,
+            const scalar eps,
+            const scalarField& y0,
             const scalarField& y,
-            const scalarField& dydx,
-            const scalar h,
-            scalarField& yout,
-            scalarField& yerr
+            const scalarField& err
         ) const;
 
+        //- Solve a single step dx and return the error
+        virtual scalar solve
+        (
+            const ODESystem& ode,
+            const scalar x0,
+            const scalarField& y0,
+            const scalarField& dydx0,
+            const scalar dx,
+            scalarField& y,
+            const scalar eps
+        ) const = 0;
 
+        //- Solve the ODE system and the update the state
         void solve
         (
             const ODESystem& ode,
@@ -105,10 +109,9 @@ public:
             scalarField& y,
             scalarField& dydx,
             const scalar eps,
-            const scalarField& yScale,
-            const scalar hTry,
-            scalar& hDid,
-            scalar& hNext
+            const scalar dxTry,
+            scalar& dxDid,
+            scalar& dxNext
         ) const;
 };
 
