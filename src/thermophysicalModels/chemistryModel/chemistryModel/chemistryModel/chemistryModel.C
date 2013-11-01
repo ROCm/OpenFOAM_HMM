@@ -310,10 +310,7 @@ void Foam::chemistryModel<CompType, ThermoType>::derivatives
     }
     dT /= rho*cp;
 
-    // limit the time-derivative, this is more stable for the ODE
-    // solver when calculating the allowed time step
-    const scalar dTLimited = min(500.0, mag(dT));
-    dcdt[nSpecie_] = -dT*dTLimited/(mag(dT) + 1.0e-10);
+    dcdt[nSpecie_] = -dT;
 
     // dp/dt = ...
     dcdt[nSpecie_ + 1] = 0.0;
@@ -743,7 +740,7 @@ Foam::scalar Foam::chemistryModel<CompType, ThermoType>::solve
             RR_[i][celli] = (c[i] - c0[i])*specieThermo_[i].W()/deltaT[celli];
         }
     }
-
+    Info << "deltaTMin " << deltaTMin  << endl;
     return deltaTMin;
 }
 
