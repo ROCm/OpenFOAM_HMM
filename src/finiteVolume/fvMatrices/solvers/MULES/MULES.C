@@ -48,19 +48,21 @@ void Foam::MULES::explicitSolve
 }
 
 
-void Foam::MULES::correct
+void Foam::MULES::explicitLTSSolve
 (
     volScalarField& psi,
-    surfaceScalarField& phiPsiCorr,
+    const surfaceScalarField& phi,
+    surfaceScalarField& phiPsi,
     const scalar psiMax,
     const scalar psiMin
 )
 {
-    correct
+    explicitLTSSolve
     (
         geometricOneField(),
         psi,
-        phiPsiCorr,
+        phi,
+        phiPsi,
         zeroField(), zeroField(),
         psiMax, psiMin
     );

@@ -542,8 +542,11 @@ public:
             //- Compact maps. Gets per field a bool whether it is used (locally)
             //  and works out itself what this side and sender side can remove
             //  from maps.
-            void compact(const boolList& elemIsUsed, const int tag);
-
+            void compact
+            (
+                const boolList& elemIsUsed,
+                const int tag = UPstream::msgType()
+            );
 
             //- Distribute data. Note:schedule only used for Pstream::scheduled
             //  for now, all others just use send-to-all, receive-from-all.

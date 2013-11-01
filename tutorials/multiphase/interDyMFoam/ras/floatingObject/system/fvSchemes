@@ -27,7 +27,7 @@ gradSchemes
 
 divSchemes
 {
-    div(rho*phi,U)  Gauss vanLeerV;
+    div(rhoPhi,U)  Gauss vanLeerV;
     div(phi,alpha)  Gauss vanLeer;
     div(phirb,alpha) Gauss interfaceCompression;
     div(phi,k)      Gauss upwind;
@@ -55,7 +55,7 @@ fluxRequired
     default         no;
     p_rgh;
     pcorr;
-    alpha;
+    alpha.water;
 }
 
 

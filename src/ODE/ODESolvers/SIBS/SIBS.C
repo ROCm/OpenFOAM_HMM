@@ -47,7 +47,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::SIBS::SIBS(const ODE& ode)
+Foam::SIBS::SIBS(const ODESystem& ode)
 :
     ODESolver(ode),
     a_(iMaxX_, 0.0),
@@ -70,12 +70,11 @@ Foam::SIBS::SIBS(const ODE& ode)
 
 void Foam::SIBS::solve
 (
-    const ODE& ode,
+    const ODESystem& ode,
     scalar& x,
     scalarField& y,
     scalarField& dydx,
     const scalar eps,
-    const scalarField& yScale,
     const scalar hTry,
     scalar& hDid,
     scalar& hNext
@@ -164,7 +163,11 @@ void Foam::SIBS::solve
                 maxErr = SMALL;
                 for (register label i=0; i<n_; i++)
                 {
-                    maxErr = max(maxErr, mag(yErr_[i]/yScale[i]));
+                    maxErr = max
+                    (
+                        maxErr,
+                        mag(yErr_[i])/(mag(yTemp_[i]) + SMALL)
+                    );
                 }
                 maxErr /= eps;
                 km = k - 1;

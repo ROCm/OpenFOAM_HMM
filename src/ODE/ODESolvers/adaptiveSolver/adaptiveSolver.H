@@ -22,18 +22,29 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::ODE
+    Foam::adaptiveSolver
 
 Description
-    Abstract base class for the ODE solvers.
+    5th Order Cash-Karp Runge-Kutta ODE solver
+
+    References:
+    \verbatim
+        "A variable order Runge-Kutta method for initial value problems
+         with rapidly varying right-hand sides"
+        Cash, J.R.,
+        Karp, A.H.
+        ACM Transactions on Mathematical Software, vol. 16, 1990, pp. 201–222.
+    \endverbatim
+
+SourceFiles
+    adaptiveSolver.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ODE_H
-#define ODE_H
+#ifndef adaptiveSolver_H
+#define adaptiveSolver_H
 
-#include "scalarField.H"
-#include "scalarMatrices.H"
+#include "ODESolver.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -41,45 +52,67 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class ODE Declaration
+                           Class adaptiveSolver Declaration
 \*---------------------------------------------------------------------------*/
 
-class ODE
+class adaptiveSolver
 {
+    // Private data
+
+        //- Step-size adjustment controls
+        static const scalar safeScale, alphaInc, alphaDec, minScale, maxScale;
+
+        mutable scalarField yTemp_;
+
 
 public:
 
     // Constructors
 
-        //- Construct null
-        ODE()
-        {}
+        //- Construct from ODESystem
+        adaptiveSolver(const ODESystem& ode);
 
 
     //- Destructor
-    virtual ~ODE()
+    virtual ~adaptiveSolver()
     {}
 
 
     // Member Functions
 
-        virtual label nEqns() const = 0;
-
-        virtual void derivatives
+        //- Return the nomalized scalar error
+        scalar normalizeError
         (
-            const scalar x,
+            const scalar eps,
+            const scalarField& y0,
             const scalarField& y,
-            scalarField& dydx
+            const scalarField& err
+        ) const;
+
+        //- Solve a single step dx and return the error
+        virtual scalar solve
+        (
+            const ODESystem& ode,
+            const scalar x0,
+            const scalarField& y0,
+            const scalarField& dydx0,
+            const scalar dx,
+            scalarField& y,
+            const scalar eps
         ) const = 0;
 
-
-        virtual void jacobian
+        //- Solve the ODE system and the update the state
+        void solve
         (
-            const scalar x,
-            const scalarField& y,
-            scalarField& dfdx,
-            scalarSquareMatrix& dfdy
-        ) const = 0;
+            const ODESystem& ode,
+            scalar& x,
+            scalarField& y,
+            scalarField& dydx,
+            const scalar eps,
+            const scalar dxTry,
+            scalar& dxDid,
+            scalar& dxNext
+        ) const;
 };
 
 

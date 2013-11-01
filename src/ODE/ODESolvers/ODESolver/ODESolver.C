@@ -36,10 +36,9 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::ODESolver::ODESolver(const ODE& ode)
+Foam::ODESolver::ODESolver(const ODESystem& ode)
 :
     n_(ode.nEqns()),
-    yScale_(n_),
     dydx_(n_)
 {}
 
@@ -48,7 +47,7 @@ Foam::ODESolver::ODESolver(const ODE& ode)
 
 void Foam::ODESolver::solve
 (
-    const ODE& ode,
+    const ODESystem& ode,
     const scalar xStart,
     const scalar xEnd,
     scalarField& y,
@@ -67,11 +66,6 @@ void Foam::ODESolver::solve
     {
         ode.derivatives(x, y, dydx_);
 
-        for (label i=0; i<n_; i++)
-        {
-            yScale_[i] = mag(y[i]) + mag(dydx_[i]*h) + SMALL;
-        }
-
         if ((x + h - xEnd)*(x + h - xStart) > 0.0)
         {
             h = xEnd - x;
@@ -80,7 +74,7 @@ void Foam::ODESolver::solve
 
         hNext = 0;
         scalar hDid;
-        solve(ode, x, y, dydx_, eps, yScale_, h, hDid, hNext);
+        solve(ode, x, y, dydx_, eps, h, hDid, hNext);
 
         if ((x - xEnd)*(xEnd - xStart) >= 0.0)
         {
@@ -102,7 +96,7 @@ void Foam::ODESolver::solve
     FatalErrorIn
     (
         "ODESolver::solve"
-        "(const ODE& ode, const scalar xStart, const scalar xEnd,"
+        "(const ODESystem& ode, const scalar xStart, const scalar xEnd,"
         "scalarField& yStart, const scalar eps, scalar& hEst) const"
     )   << "Too many integration steps"
         << exit(FatalError);

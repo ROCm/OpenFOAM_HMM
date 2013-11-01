@@ -22,34 +22,27 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::KRR4
+    Foam::RKCK5
 
 Description
-    4th Order Kaps Rentrop Rosenbrock stiff ODE solver
+    5th Order Cash-Karp Runge-Kutta ODE solver
 
     References:
     \verbatim
-        "Generalized Runge-Kutta methods of order four with stepsize control
-         for stiff ordinary differential equations"
-        Kaps, P.,
-        Rentrop, P.,
-        Numerische Thematic, vol. 33, 1979, pp. 55–68.
-    \endverbatim
-
-    Constants from:
-    \verbatim
-        "Implementation of Rosenbrock Methods"
-        Shampine, L. F.,
-        ACM Transactions on Mathematical Software, vol. 8, 1982, pp. 93–113.
+        "A variable order Runge-Kutta method for initial value problems
+         with rapidly varying right-hand sides"
+        Cash, J.R.,
+        Karp, A.H.
+        ACM Transactions on Mathematical Software, vol. 16, 1990, pp. 201–222.
     \endverbatim
 
 SourceFiles
-    KRR4.C
+    RKCK5.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef KRR4_H
-#define KRR4_H
+#ifndef RKCK5_H
+#define RKCK5_H
 
 #include "ODESolver.H"
 #include "adaptiveSolver.H"
@@ -60,46 +53,46 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class KRR4 Declaration
+                           Class RKCK5 Declaration
 \*---------------------------------------------------------------------------*/
 
-class KRR4
+class RKCK5
 :
     public ODESolver,
     public adaptiveSolver
 {
     // Private data
 
-        mutable scalarField g1_;
-        mutable scalarField g2_;
-        mutable scalarField g3_;
-        mutable scalarField g4_;
-        mutable scalarField err_;
-        mutable scalarField dfdx_;
-        mutable scalarSquareMatrix dfdy_;
-        mutable scalarSquareMatrix a_;
-        mutable labelList pivotIndices_;
-
+        //- RKCK Constants
         static const scalar
-            gamma,
-            a21, a31, a32,
-            c21, c31, c32, c41, c42, c43,
-            b1, b2, b3, b4,
-            e1, e2, e3, e4,
-            c1X, c2X, c3X, c4X,
-            a2X, a3X;
+            a2, a3, a4, a5, a6,
+            b21, b31, b32, b41, b42, b43,
+            b51, b52, b53, b54, b61, b62, b63, b64, b65,
+            c1, c3, c4, c6,
+            dc1, dc3, dc4, dc5, dc6;
+
+        // Temporary fields
+        mutable scalarField yTemp_;
+        mutable scalarField k2_;
+        mutable scalarField k3_;
+        mutable scalarField k4_;
+        mutable scalarField k5_;
+        mutable scalarField k6_;
+
+        //- Error-estimate field
+        mutable scalarField err_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("KRR4");
+    TypeName("RKCK5");
 
 
     // Constructors
 
         //- Construct from ODE
-        KRR4(const ODESystem& ode);
+        RKCK5(const ODESystem& ode);
 
 
     // Member Functions

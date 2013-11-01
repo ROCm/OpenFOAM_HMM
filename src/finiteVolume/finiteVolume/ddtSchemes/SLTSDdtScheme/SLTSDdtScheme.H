@@ -199,7 +199,6 @@ tmp<surfaceScalarField> SLTSDdtScheme<scalar>::fvcDdtUfCorr
     const GeometricField<scalar, fvsPatchField, surfaceMesh>& Uf
 );
 
-
 template<>
 tmp<surfaceScalarField> SLTSDdtScheme<scalar>::fvcDdtPhiCorr
 (
@@ -207,6 +206,13 @@ tmp<surfaceScalarField> SLTSDdtScheme<scalar>::fvcDdtPhiCorr
     const surfaceScalarField& phi
 );
 
+template<>
+tmp<surfaceScalarField> SLTSDdtScheme<scalar>::fvcDdtUfCorr
+(
+    const volScalarField& rho,
+    const volScalarField& U,
+    const surfaceScalarField& Uf
+);
 
 template<>
 tmp<surfaceScalarField> SLTSDdtScheme<scalar>::fvcDdtPhiCorr

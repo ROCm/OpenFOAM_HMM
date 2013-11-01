@@ -235,6 +235,12 @@ Foam::layerParameters::layerParameters
         Info<< "Layer thickness specified as final layer and expansion ratio."
             << endl;
     }
+    else if (haveTotal && haveExp)
+    {
+        layerSpec_ = TOTAL_AND_EXPANSION;
+        Info<< "Layer thickness specified as overall thickness"
+            << " and expansion ratio." << endl;
+    }
 
 
     if (layerSpec_ == ILLEGAL || nSpec != 2)
@@ -253,7 +259,9 @@ Foam::layerParameters::layerParameters
             << "    final layer thickness ('finalLayerThickness')"
             << " and expansion ratio ('expansionRatio') or" << nl
             << "    final layer thickness ('finalLayerThickness')"
-            << " and overall thickness ('thickness')"
+            << " and overall thickness ('thickness') or" << nl
+            << "    overall thickness ('thickness')"
+            << " and expansion ratio ('expansionRatio'"
             << exit(FatalIOError);
     }
 
@@ -354,6 +362,19 @@ Foam::layerParameters::layerParameters
                             );
                         break;
 
+                        case TOTAL_AND_EXPANSION:
+                            layerDict.readIfPresent
+                            (
+                                "thickness",
+                                thickness_[patchI]
+                            );
+                            layerDict.readIfPresent
+                            (
+                                "expansionRatio",
+                                expansionRatio_[patchI]
+                            );
+                        break;
+
                         default:
                             FatalIOErrorIn
                             (
@@ -390,6 +411,7 @@ Foam::scalar Foam::layerParameters::layerThickness
     {
         case FIRST_AND_TOTAL:
         case FINAL_AND_TOTAL:
+        case TOTAL_AND_EXPANSION:
         {
             return totalThickness;
         }
@@ -450,6 +472,7 @@ Foam::scalar Foam::layerParameters::layerExpansionRatio
     {
         case FIRST_AND_EXPANSION:
         case FINAL_AND_EXPANSION:
+        case TOTAL_AND_EXPANSION:
         {
             return expansionRatio;
         }
@@ -521,6 +544,18 @@ Foam::scalar Foam::layerParameters::firstLayerThickness
                 expansionRatio
             );
             return finalLayerThickess/pow(r, nLayers-1);
+        }
+        break;
+
+        case TOTAL_AND_EXPANSION:
+        {
+            scalar r = finalLayerThicknessRatio
+            (
+                nLayers,
+                expansionRatio
+            );
+            scalar finalThickness = r*totalThickness;
+            return finalThickness/pow(expansionRatio, nLayers-1);
         }
         break;
 

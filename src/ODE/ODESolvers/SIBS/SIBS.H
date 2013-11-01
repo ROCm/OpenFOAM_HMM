@@ -78,7 +78,7 @@ class SIBS
 
         void SIMPR
         (
-            const ODE& ode,
+            const ODESystem& ode,
             const scalar xStart,
             const scalarField& y,
             const scalarField& dydx,
@@ -110,19 +110,18 @@ public:
     // Constructors
 
         //- Construct from ODE
-        SIBS(const ODE& ode);
+        SIBS(const ODESystem& ode);
 
 
     // Member Functions
 
         void solve
         (
-            const ODE& ode,
+            const ODESystem& ode,
             scalar& x,
             scalarField& y,
             scalarField& dydx,
             const scalar eps,
-            const scalarField& yScale,
             const scalar hTry,
             scalar& hDid,
             scalar& hNext

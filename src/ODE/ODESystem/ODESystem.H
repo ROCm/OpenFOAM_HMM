@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,21 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::RK
+    Foam::ODESystem
 
 Description
-    Runge-Kutta ODE solver
-
-SourceFiles
-    RKCK.C
-    RKQS.C
+    Abstract base class for the systems of ordinary differential equations.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef RK_H
-#define RK_H
+#ifndef ODESystem_H
+#define ODESystem_H
 
-#include "ODESolver.H"
+#include "scalarField.H"
+#include "scalarMatrices.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,72 +41,48 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class RK Declaration
+                       Class ODESystem Declaration
 \*---------------------------------------------------------------------------*/
 
-class RK
-:
-    public ODESolver
+class ODESystem
 {
-    // Private data
-        static const scalar safety, pGrow, pShrink, errCon;
-
-        static const scalar
-            a2, a3, a4, a5, a6,
-            b21, b31, b32, b41, b42, b43,
-            b51, b52, b53, b54, b61, b62, b63, b64, b65,
-            c1, c3, c4, c6,
-            dc1, dc3, dc4, dc5, dc6;
-
-
-        mutable scalarField yTemp_;
-        mutable scalarField ak2_;
-        mutable scalarField ak3_;
-        mutable scalarField ak4_;
-        mutable scalarField ak5_;
-        mutable scalarField ak6_;
-
-        mutable scalarField yErr_;
-        mutable scalarField yTemp2_;
 
 public:
 
-    //- Runtime type information
-    TypeName("RK");
-
-
     // Constructors
 
-        //- Construct from ODE
-        RK(const ODE& ode);
+        //- Construct null
+        ODESystem()
+        {}
+
+
+    //- Destructor
+    virtual ~ODESystem()
+    {}
 
 
     // Member Functions
 
-        void solve
+        //- Return the number of equations in the system
+        virtual label nEqns() const = 0;
+
+        //- Calculate the derivatives in dydx
+        virtual void derivatives
         (
-            const ODE& ode,
             const scalar x,
             const scalarField& y,
-            const scalarField& dydx,
-            const scalar h,
-            scalarField& yout,
-            scalarField& yerr
-        ) const;
+            scalarField& dydx
+        ) const = 0;
 
-
-        void solve
+        //- Calculate the Jacobian of the system
+        //  Need by the stiff-system solvers
+        virtual void jacobian
         (
-            const ODE& ode,
-            scalar& x,
-            scalarField& y,
-            scalarField& dydx,
-            const scalar eps,
-            const scalarField& yScale,
-            const scalar hTry,
-            scalar& hDid,
-            scalar& hNext
-        ) const;
+            const scalar x,
+            const scalarField& y,
+            scalarField& dfdx,
+            scalarSquareMatrix& dfdy
+        ) const = 0;
 };
 
 

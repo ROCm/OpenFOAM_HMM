@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,6 +38,8 @@ const uLabel pTraits<uLabel>::zero = 0;
 const uLabel pTraits<uLabel>::one = 1;
 const uLabel pTraits<uLabel>::min = uLabelMin;
 const uLabel pTraits<uLabel>::max = uLabelMax;
+const uLabel pTraits<uLabel>::rootMin = pTraits<uLabel>::min;
+const uLabel pTraits<uLabel>::rootMax = pTraits<uLabel>::max;
 
 const char* pTraits<uLabel>::componentNames[] = { "x" };
 
