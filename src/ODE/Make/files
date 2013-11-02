@@ -2,7 +2,8 @@ ODESolvers/ODESolver/ODESolver.C
 ODESolvers/ODESolver/ODESolverNew.C
 
 ODESolvers/adaptiveSolver/adaptiveSolver.C
-ODESolvers/RKCK5/RKCK5.C
+ODESolvers/RKF45/RKF45.C
+ODESolvers/RKCK45/RKCK45.C
 ODESolvers/KRR4/KRR4.C
 ODESolvers/SIBS/SIBS.C
 ODESolvers/SIBS/SIMPR.C

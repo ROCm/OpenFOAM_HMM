@@ -109,8 +109,11 @@ int main(int argc, char *argv[])
     // Create the ODE system
     testODE ode;
 
+    dictionary dict;
+    dict.add("solver", args[1]);
+
     // Create the selected ODE system solver
-    autoPtr<ODESolver> odeSolver = ODESolver::New(args[1], ode);
+    autoPtr<ODESolver> odeSolver = ODESolver::New(ode, dict);
 
     // Initialise the ODE system fields
     scalar xStart = 1.0;
@@ -124,26 +127,26 @@ int main(int argc, char *argv[])
     scalarField dyStart(ode.nEqns());
     ode.derivatives(xStart, yStart, dyStart);
 
-    Info<< setw(10) << "eps" << setw(12) << "hEst";
-    Info<< setw(13) << "hDid" << setw(14) << "hNext" << endl;
+    Info<< setw(10) << "relTol" << setw(12) << "dxEst";
+    Info<< setw(13) << "dxDid" << setw(14) << "dxNext" << endl;
     Info<< setprecision(6);
 
     for (label i=0; i<15; i++)
     {
-        scalar eps = ::Foam::exp(-scalar(i + 1));
+        scalar relTol = ::Foam::exp(-scalar(i + 1));
 
         scalar x = xStart;
         scalarField y(yStart);
-        scalarField dydx(dyStart);
 
-        scalar hEst = 0.6;
-        scalar hDid, hNext;
+        scalar dxEst = 0.6;
+        scalar dxNext = dxEst;
 
-        odeSolver->solve(ode, x, y, dydx, eps, hEst, hDid, hNext);
+        odeSolver->relTol() = relTol;
+        odeSolver->solve(ode, x, y, dxNext);
 
-        Info<< scientific << setw(13) << eps;
-        Info<< fixed << setw(11) << hEst;
-        Info<< setw(13) << hDid << setw(13) << hNext
+        Info<< scientific << setw(13) << relTol;
+        Info<< fixed << setw(11) << dxEst;
+        Info<< setw(13) << x - xStart << setw(13) << dxNext
             << setw(13) << y[0] << setw(13) << y[1]
             << setw(13) << y[2] << setw(13) << y[3]
             << endl;
@@ -159,12 +162,13 @@ int main(int argc, char *argv[])
     yEnd[2] = ::Foam::jn(2, xEnd);
     yEnd[3] = ::Foam::jn(3, xEnd);
 
-    scalar hEst = 0.5;
+    scalar dxEst = 0.5;
 
-    odeSolver->solve(ode, x, xEnd, y, 1e-4, hEst);
+    odeSolver->relTol() = 1e-4;
+    odeSolver->solve(ode, x, xEnd, y, dxEst);
 
     Info<< nl << "Analytical: y(2.0) = " << yEnd << endl;
-    Info      << "Numerical:  y(2.0) = " << y << ", hEst = " << hEst << endl;
+    Info      << "Numerical:  y(2.0) = " << y << ", dxEst = " << dxEst << endl;
 
     Info<< "\nEnd\n" << endl;
 

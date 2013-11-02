@@ -31,7 +31,7 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(KRR4, 0);
-    addToRunTimeSelectionTable(ODESolver, KRR4, ODE);
+    addToRunTimeSelectionTable(ODESolver, KRR4, dictionary);
 
 const scalar
     KRR4::gamma = 1.0/2.0,
@@ -50,15 +50,16 @@ const scalar
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::KRR4::KRR4(const ODESystem& ode)
+Foam::KRR4::KRR4(const ODESystem& ode, const dictionary& dict)
 :
-    ODESolver(ode),
-    adaptiveSolver(ode),
+    ODESolver(ode, dict),
+    adaptiveSolver(ode, dict),
     g1_(n_),
     g2_(n_),
     g3_(n_),
     g4_(n_),
     err_(n_),
+    dydx_(n_),
     dfdx_(n_),
     dfdy_(n_, n_),
     a_(n_, n_),
@@ -75,8 +76,7 @@ Foam::scalar Foam::KRR4::solve
     const scalarField& y0,
     const scalarField& dydx0,
     const scalar dx,
-    scalarField& y,
-    const scalar eps
+    scalarField& y
 ) const
 {
     ode.jacobian(x0, y0, dfdx_, dfdy_);
@@ -142,7 +142,7 @@ Foam::scalar Foam::KRR4::solve
         err_[i] = e1*g1_[i] + e2*g2_[i] + e3*g3_[i] + e4*g4_[i];
     }
 
-    return normalizeError(eps, y0, y, err_);
+    return normalizeError(y0, y, err_);
 }
 
 
@@ -151,14 +151,10 @@ void Foam::KRR4::solve
     const ODESystem& odes,
     scalar& x,
     scalarField& y,
-    scalarField& dydx,
-    const scalar eps,
-    const scalar dxTry,
-    scalar& dxDid,
-    scalar& dxNext
+    scalar& dxTry
 ) const
 {
-    adaptiveSolver::solve(odes, x, y, dydx, eps, dxTry, dxDid, dxNext);
+    adaptiveSolver::solve(odes, x, y, dxTry);
 }
 
 

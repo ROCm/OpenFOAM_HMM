@@ -75,6 +75,7 @@ class KRR4
         mutable scalarField g3_;
         mutable scalarField g4_;
         mutable scalarField err_;
+        mutable scalarField dydx_;
         mutable scalarField dfdx_;
         mutable scalarSquareMatrix dfdy_;
         mutable scalarSquareMatrix a_;
@@ -99,7 +100,7 @@ public:
     // Constructors
 
         //- Construct from ODE
-        KRR4(const ODESystem& ode);
+        KRR4(const ODESystem& ode, const dictionary& dict);
 
 
     // Member Functions
@@ -112,8 +113,7 @@ public:
             const scalarField& y0,
             const scalarField& dydx0,
             const scalar dx,
-            scalarField& y,
-            const scalar eps
+            scalarField& y
         ) const;
 
         //- Solve the ODE system and the update the state
@@ -122,11 +122,7 @@ public:
             const ODESystem& ode,
             scalar& x,
             scalarField& y,
-            scalarField& dydx,
-            const scalar eps,
-            const scalar dxTry,
-            scalar& dxDid,
-            scalar& dxNext
+            scalar& dxTry
         ) const;
 };
 

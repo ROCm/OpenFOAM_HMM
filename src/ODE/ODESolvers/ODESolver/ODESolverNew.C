@@ -29,29 +29,30 @@ License
 
 Foam::autoPtr<Foam::ODESolver> Foam::ODESolver::New
 (
-    const Foam::word& ODESolverTypeName,
-    const Foam::ODESystem& ode
+    const ODESystem& odes,
+    const dictionary& dict
 )
 {
+    word ODESolverTypeName(dict.lookup("solver"));
     Info<< "Selecting ODE solver " << ODESolverTypeName << endl;
 
-    ODEConstructorTable::iterator cstrIter =
-        ODEConstructorTablePtr_->find(ODESolverTypeName);
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(ODESolverTypeName);
 
-    if (cstrIter == ODEConstructorTablePtr_->end())
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalErrorIn
         (
             "ODESolver::New"
-            "(const word& ODESolverTypeName, const ODESystem& ode)"
+            "(const dictionary& dict, const ODESystem& odes)"
         )   << "Unknown ODESolver type "
             << ODESolverTypeName << nl << nl
             << "Valid ODESolvers are : " << endl
-            << ODEConstructorTablePtr_->sortedToc()
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
-    return autoPtr<ODESolver>(cstrIter()(ode));
+    return autoPtr<ODESolver>(cstrIter()(odes, dict));
 }
 
 
