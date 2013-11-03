@@ -86,7 +86,15 @@ void Foam::adaptiveSolver::solve
     y = yTemp_;
 
     // If the error is small increase the step-size
-    dxTry = min(max(safeScale_*pow(err, -alphaInc_), minScale_), maxScale_)*dx;
+    if (err > pow(maxScale_/safeScale_, -1.0/alphaInc_))
+    {
+        dxTry =
+            min(max(safeScale_*pow(err, -alphaInc_), minScale_), maxScale_)*dx;
+    }
+    else
+    {
+        dxTry = safeScale_*maxScale_*dx;
+    }
 }
 
 
