@@ -56,19 +56,17 @@ const scalar
     RKF45::a64 = 1859.0/4104.0,
     RKF45::a65 = -11.0/40.0,
 
-    RKF45::b41  = 25.0/216.0,
-    RKF45::b42  = 0.0,
-    RKF45::b43  = 1408.0/2565.0,
-    RKF45::b44  = 2197.0/4104.0,
-    RKF45::b45  = -1.0/5.0,
-    RKF45::b46  = 0.0,
+    RKF45::b1  = 16.0/135.0,
+    RKF45::b3  = 6656.0/12825.0,
+    RKF45::b4  = 28561.0/56430.0,
+    RKF45::b5  = -9.0/50.0,
+    RKF45::b6  = 2.0/55.0,
 
-    RKF45::b51  = 16.0/135.0,
-    RKF45::b52  = 0.0,
-    RKF45::b53  = 6656.0/12825.0,
-    RKF45::b54  = 28561.0/56430.0,
-    RKF45::b55  = -9.0/50.0,
-    RKF45::b56  = 2.0/55.0;
+    RKF45::e1  = 25.0/216.0 - RKF45::b1,
+    RKF45::e3  = 1408.0/2565.0 - RKF45::b3,
+    RKF45::e4  = 2197.0/4104.0 - RKF45::b4,
+    RKF45::e5  = -1.0/5.0 - RKF45::b5,
+    RKF45::e6  = -RKF45::b6;
 }
 
 
@@ -143,7 +141,7 @@ Foam::scalar Foam::RKF45::solve
     {
         y[i] = y0[i]
           + dx
-           *(b51*dydx0[i] + b53*k3_[i] + b54*k4_[i] + b55*k5_[i] + b56*k6_[i]);
+           *(b1*dydx0[i] + b3*k3_[i] + b4*k4_[i] + b5*k5_[i] + b6*k6_[i]);
     }
 
     // Calculate the error estimate from the difference between the
@@ -152,9 +150,7 @@ Foam::scalar Foam::RKF45::solve
     {
         err_[i] =
             dx
-           *(b41*dydx0[i] + b43*k3_[i] + b44*k4_[i] + b45*k5_[i])
-          - (y[i] - y0[i])
-        ;
+           *(e1*dydx0[i] + e3*k3_[i] + e4*k4_[i] + e5*k5_[i] + e6*k6_[i]);
     }
 
     return normalizeError(y0, y, err_);

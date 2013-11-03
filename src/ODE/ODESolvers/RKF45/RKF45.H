@@ -31,15 +31,15 @@ Description
     \verbatim
         "Low-order classical Runge-Kutta formulas with step size control
          and their application to some heat transfer problems."
-         Fehlberg, E.,
-         NASA Technical Report 315 1969
+        Fehlberg, E.,
+        NASA Technical Report 315, 1969.
 
-         "Solving Ordinary Differential Equations I: Nonstiff Problems,
-          second edition",
-         Hairer, E.,
-         Nørsett, S.,
-         Wanner, G.,
-         Springer-Verlag, Berlin. 1993, ISBN 3-540-56670-8.
+        "Solving Ordinary Differential Equations I: Nonstiff Problems,
+         second edition",
+        Hairer, E.,
+        Nørsett, S.,
+        Wanner, G.,
+        Springer-Verlag, Berlin. 1993, ISBN 3-540-56670-8.
     \endverbatim
 
     This method embedds the 4-th order integration step into the 5-th order step
@@ -112,8 +112,8 @@ class RKF45
             c2, c3, c4, c5, c6,
             a21, a31, a32, a41, a42, a43, a51, a52, a53, a54,
             a61, a62, a63, a64, a65,
-            b41, b42, b43, b44, b45, b46,
-            b51, b52, b53, b54, b55, b56;
+            b1, b3, b4, b5, b6,
+            e1, e3, e4, e5, e6;
 
 
         // Temporary fields
