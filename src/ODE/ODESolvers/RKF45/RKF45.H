@@ -34,6 +34,8 @@ Description
         Fehlberg, E.,
         NASA Technical Report 315, 1969.
 
+    Based on code from:
+    \verbatim
         "Solving Ordinary Differential Equations I: Nonstiff Problems,
          second edition",
         Hairer, E.,
@@ -69,16 +71,7 @@ Description
 
     The difference between the 5th and 4th order (\f$\epsilon = \left|\Delta_5
     - \Delta_4\right|\f$) can be used to determine if the stepsize \f$h\f$ needs
-    to be adjusted. The step-size does not need to be reduced if the following
-    inequation holds true:
-
-    \f[
-      \left|\Delta_5 - \Delta_4\right| < \epsilon_{abs} +
-                                         \epsilon_{rel}\left|y\right|
-    \f]
-
-    where \f$\left|y\right|\f$ is the element wise maximum of
-    \f$\left|y_k\right|\f$ and \f$\left|y_{k+1}\right|\f$.
+    to be adjusted.
 
 SourceFiles
     RKF45.C

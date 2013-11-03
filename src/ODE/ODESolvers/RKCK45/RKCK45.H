@@ -34,7 +34,10 @@ Description
         Cash, J.R.,
         Karp, A.H.
         ACM Transactions on Mathematical Software, vol. 16, 1990, pp. 201–222.
+    \endverbatim
 
+    Based on code from:
+    \verbatim
         "Solving Ordinary Differential Equations I: Nonstiff Problems,
          second edition",
         Hairer, E.,

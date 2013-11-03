@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::KRR4
+    Foam::KRR43
 
 Description
     4th Order Kaps Rentrop Rosenbrock stiff ODE solver
@@ -44,12 +44,12 @@ Description
     \endverbatim
 
 SourceFiles
-    KRR4.C
+    KRR43.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef KRR4_H
-#define KRR4_H
+#ifndef KRR43_H
+#define KRR43_H
 
 #include "ODESolver.H"
 #include "adaptiveSolver.H"
@@ -60,20 +60,20 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class KRR4 Declaration
+                           Class KRR43 Declaration
 \*---------------------------------------------------------------------------*/
 
-class KRR4
+class KRR43
 :
     public ODESolver,
     public adaptiveSolver
 {
     // Private data
 
-        mutable scalarField g1_;
-        mutable scalarField g2_;
-        mutable scalarField g3_;
-        mutable scalarField g4_;
+        mutable scalarField k1_;
+        mutable scalarField k2_;
+        mutable scalarField k3_;
+        mutable scalarField k4_;
         mutable scalarField err_;
         mutable scalarField dydx_;
         mutable scalarField dfdx_;
@@ -94,13 +94,13 @@ class KRR4
 public:
 
     //- Runtime type information
-    TypeName("KRR4");
+    TypeName("KRR43");
 
 
     // Constructors
 
         //- Construct from ODE
-        KRR4(const ODESystem& ode, const dictionary& dict);
+        KRR43(const ODESystem& ode, const dictionary& dict);
 
 
     // Member Functions

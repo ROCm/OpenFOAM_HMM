@@ -22,18 +22,25 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::RKDP45
+    Foam::Rosenbrock43
 
 Description
-    4/5th Order Dormand–Prince Runge-Kutta ODE solver.
+    4th Order Kaps Rentrop Rosenbrock stiff ODE solver
 
     References:
     \verbatim
-        "A family of embedded Runge-Kutta formulae"
-        Dormand, J. R.,
-        Prince, P. J.,
-        Journal of Computational and Applied Mathematics,
-        6 (1), 1980: pp. 19-26.
+        "Generalized Runge-Kutta methods of order four with stepsize control
+         for stiff ordinary differential equations"
+        Kaps, P.,
+        Rentrop, P.,
+        Numerische Thematic, vol. 33, 1979, pp. 55–68.
+    \endverbatim
+
+    Constants from:
+    \verbatim
+        "Implementation of Rosenbrock Methods"
+        Shampine, L. F.,
+        ACM Transactions on Mathematical Software, vol. 8, 1982, pp. 93–113.
     \endverbatim
 
     Based on code from:
@@ -46,17 +53,13 @@ Description
         Springer-Verlag, Berlin. 1993, ISBN 3-540-56670-8.
     \endverbatim
 
-SeeAlso
-    Foam::RKF45
-    Foam::RKCK45
-
 SourceFiles
-    RKDP45.C
+    Rosenbrock43.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef RKDP45_H
-#define RKDP45_H
+#ifndef Rosenbrock43_H
+#define Rosenbrock43_H
 
 #include "ODESolver.H"
 #include "adaptiveSolver.H"
@@ -67,46 +70,48 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class RKDP45 Declaration
+                           Class Rosenbrock43 Declaration
 \*---------------------------------------------------------------------------*/
 
-class RKDP45
+class Rosenbrock43
 :
     public ODESolver,
     public adaptiveSolver
 {
     // Private data
 
-        //- RKDP Constants
-        static const scalar
-            c2, c3, c4, c5,
-            a21, a31, a32, a41, a42, a43, a51, a52, a53, a54,
-            a61, a62, a63, a64, a65,
-            b1, b3, b4, b5, b6,
-            e1, e3, e4, e5, e6, e7;
-
-        // Temporary fields
-        mutable scalarField yTemp_;
+        mutable scalarField k1_;
         mutable scalarField k2_;
         mutable scalarField k3_;
         mutable scalarField k4_;
-        mutable scalarField k5_;
-        mutable scalarField k6_;
-
-        //- Error-estimate field
         mutable scalarField err_;
+        mutable scalarField dydx_;
+        mutable scalarField dfdx_;
+        mutable scalarSquareMatrix dfdy_;
+        mutable scalarSquareMatrix a_;
+        mutable labelList pivotIndices_;
+
+        static const scalar
+            a21, a31, a32,
+            c21, c31, c32,
+            c41, c42, c43,
+            b1, b2, b3, b4,
+            e1, e2, e3, e4,
+            gamma,
+            c2, c3,
+            d1, d2, d3, d4;
 
 
 public:
 
     //- Runtime type information
-    TypeName("RKDP45");
+    TypeName("Rosenbrock43");
 
 
     // Constructors
 
         //- Construct from ODE
-        RKDP45(const ODESystem& ode, const dictionary& dict);
+        Rosenbrock43(const ODESystem& ode, const dictionary& dict);
 
 
     // Member Functions
