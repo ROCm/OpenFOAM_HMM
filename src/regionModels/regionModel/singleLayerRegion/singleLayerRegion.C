@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -157,9 +157,13 @@ bool Foam::regionModels::singleLayerRegion::read()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::regionModels::singleLayerRegion::singleLayerRegion(const fvMesh& mesh)
+Foam::regionModels::singleLayerRegion::singleLayerRegion
+(
+    const fvMesh& mesh,
+    const word& regionType
+)
 :
-    regionModel(mesh),
+    regionModel(mesh, regionType),
     nHatPtr_(NULL),
     magSfPtr_(NULL),
     passivePatchIDs_()

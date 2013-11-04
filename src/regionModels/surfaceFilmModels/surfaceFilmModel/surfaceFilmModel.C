@@ -61,10 +61,11 @@ surfaceFilmModel::surfaceFilmModel
 (
     const word& modelType,
     const fvMesh& mesh,
-    const dimensionedVector& g
+    const dimensionedVector& g,
+    const word& regionType
 )
 :
-    singleLayerRegion(mesh, "surfaceFilm", modelType),
+    singleLayerRegion(mesh, regionType, modelType),
     g_(g)
 {
     if (active_)
