@@ -1,19 +1,14 @@
-ODE  =  ODE
-ODESolvers  =  ODESolvers
-ODESolversODESolver  =  ODESolvers/ODESolver
-ODESolversKRR4  =  ODESolvers/KRR4
-ODESolversRK  =  ODESolvers/RK
-ODESolversSIBS  =  ODESolvers/SIBS
+ODESolvers/ODESolver/ODESolver.C
+ODESolvers/ODESolver/ODESolverNew.C
 
-$(ODESolversODESolver)/ODESolver.C
-$(ODESolversODESolver)/ODESolverNew.C
-
-$(ODESolversRK)/RK.C
-
-$(ODESolversKRR4)/KRR4.C
-
-$(ODESolversSIBS)/SIBS.C
-$(ODESolversSIBS)/SIMPR.C
-$(ODESolversSIBS)/polyExtrapolate.C
+ODESolvers/adaptiveSolver/adaptiveSolver.C
+ODESolvers/RKF45/RKF45.C
+ODESolvers/RKCK45/RKCK45.C
+ODESolvers/RKDP45/RKDP45.C
+ODESolvers/Rosenbrock43/Rosenbrock43.C
+ODESolvers/rodas43/rodas43.C
+ODESolvers/SIBS/SIBS.C
+ODESolvers/SIBS/SIMPR.C
+ODESolvers/SIBS/polyExtrapolate.C
 
 LIB = $(FOAM_LIBBIN)/libODE

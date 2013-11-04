@@ -74,7 +74,7 @@ EulerDdtScheme<Type>::fvcDdt
         );
 
         tdtdt().internalField() =
-            rDeltaT.value()*dt.value()*(1.0 - mesh().V0()/mesh().V());
+            rDeltaT.value()*dt.value()*(1.0 - mesh().Vsc0()/mesh().Vsc());
 
         return tdtdt;
     }
@@ -127,7 +127,7 @@ EulerDdtScheme<Type>::fvcDdt
                 rDeltaT.value()*
                 (
                     vf.internalField()
-                  - vf.oldTime().internalField()*mesh().V0()/mesh().V()
+                  - vf.oldTime().internalField()*mesh().Vsc0()/mesh().Vsc()
                 ),
                 rDeltaT.value()*
                 (
@@ -179,7 +179,7 @@ EulerDdtScheme<Type>::fvcDdt
                 rDeltaT.value()*rho.value()*
                 (
                     vf.internalField()
-                  - vf.oldTime().internalField()*mesh().V0()/mesh().V()
+                  - vf.oldTime().internalField()*mesh().Vsc0()/mesh().Vsc()
                 ),
                 rDeltaT.value()*rho.value()*
                 (
@@ -232,7 +232,7 @@ EulerDdtScheme<Type>::fvcDdt
                 (
                     rho.internalField()*vf.internalField()
                   - rho.oldTime().internalField()
-                   *vf.oldTime().internalField()*mesh().V0()/mesh().V()
+                   *vf.oldTime().internalField()*mesh().Vsc0()/mesh().Vsc()
                 ),
                 rDeltaT.value()*
                 (
@@ -277,15 +277,15 @@ EulerDdtScheme<Type>::fvmDdt
 
     scalar rDeltaT = 1.0/mesh().time().deltaTValue();
 
-    fvm.diag() = rDeltaT*mesh().V();
+    fvm.diag() = rDeltaT*mesh().Vsc();
 
     if (mesh().moving())
     {
-        fvm.source() = rDeltaT*vf.oldTime().internalField()*mesh().V0();
+        fvm.source() = rDeltaT*vf.oldTime().internalField()*mesh().Vsc0();
     }
     else
     {
-        fvm.source() = rDeltaT*vf.oldTime().internalField()*mesh().V();
+        fvm.source() = rDeltaT*vf.oldTime().internalField()*mesh().Vsc();
     }
 
     return tfvm;
@@ -312,17 +312,17 @@ EulerDdtScheme<Type>::fvmDdt
 
     scalar rDeltaT = 1.0/mesh().time().deltaTValue();
 
-    fvm.diag() = rDeltaT*rho.value()*mesh().V();
+    fvm.diag() = rDeltaT*rho.value()*mesh().Vsc();
 
     if (mesh().moving())
     {
         fvm.source() = rDeltaT
-            *rho.value()*vf.oldTime().internalField()*mesh().V0();
+            *rho.value()*vf.oldTime().internalField()*mesh().Vsc0();
     }
     else
     {
         fvm.source() = rDeltaT
-            *rho.value()*vf.oldTime().internalField()*mesh().V();
+            *rho.value()*vf.oldTime().internalField()*mesh().Vsc();
     }
 
     return tfvm;
@@ -349,19 +349,19 @@ EulerDdtScheme<Type>::fvmDdt
 
     scalar rDeltaT = 1.0/mesh().time().deltaTValue();
 
-    fvm.diag() = rDeltaT*rho.internalField()*mesh().V();
+    fvm.diag() = rDeltaT*rho.internalField()*mesh().Vsc();
 
     if (mesh().moving())
     {
         fvm.source() = rDeltaT
             *rho.oldTime().internalField()
-            *vf.oldTime().internalField()*mesh().V0();
+            *vf.oldTime().internalField()*mesh().Vsc0();
     }
     else
     {
         fvm.source() = rDeltaT
             *rho.oldTime().internalField()
-            *vf.oldTime().internalField()*mesh().V();
+            *vf.oldTime().internalField()*mesh().Vsc();
     }
 
     return tfvm;

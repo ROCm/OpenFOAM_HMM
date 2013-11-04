@@ -53,14 +53,30 @@ class ODESolver
 
 protected:
 
-    // Private data
+    // Protected data
 
+        //- Size of the ODESystem
         label n_;
-        mutable scalarField yScale_;
-        mutable scalarField dydx_;
+
+        //- Absolute convergence tolerance per step
+        scalarField absTol_;
+
+        //- Relative convergence tolerance per step
+        scalarField relTol_;
+
+        //- The maximum number of sub-steps allowed for the integration step
+        label maxSteps_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
+
+        //- Return the nomalized scalar error
+        scalar normalizeError
+        (
+            const scalarField& y0,
+            const scalarField& y,
+            const scalarField& err
+        ) const;
 
         //- Disallow default bitwise copy construct
         ODESolver(const ODESolver&);
@@ -81,16 +97,24 @@ public:
         (
             autoPtr,
             ODESolver,
-            ODE,
-            (const ODESystem& ode),
-            (ode)
+            dictionary,
+            (const ODESystem& ode, const dictionary& dict),
+            (ode, dict)
         );
 
 
     // Constructors
 
-        //- Construct for given ODE
-        ODESolver(const ODESystem& ode);
+        //- Construct for given ODESystem
+        ODESolver(const ODESystem& ode, const dictionary& dict);
+
+        //- Construct for given ODESystem specifying tolerances
+        ODESolver
+        (
+            const ODESystem& ode,
+            const scalarField& absTol,
+            const scalarField& relTol
+        );
 
 
     // Selectors
@@ -98,8 +122,8 @@ public:
         //- Select null constructed
         static autoPtr<ODESolver> New
         (
-            const word& ODESolverTypeName,
-            const ODESystem& ode
+            const ODESystem& ode,
+            const dictionary& dict
         );
 
 
@@ -110,28 +134,37 @@ public:
 
     // Member Functions
 
+        scalarField& absTol()
+        {
+            return absTol_;
+        }
+
+        scalarField& relTol()
+        {
+            return relTol_;
+        }
+
+        //- Solve the ODE system as far as possible upto dxTry
+        //  adjusting the step as necessary to provide a solution within
+        //  the specified tolerance.
+        //  Update the state and return an estimate for the next step in dxTry
         virtual void solve
         (
             const ODESystem& ode,
             scalar& x,
             scalarField& y,
-            scalarField& dydx,
-            const scalar eps,
-            const scalarField& yScale,
-            const scalar hTry,
-            scalar& hDid,
-            scalar& hNext
+            scalar& dxTry
         ) const = 0;
 
-
+        //- Solve the ODE system from xStart to xEnd, update the state
+        //  and return an estimate for the next step in dxTry
         virtual void solve
         (
             const ODESystem& ode,
             const scalar xStart,
             const scalar xEnd,
             scalarField& y,
-            const scalar eps,
-            scalar& hEst
+            scalar& dxEst
         ) const;
 };
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,26 +22,31 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::SIBS
+    Foam::rodas43
 
 Description
-    Foam::SIBS
+    Stiffly-stable embedded Rosenbrock ODE solver of order (3)4.
 
-    Bader, G. and Deuflhard, P.
-    "A Semi-Implicit Mid-Point Rule for
-     Stiff Systems of Ordinary Differential Equations."
-     Numer. Math. 41, 373-398, 1983.
+    References:
+    \verbatim
+        "Solving Ordinary Differential Equations II: Stiff
+         and Differential-Algebraic Problems, second edition",
+        Hairer, E.,
+        Nørsett, S.,
+        Wanner, G.,
+        Springer-Verlag, Berlin. 1996.
+    \endverbatim
 
 SourceFiles
-    SIMPR.C
-    polyExtrapolate.C
+    rodas43.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SIBS_H
-#define SIBS_H
+#ifndef rodas43_H
+#define rodas43_H
 
 #include "ODESolver.H"
+#include "adaptiveSolver.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,78 +54,68 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class SIBS Declaration
+                           Class rodas43 Declaration
 \*---------------------------------------------------------------------------*/
 
-class SIBS
+class rodas43
 :
-    public ODESolver
+    public ODESolver,
+    public adaptiveSolver
 {
     // Private data
 
-        static const label kMaxX_ = 7, iMaxX_ = kMaxX_ + 1;
-        static const label nSeq_[iMaxX_];
-
-        static const scalar safe1, safe2, redMax, redMin, scaleMX;
-
-        mutable scalarField a_;
-        mutable scalarSquareMatrix alpha_;
-        mutable scalarRectangularMatrix d_p_;
-        mutable scalarField x_p_;
+        mutable scalarField k1_;
+        mutable scalarField k2_;
+        mutable scalarField k3_;
+        mutable scalarField k4_;
+        mutable scalarField k5_;
+        mutable scalarField dy_;
         mutable scalarField err_;
-
-        mutable scalarField yTemp_;
-        mutable scalarField ySeq_;
-        mutable scalarField yErr_;
-        mutable scalarField dydx0_;
+        mutable scalarField dydx_;
         mutable scalarField dfdx_;
         mutable scalarSquareMatrix dfdy_;
+        mutable scalarSquareMatrix a_;
+        mutable labelList pivotIndices_;
 
-        mutable label first_, kMax_, kOpt_;
-        mutable scalar epsOld_, xNew_;
-
-
-    // Private Member Functions
-
-        void SIMPR
-        (
-            const ODESystem& ode,
-            const scalar xStart,
-            const scalarField& y,
-            const scalarField& dydx,
-            const scalarField& dfdx,
-            const scalarSquareMatrix& dfdy,
-            const scalar deltaX,
-            const label nSteps,
-            scalarField& yEnd
-        ) const;
-
-        void polyExtrapolate
-        (
-            const label iest,
-            const scalar xest,
-            const scalarField& yest,
-            scalarField& yz,
-            scalarField& dy,
-            scalarField& x_p,
-            scalarRectangularMatrix& d_p
-        ) const;
-
+        static const scalar
+            c2, c3, c4,
+            bet2p, bet3p, bet4p,
+            d1, d2, d3, d4,
+            a21, a31, a32,
+            a41, a42, a43,
+            a51, a52, a53, a54,
+            c21, c31, c32,
+            c41, c42, c43,
+            c51, c52, c53, c54,
+            c61, c62, c63, c64, c65,
+            gamma;
 
 public:
 
     //- Runtime type information
-    TypeName("SIBS");
+    TypeName("rodas43");
 
 
     // Constructors
 
         //- Construct from ODE
-        SIBS(const ODESystem& ode, const dictionary& dict);
+        rodas43(const ODESystem& ode, const dictionary& dict);
 
 
     // Member Functions
 
+        //- Solve a single step dx and return the error
+        scalar solve
+        (
+            const ODESystem& ode,
+            const scalar x0,
+            const scalarField& y0,
+            const scalarField& dydx0,
+            const scalar dx,
+            scalarField& y
+        ) const;
+
+        //- Solve the ODE system and the update the state
         void solve
         (
             const ODESystem& ode,

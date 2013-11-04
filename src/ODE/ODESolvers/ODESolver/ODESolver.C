@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,21 +30,55 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(ODESolver, 0);
-    defineRunTimeSelectionTable(ODESolver, ODE);
+    defineRunTimeSelectionTable(ODESolver, dictionary);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::ODESolver::ODESolver(const ODESystem& ode)
+Foam::ODESolver::ODESolver(const ODESystem& ode, const dictionary& dict)
 :
     n_(ode.nEqns()),
-    yScale_(n_),
-    dydx_(n_)
+    absTol_(n_, dict.lookupOrDefault<scalar>("absTol", SMALL)),
+    relTol_(n_, dict.lookupOrDefault<scalar>("relTol", 1e-4)),
+    maxSteps_(10000)
+{}
+
+
+Foam::ODESolver::ODESolver
+(
+    const ODESystem& ode,
+    const scalarField& absTol,
+    const scalarField& relTol
+)
+:
+    n_(ode.nEqns()),
+    absTol_(absTol),
+    relTol_(relTol),
+    maxSteps_(10000)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::scalar Foam::ODESolver::normalizeError
+(
+    const scalarField& y0,
+    const scalarField& y,
+    const scalarField& err
+) const
+{
+    // Calculate the maximum error
+    scalar maxErr = 0.0;
+    forAll(err, i)
+    {
+        scalar tol = absTol_[i] + relTol_[i]*max(mag(y0[i]), mag(y[i]));
+        maxErr = max(maxErr, mag(err[i])/tol);
+    }
+
+    return maxErr;
+}
+
 
 void Foam::ODESolver::solve
 (
@@ -52,60 +86,47 @@ void Foam::ODESolver::solve
     const scalar xStart,
     const scalar xEnd,
     scalarField& y,
-    const scalar eps,
-    scalar& hEst
+    scalar& dxEst
 ) const
 {
-    const label MAXSTP = 10000;
-
     scalar x = xStart;
-    scalar h = hEst;
-    scalar hNext = 0;
-    scalar hPrev = 0;
+    bool truncated = false;
 
-    for (label nStep=0; nStep<MAXSTP; nStep++)
+    for (label nStep=0; nStep<maxSteps_; nStep++)
     {
-        ode.derivatives(x, y, dydx_);
+        // Store previous iteration dxEst
+        scalar dxEst0 = dxEst;
 
-        for (label i=0; i<n_; i++)
+        // Check if this is a truncated step and set dxEst to integrate to xEnd
+        if ((x + dxEst - xEnd)*(x + dxEst - xStart) > 0)
         {
-            yScale_[i] = mag(y[i]) + mag(dydx_[i]*h) + SMALL;
+            truncated = true;
+            dxEst = xEnd - x;
         }
 
-        if ((x + h - xEnd)*(x + h - xStart) > 0.0)
-        {
-            h = xEnd - x;
-            hPrev = hNext;
-        }
+        // Integrate as far as possible up to dxEst
+        solve(ode, x, y, dxEst);
 
-        hNext = 0;
-        scalar hDid;
-        solve(ode, x, y, dydx_, eps, yScale_, h, hDid, hNext);
-
-        if ((x - xEnd)*(xEnd - xStart) >= 0.0)
+        // Check if reached xEnd
+        if ((x - xEnd)*(xEnd - xStart) >= 0)
         {
-            if (hPrev != 0)
+            if (nStep > 0 && truncated)
             {
-                hEst = hPrev;
-            }
-            else
-            {
-                hEst = hNext;
+                dxEst = dxEst0;
             }
 
             return;
         }
-
-        h = hNext;
     }
 
     FatalErrorIn
     (
         "ODESolver::solve"
         "(const ODESystem& ode, const scalar xStart, const scalar xEnd,"
-        "scalarField& yStart, const scalar eps, scalar& hEst) const"
-    )   << "Too many integration steps"
+        "scalarField& y, scalar& dxEst) const"
+    )   << "Integration steps greater than maximum " << maxSteps_
         << exit(FatalError);
 }
+
 
 // ************************************************************************* //

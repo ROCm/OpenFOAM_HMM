@@ -36,9 +36,7 @@ Foam::ode<ChemistryModel>::ode
 :
     chemistrySolver<ChemistryModel>(mesh),
     coeffsDict_(this->subDict("odeCoeffs")),
-    solverName_(coeffsDict_.lookup("solver")),
-    odeSolver_(ODESolver::New(solverName_, *this)),
-    eps_(readScalar(coeffsDict_.lookup("eps"))),
+    odeSolver_(ODESolver::New(*this, coeffsDict_)),
     cTp_(this->nEqns())
 {}
 
@@ -78,7 +76,6 @@ void Foam::ode<ChemistryModel>::solve
         0,
         deltaT,
         cTp_,
-        eps_,
         subDeltaT
     );
 

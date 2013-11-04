@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,21 +22,40 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::RK
+    Foam::RKCK45
 
 Description
-    Runge-Kutta ODE solver
+    4/5th Order Cash-Karp Runge-Kutta ODE solver.
+
+    References:
+    \verbatim
+        "A variable order Runge-Kutta method for initial value problems
+         with rapidly varying right-hand sides"
+        Cash, J.R.,
+        Karp, A.H.
+        ACM Transactions on Mathematical Software, vol. 16, 1990, pp. 201–222.
+    \endverbatim
+
+    Based on code from:
+    \verbatim
+        "Solving Ordinary Differential Equations I: Nonstiff Problems,
+         second edition",
+        Hairer, E.,
+        Nørsett, S.,
+        Wanner, G.,
+        Springer-Verlag, Berlin. 1993, ISBN 3-540-56670-8.
+    \endverbatim
 
 SourceFiles
-    RKCK.C
-    RKQS.C
+    RKCK45.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef RK_H
-#define RK_H
+#ifndef RKCK45_H
+#define RKCK45_H
 
 #include "ODESolver.H"
+#include "adaptiveSolver.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,71 +63,68 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class RK Declaration
+                           Class RKCK45 Declaration
 \*---------------------------------------------------------------------------*/
 
-class RK
+class RKCK45
 :
-    public ODESolver
+    public ODESolver,
+    public adaptiveSolver
 {
     // Private data
-        static const scalar safety, pGrow, pShrink, errCon;
 
+        //- RKCK Constants
         static const scalar
-            a2, a3, a4, a5, a6,
-            b21, b31, b32, b41, b42, b43,
-            b51, b52, b53, b54, b61, b62, b63, b64, b65,
-            c1, c3, c4, c6,
-            dc1, dc3, dc4, dc5, dc6;
+            c2, c3, c4, c5, c6,
+            a21, a31, a32, a41, a42, a43, a51, a52, a53, a54,
+            a61, a62, a63, a64, a65,
+            b1, b3, b4, b6,
+            e1, e3, e4, e5, e6;
 
-
+        // Temporary fields
         mutable scalarField yTemp_;
-        mutable scalarField ak2_;
-        mutable scalarField ak3_;
-        mutable scalarField ak4_;
-        mutable scalarField ak5_;
-        mutable scalarField ak6_;
+        mutable scalarField k2_;
+        mutable scalarField k3_;
+        mutable scalarField k4_;
+        mutable scalarField k5_;
+        mutable scalarField k6_;
 
-        mutable scalarField yErr_;
-        mutable scalarField yTemp2_;
+        //- Error-estimate field
+        mutable scalarField err_;
+
 
 public:
 
     //- Runtime type information
-    TypeName("RK");
+    TypeName("RKCK45");
 
 
     // Constructors
 
         //- Construct from ODE
-        RK(const ODESystem& ode);
+        RKCK45(const ODESystem& ode, const dictionary& dict);
 
 
     // Member Functions
 
-        void solve
+        //- Solve a single step dx and return the error
+        scalar solve
         (
             const ODESystem& ode,
-            const scalar x,
-            const scalarField& y,
-            const scalarField& dydx,
-            const scalar h,
-            scalarField& yout,
-            scalarField& yerr
+            const scalar x0,
+            const scalarField& y0,
+            const scalarField& dydx0,
+            const scalar dx,
+            scalarField& y
         ) const;
 
-
+        //- Solve the ODE system and the update the state
         void solve
         (
             const ODESystem& ode,
             scalar& x,
             scalarField& y,
-            scalarField& dydx,
-            const scalar eps,
-            const scalarField& yScale,
-            const scalar hTry,
-            scalar& hDid,
-            scalar& hNext
+            scalar& dxTry
         ) const;
 };
 

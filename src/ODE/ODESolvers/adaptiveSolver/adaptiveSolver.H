@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,24 +22,17 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::SIBS
+    Foam::adaptiveSolver
 
 Description
-    Foam::SIBS
-
-    Bader, G. and Deuflhard, P.
-    "A Semi-Implicit Mid-Point Rule for
-     Stiff Systems of Ordinary Differential Equations."
-     Numer. Math. 41, 373-398, 1983.
 
 SourceFiles
-    SIMPR.C
-    polyExtrapolate.C
+    adaptiveSolver.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SIBS_H
-#define SIBS_H
+#ifndef adaptiveSolver_H
+#define adaptiveSolver_H
 
 #include "ODESolver.H"
 
@@ -49,78 +42,50 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class SIBS Declaration
+                           Class adaptiveSolver Declaration
 \*---------------------------------------------------------------------------*/
 
-class SIBS
-:
-    public ODESolver
+class adaptiveSolver
 {
     // Private data
 
-        static const label kMaxX_ = 7, iMaxX_ = kMaxX_ + 1;
-        static const label nSeq_[iMaxX_];
+        //- Step-size adjustment controls
+        scalar safeScale_, alphaInc_, alphaDec_, minScale_, maxScale_;
 
-        static const scalar safe1, safe2, redMax, redMin, scaleMX;
-
-        mutable scalarField a_;
-        mutable scalarSquareMatrix alpha_;
-        mutable scalarRectangularMatrix d_p_;
-        mutable scalarField x_p_;
-        mutable scalarField err_;
-
-        mutable scalarField yTemp_;
-        mutable scalarField ySeq_;
-        mutable scalarField yErr_;
+        //- Cache for dydx at the initial time
         mutable scalarField dydx0_;
-        mutable scalarField dfdx_;
-        mutable scalarSquareMatrix dfdy_;
 
-        mutable label first_, kMax_, kOpt_;
-        mutable scalar epsOld_, xNew_;
-
-
-    // Private Member Functions
-
-        void SIMPR
-        (
-            const ODESystem& ode,
-            const scalar xStart,
-            const scalarField& y,
-            const scalarField& dydx,
-            const scalarField& dfdx,
-            const scalarSquareMatrix& dfdy,
-            const scalar deltaX,
-            const label nSteps,
-            scalarField& yEnd
-        ) const;
-
-        void polyExtrapolate
-        (
-            const label iest,
-            const scalar xest,
-            const scalarField& yest,
-            scalarField& yz,
-            scalarField& dy,
-            scalarField& x_p,
-            scalarRectangularMatrix& d_p
-        ) const;
+        //- Temprorary for the test-step solution
+        mutable scalarField yTemp_;
 
 
 public:
 
-    //- Runtime type information
-    TypeName("SIBS");
-
-
     // Constructors
 
-        //- Construct from ODE
-        SIBS(const ODESystem& ode, const dictionary& dict);
+        //- Construct from ODESystem
+        adaptiveSolver(const ODESystem& ode, const dictionary& dict);
+
+
+    //- Destructor
+    virtual ~adaptiveSolver()
+    {}
 
 
     // Member Functions
 
+        //- Solve a single step dx and return the error
+        virtual scalar solve
+        (
+            const ODESystem& ode,
+            const scalar x0,
+            const scalarField& y0,
+            const scalarField& dydx0,
+            const scalar dx,
+            scalarField& y
+        ) const = 0;
+
+        //- Solve the ODE system and the update the state
         void solve
         (
             const ODESystem& ode,
