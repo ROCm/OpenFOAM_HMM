@@ -1328,24 +1328,9 @@ void Foam::polyMesh::findTetFacePt
 {
     const polyMesh& mesh = *this;
 
-    tetFaceI = -1;
-    tetPtI = -1;
-
-    List<tetIndices> cellTets =
-        polyMeshTetDecomposition::cellTetIndices(mesh, cellI);
-
-    forAll(cellTets, tetI)
-    {
-        const tetIndices& cellTetIs = cellTets[tetI];
-
-        if (cellTetIs.tet(mesh).inside(pt))
-        {
-            tetFaceI = cellTetIs.face();
-            tetPtI = cellTetIs.tetPt();
-
-            return;
-        }
-    }
+    tetIndices tet(polyMeshTetDecomposition::findTet(mesh, cellI, pt));
+    tetFaceI = tet.face();
+    tetPtI = tet.tetPt();
 }
 
 
