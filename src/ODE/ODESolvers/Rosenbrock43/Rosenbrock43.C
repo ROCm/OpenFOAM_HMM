@@ -113,7 +113,7 @@ Foam::scalar Foam::Rosenbrock43::solve
 
     LUDecompose(a_, pivotIndices_);
 
-    // Compute k1:
+    // Calculate k1:
     forAll(k1_, i)
     {
         k1_[i] = dydx0[i] + dx*d1*dfdx_[i];
@@ -121,7 +121,7 @@ Foam::scalar Foam::Rosenbrock43::solve
 
     LUBacksubstitute(a_, pivotIndices_, k1_);
 
-    // Compute k2:
+    // Calculate k2:
     forAll(y, i)
     {
         y[i] = y0[i] + a21*k1_[i];
@@ -136,7 +136,7 @@ Foam::scalar Foam::Rosenbrock43::solve
 
     LUBacksubstitute(a_, pivotIndices_, k2_);
 
-    // Compute k3:
+    // Calculate k3:
     forAll(y, i)
     {
         y[i] = y0[i] + a31*k1_[i] + a32*k2_[i];
@@ -151,7 +151,7 @@ Foam::scalar Foam::Rosenbrock43::solve
 
     LUBacksubstitute(a_, pivotIndices_, k3_);
 
-    // Compute k4:
+    // Calculate k4:
     forAll(k4_, i)
     {
         k4_[i] = dydx_[i] + dx*d4*dfdx_[i]
@@ -160,6 +160,7 @@ Foam::scalar Foam::Rosenbrock43::solve
 
     LUBacksubstitute(a_, pivotIndices_, k4_);
 
+    // Calculate error and update state:
     forAll(y, i)
     {
         y[i] = y0[i] + b1*k1_[i] + b2*k2_[i] + b3*k3_[i] + b4*k4_[i];
