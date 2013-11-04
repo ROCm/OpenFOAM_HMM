@@ -2,7 +2,9 @@ ODESolvers/ODESolver/ODESolver.C
 ODESolvers/ODESolver/ODESolverNew.C
 
 ODESolvers/adaptiveSolver/adaptiveSolver.C
+ODESolvers/Euler/Euler.C
 ODESolvers/EulerSI/EulerSI.C
+ODESolvers/Trapezoid/Trapezoid.C
 ODESolvers/RKF45/RKF45.C
 ODESolvers/RKCK45/RKCK45.C
 ODESolvers/RKDP45/RKDP45.C
