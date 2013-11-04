@@ -25,15 +25,16 @@ Class
     Foam::Rosenbrock43
 
 Description
-    4th Order Kaps Rentrop Rosenbrock stiff ODE solver
+    Embedded Rosenbrock ODE solver of order (3)4.
 
-    References:
+    Based on code from:
     \verbatim
-        "Generalized Runge-Kutta methods of order four with stepsize control
-         for stiff ordinary differential equations"
-        Kaps, P.,
-        Rentrop, P.,
-        Numerische Thematic, vol. 33, 1979, pp. 55–68.
+        "Solving Ordinary Differential Equations II: Stiff
+         and Differential-Algebraic Problems, second edition",
+        Hairer, E.,
+        Nørsett, S.,
+        Wanner, G.,
+        Springer-Verlag, Berlin. 1996.
     \endverbatim
 
     Constants from:
@@ -41,16 +42,6 @@ Description
         "Implementation of Rosenbrock Methods"
         Shampine, L. F.,
         ACM Transactions on Mathematical Software, vol. 8, 1982, pp. 93–113.
-    \endverbatim
-
-    Based on code from:
-    \verbatim
-        "Solving Ordinary Differential Equations I: Nonstiff Problems,
-         second edition",
-        Hairer, E.,
-        Nørsett, S.,
-        Wanner, G.,
-        Springer-Verlag, Berlin. 1993, ISBN 3-540-56670-8.
     \endverbatim
 
 SourceFiles

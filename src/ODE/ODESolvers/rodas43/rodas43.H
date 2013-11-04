@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,34 +22,28 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::KRR43
+    Foam::rodas43
 
 Description
-    4th Order Kaps Rentrop Rosenbrock stiff ODE solver
+    Stiffly-stable embedded Rosenbrock ODE solver of order (3)4.
 
     References:
     \verbatim
-        "Generalized Runge-Kutta methods of order four with stepsize control
-         for stiff ordinary differential equations"
-        Kaps, P.,
-        Rentrop, P.,
-        Numerische Thematic, vol. 33, 1979, pp. 55–68.
-    \endverbatim
-
-    Constants from:
-    \verbatim
-        "Implementation of Rosenbrock Methods"
-        Shampine, L. F.,
-        ACM Transactions on Mathematical Software, vol. 8, 1982, pp. 93–113.
+        "Solving Ordinary Differential Equations II: Stiff
+         and Differential-Algebraic Problems, second edition",
+        Hairer, E.,
+        Nørsett, S.,
+        Wanner, G.,
+        Springer-Verlag, Berlin. 1996.
     \endverbatim
 
 SourceFiles
-    KRR43.C
+    rodas43.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef KRR43_H
-#define KRR43_H
+#ifndef rodas43_H
+#define rodas43_H
 
 #include "ODESolver.H"
 #include "adaptiveSolver.H"
@@ -60,10 +54,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class KRR43 Declaration
+                           Class rodas43 Declaration
 \*---------------------------------------------------------------------------*/
 
-class KRR43
+class rodas43
 :
     public ODESolver,
     public adaptiveSolver
@@ -74,6 +68,8 @@ class KRR43
         mutable scalarField k2_;
         mutable scalarField k3_;
         mutable scalarField k4_;
+        mutable scalarField k5_;
+        mutable scalarField dy_;
         mutable scalarField err_;
         mutable scalarField dydx_;
         mutable scalarField dfdx_;
@@ -82,25 +78,28 @@ class KRR43
         mutable labelList pivotIndices_;
 
         static const scalar
-            gamma,
+            c2, c3, c4,
+            bet2p, bet3p, bet4p,
+            d1, d2, d3, d4,
             a21, a31, a32,
-            c21, c31, c32, c41, c42, c43,
-            b1, b2, b3, b4,
-            e1, e2, e3, e4,
-            c1X, c2X, c3X, c4X,
-            a2X, a3X;
-
+            a41, a42, a43,
+            a51, a52, a53, a54,
+            c21, c31, c32,
+            c41, c42, c43,
+            c51, c52, c53, c54,
+            c61, c62, c63, c64, c65,
+            gamma;
 
 public:
 
     //- Runtime type information
-    TypeName("KRR43");
+    TypeName("rodas43");
 
 
     // Constructors
 
         //- Construct from ODE
-        KRR43(const ODESystem& ode, const dictionary& dict);
+        rodas43(const ODESystem& ode, const dictionary& dict);
 
 
     // Member Functions
