@@ -175,6 +175,8 @@ bool Foam::fv::MRFSource::read(const dictionary& dict)
         coeffs_.readIfPresent("UName", UName_);
         coeffs_.readIfPresent("rhoName", rhoName_);
 
+        initialise();
+
         return true;
     }
     else
