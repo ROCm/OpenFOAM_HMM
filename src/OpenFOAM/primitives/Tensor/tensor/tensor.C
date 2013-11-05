@@ -365,7 +365,7 @@ vector eigenValues(const symmTensor& t)
                 iii =
                     m2SqrtQ
                    *cos((theta - constant::mathematical::twoPi)/3)
-                 - aBy3;
+                  - aBy3;
             }
             else
             {
