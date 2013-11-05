@@ -53,7 +53,7 @@ else
         )
     );
 
-    fvOptions.makeRelative(fvc::interpolate(psi), phiHbyA);
+    fvOptions.makeRelative(fvc::interpolate(rho), phiHbyA);
 
     while (pimple.correctNonOrthogonal())
     {
