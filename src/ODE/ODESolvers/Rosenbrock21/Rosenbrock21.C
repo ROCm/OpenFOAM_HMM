@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,42 +23,40 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "KRR4.H"
+#include "Rosenbrock21.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(KRR4, 0);
-    addToRunTimeSelectionTable(ODESolver, KRR4, ODE);
+    defineTypeNameAndDebug(Rosenbrock21, 0);
+    addToRunTimeSelectionTable(ODESolver, Rosenbrock21, dictionary);
 
 const scalar
-    KRR4::gamma = 1.0/2.0,
-    KRR4::a21 = 2.0, KRR4::a31 = 48.0/25.0, KRR4::a32 = 6.0/25.0,
-    KRR4::c21 = -8.0, KRR4::c31 = 372.0/25.0, KRR4::c32 = 12.0/5.0,
-    KRR4::c41 = -112.0/125.0, KRR4::c42 = -54.0/125.0, KRR4::c43 = -2.0/5.0,
-    KRR4::b1 = 19.0/9.0, KRR4::b2 = 1.0/2.0, KRR4::b3 = 25.0/108.0,
-    KRR4::b4 = 125.0/108.0,
-    KRR4::e1 = 17.0/54.0, KRR4::e2 = 7.0/36.0, KRR4::e3 = 0.0,
-    KRR4::e4 = 125.0/108.0,
-    KRR4::c1X = 1.0/2.0, KRR4::c2X = -3.0/2.0, KRR4::c3X = 121.0/50.0,
-    KRR4::c4X = 29.0/250.0,
-    KRR4::a2X = 1.0, KRR4::a3X = 3.0/5.0;
+    Rosenbrock21::gamma = 1 + 1.0/std::sqrt(2.0),
+    Rosenbrock21::a21 = 1.0/gamma,
+    Rosenbrock21::c2 = 1.0,
+    Rosenbrock21::c21 = -2.0/gamma,
+    Rosenbrock21::b1 = (3.0/2.0)/gamma,
+    Rosenbrock21::b2 = (1.0/2.0)/gamma,
+    Rosenbrock21::e1 = b1 - 1.0/gamma,
+    Rosenbrock21::e2 = b2,
+    Rosenbrock21::d1 = 1,
+    Rosenbrock21::d2 = -1;
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::KRR4::KRR4(const ODESystem& ode)
+Foam::Rosenbrock21::Rosenbrock21(const ODESystem& ode, const dictionary& dict)
 :
-    ODESolver(ode),
-    adaptiveSolver(ode),
-    g1_(n_),
-    g2_(n_),
-    g3_(n_),
-    g4_(n_),
+    ODESolver(ode, dict),
+    adaptiveSolver(ode, dict),
+    k1_(n_),
+    k2_(n_),
     err_(n_),
+    dydx_(n_),
     dfdx_(n_),
     dfdy_(n_, n_),
     a_(n_, n_),
@@ -68,15 +66,14 @@ Foam::KRR4::KRR4(const ODESystem& ode)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::KRR4::solve
+Foam::scalar Foam::Rosenbrock21::solve
 (
     const ODESystem& ode,
     const scalar x0,
     const scalarField& y0,
     const scalarField& dydx0,
     const scalar dx,
-    scalarField& y,
-    const scalar eps
+    scalarField& y
 ) const
 {
     ode.jacobian(x0, y0, dfdx_, dfdy_);
@@ -93,72 +90,49 @@ Foam::scalar Foam::KRR4::solve
 
     LUDecompose(a_, pivotIndices_);
 
-    forAll(g1_, i)
+    // Calculate k1:
+    forAll(k1_, i)
     {
-        g1_[i] = dydx0[i] + dx*c1X*dfdx_[i];
+        k1_[i] = dydx0[i] + dx*d1*dfdx_[i];
     }
 
-    LUBacksubstitute(a_, pivotIndices_, g1_);
+    LUBacksubstitute(a_, pivotIndices_, k1_);
 
+    // Calculate k2:
     forAll(y, i)
     {
-        y[i] = y0[i] + a21*g1_[i];
+        y[i] = y0[i] + a21*k1_[i];
     }
 
-    ode.derivatives(x0 + a2X*dx, y, dydx_);
+    ode.derivatives(x0 + c2*dx, y, dydx_);
 
-    forAll(g2_, i)
+    forAll(k2_, i)
     {
-        g2_[i] = dydx_[i] + dx*c2X*dfdx_[i] + c21*g1_[i]/dx;
+        k2_[i] = dydx_[i] + dx*d2*dfdx_[i] + c21*k1_[i]/dx;
     }
 
-    LUBacksubstitute(a_, pivotIndices_, g2_);
+    LUBacksubstitute(a_, pivotIndices_, k2_);
 
+    // Calculate error and update state:
     forAll(y, i)
     {
-        y[i] = y0[i] + a31*g1_[i] + a32*g2_[i];
+        y[i] = y0[i] + b1*k1_[i] + b2*k2_[i];
+        err_[i] = e1*k1_[i] + e2*k2_[i];
     }
 
-    ode.derivatives(x0 + a3X*dx, y, dydx_);
-
-    forAll(g3_, i)
-    {
-        g3_[i] = dydx0[i] + dx*c3X*dfdx_[i] + (c31*g1_[i] + c32*g2_[i])/dx;
-    }
-
-    LUBacksubstitute(a_, pivotIndices_, g3_);
-
-    forAll(g4_, i)
-    {
-        g4_[i] = dydx_[i] + dx*c4X*dfdx_[i]
-           + (c41*g1_[i] + c42*g2_[i] + c43*g3_[i])/dx;
-    }
-
-    LUBacksubstitute(a_, pivotIndices_, g4_);
-
-    forAll(y, i)
-    {
-        y[i] = y0[i] + b1*g1_[i] + b2*g2_[i] + b3*g3_[i] + b4*g4_[i];
-        err_[i] = e1*g1_[i] + e2*g2_[i] + e3*g3_[i] + e4*g4_[i];
-    }
-
-    return normalizeError(eps, y0, y, err_);
+    return normalizeError(y0, y, err_);
 }
 
 
-void Foam::KRR4::solve
+void Foam::Rosenbrock21::solve
 (
     const ODESystem& odes,
     scalar& x,
     scalarField& y,
-    scalarField& dydx,
-    const scalar eps,
-    const scalar dxTry,
-    scalar& dxDid,
-    scalar& dxNext
+    scalar& dxTry
 ) const
 {
-    adaptiveSolver::solve(odes, x, y, dydx, eps, dxTry, dxDid, dxNext);
+    adaptiveSolver::solve(odes, x, y, dxTry);
 }
 
 

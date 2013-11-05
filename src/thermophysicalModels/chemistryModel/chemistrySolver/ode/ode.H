@@ -55,12 +55,7 @@ class ode
     // Private data
 
         dictionary coeffsDict_;
-        const word solverName_;
         autoPtr<ODESolver> odeSolver_;
-
-        // Model constants
-
-            scalar eps_;
 
         // Solver data
         mutable scalarField cTp_;

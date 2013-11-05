@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,34 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::KRR4
+    Foam::Trapezoid
 
 Description
-    4th Order Kaps Rentrop Rosenbrock stiff ODE solver
-
-    References:
-    \verbatim
-        "Generalized Runge-Kutta methods of order four with stepsize control
-         for stiff ordinary differential equations"
-        Kaps, P.,
-        Rentrop, P.,
-        Numerische Thematic, vol. 33, 1979, pp. 55–68.
-    \endverbatim
-
-    Constants from:
-    \verbatim
-        "Implementation of Rosenbrock Methods"
-        Shampine, L. F.,
-        ACM Transactions on Mathematical Software, vol. 8, 1982, pp. 93–113.
-    \endverbatim
+    Trapezoidal ODE solver of order (1)2.
 
 SourceFiles
-    KRR4.C
+    Trapezoid.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef KRR4_H
-#define KRR4_H
+#ifndef Trapezoid_H
+#define Trapezoid_H
 
 #include "ODESolver.H"
 #include "adaptiveSolver.H"
@@ -60,46 +44,29 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class KRR4 Declaration
+                           Class Trapezoid Declaration
 \*---------------------------------------------------------------------------*/
 
-class KRR4
+class Trapezoid
 :
     public ODESolver,
     public adaptiveSolver
 {
     // Private data
 
-        mutable scalarField g1_;
-        mutable scalarField g2_;
-        mutable scalarField g3_;
-        mutable scalarField g4_;
         mutable scalarField err_;
-        mutable scalarField dfdx_;
-        mutable scalarSquareMatrix dfdy_;
-        mutable scalarSquareMatrix a_;
-        mutable labelList pivotIndices_;
-
-        static const scalar
-            gamma,
-            a21, a31, a32,
-            c21, c31, c32, c41, c42, c43,
-            b1, b2, b3, b4,
-            e1, e2, e3, e4,
-            c1X, c2X, c3X, c4X,
-            a2X, a3X;
 
 
 public:
 
     //- Runtime type information
-    TypeName("KRR4");
+    TypeName("Trapezoid");
 
 
     // Constructors
 
         //- Construct from ODE
-        KRR4(const ODESystem& ode);
+        Trapezoid(const ODESystem& ode, const dictionary& dict);
 
 
     // Member Functions
@@ -112,8 +79,7 @@ public:
             const scalarField& y0,
             const scalarField& dydx0,
             const scalar dx,
-            scalarField& y,
-            const scalar eps
+            scalarField& y
         ) const;
 
         //- Solve the ODE system and the update the state
@@ -122,11 +88,7 @@ public:
             const ODESystem& ode,
             scalar& x,
             scalarField& y,
-            scalarField& dydx,
-            const scalar eps,
-            const scalar dxTry,
-            scalar& dxDid,
-            scalar& dxNext
+            scalar& dxTry
         ) const;
 };
 

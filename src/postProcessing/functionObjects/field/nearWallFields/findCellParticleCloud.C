@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,37 +23,20 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ODESolver.H"
+#include "findCellParticle.H"
+#include "Cloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::ODESolver> Foam::ODESolver::New
-(
-    const ODESystem& odes,
-    const dictionary& dict
-)
+namespace Foam
 {
-    word ODESolverTypeName(dict.lookup("solver"));
-    Info<< "Selecting ODE solver " << ODESolverTypeName << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(ODESolverTypeName);
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
-    {
-        FatalErrorIn
-        (
-            "ODESolver::New"
-            "(const dictionary& dict, const ODESystem& odes)"
-        )   << "Unknown ODESolver type "
-            << ODESolverTypeName << nl << nl
-            << "Valid ODESolvers are : " << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
-    }
+defineTemplateTypeNameAndDebug(Cloud<findCellParticle>, 0);
 
-    return autoPtr<ODESolver>(cstrIter()(odes, dict));
-}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace Foam
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,41 +23,58 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "RKCK5.H"
+#include "RKCK45.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(RKCK5, 0);
-    addToRunTimeSelectionTable(ODESolver, RKCK5, ODE);
+    defineTypeNameAndDebug(RKCK45, 0);
+    addToRunTimeSelectionTable(ODESolver, RKCK45, dictionary);
 
 const scalar
-    RKCK5::a2 = 0.2, RKCK5::a3 = 0.3, RKCK5::a4 = 0.6, RKCK5::a5 = 1.0,
-    RKCK5::a6 = 0.875,
-    RKCK5::b21 = 0.2, RKCK5::b31 = 3.0/40.0, RKCK5::b32 = 9.0/40.0,
-    RKCK5::b41 = 0.3, RKCK5::b42 = -0.9, RKCK5::b43 = 1.2,
-    RKCK5::b51 = -11.0/54.0, RKCK5::b52 = 2.5, RKCK5::b53 = -70.0/27.0,
-    RKCK5::b54 = 35.0/27.0,
-    RKCK5::b61 = 1631.0/55296.0, RKCK5::b62 = 175.0/512.0,
-    RKCK5::b63 = 575.0/13824.0, RKCK5::b64 = 44275.0/110592.0,
-    RKCK5::b65 = 253.0/4096.0,
-    RKCK5::c1 = 37.0/378.0, RKCK5::c3 = 250.0/621.0,
-    RKCK5::c4 = 125.0/594.0, RKCK5::c6 = 512.0/1771.0,
-    RKCK5::dc1 = RKCK5::c1 - 2825.0/27648.0,
-    RKCK5::dc3 = RKCK5::c3 - 18575.0/48384.0,
-    RKCK5::dc4 = RKCK5::c4 - 13525.0/55296.0, RKCK5::dc5 = -277.00/14336.0,
-    RKCK5::dc6 = RKCK5::c6 - 0.25;
+    RKCK45::c2 = 1.0/5.0,
+    RKCK45::c3 = 3.0/10.0,
+    RKCK45::c4 = 3.0/5.0,
+    RKCK45::c5 = 1.0,
+    RKCK45::c6 = 7.0/8.0,
+
+    RKCK45::a21 = 1.0/5.0,
+    RKCK45::a31 = 3.0/40.0,
+    RKCK45::a32 = 9.0/40.0,
+    RKCK45::a41 = 3.0/10.0,
+    RKCK45::a42 = -9.0/10.0,
+    RKCK45::a43 = 6.0/5.0,
+    RKCK45::a51 = -11.0/54.0,
+    RKCK45::a52 = 5.0/2.0,
+    RKCK45::a53 = -70.0/27.0,
+    RKCK45::a54 = 35.0/27.0,
+    RKCK45::a61 = 1631.0/55296.0,
+    RKCK45::a62 = 175.0/512.0,
+    RKCK45::a63 = 575.0/13824.0,
+    RKCK45::a64 = 44275.0/110592.0,
+    RKCK45::a65 = 253.0/4096.0,
+
+    RKCK45::b1 = 37.0/378.0,
+    RKCK45::b3 = 250.0/621.0,
+    RKCK45::b4 = 125.0/594.0,
+    RKCK45::b6 = 512.0/1771.0,
+
+    RKCK45::e1 = RKCK45::b1 - 2825.0/27648.0,
+    RKCK45::e3 = RKCK45::b3 - 18575.0/48384.0,
+    RKCK45::e4 = RKCK45::b4 - 13525.0/55296.0,
+    RKCK45::e5 = -277.00/14336.0,
+    RKCK45::e6 = RKCK45::b6 - 0.25;
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::RKCK5::RKCK5(const ODESystem& ode)
+Foam::RKCK45::RKCK45(const ODESystem& ode, const dictionary& dict)
 :
-    ODESolver(ode),
-    adaptiveSolver(ode),
+    ODESolver(ode, dict),
+    adaptiveSolver(ode, dict),
     yTemp_(n_),
     k2_(n_),
     k3_(n_),
@@ -70,85 +87,80 @@ Foam::RKCK5::RKCK5(const ODESystem& ode)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::RKCK5::solve
+Foam::scalar Foam::RKCK45::solve
 (
     const ODESystem& odes,
     const scalar x0,
     const scalarField& y0,
     const scalarField& dydx0,
     const scalar dx,
-    scalarField& y,
-    const scalar eps
+    scalarField& y
 ) const
 {
     forAll(yTemp_, i)
     {
-        yTemp_[i] = y0[i] + b21*dx*dydx0[i];
+        yTemp_[i] = y0[i] + a21*dx*dydx0[i];
     }
 
-    odes.derivatives(x0 + a2*dx, yTemp_, k2_);
+    odes.derivatives(x0 + c2*dx, yTemp_, k2_);
 
     forAll(yTemp_, i)
     {
-        yTemp_[i] = y0[i] + dx*(b31*dydx0[i] + b32*k2_[i]);
+        yTemp_[i] = y0[i] + dx*(a31*dydx0[i] + a32*k2_[i]);
     }
 
-    odes.derivatives(x0 + a3*dx, yTemp_, k3_);
+    odes.derivatives(x0 + c3*dx, yTemp_, k3_);
 
     forAll(yTemp_, i)
     {
-        yTemp_[i] = y0[i] + dx*(b41*dydx0[i] + b42*k2_[i] + b43*k3_[i]);
+        yTemp_[i] = y0[i] + dx*(a41*dydx0[i] + a42*k2_[i] + a43*k3_[i]);
     }
 
-    odes.derivatives(x0 + a4*dx, yTemp_, k4_);
+    odes.derivatives(x0 + c4*dx, yTemp_, k4_);
 
     forAll(yTemp_, i)
     {
         yTemp_[i] = y0[i]
-          + dx*(b51*dydx0[i] + b52*k2_[i] + b53*k3_[i] + b54*k4_[i]);
+          + dx*(a51*dydx0[i] + a52*k2_[i] + a53*k3_[i] + a54*k4_[i]);
     }
 
-    odes.derivatives(x0 + a5*dx, yTemp_, k5_);
+    odes.derivatives(x0 + c5*dx, yTemp_, k5_);
 
     forAll(yTemp_, i)
     {
         yTemp_[i] = y0[i]
           + dx
-           *(b61*dydx0[i] + b62*k2_[i] + b63*k3_[i] + b64*k4_[i] + b65*k5_[i]);
+           *(a61*dydx0[i] + a62*k2_[i] + a63*k3_[i] + a64*k4_[i] + a65*k5_[i]);
     }
 
-    odes.derivatives(x0 + a6*dx, yTemp_, k6_);
+    odes.derivatives(x0 + c6*dx, yTemp_, k6_);
 
     forAll(y, i)
     {
         y[i] = y0[i]
-          + dx*(c1*dydx0[i] + c3*k3_[i] + c4*k4_[i] + c6*k6_[i]);
+          + dx*(b1*dydx0[i] + b3*k3_[i] + b4*k4_[i] + b6*k6_[i]);
     }
 
     forAll(err_, i)
     {
         err_[i] =
             dx
-           *(dc1*dydx0[i] + dc3*k3_[i] + dc4*k4_[i] + dc5*k5_[i] + dc6*k6_[i]);
+           *(e1*dydx0[i] + e3*k3_[i] + e4*k4_[i] + e5*k5_[i] + e6*k6_[i]);
     }
 
-    return normalizeError(eps, y0, y, err_);
+    return normalizeError(y0, y, err_);
 }
 
 
-void Foam::RKCK5::solve
+void Foam::RKCK45::solve
 (
     const ODESystem& odes,
     scalar& x,
     scalarField& y,
-    scalarField& dydx,
-    const scalar eps,
-    const scalar dxTry,
-    scalar& dxDid,
-    scalar& dxNext
+    scalar& dxTry
 ) const
 {
-    adaptiveSolver::solve(odes, x, y, dydx, eps, dxTry, dxDid, dxNext);
+    adaptiveSolver::solve(odes, x, y, dxTry);
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,27 +22,30 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::RKCK5
+    Foam::EulerSI
 
 Description
-    5th Order Cash-Karp Runge-Kutta ODE solver
+    Semi-implicit Euler ODE solver of order (0)1.
 
-    References:
-    \verbatim
-        "A variable order Runge-Kutta method for initial value problems
-         with rapidly varying right-hand sides"
-        Cash, J.R.,
-        Karp, A.H.
-        ACM Transactions on Mathematical Software, vol. 16, 1990, pp. 201–222.
-    \endverbatim
+    The method calculates the new state from:
+    \f[
+        y_{n+1} = y_n
+          + \delta_x\left[I - \delta_x\frac{\partial f}{\partial y}\right]^{-1}
+            \cdot \left[f(y_n) + \delta_x\frac{\partial f}{\partial x}\right]
+    \f]
+    The error is estimated directly from the change in the solution,
+    i.e. the difference between the 0th and 1st order solutions:
+    \f[
+        err_{n+1} = y_{n+1} - y_n
+    \f]
 
 SourceFiles
-    RKCK5.C
+    EulerSI.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef RKCK5_H
-#define RKCK5_H
+#ifndef EulerSI_H
+#define EulerSI_H
 
 #include "ODESolver.H"
 #include "adaptiveSolver.H"
@@ -53,46 +56,34 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class RKCK5 Declaration
+                           Class EulerSI Declaration
 \*---------------------------------------------------------------------------*/
 
-class RKCK5
+class EulerSI
 :
     public ODESolver,
     public adaptiveSolver
 {
     // Private data
 
-        //- RKCK Constants
-        static const scalar
-            a2, a3, a4, a5, a6,
-            b21, b31, b32, b41, b42, b43,
-            b51, b52, b53, b54, b61, b62, b63, b64, b65,
-            c1, c3, c4, c6,
-            dc1, dc3, dc4, dc5, dc6;
-
-        // Temporary fields
-        mutable scalarField yTemp_;
-        mutable scalarField k2_;
-        mutable scalarField k3_;
-        mutable scalarField k4_;
-        mutable scalarField k5_;
-        mutable scalarField k6_;
-
-        //- Error-estimate field
         mutable scalarField err_;
+        mutable scalarField dydx_;
+        mutable scalarField dfdx_;
+        mutable scalarSquareMatrix dfdy_;
+        mutable scalarSquareMatrix a_;
+        mutable labelList pivotIndices_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("RKCK5");
+    TypeName("EulerSI");
 
 
     // Constructors
 
         //- Construct from ODE
-        RKCK5(const ODESystem& ode);
+        EulerSI(const ODESystem& ode, const dictionary& dict);
 
 
     // Member Functions
@@ -105,8 +96,7 @@ public:
             const scalarField& y0,
             const scalarField& dydx0,
             const scalar dx,
-            scalarField& y,
-            const scalar eps
+            scalarField& y
         ) const;
 
         //- Solve the ODE system and the update the state
@@ -115,11 +105,7 @@ public:
             const ODESystem& ode,
             scalar& x,
             scalarField& y,
-            scalarField& dydx,
-            const scalar eps,
-            const scalar dxTry,
-            scalar& dxDid,
-            scalar& dxNext
+            scalar& dxTry
         ) const;
 };
 

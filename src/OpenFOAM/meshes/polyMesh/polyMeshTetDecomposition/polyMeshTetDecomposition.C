@@ -311,15 +311,14 @@ Foam::labelList Foam::polyMeshTetDecomposition::findFaceBasePts
         {
             FatalErrorIn
             (
-                "Foam::labelList"
-                "Foam::polyMeshTetDecomposition::findFaceBasePts"
+                "labelList"
+                "polyMeshTetDecomposition::findFaceBasePts"
                 "("
                     "const polyMesh& mesh, "
                     "scalar tol, "
                     "bool report"
                 ")"
-            )
-                << "Coupled face base point exchange failure for face "
+            )   << "Coupled face base point exchange failure for face "
                 << fI
                 << abort(FatalError);
         }
@@ -561,8 +560,8 @@ Foam::List<Foam::tetIndices> Foam::polyMeshTetDecomposition::faceTetIndices
         {
             WarningIn
             (
-                "Foam::List<Foam::tetIndices> "
-                "Foam::polyMeshTetDecomposition::faceTetIndices"
+                "List<tetIndices> "
+                "polyMeshTetDecomposition::faceTetIndices"
                 "("
                     "const polyMesh&, "
                     "label, "
@@ -613,6 +612,76 @@ Foam::List<Foam::tetIndices> Foam::polyMeshTetDecomposition::faceTetIndices
 }
 
 
+Foam::tetIndices Foam::polyMeshTetDecomposition::triangleTetIndices
+(
+    const polyMesh& mesh,
+    const label fI,
+    const label cI,
+    const label tetPtI
+)
+{
+    static label nWarnings = 0;
+    static const label maxWarnings = 100;
+
+    const face& f = mesh.faces()[fI];
+    bool own = (mesh.faceOwner()[fI] == cI);
+    label tetBasePtI = mesh.tetBasePtIs()[fI];
+    if (tetBasePtI == -1)
+    {
+        if (nWarnings < maxWarnings)
+        {
+            WarningIn
+            (
+                "tetIndices "
+                "polyMeshTetDecomposition::triangleTetIndices"
+                "("
+                    "const polyMesh&, "
+                    "label, "
+                    "label, "
+                    "label"
+                ")"
+            )   << "No base point for face " << fI << ", " << f
+                << ", produces a valid tet decomposition."
+                << endl;
+            nWarnings++;
+        }
+        if (nWarnings == maxWarnings)
+        {
+            Warning<< "Suppressing any further warnings." << endl;
+            nWarnings++;
+        }
+
+        tetBasePtI = 0;
+    }
+
+    tetIndices faceTetIs;
+
+    label facePtI = (tetPtI + tetBasePtI) % f.size();
+    label otherFacePtI = f.fcIndex(facePtI);
+
+    faceTetIs.cell() = cI;
+
+    faceTetIs.face() = fI;
+
+    faceTetIs.faceBasePt() = tetBasePtI;
+
+    if (own)
+    {
+        faceTetIs.facePtA() = facePtI;
+        faceTetIs.facePtB() = otherFacePtI;
+    }
+    else
+    {
+        faceTetIs.facePtA() = otherFacePtI;
+        faceTetIs.facePtB() = facePtI;
+    }
+
+    faceTetIs.tetPt() = tetPtI;
+
+    return faceTetIs;
+}
+
+
 Foam::List<Foam::tetIndices> Foam::polyMeshTetDecomposition::cellTetIndices
 (
     const polyMesh& mesh,
@@ -641,6 +710,58 @@ Foam::List<Foam::tetIndices> Foam::polyMeshTetDecomposition::cellTetIndices
     }
 
     return cellTets;
+}
+
+
+Foam::tetIndices Foam::polyMeshTetDecomposition::findTet
+(
+    const polyMesh& mesh,
+    label cI,
+    const point& pt
+)
+{
+    const faceList& pFaces = mesh.faces();
+    const cellList& pCells = mesh.cells();
+
+    const cell& thisCell = pCells[cI];
+
+    tetIndices tetContainingPt;
+
+
+    forAll(thisCell, cFI)
+    {
+        label fI = thisCell[cFI];
+        const face& f = pFaces[fI];
+
+        for (label tetPtI = 1; tetPtI < f.size() - 1; tetPtI++)
+        {
+            // Get tetIndices of face triangle
+            tetIndices faceTetIs
+            (
+                triangleTetIndices
+                (
+                    mesh,
+                    fI,
+                    cI,
+                    tetPtI
+                )
+            );
+
+            // Check if inside
+            if (faceTetIs.tet(mesh).inside(pt))
+            {
+                tetContainingPt = faceTetIs;
+                break;
+            }
+        }
+
+        if (tetContainingPt.cell() != -1)
+        {
+            break;
+        }
+    }
+
+    return tetContainingPt;
 }
 
 

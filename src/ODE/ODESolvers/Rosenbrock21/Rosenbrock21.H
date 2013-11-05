@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,26 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::SIBS
+    Foam::Rosenbrock21
 
 Description
-    Foam::SIBS
-
-    Bader, G. and Deuflhard, P.
-    "A Semi-Implicit Mid-Point Rule for
-     Stiff Systems of Ordinary Differential Equations."
-     Numer. Math. 41, 373-398, 1983.
+    Embedded Rosenbrock ODE solver of order (1)2.
 
 SourceFiles
-    SIMPR.C
-    polyExtrapolate.C
+    Rosenbrock21.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SIBS_H
-#define SIBS_H
+#ifndef Rosenbrock21_H
+#define Rosenbrock21_H
 
 #include "ODESolver.H"
+#include "adaptiveSolver.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,78 +44,61 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class SIBS Declaration
+                           Class Rosenbrock21 Declaration
 \*---------------------------------------------------------------------------*/
 
-class SIBS
+class Rosenbrock21
 :
-    public ODESolver
+    public ODESolver,
+    public adaptiveSolver
 {
     // Private data
 
-        static const label kMaxX_ = 7, iMaxX_ = kMaxX_ + 1;
-        static const label nSeq_[iMaxX_];
-
-        static const scalar safe1, safe2, redMax, redMin, scaleMX;
-
-        mutable scalarField a_;
-        mutable scalarSquareMatrix alpha_;
-        mutable scalarRectangularMatrix d_p_;
-        mutable scalarField x_p_;
+        mutable scalarField k1_;
+        mutable scalarField k2_;
         mutable scalarField err_;
-
-        mutable scalarField yTemp_;
-        mutable scalarField ySeq_;
-        mutable scalarField yErr_;
-        mutable scalarField dydx0_;
+        mutable scalarField dydx_;
         mutable scalarField dfdx_;
         mutable scalarSquareMatrix dfdy_;
+        mutable scalarSquareMatrix a_;
+        mutable labelList pivotIndices_;
 
-        mutable label first_, kMax_, kOpt_;
-        mutable scalar epsOld_, xNew_;
-
-
-    // Private Member Functions
-
-        void SIMPR
-        (
-            const ODESystem& ode,
-            const scalar xStart,
-            const scalarField& y,
-            const scalarField& dydx,
-            const scalarField& dfdx,
-            const scalarSquareMatrix& dfdy,
-            const scalar deltaX,
-            const label nSteps,
-            scalarField& yEnd
-        ) const;
-
-        void polyExtrapolate
-        (
-            const label iest,
-            const scalar xest,
-            const scalarField& yest,
-            scalarField& yz,
-            scalarField& dy,
-            scalarField& x_p,
-            scalarRectangularMatrix& d_p
-        ) const;
+        static const scalar
+            a21,
+            c21,
+            b1, b2,
+            gamma,
+            c2,
+            e1, e2,
+            d1, d2;
 
 
 public:
 
     //- Runtime type information
-    TypeName("SIBS");
+    TypeName("Rosenbrock21");
 
 
     // Constructors
 
         //- Construct from ODE
-        SIBS(const ODESystem& ode, const dictionary& dict);
+        Rosenbrock21(const ODESystem& ode, const dictionary& dict);
 
 
     // Member Functions
 
+        //- Solve a single step dx and return the error
+        scalar solve
+        (
+            const ODESystem& ode,
+            const scalar x0,
+            const scalarField& y0,
+            const scalarField& dydx0,
+            const scalar dx,
+            scalarField& y
+        ) const;
+
+        //- Solve the ODE system and the update the state
         void solve
         (
             const ODESystem& ode,

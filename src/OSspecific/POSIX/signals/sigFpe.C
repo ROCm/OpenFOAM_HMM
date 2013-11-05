@@ -45,6 +45,7 @@ License
 #endif
 
 #include <stdint.h>
+#include <limits>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -53,26 +54,7 @@ struct sigaction Foam::sigFpe::oldAction_;
 
 void Foam::sigFpe::fillSignallingNan(UList<scalar>& lst)
 {
-#ifdef LINUX
-
-    // initialize to signalling NaN
-#   ifdef WM_SP
-
-    const uint32_t sNAN = 0x7ff7fffflu;
-    uint32_t* dPtr = reinterpret_cast<uint32_t*>(lst.begin());
-
-#   else
-
-    const uint64_t sNAN = 0x7ff7ffffffffffffllu;
-    uint64_t* dPtr = reinterpret_cast<uint64_t*>(lst.begin());
-
-#   endif
-
-    forAll(lst, i)
-    {
-        *dPtr++ = sNAN;
-    }
-#endif
+    lst = std::numeric_limits<scalar>::signaling_NaN();
 }
 
 

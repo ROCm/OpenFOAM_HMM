@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,26 +22,31 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::SIBS
+    Foam::Euler
 
 Description
-    Foam::SIBS
+    Euler ODE solver of order (0)1.
 
-    Bader, G. and Deuflhard, P.
-    "A Semi-Implicit Mid-Point Rule for
-     Stiff Systems of Ordinary Differential Equations."
-     Numer. Math. 41, 373-398, 1983.
+    The method calculates the new state from:
+    \f[
+        y_{n+1} = y_n + \delta_x f
+    \f]
+    The error is estimated directly from the change in the solution,
+    i.e. the difference between the 0th and 1st order solutions:
+    \f[
+        err_{n+1} = y_{n+1} - y_n
+    \f]
 
 SourceFiles
-    SIMPR.C
-    polyExtrapolate.C
+    Euler.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SIBS_H
-#define SIBS_H
+#ifndef Euler_H
+#define Euler_H
 
 #include "ODESolver.H"
+#include "adaptiveSolver.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,78 +54,45 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class SIBS Declaration
+                           Class Euler Declaration
 \*---------------------------------------------------------------------------*/
 
-class SIBS
+class Euler
 :
-    public ODESolver
+    public ODESolver,
+    public adaptiveSolver
 {
     // Private data
 
-        static const label kMaxX_ = 7, iMaxX_ = kMaxX_ + 1;
-        static const label nSeq_[iMaxX_];
-
-        static const scalar safe1, safe2, redMax, redMin, scaleMX;
-
-        mutable scalarField a_;
-        mutable scalarSquareMatrix alpha_;
-        mutable scalarRectangularMatrix d_p_;
-        mutable scalarField x_p_;
         mutable scalarField err_;
-
-        mutable scalarField yTemp_;
-        mutable scalarField ySeq_;
-        mutable scalarField yErr_;
-        mutable scalarField dydx0_;
-        mutable scalarField dfdx_;
-        mutable scalarSquareMatrix dfdy_;
-
-        mutable label first_, kMax_, kOpt_;
-        mutable scalar epsOld_, xNew_;
-
-
-    // Private Member Functions
-
-        void SIMPR
-        (
-            const ODESystem& ode,
-            const scalar xStart,
-            const scalarField& y,
-            const scalarField& dydx,
-            const scalarField& dfdx,
-            const scalarSquareMatrix& dfdy,
-            const scalar deltaX,
-            const label nSteps,
-            scalarField& yEnd
-        ) const;
-
-        void polyExtrapolate
-        (
-            const label iest,
-            const scalar xest,
-            const scalarField& yest,
-            scalarField& yz,
-            scalarField& dy,
-            scalarField& x_p,
-            scalarRectangularMatrix& d_p
-        ) const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("SIBS");
+    TypeName("Euler");
 
 
     // Constructors
 
         //- Construct from ODE
-        SIBS(const ODESystem& ode, const dictionary& dict);
+        Euler(const ODESystem& ode, const dictionary& dict);
 
 
     // Member Functions
 
+        //- Solve a single step dx and return the error
+        scalar solve
+        (
+            const ODESystem& ode,
+            const scalar x0,
+            const scalarField& y0,
+            const scalarField& dydx0,
+            const scalar dx,
+            scalarField& y
+        ) const;
+
+        //- Solve the ODE system and the update the state
         void solve
         (
             const ODESystem& ode,

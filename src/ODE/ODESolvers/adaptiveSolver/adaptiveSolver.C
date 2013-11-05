@@ -26,79 +26,50 @@ License
 #include "adaptiveSolver.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-const scalar
-    adaptiveSolver::safeScale=0.9,
-    adaptiveSolver::alphaInc=0.2,
-    adaptiveSolver::alphaDec=0.25,
-    adaptiveSolver::minScale=0.2,
-    adaptiveSolver::maxScale=10;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::adaptiveSolver::adaptiveSolver(const ODESystem& ode)
+Foam::adaptiveSolver::adaptiveSolver
+(
+    const ODESystem& ode,
+    const dictionary& dict
+)
 :
+    safeScale_(dict.lookupOrDefault<scalar>("safeScale", 0.9)),
+    alphaInc_(dict.lookupOrDefault<scalar>("alphaIncrease", 0.2)),
+    alphaDec_(dict.lookupOrDefault<scalar>("alphaDecrease", 0.25)),
+    minScale_(dict.lookupOrDefault<scalar>("minScale", 0.2)),
+    maxScale_(dict.lookupOrDefault<scalar>("maxScale", 10)),
+    dydx0_(ode.nEqns()),
     yTemp_(ode.nEqns())
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::adaptiveSolver::normalizeError
-(
-    const scalar eps,
-    const scalarField& y0,
-    const scalarField& y,
-    const scalarField& err
-) const
-{
-    scalar epsAbs = 1e-10;
-    scalar epsRel = eps;
-
-    // Calculate the maximum error
-    scalar maxErr = 0.0;
-    forAll(err, i)
-    {
-        scalar eps = epsAbs + epsRel*max(mag(y0[i]), mag(y[i]));
-        maxErr = max(maxErr, mag(err[i])/eps);
-    }
-
-    return maxErr;
-}
-
-
 void Foam::adaptiveSolver::solve
 (
     const ODESystem& odes,
     scalar& x,
     scalarField& y,
-    scalarField& dydx,
-    const scalar eps,
-    const scalar dxTry,
-    scalar& dxDid,
-    scalar& dxNext
+    scalar& dxTry
 ) const
 {
     scalar dx = dxTry;
     scalar err = 0.0;
+
+    odes.derivatives(x, y, dydx0_);
 
     // Loop over solver and adjust step-size as necessary
     // to achieve desired error
     do
     {
         // Solve step and provide error estimate
-        err = solve(odes, x, y, dydx, dx, yTemp_, eps);
+        err = solve(odes, x, y, dydx0_, dx, yTemp_);
 
         // If error is large reduce dx
         if (err > 1)
         {
-            scalar scale = max(safeScale*pow(err, -alphaDec), minScale);
+            scalar scale = max(safeScale_*pow(err, -alphaDec_), minScale_);
             dx *= scale;
 
             if (dx < VSMALL)
@@ -111,12 +82,19 @@ void Foam::adaptiveSolver::solve
     } while (err > 1);
 
     // Update the state
-    dxDid = dx;
     x += dx;
     y = yTemp_;
 
     // If the error is small increase the step-size
-    dxNext = min(max(safeScale*pow(err, -alphaInc), minScale), maxScale)*dx;
+    if (err > pow(maxScale_/safeScale_, -1.0/alphaInc_))
+    {
+        dxTry =
+            min(max(safeScale_*pow(err, -alphaInc_), minScale_), maxScale_)*dx;
+    }
+    else
+    {
+        dxTry = safeScale_*maxScale_*dx;
+    }
 }
 
 

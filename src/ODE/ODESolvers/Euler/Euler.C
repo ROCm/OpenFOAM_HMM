@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,68 +23,65 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ode.H"
-#include "chemistryModel.H"
+#include "Euler.H"
+#include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(Euler, 0);
+    addToRunTimeSelectionTable(ODESolver, Euler, dictionary);
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class ChemistryModel>
-Foam::ode<ChemistryModel>::ode
-(
-    const fvMesh& mesh
-)
+Foam::Euler::Euler(const ODESystem& ode, const dictionary& dict)
 :
-    chemistrySolver<ChemistryModel>(mesh),
-    coeffsDict_(this->subDict("odeCoeffs")),
-    odeSolver_(ODESolver::New(*this, coeffsDict_)),
-    cTp_(this->nEqns())
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class ChemistryModel>
-Foam::ode<ChemistryModel>::~ode()
+    ODESolver(ode, dict),
+    adaptiveSolver(ode, dict),
+    err_(n_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class ChemistryModel>
-void Foam::ode<ChemistryModel>::solve
+Foam::scalar Foam::Euler::solve
 (
-    scalarField& c,
-    scalar& T,
-    scalar& p,
-    scalar& deltaT,
-    scalar& subDeltaT
+    const ODESystem& ode,
+    const scalar x0,
+    const scalarField& y0,
+    const scalarField& dydx0,
+    const scalar dx,
+    scalarField& y
 ) const
 {
-    label nSpecie = this->nSpecie();
-
-    // Copy the concentration, T and P to the total solve-vector
-    for (register int i=0; i<nSpecie; i++)
+    // Calculate error estimate from the change in state:
+    forAll(err_, i)
     {
-        cTp_[i] = c[i];
+        err_[i] = dx*dydx0[i];
     }
-    cTp_[nSpecie] = T;
-    cTp_[nSpecie+1] = p;
 
-    odeSolver_->solve
-    (
-        *this,
-        0,
-        deltaT,
-        cTp_,
-        subDeltaT
-    );
-
-    for (register int i=0; i<nSpecie; i++)
+    // Update the state
+    forAll(y, i)
     {
-        c[i] = max(0.0, cTp_[i]);
+        y[i] = y0[i] + err_[i];
     }
-    T = cTp_[nSpecie];
-    p = cTp_[nSpecie+1];
+
+    return normalizeError(y0, y, err_);
+}
+
+
+void Foam::Euler::solve
+(
+    const ODESystem& odes,
+    scalar& x,
+    scalarField& y,
+    scalar& dxTry
+) const
+{
+    adaptiveSolver::solve(odes, x, y, dxTry);
 }
 
 
