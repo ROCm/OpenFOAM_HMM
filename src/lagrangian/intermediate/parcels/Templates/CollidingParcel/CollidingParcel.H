@@ -74,6 +74,58 @@ class CollidingParcel
 :
     public ParcelType
 {
+public:
+
+    //- Class to hold thermo particle constant properties
+    class constantProperties
+    :
+        public ParcelType::constantProperties
+    {
+
+        // Private data
+
+            //- Young's modulus [N/m2]
+            demandDrivenEntry<scalar> youngsModulus_;
+
+            //- Poisson's ratio
+            demandDrivenEntry<scalar> poissonsRatio_;
+
+
+    public:
+
+        // Constructors
+
+            //- Null constructor
+            constantProperties();
+
+            //- Copy constructor
+            constantProperties(const constantProperties& cp);
+
+            //- Construct from dictionary
+            constantProperties(const dictionary& parentDict);
+
+            //- Construct from components
+            constantProperties
+            (
+                const label parcelTypeId,
+                const scalar rhoMin,
+                const scalar rho0,
+                const scalar minParticleMass,
+                const scalar youngsModulus,
+                const scalar poissonsRatio
+            );
+
+
+        // Member functions
+
+            //- Return const access to Young's Modulus
+            inline scalar youngsModulus() const;
+
+            //- Return const access to Poisson's ratio
+            inline scalar poissonsRatio() const;
+    };
+
+
 protected:
 
     // Protected data

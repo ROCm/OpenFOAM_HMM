@@ -37,9 +37,7 @@ Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties()
     parcelTypeId_(dict_, -1),
     rhoMin_(dict_, 0.0),
     rho0_(dict_, 0.0),
-    minParticleMass_(dict_, 0.0),
-    youngsModulus_(dict_, 0.0),
-    poissonsRatio_(dict_, 0.0)
+    minParticleMass_(dict_, 0.0)
 {}
 
 
@@ -53,9 +51,7 @@ inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
     parcelTypeId_(cp.parcelTypeId_),
     rhoMin_(cp.rhoMin_),
     rho0_(cp.rho0_),
-    minParticleMass_(cp.minParticleMass_),
-    youngsModulus_(cp.youngsModulus_),
-    poissonsRatio_(cp.poissonsRatio_)
+    minParticleMass_(cp.minParticleMass_)
 {}
 
 
@@ -69,9 +65,7 @@ inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
     parcelTypeId_(dict_, "parcelTypeId", 1),
     rhoMin_(dict_, "rhoMin", 1e-15),
     rho0_(dict_, "rho0"),
-    minParticleMass_(dict_, "minParticleMass", 1e-15),
-    youngsModulus_(dict_, "youngsModulus"),
-    poissonsRatio_(dict_, "poissonsRatio")
+    minParticleMass_(dict_, "minParticleMass", 1e-15)
 {}
 
 
@@ -81,18 +75,14 @@ inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
     const label parcelTypeId,
     const scalar rhoMin,
     const scalar rho0,
-    const scalar minParticleMass,
-    const scalar youngsModulus,
-    const scalar poissonsRatio
+    const scalar minParticleMass
 )
 :
     dict_(dictionary::null),
     parcelTypeId_(dict_, parcelTypeId),
     rhoMin_(dict_, rhoMin),
     rho0_(dict_, rho0),
-    minParticleMass_(dict_, minParticleMass),
-    youngsModulus_(dict_, youngsModulus),
-    poissonsRatio_(dict_, poissonsRatio)
+    minParticleMass_(dict_, minParticleMass)
 {}
 
 
@@ -195,22 +185,6 @@ inline Foam::scalar
 Foam::KinematicParcel<ParcelType>::constantProperties::minParticleMass() const
 {
     return minParticleMass_.value();
-}
-
-
-template<class ParcelType>
-inline Foam::scalar
-Foam::KinematicParcel<ParcelType>::constantProperties::youngsModulus() const
-{
-    return youngsModulus_.value();
-}
-
-
-template<class ParcelType>
-inline Foam::scalar
-Foam::KinematicParcel<ParcelType>::constantProperties::poissonsRatio() const
-{
-    return poissonsRatio_.value();
 }
 
 

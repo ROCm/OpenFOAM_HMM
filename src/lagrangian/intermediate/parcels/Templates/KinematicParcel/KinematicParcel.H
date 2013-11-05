@@ -108,12 +108,6 @@ public:
             //- Minimum particle mass [kg]
             demandDrivenEntry<scalar> minParticleMass_;
 
-            //- Young's modulus [N/m2]
-            demandDrivenEntry<scalar> youngsModulus_;
-
-            //- Poisson's ratio
-            demandDrivenEntry<scalar> poissonsRatio_;
-
 
     public:
 
@@ -134,9 +128,7 @@ public:
                 const label parcelTypeId,
                 const scalar rhoMin,
                 const scalar rho0,
-                const scalar minParticleMass,
-                const scalar youngsModulus,
-                const scalar poissonsRatio
+                const scalar minParticleMass
             );
 
 
@@ -156,12 +148,6 @@ public:
 
             //- Return const access to the minimum particle mass
             inline scalar minParticleMass() const;
-
-            //- Return const access to Young's Modulus
-            inline scalar youngsModulus() const;
-
-            //- Return const access to Poisson's ratio
-            inline scalar poissonsRatio() const;
     };
 
 

@@ -34,6 +34,14 @@ Foam::CollidingCloud<CloudType>::cloudCopy() const
 
 
 template<class CloudType>
+inline const typename CloudType::particleType::constantProperties&
+Foam::CollidingCloud<CloudType>::constProps() const
+{
+    return constProps_;
+}
+
+
+template<class CloudType>
 inline const Foam::CollisionModel<Foam::CollidingCloud<CloudType> >&
 Foam::CollidingCloud<CloudType>::collision() const
 {
