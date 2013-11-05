@@ -15,32 +15,29 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-1
-(
- pyrolysis
- {
-     active          true;
+pyrolysis
+{
+    active          true;
 
-     pyrolysisModel  reactingOneDim;
+    pyrolysisModel  reactingOneDim;
 
-     regionName pyrolysisRegion;
+    regionName pyrolysisRegion;
 
-     reactingOneDimCoeffs
-     {
-         filmCoupled     true;
+    reactingOneDimCoeffs
+    {
+        filmCoupled     true;
 
-         gasHSource      true;
-         QrHSource       false;
+        gasHSource      true;
+        QrHSource       false;
 
-         radFluxName     Qr;
+        radFluxName     Qr;
 
-         moveMesh        false; // true;
-         minimumDelta    1e-6;
+        moveMesh        false; // true;
+        minimumDelta    1e-6;
 
-         useChemistrySolvers    true;
-     }
- }
+        useChemistrySolvers    true;
+    }
+}
 
-)
 
 // ************************************************************************* //

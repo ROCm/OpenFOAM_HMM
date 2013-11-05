@@ -59,9 +59,6 @@ constantProperties
     T0              300;
     Cp0             900;
 
-    youngsModulus   40e9;
-    poissonsRatio   0.25;
-
     epsilon0        1;
     f0              0.5;
 }
