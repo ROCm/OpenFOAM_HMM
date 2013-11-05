@@ -29,12 +29,12 @@ template<class ParcelType>
 inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties()
 :
     ParcelType::constantProperties(),
-    T0_(0.0),
-    TMin_(0.0),
-    TMax_(VGREAT),
-    Cp0_(0.0),
-    epsilon0_(0.0),
-    f0_(0.0)
+    T0_(this->dict_, 0.0),
+    TMin_(this->dict_, 0.0),
+    TMax_(this->dict_, VGREAT),
+    Cp0_(this->dict_, 0.0),
+    epsilon0_(this->dict_, 0.0),
+    f0_(this->dict_, 0.0)
 {}
 
 
@@ -62,30 +62,13 @@ inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
 )
 :
     ParcelType::constantProperties(parentDict, readFields),
-    T0_(0.0),
-    TMin_(200),
-    TMax_(5000),
-    Cp0_(0.0),
-    epsilon0_(0.0),
-    f0_(0.0)
-{
-    if (readFields)
-    {
-        if (this->dict().readIfPresent("TMin", TMin_))
-        {
-            Info<< "    employing parcel TMin of " << TMin_ << endl;
-        }
-        if (this->dict().readIfPresent("TMax", TMax_))
-        {
-            Info<< "    employing parcel TMax of " << TMax_ << endl;
-        }
-
-        this->dict().lookup("T0") >> T0_;
-        this->dict().lookup("Cp0") >> Cp0_;
-        this->dict().lookup("epsilon0") >> epsilon0_;
-        this->dict().lookup("f0") >> f0_;
-    }
-}
+    T0_(this->dict_, "T0"),
+    TMin_(this->dict_, "TMin", 200.0),
+    TMax_(this->dict_, "TMax", 5000.0),
+    Cp0_(this->dict_, "Cp0"),
+    epsilon0_(this->dict_, "epsilon0"),
+    f0_(this->dict_, "f0")
+{}
 
 
 template<class ParcelType>
@@ -114,12 +97,12 @@ inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
         youngsModulus,
         poissonsRatio
     ),
-    T0_(T0),
-    TMin_(TMin),
-    TMax_(TMax),
-    Cp0_(Cp0),
-    epsilon0_(epsilon0),
-    f0_(f0)
+    T0_(this->dict_, T0),
+    TMin_(this->dict_, TMin),
+    TMax_(this->dict_, TMax),
+    Cp0_(this->dict_, Cp0),
+    epsilon0_(this->dict_, epsilon0),
+    f0_(this->dict_, f0)
 {}
 
 
@@ -190,7 +173,7 @@ template<class ParcelType>
 inline Foam::scalar
 Foam::ThermoParcel<ParcelType>::constantProperties::T0() const
 {
-    return T0_;
+    return T0_.value();
 }
 
 
@@ -198,7 +181,7 @@ template<class ParcelType>
 inline Foam::scalar
 Foam::ThermoParcel<ParcelType>::constantProperties::TMin() const
 {
-    return TMin_;
+    return TMin_.value();
 }
 
 
@@ -206,15 +189,15 @@ template<class ParcelType>
 inline Foam::scalar
 Foam::ThermoParcel<ParcelType>::constantProperties::TMax() const
 {
-    return TMax_;
+    return TMax_.value();
 }
 
 
 template<class ParcelType>
-inline Foam::scalar&
-Foam::ThermoParcel<ParcelType>::constantProperties::TMax()
+inline void
+Foam::ThermoParcel<ParcelType>::constantProperties::setTMax(const scalar TMax)
 {
-    return TMax_;
+    TMax_.setValue(TMax);
 }
 
 
@@ -222,7 +205,7 @@ template<class ParcelType>
 inline Foam::scalar
 Foam::ThermoParcel<ParcelType>::constantProperties::Cp0() const
 {
-    return Cp0_;
+    return Cp0_.value();
 }
 
 
@@ -230,7 +213,7 @@ template<class ParcelType>
 inline Foam::scalar
 Foam::ThermoParcel<ParcelType>::constantProperties::epsilon0() const
 {
-    return epsilon0_;
+    return epsilon0_.value();
 }
 
 
@@ -238,7 +221,7 @@ template<class ParcelType>
 inline Foam::scalar
 Foam::ThermoParcel<ParcelType>::constantProperties::f0() const
 {
-    return f0_;
+    return f0_.value();
 }
 
 

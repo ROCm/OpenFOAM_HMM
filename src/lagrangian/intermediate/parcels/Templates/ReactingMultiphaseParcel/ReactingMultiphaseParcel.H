@@ -40,6 +40,7 @@ SourceFiles
 
 #include "particle.H"
 #include "SLGThermo.H"
+#include "demandDrivenEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -82,14 +83,14 @@ public:
         // Private data
 
             //- Devolatilisation activation temperature [K]
-            scalar TDevol_;
+            demandDrivenEntry<scalar> TDevol_;
 
             //- Latent heat of devolatilisation [J/kg]
-            scalar LDevol_;
+            demandDrivenEntry<scalar> LDevol_;
 
             //- Fraction of enthalpy retained by parcel due to surface
             //  reactions
-            scalar hRetentionCoeff_;
+            demandDrivenEntry<scalar> hRetentionCoeff_;
 
 
     public:
@@ -126,7 +127,9 @@ public:
                 const scalar f0,
                 const scalar pMin,
                 const Switch& constantVolume,
-                const scalar TDevol
+                const scalar TDevol,
+                const scalar LDevol,
+                const scalar hRetentionCoeff
             );
 
         // Access

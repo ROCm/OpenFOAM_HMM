@@ -48,6 +48,7 @@ SourceFiles
 #include "IOstream.H"
 #include "autoPtr.H"
 #include "interpolation.H"
+#include "demandDrivenEntry.H"
 
 // #include "ParticleForceList.H" // TODO
 
@@ -82,29 +83,36 @@ public:
     //- Class to hold kinematic particle constant properties
     class constantProperties
     {
-        // Private data
+    protected:
+
+        // Protected data
 
             //- Constant properties dictionary
             const dictionary dict_;
 
+
+    private:
+
+        // Private data
+
             //- Parcel type id - used for post-processing to flag the type
             //  of parcels issued by this cloud
-            label parcelTypeId_;
+            demandDrivenEntry<label> parcelTypeId_;
 
             //- Minimum density [kg/m3]
-            scalar rhoMin_;
+            demandDrivenEntry<scalar> rhoMin_;
 
             //- Particle density [kg/m3] (constant)
-            scalar rho0_;
+            demandDrivenEntry<scalar> rho0_;
 
             //- Minimum particle mass [kg]
-            scalar minParticleMass_;
+            demandDrivenEntry<scalar> minParticleMass_;
 
             //- Young's modulus [N/m2]
-            scalar youngsModulus_;
+            demandDrivenEntry<scalar> youngsModulus_;
 
             //- Poisson's ratio
-            scalar poissonsRatio_;
+            demandDrivenEntry<scalar> poissonsRatio_;
 
 
     public:

@@ -34,12 +34,12 @@ inline
 Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties()
 :
     dict_(dictionary::null),
-    parcelTypeId_(-1),
-    rhoMin_(0.0),
-    rho0_(0.0),
-    minParticleMass_(0.0),
-    youngsModulus_(0.0),
-    poissonsRatio_(0.0)
+    parcelTypeId_(dict_, -1),
+    rhoMin_(dict_, 0.0),
+    rho0_(dict_, 0.0),
+    minParticleMass_(dict_, 0.0),
+    youngsModulus_(dict_, 0.0),
+    poissonsRatio_(dict_, 0.0)
 {}
 
 
@@ -67,35 +67,14 @@ inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
 )
 :
     dict_(parentDict.subOrEmptyDict("constantProperties")),
-    parcelTypeId_(1),
-    rhoMin_(1e-15),
-    rho0_(0.0),
-    minParticleMass_(1e-15),
-    youngsModulus_(0.0),
-    poissonsRatio_(0.0)
-{
-    if (readFields)
-    {
-        if (dict_.readIfPresent("parcelTypeId", parcelTypeId_))
-        {
-            Info<< "    employing parcel parcelTypeId of " << parcelTypeId_
-                << endl;
-        }
-        if (dict_.readIfPresent("rhoMin", rhoMin_))
-        {
-            Info<< "    employing parcel rhoMin of " << rhoMin_ << endl;
-        }
-        if (dict_.readIfPresent("minParticleMass", minParticleMass_))
-        {
-            Info<< "    employing parcel minParticleMass of "
-                << minParticleMass_ << endl;
-        }
+    parcelTypeId_(dict_, "parcelTypeId", 1),
+    rhoMin_(dict_, "rhoMin", 1e-15),
+    rho0_(dict_, "rho0"),
+    minParticleMass_(dict_, "minParticleMass", 1e-15),
+    youngsModulus_(dict_, "youngsModulus"),
+    poissonsRatio_(dict_, "poissonsRatio")
+{}
 
-        dict_.lookup("rho0") >> rho0_;
-        dict_.lookup("youngsModulus") >> youngsModulus_;
-        dict_.lookup("poissonsRatio") >> poissonsRatio_;
-    }
-}
 
 template<class ParcelType>
 inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
@@ -109,12 +88,12 @@ inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
 )
 :
     dict_(dictionary::null),
-    parcelTypeId_(parcelTypeId),
-    rhoMin_(rhoMin),
-    rho0_(rho0),
-    minParticleMass_(minParticleMass),
-    youngsModulus_(youngsModulus),
-    poissonsRatio_(poissonsRatio)
+    parcelTypeId_(dict_, parcelTypeId),
+    rhoMin_(dict_, rhoMin),
+    rho0_(dict_, rho0),
+    minParticleMass_(dict_, minParticleMass),
+    youngsModulus_(dict_, youngsModulus),
+    poissonsRatio_(dict_, poissonsRatio)
 {}
 
 
@@ -192,7 +171,7 @@ template<class ParcelType>
 inline Foam::label
 Foam::KinematicParcel<ParcelType>::constantProperties::parcelTypeId() const
 {
-    return parcelTypeId_;
+    return parcelTypeId_.value();
 }
 
 
@@ -200,7 +179,7 @@ template<class ParcelType>
 inline Foam::scalar
 Foam::KinematicParcel<ParcelType>::constantProperties::rhoMin() const
 {
-    return rhoMin_;
+    return rhoMin_.value();
 }
 
 
@@ -208,7 +187,7 @@ template<class ParcelType>
 inline Foam::scalar
 Foam::KinematicParcel<ParcelType>::constantProperties::rho0() const
 {
-    return rho0_;
+    return rho0_.value();
 }
 
 
@@ -216,7 +195,7 @@ template<class ParcelType>
 inline Foam::scalar
 Foam::KinematicParcel<ParcelType>::constantProperties::minParticleMass() const
 {
-    return minParticleMass_;
+    return minParticleMass_.value();
 }
 
 
@@ -224,7 +203,7 @@ template<class ParcelType>
 inline Foam::scalar
 Foam::KinematicParcel<ParcelType>::constantProperties::youngsModulus() const
 {
-    return youngsModulus_;
+    return youngsModulus_.value();
 }
 
 
@@ -232,7 +211,7 @@ template<class ParcelType>
 inline Foam::scalar
 Foam::KinematicParcel<ParcelType>::constantProperties::poissonsRatio() const
 {
-    return poissonsRatio_;
+    return poissonsRatio_.value();
 }
 
 

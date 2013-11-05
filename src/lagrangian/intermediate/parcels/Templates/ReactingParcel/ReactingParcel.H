@@ -40,6 +40,7 @@ SourceFiles
 
 #include "particle.H"
 #include "SLGThermo.H"
+#include "demandDrivenEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,10 +76,10 @@ public:
         // Private data
 
             //- Minimum pressure [Pa]
-            scalar pMin_;
+            demandDrivenEntry<scalar> pMin_;
 
             //- Constant volume flag - e.g. during mass transfer
-            Switch constantVolume_;
+            demandDrivenEntry<bool> constantVolume_;
 
 
     public:
@@ -124,7 +125,7 @@ public:
             inline scalar pMin() const;
 
             //- Return const access to the constant volume flag
-            inline Switch constantVolume() const;
+            inline bool constantVolume() const;
     };
 
 

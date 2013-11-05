@@ -29,8 +29,8 @@ template<class ParcelType>
 inline Foam::SprayParcel<ParcelType>::constantProperties::constantProperties()
 :
     ParcelType::constantProperties(),
-    sigma0_(0.0),
-    mu0_(0.0)
+    sigma0_(this->dict_, 0.0),
+    mu0_(this->dict_, 0.0)
 {}
 
 
@@ -54,14 +54,9 @@ inline Foam::SprayParcel<ParcelType>::constantProperties::constantProperties
 )
 :
     ParcelType::constantProperties(parentDict, readFields),
-    sigma0_(0.0),
-    mu0_(0.0)
-{
-    if (readFields)
-    {
-        this->dict().lookup("sigma0") >> sigma0_;
-    }
-}
+    sigma0_(this->dict_, "sigma0"),
+    mu0_(this->dict_, "mu0")
+{}
 
 
 template<class ParcelType>
@@ -104,8 +99,8 @@ inline Foam::SprayParcel<ParcelType>::constantProperties::constantProperties
         pMin,
         constantVolume
     ),
-    sigma0_(sigma0),
-    mu0_(mu0)
+    sigma0_(this->dict_, sigma0),
+    mu0_(this->dict_, mu0)
 {}
 
 
@@ -197,6 +192,24 @@ inline Foam::SprayParcel<ParcelType>::SprayParcel
     tMom_(tMom),
     user_(user)
 {}
+
+
+// * * * * * * * * * constantProperties Member Functions * * * * * * * * * * //
+
+template<class ParcelType>
+inline Foam::scalar
+Foam::SprayParcel<ParcelType>::constantProperties::sigma0() const
+{
+    return sigma0_.value();
+}
+
+
+template<class ParcelType>
+inline Foam::scalar
+Foam::SprayParcel<ParcelType>::constantProperties::mu0() const
+{
+    return mu0_.value();
+}
 
 
 // * * * * * * * * * * SprayParcel Member Functions * * * * * * * * * * * * //

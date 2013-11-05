@@ -30,8 +30,8 @@ inline
 Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties()
 :
     ParcelType::constantProperties(),
-    pMin_(0.0),
-    constantVolume_(false)
+    pMin_(this->dict_, 0.0),
+    constantVolume_(this->dict_, false)
 {}
 
 
@@ -55,19 +55,9 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
 )
 :
     ParcelType::constantProperties(parentDict, readFields),
-    pMin_(1000.0),
-    constantVolume_(false)
-{
-    if (readFields)
-    {
-        if (this->dict().readIfPresent("pMin", pMin_))
-        {
-            Info<< "    employing parcel pMin of " << pMin_ << endl;
-        }
-
-        this->dict().lookup("constantVolume") >> constantVolume_;
-    }
-}
+    pMin_(this->dict_, "pMin", 1000.0),
+    constantVolume_(this->dict_, "constantVolume")
+{}
 
 
 template<class ParcelType>
@@ -104,8 +94,8 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
         epsilon0,
         f0
     ),
-    pMin_(pMin),
-    constantVolume_(constantVolume)
+    pMin_(this->dict_, pMin),
+    constantVolume_(this->dict_, constantVolume)
 {}
 
 
@@ -178,15 +168,15 @@ template<class ParcelType>
 inline Foam::scalar
 Foam::ReactingParcel<ParcelType>::constantProperties::pMin() const
 {
-    return pMin_;
+    return pMin_.value();
 }
 
 
 template<class ParcelType>
-inline Foam::Switch
+inline bool
 Foam::ReactingParcel<ParcelType>::constantProperties::constantVolume() const
 {
-    return constantVolume_;
+    return constantVolume_.value();
 }
 
 
