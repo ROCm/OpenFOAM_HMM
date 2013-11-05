@@ -5,27 +5,46 @@
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-FoamFile
+
+ // Solid thermo
+thermoType
 {
-    version     2.0;
-    format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      thermalBaffleProperties;
-}
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-thermalBaffleModel  none;
-
-active          no;
-
-regionName      none;
-
-thermalBaffleCoeffs
-{
+    type            heSolidThermo;
+    mixture         pureMixture;
+    transport       constIso;
+    thermo          hConst;
+    equationOfState rhoConst;
+    specie          specie;
+    energy          sensibleEnthalpy;
 }
 
-noThermoCoeffs
+mixture
 {
+    specie
+    {
+        nMoles          1;
+        molWeight       20;
+    }
+    transport
+    {
+        kappa           ${Kappa};
+    }
+    thermodynamics
+    {
+        Hf              0;
+        Cp              ${Cp};
+    }
+    equationOfState
+    {
+        rho             ${rho};
+    }
 }
+
+radiation
+{
+    radiationModel  opaqueSolid;
+    absorptionEmissionModel none;
+    scatterModel    none;
+}
+
 // ************************************************************************* //
