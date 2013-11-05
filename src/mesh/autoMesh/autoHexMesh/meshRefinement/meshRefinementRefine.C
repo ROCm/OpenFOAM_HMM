@@ -461,7 +461,8 @@ void Foam::meshRefinement::markFeatureCellLevel
     // Track all particles to their end position (= starting feature point)
     // Note that the particle might have started on a different processor
     // so this will transfer across nicely until we can start tracking proper.
-    startPointCloud.move(td, GREAT);
+    scalar maxTrackLen = 2.0*mesh_.bounds().mag();
+    startPointCloud.move(td, maxTrackLen);
 
 
     // Reset level
@@ -531,7 +532,7 @@ void Foam::meshRefinement::markFeatureCellLevel
     while (true)
     {
         // Track all particles to their end position.
-        cloud.move(td, GREAT);
+        cloud.move(td, maxTrackLen);
 
 
         label nParticles = 0;

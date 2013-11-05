@@ -184,7 +184,8 @@ CoEulerDdtScheme<Type>::fvcDdt
         );
 
         tdtdt().internalField() =
-            rDeltaT.internalField()*dt.value()*(1.0 - mesh().V0()/mesh().V());
+            rDeltaT.internalField()*dt.value()
+           *(1.0 - mesh().Vsc0()/mesh().Vsc());
 
         return tdtdt;
     }
@@ -237,7 +238,7 @@ CoEulerDdtScheme<Type>::fvcDdt
                 rDeltaT.internalField()*
                 (
                     vf.internalField()
-                  - vf.oldTime().internalField()*mesh().V0()/mesh().V()
+                  - vf.oldTime().internalField()*mesh().Vsc0()/mesh().Vsc()
                 ),
                 rDeltaT.boundaryField()*
                 (
@@ -289,7 +290,7 @@ CoEulerDdtScheme<Type>::fvcDdt
                 rDeltaT.internalField()*rho.value()*
                 (
                     vf.internalField()
-                  - vf.oldTime().internalField()*mesh().V0()/mesh().V()
+                  - vf.oldTime().internalField()*mesh().Vsc0()/mesh().Vsc()
                 ),
                 rDeltaT.boundaryField()*rho.value()*
                 (
@@ -342,7 +343,7 @@ CoEulerDdtScheme<Type>::fvcDdt
                 (
                     rho.internalField()*vf.internalField()
                   - rho.oldTime().internalField()
-                   *vf.oldTime().internalField()*mesh().V0()/mesh().V()
+                   *vf.oldTime().internalField()*mesh().Vsc0()/mesh().Vsc()
                 ),
                 rDeltaT.boundaryField()*
                 (
@@ -387,15 +388,15 @@ CoEulerDdtScheme<Type>::fvmDdt
 
     scalarField rDeltaT(CorDeltaT()().internalField());
 
-    fvm.diag() = rDeltaT*mesh().V();
+    fvm.diag() = rDeltaT*mesh().Vsc();
 
     if (mesh().moving())
     {
-        fvm.source() = rDeltaT*vf.oldTime().internalField()*mesh().V0();
+        fvm.source() = rDeltaT*vf.oldTime().internalField()*mesh().Vsc0();
     }
     else
     {
-        fvm.source() = rDeltaT*vf.oldTime().internalField()*mesh().V();
+        fvm.source() = rDeltaT*vf.oldTime().internalField()*mesh().Vsc();
     }
 
     return tfvm;
@@ -422,17 +423,17 @@ CoEulerDdtScheme<Type>::fvmDdt
 
     scalarField rDeltaT(CorDeltaT()().internalField());
 
-    fvm.diag() = rDeltaT*rho.value()*mesh().V();
+    fvm.diag() = rDeltaT*rho.value()*mesh().Vsc();
 
     if (mesh().moving())
     {
         fvm.source() = rDeltaT
-            *rho.value()*vf.oldTime().internalField()*mesh().V0();
+            *rho.value()*vf.oldTime().internalField()*mesh().Vsc0();
     }
     else
     {
         fvm.source() = rDeltaT
-            *rho.value()*vf.oldTime().internalField()*mesh().V();
+            *rho.value()*vf.oldTime().internalField()*mesh().Vsc();
     }
 
     return tfvm;
@@ -459,19 +460,19 @@ CoEulerDdtScheme<Type>::fvmDdt
 
     scalarField rDeltaT(CorDeltaT()().internalField());
 
-    fvm.diag() = rDeltaT*rho.internalField()*mesh().V();
+    fvm.diag() = rDeltaT*rho.internalField()*mesh().Vsc();
 
     if (mesh().moving())
     {
         fvm.source() = rDeltaT
             *rho.oldTime().internalField()
-            *vf.oldTime().internalField()*mesh().V0();
+            *vf.oldTime().internalField()*mesh().Vsc0();
     }
     else
     {
         fvm.source() = rDeltaT
             *rho.oldTime().internalField()
-            *vf.oldTime().internalField()*mesh().V();
+            *vf.oldTime().internalField()*mesh().Vsc();
     }
 
     return tfvm;

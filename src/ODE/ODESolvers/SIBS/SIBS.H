@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,11 @@ Class
 
 Description
     Foam::SIBS
+
+    Bader, G. and Deuflhard, P.
+    "A Semi-Implicit Mid-Point Rule for
+     Stiff Systems of Ordinary Differential Equations."
+     Numer. Math. 41, 373-398, 1983.
 
 SourceFiles
     SIMPR.C
@@ -67,6 +72,7 @@ class SIBS
         mutable scalarField yTemp_;
         mutable scalarField ySeq_;
         mutable scalarField yErr_;
+        mutable scalarField dydx0_;
         mutable scalarField dfdx_;
         mutable scalarSquareMatrix dfdy_;
 
@@ -110,7 +116,7 @@ public:
     // Constructors
 
         //- Construct from ODE
-        SIBS(const ODESystem& ode);
+        SIBS(const ODESystem& ode, const dictionary& dict);
 
 
     // Member Functions
@@ -120,12 +126,7 @@ public:
             const ODESystem& ode,
             scalar& x,
             scalarField& y,
-            scalarField& dydx,
-            const scalar eps,
-            const scalarField& yScale,
-            const scalar hTry,
-            scalar& hDid,
-            scalar& hNext
+            scalar& dxTry
         ) const;
 };
 
