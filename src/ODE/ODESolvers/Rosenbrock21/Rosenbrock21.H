@@ -25,7 +25,18 @@ Class
     Foam::Rosenbrock21
 
 Description
-    Embedded Rosenbrock ODE solver of order (1)2.
+    L-stable embedded Rosenbrock ODE solver of order (1)2.
+
+    References:
+    \verbatim
+        "A second-order Rosenbrock method applied to
+         photochemical dispersion problems",
+        J. G. Verwer,
+        E. J. Spee,
+        J. G. Blom,
+        W. Hundsdorfer,
+        Siam Journal on Scientific Computing 01/1999; 20(4):1456-1480.
+    \endverbatim
 
 SourceFiles
     Rosenbrock21.C

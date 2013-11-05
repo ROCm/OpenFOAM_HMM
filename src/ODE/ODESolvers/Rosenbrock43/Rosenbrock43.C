@@ -34,12 +34,46 @@ namespace Foam
     addToRunTimeSelectionTable(ODESolver, Rosenbrock43, dictionary);
 
 const scalar
+    // L-Stable constants from Hairer et. al.
+    Rosenbrock43::a21 = 2,
+    Rosenbrock43::a31 = 1.867943637803922,
+    Rosenbrock43::a32 = 0.2344449711399156,
 
-    Rosenbrock43::a21 = 2.0,
+    Rosenbrock43::c21 = -7.137615036412310,
+    Rosenbrock43::c31 = 2.580708087951457,
+    Rosenbrock43::c32 = 0.6515950076447975,
+    Rosenbrock43::c41 = -2.137148994382534,
+    Rosenbrock43::c42 = -0.3214669691237626,
+    Rosenbrock43::c43 = -0.6949742501781779,
+
+    Rosenbrock43::b1 = 2.255570073418735,
+    Rosenbrock43::b2 = 0.2870493262186792,
+    Rosenbrock43::b3 = 0.435317943184018,
+    Rosenbrock43::b4 = 1.093502252409163,
+
+    Rosenbrock43::e1 = -0.2815431932141155,
+    Rosenbrock43::e2 = -0.0727619912493892,
+    Rosenbrock43::e3 = -0.1082196201495311,
+    Rosenbrock43::e4 = -1.093502252409163,
+
+    Rosenbrock43::gamma = 0.57282,
+    Rosenbrock43::c2 = 1.14564,
+    Rosenbrock43::c3 = 0.65521686381559,
+
+    Rosenbrock43::d1 = 0.57282,
+    Rosenbrock43::d2 = -1.769193891319233,
+    Rosenbrock43::d3 = 0.7592633437920482,
+    Rosenbrock43::d4 = -0.1049021087100450;
+
+    // Constants by Shampine
+    // More accurate than the L-Stable coefficients for small step-size
+    // but less stable for large step-size
+    /*
+    Rosenbrock43::a21 = 2,
     Rosenbrock43::a31 = 48.0/25.0,
     Rosenbrock43::a32 = 6.0/25.0,
 
-    Rosenbrock43::c21 = -8.0,
+    Rosenbrock43::c21 = -8,
     Rosenbrock43::c31 = 372.0/25.0,
     Rosenbrock43::c32 = 12.0/5.0,
 
@@ -54,17 +88,18 @@ const scalar
 
     Rosenbrock43::e1 = 34.0/108.0,
     Rosenbrock43::e2 = 7.0/36.0,
-    Rosenbrock43::e3 = 0.0,
+    Rosenbrock43::e3 = 0,
     Rosenbrock43::e4 = 125.0/108.0,
 
     Rosenbrock43::gamma = 0.5,
-    Rosenbrock43::c2 = 1.0,
+    Rosenbrock43::c2 = 1,
     Rosenbrock43::c3  = 3.0/5.0,
 
     Rosenbrock43::d1 = 1.0/2.0,
     Rosenbrock43::d2 = -3.0/2.0,
     Rosenbrock43::d3 = 605.0/250.0,
     Rosenbrock43::d4 = 29.0/250.0;
+    */
 }
 
 
