@@ -49,6 +49,11 @@ filmModel() const
         }
     }
 
+    DynamicList<word> modelNames;
+    forAllConstIter(HashTable<const filmModelType*>, models, iter)
+    {
+        modelNames.append(iter()->regionMesh().name());
+    }
 
     FatalErrorIn
     (
@@ -58,6 +63,7 @@ filmModel() const
         "filmModel() const"
     )
         << "Unable to locate film region " << filmRegionName_
+        << ".  Available regions include: " << modelNames
         << abort(FatalError);
 
     return **models.begin();
@@ -80,6 +86,13 @@ pyrModel() const
         }
     }
 
+    DynamicList<word> modelNames;
+    forAllConstIter(HashTable<const pyrolysisModelType*>, models, iter)
+    {
+        modelNames.append(iter()->regionMesh().name());
+    }
+
+
     FatalErrorIn
     (
         "const filmPyrolysisRadiativeCoupledMixedFvPatchScalarField::"
@@ -88,6 +101,7 @@ pyrModel() const
         "pyrModel() const"
     )
         << "Unable to locate pyrolysis region " << pyrolysisRegionName_
+        << ".  Available regions include: " << modelNames
         << abort(FatalError);
 
     return **models.begin();
