@@ -153,7 +153,7 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
     ),
     thermoCloud(),
     cloudCopyPtr_(NULL),
-    constProps_(this->particleProperties(), this->solution().active()),
+    constProps_(this->particleProperties()),
     thermo_(thermo),
     T_(thermo.thermo().T()),
     p_(thermo.thermo().p()),

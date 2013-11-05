@@ -308,7 +308,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
         )
     ),
     solution_(mesh_, particleProperties_.subDict("solution")),
-    constProps_(particleProperties_, solution_.active()),
+    constProps_(particleProperties_),
     subModelProperties_
     (
         particleProperties_.subOrEmptyDict("subModels", solution_.active())

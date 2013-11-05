@@ -92,12 +92,8 @@ public:
             //- Copy constructor
             constantProperties(const constantProperties& cp);
 
-            //- Constructor from dictionary
-            constantProperties
-            (
-                const dictionary& parentDict,
-                const bool readFields = true
-            );
+            //- Construct from dictionary
+            constantProperties(const dictionary& parentDict);
 
             //- Construct from components
             constantProperties

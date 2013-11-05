@@ -49,11 +49,10 @@ inline Foam::SprayParcel<ParcelType>::constantProperties::constantProperties
 template<class ParcelType>
 inline Foam::SprayParcel<ParcelType>::constantProperties::constantProperties
 (
-    const dictionary& parentDict,
-    const bool readFields
+    const dictionary& parentDict
 )
 :
-    ParcelType::constantProperties(parentDict, readFields),
+    ParcelType::constantProperties(parentDict),
     sigma0_(this->dict_, "sigma0"),
     mu0_(this->dict_, "mu0")
 {}

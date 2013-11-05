@@ -54,11 +54,10 @@ template<class ParcelType>
 inline Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
 constantProperties
 (
-    const dictionary& parentDict,
-    const bool readFields
+    const dictionary& parentDict
 )
 :
-    ParcelType::constantProperties(parentDict, readFields),
+    ParcelType::constantProperties(parentDict),
     TDevol_(this->dict_, "TDevol"),
     LDevol_(this->dict_, "LDevol"),
     hRetentionCoeff_(this->dict_, "hRetentionCoeff")

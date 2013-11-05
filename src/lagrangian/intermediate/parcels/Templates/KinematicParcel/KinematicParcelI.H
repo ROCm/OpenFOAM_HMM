@@ -62,8 +62,7 @@ inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
 template<class ParcelType>
 inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
 (
-    const dictionary& parentDict,
-    const bool readFields
+    const dictionary& parentDict
 )
 :
     dict_(parentDict.subOrEmptyDict("constantProperties")),

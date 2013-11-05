@@ -50,11 +50,10 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
 template<class ParcelType>
 inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
 (
-    const dictionary& parentDict,
-    const bool readFields
+    const dictionary& parentDict
 )
 :
-    ParcelType::constantProperties(parentDict, readFields),
+    ParcelType::constantProperties(parentDict),
     pMin_(this->dict_, "pMin", 1000.0),
     constantVolume_(this->dict_, "constantVolume")
 {}

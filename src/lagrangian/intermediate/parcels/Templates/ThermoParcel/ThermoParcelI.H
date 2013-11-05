@@ -57,11 +57,10 @@ inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
 template<class ParcelType>
 inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
 (
-    const dictionary& parentDict,
-    const bool readFields
+    const dictionary& parentDict
 )
 :
-    ParcelType::constantProperties(parentDict, readFields),
+    ParcelType::constantProperties(parentDict),
     T0_(this->dict_, "T0"),
     TMin_(this->dict_, "TMin", 200.0),
     TMax_(this->dict_, "TMax", 5000.0),
