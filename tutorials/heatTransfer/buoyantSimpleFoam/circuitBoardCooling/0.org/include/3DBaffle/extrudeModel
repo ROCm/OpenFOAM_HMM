@@ -5,34 +5,14 @@
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-FoamFile
-{
-    version     2.0;
-    format      ascii;
-    class       dictionary;
-    object      extrudeToRegionMeshDict;
-}
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-region          baffleRegion;
-
-faceZones       (baffleFaces2);
-
-oneD            false;
-
-extrudeModel    linearNormal;
-
-nLayers         10;
-
-expansionRatio  1;
-
-adaptMesh       yes; // apply directMapped to both regions
-
-sampleMode      nearestPatchFace;
-
+extrudeModel        linearNormal;
+nLayers             ${nLayers};
+expansionRatio      1;
+columnCells         ${oneD}; //3D
 linearNormalCoeffs
 {
-    thickness       0.02;
+    thickness           ${thickness};
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// ************************************************************************* //
