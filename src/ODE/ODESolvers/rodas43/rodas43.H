@@ -25,7 +25,7 @@ Class
     Foam::rodas43
 
 Description
-    Stiffly-stable embedded Rosenbrock ODE solver of order (3)4.
+    L-stable, stiffly-accurate embedded Rosenbrock ODE solver of order (3)4.
 
     References:
     \verbatim
@@ -79,7 +79,6 @@ class rodas43
 
         static const scalar
             c2, c3, c4,
-            bet2p, bet3p, bet4p,
             d1, d2, d3, d4,
             a21, a31, a32,
             a41, a42, a43,

@@ -91,7 +91,7 @@ const scalar
     Rosenbrock43::e3 = 0,
     Rosenbrock43::e4 = 125.0/108.0,
 
-    Rosenbrock43::gamma = 0.5,
+    Rosenbrock43::gamma = 1.0/2.0,
     Rosenbrock43::c2 = 1,
     Rosenbrock43::c3  = 3.0/5.0,
 

@@ -42,8 +42,8 @@ const scalar
     Rosenbrock21::b2 = (1.0/2.0)/gamma,
     Rosenbrock21::e1 = b1 - 1.0/gamma,
     Rosenbrock21::e2 = b2,
-    Rosenbrock21::d1 = 1,
-    Rosenbrock21::d2 = -1;
+    Rosenbrock21::d1 = gamma,
+    Rosenbrock21::d2 = -gamma;
 }
 
 
