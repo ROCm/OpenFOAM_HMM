@@ -616,7 +616,7 @@ void Foam::forces::read(const dictionary& dict)
     {
         initialised_ = false;
 
-        log_ = dict.lookupOrDefault<Switch>("log", true);
+        log_ = dict.lookupOrDefault<Switch>("log", false);
 
         if (log_)
         {
