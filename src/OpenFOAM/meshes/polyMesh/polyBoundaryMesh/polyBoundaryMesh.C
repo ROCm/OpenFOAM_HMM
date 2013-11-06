@@ -486,6 +486,57 @@ Foam::polyBoundaryMesh::groupPatchIDs() const
 }
 
 
+void Foam::polyBoundaryMesh::setGroup
+(
+    const word& groupName,
+    const labelList& patchIDs
+)
+{
+    groupPatchIDsPtr_.clear();
+
+    polyPatchList& patches = *this;
+
+    boolList donePatch(patches.size(), false);
+
+    // Add to specified patches
+    forAll(patchIDs, i)
+    {
+        label patchI = patchIDs[i];
+        polyPatch& pp = patches[patchI];
+
+        if (!pp.inGroup(groupName))
+        {
+            pp.inGroups().append(groupName);
+        }
+        donePatch[patchI] = true;
+    }
+
+    // Remove from other patches
+    forAll(patches, patchI)
+    {
+        if (!donePatch[patchI])
+        {
+            polyPatch& pp = patches[patchI];
+
+            label newI = 0;
+            if (pp.inGroup(groupName))
+            {
+                wordList& groups = pp.inGroups();
+
+                forAll(groups, i)
+                {
+                    if (groups[i] != groupName)
+                    {
+                        groups[newI++] = groups[i];
+                    }
+                }
+                groups.setSize(newI);
+            }
+        }
+    }
+}
+
+
 Foam::wordList Foam::polyBoundaryMesh::names() const
 {
     const polyPatchList& patches = *this;
