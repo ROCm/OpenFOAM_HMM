@@ -22,29 +22,32 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::Rosenbrock21
+    Foam::rodas32
 
 Description
-    L-stable embedded Rosenbrock ODE solver of order (1)2.
+    L-stable, stiffly-accurate embedded Rosenbrock ODE solver of order (2)3.
 
     References:
     \verbatim
-        "A second-order Rosenbrock method applied to
-         photochemical dispersion problems",
-        J. G. Verwer,
-        E. J. Spee,
-        J. G. Blom,
-        W. Hundsdorfer,
-        Siam Journal on Scientific Computing 01/1999; 20(4):1456-1480.
+        Sandu et al,
+        "Benchmarking stiff ODE solvers for atmospheric chemistry problems II
+         Rosenbrock solvers",
+         A. Sandu,
+         J.G. Verwer,
+         J.G. Blom,
+         E.J. Spee,
+         G.R. Carmichael,
+         F.A. Potra,
+         Atmospheric Environment, Volume 31, 1997, Issue 20, Pages 3459-3472
     \endverbatim
 
 SourceFiles
-    Rosenbrock21.C
+    rodas32.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Rosenbrock21_H
-#define Rosenbrock21_H
+#ifndef rodas32_H
+#define rodas32_H
 
 #include "ODESolver.H"
 #include "adaptiveSolver.H"
@@ -55,10 +58,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class Rosenbrock21 Declaration
+                           Class rodas32 Declaration
 \*---------------------------------------------------------------------------*/
 
-class Rosenbrock21
+class rodas32
 :
     public ODESolver,
     public adaptiveSolver
@@ -67,6 +70,8 @@ class Rosenbrock21
 
         mutable scalarField k1_;
         mutable scalarField k2_;
+        mutable scalarField k3_;
+        mutable scalarField dy_;
         mutable scalarField err_;
         mutable scalarField dydx_;
         mutable scalarField dfdx_;
@@ -75,25 +80,24 @@ class Rosenbrock21
         mutable labelList pivotIndices_;
 
         static const scalar
-            a21,
-            c21,
-            b1, b2,
-            gamma,
-            c2,
-            e1, e2,
-            d1, d2;
-
+            c3,
+            d1, d2,
+            a31,
+            a41,
+            c21, c31, c32,
+            c41, c42, c43,
+            gamma;
 
 public:
 
     //- Runtime type information
-    TypeName("Rosenbrock21");
+    TypeName("rodas32");
 
 
     // Constructors
 
         //- Construct from ODE
-        Rosenbrock21(const ODESystem& ode, const dictionary& dict);
+        rodas32(const ODESystem& ode, const dictionary& dict);
 
 
     // Member Functions

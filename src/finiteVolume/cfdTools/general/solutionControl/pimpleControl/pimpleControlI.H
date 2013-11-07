@@ -79,7 +79,7 @@ inline bool Foam::pimpleControl::firstIter() const
 
 inline bool Foam::pimpleControl::finalIter() const
 {
-    return converged_ || (corr_ == corrPISO_);
+    return converged_ || (corr_ == nCorrPIMPLE_);
 }
 
 

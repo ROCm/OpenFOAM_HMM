@@ -25,7 +25,7 @@ Class
     Foam::Rosenbrock43
 
 Description
-    Embedded Rosenbrock ODE solver of order (3)4.
+    L-stable embedded Rosenbrock ODE solver of order (3)4.
 
     Based on code from:
     \verbatim
@@ -37,12 +37,14 @@ Description
         Springer-Verlag, Berlin. 1996.
     \endverbatim
 
-    Constants from:
+    Also provided are the constants from:
     \verbatim
         "Implementation of Rosenbrock Methods"
         Shampine, L. F.,
         ACM Transactions on Mathematical Software, vol. 8, 1982, pp. 93–113.
     \endverbatim
+    with which the scheme is more accurate than with the L-Stable coefficients
+    for small step-size but less stable for large step-size.
 
 SourceFiles
     Rosenbrock43.C

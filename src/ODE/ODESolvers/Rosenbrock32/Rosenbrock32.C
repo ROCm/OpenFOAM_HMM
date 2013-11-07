@@ -23,96 +23,51 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Rosenbrock43.H"
+#include "Rosenbrock32.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(Rosenbrock43, 0);
-    addToRunTimeSelectionTable(ODESolver, Rosenbrock43, dictionary);
+    defineTypeNameAndDebug(Rosenbrock32, 0);
+    addToRunTimeSelectionTable(ODESolver, Rosenbrock32, dictionary);
 
 const scalar
-    // L-Stable constants from Hairer et. al.
-    Rosenbrock43::a21 = 2,
-    Rosenbrock43::a31 = 1.867943637803922,
-    Rosenbrock43::a32 = 0.2344449711399156,
+    Rosenbrock32::a21 = 1,
+    Rosenbrock32::a31 = 1,
+    Rosenbrock32::a32 = 0,
 
-    Rosenbrock43::c21 = -7.137615036412310,
-    Rosenbrock43::c31 = 2.580708087951457,
-    Rosenbrock43::c32 = 0.6515950076447975,
-    Rosenbrock43::c41 = -2.137148994382534,
-    Rosenbrock43::c42 = -0.3214669691237626,
-    Rosenbrock43::c43 = -0.6949742501781779,
+    Rosenbrock32::c21 = -1.0156171083877702091975600115545,
+    Rosenbrock32::c31 = 4.0759956452537699824805835358067,
+    Rosenbrock32::c32 = 9.2076794298330791242156818474003,
 
-    Rosenbrock43::b1 = 2.255570073418735,
-    Rosenbrock43::b2 = 0.2870493262186792,
-    Rosenbrock43::b3 = 0.435317943184018,
-    Rosenbrock43::b4 = 1.093502252409163,
+    Rosenbrock32::b1 = 1,
+    Rosenbrock32::b2 = 6.1697947043828245592553615689730,
+    Rosenbrock32::b3 = -0.4277225654321857332623837380651,
 
-    Rosenbrock43::e1 = -0.2815431932141155,
-    Rosenbrock43::e2 = -0.0727619912493892,
-    Rosenbrock43::e3 = -0.1082196201495311,
-    Rosenbrock43::e4 = -1.093502252409163,
+    Rosenbrock32::e1 = 0.5,
+    Rosenbrock32::e2 = -2.9079558716805469821718236208017,
+    Rosenbrock32::e3 = 0.2235406989781156962736090927619,
 
-    Rosenbrock43::gamma = 0.57282,
-    Rosenbrock43::c2 = 1.14564,
-    Rosenbrock43::c3 = 0.65521686381559,
+    Rosenbrock32::gamma = 0.43586652150845899941601945119356,
+    Rosenbrock32::c2 = 0.43586652150845899941601945119356,
 
-    Rosenbrock43::d1 = 0.57282,
-    Rosenbrock43::d2 = -1.769193891319233,
-    Rosenbrock43::d3 = 0.7592633437920482,
-    Rosenbrock43::d4 = -0.1049021087100450;
-
-    // Constants by Shampine
-    // More accurate than the L-Stable coefficients for small step-size
-    // but less stable for large step-size
-    /*
-    Rosenbrock43::a21 = 2,
-    Rosenbrock43::a31 = 48.0/25.0,
-    Rosenbrock43::a32 = 6.0/25.0,
-
-    Rosenbrock43::c21 = -8,
-    Rosenbrock43::c31 = 372.0/25.0,
-    Rosenbrock43::c32 = 12.0/5.0,
-
-    Rosenbrock43::c41 = -112.0/125.0,
-    Rosenbrock43::c42 = -54.0/125.0,
-    Rosenbrock43::c43 = -2.0/5.0,
-
-    Rosenbrock43::b1 = 19.0/9.0,
-    Rosenbrock43::b2 = 1.0/2.0,
-    Rosenbrock43::b3 = 25.0/108.0,
-    Rosenbrock43::b4 = 125.0/108.0,
-
-    Rosenbrock43::e1 = 34.0/108.0,
-    Rosenbrock43::e2 = 7.0/36.0,
-    Rosenbrock43::e3 = 0,
-    Rosenbrock43::e4 = 125.0/108.0,
-
-    Rosenbrock43::gamma = 1.0/2.0,
-    Rosenbrock43::c2 = 1,
-    Rosenbrock43::c3  = 3.0/5.0,
-
-    Rosenbrock43::d1 = 1.0/2.0,
-    Rosenbrock43::d2 = -3.0/2.0,
-    Rosenbrock43::d3 = 605.0/250.0,
-    Rosenbrock43::d4 = 29.0/250.0;
-    */
+    Rosenbrock32::d1 = 0.43586652150845899941601945119356,
+    Rosenbrock32::d2 = 0.24291996454816804366592249683314,
+    Rosenbrock32::d3 = 2.1851380027664058511513169485832;
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::Rosenbrock43::Rosenbrock43(const ODESystem& ode, const dictionary& dict)
+Foam::Rosenbrock32::Rosenbrock32(const ODESystem& ode, const dictionary& dict)
 :
     ODESolver(ode, dict),
     adaptiveSolver(ode, dict),
     k1_(n_),
     k2_(n_),
     k3_(n_),
-    k4_(n_),
     err_(n_),
     dydx_(n_),
     dfdx_(n_),
@@ -124,7 +79,7 @@ Foam::Rosenbrock43::Rosenbrock43(const ODESystem& ode, const dictionary& dict)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::Rosenbrock43::solve
+Foam::scalar Foam::Rosenbrock32::solve
 (
     const ODESystem& ode,
     const scalar x0,
@@ -172,41 +127,26 @@ Foam::scalar Foam::Rosenbrock43::solve
     LUBacksubstitute(a_, pivotIndices_, k2_);
 
     // Calculate k3:
-    forAll(y, i)
-    {
-        y[i] = y0[i] + a31*k1_[i] + a32*k2_[i];
-    }
-
-    ode.derivatives(x0 + c3*dx, y, dydx_);
-
     forAll(k3_, i)
     {
-        k3_[i] = dydx_[i] + dx*d3*dfdx_[i] + (c31*k1_[i] + c32*k2_[i])/dx;
+        k3_[i] = dydx_[i] + dx*d3*dfdx_[i]
+          + (c31*k1_[i] + c32*k2_[i])/dx;
     }
 
     LUBacksubstitute(a_, pivotIndices_, k3_);
 
-    // Calculate k4:
-    forAll(k4_, i)
-    {
-        k4_[i] = dydx_[i] + dx*d4*dfdx_[i]
-          + (c41*k1_[i] + c42*k2_[i] + c43*k3_[i])/dx;
-    }
-
-    LUBacksubstitute(a_, pivotIndices_, k4_);
-
     // Calculate error and update state:
     forAll(y, i)
     {
-        y[i] = y0[i] + b1*k1_[i] + b2*k2_[i] + b3*k3_[i] + b4*k4_[i];
-        err_[i] = e1*k1_[i] + e2*k2_[i] + e4*k4_[i];
+        y[i] = y0[i] + b1*k1_[i] + b2*k2_[i] + b3*k3_[i];
+        err_[i] = e1*k1_[i] + e2*k2_[i] + e3*k3_[i];
     }
 
     return normalizeError(y0, y, err_);
 }
 
 
-void Foam::Rosenbrock43::solve
+void Foam::Rosenbrock32::solve
 (
     const ODESystem& odes,
     scalar& x,

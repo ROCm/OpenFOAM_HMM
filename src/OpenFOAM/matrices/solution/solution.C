@@ -262,7 +262,9 @@ bool Foam::solution::relaxField(const word& name) const
 {
     if (debug)
     {
-        Info<< "Find variable relaxation factor for " << name << endl;
+        Info<< "Field relaxation factor for " << name
+            << " is " << (fieldRelaxDict_.found(name) ? "set" : "unset")
+            << endl;
     }
 
     return fieldRelaxDict_.found(name) || fieldRelaxDict_.found("default");
