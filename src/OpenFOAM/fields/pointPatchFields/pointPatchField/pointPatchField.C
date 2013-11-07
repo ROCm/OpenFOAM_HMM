@@ -64,6 +64,22 @@ pointPatchField<Type>::pointPatchField
 
 
 template<class Type>
+Foam::pointPatchField<Type>::pointPatchField
+(
+    const pointPatchField<Type>& ptf,
+    const pointPatch& p,
+    const DimensionedField<Type, pointMesh>& iF,
+    const pointPatchFieldMapper&
+)
+:
+    patch_(p),
+    internalField_(iF),
+    updated_(false),
+    patchType_(ptf.patchType_)
+{}
+
+
+template<class Type>
 pointPatchField<Type>::pointPatchField
 (
     const pointPatchField<Type>& ptf

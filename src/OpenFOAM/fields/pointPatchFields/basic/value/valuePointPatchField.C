@@ -108,7 +108,7 @@ Foam::valuePointPatchField<Type>::valuePointPatchField
     const pointPatchFieldMapper& mapper
 )
 :
-    pointPatchField<Type>(p, iF),
+    pointPatchField<Type>(ptf, p, iF, mapper),
     Field<Type>(ptf, mapper)
 {}
 
