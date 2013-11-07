@@ -104,17 +104,6 @@ public:
             //- Construct from dictionary
             constantProperties(const dictionary& parentDict);
 
-            //- Construct from components
-            constantProperties
-            (
-                const label parcelTypeId,
-                const scalar rhoMin,
-                const scalar rho0,
-                const scalar minParticleMass,
-                const scalar youngsModulus,
-                const scalar poissonsRatio
-            );
-
 
         // Member functions
 

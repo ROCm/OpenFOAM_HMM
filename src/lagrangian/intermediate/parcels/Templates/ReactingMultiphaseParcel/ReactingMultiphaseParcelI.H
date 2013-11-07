@@ -65,52 +65,6 @@ constantProperties
 
 
 template<class ParcelType>
-inline Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
-constantProperties
-(
-    const label parcelTypeId,
-    const scalar rhoMin,
-    const scalar rho0,
-    const scalar minParticleMass,
-    const scalar youngsModulus,
-    const scalar poissonsRatio,
-    const scalar T0,
-    const scalar TMin,
-    const scalar TMax,
-    const scalar Cp0,
-    const scalar epsilon0,
-    const scalar f0,
-    const scalar pMin,
-    const Switch& constantVolume,
-    const scalar TDevol,
-    const scalar LDevol,
-    const scalar hRetentionCoeff
-)
-:
-    ParcelType::constantProperties
-    (
-        parcelTypeId,
-        rhoMin,
-        rho0,
-        minParticleMass,
-        youngsModulus,
-        poissonsRatio,
-        T0,
-        TMin,
-        TMax,
-        Cp0,
-        epsilon0,
-        f0,
-        pMin,
-        constantVolume
-    ),
-    TDevol_(this->dict_, TDevol),
-    LDevol_(this->dict_, LDevol),
-    hRetentionCoeff_(this->dict_, hRetentionCoeff)
-{}
-
-
-template<class ParcelType>
 inline Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
 (
     const polyMesh& mesh,

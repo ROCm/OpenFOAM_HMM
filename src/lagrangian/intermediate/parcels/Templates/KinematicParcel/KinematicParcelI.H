@@ -70,23 +70,6 @@ inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
 
 
 template<class ParcelType>
-inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
-(
-    const label parcelTypeId,
-    const scalar rhoMin,
-    const scalar rho0,
-    const scalar minParticleMass
-)
-:
-    dict_(dictionary::null),
-    parcelTypeId_(dict_, parcelTypeId),
-    rhoMin_(dict_, rhoMin),
-    rho0_(dict_, rho0),
-    minParticleMass_(dict_, minParticleMass)
-{}
-
-
-template<class ParcelType>
 inline Foam::KinematicParcel<ParcelType>::KinematicParcel
 (
     const polyMesh& owner,

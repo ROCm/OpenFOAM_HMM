@@ -60,29 +60,6 @@ inline Foam::CollidingParcel<ParcelType>::constantProperties::constantProperties
 
 
 template<class ParcelType>
-inline Foam::CollidingParcel<ParcelType>::constantProperties::constantProperties
-(
-    const label parcelTypeId,
-    const scalar rhoMin,
-    const scalar rho0,
-    const scalar minParticleMass,
-    const scalar youngsModulus,
-    const scalar poissonsRatio
-)
-:
-    ParcelType::constantProperties
-    (
-        parcelTypeId,
-        rhoMin,
-        rho0,
-        minParticleMass
-    ),
-    youngsModulus_(this->dict_, youngsModulus),
-    poissonsRatio_(this->dict_, poissonsRatio)
-{}
-
-
-template<class ParcelType>
 inline Foam::CollidingParcel<ParcelType>::CollidingParcel
 (
     const polyMesh& owner,

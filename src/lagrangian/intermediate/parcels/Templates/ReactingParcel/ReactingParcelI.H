@@ -60,45 +60,6 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
 
 
 template<class ParcelType>
-inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
-(
-    const label parcelTypeId,
-    const scalar rhoMin,
-    const scalar rho0,
-    const scalar minParticleMass,
-    const scalar youngsModulus,
-    const scalar poissonsRatio,
-    const scalar T0,
-    const scalar TMin,
-    const scalar TMax,
-    const scalar Cp0,
-    const scalar epsilon0,
-    const scalar f0,
-    const scalar pMin,
-    const Switch& constantVolume
-)
-:
-    ParcelType::constantProperties
-    (
-        parcelTypeId,
-        rhoMin,
-        rho0,
-        minParticleMass,
-        youngsModulus,
-        poissonsRatio,
-        T0,
-        TMin,
-        TMax,
-        Cp0,
-        epsilon0,
-        f0
-    ),
-    pMin_(this->dict_, pMin),
-    constantVolume_(this->dict_, constantVolume)
-{}
-
-
-template<class ParcelType>
 inline Foam::ReactingParcel<ParcelType>::ReactingParcel
 (
     const polyMesh& mesh,
