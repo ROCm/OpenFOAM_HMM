@@ -28,13 +28,20 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-inline const Type& Foam::demandDrivenEntry<Type>::value() const
+inline void Foam::demandDrivenEntry<Type>::initialise() const
 {
     if (!stored_)
     {
         dict_.lookup(keyword_) >> value_;
         stored_ = true;
     }
+}
+
+
+template<class Type>
+inline const Type& Foam::demandDrivenEntry<Type>::value() const
+{
+    initialise();
 
     return value_;
 }

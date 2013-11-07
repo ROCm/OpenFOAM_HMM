@@ -105,6 +105,9 @@ public:
 
     // Public Member Functions
 
+        //- Initialise
+        inline void initialise() const;
+
         //- Return the value
         inline const Type& value() const;
 
