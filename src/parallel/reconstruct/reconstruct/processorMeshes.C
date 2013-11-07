@@ -31,6 +31,8 @@ License
 
 void Foam::processorMeshes::read()
 {
+    // Make sure to clear (and hence unregister) any previously loaded meshes
+    // and fields
     forAll(databases_, procI)
     {
         meshes_.set(procI, NULL);
