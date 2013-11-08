@@ -59,10 +59,10 @@ Foam::basicSymmetryPointPatchField<Type>::basicSymmetryPointPatchField
     const basicSymmetryPointPatchField<Type>& ptf,
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
-    const pointPatchFieldMapper&
+    const pointPatchFieldMapper& mapper
 )
 :
-    pointPatchField<Type>(p, iF)
+    pointPatchField<Type>(ptf, p, iF, mapper)
 {}
 
 

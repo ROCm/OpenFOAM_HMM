@@ -167,6 +167,15 @@ public:
             const dictionary&
         );
 
+        //- Construct by mapping given patchField<Type> onto a new patch
+        pointPatchField
+        (
+            const pointPatchField<Type>&,
+            const pointPatch&,
+            const DimensionedField<Type, pointMesh>&,
+            const pointPatchFieldMapper&
+        );
+
         //- Construct as copy
         pointPatchField(const pointPatchField<Type>&);
 

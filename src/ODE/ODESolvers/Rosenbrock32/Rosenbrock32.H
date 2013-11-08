@@ -22,28 +22,32 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::rodas43
+    Foam::Rosenbrock32
 
 Description
-    L-stable, stiffly-accurate embedded Rosenbrock ODE solver of order (3)4.
+    L-stable embedded Rosenbrock ODE solver of order (3)4.
 
     References:
     \verbatim
-        "Solving Ordinary Differential Equations II: Stiff
-         and Differential-Algebraic Problems, second edition",
-        Hairer, E.,
-        Nørsett, S.,
-        Wanner, G.,
-        Springer-Verlag, Berlin. 1996.
+        Sandu et al,
+        "Benchmarking stiff ODE solvers for atmospheric chemistry problems II
+         Rosenbrock solvers",
+         A. Sandu,
+         J.G. Verwer,
+         J.G. Blom,
+         E.J. Spee,
+         G.R. Carmichael,
+         F.A. Potra,
+         Atmospheric Environment, Volume 31, 1997, Issue 20, Pages 3459-3472
     \endverbatim
 
 SourceFiles
-    rodas43.C
+    Rosenbrock32.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef rodas43_H
-#define rodas43_H
+#ifndef Rosenbrock32_H
+#define Rosenbrock32_H
 
 #include "ODESolver.H"
 #include "adaptiveSolver.H"
@@ -54,10 +58,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class rodas43 Declaration
+                           Class Rosenbrock32 Declaration
 \*---------------------------------------------------------------------------*/
 
-class rodas43
+class Rosenbrock32
 :
     public ODESolver,
     public adaptiveSolver
@@ -67,9 +71,6 @@ class rodas43
         mutable scalarField k1_;
         mutable scalarField k2_;
         mutable scalarField k3_;
-        mutable scalarField k4_;
-        mutable scalarField k5_;
-        mutable scalarField dy_;
         mutable scalarField err_;
         mutable scalarField dydx_;
         mutable scalarField dfdx_;
@@ -78,27 +79,25 @@ class rodas43
         mutable labelList pivotIndices_;
 
         static const scalar
-            c2, c3, c4,
-            d1, d2, d3, d4,
             a21, a31, a32,
-            a41, a42, a43,
-            a51, a52, a53, a54,
             c21, c31, c32,
-            c41, c42, c43,
-            c51, c52, c53, c54,
-            c61, c62, c63, c64, c65,
-            gamma;
+            b1, b2, b3,
+            e1, e2, e3,
+            gamma,
+            c2, c3,
+            d1, d2, d3;
+
 
 public:
 
     //- Runtime type information
-    TypeName("rodas43");
+    TypeName("Rosenbrock32");
 
 
     // Constructors
 
         //- Construct from ODE
-        rodas43(const ODESystem& ode, const dictionary& dict);
+        Rosenbrock32(const ODESystem& ode, const dictionary& dict);
 
 
     // Member Functions

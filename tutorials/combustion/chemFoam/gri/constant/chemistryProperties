@@ -23,7 +23,7 @@ chemistryType
 
 chemistry       on;
 
-initialChemicalTimeStep 1e-6;
+initialChemicalTimeStep 1e-7;
 
 EulerImplicitCoeffs
 {
@@ -33,9 +33,9 @@ EulerImplicitCoeffs
 
 odeCoeffs
 {
-    solver          Rosenbrock43;
+    solver          seulex;
     absTol          1e-12;
-    relTol          1e-2;
+    relTol          1e-1;
 }
 
 
