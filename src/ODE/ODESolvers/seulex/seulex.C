@@ -400,7 +400,11 @@ void Foam::seulex::solve
                     if (err > 1.0)
                     {
                         reject = true;
-                        if (kTarg_ > 1 && work_[kTarg_-1] < kFactor1_*work_[kTarg_])
+                        if
+                        (
+                            kTarg_ > 1
+                         && work_[kTarg_-1] < kFactor1_*work_[kTarg_]
+                        )
                         {
                             kTarg_--;
                         }
