@@ -47,8 +47,6 @@ SourceFiles
 #define seulex_H
 
 #include "ODESolver.H"
-
-#include "scalarFieldField.H"
 #include "scalarMatrices.H"
 #include "labelField.H"
 
@@ -65,20 +63,16 @@ class seulex
 :
     public ODESolver
 {
-
     // Private data
 
-        //- seulex constants
-        static const scalar EPS;
-
-        static const label KMAXX=12, IMAXX = KMAXX + 1;
+        // SEULEX constants
+        static const label kMaxx_ = 12;
+        static const label iMaxx_ = kMaxx_ + 1;
 
         static const scalar
-            STEPFAC1, STEPFAC2, STEPFAC3, STEPFAC4, STEPFAC5, KFAC1, KFAC2;
-
-
-        //- Reference to ODESystem
-        const ODESystem& ode_;
+            stepFactor1_, stepFactor2_, stepFactor3_,
+            stepFactor4_, stepFactor5_,
+            kFactor1_, kFactor2_;
 
         // Temporary fields
         mutable label kTarg_;
@@ -89,14 +83,10 @@ class seulex
         mutable scalar jacRedo_, theta_;
         mutable bool calcJac_, dense_;
         mutable scalarSquareMatrix a_, coeff_;
-
-
-        mutable scalar hnext_, hdid_;
-
         mutable labelList pivotIndices_;
 
-        // Fields space for "step" function
-        mutable scalarField hOpt_ ,work_, ySaved_, ySequence_, scale_;
+        // Fields space for "solve" function
+        mutable scalarField dxOpt_, work_, y0_, ySequence_, scale_;
 
         // Fields used in "dy" function
         mutable scalarField del_, yTemp_, dyTemp_, delTemp_;
@@ -104,13 +94,11 @@ class seulex
 
     // Private Member Functions
 
-        void step(const scalar& htry, scalar& x,  scalarField& y) const;
-
         bool dy
         (
-            const scalar& x,
+            const scalar x,
             scalarField& y,
-            const scalar htot,
+            const scalar dxTot,
             const label k,
             scalarField& yend,
             label& ipt,
@@ -141,7 +129,6 @@ public:
     // Member Functions
     void solve
     (
-        const ODESystem& ode,
         scalar& x,
         scalarField& y,
         scalar& dxTry

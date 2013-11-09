@@ -35,14 +35,13 @@ namespace Foam
     addToRunTimeSelectionTable(ODESolver, seulex, dictionary);
 
     const scalar
-        seulex::EPS = VSMALL,
-        seulex::STEPFAC1 = 0.6,
-        seulex::STEPFAC2 = 0.93,
-        seulex::STEPFAC3 = 0.1,
-        seulex::STEPFAC4 = 4.0,
-        seulex::STEPFAC5 = 0.5,
-        seulex::KFAC1 = 0.7,
-        seulex::KFAC2 = 0.9;
+        seulex::stepFactor1_ = 0.6,
+        seulex::stepFactor2_ = 0.93,
+        seulex::stepFactor3_ = 0.1,
+        seulex::stepFactor4_ = 4.0,
+        seulex::stepFactor5_ = 0.5,
+        seulex::kFactor1_ = 0.7,
+        seulex::kFactor2_ = 0.9;
 }
 
 
@@ -51,22 +50,21 @@ namespace Foam
 Foam::seulex::seulex(const ODESystem& ode, const dictionary& dict)
 :
     ODESolver(ode, dict),
-    ode_(ode),
-    nSeq_(IMAXX),
-    cost_(IMAXX),
+    nSeq_(iMaxx_),
+    cost_(iMaxx_),
     dfdx_(n_),
-    factrl_(IMAXX),
-    table_(KMAXX,n_),
-    fSave_((IMAXX-1)*(IMAXX+1)/2 + 2,n_),
+    factrl_(iMaxx_),
+    table_(kMaxx_, n_),
+    fSave_((iMaxx_ - 1)*(iMaxx_ + 1)/2 + 2, n_),
     dfdy_(n_),
     calcJac_(false),
     dense_(false),
     a_(n_),
-    coeff_(IMAXX,IMAXX),
+    coeff_(iMaxx_, iMaxx_),
     pivotIndices_(n_, 0.0),
-    hOpt_(IMAXX),
-    work_(IMAXX),
-    ySaved_(n_),
+    dxOpt_(iMaxx_),
+    work_(iMaxx_),
+    y0_(n_),
     ySequence_(n_),
     scale_(n_),
     del_(n_),
@@ -81,27 +79,25 @@ Foam::seulex::seulex(const ODESystem& ode, const dictionary& dict)
     nSeq_[0] = 2;
     nSeq_[1] = 3;
 
-    for (label i = 2; i < IMAXX; i++)
+    for (int i=2; i<iMaxx_; i++)
     {
         nSeq_[i] = 2*nSeq_[i-2];
     }
     cost_[0] = costjac + costlu + nSeq_[0]*(costfunc + costsolve);
 
-    for (label k=0;k<KMAXX;k++)
+    for (int k=0; k<kMaxx_; k++)
     {
         cost_[k+1] = cost_[k] + (nSeq_[k+1]-1)*(costfunc + costsolve) + costlu;
     }
 
-    hnext_ =- VGREAT;
-
     //NOTE: the first element of relTol_ and absTol_ are used here.
     scalar logfact =- log10(relTol_[0] + absTol_[0])*0.6 + 0.5;
 
-    kTarg_ = min(1, min(KMAXX - 1, label(logfact)));
+    kTarg_ = min(1, min(kMaxx_ - 1, label(logfact)));
 
-    for (label k = 0; k < IMAXX; k++)
+    for (int k=0; k<iMaxx_; k++)
     {
-        for (label l = 0; l < k; l++)
+        for (int l=0; l<k; l++)
         {
             scalar ratio = scalar(nSeq_[k])/nSeq_[l];
             coeff_[k][l] = 1.0/(ratio - 1.0);
@@ -109,7 +105,7 @@ Foam::seulex::seulex(const ODESystem& ode, const dictionary& dict)
     }
 
     factrl_[0] = 1.0;
-    for (label k = 0; k < IMAXX - 1; k++)
+    for (int k=0; k<iMaxx_ - 1; k++)
     {
         factrl_[k+1] = (k+1)*factrl_[k];
     }
@@ -118,274 +114,11 @@ Foam::seulex::seulex(const ODESystem& ode, const dictionary& dict)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-void Foam::seulex::solve
-(
-    const ODESystem& ode,
-    scalar& x,
-    scalarField& y,
-    scalar& dxTry
-) const
-{
-    step(dxTry, x, y);
-    dxTry = hnext_;
-}
-
-
-void Foam::seulex::step(const scalar& htry, scalar& x,  scalarField& y) const
-{
-    static bool first_step = true, last_step = false;
-    static bool forward, reject = false, prev_reject = false;
-    static scalar errold;
-    label i, k;
-    scalar fac, h, hnew, err;
-    bool firstk;
-
-    work_[0] = 1.e30;
-    h = htry;
-    forward = h > 0 ? true : false;
-
-    ySaved_ = y;
-
-    if (h != hnext_ && !first_step)
-    {
-        last_step = true;
-    }
-
-    if (reject)
-    {
-        prev_reject = true;
-        last_step = false;
-        theta_=2.0*jacRedo_;
-    }
-
-    for (i = 0; i < n_; i++)
-    {
-        scale_[i] = absTol_[i] + relTol_[i]*mag(y[i]);
-    }
-
-    reject = false;
-    firstk = true;
-    hnew = mag(h);
-
-    if (theta_ > jacRedo_ && !calcJac_)
-    {
-        ode_.jacobian(x, y, dfdx_, dfdy_);
-        calcJac_ = true;
-    }
-
-    while (firstk || reject)
-    {
-        h = forward ? hnew : -hnew;
-        firstk = false;
-        reject = false;
-
-        if (mag(h) <= mag(x)*EPS)
-        {
-             WarningIn("seulex::step(const scalar")
-                    << "step size underflow in step :"  << h << endl;
-        }
-        label ipt=-1;
-
-        for (k = 0; k <= kTarg_ + 1; k++)
-        {
-            bool success = dy(x, ySaved_, h, k, ySequence_, ipt, scale_);
-
-            if (!success)
-            {
-                reject = true;
-                hnew = mag(h)*STEPFAC5;
-                break;
-            }
-
-            if (k == 0)
-            {
-                 y = ySequence_;
-            }
-            else
-            {
-                for (i = 0; i < n_; i++)
-                    table_[k-1][i] = ySequence_[i];
-            }
-            if (k != 0)
-            {
-                polyextr(k, table_, y);
-                err = 0.0;
-                for (i = 0; i < n_; i++)
-                {
-                    scale_[i] = absTol_[i] + relTol_[i]*mag(ySaved_[i]);
-                    err += sqr((y[i] - table_[0][i])/scale_[i]);
-                }
-                err = sqrt(err/n_);
-                if (err > 1.0/EPS || (k > 1 && err >= errold))
-                {
-                    reject = true;
-                    hnew = mag(h)*STEPFAC5;
-                    break;
-                }
-                errold = min(4.0*err, 1.0);
-                scalar expo = 1.0/(k + 1);
-                scalar facmin = pow(STEPFAC3, expo);
-                if (err == 0.0)
-                {
-                    fac = 1.0/facmin;
-                }
-                else
-                {
-                    fac = STEPFAC2/pow(err/STEPFAC1, expo);
-                    fac = max(facmin/STEPFAC4, min(1.0/facmin, fac));
-                }
-                hOpt_[k] = mag(h*fac);
-                work_[k] = cost_[k]/hOpt_[k];
-
-                if ((first_step || last_step) && err <= 1.0)
-                {
-                    break;
-                }
-                if (k == kTarg_-1 && !prev_reject && !first_step && !last_step)
-                {
-                    if (err <= 1.0)
-                    {
-                        break;
-                    }
-                    else if (err > nSeq_[kTarg_]*nSeq_[kTarg_ + 1]*4.0)
-                    {
-                        reject = true;
-                        kTarg_ = k;
-                        if (kTarg_>1 && work_[k-1] < KFAC1*work_[k])
-                        {
-                            kTarg_--;
-                        }
-                        hnew = hOpt_[kTarg_];
-                        break;
-                    }
-                }
-                if (k == kTarg_)
-                {
-                    if (err <= 1.0)
-                    {
-                        break;
-                    }
-                    else if (err > nSeq_[k + 1]*2.0)
-                    {
-                        reject = true;
-                        if (kTarg_>1 && work_[k-1] < KFAC1*work_[k])
-                        {
-                            kTarg_--;
-                        }
-                        hnew = hOpt_[kTarg_];
-                        break;
-                    }
-                }
-                if (k == kTarg_+1)
-                {
-                    if (err > 1.0)
-                    {
-                        reject = true;
-                        if (kTarg_ > 1 && work_[kTarg_-1] < KFAC1*work_[kTarg_])
-                        {
-                            kTarg_--;
-                        }
-                        hnew = hOpt_[kTarg_];
-                    }
-                    break;
-                }
-            }
-        }
-        if (reject)
-        {
-            prev_reject = true;
-            if (!calcJac_)
-            {
-                theta_ = 2.0*jacRedo_;
-
-                if (theta_ > jacRedo_ && !calcJac_)
-                {
-                    ode_.jacobian(x, y, dfdx_, dfdy_);
-                    calcJac_ = true;
-                }
-            }
-        }
-    }
-
-    calcJac_ = false;
-
-    x += h;
-    hdid_ = h;
-    first_step = false;
-
-    label kopt;
-    if (k == 1)
-    {
-        kopt = 2;
-    }
-    else if (k <= kTarg_)
-    {
-        kopt=k;
-        if (work_[k-1] < KFAC1*work_[k])
-        {
-            kopt = k - 1;
-        }
-        else if (work_[k] < KFAC2*work_[k - 1])
-        {
-            kopt = min(k + 1, KMAXX - 1);
-        }
-    }
-    else
-    {
-        kopt = k - 1;
-        if (k > 2 && work_[k-2] < KFAC1*work_[k - 1])
-        {
-            kopt = k - 2;
-        }
-        if (work_[k] < KFAC2*work_[kopt])
-        {
-            kopt = min(k, KMAXX - 1);
-        }
-    }
-
-    if (prev_reject)
-    {
-        kTarg_ = min(kopt, k);
-        hnew = min(mag(h), hOpt_[kTarg_]);
-        prev_reject = false;
-    }
-    else
-    {
-        if (kopt <= k)
-        {
-            hnew = hOpt_[kopt];
-        }
-        else
-        {
-            if (k < kTarg_ && work_[k] < KFAC2*work_[k - 1])
-            {
-                hnew = hOpt_[k]*cost_[kopt + 1]/cost_[k];
-            }
-            else
-            {
-                hnew = hOpt_[k]*cost_[kopt]/cost_[k];
-            }
-        }
-        kTarg_ = kopt;
-    }
-
-    if (forward)
-    {
-        hnext_ = hnew;
-    }
-    else
-    {
-        hnext_ =- hnew;
-    }
-}
-
-
 bool Foam::seulex::dy
 (
-    const scalar& x,
+    const scalar x,
     scalarField& y,
-    const scalar htot,
+    const scalar dxTot,
     const label k,
     scalarField& yend,
     label& ipt,
@@ -393,16 +126,23 @@ bool Foam::seulex::dy
 ) const
 {
     label nstep = nSeq_[k];
-    scalar h = htot/nstep;
-    for (label i = 0; i < n_; i++)
-    {
-        for (label j = 0; j < n_; j++) a_[i][j] = -dfdy_[i][j];
-        a_[i][i] += 1.0/h;
-    }
-    LUDecompose(a_, pivotIndices_);
-    scalar xnew = x + h;
+    scalar dx = dxTot/nstep;
 
-    ode_.derivatives(xnew, y, del_);
+    for (label i=0; i<n_; i++)
+    {
+        for (label j=0; j<n_; j++)
+        {
+            a_[i][j] = -dfdy_[i][j];
+        }
+
+        a_[i][i] += 1.0/dx;
+    }
+
+    LUDecompose(a_, pivotIndices_);
+
+    scalar xnew = x + dx;
+
+    odes_.derivatives(xnew, y, del_);
 
     yTemp_ = y;
 
@@ -422,9 +162,9 @@ bool Foam::seulex::dy
         {
             yTemp_[i] += del_[i];
         }
-        xnew += h;
+        xnew += dx;
 
-        ode_.derivatives(xnew, yTemp_, yend);
+        odes_.derivatives(xnew, yTemp_, yend);
 
         if (nn == 1 && k<=1)
         {
@@ -435,10 +175,10 @@ bool Foam::seulex::dy
             }
             del1 = sqrt(del1);
 
-            ode_.derivatives(x+h, yTemp_, dyTemp_);
+            odes_.derivatives(x + dx, yTemp_, dyTemp_);
             for (label i=0;i<n_;i++)
             {
-                del_[i] = dyTemp_[i] - del_[i]/h;
+                del_[i] = dyTemp_[i] - del_[i]/dx;
             }
 
             LUBacksubstitute(a_, pivotIndices_, del_);
@@ -472,6 +212,7 @@ bool Foam::seulex::dy
     }
 
     yend = yTemp_ + del_;
+
     return true;
 }
 
@@ -483,8 +224,8 @@ void Foam::seulex::polyextr
     scalarField& last
 ) const
 {
-    label l=last.size();
-    for (label j = k - 1; j > 0; j--)
+    int l = last.size();
+    for (int j=k - 1; j>0; j--)
     {
         for (label i=0; i<l; i++)
         {
@@ -492,10 +233,269 @@ void Foam::seulex::polyextr
                 table[j][i] + coeff_[k][j]*(table[j][i] - table[j-1][i]);
         }
     }
-    for (label i = 0; i < l; i++)
+
+    for (int i=0; i<l; i++)
     {
         last[i] = table[0][i] + coeff_[k][0]*(table[0][i] - last[i]);
     }
 }
+
+
+void Foam::seulex::solve
+(
+    scalar& x,
+    scalarField& y,
+    scalar& dxTry
+) const
+{
+    static bool firstStep = true, lastStep = false;
+    static bool reject = false, prevReject = false;
+    static scalar errold;
+
+    work_[0] = GREAT;
+    scalar dx = dxTry;
+    dxTry = -VGREAT;
+
+    bool forward = dx > 0 ? true : false;
+
+    y0_ = y;
+
+    if (dx != dxTry && !firstStep)
+    {
+        lastStep = true;
+    }
+
+    if (reject)
+    {
+        prevReject = true;
+        lastStep = false;
+        theta_=2.0*jacRedo_;
+    }
+
+    forAll(scale_, i)
+    {
+        scale_[i] = absTol_[i] + relTol_[i]*mag(y[i]);
+    }
+
+    reject = false;
+    bool firstk = true;
+    scalar dxNew = mag(dx);
+
+    if (theta_ > jacRedo_ && !calcJac_)
+    {
+        odes_.jacobian(x, y, dfdx_, dfdy_);
+        calcJac_ = true;
+    }
+
+
+    int k;
+    while (firstk || reject)
+    {
+        dx = forward ? dxNew : -dxNew;
+        firstk = false;
+        reject = false;
+
+        if (mag(dx) <= mag(x)*SMALL)
+        {
+             WarningIn("seulex::step(const scalar")
+                    << "step size underflow in step :"  << dx << endl;
+        }
+        label ipt = -1;
+
+        for (k = 0; k <= kTarg_ + 1; k++)
+        {
+            bool success = dy(x, y0_, dx, k, ySequence_, ipt, scale_);
+
+            if (!success)
+            {
+                reject = true;
+                dxNew = mag(dx)*stepFactor5_;
+                break;
+            }
+
+            if (k == 0)
+            {
+                 y = ySequence_;
+            }
+            else
+            {
+                forAll(ySequence_, i)
+                {
+                    table_[k-1][i] = ySequence_[i];
+                }
+            }
+            if (k != 0)
+            {
+                polyextr(k, table_, y);
+                scalar err = 0.0;
+                forAll(scale_, i)
+                {
+                    scale_[i] = absTol_[i] + relTol_[i]*mag(y0_[i]);
+                    err += sqr((y[i] - table_[0][i])/scale_[i]);
+                }
+                err = sqrt(err/n_);
+                if (err > 1.0/SMALL || (k > 1 && err >= errold))
+                {
+                    reject = true;
+                    dxNew = mag(dx)*stepFactor5_;
+                    break;
+                }
+                errold = min(4.0*err, 1.0);
+                scalar expo = 1.0/(k + 1);
+                scalar facmin = pow(stepFactor3_, expo);
+                scalar fac;
+                if (err == 0.0)
+                {
+                    fac = 1.0/facmin;
+                }
+                else
+                {
+                    fac = stepFactor2_/pow(err/stepFactor1_, expo);
+                    fac = max(facmin/stepFactor4_, min(1.0/facmin, fac));
+                }
+                dxOpt_[k] = mag(dx*fac);
+                work_[k] = cost_[k]/dxOpt_[k];
+
+                if ((firstStep || lastStep) && err <= 1.0)
+                {
+                    break;
+                }
+                if (k == kTarg_-1 && !prevReject && !firstStep && !lastStep)
+                {
+                    if (err <= 1.0)
+                    {
+                        break;
+                    }
+                    else if (err > nSeq_[kTarg_]*nSeq_[kTarg_ + 1]*4.0)
+                    {
+                        reject = true;
+                        kTarg_ = k;
+                        if (kTarg_>1 && work_[k-1] < kFactor1_*work_[k])
+                        {
+                            kTarg_--;
+                        }
+                        dxNew = dxOpt_[kTarg_];
+                        break;
+                    }
+                }
+                if (k == kTarg_)
+                {
+                    if (err <= 1.0)
+                    {
+                        break;
+                    }
+                    else if (err > nSeq_[k + 1]*2.0)
+                    {
+                        reject = true;
+                        if (kTarg_>1 && work_[k-1] < kFactor1_*work_[k])
+                        {
+                            kTarg_--;
+                        }
+                        dxNew = dxOpt_[kTarg_];
+                        break;
+                    }
+                }
+                if (k == kTarg_+1)
+                {
+                    if (err > 1.0)
+                    {
+                        reject = true;
+                        if (kTarg_ > 1 && work_[kTarg_-1] < kFactor1_*work_[kTarg_])
+                        {
+                            kTarg_--;
+                        }
+                        dxNew = dxOpt_[kTarg_];
+                    }
+                    break;
+                }
+            }
+        }
+        if (reject)
+        {
+            prevReject = true;
+            if (!calcJac_)
+            {
+                theta_ = 2.0*jacRedo_;
+
+                if (theta_ > jacRedo_ && !calcJac_)
+                {
+                    odes_.jacobian(x, y, dfdx_, dfdy_);
+                    calcJac_ = true;
+                }
+            }
+        }
+    }
+
+    calcJac_ = false;
+
+    x += dx;
+    firstStep = false;
+
+    label kopt;
+    if (k == 1)
+    {
+        kopt = 2;
+    }
+    else if (k <= kTarg_)
+    {
+        kopt=k;
+        if (work_[k-1] < kFactor1_*work_[k])
+        {
+            kopt = k - 1;
+        }
+        else if (work_[k] < kFactor2_*work_[k - 1])
+        {
+            kopt = min(k + 1, kMaxx_ - 1);
+        }
+    }
+    else
+    {
+        kopt = k - 1;
+        if (k > 2 && work_[k-2] < kFactor1_*work_[k - 1])
+        {
+            kopt = k - 2;
+        }
+        if (work_[k] < kFactor2_*work_[kopt])
+        {
+            kopt = min(k, kMaxx_ - 1);
+        }
+    }
+
+    if (prevReject)
+    {
+        kTarg_ = min(kopt, k);
+        dxNew = min(mag(dx), dxOpt_[kTarg_]);
+        prevReject = false;
+    }
+    else
+    {
+        if (kopt <= k)
+        {
+            dxNew = dxOpt_[kopt];
+        }
+        else
+        {
+            if (k < kTarg_ && work_[k] < kFactor2_*work_[k - 1])
+            {
+                dxNew = dxOpt_[k]*cost_[kopt + 1]/cost_[k];
+            }
+            else
+            {
+                dxNew = dxOpt_[k]*cost_[kopt]/cost_[k];
+            }
+        }
+        kTarg_ = kopt;
+    }
+
+    if (forward)
+    {
+        dxTry = dxNew;
+    }
+    else
+    {
+        dxTry = -dxNew;
+    }
+}
+
 
 // ************************************************************************* //
