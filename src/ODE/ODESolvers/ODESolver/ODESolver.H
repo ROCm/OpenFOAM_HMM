@@ -55,6 +55,9 @@ protected:
 
     // Protected data
 
+        //- Reference to ODESystem
+        const ODESystem& odes_;
+
         //- Size of the ODESystem
         label n_;
 
@@ -150,7 +153,6 @@ public:
         //  Update the state and return an estimate for the next step in dxTry
         virtual void solve
         (
-            const ODESystem& ode,
             scalar& x,
             scalarField& y,
             scalar& dxTry
@@ -160,7 +162,6 @@ public:
         //  and return an estimate for the next step in dxTry
         virtual void solve
         (
-            const ODESystem& ode,
             const scalar xStart,
             const scalar xEnd,
             scalarField& y,

@@ -49,7 +49,6 @@ Foam::Euler::Euler(const ODESystem& ode, const dictionary& dict)
 
 Foam::scalar Foam::Euler::solve
 (
-    const ODESystem& ode,
     const scalar x0,
     const scalarField& y0,
     const scalarField& dydx0,
@@ -75,13 +74,12 @@ Foam::scalar Foam::Euler::solve
 
 void Foam::Euler::solve
 (
-    const ODESystem& odes,
     scalar& x,
     scalarField& y,
     scalar& dxTry
 ) const
 {
-    adaptiveSolver::solve(odes, x, y, dxTry);
+    adaptiveSolver::solve(odes_, x, y, dxTry);
 }
 
 

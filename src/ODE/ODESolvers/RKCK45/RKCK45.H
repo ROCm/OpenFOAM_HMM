@@ -110,7 +110,6 @@ public:
         //- Solve a single step dx and return the error
         scalar solve
         (
-            const ODESystem& ode,
             const scalar x0,
             const scalarField& y0,
             const scalarField& dydx0,
@@ -121,7 +120,6 @@ public:
         //- Solve the ODE system and the update the state
         void solve
         (
-            const ODESystem& ode,
             scalar& x,
             scalarField& y,
             scalar& dxTry

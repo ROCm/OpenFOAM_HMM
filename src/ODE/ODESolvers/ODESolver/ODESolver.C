@@ -38,6 +38,7 @@ namespace Foam
 
 Foam::ODESolver::ODESolver(const ODESystem& ode, const dictionary& dict)
 :
+    odes_(ode),
     n_(ode.nEqns()),
     absTol_(n_, dict.lookupOrDefault<scalar>("absTol", SMALL)),
     relTol_(n_, dict.lookupOrDefault<scalar>("relTol", 1e-4)),
@@ -52,6 +53,7 @@ Foam::ODESolver::ODESolver
     const scalarField& relTol
 )
 :
+    odes_(ode),
     n_(ode.nEqns()),
     absTol_(absTol),
     relTol_(relTol),
@@ -82,7 +84,6 @@ Foam::scalar Foam::ODESolver::normalizeError
 
 void Foam::ODESolver::solve
 (
-    const ODESystem& ode,
     const scalar xStart,
     const scalar xEnd,
     scalarField& y,
@@ -105,7 +106,7 @@ void Foam::ODESolver::solve
         }
 
         // Integrate as far as possible up to dxEst
-        solve(ode, x, y, dxEst);
+        solve(x, y, dxEst);
 
         // Check if reached xEnd
         if ((x - xEnd)*(xEnd - xStart) >= 0)
@@ -122,7 +123,7 @@ void Foam::ODESolver::solve
     FatalErrorIn
     (
         "ODESolver::solve"
-        "(const ODESystem& ode, const scalar xStart, const scalar xEnd,"
+        "(const scalar xStart, const scalar xEnd,"
         "scalarField& y, scalar& dxEst) const"
     )   << "Integration steps greater than maximum " << maxSteps_
         << exit(FatalError);

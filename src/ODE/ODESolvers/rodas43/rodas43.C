@@ -95,7 +95,6 @@ Foam::rodas43::rodas43(const ODESystem& ode, const dictionary& dict)
 
 Foam::scalar Foam::rodas43::solve
 (
-    const ODESystem& ode,
     const scalar x0,
     const scalarField& y0,
     const scalarField& dydx0,
@@ -103,7 +102,7 @@ Foam::scalar Foam::rodas43::solve
     scalarField& y
 ) const
 {
-    ode.jacobian(x0, y0, dfdx_, dfdy_);
+    odes_.jacobian(x0, y0, dfdx_, dfdy_);
 
     for (register label i=0; i<n_; i++)
     {
@@ -131,7 +130,7 @@ Foam::scalar Foam::rodas43::solve
         y[i] = y0[i] + a21*k1_[i];
     }
 
-    ode.derivatives(x0 + c2*dx, y, dydx_);
+    odes_.derivatives(x0 + c2*dx, y, dydx_);
 
     forAll(k2_, i)
     {
@@ -146,7 +145,7 @@ Foam::scalar Foam::rodas43::solve
         y[i] = y0[i] + a31*k1_[i] + a32*k2_[i];
     }
 
-    ode.derivatives(x0 + c3*dx, y, dydx_);
+    odes_.derivatives(x0 + c3*dx, y, dydx_);
 
     forAll(k3_, i)
     {
@@ -161,7 +160,7 @@ Foam::scalar Foam::rodas43::solve
         y[i] = y0[i] + a41*k1_[i] + a42*k2_[i] + a43*k3_[i];
     }
 
-    ode.derivatives(x0 + c4*dx, y, dydx_);
+    odes_.derivatives(x0 + c4*dx, y, dydx_);
 
     forAll(k4_, i)
     {
@@ -178,7 +177,7 @@ Foam::scalar Foam::rodas43::solve
         y[i] = y0[i] + dy_[i];
     }
 
-    ode.derivatives(x0 + dx, y, dydx_);
+    odes_.derivatives(x0 + dx, y, dydx_);
 
     forAll(k5_, i)
     {
@@ -195,7 +194,7 @@ Foam::scalar Foam::rodas43::solve
         y[i] = y0[i] + dy_[i];
     }
 
-    ode.derivatives(x0 + dx, y, dydx_);
+    odes_.derivatives(x0 + dx, y, dydx_);
 
     forAll(err_, i)
     {
@@ -216,13 +215,12 @@ Foam::scalar Foam::rodas43::solve
 
 void Foam::rodas43::solve
 (
-    const ODESystem& odes,
     scalar& x,
     scalarField& y,
     scalar& dxTry
 ) const
 {
-    adaptiveSolver::solve(odes, x, y, dxTry);
+    adaptiveSolver::solve(odes_, x, y, dxTry);
 }
 
 

@@ -70,13 +70,12 @@ Foam::SIBS::SIBS(const ODESystem& ode, const dictionary& dict)
 
 void Foam::SIBS::solve
 (
-    const ODESystem& ode,
     scalar& x,
     scalarField& y,
     scalar& dxTry
 ) const
 {
-    ode.derivatives(x, y, dydx0_);
+    odes_.derivatives(x, y, dydx0_);
 
     scalar h = dxTry;
     bool exitflag = false;
@@ -124,7 +123,7 @@ void Foam::SIBS::solve
     label k = 0;
     yTemp_ = y;
 
-    ode.jacobian(x, y, dfdx_, dfdy_);
+    odes_.jacobian(x, y, dfdx_, dfdy_);
 
     if (x != xNew_ || h != dxTry)
     {
@@ -151,7 +150,7 @@ void Foam::SIBS::solve
                     << exit(FatalError);
             }
 
-            SIMPR(ode, x, yTemp_, dydx0_, dfdx_, dfdy_, h, nSeq_[k], ySeq_);
+            SIMPR(x, yTemp_, dydx0_, dfdx_, dfdy_, h, nSeq_[k], ySeq_);
             scalar xest = sqr(h/nSeq_[k]);
 
             polyExtrapolate(k, xest, ySeq_, y, yErr_, x_p_, d_p_);

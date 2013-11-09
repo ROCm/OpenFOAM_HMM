@@ -77,7 +77,6 @@ public:
         //- Solve a single step dx and return the error
         virtual scalar solve
         (
-            const ODESystem& ode,
             const scalar x0,
             const scalarField& y0,
             const scalarField& dydx0,

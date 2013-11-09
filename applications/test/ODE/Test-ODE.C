@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
         scalar dxNext = dxEst;
 
         odeSolver->relTol() = relTol;
-        odeSolver->solve(ode, x, y, dxNext);
+        odeSolver->solve(x, y, dxNext);
 
         Info<< scientific << setw(13) << relTol;
         Info<< fixed << setw(11) << dxEst;
@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
     scalar dxEst = 0.5;
 
     odeSolver->relTol() = 1e-4;
-    odeSolver->solve(ode, x, xEnd, y, dxEst);
+    odeSolver->solve(x, xEnd, y, dxEst);
 
     Info<< nl << "Analytical: y(2.0) = " << yEnd << endl;
     Info      << "Numerical:  y(2.0) = " << y << ", dxEst = " << dxEst << endl;
