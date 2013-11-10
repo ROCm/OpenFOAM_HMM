@@ -28,7 +28,7 @@ Description
     An extrapolation-algorithm, based on the linearly implicit Euler method
     with step size control and order selection.
 
-    The implementation is based on the SEULEX code in
+    The implementation is based on the SEULEX algorithm in
     \verbatim
         "Solving Ordinary Differential Equations II: Stiff
          and Differential-Algebraic Problems, second edition",
@@ -65,35 +65,42 @@ class seulex
 {
     // Private data
 
-        // SEULEX constants
-        static const label kMaxx_ = 12;
-        static const label iMaxx_ = kMaxx_ + 1;
+        // Static constants
 
-        static const scalar
-            stepFactor1_, stepFactor2_, stepFactor3_,
-            stepFactor4_, stepFactor5_,
-            kFactor1_, kFactor2_;
+            static const label kMaxx_ = 12;
+            static const label iMaxx_ = kMaxx_ + 1;
 
-        // Temporary fields
-        mutable label kTarg_;
-        mutable labelField nSeq_;
-        mutable scalarField cpu_;
-        mutable scalarRectangularMatrix table_;
+            static const scalar
+                stepFactor1_, stepFactor2_, stepFactor3_,
+                stepFactor4_, stepFactor5_,
+                kFactor1_, kFactor2_;
 
-        mutable scalar jacRedo_, theta_;
-        mutable bool calcJac_;
+        // Evaluated constants
 
-        mutable scalarField dfdx_;
-        mutable scalarSquareMatrix dfdy_;
-        mutable scalarSquareMatrix a_, coeff_;
-        mutable labelList pivotIndices_;
+            scalar jacRedo_;
+            labelField nSeq_;
+            scalarField cpu_;
+            scalarSquareMatrix coeff_;
 
-        // Fields space for "solve" function
-        mutable scalarField dxOpt_, temp_;
-        mutable scalarField y0_, ySequence_, scale_;
+        // Temporary storage
+        // held to avoid dynamic memory allocation between calls
+        // and to transfer internal values between functions
 
-        // Fields used in "dy" function
-        mutable scalarField dy_, yTemp_, dydx_;
+            mutable scalar theta_;
+            mutable label kTarg_;
+            mutable scalarRectangularMatrix table_;
+
+            mutable scalarField dfdx_;
+            mutable scalarSquareMatrix dfdy_;
+            mutable scalarSquareMatrix a_;
+            mutable labelList pivotIndices_;
+
+            // Fields space for "solve" function
+            mutable scalarField dxOpt_, temp_;
+            mutable scalarField y0_, ySequence_, scale_;
+
+            // Fields used in "seul" function
+            mutable scalarField dy_, yTemp_, dydx_;
 
 
     // Private Member Functions
@@ -137,7 +144,7 @@ public:
         (
             scalar& x,
             scalarField& y,
-            scalar& dxTry
+            stepState& step
         ) const;
 };
 
