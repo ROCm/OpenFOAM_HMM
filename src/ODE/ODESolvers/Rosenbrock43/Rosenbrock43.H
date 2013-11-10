@@ -27,7 +27,6 @@ Class
 Description
     L-stable embedded Rosenbrock ODE solver of order (3)4.
 
-    Based on code from:
     \verbatim
         "Solving Ordinary Differential Equations II: Stiff
          and Differential-Algebraic Problems, second edition",
@@ -37,7 +36,7 @@ Description
         Springer-Verlag, Berlin. 1996.
     \endverbatim
 
-    Also provided are the constants from:
+    The default constants are from:
     \verbatim
         "Implementation of Rosenbrock Methods"
         Shampine, L. F.,
@@ -45,6 +44,8 @@ Description
     \endverbatim
     with which the scheme is more accurate than with the L-Stable coefficients
     for small step-size but less stable for large step-size.
+
+    The L-Stable scheme constants are provided commented-out in Rosenbrock43.C
 
 SourceFiles
     Rosenbrock43.C

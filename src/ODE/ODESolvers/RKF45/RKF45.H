@@ -34,8 +34,6 @@ Description
         Fehlberg, E.,
         NASA Technical Report 315, 1969.
 
-    Based on code from:
-    \verbatim
         "Solving Ordinary Differential Equations I: Nonstiff Problems,
          second edition",
         Hairer, E.,
@@ -47,31 +45,6 @@ Description
     This method embedds the 4-th order integration step into the 5-th order step
     and allows to perform an adapdive step-size control using these two order
     without the need of re-evaluation.
-
-    \f{align}{
-     k_1 &= h f(t_k, y_k) \\
-     k_2 &= h f(t_k + \frac{1}{4}h, y_k + \frac{1}{4}k_1) \\
-     k_3 &= h f(t_k + \frac{3}{8}h, y_k + \frac{3}{32}k_1 + \frac{9}{32}k_2) \\
-     k_4 &= h f(t_k + \frac{12}{13}h, y_k + \frac{1932}{2197}k_1
-              \frac{7200}{2197}k_2 + \frac{7296}{2197}k_3) - \\
-     k_5 &= h f(t_k + h, y_k + \frac{439}{216}k_1 - 8k_2 + \frac{3680}{513}k_3 -
-           \frac{845}{4104}k_4) \\
-     k_6 &= h f(t_k + \frac{1}{2}h, y_k - \frac{8}{27}k_1 + 2k_2 -
-           \frac{3544}{2565}k_3 + \frac{1859}{4104}k_4 - \frac{11}{40}k_5) \\
-    \f}
-
-    Which yields the following update-steps for the 4th and 5th order:
-
-    \f{align}{
-     \Delta_4 &= \frac{25}{216}k_1 + \frac{1408}{2565}k_3 +
-                 \frac{2197}{4101}k_4 - \frac{1}{5}k_5 \\
-     \Delta_5 &= \frac{16}{135}k_1 + \frac{6656}{12825}k_3 +
-                 \frac{9}{50}k_5 + \frac{2}{55}k_6
-    \f}
-
-    The difference between the 5th and 4th order (\f$\epsilon = \left|\Delta_5
-    - \Delta_4\right|\f$) can be used to determine if the stepsize \f$h\f$ needs
-    to be adjusted.
 
 SourceFiles
     RKF45.C

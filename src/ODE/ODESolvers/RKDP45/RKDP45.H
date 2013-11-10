@@ -34,10 +34,7 @@ Description
         Prince, P. J.,
         Journal of Computational and Applied Mathematics,
         6 (1), 1980: pp. 19-26.
-    \endverbatim
 
-    Based on code from:
-    \verbatim
         "Solving Ordinary Differential Equations I: Nonstiff Problems,
          second edition",
         Hairer, E.,
