@@ -77,40 +77,44 @@ class seulex
         // Temporary fields
         mutable label kTarg_;
         mutable labelField nSeq_;
-        mutable scalarField cost_, dfdx_, factrl_;
-        mutable scalarRectangularMatrix table_, fSave_;
-        mutable scalarSquareMatrix dfdy_;
+        mutable scalarField cpu_;
+        mutable scalarRectangularMatrix table_;
+
         mutable scalar jacRedo_, theta_;
-        mutable bool calcJac_, dense_;
+        mutable bool calcJac_;
+
+        mutable scalarField dfdx_;
+        mutable scalarSquareMatrix dfdy_;
         mutable scalarSquareMatrix a_, coeff_;
         mutable labelList pivotIndices_;
 
         // Fields space for "solve" function
-        mutable scalarField dxOpt_, work_, y0_, ySequence_, scale_;
+        mutable scalarField dxOpt_, temp_;
+        mutable scalarField y0_, ySequence_, scale_;
 
         // Fields used in "dy" function
-        mutable scalarField del_, yTemp_, dyTemp_, delTemp_;
+        mutable scalarField dy_, yTemp_, dydx_;
 
 
     // Private Member Functions
 
-        bool dy
+        //- Computes the j-th line of the extrapolation table
+        bool seul
         (
-            const scalar x,
-            scalarField& y,
+            const scalar x0,
+            const scalarField& y0,
             const scalar dxTot,
             const label k,
-            scalarField& yend,
-            label& ipt,
-            scalarField& scale
+            scalarField& y,
+            const scalarField& scale
         ) const;
 
-
-        void polyextr
+        //- Polynomial extrpolation
+        void extrapolate
         (
             const label k,
             scalarRectangularMatrix& table,
-            scalarField& last
+            scalarField& y
         ) const;
 
 
@@ -127,12 +131,14 @@ public:
 
 
     // Member Functions
-    void solve
-    (
-        scalar& x,
-        scalarField& y,
-        scalar& dxTry
-    ) const;
+
+        //- Solve the ODE system and the update the state
+        void solve
+        (
+            scalar& x,
+            scalarField& y,
+            scalar& dxTry
+        ) const;
 };
 
 

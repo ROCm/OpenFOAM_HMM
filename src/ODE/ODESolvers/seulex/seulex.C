@@ -51,31 +51,27 @@ Foam::seulex::seulex(const ODESystem& ode, const dictionary& dict)
 :
     ODESolver(ode, dict),
     nSeq_(iMaxx_),
-    cost_(iMaxx_),
-    dfdx_(n_),
-    factrl_(iMaxx_),
+    cpu_(iMaxx_),
     table_(kMaxx_, n_),
-    fSave_((iMaxx_ - 1)*(iMaxx_ + 1)/2 + 2, n_),
-    dfdy_(n_),
+    jacRedo_(min(1.0e-4, min(relTol_))),
+    theta_(2.0*jacRedo_),
     calcJac_(false),
-    dense_(false),
+    dfdx_(n_),
+    dfdy_(n_),
     a_(n_),
     coeff_(iMaxx_, iMaxx_),
-    pivotIndices_(n_, 0.0),
+    pivotIndices_(n_),
     dxOpt_(iMaxx_),
-    work_(iMaxx_),
+    temp_(iMaxx_),
     y0_(n_),
     ySequence_(n_),
     scale_(n_),
-    del_(n_),
+    dy_(n_),
     yTemp_(n_),
-    dyTemp_(n_),
-    delTemp_(n_)
+    dydx_(n_)
 {
-    const scalar costfunc = 1.0, costjac = 5.0, costlu = 1.0, costsolve = 1.0;
+    const scalar cpuFunc = 1.0, cpuJac = 5.0, cpuLU = 1.0, cpuSolve = 1.0;
 
-    jacRedo_ = min(1.0e-4, min(relTol_));
-    theta_ = 2.0*jacRedo_;
     nSeq_[0] = 2;
     nSeq_[1] = 3;
 
@@ -83,17 +79,16 @@ Foam::seulex::seulex(const ODESystem& ode, const dictionary& dict)
     {
         nSeq_[i] = 2*nSeq_[i-2];
     }
-    cost_[0] = costjac + costlu + nSeq_[0]*(costfunc + costsolve);
+    cpu_[0] = cpuJac + cpuLU + nSeq_[0]*(cpuFunc + cpuSolve);
 
     for (int k=0; k<kMaxx_; k++)
     {
-        cost_[k+1] = cost_[k] + (nSeq_[k+1]-1)*(costfunc + costsolve) + costlu;
+        cpu_[k+1] = cpu_[k] + (nSeq_[k+1]-1)*(cpuFunc + cpuSolve) + cpuLU;
     }
 
     //NOTE: the first element of relTol_ and absTol_ are used here.
-    scalar logfact =- log10(relTol_[0] + absTol_[0])*0.6 + 0.5;
-
-    kTarg_ = min(1, min(kMaxx_ - 1, label(logfact)));
+    scalar logTol = -log10(relTol_[0] + absTol_[0])*0.6 + 0.5;
+    kTarg_ = min(1, min(kMaxx_ - 1, int(logTol)));
 
     for (int k=0; k<iMaxx_; k++)
     {
@@ -103,30 +98,23 @@ Foam::seulex::seulex(const ODESystem& ode, const dictionary& dict)
             coeff_[k][l] = 1.0/(ratio - 1.0);
         }
     }
-
-    factrl_[0] = 1.0;
-    for (int k=0; k<iMaxx_ - 1; k++)
-    {
-        factrl_[k+1] = (k+1)*factrl_[k];
-    }
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-bool Foam::seulex::dy
+bool Foam::seulex::seul
 (
-    const scalar x,
-    scalarField& y,
+    const scalar x0,
+    const scalarField& y0,
     const scalar dxTot,
     const label k,
-    scalarField& yend,
-    label& ipt,
-    scalarField& scale
+    scalarField& y,
+    const scalarField& scale
 ) const
 {
-    label nstep = nSeq_[k];
-    scalar dx = dxTot/nstep;
+    label nSteps = nSeq_[k];
+    scalar dx = dxTot/nSteps;
 
     for (label i=0; i<n_; i++)
     {
@@ -140,56 +128,41 @@ bool Foam::seulex::dy
 
     LUDecompose(a_, pivotIndices_);
 
-    scalar xnew = x + dx;
+    scalar xnew = x0 + dx;
+    odes_.derivatives(xnew, y0, dy_);
+    LUBacksubstitute(a_, pivotIndices_, dy_);
 
-    odes_.derivatives(xnew, y, del_);
+    yTemp_ = y0;
 
-    yTemp_ = y;
-
-    LUBacksubstitute(a_, pivotIndices_, del_);
-
-    if (dense_ && nstep == k + 1)
+    for (label nn=1; nn<nSteps; nn++)
     {
-        ipt++;
-        for (label i = 0; i < n_; i++)
-        {
-            fSave_[ipt][i] = del_[i];
-        }
-    }
-    for (label nn = 1; nn < nstep; nn++)
-    {
-        for (label i=0;i<n_;i++)
-        {
-            yTemp_[i] += del_[i];
-        }
+        yTemp_ += dy_;
         xnew += dx;
-
-        odes_.derivatives(xnew, yTemp_, yend);
 
         if (nn == 1 && k<=1)
         {
-            scalar del1=0.0;
+            scalar dy1 = 0.0;
             for (label i = 0; i < n_; i++)
             {
-                del1 += sqr(del_[i]/scale[i]);
+                dy1 += sqr(dy_[i]/scale[i]);
             }
-            del1 = sqrt(del1);
+            dy1 = sqrt(dy1);
 
-            odes_.derivatives(x + dx, yTemp_, dyTemp_);
-            for (label i=0;i<n_;i++)
+            odes_.derivatives(x0 + dx, yTemp_, dydx_);
+            for (label i=0; i<n_; i++)
             {
-                del_[i] = dyTemp_[i] - del_[i]/dx;
+                dy_[i] = dydx_[i] - dy_[i]/dx;
             }
 
-            LUBacksubstitute(a_, pivotIndices_, del_);
+            LUBacksubstitute(a_, pivotIndices_, dy_);
 
-            scalar del2 = 0.0;
+            scalar dy2 = 0.0;
             for (label i = 0; i <n_ ; i++)
             {
-                del2 += sqr(del_[i]/scale[i]);
+                dy2 += sqr(dy_[i]/scale[i]);
             }
-            del2 = sqrt(del2);
-            theta_ = del2 / min(1.0, del1 + SMALL);
+            dy2 = sqrt(dy2);
+            theta_ = dy2/min(1.0, dy1 + SMALL);
 
             if (theta_ > 1.0)
             {
@@ -197,46 +170,38 @@ bool Foam::seulex::dy
             }
         }
 
-        delTemp_ = yend;
-        LUBacksubstitute(a_, pivotIndices_, delTemp_);
-        del_ = delTemp_;
-
-        if (dense_ && nn >= nstep-k-1)
-        {
-            ipt++;
-            for (label i=0;i<n_;i++)
-            {
-                fSave_[ipt][i]=del_[i];
-            }
-        }
+        odes_.derivatives(xnew, yTemp_, dy_);
+        LUBacksubstitute(a_, pivotIndices_, dy_);
     }
 
-    yend = yTemp_ + del_;
+    for (label i=0; i<n_; i++)
+    {
+        y[i] = yTemp_[i] + dy_[i];
+    }
 
     return true;
 }
 
 
-void Foam::seulex::polyextr
+void Foam::seulex::extrapolate
 (
     const label k,
     scalarRectangularMatrix& table,
-    scalarField& last
+    scalarField& y
 ) const
 {
-    int l = last.size();
-    for (int j=k - 1; j>0; j--)
+    for (int j=k-1; j>0; j--)
     {
-        for (label i=0; i<l; i++)
+        for (label i=0; i<n_; i++)
         {
             table[j-1][i] =
                 table[j][i] + coeff_[k][j]*(table[j][i] - table[j-1][i]);
         }
     }
 
-    for (int i=0; i<l; i++)
+    for (int i=0; i<n_; i++)
     {
-        last[i] = table[0][i] + coeff_[k][0]*(table[0][i] - last[i]);
+        y[i] = table[0][i] + coeff_[k][0]*(table[0][i] - y[i]);
     }
 }
 
@@ -250,9 +215,8 @@ void Foam::seulex::solve
 {
     static bool firstStep = true, lastStep = false;
     static bool reject = false, prevReject = false;
-    static scalar errold;
 
-    work_[0] = GREAT;
+    temp_[0] = GREAT;
     scalar dx = dxTry;
     dxTry = -VGREAT;
 
@@ -289,6 +253,8 @@ void Foam::seulex::solve
 
 
     int k;
+    scalar errOld;
+
     while (firstk || reject)
     {
         dx = forward ? dxNew : -dxNew;
@@ -300,11 +266,10 @@ void Foam::seulex::solve
              WarningIn("seulex::step(const scalar")
                     << "step size underflow in step :"  << dx << endl;
         }
-        label ipt = -1;
 
         for (k = 0; k <= kTarg_ + 1; k++)
         {
-            bool success = dy(x, y0_, dx, k, ySequence_, ipt, scale_);
+            bool success = seul(x, y0_, dx, k, ySequence_, scale_);
 
             if (!success)
             {
@@ -326,7 +291,7 @@ void Foam::seulex::solve
             }
             if (k != 0)
             {
-                polyextr(k, table_, y);
+                extrapolate(k, table_, y);
                 scalar err = 0.0;
                 forAll(scale_, i)
                 {
@@ -334,13 +299,13 @@ void Foam::seulex::solve
                     err += sqr((y[i] - table_[0][i])/scale_[i]);
                 }
                 err = sqrt(err/n_);
-                if (err > 1.0/SMALL || (k > 1 && err >= errold))
+                if (err > 1.0/SMALL || (k > 1 && err >= errOld))
                 {
                     reject = true;
                     dxNew = mag(dx)*stepFactor5_;
                     break;
                 }
-                errold = min(4.0*err, 1.0);
+                errOld = min(4*err, 1);
                 scalar expo = 1.0/(k + 1);
                 scalar facmin = pow(stepFactor3_, expo);
                 scalar fac;
@@ -354,7 +319,7 @@ void Foam::seulex::solve
                     fac = max(facmin/stepFactor4_, min(1.0/facmin, fac));
                 }
                 dxOpt_[k] = mag(dx*fac);
-                work_[k] = cost_[k]/dxOpt_[k];
+                temp_[k] = cpu_[k]/dxOpt_[k];
 
                 if ((firstStep || lastStep) && err <= 1.0)
                 {
@@ -370,7 +335,7 @@ void Foam::seulex::solve
                     {
                         reject = true;
                         kTarg_ = k;
-                        if (kTarg_>1 && work_[k-1] < kFactor1_*work_[k])
+                        if (kTarg_>1 && temp_[k-1] < kFactor1_*temp_[k])
                         {
                             kTarg_--;
                         }
@@ -387,7 +352,7 @@ void Foam::seulex::solve
                     else if (err > nSeq_[k + 1]*2.0)
                     {
                         reject = true;
-                        if (kTarg_>1 && work_[k-1] < kFactor1_*work_[k])
+                        if (kTarg_>1 && temp_[k-1] < kFactor1_*temp_[k])
                         {
                             kTarg_--;
                         }
@@ -403,7 +368,7 @@ void Foam::seulex::solve
                         if
                         (
                             kTarg_ > 1
-                         && work_[kTarg_-1] < kFactor1_*work_[kTarg_]
+                         && temp_[kTarg_-1] < kFactor1_*temp_[kTarg_]
                         )
                         {
                             kTarg_--;
@@ -443,11 +408,11 @@ void Foam::seulex::solve
     else if (k <= kTarg_)
     {
         kopt=k;
-        if (work_[k-1] < kFactor1_*work_[k])
+        if (temp_[k-1] < kFactor1_*temp_[k])
         {
             kopt = k - 1;
         }
-        else if (work_[k] < kFactor2_*work_[k - 1])
+        else if (temp_[k] < kFactor2_*temp_[k - 1])
         {
             kopt = min(k + 1, kMaxx_ - 1);
         }
@@ -455,11 +420,11 @@ void Foam::seulex::solve
     else
     {
         kopt = k - 1;
-        if (k > 2 && work_[k-2] < kFactor1_*work_[k - 1])
+        if (k > 2 && temp_[k-2] < kFactor1_*temp_[k - 1])
         {
             kopt = k - 2;
         }
-        if (work_[k] < kFactor2_*work_[kopt])
+        if (temp_[k] < kFactor2_*temp_[kopt])
         {
             kopt = min(k, kMaxx_ - 1);
         }
@@ -479,13 +444,13 @@ void Foam::seulex::solve
         }
         else
         {
-            if (k < kTarg_ && work_[k] < kFactor2_*work_[k - 1])
+            if (k < kTarg_ && temp_[k] < kFactor2_*temp_[k - 1])
             {
-                dxNew = dxOpt_[k]*cost_[kopt + 1]/cost_[k];
+                dxNew = dxOpt_[k]*cpu_[kopt + 1]/cpu_[k];
             }
             else
             {
-                dxNew = dxOpt_[k]*cost_[kopt]/cost_[k];
+                dxNew = dxOpt_[k]*cpu_[kopt]/cpu_[k];
             }
         }
         kTarg_ = kopt;
