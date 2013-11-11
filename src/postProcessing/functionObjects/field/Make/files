@@ -20,6 +20,7 @@ fieldValues/cellSource/cellSourceFunctionObject.C
 
 nearWallFields/nearWallFields.C
 nearWallFields/nearWallFieldsFunctionObject.C
+nearWallFields/findCellParticleCloud.C
 
 processorField/processorField.C
 processorField/processorFieldFunctionObject.C
