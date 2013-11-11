@@ -61,6 +61,7 @@ class findCellParticle
         //- passive data
         label data_;
 
+
 public:
 
     friend class Cloud<findCellParticle>;
@@ -74,7 +75,6 @@ public:
         List<List<point> >& cellToEnd_;
 
     public:
-
 
         // Constructors
 
@@ -97,12 +97,12 @@ public:
             {
                 return cellToData_;
             }
+
             List<List<point> >& cellToEnd()
             {
                 return cellToEnd_;
             }
     };
-
 
 
     // Constructors
@@ -169,7 +169,6 @@ public:
         {
             return data_;
         }
-
 
 
         // Tracking
