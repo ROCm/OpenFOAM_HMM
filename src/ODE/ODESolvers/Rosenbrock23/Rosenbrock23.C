@@ -23,45 +23,45 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Rosenbrock32.H"
+#include "Rosenbrock23.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(Rosenbrock32, 0);
-    addToRunTimeSelectionTable(ODESolver, Rosenbrock32, dictionary);
+    defineTypeNameAndDebug(Rosenbrock23, 0);
+    addToRunTimeSelectionTable(ODESolver, Rosenbrock23, dictionary);
 
 const scalar
-    Rosenbrock32::a21 = 1,
-    Rosenbrock32::a31 = 1,
-    Rosenbrock32::a32 = 0,
+    Rosenbrock23::a21 = 1,
+    Rosenbrock23::a31 = 1,
+    Rosenbrock23::a32 = 0,
 
-    Rosenbrock32::c21 = -1.0156171083877702091975600115545,
-    Rosenbrock32::c31 = 4.0759956452537699824805835358067,
-    Rosenbrock32::c32 = 9.2076794298330791242156818474003,
+    Rosenbrock23::c21 = -1.0156171083877702091975600115545,
+    Rosenbrock23::c31 = 4.0759956452537699824805835358067,
+    Rosenbrock23::c32 = 9.2076794298330791242156818474003,
 
-    Rosenbrock32::b1 = 1,
-    Rosenbrock32::b2 = 6.1697947043828245592553615689730,
-    Rosenbrock32::b3 = -0.4277225654321857332623837380651,
+    Rosenbrock23::b1 = 1,
+    Rosenbrock23::b2 = 6.1697947043828245592553615689730,
+    Rosenbrock23::b3 = -0.4277225654321857332623837380651,
 
-    Rosenbrock32::e1 = 0.5,
-    Rosenbrock32::e2 = -2.9079558716805469821718236208017,
-    Rosenbrock32::e3 = 0.2235406989781156962736090927619,
+    Rosenbrock23::e1 = 0.5,
+    Rosenbrock23::e2 = -2.9079558716805469821718236208017,
+    Rosenbrock23::e3 = 0.2235406989781156962736090927619,
 
-    Rosenbrock32::gamma = 0.43586652150845899941601945119356,
-    Rosenbrock32::c2 = 0.43586652150845899941601945119356,
+    Rosenbrock23::gamma = 0.43586652150845899941601945119356,
+    Rosenbrock23::c2 = 0.43586652150845899941601945119356,
 
-    Rosenbrock32::d1 = 0.43586652150845899941601945119356,
-    Rosenbrock32::d2 = 0.24291996454816804366592249683314,
-    Rosenbrock32::d3 = 2.1851380027664058511513169485832;
+    Rosenbrock23::d1 = 0.43586652150845899941601945119356,
+    Rosenbrock23::d2 = 0.24291996454816804366592249683314,
+    Rosenbrock23::d3 = 2.1851380027664058511513169485832;
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::Rosenbrock32::Rosenbrock32(const ODESystem& ode, const dictionary& dict)
+Foam::Rosenbrock23::Rosenbrock23(const ODESystem& ode, const dictionary& dict)
 :
     ODESolver(ode, dict),
     adaptiveSolver(ode, dict),
@@ -79,7 +79,7 @@ Foam::Rosenbrock32::Rosenbrock32(const ODESystem& ode, const dictionary& dict)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::Rosenbrock32::solve
+Foam::scalar Foam::Rosenbrock23::solve
 (
     const scalar x0,
     const scalarField& y0,
@@ -145,7 +145,7 @@ Foam::scalar Foam::Rosenbrock32::solve
 }
 
 
-void Foam::Rosenbrock32::solve
+void Foam::Rosenbrock23::solve
 (
     scalar& x,
     scalarField& y,

@@ -23,38 +23,42 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Rosenbrock21.H"
+#include "rodas23.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(Rosenbrock21, 0);
-    addToRunTimeSelectionTable(ODESolver, Rosenbrock21, dictionary);
+    defineTypeNameAndDebug(rodas23, 0);
+    addToRunTimeSelectionTable(ODESolver, rodas23, dictionary);
 
 const scalar
-    Rosenbrock21::gamma = 1 + 1.0/std::sqrt(2.0),
-    Rosenbrock21::a21 = 1.0/gamma,
-    Rosenbrock21::c2 = 1.0,
-    Rosenbrock21::c21 = -2.0/gamma,
-    Rosenbrock21::b1 = (3.0/2.0)/gamma,
-    Rosenbrock21::b2 = (1.0/2.0)/gamma,
-    Rosenbrock21::e1 = b1 - 1.0/gamma,
-    Rosenbrock21::e2 = b2,
-    Rosenbrock21::d1 = gamma,
-    Rosenbrock21::d2 = -gamma;
+    rodas23::c3 = 1,
+    rodas23::d1 = 1.0/2.0,
+    rodas23::d2 = 3.0/2.0,
+    rodas23::a31 = 2,
+    rodas23::a41 = 2,
+    rodas23::c21 = 4,
+    rodas23::c31 = 1,
+    rodas23::c32 = -1,
+    rodas23::c41 = 1,
+    rodas23::c42 = -1,
+    rodas23::c43 = -8.0/3.0,
+    rodas23::gamma = 1.0/2.0;
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::Rosenbrock21::Rosenbrock21(const ODESystem& ode, const dictionary& dict)
+Foam::rodas23::rodas23(const ODESystem& ode, const dictionary& dict)
 :
     ODESolver(ode, dict),
     adaptiveSolver(ode, dict),
     k1_(n_),
     k2_(n_),
+    k3_(n_),
+    dy_(n_),
     err_(n_),
     dydx_(n_),
     dfdx_(n_),
@@ -66,7 +70,7 @@ Foam::Rosenbrock21::Rosenbrock21(const ODESystem& ode, const dictionary& dict)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::Rosenbrock21::solve
+Foam::scalar Foam::rodas23::solve
 (
     const scalar x0,
     const scalarField& y0,
@@ -98,32 +102,55 @@ Foam::scalar Foam::Rosenbrock21::solve
     LUBacksubstitute(a_, pivotIndices_, k1_);
 
     // Calculate k2:
-    forAll(y, i)
-    {
-        y[i] = y0[i] + a21*k1_[i];
-    }
-
-    odes_.derivatives(x0 + c2*dx, y, dydx_);
-
     forAll(k2_, i)
     {
-        k2_[i] = dydx_[i] + dx*d2*dfdx_[i] + c21*k1_[i]/dx;
+        k2_[i] = dydx0[i] + dx*d2*dfdx_[i] + c21*k1_[i]/dx;
     }
 
     LUBacksubstitute(a_, pivotIndices_, k2_);
 
-    // Calculate error and update state:
+    // Calculate k3:
     forAll(y, i)
     {
-        y[i] = y0[i] + b1*k1_[i] + b2*k2_[i];
-        err_[i] = e1*k1_[i] + e2*k2_[i];
+        dy_[i] = a31*k1_[i];
+        y[i] = y0[i] + dy_[i];
+    }
+
+    odes_.derivatives(x0 + dx, y, dydx_);
+
+    forAll(k3_, i)
+    {
+        k3_[i] = dydx_[i] + (c31*k1_[i] + c32*k2_[i])/dx;
+    }
+
+    LUBacksubstitute(a_, pivotIndices_, k3_);
+
+    // Calculate new state and error
+    forAll(y, i)
+    {
+        dy_[i] += k3_[i];
+        y[i] = y0[i] + dy_[i];
+    }
+
+    odes_.derivatives(x0 + dx, y, dydx_);
+
+    forAll(err_, i)
+    {
+        err_[i] = dydx_[i] + (c41*k1_[i] + c42*k2_[i] + c43*k3_[i])/dx;
+    }
+
+    LUBacksubstitute(a_, pivotIndices_, err_);
+
+    forAll(y, i)
+    {
+        y[i] = y0[i] + dy_[i] + err_[i];
     }
 
     return normalizeError(y0, y, err_);
 }
 
 
-void Foam::Rosenbrock21::solve
+void Foam::rodas23::solve
 (
     scalar& x,
     scalarField& y,

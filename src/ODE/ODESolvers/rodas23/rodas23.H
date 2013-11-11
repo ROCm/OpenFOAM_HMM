@@ -22,38 +22,32 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::Rosenbrock43
+    Foam::rodas23
 
 Description
-    L-stable embedded Rosenbrock ODE solver of order (3)4.
+    L-stable, stiffly-accurate embedded Rosenbrock ODE solver of order (2)3.
 
+    References:
     \verbatim
-        "Solving Ordinary Differential Equations II: Stiff
-         and Differential-Algebraic Problems, second edition",
-        Hairer, E.,
-        Nørsett, S.,
-        Wanner, G.,
-        Springer-Verlag, Berlin. 1996.
+        Sandu et al,
+        "Benchmarking stiff ODE solvers for atmospheric chemistry problems II
+         Rosenbrock solvers",
+         A. Sandu,
+         J.G. Verwer,
+         J.G. Blom,
+         E.J. Spee,
+         G.R. Carmichael,
+         F.A. Potra,
+         Atmospheric Environment, Volume 31, 1997, Issue 20, Pages 3459-3472
     \endverbatim
-
-    The default constants are from:
-    \verbatim
-        "Implementation of Rosenbrock Methods"
-        Shampine, L. F.,
-        ACM Transactions on Mathematical Software, vol. 8, 1982, pp. 93–113.
-    \endverbatim
-    with which the scheme is more accurate than with the L-Stable coefficients
-    for small step-size but less stable for large step-size.
-
-    The L-Stable scheme constants are provided commented-out in Rosenbrock43.C
 
 SourceFiles
-    Rosenbrock43.C
+    rodas23.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Rosenbrock43_H
-#define Rosenbrock43_H
+#ifndef rodas23_H
+#define rodas23_H
 
 #include "ODESolver.H"
 #include "adaptiveSolver.H"
@@ -64,10 +58,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class Rosenbrock43 Declaration
+                           Class rodas23 Declaration
 \*---------------------------------------------------------------------------*/
 
-class Rosenbrock43
+class rodas23
 :
     public ODESolver,
     public adaptiveSolver
@@ -77,7 +71,7 @@ class Rosenbrock43
         mutable scalarField k1_;
         mutable scalarField k2_;
         mutable scalarField k3_;
-        mutable scalarField k4_;
+        mutable scalarField dy_;
         mutable scalarField err_;
         mutable scalarField dydx_;
         mutable scalarField dfdx_;
@@ -86,26 +80,24 @@ class Rosenbrock43
         mutable labelList pivotIndices_;
 
         static const scalar
-            a21, a31, a32,
+            c3,
+            d1, d2,
+            a31,
+            a41,
             c21, c31, c32,
             c41, c42, c43,
-            b1, b2, b3, b4,
-            e1, e2, e3, e4,
-            gamma,
-            c2, c3,
-            d1, d2, d3, d4;
-
+            gamma;
 
 public:
 
     //- Runtime type information
-    TypeName("Rosenbrock43");
+    TypeName("rodas23");
 
 
     // Constructors
 
         //- Construct from ODE
-        Rosenbrock43(const ODESystem& ode, const dictionary& dict);
+        rodas23(const ODESystem& ode, const dictionary& dict);
 
 
     // Member Functions

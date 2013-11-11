@@ -23,56 +23,56 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "rodas43.H"
+#include "rodas34.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(rodas43, 0);
-    addToRunTimeSelectionTable(ODESolver, rodas43, dictionary);
+    defineTypeNameAndDebug(rodas34, 0);
+    addToRunTimeSelectionTable(ODESolver, rodas34, dictionary);
 
 const scalar
-    rodas43::c2 = 0.386,
-    rodas43::c3 = 0.21,
-    rodas43::c4 = 0.63,
-    rodas43::d1 =  0.25,
-    rodas43::d2 = -0.1043,
-    rodas43::d3 =  0.1035,
-    rodas43::d4 = -0.3620000000000023e-01,
-    rodas43::a21 =  0.1544e1,
-    rodas43::a31 =  0.9466785280815826,
-    rodas43::a32 =  0.2557011698983284,
-    rodas43::a41 =  0.3314825187068521e1,
-    rodas43::a42 =  0.2896124015972201e1,
-    rodas43::a43 =  0.9986419139977817,
-    rodas43::a51 =  0.1221224509226641e1,
-    rodas43::a52 =  0.6019134481288629e1,
-    rodas43::a53 =  0.1253708332932087e2,
-    rodas43::a54 = -0.6878860361058950,
-    rodas43::c21 = -0.56688e1,
-    rodas43::c31 = -0.2430093356833875e1,
-    rodas43::c32 = -0.2063599157091915,
-    rodas43::c41 = -0.1073529058151375,
-    rodas43::c42 = -0.9594562251023355e1,
-    rodas43::c43 = -0.2047028614809616e2,
-    rodas43::c51 =  0.7496443313967647e1,
-    rodas43::c52 = -0.1024680431464352e2,
-    rodas43::c53 = -0.3399990352819905e2,
-    rodas43::c54 =  0.1170890893206160e2,
-    rodas43::c61 =  0.8083246795921522e1,
-    rodas43::c62 = -0.7981132988064893e1,
-    rodas43::c63 = -0.3152159432874371e2,
-    rodas43::c64 =  0.1631930543123136e2,
-    rodas43::c65 = -0.6058818238834054e1,
-    rodas43::gamma = 0.25;
+    rodas34::c2 = 0.386,
+    rodas34::c3 = 0.21,
+    rodas34::c4 = 0.63,
+    rodas34::d1 =  0.25,
+    rodas34::d2 = -0.1043,
+    rodas34::d3 =  0.1035,
+    rodas34::d4 = -0.3620000000000023e-01,
+    rodas34::a21 =  0.1544e1,
+    rodas34::a31 =  0.9466785280815826,
+    rodas34::a32 =  0.2557011698983284,
+    rodas34::a41 =  0.3314825187068521e1,
+    rodas34::a42 =  0.2896124015972201e1,
+    rodas34::a43 =  0.9986419139977817,
+    rodas34::a51 =  0.1221224509226641e1,
+    rodas34::a52 =  0.6019134481288629e1,
+    rodas34::a53 =  0.1253708332932087e2,
+    rodas34::a54 = -0.6878860361058950,
+    rodas34::c21 = -0.56688e1,
+    rodas34::c31 = -0.2430093356833875e1,
+    rodas34::c32 = -0.2063599157091915,
+    rodas34::c41 = -0.1073529058151375,
+    rodas34::c42 = -0.9594562251023355e1,
+    rodas34::c43 = -0.2047028614809616e2,
+    rodas34::c51 =  0.7496443313967647e1,
+    rodas34::c52 = -0.1024680431464352e2,
+    rodas34::c53 = -0.3399990352819905e2,
+    rodas34::c54 =  0.1170890893206160e2,
+    rodas34::c61 =  0.8083246795921522e1,
+    rodas34::c62 = -0.7981132988064893e1,
+    rodas34::c63 = -0.3152159432874371e2,
+    rodas34::c64 =  0.1631930543123136e2,
+    rodas34::c65 = -0.6058818238834054e1,
+    rodas34::gamma = 0.25;
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::rodas43::rodas43(const ODESystem& ode, const dictionary& dict)
+Foam::rodas34::rodas34(const ODESystem& ode, const dictionary& dict)
 :
     ODESolver(ode, dict),
     adaptiveSolver(ode, dict),
@@ -93,7 +93,7 @@ Foam::rodas43::rodas43(const ODESystem& ode, const dictionary& dict)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::rodas43::solve
+Foam::scalar Foam::rodas34::solve
 (
     const scalar x0,
     const scalarField& y0,
@@ -213,7 +213,7 @@ Foam::scalar Foam::rodas43::solve
 }
 
 
-void Foam::rodas43::solve
+void Foam::rodas34::solve
 (
     scalar& x,
     scalarField& y,

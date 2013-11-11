@@ -22,12 +22,11 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::rodas43
+    Foam::Rosenbrock34
 
 Description
-    L-stable, stiffly-accurate embedded Rosenbrock ODE solver of order (3)4.
+    L-stable embedded Rosenbrock ODE solver of order (3)4.
 
-    References:
     \verbatim
         "Solving Ordinary Differential Equations II: Stiff
          and Differential-Algebraic Problems, second edition",
@@ -37,13 +36,24 @@ Description
         Springer-Verlag, Berlin. 1996.
     \endverbatim
 
+    The default constants are from:
+    \verbatim
+        "Implementation of Rosenbrock Methods"
+        Shampine, L. F.,
+        ACM Transactions on Mathematical Software, vol. 8, 1982, pp. 93–113.
+    \endverbatim
+    with which the scheme is more accurate than with the L-Stable coefficients
+    for small step-size but less stable for large step-size.
+
+    The L-Stable scheme constants are provided commented-out in Rosenbrock34.C
+
 SourceFiles
-    rodas43.C
+    Rosenbrock34.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef rodas43_H
-#define rodas43_H
+#ifndef Rosenbrock34_H
+#define Rosenbrock34_H
 
 #include "ODESolver.H"
 #include "adaptiveSolver.H"
@@ -54,10 +64,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class rodas43 Declaration
+                           Class Rosenbrock34 Declaration
 \*---------------------------------------------------------------------------*/
 
-class rodas43
+class Rosenbrock34
 :
     public ODESolver,
     public adaptiveSolver
@@ -68,8 +78,6 @@ class rodas43
         mutable scalarField k2_;
         mutable scalarField k3_;
         mutable scalarField k4_;
-        mutable scalarField k5_;
-        mutable scalarField dy_;
         mutable scalarField err_;
         mutable scalarField dydx_;
         mutable scalarField dfdx_;
@@ -78,27 +86,26 @@ class rodas43
         mutable labelList pivotIndices_;
 
         static const scalar
-            c2, c3, c4,
-            d1, d2, d3, d4,
             a21, a31, a32,
-            a41, a42, a43,
-            a51, a52, a53, a54,
             c21, c31, c32,
             c41, c42, c43,
-            c51, c52, c53, c54,
-            c61, c62, c63, c64, c65,
-            gamma;
+            b1, b2, b3, b4,
+            e1, e2, e3, e4,
+            gamma,
+            c2, c3,
+            d1, d2, d3, d4;
+
 
 public:
 
     //- Runtime type information
-    TypeName("rodas43");
+    TypeName("Rosenbrock34");
 
 
     // Constructors
 
         //- Construct from ODE
-        rodas43(const ODESystem& ode, const dictionary& dict);
+        Rosenbrock34(const ODESystem& ode, const dictionary& dict);
 
 
     // Member Functions
