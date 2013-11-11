@@ -8,4 +8,4 @@ ic8h18 : iso-Octane combustion, 874 species, 3796 reactions
 Results interpreted in 'validation' sub-folder, where OpenFOAM results
 are compared against those predicted by CHEMKIN II.
 
-Overall the best performing ODE solver is seulex followed closely by rodas32.
+Overall the best performing ODE solver is seulex followed closely by rodas23.
