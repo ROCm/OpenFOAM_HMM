@@ -23,51 +23,38 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Rosenbrock32.H"
+#include "Rosenbrock12.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(Rosenbrock32, 0);
-    addToRunTimeSelectionTable(ODESolver, Rosenbrock32, dictionary);
+    defineTypeNameAndDebug(Rosenbrock12, 0);
+    addToRunTimeSelectionTable(ODESolver, Rosenbrock12, dictionary);
 
 const scalar
-    Rosenbrock32::a21 = 1,
-    Rosenbrock32::a31 = 1,
-    Rosenbrock32::a32 = 0,
-
-    Rosenbrock32::c21 = -1.0156171083877702091975600115545,
-    Rosenbrock32::c31 = 4.0759956452537699824805835358067,
-    Rosenbrock32::c32 = 9.2076794298330791242156818474003,
-
-    Rosenbrock32::b1 = 1,
-    Rosenbrock32::b2 = 6.1697947043828245592553615689730,
-    Rosenbrock32::b3 = -0.4277225654321857332623837380651,
-
-    Rosenbrock32::e1 = 0.5,
-    Rosenbrock32::e2 = -2.9079558716805469821718236208017,
-    Rosenbrock32::e3 = 0.2235406989781156962736090927619,
-
-    Rosenbrock32::gamma = 0.43586652150845899941601945119356,
-    Rosenbrock32::c2 = 0.43586652150845899941601945119356,
-
-    Rosenbrock32::d1 = 0.43586652150845899941601945119356,
-    Rosenbrock32::d2 = 0.24291996454816804366592249683314,
-    Rosenbrock32::d3 = 2.1851380027664058511513169485832;
+    Rosenbrock12::gamma = 1 + 1.0/std::sqrt(2.0),
+    Rosenbrock12::a21 = 1.0/gamma,
+    Rosenbrock12::c2 = 1.0,
+    Rosenbrock12::c21 = -2.0/gamma,
+    Rosenbrock12::b1 = (3.0/2.0)/gamma,
+    Rosenbrock12::b2 = (1.0/2.0)/gamma,
+    Rosenbrock12::e1 = b1 - 1.0/gamma,
+    Rosenbrock12::e2 = b2,
+    Rosenbrock12::d1 = gamma,
+    Rosenbrock12::d2 = -gamma;
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::Rosenbrock32::Rosenbrock32(const ODESystem& ode, const dictionary& dict)
+Foam::Rosenbrock12::Rosenbrock12(const ODESystem& ode, const dictionary& dict)
 :
     ODESolver(ode, dict),
     adaptiveSolver(ode, dict),
     k1_(n_),
     k2_(n_),
-    k3_(n_),
     err_(n_),
     dydx_(n_),
     dfdx_(n_),
@@ -79,9 +66,8 @@ Foam::Rosenbrock32::Rosenbrock32(const ODESystem& ode, const dictionary& dict)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::Rosenbrock32::solve
+Foam::scalar Foam::Rosenbrock12::solve
 (
-    const ODESystem& ode,
     const scalar x0,
     const scalarField& y0,
     const scalarField& dydx0,
@@ -89,7 +75,7 @@ Foam::scalar Foam::Rosenbrock32::solve
     scalarField& y
 ) const
 {
-    ode.jacobian(x0, y0, dfdx_, dfdy_);
+    odes_.jacobian(x0, y0, dfdx_, dfdy_);
 
     for (register label i=0; i<n_; i++)
     {
@@ -117,7 +103,7 @@ Foam::scalar Foam::Rosenbrock32::solve
         y[i] = y0[i] + a21*k1_[i];
     }
 
-    ode.derivatives(x0 + c2*dx, y, dydx_);
+    odes_.derivatives(x0 + c2*dx, y, dydx_);
 
     forAll(k2_, i)
     {
@@ -126,35 +112,25 @@ Foam::scalar Foam::Rosenbrock32::solve
 
     LUBacksubstitute(a_, pivotIndices_, k2_);
 
-    // Calculate k3:
-    forAll(k3_, i)
-    {
-        k3_[i] = dydx_[i] + dx*d3*dfdx_[i]
-          + (c31*k1_[i] + c32*k2_[i])/dx;
-    }
-
-    LUBacksubstitute(a_, pivotIndices_, k3_);
-
     // Calculate error and update state:
     forAll(y, i)
     {
-        y[i] = y0[i] + b1*k1_[i] + b2*k2_[i] + b3*k3_[i];
-        err_[i] = e1*k1_[i] + e2*k2_[i] + e3*k3_[i];
+        y[i] = y0[i] + b1*k1_[i] + b2*k2_[i];
+        err_[i] = e1*k1_[i] + e2*k2_[i];
     }
 
     return normalizeError(y0, y, err_);
 }
 
 
-void Foam::Rosenbrock32::solve
+void Foam::Rosenbrock12::solve
 (
-    const ODESystem& odes,
     scalar& x,
     scalarField& y,
     scalar& dxTry
 ) const
 {
-    adaptiveSolver::solve(odes, x, y, dxTry);
+    adaptiveSolver::solve(odes_, x, y, dxTry);
 }
 
 

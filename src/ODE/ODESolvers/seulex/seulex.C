@@ -35,14 +35,13 @@ namespace Foam
     addToRunTimeSelectionTable(ODESolver, seulex, dictionary);
 
     const scalar
-        seulex::EPS = VSMALL,
-        seulex::STEPFAC1 = 0.6,
-        seulex::STEPFAC2 = 0.93,
-        seulex::STEPFAC3 = 0.1,
-        seulex::STEPFAC4 = 4.0,
-        seulex::STEPFAC5 = 0.5,
-        seulex::KFAC1 = 0.7,
-        seulex::KFAC2 = 0.9;
+        seulex::stepFactor1_ = 0.6,
+        seulex::stepFactor2_ = 0.93,
+        seulex::stepFactor3_ = 0.1,
+        seulex::stepFactor4_ = 4.0,
+        seulex::stepFactor5_ = 0.5,
+        seulex::kFactor1_ = 0.7,
+        seulex::kFactor2_ = 0.9;
 }
 
 
@@ -51,150 +50,222 @@ namespace Foam
 Foam::seulex::seulex(const ODESystem& ode, const dictionary& dict)
 :
     ODESolver(ode, dict),
-    ode_(ode),
-    nSeq_(IMAXX),
-    cost_(IMAXX),
+    jacRedo_(min(1.0e-4, min(relTol_))),
+    nSeq_(iMaxx_),
+    cpu_(iMaxx_),
+    coeff_(iMaxx_, iMaxx_),
+    theta_(2.0*jacRedo_),
+    table_(kMaxx_, n_),
     dfdx_(n_),
-    factrl_(IMAXX),
-    table_(KMAXX,n_),
-    fSave_((IMAXX-1)*(IMAXX+1)/2 + 2,n_),
     dfdy_(n_),
-    calcJac_(false),
-    dense_(false),
     a_(n_),
-    coeff_(IMAXX,IMAXX),
-    pivotIndices_(n_, 0.0),
-    hOpt_(IMAXX),
-    work_(IMAXX),
-    ySaved_(n_),
+    pivotIndices_(n_),
+    dxOpt_(iMaxx_),
+    temp_(iMaxx_),
+    y0_(n_),
     ySequence_(n_),
     scale_(n_),
-    del_(n_),
+    dy_(n_),
     yTemp_(n_),
-    dyTemp_(n_),
-    delTemp_(n_)
+    dydx_(n_)
 {
-    const scalar costfunc = 1.0, costjac = 5.0, costlu = 1.0, costsolve = 1.0;
+    // The CPU time factors for the major parts of the algorithm
+    const scalar cpuFunc = 1.0, cpuJac = 5.0, cpuLU = 1.0, cpuSolve = 1.0;
 
-    jacRedo_ = min(1.0e-4, min(relTol_));
-    theta_ = 2.0*jacRedo_;
     nSeq_[0] = 2;
     nSeq_[1] = 3;
 
-    for (label i = 2; i < IMAXX; i++)
+    for (int i=2; i<iMaxx_; i++)
     {
         nSeq_[i] = 2*nSeq_[i-2];
     }
-    cost_[0] = costjac + costlu + nSeq_[0]*(costfunc + costsolve);
+    cpu_[0] = cpuJac + cpuLU + nSeq_[0]*(cpuFunc + cpuSolve);
 
-    for (label k=0;k<KMAXX;k++)
+    for (int k=0; k<kMaxx_; k++)
     {
-        cost_[k+1] = cost_[k] + (nSeq_[k+1]-1)*(costfunc + costsolve) + costlu;
+        cpu_[k+1] = cpu_[k] + (nSeq_[k+1]-1)*(cpuFunc + cpuSolve) + cpuLU;
     }
 
-    hnext_ =- VGREAT;
-
-    //NOTE: the first element of relTol_ and absTol_ are used here.
-    scalar logfact =- log10(relTol_[0] + absTol_[0])*0.6 + 0.5;
-
-    kTarg_ = min(1, min(KMAXX - 1, label(logfact)));
-
-    for (label k = 0; k < IMAXX; k++)
+    // Set the extrapolation coefficients array
+    for (int k=0; k<iMaxx_; k++)
     {
-        for (label l = 0; l < k; l++)
+        for (int l=0; l<k; l++)
         {
             scalar ratio = scalar(nSeq_[k])/nSeq_[l];
             coeff_[k][l] = 1.0/(ratio - 1.0);
         }
-    }
-
-    factrl_[0] = 1.0;
-    for (label k = 0; k < IMAXX - 1; k++)
-    {
-        factrl_[k+1] = (k+1)*factrl_[k];
     }
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-void Foam::seulex::solve
+bool Foam::seulex::seul
 (
-    const ODESystem& ode,
-    scalar& x,
+    const scalar x0,
+    const scalarField& y0,
+    const scalar dxTot,
+    const label k,
     scalarField& y,
-    scalar& dxTry
+    const scalarField& scale
 ) const
 {
-    step(dxTry, x, y);
-    dxTry = hnext_;
+    label nSteps = nSeq_[k];
+    scalar dx = dxTot/nSteps;
+
+    for (label i=0; i<n_; i++)
+    {
+        for (label j=0; j<n_; j++)
+        {
+            a_[i][j] = -dfdy_[i][j];
+        }
+
+        a_[i][i] += 1.0/dx;
+    }
+
+    LUDecompose(a_, pivotIndices_);
+
+    scalar xnew = x0 + dx;
+    odes_.derivatives(xnew, y0, dy_);
+    LUBacksubstitute(a_, pivotIndices_, dy_);
+
+    yTemp_ = y0;
+
+    for (label nn=1; nn<nSteps; nn++)
+    {
+        yTemp_ += dy_;
+        xnew += dx;
+
+        if (nn == 1 && k<=1)
+        {
+            scalar dy1 = 0.0;
+            for (label i=0; i<n_; i++)
+            {
+                dy1 += sqr(dy_[i]/scale[i]);
+            }
+            dy1 = sqrt(dy1);
+
+            odes_.derivatives(x0 + dx, yTemp_, dydx_);
+            for (label i=0; i<n_; i++)
+            {
+                dy_[i] = dydx_[i] - dy_[i]/dx;
+            }
+
+            LUBacksubstitute(a_, pivotIndices_, dy_);
+
+            scalar dy2 = 0.0;
+            for (label i=0; i<n_; i++)
+            {
+                dy2 += sqr(dy_[i]/scale[i]);
+            }
+            dy2 = sqrt(dy2);
+            theta_ = dy2/min(1.0, dy1 + SMALL);
+
+            if (theta_ > 1.0)
+            {
+                return false;
+            }
+        }
+
+        odes_.derivatives(xnew, yTemp_, dy_);
+        LUBacksubstitute(a_, pivotIndices_, dy_);
+    }
+
+    for (label i=0; i<n_; i++)
+    {
+        y[i] = yTemp_[i] + dy_[i];
+    }
+
+    return true;
 }
 
 
-void Foam::seulex::step(const scalar& htry, scalar& x,  scalarField& y) const
+void Foam::seulex::extrapolate
+(
+    const label k,
+    scalarRectangularMatrix& table,
+    scalarField& y
+) const
 {
-    static bool first_step = true, last_step = false;
-    static bool forward, reject = false, prev_reject = false;
-    static scalar errold;
-    label i, k;
-    scalar fac, h, hnew, err;
-    bool firstk;
-
-    work_[0] = 1.e30;
-    h = htry;
-    forward = h > 0 ? true : false;
-
-    ySaved_ = y;
-
-    if (h != hnext_ && !first_step)
+    for (int j=k-1; j>0; j--)
     {
-        last_step = true;
+        for (label i=0; i<n_; i++)
+        {
+            table[j-1][i] =
+                table[j][i] + coeff_[k][j]*(table[j][i] - table[j-1][i]);
+        }
     }
 
-    if (reject)
+    for (int i=0; i<n_; i++)
     {
-        prev_reject = true;
-        last_step = false;
-        theta_=2.0*jacRedo_;
+        y[i] = table[0][i] + coeff_[k][0]*(table[0][i] - y[i]);
+    }
+}
+
+
+void Foam::seulex::solve
+(
+    scalar& x,
+    scalarField& y,
+    stepState& step
+) const
+{
+    temp_[0] = GREAT;
+    scalar dx = step.dxTry;
+    y0_ = y;
+    dxOpt_[0] = mag(0.1*dx);
+
+    if (step.first || step.prevReject)
+    {
+        theta_ = 2.0*jacRedo_;
     }
 
-    for (i = 0; i < n_; i++)
+    if (step.first)
+    {
+        // NOTE: the first element of relTol_ and absTol_ are used here.
+        scalar logTol = -log10(relTol_[0] + absTol_[0])*0.6 + 0.5;
+        kTarg_ = max(1, min(kMaxx_ - 1, int(logTol)));
+    }
+
+    forAll(scale_, i)
     {
         scale_[i] = absTol_[i] + relTol_[i]*mag(y[i]);
     }
 
-    reject = false;
-    firstk = true;
-    hnew = mag(h);
+    bool jacUpdated = false;
 
-    if (theta_ > jacRedo_ && !calcJac_)
+    if (theta_ > jacRedo_)
     {
-        ode_.jacobian(x, y, dfdx_, dfdy_);
-        calcJac_ = true;
+        odes_.jacobian(x, y, dfdx_, dfdy_);
+        jacUpdated = true;
     }
 
-    while (firstk || reject)
+    int k;
+    scalar dxNew = mag(dx);
+    bool firstk = true;
+
+    while (firstk || step.reject)
     {
-        h = forward ? hnew : -hnew;
+        dx = step.forward ? dxNew : -dxNew;
         firstk = false;
-        reject = false;
+        step.reject = false;
 
-        if (mag(h) <= mag(x)*EPS)
+        if (mag(dx) <= mag(x)*SMALL)
         {
-             WarningIn("seulex::step(const scalar")
-                    << "step size underflow in step :"  << h << endl;
+             WarningIn("seulex::solve(scalar& x, scalarField& y, stepState&")
+                    << "step size underflow :"  << dx << endl;
         }
-        label ipt=-1;
 
-        for (k = 0; k <= kTarg_ + 1; k++)
+        scalar errOld;
+
+        for (k=0; k<=kTarg_+1; k++)
         {
-            bool success = dy(x, ySaved_, h, k, ySequence_, ipt, scale_);
+            bool success = seul(x, y0_, dx, k, ySequence_, scale_);
 
             if (!success)
             {
-                reject = true;
-                hnew = mag(h)*STEPFAC5;
+                step.reject = true;
+                dxNew = mag(dx)*stepFactor5_;
                 break;
             }
 
@@ -204,45 +275,55 @@ void Foam::seulex::step(const scalar& htry, scalar& x,  scalarField& y) const
             }
             else
             {
-                for (i = 0; i < n_; i++)
+                forAll(ySequence_, i)
+                {
                     table_[k-1][i] = ySequence_[i];
+                }
             }
+
             if (k != 0)
             {
-                polyextr(k, table_, y);
-                err = 0.0;
-                for (i = 0; i < n_; i++)
+                extrapolate(k, table_, y);
+                scalar err = 0.0;
+                forAll(scale_, i)
                 {
-                    scale_[i] = absTol_[i] + relTol_[i]*mag(ySaved_[i]);
+                    scale_[i] = absTol_[i] + relTol_[i]*mag(y0_[i]);
                     err += sqr((y[i] - table_[0][i])/scale_[i]);
                 }
                 err = sqrt(err/n_);
-                if (err > 1.0/EPS || (k > 1 && err >= errold))
+                if (err > 1.0/SMALL || (k > 1 && err >= errOld))
                 {
-                    reject = true;
-                    hnew = mag(h)*STEPFAC5;
+                    step.reject = true;
+                    dxNew = mag(dx)*stepFactor5_;
                     break;
                 }
-                errold = min(4.0*err, 1.0);
+                errOld = min(4*err, 1);
                 scalar expo = 1.0/(k + 1);
-                scalar facmin = pow(STEPFAC3, expo);
+                scalar facmin = pow(stepFactor3_, expo);
+                scalar fac;
                 if (err == 0.0)
                 {
                     fac = 1.0/facmin;
                 }
                 else
                 {
-                    fac = STEPFAC2/pow(err/STEPFAC1, expo);
-                    fac = max(facmin/STEPFAC4, min(1.0/facmin, fac));
+                    fac = stepFactor2_/pow(err/stepFactor1_, expo);
+                    fac = max(facmin/stepFactor4_, min(1.0/facmin, fac));
                 }
-                hOpt_[k] = mag(h*fac);
-                work_[k] = cost_[k]/hOpt_[k];
+                dxOpt_[k] = mag(dx*fac);
+                temp_[k] = cpu_[k]/dxOpt_[k];
 
-                if ((first_step || last_step) && err <= 1.0)
+                if ((step.first || step.last) && err <= 1.0)
                 {
                     break;
                 }
-                if (k == kTarg_-1 && !prev_reject && !first_step && !last_step)
+
+                if
+                (
+                    k == kTarg_ - 1
+                 && !step.prevReject
+                 && !step.first && !step.last
+                )
                 {
                     if (err <= 1.0)
                     {
@@ -250,16 +331,17 @@ void Foam::seulex::step(const scalar& htry, scalar& x,  scalarField& y) const
                     }
                     else if (err > nSeq_[kTarg_]*nSeq_[kTarg_ + 1]*4.0)
                     {
-                        reject = true;
+                        step.reject = true;
                         kTarg_ = k;
-                        if (kTarg_>1 && work_[k-1] < KFAC1*work_[k])
+                        if (kTarg_>1 && temp_[k-1] < kFactor1_*temp_[k])
                         {
                             kTarg_--;
                         }
-                        hnew = hOpt_[kTarg_];
+                        dxNew = dxOpt_[kTarg_];
                         break;
                     }
                 }
+
                 if (k == kTarg_)
                 {
                     if (err <= 1.0)
@@ -268,51 +350,55 @@ void Foam::seulex::step(const scalar& htry, scalar& x,  scalarField& y) const
                     }
                     else if (err > nSeq_[k + 1]*2.0)
                     {
-                        reject = true;
-                        if (kTarg_>1 && work_[k-1] < KFAC1*work_[k])
+                        step.reject = true;
+                        if (kTarg_>1 && temp_[k-1] < kFactor1_*temp_[k])
                         {
                             kTarg_--;
                         }
-                        hnew = hOpt_[kTarg_];
+                        dxNew = dxOpt_[kTarg_];
                         break;
                     }
                 }
+
                 if (k == kTarg_+1)
                 {
                     if (err > 1.0)
                     {
-                        reject = true;
-                        if (kTarg_ > 1 && work_[kTarg_-1] < KFAC1*work_[kTarg_])
+                        step.reject = true;
+                        if
+                        (
+                            kTarg_ > 1
+                         && temp_[kTarg_-1] < kFactor1_*temp_[kTarg_]
+                        )
                         {
                             kTarg_--;
                         }
-                        hnew = hOpt_[kTarg_];
+                        dxNew = dxOpt_[kTarg_];
                     }
                     break;
                 }
             }
         }
-        if (reject)
+        if (step.reject)
         {
-            prev_reject = true;
-            if (!calcJac_)
+            step.prevReject = true;
+            if (!jacUpdated)
             {
                 theta_ = 2.0*jacRedo_;
 
-                if (theta_ > jacRedo_ && !calcJac_)
+                if (theta_ > jacRedo_ && !jacUpdated)
                 {
-                    ode_.jacobian(x, y, dfdx_, dfdy_);
-                    calcJac_ = true;
+                    odes_.jacobian(x, y, dfdx_, dfdy_);
+                    jacUpdated = true;
                 }
             }
         }
     }
 
-    calcJac_ = false;
+    jacUpdated = false;
 
-    x += h;
-    hdid_ = h;
-    first_step = false;
+    step.dxDid = dx;
+    x += dx;
 
     label kopt;
     if (k == 1)
@@ -322,180 +408,56 @@ void Foam::seulex::step(const scalar& htry, scalar& x,  scalarField& y) const
     else if (k <= kTarg_)
     {
         kopt=k;
-        if (work_[k-1] < KFAC1*work_[k])
+        if (temp_[k-1] < kFactor1_*temp_[k])
         {
             kopt = k - 1;
         }
-        else if (work_[k] < KFAC2*work_[k - 1])
+        else if (temp_[k] < kFactor2_*temp_[k - 1])
         {
-            kopt = min(k + 1, KMAXX - 1);
+            kopt = min(k + 1, kMaxx_ - 1);
         }
     }
     else
     {
         kopt = k - 1;
-        if (k > 2 && work_[k-2] < KFAC1*work_[k - 1])
+        if (k > 2 && temp_[k-2] < kFactor1_*temp_[k - 1])
         {
             kopt = k - 2;
         }
-        if (work_[k] < KFAC2*work_[kopt])
+        if (temp_[k] < kFactor2_*temp_[kopt])
         {
-            kopt = min(k, KMAXX - 1);
+            kopt = min(k, kMaxx_ - 1);
         }
     }
 
-    if (prev_reject)
+    if (step.prevReject)
     {
         kTarg_ = min(kopt, k);
-        hnew = min(mag(h), hOpt_[kTarg_]);
-        prev_reject = false;
+        dxNew = min(mag(dx), dxOpt_[kTarg_]);
+        step.prevReject = false;
     }
     else
     {
         if (kopt <= k)
         {
-            hnew = hOpt_[kopt];
+            dxNew = dxOpt_[kopt];
         }
         else
         {
-            if (k < kTarg_ && work_[k] < KFAC2*work_[k - 1])
+            if (k < kTarg_ && temp_[k] < kFactor2_*temp_[k - 1])
             {
-                hnew = hOpt_[k]*cost_[kopt + 1]/cost_[k];
+                dxNew = dxOpt_[k]*cpu_[kopt + 1]/cpu_[k];
             }
             else
             {
-                hnew = hOpt_[k]*cost_[kopt]/cost_[k];
+                dxNew = dxOpt_[k]*cpu_[kopt]/cpu_[k];
             }
         }
         kTarg_ = kopt;
     }
 
-    if (forward)
-    {
-        hnext_ = hnew;
-    }
-    else
-    {
-        hnext_ =- hnew;
-    }
+    step.dxTry = step.forward ? dxNew : -dxNew;
 }
 
-
-bool Foam::seulex::dy
-(
-    const scalar& x,
-    scalarField& y,
-    const scalar htot,
-    const label k,
-    scalarField& yend,
-    label& ipt,
-    scalarField& scale
-) const
-{
-    label nstep = nSeq_[k];
-    scalar h = htot/nstep;
-    for (label i = 0; i < n_; i++)
-    {
-        for (label j = 0; j < n_; j++) a_[i][j] = -dfdy_[i][j];
-        a_[i][i] += 1.0/h;
-    }
-    LUDecompose(a_, pivotIndices_);
-    scalar xnew = x + h;
-
-    ode_.derivatives(xnew, y, del_);
-
-    yTemp_ = y;
-
-    LUBacksubstitute(a_, pivotIndices_, del_);
-
-    if (dense_ && nstep == k + 1)
-    {
-        ipt++;
-        for (label i = 0; i < n_; i++)
-        {
-            fSave_[ipt][i] = del_[i];
-        }
-    }
-    for (label nn = 1; nn < nstep; nn++)
-    {
-        for (label i=0;i<n_;i++)
-        {
-            yTemp_[i] += del_[i];
-        }
-        xnew += h;
-
-        ode_.derivatives(xnew, yTemp_, yend);
-
-        if (nn == 1 && k<=1)
-        {
-            scalar del1=0.0;
-            for (label i = 0; i < n_; i++)
-            {
-                del1 += sqr(del_[i]/scale[i]);
-            }
-            del1 = sqrt(del1);
-
-            ode_.derivatives(x+h, yTemp_, dyTemp_);
-            for (label i=0;i<n_;i++)
-            {
-                del_[i] = dyTemp_[i] - del_[i]/h;
-            }
-
-            LUBacksubstitute(a_, pivotIndices_, del_);
-
-            scalar del2 = 0.0;
-            for (label i = 0; i <n_ ; i++)
-            {
-                del2 += sqr(del_[i]/scale[i]);
-            }
-            del2 = sqrt(del2);
-            theta_ = del2 / min(1.0, del1 + SMALL);
-
-            if (theta_ > 1.0)
-            {
-                return false;
-            }
-        }
-
-        delTemp_ = yend;
-        LUBacksubstitute(a_, pivotIndices_, delTemp_);
-        del_ = delTemp_;
-
-        if (dense_ && nn >= nstep-k-1)
-        {
-            ipt++;
-            for (label i=0;i<n_;i++)
-            {
-                fSave_[ipt][i]=del_[i];
-            }
-        }
-    }
-
-    yend = yTemp_ + del_;
-    return true;
-}
-
-
-void Foam::seulex::polyextr
-(
-    const label k,
-    scalarRectangularMatrix& table,
-    scalarField& last
-) const
-{
-    label l=last.size();
-    for (label j = k - 1; j > 0; j--)
-    {
-        for (label i=0; i<l; i++)
-        {
-            table[j-1][i] =
-                table[j][i] + coeff_[k][j]*(table[j][i] - table[j-1][i]);
-        }
-    }
-    for (label i = 0; i < l; i++)
-    {
-        last[i] = table[0][i] + coeff_[k][0]*(table[0][i] - last[i]);
-    }
-}
 
 // ************************************************************************* //

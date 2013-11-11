@@ -54,7 +54,6 @@ Foam::EulerSI::EulerSI(const ODESystem& ode, const dictionary& dict)
 
 Foam::scalar Foam::EulerSI::solve
 (
-    const ODESystem& ode,
     const scalar x0,
     const scalarField& y0,
     const scalarField& dydx0,
@@ -62,7 +61,7 @@ Foam::scalar Foam::EulerSI::solve
     scalarField& y
 ) const
 {
-    ode.jacobian(x0, y0, dfdx_, dfdy_);
+    odes_.jacobian(x0, y0, dfdx_, dfdy_);
 
     for (register label i=0; i<n_; i++)
     {
@@ -95,13 +94,12 @@ Foam::scalar Foam::EulerSI::solve
 
 void Foam::EulerSI::solve
 (
-    const ODESystem& odes,
     scalar& x,
     scalarField& y,
     scalar& dxTry
 ) const
 {
-    adaptiveSolver::solve(odes, x, y, dxTry);
+    adaptiveSolver::solve(odes_, x, y, dxTry);
 }
 
 

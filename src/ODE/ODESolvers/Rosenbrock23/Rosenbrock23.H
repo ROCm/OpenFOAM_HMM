@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::Rosenbrock32
+    Foam::Rosenbrock23
 
 Description
     L-stable embedded Rosenbrock ODE solver of order (3)4.
@@ -42,12 +42,12 @@ Description
     \endverbatim
 
 SourceFiles
-    Rosenbrock32.C
+    Rosenbrock23.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Rosenbrock32_H
-#define Rosenbrock32_H
+#ifndef Rosenbrock23_H
+#define Rosenbrock23_H
 
 #include "ODESolver.H"
 #include "adaptiveSolver.H"
@@ -58,10 +58,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class Rosenbrock32 Declaration
+                           Class Rosenbrock23 Declaration
 \*---------------------------------------------------------------------------*/
 
-class Rosenbrock32
+class Rosenbrock23
 :
     public ODESolver,
     public adaptiveSolver
@@ -91,13 +91,13 @@ class Rosenbrock32
 public:
 
     //- Runtime type information
-    TypeName("Rosenbrock32");
+    TypeName("Rosenbrock23");
 
 
     // Constructors
 
         //- Construct from ODE
-        Rosenbrock32(const ODESystem& ode, const dictionary& dict);
+        Rosenbrock23(const ODESystem& ode, const dictionary& dict);
 
 
     // Member Functions
@@ -105,7 +105,6 @@ public:
         //- Solve a single step dx and return the error
         scalar solve
         (
-            const ODESystem& ode,
             const scalar x0,
             const scalarField& y0,
             const scalarField& dydx0,
@@ -116,7 +115,6 @@ public:
         //- Solve the ODE system and the update the state
         void solve
         (
-            const ODESystem& ode,
             scalar& x,
             scalarField& y,
             scalar& dxTry

@@ -29,7 +29,6 @@ License
 
 void Foam::SIBS::SIMPR
 (
-    const ODESystem& ode,
     const scalar xStart,
     const scalarField& y,
     const scalarField& dydx,
@@ -72,7 +71,7 @@ void Foam::SIBS::SIMPR
 
     scalar x = xStart + h;
 
-    ode.derivatives(x, ytemp, yEnd);
+    odes_.derivatives(x, ytemp, yEnd);
 
     for (register label nn=2; nn<=nSteps; nn++)
     {
@@ -90,7 +89,7 @@ void Foam::SIBS::SIMPR
 
         x += h;
 
-        ode.derivatives(x, ytemp, yEnd);
+        odes_.derivatives(x, ytemp, yEnd);
     }
     for (register label i=0; i<n_; i++)
     {

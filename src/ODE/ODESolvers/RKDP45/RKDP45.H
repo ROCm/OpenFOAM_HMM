@@ -34,10 +34,7 @@ Description
         Prince, P. J.,
         Journal of Computational and Applied Mathematics,
         6 (1), 1980: pp. 19-26.
-    \endverbatim
 
-    Based on code from:
-    \verbatim
         "Solving Ordinary Differential Equations I: Nonstiff Problems,
          second edition",
         Hairer, E.,
@@ -114,7 +111,6 @@ public:
         //- Solve a single step dx and return the error
         scalar solve
         (
-            const ODESystem& ode,
             const scalar x0,
             const scalarField& y0,
             const scalarField& dydx0,
@@ -125,7 +121,6 @@ public:
         //- Solve the ODE system and the update the state
         void solve
         (
-            const ODESystem& ode,
             scalar& x,
             scalarField& y,
             scalar& dxTry

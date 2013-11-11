@@ -23,35 +23,35 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "rodas32.H"
+#include "rodas23.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(rodas32, 0);
-    addToRunTimeSelectionTable(ODESolver, rodas32, dictionary);
+    defineTypeNameAndDebug(rodas23, 0);
+    addToRunTimeSelectionTable(ODESolver, rodas23, dictionary);
 
 const scalar
-    rodas32::c3 = 1,
-    rodas32::d1 = 1.0/2.0,
-    rodas32::d2 = 3.0/2.0,
-    rodas32::a31 = 2,
-    rodas32::a41 = 2,
-    rodas32::c21 = 4,
-    rodas32::c31 = 1,
-    rodas32::c32 = -1,
-    rodas32::c41 = 1,
-    rodas32::c42 = -1,
-    rodas32::c43 = -8.0/3.0,
-    rodas32::gamma = 1.0/2.0;
+    rodas23::c3 = 1,
+    rodas23::d1 = 1.0/2.0,
+    rodas23::d2 = 3.0/2.0,
+    rodas23::a31 = 2,
+    rodas23::a41 = 2,
+    rodas23::c21 = 4,
+    rodas23::c31 = 1,
+    rodas23::c32 = -1,
+    rodas23::c41 = 1,
+    rodas23::c42 = -1,
+    rodas23::c43 = -8.0/3.0,
+    rodas23::gamma = 1.0/2.0;
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::rodas32::rodas32(const ODESystem& ode, const dictionary& dict)
+Foam::rodas23::rodas23(const ODESystem& ode, const dictionary& dict)
 :
     ODESolver(ode, dict),
     adaptiveSolver(ode, dict),
@@ -70,9 +70,8 @@ Foam::rodas32::rodas32(const ODESystem& ode, const dictionary& dict)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::rodas32::solve
+Foam::scalar Foam::rodas23::solve
 (
-    const ODESystem& ode,
     const scalar x0,
     const scalarField& y0,
     const scalarField& dydx0,
@@ -80,7 +79,7 @@ Foam::scalar Foam::rodas32::solve
     scalarField& y
 ) const
 {
-    ode.jacobian(x0, y0, dfdx_, dfdy_);
+    odes_.jacobian(x0, y0, dfdx_, dfdy_);
 
     for (register label i=0; i<n_; i++)
     {
@@ -117,7 +116,7 @@ Foam::scalar Foam::rodas32::solve
         y[i] = y0[i] + dy_[i];
     }
 
-    ode.derivatives(x0 + dx, y, dydx_);
+    odes_.derivatives(x0 + dx, y, dydx_);
 
     forAll(k3_, i)
     {
@@ -133,7 +132,7 @@ Foam::scalar Foam::rodas32::solve
         y[i] = y0[i] + dy_[i];
     }
 
-    ode.derivatives(x0 + dx, y, dydx_);
+    odes_.derivatives(x0 + dx, y, dydx_);
 
     forAll(err_, i)
     {
@@ -151,15 +150,14 @@ Foam::scalar Foam::rodas32::solve
 }
 
 
-void Foam::rodas32::solve
+void Foam::rodas23::solve
 (
-    const ODESystem& odes,
     scalar& x,
     scalarField& y,
     scalar& dxTry
 ) const
 {
-    adaptiveSolver::solve(odes, x, y, dxTry);
+    adaptiveSolver::solve(odes_, x, y, dxTry);
 }
 
 

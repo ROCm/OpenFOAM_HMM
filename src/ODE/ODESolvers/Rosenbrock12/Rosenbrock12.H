@@ -22,28 +22,29 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::rodas43
+    Foam::Rosenbrock12
 
 Description
-    L-stable, stiffly-accurate embedded Rosenbrock ODE solver of order (3)4.
+    L-stable embedded Rosenbrock ODE solver of order (1)2.
 
     References:
     \verbatim
-        "Solving Ordinary Differential Equations II: Stiff
-         and Differential-Algebraic Problems, second edition",
-        Hairer, E.,
-        Nørsett, S.,
-        Wanner, G.,
-        Springer-Verlag, Berlin. 1996.
+        "A second-order Rosenbrock method applied to
+         photochemical dispersion problems",
+        J. G. Verwer,
+        E. J. Spee,
+        J. G. Blom,
+        W. Hundsdorfer,
+        Siam Journal on Scientific Computing 01/1999; 20(4):1456-1480.
     \endverbatim
 
 SourceFiles
-    rodas43.C
+    Rosenbrock12.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef rodas43_H
-#define rodas43_H
+#ifndef Rosenbrock12_H
+#define Rosenbrock12_H
 
 #include "ODESolver.H"
 #include "adaptiveSolver.H"
@@ -54,10 +55,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class rodas43 Declaration
+                           Class Rosenbrock12 Declaration
 \*---------------------------------------------------------------------------*/
 
-class rodas43
+class Rosenbrock12
 :
     public ODESolver,
     public adaptiveSolver
@@ -66,10 +67,6 @@ class rodas43
 
         mutable scalarField k1_;
         mutable scalarField k2_;
-        mutable scalarField k3_;
-        mutable scalarField k4_;
-        mutable scalarField k5_;
-        mutable scalarField dy_;
         mutable scalarField err_;
         mutable scalarField dydx_;
         mutable scalarField dfdx_;
@@ -78,27 +75,25 @@ class rodas43
         mutable labelList pivotIndices_;
 
         static const scalar
-            c2, c3, c4,
-            d1, d2, d3, d4,
-            a21, a31, a32,
-            a41, a42, a43,
-            a51, a52, a53, a54,
-            c21, c31, c32,
-            c41, c42, c43,
-            c51, c52, c53, c54,
-            c61, c62, c63, c64, c65,
-            gamma;
+            a21,
+            c21,
+            b1, b2,
+            gamma,
+            c2,
+            e1, e2,
+            d1, d2;
+
 
 public:
 
     //- Runtime type information
-    TypeName("rodas43");
+    TypeName("Rosenbrock12");
 
 
     // Constructors
 
         //- Construct from ODE
-        rodas43(const ODESystem& ode, const dictionary& dict);
+        Rosenbrock12(const ODESystem& ode, const dictionary& dict);
 
 
     // Member Functions
@@ -106,7 +101,6 @@ public:
         //- Solve a single step dx and return the error
         scalar solve
         (
-            const ODESystem& ode,
             const scalar x0,
             const scalarField& y0,
             const scalarField& dydx0,
@@ -117,7 +111,6 @@ public:
         //- Solve the ODE system and the update the state
         void solve
         (
-            const ODESystem& ode,
             scalar& x,
             scalarField& y,
             scalar& dxTry

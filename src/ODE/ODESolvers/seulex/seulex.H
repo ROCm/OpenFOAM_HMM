@@ -28,7 +28,7 @@ Description
     An extrapolation-algorithm, based on the linearly implicit Euler method
     with step size control and order selection.
 
-    The implementation is based on the SEULEX code in
+    The implementation is based on the SEULEX algorithm in
     \verbatim
         "Solving Ordinary Differential Equations II: Stiff
          and Differential-Algebraic Problems, second edition",
@@ -47,8 +47,6 @@ SourceFiles
 #define seulex_H
 
 #include "ODESolver.H"
-
-#include "scalarFieldField.H"
 #include "scalarMatrices.H"
 #include "labelField.H"
 
@@ -65,64 +63,65 @@ class seulex
 :
     public ODESolver
 {
-
     // Private data
 
-        //- seulex constants
-        static const scalar EPS;
+        // Static constants
 
-        static const label KMAXX=12, IMAXX = KMAXX + 1;
+            static const label kMaxx_ = 12;
+            static const label iMaxx_ = kMaxx_ + 1;
 
-        static const scalar
-            STEPFAC1, STEPFAC2, STEPFAC3, STEPFAC4, STEPFAC5, KFAC1, KFAC2;
+            static const scalar
+                stepFactor1_, stepFactor2_, stepFactor3_,
+                stepFactor4_, stepFactor5_,
+                kFactor1_, kFactor2_;
 
+        // Evaluated constants
 
-        //- Reference to ODESystem
-        const ODESystem& ode_;
+            scalar jacRedo_;
+            labelField nSeq_;
+            scalarField cpu_;
+            scalarSquareMatrix coeff_;
 
-        // Temporary fields
-        mutable label kTarg_;
-        mutable labelField nSeq_;
-        mutable scalarField cost_, dfdx_, factrl_;
-        mutable scalarRectangularMatrix table_, fSave_;
-        mutable scalarSquareMatrix dfdy_;
-        mutable scalar jacRedo_, theta_;
-        mutable bool calcJac_, dense_;
-        mutable scalarSquareMatrix a_, coeff_;
+        // Temporary storage
+        // held to avoid dynamic memory allocation between calls
+        // and to transfer internal values between functions
 
+            mutable scalar theta_;
+            mutable label kTarg_;
+            mutable scalarRectangularMatrix table_;
 
-        mutable scalar hnext_, hdid_;
+            mutable scalarField dfdx_;
+            mutable scalarSquareMatrix dfdy_;
+            mutable scalarSquareMatrix a_;
+            mutable labelList pivotIndices_;
 
-        mutable labelList pivotIndices_;
+            // Fields space for "solve" function
+            mutable scalarField dxOpt_, temp_;
+            mutable scalarField y0_, ySequence_, scale_;
 
-        // Fields space for "step" function
-        mutable scalarField hOpt_ ,work_, ySaved_, ySequence_, scale_;
-
-        // Fields used in "dy" function
-        mutable scalarField del_, yTemp_, dyTemp_, delTemp_;
+            // Fields used in "seul" function
+            mutable scalarField dy_, yTemp_, dydx_;
 
 
     // Private Member Functions
 
-        void step(const scalar& htry, scalar& x,  scalarField& y) const;
-
-        bool dy
+        //- Computes the j-th line of the extrapolation table
+        bool seul
         (
-            const scalar& x,
-            scalarField& y,
-            const scalar htot,
+            const scalar x0,
+            const scalarField& y0,
+            const scalar dxTot,
             const label k,
-            scalarField& yend,
-            label& ipt,
-            scalarField& scale
+            scalarField& y,
+            const scalarField& scale
         ) const;
 
-
-        void polyextr
+        //- Polynomial extrpolation
+        void extrapolate
         (
             const label k,
             scalarRectangularMatrix& table,
-            scalarField& last
+            scalarField& y
         ) const;
 
 
@@ -139,13 +138,14 @@ public:
 
 
     // Member Functions
-    void solve
-    (
-        const ODESystem& ode,
-        scalar& x,
-        scalarField& y,
-        scalar& dxTry
-    ) const;
+
+        //- Solve the ODE system and the update the state
+        void solve
+        (
+            scalar& x,
+            scalarField& y,
+            stepState& step
+        ) const;
 };
 
 

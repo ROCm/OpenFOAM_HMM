@@ -64,7 +64,7 @@ void Foam::adaptiveSolver::solve
     do
     {
         // Solve step and provide error estimate
-        err = solve(odes, x, y, dydx0_, dx, yTemp_);
+        err = solve(x, y, dydx0_, dx, yTemp_);
 
         // If error is large reduce dx
         if (err > 1)
