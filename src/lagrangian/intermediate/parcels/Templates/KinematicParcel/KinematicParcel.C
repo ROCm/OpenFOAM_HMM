@@ -265,7 +265,7 @@ bool Foam::KinematicParcel<ParcelType>::move
 
     const polyMesh& mesh = td.cloud().pMesh();
     const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
-    const scalarField& V = mesh.cellVolumes();
+    const scalarField& cellLengthScale = td.cloud().cellLengthScale();
     const scalar maxCo = td.cloud().solution().maxCo();
 
     scalar tEnd = (1.0 - p.stepFraction())*trackTime;
@@ -290,7 +290,7 @@ bool Foam::KinematicParcel<ParcelType>::move
         if (p.active() && moving && (magU > ROOTVSMALL))
         {
             const scalar d = dt*magU;
-            const scalar dCorr = min(d, maxCo*cbrt(V[cellI]));
+            const scalar dCorr = min(d, maxCo*cellLengthScale[cellI]);
             dt *=
                 dCorr/d
                *p.trackToFace(p.position() + dCorr*U_/magU, td);

@@ -518,6 +518,14 @@ Foam::KinematicCloud<CloudType>::cellOccupancy()
 
 
 template<class CloudType>
+inline const Foam::scalarField&
+Foam::KinematicCloud<CloudType>::cellLengthScale() const
+{
+    return cellLengthScale_;
+}
+
+
+template<class CloudType>
 inline Foam::DimensionedField<Foam::vector, Foam::volMesh>&
 Foam::KinematicCloud<CloudType>::UTrans()
 {

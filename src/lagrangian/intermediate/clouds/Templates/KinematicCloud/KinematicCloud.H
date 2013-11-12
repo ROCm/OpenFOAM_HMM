@@ -165,6 +165,9 @@ protected:
         //- Cell occupancy information for each parcel, (demand driven)
         autoPtr<List<DynamicList<parcelType*> > > cellOccupancyPtr_;
 
+        //- Cell length scale
+        scalarField cellLengthScale_;
+
 
         // References to the carrier gas fields
 
@@ -367,6 +370,9 @@ public:
                 //  responsible for updating it for its own purposes
                 //  if particles are removed or created.
                 inline List<DynamicList<parcelType*> >& cellOccupancy();
+
+                //- Return the cell length scale
+                inline const scalarField& cellLengthScale() const;
 
 
             // References to the carrier gas fields
