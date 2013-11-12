@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -213,8 +213,8 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
 
     if ((time0 >= 0.0) && (time0 < duration_))
     {
-         volumeAccumulator_ +=
-             fraction_*flowRateProfile_.integrate(time0, time1);
+        volumeAccumulator_ +=
+            fraction_*flowRateProfile_.integrate(time0, time1);
     }
 
     labelHashSet cellCentresUsed;
