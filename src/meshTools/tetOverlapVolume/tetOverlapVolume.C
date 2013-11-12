@@ -396,10 +396,7 @@ Foam::labelList Foam::tetOverlapVolume::overlappingCells
 {
     const indexedOctree<treeDataCell>& treeA = fromMesh.cellTree();
 
-    treeBoundBox bbB
-    (
-        pointField(toMesh.points(), toMesh.cellPoints()[iTo])
-    );
+    treeBoundBox bbB(toMesh.points(), toMesh.cellPoints()[iTo]);
 
     return treeA.findBox(bbB);
 }
