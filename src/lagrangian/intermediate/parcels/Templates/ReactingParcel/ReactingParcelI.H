@@ -55,7 +55,7 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
 :
     ParcelType::constantProperties(parentDict),
     pMin_(this->dict_, "pMin", 1000.0),
-    constantVolume_(this->dict_, "constantVolume")
+    constantVolume_(this->dict_, word("constantVolume"))
 {}
 
 
