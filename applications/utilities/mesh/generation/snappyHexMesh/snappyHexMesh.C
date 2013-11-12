@@ -576,25 +576,30 @@ void writeMesh
 (
     const string& msg,
     const meshRefinement& meshRefiner,
-    const bool writeLevel,
-    const label debug
+    const meshRefinement::debugType debugLevel,
+    const meshRefinement::writeType writeLevel
 )
 {
     const fvMesh& mesh = meshRefiner.mesh();
 
-    meshRefiner.printMeshInfo(debug, msg);
+    meshRefiner.printMeshInfo(debugLevel, msg);
     Info<< "Writing mesh to time " << meshRefiner.timeName() << endl;
 
-    label flag = meshRefinement::MESH;
-    if (writeLevel)
-    {
-        flag |= meshRefinement::SCALARLEVELS;
-    }
-    if (debug & meshRefinement::OBJINTERSECTIONS)
-    {
-        flag |= meshRefinement::OBJINTERSECTIONS;
-    }
-    meshRefiner.write(flag, mesh.time().path()/meshRefiner.timeName());
+    //label flag = meshRefinement::MESH;
+    //if (writeLevel)
+    //{
+    //    flag |= meshRefinement::SCALARLEVELS;
+    //}
+    //if (debug & meshRefinement::OBJINTERSECTIONS)
+    //{
+    //    flag |= meshRefinement::OBJINTERSECTIONS;
+    //}
+    meshRefiner.write
+    (
+        debugLevel,
+        meshRefinement::writeType(writeLevel | meshRefinement::WRITEMESH),
+        mesh.time().path()/meshRefiner.timeName()
+    );
     Info<< "Wrote mesh in = "
         << mesh.time().cpuTimeIncrement() << " s." << endl;
 }
@@ -837,16 +842,74 @@ int main(int argc, char *argv[])
     // Debug
     // ~~~~~
 
-    const label debug = meshDict.lookupOrDefault<label>("debug", 0);
-    if (debug > 0)
+    // Set debug level
+    meshRefinement::debugType debugLevel = meshRefinement::debugType
+    (
+        meshDict.lookupOrDefault<label>
+        (
+            "debug",
+            0
+        )
+    );
     {
-        meshRefinement::debug   = debug;
-        autoRefineDriver::debug = debug;
-        autoSnapDriver::debug   = debug;
-        autoLayerDriver::debug  = debug;
+        wordList flags;
+        if (meshDict.readIfPresent("debugFlags", flags))
+        {
+            debugLevel = meshRefinement::debugType
+            (
+                meshRefinement::readFlags
+                (
+                    meshRefinement::IOdebugTypeNames,
+                    flags
+                )
+            );
+        }
+    }
+    if (debugLevel > 0)
+    {
+        meshRefinement::debug   = debugLevel;
+        autoRefineDriver::debug = debugLevel;
+        autoSnapDriver::debug   = debugLevel;
+        autoLayerDriver::debug  = debugLevel;
     }
 
-    const bool writeLevel = meshDict.lookupOrDefault<bool>("writeLevel", false);
+    // Set file writing level
+    {
+        wordList flags;
+        if (meshDict.readIfPresent("writeFlags", flags))
+        {
+            meshRefinement::writeLevel
+            (
+                meshRefinement::writeType
+                (
+                    meshRefinement::readFlags
+                    (
+                        meshRefinement::IOwriteTypeNames,
+                        flags
+                    )
+                )
+            );
+        }
+    }
+
+    // Set output level
+    {
+        wordList flags;
+        if (meshDict.readIfPresent("outputFlags", flags))
+        {
+            meshRefinement::outputLevel
+            (
+                meshRefinement::outputType
+                (
+                    meshRefinement::readFlags
+                    (
+                        meshRefinement::IOoutputTypeNames,
+                        flags
+                    )
+                )
+            );
+        }
+    }
 
 
     // Read geometry
@@ -1047,11 +1110,12 @@ int main(int argc, char *argv[])
         << mesh.time().cpuTimeIncrement() << " s" << nl << endl;
 
     // Some stats
-    meshRefiner.printMeshInfo(debug, "Initial mesh");
+    meshRefiner.printMeshInfo(debugLevel, "Initial mesh");
 
     meshRefiner.write
     (
-        debug & meshRefinement::OBJINTERSECTIONS,
+        meshRefinement::debugType(debugLevel&meshRefinement::OBJINTERSECTIONS),
+        meshRefinement::writeType(0),
         mesh.time().path()/meshRefiner.timeName()
     );
 
@@ -1271,7 +1335,7 @@ int main(int argc, char *argv[])
         );
 
 
-        if (!overwrite && !debug)
+        if (!overwrite && !debugLevel)
         {
             const_cast<Time&>(mesh.time())++;
         }
@@ -1289,8 +1353,8 @@ int main(int argc, char *argv[])
         (
             "Refined mesh",
             meshRefiner,
-            writeLevel,
-            debug
+            debugLevel,
+            meshRefinement::writeLevel()
         );
 
         Info<< "Mesh refined in = "
@@ -1308,7 +1372,7 @@ int main(int argc, char *argv[])
             globalToSlavePatch
         );
 
-        if (!overwrite && !debug)
+        if (!overwrite && !debugLevel)
         {
             const_cast<Time&>(mesh.time())++;
         }
@@ -1330,8 +1394,8 @@ int main(int argc, char *argv[])
         (
             "Snapped mesh",
             meshRefiner,
-            writeLevel,
-            debug
+            debugLevel,
+            meshRefinement::writeLevel()
         );
 
         Info<< "Mesh snapped in = "
@@ -1357,7 +1421,7 @@ int main(int argc, char *argv[])
         );
 
 
-        if (!overwrite &&  !debug)
+        if (!overwrite && !debugLevel)
         {
             const_cast<Time&>(mesh.time())++;
         }
@@ -1376,8 +1440,8 @@ int main(int argc, char *argv[])
         (
             "Layer mesh",
             meshRefiner,
-            writeLevel,
-            debug
+            debugLevel,
+            meshRefinement::writeLevel()
         );
 
         Info<< "Layers added in = "

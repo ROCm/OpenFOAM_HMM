@@ -186,6 +186,9 @@ public:
         //- Per patch group the patch indices
         const HashTable<labelList, word>& groupPatchIDs() const;
 
+        //- Set/add group with patches
+        void setGroup(const word& groupName, const labelList& patchIDs);
+
         //- Return the set of patch IDs corresponding to the given names
         //  By default warns if given names are not found. Optionally
         //  matches to patchGroups as well as patchNames

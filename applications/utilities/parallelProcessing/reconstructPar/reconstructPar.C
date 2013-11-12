@@ -104,8 +104,8 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
-        "sets",
-        "reconstruct cellSets, faceSets, pointSets"
+        "noSets",
+        "skip reconstructing cellSets, faceSets, pointSets"
     );
     argList::addBoolOption
     (
@@ -122,10 +122,23 @@ int main(int argc, char *argv[])
         args.optionLookup("fields")() >> selectedFields;
     }
 
-    const bool reconstructSets = args.optionFound("sets");
-
-
     const bool noLagrangian = args.optionFound("noLagrangian");
+
+    if (noLagrangian)
+    {
+        Info<< "Skipping reconstructing lagrangian positions and fields"
+            << nl << endl;
+    }
+
+
+    const bool noReconstructSets = args.optionFound("noSets");
+
+    if (noReconstructSets)
+    {
+        Info<< "Skipping reconstructing cellSets, faceSets and pointSets"
+            << nl << endl;
+    }
+
 
     HashSet<word> selectedLagrangianFields;
     if (args.optionFound("lagrangianFields"))
@@ -682,7 +695,7 @@ int main(int argc, char *argv[])
             }
 
 
-            if (reconstructSets)
+            if (!noReconstructSets)
             {
                 // Scan to find all sets
                 HashTable<label> cSetNames;

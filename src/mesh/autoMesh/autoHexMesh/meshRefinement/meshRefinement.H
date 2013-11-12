@@ -85,16 +85,52 @@ public:
 
     // Public data types
 
-        //- Enumeration for debug dumping
-        enum writeFlag
+        //- Enumeration for what to debug
+        enum IOdebugType
         {
-            MESH = 1,
-            SCALARLEVELS = 2,
-            OBJINTERSECTIONS = 4,
-            FEATURESEEDS = 8,
-            LAYERINFO = 16
+            IOMESH,
+            //IOSCALARLEVELS,
+            IOOBJINTERSECTIONS,
+            IOFEATURESEEDS,
+            IOLAYERINFO
+        };
+        static const NamedEnum<IOdebugType, 4> IOdebugTypeNames;
+        enum debugType
+        {
+            MESH = 1<<IOMESH,
+            //SCALARLEVELS = 1<<IOSCALARLEVELS,
+            OBJINTERSECTIONS = 1<<IOOBJINTERSECTIONS,
+            FEATURESEEDS = 1<<IOFEATURESEEDS,
+            LAYERINFO = 1<<IOLAYERINFO
         };
 
+        //- Enumeration for what to output
+        enum IOoutputType
+        {
+            IOOUTPUTLAYERINFO
+        };
+        static const NamedEnum<IOoutputType, 1> IOoutputTypeNames;
+        enum outputType
+        {
+            OUTPUTLAYERINFO = 1<<IOOUTPUTLAYERINFO
+        };
+
+        //- Enumeration for what to write
+        enum IOwriteType
+        {
+            IOWRITEMESH,
+            IOWRITELEVELS,
+            IOWRITELAYERSETS,
+            IOWRITELAYERFIELDS
+        };
+        static const NamedEnum<IOwriteType, 4> IOwriteTypeNames;
+        enum writeType
+        {
+            WRITEMESH = 1<<IOWRITEMESH,
+            WRITELEVELS = 1<<IOWRITELEVELS,
+            WRITELAYERSETS = 1<<IOWRITELAYERSETS,
+            WRITELAYERFIELDS = 1<<IOWRITELAYERFIELDS
+        };
 
         //- Enumeration for how the userdata is to be mapped upon refinement.
         enum mapType
@@ -106,6 +142,15 @@ public:
 
 
 private:
+
+    // Static data members
+
+        //- Control of writing level
+        static writeType writeLevel_;
+
+        //- Control of output/log level
+        static outputType outputLevel_;
+
 
     // Private data
 
@@ -1007,9 +1052,13 @@ public:
             //- Debug: Write intersection information to OBJ format
             void dumpIntersections(const fileName& prefix) const;
 
-            //- Do any one of above IO functions. flag is combination of
-            //  writeFlag values.
-            void write(const label flag, const fileName&) const;
+            //- Do any one of above IO functions
+            void write
+            (
+                const debugType debugFlags,
+                const writeType writeFlags,
+                const fileName&
+            ) const;
 
             //- Helper: calculate average
             template<class T>
@@ -1029,6 +1078,21 @@ public:
                 const labelList& meshPoints,
                 const UList<T>& values
             );
+
+
+            //- Get/set write level
+            static writeType writeLevel();
+            static void writeLevel(const writeType);
+
+            //- Get/set output level
+            static outputType outputLevel();
+            static void outputLevel(const outputType);
+
+
+            //- Helper: convert wordList into bit pattern using provided
+            //  NamedEnum
+            template<class Enum>
+            static int readFlags(const Enum& namedEnum, const wordList&);
 
 };
 

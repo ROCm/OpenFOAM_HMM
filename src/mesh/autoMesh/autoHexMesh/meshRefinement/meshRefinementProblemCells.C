@@ -593,7 +593,12 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
             mesh_.movePoints(newPoints);
             Pout<< "Writing newPoints mesh to time " << timeName()
                 << endl;
-            write(debug, mesh_.time().path()/"newPoints");
+            write
+            (
+                debugType(debug),
+                writeType(writeLevel() | WRITEMESH),
+                mesh_.time().path()/"newPoints"
+            );
             mesh_.movePoints(oldPoints);
         }
     }

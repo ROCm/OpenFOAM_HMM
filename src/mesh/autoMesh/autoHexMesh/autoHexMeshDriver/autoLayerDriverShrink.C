@@ -1330,7 +1330,12 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
         meshRefiner_.mesh().setInstance(meshRefiner_.timeName());
         meshRefiner_.write
         (
-            debug,
+            meshRefinement::debugType(debug),
+            meshRefinement::writeType
+            (
+                meshRefinement::writeLevel()
+              | meshRefinement::WRITEMESH
+            ),
             mesh.time().path()/meshRefiner_.timeName()
         );
         dispVec.write();
@@ -1775,7 +1780,12 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
 
         meshRefiner_.write
         (
-            debug,
+            meshRefinement::debugType(debug),
+            meshRefinement::writeType
+            (
+                meshRefinement::writeLevel()
+              | meshRefinement::WRITEMESH
+            ),
             mesh.time().path()/meshRefiner_.timeName()
         );
         dispVec.write();
