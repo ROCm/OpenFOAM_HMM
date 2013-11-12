@@ -315,6 +315,21 @@ void meshRefinement::reorderPatchFields(fvMesh& mesh, const labelList& oldToNew)
 }
 
 
+template<class Enum>
+int meshRefinement::readFlags(const Enum& namedEnum, const wordList& words)
+{
+    int flags = 0;
+
+    forAll(words, i)
+    {
+        int index = namedEnum[words[i]];
+        int val = 1<<index;
+        flags |= val;
+    }
+    return flags;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

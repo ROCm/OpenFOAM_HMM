@@ -2472,6 +2472,99 @@ void Foam::autoLayerDriver::getLayerCellsFaces
 }
 
 
+void Foam::autoLayerDriver::printLayerData
+(
+    const fvMesh& mesh,
+    const labelList& patchIDs,
+    const labelList& cellNLayers,
+    const scalarField& faceWantedThickness,
+    const scalarField& faceRealThickness
+) const
+{
+    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+
+    // Find maximum length of a patch name, for a nicer output
+    label maxPatchNameLen = 0;
+    forAll(patchIDs, i)
+    {
+        label patchI = patchIDs[i];
+        word patchName = pbm[patchI].name();
+        maxPatchNameLen = max(maxPatchNameLen, label(patchName.size()));
+    }
+
+    Info<< nl
+        << setf(ios_base::left) << setw(maxPatchNameLen) << "patch"
+        << setw(0) << " faces    layers   overall thickness" << nl
+        << setf(ios_base::left) << setw(maxPatchNameLen) << " "
+        << setw(0) << "                   [m]       [%]" << nl
+        << setf(ios_base::left) << setw(maxPatchNameLen) << "-----"
+        << setw(0) << " -----    ------   ---       ---" << endl;
+
+
+    forAll(patchIDs, i)
+    {
+        label patchI = patchIDs[i];
+        const polyPatch& pp = pbm[patchI];
+
+        label sumSize = pp.size();
+
+        // Number of layers
+        const labelList& faceCells = pp.faceCells();
+        label sumNLayers = 0;
+        forAll(faceCells, i)
+        {
+            sumNLayers += cellNLayers[faceCells[i]];
+        }
+
+        // Thickness
+        scalarField::subField patchWanted = pbm[patchI].patchSlice
+        (
+            faceWantedThickness
+        );
+        scalarField::subField patchReal = pbm[patchI].patchSlice
+        (
+            faceRealThickness
+        );
+
+        scalar sumRealThickness = sum(patchReal);
+        scalar sumFraction = 0;
+        forAll(patchReal, i)
+        {
+            if (patchWanted[i] > VSMALL)
+            {
+                sumFraction += (patchReal[i]/patchWanted[i]);
+            }
+        }
+
+
+        reduce(sumSize, sumOp<label>());
+        reduce(sumNLayers, sumOp<label>());
+        reduce(sumRealThickness, sumOp<scalar>());
+        reduce(sumFraction, sumOp<scalar>());
+
+
+        scalar avgLayers = 0;
+        scalar avgReal = 0;
+        scalar avgFraction = 0;
+        if (sumSize > 0)
+        {
+            avgLayers = scalar(sumNLayers)/sumSize;
+            avgReal = sumRealThickness/sumSize;
+            avgFraction = sumFraction/sumSize;
+        }
+
+        Info<< setf(ios_base::left) << setw(maxPatchNameLen)
+            << pbm[patchI].name() << setprecision(3)
+            << " " << setw(8) << sumSize
+            << " " << setw(8) << avgLayers
+            << " " << setw(8) << avgReal
+            << "  " << setw(8) << 100*avgFraction
+            << endl;
+    }
+    Info<< endl;
+}
+
+
 bool Foam::autoLayerDriver::writeLayerData
 (
     const fvMesh& mesh,
@@ -2483,151 +2576,189 @@ bool Foam::autoLayerDriver::writeLayerData
 {
     bool allOk = true;
 
+    if (meshRefinement::writeLevel() & meshRefinement::WRITELAYERSETS)
     {
-        label nAdded = 0;
-        forAll(cellNLayers, cellI)
         {
-            if (cellNLayers[cellI] > 0)
+            label nAdded = 0;
+            forAll(cellNLayers, cellI)
             {
-                nAdded++;
+                if (cellNLayers[cellI] > 0)
+                {
+                    nAdded++;
+                }
             }
+            cellSet addedCellSet(mesh, "addedCells", nAdded);
+            forAll(cellNLayers, cellI)
+            {
+                if (cellNLayers[cellI] > 0)
+                {
+                    addedCellSet.insert(cellI);
+                }
+            }
+            addedCellSet.instance() = meshRefiner_.timeName();
+            Info<< "Writing "
+                << returnReduce(addedCellSet.size(), sumOp<label>())
+                << " added cells to cellSet "
+                << addedCellSet.name() << endl;
+            bool ok = addedCellSet.write();
+            allOk = allOk & ok;
         }
-        cellSet addedCellSet(mesh, "addedCells", nAdded);
-        forAll(cellNLayers, cellI)
         {
-            if (cellNLayers[cellI] > 0)
+            label nAdded = 0;
+            forAll(faceRealThickness, faceI)
             {
-                addedCellSet.insert(cellI);
+                if (faceRealThickness[faceI] > 0)
+                {
+                    nAdded++;
+                }
             }
-        }
-        addedCellSet.instance() = meshRefiner_.timeName();
-        Info<< "Writing "
-            << returnReduce(addedCellSet.size(), sumOp<label>())
-            << " added cells to cellSet "
-            << addedCellSet.name() << endl;
-        bool ok = addedCellSet.write();
-        allOk = allOk & ok;
-    }
-    {
-        label nAdded = 0;
-        forAll(faceRealThickness, faceI)
-        {
-            if (faceRealThickness[faceI] > 0)
-            {
-                nAdded++;
-            }
-        }
 
-        faceSet layerFacesSet(mesh, "layerFaces", nAdded);
-        forAll(faceRealThickness, faceI)
-        {
-            if (faceRealThickness[faceI] > 0)
+            faceSet layerFacesSet(mesh, "layerFaces", nAdded);
+            forAll(faceRealThickness, faceI)
             {
-                layerFacesSet.insert(faceI);
+                if (faceRealThickness[faceI] > 0)
+                {
+                    layerFacesSet.insert(faceI);
+                }
             }
+            layerFacesSet.instance() = meshRefiner_.timeName();
+            Info<< "Writing "
+                << returnReduce(layerFacesSet.size(), sumOp<label>())
+                << " faces inside added layer to faceSet "
+                << layerFacesSet.name() << endl;
+            bool ok = layerFacesSet.write();
+            allOk = allOk & ok;
         }
-        layerFacesSet.instance() = meshRefiner_.timeName();
-        Info<< "Writing "
-            << returnReduce(layerFacesSet.size(), sumOp<label>())
-            << " faces inside added layer to faceSet "
-            << layerFacesSet.name() << endl;
-        bool ok = layerFacesSet.write();
-        allOk = allOk & ok;
     }
+
+    if (meshRefinement::writeLevel() & meshRefinement::WRITELAYERFIELDS)
     {
-        volScalarField fld
-        (
-            IOobject
-            (
-                "nSurfaceLayers",
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
-            ),
-            mesh,
-            dimensionedScalar("zero", dimless, 0),
-            fixedValueFvPatchScalarField::typeName
-        );
-        const polyBoundaryMesh& pbm = mesh.boundaryMesh();
-        forAll(patchIDs, i)
         {
-            label patchI = patchIDs[i];
-            const polyPatch& pp = pbm[patchI];
-            const labelList& faceCells = pp.faceCells();
-            scalarField pfld(faceCells.size());
-            forAll(faceCells, i)
+            volScalarField fld
+            (
+                IOobject
+                (
+                    "nSurfaceLayers",
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE,
+                    false
+                ),
+                mesh,
+                dimensionedScalar("zero", dimless, 0),
+                fixedValueFvPatchScalarField::typeName
+            );
+            const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+            forAll(patchIDs, i)
             {
-                pfld[i] = cellNLayers[faceCells[i]];
+                label patchI = patchIDs[i];
+                const polyPatch& pp = pbm[patchI];
+                const labelList& faceCells = pp.faceCells();
+                scalarField pfld(faceCells.size());
+                forAll(faceCells, i)
+                {
+                    pfld[i] = cellNLayers[faceCells[i]];
+                }
+                fld.boundaryField()[patchI] == pfld;
             }
-            fld.boundaryField()[patchI] == pfld;
+            Info<< "Writing volScalarField " << fld.name()
+                << " with actual number of layers" << endl;
+            bool ok = fld.write();
+            allOk = allOk & ok;
         }
-        Info<< "Writing volScalarField " << fld.name()
-            << " with actual number of layers" << endl;
-        bool ok = fld.write();
-        allOk = allOk & ok;
-    }
-    {
-        volScalarField fld
-        (
-            IOobject
-            (
-                "wantedThickness",
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
-            ),
-            mesh,
-            dimensionedScalar("zero", dimless, 0),
-            fixedValueFvPatchScalarField::typeName
-        );
-        const polyBoundaryMesh& pbm = mesh.boundaryMesh();
-        forAll(patchIDs, i)
         {
-            label patchI = patchIDs[i];
-            fld.boundaryField()[patchI] == pbm[patchI].patchSlice
+            volScalarField fld
             (
-                faceWantedThickness
-            );
-        }
-        Info<< "Writing volScalarField " << fld.name()
-            << " with wanted thickness" << endl;
-        bool ok = fld.write();
-        allOk = allOk & ok;
-    }
-    {
-        volScalarField fld
-        (
-            IOobject
-            (
-                "thickness",
-                mesh.time().timeName(),
+                IOobject
+                (
+                    "thickness",
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE,
+                    false
+                ),
                 mesh,
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
-            ),
-            mesh,
-            dimensionedScalar("zero", dimless, 0),
-            fixedValueFvPatchScalarField::typeName
-        );
-        const polyBoundaryMesh& pbm = mesh.boundaryMesh();
-        forAll(patchIDs, i)
-        {
-            label patchI = patchIDs[i];
-            fld.boundaryField()[patchI] == pbm[patchI].patchSlice
-            (
-                faceRealThickness
+                dimensionedScalar("zero", dimless, 0),
+                fixedValueFvPatchScalarField::typeName
             );
+            const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+            forAll(patchIDs, i)
+            {
+                label patchI = patchIDs[i];
+                fld.boundaryField()[patchI] == pbm[patchI].patchSlice
+                (
+                    faceRealThickness
+                );
+            }
+            Info<< "Writing volScalarField " << fld.name()
+                << " with overall layer thickness" << endl;
+            bool ok = fld.write();
+            allOk = allOk & ok;
         }
-        Info<< "Writing volScalarField " << fld.name()
-            << " with layer thickness" << endl;
-        bool ok = fld.write();
-        allOk = allOk & ok;
+        {
+            volScalarField fld
+            (
+                IOobject
+                (
+                    "thicknessFraction",
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE,
+                    false
+                ),
+                mesh,
+                dimensionedScalar("zero", dimless, 0),
+                fixedValueFvPatchScalarField::typeName
+            );
+            const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+            forAll(patchIDs, i)
+            {
+                label patchI = patchIDs[i];
+
+                scalarField::subField patchWanted = pbm[patchI].patchSlice
+                (
+                    faceWantedThickness
+                );
+                scalarField::subField patchReal = pbm[patchI].patchSlice
+                (
+                    faceRealThickness
+                );
+
+                // Convert patchReal to relavtive thickness
+                scalarField pfld(patchReal.size(), 0.0);
+                forAll(patchReal, i)
+                {
+                    if (patchWanted[i] > VSMALL)
+                    {
+                        pfld[i] = patchReal[i]/patchWanted[i];
+                    }
+                }
+
+                fld.boundaryField()[patchI] == pfld;
+            }
+            Info<< "Writing volScalarField " << fld.name()
+                << " with overall layer thickness as fraction"
+                << " of desired thickness" << endl;
+            bool ok = fld.write();
+            allOk = allOk & ok;
+        }
     }
+
+    //if (meshRefinement::outputLevel() & meshRefinement::OUTPUTLAYERINFO)
+    {
+        printLayerData
+        (
+            mesh,
+            patchIDs,
+            cellNLayers,
+            faceWantedThickness,
+            faceRealThickness
+        );
+    }
+
     return allOk;
 }
 
@@ -2737,7 +2868,12 @@ void Foam::autoLayerDriver::addLayers
             << meshRefiner_.timeName() << endl;
         meshRefiner_.write
         (
-            debug,
+            meshRefinement::debugType(debug),
+            meshRefinement::writeType
+            (
+                meshRefinement::writeLevel()
+              | meshRefinement::WRITEMESH
+            ),
             mesh.time().path()/meshRefiner_.timeName()
         );
     }
@@ -3173,7 +3309,12 @@ void Foam::autoLayerDriver::addLayers
 
             meshRefiner_.write
             (
-                debug,
+                meshRefinement::debugType(debug),
+                meshRefinement::writeType
+                (
+                    meshRefinement::writeLevel()
+                  | meshRefinement::WRITEMESH
+                ),
                 mesh.time().path()/meshRefiner_.timeName()
             );
         }

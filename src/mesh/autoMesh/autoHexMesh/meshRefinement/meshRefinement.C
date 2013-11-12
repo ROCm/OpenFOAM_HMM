@@ -62,7 +62,60 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(meshRefinement, 0);
+
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::meshRefinement::IOdebugType,
+        4
+    >::names[] =
+    {
+        "mesh",
+        //"scalarLevels",
+        "intersections",
+        "featureSeeds",
+        "layerInfo"
+    };
+
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::meshRefinement::IOoutputType,
+        1
+    >::names[] =
+    {
+        "layerInfo"
+    };
+
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::meshRefinement::IOwriteType,
+        4
+    >::names[] =
+    {
+        "mesh",
+        "scalarLevels",
+        "layerSets",
+        "layerFields"
+    };
+
 }
+
+const Foam::NamedEnum<Foam::meshRefinement::IOdebugType, 4>
+Foam::meshRefinement::IOdebugTypeNames;
+
+const Foam::NamedEnum<Foam::meshRefinement::IOoutputType, 1>
+Foam::meshRefinement::IOoutputTypeNames;
+
+const Foam::NamedEnum<Foam::meshRefinement::IOwriteType, 4>
+Foam::meshRefinement::IOwriteTypeNames;
+
+
+Foam::meshRefinement::writeType Foam::meshRefinement::writeLevel_;
+
+Foam::meshRefinement::outputType Foam::meshRefinement::outputLevel_;
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -2728,22 +2781,47 @@ void Foam::meshRefinement::dumpIntersections(const fileName& prefix) const
 
 void Foam::meshRefinement::write
 (
-    const label flag,
+    const debugType debugFlags,
+    const writeType writeFlags,
     const fileName& prefix
 ) const
 {
-    if (flag & MESH)
+    if (writeFlags & WRITEMESH)
     {
         write();
     }
-    if (flag & SCALARLEVELS)
+    if (writeFlags & WRITELEVELS)
     {
         dumpRefinementLevel();
     }
-    if (flag & OBJINTERSECTIONS && prefix.size())
+    if (debugFlags & OBJINTERSECTIONS && prefix.size())
     {
         dumpIntersections(prefix);
     }
+}
+
+
+Foam::meshRefinement::writeType Foam::meshRefinement::writeLevel()
+{
+    return writeLevel_;
+}
+
+
+void Foam::meshRefinement::writeLevel(const writeType flags)
+{
+    writeLevel_ = flags;
+}
+
+
+Foam::meshRefinement::outputType Foam::meshRefinement::outputLevel()
+{
+    return outputLevel_;
+}
+
+
+void Foam::meshRefinement::outputLevel(const outputType flags)
+{
+    outputLevel_ = flags;
 }
 
 

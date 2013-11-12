@@ -380,6 +380,16 @@ class autoLayerDriver
                     scalarField& faceRealThickness
                 );
 
+                //- Print layer coverage table
+                void printLayerData
+                (
+                    const fvMesh& mesh,
+                    const labelList& patchIDs,
+                    const labelList& cellNLayers,
+                    const scalarField& faceWantedThickness,
+                    const scalarField& faceRealThickness
+                ) const;
+
                 //- Write cellSet,faceSet for layers
                 bool writeLayerData
                 (

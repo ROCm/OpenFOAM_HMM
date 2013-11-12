@@ -25,10 +25,9 @@ License
 
 #include "autoSnapDriver.H"
 #include "polyTopoChange.H"
-#include "OFstream.H"
 #include "syncTools.H"
 #include "fvMesh.H"
-#include "OFstream.H"
+#include "OBJstream.H"
 #include "motionSmoother.H"
 #include "refinementSurfaces.H"
 #include "refinementFeatures.H"
@@ -216,77 +215,77 @@ void Foam::autoSnapDriver::smoothAndConstrain
 }
 //XXXXXX
 //TODO: make proper parallel so coupled edges don't have double influence
-void Foam::autoSnapDriver::smoothAndConstrain2
-(
-    const bool applyConstraints,
-    const indirectPrimitivePatch& pp,
-    const List<pointConstraint>& constraints,
-    vectorField& disp
-) const
-{
-    const fvMesh& mesh = meshRefiner_.mesh();
-
-    for (label avgIter = 0; avgIter < 20; avgIter++)
-    {
-        vectorField dispSum(pp.nPoints(), vector::zero);
-        labelList dispCount(pp.nPoints(), 0);
-
-        const labelListList& pointEdges = pp.pointEdges();
-        const edgeList& edges = pp.edges();
-
-        forAll(pointEdges, pointI)
-        {
-            const labelList& pEdges = pointEdges[pointI];
-
-            forAll(pEdges, i)
-            {
-                label nbrPointI = edges[pEdges[i]].otherVertex(pointI);
-                dispSum[pointI] += disp[nbrPointI];
-                dispCount[pointI]++;
-            }
-        }
-
-        syncTools::syncPointList
-        (
-            mesh,
-            pp.meshPoints(),
-            dispSum,
-            plusEqOp<point>(),
-            vector::zero,
-            mapDistribute::transform()
-        );
-        syncTools::syncPointList
-        (
-            mesh,
-            pp.meshPoints(),
-            dispCount,
-            plusEqOp<label>(),
-            0,
-            mapDistribute::transform()
-        );
-
-        // Constraints
-        forAll(constraints, pointI)
-        {
-            if (dispCount[pointI] > 0)// && constraints[pointI].first() <= 1)
-            {
-                // Mix my displacement with neighbours' displacement
-                disp[pointI] =
-                    0.5
-                   *(disp[pointI] + dispSum[pointI]/dispCount[pointI]);
-
-                if (applyConstraints)
-                {
-                    disp[pointI] = transform
-                    (
-                        constraints[pointI].constraintTransformation(),
-                        disp[pointI]
-                    );
-                }
-            }
-        }
-    }
-}
+//void Foam::autoSnapDriver::smoothAndConstrain2
+//(
+//    const bool applyConstraints,
+//    const indirectPrimitivePatch& pp,
+//    const List<pointConstraint>& constraints,
+//    vectorField& disp
+//) const
+//{
+//    const fvMesh& mesh = meshRefiner_.mesh();
+//
+//    for (label avgIter = 0; avgIter < 20; avgIter++)
+//    {
+//        vectorField dispSum(pp.nPoints(), vector::zero);
+//        labelList dispCount(pp.nPoints(), 0);
+//
+//        const labelListList& pointEdges = pp.pointEdges();
+//        const edgeList& edges = pp.edges();
+//
+//        forAll(pointEdges, pointI)
+//        {
+//            const labelList& pEdges = pointEdges[pointI];
+//
+//            forAll(pEdges, i)
+//            {
+//                label nbrPointI = edges[pEdges[i]].otherVertex(pointI);
+//                dispSum[pointI] += disp[nbrPointI];
+//                dispCount[pointI]++;
+//            }
+//        }
+//
+//        syncTools::syncPointList
+//        (
+//            mesh,
+//            pp.meshPoints(),
+//            dispSum,
+//            plusEqOp<point>(),
+//            vector::zero,
+//            mapDistribute::transform()
+//        );
+//        syncTools::syncPointList
+//        (
+//            mesh,
+//            pp.meshPoints(),
+//            dispCount,
+//            plusEqOp<label>(),
+//            0,
+//            mapDistribute::transform()
+//        );
+//
+//        // Constraints
+//        forAll(constraints, pointI)
+//        {
+//            if (dispCount[pointI] > 0)// && constraints[pointI].first() <= 1)
+//            {
+//                // Mix my displacement with neighbours' displacement
+//                disp[pointI] =
+//                    0.5
+//                   *(disp[pointI] + dispSum[pointI]/dispCount[pointI]);
+//
+//                if (applyConstraints)
+//                {
+//                    disp[pointI] = transform
+//                    (
+//                        constraints[pointI].constraintTransformation(),
+//                        disp[pointI]
+//                    );
+//                }
+//            }
+//        }
+//    }
+//}
 //XXXXXX
 
 
@@ -1082,16 +1081,13 @@ void Foam::autoSnapDriver::featureAttractionUsingReconstruction
     List<pointConstraint>& patchConstraints
 ) const
 {
-    autoPtr<OFstream> feStr;
-    label feVertI = 0;
-    autoPtr<OFstream> fpStr;
-    label fpVertI = 0;
-
+    autoPtr<OBJstream> feStr;
+    autoPtr<OBJstream> fpStr;
     if (debug&meshRefinement::OBJINTERSECTIONS)
     {
         feStr.reset
         (
-            new OFstream
+            new OBJstream
             (
                 meshRefiner_.mesh().time().path()
               / "implicitFeatureEdge_" + name(iter) + ".obj"
@@ -1102,7 +1098,7 @@ void Foam::autoSnapDriver::featureAttractionUsingReconstruction
 
         fpStr.reset
         (
-            new OFstream
+            new OBJstream
             (
                 meshRefiner_.mesh().time().path()
               / "implicitFeaturePoint_" + name(iter) + ".obj"
@@ -1139,7 +1135,10 @@ void Foam::autoSnapDriver::featureAttractionUsingReconstruction
         if
         (
             (constraint.first() > patchConstraints[pointI].first())
-         || (magSqr(attraction) < magSqr(patchAttraction[pointI]))
+         || (
+                (constraint.first() == patchConstraints[pointI].first())
+             && (magSqr(attraction) < magSqr(patchAttraction[pointI]))
+            )
         )
         {
             patchAttraction[pointI] = attraction;
@@ -1149,19 +1148,11 @@ void Foam::autoSnapDriver::featureAttractionUsingReconstruction
 
             if (patchConstraints[pointI].first() == 2 && feStr.valid())
             {
-                meshTools::writeOBJ(feStr(), pt);
-                feVertI++;
-                meshTools::writeOBJ(feStr(), pt+patchAttraction[pointI]);
-                feVertI++;
-                feStr() << "l " << feVertI-1 << ' ' << feVertI << nl;
+                feStr().write(linePointRef(pt, pt+patchAttraction[pointI]));
             }
             else if (patchConstraints[pointI].first() == 3 && fpStr.valid())
             {
-                meshTools::writeOBJ(fpStr(), pt);
-                fpVertI++;
-                meshTools::writeOBJ(fpStr(), pt+patchAttraction[pointI]);
-                fpVertI++;
-                fpStr() << "l " << fpVertI-1 << ' ' << fpVertI << nl;
+                fpStr().write(linePointRef(pt, pt+patchAttraction[pointI]));
             }
         }
     }
@@ -1604,18 +1595,15 @@ void Foam::autoSnapDriver::determineFeatures
     List<pointConstraint>& patchConstraints
 ) const
 {
-    autoPtr<OFstream> featureEdgeStr;
-    label featureEdgeVertI = 0;
-    autoPtr<OFstream> missedEdgeStr;
-    label missedVertI = 0;
-    autoPtr<OFstream> featurePointStr;
-    label featurePointVertI = 0;
+    autoPtr<OBJstream> featureEdgeStr;
+    autoPtr<OBJstream> missedEdgeStr;
+    autoPtr<OBJstream> featurePointStr;
 
     if (debug&meshRefinement::OBJINTERSECTIONS)
     {
         featureEdgeStr.reset
         (
-            new OFstream
+            new OBJstream
             (
                 meshRefiner_.mesh().time().path()
               / "featureEdge_" + name(iter) + ".obj"
@@ -1626,7 +1614,7 @@ void Foam::autoSnapDriver::determineFeatures
 
         missedEdgeStr.reset
         (
-            new OFstream
+            new OBJstream
             (
                 meshRefiner_.mesh().time().path()
               / "missedFeatureEdge_" + name(iter) + ".obj"
@@ -1637,7 +1625,7 @@ void Foam::autoSnapDriver::determineFeatures
 
         featurePointStr.reset
         (
-            new OFstream
+            new OBJstream
             (
                 meshRefiner_.mesh().time().path()
               / "featurePoint_" + name(iter) + ".obj"
@@ -1677,7 +1665,10 @@ void Foam::autoSnapDriver::determineFeatures
         if
         (
             (constraint.first() > patchConstraints[pointI].first())
-         || (magSqr(attraction) < magSqr(patchAttraction[pointI]))
+         || (
+                (constraint.first() == patchConstraints[pointI].first())
+             && (magSqr(attraction) < magSqr(patchAttraction[pointI]))
+            )
         )
         {
             patchAttraction[pointI] = attraction;
@@ -1724,34 +1715,20 @@ void Foam::autoSnapDriver::determineFeatures
                             // Dump
                             if (featureEdgeStr.valid())
                             {
-                                meshTools::writeOBJ(featureEdgeStr(), pt);
-                                featureEdgeVertI++;
-                                meshTools::writeOBJ
+                                featureEdgeStr().write
                                 (
-                                    featureEdgeStr(),
-                                    nearInfo.hitPoint()
+                                    linePointRef(pt, nearInfo.hitPoint())
                                 );
-                                featureEdgeVertI++;
-                                featureEdgeStr()
-                                    << "l " << featureEdgeVertI-1 << ' '
-                                    << featureEdgeVertI << nl;
                             }
                         }
                         else
                         {
                             if (missedEdgeStr.valid())
                             {
-                                meshTools::writeOBJ(missedEdgeStr(), pt);
-                                missedVertI++;
-                                meshTools::writeOBJ
+                                missedEdgeStr().write
                                 (
-                                    missedEdgeStr(),
-                                    nearInfo.missPoint()
+                                    linePointRef(pt, nearInfo.missPoint())
                                 );
-                                missedVertI++;
-                                missedEdgeStr()
-                                    << "l " << missedVertI-1 << ' '
-                                    << missedVertI << nl;
                             }
                         }
                     }
@@ -1788,34 +1765,20 @@ void Foam::autoSnapDriver::determineFeatures
                     // Dump
                     if (featureEdgeStr.valid())
                     {
-                        meshTools::writeOBJ(featureEdgeStr(), pt);
-                        featureEdgeVertI++;
-                        meshTools::writeOBJ
+                        featureEdgeStr().write
                         (
-                            featureEdgeStr(),
-                            nearInfo.hitPoint()
+                            linePointRef(pt, nearInfo.hitPoint())
                         );
-                        featureEdgeVertI++;
-                        featureEdgeStr()
-                            << "l " << featureEdgeVertI-1 << ' '
-                            << featureEdgeVertI << nl;
                     }
                 }
                 else
                 {
                     if (missedEdgeStr.valid())
                     {
-                        meshTools::writeOBJ(missedEdgeStr(), pt);
-                        missedVertI++;
-                        meshTools::writeOBJ
+                        missedEdgeStr().write
                         (
-                            missedEdgeStr(),
-                            nearInfo.missPoint()
+                            linePointRef(pt, nearInfo.missPoint())
                         );
-                        missedVertI++;
-                        missedEdgeStr()
-                            << "l " << missedVertI-1 << ' '
-                            << missedVertI << nl;
                     }
                 }
             }
@@ -1852,13 +1815,7 @@ void Foam::autoSnapDriver::determineFeatures
                         const point& featPt =
                             shapes.points()[nearInfo.second()];
 
-                        meshTools::writeOBJ(featurePointStr(), pt);
-                        featurePointVertI++;
-                        meshTools::writeOBJ(featurePointStr(), featPt);
-                        featurePointVertI++;
-                        featurePointStr()
-                            << "l " << featurePointVertI-1 << ' '
-                            << featurePointVertI << nl;
+                        featurePointStr().write(linePointRef(pt, featPt));
                     }
                 }
             }
@@ -2000,13 +1957,12 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
         const scalar baffleFeatureCos = Foam::cos(degToRad(91));
 
 
-        autoPtr<OFstream> baffleEdgeStr;
-        label baffleEdgeVertI = 0;
+        autoPtr<OBJstream> baffleEdgeStr;
         if (debug&meshRefinement::OBJINTERSECTIONS)
         {
             baffleEdgeStr.reset
             (
-                new OFstream
+                new OBJstream
                 (
                     meshRefiner_.mesh().time().path()
                   / "baffleEdge_" + name(iter) + ".obj"
@@ -2040,12 +1996,7 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
                 {
                     const point& p0 = pp.localPoints()[e[0]];
                     const point& p1 = pp.localPoints()[e[1]];
-                    meshTools::writeOBJ(baffleEdgeStr(), p0);
-                    baffleEdgeVertI++;
-                    meshTools::writeOBJ(baffleEdgeStr(), p1);
-                    baffleEdgeVertI++;
-                    baffleEdgeStr() << "l " << baffleEdgeVertI-1
-                        << ' ' << baffleEdgeVertI << nl;
+                    baffleEdgeStr().write(linePointRef(p0, p1));
                 }
             }
         }
@@ -2226,6 +2177,22 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
     {
         const fvMesh& mesh = meshRefiner_.mesh();
 
+        //autoPtr<OBJstream> attractStr;
+        //if (debug&meshRefinement::OBJINTERSECTIONS)
+        //{
+        //    attractStr.reset
+        //    (
+        //        new OBJstream
+        //        (
+        //            meshRefiner_.mesh().time().path()
+        //          / "initAttract_" + name(iter) + ".obj"
+        //        )
+        //    );
+        //    Info<< nl << "Dumping initial attract points to "
+        //        << attractStr().name() << endl;
+        //}
+
+
         boolList isFeatureEdgeOrPoint(pp.nPoints(), false);
         label nFeats = 0;
         forAll(rawPatchConstraints, pointI)
@@ -2234,6 +2201,19 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
             {
                 isFeatureEdgeOrPoint[pointI] = true;
                 nFeats++;
+
+                //if (attractStr.valid())
+                //{
+                //    const point& pt = pp.localPoints()[pointI];
+                //    attractStr().write
+                //    (
+                //        linePointRef
+                //        (
+                //            pt,
+                //            pt+rawPatchAttraction[pointI]
+                //        )
+                //    );
+                //}
             }
         }
 
@@ -2254,6 +2234,8 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
 
         for (label nGrow = 0; nGrow < 1; nGrow++)
         {
+            boolList newIsFeatureEdgeOrPoint(isFeatureEdgeOrPoint);
+
             forAll(pp.localFaces(), faceI)
             {
                 const face& f = pp.localFaces()[faceI];
@@ -2265,12 +2247,15 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
                         // Mark all points on face
                         forAll(f, fp)
                         {
-                            isFeatureEdgeOrPoint[f[fp]] = true;
+                            newIsFeatureEdgeOrPoint[f[fp]] = true;
                         }
                         break;
                     }
                 }
             }
+
+            isFeatureEdgeOrPoint = newIsFeatureEdgeOrPoint;
+
             syncTools::syncPointList
             (
                 mesh,
@@ -2282,12 +2267,40 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
         }
 
 
+        //autoPtr<OBJstream> finalStr;
+        //if (debug&meshRefinement::OBJINTERSECTIONS)
+        //{
+        //    finalStr.reset
+        //    (
+        //        new OBJstream
+        //        (
+        //            meshRefiner_.mesh().time().path()
+        //          / "finalAttract_" + name(iter) + ".obj"
+        //        )
+        //    );
+        //    Info<< nl << "Dumping final attract points to "
+        //        << finalStr().name() << endl;
+        //}
+
         // Collect attractPoints
         forAll(isFeatureEdgeOrPoint, pointI)
         {
             if (isFeatureEdgeOrPoint[pointI])
             {
                 attractPoints.append(pointI);
+
+                //if (finalStr.valid())
+                //{
+                //    const point& pt = pp.localPoints()[pointI];
+                //    finalStr().write
+                //    (
+                //        linePointRef
+                //        (
+                //            pt,
+                //            pt+rawPatchAttraction[pointI]
+                //        )
+                //    );
+                //}
             }
         }
 
@@ -2440,12 +2453,12 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
     //     (hopefully)
     if (multiRegionFeatureSnap)
     {
-        autoPtr<OFstream> multiPatchStr;
+        autoPtr<OBJstream> multiPatchStr;
         if (debug&meshRefinement::OBJINTERSECTIONS)
         {
             multiPatchStr.reset
             (
-                new OFstream
+                new OBJstream
                 (
                     meshRefiner_.mesh().time().path()
                   / "multiPatch_" + name(iter) + ".obj"
@@ -2540,11 +2553,7 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
 
                         if (multiPatchStr.valid())
                         {
-                            meshTools::writeOBJ
-                            (
-                                multiPatchStr(),
-                                pp.localPoints()[pointI]
-                            );
+                            multiPatchStr().write(pp.localPoints()[pointI]);
                         }
                     }
                 }
@@ -2561,53 +2570,34 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
     // Dump
     if (debug&meshRefinement::OBJINTERSECTIONS)
     {
-        OFstream featureEdgeStr
+        OBJstream featureEdgeStr
         (
             meshRefiner_.mesh().time().path()
           / "edgeAttractors_" + name(iter) + ".obj"
         );
-        label featureEdgeVertI = 0;
         Pout<< "Dumping feature-edge attraction to "
             << featureEdgeStr.name() << endl;
 
-        OFstream featurePointStr
+        OBJstream featurePointStr
         (
             meshRefiner_.mesh().time().path()
           / "pointAttractors_" + name(iter) + ".obj"
         );
-        label featurePointVertI = 0;
         Pout<< "Dumping feature-point attraction to "
             << featurePointStr.name() << endl;
 
         forAll(patchConstraints, pointI)
         {
             const point& pt = pp.localPoints()[pointI];
+            const vector& attr = patchAttraction[pointI];
 
             if (patchConstraints[pointI].first() == 2)
             {
-                meshTools::writeOBJ(featureEdgeStr, pt);
-                featureEdgeVertI++;
-                meshTools::writeOBJ
-                (
-                    featureEdgeStr,
-                    pt+patchAttraction[pointI]
-                );
-                featureEdgeVertI++;
-                featureEdgeStr << "l " << featureEdgeVertI-1
-                    << ' ' << featureEdgeVertI << nl;
+                featureEdgeStr.write(linePointRef(pt, pt+attr));
             }
             else if (patchConstraints[pointI].first() == 3)
             {
-                meshTools::writeOBJ(featurePointStr, pt);
-                featurePointVertI++;
-                meshTools::writeOBJ
-                (
-                    featurePointStr,
-                    pt+patchAttraction[pointI]
-                );
-                featurePointVertI++;
-                featurePointStr << "l " << featurePointVertI-1
-                    << ' ' << featurePointVertI << nl;
+                featurePointStr.write(linePointRef(pt, pt+attr));
             }
         }
     }

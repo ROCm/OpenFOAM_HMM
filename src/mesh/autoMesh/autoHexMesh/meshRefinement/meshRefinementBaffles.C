@@ -685,7 +685,7 @@ Foam::List<Foam::labelPair> Foam::meshRefinement::getDuplicateFaces
         << " pairs of duplicate faces." << nl << endl;
 
 
-    if (debug&meshRefinement::MESH)
+    if (debug&MESH)
     {
         faceSet duplicateFaceSet(mesh_, "duplicateFaces", 2*dupI);
 
@@ -790,12 +790,17 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createZoneBaffles
                     << abort(FatalError);
             }
 
-            if (debug&meshRefinement::MESH)
+            if (debug&MESH)
             {
                 const_cast<Time&>(mesh_.time())++;
                 Pout<< "Writing zone-baffled mesh to time " << timeName()
                     << endl;
-                write(debug, mesh_.time().path()/"baffles");
+                write
+                (
+                    debugType(debug),
+                    writeType(writeLevel() | WRITEMESH),
+                    mesh_.time().path()/"baffles"
+                );
             }
         }
         Info<< "Created " << nZoneFaces << " baffles in = "
@@ -1920,9 +1925,9 @@ void Foam::meshRefinement::handleSnapProblems
     Info<< "Analyzed problem cells in = "
         << runTime.cpuTimeIncrement() << " s\n" << nl << endl;
 
-    if (debug&meshRefinement::MESH)
+    if (debug&MESH)
     {
-        faceSet problemFaces(mesh_, "problemFaces", 100);
+        faceSet problemFaces(mesh_, "problemFaces", mesh_.nFaces()/100);
 
         forAll(facePatch, faceI)
         {
@@ -1957,11 +1962,16 @@ void Foam::meshRefinement::handleSnapProblems
 
     printMeshInfo(debug, "After introducing baffles");
 
-    if (debug&meshRefinement::MESH)
+    if (debug&MESH)
     {
         Pout<< "Writing extra baffled mesh to time "
             << timeName() << endl;
-        write(debug, runTime.path()/"extraBaffles");
+        write
+        (
+            debugType(debug),
+            writeType(writeLevel() | WRITEMESH),
+            runTime.path()/"extraBaffles"
+        );
         Pout<< "Dumped debug data in = "
             << runTime.cpuTimeIncrement() << " s\n" << nl << endl;
     }
@@ -2519,11 +2529,16 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
     printMeshInfo(debug, "After introducing baffles");
 
-    if (debug&meshRefinement::MESH)
+    if (debug&MESH)
     {
         Pout<< "Writing baffled mesh to time " << timeName()
             << endl;
-        write(debug, runTime.path()/"baffles");
+        write
+        (
+            debugType(debug),
+            writeType(writeLevel() | WRITEMESH),
+            runTime.path()/"baffles"
+        );
         Pout<< "Dumped debug data in = "
             << runTime.cpuTimeIncrement() << " s\n" << nl << endl;
     }
@@ -2575,11 +2590,16 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
     printMeshInfo(debug, "After subsetting");
 
-    if (debug&meshRefinement::MESH)
+    if (debug&MESH)
     {
         Pout<< "Writing subsetted mesh to time " << timeName()
             << endl;
-        write(debug, runTime.path()/timeName());
+        write
+        (
+            debugType(debug),
+            writeType(writeLevel() | WRITEMESH),
+            runTime.path()/timeName()
+        );
         Pout<< "Dumped debug data in = "
             << runTime.cpuTimeIncrement() << " s\n" << nl << endl;
     }

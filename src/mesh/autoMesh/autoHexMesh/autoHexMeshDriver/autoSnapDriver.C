@@ -730,7 +730,12 @@ void Foam::autoSnapDriver::preSmoothPatch
             << meshRefiner.timeName() << '.' << endl;
         meshRefiner.write
         (
-            debug,
+            meshRefinement::debugType(debug),
+            meshRefinement::writeType
+            (
+                meshRefinement::writeLevel()
+              | meshRefinement::WRITEMESH
+            ),
             mesh.time().path()/meshRefiner.timeName()
         );
         Info<< "Dumped mesh in = "
@@ -2027,7 +2032,12 @@ void Foam::autoSnapDriver::smoothDisplacement
 
         meshRefiner_.write
         (
-            debug,
+            meshRefinement::debugType(debug),
+            meshRefinement::writeType
+            (
+                meshRefinement::writeLevel()
+              | meshRefinement::WRITEMESH
+            ),
             mesh.time().path()/meshRefiner_.timeName()
         );
         Info<< "Writing displacement field ..." << endl;
@@ -2497,8 +2507,13 @@ void Foam::autoSnapDriver::doSnap
                     << endl;
                 meshRefiner_.write
                 (
-                    debug, mesh.time().path()
-                   /"duplicatedPoints"
+                    meshRefinement::debugType(debug),
+                    meshRefinement::writeType
+                    (
+                        meshRefinement::writeLevel()
+                      | meshRefinement::WRITEMESH
+                    ),
+                    mesh.time().path()/"duplicatedPoints"
                 );
             }
         }
@@ -2804,7 +2819,12 @@ void Foam::autoSnapDriver::doSnap
                     << meshRefiner_.timeName() << endl;
                 meshRefiner_.write
                 (
-                    debug,
+                    meshRefinement::debugType(debug),
+                    meshRefinement::writeType
+                    (
+                        meshRefinement::writeLevel()
+                      | meshRefinement::WRITEMESH
+                    ),
                     mesh.time().path()/meshRefiner_.timeName()
                 );
                 Info<< "Writing displacement field ..." << endl;
@@ -2866,7 +2886,12 @@ void Foam::autoSnapDriver::doSnap
             << meshRefiner_.timeName() << endl;
         meshRefiner_.write
         (
-            debug,
+            meshRefinement::debugType(debug),
+            meshRefinement::writeType
+            (
+                meshRefinement::writeLevel()
+              | meshRefinement::WRITEMESH
+            ),
             meshRefiner_.timeName()
         );
     }

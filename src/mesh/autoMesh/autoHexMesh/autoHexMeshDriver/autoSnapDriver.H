@@ -131,13 +131,13 @@ class autoSnapDriver
                     const List<pointConstraint>& constraints,
                     vectorField& disp
                 ) const;
-                void smoothAndConstrain2
-                (
-                    const bool applyConstraints,
-                    const indirectPrimitivePatch& pp,
-                    const List<pointConstraint>& constraints,
-                    vectorField& disp
-                ) const;
+                //void smoothAndConstrain2
+                //(
+                //    const bool applyConstraints,
+                //    const indirectPrimitivePatch& pp,
+                //    const List<pointConstraint>& constraints,
+                //    vectorField& disp
+                //) const;
                 void calcNearest
                 (
                     const label iter,

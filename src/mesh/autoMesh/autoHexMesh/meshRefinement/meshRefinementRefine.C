@@ -2253,9 +2253,9 @@ Foam::meshRefinement::refineAndBalance
             << " mesh to time " << timeName() << endl;
         write
         (
-            debug,
-            mesh_.time().path()
-           /timeName()
+            debugType(debug),
+            writeType(writeLevel() | WRITEMESH),
+            mesh_.time().path()/timeName()
         );
         Pout<< "Dumped debug data in = "
             << mesh_.time().cpuTimeIncrement() << " s" << endl;
@@ -2317,7 +2317,8 @@ Foam::meshRefinement::refineAndBalance
                     << " mesh to time " << timeName() << endl;
                 write
                 (
-                    debug,
+                    debugType(debug),
+                    writeType(writeLevel() | WRITEMESH),
                     mesh_.time().path()/timeName()
                 );
                 Pout<< "Dumped debug data in = "
@@ -2439,7 +2440,8 @@ Foam::meshRefinement::balanceAndRefine
                 << " mesh to time " << timeName() << endl;
             write
             (
-                debug,
+                debugType(debug),
+                writeType(writeLevel() | WRITEMESH),
                 mesh_.time().path()/timeName()
             );
             Pout<< "Dumped debug data in = "
@@ -2462,9 +2464,9 @@ Foam::meshRefinement::balanceAndRefine
             << " mesh to time " << timeName() << endl;
         write
         (
-            debug,
-            mesh_.time().path()
-           /timeName()
+            debugType(debug),
+            writeType(writeLevel() | WRITEMESH),
+            mesh_.time().path()/timeName()
         );
         Pout<< "Dumped debug data in = "
             << mesh_.time().cpuTimeIncrement() << " s" << endl;
