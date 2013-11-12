@@ -122,7 +122,6 @@ filmPyrolysisRadiativeCoupledMixedFvPatchScalarField
     filmRegionName_("surfaceFilmProperties"),
     pyrolysisRegionName_("pyrolysisProperties"),
     TnbrName_("undefined-Tnbr"),
-    QrNbrName_("undefined-QrNbr"),
     QrName_("undefined-Qr"),
     convectiveScaling_(1.0),
     filmDeltaDry_(0.0),
@@ -148,7 +147,6 @@ filmPyrolysisRadiativeCoupledMixedFvPatchScalarField
     filmRegionName_(psf.filmRegionName_),
     pyrolysisRegionName_(psf.pyrolysisRegionName_),
     TnbrName_(psf.TnbrName_),
-    QrNbrName_(psf.QrNbrName_),
     QrName_(psf.QrName_),
     convectiveScaling_(psf.convectiveScaling_),
     filmDeltaDry_(psf.filmDeltaDry_),
@@ -175,7 +173,6 @@ filmPyrolysisRadiativeCoupledMixedFvPatchScalarField
         dict.lookupOrDefault<word>("pyrolysisRegion", "pyrolysisProperties")
     ),
     TnbrName_(dict.lookup("Tnbr")),
-    QrNbrName_(dict.lookup("QrNbr")),
     QrName_(dict.lookup("Qr")),
     convectiveScaling_(dict.lookupOrDefault<scalar>("convectiveScaling", 1.0)),
     filmDeltaDry_(readScalar(dict.lookup("filmDeltaDry"))),
@@ -231,7 +228,6 @@ filmPyrolysisRadiativeCoupledMixedFvPatchScalarField
     filmRegionName_(psf.filmRegionName_),
     pyrolysisRegionName_(psf.pyrolysisRegionName_),
     TnbrName_(psf.TnbrName_),
-    QrNbrName_(psf.QrNbrName_),
     QrName_(psf.QrName_),
     convectiveScaling_(psf.convectiveScaling_),
     filmDeltaDry_(psf.filmDeltaDry_),
@@ -241,8 +237,7 @@ filmPyrolysisRadiativeCoupledMixedFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void filmPyrolysisRadiativeCoupledMixedFvPatchScalarField::
-updateCoeffs()
+void filmPyrolysisRadiativeCoupledMixedFvPatchScalarField::updateCoeffs()
 {
     if (updated())
     {
@@ -294,34 +289,49 @@ updateCoeffs()
     const pyrolysisModelType& pyrolysis = pyrModel();
     const filmModelType& film = filmModel();
 
-    label myPatchINrbPatchI = -1;
-
     // Obtain Rad heat (Qr)
     scalarField Qr(patch().size(), 0.0);
-    if (QrName_ != "none") // primary region (region0)
+
+    label coupledPatchI = -1;
+    if (pyrolysisRegionName_ == mesh.name())
     {
-        Qr = patch().lookupPatchField<volScalarField, scalar>(QrName_);
-        myPatchINrbPatchI = nbrPatch.index();
+        coupledPatchI = patchI;
+        if (QrName_ != "none")
+        {
+            Qr = nbrPatch.lookupPatchField<volScalarField, scalar>(QrName_);
+            mpp.distribute(Qr);
+        }
+    }
+    else if (pyrolysis.primaryMesh().name() == mesh.name())
+    {
+        coupledPatchI = nbrPatch.index();
+        if (QrName_ != "none")
+        {
+            Qr = patch().lookupPatchField<volScalarField, scalar>(QrName_);
+        }
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "void filmPyrolysisRadiativeCoupledMixedFvPatchScalarField::"
+            "updateCoeffs()"
+        )
+            << type() << " condition is intended to be applied to either the "
+            << "primary or pyrolysis regions only"
+            << exit(FatalError);
     }
 
-    if (QrNbrName_ != "none") // pyrolysis region
-    {
-        Qr = nbrPatch.lookupPatchField<volScalarField, scalar>(QrNbrName_);
-        mpp.distribute(Qr);
-        myPatchINrbPatchI = patchI;
-    }
-
-    const label filmPatchI =
-        pyrolysis.nbrCoupledPatchID(film, myPatchINrbPatchI);
+    const label filmPatchI = pyrolysis.nbrCoupledPatchID(film, coupledPatchI);
 
     const scalarField htcw(film.htcw().h()().boundaryField()[filmPatchI]);
 
     // Obtain htcw
     htcwfilm =
-        const_cast<pyrolysisModelType&>(pyrolysis).mapRegionPatchField
+        pyrolysis.mapRegionPatchField
         (
             film,
-            myPatchINrbPatchI,
+            coupledPatchI,
             filmPatchI,
             htcw,
             true
@@ -335,11 +345,11 @@ updateCoeffs()
 
     // Obtain delta
     filmDelta =
-        const_cast<pyrolysisModelType&>(pyrolysis).mapRegionPatchField<scalar>
+        pyrolysis.mapRegionPatchField<scalar>
         (
             film,
             "deltaf",
-            myPatchINrbPatchI,
+            coupledPatchI,
             true
         );
 
@@ -414,14 +424,13 @@ void filmPyrolysisRadiativeCoupledMixedFvPatchScalarField::write
         pyrolysisRegionName_
     );
     os.writeKeyword("Tnbr")<< TnbrName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("QrNbr")<< QrNbrName_ << token::END_STATEMENT << nl;
     os.writeKeyword("Qr")<< QrName_ << token::END_STATEMENT << nl;
     os.writeKeyword("convectiveScaling") << convectiveScaling_
-    << token::END_STATEMENT << nl;
-    os.writeKeyword("filmDeltaDry") << filmDeltaDry_ <<
-    token::END_STATEMENT << nl;
-    os.writeKeyword("filmDeltaWet") << filmDeltaWet_ <<
-    token::END_STATEMENT << endl;
+        << token::END_STATEMENT << nl;
+    os.writeKeyword("filmDeltaDry") << filmDeltaDry_
+        << token::END_STATEMENT << nl;
+    os.writeKeyword("filmDeltaWet") << filmDeltaWet_
+        << token::END_STATEMENT << endl;
     temperatureCoupledBase::write(os);
 }
 
