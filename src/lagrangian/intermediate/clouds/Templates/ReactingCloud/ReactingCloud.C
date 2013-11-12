@@ -106,7 +106,7 @@ Foam::ReactingCloud<CloudType>::ReactingCloud
     CloudType(cloudName, rho, U, g, thermo, false),
     reactingCloud(),
     cloudCopyPtr_(NULL),
-    constProps_(this->particleProperties(), this->solution().active()),
+    constProps_(this->particleProperties()),
     compositionModel_(NULL),
     phaseChangeModel_(NULL),
     rhoTrans_(thermo.carrier().species().size())

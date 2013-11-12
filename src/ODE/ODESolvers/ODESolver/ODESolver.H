@@ -55,6 +55,9 @@ protected:
 
     // Protected data
 
+        //- Reference to ODESystem
+        const ODESystem& odes_;
+
         //- Size of the ODESystem
         label n_;
 
@@ -89,6 +92,30 @@ public:
 
     //- Runtime type information
     TypeName("ODESolver");
+
+    class stepState
+    {
+        public:
+
+        const bool forward;
+        scalar dxTry;
+        scalar dxDid;
+        bool first;
+        bool last;
+        bool reject;
+        bool prevReject;
+
+        stepState(const scalar dx)
+        :
+            forward(dx > 0 ? true : false),
+            dxTry(dx),
+            dxDid(0),
+            first(true),
+            last(false),
+            reject(false),
+            prevReject(false)
+        {}
+    };
 
 
     // Declare run-time constructor selection table
@@ -150,17 +177,31 @@ public:
         //  Update the state and return an estimate for the next step in dxTry
         virtual void solve
         (
-            const ODESystem& ode,
             scalar& x,
             scalarField& y,
             scalar& dxTry
-        ) const = 0;
+        ) const //= 0;
+        {
+            stepState step(dxTry);
+            solve(x, y, step);
+            dxTry = step.dxTry;
+        }
+
+        //- Solve the ODE system as far as possible upto dxTry
+        //  adjusting the step as necessary to provide a solution within
+        //  the specified tolerance.
+        //  Update the state and return an estimate for the next step in dxTry
+        virtual void solve
+        (
+            scalar& x,
+            scalarField& y,
+            stepState& step
+        ) const;
 
         //- Solve the ODE system from xStart to xEnd, update the state
         //  and return an estimate for the next step in dxTry
         virtual void solve
         (
-            const ODESystem& ode,
             const scalar xStart,
             const scalar xEnd,
             scalarField& y,

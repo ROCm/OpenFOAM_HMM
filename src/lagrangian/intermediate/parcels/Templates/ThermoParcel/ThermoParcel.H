@@ -41,6 +41,7 @@ SourceFiles
 
 #include "particle.H"
 #include "SLGThermo.H"
+#include "demandDrivenEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,22 +78,22 @@ public:
         // Private data
 
             //- Particle initial temperature [K]
-            scalar T0_;
+            demandDrivenEntry<scalar> T0_;
 
             //- Minimum temperature [K]
-            scalar TMin_;
+            demandDrivenEntry<scalar> TMin_;
 
             //- Maximum temperature [K]
-            scalar TMax_;
+            demandDrivenEntry<scalar> TMax_;
 
             //- Particle specific heat capacity [J/(kg.K)]
-            scalar Cp0_;
+            demandDrivenEntry<scalar> Cp0_;
 
             //- Particle emissivity [] (radiation)
-            scalar epsilon0_;
+            demandDrivenEntry<scalar> epsilon0_;
 
             //- Particle scattering factor [] (radiation)
-            scalar f0_;
+            demandDrivenEntry<scalar> f0_;
 
 
     public:
@@ -105,29 +106,8 @@ public:
             //- Copy constructor
             constantProperties(const constantProperties& cp);
 
-            //- Constructor from dictionary
-            constantProperties
-            (
-                const dictionary& parentDict,
-                const bool readFields = true
-            );
-
-            //- Construct from components
-            constantProperties
-            (
-                const label parcelTypeId,
-                const scalar rhoMin,
-                const scalar rho0,
-                const scalar minParticleMass,
-                const scalar youngsModulus,
-                const scalar poissonsRatio,
-                const scalar T0,
-                const scalar TMin,
-                const scalar TMax,
-                const scalar Cp0,
-                const scalar epsilon0,
-                const scalar f0
-            );
+            //- Construct from dictionary
+            constantProperties(const dictionary& parentDict);
 
 
         // Member functions
@@ -143,8 +123,8 @@ public:
                 //- Return const access to maximum temperature [K]
                 inline scalar TMax() const;
 
-                //- Return non-const access to maximum temperature [K]
-                inline scalar& TMax();
+                //- Set the maximum temperature [K]
+                inline void setTMax(const scalar TMax);
 
                 //- Return const access to the particle specific heat capacity
                 //  [J/(kg.K)]

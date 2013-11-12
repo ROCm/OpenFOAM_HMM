@@ -312,10 +312,11 @@ thermoSingleLayer::thermoSingleLayer
     const word& modelType,
     const fvMesh& mesh,
     const dimensionedVector& g,
+    const word& regionType,
     const bool readFields
 )
 :
-    kinematicSingleLayer(modelType, mesh, g, false),
+    kinematicSingleLayer(modelType, mesh, g, regionType, false),
     thermo_(mesh.lookupObject<SLGThermo>("SLGThermo")),
     Cp_
     (

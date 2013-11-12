@@ -70,14 +70,7 @@ void Foam::ode<ChemistryModel>::solve
     cTp_[nSpecie] = T;
     cTp_[nSpecie+1] = p;
 
-    odeSolver_->solve
-    (
-        *this,
-        0,
-        deltaT,
-        cTp_,
-        subDeltaT
-    );
+    odeSolver_->solve(0, deltaT, cTp_, subDeltaT);
 
     for (register int i=0; i<nSpecie; i++)
     {

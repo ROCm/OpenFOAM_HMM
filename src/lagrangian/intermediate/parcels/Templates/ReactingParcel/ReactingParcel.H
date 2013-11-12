@@ -40,6 +40,7 @@ SourceFiles
 
 #include "particle.H"
 #include "SLGThermo.H"
+#include "demandDrivenEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,10 +76,10 @@ public:
         // Private data
 
             //- Minimum pressure [Pa]
-            scalar pMin_;
+            demandDrivenEntry<scalar> pMin_;
 
             //- Constant volume flag - e.g. during mass transfer
-            Switch constantVolume_;
+            demandDrivenEntry<bool> constantVolume_;
 
 
     public:
@@ -91,31 +92,8 @@ public:
             //- Copy constructor
             constantProperties(const constantProperties& cp);
 
-            //- Constructor from dictionary
-            constantProperties
-            (
-                const dictionary& parentDict,
-                const bool readFields = true
-            );
-
-            //- Construct from components
-            constantProperties
-            (
-                const label parcelTypeId,
-                const scalar rhoMin,
-                const scalar rho0,
-                const scalar minParticleMass,
-                const scalar youngsModulus,
-                const scalar poissonsRatio,
-                const scalar T0,
-                const scalar TMin,
-                const scalar TMax,
-                const scalar Cp0,
-                const scalar epsilon0,
-                const scalar f0,
-                const scalar pMin,
-                const Switch& constantVolume
-            );
+            //- Construct from dictionary
+            constantProperties(const dictionary& parentDict);
 
 
         // Access
@@ -124,7 +102,7 @@ public:
             inline scalar pMin() const;
 
             //- Return const access to the constant volume flag
-            inline Switch constantVolume() const;
+            inline bool constantVolume() const;
     };
 
 

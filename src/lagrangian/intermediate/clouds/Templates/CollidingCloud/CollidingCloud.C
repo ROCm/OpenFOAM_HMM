@@ -92,6 +92,7 @@ Foam::CollidingCloud<CloudType>::CollidingCloud
 )
 :
     CloudType(cloudName, rho, U, mu, g, false),
+    constProps_(this->particleProperties()),
     collisionModel_(NULL)
 {
     if (this->solution().steadyState())
@@ -245,5 +246,6 @@ void Foam::CollidingCloud<CloudType>::info()
     Info<< "    Rotational kinetic energy       = "
         << rotationalKineticEnergy << nl;
 }
+
 
 // ************************************************************************* //

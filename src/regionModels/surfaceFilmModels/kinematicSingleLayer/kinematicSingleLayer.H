@@ -300,6 +300,7 @@ public:
             const word& modelType,
             const fvMesh& mesh,
             const dimensionedVector& g,
+            const word& regionType,
             const bool readFields = true
         );
 

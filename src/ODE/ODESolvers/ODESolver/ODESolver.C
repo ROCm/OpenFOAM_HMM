@@ -38,6 +38,7 @@ namespace Foam
 
 Foam::ODESolver::ODESolver(const ODESystem& ode, const dictionary& dict)
 :
+    odes_(ode),
     n_(ode.nEqns()),
     absTol_(n_, dict.lookupOrDefault<scalar>("absTol", SMALL)),
     relTol_(n_, dict.lookupOrDefault<scalar>("relTol", 1e-4)),
@@ -52,6 +53,7 @@ Foam::ODESolver::ODESolver
     const scalarField& relTol
 )
 :
+    odes_(ode),
     n_(ode.nEqns()),
     absTol_(absTol),
     relTol_(relTol),
@@ -82,48 +84,70 @@ Foam::scalar Foam::ODESolver::normalizeError
 
 void Foam::ODESolver::solve
 (
-    const ODESystem& ode,
+    scalar& x,
+    scalarField& y,
+    stepState& step
+) const
+{
+    solve(x, y, step.dxTry);
+}
+
+
+void Foam::ODESolver::solve
+(
     const scalar xStart,
     const scalar xEnd,
     scalarField& y,
-    scalar& dxEst
+    scalar& dxTry
 ) const
 {
+    stepState step(dxTry);
     scalar x = xStart;
-    bool truncated = false;
 
     for (label nStep=0; nStep<maxSteps_; nStep++)
     {
-        // Store previous iteration dxEst
-        scalar dxEst0 = dxEst;
+        // Store previous iteration dxTry
+        scalar dxTry0 = step.dxTry;
 
-        // Check if this is a truncated step and set dxEst to integrate to xEnd
-        if ((x + dxEst - xEnd)*(x + dxEst - xStart) > 0)
+        step.reject = false;
+
+        // Check if this is a truncated step and set dxTry to integrate to xEnd
+        if ((x + step.dxTry - xEnd)*(x + step.dxTry - xStart) > 0)
         {
-            truncated = true;
-            dxEst = xEnd - x;
+            step.last = true;
+            step.dxTry = xEnd - x;
         }
 
-        // Integrate as far as possible up to dxEst
-        solve(ode, x, y, dxEst);
+        // Integrate as far as possible up to step.dxTry
+        solve(x, y, step);
 
         // Check if reached xEnd
         if ((x - xEnd)*(xEnd - xStart) >= 0)
         {
-            if (nStep > 0 && truncated)
+            if (nStep > 0 && step.last)
             {
-                dxEst = dxEst0;
+                step.dxTry = dxTry0;
             }
 
+            dxTry = step.dxTry;
+
             return;
+        }
+
+        step.first = false;
+
+        // If the step.dxTry was reject set step.prevReject
+        if (step.reject)
+        {
+            step.prevReject = true;
         }
     }
 
     FatalErrorIn
     (
         "ODESolver::solve"
-        "(const ODESystem& ode, const scalar xStart, const scalar xEnd,"
-        "scalarField& y, scalar& dxEst) const"
+        "(const scalar xStart, const scalar xEnd,"
+        "scalarField& y, scalar& dxTry) const"
     )   << "Integration steps greater than maximum " << maxSteps_
         << exit(FatalError);
 }

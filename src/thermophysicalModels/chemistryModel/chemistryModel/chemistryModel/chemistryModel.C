@@ -740,7 +740,7 @@ Foam::scalar Foam::chemistryModel<CompType, ThermoType>::solve
             RR_[i][celli] = (c[i] - c0[i])*specieThermo_[i].W()/deltaT[celli];
         }
     }
-    Info << "deltaTMin " << deltaTMin  << endl;
+
     return deltaTMin;
 }
 

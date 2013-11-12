@@ -49,6 +49,8 @@ boundaryField
     region0_to_pyrolysisRegion_coupledWall
     {
         type            filmPyrolysisRadiativeCoupledMixed;
+        pyrolysisRegion pyrolysisRegion;
+        filmRegion      filmRegion;
         Tnbr            T;
         kappa           fluidThermo;
         QrNbr           none;

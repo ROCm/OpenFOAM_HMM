@@ -49,7 +49,6 @@ Foam::Trapezoid::Trapezoid(const ODESystem& ode, const dictionary& dict)
 
 Foam::scalar Foam::Trapezoid::solve
 (
-    const ODESystem& ode,
     const scalar x0,
     const scalarField& y0,
     const scalarField& dydx0,
@@ -64,7 +63,7 @@ Foam::scalar Foam::Trapezoid::solve
     }
 
     // Evaluate the system for the predicted state
-    ode.derivatives(x0 + dx, y, err_);
+    odes_.derivatives(x0 + dx, y, err_);
 
     // Update the state as the average between the prediction and the correction
     // and estimate the error from the difference
@@ -80,13 +79,12 @@ Foam::scalar Foam::Trapezoid::solve
 
 void Foam::Trapezoid::solve
 (
-    const ODESystem& odes,
     scalar& x,
     scalarField& y,
     scalar& dxTry
 ) const
 {
-    adaptiveSolver::solve(odes, x, y, dxTry);
+    adaptiveSolver::solve(odes_, x, y, dxTry);
 }
 
 

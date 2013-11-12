@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -108,7 +108,7 @@ Foam::valuePointPatchField<Type>::valuePointPatchField
     const pointPatchFieldMapper& mapper
 )
 :
-    pointPatchField<Type>(p, iF),
+    pointPatchField<Type>(ptf, p, iF, mapper),
     Field<Type>(ptf, mapper)
 {}
 

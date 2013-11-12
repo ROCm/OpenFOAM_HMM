@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -77,10 +77,10 @@ emptyPointPatchField<Type>::emptyPointPatchField
     const emptyPointPatchField<Type>& ptf,
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
-    const pointPatchFieldMapper&
+    const pointPatchFieldMapper& mapper
 )
 :
-    pointPatchField<Type>(p, iF)
+    pointPatchField<Type>(ptf, p, iF, mapper)
 {
     if (!isType<emptyPointPatch>(this->patch()))
     {

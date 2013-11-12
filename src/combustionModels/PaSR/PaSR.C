@@ -42,7 +42,7 @@ Foam::combustionModels::PaSR<Type>::PaSR
     (
         IOobject
         (
-            typeName + ":kappa",
+            "PaSR:kappa",
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -117,7 +117,11 @@ template<class Type>
 Foam::tmp<Foam::volScalarField>
 Foam::combustionModels::PaSR<Type>::dQ() const
 {
-    return kappa_*laminar<Type>::dQ();
+    return
+        tmp<volScalarField>
+        (
+            new volScalarField("PaSR:dQ", kappa_*laminar<Type>::dQ())
+        );
 }
 
 
@@ -125,7 +129,11 @@ template<class Type>
 Foam::tmp<Foam::volScalarField>
 Foam::combustionModels::PaSR<Type>::Sh() const
 {
-    return kappa_*laminar<Type>::Sh();
+    return
+        tmp<volScalarField>
+        (
+            new volScalarField("PaSR:Sh", kappa_*laminar<Type>::Sh())
+        );
 }
 
 

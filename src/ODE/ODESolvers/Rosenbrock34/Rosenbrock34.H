@@ -22,32 +22,38 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::rodas32
+    Foam::Rosenbrock34
 
 Description
-    L-stable, stiffly-accurate embedded Rosenbrock ODE solver of order (2)3.
+    L-stable embedded Rosenbrock ODE solver of order (3)4.
 
-    References:
     \verbatim
-        Sandu et al,
-        "Benchmarking stiff ODE solvers for atmospheric chemistry problems II
-         Rosenbrock solvers",
-         A. Sandu,
-         J.G. Verwer,
-         J.G. Blom,
-         E.J. Spee,
-         G.R. Carmichael,
-         F.A. Potra,
-         Atmospheric Environment, Volume 31, 1997, Issue 20, Pages 3459-3472
+        "Solving Ordinary Differential Equations II: Stiff
+         and Differential-Algebraic Problems, second edition",
+        Hairer, E.,
+        Nørsett, S.,
+        Wanner, G.,
+        Springer-Verlag, Berlin. 1996.
     \endverbatim
 
+    The default constants are from:
+    \verbatim
+        "Implementation of Rosenbrock Methods"
+        Shampine, L. F.,
+        ACM Transactions on Mathematical Software, vol. 8, 1982, pp. 93–113.
+    \endverbatim
+    with which the scheme is more accurate than with the L-Stable coefficients
+    for small step-size but less stable for large step-size.
+
+    The L-Stable scheme constants are provided commented-out in Rosenbrock34.C
+
 SourceFiles
-    rodas32.C
+    Rosenbrock34.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef rodas32_H
-#define rodas32_H
+#ifndef Rosenbrock34_H
+#define Rosenbrock34_H
 
 #include "ODESolver.H"
 #include "adaptiveSolver.H"
@@ -58,10 +64,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class rodas32 Declaration
+                           Class Rosenbrock34 Declaration
 \*---------------------------------------------------------------------------*/
 
-class rodas32
+class Rosenbrock34
 :
     public ODESolver,
     public adaptiveSolver
@@ -71,7 +77,7 @@ class rodas32
         mutable scalarField k1_;
         mutable scalarField k2_;
         mutable scalarField k3_;
-        mutable scalarField dy_;
+        mutable scalarField k4_;
         mutable scalarField err_;
         mutable scalarField dydx_;
         mutable scalarField dfdx_;
@@ -80,24 +86,26 @@ class rodas32
         mutable labelList pivotIndices_;
 
         static const scalar
-            c3,
-            d1, d2,
-            a31,
-            a41,
+            a21, a31, a32,
             c21, c31, c32,
             c41, c42, c43,
-            gamma;
+            b1, b2, b3, b4,
+            e1, e2, e3, e4,
+            gamma,
+            c2, c3,
+            d1, d2, d3, d4;
+
 
 public:
 
     //- Runtime type information
-    TypeName("rodas32");
+    TypeName("Rosenbrock34");
 
 
     // Constructors
 
         //- Construct from ODE
-        rodas32(const ODESystem& ode, const dictionary& dict);
+        Rosenbrock34(const ODESystem& ode, const dictionary& dict);
 
 
     // Member Functions
@@ -105,7 +113,6 @@ public:
         //- Solve a single step dx and return the error
         scalar solve
         (
-            const ODESystem& ode,
             const scalar x0,
             const scalarField& y0,
             const scalarField& dydx0,
@@ -116,7 +123,6 @@ public:
         //- Solve the ODE system and the update the state
         void solve
         (
-            const ODESystem& ode,
             scalar& x,
             scalarField& y,
             scalar& dxTry

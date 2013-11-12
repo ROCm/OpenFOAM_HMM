@@ -90,7 +90,7 @@ void Foam::SprayParcel<ParcelType>::calc
     }
 
     // set the maximum temperature limit
-    td.cloud().constProps().TMax() = TMax;
+    td.cloud().constProps().setTMax(TMax);
 
     // store the parcel properties
     const scalarField& Y(this->Y());

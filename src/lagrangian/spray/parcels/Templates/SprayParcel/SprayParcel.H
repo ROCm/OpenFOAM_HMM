@@ -33,6 +33,7 @@ Description
 #define SprayParcel_H
 
 #include "particle.H"
+#include "demandDrivenEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -69,10 +70,10 @@ public:
         // Private data
 
             //- Particle initial surface tension [N/m]
-            scalar sigma0_;
+            demandDrivenEntry<scalar> sigma0_;
 
             //- Particle initial dynamic viscosity [Pa.s]
-            scalar mu0_;
+            demandDrivenEntry<scalar> mu0_;
 
 
     public:
@@ -85,12 +86,8 @@ public:
             //- Copy constructor
             constantProperties(const constantProperties& cp);
 
-            //- Constructor from dictionary
-            constantProperties
-            (
-                const dictionary& parentDict,
-                const bool readFields = true
-            );
+            //- Construct from dictionary
+            constantProperties(const dictionary& parentDict);
 
             //- Construct from components
             constantProperties

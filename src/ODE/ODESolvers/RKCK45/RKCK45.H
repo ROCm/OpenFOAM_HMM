@@ -34,10 +34,7 @@ Description
         Cash, J.R.,
         Karp, A.H.
         ACM Transactions on Mathematical Software, vol. 16, 1990, pp. 201–222.
-    \endverbatim
 
-    Based on code from:
-    \verbatim
         "Solving Ordinary Differential Equations I: Nonstiff Problems,
          second edition",
         Hairer, E.,
@@ -110,7 +107,6 @@ public:
         //- Solve a single step dx and return the error
         scalar solve
         (
-            const ODESystem& ode,
             const scalar x0,
             const scalarField& y0,
             const scalarField& dydx0,
@@ -121,7 +117,6 @@ public:
         //- Solve the ODE system and the update the state
         void solve
         (
-            const ODESystem& ode,
             scalar& x,
             scalarField& y,
             scalar& dxTry

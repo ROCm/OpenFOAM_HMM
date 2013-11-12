@@ -58,17 +58,10 @@ constantProperties
 {
     T0              320;
 
-    // place holders for rho0, Cp0 and sigma0
-    // - reset from liquid props using T0
+    // place holders for rho0 and Cp0
+    // - reset from liquid properties using T0
     rho0            1000;
     Cp0             4187;
-    sigma0          0.02;
-
-    youngsModulus   1e9;
-    poissonsRatio   0.35;
-
-    epsilon0        1;
-    f0              0.5;
 
     constantVolume  false;
 }

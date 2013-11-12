@@ -48,6 +48,7 @@ SourceFiles
 #include "IOstream.H"
 #include "autoPtr.H"
 #include "interpolation.H"
+#include "demandDrivenEntry.H"
 
 // #include "ParticleForceList.H" // TODO
 
@@ -82,29 +83,30 @@ public:
     //- Class to hold kinematic particle constant properties
     class constantProperties
     {
-        // Private data
+    protected:
+
+        // Protected data
 
             //- Constant properties dictionary
             const dictionary dict_;
 
+
+    private:
+
+        // Private data
+
             //- Parcel type id - used for post-processing to flag the type
             //  of parcels issued by this cloud
-            label parcelTypeId_;
+            demandDrivenEntry<label> parcelTypeId_;
 
             //- Minimum density [kg/m3]
-            scalar rhoMin_;
+            demandDrivenEntry<scalar> rhoMin_;
 
             //- Particle density [kg/m3] (constant)
-            scalar rho0_;
+            demandDrivenEntry<scalar> rho0_;
 
             //- Minimum particle mass [kg]
-            scalar minParticleMass_;
-
-            //- Young's modulus [N/m2]
-            scalar youngsModulus_;
-
-            //- Poisson's ratio
-            scalar poissonsRatio_;
+            demandDrivenEntry<scalar> minParticleMass_;
 
 
     public:
@@ -117,23 +119,8 @@ public:
             //- Copy constructor
             constantProperties(const constantProperties& cp);
 
-            //- Constructor from dictionary
-            constantProperties
-            (
-                const dictionary& parentDict,
-                const bool readFields = true
-            );
-
-            //- Construct from components
-            constantProperties
-            (
-                const label parcelTypeId,
-                const scalar rhoMin,
-                const scalar rho0,
-                const scalar minParticleMass,
-                const scalar youngsModulus,
-                const scalar poissonsRatio
-            );
+            //- Construct from dictionary
+            constantProperties(const dictionary& parentDict);
 
 
         // Member functions
@@ -152,12 +139,6 @@ public:
 
             //- Return const access to the minimum particle mass
             inline scalar minParticleMass() const;
-
-            //- Return const access to Young's Modulus
-            inline scalar youngsModulus() const;
-
-            //- Return const access to Poisson's ratio
-            inline scalar poissonsRatio() const;
     };
 
 

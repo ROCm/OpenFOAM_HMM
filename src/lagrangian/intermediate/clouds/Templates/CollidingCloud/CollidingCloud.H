@@ -97,6 +97,10 @@ protected:
 
     // Protected data
 
+        //- Thermo parcel constant properties
+        typename parcelType::constantProperties constProps_;
+
+
         // References to the cloud sub-models
 
             //- Collision model
@@ -179,6 +183,11 @@ public:
 
             //- Return a reference to the cloud copy
             inline const CollidingCloud& cloudCopy() const;
+
+            //- Return the constant properties
+            inline const typename parcelType::constantProperties&
+                constProps() const;
+
 
             //- If the collision model controls the wall interaction,
             //  then the wall impact distance should be zero.

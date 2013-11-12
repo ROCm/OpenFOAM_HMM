@@ -23,30 +23,32 @@ regionName      filmRegion;
 
 thermoSingleLayerCoeffs
 {
-    thermoModel singleComponent;
+    filmThermoModel liquid;
+    liquidCoeffs
+    {
+        useReferenceValues  no;
+        liquid          H2O;
+    }
+    filmViscosityModel  liquid;
 
     hydrophilic     no;
     deltaWet        1e-4;
 
-    liquid      H2O;
-
-    turbulence  laminar;
+    turbulence      laminar;
     laminarCoeffs
     {
-        Cf          0.005;
+        Cf              0.005;
     }
 
     radiationModel  none;
     standardRadiationCoeffs
     {
-        //deltaMi 1e-6;
         beta     0.75;
         kappaBar 0.25;
     }
 
     upperSurfaceModels
     {
-
         heatTransferModel constant;
         constantCoeffs
         {
@@ -63,69 +65,13 @@ thermoSingleLayerCoeffs
         }
     }
 
+    injectionModels
+    ();
+
     forces
     (
-        surfaceShear
         thermocapillary
-        //contactAngle
     );
-
-    surfaceShearCoeffs
-    {
-        Cf          0.005;
-    }
-
-    contactAngleCoeffs
-    {
-        Ccf             0.085;
-        contactAngleDistribution
-        {
-            type            normal;
-            normalDistribution
-            {
-                minValue        50;
-                maxValue        100;
-                expectation     75;
-                variance        100;
-            }
-        }
-        zeroForcePatches
-        ();
-    }
-
-    injectionModels
-    (
-        //curvatureSeparation
-        //drippingInjection
-    );
-
-    curvatureSeparationCoeffs
-    {
-        definedPatchRadii
-        (
-            ("(cube[0-9][0-9]_side[0-9]_to_cube[0-9][0-9]_side[0-9])" 0)
-        );
-    }
-
-    drippingInjectionCoeffs
-    {
-        cloudName    reactingCloud1;
-        deltaStable  0;
-
-        particlesPerParcel 100.0;
-
-        parcelDistribution
-        {
-            type         RosinRammler;
-            RosinRammlerDistribution
-            {
-                minValue        5e-04;
-                maxValue        0.0012;
-                d               7.5e-05;
-                n               0.5;
-            }
-        }
-    }
 
     phaseChangeModel standardPhaseChange;
 

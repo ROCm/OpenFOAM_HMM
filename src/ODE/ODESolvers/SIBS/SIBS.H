@@ -84,7 +84,6 @@ class SIBS
 
         void SIMPR
         (
-            const ODESystem& ode,
             const scalar xStart,
             const scalarField& y,
             const scalarField& dydx,
@@ -123,7 +122,6 @@ public:
 
         void solve
         (
-            const ODESystem& ode,
             scalar& x,
             scalarField& y,
             scalar& dxTry

@@ -7,11 +7,13 @@ EXE_INC = \
     -I$(LIB_SRC)/sampling/lnInclude \
     -I$(LIB_SRC)/transportModels \
     -I$(LIB_SRC)/turbulenceModels \
-    -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude
+    -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
+    -I$(LIB_SRC)/surfMesh/lnInclude
 
 LIB_LIBS = \
     -lfiniteVolume \
     -lmeshTools \
+    -lsurfMesh \
     -llagrangian \
     -lfileFormats \
     -lsurfMesh \
@@ -19,4 +21,3 @@ LIB_LIBS = \
     -lincompressibleTransportModels \
     -lcompressibleTurbulenceModel \
     -lincompressibleTurbulenceModel
-

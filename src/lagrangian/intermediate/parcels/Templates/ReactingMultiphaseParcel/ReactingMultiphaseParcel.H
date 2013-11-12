@@ -40,6 +40,7 @@ SourceFiles
 
 #include "particle.H"
 #include "SLGThermo.H"
+#include "demandDrivenEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -82,14 +83,14 @@ public:
         // Private data
 
             //- Devolatilisation activation temperature [K]
-            scalar TDevol_;
+            demandDrivenEntry<scalar> TDevol_;
 
             //- Latent heat of devolatilisation [J/kg]
-            scalar LDevol_;
+            demandDrivenEntry<scalar> LDevol_;
 
             //- Fraction of enthalpy retained by parcel due to surface
             //  reactions
-            scalar hRetentionCoeff_;
+            demandDrivenEntry<scalar> hRetentionCoeff_;
 
 
     public:
@@ -102,32 +103,9 @@ public:
             //- Copy constructor
             constantProperties(const constantProperties& cp);
 
-            //- Constructor from dictionary
-            constantProperties
-            (
-                const dictionary& parentDict,
-                const bool readFields = true
-            );
+            //- Construct from dictionary
+            constantProperties(const dictionary& parentDict);
 
-            //- Construct from components
-            constantProperties
-            (
-                const label parcelTypeId,
-                const scalar rhoMin,
-                const scalar rho0,
-                const scalar minParticleMass,
-                const scalar youngsModulus,
-                const scalar poissonsRatio,
-                const scalar T0,
-                const scalar TMin,
-                const scalar TMax,
-                const scalar Cp0,
-                const scalar epsilon0,
-                const scalar f0,
-                const scalar pMin,
-                const Switch& constantVolume,
-                const scalar TDevol
-            );
 
         // Access
 

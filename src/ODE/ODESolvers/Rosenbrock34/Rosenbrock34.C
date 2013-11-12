@@ -23,56 +23,89 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "rodas43.H"
+#include "Rosenbrock34.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(rodas43, 0);
-    addToRunTimeSelectionTable(ODESolver, rodas43, dictionary);
+    defineTypeNameAndDebug(Rosenbrock34, 0);
+    addToRunTimeSelectionTable(ODESolver, Rosenbrock34, dictionary);
 
 const scalar
-    rodas43::c2 = 0.386,
-    rodas43::c3 = 0.21,
-    rodas43::c4 = 0.63,
-    rodas43::d1 =  0.25,
-    rodas43::d2 = -0.1043,
-    rodas43::d3 =  0.1035,
-    rodas43::d4 = -0.3620000000000023e-01,
-    rodas43::a21 =  0.1544e1,
-    rodas43::a31 =  0.9466785280815826,
-    rodas43::a32 =  0.2557011698983284,
-    rodas43::a41 =  0.3314825187068521e1,
-    rodas43::a42 =  0.2896124015972201e1,
-    rodas43::a43 =  0.9986419139977817,
-    rodas43::a51 =  0.1221224509226641e1,
-    rodas43::a52 =  0.6019134481288629e1,
-    rodas43::a53 =  0.1253708332932087e2,
-    rodas43::a54 = -0.6878860361058950,
-    rodas43::c21 = -0.56688e1,
-    rodas43::c31 = -0.2430093356833875e1,
-    rodas43::c32 = -0.2063599157091915,
-    rodas43::c41 = -0.1073529058151375,
-    rodas43::c42 = -0.9594562251023355e1,
-    rodas43::c43 = -0.2047028614809616e2,
-    rodas43::c51 =  0.7496443313967647e1,
-    rodas43::c52 = -0.1024680431464352e2,
-    rodas43::c53 = -0.3399990352819905e2,
-    rodas43::c54 =  0.1170890893206160e2,
-    rodas43::c61 =  0.8083246795921522e1,
-    rodas43::c62 = -0.7981132988064893e1,
-    rodas43::c63 = -0.3152159432874371e2,
-    rodas43::c64 =  0.1631930543123136e2,
-    rodas43::c65 = -0.6058818238834054e1,
-    rodas43::gamma = 0.25;
+    // Constants by Shampine
+    // More accurate than the L-Stable coefficients for small step-size
+    // but less stable for large step-size
+    Rosenbrock34::a21 = 2,
+    Rosenbrock34::a31 = 48.0/25.0,
+    Rosenbrock34::a32 = 6.0/25.0,
+
+    Rosenbrock34::c21 = -8,
+    Rosenbrock34::c31 = 372.0/25.0,
+    Rosenbrock34::c32 = 12.0/5.0,
+
+    Rosenbrock34::c41 = -112.0/125.0,
+    Rosenbrock34::c42 = -54.0/125.0,
+    Rosenbrock34::c43 = -2.0/5.0,
+
+    Rosenbrock34::b1 = 19.0/9.0,
+    Rosenbrock34::b2 = 1.0/2.0,
+    Rosenbrock34::b3 = 25.0/108.0,
+    Rosenbrock34::b4 = 125.0/108.0,
+
+    Rosenbrock34::e1 = 34.0/108.0,
+    Rosenbrock34::e2 = 7.0/36.0,
+    Rosenbrock34::e3 = 0,
+    Rosenbrock34::e4 = 125.0/108.0,
+
+    Rosenbrock34::gamma = 1.0/2.0,
+    Rosenbrock34::c2 = 1,
+    Rosenbrock34::c3  = 3.0/5.0,
+
+    Rosenbrock34::d1 = 1.0/2.0,
+    Rosenbrock34::d2 = -3.0/2.0,
+    Rosenbrock34::d3 = 605.0/250.0,
+    Rosenbrock34::d4 = 29.0/250.0;
+
+    /*
+    // L-Stable constants from Hairer et. al.
+    Rosenbrock34::a21 = 2,
+    Rosenbrock34::a31 = 1.867943637803922,
+    Rosenbrock34::a32 = 0.2344449711399156,
+
+    Rosenbrock34::c21 = -7.137615036412310,
+    Rosenbrock34::c31 = 2.580708087951457,
+    Rosenbrock34::c32 = 0.6515950076447975,
+    Rosenbrock34::c41 = -2.137148994382534,
+    Rosenbrock34::c42 = -0.3214669691237626,
+    Rosenbrock34::c43 = -0.6949742501781779,
+
+    Rosenbrock34::b1 = 2.255570073418735,
+    Rosenbrock34::b2 = 0.2870493262186792,
+    Rosenbrock34::b3 = 0.435317943184018,
+    Rosenbrock34::b4 = 1.093502252409163,
+
+    Rosenbrock34::e1 = -0.2815431932141155,
+    Rosenbrock34::e2 = -0.0727619912493892,
+    Rosenbrock34::e3 = -0.1082196201495311,
+    Rosenbrock34::e4 = -1.093502252409163,
+
+    Rosenbrock34::gamma = 0.57282,
+    Rosenbrock34::c2 = 1.14564,
+    Rosenbrock34::c3 = 0.65521686381559,
+
+    Rosenbrock34::d1 = 0.57282,
+    Rosenbrock34::d2 = -1.769193891319233,
+    Rosenbrock34::d3 = 0.7592633437920482,
+    Rosenbrock34::d4 = -0.1049021087100450;
+    */
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::rodas43::rodas43(const ODESystem& ode, const dictionary& dict)
+Foam::Rosenbrock34::Rosenbrock34(const ODESystem& ode, const dictionary& dict)
 :
     ODESolver(ode, dict),
     adaptiveSolver(ode, dict),
@@ -80,8 +113,6 @@ Foam::rodas43::rodas43(const ODESystem& ode, const dictionary& dict)
     k2_(n_),
     k3_(n_),
     k4_(n_),
-    k5_(n_),
-    dy_(n_),
     err_(n_),
     dydx_(n_),
     dfdx_(n_),
@@ -93,9 +124,8 @@ Foam::rodas43::rodas43(const ODESystem& ode, const dictionary& dict)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::rodas43::solve
+Foam::scalar Foam::Rosenbrock34::solve
 (
-    const ODESystem& ode,
     const scalar x0,
     const scalarField& y0,
     const scalarField& dydx0,
@@ -103,7 +133,7 @@ Foam::scalar Foam::rodas43::solve
     scalarField& y
 ) const
 {
-    ode.jacobian(x0, y0, dfdx_, dfdy_);
+    odes_.jacobian(x0, y0, dfdx_, dfdy_);
 
     for (register label i=0; i<n_; i++)
     {
@@ -131,7 +161,7 @@ Foam::scalar Foam::rodas43::solve
         y[i] = y0[i] + a21*k1_[i];
     }
 
-    ode.derivatives(x0 + c2*dx, y, dydx_);
+    odes_.derivatives(x0 + c2*dx, y, dydx_);
 
     forAll(k2_, i)
     {
@@ -146,7 +176,7 @@ Foam::scalar Foam::rodas43::solve
         y[i] = y0[i] + a31*k1_[i] + a32*k2_[i];
     }
 
-    ode.derivatives(x0 + c3*dx, y, dydx_);
+    odes_.derivatives(x0 + c3*dx, y, dydx_);
 
     forAll(k3_, i)
     {
@@ -156,13 +186,6 @@ Foam::scalar Foam::rodas43::solve
     LUBacksubstitute(a_, pivotIndices_, k3_);
 
     // Calculate k4:
-    forAll(y, i)
-    {
-        y[i] = y0[i] + a41*k1_[i] + a42*k2_[i] + a43*k3_[i];
-    }
-
-    ode.derivatives(x0 + c4*dx, y, dydx_);
-
     forAll(k4_, i)
     {
         k4_[i] = dydx_[i] + dx*d4*dfdx_[i]
@@ -171,58 +194,25 @@ Foam::scalar Foam::rodas43::solve
 
     LUBacksubstitute(a_, pivotIndices_, k4_);
 
-    // Calculate k5:
+    // Calculate error and update state:
     forAll(y, i)
     {
-        dy_[i] = a51*k1_[i] + a52*k2_[i] + a53*k3_[i] + a54*k4_[i];
-        y[i] = y0[i] + dy_[i];
-    }
-
-    ode.derivatives(x0 + dx, y, dydx_);
-
-    forAll(k5_, i)
-    {
-        k5_[i] = dydx_[i]
-          + (c51*k1_[i] + c52*k2_[i] + c53*k3_[i] + c54*k4_[i])/dx;
-    }
-
-    LUBacksubstitute(a_, pivotIndices_, k5_);
-
-    // Calculate new state and error
-    forAll(y, i)
-    {
-        dy_[i] += k5_[i];
-        y[i] = y0[i] + dy_[i];
-    }
-
-    ode.derivatives(x0 + dx, y, dydx_);
-
-    forAll(err_, i)
-    {
-        err_[i] = dydx_[i]
-          + (c61*k1_[i] + c62*k2_[i] + c63*k3_[i] + c64*k4_[i] + c65*k5_[i])/dx;
-    }
-
-    LUBacksubstitute(a_, pivotIndices_, err_);
-
-    forAll(y, i)
-    {
-        y[i] = y0[i] + dy_[i] + err_[i];
+        y[i] = y0[i] + b1*k1_[i] + b2*k2_[i] + b3*k3_[i] + b4*k4_[i];
+        err_[i] = e1*k1_[i] + e2*k2_[i] + e4*k4_[i];
     }
 
     return normalizeError(y0, y, err_);
 }
 
 
-void Foam::rodas43::solve
+void Foam::Rosenbrock34::solve
 (
-    const ODESystem& odes,
     scalar& x,
     scalarField& y,
     scalar& dxTry
 ) const
 {
-    adaptiveSolver::solve(odes, x, y, dxTry);
+    adaptiveSolver::solve(odes_, x, y, dxTry);
 }
 
 

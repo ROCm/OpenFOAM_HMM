@@ -94,7 +94,6 @@ Foam::RKDP45::RKDP45(const ODESystem& ode, const dictionary& dict)
 
 Foam::scalar Foam::RKDP45::solve
 (
-    const ODESystem& odes,
     const scalar x0,
     const scalarField& y0,
     const scalarField& dydx0,
@@ -107,21 +106,21 @@ Foam::scalar Foam::RKDP45::solve
         yTemp_[i] = y0[i] + a21*dx*dydx0[i];
     }
 
-    odes.derivatives(x0 + c2*dx, yTemp_, k2_);
+    odes_.derivatives(x0 + c2*dx, yTemp_, k2_);
 
     forAll(yTemp_, i)
     {
         yTemp_[i] = y0[i] + dx*(a31*dydx0[i] + a32*k2_[i]);
     }
 
-    odes.derivatives(x0 + c3*dx, yTemp_, k3_);
+    odes_.derivatives(x0 + c3*dx, yTemp_, k3_);
 
     forAll(yTemp_, i)
     {
         yTemp_[i] = y0[i] + dx*(a41*dydx0[i] + a42*k2_[i] + a43*k3_[i]);
     }
 
-    odes.derivatives(x0 + c4*dx, yTemp_, k4_);
+    odes_.derivatives(x0 + c4*dx, yTemp_, k4_);
 
     forAll(yTemp_, i)
     {
@@ -129,7 +128,7 @@ Foam::scalar Foam::RKDP45::solve
           + dx*(a51*dydx0[i] + a52*k2_[i] + a53*k3_[i] + a54*k4_[i]);
     }
 
-    odes.derivatives(x0 + c5*dx, yTemp_, k5_);
+    odes_.derivatives(x0 + c5*dx, yTemp_, k5_);
 
     forAll(yTemp_, i)
     {
@@ -138,7 +137,7 @@ Foam::scalar Foam::RKDP45::solve
            *(a61*dydx0[i] + a62*k2_[i] + a63*k3_[i] + a64*k4_[i] + a65*k5_[i]);
     }
 
-    odes.derivatives(x0 + dx, yTemp_, k6_);
+    odes_.derivatives(x0 + dx, yTemp_, k6_);
 
     forAll(y, i)
     {
@@ -147,7 +146,7 @@ Foam::scalar Foam::RKDP45::solve
     }
 
     // Reuse k2_ for the derivative of the new state
-    odes.derivatives(x0 + dx, y, k2_);
+    odes_.derivatives(x0 + dx, y, k2_);
 
     forAll(err_, i)
     {
@@ -163,13 +162,12 @@ Foam::scalar Foam::RKDP45::solve
 
 void Foam::RKDP45::solve
 (
-    const ODESystem& odes,
     scalar& x,
     scalarField& y,
     scalar& dxTry
 ) const
 {
-    adaptiveSolver::solve(odes, x, y, dxTry);
+    adaptiveSolver::solve(odes_, x, y, dxTry);
 }
 
 

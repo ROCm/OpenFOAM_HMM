@@ -92,6 +92,8 @@ void Foam::surfaceInterpolateFields::execute()
 {
     if (active_)
     {
+        Info<< type() << " " << name_ << " output:" << nl;
+
         // Clear out any previously loaded fields
         ssf_.clear();
         svf_.clear();
@@ -104,6 +106,8 @@ void Foam::surfaceInterpolateFields::execute()
         interpolateFields<sphericalTensor>(sSpheretf_);
         interpolateFields<symmTensor>(sSymmtf_);
         interpolateFields<tensor>(stf_);
+
+        Info<< endl;
     }
 }
 

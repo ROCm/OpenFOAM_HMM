@@ -30,9 +30,9 @@ inline Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
 constantProperties()
 :
     ParcelType::constantProperties(),
-    TDevol_(0.0),
-    LDevol_(0.0),
-    hRetentionCoeff_(0.0)
+    TDevol_(this->dict_, 0.0),
+    LDevol_(this->dict_, 0.0),
+    hRetentionCoeff_(this->dict_, 0.0)
 {}
 
 
@@ -54,75 +54,13 @@ template<class ParcelType>
 inline Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
 constantProperties
 (
-    const dictionary& parentDict,
-    const bool readFields
+    const dictionary& parentDict
 )
 :
-    ParcelType::constantProperties(parentDict, readFields),
-    TDevol_(0.0),
-    LDevol_(0.0),
-    hRetentionCoeff_(0.0)
-{
-    if (readFields)
-    {
-        this->dict().lookup("TDevol") >> TDevol_;
-        this->dict().lookup("LDevol") >> LDevol_;
-        this->dict().lookup("hRetentionCoeff") >> hRetentionCoeff_;
-
-        if ((hRetentionCoeff_ < 0) || (hRetentionCoeff_ > 1))
-        {
-            FatalErrorIn
-            (
-                "ReactingMultiphaseParcel<ParcelType>::constantProperties::"
-                "constantProperties"
-            )   << "hRetentionCoeff must be in the range 0 to 1" << nl
-                << exit(FatalError) << endl;
-        }
-
-        hRetentionCoeff_ = max(1e-06, hRetentionCoeff_);
-    }
-}
-
-
-template<class ParcelType>
-inline Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
-constantProperties
-(
-    const label parcelTypeId,
-    const scalar rhoMin,
-    const scalar rho0,
-    const scalar minParticleMass,
-    const scalar youngsModulus,
-    const scalar poissonsRatio,
-    const scalar T0,
-    const scalar TMin,
-    const scalar TMax,
-    const scalar Cp0,
-    const scalar epsilon0,
-    const scalar f0,
-    const scalar pMin,
-    const Switch& constantVolume,
-    const scalar TDevol
-)
-:
-    ParcelType::constantProperties
-    (
-        parcelTypeId,
-        rhoMin,
-        rho0,
-        minParticleMass,
-        youngsModulus,
-        poissonsRatio,
-        T0,
-        TMin,
-        TMax,
-        Cp0,
-        epsilon0,
-        f0,
-        pMin,
-        constantVolume
-    ),
-    TDevol_(TDevol)
+    ParcelType::constantProperties(parentDict),
+    TDevol_(this->dict_, "TDevol"),
+    LDevol_(this->dict_, "LDevol"),
+    hRetentionCoeff_(this->dict_, "hRetentionCoeff")
 {}
 
 
@@ -198,7 +136,7 @@ template<class ParcelType>
 inline Foam::scalar
 Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::TDevol() const
 {
-    return TDevol_;
+    return TDevol_.value();
 }
 
 
@@ -206,7 +144,7 @@ template<class ParcelType>
 inline Foam::scalar
 Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::LDevol() const
 {
-    return LDevol_;
+    return LDevol_.value();
 }
 
 
@@ -215,7 +153,19 @@ inline Foam::scalar
 Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
 hRetentionCoeff() const
 {
-    return hRetentionCoeff_;
+    scalar value = hRetentionCoeff_.value();
+
+    if ((value < 0) || (value > 1))
+    {
+        FatalErrorIn
+        (
+            "ReactingMultiphaseParcel<ParcelType>::constantProperties::"
+            "constantProperties"
+        )   << "hRetentionCoeff must be in the range 0 to 1" << nl
+            << exit(FatalError) << endl;
+    }
+
+    return value;
 }
 
 
