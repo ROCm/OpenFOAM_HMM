@@ -45,8 +45,12 @@ Description
         //                         beforehand)
         sampleMode nearestCell;
 
-        // If sampleMod is nearestPatchFace : patch to find faces of
+        // If sampleMode is nearestPatchFace : patch to find faces of
         samplePatch movingWall;
+
+        // If sampleMode is nearestPatchFace : specify patchgroup to find
+        // samplePatch and sampleRegion (if not provided)
+        coupleGroup baffleGroup;
 
         // How to supply offset (w.r.t. my patch face centres):
         // - uniform : single offset vector
@@ -78,6 +82,7 @@ SourceFiles
 #include "Tuple2.H"
 #include "pointIndexHit.H"
 #include "AMIPatchToPatchInterpolation.H"
+#include "coupleGroupIdentifier.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -180,13 +185,16 @@ protected:
         const polyPatch& patch_;
 
         //- Region to sample
-        const word sampleRegion_;
+        mutable word sampleRegion_;
 
         //- What to sample
         const sampleMode mode_;
 
         //- Patch (if in sampleMode NEARESTPATCH*)
-        const word samplePatch_;
+        mutable word samplePatch_;
+
+        //- PatchGroup (if in sampleMode NEARESTPATCH*)
+        const coupleGroupIdentifier coupleGroup_;
 
         //- How to obtain samples
         offsetMode offsetMode_;
@@ -201,7 +209,7 @@ protected:
         scalar distance_;
 
         //- Same region
-        const bool sameRegion_;
+        mutable bool sameRegion_;
 
 
         // Derived information
@@ -315,6 +323,11 @@ public:
         //- Construct from dictionary
         mappedPatchBase(const polyPatch&, const dictionary&);
 
+        //- Construct from dictionary and (collocated) sample mode
+        //  (only for nearestPatchFace, nearestPatchFaceAMI, nearestPatchPoint)
+        //  Assumes zero offset.
+        mappedPatchBase(const polyPatch&, const sampleMode, const dictionary&);
+
         //- Construct as copy, resetting patch
         mappedPatchBase(const polyPatch&, const mappedPatchBase&);
 
@@ -345,6 +358,9 @@ public:
 
             //- Patch (only if NEARESTPATCHFACE)
             inline const word& samplePatch() const;
+
+            //- PatchGroup (only if NEARESTPATCHFACE)
+            inline const word& coupleGroup() const;
 
             //- Return size of mapped mesh/patch/boundary
             inline label sampleSize() const;
