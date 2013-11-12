@@ -101,11 +101,9 @@ bool Foam::ReitzDiwakar<CloudType>::update
     scalar We = 0.5*rhoc*sqr(Urmag)*d/sigma;
     scalar Re = Urmag*d/nuc;
 
-    scalar sqRey = sqrt(Re);
-
     if (We > Cbag_)
     {
-        if (We > Cstrip_*sqRey)
+        if (We > Cstrip_*sqrt(Re))
         {
             scalar dStrip = sqr(2.0*Cstrip_*sigma)/(rhoc*pow3(Urmag)*muc);
             scalar tauStrip = Cs_*d*sqrt(rho/rhoc)/Urmag;
@@ -117,9 +115,7 @@ bool Foam::ReitzDiwakar<CloudType>::update
         else
         {
             scalar dBag = 2.0*Cbag_*sigma/(rhoc*sqr(Urmag));
-
             scalar tauBag = Cb_*d*sqrt(rho*d/sigma);
-
             scalar fraction = dt/tauBag;
 
             // new droplet diameter, implicit calculation
