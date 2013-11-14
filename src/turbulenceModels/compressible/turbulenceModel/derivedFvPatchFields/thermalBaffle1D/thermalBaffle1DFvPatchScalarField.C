@@ -317,6 +317,8 @@ void thermalBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
     int oldTag = UPstream::msgType();
     UPstream::msgType() = oldTag+1;
 
+    const mapDistribute& mapDist = this->mappedPatchBase::map();
+
     const label patchi = patch().index();
 
     const label nbrPatchi = samplePolyPatch().index();
@@ -354,8 +356,9 @@ void thermalBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
         scalarField myKDelta(patch().deltaCoeffs()*kappaw);
 
         // nrb properties
-        const fvPatchScalarField& nbrTp =
+        scalarField nbrTp =
             turbModel.thermo().T().boundaryField()[nbrPatchi];
+        mapDist.distribute(nbrTp);
 
         // solid properties
         scalarField kappas(patch().size(), 0.0);
