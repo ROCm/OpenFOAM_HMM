@@ -66,6 +66,8 @@ freestreamFvPatchField<Type>::freestreamFvPatchField
 :
     inletOutletFvPatchField<Type>(p, iF)
 {
+    this->phiName_ = dict.lookupOrDefault<word>("phi","phi");
+
     freestreamValue() = Field<Type>("freestreamValue", dict, p.size());
 
     if (dict.found("value"))
@@ -79,8 +81,6 @@ freestreamFvPatchField<Type>::freestreamFvPatchField
     {
         fvPatchField<Type>::operator=(freestreamValue());
     }
-
-    dict.readIfPresent("phi", this->phiName_);
 }
 
 

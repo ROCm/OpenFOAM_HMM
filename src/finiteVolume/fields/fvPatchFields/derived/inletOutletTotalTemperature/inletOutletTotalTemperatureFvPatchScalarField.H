@@ -90,9 +90,6 @@ class inletOutletTotalTemperatureFvPatchScalarField
         //- Name of the velocity field
         word UName_;
 
-        //- Name of the flux transporting the field
-        word phiName_;
-
         //- Name of the compressibility field used to calculate the wave speed
         word psiName_;
 
