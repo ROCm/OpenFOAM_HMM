@@ -104,7 +104,7 @@ bool Foam::triSurface::readOBJ(const fileName& OBJfileName)
             while (true)
             {
                 string::size_type startNum =
-                    line.find_first_not_of(' ', endNum);
+                    line.find_first_not_of(" \r", endNum);
 
                 if (startNum == string::npos)
                 {

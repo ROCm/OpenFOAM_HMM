@@ -54,6 +54,57 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+label addPatch
+(
+    fvMesh& mesh,
+    const word& patchName,
+    const word& groupName,
+    const dictionary& patchDict
+)
+{
+    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+
+    if (pbm.findPatchID(patchName) == -1)
+    {
+        autoPtr<polyPatch> ppPtr
+        (
+            polyPatch::New
+            (
+                patchName,
+                patchDict,
+                0,
+                pbm
+            )
+        );
+        polyPatch& pp = ppPtr();
+
+        if (!groupName.empty() && !pp.inGroup(groupName))
+        {
+            pp.inGroups().append(groupName);
+        }
+
+        // Add patch, create calculated everywhere
+        fvMeshTools::addPatch
+        (
+            mesh,
+            pp,
+            dictionary(),   // do not set specialised patchFields
+            calculatedFvPatchField<scalar>::typeName,
+            true            // parallel sync'ed addition
+        );
+    }
+    else
+    {
+        Info<< "Patch '" << patchName
+            << "' already exists.  Only "
+            << "moving patch faces - type will remain the same"
+            << endl;
+    }
+
+    return pbm.findPatchID(patchName);
+}
+
+
 void modifyOrAddFace
 (
     polyTopoChange& meshMod,
@@ -110,6 +161,185 @@ void modifyOrAddFace
     }
 }
 
+
+// Create faces for fZone faces. Usually newMasterPatches, newSlavePatches
+// only size one but can be more for duplicate baffle sets
+void createFaces
+(
+    const bool internalFacesOnly,
+    const fvMesh& mesh,
+    const faceZone& fZone,
+    const labelList& newMasterPatches,
+    const labelList& newSlavePatches,
+    polyTopoChange& meshMod,
+    PackedBoolList& modifiedFace,
+    label& nModified
+)
+{
+    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+
+    forAll(newMasterPatches, i)
+    {
+        // Pass 1. Do selected side of zone
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
+        {
+            label zoneFaceI = fZone.whichFace(faceI);
+
+            if (zoneFaceI != -1)
+            {
+                if (!fZone.flipMap()[zoneFaceI])
+                {
+                    // Use owner side of face
+                    modifyOrAddFace
+                    (
+                        meshMod,
+                        mesh.faces()[faceI],    // modified face
+                        faceI,                  // label of face
+                        mesh.faceOwner()[faceI],// owner
+                        false,                  // face flip
+                        newMasterPatches[i],    // patch for face
+                        fZone.index(),          // zone for face
+                        false,                  // face flip in zone
+                        modifiedFace            // modify or add status
+                    );
+                }
+                else
+                {
+                    // Use neighbour side of face
+                    modifyOrAddFace
+                    (
+                        meshMod,
+                        mesh.faces()[faceI].reverseFace(),  // modified face
+                        faceI,                      // label of face
+                        mesh.faceNeighbour()[faceI],// owner
+                        true,                       // face flip
+                        newMasterPatches[i],        // patch for face
+                        fZone.index(),              // zone for face
+                        true,                       // face flip in zone
+                        modifiedFace                // modify or add status
+                    );
+                }
+
+                nModified++;
+            }
+        }
+
+
+        // Pass 2. Do other side of zone
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
+        {
+            label zoneFaceI = fZone.whichFace(faceI);
+
+            if (zoneFaceI != -1)
+            {
+                if (!fZone.flipMap()[zoneFaceI])
+                {
+                    // Use neighbour side of face
+                    modifyOrAddFace
+                    (
+                        meshMod,
+                        mesh.faces()[faceI].reverseFace(),  // modified face
+                        faceI,                          // label of face
+                        mesh.faceNeighbour()[faceI],    // owner
+                        true,                           // face flip
+                        newSlavePatches[i],             // patch for face
+                        fZone.index(),                  // zone for face
+                        true,                           // face flip in zone
+                        modifiedFace                    // modify or add
+                    );
+                }
+                else
+                {
+                    // Use owner side of face
+                    modifyOrAddFace
+                    (
+                        meshMod,
+                        mesh.faces()[faceI],    // modified face
+                        faceI,                  // label of face
+                        mesh.faceOwner()[faceI],// owner
+                        false,                  // face flip
+                        newSlavePatches[i],     // patch for face
+                        fZone.index(),          // zone for face
+                        false,                  // face flip in zone
+                        modifiedFace            // modify or add status
+                    );
+                }
+            }
+        }
+
+
+        // Modify any boundary faces
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        // Normal boundary:
+        // - move to new patch. Might already be back-to-back baffle
+        // you want to add cyclic to. Do warn though.
+        //
+        // Processor boundary:
+        // - do not move to cyclic
+        // - add normal patches though.
+
+        // For warning once per patch.
+        labelHashSet patchWarned;
+
+        forAll(pbm, patchI)
+        {
+            const polyPatch& pp = pbm[patchI];
+
+            label newPatchI = newMasterPatches[i];
+
+            if (pp.coupled() && pbm[newPatchI].coupled())
+            {
+                // Do not allow coupled faces to be moved to different
+                // coupled patches.
+            }
+            else if (pp.coupled() || !internalFacesOnly)
+            {
+                forAll(pp, i)
+                {
+                    label faceI = pp.start()+i;
+
+                    label zoneFaceI = fZone.whichFace(faceI);
+
+                    if (zoneFaceI != -1)
+                    {
+                        if (patchWarned.insert(patchI))
+                        {
+                            WarningIn("createFaces(..)")
+                                << "Found boundary face (in patch "
+                                << pp.name()
+                                << ") in faceZone " << fZone.name()
+                                << " to convert to baffle patch "
+                                << pbm[newPatchI].name()
+                                << endl
+                                << "    Run with -internalFacesOnly option"
+                                << " if you don't wish to convert"
+                                << " boundary faces." << endl;
+                        }
+
+                        modifyOrAddFace
+                        (
+                            meshMod,
+                            mesh.faces()[faceI],        // modified face
+                            faceI,                      // label of face
+                            mesh.faceOwner()[faceI],    // owner
+                            false,                      // face flip
+                            newPatchI,                  // patch for face
+                            fZone.index(),              // zone for face
+                            fZone.flipMap()[zoneFaceI], // face flip in zone
+                            modifiedFace                // modify or add
+                        );
+                        nModified++;
+                    }
+                }
+            }
+        }
+    }
+}
 
 
 int main(int argc, char *argv[])
@@ -220,8 +450,8 @@ int main(int argc, char *argv[])
 
 
 
-    // Creating (if necessary) baffles
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Creating (if necessary) faceZones
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     forAll(selectors, selectorI)
     {
@@ -308,19 +538,26 @@ int main(int argc, char *argv[])
     {
         forAll(selectors, selectorI)
         {
-            const dictionary& patchSources
-            (
-                selectors[selectorI].dict().subDict("patches")
-            );
-            forAllConstIter(dictionary, patchSources, iter)
+            const dictionary& dict = selectors[selectorI].dict();
+
+            if (dict.found("patches"))
             {
-                //const word& patchName = iter().keyword();
-                const word patchName(iter().dict()["name"]);
-                bafflePatches.insert(patchName);
+                const dictionary& patchSources = dict.subDict("patches");
+                forAllConstIter(dictionary, patchSources, iter)
+                {
+                    const word patchName(iter().dict()["name"]);
+                    bafflePatches.insert(patchName);
+                }
+            }
+            else
+            {
+                const word masterName = selectors[selectorI].name() + "_master";
+                bafflePatches.insert(masterName);
+                const word slaveName = selectors[selectorI].name() + "_slave";
+                bafflePatches.insert(slaveName);
             }
         }
     }
-
 
 
     // Create baffles
@@ -344,55 +581,51 @@ int main(int argc, char *argv[])
         const polyBoundaryMesh& pbm = mesh.boundaryMesh();
         forAll(selectors, selectorI)
         {
-            const dictionary& patchSources
-            (
-                selectors[selectorI].dict().subDict("patches")
-            );
-            forAllConstIter(dictionary, patchSources, iter)
+            const dictionary& dict = selectors[selectorI].dict();
+            const word& groupName = selectors[selectorI].name();
+
+            if (dict.found("patches"))
             {
-                //const word& patchName = iter().keyword();
-                const word patchName(iter().dict()["name"]);
-
-                label destPatchI = pbm.findPatchID(patchName);
-
-                if (destPatchI == -1)
+                const dictionary& patchSources = dict.subDict("patches");
+                forAllConstIter(dictionary, patchSources, iter)
                 {
-                    dictionary patchDict = iter().dict();
-                    patchDict.set("nFaces", 0);
-                    patchDict.set("startFace", 0);
+                    const word patchName(iter().dict()["name"]);
 
-                    Info<< "Adding new patch " << patchName
-                        << " from " << patchDict << endl;
+                    if (pbm.findPatchID(patchName) == -1)
+                    {
+                        dictionary patchDict = iter().dict();
+                        patchDict.set("nFaces", 0);
+                        patchDict.set("startFace", 0);
 
-                    autoPtr<polyPatch> ppPtr
-                    (
-                        polyPatch::New
-                        (
-                            patchName,
-                            patchDict,
-                            0,
-                            pbm
-                        )
-                    );
+                        // Note: do not set coupleGroup if constructed from
+                        //       baffles so you have freedom specifying it
+                        //       yourself.
+                        //patchDict.set("coupleGroup", groupName);
 
-                    // Add patch, create calculated everywhere
-                    fvMeshTools::addPatch
-                    (
-                        mesh,
-                        ppPtr(),
-                        dictionary(),   // do not set specialised patchFields
-                        calculatedFvPatchField<scalar>::typeName,
-                        true            // parallel sync'ed addition
-                    );
-
-                    //addedPatches.insert(patchName);
+                        addPatch(mesh, patchName, groupName, patchDict);
+                    }
+                    else
+                    {
+                        Info<< "Patch '" << patchName
+                            << "' already exists.  Only "
+                            << "moving patch faces - type will remain the same"
+                            << endl;
+                    }
                 }
-                else
-                {
-                    Info<< "Patch '" << patchName << "' already exists.  Only "
-                        << "moving patch faces - type will remain the same"
-                        << endl;
-                }
+            }
+            else
+            {
+                const dictionary& patchSource = dict.subDict("patchPairs");
+                const word masterName = groupName + "_master";
+                const word slaveName = groupName + "_slave";
+
+                dictionary patchDict = patchSource;
+                patchDict.set("nFaces", 0);
+                patchDict.set("startFace", 0);
+                patchDict.set("coupleGroup", groupName);
+
+                addPatch(mesh, masterName, groupName, patchDict);
+                addPatch(mesh, slaveName, groupName, patchDict);
             }
         }
     }
@@ -428,195 +661,53 @@ int main(int argc, char *argv[])
         label zoneID = mesh.faceZones().findZoneID(name);
         const faceZone& fZone = mesh.faceZones()[zoneID];
 
-        const dictionary& patchSources
+        const dictionary& dict = selectors[selectorI].dict();
+
+        DynamicList<label> newMasterPatches;
+        DynamicList<label> newSlavePatches;
+
+        if (dict.found("patches"))
+        {
+            const dictionary& patchSources = dict.subDict("patches");
+
+            bool master = true;
+            forAllConstIter(dictionary, patchSources, iter)
+            {
+                const word patchName(iter().dict()["name"]);
+                label patchI = pbm.findPatchID(patchName);
+                if (master)
+                {
+                    newMasterPatches.append(patchI);
+                }
+                else
+                {
+                    newSlavePatches.append(patchI);
+                }
+                master = !master;
+            }
+        }
+        else
+        {
+            const word masterName = selectors[selectorI].name() + "_master";
+            newMasterPatches.append(pbm.findPatchID(masterName));
+
+            const word slaveName = selectors[selectorI].name() + "_slave";
+            newSlavePatches.append(pbm.findPatchID(slaveName));
+        }
+
+
+
+        createFaces
         (
-            selectors[selectorI].dict().subDict("patches")
+            internalFacesOnly,
+            mesh,
+            fZone,
+            newMasterPatches,
+            newSlavePatches,
+            meshMod,
+            modifiedFace,
+            nModified
         );
-
-        DynamicList<label> newMasterPatches(patchSources.size());
-        DynamicList<label> newSlavePatches(patchSources.size());
-
-        bool master = true;
-
-        forAllConstIter(dictionary, patchSources, iter)
-        {
-            //const word& patchName = iter().keyword();
-            const word patchName(iter().dict()["name"]);
-            label patchI = pbm.findPatchID(patchName);
-            if (master)
-            {
-                newMasterPatches.append(patchI);
-            }
-            else
-            {
-                newSlavePatches.append(patchI);
-            }
-            master = !master;
-        }
-
-
-
-        forAll(newMasterPatches, i)
-        {
-            // Pass 1. Do selected side of zone
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-            for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
-            {
-                label zoneFaceI = fZone.whichFace(faceI);
-
-                if (zoneFaceI != -1)
-                {
-                    if (!fZone.flipMap()[zoneFaceI])
-                    {
-                        // Use owner side of face
-                        modifyOrAddFace
-                        (
-                            meshMod,
-                            mesh.faces()[faceI],    // modified face
-                            faceI,                  // label of face
-                            mesh.faceOwner()[faceI],// owner
-                            false,                  // face flip
-                            newMasterPatches[i],    // patch for face
-                            fZone.index(),          // zone for face
-                            false,                  // face flip in zone
-                            modifiedFace            // modify or add status
-                        );
-                    }
-                    else
-                    {
-                        // Use neighbour side of face
-                        modifyOrAddFace
-                        (
-                            meshMod,
-                            mesh.faces()[faceI].reverseFace(),  // modified face
-                            faceI,                      // label of face
-                            mesh.faceNeighbour()[faceI],// owner
-                            true,                       // face flip
-                            newMasterPatches[i],        // patch for face
-                            fZone.index(),              // zone for face
-                            true,                       // face flip in zone
-                            modifiedFace                // modify or add status
-                        );
-                    }
-
-                    nModified++;
-                }
-            }
-
-
-            // Pass 2. Do other side of zone
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-            for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
-            {
-                label zoneFaceI = fZone.whichFace(faceI);
-
-                if (zoneFaceI != -1)
-                {
-                    if (!fZone.flipMap()[zoneFaceI])
-                    {
-                        // Use neighbour side of face
-                        modifyOrAddFace
-                        (
-                            meshMod,
-                            mesh.faces()[faceI].reverseFace(),  // modified face
-                            faceI,                          // label of face
-                            mesh.faceNeighbour()[faceI],    // owner
-                            true,                           // face flip
-                            newSlavePatches[i],             // patch for face
-                            fZone.index(),                  // zone for face
-                            true,                           // face flip in zone
-                            modifiedFace                    // modify or add
-                        );
-                    }
-                    else
-                    {
-                        // Use owner side of face
-                        modifyOrAddFace
-                        (
-                            meshMod,
-                            mesh.faces()[faceI],    // modified face
-                            faceI,                  // label of face
-                            mesh.faceOwner()[faceI],// owner
-                            false,                  // face flip
-                            newSlavePatches[i],     // patch for face
-                            fZone.index(),          // zone for face
-                            false,                  // face flip in zone
-                            modifiedFace            // modify or add status
-                        );
-                    }
-                }
-            }
-
-
-            // Modify any boundary faces
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~
-
-            // Normal boundary:
-            // - move to new patch. Might already be back-to-back baffle
-            // you want to add cyclic to. Do warn though.
-            //
-            // Processor boundary:
-            // - do not move to cyclic
-            // - add normal patches though.
-
-            // For warning once per patch.
-            labelHashSet patchWarned;
-
-            forAll(pbm, patchI)
-            {
-                const polyPatch& pp = pbm[patchI];
-
-                label newPatchI = newMasterPatches[i];
-
-                if (pp.coupled() && pbm[newPatchI].coupled())
-                {
-                    // Do not allow coupled faces to be moved to different
-                    // coupled patches.
-                }
-                else if (pp.coupled() || !internalFacesOnly)
-                {
-                    forAll(pp, i)
-                    {
-                        label faceI = pp.start()+i;
-
-                        label zoneFaceI = fZone.whichFace(faceI);
-
-                        if (zoneFaceI != -1)
-                        {
-                            if (patchWarned.insert(patchI))
-                            {
-                                WarningIn(args.executable())
-                                    << "Found boundary face (in patch "
-                                    << pp.name()
-                                    << ") in faceZone " << fZone.name()
-                                    << " to convert to baffle patch "
-                                    << pbm[newPatchI].name()
-                                    << endl
-                                    << "    Run with -internalFacesOnly option"
-                                    << " if you don't wish to convert"
-                                    << " boundary faces." << endl;
-                            }
-
-                            modifyOrAddFace
-                            (
-                                meshMod,
-                                mesh.faces()[faceI],        // modified face
-                                faceI,                      // label of face
-                                mesh.faceOwner()[faceI],    // owner
-                                false,                      // face flip
-                                newPatchI,                  // patch for face
-                                fZone.index(),              // zone for face
-                                fZone.flipMap()[zoneFaceI], // face flip in zone
-                                modifiedFace                // modify or add
-                            );
-                            nModified++;
-                        }
-                    }
-                }
-            }
-        }
     }
 
 
@@ -672,29 +763,64 @@ int main(int argc, char *argv[])
         const polyBoundaryMesh& pbm = mesh.boundaryMesh();
         forAll(selectors, selectorI)
         {
-            const dictionary& patchSources
-            (
-                selectors[selectorI].dict().subDict("patches")
-            );
-            forAllConstIter(dictionary, patchSources, iter)
+            const dictionary& dict = selectors[selectorI].dict();
+            if (dict.found("patches"))
             {
-                //const word& patchName = iter().keyword();
-                const word patchName(iter().dict()["name"]);
-                label patchI = pbm.findPatchID(patchName);
+                const dictionary& patchSources = dict.subDict("patches");
 
-                if (iter().dict().found("patchFields"))
+                forAllConstIter(dictionary, patchSources, iter)
                 {
-                    const dictionary& patchFieldsDict = iter().dict().subDict
+                    const word patchName(iter().dict()["name"]);
+                    label patchI = pbm.findPatchID(patchName);
+
+                    if (iter().dict().found("patchFields"))
+                    {
+                        const dictionary& patchFieldsDict =
+                            iter().dict().subDict
+                            (
+                                "patchFields"
+                            );
+
+                        fvMeshTools::setPatchFields
+                        (
+                            mesh,
+                            patchI,
+                            patchFieldsDict
+                        );
+                    }
+                }
+            }
+            else
+            {
+                const dictionary& patchSource = dict.subDict("patchPairs");
+                const word& groupName = selectors[selectorI].name();
+
+                if (patchSource.found("patchFields"))
+                {
+                    dictionary patchFieldsDict = patchSource.subDict
                     (
                         "patchFields"
                     );
+                    // Add coupleGroup to all entries
+                    forAllIter(dictionary, patchFieldsDict, iter)
+                    {
+                        if (iter().isDict())
+                        {
+                            dictionary& dict = iter().dict();
+                            dict.set("coupleGroup", groupName);
+                        }
+                    }
 
-                    fvMeshTools::setPatchFields
-                    (
-                        mesh,
-                        patchI,
-                        patchFieldsDict
-                    );
+                    const labelList& patchIDs = pbm.groupPatchIDs()[groupName];
+                    forAll(patchIDs, i)
+                    {
+                        fvMeshTools::setPatchFields
+                        (
+                            mesh,
+                            patchIDs[i],
+                            patchFieldsDict
+                        );
+                    }
                 }
             }
         }

@@ -40,111 +40,34 @@ internalFacesOnly true;
 // Baffles to create.
 baffles
 {
-    baffleFaces
+    baffle1
     {
-        //- Use predefined faceZone to select faces and orientation.
-        type        faceZone;
-        zoneName    baffleFaces;
-
-
+        //- Use surface to select faces and orientation.
+        type        searchableSurface;
+        surface     triSurfaceMesh;
+        name        baffle1D.stl;
         //- Optional flip
         //flip        false;
 
-        patches
+
+        // Generate patchGroup baffle1 with two patches:
+        //  - baffle1_master
+        //  - baffle1_slave
+        patchPairs
         {
-            master
+            type            wall;
+            //- Optional override of added patchfields. If not specified
+            //  any added patchfields are of type calculated.
+            patchFields
             {
-                //- Master side patch
-                name            baffles;
-                type            wall;
-
-                //- Optional override of added patchfields. If not specified
-                //  any added patchfields are of type calculated.
-                patchFields
+                U
                 {
-                    epsilon
-                    {
-                        type            epsilonWallFunction;
-                        Cmu             0.09;
-                        kappa           0.41;
-                        E               9.8;
-                        value           uniform 0;
-                    }
-                    k
-                    {
-                        type            kqRWallFunction;
-                        value           uniform 0;
-                    }
-                    nut
-                    {
-                        type            nutkWallFunction;
-                        Cmu             0.09;
-                        kappa           0.41;
-                        E               9.8;
-                        value           uniform 0;
-                    }
-                    nuTilda
-                    {
-                        type            zeroGradient;
-                    }
-                    p
-                    {
-                        type            zeroGradient;
-                    }
-                    U
-                    {
-                        type            fixedValue;
-                        value           uniform (0 0 0);
-                    }
-                }
-            }
-            slave
-            {
-                //- Slave side patch
-                name            baffles;
-                type            wall;
-
-                patchFields
-                {
-                    epsilon
-                    {
-                        type            epsilonWallFunction;
-                        Cmu             0.09;
-                        kappa           0.41;
-                        E               9.8;
-                        value           uniform 0;
-                    }
-                    k
-                    {
-                        type            kqRWallFunction;
-                        value           uniform 0;
-                    }
-                    nut
-                    {
-                        type            nutkWallFunction;
-                        Cmu             0.09;
-                        kappa           0.41;
-                        E               9.8;
-                        value           uniform 0;
-                    }
-                    nuTilda
-                    {
-                        type            zeroGradient;
-                    }
-                    p
-                    {
-                        type            zeroGradient;
-                    }
-                    U
-                    {
-                        type            fixedValue;
-                        value           uniform (0 0 0);
-                    }
+                    type            fixedValue;
+                    value           uniform (0 0 0);
                 }
             }
         }
     }
-
 
 
     cyclicFaces
@@ -152,11 +75,12 @@ baffles
         //- Select faces and orientation through a searchableSurface
         type        searchableSurface;
         surface     searchablePlate;
-        //name sphere.stl;  // name if surface=triSurfaceMesh
 
         origin      (0.099 -0.006 0.004);
         span        (0 0.012 0.012);
 
+
+        // Generate patches explicitly
         patches
         {
             master

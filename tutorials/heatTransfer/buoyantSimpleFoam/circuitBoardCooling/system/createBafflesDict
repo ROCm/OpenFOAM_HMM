@@ -29,35 +29,13 @@ baffles
         surface     triSurfaceMesh;
         name        baffle1D.stl;
 
-        patches
+        patchPairs
         {
-            master
+            type            wall;
+            patchFields
             {
-                //- Master side patch
-                name            baffle1DWall_master;
-
-                type            wall;
-                inGroups        (baffleWallGroup);
-
-                patchFields
-                {
-                    #include "./0/include/wallBafflePatches"
-                    #include "./0/include/1DBaffle/1DTemperatureMasterBafflePatches"
-                }
-            }
-            slave
-            {
-                //- Slave side patch
-                name            baffle1DWall_slave;
-
-                type            wall;
-                inGroups        (baffleWallGroup);
-
-                patchFields
-                {
-                    #include "./0/include/wallBafflePatches"
-                    #include "./0/include/1DBaffle/1DTemperatureSlaveBafflePatches"
-                }
+                #include "./0/include/wallBafflePatches"
+                #include "./0/include/1DBaffle/1DTemperatureMasterBafflePatches"
             }
         }
     }
@@ -78,10 +56,7 @@ baffles
                 name            ${masterPatchName};
 
                 type            mappedWall;
-
-
-                type            interRegionMappedWallGenerator;
-                                inGroups        (baffleWallGroup);
+                inGroups        (baffleWallGroup);
 
                 sampleMode      nearestPatchFace;
                 sampleRegion    ${baffleRegionName};

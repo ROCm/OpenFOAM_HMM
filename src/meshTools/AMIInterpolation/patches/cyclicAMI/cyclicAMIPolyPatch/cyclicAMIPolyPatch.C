@@ -125,7 +125,7 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
         FatalErrorIn("cyclicAMIPolyPatch::calcTransforms()")
             << "Patch " << name()
             << " has transform type " << transformTypeNames[transform()]
-            << ", neighbour patch " << nbrPatchName_
+            << ", neighbour patch " << neighbPatchName()
             << " has transform type "
             << neighbPatch().transformTypeNames[neighbPatch().transform()]
             << exit(FatalError);
@@ -416,7 +416,8 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
 )
 :
     coupledPolyPatch(name, dict, index, bm, patchType),
-    nbrPatchName_(dict.lookup("neighbourPatch")),
+    nbrPatchName_(dict.lookupOrDefault<word>("neighbourPatch", "")),
+    coupleGroup_(dict),
     nbrPatchID_(-1),
     rotationAxis_(vector::zero),
     rotationCentre_(point::zero),
@@ -426,6 +427,22 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     surfPtr_(NULL),
     surfDict_(dict.subOrEmptyDict("surface"))
 {
+    if (nbrPatchName_ == word::null && !coupleGroup_.valid())
+    {
+        FatalIOErrorIn
+        (
+            "cyclicAMIPolyPatch::cyclicAMIPolyPatch"
+            "("
+                "const word&, "
+                "const dictionary&, "
+                "const label, "
+                "const polyBoundaryMesh&"
+            ")",
+            dict
+        )   << "No \"neighbourPatch\" or \"coupleGroup\" provided."
+            << exit(FatalIOError);
+    }
+
     if (nbrPatchName_ == name)
     {
         FatalIOErrorIn
@@ -495,6 +512,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
 :
     coupledPolyPatch(pp, bm),
     nbrPatchName_(pp.nbrPatchName_),
+    coupleGroup_(pp.coupleGroup_),
     nbrPatchID_(-1),
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_),
@@ -521,6 +539,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
 :
     coupledPolyPatch(pp, bm, index, newSize, newStart),
     nbrPatchName_(nbrPatchName),
+    coupleGroup_(pp.coupleGroup_),
     nbrPatchID_(-1),
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_),
@@ -561,6 +580,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
 :
     coupledPolyPatch(pp, bm, index, mapAddressing, newStart),
     nbrPatchName_(pp.nbrPatchName_),
+    coupleGroup_(pp.coupleGroup_),
     nbrPatchID_(-1),
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_),
@@ -584,12 +604,12 @@ Foam::label Foam::cyclicAMIPolyPatch::neighbPatchID() const
 {
     if (nbrPatchID_ == -1)
     {
-        nbrPatchID_ = this->boundaryMesh().findPatchID(nbrPatchName_);
+        nbrPatchID_ = this->boundaryMesh().findPatchID(neighbPatchName());
 
         if (nbrPatchID_ == -1)
         {
             FatalErrorIn("cyclicPolyAMIPatch::neighbPatchID() const")
-                << "Illegal neighbourPatch name " << nbrPatchName_
+                << "Illegal neighbourPatch name " << neighbPatchName()
                 << nl << "Valid patch names are "
                 << this->boundaryMesh().names()
                 << exit(FatalError);
@@ -832,8 +852,12 @@ Foam::label Foam::cyclicAMIPolyPatch::pointFace
 void Foam::cyclicAMIPolyPatch::write(Ostream& os) const
 {
     coupledPolyPatch::write(os);
-    os.writeKeyword("neighbourPatch") << nbrPatchName_
-        << token::END_STATEMENT << nl;
+    if (!nbrPatchName_.empty())
+    {
+        os.writeKeyword("neighbourPatch") << nbrPatchName_
+            << token::END_STATEMENT << nl;
+    }
+    coupleGroup_.write(os);
 
     switch (transform())
     {

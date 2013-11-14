@@ -93,14 +93,7 @@ thermalBaffle1DFvPatchScalarField
     const dictionary& dict
 )
 :
-    mappedPatchBase
-    (
-        p.patch(),
-        p.boundaryMesh().mesh().name(),
-        NEARESTPATCHFACE,
-        dict.lookup("samplePatch"),
-        0.0
-    ),
+    mappedPatchBase(p.patch(), NEARESTPATCHFACE, dict),
     mixedFvPatchScalarField(p, iF),
     TName_("T"),
     baffleActivated_(dict.lookupOrDefault<bool>("baffleActivated", true)),

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,44 +23,19 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "coupleGroupIdentifier.H"
 
-inline const Foam::word& Foam::cyclicAMIPolyPatch::neighbPatchName() const
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+const Foam::word& Foam::coupleGroupIdentifier::name() const
 {
-    if (nbrPatchName_.empty())
-    {
-        // Try and use patchGroup to find samplePatch and sampleRegion
-        label patchID = coupleGroup_.findOtherPatchID(*this);
-
-        nbrPatchName_ = boundaryMesh()[patchID].name();
-    }
-    return nbrPatchName_;
+    return name_;
 }
 
 
-inline const Foam::cyclicAMIPolyPatch&
-Foam::cyclicAMIPolyPatch::neighbPatch() const
+bool Foam::coupleGroupIdentifier::valid() const
 {
-    const polyPatch& pp = this->boundaryMesh()[neighbPatchID()];
-    return refCast<const cyclicAMIPolyPatch>(pp);
-}
-
-
-inline const Foam::vector& Foam::cyclicAMIPolyPatch::rotationAxis() const
-{
-    return rotationAxis_;
-}
-
-
-inline const Foam::point& Foam::cyclicAMIPolyPatch::rotationCentre() const
-{
-    return rotationCentre_;
-}
-
-
-inline const Foam::vector& Foam::cyclicAMIPolyPatch::separationVector() const
-{
-    return separationVector_;
+    return !name_.empty();
 }
 
 

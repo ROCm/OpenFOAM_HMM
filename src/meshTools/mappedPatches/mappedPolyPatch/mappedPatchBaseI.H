@@ -32,13 +32,59 @@ Foam::mappedPatchBase::mode() const
 
 inline const Foam::word& Foam::mappedPatchBase::sampleRegion() const
 {
+    if (sampleRegion_.empty())
+    {
+        if (!coupleGroup_.valid())
+        {
+            FatalErrorIn("mappedPatchBase::sampleRegion()")
+                << "Supply either a regionName or a coupleGroup"
+                << " for patch " << patch_.name()
+                << " in region " << patch_.boundaryMesh().mesh().name()
+                << exit(FatalError);
+        }
+
+        // Try and use patchGroup to find samplePatch and sampleRegion
+        label samplePatchID = coupleGroup_.findOtherPatchID
+        (
+            patch_,
+            sampleRegion_
+        );
+
+        samplePatch_ = sampleMesh().boundaryMesh()[samplePatchID].name();
+    }
     return sampleRegion_;
 }
 
 
 inline const Foam::word& Foam::mappedPatchBase::samplePatch() const
 {
+    if (samplePatch_.empty())
+    {
+        if (!coupleGroup_.valid())
+        {
+            FatalErrorIn("mappedPatchBase::samplePolyPatch()")
+                << "Supply either a patchName or a coupleGroup"
+                << " for patch " << patch_.name()
+                << " in region " << patch_.boundaryMesh().mesh().name()
+                << exit(FatalError);
+        }
+
+        // Try and use patchGroup to find samplePatch and sampleRegion
+        label samplePatchID = coupleGroup_.findOtherPatchID
+        (
+            patch_,
+            sampleRegion_
+        );
+
+        samplePatch_ = sampleMesh().boundaryMesh()[samplePatchID].name();
+    }
     return samplePatch_;
+}
+
+
+inline const Foam::word& Foam::mappedPatchBase::coupleGroup() const
+{
+    return coupleGroup_.name();
 }
 
 

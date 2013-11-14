@@ -586,26 +586,24 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                             pPtr->rho()
                         );
 
-                    const scalar mParcel0 = pPtr->nParticle()*pPtr->mass();
+                    if (pPtr->nParticle() >= 1.0)
+                    {
+                        parcelsAdded++;
+                        massAdded += pPtr->nParticle()*pPtr->mass();
 
-                    if (!pPtr->move(td, dt))
-                    {
-                        massAdded += mParcel0;
-                        delete pPtr;
-                    }
-                    else
-                    {
-                        if (pPtr->nParticle() >= 1.0)
+                        if (pPtr->move(td, dt))
                         {
                             td.cloud().addParticle(pPtr);
-                            massAdded += mParcel0;
-                            parcelsAdded++;
                         }
                         else
                         {
-                            delayedVolume += pPtr->nParticle()*pPtr->volume();
                             delete pPtr;
                         }
+                    }
+                    else
+                    {
+                        delayedVolume += pPtr->nParticle()*pPtr->volume();
+                        delete pPtr;
                     }
                 }
             }

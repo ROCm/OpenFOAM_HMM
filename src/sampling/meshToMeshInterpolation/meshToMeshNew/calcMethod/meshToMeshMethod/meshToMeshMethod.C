@@ -84,14 +84,7 @@ bool Foam::meshToMeshMethod::intersect
 
     tetOverlapVolume overlapEngine;
 
-    treeBoundBox bbTgtCell
-    (
-        pointField
-        (
-            tgt_.points(),
-            tgt_.cellPoints()[tgtCellI]
-        )
-    );
+    treeBoundBox bbTgtCell(tgt_.points(), tgt_.cellPoints()[tgtCellI]);
 
     return overlapEngine.cellCellOverlapMinDecomp
     (
@@ -113,14 +106,7 @@ Foam::scalar Foam::meshToMeshMethod::interVol
 {
     tetOverlapVolume overlapEngine;
 
-    treeBoundBox bbTgtCell
-    (
-        pointField
-        (
-            tgt_.points(),
-            tgt_.cellPoints()[tgtCellI]
-        )
-    );
+    treeBoundBox bbTgtCell(tgt_.points(), tgt_.cellPoints()[tgtCellI]);
 
     scalar vol = overlapEngine.cellCellOverlapVolumeMinDecomp
     (

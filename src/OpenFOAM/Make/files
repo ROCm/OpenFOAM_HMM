@@ -387,6 +387,7 @@ $(cellShape)/cellShapeIO.C
 $(cellShape)/cellShapeIOList.C
 
 meshes/Identifiers/patch/patchIdentifier.C
+meshes/Identifiers/patch/coupleGroupIdentifier.C
 
 meshes/MeshObject/meshObject.C
 
