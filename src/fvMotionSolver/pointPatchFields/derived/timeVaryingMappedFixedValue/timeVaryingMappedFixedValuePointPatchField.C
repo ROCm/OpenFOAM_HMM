@@ -103,7 +103,18 @@ timeVaryingMappedFixedValuePointPatchField
     endAverage_(pTraits<Type>::zero)
 {
     dict.readIfPresent("fieldTableName", fieldTableName_);
-    updateCoeffs();
+
+    if (dict.found("value"))
+    {
+        fixedValuePointPatchField<Type>::operator==
+        (
+            Field<Type>("value", dict, p.size())
+        );
+    }
+    else
+    {
+        updateCoeffs();
+    }
 }
 
 
