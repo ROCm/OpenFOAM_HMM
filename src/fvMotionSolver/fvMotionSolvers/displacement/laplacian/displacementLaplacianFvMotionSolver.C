@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -88,6 +88,24 @@ Foam::displacementLaplacianFvMotionSolver::displacementLaplacianFvMotionSolver
       : -1
     )
 {
+    if (debug)
+    {
+        Info<< "displacementLaplacianFvMotionSolver:" << nl
+            << "    diffusivity       : " << diffusivityPtr_().type() << nl
+            << "    frozenPoints zone : " << frozenPointsZone_ << endl;
+    }
+
+    // Weird one: if using bc on pointDisplacement that updateCoeffs()
+    // at construction time:
+    // - read pointDisplacement, some bcs do updateCoeffs
+    // - time gets incremented
+    // - laplacianMotionSolver::solve() : now uses (old!) bc values
+    // - laplacianMotionSolver::curPoints() : finally does
+    //      pointDisplacement::correctBoundaryConditions
+    // So first iteration uses old values (but future ones are ok)
+    // So:
+    pointDisplacement_.correctBoundaryConditions();
+
     IOobject io
     (
         "pointLocation",
@@ -96,13 +114,6 @@ Foam::displacementLaplacianFvMotionSolver::displacementLaplacianFvMotionSolver
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     );
-
-    if (debug)
-    {
-        Info<< "displacementLaplacianFvMotionSolver:" << nl
-            << "    diffusivity       : " << diffusivityPtr_().type() << nl
-            << "    frozenPoints zone : " << frozenPointsZone_ << endl;
-    }
 
 
     if (io.headerOk())
