@@ -120,7 +120,11 @@ timeVaryingMappedFixedValueFvPatchField
     }
     else
     {
-        updateCoeffs();
+        // Note: we use evaluate() here to trigger updateCoeffs followed
+        //       by re-setting of fvatchfield::updated_ flag. This is
+        //       so if first use is in the next time step it retriggers
+        //       a new update.
+        this->evaluate(Pstream::blocking);
     }
 }
 

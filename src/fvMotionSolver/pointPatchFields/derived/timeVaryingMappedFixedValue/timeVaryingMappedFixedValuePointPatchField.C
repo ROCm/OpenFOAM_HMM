@@ -113,7 +113,11 @@ timeVaryingMappedFixedValuePointPatchField
     }
     else
     {
-        updateCoeffs();
+        // Note: use evaluate to do updateCoeffs followed by a reset
+        //       of the pointPatchField::updated_ flag. This is
+        //       so if first use is in the next time step it retriggers
+        //       a new update.
+        pointPatchField<Type>::evaluate(Pstream::blocking);
     }
 }
 
