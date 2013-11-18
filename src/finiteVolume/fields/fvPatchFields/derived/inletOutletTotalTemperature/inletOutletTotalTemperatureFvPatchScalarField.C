@@ -40,7 +40,6 @@ inletOutletTotalTemperatureFvPatchScalarField
 :
     inletOutletFvPatchScalarField(p, iF),
     UName_("U"),
-    phiName_("phi"),
     psiName_("psi"),
     gamma_(0.0),
     T0_(p.size(), 0.0)
@@ -62,7 +61,6 @@ inletOutletTotalTemperatureFvPatchScalarField
 :
     inletOutletFvPatchScalarField(ptf, p, iF, mapper),
     UName_(ptf.UName_),
-    phiName_(ptf.phiName_),
     psiName_(ptf.psiName_),
     gamma_(ptf.gamma_),
     T0_(ptf.T0_, mapper)
@@ -79,11 +77,12 @@ inletOutletTotalTemperatureFvPatchScalarField
 :
     inletOutletFvPatchScalarField(p, iF),
     UName_(dict.lookupOrDefault<word>("U", "U")),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
     psiName_(dict.lookupOrDefault<word>("psi", "psi")),
     gamma_(readScalar(dict.lookup("gamma"))),
     T0_("T0", dict, p.size())
 {
+    this->phiName_ = dict.lookupOrDefault<word>("phi", "phi");
+
     this->refValue() = pTraits<scalar>::zero;
     if (dict.found("value"))
     {
@@ -110,7 +109,6 @@ inletOutletTotalTemperatureFvPatchScalarField
 :
     inletOutletFvPatchScalarField(tppsf),
     UName_(tppsf.UName_),
-    phiName_(tppsf.phiName_),
     psiName_(tppsf.psiName_),
     gamma_(tppsf.gamma_),
     T0_(tppsf.T0_)
@@ -126,7 +124,6 @@ inletOutletTotalTemperatureFvPatchScalarField
 :
     inletOutletFvPatchScalarField(tppsf, iF),
     UName_(tppsf.UName_),
-    phiName_(tppsf.phiName_),
     psiName_(tppsf.psiName_),
     gamma_(tppsf.gamma_),
     T0_(tppsf.T0_)
@@ -171,7 +168,7 @@ void Foam::inletOutletTotalTemperatureFvPatchScalarField::updateCoeffs()
         patch().lookupPatchField<volVectorField, vector>(UName_);
 
     const fvsPatchField<scalar>& phip =
-        patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
+        patch().lookupPatchField<surfaceScalarField, scalar>(this->phiName_);
 
     const fvPatchField<scalar>& psip =
         patch().lookupPatchField<volScalarField, scalar>(psiName_);
@@ -191,7 +188,7 @@ const
 {
     fvPatchScalarField::write(os);
     writeEntryIfDifferent<word>(os, "U", "U", UName_);
-    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
+    writeEntryIfDifferent<word>(os, "phi", "phi", this->phiName_);
     writeEntryIfDifferent<word>(os, "psi", "psi", psiName_);
     os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << nl;
     T0_.writeEntry("T0", os);

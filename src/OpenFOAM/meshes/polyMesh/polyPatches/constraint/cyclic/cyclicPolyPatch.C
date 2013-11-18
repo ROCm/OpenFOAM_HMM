@@ -171,7 +171,7 @@ void Foam::cyclicPolyPatch::calcTransforms
             "cyclicPolyPatch::calcTransforms()"
         )   << "Patch " << name()
             << " has transform type " << transformTypeNames[transform()]
-            << ", neighbour patch " << neighbPatchName_
+            << ", neighbour patch " << neighbPatchName()
             << " has transform type "
             << neighbPatch().transformTypeNames[neighbPatch().transform()]
             << exit(FatalError);
@@ -350,7 +350,7 @@ void Foam::cyclicPolyPatch::calcTransforms
                         << neighbPatch().separationVector_
                         << " by more than tolerance " << avgTol << endl
                         << "patch:" << name()
-                        << " neighbour:" << neighbPatchName_
+                        << " neighbour:" << neighbPatchName()
                         << endl;
                 }
 
@@ -374,7 +374,7 @@ void Foam::cyclicPolyPatch::calcTransforms
                         << "Continuing with specified separation vector "
                         << separationVector_ << endl
                         << "patch:" << name()
-                        << " neighbour:" << neighbPatchName_
+                        << " neighbour:" << neighbPatchName()
                         << endl;
                 }
 
@@ -658,6 +658,7 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
 :
     coupledPolyPatch(name, dict, index, bm, patchType),
     neighbPatchName_(dict.lookupOrDefault("neighbourPatch", word::null)),
+    coupleGroup_(dict),
     neighbPatchID_(-1),
     rotationAxis_(vector::zero),
     rotationCentre_(point::zero),
@@ -665,7 +666,7 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     coupledPointsPtr_(NULL),
     coupledEdgesPtr_(NULL)
 {
-    if (neighbPatchName_ == word::null)
+    if (neighbPatchName_ == word::null && !coupleGroup_.valid())
     {
         FatalIOErrorIn
         (
@@ -733,7 +734,8 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
 )
 :
     coupledPolyPatch(pp, bm),
-    neighbPatchName_(pp.neighbPatchName()),
+    neighbPatchName_(pp.neighbPatchName_),
+    coupleGroup_(pp.coupleGroup_),
     neighbPatchID_(-1),
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_),
@@ -753,11 +755,12 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     const label index,
     const label newSize,
     const label newStart,
-    const word& neighbPatchName
+    const word& neighbName
 )
 :
     coupledPolyPatch(pp, bm, index, newSize, newStart),
-    neighbPatchName_(neighbPatchName),
+    neighbPatchName_(neighbName),
+    coupleGroup_(pp.coupleGroup_),
     neighbPatchID_(-1),
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_),
@@ -765,10 +768,10 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     coupledPointsPtr_(NULL),
     coupledEdgesPtr_(NULL)
 {
-    if (neighbPatchName_ == name())
+    if (neighbName == name())
     {
         FatalErrorIn("cyclicPolyPatch::cyclicPolyPatch(..)")
-            << "Neighbour patch name " << neighbPatchName_
+            << "Neighbour patch name " << neighbName
             << " cannot be the same as this patch " << name()
             << exit(FatalError);
     }
@@ -789,6 +792,7 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
 :
     coupledPolyPatch(pp, bm, index, mapAddressing, newStart),
     neighbPatchName_(pp.neighbPatchName_),
+    coupleGroup_(pp.coupleGroup_),
     neighbPatchID_(-1),
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_),
@@ -809,16 +813,29 @@ Foam::cyclicPolyPatch::~cyclicPolyPatch()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+const Foam::word& Foam::cyclicPolyPatch::neighbPatchName() const
+{
+    if (neighbPatchName_.empty())
+    {
+        // Try and use patchGroup to find samplePatch and sampleRegion
+        label patchID = coupleGroup_.findOtherPatchID(*this);
+
+        neighbPatchName_ = boundaryMesh()[patchID].name();
+    }
+    return neighbPatchName_;
+}
+
+
 Foam::label Foam::cyclicPolyPatch::neighbPatchID() const
 {
     if (neighbPatchID_ == -1)
     {
-        neighbPatchID_ = this->boundaryMesh().findPatchID(neighbPatchName_);
+        neighbPatchID_ = this->boundaryMesh().findPatchID(neighbPatchName());
 
         if (neighbPatchID_ == -1)
         {
             FatalErrorIn("cyclicPolyPatch::neighbPatchID() const")
-                << "Illegal neighbourPatch name " << neighbPatchName_
+                << "Illegal neighbourPatch name " << neighbPatchName()
                 << endl << "Valid patch names are "
                 << this->boundaryMesh().names()
                 << exit(FatalError);
@@ -1256,7 +1273,7 @@ bool Foam::cyclicPolyPatch::order
     {
         Pout<< "order : of " << pp.size()
             << " faces of patch:" << name()
-            << " neighbour:" << neighbPatchName_
+            << " neighbour:" << neighbPatchName()
             << endl;
     }
     faceMap.setSize(pp.size());
@@ -1444,8 +1461,12 @@ bool Foam::cyclicPolyPatch::order
 void Foam::cyclicPolyPatch::write(Ostream& os) const
 {
     coupledPolyPatch::write(os);
-    os.writeKeyword("neighbourPatch") << neighbPatchName_
-        << token::END_STATEMENT << nl;
+    if (!neighbPatchName_.empty())
+    {
+        os.writeKeyword("neighbourPatch") << neighbPatchName_
+            << token::END_STATEMENT << nl;
+    }
+    coupleGroup_.write(os);
     switch (transform())
     {
         case ROTATIONAL:

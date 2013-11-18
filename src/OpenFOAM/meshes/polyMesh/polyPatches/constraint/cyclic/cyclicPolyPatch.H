@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,6 +50,7 @@ SourceFiles
 #include "edgeList.H"
 #include "polyBoundaryMesh.H"
 #include "diagTensorField.H"
+#include "coupleGroupIdentifier.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -67,7 +68,10 @@ class cyclicPolyPatch
     // Private data
 
         //- Name of other half
-        const word neighbPatchName_;
+        mutable word neighbPatchName_;
+
+        //- Optional patchGroup to find neighbPatch
+        const coupleGroupIdentifier coupleGroup_;
 
         //- Index of other half
         mutable label neighbPatchID_;
@@ -306,12 +310,10 @@ public:
 
     // Member Functions
 
-        const word& neighbPatchName() const
-        {
-            return neighbPatchName_;
-        }
+        //- Neighbour patch name
+        const word& neighbPatchName() const;
 
-        //- Neighbour patchID.
+        //- Neighbour patchID
         virtual label neighbPatchID() const;
 
         virtual bool owner() const

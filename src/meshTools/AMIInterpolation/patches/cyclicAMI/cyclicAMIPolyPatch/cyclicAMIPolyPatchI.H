@@ -27,6 +27,13 @@ License
 
 inline const Foam::word& Foam::cyclicAMIPolyPatch::neighbPatchName() const
 {
+    if (nbrPatchName_.empty())
+    {
+        // Try and use patchGroup to find samplePatch and sampleRegion
+        label patchID = coupleGroup_.findOtherPatchID(*this);
+
+        nbrPatchName_ = boundaryMesh()[patchID].name();
+    }
     return nbrPatchName_;
 }
 

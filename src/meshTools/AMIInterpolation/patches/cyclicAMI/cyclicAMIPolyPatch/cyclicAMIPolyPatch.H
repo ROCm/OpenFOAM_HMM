@@ -38,6 +38,7 @@ SourceFiles
 #include "coupledPolyPatch.H"
 #include "AMIPatchToPatchInterpolation.H"
 #include "polyBoundaryMesh.H"
+#include "coupleGroupIdentifier.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,7 +59,10 @@ private:
     // Private data
 
         //- Name of other half
-        const word nbrPatchName_;
+        mutable word nbrPatchName_;
+
+        //- Optional patchGroup to find neighbPatch
+        const coupleGroupIdentifier coupleGroup_;
 
         //- Index of other half
         mutable label nbrPatchID_;

@@ -199,7 +199,6 @@ mappedPatches/mappedPolyPatch/mappedPatchBase.C
 mappedPatches/mappedPolyPatch/mappedPolyPatch.C
 mappedPatches/mappedPolyPatch/mappedWallPolyPatch.C
 mappedPatches/mappedPolyPatch/mappedVariableThicknessWallPolyPatch.C
-mappedPatches/mappedPolyPatch/coupleGroupIdentifier.C
 
 mappedPatches/mappedPointPatch/mappedPointPatch.C
 mappedPatches/mappedPointPatch/mappedWallPointPatch.C

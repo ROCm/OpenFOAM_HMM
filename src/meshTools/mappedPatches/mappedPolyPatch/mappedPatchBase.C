@@ -1402,10 +1402,16 @@ void Foam::mappedPatchBase::write(Ostream& os) const
 {
     os.writeKeyword("sampleMode") << sampleModeNames_[mode_]
         << token::END_STATEMENT << nl;
-    os.writeKeyword("sampleRegion") << sampleRegion()
-        << token::END_STATEMENT << nl;
-    os.writeKeyword("samplePatch") << samplePatch()
-        << token::END_STATEMENT << nl;
+    if (!sampleRegion_.empty())
+    {
+        os.writeKeyword("sampleRegion") << sampleRegion_
+            << token::END_STATEMENT << nl;
+    }
+    if (!samplePatch_.empty())
+    {
+        os.writeKeyword("samplePatch") << samplePatch_
+            << token::END_STATEMENT << nl;
+    }
     coupleGroup_.write(os);
 
     if

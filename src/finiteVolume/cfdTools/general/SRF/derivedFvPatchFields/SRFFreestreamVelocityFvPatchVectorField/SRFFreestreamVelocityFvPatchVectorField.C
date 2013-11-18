@@ -73,6 +73,8 @@ SRFFreestreamVelocityFvPatchVectorField
     relative_(dict.lookupOrDefault("relative", false)),
     UInf_(dict.lookup("UInf"))
 {
+    this->phiName_ = dict.lookupOrDefault<word>("phi","phi");
+
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
 }
 
@@ -158,6 +160,7 @@ void Foam::SRFFreestreamVelocityFvPatchVectorField::write(Ostream& os) const
     fvPatchVectorField::write(os);
     os.writeKeyword("relative") << relative_ << token::END_STATEMENT << nl;
     os.writeKeyword("UInf") << UInf_ << token::END_STATEMENT << nl;
+    os.writeKeyword("phi") << this->phiName_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }
 
