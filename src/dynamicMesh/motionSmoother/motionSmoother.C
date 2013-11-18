@@ -872,10 +872,8 @@ void Foam::motionSmoother::correctBoundaryConditions
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::motionSmoother::movePoints
-(
-    pointField& newPoints
-)
+
+void Foam::motionSmoother::modifyMotionPoints(pointField& newPoints) const
 {
     // Correct for 2-D motion
     if (twoDCorrector_.required())
@@ -892,8 +890,8 @@ Foam::tmp<Foam::scalarField> Foam::motionSmoother::movePoints
         const pointField& oldPoints = mesh_.points();
         const edgeList& edges = mesh_.edges();
 
-        const labelList& neIndices = twoDCorrector().normalEdgeIndices();
-        const vector& pn = twoDCorrector().planeNormal();
+        const labelList& neIndices = twoDCorrector_.normalEdgeIndices();
+        const vector& pn = twoDCorrector_.planeNormal();
 
         forAll(neIndices, i)
         {
@@ -915,19 +913,19 @@ Foam::tmp<Foam::scalarField> Foam::motionSmoother::movePoints
 
     if (debug)
     {
-        Pout<< "motionSmoother::movePoints : testing sync of newPoints."
+        Pout<< "motionSmoother::modifyMotionPoints : testing sync of newPoints."
             << endl;
         testSyncPositions(newPoints, 1e-6*mesh_.bounds().mag());
     }
+}
 
-    // Move actual mesh points. Make sure to delete tetBasePtIs so it
-    // gets rebuilt.
+
+void Foam::motionSmoother::movePoints()
+{
+    // Make sure to clear out tetPtIs since used in checks (sometimes, should
+    // really check)
     mesh_.clearAdditionalGeom();
-    tmp<scalarField> tsweptVol = mesh_.movePoints(newPoints);
-
     pp_.movePoints(mesh_.points());
-
-    return tsweptVol;
 }
 
 
@@ -980,6 +978,79 @@ bool Foam::motionSmoother::scaleMesh
         smoothMesh,
         nAllowableErrors
     );
+}
+
+
+Foam::tmp<Foam::pointField> Foam::motionSmoother::curPoints() const
+{
+    // Set newPoints as old + scale*displacement
+
+    // Create overall displacement with same b.c.s as displacement_
+    wordList actualPatchTypes;
+    {
+        const pointBoundaryMesh& pbm = displacement_.mesh().boundary();
+        actualPatchTypes.setSize(pbm.size());
+        forAll(pbm, patchI)
+        {
+            actualPatchTypes[patchI] = pbm[patchI].type();
+        }
+    }
+
+    wordList actualPatchFieldTypes;
+    {
+        const pointVectorField::GeometricBoundaryField& pfld =
+            displacement_.boundaryField();
+        actualPatchFieldTypes.setSize(pfld.size());
+        forAll(pfld, patchI)
+        {
+            if (isA<fixedValuePointPatchField<vector> >(pfld[patchI]))
+            {
+                // Get rid of funny
+                actualPatchFieldTypes[patchI] =
+                    fixedValuePointPatchField<vector>::typeName;
+            }
+            else
+            {
+                actualPatchFieldTypes[patchI] = pfld[patchI].type();
+            }
+        }
+    }
+
+    pointVectorField totalDisplacement
+    (
+        IOobject
+        (
+            "totalDisplacement",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        scale_*displacement_,
+        actualPatchFieldTypes,
+        actualPatchTypes
+    );
+    correctBoundaryConditions(totalDisplacement);
+
+    if (debug)
+    {
+        Pout<< "scaleMesh : testing sync of totalDisplacement" << endl;
+        testSyncField
+        (
+            totalDisplacement,
+            maxMagEqOp(),
+            vector::zero,   // null value
+            1e-6*mesh_.bounds().mag()
+        );
+    }
+
+    tmp<pointField> tnewPoints(oldPoints_ + totalDisplacement.internalField());
+
+    // Correct for 2-D motion
+    modifyMotionPoints(tnewPoints());
+
+    return tnewPoints;
 }
 
 
@@ -1052,60 +1123,18 @@ bool Foam::motionSmoother::scaleMesh
         vector::zero    // null value
     );
 
-    // Set newPoints as old + scale*displacement
-    pointField newPoints;
-    {
-        // Create overall displacement with same b.c.s as displacement_
-        wordList actualPatchTypes;
-        {
-            const pointBoundaryMesh& pbm = displacement_.mesh().boundary();
-            actualPatchTypes.setSize(pbm.size());
-            forAll(pbm, patchI)
-            {
-                actualPatchTypes[patchI] = pbm[patchI].type();
-            }
-        }
-
-        pointVectorField totalDisplacement
-        (
-            IOobject
-            (
-                "totalDisplacement",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            scale_*displacement_,
-            displacement_.boundaryField().types(),
-            actualPatchTypes
-        );
-        correctBoundaryConditions(totalDisplacement);
-
-        if (debug)
-        {
-            Pout<< "scaleMesh : testing sync of totalDisplacement" << endl;
-            testSyncField
-            (
-                totalDisplacement,
-                maxMagEqOp(),
-                vector::zero,   // null value
-                1e-6*mesh_.bounds().mag()
-            );
-        }
-
-        newPoints = oldPoints_ + totalDisplacement.internalField();
-    }
-
     Info<< "Moving mesh using displacement scaling :"
         << " min:" << gMin(scale_.internalField())
         << "  max:" << gMax(scale_.internalField())
         << endl;
 
+    // Get points using current displacement and scale. Optionally 2D corrected.
+    pointField newPoints(curPoints());
 
-    // Move
-    movePoints(newPoints);
+    // Move. No need to do 2D correction since curPoints already done that.
+    mesh_.movePoints(newPoints);
+    movePoints();
+
 
     // Check. Returns parallel number of incorrect faces.
     faceSet wrongFaces(mesh_, "wrongFaces", mesh_.nFaces()/100+100);

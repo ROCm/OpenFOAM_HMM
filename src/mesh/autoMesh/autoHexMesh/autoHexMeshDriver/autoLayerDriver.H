@@ -58,7 +58,9 @@ class layerParameters;
 
 class autoLayerDriver
 {
-    // Static data members
+public:
+
+    // Public data types
 
         //- Extrusion controls
         enum extrudeMode
@@ -69,6 +71,7 @@ class autoLayerDriver
                             /*!< faces locally */
         };
 
+private:
 
     // Private classes
 

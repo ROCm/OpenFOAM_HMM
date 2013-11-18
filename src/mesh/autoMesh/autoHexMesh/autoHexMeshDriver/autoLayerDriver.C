@@ -3522,7 +3522,9 @@ void Foam::autoLayerDriver::addLayers
         }
 
         // Reset mesh points and start again
-        meshMover().movePoints(oldPoints);
+        mesh.movePoints(oldPoints);
+        // Update meshmover for change of mesh geometry
+        meshMover().movePoints();
         meshMover().correct();
 
 

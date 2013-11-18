@@ -403,9 +403,11 @@ public:
             //  bc's.
             void correctBoundaryConditions(pointVectorField&) const;
 
-            //- Move mesh. Does 2D correction (modifies passed pointField) and
-            //  polyMesh::movePoints. Returns swept volumes.
-            tmp<scalarField> movePoints(pointField&);
+            //- Apply optional point constraint (2d correction)
+            void modifyMotionPoints(pointField& newPoints) const;
+
+            //- Get the current points (oldPoints+scale*displacement)
+            tmp<pointField> curPoints() const;
 
             //- Set the errorReduction (by how much to scale the displacement
             //  at error locations) parameter. Returns the old value.
@@ -446,8 +448,13 @@ public:
                 const label nAllow = 0
             );
 
-            //- Update topology
+
+            //- Update for new mesh geometry
+            void movePoints();
+
+            //- Update for new mesh topology
             void updateMesh();
+
 
             //- Check mesh with mesh settings in dict. Collects incorrect faces
             //  in set. Returns true if one or more faces in error.
