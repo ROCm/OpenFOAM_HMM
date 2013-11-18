@@ -833,7 +833,7 @@ Foam::autoLayerDriver::makeLayerDisplacementField
 
     forAll(numLayers, patchI)
     {
-        //  0 layers: do not allow lslip so fixedValue 0
+        //  0 layers: do not allow slip so fixedValue 0
         // >0 layers: fixedValue which gets adapted
         if (numLayers[patchI] >= 0)
         {
