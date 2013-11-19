@@ -85,12 +85,12 @@ class tetIndices
     label faceBasePtI_;
 
     //- point on the face such that the right-hand circulation
-    //      {faceBasePtI_, facePtIA_, facePtBI_}
+    //      {faceBasePtI_, facePtAI_, facePtBI_}
     //  forms a triangle that points out of the tet
     label facePtAI_;
 
     //- point on the face such that the right-hand circulation
-    //      {faceBasePtI_, facePtIA_, facePtBI_}
+    //      {faceBasePtI_, facePtAI_, facePtBI_}
     //  forms a triangle that points out of the tet
     label facePtBI_;
 
