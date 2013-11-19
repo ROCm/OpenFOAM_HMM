@@ -179,7 +179,7 @@ Foam::incompressibleTwoPhaseMixture::nuf() const
 
 bool Foam::incompressibleTwoPhaseMixture::read()
 {
-    if (transportModel::read())
+    if (regIOobject::read())
     {
         if
         (

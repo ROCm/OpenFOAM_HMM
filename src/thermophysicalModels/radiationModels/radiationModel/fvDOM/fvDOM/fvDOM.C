@@ -28,6 +28,7 @@ License
 #include "scatterModel.H"
 #include "constants.H"
 #include "fvm.H"
+#include "addToRunTimeSelectionTable.H"
 
 using namespace Foam::constant;
 using namespace Foam::constant::mathematical;

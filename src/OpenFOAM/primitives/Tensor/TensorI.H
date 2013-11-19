@@ -123,11 +123,13 @@ inline Vector<Cmpt> Tensor<Cmpt>::x() const
     return Vector<Cmpt>(this->v_[XX], this->v_[XY], this->v_[XZ]);
 }
 
+
 template<class Cmpt>
 inline Vector<Cmpt> Tensor<Cmpt>::y() const
 {
     return Vector<Cmpt>(this->v_[YX], this->v_[YY], this->v_[YZ]);
 }
+
 
 template<class Cmpt>
 inline Vector<Cmpt>  Tensor<Cmpt>::z() const
@@ -160,11 +162,13 @@ inline const Cmpt&  Tensor<Cmpt>::xx() const
     return this->v_[XX];
 }
 
+
 template<class Cmpt>
 inline const Cmpt&  Tensor<Cmpt>::xy() const
 {
     return this->v_[XY];
 }
+
 
 template<class Cmpt>
 inline const Cmpt&  Tensor<Cmpt>::xz() const
@@ -179,11 +183,13 @@ inline const Cmpt&  Tensor<Cmpt>::yx() const
     return this->v_[YX];
 }
 
+
 template<class Cmpt>
 inline const Cmpt&  Tensor<Cmpt>::yy() const
 {
     return this->v_[YY];
 }
+
 
 template<class Cmpt>
 inline const Cmpt&  Tensor<Cmpt>::yz() const
@@ -198,11 +204,13 @@ inline const Cmpt&  Tensor<Cmpt>::zx() const
     return this->v_[ZX];
 }
 
+
 template<class Cmpt>
 inline const Cmpt&  Tensor<Cmpt>::zy() const
 {
     return this->v_[ZY];
 }
+
 
 template<class Cmpt>
 inline const Cmpt&  Tensor<Cmpt>::zz() const
@@ -217,11 +225,13 @@ inline Cmpt& Tensor<Cmpt>::xx()
     return this->v_[XX];
 }
 
+
 template<class Cmpt>
 inline Cmpt& Tensor<Cmpt>::xy()
 {
     return this->v_[XY];
 }
+
 
 template<class Cmpt>
 inline Cmpt& Tensor<Cmpt>::xz()
@@ -236,11 +246,13 @@ inline Cmpt& Tensor<Cmpt>::yx()
     return this->v_[YX];
 }
 
+
 template<class Cmpt>
 inline Cmpt& Tensor<Cmpt>::yy()
 {
     return this->v_[YY];
 }
+
 
 template<class Cmpt>
 inline Cmpt& Tensor<Cmpt>::yz()
@@ -255,11 +267,13 @@ inline Cmpt& Tensor<Cmpt>::zx()
     return this->v_[ZX];
 }
 
+
 template<class Cmpt>
 inline Cmpt& Tensor<Cmpt>::zy()
 {
     return this->v_[ZY];
 }
+
 
 template<class Cmpt>
 inline Cmpt& Tensor<Cmpt>::zz()
@@ -268,7 +282,6 @@ inline Cmpt& Tensor<Cmpt>::zz()
 }
 
 
-//- Return tensor transpose
 template<class Cmpt>
 inline Tensor<Cmpt> Tensor<Cmpt>::T() const
 {
@@ -320,7 +333,6 @@ inline void Tensor<Cmpt>::operator=(const Vector<Vector<Cmpt> >& tr)
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
-//- Hodge Dual operator (tensor -> vector)
 template<class Cmpt>
 inline Vector<Cmpt> operator*(const Tensor<Cmpt>& t)
 {
@@ -328,7 +340,6 @@ inline Vector<Cmpt> operator*(const Tensor<Cmpt>& t)
 }
 
 
-//- Hodge Dual operator (vector -> tensor)
 template<class Cmpt>
 inline Tensor<Cmpt> operator*(const Vector<Cmpt>& v)
 {
@@ -341,7 +352,6 @@ inline Tensor<Cmpt> operator*(const Vector<Cmpt>& v)
 }
 
 
-//- Inner-product between two tensors
 template<class Cmpt>
 inline typename innerProduct<Tensor<Cmpt>, Tensor<Cmpt> >::type
 operator&(const Tensor<Cmpt>& t1, const Tensor<Cmpt>& t2)
@@ -363,7 +373,6 @@ operator&(const Tensor<Cmpt>& t1, const Tensor<Cmpt>& t2)
 }
 
 
-//- Inner-product between a tensor and a vector
 template<class Cmpt>
 inline typename innerProduct<Tensor<Cmpt>, Vector<Cmpt> >::type
 operator&(const Tensor<Cmpt>& t, const Vector<Cmpt>& v)
@@ -377,7 +386,6 @@ operator&(const Tensor<Cmpt>& t, const Vector<Cmpt>& v)
 }
 
 
-//- Inner-product between a vector and a tensor
 template<class Cmpt>
 inline typename innerProduct<Vector<Cmpt>, Tensor<Cmpt> >::type
 operator&(const Vector<Cmpt>& v, const Tensor<Cmpt>& t)
@@ -391,7 +399,6 @@ operator&(const Vector<Cmpt>& v, const Tensor<Cmpt>& t)
 }
 
 
-//- Outer-product between two vectors
 template<class Cmpt>
 inline typename outerProduct<Vector<Cmpt>, Vector<Cmpt> >::type
 operator*(const Vector<Cmpt>& v1, const Vector<Cmpt>& v2)
@@ -405,7 +412,6 @@ operator*(const Vector<Cmpt>& v1, const Vector<Cmpt>& v2)
 }
 
 
-//- Division of a vector by a tensor, i.e. dot-product with the tensor inverse
 template<class Cmpt>
 inline typename innerProduct<Vector<Cmpt>, Tensor<Cmpt> >::type
 operator/(const Vector<Cmpt>& v, const Tensor<Cmpt>& t)
@@ -690,6 +696,7 @@ operator&&(const Tensor<Cmpt>& t1, const SphericalTensor<Cmpt>& st2)
     return(t1.xx()*st2.ii() + t1.yy()*st2.ii() + t1.zz()*st2.ii());
 }
 
+
 template<class Cmpt>
 class typeOfSum<SphericalTensor<Cmpt>, Tensor<Cmpt> >
 {
@@ -697,6 +704,7 @@ public:
 
     typedef Tensor<Cmpt> type;
 };
+
 
 template<class Cmpt>
 class typeOfSum<Tensor<Cmpt>, SphericalTensor<Cmpt> >
@@ -706,6 +714,7 @@ public:
     typedef Tensor<Cmpt> type;
 };
 
+
 template<class Cmpt>
 class innerProduct<SphericalTensor<Cmpt>, Tensor<Cmpt> >
 {
@@ -713,6 +722,7 @@ public:
 
     typedef Tensor<Cmpt> type;
 };
+
 
 template<class Cmpt>
 class innerProduct<Tensor<Cmpt>, SphericalTensor<Cmpt> >
@@ -777,7 +787,7 @@ operator-(const Tensor<Cmpt>& t1, const SymmTensor<Cmpt>& st2)
 }
 
 
-//- Inner-product between a spherical tensor and a tensor
+//- Inner-product between a symmetric tensor and a tensor
 template<class Cmpt>
 inline Tensor<Cmpt>
 operator&(const SymmTensor<Cmpt>& st1, const Tensor<Cmpt>& t2)
@@ -799,7 +809,7 @@ operator&(const SymmTensor<Cmpt>& st1, const Tensor<Cmpt>& t2)
 }
 
 
-//- Inner-product between a tensor and a spherical tensor
+//- Inner-product between a tensor and a symmetric tensor
 template<class Cmpt>
 inline Tensor<Cmpt>
 operator&(const Tensor<Cmpt>& t1, const SymmTensor<Cmpt>& st2)
@@ -821,7 +831,7 @@ operator&(const Tensor<Cmpt>& t1, const SymmTensor<Cmpt>& st2)
 }
 
 
-//- Double-dot-product between a spherical tensor and a tensor
+//- Double-dot-product between a symmetric tensor and a tensor
 template<class Cmpt>
 inline Cmpt
 operator&&(const SymmTensor<Cmpt>& st1, const Tensor<Cmpt>& t2)
@@ -835,7 +845,7 @@ operator&&(const SymmTensor<Cmpt>& st1, const Tensor<Cmpt>& t2)
 }
 
 
-//- Double-dot-product between a tensor and a spherical tensor
+//- Double-dot-product between a tensor and a symmetric tensor
 template<class Cmpt>
 inline Cmpt
 operator&&(const Tensor<Cmpt>& t1, const SymmTensor<Cmpt>& st2)
@@ -848,6 +858,7 @@ operator&&(const Tensor<Cmpt>& t1, const SymmTensor<Cmpt>& st2)
     );
 }
 
+
 template<class Cmpt>
 class typeOfSum<SymmTensor<Cmpt>, Tensor<Cmpt> >
 {
@@ -855,6 +866,7 @@ public:
 
     typedef Tensor<Cmpt> type;
 };
+
 
 template<class Cmpt>
 class typeOfSum<Tensor<Cmpt>, SymmTensor<Cmpt> >
@@ -872,6 +884,7 @@ public:
 
     typedef Tensor<Cmpt> type;
 };
+
 
 template<class Cmpt>
 class innerProduct<Tensor<Cmpt>, SymmTensor<Cmpt> >
