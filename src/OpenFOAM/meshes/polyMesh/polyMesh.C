@@ -1351,8 +1351,10 @@ bool Foam::polyMesh::pointInCell
 
         case FACECENTRETETS:
         {
-            const point& cc = cellCentres()[cellI];
+            // only test that point is on inside of plane defined by cell face
+            // triangles
             const cell& cFaces = cells()[cellI];
+
             forAll(cFaces, cFaceI)
             {
                 label faceI = cFaces[cFaceI];
@@ -1376,31 +1378,61 @@ bool Foam::polyMesh::pointInCell
                         nextPointI = f[fp];
                     }
 
-                    if
-                    (
-                        tetPointRef
-                        (
-                            points()[nextPointI],
-                            points()[pointI],
-                            fc,
-                            cc
-                        ).inside(p)
-                    )
+                    const point& p0 = points()[pointI];
+                    const point& p1 = points()[nextPointI];
+                    const point& p2 = fc;
+
+                    vector twoFaceArea = (p1 - p0)^(p2 - p0);
+                    point centre = (p0 + p1 + p2)/3.0;
+                    vector proj = p - centre;
+
+                    if ((twoFaceArea & proj) > 0)
                     {
-                        return true;
+                        return false;
                     }
                 }
             }
-            return false;
+            return true;
         }
         break;
 
         case FACEDIAGTETS:
         {
-            label tetFaceI, tetPtI;
-            findTetFacePt(cellI, p, tetFaceI, tetPtI);
+            // only test that point is on inside of plane defined by cell face
+            // triangles
+            const cell& cFaces = cells()[cellI];
 
-            return tetFaceI != -1;
+            forAll(cFaces, cFaceI)
+            {
+                label faceI = cFaces[cFaceI];
+                const face& f = faces_[faceI];
+
+                for (label tetPtI = 1; tetPtI < f.size() - 1; tetPtI++)
+                {
+                    // Get tetIndices of face triangle
+                    tetIndices faceTetIs
+                    (
+                        polyMeshTetDecomposition::triangleTetIndices
+                        (
+                            *this,
+                            faceI,
+                            cellI,
+                            tetPtI
+                        )
+                    );
+
+                    triPointRef faceTri = faceTetIs.faceTri(*this);
+
+                    vector proj = p - faceTri.centre();
+
+                    if ((faceTri.normal() & proj) > 0)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
         break;
     }
