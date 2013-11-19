@@ -234,7 +234,7 @@ baffleThickness() const
             FatalErrorIn
             (
                 " template<class solidType>"
-                " tmp<scalarField> thermalBaffle1DFvPatchScalarField<solidType>
+                " tmp<scalarField> thermalBaffle1DFvPatchScalarField<solidType>"
                 " baffleThickness() const"
             )<< " Field thickness has not been specified "
             << " for patch " << this->patch().name()
