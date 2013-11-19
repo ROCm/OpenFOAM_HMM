@@ -216,19 +216,39 @@ void Foam::fv::interRegionHeatTransferModel::addSup
     {
         if (h.dimensions() == dimEnergy/dimMass)
         {
-            const fluidThermo& thermo =
-                mesh_.lookupObject<fluidThermo>("thermophysicalProperties");
-
-            eqn += htc_*Tmapped - fvm::SuSp(htc_/thermo.Cp(), h);
-
-            if (debug)
+            if (mesh_.foundObject<fluidThermo>("thermophysicalProperties"))
             {
-                const dimensionedScalar energy =
-                    fvc::domainIntegrate(htc_*(h/thermo.Cp() - Tmapped));
+                const basicThermo& thermo =
+                   mesh_.lookupObject<basicThermo>("thermophysicalProperties");
 
-                Info<< "Energy exchange from region " << nbrMesh.name()
-                    << " To " << mesh_.name() << " : " <<  energy.value()
-                    << endl;
+                eqn += htc_*Tmapped - fvm::SuSp(htc_/thermo.Cp(), h);
+
+                if (debug)
+                {
+                    const dimensionedScalar energy =
+                        fvc::domainIntegrate(htc_*(h/thermo.Cp() - Tmapped));
+
+                    Info<< "Energy exchange from region " << nbrMesh.name()
+                        << " To " << mesh_.name() << " : " <<  energy.value()
+                        << endl;
+                }
+            }
+            else
+            {
+                 FatalErrorIn
+                (
+                    "void Foam::fv::interRegionHeatTransferModel::addSup"
+                    "("
+                    "   fvMatrix<scalar>&, "
+                    "   const label "
+                    ")"
+                )   << " on mesh " << mesh_.name()
+                    << " could not find object fluidThermo."
+                    << " The available objects : "
+                    << mesh_.names()
+                    << " The semi implicit option can only be used for "
+                    << "fluid-fluid inter region heat transfer models "
+                    << exit(FatalError);
             }
         }
         else if (h.dimensions() == dimTemperature)
