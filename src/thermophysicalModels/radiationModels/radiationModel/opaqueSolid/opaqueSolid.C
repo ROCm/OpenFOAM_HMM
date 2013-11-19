@@ -28,6 +28,7 @@ License
 #include "fvMesh.H"
 #include "Time.H"
 #include "volFields.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

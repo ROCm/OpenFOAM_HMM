@@ -26,10 +26,10 @@ License
 #include "P1.H"
 #include "fvmLaplacian.H"
 #include "fvmSup.H"
-
 #include "absorptionEmissionModel.H"
 #include "scatterModel.H"
 #include "constants.H"
+#include "addToRunTimeSelectionTable.H"
 
 using namespace Foam::constant;
 

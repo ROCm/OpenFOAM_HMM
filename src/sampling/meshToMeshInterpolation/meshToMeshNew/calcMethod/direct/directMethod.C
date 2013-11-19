@@ -44,7 +44,12 @@ bool Foam::directMethod::intersect
     const label tgtCellI
 ) const
 {
-    return tgt_.pointInCell(src_.cellCentres()[srcCellI], tgtCellI);
+    return tgt_.pointInCell
+    (
+        src_.cellCentres()[srcCellI],
+        tgtCellI,
+        polyMesh::FACEPLANES
+    );
 }
 
 
@@ -191,7 +196,15 @@ void Foam::directMethod::appendToDirectSeeds
             {
                 label tgtI = tgtNbr[j];
 
-                if (tgt_.pointInCell(srcCentre[srcI], tgtI))
+                if
+                (
+                    tgt_.pointInCell
+                    (
+                        srcCentre[srcI],
+                        tgtI,
+                        polyMesh::FACEPLANES
+                    )
+                )
                 {
                     // new match - append to lists
                     found = true;
