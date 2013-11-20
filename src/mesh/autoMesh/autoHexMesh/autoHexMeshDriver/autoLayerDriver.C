@@ -206,12 +206,13 @@ void Foam::autoLayerDriver::checkMeshManifold() const
             << " points." << nl
             << "This is not a fatal error but might cause some unexpected"
             << " behaviour." << nl
-            << "Writing " << nNonManif
-            << " points where this happens to pointSet "
-            << nonManifoldPoints.name() << endl;
+            //<< "Writing " << nNonManif
+            //<< " points where this happens to pointSet "
+            //<< nonManifoldPoints.name()
+            << endl;
 
-        nonManifoldPoints.instance() = meshRefiner_.timeName();
-        nonManifoldPoints.write();
+        //nonManifoldPoints.instance() = meshRefiner_.timeName();
+        //nonManifoldPoints.write();
     }
     Info<< endl;
 }
@@ -2634,6 +2635,8 @@ bool Foam::autoLayerDriver::writeLayerData
 
     if (meshRefinement::writeLevel() & meshRefinement::WRITELAYERFIELDS)
     {
+        Info<< nl << "Writing fields with layer information:" << incrIndent
+            << endl;
         {
             volScalarField fld
             (
@@ -2663,8 +2666,8 @@ bool Foam::autoLayerDriver::writeLayerData
                 }
                 fld.boundaryField()[patchI] == pfld;
             }
-            Info<< "Writing volScalarField " << fld.name()
-                << " with actual number of layers" << endl;
+            Info<< indent << fld.name() << "    : actual number of layers"
+                << endl;
             bool ok = fld.write();
             allOk = allOk & ok;
         }
@@ -2693,8 +2696,8 @@ bool Foam::autoLayerDriver::writeLayerData
                     faceRealThickness
                 );
             }
-            Info<< "Writing volScalarField " << fld.name()
-                << " with overall layer thickness" << endl;
+            Info<< indent << fld.name() << "         : overall layer thickness"
+                << endl;
             bool ok = fld.write();
             allOk = allOk & ok;
         }
@@ -2740,12 +2743,13 @@ bool Foam::autoLayerDriver::writeLayerData
 
                 fld.boundaryField()[patchI] == pfld;
             }
-            Info<< "Writing volScalarField " << fld.name()
-                << " with overall layer thickness as fraction"
-                << " of desired thickness" << endl;
+            Info<< indent << fld.name()
+                << " : overall layer thickness (fraction"
+                << " of desired thickness)" << endl;
             bool ok = fld.write();
             allOk = allOk & ok;
         }
+        Info<< decrIndent<< endl;
     }
 
     //if (meshRefinement::outputLevel() & meshRefinement::OUTPUTLAYERINFO)
