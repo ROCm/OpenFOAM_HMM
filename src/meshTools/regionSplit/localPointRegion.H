@@ -48,6 +48,7 @@ SourceFiles
 #include "HashSet.H"
 #include "faceList.H"
 #include "boolList.H"
+#include "labelPair.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -149,6 +150,9 @@ public:
                 const labelList&
             );
 
+            //- Helper routine to find all baffles (two boundary faces
+            //  using the same points but in reverse order)
+            static labelPairList findDuplicateFacePairs(const polyMesh&);
 
         // Access
 

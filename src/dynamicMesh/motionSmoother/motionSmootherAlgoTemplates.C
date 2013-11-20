@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "motionSmoother.H"
+#include "motionSmootherAlgo.H"
 #include "meshTools.H"
 #include "processorPointPatchFields.H"
 #include "pointConstraint.H"
@@ -32,7 +32,7 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::motionSmoother::checkConstraints
+void Foam::motionSmootherAlgo::checkConstraints
 (
     GeometricField<Type, pointPatchField, pointMesh>& pf
 )
@@ -119,7 +119,7 @@ void Foam::motionSmoother::checkConstraints
                 {
                     FatalErrorIn
                     (
-                        "motionSmoother::checkConstraints"
+                        "motionSmootherAlgo::checkConstraints"
                         "(GeometricField<Type, pointPatchField, pointMesh>&)"
                     )   << "Patch fields are not consistent on mesh point "
                         << ppp << " coordinate " << mesh.points()[ppp]
@@ -136,7 +136,7 @@ void Foam::motionSmoother::checkConstraints
 
 
 template<class Type>
-void Foam::motionSmoother::applyCornerConstraints
+void Foam::motionSmootherAlgo::applyCornerConstraints
 (
     GeometricField<Type, pointPatchField, pointMesh>& pf
 ) const
@@ -155,7 +155,7 @@ void Foam::motionSmoother::applyCornerConstraints
 // Average of connected points.
 template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::pointPatchField, Foam::pointMesh> >
-Foam::motionSmoother::avg
+Foam::motionSmootherAlgo::avg
 (
     const GeometricField<Type, pointPatchField, pointMesh>& fld,
     const scalarField& edgeWeight
@@ -253,7 +253,7 @@ Foam::motionSmoother::avg
 
 // smooth field (point-jacobi)
 template<class Type>
-void Foam::motionSmoother::smooth
+void Foam::motionSmootherAlgo::smooth
 (
     const GeometricField<Type, pointPatchField, pointMesh>& fld,
     const scalarField& edgeWeight,
@@ -278,7 +278,7 @@ void Foam::motionSmoother::smooth
 
 //- Test synchronisation of generic field (not positions!) on points
 template<class Type, class CombineOp>
-void Foam::motionSmoother::testSyncField
+void Foam::motionSmootherAlgo::testSyncField
 (
     const Field<Type>& fld,
     const CombineOp& cop,
@@ -308,7 +308,7 @@ void Foam::motionSmoother::testSyncField
         {
             FatalErrorIn
             (
-                "motionSmoother::testSyncField"
+                "motionSmootherAlgo::testSyncField"
                 "(const Field<Type>&, const CombineOp&"
                 ", const Type&, const bool)"
             )   << "On element " << i << " value:" << fld[i]

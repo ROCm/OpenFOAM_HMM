@@ -1519,10 +1519,9 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
                 labelList coupledFace(mesh_.nFaces(), -1);
                 {
                     // Get boundary baffles that need to stay together
-                    List<labelPair> allCouples = getDuplicateFaces
+                    List<labelPair> allCouples
                     (
-                        identity(nBnd)
-                       +mesh_.nInternalFaces()
+                        localPointRegion::findDuplicateFacePairs(mesh_)
                     );
 
                     // Merge with any couples from
@@ -2229,6 +2228,36 @@ void Foam::meshRefinement::selectSeparatedCoupledFaces(boolList& selected) const
 }
 
 
+Foam::label Foam::meshRefinement::findRegion
+(
+    const polyMesh& mesh,
+    const labelList& cellToRegion,
+    const vector& perturbVec,
+    const point& p
+)
+{
+    label regionI = -1;
+    label cellI = mesh.findCell(p);
+    if (cellI != -1)
+    {
+        regionI = cellToRegion[cellI];
+    }
+    reduce(regionI, maxOp<label>());
+
+    if (regionI == -1)
+    {
+        // See if we can perturb a bit
+        cellI = mesh.findCell(p+perturbVec);
+        if (cellI != -1)
+        {
+            regionI = cellToRegion[cellI];
+        }
+        reduce(regionI, maxOp<label>());
+    }
+    return regionI;
+}
+
+
 Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
 (
     const labelList& globalToMasterPatch,
@@ -2247,16 +2276,13 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
 
     regionSplit cellRegion(mesh_, blockedFace);
 
-    label regionI = -1;
-
-    label cellI = mesh_.findCell(keepPoint);
-
-    if (cellI != -1)
-    {
-        regionI = cellRegion[cellI];
-    }
-
-    reduce(regionI, maxOp<label>());
+    label regionI = findRegion
+    (
+        mesh_,
+        cellRegion,
+        mergeDistance_*vector(1,1,1), // note:1,1,1 should really be normalised
+        keepPoint
+    );
 
     if (regionI == -1)
     {

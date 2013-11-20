@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,245 +69,31 @@ Note
 
 SourceFiles
     motionSmoother.C
-    motionSmootherTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef motionSmoother_H
 #define motionSmoother_H
 
-#include "pointFields.H"
-#include "HashSet.H"
-#include "PackedBoolList.H"
-#include "indirectPrimitivePatch.H"
-#include "className.H"
-#include "twoDPointCorrector.H"
+#include "motionSmootherData.H"
+#include "motionSmootherAlgo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class polyMeshGeometry;
-class faceSet;
-
 /*---------------------------------------------------------------------------*\
                            Class motionSmoother Declaration
 \*---------------------------------------------------------------------------*/
 
 class motionSmoother
+:
+    public motionSmootherData,
+    public motionSmootherAlgo
+
 {
     // Private class
-
-        //- To synchronise displacements. We want max displacement since
-        //  this is what is specified on pp and internal mesh will have
-        //  zero displacement.
-        class maxMagEqOp
-        {
-
-        public:
-
-            void operator()(vector& x, const vector& y) const
-            {
-                for (direction i = 0; i < vector::nComponents; i++)
-                {
-                    scalar magX = mag(x[i]);
-                    scalar magY = mag(y[i]);
-
-                    if (magX < magY)
-                    {
-                        x[i] = y[i];
-                    }
-                    else if (magX == magY)
-                    {
-                        if (y[i] > x[i])
-                        {
-                            x[i] = y[i];
-                        }
-                    }
-                }
-            }
-        };
-
-
-    // Private data
-
-        //- Reference to polyMesh. Non-const since we move mesh.
-        polyMesh& mesh_;
-
-        //- Reference to pointMesh
-        pointMesh& pMesh_;
-
-        //- Reference to face subset of all adaptPatchIDs
-        indirectPrimitivePatch& pp_;
-
-        //- Indices of fixedValue patches that we're allowed to modify the
-        // displacement on.
-        const labelList adaptPatchIDs_;
-
-
-        // Smoothing and checking parameters
-        dictionary paramDict_;
-
-        // Internal data
-
-        //- Displacement field
-        pointVectorField displacement_;
-
-        //- Scale factor for displacement
-        pointScalarField scale_;
-
-        //- Starting mesh position
-        pointField oldPoints_;
-
-        //- Is mesh point on boundary or not
-        PackedBoolList isInternalPoint_;
-
-        //- Is edge master (always except if on coupled boundary and on
-        //  lower processor)
-        PackedBoolList isMasterEdge_;
-
-        //- 2-D motion corrector
-        twoDPointCorrector twoDCorrector_;
-
-        // Muli-patch constraints (from pointPatchInterpolation)
-
-            labelList patchPatchPointConstraintPoints_;
-            tensorField patchPatchPointConstraintTensors_;
-
-
-    // Private Member Functions
-
-        //- Average of connected points.
-        template<class Type>
-        tmp<GeometricField<Type, pointPatchField, pointMesh> > avg
-        (
-            const GeometricField<Type, pointPatchField, pointMesh>& fld,
-            const scalarField& edgeWeight
-        ) const;
-
-        //- Average postion of connected points.
-        template<class Type>
-        tmp<GeometricField<Type, pointPatchField, pointMesh> > avgPositions
-        (
-            const GeometricField<Type, pointPatchField, pointMesh>& fld,
-            const scalarField& edgeWeight
-        ) const;
-
-        //- Check constraints
-        template<class Type>
-        static void checkConstraints
-        (
-            GeometricField<Type, pointPatchField, pointMesh>&
-        );
-
-        //- Multi-patch constraints
-        template<class Type>
-        void applyCornerConstraints
-        (
-            GeometricField<Type, pointPatchField, pointMesh>&
-        ) const;
-
-        //- Test synchronisation of generic field (not positions!) on points
-        template<class Type, class CombineOp>
-        void testSyncField
-        (
-            const Field<Type>&,
-            const CombineOp& cop,
-            const Type& zero,
-            const scalar maxMag
-        ) const;
-
-        //- Test synchronisation of points
-        void testSyncPositions(const pointField&, const scalar maxMag) const;
-
-        //- Assemble tensors for multi-patch constraints
-        void makePatchPatchAddressing();
-
-        static void checkFld(const pointScalarField&);
-
-        //- Get points used by given faces
-        labelHashSet getPoints(const labelHashSet&) const;
-
-        //- Calculate per-edge weight
-        tmp<scalarField> calcEdgeWeights(const pointField&) const;
-
-        //- explicit smoothing and min on all affected internal points
-        void minSmooth
-        (
-            const scalarField& edgeWeights,
-            const PackedBoolList& isAffectedPoint,
-            const pointScalarField& fld,
-            pointScalarField& newFld
-        ) const;
-
-        //- same but only on selected points (usually patch points)
-        void minSmooth
-        (
-            const scalarField& edgeWeights,
-            const PackedBoolList& isAffectedPoint,
-            const labelList& meshPoints,
-            const pointScalarField& fld,
-            pointScalarField& newFld
-        ) const;
-
-        //- Scale certain (internal) points of a field
-        void scaleField
-        (
-            const labelHashSet& pointLabels,
-            const scalar scale,
-            pointScalarField&
-        ) const;
-
-        //- As above but points have to be in meshPoints as well
-        //  (usually to scale patch points)
-        void scaleField
-        (
-            const labelList& meshPoints,
-            const labelHashSet& pointLabels,
-            const scalar scale,
-            pointScalarField&
-        ) const;
-
-        //- Lower on internal points
-        void subtractField
-        (
-            const labelHashSet& pointLabels,
-            const scalar f,
-            pointScalarField&
-        ) const;
-
-        //- As above but points have to be in meshPoints as well
-        //  (usually to scale patch points)
-        void subtractField
-        (
-            const labelList& meshPoints,
-            const labelHashSet& pointLabels,
-            const scalar scale,
-            pointScalarField&
-        ) const;
-
-        //- Helper function. Is point internal?
-        bool isInternalPoint(const label pointI) const;
-
-        //- Given a set of faces that cause smoothing and a number of
-        //  iterations determine the maximum set of points who are affected
-        //  and the accordingly affected faces.
-        void getAffectedFacesAndPoints
-        (
-            const label nPointIter,
-            const faceSet& wrongFaces,
-
-            labelList& affectedFaces,
-            PackedBoolList& isAffectedPoint
-        ) const;
-
-        //- Disallow default bitwise copy construct
-        motionSmoother(const motionSmoother&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const motionSmoother&);
-
 
 public:
 
@@ -337,209 +123,12 @@ public:
             const dictionary& paramDict
         );
 
-
-    //- Destructor
-    ~motionSmoother();
-
-
-    // Member Functions
-
-        // Access
-
-            //- Reference to mesh
-            const polyMesh& mesh() const;
-
-            //- Reference to pointMesh
-            const pointMesh& pMesh() const;
-
-            //- Reference to patch
-            const indirectPrimitivePatch& patch() const;
-
-            //- Patch labels that are being adapted
-            const labelList& adaptPatchIDs() const;
-
-            const dictionary& paramDict() const;
-
-            //- Reference to displacement field
-            pointVectorField& displacement();
-
-            //- Reference to displacement field
-            const pointVectorField& displacement() const;
-
-            //- Reference to scale field
-            const pointScalarField& scale() const;
-
-            //- Starting mesh position
-            const pointField& oldPoints() const;
-
-            //- Return reference to 2D point motion correction
-            twoDPointCorrector& twoDCorrector()
-            {
-                return twoDCorrector_;
-            }
-
-
-
-        // Edit
-
-            //- Take over existing mesh position.
-            void correct();
-
-            //- Set patch fields on displacement to be consistent with
-            //  internal values.
-            void setDisplacementPatchFields();
-
-            //- Set displacement field from displacement on patch points.
-            //  Modify provided displacement to be consistent with actual
-            //  boundary conditions on displacement. Note: resets the
-            //  displacement to be 0 on coupled patches beforehand
-            //  to make sure shared points
-            //  partially on pp (on some processors) and partially not
-            //  (on other processors) get the value from pp.
-            void setDisplacement(pointField& patchDisp);
-
-            //- Special correctBoundaryConditions which evaluates fixedValue
-            //  patches first so they get overwritten with any constraint
-            //  bc's.
-            void correctBoundaryConditions(pointVectorField&) const;
-
-            //- Move mesh. Does 2D correction (modifies passed pointField) and
-            //  polyMesh::movePoints. Returns swept volumes.
-            tmp<scalarField> movePoints(pointField&);
-
-            //- Set the errorReduction (by how much to scale the displacement
-            //  at error locations) parameter. Returns the old value.
-            //  Set to 0 (so revert to old mesh) grows out one cell layer
-            //  from error faces.
-            scalar setErrorReduction(const scalar);
-
-            //- Move mesh with given scale. Return true if mesh ok or has
-            //  less than nAllow errors, false
-            //  otherwise and locally update scale. Smoothmesh=false means only
-            //  patch points get moved.
-            //  Parallel ok (as long as displacement field is consistent
-            //  across patches)
-            bool scaleMesh
-            (
-                labelList& checkFaces,
-                const bool smoothMesh = true,
-                const label nAllow = 0
-            );
-
-            //- Move mesh (with baffles) with given scale.
-            bool scaleMesh
-            (
-                labelList& checkFaces,
-                const List<labelPair>& baffles,
-                const bool smoothMesh = true,
-                const label nAllow = 0
-            );
-
-            //- Move mesh with externally provided mesh constraints
-            bool scaleMesh
-            (
-                labelList& checkFaces,
-                const List<labelPair>& baffles,
-                const dictionary& paramDict,
-                const dictionary& meshQualityDict,
-                const bool smoothMesh = true,
-                const label nAllow = 0
-            );
-
-            //- Update topology
-            void updateMesh();
-
-            //- Check mesh with mesh settings in dict. Collects incorrect faces
-            //  in set. Returns true if one or more faces in error.
-            //  Parallel ok.
-            static bool checkMesh
-            (
-                const bool report,
-                const polyMesh& mesh,
-                const dictionary& dict,
-                labelHashSet& wrongFaces
-            );
-
-            //- Check (subset of mesh) with mesh settings in dict.
-            //  Collects incorrect faces in set. Returns true if one
-            //  or more faces in error. Parallel ok.
-            static bool checkMesh
-            (
-                const bool report,
-                const polyMesh& mesh,
-                const dictionary& dict,
-                const labelList& checkFaces,
-                labelHashSet& wrongFaces
-            );
-
-            //- Check (subset of mesh including baffles) with mesh settings
-            //  in dict. Collects incorrect faces in set. Returns true if one
-            //  or more faces in error. Parallel ok.
-            static bool checkMesh
-            (
-                const bool report,
-                const polyMesh& mesh,
-                const dictionary& dict,
-                const labelList& checkFaces,
-                const List<labelPair>& baffles,
-                labelHashSet& wrongFaces
-            );
-
-            //- Check part of mesh with mesh settings in dict.
-            //  Collects incorrect faces in set. Returns true if one or
-            //  more faces in error. Parallel ok.
-            static bool checkMesh
-            (
-                const bool report,
-                const dictionary& dict,
-                const polyMeshGeometry&,
-                const labelList& checkFaces,
-                labelHashSet& wrongFaces
-            );
-
-            //- Check part of mesh including baffles with mesh settings in dict.
-            //  Collects incorrect faces in set. Returns true if one or
-            //  more faces in error. Parallel ok.
-            static bool checkMesh
-            (
-                const bool report,
-                const dictionary& dict,
-                const polyMeshGeometry&,
-                const labelList& checkFaces,
-                const List<labelPair>& baffles,
-                labelHashSet& wrongFaces
-            );
-
-            // Helper functions to manipulate displacement vector.
-
-                //- Fully explicit smoothing of fields (not positions)
-                //  of internal points with varying diffusivity.
-                template<class Type>
-                void smooth
-                (
-                    const GeometricField<Type, pointPatchField, pointMesh>& fld,
-                    const scalarField& edgeWeight,
-                    GeometricField<Type, pointPatchField, pointMesh>& newFld
-                ) const;
 };
-
-
-template<>
-void motionSmoother::applyCornerConstraints<scalar>
-(
-    GeometricField<scalar, pointPatchField, pointMesh>& pf
-) const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "motionSmootherTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -621,89 +621,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createBaffles
 }
 
 
-// Return a list of coupled face pairs, i.e. faces that use the same vertices.
-// (this information is recalculated instead of maintained since would be too
-// hard across splitMeshRegions).
-Foam::List<Foam::labelPair> Foam::meshRefinement::getDuplicateFaces
-(
-    const labelList& testFaces
-) const
-{
-    labelList duplicateFace
-    (
-        localPointRegion::findDuplicateFaces
-        (
-            mesh_,
-            testFaces
-        )
-    );
-
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
-    // Convert into list of coupled face pairs (mesh face labels).
-    List<labelPair> duplicateFaces(testFaces.size());
-    label dupI = 0;
-
-    forAll(duplicateFace, i)
-    {
-        label otherFaceI = duplicateFace[i];
-
-        if (otherFaceI != -1 && i < otherFaceI)
-        {
-            label meshFace0 = testFaces[i];
-            label patch0 = patches.whichPatch(meshFace0);
-            label meshFace1 = testFaces[otherFaceI];
-            label patch1 = patches.whichPatch(meshFace1);
-
-            if
-            (
-                (patch0 != -1 && isA<processorPolyPatch>(patches[patch0]))
-             || (patch1 != -1 && isA<processorPolyPatch>(patches[patch1]))
-            )
-            {
-                FatalErrorIn
-                (
-                    "meshRefinement::getDuplicateFaces"
-                    "(const bool, const labelList&)"
-                )   << "One of two duplicate faces is on"
-                    << " processorPolyPatch."
-                    << "This is not allowed." << nl
-                    << "Face:" << meshFace0
-                    << " is on patch:" << patches[patch0].name()
-                    << nl
-                    << "Face:" << meshFace1
-                    << " is on patch:" << patches[patch1].name()
-                    << abort(FatalError);
-            }
-
-            duplicateFaces[dupI++] = labelPair(meshFace0, meshFace1);
-        }
-    }
-    duplicateFaces.setSize(dupI);
-
-    Info<< "getDuplicateFaces : found " << returnReduce(dupI, sumOp<label>())
-        << " pairs of duplicate faces." << nl << endl;
-
-
-    if (debug&MESH)
-    {
-        faceSet duplicateFaceSet(mesh_, "duplicateFaces", 2*dupI);
-
-        forAll(duplicateFaces, i)
-        {
-            duplicateFaceSet.insert(duplicateFaces[i][0]);
-            duplicateFaceSet.insert(duplicateFaces[i][1]);
-        }
-        Pout<< "Writing duplicate faces (baffles) to faceSet "
-            << duplicateFaceSet.name() << nl << endl;
-        duplicateFaceSet.instance() = timeName();
-        duplicateFaceSet.write();
-    }
-
-    return duplicateFaces;
-}
-
-
 Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createZoneBaffles
 (
     const labelList& globalToMasterPatch,
@@ -1464,18 +1381,16 @@ void Foam::meshRefinement::findCellZoneInsideWalk
             << endl;
 
         // Find the region containing the insidePoint
-        label keepRegionI = -1;
-
-        label cellI = mesh_.findCell(insidePoint);
-
-        if (cellI != -1)
-        {
-            keepRegionI = cellRegion[cellI];
-        }
-        reduce(keepRegionI, maxOp<label>());
+        label keepRegionI = findRegion
+        (
+            mesh_,
+            cellRegion,
+            mergeDistance_*vector(1,1,1),
+            insidePoint
+        );
 
         Info<< "For surface " << surfaces_.names()[surfI]
-            << " found point " << insidePoint << " in cell " << cellI
+            << " found point " << insidePoint
             << " in global region " << keepRegionI
             << " out of " << cellRegion.nRegions() << " regions." << endl;
 
@@ -1631,19 +1546,16 @@ void Foam::meshRefinement::findCellZoneTopo
     }
 
 
-
     // Find the region containing the keepPoint
-    label keepRegionI = -1;
+    label keepRegionI = findRegion
+    (
+        mesh_,
+        cellRegion,
+        mergeDistance_*vector(1,1,1),
+        keepPoint
+    );
 
-    label cellI = mesh_.findCell(keepPoint);
-
-    if (cellI != -1)
-    {
-        keepRegionI = cellRegion[cellI];
-    }
-    reduce(keepRegionI, maxOp<label>());
-
-    Info<< "Found point " << keepPoint << " in cell " << cellI
+    Info<< "Found point " << keepPoint
         << " in global region " << keepRegionI
         << " out of " << cellRegion.nRegions() << " regions." << endl;
 
@@ -2621,11 +2533,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
         (
             freeStandingBaffles    // filter out freestanding baffles
             (
-                getDuplicateFaces   // get all baffles
-                (
-                    identity(mesh_.nFaces()-mesh_.nInternalFaces())
-                   +mesh_.nInternalFaces()
-                ),
+                localPointRegion::findDuplicateFacePairs(mesh_),
                 planarAngle
             )
         );
@@ -2713,17 +2621,15 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
     blockedFace.clear();
 
     // Find the region containing the keepPoint
-    label keepRegionI = -1;
+    label keepRegionI = findRegion
+    (
+        mesh_,
+        cellRegion,
+        mergeDistance_*vector(1,1,1),
+        keepPoint
+    );
 
-    label cellI = mesh_.findCell(keepPoint);
-
-    if (cellI != -1)
-    {
-        keepRegionI = cellRegion[cellI];
-    }
-    reduce(keepRegionI, maxOp<label>());
-
-    Info<< "Found point " << keepPoint << " in cell " << cellI
+    Info<< "Found point " << keepPoint
         << " in global region " << keepRegionI
         << " out of " << cellRegion.nRegions() << " regions." << endl;
 

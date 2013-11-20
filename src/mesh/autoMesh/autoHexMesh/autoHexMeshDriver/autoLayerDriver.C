@@ -53,6 +53,7 @@ Description
 #include "calculatedPointPatchFields.H"
 #include "cyclicSlipPointPatchFields.H"
 #include "fixedValueFvPatchFields.H"
+#include "localPointRegion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -833,7 +834,7 @@ Foam::autoLayerDriver::makeLayerDisplacementField
 
     forAll(numLayers, patchI)
     {
-        //  0 layers: do not allow lslip so fixedValue 0
+        //  0 layers: do not allow slip so fixedValue 0
         // >0 layers: fixedValue which gets adapted
         if (numLayers[patchI] >= 0)
         {
@@ -2809,14 +2810,7 @@ void Foam::autoLayerDriver::mergePatchFacesUndo
 
     const fvMesh& mesh = meshRefiner_.mesh();
 
-    List<labelPair> couples
-    (
-        meshRefiner_.getDuplicateFaces   // get all baffles
-        (
-            identity(mesh.nFaces()-mesh.nInternalFaces())
-          + mesh.nInternalFaces()
-        )
-    );
+    List<labelPair> couples(localPointRegion::findDuplicateFacePairs(mesh));
 
     labelList duplicateFace(mesh.nFaces(), -1);
     forAll(couples, i)
@@ -3522,7 +3516,9 @@ void Foam::autoLayerDriver::addLayers
         }
 
         // Reset mesh points and start again
-        meshMover().movePoints(oldPoints);
+        mesh.movePoints(oldPoints);
+        // Update meshmover for change of mesh geometry
+        meshMover().movePoints();
         meshMover().correct();
 
 
