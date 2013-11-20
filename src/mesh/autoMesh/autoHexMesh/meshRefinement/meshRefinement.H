@@ -853,10 +853,6 @@ public:
                 List<labelPair>&
             );
 
-            //- Return a list of coupled face pairs, i.e. faces that
-            //  use the same vertices.
-            List<labelPair> getDuplicateFaces(const labelList& testFaces) const;
-
             //- Merge baffles. Gets pairs of faces.
             autoPtr<mapPolyMesh> mergeBaffles(const List<labelPair>&);
 

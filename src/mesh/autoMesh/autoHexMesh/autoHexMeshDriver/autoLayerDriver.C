@@ -53,6 +53,7 @@ Description
 #include "calculatedPointPatchFields.H"
 #include "cyclicSlipPointPatchFields.H"
 #include "fixedValueFvPatchFields.H"
+#include "localPointRegion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -2809,14 +2810,7 @@ void Foam::autoLayerDriver::mergePatchFacesUndo
 
     const fvMesh& mesh = meshRefiner_.mesh();
 
-    List<labelPair> couples
-    (
-        meshRefiner_.getDuplicateFaces   // get all baffles
-        (
-            identity(mesh.nFaces()-mesh.nInternalFaces())
-          + mesh.nInternalFaces()
-        )
-    );
+    List<labelPair> couples(localPointRegion::findDuplicateFacePairs(mesh));
 
     labelList duplicateFace(mesh.nFaces(), -1);
     forAll(couples, i)

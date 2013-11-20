@@ -1519,10 +1519,9 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
                 labelList coupledFace(mesh_.nFaces(), -1);
                 {
                     // Get boundary baffles that need to stay together
-                    List<labelPair> allCouples = getDuplicateFaces
+                    List<labelPair> allCouples
                     (
-                        identity(nBnd)
-                       +mesh_.nInternalFaces()
+                        localPointRegion::findDuplicateFacePairs(mesh_)
                     );
 
                     // Merge with any couples from
