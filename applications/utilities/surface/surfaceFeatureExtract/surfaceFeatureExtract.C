@@ -1223,10 +1223,10 @@ int main(int argc, char *argv[])
             << "        internal edges : " << newSet.nInternalEdges() << nl
             << endl;
 
-        if (writeObj)
-        {
-            newSet.writeObj("final");
-        }
+        //if (writeObj)
+        //{
+        //    newSet.writeObj("final");
+        //}
 
         boolList surfBaffleRegions(surf.patches().size(), false);
 
