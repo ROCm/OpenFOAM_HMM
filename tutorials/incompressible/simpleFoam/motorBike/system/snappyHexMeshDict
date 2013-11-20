@@ -159,7 +159,7 @@ castellatedMeshControls
     // section reachable from the locationInMesh is kept.
     // NOTE: This point should never be on a face, always inside a cell, even
     // after refinement.
-    locationInMesh (3 3 0.43);
+    locationInMesh (3.0001 3.0001 0.43);
 
 
     // Whether any faceZones (as specified in the refinementSurfaces)
@@ -311,12 +311,11 @@ meshQualityControls
 
 // Advanced
 
-// Flags for optional output
-// 0 : only write final meshes
-// 1 : write intermediate meshes
-// 2 : write volScalarField with cellLevel for postprocessing
-// 4 : write current intersections as .obj files
-debug 0;
+// Write flags
+writeFlags
+(
+    layerFields     // write volScalarField for layer coverage
+);
 
 
 // Merge tolerance. Is fraction of overall bounding box of initial mesh.
