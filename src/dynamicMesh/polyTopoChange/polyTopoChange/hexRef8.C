@@ -3185,7 +3185,8 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
 
     forAll(refineCell, cellI)
     {
-        if (refineCell.get(cellI))
+//        if (refineCell.get(cellI))
+        if (refineCell[cellI])
         {
             nRefined++;
         }
@@ -3196,7 +3197,8 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
 
     forAll(refineCell, cellI)
     {
-        if (refineCell.get(cellI))
+//        if (refineCell.get(cellI))
+        if (refineCell[cellI])
         {
             newCellsToRefine[nRefined++] = cellI;
         }
