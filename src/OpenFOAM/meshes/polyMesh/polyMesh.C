@@ -1378,15 +1378,16 @@ bool Foam::polyMesh::pointInCell
                         nextPointI = f[fp];
                     }
 
-                    const point& p0 = points()[pointI];
-                    const point& p1 = points()[nextPointI];
-                    const point& p2 = fc;
+                    triPointRef faceTri
+                    (
+                        points()[pointI],
+                        points()[nextPointI],
+                        fc
+                    );
 
-                    vector twoFaceArea = (p1 - p0)^(p2 - p0);
-                    point centre = (p0 + p1 + p2)/3.0;
-                    vector proj = p - centre;
+                    vector proj = p - faceTri.centre();
 
-                    if ((twoFaceArea & proj) > 0)
+                    if ((faceTri.normal() & proj) > 0)
                     {
                         return false;
                     }
