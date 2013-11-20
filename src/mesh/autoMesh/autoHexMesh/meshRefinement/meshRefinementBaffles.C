@@ -1381,18 +1381,16 @@ void Foam::meshRefinement::findCellZoneInsideWalk
             << endl;
 
         // Find the region containing the insidePoint
-        label keepRegionI = -1;
-
-        label cellI = mesh_.findCell(insidePoint);
-
-        if (cellI != -1)
-        {
-            keepRegionI = cellRegion[cellI];
-        }
-        reduce(keepRegionI, maxOp<label>());
+        label keepRegionI = findRegion
+        (
+            mesh_,
+            cellRegion,
+            mergeDistance_*vector(1,1,1),
+            insidePoint
+        );
 
         Info<< "For surface " << surfaces_.names()[surfI]
-            << " found point " << insidePoint << " in cell " << cellI
+            << " found point " << insidePoint
             << " in global region " << keepRegionI
             << " out of " << cellRegion.nRegions() << " regions." << endl;
 
@@ -1548,19 +1546,16 @@ void Foam::meshRefinement::findCellZoneTopo
     }
 
 
-
     // Find the region containing the keepPoint
-    label keepRegionI = -1;
+    label keepRegionI = findRegion
+    (
+        mesh_,
+        cellRegion,
+        mergeDistance_*vector(1,1,1),
+        keepPoint
+    );
 
-    label cellI = mesh_.findCell(keepPoint);
-
-    if (cellI != -1)
-    {
-        keepRegionI = cellRegion[cellI];
-    }
-    reduce(keepRegionI, maxOp<label>());
-
-    Info<< "Found point " << keepPoint << " in cell " << cellI
+    Info<< "Found point " << keepPoint
         << " in global region " << keepRegionI
         << " out of " << cellRegion.nRegions() << " regions." << endl;
 
@@ -2626,17 +2621,15 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
     blockedFace.clear();
 
     // Find the region containing the keepPoint
-    label keepRegionI = -1;
+    label keepRegionI = findRegion
+    (
+        mesh_,
+        cellRegion,
+        mergeDistance_*vector(1,1,1),
+        keepPoint
+    );
 
-    label cellI = mesh_.findCell(keepPoint);
-
-    if (cellI != -1)
-    {
-        keepRegionI = cellRegion[cellI];
-    }
-    reduce(keepRegionI, maxOp<label>());
-
-    Info<< "Found point " << keepPoint << " in cell " << cellI
+    Info<< "Found point " << keepPoint
         << " in global region " << keepRegionI
         << " out of " << cellRegion.nRegions() << " regions." << endl;
 

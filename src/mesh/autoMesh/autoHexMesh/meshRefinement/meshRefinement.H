@@ -890,6 +890,15 @@ public:
             //- Select coupled faces that are not collocated
             void selectSeparatedCoupledFaces(boolList&) const;
 
+            //- Find region cell is in. Uses optional perturbation to re-test.
+            static label findRegion
+            (
+                const polyMesh&,
+                const labelList& cellRegion,
+                const vector& perturbVec,
+                const point& p
+            );
+
             //- Split mesh. Keep part containing point.
             autoPtr<mapPolyMesh> splitMeshRegions
             (
