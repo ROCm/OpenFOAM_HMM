@@ -1204,6 +1204,7 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
 
 
     // Bit of statistics
+    if (debug)
     {
         label nSet = 0;
         label nNormals = 9;
