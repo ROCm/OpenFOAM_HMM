@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "motionSmoother.H"
+#include "motionSmootherAlgo.H"
 #include "twoDPointCorrector.H"
 #include "faceSet.H"
 #include "pointSet.H"
@@ -37,13 +37,13 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(motionSmoother, 0);
+    defineTypeNameAndDebug(motionSmootherAlgo, 0);
 }
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::motionSmoother::testSyncPositions
+void Foam::motionSmootherAlgo::testSyncPositions
 (
     const pointField& fld,
     const scalar maxMag
@@ -65,7 +65,7 @@ void Foam::motionSmoother::testSyncPositions
         {
             FatalErrorIn
             (
-                "motionSmoother::testSyncPositions"
+                "motionSmootherAlgo::testSyncPositions"
                 "("
                     "const pointField&, "
                     "const scalar"
@@ -78,7 +78,7 @@ void Foam::motionSmoother::testSyncPositions
 }
 
 
-//Foam::tmp<Foam::scalarField> Foam::motionSmoother::sumWeights
+//Foam::tmp<Foam::scalarField> Foam::motionSmootherAlgo::sumWeights
 //(
 //    const scalarField& edgeWeight
 //) const
@@ -122,11 +122,11 @@ void Foam::motionSmoother::testSyncPositions
 
 
 // From pointPatchInterpolation
-void Foam::motionSmoother::makePatchPatchAddressing()
+void Foam::motionSmootherAlgo::makePatchPatchAddressing()
 {
     if (debug)
     {
-        Pout<< "motionSmoother::makePatchPatchAddressing() : "
+        Pout<< "motionSmootherAlgo::makePatchPatchAddressing() : "
             << "constructing boundary addressing"
             << endl;
     }
@@ -232,14 +232,14 @@ void Foam::motionSmoother::makePatchPatchAddressing()
             meshTools::writeOBJ(str, mesh_.points()[pointI]);
         }
 
-        Pout<< "motionSmoother::makePatchPatchAddressing() : "
+        Pout<< "motionSmootherAlgo::makePatchPatchAddressing() : "
             << "finished constructing boundary addressing"
             << endl;
     }
 }
 
 
-void Foam::motionSmoother::checkFld(const pointScalarField& fld)
+void Foam::motionSmootherAlgo::checkFld(const pointScalarField& fld)
 {
     forAll(fld, pointI)
     {
@@ -249,15 +249,18 @@ void Foam::motionSmoother::checkFld(const pointScalarField& fld)
         {}
         else
         {
-            FatalErrorIn("motionSmoother::checkFld(const pointScalarField&)")
-                << "Problem : point:" << pointI << " value:" << val
+            FatalErrorIn
+            (
+                "motionSmootherAlgo::checkFld"
+                "(const pointScalarField&)"
+            )   << "Problem : point:" << pointI << " value:" << val
                 << abort(FatalError);
         }
     }
 }
 
 
-Foam::labelHashSet Foam::motionSmoother::getPoints
+Foam::labelHashSet Foam::motionSmootherAlgo::getPoints
 (
     const labelHashSet& faceLabels
 ) const
@@ -278,7 +281,7 @@ Foam::labelHashSet Foam::motionSmoother::getPoints
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::motionSmoother::calcEdgeWeights
+Foam::tmp<Foam::scalarField> Foam::motionSmootherAlgo::calcEdgeWeights
 (
     const pointField& points
 ) const
@@ -297,7 +300,7 @@ Foam::tmp<Foam::scalarField> Foam::motionSmoother::calcEdgeWeights
 
 
 // Smooth on selected points (usually patch points)
-void Foam::motionSmoother::minSmooth
+void Foam::motionSmootherAlgo::minSmooth
 (
     const scalarField& edgeWeights,
     const PackedBoolList& isAffectedPoint,
@@ -332,7 +335,7 @@ void Foam::motionSmoother::minSmooth
 
 
 // Smooth on all internal points
-void Foam::motionSmoother::minSmooth
+void Foam::motionSmootherAlgo::minSmooth
 (
     const scalarField& edgeWeights,
     const PackedBoolList& isAffectedPoint,
@@ -365,7 +368,7 @@ void Foam::motionSmoother::minSmooth
 
 
 // Scale on all internal points
-void Foam::motionSmoother::scaleField
+void Foam::motionSmootherAlgo::scaleField
 (
     const labelHashSet& pointLabels,
     const scalar scale,
@@ -385,7 +388,7 @@ void Foam::motionSmoother::scaleField
 
 
 // Scale on selected points (usually patch points)
-void Foam::motionSmoother::scaleField
+void Foam::motionSmootherAlgo::scaleField
 (
     const labelList& meshPoints,
     const labelHashSet& pointLabels,
@@ -406,7 +409,7 @@ void Foam::motionSmoother::scaleField
 
 
 // Lower on internal points
-void Foam::motionSmoother::subtractField
+void Foam::motionSmootherAlgo::subtractField
 (
     const labelHashSet& pointLabels,
     const scalar f,
@@ -426,7 +429,7 @@ void Foam::motionSmoother::subtractField
 
 
 // Scale on selected points (usually patch points)
-void Foam::motionSmoother::subtractField
+void Foam::motionSmootherAlgo::subtractField
 (
     const labelList& meshPoints,
     const labelHashSet& pointLabels,
@@ -446,13 +449,13 @@ void Foam::motionSmoother::subtractField
 }
 
 
-bool Foam::motionSmoother::isInternalPoint(const label pointI) const
+bool Foam::motionSmootherAlgo::isInternalPoint(const label pointI) const
 {
     return isInternalPoint_.get(pointI) == 1;
 }
 
 
-void Foam::motionSmoother::getAffectedFacesAndPoints
+void Foam::motionSmootherAlgo::getAffectedFacesAndPoints
 (
     const label nPointIter,
     const faceSet& wrongFaces,
@@ -510,11 +513,14 @@ void Foam::motionSmoother::getAffectedFacesAndPoints
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::motionSmoother::motionSmoother
+Foam::motionSmootherAlgo::motionSmootherAlgo
 (
     polyMesh& mesh,
     pointMesh& pMesh,
     indirectPrimitivePatch& pp,
+    pointVectorField& displacement,
+    pointScalarField& scale,
+    pointField& oldPoints,
     const labelList& adaptPatchIDs,
     const dictionary& paramDict
 )
@@ -522,81 +528,11 @@ Foam::motionSmoother::motionSmoother
     mesh_(mesh),
     pMesh_(pMesh),
     pp_(pp),
+    displacement_(displacement),
+    scale_(scale),
+    oldPoints_(oldPoints),
     adaptPatchIDs_(adaptPatchIDs),
     paramDict_(paramDict),
-    displacement_
-    (
-        IOobject
-        (
-            "displacement",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        pMesh_
-    ),
-    scale_
-    (
-        IOobject
-        (
-            "scale",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        pMesh_,
-        dimensionedScalar("scale", dimless, 1.0)
-    ),
-    oldPoints_(mesh_.points()),
-    isInternalPoint_(mesh_.nPoints(), 1),
-    twoDCorrector_(mesh_)
-{
-    updateMesh();
-}
-
-
-Foam::motionSmoother::motionSmoother
-(
-    polyMesh& mesh,
-    indirectPrimitivePatch& pp,
-    const labelList& adaptPatchIDs,
-    const pointVectorField& displacement,
-    const dictionary& paramDict
-)
-:
-    mesh_(mesh),
-    pMesh_(const_cast<pointMesh&>(displacement.mesh())),
-    pp_(pp),
-    adaptPatchIDs_(adaptPatchIDs),
-    paramDict_(paramDict),
-    displacement_
-    (
-        IOobject
-        (
-            "displacement",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        displacement
-    ),
-    scale_
-    (
-        IOobject
-        (
-            "scale",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        pMesh_,
-        dimensionedScalar("scale", dimless, 1.0)
-    ),
-    oldPoints_(mesh_.points()),
     isInternalPoint_(mesh_.nPoints(), 1),
     twoDCorrector_(mesh_)
 {
@@ -606,67 +542,43 @@ Foam::motionSmoother::motionSmoother
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::motionSmoother::~motionSmoother()
+Foam::motionSmootherAlgo::~motionSmootherAlgo()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::polyMesh& Foam::motionSmoother::mesh() const
+const Foam::polyMesh& Foam::motionSmootherAlgo::mesh() const
 {
     return mesh_;
 }
 
 
-const Foam::pointMesh& Foam::motionSmoother::pMesh() const
+const Foam::pointMesh& Foam::motionSmootherAlgo::pMesh() const
 {
     return pMesh_;
 }
 
 
-const Foam::indirectPrimitivePatch& Foam::motionSmoother::patch() const
+const Foam::indirectPrimitivePatch& Foam::motionSmootherAlgo::patch() const
 {
     return pp_;
 }
 
 
-const Foam::labelList& Foam::motionSmoother::adaptPatchIDs() const
+const Foam::labelList& Foam::motionSmootherAlgo::adaptPatchIDs() const
 {
     return adaptPatchIDs_;
 }
 
 
-const Foam::dictionary& Foam::motionSmoother::paramDict() const
+const Foam::dictionary& Foam::motionSmootherAlgo::paramDict() const
 {
     return paramDict_;
 }
 
 
-Foam::pointVectorField& Foam::motionSmoother::displacement()
-{
-    return displacement_;
-}
-
-
-const Foam::pointVectorField& Foam::motionSmoother::displacement() const
-{
-    return displacement_;
-}
-
-
-const Foam::pointScalarField& Foam::motionSmoother::scale() const
-{
-    return scale_;
-}
-
-
-const Foam::pointField& Foam::motionSmoother::oldPoints() const
-{
-    return oldPoints_;
-}
-
-
-void Foam::motionSmoother::correct()
+void Foam::motionSmootherAlgo::correct()
 {
     oldPoints_ = mesh_.points();
 
@@ -674,11 +586,11 @@ void Foam::motionSmoother::correct()
 
     // No need to update twoDmotion corrector since only holds edge labels
     // which will remain the same as before. So unless the mesh was distorted
-    // severely outside of motionSmoother there will be no need.
+    // severely outside of motionSmootherAlgo there will be no need.
 }
 
 
-void Foam::motionSmoother::setDisplacementPatchFields()
+void Foam::motionSmootherAlgo::setDisplacementPatchFields()
 {
     // Adapt the fixedValue bc's (i.e. copy internal point data to
     // boundaryField for all affected patches)
@@ -742,7 +654,7 @@ void Foam::motionSmoother::setDisplacementPatchFields()
 }
 
 
-void Foam::motionSmoother::setDisplacement(pointField& patchDisp)
+void Foam::motionSmootherAlgo::setDisplacement(pointField& patchDisp)
 {
     // See comment in .H file about shared points.
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
@@ -808,7 +720,7 @@ void Foam::motionSmoother::setDisplacement(pointField& patchDisp)
 
 
 // correctBoundaryConditions with fixedValue bc's first.
-void Foam::motionSmoother::correctBoundaryConditions
+void Foam::motionSmootherAlgo::correctBoundaryConditions
 (
     pointVectorField& displacement
 ) const
@@ -873,7 +785,7 @@ void Foam::motionSmoother::correctBoundaryConditions
 
 
 
-void Foam::motionSmoother::modifyMotionPoints(pointField& newPoints) const
+void Foam::motionSmootherAlgo::modifyMotionPoints(pointField& newPoints) const
 {
     // Correct for 2-D motion
     if (twoDCorrector_.required())
@@ -882,7 +794,7 @@ void Foam::motionSmoother::modifyMotionPoints(pointField& newPoints) const
 
         if (mesh_.globalData().parallel())
         {
-            WarningIn("motionSmoother::movePoints(pointField&)")
+            WarningIn("motionSmootherAlgo::movePoints(pointField&)")
                 << "2D mesh-motion probably not correct in parallel" << endl;
         }
 
@@ -913,14 +825,15 @@ void Foam::motionSmoother::modifyMotionPoints(pointField& newPoints) const
 
     if (debug)
     {
-        Pout<< "motionSmoother::modifyMotionPoints : testing sync of newPoints."
+        Pout<< "motionSmootherAlgo::modifyMotionPoints :"
+            << " testing sync of newPoints."
             << endl;
         testSyncPositions(newPoints, 1e-6*mesh_.bounds().mag());
     }
 }
 
 
-void Foam::motionSmoother::movePoints()
+void Foam::motionSmootherAlgo::movePoints()
 {
     // Make sure to clear out tetPtIs since used in checks (sometimes, should
     // really check)
@@ -929,7 +842,7 @@ void Foam::motionSmoother::movePoints()
 }
 
 
-Foam::scalar Foam::motionSmoother::setErrorReduction
+Foam::scalar Foam::motionSmootherAlgo::setErrorReduction
 (
     const scalar errorReduction
 )
@@ -943,7 +856,7 @@ Foam::scalar Foam::motionSmoother::setErrorReduction
 }
 
 
-bool Foam::motionSmoother::scaleMesh
+bool Foam::motionSmootherAlgo::scaleMesh
 (
     labelList& checkFaces,
     const bool smoothMesh,
@@ -961,7 +874,7 @@ bool Foam::motionSmoother::scaleMesh
 }
 
 
-bool Foam::motionSmoother::scaleMesh
+bool Foam::motionSmootherAlgo::scaleMesh
 (
     labelList& checkFaces,
     const List<labelPair>& baffles,
@@ -981,7 +894,7 @@ bool Foam::motionSmoother::scaleMesh
 }
 
 
-Foam::tmp<Foam::pointField> Foam::motionSmoother::curPoints() const
+Foam::tmp<Foam::pointField> Foam::motionSmootherAlgo::curPoints() const
 {
     // Set newPoints as old + scale*displacement
 
@@ -1054,7 +967,7 @@ Foam::tmp<Foam::pointField> Foam::motionSmoother::curPoints() const
 }
 
 
-bool Foam::motionSmoother::scaleMesh
+bool Foam::motionSmootherAlgo::scaleMesh
 (
     labelList& checkFaces,
     const List<labelPair>& baffles,
@@ -1068,7 +981,7 @@ bool Foam::motionSmoother::scaleMesh
     {
         FatalErrorIn
         (
-            "motionSmoother::scaleMesh"
+            "motionSmootherAlgo::scaleMesh"
             "("
                 "labelList&, "
                 "const List<labelPair>&, "
@@ -1271,7 +1184,7 @@ bool Foam::motionSmoother::scaleMesh
 }
 
 
-void Foam::motionSmoother::updateMesh()
+void Foam::motionSmootherAlgo::updateMesh()
 {
     const pointBoundaryMesh& patches = pMesh_.boundary();
 
@@ -1290,7 +1203,7 @@ void Foam::motionSmoother::updateMesh()
         {
             FatalErrorIn
             (
-                "motionSmoother::updateMesh"
+                "motionSmootherAlgo::updateMesh"
             )   << "Patch " << patches[patchI].name()
                 << " has wrong boundary condition "
                 << displacement_.boundaryField()[patchI].type()
@@ -1324,7 +1237,7 @@ void Foam::motionSmoother::updateMesh()
 // Specialisation of applyCornerConstraints for scalars because
 // no constraint need be applied
 template<>
-void Foam::motionSmoother::applyCornerConstraints<Foam::scalar>
+void Foam::motionSmootherAlgo::applyCornerConstraints<Foam::scalar>
 (
     GeometricField<scalar, pointPatchField, pointMesh>& pf
 ) const

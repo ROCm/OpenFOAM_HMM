@@ -84,7 +84,9 @@ polyMeshAdder/polyMeshAdder.C
 fvMeshTools/fvMeshTools.C
 
 motionSmoother/motionSmoother.C
-motionSmoother/motionSmootherCheck.C
+motionSmoother/motionSmootherAlgo.C
+motionSmoother/motionSmootherAlgoCheck.C
+motionSmoother/motionSmootherData.C
 motionSmoother/polyMeshGeometry/polyMeshGeometry.C
 motionSmoother/badQualityToCell/badQualityToCell.C
 motionSmoother/badQualityToFace/badQualityToFace.C

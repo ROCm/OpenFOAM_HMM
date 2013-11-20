@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::motionSmoother
+    Foam::motionSmootherAlgo
 
 Description
     Given a displacement moves the mesh by scaling the displacement back
@@ -68,13 +68,13 @@ Note
     recursive lookup)
 
 SourceFiles
-    motionSmoother.C
-    motionSmootherTemplates.C
+    motionSmootherAlgo.C
+    motionSmootherAlgoTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef motionSmoother_H
-#define motionSmoother_H
+#ifndef motionSmootherAlgo_H
+#define motionSmootherAlgo_H
 
 #include "pointFields.H"
 #include "HashSet.H"
@@ -92,10 +92,10 @@ class polyMeshGeometry;
 class faceSet;
 
 /*---------------------------------------------------------------------------*\
-                           Class motionSmoother Declaration
+                           Class motionSmootherAlgo Declaration
 \*---------------------------------------------------------------------------*/
 
-class motionSmoother
+class motionSmootherAlgo
 {
     // Private class
 
@@ -141,39 +141,39 @@ class motionSmoother
         //- Reference to face subset of all adaptPatchIDs
         indirectPrimitivePatch& pp_;
 
-        //- Indices of fixedValue patches that we're allowed to modify the
-        // displacement on.
-        const labelList adaptPatchIDs_;
+        //- Displacement field
+        pointVectorField& displacement_;
 
+        //- Scale factor for displacement
+        pointScalarField& scale_;
 
-        // Smoothing and checking parameters
-        dictionary paramDict_;
+        //- Starting mesh position
+        pointField& oldPoints_;
+
 
         // Internal data
 
-        //- Displacement field
-        pointVectorField displacement_;
+            //- Indices of fixedValue patches that we're allowed to modify the
+            // displacement on.
+            const labelList adaptPatchIDs_;
 
-        //- Scale factor for displacement
-        pointScalarField scale_;
+            // Smoothing and checking parameters
+            dictionary paramDict_;
 
-        //- Starting mesh position
-        pointField oldPoints_;
+            //- Is mesh point on boundary or not
+            PackedBoolList isInternalPoint_;
 
-        //- Is mesh point on boundary or not
-        PackedBoolList isInternalPoint_;
+            //- Is edge master (always except if on coupled boundary and on
+            //  lower processor)
+            PackedBoolList isMasterEdge_;
 
-        //- Is edge master (always except if on coupled boundary and on
-        //  lower processor)
-        PackedBoolList isMasterEdge_;
+            //- 2-D motion corrector
+            twoDPointCorrector twoDCorrector_;
 
-        //- 2-D motion corrector
-        twoDPointCorrector twoDCorrector_;
+            // Muli-patch constraints (from pointPatchInterpolation)
 
-        // Muli-patch constraints (from pointPatchInterpolation)
-
-            labelList patchPatchPointConstraintPoints_;
-            tensorField patchPatchPointConstraintTensors_;
+                labelList patchPatchPointConstraintPoints_;
+                tensorField patchPatchPointConstraintTensors_;
 
 
     // Private Member Functions
@@ -303,43 +303,34 @@ class motionSmoother
         ) const;
 
         //- Disallow default bitwise copy construct
-        motionSmoother(const motionSmoother&);
+        motionSmootherAlgo(const motionSmootherAlgo&);
 
         //- Disallow default bitwise assignment
-        void operator=(const motionSmoother&);
+        void operator=(const motionSmootherAlgo&);
 
 
 public:
 
-    ClassName("motionSmoother");
+    ClassName("motionSmootherAlgo");
 
     // Constructors
 
         //- Construct from mesh, patches to work on and smoothing parameters.
-        //  Reads displacement field (only boundary conditions used)
-        motionSmoother
+        motionSmootherAlgo
         (
             polyMesh&,
             pointMesh&,
             indirectPrimitivePatch& pp,         // 'outside' points
+            pointVectorField& displacement,
+            pointScalarField& scale,
+            pointField& oldPoints,
             const labelList& adaptPatchIDs,     // patches forming 'outside'
-            const dictionary& paramDict
-        );
-
-        //- Construct from mesh, patches to work on and smoothing parameters and
-        //  displacementfield (only boundary conditions used)
-        motionSmoother
-        (
-            polyMesh&,
-            indirectPrimitivePatch& pp,         // 'outside' points
-            const labelList& adaptPatchIDs,     // patches forming 'outside'
-            const pointVectorField&,
             const dictionary& paramDict
         );
 
 
     //- Destructor
-    ~motionSmoother();
+    ~motionSmootherAlgo();
 
 
     // Member Functions
@@ -359,18 +350,6 @@ public:
             const labelList& adaptPatchIDs() const;
 
             const dictionary& paramDict() const;
-
-            //- Reference to displacement field
-            pointVectorField& displacement();
-
-            //- Reference to displacement field
-            const pointVectorField& displacement() const;
-
-            //- Reference to scale field
-            const pointScalarField& scale() const;
-
-            //- Starting mesh position
-            const pointField& oldPoints() const;
 
             //- Return reference to 2D point motion correction
             twoDPointCorrector& twoDCorrector()
@@ -532,7 +511,7 @@ public:
 
 
 template<>
-void motionSmoother::applyCornerConstraints<scalar>
+void motionSmootherAlgo::applyCornerConstraints<scalar>
 (
     GeometricField<scalar, pointPatchField, pointMesh>& pf
 ) const;
@@ -545,7 +524,7 @@ void motionSmoother::applyCornerConstraints<scalar>
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "motionSmootherTemplates.C"
+#   include "motionSmootherAlgoTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
