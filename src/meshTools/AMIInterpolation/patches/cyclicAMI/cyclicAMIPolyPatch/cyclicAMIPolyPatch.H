@@ -284,7 +284,7 @@ public:
             virtual bool owner() const;
 
             //- Return a reference to the neighbour patch
-            inline const cyclicAMIPolyPatch& neighbPatch() const;
+            virtual const cyclicAMIPolyPatch& neighbPatch() const;
 
             //- Return a reference to the projection surface
             const autoPtr<searchableSurface>& surfPtr() const;

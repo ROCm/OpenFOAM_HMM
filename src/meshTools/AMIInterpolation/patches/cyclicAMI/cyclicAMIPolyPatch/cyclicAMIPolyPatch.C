@@ -642,6 +642,13 @@ bool Foam::cyclicAMIPolyPatch::owner() const
 }
 
 
+const Foam::cyclicAMIPolyPatch& Foam::cyclicAMIPolyPatch::neighbPatch() const
+{
+    const polyPatch& pp = this->boundaryMesh()[neighbPatchID()];
+    return refCast<const cyclicAMIPolyPatch>(pp);
+}
+
+
 const Foam::autoPtr<Foam::searchableSurface>&
 Foam::cyclicAMIPolyPatch::surfPtr() const
 {

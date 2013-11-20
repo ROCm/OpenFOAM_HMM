@@ -67,15 +67,15 @@ inline Foam::polyPatch& Foam::cyclicACMIPolyPatch::nonOverlapPatch()
 }
 
 
-inline const Foam::scalarField& Foam::cyclicACMIPolyPatch::mask() const
+inline const scalarField& Foam::cyclicACMIPolyPatch::mask() const
 {
     if (owner())
     {
-        return AMI().srcWeightsSum();
+        return srcMask_;
     }
     else
     {
-        return neighbPatch().AMI().tgtWeightsSum();
+        return neighbPatch().tgtMask();
     }
 }
 
