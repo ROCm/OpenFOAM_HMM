@@ -67,7 +67,7 @@ inline Foam::polyPatch& Foam::cyclicACMIPolyPatch::nonOverlapPatch()
 }
 
 
-inline const scalarField& Foam::cyclicACMIPolyPatch::mask() const
+inline const Foam::scalarField& Foam::cyclicACMIPolyPatch::mask() const
 {
     if (owner())
     {
