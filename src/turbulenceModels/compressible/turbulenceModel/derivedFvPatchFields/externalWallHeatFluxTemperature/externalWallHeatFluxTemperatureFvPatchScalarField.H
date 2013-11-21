@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    externalWallHeatFluxTemperatureFvPatchScalarField
+    Foam::externalWallHeatFluxTemperatureFvPatchScalarField
 
 Group
     grpThermoBoundaryConditions grpWallBoundaryConditions
@@ -34,34 +34,50 @@ Description
     fixed heat transfer coefficient mode.
 
     The condition can operate in two modes:
-        \li fixed heat transfer coefficient: supply h and Ta
-        \li fixed heat flux: supply q
+    - fixed heat transfer coefficient: supply h and Ta
+    - fixed heat flux: supply q
 
-    where
-        \var h  = heat transfer coefficient [W/m2/K]
-        \var Ta = ambient temperature [K]
-        \var q  = heat flux [W/m2]
+    where:
+    \vartable
+        h  | heat transfer coefficient [W/m2/K]
+        Ta | ambient temperature [K]
+        q  | heat flux [W/m2]
+    \endvartable
 
     The thermal conductivity, \c kappa, can either be retrieved from the
     mesh database using the \c lookup option, or from a \c solidThermo
     thermophysical package.
 
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        kappa        | thermal conductivity option | yes     |
+        q            | heat flux [W/m2]            | yes*    |
+        Ta           | ambient temperature [K]     | yes*    |
+        h            | heat transfer coefficient [W/m/K] | yes*|
+        thicknessLayers | list of thicknesses per layer [m] | yes |
+        kappaLayers  | list of thermal conductivites per layer [W/m/K] | yes |
+        kappaName    | name of thermal conductivity field | yes  |
+    \endtable
+
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-           type            externalWallHeatFluxTemperature;
-           kappa           fluidThermo;       // fluidThermo, solidThermo or
-                                               // lookup
-            q               uniform 1000;      // heat flux / [W/m2]
-            Ta              uniform 300.0;     // ambient temperature /[K]
-            h               uniform 10.0;      // heat transfer coeff /[W/Km2]
-            thicknessLayers (0.1 0.2 0.3 0.4); // thickness of layer [m]
-            kappaLayers     (1 2 3 4)          // thermal conductivity of
-                                               // layer [W/m/K]
-            value           uniform 300.0;     // initial temperature / [K]
-            kappaName       none;
-        }
+    myPatch
+    {
+        type            externalWallHeatFluxTemperature;
+        kappa           fluidThermo;       // fluidThermo, solidThermo or
+                                           // lookup
+        q               uniform 1000;      // heat flux / [W/m2]
+        Ta              uniform 300.0;     // ambient temperature /[K]
+        h               uniform 10.0;      // heat transfer coeff /[W/Km2]
+        thicknessLayers (0.1 0.2 0.3 0.4); // thickness of layer [m]
+        kappaLayers     (1 2 3 4)          // thermal conductivity of
+                                           // layer [W/m/K]
+        value           uniform 300.0;     // initial temperature / [K]
+        kappaName       none;
+    }
     \endverbatim
 
 Note
