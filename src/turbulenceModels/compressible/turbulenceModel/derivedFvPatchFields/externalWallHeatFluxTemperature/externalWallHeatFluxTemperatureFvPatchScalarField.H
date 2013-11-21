@@ -67,21 +67,20 @@ Description
     myPatch
     {
         type            externalWallHeatFluxTemperature;
-        kappa           fluidThermo;       // fluidThermo, solidThermo or
-                                           // lookup
-        q               uniform 1000;      // heat flux / [W/m2]
-        Ta              uniform 300.0;     // ambient temperature /[K]
-        h               uniform 10.0;      // heat transfer coeff /[W/Km2]
-        thicknessLayers (0.1 0.2 0.3 0.4); // thickness of layer [m]
-        kappaLayers     (1 2 3 4)          // thermal conductivity of
-                                           // layer [W/m/K]
-        value           uniform 300.0;     // initial temperature / [K]
+        kappa           fluidThermo;
+        q               uniform 1000;
+        Ta              uniform 300.0;
+        h               uniform 10.0;
+        thicknessLayers (0.1 0.2 0.3 0.4);
+        kappaLayers     (1 2 3 4)
+        value           uniform 300.0;
         kappaName       none;
     }
     \endverbatim
 
 Note
-    Only supply \c h and \c Ta, or \c q in the dictionary (see above)
+  - Only supply \c h and \c Ta, or \c q in the dictionary (see above)
+  - kappa entries can be: fluidThermo, solidThermo or lookup
 
 SourceFiles
     externalWallHeatFluxTemperatureFvPatchScalarField.C
