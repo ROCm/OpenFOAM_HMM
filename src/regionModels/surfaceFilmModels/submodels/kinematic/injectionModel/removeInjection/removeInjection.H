@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,6 +63,16 @@ private:
 
         //- Disallow default bitwise assignment
         void operator=(const removeInjection&);
+
+
+protected:
+
+        //- Stable film thickness - mass only removed if thickness execeeds
+        //  this threhold value
+        scalar deltaStable_;
+
+        //- Mask per cell to indicate whether mass can be removed
+        scalarField mask_;
 
 
 public:

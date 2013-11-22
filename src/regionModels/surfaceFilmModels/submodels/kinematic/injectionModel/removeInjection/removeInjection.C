@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,11 +45,35 @@ addToRunTimeSelectionTable(injectionModel, removeInjection, dictionary);
 removeInjection::removeInjection
 (
     const surfaceFilmModel& owner,
-    const dictionary&
+    const dictionary& dict
 )
 :
-    injectionModel(owner)
-{}
+    injectionModel(type(), owner, dict),
+    deltaStable_(coeffs_.lookupOrDefault<scalar>("deltaStable", 0.0)),
+    mask_(owner.regionMesh().nCells(), -1)
+{
+    wordReList patches;
+    if (coeffs_.readIfPresent("patches", patches))
+    {
+        Info<< "        applying to patches:" << nl;
+        const polyBoundaryMesh& pbm = owner.regionMesh().boundaryMesh();
+        const labelHashSet patchSet = pbm.patchSet(patches);
+
+        forAllConstIter(labelHashSet, patchSet, iter)
+        {
+            label patchI = iter.key();
+            const polyPatch& pp = pbm[patchI];
+            UIndirectList<scalar>(mask_, pp.faceCells()) = 1.0;
+
+            Info<< "            " << pp.name() << endl;
+        }
+    }
+    else
+    {
+        Info<< "            applying to all patches" << endl;
+        mask_ = 1.0;
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -64,11 +88,23 @@ void removeInjection::correct
 (
     scalarField& availableMass,
     scalarField& massToInject,
-    scalarField&
+    scalarField& diameterToInject
 )
 {
-    massToInject = availableMass;
-    availableMass = 0.0;
+    const scalarField& delta = owner().delta();
+    const scalarField& rho = owner().rho();
+    const scalarField& magSf = owner().magSf();
+
+    forAll(delta, cellI)
+    {
+        if (mask_[cellI] > 0)
+        {
+            scalar ddelta = max(0.0, delta[cellI] - deltaStable_);
+            scalar dMass = ddelta*rho[cellI]*magSf[cellI];
+            massToInject[cellI] += dMass;
+            availableMass[cellI] -= dMass;
+        }
+    }
 }
 
 
