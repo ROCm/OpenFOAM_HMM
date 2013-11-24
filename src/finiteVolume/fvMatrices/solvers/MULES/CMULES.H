@@ -66,6 +66,7 @@ void correct
     const RdeltaTType& rDeltaT,
     const RhoType& rho,
     volScalarField& psi,
+    const surfaceScalarField& phi,
     const surfaceScalarField& phiCorr,
     const SpType& Sp,
     const SuType& Su
@@ -76,6 +77,7 @@ void correct
 (
     const RhoType& rho,
     volScalarField& psi,
+    const surfaceScalarField& phi,
     surfaceScalarField& phiCorr,
     const SpType& Sp,
     const SuType& Su,
@@ -86,6 +88,7 @@ void correct
 void correct
 (
     volScalarField& psi,
+    const surfaceScalarField& phi,
     surfaceScalarField& phiCorr,
     const scalar psiMax,
     const scalar psiMin
@@ -96,6 +99,7 @@ void LTScorrect
 (
     const RhoType& rho,
     volScalarField& psi,
+    const surfaceScalarField& phi,
     surfaceScalarField& phiCorr,
     const SpType& Sp,
     const SuType& Su,
@@ -106,6 +110,7 @@ void LTScorrect
 void LTScorrect
 (
     volScalarField& psi,
+    const surfaceScalarField& phi,
     surfaceScalarField& phiCorr,
     const scalar psiMax,
     const scalar psiMin
@@ -119,6 +124,7 @@ void limiterCorr
     const RdeltaTType& rDeltaT,
     const RhoType& rho,
     const volScalarField& psi,
+    const surfaceScalarField& phi,
     const surfaceScalarField& phiCorr,
     const SpType& Sp,
     const SuType& Su,
@@ -133,6 +139,7 @@ void limitCorr
     const RdeltaTType& rDeltaT,
     const RhoType& rho,
     const volScalarField& psi,
+    const surfaceScalarField& phi,
     surfaceScalarField& phiCorr,
     const SpType& Sp,
     const SuType& Su,
