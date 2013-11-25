@@ -17,79 +17,69 @@ FoamFile
 
 solvers
 {
-    rho
+    "rho.*"
     {
-        solver          PCG;
-        preconditioner  DIC;
-        tolerance       0;
-        relTol          0.1;
-    }
-
-    rhoFinal
-    {
-        solver          PCG;
-        preconditioner  DIC;
-        tolerance       1e-4;
-        relTol          0;
+        solver          diagonal;
     }
 
     p
     {
-        solver           GAMG;
-
-        tolerance        0;
-        relTol           0.05;
-
-        smoother         DICGaussSeidel;
-        nPreSweeps       0;
-        nPostSweeps      2;
-
-        cacheAgglomeration true;
-
-        nCellsInCoarsestLevel 10;
-        agglomerator     faceAreaPair;
-        mergeLevels      1;
-
-        maxIter          50;
-    };
+        solver           PCG;
+        preconditioner   DIC;
+        tolerance        1e-6;
+        relTol           0.1;
+    }
 
     pFinal
     {
         $p;
-
-        tolerance        1e-4;
         relTol           0;
-    };
+    }
 
-    "(U|Yi|h|k|epsilon)"
+    "(U|h|k|epsilon)"
     {
-        solver          smoothSolver;
-        smoother        GaussSeidel;
-        tolerance       0;
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-6;
         relTol          0.1;
     }
 
-    "(U|Yi|h|k|epsilon)Final"
+    "(U|h|k|epsilon)Final"
     {
-        solver          smoothSolver;
-        smoother        GaussSeidel;
-        tolerance       1e-4;
-        relTol          0;
+        $U;
+        relTol          0.1;
+    }
+
+    Yi
+    {
+        $U;
+        relTol          0.1;
     }
 }
 
 PIMPLE
 {
-    nCorrectors     2;
+    momentumPredictor no;
+    nOuterCorrectors  1;
+    nCorrectors     1;
     nNonOrthogonalCorrectors 0;
-    momentumPredictor yes;
-    rhoMin          0.1;
-    rhoMax          1.5;
 
-    maxCo           0.1;
-    rDeltaTSmoothingCoeff 0.1;
-    maxDeltaT       2e-4;
-    alphaTemp       0.005;
+    maxDeltaT       1e-2;
+    maxCo           1;
+    alphaTemp       0.05;
+    rDeltaTSmoothingCoeff 1;
+    rDeltaTDampingCoeff 1;
+}
+
+relaxationFactors
+{
+    fields
+    {
+    }
+    equations
+    {
+        ".*" 1;
+    }
 }
 
 

@@ -231,15 +231,15 @@ baffleThickness() const
     {
         if (thickness_.size() != patch().size())
         {
-            FatalErrorIn
+            FatalIOErrorIn
             (
                 " template<class solidType>"
-                " tmp<scalarField> thermalBaffle1DFvPatchScalarField<solidType>
-                " baffleThickness() const"
+                " tmp<scalarField> thermalBaffle1DFvPatchScalarField<solidType>"
+                " baffleThickness() const",
+                solidDict_
             )<< " Field thickness has not been specified "
             << " for patch " << this->patch().name()
-            << " in dictionary " <<  solidDict_
-            << abort(FatalError);
+            << exit(FatalIOError);
         }
 
         return thickness_;
@@ -302,9 +302,14 @@ void thermalBaffle1DFvPatchScalarField<solidType>::autoMap
 )
 {
     mixedFvPatchScalarField::autoMap(m);
-    thickness_.autoMap(m);
-    Qs_.autoMap(m);
+
+    if (this->owner())
+    {
+        thickness_.autoMap(m);
+        Qs_.autoMap(m);
+    }
 }
+
 
 template<class solidType>
 void thermalBaffle1DFvPatchScalarField<solidType>::rmap

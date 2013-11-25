@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -248,6 +248,7 @@ Foam::tmp<Foam::vectorField> Foam::sampledPatch::sample
     return sampleField(vField);
 }
 
+
 Foam::tmp<Foam::sphericalTensorField> Foam::sampledPatch::sample
 (
     const volSphericalTensorField& vField
@@ -292,6 +293,7 @@ Foam::tmp<Foam::vectorField> Foam::sampledPatch::sample
     return sampleField(sField);
 }
 
+
 Foam::tmp<Foam::sphericalTensorField> Foam::sampledPatch::sample
 (
     const surfaceSphericalTensorField& sField
@@ -318,6 +320,7 @@ Foam::tmp<Foam::tensorField> Foam::sampledPatch::sample
     return sampleField(sField);
 }
 
+
 Foam::tmp<Foam::scalarField> Foam::sampledPatch::interpolate
 (
     const interpolation<scalar>& interpolator
@@ -334,6 +337,7 @@ Foam::tmp<Foam::vectorField> Foam::sampledPatch::interpolate
 {
     return interpolateField(interpolator);
 }
+
 
 Foam::tmp<Foam::sphericalTensorField> Foam::sampledPatch::interpolate
 (

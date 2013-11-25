@@ -189,9 +189,11 @@ $(derivedFvPatchFields)/uniformJumpAMI/uniformJumpAMIFvPatchFields.C
 $(derivedFvPatchFields)/uniformTotalPressure/uniformTotalPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/variableHeightFlowRate/variableHeightFlowRateFvPatchField.C
 $(derivedFvPatchFields)/variableHeightFlowRateInletVelocity/variableHeightFlowRateInletVelocityFvPatchVectorField.C
+$(derivedFvPatchFields)/outletPhaseMeanVelocity/outletPhaseMeanVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/waveTransmissive/waveTransmissiveFvPatchFields.C
 $(derivedFvPatchFields)/waveSurfacePressure/waveSurfacePressureFvPatchScalarField.C
 $(derivedFvPatchFields)/interstitialInletVelocity/interstitialInletVelocityFvPatchVectorField.C
+$(derivedFvPatchFields)/prghPressure/prghPressureFvPatchScalarField.C
 
 fvsPatchFields = fields/fvsPatchFields
 $(fvsPatchFields)/fvsPatchField/fvsPatchFields.C

@@ -281,9 +281,8 @@ void Foam::chemkinReader::addPressureDependentReaction
                     thirdBodyEfficiencies(speciesTable_, efficiencies)
                 )
             );
+            break;
         }
-        break;
-
         case Troe:
         {
             scalarList TroeCoeffs
@@ -337,9 +336,8 @@ void Foam::chemkinReader::addPressureDependentReaction
                     thirdBodyEfficiencies(speciesTable_, efficiencies)
                 )
             );
+            break;
         }
-        break;
-
         case SRI:
         {
             scalarList SRICoeffs
@@ -395,27 +393,16 @@ void Foam::chemkinReader::addPressureDependentReaction
                     thirdBodyEfficiencies(speciesTable_, efficiencies)
                 )
             );
+            break;
         }
-        break;
-
         default:
         {
-            if (fofType < 4)
-            {
-                FatalErrorIn("chemkinReader::addPressureDependentReaction")
-                    << "Fall-off function type "
-                    << fallOffFunctionNames[fofType]
-                    << " on line " << lineNo_-1
-                    << " not implemented"
-                    << exit(FatalError);
-            }
-            else
-            {
-                FatalErrorIn("chemkinReader::addPressureDependentReaction")
-                    << "Unknown fall-off function type " << fofType
-                    << " on line " << lineNo_-1
-                    << exit(FatalError);
-            }
+            FatalErrorIn("chemkinReader::addPressureDependentReaction")
+                << "Fall-off function type "
+                << fallOffFunctionNames[fofType]
+                << " on line " << lineNo_-1
+                << " not implemented"
+                << exit(FatalError);
         }
     }
 }
@@ -537,9 +524,8 @@ void Foam::chemkinReader::addReaction
                     )
                 );
             }
+            break;
         }
-        break;
-
         case thirdBodyArrhenius:
         {
             if (rType == nonEquilibriumReversible)
@@ -597,9 +583,8 @@ void Foam::chemkinReader::addReaction
                     )
                 );
             }
+            break;
         }
-        break;
-
         case unimolecularFallOff:
         {
             addPressureDependentReaction<FallOffReactionRate>
@@ -616,9 +601,8 @@ void Foam::chemkinReader::addReaction
                 Afactor,
                 RR
             );
+            break;
         }
-        break;
-
         case chemicallyActivatedBimolecular:
         {
             addPressureDependentReaction<ChemicallyActivatedReactionRate>
@@ -635,9 +619,8 @@ void Foam::chemkinReader::addReaction
                 Afactor/concFactor,
                 RR
             );
+            break;
         }
-        break;
-
         case LandauTeller:
         {
             const scalarList& LandauTellerCoeffs =
@@ -705,9 +688,8 @@ void Foam::chemkinReader::addReaction
                     )
                 );
             }
+            break;
         }
-        break;
-
         case Janev:
         {
             const scalarList& JanevCoeffs =
@@ -727,9 +709,8 @@ void Foam::chemkinReader::addReaction
                     FixedList<scalar, 9>(JanevCoeffs)
                 )
             );
+            break;
         }
-        break;
-
         case powerSeries:
         {
             const scalarList& powerSeriesCoeffs =
@@ -749,35 +730,23 @@ void Foam::chemkinReader::addReaction
                     FixedList<scalar, 4>(powerSeriesCoeffs)
                 )
             );
+            break;
         }
-        break;
-
         case unknownReactionRateType:
         {
             FatalErrorIn("chemkinReader::addReaction")
                 << "Internal error on line " << lineNo_-1
                 << ": reaction rate type has not been set"
                 << exit(FatalError);
+            break;
         }
-        break;
-
         default:
         {
-            if (rrType < 9)
-            {
-                FatalErrorIn("chemkinReader::addReaction")
-                    << "Reaction rate type " << reactionRateTypeNames[rrType]
-                    << " on line " << lineNo_-1
-                    << " not implemented"
-                    << exit(FatalError);
-            }
-            else
-            {
-                FatalErrorIn("chemkinReader::addReaction")
-                    << "Unknown reaction rate type " << rrType
-                    << " on line " << lineNo_-1
-                    << exit(FatalError);
-            }
+            FatalErrorIn("chemkinReader::addReaction")
+                << "Reaction rate type " << reactionRateTypeNames[rrType]
+                << " on line " << lineNo_-1
+                << " not implemented"
+                << exit(FatalError);
         }
     }
 

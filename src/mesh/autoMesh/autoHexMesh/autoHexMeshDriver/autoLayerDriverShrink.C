@@ -1756,19 +1756,10 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
         Info<< "Writing wanted-displacement mesh (possibly illegal) to "
             << meshRefiner_.timeName() << endl;
         pointField oldPoints(mesh.points());
-        vectorField totalDisp
-        (
-            meshMover.scale().internalField()
-          * displacement.internalField()
-        );
-        syncTools::syncPointList
-        (
-            mesh,
-            totalDisp,
-            minMagSqrEqOp<point>(),
-            vector(GREAT, GREAT, GREAT)
-        );
-        meshMover.movePoints((mesh.points()+totalDisp)());
+
+        meshRefiner_.mesh().movePoints(meshMover.curPoints());
+        // Warn meshMover for changed geometry
+        meshMover.movePoints();
 
         // Above move will have changed the instance only on the points (which
         // is correct).
@@ -1791,7 +1782,11 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
         dispVec.write();
         medialDist.write();
         medialRatio.write();
-        meshMover.movePoints(oldPoints);
+
+        // Move mesh back
+        meshRefiner_.mesh().movePoints(oldPoints);
+        // Warn meshMover for changed geometry
+        meshMover.movePoints();
     }
 
 

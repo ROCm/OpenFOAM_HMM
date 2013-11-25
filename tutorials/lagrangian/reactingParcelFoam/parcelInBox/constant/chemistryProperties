@@ -17,25 +17,12 @@ FoamFile
 
 chemistryType
 {
-    chemistrySolver   ode;
+    chemistrySolver   noChemistrySolver;
     chemistryThermo   rho;
 }
 
 chemistry       off;
 
-initialChemicalTimeStep 1e-07;
-
-EulerImplicitCoeffs
-{
-    cTauChem        0.05;
-    equilibriumRateLimiter off;
-}
-
-odeCoeffs
-{
-    solver          RK;
-    eps             0.05;
-}
-
+initialChemicalTimeStep 1e-7;
 
 // ************************************************************************* //

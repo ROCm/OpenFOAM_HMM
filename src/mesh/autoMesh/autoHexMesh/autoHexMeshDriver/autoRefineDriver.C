@@ -36,6 +36,7 @@ License
 #include "mapDistributePolyMesh.H"
 #include "unitConversion.H"
 #include "snapParameters.H"
+#include "localPointRegion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -1036,19 +1037,11 @@ void Foam::autoRefineDriver::splitAndMergeBaffles
 
 
     // Merge all baffles that are still remaining after duplicating points.
-    List<labelPair> couples
-    (
-        meshRefiner_.getDuplicateFaces   // get all baffles
-        (
-            identity(mesh.nFaces()-mesh.nInternalFaces())
-          + mesh.nInternalFaces()
-        )
-    );
+    List<labelPair> couples(localPointRegion::findDuplicateFacePairs(mesh));
 
     label nCouples = returnReduce(couples.size(), sumOp<label>());
 
-    Info<< "Detected unsplittable baffles : "
-        << nCouples << endl;
+    Info<< "Detected unsplittable baffles : " << nCouples << endl;
 
     if (nCouples > 0)
     {

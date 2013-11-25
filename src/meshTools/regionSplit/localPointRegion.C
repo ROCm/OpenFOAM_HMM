@@ -585,6 +585,65 @@ Foam::labelList Foam::localPointRegion::findDuplicateFaces
 }
 
 
+Foam::List<Foam::labelPair> Foam::localPointRegion::findDuplicateFacePairs
+(
+    const polyMesh& mesh
+)
+{
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+    // Faces to test: all boundary faces
+    labelList testFaces
+    (
+        identity(mesh.nFaces()-mesh.nInternalFaces())
+      + mesh.nInternalFaces()
+    );
+
+    // Find correspondencing baffle face (or -1)
+    const labelList duplicateFace(findDuplicateFaces(mesh, testFaces));
+
+    // Convert into list of coupled face pairs (mesh face labels).
+    DynamicList<labelPair> baffles(testFaces.size());
+
+    forAll(duplicateFace, i)
+    {
+        label otherFaceI = duplicateFace[i];
+
+        if (otherFaceI != -1 && i < otherFaceI)
+        {
+            label meshFace0 = testFaces[i];
+            label patch0 = patches.whichPatch(meshFace0);
+            label meshFace1 = testFaces[otherFaceI];
+            label patch1 = patches.whichPatch(meshFace1);
+
+            // Check for illegal topology. Should normally not happen!
+            if
+            (
+                (patch0 != -1 && isA<processorPolyPatch>(patches[patch0]))
+             || (patch1 != -1 && isA<processorPolyPatch>(patches[patch1]))
+            )
+            {
+                FatalErrorIn
+                (
+                    "localPointRegion::findDuplicateFacePairs(const polyMesh&)"
+                )   << "One of two duplicate faces is on"
+                    << " processorPolyPatch."
+                    << "This is not allowed." << nl
+                    << "Face:" << meshFace0
+                    << " is on patch:" << patches[patch0].name()
+                    << nl
+                    << "Face:" << meshFace1
+                    << " is on patch:" << patches[patch1].name()
+                    << abort(FatalError);
+            }
+
+            baffles.append(labelPair(meshFace0, meshFace1));
+        }
+    }
+    return baffles.shrink();
+}
+
+
 void Foam::localPointRegion::updateMesh(const mapPolyMesh& map)
 {
     {

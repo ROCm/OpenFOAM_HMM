@@ -33,47 +33,47 @@ Description
 
     1. incompressible subsonic:
         \f[
-            p_T = p_0 + 0.5 |U|^2
+            p_p = p_0 - 0.5 |U|^2
         \f]
         where
         \vartable
-            p_T     | incompressible total pressure [m2/s2]
-            p_0     | incompressible reference pressure [m2/s2]
+            p_p     | incompressible pressure at patch [m2/s2]
+            p_0     | incompressible total pressure [m2/s2]
             U       | velocity
         \endvartable
 
     2. compressible subsonic:
         \f[
-            p_T = p_0 + 0.5 \rho |U|^2
+            p_p = p_0 - 0.5 \rho |U|^2
         \f]
         where
         \vartable
-            p_T     | total pressure [Pa]
-            p_0     | reference pressure [Pa]
+            p_p     | pressure at patch [Pa]
+            p_0     | total pressure [Pa]
             \rho    | density [kg/m3]
             U       | velocity
         \endvartable
 
     3. compressible transonic (\gamma <= 1):
         \f[
-            p_T = \frac{p_0}{1 + 0.5 \psi |U|^2}
+            p_p = \frac{p_0}{1 + 0.5 \psi |U|^2}
         \f]
         where
         \vartable
-            p_T     | total pressure [Pa]
-            p_0     | reference pressure [Pa]
+            p_p     | pressure at patch [Pa]
+            p_0     | total pressure [Pa]
             G       | coefficient given by \f$\frac{\gamma}{1-\gamma}\f$
         \endvartable
 
     4. compressible supersonic (\gamma > 1):
         \f[
-            p_T = \frac{p_0}{(1 + 0.5 \psi G |U|^2)^{\frac{1}{G}}}
+            p_p = \frac{p_0}{(1 + 0.5 \psi G |U|^2)^{\frac{1}{G}}}
         \f]
         where
         \vartable
+            p_p     | pressure at patch [Pa]
+            p_0     | total pressure [Pa]
             \gamma  | ratio of specific heats (Cp/Cv)
-            p_T     | total pressure [Pa]
-            p_0     | reference pressure [Pa]
             \psi    | compressibility [m2/s2]
             G       | coefficient given by \f$\frac{\gamma}{1-\gamma}\f$
         \endvartable
@@ -98,7 +98,7 @@ Description
         rho          | density field name      | no          | none
         psi          | compressibility field name | no       | none
         gamma        | ratio of specific heats (Cp/Cv) | yes |
-        p0           | static pressure reference | yes       |
+        p0           | total pressure          | yes       |
     \endtable
 
     Example of the boundary condition specification:

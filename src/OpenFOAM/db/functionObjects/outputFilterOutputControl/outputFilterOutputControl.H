@@ -56,12 +56,12 @@ public:
     //- The output control options
     enum outputControls
     {
-        ocTimeStep,     /*!< execution is coupled to the time-step */
-        ocOutputTime,  /*!< execution is coupled to the output-time */
+        ocTimeStep,       /*!< execution is coupled to the time-step */
+        ocOutputTime,     /*!< execution is coupled to the output-time */
         ocAdjustableTime, /*!< Adjust time step for dumping */
         ocRunTime,        /*!< run time for dumping */
         ocClockTime,      /*!< clock time for dumping */
-        ocCpuTime        /*!< cpu time for dumping */
+        ocCpuTime         /*!< cpu time for dumping */
     };
 
 
@@ -82,7 +82,7 @@ private:
         //  a value <= 1 means execute at every time step
         label outputInterval_;
 
-        //- Dumping counter for ocOutputTime
+        //- Dumping counter for ocOutputTime or index dump for ocAdjustableTime
         label outputTimeLastDump_;
 
         //- Dump each deltaT (adjust Ttime)
@@ -123,19 +123,19 @@ public:
         bool output();
 
         //- Return outputControl
-        outputControls outputControl()
+        outputControls outputControl() const
         {
             return outputControl_;
         }
 
         //- Return writeInterval
-        scalar writeInterval()
+        scalar writeInterval() const
         {
             return writeInterval_;
         }
 
         //- Return outputTimeLastDump
-        label outputTimeLastDump()
+        label outputTimeLastDump() const
         {
             return outputTimeLastDump_;
         }

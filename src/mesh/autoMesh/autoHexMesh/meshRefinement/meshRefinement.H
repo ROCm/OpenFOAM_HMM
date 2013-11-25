@@ -853,10 +853,6 @@ public:
                 List<labelPair>&
             );
 
-            //- Return a list of coupled face pairs, i.e. faces that
-            //  use the same vertices.
-            List<labelPair> getDuplicateFaces(const labelList& testFaces) const;
-
             //- Merge baffles. Gets pairs of faces.
             autoPtr<mapPolyMesh> mergeBaffles(const List<labelPair>&);
 
@@ -893,6 +889,15 @@ public:
 
             //- Select coupled faces that are not collocated
             void selectSeparatedCoupledFaces(boolList&) const;
+
+            //- Find region cell is in. Uses optional perturbation to re-test.
+            static label findRegion
+            (
+                const polyMesh&,
+                const labelList& cellRegion,
+                const vector& perturbVec,
+                const point& p
+            );
 
             //- Split mesh. Keep part containing point.
             autoPtr<mapPolyMesh> splitMeshRegions

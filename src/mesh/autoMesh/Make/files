@@ -26,5 +26,11 @@ $(autoHexMesh)/shellSurfaces/shellSurfaces.C
 $(autoHexMesh)/trackedParticle/trackedParticle.C
 $(autoHexMesh)/trackedParticle/trackedParticleCloud.C
 
+meshMover = $(autoHexMesh)/externalDisplacementMeshMover
+$(meshMover)/displacementMeshMoverMotionSolver.C
+$(meshMover)/externalDisplacementMeshMover.C
+$(meshMover)/medialAxisMeshMover.C
+
+
 LIB = $(FOAM_LIBBIN)/libautoMesh
 

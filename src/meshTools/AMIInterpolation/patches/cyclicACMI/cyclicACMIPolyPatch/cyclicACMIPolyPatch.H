@@ -66,6 +66,12 @@ private:
         //- Index of non-overlapping patch
         mutable label nonOverlapPatchID_;
 
+        //- Mask/weighting for source patch
+        mutable scalarField srcMask_;
+
+        //- Mask/weighting for target patch
+        mutable scalarField tgtMask_;
+
         //- Flag to indicate that AMI has been updated
         mutable bool updated_;
 
@@ -110,6 +116,12 @@ protected:
 
         //- Clear geometry
         virtual void clearGeom();
+
+        //- Return the mask/weighting for the source patch
+        virtual const scalarField& srcMask() const;
+
+        //- Return the mask/weighting for the target patch
+        virtual const scalarField& tgtMask() const;
 
 
 public:
@@ -244,6 +256,9 @@ public:
 
             //- Return access to the original patch face areas
             inline const vectorField& faceAreas0() const;
+
+            //- Return a reference to the neighbour patch
+            virtual const cyclicACMIPolyPatch& neighbPatch() const;
 
             //- Non-overlapping patch name
             inline const word& nonOverlapPatchName() const;

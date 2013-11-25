@@ -49,7 +49,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class sampledPatchInternalField Declaration
+                  Class sampledPatchInternalField Declaration
 \*---------------------------------------------------------------------------*/
 
 class sampledPatchInternalField
@@ -74,6 +74,7 @@ class sampledPatchInternalField
         template<class Type>
         tmp<Field<Type> > interpolateField(const interpolation<Type>&) const;
 
+
 public:
 
     //- Runtime type information
@@ -97,67 +98,71 @@ public:
 
     // Member Functions
 
-        //- sample field on surface
-        virtual tmp<scalarField> sample
-        (
-            const volScalarField&
-        ) const;
+        // Sample
 
-        //- sample field on surface
-        virtual tmp<vectorField> sample
-        (
-            const volVectorField&
-        ) const;
+            //- Sample field on surface
+            virtual tmp<scalarField> sample
+            (
+                const volScalarField&
+            ) const;
 
-        //- sample field on surface
-        virtual tmp<sphericalTensorField> sample
-        (
-            const volSphericalTensorField&
-        ) const;
+            //- Sample field on surface
+            virtual tmp<vectorField> sample
+            (
+                const volVectorField&
+            ) const;
 
-        //- sample field on surface
-        virtual tmp<symmTensorField> sample
-        (
-            const volSymmTensorField&
-        ) const;
+            //- Sample field on surface
+            virtual tmp<sphericalTensorField> sample
+            (
+                const volSphericalTensorField&
+            ) const;
 
-        //- sample field on surface
-        virtual tmp<tensorField> sample
-        (
-            const volTensorField&
-        ) const;
+            //- Sample field on surface
+            virtual tmp<symmTensorField> sample
+            (
+                const volSymmTensorField&
+            ) const;
 
-
-        //- interpolate field on surface
-        virtual tmp<scalarField> interpolate
-        (
-            const interpolation<scalar>&
-        ) const;
+            //- Sample field on surface
+            virtual tmp<tensorField> sample
+            (
+                const volTensorField&
+            ) const;
 
 
-        //- interpolate field on surface
-        virtual tmp<vectorField> interpolate
-        (
-            const interpolation<vector>&
-        ) const;
+        // Interpolate
 
-        //- interpolate field on surface
-        virtual tmp<sphericalTensorField> interpolate
-        (
-            const interpolation<sphericalTensor>&
-        ) const;
+            //- Interpolate field on surface
+            virtual tmp<scalarField> interpolate
+            (
+                const interpolation<scalar>&
+            ) const;
 
-        //- interpolate field on surface
-        virtual tmp<symmTensorField> interpolate
-        (
-            const interpolation<symmTensor>&
-        ) const;
+            //- Interpolate field on surface
+            virtual tmp<vectorField> interpolate
+            (
+                const interpolation<vector>&
+            ) const;
 
-        //- interpolate field on surface
-        virtual tmp<tensorField> interpolate
-        (
-            const interpolation<tensor>&
-        ) const;
+            //- Interpolate field on surface
+            virtual tmp<sphericalTensorField> interpolate
+            (
+                const interpolation<sphericalTensor>&
+            ) const;
+
+            //- Interpolate field on surface
+            virtual tmp<symmTensorField> interpolate
+            (
+                const interpolation<symmTensor>&
+            ) const;
+
+            //- Interpolate field on surface
+            virtual tmp<tensorField> interpolate
+            (
+                const interpolation<tensor>&
+            ) const;
+
 
         //- Write
         virtual void print(Ostream&) const;
