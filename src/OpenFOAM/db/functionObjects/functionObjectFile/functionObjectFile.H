@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,6 +43,7 @@ SourceFiles
 #include "OFstream.H"
 #include "PtrList.H"
 #include "HashSet.H"
+#include "IOmanip.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -98,6 +99,9 @@ protected:
         //- Reset the list of names to a single name entry
         virtual void resetName(const word& name);
 
+        //- Return the value width when writing to stream with optional offset
+        virtual Omanip<int> valueWidth(const label offset = 0) const;
+
         //- Disallow default bitwise copy construct
         functionObjectFile(const functionObjectFile&);
 
@@ -149,12 +153,26 @@ public:
 
         //- Return file 'i'
         OFstream& file(const label i);
+
+        //- Write a formatted value to stream
+        template<class Type>
+        const char* writeValue
+        (
+            const Type& value,
+            const label offset = 0
+        ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "functionObjectFileTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

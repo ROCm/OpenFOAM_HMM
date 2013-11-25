@@ -147,6 +147,12 @@ void Foam::functionObjectFile::resetName(const word& name)
 }
 
 
+Foam::Omanip<int> Foam::functionObjectFile::valueWidth(const label offset) const
+{
+    return setw(IOstream::defaultPrecision() + 7 + offset);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::functionObjectFile::functionObjectFile
