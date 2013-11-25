@@ -43,9 +43,11 @@ defineTypeNameAndDebug(wallShearStress, 0);
 void Foam::wallShearStress::writeFileHeader(const label i)
 {
     // Add headers to output data
-    file() << "# Wall shear stress" << nl
-        << "# time " << token::TAB << "patch" << token::TAB
-        << "min" << token::TAB << "max" << endl;
+    writeHeader(file(), "Wall shear stress");
+    writeCommented(file(), "Time");
+    writeTabbed(file(), "patch");
+    writeTabbed(file(), "min");
+    writeTabbed(file(), "max");
 }
 
 
@@ -73,9 +75,11 @@ void Foam::wallShearStress::calcShearStress
 
         if (Pstream::master())
         {
-            file() << mesh.time().timeName() << token::TAB
-                << pp.name() << token::TAB << minSsp
-                << token::TAB << maxSsp << endl;
+            file() << mesh.time().value()
+                << token::TAB << pp.name()
+                << token::TAB << minSsp
+                << token::TAB << maxSsp
+                << endl;
         }
 
         if (log_)

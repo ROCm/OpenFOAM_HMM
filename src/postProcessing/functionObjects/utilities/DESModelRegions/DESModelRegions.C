@@ -42,9 +42,11 @@ defineTypeNameAndDebug(DESModelRegions, 0);
 
 void Foam::DESModelRegions::writeFileHeader(const label i)
 {
-    file() << "# DES model region coverage (% volume)" << nl
-        << "# time " << token::TAB << "LES" << token::TAB << "RAS"
-        << endl;
+    writeHeader(file(), "DES model region coverage (% volume)");
+
+    writeCommented(file(), "Time");
+    writeTabbed(file(), "LES");
+    writeTabbed(file(), "RAS");
 }
 
 
@@ -206,8 +208,10 @@ void Foam::DESModelRegions::write()
 
             if (Pstream::master() && log_)
             {
-                file() << obr_.time().timeName() << token::TAB
-                    << prc << token::TAB << 100.0 - prc << endl;
+                file() << obr_.time().value()
+                    << token::TAB << prc
+                    << token::TAB << 100.0 - prc
+                    << endl;
             }
 
             if (log_)

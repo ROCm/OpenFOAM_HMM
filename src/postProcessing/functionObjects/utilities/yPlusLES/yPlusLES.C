@@ -44,10 +44,13 @@ defineTypeNameAndDebug(yPlusLES, 0);
 
 void Foam::yPlusLES::writeFileHeader(const label i)
 {
-    file() << "# y+ (LES)" << nl
-        << "# time " << token::TAB << "patch" << token::TAB
-        << "min" << token::TAB << "max" << token::TAB << "average"
-        << endl;
+    writeHeader(file(), "y+ (LES)");
+
+    writeCommented(file(), "Time");
+    writeTabbed(file(), "patch");
+    writeTabbed(file(), "min");
+    writeTabbed(file(), "max");
+    writeTabbed(file(), "average");
 }
 
 
@@ -100,10 +103,12 @@ void Foam::yPlusLES::calcIncompressibleYPlus
 
             if (Pstream::master())
             {
-                file() << obr_.time().value() << token::TAB
-                    << currPatch.name() << token::TAB
-                    << minYp << token::TAB << maxYp << token::TAB
-                    << avgYp << endl;
+                file() << obr_.time().value()
+                    << token::TAB << currPatch.name()
+                    << token::TAB << minYp
+                    << token::TAB << maxYp
+                    << token::TAB << avgYp
+                    << endl;
             }
         }
     }
@@ -166,10 +171,12 @@ void Foam::yPlusLES::calcCompressibleYPlus
 
             if (Pstream::master())
             {
-                file() << obr_.time().value() << token::TAB
-                    << currPatch.name() << token::TAB
-                    << minYp << token::TAB << maxYp << token::TAB
-                    << avgYp << endl;
+                file() << obr_.time().value()
+                    << token::TAB << currPatch.name()
+                    << token::TAB << minYp
+                    << token::TAB << maxYp
+                    << token::TAB << avgYp
+                    << endl;
             }
          }
     }

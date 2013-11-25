@@ -112,20 +112,23 @@ void Foam::fieldMinMax::read(const dictionary& dict)
 
 void Foam::fieldMinMax::writeFileHeader(const label i)
 {
-    file()
-        << "# Time" << token::TAB << "field" << token::TAB
-        << "min" << token::TAB << "position(min)";
+    writeHeader(file(), "Field minima and maxima");
+    writeCommented(file(), "Time");
+    writeTabbed(file(), "field");
+    writeTabbed(file(), "min");
+    writeTabbed(file(), "position(min)");
 
     if (Pstream::parRun())
     {
-        file() << token::TAB << "proc";
+        writeTabbed(file(), "processor");
     }
 
-    file() << token::TAB << "max" << token::TAB << "position(max)";
+    writeTabbed(file(), "max");
+    writeTabbed(file(), "position(max)");
 
     if (Pstream::parRun())
     {
-        file() << token::TAB << "proc";
+        writeTabbed(file(), "processor");
     }
 
     file() << endl;

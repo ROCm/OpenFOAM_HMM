@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -111,21 +111,25 @@ void Foam::fieldMinMax::calcMinMaxFields
                     scalar maxValue = maxVs[maxI];
                     const vector& maxC = maxCs[maxI];
 
+                    file()<< obr_.time().value();
+                    writeTabbed(file(), fieldName);
+
                     file()
-                        << obr_.time().value() << token::TAB
-                        << fieldName << token::TAB
-                        << minValue << token::TAB << minC;
+                        << token::TAB << minValue
+                        << token::TAB << minC;
 
                     if (Pstream::parRun())
                     {
-                        file() << token::TAB << minI;
+                        file()<< token::TAB << minI;
                     }
 
-                    file() << token::TAB << maxValue << token::TAB << maxC;
+                    file()
+                        << token::TAB << maxValue
+                        << token::TAB << maxC;
 
                     if (Pstream::parRun())
                     {
-                        file() << token::TAB << maxI;
+                        file()<< token::TAB << maxI;
                     }
 
                     file() << endl;
@@ -212,21 +216,25 @@ void Foam::fieldMinMax::calcMinMaxFields
                     Type maxValue = maxVs[maxI];
                     const vector& maxC = maxCs[maxI];
 
+                    file()<< obr_.time().value();
+                    writeTabbed(file(), fieldName);
+
                     file()
-                        << obr_.time().value() << token::TAB
-                        << fieldName << token::TAB
-                        << minValue << token::TAB << minC;
+                        << token::TAB << minValue
+                        << token::TAB << minC;
 
                     if (Pstream::parRun())
                     {
-                        file() << token::TAB << minI;
+                        file()<< token::TAB << minI;
                     }
 
-                    file() << token::TAB << maxValue << token::TAB << maxC;
+                    file()
+                        << token::TAB << maxValue
+                        << token::TAB << maxC;
 
                     if (Pstream::parRun())
                     {
-                        file() << token::TAB << maxI;
+                        file()<< token::TAB << maxI;
                     }
 
                     file() << endl;

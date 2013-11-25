@@ -78,6 +78,9 @@ protected:
 
     // Protected Member Functions
 
+        //- Initialise the output stream for writing
+        virtual void initStream(Ostream& os) const;
+
         //- Return the base directory for output
         virtual fileName baseFileDir() const;
 
@@ -113,6 +116,9 @@ public:
 
     //- Folder prefix
     static const word outputPrefix;
+
+    //- Additional characters for writing
+    static label addChars;
 
     // Constructors
 
@@ -154,13 +160,38 @@ public:
         //- Return file 'i'
         OFstream& file(const label i);
 
-        //- Write a formatted value to stream
-        template<class Type>
-        const char* writeValue
+        //- Write a commented string to stream
+        void writeCommented
         (
-            const Type& value,
-            const label offset = 0
+            Ostream& os,
+            const string& str
         ) const;
+
+        //- Write a tabbed string to stream
+        void writeTabbed
+        (
+            Ostream& os,
+            const string& str
+        ) const;
+
+        //- Write a commented header to stream
+        void writeHeader
+        (
+            Ostream& os,
+            const string& str
+        ) const;
+
+        //- Write a (commented) header property and value pair
+        template<class Type>
+        void writeHeaderValue
+        (
+            Ostream& os,
+            const string& property,
+            const Type& value
+        ) const;
+
+        //- Return width of character stream output
+        label charWidth() const;
 };
 
 

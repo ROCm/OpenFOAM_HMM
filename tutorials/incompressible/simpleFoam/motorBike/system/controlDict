@@ -23,7 +23,7 @@ libs
 
 application     simpleFoam;
 
-startFrom       latestTime;
+startFrom       startTime; // latestTime;
 
 startTime       0;
 

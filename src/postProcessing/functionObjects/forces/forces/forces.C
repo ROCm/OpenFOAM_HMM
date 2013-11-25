@@ -73,11 +73,13 @@ void Foam::forces::writeFileHeader(const label i)
     {
         // force data
 
+        writeHeader(file(i), "Forces");
+        writeHeaderValue(file(i), "CofR", coordSys_.origin());
+        writeCommented(file(i), "Time");
+
         file(i)
-            << "# CofR      : " << coordSys_.origin() << nl
-            << "# Time" << tab
-            << "forces(pressure,viscous,porous) "
-            << "moment(pressure,viscous,porous)";
+            << "forces[pressure,viscous,porous] "
+            << "moment[pressure,viscous,porous]";
 
         if (localSystem_)
         {
@@ -91,32 +93,30 @@ void Foam::forces::writeFileHeader(const label i)
     {
         // bin data
 
-        file(i)
-            << "# bins      : " << nBin_ << nl
-            << "# start     : " << binMin_ << nl
-            << "# delta     : " << binDx_ << nl
-            << "# direction : " << binDir_ << nl
-            << "# Time";
+        writeHeader(file(i), "Force bins");
+        writeHeaderValue(file(i), "bins", nBin_);
+        writeHeaderValue(file(i), "start", binMin_);
+        writeHeaderValue(file(i), "delta", binDx_);
+        writeHeaderValue(file(i), "direction", binDir_);
+        writeCommented(file(i), "Time");
 
         for (label j = 0; j < nBin_; j++)
         {
             const word jn('[' + Foam::name(j) + ']');
+            const word f("forces" + jn + "[pressure,viscous,porous]");
+            const word m("moments" + jn + "[pressure,viscous,porous]");
 
-            file(i)
-                << tab
-                << "forces" << jn << "(pressure,viscous,porous) "
-                << "moment" << jn << "(pressure,viscous,porous)";
+            file(i)<< tab << f << tab << m;
         }
         if (localSystem_)
         {
             for (label j = 0; j < nBin_; j++)
             {
                 const word jn('[' + Foam::name(j) + ']');
+                const word f("localForces" + jn + "[pressure,viscous,porous]");
+                const word m("localMoments" + jn + "[pressure,viscous,porous]");
 
-                file(i)
-                    << tab
-                    << "localForces" << jn << "(pressure,viscous,porous) "
-                    << "localMoments" << jn << "(pressure,viscous,porous)";
+                file(i)<< tab << f << tab << m;
             }
         }
     }
@@ -370,28 +370,24 @@ void Foam::forces::writeForces()
     if (log_)
     {
         Info<< type() << " " << name_ << " output:" << nl
-            << "    forces(pressure,viscous,porous) = ("
-            << sum(force_[0]) << ","
-            << sum(force_[1]) << ","
-            << sum(force_[2]) << ")" << nl
-            << "    moment(pressure,viscous,porous) = ("
-            << sum(moment_[0]) << ","
-            << sum(moment_[1]) << ","
-            << sum(moment_[2]) << ")"
-            << nl;
+            << "    sum of forces:" << nl
+            << "        pressure : " << sum(force_[0]) << nl
+            << "        viscous  : " << sum(force_[1]) << nl
+            << "        porous   : " << sum(force_[2]) << nl
+            << "    sum of moments:" << nl
+            << "        pressure : " << sum(moment_[0]) << nl
+            << "        viscous  : " << sum(moment_[1]) << nl
+            << "        porous   : " << sum(moment_[2])
+            << endl;
     }
 
-    file(0) << obr_.time().value() << tab
-        << "("
-        << sum(force_[0]) << ","
-        << sum(force_[1]) << ","
-        << sum(force_[2])
-        << ") "
-        << "("
-        << sum(moment_[0]) << ","
-        << sum(moment_[1]) << ","
-        << sum(moment_[2])
-        << ")"
+    file(0) << obr_.time().value() << tab << setw(1) << '['
+        << sum(force_[0]) << setw(1) << ','
+        << sum(force_[1]) << setw(1) << ","
+        << sum(force_[2]) << setw(3) << "] ["
+        << sum(moment_[0]) << setw(1) << ","
+        << sum(moment_[1]) << setw(1) << ","
+        << sum(moment_[2]) << setw(1) << "]"
         << endl;
 
     if (localSystem_)
@@ -403,17 +399,13 @@ void Foam::forces::writeForces()
         vectorField localMomentT(coordSys_.localVector(moment_[1]));
         vectorField localMomentP(coordSys_.localVector(moment_[2]));
 
-        file(0) << obr_.time().value() << tab
-            << "("
-            << sum(localForceN) << ","
-            << sum(localForceT) << ","
-            << sum(localForceP)
-            << ") "
-            << "("
-            << sum(localMomentN) << ","
-            << sum(localMomentT) << ","
-            << sum(localMomentP)
-            << ")"
+        file(0) << obr_.time().value() << tab << setw(1) << "["
+            << sum(localForceN) << setw(1) << ","
+            << sum(localForceT) << setw(1) << ","
+            << sum(localForceP) << setw(3) << "] ["
+            << sum(localMomentN) << setw(1) << ","
+            << sum(localMomentT) << setw(1) << ","
+            << sum(localMomentP) << setw(1) << "]"
             << endl;
     }
 }
@@ -448,9 +440,13 @@ void Foam::forces::writeBins()
     forAll(f[0], i)
     {
         file(1)
-            << tab
-            << "(" << f[0][i] << "," << f[1][i] << "," << f[2][i] << ") "
-            << "(" << m[0][i] << "," << m[1][i] << "," << m[2][i] << ")";
+            << tab << setw(1) << "["
+            << f[0][i] << setw(1) << ","
+            << f[1][i] << setw(1) << ","
+            << f[2][i] << setw(3) << "] ["
+            << m[0][i] << setw(1) << ","
+            << m[1][i] << setw(1) << ","
+            << m[2][i] << setw(1) << "]";
     }
 
     if (localSystem_)
@@ -480,9 +476,13 @@ void Foam::forces::writeBins()
         forAll(lf[0], i)
         {
             file(1)
-                << tab
-                << "(" << lf[0][i] << "," << lf[1][i] << "," << lf[2][i] << ") "
-                << "(" << lm[0][i] << "," << lm[1][i] << "," << lm[2][i] << ")";
+                << tab << setw(1) << "["
+                << lf[0][i] << setw(1) << ","
+                << lf[1][i] << setw(1) << ","
+                << lf[2][i] << setw(3) << "] ["
+                << lm[0][i] << setw(1) << ","
+                << lm[1][i] << setw(1) << ","
+                << lm[2][i] << setw(1) << "]";
         }
     }
 
