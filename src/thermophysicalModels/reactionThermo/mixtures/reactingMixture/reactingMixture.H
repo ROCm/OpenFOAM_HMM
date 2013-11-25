@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -93,6 +93,11 @@ public:
         }
 
         Reaction<ThermoType>& operator [] (const label i)
+        {
+            return PtrList<Reaction<ThermoType> >::operator[](i);
+        }
+
+        const Reaction<ThermoType>& operator [] (const label i) const
         {
             return PtrList<Reaction<ThermoType> >::operator[](i);
         }
