@@ -55,7 +55,7 @@ dispersedPhase     particles;
 residualPhaseFraction   1e-3;
 residualSlip            1e-2;
 
-// Virtual-mass ceofficient
+// Virtual-mass coefficient
 Cvm             0;
 
 // Lift coefficient
