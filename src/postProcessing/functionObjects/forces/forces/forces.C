@@ -98,6 +98,30 @@ void Foam::forces::writeFileHeader(const label i)
         writeHeaderValue(file(i), "start", binMin_);
         writeHeaderValue(file(i), "delta", binDx_);
         writeHeaderValue(file(i), "direction", binDir_);
+
+        vectorField binPoints(nBin_);
+        writeCommented(file(i), "x co-ords  :");
+        forAll(binPoints, pointI)
+        {
+            binPoints[pointI] = (binMin_ + (pointI + 1)*binDx_)*binDir_;
+            file(i) << tab << binPoints[pointI].x();
+        }
+        file(i) << nl;
+
+        writeCommented(file(i), "y co-ords  :");
+        forAll(binPoints, pointI)
+        {
+            file(i) << tab << binPoints[pointI].y();
+        }
+        file(i) << nl;
+
+        writeCommented(file(i), "z co-ords  :");
+        forAll(binPoints, pointI)
+        {
+            file(i) << tab << binPoints[pointI].z();
+        }
+        file(i) << nl;
+
         writeCommented(file(i), "Time");
 
         for (label j = 0; j < nBin_; j++)
