@@ -135,3 +135,6 @@
     }
 
     fv::IOoptionList fvOptions(mesh);
+
+
+    tmp<surfaceScalarField> tphiAlphaCorr0;

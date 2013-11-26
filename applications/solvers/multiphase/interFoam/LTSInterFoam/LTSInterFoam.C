@@ -77,8 +77,6 @@ int main(int argc, char *argv[])
 
         #include "setrDeltaT.H"
 
-        tmp<surfaceScalarField> tphiAlpha;
-
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())
         {
@@ -91,8 +89,6 @@ int main(int argc, char *argv[])
                 #define LTSSOLVE
                 #include "alphaEqnSubCycle.H"
                 #undef LTSSOLVE
-
-                interface.correct();
             }
 
             turbulence->correct();
