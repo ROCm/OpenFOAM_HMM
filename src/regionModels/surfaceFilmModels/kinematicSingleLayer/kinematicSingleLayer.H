@@ -100,6 +100,9 @@ protected:
             //- Small delta
             const dimensionedScalar deltaSmall_;
 
+            //- Film thickness above which Courant number calculation in valid
+            scalar deltaCoLimit_;
+
 
         // Thermo properties
 
