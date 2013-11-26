@@ -99,6 +99,8 @@ protected:
         //- Optional tangential velocity component
         vectorField tangentialVelocity_;
 
+        bool applyTangentialVelocity_;
+
 
 public:
 

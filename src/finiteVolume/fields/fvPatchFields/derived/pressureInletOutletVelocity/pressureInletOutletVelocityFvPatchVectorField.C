@@ -40,7 +40,8 @@ pressureInletOutletVelocityFvPatchVectorField
 :
     mixedFvPatchVectorField(p, iF),
     phiName_("phi"),
-    rhoName_("rho")
+    rhoName_("rho"),
+    applyTangentialVelocity_(false)
 {
     refValue() = *this;
     refGrad() = vector::zero;
@@ -59,9 +60,10 @@ pressureInletOutletVelocityFvPatchVectorField
 :
     mixedFvPatchVectorField(ptf, p, iF, mapper),
     phiName_(ptf.phiName_),
-    rhoName_(ptf.rhoName_)
+    rhoName_(ptf.rhoName_),
+    applyTangentialVelocity_(ptf.applyTangentialVelocity_)
 {
-    if (ptf.tangentialVelocity_.size())
+    if (applyTangentialVelocity_)
     {
         tangentialVelocity_ = mapper(ptf.tangentialVelocity_);
     }
@@ -78,12 +80,15 @@ pressureInletOutletVelocityFvPatchVectorField
 :
     mixedFvPatchVectorField(p, iF),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho"))
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
+    applyTangentialVelocity_(false)
 {
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
 
     if (dict.found("tangentialVelocity"))
     {
+        applyTangentialVelocity_ = true;
+
         setTangentialVelocity
         (
             vectorField("tangentialVelocity", dict, p.size())
@@ -108,7 +113,8 @@ pressureInletOutletVelocityFvPatchVectorField
     mixedFvPatchVectorField(pivpvf),
     phiName_(pivpvf.phiName_),
     rhoName_(pivpvf.rhoName_),
-    tangentialVelocity_(pivpvf.tangentialVelocity_)
+    tangentialVelocity_(pivpvf.tangentialVelocity_),
+    applyTangentialVelocity_(pivpvf.applyTangentialVelocity_)
 {}
 
 
@@ -122,7 +128,8 @@ pressureInletOutletVelocityFvPatchVectorField
     mixedFvPatchVectorField(pivpvf, iF),
     phiName_(pivpvf.phiName_),
     rhoName_(pivpvf.rhoName_),
-    tangentialVelocity_(pivpvf.tangentialVelocity_)
+    tangentialVelocity_(pivpvf.tangentialVelocity_),
+    applyTangentialVelocity_(pivpvf.applyTangentialVelocity_)
 {}
 
 
@@ -143,7 +150,7 @@ void Foam::pressureInletOutletVelocityFvPatchVectorField::autoMap
 )
 {
     mixedFvPatchVectorField::autoMap(m);
-    if (tangentialVelocity_.size())
+    if (applyTangentialVelocity_)
     {
         tangentialVelocity_.autoMap(m);
     }
@@ -158,7 +165,7 @@ void Foam::pressureInletOutletVelocityFvPatchVectorField::rmap
 {
     mixedFvPatchVectorField::rmap(ptf, addr);
 
-    if (tangentialVelocity_.size())
+    if (applyTangentialVelocity_)
     {
         const pressureInletOutletVelocityFvPatchVectorField& tiptf =
             refCast<const pressureInletOutletVelocityFvPatchVectorField>(ptf);
@@ -208,7 +215,7 @@ void Foam::pressureInletOutletVelocityFvPatchVectorField::updateCoeffs()
             << exit(FatalError);
     }
 
-    if (tangentialVelocity_.size())
+    if (applyTangentialVelocity_)
     {
         // Adjust the tangential velocity to conserve kinetic energy
         // of the entrained fluid
@@ -235,7 +242,7 @@ void Foam::pressureInletOutletVelocityFvPatchVectorField::write
     fvPatchVectorField::write(os);
     writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
     writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
-    if (tangentialVelocity_.size())
+    if (applyTangentialVelocity_)
     {
         tangentialVelocity_.writeEntry("tangentialVelocity", os);
     }

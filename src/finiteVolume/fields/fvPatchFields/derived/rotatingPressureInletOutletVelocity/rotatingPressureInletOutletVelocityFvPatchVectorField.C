@@ -33,6 +33,8 @@ License
 void Foam::rotatingPressureInletOutletVelocityFvPatchVectorField::
 calcTangentialVelocity()
 {
+    applyTangentialVelocity_ = true;
+
     const scalar t = this->db().time().timeOutputValue();
     vector om = omega_->value(t);
 
@@ -70,9 +72,7 @@ rotatingPressureInletOutletVelocityFvPatchVectorField
 :
     pressureInletOutletVelocityFvPatchVectorField(ptf, p, iF, mapper),
     omega_(ptf.omega_().clone().ptr())
-{
-    calcTangentialVelocity();
-}
+{}
 
 
 Foam::rotatingPressureInletOutletVelocityFvPatchVectorField::
