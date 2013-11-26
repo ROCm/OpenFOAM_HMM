@@ -94,11 +94,8 @@ pressureInletOutletVelocityFvPatchVectorField
             vectorField("tangentialVelocity", dict, p.size())
         );
     }
-    else
-    {
-        refValue() = vector::zero;
-    }
 
+    refValue() = *this;
     refGrad() = vector::zero;
     valueFraction() = 0.0;
 }
@@ -138,6 +135,7 @@ pressureInletOutletVelocityFvPatchVectorField
 void Foam::pressureInletOutletVelocityFvPatchVectorField::
 setTangentialVelocity(const vectorField& tangentialVelocity)
 {
+    applyTangentialVelocity_ = true;
     tangentialVelocity_ = tangentialVelocity;
     vectorField n(patch().nf());
     tangentialVelocity_ -= n*(n & tangentialVelocity_);
