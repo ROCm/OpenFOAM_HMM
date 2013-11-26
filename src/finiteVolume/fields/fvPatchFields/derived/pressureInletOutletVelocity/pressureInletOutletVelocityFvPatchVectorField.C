@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,9 +25,9 @@ License
 
 #include "pressureInletOutletVelocityFvPatchVectorField.H"
 #include "addToRunTimeSelectionTable.H"
+#include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -38,12 +38,13 @@ pressureInletOutletVelocityFvPatchVectorField
     const DimensionedField<vector, volMesh>& iF
 )
 :
-    directionMixedFvPatchVectorField(p, iF),
-    phiName_("phi")
+    mixedFvPatchVectorField(p, iF),
+    phiName_("phi"),
+    rhoName_("rho")
 {
-    refValue() = vector::zero;
+    refValue() = *this;
     refGrad() = vector::zero;
-    valueFraction() = symmTensor::zero;
+    valueFraction() = 0.0;
 }
 
 
@@ -56,8 +57,9 @@ pressureInletOutletVelocityFvPatchVectorField
     const fvPatchFieldMapper& mapper
 )
 :
-    directionMixedFvPatchVectorField(ptf, p, iF, mapper),
-    phiName_(ptf.phiName_)
+    mixedFvPatchVectorField(ptf, p, iF, mapper),
+    phiName_(ptf.phiName_),
+    rhoName_(ptf.rhoName_)
 {
     if (ptf.tangentialVelocity_.size())
     {
@@ -74,8 +76,9 @@ pressureInletOutletVelocityFvPatchVectorField
     const dictionary& dict
 )
 :
-    directionMixedFvPatchVectorField(p, iF),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi"))
+    mixedFvPatchVectorField(p, iF),
+    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho"))
 {
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
 
@@ -92,7 +95,7 @@ pressureInletOutletVelocityFvPatchVectorField
     }
 
     refGrad() = vector::zero;
-    valueFraction() = symmTensor::zero;
+    valueFraction() = 0.0;
 }
 
 
@@ -102,8 +105,9 @@ pressureInletOutletVelocityFvPatchVectorField
     const pressureInletOutletVelocityFvPatchVectorField& pivpvf
 )
 :
-    directionMixedFvPatchVectorField(pivpvf),
+    mixedFvPatchVectorField(pivpvf),
     phiName_(pivpvf.phiName_),
+    rhoName_(pivpvf.rhoName_),
     tangentialVelocity_(pivpvf.tangentialVelocity_)
 {}
 
@@ -115,8 +119,9 @@ pressureInletOutletVelocityFvPatchVectorField
     const DimensionedField<vector, volMesh>& iF
 )
 :
-    directionMixedFvPatchVectorField(pivpvf, iF),
+    mixedFvPatchVectorField(pivpvf, iF),
     phiName_(pivpvf.phiName_),
+    rhoName_(pivpvf.rhoName_),
     tangentialVelocity_(pivpvf.tangentialVelocity_)
 {}
 
@@ -127,8 +132,8 @@ void Foam::pressureInletOutletVelocityFvPatchVectorField::
 setTangentialVelocity(const vectorField& tangentialVelocity)
 {
     tangentialVelocity_ = tangentialVelocity;
-    const vectorField n(patch().nf());
-    refValue() = tangentialVelocity_ - n*(n & tangentialVelocity_);
+    vectorField n(patch().nf());
+    tangentialVelocity_ -= n*(n & tangentialVelocity_);
 }
 
 
@@ -137,7 +142,7 @@ void Foam::pressureInletOutletVelocityFvPatchVectorField::autoMap
     const fvPatchFieldMapper& m
 )
 {
-    directionMixedFvPatchVectorField::autoMap(m);
+    mixedFvPatchVectorField::autoMap(m);
     if (tangentialVelocity_.size())
     {
         tangentialVelocity_.autoMap(m);
@@ -151,7 +156,7 @@ void Foam::pressureInletOutletVelocityFvPatchVectorField::rmap
     const labelList& addr
 )
 {
-    directionMixedFvPatchVectorField::rmap(ptf, addr);
+    mixedFvPatchVectorField::rmap(ptf, addr);
 
     if (tangentialVelocity_.size())
     {
@@ -170,24 +175,66 @@ void Foam::pressureInletOutletVelocityFvPatchVectorField::updateCoeffs()
         return;
     }
 
+    const surfaceScalarField& phi =
+        db().lookupObject<surfaceScalarField>(phiName_);
+
     const fvsPatchField<scalar>& phip =
-        patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
+        patch().patchField<surfaceScalarField, scalar>(phi);
 
-    valueFraction() = neg(phip)*(I - sqr(patch().nf()));
+    vectorField n(patch().nf());
+    const Field<scalar>& magSf = patch().magSf();
 
-    directionMixedFvPatchVectorField::updateCoeffs();
-    directionMixedFvPatchVectorField::evaluate();
+    if (phi.dimensions() == dimVelocity*dimArea)
+    {
+        refValue() = n*phip/magSf;
+    }
+    else if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+    {
+        const fvPatchField<scalar>& rhop =
+            patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+
+        refValue() = n*phip/(rhop*magSf);
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "pressureInletOutletVelocityFvPatchVectorField::"
+            "updateCoeffs()"
+        )   << "dimensions of phi are not correct" << nl
+            << "    on patch " << this->patch().name()
+            << " of field " << this->dimensionedInternalField().name()
+            << " in file " << this->dimensionedInternalField().objectPath()
+            << exit(FatalError);
+    }
+
+    if (tangentialVelocity_.size())
+    {
+        // Adjust the tangential velocity to conserve kinetic energy
+        // of the entrained fluid
+        // scalarField magSqrUt(magSqr(tangentialVelocity_));
+        // scalarField scale
+        // (
+        //     max(sqrt((magSqrUt - magSqr(refValue()))/magSqrUt), scalar(0))
+        // );
+        // refValue() += scale*tangentialVelocity_;
+        refValue() += tangentialVelocity_;
+    }
+
+    valueFraction() = 1.0 - pos(phip);
+
+    mixedFvPatchVectorField::updateCoeffs();
 }
 
 
 void Foam::pressureInletOutletVelocityFvPatchVectorField::write
 (
     Ostream& os
-)
-const
+) const
 {
     fvPatchVectorField::write(os);
     writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
+    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
     if (tangentialVelocity_.size())
     {
         tangentialVelocity_.writeEntry("tangentialVelocity", os);
@@ -203,9 +250,7 @@ void Foam::pressureInletOutletVelocityFvPatchVectorField::operator=
     const fvPatchField<vector>& pvf
 )
 {
-    tmp<vectorField> normalValue = transform(valueFraction(), refValue());
-    tmp<vectorField> transformGradValue = transform(I - valueFraction(), pvf);
-    fvPatchField<vector>::operator=(normalValue + transformGradValue);
+    fvPatchField<vector>::operator=(pvf);
 }
 
 
