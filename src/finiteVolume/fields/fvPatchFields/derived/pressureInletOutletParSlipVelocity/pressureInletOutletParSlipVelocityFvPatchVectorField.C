@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,8 +41,7 @@ pressureInletOutletParSlipVelocityFvPatchVectorField
 :
     mixedFvPatchVectorField(p, iF),
     phiName_("phi"),
-    rhoName_("rho"),
-    UName_("U")
+    rhoName_("rho")
 {
     refValue() = *this;
     refGrad() = vector::zero;
@@ -61,8 +60,7 @@ pressureInletOutletParSlipVelocityFvPatchVectorField
 :
     mixedFvPatchVectorField(ptf, p, iF, mapper),
     phiName_(ptf.phiName_),
-    rhoName_(ptf.rhoName_),
-    UName_(ptf.UName_)
+    rhoName_(ptf.rhoName_)
 {}
 
 
@@ -76,8 +74,7 @@ pressureInletOutletParSlipVelocityFvPatchVectorField
 :
     mixedFvPatchVectorField(p, iF),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
-    UName_(dict.lookupOrDefault<word>("U", "U"))
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho"))
 {
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
     refValue() = *this;
@@ -94,8 +91,7 @@ pressureInletOutletParSlipVelocityFvPatchVectorField
 :
     mixedFvPatchVectorField(pivpvf),
     phiName_(pivpvf.phiName_),
-    rhoName_(pivpvf.rhoName_),
-    UName_(pivpvf.UName_)
+    rhoName_(pivpvf.rhoName_)
 {}
 
 
@@ -108,8 +104,7 @@ pressureInletOutletParSlipVelocityFvPatchVectorField
 :
     mixedFvPatchVectorField(pivpvf, iF),
     phiName_(pivpvf.phiName_),
-    rhoName_(pivpvf.rhoName_),
-    UName_(pivpvf.UName_)
+    rhoName_(pivpvf.rhoName_)
 {}
 
 
@@ -122,8 +117,6 @@ void Foam::pressureInletOutletParSlipVelocityFvPatchVectorField::updateCoeffs()
         return;
     }
 
-    const label patchI = patch().index();
-
     const surfaceScalarField& phi =
         db().lookupObject<surfaceScalarField>(phiName_);
 
@@ -131,23 +124,22 @@ void Foam::pressureInletOutletParSlipVelocityFvPatchVectorField::updateCoeffs()
         patch().patchField<surfaceScalarField, scalar>(phi);
 
     tmp<vectorField> n = patch().nf();
-    const Field<scalar>& magS = patch().magSf();
+    const Field<scalar>& magSf = patch().magSf();
 
-    const volVectorField& U = db().lookupObject<volVectorField>(UName_);
-
-    vectorField Uc(U.boundaryField()[patchI].patchInternalField());
-    Uc -= n()*(Uc & n());
+    // Get the tangential component from the internalField (zero-gradient)
+    vectorField Ut(patchInternalField());
+    Ut -= n()*(Ut & n());
 
     if (phi.dimensions() == dimVelocity*dimArea)
     {
-        refValue() = Uc + n*phip/magS;
+        refValue() = Ut + n*phip/magSf;
     }
     else if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
     {
         const fvPatchField<scalar>& rhop =
             patch().lookupPatchField<volScalarField, scalar>(rhoName_);
 
-        refValue() = Uc + n*phip/(rhop*magS);
+        refValue() = Ut + n*phip/(rhop*magSf);
     }
     else
     {
@@ -176,7 +168,6 @@ void Foam::pressureInletOutletParSlipVelocityFvPatchVectorField::write
     fvPatchVectorField::write(os);
     writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
     writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
-    writeEntryIfDifferent<word>(os, "U", "U", UName_);
     writeEntry("value", os);
 }
 
@@ -188,11 +179,7 @@ void Foam::pressureInletOutletParSlipVelocityFvPatchVectorField::operator=
     const fvPatchField<vector>& pvf
 )
 {
-    fvPatchField<vector>::operator=
-    (
-        valueFraction()*(patch().nf()*(patch().nf() & pvf))
-      + (1 - valueFraction())*pvf
-    );
+    fvPatchField<vector>::operator=(pvf);
 }
 
 
