@@ -165,8 +165,8 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
-        "sets",
-        "decompose cellSets, faceSets, pointSets"
+        "noSets",
+        "skip decomposing cellSets, faceSets, pointSets"
     );
     argList::addBoolOption
     (
@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
     bool writeCellDist           = args.optionFound("cellDist");
     bool copyUniform             = args.optionFound("copyUniform");
     bool decomposeFieldsOnly     = args.optionFound("fields");
-    bool decomposeSets           = args.optionFound("sets");
+    bool decomposeSets           = !args.optionFound("noSets");
     bool forceOverwrite          = args.optionFound("force");
     bool ifRequiredDecomposition = args.optionFound("ifRequired");
 
