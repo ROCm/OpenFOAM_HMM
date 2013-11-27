@@ -220,7 +220,7 @@ void Foam::pressureInletOutletVelocityFvPatchVectorField::updateCoeffs()
         // scalarField magSqrUt(magSqr(tangentialVelocity_));
         // scalarField scale
         // (
-        //     max(sqrt((magSqrUt - magSqr(refValue()))/magSqrUt), scalar(0))
+        //     sqrt(max(magSqrUt - magSqr(refValue()), scalar(0))/magSqrUt)
         // );
         // refValue() += scale*tangentialVelocity_;
         refValue() += tangentialVelocity_;
