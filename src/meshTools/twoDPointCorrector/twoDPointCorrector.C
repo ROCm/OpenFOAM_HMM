@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -185,7 +185,7 @@ void twoDPointCorrector::clearAddressing() const
 
 twoDPointCorrector::twoDPointCorrector(const polyMesh& mesh)
 :
-    mesh_(mesh),
+    MeshObject<polyMesh, Foam::UpdateableMeshObject, twoDPointCorrector>(mesh),
     required_(mesh_.nGeometricD() == 2),
     planeNormalPtr_(NULL),
     normalEdgeIndicesPtr_(NULL)
@@ -286,9 +286,54 @@ void twoDPointCorrector::correctPoints(pointField& p) const
 }
 
 
-void twoDPointCorrector::updateMesh()
+void twoDPointCorrector::correctDisplacement
+(
+    const pointField& p,
+    vectorField& disp
+) const
+{
+    if (!required_) return;
+
+    // Algorithm:
+    // Loop through all edges. Calculate the average point position A for
+    // the front and the back. Correct the position of point P (in two planes)
+    // such that vectors AP and planeNormal are parallel
+
+    // Get reference to edges
+    const edgeList&  meshEdges = mesh_.edges();
+
+    const labelList& neIndices = normalEdgeIndices();
+    const vector& pn = planeNormal();
+
+    forAll(neIndices, edgeI)
+    {
+        const edge& e = meshEdges[neIndices[edgeI]];
+
+        label startPointI = e.start();
+        point pStart = p[startPointI] + disp[startPointI];
+
+        label endPointI = e.end();
+        point pEnd = p[endPointI] + disp[endPointI];
+
+        // calculate average point position
+        const point A = 0.5*(pStart + pEnd);
+
+        // correct point locations
+        disp[startPointI] = (A + pn*(pn & (pStart - A))) - p[startPointI];
+        disp[endPointI] = (A + pn*(pn & (pEnd - A))) - p[endPointI];
+    }
+}
+
+
+void twoDPointCorrector::updateMesh(const mapPolyMesh&)
 {
     clearAddressing();
+}
+
+
+bool twoDPointCorrector::movePoints()
+{
+    return true;
 }
 
 
