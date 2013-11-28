@@ -6,7 +6,8 @@
             thermo.isotropic()
             ? -fvm::laplacian(betav*thermo.alpha(), h, "laplacian(alpha,h)")
             : -fvm::laplacian(betav*tAnialpha(), h, "laplacian(alpha,h)")
-           + fvOptions(rho, h)
+          ==
+            fvOptions(rho, h)
         );
 
         hEqn.relax();
