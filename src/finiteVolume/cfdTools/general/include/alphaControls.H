@@ -18,3 +18,9 @@ bool alphaApplyPrevCorr
 (
     alphaControls.lookupOrDefault<Switch>("alphaApplyPrevCorr", false)
 );
+
+// Isotropic compression coefficient
+scalar icAlpha
+(
+    alphaControls.lookupOrDefault<scalar>("icAlpha", 0)
+);

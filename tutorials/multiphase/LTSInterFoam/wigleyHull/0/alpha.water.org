@@ -23,8 +23,8 @@ boundaryField
 {
     inlet
     {
-        type            calculated;
-        value           uniform 0;
+        type            fixedValue;
+        value           $internalField;
     }
 
     outlet
@@ -41,7 +41,7 @@ boundaryField
     {
         type            inletOutlet;
         inletValue      uniform 0;
-        value           uniform 0;
+        value           $internalField;
     }
 
     hull_wall

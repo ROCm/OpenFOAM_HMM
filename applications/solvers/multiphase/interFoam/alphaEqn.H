@@ -2,14 +2,15 @@
     word alphaScheme("div(phi,alpha)");
     word alpharScheme("div(phirb,alpha)");
 
-    //surfaceScalarField phic(mag(phi/mesh.magSf()));
-    //phic = min(interface.cAlpha()*phic, max(phic));
-    surfaceScalarField phic
-    (
-        (0.5*interface.cAlpha())
-       *fvc::interpolate(volScalarField("tauc", fvc::surfaceSum(mag(phi))))
-       /mesh.magSf()
-    );
+    // Standard face-flux compression coefficient
+    surfaceScalarField phic(interface.cAlpha()*mag(phi/mesh.magSf()));
+
+    // Add the optional isotropic compression contribution
+    if (icAlpha > 0)
+    {
+        phic *= (1.0 - icAlpha);
+        phic += (interface.cAlpha()*icAlpha)*fvc::interpolate(mag(U));
+    }
 
     // Do not compress interface at non-coupled boundary faces
     // (inlets, outlets etc.)

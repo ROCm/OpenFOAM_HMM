@@ -24,7 +24,7 @@ boundaryField
     inlet
     {
         type            fixedValue;
-        value           uniform 0.00015;
+        value           $internalField;
     }
 
     outlet
@@ -40,14 +40,14 @@ boundaryField
     atmosphere
     {
         type            inletOutlet;
-        inletValue      uniform 0.00015;
-        value           uniform 0.00015;
+        inletValue      $internalField;
+        value           $internalField;
     }
 
     hull_wall
     {
         type            kqRWallFunction;
-        value           uniform 0.00015;
+        value           $internalField;
     }
 }
 

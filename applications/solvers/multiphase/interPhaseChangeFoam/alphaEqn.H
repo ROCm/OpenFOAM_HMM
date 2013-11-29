@@ -71,6 +71,7 @@
             (
                 geometricOneField(),
                 alpha1,
+                tphiAlpha(),
                 tphiAlphaCorr(),
                 vDotvmcAlphal,
                 (
