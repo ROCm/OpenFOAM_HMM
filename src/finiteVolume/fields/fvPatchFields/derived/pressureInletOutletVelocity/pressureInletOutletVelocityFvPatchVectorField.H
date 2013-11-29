@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,21 +25,21 @@ Class
     Foam::pressureInletOutletVelocityFvPatchVectorField
 
 Group
-    grpInletletBoundaryConditions grpOutletBoundaryConditions
+    grpInletBoundaryConditions grpOutletBoundaryConditions
 
 Description
     This velocity inlet/outlet boundary condition is applied to pressure
     boundaries where the pressure is specified.  A zero-gradient condition is
     applied for outflow (as defined by the flux); for inflow, the velocity is
-    obtained from the patch-face normal component of the internal-cell value.
-
-    The tangential patch velocity can be optionally specified.
+    obtained from the patch-face normal component of the internal-cell value and
+    the tangential patch velocity can be optionally specified.
 
     \heading Patch usage
 
     \table
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
+        rho          | density field name      | no          | rho
         tangentialVelocity | tangential velocity field | no  |
     \endtable
 
@@ -49,6 +49,7 @@ Description
     {
         type            pressureInletOutletVelocity;
         phi             phi;
+        rho             rho;
         tangentialVelocity uniform (0 0 0);
         value           uniform 0;
     }
@@ -69,7 +70,7 @@ SourceFiles
 #define pressureInletOutletVelocityFvPatchVectorField_H
 
 #include "fvPatchFields.H"
-#include "directionMixedFvPatchFields.H"
+#include "mixedFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,20 +78,28 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-       Class pressureInletOutletVelocityFvPatchVectorField Declaration
+    Class pressureInletOutletVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
 class pressureInletOutletVelocityFvPatchVectorField
 :
-    public directionMixedFvPatchVectorField
+    public mixedFvPatchVectorField
 {
     // Private data
 
         //- Flux field name
         word phiName_;
 
+        //- Density field name
+        word rhoName_;
+
+
+protected:
+
         //- Optional tangential velocity component
         vectorField tangentialVelocity_;
+
+        bool applyTangentialVelocity_;
 
 
 public:
@@ -108,22 +117,23 @@ public:
             const DimensionedField<vector, volMesh>&
         );
 
-        //- Construct from patch, internal field and dictionary
-        pressureInletOutletVelocityFvPatchVectorField
-        (
-            const fvPatch&,
-            const DimensionedField<vector, volMesh>&,
-            const dictionary&
-        );
-
         //- Construct by mapping given
-        //  pressureInletOutletVelocityFvPatchVectorField onto a new patch
+        //  pressureInletOutletVelocityFvPatchVectorField
+        //  onto a new patch
         pressureInletOutletVelocityFvPatchVectorField
         (
             const pressureInletOutletVelocityFvPatchVectorField&,
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
             const fvPatchFieldMapper&
+        );
+
+        //- Construct from patch, internal field and dictionary
+        pressureInletOutletVelocityFvPatchVectorField
+        (
+            const fvPatch&,
+            const DimensionedField<vector, volMesh>&,
+            const dictionary&
         );
 
         //- Construct as copy
@@ -137,7 +147,10 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new pressureInletOutletVelocityFvPatchVectorField(*this)
+                new pressureInletOutletVelocityFvPatchVectorField
+                (
+                    *this
+                )
             );
         }
 
@@ -156,7 +169,11 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new pressureInletOutletVelocityFvPatchVectorField(*this, iF)
+                new pressureInletOutletVelocityFvPatchVectorField
+                (
+                    *this,
+                    iF
+                )
             );
         }
 
@@ -175,6 +192,18 @@ public:
             word& phiName()
             {
                 return phiName_;
+            }
+
+            //- Return the name of rho
+            const word& rhoName() const
+            {
+                return rhoName_;
+            }
+
+            //- Return reference to the name of rho to allow adjustment
+            word& rhoName()
+            {
+                return rhoName_;
             }
 
             //- Return the tangential velocity

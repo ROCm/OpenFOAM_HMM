@@ -30,6 +30,7 @@ License
 void Foam::MULES::correct
 (
     volScalarField& psi,
+    const surfaceScalarField& phi,
     surfaceScalarField& phiPsiCorr,
     const scalar psiMax,
     const scalar psiMin
@@ -39,6 +40,7 @@ void Foam::MULES::correct
     (
         geometricOneField(),
         psi,
+        phi,
         phiPsiCorr,
         zeroField(), zeroField(),
         psiMax, psiMin
@@ -49,6 +51,7 @@ void Foam::MULES::correct
 void Foam::MULES::LTScorrect
 (
     volScalarField& psi,
+    const surfaceScalarField& phi,
     surfaceScalarField& phiPsiCorr,
     const scalar psiMax,
     const scalar psiMin
@@ -58,6 +61,7 @@ void Foam::MULES::LTScorrect
     (
         geometricOneField(),
         psi,
+        phi,
         phiPsiCorr,
         zeroField(), zeroField(),
         psiMax, psiMin

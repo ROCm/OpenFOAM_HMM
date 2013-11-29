@@ -80,8 +80,6 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        tmp<surfaceScalarField> tphiAlpha;
-
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())
         {
