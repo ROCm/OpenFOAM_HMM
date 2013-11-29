@@ -35,7 +35,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(Peclet, 0);
+    defineTypeNameAndDebug(Peclet, 0);
 }
 
 
@@ -211,7 +211,7 @@ void Foam::Peclet::write()
     if (active_)
     {
         const surfaceScalarField& Peclet =
-            mesh.lookupObject<surfaceScalarField>(type());
+            obr_.lookupObject<surfaceScalarField>(type());
 
         Info<< type() << " " << name_ << " output:" << nl
             << "    writing field " << Peclet.name() << nl

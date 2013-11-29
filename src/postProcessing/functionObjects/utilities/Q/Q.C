@@ -152,7 +152,7 @@ void Foam::Q::write()
     if (active_)
     {
         const volScalarField& Q =
-            mesh.lookupObject<volScalarField>(type())
+            obr_.lookupObject<volScalarField>(type());
 
         Info<< type() << " " << name_ << " output:" << nl
             << "    writing field " << Q.name() << nl

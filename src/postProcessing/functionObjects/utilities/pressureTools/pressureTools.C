@@ -31,7 +31,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(pressureTools, 0);
+    defineTypeNameAndDebug(pressureTools, 0);
 }
 
 
@@ -324,7 +324,7 @@ void Foam::pressureTools::write()
     if (active_)
     {
         const volScalarField& pResult =
-            obr_.lookupObject<volScalarField>(pName())
+            obr_.lookupObject<volScalarField>(pName());
 
         Info<< type() << " " << name_ << " output:" << nl
             << "    writing field " << pResult.name() << nl

@@ -36,7 +36,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(yPlusLES, 0);
+    defineTypeNameAndDebug(yPlusLES, 0);
 }
 
 
@@ -322,7 +322,7 @@ void Foam::yPlusLES::write()
         functionObjectFile::write();
 
         const volScalarField& yPlusLES =
-            obr_.lookupObject<volScalarField>(type())
+            obr_.lookupObject<volScalarField>(type());
 
         if (log_)
         {

@@ -234,7 +234,7 @@ void Foam::DESModelRegions::write()
             obr_.lookupObject<volScalarField>(type());
 
 
-        Info<< type() << " " << name_ <<  " output:" << nl;
+        Info<< type() << " " << name_ <<  " output:" << nl
             << "    writing field " << DESModelRegions.name() << nl
             << endl;
 

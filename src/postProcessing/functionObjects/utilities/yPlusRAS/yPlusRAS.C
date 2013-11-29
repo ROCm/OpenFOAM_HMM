@@ -307,7 +307,7 @@ void Foam::yPlusRAS::write()
         functionObjectFile::write();
 
         const volScalarField& yPlusRAS =
-            mesh.lookupObject<volScalarField>(type())
+            obr_.lookupObject<volScalarField>(type());
 
         if (log_)
         {

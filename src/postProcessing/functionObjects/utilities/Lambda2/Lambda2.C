@@ -33,7 +33,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(Lambda2, 0);
+    defineTypeNameAndDebug(Lambda2, 0);
 }
 
 
@@ -159,7 +159,7 @@ void Foam::Lambda2::write()
     if (active_)
     {
         const volScalarField& Lambda2 =
-            obr_.lookupObject<volScalarField>(type())
+            obr_.lookupObject<volScalarField>(type());
 
         Info<< type() << " " << name_ << " output:" << nl
             << "    writing field " << Lambda2.name() << nl
