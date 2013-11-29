@@ -245,14 +245,14 @@ bool Foam::OutputFilterFunctionObject<OutputFilter>::adjustTimeStep()
 
         // function objects modify deltaT inside nStepsToStartTimeChange range
         // NOTE: Potential problem if two function objects dump inside the same
-        //interval
+        // interval
         if (nSteps < nStepsToStartTimeChange_)
         {
             label nStepsToNextWrite = label(nSteps) + 1;
 
             scalar newDeltaT = timeToNextWrite/nStepsToNextWrite;
 
-            //Adjust time step
+            // Adjust time step
             if (newDeltaT < deltaT)
             {
                 deltaT = max(newDeltaT, 0.2*deltaT);
