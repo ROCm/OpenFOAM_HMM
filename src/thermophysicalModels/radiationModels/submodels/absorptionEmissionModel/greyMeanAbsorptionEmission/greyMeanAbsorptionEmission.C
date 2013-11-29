@@ -337,6 +337,17 @@ Foam::radiation::greyMeanAbsorptionEmission::ECont(const label bandI) const
             }
         }
     }
+    else
+    {
+        WarningIn
+        (
+            "tmp<volScalarField>"
+            "radiation::greyMeanAbsorptionEmission::ECont"
+            "("
+                "const label"
+            ") const"
+        ) << "dQ field not found in mesh" << endl;
+    }
 
     return E;
 }
