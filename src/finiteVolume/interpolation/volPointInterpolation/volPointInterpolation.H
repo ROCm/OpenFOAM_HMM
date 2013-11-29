@@ -79,14 +79,6 @@ class volPointInterpolation
             //- Per boundary point the weights per pointFaces.
             scalarListList boundaryPointWeights_;
 
-        // Patch-patch constraints
-
-            //- Mesh points on which to apply special constraints
-            labelList patchPatchPointConstraintPoints_;
-            //- Special constraints
-            tensorField patchPatchPointConstraintTensors_;
-
-
 
     // Private Member Functions
 
@@ -102,17 +94,6 @@ class volPointInterpolation
         //- Construct all point weighting factors
         void makeWeights();
 
-        //- Make patch-patch constraints
-        void makePatchPatchAddressing();
-
-        //- Helper: sync data on collocated points only
-        template<class Type, class CombineOp>
-        void syncUntransformedData
-        (
-            List<Type>& pointData,
-            const CombineOp& cop
-        ) const;
-
         //- Helper: push master point data to collocated points
         template<class Type>
         void pushUntransformedData(List<Type>&) const;
@@ -123,20 +104,6 @@ class volPointInterpolation
         tmp<Field<Type> > flatBoundaryField
         (
             const GeometricField<Type, fvPatchField, volMesh>& vf
-        ) const;
-
-        template<class Type>
-        void interpolateBoundaryField
-        (
-            const GeometricField<Type, fvPatchField, volMesh>& vf,
-            GeometricField<Type, pointPatchField, pointMesh>& pf,
-            const bool overrideFixedValue
-        ) const;
-
-        template<class Type>
-        void applyCornerConstraints
-        (
-            GeometricField<Type, pointPatchField, pointMesh>& pf
         ) const;
 
         //- Add separated contributions
@@ -182,52 +149,6 @@ public:
 
     // Interpolation functions
 
-        //- Interpolate internal field from volField to pointField
-        //  using inverse distance weighting
-        template<class Type>
-        void interpolateInternalField
-        (
-            const GeometricField<Type, fvPatchField, volMesh>&,
-            GeometricField<Type, pointPatchField, pointMesh>&
-        ) const;
-
-        //- Interpolate from volField to pointField
-        //  using inverse distance weighting
-        template<class Type>
-        void interpolate
-        (
-            const GeometricField<Type, fvPatchField, volMesh>&,
-            GeometricField<Type, pointPatchField, pointMesh>&
-        ) const;
-
-        //- Interpolate volField using inverse distance weighting
-        //  returning pointField with the same patchField types
-        template<class Type>
-        tmp<GeometricField<Type, pointPatchField, pointMesh> > interpolate
-        (
-            const GeometricField<Type, fvPatchField, volMesh>&,
-            const wordList& patchFieldTypes
-        ) const;
-
-        //- Interpolate tmp<volField> using inverse distance weighting
-        //  returning pointField with the same patchField types
-        template<class Type>
-        tmp<GeometricField<Type, pointPatchField, pointMesh> > interpolate
-        (
-            const tmp<GeometricField<Type, fvPatchField, volMesh> >&,
-            const wordList& patchFieldTypes
-        ) const;
-
-        //- Interpolate volField using inverse distance weighting
-        //  returning pointField with name. Optionally caches
-        template<class Type>
-        tmp<GeometricField<Type, pointPatchField, pointMesh> > interpolate
-        (
-            const GeometricField<Type, fvPatchField, volMesh>&,
-            const word& name,
-            const bool cache
-        ) const;
-
         //- Interpolate volField using inverse distance weighting
         //  returning pointField
         template<class Type>
@@ -244,14 +165,89 @@ public:
             const tmp<GeometricField<Type, fvPatchField, volMesh> >&
         ) const;
 
+        //- Interpolate volField using inverse distance weighting
+        //  returning pointField with the same patchField types. Assigns
+        //  to any fixedValue boundary conditions to make them consistent
+        //  with internal field
+        template<class Type>
+        tmp<GeometricField<Type, pointPatchField, pointMesh> > interpolate
+        (
+            const GeometricField<Type, fvPatchField, volMesh>&,
+            const wordList& patchFieldTypes
+        ) const;
+
+        //- Interpolate tmp<volField> using inverse distance weighting
+        //  returning pointField with the same patchField types. Assigns
+        //  to any fixedValue boundary conditions to make them consistent
+        //  with internal field
+        template<class Type>
+        tmp<GeometricField<Type, pointPatchField, pointMesh> > interpolate
+        (
+            const tmp<GeometricField<Type, fvPatchField, volMesh> >&,
+            const wordList& patchFieldTypes
+        ) const;
+
+
+        // Low level
+
+            //- Interpolate internal field from volField to pointField
+            //  using inverse distance weighting
+            template<class Type>
+            void interpolateInternalField
+            (
+                const GeometricField<Type, fvPatchField, volMesh>&,
+                GeometricField<Type, pointPatchField, pointMesh>&
+            ) const;
+
+            //- Interpolate boundary field without applying constraints/boundary
+            //  conditions
+            template<class Type>
+            void interpolateBoundaryField
+            (
+                const GeometricField<Type, fvPatchField, volMesh>& vf,
+                GeometricField<Type, pointPatchField, pointMesh>& pf
+            ) const;
+
+            //- Interpolate boundary with constraints/boundary conditions
+            template<class Type>
+            void interpolateBoundaryField
+            (
+                const GeometricField<Type, fvPatchField, volMesh>& vf,
+                GeometricField<Type, pointPatchField, pointMesh>& pf,
+                const bool overrideFixedValue
+            ) const;
+
+            //- Interpolate from volField to pointField
+            //  using inverse distance weighting
+            template<class Type>
+            void interpolate
+            (
+                const GeometricField<Type, fvPatchField, volMesh>&,
+                GeometricField<Type, pointPatchField, pointMesh>&
+            ) const;
+
+            //- Interpolate volField using inverse distance weighting
+            //  returning pointField with name. Optionally caches
+            template<class Type>
+            tmp<GeometricField<Type, pointPatchField, pointMesh> > interpolate
+            (
+                const GeometricField<Type, fvPatchField, volMesh>&,
+                const word& name,
+                const bool cache
+            ) const;
+
+
+        // Interpolation for displacement (applies 2D correction)
+
+            //- Interpolate from volField to pointField
+            //  using inverse distance weighting
+            void interpolateDisplacement
+            (
+                const volVectorField&,
+                pointVectorField&
+            ) const;
+
 };
-
-
-template<>
-void volPointInterpolation::applyCornerConstraints<scalar>
-(
-    GeometricField<scalar, pointPatchField, pointMesh>& pf
-) const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

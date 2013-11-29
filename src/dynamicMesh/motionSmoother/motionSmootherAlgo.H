@@ -81,7 +81,6 @@ SourceFiles
 #include "PackedBoolList.H"
 #include "indirectPrimitivePatch.H"
 #include "className.H"
-#include "twoDPointCorrector.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -167,14 +166,6 @@ class motionSmootherAlgo
             //  lower processor)
             PackedBoolList isMasterEdge_;
 
-            //- 2-D motion corrector
-            twoDPointCorrector twoDCorrector_;
-
-            // Muli-patch constraints (from pointPatchInterpolation)
-
-                labelList patchPatchPointConstraintPoints_;
-                tensorField patchPatchPointConstraintTensors_;
-
 
     // Private Member Functions
 
@@ -201,13 +192,6 @@ class motionSmootherAlgo
             GeometricField<Type, pointPatchField, pointMesh>&
         );
 
-        //- Multi-patch constraints
-        template<class Type>
-        void applyCornerConstraints
-        (
-            GeometricField<Type, pointPatchField, pointMesh>&
-        ) const;
-
         //- Test synchronisation of generic field (not positions!) on points
         template<class Type, class CombineOp>
         void testSyncField
@@ -220,9 +204,6 @@ class motionSmootherAlgo
 
         //- Test synchronisation of points
         void testSyncPositions(const pointField&, const scalar maxMag) const;
-
-        //- Assemble tensors for multi-patch constraints
-        void makePatchPatchAddressing();
 
         static void checkFld(const pointScalarField&);
 
@@ -351,18 +332,21 @@ public:
 
             const dictionary& paramDict() const;
 
-            //- Return reference to 2D point motion correction
-            twoDPointCorrector& twoDCorrector()
-            {
-                return twoDCorrector_;
-            }
-
 
 
         // Edit
 
             //- Take over existing mesh position.
             void correct();
+
+
+            //- Set patch fields on patchIDs to be consistent with
+            //  all other boundary conditions
+            static void setDisplacementPatchFields
+            (
+                const labelList& patchIDs,
+                pointVectorField& pointDisplacement
+            );
 
             //- Set patch fields on displacement to be consistent with
             //  internal values.
@@ -375,6 +359,14 @@ public:
             //  to make sure shared points
             //  partially on pp (on some processors) and partially not
             //  (on other processors) get the value from pp.
+            static void setDisplacement
+            (
+                const labelList& patchIDs,
+                const indirectPrimitivePatch& pp,
+                pointField& patchDisp,
+                pointVectorField& displacement
+            );
+
             void setDisplacement(pointField& patchDisp);
 
             //- Special correctBoundaryConditions which evaluates fixedValue
@@ -508,14 +500,6 @@ public:
                     GeometricField<Type, pointPatchField, pointMesh>& newFld
                 ) const;
 };
-
-
-template<>
-void motionSmootherAlgo::applyCornerConstraints<scalar>
-(
-    GeometricField<scalar, pointPatchField, pointMesh>& pf
-) const;
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

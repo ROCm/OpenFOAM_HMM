@@ -27,6 +27,7 @@ License
 #include "meshTools.H"
 #include "processorPointPatchFields.H"
 #include "pointConstraint.H"
+#include "pointConstraints.H"
 #include "syncTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -135,23 +136,6 @@ void Foam::motionSmootherAlgo::checkConstraints
 }
 
 
-template<class Type>
-void Foam::motionSmootherAlgo::applyCornerConstraints
-(
-    GeometricField<Type, pointPatchField, pointMesh>& pf
-) const
-{
-    forAll(patchPatchPointConstraintPoints_, pointi)
-    {
-        pf[patchPatchPointConstraintPoints_[pointi]] = transform
-        (
-            patchPatchPointConstraintTensors_[pointi],
-            pf[patchPatchPointConstraintPoints_[pointi]]
-        );
-    }
-}
-
-
 // Average of connected points.
 template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::pointPatchField, Foam::pointMesh> >
@@ -244,8 +228,8 @@ Foam::motionSmootherAlgo::avg
         }
     }
 
-    res.correctBoundaryConditions();
-    applyCornerConstraints(res);
+    // Single and multi-patch constraints
+    pointConstraints::New(res.mesh()).constrain(res, false);
 
     return tres;
 }
@@ -271,8 +255,8 @@ void Foam::motionSmootherAlgo::smooth
         }
     }
 
-    newFld.correctBoundaryConditions();
-    applyCornerConstraints(newFld);
+    // Single and multi-patch constraints
+    pointConstraints::New(newFld.mesh()).constrain(newFld, false);
 }
 
 
