@@ -16,6 +16,8 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+radiation on;
+
 radiationModel  fvDOM;
 
 fvDOMCoeffs
@@ -188,5 +190,6 @@ greyMeanAbsorptionEmissionCoeffs
 
 scatterModel    none;
 
+sootModel       none;
 
 // ************************************************************************* //

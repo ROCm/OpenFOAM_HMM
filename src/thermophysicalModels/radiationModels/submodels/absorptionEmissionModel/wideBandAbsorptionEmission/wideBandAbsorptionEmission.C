@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -255,14 +255,39 @@ Foam::radiation::wideBandAbsorptionEmission::ECont(const label bandI) const
         )
     );
 
-    if (mesh().foundObject<volScalarField>("hrr"))
+    if (mesh().foundObject<volScalarField>("dQ"))
     {
-        const volScalarField& hrr = mesh().lookupObject<volScalarField>("hrr");
-        E().internalField() =
-            iEhrrCoeffs_[bandI]
-           *hrr.internalField()
-           *(iBands_[bandI][1] - iBands_[bandI][0])
-           /totalWaveLength_;
+        const volScalarField& dQ = mesh().lookupObject<volScalarField>("dQ");
+
+        if (dQ.dimensions() == dimEnergy/dimTime)
+        {
+            E().internalField() =
+                iEhrrCoeffs_[bandI]
+               *dQ.internalField()
+               *(iBands_[bandI][1] - iBands_[bandI][0])
+               /totalWaveLength_
+               /mesh_.V();
+        }
+        else if (dQ.dimensions() == dimEnergy/dimTime/dimVolume)
+        {
+            E().internalField() =
+                iEhrrCoeffs_[bandI]
+               *dQ.internalField()
+               *(iBands_[bandI][1] - iBands_[bandI][0])
+               /totalWaveLength_;
+        }
+        else
+        {
+            WarningIn
+            (
+                "tmp<volScalarField>"
+                "radiation::wideBandAbsorptionEmission::ECont"
+                "("
+                    "const label"
+                ") const"
+            )
+                << "Incompatible dimensions for dQ field" << endl;
+        }
     }
 
     return E;
@@ -289,9 +314,8 @@ void Foam::radiation::wideBandAbsorptionEmission::correct
 
     for (label j=0; j<nBands_; j++)
     {
-        Info<< "Calculating absorption in band: " << j << endl;
         aLambda[j].internalField() = this->a(j);
-        Info<< "Calculated absorption in band: " << j << endl;
+
         a.internalField() +=
             aLambda[j].internalField()
            *(iBands_[j][1] - iBands_[j][0])
