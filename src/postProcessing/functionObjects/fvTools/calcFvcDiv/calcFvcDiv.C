@@ -125,29 +125,16 @@ void Foam::calcFvcDiv::read(const dictionary& dict)
     {
         dict.lookup("fieldName") >> fieldName_;
         dict.lookup("resultName") >> resultName_;
+
+        if (resultName_ == "none")
+        {
+            resultName_ = "fvc::div(" + fieldName_ + ")";
+        }
     }
 }
 
 
 void Foam::calcFvcDiv::execute()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::calcFvcDiv::end()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::calcFvcDiv::timeSet()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::calcFvcDiv::write()
 {
     if (active_)
     {
@@ -160,6 +147,36 @@ void Foam::calcFvcDiv::write()
         {
             WarningIn("void Foam::calcFvcDiv::write()")
                 << "Unprocessed field " << fieldName_ << endl;
+        }
+    }
+}
+
+
+void Foam::calcFvcDiv::end()
+{
+    // Do nothing
+}
+
+
+void Foam::calcFvcDiv::timeSet()
+{
+    // Do nothing
+}
+
+
+void Foam::calcFvcDiv::write()
+{
+    if (active_)
+    {
+        if (obr_.foundObject<regIOobject>(resultName_))
+        {
+            const regIOobject& field =
+                obr_.lookupObject<regIOobject>(resultName_);
+
+            Info<< type() << " " << name_ << " output:" << nl
+                << "    writing field " << field.name() << nl << endl;
+
+            field.write();
         }
     }
 }

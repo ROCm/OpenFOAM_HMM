@@ -269,24 +269,6 @@ void Foam::yPlusLES::read(const dictionary& dict)
 
 void Foam::yPlusLES::execute()
 {
-    // Do nothing - only valid on write
-}
-
-
-void Foam::yPlusLES::end()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::yPlusLES::timeSet()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::yPlusLES::write()
-{
     if (active_)
     {
         functionObjectFile::write();
@@ -317,6 +299,30 @@ void Foam::yPlusLES::write()
         {
             calcIncompressibleYPlus(mesh, U, yPlusLES);
         }
+    }
+}
+
+
+void Foam::yPlusLES::end()
+{
+    // Do nothing
+}
+
+
+void Foam::yPlusLES::timeSet()
+{
+    // Do nothing
+}
+
+
+void Foam::yPlusLES::write()
+{
+    if (active_)
+    {
+        functionObjectFile::write();
+
+        const volScalarField& yPlusLES =
+            obr_.lookupObject<volScalarField>(type())
 
         if (log_)
         {

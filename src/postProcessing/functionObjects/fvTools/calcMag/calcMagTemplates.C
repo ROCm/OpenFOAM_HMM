@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -80,25 +80,14 @@ void Foam::calcMag::calc
 
     const fvMesh& mesh = refCast<const fvMesh>(obr_);
 
-    word magName = resultName;
-    if (magName == "none")
-    {
-        magName = "mag(" + fieldName + ")";
-    }
-
     if (mesh.foundObject<vfType>(fieldName))
     {
         const vfType& vf = mesh.lookupObject<vfType>(fieldName);
 
         volScalarField& field =
-            magField<volScalarField>(magName, vf.dimensions());
+            magField<volScalarField>(resultName_, vf.dimensions());
 
         field = mag(vf);
-
-        Info<< type() << " output:" << nl
-            << "    writing " << field.name() << " field" << nl << endl;
-
-        field.write();
 
         processed = true;
     }
@@ -107,14 +96,9 @@ void Foam::calcMag::calc
         const sfType& sf = mesh.lookupObject<sfType>(fieldName);
 
         surfaceScalarField& field =
-            magField<surfaceScalarField>(magName, sf.dimensions());
+            magField<surfaceScalarField>(resultName_, sf.dimensions());
 
         field = mag(sf);
-
-        Info<< type() << " output:" << nl
-            << "    writing " << field.name() << " field" << nl << endl;
-
-        field.write();
 
         processed = true;
     }

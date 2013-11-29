@@ -120,23 +120,6 @@ void Foam::Peclet::read(const dictionary& dict)
 
 void Foam::Peclet::execute()
 {
-    // Do nothing - only valid on write
-}
-
-
-void Foam::Peclet::end()
-{
-    // Do nothing - only valid on write
-}
-
-void Foam::Peclet::timeSet()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::Peclet::write()
-{
     typedef compressible::turbulenceModel cmpTurbModel;
     typedef incompressible::turbulenceModel icoTurbModel;
 
@@ -208,6 +191,27 @@ void Foam::Peclet::write()
                *mesh.surfaceInterpolation::deltaCoeffs()
                *fvc::interpolate(nuEff)
             );
+    }
+}
+
+
+void Foam::Peclet::end()
+{
+    // Do nothing - only valid on write
+}
+
+void Foam::Peclet::timeSet()
+{
+    // Do nothing - only valid on write
+}
+
+
+void Foam::Peclet::write()
+{
+    if (active_)
+    {
+        const surfaceScalarField& Peclet =
+            mesh.lookupObject<surfaceScalarField>(type());
 
         Info<< type() << " " << name_ << " output:" << nl
             << "    writing field " << Peclet.name() << nl

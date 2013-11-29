@@ -256,24 +256,6 @@ void Foam::yPlusRAS::read(const dictionary& dict)
 
 void Foam::yPlusRAS::execute()
 {
-    // Do nothing - only valid on write
-}
-
-
-void Foam::yPlusRAS::end()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::yPlusRAS::timeSet()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::yPlusRAS::write()
-{
     if (active_)
     {
         functionObjectFile::write();
@@ -302,6 +284,30 @@ void Foam::yPlusRAS::write()
         {
             calcIncompressibleYPlus(mesh, yPlusRAS);
         }
+    }
+}
+
+
+void Foam::yPlusRAS::end()
+{
+    // Do nothing
+}
+
+
+void Foam::yPlusRAS::timeSet()
+{
+    // Do nothing
+}
+
+
+void Foam::yPlusRAS::write()
+{
+    if (active_)
+    {
+        functionObjectFile::write();
+
+        const volScalarField& yPlusRAS =
+            mesh.lookupObject<volScalarField>(type())
 
         if (log_)
         {

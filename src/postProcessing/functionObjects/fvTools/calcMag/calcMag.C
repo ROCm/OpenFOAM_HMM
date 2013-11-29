@@ -87,29 +87,16 @@ void Foam::calcMag::read(const dictionary& dict)
     {
         dict.lookup("fieldName") >> fieldName_;
         dict.lookup("resultName") >> resultName_;
+
+        if (resultName_ == "none")
+        {
+            resultName_ = "mag(" + fieldName_ + ")";
+        }
     }
 }
 
 
 void Foam::calcMag::execute()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::calcMag::end()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::calcMag::timeSet()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::calcMag::write()
 {
     if (active_)
     {
@@ -125,6 +112,36 @@ void Foam::calcMag::write()
         {
             WarningIn("void Foam::calcMag::write()")
                 << "Unprocessed field " << fieldName_ << endl;
+        }
+    }
+}
+
+
+void Foam::calcMag::end()
+{
+    // Do nothing
+}
+
+
+void Foam::calcMag::timeSet()
+{
+    // Do nothing
+}
+
+
+void Foam::calcMag::write()
+{
+    if (active_)
+    {
+        if (obr_.foundObject<regIOobject>(resultName_))
+        {
+            const regIOobject& field =
+                obr_.lookupObject<regIOobject>(resultName_);
+
+            Info<< type() << " " << name_ << " output:" << nl
+                << "    writing field " << field.name() << nl << endl;
+
+            field.write();
         }
     }
 }

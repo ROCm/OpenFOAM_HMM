@@ -130,24 +130,6 @@ void Foam::DESModelRegions::read(const dictionary& dict)
 
 void Foam::DESModelRegions::execute()
 {
-    // Do nothing - only valid on write
-}
-
-
-void Foam::DESModelRegions::end()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::DESModelRegions::timeSet()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::DESModelRegions::write()
-{
     typedef incompressible::turbulenceModel icoModel;
     typedef incompressible::DESModel icoDESModel;
 
@@ -217,12 +199,8 @@ void Foam::DESModelRegions::write()
             if (log_)
             {
                 Info<< "    LES = " << prc << " % (volume)" << nl
-                    << "    RAS = " << 100.0 - prc << " % (volume)" << nl
-                    << "    writing field " << DESModelRegions.name() << nl
-                    << endl;
+                    << "    RAS = " << 100.0 - prc << " % (volume)" << endl;
             }
-
-            DESModelRegions.write();
         }
         else
         {
@@ -232,6 +210,35 @@ void Foam::DESModelRegions::write()
                     << endl;
             }
         }
+    }
+}
+
+
+void Foam::DESModelRegions::end()
+{
+    // Do nothing
+}
+
+
+void Foam::DESModelRegions::timeSet()
+{
+    // Do nothing
+}
+
+
+void Foam::DESModelRegions::write()
+{
+    if (log_)
+    {
+        const volScalarField& DESModelRegions =
+            obr_.lookupObject<volScalarField>(type());
+
+
+        Info<< type() << " " << name_ <<  " output:" << nl;
+            << "    writing field " << DESModelRegions.name() << nl
+            << endl;
+
+        DESModelRegions.write();
     }
 }
 

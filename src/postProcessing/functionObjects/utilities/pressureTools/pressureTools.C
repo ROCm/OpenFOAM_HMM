@@ -292,24 +292,6 @@ void Foam::pressureTools::read(const dictionary& dict)
 
 void Foam::pressureTools::execute()
 {
-    // Do nothing - only valid on write
-}
-
-
-void Foam::pressureTools::end()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::pressureTools::timeSet()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::pressureTools::write()
-{
     if (active_)
     {
         const volScalarField& p = obr_.lookupObject<volScalarField>(pName_);
@@ -321,6 +303,28 @@ void Foam::pressureTools::write()
             );
 
         pResult == convertToCoeff(rhoScale(p)*p + pDyn(p) + pRef());
+    }
+}
+
+
+void Foam::pressureTools::end()
+{
+    // Do nothing
+}
+
+
+void Foam::pressureTools::timeSet()
+{
+    // Do nothing
+}
+
+
+void Foam::pressureTools::write()
+{
+    if (active_)
+    {
+        const volScalarField& pResult =
+            obr_.lookupObject<volScalarField>(pName())
 
         Info<< type() << " " << name_ << " output:" << nl
             << "    writing field " << pResult.name() << nl

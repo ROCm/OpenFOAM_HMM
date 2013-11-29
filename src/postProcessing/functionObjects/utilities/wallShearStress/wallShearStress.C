@@ -225,24 +225,6 @@ void Foam::wallShearStress::read(const dictionary& dict)
 
 void Foam::wallShearStress::execute()
 {
-    // Do nothing - only valid on write
-}
-
-
-void Foam::wallShearStress::end()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::wallShearStress::timeSet()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::wallShearStress::write()
-{
     typedef compressible::turbulenceModel cmpModel;
     typedef incompressible::turbulenceModel icoModel;
 
@@ -286,8 +268,31 @@ void Foam::wallShearStress::write()
                 << "database" << exit(FatalError);
         }
 
-
         calcShearStress(mesh, Reff(), wallShearStress);
+    }
+}
+
+
+void Foam::wallShearStress::end()
+{
+    // Do nothing
+}
+
+
+void Foam::wallShearStress::timeSet()
+{
+    // Do nothing
+}
+
+
+void Foam::wallShearStress::write()
+{
+    if (active_)
+    {
+        functionObjectFile::write();
+
+        const volVectorField& wallShearStress =
+            obr_.lookupObject<volVectorField>(type());
 
         if (log_)
         {
