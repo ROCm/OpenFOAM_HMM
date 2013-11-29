@@ -377,6 +377,7 @@ $(laplacianSchemes)/gaussLaplacianScheme/gaussLaplacianSchemes.C
 
 finiteVolume/fvc/fvcMeshPhi.C
 finiteVolume/fvc/fvcSmooth/fvcSmooth.C
+finiteVolume/fvc/fvcReconstructMag.C
 
 general = cfdTools/general
 $(general)/findRefCell/findRefCell.C

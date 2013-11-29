@@ -69,6 +69,9 @@ namespace fvc
     (
         const tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >&
     );
+
+    tmp<volScalarField> reconstructMag(const surfaceScalarField&);
+    tmp<volScalarField> reconstructMag(const tmp<surfaceScalarField>&);
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,8 @@ License
 
 #include "fvcReconstruct.H"
 #include "fvMesh.H"
+#include "volFields.H"
+#include "surfaceFields.H"
 #include "zeroGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -39,21 +41,8 @@ namespace fvc
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-tmp
-<
-    GeometricField
-    <
-        typename outerProduct<vector,Type>::type, fvPatchField, volMesh
-    >
->
-reconstruct
-(
-    const GeometricField<Type, fvsPatchField, surfaceMesh>& ssf
-)
+tmp<volScalarField> reconstructMag(const surfaceScalarField& ssf)
 {
-    typedef typename outerProduct<vector, Type>::type GradType;
-
     const fvMesh& mesh = ssf.mesh();
 
     const labelUList& owner = mesh.owner();
@@ -61,10 +50,12 @@ reconstruct
 
     const volVectorField& C = mesh.C();
     const surfaceVectorField& Cf = mesh.Cf();
+    const surfaceVectorField& Sf = mesh.Sf();
+    const surfaceScalarField& magSf = mesh.magSf();
 
-    tmp<GeometricField<GradType, fvPatchField, volMesh> > treconField
+    tmp<volScalarField> treconField
     (
-        new GeometricField<GradType, fvPatchField, volMesh>
+        new volScalarField
         (
             IOobject
             (
@@ -75,41 +66,44 @@ reconstruct
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimensioned<GradType>
+            dimensionedScalar
             (
                 "0",
                 ssf.dimensions()/dimArea,
-                pTraits<GradType>::zero
+                scalar(0)
             ),
-            zeroGradientFvPatchField<GradType>::typeName
+            zeroGradientFvPatchScalarField::typeName
         )
     );
 
-    Field<GradType>& rf = treconField();
+    scalarField& rf = treconField();
 
     forAll(owner, facei)
     {
         label own = owner[facei];
         label nei = neighbour[facei];
 
-        rf[own] += (Cf[facei] - C[own])*ssf[facei];
-        rf[nei] -= (Cf[facei] - C[nei])*ssf[facei];
+        rf[own] += (Sf[facei] & (Cf[facei] - C[own]))*ssf[facei]/magSf[facei];
+        rf[nei] -= (Sf[facei] & (Cf[facei] - C[nei]))*ssf[facei]/magSf[facei];
     }
 
-    const typename GeometricField<Type, fvsPatchField, surfaceMesh>::
-    GeometricBoundaryField& bsf = ssf.boundaryField();
+    const surfaceScalarField::GeometricBoundaryField& bsf = ssf.boundaryField();
 
     forAll(bsf, patchi)
     {
-        const fvsPatchField<Type>& psf = bsf[patchi];
+        const fvsPatchScalarField& psf = bsf[patchi];
 
         const labelUList& pOwner = mesh.boundary()[patchi].faceCells();
         const vectorField& pCf = Cf.boundaryField()[patchi];
+        const vectorField& pSf = Sf.boundaryField()[patchi];
+        const scalarField& pMagSf = magSf.boundaryField()[patchi];
 
         forAll(pOwner, pFacei)
         {
             label own = pOwner[pFacei];
-            rf[own] += (pCf[pFacei] - C[own])*psf[pFacei];
+            rf[own] +=
+                (pSf[pFacei] & (pCf[pFacei] - C[own]))
+               *psf[pFacei]/pMagSf[pFacei];
         }
     }
 
@@ -121,23 +115,11 @@ reconstruct
 }
 
 
-template<class Type>
-tmp
-<
-    GeometricField
-    <
-        typename outerProduct<vector, Type>::type, fvPatchField, volMesh
-    >
->
-reconstruct
-(
-    const tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >& tssf
-)
+tmp<volScalarField> reconstructMag(const tmp<surfaceScalarField>& tssf)
 {
-    typedef typename outerProduct<vector, Type>::type GradType;
-    tmp<GeometricField<GradType, fvPatchField, volMesh> > tvf
+    tmp<volScalarField> tvf
     (
-        fvc::reconstruct(tssf())
+        fvc::reconstructMag(tssf())
     );
     tssf.clear();
     return tvf;
