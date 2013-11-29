@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,7 @@ License
 #include "Time.H"
 #include "polyMesh.H"
 #include "dlLibraryTable.H"
+#include "twoDPointCorrector.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -71,8 +72,7 @@ Foam::motionSolver::motionSolver(const polyMesh& mesh)
             IOobject::NO_WRITE
         )
     ),
-    mesh_(mesh),
-    twoDPointCorrector_(mesh)
+    mesh_(mesh)
 {}
 
 
@@ -85,7 +85,6 @@ Foam::motionSolver::motionSolver
 :
     IOdictionary(stealRegistration(dict), dict),
     mesh_(mesh),
-    twoDPointCorrector_(mesh),
     coeffDict_(dict.subDict(type + "Coeffs"))
 {}
 
@@ -172,14 +171,12 @@ Foam::tmp<Foam::pointField> Foam::motionSolver::newPoints()
 
 void Foam::motionSolver::twoDCorrectPoints(pointField& p) const
 {
-    twoDPointCorrector_.correctPoints(p);
+    twoDPointCorrector::New(mesh_).correctPoints(p);
 }
 
 
 void Foam::motionSolver::updateMesh(const mapPolyMesh& mpm)
-{
-    twoDPointCorrector_.updateMesh();
-}
+{}
 
 
 // ************************************************************************* //
