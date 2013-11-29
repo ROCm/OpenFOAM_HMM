@@ -61,7 +61,8 @@ public:
         ocAdjustableTime, /*!< Adjust time step for dumping */
         ocRunTime,        /*!< run time for dumping */
         ocClockTime,      /*!< clock time for dumping */
-        ocCpuTime         /*!< cpu time for dumping */
+        ocCpuTime,        /*!< cpu time for dumping */
+        ocNone            /*!< no output */
     };
 
 
@@ -72,8 +73,11 @@ private:
         //- Time object
         const Time& time_;
 
+        //- Prefix
+        const word prefix_;
+
         //- String representation of outputControls enums
-        static const NamedEnum<outputControls, 6> outputControlNames_;
+        static const NamedEnum<outputControls, 7> outputControlNames_;
 
         //- Type of output
         outputControls outputControl_;
@@ -101,7 +105,12 @@ public:
     // Constructors
 
         //- Construct from Time object and dictionary
-        outputFilterOutputControl(const Time&, const dictionary&);
+        outputFilterOutputControl
+        (
+            const Time&,
+            const dictionary&,
+            const word& prefix
+        );
 
 
     //- Destructor

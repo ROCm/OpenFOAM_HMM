@@ -110,7 +110,8 @@ Foam::OutputFilterFunctionObject<OutputFilter>::OutputFilterFunctionObject
     storeFilter_(true),
     timeStart_(-VGREAT),
     timeEnd_(VGREAT),
-    outputControl_(t, dict)
+    outputControl_(t, dict, "output"),
+    evaluateControl_(t, dict, "evaluate")
 {
     readDict();
 }
@@ -159,7 +160,10 @@ bool Foam::OutputFilterFunctionObject<OutputFilter>::execute
             allocateFilter();
         }
 
-        ptr_->execute();
+        if (evaluateControl_.output())
+        {
+            ptr_->execute();
+        }
 
         if (forceWrite || outputControl_.output())
         {
