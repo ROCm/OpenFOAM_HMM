@@ -200,7 +200,7 @@ void Foam::radiation::viewFactor::initialise()
                 {
                     sumF += Fmatrix_()[i][j];
                 }
-                scalar delta = 1.0 - sumF;
+                scalar delta = sumF - 1.0;
                 for (label j=0; j<totalNCoarseFaces_; j++)
                 {
                     Fmatrix_()[i][j] *= (1.0 - delta/(sumF + 0.001));

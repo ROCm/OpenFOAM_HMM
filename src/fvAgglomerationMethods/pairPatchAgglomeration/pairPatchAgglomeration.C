@@ -83,11 +83,19 @@ void Foam::pairPatchAgglomeration::setBasedEdgeWeights()
                     facePairWeight_[edgeCommon] = -1.0;
                 }
             }
-            else if (eFaces.size() == 3)
+            else
             {
-                facePairWeight_.insert(edge(eFaces[1], eFaces[0]), -1.0);
-                facePairWeight_.insert(edge(eFaces[2], eFaces[0]), -1.0);
-                facePairWeight_.insert(edge(eFaces[1], eFaces[2]), -1.0);
+                forAll(eFaces, j)
+                {
+                    for (label k = j+1; k<eFaces.size(); k++)
+                    {
+                        facePairWeight_.insert
+                        (
+                            edge(eFaces[j], eFaces[k]),
+                            -1.0
+                        );
+                    }
+                }
             }
         }
     }
@@ -154,11 +162,20 @@ void Foam::pairPatchAgglomeration::setEdgeWeights
                     facePairWeight_[edgeCommon] = -1.0;
                 }
             }
-            else if (eFaces.size() == 3)
+            else
             {
-                facePairWeight_.insert(edge(eFaces[1], eFaces[0]), -1.0);
-                facePairWeight_.insert(edge(eFaces[2], eFaces[0]), -1.0);
-                facePairWeight_.insert(edge(eFaces[1], eFaces[2]), -1.0);
+                // Set edge as barrier by setting weight to -1
+                forAll(eFaces, j)
+                {
+                    for (label k = j+1; k<eFaces.size(); k++)
+                    {
+                        facePairWeight_.insert
+                        (
+                            edge(eFaces[j], eFaces[k]),
+                            -1.0
+                        );
+                    }
+                }
             }
         }
     }
