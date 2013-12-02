@@ -73,39 +73,6 @@ class medialAxisMeshMover
         motionSmootherAlgo meshMover_;
 
 
-    // Settings
-
-        //- Smoothing wanted patch thickness
-        label nSmoothPatchThickness_;
-
-        //- (lambda-mu) smoothing of internal displacement
-        label nSmoothDisplacement_;
-
-        //- Layer thickness too big
-        scalar maxThicknessToMedialRatio_;
-
-        //- Feature angle when to stop adding layers
-        scalar featureAngle_;
-
-        //- Stop layer growth where mesh wraps around sharp edge
-        scalar minCosLayerTermination_;
-
-        //- Smooth internal normals
-        label nSmoothNormals_;
-
-        //- Smooth surface normals
-        label nSmoothSurfaceNormals_;
-
-        //- When is medial axis
-        scalar minMedianAxisAngleCos_;
-
-        //- When to slip along wall
-        scalar slipFeatureAngle_;
-
-        //- Number of attempts shrinking the mesh
-        label nSnap_;
-
-
     // Pre-calculated medial axis information
 
         //- normal of nearest wall. Where this normal changes direction
@@ -124,13 +91,6 @@ class medialAxisMeshMover
 
 
     // Private Member Functions
-
-        const dictionary& coeffDict() const;
-
-        const dictionary& meshQualityDict() const;
-
-        //- Read model coefficients
-        void read();
 
         //- Extract fixed-value patchfields
         static labelList getFixedValueBCs(const pointVectorField&);
@@ -201,8 +161,9 @@ class medialAxisMeshMover
                 const scalar minCos
             ) const;
 
-            //- Initialise medial axis
-            void update();
+            //- Initialise medial axis. Uses pointDisplacement field only
+            //  for boundary types, not values.
+            void update(const dictionary&);
 
 
         // Calculation of mesh movement
@@ -272,6 +233,7 @@ class medialAxisMeshMover
         //  (in pointDisplacement)
         void calculateDisplacement
         (
+            const dictionary&,
             const scalarField& minThickness,
             List<autoLayerDriver::extrudeMode>& extrudeStatus,
             pointField& patchDisp
@@ -281,9 +243,9 @@ class medialAxisMeshMover
         bool shrinkMesh
         (
             const dictionary& meshQualityDict,
-            const label nAllowableErrors
+            const label nAllowableErrors,
+            labelList& checkFaces
         );
-
 
         //- Disallow default bitwise copy construct
         medialAxisMeshMover
@@ -319,8 +281,15 @@ public:
 
     // Member Functions
 
-        //- Move mesh. Return true if succesful
-        virtual bool move(const label nAllowableErrors);
+        //- Move mesh using current pointDisplacement boundary values.
+        //  Return true if succesful (errors on checkFaces less than
+        //  allowable). Updates pointDisplacement.
+        virtual bool move
+        (
+            const dictionary&,
+            const label nAllowableErrors,
+            labelList& checkFaces
+        );
 
         //- Update local data for geometry changes
         virtual void movePoints(const pointField&);

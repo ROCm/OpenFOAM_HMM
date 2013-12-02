@@ -277,7 +277,7 @@ private:
                 //- Get nearest point on surface to snap to
                 void getPatchDisplacement
                 (
-                    const motionSmoother& meshMover,
+                    const indirectPrimitivePatch& pp,
                     const scalarField& thickness,
                     const scalarField& minThickness,
                     pointField& patchDisp,
@@ -315,7 +315,7 @@ private:
                 (
                     const globalIndex& globalFaces,
                     const labelListList& edgeGlobalFaces,
-                    const motionSmoother& meshMover,
+                    const indirectPrimitivePatch& pp,
                     const scalarField& minThickness,
                     const faceSet& illegalPatchFaces,
                     pointField& patchDisp,
@@ -331,7 +331,7 @@ private:
                 //  to go into the actual layer addition engine.
                 void setupLayerInfoTruncation
                 (
-                    const motionSmoother& meshMover,
+                    const indirectPrimitivePatch& pp,
                     const labelList& patchNLayers,
                     const List<extrudeMode>& extrudeStatus,
                     const label nBufferCellsNoExtrude,

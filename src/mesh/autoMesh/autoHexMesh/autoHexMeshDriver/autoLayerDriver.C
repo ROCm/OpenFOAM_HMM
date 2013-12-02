@@ -55,6 +55,10 @@ Description
 #include "fixedValueFvPatchFields.H"
 #include "localPointRegion.H"
 
+#include "externalDisplacementMeshMover.H"
+#include "medialAxisMeshMover.H"
+#include "scalarIOField.H"
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -1378,8 +1382,8 @@ void Foam::autoLayerDriver::syncPatchDisplacement
             mesh,
             meshPoints,
             patchDisp,
-            minEqOp<vector>(),
-            point::max           // null value
+            minMagSqrEqOp<vector>(),
+            point::rootMax      // null value
         );
 
         // Unmark if displacement too small
@@ -1487,7 +1491,7 @@ void Foam::autoLayerDriver::syncPatchDisplacement
 // patch point.
 void Foam::autoLayerDriver::getPatchDisplacement
 (
-    const motionSmoother& meshMover,
+    const indirectPrimitivePatch& pp,
     const scalarField& thickness,
     const scalarField& minThickness,
     pointField& patchDisp,
@@ -1499,7 +1503,6 @@ void Foam::autoLayerDriver::getPatchDisplacement
         << " according to pointNormal ..." << endl;
 
     const fvMesh& mesh = meshRefiner_.mesh();
-    const indirectPrimitivePatch& pp = meshMover.patch();
     const vectorField& faceNormals = pp.faceNormals();
     const labelListList& pointFaces = pp.pointFaces();
     const pointField& localPoints = pp.localPoints();
@@ -1593,6 +1596,11 @@ void Foam::autoLayerDriver::getPatchDisplacement
                   - localPoints[patchPointI];
 
                 nExtrudeRemove++;
+            }
+            else
+            {
+                // All surrounding points are not extruded. Leave patchDisp
+                // intact.
             }
         }
     }
@@ -1720,7 +1728,7 @@ Foam::label Foam::autoLayerDriver::truncateDisplacement
 (
     const globalIndex& globalFaces,
     const labelListList& edgeGlobalFaces,
-    const motionSmoother& meshMover,
+    const indirectPrimitivePatch& pp,
     const scalarField& minThickness,
     const faceSet& illegalPatchFaces,
     pointField& patchDisp,
@@ -1728,8 +1736,7 @@ Foam::label Foam::autoLayerDriver::truncateDisplacement
     List<extrudeMode>& extrudeStatus
 ) const
 {
-    const polyMesh& mesh = meshMover.mesh();
-    const indirectPrimitivePatch& pp = meshMover.patch();
+    const fvMesh& mesh = meshRefiner_.mesh();
 
     label nChanged = 0;
 
@@ -2034,7 +2041,7 @@ Foam::label Foam::autoLayerDriver::truncateDisplacement
 // regions where layer mesh terminates.
 void Foam::autoLayerDriver::setupLayerInfoTruncation
 (
-    const motionSmoother& meshMover,
+    const indirectPrimitivePatch& pp,
     const labelList& patchNLayers,
     const List<extrudeMode>& extrudeStatus,
     const label nBufferCellsNoExtrude,
@@ -2044,8 +2051,7 @@ void Foam::autoLayerDriver::setupLayerInfoTruncation
 {
     Info<< nl << "Setting up information for layer truncation ..." << endl;
 
-    const indirectPrimitivePatch& pp = meshMover.patch();
-    const polyMesh& mesh = meshMover.mesh();
+    const fvMesh& mesh = meshRefiner_.mesh();
 
     if (nBufferCellsNoExtrude < 0)
     {
@@ -2917,26 +2923,6 @@ void Foam::autoLayerDriver::addLayers
     );
 
 
-    // Construct iterative mesh mover.
-    Info<< "Constructing mesh displacer ..." << endl;
-
-    autoPtr<motionSmoother> meshMover
-    (
-        new motionSmoother
-        (
-            mesh,
-            pp(),
-            patchIDs,
-            makeLayerDisplacementField
-            (
-                pointMesh::New(mesh),
-                layerParams.numLayers()
-            ),
-            motionDict
-        )
-    );
-
-
     // Point-wise extrusion data
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -2961,7 +2947,7 @@ void Foam::autoLayerDriver::addLayers
         setNumLayers
         (
             layerParams.numLayers(),    // per patch the num layers
-            meshMover().adaptPatchIDs(),// patches that are being moved
+            patchIDs,                   // patches that are being moved
             pp,                         // indirectpatch for all faces moving
 
             patchDisp,
@@ -3059,12 +3045,22 @@ void Foam::autoLayerDriver::addLayers
     // Determine (wanted) point-wise overall layer thickness and expansion
     // ratio
     scalarField thickness(pp().nPoints());
-    scalarField minThickness(pp().nPoints());
+    scalarIOField minThickness
+    (
+        IOobject
+        (
+            "minThickness",
+            meshRefiner_.timeName(),
+            mesh,
+            IOobject::NO_READ
+        ),
+        pp().nPoints()
+    );
     scalarField expansionRatio(pp().nPoints());
     calculateLayerThickness
     (
         pp,
-        meshMover().adaptPatchIDs(),
+        patchIDs,
         layerParams,
         cellLevel,
         patchNLayers,
@@ -3077,89 +3073,36 @@ void Foam::autoLayerDriver::addLayers
 
 
 
-    // Calculate wall to medial axis distance for smoothing displacement
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    pointScalarField pointMedialDist
+    // Overall displacement field
+    pointVectorField displacement
     (
-        IOobject
+        makeLayerDisplacementField
         (
-            "pointMedialDist",
-            meshRefiner_.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        meshMover().pMesh(),
-        dimensionedScalar("pointMedialDist", dimLength, 0.0)
+            pointMesh::New(mesh),
+            layerParams.numLayers()
+        )
     );
 
-    pointVectorField dispVec
-    (
-        IOobject
+    // Allocate run-time selectable mesh mover
+    autoPtr<externalDisplacementMeshMover> medialAxisMoverPtr;
+    {
+        // Set up controls for meshMover
+        dictionary combinedDict(layerParams.dict());
+        // Add mesh quality constraints
+        combinedDict.merge(motionDict);
+        // Where to get minThickness from
+        combinedDict.add("minThicknessName", minThickness.name());
+
+        // Take over patchDisp as boundary conditions on displacement
+        // pointVectorField
+        medialAxisMoverPtr = externalDisplacementMeshMover::New
         (
-            "dispVec",
-            meshRefiner_.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        meshMover().pMesh(),
-        dimensionedVector("dispVec", dimLength, vector::zero)
-    );
-
-    pointScalarField medialRatio
-    (
-        IOobject
-        (
-            "medialRatio",
-            meshRefiner_.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        meshMover().pMesh(),
-        dimensionedScalar("medialRatio", dimless, 0.0)
-    );
-
-    pointVectorField medialVec
-    (
-        IOobject
-        (
-            "medialVec",
-            meshRefiner_.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        meshMover().pMesh(),
-        dimensionedVector("medialVec", dimLength, vector::zero)
-    );
-
-    // Setup information for medial axis smoothing. Calculates medial axis
-    // and a smoothed displacement direction.
-    // - pointMedialDist : distance to medial axis
-    // - dispVec : normalised direction of nearest displacement
-    // - medialRatio : ratio of medial distance to wall distance.
-    //   (1 at wall, 0 at medial axis)
-    medialAxisSmoothingInfo
-    (
-        meshMover,
-        layerParams.nSmoothNormals(),
-        layerParams.nSmoothSurfaceNormals(),
-        layerParams.minMedianAxisAngleCos(),
-        layerParams.slipFeatureAngle(),
-
-        dispVec,
-        medialRatio,
-        pointMedialDist,
-        medialVec
-    );
-
+            layerParams.meshShrinker(),
+            combinedDict,
+            baffles,
+            displacement
+        );
+    }
 
 
     // Saved old points
@@ -3215,7 +3158,7 @@ void Foam::autoLayerDriver::addLayers
         // Displacement acc. to pointnormals
         getPatchDisplacement
         (
-            meshMover,
+            pp,
             thickness,
             minThickness,
             patchDisp,
@@ -3229,42 +3172,38 @@ void Foam::autoLayerDriver::addLayers
         {
             pointField oldPatchPos(pp().localPoints());
 
-            //// Laplacian displacement shrinking.
-            //shrinkMeshDistance
-            //(
-            //    debug,
-            //    meshMover,
-            //    -patchDisp,     // Shrink in opposite direction of addedPoints
-            //    layerParams.nSmoothDisp(),
-            //    layerParams.nSnap()
-            //);
-
-            // Medial axis based shrinking
-            shrinkMeshMedialDistance
+            // Take over patchDisp into pointDisplacement field and
+            // adjust both for multi-patch constraints
+            motionSmootherAlgo::setDisplacement
             (
-                meshMover(),
-                meshQualityDict,
-                baffles,
-
-                layerParams.nSmoothThickness(),
-                layerParams.nSmoothDisplacement(),
-                layerParams.maxThicknessToMedialRatio(),
-                nAllowableErrors,
-                layerParams.nSnap(),
-                layerParams.layerTerminationCos(),
-
-                thickness,
-                minThickness,
-
-                dispVec,
-                medialRatio,
-                pointMedialDist,
-                medialVec,
-
-                extrudeStatus,
+                patchIDs,
+                pp,
                 patchDisp,
-                patchNLayers
+                displacement
             );
+
+
+            // Move mesh
+            // ~~~~~~~~~
+
+            // Set up controls for meshMover
+            dictionary combinedDict(layerParams.dict());
+            // Add standard quality constraints
+            combinedDict.merge(motionDict);
+            // Add relaxed constraints (overrides standard ones)
+            combinedDict.merge(meshQualityDict);
+            // Where to get minThickness from
+            combinedDict.add("minThicknessName", minThickness.name());
+
+            labelList checkFaces(identity(mesh.nFaces()));
+            medialAxisMoverPtr().move
+            (
+                combinedDict,
+                nAllowableErrors,
+                checkFaces
+            );
+
+            pp().movePoints(mesh.points());
 
             // Update patchDisp (since not all might have been honoured)
             patchDisp = oldPatchPos - pp().localPoints();
@@ -3278,7 +3217,7 @@ void Foam::autoLayerDriver::addLayers
         (
             globalFaces,
             edgeGlobalFaces,
-            meshMover(),
+            pp,
             minThickness,
             dummySet,
             patchDisp,
@@ -3331,7 +3270,7 @@ void Foam::autoLayerDriver::addLayers
         labelList nPatchFaceLayers(pp().size(), -1);
         setupLayerInfoTruncation
         (
-            meshMover(),
+            pp,
             patchNLayers,
             extrudeStatus,
             layerParams.nBufferCellsNoExtrude(),
@@ -3456,7 +3395,7 @@ void Foam::autoLayerDriver::addLayers
                 << endl;
             newMesh.write();
 
-            cellSet addedCellSet(newMesh," addedCells", nAddedCells);
+            cellSet addedCellSet(newMesh, "addedCells", nAddedCells);
             forAll(cellNLayers, cellI)
             {
                 if (cellNLayers[cellI] > 0)
@@ -3521,10 +3460,7 @@ void Foam::autoLayerDriver::addLayers
 
         // Reset mesh points and start again
         mesh.movePoints(oldPoints);
-        // Update meshmover for change of mesh geometry
-        meshMover().movePoints();
-        meshMover().correct();
-
+        pp().movePoints(mesh.points());
 
         // Grow out region of non-extrusion
         for (label i = 0; i < layerParams.nGrow(); i++)

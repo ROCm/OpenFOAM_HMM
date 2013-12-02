@@ -28,7 +28,10 @@ Description
     Virtual base class for mesh movers with externally provided displacement
     field giving the boundary conditions. Move the mesh from the current
     location to a new location (so modify the mesh; v.s. motionSolver that
-    only returns the new location)
+    only returns the new location).
+
+    All mesh movers are expected to read the dictionary settings at invocation
+    of move(), i.e. not cache any settings.
 
 SourceFiles
     externalDisplacementMeshMover.C
@@ -56,9 +59,6 @@ class externalDisplacementMeshMover
 protected:
 
     // Protected data
-
-        //- Settings
-        dictionary dict_;
 
         //- Baffles in the mesh
         List<labelPair> baffles_;
@@ -104,7 +104,8 @@ public:
 
     // Constructors
 
-        //- Construct from dictionary and displacement field
+        //- Construct from dictionary and displacement field. Dictionary is
+        //  allowed to go out of scope!
         externalDisplacementMeshMover
         (
             const dictionary& dict,
@@ -158,8 +159,16 @@ public:
 
         // Mesh mover
 
-            //- Move mesh. Return true if succesful
-            virtual bool move(const label nAllowableErrors) = 0;
+            //- Move mesh using current pointDisplacement boundary values
+            //  and current dictionary settings. Return true if succesful
+            //  (errors  on checkFaces less than allowable). Updates
+            //  pointDisplacement.
+            virtual bool move
+            (
+                const dictionary&,
+                const label nAllowableErrors,
+                labelList& checkFaces
+            ) = 0;
 
             //- Update local data for geometry changes
             virtual void movePoints(const pointField&);

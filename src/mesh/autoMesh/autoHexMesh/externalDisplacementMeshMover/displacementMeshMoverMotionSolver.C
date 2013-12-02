@@ -105,7 +105,8 @@ void Foam::displacementMeshMoverMotionSolver::solve()
     pointDisplacement().boundaryField().updateCoeffs();
 
     label nAllowableErrors = 0;
-    meshMover().move(nAllowableErrors);
+    labelList checkFaces(identity(mesh().nFaces()));
+    meshMover().move(coeffDict(), nAllowableErrors, checkFaces);
 }
 
 

@@ -28,6 +28,7 @@ License
 #include "unitConversion.H"
 #include "refinementSurfaces.H"
 #include "searchableSurfaces.H"
+#include "medialAxisMeshMover.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -109,6 +110,7 @@ Foam::layerParameters::layerParameters
     const polyBoundaryMesh& boundaryMesh
 )
 :
+    dict_(dict),
     numLayers_(boundaryMesh.size(), -1),
     relativeSizes_(dict.lookup("relativeSizes")),
     layerSpec_(ILLEGAL),
@@ -163,7 +165,15 @@ Foam::layerParameters::layerParameters
     nSnap_(readLabel(dict.lookup("nRelaxIter"))),
     nLayerIter_(readLabel(dict.lookup("nLayerIter"))),
     nRelaxedIter_(labelMax),
-    additionalReporting_(dict.lookupOrDefault("additionalReporting", false))
+    additionalReporting_(dict.lookupOrDefault("additionalReporting", false)),
+    meshShrinker_
+    (
+        dict.lookupOrDefault
+        (
+            "meshShrinker",
+            medialAxisMeshMover::typeName
+        )
+    )
 {
     // Detect layer specification mode
 

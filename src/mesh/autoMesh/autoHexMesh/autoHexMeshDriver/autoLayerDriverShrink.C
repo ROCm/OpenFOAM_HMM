@@ -752,15 +752,15 @@ void Foam::autoLayerDriver::findIsolatedRegions
                    nPointCounter++;
                    nChanged++;
                 }
-           }
-       }
+            }
+        }
 
 
-       if (returnReduce(nChanged, sumOp<label>()) == 0)
-       {
-           break;
-       }
-   }
+        if (returnReduce(nChanged, sumOp<label>()) == 0)
+        {
+            break;
+        }
+    }
 
     const edgeList& edges = pp.edges();
 

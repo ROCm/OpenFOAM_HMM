@@ -44,7 +44,6 @@ Foam::externalDisplacementMeshMover::externalDisplacementMeshMover
     pointVectorField& pointDisplacement
 )
 :
-    dict_(dict),
     baffles_(baffles),
     pointDisplacement_(pointDisplacement)
 {}
