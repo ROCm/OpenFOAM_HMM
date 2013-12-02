@@ -45,34 +45,65 @@ void Foam::forceCoeffs::writeFileHeader(const label i)
     {
         // force coeff data
 
+        writeHeader(file(i), "Force coefficients");
+        writeHeaderValue(file(i), "liftDir", liftDir_);
+        writeHeaderValue(file(i), "dragDir", dragDir_);
+        writeHeaderValue(file(i), "pitchAxis", pitchAxis_);
+        writeHeaderValue(file(i), "magUInf", magUInf_);
+        writeHeaderValue(file(i), "lRef", lRef_);
+        writeHeaderValue(file(i), "Aref", Aref_);
+        writeHeaderValue(file(i), "CofR", coordSys_.origin());
+        writeCommented(file(i), "Time");
+        writeTabbed(file(i), "Cm");
+        writeTabbed(file(i), "Cd");
+        writeTabbed(file(i), "Cl");
+        writeTabbed(file(i), "Cl(f)");
+        writeTabbed(file(i), "Cl(r)");
         file(i)
-            << "# liftDir   : " << liftDir_ << nl
-            << "# dragDir   : " << dragDir_ << nl
-            << "# pitchAxis : " << pitchAxis_ << nl
-            << "# magUInf   : " << magUInf_ << nl
-            << "# lRef      : " << lRef_ << nl
-            << "# Aref      : " << Aref_ << nl
-            << "# CofR      : " << coordSys_.origin() << nl
-            << "# Time" << tab << "Cm" << tab << "Cd" << tab << "Cl" << tab
-            << "Cl(f)" << tab << "Cl(r)";
+            << tab << "Cm" << tab << "Cd" << tab << "Cl" << tab << "Cl(f)"
+            << tab << "Cl(r)";
     }
     else if (i == 1)
     {
         // bin coeff data
 
-        file(i)
-            << "# bins      : " << nBin_ << nl
-            << "# start     : " << binMin_ << nl
-            << "# delta     : " << binDx_ << nl
-            << "# direction : " << binDir_ << nl
-            << "# Time";
+        writeHeader(file(i), "Force coefficient bins");
+        writeHeaderValue(file(i), "bins", nBin_);
+        writeHeaderValue(file(i), "start", binMin_);
+        writeHeaderValue(file(i), "delta", binDx_);
+        writeHeaderValue(file(i), "direction", binDir_);
+
+        vectorField binPoints(nBin_);
+        writeCommented(file(i), "x co-ords  :");
+        forAll(binPoints, pointI)
+        {
+            binPoints[pointI] = (binMin_ + (pointI + 1)*binDx_)*binDir_;
+            file(i) << tab << binPoints[pointI].x();
+        }
+        file(i) << nl;
+
+        writeCommented(file(i), "y co-ords  :");
+        forAll(binPoints, pointI)
+        {
+            file(i) << tab << binPoints[pointI].y();
+        }
+        file(i) << nl;
+
+        writeCommented(file(i), "z co-ords  :");
+        forAll(binPoints, pointI)
+        {
+            file(i) << tab << binPoints[pointI].z();
+        }
+        file(i) << nl;
+
+        writeCommented(file(i), "Time");
 
         for (label j = 0; j < nBin_; j++)
         {
             const word jn('[' + Foam::name(j) + ']');
-
-            file(i)
-                << tab << "Cm" << jn << tab << "Cd" << jn << tab << "Cl" << jn;
+            writeTabbed(file(i), "Cm" + jn);
+            writeTabbed(file(i), "Cd" + jn);
+            writeTabbed(file(i), "Cl" + jn);
         }
     }
     else
@@ -193,9 +224,8 @@ void Foam::forceCoeffs::write()
         scalar Clr = Cl/2.0 - Cm;
 
         file(0)
-            << obr_.time().value() << tab
-            << Cm << tab << Cd << tab << Cl << tab << Clf << tab << Clr
-            << endl;
+            << obr_.time().value() << tab << Cm << tab  << Cd
+            << tab << Cl << tab << Clf << tab << Clr << endl;
 
         if (log_)
         {

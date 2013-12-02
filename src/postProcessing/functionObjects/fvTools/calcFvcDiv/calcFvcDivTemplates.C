@@ -38,24 +38,13 @@ void Foam::calcFvcDiv::calcDiv
 {
     const fvMesh& mesh = refCast<const fvMesh>(obr_);
 
-    word divName = resultName;
-    if (divName == "none")
-    {
-        divName = "fvc::div(" + fieldName + ")";
-    }
-
     if (mesh.foundObject<FieldType>(fieldName))
     {
         const FieldType& vf = mesh.lookupObject<FieldType>(fieldName);
 
-        volScalarField& field = divField(divName, vf.dimensions());
+        volScalarField& field = divField(resultName, vf.dimensions());
 
         field = fvc::div(vf);
-
-        Info<< type() << " " << name_ << " output:" << nl
-            << "    writing field " << field.name() << nl << endl;
-
-        field.write();
 
         processed = true;
     }

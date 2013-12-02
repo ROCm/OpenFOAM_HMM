@@ -8,7 +8,8 @@
 
 forceCoeffs1
 {
-    type        forceCoeffs;
+//    type        forceCoeffs;
+    type        forces;
 
     functionObjectLibs ( "libforces.so" );
 

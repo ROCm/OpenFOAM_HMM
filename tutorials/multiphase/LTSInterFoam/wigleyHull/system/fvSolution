@@ -17,11 +17,21 @@ FoamFile
 
 solvers
 {
-    alpha.water
+    "alpha.water.*"
     {
         nAlphaCorr      1;
         nAlphaSubCycles 1;
         cAlpha          1;
+        icAlpha         0.25;
+
+        MULESCorr       yes;
+        nLimiterIter    8;
+        alphaApplyPrevCorr  true;
+
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-8;
+        relTol          0;
     }
 
     pcorr
@@ -56,14 +66,14 @@ solvers
         nCellsInCoarsestLevel 10;
         cacheAgglomeration true;
 
-        tolerance       1e-6;
+        tolerance       1e-7;
         relTol          0.01;
     };
 
     p_rghFinal
     {
         $p_rgh;
-        tolerance       1e-6;
+        tolerance       1e-7;
         relTol          0;
     }
 
@@ -81,17 +91,18 @@ solvers
 
 PIMPLE
 {
-    momentumPredictor yes;
+    momentumPredictor no;
 
     nCorrectors     1;
     nNonOrthogonalCorrectors 0;
 
-    maxCo           0.9;
-    maxAlphaCo      0.2;
-    nAlphaSweepIter 1;
+    maxCo           5;
+    maxAlphaCo      5;
 
-    rDeltaTSmoothingCoeff 0.1;
-    rDeltaTDampingCoeff 1;
+    rDeltaTSmoothingCoeff 0.05;
+    rDeltaTDampingCoeff 0.5;
+    nAlphaSweepIter  0;
+    nAlphaSpreadIter 0;
     maxDeltaT       1;
 }
 
@@ -102,6 +113,7 @@ relaxationFactors
     }
     equations
     {
+        ".*" 1;
     }
 }
 

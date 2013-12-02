@@ -91,24 +91,14 @@ void Foam::calcFvcGrad::calcGrad
 
     const fvMesh& mesh = refCast<const fvMesh>(obr_);
 
-    word gradName = resultName;
-    if (gradName == "none")
-    {
-        gradName = "fvc::grad(" + fieldName + ")";
-    }
 
     if (mesh.foundObject<vfType>(fieldName))
     {
         const vfType& vf = mesh.lookupObject<vfType>(fieldName);
 
-        vfGradType& field = gradField<Type>(gradName, vf.dimensions());
+        vfGradType& field = gradField<Type>(resultName, vf.dimensions());
 
         field = fvc::grad(vf);
-
-        Info<< type() << " output:" << nl
-            << "    writing " << field.name() << " field" << nl << endl;
-
-        field.write();
 
         processed = true;
     }
@@ -116,14 +106,9 @@ void Foam::calcFvcGrad::calcGrad
     {
         const sfType& sf = mesh.lookupObject<sfType>(fieldName);
 
-        vfGradType& field = gradField<Type>(gradName, sf.dimensions());
+        vfGradType& field = gradField<Type>(resultName, sf.dimensions());
 
         field = fvc::grad(sf);
-
-        Info<< type() << " " << name_ << " output:" << nl
-            << "    writing field " << field.name() << nl << endl;
-
-        field.write();
 
         processed = true;
     }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,6 +69,9 @@ namespace fvc
     (
         const tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >&
     );
+
+    tmp<volScalarField> reconstructMag(const surfaceScalarField&);
+    tmp<volScalarField> reconstructMag(const tmp<surfaceScalarField>&);
 }
 
 

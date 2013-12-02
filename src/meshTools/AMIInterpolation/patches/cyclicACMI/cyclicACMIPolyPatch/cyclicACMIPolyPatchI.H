@@ -71,11 +71,11 @@ inline const Foam::scalarField& Foam::cyclicACMIPolyPatch::mask() const
 {
     if (owner())
     {
-        return AMI().srcWeightsSum();
+        return srcMask_;
     }
     else
     {
-        return neighbPatch().AMI().tgtWeightsSum();
+        return neighbPatch().tgtMask();
     }
 }
 

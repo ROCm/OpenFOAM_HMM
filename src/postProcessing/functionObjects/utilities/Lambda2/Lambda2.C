@@ -33,7 +33,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(Lambda2, 0);
+    defineTypeNameAndDebug(Lambda2, 0);
 }
 
 
@@ -116,24 +116,6 @@ void Foam::Lambda2::read(const dictionary& dict)
 
 void Foam::Lambda2::execute()
 {
-    // Do nothing - only valid on write
-}
-
-
-void Foam::Lambda2::end()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::Lambda2::timeSet()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::Lambda2::write()
-{
     if (active_)
     {
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
@@ -156,6 +138,28 @@ void Foam::Lambda2::write()
             );
 
         Lambda2 = -eigenValues(SSplusWW)().component(vector::Y);
+    }
+}
+
+
+void Foam::Lambda2::end()
+{
+    // Do nothing
+}
+
+
+void Foam::Lambda2::timeSet()
+{
+    // Do nothing
+}
+
+
+void Foam::Lambda2::write()
+{
+    if (active_)
+    {
+        const volScalarField& Lambda2 =
+            obr_.lookupObject<volScalarField>(type());
 
         Info<< type() << " " << name_ << " output:" << nl
             << "    writing field " << Lambda2.name() << nl

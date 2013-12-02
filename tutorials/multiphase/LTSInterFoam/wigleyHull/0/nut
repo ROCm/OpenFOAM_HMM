@@ -24,7 +24,7 @@ boundaryField
     inlet
     {
         type            fixedValue;
-        value           uniform 5e-07;
+        value           $internalField;
     }
 
     outlet
@@ -45,7 +45,7 @@ boundaryField
     hull_wall
     {
         type            nutkWallFunction;
-        value           uniform 0;
+        value           $internalField;
     }
 }
 

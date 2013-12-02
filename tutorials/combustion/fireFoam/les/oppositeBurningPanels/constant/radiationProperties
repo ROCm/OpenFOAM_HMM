@@ -191,5 +191,6 @@ greyMeanAbsorptionEmissionCoeffs
 
 scatterModel    none;
 
+sootModel       none;
 
 // ************************************************************************* //

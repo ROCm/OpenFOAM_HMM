@@ -94,11 +94,10 @@ void Foam::fieldValues::fieldValueDelta::writeFileHeader(const label i)
 
     Ostream& os = file();
 
-    os  << "# Source1   : " << source1Ptr_->name() << nl
-        << "# Source2   : " << source2Ptr_->name() << nl
-        << "# Operation : " << operationTypeNames_[operation_] << nl;
-
-    os  << "# Time";
+    writeHeaderValue(os, "Source1", source1Ptr_->name());
+    writeHeaderValue(os, "Source2", source2Ptr_->name());
+    writeHeaderValue(os, "Operation", operationTypeNames_[operation_]);
+    writeCommented(os, "Time");
 
     forAll(commonFields, i)
     {
@@ -156,7 +155,7 @@ void Foam::fieldValues::fieldValueDelta::write()
 
     if (Pstream::master())
     {
-        file()<< obr_.time().timeName();
+        file()<< obr_.time().value();
     }
 
     if (log_)

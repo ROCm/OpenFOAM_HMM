@@ -48,13 +48,10 @@ greyMeanAbsorptionEmissionSootCoeffs
     EhrrCoeff                0.4;
 }
 
-scatterModel    constantScatter;
+scatterModel    none;
 
-constantScatterCoeffs
-{
-    sigma           sigma [ 0 -1 0 0 0 0 0 ] 0;
-    C               C [ 0 0 0 0 0 0 0 ] 0;
-}
+
+sootModel       none;
 
 
 // ************************************************************************* //

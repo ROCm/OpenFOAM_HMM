@@ -38,14 +38,6 @@ inline const Foam::word& Foam::cyclicAMIPolyPatch::neighbPatchName() const
 }
 
 
-inline const Foam::cyclicAMIPolyPatch&
-Foam::cyclicAMIPolyPatch::neighbPatch() const
-{
-    const polyPatch& pp = this->boundaryMesh()[neighbPatchID()];
-    return refCast<const cyclicAMIPolyPatch>(pp);
-}
-
-
 inline const Foam::vector& Foam::cyclicAMIPolyPatch::rotationAxis() const
 {
     return rotationAxis_;

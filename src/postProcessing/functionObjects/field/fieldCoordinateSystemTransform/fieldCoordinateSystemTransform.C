@@ -96,7 +96,20 @@ void Foam::fieldCoordinateSystemTransform::read(const dictionary& dict)
 
 void Foam::fieldCoordinateSystemTransform::execute()
 {
-    // Do nothing
+    if (active_)
+    {
+        Info<< type() << " " << name_ << " output:" << nl;
+
+        forAll(fieldSet_, fieldI)
+        {
+            // If necessary load field
+            transform<scalar>(fieldSet_[fieldI]);
+            transform<vector>(fieldSet_[fieldI]);
+            transform<sphericalTensor>(fieldSet_[fieldI]);
+            transform<symmTensor>(fieldSet_[fieldI]);
+            transform<tensor>(fieldSet_[fieldI]);
+        }
+    }
 }
 
 
@@ -114,16 +127,23 @@ void Foam::fieldCoordinateSystemTransform::timeSet()
 
 void Foam::fieldCoordinateSystemTransform::write()
 {
-    Info<< type() << " " << name_ << " output:" << nl;
-
-    forAll(fieldSet_, fieldI)
+    if (active_)
     {
-        // If necessary load field
-        transform<scalar>(fieldSet_[fieldI]);
-        transform<vector>(fieldSet_[fieldI]);
-        transform<sphericalTensor>(fieldSet_[fieldI]);
-        transform<symmTensor>(fieldSet_[fieldI]);
-        transform<tensor>(fieldSet_[fieldI]);
+        Info<< type() << " " << name_ << " output:" << nl;
+
+        forAll(fieldSet_, fieldI)
+        {
+            const word fieldName = fieldSet_[fieldI] + ":Transformed";
+
+            const regIOobject& field =
+                obr_.lookupObject<regIOobject>(fieldName);
+
+            Info<< "    writing field " << field.name() << nl;
+
+            field.write();
+        }
+
+        Info<< endl;
     }
 }
 

@@ -37,6 +37,7 @@ void Foam::MULES::correct
     const RdeltaTType& rDeltaT,
     const RhoType& rho,
     volScalarField& psi,
+    const surfaceScalarField& phi,
     const surfaceScalarField& phiCorr,
     const SpType& Sp,
     const SuType& Su
@@ -77,6 +78,7 @@ void Foam::MULES::correct
 (
     const RhoType& rho,
     volScalarField& psi,
+    const surfaceScalarField& phi,
     surfaceScalarField& phiCorr,
     const SpType& Sp,
     const SuType& Su,
@@ -94,8 +96,18 @@ void Foam::MULES::correct
         readLabel(MULEScontrols.lookup("nLimiterIter"))
     );
 
-    limitCorr(rDeltaT, rho, psi, phiCorr, Sp, Su, psiMax, psiMin, nLimiterIter);
-    correct(rDeltaT, rho, psi, phiCorr, Sp, Su);
+    limitCorr
+    (
+        rDeltaT,
+        rho,
+        psi,
+        phi,
+        phiCorr,
+        Sp, Su,
+        psiMax, psiMin,
+        nLimiterIter
+    );
+    correct(rDeltaT, rho, psi, phi, phiCorr, Sp, Su);
 }
 
 
@@ -104,6 +116,7 @@ void Foam::MULES::LTScorrect
 (
     const RhoType& rho,
     volScalarField& psi,
+    const surfaceScalarField& phi,
     surfaceScalarField& phiCorr,
     const SpType& Sp,
     const SuType& Su,
@@ -123,8 +136,18 @@ void Foam::MULES::LTScorrect
         readLabel(MULEScontrols.lookup("nLimiterIter"))
     );
 
-    limitCorr(rDeltaT, rho, psi, phiCorr, Sp, Su, psiMax, psiMin, nLimiterIter);
-    correct(rDeltaT, rho, psi, phiCorr, Sp, Su);
+    limitCorr
+    (
+        rDeltaT,
+        rho,
+        psi,
+        phi,
+        phiCorr,
+        Sp, Su,
+        psiMax, psiMin,
+        nLimiterIter
+    );
+    correct(rDeltaT, rho, psi, phi, phiCorr, Sp, Su);
 }
 
 
@@ -135,6 +158,7 @@ void Foam::MULES::limiterCorr
     const RdeltaTType& rDeltaT,
     const RhoType& rho,
     const volScalarField& psi,
+    const surfaceScalarField& phi,
     const surfaceScalarField& phiCorr,
     const SpType& Sp,
     const SuType& Su,
@@ -152,6 +176,9 @@ void Foam::MULES::limiterCorr
     const labelUList& neighb = mesh.neighbour();
     tmp<volScalarField::DimensionedInternalField> tVsc = mesh.Vsc();
     const scalarField& V = tVsc();
+
+    const surfaceScalarField::GeometricBoundaryField& phiBf =
+        phi.boundaryField();
 
     const scalarField& phiCorrIf = phiCorr;
     const surfaceScalarField::GeometricBoundaryField& phiCorrBf =
@@ -408,12 +435,12 @@ void Foam::MULES::limiterCorr
             {
                 const labelList& pFaceCells =
                     mesh.boundary()[patchi].faceCells();
-                const scalarField& phiCorrPf = phiCorrBf[patchi];
+                const scalarField& phiPf = phiBf[patchi];
 
                 forAll(lambdaPf, pFacei)
                 {
                     // Limit outlet faces only
-                    if (phiCorrPf[pFacei] > SMALL*SMALL)
+                    if (phiPf[pFacei] > SMALL*SMALL)
                     {
                         label pfCelli = pFaceCells[pFacei];
 
@@ -443,6 +470,7 @@ void Foam::MULES::limitCorr
     const RdeltaTType& rDeltaT,
     const RhoType& rho,
     const volScalarField& psi,
+    const surfaceScalarField& phi,
     surfaceScalarField& phiCorr,
     const SpType& Sp,
     const SuType& Su,
@@ -478,6 +506,7 @@ void Foam::MULES::limitCorr
         rDeltaT,
         rho,
         psi,
+        phi,
         phiCorr,
         Sp,
         Su,

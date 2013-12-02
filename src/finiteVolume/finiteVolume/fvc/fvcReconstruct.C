@@ -25,6 +25,9 @@ License
 
 #include "fvcReconstruct.H"
 #include "fvMesh.H"
+#include "volFields.H"
+#include "surfaceFields.H"
+#include "fvcSurfaceIntegrate.H"
 #include "zeroGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

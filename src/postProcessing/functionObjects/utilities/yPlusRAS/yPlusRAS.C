@@ -46,10 +46,13 @@ defineTypeNameAndDebug(yPlusRAS, 0);
 
 void Foam::yPlusRAS::writeFileHeader(const label i)
 {
-    file() << "# y+ (RAS)" << nl
-        << "# time " << token::TAB << "patch" << token::TAB
-        << "min" << token::TAB << "max" << token::TAB << "average"
-        << endl;
+    writeHeader(file(), "y+ (RAS)");
+
+    writeCommented(file(), "Time");
+    writeTabbed(file(), "patch");
+    writeTabbed(file(), "min");
+    writeTabbed(file(), "max");
+    writeTabbed(file(), "average");
 }
 
 
@@ -95,10 +98,12 @@ void Foam::yPlusRAS::calcIncompressibleYPlus
 
             if (Pstream::master())
             {
-                file() << obr_.time().value() << token::TAB
-                    << nutPw.patch().name() << token::TAB
-                    << minYp << token::TAB << maxYp << token::TAB
-                    << avgYp << endl;
+                file() << obr_.time().value()
+                    << token::TAB << nutPw.patch().name()
+                    << token::TAB << minYp
+                    << token::TAB << maxYp
+                    << token::TAB << avgYp
+                    << endl;
             }
         }
     }
@@ -153,10 +158,12 @@ void Foam::yPlusRAS::calcCompressibleYPlus
 
             if (Pstream::master())
             {
-                file() << obr_.time().value() << token::TAB
-                    << mutPw.patch().name() << token::TAB
-                    << minYp << token::TAB << maxYp << token::TAB
-                    << avgYp << endl;
+                file() << obr_.time().value()
+                    << token::TAB << mutPw.patch().name()
+                    << token::TAB << minYp
+                    << token::TAB << maxYp
+                    << token::TAB << avgYp
+                    << endl;
             }
         }
     }
@@ -249,24 +256,6 @@ void Foam::yPlusRAS::read(const dictionary& dict)
 
 void Foam::yPlusRAS::execute()
 {
-    // Do nothing - only valid on write
-}
-
-
-void Foam::yPlusRAS::end()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::yPlusRAS::timeSet()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::yPlusRAS::write()
-{
     if (active_)
     {
         functionObjectFile::write();
@@ -295,6 +284,30 @@ void Foam::yPlusRAS::write()
         {
             calcIncompressibleYPlus(mesh, yPlusRAS);
         }
+    }
+}
+
+
+void Foam::yPlusRAS::end()
+{
+    // Do nothing
+}
+
+
+void Foam::yPlusRAS::timeSet()
+{
+    // Do nothing
+}
+
+
+void Foam::yPlusRAS::write()
+{
+    if (active_)
+    {
+        functionObjectFile::write();
+
+        const volScalarField& yPlusRAS =
+            obr_.lookupObject<volScalarField>(type());
 
         if (log_)
         {

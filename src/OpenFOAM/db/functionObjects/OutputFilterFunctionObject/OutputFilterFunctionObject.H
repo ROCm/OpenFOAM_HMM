@@ -98,6 +98,9 @@ class OutputFilterFunctionObject
         //- Output controls
         outputFilterOutputControl outputControl_;
 
+        //- Evaluate controls
+        outputFilterOutputControl evaluateControl_;
+
         //- Pointer to the output filter
         autoPtr<OutputFilter> ptr_;
 

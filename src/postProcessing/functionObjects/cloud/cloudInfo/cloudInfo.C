@@ -39,7 +39,10 @@ defineTypeNameAndDebug(cloudInfo, 0);
 
 void Foam::cloudInfo::writeFileHeader(const label i)
 {
-    file(i) << "# Time" << tab << "nParcels" << tab << "mass" << endl;
+    writeHeader(file(), "Cloud information");
+    writeCommented(file(), "Time");
+    writeTabbed(file(), "nParcels");
+    writeTabbed(file(), "mass");
 }
 
 

@@ -335,7 +335,6 @@ void Foam::fieldAverage::write()
 {
     if (active_)
     {
-        calcAverages();
         writeAverages();
         writeAveragingProperties();
 

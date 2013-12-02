@@ -392,6 +392,7 @@ public:
             //- Get the patch on the region
             const polyPatch& samplePolyPatch() const;
 
+
         // Helpers
 
             //- Get the sample points

@@ -31,8 +31,17 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const Foam::word Foam::functionObjectFile::outputPrefix = "postProcessing";
+Foam::label Foam::functionObjectFile::addChars = 7;
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void Foam::functionObjectFile::initStream(Ostream& os) const
+{
+    os.setf(ios_base::scientific, ios_base::floatfield);
+//    os.precision(IOstream::defaultPrecision());
+    os.width(charWidth());
+}
+
 
 Foam::fileName Foam::functionObjectFile::baseFileDir() const
 {
@@ -96,6 +105,8 @@ void Foam::functionObjectFile::createFiles()
 
                 filePtrs_.set(i, new OFstream(outputDir/(fName + ".dat")));
 
+                initStream(filePtrs_[i]);
+
                 writeFileHeader(i);
 
                 i++;
@@ -144,6 +155,12 @@ void Foam::functionObjectFile::resetName(const word& name)
 
         createFiles();
     }
+}
+
+
+Foam::Omanip<int> Foam::functionObjectFile::valueWidth(const label offset) const
+{
+    return setw(IOstream::defaultPrecision() + addChars + offset);
 }
 
 
@@ -286,6 +303,44 @@ Foam::OFstream& Foam::functionObjectFile::file(const label i)
     }
 
     return filePtrs_[i];
+}
+
+
+Foam::label Foam::functionObjectFile::charWidth() const
+{
+    return IOstream::defaultPrecision() + addChars;
+}
+
+
+void Foam::functionObjectFile::writeCommented
+(
+    Ostream& os,
+    const string& str
+) const
+{
+    os  << setw(1) << "#" << setw(1) << ' '
+        << setw(charWidth() - 2) << str.c_str();
+}
+
+
+void Foam::functionObjectFile::writeTabbed
+(
+    Ostream& os,
+    const string& str
+) const
+{
+    os  << tab << setw(charWidth()) << str.c_str();
+}
+
+
+void Foam::functionObjectFile::writeHeader
+(
+    Ostream& os,
+    const string& str
+) const
+{
+    os  << setw(1) << "#" << setw(1) << ' '
+        << setf(ios_base::left) << setw(charWidth() - 2) << str.c_str() << nl;
 }
 
 

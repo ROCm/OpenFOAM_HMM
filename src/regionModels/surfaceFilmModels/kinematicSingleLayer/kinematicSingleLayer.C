@@ -440,6 +440,7 @@ kinematicSingleLayer::kinematicSingleLayer
     cumulativeContErr_(0.0),
 
     deltaSmall_("deltaSmall", dimLength, SMALL),
+    deltaCoLimit_(solution().lookupOrDefault("deltaCoLimit", 1e-4)),
 
     rho_
     (
@@ -898,15 +899,17 @@ scalar kinematicSingleLayer::CourantNumber() const
 
     if (regionMesh().nInternalFaces() > 0)
     {
-        const scalarField sumPhi(fvc::surfaceSum(mag(phi_)));
+        const scalarField sumPhi
+        (
+            fvc::surfaceSum(mag(phi_))().internalField()
+          / (deltaRho_.internalField() + ROOTVSMALL)
+        );
 
-        const scalarField& V = regionMesh().V();
-
-        forAll(deltaRho_, i)
+        forAll(delta_, i)
         {
-            if (deltaRho_[i] > SMALL)
+            if (delta_[i] > deltaCoLimit_)
             {
-                CoNum = max(CoNum, sumPhi[i]/deltaRho_[i]/V[i]);
+                CoNum = max(CoNum, sumPhi[i]/(delta_[i]*magSf()[i]));
             }
         }
 

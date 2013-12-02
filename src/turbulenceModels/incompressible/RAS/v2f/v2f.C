@@ -366,10 +366,10 @@ void v2f::correct()
 
     const volScalarField G(GName(), nut_*S2);
     const volScalarField T(Ts());
-    const volScalarField L2(type() + ".L2", sqr(Ls()));
+    const volScalarField L2(type() + ":L2", sqr(Ls()));
     const volScalarField alpha
     (
-        "v2f::alpha",
+        "v2f:alpha",
         1.0/T*((C1_ - N)*v2_ - 2.0/3.0*k_*(C1_ - 1.0))
     );
 

@@ -37,7 +37,7 @@ void Foam::fieldCoordinateSystemTransform::transformField
     const Type& field
 ) const
 {
-    const word& fieldName = field.name() + "Transformed";
+    const word& fieldName = field.name() + ":Transformed";
 
     if (!obr_.foundObject<Type>(fieldName))
     {

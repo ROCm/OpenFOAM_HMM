@@ -2,11 +2,30 @@
     word alphaScheme("div(phi,alpha)");
     word alpharScheme("div(phirb,alpha)");
 
-    surfaceScalarField phic(mag(phi/mesh.magSf()));
-    phic = min(interface.cAlpha()*phic, max(phic));
-    surfaceScalarField phir(phic*interface.nHatf());
+    // Standard face-flux compression coefficient
+    surfaceScalarField phic(interface.cAlpha()*mag(phi/mesh.magSf()));
 
-    //***HGW if (pimple.firstIter() && MULESCorr)
+    // Add the optional isotropic compression contribution
+    if (icAlpha > 0)
+    {
+        phic *= (1.0 - icAlpha);
+        phic += (interface.cAlpha()*icAlpha)*fvc::interpolate(mag(U));
+    }
+
+    // Do not compress interface at non-coupled boundary faces
+    // (inlets, outlets etc.)
+    forAll(phic.boundaryField(), patchi)
+    {
+        fvsPatchScalarField& phicp = phic.boundaryField()[patchi];
+
+        if (!phicp.coupled())
+        {
+            phicp == 0;
+        }
+    }
+
+    tmp<surfaceScalarField> tphiAlpha;
+
     if (MULESCorr)
     {
         fvScalarMatrix alpha1Eqn
@@ -32,12 +51,37 @@
             << "  Max(alpha1) = " << max(alpha1).value()
             << endl;
 
-        tphiAlpha = alpha1Eqn.flux();
+        tmp<surfaceScalarField> tphiAlphaUD(alpha1Eqn.flux());
+        tphiAlpha = tmp<surfaceScalarField>
+        (
+            new surfaceScalarField(tphiAlphaUD())
+        );
+
+        if (alphaApplyPrevCorr && tphiAlphaCorr0.valid())
+        {
+            Info<< "Applying the previous iteration compression flux" << endl;
+            #ifdef LTSSOLVE
+            MULES::LTScorrect(alpha1, tphiAlpha(), tphiAlphaCorr0(), 1, 0);
+            #else
+            MULES::correct(alpha1, tphiAlpha(), tphiAlphaCorr0(), 1, 0);
+            #endif
+
+            tphiAlpha() += tphiAlphaCorr0();
+        }
+
+        // Cache the upwind-flux
+        tphiAlphaCorr0 = tphiAlphaUD;
+
+        alpha2 = 1.0 - alpha1;
+
+        interface.correct();
     }
 
     for (int aCorr=0; aCorr<nAlphaCorr; aCorr++)
     {
-        tmp<surfaceScalarField> tphiAlpha0
+        surfaceScalarField phir(phic*interface.nHatf());
+
+        tmp<surfaceScalarField> tphiAlphaUn
         (
             fvc::flux
             (
@@ -47,7 +91,7 @@
             )
           + fvc::flux
             (
-                -fvc::flux(-phir, alpha2, alpharScheme),
+               -fvc::flux(-phir, alpha2, alpharScheme),
                 alpha1,
                 alpharScheme
             )
@@ -55,17 +99,29 @@
 
         if (MULESCorr)
         {
-            tphiAlpha0() -= tphiAlpha();
+            tmp<surfaceScalarField> tphiAlphaCorr(tphiAlphaUn() - tphiAlpha());
+            volScalarField alpha10(alpha1);
+
             #ifdef LTSSOLVE
-            MULES::LTScorrect(alpha1, tphiAlpha0(), 1, 0);
+            MULES::LTScorrect(alpha1, tphiAlphaUn(), tphiAlphaCorr(), 1, 0);
             #else
-            MULES::correct(alpha1, tphiAlpha0(), 1, 0);
+            MULES::correct(alpha1, tphiAlphaUn(), tphiAlphaCorr(), 1, 0);
             #endif
-            tphiAlpha() += tphiAlpha0();
+
+            // Under-relax the correction for more than 3 correctors
+            if (aCorr < 3)
+            {
+                tphiAlpha() += tphiAlphaCorr();
+            }
+            else
+            {
+                alpha1 = 0.5*alpha1 + 0.5*alpha10;
+                tphiAlpha() += 0.5*tphiAlphaCorr();
+            }
         }
         else
         {
-            tphiAlpha = tphiAlpha0;
+            tphiAlpha = tphiAlphaUn;
 
             #ifdef LTSSOLVE
             MULES::explicitLTSSolve(alpha1, phi, tphiAlpha(), 1, 0);
@@ -75,9 +131,16 @@
         }
 
         alpha2 = 1.0 - alpha1;
+
+        interface.correct();
     }
 
     rhoPhi = tphiAlpha()*(rho1 - rho2) + phi*rho2;
+
+    if (alphaApplyPrevCorr && MULESCorr)
+    {
+        tphiAlphaCorr0 = tphiAlpha() - tphiAlphaCorr0;
+    }
 
     Info<< "Phase-1 volume fraction = "
         << alpha1.weightedAverage(mesh.Vsc()).value()

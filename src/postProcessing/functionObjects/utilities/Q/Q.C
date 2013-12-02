@@ -115,24 +115,6 @@ void Foam::Q::read(const dictionary& dict)
 
 void Foam::Q::execute()
 {
-    // Do nothing - only valid on write
-}
-
-
-void Foam::Q::end()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::Q::timeSet()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::Q::write()
-{
     if (active_)
     {
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
@@ -149,6 +131,28 @@ void Foam::Q::write()
             );
 
         Q = 0.5*(sqr(tr(gradU)) - tr(((gradU) & (gradU))));
+    }
+}
+
+
+void Foam::Q::end()
+{
+    // Do nothing
+}
+
+
+void Foam::Q::timeSet()
+{
+    // Do nothing
+}
+
+
+void Foam::Q::write()
+{
+    if (active_)
+    {
+        const volScalarField& Q =
+            obr_.lookupObject<volScalarField>(type());
 
         Info<< type() << " " << name_ << " output:" << nl
             << "    writing field " << Q.name() << nl

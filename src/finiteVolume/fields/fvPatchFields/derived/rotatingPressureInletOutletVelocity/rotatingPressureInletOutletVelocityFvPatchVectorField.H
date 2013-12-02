@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,7 @@ Description
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
         tangentialVelocity | tangential velocity field | no  |
-        omega        | angular velocty of the frame [rad/s] | yes    | 
+        omega        | angular velocty of the frame [rad/s] | yes    |
     \endtable
 
     Example of the boundary condition specification:
@@ -49,7 +49,7 @@ Description
         type            rotatingPressureInletOutletVelocity;
         phi             phi;
         tangentialVelocity uniform (0 0 0);
-        omega           100;        
+        omega           100;
     }
     \endverbatim
 
@@ -176,6 +176,9 @@ public:
 
 
     // Member functions
+
+        //- Update the coefficients associated with the patch field
+        virtual void updateCoeffs();
 
         //- Write
         virtual void write(Ostream&) const;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,7 +41,6 @@ Description
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
         rho          | density field name      | no          | rho
-        U            | velocity field name     | no          | U
     \endtable
 
     Example of the boundary condition specification:
@@ -94,9 +93,6 @@ class pressureInletOutletParSlipVelocityFvPatchVectorField
 
         //- Density field name
         word rhoName_;
-
-        //- Velocity field name
-        word UName_;
 
 
 public:

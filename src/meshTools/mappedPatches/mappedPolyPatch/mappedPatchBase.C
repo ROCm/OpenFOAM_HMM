@@ -203,7 +203,7 @@ void Foam::mappedPatchBase::findSamples
     {
         case NEARESTCELL:
         {
-            if (samplePatch().size() && samplePatch() != "none")
+            if (samplePatch_.size() && samplePatch_ != "none")
             {
                 FatalErrorIn
                 (
@@ -495,7 +495,6 @@ void Foam::mappedPatchBase::findSamples
 void Foam::mappedPatchBase::calcMapping() const
 {
     static bool hasWarned = false;
-
     if (mapPtr_.valid())
     {
         FatalErrorIn("mappedPatchBase::calcMapping() const")
@@ -509,10 +508,8 @@ void Foam::mappedPatchBase::calcMapping() const
     // Get offsetted points
     const pointField offsettedPoints(samplePoints(patchPoints()));
 
-
-    // Do a sanity check
-    // Am I sampling my own patch? This only makes sense for a non-zero
-    // offset.
+    // Do a sanity check - am I sampling my own patch?
+    // This only makes sense for a non-zero offset.
     bool sampleMyself =
     (
         mode_ == NEARESTPATCHFACE
@@ -550,7 +547,6 @@ void Foam::mappedPatchBase::calcMapping() const
             << "offsetMode_:" << offsetModeNames_[offsetMode_] << endl;
     }
 
-
     // Get global list of all samples and the processor and face they come from.
     pointField samples;
     labelList patchFaceProcs;
@@ -564,7 +560,6 @@ void Foam::mappedPatchBase::calcMapping() const
         patchFaces,
         patchFc
     );
-
 
     // Find processor and cell/face samples are in and actual location.
     labelList sampleProcs;
@@ -641,7 +636,6 @@ void Foam::mappedPatchBase::calcMapping() const
         }
     }
 
-
     // Now we have all the data we need:
     // - where sample originates from (so destination when mapping):
     //   patchFaces, patchFaceProcs.
@@ -687,7 +681,6 @@ void Foam::mappedPatchBase::calcMapping() const
             str << "l " << vertI-1 << ' ' << vertI << nl;
         }
     }
-
 
     // Determine schedule.
     mapPtr_.reset(new mapDistribute(sampleProcs, patchFaceProcs));
@@ -806,38 +799,34 @@ void Foam::mappedPatchBase::calcAMI() const
     }
 
     AMIPtr_.clear();
-/*
-    const polyPatch& nbr = samplePolyPatch();
-
-//    pointField nbrPoints(offsettedPoints());
-    pointField nbrPoints(nbr.localPoints());
 
     if (debug)
     {
+        const polyPatch& nbr = samplePolyPatch();
+
+        pointField nbrPoints(nbr.localPoints());
+
         OFstream os(patch_.name() + "_neighbourPatch-org.obj");
         meshTools::writeOBJ(os, samplePolyPatch().localFaces(), nbrPoints);
-    }
 
-    // transform neighbour patch to local system
-    primitivePatch nbrPatch0
-    (
-        SubList<face>
+        // transform neighbour patch to local system
+        primitivePatch nbrPatch0
         (
-            nbr.localFaces(),
-            nbr.size()
-        ),
-        nbrPoints
-    );
+            SubList<face>
+            (
+                nbr.localFaces(),
+                nbr.size()
+            ),
+            nbrPoints
+        );
 
-    if (debug)
-    {
         OFstream osN(patch_.name() + "_neighbourPatch-trans.obj");
         meshTools::writeOBJ(osN, nbrPatch0, nbrPoints);
 
         OFstream osO(patch_.name() + "_ownerPatch.obj");
         meshTools::writeOBJ(osO, patch_.localFaces(), patch_.localPoints());
     }
-*/
+
     // Construct/apply AMI interpolation to determine addressing and weights
     AMIPtr_.reset
     (

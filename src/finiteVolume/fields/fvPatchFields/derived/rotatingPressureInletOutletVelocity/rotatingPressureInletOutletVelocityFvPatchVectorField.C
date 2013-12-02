@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,17 +33,17 @@ License
 void Foam::rotatingPressureInletOutletVelocityFvPatchVectorField::
 calcTangentialVelocity()
 {
+    applyTangentialVelocity_ = true;
+
     const scalar t = this->db().time().timeOutputValue();
     vector om = omega_->value(t);
 
     vector axisHat = om/mag(om);
-    const vectorField tangentialVelocity
-    (
-        (-om) ^ (patch().Cf() - axisHat*(axisHat & patch().Cf()))
-    );
+    tangentialVelocity_ =
+        (-om) ^ (patch().Cf() - axisHat*(axisHat & patch().Cf()));
 
     const vectorField n(patch().nf());
-    refValue() = tangentialVelocity - n*(n & tangentialVelocity);
+    tangentialVelocity_ -= n*(n & tangentialVelocity_);
 }
 
 
@@ -72,9 +72,7 @@ rotatingPressureInletOutletVelocityFvPatchVectorField
 :
     pressureInletOutletVelocityFvPatchVectorField(ptf, p, iF, mapper),
     omega_(ptf.omega_().clone().ptr())
-{
-    calcTangentialVelocity();
-}
+{}
 
 
 Foam::rotatingPressureInletOutletVelocityFvPatchVectorField::
@@ -87,9 +85,7 @@ rotatingPressureInletOutletVelocityFvPatchVectorField
 :
     pressureInletOutletVelocityFvPatchVectorField(p, iF, dict),
     omega_(DataEntry<vector>::New("omega", dict))
-{
-    calcTangentialVelocity();
-}
+{}
 
 
 Foam::rotatingPressureInletOutletVelocityFvPatchVectorField::
@@ -100,9 +96,7 @@ rotatingPressureInletOutletVelocityFvPatchVectorField
 :
     pressureInletOutletVelocityFvPatchVectorField(rppvf),
     omega_(rppvf.omega_().clone().ptr())
-{
-    calcTangentialVelocity();
-}
+{}
 
 
 Foam::rotatingPressureInletOutletVelocityFvPatchVectorField::
@@ -114,12 +108,23 @@ rotatingPressureInletOutletVelocityFvPatchVectorField
 :
     pressureInletOutletVelocityFvPatchVectorField(rppvf, iF),
     omega_(rppvf.omega_().clone().ptr())
-{
-    calcTangentialVelocity();
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::rotatingPressureInletOutletVelocityFvPatchVectorField::updateCoeffs()
+{
+    if (updated())
+    {
+        return;
+    }
+
+    calcTangentialVelocity();
+
+    pressureInletOutletVelocityFvPatchVectorField::updateCoeffs();
+}
+
 
 void Foam::rotatingPressureInletOutletVelocityFvPatchVectorField::write
 (

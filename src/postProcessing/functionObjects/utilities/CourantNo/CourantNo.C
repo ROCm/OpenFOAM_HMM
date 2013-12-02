@@ -155,24 +155,6 @@ void Foam::CourantNo::read(const dictionary& dict)
 
 void Foam::CourantNo::execute()
 {
-    // Do nothing - only valid on write
-}
-
-
-void Foam::CourantNo::end()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::CourantNo::timeSet()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::CourantNo::write()
-{
     if (active_)
     {
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
@@ -197,6 +179,28 @@ void Foam::CourantNo::write()
         iField = 0.5*sumPhi/mesh.V().field()*mesh.time().deltaTValue();
 
         CourantNo.correctBoundaryConditions();
+    }
+}
+
+
+void Foam::CourantNo::end()
+{
+    // Do nothing
+}
+
+
+void Foam::CourantNo::timeSet()
+{
+    // Do nothing
+}
+
+
+void Foam::CourantNo::write()
+{
+    if (active_)
+    {
+        const volScalarField& CourantNo =
+            obr_.lookupObject<volScalarField>(type());
 
         Info<< type() << " " << name_ << " output:" << nl
             << "    writing field " << CourantNo.name() << nl

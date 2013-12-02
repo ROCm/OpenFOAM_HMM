@@ -47,7 +47,7 @@ Description
     - alpha_liquidCore : alpha with outside liquid core set to 0
     - alpha_background : alpha with outside background set to 0.
 
-    Histogram:
+    %Histogram:
     - determine histogram of diameter (given minDiameter, maxDiameter, nBins)
     - write graph of number of droplets per bin
     - write graph of sum, average and deviation of droplet volume per bin

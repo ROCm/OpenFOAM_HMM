@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,6 +43,7 @@ SourceFiles
 #include "OFstream.H"
 #include "PtrList.H"
 #include "HashSet.H"
+#include "IOmanip.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,6 +78,9 @@ protected:
 
     // Protected Member Functions
 
+        //- Initialise the output stream for writing
+        virtual void initStream(Ostream& os) const;
+
         //- Return the base directory for output
         virtual fileName baseFileDir() const;
 
@@ -98,6 +102,9 @@ protected:
         //- Reset the list of names to a single name entry
         virtual void resetName(const word& name);
 
+        //- Return the value width when writing to stream with optional offset
+        virtual Omanip<int> valueWidth(const label offset = 0) const;
+
         //- Disallow default bitwise copy construct
         functionObjectFile(const functionObjectFile&);
 
@@ -109,6 +116,9 @@ public:
 
     //- Folder prefix
     static const word outputPrefix;
+
+    //- Additional characters for writing
+    static label addChars;
 
     // Constructors
 
@@ -149,12 +159,51 @@ public:
 
         //- Return file 'i'
         OFstream& file(const label i);
+
+        //- Write a commented string to stream
+        void writeCommented
+        (
+            Ostream& os,
+            const string& str
+        ) const;
+
+        //- Write a tabbed string to stream
+        void writeTabbed
+        (
+            Ostream& os,
+            const string& str
+        ) const;
+
+        //- Write a commented header to stream
+        void writeHeader
+        (
+            Ostream& os,
+            const string& str
+        ) const;
+
+        //- Write a (commented) header property and value pair
+        template<class Type>
+        void writeHeaderValue
+        (
+            Ostream& os,
+            const string& property,
+            const Type& value
+        ) const;
+
+        //- Return width of character stream output
+        label charWidth() const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "functionObjectFileTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

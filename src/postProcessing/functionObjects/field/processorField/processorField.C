@@ -53,6 +53,27 @@ Foam::processorField::processorField
     if (isA<fvMesh>(obr_))
     {
         read(dict);
+
+        const fvMesh& mesh = refCast<const fvMesh>(obr_);
+
+        volScalarField* procFieldPtr
+        (
+            new volScalarField
+            (
+                IOobject
+                (
+                    "processorID",
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensionedScalar("0", dimless, 0.0)
+            )
+        );
+
+        mesh.objectRegistry::store(procFieldPtr);
     }
     else
     {
@@ -88,7 +109,14 @@ void Foam::processorField::read(const dictionary& dict)
 
 void Foam::processorField::execute()
 {
-    // Do nothing
+    if (active_)
+    {
+        const volScalarField& procField =
+            obr_.lookupObject<volScalarField>("processorID");
+
+        const_cast<volScalarField&>(procField) ==
+            dimensionedScalar("procI", dimless, Pstream::myProcNo());
+    }
 }
 
 
@@ -108,20 +136,8 @@ void Foam::processorField::write()
 {
     if (active_)
     {
-        const fvMesh& mesh = refCast<const fvMesh>(obr_);
-        volScalarField procField
-        (
-            IOobject
-            (
-                "processorID",
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh,
-            dimensionedScalar("procI", dimless, Pstream::myProcNo())
-        );
+        const volScalarField& procField =
+            obr_.lookupObject<volScalarField>("processorID");
 
         procField.write();
     }

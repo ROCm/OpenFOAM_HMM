@@ -43,9 +43,11 @@ defineTypeNameAndDebug(wallShearStress, 0);
 void Foam::wallShearStress::writeFileHeader(const label i)
 {
     // Add headers to output data
-    file() << "# Wall shear stress" << nl
-        << "# time " << token::TAB << "patch" << token::TAB
-        << "min" << token::TAB << "max" << endl;
+    writeHeader(file(), "Wall shear stress");
+    writeCommented(file(), "Time");
+    writeTabbed(file(), "patch");
+    writeTabbed(file(), "min");
+    writeTabbed(file(), "max");
 }
 
 
@@ -73,9 +75,11 @@ void Foam::wallShearStress::calcShearStress
 
         if (Pstream::master())
         {
-            file() << mesh.time().timeName() << token::TAB
-                << pp.name() << token::TAB << minSsp
-                << token::TAB << maxSsp << endl;
+            file() << mesh.time().value()
+                << token::TAB << pp.name()
+                << token::TAB << minSsp
+                << token::TAB << maxSsp
+                << endl;
         }
 
         if (log_)
@@ -221,24 +225,6 @@ void Foam::wallShearStress::read(const dictionary& dict)
 
 void Foam::wallShearStress::execute()
 {
-    // Do nothing - only valid on write
-}
-
-
-void Foam::wallShearStress::end()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::wallShearStress::timeSet()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::wallShearStress::write()
-{
     typedef compressible::turbulenceModel cmpModel;
     typedef incompressible::turbulenceModel icoModel;
 
@@ -282,8 +268,31 @@ void Foam::wallShearStress::write()
                 << "database" << exit(FatalError);
         }
 
-
         calcShearStress(mesh, Reff(), wallShearStress);
+    }
+}
+
+
+void Foam::wallShearStress::end()
+{
+    // Do nothing
+}
+
+
+void Foam::wallShearStress::timeSet()
+{
+    // Do nothing
+}
+
+
+void Foam::wallShearStress::write()
+{
+    if (active_)
+    {
+        functionObjectFile::write();
+
+        const volVectorField& wallShearStress =
+            obr_.lookupObject<volVectorField>(type());
 
         if (log_)
         {
