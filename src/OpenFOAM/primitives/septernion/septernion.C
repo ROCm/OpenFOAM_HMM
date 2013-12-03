@@ -59,6 +59,17 @@ Foam::word Foam::name(const septernion& s)
 }
 
 
+Foam::septernion Foam::slerp
+(
+    const septernion& qa,
+    const septernion& qb,
+    const scalar t
+)
+{
+    return septernion((1.0-t)*qa.t()+t*qb.t(), slerp(qa.r(), qb.r(), t));
+}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Istream& Foam::operator>>(Istream& is, septernion& s)
