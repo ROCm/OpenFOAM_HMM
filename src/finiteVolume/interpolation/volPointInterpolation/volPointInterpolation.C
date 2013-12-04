@@ -390,7 +390,7 @@ void volPointInterpolation::interpolateDisplacement
     interpolateBoundaryField(vf, pf);
 
     // Apply displacement constraints
-    const pointConstraints& pcs = pointConstraints::New(pf.mesh());
+    const pointConstraints& pcs = pointConstraints::New(vf.mesh());
 
     pcs.constrainDisplacement(pf, false);
 }

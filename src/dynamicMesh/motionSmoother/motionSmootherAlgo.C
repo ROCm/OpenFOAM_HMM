@@ -169,7 +169,7 @@ void Foam::motionSmootherAlgo::minSmooth
     }
 
     // Single and multi-patch constraints
-    pointConstraints::New(newFld.mesh()).constrain(newFld, false);
+    pointConstraints::New(mesh()).constrain(newFld, false);
 }
 
 
@@ -202,7 +202,7 @@ void Foam::motionSmootherAlgo::minSmooth
     }
 
    // Single and multi-patch constraints
-    pointConstraints::New(newFld.mesh()).constrain(newFld, false);
+    pointConstraints::New(mesh()).constrain(newFld, false);
 
 }
 
@@ -224,7 +224,7 @@ void Foam::motionSmootherAlgo::scaleField
     }
 
     // Single and multi-patch constraints
-    pointConstraints::New(fld.mesh()).constrain(fld, false);
+    pointConstraints::New(mesh()).constrain(fld, false);
 }
 
 
@@ -266,7 +266,7 @@ void Foam::motionSmootherAlgo::subtractField
     }
 
     // Single and multi-patch constraints
-    pointConstraints::New(fld.mesh()).constrain(fld);
+    pointConstraints::New(mesh()).constrain(fld);
 }
 
 
@@ -476,7 +476,7 @@ void Foam::motionSmootherAlgo::setDisplacementPatchFields
     }
 
     // Multi-patch constraints
-    pointConstraints::New(displacement.mesh()).constrainCorners(displacement);
+    pointConstraints::New(displacement.mesh()()).constrainCorners(displacement);
 
     // Adapt the fixedValue bc's (i.e. copy internal point data to
     // boundaryField for all affected patches) to take the changes caused
@@ -622,7 +622,7 @@ void Foam::motionSmootherAlgo::correctBoundaryConditions
     }
 
     // Multi-patch constraints
-    pointConstraints::New(displacement.mesh()).constrainCorners(displacement);
+    pointConstraints::New(displacement.mesh()()).constrainCorners(displacement);
 
     // Correct for problems introduced by corner constraints
     syncTools::syncPointList

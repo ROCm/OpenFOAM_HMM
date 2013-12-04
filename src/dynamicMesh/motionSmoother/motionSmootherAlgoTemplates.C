@@ -229,7 +229,7 @@ Foam::motionSmootherAlgo::avg
     }
 
     // Single and multi-patch constraints
-    pointConstraints::New(res.mesh()).constrain(res, false);
+    pointConstraints::New(mesh).constrain(res, false);
 
     return tres;
 }
@@ -256,7 +256,7 @@ void Foam::motionSmootherAlgo::smooth
     }
 
     // Single and multi-patch constraints
-    pointConstraints::New(newFld.mesh()).constrain(newFld, false);
+    pointConstraints::New(mesh_).constrain(newFld, false);
 }
 
 
