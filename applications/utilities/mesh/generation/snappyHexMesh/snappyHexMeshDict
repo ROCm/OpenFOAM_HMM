@@ -401,7 +401,7 @@ addLayersControls
         // Angle used to pick up medial axis points
         // Note: changed(corrected) w.r.t 17x! 90 degrees corresponds to 130
         // in 17x.
-        minMedianAxisAngle 90;
+        minMedialAxisAngle 90;
 
         // Reduce layer growth where ratio thickness to medial
         // distance is large
@@ -413,6 +413,9 @@ addLayersControls
         // Optional: smooth displacement after medial axis determination.
         // default is 0.
         nSmoothDisplacement 90;
+
+        // Optional: limit the number of steps walking away from the surface
+        nMedialAxisIter 10;
 
 
     // Mesh shrinking
