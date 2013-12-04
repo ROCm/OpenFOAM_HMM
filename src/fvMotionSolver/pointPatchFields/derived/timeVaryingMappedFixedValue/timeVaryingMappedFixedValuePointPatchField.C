@@ -48,8 +48,8 @@ timeVaryingMappedFixedValuePointPatchField
     startAverage_(pTraits<Type>::zero),
     endSampleTime_(-1),
     endSampledValues_(0),
-    endAverage_(pTraits<Type>::zero)
-
+    endAverage_(pTraits<Type>::zero),
+    offset_()
 {}
 
 
@@ -75,7 +75,13 @@ timeVaryingMappedFixedValuePointPatchField
     startAverage_(pTraits<Type>::zero),
     endSampleTime_(-1),
     endSampledValues_(0),
-    endAverage_(pTraits<Type>::zero)
+    endAverage_(pTraits<Type>::zero),
+    offset_
+    (
+        ptf.offset_.valid()
+      ? ptf.offset_().clone().ptr()
+      : NULL
+    )
 {}
 
 
@@ -100,8 +106,14 @@ timeVaryingMappedFixedValuePointPatchField
     startAverage_(pTraits<Type>::zero),
     endSampleTime_(-1),
     endSampledValues_(0),
-    endAverage_(pTraits<Type>::zero)
+    endAverage_(pTraits<Type>::zero),
+    offset_()
 {
+    if (dict.found("offset"))
+    {
+        offset_ = DataEntry<Type>::New("offset", dict);
+    }
+
     dict.readIfPresent("fieldTableName", fieldTableName_);
 
     if (dict.found("value"))
@@ -141,7 +153,13 @@ timeVaryingMappedFixedValuePointPatchField
     startAverage_(ptf.startAverage_),
     endSampleTime_(ptf.endSampleTime_),
     endSampledValues_(ptf.endSampledValues_),
-    endAverage_(ptf.endAverage_)
+    endAverage_(ptf.endAverage_),
+    offset_
+    (
+        ptf.offset_.valid()
+      ? ptf.offset_().clone().ptr()
+      : NULL
+    )
 {}
 
 
@@ -165,7 +183,13 @@ timeVaryingMappedFixedValuePointPatchField
     startAverage_(ptf.startAverage_),
     endSampleTime_(ptf.endSampleTime_),
     endSampledValues_(ptf.endSampledValues_),
-    endAverage_(ptf.endAverage_)
+    endAverage_(ptf.endAverage_),
+    offset_
+    (
+        ptf.offset_.valid()
+      ? ptf.offset_().clone().ptr()
+      : NULL
+    )
 {}
 
 
@@ -532,10 +556,18 @@ void Foam::timeVaryingMappedFixedValuePointPatchField<Type>::updateCoeffs()
         }
     }
 
+    // apply offset to mapped values
+    if (offset_.valid())
+    {
+        const scalar t = this->db().time().timeOutputValue();
+        this->operator==(*this + offset_->value(t));
+    }
+
     if (debug)
     {
         Pout<< "updateCoeffs : set fixedValue to min:" << gMin(*this)
-            << " max:" << gMax(*this) << endl;
+            << " max:" << gMax(*this)
+            << " avg:" << gAverage(*this) << endl;
     }
 
     fixedValuePointPatchField<Type>::updateCoeffs();
@@ -550,12 +582,20 @@ void Foam::timeVaryingMappedFixedValuePointPatchField<Type>::write
 {
     fixedValuePointPatchField<Type>::write(os);
     os.writeKeyword("setAverage") << setAverage_ << token::END_STATEMENT << nl;
-    os.writeKeyword("perturb") << perturb_ << token::END_STATEMENT << nl;
+    if (perturb_ != 1e-5)
+    {
+        os.writeKeyword("perturb") << perturb_ << token::END_STATEMENT << nl;
+    }
 
     if (fieldTableName_ != this->dimensionedInternalField().name())
     {
         os.writeKeyword("fieldTableName") << fieldTableName_
             << token::END_STATEMENT << nl;
+    }
+
+    if (offset_.valid())
+    {
+        offset_->writeData(os);
     }
 }
 
