@@ -154,10 +154,6 @@ Foam::layerParameters::layerParameters
     (
         readScalar(dict.lookup("maxThicknessToMedialRatio"))
     ),
-    minMedianAxisAngleCos_
-    (
-        Foam::cos(degToRad(readScalar(dict.lookup("minMedianAxisAngle"))))
-    ),
     nBufferCellsNoExtrude_
     (
         readLabel(dict.lookup("nBufferCellsNoExtrude"))
@@ -175,6 +171,18 @@ Foam::layerParameters::layerParameters
         )
     )
 {
+    word angleKey = "minMedialAxisAngle";
+    if (!dict.found(angleKey))
+    {
+        // Backwards compatibility
+        angleKey = "minMedianAxisAngle";
+    }
+    minMedialAxisAngleCos_ = Foam::cos
+    (
+        degToRad(readScalar(dict.lookup(angleKey)))
+    );
+
+
     // Detect layer specification mode
 
     label nSpec = 0;

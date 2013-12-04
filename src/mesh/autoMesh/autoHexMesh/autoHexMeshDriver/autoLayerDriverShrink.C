@@ -864,7 +864,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
     const motionSmoother& meshMover,
     const label nSmoothNormals,
     const label nSmoothSurfaceNormals,
-    const scalar minMedianAxisAngleCos,
+    const scalar minMedialAxisAngleCos,
     const scalar featureAngle,
 
     pointVectorField& dispVec,
@@ -1049,7 +1049,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
             {
                 // Unvisited point. See above about nUnvisit warning
             }
-            else if (isMaxEdge(pointWallDist, edgeI, minMedianAxisAngleCos))
+            else if (isMaxEdge(pointWallDist, edgeI, minMedialAxisAngleCos))
             {
                 // Both end points of edge have very different nearest wall
                 // point. Mark both points as medial axis points.
