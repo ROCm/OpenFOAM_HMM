@@ -85,6 +85,10 @@ public:
         explicit pointMesh(const polyMesh& pMesh);
 
 
+    //- Destructor
+    ~pointMesh();
+
+
     // Member Functions
 
         //- Return number of points

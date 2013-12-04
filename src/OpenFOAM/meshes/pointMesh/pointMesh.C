@@ -88,6 +88,20 @@ Foam::pointMesh::pointMesh(const polyMesh& pMesh)
 }
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::pointMesh::~pointMesh()
+{
+    if (debug)
+    {
+        Pout<< "~pointMesh::pointMesh()"
+            << endl;
+    }
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 bool Foam::pointMesh::movePoints()
 {
     if (debug)
