@@ -9,15 +9,10 @@
 T
 {
         type                compressible::thermalBaffle;
-        Tnbr                T;
         kappa               fluidThermo;
         kappaName           none;
-        QrNbr               none;
-        Qr                  none;
         value               uniform 300;
 
-        // Thermo baffle model
-        //thermalBaffleModel   thermalBaffle;
         regionName           ${baffleRegionName};
         active               yes;
 
@@ -26,33 +21,6 @@ T
         // New fvMesh (region) information
         # include "extrudeModel"
 
-
-        // New mesh polyPatch information
-        bottomCoeffs
-        {
-            name        "bottom";
-            type        mappedWall;
-            sampleMode  nearestPatchFace;
-            samplePatch ${masterPatchName};
-            offsetMode  uniform;
-            offset      (0 0 0);
-        }
-
-        topCoeffs
-        {
-            name        "top";
-            type        mappedWall;
-            sampleMode  nearestPatchFace;
-            samplePatch ${slavePatchName};
-            offsetMode  uniform;
-            offset      (0 0 0);
-        }
-
-        sideCoeffs
-        {
-            name        "side";
-            type        patch;
-        }
 }
 
 // ************************************************************************* //

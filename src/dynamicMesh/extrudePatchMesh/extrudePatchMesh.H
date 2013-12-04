@@ -105,6 +105,15 @@ private:
         //- Const reference to the patch from which this mesh is extruded
         const polyPatch& extrudedPatch_;
 
+        //- Model dictionary
+        dictionary dict_;
+
+
+    // Private member functions
+
+        //- Extrude mesh using polyPatches
+        void extrudeMesh(const List<polyPatch*>& regionPatches);
+
 
 public:
 
@@ -121,6 +130,17 @@ public:
             const fvPatch&,
             const dictionary&,
             const word
+        );
+
+        //- Construct from mesh, patch, dictionary and new mesh
+        //  polyPatch information
+        extrudePatchMesh
+        (
+            const fvMesh&,
+            const fvPatch&,
+            const dictionary&,
+            const word,
+            const List<polyPatch*>& polyPatches
         );
 
 

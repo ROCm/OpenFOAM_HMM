@@ -182,6 +182,14 @@ class thermalBaffleFvPatchScalarField
 {
     // Private data
 
+        //- Enumeration of patch IDs
+        enum patchID
+        {
+            bottomPatchID,
+            topPatchID,
+            sidePatchID
+        };
+
         //- Is the baffle owner
         bool owner_;
 

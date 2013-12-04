@@ -48,6 +48,39 @@ extrudePatchMesh::extrudePatchMesh
     const fvMesh& mesh,
     const fvPatch& patch,
     const dictionary& dict,
+    const word regionName,
+    const List<polyPatch*>& regionPatches
+)
+:
+    fvMesh
+    (
+        IOobject
+        (
+            regionName,
+            mesh.facesInstance(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE,
+            true
+        ),
+        xferCopy(pointField()),
+        xferCopy(faceList()),
+        xferCopy(labelList()),
+        xferCopy(labelList()),
+        false
+    ),
+    extrudedPatch_(patch.patch()),
+    dict_(dict)
+{
+    extrudeMesh(regionPatches);
+}
+
+
+extrudePatchMesh::extrudePatchMesh
+(
+    const fvMesh& mesh,
+    const fvPatch& patch,
+    const dictionary& dict,
     const word regionName
 )
 :
@@ -68,11 +101,59 @@ extrudePatchMesh::extrudePatchMesh
         xferCopy(labelList()),
         false
     ),
-    extrudedPatch_(patch.patch())
+    extrudedPatch_(patch.patch()),
+    dict_(dict)
+{
+
+    List<polyPatch*> regionPatches(3);
+    List<word> patchNames(regionPatches.size());
+    List<word> patchTypes(regionPatches.size());
+    PtrList<dictionary> dicts(regionPatches.size());
+
+    forAll (dicts, patchI)
+    {
+        if (!dicts.set(patchI))
+        {
+            dicts.set(patchI, new dictionary());
+        }
+    }
+
+    dicts[bottomPatchID] = dict_.subDict("bottomCoeffs");
+    dicts[sidePatchID] = dict_.subDict("sideCoeffs");
+    dicts[topPatchID] = dict_.subDict("topCoeffs");
+
+    forAll (dicts, patchI)
+    {
+        dicts[patchI].lookup("name") >> patchNames[patchI];
+        dicts[patchI].lookup("type") >> patchTypes[patchI];
+    }
+
+    forAll (regionPatches, patchI)
+    {
+        dictionary&  patchDict = dicts[patchI];
+        patchDict.set("nFaces", 0);
+        patchDict.set("startFace", 0);
+
+        regionPatches[patchI] = polyPatch::New
+            (
+                patchNames[patchI],
+                patchDict,
+                patchI,
+                mesh.boundaryMesh()
+            ).ptr();
+
+    }
+
+    extrudeMesh(regionPatches);
+
+}
+
+
+void extrudePatchMesh::extrudeMesh(const List<polyPatch*>& regionPatches)
 {
     if (this->boundaryMesh().size() == 0)
     {
-        bool columnCells = readBool(dict.lookup("columnCells"));
+        bool columnCells = readBool(dict_.lookup("columnCells"));
 
         PackedBoolList nonManifoldEdge(extrudedPatch_.nEdges());
         for (label edgeI = 0; edgeI < extrudedPatch_.nInternalEdges(); edgeI++)
@@ -83,7 +164,7 @@ extrudePatchMesh::extrudePatchMesh
             }
         }
 
-        autoPtr<extrudeModel> model_(extrudeModel::New(dict));
+        autoPtr<extrudeModel> model_(extrudeModel::New(dict_));
 
         faceList pointGlobalRegions;
         faceList pointLocalRegions;
@@ -180,7 +261,7 @@ extrudePatchMesh::extrudePatchMesh
             pointLocalRegions,
             localRegionPoints
         );
-
+/*
         List<polyPatch*> regionPatches(3);
         List<word> patchNames(regionPatches.size());
         List<word> patchTypes(regionPatches.size());
@@ -194,9 +275,9 @@ extrudePatchMesh::extrudePatchMesh
             }
         }
 
-        dicts[bottomPatchID] = dict.subDict("bottomCoeffs");
-        dicts[sidePatchID] = dict.subDict("sideCoeffs");
-        dicts[topPatchID] = dict.subDict("topCoeffs");
+        dicts[bottomPatchID] = dict_.subDict("bottomCoeffs");
+        dicts[sidePatchID] = dict_.subDict("sideCoeffs");
+        dicts[topPatchID] = dict_.subDict("topCoeffs");
 
         forAll (dicts, patchI)
         {
@@ -219,7 +300,7 @@ extrudePatchMesh::extrudePatchMesh
                 ).ptr();
 
         }
-
+*/
         this->clearOut();
         this->removeFvBoundary();
         this->addFvPatches(regionPatches, true);
