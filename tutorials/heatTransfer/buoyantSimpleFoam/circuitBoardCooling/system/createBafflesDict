@@ -48,47 +48,16 @@ baffles
         surface     triSurfaceMesh;
         name        baffle3D.stl;
 
-        patches
+        patchPairs
         {
-            master
+            type            mappedWall;
+            sampleMode      nearestPatchFace;
+            //Group master and slave in different groups. (default off)
+            groupBase       on;
+            patchFields
             {
-                //- Master side patch
-                name            ${masterPatchName};
-
-                type            mappedWall;
-                inGroups        (baffleWallGroup);
-
-                sampleMode      nearestPatchFace;
-                sampleRegion    ${baffleRegionName};
-                samplePatch     bottom;
-                offsetMode      uniform;
-                offset          (0 0 0);
-
-                patchFields
-                {
-                    #include "./0/include/wallBafflePatches"
-                    #include "./0/include/3DBaffle/3DTemperatureMasterBafflePatches"
-                }
-            }
-            slave
-            {
-                //- Slave side patch
-                name            ${slavePatchName};
-
-                type            mappedWall;
-                inGroups        (baffleWallGroup);
-
-                sampleMode      nearestPatchFace;
-                sampleRegion    ${baffleRegionName};
-                samplePatch     top;
-                offsetMode      uniform;
-                offset          (0 0 0);
-
-                patchFields
-                {
-                    #include "./0/include/wallBafflePatches"
-                    #include "./0/include/3DBaffle/3DTemperatureSlaveBafflePatches"
-                }
+                #include "./0/include/wallBafflePatches"
+                #include "./0/include/3DBaffle/3DTemperatureMasterBafflePatches"
             }
         }
     }

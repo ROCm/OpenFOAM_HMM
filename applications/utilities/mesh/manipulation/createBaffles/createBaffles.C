@@ -619,17 +619,39 @@ int main(int argc, char *argv[])
                 const word masterName = groupName + "_master";
                 const word slaveName = groupName + "_slave";
 
-                dictionary patchDict = patchSource;
-                patchDict.set("nFaces", 0);
-                patchDict.set("startFace", 0);
-                patchDict.set("coupleGroup", groupName);
+                word groupNameMaster = groupName;
+                word groupNameSlave = groupName;
 
-                addPatch(mesh, masterName, groupName, patchDict);
-                addPatch(mesh, slaveName, groupName, patchDict);
+
+                dictionary patchDictMaster(patchSource);
+                patchDictMaster.set("nFaces", 0);
+                patchDictMaster.set("startFace", 0);
+                patchDictMaster.set("coupleGroup", groupName);
+
+                dictionary patchDictSlave(patchDictMaster);
+
+                // Note: This is added for the particular case where we want
+                // master and slave in different groupNames
+                // (ie 3D thermal baffles)
+                bool groupBase = false;
+                if (patchSource.found("groupBase"))
+                {
+                    groupBase = readBool(patchSource.lookup("groupBase"));
+
+                    if (groupBase)
+                    {
+                        groupNameMaster = groupName + "Group_master";
+                        groupNameSlave = groupName + "Group_slave";
+                        patchDictMaster.set("coupleGroup", groupNameMaster);
+                        patchDictSlave.set("coupleGroup", groupNameSlave);
+                    }
+                }
+
+                addPatch(mesh, masterName, groupNameMaster, patchDictMaster);
+                addPatch(mesh, slaveName, groupNameSlave, patchDictSlave);
             }
         }
     }
-
 
 
     // Make sure patches and zoneFaces are synchronised across couples
@@ -793,6 +815,12 @@ int main(int argc, char *argv[])
             else
             {
                 const dictionary& patchSource = dict.subDict("patchPairs");
+                bool groupBase = false;
+                if (patchSource.found("groupBase"))
+                {
+                    groupBase = readBool(patchSource.lookup("groupBase"));
+                }
+
                 const word& groupName = selectors[selectorI].name();
 
                 if (patchSource.found("patchFields"))
@@ -801,23 +829,51 @@ int main(int argc, char *argv[])
                     (
                         "patchFields"
                     );
-                    // Add coupleGroup to all entries
-                    forAllIter(dictionary, patchFieldsDict, iter)
+
+                    if (!groupBase)
                     {
-                        if (iter().isDict())
+                        // Add coupleGroup to all entries
+                        forAllIter(dictionary, patchFieldsDict, iter)
                         {
-                            dictionary& dict = iter().dict();
-                            dict.set("coupleGroup", groupName);
+                            if (iter().isDict())
+                            {
+                                dictionary& dict = iter().dict();
+                                dict.set("coupleGroup", groupName);
+                            }
+                        }
+
+                        const labelList& patchIDs =
+                            pbm.groupPatchIDs()[groupName];
+
+                        forAll(patchIDs, i)
+                        {
+                            fvMeshTools::setPatchFields
+                            (
+                                mesh,
+                                patchIDs[i],
+                                patchFieldsDict
+                            );
                         }
                     }
-
-                    const labelList& patchIDs = pbm.groupPatchIDs()[groupName];
-                    forAll(patchIDs, i)
+                    else
                     {
+                        const word masterPatchName(groupName + "_master");
+                        const word slavePatchName(groupName + "_slave");
+
+                        label patchIMaster = pbm.findPatchID(masterPatchName);
+                        label patchISlave = pbm.findPatchID(slavePatchName);
+
                         fvMeshTools::setPatchFields
                         (
                             mesh,
-                            patchIDs[i],
+                            patchIMaster,
+                            patchFieldsDict
+                        );
+
+                        fvMeshTools::setPatchFields
+                        (
+                            mesh,
+                            patchISlave,
                             patchFieldsDict
                         );
                     }

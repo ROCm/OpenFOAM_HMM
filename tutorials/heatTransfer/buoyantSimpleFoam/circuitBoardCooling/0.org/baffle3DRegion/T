@@ -24,11 +24,8 @@ boundaryField
     bottom
     {
         type                compressible::thermalBaffle;
-        Tnbr                T;
         kappa               solidThermo;
         kappaName           none;
-        QrNbr               none;
-        Qr                  none;
         value               uniform 300;
     }
     side
@@ -38,11 +35,8 @@ boundaryField
     top
     {
         type                compressible::thermalBaffle;
-        Tnbr                T;
         kappa               solidThermo;
         kappaName           none;
-        QrNbr               none;
-        Qr                  none;
         value               uniform 300;
     }
 }

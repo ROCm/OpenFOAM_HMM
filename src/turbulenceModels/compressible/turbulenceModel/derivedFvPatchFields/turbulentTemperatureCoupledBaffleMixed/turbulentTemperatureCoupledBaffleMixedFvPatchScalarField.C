@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,7 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     temperatureCoupledBase(patch(), "undefined", "undefined-K"),
-    neighbourFieldName_("undefined-neighbourFieldName")
+    TnbrName_("undefined-Tnbr")
 {
     this->refValue() = 0.0;
     this->refGrad() = 0.0;
@@ -66,7 +66,7 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(ptf, p, iF, mapper),
     temperatureCoupledBase(patch(), ptf.KMethod(), ptf.kappaName()),
-    neighbourFieldName_(ptf.neighbourFieldName_)
+    TnbrName_(ptf.TnbrName_)
 {}
 
 
@@ -80,7 +80,7 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     temperatureCoupledBase(patch(), dict),
-    neighbourFieldName_(dict.lookup("neighbourFieldName"))
+    TnbrName_(dict.lookup("neighbourFieldName"))
 {
     if (!isA<mappedPatchBase>(this->patch().patch()))
     {
@@ -129,7 +129,7 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(wtcsf, iF),
     temperatureCoupledBase(patch(), wtcsf.KMethod(), wtcsf.kappaName()),
-    neighbourFieldName_(wtcsf.neighbourFieldName_)
+    TnbrName_(wtcsf.TnbrName_)
 {}
 
 
@@ -169,7 +169,7 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
     (
         nbrPatch.lookupPatchField<volScalarField, scalar>
         (
-            neighbourFieldName_
+            TnbrName_
         )
     );
 
@@ -237,7 +237,7 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::write
 ) const
 {
     mixedFvPatchScalarField::write(os);
-    os.writeKeyword("neighbourFieldName")<< neighbourFieldName_
+    os.writeKeyword("TnbrName")<< TnbrName_
         << token::END_STATEMENT << nl;
     temperatureCoupledBase::write(os);
 }

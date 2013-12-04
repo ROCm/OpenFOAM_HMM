@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,9 +84,9 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     temperatureCoupledBase(patch(), dict),
-    TnbrName_(dict.lookup("Tnbr")),
-    QrNbrName_(dict.lookup("QrNbr")),
-    QrName_(dict.lookup("Qr"))
+    TnbrName_(dict.lookupOrDefault<word>("Tnbr", "T")),
+    QrNbrName_(dict.lookupOrDefault<word>("QrNbr", "none")),
+    QrName_(dict.lookupOrDefault<word>("Qr", "none"))
 {
     if (!isA<mappedPatchBase>(this->patch().patch()))
     {
