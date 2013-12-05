@@ -90,6 +90,19 @@ public:
             const Time& runTime
         );
 
+        //- Construct and return a clone
+        virtual autoPtr<solidBodyMotionFunction> clone() const
+        {
+            return autoPtr<solidBodyMotionFunction>
+            (
+                new oscillatingRotatingMotion
+                (
+                    SBMFCoeffs_,
+                    time_
+                )
+            );
+        }
+
 
     //- Destructor
     virtual ~oscillatingRotatingMotion();

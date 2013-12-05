@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -67,6 +67,12 @@ bool Foam::solidBodyMotionFunction::read(const dictionary& SBMFCoeffs)
     SBMFCoeffs_ = SBMFCoeffs.subDict(type() + "Coeffs");
 
     return true;
+}
+
+
+void Foam::solidBodyMotionFunction::writeData(Ostream& os) const
+{
+    os << SBMFCoeffs_;
 }
 
 
