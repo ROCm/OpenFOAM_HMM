@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -117,6 +117,19 @@ public:
             const dictionary& SBMFCoeffs,
             const Time& runTime
         );
+
+        //- Construct and return a clone
+        virtual autoPtr<solidBodyMotionFunction> clone() const
+        {
+            return autoPtr<solidBodyMotionFunction>
+            (
+                new SDA
+                (
+                    SBMFCoeffs_,
+                    time_
+                )
+            );
+        }
 
 
     //- Destructor
