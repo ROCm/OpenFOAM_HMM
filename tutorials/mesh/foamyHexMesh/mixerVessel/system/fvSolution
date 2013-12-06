@@ -51,6 +51,13 @@ solvers
         relTol          0;
     }
 
+    pcorrFinal
+    {
+        $pcorr;
+        tolerance       0.1;
+        relTol          0;
+    }
+
     ".*(rho|rhoFinal)"
     {
         solver          diagonal;
