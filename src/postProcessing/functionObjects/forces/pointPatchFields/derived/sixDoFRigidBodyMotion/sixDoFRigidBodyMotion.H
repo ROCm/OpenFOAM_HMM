@@ -122,6 +122,9 @@ class sixDoFRigidBodyMotion
         //- Acceleration relaxation coefficient
         scalar aRelax_;
 
+        //- Acceleration damping coefficient (for steady-state simulations)
+        scalar aDamp_;
+
         //- Switch to turn reporting of motion data on and off
         Switch report_;
 
@@ -264,6 +267,7 @@ public:
             const tensor& initialQ,
             const diagTensor& momentOfInertia,
             scalar aRelax = 1.0,
+            scalar aDamp = 1.0,
             bool report = false
         );
 
