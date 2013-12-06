@@ -56,12 +56,20 @@ boundary
         );
     }
 
-    entrance
+    entrance1
     {
         type symmetryPlane;
         faces
         (
             (0 1 5 4)
+        );
+    }
+
+    entrance2
+    {
+        type symmetryPlane;
+        faces
+        (
             (0 3 2 1)
         );
     }

@@ -24,6 +24,7 @@ $(constraintFvPatches)/empty/emptyFvPatch.C
 $(constraintFvPatches)/nonuniformTransformCyclic/nonuniformTransformCyclicFvPatch.C
 $(constraintFvPatches)/processor/processorFvPatch.C
 $(constraintFvPatches)/processorCyclic/processorCyclicFvPatch.C
+$(constraintFvPatches)/symmetryPlane/symmetryPlaneFvPatch.C
 $(constraintFvPatches)/symmetry/symmetryFvPatch.C
 $(constraintFvPatches)/wedge/wedgeFvPatch.C
 
@@ -119,6 +120,8 @@ $(constraintFvPatchFields)/nonuniformTransformCyclic/nonuniformTransformCyclicFv
 $(constraintFvPatchFields)/processor/processorFvPatchFields.C
 $(constraintFvPatchFields)/processor/processorFvPatchScalarField.C
 $(constraintFvPatchFields)/processorCyclic/processorCyclicFvPatchFields.C
+$(constraintFvPatchFields)/symmetryPlane/symmetryPlaneFvPatchFields.C
+$(constraintFvPatchFields)/symmetryPlane/symmetryPlaneFvPatchScalarField.C
 $(constraintFvPatchFields)/symmetry/symmetryFvPatchFields.C
 $(constraintFvPatchFields)/wedge/wedgeFvPatchFields.C
 $(constraintFvPatchFields)/wedge/wedgeFvPatchScalarField.C
@@ -213,6 +216,7 @@ $(constraintFvsPatchFields)/empty/emptyFvsPatchFields.C
 $(constraintFvsPatchFields)/nonuniformTransformCyclic/nonuniformTransformCyclicFvsPatchFields.C
 $(constraintFvsPatchFields)/processor/processorFvsPatchFields.C
 $(constraintFvsPatchFields)/processorCyclic/processorCyclicFvsPatchFields.C
+$(constraintFvsPatchFields)/symmetryPlane/symmetryPlaneFvsPatchFields.C
 $(constraintFvsPatchFields)/symmetry/symmetryFvsPatchFields.C
 $(constraintFvsPatchFields)/wedge/wedgeFvsPatchFields.C
 

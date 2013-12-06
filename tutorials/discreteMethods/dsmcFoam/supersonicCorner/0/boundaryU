@@ -26,7 +26,7 @@ boundaryField
         value           uniform (1936 0 0);
     }
 
-    entrance
+    "entrance.*"
     {
         type            symmetryPlane;
     }

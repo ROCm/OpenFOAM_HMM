@@ -36,7 +36,7 @@ Description
     \verbatim
     myPatch
     {
-        type            symmetryPlane;
+        type            symmetry;
     }
     \endverbatim
 

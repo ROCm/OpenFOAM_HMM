@@ -55,6 +55,7 @@ class polyPatch;
 
 class cyclicPolyPatch;
 class processorPolyPatch;
+class symmetryPlanePolyPatch;
 class symmetryPolyPatch;
 class wallPolyPatch;
 class wedgePolyPatch;
@@ -247,6 +248,15 @@ protected:
         //- Overridable function to handle the particle hitting a wedgePatch
         template<class TrackData>
         void hitWedgePatch(const wedgePolyPatch&, TrackData& td);
+
+        //- Overridable function to handle the particle hitting a
+        //  symmetryPlanePatch
+        template<class TrackData>
+        void hitSymmetryPlanePatch
+        (
+            const symmetryPlanePolyPatch&,
+            TrackData& td
+        );
 
         //- Overridable function to handle the particle hitting a
         //  symmetryPatch

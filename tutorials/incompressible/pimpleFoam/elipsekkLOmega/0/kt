@@ -34,7 +34,7 @@ boundaryField
     }
     up
     {
-        type            symmetryPlane;
+        type            symmetry;
     }
     hole
     {

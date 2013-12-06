@@ -345,6 +345,17 @@ void Foam::streamLineParticle::hitWedgePatch
 }
 
 
+void Foam::streamLineParticle::hitSymmetryPlanePatch
+(
+    const symmetryPlanePolyPatch& pp,
+    trackingData& td
+)
+{
+    // Remove particle
+    td.keepParticle = false;
+}
+
+
 void Foam::streamLineParticle::hitSymmetryPatch
 (
     const symmetryPolyPatch& pp,

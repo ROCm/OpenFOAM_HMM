@@ -214,7 +214,15 @@ public:
             );
 
             //- Overridable function to handle the particle hitting a
-            //  symmetryPlane
+            //  symmetry plane
+            void hitSymmetryPlanePatch
+            (
+                const symmetryPlanePolyPatch&,
+                trackingData& td
+            );
+
+            //- Overridable function to handle the particle hitting a
+            //  symmetry patch
             void hitSymmetryPatch
             (
                 const symmetryPolyPatch&,

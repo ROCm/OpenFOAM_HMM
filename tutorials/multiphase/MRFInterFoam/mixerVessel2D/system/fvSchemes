@@ -27,7 +27,7 @@ gradSchemes
 
 divSchemes
 {
-    div(rho*phi,U)  Gauss linear;
+    div(rhoPhi,U)  Gauss linear;
     div(phi,alpha)  Gauss vanLeer;
     div(phirb,alpha) Gauss interfaceCompression;
     div((muEff*dev(T(grad(U))))) Gauss linear;

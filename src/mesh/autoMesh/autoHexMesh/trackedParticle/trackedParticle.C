@@ -141,6 +141,17 @@ void Foam::trackedParticle::hitWedgePatch
 }
 
 
+void Foam::trackedParticle::hitSymmetryPlanePatch
+(
+    const symmetryPlanePolyPatch&,
+    trackingData& td
+)
+{
+    // Remove particle
+    td.keepParticle = false;
+}
+
+
 void Foam::trackedParticle::hitSymmetryPatch
 (
     const symmetryPolyPatch&,

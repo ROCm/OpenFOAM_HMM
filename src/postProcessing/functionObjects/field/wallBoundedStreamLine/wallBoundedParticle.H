@@ -159,7 +159,16 @@ protected:
         );
 
         //- Overridable function to handle the particle hitting a
-        //  symmetryPlane
+        //  symmetry plane
+        template<class TrackData>
+        void hitSymmetryPlanePatch
+        (
+            const symmetryPlanePolyPatch&,
+            TrackData& td
+        );
+
+        //- Overridable function to handle the particle hitting a
+        //  symmetry patch
         template<class TrackData>
         void hitSymmetryPatch
         (

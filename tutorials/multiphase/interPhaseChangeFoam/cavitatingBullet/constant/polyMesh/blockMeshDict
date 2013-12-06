@@ -54,7 +54,7 @@ boundary
     }
     walls
     {
-        type symmetryPlane;
+        type symmetry;
         faces
         (
             (0 4 7 3)
