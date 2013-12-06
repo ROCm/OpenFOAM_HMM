@@ -21,7 +21,7 @@ internalField   uniform 0;
 
 boundaryField
 {
-    frontAndBack
+    "(front|back)"
     {
         type            symmetryPlane;
         value           uniform 0;

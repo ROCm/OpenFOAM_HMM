@@ -175,6 +175,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion()
     momentOfInertia_(diagTensor::one*VSMALL),
     mass_(VSMALL),
     aRelax_(1.0),
+    aDamp_(1.0),
     report_(false)
 {}
 
@@ -192,6 +193,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     const tensor& initialQ,
     const diagTensor& momentOfInertia,
     scalar aRelax,
+    scalar aDamp,
     bool report
 )
 :
@@ -215,6 +217,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     momentOfInertia_(momentOfInertia),
     mass_(mass),
     aRelax_(aRelax),
+    aDamp_(aDamp),
     report_(report)
 {}
 
@@ -239,6 +242,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion(const dictionary& dict)
     momentOfInertia_(dict.lookup("momentOfInertia")),
     mass_(readScalar(dict.lookup("mass"))),
     aRelax_(dict.lookupOrDefault<scalar>("accelerationRelaxation", 1.0)),
+    aDamp_(dict.lookupOrDefault<scalar>("accelerationDamping", 1.0)),
     report_(dict.lookupOrDefault<Switch>("report", false))
 {
     addRestraints(dict);
@@ -264,6 +268,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     momentOfInertia_(sDoFRBM.momentOfInertia_),
     mass_(sDoFRBM.mass_),
     aRelax_(sDoFRBM.aRelax_),
+    aDamp_(sDoFRBM.aDamp_),
     report_(sDoFRBM.report_)
 {}
 
@@ -375,8 +380,8 @@ void Foam::sixDoFRigidBodyMotion::updatePosition
 
     if (Pstream::master())
     {
-        v() = v0() + 0.5*deltaT0*a();
-        pi() = pi0() + 0.5*deltaT0*tau();
+        v() = v0() + aDamp_*0.5*deltaT0*a();
+        pi() = pi0() + aDamp_*0.5*deltaT0*tau();
 
         // Leapfrog move part
         centreOfMass() = centreOfMass0() + deltaT*v();
@@ -426,8 +431,8 @@ void Foam::sixDoFRigidBodyMotion::updateAcceleration
         applyConstraints(deltaT);
 
         // Correct velocities
-        v() += 0.5*deltaT*a();
-        pi() += 0.5*deltaT*tau();
+        v() += aDamp_*0.5*deltaT*a();
+        pi() += aDamp_*0.5*deltaT*tau();
 
         if (report_)
         {
@@ -446,8 +451,8 @@ void Foam::sixDoFRigidBodyMotion::updateVelocity(scalar deltaT)
 
     if (Pstream::master())
     {
-        v() += 0.5*deltaT*a();
-        pi() += 0.5*deltaT*tau();
+        v() += aDamp_*0.5*deltaT*a();
+        pi() += aDamp_*0.5*deltaT*tau();
 
         if (report_)
         {

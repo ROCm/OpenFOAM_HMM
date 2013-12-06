@@ -67,7 +67,7 @@ functions
 
         fields
         (
-            rho*phi
+            rhoPhi
         );
     }
 

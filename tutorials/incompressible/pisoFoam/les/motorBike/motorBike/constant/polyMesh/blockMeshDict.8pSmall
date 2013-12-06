@@ -40,12 +40,19 @@ edges
 
 boundary
 (
-    frontAndBack
+    front
     {
         type symmetryPlane;
         faces
         (
             (3 7 6 2)
+        );
+    }
+    back
+    {
+        type symmetryPlane;
+        faces
+        (
             (1 5 4 0)
         );
     }

@@ -409,6 +409,7 @@ $(constraintPolyPatches)/empty/emptyPolyPatch.C
 $(constraintPolyPatches)/nonuniformTransformCyclic/nonuniformTransformCyclicPolyPatch.C
 $(constraintPolyPatches)/processorCyclic/processorCyclicPolyPatch.C
 $(constraintPolyPatches)/processor/processorPolyPatch.C
+$(constraintPolyPatches)/symmetryPlane/symmetryPlanePolyPatch.C
 $(constraintPolyPatches)/symmetry/symmetryPolyPatch.C
 $(constraintPolyPatches)/wedge/wedgePolyPatch.C
 
@@ -528,6 +529,7 @@ $(constraintPointPatches)/empty/emptyPointPatch.C
 $(constraintPointPatches)/nonuniformTransformCyclic/nonuniformTransformCyclicPointPatch.C
 $(constraintPointPatches)/processor/processorPointPatch.C
 $(constraintPointPatches)/processorCyclic/processorCyclicPointPatch.C
+$(constraintPointPatches)/symmetryPlane/symmetryPlanePointPatch.C
 $(constraintPointPatches)/symmetry/symmetryPointPatch.C
 $(constraintPointPatches)/wedge/wedgePointPatch.C
 
@@ -597,6 +599,7 @@ $(constraintPointPatchFields)/empty/emptyPointPatchFields.C
 $(constraintPointPatchFields)/nonuniformTransformCyclic/nonuniformTransformCyclicPointPatchFields.C
 $(constraintPointPatchFields)/processor/processorPointPatchFields.C
 $(constraintPointPatchFields)/processorCyclic/processorCyclicPointPatchFields.C
+$(constraintPointPatchFields)/symmetryPlane/symmetryPlanePointPatchFields.C
 $(constraintPointPatchFields)/symmetry/symmetryPointPatchFields.C
 $(constraintPointPatchFields)/wedge/wedgePointPatchFields.C
 

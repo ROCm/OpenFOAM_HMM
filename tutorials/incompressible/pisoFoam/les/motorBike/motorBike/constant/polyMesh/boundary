@@ -15,14 +15,21 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-5
+6
 (
-    frontAndBack
+    front
     {
         type            symmetryPlane;
         inGroups        1(symmetryPlane);
-        nFaces          320;
+        nFaces          160;
         startFace       3456;
+    }
+    back
+    {
+        type            symmetryPlane;
+        inGroups        1(symmetryPlane);
+        nFaces          160;
+        startFace       3616;
     }
     inlet
     {

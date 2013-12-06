@@ -27,7 +27,7 @@ boundaryField
 
     }
 
-    entrance
+    "entrance.*"
     {
         type            symmetryPlane;
     }

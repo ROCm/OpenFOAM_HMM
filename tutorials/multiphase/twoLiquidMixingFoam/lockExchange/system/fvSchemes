@@ -30,7 +30,7 @@ divSchemes
 {
     default         none;
 
-    div(rho*phi,U)  Gauss linear;
+    div(rhoPhi,U)  Gauss linear;
     div(phi,alpha)  Gauss vanLeer;
     div(phi,k)      Gauss limitedLinear 1;
     div((muEff*dev(T(grad(U))))) Gauss linear;

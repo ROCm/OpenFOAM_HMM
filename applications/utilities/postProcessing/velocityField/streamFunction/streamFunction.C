@@ -33,6 +33,7 @@ Description
 #include "fvCFD.H"
 #include "pointFields.H"
 #include "emptyPolyPatch.H"
+#include "symmetryPlanePolyPatch.H"
 #include "symmetryPolyPatch.H"
 #include "wedgePolyPatch.H"
 #include "OSspecific.H"
@@ -285,6 +286,8 @@ int main(int argc, char *argv[])
                                      if
                                      (
                                         !isType<emptyPolyPatch>
+                                         (patches[patchNo])
+                                     && !isType<symmetryPlanePolyPatch>
                                          (patches[patchNo])
                                      && !isType<symmetryPolyPatch>
                                          (patches[patchNo])

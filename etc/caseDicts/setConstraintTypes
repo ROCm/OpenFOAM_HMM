@@ -51,6 +51,11 @@ symmetryPlane
     type  symmetryPlane;
 }
 
+symmetry
+{
+    type  symmetry;
+}
+
 wedge
 {
     type  wedge;

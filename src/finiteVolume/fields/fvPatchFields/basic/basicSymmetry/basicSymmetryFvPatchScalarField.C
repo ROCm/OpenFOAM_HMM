@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,22 +26,21 @@ License
 #include "basicSymmetryFvPatchField.H"
 #include "volFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<>
-tmp<scalarField > basicSymmetryFvPatchField<scalar>::snGrad() const
+Foam::tmp<Foam::scalarField>
+Foam::basicSymmetryFvPatchField<Foam::scalar>::snGrad() const
 {
     return tmp<scalarField >(new scalarField(size(), 0.0));
 }
 
 
 template<>
-void basicSymmetryFvPatchField<scalar>::evaluate(const Pstream::commsTypes)
+void Foam::basicSymmetryFvPatchField<Foam::scalar>::evaluate
+(
+    const Pstream::commsTypes
+)
 {
     if (!updated())
     {
@@ -52,9 +51,5 @@ void basicSymmetryFvPatchField<scalar>::evaluate(const Pstream::commsTypes)
     transformFvPatchField<scalar>::evaluate();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

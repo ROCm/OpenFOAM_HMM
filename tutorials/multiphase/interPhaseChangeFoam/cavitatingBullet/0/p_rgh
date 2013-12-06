@@ -34,7 +34,7 @@ boundaryField
 
     walls
     {
-        type            symmetryPlane;
+        type            symmetry;
     }
 
     bullet
