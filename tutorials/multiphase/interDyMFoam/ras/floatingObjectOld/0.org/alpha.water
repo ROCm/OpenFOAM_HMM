@@ -9,31 +9,31 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       pointVectorField;
-    object      pointDisplacement;
+    class       volScalarField;
+    location    "0";
+    object      alpha.water;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 1 0 0 0 0 0];
+dimensions      [0 0 0 0 0 0 0];
 
-internalField   uniform (0 0 0);
+internalField   uniform 0;
 
 boundaryField
 {
     stationaryWalls
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
+        type            zeroGradient;
     }
     atmosphere
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
+        type            inletOutlet;
+        inletValue      uniform 0;
+        value           uniform 0;
     }
     floatingObject
     {
-        type            calculated;
-        value           uniform (0 0 0);
+        type            zeroGradient;
     }
 }
 

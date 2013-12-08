@@ -9,32 +9,20 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       pointVectorField;
-    object      pointDisplacement;
+    class       dictionary;
+    object      motionProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 1 0 0 0 0 0];
+dynamicFvMesh      dynamicMotionSolverFvMesh;
 
-internalField   uniform (0 0 0);
+motionSolverLibs    ("libfvMotionSolvers.so" "libsixDoFRigidBodyMotion.so");
 
-boundaryField
+solver            displacementLaplacian;
+
+displacementLaplacianCoeffs
 {
-    stationaryWalls
-    {
-        type            fixedValue;
-        value           uniform (0 0 0);
-    }
-    atmosphere
-    {
-        type            fixedValue;
-        value           uniform (0 0 0);
-    }
-    floatingObject
-    {
-        type            calculated;
-        value           uniform (0 0 0);
-    }
+    diffusivity       inverseDistance (floatingObject);
 }
 
 

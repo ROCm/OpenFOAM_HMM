@@ -9,33 +9,36 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       pointVectorField;
-    object      pointDisplacement;
+    class       volScalarField;
+    object      p_rgh;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 1 0 0 0 0 0];
+dimensions      [1 -1 -2 0 0 0 0];
 
-internalField   uniform (0 0 0);
+internalField   uniform 0;
 
 boundaryField
 {
     stationaryWalls
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
+        type            fixedFluxPressure;
     }
     atmosphere
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
+        type            totalPressure;
+        p0              uniform 0;
+        U               U;
+        phi             phi;
+        rho             rho;
+        psi             none;
+        gamma           1;
+        value           uniform 0;
     }
     floatingObject
     {
-        type            calculated;
-        value           uniform (0 0 0);
+        type            fixedFluxPressure;
     }
 }
-
 
 // ************************************************************************* //

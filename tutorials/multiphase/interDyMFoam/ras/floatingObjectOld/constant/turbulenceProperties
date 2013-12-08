@@ -9,33 +9,12 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       pointVectorField;
-    object      pointDisplacement;
+    class       dictionary;
+    location    "constant";
+    object      turbulenceProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 1 0 0 0 0 0];
-
-internalField   uniform (0 0 0);
-
-boundaryField
-{
-    stationaryWalls
-    {
-        type            fixedValue;
-        value           uniform (0 0 0);
-    }
-    atmosphere
-    {
-        type            fixedValue;
-        value           uniform (0 0 0);
-    }
-    floatingObject
-    {
-        type            calculated;
-        value           uniform (0 0 0);
-    }
-}
-
+simulationType  RASModel;
 
 // ************************************************************************* //

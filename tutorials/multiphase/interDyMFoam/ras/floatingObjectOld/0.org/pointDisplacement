@@ -32,7 +32,13 @@ boundaryField
     }
     floatingObject
     {
-        type            calculated;
+        type            sixDoFRigidBodyDisplacement;
+        centreOfMass    (0.5 0.5 0.5);
+        momentOfInertia (0.08622222 0.08622222 0.144);
+        mass            9.6;
+        rhoInf          1;
+        report          on;
+        accelerationRelaxation 0.3;
         value           uniform (0 0 0);
     }
 }

@@ -9,33 +9,32 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       pointVectorField;
-    object      pointDisplacement;
+    class       polyBoundaryMesh;
+    location    "constant/polyMesh";
+    object      boundary;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 1 0 0 0 0 0];
-
-internalField   uniform (0 0 0);
-
-boundaryField
-{
+3
+(
     stationaryWalls
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
+        type            wall;
+        nFaces          11200;
+        startFace       277808;
     }
     atmosphere
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
+        type            patch;
+        nFaces          1600;
+        startFace       289008;
     }
     floatingObject
     {
-        type            calculated;
-        value           uniform (0 0 0);
+        type            wall;
+        nFaces          672;
+        startFace       290608;
     }
-}
-
+)
 
 // ************************************************************************* //

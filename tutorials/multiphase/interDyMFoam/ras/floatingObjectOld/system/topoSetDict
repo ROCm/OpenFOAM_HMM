@@ -9,33 +9,30 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       pointVectorField;
-    object      pointDisplacement;
+    class       dictionary;
+    object      topoSetDict;
 }
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 1 0 0 0 0 0];
-
-internalField   uniform (0 0 0);
-
-boundaryField
-{
-    stationaryWalls
+actions
+(
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
+        name    c0;
+        type    cellSet;
+        action  new;
+        source  boxToCell;
+        sourceInfo
+        {
+            box (0.35 0.35 0.44) (0.65 0.65 0.56);
+        }
     }
-    atmosphere
-    {
-        type            fixedValue;
-        value           uniform (0 0 0);
-    }
-    floatingObject
-    {
-        type            calculated;
-        value           uniform (0 0 0);
-    }
-}
 
+    {
+        name    c0;
+        type    cellSet;
+        action  invert;
+    }
+);
 
 // ************************************************************************* //

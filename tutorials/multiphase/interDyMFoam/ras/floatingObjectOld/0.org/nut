@@ -9,31 +9,38 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       pointVectorField;
-    object      pointDisplacement;
+    class       volScalarField;
+    location    "0";
+    object      nut;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 1 0 0 0 0 0];
+dimensions      [0 2 -1 0 0 0 0];
 
-internalField   uniform (0 0 0);
+internalField   uniform 0;
 
 boundaryField
 {
     stationaryWalls
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
+        type            nutkWallFunction;
+        Cmu             0.09;
+        kappa           0.41;
+        E               9.8;
+        value           uniform 0;
     }
     atmosphere
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
+        type            calculated;
+        value           uniform 0;
     }
     floatingObject
     {
-        type            calculated;
-        value           uniform (0 0 0);
+        type            nutkWallFunction;
+        Cmu             0.09;
+        kappa           0.41;
+        E               9.8;
+        value           uniform 0;
     }
 }
 
