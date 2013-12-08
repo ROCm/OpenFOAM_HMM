@@ -51,12 +51,4 @@ maxCo           5;
 maxAlphaCo      5;
 maxDeltaT       1;
 
-libs
-(
-    "libOpenFOAM.so"
-    "libincompressibleRASModels.so"
-    "libfvMotionSolvers.so"
-    "libforces.so"
-);
-
 // ************************************************************************* //

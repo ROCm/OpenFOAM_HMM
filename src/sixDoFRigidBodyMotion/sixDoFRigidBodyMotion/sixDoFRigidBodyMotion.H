@@ -325,14 +325,19 @@ public:
 
         //- Transform the given initial state pointField by the current
         //  motion state
-        inline tmp<pointField> currentPosition
+        tmp<pointField> currentPosition(const pointField& initialPoints) const;
+
+        //- Transform the given initial state pointField by the current
+        //  motion state
+        tmp<pointField> scaledPosition
         (
-            const pointField& pInitial
+            const pointField& initialPoints,
+            const scalarField& scale
         ) const;
 
         //- Transform the given initial state point by the current motion
         //  state
-        inline point currentPosition(const point& pInitial) const;
+        inline point currentPosition(const point& initialPoints) const;
 
         //- Transform the given initial state direction by the current
         //  motion state
@@ -348,7 +353,7 @@ public:
         //  additional supplied force and moment
         point predictedPosition
         (
-            const point& pInitial,
+            const point& initialPoints,
             const vector& deltaForce,
             const vector& deltaMoment,
             scalar deltaT

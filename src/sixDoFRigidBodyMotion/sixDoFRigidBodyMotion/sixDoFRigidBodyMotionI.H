@@ -255,26 +255,15 @@ inline Foam::vector& Foam::sixDoFRigidBodyMotion::tau()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-inline Foam::tmp<Foam::pointField>
-Foam::sixDoFRigidBodyMotion::currentPosition(const pointField& pInitial) const
-{
-    return
-    (
-        centreOfMass()
-      + (Q() & initialQ_.T() & (pInitial - initialCentreOfMass_)))
-    ;
-}
-
-
 inline Foam::point Foam::sixDoFRigidBodyMotion::currentPosition
 (
-    const point& pInitial
+    const point& initialPoints
 ) const
 {
     return
     (
         centreOfMass()
-      + (Q() & initialQ_.T() & (pInitial - initialCentreOfMass_))
+      + (Q() & initialQ_.T() & (initialPoints - initialCentreOfMass_))
     );
 }
 

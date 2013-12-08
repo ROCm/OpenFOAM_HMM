@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "sixDoFRigidBodyMotion.H"
+#include "septernion.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -530,6 +531,49 @@ void Foam::sixDoFRigidBodyMotion::status() const
         << "Linear velocity: " << v() << nl
         << "Angular velocity: " << omega()
         << endl;
+}
+
+
+Foam::tmp<Foam::pointField> Foam::sixDoFRigidBodyMotion::currentPosition
+(
+    const pointField& initialPoints
+) const
+{
+    return
+    (
+        centreOfMass()
+      + (Q() & initialQ_.T() & (initialPoints - initialCentreOfMass_))
+    );
+}
+
+
+Foam::tmp<Foam::pointField> Foam::sixDoFRigidBodyMotion::scaledPosition
+(
+    const pointField& initialPoints,
+    const scalarField& scale
+) const
+{
+    // Calculate the transformation septerion from the initial state
+    septernion s
+    (
+        centreOfMass() - initialCentreOfMass(),
+        quaternion(Q() & initialQ().T())
+    );
+
+    tmp<pointField> tpoints(new pointField(initialPoints));
+    pointField& points = tpoints();
+
+    forAll(points, pointi)
+    {
+        //- Slerp septernion
+        septernion ss(slerp(septernion::I, s, scale[pointi]));
+
+        points[pointi] =
+            initialCentreOfMass()
+          + ss.transform(initialPoints[pointi] - initialCentreOfMass());
+    }
+
+    return tpoints;
 }
 
 

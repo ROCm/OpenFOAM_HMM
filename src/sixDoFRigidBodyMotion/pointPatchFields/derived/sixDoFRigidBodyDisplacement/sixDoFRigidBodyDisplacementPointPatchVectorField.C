@@ -238,10 +238,13 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
         g_ = g.value();
     }
 
+    // scalar ramp = min(max((this->db().time().value() - 5)/10, 0), 1);
+    scalar ramp = 1.0;
+
     motion_.updateAcceleration
     (
-        f.forceEff() + g_*motion_.mass(),
-        f.momentEff(),
+        ramp*(f.forceEff() + g_*motion_.mass()),
+        ramp*(f.momentEff()),
         t.deltaTValue()
     );
 
