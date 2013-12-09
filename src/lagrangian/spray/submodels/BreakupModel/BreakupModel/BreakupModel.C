@@ -33,7 +33,7 @@ Foam::BreakupModel<CloudType>::BreakupModel
     CloudType& owner
 )
 :
-    SubModelBase<CloudType>(owner),
+    CloudSubModelBase<CloudType>(owner),
     solveOscillationEq_(false),
     y0_(0.0),
     yDot0_(0.0),
@@ -49,7 +49,7 @@ Foam::BreakupModel<CloudType>::BreakupModel
     const BreakupModel<CloudType>& bum
 )
 :
-    SubModelBase<CloudType>(bum),
+    CloudSubModelBase<CloudType>(bum),
     solveOscillationEq_(bum.solveOscillationEq_),
     y0_(bum.y0_),
     yDot0_(bum.yDot0_),
@@ -68,7 +68,7 @@ Foam::BreakupModel<CloudType>::BreakupModel
     bool solveOscillationEq
 )
 :
-    SubModelBase<CloudType>(owner, dict, typeName, type),
+    CloudSubModelBase<CloudType>(owner, dict, typeName, type),
     solveOscillationEq_(solveOscillationEq),
     y0_(0.0),
     yDot0_(0.0),

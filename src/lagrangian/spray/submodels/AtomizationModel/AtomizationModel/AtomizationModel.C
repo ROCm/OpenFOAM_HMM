@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,7 +33,7 @@ Foam::AtomizationModel<CloudType>::AtomizationModel
     CloudType& owner
 )
 :
-    SubModelBase<CloudType>(owner)
+    CloudSubModelBase<CloudType>(owner)
 {}
 
 
@@ -43,7 +43,7 @@ Foam::AtomizationModel<CloudType>::AtomizationModel
     const AtomizationModel<CloudType>& am
 )
 :
-    SubModelBase<CloudType>(am)
+    CloudSubModelBase<CloudType>(am)
 {}
 
 
@@ -55,7 +55,7 @@ Foam::AtomizationModel<CloudType>::AtomizationModel
     const word& type
 )
 :
-    SubModelBase<CloudType>(owner, dict, typeName, type)
+    CloudSubModelBase<CloudType>(owner, dict, typeName, type)
 {}
 
 
