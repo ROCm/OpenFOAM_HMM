@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -109,6 +109,42 @@ inline const Foam::dictionary&
 Foam::regionModels::regionModel::solution() const
 {
     return regionMesh().solutionDict();
+}
+
+
+inline const Foam::IOdictionary&
+Foam::regionModels::regionModel::outputProperties() const
+{
+    if (!outputPropertiesPtr_.valid())
+    {
+        FatalErrorIn
+        (
+            "inline const Foam::IOdictionary& "
+            "Foam::regionModels::regionModel::outputProperties() const"
+        )
+            << "outputProperties dictionary not available"
+            << abort(FatalError);
+    }
+
+    return outputPropertiesPtr_();
+}
+
+
+inline Foam::IOdictionary&
+Foam::regionModels::regionModel::outputProperties()
+{
+    if (!outputPropertiesPtr_.valid())
+    {
+        FatalErrorIn
+        (
+            "inline Foam::IOdictionary& "
+            "Foam::regionModels::regionModel::outputProperties()"
+        )
+            << "outputProperties dictionary not available"
+            << abort(FatalError);
+    }
+
+    return outputPropertiesPtr_();
 }
 
 

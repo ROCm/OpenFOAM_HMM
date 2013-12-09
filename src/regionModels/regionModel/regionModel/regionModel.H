@@ -105,6 +105,9 @@ protected:
         //- Model coefficients dictionary
         dictionary coeffs_;
 
+        //- Dictionary of output properties
+        autoPtr<IOdictionary> outputPropertiesPtr_;
+
 
         // Addressing
 
@@ -215,6 +218,12 @@ public:
 
             //- Return the solution dictionary
             inline const dictionary& solution() const;
+
+            //- Return const access to the output properties dictionary
+            inline const IOdictionary& outputProperties() const;
+
+            //- Return output properties dictionary
+            inline IOdictionary& outputProperties();
 
 
             // Addressing
