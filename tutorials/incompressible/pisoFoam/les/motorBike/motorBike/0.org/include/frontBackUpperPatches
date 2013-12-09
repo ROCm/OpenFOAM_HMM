@@ -11,7 +11,7 @@ upperWall
     type symmetryPlane;
 }
 
-frontAndBack
+"(front|back)"
 {
     type symmetryPlane;
 }

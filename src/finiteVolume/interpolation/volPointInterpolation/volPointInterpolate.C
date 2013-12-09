@@ -271,7 +271,7 @@ void volPointInterpolation::interpolateBoundaryField
     interpolateBoundaryField(vf, pf);
 
     // Apply constraints
-    const pointConstraints& pcs = pointConstraints::New(pf.mesh());
+    const pointConstraints& pcs = pointConstraints::New(vf.mesh());
 
     pcs.constrain(pf, overrideFixedValue);
 }

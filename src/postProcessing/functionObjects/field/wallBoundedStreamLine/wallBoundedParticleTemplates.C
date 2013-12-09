@@ -80,6 +80,13 @@ void Foam::wallBoundedParticle::patchInteraction
                     static_cast<const wedgePolyPatch&>(patch), td
                 );
             }
+            else if (isA<symmetryPlanePolyPatch>(patch))
+            {
+                p.hitSymmetryPlanePatch
+                (
+                    static_cast<const symmetryPlanePolyPatch&>(patch), td
+                );
+            }
             else if (isA<symmetryPolyPatch>(patch))
             {
                 p.hitSymmetryPatch
@@ -395,6 +402,18 @@ template<class TrackData>
 void Foam::wallBoundedParticle::hitWedgePatch
 (
     const wedgePolyPatch& pp,
+    TrackData& td
+)
+{
+    // Remove particle
+    td.keepParticle = false;
+}
+
+
+template<class TrackData>
+void Foam::wallBoundedParticle::hitSymmetryPlanePatch
+(
+    const symmetryPlanePolyPatch& pp,
     TrackData& td
 )
 {

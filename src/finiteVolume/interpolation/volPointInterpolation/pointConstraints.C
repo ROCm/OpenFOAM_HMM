@@ -51,11 +51,11 @@ void pointConstraints::makePatchPatchAddressing()
             << endl;
     }
 
-    const pointMesh& pMesh = mesh();
-    const polyMesh& mesh = pMesh();
+    //const polyMesh& mesh = mesh();
+    const pointMesh& pMesh = pointMesh::New(mesh());
 
     const pointBoundaryMesh& pbm = pMesh.boundary();
-    const polyBoundaryMesh& bm = mesh.boundaryMesh();
+    const polyBoundaryMesh& bm = mesh().boundaryMesh();
 
 
     // first count the total number of patch-patch points
@@ -146,7 +146,7 @@ void pointConstraints::makePatchPatchAddressing()
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     {
-        const globalMeshData& gd = mesh.globalData();
+        const globalMeshData& gd = mesh().globalData();
         const labelListList& globalPointSlaves = gd.globalPointSlaves();
         const mapDistribute& globalPointSlavesMap = gd.globalPointSlavesMap();
         const Map<label>& cpPointMap = gd.coupledPatch().meshPointMap();
@@ -226,7 +226,7 @@ void pointConstraints::makePatchPatchAddressing()
                 {
                     //Pout<< "on meshpoint:" << meshPointI
                     //    << " coupled:" << coupledPointI
-                    //    << " at:" << mesh.points()[meshPointI]
+                    //    << " at:" << mesh().points()[meshPointI]
                     //    << " have new constraint:"
                     //    << constraints[coupledPointI]
                     //    << endl;
@@ -244,7 +244,7 @@ void pointConstraints::makePatchPatchAddressing()
                 {
                     //Pout<< "on meshpoint:" << meshPointI
                     //    << " coupled:" << coupledPointI
-                    //    << " at:" << mesh.points()[meshPointI]
+                    //    << " at:" << mesh().points()[meshPointI]
                     //    << " have possibly extended constraint:"
                     //    << constraints[coupledPointI]
                     //    << endl;
@@ -323,9 +323,10 @@ void pointConstraints::makePatchPatchAddressing()
 
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
-pointConstraints::pointConstraints(const pointMesh& pm)
+//pointConstraints::pointConstraints(const pointMesh& pm)
+pointConstraints::pointConstraints(const polyMesh& pm)
 :
-    MeshObject<pointMesh, Foam::UpdateableMeshObject, pointConstraints>(pm)
+    MeshObject<polyMesh, Foam::UpdateableMeshObject, pointConstraints>(pm)
 {
     makePatchPatchAddressing();
 }
@@ -334,7 +335,12 @@ pointConstraints::pointConstraints(const pointMesh& pm)
 // * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
 
 pointConstraints::~pointConstraints()
-{}
+{
+    if (debug)
+    {
+        Pout<< "pointConstraints::~pointConstraints()" << endl;
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -375,9 +381,9 @@ void pointConstraints::constrainDisplacement
 
     // Apply any 2D motion constraints (or should they go before
     // corner constraints?)
-    twoDPointCorrector::New(mesh()()).correctDisplacement
+    twoDPointCorrector::New(mesh()).correctDisplacement
     (
-        mesh()().points(),
+        mesh().points(),
         pf.internalField()
     );
 

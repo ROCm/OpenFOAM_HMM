@@ -510,7 +510,7 @@ private:
                     const motionSmoother& meshMover,
                     const label nSmoothNormals,
                     const label nSmoothSurfaceNormals,
-                    const scalar minMedianAxisAngleCos,
+                    const scalar minMedialAxisAngleCos,
                     const scalar featureAngle,
 
                     pointVectorField& dispVec,

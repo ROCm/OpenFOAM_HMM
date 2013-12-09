@@ -31,8 +31,8 @@ FoamFile
     }
     walls
     {
-        type            symmetryPlane;
-        inGroups        1(symmetryPlane);
+        type            symmetry;
+        inGroups        1(symmetry);
         nFaces          3000;
         startFace       1130431;
     }

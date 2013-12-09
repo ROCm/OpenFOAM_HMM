@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,6 +33,7 @@ using std::ios;
 #include "fluentFvMesh.H"
 #include "primitiveMesh.H"
 #include "wallFvPatch.H"
+#include "symmetryPlaneFvPatch.H"
 #include "symmetryFvPatch.H"
 #include "cellModeller.H"
 
@@ -177,7 +178,11 @@ void Foam::fluentFvMesh::writeFluentMesh() const
         {
             fluentMeshFile << 3;
         }
-        else if (isA<symmetryFvPatch>(boundary()[patchI]))
+        else if
+        (
+            isA<symmetryPlaneFvPatch>(boundary()[patchI])
+         || isA<symmetryFvPatch>(boundary()[patchI])
+        )
         {
             fluentMeshFile << 7;
         }
@@ -280,7 +285,11 @@ void Foam::fluentFvMesh::writeFluentMesh() const
         {
             fluentMeshFile << "wall ";
         }
-        else if (isA<symmetryFvPatch>(boundary()[patchI]))
+        else if
+        (
+            isA<symmetryPlaneFvPatch>(boundary()[patchI])
+         || isA<symmetryFvPatch>(boundary()[patchI])
+        )
         {
             fluentMeshFile << "symmetry ";
         }

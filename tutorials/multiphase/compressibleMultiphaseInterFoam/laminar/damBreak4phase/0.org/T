@@ -39,7 +39,7 @@ boundaryField
     atmosphere
     {
         type            inletOutlet;
-        phi             rho*phi;
+        phi             rhoPhi;
         inletValue      $internalField;
     }
     defaultFaces

@@ -28,6 +28,7 @@ License
 #include "cyclicPolyPatch.H"
 #include "cyclicAMIPolyPatch.H"
 #include "processorPolyPatch.H"
+#include "symmetryPlanePolyPatch.H"
 #include "symmetryPolyPatch.H"
 #include "wallPolyPatch.H"
 #include "wedgePolyPatch.H"
@@ -585,6 +586,13 @@ Foam::scalar Foam::particle::trackToFace
                     static_cast<const wedgePolyPatch&>(patch), td
                 );
             }
+            else if (isA<symmetryPlanePolyPatch>(patch))
+            {
+                p.hitSymmetryPlanePatch
+                (
+                    static_cast<const symmetryPlanePolyPatch&>(patch), td
+                );
+            }
             else if (isA<symmetryPolyPatch>(patch))
             {
                 p.hitSymmetryPatch
@@ -951,6 +959,20 @@ void Foam::particle::hitWedgePatch
     )   << "Hitting a wedge patch should not be possible."
         << abort(FatalError);
 
+    vector nf = normal();
+    nf /= mag(nf);
+
+    transformProperties(I - 2.0*nf*nf);
+}
+
+
+template<class TrackData>
+void Foam::particle::hitSymmetryPlanePatch
+(
+    const symmetryPlanePolyPatch& spp,
+    TrackData&
+)
+{
     vector nf = normal();
     nf /= mag(nf);
 

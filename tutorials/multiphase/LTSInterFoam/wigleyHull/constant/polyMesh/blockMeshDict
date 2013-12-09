@@ -68,7 +68,7 @@ boundary
 
     sides
     {
-        type symmetryPlane;
+        type symmetry;
         faces
         (
             (1 5 4 0)

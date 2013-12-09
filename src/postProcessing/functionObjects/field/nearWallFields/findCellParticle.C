@@ -140,6 +140,17 @@ void Foam::findCellParticle::hitWedgePatch
 }
 
 
+void Foam::findCellParticle::hitSymmetryPlanePatch
+(
+    const symmetryPlanePolyPatch&,
+    trackingData& td
+)
+{
+    // Remove particle
+    td.keepParticle = false;
+}
+
+
 void Foam::findCellParticle::hitSymmetryPatch
 (
     const symmetryPolyPatch&,

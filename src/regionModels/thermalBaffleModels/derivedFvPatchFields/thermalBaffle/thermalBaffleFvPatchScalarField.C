@@ -25,6 +25,9 @@ License
 
 #include "thermalBaffleFvPatchScalarField.H"
 #include "addToRunTimeSelectionTable.H"
+#include "emptyPolyPatch.H"
+#include "polyPatch.H"
+#include "mappedWallPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -114,17 +117,6 @@ thermalBaffleFvPatchScalarField
             owner_ = true;
             baffle_->rename(baffleName);
         }
-        else if //Backwards compatibility (if region exists)
-        (
-            thisMesh.time().foundObject<fvMesh>(regionName)
-         && baffle_.empty()
-         && regionName != "none"
-        )
-        {
-            baffle_.reset(baffle::New(thisMesh, dict).ptr());
-            owner_ = true;
-            baffle_->rename(baffleName);
-        }
     }
 }
 
@@ -168,19 +160,79 @@ void thermalBaffleFvPatchScalarField::rmap
 
 void thermalBaffleFvPatchScalarField::createPatchMesh()
 {
-    const fvMesh& defaultRegion =
-        db().time().lookupObject<fvMesh>(fvMesh::defaultRegion);
+
+    const fvMesh& thisMesh = patch().boundaryMesh().mesh();
 
     word regionName = dict_.lookup("regionName");
+
+    List<polyPatch*> regionPatches(3);
+    List<word> patchNames(regionPatches.size());
+    List<word> patchTypes(regionPatches.size());
+    List<dictionary> dicts(regionPatches.size());
+
+    patchNames[bottomPatchID] = word("bottom");
+    patchNames[sidePatchID] = word("side");
+    patchNames[topPatchID] = word("top");
+
+    patchTypes[bottomPatchID] = mappedWallPolyPatch::typeName;
+    patchTypes[topPatchID] = mappedWallPolyPatch::typeName;
+
+    if (readBool(dict_.lookup("columnCells")))
+    {
+        patchTypes[sidePatchID] = emptyPolyPatch::typeName;
+    }
+    else
+    {
+        patchTypes[sidePatchID] = polyPatch::typeName;
+    }
+
+    const mappedPatchBase& mpp =
+        refCast<const mappedPatchBase>(patch().patch());
+
+    const word coupleGroup(mpp.coupleGroup());
+
+    wordList inGroups(1);
+    inGroups[0] = coupleGroup;
+
+    dicts[bottomPatchID].add("coupleGroup", coupleGroup);
+    dicts[bottomPatchID].add("inGroups", inGroups);
+    dicts[bottomPatchID].add("sampleMode", mpp.sampleModeNames_[mpp.mode()]);
+
+    const label sepPos = coupleGroup.find('_');
+
+    const word coupleGroupSlave = coupleGroup(0, sepPos) + "_slave";
+
+    inGroups[0] = coupleGroupSlave;
+    dicts[topPatchID].add("coupleGroup", coupleGroupSlave);
+    dicts[topPatchID].add("inGroups", inGroups);
+    dicts[topPatchID].add("sampleMode", mpp.sampleModeNames_[mpp.mode()]);
+
+
+    forAll (regionPatches, patchI)
+    {
+        dictionary&  patchDict = dicts[patchI];
+        patchDict.set("nFaces", 0);
+        patchDict.set("startFace", 0);
+
+        regionPatches[patchI] = polyPatch::New
+        (
+            patchTypes[patchI],
+            patchNames[patchI],
+            dicts[patchI],
+            patchI,
+            thisMesh.boundaryMesh()
+        ).ptr();
+    }
 
     extrudeMeshPtr_.reset
     (
         new extrudePatchMesh
         (
-            defaultRegion,
+            thisMesh,
             patch(),
             dict_,
-            regionName
+            regionName,
+            regionPatches
         )
     );
 

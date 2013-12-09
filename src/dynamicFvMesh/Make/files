@@ -18,5 +18,6 @@ $(solidBodyMotionFunctions)/axisRotationMotion/axisRotationMotion.C
 $(solidBodyMotionFunctions)/multiMotion/multiMotion.C
 $(solidBodyMotionFunctions)/oscillatingLinearMotion/oscillatingLinearMotion.C
 $(solidBodyMotionFunctions)/oscillatingRotatingMotion/oscillatingRotatingMotion.C
+solidBodyMotionFvMesh/pointPatchFields/derived/solidBodyMotionDisplacement/solidBodyMotionDisplacementPointPatchVectorField.C
 
 LIB = $(FOAM_LIBBIN)/libdynamicFvMesh

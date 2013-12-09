@@ -41,6 +41,7 @@ SourceFiles
 #include "fixedValuePointPatchField.H"
 #include "instantList.H"
 #include "pointToPointPlanarInterpolation.H"
+#include "DataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -90,6 +91,9 @@ class timeVaryingMappedFixedValuePointPatchField
 
         //- If setAverage: end average value
         Type endAverage_;
+
+        //- Time varying offset values to interpolated data
+        autoPtr<DataEntry<Type> > offset_;
 
 
 public:

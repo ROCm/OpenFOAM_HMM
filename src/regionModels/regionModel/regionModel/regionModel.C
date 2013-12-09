@@ -103,7 +103,7 @@ void Foam::regionModels::regionModel::initialise()
     forAll(rbm, patchI)
     {
         const polyPatch& regionPatch = rbm[patchI];
-        if (isA<mappedWallPolyPatch>(regionPatch))
+        if (isA<mappedPatchBase>(regionPatch))
         {
             if (debug)
             {
@@ -136,7 +136,7 @@ void Foam::regionModels::regionModel::initialise()
     primaryPatchIDs_.transfer(primaryPatchIDs);
     intCoupledPatchIDs_.transfer(intCoupledPatchIDs);
 
-    if (nBoundaryFaces == 0)
+    if (returnReduce(nBoundaryFaces, sumOp<label>()) == 0)
     {
         WarningIn("regionModel::initialise()")
             << "Region model has no mapped boundary conditions - transfer "

@@ -134,7 +134,7 @@ private:
 
         scalar maxThicknessToMedialRatio_;
 
-        scalar minMedianAxisAngleCos_;
+        scalar minMedialAxisAngleCos_;
 
         label nBufferCellsNoExtrude_;
 
@@ -348,9 +348,9 @@ public:
             }
 
             //- Angle used to pick up medial axis points
-            scalar minMedianAxisAngleCos() const
+            scalar minMedialAxisAngleCos() const
             {
-                return minMedianAxisAngleCos_;
+                return minMedialAxisAngleCos_;
             }
 
             label nSnap() const

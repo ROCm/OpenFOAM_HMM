@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,10 +25,13 @@ Class
     Foam::symmetryPolyPatch
 
 Description
-    Symmetry-plane patch.
+    Symmetry patch for non-planar or multi-plane patches.
 
 SourceFiles
     symmetryPolyPatch.C
+
+SeeAlso
+    symmetryPlanePolyPatch
 
 \*---------------------------------------------------------------------------*/
 
@@ -53,7 +56,7 @@ class symmetryPolyPatch
 public:
 
     //- Runtime type information
-    TypeName("symmetryPlane");
+    TypeName("symmetry");
 
 
     // Constructors

@@ -210,37 +210,45 @@ void Foam::pointToPointPlanarInterpolation::calcWeights
         nearestVertexWeight_
     );
 
-    //if (debug)
-    //{
-    //    forAll(sourcePoints, i)
-    //    {
-    //        Pout<< "source:" << i << " at:" << sourcePoints[i]
-    //            << " 2d:" << localVertices[i]
-    //            << endl;
-    //    }
-    //
-    //
-    //    forAll(destPoints, i)
-    //    {
-    //        label v0 = nearestVertex_[i][0];
-    //        label v1 = nearestVertex_[i][1];
-    //        label v2 = nearestVertex_[i][2];
-    //
-    //        Pout<< "For location " << destPoints[i]
-    //            << " 2d:" << localFaceCentres[i]
-    //            << " sampling vertices" << nl
-    //            << "    " << v0
-    //            << " at:" << sourcePoints[v0]
-    //            << " weight:" << nearestVertexWeight_[i][0] << nl
-    //            << "    " << v1
-    //            << " at:" << sourcePoints[v1]
-    //            << " weight:" << nearestVertexWeight_[i][1] << nl
-    //            << "    " << v2
-    //            << " at:" << sourcePoints[v2]
-    //            << " weight:" << nearestVertexWeight_[i][2] << nl
-    //            << endl;
-    //    }
-    //}
+    if (debug)
+    {
+        forAll(sourcePoints, i)
+        {
+            Pout<< "source:" << i << " at:" << sourcePoints[i]
+                << " 2d:" << localVertices[i]
+                << endl;
+        }
+
+
+        forAll(destPoints, i)
+        {
+            label v0 = nearestVertex_[i][0];
+            label v1 = nearestVertex_[i][1];
+            label v2 = nearestVertex_[i][2];
+
+            Pout<< "For location " << destPoints[i]
+                << " 2d:" << localFaceCentres[i]
+                << " sampling vertices" << nl
+                << "    " << v0
+                << " at:" << sourcePoints[v0]
+                << " weight:" << nearestVertexWeight_[i][0] << nl;
+
+            if (v1 != -1)
+            {
+                Pout<< "    " << v1
+                    << " at:" << sourcePoints[v1]
+                    << " weight:" << nearestVertexWeight_[i][1] << nl;
+            }
+            if (v2 != -1)
+            {
+                Pout<< "    " << v2
+                    << " at:" << sourcePoints[v2]
+                    << " weight:" << nearestVertexWeight_[i][2] << nl;
+            }
+
+            Pout<< endl;
+        }
+    }
 }
 
 

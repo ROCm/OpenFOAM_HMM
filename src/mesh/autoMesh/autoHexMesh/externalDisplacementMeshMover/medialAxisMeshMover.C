@@ -402,7 +402,7 @@ bool Foam::medialAxisMeshMover::isMaxEdge
 void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
 {
     Info<< typeName
-        << " : Calculate distance to Medial Axis ..." << endl;
+        << " : Calculating distance to Medial Axis ..." << endl;
 
     const pointField& points = mesh().points();
 
@@ -420,9 +420,15 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
     );
 
     //- When is medial axis
-    const scalar minMedianAxisAngleCos = Foam::cos
+    word angleKey = "minMedialAxisAngle";
+    if (!coeffDict.found(angleKey))
+    {
+        // Backwards compatibility
+        angleKey = "minMedianAxisAngle";
+    }
+    scalar minMedialAxisAngleCos = Foam::cos
     (
-        degToRad(readScalar(coeffDict.lookup("minMedianAxisAngle")))
+        degToRad(readScalar(coeffDict.lookup(angleKey)))
     );
 
     //- Feature angle when to stop adding layers
@@ -440,6 +446,13 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
     const label nSmoothNormals = readLabel
     (
         coeffDict.lookup("nSmoothNormals")
+    );
+
+    //- Number of edges walking out
+    const label nMedialAxisIter = coeffDict.lookupOrDefault<label>
+    (
+        "nMedialAxisIter",
+        mesh().globalData().nTotalPoints()
     );
 
 
@@ -512,10 +525,10 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
             wallInfo,
             pointWallDist,
             edgeWallDist,
-            mesh().globalData().nTotalPoints(),   // max iterations
+            0,   // max iterations
             dummyTrackData
         );
-
+        wallDistCalc.iterate(nMedialAxisIter);
 
         label nUnvisit = returnReduce
         (
@@ -525,16 +538,27 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
 
         if (nUnvisit > 0)
         {
-            WarningIn
-            (
-                "medialAxisMeshMover::"
-                "medialAxisSmoothingInfo(..)"
-            )   << "Walking did not visit all points." << nl
-                << "    Did not visit " << nUnvisit
-                << " out of " << mesh().globalData().nTotalPoints()
-                << " points. This is not necessarily a problem" << nl
-                << "    and might be due to faceZones splitting of part"
-                << " of the domain." << nl << endl;
+            if (nMedialAxisIter > 0)
+            {
+                Info<< typeName
+                    << " : Limited walk to " << nMedialAxisIter
+                    << " steps. Not visited " << nUnvisit
+                    << " out of " << mesh().globalData().nTotalPoints()
+                    << " points" << endl;
+            }
+            else
+            {
+                WarningIn
+                (
+                    "medialAxisMeshMover::"
+                    "medialAxisSmoothingInfo(..)"
+                )   << "Walking did not visit all points." << nl
+                    << "    Did not visit " << nUnvisit
+                    << " out of " << mesh().globalData().nTotalPoints()
+                    << " points. This is not necessarily a problem" << nl
+                    << "    and might be due to faceZones splitting of part"
+                    << " of the domain." << nl << endl;
+            }
         }
     }
 
@@ -564,8 +588,29 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
             )
             {
                 // Unvisited point. See above about nUnvisit warning
+                forAll(e, ep)
+                {
+                    label pointI = e[ep];
+
+                    if (!pointMedialDist[pointI].valid(dummyTrackData))
+                    {
+                        maxPoints.append(pointI);
+                        maxInfo.append
+                        (
+                            pointData
+                            (
+                                points[pointI],
+                                0.0,
+                                pointI,         // passive data
+                                vector::zero    // passive data
+                            )
+                        );
+                        pointMedialDist[pointI] = maxInfo.last();
+                    }
+                }
+
             }
-            else if (isMaxEdge(pointWallDist, edgeI, minMedianAxisAngleCos))
+            else if (isMaxEdge(pointWallDist, edgeI, minMedialAxisAngleCos))
             {
                 // Both end points of edge have very different nearest wall
                 // point. Mark both points as medial axis points.
@@ -653,7 +698,8 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
                 if (pvf.fixesValue())
                 {
                     // Disable all movement on fixedValue patchFields
-                    Info<< "Inserting all points on patch " << pp.name()
+                    Info<< typeName
+                        << " : Inserting all points on patch " << pp.name()
                         << endl;
 
                     forAll(meshPoints, i)
@@ -683,7 +729,8 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
                     // normal as the passive vector. Note that this points
                     // out of the originating wall so inside of the domain
                     // on this patch.
-                    Info<< "Inserting points on patch " << pp.name()
+                    Info<< typeName
+                        << " : Inserting points on patch " << pp.name()
                         << " if angle to nearest layer patch > "
                         << slipFeatureAngle << " degrees." << endl;
 
@@ -753,15 +800,29 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
 
             pointMedialDist,
             edgeMedialDist,
-            mesh().globalData().nTotalPoints(),   // max iterations
+            0,   // max iterations
             dummyTrackData
         );
+        medialDistCalc.iterate(2*nMedialAxisIter);
+
 
         // Extract medial axis distance as pointScalarField
         forAll(pointMedialDist, pointI)
         {
-            medialDist_[pointI] = Foam::sqrt(pointMedialDist[pointI].distSqr());
-            medialVec_[pointI] = pointMedialDist[pointI].origin();
+            if (pointMedialDist[pointI].valid(dummyTrackData))
+            {
+                medialDist_[pointI] = Foam::sqrt
+                (
+                    pointMedialDist[pointI].distSqr()
+                );
+                medialVec_[pointI] = pointMedialDist[pointI].origin();
+            }
+            else
+            {
+                // Unvisited. Do as if on medial axis so unmoving
+                medialDist_[pointI] = 0.0;
+                medialVec_[pointI] = point(1, 0, 0);
+            }
         }
     }
 
@@ -1380,7 +1441,8 @@ void Foam::medialAxisMeshMover::findIsolatedRegions
     }
 
     reduce(nPointCounter, sumOp<label>());
-    Info<< "Number isolated points extrusion stopped : "<< nPointCounter
+    Info<< typeName
+        << " : Number of isolated points extrusion stopped : "<< nPointCounter
         << endl;
 }
 
@@ -1632,6 +1694,13 @@ void Foam::medialAxisMeshMover::calculateDisplacement
         coeffDict.lookup("nSmoothThickness")
     );
 
+    //- Number of edges walking out
+    const label nMedialAxisIter = coeffDict.lookupOrDefault<label>
+    (
+        "nMedialAxisIter",
+        mesh().globalData().nTotalPoints()
+    );
+
 
     // Precalulate master points/edge (only relevant for shared points/edges)
     const PackedBoolList isMasterPoint(syncTools::getMasterPoints(mesh()));
@@ -1677,7 +1746,8 @@ void Foam::medialAxisMeshMover::calculateDisplacement
               + ".obj"
             )
         );
-        Info<< "Writing points with too large an extrusion distance to "
+        Info<< typeName
+            << " : Writing points with too large an extrusion distance to "
             << str().name() << endl;
     }
 
@@ -1694,8 +1764,9 @@ void Foam::medialAxisMeshMover::calculateDisplacement
               + ".obj"
             )
         );
-        Info<< "Writing points with too large an extrusion distance to "
-            << medialVecStr().name() << endl;
+        Info<< typeName
+            << " : Writing medial axis vectors on points with too large"
+            << " an extrusion distance to " << medialVecStr().name() << endl;
     }
 
     forAll(meshPoints, patchPointI)
@@ -1721,7 +1792,7 @@ void Foam::medialAxisMeshMover::calculateDisplacement
             if (thicknessRatio > maxThicknessToMedialRatio)
             {
                 // Truncate thickness.
-                if (debug)
+                if (debug&2)
                 {
                     Pout<< "truncating displacement at "
                         << mesh().points()[pointI]
@@ -1770,7 +1841,7 @@ void Foam::medialAxisMeshMover::calculateDisplacement
     }
 
     reduce(numThicknessRatioExclude, sumOp<label>());
-    Info<< typeName << " : Reduce layer thickness at "
+    Info<< typeName << " : Reducing layer thickness at "
         << numThicknessRatioExclude
         << " nodes where thickness to medial axis distance is large " << endl;
 
@@ -1849,9 +1920,10 @@ void Foam::medialAxisMeshMover::calculateDisplacement
             wallInfo,
             pointWallDist,
             edgeWallDist,
-            mesh().globalData().nTotalPoints(),   // max iterations
+            0,   // max iterations
             dummyTrackData
         );
+        wallDistCalc.iterate(nMedialAxisIter);
     }
 
 
@@ -1917,10 +1989,13 @@ bool Foam::medialAxisMeshMover::shrinkMesh
 
     for (label iter = 0; iter < 2*nSnap ; iter++)
     {
-        Info<< "Iteration " << iter << endl;
+        Info<< typeName
+            << " : Iteration " << iter << endl;
         if (iter == nSnap)
         {
-            Info<< "Displacement scaling for error reduction set to 0." << endl;
+            Info<< typeName
+                << " : Displacement scaling for error reduction set to 0."
+                << endl;
             oldErrorReduction = meshMover_.setErrorReduction(0.0);
         }
 
@@ -1937,7 +2012,7 @@ bool Foam::medialAxisMeshMover::shrinkMesh
             )
         )
         {
-            Info<< typeName << " :" << " Successfully moved mesh" << endl;
+            Info<< typeName << " : Successfully moved mesh" << endl;
             meshOk = true;
             break;
         }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -157,6 +157,13 @@ inline septernion inv(const septernion& tr);
 //- Return a string representation of a septernion
 word name(const septernion&);
 
+//- Spherical linear interpolation of septernions. 0 for qa, 1 for qb
+septernion slerp
+(
+    const septernion& qa,
+    const septernion& qb,
+    const scalar t
+);
 
 //- Data associated with septernion type are contiguous
 template<>

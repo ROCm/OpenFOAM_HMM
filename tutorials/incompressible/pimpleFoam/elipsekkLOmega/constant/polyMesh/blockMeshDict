@@ -67,7 +67,7 @@ boundary
 (
     left
     {
-        type symmetryPlane;
+        type symmetry;
         faces
         (
             (8 9 20 19)
@@ -85,7 +85,7 @@ boundary
     }
     down
     {
-        type symmetryPlane;
+        type symmetry;
         faces
         (
             (0 1 12 11)
@@ -94,7 +94,7 @@ boundary
     }
     up
     {
-        type symmetryPlane;
+        type symmetry;
         faces
         (
             (7 8 19 18)

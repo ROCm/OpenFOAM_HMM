@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -89,7 +89,7 @@ class turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
     // Private data
 
         //- Name of field on the neighbour region
-        const word neighbourFieldName_;
+        const word TnbrName_;
 
 
 public:
