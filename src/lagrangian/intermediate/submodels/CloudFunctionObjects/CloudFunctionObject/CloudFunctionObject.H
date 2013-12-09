@@ -39,7 +39,7 @@ SourceFiles
 #include "IOdictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
-#include "SubModelBase.H"
+#include "CloudSubModelBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,9 +56,15 @@ class tetIndices;
 template<class CloudType>
 class CloudFunctionObject
 :
-    public SubModelBase<CloudType>
+    public CloudSubModelBase<CloudType>
 {
-    // Protected Member Functions
+    // Private data
+
+        //- Output path
+        fileName outputDir_;
+
+
+    // Private Member Functions
 
         //- Write post-processing info
         virtual void write();
@@ -77,9 +83,10 @@ public:
         dictionary,
         (
             const dictionary& dict,
-            CloudType& owner
+            CloudType& owner,
+            const word& modelName
         ),
-        (dict, owner)
+        (dict, owner, modelName)
     );
 
 
@@ -93,7 +100,8 @@ public:
         (
             const dictionary& dict,
             CloudType& owner,
-            const word& modelType
+            const word& objectType,
+            const word& modelName
         );
 
         //- Construct copy
@@ -118,7 +126,8 @@ public:
     (
         const dictionary& dict,
         CloudType& owner,
-        const word& modelType
+        const word& objectType,
+        const word& modelName
     );
 
 
@@ -159,6 +168,12 @@ public:
                 const label faceI,
                 bool& keepParticle
             );
+
+
+        // Input/output
+
+            //- Return the output path
+            const fileName& outputDir() const;
 };
 
 

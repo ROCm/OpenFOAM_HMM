@@ -51,15 +51,13 @@ void Foam::ParticleCollector<CloudType>::makeLogFile
 
         if (Pstream::master())
         {
-            const fileName logDir = outputDir_/this->owner().time().timeName();
-
             // Create directory if does not exist
-            mkDir(logDir);
+            mkDir(this->outputDir());
 
             // Open new file at start up
             outputFilePtr_.reset
             (
-                new OFstream(logDir/(type() + ".dat"))
+                new OFstream(this->outputDir()/(type() + ".dat"))
             );
 
             outputFilePtr_()
@@ -463,7 +461,7 @@ void Foam::ParticleCollector<CloudType>::write()
 
             writer->write
             (
-                outputDir_/time.timeName(),
+                this->outputDir()/time.timeName(),
                 "collector",
                 points_,
                 faces_,
@@ -474,7 +472,7 @@ void Foam::ParticleCollector<CloudType>::write()
 
             writer->write
             (
-                outputDir_/time.timeName(),
+                this->outputDir()/time.timeName(),
                 "collector",
                 points_,
                 faces_,
@@ -516,10 +514,11 @@ template<class CloudType>
 Foam::ParticleCollector<CloudType>::ParticleCollector
 (
     const dictionary& dict,
-    CloudType& owner
+    CloudType& owner,
+    const word& modelName
 )
 :
-    CloudFunctionObject<CloudType>(dict, owner, typeName),
+    CloudFunctionObject<CloudType>(dict, owner, modelName, typeName),
     mode_(mtUnknown),
     parcelType_(this->coeffDict().lookupOrDefault("parcelType", -1)),
     removeCollected_(this->coeffDict().lookup("removeCollected")),
@@ -542,22 +541,8 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     massFlowRate_(),
     log_(this->coeffDict().lookup("log")),
     outputFilePtr_(),
-    outputDir_(owner.mesh().time().path()),
     timeOld_(owner.mesh().time().value())
 {
-    if (Pstream::parRun())
-    {
-        // Put in undecomposed case (Note: gives problems for
-        // distributed data running)
-        outputDir_ =
-            outputDir_/".."/"postProcessing"/cloud::prefix/owner.name();
-    }
-    else
-    {
-        outputDir_ =
-            outputDir_/"postProcessing"/cloud::prefix/owner.name();
-    }
-
     normal_ /= mag(normal_);
 
     word mode(this->coeffDict().lookup("mode"));
@@ -618,7 +603,6 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     massFlowRate_(pc.massFlowRate_),
     log_(pc.log_),
     outputFilePtr_(),
-    outputDir_(pc.outputDir_),
     timeOld_(0.0)
 {}
 

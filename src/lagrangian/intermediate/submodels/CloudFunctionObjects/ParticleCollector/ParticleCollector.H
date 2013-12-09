@@ -143,9 +143,6 @@ private:
         //- Output file pointer
         autoPtr<OFstream> outputFilePtr_;
 
-        //- Output directory
-        fileName outputDir_;
-
         //- Last calculation time
         scalar timeOld_;
 
@@ -198,7 +195,12 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        ParticleCollector(const dictionary& dict, CloudType& owner);
+        ParticleCollector
+        (
+            const dictionary& dict,
+            CloudType& owner,
+            const word& modelName
+        );
 
         //- Construct copy
         ParticleCollector(const ParticleCollector<CloudType>& pc);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,13 +33,15 @@ Foam::CloudFunctionObject<CloudType>::New
 (
     const dictionary& dict,
     CloudType& owner,
-    const word& modelType
+    const word& objectType,
+    const word& modelName
 )
 {
-    Info<< "    Selecting cloud function " << modelType << endl;
+    Info<< "    Selecting cloud function " << modelName << " of type "
+        << objectType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+        dictionaryConstructorTablePtr_->find(objectType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -48,16 +50,26 @@ Foam::CloudFunctionObject<CloudType>::New
             "CloudFunctionObject<CloudType>::New"
             "("
                 "const dictionary&, "
-                "CloudType&"
+                "CloudType&, "
+                "const word&, "
+                "const word&"
             ")"
         )   << "Unknown cloud function type "
-            << modelType << nl << nl
+            << objectType << nl << nl
             << "Valid cloud function types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
-    return autoPtr<CloudFunctionObject<CloudType> >(cstrIter()(dict, owner));
+    return autoPtr<CloudFunctionObject<CloudType> >
+    (
+        cstrIter()
+        (
+            dict,
+            owner,
+            modelName
+        )
+    );
 }
 
 

@@ -39,7 +39,8 @@ void Foam::CloudFunctionObject<CloudType>::write()
 template<class CloudType>
 Foam::CloudFunctionObject<CloudType>::CloudFunctionObject(CloudType& owner)
 :
-    SubModelBase<CloudType>(owner)
+    CloudSubModelBase<CloudType>(owner),
+    outputDir_()
 {}
 
 
@@ -48,11 +49,28 @@ Foam::CloudFunctionObject<CloudType>::CloudFunctionObject
 (
     const dictionary& dict,
     CloudType& owner,
-    const word& type
+    const word& modelName,
+    const word& objectType
 )
 :
-    SubModelBase<CloudType>(owner, dict, typeName, type, "")
-{}
+    CloudSubModelBase<CloudType>(modelName, owner, dict, typeName, objectType),
+    outputDir_(owner.mesh().time().path())
+{
+    const fileName relPath =
+        "postProcessing"/cloud::prefix/owner.name()/this->modelName();
+
+
+    if (Pstream::parRun())
+    {
+        // Put in undecomposed case (Note: gives problems for
+        // distributed data running)
+        outputDir_ = outputDir_/".."/relPath;
+    }
+    else
+    {
+        outputDir_ = outputDir_/relPath;
+    }
+}
 
 
 template<class CloudType>
@@ -61,7 +79,7 @@ Foam::CloudFunctionObject<CloudType>::CloudFunctionObject
     const CloudFunctionObject<CloudType>& ppm
 )
 :
-    SubModelBase<CloudType>(ppm)
+    CloudSubModelBase<CloudType>(ppm)
 {}
 
 
@@ -128,6 +146,13 @@ void Foam::CloudFunctionObject<CloudType>::postFace
 )
 {
     // do nothing
+}
+
+
+template<class CloudType>
+const Foam::fileName& Foam::CloudFunctionObject<CloudType>::outputDir() const
+{
+    return outputDir_;
 }
 
 
