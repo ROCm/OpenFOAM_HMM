@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ License
 template<class CloudType>
 Foam::CompositionModel<CloudType>::CompositionModel(CloudType& owner)
 :
-    SubModelBase<CloudType>(owner),
+    CloudSubModelBase<CloudType>(owner),
     thermo_(owner.thermo()),
     phaseProps_()
 {}
@@ -44,7 +44,7 @@ Foam::CompositionModel<CloudType>::CompositionModel
     const word& type
 )
 :
-    SubModelBase<CloudType>(owner, dict, typeName, type),
+    CloudSubModelBase<CloudType>(owner, dict, typeName, type),
     thermo_(owner.thermo()),
     phaseProps_
     (
@@ -62,7 +62,7 @@ Foam::CompositionModel<CloudType>::CompositionModel
     const CompositionModel<CloudType>& cm
 )
 :
-    SubModelBase<CloudType>(cm),
+    CloudSubModelBase<CloudType>(cm),
     thermo_(cm.thermo_),
     phaseProps_(cm.phaseProps_)
 {}

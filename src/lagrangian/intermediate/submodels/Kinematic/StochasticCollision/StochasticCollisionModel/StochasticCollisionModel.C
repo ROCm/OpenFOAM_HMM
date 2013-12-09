@@ -45,7 +45,7 @@ Foam::StochasticCollisionModel<CloudType>::StochasticCollisionModel
     CloudType& owner
 )
 :
-    SubModelBase<CloudType>(owner)
+    CloudSubModelBase<CloudType>(owner)
 {}
 
 
@@ -55,7 +55,7 @@ Foam::StochasticCollisionModel<CloudType>::StochasticCollisionModel
     const StochasticCollisionModel<CloudType>& cm
 )
 :
-    SubModelBase<CloudType>(cm)
+    CloudSubModelBase<CloudType>(cm)
 {}
 
 
@@ -67,7 +67,7 @@ Foam::StochasticCollisionModel<CloudType>::StochasticCollisionModel
     const word& type
 )
 :
-    SubModelBase<CloudType>(owner, dict, typeName, type)
+    CloudSubModelBase<CloudType>(owner, dict, typeName, type)
 {}
 
 

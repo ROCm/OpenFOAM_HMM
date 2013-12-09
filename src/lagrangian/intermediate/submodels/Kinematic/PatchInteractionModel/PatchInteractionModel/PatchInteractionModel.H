@@ -42,7 +42,7 @@ SourceFiles
 #include "polyPatch.H"
 #include "wallPolyPatch.H"
 #include "tetIndices.H"
-#include "SubModelBase.H"
+#include "CloudSubModelBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,7 +56,7 @@ namespace Foam
 template<class CloudType>
 class PatchInteractionModel
 :
-    public SubModelBase<CloudType>
+    public CloudSubModelBase<CloudType>
 {
 public:
 
