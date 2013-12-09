@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ namespace surfaceFilmModels
 
 autoPtr<filmRadiationModel> filmRadiationModel::New
 (
-    const surfaceFilmModel& model,
+    surfaceFilmModel& model,
     const dictionary& dict
 )
 {
@@ -55,7 +55,7 @@ autoPtr<filmRadiationModel> filmRadiationModel::New
         (
             "filmRadiationModel::New"
             "("
-                "const surfaceFilmModel&, "
+                "surfaceFilmModel&, "
                 "const dictionary&"
             ")"
         )   << "Unknown radiationModel type " << modelType << nl << nl

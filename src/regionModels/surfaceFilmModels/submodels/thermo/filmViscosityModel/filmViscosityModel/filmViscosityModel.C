@@ -43,13 +43,13 @@ defineRunTimeSelectionTable(filmViscosityModel, dictionary);
 
 filmViscosityModel::filmViscosityModel
 (
-    const word& type,
-    const surfaceFilmModel& owner,
+    const word& modelType,
+    surfaceFilmModel& owner,
     const dictionary& dict,
     volScalarField& mu
 )
 :
-    subModelBase(type, owner, dict),
+    filmSubModelBase(owner, dict, typeName, modelType),
     mu_(mu)
 {}
 

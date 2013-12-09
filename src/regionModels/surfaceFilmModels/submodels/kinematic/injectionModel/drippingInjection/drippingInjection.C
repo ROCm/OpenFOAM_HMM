@@ -50,19 +50,19 @@ addToRunTimeSelectionTable(injectionModel, drippingInjection, dictionary);
 
 drippingInjection::drippingInjection
 (
-    const surfaceFilmModel& owner,
+    surfaceFilmModel& owner,
     const dictionary& dict
 )
 :
     injectionModel(type(), owner, dict),
-    deltaStable_(readScalar(coeffs_.lookup("deltaStable"))),
-    particlesPerParcel_(readScalar(coeffs_.lookup("particlesPerParcel"))),
+    deltaStable_(readScalar(coeffDict_.lookup("deltaStable"))),
+    particlesPerParcel_(readScalar(coeffDict_.lookup("particlesPerParcel"))),
     rndGen_(label(0), -1),
     parcelDistribution_
     (
         distributionModels::distributionModel::New
         (
-            coeffs_.subDict("parcelDistribution"),
+            coeffDict_.subDict("parcelDistribution"),
             rndGen_
         )
     ),

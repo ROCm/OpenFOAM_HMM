@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,12 +60,12 @@ public:
     // Constructors
 
         //- Construct null
-        forceList(const surfaceFilmModel& owner);
+        forceList(surfaceFilmModel& owner);
 
         //- Construct from type name, dictionary and surface film model
         forceList
         (
-            const surfaceFilmModel& owner,
+            surfaceFilmModel& owner,
             const dictionary& dict
         );
 

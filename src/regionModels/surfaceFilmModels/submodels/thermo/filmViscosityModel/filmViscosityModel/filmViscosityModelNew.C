@@ -38,7 +38,7 @@ namespace surfaceFilmModels
 
 autoPtr<filmViscosityModel> filmViscosityModel::New
 (
-    const surfaceFilmModel& model,
+    surfaceFilmModel& model,
     const dictionary& dict,
     volScalarField& mu
 )
@@ -56,7 +56,7 @@ autoPtr<filmViscosityModel> filmViscosityModel::New
         (
             "filmViscosityModel::New"
             "("
-                "const surfaceFilmModel&, "
+                "surfaceFilmModel&, "
                 "const dictionary&, "
                 "volScalarField&"
             ")"

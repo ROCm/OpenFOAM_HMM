@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,10 +43,10 @@ defineRunTimeSelectionTable(phaseChangeModel, dictionary);
 
 phaseChangeModel::phaseChangeModel
 (
-    const surfaceFilmModel& owner
+    surfaceFilmModel& owner
 )
 :
-    subModelBase(owner),
+    filmSubModelBase(owner),
     latestMassPC_(0.0),
     totalMassPC_(0.0)
 {}
@@ -54,12 +54,12 @@ phaseChangeModel::phaseChangeModel
 
 phaseChangeModel::phaseChangeModel
 (
-    const word& type,
-    const surfaceFilmModel& owner,
+    const word& modelType,
+    surfaceFilmModel& owner,
     const dictionary& dict
 )
 :
-    subModelBase(type, owner, dict),
+    filmSubModelBase(owner, dict, typeName, modelType),
     latestMassPC_(0.0),
     totalMassPC_(0.0)
 {}

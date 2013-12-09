@@ -36,7 +36,7 @@ SourceFiles
 #ifndef filmViscosityModel_H
 #define filmViscosityModel_H
 
-#include "subModelBase.H"
+#include "filmSubModelBase.H"
 #include "runTimeSelectionTables.H"
 #include "scalarField.H"
 
@@ -55,7 +55,7 @@ namespace surfaceFilmModels
 
 class filmViscosityModel
 :
-    public subModelBase
+    public filmSubModelBase
 {
 private:
 
@@ -90,7 +90,7 @@ public:
              filmViscosityModel,
              dictionary,
              (
-                const surfaceFilmModel& owner,
+                surfaceFilmModel& owner,
                 const dictionary& dict,
                 volScalarField& mu
              ),
@@ -102,8 +102,8 @@ public:
         //- Construct from type name, dictionary and surface film model
         filmViscosityModel
         (
-            const word& type,
-            const surfaceFilmModel& owner,
+            const word& modelType,
+            surfaceFilmModel& owner,
             const dictionary& dict,
             volScalarField& mu
         );
@@ -114,7 +114,7 @@ public:
         //- Return a reference to the selected phase change model
         static autoPtr<filmViscosityModel> New
         (
-            const surfaceFilmModel& owner,
+            surfaceFilmModel& owner,
             const dictionary& dict,
             volScalarField& mu
         );

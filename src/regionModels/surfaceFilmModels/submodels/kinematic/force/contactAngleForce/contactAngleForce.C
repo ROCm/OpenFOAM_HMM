@@ -48,12 +48,12 @@ addToRunTimeSelectionTable(force, contactAngleForce, dictionary);
 
 void contactAngleForce::initialise()
 {
-    const wordReList zeroForcePatches(coeffs_.lookup("zeroForcePatches"));
+    const wordReList zeroForcePatches(coeffDict_.lookup("zeroForcePatches"));
 
     if (zeroForcePatches.size())
     {
         const polyBoundaryMesh& pbm = owner_.regionMesh().boundaryMesh();
-        scalar dLim = readScalar(coeffs_.lookup("zeroForceDistance"));
+        scalar dLim = readScalar(coeffDict_.lookup("zeroForceDistance"));
 
         Info<< "        Assigning zero contact force within " << dLim
             << " of patches:" << endl;
@@ -77,18 +77,18 @@ void contactAngleForce::initialise()
 
 contactAngleForce::contactAngleForce
 (
-    const surfaceFilmModel& owner,
+    surfaceFilmModel& owner,
     const dictionary& dict
 )
 :
     force(typeName, owner, dict),
-    Ccf_(readScalar(coeffs_.lookup("Ccf"))),
+    Ccf_(readScalar(coeffDict_.lookup("Ccf"))),
     rndGen_(label(0), -1),
     distribution_
     (
         distributionModels::distributionModel::New
         (
-            coeffs_.subDict("contactAngleDistribution"),
+            coeffDict_.subDict("contactAngleDistribution"),
             rndGen_
         )
     ),

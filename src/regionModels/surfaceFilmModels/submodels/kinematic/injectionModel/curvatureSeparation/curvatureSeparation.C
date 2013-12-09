@@ -220,13 +220,13 @@ tmp<scalarField> curvatureSeparation::calcCosAngle
 
 curvatureSeparation::curvatureSeparation
 (
-    const surfaceFilmModel& owner,
+    surfaceFilmModel& owner,
     const dictionary& dict
 )
 :
     injectionModel(type(), owner, dict),
     gradNHat_(fvc::grad(owner.nHat())),
-    deltaByR1Min_(coeffs().lookupOrDefault<scalar>("deltaByR1Min", 0.0)),
+    deltaByR1Min_(coeffDict_.lookupOrDefault<scalar>("deltaByR1Min", 0.0)),
     definedPatchRadii_(),
     magG_(mag(owner.g().value())),
     gHat_(vector::zero)
@@ -247,7 +247,7 @@ curvatureSeparation::curvatureSeparation
 
     gHat_ = owner.g().value()/magG_;
 
-    List<Tuple2<word, scalar> > prIn(coeffs().lookup("definedPatchRadii"));
+    List<Tuple2<word, scalar> > prIn(coeffDict_.lookup("definedPatchRadii"));
     const wordList& allPatchNames = owner.regionMesh().boundaryMesh().names();
 
     DynamicList<Tuple2<label, scalar> > prData(allPatchNames.size());

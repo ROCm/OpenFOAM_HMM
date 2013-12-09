@@ -50,13 +50,13 @@ addToRunTimeSelectionTable
 
 constantViscosity::constantViscosity
 (
-    const surfaceFilmModel& owner,
+    surfaceFilmModel& owner,
     const dictionary& dict,
     volScalarField& mu
 )
 :
     filmViscosityModel(typeName, owner, dict, mu),
-    mu0_(readScalar(coeffs().lookup("mu0")))
+    mu0_(readScalar(coeffDict_.lookup("mu0")))
 {
     mu_.internalField() = mu0_;
     mu_.correctBoundaryConditions();

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,20 +41,20 @@ defineRunTimeSelectionTable(injectionModel, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-injectionModel::injectionModel(const surfaceFilmModel& owner)
+injectionModel::injectionModel(surfaceFilmModel& owner)
 :
-    subModelBase(owner)
+    filmSubModelBase(owner)
 {}
 
 
 injectionModel::injectionModel
 (
-    const word& type,
-    const surfaceFilmModel& owner,
+    const word& modelType,
+    surfaceFilmModel& owner,
     const dictionary& dict
 )
 :
-    subModelBase(type, owner, dict)
+    filmSubModelBase(owner, dict, typeName, modelType)
 {}
 
 

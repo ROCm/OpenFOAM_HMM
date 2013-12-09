@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,7 @@ SourceFiles
 #ifndef injectionModel_H
 #define injectionModel_H
 
-#include "subModelBase.H"
+#include "filmSubModelBase.H"
 #include "runTimeSelectionTables.H"
 #include "scalarField.H"
 
@@ -55,7 +55,7 @@ namespace surfaceFilmModels
 
 class injectionModel
 :
-    public subModelBase
+    public filmSubModelBase
 {
 private:
 
@@ -82,7 +82,7 @@ public:
              injectionModel,
              dictionary,
              (
-                const surfaceFilmModel& owner,
+                surfaceFilmModel& owner,
                 const dictionary& dict
              ),
              (owner, dict)
@@ -91,13 +91,13 @@ public:
     // Constructors
 
         //- Construct null
-        injectionModel(const surfaceFilmModel& owner);
+        injectionModel(surfaceFilmModel& owner);
 
         //- Construct from type name, dictionary and surface film model
         injectionModel
         (
-            const word& type,
-            const surfaceFilmModel& owner,
+            const word& modelType,
+            surfaceFilmModel& owner,
             const dictionary& dict
         );
 
@@ -107,7 +107,7 @@ public:
         //- Return a reference to the selected injection model
         static autoPtr<injectionModel> New
         (
-            const surfaceFilmModel& owner,
+            surfaceFilmModel& owner,
             const dictionary& dict,
             const word& mdoelType
         );
