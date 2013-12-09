@@ -207,7 +207,10 @@ void createFaces
                 }
                 else
                 {
-                    // Use neighbour side of face
+                    // Use neighbour side of face.
+                    // To keep faceZone pointing out of original neighbour
+                    // we don't need to set faceFlip since that cell
+                    // now becomes the owner
                     modifyOrAddFace
                     (
                         meshMod,
@@ -217,7 +220,7 @@ void createFaces
                         true,                       // face flip
                         newMasterPatches[i],        // patch for face
                         fZone.index(),              // zone for face
-                        true,                       // face flip in zone
+                        false,                      // face flip in zone
                         modifiedFace                // modify or add status
                     );
                 }
@@ -264,7 +267,7 @@ void createFaces
                         false,                  // face flip
                         newSlavePatches[i],     // patch for face
                         fZone.index(),          // zone for face
-                        false,                  // face flip in zone
+                        true,                   // face flip in zone
                         modifiedFace            // modify or add status
                     );
                 }
