@@ -79,7 +79,6 @@ protected:
 
     // Protected data
 
-
         //- Acceleration due to gravity [m/s2]
         const dimensionedVector& g_;
 
