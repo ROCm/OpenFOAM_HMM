@@ -267,7 +267,11 @@ Foam::label Foam::polyMeshFilter::filterFacesLoop(const label nOriginalBadFaces)
             newBadFaces = false;
             forAll(mesh_.points(), pI)
             {
-                if (isErrorPoint[origToCurrentPointMap[pI]])
+                if
+                (
+                    origToCurrentPointMap[pI] >= 0
+                 && isErrorPoint[origToCurrentPointMap[pI]]
+                )
                 {
                     if (!newErrorPoint[pI])
                     {
@@ -862,13 +866,21 @@ void Foam::polyMeshFilter::updateOldToNewPointMap
     {
         label oldPointI = origToCurrentPointMap[origPointI];
 
-        if (oldPointI < currToNew.size())
+        if (oldPointI != -1)
         {
             label newPointI = currToNew[oldPointI];
 
-            if (newPointI != -1)
+            if (newPointI >= 0)
             {
                 origToCurrentPointMap[origPointI] = newPointI;
+            }
+            else if (newPointI == -1)
+            {
+                origToCurrentPointMap[origPointI] = -1;
+            }
+            else
+            {
+                origToCurrentPointMap[origPointI] = -newPointI-2;
             }
         }
     }
