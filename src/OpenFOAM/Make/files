@@ -73,6 +73,8 @@ primitives/functions/DataEntry/polynomial/polynomialIO.C
 
 primitives/functions/Polynomial/polynomialFunction.C
 
+primitives/subModelBase/subModelBase.C
+
 strings = primitives/strings
 $(strings)/string/string.C
 $(strings)/string/stringIO.C
