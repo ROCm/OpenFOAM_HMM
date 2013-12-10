@@ -26,10 +26,11 @@ License
 #include "sixDoFRigidBodyMotionSolver.H"
 #include "addToRunTimeSelectionTable.H"
 #include "polyMesh.H"
-#include "patchDist.H"
-#include "volPointInterpolation.H"
+#include "pointPatchDist.H"
+#include "pointConstraints.H"
 #include "uniformDimensionedFields.H"
 #include "forces.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -55,17 +56,42 @@ Foam::sixDoFRigidBodyMotionSolver::sixDoFRigidBodyMotionSolver
 )
 :
     displacementMotionSolver(mesh, dict, typeName),
-    motion_(coeffDict()),
+    motion_
+    (
+        coeffDict(),
+        IOobject
+        (
+            "sixDoFRigidBodyMotionState",
+            mesh.time().timeName(),
+            "uniform",
+            mesh
+        ).headerOk()
+      ? IOdictionary
+        (
+            IOobject
+            (
+                "sixDoFRigidBodyMotionState",
+                mesh.time().timeName(),
+                "uniform",
+                mesh,
+                IOobject::READ_IF_PRESENT,
+                IOobject::NO_WRITE,
+                false
+            )
+        )
+      : coeffDict()
+    ),
     patches_(wordReList(coeffDict().lookup("patches"))),
     patchSet_(mesh.boundaryMesh().patchSet(patches_)),
-    distance_(readScalar(coeffDict().lookup("distance"))),
+    di_(readScalar(coeffDict().lookup("innerDistance"))),
+    do_(readScalar(coeffDict().lookup("outerDistance"))),
     rhoInf_(1.0),
     rhoName_(coeffDict().lookupOrDefault<word>("rhoName", "rho")),
     scale_
     (
         IOobject
         (
-            "scale",
+            "motionScale",
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -77,8 +103,6 @@ Foam::sixDoFRigidBodyMotionSolver::sixDoFRigidBodyMotionSolver
     ),
     curTimeIndex_(-1)
 {
-    const fvMesh& fMesh = dynamic_cast<const fvMesh&>(mesh);
-
     if (rhoName_ == "rhoInf")
     {
         rhoInf_ = readScalar(dict.lookup("rhoInf"));
@@ -88,19 +112,35 @@ Foam::sixDoFRigidBodyMotionSolver::sixDoFRigidBodyMotionSolver
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     {
-        patchDist dist(fMesh, patchSet_);
+        pointPatchDist pDist(pointMesh::New(mesh), patchSet_, points0());
 
-        // Update distance to object
-        pointScalarField pDist
-        (
-            volPointInterpolation::New
+        // Scaling: 1 up to di then linear down to 0 at do away from patches
+        scale_.internalField() =
+            min
             (
-                fMesh
-            ).interpolate(dist)
-        );
+                max
+                (
+                    (do_ - pDist.internalField())/(do_ - di_),
+                    0.0
+                ),
+                1.0
+            );
 
-        // Scaling. 1 at patches, 0 at distance_ away from patches
-        scale_.internalField() = 1 - min(1.0, pDist.internalField()/distance_);
+        // Convert the scale function to a cosine
+        scale_.internalField() =
+            min
+            (
+                max
+                (
+                    0.5
+                  - 0.5
+                   *cos(scale_.internalField()
+                   *Foam::constant::mathematical::pi),
+                    0.0
+                ),
+                1.0
+            );
+
         scale_.correctBoundaryConditions();
         scale_.write();
     }
@@ -179,7 +219,34 @@ void Foam::sixDoFRigidBodyMotionSolver::solve()
     pointDisplacement_.internalField() =
         motion_.scaledPosition(points0(), scale_) - points0();
 
-    pointDisplacement_.correctBoundaryConditions();
+    // Displacement has changed. Update boundary conditions
+    pointConstraints::New(mesh()).constrainDisplacement(pointDisplacement_);
+}
+
+
+bool Foam::sixDoFRigidBodyMotionSolver::writeObject
+(
+    IOstream::streamFormat fmt,
+    IOstream::versionNumber ver,
+    IOstream::compressionType cmp
+) const
+{
+    IOdictionary dict
+    (
+        IOobject
+        (
+            "sixDoFRigidBodyMotionState",
+            mesh().time().timeName(),
+            "uniform",
+            mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        )
+    );
+
+    motion_.state().write(dict);
+    return dict.regIOobject::write();
 }
 
 

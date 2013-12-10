@@ -38,11 +38,6 @@ boundaryField
         value           uniform (0 0 0);
     }
 
-    axis
-    {
-        type            symmetryPlane;
-    }
-
     left
     {
         type            pressureInletOutletVelocity;

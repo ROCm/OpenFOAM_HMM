@@ -137,7 +137,7 @@ Foam::Ostream& Foam::operator<<
     const sixDoFRigidBodyMotion& sDoFRBM
 )
 {
-    os  << sDoFRBM.motionState()
+    os  << sDoFRBM.state()
         << token::SPACE << sDoFRBM.initialCentreOfMass()
         << token::SPACE << sDoFRBM.initialQ()
         << token::SPACE << sDoFRBM.momentOfInertia()

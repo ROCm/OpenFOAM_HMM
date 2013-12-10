@@ -28,6 +28,17 @@ License
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
+void Foam::sixDoFRigidBodyMotionState::write(dictionary& dict) const
+{
+    dict.add("centreOfMass", centreOfMass_);
+    dict.add("orientation", Q_);
+    dict.add("velocity", v_);
+    dict.add("acceleration", a_);
+    dict.add("angularMomentum", pi_);
+    dict.add("torque", tau_);
+}
+
+
 void Foam::sixDoFRigidBodyMotionState::write(Ostream& os) const
 {
     os.writeKeyword("centreOfMass")

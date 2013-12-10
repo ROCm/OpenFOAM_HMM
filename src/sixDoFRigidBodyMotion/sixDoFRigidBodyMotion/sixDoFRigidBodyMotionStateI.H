@@ -23,9 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 inline const Foam::point& Foam::sixDoFRigidBodyMotionState::centreOfMass() const
 {
     return centreOfMass_;

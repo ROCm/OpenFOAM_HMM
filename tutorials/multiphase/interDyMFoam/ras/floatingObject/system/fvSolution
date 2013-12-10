@@ -17,18 +17,6 @@ FoamFile
 
 solvers
 {
-    "cellDisplacement.*"
-    {
-        solver          GAMG;
-        tolerance       1e-5;
-        relTol          0;
-        smoother        GaussSeidel;
-        cacheAgglomeration true;
-        nCellsInCoarsestLevel 10;
-        agglomerator    faceAreaPair;
-        mergeLevels     1;
-    }
-
     "alpha.water.*"
     {
         nAlphaCorr      1;
@@ -39,6 +27,7 @@ solvers
 
         MULESCorr       yes;
         nLimiterIter    5;
+        alphaApplyPrevCorr  true;
 
         solver          PBiCG;
         preconditioner  DILU;
@@ -130,7 +119,7 @@ solvers
 PIMPLE
 {
     momentumPredictor no;
-    nOuterCorrectors 6;
+    nOuterCorrectors 5;
     nCorrectors      1;
     nNonOrthogonalCorrectors 0;
     correctPhi      yes;

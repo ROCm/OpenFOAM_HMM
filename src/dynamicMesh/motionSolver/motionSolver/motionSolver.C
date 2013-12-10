@@ -69,7 +69,7 @@ Foam::motionSolver::motionSolver(const polyMesh& mesh)
             mesh.time().constant(),
             mesh,
             IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         )
     ),
     mesh_(mesh)
@@ -146,7 +146,7 @@ Foam::autoPtr<Foam::motionSolver> Foam::motionSolver::New(const polyMesh& mesh)
             mesh.time().constant(),
             mesh,
             IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         )
     );
 
@@ -177,6 +177,17 @@ void Foam::motionSolver::twoDCorrectPoints(pointField& p) const
 
 void Foam::motionSolver::updateMesh(const mapPolyMesh& mpm)
 {}
+
+
+bool Foam::motionSolver::writeObject
+(
+    IOstream::streamFormat fmt,
+    IOstream::versionNumber ver,
+    IOstream::compressionType cmp
+) const
+{
+    return true;
+}
 
 
 // ************************************************************************* //

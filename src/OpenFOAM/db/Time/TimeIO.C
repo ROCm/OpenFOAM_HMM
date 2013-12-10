@@ -163,115 +163,6 @@ void Foam::Time::readDict()
     }
 
 
-
-    //{
-    //    // fundamentalConstants.C
-    //    Info<< "constant::universal::hr:"
-    //        << Foam::constant::universal::hr
-    //        << endl;
-    //    Info<< "constant::universal::c:"
-    //        << Foam::constant::universal::c
-    //        << endl;
-    //    Info<< "constant::universal::G:"
-    //        << Foam::constant::universal::G
-    //        << endl;
-    //    Info<< "constant::universal::h:"
-    //        << Foam::constant::universal::h
-    //        << endl;
-    //    Info<< "constant::electromagnetic::e:"
-    //        << Foam::constant::electromagnetic::e
-    //        << endl;
-    //    Info<< "constant::atomic::me:"
-    //        << Foam::constant::atomic::me
-    //        << endl;
-    //    Info<< "constant::atomic::mp:"
-    //        << Foam::constant::atomic::mp
-    //        << endl;
-    //    Info<< "constant::physicoChemical::mu:"
-    //        << Foam::constant::physicoChemical::mu
-    //        << endl;
-    //    Info<< "constant::physicoChemical::NA:"
-    //        << Foam::constant::physicoChemical::NA
-    //        << endl;
-    //    Info<< "constant::physicoChemical::k:"
-    //        << Foam::constant::physicoChemical::k
-    //        << endl;
-    //    Info<< "constant::standard::Pstd:"
-    //        << Foam::constant::standard::Pstd
-    //        << endl;
-    //    Info<< "constant::standard::Tstd:"
-    //        << Foam::constant::standard::Tstd
-    //        << endl;
-    //
-    //    // universalConstants.C
-    //    Info<< "constant::universal::hr:"
-    //        << Foam::constant::universal::hr
-    //        << endl;
-    //
-    //    // electromagneticConstants.C
-    //    Info<< "constant::electromagnetic::mu0:"
-    //        << Foam::constant::electromagnetic::mu0
-    //        << endl;
-    //    Info<< "constant::electromagnetic::epsilon0:"
-    //        << Foam::constant::electromagnetic::epsilon0
-    //        << endl;
-    //    Info<< "constant::electromagnetic::Z0:"
-    //        << Foam::constant::electromagnetic::Z0
-    //        << endl;
-    //    Info<< "constant::electromagnetic::kappa:"
-    //        << Foam::constant::electromagnetic::kappa
-    //        << endl;
-    //    Info<< "constant::electromagnetic::G0:"
-    //        << Foam::constant::electromagnetic::G0
-    //        << endl;
-    //    Info<< "constant::electromagnetic::KJ:"
-    //        << Foam::constant::electromagnetic::KJ
-    //        << endl;
-    //    Info<< "constant::electromagnetic::RK:"
-    //        << Foam::constant::electromagnetic::RK
-    //        << endl;
-    //
-    //
-    //    // atomicConstants.C
-    //    Info<< "constant::atomic::alpha:"
-    //        << Foam::constant::atomic::alpha
-    //        << endl;
-    //    Info<< "constant::atomic::Rinf:"
-    //        << Foam::constant::atomic::Rinf
-    //        << endl;
-    //    Info<< "constant::atomic::a0:"
-    //        << Foam::constant::atomic::a0
-    //        << endl;
-    //    Info<< "constant::physiatomic::re:"
-    //        << Foam::constant::atomic::re
-    //        << endl;
-    //    Info<< "constant::atomic::Eh:"
-    //        << Foam::constant::atomic::Eh
-    //        << endl;
-    //
-    //
-    //    // physicoChemicalConstants.C
-    //    Info<< "constant::physicoChemical::R:"
-    //        << Foam::constant::physicoChemical::R
-    //        << endl;
-    //    Info<< "constant::physicoChemical::F:"
-    //        << Foam::constant::physicoChemical::F
-    //        << endl;
-    //    Info<< "constant::physicoChemical::sigma:"
-    //        << Foam::constant::physicoChemical::sigma
-    //        << endl;
-    //    Info<< "constant::physicoChemical::b:"
-    //        << Foam::constant::physicoChemical::b
-    //        << endl;
-    //    Info<< "constant::physicoChemical::c1:"
-    //        << Foam::constant::physicoChemical::c1
-    //        << endl;
-    //    Info<< "constant::physicoChemical::c2:"
-    //        << Foam::constant::physicoChemical::c2
-    //        << endl;
-    //}
-
-
     // Dimension sets
     if (controlDict_.found("DimensionSets"))
     {
@@ -300,7 +191,6 @@ void Foam::Time::readDict()
             }
         }
     }
-
 
 
     if (!deltaTchanged_)

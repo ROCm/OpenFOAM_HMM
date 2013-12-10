@@ -223,9 +223,13 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
 {}
 
 
-Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion(const dictionary& dict)
+Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
+(
+    const dictionary& dict,
+    const dictionary& stateDict
+)
 :
-    motionState_(dict),
+    motionState_(stateDict),
     motionState0_(motionState_),
     restraints_(),
     restraintNames_(),
@@ -234,11 +238,19 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion(const dictionary& dict)
     maxConstraintIterations_(0),
     initialCentreOfMass_
     (
-        dict.lookupOrDefault("initialCentreOfMass", centreOfMass())
+        dict.lookupOrDefault
+        (
+            "initialCentreOfMass",
+            vector(dict.lookup("centreOfMass"))
+        )
     ),
     initialQ_
     (
-        dict.lookupOrDefault("initialOrientation", Q())
+        dict.lookupOrDefault
+        (
+            "initialOrientation",
+            dict.lookupOrDefault("orientation", I)
+        )
     ),
     momentOfInertia_(dict.lookup("momentOfInertia")),
     mass_(readScalar(dict.lookup("mass"))),
@@ -247,7 +259,6 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion(const dictionary& dict)
     report_(dict.lookupOrDefault<Switch>("report", false))
 {
     addRestraints(dict);
-
     addConstraints(dict);
 }
 
@@ -404,7 +415,7 @@ void Foam::sixDoFRigidBodyMotion::updateAcceleration
     scalar deltaT
 )
 {
-    static bool first = true;
+    static bool first = false;
 
     // Second leapfrog velocity adjust part, required after motion and
     // acceleration calculation
@@ -553,6 +564,8 @@ Foam::tmp<Foam::pointField> Foam::sixDoFRigidBodyMotion::scaledPosition
     const scalarField& scale
 ) const
 {
+    Info<< "initialCentreOfMass " << initialCentreOfMass() << endl;
+
     // Calculate the transformation septerion from the initial state
     septernion s
     (
@@ -565,12 +578,24 @@ Foam::tmp<Foam::pointField> Foam::sixDoFRigidBodyMotion::scaledPosition
 
     forAll(points, pointi)
     {
-        //- Slerp septernion
-        septernion ss(slerp(septernion::I, s, scale[pointi]));
+        // Move non-stationary points
+        if (scale[pointi] > SMALL)
+        {
+            // Use solid-body motion where scale = 1
+            if (scale[pointi] > 1 - SMALL)
+            {
+                points[pointi] = currentPosition(initialPoints[pointi]);
+            }
+            // Slerp septernion interpolation
+            else
+            {
+                septernion ss(slerp(septernion::I, s, scale[pointi]));
 
-        points[pointi] =
-            initialCentreOfMass()
-          + ss.transform(initialPoints[pointi] - initialCentreOfMass());
+                points[pointi] =
+                    initialCentreOfMass()
+                  + ss.transform(initialPoints[pointi] - initialCentreOfMass());
+            }
+        }
     }
 
     return tpoints;
