@@ -164,9 +164,6 @@ class sixDoFRigidBodyMotion
 
         // Access
 
-            //- Return access to the motion state
-            inline const sixDoFRigidBodyMotionState& motionState() const;
-
             //- Return access to the restraints
             inline const PtrList<sixDoFRigidBodyMotionRestraint>&
                 restraints() const;
@@ -271,8 +268,12 @@ public:
             bool report = false
         );
 
-        //- Construct from dictionary
-        sixDoFRigidBodyMotion(const dictionary& dict);
+        //- Construct from constant and state dictionaries
+        sixDoFRigidBodyMotion
+        (
+            const dictionary& dict,
+            const dictionary& stateDict
+        );
 
         //- Construct as copy
         sixDoFRigidBodyMotion(const sixDoFRigidBodyMotion&);
@@ -381,6 +382,9 @@ public:
 
 
         // Access
+
+            //- Return access to the motion state
+            inline const sixDoFRigidBodyMotionState& state() const;
 
             //- Return const access to the centre of mass
             inline const point& centreOfMass() const;

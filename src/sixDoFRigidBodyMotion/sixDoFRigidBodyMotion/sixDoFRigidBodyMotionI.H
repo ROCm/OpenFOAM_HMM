@@ -98,7 +98,7 @@ Foam::sixDoFRigidBodyMotion::rotate
 
 
 inline const Foam::sixDoFRigidBodyMotionState&
-Foam::sixDoFRigidBodyMotion::motionState() const
+Foam::sixDoFRigidBodyMotion::state() const
 {
     return motionState_;
 }

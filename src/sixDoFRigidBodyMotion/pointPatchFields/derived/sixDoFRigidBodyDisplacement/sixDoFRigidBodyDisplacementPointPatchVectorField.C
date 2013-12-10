@@ -66,7 +66,7 @@ sixDoFRigidBodyDisplacementPointPatchVectorField
 )
 :
     fixedValuePointPatchField<vector>(p, iF, dict),
-    motion_(dict),
+    motion_(dict, dict),
     rhoInf_(1.0),
     rhoName_(dict.lookupOrDefault<word>("rhoName", "rho")),
     lookupGravity_(-1),

@@ -60,7 +60,7 @@ uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField
 )
 :
     fixedValuePointPatchField<vector>(p, iF, dict),
-    motion_(dict)
+    motion_(dict, dict)
 {
     if (!dict.found("value"))
     {

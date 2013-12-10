@@ -148,6 +148,14 @@ public:
 
         //-  Update local data for topology changes
         virtual void updateMesh(const mapPolyMesh&) = 0;
+
+        //- Write state using given format, version and compression
+        virtual bool writeObject
+        (
+            IOstream::streamFormat fmt,
+            IOstream::versionNumber ver,
+            IOstream::compressionType cmp
+        ) const;
 };
 
 

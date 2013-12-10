@@ -163,13 +163,12 @@ public:
             inline vector& tau();
 
 
-        //- Write
+        //- Write to dictionary
+        void write(dictionary& dict) const;
+
+        //- Write to stream
         void write(Ostream&) const;
 
-
-    // Friend Functions
-
-    // Friend Operators
 
     // IOstream Operators
 

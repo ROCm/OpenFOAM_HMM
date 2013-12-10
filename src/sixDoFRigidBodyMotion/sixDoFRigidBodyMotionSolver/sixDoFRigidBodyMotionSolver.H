@@ -64,8 +64,11 @@ class sixDoFRigidBodyMotionSolver
         //- Patches to integrate forces
         const labelHashSet patchSet_;
 
-        //- Morphing distance
-        const scalar distance_;
+        //- Inner morphing distance (limit of solid-body region)
+        const scalar di_;
+
+        //- Outer morphing distance (limit of linear interpolation region)
+        const scalar do_;
 
         //- Reference density required by the forces object for
         //  incompressible calculations, required if rhoName == rhoInf
@@ -122,6 +125,14 @@ public:
 
         //- Solve for motion
         virtual void solve();
+
+        //- Write state using given format, version and compression
+        virtual bool writeObject
+        (
+            IOstream::streamFormat fmt,
+            IOstream::versionNumber ver,
+            IOstream::compressionType cmp
+        ) const;
 };
 
 
