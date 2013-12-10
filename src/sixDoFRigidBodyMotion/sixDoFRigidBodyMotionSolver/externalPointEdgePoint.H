@@ -217,7 +217,7 @@ public:
                 TrackingData& td
             );
 
-            //- Same (like operator==)
+            //- Equivalent to operator== with TrackingData
             template<class TrackingData>
             inline bool equal
             (
