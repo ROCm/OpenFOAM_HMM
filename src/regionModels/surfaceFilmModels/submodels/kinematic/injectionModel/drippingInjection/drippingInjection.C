@@ -137,6 +137,8 @@ void drippingInjection::correct
 
                 // Retrieve new particle diameter sample
                 diam = parcelDistribution_->sample();
+
+                addToInjectedMass(massDrip[cellI]);
             }
             else
             {
@@ -151,6 +153,8 @@ void drippingInjection::correct
             diameterToInject[cellI] = 0.0;
         }
     }
+
+    injectionModel::correct();
 }
 
 

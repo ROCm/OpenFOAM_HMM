@@ -339,6 +339,8 @@ void curvatureSeparation::correct
     diameterToInject = separated*delta;
     availableMass -= separated*availableMass;
 
+    addToInjectedMass(sum(separated*availableMass));
+
     if (debug && mesh.time().outputTime())
     {
         volScalarField volFnet
@@ -358,6 +360,8 @@ void curvatureSeparation::correct
         volFnet.correctBoundaryConditions();
         volFnet.write();
     }
+
+    injectionModel::correct();
 }
 
 

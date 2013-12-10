@@ -59,6 +59,12 @@ class injectionModel
 {
 private:
 
+    // Private data
+
+        //- Injected mass
+        scalar injectedMass_;
+
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -66,6 +72,17 @@ private:
 
         //- Disallow default bitwise assignment
         void operator=(const injectionModel&);
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Add to injected mass
+        void addToInjectedMass(const scalar dMass);
+
+        //- Correct
+        void correct();
 
 
 public:
@@ -128,6 +145,9 @@ public:
                 scalarField& massToInject,
                 scalarField& diameterToInject
             ) = 0;
+
+            //- Return the total mass injected
+            scalar injectedMassTotal() const;
 };
 
 

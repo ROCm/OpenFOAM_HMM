@@ -103,8 +103,12 @@ void removeInjection::correct
             scalar dMass = ddelta*rho[cellI]*magSf[cellI];
             massToInject[cellI] += dMass;
             availableMass[cellI] -= dMass;
+
+            addToInjectedMass(dMass);
         }
     }
+
+    injectionModel::correct();
 }
 
 

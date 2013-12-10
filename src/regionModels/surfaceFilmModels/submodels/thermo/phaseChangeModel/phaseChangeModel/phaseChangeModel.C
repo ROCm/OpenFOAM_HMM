@@ -94,6 +94,14 @@ void phaseChangeModel::correct
 
     availableMass -= dMass;
     dMass.correctBoundaryConditions();
+
+    if (outputTime())
+    {
+        scalar phaseChangeMass = getModelProperty<scalar>("phaseChangeMass");
+        phaseChangeMass += returnReduce(totalMassPC_, sumOp<scalar>());
+        setModelProperty<scalar>("phaseChangeMass", phaseChangeMass);
+        totalMassPC_ = 0.0;
+    }
 }
 
 
@@ -103,8 +111,10 @@ void phaseChangeModel::info(Ostream& os) const
         returnReduce(latestMassPC_, sumOp<scalar>())
        /owner_.time().deltaTValue();
 
-    os  << indent << "mass phase change  = "
-        << returnReduce(totalMassPC_, sumOp<scalar>()) << nl
+    scalar phaseChangeMass = getModelProperty<scalar>("phaseChangeMass");
+    phaseChangeMass += returnReduce(totalMassPC_, sumOp<scalar>());
+
+    os  << indent << "mass phase change  = " << phaseChangeMass << nl
         << indent << "vapourisation rate = " << massPCRate << nl;
 }
 

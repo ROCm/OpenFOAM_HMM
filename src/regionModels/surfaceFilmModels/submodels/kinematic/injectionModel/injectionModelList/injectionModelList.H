@@ -65,9 +65,6 @@ private:
         //- Dictionary
         dictionary dict_;
 
-        //- Cumulative mass injected total
-        scalar injectedMassTotal_;
-
 
     // Private Member Functions
 
