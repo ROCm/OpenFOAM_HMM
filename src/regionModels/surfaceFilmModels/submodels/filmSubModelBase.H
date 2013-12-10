@@ -100,6 +100,9 @@ public:
 
         // Access
 
+            //- Flag to indicate when to write a property
+            virtual bool outputTime() const;
+
             //- Return the reference to the owner surface film model
             inline const surfaceFilmModel& owner() const;
 

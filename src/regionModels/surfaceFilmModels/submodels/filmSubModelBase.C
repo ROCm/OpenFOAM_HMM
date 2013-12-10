@@ -91,6 +91,14 @@ filmSubModelBase::~filmSubModelBase()
 {}
 
 
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+bool filmSubModelBase::outputTime() const
+{
+    return active() && owner_.time().outputTime();
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace surfaceFilmModels
