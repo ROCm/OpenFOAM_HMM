@@ -136,6 +136,16 @@ void kinematicSingleLayer::transferPrimaryRegionSourceFields()
     rhoSp_.correctBoundaryConditions();
     USp_.correctBoundaryConditions();
     pSp_.correctBoundaryConditions();
+
+    // update addedMassTotal counter
+    if (time().outputTime())
+    {
+        scalar addedMassTotal = 0.0;
+        outputProperties().readIfPresent("addedMassTotal", addedMassTotal);
+        addedMassTotal += returnReduce(addedMassTotal_, sumOp<scalar>());
+        outputProperties().add("addedMassTotal", addedMassTotal, true);
+        addedMassTotal_ = 0.0;
+    }
 }
 
 
@@ -1055,9 +1065,11 @@ void kinematicSingleLayer::info() const
 
     const scalarField& deltaInternal = delta_.internalField();
     const vectorField& Uinternal = U_.internalField();
+    scalar addedMassTotal = 0.0;
+    outputProperties().readIfPresent("addedMassTotal", addedMassTotal);
+    addedMassTotal += returnReduce(addedMassTotal_, sumOp<scalar>());
 
-    Info<< indent << "added mass         = "
-        << returnReduce<scalar>(addedMassTotal_, sumOp<scalar>()) << nl
+    Info<< indent << "added mass         = " << addedMassTotal << nl
         << indent << "current mass       = "
         << gSum((deltaRho_*magSf())()) << nl
         << indent << "min/max(mag(U))    = " << gMin(mag(Uinternal)) << ", "
