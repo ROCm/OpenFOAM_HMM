@@ -158,7 +158,7 @@ void Foam::regionModels::regionModel::initialise()
                     uniformPath/regionName_,
                     primaryMesh_,
                     IOobject::READ_IF_PRESENT,
-                    IOobject::AUTO_WRITE
+                    IOobject::NO_WRITE
                 )
             )
         );
@@ -542,6 +542,16 @@ void Foam::regionModels::regionModel::evolve()
             Info<< incrIndent;
             info();
             Info<< endl << decrIndent;
+        }
+
+        if (time_.outputTime())
+        {
+            outputProperties().writeObject
+            (
+                IOstream::ASCII,
+                IOstream::currentVersion,
+                time_.writeCompression()
+            );
         }
     }
 }
