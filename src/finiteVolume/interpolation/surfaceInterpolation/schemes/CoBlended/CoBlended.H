@@ -170,7 +170,7 @@ public:
             (
                 surfaceInterpolationScheme<Type>::New(mesh, faceFlux, is)
             ),
-             faceFlux_(faceFlux)
+            faceFlux_(faceFlux)
         {
             if (Co1_ < 0 || Co2_ < 0 || Co1_ >= Co2_)
             {
