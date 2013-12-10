@@ -34,10 +34,6 @@ boundaryField
         type            uniformFixedValue;
         uniformValue    constant 0;
     }
-    axis
-    {
-        type            symmetryPlane;
-    }
     left
     {
         type            uniformFixedValue;

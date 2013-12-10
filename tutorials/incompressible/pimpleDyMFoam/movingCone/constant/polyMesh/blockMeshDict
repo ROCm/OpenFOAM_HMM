@@ -84,7 +84,7 @@ boundary
     }
     axis
     {
-        type symmetryPlane;
+        type empty;
         faces
         (
             (0 1 1 0)
