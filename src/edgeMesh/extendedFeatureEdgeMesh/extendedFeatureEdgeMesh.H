@@ -161,7 +161,7 @@ private:
         //  points and edges, unsorted
         vectorField normals_;
 
-        //-
+        //- Type per normal: which side of normal to mesh
         List<sideVolumeType> normalVolumeTypes_;
 
         //- Flat and open edges require the direction of the edge
