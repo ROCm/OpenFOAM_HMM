@@ -38,7 +38,7 @@ namespace surfaceFilmModels
 
 autoPtr<filmTurbulenceModel> filmTurbulenceModel::New
 (
-    const surfaceFilmModel& model,
+    surfaceFilmModel& model,
     const dictionary& dict
 )
 {
@@ -55,7 +55,7 @@ autoPtr<filmTurbulenceModel> filmTurbulenceModel::New
         (
             "filmTurbulenceModel::New"
             "("
-                "const surfaceFilmModel&, "
+                "surfaceFilmModel&, "
                 "const dictionary&"
             ")"
         )   << "Unknown filmTurbulenceModel type " << modelType

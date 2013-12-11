@@ -14,15 +14,23 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dynamicFvMesh      dynamicMotionSolverFvMesh;
+dynamicFvMesh       dynamicMotionSolverFvMesh;
 
-motionSolverLibs ("libfvMotionSolvers.so");
+motionSolverLibs    ("libsixDoFRigidBodyMotion.so");
 
-solver            displacementLaplacian;
+solver              sixDoFRigidBodyMotion;
 
-displacementLaplacianCoeffs
+sixDoFRigidBodyMotionCoeffs
 {
-    diffusivity       inverseDistance (floatingObject);
+    patches         (floatingObject);
+    innerDistance   0.05;
+    outerDistance   0.35;
+
+    centreOfMass    (0.5 0.5 0.5);
+    momentOfInertia (0.08622222 0.08622222 0.144);
+    mass            9.6;
+    report          on;
+    accelerationRelaxation 0.7;
 }
 
 

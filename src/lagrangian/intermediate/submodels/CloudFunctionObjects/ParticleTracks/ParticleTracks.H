@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -95,7 +95,12 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        ParticleTracks(const dictionary& dict, CloudType& owner);
+        ParticleTracks
+        (
+            const dictionary& dict,
+            CloudType& owner,
+            const word& modelName
+        );
 
         //- Construct copy
         ParticleTracks(const ParticleTracks<CloudType>& ppm);

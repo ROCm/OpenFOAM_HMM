@@ -82,7 +82,7 @@ public:
         //- Construct from surface film model
         liquidViscosity
         (
-            const surfaceFilmModel& owner,
+            surfaceFilmModel& owner,
             const dictionary& dict,
             volScalarField& mu
         );

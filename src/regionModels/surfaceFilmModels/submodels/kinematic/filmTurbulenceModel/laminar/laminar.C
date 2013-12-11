@@ -51,12 +51,12 @@ addToRunTimeSelectionTable(filmTurbulenceModel, laminar, dictionary);
 
 laminar::laminar
 (
-    const surfaceFilmModel& owner,
+    surfaceFilmModel& owner,
     const dictionary& dict
 )
 :
     filmTurbulenceModel(type(), owner, dict),
-    Cf_(readScalar(coeffs_.lookup("Cf")))
+    Cf_(readScalar(coeffDict_.lookup("Cf")))
 {}
 
 

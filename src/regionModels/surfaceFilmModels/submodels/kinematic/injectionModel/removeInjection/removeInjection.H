@@ -84,7 +84,7 @@ public:
     // Constructors
 
         //- Construct from surface film model
-        removeInjection(const surfaceFilmModel& owner, const dictionary& dict);
+        removeInjection(surfaceFilmModel& owner, const dictionary& dict);
 
 
     //- Destructor

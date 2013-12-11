@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,7 +61,7 @@ void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
             Un /= patch().lookupPatchField<volScalarField, scalar>("rho");
         }
 
-        this->jump_ = this->jumpTable_->value(Un);
+        this->jump_ = max(this->jumpTable_->value(Un), scalar(0));
     }
 }
 

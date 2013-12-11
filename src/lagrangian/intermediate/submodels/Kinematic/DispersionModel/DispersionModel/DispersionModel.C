@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ License
 template<class CloudType>
 Foam::DispersionModel<CloudType>::DispersionModel(CloudType& owner)
 :
-    SubModelBase<CloudType>(owner)
+    CloudSubModelBase<CloudType>(owner)
 {}
 
 
@@ -42,7 +42,7 @@ Foam::DispersionModel<CloudType>::DispersionModel
     const word& type
 )
 :
-    SubModelBase<CloudType>(owner, dict, typeName, type)
+    CloudSubModelBase<CloudType>(owner, dict, typeName, type)
 {}
 
 
@@ -52,7 +52,7 @@ Foam::DispersionModel<CloudType>::DispersionModel
     DispersionModel<CloudType>& dm
 )
 :
-    SubModelBase<CloudType>(dm)
+    CloudSubModelBase<CloudType>(dm)
 {}
 
 

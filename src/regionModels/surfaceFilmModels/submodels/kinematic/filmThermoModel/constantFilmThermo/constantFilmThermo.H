@@ -144,7 +144,7 @@ public:
         //- Construct from surface film model and dictionary
         constantFilmThermo
         (
-            const surfaceFilmModel& owner,
+            surfaceFilmModel& owner,
             const dictionary& dict
         );
 

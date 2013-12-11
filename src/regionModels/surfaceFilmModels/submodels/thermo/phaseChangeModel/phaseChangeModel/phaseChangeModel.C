@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,10 +43,10 @@ defineRunTimeSelectionTable(phaseChangeModel, dictionary);
 
 phaseChangeModel::phaseChangeModel
 (
-    const surfaceFilmModel& owner
+    surfaceFilmModel& owner
 )
 :
-    subModelBase(owner),
+    filmSubModelBase(owner),
     latestMassPC_(0.0),
     totalMassPC_(0.0)
 {}
@@ -54,12 +54,12 @@ phaseChangeModel::phaseChangeModel
 
 phaseChangeModel::phaseChangeModel
 (
-    const word& type,
-    const surfaceFilmModel& owner,
+    const word& modelType,
+    surfaceFilmModel& owner,
     const dictionary& dict
 )
 :
-    subModelBase(type, owner, dict),
+    filmSubModelBase(owner, dict, typeName, modelType),
     latestMassPC_(0.0),
     totalMassPC_(0.0)
 {}
@@ -94,6 +94,14 @@ void phaseChangeModel::correct
 
     availableMass -= dMass;
     dMass.correctBoundaryConditions();
+
+    if (outputTime())
+    {
+        scalar phaseChangeMass = getModelProperty<scalar>("phaseChangeMass");
+        phaseChangeMass += returnReduce(totalMassPC_, sumOp<scalar>());
+        setModelProperty<scalar>("phaseChangeMass", phaseChangeMass);
+        totalMassPC_ = 0.0;
+    }
 }
 
 
@@ -103,8 +111,10 @@ void phaseChangeModel::info(Ostream& os) const
         returnReduce(latestMassPC_, sumOp<scalar>())
        /owner_.time().deltaTValue();
 
-    os  << indent << "mass phase change  = "
-        << returnReduce(totalMassPC_, sumOp<scalar>()) << nl
+    scalar phaseChangeMass = getModelProperty<scalar>("phaseChangeMass");
+    phaseChangeMass += returnReduce(totalMassPC_, sumOp<scalar>());
+
+    os  << indent << "mass phase change  = " << phaseChangeMass << nl
         << indent << "vapourisation rate = " << massPCRate << nl;
 }
 

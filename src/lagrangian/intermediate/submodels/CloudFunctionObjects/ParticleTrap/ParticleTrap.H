@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,8 +29,9 @@ Description
 
     Model is activated using:
 
-        particleTrap
+        particleTrap1
         {
+            type        particleTrap;
             alphaName   alpha;      // name volume fraction field
             threshold   0.95;       // alpha value below which model is active
         }
@@ -91,7 +92,12 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        ParticleTrap(const dictionary& dict, CloudType& owner);
+        ParticleTrap
+        (
+            const dictionary& dict,
+            CloudType& owner,
+            const word& modelName
+        );
 
         //- Construct copy
         ParticleTrap(const ParticleTrap<CloudType>& pe);

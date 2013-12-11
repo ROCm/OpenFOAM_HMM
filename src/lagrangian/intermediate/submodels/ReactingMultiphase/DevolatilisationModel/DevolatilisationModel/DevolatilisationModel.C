@@ -33,7 +33,7 @@ Foam::DevolatilisationModel<CloudType>::DevolatilisationModel
     CloudType& owner
 )
 :
-    SubModelBase<CloudType>(owner),
+    CloudSubModelBase<CloudType>(owner),
     dMass_(0.0)
 {}
 
@@ -46,7 +46,7 @@ Foam::DevolatilisationModel<CloudType>::DevolatilisationModel
     const word& type
 )
 :
-    SubModelBase<CloudType>(owner, dict, typeName, type),
+    CloudSubModelBase<CloudType>(owner, dict, typeName, type),
     dMass_(0.0)
 {}
 
@@ -57,7 +57,7 @@ Foam::DevolatilisationModel<CloudType>::DevolatilisationModel
     const DevolatilisationModel<CloudType>& dm
 )
 :
-    SubModelBase<CloudType>(dm),
+    CloudSubModelBase<CloudType>(dm),
     dMass_(dm.dMass_)
 {}
 

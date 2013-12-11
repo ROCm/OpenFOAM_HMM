@@ -95,7 +95,7 @@ public:
     // Constructors
 
         //- Construct from surface film model
-        solidification(const surfaceFilmModel& owner, const dictionary& dict);
+        solidification(surfaceFilmModel& owner, const dictionary& dict);
 
 
     //- Destructor

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -91,9 +91,6 @@ class FacePostProcessing
         //- Output file pointer per zone
         PtrList<OFstream> outputFilePtr_;
 
-        //- Output directory
-        fileName outputDir_;
-
         //- Last calculation time
         scalar timeOld_;
 
@@ -127,7 +124,12 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        FacePostProcessing(const dictionary& dict, CloudType& owner);
+        FacePostProcessing
+        (
+            const dictionary& dict,
+            CloudType& owner,
+            const word& modelName
+        );
 
         //- Construct copy
         FacePostProcessing(const FacePostProcessing<CloudType>& ppm);

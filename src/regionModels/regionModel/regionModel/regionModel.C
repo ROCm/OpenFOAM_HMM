@@ -142,6 +142,27 @@ void Foam::regionModels::regionModel::initialise()
             << "Region model has no mapped boundary conditions - transfer "
             << "between regions will not be possible" << endl;
     }
+
+    if (!outputPropertiesPtr_.valid())
+    {
+        const fileName uniformPath(word("uniform")/"regionModels");
+
+        outputPropertiesPtr_.reset
+        (
+            new IOdictionary
+            (
+                IOobject
+                (
+                    regionName_ + "OutputProperties",
+                    time_.timeName(),
+                    uniformPath/regionName_,
+                    primaryMesh_,
+                    IOobject::READ_IF_PRESENT,
+                    IOobject::NO_WRITE
+                )
+            )
+        );
+    }
 }
 
 
@@ -389,6 +410,7 @@ Foam::regionModels::regionModel::regionModel
     modelName_("none"),
     regionMeshPtr_(NULL),
     coeffs_(dictionary::null),
+    outputPropertiesPtr_(NULL),
     primaryPatchIDs_(),
     intCoupledPatchIDs_(),
     regionName_("none"),
@@ -424,6 +446,7 @@ Foam::regionModels::regionModel::regionModel
     modelName_(modelName),
     regionMeshPtr_(NULL),
     coeffs_(subOrEmptyDict(modelName + "Coeffs")),
+    outputPropertiesPtr_(NULL),
     primaryPatchIDs_(),
     intCoupledPatchIDs_(),
     regionName_(lookup("regionName")),
@@ -471,6 +494,7 @@ Foam::regionModels::regionModel::regionModel
     modelName_(modelName),
     regionMeshPtr_(NULL),
     coeffs_(dict.subOrEmptyDict(modelName + "Coeffs")),
+    outputPropertiesPtr_(NULL),
     primaryPatchIDs_(),
     intCoupledPatchIDs_(),
     regionName_(dict.lookup("regionName")),
@@ -518,6 +542,16 @@ void Foam::regionModels::regionModel::evolve()
             Info<< incrIndent;
             info();
             Info<< endl << decrIndent;
+        }
+
+        if (time_.outputTime())
+        {
+            outputProperties().writeObject
+            (
+                IOstream::ASCII,
+                IOstream::currentVersion,
+                time_.writeCompression()
+            );
         }
     }
 }

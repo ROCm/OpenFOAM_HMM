@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,22 +39,32 @@ namespace surfaceFilmModels
 defineTypeNameAndDebug(injectionModel, 0);
 defineRunTimeSelectionTable(injectionModel, dictionary);
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void injectionModel::addToInjectedMass(const scalar dMass)
+{
+    injectedMass_ += dMass;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-injectionModel::injectionModel(const surfaceFilmModel& owner)
+injectionModel::injectionModel(surfaceFilmModel& owner)
 :
-    subModelBase(owner)
+    filmSubModelBase(owner),
+    injectedMass_(0.0)
 {}
 
 
 injectionModel::injectionModel
 (
-    const word& type,
-    const surfaceFilmModel& owner,
+    const word& modelType,
+    surfaceFilmModel& owner,
     const dictionary& dict
 )
 :
-    subModelBase(type, owner, dict)
+    filmSubModelBase(owner, dict, typeName, modelType),
+    injectedMass_(0.0)
 {}
 
 
@@ -62,6 +72,27 @@ injectionModel::injectionModel
 
 injectionModel::~injectionModel()
 {}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void injectionModel::correct()
+{
+    if (outputTime())
+    {
+        scalar injectedMass0 = getModelProperty<scalar>("injectedMass");
+        injectedMass0 += returnReduce(injectedMass_, sumOp<scalar>());
+        setModelProperty<scalar>("injectedMass", injectedMass0);
+        injectedMass_ = 0.0;
+    }
+}
+
+
+scalar injectionModel::injectedMassTotal() const
+{
+    scalar injectedMass0 = getModelProperty<scalar>("injectedMass");
+    return injectedMass0 + returnReduce(injectedMass_, sumOp<scalar>());
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

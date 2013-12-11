@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,16 +50,17 @@ void Foam::FacePostProcessing<CloudType>::makeLogFile
 
         if (Pstream::master())
         {
-            const fileName logDir = outputDir_/this->owner().time().timeName();
-
             // Create directory if does not exist
-            mkDir(logDir);
+            mkDir(this->outputDir());
 
             // Open new file at start up
             outputFilePtr_.set
             (
                 zoneI,
-                new OFstream(logDir/(type() + '_' + zoneName + ".dat"))
+                new OFstream
+                (
+                    this->outputDir()/(type() + '_' + zoneName + ".dat")
+                )
             );
 
             outputFilePtr_[zoneI]
@@ -201,7 +202,7 @@ void Foam::FacePostProcessing<CloudType>::write()
 
                 writer->write
                 (
-                    outputDir_/time.timeName(),
+                    this->outputDir()/time.timeName(),
                     fZone.name(),
                     allPoints,
                     allFaces,
@@ -212,7 +213,7 @@ void Foam::FacePostProcessing<CloudType>::write()
 
                 writer->write
                 (
-                    outputDir_/time.timeName(),
+                    this->outputDir()/time.timeName(),
                     fZone.name(),
                     allPoints,
                     allFaces,
@@ -250,10 +251,11 @@ template<class CloudType>
 Foam::FacePostProcessing<CloudType>::FacePostProcessing
 (
     const dictionary& dict,
-    CloudType& owner
+    CloudType& owner,
+    const word& modelName
 )
 :
-    CloudFunctionObject<CloudType>(dict, owner, typeName),
+    CloudFunctionObject<CloudType>(dict, owner, modelName, typeName),
     faceZoneIDs_(),
     surfaceFormat_(this->coeffDict().lookup("surfaceFormat")),
     resetOnWrite_(this->coeffDict().lookup("resetOnWrite")),
@@ -263,7 +265,6 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
     massFlowRate_(),
     log_(this->coeffDict().lookup("log")),
     outputFilePtr_(),
-    outputDir_(owner.mesh().time().path()),
     timeOld_(owner.mesh().time().value())
 {
     wordList faceZoneNames(this->coeffDict().lookup("faceZones"));
@@ -272,19 +273,6 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
     massFlowRate_.setSize(faceZoneNames.size());
 
     outputFilePtr_.setSize(faceZoneNames.size());
-
-    if (Pstream::parRun())
-    {
-        // Put in undecomposed case (Note: gives problems for
-        // distributed data running)
-        outputDir_ =
-            outputDir_/".."/"postProcessing"/cloud::prefix/owner.name();
-    }
-    else
-    {
-        outputDir_ =
-            outputDir_/"postProcessing"/cloud::prefix/owner.name();
-    }
 
     DynamicList<label> zoneIDs;
     const faceZoneMesh& fzm = owner.mesh().faceZones();
@@ -358,7 +346,6 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
     massFlowRate_(pff.massFlowRate_),
     log_(pff.log_),
     outputFilePtr_(),
-    outputDir_(pff.outputDir_),
     timeOld_(0.0)
 {}
 

@@ -51,14 +51,14 @@ addToRunTimeSelectionTable
 
 solidification::solidification
 (
-    const surfaceFilmModel& owner,
+    surfaceFilmModel& owner,
     const dictionary& dict
 )
 :
     phaseChangeModel(typeName, owner, dict),
-    T0_(readScalar(coeffs_.lookup("T0"))),
-    L_(readScalar(coeffs_.lookup("L"))),
-    alpha_(readScalar(coeffs_.lookup("alpha"))),
+    T0_(readScalar(coeffDict_.lookup("T0"))),
+    L_(readScalar(coeffDict_.lookup("L"))),
+    alpha_(readScalar(coeffDict_.lookup("alpha"))),
     mass_
     (
         IOobject

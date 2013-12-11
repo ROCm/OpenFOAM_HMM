@@ -52,7 +52,7 @@ addToRunTimeSelectionTable
 
 primaryRadiation::primaryRadiation
 (
-    const surfaceFilmModel& owner,
+    surfaceFilmModel& owner,
     const dictionary& dict
 )
 :

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ License
 template<class CloudType>
 Foam::CollisionModel<CloudType>::CollisionModel(CloudType& owner)
 :
-    SubModelBase<CloudType>(owner)
+    CloudSubModelBase<CloudType>(owner)
 {}
 
 
@@ -42,14 +42,14 @@ Foam::CollisionModel<CloudType>::CollisionModel
     const word& type
 )
 :
-    SubModelBase<CloudType>(owner, dict, typeName, type)
+    CloudSubModelBase<CloudType>(owner, dict, typeName, type)
 {}
 
 
 template<class CloudType>
 Foam::CollisionModel<CloudType>::CollisionModel(CollisionModel<CloudType>& cm)
 :
-    SubModelBase<CloudType>(cm)
+    CloudSubModelBase<CloudType>(cm)
 {}
 
 

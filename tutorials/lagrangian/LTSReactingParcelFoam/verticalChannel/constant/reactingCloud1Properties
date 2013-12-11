@@ -179,14 +179,16 @@ subModels
 
 cloudFunctions
 {
-    patchPostProcessing
+    patchPostProcessing1
     {
+        type            patchPostProcessing;
         maxStoredParcels 100;
         patches         ( outlet );
     }
 
-    particleTracks
+    particleTracks1
     {
+        type            particleTracks;
         trackInterval   5;
         maxSamples      1000000;
         resetOnWrite    yes;

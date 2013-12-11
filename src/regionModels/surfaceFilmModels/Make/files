@@ -7,7 +7,7 @@ thermoSingleLayer/thermoSingleLayer.C
 
 
 /* Sub-models */
-submodels/subModelBase.C
+submodels/filmSubModelBase.C
 
 KINEMATICMODELS=submodels/kinematic
 $(KINEMATICMODELS)/force/force/force.C

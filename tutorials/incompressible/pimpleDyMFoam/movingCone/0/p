@@ -35,11 +35,6 @@ boundaryField
         type            zeroGradient;
     }
 
-    axis
-    {
-        type            symmetryPlane;
-    }
-
     left
     {
         type            totalPressure;

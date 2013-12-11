@@ -38,7 +38,7 @@ namespace surfaceFilmModels
 
 autoPtr<filmThermoModel> filmThermoModel::New
 (
-    const surfaceFilmModel& model,
+    surfaceFilmModel& model,
     const dictionary& dict
 )
 {
@@ -53,7 +53,7 @@ autoPtr<filmThermoModel> filmThermoModel::New
     {
         FatalErrorIn
         (
-            "filmThermoModel::New(const surfaceFilmModel&, const dictionary&)"
+            "filmThermoModel::New(surfaceFilmModel&, const dictionary&)"
         )   << "Unknown filmThermoModel type " << modelType << nl << nl
             << "Valid filmThermoModel types are:" << nl
             << dictionaryConstructorTablePtr_->toc()

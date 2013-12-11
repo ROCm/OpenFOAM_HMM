@@ -43,21 +43,21 @@ defineRunTimeSelectionTable(filmThermoModel, dictionary);
 
 filmThermoModel::filmThermoModel
 (
-    const surfaceFilmModel& owner
+    surfaceFilmModel& owner
 )
 :
-    subModelBase(owner)
+    filmSubModelBase(owner)
 {}
 
 
 filmThermoModel::filmThermoModel
 (
-    const word& type,
-    const surfaceFilmModel& owner,
+    const word& modelType,
+    surfaceFilmModel& owner,
     const dictionary& dict
 )
 :
-    subModelBase(type, owner, dict)
+    filmSubModelBase(owner, dict, typeName, modelType)
 {}
 
 

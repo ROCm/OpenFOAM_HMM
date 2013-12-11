@@ -51,7 +51,7 @@ SourceFiles
 #include "IOdictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
-#include "SubModelBase.H"
+#include "CloudSubModelBase.H"
 #include "vector.H"
 #include "TimeDataEntry.H"
 
@@ -67,7 +67,7 @@ namespace Foam
 template<class CloudType>
 class InjectionModel
 :
-    public SubModelBase<CloudType>
+    public CloudSubModelBase<CloudType>
 {
 public:
 

@@ -75,7 +75,7 @@ Foam::PhaseChangeModel<CloudType>::PhaseChangeModel
     CloudType& owner
 )
 :
-    SubModelBase<CloudType>(owner),
+    CloudSubModelBase<CloudType>(owner),
     enthalpyTransfer_(etLatentHeat),
     dMass_(0.0)
 {}
@@ -87,7 +87,7 @@ Foam::PhaseChangeModel<CloudType>::PhaseChangeModel
     const PhaseChangeModel<CloudType>& pcm
 )
 :
-    SubModelBase<CloudType>(pcm),
+    CloudSubModelBase<CloudType>(pcm),
     enthalpyTransfer_(pcm.enthalpyTransfer_),
     dMass_(pcm.dMass_)
 {}
@@ -101,7 +101,7 @@ Foam::PhaseChangeModel<CloudType>::PhaseChangeModel
     const word& type
 )
 :
-    SubModelBase<CloudType>(owner, dict, typeName, type),
+    CloudSubModelBase<CloudType>(owner, dict, typeName, type),
     enthalpyTransfer_
     (
         wordToEnthalpyTransfer(this->coeffDict().lookup("enthalpyTransfer"))

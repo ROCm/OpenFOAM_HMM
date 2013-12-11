@@ -70,14 +70,14 @@ scalar standardPhaseChange::Sh
 
 standardPhaseChange::standardPhaseChange
 (
-    const surfaceFilmModel& owner,
+    surfaceFilmModel& owner,
     const dictionary& dict
 )
 :
     phaseChangeModel(typeName, owner, dict),
-    deltaMin_(readScalar(coeffs_.lookup("deltaMin"))),
-    L_(readScalar(coeffs_.lookup("L"))),
-    TbFactor_(coeffs_.lookupOrDefault<scalar>("TbFactor", 1.1))
+    deltaMin_(readScalar(coeffDict_.lookup("deltaMin"))),
+    L_(readScalar(coeffDict_.lookup("L"))),
+    TbFactor_(coeffDict_.lookupOrDefault<scalar>("TbFactor", 1.1))
 {}
 
 

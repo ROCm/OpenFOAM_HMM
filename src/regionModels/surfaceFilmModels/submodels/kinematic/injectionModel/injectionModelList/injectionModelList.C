@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,25 +36,23 @@ namespace surfaceFilmModels
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-injectionModelList::injectionModelList(const surfaceFilmModel& owner)
+injectionModelList::injectionModelList(surfaceFilmModel& owner)
 :
     PtrList<injectionModel>(),
     owner_(owner),
-    dict_(dictionary::null),
-    injectedMassTotal_(0.0)
+    dict_(dictionary::null)
 {}
 
 
 injectionModelList::injectionModelList
 (
-    const surfaceFilmModel& owner,
+    surfaceFilmModel& owner,
     const dictionary& dict
 )
 :
     PtrList<injectionModel>(),
     owner_(owner),
-    dict_(dict),
-    injectedMassTotal_(0.0)
+    dict_(dict)
 {
     const wordList activeModels(dict.lookup("injectionModels"));
 
@@ -109,9 +107,6 @@ void injectionModelList::correct
         im.correct(availableMass, massToInject, diameterToInject);
     }
 
-    injectedMassTotal_ += sum(massToInject.internalField());
-
-
     // Push values to boundaries ready for transfer to the primary region
     massToInject.correctBoundaryConditions();
     diameterToInject.correctBoundaryConditions();
@@ -120,8 +115,14 @@ void injectionModelList::correct
 
 void injectionModelList::info(Ostream& os) const
 {
-    os  << indent << "injected mass      = "
-        << returnReduce<scalar>(injectedMassTotal_, sumOp<scalar>()) << nl;
+    scalar injectedMass = 0.0;
+    forAll(*this, i)
+    {
+        const injectionModel& im = operator[](i);
+        injectedMass += im.injectedMassTotal();
+    }
+
+    os  << indent << "injected mass      = " << injectedMass << nl;
 }
 
 

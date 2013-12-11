@@ -49,7 +49,7 @@ addToRunTimeSelectionTable
 
 void constantFilmThermo::init(thermoData& td)
 {
-    if (coeffs_.readIfPresent(td.name_, td.value_))
+    if (coeffDict_.readIfPresent(td.name_, td.value_))
     {
         td.set_ = true;
     }
@@ -60,12 +60,12 @@ void constantFilmThermo::init(thermoData& td)
 
 constantFilmThermo::constantFilmThermo
 (
-    const surfaceFilmModel& owner,
+    surfaceFilmModel& owner,
     const dictionary& dict
 )
 :
     filmThermoModel(typeName, owner, dict),
-    name_(coeffs_.lookup("specieName")),
+    name_(coeffDict_.lookup("specieName")),
     rho0_("rho0"),
     mu0_("mu0"),
     sigma0_("sigma0"),
@@ -110,7 +110,7 @@ scalar constantFilmThermo::rho
 {
     if (!rho0_.set_)
     {
-        coeffs_.lookup(rho0_.name_) >> rho0_.value_;
+        coeffDict_.lookup(rho0_.name_) >> rho0_.value_;
         rho0_.set_ = true;
     }
 
@@ -126,7 +126,7 @@ scalar constantFilmThermo::mu
 {
     if (!mu0_.set_)
     {
-        coeffs_.lookup(mu0_.name_) >> mu0_.value_;
+        coeffDict_.lookup(mu0_.name_) >> mu0_.value_;
         mu0_.set_ = true;
     }
 
@@ -142,7 +142,7 @@ scalar constantFilmThermo::sigma
 {
     if (!sigma0_.set_)
     {
-        coeffs_.lookup(sigma0_.name_) >> sigma0_.value_;
+        coeffDict_.lookup(sigma0_.name_) >> sigma0_.value_;
         sigma0_.set_ = true;
     }
 
@@ -158,7 +158,7 @@ scalar constantFilmThermo::Cp
 {
     if (!Cp0_.set_)
     {
-        coeffs_.lookup(Cp0_.name_) >> Cp0_.value_;
+        coeffDict_.lookup(Cp0_.name_) >> Cp0_.value_;
         Cp0_.set_ = true;
     }
 
@@ -174,7 +174,7 @@ scalar constantFilmThermo::kappa
 {
     if (!kappa0_.set_)
     {
-        coeffs_.lookup(kappa0_.name_) >> kappa0_.value_;
+        coeffDict_.lookup(kappa0_.name_) >> kappa0_.value_;
         kappa0_.set_ = true;
     }
 
@@ -190,7 +190,7 @@ scalar constantFilmThermo::D
 {
     if (!D0_.set_)
     {
-        coeffs_.lookup(D0_.name_) >> D0_.value_;
+        coeffDict_.lookup(D0_.name_) >> D0_.value_;
         D0_.set_ = true;
     }
 
@@ -206,7 +206,7 @@ scalar constantFilmThermo::hl
 {
     if (!hl0_.set_)
     {
-        coeffs_.lookup(hl0_.name_) >> hl0_.value_;
+        coeffDict_.lookup(hl0_.name_) >> hl0_.value_;
         hl0_.set_ = true;
     }
 
@@ -222,7 +222,7 @@ scalar constantFilmThermo::pv
 {
     if (!pv0_.set_)
     {
-        coeffs_.lookup(pv0_.name_) >> pv0_.value_;
+        coeffDict_.lookup(pv0_.name_) >> pv0_.value_;
         pv0_.set_ = true;
     }
 
@@ -234,7 +234,7 @@ scalar constantFilmThermo::W() const
 {
     if (!W0_.set_)
     {
-        coeffs_.lookup(W0_.name_) >> W0_.value_;
+        coeffDict_.lookup(W0_.name_) >> W0_.value_;
         W0_.set_ = true;
     }
 
@@ -246,7 +246,7 @@ scalar constantFilmThermo::Tb(const scalar p) const
 {
     if (!Tb0_.set_)
     {
-        coeffs_.lookup(Tb0_.name_) >> Tb0_.value_;
+        coeffDict_.lookup(Tb0_.name_) >> Tb0_.value_;
         Tb0_.set_ = true;
     }
 

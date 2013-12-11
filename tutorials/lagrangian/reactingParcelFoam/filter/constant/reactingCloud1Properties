@@ -164,10 +164,10 @@ subModels
 
 cloudFunctions
 {
-    patchPostProcessing
+    patchPostProcessing1
     {
+        type            patchPostProcessing;
         maxStoredParcels 20;
-
         patches
         (
             cycLeft_half0
@@ -175,8 +175,9 @@ cloudFunctions
         );
     }
 
-    facePostProcessing
+    facePostProcessing1
     {
+        type            facePostProcessing;
         surfaceFormat   vtk;
         resetOnWrite    no;
         log             yes;

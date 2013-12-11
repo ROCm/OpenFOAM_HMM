@@ -35,7 +35,7 @@ SourceFiles
 #ifndef force_H
 #define force_H
 
-#include "subModelBase.H"
+#include "filmSubModelBase.H"
 #include "runTimeSelectionTables.H"
 #include "fvMatrices.H"
 
@@ -54,7 +54,7 @@ namespace surfaceFilmModels
 
 class force
 :
-    public subModelBase
+    public filmSubModelBase
 {
 private:
 
@@ -81,7 +81,7 @@ public:
              force,
              dictionary,
              (
-                const surfaceFilmModel& owner,
+                surfaceFilmModel& owner,
                 const dictionary& dict
              ),
              (owner, dict)
@@ -90,13 +90,13 @@ public:
     // Constructors
 
         //- Construct null
-        force(const surfaceFilmModel& owner);
+        force(surfaceFilmModel& owner);
 
         //- Construct from type name, dictionary and surface film model
         force
         (
-            const word& type,
-            const surfaceFilmModel& owner,
+            const word& modelType,
+            surfaceFilmModel& owner,
             const dictionary& dict
         );
 
@@ -106,7 +106,7 @@ public:
         //- Return a reference to the selected force model
         static autoPtr<force> New
         (
-            const surfaceFilmModel& owner,
+            surfaceFilmModel& owner,
             const dictionary& dict,
             const word& modelType
         );

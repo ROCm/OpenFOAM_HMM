@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -72,7 +72,14 @@ bool Foam::primitiveEntry::expandVariable
         // ...if defined append its tokens into this
         if (ePtr)
         {
-            append(ePtr->stream());
+            if (ePtr->isDict())
+            {
+                append(ePtr->dict().tokens());
+            }
+            else
+            {
+                append(ePtr->stream());
+            }
         }
         else
         {

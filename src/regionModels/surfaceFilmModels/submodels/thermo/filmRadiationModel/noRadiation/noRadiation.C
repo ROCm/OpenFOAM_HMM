@@ -52,7 +52,7 @@ addToRunTimeSelectionTable
 
 noRadiation::noRadiation
 (
-    const surfaceFilmModel& owner,
+    surfaceFilmModel& owner,
     const dictionary& dict
 )
 :

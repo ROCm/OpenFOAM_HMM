@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,7 +34,7 @@ Description
 #include "IOdictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
-#include "SubModelBase.H"
+#include "CloudSubModelBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,7 +48,7 @@ namespace Foam
 template<class CloudType>
 class DispersionModel
 :
-    public SubModelBase<CloudType>
+    public CloudSubModelBase<CloudType>
 {
 public:
 

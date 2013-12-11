@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ SourceFiles
 #ifndef CompositionModel_H
 #define CompositionModel_H
 
-#include "SubModelBase.H"
+#include "CloudSubModelBase.H"
 #include "IOdictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
@@ -60,7 +60,7 @@ namespace Foam
 template<class CloudType>
 class CompositionModel
 :
-    public SubModelBase<CloudType>
+    public CloudSubModelBase<CloudType>
 {
     // Private data
         //- Reference to the thermo database

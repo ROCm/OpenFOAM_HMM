@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ namespace surfaceFilmModels
 
 autoPtr<injectionModel> injectionModel::New
 (
-    const surfaceFilmModel& model,
+    surfaceFilmModel& model,
     const dictionary& dict,
     const word& modelType
 )
@@ -52,7 +52,12 @@ autoPtr<injectionModel> injectionModel::New
     {
         FatalErrorIn
         (
-            "injectionModel::New(const surfaceFilmModel&, const dictionary&)"
+            "injectionModel::New"
+            "("
+                "surfaceFilmModel&, "
+                "const dictionary&, "
+                "const word&"
+            ")"
         )   << "Unknown injectionModel type " << modelType
             << nl << nl << "Valid injectionModel types are:" << nl
             << dictionaryConstructorTablePtr_->toc()

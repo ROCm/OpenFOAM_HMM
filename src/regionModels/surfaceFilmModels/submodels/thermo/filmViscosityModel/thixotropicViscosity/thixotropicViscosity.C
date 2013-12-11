@@ -85,18 +85,18 @@ void thixotropicViscosity::updateMu()
 
 thixotropicViscosity::thixotropicViscosity
 (
-    const surfaceFilmModel& owner,
+    surfaceFilmModel& owner,
     const dictionary& dict,
     volScalarField& mu
 )
 :
     filmViscosityModel(typeName, owner, dict, mu),
-    a_(coeffs().lookup("a")),
-    b_(coeffs().lookup("b")),
-    c_(coeffs().lookup("c")),
-    d_(coeffs().lookup("d")),
-    mu0_(coeffs().lookup("mu0")),
-    muInf_(coeffs().lookup("muInf")),
+    a_(coeffDict_.lookup("a")),
+    b_(coeffDict_.lookup("b")),
+    c_(coeffDict_.lookup("c")),
+    d_(coeffDict_.lookup("d")),
+    mu0_(coeffDict_.lookup("mu0")),
+    muInf_(coeffDict_.lookup("muInf")),
     K_(1.0 - Foam::sqrt(muInf_/mu0_)),
     lambda_
     (

@@ -282,7 +282,7 @@ void Foam::InjectionModel<CloudType>::postInjectCheck
 template<class CloudType>
 Foam::InjectionModel<CloudType>::InjectionModel(CloudType& owner)
 :
-    SubModelBase<CloudType>(owner),
+    CloudSubModelBase<CloudType>(owner),
     SOI_(0.0),
     volumeTotal_(0.0),
     massTotal_(0.0),
@@ -310,7 +310,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
     const word& modelType
 )
 :
-    SubModelBase<CloudType>(modelName, owner, dict, typeName, modelType),
+    CloudSubModelBase<CloudType>(modelName, owner, dict, typeName, modelType),
     SOI_(0.0),
     volumeTotal_(0.0),
     massTotal_(0.0),
@@ -387,7 +387,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
     const InjectionModel<CloudType>& im
 )
 :
-    SubModelBase<CloudType>(im),
+    CloudSubModelBase<CloudType>(im),
     SOI_(im.SOI_),
     volumeTotal_(im.volumeTotal_),
     massTotal_(im.massTotal_),

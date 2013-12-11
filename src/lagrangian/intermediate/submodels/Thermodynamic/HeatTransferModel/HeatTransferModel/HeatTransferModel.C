@@ -30,7 +30,7 @@ License
 template<class CloudType>
 Foam::HeatTransferModel<CloudType>::HeatTransferModel(CloudType& owner)
 :
-    SubModelBase<CloudType>(owner),
+    CloudSubModelBase<CloudType>(owner),
     BirdCorrection_(false)
 {}
 
@@ -43,7 +43,7 @@ Foam::HeatTransferModel<CloudType>::HeatTransferModel
     const word& type
 )
 :
-    SubModelBase<CloudType>(owner, dict, typeName, type),
+    CloudSubModelBase<CloudType>(owner, dict, typeName, type),
     BirdCorrection_(this->coeffDict().lookup("BirdCorrection"))
 {}
 
@@ -54,7 +54,7 @@ Foam::HeatTransferModel<CloudType>::HeatTransferModel
     const HeatTransferModel<CloudType>& htm
 )
 :
-    SubModelBase<CloudType>(htm),
+    CloudSubModelBase<CloudType>(htm),
     BirdCorrection_(htm.BirdCorrection_)
 {}
 

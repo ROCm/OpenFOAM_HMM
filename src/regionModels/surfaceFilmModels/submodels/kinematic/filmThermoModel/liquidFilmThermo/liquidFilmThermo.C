@@ -104,7 +104,7 @@ void liquidFilmThermo::initLiquid(const dictionary& dict)
 
 liquidFilmThermo::liquidFilmThermo
 (
-    const surfaceFilmModel& owner,
+    surfaceFilmModel& owner,
     const dictionary& dict
 )
 :
@@ -112,16 +112,16 @@ liquidFilmThermo::liquidFilmThermo
     name_("unknown_liquid"),
     liquidPtr_(NULL),
     ownLiquid_(false),
-    useReferenceValues_(readBool(coeffs_.lookup("useReferenceValues"))),
+    useReferenceValues_(readBool(coeffDict_.lookup("useReferenceValues"))),
     pRef_(0.0),
     TRef_(0.0)
 {
-    initLiquid(coeffs_);
+    initLiquid(coeffDict_);
 
     if (useReferenceValues_)
     {
-        coeffs_.lookup("pRef") >> pRef_;
-        coeffs_.lookup("TRef") >> TRef_;
+        coeffDict_.lookup("pRef") >> pRef_;
+        coeffDict_.lookup("TRef") >> TRef_;
     }
 }
 

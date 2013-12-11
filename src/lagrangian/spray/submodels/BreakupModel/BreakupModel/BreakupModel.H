@@ -52,7 +52,7 @@ namespace Foam
 template<class CloudType>
 class BreakupModel
 :
-    public SubModelBase<CloudType>
+    public CloudSubModelBase<CloudType>
 {
 
 protected:

@@ -44,16 +44,16 @@ addToRunTimeSelectionTable(injectionModel, removeInjection, dictionary);
 
 removeInjection::removeInjection
 (
-    const surfaceFilmModel& owner,
+    surfaceFilmModel& owner,
     const dictionary& dict
 )
 :
     injectionModel(type(), owner, dict),
-    deltaStable_(coeffs_.lookupOrDefault<scalar>("deltaStable", 0.0)),
+    deltaStable_(coeffDict_.lookupOrDefault<scalar>("deltaStable", 0.0)),
     mask_(owner.regionMesh().nCells(), -1)
 {
     wordReList patches;
-    if (coeffs_.readIfPresent("patches", patches))
+    if (coeffDict_.readIfPresent("patches", patches))
     {
         Info<< "        applying to patches:" << nl;
         const polyBoundaryMesh& pbm = owner.regionMesh().boundaryMesh();
@@ -103,8 +103,12 @@ void removeInjection::correct
             scalar dMass = ddelta*rho[cellI]*magSf[cellI];
             massToInject[cellI] += dMass;
             availableMass[cellI] -= dMass;
+
+            addToInjectedMass(dMass);
         }
     }
+
+    injectionModel::correct();
 }
 
 

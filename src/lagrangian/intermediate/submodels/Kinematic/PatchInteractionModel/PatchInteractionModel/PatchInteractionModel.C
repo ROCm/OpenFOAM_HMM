@@ -109,7 +109,7 @@ Foam::PatchInteractionModel<CloudType>::PatchInteractionModel
     CloudType& owner
 )
 :
-    SubModelBase<CloudType>(owner),
+    CloudSubModelBase<CloudType>(owner),
     UName_("unknown_UName")
 {}
 
@@ -122,7 +122,7 @@ Foam::PatchInteractionModel<CloudType>::PatchInteractionModel
     const word& type
 )
 :
-    SubModelBase<CloudType>(owner, dict, typeName, type),
+    CloudSubModelBase<CloudType>(owner, dict, typeName, type),
     UName_(this->coeffDict().lookupOrDefault("UName", word("U")))
 {}
 
@@ -133,7 +133,7 @@ Foam::PatchInteractionModel<CloudType>::PatchInteractionModel
     const PatchInteractionModel<CloudType>& pim
 )
 :
-    SubModelBase<CloudType>(pim),
+    CloudSubModelBase<CloudType>(pim),
     UName_(pim.UName_)
 {}
 

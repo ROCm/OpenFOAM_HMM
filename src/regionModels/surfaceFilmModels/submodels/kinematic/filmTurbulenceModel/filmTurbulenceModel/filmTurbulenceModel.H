@@ -36,7 +36,7 @@ SourceFiles
 #ifndef filmTurbulenceModel_H
 #define filmTurbulenceModel_H
 
-#include "subModelBase.H"
+#include "filmSubModelBase.H"
 #include "runTimeSelectionTables.H"
 #include "fvMatricesFwd.H"
 #include "volFieldsFwd.H"
@@ -56,7 +56,7 @@ namespace surfaceFilmModels
 
 class filmTurbulenceModel
 :
-    public subModelBase
+    public filmSubModelBase
 {
 private:
 
@@ -83,7 +83,7 @@ public:
              filmTurbulenceModel,
              dictionary,
              (
-                const surfaceFilmModel& owner,
+                surfaceFilmModel& owner,
                 const dictionary& dict
              ),
              (owner, dict)
@@ -92,13 +92,13 @@ public:
     // Constructors
 
         //- Construct null
-        filmTurbulenceModel(const surfaceFilmModel& owner);
+        filmTurbulenceModel(surfaceFilmModel& owner);
 
         //- Construct from type name, dictionary and surface film model
         filmTurbulenceModel
         (
-            const word& type,
-            const surfaceFilmModel& owner,
+            const word& modelType,
+            surfaceFilmModel& owner,
             const dictionary& dict
         );
 
@@ -108,7 +108,7 @@ public:
         //- Return a reference to the selected injection model
         static autoPtr<filmTurbulenceModel> New
         (
-            const surfaceFilmModel& owner,
+            surfaceFilmModel& owner,
             const dictionary& dict
         );
 

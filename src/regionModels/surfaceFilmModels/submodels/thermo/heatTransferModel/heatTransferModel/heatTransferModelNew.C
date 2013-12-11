@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ namespace surfaceFilmModels
 
 autoPtr<heatTransferModel> heatTransferModel::New
 (
-    const surfaceFilmModel& model,
+    surfaceFilmModel& model,
     const dictionary& dict
 )
 {
@@ -53,7 +53,7 @@ autoPtr<heatTransferModel> heatTransferModel::New
     {
         FatalErrorIn
         (
-            "heatTransferModel::New(const surfaceFilmModel&, const dictionary&)"
+            "heatTransferModel::New(surfaceFilmModel&, const dictionary&)"
         )   << "Unknown heatTransferModel type " << modelType << nl << nl
             << "Valid heatTransferModel types are:" << nl
             << dictionaryConstructorTablePtr_->toc()

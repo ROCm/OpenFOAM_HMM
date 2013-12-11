@@ -36,7 +36,7 @@ SourceFiles
 #ifndef filmThermoModel_H
 #define filmThermoModel_H
 
-#include "subModelBase.H"
+#include "filmSubModelBase.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -54,7 +54,7 @@ namespace surfaceFilmModels
 
 class filmThermoModel
 :
-    public subModelBase
+    public filmSubModelBase
 {
 private:
 
@@ -81,7 +81,7 @@ public:
              filmThermoModel,
              dictionary,
              (
-                 const surfaceFilmModel& owner,
+                 surfaceFilmModel& owner,
                  const dictionary& dict
              ),
              (owner, dict)
@@ -90,13 +90,13 @@ public:
     // Constructors
 
         //- Construct null
-        filmThermoModel(const surfaceFilmModel& owner);
+        filmThermoModel(surfaceFilmModel& owner);
 
         //- Construct from type name, dictionary and surface film model
         filmThermoModel
         (
-            const word& type,
-            const surfaceFilmModel& owner,
+            const word& modelType,
+            surfaceFilmModel& owner,
             const dictionary& dict
         );
 
@@ -106,7 +106,7 @@ public:
         //- Return a reference to the selected phase change model
         static autoPtr<filmThermoModel> New
         (
-            const surfaceFilmModel& owner,
+            surfaceFilmModel& owner,
             const dictionary& dict
         );
 

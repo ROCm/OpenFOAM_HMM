@@ -81,4 +81,6 @@ wmake $makeType regionCoupled
 
 postProcessing/Allwmake $*
 
+wmake $makeType sixDoFRigidBodyMotion
+
 # ----------------------------------------------------------------- end-of-file
