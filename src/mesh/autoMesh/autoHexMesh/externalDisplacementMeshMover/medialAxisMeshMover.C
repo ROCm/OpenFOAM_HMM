@@ -66,7 +66,6 @@ Foam::labelList Foam::medialAxisMeshMover::getFixedValueBCs
         if (isA<valuePointPatchField<vector> >(patchFld))
         {
             adaptPatchIDs.append(patchI);
-            //Info<< "Detected adapt patch " << patchFld.patch().name() << endl;
         }
     }
     return adaptPatchIDs;
@@ -1259,6 +1258,7 @@ handleFeatureAngleLayerTerminations
 void Foam::medialAxisMeshMover::findIsolatedRegions
 (
     const scalar minCosLayerTermination,
+    const bool detectExtrusionIsland,
     const PackedBoolList& isMasterPoint,
     const PackedBoolList& isMasterEdge,
     const labelList& meshEdges,
@@ -1268,6 +1268,8 @@ void Foam::medialAxisMeshMover::findIsolatedRegions
 ) const
 {
     const indirectPrimitivePatch& pp = adaptPatchPtr_();
+    const labelListList& pointFaces = pp.pointFaces();
+
 
     Info<< typeName << " : Removing isolated regions ..." << endl;
 
@@ -1292,40 +1294,110 @@ void Foam::medialAxisMeshMover::findIsolatedRegions
         syncPatchDisplacement(minThickness, patchDisp, extrudeStatus);
 
 
-        // Do not extrude from point where all neighbouring
-        // faces are not grown
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        boolList extrudedFaces(pp.size(), true);
-        forAll(pp.localFaces(), faceI)
-        {
-            const face& f = pp.localFaces()[faceI];
-            forAll(f, fp)
-            {
-                if (extrudeStatus[f[fp]] == autoLayerDriver::NOEXTRUDE)
-                {
-                    extrudedFaces[faceI] = false;
-                    break;
-                }
-            }
-        }
 
-        const labelListList& pointFaces = pp.pointFaces();
+        // Detect either:
+        // - point where all surrounding points are not extruded
+        //   (detectExtrusionIsland)
+        // or
+        // - point where all the faces surrounding it are not fully
+        //   extruded
 
         boolList keptPoints(pp.nPoints(), false);
-        forAll(keptPoints, patchPointI)
-        {
-            const labelList& pFaces = pointFaces[patchPointI];
 
-            forAll(pFaces, i)
+        if (detectExtrusionIsland)
+        {
+            // Do not extrude from point where all neighbouring
+            // points are not grown
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            labelList islandPoint(pp.size(), -1);
+            forAll(pp, faceI)
             {
-                label faceI = pFaces[i];
-                if (extrudedFaces[faceI])
+                const face& f = pp.localFaces()[faceI];
+
+                forAll(f, fp)
                 {
-                    keptPoints[patchPointI] = true;
-                    break;
+                    label patchPointI = f[fp];
+
+                    if (extrudeStatus[f[fp]] != autoLayerDriver::NOEXTRUDE)
+                    {
+                        if (islandPoint[faceI] == -1)
+                        {
+                            // First point to extrude
+                            islandPoint[faceI] = patchPointI;
+                        }
+                        else
+                        {
+                            // Second or more point to extrude
+                            islandPoint[faceI] = -2;
+                        }
+                    }
+                }
+            }
+
+            // islandPoint:
+            //  -1 : no point extruded
+            //  -2 : >= 2 points extruded
+            //  >=0: label of point extruded
+
+            // Check all surrounding faces that I am the islandPoint
+            boolList keptPoints(pp.nPoints(), false);
+            forAll(pointFaces, patchPointI)
+            {
+                if (extrudeStatus[patchPointI] != autoLayerDriver::NOEXTRUDE)
+                {
+                    const labelList& pFaces = pointFaces[patchPointI];
+
+                    forAll(pFaces, i)
+                    {
+                        label faceI = pFaces[i];
+                        if (islandPoint[faceI] != patchPointI)
+                        {
+                            keptPoints[patchPointI] = true;
+                            break;
+                        }
+                    }
                 }
             }
         }
+        else
+        {
+            // Do not extrude from point where all neighbouring
+            // faces are not grown
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            boolList extrudedFaces(pp.size(), true);
+            forAll(pp.localFaces(), faceI)
+            {
+                const face& f = pp.localFaces()[faceI];
+                forAll(f, fp)
+                {
+                    if (extrudeStatus[f[fp]] == autoLayerDriver::NOEXTRUDE)
+                    {
+                        extrudedFaces[faceI] = false;
+                        break;
+                    }
+                }
+            }
+
+            const labelListList& pointFaces = pp.pointFaces();
+
+            forAll(keptPoints, patchPointI)
+            {
+                const labelList& pFaces = pointFaces[patchPointI];
+
+                forAll(pFaces, i)
+                {
+                    label faceI = pFaces[i];
+                    if (extrudedFaces[faceI])
+                    {
+                        keptPoints[patchPointI] = true;
+                        break;
+                    }
+                }
+            }
+        }
+
 
         syncTools::syncPointList
         (
@@ -1344,8 +1416,8 @@ void Foam::medialAxisMeshMover::findIsolatedRegions
             {
                 if (unmarkExtrusion(patchPointI, patchDisp, extrudeStatus))
                 {
-                   nPointCounter++;
-                   nChanged++;
+                    nPointCounter++;
+                    nChanged++;
                 }
             }
         }
@@ -1701,6 +1773,13 @@ void Foam::medialAxisMeshMover::calculateDisplacement
         mesh().globalData().nTotalPoints()
     );
 
+    //- Use strick extrusionIsland detection
+    const Switch detectExtrusionIsland = coeffDict.lookupOrDefault<label>
+    (
+        "detectExtrusionIsland",
+        true
+    );
+
 
     // Precalulate master points/edge (only relevant for shared points/edges)
     const PackedBoolList isMasterPoint(syncTools::getMasterPoints(mesh()));
@@ -1851,6 +1930,8 @@ void Foam::medialAxisMeshMover::calculateDisplacement
     findIsolatedRegions
     (
         minCosLayerTermination,
+        detectExtrusionIsland,
+
         isMasterPoint,
         isMasterEdge,
         meshEdges,

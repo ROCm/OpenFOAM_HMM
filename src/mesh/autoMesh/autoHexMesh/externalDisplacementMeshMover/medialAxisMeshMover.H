@@ -219,6 +219,7 @@ class medialAxisMeshMover
             void findIsolatedRegions
             (
                 const scalar minCosLayerTermination,
+                const bool detectExtrusionIsland,
                 const PackedBoolList& isMasterPoint,
                 const PackedBoolList& isMasterEdge,
                 const labelList& meshEdges,
