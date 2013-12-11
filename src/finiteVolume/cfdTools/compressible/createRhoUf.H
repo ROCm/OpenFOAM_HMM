@@ -46,8 +46,13 @@ surfaceVectorField rhoUf
         IOobject::READ_IF_PRESENT,
         IOobject::AUTO_WRITE
     ),
-    linearInterpolate(rho*U)
+    fvc::interpolate(rho*U)
 );
+
+{
+    surfaceVectorField n(mesh.Sf()/mesh.magSf());
+    rhoUf += n*(phi/mesh.magSf() - (n & rhoUf));
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
