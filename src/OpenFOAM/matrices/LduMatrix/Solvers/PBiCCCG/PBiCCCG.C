@@ -104,7 +104,11 @@ Foam::PBiCCCG<Type, DType, LUType>::solve
     solverPerf.finalResidual() = solverPerf.initialResidual();
 
     // --- Check convergence, solve if not converged
-    if (!solverPerf.checkConvergence(this->tolerance_, this->relTol_))
+    if
+    (
+        this->minIter_ > 0
+     || !solverPerf.checkConvergence(this->tolerance_, this->relTol_)
+    )
     {
         // --- Select and construct the preconditioner
         autoPtr<typename LduMatrix<Type, DType, LUType>::preconditioner>
@@ -182,8 +186,11 @@ Foam::PBiCCCG<Type, DType, LUType>::solve
 
         } while
         (
-            solverPerf.nIterations()++ < this->maxIter_
-        && !(solverPerf.checkConvergence(this->tolerance_, this->relTol_))
+            (
+                solverPerf.nIterations()++ < this->maxIter_
+            && !solverPerf.checkConvergence(this->tolerance_, this->relTol_)
+            )
+         || solverPerf.nIterations() < this->minIter_
         );
     }
 

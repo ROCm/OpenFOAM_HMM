@@ -107,6 +107,9 @@ public:
             //- Maximum number of iterations in the solver
             label maxIter_;
 
+            //- Minimum number of iterations in the solver
+            label minIter_;
+
             //- Final convergence tolerance
             scalar tolerance_;
 

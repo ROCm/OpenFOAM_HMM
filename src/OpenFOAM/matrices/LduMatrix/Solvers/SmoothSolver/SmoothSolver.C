@@ -113,7 +113,11 @@ Foam::SmoothSolver<Type, DType, LUType>::solve(Field<Type>& psi) const
 
 
         // Check convergence, solve if not converged
-        if (!solverPerf.checkConvergence(this->tolerance_, this->relTol_))
+        if
+        (
+            this->minIter_ > 0
+         || !solverPerf.checkConvergence(this->tolerance_, this->relTol_)
+        )
         {
             autoPtr<typename LduMatrix<Type, DType, LUType>::smoother>
             smootherPtr = LduMatrix<Type, DType, LUType>::smoother::New
@@ -140,8 +144,11 @@ Foam::SmoothSolver<Type, DType, LUType>::solve(Field<Type>& psi) const
                 );
             } while
             (
-                (solverPerf.nIterations() += nSweeps_) < this->maxIter_
-             && !(solverPerf.checkConvergence(this->tolerance_, this->relTol_))
+                (
+                    (solverPerf.nIterations() += nSweeps_) < this->maxIter_
+                && !solverPerf.checkConvergence(this->tolerance_, this->relTol_)
+                )
+             || solverPerf.nIterations() < this->minIter_
             );
         }
     }

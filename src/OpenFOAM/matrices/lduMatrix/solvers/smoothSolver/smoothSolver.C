@@ -138,7 +138,11 @@ Foam::solverPerformance Foam::smoothSolver::solve
 
 
         // Check convergence, solve if not converged
-        if (!solverPerf.checkConvergence(tolerance_, relTol_))
+        if
+        (
+            minIter_ > 0
+         || !solverPerf.checkConvergence(tolerance_, relTol_)
+        )
         {
             autoPtr<lduMatrix::smoother> smootherPtr = lduMatrix::smoother::New
             (
@@ -176,8 +180,11 @@ Foam::solverPerformance Foam::smoothSolver::solve
                 )/normFactor;
             } while
             (
-                (solverPerf.nIterations() += nSweeps_) < maxIter_
-             && !(solverPerf.checkConvergence(tolerance_, relTol_))
+                (
+                    (solverPerf.nIterations() += nSweeps_) < maxIter_
+                && !solverPerf.checkConvergence(tolerance_, relTol_)
+                )
+             || solverPerf.nIterations() < minIter_
             );
         }
     }

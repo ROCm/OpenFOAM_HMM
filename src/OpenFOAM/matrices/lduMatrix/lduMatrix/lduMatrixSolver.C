@@ -164,6 +164,7 @@ Foam::lduMatrix::solver::solver
 void Foam::lduMatrix::solver::readControls()
 {
     maxIter_   = controlDict_.lookupOrDefault<label>("maxIter", 1000);
+    minIter_   = controlDict_.lookupOrDefault<label>("minIter", 0);
     tolerance_ = controlDict_.lookupOrDefault<scalar>("tolerance", 1e-6);
     relTol_    = controlDict_.lookupOrDefault<scalar>("relTol", 0);
 }
