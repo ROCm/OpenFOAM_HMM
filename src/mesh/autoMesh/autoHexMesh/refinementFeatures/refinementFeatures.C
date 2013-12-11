@@ -303,7 +303,7 @@ Foam::refinementFeatures::refinementFeatures
 
         Info<< "Detected " << featurePoints.size()
             << " featurePoints out of " << pointEdges.size()
-            << " on feature " << eMesh.name() << endl;
+            << " points on feature " << eMesh.name() << endl;
 
         buildTrees(i, featurePoints);
     }
@@ -372,7 +372,7 @@ Foam::refinementFeatures::refinementFeatures
 
         Info<< "Detected " << featurePoints.size()
             << " featurePoints out of " << points.size()
-            << " on feature " << eMesh.name()
+            << " points on feature " << eMesh.name()
             << " when using feature cos " << minCos << endl;
 
         buildTrees(i, featurePoints);
