@@ -83,6 +83,7 @@ label addPatch
             pp.inGroups().append(groupName);
         }
 
+
         // Add patch, create calculated everywhere
         fvMeshTools::addPatch
         (
@@ -636,18 +637,17 @@ int main(int argc, char *argv[])
                 // Note: This is added for the particular case where we want
                 // master and slave in different groupNames
                 // (ie 3D thermal baffles)
-                bool groupBase = false;
-                if (patchSource.found("groupBase"))
-                {
-                    groupBase = readBool(patchSource.lookup("groupBase"));
 
-                    if (groupBase)
-                    {
-                        groupNameMaster = groupName + "Group_master";
-                        groupNameSlave = groupName + "Group_slave";
-                        patchDictMaster.set("coupleGroup", groupNameMaster);
-                        patchDictSlave.set("coupleGroup", groupNameSlave);
-                    }
+                Switch sameGroup
+                (
+                    patchSource.lookupOrDefault("sameGroup", true)
+                );
+                if (!sameGroup)
+                {
+                    groupNameMaster = groupName + "Group_master";
+                    groupNameSlave = groupName + "Group_slave";
+                    patchDictMaster.set("coupleGroup", groupNameMaster);
+                    patchDictSlave.set("coupleGroup", groupNameSlave);
                 }
 
                 addPatch(mesh, masterName, groupNameMaster, patchDictMaster);
@@ -818,11 +818,11 @@ int main(int argc, char *argv[])
             else
             {
                 const dictionary& patchSource = dict.subDict("patchPairs");
-                bool groupBase = false;
-                if (patchSource.found("groupBase"))
-                {
-                    groupBase = readBool(patchSource.lookup("groupBase"));
-                }
+
+                Switch sameGroup
+                (
+                    patchSource.lookupOrDefault("sameGroup", true)
+                );
 
                 const word& groupName = selectors[selectorI].name();
 
@@ -833,7 +833,7 @@ int main(int argc, char *argv[])
                         "patchFields"
                     );
 
-                    if (!groupBase)
+                    if (sameGroup)
                     {
                         // Add coupleGroup to all entries
                         forAllIter(dictionary, patchFieldsDict, iter)

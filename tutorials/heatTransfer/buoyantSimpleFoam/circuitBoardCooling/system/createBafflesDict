@@ -52,8 +52,9 @@ baffles
         {
             type            mappedWall;
             sampleMode      nearestPatchFace;
-            //Group master and slave in different groups. (default off)
-            groupBase       on;
+            // Put master and slave patch in same group (default on)
+            // Otherwise makeup group names xxx_master and xxx_slave
+            sameGroup       off;
             patchFields
             {
                 #include "./0/include/wallBafflePatches"
