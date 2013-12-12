@@ -46,8 +46,14 @@ surfaceVectorField Uf
         IOobject::READ_IF_PRESENT,
         IOobject::AUTO_WRITE
     ),
-    linearInterpolate(U)
+    fvc::interpolate(U)
 );
+
+{
+    surfaceVectorField n(mesh.Sf()/mesh.magSf());
+    Uf += n*(phi/mesh.magSf() - (n & Uf));
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

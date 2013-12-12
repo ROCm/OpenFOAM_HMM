@@ -91,10 +91,7 @@ K = 0.5*magSqr(U);
 {
     rhoUf = fvc::interpolate(rho*U);
     surfaceVectorField n(mesh.Sf()/mesh.magSf());
-    rhoUf +=
-        mesh.Sf()
-       *(fvc::absolute(phi, rho, U) - (mesh.Sf() & rhoUf))
-       /sqr(mesh.magSf());
+    rhoUf += n*(fvc::absolute(phi, rho, U)/mesh.magSf() - (n & rhoUf));
 }
 
 if (thermo.dpdt())

@@ -120,7 +120,11 @@ Foam::solverPerformance Foam::PBiCG::solve
     solverPerf.finalResidual() = solverPerf.initialResidual();
 
     // --- Check convergence, solve if not converged
-    if (!solverPerf.checkConvergence(tolerance_, relTol_))
+    if
+    (
+        minIter_ > 0
+     || !solverPerf.checkConvergence(tolerance_, relTol_)
+    )
     {
         // --- Select and construct the preconditioner
         autoPtr<lduMatrix::preconditioner> preconPtr =
@@ -192,8 +196,11 @@ Foam::solverPerformance Foam::PBiCG::solve
                /normFactor;
         } while
         (
-            solverPerf.nIterations()++ < maxIter_
-        && !(solverPerf.checkConvergence(tolerance_, relTol_))
+            (
+                solverPerf.nIterations()++ < maxIter_
+            && !solverPerf.checkConvergence(tolerance_, relTol_)
+            )
+         || solverPerf.nIterations() < minIter_
         );
     }
 

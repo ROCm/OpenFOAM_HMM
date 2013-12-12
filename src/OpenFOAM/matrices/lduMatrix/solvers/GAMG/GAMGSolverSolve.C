@@ -69,7 +69,11 @@ Foam::solverPerformance Foam::GAMGSolver::solve
 
 
     // Check convergence, solve if not converged
-    if (!solverPerf.checkConvergence(tolerance_, relTol_))
+    if
+    (
+        minIter_ > 0
+     || !solverPerf.checkConvergence(tolerance_, relTol_)
+    )
     {
         // Create coarse grid correction fields
         PtrList<scalarField> coarseCorrFields;
@@ -131,8 +135,11 @@ Foam::solverPerformance Foam::GAMGSolver::solve
             }
         } while
         (
-            ++solverPerf.nIterations() < maxIter_
-         && !(solverPerf.checkConvergence(tolerance_, relTol_))
+            (
+              ++solverPerf.nIterations() < maxIter_
+            && !solverPerf.checkConvergence(tolerance_, relTol_)
+            )
+         || solverPerf.nIterations() < minIter_
         );
     }
 

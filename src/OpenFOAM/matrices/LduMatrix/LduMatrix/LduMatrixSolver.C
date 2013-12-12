@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -135,6 +135,7 @@ Foam::LduMatrix<Type, DType, LUType>::solver::solver
     controlDict_(solverDict),
 
     maxIter_(1000),
+    minIter_(0),
     tolerance_(1e-6*pTraits<Type>::one),
     relTol_(pTraits<Type>::zero)
 {
@@ -148,6 +149,7 @@ template<class Type, class DType, class LUType>
 void Foam::LduMatrix<Type, DType, LUType>::solver::readControls()
 {
     readControl(controlDict_, maxIter_, "maxIter");
+    readControl(controlDict_, minIter_, "minIter");
     readControl(controlDict_, tolerance_, "tolerance");
     readControl(controlDict_, relTol_, "relTol");
 }

@@ -65,10 +65,10 @@ int main(int argc, char *argv[])
     pimpleControl pimple(mesh);
 
     #include "createFields.H"
-    #include "createUf.H"
     #include "readTimeControls.H"
     #include "createPcorrTypes.H"
     #include "../interFoam/interDyMFoam/correctPhi.H"
+    #include "createUf.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
 
