@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,6 +38,14 @@ namespace fv
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class Type>
+const surfaceInterpolationScheme<Type>&
+gaussConvectionScheme<Type>::interpScheme() const
+{
+    return tinterpScheme_();
+}
+
 
 template<class Type>
 tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
