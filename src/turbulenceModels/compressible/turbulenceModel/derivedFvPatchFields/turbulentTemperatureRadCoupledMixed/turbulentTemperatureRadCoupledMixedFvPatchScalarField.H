@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,7 +34,7 @@ Description
         myInterfacePatchName
         {
             type compressible::turbulentTemperatureRadCoupledMixed;
-            TNbr        T;      // name of T field on neighbour region
+            Tnbr        T;      // name of T field on neighbour region
             kappa       lookup;
             KappaName   kappa;
             QrNbr       Qr; // or none. Name of Qr field on neighbour region
