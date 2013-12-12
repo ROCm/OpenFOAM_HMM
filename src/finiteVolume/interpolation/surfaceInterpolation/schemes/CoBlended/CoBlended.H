@@ -63,6 +63,7 @@ SourceFiles
 #define CoBlended_H
 
 #include "surfaceInterpolationScheme.H"
+#include "blendedSchemeBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -76,7 +77,8 @@ namespace Foam
 template<class Type>
 class CoBlended
 :
-    public surfaceInterpolationScheme<Type>
+    public surfaceInterpolationScheme<Type>,
+    public blendedSchemeBase<Type>
 {
     // Private data
 
@@ -135,10 +137,7 @@ public:
             ),
             faceFlux_
             (
-                mesh.lookupObject<surfaceScalarField>
-                (
-                    word(is)
-                )
+                mesh.lookupObject<surfaceScalarField>(word(is))
             )
         {
             if (Co1_ < 0 || Co2_ < 0 || Co1_ >= Co2_)
@@ -182,17 +181,39 @@ public:
         }
 
 
+    //- Destructor
+    virtual ~CoBlended()
+    {}
+
+
     // Member Functions
 
-        //- Return the face-based Courant number blending factor
-        tmp<surfaceScalarField> blendingFactor() const
+        //- Return the face-based blending factor
+        virtual tmp<surfaceScalarField> blendingFactor
+        (
+             const GeometricField<Type, fvPatchField, volMesh>& vf
+        ) const
         {
-            const fvMesh& mesh = faceFlux_.mesh();
+            const fvMesh& mesh = this->mesh();
 
-            return
+            tmp<surfaceScalarField> tbf
             (
-                scalar(1) -
-                max
+                new surfaceScalarField
+                (
+                    IOobject
+                    (
+                        vf.name() + "BlendingFactor",
+                        mesh.time().timeName(),
+                        mesh
+                    ),
+                    mesh,
+                    dimensionedScalar("blendingFactor", dimless, 0.0)
+                )
+            );
+
+            tbf() =
+                scalar(1)
+              - max
                 (
                     min
                     (
@@ -204,8 +225,9 @@ public:
                         scalar(1)
                     ),
                     scalar(0)
-                )
-            );
+                );
+
+            return tbf;
         }
 
 
@@ -216,9 +238,10 @@ public:
             const GeometricField<Type, fvPatchField, volMesh>& vf
         ) const
         {
-            surfaceScalarField bf(blendingFactor());
+            surfaceScalarField bf(blendingFactor(vf));
 
-            Info<< "weights " << max(bf) << " " << min(bf) << endl;
+            Info<< "weights " << max(bf).value() << " " << min(bf).value()
+                << endl;
 
             return
                 bf*tScheme1_().weights(vf)
@@ -234,7 +257,7 @@ public:
             const GeometricField<Type, fvPatchField, volMesh>& vf
         ) const
         {
-            surfaceScalarField bf(blendingFactor());
+            surfaceScalarField bf(blendingFactor(vf));
 
             return
                 bf*tScheme1_().interpolate(vf)
@@ -257,7 +280,7 @@ public:
             const GeometricField<Type, fvPatchField, volMesh>& vf
         ) const
         {
-            surfaceScalarField bf(blendingFactor());
+            surfaceScalarField bf(blendingFactor(vf));
 
             if (tScheme1_().corrected())
             {

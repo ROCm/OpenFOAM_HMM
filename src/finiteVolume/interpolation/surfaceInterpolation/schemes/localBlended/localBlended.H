@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,6 +36,7 @@ SourceFiles
 #define localBlended_H
 
 #include "surfaceInterpolationScheme.H"
+#include "blendedSchemeBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +50,8 @@ namespace Foam
 template<class Type>
 class localBlended
 :
-    public surfaceInterpolationScheme<Type>
+    public surfaceInterpolationScheme<Type>,
+    public blendedSchemeBase<Type>
 {
     // Private Member Functions
 
@@ -115,7 +117,26 @@ public:
         {}
 
 
+    //- Destructor
+    virtual ~localBlended()
+    {}
+
+
     // Member Functions
+
+        //- Return the face-based blending factor
+        virtual tmp<surfaceScalarField> blendingFactor
+        (
+             const GeometricField<Type, fvPatchField, volMesh>& vf
+        ) const
+        {
+            return
+                this->mesh().objectRegistry::template
+                    lookupObject<const surfaceScalarField>
+                    (
+                        word(vf.name() + "BlendingFactor")
+                    );
+        }
 
         //- Return the interpolation weighting factors
         tmp<surfaceScalarField> weights
@@ -125,10 +146,10 @@ public:
         {
             const surfaceScalarField& blendingFactor =
                 this->mesh().objectRegistry::template
-                lookupObject<const surfaceScalarField>
-                (
-                    word(vf.name() + "BlendingFactor")
-                );
+                    lookupObject<const surfaceScalarField>
+                    (
+                        word(vf.name() + "BlendingFactor")
+                    );
 
             return
                 blendingFactor*tScheme1_().weights(vf)
