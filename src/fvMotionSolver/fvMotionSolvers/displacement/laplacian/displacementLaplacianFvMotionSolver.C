@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -139,6 +139,21 @@ Foam::displacementLaplacianFvMotionSolver::
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+Foam::motionDiffusivity&
+Foam::displacementLaplacianFvMotionSolver::diffusivity()
+{
+    if (!diffusivityPtr_.valid())
+    {
+        diffusivityPtr_ = motionDiffusivity::New
+        (
+            fvMesh_,
+            coeffDict().lookup("diffusivity")
+        );
+    }
+    return diffusivityPtr_();
+}
+
+
 Foam::tmp<Foam::pointField>
 Foam::displacementLaplacianFvMotionSolver::curPoints() const
 {
@@ -210,14 +225,14 @@ void Foam::displacementLaplacianFvMotionSolver::solve()
     // the motionSolver accordingly
     movePoints(fvMesh_.points());
 
-    diffusivityPtr_->correct();
+    diffusivity().correct();
     pointDisplacement_.boundaryField().updateCoeffs();
 
     Foam::solve
     (
         fvm::laplacian
         (
-            diffusivityPtr_->operator()(),
+            diffusivity().operator()(),
             cellDisplacement_,
             "laplacian(diffusivity,cellDisplacement)"
         )
@@ -234,12 +249,7 @@ void Foam::displacementLaplacianFvMotionSolver::updateMesh
 
     // Update diffusivity. Note two stage to make sure old one is de-registered
     // before creating/registering new one.
-    diffusivityPtr_.reset(NULL);
-    diffusivityPtr_ = motionDiffusivity::New
-    (
-        fvMesh_,
-        coeffDict().lookup("diffusivity")
-    );
+    diffusivityPtr_.clear();
 }
 
 

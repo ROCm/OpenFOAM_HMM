@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,14 +48,11 @@ Foam::autoPtr<Foam::edgeMesh> Foam::edgeMesh::New
             << exit(FatalError);
     }
 
-    return autoPtr< edgeMesh >(cstrIter()(name));
+    return autoPtr<edgeMesh>(cstrIter()(name));
 }
 
 
-Foam::autoPtr<Foam::edgeMesh> Foam::edgeMesh::New
-(
-    const fileName& name
-)
+Foam::autoPtr<Foam::edgeMesh> Foam::edgeMesh::New(const fileName& name)
 {
     word ext = name.ext();
     if (ext == "gz")

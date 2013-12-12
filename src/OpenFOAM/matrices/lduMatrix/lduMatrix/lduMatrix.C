@@ -31,7 +31,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(lduMatrix, 1);
+    defineTypeNameAndDebug(lduMatrix, 1);
 }
 
 

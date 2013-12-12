@@ -4,36 +4,10 @@ cd ${0%/*} || exit 1    # run from this directory
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
-\cp system/controlDict.flow system/controlDict
+# Generate mesh
+./Allrun-pre
 
-# Set application name
-application=$(getApplication)
-
-# Get number of processors to run on
-nProcs=$(getNumberOfProcessors)
-
-\rm -rf 0
-
-runApplication createBaffles -overwrite
-runApplication mergeOrSplitBaffles -split -overwrite
-
-# Get rid of zero faced patches
-runApplication createPatch -overwrite
-
-# Copy fields after meshing to avoind the generation of unnecessary patch fields
-\cp -r 0.org 0
-
-# Initialize alpha
-runApplication setFields
-
-# Decompose
-runApplication decomposePar -force
-
-# Run
-runParallel $application 8
-
-# Reconstruct
-runApplication reconstructPar -noFunctionObjects
-
+## Run simulation
+#./Allrun-simulation
 
 # ----------------------------------------------------------------- end-of-file

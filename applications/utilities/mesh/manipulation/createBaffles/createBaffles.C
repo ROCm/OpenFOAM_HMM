@@ -83,6 +83,7 @@ label addPatch
             pp.inGroups().append(groupName);
         }
 
+
         // Add patch, create calculated everywhere
         fvMeshTools::addPatch
         (
@@ -207,7 +208,10 @@ void createFaces
                 }
                 else
                 {
-                    // Use neighbour side of face
+                    // Use neighbour side of face.
+                    // To keep faceZone pointing out of original neighbour
+                    // we don't need to set faceFlip since that cell
+                    // now becomes the owner
                     modifyOrAddFace
                     (
                         meshMod,
@@ -217,7 +221,7 @@ void createFaces
                         true,                       // face flip
                         newMasterPatches[i],        // patch for face
                         fZone.index(),              // zone for face
-                        true,                       // face flip in zone
+                        false,                      // face flip in zone
                         modifiedFace                // modify or add status
                     );
                 }
@@ -264,7 +268,7 @@ void createFaces
                         false,                  // face flip
                         newSlavePatches[i],     // patch for face
                         fZone.index(),          // zone for face
-                        false,                  // face flip in zone
+                        true,                   // face flip in zone
                         modifiedFace            // modify or add status
                     );
                 }
@@ -633,18 +637,17 @@ int main(int argc, char *argv[])
                 // Note: This is added for the particular case where we want
                 // master and slave in different groupNames
                 // (ie 3D thermal baffles)
-                bool groupBase = false;
-                if (patchSource.found("groupBase"))
-                {
-                    groupBase = readBool(patchSource.lookup("groupBase"));
 
-                    if (groupBase)
-                    {
-                        groupNameMaster = groupName + "Group_master";
-                        groupNameSlave = groupName + "Group_slave";
-                        patchDictMaster.set("coupleGroup", groupNameMaster);
-                        patchDictSlave.set("coupleGroup", groupNameSlave);
-                    }
+                Switch sameGroup
+                (
+                    patchSource.lookupOrDefault("sameGroup", true)
+                );
+                if (!sameGroup)
+                {
+                    groupNameMaster = groupName + "Group_master";
+                    groupNameSlave = groupName + "Group_slave";
+                    patchDictMaster.set("coupleGroup", groupNameMaster);
+                    patchDictSlave.set("coupleGroup", groupNameSlave);
                 }
 
                 addPatch(mesh, masterName, groupNameMaster, patchDictMaster);
@@ -815,11 +818,11 @@ int main(int argc, char *argv[])
             else
             {
                 const dictionary& patchSource = dict.subDict("patchPairs");
-                bool groupBase = false;
-                if (patchSource.found("groupBase"))
-                {
-                    groupBase = readBool(patchSource.lookup("groupBase"));
-                }
+
+                Switch sameGroup
+                (
+                    patchSource.lookupOrDefault("sameGroup", true)
+                );
 
                 const word& groupName = selectors[selectorI].name();
 
@@ -830,7 +833,7 @@ int main(int argc, char *argv[])
                         "patchFields"
                     );
 
-                    if (!groupBase)
+                    if (sameGroup)
                     {
                         // Add coupleGroup to all entries
                         forAllIter(dictionary, patchFieldsDict, iter)

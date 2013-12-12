@@ -26,7 +26,6 @@ License
 #include "SurfaceFilmModel.H"
 #include "surfaceFilmModel.H"
 #include "mathematicalConstants.H"
-#include "mappedPatchBase.H"
 
 using namespace Foam::constant;
 

@@ -85,6 +85,6 @@
     {
         Uf = fvc::interpolate(U);
         surfaceVectorField n(mesh.Sf()/mesh.magSf());
-        Uf += mesh.Sf()*(phiv - (mesh.Sf() & Uf))/sqr(mesh.magSf());
+        Uf += n*(phiv/mesh.magSf() - (n & Uf));
     }
 }

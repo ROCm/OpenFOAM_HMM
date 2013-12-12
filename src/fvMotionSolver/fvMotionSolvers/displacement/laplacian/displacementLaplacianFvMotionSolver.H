@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,7 +53,6 @@ class motionDiffusivity;
 
 class displacementLaplacianFvMotionSolver
 :
-//    public displacementFvMotionSolver
     public displacementMotionSolver,
     public fvMotionSolverCore
 {
@@ -119,6 +118,9 @@ public:
         {
             return cellDisplacement_;
         }
+
+        //- Return reference to the diffusivity field
+        motionDiffusivity& diffusivity();
 
         //- Return point location obtained from the current motion field
         virtual tmp<pointField> curPoints() const;

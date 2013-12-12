@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -124,6 +124,9 @@ public:
 
             //- Maximum number of iterations in the solver
             label maxIter_;
+
+            //- Minimum number of iterations in the solver
+            label minIter_;
 
             //- Final convergence tolerance
             Type tolerance_;

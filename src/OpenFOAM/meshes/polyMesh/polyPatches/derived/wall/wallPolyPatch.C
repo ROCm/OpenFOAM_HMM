@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,7 +49,13 @@ Foam::wallPolyPatch::wallPolyPatch
 )
 :
     polyPatch(name, size, start, index, bm, patchType)
-{}
+{
+    //  wall is not constraint type so add wall group explicitly
+    if (findIndex(inGroups(), typeName) == -1)
+    {
+        inGroups().append(typeName);
+    }
+}
 
 
 Foam::wallPolyPatch::wallPolyPatch
@@ -62,7 +68,13 @@ Foam::wallPolyPatch::wallPolyPatch
 )
 :
     polyPatch(name, dict, index, bm, patchType)
-{}
+{
+    //  wall is not constraint type so add wall group explicitly
+    if (findIndex(inGroups(), typeName) == -1)
+    {
+        inGroups().append(typeName);
+    }
+}
 
 
 Foam::wallPolyPatch::wallPolyPatch

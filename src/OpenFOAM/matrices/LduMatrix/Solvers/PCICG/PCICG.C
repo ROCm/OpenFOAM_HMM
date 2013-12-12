@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -92,7 +92,11 @@ Foam::PCICG<Type, DType, LUType>::solve(Field<Type>& psi) const
     solverPerf.finalResidual() = solverPerf.initialResidual();
 
     // --- Check convergence, solve if not converged
-    if (!solverPerf.checkConvergence(this->tolerance_, this->relTol_))
+    if
+    (
+        this->minIter_ > 0
+     || !solverPerf.checkConvergence(this->tolerance_, this->relTol_)
+    )
     {
         // --- Select and construct the preconditioner
         autoPtr<typename LduMatrix<Type, DType, LUType>::preconditioner>
@@ -174,8 +178,11 @@ Foam::PCICG<Type, DType, LUType>::solve(Field<Type>& psi) const
 
         } while
         (
-            solverPerf.nIterations()++ < this->maxIter_
-        && !(solverPerf.checkConvergence(this->tolerance_, this->relTol_))
+            (
+                solverPerf.nIterations()++ < this->maxIter_
+            && !solverPerf.checkConvergence(this->tolerance_, this->relTol_)
+            )
+         || solverPerf.nIterations() < this->minIter_
         );
     }
 
