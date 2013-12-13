@@ -96,6 +96,12 @@ class sixDoFRigidBodyMotion
         //- Motion constaints
         PtrList<sixDoFRigidBodyMotionConstraint> constraints_;
 
+        //- Translational constraint tensor
+        tensor tConstraints_;
+
+        //- Rotational constraint tensor
+        tensor rConstraints_;
+
         //- Centre of mass of initial state
         point initialCentreOfMass_;
 
@@ -117,10 +123,6 @@ class sixDoFRigidBodyMotion
 
         //- Switch to turn reporting of motion data on and off
         Switch report_;
-
-        tensor tConstraints_;
-
-        tensor rConstraints_;
 
 
     // Private Member Functions

@@ -73,15 +73,15 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion()
     motionState0_(),
     restraints_(),
     constraints_(),
+    tConstraints_(tensor::I),
+    rConstraints_(tensor::I),
     initialCentreOfMass_(vector::zero),
     initialQ_(I),
     momentOfInertia_(diagTensor::one*VSMALL),
     mass_(VSMALL),
     aRelax_(1.0),
     aDamp_(1.0),
-    report_(false),
-    tConstraints_(tensor::I),
-    rConstraints_(tensor::I)
+    report_(false)
 {}
 
 
@@ -114,15 +114,15 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     motionState0_(motionState_),
     restraints_(),
     constraints_(),
+    tConstraints_(tensor::I),
+    rConstraints_(tensor::I),
     initialCentreOfMass_(initialCentreOfMass),
     initialQ_(initialQ),
     momentOfInertia_(momentOfInertia),
     mass_(mass),
     aRelax_(aRelax),
     aDamp_(aDamp),
-    report_(report),
-    tConstraints_(tensor::I),
-    rConstraints_(tensor::I)
+    report_(report)
 {}
 
 
@@ -136,6 +136,8 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     motionState0_(motionState_),
     restraints_(),
     constraints_(),
+    tConstraints_(tensor::I),
+    rConstraints_(tensor::I),
     initialCentreOfMass_
     (
         dict.lookupOrDefault
@@ -156,9 +158,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     mass_(readScalar(dict.lookup("mass"))),
     aRelax_(dict.lookupOrDefault<scalar>("accelerationRelaxation", 1.0)),
     aDamp_(dict.lookupOrDefault<scalar>("accelerationDamping", 1.0)),
-    report_(dict.lookupOrDefault<Switch>("report", false)),
-    tConstraints_(tensor::I),
-    rConstraints_(tensor::I)
+    report_(dict.lookupOrDefault<Switch>("report", false))
 {
     addRestraints(dict);
     addConstraints(dict);
