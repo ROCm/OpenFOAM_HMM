@@ -9,46 +9,53 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    location    "0";
-    object      T;
+    class       dictionary;
+    location    "system";
+    object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 0 0 1 0 0 0];
-
-internalField   uniform 300;
-
-boundaryField
+solvers
 {
-    floor
+    p
     {
-        type            zeroGradient;
+        solver           GAMG;
+        tolerance        1e-7;
+        relTol           0.01;
+
+        smoother         GaussSeidel;
+
+        cacheAgglomeration true;
+        nCellsInCoarsestLevel 10;
+        agglomerator     faceAreaPair;
+        mergeLevels      1;
     }
-    ceiling
+
+    pFinal
     {
-        type            zeroGradient;
+        $p;
+        relTol          0;
     }
-    inlet
+
+    "(U|k|epsilon)"
     {
-        type            fixedValue;
-        value           uniform 300;
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-05;
+        relTol          0.1;
     }
-    outlet
+
+    "(U|k|epsilon)Final"
     {
-        type            inletOutlet;
-        inletValue      uniform 300;
-        value           uniform 300;
+        $U;
+        relTol          0;
     }
-    fixedWalls
-    {
-        type            empty;
-    }
-    processor
-    {
-        type            processor;
-        value           $internalField;
-    }
+}
+
+PIMPLE
+{
+    nNonOrthogonalCorrectors 0;
+    nCorrectors         2;
 }
 
 

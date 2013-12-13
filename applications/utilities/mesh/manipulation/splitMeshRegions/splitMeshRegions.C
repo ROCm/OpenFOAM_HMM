@@ -1078,7 +1078,6 @@ labelList addRegionPatches
             mesh.boundaryMesh()
         );
 
-        //interfacePatches[interI] = addPatch(mesh, patch1);
         interfacePatches[interI] = fvMeshTools::addPatch
         (
             mesh,
@@ -1100,7 +1099,6 @@ labelList addRegionPatches
             point::zero,        // offset
             mesh.boundaryMesh()
         );
-        //addPatch(mesh, patch2);
         fvMeshTools::addPatch
         (
             mesh,

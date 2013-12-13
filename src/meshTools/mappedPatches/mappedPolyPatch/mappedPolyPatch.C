@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,13 @@ Foam::mappedPolyPatch::mappedPolyPatch
 :
     polyPatch(name, size, start, index, bm, patchType),
     mappedPatchBase(static_cast<const polyPatch&>(*this))
-{}
+{
+    //  mapped is not constraint type so add mapped group explicitly
+    if (findIndex(inGroups(), typeName) == -1)
+    {
+        inGroups().append(typeName);
+    }
+}
 
 
 Foam::mappedPolyPatch::mappedPolyPatch
@@ -115,7 +121,13 @@ Foam::mappedPolyPatch::mappedPolyPatch
 :
     polyPatch(name, dict, index, bm, patchType),
     mappedPatchBase(*this, dict)
-{}
+{
+    //  mapped is not constraint type so add mapped group explicitly
+    if (findIndex(inGroups(), typeName) == -1)
+    {
+        inGroups().append(typeName);
+    }
+}
 
 
 Foam::mappedPolyPatch::mappedPolyPatch
