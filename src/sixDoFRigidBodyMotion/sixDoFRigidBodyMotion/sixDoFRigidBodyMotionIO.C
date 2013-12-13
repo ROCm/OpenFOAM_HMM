@@ -54,7 +54,7 @@ void Foam::sixDoFRigidBodyMotion::write(Ostream& os) const
         {
             word restraintType = restraints_[rI].type();
 
-            os  << indent << restraintNames_[rI] << nl
+            os  << indent << restraints_[rI].name() << nl
                 << indent << token::BEGIN_BLOCK << incrIndent << endl;
 
             os.writeKeyword("sixDoFRigidBodyMotionRestraint")
@@ -79,14 +79,11 @@ void Foam::sixDoFRigidBodyMotion::write(Ostream& os) const
         os  << indent << "constraints" << nl
             << indent << token::BEGIN_BLOCK << incrIndent << nl;
 
-        os.writeKeyword("maxIterations")
-            << maxConstraintIterations_ << token::END_STATEMENT << nl;
-
         forAll(constraints_, rI)
         {
             word constraintType = constraints_[rI].type();
 
-            os  << indent << constraintNames_[rI] << nl
+            os  << indent << constraints_[rI].name() << nl
                 << indent << token::BEGIN_BLOCK << incrIndent << endl;
 
             os.writeKeyword("sixDoFRigidBodyMotionConstraint")

@@ -3,7 +3,7 @@ sixDoFRigidBodyMotion/sixDoFRigidBodyMotionIO.C
 sixDoFRigidBodyMotion/sixDoFRigidBodyMotionState.C
 sixDoFRigidBodyMotion/sixDoFRigidBodyMotionStateIO.C
 
-restraints = sixDoFRigidBodyMotion/sixDoFRigidBodyMotionRestraint
+restraints = sixDoFRigidBodyMotion/restraints
 
 $(restraints)/sixDoFRigidBodyMotionRestraint/sixDoFRigidBodyMotionRestraint.C
 $(restraints)/sixDoFRigidBodyMotionRestraint/sixDoFRigidBodyMotionRestraintNew.C
@@ -12,7 +12,7 @@ $(restraints)/linearSpring/linearSpring.C
 $(restraints)/sphericalAngularSpring/sphericalAngularSpring.C
 $(restraints)/tabulatedAxialAngularSpring/tabulatedAxialAngularSpring.C
 
-constraints = sixDoFRigidBodyMotion/sixDoFRigidBodyMotionConstraint
+constraints = sixDoFRigidBodyMotion/constraints
 
 $(constraints)/sixDoFRigidBodyMotionConstraint/sixDoFRigidBodyMotionConstraint.C
 $(constraints)/sixDoFRigidBodyMotionConstraint/sixDoFRigidBodyMotionConstraintNew.C
