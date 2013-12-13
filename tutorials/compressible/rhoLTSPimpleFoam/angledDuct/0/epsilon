@@ -31,7 +31,7 @@ boundaryField
         type            compressible::epsilonWallFunction;
         value           uniform 200;
     }
-    wall
+    walls
     {
         type            compressible::epsilonWallFunction;
         value           uniform 200;
