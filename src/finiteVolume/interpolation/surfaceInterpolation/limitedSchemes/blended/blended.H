@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,6 +36,7 @@ SourceFiles
 #define blended_H
 
 #include "limitedSurfaceInterpolationScheme.H"
+#include "blendedSchemeBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +50,8 @@ namespace Foam
 template<class Type>
 class blended
 :
-    public limitedSurfaceInterpolationScheme<Type>
+    public limitedSurfaceInterpolationScheme<Type>,
+    public blendedSchemeBase<Type>
 {
     // Private data
 
@@ -111,7 +113,39 @@ public:
         {}
 
 
+    //- Destructor
+    virtual ~blended()
+    {}
+
+
     // Member Functions
+
+        //- Return the face-based blending factor
+        virtual tmp<surfaceScalarField> blendingFactor
+        (
+             const GeometricField<Type, fvPatchField, volMesh>& vf
+        ) const
+        {
+            return tmp<surfaceScalarField>
+            (
+                new surfaceScalarField
+                (
+                    IOobject
+                    (
+                        vf.name() + "BlendingFactor",
+                        this->mesh().time().timeName(),
+                        this->mesh()
+                    ),
+                    this->mesh(),
+                    dimensionedScalar
+                    (
+                        "blendingFactor",
+                        dimless,
+                        blendingFactor_
+                    )
+                )
+            );
+        }
 
         //- Return the interpolation limiter
         virtual tmp<surfaceScalarField> limiter

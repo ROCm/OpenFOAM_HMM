@@ -197,12 +197,12 @@ void Foam::Peclet::execute()
 
 void Foam::Peclet::end()
 {
-    // Do nothing - only valid on write
+    // Do nothing
 }
 
 void Foam::Peclet::timeSet()
 {
-    // Do nothing - only valid on write
+    // Do nothing
 }
 
 

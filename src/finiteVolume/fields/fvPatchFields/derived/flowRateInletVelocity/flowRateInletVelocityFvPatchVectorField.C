@@ -199,10 +199,7 @@ void Foam::flowRateInletVelocityFvPatchVectorField::updateCoeffs()
     else
     {
         // mass flow-rate
-        if
-        (
-            patch().boundaryMesh().mesh().foundObject<volScalarField>(rhoName_)
-        )
+        if (db().foundObject<volScalarField>(rhoName_))
         {
             const fvPatchField<scalar>& rhop =
                 patch().lookupPatchField<volScalarField, scalar>(rhoName_);
