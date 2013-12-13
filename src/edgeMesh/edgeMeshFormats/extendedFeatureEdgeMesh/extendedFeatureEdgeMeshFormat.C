@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,44 +23,47 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "edgeMesh.H"
+#include "extendedFeatureEdgeMeshFormat.H"
+#include "edgeMeshFormat.H"
+#include "IFstream.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::edgeMesh> Foam::edgeMesh::New
+Foam::fileFormats::extendedFeatureEdgeMeshFormat::extendedFeatureEdgeMeshFormat
 (
-    const fileName& name,
-    const word& ext
+    const fileName& filename
 )
 {
-    fileExtensionConstructorTable::iterator cstrIter =
-        fileExtensionConstructorTablePtr_->find(ext);
-
-    if (cstrIter == fileExtensionConstructorTablePtr_->end())
-    {
-        FatalErrorIn
-        (
-            "edgeMesh<Face>::New(const fileName&, const word&) : "
-            "constructing edgeMesh"
-        )   << "Unknown file extension " << ext
-            << " for file " << name << nl << nl
-            << "Valid extensions are :" << nl
-            << fileExtensionConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
-    }
-
-    return autoPtr<edgeMesh>(cstrIter()(name));
+    read(filename);
 }
 
 
-Foam::autoPtr<Foam::edgeMesh> Foam::edgeMesh::New(const fileName& name)
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::fileFormats::extendedFeatureEdgeMeshFormat::read
+(
+    const fileName& filename
+)
 {
-    word ext = name.ext();
-    if (ext == "gz")
+    clear();
+
+    IFstream is(filename);
+    if (!is.good())
     {
-        ext = name.lessExt().ext();
+        FatalErrorIn
+        (
+            "fileFormats::extendedFeatureEdgeMeshFormat::read(const fileName&)"
+        )
+            << "Cannot read file " << filename
+            << exit(FatalError);
     }
-    return New(name, ext);
+
+    return fileFormats::edgeMeshFormat::read
+    (
+        is,
+        this->storedPoints(),
+        this->storedEdges()
+    );
 }
 
 

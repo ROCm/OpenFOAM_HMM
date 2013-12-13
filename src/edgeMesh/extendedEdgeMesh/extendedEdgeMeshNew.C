@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,11 +23,20 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "edgeMesh.H"
+#include "extendedEdgeMesh.H"
+
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineRunTimeSelectionTable(extendedEdgeMesh, fileExtension);
+}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::edgeMesh> Foam::edgeMesh::New
+Foam::autoPtr<Foam::extendedEdgeMesh> Foam::extendedEdgeMesh::New
 (
     const fileName& name,
     const word& ext
@@ -40,8 +49,8 @@ Foam::autoPtr<Foam::edgeMesh> Foam::edgeMesh::New
     {
         FatalErrorIn
         (
-            "edgeMesh<Face>::New(const fileName&, const word&) : "
-            "constructing edgeMesh"
+            "extendedEdgeMesh::New(const fileName&, const word&) : "
+            "constructing extendedEdgeMesh"
         )   << "Unknown file extension " << ext
             << " for file " << name << nl << nl
             << "Valid extensions are :" << nl
@@ -49,11 +58,14 @@ Foam::autoPtr<Foam::edgeMesh> Foam::edgeMesh::New
             << exit(FatalError);
     }
 
-    return autoPtr<edgeMesh>(cstrIter()(name));
+    return autoPtr<extendedEdgeMesh>(cstrIter()(name));
 }
 
 
-Foam::autoPtr<Foam::edgeMesh> Foam::edgeMesh::New(const fileName& name)
+Foam::autoPtr<Foam::extendedEdgeMesh> Foam::extendedEdgeMesh::New
+(
+    const fileName& name
+)
 {
     word ext = name.ext();
     if (ext == "gz")

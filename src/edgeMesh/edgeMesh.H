@@ -27,6 +27,9 @@ Class
 Description
     Points connected by edges.
 
+    Can be read from fileName based on extension. Uses ::New factory method
+    to select the reader and transfer the result.
+
 SourceFiles
     edgeMeshI.H
     edgeMesh.C
@@ -253,7 +256,7 @@ public:
 
     // Write
 
-        void writeStats(Ostream&) const;
+        virtual void writeStats(Ostream&) const;
 
         //- Generic write routine. Chooses writer based on extension.
         virtual void write(const fileName& name) const

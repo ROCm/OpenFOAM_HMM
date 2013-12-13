@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,45 +23,38 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "edgeMesh.H"
+#include "OBJextendedEdgeFormat.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "addToRunTimeSelectionTable.H"
+#include "addToMemberFunctionSelectionTable.H"
 
-Foam::autoPtr<Foam::edgeMesh> Foam::edgeMesh::New
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace fileFormats
+{
+
+// read extendedEdgeMesh
+addNamedToRunTimeSelectionTable
 (
-    const fileName& name,
-    const word& ext
-)
-{
-    fileExtensionConstructorTable::iterator cstrIter =
-        fileExtensionConstructorTablePtr_->find(ext);
+    extendedEdgeMesh,
+    OBJextendedEdgeFormat,
+    fileExtension,
+    obj
+);
 
-    if (cstrIter == fileExtensionConstructorTablePtr_->end())
-    {
-        FatalErrorIn
-        (
-            "edgeMesh<Face>::New(const fileName&, const word&) : "
-            "constructing edgeMesh"
-        )   << "Unknown file extension " << ext
-            << " for file " << name << nl << nl
-            << "Valid extensions are :" << nl
-            << fileExtensionConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
-    }
+//// write extendedEdgeMesh
+//addNamedToMemberFunctionSelectionTable
+//(
+//    extendedEdgeMesh,
+//    OBJextendedEdgeFormat,
+//    write,
+//    fileExtension,
+//    obj
+//);
 
-    return autoPtr<edgeMesh>(cstrIter()(name));
 }
-
-
-Foam::autoPtr<Foam::edgeMesh> Foam::edgeMesh::New(const fileName& name)
-{
-    word ext = name.ext();
-    if (ext == "gz")
-    {
-        ext = name.lessExt().ext();
-    }
-    return New(name, ext);
 }
-
 
 // ************************************************************************* //
