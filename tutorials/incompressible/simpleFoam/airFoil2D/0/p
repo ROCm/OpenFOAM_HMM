@@ -30,7 +30,7 @@ boundaryField
         type            freestreamPressure;
     }
 
-    wall
+    walls
     {
         type            zeroGradient;
     }
