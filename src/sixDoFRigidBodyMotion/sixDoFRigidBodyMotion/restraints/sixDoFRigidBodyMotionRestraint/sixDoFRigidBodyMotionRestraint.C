@@ -29,9 +29,8 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(sixDoFRigidBodyMotionRestraint, 0);
-
-defineRunTimeSelectionTable(sixDoFRigidBodyMotionRestraint, dictionary);
+    defineTypeNameAndDebug(sixDoFRigidBodyMotionRestraint, 0);
+    defineRunTimeSelectionTable(sixDoFRigidBodyMotionRestraint, dictionary);
 }
 
 
@@ -44,14 +43,7 @@ Foam::sixDoFRigidBodyMotionRestraint::sixDoFRigidBodyMotionRestraint
 )
 :
     name_(name),
-    sDoFRBMRCoeffs_
-    (
-        sDoFRBMRDict.subDict
-        (
-            word(sDoFRBMRDict.lookup("sixDoFRigidBodyMotionRestraint"))
-          + "Coeffs"
-        )
-    )
+    sDoFRBMRCoeffs_(sDoFRBMRDict)
 {}
 
 
@@ -68,7 +60,7 @@ bool Foam::sixDoFRigidBodyMotionRestraint::read
     const dictionary& sDoFRBMRDict
 )
 {
-    sDoFRBMRCoeffs_ = sDoFRBMRDict.subDict(type() + "Coeffs");
+    sDoFRBMRCoeffs_ = sDoFRBMRDict;
 
     return true;
 }

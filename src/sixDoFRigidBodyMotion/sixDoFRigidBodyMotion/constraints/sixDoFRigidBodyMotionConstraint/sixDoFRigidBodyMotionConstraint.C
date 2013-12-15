@@ -43,14 +43,7 @@ Foam::sixDoFRigidBodyMotionConstraint::sixDoFRigidBodyMotionConstraint
 )
 :
     name_(name),
-    sDoFRBMCCoeffs_
-    (
-        sDoFRBMCDict.subDict
-        (
-            word(sDoFRBMCDict.lookup("sixDoFRigidBodyMotionConstraint"))
-          + "Coeffs"
-        )
-    )
+    sDoFRBMCCoeffs_(sDoFRBMCDict)
 {}
 
 
@@ -67,7 +60,7 @@ bool Foam::sixDoFRigidBodyMotionConstraint::read
     const dictionary& sDoFRBMCDict
 )
 {
-    sDoFRBMCCoeffs_ = sDoFRBMCDict.subDict(type() + "Coeffs");
+    sDoFRBMCCoeffs_ = sDoFRBMCDict;
 
     return true;
 }
