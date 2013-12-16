@@ -1464,6 +1464,8 @@ Foam::pointIndexHit Foam::autoSnapDriver::findNearFeatureEdge
     }
     return nearInfo;
 }
+
+
 Foam::labelPair Foam::autoSnapDriver::findNearFeaturePoint
 (
     const indirectPrimitivePatch& pp,
