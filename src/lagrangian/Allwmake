@@ -7,6 +7,7 @@ wmake $makeType distributionModels
 wmake $makeType basic
 wmake $makeType solidParticle
 wmake $makeType intermediate
+wmake $makeType turbulence
 wmake $makeType spray
 wmake $makeType dsmc
 wmake $makeType coalCombustion
