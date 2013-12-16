@@ -54,21 +54,14 @@ boundaryField
         }
         constraints
         {
-            maxIterations       500;
-
             fixedAxes1
             {
                 sixDoFRigidBodyMotionConstraint fixedOrientation;
-                tolerance           1e-6;
-                relaxationFactor    1.0;
             }
 
             fixedLine1
             {
                 sixDoFRigidBodyMotionConstraint fixedLine;
-                tolerance           1e-6;
-                relaxationFactor    1.0;
-                refPoint            $centreOfMass;
                 direction           (0 0 1);
             }
         }
