@@ -45,18 +45,18 @@ boundaryField
         {
             maxIterations   500;
 
-            fixedLine1
+            yLine
             {
-                sixDoFRigidBodyMotionConstraint fixedLine;
+                sixDoFRigidBodyMotionConstraint line;
                 tolerance        1e-9;
                 relaxationFactor 0.7;
                 refPoint      (0.25 0.007 0.125);
                 direction     (0 1 0);
             }
 
-            fixedAxis1
+            zAxis
             {
-                sixDoFRigidBodyMotionConstraint fixedAxis;
+                sixDoFRigidBodyMotionConstraint axis;
                 tolerance       1e-06;
                 relaxationFactor 0.7;
                 axis            (0 0 1);

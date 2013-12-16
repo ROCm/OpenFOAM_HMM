@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fixedPoint.H"
+#include "sixDoFRigidBodyMotionOrientationConstraint.H"
 #include "addToRunTimeSelectionTable.H"
 #include "sixDoFRigidBodyMotion.H"
 
@@ -33,12 +33,12 @@ namespace Foam
 {
 namespace sixDoFRigidBodyMotionConstraints
 {
-    defineTypeNameAndDebug(fixedPoint, 0);
+    defineTypeNameAndDebug(orientation, 0);
 
     addToRunTimeSelectionTable
     (
         sixDoFRigidBodyMotionConstraint,
-        fixedPoint,
+        orientation,
         dictionary
     );
 }
@@ -47,14 +47,13 @@ namespace sixDoFRigidBodyMotionConstraints
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::fixedPoint
+Foam::sixDoFRigidBodyMotionConstraints::orientation::orientation
 (
     const word& name,
     const dictionary& sDoFRBMCDict
 )
 :
-    sixDoFRigidBodyMotionConstraint(name, sDoFRBMCDict),
-    fixedPoint_()
+    sixDoFRigidBodyMotionConstraint(name, sDoFRBMCDict)
 {
     read(sDoFRBMCDict);
 }
@@ -62,13 +61,22 @@ Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::fixedPoint
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::~fixedPoint()
+Foam::sixDoFRigidBodyMotionConstraints::orientation::~orientation()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::constrainTranslation
+void Foam::sixDoFRigidBodyMotionConstraints::orientation::
+constrainTranslation
+(
+    pointConstraint& pc
+) const
+{}
+
+
+void Foam::sixDoFRigidBodyMotionConstraints::orientation::
+constrainRotation
 (
     pointConstraint& pc
 ) const
@@ -77,33 +85,22 @@ void Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::constrainTranslation
 }
 
 
-void Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::constrainRotation
-(
-    pointConstraint& pc
-) const
-{}
-
-
-bool Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::read
+bool Foam::sixDoFRigidBodyMotionConstraints::orientation::read
 (
     const dictionary& sDoFRBMCDict
 )
 {
     sixDoFRigidBodyMotionConstraint::read(sDoFRBMCDict);
 
-    sDoFRBMCCoeffs_.lookup("fixedPoint") >> fixedPoint_;
-
     return true;
 }
 
 
-void Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::write
+void Foam::sixDoFRigidBodyMotionConstraints::orientation::write
 (
     Ostream& os
 ) const
 {
-    os.writeKeyword("fixedPoint")
-        << fixedPoint_ << token::END_STATEMENT << nl;
 }
 
 // ************************************************************************* //

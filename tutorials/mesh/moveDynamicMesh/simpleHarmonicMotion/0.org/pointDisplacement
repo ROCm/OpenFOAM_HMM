@@ -54,14 +54,14 @@ boundaryField
         }
         constraints
         {
-            fixedAxes1
+            fixedOrientation
             {
-                sixDoFRigidBodyMotionConstraint fixedOrientation;
+                sixDoFRigidBodyMotionConstraint orientation;
             }
 
-            fixedLine1
+            zLine
             {
-                sixDoFRigidBodyMotionConstraint fixedLine;
+                sixDoFRigidBodyMotionConstraint line;
                 direction           (0 0 1);
             }
         }

@@ -22,19 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::sixDoFRigidBodyMotionConstraints::fixedAxis
+    Foam::sixDoFRigidBodyMotionConstraints::line
 
 Description
-    sixDoFRigidBodyMotionConstraint.  Body may only rotate around
-    an axis fixed in global space.
+    sixDoFRigidBodyMotionConstraint.  Reference point may only move
+    along a line.
 
 SourceFiles
-    fixedAxis.C
+    sixDoFRigidBodyMotionLineConstraint.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fixedAxis_H
-#define fixedAxis_H
+#ifndef sixDoFRigidBodyMotionLineConstraint_H
+#define sixDoFRigidBodyMotionLineConstraint_H
 
 #include "sixDoFRigidBodyMotionConstraint.H"
 
@@ -47,30 +47,29 @@ namespace sixDoFRigidBodyMotionConstraints
 {
 
 /*---------------------------------------------------------------------------*\
-                            Class fixedAxis Declaration
+                          Class line Declaration
 \*---------------------------------------------------------------------------*/
 
-class fixedAxis
+class line
 :
     public sixDoFRigidBodyMotionConstraint
 {
-
     // Private data
 
-        //- Reference axis in global space
-        vector fixedAxis_;
+        //- Direction of the constraining line
+        vector dir_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("fixedAxis");
+    TypeName("line");
 
 
     // Constructors
 
         //- Construct from components
-        fixedAxis
+        line
         (
             const word& name,
             const dictionary& sDoFRBMCDict
@@ -81,13 +80,13 @@ public:
         {
             return autoPtr<sixDoFRigidBodyMotionConstraint>
             (
-                new fixedAxis(*this)
+                new line(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~fixedAxis();
+    virtual ~line();
 
 
     // Member Functions

@@ -22,19 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::sixDoFRigidBodyMotionConstraints::fixedLine
+    Foam::sixDoFRigidBodyMotionConstraints::plane
 
 Description
     sixDoFRigidBodyMotionConstraint.  Reference point may only move
-    along a line.
+    along a plane.
 
 SourceFiles
-    fixedLine.C
+    sixDoFRigidBodyMotionPlaneConstraint.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fixedLine_H
-#define fixedLine_H
+#ifndef sixDoFRigidBodyMotionPlaneConstraint_H
+#define sixDoFRigidBodyMotionPlaneConstraint_H
 
 #include "sixDoFRigidBodyMotionConstraint.H"
 
@@ -47,29 +47,29 @@ namespace sixDoFRigidBodyMotionConstraints
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class fixedLine Declaration
+                          Class plane Declaration
 \*---------------------------------------------------------------------------*/
 
-class fixedLine
+class plane
 :
     public sixDoFRigidBodyMotionConstraint
 {
     // Private data
 
-        //- Direction of the constraining line
-        vector dir_;
+        //- Normal to plane
+        vector normal_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("fixedLine");
+    TypeName("plane");
 
 
     // Constructors
 
         //- Construct from components
-        fixedLine
+        plane
         (
             const word& name,
             const dictionary& sDoFRBMCDict
@@ -80,13 +80,13 @@ public:
         {
             return autoPtr<sixDoFRigidBodyMotionConstraint>
             (
-                new fixedLine(*this)
+                new plane(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~fixedLine();
+    virtual ~plane();
 
 
     // Member Functions

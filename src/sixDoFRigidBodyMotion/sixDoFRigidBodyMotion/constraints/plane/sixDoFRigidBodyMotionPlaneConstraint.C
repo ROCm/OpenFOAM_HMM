@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fixedOrientation.H"
+#include "sixDoFRigidBodyMotionPlaneConstraint.H"
 #include "addToRunTimeSelectionTable.H"
 #include "sixDoFRigidBodyMotion.H"
 
@@ -33,12 +33,12 @@ namespace Foam
 {
 namespace sixDoFRigidBodyMotionConstraints
 {
-    defineTypeNameAndDebug(fixedOrientation, 0);
+    defineTypeNameAndDebug(plane, 0);
 
     addToRunTimeSelectionTable
     (
         sixDoFRigidBodyMotionConstraint,
-        fixedOrientation,
+        plane,
         dictionary
     );
 }
@@ -47,13 +47,14 @@ namespace sixDoFRigidBodyMotionConstraints
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation::fixedOrientation
+Foam::sixDoFRigidBodyMotionConstraints::plane::plane
 (
     const word& name,
     const dictionary& sDoFRBMCDict
 )
 :
-    sixDoFRigidBodyMotionConstraint(name, sDoFRBMCDict)
+    sixDoFRigidBodyMotionConstraint(name, sDoFRBMCDict),
+    normal_(vector::zero)
 {
     read(sDoFRBMCDict);
 }
@@ -61,46 +62,48 @@ Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation::fixedOrientation
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation::~fixedOrientation()
+Foam::sixDoFRigidBodyMotionConstraints::plane::~plane()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation::
-constrainTranslation
+void Foam::sixDoFRigidBodyMotionConstraints::plane::constrainTranslation
+(
+    pointConstraint& pc
+) const
+{
+    pc.applyConstraint(normal_);
+}
+
+
+void Foam::sixDoFRigidBodyMotionConstraints::plane::constrainRotation
 (
     pointConstraint& pc
 ) const
 {}
 
 
-void Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation::
-constrainRotation
-(
-    pointConstraint& pc
-) const
-{
-    pc.combine(pointConstraint(Tuple2<label, vector>(3, vector::zero)));
-}
-
-
-bool Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation::read
+bool Foam::sixDoFRigidBodyMotionConstraints::plane::read
 (
     const dictionary& sDoFRBMCDict
 )
 {
     sixDoFRigidBodyMotionConstraint::read(sDoFRBMCDict);
 
+    normal_ = sDoFRBMCCoeffs_.lookup("normal");
+
     return true;
 }
 
 
-void Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation::write
+void Foam::sixDoFRigidBodyMotionConstraints::plane::write
 (
     Ostream& os
 ) const
 {
+    os.writeKeyword("normal")
+        << normal_ << token::END_STATEMENT << nl;
 }
 
 // ************************************************************************* //

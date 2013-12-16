@@ -22,18 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation
+    Foam::sixDoFRigidBodyMotionConstraints::orientation
 
 Description
     Fix orientation of body in global space.
 
 SourceFiles
-    fixedOrientation.C
+    sixDoFRigidBodyMotionOrientationConstraint.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fixedOrientation_H
-#define fixedOrientation_H
+#ifndef sixDoFRigidBodyMotionOrientationConstraint_H
+#define sixDoFRigidBodyMotionOrientationConstraint_H
 
 #include "sixDoFRigidBodyMotionConstraint.H"
 
@@ -46,10 +46,10 @@ namespace sixDoFRigidBodyMotionConstraints
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class fixedOrientation Declaration
+                       Class orientation Declaration
 \*---------------------------------------------------------------------------*/
 
-class fixedOrientation
+class orientation
 :
     public sixDoFRigidBodyMotionConstraint
 {
@@ -57,13 +57,13 @@ class fixedOrientation
 public:
 
     //- Runtime type information
-    TypeName("fixedOrientation");
+    TypeName("orientation");
 
 
     // Constructors
 
         //- Construct from components
-        fixedOrientation
+        orientation
         (
             const word& name,
             const dictionary& sDoFRBMCDict
@@ -74,13 +74,13 @@ public:
         {
             return autoPtr<sixDoFRigidBodyMotionConstraint>
             (
-                new fixedOrientation(*this)
+                new orientation(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~fixedOrientation();
+    virtual ~orientation();
 
 
     // Member Functions

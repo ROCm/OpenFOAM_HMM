@@ -22,21 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::sixDoFRigidBodyMotionConstraints::fixedPoint
+    Foam::sixDoFRigidBodyMotionConstraints::axis
 
 Description
-    Point fixed in space.
+    sixDoFRigidBodyMotionConstraint.  Body may only rotate around
+    an axis fixed in global space.
 
 SourceFiles
-    fixedPoint.C
+    sixDoFRigidBodyMotionAxisConstraint.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fixedPoint_H
-#define fixedPoint_H
+#ifndef sixDoFRigidBodyMotionAxisConstraint_H
+#define sixDoFRigidBodyMotionAxisConstraint_H
 
 #include "sixDoFRigidBodyMotionConstraint.H"
-#include "point.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,32 +47,30 @@ namespace sixDoFRigidBodyMotionConstraints
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class fixedPoint Declaration
+                            Class axis Declaration
 \*---------------------------------------------------------------------------*/
 
-class fixedPoint
+class axis
 :
     public sixDoFRigidBodyMotionConstraint
 {
+
     // Private data
 
-        //- Point which is rigidly attached to the body and constrains
-        //  it so that this point remains fixed.  This serves as the
-        //  reference point for displacements as well as the target
-        //  position.
-        point fixedPoint_;
+        //- Reference axis in global space
+        vector axis_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("fixedPoint");
+    TypeName("axis");
 
 
     // Constructors
 
         //- Construct from components
-        fixedPoint
+        axis
         (
             const word& name,
             const dictionary& sDoFRBMCDict
@@ -83,13 +81,13 @@ public:
         {
             return autoPtr<sixDoFRigidBodyMotionConstraint>
             (
-                new fixedPoint(*this)
+                new axis(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~fixedPoint();
+    virtual ~axis();
 
 
     // Member Functions
