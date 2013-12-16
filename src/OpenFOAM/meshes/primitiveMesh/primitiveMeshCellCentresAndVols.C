@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -111,7 +111,7 @@ void Foam::primitiveMesh::makeCellCentresAndVols
     {
         // Calculate 3*face-pyramid volume
         scalar pyr3Vol =
-            max(fAreas[facei] & (fCtrs[facei] - cEst[own[facei]]), VSMALL);
+            fAreas[facei] & (fCtrs[facei] - cEst[own[facei]]);
 
         // Calculate face-pyramid centre
         vector pc = (3.0/4.0)*fCtrs[facei] + (1.0/4.0)*cEst[own[facei]];
@@ -127,7 +127,7 @@ void Foam::primitiveMesh::makeCellCentresAndVols
     {
         // Calculate 3*face-pyramid volume
         scalar pyr3Vol =
-            max(fAreas[facei] & (cEst[nei[facei]] - fCtrs[facei]), VSMALL);
+            fAreas[facei] & (cEst[nei[facei]] - fCtrs[facei]);
 
         // Calculate face-pyramid centre
         vector pc = (3.0/4.0)*fCtrs[facei] + (1.0/4.0)*cEst[nei[facei]];
@@ -139,7 +139,18 @@ void Foam::primitiveMesh::makeCellCentresAndVols
         cellVols[nei[facei]] += pyr3Vol;
     }
 
-    cellCtrs /= cellVols;
+    forAll(cellCtrs, celli)
+    {
+        if (cellVols[celli] > VSMALL)
+        {
+            cellCtrs[celli] /= cellVols[celli];
+        }
+        else
+        {
+            cellCtrs[celli] = cEst[celli];
+        }
+    }
+
     cellVols *= (1.0/3.0);
 }
 
