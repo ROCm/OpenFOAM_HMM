@@ -27,8 +27,8 @@ License
 
 #include "makeParcelCloudFunctionObjects.H"
 
-#include "GradientDispersionRAS.H"                                              
-#include "StochasticDispersionRAS.H"                                            
+#include "GradientDispersionRAS.H"
+#include "StochasticDispersionRAS.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

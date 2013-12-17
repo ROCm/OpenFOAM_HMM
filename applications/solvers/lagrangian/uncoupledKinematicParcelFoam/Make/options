@@ -14,6 +14,7 @@ EXE_INC = \
 EXE_LIBS = \
     -llagrangian \
     -llagrangianIntermediate \
+    -llagrangianTurbulence \
     -lthermophysicalFunctions \
     -lfluidThermophysicalModels \
     -lspecie \

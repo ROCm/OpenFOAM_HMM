@@ -52,4 +52,5 @@ EXE_LIBS = \
     -lpyrolysisModels \
     -lregionCoupling \
     -llagrangianIntermediate \
+    -llagrangianTurbulence \
     -lODE
