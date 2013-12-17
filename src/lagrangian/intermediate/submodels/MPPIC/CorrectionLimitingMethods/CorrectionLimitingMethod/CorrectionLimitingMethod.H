@@ -22,18 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::WenYuDragForce
+    Foam::CorrectionLimitingMethod
 
 Description
-    Wen-Yu drag model for solid spheres.
+
+SourceFiles
+    CorrectionLimitingMethod.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef WenYuDragForce_H
-#define WenYuDragForce_H
+#ifndef CorrectionLimitingMethod_H
+#define CorrectionLimitingMethod_H
 
-#include "ParticleForce.H"
-#include "volFieldsFwd.H"
+#include "fvCFD.H"
+#include "dictionary.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -41,84 +44,73 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class WenYuDragForce Declaration
+                         Class CorrectionLimitingMethod Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CloudType>
-class WenYuDragForce
-:
-    public ParticleForce<CloudType>
+class CorrectionLimitingMethod
 {
-    // Private Data
-
-        //- Reference to the carrier volume fraction field
-        const volScalarField& alphac_;
-
+private:
 
     // Private Member Functions
 
-        //- Drag coefficient multiplied by Reynolds number
-        scalar CdRe(const scalar Re) const;
+        //- Disallow default bitwise assignment
+        void operator=(const CorrectionLimitingMethod&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("WenYuDrag");
+    TypeName("correctionLimitingMethod");
+
+    //- Declare runtime constructor selection table
+    declareRunTimeSelectionTable
+    (
+        autoPtr,
+        CorrectionLimitingMethod,
+        dictionary,
+        (const dictionary& dict),
+        (dict)
+    );
 
 
     // Constructors
 
-        //- Construct from mesh
-        WenYuDragForce
-        (
-            CloudType& owner,
-            const fvMesh& mesh,
-            const dictionary& dict
-        );
+        //- Construct from components
+        CorrectionLimitingMethod(const dictionary& dict);
 
-        //- Construct copy
-        WenYuDragForce(const WenYuDragForce<CloudType>& df);
+        //- Construct as copy
+        CorrectionLimitingMethod(const CorrectionLimitingMethod& cl);
 
         //- Construct and return a clone
-        virtual autoPtr<ParticleForce<CloudType> > clone() const
-        {
-            return autoPtr<ParticleForce<CloudType> >
-            (
-                new WenYuDragForce<CloudType>(*this)
-            );
-        }
+        virtual autoPtr<CorrectionLimitingMethod> clone() const = 0;
+
+
+    //- Selector
+    static autoPtr<CorrectionLimitingMethod> New
+    (
+        const dictionary& dict
+    );
 
 
     //- Destructor
-    virtual ~WenYuDragForce();
+    virtual ~CorrectionLimitingMethod();
 
 
     // Member Functions
 
-        // Evaluation
-
-            //- Calculate the coupled force
-            virtual forceSuSp calcCoupled
-            (
-                const typename CloudType::parcelType& p,
-                const scalar dt,
-                const scalar mass,
-                const scalar Re,
-                const scalar muc
-            ) const;
+        //- Return the limited velocity
+        virtual vector limitedVelocity
+        (
+            const vector uP,
+            const vector dU,
+            const vector uMean
+        ) const = 0;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "WenYuDragForce.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

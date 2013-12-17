@@ -22,102 +22,87 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::WenYuDragForce
+    Foam::NoDamping
 
 Description
-    Wen-Yu drag model for solid spheres.
+    Templated NoDamping model class.
+
+SourceFiles
+    NoDamping.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef WenYuDragForce_H
-#define WenYuDragForce_H
+#ifndef NoDamping_H
+#define NoDamping_H
 
-#include "ParticleForce.H"
-#include "volFieldsFwd.H"
+#include "DampingModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace DampingModels
+{
 
 /*---------------------------------------------------------------------------*\
-                       Class WenYuDragForce Declaration
+                         Class NoDamping Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class WenYuDragForce
+class NoDamping
 :
-    public ParticleForce<CloudType>
+    public DampingModel<CloudType>
 {
-    // Private Data
-
-        //- Reference to the carrier volume fraction field
-        const volScalarField& alphac_;
-
-
-    // Private Member Functions
-
-        //- Drag coefficient multiplied by Reynolds number
-        scalar CdRe(const scalar Re) const;
-
-
 public:
 
     //- Runtime type information
-    TypeName("WenYuDrag");
-
+    TypeName("none");
 
     // Constructors
 
-        //- Construct from mesh
-        WenYuDragForce
-        (
-            CloudType& owner,
-            const fvMesh& mesh,
-            const dictionary& dict
-        );
+        //- Construct from components
+        NoDamping(const dictionary& dict, CloudType& owner);
 
         //- Construct copy
-        WenYuDragForce(const WenYuDragForce<CloudType>& df);
+        NoDamping(const NoDamping<CloudType>& cm);
 
         //- Construct and return a clone
-        virtual autoPtr<ParticleForce<CloudType> > clone() const
+        virtual autoPtr<DampingModel<CloudType> > clone() const
         {
-            return autoPtr<ParticleForce<CloudType> >
+            return autoPtr<DampingModel<CloudType> >
             (
-                new WenYuDragForce<CloudType>(*this)
+                new NoDamping<CloudType>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~WenYuDragForce();
+    virtual ~NoDamping();
 
 
-    // Member Functions
+    //- Member Functions
 
-        // Evaluation
+        //- Calculate the velocity correction
+        virtual vector velocityCorrection
+        (
+            typename CloudType::parcelType& p,
+            const scalar deltaT
+        ) const;
 
-            //- Calculate the coupled force
-            virtual forceSuSp calcCoupled
-            (
-                const typename CloudType::parcelType& p,
-                const scalar dt,
-                const scalar mass,
-                const scalar Re,
-                const scalar muc
-            ) const;
+        //- Return the model 'active' status
+        virtual bool active() const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace DampingModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "WenYuDragForce.C"
+#   include "NoDamping.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -22,103 +22,87 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::WenYuDragForce
+    Foam::CorrectionLimitingMethods::relative
 
 Description
-    Wen-Yu drag model for solid spheres.
+
+SourceFiles
+    relative.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef WenYuDragForce_H
-#define WenYuDragForce_H
+#ifndef relative_H
+#define relative_H
 
-#include "ParticleForce.H"
-#include "volFieldsFwd.H"
+#include "CorrectionLimitingMethod.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace CorrectionLimitingMethods
+{
 
 /*---------------------------------------------------------------------------*\
-                       Class WenYuDragForce Declaration
+                         Class relative Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CloudType>
-class WenYuDragForce
+class relative
 :
-    public ParticleForce<CloudType>
+    public CorrectionLimitingMethod
 {
-    // Private Data
+protected:
 
-        //- Reference to the carrier volume fraction field
-        const volScalarField& alphac_;
+    // Protected data
 
-
-    // Private Member Functions
-
-        //- Drag coefficient multiplied by Reynolds number
-        scalar CdRe(const scalar Re) const;
+        //- Coefficient of restitution
+        scalar e_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("WenYuDrag");
+    TypeName("relative");
 
 
     // Constructors
 
-        //- Construct from mesh
-        WenYuDragForce
-        (
-            CloudType& owner,
-            const fvMesh& mesh,
-            const dictionary& dict
-        );
+        //- Construct from components
+        relative(const dictionary& dict);
 
-        //- Construct copy
-        WenYuDragForce(const WenYuDragForce<CloudType>& df);
+        //- Construct as copy
+        relative(const relative& cl);
 
         //- Construct and return a clone
-        virtual autoPtr<ParticleForce<CloudType> > clone() const
+        virtual autoPtr<CorrectionLimitingMethod> clone() const
         {
-            return autoPtr<ParticleForce<CloudType> >
+            return autoPtr<CorrectionLimitingMethod>
             (
-                new WenYuDragForce<CloudType>(*this)
+                new relative(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~WenYuDragForce();
+    virtual ~relative();
 
 
     // Member Functions
 
-        // Evaluation
-
-            //- Calculate the coupled force
-            virtual forceSuSp calcCoupled
-            (
-                const typename CloudType::parcelType& p,
-                const scalar dt,
-                const scalar mass,
-                const scalar Re,
-                const scalar muc
-            ) const;
+        //- Return the limited velocity
+        virtual vector limitedVelocity
+        (
+            const vector uP,
+            const vector dU,
+            const vector uMean
+        ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace CorrectionLimitingMethods
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "WenYuDragForce.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

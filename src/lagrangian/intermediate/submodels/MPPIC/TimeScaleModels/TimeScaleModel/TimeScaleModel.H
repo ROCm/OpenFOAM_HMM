@@ -21,19 +21,14 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::WenYuDragForce
-
-Description
-    Wen-Yu drag model for solid spheres.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef WenYuDragForce_H
-#define WenYuDragForce_H
+#ifndef TimeScaleModel_H
+#define TimeScaleModel_H
 
-#include "ParticleForce.H"
-#include "volFieldsFwd.H"
+#include "fvCFD.H"
+#include "dictionary.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -41,84 +36,85 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class WenYuDragForce Declaration
+                        Class TimeScaleModel Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CloudType>
-class WenYuDragForce
-:
-    public ParticleForce<CloudType>
+class TimeScaleModel
 {
-    // Private Data
+private:
 
-        //- Reference to the carrier volume fraction field
-        const volScalarField& alphac_;
+    //- Private member functions
+
+        //- Disallow default bitwise assignment
+        void operator=(const TimeScaleModel&);
 
 
-    // Private Member Functions
+protected:
 
-        //- Drag coefficient multiplied by Reynolds number
-        scalar CdRe(const scalar Re) const;
+    // Protected data
+
+        //- Close pack volume fraction
+        scalar alphaPacked_;
+
+        //- Coefficient of restitution
+        scalar e_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("WenYuDrag");
+    TypeName("timeScaleModel");
+
+    //- Declare runtime constructor selection table
+    declareRunTimeSelectionTable
+    (
+        autoPtr,
+        TimeScaleModel,
+        dictionary,
+        (const dictionary& dict),
+        (dict)
+    );
 
 
-    // Constructors
+    //- Constructors
 
-        //- Construct from mesh
-        WenYuDragForce
-        (
-            CloudType& owner,
-            const fvMesh& mesh,
-            const dictionary& dict
-        );
+        //- Construct from components
+        TimeScaleModel(const dictionary& dict);
 
-        //- Construct copy
-        WenYuDragForce(const WenYuDragForce<CloudType>& df);
+        //- Construct a copy
+        TimeScaleModel(const TimeScaleModel& sm);
 
         //- Construct and return a clone
-        virtual autoPtr<ParticleForce<CloudType> > clone() const
-        {
-            return autoPtr<ParticleForce<CloudType> >
-            (
-                new WenYuDragForce<CloudType>(*this)
-            );
-        }
+        virtual autoPtr<TimeScaleModel> clone() const = 0;
+
+
+    //- Selector
+    static autoPtr<TimeScaleModel> New
+    (
+        const dictionary& dict
+    );
 
 
     //- Destructor
-    virtual ~WenYuDragForce();
+    virtual ~TimeScaleModel();
 
 
-    // Member Functions
+    //- Member Functions
 
-        // Evaluation
-
-            //- Calculate the coupled force
-            virtual forceSuSp calcCoupled
-            (
-                const typename CloudType::parcelType& p,
-                const scalar dt,
-                const scalar mass,
-                const scalar Re,
-                const scalar muc
-            ) const;
+        //- Time scale
+        virtual tmp<FieldField<Field, scalar> > oneByTau
+        (
+            const FieldField<Field, scalar>& alpha,
+            const FieldField<Field, scalar>& r32,
+            const FieldField<Field, scalar>& uSqr,
+            const FieldField<Field, scalar>& f
+        ) const = 0;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "WenYuDragForce.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

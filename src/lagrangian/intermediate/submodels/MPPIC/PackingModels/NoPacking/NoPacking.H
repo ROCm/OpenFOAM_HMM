@@ -22,102 +22,87 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::WenYuDragForce
+    Foam::NoPacking
 
 Description
-    Wen-Yu drag model for solid spheres.
+    Templated NoPacking model class.
+
+SourceFiles
+    NoPacking.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef WenYuDragForce_H
-#define WenYuDragForce_H
+#ifndef NoPacking_H
+#define NoPacking_H
 
-#include "ParticleForce.H"
-#include "volFieldsFwd.H"
+#include "PackingModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace PackingModels
+{
 
 /*---------------------------------------------------------------------------*\
-                       Class WenYuDragForce Declaration
+                         Class NoPacking Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class WenYuDragForce
+class NoPacking
 :
-    public ParticleForce<CloudType>
+    public PackingModel<CloudType>
 {
-    // Private Data
-
-        //- Reference to the carrier volume fraction field
-        const volScalarField& alphac_;
-
-
-    // Private Member Functions
-
-        //- Drag coefficient multiplied by Reynolds number
-        scalar CdRe(const scalar Re) const;
-
-
 public:
 
     //- Runtime type information
-    TypeName("WenYuDrag");
-
+    TypeName("none");
 
     // Constructors
 
-        //- Construct from mesh
-        WenYuDragForce
-        (
-            CloudType& owner,
-            const fvMesh& mesh,
-            const dictionary& dict
-        );
+        //- Construct from components
+        NoPacking(const dictionary& dict, CloudType& owner);
 
         //- Construct copy
-        WenYuDragForce(const WenYuDragForce<CloudType>& df);
+        NoPacking(const NoPacking<CloudType>& cm);
 
         //- Construct and return a clone
-        virtual autoPtr<ParticleForce<CloudType> > clone() const
+        virtual autoPtr<PackingModel<CloudType> > clone() const
         {
-            return autoPtr<ParticleForce<CloudType> >
+            return autoPtr<PackingModel<CloudType> >
             (
-                new WenYuDragForce<CloudType>(*this)
+                new NoPacking<CloudType>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~WenYuDragForce();
+    virtual ~NoPacking();
 
 
     // Member Functions
 
-        // Evaluation
+        //- Calculate the velocity correction
+        virtual vector velocityCorrection
+        (
+            typename CloudType::parcelType& p,
+            const scalar deltaT
+        ) const;
 
-            //- Calculate the coupled force
-            virtual forceSuSp calcCoupled
-            (
-                const typename CloudType::parcelType& p,
-                const scalar dt,
-                const scalar mass,
-                const scalar Re,
-                const scalar muc
-            ) const;
+        //- Return the model 'active' status
+        virtual bool active() const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace PackingModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "WenYuDragForce.C"
+#   include "NoPacking.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

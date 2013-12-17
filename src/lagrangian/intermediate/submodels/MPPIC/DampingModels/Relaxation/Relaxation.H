@@ -22,102 +22,98 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::WenYuDragForce
+    Foam::Relaxation
 
 Description
-    Wen-Yu drag model for solid spheres.
+    Templated Relaxation model class.
+
+SourceFiles
+    Relaxation.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef WenYuDragForce_H
-#define WenYuDragForce_H
+#ifndef Relaxation_H
+#define Relaxation_H
 
-#include "ParticleForce.H"
-#include "volFieldsFwd.H"
+#include "DampingModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace DampingModels
+{
 
 /*---------------------------------------------------------------------------*\
-                       Class WenYuDragForce Declaration
+                         Class Relaxation Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class WenYuDragForce
+class Relaxation
 :
-    public ParticleForce<CloudType>
+    public DampingModel<CloudType>
 {
-    // Private Data
+private:
 
-        //- Reference to the carrier volume fraction field
-        const volScalarField& alphac_;
+    // Private data
 
+        //- Velocity average
+        const AveragingMethod<vector>* uAverage_;
 
-    // Private Member Functions
-
-        //- Drag coefficient multiplied by Reynolds number
-        scalar CdRe(const scalar Re) const;
+        //- Reciprocal of the time scale average
+        autoPtr<AveragingMethod<scalar> > oneByTimeScaleAverage_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("WenYuDrag");
-
+    TypeName("relaxation");
 
     // Constructors
 
-        //- Construct from mesh
-        WenYuDragForce
-        (
-            CloudType& owner,
-            const fvMesh& mesh,
-            const dictionary& dict
-        );
+        //- Construct from components
+        Relaxation(const dictionary& dict, CloudType& owner);
 
         //- Construct copy
-        WenYuDragForce(const WenYuDragForce<CloudType>& df);
+        Relaxation(const Relaxation<CloudType>& cm);
 
         //- Construct and return a clone
-        virtual autoPtr<ParticleForce<CloudType> > clone() const
+        virtual autoPtr<DampingModel<CloudType> > clone() const
         {
-            return autoPtr<ParticleForce<CloudType> >
+            return autoPtr<DampingModel<CloudType> >
             (
-                new WenYuDragForce<CloudType>(*this)
+                new Relaxation<CloudType>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~WenYuDragForce();
+    virtual ~Relaxation();
 
 
-    // Member Functions
+    //- Member Functions
 
-        // Evaluation
+        //- Calculate the damping time scales
+        virtual void cacheFields(const bool store);
 
-            //- Calculate the coupled force
-            virtual forceSuSp calcCoupled
-            (
-                const typename CloudType::parcelType& p,
-                const scalar dt,
-                const scalar mass,
-                const scalar Re,
-                const scalar muc
-            ) const;
+        //- Calculate the velocity correction
+        virtual vector velocityCorrection
+        (
+            typename CloudType::parcelType& p,
+            const scalar deltaT
+        ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace DampingModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "WenYuDragForce.C"
+#   include "Relaxation.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

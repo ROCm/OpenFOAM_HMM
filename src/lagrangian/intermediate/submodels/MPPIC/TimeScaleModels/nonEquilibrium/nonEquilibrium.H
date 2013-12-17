@@ -21,104 +21,73 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::WenYuDragForce
-
-Description
-    Wen-Yu drag model for solid spheres.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef WenYuDragForce_H
-#define WenYuDragForce_H
+#ifndef nonEquilibrium_H
+#define nonEquilibrium_H
 
-#include "ParticleForce.H"
-#include "volFieldsFwd.H"
+#include "TimeScaleModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace TimeScaleModels
+{
 
 /*---------------------------------------------------------------------------*\
-                       Class WenYuDragForce Declaration
+                        Class nonEquilibrium Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CloudType>
-class WenYuDragForce
+class nonEquilibrium
 :
-    public ParticleForce<CloudType>
+    public TimeScaleModel
 {
-    // Private Data
-
-        //- Reference to the carrier volume fraction field
-        const volScalarField& alphac_;
-
-
-    // Private Member Functions
-
-        //- Drag coefficient multiplied by Reynolds number
-        scalar CdRe(const scalar Re) const;
-
-
 public:
 
     //- Runtime type information
-    TypeName("WenYuDrag");
+    TypeName("nonEquilibrium");
 
 
-    // Constructors
+    //- Constructors
 
-        //- Construct from mesh
-        WenYuDragForce
-        (
-            CloudType& owner,
-            const fvMesh& mesh,
-            const dictionary& dict
-        );
+        //- Construct from components
+        nonEquilibrium(const dictionary& dict);
 
-        //- Construct copy
-        WenYuDragForce(const WenYuDragForce<CloudType>& df);
+        //- Construct a copy
+        nonEquilibrium(const nonEquilibrium& hc);
 
         //- Construct and return a clone
-        virtual autoPtr<ParticleForce<CloudType> > clone() const
+        virtual autoPtr<TimeScaleModel> clone() const
         {
-            return autoPtr<ParticleForce<CloudType> >
+            return autoPtr<TimeScaleModel>
             (
-                new WenYuDragForce<CloudType>(*this)
+                new nonEquilibrium(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~WenYuDragForce();
+    virtual ~nonEquilibrium();
 
 
-    // Member Functions
+    //- Member Functions
 
-        // Evaluation
-
-            //- Calculate the coupled force
-            virtual forceSuSp calcCoupled
-            (
-                const typename CloudType::parcelType& p,
-                const scalar dt,
-                const scalar mass,
-                const scalar Re,
-                const scalar muc
-            ) const;
+        //- Time scale
+        tmp<FieldField<Field, scalar> > oneByTau
+        (
+            const FieldField<Field, scalar>& alpha,
+            const FieldField<Field, scalar>& r32,
+            const FieldField<Field, scalar>& uSqr,
+            const FieldField<Field, scalar>& f
+        ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace TimeScaleModels
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "WenYuDragForce.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -21,104 +21,89 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::WenYuDragForce
-
-Description
-    Wen-Yu drag model for solid spheres.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef WenYuDragForce_H
-#define WenYuDragForce_H
+#ifndef Lun_H
+#define Lun_H
 
-#include "ParticleForce.H"
-#include "volFieldsFwd.H"
+#include "ParticleStressModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace ParticleStressModels
+{
 
 /*---------------------------------------------------------------------------*\
-                       Class WenYuDragForce Declaration
+                        Class Lun Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CloudType>
-class WenYuDragForce
+class Lun
 :
-    public ParticleForce<CloudType>
+    public ParticleStressModel
 {
-    // Private Data
+    // Private data
 
-        //- Reference to the carrier volume fraction field
-        const volScalarField& alphac_;
+        //- Coefficient of restitution
+        scalar e_;
 
-
-    // Private Member Functions
-
-        //- Drag coefficient multiplied by Reynolds number
-        scalar CdRe(const scalar Re) const;
+        //- Smallest allowable difference from the packed volume fraction
+        scalar eps_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("WenYuDrag");
+    TypeName("Lun");
 
 
-    // Constructors
+    //- Constructors
 
-        //- Construct from mesh
-        WenYuDragForce
-        (
-            CloudType& owner,
-            const fvMesh& mesh,
-            const dictionary& dict
-        );
+        //- Construct from components
+        Lun(const dictionary& dict);
 
         //- Construct copy
-        WenYuDragForce(const WenYuDragForce<CloudType>& df);
+        Lun(const Lun& hc);
 
-        //- Construct and return a clone
-        virtual autoPtr<ParticleForce<CloudType> > clone() const
+        //- Clone
+        virtual autoPtr<ParticleStressModel> clone() const
         {
-            return autoPtr<ParticleForce<CloudType> >
+            return autoPtr<ParticleStressModel>
             (
-                new WenYuDragForce<CloudType>(*this)
+                new Lun(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~WenYuDragForce();
+    virtual ~Lun();
 
 
-    // Member Functions
+    //- Member Functions
 
-        // Evaluation
+        //- Collision stress
+        tmp<Field<scalar> > tau
+        (
+            const Field<scalar>& alpha,
+            const Field<scalar>& rho,
+            const Field<scalar>& uRms
+        ) const;
 
-            //- Calculate the coupled force
-            virtual forceSuSp calcCoupled
-            (
-                const typename CloudType::parcelType& p,
-                const scalar dt,
-                const scalar mass,
-                const scalar Re,
-                const scalar muc
-            ) const;
+        //- Collision stress derivaive w.r.t. the volume fraction
+        tmp<Field<scalar> > dTaudTheta
+        (
+            const Field<scalar>& alpha,
+            const Field<scalar>& rho,
+            const Field<scalar>& uRms
+        ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace ParticleStressModels
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "WenYuDragForce.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

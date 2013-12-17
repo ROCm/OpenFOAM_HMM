@@ -22,102 +22,83 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::WenYuDragForce
+    Foam::NoIsotropy
 
 Description
-    Wen-Yu drag model for solid spheres.
+    Templated NoIsotropy model class.
+
+SourceFiles
+    NoIsotropy.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef WenYuDragForce_H
-#define WenYuDragForce_H
+#ifndef NoIsotropy_H
+#define NoIsotropy_H
 
-#include "ParticleForce.H"
-#include "volFieldsFwd.H"
+#include "IsotropyModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace IsotropyModels
+{
 
 /*---------------------------------------------------------------------------*\
-                       Class WenYuDragForce Declaration
+                         Class NoIsotropy Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class WenYuDragForce
+class NoIsotropy
 :
-    public ParticleForce<CloudType>
+    public IsotropyModel<CloudType>
 {
-    // Private Data
-
-        //- Reference to the carrier volume fraction field
-        const volScalarField& alphac_;
-
-
-    // Private Member Functions
-
-        //- Drag coefficient multiplied by Reynolds number
-        scalar CdRe(const scalar Re) const;
-
-
 public:
 
     //- Runtime type information
-    TypeName("WenYuDrag");
-
+    TypeName("none");
 
     // Constructors
 
-        //- Construct from mesh
-        WenYuDragForce
-        (
-            CloudType& owner,
-            const fvMesh& mesh,
-            const dictionary& dict
-        );
+        //- Construct from components
+        NoIsotropy(const dictionary& dict, CloudType& owner);
 
         //- Construct copy
-        WenYuDragForce(const WenYuDragForce<CloudType>& df);
+        NoIsotropy(const NoIsotropy<CloudType>& cm);
 
         //- Construct and return a clone
-        virtual autoPtr<ParticleForce<CloudType> > clone() const
+        virtual autoPtr<IsotropyModel<CloudType> > clone() const
         {
-            return autoPtr<ParticleForce<CloudType> >
+            return autoPtr<IsotropyModel<CloudType> >
             (
-                new WenYuDragForce<CloudType>(*this)
+                new NoIsotropy<CloudType>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~WenYuDragForce();
+    virtual ~NoIsotropy();
 
 
-    // Member Functions
+    //- Member Functions
 
-        // Evaluation
+        //- calculate velocities
+        virtual void calculate();
 
-            //- Calculate the coupled force
-            virtual forceSuSp calcCoupled
-            (
-                const typename CloudType::parcelType& p,
-                const scalar dt,
-                const scalar mass,
-                const scalar Re,
-                const scalar muc
-            ) const;
+        //- Return the model 'active' status
+        virtual bool active() const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace IsotropyModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "WenYuDragForce.C"
+#   include "NoIsotropy.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

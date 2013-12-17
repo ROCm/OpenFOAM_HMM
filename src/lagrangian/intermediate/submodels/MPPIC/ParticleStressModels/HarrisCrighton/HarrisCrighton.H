@@ -21,104 +21,98 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::WenYuDragForce
-
-Description
-    Wen-Yu drag model for solid spheres.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef WenYuDragForce_H
-#define WenYuDragForce_H
+#ifndef HarrisCrighton_H
+#define HarrisCrighton_H
 
-#include "ParticleForce.H"
-#include "volFieldsFwd.H"
+#include "ParticleStressModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace ParticleStressModels
+{
 
 /*---------------------------------------------------------------------------*\
-                       Class WenYuDragForce Declaration
+                        Class HarrisCrighton Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CloudType>
-class WenYuDragForce
+class HarrisCrighton
 :
-    public ParticleForce<CloudType>
+    public ParticleStressModel
 {
-    // Private Data
+    // Private data
 
-        //- Reference to the carrier volume fraction field
-        const volScalarField& alphac_;
+        //- Solid pressure coefficient
+        scalar pSolid_;
+
+        //- Exponent of the volume fraction
+        scalar beta_;
+
+        //- Smallest allowable difference from the packed volume fraction
+        scalar eps_;
 
 
-    // Private Member Functions
+    // Private member functions
 
-        //- Drag coefficient multiplied by Reynolds number
-        scalar CdRe(const scalar Re) const;
+        //- Return the limited denominator of the radial distribution function
+        tmp<Field<scalar> > denominator(const Field<scalar>& alpha) const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("WenYuDrag");
+    TypeName("HarrisCrighton");
 
 
-    // Constructors
+    //- Constructors
 
-        //- Construct from mesh
-        WenYuDragForce
-        (
-            CloudType& owner,
-            const fvMesh& mesh,
-            const dictionary& dict
-        );
+        //- Construct from components
+        HarrisCrighton(const dictionary& dict);
 
         //- Construct copy
-        WenYuDragForce(const WenYuDragForce<CloudType>& df);
+        HarrisCrighton(const HarrisCrighton& hc);
 
-        //- Construct and return a clone
-        virtual autoPtr<ParticleForce<CloudType> > clone() const
+        //- Clone
+        virtual autoPtr<ParticleStressModel> clone() const
         {
-            return autoPtr<ParticleForce<CloudType> >
+            return autoPtr<ParticleStressModel>
             (
-                new WenYuDragForce<CloudType>(*this)
+                new HarrisCrighton(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~WenYuDragForce();
+    virtual ~HarrisCrighton();
 
 
-    // Member Functions
+    //- Member Functions
 
-        // Evaluation
+        //- Collision stress
+        tmp<Field<scalar> > tau
+        (
+            const Field<scalar>& alpha,
+            const Field<scalar>& rho,
+            const Field<scalar>& uRms
+        ) const;
 
-            //- Calculate the coupled force
-            virtual forceSuSp calcCoupled
-            (
-                const typename CloudType::parcelType& p,
-                const scalar dt,
-                const scalar mass,
-                const scalar Re,
-                const scalar muc
-            ) const;
+        //- Collision stress derivaive w.r.t. the volume fraction
+        tmp<Field<scalar> > dTaudTheta
+        (
+            const Field<scalar>& alpha,
+            const Field<scalar>& rho,
+            const Field<scalar>& uRms
+        ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace ParticleStressModels
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "WenYuDragForce.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

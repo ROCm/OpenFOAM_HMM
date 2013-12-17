@@ -22,102 +22,135 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::WenYuDragForce
+    Foam::AveragingMethods::Basic
 
-Description
-    Wen-Yu drag model for solid spheres.
+SourceFiles
+    Basic.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef WenYuDragForce_H
-#define WenYuDragForce_H
+#ifndef Basic_H
+#define Basic_H
 
-#include "ParticleForce.H"
-#include "volFieldsFwd.H"
+#include "AveragingMethod.H"
+#include "pointMesh.H"
+#include "tetIndices.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace AveragingMethods
+{
 
 /*---------------------------------------------------------------------------*\
-                       Class WenYuDragForce Declaration
+                        Class Basic Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CloudType>
-class WenYuDragForce
+template<class Type>
+class Basic
 :
-    public ParticleForce<CloudType>
+    public AveragingMethod<Type>
 {
-    // Private Data
+public:
 
-        //- Reference to the carrier volume fraction field
-        const volScalarField& alphac_;
+    //- Public typedefs
+
+        //- Gradient type
+        typedef typename AveragingMethod<Type>::TypeGrad TypeGrad;
 
 
-    // Private Member Functions
+private:
 
-        //- Drag coefficient multiplied by Reynolds number
-        scalar CdRe(const scalar Re) const;
+    //- Private data
+
+        //- Cell average field
+        Field<Type>& data_;
+
+        //- Gradient field
+        Field<TypeGrad> dataGrad_;
+
+
+    //- Private member functions
+
+        //- Re-calculate gradient
+        virtual void updateGrad();
 
 
 public:
 
     //- Runtime type information
-    TypeName("WenYuDrag");
+    TypeName("basic");
 
 
-    // Constructors
+    //- Constructors
 
-        //- Construct from mesh
-        WenYuDragForce
+        //- Construct from components
+        Basic
         (
-            CloudType& owner,
-            const fvMesh& mesh,
-            const dictionary& dict
+            const IOobject& io,
+            const dictionary& dict,
+            const fvMesh &mesh
         );
 
-        //- Construct copy
-        WenYuDragForce(const WenYuDragForce<CloudType>& df);
+        //- Construct a copy
+        Basic(const Basic<Type>& am);
 
         //- Construct and return a clone
-        virtual autoPtr<ParticleForce<CloudType> > clone() const
+        virtual autoPtr<AveragingMethod<Type> > clone() const
         {
-            return autoPtr<ParticleForce<CloudType> >
+            return autoPtr<AveragingMethod<Type> >
             (
-                new WenYuDragForce<CloudType>(*this)
+                new Basic<Type>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~WenYuDragForce();
+    virtual ~Basic();
 
 
-    // Member Functions
+    //- Member Functions
 
-        // Evaluation
+        //- Add point value to interpolation
+        void add
+        (
+            const point position,
+            const tetIndices& tetIs,
+            const Type& value
+        );
 
-            //- Calculate the coupled force
-            virtual forceSuSp calcCoupled
-            (
-                const typename CloudType::parcelType& p,
-                const scalar dt,
-                const scalar mass,
-                const scalar Re,
-                const scalar muc
-            ) const;
+        //- Interpolate
+        Type interpolate
+        (
+            const point position,
+            const tetIndices& tetIs
+        ) const;
+
+        //- Interpolate gradient
+        TypeGrad interpolateGrad
+        (
+            const point position,
+            const tetIndices& tetIs
+        ) const;
+
+        //- Return an internal field of the average
+        tmp<Field<Type> > internalField() const;
+
+        //- Return an internal field of the gradient
+        tmp<Field<TypeGrad> > internalFieldGrad() const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace AveragingMethods
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "WenYuDragForce.C"
+#   include "Basic.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

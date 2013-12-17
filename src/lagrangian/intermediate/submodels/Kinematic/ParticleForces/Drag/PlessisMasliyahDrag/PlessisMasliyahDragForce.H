@@ -64,7 +64,7 @@ class PlessisMasliyahDragForce
 public:
 
     //- Runtime type information
-    TypeName("PlessisMasliyahDragForce");
+    TypeName("PlessisMasliyahDrag");
 
 
     // Constructors

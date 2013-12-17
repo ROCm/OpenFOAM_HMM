@@ -22,102 +22,101 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::WenYuDragForce
+    Foam::Explicit
 
-Description
-    Wen-Yu drag model for solid spheres.
+SourceFiles
+    Explicit.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef WenYuDragForce_H
-#define WenYuDragForce_H
+#ifndef Explicit_H
+#define Explicit_H
 
-#include "ParticleForce.H"
-#include "volFieldsFwd.H"
+#include "PackingModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace PackingModels
+{
 
 /*---------------------------------------------------------------------------*\
-                       Class WenYuDragForce Declaration
+                         Class Explicit Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class WenYuDragForce
+class Explicit
 :
-    public ParticleForce<CloudType>
+    public PackingModel<CloudType>
 {
-    // Private Data
+private:
 
-        //- Reference to the carrier volume fraction field
-        const volScalarField& alphac_;
+    //- Private data
 
+        //- Volume fraction average
+        const AveragingMethod<scalar>* volumeAverage_;
 
-    // Private Member Functions
+        //- Velocity average
+        const AveragingMethod<vector>* uAverage_;
 
-        //- Drag coefficient multiplied by Reynolds number
-        scalar CdRe(const scalar Re) const;
+        //- Stress average field
+        autoPtr<AveragingMethod<scalar> > stressAverage_;
+
+        //- Correction limiter
+        autoPtr<CorrectionLimitingMethod> correctionLimiting_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("WenYuDrag");
-
+    TypeName("explicit");
 
     // Constructors
 
-        //- Construct from mesh
-        WenYuDragForce
-        (
-            CloudType& owner,
-            const fvMesh& mesh,
-            const dictionary& dict
-        );
+        //- Construct from components
+        Explicit(const dictionary& dict, CloudType& owner);
 
         //- Construct copy
-        WenYuDragForce(const WenYuDragForce<CloudType>& df);
+        Explicit(const Explicit<CloudType>& cm);
 
         //- Construct and return a clone
-        virtual autoPtr<ParticleForce<CloudType> > clone() const
+        virtual autoPtr<PackingModel<CloudType> > clone() const
         {
-            return autoPtr<ParticleForce<CloudType> >
+            return autoPtr<PackingModel<CloudType> >
             (
-                new WenYuDragForce<CloudType>(*this)
+                new Explicit<CloudType>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~WenYuDragForce();
+    virtual ~Explicit();
 
 
     // Member Functions
 
-        // Evaluation
+        //- Calculate the inter particles stresses
+        virtual void cacheFields(const bool store);
 
-            //- Calculate the coupled force
-            virtual forceSuSp calcCoupled
-            (
-                const typename CloudType::parcelType& p,
-                const scalar dt,
-                const scalar mass,
-                const scalar Re,
-                const scalar muc
-            ) const;
+        //- Calculate the velocity correction
+        virtual vector velocityCorrection
+        (
+            typename CloudType::parcelType& p,
+            const scalar deltaT
+        ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace PackingModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "WenYuDragForce.C"
+#   include "Explicit.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
