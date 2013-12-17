@@ -182,6 +182,16 @@ public:
 
         template<class Mesh, template<class> class MeshObjectType>
         static void clear(objectRegistry&);
+
+        //- Clear all meshObject derived from FromType up to (but not including)
+        //  ToType. Used to clear e.g. all non-updateable meshObjects
+        template
+        <
+            class Mesh,
+            template<class> class FromType,
+            template<class> class ToType
+        >
+        static void clearUpto(objectRegistry&);
 };
 
 
