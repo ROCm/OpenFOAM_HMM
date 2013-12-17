@@ -493,4 +493,22 @@ Foam::tmp<Foam::pointField> Foam::sixDoFRigidBodyMotion::scaledPosition
 }
 
 
+bool Foam::sixDoFRigidBodyMotion::read(const dictionary& dict)
+{
+    dict.lookup("momentOfInertia") >> momentOfInertia_;
+    dict.lookup("mass") >> mass_;
+    aRelax_ = dict.lookupOrDefault<scalar>("accelerationRelaxation", 1.0);
+    aDamp_ = dict.lookupOrDefault<scalar>("accelerationDamping", 1.0);
+    report_ = dict.lookupOrDefault<Switch>("report", false);
+
+    restraints_.clear();
+    addRestraints(dict);
+
+    constraints_.clear();
+    addConstraints(dict);
+
+    return true;
+}
+
+
 // ************************************************************************* //

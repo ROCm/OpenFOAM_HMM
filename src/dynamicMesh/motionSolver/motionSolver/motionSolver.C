@@ -190,4 +190,19 @@ bool Foam::motionSolver::writeObject
 }
 
 
+bool Foam::motionSolver::read()
+{
+    if (regIOobject::read())
+    {
+        coeffDict_ = subDict(type() + "Coeffs");
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
 // ************************************************************************* //

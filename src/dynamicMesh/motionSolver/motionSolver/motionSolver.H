@@ -156,6 +156,9 @@ public:
             IOstream::versionNumber ver,
             IOstream::compressionType cmp
         ) const;
+
+        //- Read dynamicMeshDict dictionary
+        virtual bool read();
 };
 
 

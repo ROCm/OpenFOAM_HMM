@@ -250,4 +250,19 @@ bool Foam::sixDoFRigidBodyMotionSolver::writeObject
 }
 
 
+bool Foam::sixDoFRigidBodyMotionSolver::read()
+{
+    if (displacementMotionSolver::read())
+    {
+        motion_.read(coeffDict());
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
 // ************************************************************************* //

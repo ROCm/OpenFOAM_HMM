@@ -404,6 +404,11 @@ public:
         void write(Ostream&) const;
 
 
+        //- Read coefficients dictionary and update system parameters,
+        //  constraints and restraints but not the current state
+        bool read(const dictionary& dict);
+
+
     // IOstream Operators
 
         friend Istream& operator>>(Istream&, sixDoFRigidBodyMotion&);
