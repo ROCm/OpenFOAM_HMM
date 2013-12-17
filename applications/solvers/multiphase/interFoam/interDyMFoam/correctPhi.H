@@ -37,7 +37,8 @@ if (mesh.changing())
         pcorrTypes
     );
 
-    dimensionedScalar rAUf("rAUf", dimTime/rho.dimensions(), 1.0);
+    // dimensionedScalar rAUf("rAUf", dimTime/rho.dimensions(), 1.0);
+    surfaceScalarField rAUf("rAUf", fvc::interpolate(rAU));
 
     while (pimple.correctNonOrthogonal())
     {
