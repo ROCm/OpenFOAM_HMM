@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fixedAxis.H"
+#include "sixDoFRigidBodyMotionAxisConstraint.H"
 #include "addToRunTimeSelectionTable.H"
 #include "sixDoFRigidBodyMotion.H"
 
@@ -33,12 +33,12 @@ namespace Foam
 {
 namespace sixDoFRigidBodyMotionConstraints
 {
-    defineTypeNameAndDebug(fixedAxis, 0);
+    defineTypeNameAndDebug(axis, 0);
 
     addToRunTimeSelectionTable
     (
         sixDoFRigidBodyMotionConstraint,
-        fixedAxis,
+        axis,
         dictionary
     );
 }
@@ -47,14 +47,14 @@ namespace sixDoFRigidBodyMotionConstraints
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionConstraints::fixedAxis::fixedAxis
+Foam::sixDoFRigidBodyMotionConstraints::axis::axis
 (
     const word& name,
     const dictionary& sDoFRBMCDict
 )
 :
     sixDoFRigidBodyMotionConstraint(name, sDoFRBMCDict),
-    fixedAxis_()
+    axis_()
 {
     read(sDoFRBMCDict);
 }
@@ -62,20 +62,20 @@ Foam::sixDoFRigidBodyMotionConstraints::fixedAxis::fixedAxis
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionConstraints::fixedAxis::~fixedAxis()
+Foam::sixDoFRigidBodyMotionConstraints::axis::~axis()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::sixDoFRigidBodyMotionConstraints::fixedAxis::constrainTranslation
+void Foam::sixDoFRigidBodyMotionConstraints::axis::constrainTranslation
 (
     pointConstraint& pc
 ) const
 {}
 
 
-void Foam::sixDoFRigidBodyMotionConstraints::fixedAxis::constrainRotation
+void Foam::sixDoFRigidBodyMotionConstraints::axis::constrainRotation
 (
     pointConstraint& pc
 ) const
@@ -84,26 +84,26 @@ void Foam::sixDoFRigidBodyMotionConstraints::fixedAxis::constrainRotation
 }
 
 
-bool Foam::sixDoFRigidBodyMotionConstraints::fixedAxis::read
+bool Foam::sixDoFRigidBodyMotionConstraints::axis::read
 (
     const dictionary& sDoFRBMCDict
 )
 {
     sixDoFRigidBodyMotionConstraint::read(sDoFRBMCDict);
 
-    sDoFRBMCCoeffs_.lookup("axis") >> fixedAxis_;
+    sDoFRBMCCoeffs_.lookup("axis") >> axis_;
 
-    scalar magFixedAxis(mag(fixedAxis_));
+    scalar magFixedAxis(mag(axis_));
 
     if (magFixedAxis > VSMALL)
     {
-        fixedAxis_ /= magFixedAxis;
+        axis_ /= magFixedAxis;
     }
     else
     {
         FatalErrorIn
         (
-            "Foam::sixDoFRigidBodyMotionConstraints::fixedAxis::read"
+            "Foam::sixDoFRigidBodyMotionConstraints::axis::read"
             "("
                 "const dictionary& sDoFRBMCDict"
             ")"
@@ -116,13 +116,13 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedAxis::read
 }
 
 
-void Foam::sixDoFRigidBodyMotionConstraints::fixedAxis::write
+void Foam::sixDoFRigidBodyMotionConstraints::axis::write
 (
     Ostream& os
 ) const
 {
     os.writeKeyword("axis")
-        << fixedAxis_ << token::END_STATEMENT << nl;
+        << axis_ << token::END_STATEMENT << nl;
 }
 
 // ************************************************************************* //

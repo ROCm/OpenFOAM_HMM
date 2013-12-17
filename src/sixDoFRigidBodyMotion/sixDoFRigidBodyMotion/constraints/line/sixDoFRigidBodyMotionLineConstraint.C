@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fixedPlane.H"
+#include "sixDoFRigidBodyMotionLineConstraint.H"
 #include "addToRunTimeSelectionTable.H"
 #include "sixDoFRigidBodyMotion.H"
 
@@ -33,12 +33,12 @@ namespace Foam
 {
 namespace sixDoFRigidBodyMotionConstraints
 {
-    defineTypeNameAndDebug(fixedPlane, 0);
+    defineTypeNameAndDebug(line, 0);
 
     addToRunTimeSelectionTable
     (
         sixDoFRigidBodyMotionConstraint,
-        fixedPlane,
+        line,
         dictionary
     );
 }
@@ -47,14 +47,14 @@ namespace sixDoFRigidBodyMotionConstraints
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionConstraints::fixedPlane::fixedPlane
+Foam::sixDoFRigidBodyMotionConstraints::line::line
 (
     const word& name,
     const dictionary& sDoFRBMCDict
 )
 :
     sixDoFRigidBodyMotionConstraint(name, sDoFRBMCDict),
-    normal_(vector::zero)
+    dir_()
 {
     read(sDoFRBMCDict);
 }
@@ -62,48 +62,67 @@ Foam::sixDoFRigidBodyMotionConstraints::fixedPlane::fixedPlane
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionConstraints::fixedPlane::~fixedPlane()
+Foam::sixDoFRigidBodyMotionConstraints::line::~line()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::sixDoFRigidBodyMotionConstraints::fixedPlane::constrainTranslation
+void Foam::sixDoFRigidBodyMotionConstraints::line::constrainTranslation
 (
     pointConstraint& pc
 ) const
 {
-    pc.applyConstraint(normal_);
+    pc.combine(pointConstraint(Tuple2<label, vector>(2, dir_)));
 }
 
 
-void Foam::sixDoFRigidBodyMotionConstraints::fixedPlane::constrainRotation
+void Foam::sixDoFRigidBodyMotionConstraints::line::constrainRotation
 (
     pointConstraint& pc
 ) const
 {}
 
 
-bool Foam::sixDoFRigidBodyMotionConstraints::fixedPlane::read
+bool Foam::sixDoFRigidBodyMotionConstraints::line::read
 (
     const dictionary& sDoFRBMCDict
 )
 {
     sixDoFRigidBodyMotionConstraint::read(sDoFRBMCDict);
 
-    normal_ = sDoFRBMCCoeffs_.lookup("normal");
+    sDoFRBMCCoeffs_.lookup("direction") >> dir_;
+
+    scalar magDir(mag(dir_));
+
+    if (magDir > VSMALL)
+    {
+        dir_ /= magDir;
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "Foam::sixDoFRigidBodyMotionConstraints::line::read"
+            "("
+                "const dictionary& sDoFRBMCDict"
+            ")"
+        )
+            << "line direction has zero length"
+            << abort(FatalError);
+    }
 
     return true;
 }
 
 
-void Foam::sixDoFRigidBodyMotionConstraints::fixedPlane::write
+void Foam::sixDoFRigidBodyMotionConstraints::line::write
 (
     Ostream& os
 ) const
 {
-    os.writeKeyword("normal")
-        << normal_ << token::END_STATEMENT << nl;
+    os.writeKeyword("direction")
+        << dir_ << token::END_STATEMENT << nl;
 }
 
 // ************************************************************************* //

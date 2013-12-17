@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fixedLine.H"
+#include "sixDoFRigidBodyMotionPointConstraint.H"
 #include "addToRunTimeSelectionTable.H"
 #include "sixDoFRigidBodyMotion.H"
 
@@ -33,12 +33,12 @@ namespace Foam
 {
 namespace sixDoFRigidBodyMotionConstraints
 {
-    defineTypeNameAndDebug(fixedLine, 0);
+    defineTypeNameAndDebug(point, 0);
 
     addToRunTimeSelectionTable
     (
         sixDoFRigidBodyMotionConstraint,
-        fixedLine,
+        point,
         dictionary
     );
 }
@@ -47,14 +47,14 @@ namespace sixDoFRigidBodyMotionConstraints
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionConstraints::fixedLine::fixedLine
+Foam::sixDoFRigidBodyMotionConstraints::point::point
 (
     const word& name,
     const dictionary& sDoFRBMCDict
 )
 :
     sixDoFRigidBodyMotionConstraint(name, sDoFRBMCDict),
-    dir_()
+    point_()
 {
     read(sDoFRBMCDict);
 }
@@ -62,67 +62,48 @@ Foam::sixDoFRigidBodyMotionConstraints::fixedLine::fixedLine
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionConstraints::fixedLine::~fixedLine()
+Foam::sixDoFRigidBodyMotionConstraints::point::~point()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::sixDoFRigidBodyMotionConstraints::fixedLine::constrainTranslation
+void Foam::sixDoFRigidBodyMotionConstraints::point::constrainTranslation
 (
     pointConstraint& pc
 ) const
 {
-    pc.combine(pointConstraint(Tuple2<label, vector>(2, dir_)));
+    pc.combine(pointConstraint(Tuple2<label, vector>(3, vector::zero)));
 }
 
 
-void Foam::sixDoFRigidBodyMotionConstraints::fixedLine::constrainRotation
+void Foam::sixDoFRigidBodyMotionConstraints::point::constrainRotation
 (
     pointConstraint& pc
 ) const
 {}
 
 
-bool Foam::sixDoFRigidBodyMotionConstraints::fixedLine::read
+bool Foam::sixDoFRigidBodyMotionConstraints::point::read
 (
     const dictionary& sDoFRBMCDict
 )
 {
     sixDoFRigidBodyMotionConstraint::read(sDoFRBMCDict);
 
-    sDoFRBMCCoeffs_.lookup("direction") >> dir_;
-
-    scalar magDir(mag(dir_));
-
-    if (magDir > VSMALL)
-    {
-        dir_ /= magDir;
-    }
-    else
-    {
-        FatalErrorIn
-        (
-            "Foam::sixDoFRigidBodyMotionConstraints::fixedLine::read"
-            "("
-                "const dictionary& sDoFRBMCDict"
-            ")"
-        )
-            << "line direction has zero length"
-            << abort(FatalError);
-    }
+    sDoFRBMCCoeffs_.lookup("point") >> point_;
 
     return true;
 }
 
 
-void Foam::sixDoFRigidBodyMotionConstraints::fixedLine::write
+void Foam::sixDoFRigidBodyMotionConstraints::point::write
 (
     Ostream& os
 ) const
 {
-    os.writeKeyword("direction")
-        << dir_ << token::END_STATEMENT << nl;
+    os.writeKeyword("point")
+        << point_ << token::END_STATEMENT << nl;
 }
 
 // ************************************************************************* //

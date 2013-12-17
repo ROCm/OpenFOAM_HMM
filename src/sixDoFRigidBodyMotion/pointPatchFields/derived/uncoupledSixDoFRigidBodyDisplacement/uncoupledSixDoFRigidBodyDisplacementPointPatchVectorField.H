@@ -59,6 +59,9 @@ class uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField
         //- Initial positions of points on the patch
         pointField initialPoints_;
 
+        //- Current time index (used for updating)
+        label curTimeIndex_;
+
 
 public:
 

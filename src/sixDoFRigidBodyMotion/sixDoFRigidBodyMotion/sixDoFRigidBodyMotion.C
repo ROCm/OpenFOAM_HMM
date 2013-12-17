@@ -151,7 +151,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
         dict.lookupOrDefault
         (
             "initialOrientation",
-            dict.lookupOrDefault("orientation", I)
+            dict.lookupOrDefault("orientation", tensor::I)
         )
     ),
     momentOfInertia_(dict.lookup("momentOfInertia")),
