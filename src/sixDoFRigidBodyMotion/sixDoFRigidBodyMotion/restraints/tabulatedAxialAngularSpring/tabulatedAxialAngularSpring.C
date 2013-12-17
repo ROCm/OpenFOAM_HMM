@@ -136,7 +136,6 @@ Foam::sixDoFRigidBodyMotionRestraints::tabulatedAxialAngularSpring::restrain
     if (motion.report())
     {
         Info<< " angle " << theta
-            << " force " << restraintForce
             << " moment " << restraintMoment
             << endl;
     }

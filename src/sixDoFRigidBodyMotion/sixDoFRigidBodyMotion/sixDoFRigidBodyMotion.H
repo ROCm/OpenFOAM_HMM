@@ -174,9 +174,6 @@ class sixDoFRigidBodyMotion
             //- Return access to the orientation
             inline const tensor& Q() const;
 
-            //- Return access to velocity
-            inline const vector& v() const;
-
             //- Return access to acceleration
             inline const vector& a() const;
 
@@ -356,8 +353,7 @@ public:
         //- Return the angular velocity in the global frame
         inline vector omega() const;
 
-        //- Return the velocity of a position given by the current
-        //  motion state
+        //- Return the velocity of a position
         inline point currentVelocity(const point& pt) const;
 
         //- Report the status of the motion
@@ -383,6 +379,9 @@ public:
 
             //- Return the report Switch
             inline bool report() const;
+
+            //- Return access to velocity
+            inline const vector& v() const;
 
 
         // Edit

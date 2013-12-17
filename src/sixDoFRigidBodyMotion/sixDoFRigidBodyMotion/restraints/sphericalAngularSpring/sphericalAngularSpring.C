@@ -72,8 +72,7 @@ Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void
-Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::restrain
+void Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::restrain
 (
     const sixDoFRigidBodyMotion& motion,
     vector& restraintPosition,
@@ -86,19 +85,15 @@ Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::restrain
     for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
     {
         vector axis = vector::zero;
-
         axis[cmpt] = 1;
 
         vector refDir = vector::zero;
-
         refDir[(cmpt + 1) % 3] = 1;
 
         vector newDir = motion.orientation() & refDir;
 
         axis = (refQ_ & axis);
-
         refDir = (refQ_ & refDir);
-
         newDir -= (axis & newDir)*axis;
 
         restraintMoment += -stiffness_*(refDir ^ newDir);
@@ -114,8 +109,7 @@ Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::restrain
 
     if (motion.report())
     {
-        Info<< " force " << restraintForce
-            << " moment " << restraintMoment
+        Info<< " moment " << restraintMoment
             << endl;
     }
 }
@@ -147,7 +141,6 @@ bool Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::read
     }
 
     sDoFRBMRCoeffs_.lookup("stiffness") >> stiffness_;
-
     sDoFRBMRCoeffs_.lookup("damping") >> damping_;
 
     return true;

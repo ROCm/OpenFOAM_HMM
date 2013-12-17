@@ -85,8 +85,6 @@ void Foam::sixDoFRigidBodyMotionRestraints::linearSpring::restrain
     vector r = restraintPosition - anchor_;
 
     scalar magR = mag(r);
-
-    // r is now the r unit vector
     r /= (magR + VSMALL);
 
     vector v = motion.currentVelocity(restraintPosition);
@@ -100,7 +98,6 @@ void Foam::sixDoFRigidBodyMotionRestraints::linearSpring::restrain
         Info<< " attachmentPt - anchor " << r*magR
             << " spring length " << magR
             << " force " << restraintForce
-            << " moment " << restraintMoment
             << endl;
     }
 }
@@ -114,13 +111,9 @@ bool Foam::sixDoFRigidBodyMotionRestraints::linearSpring::read
     sixDoFRigidBodyMotionRestraint::read(sDoFRBMRDict);
 
     sDoFRBMRCoeffs_.lookup("anchor") >> anchor_;
-
     sDoFRBMRCoeffs_.lookup("refAttachmentPt") >> refAttachmentPt_;
-
     sDoFRBMRCoeffs_.lookup("stiffness") >> stiffness_;
-
     sDoFRBMRCoeffs_.lookup("damping") >> damping_;
-
     sDoFRBMRCoeffs_.lookup("restLength") >> restLength_;
 
     return true;
