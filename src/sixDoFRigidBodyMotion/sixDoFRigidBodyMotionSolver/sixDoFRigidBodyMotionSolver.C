@@ -220,7 +220,10 @@ void Foam::sixDoFRigidBodyMotionSolver::solve()
         motion_.scaledPosition(points0(), scale_) - points0();
 
     // Displacement has changed. Update boundary conditions
-    pointConstraints::New(mesh()).constrainDisplacement(pointDisplacement_);
+    pointConstraints::New
+    (
+        pointDisplacement_.mesh()
+    ).constrainDisplacement(pointDisplacement_);
 }
 
 
