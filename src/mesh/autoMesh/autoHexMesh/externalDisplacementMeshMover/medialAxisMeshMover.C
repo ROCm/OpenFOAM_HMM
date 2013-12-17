@@ -1317,16 +1317,14 @@ void Foam::medialAxisMeshMover::findIsolatedRegions
 
                 forAll(f, fp)
                 {
-                    label patchPointI = f[fp];
-
                     if (extrudeStatus[f[fp]] != autoLayerDriver::NOEXTRUDE)
                     {
                         if (islandPoint[faceI] == -1)
                         {
                             // First point to extrude
-                            islandPoint[faceI] = patchPointI;
+                            islandPoint[faceI] = f[fp];
                         }
-                        else
+                        else if (islandPoint[faceI] != -2)
                         {
                             // Second or more point to extrude
                             islandPoint[faceI] = -2;
@@ -1336,12 +1334,11 @@ void Foam::medialAxisMeshMover::findIsolatedRegions
             }
 
             // islandPoint:
-            //  -1 : no point extruded
-            //  -2 : >= 2 points extruded
+            //  -1 : no point extruded on face
+            //  -2 : >= 2 points extruded on face
             //  >=0: label of point extruded
 
             // Check all surrounding faces that I am the islandPoint
-            boolList keptPoints(pp.nPoints(), false);
             forAll(pointFaces, patchPointI)
             {
                 if (extrudeStatus[patchPointI] != autoLayerDriver::NOEXTRUDE)
@@ -1421,6 +1418,7 @@ void Foam::medialAxisMeshMover::findIsolatedRegions
                 }
             }
         }
+
 
         if (returnReduce(nChanged, sumOp<label>()) == 0)
         {
@@ -1773,8 +1771,8 @@ void Foam::medialAxisMeshMover::calculateDisplacement
         mesh().globalData().nTotalPoints()
     );
 
-    //- Use strick extrusionIsland detection
-    const Switch detectExtrusionIsland = coeffDict.lookupOrDefault<label>
+    //- Use strict extrusionIsland detection
+    const Switch detectExtrusionIsland = coeffDict.lookupOrDefault<Switch>
     (
         "detectExtrusionIsland",
         true
