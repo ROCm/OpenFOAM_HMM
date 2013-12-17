@@ -114,17 +114,26 @@ const Foam::vector& Foam::symmetryPlanePolyPatch::n() const
     // as the average face-normal
     if (magSqr(n_) < 0.5)
     {
-        const vectorField& nf(faceNormals());
-        n_ = gAverage(nf);
-
-        // Check the symmetry plane is planar
-        forAll(nf, facei)
+        if (returnReduce(size(), sumOp<label>()) == 0)
         {
-            if (magSqr(n_ - nf[facei]) > SMALL)
+            // No faces in patch. Avoid gAverage complaining and set
+            // normal to nonsense value to catch any use
+            n_ = vector::rootMax;
+        }
+        else
+        {
+            const vectorField& nf(faceNormals());
+            n_ = gAverage(nf);
+
+            // Check the symmetry plane is planar
+            forAll(nf, facei)
             {
-                FatalErrorIn("symmetryPlanePolyPatch::n()")
-                    << "Symmetry plane '" << name() << "' is not planar"
-                    << exit(FatalError);
+                if (magSqr(n_ - nf[facei]) > SMALL)
+                {
+                    FatalErrorIn("symmetryPlanePolyPatch::n()")
+                        << "Symmetry plane '" << name() << "' is not planar"
+                        << exit(FatalError);
+                }
             }
         }
     }

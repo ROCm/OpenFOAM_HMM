@@ -34,11 +34,6 @@ Description
           coupled to points which are not on any constraint patch and we
           don't want to get inconsistency between the two points.
 
-    Note: is currently MeshObject on polyMesh but should really be on
-          pointMesh. The problem is that pointMesh::updateMesh never
-          gets called (since currently polyMesh gets reset and destroys
-          pointMesh)
-
 SourceFiles
     pointConstraints.C
     pointConstraintsTemplates.C
@@ -67,8 +62,7 @@ class polyMesh;
 
 class pointConstraints
 :
-//See above:public MeshObject<pointMesh, UpdateableMeshObject, pointConstraints>
-    public MeshObject<polyMesh, UpdateableMeshObject, pointConstraints>
+    public MeshObject<pointMesh, UpdateableMeshObject, pointConstraints>
 {
     // Private data
 
@@ -103,8 +97,7 @@ public:
     // Constructors
 
         //- Constructor from pointMesh.
-        //explicit pointConstraints(const pointMesh&);
-        explicit pointConstraints(const polyMesh&);
+        explicit pointConstraints(const pointMesh&);
 
 
     //- Destructor

@@ -410,12 +410,17 @@ addLayersControls
         // Number of smoothing iterations of interior mesh movement direction
         nSmoothNormals 3;
 
+        // Optional: limit the number of steps walking away from the surface.
+        // Default is unlimited.
+        //nMedialAxisIter 10;
+
         // Optional: smooth displacement after medial axis determination.
         // default is 0.
-        nSmoothDisplacement 90;
+        //nSmoothDisplacement 90;
 
-        // Optional: limit the number of steps walking away from the surface
-        nMedialAxisIter 10;
+        // Optional: do not extrude any point where all surrounding faces
+        // have at least one point not extruded. Default is true.
+        //detectExtrusionIsland false;
 
 
     // Mesh shrinking

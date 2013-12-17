@@ -139,12 +139,7 @@ void pointConstraints::constrain
     pf.correctBoundaryConditions();
 
     // Sync any dangling points
-    syncUntransformedData
-    (
-        pf.mesh()(),
-        pf.internalField(),
-        maxMagSqrEqOp<Type>()
-    );
+    syncUntransformedData(mesh()(), pf.internalField(), maxMagSqrEqOp<Type>());
 
     // Apply multiple constraints on edge/corner points
     constrainCorners(pf);
