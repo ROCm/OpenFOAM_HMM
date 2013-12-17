@@ -110,10 +110,42 @@ void Foam::fvMesh::clearGeom()
 }
 
 
-void Foam::fvMesh::clearAddressing()
+void Foam::fvMesh::clearAddressing(const bool isMeshUpdate)
 {
-    meshObject::clear<fvMesh, TopologicalMeshObject>(*this);
-    meshObject::clear<lduMesh, TopologicalMeshObject>(*this);
+    if (debug)
+    {
+        Info<< "fvMesh::clearAddressing(const bool) :"
+            << " isMeshUpdate:" << isMeshUpdate << endl;
+    }
+
+    if (isMeshUpdate)
+    {
+        // Part of a mesh update. Keep meshObjects that have an updateMesh
+        // callback
+        meshObject::clearUpto
+        <
+            fvMesh,
+            TopologicalMeshObject,
+            UpdateableMeshObject
+        >
+        (
+            *this
+        );
+        meshObject::clearUpto
+        <
+            lduMesh,
+            TopologicalMeshObject,
+            UpdateableMeshObject
+        >
+        (
+            *this
+        );
+    }
+    else
+    {
+        meshObject::clear<fvMesh, TopologicalMeshObject>(*this);
+        meshObject::clear<lduMesh, TopologicalMeshObject>(*this);
+    }
     deleteDemandDrivenData(lduPtr_);
 }
 
@@ -806,7 +838,8 @@ void Foam::fvMesh::updateMesh(const mapPolyMesh& mpm)
     // Clear the current volume and other geometry factors
     surfaceInterpolation::clearOut();
 
-    clearAddressing();
+    // Clear any non-updateable addressing
+    clearAddressing(true);
 
     meshObject::updateMesh<fvMesh>(*this, mpm);
     meshObject::updateMesh<lduMesh>(*this, mpm);
