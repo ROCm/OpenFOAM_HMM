@@ -19,6 +19,8 @@ KINEMATICPARCEL=$(DERIVEDPARCELS)/basicKinematicParcel
 $(KINEMATICPARCEL)/defineBasicKinematicParcel.C
 $(KINEMATICPARCEL)/makeBasicKinematicParcelSubmodels.C
 
+
+/* kinematic colliding parcel sub-models */
 KINEMATICCOLLIDINGPARCEL=$(DERIVEDPARCELS)/basicKinematicCollidingParcel
 $(KINEMATICCOLLIDINGPARCEL)/defineBasicKinematicCollidingParcel.C
 $(KINEMATICCOLLIDINGPARCEL)/makeBasicKinematicCollidingParcelSubmodels.C
@@ -40,6 +42,12 @@ $(REACTINGPARCEL)/makeBasicReactingParcelSubmodels.C
 REACTINGMPPARCEL=$(DERIVEDPARCELS)/basicReactingMultiphaseParcel
 $(REACTINGMPPARCEL)/defineBasicReactingMultiphaseParcel.C
 $(REACTINGMPPARCEL)/makeBasicReactingMultiphaseParcelSubmodels.C
+
+
+/* kinematic MPPIC parcel sub-models */
+KINEMATICMPPICPARCEL=$(DERIVEDPARCELS)/basicKinematicMPPICParcel
+$(KINEMATICMPPICPARCEL)/defineBasicKinematicMPPICParcel.C
+$(KINEMATICMPPICPARCEL)/makeBasicKinematicMPPICParcelSubmodels.C
 
 
 /* bolt-on models */
@@ -71,6 +79,24 @@ $(REACTINGMPINJECTION)/ReactingMultiphaseLookupTableInjection/reactingMultiphase
 $(REACTINGMPINJECTION)/ReactingMultiphaseLookupTableInjection/reactingMultiphaseParcelInjectionDataIO.C
 $(REACTINGMPINJECTION)/ReactingMultiphaseLookupTableInjection/reactingMultiphaseParcelInjectionDataIOList.C
 
+MPPICPARTICLESTRESS=submodels/MPPIC/ParticleStressModels
+$(MPPICPARTICLESTRESS)/ParticleStressModel/ParticleStressModel.C
+$(MPPICPARTICLESTRESS)/HarrisCrighton/HarrisCrighton.C
+$(MPPICPARTICLESTRESS)/Lun/Lun.C
+$(MPPICPARTICLESTRESS)/exponential/exponential.C
+
+MPPICCORRECTIONLIMITING=submodels/MPPIC/CorrectionLimitingMethods
+$(MPPICCORRECTIONLIMITING)/CorrectionLimitingMethod/CorrectionLimitingMethod.C
+$(MPPICCORRECTIONLIMITING)/noCorrectionLimiting/noCorrectionLimiting.C
+$(MPPICCORRECTIONLIMITING)/absolute/absolute.C
+$(MPPICCORRECTIONLIMITING)/relative/relative.C
+
+MPPICTIMESCALE=submodels/MPPIC/TimeScaleModels
+$(MPPICTIMESCALE)/TimeScaleModel/TimeScaleModel.C
+$(MPPICTIMESCALE)/equilibrium/equilibrium.C
+$(MPPICTIMESCALE)/nonEquilibrium/nonEquilibrium.C
+$(MPPICTIMESCALE)/isotropic/isotropic.C
+
 
 /* integration schemes */
 IntegrationScheme/makeIntegrationSchemes.C
@@ -81,8 +107,13 @@ phaseProperties/phaseProperties/phaseProperties.C
 phaseProperties/phaseProperties/phasePropertiesIO.C
 phaseProperties/phasePropertiesList/phasePropertiesList.C
 
-/* Additional helper classes */
+
+/* additional helper classes */
 clouds/Templates/KinematicCloud/cloudSolution/cloudSolution.C
+
+
+/* averaging methods */
+submodels/MPPIC/AveragingMethods/makeAveragingMethods.C
 
 
 LIB = $(FOAM_LIBBIN)/liblagrangianIntermediate
