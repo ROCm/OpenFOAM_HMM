@@ -225,6 +225,18 @@ public:
         //- Number of possible feature edge types (i.e. number of slices)
         static label nEdgeTypes;
 
+        //- Can we read this file format?
+        static bool canRead(const fileName&, const bool verbose=false);
+
+        //- Can we read this file format?
+        static bool canReadType(const word& ext, const bool verbose=false);
+
+        //- Can we write this file format type?
+        static bool canWriteType(const word& ext, const bool verbose=false);
+
+        static wordHashSet readTypes();
+        static wordHashSet writeTypes();
+
 
     // Constructors
 

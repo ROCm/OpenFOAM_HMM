@@ -35,8 +35,6 @@ eem = $(em)/extendedEdgeMesh
 $(eem)/extendedEdgeMesh.C
 $(eem)/extendedEdgeMeshNew.C
 
-$(eem)/extendedEdgeMeshFormats/obj/OBJextendedEdgeFormat.C
-$(eem)/extendedEdgeMeshFormats/obj/OBJextendedEdgeFormatRunTime.C
 $(eem)/extendedEdgeMeshFormats/extendedEdgeMeshFormat/extendedEdgeMeshFormat.C
 $(eem)/extendedEdgeMeshFormats/extendedEdgeMeshFormat/extendedEdgeMeshFormatRunTime.C
 
