@@ -32,6 +32,9 @@
         )/(mesh.magSf().boundaryField()*rAUf.boundaryField())
     );
 
+    // Make the fluxes relative to the mesh motion
+    fvc::makeRelative(phiHbyA, U);
+
     tmp<fvScalarMatrix> p_rghEqnComp1;
     tmp<fvScalarMatrix> p_rghEqnComp2;
 
@@ -114,11 +117,8 @@
     {
         Uf = fvc::interpolate(U);
         surfaceVectorField n(mesh.Sf()/mesh.magSf());
-        Uf += n*(phi/mesh.magSf() - (n & Uf));
+        Uf += n*(fvc::absolute(phi, U)/mesh.magSf() - (n & Uf));
     }
-
-    // Make the fluxes relative to the mesh motion
-    fvc::makeRelative(phi, U);
 
     // Update densities from change in p_rgh
     rho1 += psi1*(p_rgh - p_rgh_0);
