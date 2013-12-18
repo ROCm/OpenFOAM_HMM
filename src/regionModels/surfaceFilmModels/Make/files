@@ -64,10 +64,5 @@ $(PATCHFIELDS)/filmHeightInletVelocity/filmHeightInletVelocityFvPatchVectorField
 $(PATCHFIELDS)/inclinedFilmNusseltHeight/inclinedFilmNusseltHeightFvPatchScalarField.C
 $(PATCHFIELDS)/inclinedFilmNusseltInletVelocity/inclinedFilmNusseltInletVelocityFvPatchVectorField.C
 
-/* Wall functions for primary region */
-WALLFUNCS=$(PATCHFIELDS)/wallFunctions
-$(WALLFUNCS)/alphatFilmWallFunction/alphatFilmWallFunctionFvPatchScalarField.C
-$(WALLFUNCS)/mutkFilmWallFunction/mutkFilmWallFunctionFvPatchScalarField.C
-
 
 LIB = $(FOAM_LIBBIN)/libsurfaceFilmModels
