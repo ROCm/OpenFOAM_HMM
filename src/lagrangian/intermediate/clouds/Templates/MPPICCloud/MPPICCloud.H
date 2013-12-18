@@ -25,7 +25,7 @@ Class
     Foam::MPPICCloud
 
 Description
-    Adds collisions to kinematic clouds
+    Adds MPPIC modelling to kinematic clouds
 
 SourceFiles
     MPPICCloudI.H

@@ -22,10 +22,9 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::NoIsotropy
+    Foam::IsotropyModels::NoIsotropy
 
 Description
-    Templated NoIsotropy model class.
 
 SourceFiles
     NoIsotropy.C

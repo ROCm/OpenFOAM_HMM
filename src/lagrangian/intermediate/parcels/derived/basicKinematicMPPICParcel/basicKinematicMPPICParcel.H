@@ -28,7 +28,7 @@ Description
     Definition of basic kinematic MPPIC parcel
 
 SourceFiles
-    basicKinematicParcel.H
+    basicKinematicMPPICParcel.H
 
 \*---------------------------------------------------------------------------*/
 

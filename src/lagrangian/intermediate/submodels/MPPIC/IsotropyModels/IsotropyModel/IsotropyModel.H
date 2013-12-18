@@ -25,7 +25,7 @@ Class
     Foam::IsotropyModel
 
 Description
-    Templated Isotropy model class.
+    Base class for collisional return-to-isotropy models.
 
 SourceFiles
     IsotropyModel.C

@@ -22,10 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::Relaxation
+    Foam::DampingModels::Relaxation
 
 Description
-    Templated Relaxation model class.
+    Relaxation collisional damping model.
+
+    Particle velocities are relaxed towards the local mean over a time-scale.
+
+    Reference:
+    \verbatim
+        "An improved collision damping time for MP-PIC calculations of dense
+        particle flows with applications to polydisperse sedimenting beds and
+        colliding particle jets"
+        P O'Rourke and D Snider
+        Chemical Engineering Science
+        Volume 65, Issue 22, Pages 6014-6028, November 2010
+    \endverbatim
 
 SourceFiles
     Relaxation.C

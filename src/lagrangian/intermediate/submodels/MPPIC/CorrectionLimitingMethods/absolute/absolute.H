@@ -25,6 +25,10 @@ Class
     Foam::CorrectionLimitingMethods::absolute
 
 Description
+    Correction limiting method that limits the velocity correction to that of a
+    rebound with a coefficient of restitution $e$. The absolute velocity of the
+    particle is used when calculating the magnitude of the limited correction.
+    The direction is calculated using the relative velocity.
 
 SourceFiles
     absolute.C

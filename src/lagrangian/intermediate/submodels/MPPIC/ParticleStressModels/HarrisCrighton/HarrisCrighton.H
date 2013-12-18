@@ -21,6 +21,33 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::ParticleStressModels::HarrisCrighton
+
+Description
+    Inter-particle stress model of Harris and Crighton
+
+    The stress value takes the following form:
+    \f[
+        \dfrac{P_s \alpha^\beta}{\max \left( \alpha_{pack} - \alpha , \epsilon
+        ( 1 - \alpha ) \right) }
+    \f]
+    Here, $\alpha$ is the volume fraction of the dispersed phase, and the other
+    values are modelling constants. A small value $\epsilon$ is used to limit
+    the denominator to ensure numerical stability.
+
+    Reference:
+    \verbatim
+        "Solitons, solitary waves, and voidage disturbances in gas-fluidized
+        beds"
+        S Harris and D Crighton,
+        Journal of Fluid Mechanics
+        Volume 266, Pages 243-276, April 2006
+    \endverbatim
+
+SourceFiles
+    HarrisCrighton.C
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef HarrisCrighton_H

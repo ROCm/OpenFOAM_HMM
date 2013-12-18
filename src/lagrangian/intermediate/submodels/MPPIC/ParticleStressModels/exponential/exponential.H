@@ -21,6 +21,16 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::ParticleStressModels::exponential
+
+Description
+    Exponential inter-particle stress model of the same form as used in
+    twoPhaseEulerFoam
+
+SourceFiles
+    exponential.C
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef exponential_H

@@ -22,10 +22,9 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::NoPacking
+    Foam::PackingModel::NoPacking
 
 Description
-    Templated NoPacking model class.
 
 SourceFiles
     NoPacking.C

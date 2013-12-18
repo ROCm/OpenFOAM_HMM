@@ -25,7 +25,7 @@ Class
     Foam::PackingModel
 
 Description
-    Templated Packing model class.
+    Base class for packing models.
 
 SourceFiles
     PackingModel.C

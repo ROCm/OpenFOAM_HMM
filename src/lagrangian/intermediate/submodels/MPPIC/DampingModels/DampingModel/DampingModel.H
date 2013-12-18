@@ -25,7 +25,7 @@ Class
     Foam::DampingModel
 
 Description
-    Templated Damping model class.
+    Base class for collisional damping models.
 
 SourceFiles
     DampingModel.C

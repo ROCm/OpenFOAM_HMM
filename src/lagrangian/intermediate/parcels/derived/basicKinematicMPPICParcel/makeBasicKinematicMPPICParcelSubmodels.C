@@ -58,7 +58,6 @@ namespace Foam
     makeMPPICParcelDampingModels(basicKinematicMPPICCloud);
     makeMPPICParcelIsotropyModels(basicKinematicMPPICCloud);
     makeMPPICParcelPackingModels(basicKinematicMPPICCloud);
-
 }
 
 

@@ -25,10 +25,11 @@ Class
     Foam::AveragingMethod
 
 Description
-    Base-class for averaging lagrangian fields
+    Base class for lagrangian averaging methods.
 
 SourceFiles
     AveragingMethod.C
+    AveragingMethodI.H
 
 \*---------------------------------------------------------------------------*/
 
