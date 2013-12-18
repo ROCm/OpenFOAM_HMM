@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -104,10 +104,10 @@ Foam::OFstream::OFstream
     {
         if (debug)
         {
-            Info<< "IFstream::IFstream(const fileName&,"
-                   "streamFormat format=ASCII,"
-                   "versionNumber version=currentVersion) : "
-                   "could not open file for input\n"
+            Info<< "OFstream::OFstream(const fileName&,"
+                   "streamFormat, versionNumber, compressionType) : "
+                   "could not open file " << pathname
+                << "for input\n"
                    "in stream " << info() << Foam::endl;
         }
 
