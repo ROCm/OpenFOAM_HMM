@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "sphericalAngularSpring.H"
+#include "sphericalAngularDamper.H"
 #include "addToRunTimeSelectionTable.H"
 #include "sixDoFRigidBodyMotion.H"
 
@@ -33,12 +33,12 @@ namespace Foam
 {
 namespace sixDoFRigidBodyMotionRestraints
 {
-    defineTypeNameAndDebug(sphericalAngularSpring, 0);
+    defineTypeNameAndDebug(sphericalAngularDamper, 0);
 
     addToRunTimeSelectionTable
     (
         sixDoFRigidBodyMotionRestraint,
-        sphericalAngularSpring,
+        sphericalAngularDamper,
         dictionary
     );
 }
@@ -47,17 +47,15 @@ namespace sixDoFRigidBodyMotionRestraints
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::
-sphericalAngularSpring
+Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularDamper::
+sphericalAngularDamper
 (
     const word& name,
     const dictionary& sDoFRBMRDict
 )
 :
     sixDoFRigidBodyMotionRestraint(name, sDoFRBMRDict),
-    refQ_(),
-    stiffness_(),
-    damping_()
+    coeff_()
 {
     read(sDoFRBMRDict);
 }
@@ -65,14 +63,14 @@ sphericalAngularSpring
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::
-~sphericalAngularSpring()
+Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularDamper::
+~sphericalAngularDamper()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::restrain
+void Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularDamper::restrain
 (
     const sixDoFRigidBodyMotion& motion,
     vector& restraintPosition,
@@ -80,32 +78,8 @@ void Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::restrain
     vector& restraintMoment
 ) const
 {
-    restraintMoment = vector::zero;
-
-    for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
-    {
-        vector axis = vector::zero;
-        axis[cmpt] = 1;
-
-        vector refDir = vector::zero;
-        refDir[(cmpt + 1) % 3] = 1;
-
-        vector newDir = motion.orientation() & refDir;
-
-        axis = (refQ_ & axis);
-        refDir = (refQ_ & refDir);
-        newDir -= (axis & newDir)*axis;
-
-        restraintMoment += -stiffness_*(refDir ^ newDir);
-    }
-
-    restraintMoment += -damping_*motion.omega();
-
+    restraintMoment = -coeff_*motion.omega();
     restraintForce = vector::zero;
-
-    // Not needed to be altered as restraintForce is zero, but set to
-    // centreOfMass to be sure of no spurious moment
-    restraintPosition = motion.centreOfMass();
 
     if (motion.report())
     {
@@ -115,49 +89,25 @@ void Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::restrain
 }
 
 
-bool Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::read
+bool Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularDamper::read
 (
     const dictionary& sDoFRBMRDict
 )
 {
     sixDoFRigidBodyMotionRestraint::read(sDoFRBMRDict);
 
-    refQ_ = sDoFRBMRCoeffs_.lookupOrDefault<tensor>("referenceOrientation", I);
-
-    if (mag(mag(refQ_) - sqrt(3.0)) > 1e-9)
-    {
-        FatalErrorIn
-        (
-            "Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::"
-            "read"
-            "("
-                "const dictionary& sDoFRBMRDict"
-            ")"
-        )
-            << "referenceOrientation " << refQ_ << " is not a rotation tensor. "
-            << "mag(referenceOrientation) - sqrt(3) = "
-            << mag(refQ_) - sqrt(3.0) << nl
-            << exit(FatalError);
-    }
-
-    sDoFRBMRCoeffs_.lookup("stiffness") >> stiffness_;
-    sDoFRBMRCoeffs_.lookup("damping") >> damping_;
+    sDoFRBMRCoeffs_.lookup("coeff") >> coeff_;
 
     return true;
 }
 
 
-void Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::write
+void Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularDamper::write
 (
     Ostream& os
 ) const
 {
-    os.writeKeyword("referenceOrientation")
-        << refQ_ << token::END_STATEMENT << nl;
-
-    os.writeKeyword("stiffness") << stiffness_ << token::END_STATEMENT << nl;
-
-    os.writeKeyword("damping") << damping_ << token::END_STATEMENT << nl;
+    os.writeKeyword("coeff") << coeff_ << token::END_STATEMENT << nl;
 }
 
 

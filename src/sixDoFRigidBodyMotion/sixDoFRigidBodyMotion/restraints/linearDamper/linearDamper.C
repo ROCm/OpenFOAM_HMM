@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "linearSpring.H"
+#include "linearDamper.H"
 #include "addToRunTimeSelectionTable.H"
 #include "sixDoFRigidBodyMotion.H"
 
@@ -33,12 +33,12 @@ namespace Foam
 {
 namespace sixDoFRigidBodyMotionRestraints
 {
-    defineTypeNameAndDebug(linearSpring, 0);
+    defineTypeNameAndDebug(linearDamper, 0);
 
     addToRunTimeSelectionTable
     (
         sixDoFRigidBodyMotionRestraint,
-        linearSpring,
+        linearDamper,
         dictionary
     );
 }
@@ -47,18 +47,14 @@ namespace sixDoFRigidBodyMotionRestraints
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionRestraints::linearSpring::linearSpring
+Foam::sixDoFRigidBodyMotionRestraints::linearDamper::linearDamper
 (
     const word& name,
     const dictionary& sDoFRBMRDict
 )
 :
     sixDoFRigidBodyMotionRestraint(name, sDoFRBMRDict),
-    anchor_(),
-    refAttachmentPt_(),
-    stiffness_(),
-    damping_(),
-    restLength_()
+    coeff_()
 {
     read(sDoFRBMRDict);
 }
@@ -66,13 +62,13 @@ Foam::sixDoFRigidBodyMotionRestraints::linearSpring::linearSpring
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionRestraints::linearSpring::~linearSpring()
+Foam::sixDoFRigidBodyMotionRestraints::linearDamper::~linearDamper()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::sixDoFRigidBodyMotionRestraints::linearSpring::restrain
+void Foam::sixDoFRigidBodyMotionRestraints::linearDamper::restrain
 (
     const sixDoFRigidBodyMotion& motion,
     vector& restraintPosition,
@@ -80,65 +76,38 @@ void Foam::sixDoFRigidBodyMotionRestraints::linearSpring::restrain
     vector& restraintMoment
 ) const
 {
-    restraintPosition = motion.currentPosition(refAttachmentPt_);
-
-    vector r = restraintPosition - anchor_;
-
-    scalar magR = mag(r);
-    r /= (magR + VSMALL);
-
-    vector v = motion.currentVelocity(restraintPosition);
-
-    restraintForce = -stiffness_*(magR - restLength_)*r - damping_*(r & v)*r;
-
+    restraintForce = -coeff_*motion.v();
     restraintMoment = vector::zero;
 
     if (motion.report())
     {
-        Info<< " attachmentPt - anchor " << r*magR
-            << " spring length " << magR
-            << " force " << restraintForce
+        Info<< " force " << restraintForce
             << endl;
     }
 }
 
 
-bool Foam::sixDoFRigidBodyMotionRestraints::linearSpring::read
+bool Foam::sixDoFRigidBodyMotionRestraints::linearDamper::read
 (
     const dictionary& sDoFRBMRDict
 )
 {
     sixDoFRigidBodyMotionRestraint::read(sDoFRBMRDict);
 
-    sDoFRBMRCoeffs_.lookup("anchor") >> anchor_;
-    sDoFRBMRCoeffs_.lookup("refAttachmentPt") >> refAttachmentPt_;
-    sDoFRBMRCoeffs_.lookup("stiffness") >> stiffness_;
-    sDoFRBMRCoeffs_.lookup("damping") >> damping_;
-    sDoFRBMRCoeffs_.lookup("restLength") >> restLength_;
+    sDoFRBMRCoeffs_.lookup("coeff") >> coeff_;
 
     return true;
 }
 
 
-void Foam::sixDoFRigidBodyMotionRestraints::linearSpring::write
+void Foam::sixDoFRigidBodyMotionRestraints::linearDamper::write
 (
     Ostream& os
 ) const
 {
-    os.writeKeyword("anchor")
-        << anchor_ << token::END_STATEMENT << nl;
-
-    os.writeKeyword("refAttachmentPt")
-        << refAttachmentPt_ << token::END_STATEMENT << nl;
-
-    os.writeKeyword("stiffness")
-        << stiffness_ << token::END_STATEMENT << nl;
-
-    os.writeKeyword("damping")
-        << damping_ << token::END_STATEMENT << nl;
-
-    os.writeKeyword("restLength")
-        << restLength_ << token::END_STATEMENT << nl;
+    os.writeKeyword("coeff")
+        << coeff_ << token::END_STATEMENT << nl;
 }
+
 
 // ************************************************************************* //
