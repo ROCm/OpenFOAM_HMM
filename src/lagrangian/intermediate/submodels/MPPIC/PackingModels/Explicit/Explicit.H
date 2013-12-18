@@ -39,6 +39,7 @@ Description
         D Snider
         Journal of Computational Physics
         Volume 170, Issue 2, Pages 523-549, July 2001
+    \endverbatim
 
 SourceFiles
     Explicit.C

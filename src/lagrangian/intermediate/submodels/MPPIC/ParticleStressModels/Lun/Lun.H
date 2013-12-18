@@ -29,13 +29,13 @@ Description
 
     The stress value takes the following form:
     \f[
-        \left[ \alpha \rho + \alpha^2 \rho (1 + e) \frac{3}{5}
-        \left( \frac{\alpha_{pack}}{\alpha_{pack} - \alpha}
-        \right)^\frac{1}{3} \right] \frac{1}{3} \sigma^2
+        \left( \alpha \rho + \alpha^2 \rho (1 + e) \frac{3}{5}
+        \left( 1 - \left( \frac{\alpha}{\alpha_{pack}} \right)^\frac{1}{3}
+        \right) \right) \frac{1}{3} \sigma^2
     \f]
-    Here, $\alpha$ is the volume fraction of the dispersed phase, $\rho$ is the
-    density of the dispersed phase, $e$ is a coefficient of restitution, and
-    $\sigma$ is the RMS velocityh fluctuation.
+    Here, \f$\alpha\f$ is the volume fraction of the dispersed phase,
+    \f$\rho\f$ is the density of the dispersed phase, \f$e\f$ is a coefficient
+    of restitution, and \f$\sigma\f$ is the RMS velocity fluctuation.
 
     Reference:
     \verbatim

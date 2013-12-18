@@ -29,12 +29,12 @@ Description
 
     The stress value takes the following form:
     \f[
-        \dfrac{P_s \alpha^\beta}{\max \left( \alpha_{pack} - \alpha , \epsilon
-        ( 1 - \alpha ) \right) }
+        \frac{P_s \alpha^\beta}{ \mathrm{max} \left( \alpha_{pack} - \alpha ,
+        \epsilon ( 1 - \alpha ) \right) }
     \f]
-    Here, $\alpha$ is the volume fraction of the dispersed phase, and the other
-    values are modelling constants. A small value $\epsilon$ is used to limit
-    the denominator to ensure numerical stability.
+    Here, \f$\alpha\f$ is the volume fraction of the dispersed phase, and the
+    other values are modelling constants. A small value \f$\epsilon\f$ is used
+    to limit the denominator to ensure numerical stability.
 
     Reference:
     \verbatim

@@ -36,6 +36,7 @@ Description
         P O'Rourke and D Snider
         Chemical Engineering Science
         Volume 65, Issue 22, Pages 6014-6028, November 2010
+    \endverbatim
 
 SourceFiles
     nonEquilibrium.C
