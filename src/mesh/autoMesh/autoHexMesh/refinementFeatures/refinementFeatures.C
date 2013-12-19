@@ -26,6 +26,7 @@ License
 #include "refinementFeatures.H"
 #include "Time.H"
 #include "Tuple2.H"
+#include "DynamicField.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -41,7 +42,40 @@ void Foam::refinementFeatures::read
 
         fileName featFileName(dict.lookup("file"));
 
+
+        // Try reading extendedEdgeMesh first
+
+        IOobject extFeatObj
+        (
+            featFileName,                       // name
+            io.time().constant(),               // instance
+            "extendedFeatureEdgeMesh",          // local
+            io.time(),                          // registry
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
+        );
+
+        const fileName fName(extFeatObj.filePath());
+
+        if (!fName.empty() && extendedEdgeMesh::canRead(fName))
         {
+            autoPtr<extendedEdgeMesh> eMeshPtr = extendedEdgeMesh::New
+            (
+                fName
+            );
+
+            Info<< "Read extendedFeatureEdgeMesh " << extFeatObj.name()
+                << nl << incrIndent;
+            eMeshPtr().writeStats(Info);
+            Info<< decrIndent << endl;
+
+            set(featI, new extendedFeatureEdgeMesh(extFeatObj, eMeshPtr()));
+        }
+        else
+        {
+            // Try reading edgeMesh
+
             IOobject featObj
             (
                 featFileName,                       // name
@@ -53,21 +87,106 @@ void Foam::refinementFeatures::read
                 false
             );
 
-            autoPtr<edgeMesh> eMeshPtr = edgeMesh::New(featObj.filePath());
+            const fileName fName(featObj.filePath());
 
-            set
-            (
-                featI,
-                new featureEdgeMesh
+            if (fName.empty())
+            {
+                FatalIOErrorIn
                 (
-                    featObj,
-                    eMeshPtr->points(),
-                    eMeshPtr->edges()
-                )
+                    "refinementFeatures::read"
+                    "(const objectRegistry&"
+                    ", const PtrList<dictionary>&)",
+                    dict
+                )   << "Could not open " << featObj.objectPath()
+                    << exit(FatalIOError);
+            }
+
+
+            // Read as edgeMesh
+            autoPtr<edgeMesh> eMeshPtr = edgeMesh::New(fName);
+            const edgeMesh& eMesh = eMeshPtr();
+
+            Info<< "Read edgeMesh " << featObj.name() << nl
+                << incrIndent;
+            eMesh.writeStats(Info);
+            Info<< decrIndent << endl;
+
+
+            // Analyse for feature points. These are all classified as mixed
+            // points for lack of anything better
+            const labelListList& pointEdges = eMesh.pointEdges();
+
+            labelList oldToNew(eMesh.points().size(), -1);
+            DynamicField<point> newPoints(eMesh.points().size());
+            forAll(pointEdges, pointI)
+            {
+                if (pointEdges[pointI].size() > 2)
+                {
+                    oldToNew[pointI] = newPoints.size();
+                    newPoints.append(eMesh.points()[pointI]);
+                }
+                //else if (pointEdges[pointI].size() == 2)
+                //MEJ: do something based on a feature angle?
+            }
+            label nFeatures = newPoints.size();
+            forAll(oldToNew, pointI)
+            {
+                if (oldToNew[pointI] == -1)
+                {
+                    oldToNew[pointI] = newPoints.size();
+                    newPoints.append(eMesh.points()[pointI]);
+                }
+            }
+
+
+            const edgeList& edges = eMesh.edges();
+            edgeList newEdges(edges.size());
+            forAll(edges, edgeI)
+            {
+                const edge& e = edges[edgeI];
+                newEdges[edgeI] = edge
+                (
+                    oldToNew[e[0]],
+                    oldToNew[e[1]]
+                );
+            }
+
+            // Construct an extendedEdgeMesh with
+            // - all points on more than 2 edges : mixed feature points
+            // - all edges : external edges
+
+            extendedEdgeMesh eeMesh
+            (
+                newPoints,          // pts
+                newEdges,           // eds
+                0,                  // (point) concaveStart
+                0,                  // (point) mixedStart
+                nFeatures,          // (point) nonFeatureStart
+                edges.size(),       // (edge) internalStart
+                edges.size(),       // (edge) flatStart
+                edges.size(),       // (edge) openStart
+                edges.size(),       // (edge) multipleStart
+                vectorField(0),     // normals
+                List<extendedEdgeMesh::sideVolumeType>(0),// normalVolumeTypes
+                vectorField(0),     // edgeDirections
+                labelListList(0),   // normalDirections
+                labelListList(0),   // edgeNormals
+                labelListList(0),   // featurePointNormals
+                labelListList(0),   // featurePointEdges
+                labelList(0)        // regionEdges
             );
+
+
+            Info<< "Constructed extendedFeatureEdgeMesh " << featObj.name()
+                << nl << incrIndent;
+            eeMesh.writeStats(Info);
+            Info<< decrIndent << endl;
+
+
+            set(featI, new extendedFeatureEdgeMesh(featObj, eeMesh));
         }
 
-        const featureEdgeMesh& eMesh = operator[](featI);
+        const edgeMesh& eMesh = operator[](featI);
 
         //eMesh.mergePoints(meshRefiner_.mergeDistance());
 
@@ -145,7 +264,7 @@ void Foam::refinementFeatures::buildTrees
     const labelList& featurePoints
 )
 {
-    const featureEdgeMesh& eMesh = operator[](featI);
+    const edgeMesh& eMesh = operator[](featI);
     const pointField& points = eMesh.points();
     const edgeList& edges = eMesh.edges();
 
@@ -277,7 +396,7 @@ Foam::refinementFeatures::refinementFeatures
     const PtrList<dictionary>& featDicts
 )
 :
-    PtrList<featureEdgeMesh>(featDicts.size()),
+    PtrList<extendedFeatureEdgeMesh>(featDicts.size()),
     distances_(featDicts.size()),
     levels_(featDicts.size()),
     edgeTrees_(featDicts.size()),
@@ -289,7 +408,7 @@ Foam::refinementFeatures::refinementFeatures
     // Search engines
     forAll(*this, i)
     {
-        const featureEdgeMesh& eMesh = operator[](i);
+        const extendedEdgeMesh& eMesh = operator[](i);
         const labelListList& pointEdges = eMesh.pointEdges();
 
         DynamicList<label> featurePoints;
@@ -303,81 +422,82 @@ Foam::refinementFeatures::refinementFeatures
 
         Info<< "Detected " << featurePoints.size()
             << " featurePoints out of " << pointEdges.size()
-            << " points on feature " << eMesh.name() << endl;
+            << " points on feature " << operator[](i).name()
+            << endl;
 
         buildTrees(i, featurePoints);
     }
 }
 
 
-Foam::refinementFeatures::refinementFeatures
-(
-    const objectRegistry& io,
-    const PtrList<dictionary>& featDicts,
-    const scalar minCos
-)
-:
-    PtrList<featureEdgeMesh>(featDicts.size()),
-    distances_(featDicts.size()),
-    levels_(featDicts.size()),
-    edgeTrees_(featDicts.size()),
-    pointTrees_(featDicts.size())
-{
-    // Read features
-    read(io, featDicts);
-
-    // Search engines
-    forAll(*this, i)
-    {
-        const featureEdgeMesh& eMesh = operator[](i);
-        const pointField& points = eMesh.points();
-        const edgeList& edges = eMesh.edges();
-        const labelListList& pointEdges = eMesh.pointEdges();
-
-        DynamicList<label> featurePoints;
-        forAll(pointEdges, pointI)
-        {
-            const labelList& pEdges = pointEdges[pointI];
-            if (pEdges.size() > 2)
-            {
-                featurePoints.append(pointI);
-            }
-            else if (pEdges.size() == 2)
-            {
-                // Check the angle
-                const edge& e0 = edges[pEdges[0]];
-                const edge& e1 = edges[pEdges[1]];
-
-                const point& p = points[pointI];
-                const point& p0 = points[e0.otherVertex(pointI)];
-                const point& p1 = points[e1.otherVertex(pointI)];
-
-                vector v0 = p-p0;
-                scalar v0Mag = mag(v0);
-
-                vector v1 = p1-p;
-                scalar v1Mag = mag(v1);
-
-                if
-                (
-                    v0Mag > SMALL
-                 && v1Mag > SMALL
-                 && ((v0/v0Mag & v1/v1Mag) < minCos)
-                )
-                {
-                    featurePoints.append(pointI);
-                }
-            }
-        }
-
-        Info<< "Detected " << featurePoints.size()
-            << " featurePoints out of " << points.size()
-            << " points on feature " << eMesh.name()
-            << " when using feature cos " << minCos << endl;
-
-        buildTrees(i, featurePoints);
-    }
-}
+//Foam::refinementFeatures::refinementFeatures
+//(
+//    const objectRegistry& io,
+//    const PtrList<dictionary>& featDicts,
+//    const scalar minCos
+//)
+//:
+//    PtrList<extendedFeatureEdgeMesh>(featDicts.size()),
+//    distances_(featDicts.size()),
+//    levels_(featDicts.size()),
+//    edgeTrees_(featDicts.size()),
+//    pointTrees_(featDicts.size())
+//{
+//    // Read features
+//    read(io, featDicts);
+//
+//    // Search engines
+//    forAll(*this, i)
+//    {
+//        const edgeMesh& eMesh = operator[](i);
+//        const pointField& points = eMesh.points();
+//        const edgeList& edges = eMesh.edges();
+//        const labelListList& pointEdges = eMesh.pointEdges();
+//
+//        DynamicList<label> featurePoints;
+//        forAll(pointEdges, pointI)
+//        {
+//            const labelList& pEdges = pointEdges[pointI];
+//            if (pEdges.size() > 2)
+//            {
+//                featurePoints.append(pointI);
+//            }
+//            else if (pEdges.size() == 2)
+//            {
+//                // Check the angle
+//                const edge& e0 = edges[pEdges[0]];
+//                const edge& e1 = edges[pEdges[1]];
+//
+//                const point& p = points[pointI];
+//                const point& p0 = points[e0.otherVertex(pointI)];
+//                const point& p1 = points[e1.otherVertex(pointI)];
+//
+//                vector v0 = p-p0;
+//                scalar v0Mag = mag(v0);
+//
+//                vector v1 = p1-p;
+//                scalar v1Mag = mag(v1);
+//
+//                if
+//                (
+//                    v0Mag > SMALL
+//                 && v1Mag > SMALL
+//                 && ((v0/v0Mag & v1/v1Mag) < minCos)
+//                )
+//                {
+//                    featurePoints.append(pointI);
+//                }
+//            }
+//        }
+//
+//        Info<< "Detected " << featurePoints.size()
+//            << " featurePoints out of " << points.size()
+//            << " points on feature " << i   //eMesh.name()
+//            << " when using feature cos " << minCos << endl;
+//
+//        buildTrees(i, featurePoints);
+//    }
+//}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -387,12 +507,16 @@ void Foam::refinementFeatures::findNearestEdge
     const pointField& samples,
     const scalarField& nearestDistSqr,
     labelList& nearFeature,
-    List<pointIndexHit>& nearInfo
+    List<pointIndexHit>& nearInfo,
+    vectorField& nearNormal
 ) const
 {
     nearFeature.setSize(samples.size());
     nearFeature = -1;
     nearInfo.setSize(samples.size());
+    nearInfo = pointIndexHit();
+    nearNormal.setSize(samples.size());
+    nearNormal = vector::zero;
 
     forAll(edgeTrees_, featI)
     {
@@ -418,8 +542,18 @@ void Foam::refinementFeatures::findNearestEdge
 
                 if (info.hit())
                 {
-                    nearInfo[sampleI] = info;
                     nearFeature[sampleI] = featI;
+                    nearInfo[sampleI] = pointIndexHit
+                    (
+                        info.hit(),
+                        info.hitPoint(),
+                        tree.shapes().edgeLabels()[info.index()]
+                    );
+
+                    const treeDataEdge& td = tree.shapes();
+                    const edge& e = td.edges()[nearInfo[sampleI].index()];
+                    nearNormal[sampleI] =  e.vec(td.points());
+                    nearNormal[sampleI] /= mag(nearNormal[sampleI])+VSMALL;
                 }
             }
         }
@@ -427,18 +561,71 @@ void Foam::refinementFeatures::findNearestEdge
 }
 
 
+//void Foam::refinementFeatures::findNearestPoint
+//(
+//    const pointField& samples,
+//    const scalarField& nearestDistSqr,
+//    labelList& nearFeature,
+//    labelList& nearIndex
+//) const
+//{
+//    nearFeature.setSize(samples.size());
+//    nearFeature = -1;
+//    nearIndex.setSize(samples.size());
+//    nearIndex = -1;
+//
+//    forAll(pointTrees_, featI)
+//    {
+//        const indexedOctree<treeDataPoint>& tree = pointTrees_[featI];
+//
+//        if (tree.shapes().pointLabels().size() > 0)
+//        {
+//            forAll(samples, sampleI)
+//            {
+//                const point& sample = samples[sampleI];
+//
+//                scalar distSqr;
+//                if (nearFeature[sampleI] != -1)
+//                {
+//                    label nearFeatI = nearFeature[sampleI];
+//                    const indexedOctree<treeDataPoint>& nearTree =
+//                        pointTrees_[nearFeatI];
+//                    label featPointI =
+//                        nearTree.shapes().pointLabels()[nearIndex[sampleI]];
+//                    const point& featPt =
+//                        operator[](nearFeatI).points()[featPointI];
+//                    distSqr = magSqr(featPt-sample);
+//                }
+//                else
+//                {
+//                    distSqr = nearestDistSqr[sampleI];
+//                }
+//
+//                pointIndexHit info = tree.findNearest(sample, distSqr);
+//
+//                if (info.hit())
+//                {
+//                    nearFeature[sampleI] = featI;
+//                    nearIndex[sampleI] = info.index();
+//                }
+//            }
+//        }
+//    }
+//}
+
+
 void Foam::refinementFeatures::findNearestPoint
 (
     const pointField& samples,
     const scalarField& nearestDistSqr,
     labelList& nearFeature,
-    labelList& nearIndex
+    List<pointIndexHit>& nearInfo
 ) const
 {
     nearFeature.setSize(samples.size());
     nearFeature = -1;
-    nearIndex.setSize(samples.size());
-    nearIndex = -1;
+    nearInfo.setSize(samples.size());
+    nearInfo = pointIndexHit();
 
     forAll(pointTrees_, featI)
     {
@@ -453,14 +640,7 @@ void Foam::refinementFeatures::findNearestPoint
                 scalar distSqr;
                 if (nearFeature[sampleI] != -1)
                 {
-                    label nearFeatI = nearFeature[sampleI];
-                    const indexedOctree<treeDataPoint>& nearTree =
-                        pointTrees_[nearFeatI];
-                    label featPointI =
-                        nearTree.shapes().pointLabels()[nearIndex[sampleI]];
-                    const point& featPt =
-                        operator[](nearFeatI).points()[featPointI];
-                    distSqr = magSqr(featPt-sample);
+                    distSqr = magSqr(nearInfo[sampleI].hitPoint()-sample);
                 }
                 else
                 {
@@ -472,7 +652,12 @@ void Foam::refinementFeatures::findNearestPoint
                 if (info.hit())
                 {
                     nearFeature[sampleI] = featI;
-                    nearIndex[sampleI] = info.index();
+                    nearInfo[sampleI] = pointIndexHit
+                    (
+                        info.hit(),
+                        info.hitPoint(),
+                        tree.shapes().pointLabels()[info.index()]
+                    );
                 }
             }
         }

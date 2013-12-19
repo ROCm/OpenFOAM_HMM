@@ -170,7 +170,7 @@ void Foam::autoSnapDriver::smoothAndConstrain
 
                     if (isMasterEdge[meshEdges[edgeI]])
                     {
-                        label nbrPointI = edges[pEdges[i]].otherVertex(pointI);
+                        label nbrPointI = edges[edgeI].otherVertex(pointI);
                         if (constraints[nbrPointI].first() >= nConstraints)
                         {
                             dispSum[pointI] += disp[nbrPointI];
@@ -213,80 +213,6 @@ void Foam::autoSnapDriver::smoothAndConstrain
         }
     }
 }
-//XXXXXX
-//TODO: make proper parallel so coupled edges don't have double influence
-//void Foam::autoSnapDriver::smoothAndConstrain2
-//(
-//    const bool applyConstraints,
-//    const indirectPrimitivePatch& pp,
-//    const List<pointConstraint>& constraints,
-//    vectorField& disp
-//) const
-//{
-//    const fvMesh& mesh = meshRefiner_.mesh();
-//
-//    for (label avgIter = 0; avgIter < 20; avgIter++)
-//    {
-//        vectorField dispSum(pp.nPoints(), vector::zero);
-//        labelList dispCount(pp.nPoints(), 0);
-//
-//        const labelListList& pointEdges = pp.pointEdges();
-//        const edgeList& edges = pp.edges();
-//
-//        forAll(pointEdges, pointI)
-//        {
-//            const labelList& pEdges = pointEdges[pointI];
-//
-//            forAll(pEdges, i)
-//            {
-//                label nbrPointI = edges[pEdges[i]].otherVertex(pointI);
-//                dispSum[pointI] += disp[nbrPointI];
-//                dispCount[pointI]++;
-//            }
-//        }
-//
-//        syncTools::syncPointList
-//        (
-//            mesh,
-//            pp.meshPoints(),
-//            dispSum,
-//            plusEqOp<point>(),
-//            vector::zero,
-//            mapDistribute::transform()
-//        );
-//        syncTools::syncPointList
-//        (
-//            mesh,
-//            pp.meshPoints(),
-//            dispCount,
-//            plusEqOp<label>(),
-//            0,
-//            mapDistribute::transform()
-//        );
-//
-//        // Constraints
-//        forAll(constraints, pointI)
-//        {
-//            if (dispCount[pointI] > 0)// && constraints[pointI].first() <= 1)
-//            {
-//                // Mix my displacement with neighbours' displacement
-//                disp[pointI] =
-//                    0.5
-//                   *(disp[pointI] + dispSum[pointI]/dispCount[pointI]);
-//
-//                if (applyConstraints)
-//                {
-//                    disp[pointI] = transform
-//                    (
-//                        constraints[pointI].constraintTransformation(),
-//                        disp[pointI]
-//                    );
-//                }
-//            }
-//        }
-//    }
-//}
-//XXXXXX
 
 
 void Foam::autoSnapDriver::calcNearestFace
@@ -716,7 +642,7 @@ void Foam::autoSnapDriver::calcNearestFacePointProperties
         pNormals = List<point>(pNormals, visitOrder);
         pDisp = List<point>(pDisp, visitOrder);
         pFc = List<point>(pFc, visitOrder);
-        pFid = UIndirectList<label>(pFid, visitOrder);
+        pFid = UIndirectList<label>(pFid, visitOrder)();
     }
 }
 
@@ -1412,14 +1338,14 @@ Foam::labelPair Foam::autoSnapDriver::findDiagonalAttraction
 }
 
 
-Foam::pointIndexHit Foam::autoSnapDriver::findNearFeatureEdge
+Foam::Tuple2<Foam::label, Foam::pointIndexHit>
+Foam::autoSnapDriver::findNearFeatureEdge
 (
     const indirectPrimitivePatch& pp,
     const scalarField& snapDist,
     const label pointI,
     const point& estimatedPt,
 
-    label& featI,
     List<List<DynamicList<point> > >& edgeAttractors,
     List<List<DynamicList<pointConstraint> > >& edgeConstraints,
     vectorField& patchAttraction,
@@ -1430,16 +1356,18 @@ Foam::pointIndexHit Foam::autoSnapDriver::findNearFeatureEdge
 
     labelList nearEdgeFeat;
     List<pointIndexHit> nearEdgeInfo;
+    vectorField nearNormal;
     features.findNearestEdge
     (
         pointField(1, estimatedPt),
         scalarField(1, sqr(snapDist[pointI])),
         nearEdgeFeat,
-        nearEdgeInfo
+        nearEdgeInfo,
+        nearNormal
     );
 
     const pointIndexHit& nearInfo = nearEdgeInfo[0];
-    featI = nearEdgeFeat[0];
+    label featI = nearEdgeFeat[0];
 
     if (nearInfo.hit())
     {
@@ -1449,12 +1377,7 @@ Foam::pointIndexHit Foam::autoSnapDriver::findNearFeatureEdge
         (
             nearInfo.hitPoint()
         );
-        pointConstraint c;
-        const edge e = features[featI].edges()[nearInfo.index()];
-        vector eVec = e.vec(features[featI].points());
-        eVec /= mag(eVec)+VSMALL;
-        c.first() = 2;
-        c.second() = eVec;
+        pointConstraint c(Tuple2<label, vector>(2, nearNormal[0]));
         edgeConstraints[featI][nearInfo.index()].append(c);
 
         // Store for later use
@@ -1462,11 +1385,12 @@ Foam::pointIndexHit Foam::autoSnapDriver::findNearFeatureEdge
             nearInfo.hitPoint()-pp.localPoints()[pointI];
         patchConstraints[pointI] = c;
     }
-    return nearInfo;
+    return Tuple2<label, pointIndexHit>(featI, nearInfo);
 }
 
 
-Foam::labelPair Foam::autoSnapDriver::findNearFeaturePoint
+Foam::Tuple2<Foam::label, Foam::pointIndexHit>
+Foam::autoSnapDriver::findNearFeaturePoint
 (
     const indirectPrimitivePatch& pp,
     const scalarField& snapDist,
@@ -1487,26 +1411,23 @@ Foam::labelPair Foam::autoSnapDriver::findNearFeaturePoint
     const refinementFeatures& features = meshRefiner_.features();
 
     labelList nearFeat;
-    labelList nearIndex;
+    List<pointIndexHit> nearInfo;
     features.findNearestPoint
     (
         pointField(1, estimatedPt),
         scalarField(1, sqr(snapDist[pointI])),
         nearFeat,
-        nearIndex
+        nearInfo
     );
 
     label featI = nearFeat[0];
-    label featPointI = -1;
 
     if (featI != -1)
     {
         const point& pt = pp.localPoints()[pointI];
 
-        const treeDataPoint& shapes =
-            features.pointTrees()[featI].shapes();
-        featPointI = shapes.pointLabels()[nearIndex[0]];
-        const point& featPt = shapes.points()[featPointI];
+        label featPointI = nearInfo[0].index();
+        const point& featPt = nearInfo[0].hitPoint();
         scalar distSqr = magSqr(featPt-pt);
 
         // Check if already attracted
@@ -1537,7 +1458,6 @@ Foam::labelPair Foam::autoSnapDriver::findNearFeaturePoint
                 patchAttraction[oldPointI] = vector::zero;
                 patchConstraints[oldPointI] = pointConstraint();
 
-                label edgeFeatI;
                 findNearFeatureEdge
                 (
                     pp,
@@ -1545,7 +1465,6 @@ Foam::labelPair Foam::autoSnapDriver::findNearFeaturePoint
                     oldPointI,
                     pp.localPoints()[oldPointI],
 
-                    edgeFeatI,
                     edgeAttractors,
                     edgeConstraints,
                     patchAttraction,
@@ -1566,7 +1485,7 @@ Foam::labelPair Foam::autoSnapDriver::findNearFeaturePoint
         }
     }
 
-    return labelPair(featI, featPointI);
+    return Tuple2<label, pointIndexHit>(featI, nearInfo[0]);
 }
 
 
@@ -1637,7 +1556,6 @@ void Foam::autoSnapDriver::determineFeatures
             << featurePointStr().name() << endl;
     }
 
-    const refinementFeatures& features = meshRefiner_.features();
 
     forAll(pp.localPoints(), pointI)
     {
@@ -1663,6 +1581,7 @@ void Foam::autoSnapDriver::determineFeatures
             attraction,
             constraint
         );
+
 
         if
         (
@@ -1696,15 +1615,14 @@ void Foam::autoSnapDriver::determineFeatures
                         // Behave like when having two surface normals so
                         // attract to nearest feature edge (with a guess for
                         // the multipatch point as starting point)
-                        label featI = -1;
-                        pointIndexHit nearInfo = findNearFeatureEdge
+                        Tuple2<label, pointIndexHit> nearInfo =
+                        findNearFeatureEdge
                         (
                             pp,
                             snapDist,
                             pointI,
                             multiPatchPt.hitPoint(),        //estimatedPt
 
-                            featI,
                             edgeAttractors,
                             edgeConstraints,
 
@@ -1712,14 +1630,15 @@ void Foam::autoSnapDriver::determineFeatures
                             patchConstraints
                         );
 
-                        if (nearInfo.hit())
+                        const pointIndexHit& info = nearInfo.second();
+                        if (info.hit())
                         {
                             // Dump
                             if (featureEdgeStr.valid())
                             {
                                 featureEdgeStr().write
                                 (
-                                    linePointRef(pt, nearInfo.hitPoint())
+                                    linePointRef(pt, info.hitPoint())
                                 );
                             }
                         }
@@ -1729,7 +1648,7 @@ void Foam::autoSnapDriver::determineFeatures
                             {
                                 missedEdgeStr().write
                                 (
-                                    linePointRef(pt, nearInfo.missPoint())
+                                    linePointRef(pt, info.missPoint())
                                 );
                             }
                         }
@@ -1746,15 +1665,13 @@ void Foam::autoSnapDriver::determineFeatures
                 // Determine nearest point on feature edge. Store constraint
                 // (calculated from feature edge, alternative would be to
                 //  use constraint calculated from both surfaceNormals)
-                label featI = -1;
-                pointIndexHit nearInfo = findNearFeatureEdge
+                Tuple2<label, pointIndexHit> nearInfo = findNearFeatureEdge
                 (
                     pp,
                     snapDist,
                     pointI,
                     estimatedPt,
 
-                    featI,
                     edgeAttractors,
                     edgeConstraints,
 
@@ -1762,14 +1679,15 @@ void Foam::autoSnapDriver::determineFeatures
                     patchConstraints
                 );
 
-                if (nearInfo.hit())
+                // Dump to obj
+                const pointIndexHit& info = nearInfo.second();
+                if (info.hit())
                 {
-                    // Dump
                     if (featureEdgeStr.valid())
                     {
                         featureEdgeStr().write
                         (
-                            linePointRef(pt, nearInfo.hitPoint())
+                            linePointRef(pt, info.hitPoint())
                         );
                     }
                 }
@@ -1779,7 +1697,7 @@ void Foam::autoSnapDriver::determineFeatures
                     {
                         missedEdgeStr().write
                         (
-                            linePointRef(pt, nearInfo.missPoint())
+                            linePointRef(pt, info.missPoint())
                         );
                     }
                 }
@@ -1789,7 +1707,7 @@ void Foam::autoSnapDriver::determineFeatures
                 // Mark point on the nearest feature point.
                 const point estimatedPt(pt + patchAttraction[pointI]);
 
-                labelPair nearInfo = findNearFeaturePoint
+                Tuple2<label, pointIndexHit> nearInfo = findNearFeaturePoint
                 (
                     pp,
                     snapDist,
@@ -1807,18 +1725,10 @@ void Foam::autoSnapDriver::determineFeatures
                     patchConstraints
                 );
 
-                if (nearInfo.first() != -1)
+                const pointIndexHit& info = nearInfo.second();
+                if (info.hit() && featurePointStr.valid())
                 {
-                    // Dump
-                    if (featurePointStr.valid())
-                    {
-                        const treeDataPoint& shapes =
-                            features.pointTrees()[nearInfo.first()].shapes();
-                        const point& featPt =
-                            shapes.points()[nearInfo.second()];
-
-                        featurePointStr().write(linePointRef(pt, featPt));
-                    }
+                    featurePointStr().write(linePointRef(pt, info.hitPoint()));
                 }
             }
         }
@@ -2029,22 +1939,20 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
 
             if (pointStatus[pointI] == 0)   // baffle edge
             {
-                label featI;
-                const pointIndexHit nearInfo = findNearFeatureEdge
+                Tuple2<label, pointIndexHit> nearInfo = findNearFeatureEdge
                 (
                     pp,
                     snapDist,
                     pointI,
                     pt,
 
-                    featI,
                     edgeAttractors,
                     edgeConstraints,
                     rawPatchAttraction,
                     rawPatchConstraints
                 );
 
-                if (!nearInfo.hit())
+                if (!nearInfo.second().hit())
                 {
                     //Pout<< "*** Failed to find close edge to point " << pt
                     //    << endl;
@@ -2053,23 +1961,21 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
             else if (pointStatus[pointI] == 1)   // baffle point
             {
                 labelList nearFeat;
-                labelList nearIndex;
+                List<pointIndexHit> nearInfo;
                 features.findNearestPoint
                 (
                     pointField(1, pt),
                     scalarField(1, sqr(snapDist[pointI])),
                     nearFeat,
-                    nearIndex
+                    nearInfo
                 );
 
                 label featI = nearFeat[0];
 
                 if (featI != -1)
                 {
-                    const treeDataPoint& shapes =
-                        features.pointTrees()[featI].shapes();
-                    label featPointI = shapes.pointLabels()[nearIndex[0]];
-                    const point& featPt = shapes.points()[featPointI];
+                    label featPointI = nearInfo[0].index();
+                    const point& featPt = nearInfo[0].hitPoint();
                     scalar distSqr = magSqr(featPt-pt);
 
                     // Check if already attracted
@@ -2099,7 +2005,6 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
                             // The current point is closer so wins. Reset
                             // the old point to attract to nearest edge
                             // instead.
-                            label edgeFeatI;
                             findNearFeatureEdge
                             (
                                 pp,
@@ -2107,7 +2012,6 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
                                 oldPointI,
                                 pp.localPoints()[oldPointI],
 
-                                edgeFeatI,
                                 edgeAttractors,
                                 edgeConstraints,
                                 rawPatchAttraction,
@@ -2130,7 +2034,6 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
                     //    << " for baffle-feature-point " << pt
                     //    << endl;
 
-                    label featI;
                     findNearFeatureEdge
                     (
                         pp,
@@ -2138,7 +2041,6 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
                         pointI,
                         pt,                     // starting point
 
-                        featI,
                         edgeAttractors,
                         edgeConstraints,
                         rawPatchAttraction,
