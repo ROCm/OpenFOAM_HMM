@@ -30,4 +30,7 @@ do
     removeCase $caseName
 done
 
+
+(cd elbow && ./Allclean)
+
 # ----------------------------------------------------------------- end-of-file
