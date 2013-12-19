@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,39 +23,27 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeThermoParcelForces_H
-#define makeThermoParcelForces_H
+#ifndef makeParcelDispersionModels_h
+#define makeParcelDispersionModels_h
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "SphereDragForce.H"
-#include "NonSphereDragForce.H"
-
-#include "SaffmanMeiLiftForce.H"
-#include "TomiyamaLiftForce.H"
-
-#include "GravityForce.H"
-#include "NonInertialFrameForce.H"
-#include "ParamagneticForce.H"
-#include "PressureGradientForce.H"
-#include "SRFForce.H"
-#include "VirtualMassForce.H"
+#include "GradientDispersionRAS.H"
+#include "StochasticDispersionRAS.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeThermoParcelForces(CloudType)                                     \
+#define makeParcelDispersionModels(CloudType)                                 \
                                                                               \
-    makeParticleForceModel(CloudType);                                        \
-    makeParticleForceModelType(SphereDragForce, CloudType);                   \
-    makeParticleForceModelType(NonSphereDragForce, CloudType);                \
-    makeParticleForceModelType(SaffmanMeiLiftForce, CloudType);               \
-    makeParticleForceModelType(TomiyamaLiftForce, CloudType);                 \
-    makeParticleForceModelType(GravityForce, CloudType);                      \
-    makeParticleForceModelType(NonInertialFrameForce, CloudType);             \
-    makeParticleForceModelType(ParamagneticForce, CloudType);                 \
-    makeParticleForceModelType(PressureGradientForce, CloudType);             \
-    makeParticleForceModelType(SRFForce, CloudType);                          \
-    makeParticleForceModelType(VirtualMassForce, CloudType);
+    typedef CloudType::kinematicCloudType kinematicCloudType;                 \
+    defineNamedTemplateTypeNameAndDebug                                       \
+    (                                                                         \
+        DispersionRASModel<kinematicCloudType>,                               \
+        0                                                                     \
+    );                                                                        \
+                                                                              \
+    makeDispersionModelType(GradientDispersionRAS, CloudType);                \
+    makeDispersionModelType(StochasticDispersionRAS, CloudType);              \
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

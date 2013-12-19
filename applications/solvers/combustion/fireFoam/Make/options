@@ -49,7 +49,9 @@ EXE_LIBS = \
     -lregionModels \
     -lradiationModels \
     -lsurfaceFilmModels \
+    -lsurfaceFilmDerivedFvPatchFields \
     -lpyrolysisModels \
     -lregionCoupling \
     -llagrangianIntermediate \
+    -llagrangianTurbulence \
     -lODE

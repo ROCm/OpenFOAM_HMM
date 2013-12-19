@@ -6,6 +6,7 @@ set -x
 wmake $makeType regionModel
 wmake $makeType pyrolysisModels
 wmake $makeType surfaceFilmModels
+wmake $makeType surfaceFilmModels/derivedFvPatchFields/wallFunctions
 wmake $makeType thermalBaffleModels
 wmake $makeType regionCoupling
 

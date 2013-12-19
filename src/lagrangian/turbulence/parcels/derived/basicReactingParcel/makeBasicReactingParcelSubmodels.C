@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,23 +23,30 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeParcelDispersionModels_h
-#define makeParcelDispersionModels_h
+#include "basicReactingCloud.H"
+
+#include "makeParcelCloudFunctionObjects.H"
+
+#include "GradientDispersionRAS.H"
+#include "StochasticDispersionRAS.H"
+
+#include "BrownianMotionForce.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NoDispersion.H"
+namespace Foam
+{
+    typedef basicReactingCloud::kinematicCloudType kinematicCloudType_K;
+    defineNamedTemplateTypeNameAndDebug
+    (
+        DispersionRASModel<kinematicCloudType_K>,
+        0
+    );
+    makeDispersionModelType(GradientDispersionRAS, basicReactingCloud);
+    makeDispersionModelType(StochasticDispersionRAS, basicReactingCloud);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    makeParticleForceModelType(BrownianMotionForce, basicReactingCloud);
+}
 
-#define makeParcelDispersionModels(CloudType)                                 \
-                                                                              \
-    makeDispersionModel(CloudType);                                           \
-    makeDispersionModelType(NoDispersion, CloudType);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //
