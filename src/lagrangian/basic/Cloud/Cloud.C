@@ -219,22 +219,33 @@ void Foam::Cloud<ParticleType>::move(TrackData& td, const scalar trackTime)
     // Reset nTrackingRescues
     nTrackingRescues_ = 0;
 
+
+    // List of lists of particles to be transfered for all of the
+    // neighbour processors
+    List<IDLList<ParticleType> > particleTransferLists
+    (
+        neighbourProcs.size()
+    );
+
+    // List of destination processorPatches indices for all of the
+    // neighbour processors
+    List<DynamicList<label> > patchIndexTransferLists
+    (
+        neighbourProcs.size()
+    );
+
+    // Allocate transfer buffers
+    PstreamBuffers pBufs(Pstream::nonBlocking);
+
+
     // While there are particles to transfer
     while (true)
     {
-        // List of lists of particles to be transfered for all of the
-        // neighbour processors
-        List<IDLList<ParticleType> > particleTransferLists
-        (
-            neighbourProcs.size()
-        );
-
-        // List of destination processorPatches indices for all of the
-        // neighbour processors
-        List<DynamicList<label> > patchIndexTransferLists
-        (
-            neighbourProcs.size()
-        );
+        particleTransferLists = IDLList<ParticleType>();
+        forAll(patchIndexTransferLists, i)
+        {
+            patchIndexTransferLists[i].clear();
+        }
 
         // Loop over all particles
         forAllIter(typename Cloud<ParticleType>, *this, pIter)
@@ -288,8 +299,9 @@ void Foam::Cloud<ParticleType>::move(TrackData& td, const scalar trackTime)
             break;
         }
 
-        // Allocate transfer buffers
-        PstreamBuffers pBufs(Pstream::nonBlocking);
+
+        // Clear transfer buffers
+        pBufs.clear();
 
         // Stream into send buffers
         forAll(particleTransferLists, i)
@@ -308,11 +320,11 @@ void Foam::Cloud<ParticleType>::move(TrackData& td, const scalar trackTime)
             }
         }
 
-        // Set up transfers when in non-blocking mode. Returns sizes (in bytes)
-        // to be sent/received.
-        labelListList allNTrans(Pstream::nProcs());
 
+        // Start sending. Sets number of bytes transferred
+        labelListList allNTrans(Pstream::nProcs());
         pBufs.finishedSends(allNTrans);
+
 
         bool transfered = false;
 
