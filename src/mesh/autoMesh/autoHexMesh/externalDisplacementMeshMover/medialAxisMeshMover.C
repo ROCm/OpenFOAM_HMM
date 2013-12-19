@@ -51,7 +51,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-
 Foam::labelList Foam::medialAxisMeshMover::getFixedValueBCs
 (
     const pointVectorField& fld
@@ -118,63 +117,6 @@ Foam::medialAxisMeshMover::getPatch
 }
 
 
-void Foam::medialAxisMeshMover::calculateEdgeWeights
-(
-    const PackedBoolList& isMasterEdge,
-    const labelList& meshEdges,
-    const labelList& meshPoints,
-    const edgeList& edges,
-    scalarField& edgeWeights,
-    scalarField& invSumWeight
-) const
-{
-    const pointField& pts = mesh().points();
-
-    // Calculate edgeWeights and inverse sum of edge weights
-    edgeWeights.setSize(meshEdges.size());
-    invSumWeight.setSize(meshPoints.size());
-
-    forAll(edges, edgeI)
-    {
-        const edge& e = edges[edgeI];
-        scalar eMag = max
-        (
-            VSMALL,
-            mag
-            (
-                pts[meshPoints[e[1]]]
-              - pts[meshPoints[e[0]]]
-            )
-        );
-        edgeWeights[edgeI] = 1.0/eMag;
-    }
-
-    // Sum per point all edge weights
-    weightedSum
-    (
-        mesh(),
-        isMasterEdge,
-        meshEdges,
-        meshPoints,
-        edges,
-        edgeWeights,
-        scalarField(meshPoints.size(), 1.0),  // data
-        invSumWeight
-    );
-
-    // Inplace invert
-    forAll(invSumWeight, pointI)
-    {
-        scalar w = invSumWeight[pointI];
-
-        if (w > 0.0)
-        {
-            invSumWeight[pointI] = 1.0/w;
-        }
-    }
-}
-
-
 void Foam::medialAxisMeshMover::smoothPatchNormals
 (
     const label nSmoothDisp,
@@ -193,8 +135,9 @@ void Foam::medialAxisMeshMover::smoothPatchNormals
 
     scalarField edgeWeights(meshEdges.size());
     scalarField invSumWeight(meshPoints.size());
-    calculateEdgeWeights
+    meshRefinement::calculateEdgeWeights
     (
+        mesh(),
         isMasterEdge,
         meshEdges,
         meshPoints,
@@ -207,7 +150,7 @@ void Foam::medialAxisMeshMover::smoothPatchNormals
     vectorField average;
     for (label iter = 0; iter < nSmoothDisp; iter++)
     {
-        weightedSum
+        meshRefinement::weightedSum
         (
             mesh(),
             isMasterEdge,
@@ -284,8 +227,9 @@ void Foam::medialAxisMeshMover::smoothNormals
 
     scalarField edgeWeights(meshEdges.size());
     scalarField invSumWeight(meshPoints.size());
-    calculateEdgeWeights
+    meshRefinement::calculateEdgeWeights
     (
+        mesh(),
         isMasterEdge,
         meshEdges,
         meshPoints,
@@ -297,7 +241,7 @@ void Foam::medialAxisMeshMover::smoothNormals
     vectorField average;
     for (label iter = 0; iter < nSmoothDisp; iter++)
     {
-        weightedSum
+        meshRefinement::weightedSum
         (
             mesh(),
             isMasterEdge,
@@ -1059,8 +1003,9 @@ void Foam::medialAxisMeshMover::minSmoothField
 
     scalarField edgeWeights(meshEdges.size());
     scalarField invSumWeight(meshPoints.size());
-    calculateEdgeWeights
+    meshRefinement::calculateEdgeWeights
     (
+        mesh(),
         isMasterEdge,
         meshEdges,
         meshPoints,
@@ -1075,7 +1020,7 @@ void Foam::medialAxisMeshMover::minSmoothField
     for (label iter = 0; iter < nSmoothDisp; iter++)
     {
         scalarField average(pp.nPoints());
-        weightedSum
+        meshRefinement::weightedSum
         (
             mesh(),
             isMasterEdge,
@@ -1534,8 +1479,9 @@ void Foam::medialAxisMeshMover::smoothLambdaMuDisplacement
     // Calculate inverse sum of weights
     scalarField edgeWeights(meshEdges.size());
     scalarField invSumWeight(meshPoints.size());
-    calculateEdgeWeights
+    meshRefinement::calculateEdgeWeights
     (
+        mesh(),
         isMasterEdge,
         meshEdges,
         meshPoints,
@@ -1554,7 +1500,7 @@ void Foam::medialAxisMeshMover::smoothLambdaMuDisplacement
 
     for (label iter = 0; iter < nSmoothDisp; iter++)
     {
-        weightedSum
+        meshRefinement::weightedSum
         (
             mesh(),
             isMasterEdge,
@@ -1575,7 +1521,7 @@ void Foam::medialAxisMeshMover::smoothLambdaMuDisplacement
             }
         }
 
-        weightedSum
+        meshRefinement::weightedSum
         (
             mesh(),
             isMasterEdge,
