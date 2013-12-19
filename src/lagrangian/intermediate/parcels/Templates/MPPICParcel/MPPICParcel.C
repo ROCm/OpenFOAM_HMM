@@ -76,12 +76,16 @@ bool Foam::MPPICParcel<ParcelType>::move
             p.UCorrect() =
                 td.cloud().dampingModel().velocityCorrection(p, trackTime);
 
+            td.keepParticle = true;
+
             break;
         }
         case TrackData::tpPackingNoTrack:
         {
             p.UCorrect() =
                 td.cloud().packingModel().velocityCorrection(p, trackTime);
+
+            td.keepParticle = true;
 
             break;
         }

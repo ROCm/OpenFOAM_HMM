@@ -80,6 +80,8 @@ bool Foam::CollidingParcel<ParcelType>::move
 
             p.angularMomentum() += 0.5*trackTime*p.torque();
 
+            td.keepParticle = true;
+
             break;
         }
 
