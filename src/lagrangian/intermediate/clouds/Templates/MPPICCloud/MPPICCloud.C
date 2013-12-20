@@ -273,26 +273,33 @@ void Foam::MPPICCloud<CloudType>::info()
 
     tmp<volScalarField> alpha = this->theta();
 
-    Info<< "    Min cell volume fraction        = "
-        << gMin(alpha().internalField()) << endl;
-    Info<< "    Max cell volume fraction        = "
-        << gMax(alpha().internalField()) << endl;
+    const scalar alphaMin = gMin(alpha().internalField());
+    const scalar alphaMax = gMax(alpha().internalField());
 
-    label nOutside = 0;
+    Info<< "    Min cell volume fraction        = " << alphaMin << endl;
+    Info<< "    Max cell volume fraction        = " << alphaMax << endl;
 
-    forAllIter(typename CloudType, *this, iter)
+    if (alphaMax < SMALL)
     {
-        typename CloudType::parcelType& p = iter();
-        const tetIndices tetIs(p.cell(), p.tetFace(), p.tetPt(), this->mesh());
-        nOutside += !tetIs.tet(this->mesh()).inside(p.position());
+        return;
     }
 
-    reduce(nOutside, plusOp<label>());
+    scalar nMin = GREAT;
 
-    if (nOutside > 0)
+    forAll(this->mesh().cells(), cellI)
     {
-        Info<< "    Number of parcels outside tets  = " << nOutside << endl;
+        const label n = this->cellOccupancy()[cellI].size();
+        const scalar nPack = n*alphaMax/alpha()[cellI];
+
+        if (n > 0 && nPack < nMin)
+        {
+            nMin = nPack;
+        }
     }
+
+    reduce(nMin, minOp<scalar>());
+
+    Info<< "    Min dense number of parcels     = " << nMin << endl;
 }
 
 
