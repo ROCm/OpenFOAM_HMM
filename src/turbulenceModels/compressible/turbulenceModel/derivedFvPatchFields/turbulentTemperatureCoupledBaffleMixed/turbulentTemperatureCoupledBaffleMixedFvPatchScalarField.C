@@ -80,7 +80,7 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     temperatureCoupledBase(patch(), dict),
-    TnbrName_(dict.lookup("neighbourFieldName"))
+    TnbrName_(dict.lookup("Tnbr"))
 {
     if (!isA<mappedPatchBase>(this->patch().patch()))
     {
@@ -237,7 +237,7 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::write
 ) const
 {
     mixedFvPatchScalarField::write(os);
-    os.writeKeyword("TnbrName")<< TnbrName_
+    os.writeKeyword("Tnbr")<< TnbrName_
         << token::END_STATEMENT << nl;
     temperatureCoupledBase::write(os);
 }

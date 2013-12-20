@@ -67,7 +67,7 @@ dictionaryReplacement
             "topAir_to_.*"
             {
                 type            compressible::turbulentTemperatureCoupledBaffleMixed;
-                neighbourFieldName T;
+                Tnbr            T;
                 kappa           fluidThermo;
                 kappaName       none;
                 value           uniform 300;
