@@ -458,10 +458,18 @@ void Foam::meshRefinement::markFeatureCellLevel
     // Database to pass into trackedParticle::move
     trackedParticle::trackingData td(startPointCloud, maxFeatureLevel);
 
+
     // Track all particles to their end position (= starting feature point)
     // Note that the particle might have started on a different processor
     // so this will transfer across nicely until we can start tracking proper.
     scalar maxTrackLen = 2.0*mesh_.bounds().mag();
+
+    if (debug&meshRefinement::FEATURESEEDS)
+    {
+        Pout<< "Tracking " << startPointCloud.size()
+            << " particles over distance " << maxTrackLen
+            << " to find the starting cell" << endl;
+    }
     startPointCloud.move(td, maxTrackLen);
 
 
@@ -484,6 +492,11 @@ void Foam::meshRefinement::markFeatureCellLevel
         "featureCloud",
         IDLList<trackedParticle>()
     );
+
+    if (debug&meshRefinement::FEATURESEEDS)
+    {
+        Pout<< "Constructing cloud for cell marking" << endl;
+    }
 
     forAllIter(Cloud<trackedParticle>, startPointCloud, iter)
     {
@@ -532,10 +545,13 @@ void Foam::meshRefinement::markFeatureCellLevel
     while (true)
     {
         // Track all particles to their end position.
+        if (debug&meshRefinement::FEATURESEEDS)
+        {
+            Pout<< "Tracking " << cloud.size()
+                << " particles over distance " << maxTrackLen
+                << " to mark cells" << endl;
+        }
         cloud.move(td, maxTrackLen);
-
-
-        label nParticles = 0;
 
         // Make particle follow edge.
         forAllIter(Cloud<trackedParticle>, cloud, iter)
@@ -578,15 +594,15 @@ void Foam::meshRefinement::markFeatureCellLevel
                 // seeded. Delete particle.
                 cloud.deleteParticle(tp);
             }
-            else
-            {
-                // Keep particle
-                nParticles++;
-            }
         }
 
-        reduce(nParticles, sumOp<label>());
-        if (nParticles == 0)
+
+        if (debug&meshRefinement::FEATURESEEDS)
+        {
+            Pout<< "Remaining particles " << cloud.size() << endl;
+        }
+
+        if (returnReduce(cloud.size(), sumOp<label>()) == 0)
         {
             break;
         }

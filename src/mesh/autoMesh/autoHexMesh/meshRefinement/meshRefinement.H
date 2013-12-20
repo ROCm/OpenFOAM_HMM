@@ -729,6 +729,33 @@ public:
             //- Helper function: check that face zones are synced
             static void checkCoupledFaceZones(const polyMesh&);
 
+            //- Helper: calculate edge weights (1/length)
+            static void calculateEdgeWeights
+            (
+                const polyMesh& mesh,
+                const PackedBoolList& isMasterEdge,
+                const labelList& meshEdges,
+                const labelList& meshPoints,
+                const edgeList& edges,
+                scalarField& edgeWeights,
+                scalarField& invSumWeight
+            );
+
+            //- Helper: weighted sum (over all subset of mesh points) by
+            //  summing contribution from (master) edges
+            template<class Type>
+            static void weightedSum
+            (
+                const polyMesh& mesh,
+                const PackedBoolList& isMasterEdge,
+                const labelList& meshEdges,
+                const labelList& meshPoints,
+                const edgeList& edges,
+                const scalarField& edgeWeights,
+                const Field<Type>& data,
+                Field<Type>& sum
+            );
+
 
         // Refinement
 

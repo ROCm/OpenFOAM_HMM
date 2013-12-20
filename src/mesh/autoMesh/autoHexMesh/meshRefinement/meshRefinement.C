@@ -1949,6 +1949,64 @@ void Foam::meshRefinement::checkCoupledFaceZones(const polyMesh& mesh)
 }
 
 
+void Foam::meshRefinement::calculateEdgeWeights
+(
+    const polyMesh& mesh,
+    const PackedBoolList& isMasterEdge,
+    const labelList& meshEdges,
+    const labelList& meshPoints,
+    const edgeList& edges,
+    scalarField& edgeWeights,
+    scalarField& invSumWeight
+)
+{
+    const pointField& pts = mesh.points();
+
+    // Calculate edgeWeights and inverse sum of edge weights
+    edgeWeights.setSize(meshEdges.size());
+    invSumWeight.setSize(meshPoints.size());
+
+    forAll(edges, edgeI)
+    {
+        const edge& e = edges[edgeI];
+        scalar eMag = max
+        (
+            VSMALL,
+            mag
+            (
+                pts[meshPoints[e[1]]]
+              - pts[meshPoints[e[0]]]
+            )
+        );
+        edgeWeights[edgeI] = 1.0/eMag;
+    }
+
+    // Sum per point all edge weights
+    weightedSum
+    (
+        mesh,
+        isMasterEdge,
+        meshEdges,
+        meshPoints,
+        edges,
+        edgeWeights,
+        scalarField(meshPoints.size(), 1.0),  // data
+        invSumWeight
+    );
+
+    // Inplace invert
+    forAll(invSumWeight, pointI)
+    {
+        scalar w = invSumWeight[pointI];
+
+        if (w > 0.0)
+        {
+            invSumWeight[pointI] = 1.0/w;
+        }
+    }
+}
+
+
 Foam::label Foam::meshRefinement::appendPatch
 (
     fvMesh& mesh,
@@ -2167,9 +2225,7 @@ Foam::label Foam::meshRefinement::addMeshedPatch
 //        );
 
         // Store
-        label sz = meshedPatches_.size();
-        meshedPatches_.setSize(sz+1);
-        meshedPatches_[sz] = name;
+        meshedPatches_.append(name);
 
         return patchI;
     }

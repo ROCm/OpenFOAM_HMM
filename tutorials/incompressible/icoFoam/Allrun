@@ -18,12 +18,6 @@ runMapFieldsConsistent()
     mapFieldsNew $1 -case $2 -sourceTime latestTime -consistent > $2/log.mapFields 2>&1
 }
 
-runFluentMeshToFoam()
-{
-    echo "fluentMeshToFoam: converting mesh $2"
-    fluentMeshToFoam $2 -case $1 > $1/log.fluentMeshToFoam 2>&1
-}
-
 copySolutionDirs()
 {
     echo "Copying $2/0* directory to $1"
@@ -95,16 +89,8 @@ do
     ( cd $caseName && runApplication `getApplication` )
 done
 
+
 # elbow case for testing Fluent-FOAM conversion tools
-
-runFluentMeshToFoam elbow elbow/elbow.msh
-
-(
-    cd elbow || exit
-
-    runApplication `getApplication`
-    runApplication foamMeshToFluent
-    runApplication foamDataToFluent
-)
+(cd elbow && ./Allrun)
 
 # ----------------------------------------------------------------- end-of-file

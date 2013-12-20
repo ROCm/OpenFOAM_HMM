@@ -145,4 +145,19 @@ void Foam::PstreamBuffers::finishedSends(labelListList& sizes, const bool block)
 }
 
 
+void Foam::PstreamBuffers::clear()
+{
+    forAll(sendBuf_, i)
+    {
+        sendBuf_[i].clear();
+    }
+    forAll(recvBuf_, i)
+    {
+        recvBuf_[i].clear();
+    }
+    recvBufPos_ = 0;
+    finishedSendsCalled_ = false;
+}
+
+
 // ************************************************************************* //

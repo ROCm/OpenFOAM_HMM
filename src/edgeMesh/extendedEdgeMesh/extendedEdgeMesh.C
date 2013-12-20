@@ -30,6 +30,7 @@ License
 #include "Time.H"
 #include "OBJstream.H"
 #include "DynamicField.H"
+#include "edgeMeshFormatsCore.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -102,6 +103,68 @@ Foam::label Foam::extendedEdgeMesh::nPointTypes = 4;
 
 
 Foam::label Foam::extendedEdgeMesh::nEdgeTypes = 5;
+
+
+Foam::wordHashSet Foam::extendedEdgeMesh::readTypes()
+{
+    return wordHashSet(*fileExtensionConstructorTablePtr_);
+}
+
+
+Foam::wordHashSet Foam::extendedEdgeMesh::writeTypes()
+{
+    return wordHashSet(*writefileExtensionMemberFunctionTablePtr_);
+}
+
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+bool Foam::extendedEdgeMesh::canReadType
+(
+    const word& ext,
+    const bool verbose
+)
+{
+    return edgeMeshFormatsCore::checkSupport
+    (
+        readTypes(),
+        ext,
+        verbose,
+        "reading"
+   );
+}
+
+
+bool Foam::extendedEdgeMesh::canWriteType
+(
+    const word& ext,
+    const bool verbose
+)
+{
+    return edgeMeshFormatsCore::checkSupport
+    (
+        writeTypes(),
+        ext,
+        verbose,
+        "writing"
+    );
+}
+
+
+bool Foam::extendedEdgeMesh::canRead
+(
+    const fileName& name,
+    const bool verbose
+)
+{
+    word ext = name.ext();
+    if (ext == "gz")
+    {
+        ext = name.lessExt().ext();
+    }
+    return canReadType(ext, verbose);
+}
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
