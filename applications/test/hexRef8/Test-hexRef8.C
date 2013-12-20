@@ -34,11 +34,13 @@ Description
 #include "Time.H"
 #include "volFields.H"
 #include "surfaceFields.H"
+#include "pointFields.H"
 #include "hexRef8.H"
 #include "mapPolyMesh.H"
 #include "polyTopoChange.H"
 #include "Random.H"
 #include "zeroGradientFvPatchFields.H"
+#include "calculatedPointPatchFields.H"
 #include "fvcDiv.H"
 
 using namespace Foam;
@@ -142,6 +144,29 @@ int main(int argc, char *argv[])
     Info<< "Writing surface one field "
         << surfaceOne.name() << " in " << runTime.timeName() << endl;
     surfaceOne.write();
+
+
+    // Uniform point field
+    pointScalarField pointX
+    (
+        IOobject
+        (
+            "pointX",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        pointMesh::New(mesh),
+        dimensionedScalar("one", dimless, 1.0),
+        calculatedPointPatchScalarField::typeName
+    );
+    pointX.internalField() = mesh.points().component(0);
+    pointX.correctBoundaryConditions();
+    Info<< "Writing x-component field "
+        << pointX.name() << " in " << runTime.timeName() << endl;
+    pointX.write();
+
 
 
     // Force allocation of V. Important for any mesh changes since otherwise
