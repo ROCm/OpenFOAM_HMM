@@ -17,9 +17,12 @@ FoamFile
 
 DebugSwitches
 {
-    primitiveMesh   1;
-    polyMesh        1;
-    fvMesh          1;
+    primitiveMesh       1;
+    polyMesh            1;
+    fvMesh              1;
+    polyTopoChange      1;
+    pointMesh           1;
+    pointConstraints    1;
 }
 
 application     icoFoam;
