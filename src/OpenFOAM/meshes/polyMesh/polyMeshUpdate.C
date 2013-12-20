@@ -92,6 +92,7 @@ void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
     }
 
     meshObject::updateMesh<polyMesh>(*this, mpm);
+    meshObject::updateMesh<pointMesh>(*this, mpm);
 
     // Reset valid directions (could change by faces put into empty patches)
     geometricD_ = Vector<label>::zero;

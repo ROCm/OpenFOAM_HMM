@@ -29,6 +29,7 @@ License
 #include "MeshObject.H"
 #include "indexedOctree.H"
 #include "treeDataCell.H"
+#include "pointMesh.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -61,6 +62,7 @@ void Foam::polyMesh::clearGeom()
     }
 
     // Clear all geometric mesh objects
+    meshObject::clear<pointMesh, GeometricMeshObject>(*this);
     meshObject::clear<polyMesh, GeometricMeshObject>(*this);
 
     primitiveMesh::clearGeom();
@@ -109,6 +111,15 @@ void Foam::polyMesh::clearAddressing(const bool isMeshUpdate)
         // callback
         meshObject::clearUpto
         <
+            pointMesh,
+            TopologicalMeshObject,
+            UpdateableMeshObject
+        >
+        (
+            *this
+        );
+        meshObject::clearUpto
+        <
             polyMesh,
             TopologicalMeshObject,
             UpdateableMeshObject
@@ -119,6 +130,7 @@ void Foam::polyMesh::clearAddressing(const bool isMeshUpdate)
     }
     else
     {
+        meshObject::clear<pointMesh, TopologicalMeshObject>(*this);
         meshObject::clear<polyMesh, TopologicalMeshObject>(*this);
     }
 
