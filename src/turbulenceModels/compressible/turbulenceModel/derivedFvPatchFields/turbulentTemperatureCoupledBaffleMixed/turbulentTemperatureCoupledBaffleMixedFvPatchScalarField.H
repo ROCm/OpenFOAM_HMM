@@ -40,10 +40,10 @@ Description
         myInterfacePatchName
         {
             type        compressible::turbulentTemperatureCoupledBaffleMixed;
-            neighbourFieldName  T;
-            kappa               lookup;
-            kappaName           kappa;
-            value               uniform 300;
+            Tnbr        T;
+            kappa       lookup;
+            kappaName   kappa;
+            value       uniform 300;
         }
 
     Needs to be on underlying mapped(Wall)FvPatch.
