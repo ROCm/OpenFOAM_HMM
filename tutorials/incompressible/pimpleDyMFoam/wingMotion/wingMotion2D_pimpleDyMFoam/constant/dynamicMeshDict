@@ -16,7 +16,7 @@ FoamFile
 
 dynamicFvMesh      dynamicMotionSolverFvMesh;
 
-motionSolverLibs ("libfvMotionSolvers.so");
+motionSolverLibs ("libfvMotionSolvers.so" "libsixDoFRigidBodyMotion.so");
 
 solver            displacementLaplacian;
 

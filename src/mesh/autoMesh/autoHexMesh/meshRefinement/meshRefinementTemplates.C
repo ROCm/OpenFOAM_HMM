@@ -26,16 +26,12 @@ License
 #include "meshRefinement.H"
 #include "fvMesh.H"
 #include "globalIndex.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
+#include "syncTools.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Add a T entry
-template<class T> void meshRefinement::updateList
+template<class T> void Foam::meshRefinement::updateList
 (
     const labelList& newToOld,
     const T& nullValue,
@@ -59,7 +55,7 @@ template<class T> void meshRefinement::updateList
 
 
 template<class T>
-T meshRefinement::gAverage
+T Foam::meshRefinement::gAverage
 (
     const polyMesh& mesh,
     const PackedBoolList& isMasterElem,
@@ -109,7 +105,7 @@ T meshRefinement::gAverage
 
 
 template<class T>
-T meshRefinement::gAverage
+T Foam::meshRefinement::gAverage
 (
     const polyMesh& mesh,
     const PackedBoolList& isMasterElem,
@@ -162,7 +158,7 @@ T meshRefinement::gAverage
 
 // Compare two lists over all boundary faces
 template<class T>
-void meshRefinement::testSyncBoundaryFaceList
+void Foam::meshRefinement::testSyncBoundaryFaceList
 (
     const scalar tol,
     const string& msg,
@@ -222,7 +218,7 @@ void meshRefinement::testSyncBoundaryFaceList
 // Print list sorted by coordinates. Used for comparing non-parallel v.s.
 // parallel operation
 template<class T>
-void meshRefinement::collectAndPrint
+void Foam::meshRefinement::collectAndPrint
 (
     const UList<point>& points,
     const UList<T>& data
@@ -268,7 +264,11 @@ void meshRefinement::collectAndPrint
 
 //template<class T, class Mesh>
 template<class GeoField>
-void meshRefinement::addPatchFields(fvMesh& mesh, const word& patchFieldType)
+void Foam::meshRefinement::addPatchFields
+(
+    fvMesh& mesh,
+    const word& patchFieldType
+)
 {
     HashTable<GeoField*> flds
     (
@@ -298,7 +298,11 @@ void meshRefinement::addPatchFields(fvMesh& mesh, const word& patchFieldType)
 
 // Reorder patch field
 template<class GeoField>
-void meshRefinement::reorderPatchFields(fvMesh& mesh, const labelList& oldToNew)
+void Foam::meshRefinement::reorderPatchFields
+(
+    fvMesh& mesh,
+    const labelList& oldToNew
+)
 {
     HashTable<GeoField*> flds
     (
@@ -316,7 +320,11 @@ void meshRefinement::reorderPatchFields(fvMesh& mesh, const labelList& oldToNew)
 
 
 template<class Enum>
-int meshRefinement::readFlags(const Enum& namedEnum, const wordList& words)
+int Foam::meshRefinement::readFlags
+(
+    const Enum& namedEnum,
+    const wordList& words
+)
 {
     int flags = 0;
 
@@ -330,8 +338,66 @@ int meshRefinement::readFlags(const Enum& namedEnum, const wordList& words)
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class Type>
+void Foam::meshRefinement::weightedSum
+(
+    const polyMesh& mesh,
+    const PackedBoolList& isMasterEdge,
+    const labelList& meshEdges,
+    const labelList& meshPoints,
+    const edgeList& edges,
+    const scalarField& edgeWeights,
+    const Field<Type>& pointData,
+    Field<Type>& sum
+)
+{
+    if
+    (
+        mesh.nEdges() != isMasterEdge.size()
+     || edges.size() != meshEdges.size()
+     || edges.size() != edgeWeights.size()
+     || meshPoints.size() != pointData.size()
+    )
+    {
+        FatalErrorIn("medialAxisMeshMover::weightedSum(..)")
+            << "Inconsistent sizes for edge or point data:"
+            << " meshEdges:" << meshEdges.size()
+            << " isMasterEdge:" << isMasterEdge.size()
+            << " edgeWeights:" << edgeWeights.size()
+            << " edges:" << edges.size()
+            << " pointData:" << pointData.size()
+            << " meshPoints:" << meshPoints.size()
+            << abort(FatalError);
+    }
 
-} // End namespace Foam
+    sum.setSize(meshPoints.size());
+    sum = pTraits<Type>::zero;
+
+    forAll(edges, edgeI)
+    {
+        if (isMasterEdge.get(meshEdges[edgeI]) == 1)
+        {
+            const edge& e = edges[edgeI];
+
+            scalar eWeight = edgeWeights[edgeI];
+
+            label v0 = e[0];
+            label v1 = e[1];
+
+            sum[v0] += eWeight*pointData[v1];
+            sum[v1] += eWeight*pointData[v0];
+        }
+    }
+
+    syncTools::syncPointList
+    (
+        mesh,
+        meshPoints,
+        sum,
+        plusEqOp<Type>(),
+        pTraits<Type>::zero     // null value
+    );
+}
+
 
 // ************************************************************************* //

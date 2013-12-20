@@ -105,31 +105,6 @@ class medialAxisMeshMover
             const labelList&
         );
 
-        //- Weighted sum (over all subset of mesh points) by
-        //  summing contribution from (master) edges
-        template<class Type>
-        static void weightedSum
-        (
-            const polyMesh& mesh,
-            const PackedBoolList& isMasterEdge,
-            const labelList& meshEdges,
-            const labelList& meshPoints,
-            const edgeList& edges,
-            const scalarField& edgeWeights,
-            const Field<Type>& data,
-            Field<Type>& sum
-        );
-
-        void calculateEdgeWeights
-        (
-            const PackedBoolList& isMasterEdge,
-            const labelList& meshEdges,
-            const labelList& meshPoints,
-            const edgeList& edges,
-            scalarField& edgeWeights,
-            scalarField& invSumWeight
-        ) const;
-
 
         // Calculation of medial axis information
 
@@ -311,12 +286,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "medialAxisMeshMoverTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

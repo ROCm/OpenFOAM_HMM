@@ -126,7 +126,7 @@ patches
     backQuad(poro1, out1, out2, poro2)
     )
 
-    wall wall
+    wall walls
     (
     // inlet block
     quad2D(in1, join1)

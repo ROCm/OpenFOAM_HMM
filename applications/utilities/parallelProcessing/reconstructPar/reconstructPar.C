@@ -706,10 +706,17 @@ int main(int argc, char *argv[])
                 {
                     const fvMesh& procMesh = procMeshes.meshes()[procI];
 
+                    // Note: look at sets in current time only or between
+                    // mesh and current time?. For now current time. This will
+                    // miss out on sets in intermediate times that have not
+                    // been reconstructed.
                     IOobjectList objects
                     (
-                        procMesh, procMesh.facesInstance(), "polyMesh/sets"
+                        procMesh,
+                        databases[0].timeName(),    //procMesh.facesInstance()
+                        polyMesh::meshSubDir/"sets"
                     );
+
                     IOobjectList cSets(objects.lookupClass(cellSet::typeName));
                     forAllConstIter(IOobjectList, cSets, iter)
                     {
@@ -754,7 +761,9 @@ int main(int argc, char *argv[])
 
                     IOobjectList objects
                     (
-                        procMesh, procMesh.facesInstance(), "polyMesh/sets"
+                        procMesh,
+                        databases[0].timeName(),    //procMesh.facesInstance(),
+                        polyMesh::meshSubDir/"sets"
                     );
 
                     // cellSets
@@ -856,6 +865,9 @@ int main(int argc, char *argv[])
     // the master processor
     forAll(timeDirs, timeI)
     {
+        runTime.setTime(timeDirs[timeI], timeI);
+        databases[0].setTime(timeDirs[timeI], timeI);
+
         fileName uniformDir0 = databases[0].timePath()/"uniform";
         if (isDir(uniformDir0))
         {

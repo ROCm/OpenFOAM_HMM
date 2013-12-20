@@ -310,14 +310,13 @@ class autoSnapDriver
                 //- Find point on nearest feature edge (within searchDist).
                 //  Return point and feature
                 //  and store feature-edge to mesh-point and vice versa
-                pointIndexHit findNearFeatureEdge
+                Tuple2<label, pointIndexHit> findNearFeatureEdge
                 (
                     const indirectPrimitivePatch& pp,
                     const scalarField& snapDist,
                     const label pointI,
                     const point& estimatedPt,
 
-                    label& featI,
                     List<List<DynamicList<point> > >&,
                     List<List<DynamicList<pointConstraint> > >&,
                     vectorField&,
@@ -330,7 +329,7 @@ class autoSnapDriver
                 //  If another mesh point already referring to this feature
                 //  point and further away, reset that one to a near feature
                 //  edge (using findNearFeatureEdge above)
-                labelPair findNearFeaturePoint
+                Tuple2<label, pointIndexHit> findNearFeaturePoint
                 (
                     const indirectPrimitivePatch& pp,
                     const scalarField& snapDist,

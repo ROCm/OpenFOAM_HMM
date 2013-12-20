@@ -220,7 +220,10 @@ void Foam::sixDoFRigidBodyMotionSolver::solve()
         motion_.scaledPosition(points0(), scale_) - points0();
 
     // Displacement has changed. Update boundary conditions
-    pointConstraints::New(mesh()).constrainDisplacement(pointDisplacement_);
+    pointConstraints::New
+    (
+        pointDisplacement_.mesh()
+    ).constrainDisplacement(pointDisplacement_);
 }
 
 
@@ -247,6 +250,21 @@ bool Foam::sixDoFRigidBodyMotionSolver::writeObject
 
     motion_.state().write(dict);
     return dict.regIOobject::write();
+}
+
+
+bool Foam::sixDoFRigidBodyMotionSolver::read()
+{
+    if (displacementMotionSolver::read())
+    {
+        motion_.read(coeffDict());
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 

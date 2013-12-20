@@ -265,7 +265,7 @@ Foam::polyMesh::polyMesh(const IOobject& io)
     ),
     globalMeshDataPtr_(NULL),
     moving_(false),
-    changing_(false),
+    topoChanging_(false),
     curMotionTimeIndex_(time().timeIndex()),
     oldPointsPtr_(NULL)
 {
@@ -447,7 +447,7 @@ Foam::polyMesh::polyMesh
     ),
     globalMeshDataPtr_(NULL),
     moving_(false),
-    changing_(false),
+    topoChanging_(false),
     curMotionTimeIndex_(time().timeIndex()),
     oldPointsPtr_(NULL)
 {
@@ -606,7 +606,7 @@ Foam::polyMesh::polyMesh
     ),
     globalMeshDataPtr_(NULL),
     moving_(false),
-    changing_(false),
+    topoChanging_(false),
     curMotionTimeIndex_(time().timeIndex()),
     oldPointsPtr_(NULL)
 {
@@ -673,8 +673,8 @@ void Foam::polyMesh::resetPrimitives
     const bool validBoundary
 )
 {
-    // Clear addressing. Keep geometric props for mapping.
-    clearAddressing();
+    // Clear addressing. Keep geometric props and updateable props for mapping.
+    clearAddressing(true);
 
     // Take over new primitive data.
     // Optimized to avoid overwriting data at all

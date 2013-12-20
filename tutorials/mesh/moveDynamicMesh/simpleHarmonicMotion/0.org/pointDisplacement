@@ -33,7 +33,6 @@ boundaryField
         momentOfInertia (0.1052 0.1052 0.1778);
         mass            9.6;
         velocity        (0 0 0);
-        orientation     (1 0 0 0 1 0 0 0 1);
         acceleration    (0 0 0);
         angularMomentum (0 0 0);
         torque          (0 0 0);
@@ -46,38 +45,24 @@ boundaryField
             {
                 sixDoFRigidBodyMotionRestraint linearSpring;
 
-                linearSpringCoeffs
-                {
-                    anchor          (0.5 0.5 1);
-                    refAttachmentPt $centreOfMass;
-                    stiffness       5000;
-                    damping         50;
-                    restLength      0.4;
-                }
+                anchor          (0.5 0.5 1);
+                refAttachmentPt $centreOfMass;
+                stiffness       5000;
+                damping         50;
+                restLength      0.4;
             }
         }
         constraints
         {
-            maxIterations       500;
-
-            fixedAxes1
+            fixedOrientation
             {
-                sixDoFRigidBodyMotionConstraint fixedOrientation;
-                tolerance           1e-6;
-                relaxationFactor    1.0;
-                fixedOrientationCoeffs {}
+                sixDoFRigidBodyMotionConstraint orientation;
             }
 
-            fixedLine1
+            zLine
             {
-                sixDoFRigidBodyMotionConstraint fixedLine;
-                tolerance           1e-6;
-                relaxationFactor    1.0;
-                fixedLineCoeffs
-                {
-                    refPoint      $centreOfMass;
-                    direction     (0 0 1);
-                }
+                sixDoFRigidBodyMotionConstraint line;
+                direction           (0 0 1);
             }
         }
         value           uniform (0 0 0);

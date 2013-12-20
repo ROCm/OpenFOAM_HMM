@@ -168,7 +168,6 @@ castellatedMeshControls
             patchInfo
             {
                 type        wall;
-                inGroups    (wall);
             }
         }
 
@@ -182,7 +181,6 @@ castellatedMeshControls
             patchInfo
             {
                 type        wall;
-                inGroups    (wall);
             }
         }
     }

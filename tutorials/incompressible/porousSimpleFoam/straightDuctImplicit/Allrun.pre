@@ -22,7 +22,7 @@ runApplication checkMesh -allTopology -allGeometry -latestTime
 latestTime=`foamInfoExec -latestTime`
 
 # Move the mesh into polyMesh
-\rm -r constant/polyMesh
+\rm -rf constant/polyMesh
 \mv "${latestTime}"/polyMesh constant
 
 # Clean up intermediate meshes

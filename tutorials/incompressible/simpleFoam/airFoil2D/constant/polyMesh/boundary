@@ -31,7 +31,7 @@ outlet
     startFace 21388;
 }
 
-wall
+walls
 {
     type wall;
     physicalType wall;

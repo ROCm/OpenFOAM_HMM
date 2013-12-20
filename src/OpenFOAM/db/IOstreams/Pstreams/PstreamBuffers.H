@@ -112,8 +112,6 @@ class PstreamBuffers
 
         bool finishedSendsCalled_;
 
-    // Private Member Functions
-
 public:
 
     // Static data
@@ -154,6 +152,9 @@ public:
         //  sizes (bytes) transferred. Note:currently only valid for
         //  non-blocking.
         void finishedSends(labelListList& sizes, const bool block = true);
+
+        //- Clear storage and reset
+        void clear();
 
 };
 

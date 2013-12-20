@@ -71,7 +71,7 @@ geometry
     wall.obj
     {
         type        triSurfaceMesh;
-        name        wall;
+        name        walls;
     }
 };
 
@@ -191,7 +191,7 @@ castellatedMeshControls
             faceType baffle;
         }
 
-        wall
+        walls
         {
             level       (1 1);
             patchInfo

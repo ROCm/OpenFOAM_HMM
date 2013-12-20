@@ -34,7 +34,6 @@ License
 #include "SaffmanMeiLiftForce.H"
 #include "TomiyamaLiftForce.H"
 
-#include "BrownianMotionForce.H"
 #include "GravityForce.H"
 #include "NonInertialFrameForce.H"
 #include "ParamagneticForce.H"
@@ -51,7 +50,6 @@ License
     makeParticleForceModelType(NonSphereDragForce, CloudType);                \
     makeParticleForceModelType(SaffmanMeiLiftForce, CloudType);               \
     makeParticleForceModelType(TomiyamaLiftForce, CloudType);                 \
-    makeParticleForceModelType(BrownianMotionForce, CloudType);               \
     makeParticleForceModelType(GravityForce, CloudType);                      \
     makeParticleForceModelType(NonInertialFrameForce, CloudType);             \
     makeParticleForceModelType(ParamagneticForce, CloudType);                 \

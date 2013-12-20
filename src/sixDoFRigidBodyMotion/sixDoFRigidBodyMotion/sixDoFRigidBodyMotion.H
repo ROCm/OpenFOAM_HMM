@@ -90,21 +90,17 @@ class sixDoFRigidBodyMotion
         //- Motion state data object for previous time-step
         sixDoFRigidBodyMotionState motionState0_;
 
-        //- Restraints on the motion
+        //- Motion restraints
         PtrList<sixDoFRigidBodyMotionRestraint> restraints_;
 
-        //- Names of the restraints
-        wordList restraintNames_;
-
-        //- Constaints on the motion
+        //- Motion constaints
         PtrList<sixDoFRigidBodyMotionConstraint> constraints_;
 
-        //- Names of the constraints
-        wordList constraintNames_;
+        //- Translational constraint tensor
+        tensor tConstraints_;
 
-        //- Maximum number of iterations allowed to attempt to obey
-        //  constraints
-        label maxConstraintIterations_;
+        //- Rotational constraint tensor
+        tensor rConstraints_;
 
         //- Centre of mass of initial state
         point initialCentreOfMass_;
@@ -155,9 +151,6 @@ class sixDoFRigidBodyMotion
         //- Apply the restraints to the object
         void applyRestraints();
 
-        //- Apply the constraints to the object
-        void applyConstraints(scalar deltaT);
-
 
         // Access functions retained as private because of the risk of
         // confusion over what is a body local frame vector and what is global
@@ -168,19 +161,9 @@ class sixDoFRigidBodyMotion
             inline const PtrList<sixDoFRigidBodyMotionRestraint>&
                 restraints() const;
 
-            //- Return access to the restraintNames
-            inline const wordList& restraintNames() const;
-
             //- Return access to the constraints
             inline const PtrList<sixDoFRigidBodyMotionConstraint>&
                 constraints() const;
-
-            //- Return access to the constraintNames
-            inline const wordList& constraintNames() const;
-
-            //- Return access to the maximum allowed number of
-            //  constraint iterations
-            inline label maxConstraintIterations() const;
 
             //- Return access to the initial centre of mass
             inline const point& initialCentreOfMass() const;
@@ -190,9 +173,6 @@ class sixDoFRigidBodyMotion
 
             //- Return access to the orientation
             inline const tensor& Q() const;
-
-            //- Return access to velocity
-            inline const vector& v() const;
 
             //- Return access to acceleration
             inline const vector& a() const;
@@ -373,8 +353,7 @@ public:
         //- Return the angular velocity in the global frame
         inline vector omega() const;
 
-        //- Return the velocity of a position given by the current
-        //  motion state
+        //- Return the velocity of a position
         inline point currentVelocity(const point& pt) const;
 
         //- Report the status of the motion
@@ -401,6 +380,9 @@ public:
             //- Return the report Switch
             inline bool report() const;
 
+            //- Return access to velocity
+            inline const vector& v() const;
+
 
         // Edit
 
@@ -419,6 +401,11 @@ public:
 
         //- Write
         void write(Ostream&) const;
+
+
+        //- Read coefficients dictionary and update system parameters,
+        //  constraints and restraints but not the current state
+        bool read(const dictionary& dict);
 
 
     // IOstream Operators

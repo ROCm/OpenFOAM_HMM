@@ -31,7 +31,7 @@ boundaryField
         type            mutkWallFunction;
         value           uniform 0;
     }
-    wall
+    walls
     {
         type            mutkWallFunction;
         value           uniform 0;

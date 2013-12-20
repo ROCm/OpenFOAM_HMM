@@ -204,10 +204,10 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
     const pointPatch& ptPatch = this->patch();
 
     // Store the motion state at the beginning of the time-step
-    if (curTimeIndex_ != this->db().time().timeIndex())
+    if (curTimeIndex_ != t.timeIndex())
     {
         motion_.newTime();
-        curTimeIndex_ = this->db().time().timeIndex();
+        curTimeIndex_ = t.timeIndex();
     }
 
     // Patch force data is valid for the current positions, so
@@ -238,7 +238,7 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
         g_ = g.value();
     }
 
-    // scalar ramp = min(max((this->db().time().value() - 5)/10, 0), 1);
+    // scalar ramp = min(max((t.value() - 5)/10, 0), 1);
     scalar ramp = 1.0;
 
     motion_.updateAcceleration

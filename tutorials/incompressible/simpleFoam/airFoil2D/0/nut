@@ -32,7 +32,7 @@ boundaryField
         freestreamValue uniform 0.14;
     }
 
-    wall
+    walls
     {
         type            nutUSpaldingWallFunction;
         value           uniform 0;

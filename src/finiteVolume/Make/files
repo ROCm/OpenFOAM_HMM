@@ -251,6 +251,8 @@ surfaceInterpolation = interpolation/surfaceInterpolation
 $(surfaceInterpolation)/surfaceInterpolation/surfaceInterpolation.C
 $(surfaceInterpolation)/surfaceInterpolationScheme/surfaceInterpolationSchemes.C
 
+$(surfaceInterpolation)/blendedSchemeBase/blendedSchemeBaseName.C
+
 schemes = $(surfaceInterpolation)/schemes
 $(schemes)/linear/linear.C
 $(schemes)/pointLinear/pointLinear.C

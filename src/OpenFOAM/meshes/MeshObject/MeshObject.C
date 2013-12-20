@@ -374,4 +374,32 @@ void Foam::meshObject::clear(objectRegistry& obr)
 }
 
 
+template
+<
+    class Mesh,
+    template<class> class FromType,
+    template<class> class ToType
+>
+void Foam::meshObject::clearUpto(objectRegistry& obr)
+{
+    HashTable<FromType<Mesh>*> meshObjects
+    (
+        obr.lookupClass<FromType<Mesh> >()
+    );
+
+    forAllIter(typename HashTable<FromType<Mesh>*>, meshObjects, iter)
+    {
+        if (!isA<ToType<Mesh> >(*iter()))
+        {
+            if (meshObject::debug)
+            {
+                Pout<< "meshObject::clearUpto(objectRegistry&) : destroying "
+                    << iter()->name() << endl;
+            }
+            obr.checkOut(*iter());
+        }
+    }
+}
+
+
 // ************************************************************************* //

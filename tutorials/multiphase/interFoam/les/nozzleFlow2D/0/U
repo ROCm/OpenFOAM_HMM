@@ -31,7 +31,7 @@ boundaryField
         value           uniform (460 0 0);
     }
 
-    wall
+    walls
     {
         type            fixedValue;
         value           uniform (0 0 0);

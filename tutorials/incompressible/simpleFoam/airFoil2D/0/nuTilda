@@ -32,7 +32,7 @@ boundaryField
         freestreamValue uniform 0.14;
     }
 
-    wall
+    walls
     {
         type            fixedValue;
         value           uniform 0;

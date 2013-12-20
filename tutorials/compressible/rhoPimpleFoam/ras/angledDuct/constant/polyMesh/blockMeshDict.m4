@@ -134,7 +134,7 @@ boundary
         );
     }
 
-    wall
+    walls
     {
         type wall;
         faces

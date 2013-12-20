@@ -141,7 +141,7 @@ class fvMesh
             void clearGeom();
 
             //- Clear addressing
-            void clearAddressing();
+            void clearAddressing(const bool isMeshUpdate = false);
 
             //- Preserve old volume(s)
             void storeOldVol(const scalarField&);

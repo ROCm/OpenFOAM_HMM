@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,6 +65,12 @@ bool Foam::rawTopoChangerFvMesh::update()
     // Do mesh changes (use inflation - put new points in topoChangeMap)
     Info<< "rawTopoChangerFvMesh : Checking for topology changes..."
         << endl;
+
+    // Mesh not moved/changed yet
+    moving(false);
+    topoChanging(false);
+
+    // Do any topology changes. Sets topoChanging (through polyTopoChange)
     autoPtr<mapPolyMesh> topoChangeMap = topoChanger_.changeMesh(true);
 
     bool hasChanged = topoChangeMap.valid();
@@ -169,8 +175,6 @@ bool Foam::rawTopoChangerFvMesh::update()
         //Pout<< "rawTopoChangerFvMesh :"
         //    << " no topology changes..." << endl;
     }
-
-    changing(hasChanged);
 
     return hasChanged;
 }

@@ -29,25 +29,13 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "NoDispersion.H"
-#include "GradientDispersionRAS.H"
-#include "StochasticDispersionRAS.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #define makeParcelDispersionModels(CloudType)                                 \
                                                                               \
     makeDispersionModel(CloudType);                                           \
-                                                                              \
-    typedef CloudType::kinematicCloudType kinematicCloudType;                 \
-    defineNamedTemplateTypeNameAndDebug                                       \
-    (                                                                         \
-        DispersionRASModel<kinematicCloudType>,                               \
-        0                                                                     \
-    );                                                                        \
-                                                                              \
-    makeDispersionModelType(NoDispersion, CloudType);                         \
-    makeDispersionModelType(GradientDispersionRAS, CloudType);                \
-    makeDispersionModelType(StochasticDispersionRAS, CloudType);
+    makeDispersionModelType(NoDispersion, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

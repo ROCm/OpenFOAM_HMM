@@ -32,6 +32,7 @@ License
 #include "syncTools.H"
 #include "pointFields.H"
 #include "sigFpe.H"
+#include "cellSet.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -1072,6 +1073,26 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
     {
         protectedCell_.clear();
     }
+    else
+    {
+
+        cellSet protectedCells(*this, "protectedCells", nProtected);
+        forAll(protectedCell_, cellI)
+        {
+            if (protectedCell_[cellI])
+            {
+                protectedCells.insert(cellI);
+            }
+        }
+
+        Info<< "Detected " << returnReduce(nProtected, sumOp<label>())
+            << " cells that are projected from refinement."
+            << " Writing these to cellSet "
+            << protectedCells.name()
+            << "." << endl;
+
+        protectedCells.write();
+    }
 }
 
 
@@ -1110,7 +1131,7 @@ bool Foam::dynamicRefineFvMesh::update()
 
     if (refineInterval == 0)
     {
-        changing(hasChanged);
+        topoChanging(hasChanged);
 
         return false;
     }
@@ -1279,7 +1300,13 @@ bool Foam::dynamicRefineFvMesh::update()
         nRefinementIterations_++;
     }
 
-    changing(hasChanged);
+    topoChanging(hasChanged);
+    if (hasChanged)
+    {
+        // Reset moving flag (if any). If not using inflation we'll not move,
+        // if are using inflation any follow on movePoints will set it.
+        moving(false);
+    }
 
     return hasChanged;
 }

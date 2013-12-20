@@ -34,6 +34,7 @@ EXE_LIBS = \
     -lcompressibleLESModels \
     -llagrangian \
     -llagrangianIntermediate \
+    -llagrangianTurbulence \
     -lspecie \
     -lfluidThermophysicalModels \
     -lliquidProperties \

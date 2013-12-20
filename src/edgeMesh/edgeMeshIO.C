@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -122,9 +122,9 @@ void Foam::edgeMesh::write
 
 void Foam::edgeMesh::writeStats(Ostream& os) const
 {
-    os  << "points      : " << points().size() << nl;
-    os  << "edges       : " << edges().size() << nl;
-    os  << "boundingBox : " << boundBox(this->points()) << endl;
+    os  << indent << "points      : " << points().size() << nl;
+    os  << indent << "edges       : " << edges().size() << nl;
+    os  << indent << "boundingBox : " << boundBox(this->points()) << endl;
 }
 
 
