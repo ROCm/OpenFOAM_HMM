@@ -25,44 +25,85 @@ Class
     Foam::fv::codedSource
 
 Description
-    Constructs on-the-fly source
+   Constructs on-the-fly fvOption source
+
+    The hook functions take the following arguments:
+
+    codeCorrect
+    (
+        GeometricField<Type, fvPatchField, volMesh>& fld
+    )
+
+    codeAddSup
+    (
+        fvMatrix<Type}>& eqn,
+        const label fieldI
+    )
+
+    setValue
+    (
+         fvMatrix<Type}>& eqn,
+        const label fieldI
+    )
+
+    where :
+        fld is the field in fieldNames
+        eqn is the fvMatrix
 
     \heading Source usage
 
-    Example usage:
+    Example usage in controlDict:
     \verbatim
-    vectorCodedSourceCoeffs
+    energySource
     {
-        fieldNames  (U);
-        redirectType    ramp;
+        type            scalarCodedSource;
 
-        codeCorrect
-        #{
-            Pout<< "**codeCorrect**" << endl;
-        #};
+        active          true;
+        selectionMode   all;
 
-        codeAddSup
-        #{
-            Pout<< "**codeAddSup**" << endl;
-        #};
+        scalarCodedSourceCoeffs
+        {
+            fieldNames      (h);
+            redirectType    sourceTime;
 
-        codeSetValue
-        #{
-            Pout<< "**codeSetValue**" << endl;
-        #};
+            codeInclude
+            #{
 
-        // Dummy entry. Make dependent on above to trigger recompilation
-        code
-        #{
-            $codeCorrect
-            $codeAddSup
-            $codeSetValue
-        #};
+            #};
+
+            codeCorrect
+            #{
+                Pout<< "**codeCorrect**" << endl;
+            #};
+
+            codeAddSup
+            #{
+                const Time& time = mesh().time();
+                const scalarField& V = mesh_.V();
+                scalarField& heSource = eqn.source();
+                heSource -= 0.1*sqr(time.value())*V;
+            #};
+
+            codeSetValue
+            #{
+                Pout<< "**codeSetValue**" << endl;
+            #};
+
+            // Dummy entry. Make dependent on above to trigger recompilation
+            code
+            #{
+                $codeInclude
+                $codeCorrect
+                $codeAddSup
+                $codeSetValue
+            #};
+        }
+
+        sourceTimeCoeffs
+        {
+            // Dummy entry
+        }
     }
-
-    // Dummy entry
-    rampCoeffs
-    {}
     \endverbatim
 
 
