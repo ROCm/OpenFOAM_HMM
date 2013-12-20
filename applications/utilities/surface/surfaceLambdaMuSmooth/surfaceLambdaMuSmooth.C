@@ -209,6 +209,7 @@ int main(int argc, char *argv[])
         }
 
         // Mu
+        if (mu != 0)
         {
             pointField newLocalPoints
             (
