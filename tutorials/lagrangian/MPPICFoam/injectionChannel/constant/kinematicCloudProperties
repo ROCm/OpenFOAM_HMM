@@ -106,7 +106,7 @@ subModels
             type            patchInjection;
             parcelBasisType fixed;
             patchName       upperInlet;
-            U0              (18.7939 6.8404 0);
+            U0              (18.7939 -6.8404 0);
             nParticle       1;
             parcelsPerSecond 1390885;
             sizeDistribution
