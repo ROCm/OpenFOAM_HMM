@@ -17,14 +17,14 @@ FoamFile
 
 solvers
 {
-    alpha.water
+    "alpha.water.*"
     {
         nAlphaCorr      1;
         nAlphaSubCycles 3;
         cAlpha          1;
     }
 
-    pcorr
+    "pcorr.*"
     {
         solver          PCG;
         preconditioner
