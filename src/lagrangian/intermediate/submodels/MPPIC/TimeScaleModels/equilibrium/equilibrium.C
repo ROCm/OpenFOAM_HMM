@@ -85,9 +85,9 @@ Foam::TimeScaleModels::equilibrium::oneByTau
         16.0/sqrt(3.0*constant::mathematical::pi)
        *0.25*(1.0 - e_*e_);
 
-    return 
+    return
         a
-       *alpha*sqrt(max(uSqr, 0.0))/max(r32, SMALL)
+       *alpha*sqrt(max(uSqr, scalar(0)))/max(r32, SMALL)
        *alphaPacked_/max(alphaPacked_ - alpha, SMALL);
 }
 

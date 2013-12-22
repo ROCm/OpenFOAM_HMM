@@ -3508,7 +3508,7 @@ void Foam::autoLayerDriver::addLayers
     meshRefiner_.updateMesh(map, labelList(0));
 
     // Update numbering of faceWantedThickness
-    meshRefinement::updateList(map().faceMap(), 0.0, faceWantedThickness);
+    meshRefinement::updateList(map().faceMap(), scalar(0), faceWantedThickness);
 
     // Update numbering on baffles
     forAll(baffles, i)

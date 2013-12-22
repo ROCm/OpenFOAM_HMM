@@ -121,9 +121,9 @@ Foam::sixDoFRigidBodyMotionSolver::sixDoFRigidBodyMotionSolver
                 max
                 (
                     (do_ - pDist.internalField())/(do_ - di_),
-                    0.0
+                    scalar(0)
                 ),
-                1.0
+                scalar(1)
             );
 
         // Convert the scale function to a cosine
@@ -136,9 +136,9 @@ Foam::sixDoFRigidBodyMotionSolver::sixDoFRigidBodyMotionSolver
                   - 0.5
                    *cos(scale_.internalField()
                    *Foam::constant::mathematical::pi),
-                    0.0
+                    scalar(0)
                 ),
-                1.0
+                scalar(1)
             );
 
         scale_.correctBoundaryConditions();
