@@ -123,7 +123,7 @@ void Foam::AveragingMethods::Dual<Type>::tetGeometry
 
     tetIs.tet(this->mesh_).barycentric(position, tetCoordinates_);
 
-    tetCoordinates_ = max(tetCoordinates_, 0.0);
+    tetCoordinates_ = max(tetCoordinates_, scalar(0));
 }
 
 
