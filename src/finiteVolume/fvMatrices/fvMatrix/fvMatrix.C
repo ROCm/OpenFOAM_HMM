@@ -2348,12 +2348,19 @@ Foam::operator&
     GeometricField<Type, fvPatchField, volMesh>& Mphi = tMphi();
 
     // Loop over field components
-    for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+    if (M.hasDiag())
     {
-        scalarField psiCmpt(psi.field().component(cmpt));
-        scalarField boundaryDiagCmpt(M.diag());
-        M.addBoundaryDiag(boundaryDiagCmpt, cmpt);
-        Mphi.internalField().replace(cmpt, -boundaryDiagCmpt*psiCmpt);
+        for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+        {
+            scalarField psiCmpt(psi.field().component(cmpt));
+            scalarField boundaryDiagCmpt(M.diag());
+            M.addBoundaryDiag(boundaryDiagCmpt, cmpt);
+            Mphi.internalField().replace(cmpt, -boundaryDiagCmpt*psiCmpt);
+        }
+    }
+    else
+    {
+        Mphi.internalField() = pTraits<Type>::zero;
     }
 
     Mphi.internalField() += M.lduMatrix::H(psi.field()) + M.source();
