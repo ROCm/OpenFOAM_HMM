@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -111,8 +111,6 @@ void Foam::fieldAverage::calcAverages()
         initialize();
     }
 
-    Info<< type() << " " << name_ << " output:" << nl;
-
     const label currentTimeIndex =
         static_cast<const fvMesh&>(obr_).time().timeIndex();
 
@@ -124,6 +122,8 @@ void Foam::fieldAverage::calcAverages()
     {
         prevTimeIndex_ = currentTimeIndex;
     }
+
+    Info<< type() << " " << name_ << " output:" << nl;
 
     Info<< "    Calculating averages" << nl;
 
@@ -324,7 +324,14 @@ void Foam::fieldAverage::execute()
 
 
 void Foam::fieldAverage::end()
-{}
+{
+    if (active_)
+    {
+        calcAverages();
+
+        Info<< endl;
+    }
+}
 
 
 void Foam::fieldAverage::timeSet()
