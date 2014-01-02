@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,7 +60,7 @@ Foam::solverPerformance Foam::fvMatrix<Type>::solve
 {
     if (debug)
     {
-        Info(this->mesh().comm())
+        Info.masterStream(this->mesh().comm())
             << "fvMatrix<Type>::solve(const dictionary& solverControls) : "
                "solving fvMatrix<Type>"
             << endl;
@@ -108,7 +108,7 @@ Foam::solverPerformance Foam::fvMatrix<Type>::solveSegregated
 {
     if (debug)
     {
-        Info(this->mesh().comm())
+        Info.masterStream(this->mesh().comm())
             << "fvMatrix<Type>::solveSegregated"
                "(const dictionary& solverControls) : "
                "solving fvMatrix<Type>"
@@ -202,7 +202,7 @@ Foam::solverPerformance Foam::fvMatrix<Type>::solveSegregated
 
         if (solverPerformance::debug)
         {
-            solverPerf.print(Info(this->mesh().comm()));
+            solverPerf.print(Info.masterStream(this->mesh().comm()));
         }
 
         solverPerfVec = max(solverPerfVec, solverPerf);
@@ -228,7 +228,7 @@ Foam::solverPerformance Foam::fvMatrix<Type>::solveCoupled
 {
     if (debug)
     {
-        Info(this->mesh().comm())
+        Info.masterStream(this->mesh().comm())
             << "fvMatrix<Type>::solveCoupled"
                "(const dictionary& solverControls) : "
                "solving fvMatrix<Type>"
@@ -269,7 +269,7 @@ Foam::solverPerformance Foam::fvMatrix<Type>::solveCoupled
 
     if (SolverPerformance<Type>::debug)
     {
-        solverPerf.print(Info(this->mesh().comm()));
+        solverPerf.print(Info.masterStream(this->mesh().comm()));
     }
 
     psi.correctBoundaryConditions();
