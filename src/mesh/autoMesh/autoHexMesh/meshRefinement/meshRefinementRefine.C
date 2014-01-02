@@ -35,7 +35,6 @@ License
 #include "fvMeshDistribute.H"
 #include "polyTopoChange.H"
 #include "mapDistributePolyMesh.H"
-#include "featureEdgeMesh.H"
 #include "Cloud.H"
 //#include "globalIndex.H"
 #include "OBJstream.H"
@@ -358,7 +357,7 @@ void Foam::meshRefinement::markFeatureCellLevel
 
         forAll(features_, featI)
         {
-            const featureEdgeMesh& featureMesh = features_[featI];
+            const edgeMesh& featureMesh = features_[featI];
             const label featureLevel = features_.levels()[featI][0];
             const labelListList& pointEdges = featureMesh.pointEdges();
 
@@ -505,7 +504,7 @@ void Foam::meshRefinement::markFeatureCellLevel
         label featI = startTp.i();
         label pointI = startTp.j();
 
-        const featureEdgeMesh& featureMesh = features_[featI];
+        const edgeMesh& featureMesh = features_[featI];
         const labelList& pEdges = featureMesh.pointEdges()[pointI];
 
         // Now shoot particles down all pEdges.
@@ -561,7 +560,7 @@ void Foam::meshRefinement::markFeatureCellLevel
             label featI = tp.i();
             label pointI = tp.j();
 
-            const featureEdgeMesh& featureMesh = features_[featI];
+            const edgeMesh& featureMesh = features_[featI];
             const labelList& pEdges = featureMesh.pointEdges()[pointI];
 
             // Particle now at pointI. Check connected edges to see which one

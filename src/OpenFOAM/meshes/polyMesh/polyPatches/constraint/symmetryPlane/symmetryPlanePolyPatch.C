@@ -25,6 +25,7 @@ License
 
 #include "symmetryPlanePolyPatch.H"
 #include "addToRunTimeSelectionTable.H"
+#include "symmetryPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -131,7 +132,11 @@ const Foam::vector& Foam::symmetryPlanePolyPatch::n() const
                 if (magSqr(n_ - nf[facei]) > SMALL)
                 {
                     FatalErrorIn("symmetryPlanePolyPatch::n()")
-                        << "Symmetry plane '" << name() << "' is not planar"
+                        << "Symmetry plane '" << name() << "' is not planar."
+                        << endl
+                        << " Either split the patch into planar parts"
+                        << " or use the " << symmetryPolyPatch::typeName
+                        << " patch type"
                         << exit(FatalError);
                 }
             }

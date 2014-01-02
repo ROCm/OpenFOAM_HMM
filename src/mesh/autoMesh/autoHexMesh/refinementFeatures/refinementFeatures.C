@@ -186,7 +186,7 @@ void Foam::refinementFeatures::read
             set(featI, new extendedFeatureEdgeMesh(featObj, eeMesh));
         }
 
-        const edgeMesh& eMesh = operator[](featI);
+        const extendedEdgeMesh& eMesh = operator[](featI);
 
         //eMesh.mergePoints(meshRefiner_.mergeDistance());
 
@@ -258,13 +258,9 @@ void Foam::refinementFeatures::read
 }
 
 
-void Foam::refinementFeatures::buildTrees
-(
-    const label featI,
-    const labelList& featurePoints
-)
+void Foam::refinementFeatures::buildTrees(const label featI)
 {
-    const edgeMesh& eMesh = operator[](featI);
+    const extendedEdgeMesh& eMesh = operator[](featI);
     const pointField& points = eMesh.points();
     const edgeList& edges = eMesh.edges();
 
@@ -298,6 +294,9 @@ void Foam::refinementFeatures::buildTrees
             3.0     // duplicity
         )
     );
+
+
+    labelList featurePoints(identity(eMesh.nonFeatureStart()));
 
     pointTrees_.set
     (
@@ -408,24 +407,7 @@ Foam::refinementFeatures::refinementFeatures
     // Search engines
     forAll(*this, i)
     {
-        const extendedEdgeMesh& eMesh = operator[](i);
-        const labelListList& pointEdges = eMesh.pointEdges();
-
-        DynamicList<label> featurePoints;
-        forAll(pointEdges, pointI)
-        {
-            if (pointEdges[pointI].size() > 2)
-            {
-                featurePoints.append(pointI);
-            }
-        }
-
-        Info<< "Detected " << featurePoints.size()
-            << " featurePoints out of " << pointEdges.size()
-            << " points on feature " << operator[](i).name()
-            << endl;
-
-        buildTrees(i, featurePoints);
+        buildTrees(i);
     }
 }
 

@@ -34,11 +34,14 @@ Description
 #include "Time.H"
 #include "volFields.H"
 #include "surfaceFields.H"
+#include "pointFields.H"
 #include "hexRef8.H"
 #include "mapPolyMesh.H"
 #include "polyTopoChange.H"
 #include "Random.H"
 #include "zeroGradientFvPatchFields.H"
+#include "calculatedPointPatchFields.H"
+#include "pointConstraints.H"
 #include "fvcDiv.H"
 
 using namespace Foam;
@@ -60,6 +63,8 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createMesh.H"
 
+
+    const pointConstraints& pc = pointConstraints::New(pointMesh::New(mesh));
 
     const Switch inflate(args.args()[1]);
 
@@ -144,6 +149,29 @@ int main(int argc, char *argv[])
     surfaceOne.write();
 
 
+    // Uniform point field
+    pointScalarField pointX
+    (
+        IOobject
+        (
+            "pointX",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        pointMesh::New(mesh),
+        dimensionedScalar("one", dimless, 1.0),
+        calculatedPointPatchScalarField::typeName
+    );
+    pointX.internalField() = mesh.points().component(0);
+    pointX.correctBoundaryConditions();
+    Info<< "Writing x-component field "
+        << pointX.name() << " in " << runTime.timeName() << endl;
+    pointX.write();
+
+
+
     // Force allocation of V. Important for any mesh changes since otherwise
     // old time volumes are not stored
     const scalar totalVol = gSum(mesh.V());
@@ -163,89 +191,107 @@ int main(int argc, char *argv[])
         }
 
 
+        mesh.moving(false);
+        mesh.topoChanging(false);
 
-        // Mesh changing engine.
-        polyTopoChange meshMod(mesh);
 
-        if (rndGen.bit())
+        label action = rndGen.integer(0, 5);
+
+
+        if (action == 0)
         {
-            // Refine
-            label nRefine = mesh.nCells()/20;
-            DynamicList<label> refineCandidates(nRefine);
-
-            for (label i=0; i<nRefine; i++)
-            {
-                refineCandidates.append(rndGen.integer(0, mesh.nCells()-1));
-            }
-
-            labelList cellsToRefine
-            (
-                meshCutter.consistentRefinement
-                (
-                    refineCandidates,
-                    true                  // buffer layer
-                )
-            );
-            Info<< nl << "-- selected "
-                << returnReduce(cellsToRefine.size(), sumOp<label>())
-                << " cells out of " << mesh.globalData().nTotalCells()
-                << " for refinement" << endl;
-
-            // Play refinement commands into mesh changer.
-            meshCutter.setRefinement(cellsToRefine, meshMod);
+            Info<< nl << "-- moving only" << endl;
+            mesh.movePoints(pointField(mesh.points()));
         }
-        else
+        else if (action == 1 || action == 2)
         {
-            // Unrefine
-            labelList allSplitPoints(meshCutter.getSplitPoints());
+            // Mesh changing engine.
+            polyTopoChange meshMod(mesh);
 
-            label nUnrefine = allSplitPoints.size()/20;
-            labelHashSet candidates(2*nUnrefine);
-
-            for (label i=0; i<nUnrefine; i++)
+            if (action == 1)
             {
-                candidates.insert
+                // Refine
+                label nRefine = mesh.nCells()/20;
+                DynamicList<label> refineCandidates(nRefine);
+
+                for (label i=0; i<nRefine; i++)
+                {
+                    refineCandidates.append(rndGen.integer(0, mesh.nCells()-1));
+                }
+
+                labelList cellsToRefine
                 (
-                    allSplitPoints[rndGen.integer(0, allSplitPoints.size()-1)]
+                    meshCutter.consistentRefinement
+                    (
+                        refineCandidates,
+                        true                  // buffer layer
+                    )
                 );
+                Info<< nl << "-- selected "
+                    << returnReduce(cellsToRefine.size(), sumOp<label>())
+                    << " cells out of " << mesh.globalData().nTotalCells()
+                    << " for refinement" << endl;
+
+                // Play refinement commands into mesh changer.
+                meshCutter.setRefinement(cellsToRefine, meshMod);
+            }
+            else
+            {
+                // Unrefine
+                labelList allSplitPoints(meshCutter.getSplitPoints());
+
+                label nUnrefine = allSplitPoints.size()/20;
+                labelHashSet candidates(2*nUnrefine);
+
+                for (label i=0; i<nUnrefine; i++)
+                {
+                    label index = rndGen.integer(0, allSplitPoints.size()-1);
+                    candidates.insert(allSplitPoints[index]);
+                }
+
+                labelList splitPoints = meshCutter.consistentUnrefinement
+                (
+                    candidates.toc(),
+                    false
+                );
+                Info<< nl << "-- selected "
+                    << returnReduce(splitPoints.size(), sumOp<label>())
+                    << " points out of "
+                    << returnReduce(allSplitPoints.size(), sumOp<label>())
+                    << " for unrefinement" << endl;
+
+                // Play refinement commands into mesh changer.
+                meshCutter.setUnrefinement(splitPoints, meshMod);
             }
 
-            labelList splitPoints = meshCutter.consistentUnrefinement
-            (
-                candidates.toc(),
-                false
-            );
-            Info<< nl << "-- selected "
-                << returnReduce(splitPoints.size(), sumOp<label>())
-                << " points out of "
-                << returnReduce(allSplitPoints.size(), sumOp<label>())
-                << " for unrefinement" << endl;
 
-            // Play refinement commands into mesh changer.
-            meshCutter.setUnrefinement(splitPoints, meshMod);
+
+
+            // Create mesh, return map from old to new mesh.
+            Info<< nl << "-- actually changing mesh" << endl;
+            autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, inflate);
+
+            // Update fields
+            Info<< nl << "-- mapping mesh data" << endl;
+            mesh.updateMesh(map);
+
+            // Inflate mesh
+            if (map().hasMotionPoints())
+            {
+                Info<< nl << "-- moving mesh" << endl;
+                mesh.movePoints(map().preMotionPoints());
+            }
+
+            // Update numbering of cells/vertices.
+            Info<< nl << "-- mapping hexRef8 data" << endl;
+            meshCutter.updateMesh(map);
         }
 
 
-
-
-        // Create mesh, return map from old to new mesh.
-        Info<< nl << "-- actually changing mesh" << endl;
-        autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, inflate);
-
-        // Update fields
-        Info<< nl << "-- mapping mesh data" << endl;
-        mesh.updateMesh(map);
-
-        // Inflate mesh
-        if (map().hasMotionPoints())
-        {
-            Info<< nl << "-- moving mesh" << endl;
-            mesh.movePoints(map().preMotionPoints());
-        }
-
-        // Update numbering of cells/vertices.
-        Info<< nl << "-- mapping hexRef8 data" << endl;
-        meshCutter.updateMesh(map);
+        Info<< nl<< "-- Mesh : moving:" << mesh.moving()
+            << " topoChanging:" << mesh.topoChanging()
+            << " changing:" << mesh.changing()
+            << endl;
 
 
 
@@ -361,6 +407,9 @@ int main(int argc, char *argv[])
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
             << nl << endl;
     }
+
+    Info<< "pc:" << pc.patchPatchPointConstraintPoints().size() << endl;
+
 
     Info<< "End\n" << endl;
 

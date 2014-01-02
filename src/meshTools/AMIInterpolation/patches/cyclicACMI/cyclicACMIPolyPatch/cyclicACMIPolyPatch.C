@@ -91,10 +91,10 @@ void Foam::cyclicACMIPolyPatch::resetAMI
         );
 
         srcMask_ =
-            min(1.0 - tolerance_, max(tolerance_, AMI().srcWeightsSum()));
+            min(scalar(1) - tolerance_, max(tolerance_, AMI().srcWeightsSum()));
 
         tgtMask_ =
-            min(1.0 - tolerance_, max(tolerance_, AMI().tgtWeightsSum()));
+            min(scalar(1) - tolerance_, max(tolerance_, AMI().tgtWeightsSum()));
 
         forAll(Sf, faceI)
         {
