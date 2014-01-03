@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -94,15 +94,12 @@ void Foam::yPlusLES::calcIncompressibleYPlus
             scalar maxYp = gMax(Yp);
             scalar avgYp = gAverage(Yp);
 
-            if (log_)
-            {
-                Info<< "    patch " << currPatch.name()
-                    << " y+ : min = " << minYp << ", max = " << maxYp
-                    << ", average = " << avgYp << nl;
-            }
-
             if (Pstream::master())
             {
+                Info(log_)<< "    patch " << currPatch.name()
+                    << " y+ : min = " << minYp << ", max = " << maxYp
+                    << ", average = " << avgYp << nl;
+
                 file() << obr_.time().value()
                     << token::TAB << currPatch.name()
                     << token::TAB << minYp
@@ -162,15 +159,12 @@ void Foam::yPlusLES::calcCompressibleYPlus
             scalar maxYp = gMax(Yp);
             scalar avgYp = gAverage(Yp);
 
-            if (log_)
-            {
-                Info<< "    patch " << currPatch.name()
-                    << " y+ : min = " << minYp << ", max = " << maxYp
-                    << ", average = " << avgYp << nl;
-            }
-
             if (Pstream::master())
             {
+                Info(log_)<< "    patch " << currPatch.name()
+                    << " y+ : min = " << minYp << ", max = " << maxYp
+                    << ", average = " << avgYp << nl;
+
                 file() << obr_.time().value()
                     << token::TAB << currPatch.name()
                     << token::TAB << minYp
@@ -286,10 +280,7 @@ void Foam::yPlusLES::execute()
                 mesh.lookupObject<volScalarField>(type())
             );
 
-        if (log_)
-        {
-            Info<< type() << " " << name_ << " output:" << nl;
-        }
+        Info(log_)<< type() << " " << name_ << " output:" << nl;
 
         if (phi.dimensions() == dimMass/dimTime)
         {
@@ -305,7 +296,10 @@ void Foam::yPlusLES::execute()
 
 void Foam::yPlusLES::end()
 {
-    // Do nothing
+    if (active_)
+    {
+        execute();
+    }
 }
 
 
@@ -324,10 +318,7 @@ void Foam::yPlusLES::write()
         const volScalarField& yPlusLES =
             obr_.lookupObject<volScalarField>(type());
 
-        if (log_)
-        {
-            Info<< "    writing field " << yPlusLES.name() << nl << endl;
-        }
+        Info(log_)<< "    writing field " << yPlusLES.name() << nl << endl;
 
         yPlusLES.write();
     }

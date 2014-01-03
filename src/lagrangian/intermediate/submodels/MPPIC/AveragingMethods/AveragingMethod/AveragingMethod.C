@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -91,7 +91,8 @@ Foam::AveragingMethod<Type>::New
         (
             "Foam::AveragingMethod<Type>::New"
             "("
-                "const dictionary&"
+                "const IOobject&, "
+                "const dictionary&, "
                 "const fvMesh&"
             ")"
         )   << "Unknown averaging method " << averageType
@@ -243,10 +244,10 @@ bool Foam::AveragingMethod<Type>::write() const
     pointGrad.internalField() /= pointVolume;
 
     // write
-    if(!cellValue.write()) return false;
-    if(!cellGrad.write()) return false;
-    if(!pointValue.write()) return false;
-    if(!pointGrad.write()) return false;
+    if (!cellValue.write()) return false;
+    if (!cellGrad.write()) return false;
+    if (!pointValue.write()) return false;
+    if (!pointGrad.write()) return false;
 
     return true;
 }

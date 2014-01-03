@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,7 @@ namespace Foam
 class TimeScaleModel;
 
 /*---------------------------------------------------------------------------*\
-                         Class IsotropyModel Declaration
+                        Class IsotropyModel Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
@@ -129,27 +129,27 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeIsotropyModel(CloudType)                                \
+#define makeIsotropyModel(CloudType)                                          \
                                                                               \
     typedef CloudType::MPPICCloudType MPPICCloudType;                         \
     defineNamedTemplateTypeNameAndDebug                                       \
     (                                                                         \
-        IsotropyModel<MPPICCloudType>,                             \
+        IsotropyModel<MPPICCloudType>,                                        \
         0                                                                     \
     );                                                                        \
     defineTemplateRunTimeSelectionTable                                       \
     (                                                                         \
-        IsotropyModel<MPPICCloudType>,                             \
+        IsotropyModel<MPPICCloudType>,                                        \
         dictionary                                                            \
     );
 
 
-#define makeIsotropyModelType(SS, CloudType)                       \
+#define makeIsotropyModelType(SS, CloudType)                                  \
                                                                               \
     typedef CloudType::MPPICCloudType MPPICCloudType;                         \
     defineNamedTemplateTypeNameAndDebug(SS<MPPICCloudType>, 0);               \
                                                                               \
-    IsotropyModel<MPPICCloudType>::                                \
+    IsotropyModel<MPPICCloudType>::                                           \
         adddictionaryConstructorToTable<SS<MPPICCloudType> >                  \
             add##SS##CloudType##MPPICCloudType##ConstructorToTable_;
 

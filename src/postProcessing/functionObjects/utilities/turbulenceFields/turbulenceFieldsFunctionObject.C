@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,29 +21,22 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::IOturbulenceFields
-
-Description
-    Instance of the generic IOOutputFilter for turbulenceFields.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOturbulenceFields_H
-#define IOturbulenceFields_H
+#include "turbulenceFieldsFunctionObject.H"
 
-#include "turbulenceFields.H"
-#include "IOOutputFilter.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef IOOutputFilter<turbulenceFields> IOturbulenceFields;
+    defineNamedTemplateTypeNameAndDebug(turbulenceFieldsFunctionObject, 0);
+
+    addToRunTimeSelectionTable
+    (
+        functionObject,
+        turbulenceFieldsFunctionObject,
+        dictionary
+    );
 }
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -227,15 +227,12 @@ void Foam::forceCoeffs::write()
             << obr_.time().value() << tab << Cm << tab  << Cd
             << tab << Cl << tab << Clf << tab << Clr << endl;
 
-        if (log_)
-        {
-            Info<< type() << " " << name_ << " output:" << nl
-                << "    Cm    = " << Cm << nl
-                << "    Cd    = " << Cd << nl
-                << "    Cl    = " << Cl << nl
-                << "    Cl(f) = " << Clf << nl
-                << "    Cl(r) = " << Clr << endl;
-        }
+        Info(log_)<< type() << " " << name_ << " output:" << nl
+            << "    Cm    = " << Cm << nl
+            << "    Cd    = " << Cd << nl
+            << "    Cl    = " << Cl << nl
+            << "    Cl(f) = " << Clf << nl
+            << "    Cl(r) = " << Clr << endl;
 
         if (nBin_ > 1)
         {
@@ -262,10 +259,7 @@ void Foam::forceCoeffs::write()
             file(1) << endl;
         }
 
-        if (log_)
-        {
-            Info<< endl;
-        }
+        Info(log_)<< endl;
     }
 }
 

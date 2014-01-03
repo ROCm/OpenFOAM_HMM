@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,7 +61,7 @@ Foam::fvMatrix<Foam::scalar>::solver
 {
     if (debug)
     {
-        Info(this->mesh().comm())
+        Info.masterStream(this->mesh().comm())
             << "fvMatrix<scalar>::solver(const dictionary& solverControls) : "
                "solver for fvMatrix<scalar>"
             << endl;
@@ -120,7 +120,7 @@ Foam::solverPerformance Foam::fvMatrix<Foam::scalar>::fvSolver::solve
 
     if (solverPerformance::debug)
     {
-        solverPerf.print(Info(fvMat_.mesh().comm()));
+        solverPerf.print(Info.masterStream(fvMat_.mesh().comm()));
     }
 
     fvMat_.diag() = saveDiag;
@@ -141,7 +141,7 @@ Foam::solverPerformance Foam::fvMatrix<Foam::scalar>::solveSegregated
 {
     if (debug)
     {
-        Info(this->mesh().comm())
+        Info.masterStream(this->mesh().comm())
             << "fvMatrix<scalar>::solveSegregated"
                "(const dictionary& solverControls) : "
                "solving fvMatrix<scalar>"
@@ -170,7 +170,7 @@ Foam::solverPerformance Foam::fvMatrix<Foam::scalar>::solveSegregated
 
     if (solverPerformance::debug)
     {
-        solverPerf.print(Info(mesh().comm()));
+        solverPerf.print(Info.masterStream(mesh().comm()));
     }
 
     diag() = saveDiag;

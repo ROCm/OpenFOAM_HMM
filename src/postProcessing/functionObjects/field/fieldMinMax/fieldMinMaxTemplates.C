@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,6 +30,62 @@ License
 #include "ListOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class Type>
+void Foam::fieldMinMax::output
+(
+    const word& fieldName,
+    const word& outputName,
+    const vector& minC,
+    const vector& maxC,
+    const label minProcI,
+    const label maxProcI,
+    const Type& minValue,
+    const Type& maxValue
+)
+{
+    file()<< obr_.time().value();
+    writeTabbed(file(), fieldName);
+
+    file()
+        << token::TAB << minValue
+        << token::TAB << minC;
+
+    if (Pstream::parRun())
+    {
+        file()<< token::TAB << minProcI;
+    }
+
+    file()
+        << token::TAB << maxValue
+        << token::TAB << maxC;
+
+    if (Pstream::parRun())
+    {
+        file()<< token::TAB << maxProcI;
+    }
+
+    file() << endl;
+
+    Info(log_)<< "    min(" << outputName << ") = "
+        << minValue << " at position " << minC;
+
+    if (Pstream::parRun())
+    {
+        Info(log_)<< " on processor " << minProcI;
+    }
+
+    Info(log_)<< nl << "    max(" << outputName << ") = "
+        << maxValue << " at position " << maxC;
+
+    if (Pstream::parRun())
+    {
+        Info(log_)<< " on processor " << maxProcI;
+    }
+
+    Info(log_)<< endl;
+}
+
 
 template<class Type>
 void Foam::fieldMinMax::calcMinMaxFields
@@ -111,49 +167,17 @@ void Foam::fieldMinMax::calcMinMaxFields
                     scalar maxValue = maxVs[maxI];
                     const vector& maxC = maxCs[maxI];
 
-                    file()<< obr_.time().value();
-                    writeTabbed(file(), fieldName);
-
-                    file()
-                        << token::TAB << minValue
-                        << token::TAB << minC;
-
-                    if (Pstream::parRun())
-                    {
-                        file()<< token::TAB << minI;
-                    }
-
-                    file()
-                        << token::TAB << maxValue
-                        << token::TAB << maxC;
-
-                    if (Pstream::parRun())
-                    {
-                        file()<< token::TAB << maxI;
-                    }
-
-                    file() << endl;
-
-                    if (log_)
-                    {
-                        Info<< "    min(mag(" << fieldName << ")) = "
-                            << minValue << " at position " << minC;
-
-                        if (Pstream::parRun())
-                        {
-                            Info<< " on processor " << minI;
-                        }
-
-                        Info<< nl << "    max(mag(" << fieldName << ")) = "
-                            << maxValue << " at position " << maxC;
-
-                        if (Pstream::parRun())
-                        {
-                            Info<< " on processor " << maxI;
-                        }
-
-                        Info<< endl;
-                    }
+                    output
+                    (
+                        fieldName,
+                        word("mag(" + fieldName + ")"),
+                        minC,
+                        maxC,
+                        minI,
+                        maxI,
+                        minValue,
+                        maxValue
+                    );
                 }
                 break;
             }
@@ -216,49 +240,17 @@ void Foam::fieldMinMax::calcMinMaxFields
                     Type maxValue = maxVs[maxI];
                     const vector& maxC = maxCs[maxI];
 
-                    file()<< obr_.time().value();
-                    writeTabbed(file(), fieldName);
-
-                    file()
-                        << token::TAB << minValue
-                        << token::TAB << minC;
-
-                    if (Pstream::parRun())
-                    {
-                        file()<< token::TAB << minI;
-                    }
-
-                    file()
-                        << token::TAB << maxValue
-                        << token::TAB << maxC;
-
-                    if (Pstream::parRun())
-                    {
-                        file()<< token::TAB << maxI;
-                    }
-
-                    file() << endl;
-
-                    if (log_)
-                    {
-                        Info<< "    min(" << fieldName << ") = "
-                            << minValue << " at position " << minC;
-
-                        if (Pstream::parRun())
-                        {
-                            Info<< " on processor " << minI;
-                        }
-
-                        Info<< nl << "    max(" << fieldName << ") = "
-                            << maxValue << " at position " << maxC;
-
-                        if (Pstream::parRun())
-                        {
-                            Info<< " on processor " << maxI;
-                        }
-
-                        Info<< endl;
-                    }
+                    output
+                    (
+                        fieldName,
+                        fieldName,
+                        minC,
+                        maxC,
+                        minI,
+                        maxI,
+                        minValue,
+                        maxValue
+                    );
                 }
                 break;
             }

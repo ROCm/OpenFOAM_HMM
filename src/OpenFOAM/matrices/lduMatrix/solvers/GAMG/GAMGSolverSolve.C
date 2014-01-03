@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -131,7 +131,7 @@ Foam::solverPerformance Foam::GAMGSolver::solve
 
             if (debug >= 2)
             {
-                solverPerf.print(Info(matrix().mesh().comm()));
+                solverPerf.print(Info.masterStream(matrix().mesh().comm()));
             }
         } while
         (
@@ -631,7 +631,7 @@ void Foam::GAMGSolver::solveCoarsestLevel
     //
     //    if (debug >= 2)
     //    {
-    //        coarseSolverPerf.print(Info(coarseComm));
+    //        coarseSolverPerf.print(Info.masterStream(coarseComm));
     //    }
     //
     //    Pout<< "procAgglom: coarsestSource   :" << coarsestSource << endl;
@@ -679,7 +679,7 @@ void Foam::GAMGSolver::solveCoarsestLevel
 
         if (debug >= 2)
         {
-            coarseSolverPerf.print(Info(coarseComm));
+            coarseSolverPerf.print(Info.masterStream(coarseComm));
         }
     }
 

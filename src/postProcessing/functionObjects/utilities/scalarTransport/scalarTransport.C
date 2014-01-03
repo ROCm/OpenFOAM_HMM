@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -214,92 +214,97 @@ void Foam::scalarTransport::read(const dictionary& dict)
 
 void Foam::scalarTransport::execute()
 {
-    Info<< type() << " output:" << endl;
-
-    const surfaceScalarField& phi =
-        mesh_.lookupObject<surfaceScalarField>(phiName_);
-
-    // calculate the diffusivity
-    volScalarField DT(this->DT(phi));
-
-    // set schemes
-    word schemeVar = T_.name();
-    if (autoSchemes_)
+    if (active_)
     {
-        schemeVar = UName_;
-    }
+        Info<< type() << " output:" << endl;
 
-    word divScheme("div(phi," + schemeVar + ")");
-    word laplacianScheme("laplacian(" + DT.name() + "," + schemeVar + ")");
+        const surfaceScalarField& phi =
+            mesh_.lookupObject<surfaceScalarField>(phiName_);
 
-    // set under-relaxation coeff
-    scalar relaxCoeff = 0.0;
-    if (mesh_.relaxEquation(schemeVar))
-    {
-        relaxCoeff = mesh_.equationRelaxationFactor(schemeVar);
-    }
+        // calculate the diffusivity
+        volScalarField DT(this->DT(phi));
 
-    if (phi.dimensions() == dimMass/dimTime)
-    {
-        const volScalarField& rho =
-            mesh_.lookupObject<volScalarField>(rhoName_);
-
-        // solve
-        for (label i = 0; i <= nCorr_; i++)
+        // set schemes
+        word schemeVar = T_.name();
+        if (autoSchemes_)
         {
-            fvScalarMatrix TEqn
-            (
-                fvm::ddt(rho, T_)
-              + fvm::div(phi, T_, divScheme)
-              - fvm::laplacian(DT, T_, laplacianScheme)
-             ==
-                fvOptions_(rho, T_)
-            );
-
-            TEqn.relax(relaxCoeff);
-
-            fvOptions_.constrain(TEqn);
-
-            TEqn.solve(mesh_.solverDict(schemeVar));
+            schemeVar = UName_;
         }
-    }
-    else if (phi.dimensions() == dimVolume/dimTime)
-    {
-        // solve
-        for (label i = 0; i <= nCorr_; i++)
+
+        word divScheme("div(phi," + schemeVar + ")");
+        word laplacianScheme("laplacian(" + DT.name() + "," + schemeVar + ")");
+
+        // set under-relaxation coeff
+        scalar relaxCoeff = 0.0;
+        if (mesh_.relaxEquation(schemeVar))
         {
-            fvScalarMatrix TEqn
-            (
-                fvm::ddt(T_)
-              + fvm::div(phi, T_, divScheme)
-              - fvm::laplacian(DT, T_, laplacianScheme)
-             ==
-                fvOptions_(T_)
-            );
-
-            TEqn.relax(relaxCoeff);
-
-            fvOptions_.constrain(TEqn);
-
-            TEqn.solve(mesh_.solverDict(schemeVar));
+            relaxCoeff = mesh_.equationRelaxationFactor(schemeVar);
         }
-    }
-    else
-    {
-        FatalErrorIn("void Foam::scalarTransport::execute()")
-            << "Incompatible dimensions for phi: " << phi.dimensions() << nl
-            << "Dimensions should be " << dimMass/dimTime << " or "
-            << dimVolume/dimTime << endl;
-    }
 
+        if (phi.dimensions() == dimMass/dimTime)
+        {
+            const volScalarField& rho =
+                mesh_.lookupObject<volScalarField>(rhoName_);
 
-    Info<< endl;
+            // solve
+            for (label i = 0; i <= nCorr_; i++)
+            {
+                fvScalarMatrix TEqn
+                (
+                    fvm::ddt(rho, T_)
+                  + fvm::div(phi, T_, divScheme)
+                  - fvm::laplacian(DT, T_, laplacianScheme)
+                 ==
+                    fvOptions_(rho, T_)
+                );
+
+                TEqn.relax(relaxCoeff);
+
+                fvOptions_.constrain(TEqn);
+
+                TEqn.solve(mesh_.solverDict(schemeVar));
+            }
+        }
+        else if (phi.dimensions() == dimVolume/dimTime)
+        {
+            // solve
+            for (label i = 0; i <= nCorr_; i++)
+            {
+                fvScalarMatrix TEqn
+                (
+                    fvm::ddt(T_)
+                  + fvm::div(phi, T_, divScheme)
+                  - fvm::laplacian(DT, T_, laplacianScheme)
+                 ==
+                    fvOptions_(T_)
+                );
+
+                TEqn.relax(relaxCoeff);
+
+                fvOptions_.constrain(TEqn);
+
+                TEqn.solve(mesh_.solverDict(schemeVar));
+            }
+        }
+        else
+        {
+            FatalErrorIn("void Foam::scalarTransport::execute()")
+                << "Incompatible dimensions for phi: " << phi.dimensions() << nl
+                << "Dimensions should be " << dimMass/dimTime << " or "
+                << dimVolume/dimTime << endl;
+        }
+
+        Info<< endl;
+    }
 }
 
 
 void Foam::scalarTransport::end()
 {
-    // Do nothing
+    if (active_)
+    {
+        execute();
+    }
 }
 
 

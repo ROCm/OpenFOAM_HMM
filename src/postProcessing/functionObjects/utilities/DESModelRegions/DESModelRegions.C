@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -142,10 +142,7 @@ void Foam::DESModelRegions::execute()
 
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
 
-        if (log_)
-        {
-            Info<< type() << " " << name_ <<  " output:" << nl;
-        }
+        Info(log_)<< type() << " " << name_ <<  " output:" << nl;
 
         volScalarField& DESModelRegions =
             const_cast<volScalarField&>
@@ -196,19 +193,14 @@ void Foam::DESModelRegions::execute()
                     << endl;
             }
 
-            if (log_)
-            {
-                Info<< "    LES = " << prc << " % (volume)" << nl
-                    << "    RAS = " << 100.0 - prc << " % (volume)" << endl;
-            }
+            Info(log_)
+                << "    LES = " << prc << " % (volume)" << nl
+                << "    RAS = " << 100.0 - prc << " % (volume)" << endl;
         }
         else
         {
-            if (log_)
-            {
-                Info<< "    No DES turbulence model found in database" << nl
-                    << endl;
-            }
+            Info(log_)<< "    No DES turbulence model found in database" << nl
+                << endl;
         }
     }
 }
@@ -216,7 +208,10 @@ void Foam::DESModelRegions::execute()
 
 void Foam::DESModelRegions::end()
 {
-    // Do nothing
+    if (active_)
+    {
+        execute();
+    }
 }
 
 
