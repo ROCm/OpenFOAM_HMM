@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -82,11 +82,8 @@ void Foam::wallShearStress::calcShearStress
                 << endl;
         }
 
-        if (log_)
-        {
-            Info<< "    min/max(" << pp.name() << ") = "
-                << minSsp << ", " << maxSsp << endl;
-        }
+        Info(log_)<< "    min/max(" << pp.name() << ") = "
+            << minSsp << ", " << maxSsp << endl;
     }
 }
 
@@ -240,10 +237,7 @@ void Foam::wallShearStress::execute()
                 mesh.lookupObject<volVectorField>(type())
             );
 
-        if (log_)
-        {
-            Info<< type() << " " << name_ << " output:" << nl;
-        }
+        Info(log_)<< type() << " " << name_ << " output:" << nl;
 
 
         tmp<volSymmTensorField> Reff;
@@ -275,7 +269,10 @@ void Foam::wallShearStress::execute()
 
 void Foam::wallShearStress::end()
 {
-    // Do nothing
+    if (active_)
+    {
+        execute();
+    }
 }
 
 
@@ -294,12 +291,9 @@ void Foam::wallShearStress::write()
         const volVectorField& wallShearStress =
             obr_.lookupObject<volVectorField>(type());
 
-        if (log_)
-        {
-            Info<< type() << " " << name_ << " output:" << nl
-                << "    writing field " << wallShearStress.name() << nl
-                << endl;
-        }
+        Info(log_)<< type() << " " << name_ << " output:" << nl
+            << "    writing field " << wallShearStress.name() << nl
+            << endl;
 
         wallShearStress.write();
     }

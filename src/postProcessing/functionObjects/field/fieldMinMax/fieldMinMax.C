@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -159,10 +159,7 @@ void Foam::fieldMinMax::write()
     {
         functionObjectFile::write();
 
-        if (log_)
-        {
-            Info<< type() << " " << name_ <<  " output:" << nl;
-        }
+        Info(log_)<< type() << " " << name_ <<  " output:" << nl;
 
         forAll(fieldSet_, fieldI)
         {
@@ -173,10 +170,7 @@ void Foam::fieldMinMax::write()
             calcMinMaxFields<tensor>(fieldSet_[fieldI], mode_);
         }
 
-        if (log_)
-        {
-            Info<< endl;
-        }
+        Info(log_)<< endl;
     }
 }
 

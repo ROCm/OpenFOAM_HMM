@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -138,6 +138,20 @@ protected:
 
 
     // Private Member Functions
+
+        //- Helper function to write the output
+        template<class Type>
+        void output
+        (
+            const word& fieldName,
+            const word& outputName,
+            const vector& minC,
+            const vector& maxC,
+            const label minProcI,
+            const label maxProcI,
+            const Type& minValue,
+            const Type& maxValue
+        );
 
         //- Disallow default bitwise copy construct
         fieldMinMax(const fieldMinMax&);

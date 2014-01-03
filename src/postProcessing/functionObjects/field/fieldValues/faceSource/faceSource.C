@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -663,10 +663,7 @@ void Foam::fieldValues::faceSource::write()
             file()<< endl;
         }
 
-        if (log_)
-        {
-            Info<< endl;
-        }
+        Info(log_)<< endl;
     }
 }
 

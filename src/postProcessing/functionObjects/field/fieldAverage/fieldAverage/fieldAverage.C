@@ -317,7 +317,6 @@ void Foam::fieldAverage::execute()
     if (active_)
     {
         calcAverages();
-
         Info<< endl;
     }
 }
@@ -328,7 +327,6 @@ void Foam::fieldAverage::end()
     if (active_)
     {
         calcAverages();
-
         Info<< endl;
     }
 }

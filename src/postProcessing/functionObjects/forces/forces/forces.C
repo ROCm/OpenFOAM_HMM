@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -391,19 +391,17 @@ void Foam::forces::applyBins
 
 void Foam::forces::writeForces()
 {
-    if (log_)
-    {
-        Info<< type() << " " << name_ << " output:" << nl
-            << "    sum of forces:" << nl
-            << "        pressure : " << sum(force_[0]) << nl
-            << "        viscous  : " << sum(force_[1]) << nl
-            << "        porous   : " << sum(force_[2]) << nl
-            << "    sum of moments:" << nl
-            << "        pressure : " << sum(moment_[0]) << nl
-            << "        viscous  : " << sum(moment_[1]) << nl
-            << "        porous   : " << sum(moment_[2])
-            << endl;
-    }
+    Info(log_)
+        << type() << " " << name_ << " output:" << nl
+        << "    sum of forces:" << nl
+        << "        pressure : " << sum(force_[0]) << nl
+        << "        viscous  : " << sum(force_[1]) << nl
+        << "        porous   : " << sum(force_[2]) << nl
+        << "    sum of moments:" << nl
+        << "        pressure : " << sum(moment_[0]) << nl
+        << "        viscous  : " << sum(moment_[1]) << nl
+        << "        porous   : " << sum(moment_[2])
+        << endl;
 
     file(0) << obr_.time().value() << tab << setw(1) << '['
         << sum(force_[0]) << setw(1) << ','
@@ -642,10 +640,7 @@ void Foam::forces::read(const dictionary& dict)
 
         log_ = dict.lookupOrDefault<Switch>("log", false);
 
-        if (log_)
-        {
-            Info<< type() << " " << name_ << ":" << nl;
-        }
+        Info(log_)<< type() << " " << name_ << ":" << nl;
 
         directForceDensity_ = dict.lookupOrDefault("directForceDensity", false);
 
@@ -809,10 +804,7 @@ void Foam::forces::write()
 
         writeBins();
 
-        if (log_)
-        {
-            Info<< endl;
-        }
+        Info(log_)<< endl;
     }
 }
 
