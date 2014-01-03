@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,22 +21,34 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::turbulenceFieldsFunctionObject
+
+Description
+    FunctionObject wrapper around turbulenceFields to allow them to be created
+    via the functions entry within controlDict.
+
+SourceFiles
+    turbulenceFieldsFunctionObject.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "turbulenceFieldsFunctionObject.H"
+#ifndef turbulenceFieldsFunctionObject_H
+#define turbulenceFieldsFunctionObject_H
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#include "turbulenceFields.H"
+#include "OutputFilterFunctionObject.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineNamedTemplateTypeNameAndDebug(turbulenceFieldsFunctionObject, 0);
-
-    addToRunTimeSelectionTable
-    (
-        functionObject,
-        turbulenceFieldsFunctionObject,
-        dictionary
-    );
+    typedef OutputFilterFunctionObject<turbulenceFields>
+        turbulenceFieldsFunctionObject;
 }
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //
