@@ -82,7 +82,7 @@ class twoPhaseSystem
         //- Total volumetric flux
         surfaceScalarField phi_;
 
-        //- 
+        //-  Dilatation term
         volScalarField dgdt_;
 
         //- Surface tension coefficient
@@ -224,7 +224,7 @@ public:
                 return phi_;
             }
 
-            //- Return
+            //- Return the dilatation term
             const volScalarField& dgdt() const
             {
                 return dgdt_;

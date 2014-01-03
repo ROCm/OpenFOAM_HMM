@@ -55,8 +55,6 @@ Foam::RASModels::kineticTheoryModel::kineticTheoryModel
 
     phase_(phase),
 
-    draga_(phase.fluid().drag1()),
-
     viscosityModel_
     (
         kineticTheoryModels::viscosityModel::New
@@ -401,7 +399,11 @@ void Foam::RASModels::kineticTheoryModel::correct()
             (
                 alpha*(1.0 - alpha),
                 phase_.fluid().residualPhaseFraction()
-            )*draga_.K(magUr + phase_.fluid().residualSlip())/rho
+            )
+           *phase_.fluid().drag(phase_).K
+            (
+                magUr + phase_.fluid().residualSlip()
+            )/rho
         );
 
         // Eq. 3.25, p. 50 Js = J1 - J2
