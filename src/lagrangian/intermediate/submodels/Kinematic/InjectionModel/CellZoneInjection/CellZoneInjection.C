@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -98,7 +98,7 @@ void Foam::CellZoneInjection<CloudType>::setPositions
 
             injectorCells.append(cellI);
             injectorTetFaces.append(cellTetIs[tetI].face());
-            injectorTetPts.append(cellTetIs[tetI].faceBasePt());
+            injectorTetPts.append(cellTetIs[tetI].tetPt());
         }
     }
 
