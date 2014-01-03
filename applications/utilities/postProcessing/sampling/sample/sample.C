@@ -132,6 +132,11 @@ int main(int argc, char *argv[])
             )
         );
 
+        // Note: both IOsampledSets and IOsampledSurfaces read the
+        //       same dictionary. Unregister one to make sure no duplicates
+        //       trying to register
+        sSetsPtr().checkOut();
+
         sSurfsPtr.reset
         (
             new IOsampledSurfaces
@@ -159,6 +164,8 @@ int main(int argc, char *argv[])
                 true
             )
         );
+
+        sSetsPtr().checkOut();
 
         sSurfsPtr.reset
         (

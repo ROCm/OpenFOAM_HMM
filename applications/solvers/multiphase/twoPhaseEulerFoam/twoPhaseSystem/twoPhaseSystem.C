@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -111,13 +111,6 @@ Foam::twoPhaseSystem::twoPhaseSystem
         lookup("Cvm")
     ),
 
-    Cl_
-    (
-        "Cl",
-        dimless,
-        lookup("Cl")
-    ),
-
     drag1_
     (
         dragModel::New
@@ -156,6 +149,28 @@ Foam::twoPhaseSystem::twoPhaseSystem
         heatTransferModel::New
         (
             subDict("heatTransfer"),
+            phase2_,
+            phase2_,
+            phase1_
+        )
+    ),
+
+    lift1_
+    (
+        liftModel::New
+        (
+            subDict("lift"),
+            phase1_,
+            phase1_,
+            phase2_
+        )
+    ),
+
+    lift2_
+    (
+        liftModel::New
+        (
+            subDict("lift"),
             phase2_,
             phase2_,
             phase1_
@@ -311,11 +326,28 @@ Foam::tmp<Foam::volVectorField> Foam::twoPhaseSystem::liftForce
     );
     volVectorField& liftForce = tliftForce();
 
-    volVectorField Ur(phase1_.U() - phase2_.U());
-
-    liftForce =
-        Cl_*(phase1_*phase1_.rho() + phase2_*phase2_.rho())
-       *(Ur ^ fvc::curl(U));
+    if (dispersedPhase_ == phase1_.name())
+    {
+        liftForce = lift1().F(U);
+    }
+    else if (dispersedPhase_ == phase2_.name())
+    {
+        liftForce = lift2().F(U);
+    }
+    else if (dispersedPhase_ == "both")
+    {
+        liftForce =
+        (
+            phase2_*lift1().F(U)
+          + phase1_*lift2().F(U)
+        );
+    }
+    else
+    {
+        FatalErrorIn("twoPhaseSystem::liftForce()")
+            << "dispersedPhase: " << dispersedPhase_ << " is incorrect"
+            << exit(FatalError);
+    }
 
     // Remove lift at fixed-flux boundaries
     forAll(phase1_.phi().boundaryField(), patchi)
@@ -631,7 +663,6 @@ bool Foam::twoPhaseSystem::read()
 
         lookup("sigma") >> sigma_;
         lookup("Cvm") >> Cvm_;
-        lookup("Cl") >> Cl_;
 
         // drag1_->read(*this);
         // drag2_->read(*this);
