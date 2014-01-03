@@ -68,7 +68,7 @@ Foam::OSstream& Foam::messageStream::masterStream(const label communicator)
 
     if (communicator == UPstream::worldComm)
     {
-        return operator()(Pstream::master());
+        return operator()();
     }
     else
     {
