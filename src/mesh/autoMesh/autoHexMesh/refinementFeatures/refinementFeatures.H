@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,6 +69,10 @@ private:
         //- Features points
         PtrList<indexedOctree<treeDataPoint> > pointTrees_;
 
+        //- Region edge trees (demand driven)
+        mutable autoPtr<PtrList<indexedOctree<treeDataEdge> > >
+            regionEdgeTreesPtr_;
+
 
     // Private Member Functions
 
@@ -99,6 +103,8 @@ protected:
             return pointTrees_;
         }
 
+
+        const PtrList<indexedOctree<treeDataEdge> >& regionEdgeTrees() const;
 
 public:
 
@@ -141,6 +147,21 @@ public:
             //                  edges() directly)
             //  - nearNormal : local feature edge normal
             void findNearestEdge
+            (
+                const pointField& samples,
+                const scalarField& nearestDistSqr,
+                labelList& nearFeature,
+                List<pointIndexHit>& nearInfo,
+                vectorField& nearNormal
+            ) const;
+
+            //- Find nearest point on nearest region edge. Sets
+            //  - nearFeature: index of feature mesh
+            //  - nearInfo   : location on feature edge and edge index
+            //                 (note: not feature edge index but index into
+            //                  edges() directly)
+            //  - nearNormal : local feature edge normal
+            void findNearestRegionEdge
             (
                 const pointField& samples,
                 const scalarField& nearestDistSqr,
