@@ -34,7 +34,7 @@ License
 #include "indexedOctree.H"
 #include "treeDataCell.H"
 #include "MeshObject.H"
-
+#include "pointMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -1160,6 +1160,7 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
     solutionD_ = Vector<label>::zero;
 
     meshObject::movePoints<polyMesh>(*this);
+    meshObject::movePoints<pointMesh>(*this);
 
     const_cast<Time&>(time()).functionObjects().movePoints(*this);
 

@@ -76,7 +76,7 @@ private:
         void read(const objectRegistry&, const PtrList<dictionary>&);
 
         //- Build edge tree and feature point tree
-        void buildTrees(const label, const labelList&);
+        void buildTrees(const label);
 
         //- Find shell level higher than ptLevel
         void findHigherLevel

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,90 +22,97 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::CorrectionLimitingMethod
+    Foam::liftModel
 
 Description
-    Base class for correction limiting methods.
 
 SourceFiles
-    CorrectionLimitingMethod.C
+    liftModel.C
+    newLiftModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef CorrectionLimitingMethod_H
-#define CorrectionLimitingMethod_H
-
-#include "fvCFD.H"
-#include "dictionary.H"
-#include "runTimeSelectionTables.H"
+#ifndef liftModel_H
+#define liftModel_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "dictionary.H"
+#include "phaseModel.H"
+#include "runTimeSelectionTables.H"
 
 namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class CorrectionLimitingMethod Declaration
+                           Class liftModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class CorrectionLimitingMethod
+class liftModel
 {
-private:
+protected:
 
-    // Private Member Functions
+    // Protected data
 
-        //- Disallow default bitwise assignment
-        void operator=(const CorrectionLimitingMethod&);
+        const dictionary& dict_;
+        const volScalarField& alpha1_;
+        const phaseModel& phase1_;
+        const phaseModel& phase2_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("correctionLimitingMethod");
+    TypeName("liftModel");
 
-    //- Declare runtime constructor selection table
-    declareRunTimeSelectionTable
-    (
-        autoPtr,
-        CorrectionLimitingMethod,
-        dictionary,
-        (const dictionary& dict),
-        (dict)
-    );
+
+    // Declare runtime construction
+
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            liftModel,
+            dictionary,
+            (
+                const dictionary& dict,
+                const volScalarField& alpha1,
+                const phaseModel& phase1,
+                const phaseModel& phase2
+            ),
+            (dict, alpha1, phase1, phase2)
+        );
 
 
     // Constructors
 
-        //- Construct from components
-        CorrectionLimitingMethod(const dictionary& dict);
-
-        //- Construct as copy
-        CorrectionLimitingMethod(const CorrectionLimitingMethod& cl);
-
-        //- Construct and return a clone
-        virtual autoPtr<CorrectionLimitingMethod> clone() const = 0;
-
-
-    //- Selector
-    static autoPtr<CorrectionLimitingMethod> New
-    (
-        const dictionary& dict
-    );
+        liftModel
+        (
+            const dictionary& dict,
+            const volScalarField& alpha1,
+            const phaseModel& phase1,
+            const phaseModel& phase2
+        );
 
 
     //- Destructor
-    virtual ~CorrectionLimitingMethod();
+    virtual ~liftModel();
+
+
+    // Selectors
+
+        static autoPtr<liftModel> New
+        (
+            const dictionary& dict,
+            const volScalarField& alpha1,
+            const phaseModel& phase1,
+            const phaseModel& phase2
+        );
 
 
     // Member Functions
 
-        //- Return the limited velocity
-        virtual vector limitedVelocity
-        (
-            const vector uP,
-            const vector dU,
-            const vector uMean
-        ) const = 0;
+        //- Lift force
+        virtual tmp<volVectorField> F(const volVectorField& U) const = 0;
 };
 
 

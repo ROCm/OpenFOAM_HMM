@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,20 +23,64 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "turbulenceFieldsFunctionObject.H"
+#include "constantCoefficient.H"
+#include "addToRunTimeSelectionTable.H"
+#include "fvc.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineNamedTemplateTypeNameAndDebug(turbulenceFieldsFunctionObject, 0);
+namespace liftModels
+{
+    defineTypeNameAndDebug(constantCoefficient, 0);
 
     addToRunTimeSelectionTable
     (
-        functionObject,
-        turbulenceFieldsFunctionObject,
+        liftModel,
+        constantCoefficient,
         dictionary
     );
 }
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::liftModels::constantCoefficient::constantCoefficient
+(
+    const dictionary& dict,
+    const volScalarField& alpha1,
+    const phaseModel& phase1,
+    const phaseModel& phase2
+)
+:
+    liftModel(dict, alpha1, phase1, phase2),
+    Cl_("Cl", dimless, dict.lookup("Cl"))
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::liftModels::constantCoefficient::~constantCoefficient()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::tmp<Foam::volVectorField> Foam::liftModels::constantCoefficient::F
+(
+    const volVectorField& U
+) const
+{
+    return
+        Cl_
+       *(phase1_*phase1_.rho() + phase2_*phase2_.rho())
+       *(
+            (phase1_.U() - phase2_.U())
+          ^ fvc::curl(U)
+        );
+}
+
 
 // ************************************************************************* //

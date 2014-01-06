@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -132,7 +132,7 @@ Foam::solverPerformance Foam::smoothSolver::solve
 
         if (lduMatrix::debug >= 2)
         {
-            Info(matrix().mesh().comm())
+            Info.masterStream(matrix().mesh().comm())
                 << "   Normalisation factor = " << normFactor << endl;
         }
 

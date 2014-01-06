@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,26 +21,75 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::IOturbulenceFields
+Class
+    Foam::liftModels::constantCoefficient
 
 Description
-    Instance of the generic IOOutputFilter for turbulenceFields.
+
+SourceFiles
+    constantCoefficient.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOturbulenceFields_H
-#define IOturbulenceFields_H
+#ifndef constantCoefficient_H
+#define constantCoefficient_H
 
-#include "turbulenceFields.H"
-#include "IOOutputFilter.H"
+#include "liftModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef IOOutputFilter<turbulenceFields> IOturbulenceFields;
-}
+namespace liftModels
+{
+
+/*---------------------------------------------------------------------------*\
+                           Class constantCoefficient Declaration
+\*---------------------------------------------------------------------------*/
+
+class constantCoefficient
+:
+    public liftModel
+{
+    // Private data
+
+        //- Constant lift coefficient
+        dimensionedScalar Cl_;
+
+
+public:
+
+    //- Runtime type information
+    TypeName("constantCoefficient");
+
+
+    // Constructors
+
+        //- Construct from components
+        constantCoefficient
+        (
+            const dictionary& dict,
+            const volScalarField& alpha1,
+            const phaseModel& phase1,
+            const phaseModel& phase2
+        );
+
+
+    //- Destructor
+    virtual ~constantCoefficient();
+
+
+    // Member Functions
+
+        //- Lift force
+        tmp<volVectorField> F(const volVectorField& U) const;
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace liftModels
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

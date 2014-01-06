@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -135,6 +135,11 @@ public:
         }
 
         //- Convert to OSstream
+        //  Prints to Pout for the master stream
+        OSstream& masterStream(const label communicator);
+
+
+        //- Convert to OSstream
         //  Prints basic message and returns OSstream for further info.
         OSstream& operator()
         (
@@ -185,9 +190,8 @@ public:
         );
 
         //- Convert to OSstream
-        //  Use Info for default communicator, use Pout
-        //  on master for non-default one.
-        OSstream& operator()(const label communicator);
+        //  Use Info for default communicator, control output using bool flag
+        OSstream& operator()(const bool output);
 
         //- Convert to OSstream for << operations
         operator OSstream&();

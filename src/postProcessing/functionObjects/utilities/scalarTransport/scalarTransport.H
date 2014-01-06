@@ -43,9 +43,6 @@ SourceFiles
     scalarTransport.C
     IOscalarTransport.H
 
-SeeAlso
-    Foam::basicSourceList
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef scalarTransport_H

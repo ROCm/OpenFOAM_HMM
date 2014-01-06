@@ -86,7 +86,7 @@ castellatedMeshControls
     features
     (
         {
-            file "flange.eMesh";
+            file "flange.extendedFeatureEdgeMesh";
             level 0;
         }
     );
@@ -301,12 +301,13 @@ meshQualityControls
 
 // Advanced
 
-// Flags for optional output
-// 0 : only write final meshes
-// 1 : write intermediate meshes
-// 2 : write volScalarField with cellLevel for postprocessing
-// 4 : write current intersections as .obj files
-debug 0;
+// Write flags
+writeFlags
+(
+    scalarLevels    // write volScalarField with cellLevel for postprocessing
+    layerSets       // write cellSets, faceSets of faces in layer
+    layerFields     // write volScalarField for layer coverage
+);
 
 
 // Merge tolerance. Is fraction of overall bounding box of initial mesh.

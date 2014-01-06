@@ -12,4 +12,8 @@ heatTransferModels/heatTransferModel/heatTransferModel.C
 heatTransferModels/heatTransferModel/newHeatTransferModel.C
 heatTransferModels/RanzMarshall/RanzMarshall.C
 
+liftModels/liftModel/liftModel.C
+liftModels/liftModel/newLiftModel.C
+liftModels/constantCoefficient/constantCoefficient.C
+
 LIB = $(FOAM_LIBBIN)/libcompressibleEulerianInterfacialModels

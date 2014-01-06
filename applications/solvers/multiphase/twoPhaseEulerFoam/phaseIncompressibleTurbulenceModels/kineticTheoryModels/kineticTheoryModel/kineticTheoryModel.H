@@ -82,8 +82,8 @@ class kineticTheoryModel
             const phaseModel& phase_;
 
 
-        //- Drag model
-        const dragModel& draga_;
+        ////- Drag model
+        //const dragModel& draga_;
 
         // Sub-models
 

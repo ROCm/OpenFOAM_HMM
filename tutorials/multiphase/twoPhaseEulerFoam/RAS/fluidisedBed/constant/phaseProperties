@@ -50,6 +50,26 @@ heatTransfer
     air         RanzMarshall;
 }
 
+lift
+{
+    particles
+    {
+        type constantCoefficient;
+        constantCoefficientCoeffs
+        {
+            Cl          0;
+        }
+    }
+    air
+    {
+        type constantCoefficient;
+        constantCoefficientCoeffs
+        {
+            Cl          0;
+        }
+    }
+}
+
 dispersedPhase     particles;
 
 residualPhaseFraction   1e-3;
@@ -57,9 +77,6 @@ residualSlip            1e-2;
 
 // Virtual-mass coefficient
 Cvm             0;
-
-// Lift coefficient
-Cl              0;
 
 // Minimum allowable pressure
 pMin            10000;

@@ -48,7 +48,7 @@ void pointConstraints::makePatchPatchAddressing()
     {
         Pout<< "pointConstraints::makePatchPatchAddressing() : "
             << "constructing boundary addressing"
-            << endl;
+            << endl << incrIndent;
     }
 
     const pointMesh& pMesh = mesh();
@@ -72,7 +72,7 @@ void pointConstraints::makePatchPatchAddressing()
 
             if (debug)
             {
-                Pout<< "On patch:" << pbm[patchi].name()
+                Pout<< indent << "On patch:" << pbm[patchi].name()
                     << " nBoundaryPoints:" << bp.size() << endl;
             }
         }
@@ -80,7 +80,8 @@ void pointConstraints::makePatchPatchAddressing()
 
     if (debug)
     {
-        Pout<< "Found nPatchPatchPoints:" << nPatchPatchPoints << endl;
+        Pout<< indent << "Found nPatchPatchPoints:" << nPatchPatchPoints
+            << endl;
     }
 
 
@@ -137,7 +138,7 @@ void pointConstraints::makePatchPatchAddressing()
 
     if (debug)
     {
-        Pout<< "Have (local) constrained points:"
+        Pout<< indent << "Have (local) constrained points:"
             << nPatchPatchPoints << endl;
     }
 
@@ -224,7 +225,7 @@ void pointConstraints::makePatchPatchAddressing()
 
                 if (iter == patchPatchPointSet.end())
                 {
-                    //Pout<< "on meshpoint:" << meshPointI
+                    //Pout<< indent << "on meshpoint:" << meshPointI
                     //    << " coupled:" << coupledPointI
                     //    << " at:" << mesh.points()[meshPointI]
                     //    << " have new constraint:"
@@ -242,7 +243,7 @@ void pointConstraints::makePatchPatchAddressing()
                 }
                 else
                 {
-                    //Pout<< "on meshpoint:" << meshPointI
+                    //Pout<< indent << "on meshpoint:" << meshPointI
                     //    << " coupled:" << coupledPointI
                     //    << " at:" << mesh.points()[meshPointI]
                     //    << " have possibly extended constraint:"
@@ -271,7 +272,7 @@ void pointConstraints::makePatchPatchAddressing()
 
     if (debug)
     {
-        Pout<< "Have (global) constrained points:"
+        Pout<< indent << "Have (global) constrained points:"
             << nPatchPatchPoints << endl;
     }
 
@@ -303,7 +304,7 @@ void pointConstraints::makePatchPatchAddressing()
 
     if (debug)
     {
-        Pout<< "Have non-trivial constrained points:"
+        Pout<< indent << "Have non-trivial constrained points:"
             << nConstraints << endl;
     }
 
@@ -314,7 +315,8 @@ void pointConstraints::makePatchPatchAddressing()
 
     if (debug)
     {
-        Pout<< "pointConstraints::makePatchPatchAddressing() : "
+        Pout<< decrIndent
+            << "pointConstraints::makePatchPatchAddressing() : "
             << "finished constructing boundary addressing"
             << endl;
     }
@@ -327,6 +329,13 @@ pointConstraints::pointConstraints(const pointMesh& pm)
 :
     MeshObject<pointMesh, Foam::UpdateableMeshObject, pointConstraints>(pm)
 {
+    if (debug)
+    {
+        Pout<< "pointConstraints::pointConstraints(const pointMesh&): "
+            << "Constructing from pointMesh " << pm.name()
+            << endl;
+    }
+
     makePatchPatchAddressing();
 }
 

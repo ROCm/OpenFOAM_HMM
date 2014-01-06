@@ -488,7 +488,7 @@ meshQualityControls
 //(
 //    mesh            // write intermediate meshes
 //    intersections   // write current mesh intersections as .obj files
-//    featureSeeds,   // write information about explicit feature edge refinement
+//    featureSeeds    // write information about explicit feature edge refinement
 //    layerInfo       // write information about layers
 //);
 //

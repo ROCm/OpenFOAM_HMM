@@ -30,6 +30,9 @@ scalarTransport/scalarTransportFunctionObject.C
 timeActivatedFileUpdate/timeActivatedFileUpdate.C
 timeActivatedFileUpdate/timeActivatedFileUpdateFunctionObject.C
 
+turbulenceFields/turbulenceFields.C
+turbulenceFields/turbulenceFieldsFunctionObject.C
+
 wallShearStress/wallShearStress.C
 wallShearStress/wallShearStressFunctionObject.C
 

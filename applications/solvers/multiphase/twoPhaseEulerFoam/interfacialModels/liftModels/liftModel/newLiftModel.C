@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,34 +21,52 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::turbulenceFieldsFunctionObject
-
-Description
-    FunctionObject wrapper around turbulenceFields to allow them to be created
-    via the functions entry within controlDict.
-
-SourceFiles
-    turbulenceFieldsFunctionObject.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef turbulenceFieldsFunctionObject_H
-#define turbulenceFieldsFunctionObject_H
-
-#include "turbulenceFields.H"
-#include "OutputFilterFunctionObject.H"
+#include "liftModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+Foam::autoPtr<Foam::liftModel> Foam::liftModel::New
+(
+    const dictionary& dict,
+    const volScalarField& alpha1,
+    const phaseModel& phase1,
+    const phaseModel& phase2
+)
 {
-    typedef OutputFilterFunctionObject<turbulenceFields>
-        turbulenceFieldsFunctionObject;
+    word liftModelType
+    (
+        dict.subDict(phase1.name()).lookup("type")
+    );
+
+    Info << "Selecting liftModel for phase "
+        << phase1.name()
+        << ": "
+        << liftModelType << endl;
+
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(liftModelType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn("liftModel::New")
+            << "Unknown liftModelType type "
+            << liftModelType << endl << endl
+            << "Valid liftModel types are : " << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return
+        cstrIter()
+        (
+            dict.subDict(phase1.name()).subDict(liftModelType + "Coeffs"),
+            alpha1,
+            phase1,
+            phase2
+        );
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

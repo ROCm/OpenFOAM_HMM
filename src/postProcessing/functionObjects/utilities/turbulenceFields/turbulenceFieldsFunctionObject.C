@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,73 +23,20 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "equilibrium.H"
-#include "addToRunTimeSelectionTable.H"
+#include "turbulenceFieldsFunctionObject.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace TimeScaleModels
-{
-    defineTypeNameAndDebug(equilibrium, 0);
+    defineNamedTemplateTypeNameAndDebug(turbulenceFieldsFunctionObject, 0);
 
     addToRunTimeSelectionTable
     (
-        TimeScaleModel,
-        equilibrium,
+        functionObject,
+        turbulenceFieldsFunctionObject,
         dictionary
     );
 }
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::TimeScaleModels::equilibrium::equilibrium
-(
-    const dictionary& dict
-)
-:
-    TimeScaleModel(dict)
-{}
-
-
-Foam::TimeScaleModels::equilibrium::equilibrium
-(
-    const equilibrium& hc
-)
-:
-    TimeScaleModel(hc)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::TimeScaleModels::equilibrium::~equilibrium()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::tmp<Foam::FieldField<Foam::Field, Foam::scalar> >
-Foam::TimeScaleModels::equilibrium::oneByTau
-(
-    const FieldField<Field, scalar>& alpha,
-    const FieldField<Field, scalar>& r32,
-    const FieldField<Field, scalar>& uSqr,
-    const FieldField<Field, scalar>& f
-) const
-{
-    static const scalar a =
-        16.0/sqrt(3.0*constant::mathematical::pi)
-       *0.25*(1.0 - e_*e_);
-
-    return
-        a
-       *alpha*sqrt(max(uSqr, scalar(0)))/max(r32, SMALL)
-       *alphaPacked_/max(alphaPacked_ - alpha, SMALL);
-}
-
 
 // ************************************************************************* //

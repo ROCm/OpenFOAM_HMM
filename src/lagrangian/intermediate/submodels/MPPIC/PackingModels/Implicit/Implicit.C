@@ -198,16 +198,6 @@ void Foam::PackingModels::Implicit<CloudType>::cacheFields(const bool store)
 
         alphaEqn.solve();
 
-        //// updated stress
-        //tauPrime.internalField() =
-        //    this->particleStressModel_->tauPrime
-        //    (
-        //        alpha_.internalField(),
-        //        rho.internalField(),
-        //        uSqrAverage.internalField()
-        //    )();
-        //tauPrime.correctBoundaryConditions();
-
 
         // Generate correction fields
         // ~~~~~~~~~~~~~~~~~
@@ -229,8 +219,6 @@ void Foam::PackingModels::Implicit<CloudType>::cacheFields(const bool store)
             (
                 cloudName + ":uCorrect",
                 fvc::reconstruct(phiCorrect_())
-            //  - deltaT*fvc::grad(tauPrime)/(rho*alpha_)
-            //  + (applyGravity_ ? deltaT*g*(1.0 - rhoc/rho) : 0.0)
             )
 
         );

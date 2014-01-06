@@ -17,7 +17,7 @@ FoamFile
 
 solvers
 {
-    alpha.water
+    "alpha.water.*"
     {
         nAlphaCorr          1;
         nAlphaSubCycles     2;
@@ -38,7 +38,7 @@ solvers
         mergeLevels     1;
     }
 
-    pcorr
+    "pcorr.*"
     {
         $p_rgh;
         tolerance       0.1;
