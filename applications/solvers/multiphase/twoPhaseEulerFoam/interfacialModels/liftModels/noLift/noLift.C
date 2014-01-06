@@ -23,9 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "constantCoefficient.H"
+#include "noLift.H"
 #include "addToRunTimeSelectionTable.H"
-#include "fvc.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -33,12 +32,12 @@ namespace Foam
 {
 namespace liftModels
 {
-    defineTypeNameAndDebug(constantCoefficient, 0);
+    defineTypeNameAndDebug(noLift, 0);
 
     addToRunTimeSelectionTable
     (
         liftModel,
-        constantCoefficient,
+        noLift,
         dictionary
     );
 }
@@ -47,7 +46,7 @@ namespace liftModels
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::liftModels::constantCoefficient::constantCoefficient
+Foam::liftModels::noLift::noLift
 (
     const dictionary& dict,
     const volScalarField& alpha1,
@@ -55,31 +54,42 @@ Foam::liftModels::constantCoefficient::constantCoefficient
     const phaseModel& phase2
 )
 :
-    liftModel(dict, alpha1, phase1, phase2),
-    coeffDict_(dict.subDict(typeName + "Coeffs")),
-    Cl_("Cl", dimless, coeffDict_.lookup("Cl"))
+    liftModel(dict, alpha1, phase1, phase2)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::liftModels::constantCoefficient::~constantCoefficient()
+Foam::liftModels::noLift::~noLift()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volVectorField> Foam::liftModels::constantCoefficient::F
+Foam::tmp<Foam::volVectorField> Foam::liftModels::noLift::F
 (
     const volVectorField& U
 ) const
 {
     return
-        Cl_
-       *(phase1_*phase1_.rho() + phase2_*phase2_.rho())
-       *(
-            (phase1_.U() - phase2_.U())
-          ^ fvc::curl(U)
+        tmp<volVectorField>
+        (
+            new volVectorField
+            (
+                IOobject
+                (
+                    "zero",
+                    U.time().timeName(),
+                    U.mesh()
+                ),
+                U.mesh(),
+                dimensionedVector
+                (
+                    "zero",
+                    dimensionSet(1, -2, -2, 0, 0, 0, 0),
+                    vector::zero
+                )
+            )
         );
 }
 

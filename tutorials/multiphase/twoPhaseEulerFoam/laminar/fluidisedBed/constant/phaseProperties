@@ -54,19 +54,11 @@ lift
 {
     particles
     {
-        type constantCoefficient;
-        constantCoefficientCoeffs
-        {
-            Cl          0;
-        }
+        type            none;
     }
     air
     {
-        type constantCoefficient;
-        constantCoefficientCoeffs
-        {
-            Cl          0;
-        }
+        type            none;
     }
 }
 

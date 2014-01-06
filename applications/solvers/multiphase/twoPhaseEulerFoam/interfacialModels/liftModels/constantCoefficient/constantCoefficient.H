@@ -53,6 +53,9 @@ class constantCoefficient
 {
     // Private data
 
+        //- Coefficient dictionary
+        const dictionary& coeffDict_;
+
         //- Constant lift coefficient
         dimensionedScalar Cl_;
 
