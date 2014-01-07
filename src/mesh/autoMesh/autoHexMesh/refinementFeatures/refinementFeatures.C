@@ -173,7 +173,7 @@ void Foam::refinementFeatures::read
                 labelListList(0),   // edgeNormals
                 labelListList(0),   // featurePointNormals
                 labelListList(0),   // featurePointEdges
-                labelList(0)        // regionEdges
+                identity(newEdges.size())   // regionEdges
             );
 
 
