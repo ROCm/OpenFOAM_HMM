@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -323,7 +323,7 @@ void Foam::probes::read(const dictionary& dict)
     dict.lookup("probeLocations") >> *this;
     dict.lookup("fields") >> fieldSelection_;
 
-    // redetermined all cell locations
+    // Re-determine all cell locations
     findElements(mesh_);
     prepare();
 }
