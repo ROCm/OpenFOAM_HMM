@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -90,6 +90,7 @@ SourceFiles
 
 #include "mixedFvPatchFields.H"
 #include "temperatureCoupledBase.H"
+#include "scalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -113,10 +114,10 @@ class turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
         const word TnbrName_;
 
         //- Thickness of layers
-        scalarField thicknessLayers_;
+        scalarList thicknessLayers_;
 
         //- Conductivity of layers
-        scalarField kappaLayers_;
+        scalarList kappaLayers_;
 
         //- Total contact resistance
         scalar contactRes_;

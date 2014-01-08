@@ -279,10 +279,8 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::write
     mixedFvPatchScalarField::write(os);
     os.writeKeyword("Tnbr")<< TnbrName_
         << token::END_STATEMENT << nl;
-    os.writeKeyword("thicknessLayers")<< thicknessLayers_
-        << token::END_STATEMENT << nl;
-    os.writeKeyword("kappaLayers")<< kappaLayers_
-        << token::END_STATEMENT << nl;
+    thicknessLayers_.writeEntry("thicknessLayers", os);
+    thicknessLayers_.writeEntry("kappaLayers", os);
 
     temperatureCoupledBase::write(os);
 }

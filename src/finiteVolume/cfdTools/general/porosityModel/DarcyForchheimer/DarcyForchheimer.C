@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -102,9 +102,10 @@ Foam::porosityModels::DarcyForchheimer::DarcyForchheimer
                 D_[zoneI][i].yy() = d.value().y();
                 D_[zoneI][i].zz() = d.value().z();
 
-                F_[zoneI][i].xx() = f.value().x();
-                F_[zoneI][i].yy() = f.value().y();
-                F_[zoneI][i].zz() = f.value().z();
+                // leading 0.5 is from 1/2*rho
+                F_[zoneI][i].xx() = 0.5*f.value().x();
+                F_[zoneI][i].yy() = 0.5*f.value().y();
+                F_[zoneI][i].zz() = 0.5*f.value().z();
             }
 
             D_[zoneI] = coordSys_.R().transformTensor(D_[zoneI], cells);
