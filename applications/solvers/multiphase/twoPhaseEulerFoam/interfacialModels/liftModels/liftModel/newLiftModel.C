@@ -61,7 +61,7 @@ Foam::autoPtr<Foam::liftModel> Foam::liftModel::New
     return
         cstrIter()
         (
-            dict.subDict(phase1.name()).subDict(liftModelType + "Coeffs"),
+            dict.subDict(phase1.name()),
             alpha1,
             phase1,
             phase2

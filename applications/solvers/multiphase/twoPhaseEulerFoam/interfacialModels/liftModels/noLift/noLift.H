@@ -21,67 +21,78 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::liftModels::noLift
+
+Description
+
+SourceFiles
+    noLift.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "constantCoefficient.H"
-#include "addToRunTimeSelectionTable.H"
-#include "fvc.H"
+#ifndef noLift_H
+#define noLift_H
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#include "liftModel.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 namespace liftModels
 {
-    defineTypeNameAndDebug(constantCoefficient, 0);
 
-    addToRunTimeSelectionTable
-    (
-        liftModel,
-        constantCoefficient,
-        dictionary
-    );
-}
-}
+/*---------------------------------------------------------------------------*\
+                           Class noLift Declaration
+\*---------------------------------------------------------------------------*/
 
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::liftModels::constantCoefficient::constantCoefficient
-(
-    const dictionary& dict,
-    const volScalarField& alpha1,
-    const phaseModel& phase1,
-    const phaseModel& phase2
-)
+class noLift
 :
-    liftModel(dict, alpha1, phase1, phase2),
-    coeffDict_(dict.subDict(typeName + "Coeffs")),
-    Cl_("Cl", dimless, coeffDict_.lookup("Cl"))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::liftModels::constantCoefficient::~constantCoefficient()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::tmp<Foam::volVectorField> Foam::liftModels::constantCoefficient::F
-(
-    const volVectorField& U
-) const
+    public liftModel
 {
-    return
-        Cl_
-       *(phase1_*phase1_.rho() + phase2_*phase2_.rho())
-       *(
-            (phase1_.U() - phase2_.U())
-          ^ fvc::curl(U)
-        );
-}
+    // Private data
 
+        //- Constant lift coefficient
+        dimensionedScalar Cl_;
+
+
+public:
+
+    //- Runtime type information
+    TypeName("none");
+
+
+    // Constructors
+
+        //- Construct from components
+        noLift
+        (
+            const dictionary& dict,
+            const volScalarField& alpha1,
+            const phaseModel& phase1,
+            const phaseModel& phase2
+        );
+
+
+    //- Destructor
+    virtual ~noLift();
+
+
+    // Member Functions
+
+        //- Lift force
+        tmp<volVectorField> F(const volVectorField& U) const;
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace liftModels
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

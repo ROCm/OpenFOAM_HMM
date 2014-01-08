@@ -188,12 +188,12 @@ Foam::OSstream& Foam::messageStream::operator()
 
 Foam::OSstream& Foam::messageStream::operator()(const bool output)
 {
-    if (output && level)
+    if (level)
     {
         bool collect = (severity_ == INFO || severity_ == WARNING);
 
         // Report the error
-        if (collect)
+        if (!output && collect)
         {
             return Snull;
         }
