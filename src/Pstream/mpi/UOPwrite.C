@@ -74,7 +74,7 @@ bool Foam::UOPstream::write
         (
             const_cast<char*>(buf),
             bufSize,
-            MPI_PACKED,
+            MPI_BYTE,
             toProcNo,   //procID(toProcNo),
             tag,
             PstreamGlobals::MPICommunicators_[communicator] //MPI_COMM_WORLD
@@ -94,7 +94,7 @@ bool Foam::UOPstream::write
         (
             const_cast<char*>(buf),
             bufSize,
-            MPI_PACKED,
+            MPI_BYTE,
             toProcNo,   //procID(toProcNo),
             tag,
             PstreamGlobals::MPICommunicators_[communicator] //MPI_COMM_WORLD
@@ -116,7 +116,7 @@ bool Foam::UOPstream::write
         (
             const_cast<char*>(buf),
             bufSize,
-            MPI_PACKED,
+            MPI_BYTE,
             toProcNo,   //procID(toProcNo),
             tag,
             PstreamGlobals::MPICommunicators_[communicator],//MPI_COMM_WORLD,

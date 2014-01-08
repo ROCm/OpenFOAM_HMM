@@ -261,7 +261,7 @@ Foam::label Foam::UIPstream::read
             (
                 buf,
                 bufSize,
-                MPI_PACKED,
+                MPI_BYTE,
                 fromProcNo,
                 tag,
                 PstreamGlobals::MPICommunicators_[communicator],
@@ -317,7 +317,7 @@ Foam::label Foam::UIPstream::read
             (
                 buf,
                 bufSize,
-                MPI_PACKED,
+                MPI_BYTE,
                 fromProcNo,
                 tag,
                 PstreamGlobals::MPICommunicators_[communicator],
