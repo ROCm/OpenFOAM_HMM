@@ -39,7 +39,7 @@ writeInterval   10;
 
 purgeWrite      0;
 
-writeFormat     binary;
+writeFormat     ascii;
 
 writePrecision  8;
 
@@ -51,7 +51,7 @@ timePrecision   6;
 
 runTimeModifiable yes;
 
-maxCo           0.3;
+maxCo           0.6;
 
 // Maximum diffusion number
 maxDi           10.0;

@@ -47,6 +47,17 @@ dictionaryReplacement
                 kappaName       none;
                 value           uniform 300;
             }
+
+            leftSolid_to_heater
+            {
+                type            compressible::turbulentTemperatureCoupledBaffleMixed;
+                Tnbr            T;
+                kappa           solidThermo;
+                kappaName       none;
+                thicknessLayers (1e-3);
+                kappaLayers     (5e-4);
+                value           uniform 300;
+            }
         }
     }
 }

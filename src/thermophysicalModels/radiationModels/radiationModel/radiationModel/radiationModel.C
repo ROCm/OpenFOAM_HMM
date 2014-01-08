@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,7 @@ License
 #include "radiationModel.H"
 #include "absorptionEmissionModel.H"
 #include "scatterModel.H"
+#include "sootModel.H"
 #include "fvmSup.H"
 #include "fluidThermo.H"
 
@@ -83,6 +84,8 @@ void Foam::radiation::radiationModel::initialise()
         );
 
         scatter_.reset(scatterModel::New(*this, mesh_).ptr());
+
+        soot_.reset(sootModel::New(*this, mesh_).ptr());
     }
 }
 
@@ -110,7 +113,8 @@ Foam::radiation::radiationModel::radiationModel(const volScalarField& T)
     solverFreq_(0),
     firstIter_(true),
     absorptionEmission_(NULL),
-    scatter_(NULL)
+    scatter_(NULL),
+    soot_(NULL)
 {}
 
 
@@ -129,7 +133,8 @@ Foam::radiation::radiationModel::radiationModel
     solverFreq_(1),
     firstIter_(true),
     absorptionEmission_(NULL),
-    scatter_(NULL)
+    scatter_(NULL),
+    soot_(NULL)
 {
     if (readOpt() == IOobject::NO_READ)
     {
@@ -167,7 +172,8 @@ Foam::radiation::radiationModel::radiationModel
     solverFreq_(1),
     firstIter_(true),
     absorptionEmission_(NULL),
-    scatter_(NULL)
+    scatter_(NULL),
+    soot_(NULL)
 {
     initialise();
 }
@@ -211,6 +217,11 @@ void Foam::radiation::radiationModel::correct()
     {
         calculate();
         firstIter_ = false;
+    }
+
+    if (!soot_.empty())
+    {
+        soot_->correct();
     }
 }
 
@@ -262,6 +273,24 @@ Foam::radiation::radiationModel::absorptionEmission() const
     }
 
     return absorptionEmission_();
+}
+
+
+const Foam::radiation::sootModel&
+Foam::radiation::radiationModel::soot() const
+{
+    if (!soot_.valid())
+    {
+        FatalErrorIn
+        (
+            "const Foam::radiation::sootModel&"
+            "Foam::radiation::radiationModel::soot() const"
+        )
+            << "Requested radiation sootModel model, but model is "
+            << "not activate" << abort(FatalError);
+    }
+
+    return soot_();
 }
 
 

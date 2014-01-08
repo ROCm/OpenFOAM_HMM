@@ -23,7 +23,7 @@ boundaryField
 {
     ".*"
     {
-        type            calculate;
+        type            calculated;
     }
 
     frontAndBack

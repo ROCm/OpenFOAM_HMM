@@ -29,7 +29,7 @@ solvers
         agglomerator     faceAreaPair;
         mergeLevels      1;
 
-        maxIter          100;
+        maxIter          10;
     }
 
     "(U|h|e|k|epsilon)"
