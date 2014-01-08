@@ -67,6 +67,29 @@ class MGridGenGAMGAgglomeration
 
     // Private Member Functions
 
+        void swap
+        (
+            const lduInterfacePtrsList& interfaces,
+            const labelUList& cellValues,
+            PtrList<labelList>& nbrValues
+        ) const;
+
+        void getNbrAgglom
+        (
+            const lduAddressing& addr,
+            const lduInterfacePtrsList& interfaces,
+            const PtrList<labelList>& nbrGlobalAgglom,
+            labelList& cellToNbrAgglom
+        ) const;
+
+        void detectSharedFaces
+        (
+            const lduMesh& mesh,
+            const labelList& value,
+            labelHashSet& sharedFaces
+        ) const;
+
+
         //- Construct the CSR format addressing
         void makeCompactCellFaceAddressingAndFaceWeights
         (
