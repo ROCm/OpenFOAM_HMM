@@ -352,7 +352,11 @@ void Foam::GAMGSolver::Vcycle
 
             // Scale coarse-grid correction field
             // but not on the coarsest level because it evaluates to 1
-            if (scaleCorrection_ && leveli < coarsestLevel - 1)
+            if
+            (
+                scaleCorrection_
+             && (interpolateCorrection_ || leveli < coarsestLevel - 1)
+            )
             {
                 scale
                 (
