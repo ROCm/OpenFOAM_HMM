@@ -5,39 +5,58 @@
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      radiationProperties;
+    class       volScalarField;
+    location    "0/bottomWater";
+    object      cellToRegion;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-radiation       on;
+dimensions      [0 0 0 0 0 0 0];
 
-radiationModel  opaqueSolid;
+internalField   uniform 0;
 
-absorptionEmissionModel greyMeanSolidAbsorptionEmission;
-
-greyMeanSolidAbsorptionEmissionCoeffs
+boundaryField
 {
-    wood
+    minX
     {
-        absorptivity    0.17;
-        emissivity      0.17;
+        type            zeroGradient;
     }
-
-    char
+    maxX
     {
-        absorptivity    0.85;
-        emissivity      0.85;
+        type            zeroGradient;
+    }
+    minY
+    {
+        type            zeroGradient;
+    }
+    minZ
+    {
+        type            zeroGradient;
+    }
+    maxZ
+    {
+        type            zeroGradient;
+    }
+    bottomWater_to_rightSolid
+    {
+        type            calculated;
+        value           uniform 0;
+    }
+    bottomWater_to_leftSolid
+    {
+        type            calculated;
+        value           uniform 0;
+    }
+    bottomWater_to_heater
+    {
+        type            calculated;
+        value           uniform 0;
     }
 }
-
-scatterModel    none;
 
 
 // ************************************************************************* //

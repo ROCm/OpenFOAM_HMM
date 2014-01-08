@@ -13,7 +13,7 @@ rm -rf 0/heater
 rm -rf 0/leftSolid
 rm -rf 0/rightSolid
 rm -f 0/cellToRegion
-rm -rf constant/bottomAir/polyMesh
+rm -rf constant/bottomWater/polyMesh
 rm -rf constant/topAir/polyMesh
 rm -rf constant/heater/polyMesh
 rm -rf constant/leftSolid/polyMesh

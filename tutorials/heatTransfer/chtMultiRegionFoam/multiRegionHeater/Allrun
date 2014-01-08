@@ -16,7 +16,7 @@ do
 done
 
 
-for i in bottomAir topAir heater leftSolid rightSolid
+for i in bottomWater topAir heater leftSolid rightSolid
 do
    changeDictionary -region $i > log.changeDictionary.$i 2>&1
 done

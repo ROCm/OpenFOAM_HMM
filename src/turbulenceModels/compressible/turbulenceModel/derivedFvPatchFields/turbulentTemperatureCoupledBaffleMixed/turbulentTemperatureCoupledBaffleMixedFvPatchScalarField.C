@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,10 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     temperatureCoupledBase(patch(), "undefined", "undefined-K"),
-    TnbrName_("undefined-Tnbr")
+    TnbrName_("undefined-Tnbr"),
+    thicknessLayers_(0),
+    kappaLayers_(0),
+    contactRes_(0)
 {
     this->refValue() = 0.0;
     this->refGrad() = 0.0;
@@ -66,7 +69,10 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(ptf, p, iF, mapper),
     temperatureCoupledBase(patch(), ptf.KMethod(), ptf.kappaName()),
-    TnbrName_(ptf.TnbrName_)
+    TnbrName_(ptf.TnbrName_),
+    thicknessLayers_(ptf.thicknessLayers_),
+    kappaLayers_(ptf.kappaLayers_),
+    contactRes_(ptf.contactRes_)
 {}
 
 
@@ -80,7 +86,10 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     temperatureCoupledBase(patch(), dict),
-    TnbrName_(dict.lookup("Tnbr"))
+    TnbrName_(dict.lookup("Tnbr")),
+    thicknessLayers_(0),
+    kappaLayers_(0),
+    contactRes_(0.0)
 {
     if (!isA<mappedPatchBase>(this->patch().patch()))
     {

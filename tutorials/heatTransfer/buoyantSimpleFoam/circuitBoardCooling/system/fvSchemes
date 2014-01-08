@@ -16,12 +16,12 @@ FoamFile
 
 ddtSchemes
 {
-    default steadyState;
+    default     steadyState;
 }
 
 gradSchemes
 {
-    default         Gauss linear;
+    default     Gauss linear;
 }
 
 divSchemes

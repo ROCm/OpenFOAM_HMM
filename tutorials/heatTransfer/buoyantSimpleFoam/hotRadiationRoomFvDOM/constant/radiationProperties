@@ -15,14 +15,17 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+radiation on;
+
 radiationModel  fvDOM;
 
 fvDOMCoeffs
 {
-    nPhi    3;          // azimuthal angles in PI/2 on X-Y.(from Y to X)
-    nTheta  5;          // polar angles in PI (from Z to X-Y plane)
+    nPhi        3;          // azimuthal angles in PI/2 on X-Y.(from Y to X)
+    nTheta      5;          // polar angles in PI (from Z to X-Y plane)
     convergence 1e-3;   // convergence criteria for radiation iteration
-    maxIter 10;         // maximum number of iterations
+    maxIter     10;         // maximum number of iterations
+    cacheDiv    false;
 }
 
 // Number of flow iterations per radiation iteration
@@ -32,12 +35,13 @@ absorptionEmissionModel constantAbsorptionEmission;
 
 constantAbsorptionEmissionCoeffs
 {
-   absorptivity    absorptivity    [ 0 -1 0 0 0 0 0 ] 0.01;
-   emissivity      emissivity      [ 0 -1 0 0 0 0 0 ] 0.01;
-   E               E   [ 1 -1 -3 0 0 0 0 ] 0;
+   absorptivity    absorptivity    [ m^-1 ]         0.5;
+   emissivity      emissivity      [ m^-1 ]         0.5;
+   E               E               [ kg m^-1 s^-3 ] 0;
 }
 
 scatterModel    none;
 
+sootModel       none;
 
 // ************************************************************************* //

@@ -32,18 +32,18 @@ divSchemes
 laplacianSchemes
 {
     default         none;
-    laplacian(thermo:alpha,h) Gauss linear uncorrected;
-    laplacian(kappa,T) Gauss harmonic uncorrected;
+    laplacian(thermo:alpha,h) Gauss linear corrected;
+    laplacian(kappa,T) Gauss harmonic corrected;
 }
 
 interpolationSchemes
 {
-    default         linear;
+    default        linear;
 }
 
 snGradSchemes
 {
-    default        uncorrected;
+    default        corrected;
 }
 
 fluxRequired

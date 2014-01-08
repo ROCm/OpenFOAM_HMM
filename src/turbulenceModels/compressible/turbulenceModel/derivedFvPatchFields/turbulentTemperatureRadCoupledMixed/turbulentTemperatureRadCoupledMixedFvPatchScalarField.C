@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,8 +50,8 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     TnbrName_("undefined-Tnbr"),
     QrNbrName_("undefined-QrNbr"),
     QrName_("undefined-Qr"),
-    thicknessLayers_(),
-    kappaLayers_(),
+    thicknessLayers_(0),
+    kappaLayers_(0),
     contactRes_(0)
 {
     this->refValue() = 0.0;
@@ -93,8 +93,8 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     TnbrName_(dict.lookupOrDefault<word>("Tnbr", "T")),
     QrNbrName_(dict.lookupOrDefault<word>("QrNbr", "none")),
     QrName_(dict.lookupOrDefault<word>("Qr", "none")),
-    thicknessLayers_(),
-    kappaLayers_(),
+    thicknessLayers_(0),
+    kappaLayers_(0),
     contactRes_(0.0)
 {
     if (!isA<mappedPatchBase>(this->patch().patch()))

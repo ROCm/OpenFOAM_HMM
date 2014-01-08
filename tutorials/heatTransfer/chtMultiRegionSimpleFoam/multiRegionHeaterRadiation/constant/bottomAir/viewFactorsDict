@@ -16,6 +16,7 @@ FoamFile
 
 writeViewFactorMatrix     true;
 writeFacesAgglomeration   true;
+writePatchViewFactors     false;
 
 bottomAir_to_heater
 {
