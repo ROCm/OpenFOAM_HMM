@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,6 +75,12 @@ Foam::dimensionSet::dimensionSet
     exponents_[MOLES] = moles;
     exponents_[CURRENT] = 0;
     exponents_[LUMINOUS_INTENSITY] = 0;
+}
+
+
+Foam::dimensionSet::dimensionSet(const dimensionSet& ds)
+{
+    reset(ds);
 }
 
 
