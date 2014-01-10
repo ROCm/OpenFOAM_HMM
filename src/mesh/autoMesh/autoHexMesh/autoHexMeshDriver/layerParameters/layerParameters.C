@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -124,41 +124,19 @@ Foam::layerParameters::layerParameters
         readScalar(dict.lookup("minThickness"))
     ),
     featureAngle_(readScalar(dict.lookup("featureAngle"))),
-    slipFeatureAngle_
-    (
-        dict.found("slipFeatureAngle")
-      ? readScalar(dict.lookup("slipFeatureAngle"))
-      : 0.5*featureAngle_
-    ),
     concaveAngle_
     (
         dict.lookupOrDefault("concaveAngle", defaultConcaveAngle)
     ),
     nGrow_(readLabel(dict.lookup("nGrow"))),
-    nSmoothSurfaceNormals_
-    (
-        readLabel(dict.lookup("nSmoothSurfaceNormals"))
-    ),
-    nSmoothNormals_(readLabel(dict.lookup("nSmoothNormals"))),
-    nSmoothDisplacement_(dict.lookupOrDefault("nSmoothDisplacement", 0)),
-    nSmoothThickness_(readLabel(dict.lookup("nSmoothThickness"))),
     maxFaceThicknessRatio_
     (
         readScalar(dict.lookup("maxFaceThicknessRatio"))
-    ),
-    layerTerminationCos_
-    (
-        Foam::cos(degToRad(0.5*featureAngle_))
-    ),
-    maxThicknessToMedialRatio_
-    (
-        readScalar(dict.lookup("maxThicknessToMedialRatio"))
     ),
     nBufferCellsNoExtrude_
     (
         readLabel(dict.lookup("nBufferCellsNoExtrude"))
     ),
-    nSnap_(readLabel(dict.lookup("nRelaxIter"))),
     nLayerIter_(readLabel(dict.lookup("nLayerIter"))),
     nRelaxedIter_(labelMax),
     additionalReporting_(dict.lookupOrDefault("additionalReporting", false)),
@@ -171,18 +149,6 @@ Foam::layerParameters::layerParameters
         )
     )
 {
-    word angleKey = "minMedialAxisAngle";
-    if (!dict.found(angleKey))
-    {
-        // Backwards compatibility
-        angleKey = "minMedianAxisAngle";
-    }
-    minMedialAxisAngleCos_ = Foam::cos
-    (
-        degToRad(readScalar(dict.lookup(angleKey)))
-    );
-
-
     // Detect layer specification mode
 
     label nSpec = 0;
