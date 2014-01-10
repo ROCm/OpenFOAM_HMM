@@ -393,7 +393,7 @@ class autoSnapDriver
                     const List<List<pointConstraint> >& pointConstraints,
                     // Feature-edge to pp point
                     const List<List<DynamicList<point> > >& edgeAttractors,
-                    const List<List<DynamicList<pointConstraint> > >&
+                    const List<List<DynamicList<pointConstraint> > >&,
 
                     const vectorField& rawPatchAttraction,
                     const List<pointConstraint>& rawPatchConstraints,
