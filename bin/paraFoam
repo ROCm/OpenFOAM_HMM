@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -121,18 +121,18 @@ do
     esac
 done
 
+# Get the ParaView major version to select the appropriate readers
+version=`echo $ParaView_VERSION | sed -e 's/^\([0-9][0-9]*\).*$/\1/'`
 
-#
 # check that reader module has been built
-#
-if [ $requirePV -eq 1 -a ! -f $PV_PLUGIN_PATH/libPV3FoamReader_SM.so ]
+if [ $requirePV -eq 1 -a ! -f $PV_PLUGIN_PATH/libPV${version}FoamReader_SM.so ]
 then
     cat<< BUILDREADER
 
 FATAL ERROR: ParaView reader module libraries do not exist
 
 Please build the reader module before continuing:
-cd \$FOAM_UTILITIES/postProcessing/graphics/PV3Readers
+cd \$FOAM_UTILITIES/postProcessing/graphics/PV${version}Readers
 ./Allwclean
 ./Allwmake
 
@@ -140,9 +140,7 @@ BUILDREADER
     exit 1
 fi
 
-#
 # check for --data=... argument
-#
 hasDataArg()
 {
     hasData=false
@@ -264,7 +262,8 @@ else
     }
 
     # For now filter out any ld.so errors. Caused by non-system compiler?
-    paraview --data="$caseFile" "$@" 2>&1 | fgrep -v 'Inconsistency detected by ld.so'
+    paraview --data="$caseFile" "$@" 2>&1 \
+        | fgrep -v 'Inconsistency detected by ld.so'
 fi
 
 

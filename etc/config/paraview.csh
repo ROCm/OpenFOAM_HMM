@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -25,7 +25,7 @@
 #     config/paraview.csh
 #
 # Description
-#     Setup file for paraview-3.x
+#     Setup file for paraview-[3-4].x
 #     Sourced from OpenFOAM-<VERSION>/etc/cshrc or from foamPV alias
 #
 # Note
@@ -39,7 +39,7 @@ if ( $status == 0 ) setenv PATH $cleaned
 
 # determine the cmake to be used
 unsetenv CMAKE_HOME
-foreach cmake ( cmake-2.8.4 cmake-2.8.3 cmake-2.8.1 )
+foreach cmake ( cmake-2.8.12.1 cmake-2.8.8 cmake-2.8.4 cmake-2.8.3 cmake-2.8.1 )
     set cmake=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cmake
     if ( -r $cmake ) then
         setenv CMAKE_HOME $cmake
@@ -49,7 +49,9 @@ foreach cmake ( cmake-2.8.4 cmake-2.8.3 cmake-2.8.1 )
 end
 
 #- ParaView version, automatically determine major version:
-setenv ParaView_VERSION 3.12.0
+#setenv ParaView_VERSION 3.12.0
+#setenv ParaView_VERSION 4.0.1
+setenv ParaView_VERSION 4.1.0
 setenv ParaView_MAJOR detect
 
 
@@ -81,7 +83,14 @@ endsw
 
 
 set paraviewInstDir=$WM_THIRD_PARTY_DIR/ParaView-${ParaView_VERSION}
-setenv ParaView_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/paraview-${ParaView_VERSION}
+set paraviewArchName=ParaView-$ParaView_VERSION
+
+# Reset the name of the binary install directory for version 3
+if ( `echo $ParaView_VERSION | sed -e 's/^\([0-9][0-9]*\).*$/\1/'` == 3) then
+    set paraviewArchName=paraview-$ParaView_VERSION
+endif
+
+setenv ParaView_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$paraviewArchName
 
 # set paths if binaries or source are present
 if ( -r $ParaView_DIR || -r $paraviewInstDir ) then
