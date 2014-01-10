@@ -286,7 +286,7 @@
     <Property name="UiIncludeSets" show="0"/>
     <Property name="UiIncludeZones" show="0"/>
     <ReaderFactory extensions="OpenFOAM"
-                   file_description="OpenFOAM" />
+                   file_description="OpenFOAM"/>
   </Hints>
 
 
