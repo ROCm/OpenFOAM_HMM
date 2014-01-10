@@ -1,0 +1,77 @@
+l/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.2.0                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "templates";
+    object      inlet;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+flowSpecification
+{
+    fixedPressure
+    {
+        U
+        {
+            type        pressureInletVelocity;
+            value       ${:inlet.U};
+        }
+        p
+        {
+            type        calculated;
+            value       ${:inlet.p};
+        }
+        p_rgh
+        {
+            type        fixedValue;
+            value       ${:inlet.p_rgh};
+        }
+    }
+    fixedVelocity
+    {
+        U
+        {
+            type        fixedValue;
+            value       ${:VALUE.U};
+        }
+        p
+        {
+            type        calculated;
+            value       ${:inlet.p};
+        }
+        p_rgh
+        {
+            type        zeroGradient;
+        }
+    }
+    flowRate
+    {
+        U
+        {
+            type        flowRateInletVelocity;
+            massFlowRate ${:VALUE.massFlowRate};
+            value       ${:VALUE.U};
+        }
+        p
+        {
+            type        calculated;
+            value       ${:VALUE.p};
+        }
+        p_rgh
+        {
+            type        fixedFluxPressure;
+            value       ${:VALUE.p_rgh};
+        }
+    }
+}
+
+
+// ************************************************************************* //

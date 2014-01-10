@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -158,6 +158,7 @@ private:
 
                 label size_;
 
+
             // Private Member Functions
 
                 void push(const token&);
@@ -171,6 +172,7 @@ private:
             // Constructors
 
                  tokeniser(Istream&);
+
 
             // Member Functions
 
@@ -190,7 +192,6 @@ private:
                 static bool valid(char c);
 
                 static label priority(const token& t);
-
         };
 
 
@@ -243,6 +244,15 @@ public:
             const scalar temperature,
             const scalar moles
         );
+
+        //- Copy constructor
+        dimensionSet(const dimensionSet& ds);
+
+        //- Construct and return a clone
+        autoPtr<dimensionSet> clone() const
+        {
+            return autoPtr<dimensionSet>(new dimensionSet(*this));
+        }
 
         //- Construct from Istream
         dimensionSet(Istream&);

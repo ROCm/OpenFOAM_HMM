@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -298,7 +298,7 @@ void Foam::LocalInteraction<CloudType>::info(Ostream& os)
     this->getModelProperty("massStick", mps0);
 
     // accumulate current data
-    labelList npe(nEscape_, 0);
+    labelList npe(nEscape_);
     Pstream::listCombineGather(npe, plusEqOp<label>());
     npe = npe + npe0;
 
