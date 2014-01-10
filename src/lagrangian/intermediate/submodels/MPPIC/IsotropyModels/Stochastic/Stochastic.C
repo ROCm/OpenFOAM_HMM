@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -170,7 +170,7 @@ void Foam::IsotropyModels::Stochastic<CloudType>::calculate()
 
         const scalar x = exponentAverage.interpolate(p.position(), tetIs);
 
-        if(x < rndGen.sample01<scalar>())
+        if (x < rndGen.sample01<scalar>())
         {
             const vector r(sampleGauss(), sampleGauss(), sampleGauss());
 
