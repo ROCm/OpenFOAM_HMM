@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,11 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::compressible::turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
+    Foam::
+    compressible::
+    turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 
 Description
     Mixed boundary condition for temperature, to be used for heat-transfer
-    on back-to-back baffles.
+    on back-to-back baffles.Optional thin thermal layer
+    resistances can be specified through thicknessLayers and kappaLayers
+    entries.
+
+    The thermal conductivity, \c kappa, can either be retrieved from the
+    mesh database using the \c lookup option, or from a \c solidThermo
+    or \c fluidThermo thermophysical package.
+
 
     Specifies gradient and temperature such that the equations are the same
     on both sides:
@@ -36,28 +45,40 @@ Description
 
     where KDelta is heat-transfer coefficient K * deltaCoeffs
 
-    Example usage:
-        myInterfacePatchName
-        {
-            type        compressible::turbulentTemperatureCoupledBaffleMixed;
-            Tnbr        T;
-            kappa       lookup;
-            kappaName   kappa;
-            value       uniform 300;
-        }
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        kappa        | thermal conductivity option | yes     |
+        kappaName    | name of thermal conductivity field | no  |
+        Tnbr         | name of the field    | no | T
+        thicknessLayers | list of thicknesses per layer [m] | no |
+        kappaLayers  | list of thermal conductivites per layer [W/m/K] | no |
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            compressible::turbulentTemperatureCoupledBaffleMixed;
+        Tnbr            T;
+        kappa           lookup;
+        KappaName       kappa;
+        thicknessLayers (0.1 0.2 0.3 0.4);
+        kappaLayers     (1 2 3 4)
+        value           uniform 300;
+    }
 
     Needs to be on underlying mapped(Wall)FvPatch.
 
     Note: kappa : heat conduction at patch. Gets supplied how to lookup
         calculate kappa:
+
     - 'lookup' : lookup volScalarField (or volSymmTensorField) with name
     - 'fluidThermo' : use fluidThermo and compressible::RASmodel to calculate
         kappa
     - 'solidThermo' : use solidThermo kappa()
     - 'directionalSolidThermo' directionalKappa()
-
-    Note: runs in parallel with arbitrary decomposition. Uses mapped
-    functionality to calculate exchange.
 
 SourceFiles
     turbulentTemperatureCoupledBaffleMixedFvPatchScalarField.C
@@ -69,6 +90,7 @@ SourceFiles
 
 #include "mixedFvPatchFields.H"
 #include "temperatureCoupledBase.H"
+#include "scalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -90,6 +112,15 @@ class turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 
         //- Name of field on the neighbour region
         const word TnbrName_;
+
+        //- Thickness of layers
+        scalarList thicknessLayers_;
+
+        //- Conductivity of layers
+        scalarList kappaLayers_;
+
+        //- Total contact resistance
+        scalar contactRes_;
 
 
 public:

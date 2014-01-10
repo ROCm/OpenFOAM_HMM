@@ -22,22 +22,22 @@ solvers
     {
         solver              PCG;
         preconditioner      DIC;
-        tolerance           1e-7;
+        tolerance           1e-6;
         relTol              0.1;
     };
 
     rhoFinal
     {
         $rho;
-        tolerance           1e-7;
+        tolerance           1e-6;
         relTol              0;
     };
 
     p_rgh
     {
         solver              GAMG;
-        tolerance           1e-7;
-        relTol              0.01;
+        tolerance           1e-6;
+        relTol              0.05;
         smoother            GaussSeidel;
         cacheAgglomeration  true;
         nCellsInCoarsestLevel   10;
@@ -48,7 +48,7 @@ solvers
     p_rghFinal
     {
         $p_rgh;
-        tolerance           1e-7;
+        tolerance           1e-6;
         relTol              0;
     };
 
@@ -57,7 +57,7 @@ solvers
     {
         solver          PBiCG;
         preconditioner  DILU;
-        tolerance       1e-7;
+        tolerance       1e-6;
         relTol          0.1;
         nSweeps         1;
     };
@@ -65,24 +65,24 @@ solvers
     "(U|Yi|k|h|omega)Final"
     {
         $U;
-        tolerance       1e-7;
+        tolerance       1e-6;
         relTol          0;
     };
 
 
     Ii
     {
-         solver              GAMG;
-        tolerance           1e-4;
-        relTol              0.1;
-        smoother            symGaussSeidel;
-        cacheAgglomeration  true;
+        solver                  GAMG;
+        tolerance               1e-4;
+        relTol                  0.1;
+        smoother                symGaussSeidel;
+        cacheAgglomeration      true;
         nCellsInCoarsestLevel   10;
-        agglomerator      faceAreaPair;
-        mergeLevels         1;
-        maxIter             3;
-        nPreSweeps          0;
-        nPostSweeps         1;
+        agglomerator            faceAreaPair;
+        mergeLevels             1;
+        maxIter                 3;
+        nPreSweeps              0;
+        nPostSweeps             1;
     }
 
     G

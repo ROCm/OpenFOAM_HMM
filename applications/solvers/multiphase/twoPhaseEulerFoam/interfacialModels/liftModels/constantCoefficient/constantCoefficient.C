@@ -56,7 +56,8 @@ Foam::liftModels::constantCoefficient::constantCoefficient
 )
 :
     liftModel(dict, alpha1, phase1, phase2),
-    Cl_("Cl", dimless, dict.lookup("Cl"))
+    coeffDict_(dict.subDict(typeName + "Coeffs")),
+    Cl_("Cl", dimless, coeffDict_.lookup("Cl"))
 {}
 
 

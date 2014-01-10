@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -475,7 +475,7 @@ Foam::scalarField Foam::edgeCollapser::calcTargetFaceSizes() const
 {
     scalarField targetFaceSizes(mesh_.nFaces(), -1);
 
-    const scalarField& cellVolumes = mesh_.cellVolumes();
+    const scalarField& V = mesh_.cellVolumes();
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
     const labelList& cellOwner = mesh_.faceOwner();
@@ -486,8 +486,8 @@ Foam::scalarField Foam::edgeCollapser::calcTargetFaceSizes() const
     // Calculate face size from cell volumes for internal faces
     for (label intFaceI = 0; intFaceI < mesh_.nInternalFaces(); ++intFaceI)
     {
-        const scalar cellOwnerVol = cellVolumes[cellOwner[intFaceI]];
-        const scalar cellNeighbourVol = cellVolumes[cellNeighbour[intFaceI]];
+        const scalar cellOwnerVol = max(0.0, V[cellOwner[intFaceI]]);
+        const scalar cellNeighbourVol = max(0.0, V[cellNeighbour[intFaceI]]);
 
         scalar targetFaceSizeA = Foam::pow(cellOwnerVol, 1.0/3.0);
         scalar targetFaceSizeB = Foam::pow(cellNeighbourVol, 1.0/3.0);
@@ -512,7 +512,7 @@ Foam::scalarField Foam::edgeCollapser::calcTargetFaceSizes() const
 
             forAll(faceCells, facei)
             {
-                neiCellVolumes[bFaceI++] = cellVolumes[faceCells[facei]];
+                neiCellVolumes[bFaceI++] = max(0.0, V[faceCells[facei]]);
             }
         }
         else
@@ -522,7 +522,7 @@ Foam::scalarField Foam::edgeCollapser::calcTargetFaceSizes() const
             forAll(patch, patchFaceI)
             {
                 const label extFaceI = patchFaceI + patch.start();
-                const scalar cellOwnerVol = cellVolumes[cellOwner[extFaceI]];
+                const scalar cellOwnerVol = max(0.0, V[cellOwner[extFaceI]]);
 
                 targetFaceSizes[extFaceI] = Foam::pow(cellOwnerVol, 1.0/3.0);
             }
@@ -542,7 +542,7 @@ Foam::scalarField Foam::edgeCollapser::calcTargetFaceSizes() const
             forAll(patch, patchFaceI)
             {
                 const label localFaceI = patchFaceI + patch.start();
-                const scalar cellOwnerVol = cellVolumes[cellOwner[localFaceI]];
+                const scalar cellOwnerVol = max(0.0, V[cellOwner[localFaceI]]);
                 const scalar cellNeighbourVol = neiCellVolumes[bFaceI++];
 
                 scalar targetFaceSizeA = Foam::pow(cellOwnerVol, 1.0/3.0);

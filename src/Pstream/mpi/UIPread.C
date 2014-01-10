@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -261,7 +261,7 @@ Foam::label Foam::UIPstream::read
             (
                 buf,
                 bufSize,
-                MPI_PACKED,
+                MPI_BYTE,
                 fromProcNo,
                 tag,
                 PstreamGlobals::MPICommunicators_[communicator],
@@ -317,7 +317,7 @@ Foam::label Foam::UIPstream::read
             (
                 buf,
                 bufSize,
-                MPI_PACKED,
+                MPI_BYTE,
                 fromProcNo,
                 tag,
                 PstreamGlobals::MPICommunicators_[communicator],

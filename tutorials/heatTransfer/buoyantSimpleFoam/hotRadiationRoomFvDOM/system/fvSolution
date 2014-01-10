@@ -19,17 +19,28 @@ solvers
 {
     p_rgh
     {
-        solver          GAMG;
+        solver          PCG;
+        preconditioner  DIC;
         tolerance       1e-06;
         relTol          0.01;
-        smoother        GaussSeidel;
-        cacheAgglomeration true;
-        nCellsInCoarsestLevel 10;
-        agglomerator    faceAreaPair;
-        mergeLevels     1;
     }
 
-    "(U|h|k|epsilon|Ii)"
+    Ii
+    {
+        solver              GAMG;
+        tolerance           1e-4;
+        relTol              0;
+        smoother            symGaussSeidel;
+        cacheAgglomeration  true;
+        nCellsInCoarsestLevel   10;
+        agglomerator        faceAreaPair;
+        mergeLevels         1;
+        maxIter             5;
+        nPreSweeps          0;
+        nPostSweeps         1;
+    }
+
+    "(U|h|k|epsilon)"
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -53,6 +64,7 @@ SIMPLE
 
         // possibly check turbulence fields
         "(k|epsilon|omega)" 1e-3;
+        "ILambda.*"     1e-3;
     }
 }
 
@@ -61,14 +73,14 @@ relaxationFactors
     fields
     {
         rho             1.0;
-        p_rgh           0.3;
+        p_rgh           0.7;
     }
     equations
     {
-        U               0.7;
-        h               0.7;
-        k               0.7;
-        epsilon         0.7;
+        U               0.2;
+        h               0.2;
+        k               0.5;
+        epsilon         0.5;
         "ILambda.*"     0.7;
     }
 }

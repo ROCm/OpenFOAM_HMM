@@ -34,7 +34,7 @@ solvers
     p_rgh
     {
         solver              GAMG;
-        tolerance           1e-7;
+        tolerance           1e-6;
         relTol              0.01;
         smoother            GaussSeidel;
         cacheAgglomeration  true;
@@ -46,7 +46,7 @@ solvers
     p_rghFinal
     {
         $p_rgh;
-        tolerance           1e-7;
+        tolerance           1e-6;
         relTol              0;
     };
 
@@ -55,7 +55,7 @@ solvers
     {
         solver          PBiCG;
         preconditioner  DILU;
-        tolerance       1e-7;
+        tolerance       1e-6;
         relTol          0.1;
         nSweeps         1;
     };
@@ -63,32 +63,24 @@ solvers
     "(U|Yi|k|h|omega)Final"
     {
         $U;
-        tolerance       1e-7;
+        tolerance       1e-6;
         relTol          0;
     };
 
-
-    "(h|hFinal|Yi)"
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-8;
-        relTol          0;
-    };
 
     Ii
     {
-        solver              GAMG;
-        tolerance           1e-4;
-        relTol              0;
-        smoother            symGaussSeidel;
-        cacheAgglomeration  true;
+        solver                  GAMG;
+        tolerance               1e-4;
+        relTol                  0;
+        smoother                symGaussSeidel;
+        cacheAgglomeration      true;
         nCellsInCoarsestLevel   10;
-        agglomerator    faceAreaPair;
-        mergeLevels         1;
-        maxIter             1;
-        nPreSweeps          0;
-        nPostSweeps         1;
+        agglomerator            faceAreaPair;
+        mergeLevels             1;
+        maxIter                 1;
+        nPreSweeps              0;
+        nPostSweeps             1;
     }
 
     "(G)Final"
@@ -105,7 +97,7 @@ PIMPLE
 {
     momentumPredictor yes;
     nOuterCorrectors  1;
-    nCorrectors       3;
+    nCorrectors       2;
     nNonOrthogonalCorrectors 0;
 }
 

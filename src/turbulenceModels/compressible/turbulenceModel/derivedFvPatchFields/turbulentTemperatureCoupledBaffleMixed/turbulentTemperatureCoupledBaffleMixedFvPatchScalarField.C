@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,10 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     temperatureCoupledBase(patch(), "undefined", "undefined-K"),
-    TnbrName_("undefined-Tnbr")
+    TnbrName_("undefined-Tnbr"),
+    thicknessLayers_(0),
+    kappaLayers_(0),
+    contactRes_(0)
 {
     this->refValue() = 0.0;
     this->refGrad() = 0.0;
@@ -66,7 +69,10 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(ptf, p, iF, mapper),
     temperatureCoupledBase(patch(), ptf.KMethod(), ptf.kappaName()),
-    TnbrName_(ptf.TnbrName_)
+    TnbrName_(ptf.TnbrName_),
+    thicknessLayers_(ptf.thicknessLayers_),
+    kappaLayers_(ptf.kappaLayers_),
+    contactRes_(ptf.contactRes_)
 {}
 
 
@@ -80,7 +86,10 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     temperatureCoupledBase(patch(), dict),
-    TnbrName_(dict.lookup("Tnbr"))
+    TnbrName_(dict.lookup("Tnbr")),
+    thicknessLayers_(0),
+    kappaLayers_(0),
+    contactRes_(0.0)
 {
     if (!isA<mappedPatchBase>(this->patch().patch()))
     {
@@ -99,6 +108,24 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
             << " of field " << dimensionedInternalField().name()
             << " in file " << dimensionedInternalField().objectPath()
             << exit(FatalError);
+    }
+
+    if (dict.found("thicknessLayers"))
+    {
+        dict.lookup("thicknessLayers") >> thicknessLayers_;
+        dict.lookup("kappaLayers") >> kappaLayers_;
+
+        if (thicknessLayers_.size() > 0)
+        {
+            forAll (thicknessLayers_, iLayer)
+            {
+                const scalar l = thicknessLayers_[iLayer];
+                if (l > 0.0)
+                {
+                    contactRes_ += kappaLayers_[iLayer]/l;
+                }
+            }
+        }
     }
 
     fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
@@ -129,7 +156,10 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(wtcsf, iF),
     temperatureCoupledBase(patch(), wtcsf.KMethod(), wtcsf.kappaName()),
-    TnbrName_(wtcsf.TnbrName_)
+    TnbrName_(wtcsf.TnbrName_),
+    thicknessLayers_(wtcsf.thicknessLayers_),
+    kappaLayers_(wtcsf.kappaLayers_),
+    contactRes_(wtcsf.contactRes_)
 {}
 
 
@@ -155,7 +185,7 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
     const fvPatch& nbrPatch =
         refCast<const fvMesh>(nbrMesh).boundary()[samplePatchI];
 
-    tmp<scalarField> intFld = patchInternalField();
+    //tmp<scalarField> intFld = patchInternalField();
 
 
     // Calculate the temperature by harmonic averaging
@@ -174,12 +204,22 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
     );
 
     // Swap to obtain full local values of neighbour internal field
-    scalarField nbrIntFld(nbrField.patchInternalField());
-    mpp.distribute(nbrIntFld);
+    tmp<scalarField> nbrIntFld(new scalarField(nbrField.size(), 0.0));
+    tmp<scalarField> nbrKDelta(new scalarField(nbrField.size(), 0.0));
 
-    // Swap to obtain full local values of neighbour kappa*delta
-    scalarField nbrKDelta(nbrField.kappa(nbrField)*nbrPatch.deltaCoeffs());
-    mpp.distribute(nbrKDelta);
+    if (contactRes_ == 0.0)
+    {
+        nbrIntFld() = nbrField.patchInternalField();
+        nbrKDelta() = nbrField.kappa(nbrField)*nbrPatch.deltaCoeffs();
+    }
+    else
+    {
+        nbrIntFld() = nbrField;
+        nbrKDelta() = contactRes_;
+    }
+
+    mpp.distribute(nbrIntFld());
+    mpp.distribute(nbrKDelta());
 
     tmp<scalarField> myKDelta = kappa(*this)*patch().deltaCoeffs();
 
@@ -200,11 +240,11 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
     //    - mixFraction = nbrKDelta / (nbrKDelta + myKDelta())
 
 
-    this->refValue() = nbrIntFld;
+    this->refValue() = nbrIntFld();
 
     this->refGrad() = 0.0;
 
-    this->valueFraction() = nbrKDelta/(nbrKDelta + myKDelta());
+    this->valueFraction() = nbrKDelta()/(nbrKDelta() + myKDelta());
 
     mixedFvPatchScalarField::updateCoeffs();
 
@@ -239,6 +279,9 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::write
     mixedFvPatchScalarField::write(os);
     os.writeKeyword("Tnbr")<< TnbrName_
         << token::END_STATEMENT << nl;
+    thicknessLayers_.writeEntry("thicknessLayers", os);
+    thicknessLayers_.writeEntry("kappaLayers", os);
+
     temperatureCoupledBase::write(os);
 }
 

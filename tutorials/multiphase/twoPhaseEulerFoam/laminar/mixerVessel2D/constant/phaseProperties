@@ -55,19 +55,11 @@ lift
 {
     air
     {
-        type constantCoefficient;
-        constantCoefficientCoeffs
-        {
-            Cl          0;
-        }
+        type            none;
     }
     water
     {
-        type constantCoefficient;
-        constantCoefficientCoeffs
-        {
-            Cl          0;
-        }
+        type            none;
     }
 }
 

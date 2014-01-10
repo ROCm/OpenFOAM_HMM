@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -173,7 +173,7 @@ void Foam::refinementFeatures::read
                 labelListList(0),   // edgeNormals
                 labelListList(0),   // featurePointNormals
                 labelListList(0),   // featurePointEdges
-                labelList(0)        // regionEdges
+                identity(newEdges.size())   // regionEdges
             );
 
 
@@ -312,6 +312,58 @@ void Foam::refinementFeatures::buildTrees(const label featI)
     );
 }
 
+
+const Foam::PtrList<Foam::indexedOctree<Foam::treeDataEdge> >&
+Foam::refinementFeatures::regionEdgeTrees() const
+{
+    if (!regionEdgeTreesPtr_.valid())
+    {
+        regionEdgeTreesPtr_.reset
+        (
+            new PtrList<indexedOctree<treeDataEdge> >(size())
+        );
+        PtrList<indexedOctree<treeDataEdge> >& trees = regionEdgeTreesPtr_();
+
+        forAll(*this, featI)
+        {
+            const extendedEdgeMesh& eMesh = operator[](featI);
+            const pointField& points = eMesh.points();
+            const edgeList& edges = eMesh.edges();
+
+            // Calculate bb of all points
+            treeBoundBox bb(points);
+
+            // Random number generator. Bit dodgy since not exactly random ;-)
+            Random rndGen(65431);
+
+            // Slightly extended bb. Slightly off-centred just so on symmetric
+            // geometry there are less face/edge aligned items.
+            bb = bb.extend(rndGen, 1e-4);
+            bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+            bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+
+            trees.set
+            (
+                featI,
+                new indexedOctree<treeDataEdge>
+                (
+                    treeDataEdge
+                    (
+                        false,                  // do not cache bb
+                        edges,
+                        points,
+                        eMesh.regionEdges()
+                    ),
+                    bb,     // overall search domain
+                    8,      // maxLevel
+                    10,     // leafsize
+                    3.0     // duplicity
+                )
+            );
+        }
+    }
+    return regionEdgeTreesPtr_();
+}
 
 
 // Find maximum level of a shell.
@@ -537,6 +589,68 @@ void Foam::refinementFeatures::findNearestEdge
                     nearNormal[sampleI] =  e.vec(td.points());
                     nearNormal[sampleI] /= mag(nearNormal[sampleI])+VSMALL;
                 }
+            }
+        }
+    }
+}
+
+
+void Foam::refinementFeatures::findNearestRegionEdge
+(
+    const pointField& samples,
+    const scalarField& nearestDistSqr,
+    labelList& nearFeature,
+    List<pointIndexHit>& nearInfo,
+    vectorField& nearNormal
+) const
+{
+    nearFeature.setSize(samples.size());
+    nearFeature = -1;
+    nearInfo.setSize(samples.size());
+    nearInfo = pointIndexHit();
+    nearNormal.setSize(samples.size());
+    nearNormal = vector::zero;
+
+
+    const PtrList<indexedOctree<treeDataEdge> >& regionTrees =
+        regionEdgeTrees();
+
+    forAll(regionTrees, featI)
+    {
+        const indexedOctree<treeDataEdge>& regionTree = regionTrees[featI];
+
+        forAll(samples, sampleI)
+        {
+            const point& sample = samples[sampleI];
+
+            scalar distSqr;
+            if (nearInfo[sampleI].hit())
+            {
+                distSqr = magSqr(nearInfo[sampleI].hitPoint()-sample);
+            }
+            else
+            {
+                distSqr = nearestDistSqr[sampleI];
+            }
+
+            // Find anything closer than current best
+            pointIndexHit info = regionTree.findNearest(sample, distSqr);
+
+            if (info.hit())
+            {
+                const treeDataEdge& td = regionTree.shapes();
+
+                nearFeature[sampleI] = featI;
+                nearInfo[sampleI] = pointIndexHit
+                (
+                    info.hit(),
+                    info.hitPoint(),
+                    regionTree.shapes().edgeLabels()[info.index()]
+                );
+
+                const edge& e = td.edges()[nearInfo[sampleI].index()];
+                nearNormal[sampleI] =  e.vec(td.points());
+                nearNormal[sampleI] /= mag(nearNormal[sampleI])+VSMALL;
             }
         }
     }

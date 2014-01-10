@@ -55,7 +55,7 @@ Description
     In between ratio 0 and 1 the gradient and value contributions are
     weighted using the ratio field in the followig way:
 
-    qConv = ratio*htcwfilm*(Tfilm - *this)*convectiveScaling_;
+    qConv = ratio*htcwfilm*(Tfilm - *this);
     qRad = (1.0 - ratio)*Qr;
 
     Then the solid can gain or loose energy through radiation or conduction

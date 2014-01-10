@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,6 +64,7 @@ namespace radiation
 // Forward declaration of classes
 class absorptionEmissionModel;
 class scatterModel;
+class sootModel;
 
 /*---------------------------------------------------------------------------*\
                        Class radiationModel Declaration
@@ -107,6 +108,9 @@ protected:
 
             //- Scatter model
             autoPtr<scatterModel> scatter_;
+
+            //- Soot model
+            autoPtr<sootModel> soot_;
 
 
 private:
@@ -232,6 +236,9 @@ public:
 
             //- Access to absorptionEmission model
             const absorptionEmissionModel& absorptionEmission() const;
+
+            //- Access to soot Model
+            const sootModel& soot() const;
 };
 
 

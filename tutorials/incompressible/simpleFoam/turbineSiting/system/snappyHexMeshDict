@@ -29,7 +29,6 @@ addLayers       false;
 // - to 'snap' the mesh boundary to the surface
 geometry
 {
-
     windTurbine1
     {
         type searchableBox;
@@ -48,30 +47,7 @@ geometry
     {
         type triSurfaceMesh;
         name terrain;
-
-        //tolerance   1e-5;   // optional:non-default tolerance on intersections
-        //maxTreeDepth 10;    // optional:depth of octree. Decrease only in case
-                              // of memory limitations.
-
-        // Per region the patchname. If not provided will be <name>_<region>.
-/*
-        regions
-        {
-            secondSolid
-            {
-                name mySecondPatch;
-            }
-        }
-*/
     }
-/*
-    sphere2
-    {
-        type searchableSphere;
-        centre  (1.5 1.5 1.5);
-        radius  1.03;
-    }
-*/
 };
 
 
@@ -262,15 +238,6 @@ addLayersControls
     // Per final patch (so not geometry!) the layer information
     layers
     {
-        sphere.stl_firstSolid
-        {
-            nSurfaceLayers 1;
-
-        }
-        maxY
-        {
-            nSurfaceLayers 1;
-        }
     }
 
     // Expansion factor for layer mesh

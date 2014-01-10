@@ -46,7 +46,7 @@ porosityBlockage
 
         DarcyForchheimerCoeffs
         {
-            d   d [0 -2 0 0 0] (10 -1000 -1000);
+            d   d [0 -2 0 0 0] (-1000 -1000 1e4);
             f   f [0 -1 0 0 0] (0 0 0);
 
             coordinateSystem
@@ -75,7 +75,7 @@ MRF1
     {
         origin    (0.25 0.25 0.25);
         axis      (0 0 1);
-        omega     477.5; // 500 rpm
+        omega     47.7; // 50 rpm
     }
 }
 

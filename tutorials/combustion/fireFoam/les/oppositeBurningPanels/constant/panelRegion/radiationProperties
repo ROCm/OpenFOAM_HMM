@@ -16,14 +16,15 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+radiation       on;
+
 radiationModel  opaqueSolid;
 
 absorptionEmissionModel greyMeanSolidAbsorptionEmission;
 
-
 greyMeanSolidAbsorptionEmissionCoeffs
 {
-      wood
+    wood
     {
         absorptivity    0.17;
         emissivity      0.17;

@@ -85,6 +85,10 @@ public:
 
     // Constructors
 
+        //- Construct null
+        liftModel();
+
+        //- Construct from components
         liftModel
         (
             const dictionary& dict,

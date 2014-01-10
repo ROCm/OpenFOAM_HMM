@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,111 +39,113 @@ Description
     - 2-D, normal and tangential components
 
     The thermodynamic properties of the baffle material are specified via
-    dictionary entries.
+    dictionary entries on the master patch
 
     \heading Patch usage
     Example of the boundary condition specification:
     \verbatim
-    myPatch
+    myPatch_master
     {
-        type                compressible::temperatureThermoBaffle;
+        type                compressible::thermalBaffle;
 
         // Underlaying coupled boundary condition
-            Tnbr               T;
-            kappa              fluidThermo; // or solidThermo
-            KappaName          none;
-            QrNbr              Qr;//or none.Name of Qr field on neighbourregion
-            Qr                 none;// or none.Name of Qr field on localregion
-            value              uniform 300;
+        Tnbr               T;
+        kappa              fluidThermo; // or solidThermo
+        KappaName          none;
+        QrNbr              Qr;//or none.Name of Qr field on neighbourregion
+        Qr                 none;// or none.Name of Qr field on localregion
+        value              uniform 300;
 
-        // Thermo baffle model
-            regionName          baffleRegion; // solid region name
-            infoOutput          yes;
-            active              yes;
+        // Baffle region name
+        regionName          baffleRegion;
+        active              yes;
 
         // Solid thermo in solid region
-            thermoType
-            {
-                type            heSolidThermo;
-                mixture         pureSolidMixture;
-                transport       constIso;
-                thermo          hConst;
-                equationOfState rhoConst;
-                specie          specie;
-                energy          sensibleEnthalpy;
-            }
+        thermoType
+        {
+            type            heSolidThermo;
+            mixture         pureMixture;
+            transport       constIso;
+            thermo          hConst;
+            equationOfState rhoConst;
+            specie          specie;
+            energy          sensibleEnthalpy;
+        }
 
-            mixture
+        mixture
+        {
+            specie
             {
-                specie
-                {
-                    nMoles          1;
-                    molWeight       20;
-                }
-                transport
-                {
-                    kappa           0.01;
-                }
-                thermodynamics
-                {
-                    Hf              0;
-                    Cp              15;
-                }
-                density
-                {
-                    rho             80;
-                }
+                nMoles          1;
+                molWeight       20;
             }
+            transport
+            {
+                kappa           0.01;
+            }
+            thermodynamics
+            {
+                Hf              0;
+                Cp              15;
+            }
+            density
+            {
+                rho             80;
+            }
+        }
 
-            radiation
-            {
-                radiationModel  opaqueSolid;
-                absorptionEmissionModel none;
-                scatterModel    none;
-            }
+        radiation
+        {
+            radiationModel  opaqueSolid;
+            absorptionEmissionModel none;
+            scatterModel    none;
+        }
 
 
         // Extrude model for new region
 
-            extrudeModel        linearNormal;
-            nLayers             50;
-            expansionRatio      1;
-            columnCells         false; //3D or 1D
-            linearNormalCoeffs
-            {
-                thickness           0.02;
-            }
+        extrudeModel        linearNormal;
+        nLayers             50;
+        expansionRatio      1;
+        columnCells         false; //3D or 1D
+        linearNormalCoeffs
+        {
+            thickness           0.02;
+        }
 
-
-        // New mesh polyPatch information
-
-            bottomCoeffs
-            {
-                name        "bottom";
-                type        mappedWall;
-                sampleMode  nearestPatchFace;
-                samplePatch baffle3DWall_master;
-                offsetMode  uniform;
-                offset      (0 0 0);
-            }
-
-            topCoeffs
-            {
-                name        "top";
-                type        mappedWall;
-                sampleMode  nearestPatchFace;
-                samplePatch baffle3DWall_slave;
-                offsetMode  uniform;
-                offset      (0 0 0);
-            }
-
-            sideCoeffs
-            {
-                name        "side";
-                type        patch;
-            }
     }
     \endverbatim
+
+    /- Slave patch on primary region
+    \verbatim
+    myPatch_slave
+    {
+        type                compressible::thermalBaffle;
+        kappa               fluidThermo;
+        kappaName           none;
+        value               uniform 300;
+    \endverbatim
+
+
+    /- Patches on baffle region
+    \verbatim
+    bottom
+    {
+        type                compressible::thermalBaffle;
+        kappa               solidThermo;
+        kappaName           none;
+        value               uniform 300;
+    }
+
+    top
+    {
+        type                compressible::thermalBaffle;
+        kappa               solidThermo;
+        kappaName           none;
+        value               uniform 300;
+    }
+    \endverbatim
+
 
 SeeAlso
     Foam::turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
