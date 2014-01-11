@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -172,7 +172,7 @@ Foam::vector Foam::PackingModels::Explicit<CloudType>::velocityCorrection
     //  + forces.calcNonCoupled(p, deltaT, p.mass(), Re, p.muc());
 
     // correction velocity
-    if((uRelative & alphaGrad) > 0)
+    if ((uRelative & alphaGrad) > 0)
     {
         dU = - deltaT*tauGrad/(p.rho()*alpha/* + deltaT*F.Sp()*/);
     }

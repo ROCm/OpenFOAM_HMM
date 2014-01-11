@@ -103,6 +103,8 @@
   <Hints>
     <Property name="FileName" show="0"/>
     <Property name="UiShowPointNumbers" show="0"/>
+    <ReaderFactory extensions="blockMesh"
+                   file_description="OpenFOAM blockMesh"/>
   </Hints>
 
   </SourceProxy>

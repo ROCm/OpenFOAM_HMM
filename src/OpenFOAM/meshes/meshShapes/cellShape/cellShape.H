@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,7 +64,7 @@ Ostream& operator<<(Ostream&, const cellShape&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class cellShape Declaration
+                          Class cellShape Declaration
 \*---------------------------------------------------------------------------*/
 
 class cellShape

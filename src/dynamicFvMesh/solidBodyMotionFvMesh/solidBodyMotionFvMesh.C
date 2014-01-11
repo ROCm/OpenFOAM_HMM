@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -94,9 +94,22 @@ Foam::solidBodyMotionFvMesh::solidBodyMotionFvMesh(const IOobject& io)
 
     if (cellZoneName != "none")
     {
-        zoneID_ = cellZones().findZoneID(cellZoneName);
         Info<< "Applying solid body motion to cellZone " << cellZoneName
             << endl;
+
+        zoneID_ = cellZones().findZoneID(cellZoneName);
+
+        if (zoneID_ == -1)
+        {
+            FatalErrorIn
+            (
+                "solidBodyMotionFvMesh::solidBodyMotionFvMesh(const IOobject&)"
+            )
+                << "Unable to find cellZone " << cellZoneName
+                << ".  Valid celLZones are:"
+                << cellZones().names()
+                << exit(FatalError);
+        }
 
         const cellZone& cz = cellZones()[zoneID_];
 

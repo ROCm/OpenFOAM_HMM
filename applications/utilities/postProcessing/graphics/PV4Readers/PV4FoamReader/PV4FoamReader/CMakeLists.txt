@@ -49,32 +49,26 @@ ADD_PARAVIEW_OBJECT_PANEL(IFACES IFACE_SRCS
   XML_GROUP sources
 )
 
-ADD_PARAVIEW_PLUGIN(
-    PV4FoamReader_SM "1.0"
-    SERVER_MANAGER_XML PV4FoamReader_SM.xml
-    SERVER_MANAGER_SOURCES vtkPV4FoamReader.cxx
-    GUI_INTERFACES ${IFACES}
-    GUI_SOURCES pqPV4FoamReaderPanel.cxx
-        ${MOC_SRCS} ${UI_SRCS} ${IFACE_SRCS}
-    GUI_RESOURCE_FILES PV4FoamReader.xml
-)
-
-# #
-# # Define the server-side portion of the reader plugin
-# #
-# ADD_PARAVIEW_PLUGIN(
-#     PV4FoamReader_SM "1.0"
-#     SERVER_MANAGER_XML PV4FoamReader_SM.xml
-#     SERVER_MANAGER_SOURCES vtkPV4FoamReader.cxx
-# )
-# #
-# # Define the client-side portion of the reader plugin
-# #
-# ADD_PARAVIEW_PLUGIN(
-#     PV4FoamReader "1.0"
-#     GUI_RESOURCES PV3FoamReader.qrc
-# )
-#
+IF("${PARAVIEW_VERSION_MINOR}" EQUAL 0)
+    ADD_PARAVIEW_PLUGIN(
+        PV4FoamReader_SM "1.0"
+        SERVER_MANAGER_XML PV4FoamReader_SM.xml
+        SERVER_MANAGER_SOURCES vtkPV4FoamReader.cxx
+        GUI_INTERFACES ${IFACES}
+        GUI_SOURCES pqPV4FoamReaderPanel.cxx
+            ${MOC_SRCS} ${UI_SRCS} ${IFACE_SRCS}
+        GUI_RESOURCE_FILES PV4FoamReader.xml
+    )
+ELSE("${PARAVIEW_VERSION_MINOR}" EQUAL 0)
+    ADD_PARAVIEW_PLUGIN(
+        PV4FoamReader_SM "1.0"
+        SERVER_MANAGER_XML PV4FoamReader_SM.xml
+        SERVER_MANAGER_SOURCES vtkPV4FoamReader.cxx
+        GUI_INTERFACES ${IFACES}
+        GUI_SOURCES pqPV4FoamReaderPanel.cxx
+            ${MOC_SRCS} ${UI_SRCS} ${IFACE_SRCS}
+    )
+ENDIF("${PARAVIEW_VERSION_MINOR}" EQUAL 0)
 
 TARGET_LINK_LIBRARIES(
     PV4FoamReader_SM
@@ -82,4 +76,5 @@ TARGET_LINK_LIBRARIES(
     finiteVolume
     vtkPV4Foam
 )
+
 #-----------------------------------------------------------------------------

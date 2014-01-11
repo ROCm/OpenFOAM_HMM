@@ -48,32 +48,26 @@ ADD_PARAVIEW_OBJECT_PANEL(IFACES IFACE_SRCS
   XML_GROUP sources
 )
 
-ADD_PARAVIEW_PLUGIN(
-    PV4blockMeshReader_SM "1.0"
-    SERVER_MANAGER_XML PV4blockMeshReader_SM.xml
-    SERVER_MANAGER_SOURCES  vtkPV4blockMeshReader.cxx
-    GUI_INTERFACES ${IFACES}
-    GUI_SOURCES pqPV4blockMeshReaderPanel.cxx
-        ${MOC_SRCS} ${UI_SRCS} ${IFACE_SRCS}
-    GUI_RESOURCE_FILES PV4blockMeshReader.xml
-)
-
-
-# #
-# # Define the server-side portion of the reader plugin
-# #
-# ADD_PARAVIEW_PLUGIN(PV4blockMeshReader_SM "1.0"
-#   SERVER_MANAGER_XML PV4blockMeshReader_SM.xml
-#   SERVER_MANAGER_SOURCES vtkPV4blockMeshReader.cxx
-# )
-# #
-# # Define the client-side portion of the reader plugin
-# #
-# ADD_PARAVIEW_PLUGIN(
-#     PV4blockMeshReader "1.0"
-#     GUI_RESOURCES PV4blockMeshReader.qrc
-# )
-
+IF("${PARAVIEW_VERSION_MINOR}" EQUAL 0)
+        ADD_PARAVIEW_PLUGIN(
+            PV4blockMeshReader_SM "1.0"
+        SERVER_MANAGER_XML PV4blockMeshReader_SM.xml
+        SERVER_MANAGER_SOURCES  vtkPV4blockMeshReader.cxx
+        GUI_INTERFACES ${IFACES}
+        GUI_SOURCES pqPV4blockMeshReaderPanel.cxx
+            ${MOC_SRCS} ${UI_SRCS} ${IFACE_SRCS}
+        GUI_RESOURCE_FILES PV4blockMeshReader.xml
+    )
+ELSE("${PARAVIEW_VERSION_MINOR}" EQUAL 0)
+        ADD_PARAVIEW_PLUGIN(
+            PV4blockMeshReader_SM "1.0"
+        SERVER_MANAGER_XML PV4blockMeshReader_SM.xml
+        SERVER_MANAGER_SOURCES  vtkPV4blockMeshReader.cxx
+        GUI_INTERFACES ${IFACES}
+        GUI_SOURCES pqPV4blockMeshReaderPanel.cxx
+            ${MOC_SRCS} ${UI_SRCS} ${IFACE_SRCS}
+    )
+ENDIF("${PARAVIEW_VERSION_MINOR}" EQUAL 0)
 
 # Build the client-side plugin
 
@@ -83,4 +77,5 @@ TARGET_LINK_LIBRARIES(
     blockMesh
     vtkPV4blockMesh
 )
+
 #-----------------------------------------------------------------------------

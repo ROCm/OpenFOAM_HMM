@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,7 +43,7 @@ Foam::Ostream& Foam::operator<<
         os.write
         (
             reinterpret_cast<const char*>(&tbl.table_),
-            sizeof(tbl.table_)
+            tbl.table_.byteSize()
         );
     }
 
