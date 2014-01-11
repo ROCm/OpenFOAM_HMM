@@ -329,14 +329,15 @@ Foam::scalar Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::interArea
     faceAreaIntersect inter(srcPoints, tgtPoints, this->reverseTarget_);
 
     // crude resultant norm
-    vector n(-this->srcPatch_.faceNormals()[srcFaceI]);
+    vector n(-src.normal(srcPoints));
+    n /= mag(n);
     if (this->reverseTarget_)
     {
-        n -= this->tgtPatch_.faceNormals()[tgtFaceI];
+        n -= tgt.normal(tgtPoints)/tgtMag;
     }
     else
     {
-        n += this->tgtPatch_.faceNormals()[tgtFaceI];
+        n += tgt.normal(tgtPoints)/tgtMag;
     }
     n *= 0.5;
 
