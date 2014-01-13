@@ -101,8 +101,9 @@ runParallel checkMesh $nProcs -allTopology -allGeometry -latestTime
 
 runApplication reconstructParMesh -latestTime
 
-# Copy the mesh into polyMesh
+# Copy the mesh into polyMesh and delete the 102 directory
 \cp -r 102/polyMesh constant
+\rm -rf 102
 
 
 # ----------------------------------------------------------------- end-of-file
