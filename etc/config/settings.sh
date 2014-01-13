@@ -268,7 +268,7 @@ OpenFOAM | ThirdParty)
         # using clang - not gcc
         export WM_CC='clang'
         export WM_CXX='clang++'
-        clang_version=llvm-3.3
+        clang_version=llvm-3.4
         ;;
     *)
         echo 1>&2
