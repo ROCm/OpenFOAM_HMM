@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,6 +36,7 @@ License
 #include "diagTensor.H"
 #include "transformField.H"
 #include "SubField.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -272,10 +273,14 @@ void Foam::cyclicPolyPatch::calcTransforms
 
             if (debug)
             {
+                scalar theta = radToDeg(acos(n0 & n1));
+
                 Pout<< "cyclicPolyPatch::calcTransforms :"
                     << " patch:" << name()
                     << " Specified rotation :"
-                    << " n0:" << n0 << " n1:" << n1 << endl;
+                    << " n0:" << n0 << " n1:" << n1
+                    << " swept angle: " << theta << " [deg]"
+                    << endl;
             }
 
             // Extended tensor from two local coordinate systems calculated
@@ -432,10 +437,14 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
 
                 if (debug)
                 {
+                    scalar theta = radToDeg(acos(n0 & n1));
+
                     Pout<< "cyclicPolyPatch::getCentresAndAnchors :"
                         << " patch:" << name()
                         << " Specified rotation :"
-                        << " n0:" << n0 << " n1:" << n1 << endl;
+                        << " n0:" << n0 << " n1:" << n1
+                        << " swept angle: " << theta << " [deg]"
+                        << endl;
                 }
 
                 // Extended tensor from two local coordinate systems calculated
