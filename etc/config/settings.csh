@@ -224,9 +224,16 @@ case ThirdParty:
         set mpfr_version=mpfr-3.1.0
         set mpc_version=mpc-0.9
         breaksw
+    case Gcc49:
+    case Gcc49++0x:
+        set gcc_version=gcc-4.9.0
+        set gmp_version=gmp-5.1.2
+        set mpfr_version=mpfr-3.1.2
+        set mpc_version=mpc-1.0.1
+        breaksw
     case Gcc48:
     case Gcc48++0x:
-        set gcc_version=gcc-4.8.1
+        set gcc_version=gcc-4.8.2
         set gmp_version=gmp-5.1.2
         set mpfr_version=mpfr-3.1.2
         set mpc_version=mpc-1.0.1
