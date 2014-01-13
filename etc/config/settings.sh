@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -246,8 +246,14 @@ OpenFOAM | ThirdParty)
         mpfr_version=mpfr-3.1.0
         mpc_version=mpc-0.9
         ;;
+    Gcc49 | Gcc49++0x)
+        gcc_version=gcc-4.9.0
+        gmp_version=gmp-5.1.2
+        mpfr_version=mpfr-3.1.2
+        mpc_version=mpc-1.0.1
+        ;;
     Gcc48 | Gcc48++0x)
-        gcc_version=gcc-4.8.1
+        gcc_version=gcc-4.8.2
         gmp_version=gmp-5.1.2
         mpfr_version=mpfr-3.1.2
         mpc_version=mpc-1.0.1
@@ -268,7 +274,7 @@ OpenFOAM | ThirdParty)
         # using clang - not gcc
         export WM_CC='clang'
         export WM_CXX='clang++'
-        clang_version=llvm-3.3
+        clang_version=llvm-3.4
         ;;
     *)
         echo 1>&2
