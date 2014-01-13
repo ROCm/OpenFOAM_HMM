@@ -940,6 +940,8 @@ void Foam::forces::calcForcesMoment()
 
     Pstream::listCombineGather(force_, plusEqOp<vectorField>());
     Pstream::listCombineGather(moment_, plusEqOp<vectorField>());
+    Pstream::listCombineScatter(force_);
+    Pstream::listCombineScatter(moment_);
 }
 
 
