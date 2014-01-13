@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,8 +75,14 @@ private:
                 //- Axis of rotation for rotational cyclics
                 vector rotationAxis_;
 
-                //- point on axis of rotation for rotational cyclics
+                //- Point on axis of rotation for rotational cyclics
                 point rotationCentre_;
+
+                //- Flag to show whether the rotation angle is defined
+                bool rotationAngleDefined_;
+
+                //- Rotation angle
+                scalar rotationAngle_;
 
 
             // For translation
@@ -101,7 +107,7 @@ private:
     // Private Member Functions
 
         //- Return normal of face at max distance from rotation axis
-        vector findFaceMaxRadius(const pointField& faceCentres) const;
+        vector findFaceNormalMaxRadius(const pointField& faceCentres) const;
 
         void calcTransforms
         (
