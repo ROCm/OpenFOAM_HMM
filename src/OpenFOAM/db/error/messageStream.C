@@ -188,39 +188,14 @@ Foam::OSstream& Foam::messageStream::operator()
 
 Foam::OSstream& Foam::messageStream::operator()(const bool output)
 {
-    if (level)
+    if (output)
     {
-        bool collect = (severity_ == INFO || severity_ == WARNING);
-
-        // Report the error
-        if (!output && collect)
-        {
-            return Snull;
-        }
-        else
-        {
-            if (title().size())
-            {
-                Pout<< title().c_str();
-            }
-
-            if (maxErrors_)
-            {
-                errorCount_++;
-
-                if (errorCount_ >= maxErrors_)
-                {
-                    FatalErrorIn("messageStream::operator OSstream&()")
-                        << "Too many errors"
-                        << abort(FatalError);
-                }
-            }
-
-            return Pout;
-        }
+        return operator()();
     }
-
-    return Snull;
+    else
+    {
+        return Snull;
+    }
 }
 
 

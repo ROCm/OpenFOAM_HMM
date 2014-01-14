@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,7 +50,7 @@ SourceFiles
 #include "volFieldsFwd.H"
 #include "cellSet.H"
 #include "autoPtr.H"
-#include "meshToMeshNew.H"
+#include "meshToMesh.H"
 
 #include "runTimeSelectionTables.H"
 
@@ -135,7 +135,7 @@ protected:
         // Data for smMapRegion only
 
             //- Mesh to mesh interpolation object
-            autoPtr<meshToMeshNew> meshInterpPtr_;
+            autoPtr<meshToMesh> meshInterpPtr_;
 
             //- Name of the neighbour region to map
             word nbrRegionName_;
@@ -293,7 +293,7 @@ public:
             inline const word& nbrRegionName() const;
 
             //- Return const access to the mapToMap pointer
-            inline const meshToMeshNew& meshInterp() const;
+            inline const meshToMesh& meshInterp() const;
 
             //- Return const access to the cell set
             inline const labelList& cells() const;

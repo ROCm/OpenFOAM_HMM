@@ -678,16 +678,14 @@ void Foam::forces::read(const dictionary& dict)
             localSystem_ = true;
         }
 
-        if (dict.readIfPresent("porosity", porosity_) && log_)
+        dict.readIfPresent("porosity", porosity_);
+        if (porosity_)
         {
-            if (porosity_)
-            {
-                Info<< "    Including porosity effects" << endl;
-            }
-            else
-            {
-                Info<< "    Not including porosity effects" << endl;
-            }
+            Info(log_)<< "    Including porosity effects" << endl;
+        }
+        else
+        {
+            Info(log_)<< "    Not including porosity effects" << endl;
         }
 
         if (dict.found("binData"))

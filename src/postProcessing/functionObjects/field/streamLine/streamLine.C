@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -128,7 +128,7 @@ void Foam::streamLine::track()
 
     label nSeeds = returnReduce(particles.size(), sumOp<label>());
 
-    Info << "    seeded " << nSeeds << " particles." << endl;
+    Info << "    seeded " << nSeeds << " particles" << endl;
 
     // Read or lookup fields
     PtrList<volScalarField> vsFlds;
@@ -625,7 +625,8 @@ void Foam::streamLine::write()
             n += allTracks_[trackI].size();
         }
 
-        Info<< "    Tracks:" << allTracks_.size() << "  total samples:" << n
+        Info<< "    Tracks:" << allTracks_.size() << nl
+            << "    Total samples:" << n
             << endl;
 
 

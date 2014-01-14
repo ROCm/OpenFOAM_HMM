@@ -356,7 +356,7 @@ void Foam::nearWallFields::execute()
 
         Info<< type() << " " << name_ << " output:" << nl;
 
-        Info<< "    Sampling fields fields to " << obr_.time().timeName()
+        Info<< "    Sampling fields to " << obr_.time().timeName()
             << endl;
 
         sampleFields(vsf_);
