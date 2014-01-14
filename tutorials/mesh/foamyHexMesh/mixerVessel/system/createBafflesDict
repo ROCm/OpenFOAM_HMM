@@ -81,6 +81,14 @@ baffles
                 matchTolerance  0.0001;
                 neighbourPatch  AMI2;
                 transform       noOrdering;
+                // Note: since imperfect meshing around feature edge make
+                // sure to project both sides onto 'proper' geometry to
+                // avoid errors leading to zero weights
+                surface
+                {
+                    type        triSurfaceMesh;
+                    name        rotating.stl;
+                }
             }
 
             slave
@@ -91,6 +99,11 @@ baffles
                 matchTolerance  0.0001;
                 neighbourPatch  AMI1;
                 transform       noOrdering;
+                surface
+                {
+                    type        triSurfaceMesh;
+                    name        rotating.stl;
+                }
             }
         }
     }

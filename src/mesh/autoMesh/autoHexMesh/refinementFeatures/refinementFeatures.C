@@ -176,19 +176,15 @@ void Foam::refinementFeatures::read
                 identity(newEdges.size())   // regionEdges
             );
 
-
-            Info<< "Constructed extendedFeatureEdgeMesh " << featObj.name()
-                << nl << incrIndent;
-            eeMesh.writeStats(Info);
-            Info<< decrIndent << endl;
-
+            //Info<< "Constructed extendedFeatureEdgeMesh " << featObj.name()
+            //    << nl << incrIndent;
+            //eeMesh.writeStats(Info);
+            //Info<< decrIndent << endl;
 
             set(featI, new extendedFeatureEdgeMesh(featObj, eeMesh));
         }
 
         const extendedEdgeMesh& eMesh = operator[](featI);
-
-        //eMesh.mergePoints(meshRefiner_.mergeDistance());
 
         if (dict.found("levels"))
         {

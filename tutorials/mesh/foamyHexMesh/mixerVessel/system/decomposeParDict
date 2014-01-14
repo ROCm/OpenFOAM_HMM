@@ -30,7 +30,8 @@ simpleCoeffs
 hierarchicalCoeffs
 {
     n               ( 2 2 2 );
-    delta           0.001;
+    delta           0.2;    // rotate a bit to avoid baffle topology
+                            // at processor boundary
     order           xyz;
 }
 

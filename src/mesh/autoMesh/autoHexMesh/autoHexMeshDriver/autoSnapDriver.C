@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,6 +42,7 @@ Description
 #include "refinementSurfaces.H"
 #include "unitConversion.H"
 #include "localPointRegion.H"
+#include "PatchTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -415,6 +416,67 @@ Foam::pointField Foam::autoSnapDriver::smoothPatchDisplacement
 
     return patchDisp;
 }
+//XXXXXXX
+//Foam::tmp<Foam::pointField> Foam::autoSnapDriver::avg
+//(
+//    const indirectPrimitivePatch& pp,
+//    const pointField& localPoints
+//)
+//{
+//    const labelListList& pointEdges = pp.pointEdges();
+//    const edgeList& edges = pp.edges();
+//
+//    tmp<pointField> tavg(new pointField(pointEdges.size(), vector::zero));
+//    pointField& avg = tavg();
+//
+//    forAll(pointEdges, vertI)
+//    {
+//        vector& avgPos = avg[vertI];
+//
+//        const labelList& pEdges = pointEdges[vertI];
+//
+//        forAll(pEdges, myEdgeI)
+//        {
+//            const edge& e = edges[pEdges[myEdgeI]];
+//
+//            label otherVertI = e.otherVertex(vertI);
+//
+//            avgPos += localPoints[otherVertI];
+//        }
+//
+//        avgPos /= pEdges.size();
+//    }
+//    return tavg;
+//}
+//Foam::tmp<Foam::pointField>
+//Foam::autoSnapDriver::smoothLambdaMuPatchDisplacement
+//(
+//    const motionSmoother& meshMover,
+//    const List<labelPair>& baffles
+//)
+//{
+//    const indirectPrimitivePatch& pp = meshMover.patch();
+//    pointField newLocalPoints(pp.localPoints());
+//
+//    const label iters = 90;
+//    const scalar lambda = 0.33;
+//    const scalar mu = 0.34;
+//
+//    for (label iter = 0; iter < iters; iter++)
+//    {
+//        // Lambda
+//        newLocalPoints =
+//            (1 - lambda)*newLocalPoints
+//          + lambda*avg(pp, newLocalPoints);
+//
+//        // Mu
+//        newLocalPoints =
+//            (1 + mu)*newLocalPoints
+//          - mu*avg(pp, newLocalPoints);
+//    }
+//    return newLocalPoints-pp.localPoints();
+//}
+//XXXXXXX
 
 
 Foam::tmp<Foam::scalarField> Foam::autoSnapDriver::edgePatchDist
@@ -684,6 +746,10 @@ void Foam::autoSnapDriver::preSmoothPatch
         }
 
         pointField patchDisp(smoothPatchDisplacement(meshMover, baffles));
+        //pointField patchDisp
+        //(
+        //  smoothLambdaMuPatchDisplacement(meshMover, baffles)
+        //);
 
         // The current mesh is the starting mesh to smooth from.
         meshMover.setDisplacement(patchDisp);
@@ -2294,6 +2360,100 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::repatchToSurface
 }
 
 
+void Foam::autoSnapDriver::detectWarpedFaces
+(
+    const scalar featureCos,
+    const indirectPrimitivePatch& pp,
+
+    DynamicList<label>& splitFaces,
+    DynamicList<labelPair>& splits
+) const
+{
+    const fvMesh& mesh = meshRefiner_.mesh();
+    const faceList& localFaces = pp.localFaces();
+    const pointField& localPoints = pp.localPoints();
+    const labelList& bFaces = pp.addressing();
+
+    splitFaces.clear();
+    splitFaces.setCapacity(bFaces.size());
+    splits.clear();
+    splits.setCapacity(bFaces.size());
+
+    // Determine parallel consistent normals on points
+    const vectorField pointNormals(PatchTools::pointNormals(mesh, pp));
+
+    face f0(4);
+    face f1(4);
+
+    forAll(localFaces, faceI)
+    {
+        const face& f = localFaces[faceI];
+
+        if (f.size() >= 4)
+        {
+            // See if splitting face across diagonal would make two faces with
+            // biggish normal angle
+
+            labelPair minDiag(-1, -1);
+            scalar minCos(GREAT);
+
+            for (label startFp = 0; startFp < f.size()-2; startFp++)
+            {
+                label minFp = f.rcIndex(startFp);
+
+                for
+                (
+                    label endFp = f.fcIndex(f.fcIndex(startFp));
+                    endFp < f.size() && endFp != minFp;
+                    endFp++
+                )
+                {
+                    // Form two faces
+                    f0.setSize(endFp-startFp+1);
+                    label i0 = 0;
+                    for (label fp = startFp; fp <= endFp; fp++)
+                    {
+                        f0[i0++] = f[fp];
+                    }
+                    f1.setSize(f.size()+2-f0.size());
+                    label i1 = 0;
+                    for (label fp = endFp; fp != startFp; fp = f.fcIndex(fp))
+                    {
+                        f1[i1++] = f[fp];
+                    }
+                    f1[i1++] = f[startFp];
+
+                    //Info<< "Splitting face:" << f << " into f0:" << f0
+                    //    << " f1:" << f1 << endl;
+
+                    vector n0 = f0.normal(localPoints);
+                    scalar n0Mag = mag(n0);
+                    vector n1 = f1.normal(localPoints);
+                    scalar n1Mag = mag(n1);
+
+                    if (n0Mag > ROOTVSMALL && n1Mag > ROOTVSMALL)
+                    {
+                        scalar cosAngle = (n0/n0Mag) & (n1/n1Mag);
+                        if (cosAngle < minCos)
+                        {
+                            minCos = cosAngle;
+                            minDiag = labelPair(startFp, endFp);
+                        }
+                    }
+                }
+            }
+
+
+            if (minCos < featureCos)
+            {
+                splitFaces.append(bFaces[faceI]);
+                splits.append(minDiag);
+            }
+        }
+    }
+}
+
+
 void Foam::autoSnapDriver::doSnap
 (
     const dictionary& snapDict,
@@ -2635,16 +2795,67 @@ void Foam::autoSnapDriver::doSnap
 
         for (label iter = 0; iter < nFeatIter; iter++)
         {
-            Info<< nl
-                << "Morph iteration " << iter << nl
-                << "-----------------" << endl;
-
-
-            //if (iter > 0 && iter == nFeatIter/2)
+            //if (doFeatures && (iter == 0 || iter == nFeatIter/2))
             //{
             //    Info<< "Splitting diagonal attractions" << endl;
-            //    const labelList& bFaces = ppPtr().addressing();
             //
+            //    indirectPrimitivePatch& pp = ppPtr();
+            //    motionSmoother& meshMover = meshMoverPtr();
+            //
+            //    // Calculate displacement at every patch point. Insert into
+            //    // meshMover.
+            //    // Calculate displacement at every patch point
+            //    pointField nearestPoint;
+            //    vectorField nearestNormal;
+            //
+            //    if (snapParams.detectNearSurfacesSnap())
+            //    {
+            //        nearestPoint.setSize(pp.nPoints(), vector::max);
+            //        nearestNormal.setSize(pp.nPoints(), vector::zero);
+            //    }
+            //
+            //    vectorField disp = calcNearestSurface
+            //    (
+            //        meshRefiner_,
+            //        snapDist,
+            //        pp,
+            //        nearestPoint,
+            //        nearestNormal
+            //    );
+            //
+            //
+            //    // Override displacement at thin gaps
+            //    if (snapParams.detectNearSurfacesSnap())
+            //    {
+            //        detectNearSurfaces
+            //        (
+            //            Foam::cos(degToRad(planarAngle)),// planar gaps
+            //            pp,
+            //            nearestPoint,   // surfacepoint from nearest test
+            //            nearestNormal,  // surfacenormal from nearest test
+            //
+            //            disp
+            //        );
+            //    }
+            //
+            //    // Override displacement with feature edge attempt
+            //    const label iter = 0;
+            //    calcNearestSurfaceFeature
+            //    (
+            //        snapParams,
+            //        false,   // avoidSnapProblems
+            //        iter,
+            //        featureCos,
+            //        scalar(iter+1)/nFeatIter,
+            //        snapDist,
+            //        disp,
+            //        meshMover,
+            //        patchAttraction,
+            //        patchConstraints
+            //    );
+            //
+            //
+            //    const labelList& bFaces = ppPtr().addressing();
             //    DynamicList<label> splitFaces(bFaces.size());
             //    DynamicList<labelPair> splits(bFaces.size());
             //
@@ -2667,6 +2878,10 @@ void Foam::autoSnapDriver::doSnap
             //            splits.append(split);
             //        }
             //    }
+            //
+            //    Info<< "Splitting "
+            //        << returnReduce(splitFaces.size(), sumOp<label>())
+            //        << " faces along diagonal attractions" << endl;
             //
             //    autoPtr<mapPolyMesh> mapPtr = meshRefiner_.splitFaces
             //    (
@@ -2703,8 +2918,109 @@ void Foam::autoSnapDriver::doSnap
             //            motionDict
             //        )
             //    );
+            //
+            //    if (debug&meshRefinement::MESH)
+            //    {
+            //        const_cast<Time&>(mesh.time())++;
+            //        Info<< "Writing split diagonal mesh to time "
+            //            << meshRefiner_.timeName() << endl;
+            //        meshRefiner_.write
+            //        (
+            //            meshRefinement::debugType(debug),
+            //            meshRefinement::writeType
+            //            (
+            //                meshRefinement::writeLevel()
+            //              | meshRefinement::WRITEMESH
+            //            ),
+            //            mesh.time().path()/meshRefiner_.timeName()
+            //        );
+            //    }
+            //}
+            //else
+            //if
+            //(
+            //    doFeatures
+            // && (iter == 1 || iter == nFeatIter/2+1 || iter == nFeatIter-1)
+            //)
+            //{
+            //    Info<< "Splitting warped faces" << endl;
+            //
+            //    const labelList& bFaces = ppPtr().addressing();
+            //    DynamicList<label> splitFaces(bFaces.size());
+            //    DynamicList<labelPair> splits(bFaces.size());
+            //
+            //    detectWarpedFaces
+            //    (
+            //        featureCos,
+            //        ppPtr(),
+            //
+            //        splitFaces,
+            //        splits
+            //    );
+            //
+            //    Info<< "Splitting "
+            //        << returnReduce(splitFaces.size(), sumOp<label>())
+            //        << " faces along diagonal to avoid warpage" << endl;
+            //
+            //    autoPtr<mapPolyMesh> mapPtr = meshRefiner_.splitFaces
+            //    (
+            //        splitFaces,
+            //        splits
+            //    );
+            //
+            //    const labelList& faceMap = mapPtr().faceMap();
+            //    meshRefinement::updateList(faceMap, -1, duplicateFace);
+            //    const labelList& reverseFaceMap = mapPtr().reverseFaceMap();
+            //    forAll(baffles, i)
+            //    {
+            //        labelPair& baffle = baffles[i];
+            //        baffle.first() = reverseFaceMap[baffle.first()];
+            //        baffle.second() = reverseFaceMap[baffle.second()];
+            //    }
+            //
+            //    meshMoverPtr.clear();
+            //    ppPtr.clear();
+            //
+            //    ppPtr = meshRefinement::makePatch(mesh, adaptPatchIDs);
+            //    meshMoverPtr.reset
+            //    (
+            //        new motionSmoother
+            //        (
+            //            mesh,
+            //            ppPtr(),
+            //            adaptPatchIDs,
+            //            meshRefinement::makeDisplacementField
+            //            (
+            //                pointMesh::New(mesh),
+            //                adaptPatchIDs
+            //            ),
+            //            motionDict
+            //        )
+            //    );
+            //
+            //    if (debug&meshRefinement::MESH)
+            //    {
+            //        const_cast<Time&>(mesh.time())++;
+            //        Info<< "Writing split warped mesh to time "
+            //            << meshRefiner_.timeName() << endl;
+            //        meshRefiner_.write
+            //        (
+            //            meshRefinement::debugType(debug),
+            //            meshRefinement::writeType
+            //            (
+            //                meshRefinement::writeLevel()
+            //              | meshRefinement::WRITEMESH
+            //            ),
+            //            mesh.time().path()/meshRefiner_.timeName()
+            //        );
+            //    }
             //}
 
+
+
+            Info<< nl
+                << "Morph iteration " << iter << nl
+                << "-----------------" << endl;
 
             indirectPrimitivePatch& pp = ppPtr();
             motionSmoother& meshMover = meshMoverPtr();
@@ -2752,6 +3068,7 @@ void Foam::autoSnapDriver::doSnap
                 disp = calcNearestSurfaceFeature
                 (
                     snapParams,
+                    true,   // avoidSnapProblems
                     iter,
                     featureCos,
                     scalar(iter+1)/nFeatIter,
@@ -2829,7 +3146,10 @@ void Foam::autoSnapDriver::doSnap
                 );
                 Info<< "Writing displacement field ..." << endl;
                 meshMover.displacement().write();
-                tmp<pointScalarField> magDisp(mag(meshMover.displacement()));
+                tmp<pointScalarField> magDisp
+                (
+                    mag(meshMover.displacement())
+                );
                 magDisp().write();
             }
 
@@ -2837,6 +3157,7 @@ void Foam::autoSnapDriver::doSnap
             meshMover.correct();
         }
     }
+
 
     // Merge any introduced baffles (from faceZones of faceType 'internal')
     {

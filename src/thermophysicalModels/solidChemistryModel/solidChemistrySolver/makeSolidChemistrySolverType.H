@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,8 @@ namespace Foam
     defineTemplateTypeNameAndDebugWithName                                    \
     (                                                                         \
         SS##Schem##Comp##SThermo##GThermo,                                    \
-        (#SS"<" + word(Schem::typeName_()) + "<"#Comp"," + SThermo::typeName()\
+        (#SS"<" + word(Schem<Comp, SThermo, GThermo>::typeName_())            \
+      + "<"#Comp"," + SThermo::typeName()                                     \
       + ","  + GThermo::typeName() + ">>").c_str(),                           \
         0                                                                     \
     );                                                                        \
@@ -82,7 +83,7 @@ namespace Foam
         Comp,                                                                 \
         SThermo,                                                              \
         GThermo                                                               \
-    );                                                                        \
+    );
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
