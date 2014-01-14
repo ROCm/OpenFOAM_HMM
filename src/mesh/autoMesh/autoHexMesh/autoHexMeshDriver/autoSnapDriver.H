@@ -87,18 +87,18 @@ class autoSnapDriver
                 const List<labelPair>&
             );
 
-            static tmp<pointField> avg
-            (
-                const indirectPrimitivePatch&,
-                const pointField&
-            );
+            //static tmp<pointField> avg
+            //(
+            //    const indirectPrimitivePatch&,
+            //    const pointField&
+            //);
 
             //- Calculate displacement per patch point. Wip.
-            static pointField smoothLambdaMuPatchDisplacement
-            (
-                const motionSmoother& meshMover,
-                const List<labelPair>& baffles
-            );
+            //static tmp<pointField> smoothLambdaMuPatchDisplacement
+            //(
+            //    const motionSmoother& meshMover,
+            //    const List<labelPair>& baffles
+            //);
 
 
             //- Check that face zones are synced

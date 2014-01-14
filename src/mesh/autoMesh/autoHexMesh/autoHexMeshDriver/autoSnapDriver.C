@@ -417,64 +417,65 @@ Foam::pointField Foam::autoSnapDriver::smoothPatchDisplacement
     return patchDisp;
 }
 //XXXXXXX
-Foam::tmp<Foam::pointField> Foam::autoSnapDriver::avg
-(
-    const indirectPrimitivePatch& pp,
-    const pointField& localPoints
-)
-{
-    const labelListList& pointEdges = pp.pointEdges();
-    const edgeList& edges = pp.edges();
-
-    tmp<pointField> tavg(new pointField(pointEdges.size(), vector::zero));
-    pointField& avg = tavg();
-
-    forAll(pointEdges, vertI)
-    {
-        vector& avgPos = avg[vertI];
-
-        const labelList& pEdges = pointEdges[vertI];
-
-        forAll(pEdges, myEdgeI)
-        {
-            const edge& e = edges[pEdges[myEdgeI]];
-
-            label otherVertI = e.otherVertex(vertI);
-
-            avgPos += localPoints[otherVertI];
-        }
-
-        avgPos /= pEdges.size();
-    }
-    return tavg;
-}
-Foam::pointField Foam::autoSnapDriver::smoothLambdaMuPatchDisplacement
-(
-    const motionSmoother& meshMover,
-    const List<labelPair>& baffles
-)
-{
-    const indirectPrimitivePatch& pp = meshMover.patch();
-    pointField newLocalPoints(pp.localPoints());
-
-    const label iters = 90;
-    const scalar lambda = 0.33;
-    const scalar mu = 0.34;
-
-    for (label iter = 0; iter < iters; iter++)
-    {
-        // Lambda
-        newLocalPoints =
-            (1 - lambda)*newLocalPoints
-          + lambda*avg(pp, newLocalPoints);
-
-        // Mu
-        newLocalPoints =
-            (1 + mu)*newLocalPoints
-          - mu*avg(pp, newLocalPoints);
-    }
-    return newLocalPoints-pp.localPoints();
-}
+//Foam::tmp<Foam::pointField> Foam::autoSnapDriver::avg
+//(
+//    const indirectPrimitivePatch& pp,
+//    const pointField& localPoints
+//)
+//{
+//    const labelListList& pointEdges = pp.pointEdges();
+//    const edgeList& edges = pp.edges();
+//
+//    tmp<pointField> tavg(new pointField(pointEdges.size(), vector::zero));
+//    pointField& avg = tavg();
+//
+//    forAll(pointEdges, vertI)
+//    {
+//        vector& avgPos = avg[vertI];
+//
+//        const labelList& pEdges = pointEdges[vertI];
+//
+//        forAll(pEdges, myEdgeI)
+//        {
+//            const edge& e = edges[pEdges[myEdgeI]];
+//
+//            label otherVertI = e.otherVertex(vertI);
+//
+//            avgPos += localPoints[otherVertI];
+//        }
+//
+//        avgPos /= pEdges.size();
+//    }
+//    return tavg;
+//}
+//Foam::tmp<Foam::pointField>
+//Foam::autoSnapDriver::smoothLambdaMuPatchDisplacement
+//(
+//    const motionSmoother& meshMover,
+//    const List<labelPair>& baffles
+//)
+//{
+//    const indirectPrimitivePatch& pp = meshMover.patch();
+//    pointField newLocalPoints(pp.localPoints());
+//
+//    const label iters = 90;
+//    const scalar lambda = 0.33;
+//    const scalar mu = 0.34;
+//
+//    for (label iter = 0; iter < iters; iter++)
+//    {
+//        // Lambda
+//        newLocalPoints =
+//            (1 - lambda)*newLocalPoints
+//          + lambda*avg(pp, newLocalPoints);
+//
+//        // Mu
+//        newLocalPoints =
+//            (1 + mu)*newLocalPoints
+//          - mu*avg(pp, newLocalPoints);
+//    }
+//    return newLocalPoints-pp.localPoints();
+//}
 //XXXXXXX
 
 
