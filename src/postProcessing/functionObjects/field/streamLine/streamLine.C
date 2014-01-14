@@ -626,7 +626,7 @@ void Foam::streamLine::write()
         }
 
         Info<< "    Tracks:" << allTracks_.size() << nl
-            << "    Tottal samples:" << n
+            << "    Total samples:" << n
             << endl;
 
 
