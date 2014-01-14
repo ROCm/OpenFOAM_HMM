@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,286 +25,456 @@ Class
     Foam::meshToMesh
 
 Description
-    mesh to mesh interpolation class.
+    Class to calculate the cell-addressing between two overlapping meshes
 
-Note
-    This class is due to be deprecated in favour of meshToMeshNew
+    Mapping is performed using a run-time selectable interpolation mothod
+
+SeeAlso
+    meshToMeshMethod
 
 SourceFiles
     meshToMesh.C
-    calculateMeshToMeshAddressing.C
-    calculateMeshToMeshWeights.C
-    meshToMeshInterpolate.C
+    meshToMeshParallelOps.C
+    meshToMeshTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef meshtoMesh_H
-#define meshtoMesh_H
+#ifndef meshToMesh_H
+#define meshToMesh_H
 
-#include "fvMesh.H"
-#include "HashTable.H"
-#include "fvPatchMapper.H"
-#include "scalarList.H"
-#include "className.H"
+#include "polyMesh.H"
+#include "boundBox.H"
+#include "mapDistribute.H"
+#include "volFieldsFwd.H"
+#include "NamedEnum.H"
+#include "AMIPatchToPatchInterpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-template<class Type>
-class indexedOctree;
-
-class treeDataCell;
-
 /*---------------------------------------------------------------------------*\
-                         Class meshToMesh Declaration
+                          Class meshToMesh Declaration
 \*---------------------------------------------------------------------------*/
 
 class meshToMesh
 {
+public:
+
+    // Public data types
+
+        //- Enumeration specifying interpolation method
+        enum interpolationMethod
+        {
+            imDirect,
+            imMapNearest,
+            imCellVolumeWeight
+        };
+
+        static const NamedEnum<interpolationMethod, 3>
+            interpolationMethodNames_;
+
+private:
+
     // Private data
 
-        // mesh references
+        //- Reference to the source mesh
+        const polyMesh& srcRegion_;
 
-        const fvMesh& fromMesh_;
-        const fvMesh& toMesh_;
+        //- Reference to the target mesh
+        const polyMesh& tgtRegion_;
 
-        //- fromMesh patch labels
-        HashTable<label> fromMeshPatches_;
+        //- List of target patch IDs per source patch (local index)
+        List<label> srcPatchID_;
 
-        //- toMesh patch labels
-        HashTable<label> toMeshPatches_;
+        //- List of source patch IDs per target patch (local index)
+        List<label> tgtPatchID_;
 
-        //- Patch map
-        HashTable<word> patchMap_;
+        //- List of AMIs between source and target patches
+        mutable PtrList<AMIPatchToPatchInterpolation> patchAMIs_;
 
-        //- toMesh patch labels which cut the from-mesh
-        HashTable<label> cuttingPatches_;
+        //- Cutting patches whose values are set using a zero-gradient condition
+        List<label> cuttingPatches_;
 
-        //- Cell addressing
-        labelList cellAddressing_;
+        //- Source to target cell addressing
+        labelListList srcToTgtCellAddr_;
 
-        //- Boundary addressing
-        labelListList boundaryAddressing_;
+        //- Target to source cell addressing
+        labelListList tgtToSrcCellAddr_;
 
-        //- Inverse-distance interpolation weights
-        mutable scalarListList* inverseDistanceWeightsPtr_;
+        //- Source to target cell interplation weights
+        scalarListList srcToTgtCellWght_;
 
-        //- Inverse-volume interpolation weights
-        mutable scalarListList* inverseVolumeWeightsPtr_;
+        //- Target to source cell interpolation weights
+        scalarListList tgtToSrcCellWght_;
 
-        //- Cell to cell overlap addressing
-        mutable labelListList* cellToCellAddressingPtr_;
+        //- Interpolation method
+        interpolationMethod method_;
 
-        //- Overlap volume
-        mutable scalar V_;
+        //- Cell total volume in overlap region [m3]
+        scalar V_;
+
+        //- Index of processor that holds all of both sides. -1 in all other
+        //  cases
+        label singleMeshProc_;
+
+        //- Source map pointer - parallel running only
+        autoPtr<mapDistribute> srcMapPtr_;
+
+        //- Target map pointer - parallel running only
+        autoPtr<mapDistribute> tgtMapPtr_;
 
 
     // Private Member Functions
 
-        void calcAddressing();
+        //- Helper function to add a constant offset to a list
+        template<class Type>
+        void add(UList<Type>& fld, const label offset) const;
 
-        void cellAddresses
+        //- Return src cell IDs for the overlap region
+        labelList maskCells(const polyMesh& src, const polyMesh& tgt) const;
+
+        //- Normalise the interpolation weights
+        void normaliseWeights
         (
-            labelList& cells,
-            const pointField& points,
-            const fvMesh& fromMesh,
-            const List<bool>& boundaryCell,
-            const indexedOctree<treeDataCell>& oc
+            const word& descriptor,
+            const labelListList& addr,
+            scalarListList& wght
         ) const;
 
-        void calculateInverseDistanceWeights() const;
+        //- Calculate the addressing between overalping regions of src and tgt
+        //  meshes
+        void calcAddressing(const polyMesh& src, const polyMesh& tgt);
 
-        void calculateInverseVolumeWeights() const;
+        //- Calculate - main driver function
+        void calculate();
 
-        void calculateCellToCellAddressing() const;
+        //- Conversion between mesh and patch interpolation methods
+        AMIPatchToPatchInterpolation::interpolationMethod
+        interpolationMethodAMI
+        (
+            const interpolationMethod method
+        ) const;
 
-        const scalarListList& inverseDistanceWeights() const;
-
-        const scalarListList& inverseVolumeWeights() const;
-
-        const labelListList& cellToCellAddressing() const;
+        //- Return the list of AMIs between source and target patches
+        const PtrList<AMIPatchToPatchInterpolation>& patchAMIs() const;
 
 
-    // Private static data members
+        // Parallel operations
 
-        //- Direct hit tolerance
-        static const scalar directHitTol;
+            //- Determine whether the meshes are split across multiple pocessors
+            label calcDistribution
+            (
+                const polyMesh& src,
+                const polyMesh& tgt
+            ) const;
+
+            //- Determine which processor bounding-boxes overlap
+            label calcOverlappingProcs
+            (
+                const List<boundBox>& procBb,
+                const boundBox& bb,
+                boolList& overlaps
+            ) const;
+
+            //- Calculate the mapping between processors
+            autoPtr<mapDistribute> calcProcMap
+            (
+                const polyMesh& src,
+                const polyMesh& tgt
+            ) const;
+
+            //- Distribute mesh info from 'my' processor to others
+            void distributeCells
+            (
+                const mapDistribute& map,
+                const polyMesh& tgtMesh,
+                const globalIndex& globalI,
+                List<pointField>& points,
+                List<label>& nInternalFaces,
+                List<faceList>& faces,
+                List<labelList>& faceOwner,
+                List<labelList>& faceNeighbour,
+                List<labelList>& cellIDs,
+                List<labelList>& nbrProcIDs,
+                List<labelList>& procLocalFaceIDs
+            ) const;
+
+            //- Collect pieces of tgt mesh from other procssors and restructure
+            void distributeAndMergeCells
+            (
+                const mapDistribute& map,
+                const polyMesh& tgt,
+                const globalIndex& globalI,
+                pointField& tgtPoints,
+                faceList& tgtFaces,
+                labelList& tgtFaceOwners,
+                labelList& tgtFaceNeighbours,
+                labelList& tgtCellIDs
+            ) const;
+
+
+        //- Disallow default bitwise copy construct
+        meshToMesh(const meshToMesh&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const meshToMesh&);
 
 
 public:
 
-    // Declare name of the class and its debug switch
-    ClassName("meshToMesh");
+    //- Run-time type information
+    TypeName("meshToMesh");
 
 
-    //- Enumeration specifying required accuracy
-    enum order
-    {
-        MAP,
-        INTERPOLATE,
-        CELL_POINT_INTERPOLATE,
-        CELL_VOLUME_WEIGHT
-    };
+    //- Construct from source and target meshes
+    meshToMesh
+    (
+        const polyMesh& src,
+        const polyMesh& tgt,
+        const interpolationMethod& method,
+        const bool interpAllPatches = true
+    );
 
 
-    // Constructors
-
-        //- Construct from the two meshes, the patch name map for the patches
-        //  to be interpolated and the names of the toMesh-patches which
-        //  cut the fromMesh
-        meshToMesh
-        (
-            const fvMesh& fromMesh,
-            const fvMesh& toMesh,
-            const HashTable<word>& patchMap,
-            const wordList& cuttingPatchNames
-        );
-
-        //- Construct from the two meshes assuming there is an exact mapping
-        //  between the patches
-        meshToMesh
-        (
-            const fvMesh& fromMesh,
-            const fvMesh& toMesh
-        );
+    //- Construct from source and target meshes
+    meshToMesh
+    (
+        const polyMesh& src,
+        const polyMesh& tgt,
+        const interpolationMethod& method,
+        const HashTable<word>& patchMap,
+        const wordList& cuttingPatches
+    );
 
 
     //- Destructor
-    ~meshToMesh();
+    virtual ~meshToMesh();
 
 
     // Member Functions
 
         // Access
 
-            const fvMesh& fromMesh() const
-            {
-                return fromMesh_;
-            }
+            //- Return const access to the source mesh
+            inline const polyMesh& srcRegion() const;
 
-            const fvMesh& toMesh() const
-            {
-                return toMesh_;
-            }
+            //- Return const access to the target mesh
+            inline const polyMesh& tgtRegion() const;
 
-            //- From toMesh cells to fromMesh cells
-            const labelList& cellAddressing() const
-            {
-                return cellAddressing_;
-            }
+            //- Return const access to the source to target cell addressing
+            inline const labelListList& srcToTgtCellAddr() const;
 
-            //- Overlap volume
-            scalar V() const
-            {
-                return V_;
-            }
+            //- Return const access to the target to source cell addressing
+            inline const labelListList& tgtToSrcCellAddr() const;
 
+            //- Return const access to the source to target cell weights
+            inline const scalarListList& srcToTgtCellWght() const;
 
-        // Interpolation
+            //- Return const access to the target to source cell weights
+            inline const scalarListList& tgtToSrcCellWght() const;
 
-            //- Map field
-            template<class Type, class CombineOp>
-            void mapField
-            (
-                Field<Type>&,
-                const Field<Type>&,
-                const labelList& adr,
-                const CombineOp& cop
-            ) const;
-
-            //- Interpolate field using inverse-distance weights
-            template<class Type, class CombineOp>
-            void interpolateField
-            (
-                Field<Type>&,
-                const GeometricField<Type, fvPatchField, volMesh>&,
-                const labelList& adr,
-                const scalarListList& weights,
-                const CombineOp& cop
-            ) const;
-
-            //- Interpolate field using inverse-volume weights
-            template<class Type, class CombineOp>
-            void interpolateField
-            (
-                Field<Type>&,
-                const GeometricField<Type, fvPatchField, volMesh>&,
-                const labelListList& adr,
-                const scalarListList& weights,
-                const CombineOp& cop
-            ) const;
+            //- Return const access to the overlap volume
+            inline scalar V() const;
 
 
-            //- Interpolate field using cell-point interpolation
-            template<class Type, class CombineOp>
-            void interpolateField
-            (
-                Field<Type>&,
-                const GeometricField<Type, fvPatchField, volMesh>&,
-                const labelList& adr,
-                const vectorField& centres,
-                const CombineOp& cop
-            )const;
+        // Evaluation
+
+            // Source-to-target field mapping
+
+                //- Map field from src to tgt mesh with defined operation
+                //  Values passed in via 'result' are used to initialise the
+                //  return value
+                template<class Type, class CombineOp>
+                void mapSrcToTgt
+                (
+                    const UList<Type>& srcFld,
+                    const CombineOp& cop,
+                    List<Type>& result
+                ) const;
+
+                //- Return the src field mapped to the tgt mesh with a defined
+                //  operation.  Initial values of the result are set to zero
+                template<class Type, class CombineOp>
+                tmp<Field<Type> > mapSrcToTgt
+                (
+                    const Field<Type>& srcFld,
+                    const CombineOp& cop
+                ) const;
+
+                //- Convenience function to map a tmp field to the tgt mesh
+                //  with a defined operation
+                template<class Type, class CombineOp>
+                tmp<Field<Type> > mapSrcToTgt
+                (
+                    const tmp<Field<Type> >& tsrcFld,
+                    const CombineOp& cop
+                ) const;
+
+                //- Convenience function to map a field to the tgt mesh with a
+                //  default operation (plusEqOp)
+                template<class Type>
+                tmp<Field<Type> > mapSrcToTgt
+                (
+                    const Field<Type>& srcFld
+                ) const;
+
+                //- Convenience function to map a tmp field to the tgt mesh
+                //  with a default operation (plusEqOp)
+                template<class Type>
+                tmp<Field<Type> > mapSrcToTgt
+                (
+                    const tmp<Field<Type> >& tsrcFld
+                ) const;
 
 
-            //- Interpolate internal volume field
-            template<class Type, class CombineOp>
-            void interpolateInternalField
-            (
-                Field<Type>&,
-                const GeometricField<Type, fvPatchField, volMesh>&,
-                order=INTERPOLATE,
-                const CombineOp& cop = eqOp<Type>()
-            ) const;
+            // Target-to-source field mapping
 
-            template<class Type, class CombineOp>
-            void interpolateInternalField
-            (
-                Field<Type>&,
-                const tmp<GeometricField<Type, fvPatchField, volMesh> >&,
-                order=INTERPOLATE,
-                const CombineOp& cop = eqOp<Type>()
-            ) const;
+                //- Map field from tgt to src mesh with defined operation
+                //  Values passed in via 'result' are used to initialise the
+                //  return value
+                template<class Type, class CombineOp>
+                void mapTgtToSrc
+                (
+                    const UList<Type>& tgtFld,
+                    const CombineOp& cop,
+                    List<Type>& result
+                ) const;
+
+                //- Return the tgt field mapped to the src mesh with a defined
+                //  operation.  Initial values of the result are set to zero
+                template<class Type, class CombineOp>
+                tmp<Field<Type> > mapTgtToSrc
+                (
+                    const Field<Type>& tgtFld,
+                    const CombineOp& cop
+                ) const;
+
+                //- Convenience function to map a tmp field to the src mesh
+                //  with a defined operation
+                template<class Type, class CombineOp>
+                tmp<Field<Type> > mapTgtToSrc
+                (
+                    const tmp<Field<Type> >& ttgtFld,
+                    const CombineOp& cop
+                ) const;
+
+                //- Convenience function to map a field to the src mesh with a
+                //  default operation (plusEqOp)
+                template<class Type>
+                tmp<Field<Type> > mapTgtToSrc
+                (
+                    const Field<Type>& tgtFld
+                ) const;
+
+                //- Convenience function to map a tmp field to the src mesh
+                //  with a default operation (plusEqOp)
+                template<class Type>
+                tmp<Field<Type> > mapTgtToSrc
+                (
+                    const tmp<Field<Type> >& ttgtFld
+                ) const;
 
 
-            //- Interpolate volume field
-            template<class Type, class CombineOp>
-            void interpolate
-            (
-                GeometricField<Type, fvPatchField, volMesh>&,
-                const GeometricField<Type, fvPatchField, volMesh>&,
-                order=INTERPOLATE,
-                const CombineOp& cop = eqOp<Type>()
-            ) const;
+            // Source-to-target volume field mapping
 
-            template<class Type, class CombineOp>
-            void interpolate
-            (
-                GeometricField<Type, fvPatchField, volMesh>&,
-                const tmp<GeometricField<Type, fvPatchField, volMesh> >&,
-                order=INTERPOLATE,
-                const CombineOp& cop = eqOp<Type>()
-            ) const;
+                //- Interpolate a field with a defined operation.  Values
+                //  passed in via 'result' are used to initialise the return
+                //  value
+                template<class Type, class CombineOp>
+                void mapSrcToTgt
+                (
+                    const GeometricField<Type, fvPatchField, volMesh>& field,
+                    const CombineOp& cop,
+                    GeometricField<Type, fvPatchField, volMesh>& result
+                ) const;
+
+                //- Interpolate a field with a defined operation.  The initial
+                //  values of the result are set to zero
+                template<class Type, class CombineOp>
+                tmp<GeometricField<Type, fvPatchField, volMesh> > mapSrcToTgt
+                (
+                    const GeometricField<Type, fvPatchField, volMesh>& field,
+                    const CombineOp& cop
+                ) const;
+
+                //- Interpolate a tmp field with a defined operation.  The
+                //  initial values of the result are set to zero
+                template<class Type, class CombineOp>
+                tmp<GeometricField<Type, fvPatchField, volMesh> > mapSrcToTgt
+                (
+                    const tmp<GeometricField<Type, fvPatchField, volMesh> >&
+                        tfield,
+                    const CombineOp& cop
+                ) const;
+
+                //- Convenience function to map a field with a default
+                //  operation (plusEqOp)
+                template<class Type>
+                tmp<GeometricField<Type, fvPatchField, volMesh> > mapSrcToTgt
+                (
+                    const GeometricField<Type, fvPatchField, volMesh>& field
+                ) const;
+
+                //- Convenience function to map a tmp field with a default
+                //  operation (plusEqOp)
+                template<class Type>
+                tmp<GeometricField<Type, fvPatchField, volMesh> > mapSrcToTgt
+                (
+                    const tmp<GeometricField<Type, fvPatchField, volMesh> >&
+                        tfield
+                ) const;
 
 
-            //- Interpolate volume field
-            template<class Type, class CombineOp>
-            tmp<GeometricField<Type, fvPatchField, volMesh> > interpolate
-            (
-                const GeometricField<Type, fvPatchField, volMesh>&,
-                order=INTERPOLATE,
-                const CombineOp& cop = eqOp<Type>()
-            ) const;
+            // Target-to-source volume field mapping
 
-            template<class Type, class CombineOp>
-            tmp<GeometricField<Type, fvPatchField, volMesh> > interpolate
-            (
-                const tmp<GeometricField<Type, fvPatchField, volMesh> >&,
-                order=INTERPOLATE,
-                const CombineOp& cop = eqOp<Type>()
-            ) const;
+                //- Interpolate a field with a defined operation.  Values
+                //  passed in via 'result' are used to initialise the return
+                //  value
+                template<class Type, class CombineOp>
+                void mapTgtToSrc
+                (
+                    const GeometricField<Type, fvPatchField, volMesh>& field,
+                    const CombineOp& cop,
+                    GeometricField<Type, fvPatchField, volMesh>& result
+                ) const;
+
+                //- Interpolate a field with a defined operation.  The initial
+                //  values of the result are set to zero
+                template<class Type, class CombineOp>
+                tmp<GeometricField<Type, fvPatchField, volMesh> > mapTgtToSrc
+                (
+                    const GeometricField<Type, fvPatchField, volMesh>& field,
+                    const CombineOp& cop
+                ) const;
+
+                //- Interpolate a tmp field with a defined operation.  The
+                //  initial values of the result are set to zero
+                template<class Type, class CombineOp>
+                tmp<GeometricField<Type, fvPatchField, volMesh> > mapTgtToSrc
+                (
+                    const tmp<GeometricField<Type, fvPatchField, volMesh> >&
+                        tfield,
+                    const CombineOp& cop
+                ) const;
+
+                //- Convenience function to map a field with a default
+                //  operation (plusEqOp)
+                template<class Type>
+                tmp<GeometricField<Type, fvPatchField, volMesh> > mapTgtToSrc
+                (
+                    const GeometricField<Type, fvPatchField, volMesh>& field
+                ) const;
+
+                //- Convenience function to map a tmp field with a default
+                //  operation (plusEqOp)
+                template<class Type>
+                tmp<GeometricField<Type, fvPatchField, volMesh> > mapTgtToSrc
+                (
+                    const tmp<GeometricField<Type, fvPatchField, volMesh> >&
+                        tfield
+                ) const;
 };
 
 
@@ -314,8 +484,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "meshToMeshI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 #ifdef NoRepository
-#   include "meshToMeshInterpolate.C"
+    #include "meshToMeshTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

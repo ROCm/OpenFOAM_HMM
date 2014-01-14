@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,20 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::cellVolumeWeightMethod
+    Foam::mapNearestMethod
 
 Description
-    Cell-volume-weighted mesh-to-mesh interpolation class
+    Map nearest mesh-to-mesh interpolation class
 
-    Volume conservative.
+    Not volume conservative.
 
 SourceFiles
-    cellVolumeWeightMethod.C
+    mapNearestMethod.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellVolumeWeightMethod_H
-#define cellVolumeWeightMethod_H
+#ifndef mapNearestMethod_H
+#define mapNearestMethod_H
 
 #include "meshToMeshMethod.H"
 
@@ -45,10 +45,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class cellVolumeWeightMethod Declaration
+                      Class mapNearestMethod Declaration
 \*---------------------------------------------------------------------------*/
 
-class cellVolumeWeightMethod
+class mapNearestMethod
 :
     public meshToMeshMethod
 {
@@ -58,7 +58,7 @@ protected:
 
         //- Find indices of overlapping cells in src and tgt meshes - returns
         //  true if found a matching pair
-        bool findInitialSeeds
+        virtual bool findInitialSeeds
         (
             const labelList& srcCellIDs,
             const boolList& mapFlag,
@@ -68,7 +68,7 @@ protected:
         ) const;
 
         //- Calculate the mesh-to-mesh addressing and weights
-        void calculateAddressing
+        virtual void calculateAddressing
         (
             labelListList& srcToTgtCellAddr,
             scalarListList& srcToTgtCellWght,
@@ -81,35 +81,49 @@ protected:
             label& startSeedI
         );
 
-        //- Set the next cells in the advancing front algorithm
-        void setNextCells
+        //- Find the nearest cell on mesh2 for cell1 on mesh1
+        virtual void findNearestCell
+        (
+            const polyMesh& mesh1,
+            const polyMesh& mesh2,
+            const label cell1,
+            label& cell2
+        ) const;
+
+        //- Set the next cells for the marching front algorithm
+        virtual void setNextNearestCells
         (
             label& startSeedI,
             label& srcCellI,
             label& tgtCellI,
-            const labelList& srcCellIDs,
-            const boolList& mapFlag,
-            const DynamicList<label>& visitedCells,
-            labelList& seedCells
+            boolList& mapFlag,
+            const labelList& srcCellIDs
+        ) const;
+
+        //- Find a source cell mapped to target cell tgtCellI
+        virtual label findMappedSrcCell
+        (
+            const label tgtCellI,
+            const List<DynamicList<label> >& tgtToSrc
         ) const;
 
         //- Disallow default bitwise copy construct
-        cellVolumeWeightMethod(const cellVolumeWeightMethod&);
+        mapNearestMethod(const mapNearestMethod&);
 
         //- Disallow default bitwise assignment
-        void operator=(const cellVolumeWeightMethod&);
+        void operator=(const mapNearestMethod&);
 
 
 public:
 
     //- Run-time type information
-    TypeName("cellVolumeWeight");
+    TypeName("mapNearest");
 
     //- Construct from source and target meshes
-    cellVolumeWeightMethod(const polyMesh& src, const polyMesh& tgt);
+    mapNearestMethod(const polyMesh& src, const polyMesh& tgt);
 
     //- Destructor
-    virtual ~cellVolumeWeightMethod();
+    virtual ~mapNearestMethod();
 
 
     // Member Functions

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,51 +23,19 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "meshToMeshNew.H"
-
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-inline const Foam::polyMesh& Foam::meshToMeshNew::srcRegion() const
+const Foam::polyMesh& Foam::meshToMeshMethod::src() const
 {
-    return srcRegion_;
+    return src_;
 }
 
 
-inline const Foam::polyMesh& Foam::meshToMeshNew::tgtRegion() const
+const Foam::polyMesh& Foam::meshToMeshMethod::tgt() const
 {
-    return tgtRegion_;
+    return tgt_;
 }
 
 
-inline const Foam::labelListList&
-Foam::meshToMeshNew::srcToTgtCellAddr() const
-{
-    return srcToTgtCellAddr_;
-}
-
-
-inline const Foam::labelListList&
-Foam::meshToMeshNew::tgtToSrcCellAddr() const
-{
-    return tgtToSrcCellAddr_;
-}
-
-
-inline const Foam::scalarListList&
-Foam::meshToMeshNew::srcToTgtCellWght() const
-{
-    return srcToTgtCellWght_;
-}
-
-
-inline const Foam::scalarListList&
-Foam::meshToMeshNew::tgtToSrcCellWght() const
-{
-    return tgtToSrcCellWght_;
-}
-
-
-inline Foam::scalar Foam::meshToMeshNew::V() const
+Foam::scalar Foam::meshToMeshMethod::V() const
 {
     return V_;
 }

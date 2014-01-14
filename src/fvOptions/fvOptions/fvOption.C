@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -187,11 +187,11 @@ void Foam::fv::option::setCellSet()
                 {
                     meshInterpPtr_.reset
                     (
-                        new meshToMeshNew
+                        new meshToMesh
                         (
                             mesh_,
                             nbrMesh,
-                            meshToMeshNew::interpolationMethodNames_.read
+                            meshToMesh::interpolationMethodNames_.read
                             (
                                 dict_.lookup("interpolationMethod")
                             ),

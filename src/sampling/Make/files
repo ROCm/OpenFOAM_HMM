@@ -57,18 +57,13 @@ graphField/makeGraph.C
 
 meshToMesh = meshToMeshInterpolation/meshToMesh
 $(meshToMesh)/meshToMesh.C
-$(meshToMesh)/calculateMeshToMeshAddressing.C
-$(meshToMesh)/calculateMeshToMeshWeights.C
-
-meshToMeshNew = meshToMeshInterpolation/meshToMeshNew
-$(meshToMeshNew)/meshToMeshNew.C
-$(meshToMeshNew)/meshToMeshNewParallelOps.C
-meshToMeshNewMethods = meshToMeshInterpolation/meshToMeshNew/calcMethod
-$(meshToMeshNewMethods)/meshToMeshMethod/meshToMeshMethod.C
-$(meshToMeshNewMethods)/meshToMeshMethod/meshToMeshMethodNew.C
-$(meshToMeshNewMethods)/cellVolumeWeight/cellVolumeWeightMethod.C
-$(meshToMeshNewMethods)/direct/directMethod.C
-$(meshToMeshNewMethods)/mapNearest/mapNearestMethod.C
+$(meshToMesh)/meshToMeshParallelOps.C
+meshToMeshMethods = meshToMeshInterpolation/meshToMesh/calcMethod
+$(meshToMeshMethods)/meshToMeshMethod/meshToMeshMethod.C
+$(meshToMeshMethods)/meshToMeshMethod/meshToMeshMethodNew.C
+$(meshToMeshMethods)/cellVolumeWeight/cellVolumeWeightMethod.C
+$(meshToMeshMethods)/direct/directMethod.C
+$(meshToMeshMethods)/mapNearest/mapNearestMethod.C
 
 
 LIB = $(FOAM_LIBBIN)/libsampling

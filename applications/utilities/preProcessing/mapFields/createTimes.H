@@ -1,15 +1,11 @@
     Info<< "\nCreate databases as time" << endl;
 
-    Time runTimeSource
-    (
-        Time::controlDictName,
-        rootDirSource,
-        caseDirSource
-    );
+    HashTable<string> srcOptions(args.options());
+    srcOptions.erase("case");
+    srcOptions.insert("case", fileName(rootDirSource/caseDirSource));
 
-    Time runTimeTarget
-    (
-        Time::controlDictName,
-        rootDirTarget,
-        caseDirTarget
-    );
+    argList argsSrc(args, srcOptions, false, false, false);
+
+    Time runTimeSource(Time::controlDictName, argsSrc);
+
+    Time runTimeTarget(Time::controlDictName, args);

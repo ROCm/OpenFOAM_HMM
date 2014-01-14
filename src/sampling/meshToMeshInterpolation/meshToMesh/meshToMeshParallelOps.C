@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "meshToMeshNew.H"
+#include "meshToMesh.H"
 #include "OFstream.H"
 #include "Time.H"
 #include "globalIndex.H"
@@ -33,7 +33,7 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::label Foam::meshToMeshNew::calcDistribution
+Foam::label Foam::meshToMesh::calcDistribution
 (
     const polyMesh& src,
     const polyMesh& tgt
@@ -63,7 +63,7 @@ Foam::label Foam::meshToMeshNew::calcDistribution
             procI = -1;
             if (debug)
             {
-                Info<< "meshToMeshNew::calcDistribution: "
+                Info<< "meshToMesh::calcDistribution: "
                     << "Meshes split across multiple processors" << endl;
             }
         }
@@ -72,7 +72,7 @@ Foam::label Foam::meshToMeshNew::calcDistribution
             procI = findIndex(cellsPresentOnProc, 1);
             if (debug)
             {
-                Info<< "meshToMeshNew::calcDistribution: "
+                Info<< "meshToMesh::calcDistribution: "
                     << "Meshes local to processor" << procI << endl;
             }
         }
@@ -82,7 +82,7 @@ Foam::label Foam::meshToMeshNew::calcDistribution
 }
 
 
-Foam::label Foam::meshToMeshNew::calcOverlappingProcs
+Foam::label Foam::meshToMesh::calcOverlappingProcs
 (
     const List<boundBox>& procBb,
     const boundBox& bb,
@@ -108,7 +108,7 @@ Foam::label Foam::meshToMeshNew::calcOverlappingProcs
 }
 
 
-Foam::autoPtr<Foam::mapDistribute> Foam::meshToMeshNew::calcProcMap
+Foam::autoPtr<Foam::mapDistribute> Foam::meshToMesh::calcProcMap
 (
     const polyMesh& src,
     const polyMesh& tgt
@@ -255,7 +255,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::meshToMeshNew::calcProcMap
 }
 
 
-void Foam::meshToMeshNew::distributeCells
+void Foam::meshToMesh::distributeCells
 (
     const mapDistribute& map,
     const polyMesh& tgtMesh,
@@ -495,7 +495,7 @@ void Foam::meshToMeshNew::distributeCells
 }
 
 
-void Foam::meshToMeshNew::distributeAndMergeCells
+void Foam::meshToMesh::distributeAndMergeCells
 (
     const mapDistribute& map,
     const polyMesh& tgt,
@@ -791,7 +791,7 @@ void Foam::meshToMeshNew::distributeAndMergeCells
                 {
                     FatalErrorIn
                     (
-                        "void Foam::meshToMeshNew::"
+                        "void Foam::meshToMesh::"
                         "distributeAndMergeCells"
                         "("
                             "const mapDistribute&, "

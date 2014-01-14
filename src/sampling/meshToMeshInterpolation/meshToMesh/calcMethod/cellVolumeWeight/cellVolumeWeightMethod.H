@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,20 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::directMethod
+    Foam::cellVolumeWeightMethod
 
 Description
-    Direct (one-to-one cell correspondence) mesh-to-mesh interpolation class
+    Cell-volume-weighted mesh-to-mesh interpolation class
 
     Volume conservative.
 
 SourceFiles
-    directMethod.C
+    cellVolumeWeightMethod.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef directMethod_H
-#define directMethod_H
+#ifndef cellVolumeWeightMethod_H
+#define cellVolumeWeightMethod_H
 
 #include "meshToMeshMethod.H"
 
@@ -45,10 +45,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class directMethod Declaration
+                   Class cellVolumeWeightMethod Declaration
 \*---------------------------------------------------------------------------*/
 
-class directMethod
+class cellVolumeWeightMethod
 :
     public meshToMeshMethod
 {
@@ -56,16 +56,9 @@ protected:
 
     // Protected Member Functions
 
-        //- Return the true if cells intersect
-        virtual bool intersect
-        (
-            const label srcCellI,
-            const label tgtCellI
-        ) const;
-
         //- Find indices of overlapping cells in src and tgt meshes - returns
         //  true if found a matching pair
-        virtual bool findInitialSeeds
+        bool findInitialSeeds
         (
             const labelList& srcCellIDs,
             const boolList& mapFlag,
@@ -75,7 +68,7 @@ protected:
         ) const;
 
         //- Calculate the mesh-to-mesh addressing and weights
-        virtual void calculateAddressing
+        void calculateAddressing
         (
             labelListList& srcToTgtCellAddr,
             scalarListList& srcToTgtCellWght,
@@ -88,33 +81,35 @@ protected:
             label& startSeedI
         );
 
-        //- Append to list of src mesh seed indices
-        virtual void appendToDirectSeeds
+        //- Set the next cells in the advancing front algorithm
+        void setNextCells
         (
-            boolList& mapFlag,
-            labelList& srcTgtSeed,
-            DynamicList<label>& srcSeeds,
-            label& srcSeedI,
-            label& tgtSeedI
+            label& startSeedI,
+            label& srcCellI,
+            label& tgtCellI,
+            const labelList& srcCellIDs,
+            const boolList& mapFlag,
+            const DynamicList<label>& visitedCells,
+            labelList& seedCells
         ) const;
 
         //- Disallow default bitwise copy construct
-        directMethod(const directMethod&);
+        cellVolumeWeightMethod(const cellVolumeWeightMethod&);
 
         //- Disallow default bitwise assignment
-        void operator=(const directMethod&);
+        void operator=(const cellVolumeWeightMethod&);
 
 
 public:
 
     //- Run-time type information
-    TypeName("direct");
+    TypeName("cellVolumeWeight");
 
     //- Construct from source and target meshes
-    directMethod(const polyMesh& src, const polyMesh& tgt);
+    cellVolumeWeightMethod(const polyMesh& src, const polyMesh& tgt);
 
     //- Destructor
-    virtual ~directMethod();
+    virtual ~cellVolumeWeightMethod();
 
 
     // Member Functions

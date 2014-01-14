@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,7 +61,7 @@ namespace Foam
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::meshToMeshNew::add
+void Foam::meshToMesh::add
 (
     UList<Type>& fld,
     const label offset
@@ -75,7 +75,7 @@ void Foam::meshToMeshNew::add
 
 
 template<class Type, class CombineOp>
-void Foam::meshToMeshNew::mapSrcToTgt
+void Foam::meshToMesh::mapSrcToTgt
 (
     const UList<Type>& srcField,
     const CombineOp& cop,
@@ -86,7 +86,7 @@ void Foam::meshToMeshNew::mapSrcToTgt
     {
         FatalErrorIn
         (
-            "void Foam::meshToMeshNew::mapSrcToTgt"
+            "void Foam::meshToMesh::mapSrcToTgt"
             "("
                 "const UList<Type>&, "
                 "const CombineOp&, "
@@ -150,7 +150,7 @@ void Foam::meshToMeshNew::mapSrcToTgt
 
 
 template<class Type, class CombineOp>
-Foam::tmp<Foam::Field<Type> > Foam::meshToMeshNew::mapSrcToTgt
+Foam::tmp<Foam::Field<Type> > Foam::meshToMesh::mapSrcToTgt
 (
     const Field<Type>& srcField,
     const CombineOp& cop
@@ -172,7 +172,7 @@ Foam::tmp<Foam::Field<Type> > Foam::meshToMeshNew::mapSrcToTgt
 
 
 template<class Type, class CombineOp>
-Foam::tmp<Foam::Field<Type> > Foam::meshToMeshNew::mapSrcToTgt
+Foam::tmp<Foam::Field<Type> > Foam::meshToMesh::mapSrcToTgt
 (
     const tmp<Field<Type> >& tsrcField,
     const CombineOp& cop
@@ -183,7 +183,7 @@ Foam::tmp<Foam::Field<Type> > Foam::meshToMeshNew::mapSrcToTgt
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::meshToMeshNew::mapSrcToTgt
+Foam::tmp<Foam::Field<Type> > Foam::meshToMesh::mapSrcToTgt
 (
     const Field<Type>& srcField
 ) const
@@ -193,7 +193,7 @@ Foam::tmp<Foam::Field<Type> > Foam::meshToMeshNew::mapSrcToTgt
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::meshToMeshNew::mapSrcToTgt
+Foam::tmp<Foam::Field<Type> > Foam::meshToMesh::mapSrcToTgt
 (
     const tmp<Field<Type> >& tsrcField
 ) const
@@ -203,7 +203,7 @@ Foam::tmp<Foam::Field<Type> > Foam::meshToMeshNew::mapSrcToTgt
 
 
 template<class Type, class CombineOp>
-void Foam::meshToMeshNew::mapTgtToSrc
+void Foam::meshToMesh::mapTgtToSrc
 (
     const UList<Type>& tgtField,
     const CombineOp& cop,
@@ -214,7 +214,7 @@ void Foam::meshToMeshNew::mapTgtToSrc
     {
         FatalErrorIn
         (
-            "void Foam::meshToMeshNew::mapTgtToSrc"
+            "void Foam::meshToMesh::mapTgtToSrc"
             "("
                 "const UList<Type>&, "
                 "const CombineOp&, "
@@ -276,7 +276,7 @@ void Foam::meshToMeshNew::mapTgtToSrc
 
 
 template<class Type, class CombineOp>
-Foam::tmp<Foam::Field<Type> > Foam::meshToMeshNew::mapTgtToSrc
+Foam::tmp<Foam::Field<Type> > Foam::meshToMesh::mapTgtToSrc
 (
     const Field<Type>& tgtField,
     const CombineOp& cop
@@ -298,7 +298,7 @@ Foam::tmp<Foam::Field<Type> > Foam::meshToMeshNew::mapTgtToSrc
 
 
 template<class Type, class CombineOp>
-Foam::tmp<Foam::Field<Type> > Foam::meshToMeshNew::mapTgtToSrc
+Foam::tmp<Foam::Field<Type> > Foam::meshToMesh::mapTgtToSrc
 (
     const tmp<Field<Type> >& ttgtField,
     const CombineOp& cop
@@ -309,7 +309,7 @@ Foam::tmp<Foam::Field<Type> > Foam::meshToMeshNew::mapTgtToSrc
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::meshToMeshNew::mapTgtToSrc
+Foam::tmp<Foam::Field<Type> > Foam::meshToMesh::mapTgtToSrc
 (
     const Field<Type>& tgtField
 ) const
@@ -319,7 +319,7 @@ Foam::tmp<Foam::Field<Type> > Foam::meshToMeshNew::mapTgtToSrc
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::meshToMeshNew::mapTgtToSrc
+Foam::tmp<Foam::Field<Type> > Foam::meshToMesh::mapTgtToSrc
 (
     const tmp<Field<Type> >& ttgtField
 ) const
@@ -329,7 +329,7 @@ Foam::tmp<Foam::Field<Type> > Foam::meshToMeshNew::mapTgtToSrc
 
 
 template<class Type, class CombineOp>
-void Foam::meshToMeshNew::mapSrcToTgt
+void Foam::meshToMesh::mapSrcToTgt
 (
     const GeometricField<Type, fvPatchField, volMesh>& field,
     const CombineOp& cop,
@@ -369,7 +369,7 @@ void Foam::meshToMeshNew::mapSrcToTgt
 
 template<class Type, class CombineOp>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
-Foam::meshToMeshNew::mapSrcToTgt
+Foam::meshToMesh::mapSrcToTgt
 (
     const GeometricField<Type, fvPatchField, volMesh>& field,
     const CombineOp& cop
@@ -409,7 +409,7 @@ Foam::meshToMeshNew::mapSrcToTgt
 
 template<class Type, class CombineOp>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
-Foam::meshToMeshNew::mapSrcToTgt
+Foam::meshToMesh::mapSrcToTgt
 (
     const tmp<GeometricField<Type, fvPatchField, volMesh> >& tfield,
     const CombineOp& cop
@@ -421,7 +421,7 @@ Foam::meshToMeshNew::mapSrcToTgt
 
 template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
-Foam::meshToMeshNew::mapSrcToTgt
+Foam::meshToMesh::mapSrcToTgt
 (
     const GeometricField<Type, fvPatchField, volMesh>& field
 ) const
@@ -432,7 +432,7 @@ Foam::meshToMeshNew::mapSrcToTgt
 
 template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
-Foam::meshToMeshNew::mapSrcToTgt
+Foam::meshToMesh::mapSrcToTgt
 (
     const tmp<GeometricField<Type, fvPatchField, volMesh> >& tfield
 ) const
@@ -442,7 +442,7 @@ Foam::meshToMeshNew::mapSrcToTgt
 
 
 template<class Type, class CombineOp>
-void Foam::meshToMeshNew::mapTgtToSrc
+void Foam::meshToMesh::mapTgtToSrc
 (
     const GeometricField<Type, fvPatchField, volMesh>& field,
     const CombineOp& cop,
@@ -482,7 +482,7 @@ void Foam::meshToMeshNew::mapTgtToSrc
 
 template<class Type, class CombineOp>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
-Foam::meshToMeshNew::mapTgtToSrc
+Foam::meshToMesh::mapTgtToSrc
 (
     const GeometricField<Type, fvPatchField, volMesh>& field,
     const CombineOp& cop
@@ -522,7 +522,7 @@ Foam::meshToMeshNew::mapTgtToSrc
 
 template<class Type, class CombineOp>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
-Foam::meshToMeshNew::mapTgtToSrc
+Foam::meshToMesh::mapTgtToSrc
 (
     const tmp<GeometricField<Type, fvPatchField, volMesh> >& tfield,
     const CombineOp& cop
@@ -534,7 +534,7 @@ Foam::meshToMeshNew::mapTgtToSrc
 
 template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
-Foam::meshToMeshNew::mapTgtToSrc
+Foam::meshToMesh::mapTgtToSrc
 (
     const GeometricField<Type, fvPatchField, volMesh>& field
 ) const
@@ -545,7 +545,7 @@ Foam::meshToMeshNew::mapTgtToSrc
 
 template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
-Foam::meshToMeshNew::mapTgtToSrc
+Foam::meshToMesh::mapTgtToSrc
 (
     const tmp<GeometricField<Type, fvPatchField, volMesh> >& tfield
 ) const
