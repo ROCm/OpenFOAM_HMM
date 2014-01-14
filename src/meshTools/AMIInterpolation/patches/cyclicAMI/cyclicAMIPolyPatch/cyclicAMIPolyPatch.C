@@ -359,6 +359,7 @@ void Foam::cyclicAMIPolyPatch::resetAMI
                 surfPtr(),
                 faceAreaIntersect::tmMesh,
                 AMIMethod,
+                AMILowWeightCorrection_,
                 AMIReverse_
             )
         );
@@ -470,6 +471,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     separationVector_(vector::zero),
     AMIPtr_(NULL),
     AMIReverse_(false),
+    AMILowWeightCorrection_(-1.0),
     surfPtr_(NULL),
     surfDict_(fileName("surface"))
 {
@@ -498,6 +500,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     separationVector_(vector::zero),
     AMIPtr_(NULL),
     AMIReverse_(dict.lookupOrDefault<bool>("flipNormals", false)),
+    AMILowWeightCorrection_(dict.lookupOrDefault("lowWeightCorrection", -1.0)),
     surfPtr_(NULL),
     surfDict_(dict.subOrEmptyDict("surface"))
 {
@@ -606,6 +609,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     separationVector_(pp.separationVector_),
     AMIPtr_(NULL),
     AMIReverse_(pp.AMIReverse_),
+    AMILowWeightCorrection_(pp.AMILowWeightCorrection_),
     surfPtr_(NULL),
     surfDict_(pp.surfDict_)
 {
@@ -635,6 +639,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     separationVector_(pp.separationVector_),
     AMIPtr_(NULL),
     AMIReverse_(pp.AMIReverse_),
+    AMILowWeightCorrection_(pp.AMILowWeightCorrection_),
     surfPtr_(NULL),
     surfDict_(pp.surfDict_)
 {
@@ -678,6 +683,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     separationVector_(pp.separationVector_),
     AMIPtr_(NULL),
     AMIReverse_(pp.AMIReverse_),
+    AMILowWeightCorrection_(pp.AMILowWeightCorrection_),
     surfPtr_(NULL),
     surfDict_(pp.surfDict_)
 {}
@@ -790,6 +796,19 @@ const Foam::AMIPatchToPatchInterpolation& Foam::cyclicAMIPolyPatch::AMI() const
     }
 
     return AMIPtr_();
+}
+
+
+bool Foam::cyclicAMIPolyPatch::applyLowWeightCorrection() const
+{
+    if (owner())
+    {
+        return AMI().applyLowWeightCorrection();
+    }
+    else
+    {
+        return neighbPatch().AMI().applyLowWeightCorrection();
+    }
 }
 
 
@@ -970,7 +989,6 @@ void Foam::cyclicAMIPolyPatch::write(Ostream& os) const
             {
                 os.writeKeyword("rotationAngle") << radToDeg(rotationAngle_)
                     << token::END_STATEMENT << nl;
-
             }
 
             break;
@@ -994,6 +1012,12 @@ void Foam::cyclicAMIPolyPatch::write(Ostream& os) const
     if (AMIReverse_)
     {
         os.writeKeyword("flipNormals") << AMIReverse_
+            << token::END_STATEMENT << nl;
+    }
+
+    if (AMILowWeightCorrection_ > 0)
+    {
+        os.writeKeyword("lowWeightCorrection") << AMILowWeightCorrection_
             << token::END_STATEMENT << nl;
     }
 

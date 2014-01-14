@@ -97,6 +97,9 @@ private:
         //- Flag to indicate that slave patch should be reversed for AMI
         const bool AMIReverse_;
 
+        //- Low weight correction threshold for AMI
+        const scalar AMILowWeightCorrection_;
+
         //- Projection surface
         mutable autoPtr<searchableSurface> surfPtr_;
 
@@ -298,6 +301,9 @@ public:
             //- Return a reference to the AMI interpolator
             const AMIPatchToPatchInterpolation& AMI() const;
 
+            //- Return true if applying the low weight correction
+            bool applyLowWeightCorrection() const;
+
 
             // Transformations
 
@@ -325,13 +331,18 @@ public:
 
                 //- Interpolate field
                 template<class Type>
-                tmp<Field<Type> > interpolate(const Field<Type>& fld) const;
+                tmp<Field<Type> > interpolate
+                (
+                    const Field<Type>& fld,
+                    const UList<Type>& defaultValues = UList<Type>()
+                ) const;
 
                 //- Interpolate tmp field
                 template<class Type>
                 tmp<Field<Type> > interpolate
                 (
-                    const tmp<Field<Type> >& tFld
+                    const tmp<Field<Type> >& tFld,
+                    const UList<Type>& defaultValues = UList<Type>()
                 ) const;
 
                 //- Low-level interpolate List
@@ -340,7 +351,8 @@ public:
                 (
                     const UList<Type>& fld,
                     const CombineOp& cop,
-                    List<Type>& result
+                    List<Type>& result,
+                    const UList<Type>& defaultValues = UList<Type>()
                 ) const;
 
 
