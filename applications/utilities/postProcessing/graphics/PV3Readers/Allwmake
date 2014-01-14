@@ -2,8 +2,8 @@
 cd ${0%/*} || exit 1    # run from this directory
 #set -x
 
-if [ "$ParaView_VERSION" != "4.0.1" ]
-    then
+case "$ParaView_VERSION" in
+3*)
     if [ -d "$ParaView_DIR" -a -r "$ParaView_DIR" ]
     then
         [ -n "$PV_PLUGIN_PATH" ] || {
@@ -20,8 +20,10 @@ if [ "$ParaView_VERSION" != "4.0.1" ]
     else
         echo "ERROR: ParaView not found in $ParaView_DIR"
     fi
-else
+    ;;
+*)
     echo "WARN: PV3 readers not building: ParaView_VERSION=$ParaView_VERSION"
-fi
+    ;;
+esac
 
 # ----------------------------------------------------------------- end-of-file
