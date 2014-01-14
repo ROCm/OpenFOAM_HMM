@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -175,7 +175,22 @@ void Foam::cyclicAMIPointPatchField<Type>::swapAddSeparated
             Field<Type> nbrFcFld(nbrPpi().pointToFaceInterpolate(nbrPtFld));
 
             // interpolate to owner
-            nbrFcFld = cyclicAMIPatch_.cyclicAMIPatch().interpolate(nbrFcFld);
+            if (cyclicAMIPatch_.cyclicAMIPatch().applyLowWeightCorrection())
+            {
+                Field<Type> fcFld(ppi().pointToFaceInterpolate(ptFld));
+
+                nbrFcFld =
+                    cyclicAMIPatch_.cyclicAMIPatch().interpolate
+                    (
+                        nbrFcFld,
+                        fcFld
+                    );
+            }
+            else
+            {
+                nbrFcFld =
+                    cyclicAMIPatch_.cyclicAMIPatch().interpolate(nbrFcFld);
+            }
 
             // add to internal field
             this->addToInternalField
@@ -190,11 +205,25 @@ void Foam::cyclicAMIPointPatchField<Type>::swapAddSeparated
             Field<Type> fcFld(ppi().pointToFaceInterpolate(ptFld));
 
             // interpolate to neighbour
-            fcFld =
-                cyclicAMIPatch_.cyclicAMIPatch().neighbPatch().interpolate
-                (
-                    fcFld
-                );
+            if (cyclicAMIPatch_.cyclicAMIPatch().applyLowWeightCorrection())
+            {
+                Field<Type> nbrFcFld(nbrPpi().pointToFaceInterpolate(nbrPtFld));
+
+                fcFld =
+                    cyclicAMIPatch_.cyclicAMIPatch().neighbPatch().interpolate
+                    (
+                        fcFld,
+                        nbrFcFld
+                    );
+            }
+            else
+            {
+                fcFld =
+                    cyclicAMIPatch_.cyclicAMIPatch().neighbPatch().interpolate
+                    (
+                        fcFld
+                    );
+            }
 
             // add to internal field
             nbr.addToInternalField

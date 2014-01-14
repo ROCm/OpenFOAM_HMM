@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,16 +28,17 @@ License
 template<class Type>
 Foam::tmp<Foam::Field<Type> > Foam::cyclicAMIPolyPatch::interpolate
 (
-    const Field<Type>& fld
+    const Field<Type>& fld,
+    const UList<Type>& defaultValues
 ) const
 {
     if (owner())
     {
-        return AMI().interpolateToSource(fld);
+        return AMI().interpolateToSource(fld, defaultValues);
     }
     else
     {
-        return neighbPatch().AMI().interpolateToTarget(fld);
+        return neighbPatch().AMI().interpolateToTarget(fld, defaultValues);
     }
 }
 
@@ -45,17 +46,11 @@ Foam::tmp<Foam::Field<Type> > Foam::cyclicAMIPolyPatch::interpolate
 template<class Type>
 Foam::tmp<Foam::Field<Type> > Foam::cyclicAMIPolyPatch::interpolate
 (
-    const tmp<Field<Type> >& tFld
+    const tmp<Field<Type> >& tFld,
+    const UList<Type>& defaultValues
 ) const
 {
-    if (owner())
-    {
-        return AMI().interpolateToSource(tFld);
-    }
-    else
-    {
-        return neighbPatch().AMI().interpolateToTarget(tFld);
-    }
+    return interpolate(tFld(), defaultValues);
 }
 
 
@@ -64,16 +59,29 @@ void Foam::cyclicAMIPolyPatch::interpolate
 (
     const UList<Type>& fld,
     const CombineOp& cop,
-    List<Type>& result
+    List<Type>& result,
+    const UList<Type>& defaultValues
 ) const
 {
     if (owner())
     {
-        AMI().interpolateToSource(fld, cop, result);
+        AMI().interpolateToSource
+        (
+            fld,
+            cop,
+            result,
+            defaultValues
+        );
     }
     else
     {
-        neighbPatch().AMI().interpolateToTarget(fld, cop, result);
+        neighbPatch().AMI().interpolateToTarget
+        (
+            fld,
+            cop,
+            result,
+            defaultValues
+        );
     }
 }
 
