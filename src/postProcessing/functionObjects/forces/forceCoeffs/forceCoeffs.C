@@ -33,7 +33,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(forceCoeffs, 0);
+    defineTypeNameAndDebug(forceCoeffs, 0);
 }
 
 
@@ -100,7 +100,7 @@ void Foam::forceCoeffs::writeFileHeader(const label i)
 
         for (label j = 0; j < nBin_; j++)
         {
-            const word jn('[' + Foam::name(j) + ']');
+            const word jn('(' + Foam::name(j) + ')');
             writeTabbed(file(i), "Cm" + jn);
             writeTabbed(file(i), "Cd" + jn);
             writeTabbed(file(i), "Cl" + jn);
