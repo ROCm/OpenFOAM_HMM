@@ -31,7 +31,7 @@ runApplication setFields
 runApplication decomposePar -force
 
 # Run
-runParallel $application 8
+runParallel $application $nProcs
 
 # Reconstruct
 runApplication reconstructPar -noFunctionObjects

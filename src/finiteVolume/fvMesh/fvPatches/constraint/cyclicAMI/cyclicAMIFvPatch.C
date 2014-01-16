@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,7 +55,11 @@ void Foam::cyclicAMIFvPatch::makeWeights(scalarField& w) const
 
         const scalarField nbrDeltas
         (
-            interpolate(nbrPatch.nf() & nbrPatch.fvPatch::delta())
+            interpolate
+            (
+                nbrPatch.nf() & nbrPatch.fvPatch::delta(),
+                scalarField(this->size(), 1.0)
+            )
         );
 
         forAll(deltas, faceI)
@@ -82,7 +86,14 @@ Foam::tmp<Foam::vectorField> Foam::cyclicAMIFvPatch::delta() const
     {
         const vectorField patchD(fvPatch::delta());
 
-        const vectorField nbrPatchD(interpolate(nbrPatch.fvPatch::delta()));
+        const vectorField nbrPatchD
+        (
+            interpolate
+            (
+                nbrPatch.fvPatch::delta(),
+                vectorField(this->size(), vector::zero)
+            )
+        );
 
         tmp<vectorField> tpdv(new vectorField(patchD.size()));
         vectorField& pdv = tpdv();

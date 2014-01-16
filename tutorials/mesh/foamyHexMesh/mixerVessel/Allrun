@@ -8,6 +8,6 @@ cd ${0%/*} || exit 1    # run from this directory
 ./Allrun-pre
 
 ## Run simulation
-#./Allrun-simulation
+./Allrun-simulation
 
 # ----------------------------------------------------------------- end-of-file

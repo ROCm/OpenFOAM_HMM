@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,23 @@ inline Foam::label
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::singlePatchProc() const
 {
     return singlePatchProc_;
+}
+
+
+template<class SourcePatch, class TargetPatch>
+inline Foam::scalar
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::lowWeightCorrection() const
+{
+    return lowWeightCorrection_;
+}
+
+
+template<class SourcePatch, class TargetPatch>
+inline bool
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::
+applyLowWeightCorrection() const
+{
+    return lowWeightCorrection_ > 0;
 }
 
 

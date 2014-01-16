@@ -354,7 +354,8 @@ void Foam::meshToMesh::mapSrcToTgt
         (
             srcField,
             multiplyWeightedOp<Type, CombineOp>(cop),
-            tgtField
+            tgtField,
+            UList<Type>::null()
         );
     }
 
@@ -385,7 +386,7 @@ Foam::meshToMesh::mapSrcToTgt
         (
             IOobject
             (
-                type() + ".interpolate(" + field.name() + ")",
+                type() + ":interpolate(" + field.name() + ")",
                 tgtMesh.time().timeName(),
                 tgtMesh,
                 IOobject::NO_READ,
@@ -498,7 +499,7 @@ Foam::meshToMesh::mapTgtToSrc
         (
             IOobject
             (
-                type() + ".interpolate(" + field.name() + ")",
+                type() + ":interpolate(" + field.name() + ")",
                 srcMesh.time().timeName(),
                 srcMesh,
                 IOobject::NO_READ,

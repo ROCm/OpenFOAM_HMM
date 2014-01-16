@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -104,13 +104,15 @@ int main(int argc, char *argv[])
 
     Info<< "Setting boundary layer velocity" << nl << endl;
     scalar yblv = ybl.value();
-    forAll(U, celli)
+    forAll(U, cellI)
     {
-        if (y[celli] <= yblv)
+        if (y[cellI] <= yblv)
         {
-            U[celli] *= ::pow(y[celli]/yblv, (1.0/7.0));
+            mask[cellI] = 1;
+            U[cellI] *= ::pow(y[cellI]/yblv, (1.0/7.0));
         }
     }
+    mask.correctBoundaryConditions();
 
     Info<< "Writing U\n" << endl;
     U.write();
@@ -128,20 +130,21 @@ int main(int argc, char *argv[])
 
     if (isA<incompressible::RASModel>(turbulence()))
     {
-        // Calculate nut
+        // Calculate nut - reference nut is calculated by the turbulence model
+        // on its construction
         tmp<volScalarField> tnut = turbulence->nut();
         volScalarField& nut = tnut();
         volScalarField S(mag(dev(symm(fvc::grad(U)))));
-        nut = sqr(kappa*min(y, ybl))*::sqrt(2)*S;
+        nut = (1 - mask)*nut + mask*sqr(kappa*min(y, ybl))*::sqrt(2)*S;
+
+        // do not correct BC - wall functions will 'undo' manipulation above
+        // by using nut from turbulence model
 
         if (args.optionFound("writenut"))
         {
             Info<< "Writing nut" << endl;
             nut.write();
         }
-
-        // Create G field - used by RAS wall functions
-        volScalarField G(turbulence().GName(), nut*2*sqr(S));
 
 
         //--- Read and modify turbulence fields
@@ -150,8 +153,11 @@ int main(int argc, char *argv[])
         tmp<volScalarField> tk = turbulence->k();
         volScalarField& k = tk();
         scalar ck0 = pow025(Cmu)*kappa;
-        k = sqr(nut/(ck0*min(y, ybl)));
-        k.correctBoundaryConditions();
+        k = (1 - mask)*k + mask*sqr(nut/(ck0*min(y, ybl)));
+
+        // do not correct BC - operation may use inconsistent fields wrt these
+        // local manipulations
+        // k.correctBoundaryConditions();
 
         Info<< "Writing k\n" << endl;
         k.write();
@@ -161,8 +167,11 @@ int main(int argc, char *argv[])
         tmp<volScalarField> tepsilon = turbulence->epsilon();
         volScalarField& epsilon = tepsilon();
         scalar ce0 = ::pow(Cmu, 0.75)/kappa;
-        epsilon = ce0*k*sqrt(k)/min(y, ybl);
-        epsilon.correctBoundaryConditions();
+        epsilon = (1 - mask)*epsilon + mask*ce0*k*sqrt(k)/min(y, ybl);
+
+        // do not correct BC - wall functions will use non-updated k from
+        // turbulence model
+        // epsilon.correctBoundaryConditions();
 
         Info<< "Writing epsilon\n" << endl;
         epsilon.write();
@@ -181,12 +190,12 @@ int main(int argc, char *argv[])
         if (omegaHeader.headerOk())
         {
             volScalarField omega(omegaHeader, mesh);
-            omega =
-                epsilon
-               /(
-                   Cmu*k+dimensionedScalar("VSMALL", k.dimensions(), VSMALL)
-                );
-            omega.correctBoundaryConditions();
+            dimensionedScalar k0("VSMALL", k.dimensions(), VSMALL);
+            omega = (1 - mask)*omega + mask*epsilon/(Cmu*k + k0);
+
+            // do not correct BC - wall functions will use non-updated k from
+            // turbulence model
+            // omega.correctBoundaryConditions();
 
             Info<< "Writing omega\n" << endl;
             omega.write();
@@ -207,7 +216,9 @@ int main(int argc, char *argv[])
         {
             volScalarField nuTilda(nuTildaHeader, mesh);
             nuTilda = nut;
-            nuTilda.correctBoundaryConditions();
+
+            // do not correct BC
+            // nuTilda.correctBoundaryConditions();
 
             Info<< "Writing nuTilda\n" << endl;
             nuTilda.write();
