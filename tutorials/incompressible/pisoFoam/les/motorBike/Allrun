@@ -13,7 +13,7 @@ cloneParallelCase()
     else
         echo "Cloning $2 case from $1 in parallel mode"
         mkdir $2
-        cpfiles="0 0.org processor* system constant"
+        cpfiles="processor* system constant"
         for f in $cpfiles
         do
             cp -r $1/$f $2
