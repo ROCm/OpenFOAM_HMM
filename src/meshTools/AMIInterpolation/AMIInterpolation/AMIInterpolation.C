@@ -247,14 +247,17 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
                 << gMin(wghtSum) << ", "
                 << gMax(wghtSum) << ", "
                 << gAverage(wghtSum) << endl;
-        }
-    }
 
-    if (debug && nLowWeight)
-    {
-        Pout<< "AMI: Identified " << nLowWeight
-            << " faces with weights less than " << lowWeightTol
-            << endl;
+            const label nLow = returnReduce(nLowWeight, sumOp<label>());
+
+            if (nLow)
+            {
+                IInfo<< "AMI: Patch " << patchName
+                    << " identified " << nLow
+                    << " faces with weights less than " << lowWeightTol
+                    << endl;
+            }
+        }
     }
 }
 
@@ -784,6 +787,14 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
     const TargetPatch& tgtPatch
 )
 {
+    label srcTotalSize = returnReduce(srcPatch.size(), sumOp<label>());
+    label tgtTotalSize = returnReduce(tgtPatch.size(), sumOp<label>());
+
+    IInfo<< "AMI: Creating addressing and weights between "
+        << srcTotalSize << " source faces and "
+        << tgtTotalSize << " target faces"
+        << endl;
+
     // Calculate face areas
     srcMagSf_.setSize(srcPatch.size());
     forAll(srcMagSf_, faceI)
@@ -956,7 +967,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
     }
     else
     {
-
         // calculate AMI interpolation
         autoPtr<AMIMethod<SourcePatch, TargetPatch> > AMIPtr
         (
