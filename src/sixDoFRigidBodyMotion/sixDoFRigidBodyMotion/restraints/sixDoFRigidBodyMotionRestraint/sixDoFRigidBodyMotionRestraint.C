@@ -60,7 +60,7 @@ bool Foam::sixDoFRigidBodyMotionRestraint::read
     const dictionary& sDoFRBMRDict
 )
 {
-    sDoFRBMRCoeffs_ = sDoFRBMRDict;
+    sDoFRBMRCoeffs_ = sDoFRBMRDict.subOrEmptyDict(type() + "Coeffs");
 
     return true;
 }
