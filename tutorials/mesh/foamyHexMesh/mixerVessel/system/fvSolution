@@ -66,16 +66,15 @@ solvers
     "U.*"
     {
         solver          smoothSolver;
-        smoother        GaussSeidel;
+        smoother        symGaussSeidel;
         tolerance       1e-6;
         relTol          0;
-        nSweeps         1;
     }
 
     "(T|k|epsilon).*"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       1e-6;
         relTol          0;
     }
