@@ -1375,14 +1375,14 @@ void Foam::autoSnapDriver::releasePointsNextToMultiPatch
                 patchAttraction[pointI] = rawPatchAttraction[pointI];
                 patchConstraints[pointI] = rawPatchConstraints[pointI];
 
-                if (multiPatchStr.valid())
-                {
-                    Pout<< "Adding constraint on multiPatchPoint:"
-                        << pp.localPoints()[pointI]
-                        << " constraint:" << patchConstraints[pointI]
-                        << " attraction:" << patchAttraction[pointI]
-                        << endl;
-                }
+                //if (multiPatchStr.valid())
+                //{
+                //    Pout<< "Adding constraint on multiPatchPoint:"
+                //        << pp.localPoints()[pointI]
+                //        << " constraint:" << patchConstraints[pointI]
+                //        << " attraction:" << patchAttraction[pointI]
+                //        << endl;
+                //}
             }
         }
     }
@@ -2152,6 +2152,28 @@ void Foam::autoSnapDriver::determineFeatures
                             patchConstraints
                         );
                     }
+                }
+                else
+                {
+                    // No multi-patch snapping
+                    nearInfo = findNearFeaturePoint
+                    (
+                        false,              // isRegionPoint
+                        pp,
+                        snapDist,
+                        pointI,
+                        estimatedPt,
+
+                        // Feature-point to pp point
+                        pointAttractor,
+                        pointConstraints,
+                        // Feature-edge to pp point
+                        edgeAttractors,
+                        edgeConstraints,
+                        // pp point to nearest feature
+                        patchAttraction,
+                        patchConstraints
+                    );
                 }
 
                 const pointIndexHit& info = nearInfo.second();
