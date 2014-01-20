@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -337,14 +337,7 @@ Foam::AMIMethod<SourcePatch, TargetPatch>::AMIMethod
     tgtMagSf_(tgtMagSf),
     srcNonOverlap_(),
     triMode_(triMode)
-{
-    label srcSize = returnReduce(srcPatch_.size(), sumOp<label>());
-    label tgtSize = returnReduce(tgtPatch_.size(), sumOp<label>());
-
-    IInfo<< "AMI: Creating addressing and weights between "
-        << srcSize << " source faces and " << tgtSize << " target faces"
-        << endl;
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //

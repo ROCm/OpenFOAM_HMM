@@ -45,11 +45,14 @@ boundaryField
             {
                 sixDoFRigidBodyMotionRestraint linearSpring;
 
-                anchor          (0.5 0.5 1);
-                refAttachmentPt $centreOfMass;
-                stiffness       5000;
-                damping         50;
-                restLength      0.4;
+                linearSpringCoeffs
+                {
+                    anchor          (0.5 0.5 1);
+                    refAttachmentPt $centreOfMass;
+                    stiffness       5000;
+                    damping         50;
+                    restLength      0.4;
+                }
             }
         }
         constraints
@@ -62,7 +65,11 @@ boundaryField
             zLine
             {
                 sixDoFRigidBodyMotionConstraint line;
-                direction           (0 0 1);
+
+                lineCoeffs
+                {
+                    direction           (0 0 1);
+                }
             }
         }
         value           uniform (0 0 0);

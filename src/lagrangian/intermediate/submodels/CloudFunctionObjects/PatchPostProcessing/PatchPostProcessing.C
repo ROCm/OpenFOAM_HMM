@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,16 +68,14 @@ void Foam::PatchPostProcessing<CloudType>::write()
         {
             const fvMesh& mesh = this->owner().mesh();
 
-            fileName outputDir = this->outputDir()/mesh.time().timeName();
-
             // Create directory if it doesn't exist
-            mkDir(outputDir);
+            mkDir(this->outputTimeDir());
 
             const word& patchName = mesh.boundaryMesh()[patchIDs_[i]].name();
 
             OFstream patchOutFile
             (
-                outputDir/patchName + ".post",
+                this->outputTimeDir()/patchName + ".post",
                 IOstream::ASCII,
                 IOstream::currentVersion,
                 mesh.time().writeCompression()

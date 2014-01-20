@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -79,7 +79,8 @@ Foam::CloudFunctionObject<CloudType>::CloudFunctionObject
     const CloudFunctionObject<CloudType>& ppm
 )
 :
-    CloudSubModelBase<CloudType>(ppm)
+    CloudSubModelBase<CloudType>(ppm),
+    outputDir_(ppm.outputDir_)
 {}
 
 
@@ -153,6 +154,13 @@ template<class CloudType>
 const Foam::fileName& Foam::CloudFunctionObject<CloudType>::outputDir() const
 {
     return outputDir_;
+}
+
+
+template<class CloudType>
+Foam::fileName Foam::CloudFunctionObject<CloudType>::outputTimeDir() const
+{
+    return outputDir_/this->owner().time().timeName();
 }
 
 

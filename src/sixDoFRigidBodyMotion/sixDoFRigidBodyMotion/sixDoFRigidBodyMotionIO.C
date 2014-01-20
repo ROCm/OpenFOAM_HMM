@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,13 +60,7 @@ void Foam::sixDoFRigidBodyMotion::write(Ostream& os) const
             os.writeKeyword("sixDoFRigidBodyMotionRestraint")
                 << restraintType << token::END_STATEMENT << nl;
 
-            os.writeKeyword(word(restraintType + "Coeffs")) << nl;
-
-            os  << indent << token::BEGIN_BLOCK << nl << incrIndent;
-
             restraints_[rI].write(os);
-
-            os << decrIndent << indent << token::END_BLOCK << nl;
 
             os  << decrIndent << indent << token::END_BLOCK << endl;
         }
@@ -89,15 +83,7 @@ void Foam::sixDoFRigidBodyMotion::write(Ostream& os) const
             os.writeKeyword("sixDoFRigidBodyMotionConstraint")
                 << constraintType << token::END_STATEMENT << nl;
 
-            constraints_[rI].sixDoFRigidBodyMotionConstraint::write(os);
-
-            os.writeKeyword(word(constraintType + "Coeffs")) << nl;
-
-            os  << indent << token::BEGIN_BLOCK << nl << incrIndent;
-
             constraints_[rI].write(os);
-
-            os << decrIndent << indent << token::END_BLOCK << nl;
 
             os  << decrIndent << indent << token::END_BLOCK << endl;
         }

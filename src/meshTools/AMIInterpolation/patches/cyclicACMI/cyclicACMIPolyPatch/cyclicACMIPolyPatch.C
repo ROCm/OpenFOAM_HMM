@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,12 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cyclicACMIPolyPatch.H"
-#include "transformField.H"
 #include "SubField.H"
-#include "polyMesh.H"
 #include "Time.H"
-#include "faceAreaIntersect.H"
-#include "ops.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

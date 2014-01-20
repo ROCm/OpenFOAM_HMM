@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -116,7 +116,7 @@ bool Foam::sixDoFRigidBodyMotionConstraints::line::read
 }
 
 
-void Foam::sixDoFRigidBodyMotionConstraints::line::write
+void Foam::sixDoFRigidBodyMotionConstraints::line::writeData
 (
     Ostream& os
 ) const
@@ -124,5 +124,6 @@ void Foam::sixDoFRigidBodyMotionConstraints::line::write
     os.writeKeyword("direction")
         << dir_ << token::END_STATEMENT << nl;
 }
+
 
 // ************************************************************************* //
