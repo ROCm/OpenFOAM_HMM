@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -197,6 +197,13 @@ int main(int argc, char *argv[])
         databases[0].times(),
         args
     );
+
+    // Note that we do not set the runTime time so it is still the
+    // one set through the controlDict. The -time option
+    // only affects the selected set of times from processor0.
+    // - can be illogical
+    // + any point motion handled through mesh.readUpdate
+
 
     if (timeDirs.empty())
     {

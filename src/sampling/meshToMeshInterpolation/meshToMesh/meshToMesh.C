@@ -420,6 +420,7 @@ Foam::meshToMesh::patchAMIs() const
                     tgtPP,
                     faceAreaIntersect::tmMesh,
                     interpolationMethodAMI(method_),
+                    -1,
                     true // flip target patch since patch normals are aligned
                 )
             );

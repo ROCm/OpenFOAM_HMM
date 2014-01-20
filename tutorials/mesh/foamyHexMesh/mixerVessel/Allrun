@@ -7,7 +7,7 @@ cd ${0%/*} || exit 1    # run from this directory
 # Generate mesh
 ./Allrun-pre
 
-## Run simulation
+# Run simulation
 ./Allrun-simulation
 
 # ----------------------------------------------------------------- end-of-file
