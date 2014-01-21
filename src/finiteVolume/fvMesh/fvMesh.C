@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -828,6 +828,9 @@ void Foam::fvMesh::updateMesh(const mapPolyMesh& mpm)
         }
     }
 
+
+    // Clear mesh motion flux (note: could instead save & map like volumes)
+    deleteDemandDrivenData(phiPtr_);
 
     // Clear the sliced fields
     clearGeomNotOldVol();
