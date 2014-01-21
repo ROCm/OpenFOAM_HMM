@@ -26,5 +26,4 @@ EXE_LIBS = \
     -ltopoChangerFvMesh \
     -lmeshTools \
     -lfvOptions \
-    -lsampling \
-    -lsixDoFRigidBodyMotion
+    -lsampling
