@@ -418,9 +418,9 @@ addLayersControls
         // default is 0.
         //nSmoothDisplacement 90;
 
-        // Optional: do not extrude any point where all surrounding faces
-        // have at least one point not extruded. Default is true.
-        //detectExtrusionIsland false;
+        // (wip)Optional: do not extrude a point if none of the surrounding points is
+        // not extruded. Default is false.
+        //detectExtrusionIsland true;
 
 
     // Mesh shrinking
@@ -488,7 +488,9 @@ meshQualityControls
 //(
 //    mesh            // write intermediate meshes
 //    intersections   // write current mesh intersections as .obj files
-//    featureSeeds    // write information about explicit feature edge refinement
+//    featureSeeds    // write information about explicit feature edge
+//                    // refinement
+//    attraction      // write attraction as .obj files
 //    layerInfo       // write information about layers
 //);
 //

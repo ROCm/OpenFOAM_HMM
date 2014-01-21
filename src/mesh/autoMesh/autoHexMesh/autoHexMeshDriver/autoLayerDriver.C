@@ -41,7 +41,7 @@ Description
 #include "mapPolyMesh.H"
 #include "addPatchCellLayer.H"
 #include "mapDistributePolyMesh.H"
-#include "OFstream.H"
+#include "OBJstream.H"
 #include "layerParameters.H"
 #include "combineFaces.H"
 #include "IOmanip.H"
@@ -80,37 +80,25 @@ void Foam::autoLayerDriver::dumpDisplacement
     const List<extrudeMode>& extrudeStatus
 )
 {
-    OFstream dispStr(prefix + "_disp.obj");
+    OBJstream dispStr(prefix + "_disp.obj");
     Info<< "Writing all displacements to " << dispStr.name() << endl;
-
-    label vertI = 0;
 
     forAll(patchDisp, patchPointI)
     {
         const point& pt = pp.localPoints()[patchPointI];
-
-        meshTools::writeOBJ(dispStr, pt); vertI++;
-        meshTools::writeOBJ(dispStr, pt + patchDisp[patchPointI]); vertI++;
-
-        dispStr << "l " << vertI-1 << ' ' << vertI << nl;
+        dispStr.write(linePointRef(pt, pt + patchDisp[patchPointI]));
     }
 
 
-    OFstream illStr(prefix + "_illegal.obj");
+    OBJstream illStr(prefix + "_illegal.obj");
     Info<< "Writing invalid displacements to " << illStr.name() << endl;
-
-    vertI = 0;
 
     forAll(patchDisp, patchPointI)
     {
         if (extrudeStatus[patchPointI] != EXTRUDE)
         {
             const point& pt = pp.localPoints()[patchPointI];
-
-            meshTools::writeOBJ(illStr, pt); vertI++;
-            meshTools::writeOBJ(illStr, pt + patchDisp[patchPointI]); vertI++;
-
-            illStr << "l " << vertI-1 << ' ' << vertI << nl;
+            illStr.write(linePointRef(pt, pt + patchDisp[patchPointI]));
         }
     }
 }
@@ -441,13 +429,12 @@ void Foam::autoLayerDriver::handleFeatureAngle
             point::max          // null value
         );
 
-        label vertI = 0;
-        autoPtr<OFstream> str;
+        autoPtr<OBJstream> str;
         if (debug&meshRefinement::MESH)
         {
             str.reset
             (
-                new OFstream
+                new OBJstream
                 (
                     mesh.time().path()
                   / "featureEdges_"
@@ -497,11 +484,9 @@ void Foam::autoLayerDriver::handleFeatureAngle
 
                     if (str.valid())
                     {
-                        meshTools::writeOBJ(str(), pp.localPoints()[e[0]]);
-                        vertI++;
-                        meshTools::writeOBJ(str(), pp.localPoints()[e[1]]);
-                        vertI++;
-                        str()<< "l " << vertI-1 << ' ' << vertI << nl;
+                        const point& p0 = pp.localPoints()[e[0]];
+                        const point& p1 = pp.localPoints()[e[1]];
+                        str().write(linePointRef(p0, p1));
                     }
                 }
             }
@@ -1542,7 +1527,7 @@ void Foam::autoLayerDriver::getPatchDisplacement
 
             if (!meshTools::visNormal(n, faceNormals, pointFaces[patchPointI]))
             {
-                if (debug&meshRefinement::OBJINTERSECTIONS)
+                if (debug&meshRefinement::ATTRACTION)
                 {
                     Pout<< "No valid normal for point " << meshPointI
                         << ' ' << pp.points()[meshPointI]
@@ -1582,7 +1567,7 @@ void Foam::autoLayerDriver::getPatchDisplacement
 
             if (nPoints > 0)
             {
-                if (debug&meshRefinement::OBJINTERSECTIONS)
+                if (debug&meshRefinement::ATTRACTION)
                 {
                     Pout<< "Displacement at illegal point "
                         << localPoints[patchPointI]

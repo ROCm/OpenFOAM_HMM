@@ -1279,7 +1279,7 @@ void Foam::autoSnapDriver::detectNearSurfaces
 
 
     autoPtr<OBJstream> gapStr;
-    if (debug&meshRefinement::OBJINTERSECTIONS)
+    if (debug&meshRefinement::ATTRACTION)
     {
         gapStr.reset
         (
@@ -3089,7 +3089,7 @@ void Foam::autoSnapDriver::doSnap
             meshMover.setDisplacement(disp);
 
 
-            if (debug&meshRefinement::OBJINTERSECTIONS)
+            if (debug&meshRefinement::ATTRACTION)
             {
                 dumpMove
                 (
@@ -3120,13 +3120,6 @@ void Foam::autoSnapDriver::doSnap
                     << "    surfaces but the"
                     << " resulting mesh will not satisfy your quality"
                     << " constraints" << nl << endl;
-                //Info<< "Did not succesfully snap mesh. Giving up."
-                //    << nl << endl;
-                //
-                //// Use current mesh as base mesh
-                //meshMover.correct();
-                //
-                //break;
             }
 
             if (debug&meshRefinement::MESH)

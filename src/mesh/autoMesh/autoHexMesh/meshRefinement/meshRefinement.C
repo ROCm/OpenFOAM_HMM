@@ -67,13 +67,14 @@ namespace Foam
     const char* Foam::NamedEnum
     <
         Foam::meshRefinement::IOdebugType,
-        4
+        5
     >::names[] =
     {
         "mesh",
         //"scalarLevels",
         "intersections",
         "featureSeeds",
+        "attraction",
         "layerInfo"
     };
 
@@ -102,7 +103,7 @@ namespace Foam
 
 }
 
-const Foam::NamedEnum<Foam::meshRefinement::IOdebugType, 4>
+const Foam::NamedEnum<Foam::meshRefinement::IOdebugType, 5>
 Foam::meshRefinement::IOdebugTypeNames;
 
 const Foam::NamedEnum<Foam::meshRefinement::IOoutputType, 1>
