@@ -186,6 +186,36 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
                     rotationAngle_ *= -1;
                 }
 
+                scalar areaError =
+                    max(errorPos, errorNeg)/(mag(area1) + ROOTVSMALL);
+
+                if (areaError > matchTolerance())
+                {
+                    WarningIn
+                    (
+                        "void Foam::cyclicAMIPolyPatch::calcTransforms"
+                        "("
+                            "const primitivePatch&, "
+                            "const pointField&, "
+                            "const vectorField&, "
+                            "const pointField&, "
+                            "const vectorField&"
+                        ")"
+                    )
+                        << "Patch areas are not consistent within "
+                        << 100*matchTolerance()
+                        << " % indicating a possible error in the specified "
+                        << "angle of rotation" << nl
+                        << "    owner patch     : " << name() << nl
+                        << "    neighbour patch : " << neighbPatch().name()
+                        << nl
+                        << "    angle           : "
+                        << radToDeg(rotationAngle_) << " deg" << nl
+                        << "    area error      : " << 100*areaError << " %"
+                        << "    match tolerance : " <<  matchTolerance()
+                        << endl;
+                }
+
                 if (debug)
                 {
                     scalar theta = radToDeg(rotationAngle_);
