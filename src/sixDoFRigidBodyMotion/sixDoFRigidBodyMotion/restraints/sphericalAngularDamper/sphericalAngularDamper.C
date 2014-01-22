@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -102,7 +102,7 @@ bool Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularDamper::read
 }
 
 
-void Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularDamper::writeData
+void Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularDamper::write
 (
     Ostream& os
 ) const
