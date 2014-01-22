@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -195,7 +195,7 @@ bool Foam::sixDoFRigidBodyMotionRestraints::linearAxialAngularSpring::read
 }
 
 
-void Foam::sixDoFRigidBodyMotionRestraints::linearAxialAngularSpring::writeData
+void Foam::sixDoFRigidBodyMotionRestraints::linearAxialAngularSpring::write
 (
     Ostream& os
 ) const
@@ -212,6 +212,5 @@ void Foam::sixDoFRigidBodyMotionRestraints::linearAxialAngularSpring::writeData
     os.writeKeyword("damping")
         << damping_ << token::END_STATEMENT << nl;
 }
-
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -147,7 +147,7 @@ bool Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::read
 }
 
 
-void Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::writeData
+void Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::write
 (
     Ostream& os
 ) const

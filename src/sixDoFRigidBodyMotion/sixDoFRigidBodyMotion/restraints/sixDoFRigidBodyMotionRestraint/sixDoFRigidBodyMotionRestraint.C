@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,17 +63,6 @@ bool Foam::sixDoFRigidBodyMotionRestraint::read
     sDoFRBMRCoeffs_ = sDoFRBMRDict;
 
     return true;
-}
-
-
-void Foam::sixDoFRigidBodyMotionRestraint::write(Ostream& os) const
-{
-    os  << indent << word(type() + "Coeffs") << nl
-        << indent << token::BEGIN_BLOCK << nl << incrIndent;
-
-    writeData(os);
-
-    os  << decrIndent << indent << token::END_BLOCK << endl;
 }
 
 
