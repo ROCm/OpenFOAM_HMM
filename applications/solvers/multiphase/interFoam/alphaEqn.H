@@ -108,8 +108,8 @@
             MULES::correct(alpha1, tphiAlphaUn(), tphiAlphaCorr(), 1, 0);
             #endif
 
-            // Under-relax the correction for more than 3 correctors
-            if (aCorr < 3)
+            // Under-relax the correction for all but the 1st corrector
+            if (aCorr == 0)
             {
                 tphiAlpha() += tphiAlphaCorr();
             }

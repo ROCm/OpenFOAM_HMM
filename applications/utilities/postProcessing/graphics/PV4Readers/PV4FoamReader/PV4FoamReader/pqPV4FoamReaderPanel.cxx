@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,7 +71,7 @@ pqPV4FoamReaderPanel::pqPV4FoamReaderPanel
     if ((prop = this->proxy()->GetProperty("UiRefresh")) != 0)
     {
         prop->SetImmediateUpdate(1);
-        QPushButton *refresh = new QPushButton("Refresh Times");
+        QPushButton* refresh = new QPushButton("Refresh Times");
         refresh->setToolTip("Rescan for updated times/fields.");
 
         form->addWidget(refresh, 0, 0, Qt::AlignLeft);
@@ -334,6 +334,23 @@ pqPV4FoamReaderPanel::pqPV4FoamReaderPanel
     QFrame* hline3 = new QFrame(this);
     hline3->setFrameStyle(QFrame::HLine | QFrame::Sunken);
     form->addWidget(hline3, 7, 0, 1, 3);
+
+    // update GUI button
+    if ((prop = this->proxy()->GetProperty("UpdateGUI")) != 0)
+    {
+        prop->SetImmediateUpdate(1);
+        QPushButton* updateGUI = new QPushButton("Update GUI");
+        updateGUI->setToolTip("Update GUI");
+
+        form->addWidget(updateGUI, 8, 0, Qt::AlignLeft);
+        QObject::connect
+        (
+            updateGUI,
+            SIGNAL(clicked()),
+            this,
+            SLOT(setModified())
+        );
+    }
 }
 
 

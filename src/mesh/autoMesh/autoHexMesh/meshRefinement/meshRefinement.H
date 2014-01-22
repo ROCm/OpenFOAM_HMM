@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -92,15 +92,17 @@ public:
             //IOSCALARLEVELS,
             IOOBJINTERSECTIONS,
             IOFEATURESEEDS,
+            IOATTRACTION,
             IOLAYERINFO
         };
-        static const NamedEnum<IOdebugType, 4> IOdebugTypeNames;
+        static const NamedEnum<IOdebugType, 5> IOdebugTypeNames;
         enum debugType
         {
             MESH = 1<<IOMESH,
             //SCALARLEVELS = 1<<IOSCALARLEVELS,
             OBJINTERSECTIONS = 1<<IOOBJINTERSECTIONS,
             FEATURESEEDS = 1<<IOFEATURESEEDS,
+            ATTRACTION = 1<< IOATTRACTION,
             LAYERINFO = 1<<IOLAYERINFO
         };
 
@@ -256,7 +258,7 @@ private:
             //  (or -1 if not passed through). Uses tracking.
             void markFeatureCellLevel
             (
-                const point& keepPoint,
+                const pointField& keepPoints,
                 labelList& maxFeatureLevel
             ) const;
 
@@ -264,7 +266,7 @@ private:
             //  features.
             label markFeatureRefinement
             (
-                const point& keepPoint,
+                const pointField& keepPoints,
                 const label nAllowRefine,
 
                 labelList& refineCell,
@@ -377,14 +379,6 @@ private:
                 labelList& neiPatch
             ) const;
 
-            //- Determine patch for baffle using some heuristic (and not
-            //  surface)
-            label getBafflePatch
-            (
-                const labelList& facePatch,
-                const label faceI
-            ) const;
-
             //- Repatches external face or creates baffle for internal face
             //  with user specified patches (might be different for both sides).
             //  Returns label of added face.
@@ -449,6 +443,11 @@ private:
                 const scalarField& perpendicularAngle,
                 const labelList& globalToMasterPatch
             ) const;
+
+            //- Returns list with for every face the label of the nearest
+            //  patch. Any unreached face (disconnected mesh?) becomes
+            //  adaptPatchIDs[0]
+            labelList nearestPatch(const labelList& adaptPatchIDs) const;
 
             //- Returns list with for every internal face -1 or the patch
             //  they should be baffled into.
@@ -782,7 +781,7 @@ public:
             //- Calculate list of cells to refine.
             labelList refineCandidates
             (
-                const point& keepPoint,
+                const pointField& keepPoints,
                 const scalar curvature,
                 const scalar planarAngle,
 
@@ -917,7 +916,7 @@ public:
             //- Select coupled faces that are not collocated
             void selectSeparatedCoupledFaces(boolList&) const;
 
-            //- Find region cell is in. Uses optional perturbation to re-test.
+            //- Find region point is in. Uses optional perturbation to re-test.
             static label findRegion
             (
                 const polyMesh&,
@@ -1021,6 +1020,8 @@ public:
                     const labelHashSet& set
                 ) const;
 
+                //- Merge edges, maintain mesh quality. Return global number
+                //  of edges merged
                 label mergeEdgesUndo
                 (
                     const scalar minCos,

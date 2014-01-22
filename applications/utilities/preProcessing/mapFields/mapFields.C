@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,14 +27,12 @@ Application
 Description
     Maps volume fields from one mesh to another, reading and
     interpolating all fields present in the time directory of both cases.
-    Parallel and non-parallel cases are handled without the need to reconstruct
-    them first.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "meshToMesh.H"
-#include "processorFvPatch.H"
+#include "processorPolyPatch.H"
 #include "MapMeshes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -43,26 +41,33 @@ void mapConsistentMesh
 (
     const fvMesh& meshSource,
     const fvMesh& meshTarget,
-    const meshToMesh::order& mapOrder,
-    const bool subtract
+    const meshToMesh::interpolationMethod& mapMethod,
+    const bool subtract,
+    const HashSet<word>& selectedFields,
+    const bool noLagrangian
 )
 {
+    Info<< nl << "Consistently creating and mapping fields for time "
+        << meshSource.time().timeName() << nl << endl;
+
+    meshToMesh interp(meshSource, meshTarget, mapMethod);
+
     if (subtract)
     {
-        MapConsistentMesh<minusEqOp>
+        MapMesh<minusEqOp>
         (
-            meshSource,
-            meshTarget,
-            mapOrder
+            interp,
+            selectedFields,
+            noLagrangian
         );
     }
     else
     {
-        MapConsistentMesh<eqOp>
+        MapMesh<plusEqOp>
         (
-            meshSource,
-            meshTarget,
-            mapOrder
+            interp,
+            selectedFields,
+            noLagrangian
         );
     }
 }
@@ -74,59 +79,40 @@ void mapSubMesh
     const fvMesh& meshTarget,
     const HashTable<word>& patchMap,
     const wordList& cuttingPatches,
-    const meshToMesh::order& mapOrder,
-    const bool subtract
+    const meshToMesh::interpolationMethod& mapMethod,
+    const bool subtract,
+    const HashSet<word>& selectedFields,
+    const bool noLagrangian
 )
 {
+    Info<< nl << "Creating and mapping fields for time "
+        << meshSource.time().timeName() << nl << endl;
+
+    meshToMesh interp
+    (
+        meshSource,
+        meshTarget,
+        mapMethod,
+        patchMap,
+        cuttingPatches
+    );
+
     if (subtract)
     {
-        MapSubMesh<minusEqOp>
+        MapMesh<minusEqOp>
         (
-            meshSource,
-            meshTarget,
-            patchMap,
-            cuttingPatches,
-            mapOrder
+            interp,
+            selectedFields,
+            noLagrangian
         );
     }
     else
     {
-        MapSubMesh<eqOp>
+        MapMesh<plusEqOp>
         (
-            meshSource,
-            meshTarget,
-            patchMap,
-            cuttingPatches,
-            mapOrder
-        );
-    }
-}
-
-
-void mapConsistentSubMesh
-(
-    const fvMesh& meshSource,
-    const fvMesh& meshTarget,
-    const meshToMesh::order& mapOrder,
-    const bool subtract
-)
-{
-    if (subtract)
-    {
-        MapConsistentSubMesh<minusEqOp>
-        (
-            meshSource,
-            meshTarget,
-            mapOrder
-        );
-    }
-    else
-    {
-        MapConsistentSubMesh<eqOp>
-        (
-            meshSource,
-            meshTarget,
-            mapOrder
+            interp,
+            selectedFields,
+            noLagrangian
         );
     }
 }
@@ -139,30 +125,20 @@ wordList addProcessorPatches
 )
 {
     // Add the processor patches to the cutting list
-    HashTable<label> cuttingPatchTable;
+    HashSet<word> cuttingPatchTable;
     forAll(cuttingPatches, i)
     {
-        cuttingPatchTable.insert(cuttingPatches[i], i);
+        cuttingPatchTable.insert(cuttingPatches[i]);
     }
 
-    forAll(meshTarget.boundary(), patchi)
+    const polyBoundaryMesh& pbm = meshTarget.boundaryMesh();
+
+    forAll(pbm, patchI)
     {
-        if (isA<processorFvPatch>(meshTarget.boundary()[patchi]))
+        if (isA<processorPolyPatch>(pbm[patchI]))
         {
-            if
-            (
-               !cuttingPatchTable.found
-                (
-                    meshTarget.boundaryMesh()[patchi].name()
-                )
-            )
-            {
-                cuttingPatchTable.insert
-                (
-                    meshTarget.boundaryMesh()[patchi].name(),
-                    -1
-                );
-            }
+            const word& patchName = pbm[patchI].name();
+            cuttingPatchTable.insert(patchName);
         }
     }
 
@@ -178,7 +154,7 @@ int main(int argc, char *argv[])
     (
         "map volume fields from one mesh to another"
     );
-    argList::noParallel();
+
     argList::validArgs.append("sourceCase");
 
     argList::addOption
@@ -201,16 +177,6 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
-        "parallelSource",
-        "the source is decomposed"
-    );
-    argList::addBoolOption
-    (
-        "parallelTarget",
-        "the target is decomposed"
-    );
-    argList::addBoolOption
-    (
         "consistent",
         "source and target geometry and boundary conditions identical"
     );
@@ -225,13 +191,20 @@ int main(int argc, char *argv[])
         "subtract",
         "subtract mapped source from target"
     );
+    argList::addOption
+    (
+        "fields",
+        "list",
+        "specify a list of fields to be mapped. Eg, '(U T p)' - "
+        "regular expressions not currently supported"
+    );
+    argList::addBoolOption
+    (
+        "noLagrangian",
+        "skip mapping lagrangian positions and fields"
+    );
 
     argList args(argc, argv);
-
-    if (!args.check())
-    {
-        FatalError.exit();
-    }
 
     fileName rootDirTarget(args.rootPath());
     fileName caseDirTarget(args.globalCaseName());
@@ -256,35 +229,17 @@ int main(int argc, char *argv[])
         Info<< "Target region: " << targetRegion << endl;
     }
 
-    const bool parallelSource = args.optionFound("parallelSource");
-    const bool parallelTarget = args.optionFound("parallelTarget");
     const bool consistent = args.optionFound("consistent");
 
-    meshToMesh::order mapOrder = meshToMesh::INTERPOLATE;
+    meshToMesh::interpolationMethod mapMethod =
+        meshToMesh::imCellVolumeWeight;
+
     if (args.optionFound("mapMethod"))
     {
-        const word mapMethod(args["mapMethod"]);
-        if (mapMethod == "mapNearest")
-        {
-            mapOrder = meshToMesh::MAP;
-        }
-        else if (mapMethod == "interpolate")
-        {
-            mapOrder = meshToMesh::INTERPOLATE;
-        }
-        else if (mapMethod == "cellPointInterpolate")
-        {
-            mapOrder = meshToMesh::CELL_POINT_INTERPOLATE;
-        }
-        else
-        {
-            FatalErrorIn(args.executable())
-                << "Unknown mapMethod " << mapMethod << ". Valid options are: "
-                << "mapNearest, interpolate and cellPointInterpolate"
-                << exit(FatalError);
-        }
+        mapMethod = meshToMesh::interpolationMethodNames_[args["mapMethod"]];
 
-        Info<< "Mapping method: " << mapMethod << endl;
+        Info<< "Mapping method: "
+            << meshToMesh::interpolationMethodNames_[mapMethod] << endl;
     }
 
     const bool subtract = args.optionFound("subtract");
@@ -293,6 +248,13 @@ int main(int argc, char *argv[])
         Info<< "Subtracting mapped source field from target" << endl;
     }
 
+    HashSet<word> selectedFields;
+    if (args.optionFound("fields"))
+    {
+        args.optionLookup("fields")() >> selectedFields;
+    }
+
+    const bool noLagrangian = args.optionFound("noLagrangian");
 
     #include "createTimes.H"
 
@@ -318,341 +280,58 @@ int main(int argc, char *argv[])
         mapFieldsDict.lookup("cuttingPatches") >>  cuttingPatches;
     }
 
-    if (parallelSource && !parallelTarget)
+    #include "setTimeIndex.H"
+
+    Info<< "\nCreate meshes\n" << endl;
+
+    fvMesh meshSource
+    (
+        IOobject
+        (
+            sourceRegion,
+            runTimeSource.timeName(),
+            runTimeSource
+        )
+    );
+
+    fvMesh meshTarget
+    (
+        IOobject
+        (
+            targetRegion,
+            runTimeTarget.timeName(),
+            runTimeTarget
+        )
+    );
+
+    Info<< "Source mesh size: " << meshSource.nCells() << tab
+        << "Target mesh size: " << meshTarget.nCells() << nl << endl;
+
+    if (consistent)
     {
-        IOdictionary decompositionDict
+        mapConsistentMesh
         (
-            IOobject
-            (
-                "decomposeParDict",
-                runTimeSource.system(),
-                runTimeSource,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE
-            )
+            meshSource,
+            meshTarget,
+            mapMethod,
+            subtract,
+            selectedFields,
+            noLagrangian
         );
-
-        int nProcs(readInt(decompositionDict.lookup("numberOfSubdomains")));
-
-        Info<< "Create target mesh\n" << endl;
-
-        fvMesh meshTarget
-        (
-            IOobject
-            (
-                targetRegion,
-                runTimeTarget.timeName(),
-                runTimeTarget
-            )
-        );
-
-        Info<< "Target mesh size: " << meshTarget.nCells() << endl;
-
-        for (int procI=0; procI<nProcs; procI++)
-        {
-            Info<< nl << "Source processor " << procI << endl;
-
-            Time runTimeSource
-            (
-                Time::controlDictName,
-                rootDirSource,
-                caseDirSource/fileName(word("processor") + name(procI))
-            );
-
-            #include "setTimeIndex.H"
-
-            fvMesh meshSource
-            (
-                IOobject
-                (
-                    sourceRegion,
-                    runTimeSource.timeName(),
-                    runTimeSource
-                )
-            );
-
-            Info<< "mesh size: " << meshSource.nCells() << endl;
-
-            if (consistent)
-            {
-                mapConsistentSubMesh
-                (
-                    meshSource,
-                    meshTarget,
-                    mapOrder,
-                    subtract
-                );
-            }
-            else
-            {
-                mapSubMesh
-                (
-                    meshSource,
-                    meshTarget,
-                    patchMap,
-                    cuttingPatches,
-                    mapOrder,
-                    subtract
-                );
-            }
-        }
-    }
-    else if (!parallelSource && parallelTarget)
-    {
-        IOdictionary decompositionDict
-        (
-            IOobject
-            (
-                "decomposeParDict",
-                runTimeTarget.system(),
-                runTimeTarget,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE
-            )
-        );
-
-        int nProcs(readInt(decompositionDict.lookup("numberOfSubdomains")));
-
-        Info<< "Create source mesh\n" << endl;
-
-        #include "setTimeIndex.H"
-
-        fvMesh meshSource
-        (
-            IOobject
-            (
-                sourceRegion,
-                runTimeSource.timeName(),
-                runTimeSource
-            )
-        );
-
-        Info<< "Source mesh size: " << meshSource.nCells() << endl;
-
-        for (int procI=0; procI<nProcs; procI++)
-        {
-            Info<< nl << "Target processor " << procI << endl;
-
-            Time runTimeTarget
-            (
-                Time::controlDictName,
-                rootDirTarget,
-                caseDirTarget/fileName(word("processor") + name(procI))
-            );
-
-            fvMesh meshTarget
-            (
-                IOobject
-                (
-                    targetRegion,
-                    runTimeTarget.timeName(),
-                    runTimeTarget
-                )
-            );
-
-            Info<< "mesh size: " << meshTarget.nCells() << endl;
-
-            if (consistent)
-            {
-                mapConsistentSubMesh
-                (
-                    meshSource,
-                    meshTarget,
-                    mapOrder,
-                    subtract
-                );
-            }
-            else
-            {
-                mapSubMesh
-                (
-                    meshSource,
-                    meshTarget,
-                    patchMap,
-                    addProcessorPatches(meshTarget, cuttingPatches),
-                    mapOrder,
-                    subtract
-                );
-            }
-        }
-    }
-    else if (parallelSource && parallelTarget)
-    {
-        IOdictionary decompositionDictSource
-        (
-            IOobject
-            (
-                "decomposeParDict",
-                runTimeSource.system(),
-                runTimeSource,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE
-            )
-        );
-
-        int nProcsSource
-        (
-            readInt(decompositionDictSource.lookup("numberOfSubdomains"))
-        );
-
-
-        IOdictionary decompositionDictTarget
-        (
-            IOobject
-            (
-                "decomposeParDict",
-                runTimeTarget.system(),
-                runTimeTarget,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE
-            )
-        );
-
-        int nProcsTarget
-        (
-            readInt(decompositionDictTarget.lookup("numberOfSubdomains"))
-        );
-
-        List<boundBox> bbsTarget(nProcsTarget);
-        List<bool> bbsTargetSet(nProcsTarget, false);
-
-        for (int procISource=0; procISource<nProcsSource; procISource++)
-        {
-            Info<< nl << "Source processor " << procISource << endl;
-
-            Time runTimeSource
-            (
-                Time::controlDictName,
-                rootDirSource,
-                caseDirSource/fileName(word("processor") + name(procISource))
-            );
-
-            #include "setTimeIndex.H"
-
-            fvMesh meshSource
-            (
-                IOobject
-                (
-                    sourceRegion,
-                    runTimeSource.timeName(),
-                    runTimeSource
-                )
-            );
-
-            Info<< "mesh size: " << meshSource.nCells() << endl;
-
-            boundBox bbSource(meshSource.bounds());
-
-            for (int procITarget=0; procITarget<nProcsTarget; procITarget++)
-            {
-                if
-                (
-                    !bbsTargetSet[procITarget]
-                  || (
-                      bbsTargetSet[procITarget]
-                   && bbsTarget[procITarget].overlaps(bbSource)
-                     )
-                )
-                {
-                    Info<< nl << "Target processor " << procITarget << endl;
-
-                    Time runTimeTarget
-                    (
-                        Time::controlDictName,
-                        rootDirTarget,
-                        caseDirTarget/fileName(word("processor")
-                      + name(procITarget))
-                    );
-
-                    fvMesh meshTarget
-                    (
-                        IOobject
-                        (
-                            targetRegion,
-                            runTimeTarget.timeName(),
-                            runTimeTarget
-                        )
-                    );
-
-                    Info<< "mesh size: " << meshTarget.nCells() << endl;
-
-                    bbsTarget[procITarget] = meshTarget.bounds();
-                    bbsTargetSet[procITarget] = true;
-
-                    if (bbsTarget[procITarget].overlaps(bbSource))
-                    {
-                        if (consistent)
-                        {
-                            mapConsistentSubMesh
-                            (
-                                meshSource,
-                                meshTarget,
-                                mapOrder,
-                                subtract
-                            );
-                        }
-                        else
-                        {
-                            mapSubMesh
-                            (
-                                meshSource,
-                                meshTarget,
-                                patchMap,
-                                addProcessorPatches(meshTarget, cuttingPatches),
-                                mapOrder,
-                                subtract
-                            );
-                        }
-                    }
-                }
-            }
-        }
     }
     else
     {
-        #include "setTimeIndex.H"
-
-        Info<< "Create meshes\n" << endl;
-
-        fvMesh meshSource
+        mapSubMesh
         (
-            IOobject
-            (
-                sourceRegion,
-                runTimeSource.timeName(),
-                runTimeSource
-            )
+            meshSource,
+            meshTarget,
+            patchMap,
+            addProcessorPatches(meshTarget, cuttingPatches),
+            mapMethod,
+            subtract,
+            selectedFields,
+            noLagrangian
         );
-
-        fvMesh meshTarget
-        (
-            IOobject
-            (
-                targetRegion,
-                runTimeTarget.timeName(),
-                runTimeTarget
-            )
-        );
-
-        Info<< "Source mesh size: " << meshSource.nCells() << tab
-            << "Target mesh size: " << meshTarget.nCells() << nl << endl;
-
-        if (consistent)
-        {
-            mapConsistentMesh(meshSource, meshTarget, mapOrder, subtract);
-        }
-        else
-        {
-            mapSubMesh
-            (
-                meshSource,
-                meshTarget,
-                patchMap,
-                cuttingPatches,
-                mapOrder,
-                subtract
-            );
-        }
     }
 
     Info<< "\nEnd\n" << endl;

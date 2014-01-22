@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,12 +52,12 @@ void Foam::ParticleCollector<CloudType>::makeLogFile
         if (Pstream::master())
         {
             // Create directory if does not exist
-            mkDir(this->outputDir());
+            mkDir(this->outputTimeDir());
 
             // Open new file at start up
             outputFilePtr_.reset
             (
-                new OFstream(this->outputDir()/(type() + ".dat"))
+                new OFstream(this->outputTimeDir()/(type() + ".dat"))
             );
 
             outputFilePtr_()
@@ -461,7 +461,7 @@ void Foam::ParticleCollector<CloudType>::write()
 
             writer->write
             (
-                this->outputDir()/time.timeName(),
+                this->outputTimeDir(),
                 "collector",
                 points_,
                 faces_,
@@ -472,7 +472,7 @@ void Foam::ParticleCollector<CloudType>::write()
 
             writer->write
             (
-                this->outputDir()/time.timeName(),
+                this->outputTimeDir(),
                 "collector",
                 points_,
                 faces_,

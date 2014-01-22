@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -224,10 +224,7 @@ class medialAxisMeshMover
         );
 
         //- Disallow default bitwise copy construct
-        medialAxisMeshMover
-        (
-            const medialAxisMeshMover&
-        );
+        medialAxisMeshMover(const medialAxisMeshMover&);
 
         //- Disallow default bitwise assignment
         void operator=(const medialAxisMeshMover&);

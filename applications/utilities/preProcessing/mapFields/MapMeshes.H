@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,9 +27,9 @@ License
 #define MapMeshes_H
 
 #include "MapVolFields.H"
-#include "MapConsistentVolFields.H"
 #include "mapLagrangian.H"
 #include "UnMapped.H"
+#include "pointMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -37,113 +37,17 @@ namespace Foam
 {
 
 template<template<class> class CombineOp>
-void MapConsistentMesh
+void MapMesh
 (
-    const fvMesh& meshSource,
-    const fvMesh& meshTarget,
-    const meshToMesh::order& mapOrder
+    const meshToMesh& interp,
+    const HashSet<word>& selectedFields,
+    const bool noLagrangian
 )
 {
-    // Create the interpolation scheme
-    meshToMesh meshToMeshInterp(meshSource, meshTarget);
-
-    Info<< nl
-        << "Consistently creating and mapping fields for time "
-        << meshSource.time().timeName() << nl << endl;
-
     {
+        const polyMesh& meshSource = interp.srcRegion();
+
         // Search for list of objects for this time
-        IOobjectList objects(meshSource, meshSource.time().timeName());
-
-        // Map volFields
-        // ~~~~~~~~~~~~~
-        MapConsistentVolFields<scalar>
-        (
-            objects,
-            meshToMeshInterp,
-            mapOrder,
-            CombineOp<scalar>()
-        );
-        MapConsistentVolFields<vector>
-        (
-            objects,
-            meshToMeshInterp,
-            mapOrder,
-            CombineOp<vector>()
-        );
-        MapConsistentVolFields<sphericalTensor>
-        (
-            objects,
-            meshToMeshInterp,
-            mapOrder,
-            CombineOp<sphericalTensor>()
-        );
-        MapConsistentVolFields<symmTensor>
-        (
-            objects,
-            meshToMeshInterp,
-            mapOrder,
-            CombineOp<symmTensor>()
-        );
-        MapConsistentVolFields<tensor>
-        (
-            objects,
-            meshToMeshInterp,
-            mapOrder,
-            CombineOp<tensor>()
-        );
-    }
-
-    {
-        // Search for list of target objects for this time
-        IOobjectList objects(meshTarget, meshTarget.time().timeName());
-
-        // Mark surfaceFields as unmapped
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        UnMapped<surfaceScalarField>(objects);
-        UnMapped<surfaceVectorField>(objects);
-        UnMapped<surfaceSphericalTensorField>(objects);
-        UnMapped<surfaceSymmTensorField>(objects);
-        UnMapped<surfaceTensorField>(objects);
-
-        // Mark pointFields as unmapped
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        UnMapped<pointScalarField>(objects);
-        UnMapped<pointVectorField>(objects);
-        UnMapped<pointSphericalTensorField>(objects);
-        UnMapped<pointSymmTensorField>(objects);
-        UnMapped<pointTensorField>(objects);
-    }
-
-    mapLagrangian(meshToMeshInterp);
-}
-
-
-template<template<class> class CombineOp>
-void MapSubMesh
-(
-    const fvMesh& meshSource,
-    const fvMesh& meshTarget,
-    const HashTable<word>& patchMap,
-    const wordList& cuttingPatches,
-    const meshToMesh::order& mapOrder
-)
-{
-    // Create the interpolation scheme
-    meshToMesh meshToMeshInterp
-    (
-        meshSource,
-        meshTarget,
-        patchMap,
-        cuttingPatches
-    );
-
-    Info<< nl
-        << "Mapping fields for time " << meshSource.time().timeName()
-        << nl << endl;
-
-    {
-        // Search for list of source objects for this time
         IOobjectList objects(meshSource, meshSource.time().timeName());
 
         // Map volFields
@@ -151,41 +55,44 @@ void MapSubMesh
         MapVolFields<scalar>
         (
             objects,
-            meshToMeshInterp,
-            mapOrder,
+            selectedFields,
+            interp,
             CombineOp<scalar>()
         );
+
         MapVolFields<vector>
         (
             objects,
-            meshToMeshInterp,
-            mapOrder,
+            selectedFields,
+            interp,
             CombineOp<vector>()
         );
         MapVolFields<sphericalTensor>
         (
             objects,
-            meshToMeshInterp,
-            mapOrder,
+            selectedFields,
+            interp,
             CombineOp<sphericalTensor>()
         );
         MapVolFields<symmTensor>
         (
             objects,
-            meshToMeshInterp,
-            mapOrder,
+            selectedFields,
+            interp,
             CombineOp<symmTensor>()
         );
         MapVolFields<tensor>
         (
             objects,
-            meshToMeshInterp,
-            mapOrder,
+            selectedFields,
+            interp,
             CombineOp<tensor>()
         );
     }
 
     {
+        const polyMesh& meshTarget = interp.tgtRegion();
+
         // Search for list of target objects for this time
         IOobjectList objects(meshTarget, meshTarget.time().timeName());
 
@@ -206,49 +113,10 @@ void MapSubMesh
         UnMapped<pointTensorField>(objects);
     }
 
-    mapLagrangian(meshToMeshInterp);
-}
-
-
-template<template<class> class CombineOp>
-void MapConsistentSubMesh
-(
-    const fvMesh& meshSource,
-    const fvMesh& meshTarget,
-    const meshToMesh::order& mapOrder
-)
-{
-    HashTable<word> patchMap;
-    HashTable<label> cuttingPatchTable;
-
-    forAll(meshTarget.boundary(), patchi)
+    if (!noLagrangian)
     {
-        if (!isA<processorFvPatch>(meshTarget.boundary()[patchi]))
-        {
-            patchMap.insert
-            (
-                meshTarget.boundary()[patchi].name(),
-                meshTarget.boundary()[patchi].name()
-            );
-        }
-        else
-        {
-            cuttingPatchTable.insert
-            (
-                meshTarget.boundaryMesh()[patchi].name(),
-                -1
-            );
-        }
+        mapLagrangian(interp);
     }
-
-    MapSubMesh<CombineOp>
-    (
-        meshSource,
-        meshTarget,
-        patchMap,
-        cuttingPatchTable.toc(),
-        mapOrder
-    );
 }
 
 

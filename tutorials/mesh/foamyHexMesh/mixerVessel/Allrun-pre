@@ -93,16 +93,17 @@ runParallel foamyHexMesh $nProcs
 runParallel collapseEdges $nProcs -collapseFaces -latestTime
 mv log.collapseEdges log.collapseFaces
 
-\cp system/collapseDict.indirectPatchFaces system/collapseDict
-runParallel collapseEdges $nProcs -collapseFaceSet indirectPatchFaces -latestTime
-mv log.collapseEdges log.collapseFaceSet
+#\cp system/collapseDict.indirectPatchFaces system/collapseDict
+#runParallel collapseEdges $nProcs -collapseFaceSet indirectPatchFaces -latestTime
+#mv log.collapseEdges log.collapseFaceSet
 
 runParallel checkMesh $nProcs -allTopology -allGeometry -latestTime
 
 runApplication reconstructParMesh -latestTime
 
-# Copy the mesh into polyMesh
-\cp -r 102/polyMesh constant
+# Copy the mesh into polyMesh and delete the 102 directory
+\cp -r 101/polyMesh constant
+\rm -rf 101
 
 
 # ----------------------------------------------------------------- end-of-file

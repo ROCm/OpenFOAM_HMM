@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,9 +22,6 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
-
-#include "cyclicAMIFvPatchField.H"
-#include "transformField.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -157,7 +154,15 @@ Foam::cyclicAMIFvPatchField<Type>::patchNeighbourField() const
 
     Field<Type> pnf(iField, nbrFaceCells);
 
-    tmp<Field<Type> > tpnf(new Field<Type>(cyclicAMIPatch_.interpolate(pnf)));
+    tmp<Field<Type> > tpnf;
+    if (cyclicAMIPatch_.applyLowWeightCorrection())
+    {
+        tpnf = cyclicAMIPatch_.interpolate(pnf, this->patchInternalField()());
+    }
+    else
+    {
+        tpnf = cyclicAMIPatch_.interpolate(pnf);
+    }
 
     if (doTransform())
     {
@@ -203,7 +208,15 @@ void Foam::cyclicAMIFvPatchField<Type>::updateInterfaceMatrix
     // Transform according to the transformation tensors
     transformCoupleField(pnf, cmpt);
 
-    pnf = cyclicAMIPatch_.interpolate(pnf);
+    if (cyclicAMIPatch_.applyLowWeightCorrection())
+    {
+        scalarField pif(psiInternal, cyclicAMIPatch_.faceCells());
+        pnf = cyclicAMIPatch_.interpolate(pnf, pif);
+    }
+    else
+    {
+        pnf = cyclicAMIPatch_.interpolate(pnf);
+    }
 
     // Multiply the field by coefficients and add into the result
     const labelUList& faceCells = cyclicAMIPatch_.faceCells();
@@ -232,7 +245,15 @@ void Foam::cyclicAMIFvPatchField<Type>::updateInterfaceMatrix
     // Transform according to the transformation tensors
     transformCoupleField(pnf);
 
-    pnf = cyclicAMIPatch_.interpolate(pnf);
+    if (cyclicAMIPatch_.applyLowWeightCorrection())
+    {
+        Field<Type> pif(psiInternal, cyclicAMIPatch_.faceCells());
+        pnf = cyclicAMIPatch_.interpolate(pnf, pif);
+    }
+    else
+    {
+        pnf = cyclicAMIPatch_.interpolate(pnf);
+    }
 
     // Multiply the field by coefficients and add into the result
     const labelUList& faceCells = cyclicAMIPatch_.faceCells();

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -750,8 +750,8 @@ void Foam::wallBoundedStreamLine::write()
             n += allTracks_[trackI].size();
         }
 
-        Info<< "Tracks:" << allTracks_.size()
-            << "  total samples:" << n << endl;
+        Info<< "    Tracks:" << allTracks_.size() << nl
+            << "    Total samples:" << n << endl;
 
 
         // Massage into form suitable for writers

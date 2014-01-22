@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,8 +75,14 @@ private:
                 //- Axis of rotation for rotational cyclics
                 vector rotationAxis_;
 
-                //- point on axis of rotation for rotational cyclics
+                //- Point on axis of rotation for rotational cyclics
                 point rotationCentre_;
+
+                //- Flag to show whether the rotation angle is defined
+                bool rotationAngleDefined_;
+
+                //- Rotation angle
+                scalar rotationAngle_;
 
 
             // For translation
@@ -91,6 +97,9 @@ private:
         //- Flag to indicate that slave patch should be reversed for AMI
         const bool AMIReverse_;
 
+        //- Low weight correction threshold for AMI
+        const scalar AMILowWeightCorrection_;
+
         //- Projection surface
         mutable autoPtr<searchableSurface> surfPtr_;
 
@@ -101,7 +110,7 @@ private:
     // Private Member Functions
 
         //- Return normal of face at max distance from rotation axis
-        vector findFaceMaxRadius(const pointField& faceCentres) const;
+        vector findFaceNormalMaxRadius(const pointField& faceCentres) const;
 
         void calcTransforms
         (
@@ -292,6 +301,9 @@ public:
             //- Return a reference to the AMI interpolator
             const AMIPatchToPatchInterpolation& AMI() const;
 
+            //- Return true if applying the low weight correction
+            bool applyLowWeightCorrection() const;
+
 
             // Transformations
 
@@ -319,13 +331,18 @@ public:
 
                 //- Interpolate field
                 template<class Type>
-                tmp<Field<Type> > interpolate(const Field<Type>& fld) const;
+                tmp<Field<Type> > interpolate
+                (
+                    const Field<Type>& fld,
+                    const UList<Type>& defaultValues = UList<Type>()
+                ) const;
 
                 //- Interpolate tmp field
                 template<class Type>
                 tmp<Field<Type> > interpolate
                 (
-                    const tmp<Field<Type> >& tFld
+                    const tmp<Field<Type> >& tFld,
+                    const UList<Type>& defaultValues = UList<Type>()
                 ) const;
 
                 //- Low-level interpolate List
@@ -334,7 +351,8 @@ public:
                 (
                     const UList<Type>& fld,
                     const CombineOp& cop,
-                    List<Type>& result
+                    List<Type>& result,
+                    const UList<Type>& defaultValues = UList<Type>()
                 ) const;
 
 

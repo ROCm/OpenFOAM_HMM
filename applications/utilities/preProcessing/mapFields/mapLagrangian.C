@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -80,26 +80,16 @@ static label findCell(const Cloud<passiveParticle>& cloud, const point& pt)
 }
 
 
-void mapLagrangian(const meshToMesh& meshToMeshInterp)
+void mapLagrangian(const meshToMesh& interp)
 {
     // Determine which particles are in meshTarget
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    // target to source cell map
-    const labelList& cellAddressing = meshToMeshInterp.cellAddressing();
+    const polyMesh& meshSource = interp.srcRegion();
+    const polyMesh& meshTarget = interp.tgtRegion();
+    const labelListList& sourceToTarget = interp.srcToTgtCellAddr();
 
-    // Invert celladdressing to get source to target(s).
-    // Note: could use sparse addressing but that is too storage inefficient
-    // (Map<labelList>)
-    labelListList sourceToTargets
-    (
-        invertOneToMany(meshToMeshInterp.fromMesh().nCells(), cellAddressing)
-    );
-
-    const fvMesh& meshSource = meshToMeshInterp.fromMesh();
-    const fvMesh& meshTarget = meshToMeshInterp.toMesh();
     const pointField& targetCc = meshTarget.cellCentres();
-
 
     fileNameList cloudDirs
     (
@@ -168,7 +158,7 @@ void mapLagrangian(const meshToMesh& meshToMeshInterp)
                 if (iter().cell() >= 0)
                 {
                     const labelList& targetCells =
-                        sourceToTargets[iter().cell()];
+                        sourceToTarget[iter().cell()];
 
                     // Particle probably in one of the targetcells. Try
                     // all by tracking from their cell centre to the parcel
@@ -259,17 +249,47 @@ void mapLagrangian(const meshToMesh& meshToMeshInterp)
                 // ~~~~~~~~~~~~~~~~~~~~~
 
                 MapLagrangianFields<label>
-                (cloudDirs[cloudI], objects, meshToMeshInterp, addParticles);
+                (
+                    cloudDirs[cloudI],
+                    objects,
+                    meshTarget,
+                    addParticles
+                );
                 MapLagrangianFields<scalar>
-                (cloudDirs[cloudI], objects, meshToMeshInterp, addParticles);
+                (
+                    cloudDirs[cloudI],
+                    objects,
+                    meshTarget,
+                    addParticles
+                );
                 MapLagrangianFields<vector>
-                (cloudDirs[cloudI], objects, meshToMeshInterp, addParticles);
+                (
+                    cloudDirs[cloudI],
+                    objects,
+                    meshTarget,
+                    addParticles
+                );
                 MapLagrangianFields<sphericalTensor>
-                (cloudDirs[cloudI], objects, meshToMeshInterp, addParticles);
+                (
+                    cloudDirs[cloudI],
+                    objects,
+                    meshTarget,
+                    addParticles
+                );
                 MapLagrangianFields<symmTensor>
-                (cloudDirs[cloudI], objects, meshToMeshInterp, addParticles);
+                (
+                    cloudDirs[cloudI],
+                    objects,
+                    meshTarget,
+                    addParticles
+                );
                 MapLagrangianFields<tensor>
-                (cloudDirs[cloudI], objects, meshToMeshInterp, addParticles);
+                (
+                    cloudDirs[cloudI],
+                    objects,
+                    meshTarget,
+                    addParticles
+                );
             }
         }
     }

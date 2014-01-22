@@ -102,7 +102,7 @@
       name="UseVTKPolyhedron"
       command="SetUseVTKPolyhedron"
       number_of_elements="1"
-      default_values="0"
+      default_values="1"
       animateable="0">
       <BooleanDomain name="bool"/>
       <Documentation>
@@ -164,6 +164,20 @@
       <BooleanDomain name="bool"/>
       <Documentation>
         Show groups only
+      </Documentation>
+    </IntVectorProperty>
+
+    <!-- Force GUI update check box -->
+    <IntVectorProperty
+      name="UpdateGUI"
+      command="SetUpdateGUI"
+      number_of_elements="1"
+      is_internal="1"
+      default_values="0"
+      animateable="0">
+      <BooleanDomain name="bool"/>
+      <Documentation>
+        A simple way to cause a reader GUI modification.
       </Documentation>
     </IntVectorProperty>
 

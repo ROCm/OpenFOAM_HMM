@@ -204,13 +204,12 @@ castellatedMeshControls
         innerCylinder
         {
             level       (2 3);
-            cellZone    innerCylinder;
-            faceZone    innerCylinder;
-            cellZoneInside  inside;
         }
         innerCylinderSmall
         {
             level       (4 4);
+
+            faceType    boundary;
             cellZone    innerCylinderSmall;
             faceZone    innerCylinderSmall;
             cellZoneInside  inside;
@@ -288,7 +287,7 @@ castellatedMeshControls
     // Whether any faceZones (as specified in the refinementSurfaces)
     // are only on the boundary of corresponding cellZones or also allow
     // free-standing zone faces. Not used if there are no faceZones.
-    allowFreeStandingZoneFaces true;
+    allowFreeStandingZoneFaces false;
 }
 
 
@@ -312,10 +311,22 @@ snapControls
     //  before upon reaching a correct mesh.
     nRelaxIter 5;
 
-    //- Highly experimental and wip: number of feature edge snapping
-    //  iterations. Leave out altogether to disable.
-    //  Do not use here since mesh resolution too low and baffles present
-    nFeatureSnapIter 20;
+    // Feature snapping
+
+        // Number of feature edge snapping iterations.
+        // Leave out altogether to disable.
+        nFeatureSnapIter 10;
+
+        // Detect (geometric only) features by sampling the surface
+        // (default=false).
+        implicitFeatureSnap true;
+
+        // Use castellatedMeshControls::features (default = true)
+        explicitFeatureSnap false;
+
+        // Detect features between multiple surfaces
+        // (only for explicitFeatureSnap, default = false)
+        multiRegionFeatureSnap true;
 }
 
 
@@ -465,15 +476,6 @@ meshQualityControls
     }
 }
 
-
-// Advanced
-
-// Flags for optional output
-// 0 : only write final meshes
-// 1 : write intermediate meshes
-// 2 : write volScalarField with cellLevel for postprocessing
-// 4 : write current intersections as .obj files
-debug 0;
 
 
 // Merge tolerance. Is fraction of overall bounding box of initial mesh.

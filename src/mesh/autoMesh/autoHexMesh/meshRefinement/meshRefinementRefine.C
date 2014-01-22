@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -313,7 +313,7 @@ bool Foam::meshRefinement::markForRefine
 
 void Foam::meshRefinement::markFeatureCellLevel
 (
-    const point& keepPoint,
+    const pointField& keepPoints,
     labelList& maxFeatureLevel
 ) const
 {
@@ -345,106 +345,111 @@ void Foam::meshRefinement::markFeatureCellLevel
     // what to seed. Do this on only the processor that
     // holds the keepPoint.
 
-    label cellI = -1;
-    label tetFaceI = -1;
-    label tetPtI = -1;
-
-    mesh_.findCellFacePt(keepPoint, cellI, tetFaceI, tetPtI);
-
-    if (cellI != -1)
+    forAll(keepPoints, i)
     {
-        // I am the processor that holds the keepPoint
+        const point& keepPoint = keepPoints[i];
 
-        forAll(features_, featI)
+        label cellI = -1;
+        label tetFaceI = -1;
+        label tetPtI = -1;
+
+        mesh_.findCellFacePt(keepPoint, cellI, tetFaceI, tetPtI);
+
+        if (cellI != -1)
         {
-            const edgeMesh& featureMesh = features_[featI];
-            const label featureLevel = features_.levels()[featI][0];
-            const labelListList& pointEdges = featureMesh.pointEdges();
+            // I am the processor that holds the keepPoint
 
-            // Find regions on edgeMesh
-            labelList edgeRegion;
-            label nRegions = featureMesh.regions(edgeRegion);
-
-
-            PackedBoolList regionVisited(nRegions);
-
-
-            // 1. Seed all 'knots' in edgeMesh
-
-
-            forAll(pointEdges, pointI)
+            forAll(features_, featI)
             {
-                if (pointEdges[pointI].size() != 2)
+                const edgeMesh& featureMesh = features_[featI];
+                const label featureLevel = features_.levels()[featI][0];
+                const labelListList& pointEdges = featureMesh.pointEdges();
+
+                // Find regions on edgeMesh
+                labelList edgeRegion;
+                label nRegions = featureMesh.regions(edgeRegion);
+
+
+                PackedBoolList regionVisited(nRegions);
+
+
+                // 1. Seed all 'knots' in edgeMesh
+
+
+                forAll(pointEdges, pointI)
                 {
-                    if (debug&meshRefinement::FEATURESEEDS)
+                    if (pointEdges[pointI].size() != 2)
                     {
-                        Pout<< "Adding particle from point:" << pointI
-                            << " coord:" << featureMesh.points()[pointI]
-                            << " since number of emanating edges:"
-                            << pointEdges[pointI].size()
-                            << endl;
-                    }
+                        if (debug&meshRefinement::FEATURESEEDS)
+                        {
+                            Pout<< "Adding particle from point:" << pointI
+                                << " coord:" << featureMesh.points()[pointI]
+                                << " since number of emanating edges:"
+                                << pointEdges[pointI].size()
+                                << endl;
+                        }
 
-                    // Non-manifold point. Create particle.
-                    startPointCloud.addParticle
-                    (
-                        new trackedParticle
+                        // Non-manifold point. Create particle.
+                        startPointCloud.addParticle
                         (
-                            mesh_,
-                            keepPoint,
-                            cellI,
-                            tetFaceI,
-                            tetPtI,
-                            featureMesh.points()[pointI],   // endpos
-                            featureLevel,                   // level
-                            featI,                          // featureMesh
-                            pointI                          // end point
-                        )
-                    );
+                            new trackedParticle
+                            (
+                                mesh_,
+                                keepPoint,
+                                cellI,
+                                tetFaceI,
+                                tetPtI,
+                                featureMesh.points()[pointI],   // endpos
+                                featureLevel,                   // level
+                                featI,                          // featureMesh
+                                pointI                          // end point
+                            )
+                        );
 
-                    // Mark
-                    if (pointEdges[pointI].size() > 0)
-                    {
-                        label e0 = pointEdges[pointI][0];
-                        label regionI = edgeRegion[e0];
-                        regionVisited[regionI] = 1u;
+                        // Mark
+                        if (pointEdges[pointI].size() > 0)
+                        {
+                            label e0 = pointEdges[pointI][0];
+                            label regionI = edgeRegion[e0];
+                            regionVisited[regionI] = 1u;
+                        }
                     }
                 }
-            }
 
 
-            // 2. Any regions that have not been visited at all? These can
-            //    only be circular regions!
-            forAll(featureMesh.edges(), edgeI)
-            {
-                if (regionVisited.set(edgeRegion[edgeI], 1u))
+                // 2. Any regions that have not been visited at all? These can
+                //    only be circular regions!
+                forAll(featureMesh.edges(), edgeI)
                 {
-                    const edge& e = featureMesh.edges()[edgeI];
-                    label pointI = e.start();
-                    if (debug&meshRefinement::FEATURESEEDS)
+                    if (regionVisited.set(edgeRegion[edgeI], 1u))
                     {
-                        Pout<< "Adding particle from point:" << pointI
-                            << " coord:" << featureMesh.points()[pointI]
-                            << " on circular region:" << edgeRegion[edgeI]
-                            << endl;
-                    }
+                        const edge& e = featureMesh.edges()[edgeI];
+                        label pointI = e.start();
+                        if (debug&meshRefinement::FEATURESEEDS)
+                        {
+                            Pout<< "Adding particle from point:" << pointI
+                                << " coord:" << featureMesh.points()[pointI]
+                                << " on circular region:" << edgeRegion[edgeI]
+                                << endl;
+                        }
 
-                    // Non-manifold point. Create particle.
-                    startPointCloud.addParticle
-                    (
-                        new trackedParticle
+                        // Non-manifold point. Create particle.
+                        startPointCloud.addParticle
                         (
-                            mesh_,
-                            keepPoint,
-                            cellI,
-                            tetFaceI,
-                            tetPtI,
-                            featureMesh.points()[pointI],   // endpos
-                            featureLevel,                   // level
-                            featI,                          // featureMesh
-                            pointI                          // end point
-                        )
-                    );
+                            new trackedParticle
+                            (
+                                mesh_,
+                                keepPoint,
+                                cellI,
+                                tetFaceI,
+                                tetPtI,
+                                featureMesh.points()[pointI],   // endpos
+                                featureLevel,                   // level
+                                featI,                          // featureMesh
+                                pointI                          // end point
+                            )
+                        );
+                    }
                 }
             }
         }
@@ -628,7 +633,7 @@ void Foam::meshRefinement::markFeatureCellLevel
 // Calculates list of cells to refine based on intersection with feature edge.
 Foam::label Foam::meshRefinement::markFeatureRefinement
 (
-    const point& keepPoint,
+    const pointField& keepPoints,
     const label nAllowRefine,
 
     labelList& refineCell,
@@ -637,7 +642,7 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
 {
     // Largest refinement level of any feature passed through
     labelList maxFeatureLevel;
-    markFeatureCellLevel(keepPoint, maxFeatureLevel);
+    markFeatureCellLevel(keepPoints, maxFeatureLevel);
 
     // See which cells to refine. maxFeatureLevel will hold highest level
     // of any feature edge that passed through.
@@ -2009,7 +2014,7 @@ Foam::label Foam::meshRefinement::markProximityRefinement
 // hitting overall limit maxGlobalCells.
 Foam::labelList Foam::meshRefinement::refineCandidates
 (
-    const point& keepPoint,
+    const pointField& keepPoints,
     const scalar curvature,
     const scalar planarAngle,
 
@@ -2077,7 +2082,7 @@ Foam::labelList Foam::meshRefinement::refineCandidates
         {
             label nFeatures = markFeatureRefinement
             (
-                keepPoint,
+                keepPoints,
                 nAllowRefine,
 
                 refineCell,

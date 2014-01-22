@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,19 +51,18 @@ void MapLagrangianFields
 (
     const string& cloudName,
     const IOobjectList& objects,
-    const meshToMesh& meshToMeshInterp,
+    const polyMesh& meshTarget,
     const labelList& addParticles
 )
 {
-    const fvMesh& meshTarget = meshToMeshInterp.toMesh();
-
     {
         IOobjectList fields = objects.lookupClass(IOField<Type>::typeName);
 
         forAllIter(IOobjectList, fields, fieldIter)
         {
-            Info<< "    mapping lagrangian field "
-                << fieldIter()->name() << endl;
+            const word& fieldName = fieldIter()->name();
+
+            Info<< "    mapping lagrangian field " << fieldName << endl;
 
             // Read field (does not need mesh)
             IOField<Type> fieldSource(*fieldIter());
@@ -73,7 +72,7 @@ void MapLagrangianFields
             (
                 IOobject
                 (
-                    fieldIter()->name(),
+                    fieldName,
                     meshTarget.time().timeName(),
                     cloud::prefix/cloudName,
                     meshTarget,
@@ -100,8 +99,9 @@ void MapLagrangianFields
 
         forAllIter(IOobjectList, fieldFields, fieldIter)
         {
-            Info<< "    mapping lagrangian fieldField "
-                << fieldIter()->name() << endl;
+            const word& fieldName = fieldIter()->name();
+
+            Info<< "    mapping lagrangian fieldField " << fieldName << endl;
 
             // Read field (does not need mesh)
             IOField<Field<Type> > fieldSource(*fieldIter());
@@ -112,7 +112,7 @@ void MapLagrangianFields
             (
                 IOobject
                 (
-                    fieldIter()->name(),
+                    fieldName,
                     meshTarget.time().timeName(),
                     cloud::prefix/cloudName,
                     meshTarget,

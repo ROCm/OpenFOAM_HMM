@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,193 +24,554 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "meshToMesh.H"
-#include "processorFvPatch.H"
-#include "demandDrivenData.H"
+#include "Time.H"
+#include "globalIndex.H"
+#include "meshToMeshMethod.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-defineTypeNameAndDebug(meshToMesh, 0);
+    defineTypeNameAndDebug(meshToMesh, 0);
+
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::meshToMesh::interpolationMethod,
+        3
+    >::names[] =
+    {
+        "direct",
+        "mapNearest",
+        "cellVolumeWeight"
+    };
+
+    const NamedEnum<meshToMesh::interpolationMethod, 3>
+        meshToMesh::interpolationMethodNames_;
 }
 
-const Foam::scalar Foam::meshToMesh::directHitTol = 1e-5;
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::labelList Foam::meshToMesh::maskCells
+(
+    const polyMesh& src,
+    const polyMesh& tgt
+) const
+{
+    boundBox intersectBb
+    (
+        max(src.bounds().min(), tgt.bounds().min()),
+        min(src.bounds().max(), tgt.bounds().max())
+    );
+
+    intersectBb.inflate(0.01);
+
+    const cellList& srcCells = src.cells();
+    const faceList& srcFaces = src.faces();
+    const pointField& srcPts = src.points();
+
+    DynamicList<label> cells(src.size());
+    forAll(srcCells, srcI)
+    {
+        boundBox cellBb(srcCells[srcI].points(srcFaces, srcPts), false);
+        if (intersectBb.overlaps(cellBb))
+        {
+            cells.append(srcI);
+        }
+    }
+
+    if (debug)
+    {
+        Pout<< "participating source mesh cells: " << cells.size() << endl;
+    }
+
+    return cells;
+}
+
+
+void Foam::meshToMesh::normaliseWeights
+(
+    const word& descriptor,
+    const labelListList& addr,
+    scalarListList& wght
+) const
+{
+    const label nCell = returnReduce(wght.size(), sumOp<label>());
+
+    if (nCell > 0)
+    {
+        forAll(wght, cellI)
+        {
+            scalarList& w = wght[cellI];
+            scalar s = sum(w);
+
+            forAll(w, i)
+            {
+                // note: normalise by s instead of cell volume since
+                // 1-to-1 methods duplicate contributions in parallel
+                w[i] /= s;
+            }
+        }
+    }
+}
+
+
+void Foam::meshToMesh::calcAddressing
+(
+    const polyMesh& src,
+    const polyMesh& tgt
+)
+{
+    autoPtr<meshToMeshMethod> methodPtr
+    (
+        meshToMeshMethod::New
+        (
+            interpolationMethodNames_[method_],
+            src,
+            tgt
+        )
+    );
+
+    methodPtr->calculate
+    (
+        srcToTgtCellAddr_,
+        srcToTgtCellWght_,
+        tgtToSrcCellAddr_,
+        tgtToSrcCellWght_
+    );
+
+    V_ = methodPtr->V();
+
+    if (debug)
+    {
+        methodPtr->writeConnectivity(src, tgt, srcToTgtCellAddr_);
+    }
+}
+
+
+void Foam::meshToMesh::calculate()
+{
+    Info<< "Creating mesh-to-mesh addressing for " << srcRegion_.name()
+        << " and " << tgtRegion_.name() << " regions using "
+        << interpolationMethodNames_[method_] << endl;
+
+    singleMeshProc_ = calcDistribution(srcRegion_, tgtRegion_);
+
+    if (singleMeshProc_ == -1)
+    {
+        // create global indexing for src and tgt meshes
+        globalIndex globalSrcCells(srcRegion_.nCells());
+        globalIndex globalTgtCells(tgtRegion_.nCells());
+
+        // Create processor map of overlapping cells. This map gets
+        // (possibly remote) cells from the tgt mesh such that they (together)
+        // cover all of the src mesh
+        autoPtr<mapDistribute> mapPtr = calcProcMap(srcRegion_, tgtRegion_);
+        const mapDistribute& map = mapPtr();
+
+        pointField newTgtPoints;
+        faceList newTgtFaces;
+        labelList newTgtFaceOwners;
+        labelList newTgtFaceNeighbours;
+        labelList newTgtCellIDs;
+
+        distributeAndMergeCells
+        (
+            map,
+            tgtRegion_,
+            globalTgtCells,
+            newTgtPoints,
+            newTgtFaces,
+            newTgtFaceOwners,
+            newTgtFaceNeighbours,
+            newTgtCellIDs
+        );
+
+
+        // create a new target mesh
+        polyMesh newTgt
+        (
+            IOobject
+            (
+                "newTgt." + Foam::name(Pstream::myProcNo()),
+                tgtRegion_.time().timeName(),
+                tgtRegion_.time(),
+                IOobject::NO_READ
+            ),
+            xferMove(newTgtPoints),
+            xferMove(newTgtFaces),
+            xferMove(newTgtFaceOwners),
+            xferMove(newTgtFaceNeighbours),
+            false                                   // no parallel comms
+        );
+
+        // create some dummy patch info
+        List<polyPatch*> patches(1);
+        patches[0] = new polyPatch
+        (
+            "defaultFaces",
+            newTgt.nFaces() - newTgt.nInternalFaces(),
+            newTgt.nInternalFaces(),
+            0,
+            newTgt.boundaryMesh(),
+            word::null
+        );
+
+        newTgt.addPatches(patches);
+
+        // force calculation of tet-base points used for point-in-cell
+        (void)newTgt.tetBasePtIs();
+
+        // force construction of cell tree
+//        (void)newTgt.cellTree();
+
+        if (debug)
+        {
+            Pout<< "Created newTgt mesh:" << nl
+                << " old cells = " << tgtRegion_.nCells()
+                << ", new cells = " << newTgt.nCells() << nl
+                << " old faces = " << tgtRegion_.nFaces()
+                << ", new faces = " << newTgt.nFaces() << endl;
+
+            if (debug > 1)
+            {
+                Pout<< "Writing newTgt mesh: " << newTgt.name() << endl;
+                newTgt.write();
+            }
+        }
+
+        calcAddressing(srcRegion_, newTgt);
+
+        // per source cell the target cell address in newTgt mesh
+        forAll(srcToTgtCellAddr_, i)
+        {
+            labelList& addressing = srcToTgtCellAddr_[i];
+            forAll(addressing, addrI)
+            {
+                addressing[addrI] = newTgtCellIDs[addressing[addrI]];
+            }
+        }
+
+        // convert target addresses in newTgtMesh into global cell numbering
+        forAll(tgtToSrcCellAddr_, i)
+        {
+            labelList& addressing = tgtToSrcCellAddr_[i];
+            forAll(addressing, addrI)
+            {
+                addressing[addrI] = globalSrcCells.toGlobal(addressing[addrI]);
+            }
+        }
+
+        // set up as a reverse distribute
+        mapDistribute::distribute
+        (
+            Pstream::nonBlocking,
+            List<labelPair>(),
+            tgtRegion_.nCells(),
+            map.constructMap(),
+            map.subMap(),
+            tgtToSrcCellAddr_,
+            ListPlusEqOp<label>(),
+            labelList()
+        );
+
+        // set up as a reverse distribute
+        mapDistribute::distribute
+        (
+            Pstream::nonBlocking,
+            List<labelPair>(),
+            tgtRegion_.nCells(),
+            map.constructMap(),
+            map.subMap(),
+            tgtToSrcCellWght_,
+            ListPlusEqOp<scalar>(),
+            scalarList()
+        );
+
+        // weights normalisation
+        normaliseWeights
+        (
+            "source",
+            srcToTgtCellAddr_,
+            srcToTgtCellWght_
+        );
+
+        normaliseWeights
+        (
+            "target",
+            tgtToSrcCellAddr_,
+            tgtToSrcCellWght_
+        );
+
+        // cache maps and reset addresses
+        List<Map<label> > cMap;
+        srcMapPtr_.reset
+        (
+            new mapDistribute(globalSrcCells, tgtToSrcCellAddr_, cMap)
+        );
+        tgtMapPtr_.reset
+        (
+            new mapDistribute(globalTgtCells, srcToTgtCellAddr_, cMap)
+        );
+
+        // collect volume intersection contributions
+        reduce(V_, sumOp<scalar>());
+    }
+    else
+    {
+        calcAddressing(srcRegion_, tgtRegion_);
+
+        normaliseWeights
+        (
+            "source",
+            srcToTgtCellAddr_,
+            srcToTgtCellWght_
+        );
+
+        normaliseWeights
+        (
+            "target",
+            tgtToSrcCellAddr_,
+            tgtToSrcCellWght_
+        );
+    }
+
+    Info<< "    Overlap volume: " << V_ << endl;
+}
+
+
+Foam::AMIPatchToPatchInterpolation::interpolationMethod
+Foam::meshToMesh::interpolationMethodAMI
+(
+    const interpolationMethod method
+) const
+{
+    switch (method_)
+    {
+        case imDirect:
+        {
+            return AMIPatchToPatchInterpolation::imDirect;
+            break;
+        }
+        case imMapNearest:
+        {
+            return AMIPatchToPatchInterpolation::imMapNearest;
+            break;
+        }
+        case imCellVolumeWeight:
+        {
+            return AMIPatchToPatchInterpolation::imFaceAreaWeight;
+            break;
+        }
+        default:
+        {
+            FatalErrorIn
+            (
+                "Foam::AMIPatchToPatchInterpolation::interpolationMethod"
+                "Foam::meshToMesh::interpolationMethodAMI"
+                "("
+                    "const interpolationMethod method"
+                ") const"
+            )
+                << "Unhandled enumeration " << method_
+                << abort(FatalError);
+        }
+    }
+
+    return AMIPatchToPatchInterpolation::imDirect;
+}
+
+
+const Foam::PtrList<Foam::AMIPatchToPatchInterpolation>&
+Foam::meshToMesh::patchAMIs() const
+{
+    if (patchAMIs_.empty())
+    {
+        const word amiMethod =
+            AMIPatchToPatchInterpolation::interpolationMethodToWord
+            (
+                interpolationMethodAMI(method_)
+            );
+
+        patchAMIs_.setSize(srcPatchID_.size());
+
+        forAll(srcPatchID_, i)
+        {
+            label srcPatchI = srcPatchID_[i];
+            label tgtPatchI = tgtPatchID_[i];
+
+            const polyPatch& srcPP = srcRegion_.boundaryMesh()[srcPatchI];
+            const polyPatch& tgtPP = tgtRegion_.boundaryMesh()[tgtPatchI];
+
+            Info<< "Creating AMI between source patch " << srcPP.name()
+                << " and target patch " << tgtPP.name()
+                << " using " << amiMethod
+                << endl;
+
+            Info<< incrIndent;
+
+            patchAMIs_.set
+            (
+                i,
+                new AMIPatchToPatchInterpolation
+                (
+                    srcPP,
+                    tgtPP,
+                    faceAreaIntersect::tmMesh,
+                    interpolationMethodAMI(method_),
+                    -1,
+                    true // flip target patch since patch normals are aligned
+                )
+            );
+
+            Info<< decrIndent;
+        }
+    }
+
+    return patchAMIs_;
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::meshToMesh::meshToMesh
 (
-    const fvMesh& meshFrom,
-    const fvMesh& meshTo,
-    const HashTable<word>& patchMap,
-    const wordList& cuttingPatchNames
+    const polyMesh& src,
+    const polyMesh& tgt,
+    const interpolationMethod& method,
+    bool interpAllPatches
 )
 :
-    fromMesh_(meshFrom),
-    toMesh_(meshTo),
-    patchMap_(patchMap),
-    cellAddressing_(toMesh_.nCells()),
-    boundaryAddressing_(toMesh_.boundaryMesh().size()),
-    inverseDistanceWeightsPtr_(NULL),
-    inverseVolumeWeightsPtr_(NULL),
-    cellToCellAddressingPtr_(NULL),
-    V_(0.0)
+    srcRegion_(src),
+    tgtRegion_(tgt),
+    srcPatchID_(),
+    tgtPatchID_(),
+    patchAMIs_(),
+    cuttingPatches_(),
+    srcToTgtCellAddr_(),
+    tgtToSrcCellAddr_(),
+    srcToTgtCellWght_(),
+    tgtToSrcCellWght_(),
+    method_(method),
+    V_(0.0),
+    singleMeshProc_(-1),
+    srcMapPtr_(NULL),
+    tgtMapPtr_(NULL)
 {
-    forAll(fromMesh_.boundaryMesh(), patchi)
+    if (interpAllPatches)
     {
-        fromMeshPatches_.insert
-        (
-            fromMesh_.boundaryMesh()[patchi].name(),
-            patchi
-        );
-    }
+        const polyBoundaryMesh& srcBM = src.boundaryMesh();
+        const polyBoundaryMesh& tgtBM = tgt.boundaryMesh();
 
-    forAll(toMesh_.boundaryMesh(), patchi)
-    {
-        toMeshPatches_.insert
-        (
-            toMesh_.boundaryMesh()[patchi].name(),
-            patchi
-        );
-    }
-
-    forAll(cuttingPatchNames, i)
-    {
-        if (toMeshPatches_.found(cuttingPatchNames[i]))
+        DynamicList<label> srcPatchID(src.boundaryMesh().size());
+        DynamicList<label> tgtPatchID(tgt.boundaryMesh().size());
+        forAll(srcBM, patchI)
         {
-            cuttingPatches_.insert
-            (
-                cuttingPatchNames[i],
-                toMeshPatches_.find(cuttingPatchNames[i])()
-            );
+            const polyPatch& pp = srcBM[patchI];
+            if (!polyPatch::constraintType(pp.type()))
+            {
+                srcPatchID.append(pp.index());
+
+                label tgtPatchI = tgt.boundaryMesh().findPatchID(pp.name());
+
+                if (tgtPatchI != -1)
+                {
+                    tgtPatchID.append(tgtPatchI);
+                }
+                else
+                {
+                    FatalErrorIn
+                    (
+                        "Foam::meshToMesh::meshToMesh"
+                        "("
+                            "const polyMesh&, "
+                            "const polyMesh&, "
+                            "const interpolationMethod&, "
+                            "bool"
+                        ")"
+                    )   << "Source patch " << pp.name()
+                        << " not found in target mesh. "
+                        << "Available target patches are " << tgtBM.names()
+                        << exit(FatalError);
+                }
+            }
         }
-        else
-        {
-            WarningIn
-            (
-                "meshToMesh::meshToMesh"
-                "(const fvMesh& meshFrom, const fvMesh& meshTo,"
-                "const HashTable<word>& patchMap,"
-                "const wordList& cuttingPatchNames)"
-            )   << "Cannot find cutting-patch " << cuttingPatchNames[i]
-                << " in destination mesh" << endl;
-        }
+
+        srcPatchID_.transfer(srcPatchID);
+        tgtPatchID_.transfer(tgtPatchID);
     }
 
-    forAll(toMesh_.boundaryMesh(), patchi)
-    {
-        // Add the processor patches in the toMesh to the cuttingPatches list
-        if (isA<processorPolyPatch>(toMesh_.boundaryMesh()[patchi]))
-        {
-            cuttingPatches_.insert
-            (
-                toMesh_.boundaryMesh()[patchi].name(),
-                patchi
-            );
-        }
-    }
+    // calculate volume addressing and weights
+    calculate();
 
-    calcAddressing();
+    // calculate patch addressing and weights
+    (void)patchAMIs();
 }
 
 
 Foam::meshToMesh::meshToMesh
 (
-    const fvMesh& meshFrom,
-    const fvMesh& meshTo
+    const polyMesh& src,
+    const polyMesh& tgt,
+    const interpolationMethod& method,
+    const HashTable<word>& patchMap,
+    const wordList& cuttingPatches
 )
 :
-    fromMesh_(meshFrom),
-    toMesh_(meshTo),
-    cellAddressing_(toMesh_.nCells()),
-    boundaryAddressing_(toMesh_.boundaryMesh().size()),
-    inverseDistanceWeightsPtr_(NULL),
-    inverseVolumeWeightsPtr_(NULL),
-    cellToCellAddressingPtr_(NULL),
-    V_(0.0)
+    srcRegion_(src),
+    tgtRegion_(tgt),
+    srcPatchID_(),
+    tgtPatchID_(),
+    patchAMIs_(),
+    cuttingPatches_(),
+    srcToTgtCellAddr_(),
+    tgtToSrcCellAddr_(),
+    srcToTgtCellWght_(),
+    tgtToSrcCellWght_(),
+    method_(method),
+    V_(0.0),
+    singleMeshProc_(-1),
+    srcMapPtr_(NULL),
+    tgtMapPtr_(NULL)
 {
-    // check whether both meshes have got the same number
-    // of boundary patches
-    if (fromMesh_.boundary().size() != toMesh_.boundary().size())
+    srcPatchID_.setSize(patchMap.size());
+    tgtPatchID_.setSize(patchMap.size());
+
+    label i = 0;
+    forAllConstIter(HashTable<word>, patchMap, iter)
     {
-        FatalErrorIn
-        (
-            "meshToMesh::meshToMesh"
-            "(const fvMesh& meshFrom, const fvMesh& meshTo)"
-        )   << "Incompatible meshes: different number of patches, "
-            << "fromMesh = " << fromMesh_.boundary().size()
-            << ", toMesh = " << toMesh_.boundary().size()
-            << exit(FatalError);
+        const word& tgtPatchName = iter.key();
+        const word& srcPatchName = iter();
+
+        const polyPatch& srcPatch = srcRegion_.boundaryMesh()[srcPatchName];
+        const polyPatch& tgtPatch = tgtRegion_.boundaryMesh()[tgtPatchName];
+
+        srcPatchID_[i] = srcPatch.index();
+        tgtPatchID_[i] = tgtPatch.index();
+        i++;
     }
 
-    forAll(fromMesh_.boundaryMesh(), patchi)
+    // calculate volume addressing and weights
+    calculate();
+
+    // calculate patch addressing and weights
+    (void)patchAMIs();
+
+    // set IDs of cutting patches on target mesh
+    cuttingPatches_.setSize(cuttingPatches.size());
+    forAll(cuttingPatches_, i)
     {
-        if
-        (
-            fromMesh_.boundaryMesh()[patchi].name()
-         != toMesh_.boundaryMesh()[patchi].name()
-        )
-        {
-            FatalErrorIn
-            (
-                "meshToMesh::meshToMesh"
-                "(const fvMesh& meshFrom, const fvMesh& meshTo)"
-            )   << "Incompatible meshes: different patch names for patch "
-                << patchi
-                << ", fromMesh = " << fromMesh_.boundary()[patchi].name()
-                << ", toMesh = " << toMesh_.boundary()[patchi].name()
-                << exit(FatalError);
-        }
-
-        if
-        (
-            fromMesh_.boundaryMesh()[patchi].type()
-         != toMesh_.boundaryMesh()[patchi].type()
-        )
-        {
-            FatalErrorIn
-            (
-                "meshToMesh::meshToMesh"
-                "(const fvMesh& meshFrom, const fvMesh& meshTo)"
-            )   << "Incompatible meshes: different patch types for patch "
-                << patchi
-                << ", fromMesh = " << fromMesh_.boundary()[patchi].type()
-                << ", toMesh = " << toMesh_.boundary()[patchi].type()
-                << exit(FatalError);
-        }
-
-        fromMeshPatches_.insert
-        (
-            fromMesh_.boundaryMesh()[patchi].name(),
-            patchi
-        );
-
-        toMeshPatches_.insert
-        (
-            toMesh_.boundaryMesh()[patchi].name(),
-            patchi
-        );
-
-        patchMap_.insert
-        (
-            toMesh_.boundaryMesh()[patchi].name(),
-            fromMesh_.boundaryMesh()[patchi].name()
-        );
+        const word& patchName = cuttingPatches[i];
+        cuttingPatches_[i] = tgt.boundaryMesh().findPatchID(patchName);
     }
-
-    calcAddressing();
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::meshToMesh::~meshToMesh()
-{
-    deleteDemandDrivenData(inverseDistanceWeightsPtr_);
-    deleteDemandDrivenData(inverseVolumeWeightsPtr_);
-    deleteDemandDrivenData(cellToCellAddressingPtr_);
-}
+{}
 
 
 // ************************************************************************* //

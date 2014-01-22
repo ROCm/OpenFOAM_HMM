@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,7 @@ namespace Foam
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-Foam::vector Foam::cyclicAMIPolyPatch::findFaceMaxRadius
+Foam::vector Foam::cyclicAMIPolyPatch::findFaceNormalMaxRadius
 (
     const pointField& faceCentres
 ) const
@@ -138,45 +138,145 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
     {
         case ROTATIONAL:
         {
-            point n0 = vector::zero;
-            if (half0Ctrs.size())
+            tensor revT = tensor::zero;
+
+            if (rotationAngleDefined_)
             {
-                n0 = findFaceMaxRadius(half0Ctrs);
+                tensor T(rotationAxis_*rotationAxis_);
+
+                tensor S
+                (
+                    0, -rotationAxis_.z(), rotationAxis_.y(),
+                    rotationAxis_.z(), 0, -rotationAxis_.x(),
+                    -rotationAxis_.y(), rotationAxis_.x(), 0
+                );
+
+                tensor RPos
+                (
+                    T
+                  + cos(rotationAngle_)*(tensor::I + T)
+                  + sin(rotationAngle_)*S
+                );
+                tensor RNeg
+                (
+                    T
+                  + cos(-rotationAngle_)*(tensor::I + T)
+                  + sin(-rotationAngle_)*S
+                );
+
+                // check - assume correct angle when difference in face areas
+                // is the smallest
+                vector transformedAreaPos = sum(half0Areas & RPos);
+                vector transformedAreaNeg = sum(half0Areas & RNeg);
+                vector area1 = sum(half1Areas);
+                reduce(transformedAreaPos, sumOp<vector>());
+                reduce(transformedAreaNeg, sumOp<vector>());
+                reduce(area1, sumOp<vector>());
+
+                scalar errorPos = mag(transformedAreaPos - area1);
+                scalar errorNeg = mag(transformedAreaNeg - area1);
+
+                if (errorPos < errorNeg)
+                {
+                    revT = RPos;
+                }
+                else
+                {
+                    revT = RNeg;
+                    rotationAngle_ *= -1;
+                }
+
+                scalar areaError =
+                    min(errorPos, errorNeg)/(mag(area1) + ROOTVSMALL);
+
+                if (areaError > matchTolerance())
+                {
+                    WarningIn
+                    (
+                        "void Foam::cyclicAMIPolyPatch::calcTransforms"
+                        "("
+                            "const primitivePatch&, "
+                            "const pointField&, "
+                            "const vectorField&, "
+                            "const pointField&, "
+                            "const vectorField&"
+                        ")"
+                    )
+                        << "Patch areas are not consistent within "
+                        << 100*matchTolerance()
+                        << " % indicating a possible error in the specified "
+                        << "angle of rotation" << nl
+                        << "    owner patch     : " << name() << nl
+                        << "    neighbour patch : " << neighbPatch().name()
+                        << nl
+                        << "    angle           : "
+                        << radToDeg(rotationAngle_) << " deg" << nl
+                        << "    area error      : " << 100*areaError << " %"
+                        << "    match tolerance : " <<  matchTolerance()
+                        << endl;
+                }
+
+                if (debug)
+                {
+                    scalar theta = radToDeg(rotationAngle_);
+
+                    Pout<< "cyclicAMIPolyPatch::calcTransforms: patch:"
+                        << name()
+                        << " Specified rotation:"
+                        << " swept angle: " << theta << " [deg]"
+                        << " reverse transform: " << revT
+                        << endl;
+                }
             }
-            point n1 = vector::zero;
-            if (half1Ctrs.size())
+            else
             {
-                n1 = -findFaceMaxRadius(half1Ctrs);
+                point n0 = vector::zero;
+                point n1 = vector::zero;
+                if (half0Ctrs.size())
+                {
+                    n0 = findFaceNormalMaxRadius(half0Ctrs);
+                }
+                if (half1Ctrs.size())
+                {
+                    n1 = -findFaceNormalMaxRadius(half1Ctrs);
+                }
+
+                reduce(n0, maxMagSqrOp<point>());
+                reduce(n1, maxMagSqrOp<point>());
+
+                n0 /= mag(n0) + VSMALL;
+                n1 /= mag(n1) + VSMALL;
+
+                // Extended tensor from two local coordinate systems calculated
+                // using normal and rotation axis
+                const tensor E0
+                (
+                    rotationAxis_,
+                    (n0 ^ rotationAxis_),
+                    n0
+                );
+                const tensor E1
+                (
+                    rotationAxis_,
+                    (-n1 ^ rotationAxis_),
+                    -n1
+                );
+                revT = E1.T() & E0;
+
+                if (debug)
+                {
+                    scalar theta = radToDeg(acos(n0 & n1));
+
+                    Pout<< "cyclicAMIPolyPatch::calcTransforms: patch:"
+                        << name()
+                        << " Specified rotation:"
+                        << " n0:" << n0 << " n1:" << n1
+                        << " swept angle: " << theta << " [deg]"
+                        << " reverse transform: " << revT
+                        << endl;
+                }
             }
 
-            reduce(n0, maxMagSqrOp<point>());
-            reduce(n1, maxMagSqrOp<point>());
-
-            n0 /= mag(n0) + VSMALL;
-            n1 /= mag(n1) + VSMALL;
-
-            if (debug)
-            {
-                Pout<< "cyclicAMIPolyPatch::calcTransforms : patch:" << name()
-                    << " Specified rotation :"
-                    << " n0:" << n0 << " n1:" << n1 << endl;
-            }
-
-            // Extended tensor from two local coordinate systems calculated
-            // using normal and rotation axis
-            const tensor E0
-            (
-                rotationAxis_,
-                (n0 ^ rotationAxis_),
-                n0
-            );
-            const tensor E1
-            (
-                rotationAxis_,
-                (-n1 ^ rotationAxis_),
-                -n1
-            );
-            const tensor revT(E1.T() & E0);
             const_cast<tensorField&>(forwardT()) = tensorField(1, revT.T());
             const_cast<tensorField&>(reverseT()) = tensorField(1, revT);
             const_cast<vectorField&>(separation()).setSize(0);
@@ -289,6 +389,7 @@ void Foam::cyclicAMIPolyPatch::resetAMI
                 surfPtr(),
                 faceAreaIntersect::tmMesh,
                 AMIMethod,
+                AMILowWeightCorrection_,
                 AMIReverse_
             )
         );
@@ -395,9 +496,12 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     nbrPatchID_(-1),
     rotationAxis_(vector::zero),
     rotationCentre_(point::zero),
+    rotationAngleDefined_(false),
+    rotationAngle_(0.0),
     separationVector_(vector::zero),
     AMIPtr_(NULL),
     AMIReverse_(false),
+    AMILowWeightCorrection_(-1.0),
     surfPtr_(NULL),
     surfDict_(fileName("surface"))
 {
@@ -421,9 +525,12 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     nbrPatchID_(-1),
     rotationAxis_(vector::zero),
     rotationCentre_(point::zero),
+    rotationAngleDefined_(false),
+    rotationAngle_(0.0),
     separationVector_(vector::zero),
     AMIPtr_(NULL),
     AMIReverse_(dict.lookupOrDefault<bool>("flipNormals", false)),
+    AMILowWeightCorrection_(dict.lookupOrDefault("lowWeightCorrection", -1.0)),
     surfPtr_(NULL),
     surfDict_(dict.subOrEmptyDict("surface"))
 {
@@ -466,6 +573,17 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
         {
             dict.lookup("rotationAxis") >> rotationAxis_;
             dict.lookup("rotationCentre") >> rotationCentre_;
+            if (dict.readIfPresent("rotationAngle", rotationAngle_))
+            {
+                rotationAngleDefined_ = true;
+                rotationAngle_ = degToRad(rotationAngle_);
+
+                if (debug)
+                {
+                    Info<< "rotationAngle: " << rotationAngle_ << " [rad]"
+                        <<  endl;
+                }
+            }
 
             scalar magRot = mag(rotationAxis_);
             if (magRot < SMALL)
@@ -516,9 +634,12 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     nbrPatchID_(-1),
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_),
+    rotationAngleDefined_(pp.rotationAngleDefined_),
+    rotationAngle_(pp.rotationAngle_),
     separationVector_(pp.separationVector_),
     AMIPtr_(NULL),
     AMIReverse_(pp.AMIReverse_),
+    AMILowWeightCorrection_(pp.AMILowWeightCorrection_),
     surfPtr_(NULL),
     surfDict_(pp.surfDict_)
 {
@@ -543,9 +664,12 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     nbrPatchID_(-1),
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_),
+    rotationAngleDefined_(pp.rotationAngleDefined_),
+    rotationAngle_(pp.rotationAngle_),
     separationVector_(pp.separationVector_),
     AMIPtr_(NULL),
     AMIReverse_(pp.AMIReverse_),
+    AMILowWeightCorrection_(pp.AMILowWeightCorrection_),
     surfPtr_(NULL),
     surfDict_(pp.surfDict_)
 {
@@ -584,9 +708,12 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     nbrPatchID_(-1),
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_),
+    rotationAngleDefined_(pp.rotationAngleDefined_),
+    rotationAngle_(pp.rotationAngle_),
     separationVector_(pp.separationVector_),
     AMIPtr_(NULL),
     AMIReverse_(pp.AMIReverse_),
+    AMILowWeightCorrection_(pp.AMILowWeightCorrection_),
     surfPtr_(NULL),
     surfDict_(pp.surfDict_)
 {}
@@ -699,6 +826,19 @@ const Foam::AMIPatchToPatchInterpolation& Foam::cyclicAMIPolyPatch::AMI() const
     }
 
     return AMIPtr_();
+}
+
+
+bool Foam::cyclicAMIPolyPatch::applyLowWeightCorrection() const
+{
+    if (owner())
+    {
+        return AMI().applyLowWeightCorrection();
+    }
+    else
+    {
+        return neighbPatch().AMI().applyLowWeightCorrection();
+    }
 }
 
 
@@ -874,6 +1014,13 @@ void Foam::cyclicAMIPolyPatch::write(Ostream& os) const
                 << token::END_STATEMENT << nl;
             os.writeKeyword("rotationCentre") << rotationCentre_
                 << token::END_STATEMENT << nl;
+
+            if (rotationAngleDefined_)
+            {
+                os.writeKeyword("rotationAngle") << radToDeg(rotationAngle_)
+                    << token::END_STATEMENT << nl;
+            }
+
             break;
         }
         case TRANSLATIONAL:
@@ -895,6 +1042,12 @@ void Foam::cyclicAMIPolyPatch::write(Ostream& os) const
     if (AMIReverse_)
     {
         os.writeKeyword("flipNormals") << AMIReverse_
+            << token::END_STATEMENT << nl;
+    }
+
+    if (AMILowWeightCorrection_ > 0)
+    {
+        os.writeKeyword("lowWeightCorrection") << AMILowWeightCorrection_
             << token::END_STATEMENT << nl;
     }
 

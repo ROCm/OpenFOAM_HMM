@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -114,31 +114,13 @@ private:
 
         scalar featureAngle_;
 
-        scalar slipFeatureAngle_;
-
         scalar concaveAngle_;
 
         label nGrow_;
 
-        label nSmoothSurfaceNormals_;
-
-        label nSmoothNormals_;
-
-        label nSmoothDisplacement_;
-
-        label nSmoothThickness_;
-
         scalar maxFaceThicknessRatio_;
 
-        scalar layerTerminationCos_;
-
-        scalar maxThicknessToMedialRatio_;
-
-        scalar minMedialAxisAngleCos_;
-
         label nBufferCellsNoExtrude_;
-
-        label nSnap_;
 
         label nLayerIter_;
 
@@ -147,6 +129,7 @@ private:
         Switch additionalReporting_;
 
         word meshShrinker_;
+
 
     // Private Member Functions
 
@@ -299,65 +282,6 @@ public:
             {
                 return meshShrinker_;
             }
-
-
-        // Specific to medial axis mesh shrinking
-
-            //- At non-patched sides allow mesh to slip if extrusion
-            //  direction makes angle larger than slipFeatureAngle.
-            scalar slipFeatureAngle() const
-            {
-                return slipFeatureAngle_;
-            }
-
-            //- Number of smoothing iterations of surface normals
-            label nSmoothSurfaceNormals() const
-            {
-                return nSmoothSurfaceNormals_;
-            }
-
-            //- Number of smoothing iterations of interior mesh movement
-            //  direction
-            label nSmoothNormals() const
-            {
-                return nSmoothNormals_;
-            }
-
-            scalar layerTerminationCos() const
-            {
-                return layerTerminationCos_;
-            }
-
-            //- Smooth internal displacement
-            label nSmoothDisplacement() const
-            {
-                return nSmoothDisplacement_;
-            }
-
-            //- Smooth layer thickness over surface patches
-            label nSmoothThickness() const
-            {
-                return nSmoothThickness_;
-            }
-
-            //- Reduce layer growth where ratio thickness to medial
-            //  distance is large
-            scalar maxThicknessToMedialRatio() const
-            {
-                return maxThicknessToMedialRatio_;
-            }
-
-            //- Angle used to pick up medial axis points
-            scalar minMedialAxisAngleCos() const
-            {
-                return minMedialAxisAngleCos_;
-            }
-
-            label nSnap() const
-            {
-                return nSnap_;
-            }
-
 
 
         // Helper

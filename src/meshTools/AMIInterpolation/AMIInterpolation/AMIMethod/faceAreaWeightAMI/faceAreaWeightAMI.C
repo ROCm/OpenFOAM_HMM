@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -310,6 +310,8 @@ Foam::scalar Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::interArea
     const label tgtFaceI
 ) const
 {
+    scalar area = 0;
+
     const pointField& srcPoints = this->srcPatch_.points();
     const pointField& tgtPoints = this->tgtPatch_.points();
 
@@ -322,7 +324,7 @@ Foam::scalar Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::interArea
     const scalar tgtMag = tgt.mag(tgtPoints);
     if ((this->srcMagSf_[srcFaceI] < ROOTVSMALL) || (tgtMag < ROOTVSMALL))
     {
-        return 0.0;
+        return area;
     }
 
     // create intersection object
@@ -338,12 +340,11 @@ Foam::scalar Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::interArea
     {
         n += this->tgtPatch_.faceNormals()[tgtFaceI];
     }
-    n *= 0.5;
+    scalar magN = mag(n);
 
-    scalar area = 0;
-    if (mag(n) > ROOTVSMALL)
+    if (magN > ROOTVSMALL)
     {
-        area = inter.calc(src, tgt, n, this->triMode_);
+        area = inter.calc(src, tgt, n/magN, this->triMode_);
     }
     else
     {
@@ -549,7 +550,7 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
         tgtFaceI
     );
 
-    if (this->srcNonOverlap_.size() != 0)
+    if (debug && !this->srcNonOverlap_.empty())
     {
         Pout<< "    AMI: " << this->srcNonOverlap_.size()
             << " non-overlap faces identified"

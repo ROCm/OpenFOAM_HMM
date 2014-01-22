@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,39 +23,55 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-    Info<< "Reading field U\n" << endl;
-    volVectorField U
+Info<< "Reading field U\n" << endl;
+volVectorField U
+(
+    IOobject
     (
-        IOobject
-        (
-            "U",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh
-    );
+        "U",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh
+);
 
-    Info<< "Calculating wall distance field" << endl;
-    volScalarField y(wallDist(mesh).y());
+Info<< "Calculating wall distance field" << endl;
+volScalarField y(wallDist(mesh).y());
 
-    // Set the mean boundary-layer thickness
-    dimensionedScalar ybl("ybl", dimLength, 0);
+// Set the mean boundary-layer thickness
+dimensionedScalar ybl("ybl", dimLength, 0);
 
-    if (args.optionFound("ybl"))
-    {
-        // If the boundary-layer thickness is provided use it
-        ybl.value() = args.optionRead<scalar>("ybl");
-    }
-    else if (args.optionFound("Cbl"))
-    {
-        // Calculate boundary layer thickness as Cbl * mean distance to wall
-        ybl.value() = gAverage(y) * args.optionRead<scalar>("Cbl");
-    }
+if (args.optionFound("ybl"))
+{
+    // If the boundary-layer thickness is provided use it
+    ybl.value() = args.optionRead<scalar>("ybl");
+}
+else if (args.optionFound("Cbl"))
+{
+    // Calculate boundary layer thickness as Cbl*mean distance to wall
+    ybl.value() = gAverage(y)*args.optionRead<scalar>("Cbl");
+}
 
-    Info<< "\nCreating boundary-layer for U of thickness "
-        << ybl.value() << " m" << nl << endl;
+Info<< "\nCreating boundary-layer for U of thickness "
+    << ybl.value() << " m" << nl << endl;
+
+Info<< "Creating mask field" << endl;
+volScalarField mask
+(
+    IOobject
+    (
+        "mask",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh,
+    dimensionedScalar("zero", dimless, 0.0),
+    zeroGradientFvPatchScalarField::typeName
+);
 
 
 // ************************************************************************* //

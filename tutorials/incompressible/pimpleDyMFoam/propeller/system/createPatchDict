@@ -23,27 +23,50 @@ pointSync false;
 patches
 (
     {
-        name inlet;
+        //- Master side patch
+        name            AMI1;
+        patchInfo
+        {
+            type            cyclicAMI;
+            matchTolerance  0.0001;
+            neighbourPatch  AMI2;
+            transform       noOrdering;
+        }
+        constructFrom patches;
+        patches (innerCylinderSmall);
+    }
 
+    {
+        //- Slave side patch
+        name            AMI2;
+        patchInfo
+        {
+            type            cyclicAMI;
+            matchTolerance  0.0001;
+            neighbourPatch  AMI1;
+            transform       noOrdering;
+        }
+        constructFrom patches;
+        patches (innerCylinderSmall_slave);
+    }
+
+
+    {
+        name inlet;
         patchInfo
         {
             type            patch;
         }
-
         constructFrom set;
-
         set inletFaces;
     }
     {
         name outlet;
-
         patchInfo
         {
             type            patch;
         }
-
         constructFrom set;
-
         set outletFaces;
     }
 );

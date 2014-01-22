@@ -7,7 +7,6 @@
 # Set-up the LES case
 cp ../lesFiles/fvS* ../lesFiles/controlDict system/
 cp ../lesFiles/LESProperties ../lesFiles/turbulenceProperties constant/
-cp ../lesFiles/nuSgs 0/
 
 ls -d processor* | xargs -i rm -rf ./{}/0 $1
 ls -d processor* | xargs -i mv ./{}/500 ./{}/0 $1
