@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -94,7 +94,7 @@ Foam::label Foam::autoRefineDriver::featureEdgeRefine
             (
                 meshRefiner_.refineCandidates
                 (
-                    refineParams.keepPoints()[0],    // For now only use one.
+                    refineParams.keepPoints(),
                     refineParams.curvature(),
                     refineParams.planarAngle(),
 
@@ -207,7 +207,7 @@ Foam::label Foam::autoRefineDriver::surfaceOnlyRefine
         (
             meshRefiner_.refineCandidates
             (
-                refineParams.keepPoints()[0],
+                refineParams.keepPoints(),
                 refineParams.curvature(),
                 refineParams.planarAngle(),
 
@@ -341,7 +341,7 @@ Foam::label Foam::autoRefineDriver::gapOnlyRefine
         (
             meshRefiner_.refineCandidates
             (
-                refineParams.keepPoints()[0],
+                refineParams.keepPoints(),
                 refineParams.curvature(),
                 refineParams.planarAngle(),
 
@@ -753,7 +753,7 @@ Foam::label Foam::autoRefineDriver::shellRefine
         (
             meshRefiner_.refineCandidates
             (
-                refineParams.keepPoints()[0],
+                refineParams.keepPoints(),
                 refineParams.curvature(),
                 refineParams.planarAngle(),
 

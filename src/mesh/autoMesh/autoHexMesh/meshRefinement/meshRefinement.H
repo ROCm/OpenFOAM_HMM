@@ -92,15 +92,17 @@ public:
             //IOSCALARLEVELS,
             IOOBJINTERSECTIONS,
             IOFEATURESEEDS,
+            IOATTRACTION,
             IOLAYERINFO
         };
-        static const NamedEnum<IOdebugType, 4> IOdebugTypeNames;
+        static const NamedEnum<IOdebugType, 5> IOdebugTypeNames;
         enum debugType
         {
             MESH = 1<<IOMESH,
             //SCALARLEVELS = 1<<IOSCALARLEVELS,
             OBJINTERSECTIONS = 1<<IOOBJINTERSECTIONS,
             FEATURESEEDS = 1<<IOFEATURESEEDS,
+            ATTRACTION = 1<< IOATTRACTION,
             LAYERINFO = 1<<IOLAYERINFO
         };
 
@@ -256,7 +258,7 @@ private:
             //  (or -1 if not passed through). Uses tracking.
             void markFeatureCellLevel
             (
-                const point& keepPoint,
+                const pointField& keepPoints,
                 labelList& maxFeatureLevel
             ) const;
 
@@ -264,7 +266,7 @@ private:
             //  features.
             label markFeatureRefinement
             (
-                const point& keepPoint,
+                const pointField& keepPoints,
                 const label nAllowRefine,
 
                 labelList& refineCell,
@@ -779,7 +781,7 @@ public:
             //- Calculate list of cells to refine.
             labelList refineCandidates
             (
-                const point& keepPoint,
+                const pointField& keepPoints,
                 const scalar curvature,
                 const scalar planarAngle,
 
@@ -914,7 +916,7 @@ public:
             //- Select coupled faces that are not collocated
             void selectSeparatedCoupledFaces(boolList&) const;
 
-            //- Find region cell is in. Uses optional perturbation to re-test.
+            //- Find region point is in. Uses optional perturbation to re-test.
             static label findRegion
             (
                 const polyMesh&,
@@ -1018,6 +1020,8 @@ public:
                     const labelHashSet& set
                 ) const;
 
+                //- Merge edges, maintain mesh quality. Return global number
+                //  of edges merged
                 label mergeEdgesUndo
                 (
                     const scalar minCos,

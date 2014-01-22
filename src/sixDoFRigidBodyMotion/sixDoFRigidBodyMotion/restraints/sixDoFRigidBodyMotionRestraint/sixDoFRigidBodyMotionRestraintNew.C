@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,7 +34,10 @@ Foam::sixDoFRigidBodyMotionRestraint::New
     const dictionary& sDoFRBMRDict
 )
 {
-    const word restraintType(sDoFRBMRDict.lookup(typeName));
+    const word restraintType
+    (
+        sDoFRBMRDict.lookup("sixDoFRigidBodyMotionRestraint")
+    );
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(restraintType);
@@ -45,12 +48,11 @@ Foam::sixDoFRigidBodyMotionRestraint::New
         (
             "sixDoFRigidBodyMotionRestraint::New"
             "("
-                "const word&, "
-                "const dictionary&"
+                "const dictionary& sDoFRBMRDict"
             ")"
-        )   << "Unknown " << typeName << " type "
+        )   << "Unknown sixDoFRigidBodyMotionRestraint type "
             << restraintType << nl << nl
-            << "Valid " << typeName << " s types are : " << endl
+            << "Valid sixDoFRigidBodyMotionRestraint types are : " << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

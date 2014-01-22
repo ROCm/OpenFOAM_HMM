@@ -422,7 +422,7 @@ void Foam::autoSnapDriver::calcNearestFace
           ^ faceSurfaceNormal[faceI];
     }
 
-    if (debug&meshRefinement::OBJINTERSECTIONS)
+    if (debug&meshRefinement::ATTRACTION)
     {
         dumpMove
         (
@@ -1037,7 +1037,7 @@ void Foam::autoSnapDriver::featureAttractionUsingReconstruction
 {
     autoPtr<OBJstream> feStr;
     autoPtr<OBJstream> fpStr;
-    if (debug&meshRefinement::OBJINTERSECTIONS)
+    if (debug&meshRefinement::ATTRACTION)
     {
         feStr.reset
         (
@@ -1331,7 +1331,7 @@ void Foam::autoSnapDriver::releasePointsNextToMultiPatch
 ) const
 {
     autoPtr<OBJstream> multiPatchStr;
-    if (debug&meshRefinement::OBJINTERSECTIONS)
+    if (debug&meshRefinement::ATTRACTION)
     {
         multiPatchStr.reset
         (
@@ -1809,7 +1809,7 @@ void Foam::autoSnapDriver::determineFeatures
     autoPtr<OBJstream> missedEdgeStr;
     autoPtr<OBJstream> featurePointStr;
 
-    if (debug&meshRefinement::OBJINTERSECTIONS)
+    if (debug&meshRefinement::ATTRACTION)
     {
         featureEdgeStr.reset
         (
@@ -2263,7 +2263,7 @@ void Foam::autoSnapDriver::determineBaffleFeatures
 
 
     autoPtr<OBJstream> baffleEdgeStr;
-    if (debug&meshRefinement::OBJINTERSECTIONS)
+    if (debug&meshRefinement::ATTRACTION)
     {
         baffleEdgeStr.reset
         (
@@ -2865,7 +2865,7 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
 
 
     // Dump
-    if (debug&meshRefinement::OBJINTERSECTIONS)
+    if (debug&meshRefinement::ATTRACTION)
     {
         OBJstream featureEdgeStr
         (
@@ -2962,7 +2962,7 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
         );
     }
 
-    if (debug&meshRefinement::OBJINTERSECTIONS)
+    if (debug&meshRefinement::ATTRACTION)
     {
         dumpMove
         (
@@ -3380,7 +3380,7 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
         // Re-add normal component
         tangPatchDisp += (pointNormals & patchDisp) * pointNormals;
 
-        if (debug&meshRefinement::OBJINTERSECTIONS)
+        if (debug&meshRefinement::ATTRACTION)
         {
             dumpMove
             (

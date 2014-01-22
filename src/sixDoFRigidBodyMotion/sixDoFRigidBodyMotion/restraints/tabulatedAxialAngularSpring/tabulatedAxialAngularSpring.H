@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -121,8 +121,8 @@ public:
         //- Update properties from given dictionary
         virtual bool read(const dictionary& sDoFRBMRCoeff);
 
-        //- Write model data
-        virtual void writeData(Ostream&) const;
+        //- Write
+        virtual void write(Ostream&) const;
 };
 
 

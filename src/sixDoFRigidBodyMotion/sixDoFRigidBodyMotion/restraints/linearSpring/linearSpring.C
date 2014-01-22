@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -120,7 +120,7 @@ bool Foam::sixDoFRigidBodyMotionRestraints::linearSpring::read
 }
 
 
-void Foam::sixDoFRigidBodyMotionRestraints::linearSpring::writeData
+void Foam::sixDoFRigidBodyMotionRestraints::linearSpring::write
 (
     Ostream& os
 ) const
@@ -140,6 +140,5 @@ void Foam::sixDoFRigidBodyMotionRestraints::linearSpring::writeData
     os.writeKeyword("restLength")
         << restLength_ << token::END_STATEMENT << nl;
 }
-
 
 // ************************************************************************* //
