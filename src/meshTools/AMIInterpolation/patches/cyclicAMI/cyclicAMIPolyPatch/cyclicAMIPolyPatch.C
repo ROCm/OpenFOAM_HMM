@@ -187,7 +187,7 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
                 }
 
                 scalar areaError =
-                    max(errorPos, errorNeg)/(mag(area1) + ROOTVSMALL);
+                    min(errorPos, errorNeg)/(mag(area1) + ROOTVSMALL);
 
                 if (areaError > matchTolerance())
                 {
