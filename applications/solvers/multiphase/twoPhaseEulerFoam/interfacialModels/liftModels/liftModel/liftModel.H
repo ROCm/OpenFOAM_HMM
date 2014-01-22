@@ -37,12 +37,14 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "volFields.H"
 #include "dictionary.H"
-#include "phaseModel.H"
 #include "runTimeSelectionTables.H"
 
 namespace Foam
 {
+
+class phasePair;
 
 /*---------------------------------------------------------------------------*\
                            Class liftModel Declaration
@@ -54,10 +56,8 @@ protected:
 
     // Protected data
 
-        const dictionary& dict_;
-        const volScalarField& alpha1_;
-        const phaseModel& phase1_;
-        const phaseModel& phase2_;
+        //- Phase pair
+        const phasePair& pair_;
 
 
 public:
@@ -75,26 +75,19 @@ public:
             dictionary,
             (
                 const dictionary& dict,
-                const volScalarField& alpha1,
-                const phaseModel& phase1,
-                const phaseModel& phase2
+                const phasePair& pair
             ),
-            (dict, alpha1, phase1, phase2)
+            (dict, pair)
         );
 
 
     // Constructors
 
-        //- Construct null
-        liftModel();
-
-        //- Construct from components
+        //- Construct from a dictionary and a phase pair
         liftModel
         (
             const dictionary& dict,
-            const volScalarField& alpha1,
-            const phaseModel& phase1,
-            const phaseModel& phase2
+            const phasePair& pair
         );
 
 
@@ -107,16 +100,17 @@ public:
         static autoPtr<liftModel> New
         (
             const dictionary& dict,
-            const volScalarField& alpha1,
-            const phaseModel& phase1,
-            const phaseModel& phase2
+            const phasePair& pair
         );
 
 
     // Member Functions
 
+        //- Lift coefficient
+        virtual tmp<volScalarField> Cl() const = 0;
+
         //- Lift force
-        virtual tmp<volVectorField> F(const volVectorField& U) const = 0;
+        virtual tmp<volVectorField> F() const;
 };
 
 

@@ -10,6 +10,15 @@ diameterModels/IATE/IATEsources/wakeEntrainmentCoalescence/wakeEntrainmentCoales
 diameterModels/IATE/IATEsources/turbulentBreakUp/turbulentBreakUp.C
 diameterModels/IATE/IATEsources/randomCoalescence/randomCoalescence.C
 
+BlendedInterfacialModel/blendingMethods/blendingMethod/blendingMethod.C
+BlendedInterfacialModel/blendingMethods/blendingMethod/newBlendingMethod.C
+BlendedInterfacialModel/blendingMethods/linear/linear.C
+BlendedInterfacialModel/blendingMethods/hyperbolic/hyperbolic.C
+
+phasePair/phasePairKey/phasePairKey.C
+phasePair/phasePair/phasePair.C
+phasePair/orderedPhasePair/orderedPhasePair.C
+
 twoPhaseSystem.C
 
 LIB = $(FOAM_LIBBIN)/libcompressibleTwoPhaseSystem

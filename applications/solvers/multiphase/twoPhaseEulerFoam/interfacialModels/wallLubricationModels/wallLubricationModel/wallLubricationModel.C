@@ -23,65 +23,35 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "constantCoefficient.H"
-#include "addToRunTimeSelectionTable.H"
-#include "fvc.H"
+#include "wallLubricationModel.H"
+#include "phasePair.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace liftModels
-{
-    defineTypeNameAndDebug(constantCoefficient, 0);
-
-    addToRunTimeSelectionTable
-    (
-        liftModel,
-        constantCoefficient,
-        dictionary
-    );
-}
+    defineTypeNameAndDebug(wallLubricationModel, 0);
+    defineRunTimeSelectionTable(wallLubricationModel, dictionary);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::liftModels::constantCoefficient::constantCoefficient
+Foam::wallLubricationModel::wallLubricationModel
 (
     const dictionary& dict,
-    const volScalarField& alpha1,
-    const phaseModel& phase1,
-    const phaseModel& phase2
+    const phasePair& pair
 )
 :
-    liftModel(dict, alpha1, phase1, phase2),
-    coeffDict_(dict.subDict(typeName + "Coeffs")),
-    Cl_("Cl", dimless, coeffDict_.lookup("Cl"))
+    pair_(pair),
+    yWall_(pair.phase1().mesh().lookupObject<volScalarField>("yWall"))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::liftModels::constantCoefficient::~constantCoefficient()
+Foam::wallLubricationModel::~wallLubricationModel()
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::tmp<Foam::volVectorField> Foam::liftModels::constantCoefficient::F
-(
-    const volVectorField& U
-) const
-{
-    return
-        Cl_
-       *(phase1_*phase1_.rho() + phase2_*phase2_.rho())
-       *(
-            (phase1_.U() - phase2_.U())
-          ^ fvc::curl(U)
-        );
-}
 
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "dragModel.H"
+#include "phasePair.H"
+#include "swarmCorrection.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -38,16 +40,48 @@ namespace Foam
 
 Foam::dragModel::dragModel
 (
-    const dictionary& interfaceDict,
-    const volScalarField& alpha1,
-    const phaseModel& phase1,
-    const phaseModel& phase2
+    const phasePair& pair
 )
 :
-    interfaceDict_(interfaceDict),
-    alpha1_(alpha1),
-    phase1_(phase1),
-    phase2_(phase2)
+    regIOobject
+    (
+        IOobject
+        (
+            IOobject::groupName(typeName, pair.name()),
+            pair.phase1().mesh().time().timeName(),
+            pair.phase1().mesh()
+        )
+    ),
+    pair_(pair)
+{}
+
+
+Foam::dragModel::dragModel
+(
+    const dictionary& dict,
+    const phasePair& pair
+)
+:
+    regIOobject
+    (
+        IOobject
+        (
+            IOobject::groupName(typeName, pair.name()),
+            pair.phase1().mesh().time().timeName(),
+            pair.phase1().mesh()
+        )
+    ),
+    pair_(pair),
+    swarmCorrection_
+    (
+        swarmCorrection::New
+        (
+            dict.subDict("swarmCorrection"),
+            pair
+        )
+    ),
+    residualAlpha_("residualAlpha", dimless, dict.lookup("residualAlpha")),
+    residualSlip_("residualSlip", dimVelocity, dict.lookup("residualSlip"))
 {}
 
 
@@ -55,6 +89,29 @@ Foam::dragModel::dragModel
 
 Foam::dragModel::~dragModel()
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::tmp<Foam::volScalarField> Foam::dragModel::K() const
+{
+    return
+        0.75
+       *Cd()
+       *swarmCorrection_->Cs()
+       *pair_.continuous().rho()
+       /(
+            max(pair_.continuous(), residualAlpha_)
+           *pair_.dispersed().d()
+        )
+       *max(pair_.magUr(), residualSlip_);
+}
+
+
+bool Foam::dragModel::writeData(Ostream& os) const
+{
+    return os.good();
+}
 
 
 // ************************************************************************* //

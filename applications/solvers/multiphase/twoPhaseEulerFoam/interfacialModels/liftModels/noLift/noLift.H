@@ -40,6 +40,9 @@ SourceFiles
 
 namespace Foam
 {
+
+class phasePair;
+
 namespace liftModels
 {
 
@@ -51,12 +54,6 @@ class noLift
 :
     public liftModel
 {
-    // Private data
-
-        //- Constant lift coefficient
-        dimensionedScalar Cl_;
-
-
 public:
 
     //- Runtime type information
@@ -65,13 +62,11 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct from a dictionary and a phase pair
         noLift
         (
             const dictionary& dict,
-            const volScalarField& alpha1,
-            const phaseModel& phase1,
-            const phaseModel& phase2
+            const phasePair& pair
         );
 
 
@@ -81,8 +76,11 @@ public:
 
     // Member Functions
 
+        //- Lift coefficient
+        virtual tmp<volScalarField> Cl() const;
+
         //- Lift force
-        tmp<volVectorField> F(const volVectorField& U) const;
+        virtual tmp<volVectorField> F() const;
 };
 
 

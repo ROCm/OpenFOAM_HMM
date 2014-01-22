@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,6 @@ Description
 
 SourceFiles
     heatTransferModel.C
-    newHeatTransferModel.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -37,12 +36,14 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "volFields.H"
 #include "dictionary.H"
-#include "phaseModel.H"
 #include "runTimeSelectionTables.H"
 
 namespace Foam
 {
+
+class phasePair;
 
 /*---------------------------------------------------------------------------*\
                            Class heatTransferModel Declaration
@@ -54,10 +55,8 @@ protected:
 
     // Protected data
 
-        const dictionary& interfaceDict_;
-        const volScalarField& alpha1_;
-        const phaseModel& phase1_;
-        const phaseModel& phase2_;
+        //- Phase pair
+        const phasePair& pair_;
 
 
 public:
@@ -74,23 +73,20 @@ public:
             heatTransferModel,
             dictionary,
             (
-                const dictionary& interfaceDict,
-                const volScalarField& alpha1,
-                const phaseModel& phase1,
-                const phaseModel& phase2
+                const dictionary& dict,
+                const phasePair& pair
             ),
-            (interfaceDict, alpha1, phase1, phase2)
+            (dict, pair)
         );
 
 
     // Constructors
 
+        //- Construct froma dictionary and a phase pair
         heatTransferModel
         (
-            const dictionary& interfaceDict,
-            const volScalarField& alpha1,
-            const phaseModel& phase1,
-            const phaseModel& phase2
+            const dictionary& dict,
+            const phasePair& pair
         );
 
 
@@ -102,25 +98,22 @@ public:
 
         static autoPtr<heatTransferModel> New
         (
-            const dictionary& interfaceDict,
-            const volScalarField& alpha1,
-            const phaseModel& phase1,
-            const phaseModel& phase2
+            const dictionary& dict,
+            const phasePair& pair
         );
 
 
     // Member Functions
 
-        //- the heat-transfer function K used in the enthalpy eq.
+        //- The heat transfer function K used in the enthalpy equation
         //    ddt(alpha1*rho1*ha) + ... = ... alpha1*alpha2*K*(Ta - Tb)
-        //    ddt(alpha2*rho2*hb) + ...  = ... alpha1*alpha2*K*(Tb - Ta)
+        //    ddt(alpha2*rho2*hb) + ... = ... alpha1*alpha2*K*(Tb - Ta)
         // ********************************** NB!*****************************
-        // for numerical reasons alpha1 and alpha2 has been
-        // extracted from the heat-transfer function K,
-        // so you MUST divide K by alpha1*alpha2 when implementing the
-        // heat-transfer function
+        // for numerical reasons alpha1 and alpha2 has been extracted from the
+        // heat transfer function K, so you MUST divide K by alpha1*alpha2 when
+        // implementing the heat transfer function
         // ********************************** NB!*****************************
-        virtual tmp<volScalarField> K(const volScalarField& Ur) const = 0;
+        virtual tmp<volScalarField> K() const = 0;
 };
 
 

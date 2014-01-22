@@ -22,76 +22,97 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::liftModels::constantCoefficient
+    Foam::turbulentDispersionModel
 
 Description
 
 SourceFiles
-    constantCoefficient.C
+    turbulentDispersionModel.C
+    newTurbulentDispersionModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef constantCoefficient_H
-#define constantCoefficient_H
-
-#include "liftModel.H"
+#ifndef turbulentDispersionModel_H
+#define turbulentDispersionModel_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "volFields.H"
+#include "dictionary.H"
+#include "runTimeSelectionTables.H"
+
 namespace Foam
 {
-namespace liftModels
-{
+
+class phasePair;
 
 /*---------------------------------------------------------------------------*\
-                           Class constantCoefficient Declaration
+                    Class turbulentDispersionModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class constantCoefficient
-:
-    public liftModel
+class turbulentDispersionModel
 {
-    // Private data
+protected:
 
-        //- Coefficient dictionary
-        const dictionary& coeffDict_;
+    // Protected data
 
-        //- Constant lift coefficient
-        dimensionedScalar Cl_;
+        //- Phase pair
+        const phasePair& pair_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("constantCoefficient");
+    TypeName("turbulentDispersionModel");
+
+
+    // Declare runtime construction
+
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            turbulentDispersionModel,
+            dictionary,
+            (
+                const dictionary& dict,
+                const phasePair& pair
+            ),
+            (dict, pair)
+        );
 
 
     // Constructors
 
-        //- Construct from components
-        constantCoefficient
+        //- Construct from a dictionary and a phase pair
+        turbulentDispersionModel
         (
             const dictionary& dict,
-            const volScalarField& alpha1,
-            const phaseModel& phase1,
-            const phaseModel& phase2
+            const phasePair& pair
         );
 
 
     //- Destructor
-    virtual ~constantCoefficient();
+    virtual ~turbulentDispersionModel();
+
+
+    // Selectors
+
+        static autoPtr<turbulentDispersionModel> New
+        (
+            const dictionary& dict,
+            const phasePair& pair
+        );
 
 
     // Member Functions
 
-        //- Lift force
-        tmp<volVectorField> F(const volVectorField& U) const;
+        //- Turbulent dispersion force
+        virtual tmp<volVectorField> F() const = 0;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace liftModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
