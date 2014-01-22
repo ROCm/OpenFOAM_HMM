@@ -505,7 +505,7 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
             }
             default:
             {
-                // Assumes that cyclic is planar. This is also the initial
+                // Assumes that cyclic is rotational. This is also the initial
                 // condition for patches without faces.
 
                 // Determine the face with max area on both halves. These
