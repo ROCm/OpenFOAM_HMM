@@ -38,8 +38,8 @@ solvers
 
     "(U|h|k|epsilon)"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       1e-6;
         relTol          0.1;
     }

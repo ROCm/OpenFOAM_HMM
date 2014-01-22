@@ -34,8 +34,8 @@ solvers
 
     "(U|h)"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       0;
         relTol          0.1;
     }
@@ -73,12 +73,14 @@ solvers
     }
 }
 
+
 PIMPLE
 {
     nCorrectors     2;
     nNonOrthogonalCorrectors 0;
     momentumPredictor yes;
 }
+
 
 relaxationFactors
 {
