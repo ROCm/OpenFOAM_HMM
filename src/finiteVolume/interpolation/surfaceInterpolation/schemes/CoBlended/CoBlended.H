@@ -64,6 +64,7 @@ SourceFiles
 
 #include "surfaceInterpolationScheme.H"
 #include "blendedSchemeBase.H"
+#include "surfaceInterpolate.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -181,11 +182,6 @@ public:
         }
 
 
-    //- Destructor
-    virtual ~CoBlended()
-    {}
-
-
     // Member Functions
 
         //- Return the face-based blending factor
@@ -195,39 +191,48 @@ public:
         ) const
         {
             const fvMesh& mesh = this->mesh();
+            tmp<surfaceScalarField> tUflux = faceFlux_;
 
-            tmp<surfaceScalarField> tbf
+            if (faceFlux_.dimensions() == dimDensity*dimVelocity*dimArea)
+            {
+                // Currently assume that the density field
+                // corresponding to the mass-flux is named "rho"
+                const volScalarField& rho =
+                    mesh.objectRegistry::template lookupObject<volScalarField>
+                    ("rho");
+
+                tUflux = faceFlux_/fvc::interpolate(rho);
+            }
+            else if (faceFlux_.dimensions() != dimVelocity*dimArea)
+            {
+                FatalErrorIn
+                (
+                    "CoBlended::blendingFactor()"
+                )   << "dimensions of faceFlux are not correct"
+                    << exit(FatalError);
+            }
+
+            return tmp<surfaceScalarField>
             (
                 new surfaceScalarField
                 (
-                    IOobject
+                    vf.name() + "BlendingFactor",
+                    scalar(1)
+                  - max
                     (
-                        vf.name() + "BlendingFactor",
-                        mesh.time().timeName(),
-                        mesh
-                    ),
-                    mesh,
-                    dimensionedScalar("blendingFactor", dimless, 0.0)
+                        min
+                        (
+                            (
+                                mesh.time().deltaT()*mesh.deltaCoeffs()
+                               *mag(tUflux)/mesh.magSf()
+                              - Co1_
+                            )/(Co2_ - Co1_),
+                            scalar(1)
+                        ),
+                        scalar(0)
+                    )
                 )
             );
-
-            tbf() =
-                scalar(1)
-              - max
-                (
-                    min
-                    (
-                        (
-                            mesh.time().deltaT()*mesh.deltaCoeffs()
-                           *mag(faceFlux_)/mesh.magSf()
-                          - Co1_
-                        )/(Co2_ - Co1_),
-                        scalar(1)
-                    ),
-                    scalar(0)
-                );
-
-            return tbf;
         }
 
 
@@ -239,9 +244,6 @@ public:
         ) const
         {
             surfaceScalarField bf(blendingFactor(vf));
-
-            Info<< "weights " << max(bf).value() << " " << min(bf).value()
-                << endl;
 
             return
                 bf*tScheme1_().weights(vf)
