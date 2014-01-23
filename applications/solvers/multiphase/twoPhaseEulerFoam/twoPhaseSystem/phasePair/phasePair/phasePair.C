@@ -135,8 +135,8 @@ Foam::tmp<Foam::volScalarField> Foam::phasePair::Re() const
 Foam::tmp<Foam::volScalarField> Foam::phasePair::Pr() const
 {
     return
-         dispersed().nu()*dispersed().Cp()*dispersed().rho()
-        /dispersed().kappa();
+         continuous().nu()*continuous().Cp()*continuous().rho()
+        /continuous().kappa();
 }
 
 
