@@ -31,7 +31,7 @@ divSchemes
 {
     div(rhoPhi,U)   Gauss upwind;
     div(phi,alpha)  Gauss vanLeer;
-    div(phirb,alpha) Gauss interfaceCompression;
+    div(phirb,alpha) Gauss linear;
     div((muEff*dev(T(grad(U))))) Gauss linear;
 }
 
