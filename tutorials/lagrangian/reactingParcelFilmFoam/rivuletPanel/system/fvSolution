@@ -34,8 +34,8 @@ solvers
 
     "(U|h)"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       0;
         relTol          0.1;
     }
@@ -54,10 +54,16 @@ solvers
 
     p_rgh
     {
-        solver          PCG;
-        preconditioner  DIC;
+        solver          GAMG;
         tolerance       0;
         relTol          0.1;
+        smoother        GaussSeidel;
+        nPreSweeps      0;
+        nPostSweeps     2;
+        cacheAgglomeration true;
+        nCellsInCoarsestLevel 10;
+        agglomerator    faceAreaPair;
+        mergeLevels     1;
     }
 
     p_rghFinal

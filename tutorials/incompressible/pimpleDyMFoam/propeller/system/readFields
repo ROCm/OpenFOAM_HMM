@@ -5,45 +5,16 @@
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-FoamFile
-{
-    version     2.0;
-    format      ascii;
-    class       dictionary;
-    location    "system";
-    object      fvSchemes;
-}
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-ddtSchemes
+// Make sure all fields for functionObjects are loaded. Prevents any
+// problems running with execFlowFunctionObjects.
+readFields
 {
-}
+    // Where to load it from (if not already in solver)
+    functionObjectLibs ("libfieldFunctionObjects.so");
 
-gradSchemes
-{
-    default         Gauss linear;
-}
-
-divSchemes
-{
-}
-
-laplacianSchemes
-{
-    default         Gauss linear corrected;
-}
-
-interpolationSchemes
-{
-    default         linear;
-}
-
-snGradSchemes
-{
-}
-
-fluxRequired
-{
+    type            readFields;
+    fields          (p U k);
 }
 
 

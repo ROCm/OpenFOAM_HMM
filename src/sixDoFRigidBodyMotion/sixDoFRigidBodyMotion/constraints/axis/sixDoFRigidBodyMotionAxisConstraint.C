@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -80,7 +80,7 @@ void Foam::sixDoFRigidBodyMotionConstraints::axis::constrainRotation
     pointConstraint& pc
 ) const
 {
-    pc.combine(pointConstraint(Tuple2<label, vector>(2, vector(0,1,0))));
+    pc.combine(pointConstraint(Tuple2<label, vector>(2, axis_)));
 }
 
 

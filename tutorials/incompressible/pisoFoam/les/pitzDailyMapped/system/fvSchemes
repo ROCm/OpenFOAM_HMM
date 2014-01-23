@@ -28,7 +28,7 @@ gradSchemes
 divSchemes
 {
     default         none;
-    div(phi,U)      Gauss filteredLinear2V 0.2 0;
+    div(phi,U)      Gauss LUST grad(U);
     div(phi,k)      Gauss limitedLinear 1;
     div(phi,B)      Gauss limitedLinear 1;
     div(phi,nuTilda) Gauss limitedLinear 1;

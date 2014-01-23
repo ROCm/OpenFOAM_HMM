@@ -34,8 +34,8 @@ solvers
 
     "(U|h|k|epsilon)"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       0;
         relTol          0.1;
     }
@@ -49,7 +49,7 @@ solvers
 
     p_rgh
     {
-        solver          GAMG;
+        solver           GAMG;
         tolerance        0;
         relTol           0.1;
         smoother         DICGaussSeidel;

@@ -5,24 +5,17 @@
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-FoamFile
+
+// Calculate Q (from U)
+Q
 {
-    version     2.0;
-    format      ascii;
-    class       dictionary;
-    object      motionProperties;
-}
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Where to load it from
+    functionObjectLibs ("libutilityFunctionObjects.so");
 
-dynamicFvMesh      dynamicMotionSolverFvMesh;
+    type Q;
 
-motionSolverLibs ("libfvMotionSolvers.so" "libsixDoFRigidBodyMotion.so");
-
-solver            displacementLaplacian;
-
-displacementLaplacianCoeffs
-{
-    diffusivity       inverseDistance (movingBlock);
+    // Output every
+    outputControl outputTime;
 }
 
 

@@ -41,7 +41,7 @@ solvers
         nPreSweeps      0;
         nPostSweeps     2;
         nFinestSweeps   2;
-        cacheAgglomeration false;
+        cacheAgglomeration on;
         nCellsInCoarsestLevel 10;
         agglomerator    faceAreaPair;
         mergeLevels     1;
@@ -56,8 +56,8 @@ solvers
 
     "(U|h|R|k|epsilon)"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       1e-05;
         relTol          0.1;
     }
@@ -71,16 +71,12 @@ solvers
 
     "(Yi|CO2|O2|N2|CH4|H2|H2O|CO)"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-06;
-        relTol          0.1;
+        $h;
     }
 
     "(Yi|CO2|O2|N2|CH4|H2|H2O|CO)Final"
     {
         $Yi;
-        preconditioner  DILU;
         tolerance       1e-06;
         relTol          0;
     }
@@ -106,5 +102,6 @@ relaxationFactors
         ".*"            1;
     }
 }
+
 
 // ************************************************************************* //
