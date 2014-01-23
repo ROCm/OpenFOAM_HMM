@@ -35,40 +35,152 @@ air
     }
 }
 
-// Surface tension coefficient
-sigma           0;
+blending
+{
+    default
+    {
+        type            none;
+        residualAlpha   1e-6;
+        continuousPhase air;
+    }
+}
+
+sigma
+(
+    (particles and air) 0
+);
+
+aspectRatio
+(
+    (particles in air)
+    {
+        type            constant;
+        E0              1.0;
+    }
+
+    (air in particles)
+    {
+        type            constant;
+        E0              1.0;
+    }
+);
 
 drag
-{
-    particles   GidaspowErgunWenYu;
-    air         GidaspowErgunWenYu;
-}
+(
+    (particles in air)
+    {
+        type            GidaspowErgunWenYu;
+        residualAlpha   1e-6;
+        residualSlip    1e-3;
+        residualRe      1e-3;
+        swarmCorrection
+        {
+            type        none;
+        }
+    }
 
-heatTransfer
-{
-    particles   RanzMarshall;
-    air         RanzMarshall;
-}
+    (air in particles)
+    {
+        type            none;
+    }
+
+    (particles and air)
+    {
+        type            none;
+    }
+);
 
 lift
-{
-    particles
+(
+    (particles in air)
     {
         type            none;
     }
-    air
+
+    (air in particles)
     {
         type            none;
     }
-}
 
-dispersedPhase     particles;
+    (particles and air)
+    {
+        type            none;
+    }
+);
 
-residualPhaseFraction   1e-3;
-residualSlip            1e-2;
+heatTransfer
+(
+    (particles in air)
+    {
+        type            RanzMarshall;
+        residualRe      1e-3;
+    }
 
-// Virtual-mass ceofficient
-Cvm             0;
+    (air in particles)
+    {
+        type            none;
+    }
+
+    (particles and air)
+    {
+        type            none;
+    }
+);
+
+virtualMass
+(
+    (particles in air)
+    {
+        type            constantCoefficient;
+        Cvm             0.5;
+    }
+
+    (air in particles)
+    {
+        type            none;
+    }
+
+    (particles and air)
+    {
+        type            none;
+    }
+);
+
+wallLubrication
+(
+    (particles in air)
+    {
+        type            none;
+    }
+
+    (air in particles)
+    {
+        type            none;
+    }
+
+    (particles and air)
+    {
+        type            none;
+    }
+);
+
+turbulentDispersion
+(
+    (particles in air)
+    {
+        type            none;
+    }
+
+    (air in particles)
+    {
+        type            none;
+    }
+
+    (particles and air)
+    {
+        type            none;
+    }
+);
 
 // Minimum allowable pressure
 pMin            10000;
