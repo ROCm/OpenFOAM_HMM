@@ -12,6 +12,7 @@ diameterModels/IATE/IATEsources/randomCoalescence/randomCoalescence.C
 
 BlendedInterfacialModel/blendingMethods/blendingMethod/blendingMethod.C
 BlendedInterfacialModel/blendingMethods/blendingMethod/newBlendingMethod.C
+BlendedInterfacialModel/blendingMethods/noBlending/noBlending.C
 BlendedInterfacialModel/blendingMethods/linear/linear.C
 BlendedInterfacialModel/blendingMethods/hyperbolic/hyperbolic.C
 
