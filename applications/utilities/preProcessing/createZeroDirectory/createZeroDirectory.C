@@ -33,7 +33,7 @@ Usage
     the $FOAM_CASE/system (or system/regionName if multi-region) directory.
     This consists of a lists of initial and boundary conditions, e.g.
 
-    \beginverbatim
+    \verbatim
     initialConditions
     {
         U           uniform (0 0 0);
