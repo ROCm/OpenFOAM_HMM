@@ -69,11 +69,11 @@ private:
         //- Residual reynolds number
         const dimensionedScalar residualRe_;
 
-        //- M segregated coefficient
-        const dimensionedScalar mSeg_;
+        //- M coefficient
+        const dimensionedScalar m_;
 
-        //- N segregated coefficient
-        const dimensionedScalar nSeg_;
+        //- N coefficient
+        const dimensionedScalar n_;
 
 
 public:

@@ -50,8 +50,8 @@ Foam::dragModels::segregated::segregated
 :
     dragModel(dict, pair),
     residualRe_("residualRe", dimless, dict.lookup("residualRe")),
-    mSeg_("mSeg", dimless, dict.lookup("mSeg")),
-    nSeg_("nSeg", dimless, dict.lookup("nSeg"))
+    m_("m", dimless, dict.lookup("m")),
+    n_("n", dimless, dict.lookup("n"))
 {}
 
 
@@ -149,7 +149,7 @@ Foam::tmp<Foam::volScalarField> Foam::dragModels::segregated::K() const
         )
     );
 
-    volScalarField lambda(mSeg_*ReI + nSeg_*muAlphaI/muI);
+    volScalarField lambda(m_*ReI + n_*muAlphaI/muI);
 
     return lambda*sqr(magGradI)*muI;
 }
