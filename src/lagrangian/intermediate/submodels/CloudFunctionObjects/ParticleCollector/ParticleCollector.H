@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -146,6 +146,9 @@ private:
         //- Last calculation time
         scalar timeOld_;
 
+        //- Work list to store which faces are hit
+        mutable DynamicList<label> hitFaceIDs_;
+
 
     // Private Member Functions
 
@@ -164,14 +167,14 @@ private:
         void initConcentricCircles();
 
         //- Collect parcels in polygon collectors
-        label collectParcelPolygon
+        void collectParcelPolygon
         (
             const point& p1,
             const point& p2
         ) const;
 
         //- Collect parcels in concentric circle collectors
-        label collectParcelConcentricCircles
+        void collectParcelConcentricCircles
         (
             const point& p1,
             const point& p2
