@@ -31,15 +31,15 @@ solvers
         relTol          0;
     }
 
-    "(U|h|k|nuTilda)"
+    "(U|e|k|nuTilda)"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       1e-6;
         relTol          0.01;
     }
 
-    "(U|h|k|nuTilda)Final"
+    "(U|e|k|nuTilda)Final"
     {
         $U;
         relTol          0;
@@ -63,7 +63,7 @@ relaxationFactors
     }
     equations
     {
-        "(U|h|k|epsilon|omega).*"  1;
+        ".*"  1;
     }
 }
 
