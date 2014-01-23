@@ -105,7 +105,7 @@ Foam::sixDoFRigidBodyMotionSolver::sixDoFRigidBodyMotionSolver
 {
     if (rhoName_ == "rhoInf")
     {
-        rhoInf_ = readScalar(dict.lookup("rhoInf"));
+        rhoInf_ = readScalar(coeffDict().lookup("rhoInf"));
     }
 
     // Calculate scaling factor everywhere
@@ -202,8 +202,16 @@ void Foam::sixDoFRigidBodyMotionSolver::solve()
 
     f.calcForcesMoment();
 
-    uniformDimensionedVectorField g =
-        db().lookupObject<uniformDimensionedVectorField>("g");
+    dimensionedVector g("g", dimAcceleration, vector::zero);
+
+    if (db().foundObject<uniformDimensionedVectorField>("g"))
+    {
+        g = db().lookupObject<uniformDimensionedVectorField>("g");
+    }
+    else if (coeffDict().found("g"))
+    {
+        coeffDict().lookup("g") >> g;
+    }
 
     // scalar ramp = min(max((this->db().time().value() - 5)/10, 0), 1);
     scalar ramp = 1.0;

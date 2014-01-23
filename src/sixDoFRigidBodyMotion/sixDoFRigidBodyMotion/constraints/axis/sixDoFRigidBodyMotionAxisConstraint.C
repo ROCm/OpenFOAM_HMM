@@ -80,7 +80,7 @@ void Foam::sixDoFRigidBodyMotionConstraints::axis::constrainRotation
     pointConstraint& pc
 ) const
 {
-    pc.combine(pointConstraint(Tuple2<label, vector>(2, vector(0,1,0))));
+    pc.combine(pointConstraint(Tuple2<label, vector>(2, axis_)));
 }
 
 
