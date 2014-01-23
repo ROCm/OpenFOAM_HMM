@@ -25,6 +25,16 @@ Class
     Foam::wallLubricationModels::Antal
 
 Description
+    Wall lubrication model of Antal et al.
+
+    Reference:
+    \verbatim
+        "Analysis of phase distribution in fully developed laminar bubbly
+        two-phase flow"
+        S P Antal, R T Lahey Jr and J E Flaherty
+        International Journal of Multiphase Flow
+        Volume 17, Issue 5, Pages 635-652, September 1991
+    \endverbatim
 
 SourceFiles
     Antal.C

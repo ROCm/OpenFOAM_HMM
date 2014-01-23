@@ -25,6 +25,15 @@ Class
     Foam::liftModels::TomiyamaLift
 
 Description
+    Lift model of Tomiyama et al.
+
+    Reference:
+    \verbatim
+        "Transverse migration of single bubbles in simple shear flows"
+        A Tomiyama, H Tamai, I Zun, S Hosokawa
+        Chemical Engineering Science
+        Volume 57, Issue 11, Pages 1849-1858, June 2002
+    \endverbatim
 
 SourceFiles
     TomiyamaLift.C

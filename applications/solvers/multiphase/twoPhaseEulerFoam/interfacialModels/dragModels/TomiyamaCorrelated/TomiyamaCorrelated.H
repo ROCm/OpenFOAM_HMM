@@ -25,6 +25,16 @@ Class
     Foam::dragModels::TomiyamaCorrelated
 
 Description
+    Correlation of Tomiyama et al.
+
+    Reference:
+    \verbatim
+        "Terminal velocity of single bubbles in surface tension force dominant
+        regime"
+        A Tomiyama, G P Celata, S Hosokawa, S Yoshida
+        International Journal of Multiphase Flow
+        Volume 28, Issue 9, Pages 1497-1519, September 2002
+    \endverbatim
 
 SourceFiles
     TomiyamaCorrelated.C

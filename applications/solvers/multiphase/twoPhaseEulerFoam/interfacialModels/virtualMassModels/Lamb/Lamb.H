@@ -25,6 +25,14 @@ Class
     Foam::virtualMassModels::Lamb
 
 Description
+    Virtual mass model of Lamb.
+
+    Reference:
+    \verbatim
+        "Hydrodynamics"
+        H Lamb 
+        Cambridge University Press, 1895
+    \endverbatim
 
 SourceFiles
     Lamb.C

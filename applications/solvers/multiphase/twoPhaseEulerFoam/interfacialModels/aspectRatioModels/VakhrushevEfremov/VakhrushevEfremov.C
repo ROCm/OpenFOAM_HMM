@@ -21,70 +21,60 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::Vakhrushev
-
-Description
-
-SourceFiles
-    Vakhrushev.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef Vakhrushev_H
-#define Vakhrushev_H
+#include "VakhrushevEfremov.H"
+#include "orderedPhasePair.H"
+#include "addToRunTimeSelectionTable.H"
 
-#include "aspectRatioModel.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
 namespace aspectRatioModels
 {
+    defineTypeNameAndDebug(VakhrushevEfremov, 0); 
+    addToRunTimeSelectionTable
+    (
+        aspectRatioModel,
+        VakhrushevEfremov,
+        dictionary
+    );
+}
+}
 
-/*---------------------------------------------------------------------------*\
-                         Class Vakhrushev Declaration
-\*---------------------------------------------------------------------------*/
 
-class Vakhrushev
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::aspectRatioModels::VakhrushevEfremov::VakhrushevEfremov
+(
+    const dictionary& dict,
+    const orderedPhasePair& pair
+)
 :
-    public aspectRatioModel
+    aspectRatioModel(dict, pair)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::aspectRatioModels::VakhrushevEfremov::~VakhrushevEfremov()
+{}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+Foam::tmp<Foam::volScalarField>
+Foam::aspectRatioModels::VakhrushevEfremov::E() const
 {
-public:
+    volScalarField Ta(pair_.Ta());
 
-    //- Runtime type information
-    TypeName("Vakhrushev");
+    return
+        neg(Ta - scalar(1))*scalar(1)
+      + pos(Ta - scalar(1))*neg(Ta - scalar(39.8))
+       *pow3(0.81 + 0.206*tanh(1.6 - 2*log10(max(Ta, scalar(1)))))
+      + pos(Ta - scalar(39.8))*0.24;
+}
 
-
-    // Constructors
-
-        //- Construct from a dictionary and an ordered phase pair
-        Vakhrushev
-        (
-            const dictionary& dict,
-            const orderedPhasePair& pair
-        );
-
-
-    //- Destructor
-    virtual ~Vakhrushev();
-
-
-    // Member Functions
-
-        //- Aspect ratio
-        virtual tmp<volScalarField> E() const;
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace aspectRatioModels
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

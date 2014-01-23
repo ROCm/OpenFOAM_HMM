@@ -28,7 +28,7 @@ Description
 
 SourceFiles
     swarmCorrection.C
-    newDragModel.C
+    newSwarmCorrection.C
 
 \*---------------------------------------------------------------------------*/
 

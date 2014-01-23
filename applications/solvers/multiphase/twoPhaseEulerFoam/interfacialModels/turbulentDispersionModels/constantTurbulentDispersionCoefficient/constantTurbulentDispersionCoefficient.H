@@ -25,6 +25,7 @@ Class
     Foam::turbulentDispersionModels::constantTurbulentDispersionCoefficient
 
 Description
+    Constant coefficient turbulent dispersion model.
 
 SourceFiles
     constantTurbulentDispersionCoefficient.C
@@ -57,7 +58,7 @@ class constantTurbulentDispersionCoefficient
     // Private data
 
         //- Constant turbulent dispersion coefficient
-        dimensionedScalar Ctd_;
+        const dimensionedScalar Ctd_;
 
 
 public:

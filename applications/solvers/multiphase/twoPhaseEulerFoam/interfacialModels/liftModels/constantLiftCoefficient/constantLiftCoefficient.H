@@ -25,6 +25,7 @@ Class
     Foam::liftModels::constantLiftCoefficient
 
 Description
+    Constant coefficient lift model.
 
 SourceFiles
     constantLiftCoefficient.C

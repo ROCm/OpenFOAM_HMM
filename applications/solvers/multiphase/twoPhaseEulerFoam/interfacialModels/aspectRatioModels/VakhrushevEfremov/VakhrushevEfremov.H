@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,76 +22,75 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::heatTransferModels::RanzMarshall
+    Foam::VakhrushevEfremov
 
 Description
+    Aspect ratio model of Vakhrushev and Efremov.
+
+    Reference:
+    \verbatim
+        "Interpolation formula for computing the velocities of single gas
+        bubbles in liquids"
+        I A Vakhrushev and G I Efremov
+        Chemistry and Technology of Fuels and Oils
+        Volume 6, Issue 5, Pages 376-379, May 1970
+    \endverbatim
 
 SourceFiles
-    RanzMarshall.C
+    VakhrushevEfremov.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef RanzMarshall_H
-#define RanzMarshall_H
+#ifndef VakhrushevEfremov_H
+#define VakhrushevEfremov_H
 
-#include "heatTransferModel.H"
+#include "aspectRatioModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-class phasePair;
-
-namespace heatTransferModels
+namespace aspectRatioModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class RanzMarshall Declaration
+                       Class VakhrushevEfremov Declaration
 \*---------------------------------------------------------------------------*/
 
-class RanzMarshall
+class VakhrushevEfremov
 :
-    public heatTransferModel
+    public aspectRatioModel
 {
-private:
-
-    // Private data
-        
-        //- Residual Reynolds number
-        const dimensionedScalar residualRe_;
-
-
 public:
 
     //- Runtime type information
-    TypeName("RanzMarshall");
+    TypeName("VakhrushevEfremov");
 
 
     // Constructors
 
-        //- Construct from components
-        RanzMarshall
+        //- Construct from a dictionary and an ordered phase pair
+        VakhrushevEfremov
         (
             const dictionary& dict,
-            const phasePair& pair
+            const orderedPhasePair& pair
         );
 
 
     //- Destructor
-    virtual ~RanzMarshall();
+    virtual ~VakhrushevEfremov();
 
 
     // Member Functions
 
-        //- The heat transfer function K used in the enthalpy equation
-        tmp<volScalarField> K() const;
+        //- Aspect ratio
+        virtual tmp<volScalarField> E() const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace heatTransferModels
+} // End namespace aspectRatioModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

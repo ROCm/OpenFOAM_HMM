@@ -25,6 +25,7 @@ Class
     Foam::virtualMassModels::constantVirtualMassCoefficient
 
 Description
+    Constant coefficient virtual mass model.
 
 SourceFiles
     constantVirtualMassCoefficient.C

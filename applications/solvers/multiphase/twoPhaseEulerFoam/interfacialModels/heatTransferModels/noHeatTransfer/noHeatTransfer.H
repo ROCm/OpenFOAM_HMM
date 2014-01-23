@@ -54,7 +54,6 @@ class noHeatTransfer
 :
     public heatTransferModel
 {
-
 public:
 
     //- Runtime type information

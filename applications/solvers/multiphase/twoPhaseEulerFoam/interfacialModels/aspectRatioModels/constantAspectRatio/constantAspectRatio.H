@@ -25,11 +25,10 @@ Class
     Foam::constantAspectRatio
 
 Description
+    Constant value aspect ratio model.
 
 SourceFiles
-    constantAspectRatioI.H
     constantAspectRatio.C
-    constantAspectRatioIO.C
 
 \*---------------------------------------------------------------------------*/
 

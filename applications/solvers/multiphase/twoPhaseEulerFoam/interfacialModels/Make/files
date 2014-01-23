@@ -48,6 +48,6 @@ turbulentDispersionModels/Gosman/Gosman.C
 aspectRatioModels/aspectRatioModel/aspectRatioModel.C
 aspectRatioModels/aspectRatioModel/newAspectRatioModel.C
 aspectRatioModels/constantAspectRatio/constantAspectRatio.C
-aspectRatioModels/Vakhrushev/Vakhrushev.C
+aspectRatioModels/VakhrushevEfremov/VakhrushevEfremov.C
 
 LIB = $(FOAM_LIBBIN)/libcompressibleEulerianInterfacialModels

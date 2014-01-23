@@ -25,6 +25,16 @@ Class
     Foam::dragModels::TomiyamaAnalytic
 
 Description
+    Analytic drag model of Tomiyama et al.
+
+    Reference:
+    \verbatim
+        "Drag Coefficients of Bubbles. 1st Report. Drag Coefficients of a
+        Single Bubble in a Stagnant Liquid."
+        A Tomiyama, I Kataoka, and T Sakaguchi
+        Nippon Kikai Gakkai Ronbunshu
+        Volume 61, Issue 587, Pages 2357-2364, 1995
+    \endverbatim
 
 SourceFiles
     TomiyamaAnalytic.C

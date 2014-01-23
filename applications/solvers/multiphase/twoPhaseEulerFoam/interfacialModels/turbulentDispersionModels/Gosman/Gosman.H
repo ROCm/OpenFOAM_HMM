@@ -25,6 +25,16 @@ Class
     Foam::turbulentDispersionModels::Gosman
 
 Description
+    Turbulent dispersion model of Gosman et al.
+
+    Reference:
+    \verbatim
+        "Multidimensional modeling of turbulent two-phase flows in stirred
+        vessels"
+        A D Gosman, C Lekakou, S Politis, R I Issa and M K Looney
+        AIChE Journal
+        Volume 38, Issue 12, Pages 1946-1956, 1992
+     \endverbatim
 
 SourceFiles
     Gosman.C
@@ -56,7 +66,8 @@ class Gosman
 {
     // Private data
 
-        dimensionedScalar sigma_;
+        //- Schmidt number
+        const dimensionedScalar sigma_;
 
 
 public:

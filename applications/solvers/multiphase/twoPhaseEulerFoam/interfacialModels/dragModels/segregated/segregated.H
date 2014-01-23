@@ -25,6 +25,14 @@ Class
     Foam::dragModels::segregated
 
 Description
+    Segregated drag model for use in regions with no obvious dispersed phase.
+
+    Reference:
+    \verbatim
+        "Towards the Numerical Simulation of Multi-scale Two-phase Flows"
+        H Marschall
+        PhD Thesis, TU München, 2011
+    \endverbatim
 
 SourceFiles
     segregated.C

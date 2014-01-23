@@ -28,7 +28,7 @@ Description
 
 SourceFiles
     virtualMassModel.C
-    newDragModel.C
+    newVirtualMassModel.C
 
 \*---------------------------------------------------------------------------*/
 
