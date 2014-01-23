@@ -34,6 +34,8 @@ namespace Foam
     defineRunTimeSelectionTable(turbulentDispersionModel, dictionary);
 }
 
+const Foam::dimensionSet Foam::turbulentDispersionModel::dimF(1, -2, -2, 0, 0);
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

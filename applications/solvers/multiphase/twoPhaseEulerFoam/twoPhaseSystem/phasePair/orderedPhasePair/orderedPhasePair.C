@@ -37,16 +37,20 @@ Foam::orderedPhasePair::orderedPhasePair
     const dictTable& aspectRatioTable
 )
 :
-    phasePair(dispersed, continuous, g, sigmaTable, true),
-    aspectRatio_
-    (
-        aspectRatioModel::New
+    phasePair(dispersed, continuous, g, sigmaTable, true)
+{
+    if (aspectRatioTable.found(*this))
+    {
+        aspectRatio_.set
         (
-            aspectRatioTable[*this],
-            *this
-        )
-    )
-{}
+            aspectRatioModel::New
+            (
+                aspectRatioTable[*this],
+                *this
+            ).ptr()
+        );
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -79,6 +83,13 @@ Foam::word Foam::orderedPhasePair::name() const
 
 Foam::tmp<Foam::volScalarField> Foam::orderedPhasePair::E() const
 {
+    if (!aspectRatio_.valid())
+    {
+        FatalErrorIn("Foam::orderedPhasePair::E() const")
+            << "Aspect ratio model not specified for " << *this << "."
+            << exit(FatalError);
+    }
+
     return aspectRatio_->E();
 }
 

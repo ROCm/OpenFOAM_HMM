@@ -38,6 +38,8 @@ SourceFiles
 #include "phasePair.H"
 #include "orderedPhasePair.H"
 
+#include "geometricZeroField.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -50,6 +52,8 @@ namespace Foam
 template<class modelType>
 class BlendedInterfacialModel
 {
+private:
+
     // Private data
 
         //- Unordered phase pair

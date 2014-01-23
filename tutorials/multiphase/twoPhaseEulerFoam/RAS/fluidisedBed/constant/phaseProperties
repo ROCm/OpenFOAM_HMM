@@ -52,17 +52,6 @@ sigma
 
 aspectRatio
 (
-    (particles in air)
-    {
-        type            constant;
-        E0              1.0;
-    }
-
-    (air in particles)
-    {
-        type            constant;
-        E0              1.0;
-    }
 );
 
 drag
@@ -78,33 +67,14 @@ drag
             type        none;
         }
     }
-
-    (air in particles)
-    {
-        type            none;
-    }
-
-    (particles and air)
-    {
-        type            none;
-    }
 );
 
-lift
+virtualMass
 (
     (particles in air)
     {
-        type            none;
-    }
-
-    (air in particles)
-    {
-        type            none;
-    }
-
-    (particles and air)
-    {
-        type            none;
+        type            constantCoefficient;
+        Cvm             0.5;
     }
 );
 
@@ -115,71 +85,18 @@ heatTransfer
         type            RanzMarshall;
         residualRe      1e-3;
     }
-
-    (air in particles)
-    {
-        type            none;
-    }
-
-    (particles and air)
-    {
-        type            none;
-    }
 );
 
-virtualMass
+lift
 (
-    (particles in air)
-    {
-        type            constantCoefficient;
-        Cvm             0.5;
-    }
-
-    (air in particles)
-    {
-        type            none;
-    }
-
-    (particles and air)
-    {
-        type            none;
-    }
 );
 
 wallLubrication
 (
-    (particles in air)
-    {
-        type            none;
-    }
-
-    (air in particles)
-    {
-        type            none;
-    }
-
-    (particles and air)
-    {
-        type            none;
-    }
 );
 
 turbulentDispersion
 (
-    (particles in air)
-    {
-        type            none;
-    }
-
-    (air in particles)
-    {
-        type            none;
-    }
-
-    (particles and air)
-    {
-        type            none;
-    }
 );
 
 // Minimum allowable pressure

@@ -35,6 +35,8 @@ namespace Foam
     defineRunTimeSelectionTable(dragModel, dictionary);
 }
 
+const Foam::dimensionSet Foam::dragModel::dimK(1, -3, -1, 0, 0);
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

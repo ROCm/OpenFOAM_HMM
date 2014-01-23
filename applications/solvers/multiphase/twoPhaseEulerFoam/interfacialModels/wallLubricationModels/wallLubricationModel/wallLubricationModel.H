@@ -84,6 +84,12 @@ public:
         );
 
 
+    // Static data members
+
+        //- Coefficient dimensions
+        static const dimensionSet dimF;
+
+
     // Constructors
 
         //- Construct from components

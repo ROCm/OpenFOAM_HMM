@@ -66,30 +66,6 @@ Foam::BlendedInterfacialModel<modelType>::BlendedInterfacialModel
     pair_(pair),
     pair1In2_(pair1In2),
     pair2In1_(pair2In1),
-    model_
-    (
-        modelType::New
-        (
-            modelTable[pair_],
-            pair_
-        )
-    ),
-    model1In2_
-    (
-        modelType::New
-        (
-            modelTable[pair1In2_],
-            pair1In2_
-        )
-    ),
-    model2In1_
-    (
-        modelType::New
-        (
-            modelTable[pair2In1_],
-            pair2In1_
-        )
-    ),
     blending_
     (
         blendingMethod::New
@@ -105,7 +81,43 @@ Foam::BlendedInterfacialModel<modelType>::BlendedInterfacialModel
         dimless,
         blendingDict.lookup("residualAlpha")
     )
-{}
+{
+    if (modelTable.found(pair_))
+    {
+        model_.set
+        (
+            modelType::New
+            (
+                modelTable[pair_],
+                pair_
+            ).ptr()
+        );
+    }
+
+    if (modelTable.found(pair1In2_))
+    {
+        model1In2_.set
+        (
+            modelType::New
+            (
+                modelTable[pair1In2_],
+                pair1In2_
+            ).ptr()
+        );
+    }
+
+    if (modelTable.found(pair2In1_))
+    {
+        model2In1_.set
+        (
+            modelType::New
+            (
+                modelTable[pair2In1_],
+                pair2In1_
+            ).ptr()
+        );
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -121,21 +133,56 @@ template<class modelType>
 Foam::tmp<Foam::volScalarField>
 Foam::BlendedInterfacialModel<modelType>::K() const
 {
-    tmp<volScalarField> f1(blending_->f1());
-    tmp<volScalarField> f2(blending_->f2());
+    tmp<volScalarField> f1, f2;
 
-    tmp<volScalarField> c
+    if (model_.valid() || model1In2_.valid())
+    {
+        f1 = blending_->f1();
+    }
+
+    if (model_.valid() || model2In1_.valid())
+    {
+        f2 = blending_->f2();
+    }
+
+    tmp<volScalarField> x
     (
-        model_->K()*(f1() - f2())
-      + model1In2_->K()*(1 - f1)
-      + model2In1_->K()*f2
+        new volScalarField
+        (
+            IOobject
+            (
+                modelType::typeName + "Coeff",
+                pair_.phase1().mesh().time().timeName(),
+                pair_.phase1().mesh()
+            ),
+            pair_.phase1().mesh(),
+            dimensionedScalar("zero", modelType::dimK, 0)
+        )
     );
 
-    c() *= max(pair_.phase1()*pair_.phase2(), residualAlpha_);
+    if (model_.valid())
+    {
+        x() += model_->K()*(f1() - f2());
+    }
 
-    correctFixedFluxBCs(c());
+    if (model1In2_.valid())
+    {
+        x() += model1In2_->K()*(1 - f1);
+    }
 
-    return c;
+    if (model2In1_.valid())
+    {
+        x() += model2In1_->K()*f2;
+    }
+
+    if (model_.valid() || model1In2_.valid() || model2In1_.valid())
+    {
+        x() *= max(pair_.phase1()*pair_.phase2(), residualAlpha_);
+
+        correctFixedFluxBCs(x());
+    }
+
+    return x;
 }
 
 
@@ -144,19 +191,54 @@ template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
 Foam::BlendedInterfacialModel<modelType>::F() const
 {
-    tmp<volScalarField> f1(blending_->f1());
-    tmp<volScalarField> f2(blending_->f2());
+    tmp<volScalarField> f1, f2;
 
-    tmp<GeometricField<Type, fvPatchField, volMesh> > v
+    if (model_.valid() || model1In2_.valid())
+    {
+        f1 = blending_->f1();
+    }
+
+    if (model_.valid() || model2In1_.valid())
+    {
+        f2 = blending_->f2();
+    }
+
+    tmp<GeometricField<Type, fvPatchField, volMesh> > x
     (
-        model_->F()*(f1() - f2())
-      + model1In2_->F()*(1 - f1)
-      - model2In1_->F()*f2
+        new GeometricField<Type, fvPatchField, volMesh>
+        (
+            IOobject
+            (
+                modelType::typeName + "Coeff",
+                pair_.phase1().mesh().time().timeName(),
+                pair_.phase1().mesh()
+            ),
+            pair_.phase1().mesh(),
+            dimensioned<Type>("zero", modelType::dimF, pTraits<Type>::zero)
+        )
     );
 
-    correctFixedFluxBCs(v());
+    if (model_.valid())
+    {
+        x() += model_->F()*(f1() - f2());
+    }
 
-    return v;
+    if (model1In2_.valid())
+    {
+        x() += model1In2_->F()*(1 - f1);
+    }
+
+    if (model2In1_.valid())
+    {
+        x() -= model2In1_->F()*f2; // note : subtraction
+    }
+
+    if (model_.valid() || model1In2_.valid() || model2In1_.valid())
+    {
+        correctFixedFluxBCs(x());
+    }
+
+    return x;
 }
 
 

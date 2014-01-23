@@ -34,6 +34,8 @@ namespace Foam
     defineRunTimeSelectionTable(virtualMassModel, dictionary);
 }
 
+const Foam::dimensionSet Foam::virtualMassModel::dimK(dimDensity);
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

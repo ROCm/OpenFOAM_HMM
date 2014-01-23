@@ -34,6 +34,8 @@ namespace Foam
     defineRunTimeSelectionTable(heatTransferModel, dictionary);
 }
 
+const Foam::dimensionSet Foam::heatTransferModel::dimK(1, -1, -3, -1, 0);
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

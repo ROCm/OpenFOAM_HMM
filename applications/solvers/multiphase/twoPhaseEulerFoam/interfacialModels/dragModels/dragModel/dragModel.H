@@ -93,6 +93,12 @@ public:
         );
 
 
+    // Static data members
+
+        //- Coefficient dimensions
+        static const dimensionSet dimK;
+
+
     // Constructors
 
         // Construct without residual constants

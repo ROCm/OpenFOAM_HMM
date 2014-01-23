@@ -81,6 +81,12 @@ public:
         );
 
 
+    // Static data members
+
+        //- Force dimensions
+        static const dimensionSet dimF;
+
+
     // Constructors
 
         //- Construct from a dictionary and a phase pair

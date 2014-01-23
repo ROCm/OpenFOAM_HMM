@@ -19,32 +19,11 @@ phases (air water);
 
 air
 {
-    diameterModel   IATE;
-
-    IATECoeffs
+    diameterModel   isothermal;
+    isothermalCoeffs
     {
-        dMax 1e-2;
-        dMin 1e-4;
-        residualAlpha 1e-6;
-
-        sources
-        (
-            wakeEntrainmentCoalescence
-            {
-                Cwe         0.002;
-            }
-            randomCoalescence
-            {
-                Crc         0.04;
-                C           3;
-                alphaMax    0.75;
-            }
-            turbulentBreakUp
-            {
-                Cti         0.085;
-                WeCr        6;
-            }
-        );
+        d0              3e-3;
+        p0              1e5;
     }
 }
 
@@ -131,21 +110,18 @@ drag
     }
 );
 
-lift
+virtualMass
 (
     (air in water)
     {
-        type            none;
+        type            constantCoefficient;
+        Cvm             0.5;
     }
 
     (water in air)
     {
-        type            none;
-    }
-
-    (air and water)
-    {
-        type            none;
+        type            constantCoefficient;
+        Cvm             0.5;
     }
 );
 
@@ -162,67 +138,18 @@ heatTransfer
         type            RanzMarshall;
         residualRe      1e-3;
     }
-
-    (air and water)
-    {
-        type            none;
-    }
 );
 
-virtualMass
+lift
 (
-    (air in water)
-    {
-        type            constantCoefficient;
-        Cvm             0.5;
-    }
-
-    (water in air)
-    {
-        type            constantCoefficient;
-        Cvm             0.5;
-    }
-
-    (air and water)
-    {
-        type            none;
-    }
 );
 
 wallLubrication
 (
-    (air in water)
-    {
-        type            none;
-    }
-
-    (water in air)
-    {
-        type            none;
-    }
-
-    (air and water)
-    {
-        type            none;
-    }
 );
 
 turbulentDispersion
 (
-    (air in water)
-    {
-        type            none;
-    }
-
-    (water in air)
-    {
-        type            none;
-    }
-
-    (air and water)
-    {
-        type            none;
-    }
 );
 
 // Minimum allowable pressure

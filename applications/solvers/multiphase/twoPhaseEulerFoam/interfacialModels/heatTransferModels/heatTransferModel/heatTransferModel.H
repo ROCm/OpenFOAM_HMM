@@ -80,6 +80,12 @@ public:
         );
 
 
+    // Static data members
+
+        //- Coefficient dimensions
+        static const dimensionSet dimK;
+
+
     // Constructors
 
         //- Construct froma dictionary and a phase pair

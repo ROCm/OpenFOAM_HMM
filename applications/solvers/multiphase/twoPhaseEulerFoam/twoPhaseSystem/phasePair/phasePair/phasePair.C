@@ -185,7 +185,7 @@ Foam::tmp<Foam::volScalarField> Foam::phasePair::Ta() const
 
 Foam::tmp<Foam::volScalarField> Foam::phasePair::E() const
 {
-    FatalErrorIn("Foam::phasePair::dispersed() const")
+    FatalErrorIn("Foam::phasePair::E() const")
         << "Requested aspect ratio of the dispersed phase in an unordered pair"
         << exit(FatalError);
 

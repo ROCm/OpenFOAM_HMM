@@ -110,21 +110,18 @@ drag
     }
 );
 
-lift
+virtualMass
 (
     (air in water)
     {
-        type            none;
+        type            constantCoefficient;
+        Cvm             0.5;
     }
 
     (water in air)
     {
-        type            none;
-    }
-
-    (air and water)
-    {
-        type            none;
+        type            constantCoefficient;
+        Cvm             0.5;
     }
 );
 
@@ -141,67 +138,18 @@ heatTransfer
         type            RanzMarshall;
         residualRe      1e-3;
     }
-
-    (air and water)
-    {
-        type            none;
-    }
 );
 
-virtualMass
+lift
 (
-    (air in water)
-    {
-        type            constantCoefficient;
-        Cvm             0.5;
-    }
-
-    (water in air)
-    {
-        type            constantCoefficient;
-        Cvm             0.5;
-    }
-
-    (air and water)
-    {
-        type            none;
-    }
 );
 
 wallLubrication
 (
-    (air in water)
-    {
-        type            none;
-    }
-
-    (water in air)
-    {
-        type            none;
-    }
-
-    (air and water)
-    {
-        type            none;
-    }
 );
 
 turbulentDispersion
 (
-    (air in water)
-    {
-        type            none;
-    }
-
-    (water in air)
-    {
-        type            none;
-    }
-
-    (air and water)
-    {
-        type            none;
-    }
 );
 
 // Minimum allowable pressure

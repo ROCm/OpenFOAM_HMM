@@ -80,6 +80,11 @@ public:
             (dict, pair)
         );
 
+    // Static data members
+
+        //- Force dimensions 
+        static const dimensionSet dimF;
+
 
     // Constructors
 

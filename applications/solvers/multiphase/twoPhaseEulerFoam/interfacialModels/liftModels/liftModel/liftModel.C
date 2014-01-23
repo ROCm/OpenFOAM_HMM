@@ -35,6 +35,8 @@ namespace Foam
     defineRunTimeSelectionTable(liftModel, dictionary);
 }
 
+const Foam::dimensionSet Foam::liftModel::dimF(1, -2, -2, 0, 0);
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
