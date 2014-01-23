@@ -81,7 +81,7 @@ solvers
             nPostSweeps      2;
             nFinestSweeps    2;
 
-            cacheAgglomeration false;
+            cacheAgglomeration true;
             nCellsInCoarsestLevel 10;
             agglomerator     faceAreaPair;
             mergeLevels      1;
