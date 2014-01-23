@@ -11,32 +11,42 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "templates";
-    object      outlet;
+    object      outletOptions;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-subSonic
+returnFlow
 {
-    T
+    default
     {
-        type        inletOutlet;
-        inletValue  ${:VALUE.T};
-        value       ${:VALUE.T};
+        p_rgh
+        {
+            type        fixedValue;
+            value       ${:VALUE.p_rgh};
+        }
     }
-    p
+    wall
     {
-        type        calculated;
-        value       ${:VALUE.p};
+        p_rgh
+        {
+            type        fixedValue;
+            value       ${:VALUE.p_rgh};
+        }
     }
-    mut
+    atmosphere
     {
-        type        zeroGradient;
-    }
-    alphat
-    {
-        type        zeroGradient;
+        p_rgh
+        {
+            type        totalPressure;
+            U           U;
+            phi         phi;
+            rho         rho;
+            psi         none;
+            gamma       1;
+            p0          ${:outlet.p_rgh};
+            value       ${:outlet.p_rgh};
+        }
     }
 }
-
 
 // ************************************************************************* //

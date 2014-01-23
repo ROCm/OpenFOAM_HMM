@@ -22,17 +22,17 @@ flowSpecification
         U
         {
             type        pressureInletVelocity;
-            value       ${:inlet.U};
+            value       ${:VALUE.U};
         }
         p
         {
             type        calculated;
-            value       ${:inlet.p};
+            value       ${:VALUE.p};
         }
         p_rgh
         {
             type        fixedValue;
-            value       ${:inlet.p_rgh};
+            value       ${:VALUE.p_rgh};
         }
     }
     fixedVelocity
@@ -45,7 +45,7 @@ flowSpecification
         p
         {
             type        calculated;
-            value       ${:inlet.p};
+            value       ${:VALUE.p};
         }
         p_rgh
         {

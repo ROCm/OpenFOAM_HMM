@@ -17,24 +17,6 @@ FoamFile
 
 subSonic
 {
-    p
-    {
-        type        fixedValue;
-        value       ${:VALUE.p};
-    }
-    k
-    {
-        type        zeroGradient;
-    }
-    epsilon
-    {
-        type        zeroGradient;
-    }
-    omega
-    {
-        type        zeroGradient;
-    }
-
     OPTIONS         (returnFlow);
 }
 

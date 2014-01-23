@@ -15,26 +15,21 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-subSonic
+returnFlow
 {
-    T
+    atmosphere
     {
-        type        inletOutlet;
-        inletValue  ${:VALUE.T};
-        value       ${:VALUE.T};
-    }
-    p
-    {
-        type        calculated;
-        value       ${:VALUE.p};
-    }
-    mut
-    {
-        type        zeroGradient;
-    }
-    alphat
-    {
-        type        zeroGradient;
+        p
+        {
+            type        totalPressure;
+            U           U;
+            phi         phi;
+            rho         rho;
+            psi         none;
+            gamma       1;
+            p0          ${:VALUE.p};
+            value       ${:VALUE.p};
+        }
     }
 }
 

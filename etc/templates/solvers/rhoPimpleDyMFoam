@@ -11,32 +11,36 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "templates";
-    object      outlet;
+    object      rhoPimpleDyMFoam;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-subSonic
+solverType  compressible;
+
+multiRegion no;
+
+fluidModels
 {
-    T
+    turbulenceModel  turbulenceModel;
+}
+
+fluidFields
+{
+    U
     {
-        type        inletOutlet;
-        inletValue  ${:VALUE.T};
-        value       ${:VALUE.T};
+        type        vector;
+        dimensions  [0 1 -1 0 0];
     }
     p
     {
-        type        calculated;
-        value       ${:VALUE.p};
+        type        scalar;
+        dimensions  [1 -1 -2 0 0];
     }
-    mut
+    T
     {
-        type        zeroGradient;
-    }
-    alphat
-    {
-        type        zeroGradient;
+        type        scalar;
+        dimensions  [0 0 0 1 0];
     }
 }
-
 
 // ************************************************************************* //
