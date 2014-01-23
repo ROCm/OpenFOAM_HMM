@@ -10,6 +10,4 @@ runApplication decomposePar
 
 runParallel `getApplication` 4
 
-runParallel vorticity 4
-
 runApplication reconstructPar
