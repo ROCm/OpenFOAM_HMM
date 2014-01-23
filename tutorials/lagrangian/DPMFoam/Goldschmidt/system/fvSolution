@@ -43,16 +43,16 @@ solvers
 
     "(U.air|k|omega)"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       1e-05;
         relTol          0.1;
     }
 
     "(U.air|k|omega)Final"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       1e-05;
         relTol          0;
     }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -108,9 +108,27 @@ Foam::scalar Foam::layerAdditionRemoval::readOldThickness
 
 void Foam::layerAdditionRemoval::clearAddressing() const
 {
-    // Layer removal data
-    deleteDemandDrivenData(pointsPairingPtr_);
-    deleteDemandDrivenData(facesPairingPtr_);
+    if (pointsPairingPtr_)
+    {
+        if (debug)
+        {
+            Pout<< "layerAdditionRemoval::clearAddressing()" << nl
+                << "    clearing pointsPairingPtr_" << endl;
+        }
+
+        deleteDemandDrivenData(pointsPairingPtr_);
+    }
+
+    if (facesPairingPtr_)
+    {
+        if (debug)
+        {
+            Pout<< "layerAdditionRemoval::clearAddressing()" << nl
+                << "    clearing facesPairingPtr_" << endl;
+        }
+
+        deleteDemandDrivenData(facesPairingPtr_);
+    }
 }
 
 

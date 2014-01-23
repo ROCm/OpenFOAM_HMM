@@ -19,10 +19,16 @@ solvers
 {
     p
     {
-        solver          PCG;
-        preconditioner  DIC;
-        tolerance       1e-06;
+        solver          GAMG;
+        tolerance       0;
         relTol          0.01;
+        smoother        GaussSeidel;
+        nPreSweeps      0;
+        nPostSweeps     2;
+        cacheAgglomeration true;
+        nCellsInCoarsestLevel 10;
+        agglomerator    faceAreaPair;
+        mergeLevels     1;
     }
 
     pFinal
@@ -33,24 +39,24 @@ solvers
 
     U.air
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       1e-05;
         relTol          0.1;
     }
 
     U.airFinal
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       1e-05;
         relTol          0;
     }
 
     kinematicCloud:alpha
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       1e-06;
         relTol          0;
     }

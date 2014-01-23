@@ -24,10 +24,16 @@ solvers
 
     p
     {
-        solver           PCG;
-        preconditioner   DIC;
-        tolerance        1e-6;
-        relTol           0.1;
+        solver          GAMG;
+        tolerance       0;
+        relTol          0.1;
+        smoother        GaussSeidel;
+        nPreSweeps      0;
+        nPostSweeps     2;
+        cacheAgglomeration true;
+        nCellsInCoarsestLevel 10;
+        agglomerator    faceAreaPair;
+        mergeLevels     1;
     }
 
     pFinal
@@ -38,8 +44,8 @@ solvers
 
     "(U|h|k|epsilon)"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       1e-6;
         relTol          0.1;
     }

@@ -19,15 +19,15 @@ solvers
 {
     "(Uf|hf|deltaf\*rhof)"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       1e-10;
         relTol          0;
     }
     deltaf
     {
-        solver          PBiCG; // PCG;
-        preconditioner  DILU; // DIC;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       1e-10;
         relTol          0;
     }
