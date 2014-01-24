@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "Ergun.H"
+#include "phasePair.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -33,13 +34,7 @@ namespace Foam
 namespace dragModels
 {
     defineTypeNameAndDebug(Ergun, 0);
-
-    addToRunTimeSelectionTable
-    (
-        dragModel,
-        Ergun,
-        dictionary
-    );
+    addToRunTimeSelectionTable(dragModel, Ergun, dictionary); 
 }
 }
 
@@ -48,13 +43,11 @@ namespace dragModels
 
 Foam::dragModels::Ergun::Ergun
 (
-    const dictionary& interfaceDict,
-    const volScalarField& alpha1,
-    const phaseModel& phase1,
-    const phaseModel& phase2
+    const dictionary& dict,
+    const phasePair& pair
 )
 :
-    dragModel(interfaceDict, alpha1, phase1, phase2)
+    dragModel(dict, pair)
 {}
 
 
@@ -66,17 +59,21 @@ Foam::dragModels::Ergun::~Ergun()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::dragModels::Ergun::K
-(
-    const volScalarField& Ur
-) const
+Foam::tmp<Foam::volScalarField> Foam::dragModels::Ergun::Cd() const
 {
-    volScalarField alpha2(max(scalar(1) - alpha1_, scalar(1.0e-6)));
-
     return
-        150.0*alpha1_*phase2_.nu()*phase2_.rho()
-       /sqr(alpha2*phase1_.d())
-      + 1.75*phase2_.rho()*Ur/(alpha2*phase1_.d());
+        (4/3)
+       *(
+            150
+           *max(pair_.dispersed(), residualAlpha_)
+           *pair_.continuous().nu()
+           /(
+                max(scalar(1) - pair_.dispersed(), residualAlpha_)
+               *pair_.dispersed().d()
+               *max(pair_.magUr(), residualSlip_)
+            )
+          + 1.75
+        );
 }
 
 

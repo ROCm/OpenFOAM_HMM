@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -77,6 +77,12 @@ Foam::diameterModels::IATE::IATE
     ),
     dMax_("dMax", dimLength, diameterProperties_.lookup("dMax")),
     dMin_("dMin", dimLength, diameterProperties_.lookup("dMin")),
+    residualAlpha_
+    (
+        "residualAlpha",
+        dimless,
+        diameterProperties_.lookup("residualAlpha")
+    ),
     d_
     (
         IOobject
@@ -137,7 +143,7 @@ void Foam::diameterModels::IATE::correct()
            /max
             (
                 fvc::average(phase_ + phase_.oldTime()),
-                phase_.fluid().residualPhaseFraction()
+                residualAlpha_
             )
         )
        *(fvc::ddt(phase_) + fvc::div(phase_.phiAlpha()))

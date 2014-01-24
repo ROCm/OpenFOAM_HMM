@@ -58,4 +58,12 @@ adjustTimeStep  yes;
 
 maxCo           2;
 
+functions
+{
+    #include "readFields"
+    #include "Q"
+    #include "surfaces"
+    #include "forces"
+}
+
 // ************************************************************************* //

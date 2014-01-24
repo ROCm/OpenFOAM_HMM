@@ -23,6 +23,9 @@ runApplication surfaceBooleanFeatures intersection \
 runApplication foamyHexMesh
 
 runApplication collapseEdges -latestTime -collapseFaceSet indirectPatchFaces
+mv log.collapseEdges log.collapseFaceSet
+
+runApplication collapseEdges -latestTime -collapseFaces
 
 
 # ----------------------------------------------------------------- end-of-file

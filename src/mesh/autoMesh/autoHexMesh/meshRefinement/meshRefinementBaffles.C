@@ -323,7 +323,7 @@ void Foam::meshRefinement::getBafflePatches
 }
 
 
-Foam::Map<Foam::labelPair>  Foam::meshRefinement::getZoneBafflePatches
+Foam::Map<Foam::labelPair> Foam::meshRefinement::getZoneBafflePatches
 (
     const bool allowBoundary,
     const labelList& globalToMasterPatch,

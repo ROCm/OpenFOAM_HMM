@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,29 +30,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from dictionary
-Foam::refinementParameters::refinementParameters
-(
-    const dictionary& dict,
-    const label dummy
-)
-:
-    maxGlobalCells_(readLabel(dict.lookup("cellLimit"))),
-    maxLocalCells_(readLabel(dict.lookup("procCellLimit"))),
-    minRefineCells_(readLabel(dict.lookup("minimumRefine"))),
-    curvature_(readScalar(dict.lookup("curvature"))),
-    planarAngle_(dict.lookupOrDefault("planarAngle", curvature_)),
-    nBufferLayers_(readLabel(dict.lookup("nBufferLayers"))),
-    keepPoints_(dict.lookup("keepPoints")),
-    allowFreeStandingZoneFaces_(dict.lookup("allowFreeStandingZoneFaces")),
-    useTopologicalSnapDetection_
-    (
-        dict.lookupOrDefault<bool>("useTopologicalSnapDetection", true)
-    ),
-    maxLoadUnbalance_(dict.lookupOrDefault<scalar>("maxLoadUnbalance", 0))
-{}
-
-
 Foam::refinementParameters::refinementParameters(const dictionary& dict)
 :
     maxGlobalCells_(readLabel(dict.lookup("maxGlobalCells"))),
@@ -73,7 +50,11 @@ Foam::refinementParameters::refinementParameters(const dictionary& dict)
     (
         dict.lookupOrDefault<bool>("useTopologicalSnapDetection", true)
     ),
-    maxLoadUnbalance_(dict.lookupOrDefault<scalar>("maxLoadUnbalance", 0))
+    maxLoadUnbalance_(dict.lookupOrDefault<scalar>("maxLoadUnbalance", 0)),
+    handleSnapProblems_
+    (
+        dict.lookupOrDefault<Switch>("handleSnapProblems", true)
+    )
 {
     scalar featAngle(readScalar(dict.lookup("resolveFeatureAngle")));
 

@@ -252,7 +252,12 @@ castellatedMeshControls
     // free-standing zone faces. Not used if there are no faceZones.
     allowFreeStandingZoneFaces true;
 
-    //
+
+    // Optional: do not remove cells likely to give snapping problems
+    // handleSnapProblems false;
+
+    // Optional: switch off topological test for cells to-be-squashed
+    //           and use geometric test instead
     //useTopologicalSnapDetection false;
 }
 

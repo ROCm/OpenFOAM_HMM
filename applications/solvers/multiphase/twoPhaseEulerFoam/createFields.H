@@ -1,6 +1,6 @@
     Info<< "Creating twoPhaseSystem\n" << endl;
 
-    twoPhaseSystem fluid(mesh);
+    twoPhaseSystem fluid(mesh, g);
 
     phaseModel& phase1 = fluid.phase1();
     phaseModel& phase2 = fluid.phase2();
