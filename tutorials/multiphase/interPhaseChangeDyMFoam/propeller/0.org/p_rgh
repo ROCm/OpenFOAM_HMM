@@ -21,6 +21,9 @@ internalField   uniform 1e5;
 
 boundaryField
 {
+    //- Set patchGroups for constraint patches
+    #include "${WM_PROJECT_DIR}/etc/caseDicts/setConstraintTypes"
+
     inlet
     {
         type            fixedFluxPressure;
@@ -32,12 +35,7 @@ boundaryField
         value           $internalField;
     }
 
-    outerCylinder
-    {
-        type            fixedFluxPressure;
-    }
-
-    "propeller.*"
+    wall
     {
         type            fixedFluxPressure;
     }
