@@ -22,7 +22,7 @@ flowSpecification
         U
         {
             type        pressureInletVelocity;
-            value       ${:inlet.U};
+            value       ${:VALUE.U};
         }
         p
         {
@@ -32,8 +32,8 @@ flowSpecification
             rho         rho;
             psi         none;
             gamma       1;
-            p0          ${:inlet.p};
-            value       ${:inlet.p};
+            p0          ${:VALUE.p};
+            value       ${:VALUE.p};
         }
     }
     flowRate

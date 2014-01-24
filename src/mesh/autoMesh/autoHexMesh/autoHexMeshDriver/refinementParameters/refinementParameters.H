@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -87,6 +87,7 @@ class refinementParameters
         //- Allowed load unbalance
         scalar maxLoadUnbalance_;
 
+        Switch handleSnapProblems_;
 
     // Private Member Functions
 
@@ -100,9 +101,6 @@ class refinementParameters
 public:
 
     // Constructors
-
-        //- Construct from dictionary - old syntax
-        refinementParameters(const dictionary& dict, const label dummy);
 
         //- Construct from dictionary - new syntax
         refinementParameters(const dictionary& dict);
@@ -172,6 +170,11 @@ public:
             scalar maxLoadUnbalance() const
             {
                 return maxLoadUnbalance_;
+            }
+
+            bool handleSnapProblems() const
+            {
+                return handleSnapProblems_;
             }
 
 

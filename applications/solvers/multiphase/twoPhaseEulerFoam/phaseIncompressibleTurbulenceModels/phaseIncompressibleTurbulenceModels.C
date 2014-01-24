@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ License
 
 #include "PhaseIncompressibleTurbulenceModel.H"
 #include "phaseModel.H"
+#include "twoPhaseSystem.H"
 #include "addToRunTimeSelectionTable.H"
 #include "makeTurbulenceModel.H"
 
@@ -76,11 +77,9 @@ makeLESModel(NicenoKEqn);
 #include "continuousGasKEqn.H"
 makeLESModel(continuousGasKEqn);
 
-
 #include "kineticTheoryModel.H"
 makeTurbulenceModel
 (phaseModelPhaseIncompressibleTurbulenceModel, RAS, kineticTheoryModel);
-
 
 #include "phasePressureModel.H"
 makeTurbulenceModel

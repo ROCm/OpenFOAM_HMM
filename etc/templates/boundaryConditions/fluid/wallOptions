@@ -73,6 +73,14 @@ motion
             value       ${:VALUE.U};
         }
     }
+    movingMesh
+    {
+        U
+        {
+            type        movingWallVelocity;
+            value       ${:VALUE.U};
+        }
+    }
 }
 
 

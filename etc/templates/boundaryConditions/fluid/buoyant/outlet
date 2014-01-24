@@ -28,11 +28,6 @@ subSonic
         type        calculated;
         value       ${:VALUE.p};
     }
-    p_rgh
-    {
-        type        fixedValue;
-        value       ${:VALUE.p_rgh};
-    }
     mut
     {
         type        zeroGradient;

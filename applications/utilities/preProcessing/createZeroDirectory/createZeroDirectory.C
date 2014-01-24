@@ -33,7 +33,7 @@ Usage
     the $FOAM_CASE/system (or system/regionName if multi-region) directory.
     This consists of a lists of initial and boundary conditions, e.g.
 
-    \beginverbatim
+    \verbatim
     initialConditions
     {
         U           uniform (0 0 0);
@@ -213,14 +213,14 @@ int main(int argc, char *argv[])
         )
     );
 
-    fileName baseDir("${WM_PROJECT_USER_DIR}/etc/templates");
+    fileName baseDir("${WM_PROJECT_DIR}/etc/templates");
     baseDir.expand();
 
     // read the solver
     const word& solverName = controlDict.lookup("application");
 
     // generate solver template
-    const solverTemplate solver(runTime, solverName);
+    const solverTemplate solver(baseDir, runTime, solverName);
 
     // read the boundary condition templates
     const boundaryTemplates bcTemplates

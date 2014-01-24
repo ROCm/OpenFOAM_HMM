@@ -186,10 +186,14 @@ Foam::dictionary Foam::solverTemplate::readFluidFieldTemplates
                     "const Time&"
                 ") const"
             )
-                << "Unhandled turbulence model option"
+                << "Unhandled turbulence model option.  Valid options are "
+                << "turbulenceModel, RASModel, LESModel"
                 << abort(FatalError);
         }
     }
+
+    Info<< "    Selecting " << turbulenceType << ": " << turbulenceModel
+        << endl;
 
     IOdictionary turbModelDict
     (
@@ -271,6 +275,7 @@ void Foam::solverTemplate::setRegionProperties
 
 Foam::solverTemplate::solverTemplate
 (
+    const fileName& baseDir,
     const Time& runTime,
     const word& solverName
 )
@@ -282,9 +287,6 @@ Foam::solverTemplate::solverTemplate
     fieldTypes_(),
     fieldDimensions_()
 {
-    fileName baseDir("${WM_PROJECT_USER_DIR}/etc/templates");
-    baseDir.expand();
-
     IOdictionary solverDict
     (
         IOobject

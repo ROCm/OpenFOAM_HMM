@@ -82,9 +82,6 @@ class kineticTheoryModel
             const phaseModel& phase_;
 
 
-        ////- Drag model
-        //const dragModel& draga_;
-
         // Sub-models
 
             //- Run-time selected viscosity model
@@ -118,6 +115,9 @@ class kineticTheoryModel
 
             //- Min value for which the frictional stresses are zero
             dimensionedScalar alphaMinFriction_;
+
+            //- Residual phase fraction
+            dimensionedScalar residualAlpha_;
 
 
         // Kinetic Theory Model Fields

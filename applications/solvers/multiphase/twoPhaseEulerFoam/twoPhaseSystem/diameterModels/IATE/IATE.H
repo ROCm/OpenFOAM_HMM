@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -79,6 +79,9 @@ class IATE
 
         //- Minimum diameter used for stabilisation in the limit kappai->inf
         dimensionedScalar dMin_;
+
+        //- Residual phase fraction
+        dimensionedScalar residualAlpha_;
 
         //- The Sauter-mean diameter of the phase
         volScalarField d_;

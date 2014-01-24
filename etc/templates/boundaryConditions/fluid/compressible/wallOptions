@@ -19,10 +19,25 @@ wallFunction
 {
     highReynolds
     {
+        k
+        {
+            type        compressible::kqRWallFunction;
+            value       ${:VALUE.k};
+        }
+        epsilon
+        {
+            type        compressible::epsilonWallFunction;
+            value       ${:VALUE.epsilon};
+        }
+        omega
+        {
+            type        compressible::omegaWallFunction;
+            value       ${:VALUE.omega};
+        }
         mut
         {
-            type        compressible::mutkWallFunction;
-            value       ${:VALUE.nut};
+            type        mutkWallFunction;
+            value       ${:VALUE.mut};
         }
         alphat
         {
@@ -32,6 +47,21 @@ wallFunction
     }
     lowReynolds
     {
+        k
+        {
+            type        fixedValue;
+            value       uniform 0;
+        }
+        epsilon
+        {
+            type        fixedValue;
+            value       uniform 0;
+        }
+        omega
+        {
+            type        fixedValue;
+            value       uniform 0;
+        }
         mut
         {
             type        fixedValue;

@@ -135,7 +135,12 @@ private:
 public:
 
     //- Constructor
-    solverTemplate(const Time& runTime, const word& regionName);
+    solverTemplate
+    (
+        const fileName& baseDir,
+        const Time& runTime,
+        const word& regionName
+    );
 
 
     // Public member functions

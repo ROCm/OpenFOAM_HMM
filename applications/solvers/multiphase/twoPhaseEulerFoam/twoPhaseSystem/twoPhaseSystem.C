@@ -24,8 +24,16 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "twoPhaseSystem.H"
-#include "fvMatrix.H"
 #include "PhaseIncompressibleTurbulenceModel.H"
+#include "BlendedInterfacialModel.H"
+#include "dragModel.H"
+#include "virtualMassModel.H"
+#include "heatTransferModel.H"
+#include "liftModel.H"
+#include "wallLubricationModel.H"
+#include "turbulentDispersionModel.H"
+#include "wallDist.H"
+#include "fvMatrix.H"
 #include "surfaceInterpolate.H"
 #include "MULES.H"
 #include "subCycle.H"
@@ -38,11 +46,15 @@ License
 #include "fvmLaplacian.H"
 #include "fixedValueFvsPatchFields.H"
 
+#include "blendingMethod.H"
+#include "HashPtrTable.H"
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::twoPhaseSystem::twoPhaseSystem
 (
-    const fvMesh& mesh
+    const fvMesh& mesh,
+    const dimensionedVector& g
 )
 :
     IOdictionary
@@ -97,119 +109,184 @@ Foam::twoPhaseSystem::twoPhaseSystem
         pos(phase2_)*fvc::div(phi_)/max(phase2_, scalar(0.0001))
     ),
 
-    sigma_
+    yWall_
     (
-        "sigma",
-        dimensionSet(1, 0, -2, 0, 0),
-        lookup("sigma")
-    ),
-
-    Cvm_
-    (
-        "Cvm",
-        dimless,
-        lookup("Cvm")
-    ),
-
-    drag1_
-    (
-        dragModel::New
+        IOobject
         (
-            subDict("drag"),
-            phase1_,
-            phase1_,
-            phase2_
-        )
-    ),
-
-    drag2_
-    (
-        dragModel::New
-        (
-            subDict("drag"),
-            phase2_,
-            phase2_,
-            phase1_
-        )
-    ),
-
-    heatTransfer1_
-    (
-        heatTransferModel::New
-        (
-            subDict("heatTransfer"),
-            phase1_,
-            phase1_,
-            phase2_
-        )
-    ),
-
-    heatTransfer2_
-    (
-        heatTransferModel::New
-        (
-            subDict("heatTransfer"),
-            phase2_,
-            phase2_,
-            phase1_
-        )
-    ),
-
-    lift1_
-    (
-        liftModel::New
-        (
-            subDict("lift"),
-            phase1_,
-            phase1_,
-            phase2_
-        )
-    ),
-
-    lift2_
-    (
-        liftModel::New
-        (
-            subDict("lift"),
-            phase2_,
-            phase2_,
-            phase1_
-        )
-    ),
-
-    dispersedPhase_(lookup("dispersedPhase")),
-
-    residualPhaseFraction_
-    (
-        readScalar(lookup("residualPhaseFraction"))
-    ),
-
-    residualSlip_
-    (
-        "residualSlip",
-        dimVelocity,
-        lookup("residualSlip")
+            "yWall",
+            mesh.time().timeName(),
+            mesh
+        ),
+        wallDist(mesh).y()
     )
 {
-    if
-    (
-        !(
-            dispersedPhase_ == phase1_.name()
-         || dispersedPhase_ == phase2_.name()
-         || dispersedPhase_ == "both"
-        )
-    )
+    phase2_.volScalarField::operator=(scalar(1) - phase1_);
+
+
+    // Blending
+    // ~~~~~~~~
+
+    forAllConstIter(dictionary, subDict("blending"), iter)
     {
-        FatalErrorIn("twoPhaseSystem::twoPhaseSystem(const fvMesh& mesh)")
-            << "invalid dispersedPhase " << dispersedPhase_
-            << exit(FatalError);
+        blendingMethods_.insert
+        (
+            iter().dict().dictName(),
+            blendingMethod::New
+            (
+                iter().dict(),
+                wordList(lookup("phases"))
+            )
+        );
     }
 
-    Info << "dispersedPhase is " << dispersedPhase_ << endl;
 
-    // Ensure the phase-fractions sum to 1
-    phase2_.volScalarField::operator=(scalar(1) - phase1_);
+    // Pairs
+    // ~~~~~
+
+    phasePair::scalarTable sigmaTable(lookup("sigma"));
+    phasePair::dictTable aspectRatioTable(lookup("aspectRatio"));
+
+    pair_.set
+    (
+        new phasePair
+        (
+            phase1_,
+            phase2_,
+            g,
+            sigmaTable
+        )
+    );
+
+    pair1In2_.set
+    (
+        new orderedPhasePair
+        (
+            phase1_,
+            phase2_,
+            g,
+            sigmaTable,
+            aspectRatioTable
+        )
+    );
+
+    pair2In1_.set
+    (
+        new orderedPhasePair
+        (
+            phase2_,
+            phase1_,
+            g,
+            sigmaTable,
+            aspectRatioTable
+        )
+    );
+
+
+    // Models
+    // ~~~~~~
+
+    drag_.set
+    (
+        new BlendedInterfacialModel<dragModel>
+        (
+            lookup("drag"),
+            (
+                blendingMethods_.found("drag")
+              ? blendingMethods_["drag"]
+              : blendingMethods_["default"]
+            ),
+            pair_,
+            pair1In2_,
+            pair2In1_
+        )
+    );
+
+    virtualMass_.set
+    (
+        new BlendedInterfacialModel<virtualMassModel>
+        (
+            lookup("virtualMass"),
+            (
+                blendingMethods_.found("virtualMass")
+              ? blendingMethods_["virtualMass"]
+              : blendingMethods_["default"]
+            ),
+            pair_,
+            pair1In2_,
+            pair2In1_
+        )
+    );
+
+    heatTransfer_.set
+    (
+        new BlendedInterfacialModel<heatTransferModel>
+        (
+            lookup("heatTransfer"),
+            (
+                blendingMethods_.found("heatTransfer")
+              ? blendingMethods_["heatTransfer"]
+              : blendingMethods_["default"]
+            ),
+            pair_,
+            pair1In2_,
+            pair2In1_
+        )
+    );
+
+    lift_.set
+    (
+        new BlendedInterfacialModel<liftModel>
+        (
+            lookup("lift"),
+            (
+                blendingMethods_.found("lift")
+              ? blendingMethods_["lift"]
+              : blendingMethods_["default"]
+            ),
+            pair_,
+            pair1In2_,
+            pair2In1_
+        )
+    );
+    
+    wallLubrication_.set
+    (
+        new BlendedInterfacialModel<wallLubricationModel>
+        (
+            lookup("wallLubrication"),
+            (
+                blendingMethods_.found("wallLubrication")
+              ? blendingMethods_["wallLubrication"]
+              : blendingMethods_["default"]
+            ),
+            pair_,
+            pair1In2_,
+            pair2In1_
+        )
+    );
+    
+    turbulentDispersion_.set
+    (
+        new BlendedInterfacialModel<turbulentDispersionModel>
+        (
+            lookup("turbulentDispersion"),
+            (
+                blendingMethods_.found("turbulentDispersion")
+              ? blendingMethods_["turbulentDispersion"]
+              : blendingMethods_["default"]
+            ),
+            pair_,
+            pair1In2_,
+            pair2In1_
+        )
+    );
 }
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::twoPhaseSystem::~twoPhaseSystem()
+{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
@@ -236,206 +313,39 @@ Foam::tmp<Foam::surfaceScalarField> Foam::twoPhaseSystem::calcPhi() const
 
 Foam::tmp<Foam::volScalarField> Foam::twoPhaseSystem::dragCoeff() const
 {
-    tmp<volScalarField> tdragCoeff
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "dragCoeff",
-                mesh_.time().timeName(),
-                mesh_
-            ),
-            mesh_,
-            dimensionedScalar("dragCoeff", dimensionSet(1, -3, -1, 0, 0), 0)
-        )
-    );
-    volScalarField& dragCoeff = tdragCoeff();
-
-    volVectorField Ur(phase1_.U() - phase2_.U());
-    volScalarField magUr(mag(Ur) + residualSlip_);
-
-    if (dispersedPhase_ == phase1_.name())
-    {
-        dragCoeff = drag1().K(magUr);
-    }
-    else if (dispersedPhase_ == phase2_.name())
-    {
-        dragCoeff = drag2().K(magUr);
-    }
-    else if (dispersedPhase_ == "both")
-    {
-        dragCoeff =
-        (
-            phase2_*drag1().K(magUr)
-          + phase1_*drag2().K(magUr)
-        );
-    }
-    else
-    {
-        FatalErrorIn("twoPhaseSystem::dragCoeff()")
-            << "dispersedPhase: " << dispersedPhase_ << " is incorrect"
-            << exit(FatalError);
-    }
-
-    volScalarField alphaCoeff(max(phase1_*phase2_, residualPhaseFraction_));
-    dragCoeff *= alphaCoeff;
-
-    // Remove drag at fixed-flux boundaries
-    forAll(phase1_.phi().boundaryField(), patchi)
-    {
-        if
-        (
-            isA<fixedValueFvsPatchScalarField>
-            (
-                phase1_.phi().boundaryField()[patchi]
-            )
-        )
-        {
-            dragCoeff.boundaryField()[patchi] = 0.0;
-        }
-    }
-
-    return tdragCoeff;
+    return drag_->K();
 }
 
 
-Foam::tmp<Foam::volVectorField> Foam::twoPhaseSystem::liftForce
-(
-    const volVectorField& U
-) const
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseSystem::virtualMassCoeff() const
 {
-    tmp<volVectorField> tliftForce
-    (
-        new volVectorField
-        (
-            IOobject
-            (
-                "liftForce",
-                mesh_.time().timeName(),
-                mesh_
-            ),
-            mesh_,
-            dimensionedVector
-            (
-                "liftForce",
-                dimensionSet(1, -2, -2, 0, 0),
-                vector::zero
-            )
-        )
-    );
-    volVectorField& liftForce = tliftForce();
-
-    if (dispersedPhase_ == phase1_.name())
-    {
-        liftForce = lift1().F(U);
-    }
-    else if (dispersedPhase_ == phase2_.name())
-    {
-        liftForce = lift2().F(U);
-    }
-    else if (dispersedPhase_ == "both")
-    {
-        liftForce =
-        (
-            phase2_*lift1().F(U)
-          + phase1_*lift2().F(U)
-        );
-    }
-    else
-    {
-        FatalErrorIn("twoPhaseSystem::liftForce()")
-            << "dispersedPhase: " << dispersedPhase_ << " is incorrect"
-            << exit(FatalError);
-    }
-
-    // Remove lift at fixed-flux boundaries
-    forAll(phase1_.phi().boundaryField(), patchi)
-    {
-        if
-        (
-            isA<fixedValueFvsPatchScalarField>
-            (
-                phase1_.phi().boundaryField()[patchi]
-            )
-        )
-        {
-            liftForce.boundaryField()[patchi] = vector::zero;
-        }
-    }
-
-    return tliftForce;
+    return virtualMass_->K();
 }
 
 
 Foam::tmp<Foam::volScalarField> Foam::twoPhaseSystem::heatTransferCoeff() const
 {
-    tmp<volScalarField> theatTransferCoeff
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "heatTransferCoeff",
-                mesh_.time().timeName(),
-                mesh_
-            ),
-            mesh_,
-            dimensionedScalar
-            (
-                "heatTransferCoeff",
-                dimensionSet(1, -1, -3, -1, 0),
-                0
-            )
-        )
-    );
-    volScalarField& heatTransferCoeff = theatTransferCoeff();
+    return heatTransfer_->K();
+}
 
-    volVectorField Ur(phase1_.U() - phase2_.U());
-    volScalarField magUr(mag(Ur) + residualSlip_);
 
-    if (dispersedPhase_ == phase1_.name())
-    {
-        heatTransferCoeff = heatTransfer1().K(magUr);
-    }
-    else if (dispersedPhase_ == phase2_.name())
-    {
-        heatTransferCoeff = heatTransfer2().K(magUr);
-    }
-    else if (dispersedPhase_ == "both")
-    {
-        heatTransferCoeff =
-        (
-            phase2_*heatTransfer1().K(magUr)
-          + phase1_*heatTransfer2().K(magUr)
-        );
-    }
-    else
-    {
-        FatalErrorIn("twoPhaseSystem::heatTransferCoeff()")
-            << "dispersedPhase: " << dispersedPhase_ << " is incorrect"
-            << exit(FatalError);
-    }
+Foam::tmp<Foam::volVectorField> Foam::twoPhaseSystem::liftForce() const
+{
+    return lift_->F<vector>();
+}
 
-    volScalarField alphaCoeff(max(phase1_*phase2_, residualPhaseFraction_));
-    heatTransferCoeff *= alphaCoeff;
 
-    // Remove heatTransfer at fixed-flux boundaries
-    forAll(phase1_.phi().boundaryField(), patchi)
-    {
-        if
-        (
-            isA<fixedValueFvsPatchScalarField>
-            (
-                phase1_.phi().boundaryField()[patchi]
-            )
-        )
-        {
-            heatTransferCoeff.boundaryField()[patchi] = 0.0;
-        }
-    }
+Foam::tmp<Foam::volVectorField>
+Foam::twoPhaseSystem::wallLubricationForce() const
+{
+    return wallLubrication_->F<vector>();
+}
 
-    return theatTransferCoeff;
+
+Foam::tmp<Foam::volVectorField>
+Foam::twoPhaseSystem::turbulentDispersionForce() const
+{
+    return turbulentDispersion_->F<vector>();
 }
 
 
@@ -661,18 +571,7 @@ bool Foam::twoPhaseSystem::read()
         readOK &= phase1_.read(*this);
         readOK &= phase2_.read(*this);
 
-        lookup("sigma") >> sigma_;
-        lookup("Cvm") >> Cvm_;
-
-        // drag1_->read(*this);
-        // drag2_->read(*this);
-
-        // heatTransfer1_->read(*this);
-        // heatTransfer2_->read(*this);
-
-        lookup("dispersedPhase") >> dispersedPhase_;
-        lookup("residualPhaseFraction") >> residualPhaseFraction_;
-        lookup("residualSlip") >> residualSlip_;
+        // models ...
 
         return readOK;
     }
@@ -680,6 +579,26 @@ bool Foam::twoPhaseSystem::read()
     {
         return false;
     }
+}
+
+
+const Foam::dragModel&
+Foam::twoPhaseSystem::drag(const phaseModel& phase) const
+{
+    return drag_->phaseModel(phase);
+}
+
+
+const Foam::virtualMassModel&
+Foam::twoPhaseSystem::virtualMass(const phaseModel& phase) const
+{
+    return virtualMass_->phaseModel(phase);
+}
+
+
+const Foam::dimensionedScalar& Foam::twoPhaseSystem::sigma() const
+{
+    return pair_->sigma();
 }
 
 
