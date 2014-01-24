@@ -23,63 +23,63 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "constantCoefficient.H"
+#include "noHeatTransfer.H"
+#include "phasePair.H"
 #include "addToRunTimeSelectionTable.H"
-#include "fvc.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace liftModels
+namespace heatTransferModels
 {
-    defineTypeNameAndDebug(constantCoefficient, 0);
-
-    addToRunTimeSelectionTable
-    (
-        liftModel,
-        constantCoefficient,
-        dictionary
-    );
+    defineTypeNameAndDebug(noHeatTransfer, 0);
+    addToRunTimeSelectionTable(heatTransferModel, noHeatTransfer, dictionary);
 }
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::liftModels::constantCoefficient::constantCoefficient
+Foam::heatTransferModels::noHeatTransfer::noHeatTransfer
 (
     const dictionary& dict,
-    const volScalarField& alpha1,
-    const phaseModel& phase1,
-    const phaseModel& phase2
+    const phasePair& pair
 )
 :
-    liftModel(dict, alpha1, phase1, phase2),
-    coeffDict_(dict.subDict(typeName + "Coeffs")),
-    Cl_("Cl", dimless, coeffDict_.lookup("Cl"))
+    heatTransferModel(dict, pair)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::liftModels::constantCoefficient::~constantCoefficient()
+Foam::heatTransferModels::noHeatTransfer::~noHeatTransfer()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volVectorField> Foam::liftModels::constantCoefficient::F
-(
-    const volVectorField& U
-) const
+Foam::tmp<Foam::volScalarField>
+Foam::heatTransferModels::noHeatTransfer::K() const
 {
+    const fvMesh& mesh(this->pair_.phase1().mesh());
+
     return
-        Cl_
-       *(phase1_*phase1_.rho() + phase2_*phase2_.rho())
-       *(
-            (phase1_.U() - phase2_.U())
-          ^ fvc::curl(U)
+        tmp<volScalarField>
+        (
+            new volScalarField
+            (
+                IOobject
+                (
+                    "zero",
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensionedScalar("zero", dimensionSet(1, -1, -3, -1, 0), 0)
+            )
         );
 }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,8 +33,6 @@ Description
 #include "fvCFD.H"
 #include "twoPhaseSystem.H"
 #include "PhaseIncompressibleTurbulenceModel.H"
-#include "dragModel.H"
-#include "heatTransferModel.H"
 #include "pimpleControl.H"
 #include "IOMRFZoneList.H"
 #include "fixedFluxPressureFvPatchScalarField.H"

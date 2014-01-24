@@ -24,26 +24,20 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "liftModel.H"
+#include "phasePair.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selector  * * * * * * * * * * * * * * * * //
 
 Foam::autoPtr<Foam::liftModel> Foam::liftModel::New
 (
     const dictionary& dict,
-    const volScalarField& alpha1,
-    const phaseModel& phase1,
-    const phaseModel& phase2
+    const phasePair& pair
 )
 {
-    word liftModelType
-    (
-        dict.subDict(phase1.name()).lookup("type")
-    );
+    word liftModelType(dict.lookup("type"));
 
-    Info << "Selecting liftModel for phase "
-        << phase1.name()
-        << ": "
-        << liftModelType << endl;
+    Info<< "Selecting liftModel for "
+        << pair << ": " << liftModelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(liftModelType);
@@ -58,14 +52,7 @@ Foam::autoPtr<Foam::liftModel> Foam::liftModel::New
             << exit(FatalError);
     }
 
-    return
-        cstrIter()
-        (
-            dict.subDict(phase1.name()),
-            alpha1,
-            phase1,
-            phase2
-        );
+    return cstrIter()(dict, pair);
 }
 
 

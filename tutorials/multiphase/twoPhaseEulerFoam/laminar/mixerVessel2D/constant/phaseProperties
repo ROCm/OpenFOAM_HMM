@@ -36,40 +36,121 @@ water
     }
 }
 
-// Surface tension coefficient
-sigma           0.07;
+blending
+{
+    default
+    {
+        type            linear;
+        residualAlpha   1e-6;
+        maxFullyDispersedAlpha.air 0.3;
+        maxPartlyDispersedAlpha.air 0.5;
+        maxFullyDispersedAlpha.water 0.3;
+        maxPartlyDispersedAlpha.water 0.5;
+    }
+}
+
+sigma
+(
+    (air and water)     0.07
+);
+
+aspectRatio
+(
+    (air in water)
+    {
+        type            constant;
+        E0              1.0;
+    }
+
+    (water in air)
+    {
+        type            constant;
+        E0              1.0;
+    }
+);
 
 drag
-{
-    air     SchillerNaumann;
-    water   SchillerNaumann;
-}
+(
+    (air in water)
+    {
+        type            SchillerNaumann;
+        residualAlpha   1e-6;
+        residualSlip    1e-3;
+        residualRe      1e-3;
+        swarmCorrection
+        {
+            type        none;
+        }
+    }
+
+    (water in air)
+    {
+        type            SchillerNaumann;
+        residualAlpha   1e-6;
+        residualSlip    1e-3;
+        residualRe      1e-3;
+        swarmCorrection
+        {
+            type        none;
+        }
+    }
+
+    (air and water)
+    {
+        type            segregated;
+        residualAlpha   1e-6;
+        residualSlip    1e-3;
+        residualRe      1e-3;
+        m               0.5;
+        n               8;
+        swarmCorrection
+        {
+            type        none;
+        }
+    }
+);
+
+virtualMass
+(
+    (air in water)
+    {
+        type            constantCoefficient;
+        Cvm             0.5;
+    }
+
+    (water in air)
+    {
+        type            constantCoefficient;
+        Cvm             0.5;
+    }
+);
 
 heatTransfer
-{
-    air     RanzMarshall;
-    water   RanzMarshall;
-}
+(
+    (air in water)
+    {
+        type            RanzMarshall;
+        residualRe      1e-3;
+    }
+
+    (water in air)
+    {
+        type            RanzMarshall;
+        residualRe      1e-3;
+    }
+);
 
 lift
-{
-    air
-    {
-        type            none;
-    }
-    water
-    {
-        type            none;
-    }
-}
+(
+);
 
-dispersedPhase          both;
+wallLubrication
+(
+);
 
-residualPhaseFraction   1e-3;
-residualSlip            1e-2;
-
-// Virtual-mass coefficient
-Cvm             0.5;
+turbulentDispersion
+(
+);
 
 // Minimum allowable pressure
 pMin            10000;

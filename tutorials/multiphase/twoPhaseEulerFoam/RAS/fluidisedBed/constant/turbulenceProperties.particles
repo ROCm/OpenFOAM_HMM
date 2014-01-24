@@ -31,6 +31,7 @@ RAS
         e                       0.8;
         alphaMax                0.62;
         alphaMinFriction        0.5;
+        residualAlpha           1e-6;
 
         viscosityModel          Gidaspow;
         conductivityModel       Gidaspow;

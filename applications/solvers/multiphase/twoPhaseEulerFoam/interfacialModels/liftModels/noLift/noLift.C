@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "noLift.H"
+#include "phasePair.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -33,13 +34,7 @@ namespace Foam
 namespace liftModels
 {
     defineTypeNameAndDebug(noLift, 0);
-
-    addToRunTimeSelectionTable
-    (
-        liftModel,
-        noLift,
-        dictionary
-    );
+    addToRunTimeSelectionTable(liftModel, noLift, dictionary);
 }
 }
 
@@ -49,12 +44,10 @@ namespace liftModels
 Foam::liftModels::noLift::noLift
 (
     const dictionary& dict,
-    const volScalarField& alpha1,
-    const phaseModel& phase1,
-    const phaseModel& phase2
+    const phasePair& pair
 )
 :
-    liftModel(dict, alpha1, phase1, phase2)
+    liftModel(dict, pair)
 {}
 
 
@@ -66,30 +59,37 @@ Foam::liftModels::noLift::~noLift()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volVectorField> Foam::liftModels::noLift::F
-(
-    const volVectorField& U
-) const
+Foam::tmp<Foam::volScalarField> Foam::liftModels::noLift::Cl() const
 {
+    const fvMesh& mesh(this->pair_.phase1().mesh());
+
     return
-        tmp<volVectorField>
+        tmp<volScalarField>
         (
-            new volVectorField
+            new volScalarField
             (
                 IOobject
                 (
-                    "zero",
-                    U.time().timeName(),
-                    U.mesh()
+                    "Cl",
+                    mesh.time().timeName(),
+                    mesh
                 ),
-                U.mesh(),
-                dimensionedVector
-                (
-                    "zero",
-                    dimensionSet(1, -2, -2, 0, 0, 0, 0),
-                    vector::zero
-                )
+                mesh,
+                dimensionedScalar("Cl", dimless, 0)
             )
+        );
+}
+
+
+Foam::tmp<Foam::volVectorField> Foam::liftModels::noLift::F() const
+{
+    return
+        Cl()
+       *dimensionedVector
+        (
+            "zero",
+            dimensionSet(1, -2, -2, 0, 0),
+            vector::zero
         );
 }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,8 @@ License
 #include "mixtureKEpsilon.H"
 #include "bound.H"
 #include "twoPhaseSystem.H"
+#include "dragModel.H"
+#include "virtualMassModel.H"
 #include "fixedValueFvPatchFields.H"
 #include "inletOutletFvPatchFields.H"
 #include "fvmSup.H"
@@ -378,7 +380,7 @@ tmp<volScalarField> mixtureKEpsilon<BasicTurbulenceModel>::Ct2() const
     volScalarField beta
     (
         (6*this->Cmu_/(4*sqrt(3.0/2.0)))
-       *alphag*fluid.drag(gas).K(magUr)/liquid.rho()
+       *alphag*fluid.drag(gas).K()/liquid.rho()
        *(liquidTurbulence.k_/liquidTurbulence.epsilon_)
     );
     volScalarField Ct0((3 + beta)/(1 + beta + 2*gas.rho()/liquid.rho()));
@@ -404,7 +406,7 @@ tmp<volScalarField> mixtureKEpsilon<BasicTurbulenceModel>::rhogEff() const
     const twoPhaseSystem& fluid = gas.fluid();
     return
         gas.rho()
-      + fluid.Cvm()*fluid.otherPhase(gas).rho();
+      + fluid.virtualMass(gas).Cvm()*fluid.otherPhase(gas).rho();
 }
 
 
@@ -489,7 +491,7 @@ tmp<volScalarField> mixtureKEpsilon<BasicTurbulenceModel>::bubbleG() const
        *sqr(liquid)*liquid.rho()
        *(
             pow3(magUr)
-          + pow(fluid.drag(gas).K(magUr)*gas.d()/liquid.rho(), 4.0/3.0)
+          + pow(fluid.drag(gas).K()*gas.d()/liquid.rho(), 4.0/3.0)
            *pow(magUr, 5.0/3.0)
         )
        *gas
@@ -499,7 +501,7 @@ tmp<volScalarField> mixtureKEpsilon<BasicTurbulenceModel>::bubbleG() const
     // Simple model
     // tmp<volScalarField> bubbleG
     // (
-    //     Cp_*sqr(liquid)*gas*fluid.drag(gas).K(magUr)*sqr(magUr)
+    //     Cp_*sqr(liquid)*gas*fluid.drag(gas).K()*sqr(magUr)
     // );
 
     return bubbleG;

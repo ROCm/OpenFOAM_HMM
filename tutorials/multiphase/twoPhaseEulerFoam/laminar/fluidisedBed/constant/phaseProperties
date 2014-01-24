@@ -35,40 +35,69 @@ air
     }
 }
 
-// Surface tension coefficient
-sigma           0;
+blending
+{
+    default
+    {
+        type            none;
+        residualAlpha   1e-6;
+        continuousPhase air;
+    }
+}
+
+sigma
+(
+    (particles and air) 0
+);
+
+aspectRatio
+(
+);
 
 drag
-{
-    particles   GidaspowErgunWenYu;
-    air         GidaspowErgunWenYu;
-}
+(
+    (particles in air)
+    {
+        type            GidaspowErgunWenYu;
+        residualAlpha   1e-6;
+        residualSlip    1e-3;
+        residualRe      1e-3;
+        swarmCorrection
+        {
+            type        none;
+        }
+    }
+);
+
+virtualMass
+(
+    (particles in air)
+    {
+        type            constantCoefficient;
+        Cvm             0.5;
+    }
+);
 
 heatTransfer
-{
-    particles   RanzMarshall;
-    air         RanzMarshall;
-}
+(
+    (particles in air)
+    {
+        type            RanzMarshall;
+        residualRe      1e-3;
+    }
+);
 
 lift
-{
-    particles
-    {
-        type            none;
-    }
-    air
-    {
-        type            none;
-    }
-}
+(
+);
 
-dispersedPhase     particles;
+wallLubrication
+(
+);
 
-residualPhaseFraction   1e-3;
-residualSlip            1e-2;
-
-// Virtual-mass ceofficient
-Cvm             0;
+turbulentDispersion
+(
+);
 
 // Minimum allowable pressure
 pMin            10000;

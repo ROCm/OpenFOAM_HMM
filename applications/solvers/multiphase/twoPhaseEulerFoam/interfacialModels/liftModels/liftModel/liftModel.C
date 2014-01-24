@@ -24,6 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "liftModel.H"
+#include "phasePair.H"
+#include "fvc.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -33,21 +35,18 @@ namespace Foam
     defineRunTimeSelectionTable(liftModel, dictionary);
 }
 
+const Foam::dimensionSet Foam::liftModel::dimF(1, -2, -2, 0, 0);
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::liftModel::liftModel
 (
     const dictionary& dict,
-    const volScalarField& alpha1,
-    const phaseModel& phase1,
-    const phaseModel& phase2
+    const phasePair& pair
 )
 :
-    dict_(dict),
-    alpha1_(alpha1),
-    phase1_(phase1),
-    phase2_(phase2)
+    pair_(pair)
 {}
 
 
@@ -55,6 +54,19 @@ Foam::liftModel::liftModel
 
 Foam::liftModel::~liftModel()
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::tmp<Foam::volVectorField> Foam::liftModel::F() const
+{
+    return
+        Cl()
+       *pair_.continuous().rho()
+       *(
+            pair_.Ur() ^ fvc::curl(pair_.continuous().U())
+        );
+}
 
 
 // ************************************************************************* //
