@@ -201,10 +201,6 @@ castellatedMeshControls
 
     refinementSurfaces
     {
-        innerCylinder
-        {
-            level       (2 3);
-        }
         innerCylinderSmall
         {
             level       (4 4);
@@ -264,11 +260,6 @@ castellatedMeshControls
         {
             mode        inside;
             levels      ((1E15 4));
-        }
-        outerCylinder
-        {
-            mode        inside;
-            levels      ((1E15 0));
         }
     }
 
