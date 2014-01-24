@@ -22,76 +22,87 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::liftModels::constantCoefficient
+    Foam::linear
 
 Description
 
 SourceFiles
-    constantCoefficient.C
+    linear.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef constantCoefficient_H
-#define constantCoefficient_H
+#ifndef linear_H
+#define linear_H
 
-#include "liftModel.H"
+#include "blendingMethod.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace liftModels
+namespace blendingMethods
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class constantCoefficient Declaration
+                         Class linear Declaration
 \*---------------------------------------------------------------------------*/
 
-class constantCoefficient
+class linear
 :
-    public liftModel
+    public blendingMethod
 {
     // Private data
 
-        //- Coefficient dictionary
-        const dictionary& coeffDict_;
+        //- Maximum fraction of phases which can be considered fully dispersed
+        HashTable<dimensionedScalar, word, word::hash>
+            maxFullyDispersedAlpha_;
 
-        //- Constant lift coefficient
-        dimensionedScalar Cl_;
+        //- Maximum fraction of phases which can be considered partly dispersed
+        HashTable<dimensionedScalar, word, word::hash>
+            maxPartlyDispersedAlpha_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("constantCoefficient");
+    TypeName("linear");
 
 
     // Constructors
 
-        //- Construct from components
-        constantCoefficient
+        //- Construct from a dictionary and two phases
+        linear
         (
             const dictionary& dict,
-            const volScalarField& alpha1,
-            const phaseModel& phase1,
-            const phaseModel& phase2
+            const wordList& phaseNames
         );
 
 
     //- Destructor
-    virtual ~constantCoefficient();
+    ~linear();
 
 
     // Member Functions
+        
+        //- Factor for primary phase
+        virtual tmp<volScalarField> f1
+        (
+            const phaseModel& phase1,
+            const phaseModel& phase2
+        ) const;
 
-        //- Lift force
-        tmp<volVectorField> F(const volVectorField& U) const;
+        //- Factor for secondary phase
+        virtual tmp<volScalarField> f2
+        (
+            const phaseModel& phase1,
+            const phaseModel& phase2
+        ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace liftModels
+} // End namespace blendingMethods
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -22,12 +22,12 @@ flowSpecification
         U
         {
             type        pressureInletVelocity;
-            value       ${:inlet.U};
+            value       ${:VALUE.U};
         }
         p
         {
             type        fixedValue;
-            value       ${:inlet.p};
+            value       ${:VALUE.p};
         }
     }
     fixedVelocity

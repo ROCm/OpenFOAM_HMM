@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,6 +44,9 @@ SourceFiles
 
 namespace Foam
 {
+
+class phasePair;
+
 namespace dragModels
 {
 
@@ -55,7 +58,6 @@ class Ergun
 :
     public dragModel
 {
-
 public:
 
     //- Runtime type information
@@ -64,13 +66,11 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct from a dictionary and a phase pair
         Ergun
         (
-            const dictionary& interfaceDict,
-            const volScalarField& alpha1,
-            const phaseModel& phase1,
-            const phaseModel& phase2
+            const dictionary& dict,
+            const phasePair& pair
         );
 
 
@@ -80,7 +80,8 @@ public:
 
     // Member Functions
 
-        tmp<volScalarField> K(const volScalarField& Ur) const;
+        //- Drag coefficient
+        virtual tmp<volScalarField> Cd() const;
 };
 
 

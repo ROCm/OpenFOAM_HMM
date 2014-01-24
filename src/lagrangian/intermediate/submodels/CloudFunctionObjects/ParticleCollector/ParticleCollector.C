@@ -286,7 +286,7 @@ void Foam::ParticleCollector<CloudType>::initConcentricCircles()
 
 
 template<class CloudType>
-Foam::label Foam::ParticleCollector<CloudType>::collectParcelPolygon
+void Foam::ParticleCollector<CloudType>::collectParcelPolygon
 (
     const point& p1,
     const point& p2
@@ -328,17 +328,15 @@ Foam::label Foam::ParticleCollector<CloudType>::collectParcelPolygon
 
             if (t.classify(pIntersect, dummyNearType, dummyNearLabel))
             {
-                return faceI;
+                hitFaceIDs_.append(faceI);
             }
         }
     }
-
-    return -1;
 }
 
 
 template<class CloudType>
-Foam::label Foam::ParticleCollector<CloudType>::collectParcelConcentricCircles
+void Foam::ParticleCollector<CloudType>::collectParcelConcentricCircles
 (
     const point& p1,
     const point& p2
@@ -352,7 +350,7 @@ Foam::label Foam::ParticleCollector<CloudType>::collectParcelConcentricCircles
     if (sign(d1) == sign(d2))
     {
         // did not cross plane
-        return secI;
+        return;
     }
 
     // intersection point in cylindrical co-ordinate system
@@ -385,7 +383,7 @@ Foam::label Foam::ParticleCollector<CloudType>::collectParcelConcentricCircles
         }
     }
 
-    return secI;
+    hitFaceIDs_.append(secI);
 }
 
 
@@ -541,7 +539,8 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     massFlowRate_(),
     log_(this->coeffDict().lookup("log")),
     outputFilePtr_(),
-    timeOld_(owner.mesh().time().value())
+    timeOld_(owner.mesh().time().value()),
+    hitFaceIDs_()
 {
     normal_ /= mag(normal_);
 
@@ -603,7 +602,8 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     massFlowRate_(pc.massFlowRate_),
     log_(pc.log_),
     outputFilePtr_(),
-    timeOld_(0.0)
+    timeOld_(0.0),
+    hitFaceIDs_()
 {}
 
 
@@ -631,21 +631,21 @@ void Foam::ParticleCollector<CloudType>::postMove
         return;
     }
 
-    label faceI = -1;
-
     // slightly extend end position to avoid falling within tracking tolerances
     const point position1 = position0 + 1.0001*(p.position() - position0);
+
+    hitFaceIDs_.clear();
 
     switch (mode_)
     {
         case mtPolygon:
         {
-            faceI = collectParcelPolygon(position0, position1);
+            collectParcelPolygon(position0, position1);
             break;
         }
         case mtConcentricCircle:
         {
-            faceI = collectParcelConcentricCircles(position0, position1);
+            collectParcelConcentricCircles(position0, position1);
             break;
         }
         default:
@@ -653,8 +653,10 @@ void Foam::ParticleCollector<CloudType>::postMove
         }
     }
 
-    if (faceI != -1)
+
+    forAll(hitFaceIDs_, i)
     {
+        label faceI = hitFaceIDs_[i];
         scalar m = p.nParticle()*p.mass();
 
         if (negateParcelsOppositeNormal_)

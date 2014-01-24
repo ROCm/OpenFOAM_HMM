@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,7 @@ License
 #include "LaheyKEpsilon.H"
 #include "addToRunTimeSelectionTable.H"
 #include "twoPhaseSystem.H"
+#include "dragModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -195,7 +196,7 @@ tmp<volScalarField> LaheyKEpsilon<BasicTurbulenceModel>::bubbleG() const
         Cp_
        *(
             pow3(magUr)
-          + pow(fluid.drag(gas).K(magUr)*gas.d()/liquid.rho(), 4.0/3.0)
+          + pow(fluid.drag(gas).K()*gas.d()/liquid.rho(), 4.0/3.0)
            *pow(magUr, 5.0/3.0)
         )
        *gas

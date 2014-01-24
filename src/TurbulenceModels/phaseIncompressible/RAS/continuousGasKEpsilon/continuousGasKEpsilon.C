@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,8 @@ License
 
 #include "continuousGasKEpsilon.H"
 #include "addToRunTimeSelectionTable.H"
+#include "twoPhaseSystem.H"
+#include "virtualMassModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -200,7 +202,7 @@ continuousGasKEpsilon<BasicTurbulenceModel>::rhoEff() const
         new volScalarField
         (
             IOobject::groupName("rhoEff", this->U_.group()),
-            gas.rho() + (fluid.Cvm() + 3.0/20.0)*liquid.rho()
+            gas.rho() + (fluid.virtualMass(gas).Cvm() + 3.0/20.0)*liquid.rho()
         )
     );
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "SyamlalOBrien.H"
+#include "phasePair.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -33,13 +34,7 @@ namespace Foam
 namespace dragModels
 {
     defineTypeNameAndDebug(SyamlalOBrien, 0);
-
-    addToRunTimeSelectionTable
-    (
-        dragModel,
-        SyamlalOBrien,
-        dictionary
-    );
+    addToRunTimeSelectionTable(dragModel, SyamlalOBrien, dictionary); 
 }
 }
 
@@ -48,13 +43,12 @@ namespace dragModels
 
 Foam::dragModels::SyamlalOBrien::SyamlalOBrien
 (
-    const dictionary& interfaceDict,
-    const volScalarField& alpha1,
-    const phaseModel& phase1,
-    const phaseModel& phase2
+    const dictionary& dict,
+    const phasePair& pair
 )
 :
-    dragModel(interfaceDict, alpha1, phase1, phase2)
+    dragModel(dict, pair),
+    residualRe_("residualRe", dimless, dict.lookup("residualRe"))
 {}
 
 
@@ -66,32 +60,30 @@ Foam::dragModels::SyamlalOBrien::~SyamlalOBrien()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::dragModels::SyamlalOBrien::K
-(
-    const volScalarField& Ur
-) const
+Foam::tmp<Foam::volScalarField> Foam::dragModels::SyamlalOBrien::Cd() const
 {
-    volScalarField alpha2(max(scalar(1) - alpha1_, scalar(1.0e-6)));
+    volScalarField alpha2(max(scalar(1) - pair_.dispersed(), residualAlpha_));
+    volScalarField magUr(max(pair_.magUr(), residualSlip_));
     volScalarField A(pow(alpha2, 4.14));
     volScalarField B
     (
         neg(alpha2 - 0.85)*(0.8*pow(alpha2, 1.28))
       + pos(alpha2 - 0.85)*(pow(alpha2, 2.65))
     );
-
-    volScalarField Re(max(Ur*phase1_.d()/phase2_.nu(), scalar(1.0e-3)));
-
+    volScalarField Re(max(pair_.Re(), residualRe_));
     volScalarField Vr
     (
-        0.5*
-        (
+        0.5
+       *(
             A - 0.06*Re + sqrt(sqr(0.06*Re) + 0.12*Re*(2.0*B - A) + sqr(A))
         )
     );
-
     volScalarField Cds(sqr(0.63 + 4.8*sqrt(Vr/Re)));
 
-    return 0.75*Cds*phase2_.rho()*Ur/(phase1_.d()*sqr(Vr));
+    return
+        Cds
+       *max(pair_.continuous(), residualAlpha_)
+       /sqr(Vr);
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,26 +24,20 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "heatTransferModel.H"
+#include "phasePair.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selector  * * * * * * * * * * * * * * * * //
 
 Foam::autoPtr<Foam::heatTransferModel> Foam::heatTransferModel::New
 (
-    const dictionary& interfaceDict,
-    const volScalarField& alpha1,
-    const phaseModel& phase1,
-    const phaseModel& phase2
+    const dictionary& dict,
+    const phasePair& pair
 )
 {
-    word heatTransferModelType
-    (
-        interfaceDict.lookup(phase1.name())
-    );
+    word heatTransferModelType(dict.lookup("type"));
 
-    Info<< "Selecting heatTransferModel for phase "
-        << phase1.name()
-        << ": "
-        << heatTransferModelType << endl;
+    Info<< "Selecting heatTransferModel for "
+        << pair << ": " << heatTransferModelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(heatTransferModelType);
@@ -58,7 +52,7 @@ Foam::autoPtr<Foam::heatTransferModel> Foam::heatTransferModel::New
             << exit(FatalError);
     }
 
-    return cstrIter()(interfaceDict, alpha1, phase1, phase2);
+    return cstrIter()(dict, pair);
 }
 
 

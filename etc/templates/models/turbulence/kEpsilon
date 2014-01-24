@@ -50,6 +50,11 @@ compressibleFields
         type        scalar;
         dimensions  [1 -1 -1 0 0];
     }
+    alphat
+    {
+        type        scalar;
+        dimensions  [1 -1 -1 0 0];
+    }
 }
 
 // ************************************************************************* //

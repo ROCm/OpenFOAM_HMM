@@ -100,6 +100,12 @@ Foam::RASModels::kineticTheoryModel::kineticTheoryModel
         dimless,
         this->coeffDict_.lookup("alphaMinFriction")
     ),
+    residualAlpha_
+    (
+        "residualAlpha",
+        dimless,
+        this->coeffDict_.lookup("residualAlpha")
+    ),
 
     Theta_
     (
@@ -384,7 +390,7 @@ void Foam::RASModels::kineticTheoryModel::correct()
         volScalarField gammaCoeff
         (
             12.0*(1.0 - sqr(e_))
-           *max(sqr(alpha), phase_.fluid().residualPhaseFraction())
+           *max(sqr(alpha), residualAlpha_)
            *gs0*(1.0/da)*ThetaSqrt/sqrtPi
         );
 
@@ -398,12 +404,9 @@ void Foam::RASModels::kineticTheoryModel::correct()
             max
             (
                 alpha*(1.0 - alpha),
-                phase_.fluid().residualPhaseFraction()
+                residualAlpha_
             )
-           *phase_.fluid().drag(phase_).K
-            (
-                magUr + phase_.fluid().residualSlip()
-            )/rho
+           *phase_.fluid().drag(phase_).K()/rho
         );
 
         // Eq. 3.25, p. 50 Js = J1 - J2
@@ -412,7 +415,7 @@ void Foam::RASModels::kineticTheoryModel::correct()
         (
             0.25*sqr(alpha2Prim)*da*sqr(magUr)
            /(
-               max(alpha, phase_.fluid().residualPhaseFraction())
+               max(alpha, residualAlpha_)
               *sqrtPi*(ThetaSqrt + ThetaSmallSqrt)
             )
         );
@@ -483,7 +486,7 @@ void Foam::RASModels::kineticTheoryModel::correct()
 
         volScalarField trD
         (
-            alpha/(alpha + phase_.fluid().residualPhaseFraction())
+            alpha/(alpha + residualAlpha_)
            *fvc::div(this->phi_)
         );
         volScalarField tr2D(sqr(trD));
@@ -503,7 +506,7 @@ void Foam::RASModels::kineticTheoryModel::correct()
         Theta_ = sqr
         (
             (l1 + sqrt(l2 + l3))
-           /(2.0*max(alpha, phase_.fluid().residualPhaseFraction())*K4)
+           /(2.0*max(alpha, residualAlpha_)*K4)
         );
     }
 
