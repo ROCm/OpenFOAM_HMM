@@ -24,7 +24,9 @@ boundaryField
 {
     sides
     {
-        type            zeroGradient;
+        type            inletOutlet;
+        inletValue      $internalField;
+        value           $internalField;
     }
     region0_to_wallFilmRegion_wallFilmFaces
     {
