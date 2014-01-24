@@ -14,10 +14,10 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-innerCylinder.obj
-{
-    #include "surfaceFeatureExtractDictDefaults"
-}
+//innerCylinder.obj
+//{
+//    #include "surfaceFeatureExtractDictDefaults"
+//}
 
 
 innerCylinderSmall.obj
