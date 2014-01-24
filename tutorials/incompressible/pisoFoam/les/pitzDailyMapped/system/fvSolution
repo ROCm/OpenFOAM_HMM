@@ -19,48 +19,30 @@ solvers
 {
     p
     {
-        solver          PCG;
-        preconditioner  DIC;
-        tolerance       1e-06;
-        relTol          0.05;
+        solver          GAMG;
+        tolerance       1e-07;
+        relTol          0.1;
+        smoother        GaussSeidel;
+        nPreSweeps      0;
+        nPostSweeps     2;
+        cacheAgglomeration on;
+        agglomerator    faceAreaPair;
+        nCellsInCoarsestLevel 10;
+        mergeLevels     1;
     }
 
     pFinal
     {
-        solver          PCG;
-        preconditioner  DIC;
-        tolerance       1e-06;
+        $p;
+        smoother        DICGaussSeidel;
+        tolerance       1e-6;
         relTol          0;
-    }
+    };
 
-    U
+    "(U|k|B|nuTilda)"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0;
-    }
-
-    k
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0;
-    }
-
-    B
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0;
-    }
-
-    nuTilda
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        GaussSeidel;
         tolerance       1e-05;
         relTol          0;
     }

@@ -18,86 +18,38 @@ solvers
 {
     p
     {
-        solver           GAMG;
-        tolerance        1e-6;
-        relTol           0.1;
+        solver          GAMG;
+        tolerance       1e-6;
+        relTol          0.1;
 
-        smoother         GaussSeidel;
-        nPreSweeps       0;
-        nPostSweeps      2;
+        smoother        GaussSeidel;
+        nPreSweeps      0;
+        nPostSweeps     2;
 
         cacheAgglomeration true;
 
         nCellsInCoarsestLevel 50;//10;
-        agglomerator     faceAreaPair;
-        mergeLevels      1;
+        agglomerator    faceAreaPair;
+        mergeLevels     1;
     };
 
     pFinal
     {
-        solver           GAMG;
-        tolerance        1e-6;
-        relTol           0;
-
-        smoother         GaussSeidel;
-        nPreSweeps       0;
-        nPostSweeps      2;
-
-        cacheAgglomeration true;
-
-        nCellsInCoarsestLevel 50;//10;
-        agglomerator     faceAreaPair;
-        mergeLevels      1;
+        $p;
+        tolerance       1e-6;
+        relTol          0;
     };
 
-    U
+    "(U|k|B|nuTilda)"
     {
-        solver           PBiCG;
-        preconditioner   DILU;
-        tolerance        1e-08;
-        relTol           0;
-    };
-
-    UFinal
-    {
-        solver           PBiCG;
-        preconditioner   DILU;
-        tolerance        1e-08;
-        relTol           0;
-    };
-
-    k
-    {
-        solver           PBiCG;
-        preconditioner   DILU;
-        tolerance        1e-07;
-        relTol           0;
-    };
-
-    B
-    {
-        solver           PBiCG;
-        preconditioner   DILU;
-        tolerance        1e-07;
-        relTol           0;
-    };
-
-    nuTilda
-    {
-        solver           PBiCG;
-        preconditioner   DILU;
-        tolerance        1e-07;
-        relTol           0;
+        solver          smoothSolver;
+        smoother        GaussSeidel;
+        tolerance       1e-07;
+        relTol          0;
     };
 }
 
 PISO
-{
-    nCorrectors     2;
-    nNonOrthogonalCorrectors 1;
-}
-
-PIMPLE
 {
     nCorrectors     2;
     nNonOrthogonalCorrectors 1;
