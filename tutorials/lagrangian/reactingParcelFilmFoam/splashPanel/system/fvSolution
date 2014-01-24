@@ -32,31 +32,27 @@ solvers
         relTol          0;
     }
 
-    "(U|h)"
+    U
     {
         solver          smoothSolver;
         smoother        symGaussSeidel;
         tolerance       0;
         relTol          0.1;
+        maxIter         50;
     }
 
-    "(U|h)Final"
+    UFinal
     {
         $U;
         relTol          0;
         tolerance       1e-05;
     }
 
-    "(k|epsilon)"
-    {
-        $UFinal;
-    }
-
     p_rgh
     {
         solver          GAMG;
         tolerance       0;
-        relTol          0.1;
+        relTol          0.01;
         smoother        GaussSeidel;
         nPreSweeps      0;
         nPostSweeps     2;
@@ -64,18 +60,29 @@ solvers
         nCellsInCoarsestLevel 10;
         agglomerator    faceAreaPair;
         mergeLevels     1;
+        maxIter         50;
     }
 
     p_rghFinal
     {
         $p_rgh;
-        tolerance       1e-06;
+        tolerance       1e-05;
         relTol          0;
     }
 
-    "(Yi|O2|N2|H2O)"
+    "(h|Yi|O2|N2|H2O)"
     {
-        $hFinal;
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-6;
+        relTol          0;
+    }
+    hFinal
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-6;
+        relTol          0;
     }
 }
 
@@ -90,11 +97,11 @@ relaxationFactors
 {
     fields
     {
-        ".*Final"       1;
+        ".*"       1;
     }
     equations
     {
-        ".*Final"       1;
+        ".*"       1;
     }
 }
 

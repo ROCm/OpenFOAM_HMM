@@ -32,15 +32,16 @@ solvers
         relTol          0;
     }
 
-    "(U|h)"
+    U
     {
         solver          smoothSolver;
         smoother        symGaussSeidel;
         tolerance       0;
         relTol          0.1;
+        maxIter         50;
     }
 
-    "(U|h)Final"
+    UFinal
     {
         $U;
         relTol          0;
@@ -73,9 +74,19 @@ solvers
         relTol          0;
     }
 
-    "(Yi|O2|N2|H2O)"
+    "(h|Yi|O2|N2|H2O)"
     {
-        $hFinal;
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-6;
+        relTol          0;
+    }
+    hFinal
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-6;
+        relTol          0;
     }
 }
 

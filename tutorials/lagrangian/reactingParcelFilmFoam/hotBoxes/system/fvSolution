@@ -34,9 +34,9 @@ solvers
 
     "(U|h|k|epsilon)"
     {
-        solver          smoothSolver;
-        smoother        symGaussSeidel;
-        tolerance       0;
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-5;
         relTol          0.1;
     }
 
