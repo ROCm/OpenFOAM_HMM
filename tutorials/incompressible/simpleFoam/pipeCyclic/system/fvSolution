@@ -32,13 +32,7 @@ solvers
 
     pFinal
     {
-        solver          GAMG;
-        smoother        GaussSeidel;
-        cacheAgglomeration true;
-        nCellsInCoarsestLevel 10;
-        agglomerator    faceAreaPair;
-        mergeLevels     1;
-
+        $p;
         tolerance       1e-06;
         relTol          0;
     }
@@ -46,16 +40,14 @@ solvers
     "(U|k|epsilon)"
     {
         solver          smoothSolver;
-        smoother        GaussSeidel;
+        smoother        symGaussSeidel;
         tolerance       1e-05;
         relTol          0.1;
     }
 
     "(U|k|epsilon)Final"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
-
+        $U;
         tolerance       1e-05;
         relTol          0;
     }

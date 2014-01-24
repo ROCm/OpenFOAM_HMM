@@ -21,8 +21,8 @@ solvers
     {
         solver          GAMG;
         tolerance       1e-06;
-        relTol          0.01;
-        smoother        GaussSeidel;
+        relTol          0.1;
+        smoother        DICGaussSeidel;
         cacheAgglomeration true;
         nCellsInCoarsestLevel 10;
         agglomerator    faceAreaPair;
@@ -31,20 +31,15 @@ solvers
 
     pFinal
     {
-        solver          GAMG;
+        $p;
         tolerance       1e-06;
         relTol          0;
-        smoother        GaussSeidel;
-        cacheAgglomeration true;
-        nCellsInCoarsestLevel 10;
-        agglomerator    faceAreaPair;
-        mergeLevels     1;
     }
 
     "(U|kl|kt|omega)"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       1e-06;
         relTol          0.01;
     }
