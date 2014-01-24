@@ -43,7 +43,7 @@ boundaryField
         value           uniform (0 0 0);
     }
 
-    outerCylinder
+    innerCylinder
     {
         type            fixedValue;
         value           uniform (0 0 0);
