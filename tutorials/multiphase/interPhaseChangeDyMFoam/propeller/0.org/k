@@ -21,6 +21,9 @@ internalField   uniform 0.06;
 
 boundaryField
 {
+    //- Set patchGroups for constraint patches
+    #include "${WM_PROJECT_DIR}/etc/caseDicts/setConstraintTypes"
+
     inlet
     {
         type            fixedValue;
@@ -34,13 +37,7 @@ boundaryField
         value           $internalField;
     }
 
-    outerCylinder
-    {
-        type            kqRWallFunction;
-        value           $internalField;
-    }
-
-    "propeller.*"
+    wall
     {
         type            kqRWallFunction;
         value           $internalField;
