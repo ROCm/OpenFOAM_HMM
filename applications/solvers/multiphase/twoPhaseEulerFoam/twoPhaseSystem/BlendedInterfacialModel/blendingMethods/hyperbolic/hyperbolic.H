@@ -53,11 +53,8 @@ class hyperbolic
 {
     // Private data
 
-        //- Maximum fraction of phase 1 which can be considered dispersed
-        const dimensionedScalar maxDispersedAlpha1_;
-
-        //- Maximum fraction of phase 2 which can be considered dispersed
-        const dimensionedScalar maxDispersedAlpha2_;
+        //- Maximum fraction of phases which can be considered dispersed
+        HashTable<dimensionedScalar, word, word::hash> maxDispersedAlpha_;
 
         //- Width of the transition
         const dimensionedScalar transitionAlphaScale_;
@@ -71,12 +68,11 @@ public:
 
     // Constructors
 
-        //- Construct from a dictionary and two phases
+        //- Construct from a dictionary and a list of phase names
         hyperbolic
         (
             const dictionary& dict,
-            const phaseModel& phase1,
-            const phaseModel& phase2
+            const wordList& phaseNames
         );
 
 
@@ -86,11 +82,19 @@ public:
 
     // Member Functions
         
-        //- Factor for primary phase
-        virtual tmp<volScalarField> f1() const;
+        //- Factor for first phase
+        virtual tmp<volScalarField> f1
+        (
+            const phaseModel& phase1,
+            const phaseModel& phase2
+        ) const;
 
-        //- Factor for secondary phase
-        virtual tmp<volScalarField> f2() const;
+        //- Factor for second phase
+        virtual tmp<volScalarField> f2
+        (
+            const phaseModel& phase1,
+            const phaseModel& phase2
+        ) const;
 };
 
 

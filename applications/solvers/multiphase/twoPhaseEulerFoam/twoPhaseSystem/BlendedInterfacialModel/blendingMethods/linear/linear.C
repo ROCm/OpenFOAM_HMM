@@ -48,65 +48,63 @@ namespace blendingMethods
 Foam::blendingMethods::linear::linear
 (
     const dictionary& dict,
-    const phaseModel& phase1,
-    const phaseModel& phase2
+    const wordList& phaseNames
 )
 :
-    blendingMethod(dict, phase1, phase2),
-    maxFullyDispersedAlpha1_
-    (
-        "maxFullyDispersedAlpha1",
-        dimless,
-        dict.lookup
-        (
-            IOobject::groupName("maxFullyDispersedAlpha", phase1.name())
-        )
-    ),
-    maxPartlyDispersedAlpha1_
-    (
-        "maxPartlyDispersedAlpha1",
-        dimless,
-        dict.lookup
-        (
-            IOobject::groupName("maxPartlyDispersedAlpha", phase1.name())
-        )
-    ),
-    maxFullyDispersedAlpha2_
-    (
-        "maxFullyDispersedAlpha2",
-        dimless,
-        dict.lookup
-        (
-            IOobject::groupName("maxFullyDispersedAlpha", phase2.name())
-        )
-    ),
-    maxPartlyDispersedAlpha2_
-    (
-        "maxPartlyDispersedAlpha2",
-        dimless,
-        dict.lookup
-        (
-            IOobject::groupName("maxPartlyDispersedAlpha", phase2.name())
-        )
-    )
+    blendingMethod(dict)
 {
-    if
-    (
-        maxFullyDispersedAlpha1_ > maxPartlyDispersedAlpha1_
-     || maxFullyDispersedAlpha2_ > maxPartlyDispersedAlpha2_
-    )
+    forAllConstIter(wordList, phaseNames, iter)
     {
-        FatalErrorIn
+        const word nameFull
         (
-            "Foam::blendingMethods::linear::linear"
-            "("
-                "const dictionary& dict,"
-                "const phaseModel& phase1,"
-                "const phaseModel& phase2"
-            ")"
-        )   << "The supplied fully dispersed volume fraction is greater than "
-            << "the partly dispersed value"
-            << endl << exit(FatalError);
+            IOobject::groupName("maxFullyDispersedAlpha", *iter)
+        );
+
+        maxFullyDispersedAlpha_.insert
+        (
+            *iter,
+            dimensionedScalar
+            (
+                nameFull,
+                dimless,
+                dict.lookup(nameFull)
+            )
+        );
+
+        const word namePart
+        (
+            IOobject::groupName("maxPartlyDispersedAlpha", *iter)
+        );
+
+        maxPartlyDispersedAlpha_.insert
+        (
+            *iter,
+            dimensionedScalar
+            (
+                namePart,
+                dimless,
+                dict.lookup(namePart)
+            )
+        );
+
+        if
+        (
+            maxFullyDispersedAlpha_[*iter]
+          > maxPartlyDispersedAlpha_[*iter]
+        )
+        {
+            FatalErrorIn
+            (
+                "Foam::blendingMethods::linear::linear"
+                "("
+                    "const dictionary& dict,"
+                    "const wordList& phaseNames"
+                ")"
+            )   << "The supplied fully dispersed volume fraction for "
+                << *iter
+                << " is greater than the partly dispersed value."
+                << endl << exit(FatalError);
+        }
     }
 }
 
@@ -119,15 +117,24 @@ Foam::blendingMethods::linear::~linear()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::blendingMethods::linear::f1() const
+Foam::tmp<Foam::volScalarField> Foam::blendingMethods::linear::f1
+(
+    const phaseModel& phase1,
+    const phaseModel& phase2
+) const
 {
+    const dimensionedScalar
+        maxFullAlpha(maxFullyDispersedAlpha_[phase1.name()]);
+    const dimensionedScalar
+        maxPartAlpha(maxPartlyDispersedAlpha_[phase1.name()]);
+
     return
         min
         (
             max
             (
-                (phase1_ - maxFullyDispersedAlpha1_)
-               /(maxPartlyDispersedAlpha1_ - maxFullyDispersedAlpha1_ + SMALL),
+                (phase1 - maxFullAlpha)
+               /(maxPartAlpha - maxFullAlpha + SMALL),
                 0.0
             ),
             1.0
@@ -135,15 +142,24 @@ Foam::tmp<Foam::volScalarField> Foam::blendingMethods::linear::f1() const
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::blendingMethods::linear::f2() const
+Foam::tmp<Foam::volScalarField> Foam::blendingMethods::linear::f2
+(
+    const phaseModel& phase1,
+    const phaseModel& phase2
+) const
 {
+    const dimensionedScalar
+        maxFullAlpha(maxFullyDispersedAlpha_[phase2.name()]);
+    const dimensionedScalar
+        maxPartAlpha(maxPartlyDispersedAlpha_[phase2.name()]);
+
     return
         min
         (
             max
             (
-                (maxPartlyDispersedAlpha2_ - phase2_)
-               /(maxPartlyDispersedAlpha2_ - maxFullyDispersedAlpha2_ + SMALL),
+                (maxPartAlpha - phase2)
+               /(maxPartAlpha - maxFullAlpha + SMALL),
                 0.0
             ),
             1.0

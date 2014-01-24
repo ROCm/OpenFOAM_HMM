@@ -57,7 +57,7 @@ template<class modelType>
 Foam::BlendedInterfacialModel<modelType>::BlendedInterfacialModel
 (
     const phasePair::dictTable& modelTable,
-    const dictionary& blendingDict,
+    const blendingMethod& blending,
     const phasePair& pair,
     const orderedPhasePair& pair1In2,
     const orderedPhasePair& pair2In1
@@ -66,21 +66,7 @@ Foam::BlendedInterfacialModel<modelType>::BlendedInterfacialModel
     pair_(pair),
     pair1In2_(pair1In2),
     pair2In1_(pair2In1),
-    blending_
-    (
-        blendingMethod::New
-        (
-            blendingDict,
-            pair1In2_.dispersed(),
-            pair1In2_.continuous()
-        )
-    ),
-    residualAlpha_
-    (
-        "residualAlpha",
-        dimless,
-        blendingDict.lookup("residualAlpha")
-    )
+    blending_(blending)
 {
     if (modelTable.found(pair_))
     {
@@ -137,12 +123,12 @@ Foam::BlendedInterfacialModel<modelType>::K() const
 
     if (model_.valid() || model1In2_.valid())
     {
-        f1 = blending_->f1();
+        f1 = blending_.f1(pair1In2_.dispersed(), pair2In1_.dispersed());
     }
 
     if (model_.valid() || model2In1_.valid())
     {
-        f2 = blending_->f2();
+        f2 = blending_.f2(pair1In2_.dispersed(), pair2In1_.dispersed());
     }
 
     tmp<volScalarField> x
@@ -177,7 +163,7 @@ Foam::BlendedInterfacialModel<modelType>::K() const
 
     if (model_.valid() || model1In2_.valid() || model2In1_.valid())
     {
-        x() *= max(pair_.phase1()*pair_.phase2(), residualAlpha_);
+        x() *= max(pair_.phase1()*pair_.phase2(), blending_.residualAlpha());
 
         correctFixedFluxBCs(x());
     }
@@ -195,12 +181,12 @@ Foam::BlendedInterfacialModel<modelType>::F() const
 
     if (model_.valid() || model1In2_.valid())
     {
-        f1 = blending_->f1();
+        f1 = blending_.f1(pair1In2_.dispersed(), pair2In1_.dispersed());
     }
 
     if (model_.valid() || model2In1_.valid())
     {
-        f2 = blending_->f2();
+        f2 = blending_.f2(pair1In2_.dispersed(), pair2In1_.dispersed());
     }
 
     tmp<GeometricField<Type, fvPatchField, volMesh> > x

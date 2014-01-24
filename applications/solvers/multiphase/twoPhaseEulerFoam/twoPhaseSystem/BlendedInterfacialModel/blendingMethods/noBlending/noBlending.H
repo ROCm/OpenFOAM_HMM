@@ -69,8 +69,7 @@ public:
         noBlending
         (
             const dictionary& dict,
-            const phaseModel& phase1,
-            const phaseModel& phase2
+            const wordList& phaseNames
         );
 
 
@@ -81,10 +80,18 @@ public:
     // Member Functions
         
         //- Factor for primary phase
-        virtual tmp<volScalarField> f1() const;
+        virtual tmp<volScalarField> f1
+        (
+            const phaseModel& phase1,
+            const phaseModel& phase2
+        ) const;
 
         //- Factor for secondary phase
-        virtual tmp<volScalarField> f2() const;
+        virtual tmp<volScalarField> f2
+        (
+            const phaseModel& phase1,
+            const phaseModel& phase2
+        ) const;
 };
 
 

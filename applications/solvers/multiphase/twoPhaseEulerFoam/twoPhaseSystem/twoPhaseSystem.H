@@ -53,6 +53,7 @@ class liftModel;
 class wallLubricationModel;
 class turbulentDispersionModel;
 
+class blendingMethod;
 template <class modelType> class BlendedInterfacialModel;
 
 /*---------------------------------------------------------------------------*\
@@ -93,6 +94,9 @@ private:
 
         //- Phase pair for phase 2 dispersed in phase 1
         autoPtr<orderedPhasePair> pair2In1_;
+
+        //- Blending methods
+        HashTable<autoPtr<blendingMethod>, word, word::hash> blendingMethods_;
 
         //- Drag model
         autoPtr<BlendedInterfacialModel<dragModel> > drag_;

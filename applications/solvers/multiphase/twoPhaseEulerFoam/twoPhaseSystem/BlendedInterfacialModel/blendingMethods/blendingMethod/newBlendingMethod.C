@@ -30,14 +30,12 @@ License
 Foam::autoPtr<Foam::blendingMethod> Foam::blendingMethod::New
 (
     const dictionary& dict,
-    const phaseModel& phase1,
-    const phaseModel& phase2
+    const wordList& phaseNames
 )
 {
     word blendingMethodType(dict.lookup("type"));
 
-    Info<< "Selecting blendingMethod for "
-        << phase1.name() << " and " << phase2.name() << ": " 
+    Info<< "Selecting " << dict.dictName() << " blending method: "
         << blendingMethodType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
@@ -53,7 +51,7 @@ Foam::autoPtr<Foam::blendingMethod> Foam::blendingMethod::New
             << exit(FatalError);
     }
 
-    return cstrIter()(dict, phase1, phase2);
+    return cstrIter()(dict, phaseNames);
 }
 
 

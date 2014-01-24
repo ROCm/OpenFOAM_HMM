@@ -75,10 +75,7 @@ private:
         autoPtr<modelType> model2In1_;
 
         //- Blending model
-        autoPtr<blendingMethod> blending_;
-
-        //- Residual phase fraction
-        const dimensionedScalar residualAlpha_;
+        const blendingMethod& blending_;
 
 
     // Private Member Functions
@@ -105,7 +102,7 @@ public:
         BlendedInterfacialModel
         (
             const phasePair::dictTable& modelTable,
-            const dictionary& blendingDict,
+            const blendingMethod& blending,
             const phasePair& pair,
             const orderedPhasePair& pair1In2,
             const orderedPhasePair& pair2In1

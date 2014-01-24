@@ -53,17 +53,13 @@ class linear
 {
     // Private data
 
-        //- Max fraction of phase 1 which can be considered fully dispersed
-        const dimensionedScalar maxFullyDispersedAlpha1_;
+        //- Maximum fraction of phases which can be considered fully dispersed
+        HashTable<dimensionedScalar, word, word::hash>
+            maxFullyDispersedAlpha_;
 
-        //- Max fraction of phase 1 which can be considered partly dispersed
-        const dimensionedScalar maxPartlyDispersedAlpha1_;
-
-        //- Max fraction of phase 2 which can be considered fully dispersed
-        const dimensionedScalar maxFullyDispersedAlpha2_;
-
-        //- Max fraction of phase 2 which can be considered partly dispersed
-        const dimensionedScalar maxPartlyDispersedAlpha2_;
+        //- Maximum fraction of phases which can be considered partly dispersed
+        HashTable<dimensionedScalar, word, word::hash>
+            maxPartlyDispersedAlpha_;
 
 
 public:
@@ -78,8 +74,7 @@ public:
         linear
         (
             const dictionary& dict,
-            const phaseModel& phase1,
-            const phaseModel& phase2
+            const wordList& phaseNames
         );
 
 
@@ -90,10 +85,18 @@ public:
     // Member Functions
         
         //- Factor for primary phase
-        virtual tmp<volScalarField> f1() const;
+        virtual tmp<volScalarField> f1
+        (
+            const phaseModel& phase1,
+            const phaseModel& phase2
+        ) const;
 
         //- Factor for secondary phase
-        virtual tmp<volScalarField> f2() const;
+        virtual tmp<volScalarField> f2
+        (
+            const phaseModel& phase1,
+            const phaseModel& phase2
+        ) const;
 };
 
 

@@ -49,24 +49,12 @@ namespace Foam
 
 class blendingMethod
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        blendingMethod(const blendingMethod&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const blendingMethod&);
-
-
 protected:
 
     // Protected data
 
-        //- Phase 1
-        const phaseModel& phase1_;
-
-        //- Phase 2
-        const phaseModel& phase2_;
+        //- Residual phase fraction
+        const dimensionedScalar residualAlpha_;
 
 
 public:
@@ -83,21 +71,18 @@ public:
         dictionary,
         (
             const dictionary& dict,
-            const phaseModel& phase1,
-            const phaseModel& phase2
+            const wordList& phaseNames
         ),
-        (dict, phase1, phase2)
+        (dict, phaseNames)
     );
 
 
     // Constructors
 
-        //- Construct from a dictionary and two phases
+        //- Construct from a dictionary
         blendingMethod
         (
-            const dictionary& dict,
-            const phaseModel& phase1,
-            const phaseModel& phase2
+            const dictionary& dict
         );
 
 
@@ -106,8 +91,7 @@ public:
         static autoPtr<blendingMethod> New
         (
             const dictionary& dict,
-            const phaseModel& phase1,
-            const phaseModel& phase2
+            const wordList& phaseNames
         );
 
 
@@ -117,11 +101,22 @@ public:
 
     // Member Functions
 
+        //- Residual phase fraction
+        const dimensionedScalar& residualAlpha() const;
+
         //- Factor for first phase
-        virtual tmp<volScalarField> f1() const = 0;
+        virtual tmp<volScalarField> f1
+        (
+            const phaseModel& phase1,
+            const phaseModel& phase2
+        ) const = 0;
 
         //- Factor for second phase
-        virtual tmp<volScalarField> f2() const = 0;
+        virtual tmp<volScalarField> f2
+        (
+            const phaseModel& phase1,
+            const phaseModel& phase2
+        ) const = 0;
 };
 
 

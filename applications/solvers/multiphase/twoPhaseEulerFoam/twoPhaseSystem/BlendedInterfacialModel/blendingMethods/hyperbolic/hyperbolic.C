@@ -48,36 +48,33 @@ namespace blendingMethods
 Foam::blendingMethods::hyperbolic::hyperbolic
 (
     const dictionary& dict,
-    const phaseModel& phase1,
-    const phaseModel& phase2
+    const wordList& phaseNames
 )
 :
-    blendingMethod(dict, phase1, phase2),
-    maxDispersedAlpha1_
-    (
-        "maxDispersedAlpha1",
-        dimless,
-        dict.lookup
-        (
-            IOobject::groupName("maxDispersedAlpha", phase1.name())
-        )
-    ),
-    maxDispersedAlpha2_
-    (
-        "maxDispersedAlpha2",
-        dimless,
-        dict.lookup
-        (
-            IOobject::groupName("maxDispersedAlpha", phase2.name())
-        )
-    ),
+    blendingMethod(dict),
     transitionAlphaScale_
     (
         "transitionAlphaScale",
         dimless,
         dict.lookup("transitionAlphaScale")
     )
-{}
+{
+    forAllConstIter(wordList, phaseNames, iter)
+    {
+        const word name(IOobject::groupName("maxDispersedAlpha", *iter));
+
+        maxDispersedAlpha_.insert
+        (
+            *iter,
+            dimensionedScalar
+            (
+                name,
+                dimless,
+                dict.lookup(name)
+            )
+        );
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -88,7 +85,11 @@ Foam::blendingMethods::hyperbolic::~hyperbolic()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::blendingMethods::hyperbolic::f1() const
+Foam::tmp<Foam::volScalarField> Foam::blendingMethods::hyperbolic::f1
+(
+    const phaseModel& phase1,
+    const phaseModel& phase2
+) const
 {
     return
         (
@@ -96,13 +97,17 @@ Foam::tmp<Foam::volScalarField> Foam::blendingMethods::hyperbolic::f1() const
           + tanh
             (
                 (4/transitionAlphaScale_)
-               *(phase1_ - maxDispersedAlpha1_)
+               *(phase1 - maxDispersedAlpha_[phase1.name()])
             )
         )/2;
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::blendingMethods::hyperbolic::f2() const
+Foam::tmp<Foam::volScalarField> Foam::blendingMethods::hyperbolic::f2
+(
+    const phaseModel& phase1,
+    const phaseModel& phase2
+) const
 {
     return
         (
@@ -110,7 +115,7 @@ Foam::tmp<Foam::volScalarField> Foam::blendingMethods::hyperbolic::f2() const
           + tanh
             (
                 (4/transitionAlphaScale_)
-               *(maxDispersedAlpha2_ - phase2_)
+               *(maxDispersedAlpha_[phase2.name()] - phase2)
             )
         )/2;
 }

@@ -46,6 +46,9 @@ License
 #include "fvmLaplacian.H"
 #include "fixedValueFvsPatchFields.H"
 
+#include "blendingMethod.H"
+#include "HashPtrTable.H"
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::twoPhaseSystem::twoPhaseSystem
@@ -120,6 +123,23 @@ Foam::twoPhaseSystem::twoPhaseSystem
     phase2_.volScalarField::operator=(scalar(1) - phase1_);
 
 
+    // Blending
+    // ~~~~~~~~
+
+    forAllConstIter(dictionary, subDict("blending"), iter)
+    {
+        blendingMethods_.insert
+        (
+            iter().dict().dictName(),
+            blendingMethod::New
+            (
+                iter().dict(),
+                wordList(lookup("phases"))
+            )
+        );
+    }
+
+
     // Pairs
     // ~~~~~
 
@@ -165,17 +185,15 @@ Foam::twoPhaseSystem::twoPhaseSystem
     // Models
     // ~~~~~~
 
-    const dictionary& blendingDict(subDict("blending"));
-
     drag_.set
     (
         new BlendedInterfacialModel<dragModel>
         (
             lookup("drag"),
             (
-                blendingDict.isDict("drag")
-              ? blendingDict.subDict("drag")
-              : blendingDict.subDict("default")
+                blendingMethods_.found("drag")
+              ? blendingMethods_["drag"]
+              : blendingMethods_["default"]
             ),
             pair_,
             pair1In2_,
@@ -189,9 +207,9 @@ Foam::twoPhaseSystem::twoPhaseSystem
         (
             lookup("virtualMass"),
             (
-                blendingDict.isDict("virtualMass")
-              ? blendingDict.subDict("virtualMass")
-              : blendingDict.subDict("default")
+                blendingMethods_.found("virtualMass")
+              ? blendingMethods_["virtualMass"]
+              : blendingMethods_["default"]
             ),
             pair_,
             pair1In2_,
@@ -205,9 +223,9 @@ Foam::twoPhaseSystem::twoPhaseSystem
         (
             lookup("heatTransfer"),
             (
-                blendingDict.isDict("heatTransfer")
-              ? blendingDict.subDict("heatTransfer")
-              : blendingDict.subDict("default")
+                blendingMethods_.found("heatTransfer")
+              ? blendingMethods_["heatTransfer"]
+              : blendingMethods_["default"]
             ),
             pair_,
             pair1In2_,
@@ -221,9 +239,9 @@ Foam::twoPhaseSystem::twoPhaseSystem
         (
             lookup("lift"),
             (
-                blendingDict.isDict("lift")
-              ? blendingDict.subDict("lift")
-              : blendingDict.subDict("default")
+                blendingMethods_.found("lift")
+              ? blendingMethods_["lift"]
+              : blendingMethods_["default"]
             ),
             pair_,
             pair1In2_,
@@ -237,9 +255,9 @@ Foam::twoPhaseSystem::twoPhaseSystem
         (
             lookup("wallLubrication"),
             (
-                blendingDict.isDict("wallLubrication")
-              ? blendingDict.subDict("wallLubrication")
-              : blendingDict.subDict("default")
+                blendingMethods_.found("wallLubrication")
+              ? blendingMethods_["wallLubrication"]
+              : blendingMethods_["default"]
             ),
             pair_,
             pair1In2_,
@@ -253,9 +271,9 @@ Foam::twoPhaseSystem::twoPhaseSystem
         (
             lookup("turbulentDispersion"),
             (
-                blendingDict.isDict("turbulentDispersion")
-              ? blendingDict.subDict("turbulentDispersion")
-              : blendingDict.subDict("default")
+                blendingMethods_.found("turbulentDispersion")
+              ? blendingMethods_["turbulentDispersion"]
+              : blendingMethods_["default"]
             ),
             pair_,
             pair1In2_,

@@ -38,13 +38,10 @@ namespace Foam
 
 Foam::blendingMethod::blendingMethod
 (
-    const dictionary& dict,
-    const phaseModel& phase1,
-    const phaseModel& phase2
+    const dictionary& dict
 )
 :
-    phase1_(phase1),
-    phase2_(phase2)
+    residualAlpha_("residualAlpha", dimless, dict.lookup("residualAlpha"))
 {}
 
 
@@ -52,6 +49,14 @@ Foam::blendingMethod::blendingMethod
 
 Foam::blendingMethod::~blendingMethod()
 {}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+const Foam::dimensionedScalar& Foam::blendingMethod::residualAlpha() const
+{
+    return residualAlpha_;
+}
 
 
 // ************************************************************************* //

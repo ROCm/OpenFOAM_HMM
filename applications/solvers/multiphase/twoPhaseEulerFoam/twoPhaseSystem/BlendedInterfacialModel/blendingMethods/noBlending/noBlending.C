@@ -48,11 +48,10 @@ namespace blendingMethods
 Foam::blendingMethods::noBlending::noBlending
 (
     const dictionary& dict,
-    const phaseModel& phase1,
-    const phaseModel& phase2
+    const wordList& phaseNames
 )
 :
-    blendingMethod(dict, phase1, phase2),
+    blendingMethod(dict),
     continuousPhase_(dict.lookup("continuousPhase"))
 {}
 
@@ -65,9 +64,13 @@ Foam::blendingMethods::noBlending::~noBlending()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::blendingMethods::noBlending::f1() const
+Foam::tmp<Foam::volScalarField> Foam::blendingMethods::noBlending::f1
+(
+    const phaseModel& phase1,
+    const phaseModel& phase2
+) const
 {
-    const fvMesh& mesh(phase1_.mesh());
+    const fvMesh& mesh(phase1.mesh());
 
     return
         tmp<volScalarField>
@@ -85,16 +88,20 @@ Foam::tmp<Foam::volScalarField> Foam::blendingMethods::noBlending::f1() const
                 (
                     "f",
                     dimless,
-                    phase1_.name() == continuousPhase_
+                    phase1.name() == continuousPhase_
                 )
             )
         );
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::blendingMethods::noBlending::f2() const
+Foam::tmp<Foam::volScalarField> Foam::blendingMethods::noBlending::f2
+(
+    const phaseModel& phase1,
+    const phaseModel& phase2
+) const
 {
-    return f1();
+    return f1(phase1, phase2);
 }
 
 
