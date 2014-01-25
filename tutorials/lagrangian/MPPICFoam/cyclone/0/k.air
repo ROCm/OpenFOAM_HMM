@@ -9,44 +9,36 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       polyBoundaryMesh;
-    location    "constant/polyMesh";
-    object      boundary;
+    class       volScalarField;
+    object      k.air;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-5
-(
+dimensions          [0 2 -2 0 0 0 0];
+
+internalField       uniform 1;
+
+boundaryField
+{
     inlet
     {
-        type            patch;
-        nFaces          30;
-        startFace       24170;
+        type               fixedValue;
+        value              $internalField;
     }
+
     outlet
     {
-        type            patch;
-        nFaces          57;
-        startFace       24200;
+        type               inletOutlet;
+        phi                phi.air;
+        inletValue         $internalField;
+        value              $internalField;
     }
-    upperWall
-    {
-        type            wall;
-        nFaces          223;
-        startFace       24257;
-    }
-    lowerWall
-    {
-        type            wall;
-        nFaces          250;
-        startFace       24480;
-    }
-    frontAndBack
-    {
-        type            empty;
-        nFaces          24450;
-        startFace       24730;
-    }
-)
 
-// ************************************************************************* //
+    walls
+    {
+        type               kqRWallFunction;
+        value              $internalField;
+    }
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

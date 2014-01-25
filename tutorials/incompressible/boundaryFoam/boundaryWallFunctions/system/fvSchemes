@@ -28,10 +28,10 @@ gradSchemes
 divSchemes
 {
     default         none;
-    div(phi,k)      Gauss linear;
-    div(phi,epsilon) Gauss linear;
-    div(phi,R)      Gauss linear;
-    div(phi,nuTilda) Gauss linear;
+    div(phi,k)      bounded Gauss linear;
+    div(phi,epsilon) bounded Gauss linear;
+    div(phi,R)      bounded Gauss linear;
+    div(phi,nuTilda) bounded Gauss linear;
     div((nuEff*dev(T(grad(U))))) Gauss linear;
 }
 
