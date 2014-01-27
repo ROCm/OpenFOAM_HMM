@@ -13,6 +13,7 @@ runApplication snappyHexMesh -overwrite
 cd ../wingMotion2D_simpleFoam
 runApplication extrudeMesh
 runApplication createPatch -overwrite
+cp -r 0.org 0
 runApplication simpleFoam
 
 # Copy the mesh from the steady state case and map the results to a

@@ -9,6 +9,7 @@ cleanCase
 
 cd ../wingMotion2D_simpleFoam
 cleanCase
+rm -rf 0
 
 cd ../wingMotion2D_pimpleDyMFoam
 cleanCase

@@ -57,7 +57,7 @@ boundaryField
         value           uniform 0;
     }
 
-    porosity_ascii
+    porosity
     {
         type            zeroGradient;
     }

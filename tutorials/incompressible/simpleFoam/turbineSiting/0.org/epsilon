@@ -25,7 +25,7 @@ boundaryField
 {
     #include "include/ABLConditions"
 
-    "terrain_.*"
+    terrain
     {
         type            epsilonWallFunction;
         Cmu             0.09;
