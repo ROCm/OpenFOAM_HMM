@@ -1,5 +1,5 @@
 /*
-cvMeshSurfaceSimplify_non_octree.C
+foamyHexMeshSurfaceSimplify_non_octree.C
 MarchingCubes/MarchingCubes.cpp
 MarchingCubes/ply.c
 */
@@ -17,6 +17,6 @@ $(MarchingCubes)/opt_octree.cpp
 $(MarchingCubes)/hash_octree.cpp
 */
 
-cvMeshSurfaceSimplify.C
+foamyHexMeshSurfaceSimplify.C
 
-EXE = $(FOAM_APPBIN)/cvMeshSurfaceSimplify
+EXE = $(FOAM_APPBIN)/foamyHexMeshSurfaceSimplify

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -855,7 +855,8 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         ),
-        foamyHexMeshDict.subDict("geometry")
+        foamyHexMeshDict.subDict("geometry"),
+        foamyHexMeshDict.lookupOrDefault("singleRegionName", true)
     ),
     geometryToConformTo_
     (

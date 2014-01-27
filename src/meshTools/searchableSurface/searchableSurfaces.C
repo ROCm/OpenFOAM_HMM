@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -175,7 +175,8 @@ Foam::searchableSurfaces::searchableSurfaces(const label size)
 Foam::searchableSurfaces::searchableSurfaces
 (
     const IOobject& io,
-    const dictionary& topDict
+    const dictionary& topDict,
+    const bool singleRegionName
 )
 :
     PtrList<searchableSurface>(topDict.size()),
@@ -233,9 +234,16 @@ Foam::searchableSurfaces::searchableSurfaces
         wordList& rNames = regionNames_[surfI];
         rNames.setSize(localNames.size());
 
-        forAll(localNames, regionI)
+        if (singleRegionName && localNames.size() == 1)
         {
-            rNames[regionI] = names_[surfI] + '_' + localNames[regionI];
+            rNames[0] = names_[surfI];
+        }
+        else
+        {
+            forAll(localNames, regionI)
+            {
+                rNames[regionI] = names_[surfI] + '_' + localNames[regionI];
+            }
         }
 
         // See if dictionary provides any global region names.

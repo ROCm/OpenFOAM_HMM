@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    cvMeshSurfaceSimplify
+    foamyHexMeshSurfaceSimplify
 
 Description
     Simplifies surfaces by resampling.
@@ -112,7 +112,7 @@ class distanceCalc
             surfaces,
             samples,
             scalarField(1, GREAT),
-            searchableSurface::OUTSIDE,
+            volumeType::OUTSIDE,
             nearestSurfaces,
             distance
         );
@@ -366,7 +366,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Re-sample surfaces used in cvMesh operation"
+        "Re-sample surfaces used in foamyHexMesh operation"
     );
     argList::validArgs.append("outputName");
 
@@ -376,17 +376,17 @@ int main(int argc, char *argv[])
 
     const fileName exportName = args.args()[1];
 
-    Info<< "Reading surfaces as specified in the cvMeshDict and"
+    Info<< "Reading surfaces as specified in the foamyHexMeshDict and"
         << " writing a re-sampled surface to " << exportName
         << nl << endl;
 
     cpuTime timer;
 
-    IOdictionary cvMeshDict
+    IOdictionary foamyHexMeshDict
     (
         IOobject
         (
-            "cvMeshDict",
+            "foamyHexMeshDict",
             runTime.system(),
             runTime,
             IOobject::MUST_READ_IF_MODIFIED,
@@ -406,7 +406,8 @@ int main(int argc, char *argv[])
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         ),
-        cvMeshDict.subDict("geometry")
+        foamyHexMeshDict.subDict("geometry"),
+        foamyHexMeshDict.lookupOrDefault("singleRegionName", true)
     );
 
     Info<< "Geometry read in = "
@@ -420,7 +421,7 @@ int main(int argc, char *argv[])
         runTime,
         rndGen,
         allGeometry,
-        cvMeshDict.subDict("surfaceConformation")
+        foamyHexMeshDict.subDict("surfaceConformation")
     );
 
     Info<< "Set up geometry in = "

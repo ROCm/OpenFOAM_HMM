@@ -927,7 +927,8 @@ int main(int argc, char *argv[])
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         ),
-        geometryDict
+        geometryDict,
+        meshDict.lookupOrDefault("singleRegionName", true)
     );
 
 

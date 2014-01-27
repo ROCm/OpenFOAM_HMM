@@ -11,7 +11,7 @@ EXE_INC = \
     ${CGAL_INC} \
     ${c++CGALWARN} \
     -I$(FOAM_APP)/utilities/mesh/generation/extrude2DMesh/extrude2DMesh/lnInclude \
-    -I../cvMesh/vectorTools \
+/*    -I../cvMesh/vectorTools  */\
     -IconformalVoronoi2DMesh/lnInclude \
     -I$(FOAM_APP)/utilities/mesh/generation/foamyHexMesh/conformalVoronoiMesh/lnInclude \
     -I$(LIB_SRC)/parallel/decompose/decompositionMethods/lnInclude \

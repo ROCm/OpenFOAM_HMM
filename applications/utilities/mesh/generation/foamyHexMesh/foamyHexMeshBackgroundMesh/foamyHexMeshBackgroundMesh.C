@@ -2,7 +2,7 @@
  =========                   |
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
-   \\  /     A nd            | Copyright (C) 2012-2013 OpenFOAM Foundation
+   \\  /     A nd            | Copyright (C) 2012-2014 OpenFOAM Foundation
     \\/      M anipulation   |
 -------------------------------------------------------------------------------
 License
@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    cvMeshBackGroundMesh
+    foamyHexMeshBackGroundMesh
 
 Description
-    Writes out background mesh as constructed by cvMesh and constructs
+    Writes out background mesh as constructed by foamyHexMesh and constructs
     distanceSurface.
 
 \*---------------------------------------------------------------------------*/
@@ -346,7 +346,7 @@ tmp<scalarField> signedDistance
 
         // Calculate sideness of these surface points
         label geomI = surfaces[surfI];
-        List<searchableSurface::volumeType> volType;
+        List<volumeType> volType;
         geometry[geomI].getVolumeType(surfPoints, volType);
 
         // Push back to original
@@ -355,13 +355,13 @@ tmp<scalarField> signedDistance
             label pointI = surfIndices[i];
             scalar dist = mag(points[pointI] - nearest[pointI].hitPoint());
 
-            searchableSurface::volumeType vT = volType[i];
+            volumeType vT = volType[i];
 
-            if (vT == searchableSurface::OUTSIDE)
+            if (vT == volumeType::OUTSIDE)
             {
                 fld[pointI] = dist;
             }
-            else if (vT == searchableSurface::INSIDE)
+            else if (vT == volumeType::INSIDE)
             {
                 fld[i] = -dist;
             }
@@ -385,7 +385,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Generate cvMesh-consistent representation of surfaces"
+        "Generate foamyHexMesh-consistent representation of surfaces"
     );
     argList::addBoolOption
     (
@@ -413,11 +413,11 @@ int main(int argc, char *argv[])
     }
 
 
-    IOdictionary cvMeshDict
+    IOdictionary foamyHexMeshDict
     (
         IOobject
         (
-            "cvMeshDict",
+            "foamyHexMeshDict",
             runTime.system(),
             runTime,
             IOobject::MUST_READ_IF_MODIFIED,
@@ -437,7 +437,8 @@ int main(int argc, char *argv[])
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         ),
-        cvMeshDict.subDict("geometry")
+        foamyHexMeshDict.subDict("geometry"),
+        foamyHexMeshDict.lookupOrDefault("singleRegionName", true)
     );
 
     Random rndGen(64293*Pstream::myProcNo());
@@ -447,18 +448,15 @@ int main(int argc, char *argv[])
         runTime,
         rndGen,
         allGeometry,
-        cvMeshDict.subDict("surfaceConformation")
+        foamyHexMeshDict.subDict("surfaceConformation")
     );
 
-    autoPtr<cellShapeControl> cellShapeControls
+    cellShapeControl cellShapeControls
     (
-        cellShapeControl::New
-        (
-            runTime,
-            cvMeshDict.subDict("motionControl"),
-            allGeometry,
-            geometryToConformTo
-        )
+        runTime,
+        foamyHexMeshDict.subDict("motionControl"),
+        allGeometry,
+        geometryToConformTo
     );
 
 
@@ -587,7 +585,7 @@ int main(int argc, char *argv[])
         geometryToConformTo,
         cellShapeControls(),
         rndGen,
-        cvMeshDict
+        foamyHexMeshDict
     );
 
     if (writeMesh)
