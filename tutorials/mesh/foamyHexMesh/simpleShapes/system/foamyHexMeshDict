@@ -23,28 +23,12 @@ geometry
     {
         name sphere;
         type triSurfaceMesh;
-
-        regions
-        {
-            ascii
-            {
-                name sphere_patch;
-            }
-        }
     }
 
     cone_orient.stl
     {
         name cone;
         type triSurfaceMesh;
-
-        regions
-        {
-            ascii
-            {
-                name cone_patch;
-            }
-        }
     }
 
     // Outside of domain
