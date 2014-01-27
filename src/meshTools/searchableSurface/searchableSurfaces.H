@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -101,8 +101,16 @@ public:
         ////- Construct from list of dictionaries
         //searchableSurfaces(const IOobject&, const PtrList<dictionary>&);
 
-        //- Construct from dictionary
-        searchableSurfaces(const IOobject&, const dictionary&);
+        //- Construct from dictionary and whether to construct names always
+        //  as surfaceName "_" regionName (singleRegionName false) or
+        //  for single region surfaces as surfaceName only (singleRegionName
+        //  true)
+        searchableSurfaces
+        (
+            const IOobject&,
+            const dictionary&,
+            const bool singleRegionName
+        );
 
 
     // Member Functions

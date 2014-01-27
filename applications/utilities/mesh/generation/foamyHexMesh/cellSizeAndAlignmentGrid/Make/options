@@ -21,8 +21,9 @@ EXE_INC =  \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/parallel/decompose/decompositionMethods/lnInclude \
     -I$(LIB_SRC)/edgeMesh/lnInclude \
-    -I$(FOAM_UTILITIES)/mesh/generation/cvMesh/conformalVoronoiMesh/lnInclude \
-    -I$(FOAM_UTILITIES)/mesh/generation/cvMesh/vectorTools
+    -I$(LIB_SRC)/mesh/autoMesh/lnInclude \
+    -I$(FOAM_UTILITIES)/mesh/generation/foamyHexMesh/conformalVoronoiMesh/lnInclude \
+    -I$(FOAM_UTILITIES)/mesh/generation/foamyHexMesh/vectorTools
 
 EXE_LIBS =  \
     $(CGAL_LIBS) \

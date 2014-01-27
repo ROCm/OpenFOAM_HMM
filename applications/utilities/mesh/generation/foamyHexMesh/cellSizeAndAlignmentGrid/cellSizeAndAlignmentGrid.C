@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -285,11 +285,11 @@ int main(int argc, char *argv[])
     // - type should be optional
     cellShapeControlMesh mesh(runTime);
 
-    IOdictionary cvMeshDict
+    IOdictionary foamyHexMeshDict
     (
         IOobject
         (
-            "cvMeshDict",
+            "foamyHexMeshDict",
             runTime.system(),
             runTime,
             IOobject::MUST_READ,
@@ -310,7 +310,8 @@ int main(int argc, char *argv[])
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         ),
-        cvMeshDict.subDict("geometry")
+        foamyHexMeshDict.subDict("geometry"),
+        foamyHexMeshDict.lookupOrDefault("singleRegionName", true)
     );
 
     conformationSurfaces geometryToConformTo
@@ -318,7 +319,7 @@ int main(int argc, char *argv[])
         runTime,
         rndGen,
         allGeometry,
-        cvMeshDict.subDict("surfaceConformation")
+        foamyHexMeshDict.subDict("surfaceConformation")
     );
 
     autoPtr<backgroundMeshDecomposition> bMesh;
@@ -331,7 +332,7 @@ int main(int argc, char *argv[])
                 runTime,
                 rndGen,
                 geometryToConformTo,
-                cvMeshDict.subDict("backgroundMeshDecomposition")
+                foamyHexMeshDict.subDict("backgroundMeshDecomposition")
             )
         );
     }

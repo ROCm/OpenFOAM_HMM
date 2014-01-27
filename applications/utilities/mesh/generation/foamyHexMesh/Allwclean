@@ -4,7 +4,7 @@ set -x
 
 wclean libso conformalVoronoiMesh
 wclean
-wclean cvMeshSurfaceSimplify
-wclean cvMeshBackgroundMesh
+wclean foamyHexMeshSurfaceSimplify
+wclean foamyHexMeshBackgroundMesh
 
 # ----------------------------------------------------------------- end-of-file
