@@ -77,6 +77,7 @@ void Foam::multiphaseSystem::solveAlphas()
             phasei,
             new surfaceScalarField
             (
+                "phi" + alpha1.name() + "Corr",
                 fvc::flux
                 (
                     phi_,
@@ -106,7 +107,7 @@ void Foam::multiphaseSystem::solveAlphas()
             {
                 surfaceScalarField phic
                 (
-                    (mag(phi_) + mag(phase1.phi() - phase2.phi()))/mesh_.magSf()
+                    (mag(phi_) + mag(phir))/mesh_.magSf()
                 );
 
                 phir += min(cAlpha()*phic, max(phic))*nHatf(phase1, phase2);
