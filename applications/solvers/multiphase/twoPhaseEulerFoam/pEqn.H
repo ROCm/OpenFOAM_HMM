@@ -1,6 +1,6 @@
 {
-    surfaceScalarField alpha1f(fvc::interpolate(alpha1));
-    surfaceScalarField alpha2f(scalar(1) - alpha1f);
+    surfaceScalarField alpha1f("alpha1f", fvc::interpolate(alpha1));
+    surfaceScalarField alpha2f("alpha2f", scalar(1) - alpha1f);
 
     rAU1 = 1.0/U1Eqn.A();
     rAU2 = 1.0/U2Eqn.A();
@@ -189,7 +189,7 @@
 
         if (pimple.finalNonOrthogonalIter())
         {
-            surfaceScalarField mSfGradp(pEqnIncomp.flux()/rAUf);
+            surfaceScalarField mSfGradp("mSfGradp", pEqnIncomp.flux()/rAUf);
 
             phi1.boundaryField() ==
                 mrfZones.relative
