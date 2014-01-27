@@ -2,7 +2,7 @@
  =========                   |
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
-   \\  /     A nd            | Copyright (C) 2012-2013 OpenFOAM Foundation
+   \\  /     A nd            | Copyright (C) 2012-2014 OpenFOAM Foundation
     \\/      M anipulation   |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    cvMeshSurfaceSimplify
+    foamyHexMeshSurfaceSimplify
 
 Description
     Simplifies surfaces by resampling.
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Re-sample surfaces used in cvMesh operation"
+        "Re-sample surfaces used in foamyHexMesh operation"
     );
     //argList::validArgs.append("inputFile");
     argList::validArgs.append("(nx ny nz)");
@@ -63,17 +63,17 @@ int main(int argc, char *argv[])
     const Vector<label> n(IStringStream(args.args()[1])());
     const fileName exportName = args.args()[2];
 
-    Info<< "Reading surfaces as specified in the cvMeshDict and"
+    Info<< "Reading surfaces as specified in the foamyHexMeshDict and"
         << " writing re-sampled " << n << " to " << exportName
         << nl << endl;
 
     cpuTime timer;
 
-    IOdictionary cvMeshDict
+    IOdictionary foamyHexMeshDict
     (
         IOobject
         (
-            "cvMeshDict",
+            "foamyHexMeshDict",
             runTime.system(),
             runTime,
             IOobject::MUST_READ_IF_MODIFIED,
@@ -93,7 +93,8 @@ int main(int argc, char *argv[])
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         ),
-        cvMeshDict.subDict("geometry")
+        foamyHexMeshDict.subDict("geometry"),
+        foamyHexMeshDict.lookupOrDefault("singleRegionName", true)
     );
 
     Info<< "Geometry read in = "
@@ -107,7 +108,7 @@ int main(int argc, char *argv[])
         runTime,
         rndGen,
         allGeometry,
-        cvMeshDict.subDict("surfaceConformation")
+        foamyHexMeshDict.subDict("surfaceConformation")
     );
 
     Info<< "Set up geometry in = "

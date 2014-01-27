@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -130,7 +130,7 @@ public:
             Ostream& write(const point&, const vector&);
 
             //- Write edge as points with line
-            Ostream& write(const edge&, const pointField&);
+            Ostream& write(const edge&, const UList<point>&);
 
             //- Write line
             Ostream& write(const linePointRef&);
@@ -150,7 +150,7 @@ public:
             Ostream& write
             (
                 const face&,
-                const pointField&,
+                const UList<point>&,
                 const bool lines = true
             );
 

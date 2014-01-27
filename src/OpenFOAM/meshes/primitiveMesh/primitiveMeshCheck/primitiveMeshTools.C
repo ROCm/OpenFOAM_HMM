@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -315,10 +315,12 @@ void Foam::primitiveMeshTools::cellClosedness
         scalar aspectRatio = maxCmpt/(minCmpt + VSMALL);
         if (nDims == 3)
         {
+            scalar v = max(VSMALL, vols[cellI]);
+
             aspectRatio = max
             (
                 aspectRatio,
-                1.0/6.0*cmptSum(sumMagClosed[cellI])/pow(vols[cellI], 2.0/3.0)
+                1.0/6.0*cmptSum(sumMagClosed[cellI])/pow(v, 2.0/3.0)
             );
         }
 

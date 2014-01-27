@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -123,7 +123,8 @@ Foam::CV2D::CV2D
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         ),
-        cvMeshDict.subDict("geometry")
+        cvMeshDict.subDict("geometry"),
+        cvMeshDict.lookupOrDefault("singleRegionName", true)
     ),
     qSurf_
     (

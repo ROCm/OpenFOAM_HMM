@@ -2,7 +2,7 @@
  =========                   |
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
-   \\  /     A nd            | Copyright (C) 2011-2013 OpenFOAM Foundation
+   \\  /     A nd            | Copyright (C) 2011-2014 OpenFOAM Foundation
     \\/      M anipulation   |
 -------------------------------------------------------------------------------
 License
@@ -88,7 +88,8 @@ int main(int argc, char *argv[])
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE
             ),
-            foamyHexMeshDict.subDict("geometry")
+            foamyHexMeshDict.subDict("geometry"),
+            foamyHexMeshDict.lookupOrDefault("singleRegionName", true)
         );
 
         // Write some stats

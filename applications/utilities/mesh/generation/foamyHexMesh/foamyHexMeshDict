@@ -75,6 +75,12 @@ geometry
     }
 }
 
+//Optional: single region surfaces get patch names according to
+//          surface only. Multi-region surfaces get patch name
+//          surface "_ "region. Default is true
+//singleRegionName false;
+
+
 
 // Controls for conforming to the surfaces.
 surfaceConformation

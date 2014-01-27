@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -399,7 +399,8 @@ surfaceSlipDisplacementPointPatchVectorField::surfaces() const
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE
                 ),
-                surfacesDict_
+                surfacesDict_,
+                true    // use single region naming shortcut
             )
         );
     }
