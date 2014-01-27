@@ -50,7 +50,7 @@ boundaryField
         value           $internalField;
     }
 
-    hull_wall
+    hull
     {
         type            omegaWallFunction;
         value           $internalField;

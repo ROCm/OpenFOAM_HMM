@@ -48,7 +48,7 @@ boundaryField
         value           $internalField;
     }
 
-    hull_wall
+    hull
     {
         type            fixedFluxPressure;
         value           $internalField;

@@ -42,7 +42,7 @@ boundaryField
         type            zeroGradient;
     }
 
-    hull_wall
+    hull
     {
         type            nutkWallFunction;
         value           $internalField;
