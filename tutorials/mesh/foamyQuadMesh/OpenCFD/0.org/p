@@ -20,28 +20,28 @@ internalField   uniform 1;
 
 boundaryField
 {
-    box_inlet
+    inlet
     {
         type            fixedValue;
         value           uniform 1;
     }
 
-    box_outlet
+    outlet
     {
         type            zeroGradient;
     }
 
-    box_bottom
+    bottom
     {
         type            zeroGradient;
     }
 
-    box_top
+    top
     {
         type            zeroGradient;
     }
 
-    letters_text
+    letters
     {
         type            zeroGradient;
     }
