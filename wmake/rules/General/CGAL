@@ -9,4 +9,5 @@ CGAL_LIBS = \
     -L$(GMP_ARCH_PATH)/lib \
     -L$(BOOST_ARCH_PATH)/lib \
     -L$(CGAL_ARCH_PATH)/lib \
-    -lCGAL
+    -lCGAL \
+    -lmpfr
