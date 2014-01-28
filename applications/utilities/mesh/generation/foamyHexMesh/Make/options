@@ -27,9 +27,6 @@ EXE_INC = \
     -IvectorTools
 
 EXE_LIBS = \
-    $(CGAL_LIBS) \
-    -lboost_thread \
-    -lmpfr \
     -lconformalVoronoiMesh \
     -lmeshTools \
     -ldecompositionMethods \
