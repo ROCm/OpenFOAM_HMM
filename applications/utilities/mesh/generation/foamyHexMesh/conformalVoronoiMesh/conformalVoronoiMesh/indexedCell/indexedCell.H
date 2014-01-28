@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,8 +37,8 @@ SourceFiles
 #ifndef indexedCell_H
 #define indexedCell_H
 
-#include <CGAL/Triangulation_3.h>
-#include <CGAL/Triangulation_cell_base_with_circumcenter_3.h>
+#include "CGAL/Triangulation_3.h"
+#include "CGAL/Triangulation_cell_base_with_circumcenter_3.h"
 #include "indexedVertex.H"
 #include "List.H"
 #include "globalIndex.H"

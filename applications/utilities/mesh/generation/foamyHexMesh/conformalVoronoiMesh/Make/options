@@ -25,7 +25,8 @@ EXE_INC = \
     -I$(LIB_SRC)/sampling/lnInclude \
     -I$(LIB_SRC)/mesh/autoMesh/lnInclude \
     -IPrintTable \
-    -I../vectorTools
+    -I../vectorTools \
+    -I/usr/include
 
 LIB_LIBS = \
     ${CGAL_LIBS} \

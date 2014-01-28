@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,10 +42,10 @@ Description
     #include "CGAL/Exact_predicates_inexact_constructions_kernel.h"
     typedef CGAL::Exact_predicates_inexact_constructions_kernel baseK;
 
-//    #include <CGAL/Robust_circumcenter_traits_3.h>
+//    #include "CGAL/Robust_circumcenter_traits_3.h"
 //    typedef CGAL::Robust_circumcenter_traits_3<baseK>           K;
 
-    #include <CGAL/Robust_circumcenter_filtered_traits_3.h>
+    #include "CGAL/Robust_circumcenter_filtered_traits_3.h"
     typedef CGAL::Robust_circumcenter_filtered_traits_3<baseK>  K;
 
 #else
