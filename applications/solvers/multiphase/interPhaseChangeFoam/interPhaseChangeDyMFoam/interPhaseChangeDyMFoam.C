@@ -82,7 +82,6 @@ int main(int argc, char *argv[])
         dimensionedScalar("rAUf", dimTime/rho.dimensions(), 1.0)
     );
 
-    #include "../interFoam/interDyMFoam/correctPhi.H"
     #include "createUf.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
@@ -106,6 +105,9 @@ int main(int argc, char *argv[])
         {
             if (pimple.firstIter() || moveMeshOuterCorrectors)
             {
+                // Store divU from the previous mesh for the correctPhi
+                volScalarField divU(fvc::div(fvc::absolute(phi, U)));
+
                 scalar timeBeforeMeshUpdate = runTime.elapsedCpuTime();
 
                 mesh.update();
@@ -125,6 +127,7 @@ int main(int argc, char *argv[])
                     // Calculate absolute flux from the mapped surface velocity
                     phi = mesh.Sf() & Uf;
 
+                    #define divUCorr -divU
                     #include "../interFoam/interDyMFoam/correctPhi.H"
 
                     // Make the flux relative to the mesh motion
