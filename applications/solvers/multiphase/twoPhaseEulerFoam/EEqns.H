@@ -2,8 +2,8 @@
     volScalarField& he1 = thermo1.he();
     volScalarField& he2 = thermo2.he();
 
-    volScalarField Cpv1(thermo1.Cpv());
-    volScalarField Cpv2(thermo2.Cpv());
+    volScalarField Cpv1("Cpv1", thermo1.Cpv());
+    volScalarField Cpv2("Cpv2", thermo2.Cpv());
 
     volScalarField heatTransferCoeff(fluid.heatTransferCoeff());
 

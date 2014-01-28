@@ -65,6 +65,7 @@
         const volScalarField& alpha = phase;
 
         alphafs.set(phasei, fvc::interpolate(alpha).ptr());
+        alphafs[phasei].rename("hmm" + alpha.name());
 
         volScalarField dragCoeffi
         (
@@ -227,7 +228,7 @@
 
         if (pimple.finalNonOrthogonalIter())
         {
-            surfaceScalarField mSfGradp(pEqnIncomp.flux()/rAUf);
+            surfaceScalarField mSfGradp("mSfGradp", pEqnIncomp.flux()/rAUf);
 
             phasei = 0;
             phi = dimensionedScalar("phi", phi.dimensions(), 0);

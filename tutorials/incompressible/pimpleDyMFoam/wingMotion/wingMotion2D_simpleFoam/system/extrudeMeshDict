@@ -21,10 +21,10 @@ FoamFile
 
 constructFrom patch;
 sourceCase "../wingMotion_snappyHexMesh";
-sourcePatches (front);
+sourcePatches (symFront);
 
 // If construct from patch: patch to use for back (can be same as sourcePatch)
-exposedPatchName back;
+exposedPatchName symBack;
 
 // Flip surface normals before usage. Valid only for extrude from surface or
 // patch.

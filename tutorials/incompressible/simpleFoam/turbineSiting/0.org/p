@@ -33,7 +33,7 @@ boundaryField
         uniformValue    constant $pressure;
     }
 
-    "terrain_.*"
+    terrain
     {
         type            zeroGradient;
     }
