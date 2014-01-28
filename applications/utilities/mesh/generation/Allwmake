@@ -7,7 +7,7 @@ wmake all extrude
 wmake all extrude2DMesh
 wmake all snappyHexMesh
 
-if [ -d "$CGAL_ARCH_PATH" ]
+if [ -n "$CGAL_ARCH_PATH" ]
 then
     wmake libso foamyHexMesh/conformalVoronoiMesh
     wmake all foamyHexMesh

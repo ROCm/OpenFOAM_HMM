@@ -30,14 +30,15 @@ geometry
 {
     wing_5degrees.obj
     {
-        type triSurfaceMesh;
+        type    triSurfaceMesh;
+        name    wing;
     }
 
     refinementBox
     {
-        type searchableBox;
-        min (-1 -1 -1);
-        max ( 5  1  1);
+        type    searchableBox;
+        min     (-1 -1 -1);
+        max     ( 5  1  1);
     }
 };
 
@@ -95,7 +96,7 @@ castellatedMeshControls
 
     refinementSurfaces
     {
-        wing_5degrees.obj
+        wing
         {
             // Surface-wise min and max refinement level
             level (5 5);
@@ -180,7 +181,7 @@ addLayersControls
     // Per final patch (so not geometry!) the layer information
     layers
     {
-        "wing.*"
+        wing
         {
             nSurfaceLayers 3;
         }

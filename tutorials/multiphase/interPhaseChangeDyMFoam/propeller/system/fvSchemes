@@ -32,7 +32,6 @@ divSchemes
 
     div(phi,alpha)      Gauss vanLeer;
     div(phirb,alpha)    Gauss linear;
-    UD                  Gauss upwind;
     div(rhoPhi,U)       Gauss linearUpwind grad(U);
     div(phi,k)          Gauss upwind;
     div(phi,epsilon)    Gauss upwind;

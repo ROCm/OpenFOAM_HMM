@@ -27,6 +27,34 @@ geometry
     {
         name box;
         type closedTriSurfaceMesh;
+
+        regions
+        {
+            back
+            {
+                name back;
+            }
+            front
+            {
+                name front;
+            }
+            bottom
+            {
+                name bottom;
+            }
+            top
+            {
+                name top;
+            }
+            inlet
+            {
+                name inlet;
+            }
+            outlet
+            {
+                name outlet;
+            }
+        }
     }
 }
 

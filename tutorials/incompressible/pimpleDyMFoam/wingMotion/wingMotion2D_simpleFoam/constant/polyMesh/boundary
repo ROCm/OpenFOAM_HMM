@@ -35,26 +35,26 @@ FoamFile
         nFaces          62;
         startFace       25291;
     }
+    wing
+    {
+        type            wall;
+        inGroups        1(wall);
+        nFaces          378;
+        startFace       25353;
+    }
     front
     {
         type            empty;
         inGroups        1(empty);
         nFaces          12565;
-        startFace       25353;
+        startFace       25731;
     }
     back
     {
         type            empty;
         inGroups        1(empty);
         nFaces          12565;
-        startFace       37918;
-    }
-    wing
-    {
-        type            wall;
-        inGroups        1(wall);
-        nFaces          378;
-        startFace       50483;
+        startFace       38296;
     }
 )
 

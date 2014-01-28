@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,8 +55,8 @@ Usage
     \param -fields \n
     Use existing geometry decomposition and convert fields only.
 
-    \param -sets \n
-    Decompose cellSets, faceSets, pointSets.
+    \param -noSets \n
+    Skip decomposing cellSets, faceSets, pointSets.
 
     \param -force \n
     Remove any existing \a processor subdirectories before decomposing the

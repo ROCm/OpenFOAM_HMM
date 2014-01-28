@@ -20,21 +20,21 @@ FoamFile
     inlet
     {
         type            patch;
-        nFaces          0;
+        nFaces          652;
         startFace       1576984;
     }
     outlet
     {
         type            patch;
-        nFaces          0;
-        startFace       1576984;
+        nFaces          112;
+        startFace       1577636;
     }
     outerCylinder
     {
         type            wall;
         inGroups        1(wall);
-        nFaces          1404;
-        startFace       1576984;
+        nFaces          640;
+        startFace       1577748;
     }
     propellerTip
     {
