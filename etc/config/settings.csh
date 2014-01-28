@@ -353,35 +353,6 @@ if ( $?WM_CXXFLAGS ) then
 endif
 
 
-# boost and CGAL
-# ~~~~~~~~~~~~~~
-
-set boost_version=boost_1_45_0
-set cgal_version=CGAL-4.0
-
-setenv BOOST_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$boost_version
-setenv CGAL_ARCH_PATH  $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cgal_version
-
-# enabled if CGAL is available
-if ($?FOAM_VERBOSE && $?prompt) then
-    echo "Checking for"
-    echo "    $cgal_version at $CGAL_ARCH_PATH"
-    echo "    $boost_version at $BOOST_ARCH_PATH"
-endif
-
-if ( -d "$CGAL_ARCH_PATH" ) then
-    if ( -d "$BOOST_ARCH_PATH" ) then
-        _foamAddLib $BOOST_ARCH_PATH/lib
-    else
-        unsetenv BOOST_ARCH_PATH
-    endif
-    _foamAddLib $CGAL_ARCH_PATH/lib
-else
-    unsetenv BOOST_ARCH_PATH CGAL_ARCH_PATH MPFR_ARCH_PATH GMP_ARCH_PATH
-endif
-
-unset boost_version cgal_version
-
 
 # Communications library
 # ~~~~~~~~~~~~~~~~~~~~~~
