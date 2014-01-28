@@ -2,7 +2,7 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-if [ -d "$CGAL_ARCH_PATH" ]
+if [ -n "$CGAL_ARCH_PATH" ]
 then
     #- Already built by ../Allwake
     #wmake libso ../foamyHexMesh/conformalVoronoiMesh
