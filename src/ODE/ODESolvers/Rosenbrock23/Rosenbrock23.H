@@ -25,7 +25,7 @@ Class
     Foam::Rosenbrock23
 
 Description
-    L-stable embedded Rosenbrock ODE solver of order (3)4.
+    L-stable embedded Rosenbrock ODE solver of order (2)3.
 
     References:
     \verbatim
