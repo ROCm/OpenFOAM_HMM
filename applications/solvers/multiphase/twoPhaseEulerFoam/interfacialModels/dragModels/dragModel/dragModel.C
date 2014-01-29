@@ -42,7 +42,8 @@ const Foam::dimensionSet Foam::dragModel::dimK(1, -3, -1, 0, 0);
 
 Foam::dragModel::dragModel
 (
-    const phasePair& pair
+    const phasePair& pair,
+    const bool registerObject
 )
 :
     regIOobject
@@ -51,7 +52,10 @@ Foam::dragModel::dragModel
         (
             IOobject::groupName(typeName, pair.name()),
             pair.phase1().mesh().time().timeName(),
-            pair.phase1().mesh()
+            pair.phase1().mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            registerObject
         )
     ),
     pair_(pair)
@@ -61,7 +65,8 @@ Foam::dragModel::dragModel
 Foam::dragModel::dragModel
 (
     const dictionary& dict,
-    const phasePair& pair
+    const phasePair& pair,
+    const bool registerObject
 )
 :
     regIOobject
@@ -70,7 +75,10 @@ Foam::dragModel::dragModel
         (
             IOobject::groupName(typeName, pair.name()),
             pair.phase1().mesh().time().timeName(),
-            pair.phase1().mesh()
+            pair.phase1().mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            registerObject
         )
     ),
     pair_(pair),

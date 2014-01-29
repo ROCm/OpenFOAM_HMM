@@ -44,10 +44,11 @@ namespace dragModels
 Foam::dragModels::TomiyamaAnalytic::TomiyamaAnalytic
 (
     const dictionary& dict,
-    const phasePair& pair
+    const phasePair& pair,
+    const bool registerObject
 )
 :
-    dragModel(dict, pair),
+    dragModel(dict, pair, registerObject),
     residualEo_("residualEo", dimless, dict.lookup("residualEo")),
     residualE_("residualE", dimless, dict.lookup("residualE"))
 {}

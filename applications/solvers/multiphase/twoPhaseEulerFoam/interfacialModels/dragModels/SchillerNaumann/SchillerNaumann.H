@@ -74,7 +74,8 @@ public:
         SchillerNaumann
         (
             const dictionary& dict,
-            const phasePair& pair
+            const phasePair& pair,
+            const bool registerObject
         );
 
 

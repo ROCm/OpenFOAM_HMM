@@ -46,16 +46,18 @@ namespace dragModels
 Foam::dragModels::GidaspowErgunWenYu::GidaspowErgunWenYu
 (
     const dictionary& dict,
-    const phasePair& pair
+    const phasePair& pair,
+    const bool registerObject
 )
 :
-    dragModel(dict, pair),
+    dragModel(dict, pair, registerObject),
     Ergun_
     (
         new Ergun
         (
             dict,
-            pair
+            pair,
+            false
         )
     ),
     WenYu_
@@ -63,7 +65,8 @@ Foam::dragModels::GidaspowErgunWenYu::GidaspowErgunWenYu
         new WenYu
         (
             dict,
-            pair
+            pair,
+            false
         )
     ),
     residualRe_("residualRe", dimless, dict.lookup("residualRe"))

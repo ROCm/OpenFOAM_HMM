@@ -52,7 +52,7 @@ Foam::autoPtr<Foam::virtualMassModel> Foam::virtualMassModel::New
             << exit(FatalError);
     }
 
-    return cstrIter()(dict, pair);
+    return cstrIter()(dict, pair, true);
 }
 
 

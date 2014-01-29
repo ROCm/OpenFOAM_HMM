@@ -77,9 +77,10 @@ public:
             dictionary,
             (
                 const dictionary& dict,
-                const phasePair& pair
+                const phasePair& pair,
+                const bool registerObject
             ),
-            (dict, pair)
+            (dict, pair, registerObject)
         );
 
 
@@ -95,7 +96,8 @@ public:
         virtualMassModel
         (
             const dictionary& dict,
-            const phasePair& pair
+            const phasePair& pair,
+            const bool registerObject
         );
 
 
