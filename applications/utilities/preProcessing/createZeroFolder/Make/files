@@ -4,4 +4,4 @@ caseInfo.C
 solverTemplate.C
 createZeroDirectory.C
 
-EXE = $(FOAM_APPBIN)/createZeroDirectory
+EXE = $(FOAM_APPBIN)/createZeroFolder

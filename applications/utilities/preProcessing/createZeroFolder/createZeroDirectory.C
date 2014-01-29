@@ -137,17 +137,19 @@ void createFieldFiles
         const_cast<word&>(IOdictionary::typeName) =
             getClassType(fieldTypes[i]);
 
-        IOdictionary field
-        (
-            IOobject
-            (
-                fieldNames[i],
-                "0",
-                regionName,
-                runTime,
-                IOobject::NO_READ
-            )
-        );
+//        IOdictionary field
+//        (
+//            IOobject
+//            (
+//                fieldNames[i],
+//                "0",
+//                regionName,
+//                runTime,
+//                IOobject::NO_READ
+//            )
+//        );
+
+        dictionary field;
 
         word regionPath = "/";
 
@@ -180,7 +182,33 @@ void createFieldFiles
 
         field.add("boundaryField", boundaryField);
 
-        field.regIOobject::writeObject
+        // expand all of the dictionary redirections and remove unnecessary
+        // entries
+        OStringStream os;
+        os  << field;
+
+        entry::disableFunctionEntries = 0;
+        dictionary field2(IStringStream(os.str())());
+        entry::disableFunctionEntries = 1;
+        field2.remove("#include");
+        field2.remove("initialConditions");
+        field2.remove("boundaryConditions");
+
+        // construct and write field dictionary
+        IOdictionary fieldOut
+        (
+            IOobject
+            (
+                fieldNames[i],
+                "0",
+                regionName,
+                runTime,
+                IOobject::NO_READ
+            ),
+            field2
+        );
+
+        fieldOut.regIOobject::writeObject
         (
             IOstream::ASCII,
             IOstream::currentVersion,
