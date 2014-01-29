@@ -42,7 +42,8 @@ const Foam::dimensionSet Foam::virtualMassModel::dimK(dimDensity);
 Foam::virtualMassModel::virtualMassModel
 (
     const dictionary& dict,
-    const phasePair& pair
+    const phasePair& pair,
+    const bool registerObject
 )
 :
     regIOobject
@@ -51,7 +52,10 @@ Foam::virtualMassModel::virtualMassModel
         (
             IOobject::groupName(typeName, pair.name()),
             pair.phase1().mesh().time().timeName(),
-            pair.phase1().mesh()
+            pair.phase1().mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            registerObject
         )
     ),
     pair_(pair)

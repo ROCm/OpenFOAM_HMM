@@ -49,10 +49,11 @@ namespace virtualMassModels
 Foam::virtualMassModels::Lamb::Lamb
 (
     const dictionary& dict,
-    const phasePair& pair
+    const phasePair& pair,
+    const bool registerObject
 )
 :
-    virtualMassModel(dict, pair)
+    virtualMassModel(dict, pair, registerObject)
 {}
 
 

@@ -85,7 +85,8 @@ public:
         GidaspowErgunWenYu
         (
             const dictionary& interfaceDict,
-            const phasePair& pair
+            const phasePair& pair,
+            const bool registerObject
         );
 
 

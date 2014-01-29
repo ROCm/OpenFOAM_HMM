@@ -44,10 +44,11 @@ namespace dragModels
 Foam::dragModels::SyamlalOBrien::SyamlalOBrien
 (
     const dictionary& dict,
-    const phasePair& pair
+    const phasePair& pair,
+    const bool registerObject
 )
 :
-    dragModel(dict, pair),
+    dragModel(dict, pair, registerObject),
     residualRe_("residualRe", dimless, dict.lookup("residualRe"))
 {}
 

@@ -44,10 +44,11 @@ namespace virtualMassModels
 Foam::virtualMassModels::noVirtualMass::noVirtualMass
 (
     const dictionary& dict,
-    const phasePair& pair
+    const phasePair& pair,
+    const bool registerObject
 )
 :
-    virtualMassModel(dict, pair)
+    virtualMassModel(dict, pair, registerObject)
 {}
 
 

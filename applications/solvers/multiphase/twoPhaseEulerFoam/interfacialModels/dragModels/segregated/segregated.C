@@ -45,10 +45,11 @@ namespace dragModels
 Foam::dragModels::segregated::segregated
 (
     const dictionary& dict,
-    const phasePair& pair
+    const phasePair& pair,
+    const bool registerObject
 )
 :
-    dragModel(dict, pair),
+    dragModel(dict, pair, registerObject),
     residualRe_("residualRe", dimless, dict.lookup("residualRe")),
     m_("m", dimless, dict.lookup("m")),
     n_("n", dimless, dict.lookup("n"))

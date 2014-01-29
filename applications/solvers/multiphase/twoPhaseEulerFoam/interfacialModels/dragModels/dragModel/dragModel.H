@@ -87,9 +87,10 @@ public:
             dictionary,
             (
                 const dictionary& dict,
-                const phasePair& pair
+                const phasePair& pair,
+                const bool registerObject
             ),
-            (dict, pair)
+            (dict, pair, registerObject)
         );
 
 
@@ -104,14 +105,16 @@ public:
         // Construct without residual constants
         dragModel
         (
-            const phasePair& pair
+            const phasePair& pair,
+            const bool registerObject
         );
 
         // Construct with residual constants
         dragModel
         (
             const dictionary& dict,
-            const phasePair& pair
+            const phasePair& pair,
+            const bool registerObject
         );
 
 
