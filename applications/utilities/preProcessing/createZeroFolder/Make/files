@@ -2,6 +2,6 @@ boundaryInfo.C
 boundaryTemplates.C
 caseInfo.C
 solverTemplate.C
-createZeroDirectory.C
+createZeroFolder.C
 
 EXE = $(FOAM_APPBIN)/createZeroFolder
