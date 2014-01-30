@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,74 +61,86 @@ int main(int argc, char *argv[])
 
         surfaceScalarField rho_pos
         (
+            "rho_pos",
             fvc::interpolate(rho, pos, "reconstruct(rho)")
         );
         surfaceScalarField rho_neg
         (
+            "rho_neg",
             fvc::interpolate(rho, neg, "reconstruct(rho)")
         );
 
         surfaceVectorField rhoU_pos
         (
+            "rhoU_pos",
             fvc::interpolate(rhoU, pos, "reconstruct(U)")
         );
         surfaceVectorField rhoU_neg
         (
+            "rhoU_neg",
             fvc::interpolate(rhoU, neg, "reconstruct(U)")
         );
 
         volScalarField rPsi(1.0/psi);
         surfaceScalarField rPsi_pos
         (
+            "rPsi_pos",
             fvc::interpolate(rPsi, pos, "reconstruct(T)")
         );
         surfaceScalarField rPsi_neg
         (
+            "rPsi_neg",
             fvc::interpolate(rPsi, neg, "reconstruct(T)")
         );
 
         surfaceScalarField e_pos
         (
+            "e_pos",
             fvc::interpolate(e, pos, "reconstruct(T)")
         );
         surfaceScalarField e_neg
         (
+            "e_neg",
             fvc::interpolate(e, neg, "reconstruct(T)")
         );
 
-        surfaceVectorField U_pos(rhoU_pos/rho_pos);
-        surfaceVectorField U_neg(rhoU_neg/rho_neg);
+        surfaceVectorField U_pos("U_pos", rhoU_pos/rho_pos);
+        surfaceVectorField U_neg("U_neg", rhoU_neg/rho_neg);
 
-        surfaceScalarField p_pos(rho_pos*rPsi_pos);
-        surfaceScalarField p_neg(rho_neg*rPsi_neg);
+        surfaceScalarField p_pos("p_pos", rho_pos*rPsi_pos);
+        surfaceScalarField p_neg("p_neg", rho_neg*rPsi_neg);
 
-        surfaceScalarField phiv_pos(U_pos & mesh.Sf());
-        surfaceScalarField phiv_neg(U_neg & mesh.Sf());
+        surfaceScalarField phiv_pos("phiv_pos", U_pos & mesh.Sf());
+        surfaceScalarField phiv_neg("phiv_neg", U_neg & mesh.Sf());
 
         volScalarField c(sqrt(thermo.Cp()/thermo.Cv()*rPsi));
         surfaceScalarField cSf_pos
         (
+            "cSf_pos",
             fvc::interpolate(c, pos, "reconstruct(T)")*mesh.magSf()
         );
         surfaceScalarField cSf_neg
         (
+            "cSf_neg",
             fvc::interpolate(c, neg, "reconstruct(T)")*mesh.magSf()
         );
 
         surfaceScalarField ap
         (
+            "ap",
             max(max(phiv_pos + cSf_pos, phiv_neg + cSf_neg), v_zero)
         );
         surfaceScalarField am
         (
+            "am",
             min(min(phiv_pos - cSf_pos, phiv_neg - cSf_neg), v_zero)
         );
 
-        surfaceScalarField a_pos(ap/(ap - am));
+        surfaceScalarField a_pos("a_pos", ap/(ap - am));
 
         surfaceScalarField amaxSf("amaxSf", max(mag(am), mag(ap)));
 
-        surfaceScalarField aSf(am*a_pos);
+        surfaceScalarField aSf("aSf", am*a_pos);
 
         if (fluxScheme == "Tadmor")
         {
@@ -136,13 +148,13 @@ int main(int argc, char *argv[])
             a_pos = 0.5;
         }
 
-        surfaceScalarField a_neg(1.0 - a_pos);
+        surfaceScalarField a_neg("a_neg", 1.0 - a_pos);
 
         phiv_pos *= a_pos;
         phiv_neg *= a_neg;
 
-        surfaceScalarField aphiv_pos(phiv_pos - aSf);
-        surfaceScalarField aphiv_neg(phiv_neg + aSf);
+        surfaceScalarField aphiv_pos("aphiv_pos", phiv_pos - aSf);
+        surfaceScalarField aphiv_neg("aphiv_neg", phiv_neg + aSf);
 
         // Reuse amaxSf for the maximum positive and negative fluxes
         // estimated by the central scheme
@@ -166,6 +178,7 @@ int main(int argc, char *argv[])
 
         surfaceScalarField phiEp
         (
+            "phiEp",
             aphiv_pos*(rho_pos*(e_pos + 0.5*magSqr(U_pos)) + p_pos)
           + aphiv_neg*(rho_neg*(e_neg + 0.5*magSqr(U_neg)) + p_neg)
           + aSf*p_pos - aSf*p_neg
@@ -202,6 +215,7 @@ int main(int argc, char *argv[])
         // --- Solve energy
         surfaceScalarField sigmaDotU
         (
+            "sigmaDotU",
             (
                 fvc::interpolate(muEff)*mesh.magSf()*fvc::snGrad(U)
               + (mesh.Sf() & fvc::interpolate(tauMC))

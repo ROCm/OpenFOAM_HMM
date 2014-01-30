@@ -37,14 +37,17 @@ if (mesh.changing())
         pcorrTypes
     );
 
-    // dimensionedScalar rAUf("rAUf", dimTime/rho.dimensions(), 1.0);
     surfaceScalarField rAUf("rAUf", fvc::interpolate(rAU));
+
+    #ifndef divUCorr
+    #define divUCorr
+    #endif
 
     while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix pcorrEqn
         (
-            fvm::laplacian(rAUf, pcorr) == fvc::div(phi)
+            fvm::laplacian(rAUf, pcorr) == fvc::div(phi) divUCorr
         );
 
         pcorrEqn.setReference(pRefCell, pRefValue);
@@ -55,6 +58,8 @@ if (mesh.changing())
             phi -= pcorrEqn.flux();
         }
     }
+
+    #undef divUCorr
 
     #include "continuityErrs.H"
 }

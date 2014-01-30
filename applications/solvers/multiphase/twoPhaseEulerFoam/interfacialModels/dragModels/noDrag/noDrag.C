@@ -44,10 +44,11 @@ namespace dragModels
 Foam::dragModels::noDrag::noDrag
 (
     const dictionary& dict,
-    const phasePair& pair
+    const phasePair& pair,
+    const bool registerObject
 )
 :
-    dragModel(pair)
+    dragModel(pair, registerObject)
 {}
 
 

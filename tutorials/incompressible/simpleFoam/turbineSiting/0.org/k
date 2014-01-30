@@ -37,7 +37,7 @@ boundaryField
         uniformValue    constant $turbulentKE;
     }
 
-    "terrain_.*"
+    terrain
     {
         type            kqRWallFunction;
         value           uniform 0.0;

@@ -52,7 +52,7 @@ Foam::autoPtr<Foam::dragModel> Foam::dragModel::New
             << exit(FatalError);
     }
 
-    return cstrIter()(dict, pair);
+    return cstrIter()(dict, pair, true);
 }
 
 

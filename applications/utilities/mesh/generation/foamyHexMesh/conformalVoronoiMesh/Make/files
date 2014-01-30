@@ -1,5 +1,3 @@
-#include CGAL_FILES
-
 DelaunayMeshTools/DelaunayMeshTools.C
 
 conformalVoronoiMesh/indexedVertex/indexedVertexEnum.C

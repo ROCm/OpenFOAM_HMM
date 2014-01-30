@@ -44,7 +44,7 @@ boundaryField
         zGround         $zGround;
     }
 
-    "terrain_.*"
+    terrain
     {
         type            uniformFixedValue;
         uniformValue    (0 0 0);

@@ -47,7 +47,7 @@ boundaryField
         value           $internalField;
     }
 
-    porosity_ascii
+    porosity
     {
         type            zeroGradient;
     }

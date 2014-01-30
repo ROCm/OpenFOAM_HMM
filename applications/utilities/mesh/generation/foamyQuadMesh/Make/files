@@ -1,5 +1,3 @@
-#include CGAL_FILES
-
 CV2D.C
 insertFeaturePoints.C
 insertSurfaceNearestPointPairs.C

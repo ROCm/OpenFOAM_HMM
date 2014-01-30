@@ -7,4 +7,7 @@ CGAL_INC = \
 CGAL_LIBS = \
     -L$(MPFR_ARCH_PATH)/lib \
     -L$(GMP_ARCH_PATH)/lib \
-    -L$(BOOST_ARCH_PATH)/lib
+    -L$(BOOST_ARCH_PATH)/lib \
+    -L$(CGAL_ARCH_PATH)/lib \
+    -lCGAL \
+    -lmpfr

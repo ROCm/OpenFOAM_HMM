@@ -82,7 +82,16 @@
                 0
             );
 
-            tphiAlpha() += tphiAlphaCorr();
+            // Under-relax the correction for all but the 1st corrector
+            if (aCorr == 0)
+            {
+                tphiAlpha() += tphiAlphaCorr();
+            }
+            else
+            {
+                alpha1 = 0.5*alpha1 + 0.5*alpha10;
+                tphiAlpha() += 0.5*tphiAlphaCorr();
+            }
         }
         else
         {

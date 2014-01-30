@@ -6,7 +6,6 @@ CGAL_EXACT = /*-DCGAL_DONT_USE_LAZY_KERNEL*/
 CGAL_INEXACT = -DCGAL_INEXACT
 
 include $(GENERAL_RULES)/CGAL
-FFLAGS = -DCGAL_FILES='"${CGAL_ARCH_PATH}/share/files"'
 
 EXE_INC = \
     ${EXE_FROUNDING_MATH} \
@@ -26,9 +25,11 @@ EXE_INC = \
     -I$(LIB_SRC)/sampling/lnInclude \
     -I$(LIB_SRC)/mesh/autoMesh/lnInclude \
     -IPrintTable \
-    -I../vectorTools
+    -I../vectorTools \
+    -I/usr/include
 
 LIB_LIBS = \
+    ${CGAL_LIBS} \
     -lmeshTools \
     -ledgeMesh \
     -lfileFormats \

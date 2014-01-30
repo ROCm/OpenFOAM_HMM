@@ -88,7 +88,8 @@ public:
         WenYu
         (
             const dictionary& dict,
-            const phasePair& pair
+            const phasePair& pair,
+            const bool registerObject
         );
 
 

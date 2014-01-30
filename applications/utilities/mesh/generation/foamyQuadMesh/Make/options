@@ -3,7 +3,6 @@ EXE_FROUNDING_MATH = -frounding-math
 EXE_NDEBUG = -DNDEBUG
 
 include $(GENERAL_RULES)/CGAL
-FFLAGS = -DCGAL_FILES='"${CGAL_ARCH_PATH}/share/files"'
 
 EXE_INC = \
     ${EXE_FROUNDING_MATH} \
@@ -11,7 +10,6 @@ EXE_INC = \
     ${CGAL_INC} \
     ${c++CGALWARN} \
     -I$(FOAM_APP)/utilities/mesh/generation/extrude2DMesh/extrude2DMesh/lnInclude \
-    -I../cvMesh/vectorTools \
     -IconformalVoronoi2DMesh/lnInclude \
     -I$(FOAM_APP)/utilities/mesh/generation/foamyHexMesh/conformalVoronoiMesh/lnInclude \
     -I$(LIB_SRC)/parallel/decompose/decompositionMethods/lnInclude \
@@ -24,12 +22,11 @@ EXE_INC = \
     -I$(LIB_SRC)/sampling/lnInclude \
     -I$(LIB_SRC)/triSurface/lnInclude \
     -I$(LIB_SRC)/fileFormats/lnInclude \
-    -I$(LIB_SRC)/mesh/autoMesh/lnInclude
+    -I$(LIB_SRC)/mesh/autoMesh/lnInclude \
+    -I/usr/include
 
 EXE_LIBS = \
     $(CGAL_LIBS) \
-    -lboost_thread \
-    -lmpfr \
     -lextrude2DMesh \
     -lextrudeModel \
     -lcv2DMesh \

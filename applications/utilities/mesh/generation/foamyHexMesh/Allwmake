@@ -2,12 +2,12 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-if [ -d "$CGAL_ARCH_PATH" ]
+if [ -n "$CGAL_ARCH_PATH" ]
 then
     wmake libso conformalVoronoiMesh
     wmake
-    #wmake cvMeshBackgroundMesh
-    #(cd cvMeshSurfaceSimplify && ./Allwmake)
+    #wmake foamyHexMeshBackgroundMesh
+    #(cd foamyHexMeshSurfaceSimplify && ./Allwmake)
     #wmake cellSizeAndAlignmentGrid
 fi
 

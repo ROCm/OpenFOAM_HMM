@@ -64,7 +64,7 @@ geometry
             }
         }
     }
-    propellerTip.obj
+    propellerTip.obj.gz
     {
         type        triSurfaceMesh;
         name        propellerTip;

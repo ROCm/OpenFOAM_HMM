@@ -603,6 +603,8 @@ void mixtureKEpsilon<BasicTurbulenceModel>::correct()
         // Update k, epsilon and G at the wall
         kl.boundaryField().updateCoeffs();
         epsilonl.boundaryField().updateCoeffs();
+
+        Gc().checkOut();
     }
 
     tmp<volScalarField> Gd;
@@ -621,6 +623,8 @@ void mixtureKEpsilon<BasicTurbulenceModel>::correct()
         // Update k, epsilon and G at the wall
         kg.boundaryField().updateCoeffs();
         epsilong.boundaryField().updateCoeffs();
+
+        Gd().checkOut();
     }
 
     // Mixture turbulence generation
