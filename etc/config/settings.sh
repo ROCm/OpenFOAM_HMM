@@ -569,6 +569,7 @@ export MPI_BUFFER_SIZE
 
 # cleanup environment:
 # ~~~~~~~~~~~~~~~~~~~~
-unset _foamAddPath _foamAddLib _foamAddMan foamCompiler minBufferSize
+#keep _foamAddPath _foamAddLib _foamAddMan
+unset foamCompiler minBufferSize
 
 # ----------------------------------------------------------------- end-of-file

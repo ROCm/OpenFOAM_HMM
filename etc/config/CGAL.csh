@@ -41,6 +41,10 @@ if ($?FOAM_VERBOSE && $?prompt) then
     echo "    $boost_version at $BOOST_ARCH_PATH"
 endif
 
+if ( -d "$CGAL_ARCH_PATH" ) then
+    _foamAddLib $CGAL_ARCH_PATH/lib
+endif
+
 if ( -d "$BOOST_ARCH_PATH" ) then
     _foamAddLib $BOOST_ARCH_PATH/lib
 endif
