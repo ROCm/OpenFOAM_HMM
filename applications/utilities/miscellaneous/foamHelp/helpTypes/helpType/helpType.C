@@ -134,12 +134,12 @@ void Foam::helpType::displayDoc
         // can use FOAM_DOC_BROWSER='application file://%f' if required
         docBrowser.replaceAll("%f", docFile);
 
-        fileName classFolder(parser.subDict(className).lookup("path"));
+        fileName classDirectory(parser.subDict(className).lookup("path"));
         word classFile(parser.subDict(className).lookup("name"));
 
         Info<< "Showing documentation for type " << className << nl << endl;
 
-        Info<< "Source file: " << classFolder.c_str() << classFile << nl
+        Info<< "Source file: " << classDirectory.c_str() << classFile << nl
             << endl;
 
         system(docBrowser);

@@ -29,7 +29,7 @@ Group
 
 Description
     Evaluates and outputs turbulence y+ for LES models.  Values written to
-    time folders as field 'yPlusLES'
+    time directories as field 'yPlusLES'
 
 SourceFiles
     yPlusLES.C

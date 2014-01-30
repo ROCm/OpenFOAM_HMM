@@ -44,7 +44,7 @@ void writeWeights
 (
     const scalarField& wghtSum,
     const primitivePatch& patch,
-    const fileName& folder,
+    const fileName& directory,
     const fileName& prefix,
     const word& timeName
 )
@@ -53,7 +53,7 @@ void writeWeights
 
     writer.write
     (
-        folder,
+        directory,
         prefix + "_proc" + Foam::name(Pstream::myProcNo()) + "_" + timeName,
         patch.localPoints(),
         patch.localFaces(),

@@ -29,7 +29,7 @@ Group
 
 Description
     This function object evaluates and outputs the shear stress at wall
-    patches.  The result is written as a volVectorField to time folders as
+    patches.  The result is written as a volVectorField to time directories as
     field 'wallShearStress'
 
         \f[

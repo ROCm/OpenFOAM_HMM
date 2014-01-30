@@ -29,7 +29,7 @@ Group
 
 Description
     Evaluates and outputs turbulence y+ for RAS models.  Values written to
-    time folders as field 'yPlusRAS'
+    time directories as field 'yPlusRAS'
 
 SourceFiles
     yPlusRAS.C

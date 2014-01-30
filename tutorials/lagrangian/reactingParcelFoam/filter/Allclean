@@ -9,7 +9,7 @@ cleanCase
 # remove 0 directory
 rm -rf 0
 
-# remove post-processing folder
+# remove post-processing directory
 rm -rf postProcessing
 
 # copy 0.org to 0

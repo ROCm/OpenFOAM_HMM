@@ -28,7 +28,7 @@ Group
     grpFieldFunctionObjects
 
 Description
-    This function object reads fields from the time folders and adds them to
+    This function object reads fields from the time directories and adds them to
     the mesh database for further post-processing.
 
     Example of function object specification:

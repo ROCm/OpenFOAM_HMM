@@ -31,10 +31,10 @@ core
 # dependency files - anywhere
 *.dep
 
-# lnInclude (symlink) folders - anywhere
+# lnInclude (symlink) directories - anywhere
 lnInclude
 
-# build folders - anywhere
+# build directories - anywhere
 linux*Clang*/
 linux*Gcc*/
 linux*Icc*/
@@ -44,7 +44,7 @@ solaris*Gcc*/
 SunOS*Gcc*/
 platforms/
 
-# reinstate wmake/rules that might look like build folders
+# reinstate wmake/rules that might look like build directories
 !wmake/rules/*/
 
 # doxygen generated documentation

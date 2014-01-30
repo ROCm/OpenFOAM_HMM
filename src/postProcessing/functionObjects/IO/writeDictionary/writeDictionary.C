@@ -38,7 +38,7 @@ defineTypeNameAndDebug(writeDictionary, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool Foam::writeDictionary::tryFolder
+bool Foam::writeDictionary::tryDirectory
 (
     const label dictI,
     const word& location,
@@ -167,16 +167,16 @@ void Foam::writeDictionary::execute()
         }
         else
         {
-            bool processed = tryFolder(i, obr_.time().timeName(), firstDict);
+            bool processed = tryDirectory(i, obr_.time().timeName(), firstDict);
 
             if (!processed)
             {
-                processed = tryFolder(i, obr_.time().constant(), firstDict);
+                processed = tryDirectory(i, obr_.time().constant(), firstDict);
             }
 
             if (!processed)
             {
-                processed = tryFolder(i, obr_.time().system(), firstDict);
+                processed = tryDirectory(i, obr_.time().system(), firstDict);
             }
 
             if (!processed)

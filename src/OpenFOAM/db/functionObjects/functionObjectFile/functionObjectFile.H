@@ -114,7 +114,7 @@ protected:
 
 public:
 
-    //- Folder prefix
+    //- Directory prefix
     static const word outputPrefix;
 
     //- Additional characters for writing

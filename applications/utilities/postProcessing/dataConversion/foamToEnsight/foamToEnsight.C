@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
         volTensorField::typeName
     };
 
-    // Path to EnSight folder at case level only
+    // Path to EnSight directory at case level only
     // - For parallel cases, data only written from master
     fileName ensightDir = args.rootPath()/args.globalCaseName()/"EnSight";
 

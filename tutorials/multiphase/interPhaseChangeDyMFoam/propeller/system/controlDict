@@ -23,7 +23,7 @@ libs
 
 application     interPhaseChangeDyMFoam;
 
-startFrom       latestTime;
+startFrom       startTime;
 
 startTime       0;
 
@@ -54,6 +54,6 @@ runTimeModifiable true;
 adjustTimeStep  yes;
 
 maxCo           2;
-maxAlphaCo      2;
+maxAlphaCo      1;
 
 // ************************************************************************* //
