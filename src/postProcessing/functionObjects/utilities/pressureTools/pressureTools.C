@@ -285,6 +285,17 @@ void Foam::pressureTools::read(const dictionary& dict)
             dict.lookup("pInf") >> pInf_;
             dict.lookup("UInf") >> UInf_;
             dict.lookup("rhoInf") >> rhoInf_;
+
+            scalar zeroCheck = 0.5*rhoInf_*magSqr(UInf_) + pInf_;
+
+            if (mag(zeroCheck) < ROOTVSMALL)
+            {
+                WarningIn("void Foam::pressureTools::read(const dictionary&)")
+                    << type() << " " << name_ << ": "
+                    << "Coefficient calculation requested, but reference "
+                    << "pressure level is zero.  Please check the supplied "
+                    << "values of pInf, UInf and rhoInf" << endl;
+            }
         }
     }
 }
