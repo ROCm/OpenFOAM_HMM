@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  2.2.0                                 |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -19,6 +19,11 @@ returnFlow
 {
     default
     {
+        p
+        {
+            type        calculated;
+            value       ${:VALUE.p};
+        }
         p_rgh
         {
             type        fixedValue;
@@ -27,6 +32,11 @@ returnFlow
     }
     wall
     {
+        p
+        {
+            type        calculated;
+            value       ${:VALUE.p};
+        }
         p_rgh
         {
             type        fixedValue;
@@ -35,6 +45,11 @@ returnFlow
     }
     atmosphere
     {
+        p
+        {
+            type        calculated;
+            value       ${:VALUE.p};
+        }
         p_rgh
         {
             type        totalPressure;
@@ -43,8 +58,8 @@ returnFlow
             rho         rho;
             psi         none;
             gamma       1;
-            p0          ${:outlet.p_rgh};
-            value       ${:outlet.p_rgh};
+            p0          ${:VALUE.p_rgh};
+            value       ${:VALUE.p_rgh};
         }
     }
 }

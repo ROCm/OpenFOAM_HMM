@@ -100,16 +100,22 @@ Foam::boundaryTemplates::boundaryTemplates
         // read general boundary options
         forAll(patchTypes, i)
         {
-            IOobject io
-            (
-                fileName(BCDir/regionType/patchTypes[i] + "Options"),
-                runTime,
-                IOobject::MUST_READ
-            );
+            fileName optFile(BCDir/regionType/patchTypes[i] + "Options");
 
-            if (io.headerOk())
+            IFstream is(optFile);
+
+            if (is.good())
             {
-                IOdictionary dict(io);
+                IOdictionary dict
+                (
+                    IOobject
+                    (
+                        optFile,
+                        runTime,
+                        IOobject::MUST_READ
+                    )
+                );
+
                 regionOptions.add(patchTypes[i], dictionary(dict));
             }
         }
@@ -117,16 +123,27 @@ Foam::boundaryTemplates::boundaryTemplates
         // add solver type boundary options
         forAll(patchTypes, i)
         {
-            IOobject io
+            // options are optional - however, if file exists, assume that it
+            // is to be read
+            fileName optFile
             (
-                fileName(BCDir/regionType/solverType/patchTypes[i] + "Options"),
-                runTime,
-                IOobject::MUST_READ
+                BCDir/regionType/solverType/patchTypes[i] + "Options"
             );
 
-            if (io.headerOk())
+            IFstream is(optFile);
+
+            if (is.good())
             {
-                IOdictionary dict(io);
+                IOdictionary dict
+                (
+                    IOobject
+                    (
+                        optFile,
+                        runTime,
+                        IOobject::MUST_READ
+                    )
+                );
+
                 regionOptions.subDict(patchTypes[i]).merge(dict);
             }
         }
