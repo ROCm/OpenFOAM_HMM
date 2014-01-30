@@ -42,6 +42,11 @@ then
     echo "    $boost_version at $BOOST_ARCH_PATH"
 fi
 
+if [ -d "$CGAL_ARCH_PATH" ]
+then
+    _foamAddLib $CGAL_ARCH_PATH/lib
+fi
+
 if [ -d "$BOOST_ARCH_PATH" ]
 then
     _foamAddLib $BOOST_ARCH_PATH/lib

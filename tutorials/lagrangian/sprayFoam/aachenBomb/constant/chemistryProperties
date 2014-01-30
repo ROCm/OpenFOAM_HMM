@@ -27,7 +27,7 @@ initialChemicalTimeStep 1e-07;
 
 odeCoeffs
 {
-    solver          SIBS;
+    solver          seulex;
     eps             0.05;
 }
 
