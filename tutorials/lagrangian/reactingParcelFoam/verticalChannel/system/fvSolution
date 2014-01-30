@@ -51,7 +51,7 @@ solvers
     {
         solver          GAMG;
         tolerance       0;
-        relTol          0.1;
+        relTol          0.05;
         smoother        DICGaussSeidel;
         nPreSweeps      0;
         nPostSweeps     2;
@@ -86,11 +86,17 @@ solvers
     }
 }
 
+potentialFlow
+{
+    // used for potentialFoam initialisation
+    nNonOrthogonalCorrectors 5;
+}
+
 PIMPLE
 {
     transonic       no;
     nOuterCorrectors 1;
-    nCorrectors     2;
+    nCorrectors     3;
     nNonOrthogonalCorrectors 0;
     momentumPredictor yes;
 }
@@ -102,7 +108,7 @@ relaxationFactors
     }
     equations
     {
-        ".*Final"       1;
+        ".*"            1;
     }
 }
 
