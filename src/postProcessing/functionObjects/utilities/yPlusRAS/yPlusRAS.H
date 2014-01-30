@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Group
 
 Description
     Evaluates and outputs turbulence y+ for RAS models.  Values written to
-    time folders as field 'yPlusRAS'
+    time directories as field 'yPlusRAS'
 
 SourceFiles
     yPlusRAS.C

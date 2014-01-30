@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,7 +84,7 @@ Where:
 \endtable
 
 The sub-dictionary name \c myFunctionObject is chosen by the user, and is
-typically used as the name of the output folder for any derived data.  The
+typically used as the name of the output directory for any derived data.  The
 \c type entry defines the type of function object properties that follow.
 Since the function objects are packaged into separate libraries, the user must
 tell the code where to find the function object implementation, identified

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,7 +35,7 @@ Description
     On execution, the field <fieldName> is read, and its boundary conditions
     interrogated for the presence of an \c externalCoupled type.  If found,
     the patch geometry (points and faces) for the coupled patches are output
-    to the communications folder.
+    to the communications directory.
 
 Note:
     The addressing is patch-local, i.e. point indices for each patch point

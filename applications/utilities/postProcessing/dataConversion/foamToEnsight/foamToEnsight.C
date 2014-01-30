@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
         volTensorField::typeName
     };
 
-    // Path to EnSight folder at case level only
+    // Path to EnSight directory at case level only
     // - For parallel cases, data only written from master
     fileName ensightDir = args.rootPath()/args.globalCaseName()/"EnSight";
 

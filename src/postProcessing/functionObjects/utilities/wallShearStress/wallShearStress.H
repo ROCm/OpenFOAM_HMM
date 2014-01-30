@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Group
 
 Description
     This function object evaluates and outputs the shear stress at wall
-    patches.  The result is written as a volVectorField to time folders as
+    patches.  The result is written as a volVectorField to time directories as
     field 'wallShearStress'
 
         \f[

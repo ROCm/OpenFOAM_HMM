@@ -1,7 +1,7 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
 
-# Clean time folders only
+# Clean time directories only
 
 rm -rf *[1-9]*
 rm -f log.* 2>/dev/null

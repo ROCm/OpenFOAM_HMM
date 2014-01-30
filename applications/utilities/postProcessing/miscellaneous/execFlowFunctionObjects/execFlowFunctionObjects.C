@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,7 @@ Application
 Description
     Execute the set of functionObjects specified in the selected dictionary
     (which defaults to system/controlDict) for the selected set of times.
-    Alternative dictionaries should be placed in the system/ folder.
+    Alternative dictionaries should be placed in the system/ directory.
 
     The flow (p-U) and optionally turbulence fields are available for the
     function objects to operate on allowing forces and other related properties

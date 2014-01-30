@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -39,7 +39,7 @@ usage()
 usage: ${0##*/} [OPTION]
 
 options:
-  -root <dir>       specify root folder to run tests from
+  -root <dir>       specify root directory to run tests from
   -default          sets up a default scheme on all schemes
   -help             print the usage
 
