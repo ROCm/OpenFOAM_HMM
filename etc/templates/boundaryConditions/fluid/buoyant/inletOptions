@@ -1,7 +1,7 @@
-l/*--------------------------------*- C++ -*----------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  2.2.0                                 |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -11,7 +11,7 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "templates";
-    object      inlet;
+    object      inletOptions;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +49,8 @@ flowSpecification
         }
         p_rgh
         {
-            type        zeroGradient;
+            type        fixedFluxPressure;
+            value       ${:VALUE.p_rgh};
         }
     }
     flowRate
