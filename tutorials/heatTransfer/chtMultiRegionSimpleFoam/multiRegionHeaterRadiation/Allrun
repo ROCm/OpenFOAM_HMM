@@ -54,7 +54,7 @@ runApplication `getApplication`
 #runParallel `getApplication` 4
 #
 ## Reconstruct
-runApplication reconstructPar -allRegions
+#runApplication reconstructPar -allRegions
 
 
 echo
