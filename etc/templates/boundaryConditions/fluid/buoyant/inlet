@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  2.2.0                                 |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -17,16 +17,6 @@ FoamFile
 
 subSonic
 {
-    p
-    {
-        type        calculated;
-        value       ${:VALUE.p};
-    }
-    p_rgh
-    {
-        type        fixedFluxPressure;
-        value       ${:VALUE.p_rgh};
-    }
     T
     {
         type        fixedValue;
@@ -34,12 +24,12 @@ subSonic
     }
     mut
     {
-        type        fixedValue;
+        type        calculated;
         value       ${:VALUE.mut};
     }
     alphat
     {
-        type        fixedValue;
+        type        calculated;
         value       ${:VALUE.alphat};
     }
 }

@@ -5,7 +5,7 @@ h2     : H2 combustion, 10 species, 27 reactions
 nc7h16 : n-Heptane combustion, 544 species, 2446 reactions
 ic8h18 : iso-Octane combustion, 874 species, 3796 reactions
 
-Results interpreted in 'validation' sub-folder, where OpenFOAM results
+Results interpreted in 'validation' sub-directory, where OpenFOAM results
 are compared against those predicted by CHEMKIN II.
 
 Overall the best performing ODE solver is seulex followed closely by rodas23.

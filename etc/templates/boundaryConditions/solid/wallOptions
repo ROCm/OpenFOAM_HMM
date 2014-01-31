@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  2.2.0                                 |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -14,37 +14,6 @@ FoamFile
     object      wallOptions;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-wallFunction
-{
-    highReynolds
-    {
-        mut
-        {
-            type        compressible::mutkWallFunction;
-            value       ${:VALUE.nut};
-        }
-        alphat
-        {
-            type        compressible::alphatWallFunction;
-            value       ${:VALUE.alphat};
-        }
-    }
-    lowReynolds
-    {
-        mut
-        {
-            type        fixedValue;
-            value       uniform 0;
-        }
-        alphat
-        {
-            type        fixedValue;
-            value       uniform 0;
-        }
-    }
-}
-
 
 heatTransfer
 {

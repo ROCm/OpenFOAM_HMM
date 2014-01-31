@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,7 +48,7 @@ Description
         ...
         <valueN> <gradientN> <valueFracionN>
 
-    Data is sent/received as a single file for all patches from the folder
+    Data is sent/received as a single file for all patches from the directory
 
         $FOAM_CASE/<commsDir>
 
@@ -75,7 +75,7 @@ Description
 
     \table
         Property     | Description             | Required    | Default value
-        commsDir     | communications folder   | yes         |
+        commsDir     | communications directory   | yes         |
         fileName     | transfer file name      | yes         |
         waitInterval | interval [s] between file checks | no | 1
         timeOut      | time after which error invoked [s] |no |100*waitInterval

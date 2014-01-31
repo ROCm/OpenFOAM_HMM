@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -87,7 +87,7 @@ SETSDIR="../postProcessing/sets"
 
 if [ ! -d $SETSDIR ]
 then
-    echo "createGraphs: results sets not available in folder $SETSDIR"
+    echo "createGraphs: results sets not available in directory $SETSDIR"
     exit 0
 fi
 

@@ -4,7 +4,7 @@ cd ${0%/*} || exit 1    # run from this directory
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
-# copy wigley surface from resources folder
+# copy wigley surface from resources directory
 cp $FOAM_TUTORIALS/resources/geometry/wigley-scaled-oriented.stl.gz constant/triSurface/
 
 runApplication blockMesh

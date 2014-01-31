@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -212,7 +212,7 @@ public:
             //- Return source for enthalpy equation [kg/m/s3]
             virtual tmp<volScalarField> Sh() const;
 
-            //- Return the heat release, i.e. enthalpy/sec [m2/s3]
+            //- Return the heat release, i.e. enthalpy/sec [kg/m2/s3]
             virtual tmp<volScalarField> dQ() const;
 
 

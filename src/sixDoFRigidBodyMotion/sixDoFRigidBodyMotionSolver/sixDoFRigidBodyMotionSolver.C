@@ -112,7 +112,9 @@ Foam::sixDoFRigidBodyMotionSolver::sixDoFRigidBodyMotionSolver
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     {
-        pointPatchDist pDist(pointMesh::New(mesh), patchSet_, points0());
+        const pointMesh& pMesh = pointMesh::New(mesh);
+
+        pointPatchDist pDist(pMesh, patchSet_, points0());
 
         // Scaling: 1 up to di then linear down to 0 at do away from patches
         scale_.internalField() =
@@ -141,7 +143,7 @@ Foam::sixDoFRigidBodyMotionSolver::sixDoFRigidBodyMotionSolver
                 scalar(1)
             );
 
-        scale_.correctBoundaryConditions();
+        pointConstraints::New(pMesh).constrain(scale_);
         scale_.write();
     }
 }

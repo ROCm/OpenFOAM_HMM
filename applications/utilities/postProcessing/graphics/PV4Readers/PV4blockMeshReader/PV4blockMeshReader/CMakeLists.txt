@@ -28,7 +28,7 @@ ADD_DEFINITIONS(
     -DWM_$ENV{WM_PRECISION_OPTION}
 )
 
-# Set output library destination to plugin folder
+# Set output library destination to plugin directory
 SET(
     LIBRARY_OUTPUT_PATH $ENV{PV_PLUGIN_PATH}
     CACHE INTERNAL

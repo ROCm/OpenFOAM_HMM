@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,7 @@ Description
     This boundary condition provides a turbulent kinematic viscosity condition
     when using wall functions.  As input, the user specifies a look-up table
     of U+ as a function of near-wall Reynolds number.  The table should be
-    located in the $FOAM_CASE/constant folder.
+    located in the $FOAM_CASE/constant directory.
 
     \heading Patch usage
 

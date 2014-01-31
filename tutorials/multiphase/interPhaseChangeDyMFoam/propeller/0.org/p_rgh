@@ -31,7 +31,13 @@ boundaryField
 
     outlet
     {
-        type            fixedValue;
+        type            totalPressure;
+        p0              $internalField;
+        U               U;
+        phi             phi;
+        rho             rho;
+        psi             none;
+        gamma           1;
         value           $internalField;
     }
 
