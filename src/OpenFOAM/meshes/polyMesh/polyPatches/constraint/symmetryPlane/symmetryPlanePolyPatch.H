@@ -52,8 +52,13 @@ class symmetryPlanePolyPatch
 {
     // Private data
 
-        //- Symmetry plane normal (calculated on demand)
-        mutable vector n_;
+        //- Symmetry plane normal
+        vector n_;
+
+    // Private member functions
+
+        //- Calculate and return the symmetry plane normal
+        vector calcNormal() const;
 
 
 public:
@@ -162,7 +167,10 @@ public:
     // Member Functions
 
         //- Return symmetry plane normal
-        const vector& n() const;
+        const vector& n() const
+        {
+            return n_;
+        }
 };
 
 
