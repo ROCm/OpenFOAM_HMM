@@ -6,6 +6,5 @@ cd ${0%/*} || exit 1    # run from this directory
 
 cleanCase
 rm system/topoSetDict > /dev/null 2>&1
-cp constant/polyMesh/boundary.org constant/polyMesh/boundary
 
 # ----------------------------------------------------------------- end-of-file
