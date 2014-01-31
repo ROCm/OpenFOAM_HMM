@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,7 +43,7 @@ Description
         flow and slightly inelastic particles in a general flowfield"
         C Lun, S Savage, G Jeffrey, N Chepurniy
         Journal of Fluid Mechanics
-        Volume 1, Page 223, April 2006
+        Volume 140, Pages 223-256, 1984
     \endverbatim
 
 SourceFiles

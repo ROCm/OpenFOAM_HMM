@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,7 +42,7 @@ Description
         beds"
         S Harris and D Crighton,
         Journal of Fluid Mechanics
-        Volume 266, Pages 243-276, April 2006
+        Volume 266, Pages 243-276, 1994
     \endverbatim
 
 SourceFiles
