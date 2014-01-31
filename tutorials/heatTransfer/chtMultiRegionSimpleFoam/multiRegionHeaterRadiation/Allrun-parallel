@@ -10,21 +10,28 @@ cd ${0%/*} || exit 1    # run from this directory
 ./Allrun.pre
 
 
-#-- Run on single processor
+#-- Run in parallel
+
+# Decompose
+runApplication decomposePar -allRegions
 
 # Agglomerate patch faces
 for i in bottomAir topAir
 do
-    faceAgglomerate -region $i -dict constant/viewFactorsDict > log.faceAgglomerate.$i 2>&1
+    mpirun -np 4 faceAgglomerate -region $i -dict constant/viewFactorsDict -parallel>   log.faceAgglomerate.$i 2>&1
 done
 
 # Generate view factors
 for i in bottomAir topAir
 do
-    viewFactorsGen -region $i > log.viewFactorsGen.$i 2>&1
+    mpirun -np 4 viewFactorsGen -region $i -parallel > log.viewFactorsGen.$i 2>&1
 done
 
-runApplication `getApplication`
+# Run
+runParallel `getApplication` 4
+
+# Reconstruct
+runApplication reconstructPar -allRegions
 
 
 
