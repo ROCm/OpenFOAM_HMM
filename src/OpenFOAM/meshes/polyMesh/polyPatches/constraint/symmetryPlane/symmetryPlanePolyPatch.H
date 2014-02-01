@@ -55,10 +55,13 @@ class symmetryPlanePolyPatch
         //- Symmetry plane normal
         vector n_;
 
-    // Private member functions
 
-        //- Calculate and return the symmetry plane normal
-        vector calcNormal() const;
+protected:
+
+    // Protected Member Functions
+
+        //- Calculate the patch geometry
+        virtual void calcGeometry(PstreamBuffers&);
 
 
 public:

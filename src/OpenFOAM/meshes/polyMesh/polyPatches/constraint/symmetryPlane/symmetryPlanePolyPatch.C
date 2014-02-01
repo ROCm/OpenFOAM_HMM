@@ -37,6 +37,40 @@ namespace Foam
     addToRunTimeSelectionTable(polyPatch, symmetryPlanePolyPatch, dictionary);
 }
 
+
+// * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
+
+void Foam::symmetryPlanePolyPatch::calcGeometry(PstreamBuffers&)
+{
+    if (returnReduce(size(), sumOp<label>()) == 0)
+    {
+        // No faces in patch. Avoid gAverage complaining and set
+        // normal to nonsense value to catch any use
+        n_ = vector::rootMax;
+    }
+    else
+    {
+        const vectorField& nf(faceNormals());
+        n_ = gAverage(nf);
+
+        // Check the symmetry plane is planar
+        forAll(nf, facei)
+        {
+            if (magSqr(n_ - nf[facei]) > SMALL)
+            {
+                FatalErrorIn("symmetryPlanePolyPatch::n()")
+                    << "Symmetry plane '" << name() << "' is not planar."
+                    << endl
+                    << " Either split the patch into planar parts"
+                    << " or use the " << symmetryPolyPatch::typeName
+                    << " patch type"
+                    << exit(FatalError);
+            }
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * * * * //
 
 Foam::symmetryPlanePolyPatch::symmetryPlanePolyPatch
@@ -50,7 +84,7 @@ Foam::symmetryPlanePolyPatch::symmetryPlanePolyPatch
 )
 :
     polyPatch(name, size, start, index, bm, patchType),
-    n_(calcNormal())
+    n_(vector::rootMax)
 {}
 
 
@@ -64,7 +98,7 @@ Foam::symmetryPlanePolyPatch::symmetryPlanePolyPatch
 )
 :
     polyPatch(name, dict, index, bm, patchType),
-    n_(calcNormal())
+    n_(vector::rootMax)
 {}
 
 
@@ -75,7 +109,7 @@ Foam::symmetryPlanePolyPatch::symmetryPlanePolyPatch
 )
 :
     polyPatch(pp, bm),
-    n_(calcNormal())
+    n_(vector::rootMax)
 {}
 
 
@@ -89,7 +123,7 @@ Foam::symmetryPlanePolyPatch::symmetryPlanePolyPatch
 )
 :
     polyPatch(pp, bm, index, newSize, newStart),
-    n_(calcNormal())
+    n_(vector::rootMax)
 {}
 
 
@@ -103,43 +137,8 @@ Foam::symmetryPlanePolyPatch::symmetryPlanePolyPatch
 )
 :
     polyPatch(pp, bm, index, mapAddressing, newStart),
-    n_(calcNormal())
+    n_(vector::rootMax)
 {}
-
-
-// * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * * //
-
-Foam::vector Foam::symmetryPlanePolyPatch::calcNormal() const
-{
-    if (returnReduce(size(), sumOp<label>()) == 0)
-    {
-        // No faces in patch. Avoid gAverage complaining and set
-        // normal to nonsense value to catch any use
-        return vector::rootMax;
-    }
-    else
-    {
-        const vectorField& nf(faceNormals());
-        vector n = gAverage(nf);
-
-        // Check the symmetry plane is planar
-        forAll(nf, facei)
-        {
-            if (magSqr(n - nf[facei]) > SMALL)
-            {
-                FatalErrorIn("symmetryPlanePolyPatch::n()")
-                    << "Symmetry plane '" << name() << "' is not planar."
-                    << endl
-                    << " Either split the patch into planar parts"
-                    << " or use the " << symmetryPolyPatch::typeName
-                    << " patch type"
-                    << exit(FatalError);
-            }
-        }
-
-        return n;
-    }
-}
 
 
 // ************************************************************************* //
