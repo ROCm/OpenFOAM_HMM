@@ -32687,7 +32687,7 @@ boundaryField
     }
     centreLeft
     {
-        type            symmetryPlane;
+        type            symmetry;
     }
     wedge1
     {
