@@ -54,14 +54,6 @@ class RanzMarshall
 :
     public heatTransferModel
 {
-private:
-
-    // Private data
-        
-        //- Residual Reynolds number
-        const dimensionedScalar residualRe_;
-
-
 public:
 
     //- Runtime type information

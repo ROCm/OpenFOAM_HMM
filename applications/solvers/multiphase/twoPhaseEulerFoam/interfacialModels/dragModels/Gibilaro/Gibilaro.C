@@ -48,8 +48,7 @@ Foam::dragModels::Gibilaro::Gibilaro
     const bool registerObject
 )
 :
-    dragModel(dict, pair, registerObject),
-    residualRe_("residualRe", dimless, dict.lookup("residualRe"))
+    dragModel(dict, pair, registerObject)
 {}
 
 
@@ -61,13 +60,13 @@ Foam::dragModels::Gibilaro::~Gibilaro()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::dragModels::Gibilaro::Cd() const
+Foam::tmp<Foam::volScalarField> Foam::dragModels::Gibilaro::CdRe() const
 {
     volScalarField alpha2(max(scalar(1) - pair_.dispersed(), residualAlpha_));
 
     return
         (4/3)
-       *(17.3/(alpha2*max(pair_.Re(), residualRe_)) + scalar(0.336))
+       *(17.3/alpha2 + 0.336*pair_.Re())
        *max(pair_.continuous(), residualAlpha_)
        *pow(alpha2, -2.8);
 }

@@ -47,8 +47,7 @@ Foam::heatTransferModels::RanzMarshall::RanzMarshall
     const phasePair& pair
 )
 :
-    heatTransferModel(dict, pair),
-    residualRe_("residualRe", dimless, dict.lookup("residualRe"))
+    heatTransferModel(dict, pair)
 {}
 
 
@@ -63,8 +62,7 @@ Foam::heatTransferModels::RanzMarshall::~RanzMarshall()
 Foam::tmp<Foam::volScalarField>
 Foam::heatTransferModels::RanzMarshall::K() const
 {
-    volScalarField Re(pair_.Re() + residualRe_);
-    volScalarField Nu(scalar(2) + 0.6*sqrt(Re)*cbrt(pair_.Pr()));
+    volScalarField Nu(scalar(2) + 0.6*pair_.Re()*cbrt(pair_.Pr()));
 
     return 6.0*pair_.continuous().kappa()*Nu/sqr(pair_.dispersed().d());
 }

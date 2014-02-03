@@ -68,8 +68,7 @@ Foam::dragModels::GidaspowErgunWenYu::GidaspowErgunWenYu
             pair,
             false
         )
-    ),
-    residualRe_("residualRe", dimless, dict.lookup("residualRe"))
+    )
 {}
 
 
@@ -82,11 +81,11 @@ Foam::dragModels::GidaspowErgunWenYu::~GidaspowErgunWenYu()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
-Foam::dragModels::GidaspowErgunWenYu::Cd() const
+Foam::dragModels::GidaspowErgunWenYu::CdRe() const
 {
     return
-        pos(pair_.continuous() - 0.8)*WenYu_->Cd()
-      + neg(pair_.continuous() - 0.8)*Ergun_->Cd();
+        pos(pair_.continuous() - 0.8)*WenYu_->CdRe()
+      + neg(pair_.continuous() - 0.8)*Ergun_->CdRe();
 }
 
 

@@ -57,14 +57,6 @@ class SyamlalOBrien
 :
     public dragModel
 {
-private:
-
-    // Private data
-
-        //- Residual Reynolds number
-        const dimensionedScalar residualRe_;
-
-
 public:
 
     //- Runtime type information
@@ -89,7 +81,7 @@ public:
     // Member Functions
 
         //- Drag coefficient
-        virtual tmp<volScalarField> Cd() const;
+        virtual tmp<volScalarField> CdRe() const;
 };
 
 

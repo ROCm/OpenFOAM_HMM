@@ -75,7 +75,6 @@ drag
     {
         type            SchillerNaumann;
         residualAlpha   1e-6;
-        residualSlip    1e-3;
         residualRe      1e-3;
         swarmCorrection
         {
@@ -87,7 +86,6 @@ drag
     {
         type            SchillerNaumann;
         residualAlpha   1e-6;
-        residualSlip    1e-3;
         residualRe      1e-3;
         swarmCorrection
         {
@@ -99,8 +97,6 @@ drag
     {
         type            segregated;
         residualAlpha   1e-6;
-        residualSlip    1e-3;
-        residualRe      1e-3;
         m               0.5;
         n               8;
         swarmCorrection
@@ -130,13 +126,11 @@ heatTransfer
     (air in water)
     {
         type            RanzMarshall;
-        residualRe      1e-3;
     }
 
     (water in air)
     {
         type            RanzMarshall;
-        residualRe      1e-3;
     }
 );
 

@@ -49,7 +49,6 @@ Foam::dragModels::TomiyamaCorrelated::TomiyamaCorrelated
 )
 :
     dragModel(dict, pair, registerObject),
-    residualRe_("residualRe", dimless, dict.lookup("residualRe")),
     A_("A", dimless, dict.lookup("A"))
 {}
 
@@ -63,21 +62,21 @@ Foam::dragModels::TomiyamaCorrelated::~TomiyamaCorrelated()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
-Foam::dragModels::TomiyamaCorrelated::Cd() const
+Foam::dragModels::TomiyamaCorrelated::CdRe() const
 {
-    volScalarField Re(pair_.Re() + residualRe_);
+    volScalarField Re(pair_.Re());
     volScalarField Eo(pair_.Eo());
 
     return
         max
         (
-            A_/Re
+            A_
            *min
             (
                 (1 + 0.15*pow(Re, 0.687)),
                 scalar(3)
             ),
-            8*Eo/(3*Eo + 12)
+            8*Eo*Re/(3*Eo + 12)
         );
 
 }

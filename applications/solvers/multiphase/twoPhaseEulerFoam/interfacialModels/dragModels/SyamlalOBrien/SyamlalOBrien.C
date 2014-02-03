@@ -48,8 +48,7 @@ Foam::dragModels::SyamlalOBrien::SyamlalOBrien
     const bool registerObject
 )
 :
-    dragModel(dict, pair, registerObject),
-    residualRe_("residualRe", dimless, dict.lookup("residualRe"))
+    dragModel(dict, pair, registerObject)
 {}
 
 
@@ -61,17 +60,16 @@ Foam::dragModels::SyamlalOBrien::~SyamlalOBrien()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::dragModels::SyamlalOBrien::Cd() const
+Foam::tmp<Foam::volScalarField> Foam::dragModels::SyamlalOBrien::CdRe() const
 {
     volScalarField alpha2(max(scalar(1) - pair_.dispersed(), residualAlpha_));
-    volScalarField magUr(max(pair_.magUr(), residualSlip_));
     volScalarField A(pow(alpha2, 4.14));
     volScalarField B
     (
         neg(alpha2 - 0.85)*(0.8*pow(alpha2, 1.28))
       + pos(alpha2 - 0.85)*(pow(alpha2, 2.65))
     );
-    volScalarField Re(max(pair_.Re(), residualRe_));
+    volScalarField Re(pair_.Re());
     volScalarField Vr
     (
         0.5
@@ -79,10 +77,10 @@ Foam::tmp<Foam::volScalarField> Foam::dragModels::SyamlalOBrien::Cd() const
             A - 0.06*Re + sqrt(sqr(0.06*Re) + 0.12*Re*(2.0*B - A) + sqr(A))
         )
     );
-    volScalarField Cds(sqr(0.63 + 4.8*sqrt(Vr/Re)));
+    volScalarField CdsRe(sqr(0.63*sqrt(Re) + 4.8*sqrt(Vr)));
 
     return
-        Cds
+        CdsRe
        *max(pair_.continuous(), residualAlpha_)
        /sqr(Vr);
 }

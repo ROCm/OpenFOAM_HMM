@@ -90,8 +90,7 @@ Foam::dragModel::dragModel
             pair
         )
     ),
-    residualAlpha_("residualAlpha", dimless, dict.lookup("residualAlpha")),
-    residualSlip_("residualSlip", dimVelocity, dict.lookup("residualSlip"))
+    residualAlpha_("residualAlpha", dimless, dict.lookup("residualAlpha"))
 {}
 
 
@@ -107,14 +106,14 @@ Foam::tmp<Foam::volScalarField> Foam::dragModel::K() const
 {
     return
         0.75
-       *Cd()
+       *CdRe()
        *swarmCorrection_->Cs()
        *pair_.continuous().rho()
+       *pair_.continuous().nu()
        /(
             max(pair_.continuous(), residualAlpha_)
-           *pair_.dispersed().d()
-        )
-       *max(pair_.magUr(), residualSlip_);
+           *sqr(pair_.dispersed().d())
+        );
 }
 
 

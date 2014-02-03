@@ -68,9 +68,6 @@ protected:
         //- Residual phase fraction
         const dimensionedScalar residualAlpha_;
 
-        //- Residual slip velocity
-        const dimensionedScalar residualSlip_;
-
 
 public:
 
@@ -134,7 +131,7 @@ public:
     // Member Functions
 
         //- Drag coefficient
-        virtual tmp<volScalarField> Cd() const = 0;
+        virtual tmp<volScalarField> CdRe() const = 0;
 
         //- The drag function K used in the momentum equation
         //    ddt(alpha1*rho1*U1) + ... = ... alpha1*alpha2*K*(U1-U2)
