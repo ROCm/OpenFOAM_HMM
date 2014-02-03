@@ -68,7 +68,7 @@ Foam::dragModels::GidaspowSchillerNaumann::CdRe() const
     volScalarField Re(alpha2*pair_.Re());
     volScalarField CdsRe
     (
-        neg(Re - 1000)*24.0*(1.0 + 0.15*pow(Re, 0.687))
+        neg(Re - 1000)*24.0*(1.0 + 0.15*pow(Re, 0.687))/alpha2
       + pos(Re - 1000)*0.44*max(Re, residualRe_)
     );
 

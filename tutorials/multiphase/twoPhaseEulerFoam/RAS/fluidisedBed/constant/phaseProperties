@@ -40,7 +40,7 @@ blending
     default
     {
         type            none;
-        residualAlpha   1e-6;
+        residualAlpha   1e-3;
         continuousPhase air;
     }
 }
@@ -73,7 +73,7 @@ virtualMass
     (particles in air)
     {
         type            constantCoefficient;
-        Cvm             0.5;
+        Cvm             0;
     }
 );
 

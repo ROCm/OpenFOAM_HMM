@@ -40,7 +40,7 @@ blending
     default
     {
         type            none;
-        residualAlpha   1e-6;
+        residualAlpha   1e-3;
         continuousPhase air;
     }
 }
