@@ -25,6 +25,7 @@ License
 
 #include "fvMesh.H"
 #include "volFields.H"
+#include "directFvPatchFieldMapper.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -380,6 +381,32 @@ Foam::meshToMesh::mapSrcToTgt
 
     const fvMesh& tgtMesh = static_cast<const fvMesh&>(tgtRegion_);
 
+    const typename fieldType::GeometricBoundaryField& bfld =
+        field.boundaryField();
+
+    PtrList<fvPatchField<Type> > patchFields(bfld.size());
+
+    // constuct tgt boundary patch types as copy of field boundary types
+    // note: this will provide place holders for fields with additional
+    // entries, but these values will need to be reset
+    forAll(bfld, patchI)
+    {
+        patchFields.set
+        (
+            patchI,
+            fvPatchField<Type>::New
+            (
+                bfld[patchI],
+                tgtMesh.boundary()[patchI],
+                DimensionedField<Type, volMesh>::null(),
+                directFvPatchFieldMapper
+                (
+                    labelList(tgtMesh.boundary()[patchI].size(), -1)
+                )
+            )
+        );
+    }
+
     tmp<fieldType> tresult
     (
         new fieldType
@@ -393,12 +420,9 @@ Foam::meshToMesh::mapSrcToTgt
                 IOobject::NO_WRITE
             ),
             tgtMesh,
-            dimensioned<Type>
-            (
-                "zero",
-                field.dimensions(),
-                pTraits<Type>::zero
-            )
+            field.dimensions(),
+            Field<Type>(tgtMesh.nCells(), pTraits<Type>::zero),
+            patchFields
         )
     );
 
@@ -493,6 +517,32 @@ Foam::meshToMesh::mapTgtToSrc
 
     const fvMesh& srcMesh = static_cast<const fvMesh&>(srcRegion_);
 
+    const typename fieldType::GeometricBoundaryField& bfld =
+        field.boundaryField();
+
+    PtrList<fvPatchField<Type> > patchFields(bfld.size());
+
+    // constuct src boundary patch types as copy of field boundary types
+    // note: this will provide place holders for fields with additional
+    // entries, but these values will need to be reset
+    forAll(bfld, patchI)
+    {
+        patchFields.set
+        (
+            patchI,
+            fvPatchField<Type>::New
+            (
+                bfld[patchI],
+                srcMesh.boundary()[patchI],
+                DimensionedField<Type, volMesh>::null(),
+                directFvPatchFieldMapper
+                (
+                    labelList(srcMesh.boundary()[patchI].size(), -1)
+                )
+            )
+        );
+    }
+
     tmp<fieldType> tresult
     (
         new fieldType
@@ -506,12 +556,9 @@ Foam::meshToMesh::mapTgtToSrc
                 IOobject::NO_WRITE
             ),
             srcMesh,
-            dimensioned<Type>
-            (
-                "zero",
-                field.dimensions(),
-                pTraits<Type>::zero
-            )
+            field.dimensions(),
+            Field<Type>(srcMesh.nCells(), pTraits<Type>::zero),
+            patchFields
         )
     );
 
