@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,7 +57,7 @@ fixedGradientFvPatchField<Type>::fixedGradientFvPatchField
     fvPatchField<Type>(ptf, p, iF, mapper),
     gradient_(ptf.gradient_, mapper)
 {
-    if (mapper.hasUnmapped())
+    if (&iF && mapper.hasUnmapped())
     {
         WarningIn
         (
