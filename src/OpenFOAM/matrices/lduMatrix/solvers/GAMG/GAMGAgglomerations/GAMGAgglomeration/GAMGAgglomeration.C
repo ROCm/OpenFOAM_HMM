@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -177,22 +177,26 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
 
             scalar totProfile = returnReduce(profile, sumOp<scalar>());
 
+            int oldPrecision = Info().precision(4);
+
             Info<< setw(8) << levelI
                 << setw(8) << totNprocs
                 << "    "
                 << setw(8) << totNCells/totNprocs
                 << setw(8) << maxNCells
                 << "    "
-                << setw(8) << setprecision(4) << totFaceCellRatio/totNprocs
-                << setw(8) << setprecision(4) << maxFaceCellRatio
+                << setw(8) << totFaceCellRatio/totNprocs
+                << setw(8) << maxFaceCellRatio
                 << "    "
                 << setw(8) << scalar(totNInt)/totNprocs
                 << setw(8) << maxNInt
                 << "    "
-                << setw(8) << setprecision(4) << totRatio/totNprocs
-                << setw(8) << setprecision(4) << maxRatio
-                << setw(12) << setprecision(4) << totProfile/totNprocs
+                << setw(8) << totRatio/totNprocs
+                << setw(8) << maxRatio
+                << setw(12) << totProfile/totNprocs
                 << nl;
+
+            Info().precision(oldPrecision);
         }
         Info<< endl;
     }

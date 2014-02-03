@@ -457,8 +457,9 @@ int main(int argc, char *argv[])
         }
     }
 
-    // Collect remote Cf and Sf on coarse mesh
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Distribute local coarse Cf and Sf for shooting rays
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     List<pointField> remoteCoarseCf(Pstream::nProcs());
     List<pointField> remoteCoarseSf(Pstream::nProcs());
@@ -467,19 +468,6 @@ int main(int argc, char *argv[])
     remoteCoarseCf[Pstream::myProcNo()] = localCoarseCf;
     remoteCoarseSf[Pstream::myProcNo()] = localCoarseSf;
     remoteCoarseAgg[Pstream::myProcNo()] = localAgg;
-
-
-    // Collect remote Cf and Sf on fine mesh
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    List<pointField> remoteFineCf(Pstream::nProcs());
-    List<pointField> remoteFineSf(Pstream::nProcs());
-
-    remoteCoarseCf[Pstream::myProcNo()] = localCoarseCf;
-    remoteCoarseSf[Pstream::myProcNo()] = localCoarseSf;
-
-    // Distribute local coarse Cf and Sf for shooting rays
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Pstream::gatherList(remoteCoarseCf);
     Pstream::scatterList(remoteCoarseCf);

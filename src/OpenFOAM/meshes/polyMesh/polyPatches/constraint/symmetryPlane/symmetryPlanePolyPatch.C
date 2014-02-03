@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,49 @@ namespace Foam
     addToRunTimeSelectionTable(polyPatch, symmetryPlanePolyPatch, dictionary);
 }
 
+
+// * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
+
+void Foam::symmetryPlanePolyPatch::calcGeometry(PstreamBuffers&)
+{
+    if (n_ == vector::rootMax)
+    {
+        if (returnReduce(size(), sumOp<label>()))
+        {
+            const vectorField& nf(faceNormals());
+            n_ = gAverage(nf);
+
+            if (debug)
+            {
+                Info<< "Patch " << name() << " calculated average normal "
+                    << n_ << endl;
+            }
+
+
+            // Check the symmetry plane is planar
+            forAll(nf, facei)
+            {
+                if (magSqr(n_ - nf[facei]) > SMALL)
+                {
+                    FatalErrorIn("symmetryPlanePolyPatch::n()")
+                        << "Symmetry plane '" << name() << "' is not planar."
+                        << endl
+                        << "At local face at "
+                        << primitivePatch::faceCentres()[facei]
+                        << " the normal " << nf[facei]
+                        << " differs from the average normal " << n_
+                        << " by " << magSqr(n_ - nf[facei]) << endl
+                        << "Either split the patch into planar parts"
+                        << " or use the " << symmetryPolyPatch::typeName
+                        << " patch type"
+                        << exit(FatalError);
+                }
+            }
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * * * * //
 
 Foam::symmetryPlanePolyPatch::symmetryPlanePolyPatch
@@ -50,7 +93,7 @@ Foam::symmetryPlanePolyPatch::symmetryPlanePolyPatch
 )
 :
     polyPatch(name, size, start, index, bm, patchType),
-    n_(vector::zero)
+    n_(vector::rootMax)
 {}
 
 
@@ -64,7 +107,7 @@ Foam::symmetryPlanePolyPatch::symmetryPlanePolyPatch
 )
 :
     polyPatch(name, dict, index, bm, patchType),
-    n_(vector::zero)
+    n_(vector::rootMax)
 {}
 
 
@@ -75,7 +118,7 @@ Foam::symmetryPlanePolyPatch::symmetryPlanePolyPatch
 )
 :
     polyPatch(pp, bm),
-    n_(vector::zero)
+    n_(pp.n_)
 {}
 
 
@@ -89,7 +132,7 @@ Foam::symmetryPlanePolyPatch::symmetryPlanePolyPatch
 )
 :
     polyPatch(pp, bm, index, newSize, newStart),
-    n_(vector::zero)
+    n_(pp.n_)
 {}
 
 
@@ -103,48 +146,8 @@ Foam::symmetryPlanePolyPatch::symmetryPlanePolyPatch
 )
 :
     polyPatch(pp, bm, index, mapAddressing, newStart),
-    n_(vector::zero)
+    n_(pp.n_)
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-const Foam::vector& Foam::symmetryPlanePolyPatch::n() const
-{
-    // If the symmetry normal is not set calculate it
-    // as the average face-normal
-    if (magSqr(n_) < 0.5)
-    {
-        if (returnReduce(size(), sumOp<label>()) == 0)
-        {
-            // No faces in patch. Avoid gAverage complaining and set
-            // normal to nonsense value to catch any use
-            n_ = vector::rootMax;
-        }
-        else
-        {
-            const vectorField& nf(faceNormals());
-            n_ = gAverage(nf);
-
-            // Check the symmetry plane is planar
-            forAll(nf, facei)
-            {
-                if (magSqr(n_ - nf[facei]) > SMALL)
-                {
-                    FatalErrorIn("symmetryPlanePolyPatch::n()")
-                        << "Symmetry plane '" << name() << "' is not planar."
-                        << endl
-                        << " Either split the patch into planar parts"
-                        << " or use the " << symmetryPolyPatch::typeName
-                        << " patch type"
-                        << exit(FatalError);
-                }
-            }
-        }
-    }
-
-    return n_;
-}
 
 
 // ************************************************************************* //

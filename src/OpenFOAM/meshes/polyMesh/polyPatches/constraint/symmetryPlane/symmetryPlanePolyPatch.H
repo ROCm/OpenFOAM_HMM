@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,8 +52,16 @@ class symmetryPlanePolyPatch
 {
     // Private data
 
-        //- Symmetry plane normal (calculated on demand)
-        mutable vector n_;
+        //- Symmetry plane normal
+        vector n_;
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Calculate the patch geometry
+        virtual void calcGeometry(PstreamBuffers&);
 
 
 public:
@@ -162,7 +170,10 @@ public:
     // Member Functions
 
         //- Return symmetry plane normal
-        const vector& n() const;
+        const vector& n() const
+        {
+            return n_;
+        }
 };
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,13 +66,13 @@ fixedValueFvPatchField<Type>::fixedValueFvPatchField
 :
     fvPatchField<Type>(ptf, p, iF, mapper)
 {
-    if (mapper.hasUnmapped())
+    if (&iF && mapper.hasUnmapped())
     {
         WarningIn
         (
             "fixedValueFvPatchField<Type>::fixedValueFvPatchField\n"
             "(\n"
-            "    const fixedGradientFvPatchField<Type>&,\n"
+            "    const fixedValueFvPatchField<Type>&,\n"
             "    const fvPatch&,\n"
             "    const DimensionedField<Type, volMesh>&,\n"
             "    const fvPatchFieldMapper&\n"

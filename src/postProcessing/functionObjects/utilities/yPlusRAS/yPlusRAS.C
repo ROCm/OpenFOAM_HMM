@@ -28,17 +28,15 @@ License
 
 #include "incompressible/RAS/RASModel/RASModel.H"
 #include "nutWallFunction/nutWallFunctionFvPatchScalarField.H"
-
 #include "compressible/RAS/RASModel/RASModel.H"
 #include "mutWallFunction/mutWallFunctionFvPatchScalarField.H"
-
 #include "wallDist.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-defineTypeNameAndDebug(yPlusRAS, 0);
+    defineTypeNameAndDebug(yPlusRAS, 0);
 }
 
 
@@ -73,17 +71,17 @@ void Foam::yPlusRAS::calcIncompressibleYPlus
         nut.boundaryField();
 
     bool foundPatch = false;
-    forAll(nutPatches, patchI)
+    forAll(nutPatches, patchi)
     {
-        if (isA<wallFunctionPatchField>(nutPatches[patchI]))
+        if (isA<wallFunctionPatchField>(nutPatches[patchi]))
         {
             foundPatch = true;
 
             const wallFunctionPatchField& nutPw =
-                dynamic_cast<const wallFunctionPatchField&>(nutPatches[patchI]);
+                dynamic_cast<const wallFunctionPatchField&>(nutPatches[patchi]);
 
-            yPlus.boundaryField()[patchI] = nutPw.yPlus();
-            const scalarField& Yp = yPlus.boundaryField()[patchI];
+            yPlus.boundaryField()[patchi] = nutPw.yPlus();
+            const scalarField& Yp = yPlus.boundaryField()[patchi];
 
             scalar minYp = gMin(Yp);
             scalar maxYp = gMax(Yp);
@@ -130,17 +128,17 @@ void Foam::yPlusRAS::calcCompressibleYPlus
         mut.boundaryField();
 
     bool foundPatch = false;
-    forAll(mutPatches, patchI)
+    forAll(mutPatches, patchi)
     {
-        if (isA<wallFunctionPatchField>(mutPatches[patchI]))
+        if (isA<wallFunctionPatchField>(mutPatches[patchi]))
         {
             foundPatch = true;
 
             const wallFunctionPatchField& mutPw =
-                dynamic_cast<const wallFunctionPatchField&>(mutPatches[patchI]);
+                dynamic_cast<const wallFunctionPatchField&>(mutPatches[patchi]);
 
-            yPlus.boundaryField()[patchI] = mutPw.yPlus();
-            const scalarField& Yp = yPlus.boundaryField()[patchI];
+            yPlus.boundaryField()[patchi] = mutPw.yPlus();
+            const scalarField& Yp = yPlus.boundaryField()[patchi];
 
             scalar minYp = gMin(Yp);
             scalar maxYp = gMax(Yp);
