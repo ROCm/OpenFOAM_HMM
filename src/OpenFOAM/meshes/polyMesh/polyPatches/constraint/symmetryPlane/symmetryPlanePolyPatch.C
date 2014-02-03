@@ -42,29 +42,38 @@ namespace Foam
 
 void Foam::symmetryPlanePolyPatch::calcGeometry(PstreamBuffers&)
 {
-    if (returnReduce(size(), sumOp<label>()) == 0)
+    if (n_ == vector::rootMax)
     {
-        // No faces in patch. Avoid gAverage complaining and set
-        // normal to nonsense value to catch any use
-        n_ = vector::rootMax;
-    }
-    else
-    {
-        const vectorField& nf(faceNormals());
-        n_ = gAverage(nf);
-
-        // Check the symmetry plane is planar
-        forAll(nf, facei)
+        if (returnReduce(size(), sumOp<label>()))
         {
-            if (magSqr(n_ - nf[facei]) > SMALL)
+            const vectorField& nf(faceNormals());
+            n_ = gAverage(nf);
+
+            if (debug)
             {
-                FatalErrorIn("symmetryPlanePolyPatch::n()")
-                    << "Symmetry plane '" << name() << "' is not planar."
-                    << endl
-                    << " Either split the patch into planar parts"
-                    << " or use the " << symmetryPolyPatch::typeName
-                    << " patch type"
-                    << exit(FatalError);
+                Info<< "Patch " << name() << " calculated average normal "
+                    << n_ << endl;
+            }
+
+
+            // Check the symmetry plane is planar
+            forAll(nf, facei)
+            {
+                if (magSqr(n_ - nf[facei]) > SMALL)
+                {
+                    FatalErrorIn("symmetryPlanePolyPatch::n()")
+                        << "Symmetry plane '" << name() << "' is not planar."
+                        << endl
+                        << "At local face at "
+                        << primitivePatch::faceCentres()[facei]
+                        << " the normal " << nf[facei]
+                        << " differs from the average normal " << n_
+                        << " by " << magSqr(n_ - nf[facei]) << endl
+                        << "Either split the patch into planar parts"
+                        << " or use the " << symmetryPolyPatch::typeName
+                        << " patch type"
+                        << exit(FatalError);
+                }
             }
         }
     }
@@ -109,7 +118,7 @@ Foam::symmetryPlanePolyPatch::symmetryPlanePolyPatch
 )
 :
     polyPatch(pp, bm),
-    n_(vector::rootMax)
+    n_(pp.n_)
 {}
 
 
@@ -123,7 +132,7 @@ Foam::symmetryPlanePolyPatch::symmetryPlanePolyPatch
 )
 :
     polyPatch(pp, bm, index, newSize, newStart),
-    n_(vector::rootMax)
+    n_(pp.n_)
 {}
 
 
@@ -137,7 +146,7 @@ Foam::symmetryPlanePolyPatch::symmetryPlanePolyPatch
 )
 :
     polyPatch(pp, bm, index, mapAddressing, newStart),
-    n_(vector::rootMax)
+    n_(pp.n_)
 {}
 
 
