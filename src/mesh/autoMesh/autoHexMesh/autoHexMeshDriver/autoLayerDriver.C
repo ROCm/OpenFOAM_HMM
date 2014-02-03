@@ -1262,6 +1262,8 @@ void Foam::autoLayerDriver::calculateLayerThickness
     {
         const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
+        int oldPrecision = Info().precision();
+
         // Find maximum length of a patch name, for a nicer output
         label maxPatchNameLen = 0;
         forAll(patchIDs, i)
@@ -1337,7 +1339,7 @@ void Foam::autoLayerDriver::calculateLayerThickness
                 << "  " << setw(8) << avgThickness
                 << endl;
         }
-        Info<< endl;
+        Info<< setprecision(oldPrecision) << endl;
     }
 }
 
@@ -2476,6 +2478,8 @@ void Foam::autoLayerDriver::printLayerData
 {
     const polyBoundaryMesh& pbm = mesh.boundaryMesh();
 
+    int oldPrecision = Info().precision();
+
     // Find maximum length of a patch name, for a nicer output
     label maxPatchNameLen = 0;
     forAll(patchIDs, i)
@@ -2554,7 +2558,7 @@ void Foam::autoLayerDriver::printLayerData
             << "  " << setw(8) << 100*avgFraction
             << endl;
     }
-    Info<< endl;
+    Info<< setprecision(oldPrecision) << endl;
 }
 
 
