@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,7 +56,7 @@ Foam::directionMixedFvPatchField<Type>::directionMixedFvPatchField
     refGrad_(ptf.refGrad_, mapper),
     valueFraction_(ptf.valueFraction_, mapper)
 {
-    if (mapper.hasUnmapped())
+    if (&iF && mapper.hasUnmapped())
     {
         WarningIn
         (
