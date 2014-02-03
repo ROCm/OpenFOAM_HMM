@@ -62,18 +62,18 @@ Foam::dragModels::GidaspowSchillerNaumann::~GidaspowSchillerNaumann()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
-Foam::dragModels::GidaspowSchillerNaumann::Cd() const
+Foam::dragModels::GidaspowSchillerNaumann::CdRe() const
 {
     volScalarField alpha2(max(scalar(1) - pair_.dispersed(), residualAlpha_));
-    volScalarField Re(max(alpha2*pair_.Re(), residualRe_));
-    volScalarField Cds
+    volScalarField Re(alpha2*pair_.Re());
+    volScalarField CdsRe
     (
-        neg(Re - 1000)*(24.0*(1.0 + 0.15*pow(Re, 0.687))/Re)
-      + pos(Re - 1000)*0.44
+        neg(Re - 1000)*24.0*(1.0 + 0.15*pow(Re, 0.687))
+      + pos(Re - 1000)*0.44*max(Re, residualRe_)
     );
 
     return
-        Cds
+        CdsRe
        *pow(alpha2, -2.65)
        *max(pair_.continuous(), residualAlpha_);
 }

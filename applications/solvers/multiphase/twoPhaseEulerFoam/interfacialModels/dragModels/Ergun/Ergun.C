@@ -60,20 +60,16 @@ Foam::dragModels::Ergun::~Ergun()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::dragModels::Ergun::Cd() const
+Foam::tmp<Foam::volScalarField> Foam::dragModels::Ergun::CdRe() const
 {
     return
         (4/3)
        *(
             150
-           *max(pair_.dispersed(), residualAlpha_)
-           *pair_.continuous().nu()
-           /(
-                max(scalar(1) - pair_.dispersed(), residualAlpha_)
-               *pair_.dispersed().d()
-               *max(pair_.magUr(), residualSlip_)
-            )
+           *max(scalar(1) - pair_.continuous(), residualAlpha_)
+           /max(pair_.continuous(), residualAlpha_)
           + 1.75
+           *pair_.Re()
         );
 }
 

@@ -49,6 +49,7 @@ Foam::dragModels::TomiyamaAnalytic::TomiyamaAnalytic
 )
 :
     dragModel(dict, pair, registerObject),
+    residualRe_("residualRe", dimless, dict.lookup("residualRe")),
     residualEo_("residualEo", dimless, dict.lookup("residualEo")),
     residualE_("residualE", dimless, dict.lookup("residualE"))
 {}
@@ -62,7 +63,8 @@ Foam::dragModels::TomiyamaAnalytic::~TomiyamaAnalytic()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::dragModels::TomiyamaAnalytic::Cd() const
+Foam::tmp<Foam::volScalarField>
+Foam::dragModels::TomiyamaAnalytic::CdRe() const
 {
     volScalarField Eo(max(pair_.Eo(), residualEo_));
     volScalarField E(max(pair_.E(), residualE_));
@@ -73,12 +75,14 @@ Foam::tmp<Foam::volScalarField> Foam::dragModels::TomiyamaAnalytic::Cd() const
     volScalarField F((asin(rtOmEsq) - E*rtOmEsq)/OmEsq);
 
     return
-        (8.0/3.0)*Eo
+        (8.0/3.0)
+       *Eo
        /(
             Eo*pow(E, 2.0/3.0)/OmEsq
           + 16*pow(E, 0.75)
         )
-       /sqr(F);
+       /sqr(F)
+       *max(pair_.Re(), residualRe_);
 }
 
 

@@ -60,7 +60,7 @@ Foam::dragModels::noDrag::~noDrag()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::dragModels::noDrag::Cd() const
+Foam::tmp<Foam::volScalarField> Foam::dragModels::noDrag::CdRe() const
 {
     const fvMesh& mesh(this->pair_.phase1().mesh());
 
@@ -84,7 +84,7 @@ Foam::tmp<Foam::volScalarField> Foam::dragModels::noDrag::Cd() const
 
 Foam::tmp<Foam::volScalarField> Foam::dragModels::noDrag::K() const
 {
-    return Cd()*dimensionedScalar("zero", dimensionSet(1, -3, -1, 0, 0), 0);
+    return CdRe()*dimensionedScalar("zero", dimensionSet(1, -3, -1, 0, 0), 0);
 }
 
 

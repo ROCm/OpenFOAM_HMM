@@ -50,7 +50,6 @@ Foam::dragModels::segregated::segregated
 )
 :
     dragModel(dict, pair, registerObject),
-    residualRe_("residualRe", dimless, dict.lookup("residualRe")),
     m_("m", dimless, dict.lookup("m")),
     n_("n", dimless, dict.lookup("n"))
 {}
@@ -64,9 +63,9 @@ Foam::dragModels::segregated::~segregated()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::dragModels::segregated::Cd() const
+Foam::tmp<Foam::volScalarField> Foam::dragModels::segregated::CdRe() const
 {
-    FatalErrorIn("Foam::dragModels::segregated::Cd() const")
+    FatalErrorIn("Foam::dragModels::segregated::CdRe() const")
         << "Not implemented."
         << "Drag coefficient not defined for the segregated model."
         << exit(FatalError);
@@ -137,16 +136,12 @@ Foam::tmp<Foam::volScalarField> Foam::dragModels::segregated::K() const
 
     volScalarField ReI
     (
-        max
-        (
-            pair_.rho()
-           *pair_.magUr()
-           /(
-               magGradI
-              *max(alpha1*alpha2, sqr(residualAlpha_))
-              *muI
-            ),
-            residualRe_
+        pair_.rho()
+       *pair_.magUr()
+       /(
+           magGradI
+          *max(alpha1*alpha2, sqr(residualAlpha_))
+          *muI
         )
     );
 

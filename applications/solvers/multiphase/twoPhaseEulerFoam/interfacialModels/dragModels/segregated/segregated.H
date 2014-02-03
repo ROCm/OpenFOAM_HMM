@@ -66,9 +66,6 @@ private:
 
     // Private data
 
-        //- Residual reynolds number
-        const dimensionedScalar residualRe_;
-
         //- M coefficient
         const dimensionedScalar m_;
 
@@ -100,7 +97,7 @@ public:
     // Member Functions
 
         //- Drag coefficient
-        virtual tmp<volScalarField> Cd() const;
+        virtual tmp<volScalarField> CdRe() const;
 
         //- The drag function used in the momentum equation
         virtual tmp<volScalarField> K() const;
