@@ -89,9 +89,9 @@ int main(int argc, char *argv[])
                     "phid",
                     psi
                    *(
-                       (fvc::interpolate(rho*U) & mesh.Sf())
-                     + rhorAUf*fvc::ddtCorr(rho, U, phi)
-                    )/fvc::interpolate(rho)
+                       (fvc::interpolate(U) & mesh.Sf())
+                     + rhorAUf*fvc::ddtCorr(rho, U, phi)/fvc::interpolate(rho)
+                    )
                 );
 
                 phi = (rhoO/psi)*phid;

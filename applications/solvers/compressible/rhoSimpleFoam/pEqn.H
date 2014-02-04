@@ -13,8 +13,7 @@
         (
             "phid",
             fvc::interpolate(psi)
-           *(fvc::interpolate(rho*HbyA) & mesh.Sf())
-           /fvc::interpolate(rho)
+           *(fvc::interpolate(HbyA) & mesh.Sf())
         );
 
         fvOptions.makeRelative(fvc::interpolate(psi), phid);
