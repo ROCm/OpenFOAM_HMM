@@ -57,8 +57,8 @@
     rDeltaT.dimensionedInternalField() = max
     (
         1/dimensionedScalar("maxDeltaT", dimTime, maxDeltaT),
-        fvc::surfaceSum(mag(phi))().dimensionedInternalField()
-       /((2*maxCo)*mesh.V())
+        fvc::surfaceSum(mag(rhoPhi))().dimensionedInternalField()
+       /((2*maxCo)*mesh.V()*rho.dimensionedInternalField())
     );
 
     if (maxAlphaCo < maxCo)
