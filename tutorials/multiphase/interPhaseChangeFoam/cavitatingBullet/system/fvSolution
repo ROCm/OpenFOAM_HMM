@@ -25,16 +25,16 @@ solvers
         MULESCorr       yes;
         nLimiterIter    5;
 
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       1e-8;
         relTol          0;
     };
 
     "U.*"
     {
-        solver           PBiCG;
-        preconditioner   DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance        1e-6;
         relTol           0;
     };

@@ -29,8 +29,8 @@ solvers
         nLimiterIter    5;
         alphaApplyPrevCorr  true;
 
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       1e-8;
         relTol          0;
     }

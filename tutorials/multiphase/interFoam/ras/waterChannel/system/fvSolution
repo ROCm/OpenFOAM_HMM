@@ -26,8 +26,8 @@ solvers
         MULESCorr       yes;
         nLimiterIter    3;
 
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       1e-8;
         relTol          0;
     }
