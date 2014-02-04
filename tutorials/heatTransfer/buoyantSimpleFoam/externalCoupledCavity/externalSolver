@@ -18,12 +18,12 @@ timeOut=10
 refGrad=0
 valueFraction=1
 
-function log()
+log()
 {
     echo "External: $@"
 }
 
-function init()
+init()
 {
     log "initialisation: creating ${dataFile}.in"
 
@@ -54,7 +54,7 @@ step=0
 while [ 1 ]; do
     if [ -f $lockFile ]; then
         log "found lock file ${lockFile} - waiting"
-        ((totalWait += waitSec))
+        totalWait=$(expr $totalWait + $waitSec)
         if [ $totalWait -gt $timeOut ]; then
             log "timeout"
             break
@@ -63,7 +63,7 @@ while [ 1 ]; do
         fi
     else
         totalWait=0
-        ((step++))
+        step=$(expr $step + 1)
         log "step $step"
         log "lock not present - taking control"
 
