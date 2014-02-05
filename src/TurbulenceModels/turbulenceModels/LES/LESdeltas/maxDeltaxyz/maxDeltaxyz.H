@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,9 +25,10 @@ Class
     Foam::maxDeltaxyz
 
 Description
-    maxDeltaxyz takes the maximum of the three dimensions per cell:
-    max(hx, hy, hz). Valid for structures hexahedral cells only.
-
+    Delta calculated by taking the maximum distance between the cell centre
+    and any face centre.  For a regular hex cell, the computed delta will
+    equate to half of the cell width; accordingly, the deltaCoeff model
+    coefficient should be set to 2 for this case.
 
 SourceFiles
     maxDeltaxyz.C
@@ -45,7 +46,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class maxDeltaxyz Declaration
+                         Class maxDeltaxyz Declaration
 \*---------------------------------------------------------------------------*/
 
 class maxDeltaxyz
@@ -54,7 +55,8 @@ class maxDeltaxyz
 {
     // Private data
 
-        scalar deltaCoeff_; //
+        //- Model coefficient
+        scalar deltaCoeff_;
 
 
     // Private Member Functions
