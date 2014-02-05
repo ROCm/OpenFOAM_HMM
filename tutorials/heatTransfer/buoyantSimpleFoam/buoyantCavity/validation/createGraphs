@@ -78,10 +78,11 @@ EOF
 
 
 # test if gnuplot exists on the system
-type -P gnuplot &>/dev/null || {
+if ! which gnuplot > /dev/null 2>&1
+then
     echo "gnuplot not found - skipping graph creation" >&2
     exit 1
-}
+fi
 
 SETSDIR="../postProcessing/sets"
 
