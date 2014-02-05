@@ -63,6 +63,7 @@ Description
         kappaLayers     (1 2 3 4)
         value           uniform 300;
     }
+    \endverbatim
 
     Needs to be on underlying mapped(Wall)FvPatch.
 

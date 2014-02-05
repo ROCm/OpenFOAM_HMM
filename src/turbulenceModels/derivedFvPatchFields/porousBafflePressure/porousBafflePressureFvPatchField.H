@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ Group
     grpCoupledBoundaryConditions
 
 Description
-    This boundary condition provides a jump condition, using the \cyclic
+    This boundary condition provides a jump condition, using the \c cyclic
     condition as a base.
 
     The porous baffle introduces a pressure jump defined by:

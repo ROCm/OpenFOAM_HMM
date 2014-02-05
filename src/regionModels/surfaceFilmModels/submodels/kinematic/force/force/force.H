@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::force
+    Foam::regionModels::surfaceFilmModels::force
 
 Description
     Base class for film (stress-based) force models
@@ -30,6 +30,7 @@ Description
 SourceFiles
     force.C
     forceNew.C
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef force_H

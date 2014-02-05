@@ -30,9 +30,9 @@ Description
 
     Usage:
 
-        createExternalCoupledPatchGeometry <fieldName>
+        createExternalCoupledPatchGeometry \<fieldName\>
 
-    On execution, the field <fieldName> is read, and its boundary conditions
+    On execution, the field \<fieldName\> is read, and its boundary conditions
     interrogated for the presence of an \c externalCoupled type.  If found,
     the patch geometry (points and faces) for the coupled patches are output
     to the communications directory.
