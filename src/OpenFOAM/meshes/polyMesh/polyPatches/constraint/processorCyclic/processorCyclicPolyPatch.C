@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -93,6 +93,22 @@ Foam::processorCyclicPolyPatch::processorCyclicPolyPatch
 :
     processorPolyPatch(pp, bm),
     referPatchName_(pp.referPatchName()),
+    tag_(pp.tag()),
+    referPatchID_(-1)
+{}
+
+
+Foam::processorCyclicPolyPatch::processorCyclicPolyPatch
+(
+    const processorCyclicPolyPatch& pp,
+    const polyBoundaryMesh& bm,
+    const label index,
+    const label newSize,
+    const label newStart
+)
+:
+    processorPolyPatch(pp, bm, index, newSize, newStart),
+    referPatchName_(pp.referPatchName_),
     tag_(pp.tag()),
     referPatchID_(-1)
 {}
