@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ License
 
 #include "maxDeltaxyz.H"
 #include "addToRunTimeSelectionTable.H"
+#include "surfaceFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,24 +61,30 @@ void maxDeltaxyz::calcDelta()
     );
 
     const cellList& cells = mesh().cells();
+    const vectorField& cellC = mesh().cellCentres();
+    const vectorField& faceC = mesh().faceCentres();
+    const vectorField faceN(mesh().faceAreas()/mag(mesh().faceAreas()));
 
-    forAll(cells,cellI)
+    forAll(cells, cellI)
     {
         scalar deltaMaxTmp = 0.0;
-        const labelList& cFaces = mesh().cells()[cellI];
-        const point& centrevector = mesh().cellCentres()[cellI];
+        const labelList& cFaces = cells[cellI];
+        const point& cc = cellC[cellI];
 
         forAll(cFaces, cFaceI)
         {
             label faceI = cFaces[cFaceI];
-            const point& facevector = mesh().faceCentres()[faceI];
-            scalar tmp = mag(facevector - centrevector);
+            const point& fc = faceC[faceI];
+            const vector& n = faceN[faceI];
+
+            scalar tmp = magSqr(n*(n & (fc - cc)));
             if (tmp > deltaMaxTmp)
             {
                 deltaMaxTmp = tmp;
             }
         }
-        hmax()[cellI] = deltaCoeff_*deltaMaxTmp;
+
+        hmax()[cellI] = deltaCoeff_*sqrt(deltaMaxTmp);
     }
 
     if (nD == 3)
@@ -98,6 +105,8 @@ void maxDeltaxyz::calcDelta()
             << "Case is not 3D or 2D, LES is not applicable"
             << exit(FatalError);
     }
+
+    hmax().write();
 }
 
 
