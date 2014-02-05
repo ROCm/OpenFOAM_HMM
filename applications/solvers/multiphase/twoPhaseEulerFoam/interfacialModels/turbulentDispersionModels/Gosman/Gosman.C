@@ -84,12 +84,12 @@ Foam::turbulentDispersionModels::Gosman::F() const
 
     return
       - 0.75
-       *drag.Cd()
+       *drag.CdRe()
+       *pair_.continuous().nu()
        *pair_.continuous().turbulence().nut()
-       *pair_.magUr()
        /(
             sigma_
-           *pair_.dispersed().d()
+           *sqr(pair_.dispersed().d())
         )
        *pair_.continuous().rho()
        *fvc::grad(pair_.dispersed());

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,7 +35,7 @@ License
 
 namespace Foam
 {
-defineDebugSwitchWithName(solution, "solution", 0);
+    defineDebugSwitchWithName(solution, "solution", 0);
 }
 
 // List of sub-dictionaries to rewrite
@@ -60,10 +60,17 @@ void Foam::solution::read(const dictionary& dict)
     if (dict.found("relaxationFactors"))
     {
         const dictionary& relaxDict(dict.subDict("relaxationFactors"));
-        if (relaxDict.found("fields"))
+        if (relaxDict.found("fields") || relaxDict.found("equations"))
         {
-            fieldRelaxDict_ = relaxDict.subDict("fields");
-            eqnRelaxDict_ = relaxDict.subDict("equations");
+            if (relaxDict.found("fields"))
+            {
+                fieldRelaxDict_ = relaxDict.subDict("fields");
+            }
+
+            if (relaxDict.found("equations"))
+            {
+                eqnRelaxDict_ = relaxDict.subDict("equations");
+            }
         }
         else
         {

@@ -14,8 +14,7 @@ if (simple.transonic())
     (
         "phid",
         fvc::interpolate(psi)
-       *(fvc::interpolate(rho*HbyA) & mesh.Sf())
-       /fvc::interpolate(rho)
+       *(fvc::interpolate(HbyA) & mesh.Sf())
     );
 
     surfaceScalarField phic

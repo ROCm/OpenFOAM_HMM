@@ -9,53 +9,44 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "system";
-    object      fvSchemes;
+    class       volScalarField;
+    location    "0";
+    object      nut;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-ddtSchemes
-{
-    default         localEuler rDeltaT;
-}
+dimensions      [0 2 -1 0 0 0 0];
 
-gradSchemes
-{
-    default         Gauss linear;
-}
+internalField   uniform 5e-07;
 
-divSchemes
+boundaryField
 {
-    div(rhoPhi,U)   Gauss linearUpwind grad(U);
-    div(phi,alpha)  Gauss vanLeer;
-    div(phirb,alpha) Gauss linear;
-    div(phi,k)      Gauss upwind;
-    div(phi,omega)  Gauss upwind;
-    div((muEff*dev(T(grad(U))))) Gauss linear;
-}
+    //- Set patchGroups for constraint patches
+    #include "${WM_PROJECT_DIR}/etc/caseDicts/setConstraintTypes"
 
-laplacianSchemes
-{
-    default         Gauss linear corrected;
-}
+    inlet
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
 
-interpolationSchemes
-{
-    default         linear;
-}
+    outlet
+    {
+        type            zeroGradient;
+    }
 
-snGradSchemes
-{
-    default         corrected;
-}
+    atmosphere
+    {
+        type            zeroGradient;
+    }
 
-fluxRequired
-{
-    default         no;
-    p_rgh;
-    pcorr;
-    alpha.water;
+    hull
+    {
+        type            nutkRoughWallFunction;
+        Ks              uniform 100e-6;
+        Cs              uniform 0.5;
+        value           $internalField;
+    }
 }
 
 

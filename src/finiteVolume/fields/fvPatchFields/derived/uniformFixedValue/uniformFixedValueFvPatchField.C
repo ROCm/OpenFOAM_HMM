@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,10 +66,10 @@ uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchField<Type>(ptf, p, iF, mapper),
+    fixedValueFvPatchField<Type>(p, iF),  // bypass mapper
     uniformValue_(ptf.uniformValue_().clone().ptr())
 {
-    // For safety re-evaluate
+    // Evaluate since value not mapped
     const scalar t = this->db().time().timeOutputValue();
     fvPatchField<Type>::operator==(uniformValue_->value(t));
 }

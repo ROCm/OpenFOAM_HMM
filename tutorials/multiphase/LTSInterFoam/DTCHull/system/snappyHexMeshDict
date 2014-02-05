@@ -18,7 +18,7 @@ FoamFile
 // Which of the steps to run
 castellatedMesh true;
 snap            true;
-addLayers       false;
+addLayers       true;
 
 
 // Geometry. Definition of all surfaces. All surfaces are of class
@@ -29,7 +29,7 @@ addLayers       false;
 // - to 'snap' the mesh boundary to the surface
 geometry
 {
-    wigley-scaled-oriented.stl
+    DTC-scaled.stl
     {
         type triSurfaceMesh;
         name hull;
@@ -38,27 +38,6 @@ geometry
         {
             type wall;
         }
-    }
-
-    box1
-    {
-        type searchableBox;
-        min (-1 -0.5 -0.25);
-        max ( 1  0.5  1 );
-    }
-
-    box2
-    {
-        type searchableBox;
-        min (-1    -0.2  -0.15);
-        max ( 0.75  0.2   1);
-    }
-
-    box3
-    {
-        type searchableBox;
-        min (-10    -10  -0.03);
-        max ( 10  10   1);
     }
 };
 
@@ -103,10 +82,10 @@ castellatedMeshControls
     // This is a featureEdgeMesh, read from constant/triSurface for now.
     features
     (
-        // {
-        //     file "wigley-scaled.eMesh";
-        //     level 3;
-        // }
+         {
+             file "DTC-scaled.eMesh";
+             level 0;
+         }
     );
 
 
@@ -125,7 +104,7 @@ castellatedMeshControls
         hull
         {
             // Surface-wise min and max refinement level
-            level (3 3);
+            level (0 0);
         }
     }
 
@@ -147,21 +126,6 @@ castellatedMeshControls
 
     refinementRegions
     {
-        box1
-        {
-            mode inside;
-            levels ((1e15 1));
-        }
-        box2
-        {
-            mode inside;
-            levels ((1e15 2));
-        }
-        box3
-        {
-            mode inside;
-            levels ((1e15 2));
-        }
     }
 
 
@@ -194,15 +158,17 @@ snapControls
     //- Relative distance for points to be attracted by surface feature point
     //  or edge. True distance is this factor times local
     //  maximum edge length.
-//    tolerance 4.0;
-tolerance 1.0;
+    //    tolerance 4.0;
+    tolerance 1.0;
 
     //- Number of mesh displacement relaxation iterations.
-    nSolveIter 300;
+    nSolveIter 100;
 
     //- Maximum number of snapping relaxation iterations. Should stop
     //  before upon reaching a correct mesh.
     nRelaxIter 5;
+
+    nFeatureSnapIter 10;
 }
 
 
@@ -219,19 +185,19 @@ addLayersControls
     {
         hull
         {
-            nSurfaceLayers 1;
+            nSurfaceLayers 3;
 
         }
     }
 
     // Expansion factor for layer mesh
-    expansionRatio 1.0;
+    expansionRatio 1.5;
 
 
     // Wanted thickness of final added cell layer. If multiple layers
     // is the thickness of the layer furthest away from the wall.
     // See relativeSizes parameter.
-    finalLayerThickness 0.3;
+    finalLayerThickness 0.7;
 
     // Minimum thickness of cell layer. If for any reason layer
     // cannot be above minThickness do not add layer.
@@ -296,79 +262,19 @@ addLayersControls
 // where to undo.
 meshQualityControls
 {
-    //- Maximum non-orthogonality allowed. Set to 180 to disable.
-    maxNonOrtho 65;
-
-    //- Max skewness allowed. Set to <0 to disable.
-    maxBoundarySkewness 20;
-    maxInternalSkewness 4;
-
-    //- Max concaveness allowed. Is angle (in degrees) below which concavity
-    //  is allowed. 0 is straight face, <0 would be convex face.
-    //  Set to 180 to disable.
-    maxConcave 80;
-
-    //- Minimum pyramid volume. Is absolute volume of cell pyramid.
-    //  Set to a sensible fraction of the smallest cell volume expected.
-    //  Set to very negative number (e.g. -1E30) to disable.
-    minVol 1e-13;
-
-    //- Minimum quality of the tet formed by the face-centre
-    //  and variable base point minimum decomposition triangles and
-    //  the cell centre.  Set to very negative number (e.g. -1E30) to
-    //  disable.
-    //     <0 = inside out tet,
-    //      0 = flat tet
-    //      1 = regular tet
-    minTetQuality 1e-30;
-
-    //- Minimum face area. Set to <0 to disable.
-    minArea -1;
-
-    //- Minimum face twist. Set to <-1 to disable. dot product of face normal
-    //- and face centre triangles normal
-    minTwist 0.05;
-
-    //- minimum normalised cell determinant
-    //- 1 = hex, <= 0 = folded or flattened illegal cell
-    minDeterminant 0.001;
-
-    //- minFaceWeight (0 -> 0.5)
-    minFaceWeight 0.05;
-
-    //- minVolRatio (0 -> 1)
-    minVolRatio 0.01;
-
-    //must be >0 for Fluent compatibility
-    minTriangleTwist -1;
-
-    //- if >0 : preserve single cells with all points on the surface if the
-    //  resulting volume after snapping (by approximation) is larger than
-    //  minVolCollapseRatio times old volume (i.e. not collapsed to flat cell).
-    //  If <0 : delete always.
-    //minVolCollapseRatio 0.5;
-
-
-    // Advanced
-
-    //- Number of error distribution iterations
-    nSmoothScale 4;
-    //- amount to scale back displacement at error points
-    errorReduction 0.75;
-
-
-
-    // Optional : some meshing phases allow usage of relaxed rules.
-    // See e.g. addLayersControls::nRelaxedIter.
-    relaxed
-    {
-        //- Maximum non-orthogonality allowed. Set to 180 to disable.
-        maxNonOrtho 75;
-    }
+    #include "meshQualityDict"
 }
 
 
 // Advanced
+
+// Flags for optional output
+// 0 : only write final meshes
+// 1 : write intermediate meshes
+// 2 : write volScalarField with cellLevel for postprocessing
+// 4 : write current intersections as .obj files
+debug 0;
+
 
 // Merge tolerance. Is fraction of overall bounding box of initial mesh.
 // Note: the write tolerance needs to be higher than this.

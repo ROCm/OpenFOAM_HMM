@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -945,6 +945,56 @@ void Foam::dynamicRefineFvMesh::extendMarkedCells
 }
 
 
+void Foam::dynamicRefineFvMesh::checkEightAnchorPoints
+(
+    PackedBoolList& protectedCell,
+    label& nProtected
+) const
+{
+    const labelList& cellLevel = meshCutter_.cellLevel();
+    const labelList& pointLevel = meshCutter_.pointLevel();
+
+    labelList nAnchorPoints(nCells(), 0);
+
+    forAll(pointLevel, pointI)
+    {
+        const labelList& pCells = pointCells(pointI);
+
+        forAll(pCells, pCellI)
+        {
+            label cellI = pCells[pCellI];
+
+            if (pointLevel[pointI] <= cellLevel[cellI])
+            {
+                // Check if cell has already 8 anchor points -> protect cell
+                if (nAnchorPoints[cellI] == 8)
+                {
+                    if (protectedCell.set(cellI, true))
+                    {
+                        nProtected++;
+                    }
+                }
+
+                if (!protectedCell[cellI])
+                {
+                    nAnchorPoints[cellI]++;
+                }
+            }
+        }
+    }
+
+
+    forAll(protectedCell, cellI)
+    {
+        if (!protectedCell[cellI] && nAnchorPoints[cellI] != 8)
+        {
+            protectedCell.set(cellI, true);
+            nProtected++;
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
@@ -1067,6 +1117,37 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
                 nProtected++;
             }
         }
+
+        // Also protect any cells that are less than hex
+        forAll(cells(), cellI)
+        {
+            const cell& cFaces = cells()[cellI];
+
+            if (cFaces.size() < 6)
+            {
+                if (protectedCell_.set(cellI, 1))
+                {
+                    nProtected++;
+                }
+            }
+            else
+            {
+                forAll(cFaces, cFaceI)
+                {
+                    if (faces()[cFaces[cFaceI]].size() < 4)
+                    {
+                        if (protectedCell_.set(cellI, 1))
+                        {
+                            nProtected++;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Check cells for 8 corner points
+        checkEightAnchorPoints(protectedCell_, nProtected);
     }
 
     if (returnReduce(nProtected, sumOp<label>()) == 0)

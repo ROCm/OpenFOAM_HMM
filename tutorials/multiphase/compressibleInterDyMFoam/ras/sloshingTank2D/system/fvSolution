@@ -102,8 +102,8 @@ solvers
 
     "(T|k|B|nuTilda).*"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       1e-08;
         relTol          0;
     }

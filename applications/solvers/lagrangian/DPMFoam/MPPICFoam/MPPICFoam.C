@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ Application
 
 Description
     Transient solver for the coupled transport of a single kinematic particle
-    could including the effect of the volume fraction of particles on the
+    cloud including the effect of the volume fraction of particles on the
     continuous phase. Multi-Phase Particle In Cell (MPPIC) modeling is used to
     represent collisions without resolving particle-particle interactions.
 

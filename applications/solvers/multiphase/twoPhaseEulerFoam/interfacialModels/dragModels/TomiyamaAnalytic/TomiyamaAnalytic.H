@@ -68,6 +68,9 @@ private:
 
     // Private data
 
+        //- Residual Reynolds Number
+        const dimensionedScalar residualRe_;
+
         //- Residual Eotvos number
         const dimensionedScalar residualEo_;
 
@@ -99,7 +102,7 @@ public:
     // Member Functions
 
         // Drag coefficient
-        virtual tmp<volScalarField> Cd() const;
+        virtual tmp<volScalarField> CdRe() const;
 };
 
 

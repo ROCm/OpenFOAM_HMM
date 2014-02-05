@@ -19,19 +19,20 @@ solvers
 {
     "alpha.water.*"
     {
-        nAlphaCorr      1;
+        nAlphaCorr      2;
         nAlphaSubCycles 1;
         cAlpha          1;
-        icAlpha         0.25;
+        icAlpha         0;
 
         MULESCorr       yes;
-        nLimiterIter    8;
-        alphaApplyPrevCorr  true;
+        nLimiterIter    10;
+        alphaApplyPrevCorr  yes;
 
         solver          smoothSolver;
         smoother        symGaussSeidel;
         tolerance       1e-8;
         relTol          0;
+        minIter         1;
     }
 
     pcorr
@@ -42,7 +43,7 @@ solvers
         {
             preconditioner  GAMG;
 
-            smoother        DICGaussSeidel;
+            smoother        GaussSeidel;
             agglomerator    faceAreaPair;
             mergeLevels     1;
             nCellsInCoarsestLevel 10;
@@ -60,7 +61,7 @@ solvers
     {
         solver          GAMG;
 
-        smoother        GaussSeidel;
+        smoother        DIC;
         agglomerator    faceAreaPair;
         mergeLevels     1;
         nCellsInCoarsestLevel 10;
@@ -73,7 +74,6 @@ solvers
     p_rghFinal
     {
         $p_rgh;
-        tolerance       1e-7;
         relTol          0;
     }
 
@@ -81,29 +81,31 @@ solvers
     {
         solver          smoothSolver;
 
-        smoother        GaussSeidel;
+        smoother        symGaussSeidel;
         nSweeps         1;
 
         tolerance       1e-7;
         relTol          0.1;
+        minIter         1;
     };
 }
 
 PIMPLE
 {
-    momentumPredictor no;
+    momentumPredictor   no;
 
-    nCorrectors     1;
+    nOuterCorrectors    1;
+    nCorrectors         2;
     nNonOrthogonalCorrectors 0;
 
-    maxCo           5;
-    maxAlphaCo      5;
+    maxCo               10;
+    maxAlphaCo          5;
 
     rDeltaTSmoothingCoeff 0.05;
     rDeltaTDampingCoeff 0.5;
-    nAlphaSweepIter  0;
-    nAlphaSpreadIter 0;
-    maxDeltaT       1;
+    nAlphaSpreadIter    0;
+    nAlphaSweepIter     0;
+    maxDeltaT           1;
 }
 
 relaxationFactors
@@ -115,6 +117,11 @@ relaxationFactors
     {
         ".*" 1;
     }
+}
+
+cache
+{
+    grad(U);
 }
 
 

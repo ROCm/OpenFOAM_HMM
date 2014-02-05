@@ -11,37 +11,22 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "system";
-    object      setFieldsDict;
+    object      topoSetDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-defaultFieldValues
+actions
 (
-    volScalarFieldValue alpha.water 0
-);
-
-regions
-(
-    boxToCell
     {
-        box (-100 -100 -100) (100 100 0);
-        fieldValues
-        (
-            volScalarFieldValue alpha.water 1
-        );
-    }
-
-    // Set patch values (using ==)
-    boxToFace
-    {
-        box (-100 -100 -100) (100 100 0);
-
-        fieldValues
-        (
-            volScalarFieldValue alpha.water 1
-        );
+        name    c0;
+        type    cellSet;
+        action  new;
+        source  boxToCell;
+        sourceInfo
+        {
+            box (-5 -3 -2.5) (9 0 2);
+        }
     }
 );
-
 
 // ************************************************************************* //

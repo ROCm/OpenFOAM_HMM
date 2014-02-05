@@ -9,46 +9,28 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    location    "0";
-    object      k;
+    class       dictionary;
+    location    "constant";
+    object      transportProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -2 0 0 0 0];
+phases (water air);
 
-internalField   uniform 0.00015;
-
-boundaryField
+water
 {
-    inlet
-    {
-        type            fixedValue;
-        value           $internalField;
-    }
-
-    outlet
-    {
-        type            zeroGradient;
-    }
-
-    sides
-    {
-        type            symmetry;
-    }
-
-    atmosphere
-    {
-        type            inletOutlet;
-        inletValue      $internalField;
-        value           $internalField;
-    }
-
-    hull
-    {
-        type            kqRWallFunction;
-        value           $internalField;
-    }
+    transportModel  Newtonian;
+    nu              nu [ 0 2 -1 0 0 0 0 ]  1.09e-06;
+    rho             rho [ 1 -3 0 0 0 0 0 ] 998.8;
 }
+
+air
+{
+    transportModel  Newtonian;
+    nu              nu [ 0 2 -1 0 0 0 0 ]  1.48e-05;
+    rho             rho [ 1 -3 0 0 0 0 0 ] 1;
+}
+
+sigma           sigma [ 1 0 -2 0 0 0 0 ] 0;
 
 // ************************************************************************* //

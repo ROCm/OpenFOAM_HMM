@@ -69,9 +69,6 @@ private:
         //- Wen Yu drag model
         autoPtr<WenYu> WenYu_;
 
-        //- Residual Reynolds number
-        const dimensionedScalar residualRe_;
-
 
 public:
 
@@ -97,7 +94,7 @@ public:
     // Member Functions
 
         //- Drag coefficient
-        virtual tmp<volScalarField> Cd() const;
+        virtual tmp<volScalarField> CdRe() const;
 };
 
 

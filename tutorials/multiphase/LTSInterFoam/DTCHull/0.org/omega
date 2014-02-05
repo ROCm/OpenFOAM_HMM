@@ -9,20 +9,21 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volVectorField;
+    class       volScalarField;
     location    "0";
-    object      U;
+    object      omega;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Umean 1;
+dimensions      [0 0 -1 0 0 0 0];
 
-dimensions      [0 1 -1 0 0 0 0];
-
-internalField   uniform ($Umean 0 0);
+internalField   uniform 2;
 
 boundaryField
 {
+    //- Set patchGroups for constraint patches
+    #include "${WM_PROJECT_DIR}/etc/caseDicts/setConstraintTypes"
+
     inlet
     {
         type            fixedValue;
@@ -31,30 +32,25 @@ boundaryField
 
     outlet
     {
-        type            outletPhaseMeanVelocity;
-        alpha           alpha.water;
-        Umean           $Umean;
-        value           $internalField;
-    }
-
-    sides
-    {
-        type            symmetry;
+       type            inletOutlet;
+       inletValue      $internalField;
+       value           $internalField;
     }
 
     atmosphere
     {
-        type            pressureInletOutletVelocity;
-        tangentialVelocity $internalField;
-        value           uniform (0 0 0);
+        type            inletOutlet;
+        inletValue      $internalField;
+        value           $internalField;
     }
 
     hull
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
+        type            omegaWallFunction;
+        value           $internalField;
     }
 }
+
 
 
 // ************************************************************************* //

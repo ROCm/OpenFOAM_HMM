@@ -56,8 +56,6 @@
 
 
     // Mass flux
-    // Initialisation does not matter because rhoPhi is reset after the
-    // alpha1 solution before it is used in the U equation.
     surfaceScalarField rhoPhi
     (
         IOobject
@@ -68,8 +66,7 @@
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
-        mesh,
-        dimensionedScalar("0", dimMass/dimTime, 0)
+        fvc::interpolate(rho)*phi
     );
 
 

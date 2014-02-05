@@ -34,16 +34,16 @@ solvers
 
     U
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       1e-5;
         relTol          0.1;
     }
 
     UFinal
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       1e-5;
         relTol          0;
     }
@@ -74,8 +74,8 @@ solvers
 
     "(U|h|k|epsilon)"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       1e-5;
         relTol          0.1;
     }

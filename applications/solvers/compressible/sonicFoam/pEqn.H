@@ -11,9 +11,9 @@ surfaceScalarField phid
     "phid",
     fvc::interpolate(psi)*
     (
-        (mesh.Sf() & fvc::interpolate(rho*HbyA))
-      + rhorAUf*fvc::ddtCorr(rho, U, phi)
-    )/fvc::interpolate(rho)
+        (mesh.Sf() & fvc::interpolate(HbyA))
+      + rhorAUf*fvc::ddtCorr(rho, U, phi)/fvc::interpolate(rho)
+    )
 );
 
 // Non-orthogonal pressure corrector loop

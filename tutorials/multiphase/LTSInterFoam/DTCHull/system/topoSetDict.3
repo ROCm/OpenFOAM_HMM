@@ -9,50 +9,24 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      p_rgh;
+    class       dictionary;
+    location    "system";
+    object      topoSetDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 -1 -2 0 0 0 0];
-
-internalField   uniform 0;
-
-boundaryField
-{
-    inlet
+actions
+(
     {
-        type            fixedFluxPressure;
-        value           $internalField;
+        name    c0;
+        type    cellSet;
+        action  new;
+        source  boxToCell;
+        sourceInfo
+        {
+            box (-3 -1.5 -1) (8 0 1.5);
+        }
     }
-
-    outlet
-    {
-        type            zeroGradient;
-    }
-
-    sides
-    {
-        type            symmetry;
-    }
-
-    atmosphere
-    {
-        type            totalPressure;
-        p0              uniform 0;
-        U               U;
-        phi             phi;
-        rho             rho;
-        psi             none;
-        gamma           1;
-        value           $internalField;
-    }
-
-    hull
-    {
-        type            fixedFluxPressure;
-        value           $internalField;
-    }
-}
+);
 
 // ************************************************************************* //

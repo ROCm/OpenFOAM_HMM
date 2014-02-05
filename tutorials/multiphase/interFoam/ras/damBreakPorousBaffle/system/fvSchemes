@@ -27,14 +27,11 @@ gradSchemes
 
 divSchemes
 {
-    div(rhoPhi,U)   Gauss linear;
+    div(rhoPhi,U)   Gauss linearUpwind grad(U);
     div(phi,alpha)  Gauss vanLeer;
     div(phirb,alpha) Gauss linear;
     div(phi,k)      Gauss upwind;
     div(phi,epsilon) Gauss upwind;
-    div(phi,R)      Gauss upwind;
-    div(R)          Gauss linear;
-    div(phi,nuTilda) Gauss upwind;
     div((muEff*dev(T(grad(U))))) Gauss linear;
 }
 
@@ -58,7 +55,7 @@ fluxRequired
     default         no;
     p_rgh;
     pcorr;
-    alpha;
+    alpha.water;
 }
 
 

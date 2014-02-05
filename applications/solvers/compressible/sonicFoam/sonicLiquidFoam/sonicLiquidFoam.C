@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -89,9 +89,9 @@ int main(int argc, char *argv[])
                     "phid",
                     psi
                    *(
-                       (fvc::interpolate(rho*U) & mesh.Sf())
-                     + rhorAUf*fvc::ddtCorr(rho, U, phi)
-                    )/fvc::interpolate(rho)
+                       (fvc::interpolate(U) & mesh.Sf())
+                     + rhorAUf*fvc::ddtCorr(rho, U, phi)/fvc::interpolate(rho)
+                    )
                 );
 
                 phi = (rhoO/psi)*phid;

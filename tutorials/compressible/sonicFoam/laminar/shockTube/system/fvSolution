@@ -19,8 +19,8 @@ solvers
 {
     "(p|U|e).*"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       1e-15;
         relTol          0;
     }
