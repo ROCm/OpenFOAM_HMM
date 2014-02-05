@@ -51,6 +51,7 @@ solvers
         smoother        symGaussSeidel;
         tolerance       1e-7;
         relTol          0;
+        minIter         1;
     }
 
     "h.*"
@@ -59,6 +60,7 @@ solvers
         smoother        symGaussSeidel;
         tolerance       1e-7;
         relTol          0;
+        minIter         1;
     }
 
     "(k|epsilon|Theta).*"
@@ -67,6 +69,7 @@ solvers
         smoother        symGaussSeidel;
         tolerance       1e-7;
         relTol          0;
+        minIter         1;
     }
 }
 
@@ -79,9 +82,6 @@ PIMPLE
 
 relaxationFactors
 {
-    fields
-    {
-    }
     equations
     {
         ".*"            1;
