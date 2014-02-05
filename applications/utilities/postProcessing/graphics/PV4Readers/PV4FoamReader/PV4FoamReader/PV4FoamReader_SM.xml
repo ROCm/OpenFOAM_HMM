@@ -102,7 +102,7 @@
       name="UseVTKPolyhedron"
       command="SetUseVTKPolyhedron"
       number_of_elements="1"
-      default_values="1"
+      default_values="0"
       animateable="0">
       <BooleanDomain name="bool"/>
       <Documentation>
