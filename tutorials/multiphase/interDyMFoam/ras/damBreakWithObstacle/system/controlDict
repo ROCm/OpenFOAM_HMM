@@ -17,7 +17,7 @@ FoamFile
 
 application     interDyMFoam;
 
-startFrom       latestTime;
+startFrom       startTime;
 
 startTime       0;
 
@@ -47,8 +47,8 @@ runTimeModifiable yes;
 
 adjustTimeStep  yes;
 
-maxCo           0.1;
-maxAlphaCo      0.1;
+maxCo           0.2;
+maxAlphaCo      0.2;
 maxDeltaT       1;
 
 
