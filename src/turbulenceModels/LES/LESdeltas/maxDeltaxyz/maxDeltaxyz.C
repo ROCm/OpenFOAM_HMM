@@ -105,8 +105,6 @@ void maxDeltaxyz::calcDelta()
             << "Case is not 3D or 2D, LES is not applicable"
             << exit(FatalError);
     }
-
-    hmax().write();
 }
 
 
