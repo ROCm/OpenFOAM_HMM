@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -223,7 +223,7 @@ Foam::vector Foam::eigenVector(const tensor& t, const scalar lambda)
     scalar magSd2 = mag(sd2);
 
     // Evaluate the eigenvector using the largest sub-determinant
-    if (magSd0 > magSd1 && magSd0 > magSd2 && magSd0 > SMALL)
+    if (magSd0 >= magSd1 && magSd0 >= magSd2 && magSd0 > SMALL)
     {
         vector ev
         (
@@ -235,7 +235,7 @@ Foam::vector Foam::eigenVector(const tensor& t, const scalar lambda)
 
         return ev;
     }
-    else if (magSd1 > magSd2 && magSd1 > SMALL)
+    else if (magSd1 >= magSd2 && magSd1 > SMALL)
     {
         vector ev
         (
@@ -418,7 +418,7 @@ Foam::vector Foam::eigenVector(const symmTensor& t, const scalar lambda)
     scalar magSd2 = mag(sd2);
 
     // Evaluate the eigenvector using the largest sub-determinant
-    if (magSd0 > magSd1 && magSd0 > magSd2 && magSd0 > SMALL)
+    if (magSd0 >= magSd1 && magSd0 >= magSd2 && magSd0 > SMALL)
     {
         vector ev
         (
@@ -430,7 +430,7 @@ Foam::vector Foam::eigenVector(const symmTensor& t, const scalar lambda)
 
         return ev;
     }
-    else if (magSd1 > magSd2 && magSd1 > SMALL)
+    else if (magSd1 >= magSd2 && magSd1 > SMALL)
     {
         vector ev
         (
