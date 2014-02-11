@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -187,7 +187,7 @@ Foam::autoPtr<Foam::liquidProperties> Foam::liquidProperties::New
         {
             FatalErrorIn
             (
-                "liquidProperties::New(const dictionary&, const word&)"
+                "liquidProperties::New(const dictionary&)"
             )   << "Unknown liquidProperties type "
                 << liquidPropertiesTypeName << nl << nl
                 << "Valid liquidProperties types are:" << nl
@@ -199,12 +199,24 @@ Foam::autoPtr<Foam::liquidProperties> Foam::liquidProperties::New
     }
     else
     {
+        dictionaryConstructorTable::iterator cstrIter =
+            dictionaryConstructorTablePtr_->find(liquidPropertiesTypeName);
+
+        if (cstrIter == dictionaryConstructorTablePtr_->end())
+        {
+            FatalErrorIn
+            (
+                "liquidProperties::New(const dictionary&)"
+            )   << "Unknown liquidProperties type "
+                << liquidPropertiesTypeName << nl << nl
+                << "Valid liquidProperties types are:" << nl
+                << dictionaryConstructorTablePtr_->sortedToc()
+                << abort(FatalError);
+        }
+
         return autoPtr<liquidProperties>
         (
-            new liquidProperties
-            (
-                dict.subDict(liquidPropertiesTypeName + "Coeffs")
-            )
+            cstrIter()(dict.subDict(liquidPropertiesTypeName + "Coeffs"))
         );
     }
 }
