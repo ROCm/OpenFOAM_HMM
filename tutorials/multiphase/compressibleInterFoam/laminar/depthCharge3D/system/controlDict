@@ -33,11 +33,11 @@ writeInterval   0.005;
 
 purgeWrite      0;
 
-writeFormat     ascii;
+writeFormat     binary;
 
 writePrecision  8;
 
-writeCompression compressed;
+writeCompression off;
 
 timeFormat      general;
 
