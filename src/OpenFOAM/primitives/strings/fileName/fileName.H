@@ -154,8 +154,9 @@ public:
 
         // Interrogation
 
-            //- Return the file type: FILE, DIRECTORY or UNDEFINED
-            Type type() const;
+            //- Return the file type: FILE, DIRECTORY, UNDEFINED or
+            //  LINK (only if followLink=false)
+            Type type(const bool followLink = true) const;
 
             //- Return true if file name is absolute
             bool isAbsolute() const;

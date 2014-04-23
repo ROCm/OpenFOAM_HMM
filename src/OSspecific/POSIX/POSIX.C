@@ -593,9 +593,9 @@ bool Foam::chMod(const fileName& name, const mode_t m)
 }
 
 
-mode_t Foam::mode(const fileName& name)
+mode_t Foam::mode(const fileName& name, const bool followLink)
 {
-    fileStat fileStatus(name);
+    fileStat fileStatus(name, followLink);
     if (fileStatus.isValid())
     {
         return fileStatus.status().st_mode;
@@ -607,13 +607,17 @@ mode_t Foam::mode(const fileName& name)
 }
 
 
-Foam::fileName::Type Foam::type(const fileName& name)
+Foam::fileName::Type Foam::type(const fileName& name, const bool followLink)
 {
-    mode_t m = mode(name);
+    mode_t m = mode(name, followLink);
 
     if (S_ISREG(m))
     {
         return fileName::FILE;
+    }
+    else if (S_ISLNK(m))
+    {
+        return fileName::LINK;
     }
     else if (S_ISDIR(m))
     {
@@ -626,27 +630,39 @@ Foam::fileName::Type Foam::type(const fileName& name)
 }
 
 
-bool Foam::exists(const fileName& name, const bool checkGzip)
+bool Foam::exists
+(
+    const fileName& name,
+    const bool checkGzip,
+    const bool followLink
+)
 {
-    return mode(name) || isFile(name, checkGzip);
+    return mode(name, followLink) || isFile(name, checkGzip, followLink);
 }
 
 
-bool Foam::isDir(const fileName& name)
+bool Foam::isDir(const fileName& name, const bool followLink)
 {
-    return S_ISDIR(mode(name));
+    return S_ISDIR(mode(name, followLink));
 }
 
 
-bool Foam::isFile(const fileName& name, const bool checkGzip)
+bool Foam::isFile
+(
+    const fileName& name,
+    const bool checkGzip,
+    const bool followLink
+)
 {
-    return S_ISREG(mode(name)) || (checkGzip && S_ISREG(mode(name + ".gz")));
+    return
+        S_ISREG(mode(name, followLink))
+     || (checkGzip && S_ISREG(mode(name + ".gz", followLink)));
 }
 
 
-off_t Foam::fileSize(const fileName& name)
+off_t Foam::fileSize(const fileName& name, const bool followLink)
 {
-    fileStat fileStatus(name);
+    fileStat fileStatus(name, followLink);
     if (fileStatus.isValid())
     {
         return fileStatus.status().st_size;
@@ -658,9 +674,9 @@ off_t Foam::fileSize(const fileName& name)
 }
 
 
-time_t Foam::lastModified(const fileName& name)
+time_t Foam::lastModified(const fileName& name, const bool followLink)
 {
-    fileStat fileStatus(name);
+    fileStat fileStatus(name, followLink);
     if (fileStatus.isValid())
     {
         return fileStatus.status().st_mtime;
@@ -676,7 +692,8 @@ Foam::fileNameList Foam::readDir
 (
     const fileName& directory,
     const fileName::Type type,
-    const bool filtergz
+    const bool filtergz,
+    const bool followLink
 )
 {
     // Initial filename list size
@@ -717,10 +734,10 @@ Foam::fileNameList Foam::readDir
         {
             fileName fName(list->d_name);
 
-            // ignore files begining with ., i.e. '.', '..' and '.*'
+            // ignore files beginning with ., i.e. '.', '..' and '.*'
             if (fName.size() && fName[0] != '.')
             {
-                word fExt = fName.ext();
+                const word fExt = fName.ext();
 
                 if
                 (
@@ -736,7 +753,7 @@ Foam::fileNameList Foam::readDir
                     )
                 )
                 {
-                    if ((directory/fName).type() == type)
+                    if ((directory/fName).type(followLink) == type)
                     {
                         if (nEntries >= dirEntries.size())
                         {
@@ -766,7 +783,7 @@ Foam::fileNameList Foam::readDir
 }
 
 
-bool Foam::cp(const fileName& src, const fileName& dest)
+bool Foam::cp(const fileName& src, const fileName& dest, const bool followLink)
 {
     // Make sure source exists.
     if (!exists(src))
@@ -777,7 +794,8 @@ bool Foam::cp(const fileName& src, const fileName& dest)
     fileName destFile(dest);
 
     // Check type of source file.
-    if (src.type() == fileName::FILE)
+    const fileName::Type srcType = src.type(followLink);
+    if (srcType == fileName::FILE)
     {
         // If dest is a directory, create the destination file name.
         if (destFile.type() == fileName::DIRECTORY)
@@ -817,7 +835,23 @@ bool Foam::cp(const fileName& src, const fileName& dest)
             return false;
         }
     }
-    else if (src.type() == fileName::DIRECTORY)
+    else if (srcType == fileName::LINK)
+    {
+        // If dest is a directory, create the destination file name.
+        if (destFile.type() == fileName::DIRECTORY)
+        {
+            destFile = destFile/src.name();
+        }
+
+        // Make sure the destination directory exists.
+        if (!isDir(destFile.path()) && !mkDir(destFile.path()))
+        {
+            return false;
+        }
+
+        ln(src, destFile);
+    }
+    else if (srcType == fileName::DIRECTORY)
     {
         // If dest is a directory, create the destination file name.
         if (destFile.type() == fileName::DIRECTORY)
@@ -832,7 +866,7 @@ bool Foam::cp(const fileName& src, const fileName& dest)
         }
 
         // Copy files
-        fileNameList contents = readDir(src, fileName::FILE, false);
+        fileNameList contents = readDir(src, fileName::FILE, false, followLink);
         forAll(contents, i)
         {
             if (POSIX::debug)
@@ -843,11 +877,17 @@ bool Foam::cp(const fileName& src, const fileName& dest)
             }
 
             // File to file.
-            cp(src/contents[i], destFile/contents[i]);
+            cp(src/contents[i], destFile/contents[i], followLink);
         }
 
         // Copy sub directories.
-        fileNameList subdirs = readDir(src, fileName::DIRECTORY);
+        fileNameList subdirs = readDir
+        (
+            src,
+            fileName::DIRECTORY,
+            false,
+            followLink
+        );
         forAll(subdirs, i)
         {
             if (POSIX::debug)
@@ -858,8 +898,12 @@ bool Foam::cp(const fileName& src, const fileName& dest)
             }
 
             // Dir to Dir.
-            cp(src/subdirs[i], destFile);
+            cp(src/subdirs[i], destFile, followLink);
         }
+    }
+    else
+    {
+        return false;
     }
 
     return true;
@@ -903,7 +947,7 @@ bool Foam::ln(const fileName& src, const fileName& dst)
 }
 
 
-bool Foam::mv(const fileName& src, const fileName& dst)
+bool Foam::mv(const fileName& src, const fileName& dst, const bool followLink)
 {
     if (POSIX::debug)
     {
@@ -914,7 +958,7 @@ bool Foam::mv(const fileName& src, const fileName& dst)
     if
     (
         dst.type() == fileName::DIRECTORY
-     && src.type() != fileName::DIRECTORY
+     && src.type(followLink) != fileName::DIRECTORY
     )
     {
         const fileName dstName(dst/src.name());
@@ -1016,7 +1060,7 @@ bool Foam::rmDir(const fileName& directory)
             {
                 fileName path = directory/fName;
 
-                if (path.type() == fileName::DIRECTORY)
+                if (path.type(false) == fileName::DIRECTORY)
                 {
                     if (!rmDir(path))
                     {
