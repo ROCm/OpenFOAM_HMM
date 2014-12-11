@@ -2473,12 +2473,6 @@ void Foam::autoLayerDriver::getLayerCellsFaces
         {
             // Layer contains both original boundary face and new boundary
             // face so is nLayers+1. Leave out old internal face.
-            if (!mesh.isInternalFace(layer[0]))
-            {
-                FatalErrorIn("autoLayerDriver::getLayerCellsFaces()")
-                    << "problem." << layer[0] << exit(FatalError);
-            }
-
             for (label i = 1; i < layer.size(); i++)
             {
                 faceRealThickness[layer[i]] = realThickness;
