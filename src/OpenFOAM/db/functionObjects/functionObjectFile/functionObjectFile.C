@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,6 +39,7 @@ Foam::label Foam::functionObjectFile::addChars = 7;
 void Foam::functionObjectFile::initStream(Ostream& os) const
 {
     os.setf(ios_base::scientific, ios_base::floatfield);
+    os.precision(writePrecision_);
     os.width(charWidth());
 }
 
@@ -78,78 +79,44 @@ Foam::fileName Foam::functionObjectFile::baseTimeDir() const
 }
 
 
-void Foam::functionObjectFile::createFiles()
+Foam::autoPtr<Foam::OFstream> Foam::functionObjectFile::createFile
+(
+    const word& name
+) const
 {
-    if (Pstream::master())
+    autoPtr<OFstream> osPtr;
+
+    if (Pstream::master() && writeToFile_)
     {
         const word startTimeName =
             obr_.time().timeName(obr_.time().startTime().value());
 
-        forAll(names_, i)
+        fileName outputDir(baseFileDir()/prefix_/startTimeName);
+
+        mkDir(outputDir);
+
+        word fName(name);
+
+        // Check if file already exists
+        IFstream is(outputDir/(fName + ".dat"));
+        if (is.good())
         {
-            if (!filePtrs_.set(i))
-            {
-                fileName outputDir(baseFileDir()/prefix_/startTimeName);
-                mkDir(outputDir);
-
-                word fName(names_[i]);
-
-                // Check if file already exists
-                IFstream is(outputDir/(fName + ".dat"));
-                if (is.good())
-                {
-                    fName = fName + "_" + obr_.time().timeName();
-                }
-
-                filePtrs_.set(i, new OFstream(outputDir/(fName + ".dat")));
-
-                initStream(filePtrs_[i]);
-
-                writeFileHeader(i);
-
-            }
+            fName = fName + "_" + obr_.time().timeName();
         }
+
+        osPtr.set(new OFstream(outputDir/(fName + ".dat")));
+
+        initStream(osPtr());
     }
+
+    return osPtr;
 }
 
 
-void Foam::functionObjectFile::writeFileHeader(const label i)
-{}
-
-
-void Foam::functionObjectFile::write()
+void Foam::functionObjectFile::resetFile(const word& fileName)
 {
-    createFiles();
-}
-
-
-void Foam::functionObjectFile::resetNames(const wordList& names)
-{
-    names_.clear();
-    names_.append(names);
-
-    if (Pstream::master())
-    {
-        filePtrs_.clear();
-        filePtrs_.setSize(names_.size());
-
-        createFiles();
-    }
-}
-
-
-void Foam::functionObjectFile::resetName(const word& name)
-{
-    names_.clear();
-    names_.append(name);
-
-    if (Pstream::master())
-    {
-        filePtrs_.clear();
-        filePtrs_.setSize(1);
-
-        createFiles();
-    }
+    fileName_ = fileName;
+    filePtr_ = createFile(fileName_);
 }
 
 
@@ -169,8 +136,10 @@ Foam::functionObjectFile::functionObjectFile
 :
     obr_(obr),
     prefix_(prefix),
-    names_(),
-    filePtrs_()
+    fileName_("undefined"),
+    filePtr_(),
+    writePrecision_(IOstream::defaultPrecision()),
+    writeToFile_(true)
 {}
 
 
@@ -178,46 +147,22 @@ Foam::functionObjectFile::functionObjectFile
 (
     const objectRegistry& obr,
     const word& prefix,
-    const word& name
+    const word& fileName,
+    const dictionary& dict
 )
 :
     obr_(obr),
     prefix_(prefix),
-    names_(),
-    filePtrs_()
+    fileName_(fileName),
+    filePtr_(),
+    writePrecision_(IOstream::defaultPrecision()),
+    writeToFile_(true)
 {
-    names_.clear();
-    names_.append(name);
-    if (Pstream::master())
+    read(dict);
+
+    if (writeToFile_)
     {
-        filePtrs_.clear();
-        filePtrs_.setSize(1);
-
-        // Cannot create files - need to access virtual function
-    }
-}
-
-
-Foam::functionObjectFile::functionObjectFile
-(
-    const objectRegistry& obr,
-    const word& prefix,
-    const wordList& names
-)
-:
-    obr_(obr),
-    prefix_(prefix),
-    names_(names),
-    filePtrs_()
-{
-    names_.clear();
-    names_.append(names);
-    if (Pstream::master())
-    {
-        filePtrs_.clear();
-        filePtrs_.setSize(names_.size());
-
-        // Cannot create files - need to access virtual function
+        filePtr_ = createFile(fileName_);
     }
 }
 
@@ -230,72 +175,38 @@ Foam::functionObjectFile::~functionObjectFile()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::wordList& Foam::functionObjectFile::names() const
+void Foam::functionObjectFile::read(const dictionary& dict)
 {
-    return names_;
+    writePrecision_ =
+        dict.lookupOrDefault("writePrecision", IOstream::defaultPrecision());
+
+    // Only write on master process
+    writeToFile_ = dict.lookupOrDefault("writeToFile", true);
+    writeToFile_ = writeToFile_ && Pstream::master();
 }
 
 
 Foam::OFstream& Foam::functionObjectFile::file()
 {
-    if (!Pstream::master())
+    if (!writeToFile_)
+    {
+        return Snull;
+    }
+
+    if (!filePtr_.valid())
     {
         FatalErrorIn("Foam::OFstream& Foam::functionObjectFile::file()")
-            << "Request for file() can only be done by the master process"
+            << "File pointer not allocated"
             << abort(FatalError);
     }
 
-    if (filePtrs_.size() != 1)
-    {
-        WarningIn("Foam::Ostream& Foam::functionObjectFile::file()")
-            << "Requested single file, but multiple files are present"
-            << endl;
-    }
-
-    if (!filePtrs_.set(0))
-    {
-        FatalErrorIn("Foam::OFstream& Foam::functionObjectFile::file()")
-            << "File pointer at index " << 0 << " not allocated"
-            << abort(FatalError);
-    }
-
-    return filePtrs_[0];
+    return filePtr_();
 }
 
 
-Foam::PtrList<Foam::OFstream>& Foam::functionObjectFile::files()
+bool Foam::functionObjectFile::writeToFile() const
 {
-    if (!Pstream::master())
-    {
-        FatalErrorIn("Foam::OFstream& Foam::functionObjectFile::files()")
-            << "Request for files() can only be done by the master process"
-            << abort(FatalError);
-    }
-
-    return filePtrs_;
-}
-
-
-Foam::OFstream& Foam::functionObjectFile::file(const label i)
-{
-    if (!Pstream::master())
-    {
-        FatalErrorIn
-        (
-            "Foam::OFstream& Foam::functionObjectFile::file(const label)"
-        )
-            << "Request for file(i) can only be done by the master process"
-            << abort(FatalError);
-    }
-
-    if (!filePtrs_.set(i))
-    {
-        FatalErrorIn("Foam::OFstream& Foam::functionObjectFile::file()")
-            << "File pointer at index " << i << " not allocated"
-            << abort(FatalError);
-    }
-
-    return filePtrs_[i];
+    return writeToFile_;
 }
 
 
