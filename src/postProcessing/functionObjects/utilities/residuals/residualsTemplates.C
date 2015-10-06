@@ -32,10 +32,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::residuals::writeResidual
-(
-    const word& fieldName
-)
+void Foam::residuals::writeResidual(const word& fieldName)
 {
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
