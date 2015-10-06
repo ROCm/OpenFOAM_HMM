@@ -43,13 +43,9 @@ Description
         ...
         writeToFile yes;
         log         yes;
-        location    yes;
+        writeLocation yes;
         mode        magnitude;
-        fields
-        (
-            U
-            p
-        );
+        fields      (U p);
     }
     \endverbatim
 
@@ -59,7 +55,7 @@ Description
         type         | type name: fieldMinMax  | yes         |
         writeToFile  | write min/max data to file | no       | yes
         log          | write min/max data to standard output | no | yes
-        location     | write location of the min/max value | no | yes
+        writeLocation | write location of the min/max value | no | yes
         mode         | calculation mode: magnitude or component | no | magnitude
         fields       | list of fields to process | yes       |
     \endtable
@@ -69,6 +65,7 @@ Description
 SeeAlso
     Foam::functionObject
     Foam::functionObjectFile
+    Foam::functionObjectState
     Foam::OutputFilterFunctionObject
 
 SourceFiles
@@ -81,8 +78,10 @@ SourceFiles
 #ifndef fieldMinMax_H
 #define fieldMinMax_H
 
+#include "functionObjectState.H"
 #include "functionObjectFile.H"
 #include "Switch.H"
+#include "NamedEnum.H"
 #include "vector.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -97,20 +96,24 @@ class polyMesh;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                       Class fieldMinMax Declaration
+                         Class fieldMinMax Declaration
 \*---------------------------------------------------------------------------*/
 
 class fieldMinMax
 :
+    public functionObjectState,
     public functionObjectFile
 {
 public:
 
-    enum modeType
-    {
-        mdMag,      // magnitude
-        mdCmpt      // component
-    };
+    // Public enumerations
+
+        enum modeType
+        {
+            mdMag,      // magnitude
+            mdCmpt      // component
+        };
+
 
 protected:
 
@@ -119,16 +122,10 @@ protected:
         //- Mode type names
         static const NamedEnum<modeType, 2> modeTypeNames_;
 
-        //- Name of this set of field min/max
-        //  Also used as the name of the output directory
-        word name_;
-
+        //- Reference to the database
         const objectRegistry& obr_;
 
-        //- On/off switch
-        bool active_;
-
-        //- Switch to send output to Info as well as file
+        //- Switch to send output to Info as well
         Switch log_;
 
         //- Switch to write location of min/max values
@@ -192,12 +189,6 @@ public:
 
 
     // Member Functions
-
-        //- Return name of the set of field min/max
-        virtual const word& name() const
-        {
-            return name_;
-        }
 
         //- Read the field min/max data
         virtual void read(const dictionary&);
