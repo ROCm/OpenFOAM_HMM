@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Base class for field value -based function objects.
+    Base class for field value-based function objects.
 
 SourceFiles
     fieldValue.C
@@ -95,6 +95,9 @@ protected:
 
         //- Results dictionary for external access of results
         dictionary resultDict_;
+
+        //- Scale factor - optional
+        scalar scaleFactor_;
 
 
 public:

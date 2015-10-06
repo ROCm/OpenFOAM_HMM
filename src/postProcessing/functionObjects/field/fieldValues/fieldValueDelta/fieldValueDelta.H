@@ -121,6 +121,9 @@ private:
         //- Database this class is registered to
         const objectRegistry& obr_;
 
+        //- On/off switch
+        bool active_;
+
         //- Flag to indicate to load from files
         bool loadFromFiles_;
 
@@ -153,7 +156,7 @@ protected:
     // Functions to be over-ridden from IOoutputFilter class
 
         //- Output file header information
-        virtual void writeFileHeader(const label i);
+        virtual void writeFileHeader(Ostream& os) const;
 
 
 public:
