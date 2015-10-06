@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,30 +54,9 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-Foam::fieldValues::fieldValueDelta::fieldValueDelta
-(
-    const word& name,
-    const objectRegistry& obr,
-    const dictionary& dict,
-    const bool loadFromFiles
-)
-:
-    functionObjectFile(obr, name, typeName),
-    name_(name),
-    obr_(obr),
-    loadFromFiles_(loadFromFiles),
-    log_(true),
-    operation_(opSubtract),
-    source1Ptr_(NULL),
-    source2Ptr_(NULL)
-{
-    read(dict);
-}
-
-
-void Foam::fieldValues::fieldValueDelta::writeFileHeader(const label i)
+void Foam::fieldValues::fieldValueDelta::writeFileHeader(Ostream& os) const
 {
     const wordList& fields1 = source1Ptr_->fields();
     const wordList& fields2 = source2Ptr_->fields();
@@ -91,8 +70,6 @@ void Foam::fieldValues::fieldValueDelta::writeFileHeader(const label i)
             commonFields.append(fields1[i]);
         }
     }
-
-    Ostream& os = file();
 
     writeHeaderValue(os, "Source1", source1Ptr_->name());
     writeHeaderValue(os, "Source2", source2Ptr_->name());
@@ -108,6 +85,51 @@ void Foam::fieldValues::fieldValueDelta::writeFileHeader(const label i)
 }
 
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::fieldValues::fieldValueDelta::fieldValueDelta
+(
+    const word& name,
+    const objectRegistry& obr,
+    const dictionary& dict,
+    const bool loadFromFiles
+)
+:
+    functionObjectFile(obr, name, typeName, dict),
+    name_(name),
+    obr_(obr),
+    active_(true),
+    loadFromFiles_(loadFromFiles),
+    log_(true),
+    operation_(opSubtract),
+    source1Ptr_(NULL),
+    source2Ptr_(NULL)
+{
+    // Check if the available mesh is an fvMesh otherise deactivate
+    if (!isA<fvMesh>(obr_))
+    {
+        active_ = false;
+        WarningIn
+        (
+            "fieldMinMax::fieldMinMax"
+            "("
+                "const word&, "
+                "const objectRegistry&, "
+                "const dictionary&, "
+                "const bool"
+            ")"
+        )   << "No fvMesh available, deactivating " << name_
+            << endl;
+    }
+
+    if (active_)
+    {
+        read(dict);
+        writeFileHeader(file());
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::fieldValues::fieldValueDelta::~fieldValueDelta()
@@ -118,69 +140,75 @@ Foam::fieldValues::fieldValueDelta::~fieldValueDelta()
 
 void Foam::fieldValues::fieldValueDelta::read(const dictionary& dict)
 {
-    log_ = dict.lookupOrDefault<Switch>("log", true);
-    source1Ptr_.reset
-    (
-        fieldValue::New
-        (
-            name_ + ".source1",
-            obr_,
-            dict.subDict("source1"),
-            loadFromFiles_,
-            false
-        ).ptr()
-    );
-    source2Ptr_.reset
-    (
-        fieldValue::New
-        (
-            name_ + ".source2",
-            obr_,
-            dict.subDict("source2"),
-            loadFromFiles_,
-            false
-        ).ptr()
-    );
+    if (active_)
+    {
+        functionObjectFile::read(dict);
 
-    operation_ = operationTypeNames_.read(dict.lookup("operation"));
+        log_ = dict.lookupOrDefault<Switch>("log", true);
+        source1Ptr_.reset
+        (
+            fieldValue::New
+            (
+                name_ + ".source1",
+                obr_,
+                dict.subDict("source1"),
+                loadFromFiles_,
+                false
+            ).ptr()
+        );
+        source2Ptr_.reset
+        (
+            fieldValue::New
+            (
+                name_ + ".source2",
+                obr_,
+                dict.subDict("source2"),
+                loadFromFiles_,
+                false
+            ).ptr()
+        );
+
+        operation_ = operationTypeNames_.read(dict.lookup("operation"));
+    }
 }
 
 
 void Foam::fieldValues::fieldValueDelta::write()
 {
-    functionObjectFile::write();
-
-    source1Ptr_->write();
-    source2Ptr_->write();
-
-    if (Pstream::master())
+    if (active_)
     {
-        file()<< obr_.time().value();
-    }
+        source1Ptr_->write();
+        source2Ptr_->write();
 
-    if (log_) Info<< type() << " " << name_ << " output:" << endl;
-
-    bool found = false;
-    processFields<scalar>(found);
-    processFields<vector>(found);
-    processFields<sphericalTensor>(found);
-    processFields<symmTensor>(found);
-    processFields<tensor>(found);
-
-    if (Pstream::master())
-    {
-        file()<< endl;
-    }
-
-    if (log_)
-    {
-        if (!found)
+        if (Pstream::master())
         {
-            Info<< "    none" << endl;
+            file()<< obr_.time().value();
         }
-        else
+
+        if (log_) Info<< type() << " " << name_ << " output:" << endl;
+
+        bool found = false;
+        processFields<scalar>(found);
+        processFields<vector>(found);
+        processFields<sphericalTensor>(found);
+        processFields<symmTensor>(found);
+        processFields<tensor>(found);
+
+        if (Pstream::master())
         {
-            Info<< endl;
+            file()<< endl;
+        }
+
+        if (log_)
+        {
+            if (!found)
+            {
+                Info<< "    none" << endl;
+            }
+            else
+            {
+                Info<< endl;
+            }
         }
     }
 }
