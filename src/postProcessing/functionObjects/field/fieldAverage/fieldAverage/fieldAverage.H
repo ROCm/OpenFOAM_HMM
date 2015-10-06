@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,9 +94,10 @@ Description
     \table
         Property     | Description             | Required    | Default value
         type         | type name: fieldAverage | yes         |
-        resetOnRestart | flag to reset the averaging on restart | yes  |
+        resetOnRestart | flag to reset the averaging on restart | yes |
         resetOnOutput| flag to reset the averaging on output | yes |
         fields       | list of fields and averaging options | yes |
+        log          | Log to standard output  | no          | yes
     \endtable
 
 
@@ -117,6 +118,7 @@ SourceFiles
 #ifndef fieldAverage_H
 #define fieldAverage_H
 
+#include "functionObjectState.H"
 #include "volFieldsFwd.H"
 #include "Switch.H"
 
@@ -139,19 +141,15 @@ class mapPolyMesh;
 \*---------------------------------------------------------------------------*/
 
 class fieldAverage
+:
+    public functionObjectState
 {
 protected:
 
     // Protected data
 
-        //- Name of this set of field averages.
-        word name_;
-
-        //- Database this class is registered to
+        //- Reference to the database
         const objectRegistry& obr_;
-
-        //- On/off switch
-        bool active_;
 
         //- Time at last call, prevents repeated averaging
         label prevTimeIndex_;
@@ -161,6 +159,9 @@ protected:
 
         //- Reset the averaging process on output flag
         Switch resetOnOutput_;
+
+        //- Switch to send output to Info as well as to file
+        Switch log_;
 
         //- Initialised flag
         bool initialised_;
@@ -251,7 +252,7 @@ protected:
             void writeFields() const;
 
             //- Write averaging properties - steps and time
-            void writeAveragingProperties() const;
+            void writeAveragingProperties();
 
             //- Read averaging properties - steps and time
             void readAveragingProperties();
