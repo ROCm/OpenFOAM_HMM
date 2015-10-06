@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,19 @@ Description
     lift, drag and moment coefficients.  The data can optionally be output into
     bins, defined in a given direction.
 
+    The binned data provides the total and consitituentcomponents per bin:
+    - total coefficient
+    - pressure coefficient contribution
+    - viscous coefficient contribution
+    - porous coefficient contribution
+
+    Data is written into multiple files in the
+    postProcessing/\<functionObjectName\> directory:
+    - coefficient.dat   : integrated coefficients over all geometries
+    - CmBin.dat         : moment coefficient bins
+    - CdBin.dat         : drag coefficient bins
+    - ClBin.dat         : lift coefficient bins
+
     Example of function object specification:
     \verbatim
     forceCoeffs1
@@ -40,6 +53,7 @@ Description
         functionObjectLibs ("libforces.so");
         ...
         log         yes;
+        writeFields yes;
         patches     (walls);
         liftDir     (0 1 0);
         dragDir     (-1 0 0);
@@ -62,6 +76,7 @@ Description
         Property     | Description             | Required    | Default value
         type         | type name: forces       | yes         |
         log          | write force data to standard output | no | no
+        writeFields  | write the force and moment coefficient fields | no | no
         patches      | patches included in the forces calculation | yes |
         liftDir      | lift direction          | yes         |
         dragDir      | drag direction          | yes         |
@@ -137,6 +152,21 @@ class forceCoeffs
             scalar Aref_;
 
 
+        // File streams
+
+            //- Integrated coefficients
+            autoPtr<OFstream> coeffFilePtr_;
+
+            //- Moment coefficient
+            autoPtr<OFstream> CmBinFilePtr_;
+
+            //- Drag coefficient
+            autoPtr<OFstream> CdBinFilePtr_;
+
+            //- Lift coefficient
+            autoPtr<OFstream> ClBinFilePtr_;
+
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -148,8 +178,26 @@ class forceCoeffs
 
 protected:
 
-    //- Output file header information
-    virtual void writeFileHeader(const label i);
+    // Protected Member Functions
+
+        //- Create the output files
+        void createFiles();
+
+        //- Write header for integrated data
+        void writeIntegratedHeader(const word& header, Ostream& os) const;
+
+        //- Write header for binned data
+        void writeBinHeader(const word& header, Ostream& os) const;
+
+        //- Write integrated data
+        void writeIntegratedData
+        (
+            const word& title,
+            const List<Field<scalar> >& coeff
+        ) const;
+
+        //- Write binned data
+        void writeBinData(const List<Field<scalar> > coeffs, Ostream& os) const;
 
 
 public:
@@ -167,7 +215,8 @@ public:
             const word& name,
             const objectRegistry&,
             const dictionary&,
-            const bool loadFromFiles = false
+            const bool loadFromFiles = false,
+            const bool readFields = true
         );
 
 
