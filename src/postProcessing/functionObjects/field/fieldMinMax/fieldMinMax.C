@@ -98,32 +98,16 @@ Foam::fieldMinMax::fieldMinMax
     const bool loadFromFiles
 )
 :
+    functionObjectState(obr, name),
     functionObjectFile(obr, name, typeName, dict),
     obr_(obr),
-    active_(true),
     log_(true),
     writeLocation_(true),
     mode_(mdMag),
     fieldSet_()
 {
     // Check if the available mesh is an fvMesh otherise deactivate
-    if (!isA<fvMesh>(obr_))
-    {
-        active_ = false;
-        WarningIn
-        (
-            "fieldMinMax::fieldMinMax"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating " << name_
-            << endl;
-    }
-
-    if (active_)
+    if (setActive<fvMesh>())
     {
         read(dict);
         writeFileHeader(file());
