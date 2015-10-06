@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,15 +40,15 @@ namespace Foam
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-void Foam::wallShearStress::writeFileHeader(const label i)
+void Foam::wallShearStress::writeFileHeader(Ostream& os) const
 {
     // Add headers to output data
-    writeHeader(file(), "Wall shear stress");
-    writeCommented(file(), "Time");
-    writeTabbed(file(), "patch");
-    writeTabbed(file(), "min");
-    writeTabbed(file(), "max");
-    file() << endl;
+    writeHeader(os, "Wall shear stress");
+    writeCommented(os, "Time");
+    writeTabbed(os, "patch");
+    writeTabbed(os, "min");
+    writeTabbed(os, "max");
+    os << endl;
 }
 
 
@@ -74,17 +74,17 @@ void Foam::wallShearStress::calcShearStress
         vector minSsp = gMin(ssp);
         vector maxSsp = gMax(ssp);
 
-        if (Pstream::master())
-        {
-            file() << mesh.time().value()
-                << token::TAB << pp.name()
-                << token::TAB << minSsp
-                << token::TAB << maxSsp
-                << endl;
-        }
+        file() << mesh.time().value()
+            << token::TAB << pp.name()
+            << token::TAB << minSsp
+            << token::TAB << maxSsp
+            << endl;
 
-        if (log_) Info<< "    min/max(" << pp.name() << ") = "
-            << minSsp << ", " << maxSsp << endl;
+        if (log_)
+        {
+            Info<< "    min/max(" << pp.name() << ") = "
+                << minSsp << ", " << maxSsp << endl;
+        }
     }
 }
 
@@ -99,10 +99,11 @@ Foam::wallShearStress::wallShearStress
     const bool loadFromFiles
 )
 :
-    functionObjectFile(obr, name, typeName),
+    functionObjectFile(obr, name, typeName, dict),
     name_(name),
     obr_(obr),
     active_(true),
+    resultName_(name),
     log_(true),
     patchSet_()
 {
@@ -123,6 +124,8 @@ Foam::wallShearStress::wallShearStress
             << endl;
     }
 
+    read(dict);
+
     if (active_)
     {
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
@@ -133,7 +136,7 @@ Foam::wallShearStress::wallShearStress
             (
                 IOobject
                 (
-                    type(),
+                    resultName_,
                     mesh.time().timeName(),
                     mesh,
                     IOobject::NO_READ,
@@ -150,9 +153,9 @@ Foam::wallShearStress::wallShearStress
         );
 
         mesh.objectRegistry::store(wallShearStressPtr);
-    }
 
-    read(dict);
+        writeFileHeader(file());
+    }
 }
 
 
@@ -168,7 +171,10 @@ void Foam::wallShearStress::read(const dictionary& dict)
 {
     if (active_)
     {
-        log_ = dict.lookupOrDefault<Switch>("log", true);
+        functionObjectFile::read(dict);
+
+        log_.readIfPresent("log", dict);
+        dict.readIfPresent("resultName", resultName_);
 
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
         const polyBoundaryMesh& pbm = mesh.boundaryMesh();
@@ -179,7 +185,7 @@ void Foam::wallShearStress::read(const dictionary& dict)
                 wordReList(dict.lookupOrDefault("patches", wordReList()))
             );
 
-        Info<< type() << " " << name_ << ":" << nl;
+        if (log_) Info << type() << " " << name_ << " output:" << nl;
 
         if (patchSet_.empty())
         {
@@ -191,11 +197,11 @@ void Foam::wallShearStress::read(const dictionary& dict)
                 }
             }
 
-            Info<< "    processing all wall patches" << nl << endl;
+            if (log_) Info << "    processing all wall patches" << nl << endl;
         }
         else
         {
-            Info<< "    processing wall patches: " << nl;
+            if (log_) Info << "    processing wall patches: " << nl;
             labelHashSet filteredPatchSet;
             forAllConstIter(labelHashSet, patchSet_, iter)
             {
@@ -203,7 +209,7 @@ void Foam::wallShearStress::read(const dictionary& dict)
                 if (isA<wallPolyPatch>(pbm[patchI]))
                 {
                     filteredPatchSet.insert(patchI);
-                    Info<< "        " << pbm[patchI].name() << endl;
+                    if (log_) Info << "        " << pbm[patchI].name() << endl;
                 }
                 else
                 {
@@ -213,7 +219,7 @@ void Foam::wallShearStress::read(const dictionary& dict)
                 }
             }
 
-            Info<< endl;
+            if (log_) Info << endl;
 
             patchSet_ = filteredPatchSet;
         }
@@ -228,17 +234,15 @@ void Foam::wallShearStress::execute()
 
     if (active_)
     {
-        functionObjectFile::write();
-
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
 
         volVectorField& wallShearStress =
             const_cast<volVectorField&>
             (
-                mesh.lookupObject<volVectorField>(type())
+                mesh.lookupObject<volVectorField>(resultName_)
             );
 
-        if (log_) Info<< type() << " " << name_ << " output:" << nl;
+        if (log_) Info << type() << " " << name_ << " output:" << nl;
 
 
         tmp<volSymmTensorField> Reff;
@@ -258,12 +262,14 @@ void Foam::wallShearStress::execute()
         }
         else
         {
-            FatalErrorIn("void Foam::wallShearStress::execute()")
+            FatalErrorIn("void Foam::wallShearStress::write()")
                 << "Unable to find turbulence model in the "
                 << "database" << exit(FatalError);
         }
 
         calcShearStress(mesh, Reff(), wallShearStress);
+
+        if (log_) Info << endl;
     }
 }
 
@@ -287,14 +293,15 @@ void Foam::wallShearStress::write()
 {
     if (active_)
     {
-        functionObjectFile::write();
-
         const volVectorField& wallShearStress =
-            obr_.lookupObject<volVectorField>(type());
+            obr_.lookupObject<volVectorField>(resultName_);
 
-        if (log_) Info<< type() << " " << name_ << " output:" << nl
-            << "    writing field " << wallShearStress.name() << nl
-            << endl;
+        if (log_)
+        {
+            Info<< type() << " " << name_ << " output:" << nl
+                << "    writing field " << wallShearStress.name() << nl
+                << endl;
+        }
 
         wallShearStress.write();
     }
