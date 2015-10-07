@@ -386,6 +386,15 @@ void Foam::forceCoeffs::execute()
         }
     }
 
+    // Write state/results information
+    {
+        setResult("Cm", CmTot);
+        setResult("Cd", CdTot);
+        setResult("Cl", ClTot);
+        setResult("Cl(f)", ClfTot);
+        setResult("Cl(r)", ClrTot);
+    }
+
     if (writeFields_)
     {
         const volVectorField& force =
