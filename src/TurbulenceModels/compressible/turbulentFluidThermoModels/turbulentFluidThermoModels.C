@@ -23,13 +23,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "CompressibleTurbulenceModel.H"
 #include "compressibleTransportModel.H"
 #include "fluidThermo.H"
 #include "addToRunTimeSelectionTable.H"
 #include "makeTurbulenceModel.H"
 
-#include "thermalDiffusivity.H"
-#include "eddyDiffusivity.H"
+#include "ThermalDiffusivity.H"
+#include "EddyDiffusivity.H"
 
 #include "laminar.H"
 #include "RASModel.H"
@@ -42,17 +43,18 @@ makeBaseTurbulenceModel
     geometricOneField,
     volScalarField,
     compressibleTurbulenceModel,
-    thermalDiffusivity,
+    CompressibleTurbulenceModel,
+    ThermalDiffusivity,
     fluidThermo
 );
 
 #define makeRASModel(Type)                                                     \
     makeTemplatedTurbulenceModel                                               \
-    (fluidThermothermalDiffusivity, RAS, Type)
+    (fluidThermoCompressibleTurbulenceModel, RAS, Type)
 
 #define makeLESModel(Type)                                                     \
     makeTemplatedTurbulenceModel                                               \
-    (fluidThermothermalDiffusivity, LES, Type)
+    (fluidThermoCompressibleTurbulenceModel, LES, Type)
 
 
 // -------------------------------------------------------------------------- //
