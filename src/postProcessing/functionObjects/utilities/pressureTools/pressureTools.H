@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -93,6 +93,9 @@ Description
         Property     | Description             | Required    | Default value
         type         | type name: pressureTools| yes         |
         calcTotal    | Calculate total coefficient | yes     |
+        pName        | Name of pressure field  | no          | p
+        UName        | Name of velocity field  | no          | U
+        rhoName      | Name of density field   | no          | rho
         pRef         | Reference pressure for total pressure | no | 0.0
         calcCoeff    | Calculate pressure coefficient | yes  |
         pInf         | Freestream pressure for coefficient calculation | no |
