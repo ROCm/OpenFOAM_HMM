@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -243,7 +243,7 @@ void Foam::meshRefinement::getBafflePatches
 
     // Extend segments a bit
     {
-        const vectorField smallVec(Foam::sqrt(SMALL)*(end-start));
+        const vectorField smallVec(ROOTSMALL*(end-start));
         start -= smallVec;
         end += smallVec;
     }
@@ -830,7 +830,7 @@ Foam::List<Foam::labelPair> Foam::meshRefinement::freeStandingBaffles
 
         // Extend segments a bit
         {
-            const vectorField smallVec(Foam::sqrt(SMALL)*(end-start));
+            const vectorField smallVec(ROOTSMALL*(end-start));
             start -= smallVec;
             end += smallVec;
         }
@@ -2967,7 +2967,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
 
         // Extend segments a bit
         {
-            const vectorField smallVec(Foam::sqrt(SMALL)*(end-start));
+            const vectorField smallVec(ROOTSMALL*(end-start));
             start -= smallVec;
             end += smallVec;
         }
