@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1316,7 +1316,8 @@ void Foam::syncTools::syncBoundaryFaceList
     const polyMesh& mesh,
     UList<T>& faceValues,
     const CombineOp& cop,
-    const TransformOp& top
+    const TransformOp& top,
+    const bool parRun
 )
 {
     const label nBFaces = mesh.nFaces() - mesh.nInternalFaces();
@@ -1327,7 +1328,7 @@ void Foam::syncTools::syncBoundaryFaceList
         (
             "syncTools<class T, class CombineOp>::syncBoundaryFaceList"
             "(const polyMesh&, UList<T>&, const CombineOp&"
-            ", const bool)"
+            ", const TransformOp&, const bool)"
         )   << "Number of values " << faceValues.size()
             << " is not equal to the number of boundary faces in the mesh "
             << nBFaces << abort(FatalError);
@@ -1335,7 +1336,7 @@ void Foam::syncTools::syncBoundaryFaceList
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    if (Pstream::parRun())
+    if (parRun)
     {
         PstreamBuffers pBufs(Pstream::nonBlocking);
 
@@ -1441,7 +1442,8 @@ void Foam::syncTools::syncFaceList
 (
     const polyMesh& mesh,
     PackedList<nBits>& faceValues,
-    const CombineOp& cop
+    const CombineOp& cop,
+    const bool parRun
 )
 {
     if (faceValues.size() != mesh.nFaces())
@@ -1457,7 +1459,7 @@ void Foam::syncTools::syncFaceList
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    if (Pstream::parRun())
+    if (parRun)
     {
         PstreamBuffers pBufs(Pstream::nonBlocking);
 
