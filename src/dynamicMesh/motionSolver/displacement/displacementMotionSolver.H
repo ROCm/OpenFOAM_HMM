@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,13 +68,7 @@ protected:
         pointIOField points0_;
 
 
-    // Protected Member Functions
-
-        //- Return IO object for points0
-        IOobject points0IO(const polyMesh& mesh) const;
-
 private:
-
 
     // Private Member Functions
 
@@ -84,10 +78,47 @@ private:
         //- Disallow default bitwise assignment
         void operator=(const displacementMotionSolver&);
 
+
 public:
 
     //- Runtime type information
     TypeName("displacementMotionSolver");
+
+
+    // Declare run-time constructor selection tables
+
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            displacementMotionSolver,
+            displacement,
+            (
+                const polyMesh& mesh,
+                const IOdictionary& dict,
+                const pointVectorField& pointDisplacement,
+                const pointIOField& points0
+            ),
+            (mesh, dict, pointDisplacement, points0)
+        );
+
+    // Static Member Functions
+
+        //- Return IO object for points0
+        static IOobject points0IO(const polyMesh& mesh);
+
+
+    // Selectors
+
+        //- Select constructed from polyMesh, dictionary and components.
+        //  If dictionary was registered this will 'steal' that registration.
+        static autoPtr<displacementMotionSolver> New
+        (
+            const word& solverTypeName,
+            const polyMesh&,
+            const IOdictionary&,
+            const pointVectorField& pointDisplacement,
+            const pointIOField& points0
+        );
 
 
     // Constructors
@@ -97,6 +128,16 @@ public:
         (
             const polyMesh&,
             const IOdictionary&,
+            const word& type
+        );
+
+        //- Construct from mesh and dictionary
+        displacementMotionSolver
+        (
+            const polyMesh&,
+            const IOdictionary&,
+            const pointVectorField& pointDisplacement,
+            const pointIOField& points0,
             const word& type
         );
 

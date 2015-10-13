@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,25 +31,23 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(displacementMotionSolver, 0);
+    defineRunTimeSelectionTable(displacementMotionSolver, displacement);
 }
 
 
-// * * * * * * * * * * * * * Protected Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-Foam::IOobject Foam::displacementMotionSolver::points0IO
-(
-    const polyMesh& mesh
-) const
+Foam::IOobject Foam::displacementMotionSolver::points0IO(const polyMesh& mesh)
 {
     const word instance =
-        time().findInstance
+        mesh.time().findInstance
         (
             mesh.meshDir(),
             "points0",
             IOobject::READ_IF_PRESENT
         );
 
-    if (instance != time().constant())
+    if (instance != mesh.time().constant())
     {
         // points0 written to a time folder
 
@@ -58,7 +56,7 @@ Foam::IOobject Foam::displacementMotionSolver::points0IO
             (
                 "points0",
                 instance,
-                polyMesh::meshSubDir,
+                mesh.meshDir(),
                 mesh,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
@@ -73,7 +71,7 @@ Foam::IOobject Foam::displacementMotionSolver::points0IO
         (
             "points0",
             instance,
-            polyMesh::meshSubDir,
+            mesh.meshDir(),
             mesh,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
@@ -93,7 +91,7 @@ Foam::IOobject Foam::displacementMotionSolver::points0IO
                 (
                     "points",
                     instance,
-                    polyMesh::meshSubDir,
+                    mesh.meshDir(),
                     mesh,
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE,
@@ -142,12 +140,11 @@ Foam::displacementMotionSolver::displacementMotionSolver
         )   << "Number of points in mesh " << mesh.nPoints()
             << " differs from number of points " << points0_.size()
             << " read from file "
-            <<
-                IOobject
+            << IOobject
                 (
                     "points",
                     time().constant(),
-                    polyMesh::meshSubDir,
+                    mesh.meshDir(),
                     mesh,
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE,
@@ -155,6 +152,104 @@ Foam::displacementMotionSolver::displacementMotionSolver
                 ).filePath()
             << exit(FatalError);
     }
+}
+
+
+Foam::displacementMotionSolver::displacementMotionSolver
+(
+    const polyMesh& mesh,
+    const IOdictionary& dict,
+    const pointVectorField& pointDisplacement,
+    const pointIOField& points0,
+    const word& type
+)
+:
+    motionSolver(mesh, dict, type),
+    pointDisplacement_
+    (
+        IOobject(pointDisplacement, "pointDisplacement"),
+        pointDisplacement
+    ),
+    points0_(points0)
+{
+    if (points0_.size() != mesh.nPoints())
+    {
+        FatalErrorIn
+        (
+            "displacementMotionSolver::"
+            "displacementMotionSolver\n"
+            "(\n"
+            "    const polyMesh&,\n"
+            "    const IOdictionary&,\n"
+            "    const pointVectorField&,\n"
+            "    const pointIOField&,\n"
+            "    const word&\n"
+            ")"
+        )   << "Number of points in mesh " << mesh.nPoints()
+            << " differs from number of points " << points0_.size()
+            << " read from file " << points0.filePath()
+            << exit(FatalError);
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::displacementMotionSolver>
+Foam::displacementMotionSolver::New
+(
+    const word& solverTypeName,
+    const polyMesh& mesh,
+    const IOdictionary& solverDict,
+    const pointVectorField& pointDisplacement,
+    const pointIOField& points0
+)
+{
+    //const word solverTypeName(solverDict.lookup("solver"));
+
+    Info<< "Selecting motion solver: " << solverTypeName << endl;
+
+    const_cast<Time&>(mesh.time()).libs().open
+    (
+        solverDict,
+        "motionSolverLibs",
+        displacementConstructorTablePtr_
+    );
+
+    if (!displacementConstructorTablePtr_)
+    {
+        FatalErrorIn
+        (
+            "displacementMotionSolver::New(const polyMesh& mesh)"
+        )   << "solver table is empty"
+            << exit(FatalError);
+    }
+
+    displacementConstructorTable::iterator cstrIter =
+        displacementConstructorTablePtr_->find(solverTypeName);
+
+    if (cstrIter == displacementConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "displacementMotionSolver::New(const polyMesh&)"
+        )   << "Unknown solver type "
+            << solverTypeName << nl << nl
+            << "Valid solver types are:" << endl
+            << displacementConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<displacementMotionSolver>
+    (
+        cstrIter()
+        (
+            mesh,
+            solverDict,
+            pointDisplacement,
+            points0
+        )
+    );
 }
 
 
