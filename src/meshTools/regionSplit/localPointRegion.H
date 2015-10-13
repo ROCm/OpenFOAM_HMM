@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -101,9 +101,9 @@ class localPointRegion
         void calcPointRegions
         (
             const polyMesh& mesh,
+            const labelPairList& baffles,
             boolList& candidatePoint
         );
-
 
         //- Check if two faces are equal. If forward = false checks f1 in
         //  reverse order.
@@ -130,6 +130,14 @@ public:
         localPointRegion
         (
             const polyMesh& mesh,
+            const labelList& candidatePoints
+        );
+
+        //- Construct from mesh and candidate points for duplication
+        localPointRegion
+        (
+            const polyMesh& mesh,
+            const labelPairList& baffles,
             const labelList& candidatePoints
         );
 
