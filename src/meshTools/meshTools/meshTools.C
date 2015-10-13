@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +29,6 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Check if n is in same direction as normals of all faceLabels
 bool Foam::meshTools::visNormal
 (
     const vector& n,
@@ -309,7 +308,6 @@ bool Foam::meshTools::edgeOnFace
 }
 
 
-// Return true if faceI part of cellI
 bool Foam::meshTools::faceOnCell
 (
     const primitiveMesh& mesh,
@@ -465,7 +463,6 @@ Foam::label Foam::meshTools::getSharedFace
 }
 
 
-// Get the two faces on cellI using edgeI.
 void Foam::meshTools::getEdgeFaces
 (
     const primitiveMesh& mesh,
@@ -511,7 +508,6 @@ void Foam::meshTools::getEdgeFaces
 }
 
 
-// Return label of other edge connected to vertex
 Foam::label Foam::meshTools::otherEdge
 (
     const primitiveMesh& mesh,
@@ -549,7 +545,6 @@ Foam::label Foam::meshTools::otherEdge
 }
 
 
-// Return face on other side of edgeI
 Foam::label Foam::meshTools::otherFace
 (
     const primitiveMesh& mesh,
@@ -574,7 +569,6 @@ Foam::label Foam::meshTools::otherFace
 }
 
 
-// Return face on other side of edgeI
 Foam::label Foam::meshTools::otherCell
 (
     const primitiveMesh& mesh,
@@ -602,8 +596,6 @@ Foam::label Foam::meshTools::otherCell
 }
 
 
-// Returns label of edge nEdges away from startEdge (in the direction of
-// startVertI)
 Foam::label Foam::meshTools::walkFace
 (
     const primitiveMesh& mesh,
@@ -688,7 +680,6 @@ void Foam::meshTools::constrainToMeshCentre
 }
 
 
-//- Set the constrained components of directions/velocity to zero
 void Foam::meshTools::constrainDirection
 (
     const polyMesh& mesh,
@@ -814,7 +805,6 @@ Foam::vector Foam::meshTools::edgeToCutDir
 }
 
 
-// Find edges most aligned with cutDir
 Foam::label Foam::meshTools::cutDirToEdge
 (
     const primitiveMesh& mesh,
