@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -493,21 +493,30 @@ int main(int argc, char *argv[])
         //    new patchID to neighbour processor)
         //  - number of new patches (nPatches)
 
-        labelList sidePatchID;
+        labelList edgePatchID;
+        labelList edgeZoneID;
+        boolList edgeFlip;
+        labelList inflateFaceID;
         label nPatches;
         Map<label> nbrProcToPatch;
         Map<label> patchToNbrProc;
-        addPatchCellLayer::calcSidePatch
+        addPatchCellLayer::calcExtrudeInfo
         (
+            true,   // for internal edges get zone info from any face
+
             mesh,
             globalFaces,
             edgeGlobalFaces,
             extrudePatch,
 
-            sidePatchID,
+            edgePatchID,
             nPatches,
             nbrProcToPatch,
-            patchToNbrProc
+            patchToNbrProc,
+
+            edgeZoneID,
+            edgeFlip,
+            inflateFaceID
         );
 
 
@@ -659,7 +668,12 @@ int main(int argc, char *argv[])
 
             ratio,              // expansion ratio
             extrudePatch,       // patch faces to extrude
-            sidePatchID,        // if boundary edge: patch to use
+
+            edgePatchID,        // if boundary edge: patch for extruded face
+            edgeZoneID,         // optional zone for extruded face
+            edgeFlip,
+            inflateFaceID,      // mesh face that zone/patch info is from
+
             exposedPatchID,     // if new mesh: patches for exposed faces
             nFaceLayers,
             nPointLayers,

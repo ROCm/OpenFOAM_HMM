@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -124,6 +124,14 @@ Foam::layerParameters::layerParameters
         readScalar(dict.lookup("minThickness"))
     ),
     featureAngle_(readScalar(dict.lookup("featureAngle"))),
+    mergePatchFacesAngle_
+    (
+        dict.lookupOrDefault<scalar>
+        (
+            "mergePatchFacesAngle",
+            featureAngle_
+        )
+    ),
     concaveAngle_
     (
         dict.lookupOrDefault("concaveAngle", defaultConcaveAngle)

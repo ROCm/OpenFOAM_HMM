@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,7 @@ License
 
 #include "externalDisplacementMeshMover.H"
 #include "mapPolyMesh.H"
+#include "zeroFixedValuePointPatchFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -32,6 +33,84 @@ namespace Foam
 {
     defineTypeNameAndDebug(externalDisplacementMeshMover, 0);
     defineRunTimeSelectionTable(externalDisplacementMeshMover, dictionary);
+}
+
+
+// * * * * * * * * * * * *  Protected Member Functions * * * * * * * * * * * //
+
+Foam::labelList Foam::externalDisplacementMeshMover::getFixedValueBCs
+(
+    const pointVectorField& field
+)
+{
+    DynamicList<label> adaptPatchIDs;
+
+    forAll(field.boundaryField(), patchI)
+    {
+        const pointPatchField<vector>& patchField =
+            field.boundaryField()[patchI];
+
+        if (isA<valuePointPatchField<vector> >(patchField))
+        {
+            if (isA<zeroFixedValuePointPatchField<vector> >(patchField))
+            {
+                // Special condition of fixed boundary condition. Does not
+                // get adapted
+            }
+            else
+            {
+                adaptPatchIDs.append(patchI);
+            }
+        }
+    }
+
+    return adaptPatchIDs;
+}
+
+
+Foam::autoPtr<Foam::indirectPrimitivePatch>
+Foam::externalDisplacementMeshMover::getPatch
+(
+    const polyMesh& mesh,
+    const labelList& patchIDs
+)
+{
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+    // Count faces.
+    label nFaces = 0;
+
+    forAll(patchIDs, i)
+    {
+        const polyPatch& pp = patches[patchIDs[i]];
+
+        nFaces += pp.size();
+    }
+
+    // Collect faces.
+    labelList addressing(nFaces);
+    nFaces = 0;
+
+    forAll(patchIDs, i)
+    {
+        const polyPatch& pp = patches[patchIDs[i]];
+
+        label meshFaceI = pp.start();
+
+        forAll(pp, i)
+        {
+            addressing[nFaces++] = meshFaceI++;
+        }
+    }
+
+    return autoPtr<indirectPrimitivePatch>
+    (
+        new indirectPrimitivePatch
+        (
+            IndirectList<face>(mesh.faces(), addressing),
+            mesh.points()
+        )
+    );
 }
 
 

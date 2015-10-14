@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +47,6 @@ class removePoints;
 class pointSet;
 class motionSmoother;
 class addPatchCellLayer;
-class pointData;
 class faceSet;
 class layerParameters;
 
@@ -106,7 +105,6 @@ private:
 
         //- From surface region to patch
         const labelList globalToSlavePatch_;
-
 
 
     // Private Member Functions
@@ -231,14 +229,17 @@ private:
                     List<extrudeMode>& extrudeStatus
                 ) const;
 
-                //- See what patches boundaryedges should be extruded into
+                //- See what zones and patches edges should be extruded into
                 void determineSidePatches
                 (
                     const globalIndex& globalFaces,
                     const labelListList& edgeGlobalFaces,
                     const indirectPrimitivePatch& pp,
 
-                    labelList& sidePatchID
+                    labelList& edgePatchID,
+                    labelList& edgeZoneID,
+                    boolList& edgeFlip,
+                    labelList& inflateFaceID
                 );
 
                 //- Calculate pointwise wanted and minimum thickness.
@@ -370,6 +371,14 @@ private:
                     const List<extrudeMode>& extrudeStatus
                 );
 
+                //- After adding to mesh get the new baffles
+                static List<labelPair> getBafflesOnAddedMesh
+                (
+                    const polyMesh& mesh,
+                    const labelList& newToOldFaces,
+                    const List<labelPair>& baffles
+                );
+
                 //- Collect layer faces and layer cells into bools
                 //  for ease of handling
                 static void getLayerCellsFaces
@@ -393,6 +402,15 @@ private:
                 ) const;
 
                 //- Write cellSet,faceSet for layers
+                bool writeLayerSets
+                (
+                    const fvMesh& mesh,
+                    const labelList& cellNLayers,
+                    const scalarField& faceRealThickness
+                ) const;
+
+                //- Write volFields,cellSet,faceSet for layers depending
+                //  on write level
                 bool writeLayerData
                 (
                     const fvMesh& mesh,
@@ -462,13 +480,6 @@ private:
                     const PackedBoolList& isMasterEdge,
                     const labelList& fixedPoints,
                     pointVectorField& normals
-                ) const;
-
-                bool isMaxEdge
-                (
-                    const List<pointData>&,
-                    const label edgeI,
-                    const scalar minCos
                 ) const;
 
                 //- Stop layer growth where mesh wraps around edge with a
@@ -595,6 +606,7 @@ public:
                 const dictionary& shrinkDict,
                 const dictionary& motionDict,
                 const layerParameters& layerParams,
+                const bool mergePatchFaces,         // merging patch faces
                 const bool preBalance,              // balance before adding?
                 decompositionMethod& decomposer,
                 fvMeshDistribute& distributor
