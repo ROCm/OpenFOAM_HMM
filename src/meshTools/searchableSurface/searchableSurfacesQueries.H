@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -183,14 +183,14 @@ public:
                 List<pointIndexHit>&
             );
 
-            //- Find nearest points to a specific region of the surface
+            //- Find nearest points to a specific regions of the surface
             static void findNearest
             (
                 const PtrList<searchableSurface>& allSurfaces,
                 const labelList& surfacesToTest,
+                const labelListList& regionIndices,
                 const pointField& samples,
                 const scalarField& nearestDistSqr,
-                const labelList& regionIndices,
                 labelList& nearestSurfaces,
                 List<pointIndexHit>& nearestInfo
             );
