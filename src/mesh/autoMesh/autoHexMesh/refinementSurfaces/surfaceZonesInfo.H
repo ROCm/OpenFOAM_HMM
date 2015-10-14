@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,6 +39,7 @@ SourceFiles
 #include "word.H"
 #include "PtrList.H"
 #include "labelList.H"
+#include "boolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -222,10 +223,25 @@ public:
                 const PtrList<surfaceZonesInfo>& surfList
             );
 
+            static label addCellZone
+            (
+                const word& name,
+                const labelList& addressing,
+                polyMesh& mesh
+            );
+
             static labelList addCellZonesToMesh
             (
                 const PtrList<surfaceZonesInfo>& surfList,
                 const labelList& namedSurfaces,
+                polyMesh& mesh
+            );
+
+            static label addFaceZone
+            (
+                const word& name,
+                const labelList& addressing,
+                const boolList& flipMap,
                 polyMesh& mesh
             );
 

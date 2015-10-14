@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +37,7 @@ SourceFiles
 #define autoSnapDriver_H
 
 #include "meshRefinement.H"
+#include "DynamicField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,6 +46,7 @@ namespace Foam
 
 // Forward declaration of classes
 class motionSmoother;
+class refinementParameters;
 class snapParameters;
 class pointConstraint;
 
@@ -79,26 +81,34 @@ class autoSnapDriver
                 PackedBoolList&
             );
 
+            //- Calculate displacement (over all mesh points) to move points
+            //  to average of connected cell centres
+            static tmp<pointField> smoothInternalDisplacement
+            (
+                const meshRefinement& meshRefiner,
+                const motionSmoother&
+            );
+
             //- Calculate displacement per patch point to smooth out patch.
             //  Quite complicated in determining which points to move where.
-            static pointField smoothPatchDisplacement
+            static tmp<pointField> smoothPatchDisplacement
             (
                 const motionSmoother&,
                 const List<labelPair>&
             );
 
-            //static tmp<pointField> avg
-            //(
-            //    const indirectPrimitivePatch&,
-            //    const pointField&
-            //);
+            static tmp<pointField> avg
+            (
+                const indirectPrimitivePatch&,
+                const pointField&
+            );
 
             //- Calculate displacement per patch point. Wip.
-            //static tmp<pointField> smoothLambdaMuPatchDisplacement
-            //(
-            //    const motionSmoother& meshMover,
-            //    const List<labelPair>& baffles
-            //);
+            static pointField smoothLambdaMuPatchDisplacement
+            (
+                const motionSmoother& meshMover,
+                const List<labelPair>& baffles
+            );
 
 
             //- Check that face zones are synced
@@ -135,6 +145,48 @@ class autoSnapDriver
                 DynamicList<label>& splitFaces,
                 DynamicList<labelPair>& splits
             ) const;
+
+            //- Get per face -1 or label of opposite face if on internal/baffle
+            //  faceZone
+            labelList getInternalOrBaffleDuplicateFace() const;
+
+            //- Get points both on patch and facezone.
+            static labelList getZoneSurfacePoints
+            (
+                const fvMesh& mesh,
+                const indirectPrimitivePatch&,
+                const word& zoneName
+            );
+
+            //- Get points both on patch and facezone.
+            template<class FaceList>
+            static labelList getFacePoints
+            (
+                const indirectPrimitivePatch& pp,
+                const FaceList& faces
+            );
+
+            //- Per patch point calculate point on nearest surface.
+            //  Return displacement of patch points.
+            static void calcNearestSurface
+            (
+                const refinementSurfaces& surfaces,
+
+                const labelList& surfacesToTest,
+                const labelListList& regionsToTest,
+
+                const pointField& localPoints,
+                const labelList& zonePointIndices,
+
+                scalarField& minSnapDist,
+                labelList& snapSurf,
+                vectorField& patchDisp,
+
+                // Optional: nearest point, normal
+                pointField& nearestPoint,
+                vectorField& nearestNormal
+            );
+
 
             // Feature line snapping
 
@@ -177,8 +229,8 @@ class autoSnapDriver
                     const scalarField& faceSnapDist,
                     vectorField& faceDisp,
                     vectorField& faceSurfaceNormal,
-                    labelList& faceSurfaceRegion,
-                    vectorField& faceRotation
+                    labelList& faceSurfaceRegion
+                    //vectorField& faceRotation
                 ) const;
                 void calcNearestFacePointProperties
                 (
@@ -253,6 +305,86 @@ class autoSnapDriver
                     const label faceI
                 ) const;
 
+                scalar pyrVol
+                (
+                    const indirectPrimitivePatch& pp,
+                    const vectorField& featureAttraction,
+                    const face& localF,
+                    const point& cc
+                ) const;
+                void facePoints
+                (
+                    const indirectPrimitivePatch& pp,
+                    const vectorField& featureAttraction,
+                    const vectorField& nearestAttraction,
+                    const face& f,
+                    DynamicField<point>& points
+                ) const;
+                scalar pyrVol
+                (
+                    const indirectPrimitivePatch& pp,
+                    const vectorField& featureAttraction,
+                    const vectorField& nearestAttraction,
+                    const face& localF,
+                    const point& cc
+                ) const;
+                Tuple2<point, vector> centreAndNormal
+                (
+                    const indirectPrimitivePatch& pp,
+                    const vectorField& featureAttraction,
+                    const vectorField& nearestAttraction,
+                    const face& localF
+                ) const;
+                bool isSplitAlignedWithFeature
+                (
+                    const scalar featureCos,
+                    const point& newPt0,
+                    const pointConstraint& pc0,
+                    const point& newPt1,
+                    const pointConstraint& pc1
+                ) const;
+                bool isConcave
+                (
+                    const point& c0,
+                    const vector& area0,
+                    const point& c1,
+                    const vector& area1,
+                    const scalar concaveCos
+                ) const;
+                labelPair findDiagonalAttraction
+                (
+                    const scalar featureCos,
+                    const scalar concaveCos,
+                    const scalar minAreaFraction,
+                    const indirectPrimitivePatch& pp,
+                    const vectorField& patchAttraction,
+                    const List<pointConstraint>& patchConstraints,
+                    const vectorField& nearestAttraction,
+                    const vectorField& nearestNormal,
+                    const label faceI,
+
+                    DynamicField<point>& points0,
+                    DynamicField<point>& points1
+                ) const;
+
+                //- Do all logic on whether to add face cut to diagonal
+                //  attraction
+                void splitDiagonals
+                (
+                    const scalar featureCos,
+                    const scalar concaveCos,
+                    const scalar minAreaFraction,
+
+                    const indirectPrimitivePatch& pp,
+                    const vectorField& nearestAttraction,
+                    const vectorField& nearestNormal,
+
+                    vectorField& patchAttraction,
+                    List<pointConstraint>& patchConstraints,
+                    DynamicList<label>& splitFaces,
+                    DynamicList<labelPair>& splits
+                ) const;
+
                 //- Avoid attraction across face diagonal since would
                 //  cause face squeeze
                 void avoidDiagonalAttraction
@@ -262,6 +394,14 @@ class autoSnapDriver
                     const indirectPrimitivePatch& pp,
                     vectorField& patchAttraction,
                     List<pointConstraint>& patchConstraints
+                ) const;
+
+                //- Write some stats about constraints
+                void writeStats
+                (
+                    const indirectPrimitivePatch& pp,
+                    const PackedBoolList& isMasterPoint,
+                    const List<pointConstraint>& patchConstraints
                 ) const;
 
                 //- Return hit if on multiple points
@@ -320,7 +460,6 @@ class autoSnapDriver
                 void featureAttractionUsingReconstruction
                 (
                     const label iter,
-                    const bool avoidSnapProblems,
                     const scalar featureCos,
                     const indirectPrimitivePatch& pp,
                     const scalarField& snapDist,
@@ -366,6 +505,7 @@ class autoSnapDriver
                 void determineBaffleFeatures
                 (
                     const label iter,
+                    const bool baffleFeaturePoints,
                     const scalar featureCos,
 
                     const indirectPrimitivePatch& pp,
@@ -450,12 +590,20 @@ class autoSnapDriver
                 void featureAttractionUsingFeatureEdges
                 (
                     const label iter,
-                    const bool avoidSnapProblems,
-                    const scalar featureCos,
                     const bool multiRegionFeatureSnap,
+
+                    const bool detectBaffles,
+                    const bool baffleFeaturePoints,
+                    const bool releasePoints,
+                    const bool stringFeatures,
+                    const bool avoidDiagonal,
+
+                    const scalar featureCos,
+
                     const indirectPrimitivePatch& pp,
                     const scalarField& snapDist,
                     const vectorField& nearestDisp,
+                    const vectorField& nearestNormal,
 
                     const List<List<point> >& pointFaceSurfNormals,
                     const List<List<point> >& pointFaceDisp,
@@ -465,12 +613,14 @@ class autoSnapDriver
                     vectorField& patchAttraction,
                     List<pointConstraint>& patchConstraints
                 ) const;
+
                 void preventFaceSqueeze
                 (
                     const label iter,
                     const scalar featureCos,
                     const indirectPrimitivePatch& pp,
                     const scalarField& snapDist,
+                    const vectorField& nearestAttraction,
 
                     vectorField& patchAttraction,
                     List<pointConstraint>& patchConstraints
@@ -483,15 +633,19 @@ class autoSnapDriver
                 vectorField calcNearestSurfaceFeature
                 (
                     const snapParameters& snapParams,
-                    const bool avoidSnapProblems,
+                    const bool alignMeshEdges,
                     const label iter,
                     const scalar featureCos,
                     const scalar featureAttract,
                     const scalarField& snapDist,
                     const vectorField& nearestDisp,
+                    const vectorField& nearestNormal,
                     motionSmoother& meshMover,
                     vectorField& patchAttraction,
-                    List<pointConstraint>& patchConstraints
+                    List<pointConstraint>& patchConstraints,
+
+                    DynamicList<label>& splitFaces,
+                    DynamicList<labelPair>& splits
                 ) const;
 
 
@@ -545,14 +699,6 @@ public:
                 motionSmoother&
             );
 
-            //- Get points both on patch and facezone.
-            static labelList getZoneSurfacePoints
-            (
-                const fvMesh& mesh,
-                const indirectPrimitivePatch&,
-                const word& zoneName
-            );
-
             //- Helper: calculate average cell centre per point
             static tmp<pointField> avgCellCentres
             (
@@ -575,7 +721,10 @@ public:
             //  displacement of patch points.
             static vectorField calcNearestSurface
             (
+                const bool strictRegionSnap,
                 const meshRefinement& meshRefiner,
+                const labelList& globalToMasterPatch,
+                const labelList& globalToSlavePatch,
                 const scalarField& snapDist,
                 const indirectPrimitivePatch&,
                 pointField& nearestPoint,
@@ -622,6 +771,7 @@ public:
             (
                 const dictionary& snapDict,
                 const dictionary& motionDict,
+                const bool mergePatchFaces,
                 const scalar featureCos,
                 const scalar planarAngle,
                 const snapParameters& snapParams
@@ -633,6 +783,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "autoSnapDriverTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

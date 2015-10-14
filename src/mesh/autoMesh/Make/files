@@ -2,7 +2,6 @@ autoHexMesh             = autoHexMesh
 autoHexMeshDriver       = $(autoHexMesh)/autoHexMeshDriver
 
 $(autoHexMeshDriver)/autoLayerDriver.C
-/* $(autoHexMeshDriver)/autoLayerDriverShrink.C */
 $(autoHexMeshDriver)/autoSnapDriver.C
 $(autoHexMeshDriver)/autoSnapDriverFeature.C
 $(autoHexMeshDriver)/autoRefineDriver.C
@@ -10,7 +9,6 @@ $(autoHexMeshDriver)/autoRefineDriver.C
 $(autoHexMeshDriver)/layerParameters/layerParameters.C
 $(autoHexMeshDriver)/refinementParameters/refinementParameters.C
 $(autoHexMeshDriver)/snapParameters/snapParameters.C
-$(autoHexMeshDriver)/pointData/pointData.C
 
 $(autoHexMesh)/meshRefinement/meshRefinementBaffles.C
 $(autoHexMesh)/meshRefinement/meshRefinement.C
@@ -30,7 +28,10 @@ meshMover = $(autoHexMesh)/externalDisplacementMeshMover
 $(meshMover)/displacementMeshMoverMotionSolver.C
 $(meshMover)/externalDisplacementMeshMover.C
 $(meshMover)/medialAxisMeshMover.C
+$(meshMover)/displacementMotionSolverMeshMover.C
+/* $(meshMover)/pointSmoothingMeshMover.C */
 $(meshMover)/zeroFixedValue/zeroFixedValuePointPatchFields.C
+$(meshMover)/fieldSmoother/fieldSmoother.C
 
 LIB = $(FOAM_LIBBIN)/libautoMesh
 

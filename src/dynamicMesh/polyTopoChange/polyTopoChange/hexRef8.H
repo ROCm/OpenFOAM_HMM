@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -411,7 +411,7 @@ public:
         // Refinement
 
             //- Gets level such that the face has four points <= level.
-            label getAnchorLevel(const label faceI) const;
+            label faceLevel(const label faceI) const;
 
             //- Given valid mesh and current cell level and proposed
             //  cells to refine calculate any clashes (due to 2:1) and return
