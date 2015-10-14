@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -22,36 +22,47 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::searchableSurfaceCollection
+    Foam::searchableRotatedBox
 
 Description
-    Set of transformed searchableSurfaces. Does not do boolean operations
-    so when meshing might find parts 'inside'.
+    Searching on a rotated box
+
+    Box defined as min and max coordinate. Rotation by coordinate system
+    at box middle.
+
+    E.g. box with sides 1 1 1 rotated 45 degrees around z-axis at
+         origin (0.5 0.5 0.5)
+    \verbatim
+        span     (1 1 1);
+        origin  (0.5 0.5 0.5);
+        e1      (1 1 0);
+        e3      (0 0 1);
+    \endverbatim
 
 SourceFiles
-    searchableSurfaceCollection.C
+    searchableRotatedBox.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef searchableSurfaceCollection_H
-#define searchableSurfaceCollection_H
+#ifndef searchableRotatedBox_H
+#define searchableRotatedBox_H
 
 #include "searchableSurface.H"
-#include "treeBoundBox.H"
 #include "coordinateSystem.H"
-#include "UPtrList.H"
-#include "Switch.H"
+#include "searchableBox.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of classes
+
 /*---------------------------------------------------------------------------*\
-                 Class searchableSurfaceCollection Declaration
+                           Class searchableRotatedBox Declaration
 \*---------------------------------------------------------------------------*/
 
-class searchableSurfaceCollection
+class searchableRotatedBox
 :
     public searchableSurface
 {
@@ -59,119 +70,60 @@ private:
 
     // Private Member Data
 
-        // Per instance data
+        //- box in local coordinate system
+        searchableBox box_;
 
-            //- Instance name
-            wordList instance_;
+        //- transformation from local to global coordinates
+        coordinateSystem transform_;
 
-            //- Scaling vector
-            vectorField scale_;
-
-            //- transformation
-            PtrList<coordinateSystem> transform_;
-
-            UPtrList<searchableSurface> subGeom_;
-
-            Switch mergeSubRegions_;
-
-            //- Offsets for indices coming from different surfaces
-            //  (sized with size() of each surface)
-            labelList indexOffset_;
-
-        //- Region names
-        mutable wordList regions_;
-        //- From individual regions to collection regions
-        mutable labelList regionOffset_;
+        //- (global) corner points (in treeBoundBox order)
+        pointField points_;
 
 
     // Private Member Functions
 
-        //- Inherit findNearest from searchableSurface
-        using searchableSurface::findNearest;
-
-        //- Find point nearest to sample. Updates minDistSqr. Sets nearestInfo
-        //  and surface index
-        void findNearest
-        (
-            const pointField& samples,
-            scalarField& minDistSqr,
-            List<pointIndexHit>& nearestInfo,
-            labelList& nearestSurf
-        ) const;
-
-        //- Sort hits into per-surface bins. Misses are rejected.
-        //  Maintains map back to position
-        void sortHits
-        (
-            const List<pointIndexHit>& info,
-            List<List<pointIndexHit> >& surfInfo,
-            labelListList& infoMap
-        ) const;
-
-
         //- Disallow default bitwise copy construct
-        searchableSurfaceCollection(const searchableSurfaceCollection&);
+        searchableRotatedBox(const searchableRotatedBox&);
 
         //- Disallow default bitwise assignment
-        void operator=(const searchableSurfaceCollection&);
+        void operator=(const searchableRotatedBox&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("searchableSurfaceCollection");
+    TypeName("searchableRotatedBox");
 
 
     // Constructors
 
         //- Construct from dictionary (used by searchableSurface)
-        searchableSurfaceCollection
+        searchableRotatedBox
         (
             const IOobject& io,
             const dictionary& dict
         );
 
+
     //- Destructor
-    virtual ~searchableSurfaceCollection();
+    virtual ~searchableRotatedBox();
 
 
     // Member Functions
-
-        //- Scaling vector per subsurface
-        const vectorField& scale() const
-        {
-            return scale_;
-        }
-
-        //- Scaling vector per subsurface
-        vectorField& scale()
-        {
-            return scale_;
-        }
-
-        //- Coordinate system per subsurface
-        const PtrList<coordinateSystem>& transform() const
-        {
-            return transform_;
-        }
-
-        //- Coordinate system per subsurface
-        PtrList<coordinateSystem>& transform()
-        {
-            return transform_;
-        }
-
 
         virtual const wordList& regions() const;
 
         //- Whether supports volume type below
         virtual bool hasVolumeType() const
         {
-            return false;
+            return true;
         }
 
         //- Range of local indices that can be returned.
-        virtual label size() const;
+        virtual label size() const
+        {
+            return 6;
+        }
 
         //- Get representative set of element coordinates
         //  Usually the element centres (should be of length size()).
@@ -188,16 +140,50 @@ public:
         //- Get the points that define the surface.
         virtual tmp<pointField> points() const;
 
-        //- Does any part of the surface overlap the supplied bound box?
-        virtual bool overlaps(const boundBox& bb) const
-        {
-            notImplemented
-            (
-                "searchableSurfaceCollection::overlaps(const boundBox&) const"
-            );
+        // Does any part of the surface overlap the supplied bound box?
+        virtual bool overlaps(const boundBox& bb) const;
 
-            return false;
-        }
+        // Single point queries.
+
+            //- Calculate nearest point on surface.
+            //  Returns
+            //  - bool : any point found nearer than nearestDistSqr
+            //  - label: relevant index in surface (=face 0..5)
+            //  - point: actual nearest point found
+            pointIndexHit findNearest
+            (
+                const point& sample,
+                const scalar nearestDistSqr
+            ) const;
+
+            //- Find nearest to segment.
+            //  Returns
+            //  - bool : any point found?
+            //  - label: relevant index in shapes (=face 0..5)
+            //  - point: actual nearest point found
+            //  sets:
+            //  - tightest  : bounding box
+            //  - linePoint : corresponding nearest point on line
+            pointIndexHit findNearest
+            (
+                const linePointRef& ln,
+                treeBoundBox& tightest,
+                point& linePoint
+            ) const;
+
+            //- Find nearest intersection of line between start and end.
+            pointIndexHit findLine
+            (
+                const point& start,
+                const point& end
+            ) const;
+
+            //- Find any intersection of line between start and end.
+            pointIndexHit findLineAny
+            (
+                const point& start,
+                const point& end
+            ) const;
 
 
         // Multiple point queries.
@@ -253,27 +239,6 @@ public:
                 List<volumeType>&
             ) const;
 
-        // Other
-
-            //- Set bounds of surface. Bounds currently set as list of
-            //  bounding boxes. The bounds are hints to the surface as for
-            //  the range of queries it can expect. faceMap/pointMap can be
-            //  set if the surface has done any redistribution.
-            virtual void distribute
-            (
-                const List<treeBoundBox>&,
-                const bool keepNonLocal,
-                autoPtr<mapDistribute>& faceMap,
-                autoPtr<mapDistribute>& pointMap
-            );
-
-            //- WIP. Store element-wise field.
-            virtual void setField(const labelList& values);
-
-            //- WIP. From a set of hits (points and
-            //  indices) get the specified field. Misses do not get set. Return
-            //  empty field if not supported.
-            virtual void getField(const List<pointIndexHit>&, labelList&) const;
 
         // regIOobject implementation
 
@@ -281,11 +246,10 @@ public:
             {
                 notImplemented
                 (
-                    "searchableSurfaceCollection::writeData(Ostream&) const"
+                    "searchableRotatedBox::writeData(Ostream&) const"
                 );
                 return false;
             }
-
 };
 
 
