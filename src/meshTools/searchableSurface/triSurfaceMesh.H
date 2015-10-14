@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,6 +85,9 @@ private:
         //- Is surface closed
         mutable label surfaceClosed_;
 
+        //- If surface is closed, what is type of outside points
+        mutable volumeType outsideVolType_;
+
 
     // Private Member Functions
 
@@ -136,6 +139,9 @@ public:
 
     //- Runtime type information
     TypeName("triSurfaceMesh");
+
+    //- Return the mesh sub-directory name (usually "triSurface")
+    static word meshSubDir;
 
 
     // Constructors
