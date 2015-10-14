@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -498,6 +498,21 @@ void Foam::polyTopoChange::makeCells
     {
         if (faceOwner_[faceI] < 0)
         {
+            pointField newPoints;
+            if (faceI < faces_.size())
+            {
+                const face& f = faces_[faceI];
+                newPoints.setSize(f.size(), vector::max);
+                forAll(f, fp)
+                {
+                    if (f[fp] < points_.size())
+                    {
+                        newPoints[fp] = points_[f[fp]];
+                    }
+                }
+            }
+
+
             FatalErrorIn
             (
                 "polyTopoChange::makeCells\n"
@@ -506,7 +521,9 @@ void Foam::polyTopoChange::makeCells
                 "    labelList&,\n"
                 "    labelList&\n"
                 ") const\n"
-            )   << "Face " << faceI << " is active but its owner has"
+            )   << "Face " << faceI
+                << " with vertices " << newPoints
+                << " is active but its owner has"
                 << " been deleted. This is usually due to deleting cells"
                 << " without modifying exposed faces to be boundary faces."
                 << exit(FatalError);
