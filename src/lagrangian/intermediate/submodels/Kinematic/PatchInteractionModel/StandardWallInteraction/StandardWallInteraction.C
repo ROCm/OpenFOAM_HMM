@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -130,6 +130,7 @@ bool Foam::StandardWallInteraction<CloudType>::correct
                 active = false;
                 U = vector::zero;
                 nEscape_++;
+                massEscape_ += p.nParticle()*p.mass();
                 break;
             }
             case PatchInteractionModel<CloudType>::itStick:
@@ -138,6 +139,7 @@ bool Foam::StandardWallInteraction<CloudType>::correct
                 active = false;
                 U = vector::zero;
                 nStick_++;
+                massStick_ += p.nParticle()*p.mass();
                 break;
             }
             case PatchInteractionModel<CloudType>::itRebound:
@@ -197,19 +199,21 @@ bool Foam::StandardWallInteraction<CloudType>::correct
 template<class CloudType>
 void Foam::StandardWallInteraction<CloudType>::info(Ostream& os)
 {
-    label npe0 = this->template getBaseProperty<scalar>("nEscape");
+    PatchInteractionModel<CloudType>::info(os);
+
+    label npe0 = this->template getModelProperty<scalar>("nEscape");
     label npe = npe0 + returnReduce(nEscape_, sumOp<label>());
 
-    scalar mpe0 = this->template getBaseProperty<scalar>("massEscape");
+    scalar mpe0 = this->template getModelProperty<scalar>("massEscape");
     scalar mpe = mpe0 + returnReduce(massEscape_, sumOp<scalar>());
 
-    label nps0 = this->template getBaseProperty<scalar>("nStick");
+    label nps0 = this->template getModelProperty<scalar>("nStick");
     label nps = nps0 + returnReduce(nStick_, sumOp<label>());
 
-    scalar mps0 = this->template getBaseProperty<scalar>("massStick");
+    scalar mps0 = this->template getModelProperty<scalar>("massStick");
     scalar mps = mps0 + returnReduce(massStick_, sumOp<scalar>());
 
-    os  << "    Parcel fate (number, mass)" << nl
+    os  << "    Parcel fate: walls (number, mass)" << nl
         << "      - escape                      = " << npe << ", " << mpe << nl
         << "      - stick                       = " << nps << ", " << mps << nl;
 
