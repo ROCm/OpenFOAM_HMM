@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -140,6 +140,10 @@ void Foam::uniformInletOutletFvPatchField<Type>::updateCoeffs()
     {
         return;
     }
+
+    // Update the uniform value as a function of time
+    const scalar t = this->db().time().timeOutputValue();
+    this->refValue() = uniformInletValue_->value(t);
 
     const Field<scalar>& phip =
         this->patch().template lookupPatchField<surfaceScalarField, scalar>
