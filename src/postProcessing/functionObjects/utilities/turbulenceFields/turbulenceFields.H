@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,7 @@ Description
     \heading Function object usage
     \table
         Property     | Description                 | Required | Default value
-        type         | type name: processorField   | yes      |
+        type         | type name: turbulenceFields | yes      |
         fields       | fields to store (see below) | yes      |
     \endtable
 
