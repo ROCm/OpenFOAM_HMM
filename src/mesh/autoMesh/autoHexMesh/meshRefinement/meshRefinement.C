@@ -279,7 +279,7 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
 
     // Extend segments a bit
     {
-        const vectorField smallVec(Foam::sqrt(SMALL)*(end-start));
+        const vectorField smallVec(ROOTSMALL*(end-start));
         start -= smallVec;
         end += smallVec;
     }
@@ -491,7 +491,7 @@ void Foam::meshRefinement::checkData()
 
         // Extend segments a bit
         {
-            const vectorField smallVec(Foam::sqrt(SMALL)*(end-start));
+            const vectorField smallVec(ROOTSMALL*(end-start));
             start -= smallVec;
             end += smallVec;
         }
@@ -2974,7 +2974,7 @@ void Foam::meshRefinement::dumpIntersections(const fileName& prefix) const
 
         // Extend segments a bit
         {
-            const vectorField smallVec(Foam::sqrt(SMALL)*(end-start));
+            const vectorField smallVec(ROOTSMALL*(end-start));
             start -= smallVec;
             end += smallVec;
         }

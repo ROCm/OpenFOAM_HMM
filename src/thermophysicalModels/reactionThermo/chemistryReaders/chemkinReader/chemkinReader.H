@@ -77,7 +77,7 @@ public:
             gas
         };
 
-        //- Species element
+        //- species element
         struct specieElement
         {
             word elementName;
@@ -210,6 +210,9 @@ private:
 
         //- Flag to indicate that file is in new format
         Switch newFormat_;
+
+        //- Tolerance for element imbalance in a reaction
+        scalar imbalanceTol_;
 
 
     // Private Member Functions
