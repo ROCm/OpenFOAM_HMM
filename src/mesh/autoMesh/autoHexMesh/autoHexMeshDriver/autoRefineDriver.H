@@ -84,6 +84,13 @@ class autoRefineDriver
             const label minRefine
         );
 
+        //- Refine all cells containing small surface features
+        label smallFeatureRefine
+        (
+            const refinementParameters& refineParams,
+            const label maxIter
+        );
+
         //- Refine all cells interacting with the surface
         label surfaceOnlyRefine
         (
@@ -93,6 +100,13 @@ class autoRefineDriver
 
         //- Refine all cells in small gaps
         label gapOnlyRefine
+        (
+            const refinementParameters& refineParams,
+            const label maxIter
+        );
+
+        //- Refine all cells in large gaps
+        label bigGapOnlyRefine
         (
             const refinementParameters& refineParams,
             const label maxIter

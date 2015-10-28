@@ -215,6 +215,55 @@ void Foam::meshRefinement::calcNeighbourData
 }
 
 
+void Foam::meshRefinement::calcCellCellRays
+(
+    const pointField& neiCc,
+    const labelList& neiLevel,
+    const labelList& testFaces,
+    pointField& start,
+    pointField& end,
+    labelList& minLevel
+) const
+{
+    const labelList& cellLevel = meshCutter_.cellLevel();
+    const pointField& cellCentres = mesh_.cellCentres();
+
+    start.setSize(testFaces.size());
+    end.setSize(testFaces.size());
+    minLevel.setSize(testFaces.size());
+
+    forAll(testFaces, i)
+    {
+        label faceI = testFaces[i];
+        label own = mesh_.faceOwner()[faceI];
+
+        if (mesh_.isInternalFace(faceI))
+        {
+            label nei = mesh_.faceNeighbour()[faceI];
+
+            start[i] = cellCentres[own];
+            end[i] = cellCentres[nei];
+            minLevel[i] = min(cellLevel[own], cellLevel[nei]);
+        }
+        else
+        {
+            label bFaceI = faceI - mesh_.nInternalFaces();
+
+            start[i] = cellCentres[own];
+            end[i] = neiCc[bFaceI];
+            minLevel[i] = min(cellLevel[own], neiLevel[bFaceI]);
+        }
+    }
+
+    // Extend segments a bit
+    {
+        const vectorField smallVec(ROOTSMALL*(end-start));
+        start -= smallVec;
+        end += smallVec;
+    }
+}
+
+
 // Find intersections of edges (given by their two endpoints) with surfaces.
 // Returns first intersection if there are more than one.
 void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
@@ -1187,7 +1236,8 @@ Foam::meshRefinement::meshRefinement
     const bool overwrite,
     const refinementSurfaces& surfaces,
     const refinementFeatures& features,
-    const shellSurfaces& shells
+    const shellSurfaces& shells,
+    const shellSurfaces& limitShells
 )
 :
     mesh_(mesh),
@@ -1197,6 +1247,7 @@ Foam::meshRefinement::meshRefinement
     surfaces_(surfaces),
     features_(features),
     shells_(shells),
+    limitShells_(limitShells),
     meshCutter_
     (
         mesh,
