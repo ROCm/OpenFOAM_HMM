@@ -162,7 +162,7 @@ void Foam::searchableCone::findNearest
             normalCone /= mag(normalCone);
         }
 
-        if (innerRadius1_ > 0 && innerRadius2_ > 0)
+        if (innerRadius1_ > 0 || innerRadius2_ > 0)
         {
             // Same for inner radius
             point iCprojPt1 = point1_+ innerRadius1_*v;
@@ -319,8 +319,8 @@ Foam::scalar Foam::searchableCone::radius2
 }
 
 
-// From http://www.gamedev.net/community/forums/topic.asp?topic_id=467789 -
-// intersection of cylinder with ray
+// From mrl.nyu.edu/~dzorin/rend05/lecture2.pdf,
+// Ray Tracing II, Infinite cone ray intersection.
 void Foam::searchableCone::findLineAll
 (
     const searchableCone& cone,
@@ -445,33 +445,53 @@ void Foam::searchableCone::findLineAll
     }
 
 
-    vector va = cone.unitDir_;
-    point pa =
-        cone.unitDir_*cone.radius1_*mag(cone.point2_-cone.point1_)
-       /(cone.radius1_-cone.radius2_)
-       +cone.point1_;
+    // Second order equation of the form a*t^2 + b*t + c
+    scalar a, b, c;
 
     scalar deltaRadius = cone.radius2_-cone.radius1_;
-    scalar l2 = sqr(deltaRadius)+sqr(cone.magDir_);
-    scalar sqrCosAlpha = sqr(cone.magDir_)/l2;
-    scalar sqrSinAlpha = sqr(deltaRadius)/l2;
+    if (mag(deltaRadius) <= ROOTVSMALL)
+    {
+        vector point1Start(start-cone.point1_);
+        const vector x = point1Start ^ cone.unitDir_;
+        const vector y = V ^ cone.unitDir_;
+        const scalar d = sqr(0.5*(cone.radius1_ + cone.radius2_));
+
+        a = (y&y);
+        b = 2*(x&y);
+        c = (x&x)-d;
+    }
+    else
+    {
+        vector va = cone.unitDir_;
+        vector v1(end-start);
+        v1 = v1/mag(v1);
+        scalar p  = (va&v1);
+        vector a1 = (v1-p*va);
+
+        // Determine the end point of the cone
+        point pa =
+            cone.unitDir_*cone.radius1_*mag(cone.point2_-cone.point1_)
+           /(-deltaRadius)
+           +cone.point1_;
+
+        scalar l2 = sqr(deltaRadius)+sqr(cone.magDir_);
+        scalar sqrCosAlpha = sqr(cone.magDir_)/l2;
+        scalar sqrSinAlpha = sqr(deltaRadius)/l2;
 
 
-    vector delP(start-pa);
-    vector v1(end-start);
-    v1 = v1/mag(v1);
+        vector delP(start-pa);
+        vector p1 = (delP-(delP&va)*va);
 
-    scalar p  = (va&v1);
-    vector a1 = (v1-p*va);
-    vector p1 = (delP-(delP&va)*va);
-    const scalar a = sqrCosAlpha*((v1-p*va)&(v1-p*va))-sqrSinAlpha*p*p;
-    const scalar b =
-        2.0*sqrCosAlpha*(a1&p1)
-       -2.0*sqrSinAlpha*(v1&va)*(delP&va);
-    const scalar c =
-        sqrCosAlpha
-       *((delP-(delP&va)*va)&(delP-(delP&va)*va))
-       -sqrSinAlpha*sqr(delP&va);
+        a = sqrCosAlpha*((v1-p*va)&(v1-p*va))-sqrSinAlpha*p*p;
+        b =
+            2.0*sqrCosAlpha*(a1&p1)
+           -2.0*sqrSinAlpha*(v1&va)*(delP&va);
+        c =
+            sqrCosAlpha
+           *((delP-(delP&va)*va)&(delP-(delP&va)*va))
+           -sqrSinAlpha*sqr(delP&va);
+    }
+
     const scalar disc = b*b-4.0*a*c;
 
     scalar t1 = -VGREAT;
@@ -795,7 +815,7 @@ void Foam::searchableCone::findLine
     }
 
 
-    if (innerRadius1_ > 0.0 && innerRadius2_ > 0.0)
+    if (innerRadius1_ > 0.0 || innerRadius2_ > 0.0)
     {
         IOobject io(*this);
         io.rename(name()+"Inner");
@@ -875,7 +895,7 @@ void Foam::searchableCone::findLineAny
             info[i] = b;
         }
     }
-    if (innerRadius1_ > 0.0 && innerRadius2_ > 0.0)
+    if (innerRadius1_ > 0.0 || innerRadius2_ > 0.0)
     {
         IOobject io(*this);
         io.rename(name()+"Inner");
@@ -966,7 +986,7 @@ void Foam::searchableCone::findLineAll
         }
     }
 
-    if (innerRadius1_ > 0.0 && innerRadius2_ > 0.0)
+    if (innerRadius1_ > 0.0 || innerRadius2_ > 0.0)
     {
         IOobject io(*this);
         io.rename(name()+"Inner");
