@@ -28,11 +28,14 @@ License
 #include "refinementSurfaces.H"
 #include "refinementFeatures.H"
 #include "shellSurfaces.H"
-#include "OBJstream.H"
 #include "triSurfaceMesh.H"
 #include "treeDataCell.H"
 #include "searchableSurfaces.H"
 #include "DynamicField.H"
+#include "transportData.H"
+#include "FaceCellWave.H"
+#include "volFields.H"
+#include "zeroGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -71,17 +74,18 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
 
         pointField start(testFaces.size());
         pointField end(testFaces.size());
-        labelList minLevel(testFaces.size());
-
-        calcCellCellRays
-        (
-            neiCc,
-            neiLevel,
-            testFaces,
-            start,
-            end,
-            minLevel
-        );
+        {
+            labelList minLevel(testFaces.size());
+            calcCellCellRays
+            (
+                neiCc,
+                neiLevel,
+                testFaces,
+                start,
+                end,
+                minLevel
+            );
+        }
 
 
         // Collect cells to test for inside/outside in shell
@@ -134,24 +138,21 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
         }
 
 
-        //OBJstream str(mesh_.time().timePath()/"markSurfaceRefinement.obj");
-        //Info<< "Dumping rays to " << str.name( ) << endl;
-
         const List<FixedList<label, 3> >& extendedGapLevel =
             surfaces_.extendedGapLevel();
         const List<volumeType>& extendedGapMode =
             surfaces_.extendedGapMode();
 
-        labelList surface1;
-        List<pointIndexHit> hit1;
-        labelList region1;
-        vectorField normal1;
+        labelList ccSurface1;
+        List<pointIndexHit> ccHit1;
+        labelList ccRegion1;
+        vectorField ccNormal1;
 
         {
-            labelList surface2;
-            List<pointIndexHit> hit2;
-            labelList region2;
-            vectorField normal2;
+            labelList ccSurface2;
+            List<pointIndexHit> ccHit2;
+            labelList ccRegion2;
+            vectorField ccNormal2;
 
             surfaces_.findNearestIntersection
             (
@@ -159,38 +160,43 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
                 start,
                 end,
 
-                surface1,
-                hit1,
-                region1,
-                normal1,
+                ccSurface1,
+                ccHit1,
+                ccRegion1,
+                ccNormal1,
 
-                surface2,
-                hit2,
-                region2,
-                normal2
+                ccSurface2,
+                ccHit2,
+                ccRegion2,
+                ccNormal2
             );
         }
 
+        start.clear();
+        end.clear();
 
-        start.setSize(2*surface1.size());
-        end.setSize(2*surface1.size());
-        labelList map(2*surface1.size());
-        pointField start2(2*surface1.size());
-        pointField end2(2*surface1.size());
-        labelList cellMap(2*surface1.size());
+        DynamicField<point> rayStart(2*ccSurface1.size());
+        DynamicField<point> rayEnd(2*ccSurface1.size());
+        DynamicField<scalar> gapSize(2*ccSurface1.size());
 
-        label compactI = 0;
+        DynamicField<point> rayStart2(2*ccSurface1.size());
+        DynamicField<point> rayEnd2(2*ccSurface1.size());
+        DynamicField<scalar> gapSize2(2*ccSurface1.size());
 
-        forAll(surface1, i)
+        DynamicList<label> cellMap(2*ccSurface1.size());
+        DynamicList<label> compactMap(2*ccSurface1.size());
+
+        forAll(ccSurface1, i)
         {
-            label surfI = surface1[i];
+            label surfI = ccSurface1[i];
 
             if (surfI != -1)
             {
-                label globalRegionI = surfaces_.globalRegion(surfI, region1[i]);
+                label globalRegionI =
+                    surfaces_.globalRegion(surfI, ccRegion1[i]);
 
                 label faceI = testFaces[i];
-                const point& surfPt = hit1[i].hitPoint();
+                const point& surfPt = ccHit1[i].hitPoint();
 
                 label own = mesh_.faceOwner()[faceI];
                 if (cellToCompact[own] != -1)
@@ -210,26 +216,28 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
                     );
 
                     const point& cc = cellCentres[own];
-                    bool okRay = generateRay
+                    label nRays = generateRays
                     (
                         false,
                         surfPt,
-                        normal1[i],
+                        ccNormal1[i],
                         gapInfo,
                         gapMode,
-                        surfPt+((cc-surfPt)&normal1[i])*normal1[i],
+                        surfPt+((cc-surfPt)&ccNormal1[i])*ccNormal1[i],
                         cellLevel[own],
 
-                        start[compactI],
-                        end[compactI],
-                        start2[compactI],
-                        end2[compactI]
-                    );
-                    cellMap[compactI] = own;
+                        rayStart,
+                        rayEnd,
+                        gapSize,
 
-                    if (okRay)
+                        rayStart2,
+                        rayEnd2,
+                        gapSize2
+                    );
+                    for (label j = 0; j < nRays; j++)
                     {
-                        map[compactI++] = i;
+                        cellMap.append(own);
+                        compactMap.append(i);
                     }
                 }
                 if (mesh_.isInternalFace(faceI))
@@ -252,31 +260,37 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
                         );
 
                         const point& cc = cellCentres[nei];
-                        bool okRay = generateRay
+                        label nRays = generateRays
                         (
                             false,
                             surfPt,
-                            normal1[i],
+                            ccNormal1[i],
                             gapInfo,
                             gapMode,
-                            surfPt+((cc-surfPt)&normal1[i])*normal1[i],
+                            surfPt+((cc-surfPt)&ccNormal1[i])*ccNormal1[i],
                             cellLevel[nei],
 
-                            start[compactI],
-                            end[compactI],
-                            start2[compactI],
-                            end2[compactI]
-                        );
-                        cellMap[compactI] = nei;
+                            rayStart,
+                            rayEnd,
+                            gapSize,
 
-                        if (okRay)
+                            rayStart2,
+                            rayEnd2,
+                            gapSize2
+                        );
+                        for (label j = 0; j < nRays; j++)
                         {
-                            map[compactI++] = i;
+                            cellMap.append(nei);
+                            compactMap.append(i);
                         }
                     }
                 }
                 else
                 {
+                    // Note: on coupled face. What cell are we going to
+                    // refine? We've got the neighbouring cell centre
+                    // and level but we cannot mark it for refinement on
+                    // this side...
                     label bFaceI = faceI - mesh_.nInternalFaces();
 
                     if (bFaceToCompact[bFaceI] != -1)
@@ -296,99 +310,103 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
                         );
 
                         const point& cc = neiCc[bFaceI];
-                        bool okRay = generateRay
+                        label nRays = generateRays
                         (
                             false,
                             surfPt,
-                            normal1[i],
+                            ccNormal1[i],
                             gapInfo,
                             gapMode,
-                            surfPt+((cc-surfPt)&normal1[i])*normal1[i],
+                            surfPt+((cc-surfPt)&ccNormal1[i])*ccNormal1[i],
                             neiLevel[bFaceI],
 
-                            start[compactI],
-                            end[compactI],
-                            start2[compactI],
-                            end2[compactI]
-                        );
-                        cellMap[compactI] = -1;
+                            rayStart,
+                            rayEnd,
+                            gapSize,
 
-                        if (okRay)
+                            rayStart2,
+                            rayEnd2,
+                            gapSize2
+                        );
+                        for (label j = 0; j < nRays; j++)
                         {
-                            map[compactI++] = i;
+                            cellMap.append(-1); // See above.
+                            compactMap.append(i);
                         }
                     }
                 }
             }
         }
 
-        //Info<< "Retesting " << returnReduce(compactI, sumOp<label>())
-        //    << " out of " << returnReduce(start.size(), sumOp<label>())
-        //    << endl;
+        Info<< "Shooting " << returnReduce(rayStart.size(), sumOp<label>())
+            << " rays from " << returnReduce(testFaces.size(), sumOp<label>())
+            << " intersected faces" << endl;
 
-        start.setSize(compactI);
-        end.setSize(compactI);
-        start2.setSize(compactI);
-        end2.setSize(compactI);
-        map.setSize(compactI);
-        cellMap.setSize(compactI);
+        rayStart.shrink();
+        rayEnd.shrink();
+        gapSize.shrink();
 
-        testFaces = UIndirectList<label>(testFaces, map)();
-        minLevel = UIndirectList<label>(minLevel, map)();
-        surface1.clear();
-        hit1.clear();
-        region1.clear();
-        normal1 = UIndirectList<vector>(normal1, map)();
+        rayStart2.shrink();
+        rayEnd2.shrink();
+        gapSize2.shrink();
 
-        // Do intersections in first direction
-        labelList surfaceHit;
-        vectorField surfaceNormal;
+        cellMap.shrink();
+        compactMap.shrink();
+
+        testFaces.clear();
+        ccSurface1.clear();
+        ccHit1.clear();
+        ccRegion1.clear();
+        ccNormal1 = UIndirectList<vector>(ccNormal1, compactMap)();
+
+
+        // Do intersections in pairs
+        labelList surf1;
+        List<pointIndexHit> hit1;
+        vectorField normal1;
         surfaces_.findNearestIntersection
         (
-            start,
-            end,
-            surfaceHit,
-            surfaceNormal
+            rayStart,
+            rayEnd,
+            surf1,
+            hit1,
+            normal1
         );
+
+        labelList surf2;
+        List<pointIndexHit> hit2;
+        vectorField normal2;
+        surfaces_.findNearestIntersection
+        (
+            rayStart2,
+            rayEnd2,
+            surf2,
+            hit2,
+            normal2
+        );
+
+        forAll(surf1, i)
         {
-            // Do intersections in second direction and merge
-            labelList surfaceHit2;
-            vectorField surfaceNormal2;
-            surfaces_.findNearestIntersection
-            (
-                start2,
-                end2,
-                surfaceHit2,
-                surfaceNormal2
-            );
-            forAll(surfaceHit, i)
-            {
-                if (surfaceHit[i] == -1 && surfaceHit2[i] != -1)
-                {
-                    surfaceHit[i] = surfaceHit2[i];
-                    surfaceNormal[i] = surfaceNormal2[i];
-                }
-            }
-        }
-
-
-        forAll(surfaceHit, i)
-        {
-            label surfI = surfaceHit[i];
-
-            if (surfI != -1)
+            if (surf1[i] != -1 && surf2[i] != -1)
             {
                 // Found intersection with surface. Check opposite normal.
-
                 label cellI = cellMap[i];
 
-                if (cellI != -1 && mag(normal1[i]&surfaceNormal[i]) > planarCos)
+                if
+                (
+                    cellI != -1
+                 && (mag(normal1[i]&normal2[i]) > planarCos)
+                 && (
+                        magSqr(hit1[i].hitPoint()-hit2[i].hitPoint())
+                      < Foam::sqr(gapSize[i])
+                    )
+                )
                 {
                     if
                     (
                        !markForRefine
                         (
-                            surfI,
+                            surf1[i],
                             nAllowRefine,
                             refineCell[cellI],
                             nRefine
@@ -415,84 +433,6 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
 }
 
 
-//Foam::labelList Foam::meshRefinement::extractHits
-//(
-//    const List<pointIndexHit>& info
-//)
-//{
-//    labelList compactMap(info.size());
-//    label compactI = 0;
-//    forAll(info, i)
-//    {
-//        if (info[i].hit())
-//        {
-//            compactMap[compactI++] = i;
-//        }
-//    }
-//    compactMap.setSize(compactI);
-//    return compactMap;
-//}
-//
-//
-//void Foam::meshRefinement::mergeHits
-//(
-//    const pointField& samples,
-//    const List<pointIndexHit>& extraInfo,
-//    List<pointIndexHit>& info
-//)
-//{
-//    if (extraInfo.size() != info.size())
-//    {
-//        FatalErrorIn
-//        (
-//            "meshRefinement::mergeHits(const List<pointIndexHit>&"
-//            ", List<pointIndexHit>& info)"
-//        )   << "Sizes differ " << extraInfo.size() << ' ' << info.size()
-//            << exit(FatalError);
-//    }
-//
-//    // Merge oppositeInfo2 into oppositeInfo
-//    forAll(extraInfo, i)
-//    {
-//        if (!info[i].hit())
-//        {
-//            if (extraInfo[i].hit())
-//            {
-//                info[i] = extraInfo[i];
-//            }
-//        }
-//        else if (extraInfo[i].hit())
-//        {
-//            const point& nearPt = samples[i];   //nearInfo[i].hitPoint();
-//
-//            scalar d = magSqr(info[i].hitPoint()-nearPt);
-//            scalar d2 = magSqr(extraInfo[i].hitPoint()-nearPt);
-//
-//            if (d2 < d)
-//            {
-//                info[i] = extraInfo[i];
-//            }
-//        }
-//    }
-//}
-//
-//
-//Foam::tmp<Foam::pointField> Foam::meshRefinement::extractPoints
-//(
-//    const List<pointIndexHit>& info
-//)
-//{
-//    tmp<pointField> tfld(new pointField(info.size()));
-//    pointField& fld = tfld();
-//
-//    forAll(info, i)
-//    {
-//        fld[i] = info[i].rawPoint();
-//    }
-//    return tfld;
-//}
-//
-//
 //Foam::meshRefinement::findNearestOppositeOp::findNearestOppositeOp
 //(
 //    const indexedOctree<treeDataTriSurface>& tree,
@@ -730,7 +670,58 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
 //}
 
 
-bool Foam::meshRefinement::generateRay
+Foam::label Foam::meshRefinement::generateRays
+(
+    const point& nearPoint,
+    const vector& nearNormal,
+    const FixedList<label, 3>& gapInfo,
+    const volumeType& mode,
+
+    const label cLevel,
+
+    DynamicField<point>& start,
+    DynamicField<point>& end
+) const
+{
+    label nOldRays = start.size();
+
+    if (cLevel >= gapInfo[1] && cLevel < gapInfo[2])
+    {
+        scalar cellSize = meshCutter_.level0EdgeLength()/pow(2, cLevel);
+
+        // Calculate gap size
+        scalar nearGap = gapInfo[0]*cellSize;
+
+        const vector& n = nearNormal;
+
+        // Situation 'C' above: cell too close. Use surface
+        // -normal and -point to shoot rays
+
+        if (mode == volumeType::OUTSIDE)
+        {
+            start.append(nearPoint+1e-6*n);
+            end.append(nearPoint+nearGap*n);
+        }
+        else if (mode == volumeType::INSIDE)
+        {
+            start.append(nearPoint-1e-6*n);
+            end.append(nearPoint-nearGap*n);
+        }
+        else if (mode == volumeType::MIXED)
+        {
+            start.append(nearPoint+1e-6*n);
+            end.append(nearPoint+nearGap*n);
+
+            start.append(nearPoint-1e-6*n);
+            end.append(nearPoint-nearGap*n);
+        }
+    }
+
+    return start.size()-nOldRays;
+}
+
+
+Foam::label Foam::meshRefinement::generateRays
 (
     const bool useSurfaceNormal,
 
@@ -742,10 +733,13 @@ bool Foam::meshRefinement::generateRay
     const point& cc,
     const label cLevel,
 
-    point& start,
-    point& end,
-    point& start2,
-    point& end2
+    DynamicField<point>& start,
+    DynamicField<point>& end,
+    DynamicField<scalar>& gapSize,
+
+    DynamicField<point>& start2,
+    DynamicField<point>& end2,
+    DynamicField<scalar>& gapSize2
 ) const
 {
     // We want to handle the following cases:
@@ -805,7 +799,7 @@ bool Foam::meshRefinement::generateRay
     //   magV < 0.5cellSize)
     // - or otherwise if on the correct side
 
-    bool okRay = false;
+    label nOldRays = start.size();
 
     if (cLevel >= gapInfo[1] && cLevel < gapInfo[2])
     {
@@ -823,36 +817,52 @@ bool Foam::meshRefinement::generateRay
             const vector& n = nearNormal;
 
             // Situation 'C' above: cell too close. Use surface
-            // normal to shoot rays
+            // -normal and -point to shoot rays
 
             if (mode == volumeType::OUTSIDE)
             {
-                start = nearPoint+1e-6*n;
-                end = nearPoint+nearGap*n;
-                // Small second vector just to make sure to
-                // refine cell
-                start2 = nearPoint-1e-6*n;
-                end2 = nearPoint-0.5*cellSize*n;
+                start.append(nearPoint+1e-6*n);
+                end.append(nearPoint+nearGap*n);
+                gapSize.append(nearGap);
+                // Second vector so we get pairs of intersections
+                start2.append(nearPoint+1e-6*n);
+                end2.append(nearPoint-1e-6*n);
+                gapSize2.append(gapSize.last());
             }
             else if (mode == volumeType::INSIDE)
             {
-                start = nearPoint-1e-6*n;
-                end = nearPoint-nearGap*n;
-                // Small second vector just to make sure to
-                // refine cell
-                start2 = nearPoint+1e-6*n;
-                end2 = nearPoint+0.5*cellSize*n;
+                start.append(nearPoint-1e-6*n);
+                end.append(nearPoint-nearGap*n);
+                gapSize.append(nearGap);
+                // Second vector so we get pairs of intersections
+                start2.append(nearPoint-1e-6*n);
+                end2.append(nearPoint+1e-6*n);
+                gapSize2.append(gapSize.last());
             }
             else if (mode == volumeType::MIXED)
             {
-                start = nearPoint+1e-6*n;
-                end = nearPoint+nearGap*n;
-
-                start2 = nearPoint-1e-6*n;
-                end2 = nearPoint-nearGap*n;
+                // Do both rays:
+                // Outside
+                {
+                    start.append(nearPoint+1e-6*n);
+                    end.append(nearPoint+nearGap*n);
+                    gapSize.append(nearGap);
+                    // Second vector so we get pairs of intersections
+                    start2.append(nearPoint+1e-6*n);
+                    end2.append(nearPoint-1e-6*n);
+                    gapSize2.append(gapSize.last());
+                }
+                // Inside
+                {
+                    start.append(nearPoint-1e-6*n);
+                    end.append(nearPoint-nearGap*n);
+                    gapSize.append(nearGap);
+                    // Second vector so we get pairs of intersections
+                    start2.append(nearPoint-1e-6*n);
+                    end2.append(nearPoint+1e-6*n);
+                    gapSize2.append(gapSize.last());
+                }
             }
-
-            okRay = true;
         }
         else
         {
@@ -871,115 +881,51 @@ bool Foam::meshRefinement::generateRay
              || (mode == volumeType::INSIDE && s < -SMALL)
             )
             {
-                // Use vector through cell centre
-                vector n(v/(magV+ROOTVSMALL));
+                //// Use vector through cell centre
+                //vector n(v/(magV+ROOTVSMALL));
+                //
+                //start.append(cc);
+                //end.append(cc+nearGap*n);
+                //gapSize.append(nearGap);
+                //
+                //start2.append(cc);
+                //end2.append(cc-nearGap*n);
+                //gapSize2.append(nearGap);
 
-                start = nearPoint+1e-6*n;
-                end = nearPoint+nearGap*n;
-                // Dummy second vector
-                start2 = start;
-                end2 = start2;
 
-                okRay = true;
+                // Shoot some rays through the cell centre
+                // X-direction:
+                start.append(cc);
+                end.append(cc+nearGap*vector(1, 0, 0));
+                gapSize.append(nearGap);
+
+                start2.append(cc);
+                end2.append(cc-nearGap*vector(1, 0, 0));
+                gapSize2.append(nearGap);
+
+                // Y-direction:
+                start.append(cc);
+                end.append(cc+nearGap*vector(0, 1, 0));
+                gapSize.append(nearGap);
+
+                start2.append(cc);
+                end2.append(cc-nearGap*vector(0, 1, 0));
+                gapSize2.append(nearGap);
+
+                // Z-direction:
+                start.append(cc);
+                end.append(cc+nearGap*vector(0, 0, 1));
+                gapSize.append(nearGap);
+
+                start2.append(cc);
+                end2.append(cc-nearGap*vector(0, 0, 1));
+                gapSize2.append(nearGap);
             }
         }
     }
 
-    return okRay;
+    return start.size()-nOldRays;
 }
-
-
-//void Foam::meshRefinement::shootRays
-//(
-//    const label surfI,
-//    labelList& nearMap,
-//    scalarField& nearGap,
-//    List<pointIndexHit>& nearInfo,
-//    List<pointIndexHit>& oppositeInfo
-//) const
-//{
-//    const labelList& cellLevel = meshCutter_.cellLevel();
-//    const scalar edge0Len = meshCutter_.level0EdgeLength();
-//
-//    const labelList& surfaceIndices = surfaces_.surfaces();
-//    const List<FixedList<label, 3> >& extendedGapLevel =
-//        surfaces_.extendedGapLevel();
-//    const List<volumeType>& extendedGapMode = surfaces_.extendedGapMode();
-//
-//
-//    label geomI = surfaceIndices[surfI];
-//    const searchableSurface& geom = surfaces_.geometry()[geomI];
-//
-//
-//    // Normals for ray shooting and inside/outside detection
-//    vectorField nearNormal;
-//    geom.getNormal(nearInfo, nearNormal);
-//    // Regions
-//    labelList nearRegion;
-//    geom.getRegion(nearInfo, nearRegion);
-//
-//    labelList map(nearInfo.size());
-//
-//    pointField start(nearInfo.size());
-//    pointField end(nearInfo.size());
-//    pointField start2(nearInfo.size());
-//    pointField end2(nearInfo.size());
-//
-//    label compactI = 0;
-//    forAll(nearInfo, i)
-//    {
-//        label globalRegionI =
-//            surfaces_.globalRegion(surfI, nearRegion[i]);
-//
-//        label cellI = nearMap[i];
-//        label cLevel = cellLevel[cellI];
-//        scalar cellSize = edge0Len/pow(2, cLevel);
-//
-//        // Update gap size
-//        nearGap[i] = extendedGapLevel[globalRegionI][0]*cellSize;
-//
-//        // Construct one or two rays to test for oppositeness
-//        bool okRay = generateRay
-//        (
-//            false,
-//            nearInfo[i].hitPoint(),
-//            nearNormal[i],
-//            extendedGapLevel[globalRegionI],
-//            extendedGapMode[globalRegionI],
-//
-//            cellCentres[cellI],
-//            cellLevel[cellI],
-//
-//            start[compactI],
-//            end[compactI],
-//            start2[compactI],
-//            end2[compactI]
-//        );
-//        if (okRay)
-//        {
-//            map[compactI++] = i;
-//        }
-//    }
-//
-//    Info<< "Selected " << returnReduce(compactI, sumOp<label>())
-//        << " hits on the correct side out of "
-//        << returnReduce(map.size(), sumOp<label>()) << endl;
-//    map.setSize(compactI);
-//    start.setSize(compactI);
-//    end.setSize(compactI);
-//    start2.setSize(compactI);
-//    end2.setSize(compactI);
-//
-//    nearMap = UIndirectList<label>(nearMap, map)();
-//    nearGap = UIndirectList<scalar>(nearGap, map)();
-//    nearInfo = UIndirectList<pointIndexHit>(nearInfo, map)();
-//
-//    geom.findLineAny(start, end, oppositeInfo);
-//
-//    List<pointIndexHit> oppositeInfo2;
-//    geom.findLineAny(start2, end2, oppositeInfo2);
-//    mergeHits(extractPoints(nearInfo), oppositeInfo2, oppositeInfo);
-//}
 
 
 void Foam::meshRefinement::selectGapCandidates
@@ -1081,12 +1027,20 @@ void Foam::meshRefinement::mergeGapInfo
 Foam::label Foam::meshRefinement::markInternalGapRefinement
 (
     const scalar planarCos,
+    const bool spreadGapSize,
     const label nAllowRefine,
 
     labelList& refineCell,
-    label& nRefine
+    label& nRefine,
+    labelList& numGapCells,
+    scalarField& detectedGapSize
 ) const
 {
+    detectedGapSize.setSize(mesh_.nCells());
+    detectedGapSize = GREAT;
+    numGapCells.setSize(mesh_.nCells());
+    numGapCells = -1;
+
     const labelList& cellLevel = meshCutter_.cellLevel();
     const pointField& cellCentres = mesh_.cellCentres();
     const scalar edge0Len = meshCutter_.level0EdgeLength();
@@ -1115,7 +1069,6 @@ Foam::label Foam::meshRefinement::markInternalGapRefinement
             shellGapInfo,
             shellGapMode
         );
-
 
         // Find nearest point and normal on the surfaces
         List<pointIndexHit> nearInfo;
@@ -1147,13 +1100,16 @@ Foam::label Foam::meshRefinement::markInternalGapRefinement
 
 
 
-        labelList map(nearInfo.size());
-        pointField start(nearInfo.size());
-        pointField end(nearInfo.size());
-        pointField start2(nearInfo.size());
-        pointField end2(nearInfo.size());
+        DynamicList<label> map(nearInfo.size());
+        DynamicField<point> rayStart(nearInfo.size());
+        DynamicField<point> rayEnd(nearInfo.size());
+        DynamicField<scalar> gapSize(nearInfo.size());
 
-        label compactI = 0;
+        DynamicField<point> rayStart2(nearInfo.size());
+        DynamicField<point> rayEnd2(nearInfo.size());
+        DynamicField<scalar> gapSize2(nearInfo.size());
+
+        label nTestCells = 0;
 
         forAll(nearInfo, i)
         {
@@ -1178,9 +1134,16 @@ Foam::label Foam::meshRefinement::markInternalGapRefinement
                     gapMode
                 );
 
+                // Store wanted number of cells in gap
+                label cellI = cellMap[i];
+                label cLevel = cellLevel[cellI];
+                if (cLevel >= gapInfo[1] && cLevel < gapInfo[2])
+                {
+                    numGapCells[cellI] = max(numGapCells[cellI], gapInfo[0]);
+                }
 
-                // Construct one or two rays to test for oppositeness
-                bool okRay = generateRay
+                // Construct one or more rays to test for oppositeness
+                label nRays = generateRays
                 (
                     false,
                     nearInfo[i].hitPoint(),
@@ -1188,29 +1151,39 @@ Foam::label Foam::meshRefinement::markInternalGapRefinement
                     gapInfo,
                     gapMode,
 
-                    cellCentres[cellMap[i]],
-                    cellLevel[cellMap[i]],
+                    cellCentres[cellI],
+                    cLevel,
 
-                    start[compactI],
-                    end[compactI],
-                    start2[compactI],
-                    end2[compactI]
+                    rayStart,
+                    rayEnd,
+                    gapSize,
+
+                    rayStart2,
+                    rayEnd2,
+                    gapSize2
                 );
-                if (okRay)
+                if (nRays > 0)
                 {
-                    map[compactI++] = i;
+                    nTestCells++;
+                    for (label j = 0; j < nRays; j++)
+                    {
+                        map.append(i);
+                    }
                 }
             }
         }
 
-        Info<< "Selected " << returnReduce(compactI, sumOp<label>())
+        Info<< "Selected " << returnReduce(nTestCells, sumOp<label>())
             << " cells for testing out of "
             << mesh_.globalData().nTotalCells() << endl;
-        map.setSize(compactI);
-        start.setSize(compactI);
-        end.setSize(compactI);
-        start2.setSize(compactI);
-        end2.setSize(compactI);
+        map.shrink();
+        rayStart.shrink();
+        rayEnd.shrink();
+        gapSize.shrink();
+
+        rayStart2.shrink();
+        rayEnd2.shrink();
+        gapSize2.shrink();
 
         cellMap = UIndirectList<label>(cellMap, map)();
         nearNormal = UIndirectList<vector>(nearNormal, map)();
@@ -1221,63 +1194,190 @@ Foam::label Foam::meshRefinement::markInternalGapRefinement
         nearRegion.clear();
 
 
-        // Do intersections in first direction
-        labelList surfaceHit;
-        vectorField surfaceNormal;
+        // Do intersections in pairs
+        labelList surf1;
+        List<pointIndexHit> hit1;
+        vectorField normal1;
         surfaces_.findNearestIntersection
         (
-            start,
-            end,
-            surfaceHit,
-            surfaceNormal
+            rayStart,
+            rayEnd,
+            surf1,
+            hit1,
+            normal1
         );
+
+        labelList surf2;
+        List<pointIndexHit> hit2;
+        vectorField normal2;
+        surfaces_.findNearestIntersection
+        (
+            rayStart2,
+            rayEnd2,
+            surf2,
+            hit2,
+            normal2
+        );
+
+        // Extract cell based gap size
+        forAll(surf1, i)
         {
-            // Do intersections in second direction and merge
-            labelList surfaceHit2;
-            vectorField surfaceNormal2;
-            surfaces_.findNearestIntersection
-            (
-                start2,
-                end2,
-                surfaceHit2,
-                surfaceNormal2
-            );
-            forAll(surfaceHit, i)
+            if (surf1[i] != -1 && surf2[i] != -1)
             {
-                if (surfaceHit[i] == -1 && surfaceHit2[i] != -1)
-                {
-                    surfaceHit[i] = surfaceHit2[i];
-                    surfaceNormal[i] = surfaceNormal2[i];
-                }
-            }
-        }
-
-
-        forAll(surfaceHit, i)
-        {
-            label surfI = surfaceHit[i];
-
-            if (surfI != -1 && mag(nearNormal[i]&surfaceNormal[i]) > planarCos)
-            {
-                // Found intersection with surface. Check opposite normal.
+                // Found intersections with surface. Check for
+                // - small gap
+                // - coplanar normals
 
                 label cellI = cellMap[i];
 
+                scalar d2 = magSqr(hit1[i].hitPoint()-hit2[i].hitPoint());
+
                 if
                 (
-                   !markForRefine
-                    (
-                        surfI,
-                        nAllowRefine,
-                        refineCell[cellI],
-                        nRefine
-                    )
+                    cellI != -1
+                 && (mag(normal1[i]&normal2[i]) > planarCos)
+                 && (d2 < Foam::sqr(gapSize[i]))
                 )
                 {
-                    break;
+                    detectedGapSize[cellI] = min
+                    (
+                        detectedGapSize[cellI],
+                        Foam::sqrt(d2)
+                    );
                 }
             }
         }
+
+        // Spread it
+        if (spreadGapSize)
+        {
+            // Field on cells and faces
+            List<transportData> cellData(mesh_.nCells());
+            List<transportData> faceData(mesh_.nFaces());
+
+            // Start of walk
+            const pointField& faceCentres = mesh_.faceCentres();
+
+            DynamicList<label> frontFaces(mesh_.nFaces());
+            DynamicList<transportData> frontData(mesh_.nFaces());
+            for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
+            {
+                label own = mesh_.faceOwner()[faceI];
+                label nei = mesh_.faceNeighbour()[faceI];
+
+                scalar minSize = min
+                (
+                    detectedGapSize[own],
+                    detectedGapSize[nei]
+                );
+
+                if (minSize < GREAT)
+                {
+                    frontFaces.append(faceI);
+                    frontData.append
+                    (
+                        transportData
+                        (
+                            faceCentres[faceI],
+                            minSize,
+                            0.0
+                        )
+                    );
+                }
+            }
+            for
+            (
+                label faceI = mesh_.nInternalFaces();
+                faceI < mesh_.nFaces();
+                faceI++
+            )
+            {
+                label own = mesh_.faceOwner()[faceI];
+
+                if (detectedGapSize[own] < GREAT)
+                {
+                    frontFaces.append(faceI);
+                    frontData.append
+                    (
+                        transportData
+                        (
+                            faceCentres[faceI],
+                            detectedGapSize[own],
+                            0.0
+                        )
+                    );
+                }
+            }
+
+            Info<< "Selected "
+                << returnReduce(frontFaces.size(), sumOp<label>())
+                << " faces for spreading gap size out of "
+                << mesh_.globalData().nTotalFaces() << endl;
+
+
+            FaceCellWave<transportData> deltaCalc
+            (
+                mesh_,
+                frontFaces,
+                frontData,
+                faceData,
+                cellData,
+                mesh_.globalData().nTotalCells()+1
+            );
+
+
+            forAll(cellMap, i)
+            {
+                label cellI = cellMap[i];
+                if
+                (
+                    cellI != -1
+                 && cellData[cellI].valid(deltaCalc.data())
+                 && numGapCells[cellI] != -1
+                )
+                {
+                    // Update transported gap size
+                    detectedGapSize[cellI] = min
+                    (
+                        detectedGapSize[cellI],
+                        cellData[cellI].data()
+                    );
+                }
+            }
+        }
+
+
+        // Use it
+        forAll(cellMap, i)
+        {
+            label cellI = cellMap[i];
+
+            if (cellI != -1 && numGapCells[cellI] != -1)
+            {
+                // Needed gap size
+                label cLevel = cellLevel[cellI];
+                scalar cellSize = meshCutter_.level0EdgeLength()/pow(2, cLevel);
+                scalar neededGapSize = numGapCells[cellI]*cellSize;
+
+                if (neededGapSize > detectedGapSize[cellI])
+                {
+                    if
+                    (
+                       !markForRefine
+                        (
+                            123,
+                            nAllowRefine,
+                            refineCell[cellI],
+                            nRefine
+                        )
+                    )
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+
 
         if
         (
@@ -1305,8 +1405,6 @@ Foam::label Foam::meshRefinement::markSmallFeatureRefinement
 ) const
 {
     const labelList& cellLevel = meshCutter_.cellLevel();
-    const pointField& cellCentres = mesh_.cellCentres();
-
     const labelList& surfaceIndices = surfaces_.surfaces();
     const List<FixedList<label, 3> >& extendedGapLevel =
         surfaces_.extendedGapLevel();
@@ -1376,14 +1474,14 @@ Foam::label Foam::meshRefinement::markSmallFeatureRefinement
         );
 
 
-        labelList map(ctrs.size());
-        labelList cellMap(ctrs.size());
-        label compactI = 0;
+        DynamicList<label> map(ctrs.size());
+        DynamicList<label> cellMap(ctrs.size());
 
-        pointField start(ctrs.size());
-        pointField end(ctrs.size());
-        pointField start2(ctrs.size());
-        pointField end2(ctrs.size());
+        DynamicField<point> rayStart(ctrs.size());
+        DynamicField<point> rayEnd(ctrs.size());
+        DynamicField<scalar> gapSize(ctrs.size());
+
+        label nTestCells = 0;
 
         forAll(ctrs, i)
         {
@@ -1422,40 +1520,39 @@ Foam::label Foam::meshRefinement::markSmallFeatureRefinement
                     // Note that we always want to use the surface normal
                     // and not the vector from cell centre to surface point
 
-                    bool okRay = generateRay
+                    label nRays = generateRays
                     (
-                        true,               // always use surface normal
                         ctrs[i],
                         normal[i],
                         gapInfo,
                         gapMode,
 
-                        cellCentres[cellI],
                         cellLevel[cellI],
 
-                        start[compactI],
-                        end[compactI],
-                        start2[compactI],
-                        end2[compactI]
+                        rayStart,
+                        rayEnd
                     );
-                    if (okRay)
+
+                    if (nRays > 0)
                     {
-                        cellMap[compactI] = cellI;
-                        map[compactI++] = i;
+                        nTestCells++;
+                        for (label j = 0; j < nRays; j++)
+                        {
+                            cellMap.append(cellI);
+                            map.append(i);
+                        }
                     }
                 }
             }
         }
 
-        Info<< "Selected " << returnReduce(compactI, sumOp<label>())
+        Info<< "Selected " << returnReduce(nTestCells, sumOp<label>())
             << " cells containing triangle centres out of "
             << mesh_.globalData().nTotalCells() << endl;
-        map.setSize(compactI);
-        cellMap.setSize(compactI);
-        start.setSize(compactI);
-        end.setSize(compactI);
-        start2.setSize(compactI);
-        end2.setSize(compactI);
+        map.shrink();
+        cellMap.shrink();
+        rayStart.shrink();
+        rayEnd.shrink();
 
         ctrs.clear();
         region.clear();
@@ -1463,70 +1560,49 @@ Foam::label Foam::meshRefinement::markSmallFeatureRefinement
         shellGapMode.clear();
         normal = UIndirectList<vector>(normal, map)();
 
-
-        // Do intersections in first direction.
-        // Note passing in of -1 for cell level such that it does not
-        // discard surfaces with level 0. (since can be overridden with
-        // gap level)
+        // Do intersections.
         labelList surfaceHit;
         vectorField surfaceNormal;
         surfaces_.findNearestIntersection
         (
-            start,
-            end,
+            rayStart,
+            rayEnd,
             surfaceHit,
             surfaceNormal
         );
-        {
-            // Do intersections in second direction and merge
-            labelList surfaceHit2;
-            vectorField surfaceNormal2;
-            surfaces_.findNearestIntersection
-            (
-                start2,
-                end2,
-                surfaceHit2,
-                surfaceNormal2
-            );
-            forAll(surfaceHit, i)
-            {
-                if (surfaceHit[i] == -1 && surfaceHit2[i] != -1)
-                {
-                    surfaceHit[i] = surfaceHit2[i];
-                    surfaceNormal[i] = surfaceNormal2[i];
-                }
-            }
-        }
 
 
-        label nGaps = 0;
+        label nOldRefine = 0;
+
 
         forAll(surfaceHit, i)
         {
-            label surfI = surfaceHit[i];
-
-            if (surfI != -1 && mag(normal[i]&surfaceNormal[i]) > planarCos)
+            if (surfaceHit[i] != -1) // && surf2[i] != -1)
             {
-                nGaps++;
+                // Found intersection with surface. Check coplanar normals.
+                label cellI = cellMap[i];
 
-                if
-                (
-                   !markForRefine
-                    (
-                        surfI,
-                        nAllowRefine,
-                        refineCell[cellMap[i]],
-                        nRefine
-                    )
-                )
+                if (mag(normal[i]&surfaceNormal[i]) > planarCos)
                 {
-                    break;
+                    if
+                    (
+                       !markForRefine
+                        (
+                            surfaceHit[i],
+                            nAllowRefine,
+                            refineCell[cellI],
+                            nRefine
+                        )
+                    )
+                    {
+                        break;
+                    }
                 }
             }
         }
 
         Info<< "For surface " << geom.name() << " found "
-            << returnReduce(nGaps, sumOp<label>())
+            << returnReduce(nRefine-nOldRefine, sumOp<label>())
             << " cells in small gaps" << endl;
 
         if

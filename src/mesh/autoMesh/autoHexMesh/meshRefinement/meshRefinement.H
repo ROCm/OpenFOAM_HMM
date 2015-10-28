@@ -55,6 +55,7 @@ SourceFiles
 #include "wordPairHashTable.H"
 #include "surfaceZonesInfo.H"
 #include "volumeType.H"
+#include "DynamicField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -353,8 +354,23 @@ private:
                 label& nRefine
             ) const;
 
-            //- Generate single ray for cell to detect gap
-            bool generateRay
+            //- Generate single ray from nearPoint in direction of nearNormal
+            label generateRays
+            (
+                const point& nearPoint,
+                const vector& nearNormal,
+                const FixedList<label, 3>& gapInfo,
+                const volumeType& mode,
+
+                const label cLevel,
+
+                DynamicField<point>& start,
+                DynamicField<point>& end
+            ) const;
+
+            //- Generate pairs of rays through cell centre
+            //  Each ray pair has start, end, and expected gap size
+            label generateRays
             (
                 const bool useSurfaceNormal,
 
@@ -366,10 +382,13 @@ private:
                 const point& cc,
                 const label cLevel,
 
-                point& start,
-                point& end,
-                point& start2,
-                point& end2
+                DynamicField<point>& start,
+                DynamicField<point>& end,
+                DynamicField<scalar>& gapSize,
+
+                DynamicField<point>& start2,
+                DynamicField<point>& end2,
+                DynamicField<scalar>& gapSize2
             ) const;
 
             //- Select candidate cells (cells inside a shell with gapLevel
@@ -400,9 +419,12 @@ private:
             label markInternalGapRefinement
             (
                 const scalar planarCos,
+                const bool spreadGapSize,
                 const label nAllowRefine,
                 labelList& refineCell,
-                label& nRefine
+                label& nRefine,
+                labelList& numGapCells,
+                scalarField& gapSize
             ) const;
 
             //- Refine cells containing small gaps
@@ -958,6 +980,7 @@ public:
                 const bool smallFeatureRefinement,
                 const bool gapRefinement,
                 const bool bigGapRefinement,
+                const bool spreadGapSize,
                 const label maxGlobalCells,
                 const label maxLocalCells
             ) const;

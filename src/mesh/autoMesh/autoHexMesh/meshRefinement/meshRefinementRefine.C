@@ -2055,6 +2055,7 @@ Foam::labelList Foam::meshRefinement::refineCandidates
     const bool smallFeatureRefinement,
     const bool gapRefinement,
     const bool bigGapRefinement,
+    const bool spreadGapSize,
     const label maxGlobalCells,
     const label maxLocalCells
 ) const
@@ -2290,12 +2291,18 @@ Foam::labelList Foam::meshRefinement::refineCandidates
         {
             // Refine based on gap information provided by shell and nearest
             // surface
+            labelList numGapCells;
+            scalarField gapSize;
             label nGap = markInternalGapRefinement
             (
                 planarCos,
+                spreadGapSize,
                 nAllowRefine,
+
                 refineCell,
-                nRefine
+                nRefine,
+                numGapCells,
+                gapSize
             );
             Info<< "Marked for refinement due to opposite surfaces"
                 << "             "

@@ -350,6 +350,16 @@ public:
                 vectorField& normal
             ) const;
 
+            //- Find nearest (to start only) intersection of edge
+            void findNearestIntersection
+            (
+                const pointField& start,
+                const pointField& end,
+                labelList& surfaces,
+                List<pointIndexHit>&,
+                vectorField& normal
+            ) const;
+
             //- Used for debugging only: find intersection of edge.
             void findAnyIntersection
             (

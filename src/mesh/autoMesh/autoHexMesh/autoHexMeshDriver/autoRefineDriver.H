@@ -109,6 +109,7 @@ class autoRefineDriver
         label bigGapOnlyRefine
         (
             const refinementParameters& refineParams,
+            const bool spreadGapSize,
             const label maxIter
         );
 

@@ -244,8 +244,17 @@ castellatedMeshControls
         }
         //sphere.stl
         //{
-        //    mode distance;
-        //    levels ((1.0 5) (2.0 3));
+        //    mode inside;
+        //    levels ((1.0 4));
+        //    // Optional override of uniform refinement level such
+        //    //  that in small gaps we're getting more cells.
+        //    //  The specification is
+        //    //  - numGapCells : minimum number of cells in the gap
+        //    //  - minLevel    : min refinement level at which to kick in
+        //    //  - maxLevel    : upper refinement level
+        //    // All three settings can be overridden on a surface by
+        //    // surface basis in the refinementSurfaces section.
+        //    gapLevel (<numGapCells> <minLevel> <maxlevel>);
         //}
     }
 
