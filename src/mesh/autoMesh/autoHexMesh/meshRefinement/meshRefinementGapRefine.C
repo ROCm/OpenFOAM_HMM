@@ -881,7 +881,7 @@ Foam::label Foam::meshRefinement::generateRays
              || (mode == volumeType::INSIDE && s < -SMALL)
             )
             {
-                //// Use vector through cell centre
+                //// Use single vector through cell centre
                 //vector n(v/(magV+ROOTVSMALL));
                 //
                 //start.append(cc);
@@ -893,32 +893,83 @@ Foam::label Foam::meshRefinement::generateRays
                 //gapSize2.append(nearGap);
 
 
-                // Shoot some rays through the cell centre
-                // X-direction:
+                //// Shoot some rays through the cell centre
+                //// X-direction:
+                //start.append(cc);
+                //end.append(cc+nearGap*vector(1, 0, 0));
+                //gapSize.append(nearGap);
+                //
+                //start2.append(cc);
+                //end2.append(cc-nearGap*vector(1, 0, 0));
+                //gapSize2.append(nearGap);
+                //
+                //// Y-direction:
+                //start.append(cc);
+                //end.append(cc+nearGap*vector(0, 1, 0));
+                //gapSize.append(nearGap);
+                //
+                //start2.append(cc);
+                //end2.append(cc-nearGap*vector(0, 1, 0));
+                //gapSize2.append(nearGap);
+                //
+                //// Z-direction:
+                //start.append(cc);
+                //end.append(cc+nearGap*vector(0, 0, 1));
+                //gapSize.append(nearGap);
+                //
+                //start2.append(cc);
+                //end2.append(cc-nearGap*vector(0, 0, 1));
+                //gapSize2.append(nearGap);
+
+
+                // 3 axes aligned with normal
+
+                // Use vector through cell centre
+                vector n(v/(magV+ROOTVSMALL));
+
+                // Get second vector. Make sure it is sufficiently perpendicular
+                vector e2(1, 0, 0);
+                scalar s = (e2 & n);
+                if (mag(s) < 0.9)
+                {
+                    e2 -= s*n;
+                }
+                else
+                {
+                    e2 = vector(0, 1, 0);
+                    e2 -= (e2 & n)*n;
+                }
+                e2 /= mag(e2);
+
+                // Third vector
+                vector e3 = n ^ e2;
+
+
+                // Rays in first direction
                 start.append(cc);
-                end.append(cc+nearGap*vector(1, 0, 0));
+                end.append(cc+nearGap*n);
                 gapSize.append(nearGap);
 
                 start2.append(cc);
-                end2.append(cc-nearGap*vector(1, 0, 0));
+                end2.append(cc-nearGap*n);
                 gapSize2.append(nearGap);
 
-                // Y-direction:
+                // Rays in second direction
                 start.append(cc);
-                end.append(cc+nearGap*vector(0, 1, 0));
+                end.append(cc+nearGap*e2);
                 gapSize.append(nearGap);
 
                 start2.append(cc);
-                end2.append(cc-nearGap*vector(0, 1, 0));
+                end2.append(cc-nearGap*e2);
                 gapSize2.append(nearGap);
 
-                // Z-direction:
+                // Rays in third direction
                 start.append(cc);
-                end.append(cc+nearGap*vector(0, 0, 1));
+                end.append(cc+nearGap*e3);
                 gapSize.append(nearGap);
 
                 start2.append(cc);
-                end2.append(cc-nearGap*vector(0, 0, 1));
+                end2.append(cc-nearGap*e3);
                 gapSize2.append(nearGap);
             }
         }
