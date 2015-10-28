@@ -65,6 +65,7 @@ searchableSurface = searchableSurface
 $(searchableSurface)/searchableBox.C
 $(searchableSurface)/searchableRotatedBox.C
 $(searchableSurface)/searchableCylinder.C
+$(searchableSurface)/searchableCone.C
 $(searchableSurface)/searchableDisk.C
 $(searchableSurface)/searchablePlane.C
 $(searchableSurface)/searchablePlate.C
