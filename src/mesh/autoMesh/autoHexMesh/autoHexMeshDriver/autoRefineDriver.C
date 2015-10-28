@@ -108,6 +108,7 @@ Foam::label Foam::autoRefineDriver::featureEdgeRefine
                     false,              // smallFeatureRefinement
                     false,              // gapRefinement
                     false,              // bigGapRefinement
+                    false,              // spreadGapSize
                     refineParams.maxGlobalCells(),
                     refineParams.maxLocalCells()
                 )
@@ -228,6 +229,7 @@ Foam::label Foam::autoRefineDriver::smallFeatureRefine
                 true,               // smallFeatureRefinement
                 false,              // gapRefinement
                 false,              // bigGapRefinement
+                false,              // spreadGapSize
                 refineParams.maxGlobalCells(),
                 refineParams.maxLocalCells()
             )
@@ -344,6 +346,7 @@ Foam::label Foam::autoRefineDriver::surfaceOnlyRefine
                 false,              // smallFeatureRefinement
                 false,              // gapRefinement
                 false,              // bigGapRefinement
+                false,              // spreadGapSize
                 refineParams.maxGlobalCells(),
                 refineParams.maxLocalCells()
             )
@@ -480,6 +483,7 @@ Foam::label Foam::autoRefineDriver::gapOnlyRefine
                 false,              // smallFeatureRefinement
                 true,               // gapRefinement
                 false,              // bigGapRefinement
+                false,              // spreadGapSize
                 refineParams.maxGlobalCells(),
                 refineParams.maxLocalCells()
             )
@@ -657,6 +661,7 @@ Foam::label Foam::autoRefineDriver::gapOnlyRefine
 Foam::label Foam::autoRefineDriver::bigGapOnlyRefine
 (
     const refinementParameters& refineParams,
+    const bool spreadGapSize,
     const label maxIter
 )
 {
@@ -703,6 +708,7 @@ Foam::label Foam::autoRefineDriver::bigGapOnlyRefine
                 false,              // smallFeatureRefinement
                 false,              // gapRefinement
                 true,               // bigGapRefinement
+                spreadGapSize,      // spreadGapSize
                 refineParams.maxGlobalCells(),
                 refineParams.maxLocalCells()
             )
@@ -1378,6 +1384,7 @@ Foam::label Foam::autoRefineDriver::shellRefine
                 false,              // smallFeatureRefinement
                 false,              // gapRefinement
                 false,              // bigGapRefinement
+                false,              // spreadGapSize
                 refineParams.maxGlobalCells(),
                 refineParams.maxLocalCells()
             )
@@ -1930,6 +1937,7 @@ void Foam::autoRefineDriver::doRefine
     bigGapOnlyRefine
     (
         refineParams,
+        true,   // spreadGapSize
         100     // maxIter
     );
 
