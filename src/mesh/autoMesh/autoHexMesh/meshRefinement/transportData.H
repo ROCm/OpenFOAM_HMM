@@ -45,7 +45,6 @@ namespace Foam
 
 // Forward declaration of classes
 class polyMesh;
-class hexRef8;
 
 /*---------------------------------------------------------------------------*\
                            Class transportData Declaration
@@ -55,6 +54,23 @@ class transportData
 :
     public wallPointData<scalar>
 {
+public:
+
+    //- Class used to pass additional data in
+    class trackData
+    {
+    public:
+
+        //- Per face the index of the surface hit
+        const labelList& surfaceIndex_;
+
+        trackData(const labelList& surfaceIndex)
+        :
+            surfaceIndex_(surfaceIndex)
+        {}
+    };
+
+
 private:
 
     // Private Member Functions

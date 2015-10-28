@@ -1366,14 +1366,17 @@ Foam::label Foam::meshRefinement::markInternalGapRefinement
                 << mesh_.globalData().nTotalFaces() << endl;
 
 
-            FaceCellWave<transportData> deltaCalc
+            transportData::trackData td(surfaceIndex_);
+
+            FaceCellWave<transportData, transportData::trackData> deltaCalc
             (
                 mesh_,
                 frontFaces,
                 frontData,
                 faceData,
                 cellData,
-                mesh_.globalData().nTotalCells()+1
+                mesh_.globalData().nTotalCells()+1,
+                td
             );
 
 

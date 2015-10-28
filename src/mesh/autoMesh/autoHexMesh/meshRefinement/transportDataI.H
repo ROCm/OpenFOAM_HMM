@@ -101,12 +101,17 @@ inline bool Foam::transportData::updateCell
 (
     const polyMesh& mesh,
     const label cellI,
-    const label,
+    const label faceI,
     const transportData& neighbourWallInfo,
     const scalar tol,
     TrackingData& td
 )
 {
+    if (td.surfaceIndex_[faceI] != -1)
+    {
+        return false;
+    }
+
     const vectorField& cellCentres = mesh.primitiveMesh::cellCentres();
 
     bool updated = update
@@ -132,6 +137,11 @@ inline bool Foam::transportData::updateFace
     TrackingData& td
 )
 {
+    if (td.surfaceIndex_[thisFaceI] != -1)
+    {
+        return false;
+    }
+
     return update
     (
         mesh.faceCentres()[thisFaceI],
@@ -152,6 +162,11 @@ inline bool Foam::transportData::updateFace
     TrackingData& td
 )
 {
+    if (td.surfaceIndex_[thisFaceI] != -1)
+    {
+        return false;
+    }
+
     return update
     (
         mesh.faceCentres()[thisFaceI],
