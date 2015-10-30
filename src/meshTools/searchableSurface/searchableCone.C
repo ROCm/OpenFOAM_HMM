@@ -83,7 +83,7 @@ Foam::tmp<Foam::pointField> Foam::searchableCone::points() const
 }
 
 
-void Foam::searchableCone::findNearest
+void Foam::searchableCone::findNearestAndNormal
 (
     const point& sample,
     const scalar nearestDistSqr,
@@ -780,7 +780,7 @@ void Foam::searchableCone::findNearest
     forAll(samples, i)
     {
         vector normal;
-        findNearest(samples[i], nearestDistSqr[i], info[i], normal);
+        findNearestAndNormal(samples[i], nearestDistSqr[i], info[i], normal);
     }
 }
 
@@ -1054,7 +1054,7 @@ void Foam::searchableCone::getNormal
         if (info[i].hit())
         {
             pointIndexHit nearInfo;
-            findNearest
+            findNearestAndNormal
             (
                 info[i].hitPoint(),
                 Foam::sqr(GREAT),

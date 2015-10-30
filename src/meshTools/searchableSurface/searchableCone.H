@@ -100,7 +100,7 @@ class searchableCone
    // Private Member Functions
 
         //- Find nearest point on cylinder.
-        void findNearest
+        void findNearestAndNormal
         (
             const point& sample,
             const scalar nearestDistSqr,
@@ -236,20 +236,20 @@ public:
                 List<pointIndexHit>&
             ) const;
 
-            //- Find any intersection on line from start to end
-            virtual void findLineAny
-            (
-                const pointField& start,
-                const pointField& end,
-                List<pointIndexHit>&
-            ) const;
-
             //- Find all intersections in order from start to end
             virtual void findLineAll
             (
                 const pointField& start,
                 const pointField& end,
                 List<List<pointIndexHit> >&
+            ) const;
+
+            //- Find any intersection on line from start to end
+            virtual void findLineAny
+            (
+                const pointField& start,
+                const pointField& end,
+                List<pointIndexHit>&
             ) const;
 
             //- From a set of points and indices get the region
@@ -277,7 +277,7 @@ public:
 
         // regIOobject implementation
 
-            bool writeData(Ostream&) const
+            virtual bool writeData(Ostream&) const
             {
                 notImplemented("searchableCone::writeData(Ostream&) const");
                 return false;

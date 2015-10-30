@@ -56,10 +56,8 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-
 /*---------------------------------------------------------------------------*\
-                           Class searchableRotatedBox Declaration
+                    Class searchableRotatedBox Declaration
 \*---------------------------------------------------------------------------*/
 
 class searchableRotatedBox
@@ -144,6 +142,9 @@ public:
         virtual bool overlaps(const boundBox& bb) const;
 
         // Single point queries.
+
+            //- Inherit findNearest from searchableSurface
+            using searchableSurface::findNearest;
 
             //- Calculate nearest point on surface.
             //  Returns
