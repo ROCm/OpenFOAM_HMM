@@ -59,6 +59,8 @@ parallel/Allwmake $targetType $*
 wmake $targetType ODE
 wmake $targetType randomProcesses
 
+wmake $targetType fvMotionSolver
+
 transportModels/Allwmake $targetType $*
 thermophysicalModels/Allwmake $targetType $*
 TurbulenceModels/Allwmake $targetType $*
@@ -69,7 +71,6 @@ mesh/Allwmake $targetType $*
 renumber/Allwmake $targetType $*
 fvAgglomerationMethods/Allwmake $targetType $*
 
-wmake $targetType fvMotionSolver
 wmake $targetType engine
 wmake $targetType fvOptions
 wmake $targetType regionCoupled
