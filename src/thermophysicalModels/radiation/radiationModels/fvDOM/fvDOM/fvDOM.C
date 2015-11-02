@@ -87,14 +87,6 @@ void Foam::radiation::fvDOM::initialise()
     // 2D
     else if (mesh_.nSolutionD() == 2)
     {
-        // Currently 2D solution is limited to the x-y plane
-        if (mesh_.solutionD()[vector::Z] != -1)
-        {
-            FatalErrorIn("fvDOM::initialise()")
-                << "Currently 2D solution is limited to the x-y plane"
-                << exit(FatalError);
-        }
-
         scalar thetai = piByTwo;
         scalar deltaTheta = pi;
         nRay_ = 4*nPhi_;
@@ -127,14 +119,6 @@ void Foam::radiation::fvDOM::initialise()
     // 1D
     else
     {
-        // Currently 1D solution is limited to the x-direction
-        if (mesh_.solutionD()[vector::X] != 1)
-        {
-            FatalErrorIn("fvDOM::initialise()")
-                << "Currently 1D solution is limited to the x-direction"
-                << exit(FatalError);
-        }
-
         scalar thetai = piByTwo;
         scalar deltaTheta = pi;
         nRay_ = 2;
@@ -221,11 +205,38 @@ void Foam::radiation::fvDOM::initialise()
         {
             omegaMax_ = IRay_[rayId].omega();
         }
-        Info<< '\t' << IRay_[rayId].I().name() << " : " << "omega : "
-            << '\t' << IRay_[rayId].omega() << nl;
+        Info<< '\t' << IRay_[rayId].I().name() << " : " << "dAve : "
+            << '\t' << IRay_[rayId].dAve() << nl;
     }
 
     Info<< endl;
+
+    if (this->found("useSolarLoad"))
+    {
+        this->lookup("useSolarLoad") >> useSolarLoad_;
+    }
+
+    if (useSolarLoad_)
+    {
+        const dictionary& solarDict = this->subDict("solarLoarCoeffs");
+        solarLoad_.reset
+        (
+            new solarLoad(solarDict, T_, externalRadHeatFieldName_)
+        );
+
+        if (solarLoad_->nBands() > 1)
+        {
+            FatalErrorIn
+            (
+                "const Foam::radiation::fvDOM::initialise()"
+            )
+                << "Requested solar radiation with fvDOM. Using "
+                << "more than one band for the solar load is not allowed"
+                << abort(FatalError);
+            }
+
+        Info<< "Creating Solar Load Model " << nl;
+    }
 }
 
 
@@ -294,7 +305,7 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
             mesh_.time().timeName(),
             mesh_,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            IOobject::NO_WRITE
         ),
         mesh_,
         dimensionedScalar("a", dimless/dimLength, 0.0)
@@ -310,7 +321,13 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
     maxIter_(coeffs_.lookupOrDefault<label>("maxIter", 50)),
     fvRayDiv_(nLambda_),
     cacheDiv_(coeffs_.lookupOrDefault<bool>("cacheDiv", false)),
-    omegaMax_(0)
+    omegaMax_(0),
+    useSolarLoad_(false),
+    solarLoad_(),
+    meshOrientation_
+    (
+        coeffs_.lookupOrDefault<vector>("meshOrientation", vector::zero)
+    )
 {
     initialise();
 }
@@ -399,7 +416,13 @@ Foam::radiation::fvDOM::fvDOM
     maxIter_(coeffs_.lookupOrDefault<label>("maxIter", 50)),
     fvRayDiv_(nLambda_),
     cacheDiv_(coeffs_.lookupOrDefault<bool>("cacheDiv", false)),
-    omegaMax_(0)
+    omegaMax_(0),
+    useSolarLoad_(false),
+    solarLoad_(),
+    meshOrientation_
+    (
+        coeffs_.lookupOrDefault<vector>("meshOrientation", vector::zero)
+    )
 {
     initialise();
 }
@@ -435,6 +458,11 @@ void Foam::radiation::fvDOM::calculate()
     absorptionEmission_->correct(a_, aLambda_);
 
     updateBlackBodyEmission();
+
+    if (useSolarLoad_)
+    {
+        solarLoad_->calculate();
+    }
 
     // Set rays convergence false
     List<bool> rayIdConv(nRay_, false);
@@ -482,8 +510,7 @@ Foam::tmp<Foam::volScalarField> Foam::radiation::fvDOM::Rp() const
                 IOobject::NO_WRITE,
                 false
             ),
-            // Only include continuous phase emission
-            4*absorptionEmission_->aCont()*physicoChemical::sigma
+            4.0*a_*physicoChemical::sigma //absorptionEmission_->a()
         )
     );
 }
@@ -495,15 +522,12 @@ Foam::radiation::fvDOM::Ru() const
 
     const DimensionedField<scalar, volMesh>& G =
         G_.dimensionedInternalField();
-
     const DimensionedField<scalar, volMesh> E =
         absorptionEmission_->ECont()().dimensionedInternalField();
-
-    // Only include continuous phase absorption
     const DimensionedField<scalar, volMesh> a =
-        absorptionEmission_->aCont()().dimensionedInternalField();
+        a_.dimensionedInternalField();
 
-    return a*G - E;
+    return  a*G - E;
 }
 
 

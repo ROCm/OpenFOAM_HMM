@@ -47,16 +47,23 @@ Description
             cacheDiv    true;       // cache the div of the RTE equation.
             //NOTE: Caching div is "only" accurate if the upwind scheme is used
             //in div(Ji,Ii_h)
+             meshOrientation    (1 1 1); //Mesh ortientation used for 2D and 1D
         }
 
         solverFreq   1; // Number of flow iterations per radiation iteration
     \endverbatim
 
-    The total number of solid angles is  4*nPhi*nTheta.
+    The total number of solid angles is  4*nPhi*nTheta in 3-D.
 
-    In 1D the direction of the rays is X (nPhi and nTheta are ignored)
-    In 2D the direction of the rays is on X-Y plane (only nPhi is considered)
-    In 3D (nPhi and nTheta are considered)
+    In 1-D the ray directions are on X, Y or Z (nPhi and nTheta are ignored).
+    'meshOrientation' vector can be used for any other 1D direction.
+
+    In 2-D the ray directions are on X-Y, X-Z or Y-Z planes.
+    (only nPhi is considered). 'meshOrientation' vector can be used for
+    not-aligned planes specifying the plane normal vector.
+
+    In 3D (nPhi and nTheta are considered). 'meshOrientation' vector is not
+    considered.
 
 SourceFiles
     fvDOM.C
@@ -69,6 +76,7 @@ SourceFiles
 #include "radiativeIntensityRay.H"
 #include "radiationModel.H"
 #include "fvMatrices.H"
+#include "solarLoad.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -138,6 +146,15 @@ class fvDOM
 
         //- Maximum omega weight
         scalar omegaMax_;
+
+        //- Use Solar Load model
+        bool useSolarLoad_;
+
+        //- Solar load radiation model
+        autoPtr<solarLoad> solarLoad_;
+
+        //- Mesh orientation vector
+        vector meshOrientation_;
 
 
     // Private Member Functions
@@ -260,6 +277,9 @@ public:
 
             //- Return omegaMax
             inline scalar omegaMax() const;
+
+            //- Return meshOrientation
+            inline vector meshOrientation() const;
 };
 
 

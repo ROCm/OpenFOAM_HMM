@@ -29,6 +29,7 @@ License
 #include "greyDiffusiveViewFactorFixedValueFvPatchScalarField.H"
 #include "typeInfo.H"
 #include "addToRunTimeSelectionTable.H"
+#include "boundaryRadiationProperties.H"
 
 using namespace Foam::constant;
 
@@ -43,29 +44,21 @@ namespace Foam
     }
 }
 
+const Foam::word Foam::radiation::viewFactor::viewFactorWalls
+    = "viewFactorWall";
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::radiation::viewFactor::initialise()
 {
     const polyBoundaryMesh& coarsePatches = coarseMesh_.boundaryMesh();
-    const volScalarField::GeometricBoundaryField& Qrp = Qr_.boundaryField();
 
-    label count = 0;
-    forAll(Qrp, patchI)
+    selectedPatches_ = mesh_.boundaryMesh().findIndices(viewFactorWalls);
+    forAll(selectedPatches_, i)
     {
-        //const polyPatch& pp = mesh_.boundaryMesh()[patchI];
-        const fvPatchScalarField& QrPatchI = Qrp[patchI];
-
-        if ((isA<fixedValueFvPatchScalarField>(QrPatchI)))
-        {
-            selectedPatches_[count] = QrPatchI.patch().index();
-            nLocalCoarseFaces_ += coarsePatches[patchI].size();
-            count++;
-        }
+        const label patchI = selectedPatches_[i];
+        nLocalCoarseFaces_ += coarsePatches[patchI].size();
     }
-
-    selectedPatches_.resize(count--);
 
     if (debug)
     {
@@ -84,52 +77,19 @@ void Foam::radiation::viewFactor::initialise()
             << "Total number of clusters : " << totalNCoarseFaces_ << endl;
     }
 
-    labelListIOList subMap
-    (
-        IOobject
-        (
-            "subMap",
-            mesh_.facesInstance(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        )
-    );
-
-    labelListIOList constructMap
-    (
-        IOobject
-        (
-            "constructMap",
-            mesh_.facesInstance(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        )
-    );
-
-    IOList<label> consMapDim
-    (
-        IOobject
-        (
-            "constructMapDim",
-            mesh_.facesInstance(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        )
-    );
-
     map_.reset
     (
-        new mapDistribute
+        new IOmapDistribute
         (
-            consMapDim[0],
-            Xfer<labelListList>(subMap),
-            Xfer<labelListList>(constructMap)
+            IOobject
+            (
+                "mapDist",
+                mesh_.facesInstance(),
+                mesh_,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
+            )
         )
     );
 
@@ -235,6 +195,33 @@ void Foam::radiation::viewFactor::initialise()
             pivotIndices_.setSize(CLU_().n());
         }
     }
+
+    if (this->found("useSolarLoad"))
+    {
+        this->lookup("useSolarLoad") >> useSolarLoad_;
+    }
+
+    if (useSolarLoad_)
+    {
+        const dictionary& solarDict = this->subDict("solarLoarCoeffs");
+        solarLoad_.reset
+        (
+            new solarLoad(solarDict, T_, externalRadHeatFieldName_)
+        );
+
+        if (solarLoad_->nBands() > 1)
+        {
+            FatalErrorIn
+            (
+                "const Foam::radiation::viewFactor::initialise()"
+            )
+                << "Requested solar radiation with fvDOM. Using "
+                << "more thant one band for the solar load is not allowed"
+                << abort(FatalError);
+            }
+
+        Info<< "Creating Solar Load Model " << nl;
+    }
 }
 
 
@@ -260,7 +247,7 @@ Foam::radiation::viewFactor::viewFactor(const volScalarField& T)
     (
         IOobject
         (
-            mesh_.name(),
+            "coarse:" + mesh_.name(),
             mesh_.polyMesh::instance(),
             mesh_.time(),
             IOobject::NO_READ,
@@ -288,7 +275,9 @@ Foam::radiation::viewFactor::viewFactor(const volScalarField& T)
     nLocalCoarseFaces_(0),
     constEmissivity_(false),
     iterCounter_(0),
-    pivotIndices_(0)
+    pivotIndices_(0),
+    useSolarLoad_(false),
+    solarLoad_()
 {
     initialise();
 }
@@ -318,7 +307,7 @@ Foam::radiation::viewFactor::viewFactor
     (
         IOobject
         (
-            mesh_.name(),
+            "coarse:" + mesh_.name(),
             mesh_.polyMesh::instance(),
             mesh_.time(),
             IOobject::NO_READ,
@@ -346,7 +335,9 @@ Foam::radiation::viewFactor::viewFactor
     nLocalCoarseFaces_(0),
     constEmissivity_(false),
     iterCounter_(0),
-    pivotIndices_(0)
+    pivotIndices_(0),
+    useSolarLoad_(false),
+    solarLoad_()
 {
     initialise();
 }
@@ -401,6 +392,11 @@ void Foam::radiation::viewFactor::calculate()
     // Store previous iteration
     Qr_.storePrevIter();
 
+    if (useSolarLoad_)
+    {
+        solarLoad_->calculate();
+    }
+
     scalarField compactCoarseT(map_->constructSize(), 0.0);
     scalarField compactCoarseE(map_->constructSize(), 0.0);
     scalarField compactCoarseHo(map_->constructSize(), 0.0);
@@ -411,6 +407,9 @@ void Foam::radiation::viewFactor::calculate()
     DynamicList<scalar> localCoarseTave(nLocalCoarseFaces_);
     DynamicList<scalar> localCoarseEave(nLocalCoarseFaces_);
     DynamicList<scalar> localCoarseHoave(nLocalCoarseFaces_);
+
+    const boundaryRadiationProperties& boundaryRadiation =
+        boundaryRadiationProperties::New(mesh_);
 
     forAll(selectedPatches_, i)
     {
@@ -427,9 +426,11 @@ void Foam::radiation::viewFactor::calculate()
                 greyDiffusiveViewFactorFixedValueFvPatchScalarField
             >(QrPatch);
 
-        const scalarList eb = Qrp.emissivity();
+        const tmp<scalarField> teb = boundaryRadiation.emissivity(patchID);
+        const scalarField& eb = teb();
 
-        const scalarList& Hoi = Qrp.Qro();
+        const tmp<scalarField> tHoi = Qrp.Qro();
+        const scalarField& Hoi = tHoi();
 
         const polyPatch& pp = coarseMesh_.boundaryMesh()[patchID];
         const labelList& coarsePatchFace = coarseMesh_.patchFaceMap()[patchID];

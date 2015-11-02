@@ -10,7 +10,9 @@ EXE_INC = \
     -I$(LIB_SRC)/thermophysicalModels/properties/solidMixtureProperties/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/reactionThermo/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
-    -I$(LIB_SRC)/meshTools/lnInclude
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/triSurface/lnInclude \
+    -I$(LIB_SRC)/parallel/distributed/lnInclude
 
 LIB_LIBS = \
     -lcompressibleTransportModels \
@@ -23,4 +25,6 @@ LIB_LIBS = \
     -lsolidProperties \
     -lliquidProperties \
     -lfiniteVolume \
-    -lmeshTools
+    -lmeshTools \
+    -ldistributed \
+    -ltriSurface

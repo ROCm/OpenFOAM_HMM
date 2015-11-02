@@ -31,6 +31,7 @@ License
 #include "fvDOM.H"
 #include "wideBandAbsorptionEmission.H"
 #include "constants.H"
+#include "boundaryRadiationProperties.H"
 
 using namespace Foam::constant;
 using namespace Foam::constant::mathematical;
@@ -44,9 +45,7 @@ wideBandDiffusiveRadiationMixedFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    mixedFvPatchScalarField(p, iF),
-    radiationCoupledBase(p, "undefined", scalarField::null()),
-    TName_("T")
+    mixedFvPatchScalarField(p, iF)
 {
     refValue() = 0.0;
     refGrad() = 0.0;
@@ -63,14 +62,7 @@ wideBandDiffusiveRadiationMixedFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    mixedFvPatchScalarField(ptf, p, iF, mapper),
-    radiationCoupledBase
-    (
-        p,
-        ptf.emissivityMethod(),
-        ptf.emissivity_
-    ),
-    TName_(ptf.TName_)
+    mixedFvPatchScalarField(ptf, p, iF, mapper)
 {}
 
 
@@ -82,9 +74,7 @@ wideBandDiffusiveRadiationMixedFvPatchScalarField
     const dictionary& dict
 )
 :
-    mixedFvPatchScalarField(p, iF),
-    radiationCoupledBase(p, dict),
-    TName_(dict.lookupOrDefault<word>("T", "T"))
+    mixedFvPatchScalarField(p, iF)
 {
     if (dict.found("value"))
     {
@@ -98,12 +88,9 @@ wideBandDiffusiveRadiationMixedFvPatchScalarField
     }
     else
     {
-        const scalarField& Tp =
-            patch().lookupPatchField<volScalarField, scalar>(TName_);
-
-        refValue() =
-            4.0*physicoChemical::sigma.value()*pow4(Tp)*emissivity()/pi;
+        refValue() = 0.0;
         refGrad() = 0.0;
+        valueFraction() = 1.0;
 
         fvPatchScalarField::operator=(refValue());
     }
@@ -116,14 +103,7 @@ wideBandDiffusiveRadiationMixedFvPatchScalarField
     const wideBandDiffusiveRadiationMixedFvPatchScalarField& ptf
 )
 :
-    mixedFvPatchScalarField(ptf),
-    radiationCoupledBase
-    (
-        ptf.patch(),
-        ptf.emissivityMethod(),
-        ptf.emissivity_
-    ),
-    TName_(ptf.TName_)
+    mixedFvPatchScalarField(ptf)
 {}
 
 
@@ -134,14 +114,7 @@ wideBandDiffusiveRadiationMixedFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    mixedFvPatchScalarField(ptf, iF),
-    radiationCoupledBase
-    (
-        ptf.patch(),
-        ptf.emissivityMethod(),
-        ptf.emissivity_
-    ),
-    TName_(ptf.TName_)
+    mixedFvPatchScalarField(ptf, iF)
 {}
 
 
@@ -196,7 +169,16 @@ updateCoeffs()
         dom.blackBody().bLambda(lambdaId).boundaryField()[patchI]
     );
 
-    scalarField temissivity = emissivity();
+    const boundaryRadiationProperties& boundaryRadiation =
+        boundaryRadiationProperties::New(dimensionedInternalField().mesh());
+
+
+    const tmp<scalarField> temissivity
+    (
+        boundaryRadiation.emissivity(patch().index(), lambdaId)
+    );
+
+    const scalarField& emissivity = temissivity();
 
     scalarField& Qem = ray.Qem().boundaryField()[patchI];
     scalarField& Qin = ray.Qin().boundaryField()[patchI];
@@ -221,8 +203,8 @@ updateCoeffs()
             valueFraction()[faceI] = 1.0;
             refValue()[faceI] =
                 (
-                    Ir[faceI]*(1.0 - temissivity[faceI])
-                  + temissivity[faceI]*Eb[faceI]
+                    Ir[faceI]*(1.0 - emissivity[faceI])
+                  + emissivity[faceI]*Eb[faceI]
                 )/pi;
 
             // Emmited heat flux from this ray direction
@@ -253,8 +235,6 @@ void Foam::radiation::wideBandDiffusiveRadiationMixedFvPatchScalarField::write
 ) const
 {
     mixedFvPatchScalarField::write(os);
-    radiationCoupledBase::write(os);
-    writeEntryIfDifferent<word>(os, "T", "T", TName_);
 }
 
 
