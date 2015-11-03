@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,25 +25,16 @@ Class
     Foam::sixDoFRigidBodyMotion
 
 Description
-    Six degree of freedom motion for a rigid body.  Angular momentum
-    stored in body fixed reference frame.  Reference orientation of
-    the body (where Q = I) must align with the cartesian axes such
-    that the Inertia tensor is in principle component form.
+    Six degree of freedom motion for a rigid body.
 
-    Symplectic motion as per:
+    Angular momentum stored in body fixed reference frame.  Reference
+    orientation of the body (where Q = I) must align with the cartesian axes
+    such that the Inertia tensor is in principle component form.  Can add
+    restraints (e.g. a spring) and constraints (e.g. motion may only be on a
+    plane).
 
-    title = {Symplectic splitting methods for rigid body molecular dynamics},
-    publisher = {AIP},
-    year = {1997},
-    journal = {The Journal of Chemical Physics},
-    volume = {107},
-    number = {15},
-    pages = {5840-5851},
-    url = {http://link.aip.org/link/?JCP/107/5840/1},
-    doi = {10.1063/1.474310}
-
-    Can add restraints (e.g. a spring)
-    and constraints (e.g. motion may only be on a plane).
+    The time-integrator for the motion is run-time selectable with options for
+    symplectic (explicit), Crank-Nicolson and Newmark schemes.
 
 SourceFiles
     sixDoFRigidBodyMotionI.H
@@ -66,12 +57,17 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
+class sixDoFSolver;
+
 /*---------------------------------------------------------------------------*\
                       Class sixDoFRigidBodyMotion Declaration
 \*---------------------------------------------------------------------------*/
 
 class sixDoFRigidBodyMotion
 {
+    friend class sixDoFSolver;
+
     // Private data
 
         //- Motion state data object
@@ -117,6 +113,9 @@ class sixDoFRigidBodyMotion
         //- Switch to turn reporting of motion data on and off
         Switch report_;
 
+        //- Motion solver
+        autoPtr<sixDoFSolver> solver_;
+
 
     // Private Member Functions
 
@@ -143,6 +142,9 @@ class sixDoFRigidBodyMotion
 
         //- Apply the restraints to the object
         void applyRestraints();
+
+        //- Update and relax accelerations from the force and torque
+        void updateAcceleration(const vector& fGlobal, const vector& tauGlobal);
 
 
         // Access functions retained as private because of the risk of
@@ -175,21 +177,6 @@ class sixDoFRigidBodyMotion
 
             //- Return the current torque
             inline const vector& tau() const;
-
-            //- Return the orientation at previous time-step
-            inline const tensor& Q0() const;
-
-            //- Return the velocity at previous time-step
-            inline const vector& v0() const;
-
-            //- Return the acceleration at previous time-step
-            inline const vector& a0() const;
-
-            //- Return the angular momentum at previous time-step
-            inline const vector& pi0() const;
-
-            //- Return the torque at previous time-step
-            inline const vector& tau0() const;
 
 
         // Edit
@@ -234,6 +221,10 @@ public:
         sixDoFRigidBodyMotion(const sixDoFRigidBodyMotion&);
 
 
+    //- Destructor
+    ~sixDoFRigidBodyMotion();
+
+
     // Member Functions
 
         // Access
@@ -249,9 +240,6 @@ public:
 
             //- Return the current centre of rotation
             inline const point& centreOfRotation() const;
-
-            //- Return the centre of rotation at previous time-step
-            inline const point& centreOfRotation0() const;
 
             //- Return the initial centre of mass
             inline const point& initialCentreOfMass() const;
@@ -298,18 +286,15 @@ public:
 
         // Update state
 
-            //- First leapfrog velocity adjust and motion part, required
-            //  before force calculation.  Takes old timestep for variable
-            //  timestep cases.
-            void updatePosition(scalar deltaT, scalar deltaT0);
-
-            //- Second leapfrog velocity adjust part
-            //  required after motion and force calculation
-            void updateAcceleration
+            //- Symplectic integration of velocities, orientation and position.
+            //  Changes to Crank-Nicolson integration for subsequent iterations.
+            void update
             (
+                bool firstIter,
                 const vector& fGlobal,
                 const vector& tauGlobal,
-                scalar deltaT
+                scalar deltaT,
+                scalar deltaT0
             );
 
             //- Report the status of the motion
