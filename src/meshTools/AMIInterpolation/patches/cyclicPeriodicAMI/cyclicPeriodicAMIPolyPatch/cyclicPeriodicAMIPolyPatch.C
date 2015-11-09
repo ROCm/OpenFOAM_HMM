@@ -360,11 +360,11 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
                 << periodicPatch.name() << "." << exit(FatalError);
         }
 
-        // Check that at least one patch has a weight sum of one
+        // Check that both patches have replicated an integer number of times
         if
         (
-            mag(1 - srcSum) > matchTolerance()
-         && mag(1 - tgtSum) > matchTolerance()
+            mag(srcSum - floor(srcSum + matchTolerance())) > matchTolerance()
+         || mag(tgtSum - floor(tgtSum + matchTolerance())) > matchTolerance()
         )
         {
             FatalErrorIn
