@@ -363,8 +363,8 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
         // Check that both patches have replicated an integer number of times
         if
         (
-            mag(srcSum - floor(srcSum + matchTolerance())) > matchTolerance()
-         || mag(tgtSum - floor(tgtSum + matchTolerance())) > matchTolerance()
+            mag(srcSum - floor(srcSum + 0.5)) > matchTolerance()
+         || mag(tgtSum - floor(tgtSum + 0.5)) > matchTolerance()
         )
         {
             FatalErrorIn
