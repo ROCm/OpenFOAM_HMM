@@ -119,8 +119,15 @@ void Foam::cyclicPeriodicAMIPolyPatch::syncTransforms() const
             // replacing with the transformations from other processors.
 
             // Parallel in this context refers to a parallel transformation,
-            // rather than a rotational transformation
-            bool isParallel = periodicPatch.parallel();
+            // rather than a rotational transformation.
+
+            // Note that a cyclic with zero faces is considered parallel so
+            // explicitly check for that.
+            bool isParallel =
+            (
+                periodicPatch.size()
+             && periodicPatch.parallel()
+            );
             reduce(isParallel, orOp<bool>());
 
             if (isParallel)
@@ -187,6 +194,8 @@ void Foam::cyclicPeriodicAMIPolyPatch::syncTransforms() const
                             (
                                 periodicPatch.reverseT()
                             ) = reverseT[procI];
+
+                            break;
                         }
                     }
                 }
@@ -293,21 +302,26 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
         pointField nbrPoints(nbrPoints0);
 
         // Create patches for all the points
-        primitivePatch thisPatch0
+
+        // Source patch at initial location
+        const primitivePatch thisPatch0
         (
             SubList<face>(localFaces(), size()),
             thisPoints0
         );
+        // Source patch that gets moved
         primitivePatch thisPatch
         (
             SubList<face>(localFaces(), size()),
             thisPoints
         );
-        primitivePatch nbrPatch0
+        // Target patch at initial location
+        const primitivePatch nbrPatch0
         (
             SubList<face>(neighbPatch().localFaces(), neighbPatch().size()),
             nbrPoints0
         );
+        // Target patch that gets moved
         primitivePatch nbrPatch
         (
             SubList<face>(neighbPatch().localFaces(), neighbPatch().size()),
