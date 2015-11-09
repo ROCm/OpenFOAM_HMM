@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,7 @@ License
 Foam::snapParameters::snapParameters(const dictionary& dict)
 :
     nSmoothPatch_(readLabel(dict.lookup("nSmoothPatch"))),
+    nSmoothInternal_(dict.lookupOrDefault("nSmoothInternal", 0)),
     snapTol_(readScalar(dict.lookup("tolerance"))),
     nSmoothDispl_(readLabel(dict.lookup("nSolveIter"))),
     nSnap_(readLabel(dict.lookup("nRelaxIter"))),
@@ -44,7 +45,22 @@ Foam::snapParameters::snapParameters(const dictionary& dict)
     detectNearSurfacesSnap_
     (
         dict.lookupOrDefault("detectNearSurfacesSnap", true)
-    )
+    ),
+    strictRegionSnap_
+    (
+        dict.lookupOrDefault("strictRegionSnap", false)
+    ),
+    detectBaffles_(dict.lookupOrDefault("detectBaffles", true)),
+    baffleFeaturePoints_(dict.lookupOrDefault("baffleFeaturePoints", false)),
+    releasePoints_(dict.lookupOrDefault("releasePoints", false)),
+    stringFeatures_(dict.lookupOrDefault("stringFeatures", true)),
+    avoidDiagonal_(dict.lookupOrDefault("avoidDiagonal", false)),
+    nFaceSplitInterval_
+    (
+        dict.lookupOrDefault("nFaceSplitInterval", labelMin)
+    ),
+    concaveAngle_(dict.lookupOrDefault("concaveAngle", 45)),
+    minAreaRatio_(dict.lookupOrDefault("minAreaRatio", 0.3))
 {}
 
 

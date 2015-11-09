@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,91 @@ License
 #include "searchableSurfacesQueries.H"
 #include "UPtrList.H"
 #include "volumeType.H"
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::labelList Foam::refinementSurfaces::findHigherLevel
+(
+    const searchableSurface& geom,
+    const shellSurfaces& shells,
+    const List<pointIndexHit>& intersectionInfo,
+    const labelList& surfaceLevel       // current level
+) const
+{
+    // See if a cached level field available
+    labelList minLevelField;
+    geom.getField(intersectionInfo, minLevelField);
+
+
+    // Detect any uncached values and do proper search
+    labelList localLevel(surfaceLevel);
+    {
+        // Check hits:
+        // 1. cached value == -1 : store for re-testing
+        // 2. cached value != -1 : use
+        // 3. uncached : use region 0 value
+
+        DynamicList<label> retestSet;
+        label nHits = 0;
+
+        forAll(intersectionInfo, i)
+        {
+            if (intersectionInfo[i].hit())
+            {
+                nHits++;
+
+                // Check if minLevelField for this surface.
+                if (minLevelField.size())
+                {
+                    if (minLevelField[i] == -1)
+                    {
+                        retestSet.append(i);
+                    }
+                    else
+                    {
+                        localLevel[i] = max(localLevel[i], minLevelField[i]);
+                    }
+                }
+                else
+                {
+                    retestSet.append(i);
+                }
+            }
+        }
+
+        label nRetest = returnReduce(retestSet.size(), sumOp<label>());
+        if (nRetest > 0)
+        {
+            reduce(nHits, sumOp<label>());
+
+            //Info<< "Retesting " << nRetest
+            //    << " out of " << nHits
+            //    << " intersections on uncached elements on geometry "
+            //    << geom.name() << endl;
+
+            pointField samples(retestSet.size());
+            forAll(retestSet, i)
+            {
+                samples[i] = intersectionInfo[retestSet[i]].hitPoint();
+            }
+            labelList shellLevel;
+            shells.findHigherLevel
+            (
+                samples,
+                UIndirectList<label>(surfaceLevel, retestSet)(),
+                shellLevel
+            );
+            forAll(retestSet, i)
+            {
+                label sampleI = retestSet[i];
+                localLevel[sampleI] = max(localLevel[sampleI], shellLevel[i]);
+            }
+        }
+    }
+
+    return localLevel;
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -408,19 +493,19 @@ void Foam::refinementSurfaces::setMinLevelFields
     {
         const searchableSurface& geom = allGeometry_[surfaces_[surfI]];
 
-        // Precalculation only makes sense if there are different regions
-        // (so different refinement levels possible) and there are some
+        // Cache the refinement level (max of surface level and shell level)
+        // on a per-element basis. Only makes sense if there are lots of
         // elements. Possibly should have 'enough' elements to have fine
         // enough resolution but for now just make sure we don't catch e.g.
         // searchableBox (size=6)
-        if (geom.regions().size() > 1 && geom.globalSize() > 10)
+        if (geom.globalSize() > 10)
         {
             // Representative local coordinates and bounding sphere
             pointField ctrs;
             scalarField radiusSqr;
             geom.boundingSpheres(ctrs, radiusSqr);
 
-            labelList minLevelField(ctrs.size(), -1);
+            labelList minLevelField(ctrs.size(), 0);
             {
                 // Get the element index in a roundabout way. Problem is e.g.
                 // distributed surface where local indices differ from global
@@ -447,9 +532,78 @@ void Foam::refinementSurfaces::setMinLevelFields
             labelList shellLevel;
             shells.findHigherLevel(ctrs, minLevelField, shellLevel);
 
+
+            // In case of triangulated surfaces only cache value if triangle
+            // centre and vertices are in same shell
+            if (isA<triSurface>(geom))
+            {
+                label nUncached = 0;
+
+                // Check if points differing from ctr level
+
+                const triSurface& ts = refCast<const triSurface>(geom);
+                const pointField& points = ts.points();
+
+                // Determine minimum expected level to avoid having to
+                // test lots of points
+                labelList minPointLevel(points.size(), labelMax);
+                forAll(shellLevel, triI)
+                {
+                    const labelledTri& t = ts[triI];
+                    label level = shellLevel[triI];
+                    forAll(t, tI)
+                    {
+                        minPointLevel[t[tI]] = min(minPointLevel[t[tI]], level);
+                    }
+                }
+
+
+                // See if inside any shells with higher refinement level
+                labelList pointLevel;
+                shells.findHigherLevel(points, minPointLevel, pointLevel);
+
+
+                // See if triangle centre values differ from triangle points
+                forAll(shellLevel, triI)
+                {
+                    const labelledTri& t = ts[triI];
+                    label fLevel = shellLevel[triI];
+                    if
+                    (
+                        (pointLevel[t[0]] != fLevel)
+                     || (pointLevel[t[1]] != fLevel)
+                     || (pointLevel[t[2]] != fLevel)
+                    )
+                    {
+                        //Pout<< "Detected triangle " << t.tri(ts.points())
+                        //    << " partially inside/partially outside" << endl;
+
+                        // Mark as uncached
+                        shellLevel[triI] = -1;
+                        nUncached++;
+                    }
+                }
+
+                Info<< "For geometry " << geom.name()
+                    << " detected " << returnReduce(nUncached, sumOp<label>())
+                    << " uncached triangles out of " << geom.globalSize()
+                    << endl;
+            }
+
+
+            // Combine overall level field with current shell level. Make sure
+            // to preserve -1 (from triSurfaceMeshes with triangles partly
+            // inside/outside
             forAll(minLevelField, i)
             {
-                minLevelField[i] = max(minLevelField[i], shellLevel[i]);
+                if (min(minLevelField[i], shellLevel[i]) < 0)
+                {
+                    minLevelField[i] = -1;
+                }
+                else
+                {
+                    minLevelField[i] = max(minLevelField[i], shellLevel[i]);
+                }
             }
 
             // Store minLevelField on surface
@@ -463,6 +617,8 @@ void Foam::refinementSurfaces::setMinLevelFields
 // number.
 void Foam::refinementSurfaces::findHigherIntersection
 (
+    const shellSurfaces& shells,
+
     const pointField& start,
     const pointField& end,
     const labelList& currentLevel,   // current cell refinement level
@@ -494,41 +650,48 @@ void Foam::refinementSurfaces::findHigherIntersection
         List<pointIndexHit> intersectionInfo(start.size());
         geom.findLineAny(start, end, intersectionInfo);
 
-        // See if a cached level field available
-        labelList minLevelField;
-        geom.getField(intersectionInfo, minLevelField);
-        bool haveLevelField =
-        (
-            returnReduce(minLevelField.size(), sumOp<label>())
-          > 0
-        );
 
-        if (!haveLevelField && geom.regions().size() == 1)
+        // Surface-based refinement level
+        labelList surfaceOnlyLevel(start.size(), -1);
         {
-            minLevelField = labelList
-            (
-                intersectionInfo.size(),
-                minLevel(surfI, 0)
-            );
-            haveLevelField = true;
-        }
+            // Get per intersection the region
+            labelList region;
+            geom.getRegion(intersectionInfo, region);
 
-        if (haveLevelField)
-        {
             forAll(intersectionInfo, i)
             {
-                if
-                (
-                    intersectionInfo[i].hit()
-                 && minLevelField[i] > currentLevel[i]
-                )
+                if (intersectionInfo[i].hit())
                 {
-                    surfaces[i] = surfI;    // index of surface
-                    surfaceLevel[i] = minLevelField[i];
+                    surfaceOnlyLevel[i] = minLevel(surfI, region[i]);
                 }
             }
-            return;
         }
+
+
+        // Get shell refinement level if higher
+        const labelList localLevel
+        (
+            findHigherLevel
+            (
+                geom,
+                shells,
+                intersectionInfo,
+                surfaceOnlyLevel // starting level
+            )
+        );
+
+
+        // Combine localLevel with current level
+        forAll(localLevel, i)
+        {
+            if (localLevel[i] > currentLevel[i])
+            {
+                surfaces[i] = surfI;    // index of surface
+                surfaceLevel[i] = localLevel[i];
+            }
+        }
+
+        return;
     }
 
 
@@ -546,40 +709,48 @@ void Foam::refinementSurfaces::findHigherIntersection
         // Do intersection test
         geom.findLineAny(p0, p1, intersectionInfo);
 
-        // See if a cached level field available
-        labelList minLevelField;
-        geom.getField(intersectionInfo, minLevelField);
 
-        // Copy all hits into arguments, In-place compact misses.
-        label missI = 0;
-        forAll(intersectionInfo, i)
+        // Surface-based refinement level
+        labelList surfaceOnlyLevel(intersectionInfo.size(), -1);
         {
-            // Get the minLevel for the point
-            label minLocalLevel = -1;
+            // Get per intersection the region
+            labelList region;
+            geom.getRegion(intersectionInfo, region);
 
-            if (intersectionInfo[i].hit())
+            forAll(intersectionInfo, i)
             {
-                // Check if minLevelField for this surface.
-                if (minLevelField.size())
+                if (intersectionInfo[i].hit())
                 {
-                    minLocalLevel = minLevelField[i];
-                }
-                else
-                {
-                    // Use the min level for the surface instead. Assume
-                    // single region 0.
-                    minLocalLevel = minLevel(surfI, 0);
+                    surfaceOnlyLevel[i] = minLevel(surfI, region[i]);
                 }
             }
+        }
 
 
+        // Get shell refinement level if higher
+        const labelList localLevel
+        (
+            findHigherLevel
+            (
+                geom,
+                shells,
+                intersectionInfo,
+                surfaceOnlyLevel
+            )
+        );
+
+
+        // Combine localLevel with current level
+        label missI = 0;
+        forAll(localLevel, i)
+        {
             label pointI = intersectionToPoint[i];
 
-            if (minLocalLevel > currentLevel[pointI])
+            if (localLevel[i] > currentLevel[pointI])
             {
                 // Mark point for refinement
                 surfaces[pointI] = surfI;
-                surfaceLevel[pointI] = minLocalLevel;
+                surfaceLevel[pointI] = localLevel[i];
             }
             else
             {
@@ -589,6 +760,7 @@ void Foam::refinementSurfaces::findHigherIntersection
                 missI++;
             }
         }
+
 
         // All done? Note that this decision should be synchronised
         if (returnReduce(missI, sumOp<label>()) == 0)
@@ -1061,7 +1233,7 @@ void Foam::refinementSurfaces::findNearest
 (
     const labelList& surfacesToTest,
     const pointField& samples,
-    const  scalarField& nearestDistSqr,
+    const scalarField& nearestDistSqr,
     labelList& hitSurface,
     List<pointIndexHit>& hitInfo
 ) const
@@ -1332,6 +1504,123 @@ void Foam::refinementSurfaces::findInside
                     }
                 }
             }
+        }
+    }
+}
+
+
+void Foam::refinementSurfaces::findNearest
+(
+    const labelList& surfacesToTest,
+    const labelListList& regions,
+
+    const pointField& samples,
+    const scalarField& nearestDistSqr,
+
+    labelList& hitSurface,
+    List<pointIndexHit>& hitInfo
+) const
+{
+    labelList geometries(UIndirectList<label>(surfaces_, surfacesToTest));
+
+    // Do the tests. Note that findNearest returns index in geometries.
+    searchableSurfacesQueries::findNearest
+    (
+        allGeometry_,
+        geometries,
+        regions,
+        samples,
+        nearestDistSqr,
+        hitSurface,
+        hitInfo
+    );
+
+    // Rework the hitSurface to be surface (i.e. index into surfaces_)
+    forAll(hitSurface, pointI)
+    {
+        if (hitSurface[pointI] != -1)
+        {
+            hitSurface[pointI] = surfacesToTest[hitSurface[pointI]];
+        }
+    }
+}
+
+
+void Foam::refinementSurfaces::findNearestRegion
+(
+    const labelList& surfacesToTest,
+    const labelListList& regions,
+
+    const pointField& samples,
+    const scalarField& nearestDistSqr,
+
+    labelList& hitSurface,
+    List<pointIndexHit>& hitInfo,
+    labelList& hitRegion,
+    vectorField& hitNormal
+) const
+{
+    labelList geometries(UIndirectList<label>(surfaces_, surfacesToTest));
+
+    // Do the tests. Note that findNearest returns index in geometries.
+    searchableSurfacesQueries::findNearest
+    (
+        allGeometry_,
+        geometries,
+        regions,
+        samples,
+        nearestDistSqr,
+        hitSurface,
+        hitInfo
+    );
+
+    // Rework the hitSurface to be surface (i.e. index into surfaces_)
+    forAll(hitSurface, pointI)
+    {
+        if (hitSurface[pointI] != -1)
+        {
+            hitSurface[pointI] = surfacesToTest[hitSurface[pointI]];
+        }
+    }
+
+    // Collect the region
+    hitRegion.setSize(hitSurface.size());
+    hitRegion = -1;
+    hitNormal.setSize(hitSurface.size());
+    hitNormal = vector::zero;
+
+    forAll(surfacesToTest, i)
+    {
+        label surfI = surfacesToTest[i];
+
+        // Collect hits for surfI
+        const labelList localIndices(findIndices(hitSurface, surfI));
+
+        List<pointIndexHit> localHits
+        (
+            UIndirectList<pointIndexHit>
+            (
+                hitInfo,
+                localIndices
+            )
+        );
+
+        // Region
+        labelList localRegion;
+        allGeometry_[surfaces_[surfI]].getRegion(localHits, localRegion);
+
+        forAll(localIndices, i)
+        {
+            hitRegion[localIndices[i]] = localRegion[i];
+        }
+
+        // Normal
+        vectorField localNormal;
+        allGeometry_[surfaces_[surfI]].getNormal(localHits, localNormal);
+
+        forAll(localIndices, i)
+        {
+            hitNormal[localIndices[i]] = localNormal[i];
         }
     }
 }

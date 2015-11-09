@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,13 +116,23 @@ Foam::labelList Foam::removeCells::getExposedFaces
     }
 
     // Coupled faces: add number of cells using face across couple.
-    if (syncPar_)
     {
-        syncTools::syncFaceList
+        // Note cyclics done always, parallel bits only done if syncPar_
+
+        SubList<label> bndValues
+        (
+            nCellsUsingFace,
+            mesh_.nFaces()-mesh_.nInternalFaces(),
+            mesh_.nInternalFaces()
+        );
+
+        syncTools::syncBoundaryFaceList
         (
             mesh_,
-            nCellsUsingFace,
-            plusEqOp<label>()
+            bndValues,
+            plusEqOp<label>(),
+            mapDistribute::transform(),
+            syncPar_
         );
     }
 

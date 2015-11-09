@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -716,66 +716,35 @@ Foam::faceList Foam::intersectedSurface::resplitFace
     edgeSurface& eSurf
 )
 {
-    {
-        // Dump face for debugging.
-        Pout<< "Writing face:" << faceI << " to face.obj" << endl;
-        OFstream str("face.obj");
-        writeOBJ(eSurf.points(), eSurf.edges(), eSurf.faceEdges()[faceI], str);
-    }
-
-
     // Count the number of times point has been visited so we
     // can compare number to facePointEdges.
     Map<label> pointVisited(2*facePointEdges.size());
 
-
-    {
-        OFstream str0("visitedNone.obj");
-        OFstream str1("visitedOnce.obj");
-        OFstream str2("visitedTwice.obj");
-        forAll(eSurf.points(), pointI)
-        {
-            const point& pt = eSurf.points()[pointI];
-
-            str0 << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
-            str1 << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
-            str2 << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
-        }
-
-
     forAllConstIter(Map<label>, visited, iter)
     {
         label edgeI = iter.key();
-
         const edge& e = eSurf.edges()[edgeI];
-
         label stat = iter();
 
         if (stat == STARTTOEND || stat == ENDTOSTART)
         {
             incCount(pointVisited, e[0], 1);
             incCount(pointVisited, e[1], 1);
-
-            str1 << "l " << e[0]+1 << ' ' << e[1]+1 << nl;
         }
         else if (stat == BOTH)
         {
             incCount(pointVisited, e[0], 2);
             incCount(pointVisited, e[1], 2);
-
-            str2 << "l " << e[0]+1 << ' ' << e[1]+1 << nl;
         }
         else if (stat == UNVISITED)
         {
             incCount(pointVisited, e[0], 0);
             incCount(pointVisited, e[1], 0);
-
-            str0 << "l " << e[0]+1 << ' ' << e[1]+1 << nl;
         }
     }
-    }
 
 
+    if (debug)
     {
         forAllConstIter(Map<label>, pointVisited, iter)
         {
@@ -838,8 +807,6 @@ Foam::faceList Foam::intersectedSurface::resplitFace
 
 
     // Find second intersection.
-    label visitedVert1 = -1;
-    label unvisitedVert1 = -1;
     {
         scalar minDist = GREAT;
 
@@ -876,8 +843,6 @@ Foam::faceList Foam::intersectedSurface::resplitFace
                     if (nearDist < minDist)
                     {
                         minDist = nearDist;
-                        visitedVert1 = nearVertI;
-                        unvisitedVert1 = pointI;
                     }
                 }
             }
@@ -885,32 +850,24 @@ Foam::faceList Foam::intersectedSurface::resplitFace
     }
 
 
-    Pout<< "resplitFace : adding intersection from " << visitedVert0
-        << " to " << unvisitedVert0 << endl
-        << " and from " << visitedVert1
-        << " to " << unvisitedVert1 << endl;
-
-
-//    // Add the new intersection edges to the edgeSurface
-//    edgeList additionalEdges(2);
-//    additionalEdges[0] = edge(visitedVert0, unvisitedVert0);
-//    additionalEdges[1] = edge(visitedVert1, unvisitedVert1);
-
     // Add the new intersection edges to the edgeSurface
     edgeList additionalEdges(1);
     additionalEdges[0] = edge(visitedVert0, unvisitedVert0);
 
     eSurf.addIntersectionEdges(faceI, additionalEdges);
 
-    fileName newFName("face_" + Foam::name(faceI) + "_newEdges.obj");
-    Pout<< "Dumping face:" << faceI << " to " << newFName << endl;
-    writeLocalOBJ
-    (
-        eSurf.points(),
-        eSurf.edges(),
-        eSurf.faceEdges()[faceI],
-        newFName
-    );
+    if (debug)
+    {
+        fileName newFName("face_" + Foam::name(faceI) + "_newEdges.obj");
+        Pout<< "Dumping face:" << faceI << " to " << newFName << endl;
+        writeLocalOBJ
+        (
+            eSurf.points(),
+            eSurf.edges(),
+            eSurf.faceEdges()[faceI],
+            newFName
+        );
+    }
 
     // Retry splitFace. Use recursion since is rare situation.
     return splitFace(surf, faceI, eSurf);
@@ -1085,20 +1042,6 @@ Foam::faceList Foam::intersectedSurface::splitFace
         }
         else if (stat != BOTH)
         {
-            //{
-            //    Pout<< "Dumping faces so far to faces.obj" << nl
-            //        << faces << endl;
-            //
-            //    OFstream str("faces.obj");
-            //
-            //    forAll(faces, i)
-            //    {
-            //        writeOBJ(points, faces[i], str);
-            //    }
-            //}
-
-            Pout<< "** Resplitting **" << endl;
-
             // Redo face after introducing extra edge. Edge introduced
             // should be one nearest to any fully visited edge.
             return resplitFace
@@ -1220,34 +1163,6 @@ Foam::intersectedSurface::intersectedSurface
             forAll(newFaces, newFaceI)
             {
                 const face& newF = newFaces[newFaceI];
-
-//                {
-//                    fileName fName
-//                    (
-//                        "face_"
-//                      + Foam::name(faceI)
-//                      + "_subFace_"
-//                      + Foam::name(newFaceI)
-//                      + ".obj"
-//                    );
-//                    Pout<< "Writing original face:" << faceI << " subFace:"
-//                        << newFaceI << " to " << fName << endl;
-//
-//                    OFstream str(fName);
-//
-//                    forAll(newF, fp)
-//                    {
-//                        meshTools::writeOBJ(str, eSurf.points()[newF[fp]]);
-//                    }
-//                    str << 'l';
-//                    forAll(newF, fp)
-//                    {
-//                        str << ' ' << fp+1;
-//                    }
-//                    str<< " 1" << nl;
-//                }
-
-
                 const vector& n = surf.faceNormals()[faceI];
                 const label region = surf[faceI].region();
 

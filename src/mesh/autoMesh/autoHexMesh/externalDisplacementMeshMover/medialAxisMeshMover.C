@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,7 @@ License
 #include "unitConversion.H"
 #include "PatchTools.H"
 #include "OBJstream.H"
-#include "pointData.H"
+#include "PointData.H"
 #include "zeroFixedValuePointPatchFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -52,241 +52,11 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::labelList Foam::medialAxisMeshMover::getFixedValueBCs
-(
-    const pointVectorField& fld
-)
-{
-    DynamicList<label> adaptPatchIDs;
-    forAll(fld.boundaryField(), patchI)
-    {
-        const pointPatchField<vector>& patchFld =
-            fld.boundaryField()[patchI];
-
-        if (isA<valuePointPatchField<vector> >(patchFld))
-        {
-            if (isA<zeroFixedValuePointPatchField<vector> >(patchFld))
-            {
-                // Special condition of fixed boundary condition. Does not
-                // get adapted
-            }
-            else
-            {
-                adaptPatchIDs.append(patchI);
-            }
-        }
-    }
-    return adaptPatchIDs;
-}
-
-
-Foam::autoPtr<Foam::indirectPrimitivePatch>
-Foam::medialAxisMeshMover::getPatch
-(
-    const polyMesh& mesh,
-    const labelList& patchIDs
-)
-{
-    const polyBoundaryMesh& patches = mesh.boundaryMesh();
-
-    // Count faces.
-    label nFaces = 0;
-
-    forAll(patchIDs, i)
-    {
-        const polyPatch& pp = patches[patchIDs[i]];
-
-        nFaces += pp.size();
-    }
-
-    // Collect faces.
-    labelList addressing(nFaces);
-    nFaces = 0;
-
-    forAll(patchIDs, i)
-    {
-        const polyPatch& pp = patches[patchIDs[i]];
-
-        label meshFaceI = pp.start();
-
-        forAll(pp, i)
-        {
-            addressing[nFaces++] = meshFaceI++;
-        }
-    }
-
-    return autoPtr<indirectPrimitivePatch>
-    (
-        new indirectPrimitivePatch
-        (
-            IndirectList<face>(mesh.faces(), addressing),
-            mesh.points()
-        )
-    );
-}
-
-
-void Foam::medialAxisMeshMover::smoothPatchNormals
-(
-    const label nSmoothDisp,
-    const PackedBoolList& isPatchMasterPoint,
-    const PackedBoolList& isPatchMasterEdge,
-    pointField& normals
-) const
-{
-    const indirectPrimitivePatch& pp = adaptPatchPtr_();
-    const edgeList& edges = pp.edges();
-    const labelList& meshPoints = pp.meshPoints();
-
-    // Get smoothly varying internal normals field.
-    Info<< typeName << " : Smoothing normals ..." << endl;
-
-    scalarField edgeWeights(edges.size());
-    scalarField invSumWeight(meshPoints.size());
-    meshRefinement::calculateEdgeWeights
-    (
-        mesh(),
-        isPatchMasterEdge,
-        meshPoints,
-        edges,
-        edgeWeights,
-        invSumWeight
-    );
-
-
-    vectorField average;
-    for (label iter = 0; iter < nSmoothDisp; iter++)
-    {
-        meshRefinement::weightedSum
-        (
-            mesh(),
-            isPatchMasterEdge,
-            meshPoints,
-            edges,
-            edgeWeights,
-            normals,
-            average
-        );
-        average *= invSumWeight;
-
-        // Do residual calculation every so often.
-        if ((iter % 10) == 0)
-        {
-            scalar resid = meshRefinement::gAverage
-            (
-                isPatchMasterPoint,
-                mag(normals-average)()
-            );
-            Info<< "    Iteration " << iter << "   residual " << resid << endl;
-        }
-
-        // Transfer to normals vector field
-        forAll(average, pointI)
-        {
-            // full smoothing neighbours + point value
-            average[pointI] = 0.5*(normals[pointI]+average[pointI]);
-            normals[pointI] = average[pointI];
-            normals[pointI] /= mag(normals[pointI]) + VSMALL;
-        }
-    }
-}
-
-
-// Smooth normals in interior.
-void Foam::medialAxisMeshMover::smoothNormals
-(
-    const label nSmoothDisp,
-    const PackedBoolList& isMeshMasterPoint,
-    const PackedBoolList& isMeshMasterEdge,
-    const labelList& fixedPoints,
-    pointVectorField& normals
-) const
-{
-    // Get smoothly varying internal normals field.
-    Info<< typeName
-        << " : Smoothing normals in interior ..." << endl;
-
-    const edgeList& edges = mesh().edges();
-
-    // Points that do not change.
-    PackedBoolList isFixedPoint(mesh().nPoints());
-
-    // Internal points that are fixed
-    forAll(fixedPoints, i)
-    {
-        label meshPointI = fixedPoints[i];
-        isFixedPoint.set(meshPointI, 1);
-    }
-
-    // Make sure that points that are coupled to meshPoints but not on a patch
-    // are fixed as well
-    syncTools::syncPointList(mesh(), isFixedPoint, maxEqOp<unsigned int>(), 0);
-
-
-    // Correspondence between local edges/points and mesh edges/points
-    const labelList meshPoints(identity(mesh().nPoints()));
-
-    // Calculate inverse sum of weights
-
-    scalarField edgeWeights(mesh().nEdges());
-    scalarField invSumWeight(meshPoints.size());
-    meshRefinement::calculateEdgeWeights
-    (
-        mesh(),
-        isMeshMasterEdge,
-        meshPoints,
-        edges,
-        edgeWeights,
-        invSumWeight
-    );
-
-    vectorField average;
-    for (label iter = 0; iter < nSmoothDisp; iter++)
-    {
-        meshRefinement::weightedSum
-        (
-            mesh(),
-            isMeshMasterEdge,
-            meshPoints,
-            edges,
-            edgeWeights,
-            normals,
-            average
-        );
-        average *= invSumWeight;
-
-        // Do residual calculation every so often.
-        if ((iter % 10) == 0)
-        {
-            scalar resid = meshRefinement::gAverage
-            (
-                isMeshMasterPoint,
-                mag(normals-average)()
-            );
-            Info<< "    Iteration " << iter << "   residual " << resid << endl;
-        }
-
-
-        // Transfer to normals vector field
-        forAll(average, pointI)
-        {
-            if (isFixedPoint.get(pointI) == 0)
-            {
-                //full smoothing neighbours + point value
-                average[pointI] = 0.5*(normals[pointI]+average[pointI]);
-                normals[pointI] = average[pointI];
-                normals[pointI] /= mag(normals[pointI]) + VSMALL;
-            }
-        }
-    }
-}
-
-
 // Tries and find a medial axis point. Done by comparing vectors to nearest
 // wall point for both vertices of edge.
 bool Foam::medialAxisMeshMover::isMaxEdge
 (
-    const List<pointData>& pointWallDist,
+    const List<PointData<vector> >& pointWallDist,
     const label edgeI,
     const scalar minCos
 ) const
@@ -331,7 +101,7 @@ bool Foam::medialAxisMeshMover::isMaxEdge
     //- Detect based on extrusion vector differing for both endpoints
     //  the idea is that e.g. a sawtooth wall can still be extruded
     //  successfully as long as it is done all to the same direction.
-    if ((pointWallDist[e[0]].v() & pointWallDist[e[1]].v()) < minCos)
+    if ((pointWallDist[e[0]].data() & pointWallDist[e[1]].data()) < minCos)
     {
         return true;
     }
@@ -439,11 +209,12 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
     pointField pointNormals(PatchTools::pointNormals(mesh(), pp));
 
     // Smooth patch normal vectors
-    smoothPatchNormals
+    fieldSmoother_.smoothPatchNormals
     (
         nSmoothSurfaceNormals,
         isPatchMasterPoint,
         isPatchMasterEdge,
+        pp,
         pointNormals
     );
 
@@ -452,7 +223,7 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Distance to wall
-    List<pointData> pointWallDist(mesh().nPoints());
+    List<PointData<vector> > pointWallDist(mesh().nPoints());
 
     // Dummy additional info for PointEdgeWave
     int dummyTrackData = 0;
@@ -461,23 +232,22 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
     // 1. Calculate distance to points where displacement is specified.
     {
         // Seed data.
-        List<pointData> wallInfo(meshPoints.size());
+        List<PointData<vector> > wallInfo(meshPoints.size());
 
         forAll(meshPoints, patchPointI)
         {
             label pointI = meshPoints[patchPointI];
-            wallInfo[patchPointI] = pointData
+            wallInfo[patchPointI] = PointData<vector>
             (
                 points[pointI],
                 0.0,
-                pointI,                       // passive scalar
                 pointNormals[patchPointI]     // surface normals
             );
         }
 
         // Do all calculations
-        List<pointData> edgeWallDist(mesh().nEdges());
-        PointEdgeWave<pointData> wallDistCalc
+        List<PointData<vector> > edgeWallDist(mesh().nEdges());
+        PointEdgeWave<PointData<vector> > wallDistCalc
         (
             mesh(),
             meshPoints,
@@ -525,11 +295,11 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
     // 2. Find points with max distance and transport information back to
     //    wall.
     {
-        List<pointData> pointMedialDist(mesh().nPoints());
-        List<pointData> edgeMedialDist(mesh().nEdges());
+        List<pointEdgePoint> pointMedialDist(mesh().nPoints());
+        List<pointEdgePoint> edgeMedialDist(mesh().nEdges());
 
         // Seed point data.
-        DynamicList<pointData> maxInfo(meshPoints.size());
+        DynamicList<pointEdgePoint> maxInfo(meshPoints.size());
         DynamicList<label> maxPoints(meshPoints.size());
 
         // 1. Medial axis points
@@ -556,12 +326,10 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
                         maxPoints.append(pointI);
                         maxInfo.append
                         (
-                            pointData
+                            pointEdgePoint
                             (
                                 points[pointI],
-                                0.0,
-                                pointI,         // passive data
-                                vector::zero    // passive data
+                                0.0
                             )
                         );
                         pointMedialDist[pointI] = maxInfo.last();
@@ -612,12 +380,10 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
                             maxPoints.append(pointI);
                             maxInfo.append
                             (
-                                pointData
+                                pointEdgePoint
                                 (
                                     medialAxisPt,   //points[pointI],
-                                    magSqr(points[pointI]-medialAxisPt),//0.0,
-                                    pointI,         // passive data
-                                    vector::zero    // passive data
+                                    magSqr(points[pointI]-medialAxisPt)//0.0
                                 )
                             );
                             pointMedialDist[pointI] = maxInfo.last();
@@ -669,12 +435,10 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
                             maxPoints.append(pointI);
                             maxInfo.append
                             (
-                                pointData
+                                pointEdgePoint
                                 (
                                     points[pointI],
-                                    0.0,
-                                    pointI,         // passive data
-                                    vector::zero    // passive data
+                                    0.0
                                 )
                             );
                             pointMedialDist[pointI] = maxInfo.last();
@@ -715,7 +479,7 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
                             // Check if angle not too large.
                             scalar cosAngle =
                             (
-                               -pointWallDist[pointI].v()
+                               -pointWallDist[pointI].data()
                               & pointNormals[i]
                             );
                             if (cosAngle > slipFeatureAngleCos)
@@ -726,12 +490,10 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
                                 maxPoints.append(pointI);
                                 maxInfo.append
                                 (
-                                    pointData
+                                    pointEdgePoint
                                     (
                                         points[pointI],
-                                        0.0,
-                                        pointI,         // passive data
-                                        vector::zero    // passive data
+                                        0.0
                                     )
                                 );
                                 pointMedialDist[pointI] = maxInfo.last();
@@ -751,7 +513,7 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
         maxPoints.shrink();
 
         // Do all calculations
-        PointEdgeWave<pointData> medialDistCalc
+        PointEdgeWave<pointEdgePoint> medialDistCalc
         (
             mesh(),
             maxPoints,
@@ -794,12 +556,12 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
         }
         else
         {
-            dispVec_[i] = pointWallDist[i].v();
+            dispVec_[i] = pointWallDist[i].data();
         }
     }
 
     // Smooth normal vectors. Do not change normals on pp.meshPoints
-    smoothNormals
+    fieldSmoother_.smoothNormals
     (
         nSmoothNormals,
         isMeshMasterPoint,
@@ -1003,79 +765,6 @@ void Foam::medialAxisMeshMover::syncPatchDisplacement
 }
 
 
-void Foam::medialAxisMeshMover::minSmoothField
-(
-    const label nSmoothDisp,
-    const PackedBoolList& isPatchMasterPoint,
-    const PackedBoolList& isPatchMasterEdge,
-    const scalarField& fieldMin,
-    scalarField& field
-) const
-{
-    const indirectPrimitivePatch& pp = adaptPatchPtr_();
-    const edgeList& edges = pp.edges();
-    const labelList& meshPoints = pp.meshPoints();
-
-    scalarField edgeWeights(edges.size());
-    scalarField invSumWeight(meshPoints.size());
-    meshRefinement::calculateEdgeWeights
-    (
-        mesh(),
-        isPatchMasterEdge,
-        meshPoints,
-        edges,
-        edgeWeights,
-        invSumWeight
-    );
-
-    // Get smoothly varying patch field.
-    Info<< typeName << " : Smoothing field ..." << endl;
-
-    for (label iter = 0; iter < nSmoothDisp; iter++)
-    {
-        scalarField average(pp.nPoints());
-        meshRefinement::weightedSum
-        (
-            mesh(),
-            isPatchMasterEdge,
-            meshPoints,
-            edges,
-            edgeWeights,
-            field,
-            average
-        );
-        average *= invSumWeight;
-
-        // Transfer to field
-        forAll(field, pointI)
-        {
-            //full smoothing neighbours + point value
-            average[pointI] = 0.5*(field[pointI]+average[pointI]);
-
-            // perform monotonic smoothing
-            if
-            (
-                average[pointI] < field[pointI]
-             && average[pointI] >= fieldMin[pointI]
-            )
-            {
-                field[pointI] = average[pointI];
-            }
-        }
-
-        // Do residual calculation every so often.
-        if ((iter % 10) == 0)
-        {
-            scalar resid = meshRefinement::gAverage
-            (
-                isPatchMasterPoint,
-                mag(field-average)()
-            );
-            Info<< "    Iteration " << iter << "   residual " << resid << endl;
-        }
-    }
-}
-
 // Stop layer growth where mesh wraps around edge with a
 // large feature angle
 void Foam::medialAxisMeshMover::
@@ -1204,7 +893,8 @@ handleFeatureAngleLayerTerminations
 
     //Info<< "Added "
     //    << returnReduce(nPointCounter-nOldPointCounter, sumOp<label>())
-    //    << " point not to extrude." << endl;
+    //    << " point not to extrude due to minCos "
+    //    << minCos << endl;
 }
 
 
@@ -1226,47 +916,43 @@ void Foam::medialAxisMeshMover::findIsolatedRegions
     const labelListList& pointFaces = pp.pointFaces();
     const labelList& meshPoints = pp.meshPoints();
 
-    Info<< typeName << " : Removing isolated regions ..." << endl;
+
+    Info<< typeName << " : Removing isolated regions ..." << nl
+        << indent << "- if partially extruded faces make angle < "
+        << Foam::radToDeg(Foam::acos(minCosLayerTermination)) <<  nl;
+    if (detectExtrusionIsland)
+    {
+        Info<< indent << "- if exclusively surrounded by non-extruded points"
+            << nl;
+    }
+    else
+    {
+        Info<< indent << "- if exclusively surrounded by non-extruded faces"
+            << nl;
+    }
 
     // Keep count of number of points unextruded
     label nPointCounter = 0;
-
-
-    autoPtr<OBJstream> str;
-    if (debug)
-    {
-        str.reset
-        (
-            new OBJstream
-            (
-                mesh().time().path()
-              / "islandExcludePoints_"
-              + mesh().time().timeName()
-              + ".obj"
-            )
-        );
-        Info<< typeName
-            << " : Writing points surrounded by non-extruded points to "
-            << str().name() << endl;
-    }
 
     while (true)
     {
         // Stop layer growth where mesh wraps around edge with a
         // large feature angle
-        handleFeatureAngleLayerTerminations
-        (
-            minCosLayerTermination,
-            isPatchMasterPoint,
-            meshEdges,
+        if (minCosLayerTermination > -1)
+        {
+            handleFeatureAngleLayerTerminations
+            (
+                minCosLayerTermination,
+                isPatchMasterPoint,
+                meshEdges,
 
-            extrudeStatus,
-            patchDisp,
-            nPointCounter
-        );
+                extrudeStatus,
+                patchDisp,
+                nPointCounter
+            );
 
-        syncPatchDisplacement(minThickness, patchDisp, extrudeStatus);
-
+            syncPatchDisplacement(minThickness, patchDisp, extrudeStatus);
+        }
 
 
         // Detect either:
@@ -1389,11 +1075,6 @@ void Foam::medialAxisMeshMover::findIsolatedRegions
                 {
                     nPointCounter++;
                     nChanged++;
-
-                    if (str.valid())
-                    {
-                        str().write(pp.points()[meshPoints[patchPointI]]);
-                    }
                 }
             }
         }
@@ -1483,11 +1164,6 @@ void Foam::medialAxisMeshMover::findIsolatedRegions
                     )
                     {
                         nPointCounter++;
-
-                        if (str.valid())
-                        {
-                            str().write(pp.points()[meshPoints[f[fp]]]);
-                        }
                     }
                 }
             }
@@ -1498,98 +1174,6 @@ void Foam::medialAxisMeshMover::findIsolatedRegions
     Info<< typeName
         << " : Number of isolated points extrusion stopped : "<< nPointCounter
         << endl;
-}
-
-
-void Foam::medialAxisMeshMover::smoothLambdaMuDisplacement
-(
-    const label nSmoothDisp,
-    const PackedBoolList& isMeshMasterPoint,
-    const PackedBoolList& isMeshMasterEdge,
-    vectorField& displacement
-) const
-{
-    const edgeList& edges = mesh().edges();
-
-    // Correspondence between local edges/points and mesh edges/points
-    const labelList meshPoints(identity(mesh().nPoints()));
-
-    // Calculate inverse sum of weights
-    scalarField edgeWeights(mesh().nEdges());
-    scalarField invSumWeight(meshPoints.size());
-    meshRefinement::calculateEdgeWeights
-    (
-        mesh(),
-        isMeshMasterEdge,
-        meshPoints,
-        edges,
-        edgeWeights,
-        invSumWeight
-    );
-
-    // Get smoothly varying patch field.
-    Info<< typeName << " : Smoothing displacement ..." << endl;
-
-    const scalar lambda = 0.33;
-    const scalar mu = -0.34;
-
-    vectorField average;
-
-    for (label iter = 0; iter < nSmoothDisp; iter++)
-    {
-        meshRefinement::weightedSum
-        (
-            mesh(),
-            isMeshMasterEdge,
-            meshPoints,
-            edges,
-            edgeWeights,
-            displacement,
-            average
-        );
-        average *= invSumWeight;
-
-        forAll(displacement, i)
-        {
-            if (medialRatio_[i] > SMALL && medialRatio_[i] < 1-SMALL)
-            {
-                displacement[i] = (1-lambda)*displacement[i]+lambda*average[i];
-            }
-        }
-
-        meshRefinement::weightedSum
-        (
-            mesh(),
-            isMeshMasterEdge,
-            meshPoints,
-            edges,
-            edgeWeights,
-            displacement,
-            average
-        );
-        average *= invSumWeight;
-
-
-        forAll(displacement, i)
-        {
-            if (medialRatio_[i] > SMALL && medialRatio_[i] < 1-SMALL)
-            {
-                displacement[i] = (1-mu)*displacement[i]+mu*average[i];
-            }
-        }
-
-
-        // Do residual calculation every so often.
-        if ((iter % 10) == 0)
-        {
-            scalar resid = meshRefinement::gAverage
-            (
-                isMeshMasterPoint,
-                mag(displacement-average)()
-            );
-            Info<< "    Iteration " << iter << "   residual " << resid << endl;
-        }
-    }
 }
 
 
@@ -1630,6 +1214,7 @@ Foam::medialAxisMeshMover::medialAxisMeshMover
         adaptPatchIDs_,
         dict
     ),
+    fieldSmoother_(mesh()),
     dispVec_
     (
         IOobject
@@ -1733,10 +1318,12 @@ void Foam::medialAxisMeshMover::calculateDisplacement
     const scalar featureAngle = readScalar(coeffDict.lookup("featureAngle"));
 
     //- Stop layer growth where mesh wraps around sharp edge
-    const scalar minCosLayerTermination = Foam::cos
+    scalar layerTerminationAngle = coeffDict.lookupOrDefault<scalar>
     (
-        degToRad(0.5*featureAngle)
+        "layerTerminationAngle",
+        0.5*featureAngle
     );
+    scalar minCosLayerTermination = Foam::cos(degToRad(layerTerminationAngle));
 
     //- Smoothing wanted patch thickness
     const label nSmoothPatchThickness = readLabel
@@ -1791,9 +1378,7 @@ void Foam::medialAxisMeshMover::calculateDisplacement
     );
 
 
-    scalarField thickness(patchDisp.size());
-
-    thickness = mag(patchDisp);
+    scalarField thickness(mag(patchDisp));
 
     forAll(thickness, patchPointI)
     {
@@ -1860,7 +1445,7 @@ void Foam::medialAxisMeshMover::calculateDisplacement
             vector n =
                 patchDisp[patchPointI]
               / (mag(patchDisp[patchPointI]) + VSMALL);
-            vector mVec = mesh().points()[pointI]-medialVec_[pointI];
+            vector mVec = medialVec_[pointI]-mesh().points()[pointI];
             mVec /= mag(mVec)+VSMALL;
             thicknessRatio *= (n&mVec);
 
@@ -1947,14 +1532,17 @@ void Foam::medialAxisMeshMover::calculateDisplacement
     }
 
 
-    // smooth layer thickness on moving patch
-    minSmoothField
+    // Smooth layer thickness on moving patch. Since some locations will have
+    // disabled the extrusion this might cause big jumps in wanted displacement
+    // for neighbouring patch points. So smooth the wanted displacement
+    // before actually trying to move the mesh.
+    fieldSmoother_.minSmoothField
     (
         nSmoothPatchThickness,
         isPatchMasterPoint,
         isPatchMasterEdge,
+        pp,
         minThickness,
-
         thickness
     );
 
@@ -1962,34 +1550,33 @@ void Foam::medialAxisMeshMover::calculateDisplacement
     // Dummy additional info for PointEdgeWave
     int dummyTrackData = 0;
 
-    List<pointData> pointWallDist(mesh().nPoints());
+    List<PointData<scalar> > pointWallDist(mesh().nPoints());
 
     const pointField& points = mesh().points();
     // 1. Calculate distance to points where displacement is specified.
     // This wave is used to transport layer thickness
     {
         // Distance to wall and medial axis on edges.
-        List<pointData> edgeWallDist(mesh().nEdges());
+        List<PointData<scalar> > edgeWallDist(mesh().nEdges());
         labelList wallPoints(meshPoints.size());
 
         // Seed data.
-        List<pointData> wallInfo(meshPoints.size());
+        List<PointData<scalar> > wallInfo(meshPoints.size());
 
         forAll(meshPoints, patchPointI)
         {
             label pointI = meshPoints[patchPointI];
             wallPoints[patchPointI] = pointI;
-            wallInfo[patchPointI] = pointData
+            wallInfo[patchPointI] = PointData<scalar>
             (
                 points[pointI],
                 0.0,
-                thickness[patchPointI],       // transport layer thickness
-                vector::zero                  // passive vector
+                thickness[patchPointI]        // transport layer thickness
             );
         }
 
         // Do all calculations
-        PointEdgeWave<pointData> wallDistCalc
+        PointEdgeWave<PointData<scalar> > wallDistCalc
         (
             mesh(),
             wallPoints,
@@ -2016,12 +1603,12 @@ void Foam::medialAxisMeshMover::calculateDisplacement
         {
             // 1) displacement on nearest wall point, scaled by medialRatio
             //    (wall distance / medial distance)
-            // 2) pointWallDist[pointI].s() is layer thickness transported
+            // 2) pointWallDist[pointI].data() is layer thickness transported
             //    from closest wall point.
             // 3) shrink in opposite direction of addedPoints
             displacement[pointI] =
                 -medialRatio_[pointI]
-                *pointWallDist[pointI].s()
+                *pointWallDist[pointI].data()
                 *dispVec_[pointI];
         }
     }
@@ -2030,11 +1617,20 @@ void Foam::medialAxisMeshMover::calculateDisplacement
     // Smear displacement away from fixed values (medialRatio=0 or 1)
     if (nSmoothDisplacement > 0)
     {
-        smoothLambdaMuDisplacement
+        PackedBoolList isToBeSmoothed(displacement.size(), false);
+
+        forAll(displacement, i)
+        {
+            isToBeSmoothed[i] =
+                medialRatio_[i] > SMALL && medialRatio_[i] < 1-SMALL;
+        }
+
+        fieldSmoother_.smoothLambdaMuDisplacement
         (
             nSmoothDisplacement,
             isMeshMasterPoint,
             isMeshMasterEdge,
+            isToBeSmoothed,
             displacement
         );
     }
@@ -2050,8 +1646,6 @@ bool Foam::medialAxisMeshMover::shrinkMesh
 {
     //- Number of attempts shrinking the mesh
     const label nSnap  = readLabel(meshQualityDict.lookup("nRelaxIter"));
-
-
 
 
     // Make sure displacement boundary conditions is uptodate with
@@ -2119,14 +1713,6 @@ bool Foam::medialAxisMeshMover::move
     const word minThicknessName = word(moveDict.lookup("minThicknessName"));
 
 
-    // The points have moved so before calculation update
-    // the mesh and motionSolver accordingly
-    movePoints(mesh().points());
-    //
-    //// Update any point motion bcs (e.g. timevarying)
-    //pointDisplacement_.boundaryField().updateCoeffs();
-
-
     // Extract out patch-wise displacement
     const indirectPrimitivePatch& pp = adaptPatchPtr_();
 
@@ -2180,13 +1766,10 @@ void Foam::medialAxisMeshMover::movePoints(const pointField& p)
 {
     externalDisplacementMeshMover::movePoints(p);
 
-    // Update local data for new geometry
-    adaptPatchPtr_().movePoints(p);
-
-    // Update motionSmoother for new geometry
+    // Update motionSmoother for new geometry (moves adaptPatchPtr_)
     meshMover_.movePoints();
 
-    // Assume corrent mesh location is correct
+    // Assume corrent mesh location is correct (reset oldPoints, scale)
     meshMover_.correct();
 }
 

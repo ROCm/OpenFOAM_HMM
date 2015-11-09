@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,110 +34,115 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-//// Merge faces that are in-line.
-//Foam::label Foam::meshRefinement::mergePatchFaces
-//(
-//    const scalar minCos,
-//    const scalar concaveCos,
-//    const labelList& patchIDs
-//)
-//{
-//    // Patch face merging engine
-//    combineFaces faceCombiner(mesh_);
-//
-//    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-//
-//    // Pick up all candidate cells on boundary
-//    labelHashSet boundaryCells(mesh_.nFaces()-mesh_.nInternalFaces());
-//
-//    forAll(patchIDs, i)
-//    {
-//        label patchI = patchIDs[i];
-//
-//        const polyPatch& patch = patches[patchI];
-//
-//        if (!patch.coupled())
-//        {
-//            forAll(patch, i)
-//            {
-//                boundaryCells.insert(mesh_.faceOwner()[patch.start()+i]);
-//            }
-//        }
-//    }
-//
-//    // Get all sets of faces that can be merged
-//    labelListList mergeSets
-//    (
-//        faceCombiner.getMergeSets
-//        (
-//            minCos,
-//            concaveCos,
-//            boundaryCells
-//        )
-//    );
-//
-//    label nFaceSets = returnReduce(mergeSets.size(), sumOp<label>());
-//
-//    Info<< "mergePatchFaces : Merging " << nFaceSets
-//        << " sets of faces." << endl;
-//
-//    if (nFaceSets > 0)
-//    {
-//        // Topology changes container
-//        polyTopoChange meshMod(mesh_);
-//
-//        // Merge all faces of a set into the first face of the set. Remove
-//        // unused points.
-//        faceCombiner.setRefinement(mergeSets, meshMod);
-//
-//        // Change the mesh (no inflation)
-//        autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, true);
-//
-//        // Update fields
-//        mesh_.updateMesh(map);
-//
-//        // Move mesh (since morphing does not do this)
-//        if (map().hasMotionPoints())
-//        {
-//            mesh_.movePoints(map().preMotionPoints());
-//        }
-//        else
-//        {
-//            // Delete mesh volumes. No other way to do this?
-//            mesh_.clearOut();
-//        }
-//
-//
-//        // Reset the instance for if in overwrite mode
-//        mesh_.setInstance(timeName());
-//
-//        faceCombiner.updateMesh(map);
-//
-//        // Get the kept faces that need to be recalculated.
-//        // Merging two boundary faces might shift the cell centre
-//        // (unless the faces are absolutely planar)
-//        labelHashSet retestFaces(6*mergeSets.size());
-//
-//        forAll(mergeSets, setI)
-//        {
-//            label oldMasterI = mergeSets[setI][0];
-//
-//            label faceI = map().reverseFaceMap()[oldMasterI];
-//
-//            // faceI is always uncoupled boundary face
-//            const cell& cFaces = mesh_.cells()[mesh_.faceOwner()[faceI]];
-//
-//            forAll(cFaces, i)
-//            {
-//                retestFaces.insert(cFaces[i]);
-//            }
-//        }
-//        updateMesh(map, retestFaces.toc());
-//    }
-//
-//
-//    return nFaceSets;
-//}
+// Merge faces that are in-line.
+Foam::label Foam::meshRefinement::mergePatchFaces
+(
+    const scalar minCos,
+    const scalar concaveCos,
+    const label mergeSize,
+    const labelList& patchIDs
+)
+{
+    // Patch face merging engine
+    combineFaces faceCombiner(mesh_, false);
+
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+    // Pick up all candidate cells on boundary
+    labelHashSet boundaryCells(mesh_.nFaces()-mesh_.nInternalFaces());
+
+    forAll(patchIDs, i)
+    {
+        label patchI = patchIDs[i];
+
+        const polyPatch& patch = patches[patchI];
+
+        if (!patch.coupled())
+        {
+            forAll(patch, i)
+            {
+                boundaryCells.insert(mesh_.faceOwner()[patch.start()+i]);
+            }
+        }
+    }
+
+    // Get all sets of faces that can be merged
+    labelListList mergeSets
+    (
+        faceCombiner.getMergeSets
+        (
+            minCos,
+            concaveCos,
+            boundaryCells
+        )
+    );
+
+    if (mergeSize != -1)
+    {
+        // Keep only those that are mergeSize faces
+        label compactI = 0;
+        forAll(mergeSets, setI)
+        {
+            if (mergeSets[setI].size() == mergeSize)
+            {
+                mergeSets[compactI++] = mergeSets[setI];
+            }
+        }
+        mergeSets.setSize(compactI);
+    }
+
+
+    label nFaceSets = returnReduce(mergeSets.size(), sumOp<label>());
+
+    Info<< "Merging " << nFaceSets << " sets of faces." << nl << endl;
+
+    if (nFaceSets > 0)
+    {
+        // Topology changes container
+        polyTopoChange meshMod(mesh_);
+
+        // Merge all faces of a set into the first face of the set. Remove
+        // unused points.
+        faceCombiner.setRefinement(mergeSets, meshMod);
+
+        // Change the mesh (no inflation)
+        autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, true);
+
+        // Update fields
+        mesh_.updateMesh(map);
+
+        // Move mesh (since morphing does not do this)
+        if (map().hasMotionPoints())
+        {
+            mesh_.movePoints(map().preMotionPoints());
+        }
+        else
+        {
+            // Delete mesh volumes. No other way to do this?
+            mesh_.clearOut();
+        }
+
+        // Reset the instance for if in overwrite mode
+        mesh_.setInstance(timeName());
+
+        faceCombiner.updateMesh(map);
+
+        // Get the kept faces that need to be recalculated.
+        // Merging two boundary faces might shift the cell centre
+        // (unless the faces are absolutely planar)
+        labelHashSet retestFaces(2*mergeSets.size());
+
+        forAll(mergeSets, setI)
+        {
+            label oldMasterI = mergeSets[setI][0];
+            retestFaces.insert(map().reverseFaceMap()[oldMasterI]);
+        }
+        updateMesh(map, growFaceCellFace(retestFaces));
+    }
+
+    return nFaceSets;
+}
+
 //
 //
 //// Remove points not used by any face or points used by only two faces where

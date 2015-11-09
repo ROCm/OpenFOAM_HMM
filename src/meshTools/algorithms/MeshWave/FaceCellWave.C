@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -810,6 +810,79 @@ void Foam::FaceCellWave<Type, TrackingData>::handleAMICyclicPatches()
 }
 
 
+template<class Type, class TrackingData>
+void Foam::FaceCellWave<Type, TrackingData>::handleExplicitConnections()
+{
+    // Collect changed information
+
+    DynamicList<label> f0Baffle(explicitConnections_.size());
+    DynamicList<Type> f0Info(explicitConnections_.size());
+
+    DynamicList<label> f1Baffle(explicitConnections_.size());
+    DynamicList<Type> f1Info(explicitConnections_.size());
+
+    forAll(explicitConnections_, connI)
+    {
+        const labelPair& baffle = explicitConnections_[connI];
+
+        label f0 = baffle[0];
+        if (changedFace_[f0])
+        {
+            f0Baffle.append(connI);
+            f0Info.append(allFaceInfo_[f0]);
+        }
+
+        label f1 = baffle[1];
+        if (changedFace_[f1])
+        {
+            f1Baffle.append(connI);
+            f1Info.append(allFaceInfo_[f1]);
+        }
+    }
+
+
+    // Update other side with changed information
+
+    forAll(f1Info, index)
+    {
+        const labelPair& baffle = explicitConnections_[f1Baffle[index]];
+
+        label f0 = baffle[0];
+        Type& currentWallInfo = allFaceInfo_[f0];
+
+        if (!currentWallInfo.equal(f1Info[index], td_))
+        {
+            updateFace
+            (
+                f0,
+                f1Info[index],
+                propagationTol_,
+                currentWallInfo
+            );
+        }
+    }
+
+    forAll(f0Info, index)
+    {
+        const labelPair& baffle = explicitConnections_[f0Baffle[index]];
+
+        label f1 = baffle[1];
+        Type& currentWallInfo = allFaceInfo_[f1];
+
+        if (!currentWallInfo.equal(f0Info[index], td_))
+        {
+            updateFace
+            (
+                f1,
+                f0Info[index],
+                propagationTol_,
+                currentWallInfo
+            );
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Set up only. Use setFaceInfo and iterate() to do actual calculation.
@@ -823,6 +896,7 @@ Foam::FaceCellWave<Type, TrackingData>::FaceCellWave
 )
 :
     mesh_(mesh),
+    explicitConnections_(0),
     allFaceInfo_(allFaceInfo),
     allCellInfo_(allCellInfo),
     td_(td),
@@ -878,6 +952,7 @@ Foam::FaceCellWave<Type, TrackingData>::FaceCellWave
 )
 :
     mesh_(mesh),
+    explicitConnections_(0),
     allFaceInfo_(allFaceInfo),
     allCellInfo_(allCellInfo),
     td_(td),
@@ -931,6 +1006,87 @@ Foam::FaceCellWave<Type, TrackingData>::FaceCellWave
             " UList<Type>&, UList<Type>&, const label maxIter)"
         )
             << "Maximum number of iterations reached. Increase maxIter." << endl
+            << "    maxIter:" << maxIter << endl
+            << "    nChangedCells:" << nChangedCells_ << endl
+            << "    nChangedFaces:" << nChangedFaces_ << endl
+            << exit(FatalError);
+    }
+}
+
+
+// Iterate, propagating changedFacesInfo across mesh, until no change (or
+// maxIter reached). Initial cell values specified.
+template<class Type, class TrackingData>
+Foam::FaceCellWave<Type, TrackingData>::FaceCellWave
+(
+    const polyMesh& mesh,
+    const List<labelPair>& explicitConnections,
+    const bool handleCyclicAMI,
+    const labelList& changedFaces,
+    const List<Type>& changedFacesInfo,
+    UList<Type>& allFaceInfo,
+    UList<Type>& allCellInfo,
+    const label maxIter,
+    TrackingData& td
+)
+:
+    mesh_(mesh),
+    explicitConnections_(explicitConnections),
+    allFaceInfo_(allFaceInfo),
+    allCellInfo_(allCellInfo),
+    td_(td),
+    changedFace_(mesh_.nFaces(), false),
+    changedFaces_(mesh_.nFaces()),
+    nChangedFaces_(0),
+    changedCell_(mesh_.nCells(), false),
+    changedCells_(mesh_.nCells()),
+    nChangedCells_(0),
+    hasCyclicPatches_(hasPatch<cyclicPolyPatch>()),
+    hasCyclicAMIPatches_
+    (
+        handleCyclicAMI
+     && returnReduce(hasPatch<cyclicAMIPolyPatch>(), orOp<bool>())
+    ),
+    nEvals_(0),
+    nUnvisitedCells_(mesh_.nCells()),
+    nUnvisitedFaces_(mesh_.nFaces())
+{
+    if
+    (
+        allFaceInfo.size() != mesh_.nFaces()
+     || allCellInfo.size() != mesh_.nCells()
+    )
+    {
+        FatalErrorIn
+        (
+            "FaceCellWave<Type, TrackingData>::FaceCellWave"
+            "(const polyMesh&, const List<labelPair>&, const labelList&"
+            ", const List<Type>,"
+            " UList<Type>&, UList<Type>&, const label maxIter)"
+        )   << "face and cell storage not the size of mesh faces, cells:"
+            << endl
+            << "    allFaceInfo   :" << allFaceInfo.size() << endl
+            << "    mesh_.nFaces():" << mesh_.nFaces() << endl
+            << "    allCellInfo   :" << allCellInfo.size() << endl
+            << "    mesh_.nCells():" << mesh_.nCells()
+            << exit(FatalError);
+    }
+
+    // Copy initial changed faces data
+    setFaceInfo(changedFaces, changedFacesInfo);
+
+    // Iterate until nothing changes
+    label iter = iterate(maxIter);
+
+    if ((maxIter > 0) && (iter >= maxIter))
+    {
+        FatalErrorIn
+        (
+            "FaceCellWave<Type, TrackingData>::FaceCellWave"
+            "(const polyMesh&, const List<labelPair>&, const labelList&"
+            ", const List<Type>, UList<Type>&, UList<Type>&"
+            ", const label maxIter)"
+        )   << "Maximum number of iterations reached. Increase maxIter." << endl
             << "    maxIter:" << maxIter << endl
             << "    nChangedCells:" << nChangedCells_ << endl
             << "    nChangedFaces:" << nChangedFaces_ << endl
@@ -1092,6 +1248,10 @@ Foam::label Foam::FaceCellWave<Type, TrackingData>::cellToFace()
 
     // Handled all changed cells by now
     nChangedCells_ = 0;
+
+
+    // Transfer across any explicitly provided internal connections
+    handleExplicitConnections();
 
     if (hasCyclicPatches_)
     {

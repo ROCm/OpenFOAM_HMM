@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,86 +105,82 @@ void Foam::polyMeshGeometry::updateCellCentresAndVols
     const labelList& changedFaces
 )
 {
+    const labelList& own = mesh().faceOwner();
+    const cellList& cells = mesh().cells();
+
     // Clear the fields for accumulation
     UIndirectList<vector>(cellCentres_, changedCells) = vector::zero;
     UIndirectList<scalar>(cellVolumes_, changedCells) = 0.0;
 
-    const labelList& own = mesh_.faceOwner();
-    const labelList& nei = mesh_.faceNeighbour();
 
-    // first estimate the approximate cell centre as the average of face centres
-
-    vectorField cEst(mesh_.nCells());
-    UIndirectList<vector>(cEst, changedCells) = vector::zero;
-    scalarField nCellFaces(mesh_.nCells());
-    UIndirectList<scalar>(nCellFaces, changedCells) = 0.0;
-
-    forAll(changedFaces, i)
+    // Re-calculate the changed cell centres and volumes
+    forAll(changedCells, changedCellI)
     {
-        label faceI = changedFaces[i];
-        cEst[own[faceI]] += faceCentres_[faceI];
-        nCellFaces[own[faceI]] += 1;
+        const label cellI(changedCells[changedCellI]);
 
-        if (mesh_.isInternalFace(faceI))
+        const labelList& cFaces(cells[cellI]);
+
+
+        // Estimate the cell centre and bounding box using the face centres
+        vector cEst = vector::zero;
+        boundBox bb(boundBox::invertedBox);
+
+        forAll(cFaces, cFaceI)
         {
-            cEst[nei[faceI]] += faceCentres_[faceI];
-            nCellFaces[nei[faceI]] += 1;
+            const point& fc = faceCentres_[cFaces[cFaceI]];
+            cEst += fc;
+            bb.max() = max(bb.max(), fc);
+            bb.min() = min(bb.min(), fc);
         }
-    }
+        cEst /= cFaces.size();
 
-    forAll(changedCells, i)
-    {
-        label cellI = changedCells[i];
-        cEst[cellI] /= nCellFaces[cellI];
-    }
 
-    forAll(changedFaces, i)
-    {
-        label faceI = changedFaces[i];
-
-        // Calculate 3*face-pyramid volume
-        scalar pyr3Vol = max
-        (
-            faceAreas_[faceI] & (faceCentres_[faceI] - cEst[own[faceI]]),
-            VSMALL
-        );
-
-        // Calculate face-pyramid centre
-        vector pc = (3.0/4.0)*faceCentres_[faceI] + (1.0/4.0)*cEst[own[faceI]];
-
-        // Accumulate volume-weighted face-pyramid centre
-        cellCentres_[own[faceI]] += pyr3Vol*pc;
-
-        // Accumulate face-pyramid volume
-        cellVolumes_[own[faceI]] += pyr3Vol;
-
-        if (mesh_.isInternalFace(faceI))
+        // Sum up the face-pyramid contributions
+        forAll(cFaces, cFaceI)
         {
-            // Calculate 3*face-pyramid volume
-            scalar pyr3Vol = max
-            (
-                faceAreas_[faceI] & (cEst[nei[faceI]] - faceCentres_[faceI]),
-                VSMALL
-            );
+            const label faceI(cFaces[cFaceI]);
 
-            // Calculate face-pyramid centre
-            vector pc =
-                (3.0/4.0)*faceCentres_[faceI]
-              + (1.0/4.0)*cEst[nei[faceI]];
+            // Calculate 3* the face-pyramid volume
+            scalar pyr3Vol = faceAreas_[faceI] & (faceCentres_[faceI] - cEst);
 
-            // Accumulate volume-weighted face-pyramid centre
-            cellCentres_[nei[faceI]] += pyr3Vol*pc;
+            if (own[faceI] != cellI)
+            {
+                pyr3Vol = -pyr3Vol;
+            }
 
             // Accumulate face-pyramid volume
-            cellVolumes_[nei[faceI]] += pyr3Vol;
+            cellVolumes_[cellI] += pyr3Vol;
+
+            // Calculate the face-pyramid centre
+            const vector pCtr = (3.0/4.0)*faceCentres_[faceI] + (1.0/4.0)*cEst;
+
+            // Accumulate volume-weighted face-pyramid centre
+            cellCentres_[cellI] += pyr3Vol*pCtr;
         }
-    }
 
-    forAll(changedCells, i)
-    {
-        label cellI = changedCells[i];
+        // Average the accumulated quantities
 
-        cellCentres_[cellI] /= cellVolumes_[cellI] + VSMALL;
+        if (mag(cellVolumes_[cellI]) > VSMALL)
+        {
+            point cc = cellCentres_[cellI] / cellVolumes_[cellI];
+
+            // Do additional check for collapsed cells since some volumes
+            // (e.g. 1e-33) do not trigger above but do return completely
+            // wrong cell centre
+            if (bb.contains(cc))
+            {
+                cellCentres_[cellI] = cc;
+            }
+            else
+            {
+                cellCentres_[cellI] = cEst;
+            }
+        }
+        else
+        {
+            cellCentres_[cellI] = cEst;
+        }
+
         cellVolumes_[cellI] *= (1.0/3.0);
     }
 }
