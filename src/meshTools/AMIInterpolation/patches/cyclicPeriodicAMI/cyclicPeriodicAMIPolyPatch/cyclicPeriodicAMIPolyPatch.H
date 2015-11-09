@@ -72,6 +72,9 @@ private:
 
     // Private Member Functions
 
+        //- Synchronise the periodic transformations
+        void syncTransforms() const;
+
         //- Reset the AMI interpolator
         virtual void resetAMI
         (

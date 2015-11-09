@@ -44,6 +44,151 @@ namespace Foam
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
+void Foam::cyclicPeriodicAMIPolyPatch::syncTransforms() const
+{
+    if (owner())
+    {
+        // At this point we guarantee that the transformations have been
+        // updated. There is one particular case, where if the periodic patch
+        // locally has zero faces then its transformation will not be set. We
+        // need to synchronise the transforms over the zero-sized patches as
+        // well.
+        //
+        // We can't put the logic into cyclicPolyPatch as
+        // processorCyclicPolyPatch uses cyclicPolyPatch functionality.
+        // Synchronisation will fail because processor-type patches do not exist
+        // on all processors.
+        //
+        // The use in cyclicPeriodicAMI is special; we use the patch even
+        // though we have no faces in it. Ideally, in future, the transformation
+        // logic will be abstracted out, and we won't need a periodic patch
+        // here. Until then, we can just fix the behaviour of the zero-sized
+        // coupled patches here
+
+        // Get the periodic patch
+        const coupledPolyPatch& periodicPatch
+        (
+            refCast<const coupledPolyPatch>
+            (
+                boundaryMesh()[periodicPatchID()]
+            )
+        );
+
+        // If there are any zero-sized periodic patches
+        if (returnReduce((size() && !periodicPatch.size()), orOp<bool>()))
+        {
+            if (periodicPatch.separation().size() > 1)
+            {
+                FatalErrorIn
+                (
+                    "cyclicPeriodicAMIPolyPatch::resetAMI"
+                    "(const AMIPatchToPatchInterpolation::interpolationMethod&"
+                    ") const"
+                )   << "Periodic patch " << periodicPatchName_
+                    << " has non-uniform separation vector "
+                    << periodicPatch.separation()
+                    << "This is not allowed inside " << type()
+                    << " patch " << name()
+                    << exit(FatalError);
+            }
+
+            if (periodicPatch.forwardT().size() > 1)
+            {
+                FatalErrorIn
+                (
+                    "cyclicPeriodicAMIPolyPatch::resetAMI"
+                    "(const AMIPatchToPatchInterpolation::interpolationMethod&"
+                    ") const"
+                )   << "Periodic patch " << periodicPatchName_
+                    << " has non-uniform transformation tensor "
+                    << periodicPatch.forwardT()
+                    << "This is not allowed inside " << type()
+                    << " patch " << name()
+                    << exit(FatalError);
+            }
+
+            // Note that zero-sized patches will have zero-sized fields for the
+            // separation vector, forward and reverse transforms. These need
+            // replacing with the transformations from other processors.
+
+            // Parallel in this context refers to a parallel transformation,
+            // rather than a rotational transformation
+            bool isParallel = periodicPatch.parallel();
+            reduce(isParallel, orOp<bool>());
+
+            if (isParallel)
+            {
+                // Sync a list of separation vectors
+                List<vectorField> sep(Pstream::nProcs());
+                sep[Pstream::myProcNo()] = periodicPatch.separation();
+                Pstream::gatherList(sep);
+                Pstream::scatterList(sep);
+
+                List<boolList> coll(Pstream::nProcs());
+                coll[Pstream::myProcNo()] = periodicPatch.collocated();
+                Pstream::gatherList(coll);
+                Pstream::scatterList(coll);
+
+                // If locally we have zero faces pick the first one that has a
+                // separation vector
+                if (!periodicPatch.size())
+                {
+                    forAll(sep, procI)
+                    {
+                        if (sep[procI].size())
+                        {
+                            const_cast<vectorField&>
+                            (
+                                periodicPatch.separation()
+                            ) = sep[procI];
+                            const_cast<boolList&>
+                            (
+                                periodicPatch.collocated()
+                            ) = coll[procI];
+
+                            break;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Sync a list of forward and reverse transforms
+                List<tensorField> forwardT(Pstream::nProcs());
+                forwardT[Pstream::myProcNo()] = periodicPatch.forwardT();
+                Pstream::gatherList(forwardT);
+                Pstream::scatterList(forwardT);
+
+                List<tensorField> reverseT(Pstream::nProcs());
+                reverseT[Pstream::myProcNo()] = periodicPatch.reverseT();
+                Pstream::gatherList(reverseT);
+                Pstream::scatterList(reverseT);
+
+                // If locally we have zero faces pick the first one that has a
+                // transformation vector
+                if (!periodicPatch.size())
+                {
+                    forAll(forwardT, procI)
+                    {
+                        if (forwardT[procI].size())
+                        {
+                            const_cast<tensorField&>
+                            (
+                                periodicPatch.forwardT()
+                            ) = forwardT[procI];
+                            const_cast<tensorField&>
+                            (
+                                periodicPatch.reverseT()
+                            ) = reverseT[procI];
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
 (
     const AMIPatchToPatchInterpolation::interpolationMethod& AMIMethod
@@ -59,6 +204,9 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
                 boundaryMesh()[periodicPatchID()]
             )
         );
+
+        // Synchronise the transforms
+        syncTransforms();
 
         // Create copies of both patches' points, transformed to the owner
         pointField thisPoints0(localPoints());

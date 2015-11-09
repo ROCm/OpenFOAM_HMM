@@ -345,6 +345,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
                 // targetRestrictAddressing or allRestrict (since the same
                 // for local data).
                 const labelList& elems = map.subMap()[procI];
+                const labelList& elemsMap =
+                    map.constructMap()[Pstream::myProcNo()];
                 labelList& newSubMap = tgtSubMap[procI];
                 newSubMap.setSize(elems.size());
 
@@ -353,7 +355,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
 
                 forAll(elems, i)
                 {
-                    label fineElem = elems[i];
+                    label fineElem = elemsMap[elems[i]];
                     label coarseElem = allRestrict[fineElem];
                     if (oldToNew[coarseElem] == -1)
                     {
@@ -371,16 +373,26 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
         // the sending map
 
         labelListList tgtConstructMap(Pstream::nProcs());
-        labelList tgtCompactMap;
 
         // Local constructMap is just identity
         {
             tgtConstructMap[Pstream::myProcNo()] =
                 identity(targetCoarseSize);
-
-            tgtCompactMap = targetRestrictAddressing;
         }
-        tgtCompactMap.setSize(map.constructSize());
+
+        labelList tgtCompactMap(map.constructSize());
+
+        {
+            const labelList& elemsMap =
+                map.constructMap()[Pstream::myProcNo()];
+            forAll(elemsMap, i)
+            {
+                label fineElem = elemsMap[i];
+                label coarseElem = allRestrict[fineElem];
+                tgtCompactMap[fineElem] = coarseElem;
+            }
+        }
+
         label compactI = targetCoarseSize;
 
         // Compact data from other processors
@@ -438,7 +450,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
                 }
             }
         }
-
 
         srcAddress.setSize(sourceCoarseSize);
         srcWeights.setSize(sourceCoarseSize);
@@ -1095,7 +1106,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::append
     const TargetPatch& tgtPatch
 )
 {
-    // create a new interpolation
+    // Create a new interpolation
     autoPtr<AMIInterpolation<SourcePatch, TargetPatch> > newPtr
     (
         new AMIInterpolation<SourcePatch, TargetPatch>
@@ -1110,7 +1121,145 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::append
         )
     );
 
-    // combine new and current data
+    // If parallel then combine the mapDistribution and re-index
+    if (singlePatchProc_ == -1)
+    {
+        labelListList& srcSubMap = srcMapPtr_->subMap();
+        labelListList& srcConstructMap = srcMapPtr_->constructMap();
+
+        labelListList& tgtSubMap = tgtMapPtr_->subMap();
+        labelListList& tgtConstructMap = tgtMapPtr_->constructMap();
+
+        labelListList& newSrcSubMap = newPtr->srcMapPtr_->subMap();
+        labelListList& newSrcConstructMap = newPtr->srcMapPtr_->constructMap();
+
+        labelListList& newTgtSubMap = newPtr->tgtMapPtr_->subMap();
+        labelListList& newTgtConstructMap = newPtr->tgtMapPtr_->constructMap();
+
+        // Re-calculate the source indices
+        {
+            labelList mapMap(0), newMapMap(0);
+            forAll(srcSubMap, procI)
+            {
+                mapMap.append
+                (
+                    identity(srcConstructMap[procI].size())
+                  + mapMap.size() + newMapMap.size()
+                );
+                newMapMap.append
+                (
+                    identity(newSrcConstructMap[procI].size())
+                  + mapMap.size() + newMapMap.size()
+                );
+            }
+
+            forAll(srcSubMap, procI)
+            {
+                forAll(srcConstructMap[procI], srcI)
+                {
+                    srcConstructMap[procI][srcI] =
+                        mapMap[srcConstructMap[procI][srcI]];
+                }
+            }
+
+            forAll(srcSubMap, procI)
+            {
+                forAll(newSrcConstructMap[procI], srcI)
+                {
+                    newSrcConstructMap[procI][srcI] =
+                        newMapMap[newSrcConstructMap[procI][srcI]];
+                }
+            }
+
+            forAll(tgtAddress_, tgtI)
+            {
+                forAll(tgtAddress_[tgtI], tgtJ)
+                {
+                    tgtAddress_[tgtI][tgtJ] =
+                        mapMap[tgtAddress_[tgtI][tgtJ]];
+                }
+            }
+
+            forAll(newPtr->tgtAddress_, tgtI)
+            {
+                forAll(newPtr->tgtAddress_[tgtI], tgtJ)
+                {
+                    newPtr->tgtAddress_[tgtI][tgtJ] =
+                        newMapMap[newPtr->tgtAddress_[tgtI][tgtJ]];
+                }
+            }
+        }
+
+        // Re-calculate the target indices
+        {
+            labelList mapMap(0), newMapMap(0);
+            forAll(srcSubMap, procI)
+            {
+                mapMap.append
+                (
+                    identity(tgtConstructMap[procI].size())
+                  + mapMap.size() + newMapMap.size()
+                );
+                newMapMap.append
+                (
+                    identity(newTgtConstructMap[procI].size())
+                  + mapMap.size() + newMapMap.size()
+                );
+            }
+
+            forAll(srcSubMap, procI)
+            {
+                forAll(tgtConstructMap[procI], tgtI)
+                {
+                    tgtConstructMap[procI][tgtI] =
+                        mapMap[tgtConstructMap[procI][tgtI]];
+                }
+            }
+
+            forAll(srcSubMap, procI)
+            {
+                forAll(newTgtConstructMap[procI], tgtI)
+                {
+                    newTgtConstructMap[procI][tgtI] =
+                        newMapMap[newTgtConstructMap[procI][tgtI]];
+                }
+            }
+
+            forAll(srcAddress_, srcI)
+            {
+                forAll(srcAddress_[srcI], srcJ)
+                {
+                    srcAddress_[srcI][srcJ] =
+                        mapMap[srcAddress_[srcI][srcJ]];
+                }
+            }
+
+            forAll(newPtr->srcAddress_, srcI)
+            {
+                forAll(newPtr->srcAddress_[srcI], srcJ)
+                {
+                    newPtr->srcAddress_[srcI][srcJ] =
+                        newMapMap[newPtr->srcAddress_[srcI][srcJ]];
+                }
+            }
+        }
+
+        // Sum the construction sizes
+        srcMapPtr_->constructSize() += newPtr->srcMapPtr_->constructSize();
+        tgtMapPtr_->constructSize() += newPtr->tgtMapPtr_->constructSize();
+
+        // Combine the maps
+        forAll(srcSubMap, procI)
+        {
+            srcSubMap[procI].append(newSrcSubMap[procI]);
+            srcConstructMap[procI].append(newSrcConstructMap[procI]);
+
+            tgtSubMap[procI].append(newTgtSubMap[procI]);
+            tgtConstructMap[procI].append(newTgtConstructMap[procI]);
+        }
+    }
+
+    // Combine new and current source data
     forAll(srcMagSf_, srcFaceI)
     {
         srcAddress_[srcFaceI].append(newPtr->srcAddress()[srcFaceI]);
@@ -1118,6 +1267,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::append
         srcWeightsSum_[srcFaceI] += newPtr->srcWeightsSum()[srcFaceI];
     }
 
+    // Combine new and current target data
     forAll(tgtMagSf_, tgtFaceI)
     {
         tgtAddress_[tgtFaceI].append(newPtr->tgtAddress()[tgtFaceI]);
