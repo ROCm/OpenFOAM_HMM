@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -108,14 +108,14 @@ class scalarTransport
         //- Run-time selectable finite volume options, e.g. sources, constraints
         fv::optionList fvOptions_;
 
-        //- The scalar field
-        volScalarField T_;
-
 
     // Private Member Functions
 
         //- Return the boundary types for the scalar field
         wordList boundaryTypes() const;
+
+        //- Return reference to registered transported field
+        volScalarField& transportedField();
 
         //- Return the diffusivity field
         tmp<volScalarField> DT(const surfaceScalarField& phi) const;
