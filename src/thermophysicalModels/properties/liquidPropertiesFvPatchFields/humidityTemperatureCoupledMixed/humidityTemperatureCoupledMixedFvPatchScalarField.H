@@ -155,7 +155,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-        Class humidityTemperatureCoupledMixedFvPatchScalarField Declaration
+      Class humidityTemperatureCoupledMixedFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class humidityTemperatureCoupledMixedFvPatchScalarField
@@ -189,7 +189,7 @@ private:
         //- Name of field on the neighbour region
         const word TnbrName_;
 
-         //- Name of the radiative heat flux in the neighbout region
+        //- Name of the radiative heat flux in the neighbout region
         const word QrNbrName_;
 
         //- Name of the radiative heat flux
@@ -241,13 +241,13 @@ private:
     // Private members
 
         //- Calculation of Sh
-        scalar Sh(const scalar Re,const scalar Sc) const;
+        scalar Sh(const scalar Re, const scalar Sc) const;
 
         //- Calculation of htc from the condensed surface
-        scalar htcCondensation(const scalar TSat,const scalar Re) const;
+        scalar htcCondensation(const scalar TSat, const scalar Re) const;
 
-        //- Create thickness field for output
-        volScalarField& thicknessField(const word& , const fvMesh&);
+        //- Lookup (or create) thickness field for output
+        volScalarField& thicknessField(const word&, const fvMesh&);
 
 
 public:

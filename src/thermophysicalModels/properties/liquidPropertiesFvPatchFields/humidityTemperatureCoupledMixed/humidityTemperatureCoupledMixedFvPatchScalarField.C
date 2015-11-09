@@ -57,18 +57,86 @@ const Foam::NamedEnum
     humidityTemperatureCoupledMixedFvPatchScalarField::
     massTransferMode,
     4
-> Foam::
-humidityTemperatureCoupledMixedFvPatchScalarField:: MassModeTypeNames_;
+> Foam::humidityTemperatureCoupledMixedFvPatchScalarField::MassModeTypeNames_;
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-namespace Foam
+Foam::scalar Foam::humidityTemperatureCoupledMixedFvPatchScalarField::Sh
+(
+    const scalar Re,
+    const scalar Sc
+) const
 {
+    if (Re < 5.0E+05)
+    {
+        return 0.664*sqrt(Re)*cbrt(Sc);
+    }
+    else
+    {
+        return 0.037*pow(Re, 0.8)*cbrt(Sc);
+    }
+}
+
+
+Foam::scalar
+Foam::humidityTemperatureCoupledMixedFvPatchScalarField::htcCondensation
+(
+    const scalar Tsat,
+    const scalar Re
+) const
+{
+    if (Tsat > 295 && Tsat < 373)
+    {
+        return 51104 + 2044*Tsat;
+    }
+    else
+    {
+        return 255510;
+    }
+}
+
+
+Foam::volScalarField&
+Foam::humidityTemperatureCoupledMixedFvPatchScalarField::thicknessField
+(
+    const word& fieldName,
+    const fvMesh& mesh
+)
+{
+    if (!mesh.foundObject<volScalarField>(fieldName))
+    {
+        tmp<volScalarField> tField
+        (
+            new volScalarField
+            (
+                IOobject
+                (
+                    fieldName,
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                mesh,
+                dimensionedScalar("zero", dimLength, 0.0)
+            )
+        );
+
+        tField.ptr()->store();
+    }
+
+    return
+        const_cast<volScalarField&>
+        (
+            mesh.lookupObject<volScalarField>(fieldName)
+        );
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-humidityTemperatureCoupledMixedFvPatchScalarField::
+Foam::humidityTemperatureCoupledMixedFvPatchScalarField::
 humidityTemperatureCoupledMixedFvPatchScalarField
 (
     const fvPatch& p,
@@ -102,7 +170,7 @@ humidityTemperatureCoupledMixedFvPatchScalarField
 }
 
 
-humidityTemperatureCoupledMixedFvPatchScalarField::
+Foam::humidityTemperatureCoupledMixedFvPatchScalarField::
 humidityTemperatureCoupledMixedFvPatchScalarField
 (
     const humidityTemperatureCoupledMixedFvPatchScalarField& psf,
@@ -134,7 +202,7 @@ humidityTemperatureCoupledMixedFvPatchScalarField
 {}
 
 
-humidityTemperatureCoupledMixedFvPatchScalarField::
+Foam::humidityTemperatureCoupledMixedFvPatchScalarField::
 humidityTemperatureCoupledMixedFvPatchScalarField
 (
     const fvPatch& p,
@@ -165,7 +233,7 @@ humidityTemperatureCoupledMixedFvPatchScalarField
 {
     if (!isA<mappedPatchBase>(this->patch().patch()))
     {
-        FatalErrorIn
+        FatalIOErrorIn
         (
             "humidityTemperatureCoupledMixedFvPatchScalarField::"
             "humidityTemperatureCoupledMixedFvPatchScalarField\n"
@@ -173,13 +241,14 @@ humidityTemperatureCoupledMixedFvPatchScalarField
             "    const fvPatch&,\n"
             "    const DimensionedField<scalar, volMesh>&,\n"
             "    const dictionary&\n"
-            ")\n"
+            ")\n",
+            dict
         )   << "\n    patch type '" << p.type()
             << "' not type '" << mappedPatchBase::typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << dimensionedInternalField().name()
             << " in file " << dimensionedInternalField().objectPath()
-            << exit(FatalError);
+            << exit(FatalIOError);
     }
 
     fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
@@ -192,54 +261,64 @@ humidityTemperatureCoupledMixedFvPatchScalarField
 
     if (fluid_)
     {
-        if (mode_ == mConstantMass)
+        switch(mode_)
         {
-            thickness_ = scalarField("thickness", dict, p.size());
-            cp_ = scalarField("cp", dict, p.size());
-            rho_ = scalarField("rho", dict, p.size());
-        }
-        else if (mode_ > mConstantMass)
-        {
-            Mcomp_ = readScalar(dict.lookup("carrierMolWeight"));
-            L_ = readScalar(dict.lookup("L"));
-            Tvap_ = readScalar(dict.lookup("Tvap"));
-            liquidDict_ = dict.subDict("liquid");
-            liquid_.reset
-            (
-                liquidProperties::New(liquidDict_.subDict(specieName_)).ptr()
-            );
-            if (dict.found("thickness"))
+            case mConstantMass:
             {
-                scalarField& Tp = *this;
-                const scalarField magSf = patch().magSf();
-                // Assume initially standard pressure for rho calculation
-                scalar pf = 1e5;
                 thickness_ = scalarField("thickness", dict, p.size());
-                forAll (thickness_, i)
-                {
-                    mass_[i] = thickness_[i]*liquid_->rho(pf, Tp[i])*magSf[i];
-                }
+                cp_ = scalarField("cp", dict, p.size());
+                rho_ = scalarField("rho", dict, p.size());
+
+                break;
             }
-            fluid_ = true;
-        }
-        else
-        {
-            FatalErrorIn
-            (
-                "humidityTemperatureCoupledMixedFvPatchScalarField::"
-                "humidityTemperatureCoupledMixedFvPatchScalarField\n"
-                "(\n"
-                "    const fvPatch&,\n"
-                "    const DimensionedField<scalar, volMesh>&,\n"
-                "    const dictionary& \n"
-                ")\n"
-            )
-                << "Did not find mode " << mode_
-                << " on  patch " << patch().name()
-                << nl
-                << "Please set 'mode' to one of "
-                << MassModeTypeNames_.toc()
-                << exit(FatalError);
+            case mCondensation:
+            case mEvaporation:
+            case mCondensationAndEvaporation:
+            {
+                Mcomp_ = readScalar(dict.lookup("carrierMolWeight"));
+                L_ = readScalar(dict.lookup("L"));
+                Tvap_ = readScalar(dict.lookup("Tvap"));
+                liquidDict_ = dict.subDict("liquid");
+                liquid_ =
+                    liquidProperties::New(liquidDict_.subDict(specieName_));
+
+                if (dict.found("thickness"))
+                {
+                    scalarField& Tp = *this;
+                    const scalarField& magSf = patch().magSf();
+                    // Assume initially standard pressure for rho calculation
+                    scalar pf = 1e5;
+                    thickness_ = scalarField("thickness", dict, p.size());
+                    forAll(thickness_, i)
+                    {
+                        mass_[i] =
+                            thickness_[i]*liquid_->rho(pf, Tp[i])*magSf[i];
+                    }
+                }
+                fluid_ = true;
+
+                break;
+            }
+            default:
+            {
+                FatalIOErrorIn
+                (
+                    "humidityTemperatureCoupledMixedFvPatchScalarField::"
+                    "humidityTemperatureCoupledMixedFvPatchScalarField\n"
+                    "(\n"
+                    "    const fvPatch&,\n"
+                    "    const DimensionedField<scalar, volMesh>&,\n"
+                    "    const dictionary& \n"
+                    ")\n",
+                    dict
+                )
+                    << "Did not find mode " << mode_
+                    << " on  patch " << patch().name()
+                    << nl
+                    << "Please set 'mode' to one of "
+                    << MassModeTypeNames_.sortedToc()
+                    << exit(FatalIOError);
+            }
         }
     }
 
@@ -262,7 +341,7 @@ humidityTemperatureCoupledMixedFvPatchScalarField
 }
 
 
-humidityTemperatureCoupledMixedFvPatchScalarField::
+Foam::humidityTemperatureCoupledMixedFvPatchScalarField::
 humidityTemperatureCoupledMixedFvPatchScalarField
 (
     const humidityTemperatureCoupledMixedFvPatchScalarField& psf,
@@ -291,87 +370,10 @@ humidityTemperatureCoupledMixedFvPatchScalarField
     rho_(psf.rho_)
 {}
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-scalar humidityTemperatureCoupledMixedFvPatchScalarField::Sh
-(
-    const scalar Re,
-    const scalar Sc
-) const
-{
-    if (Re < 5.0E+05)
-    {
-        return 0.664*sqrt(Re)*cbrt(Sc);
-    }
-    else
-    {
-        return 0.037*pow(Re, 0.8)*cbrt(Sc);
-    }
-}
-
-
-scalar humidityTemperatureCoupledMixedFvPatchScalarField::htcCondensation
-(
-    const scalar Tsat,
-    const scalar Re
-) const
-{
-    if (Tsat > 295 && Tsat < 373)
-    {
-        return 51104 + 2044*Tsat;
-    }
-    else
-    {
-        return 255510;
-    }
-}
-
-
-volScalarField& humidityTemperatureCoupledMixedFvPatchScalarField::
-thicknessField
-(
-    const word& fieldName,
-    const fvMesh& mesh
-)
-{
-    if (!mesh.foundObject<volScalarField>(fieldName))
-    {
-        tmp<volScalarField> tField
-        (
-            new volScalarField
-            (
-                IOobject
-                (
-                    fieldName,
-                    mesh.time().timeName(),
-                    mesh,
-                    IOobject::NO_READ,
-                    IOobject::AUTO_WRITE
-                ),
-                mesh,
-                dimensionedScalar("zero", dimLength, 0.0)
-            )
-        );
-
-        volScalarField& field = tField();
-
-        field.rename(fieldName);
-        field.writeOpt() = IOobject::AUTO_WRITE;
-
-        tField.ptr()->store();
-    }
-
-    return
-        const_cast<volScalarField&>
-        (
-            mesh.lookupObject<volScalarField>(fieldName)
-        );
-}
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void humidityTemperatureCoupledMixedFvPatchScalarField::autoMap
+void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::autoMap
 (
     const fvPatchFieldMapper& m
 )
@@ -391,7 +393,7 @@ void humidityTemperatureCoupledMixedFvPatchScalarField::autoMap
 }
 
 
-void humidityTemperatureCoupledMixedFvPatchScalarField::rmap
+void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::rmap
 (
     const fvPatchScalarField& ptf,
     const labelList& addr
@@ -418,7 +420,7 @@ void humidityTemperatureCoupledMixedFvPatchScalarField::rmap
 }
 
 
-void humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
+void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
 {
     if (updated())
     {
@@ -429,7 +431,7 @@ void humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
     const mappedPatchBase& mpp =
         refCast<const mappedPatchBase>(patch().patch());
 
-    const scalarField magSf = patch().magSf();
+    const scalarField& magSf = patch().magSf();
 
     const label nbrPatchI = mpp.samplePolyPatch().index();
     const polyMesh& mesh = patch().boundaryMesh().mesh();
@@ -456,7 +458,7 @@ void humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
 
     const scalarField K(this->kappa(*this));
 
-    // nrb kappa is done separatedly because I need kappa solid for
+    // nrb kappa is done separately because I need kappa solid for
     // htc correlation
     scalarField nbrK(nbrField.kappa(*this));
     mpp.distribute(nbrK);
@@ -470,7 +472,7 @@ void humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
 
     scalarField dm(patch().size(), 0.0);
 
-    //Fluid Side
+    // Fluid Side
     if (fluid_)
     {
         scalarField Yvp(patch().size(), 0.0);
@@ -515,7 +517,7 @@ void humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
             const vectorField Ui(Up.patchInternalField());
             const scalarField Yi(Yp.patchInternalField());
 
-            forAll (Tp, faceI)
+            forAll(Tp, faceI)
             {
                 const scalar Tf = Tp[faceI];
                 const scalar Tint = Tin[faceI];
@@ -561,9 +563,9 @@ void humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
 
                 if
                 (
-                    Tf < Tdew && RH > RHmin
-                 &&
-                    (
+                    Tf < Tdew
+                 && RH > RHmin
+                 && (
                         mode_ == mCondensation
                      || mode_ == mCondensationAndEvaporation
                     )
@@ -575,10 +577,10 @@ void humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
                     scalar htcTotal =
                         1.0/((1.0/myKDelta_[faceI]) + (1.0/htc[faceI]));
 
-                    // heat flux W (>0 heat is converted into mass)
+                    // Heat flux W (>0 heat is converted into mass)
                     const scalar q = (Tint - Tf)*htcTotal*magSf[faceI];
 
-                    // mass flux rate [Kg/s/m2]
+                    // Mass flux rate [Kg/s/m2]
                     dm[faceI] = q/hfg[faceI]/magSf[faceI];
 
                     mass_[faceI] += q/hfg[faceI]*dt;
@@ -587,13 +589,12 @@ void humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
                     const scalar Dab = liquid_->D(pf, Tf);
                     Yvp[faceI] =
                         -min(dm[faceI]/Dab/rhof, Yi[faceI]*myDelta[faceI]);
-
                 }
                 else if
                 (
-                    Tf > Tvap_ && mass_[faceI] > 0.0
-                 &&
-                    (
+                    Tf > Tvap_
+                 && mass_[faceI] > 0.0
+                 && (
                         mode_ == mEvaporation
                      || mode_ == mCondensationAndEvaporation
                     )
@@ -605,12 +606,12 @@ void humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
                     const scalar Sh = this->Sh(Re, Sc);
 
                     const scalar Ys = Mv*pSat/(Mv*pSat + Mcomp_*(pf - pSat));
-                    // mass transfer coefficient [m/s]
+                    // Mass transfer coefficient [m/s]
                     const scalar hm = Dab*Sh/L_;
 
                     const scalar Yinf = max(Yi[faceI], 0.0);
 
-                    // mass flux rate [Kg/s/m2]
+                    // Mass flux rate [Kg/s/m2]
                     dm[faceI] = -rhof*hm*max((Ys - Yinf), 0.0)/(1.0 - Ys);
 
                     // Set fixedGradient for carrier species.
@@ -624,12 +625,11 @@ void humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
                 }
                 else if (Tf > Tdew && Tf < Tvap_ && mass_[faceI] > 0.0)
                 {
-                    htc[faceI] =
-                        this->htcCondensation(TSat, Re)*nbrK[faceI]/L_;
+                    htc[faceI] = this->htcCondensation(TSat, Re)*nbrK[faceI]/L_;
                 }
                 else if (mass_[faceI] == 0.0)
                 {
-                    //Do nothing
+                    // Do nothing
                 }
 
                 liquidRho[faceI] = liquid_->rho(pf, Tf);
@@ -639,7 +639,7 @@ void humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
 
             Yp.gradient() = Yvp;
 
-            // Output filmDelta [m]
+            // Output film delta (e.g. H2OThickness) [m]
             const word fieldName(specieName_ + "Thickness");
 
             scalarField& pDelta =
@@ -662,7 +662,7 @@ void humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
         }
         else
         {
-            // inertia term [W/K/m2]
+            // Inertia term [W/K/m2]
             mpCpTp_ = thickness_*rho_*cp_/dt;
         }
     }
@@ -742,7 +742,7 @@ void humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
 }
 
 
-void humidityTemperatureCoupledMixedFvPatchScalarField::write
+void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::write
 (
     Ostream& os
 ) const
@@ -768,7 +768,6 @@ void humidityTemperatureCoupledMixedFvPatchScalarField::write
         if (mode_ == mConstantMass)
         {
             cp_.writeEntry("cp", os);
-//             thickness_.writeEntry("thickness", os);
             rho_.writeEntry("rho", os);
         }
 
@@ -784,16 +783,14 @@ void humidityTemperatureCoupledMixedFvPatchScalarField::write
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchScalarField,
-    humidityTemperatureCoupledMixedFvPatchScalarField
-);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchScalarField,
+        humidityTemperatureCoupledMixedFvPatchScalarField
+    );
+}
 
 
 // ************************************************************************* //
