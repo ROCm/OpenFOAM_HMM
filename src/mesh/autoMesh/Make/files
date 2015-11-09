@@ -15,6 +15,7 @@ $(autoHexMesh)/meshRefinement/meshRefinement.C
 $(autoHexMesh)/meshRefinement/meshRefinementMerge.C
 $(autoHexMesh)/meshRefinement/meshRefinementProblemCells.C
 $(autoHexMesh)/meshRefinement/meshRefinementRefine.C
+$(autoHexMesh)/meshRefinement/meshRefinementGapRefine.C
 $(autoHexMesh)/meshRefinement/patchFaceOrientation.C
 
 $(autoHexMesh)/refinementFeatures/refinementFeatures.C

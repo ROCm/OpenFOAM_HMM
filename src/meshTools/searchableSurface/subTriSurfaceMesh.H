@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,104 +22,86 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::volumeType
+    Foam::subTriSurfaceMesh
 
 Description
+    On-the-fly subset of triSurfaceMesh (based on selected patches)
+
+Note
+
+    Example usage:
+    \verbatim
+    spheres.stl
+    {
+        type subTriSurfaceMesh;
+
+        // Surface to operate on. Avoid duplicate loading
+        surface spheres.stl;
+
+        // Regions to operate on (regular expressions allowed)
+        patches (solid1);
+    }
+    \endverbatim
+
 
 SourceFiles
-    volumeType.C
+    subTriSurfaceMesh.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef volumeType_H
-#define volumeType_H
+#ifndef subTriSurfaceMesh_H
+#define subTriSurfaceMesh_H
 
-#include "NamedEnum.H"
+#include "triSurfaceMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
-class volumeType;
-Istream& operator>>(Istream& is, volumeType&);
-Ostream& operator<<(Ostream& os, const volumeType& C);
-
-
 /*---------------------------------------------------------------------------*\
-                         Class volumeType Declaration
+                      Class subTriSurfaceMesh Declaration
 \*---------------------------------------------------------------------------*/
 
-class volumeType
+class subTriSurfaceMesh
+:
+    public triSurfaceMesh
 {
-public:
+    // Private member functions
 
-    //- Volume types
-    enum type
-    {
-        UNKNOWN = 0,
-        MIXED   = 1,
-        INSIDE  = 2,
-        OUTSIDE = 3
-    };
+        //- Extract patch names of triSurface
+        static wordList patchNames(const triSurface& s);
 
+        //- Select regions by name
+        static labelList selectedRegions
+        (
+            const triSurface& s,
+            const wordReList& regionNames
+        );
 
-private:
-
-    // Private data
-
-        //- Volume type
-        type t_;
+        //- Subset triSurface based on regions
+        static triSurface subset(const IOobject&, const dictionary&);
 
 
 public:
 
-    // Static data
-
-        static const NamedEnum<volumeType, 4> names;
+    //- Runtime type information
+    TypeName("subTriSurfaceMesh");
 
 
     // Constructors
 
-        //- Construct null
-        volumeType()
-        :
-            t_(UNKNOWN)
-        {}
-
-        //- Construct from components
-        volumeType(type t)
-        :
-            t_(t)
-        {}
-
-        //- Construct from integer
-        explicit volumeType(const int t)
-        :
-            t_(static_cast<volumeType::type>(t))
-        {}
+        //- Construct from IO and dictionary.
+        subTriSurfaceMesh
+        (
+            const IOobject& io,
+            const dictionary& dict
+        );
 
 
-    // Member Functions
-
-        operator type() const
-        {
-            return t_;
-        }
-
-
-    // IOstream operators
-
-        friend Istream& operator>>(Istream& is, volumeType& vt);
-        friend Ostream& operator<<(Ostream& os, const volumeType& vt);
+    //- Destructor
+    virtual ~subTriSurfaceMesh();
 };
-
-
-//- Data associated with volumeType type are contiguous
-template<>
-inline bool contiguous<volumeType>() {return true;}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

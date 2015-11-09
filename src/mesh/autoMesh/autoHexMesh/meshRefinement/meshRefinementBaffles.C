@@ -175,6 +175,7 @@ Foam::label Foam::meshRefinement::createBaffle
 void Foam::meshRefinement::getIntersections
 (
     const labelList& surfacesToTest,
+    const labelList& neiLevel,
     const pointField& neiCc,
     const labelList& testFaces,
 
@@ -198,8 +199,6 @@ void Foam::meshRefinement::getIntersections
             << str().name() << nl << endl;
     }
 
-    const pointField& cellCentres = mesh_.cellCentres();
-
 
     globalRegion1.setSize(mesh_.nFaces());
     globalRegion1 = -1;
@@ -213,29 +212,17 @@ void Foam::meshRefinement::getIntersections
     pointField start(testFaces.size());
     pointField end(testFaces.size());
 
-    forAll(testFaces, i)
     {
-        label faceI = testFaces[i];
-
-        label own = mesh_.faceOwner()[faceI];
-
-        if (mesh_.isInternalFace(faceI))
-        {
-            start[i] = cellCentres[own];
-            end[i] = cellCentres[mesh_.faceNeighbour()[faceI]];
-        }
-        else
-        {
-            start[i] = cellCentres[own];
-            end[i] = neiCc[faceI-mesh_.nInternalFaces()];
-        }
-    }
-
-    // Extend segments a bit
-    {
-        const vectorField smallVec(ROOTSMALL*(end-start));
-        start -= smallVec;
-        end += smallVec;
+        labelList minLevel;
+        calcCellCellRays
+        (
+            neiCc,
+            neiLevel,
+            testFaces,
+            start,
+            end,
+            minLevel
+        );
     }
 
 
@@ -319,6 +306,7 @@ void Foam::meshRefinement::getBafflePatches
         getIntersections
         (
             surfaceZonesInfo::getUnnamedSurfaces(surfaces_.surfZones()),
+            neiLevel,
             neiCc,
             testFaces,
             globalRegion1,
@@ -2608,7 +2596,7 @@ void Foam::meshRefinement::consistentOrientation
     const labelList& nMasterFacesPerEdge,
     const labelList& faceToZone,
     const Map<label>& zoneToOrientation,
-    boolList& meshFlipMap
+    PackedBoolList& meshFlipMap
 ) const
 {
     const polyBoundaryMesh& bm = mesh_.boundaryMesh();
@@ -2858,7 +2846,7 @@ void Foam::meshRefinement::zonify
     const labelList& cellToZone,
     const labelList& neiCellZone,
     const labelList& faceToZone,
-    const boolList& meshFlipMap,
+    const PackedBoolList& meshFlipMap,
     polyTopoChange& meshMod
 ) const
 {
@@ -3902,6 +3890,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
         getIntersections
         (
             identity(surfaces_.surfaces().size()),  // surfacesToTest,
+            neiLevel,
             neiCc,
             intersectedFaces(),     // testFaces
             globalRegion1,
@@ -4297,7 +4286,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
         }
 
 
-        // 2. Combine faceZoneNames allocated on different processors
+        // 2.Combine faceZoneNames allocated on different processors
 
         Pstream::mapCombineGather(zonesToFaceZone, eqOp<word>());
         Pstream::mapCombineScatter(zonesToFaceZone);
@@ -4438,7 +4427,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     //      - do a consistent orientation
     //      - check number of faces with consistent orientation
     //      - if <0 flip the whole patch
-    boolList meshFlipMap(mesh_.nFaces(), false);
+    PackedBoolList meshFlipMap(mesh_.nFaces(), false);
     {
         // Collect all data on zone faces without cellZones on either side.
         const indirectPrimitivePatch patch

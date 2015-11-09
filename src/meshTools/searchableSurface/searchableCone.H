@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,34 +22,34 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::searchableRotatedBox
+    Foam::searchableCone
 
 Description
-    Searching on a rotated box
+    Searching on (optionally hollow) cone.
 
-    Box defined as min and max coordinate. Rotation by coordinate system
-    at box middle.
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        point1       | coordinate of endpoint  | yes         |
+        radius1      | radius at point1        | yes         | yes
+        innerRadius1 | inner radius at point1  | no          |
+        point2       | coordinate of endpoint  | yes         |
+        radius2      | radius at point2        | yes         | yes
+        innerRadius2 | inner radius at point2  | no          |
+    \endtable
 
-    E.g. box with sides 1 1 1 rotated 45 degrees around z-axis at
-         origin (0.5 0.5 0.5)
-    \verbatim
-        span     (1 1 1);
-        origin  (0.5 0.5 0.5);
-        e1      (1 1 0);
-        e3      (0 0 1);
-    \endverbatim
+Note
+    Initial implementation, might suffer from robustness (e.g. radius1==radius2)
 
 SourceFiles
-    searchableRotatedBox.C
+    searchableCone.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef searchableRotatedBox_H
-#define searchableRotatedBox_H
+#ifndef searchableCone_H
+#define searchableCone_H
 
 #include "searchableSurface.H"
-#include "coordinateSystem.H"
-#include "searchableBox.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,46 +57,113 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class searchableRotatedBox Declaration
+                       Class searchableCone Declaration
 \*---------------------------------------------------------------------------*/
 
-class searchableRotatedBox
+class searchableCone
 :
     public searchableSurface
 {
-private:
-
     // Private Member Data
 
-        //- box in local coordinate system
-        searchableBox box_;
+        //- 'Left' point
+        const point point1_;
 
-        //- transformation from local to global coordinates
-        coordinateSystem transform_;
+        //- Outer radius at point1
+        const scalar radius1_;
 
-        //- (global) corner points (in treeBoundBox order)
-        pointField points_;
+        //- Inner radius at point1
+        const scalar innerRadius1_;
 
 
-    // Private Member Functions
+        //- 'Right' point
+        const point point2_;
+
+        //- Outer radius at point2
+        const scalar radius2_;
+
+        //- Inner radius at point2
+        const scalar innerRadius2_;
+
+
+        //- Length of vector point2-point1
+        const scalar magDir_;
+
+        //- Normalised vector point2-point1
+        const vector unitDir_;
+
+
+        //- Names of regions
+        mutable wordList regions_;
+
+
+   // Private Member Functions
+
+        //- Find nearest point on cylinder.
+        void findNearestAndNormal
+        (
+            const point& sample,
+            const scalar nearestDistSqr,
+            pointIndexHit & nearInfo,
+            vector& normal
+        ) const;
+
+        //- Determine radial coordinate (squared)
+        static scalar radius2(const searchableCone& cone, const point& pt);
+
+        //- Find both intersections with cone. innerRadii supplied externally.
+        void findLineAll
+        (
+            const searchableCone& cone,
+            const scalar innerRadius1,
+            const scalar innerRadius2,
+            const point& start,
+            const point& end,
+            pointIndexHit& near,
+            pointIndexHit& far
+        ) const;
+
+        //- Insert a hit if it differs (by a tolerance) from the existing ones
+        void insertHit
+        (
+            const point& start,
+            const point& end,
+            List<pointIndexHit>& info,
+            const pointIndexHit& hit
+        ) const;
+
+        //- Return the boundBox of the cylinder
+        boundBox calcBounds() const;
 
         //- Disallow default bitwise copy construct
-        searchableRotatedBox(const searchableRotatedBox&);
+        searchableCone(const searchableCone&);
 
         //- Disallow default bitwise assignment
-        void operator=(const searchableRotatedBox&);
+        void operator=(const searchableCone&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("searchableRotatedBox");
+   TypeName("searchableCone");
 
 
     // Constructors
 
+        //- Construct from components
+       searchableCone
+       (
+           const IOobject& io,
+           const point& point1,
+           const scalar radius1,
+           const scalar innerRadius1,
+           const point& point2,
+           const scalar radius2,
+           const scalar innerRadius2
+       );
+
         //- Construct from dictionary (used by searchableSurface)
-        searchableRotatedBox
+        searchableCone
         (
             const IOobject& io,
             const dictionary& dict
@@ -104,7 +171,8 @@ public:
 
 
     //- Destructor
-    virtual ~searchableRotatedBox();
+
+        virtual ~searchableCone();
 
 
     // Member Functions
@@ -120,7 +188,7 @@ public:
         //- Range of local indices that can be returned.
         virtual label size() const
         {
-            return 6;
+            return 1;
         }
 
         //- Get representative set of element coordinates
@@ -138,57 +206,21 @@ public:
         //- Get the points that define the surface.
         virtual tmp<pointField> points() const;
 
-        // Does any part of the surface overlap the supplied bound box?
-        virtual bool overlaps(const boundBox& bb) const;
-
-        // Single point queries.
-
-            //- Inherit findNearest from searchableSurface
-            using searchableSurface::findNearest;
-
-            //- Calculate nearest point on surface.
-            //  Returns
-            //  - bool : any point found nearer than nearestDistSqr
-            //  - label: relevant index in surface (=face 0..5)
-            //  - point: actual nearest point found
-            pointIndexHit findNearest
+        //- Does any part of the surface overlap the supplied bound box?
+        virtual bool overlaps(const boundBox& bb) const
+        {
+            notImplemented
             (
-                const point& sample,
-                const scalar nearestDistSqr
-            ) const;
+                "searchableCone::overlaps(const boundBox&) const"
+            );
 
-            //- Find nearest to segment.
-            //  Returns
-            //  - bool : any point found?
-            //  - label: relevant index in shapes (=face 0..5)
-            //  - point: actual nearest point found
-            //  sets:
-            //  - tightest  : bounding box
-            //  - linePoint : corresponding nearest point on line
-            pointIndexHit findNearest
-            (
-                const linePointRef& ln,
-                treeBoundBox& tightest,
-                point& linePoint
-            ) const;
-
-            //- Find nearest intersection of line between start and end.
-            pointIndexHit findLine
-            (
-                const point& start,
-                const point& end
-            ) const;
-
-            //- Find any intersection of line between start and end.
-            pointIndexHit findLineAny
-            (
-                const point& start,
-                const point& end
-            ) const;
+            return false;
+        }
 
 
         // Multiple point queries.
 
+            //- Find nearest point on cylinder
             virtual void findNearest
             (
                 const pointField& sample,
@@ -196,6 +228,7 @@ public:
                 List<pointIndexHit>&
             ) const;
 
+            //- Find nearest intersection on line from start to end
             virtual void findLine
             (
                 const pointField& start,
@@ -203,19 +236,20 @@ public:
                 List<pointIndexHit>&
             ) const;
 
-            virtual void findLineAny
-            (
-                const pointField& start,
-                const pointField& end,
-                List<pointIndexHit>&
-            ) const;
-
-            //- Get all intersections in order from start to end.
+            //- Find all intersections in order from start to end
             virtual void findLineAll
             (
                 const pointField& start,
                 const pointField& end,
                 List<List<pointIndexHit> >&
+            ) const;
+
+            //- Find any intersection on line from start to end
+            virtual void findLineAny
+            (
+                const pointField& start,
+                const pointField& end,
+                List<pointIndexHit>&
             ) const;
 
             //- From a set of points and indices get the region
@@ -243,12 +277,9 @@ public:
 
         // regIOobject implementation
 
-            bool writeData(Ostream&) const
+            virtual bool writeData(Ostream&) const
             {
-                notImplemented
-                (
-                    "searchableRotatedBox::writeData(Ostream&) const"
-                );
+                notImplemented("searchableCone::writeData(Ostream&) const");
                 return false;
             }
 };

@@ -42,6 +42,7 @@ SourceFiles
 #include "vectorList.H"
 #include "pointIndexHit.H"
 #include "surfaceZonesInfo.H"
+#include "volumeType.H"
 #include "pointList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -84,6 +85,12 @@ class refinementSurfaces
 
         //- From global region number to small-gap level
         labelList gapLevel_;
+
+        //- From global region number to small-gap level specification
+        List<FixedList<label, 3> > extendedGapLevel_;
+
+        //- From global region number to side of surface to detect
+        List<volumeType> extendedGapMode_;
 
         //- From global region number to perpendicular angle
         scalarField perpendicularAngle_;
@@ -188,6 +195,23 @@ public:
                 return gapLevel_;
             }
 
+            //- From global region number to specification of gap and its
+            //  refinement: 3 labels specifying
+            //  - minimum wanted number of cells in the gap
+            //  - minimum cell level when to start trying to detect gaps
+            //  - maximum cell level to refine to (so do not detect gaps if
+            //    cell >= maximum level)
+            const List<FixedList<label, 3> >& extendedGapLevel() const
+            {
+                return extendedGapLevel_;
+            }
+
+            //- From global region number to side of surface to detect
+            const List<volumeType>& extendedGapMode() const
+            {
+                return extendedGapMode_;
+            }
+
             //- From global region number to perpendicular angle
             const scalarField& perpendicularAngle() const
             {
@@ -225,6 +249,9 @@ public:
             {
                 return minLevel_.size();
             }
+
+            //- Per surface the maximum extendedGapLevel over all its regions
+            labelList maxGapLevel() const;
 
             //- Calculate minLevelFields
             void setMinLevelFields
@@ -312,6 +339,25 @@ public:
                 List<pointIndexHit>& hit2,
                 labelList& region2,
                 vectorField& normal2
+            ) const;
+
+            //- Find nearest (to start only) intersection of edge
+            void findNearestIntersection
+            (
+                const pointField& start,
+                const pointField& end,
+                labelList& surfaces,
+                vectorField& normal
+            ) const;
+
+            //- Find nearest (to start only) intersection of edge
+            void findNearestIntersection
+            (
+                const pointField& start,
+                const pointField& end,
+                labelList& surfaces,
+                List<pointIndexHit>&,
+                vectorField& normal
             ) const;
 
             //- Used for debugging only: find intersection of edge.

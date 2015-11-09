@@ -105,7 +105,10 @@ Foam::label Foam::autoRefineDriver::featureEdgeRefine
                     false,              // internalRefinement
                     false,              // surfaceRefinement
                     false,              // curvatureRefinement
+                    false,              // smallFeatureRefinement
                     false,              // gapRefinement
+                    false,              // bigGapRefinement
+                    false,              // spreadGapSize
                     refineParams.maxGlobalCells(),
                     refineParams.maxLocalCells()
                 )
@@ -179,6 +182,128 @@ Foam::label Foam::autoRefineDriver::featureEdgeRefine
 }
 
 
+Foam::label Foam::autoRefineDriver::smallFeatureRefine
+(
+    const refinementParameters& refineParams,
+    const label maxIter
+)
+{
+    const fvMesh& mesh = meshRefiner_.mesh();
+
+
+    label iter = 0;
+
+    // See if any surface has an extendedGapLevel
+    labelList surfaceMaxLevel(meshRefiner_.surfaces().maxGapLevel());
+    labelList shellMaxLevel(meshRefiner_.shells().maxGapLevel());
+
+    if (max(surfaceMaxLevel) == 0 && max(shellMaxLevel) == 0)
+    {
+        return iter;
+    }
+
+    for (; iter < maxIter; iter++)
+    {
+        Info<< nl
+            << "Small surface feature refinement iteration " << iter << nl
+            << "--------------------------------------------" << nl
+            << endl;
+
+
+        // Determine cells to refine
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        labelList candidateCells
+        (
+            meshRefiner_.refineCandidates
+            (
+                refineParams.locationsInMesh(),
+                refineParams.curvature(),
+                refineParams.planarAngle(),
+
+                false,              // featureRefinement
+                false,              // featureDistanceRefinement
+                false,              // internalRefinement
+                false,              // surfaceRefinement
+                false,              // curvatureRefinement
+                true,               // smallFeatureRefinement
+                false,              // gapRefinement
+                false,              // bigGapRefinement
+                false,              // spreadGapSize
+                refineParams.maxGlobalCells(),
+                refineParams.maxLocalCells()
+            )
+        );
+
+        labelList cellsToRefine
+        (
+            meshRefiner_.meshCutter().consistentRefinement
+            (
+                candidateCells,
+                true
+            )
+        );
+        Info<< "Determined cells to refine in = "
+            << mesh.time().cpuTimeIncrement() << " s" << endl;
+
+
+        label nCellsToRefine = cellsToRefine.size();
+        reduce(nCellsToRefine, sumOp<label>());
+
+        Info<< "Selected for refinement : " << nCellsToRefine
+            << " cells (out of " << mesh.globalData().nTotalCells()
+            << ')' << endl;
+
+        // Stop when no cells to refine or have done minimum necessary
+        // iterations and not enough cells to refine.
+        if (nCellsToRefine == 0)
+        {
+            Info<< "Stopping refining since too few cells selected."
+                << nl << endl;
+            break;
+        }
+
+
+        if (debug)
+        {
+            const_cast<Time&>(mesh.time())++;
+        }
+
+
+        if
+        (
+            returnReduce
+            (
+                (mesh.nCells() >= refineParams.maxLocalCells()),
+                orOp<bool>()
+            )
+        )
+        {
+            meshRefiner_.balanceAndRefine
+            (
+                "small feature refinement iteration " + name(iter),
+                decomposer_,
+                distributor_,
+                cellsToRefine,
+                refineParams.maxLoadUnbalance()
+            );
+        }
+        else
+        {
+            meshRefiner_.refineAndBalance
+            (
+                "small feature refinement iteration " + name(iter),
+                decomposer_,
+                distributor_,
+                cellsToRefine,
+                refineParams.maxLoadUnbalance()
+            );
+        }
+    }
+    return iter;
+}
+
+
 Foam::label Foam::autoRefineDriver::surfaceOnlyRefine
 (
     const refinementParameters& refineParams,
@@ -218,7 +343,10 @@ Foam::label Foam::autoRefineDriver::surfaceOnlyRefine
                 false,              // internalRefinement
                 true,               // surfaceRefinement
                 true,               // curvatureRefinement
+                false,              // smallFeatureRefinement
                 false,              // gapRefinement
+                false,              // bigGapRefinement
+                false,              // spreadGapSize
                 refineParams.maxGlobalCells(),
                 refineParams.maxLocalCells()
             )
@@ -352,7 +480,10 @@ Foam::label Foam::autoRefineDriver::gapOnlyRefine
                 false,              // internalRefinement
                 false,              // surfaceRefinement
                 false,              // curvatureRefinement
+                false,              // smallFeatureRefinement
                 true,               // gapRefinement
+                false,              // bigGapRefinement
+                false,              // spreadGapSize
                 refineParams.maxGlobalCells(),
                 refineParams.maxLocalCells()
             )
@@ -516,6 +647,148 @@ Foam::label Foam::autoRefineDriver::gapOnlyRefine
             meshRefiner_.refineAndBalance
             (
                 "gap refinement iteration " + name(iter),
+                decomposer_,
+                distributor_,
+                cellsToRefine,
+                refineParams.maxLoadUnbalance()
+            );
+        }
+    }
+    return iter;
+}
+
+
+Foam::label Foam::autoRefineDriver::bigGapOnlyRefine
+(
+    const refinementParameters& refineParams,
+    const bool spreadGapSize,
+    const label maxIter
+)
+{
+    const fvMesh& mesh = meshRefiner_.mesh();
+
+    label iter = 0;
+
+    // See if any surface has an extendedGapLevel
+    labelList surfaceMaxLevel(meshRefiner_.surfaces().maxGapLevel());
+    labelList shellMaxLevel(meshRefiner_.shells().maxGapLevel());
+
+    label overallMaxLevel(max(max(surfaceMaxLevel), max(shellMaxLevel)));
+
+    if (overallMaxLevel == 0)
+    {
+        return iter;
+    }
+
+
+    for (; iter < maxIter; iter++)
+    {
+        Info<< nl
+            << "Big gap refinement iteration " << iter << nl
+            << "------------------------------" << nl
+            << endl;
+
+
+        // Determine cells to refine
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        labelList candidateCells
+        (
+            meshRefiner_.refineCandidates
+            (
+                refineParams.locationsInMesh(),
+                refineParams.curvature(),
+                refineParams.planarAngle(),
+
+                false,              // featureRefinement
+                false,              // featureDistanceRefinement
+                false,              // internalRefinement
+                false,              // surfaceRefinement
+                false,              // curvatureRefinement
+                false,              // smallFeatureRefinement
+                false,              // gapRefinement
+                true,               // bigGapRefinement
+                spreadGapSize,      // spreadGapSize
+                refineParams.maxGlobalCells(),
+                refineParams.maxLocalCells()
+            )
+        );
+
+
+        if (debug&meshRefinement::MESH)
+        {
+            Pout<< "Dumping " << candidateCells.size()
+                << " cells to cellSet candidateCellsFromBigGap." << endl;
+            cellSet c(mesh, "candidateCellsFromBigGap", candidateCells);
+            c.instance() = meshRefiner_.timeName();
+            c.write();
+        }
+
+        labelList cellsToRefine
+        (
+            meshRefiner_.meshCutter().consistentRefinement
+            (
+                candidateCells,
+                true
+            )
+        );
+        Info<< "Determined cells to refine in = "
+            << mesh.time().cpuTimeIncrement() << " s" << endl;
+
+
+        label nCellsToRefine = cellsToRefine.size();
+        reduce(nCellsToRefine, sumOp<label>());
+
+        Info<< "Selected for refinement : " << nCellsToRefine
+            << " cells (out of " << mesh.globalData().nTotalCells()
+            << ')' << endl;
+
+        // Stop when no cells to refine or have done minimum necessary
+        // iterations and not enough cells to refine.
+        if
+        (
+            nCellsToRefine == 0
+         || (
+                iter >= overallMaxLevel
+             && nCellsToRefine <= refineParams.minRefineCells()
+            )
+        )
+        {
+            Info<< "Stopping refining since too few cells selected."
+                << nl << endl;
+            break;
+        }
+
+
+        if (debug)
+        {
+            const_cast<Time&>(mesh.time())++;
+        }
+
+
+        if
+        (
+            returnReduce
+            (
+                (mesh.nCells() >= refineParams.maxLocalCells()),
+                orOp<bool>()
+            )
+        )
+        {
+            meshRefiner_.balanceAndRefine
+            (
+                "big gap refinement iteration " + name(iter),
+                decomposer_,
+                distributor_,
+                cellsToRefine,
+                refineParams.maxLoadUnbalance()
+            );
+        }
+        else
+        {
+            meshRefiner_.refineAndBalance
+            (
+                "big gap refinement iteration " + name(iter),
                 decomposer_,
                 distributor_,
                 cellsToRefine,
@@ -1108,7 +1381,10 @@ Foam::label Foam::autoRefineDriver::shellRefine
                 true,               // internalRefinement
                 false,              // surfaceRefinement
                 false,              // curvatureRefinement
+                false,              // smallFeatureRefinement
                 false,              // gapRefinement
+                false,              // bigGapRefinement
+                false,              // spreadGapSize
                 refineParams.maxGlobalCells(),
                 refineParams.maxLocalCells()
             )
@@ -1630,6 +1906,13 @@ void Foam::autoRefineDriver::doRefine
         0       // min cells to refine
     );
 
+    // Refine cells that contain a gap
+    smallFeatureRefine
+    (
+        refineParams,
+        100     // maxIter
+    );
+
     // Refine based on surface
     surfaceOnlyRefine
     (
@@ -1648,6 +1931,14 @@ void Foam::autoRefineDriver::doRefine
     (
         refineParams,
         1       // nBufferLayers
+    );
+
+    // Refine consistently across narrow gaps (a form of shell refinement)
+    bigGapOnlyRefine
+    (
+        refineParams,
+        true,   // spreadGapSize
+        100     // maxIter
     );
 
     // Internal mesh refinement

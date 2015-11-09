@@ -34,6 +34,7 @@ Description
 SourceFiles
     meshRefinement.C
     meshRefinementBaffles.C
+    meshRefinementGapRefine.C
     meshRefinementMerge.C
     meshRefinementProblemCells.C
     meshRefinementRefine.C
@@ -53,6 +54,8 @@ SourceFiles
 #include "pointIndexHit.H"
 #include "wordPairHashTable.H"
 #include "surfaceZonesInfo.H"
+#include "volumeType.H"
+#include "DynamicField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -176,6 +179,9 @@ private:
         //- All shell-refinement interaction
         const shellSurfaces& shells_;
 
+        //- All limit-refinement interaction
+        const shellSurfaces& limitShells_;
+
         //- Refinement engine
         hexRef8 meshCutter_;
 
@@ -226,10 +232,18 @@ private:
         );
 
         //- Calculate coupled boundary end vector and refinement level
-        void calcNeighbourData
+        void calcNeighbourData(labelList& neiLevel, pointField& neiCc) const;
+
+        //- Calculate rays from cell-centre to cell-centre and corresponding
+        //  min cell refinement level
+        void calcCellCellRays
         (
-            labelList& neiLevel,
-            pointField& neiCc
+            const pointField& neiCc,
+            const labelList& neiLevel,
+            const labelList& testFaces,
+            pointField& start,
+            pointField& end,
+            labelList& minLevel
         ) const;
 
         //- Remove cells. Put exposedFaces into exposedPatchIDs.
@@ -241,12 +255,12 @@ private:
             removeCells& cellRemover
         );
 
-        // Get cells which are inside any closed surface. Note that
-        // all closed surfaces
-        // will have already been oriented to have keepPoint outside.
+        //- Get cells which are inside any closed surface. Note that
+        //  all closed surfaces
+        //  will have already been oriented to have keepPoint outside.
         labelList getInsideCells(const word&) const;
 
-        // Do all to remove inside cells
+        //- Do all to remove inside cells
         autoPtr<mapPolyMesh> removeInsideCells
         (
             const string& msg,
@@ -302,6 +316,14 @@ private:
                 label& nRefine
             ) const;
 
+            //- Unmark cells for refinement based on limit-shells. Return number
+            //  of limited cells.
+            label unmarkInternalRefinement
+            (
+                labelList& refineCell,
+                label& nRefine
+            ) const;
+
             //- Collect faces that are intersected and whose neighbours aren't
             //  yet marked  for refinement.
             labelList getRefineCandidateFaces
@@ -315,6 +337,104 @@ private:
                 const label nAllowRefine,
                 const labelList& neiLevel,
                 const pointField& neiCc,
+                labelList& refineCell,
+                label& nRefine
+            ) const;
+
+            //- Mark cells intersected by the surface if they are inside
+            //  close gaps
+            label markSurfaceGapRefinement
+            (
+                const scalar planarCos,
+                const label nAllowRefine,
+                const labelList& neiLevel,
+                const pointField& neiCc,
+
+                labelList& refineCell,
+                label& nRefine
+            ) const;
+
+            //- Generate single ray from nearPoint in direction of nearNormal
+            label generateRays
+            (
+                const point& nearPoint,
+                const vector& nearNormal,
+                const FixedList<label, 3>& gapInfo,
+                const volumeType& mode,
+
+                const label cLevel,
+
+                DynamicField<point>& start,
+                DynamicField<point>& end
+            ) const;
+
+            //- Generate pairs of rays through cell centre
+            //  Each ray pair has start, end, and expected gap size
+            label generateRays
+            (
+                const bool useSurfaceNormal,
+
+                const point& nearPoint,
+                const vector& nearNormal,
+                const FixedList<label, 3>& gapInfo,
+                const volumeType& mode,
+
+                const point& cc,
+                const label cLevel,
+
+                DynamicField<point>& start,
+                DynamicField<point>& end,
+                DynamicField<scalar>& gapSize,
+
+                DynamicField<point>& start2,
+                DynamicField<point>& end2,
+                DynamicField<scalar>& gapSize2
+            ) const;
+
+            //- Select candidate cells (cells inside a shell with gapLevel
+            //  specified)
+            void selectGapCandidates
+            (
+                const labelList& refineCell,
+                const label nRefine,
+
+                labelList& cellMap,
+                List<FixedList<label, 3> >& shellGapInfo,
+                List<volumeType>& shellGapMode
+            ) const;
+
+            //- Merge gap information coming from shell and from surface
+            //  (surface wins)
+            void mergeGapInfo
+            (
+                const FixedList<label, 3>& shellGapInfo,
+                const volumeType shellGapMode,
+                const FixedList<label, 3>& surfGapInfo,
+                const volumeType surfGapMode,
+                FixedList<label, 3>& gapInfo,
+                volumeType& gapMode
+            ) const;
+
+            //- Mark cells for non-surface intersection based gap refinement
+            label markInternalGapRefinement
+            (
+                const scalar planarCos,
+                const bool spreadGapSize,
+                const label nAllowRefine,
+                labelList& refineCell,
+                label& nRefine,
+                labelList& numGapCells,
+                scalarField& gapSize
+            ) const;
+
+            //- Refine cells containing small gaps
+            label markSmallFeatureRefinement
+            (
+                const scalar planarCos,
+                const label nAllowRefine,
+                const labelList& neiLevel,
+                const pointField& neiCc,
+
                 labelList& refineCell,
                 label& nRefine
             ) const;
@@ -387,6 +507,7 @@ private:
             void getIntersections
             (
                 const labelList& surfacesToTest,
+                const labelList& neiLevel,
                 const pointField& neiCc,
                 const labelList& testFaces,
 
@@ -567,7 +688,7 @@ private:
                 const labelList& cellToZone,
                 const labelList& neiCellZone,
                 const labelList& faceToZone,
-                const boolList& meshFlipMap,
+                const PackedBoolList& meshFlipMap,
                 polyTopoChange& meshMod
             ) const;
 
@@ -631,7 +752,7 @@ private:
                 const labelList& nMasterFaces,
                 const labelList& faceToZone,
                 const Map<label>& zoneToOrientation,
-                boolList& meshFlipMap
+                PackedBoolList& meshFlipMap
             ) const;
 
 
@@ -657,6 +778,7 @@ public:
             const bool overwrite,
             const refinementSurfaces&,
             const refinementFeatures&,
+            const shellSurfaces&,
             const shellSurfaces&
         );
 
@@ -855,7 +977,10 @@ public:
                 const bool internalRefinement,
                 const bool surfaceRefinement,
                 const bool curvatureRefinement,
+                const bool smallFeatureRefinement,
                 const bool gapRefinement,
+                const bool bigGapRefinement,
+                const bool spreadGapSize,
                 const label maxGlobalCells,
                 const label maxLocalCells
             ) const;

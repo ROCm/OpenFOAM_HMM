@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,6 +85,15 @@ private:
         labelListList levels_;
 
 
+        // Gap level refinement
+
+            //- Per shell, per region the small-gap level specification
+            List<List<FixedList<label, 3> > > extendedGapLevel_;
+
+            //- Per shell, per region the small-gap level specification
+            List<List<volumeType> > extendedGapMode_;
+
+
     // Private data
 
         //- refineMode names
@@ -93,20 +102,50 @@ private:
 
     // Private Member Functions
 
-        //- Helper function for initialisation.
+        //- Helper function for initialisation of levels
         void setAndCheckLevels
         (
             const label shellI,
             const List<Tuple2<scalar, label> >&
         );
 
+        //- Helper function for checking of gap information
+        void checkGapLevels
+        (
+            const dictionary&,
+            const label shellI,
+            const List<FixedList<label, 3> >& levels
+        );
+
         void orient();
 
+        //- Find first shell with a level higher than maxLevel
         void findHigherLevel
         (
             const pointField& pt,
             const label shellI,
             labelList& maxLevel
+        ) const;
+
+        //- Update highest min gap level
+        void findHigherGapLevel
+        (
+            const pointField& pt,
+            const labelList& ptLevel,
+            const label shellI,
+            labelList& gapShell,
+            List<FixedList<label, 3> >& gapInfo,
+            List<volumeType>& gapMode
+        ) const;
+
+        //- Find first shell with a level lower or equal to minLevel. Update
+        //  minLevel and shell.
+        void findLevel
+        (
+            const pointField& pt,
+            const label shellI,
+            labelList& minLevel,
+            labelList& shell
         ) const;
 
 public:
@@ -125,22 +164,20 @@ public:
 
         // Access
 
-            //const List<scalarField>& distances() const
-            //{
-            //    return distances_;
-            //}
-            //
-            ////- Per shell per distance the refinement level
-            //const labelListList& levels() const
-            //{
-            //    return levels_;
-            //}
+            //- Indices of surfaces that are shells
+            const labelList& shells() const
+            {
+                return shells_;
+            }
 
 
         // Query
 
             //- Highest shell level
             label maxLevel() const;
+
+            //- Highest shell gap level
+            labelList maxGapLevel() const;
 
             //- Find shell level higher than ptLevel
             void findHigherLevel
@@ -150,6 +187,33 @@ public:
                 labelList& maxLevel
             ) const;
 
+            //- Find a shell whose minimum gap level is >= ptLevel
+            void findHigherGapLevel
+            (
+                const pointField& pt,
+                const labelList& ptLevel,
+                labelList& gapShell,
+                List<FixedList<label, 3> >& gapInfo,
+                List<volumeType>& gapMode
+            ) const;
+
+            //- Find a shell whose minimum gap level is >= ptLevel. gapInfo
+            //  is (0 0 0) if no shell found
+            void findHigherGapLevel
+            (
+                const pointField& pt,
+                const labelList& ptLevel,
+                List<FixedList<label, 3> >& gapInfo,
+                List<volumeType>& gapMode
+            ) const;
+
+            //- Find first shell (or -1) with level equal or lower than ptLevel.
+            void findLevel
+            (
+                const pointField& pt,
+                const labelList& ptLevel,
+                labelList& shell
+            ) const;
 };
 
 

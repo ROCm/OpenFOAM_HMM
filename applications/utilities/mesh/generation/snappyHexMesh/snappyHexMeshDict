@@ -95,10 +95,10 @@ castellatedMeshControls
     // actually be a lot less.
     maxGlobalCells 2000000;
 
-    // The surface refinement loop might spend lots of iterations refining just a
-    // few cells. This setting will cause refinement to stop if <= minimumRefine
-    // are selected for refinement. Note: it will at least do one iteration
-    // (unless the number of cells to refine is 0)
+    // The surface refinement loop might spend lots of iterations refining just
+    // a few cells. This setting will cause refinement to stop if
+    // <= minimumRefine cells are selected for refinement. Note: it will
+    // at least do one iteration (unless the number of cells to refine is 0)
     minRefinementCells 0;
 
     // Allow a certain level of imbalance during refining
@@ -244,10 +244,26 @@ castellatedMeshControls
         }
         //sphere.stl
         //{
-        //    mode distance;
-        //    levels ((1.0 5) (2.0 3));
+        //    mode inside;
+        //    levels ((1.0 4));
+        //    // Optional override of uniform refinement level such
+        //    //  that in small gaps we're getting more cells.
+        //    //  The specification is
+        //    //  - numGapCells : minimum number of cells in the gap
+        //    //  - minLevel    : min refinement level at which to kick in
+        //    //  - maxLevel    : upper refinement level
+        //    // All three settings can be overridden on a surface by
+        //    // surface basis in the refinementSurfaces section.
+        //    gapLevel (<numGapCells> <minLevel> <maxlevel>);
         //}
     }
+
+
+    // Limit refinement in geometric region
+    limitRegions
+    {
+    }
+
 
     // Mesh selection
     // ~~~~~~~~~~~~~~

@@ -1075,6 +1075,26 @@ int main(int argc, char *argv[])
         << mesh.time().cpuTimeIncrement() << " s" << nl << endl;
 
 
+    // Optionally read limit shells
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    const dictionary limitDict(refineDict.subOrEmptyDict("limitRegions"));
+
+    if (!limitDict.empty())
+    {
+        Info<< "Reading limit shells." << endl;
+    }
+
+    shellSurfaces limitShells(allGeometry, limitDict);
+
+    if (!limitDict.empty())
+    {
+        Info<< "Read refinement shells in = "
+            << mesh.time().cpuTimeIncrement() << " s" << nl << endl;
+    }
+
+
+
     // Read feature meshes
     // ~~~~~~~~~~~~~~~~~~~
 
@@ -1105,7 +1125,8 @@ int main(int argc, char *argv[])
         overwrite,          // overwrite mesh files?
         surfaces,           // for surface intersection refinement
         features,           // for feature edges/point based refinement
-        shells              // for volume (inside/outside) refinement
+        shells,             // for volume (inside/outside) refinement
+        limitShells         // limit of volume refinement
     );
     Info<< "Calculated surface intersections in = "
         << mesh.time().cpuTimeIncrement() << " s" << nl << endl;
