@@ -255,7 +255,7 @@ Foam::cyclicPeriodicAMIPolyPatch::cyclicPeriodicAMIPolyPatch
     periodicPatchName_(word::null),
     periodicPatchID_(-1),
     nTransforms_(0),
-    nSectors_(-1),
+    nSectors_(0),
     maxIter_(36)
 {}
 
@@ -378,13 +378,22 @@ void Foam::cyclicPeriodicAMIPolyPatch::write(Ostream& os) const
     os.writeKeyword("periodicPatch") << periodicPatchName_
         << token::END_STATEMENT << nl;
 
-    os.writeKeyword("nTransforms") << nTransforms_ <<
-        token::END_STATEMENT << nl;
+    if (nTransforms_ != 0)
+    {
+        os.writeKeyword("nTransforms") << nTransforms_ <<
+            token::END_STATEMENT << nl;
+    }
 
-    os.writeKeyword("nSectors") << nSectors_ <<
-        token::END_STATEMENT << nl;
+    if (nSectors_ != 0)
+    {
+        os.writeKeyword("nSectors") << nSectors_ <<
+            token::END_STATEMENT << nl;
+    }
 
-    os.writeKeyword("maxIter") << maxIter_ << token::END_STATEMENT << nl;
+    if (maxIter_ != 36)
+    {
+        os.writeKeyword("maxIter") << maxIter_ << token::END_STATEMENT << nl;
+    }
 }
 
 
