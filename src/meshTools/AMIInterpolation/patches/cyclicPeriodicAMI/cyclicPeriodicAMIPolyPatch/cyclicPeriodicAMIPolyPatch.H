@@ -42,6 +42,8 @@ SourceFiles
 namespace Foam
 {
 
+class OBJstream;
+
 /*---------------------------------------------------------------------------*\
                     Class cyclicPeriodicAMIPolyPatch Declaration
 \*---------------------------------------------------------------------------*/
@@ -74,6 +76,9 @@ private:
 
         //- Synchronise the periodic transformations
         void syncTransforms() const;
+
+        //- Debug: write obj files of patch (collected on master)
+        void writeOBJ(const primitivePatch& p, OBJstream& str) const;
 
         //- Reset the AMI interpolator
         virtual void resetAMI

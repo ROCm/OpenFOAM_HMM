@@ -25,8 +25,13 @@ License
 
 #include "cyclicPeriodicAMIPolyPatch.H"
 #include "addToRunTimeSelectionTable.H"
+
+// For debugging
 #include "OBJstream.H"
+#include "PatchTools.H"
 #include "Time.H"
+//Note: cannot use vtkSurfaceWriter here - circular linkage
+//#include "vtkSurfaceWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -191,6 +196,33 @@ void Foam::cyclicPeriodicAMIPolyPatch::syncTransforms() const
 }
 
 
+void Foam::cyclicPeriodicAMIPolyPatch::writeOBJ
+(
+    const primitivePatch& p,
+    OBJstream& str
+) const
+{
+    // Collect faces and points
+    pointField allPoints;
+    faceList allFaces;
+    labelList pointMergeMap;
+    PatchTools::gatherAndMerge
+    (
+        -1.0,           // do not merge points
+        p,
+        allPoints,
+        allFaces,
+        pointMergeMap
+    );
+
+    if (Pstream::master())
+    {
+        // Write base geometry
+        str.write(allFaces, allPoints);
+    }
+}
+
+
 void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
 (
     const AMIPatchToPatchInterpolation::interpolationMethod& AMIMethod
@@ -239,6 +271,23 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
             periodicPatch.transformPosition(nbrPoints0);
         }
 
+        autoPtr<OBJstream> ownStr;
+        autoPtr<OBJstream> neiStr;
+        if (debug)
+        {
+            const Time& runTime = boundaryMesh().mesh().time();
+
+            fileName dir(runTime.rootPath()/runTime.globalCaseName());
+            fileName postfix("_" + runTime.timeName()+"_expanded.obj");
+
+            ownStr.reset(new OBJstream(dir/name() + postfix));
+            neiStr.reset(new OBJstream(dir/neighbPatch().name() + postfix));
+
+            Info<< "cyclicPeriodicAMIPolyPatch::resetAMI : patch:" << name()
+                << " writing accumulated AMI to " << ownStr().name()
+                << " and " << neiStr().name() << endl;
+        }
+
         // Create another copy
         pointField thisPoints(thisPoints0);
         pointField nbrPoints(nbrPoints0);
@@ -265,25 +314,6 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
             nbrPoints
         );
 
-
-        autoPtr<OBJstream> thisStr;
-        autoPtr<OBJstream> nbrStr;
-        if (debug)
-        {
-            const fileName dir(boundaryMesh().mesh().time().timePath());
-
-            mkDir(dir);
-
-            thisStr.reset(new OBJstream(dir/name()+"_this.obj"));
-            nbrStr.reset(new OBJstream(dir/name()+"_nbr.obj"));
-            Info<< name() << " : dumping local duplicated geometry to "
-                << thisStr().name() << " and " << nbrStr().name() << endl;
-
-            thisStr().write(thisPatch0, thisPatch0.points());
-            nbrStr().write(nbrPatch0, nbrPatch0.points());
-        }
-
-
         // Construct a new AMI interpolation between the initial patch locations
         AMIPtr_.reset
         (
@@ -304,6 +334,16 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
         label iter(0);
         label nTransformsOld(nTransforms_);
 
+        if (ownStr.valid())
+        {
+            writeOBJ(thisPatch0, ownStr());
+        }
+        if (neiStr.valid())
+        {
+            writeOBJ(nbrPatch0, neiStr());
+        }
+
+
         // Weight sum averages
         scalar srcSum(gAverage(AMIPtr_->srcWeightsSum()));
         scalar tgtSum(gAverage(AMIPtr_->tgtWeightsSum()));
@@ -320,6 +360,15 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
         // 'reverseTransformPosition' functionality.
         scalar srcSumDiff = 0;
 
+        if (debug)
+        {
+            Info<< "cyclicPeriodicAMIPolyPatch::resetAMI : patch:" << name()
+                << " srcSum:" << srcSum
+                << " tgtSum:" << tgtSum
+                << " direction:" << direction
+                << endl;
+        }
+
         // Loop, replicating the geometry
         while
         (
@@ -334,27 +383,53 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
             {
                 periodicPatch.transformPosition(thisPoints);
 
+                if (debug)
+                {
+                    Info<< "cyclicPeriodicAMIPolyPatch::resetAMI : patch:"
+                        << name()
+                        << " moving this side from:"
+                        << gAverage(thisPatch.points())
+                        << " to:" << gAverage(thisPoints) << endl;
+                }
+
                 thisPatch.movePoints(thisPoints);
 
-                if (thisStr.valid())
+                if (debug)
                 {
-                    thisStr().write(thisPatch, thisPatch.points());
+                    Info<< "cyclicPeriodicAMIPolyPatch::resetAMI : patch:"
+                        << name()
+                        << " appending weights with untransformed slave side"
+                        << endl;
                 }
 
                 AMIPtr_->append(thisPatch, nbrPatch0);
+
+                if (ownStr.valid())
+                {
+                    writeOBJ(thisPatch, ownStr());
+                }
             }
             else
             {
                 periodicPatch.transformPosition(nbrPoints);
 
-                nbrPatch.movePoints(nbrPoints);
-
-                if (nbrStr.valid())
+                if (debug)
                 {
-                    nbrStr().write(nbrPatch, nbrPatch.points());
+                    Info<< "cyclicPeriodicAMIPolyPatch::resetAMI : patch:"
+                        << name()
+                        << " moving neighbour side from:"
+                        << gAverage(nbrPatch.points())
+                        << " to:" << gAverage(nbrPoints) << endl;
                 }
 
+                nbrPatch.movePoints(nbrPoints);
+
                 AMIPtr_->append(thisPatch0, nbrPatch);
+
+                if (neiStr.valid())
+                {
+                    writeOBJ(nbrPatch, neiStr());
+                }
             }
 
             const scalar srcSumNew = gAverage(AMIPtr_->srcWeightsSum());
@@ -373,7 +448,30 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
             nTransforms_ += direction ? +1 : -1;
 
             ++ iter;
+
+            if (debug)
+            {
+                Info<< "cyclicPeriodicAMIPolyPatch::resetAMI : patch:" << name()
+                    << " iteration:" << iter
+                    << " srcSum:" << srcSum
+                    << " tgtSum:" << tgtSum
+                    << " direction:" << direction
+                    << endl;
+            }
         }
+
+
+        // Close debug streams
+        if (ownStr.valid())
+        {
+            ownStr.clear();
+        }
+        if (neiStr.valid())
+        {
+            neiStr.clear();
+        }
+
+
 
         // Average the number of transformstions
         nTransforms_ = (nTransforms_ + nTransformsOld)/2;
