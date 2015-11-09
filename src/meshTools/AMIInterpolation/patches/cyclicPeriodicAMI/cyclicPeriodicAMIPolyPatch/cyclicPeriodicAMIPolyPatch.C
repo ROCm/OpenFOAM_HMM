@@ -25,6 +25,8 @@ License
 
 #include "cyclicPeriodicAMIPolyPatch.H"
 #include "addToRunTimeSelectionTable.H"
+#include "OBJstream.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -263,6 +265,25 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
             nbrPoints
         );
 
+
+        autoPtr<OBJstream> thisStr;
+        autoPtr<OBJstream> nbrStr;
+        if (debug)
+        {
+            const fileName dir(boundaryMesh().mesh().time().timePath());
+
+            mkDir(dir);
+
+            thisStr.reset(new OBJstream(dir/name()+"_this.obj"));
+            nbrStr.reset(new OBJstream(dir/name()+"_nbr.obj"));
+            Info<< name() << " : dumping local duplicated geometry to "
+                << thisStr().name() << " and " << nbrStr().name() << endl;
+
+            thisStr().write(thisPatch0, thisPatch0.points());
+            nbrStr().write(nbrPatch0, nbrPatch0.points());
+        }
+
+
         // Construct a new AMI interpolation between the initial patch locations
         AMIPtr_.reset
         (
@@ -287,12 +308,16 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
         scalar srcSum(gAverage(AMIPtr_->srcWeightsSum()));
         scalar tgtSum(gAverage(AMIPtr_->tgtWeightsSum()));
 
-        // Direction of geometry replication
+        // Direction (or rather side of AMI : this or nbr patch) of 
+        // geometry replication
         bool direction = nTransforms_ >= 0;
 
         // Increase in the source weight sum for the last iteration in the
         // opposite direction. If the current increase is less than this, the
-        // direction is reversed.
+        // direction (= side of AMI to transform) is reversed.
+        // We switch the side to replicate instead of reversing the transform
+        // since at the coupledPolyPatch level there is no
+        // 'reverseTransformPosition' functionality.
         scalar srcSumDiff = 0;
 
         // Loop, replicating the geometry
@@ -311,6 +336,11 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
 
                 thisPatch.movePoints(thisPoints);
 
+                if (thisStr.valid())
+                {
+                    thisStr().write(thisPatch, thisPatch.points());
+                }
+
                 AMIPtr_->append(thisPatch, nbrPatch0);
             }
             else
@@ -318,6 +348,11 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
                 periodicPatch.transformPosition(nbrPoints);
 
                 nbrPatch.movePoints(nbrPoints);
+
+                if (nbrStr.valid())
+                {
+                    nbrStr().write(nbrPatch, nbrPatch.points());
+                }
 
                 AMIPtr_->append(thisPatch0, nbrPatch);
             }
@@ -346,7 +381,7 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
         // Check that the match is complete
         if (iter == maxIter_)
         {
-            FatalErrorIn
+            SeriousErrorIn
             (
                 "void Foam::cyclicPeriodicAMIPolyPatch::resetPeriodicAMI"
                 "("
@@ -357,7 +392,12 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
                 << " do not couple to within a tolerance of "
                 << matchTolerance()
                 << " when transformed according to the periodic patch "
-                << periodicPatch.name() << "." << exit(FatalError);
+                << periodicPatch.name() << "." << nl
+                << "This is only acceptable during post-processing"
+                << "; not during running. Improve your mesh or increase"
+                << " the 'matchTolerance' setting in the patch specification."
+                << endl;
+                // << exit(FatalError);
         }
 
         // Check that both patches have replicated an integer number of times
@@ -367,7 +407,7 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
          || mag(tgtSum - floor(tgtSum + 0.5)) > tgtSum*matchTolerance()
         )
         {
-            FatalErrorIn
+            SeriousErrorIn
             (
                 "void Foam::cyclicPeriodicAMIPolyPatch::resetPeriodicAMI"
                 "("
@@ -377,7 +417,11 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
                 << "Patches " << name() << " and " << neighbPatch().name()
                 << " do not overlap an integer number of times when transformed"
                 << " according to the periodic patch "
-                << periodicPatch.name() << "." << exit(FatalError);
+                << periodicPatch.name() << "." << nl
+                << "This is only acceptable during post-processing"
+                << "; not during running. Improve your mesh or increase"
+                << " the 'matchTolerance' setting in the patch specification."
+                << endl;    //<< exit(FatalError);
         }
 
         // Normalise the weights

@@ -326,8 +326,29 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
 
         // So now we have agglomeration of the target side in
         // allRestrict:
-        //  0..size-1 : local agglomeration (= targetRestrictAddressing)
+        //  0..size-1 : local agglomeration (= targetRestrictAddressing
+        //              (but potentially permutated))
         //  size..    : agglomeration data from other processors
+
+
+        // The trickiness in this algorithm is finding out the compaction
+        // of the remote data (i.e. allocation of the coarse 'slots'). We could
+        // either send across the slot compaction maps or just make sure
+        // that we allocate the slots in exactly the same order on both sending
+        // and receiving side (e.g. if the submap is set up to send 4 items,
+        // the constructMap is also set up to receive 4 items.
+
+
+        // Short note about the various types of indices:
+        // - face indices : indices into the geometry.
+        // - coarse face indices : how the faces get agglomerated
+        // - transferred data : how mapDistribute sends/receives data,
+        // - slots : indices into data after distribution (e.g. stencil,
+        //           srcAddress/tgtAddress). Note: for fully local addressing
+        //           the slots are equal to face indices.
+        // A mapDistribute has:
+        // - a subMap : these are face indices
+        // - a constructMap : these are from 'transferred-date' to slots
 
         labelListList tgtSubMap(Pstream::nProcs());
 
@@ -340,10 +361,14 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
         {
             if (procI != Pstream::myProcNo())
             {
-                // Combine entries that point to the same coarse element. All
-                // the elements refer to local data so index into
-                // targetRestrictAddressing or allRestrict (since the same
-                // for local data).
+                // Combine entries that point to the same coarse element.
+                // The important bit is to loop over the data (and hand out
+                // compact indices ) in 'transferred data' order. This
+                // guarantees that we're doing exactly the
+                // same on sending and receiving side - e.g. the fourth element
+                // in the subMap is the fourth element received in the
+                // constructMap
+
                 const labelList& elems = map.subMap()[procI];
                 const labelList& elemsMap =
                     map.constructMap()[Pstream::myProcNo()];
@@ -383,8 +408,13 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
         labelList tgtCompactMap(map.constructSize());
 
         {
-            const labelList& elemsMap =
-                map.constructMap()[Pstream::myProcNo()];
+            // Note that in special cases (e.g. 'appending' two AMIs) the
+            // local size after distributing can be longer than the number
+            // of faces. I.e. it duplicates elements.
+            // Since we don't know this size instead we loop over all
+            // reachable elements (using the local constructMap)
+
+            const labelList& elemsMap = map.constructMap()[Pstream::myProcNo()];
             forAll(elemsMap, i)
             {
                 label fineElem = elemsMap[i];
@@ -503,7 +533,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
         forAll(fineSrcAddress, faceI)
         {
             // All the elements contributing to faceI. Are slots in
-            // mapDistribute'd data.
+            // target data.
             const labelList& elems = fineSrcAddress[faceI];
             const scalarList& weights = fineSrcWeights[faceI];
             const scalar fineArea = fineSrcMagSf[faceI];
