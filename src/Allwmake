@@ -79,5 +79,7 @@ postProcessing/Allwmake $targetType $*
 
 wmake $targetType sixDoFRigidBodyMotion
 
+# Needs access to Turbulence
+wmake $targetType thermophysicalModels/properties/liquidPropertiesFvPatchFields
 
 # ----------------------------------------------------------------- end-of-file

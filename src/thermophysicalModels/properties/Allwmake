@@ -7,7 +7,6 @@ targetType=libso
 set -x
 
 wmake $targetType liquidProperties
-wmake $targetType liquidPropertiesFvPatchFields
 wmake $targetType liquidMixtureProperties
 wmake $targetType solidProperties
 wmake $targetType solidMixtureProperties
