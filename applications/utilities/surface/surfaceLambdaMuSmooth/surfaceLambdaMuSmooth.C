@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -188,8 +188,6 @@ int main(int argc, char *argv[])
         Info<< "Number of fixed points on surface = " << fixedPoints.count()
             << endl;
     }
-
-    pointField newPoints(surf1.localPoints());
 
     for (label iter = 0; iter < iters; iter++)
     {
