@@ -1,0 +1,101 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev-OpenCFD.feature-periodicAMIAndXiDyMFoam|
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      binary;
+    class       polyBoundaryMesh;
+    location    "constant/polyMesh";
+    object      boundary;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+9
+(
+    inlet
+    {
+        type            patch;
+        nFaces          274;
+        startFace       250645;
+    }
+    outlet
+    {
+        type            patch;
+        nFaces          1280;
+        startFace       250919;
+    }
+    walls
+    {
+        type            wall;
+        inGroups        1(wall);
+        nFaces          10444;
+        startFace       252199;
+    }
+    cyclic0
+    {
+        type            cyclicSlip;
+        inGroups        1(cyclicSlip);
+        nFaces          3206;
+        startFace       262643;
+        matchTolerance  0.001;
+        transform       rotational;
+        neighbourPatch  cyclic1;
+        rotationAxis    (1 0 0);
+        rotationCentre  (0 0 0);
+    }
+    cyclic1
+    {
+        type            cyclicSlip;
+        inGroups        1(cyclicSlip);
+        nFaces          3206;
+        startFace       265849;
+        matchTolerance  0.001;
+        transform       rotational;
+        neighbourPatch  cyclic0;
+        rotationAxis    (1 0 0);
+        rotationCentre  (0 0 0);
+    }
+    blade1
+    {
+        type            wall;
+        inGroups        1(wall);
+        nFaces          2614;
+        startFace       269055;
+    }
+    blade2
+    {
+        type            wall;
+        inGroups        1(wall);
+        nFaces          2616;
+        startFace       271669;
+    }
+    ami0
+    {
+        type            cyclicPeriodicAMI;
+        inGroups        1(cyclicAMI);
+        nFaces          1280;
+        startFace       274285;
+        matchTolerance  0.001;
+        transform       unknown;
+        neighbourPatch  ami1;
+        periodicPatch   cyclic0;
+    }
+    ami1
+    {
+        type            cyclicPeriodicAMI;
+        inGroups        1(cyclicAMI);
+        nFaces          1280;
+        startFace       275565;
+        matchTolerance  0.001;
+        transform       unknown;
+        neighbourPatch  ami0;
+        periodicPatch   cyclic0;
+    }
+)
+
+// ************************************************************************* //

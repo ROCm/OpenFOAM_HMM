@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -40,28 +40,46 @@ getApplication()
 
 runApplication()
 {
+    APP_LOGFILE=''
+    if [ "$1" = "-l" ]
+    then
+        APP_LOGFILE=$2
+        shift 2
+    fi
+
     APP_RUN=$1
     APP_NAME=${1##*/}
     shift
 
-    if [ -f log.$APP_NAME ]
+    APP_LOGFILE=${APP_LOGFILE:="log.$APP_NAME"}
+
+    if [ -f $APP_LOGFILE ]
     then
-        echo "$APP_NAME already run on $PWD: remove log file to re-run"
+        echo "$APP_NAME already run on $PWD: remove log file $APP_LOGFILE to re-run"
     else
         echo "Running $APP_RUN on $PWD"
-        $APP_RUN "$@" > log.$APP_NAME 2>&1
+        $APP_RUN "$@" > $APP_LOGFILE 2>&1
     fi
 }
 
 runParallel()
 {
+    APP_LOGFILE=''
+    if [ "$1" = "-l" ]
+    then
+        APP_LOGFILE=$2
+        shift 2
+    fi
+
     APP_RUN=$1
     APP_NAME=${1##*/}
     shift
 
-    if [ -f log.$APP_NAME ]
+    APP_LOGFILE=${APP_LOGFILE:="log.$APP_NAME"}
+
+    if [ -f $APP_LOGFILE ]
     then
-        echo "$APP_NAME already run on $PWD: remove log file to re-run"
+        echo "$APP_NAME already run on $PWD: remove log file $APP_LOGFILE to re-run"
     else
         nProcs=$1
         shift
@@ -70,9 +88,9 @@ runParallel()
         #if [ "$WM_SCHEDULER" ]
         #then
         #    echo "$PWD: $WM_SCHEDULER -np $nProcs" 1>&2
-        #    $WM_SCHEDULER -np $nProcs "( mpirun -np $nProcs $APP_RUN -parallel "$@" < /dev/null > log.$APP_NAME 2>&1 )"
+        #    $WM_SCHEDULER -np $nProcs "( mpirun -np $nProcs $APP_RUN -parallel "$@" < /dev/null > $APP_LOGFILE 2>&1 )"
         #else
-            ( mpirun -np $nProcs $APP_RUN -parallel "$@" < /dev/null > log.$APP_NAME 2>&1 )
+            ( mpirun -np $nProcs $APP_RUN -parallel "$@" < /dev/null > $APP_LOGFILE 2>&1 )
         #fi
     fi
 }

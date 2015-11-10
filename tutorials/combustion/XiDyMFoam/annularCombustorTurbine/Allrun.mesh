@@ -1,0 +1,23 @@
+#!/bin/sh
+
+cd ${0%/*} || exit 1
+
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+rm -f log.* constant/polyMesh/*Level
+
+runApplication blockMesh
+
+runApplication -l log.createPatch.cyclic \
+    createPatch -dict system/createPatchDict.cyclic -overwrite
+
+runApplication snappyHexMesh -overwrite
+
+rm -rf 0
+
+runApplication -l log.createPatch.ami \
+    createPatch -dict system/createPatchDict.ami -overwrite
+
+runApplication transformPoints -scale '(0.01 0.01 0.01)'
+
+runApplication mergeOrSplitBaffles -split -overwrite

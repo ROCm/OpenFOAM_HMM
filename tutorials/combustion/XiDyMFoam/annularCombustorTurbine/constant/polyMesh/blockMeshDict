@@ -1,0 +1,208 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: Uhe Open Source CFD Uoolbox           |
+|  \\    /   O peration     | Tersion:  1.5                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+convertUoMeters 1;
+
+r0 34;
+r1 39;
+r2 61;
+r3 66;
+
+t -10;
+u 10;
+o 10;
+
+d2r #calc "constant::mathematical::pi/180";
+
+r0CosT  #calc "$r0*cos($d2r*($t   ))";
+r0CosTO #calc "$r0*cos($d2r*($t+$o))";
+r0CosU  #calc "$r0*cos($d2r*($u   ))";
+r0CosUO #calc "$r0*cos($d2r*($u+$o))";
+r0SinT  #calc "$r0*sin($d2r*($t   ))";
+r0SinTO #calc "$r0*sin($d2r*($t+$o))";
+r0SinU  #calc "$r0*sin($d2r*($u   ))";
+r0SinUO #calc "$r0*sin($d2r*($u+$o))";
+
+r1CosT  #calc "$r1*cos($d2r*($t   ))";
+r1CosTO #calc "$r1*cos($d2r*($t+$o))";
+r1CosU  #calc "$r1*cos($d2r*($u   ))";
+r1CosUO #calc "$r1*cos($d2r*($u+$o))";
+r1SinT  #calc "$r1*sin($d2r*($t   ))";
+r1SinTO #calc "$r1*sin($d2r*($t+$o))";
+r1SinU  #calc "$r1*sin($d2r*($u   ))";
+r1SinUO #calc "$r1*sin($d2r*($u+$o))";
+
+r2CosT  #calc "$r2*cos($d2r*($t   ))";
+r2CosTO #calc "$r2*cos($d2r*($t+$o))";
+r2CosU  #calc "$r2*cos($d2r*($u   ))";
+r2CosUO #calc "$r2*cos($d2r*($u+$o))";
+r2SinT  #calc "$r2*sin($d2r*($t   ))";
+r2SinTO #calc "$r2*sin($d2r*($t+$o))";
+r2SinU  #calc "$r2*sin($d2r*($u   ))";
+r2SinUO #calc "$r2*sin($d2r*($u+$o))";
+
+r3CosT  #calc "$r3*cos($d2r*($t   ))";
+r3CosTO #calc "$r3*cos($d2r*($t+$o))";
+r3CosU  #calc "$r3*cos($d2r*($u   ))";
+r3CosUO #calc "$r3*cos($d2r*($u+$o))";
+r3SinT  #calc "$r3*sin($d2r*($t   ))";
+r3SinTO #calc "$r3*sin($d2r*($t+$o))";
+r3SinU  #calc "$r3*sin($d2r*($u   ))";
+r3SinUO #calc "$r3*sin($d2r*($u+$o))";
+
+vertices
+(
+    (-34 $r1CosT  $r1SinT )
+    (-34 $r1CosTO $r1SinTO)
+    (-34 $r1CosU  $r1SinU )
+
+    (-30 $r1CosT  $r1SinT )
+    (-30 $r1CosTO $r1SinTO)
+    (-30 $r1CosU  $r1SinU )
+
+    (-15 $r0CosT  $r0SinT )
+    (-15 $r0CosTO $r0SinTO)
+    (-15 $r0CosU  $r0SinU )
+
+    (  0 $r1CosT  $r1SinT )
+    (  0 $r1CosTO $r1SinTO)
+    (  0 $r1CosU  $r1SinU )
+
+    ( 12 $r1CosT  $r1SinT )
+    ( 12 $r1CosTO $r1SinTO)
+    ( 12 $r1CosU  $r1SinU )
+    ( 12 $r1CosUO $r1SinUO)
+
+    ( 28 $r1CosT  $r1SinT )
+    ( 28 $r1CosTO $r1SinTO)
+    ( 28 $r1CosU  $r1SinU )
+    ( 28 $r1CosUO $r1SinUO)
+
+    ( 40 $r1CosT  $r1SinT )
+    ( 40 $r1CosTO $r1SinTO)
+    ( 40 $r1CosU  $r1SinU )
+
+
+    (-34 $r2CosT  $r2SinT )
+    (-34 $r2CosTO $r2SinTO)
+    (-34 $r2CosU  $r2SinU )
+
+    (-30 $r2CosT  $r2SinT )
+    (-30 $r2CosTO $r2SinTO)
+    (-30 $r2CosU  $r2SinU )
+
+    (-15 $r3CosT  $r3SinT )
+    (-15 $r3CosTO $r3SinTO)
+    (-15 $r3CosU  $r3SinU )
+
+    (  0 $r2CosT  $r2SinT )
+    (  0 $r2CosTO $r2SinTO)
+    (  0 $r2CosU  $r2SinU )
+
+    ( 12 $r2CosT  $r2SinT )
+    ( 12 $r2CosTO $r2SinTO)
+    ( 12 $r2CosU  $r2SinU )
+    ( 12 $r2CosUO $r2SinUO)
+
+    ( 28 $r2CosT  $r2SinT )
+    ( 28 $r2CosTO $r2SinTO)
+    ( 28 $r2CosU  $r2SinU )
+    ( 28 $r2CosUO $r2SinUO)
+
+    ( 40 $r2CosT  $r2SinT )
+    ( 40 $r2CosTO $r2SinTO)
+    ( 40 $r2CosU  $r2SinU )
+);
+
+blocks
+(
+    hex ( 0    1    4    3   23   24   27   26) (8  4 22) simpleGrading (1 1 1)
+    hex ( 1    2    5    4   24   25   28   27) (8  4 22) simpleGrading (1 1 1)
+    hex ( 3    4    7    6   26   27   30   29) (8 15 22) simpleGrading (1 1 1)
+    hex ( 4    5    8    7   27   28   31   30) (8 15 22) simpleGrading (1 1 1)
+    hex ( 6    7   10    9   29   30   33   32) (8 15 22) simpleGrading (1 1 1)
+    hex ( 7    8   11   10   30   31   34   33) (8 15 22) simpleGrading (1 1 1)
+    hex ( 9   10   13   12   32   33   36   35) (8 12 22) simpleGrading (1 1 1)
+    hex (10   11   14   13   33   34   37   36) (8 12 22) simpleGrading (1 1 1)
+    hex (13   14   18   17   36   37   41   40) (8 16 22) simpleGrading (1 1 1)
+    hex (14   15   19   18   37   38   42   41) (8 16 22) simpleGrading (1 1 1)
+    hex (16   17   21   20   39   40   44   43) (8 12 22) simpleGrading (1 1 1)
+    hex (17   18   22   21   40   41   45   44) (8 12 22) simpleGrading (1 1 1)
+);
+
+edges
+(
+);
+
+defaultPatch
+{
+    name    walls;
+    type    wall;
+}
+
+boundary
+(
+    coupled0
+    {
+        type patch;
+        faces
+        (
+            ( 0  3 26 23)
+            ( 3  6 29 26)
+            ( 6  9 32 29)
+            ( 9 12 35 32)
+            (12 13 36 35)
+            (13 17 40 36)
+            (17 16 39 40)
+            (16 20 43 39)
+        );
+    }
+    coupled1
+    {
+        type patch;
+        faces
+        (
+            ( 2  5 28 25)
+            ( 5  8 31 28)
+            ( 8 11 34 31)
+            (11 14 37 34)
+            (14 15 38 37)
+            (15 19 42 38)
+            (19 18 41 42)
+            (18 22 45 41)
+        );
+    }
+    inlet
+    {
+        type patch;
+        faces
+        (
+            (0 1 24 23)
+            (1 2 25 24)
+        );
+    }
+    outlet
+    {
+        type patch;
+        faces
+        (
+            (20 21 44 43)
+            (21 22 45 44)
+        );
+    }
+);
+
+// ************************************************************************* //
