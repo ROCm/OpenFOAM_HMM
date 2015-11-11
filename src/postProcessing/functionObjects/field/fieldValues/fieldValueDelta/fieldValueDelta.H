@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,8 +28,11 @@ Group
     grpFieldFunctionObjects
 
 Description
-    This function object provides a differencing option between two 'field
-    value' function objects.
+    This function object provides applies an operation to the output of two
+    fieldValue function objects.
+
+    The operation is applied to all results of each fieldValue object.
+    Accordingly, each object must generate the same number and type of results.
 
     Example of function object specification:
     \verbatim
@@ -39,11 +42,11 @@ Description
         functionObjectLibs ("libfieldFunctionObjects.so");
         operation       subtract;
 
-        fieldValue1
+        source1
         {
             ...
         }
-        fieldValue2
+        source2
         {
             ...
         }
@@ -65,6 +68,7 @@ Description
        max           | maximum
        average       | average
     \endplaintable
+
 SeeAlso
     Foam::fieldValue
 
@@ -76,6 +80,7 @@ SourceFiles
 #ifndef fieldValueDelta_H
 #define fieldValueDelta_H
 
+#include "functionObjectState.H"
 #include "functionObjectFile.H"
 #include "fieldValue.H"
 #include "autoPtr.H"
@@ -94,6 +99,7 @@ namespace fieldValues
 
 class fieldValueDelta
 :
+    public functionObjectState,
     public functionObjectFile
 {
 public:
@@ -115,14 +121,8 @@ private:
 
     // Private data
 
-        //- Name of this fieldValue object
-        word name_;
-
         //- Database this class is registered to
         const objectRegistry& obr_;
-
-        //- On/off switch
-        bool active_;
 
         //- Flag to indicate to load from files
         bool loadFromFiles_;
@@ -142,13 +142,17 @@ private:
 
     // Private Member Functions
 
-        //- Templated function to process common fields
-        template<class Type>
-        void processFields(bool& found);
-
         //- Templated function to apply the operation
         template<class Type>
-        Type applyOperation(const Type& value1, const Type& value2) const;
+        void apply
+        (
+            const word& resultType,
+            const word& name1,
+            const word& name2,
+            const word& entryName1,
+            const word& entryName2,
+            bool& found
+        );
 
 
 protected:

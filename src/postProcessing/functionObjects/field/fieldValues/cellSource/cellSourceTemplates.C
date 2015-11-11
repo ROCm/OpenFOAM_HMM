@@ -87,52 +87,65 @@ Type Foam::fieldValues::cellSource::processValues
     {
         case opSum:
         {
-            result = sum(values);
+            result = gSum(values);
             break;
         }
         case opSumMag:
         {
-            result = sum(cmptMag(values));
+            result = gSum(cmptMag(values));
             break;
         }
         case opAverage:
         {
-            result = sum(values)/values.size();
+            label n = returnReduce(values.size(), sumOp<label>());
+            result = gSum(values)/(scalar(n) + ROOTVSMALL);
             break;
         }
         case opWeightedAverage:
         {
-            result = sum(weightField*values)/sum(weightField);
+            label wSize = returnReduce(weightField.size(), sumOp<label>());
+
+            if (wSize > 0)
+            {
+                result = gSum(weightField*values)/(gSum(weightField) + ROOTVSMALL);
+            }
+            else
+            {
+                label n = returnReduce(values.size(), sumOp<label>());
+                result = gSum(values)/(scalar(n) + ROOTVSMALL);
+            }
             break;
         }
         case opVolAverage:
         {
-            result = sum(V*values)/sum(V);
+            result = gSum(values*V)/(gSum(V) + ROOTVSMALL);
             break;
         }
         case opWeightedVolAverage:
         {
-            result = sum(weightField*V*values)/sum(weightField*V);
+            result = gSum(weightField*V*values)/gSum(weightField*V);
             break;
         }
         case opVolIntegrate:
         {
-            result = sum(V*values);
+            result = gSum(V*values);
             break;
         }
         case opMin:
         {
-            result = min(values);
+            result = gMin(values);
             break;
         }
         case opMax:
         {
-            result = max(values);
+            result = gMax(values);
             break;
         }
         case opCoV:
         {
-            Type meanValue = sum(values*V)/sum(V);
+            const scalar sumV = gSum(V);
+
+            Type meanValue = gSum(V*values)/sumV;
 
             const label nComp = pTraits<Type>::nComponents;
 
@@ -142,7 +155,7 @@ Type Foam::fieldValues::cellSource::processValues
                 scalar mean = component(meanValue, d);
                 scalar& res = setComponent(result, d);
 
-                res = sqrt(sum(V*sqr(vals - mean))/sum(V))/mean;
+                res = sqrt(gSum(V*sqr(vals - mean))/sumV)/(mean + ROOTVSMALL);
             }
 
             break;
@@ -160,7 +173,11 @@ Type Foam::fieldValues::cellSource::processValues
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-bool Foam::fieldValues::cellSource::writeValues(const word& fieldName)
+bool Foam::fieldValues::cellSource::writeValues
+(
+    const word& fieldName,
+    const scalarField& weightField
+)
 {
     const bool ok = validField<Type>(fieldName);
 
@@ -168,26 +185,13 @@ bool Foam::fieldValues::cellSource::writeValues(const word& fieldName)
     {
         Field<Type> values(setFieldValues<Type>(fieldName));
         scalarField V(filterField(mesh().V()));
-        scalarField weightField(values.size(), 1.0);
 
-        if (weightFieldName_ != "none")
+        if (valueOutput_)
         {
-            weightField = setFieldValues<scalar>(weightFieldName_, true);
-        }
+            Field<Type> allValues(values);
+            combineFields(allValues);
 
-        // Combine onto master
-        combineFields(values);
-        combineFields(V);
-        combineFields(weightField);
-
-        if (Pstream::master())
-        {
-            Type result = processValues(values, V, weightField);
-
-            // Add to result dictionary, over-writing any previous entry
-            resultDict_.add(fieldName, result, true);
-
-            if (valueOutput_)
+            if (Pstream::master())
             {
                 IOField<Type>
                 (
@@ -200,17 +204,29 @@ bool Foam::fieldValues::cellSource::writeValues(const word& fieldName)
                         IOobject::NO_READ,
                         IOobject::NO_WRITE
                     ),
-                    weightField*values
+                    allValues
                 ).write();
             }
+        }
 
+        // Apply scale factor
+        values *= scaleFactor_;
 
-            file()<< tab << result;
+        Type result = processValues(values, V, weightField);
 
-            if (log_) Info<< "    " << operationTypeNames_[operation_]
+        file()<< tab << result;
+
+        if (log_)
+        {
+            Info<< "    " << operationTypeNames_[operation_]
                 << "(" << sourceName_ << ") of " << fieldName
                 <<  " = " << result << endl;
         }
+
+        // write state/results information
+        const word& opName = operationTypeNames_[operation_];
+        word resultName = opName + '(' + sourceName_ + ',' + fieldName + ')';
+        this->setResult(resultName, result);
     }
 
     return ok;
