@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -187,8 +187,10 @@ bool Foam::matchPoints
 
         // Go through range of equal mag and find nearest vector.
         scalar minDistSqr = VGREAT;
-        scalar minDistNorm = 0;
         label minFaceI = -1;
+
+        // Valid candidate points should have opposite normal
+        const scalar minDistNorm = 0;
 
         for
         (
@@ -220,7 +222,6 @@ bool Foam::matchPoints
                 // Check that the normals point in equal and opposite directions
                 if (distNorm < minDistNorm)
                 {
-                    minDistNorm = distNorm;
                     minDistSqr = distSqr;
                     minFaceI = faceI;
                 }
