@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
@@ -23,69 +23,72 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "proxySurfaceWriter.H"
-
-#include "MeshedSurfaceProxy.H"
 #include "OFstream.H"
 #include "OSspecific.H"
 
-#include "makeSurfaceWriterMethods.H"
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
+template<class Type>
+void Foam::vtkSurfaceWriter::writeData
+(
+    Ostream& os,
+    const Field<Type>& values
+)
 {
-    defineTypeNameAndDebug(proxySurfaceWriter, 0);
+    os  << "1 " << values.size() << " float" << nl;
+
+    forAll(values, elemI)
+    {
+        os  << float(0) << nl;
+    }
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::proxySurfaceWriter::proxySurfaceWriter(const word& ext)
-:
-    surfaceWriter(),
-    ext_(ext)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::proxySurfaceWriter::~proxySurfaceWriter()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::fileName Foam::proxySurfaceWriter::write
+template<class Type>
+Foam::fileName Foam::vtkSurfaceWriter::writeTemplate
 (
     const fileName& outputDir,
     const fileName& surfaceName,
     const pointField& points,
     const faceList& faces,
+    const word& fieldName,
+    const Field<Type>& values,
+    const bool isNodeValues,
     const bool verbose
 ) const
 {
-    // avoid bad values
-    if (ext_.empty())
-    {
-        return fileName::null;
-    }
-
     if (!isDir(outputDir))
     {
         mkDir(outputDir);
     }
 
-    fileName outName(outputDir/surfaceName + "." + ext_);
+    OFstream os(outputDir/fieldName + '_' + surfaceName + ".vtk");
 
     if (verbose)
     {
-        Info<< "Writing geometry to " << outName << endl;
+        Info<< "Writing field " << fieldName << " to " << os.name() << endl;
     }
 
-    MeshedSurfaceProxy<face>(points, faces).write(outName);
+    writeGeometry(os, points, faces);
 
-    return outName;
+    // start writing data
+    if (isNodeValues)
+    {
+        os  << "POINT_DATA ";
+    }
+    else
+    {
+        os  << "CELL_DATA ";
+    }
+
+    os  << values.size() << nl
+        << "FIELD attributes 1" << nl
+        << fieldName << " ";
+
+    // Write data
+    writeData(os, values);
+
+    return os.name();
 }
 
 

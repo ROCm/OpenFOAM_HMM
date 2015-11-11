@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -110,13 +110,13 @@ public:
 
         //- True if the surface format supports geometry in a separate file.
         //  False if geometry and field must be in a single file
-        virtual bool separateGeometry()
+        virtual bool separateGeometry() const
         {
             return false;
         }
 
         //- Write single surface geometry to file.
-        virtual void write
+        virtual fileName write
         (
             const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
@@ -124,11 +124,13 @@ public:
             const faceList& faces,
             const bool verbose = false
         ) const
-        {}
+        {
+            return fileName::null;
+        }
 
         //- Write scalarField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
-        virtual void write
+        virtual fileName write
         (
             const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
@@ -139,11 +141,13 @@ public:
             const bool isNodeValues,
             const bool verbose = false
         ) const
-        {}
+        {
+            return fileName::null;
+        }
 
         //- Write vectorField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
-        virtual void write
+        virtual fileName write
         (
             const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
@@ -154,11 +158,13 @@ public:
             const bool isNodeValues,
             const bool verbose = false
         ) const
-        {}
+        {
+            return fileName::null;
+        }
 
         //- Write sphericalTensorField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
-        virtual void write
+        virtual fileName write
         (
             const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
@@ -169,11 +175,13 @@ public:
             const bool isNodeValues,
             const bool verbose = false
         ) const
-        {}
+        {
+            return fileName::null;
+        }
 
         //- Write symmTensorField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
-        virtual void write
+        virtual fileName write
         (
             const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
@@ -184,11 +192,13 @@ public:
             const bool isNodeValues,
             const bool verbose = false
         ) const
-        {}
+        {
+            return fileName::null;
+        }
 
         //- Write tensorField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
-        virtual void write
+        virtual fileName write
         (
             const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
@@ -199,7 +209,9 @@ public:
             const bool isNodeValues,
             const bool verbose = false
         ) const
-        {}
+        {
+            return fileName::null;
+        }
 };
 
 

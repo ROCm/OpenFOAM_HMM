@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,20 +22,57 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::dxSurfaceWriter
+    Foam::boundaryDataSurfaceWriter
 
 Description
-    A surfaceWriter for OpenDX format.
+    A surfaceWriter for outputting to a form useable for the
+    timeVaryingMapped boundary condition. This reads the data from
+    constant/boundaryData/<patch>
+
+    Typical way of working:
+    - use a sampledSurface of type 'patch' (to sample a patch):
+        surfaces
+        {
+            type            surfaces;
+            surfaceFormat   boundaryData;
+            fields          ( p );
+            surfaces
+            (
+                outlet
+                {
+                    type            patch;
+                    patches         (outlet);
+                    interpolate     false;
+                }
+            );
+
+    - write using this writer.
+    - move postProcessing/surfaces/outlet to constant/boundaryData/outlet
+      in your destination case.
+    - use a timeVaryingMappedFixedValue bc to read&interpolate
+      the profile:
+        type            timeVaryingMappedFixedValue;
+        setAverage      false;  // do not use read average
+        offset          0;      // do not apply offset to values
+
+    Note:
+    - with 'interpolate false' the data is on the face centres of the
+      patch. Take care that a 2D geometry will only have a single row
+      of face centres so might not provide a valid triangulation
+      (this is what timeVaryingMappedFixedValue uses to do interpolation)
+      (Alternatively use timeVaryingMappedFixedValue with mapMethod 'nearest')
+
 
 SourceFiles
-    dxSurfaceWriter.C
+    boundaryDataSurfaceWriter.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dxSurfaceWriter_H
-#define dxSurfaceWriter_H
+#ifndef boundaryDataSurfaceWriter_H
+#define boundaryDataSurfaceWriter_H
 
 #include "surfaceWriter.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,21 +80,14 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class dxSurfaceWriter Declaration
+                  Class boundaryDataSurfaceWriter Declaration
 \*---------------------------------------------------------------------------*/
 
-class dxSurfaceWriter
+class boundaryDataSurfaceWriter
 :
     public surfaceWriter
 {
-
     // Private Member Functions
-
-        static void writeGeometry(Ostream&, const pointField&, const faceList&);
-        static void writeTrailer(Ostream&, const bool isNodeValues);
-
-        template<class Type>
-        static void writeData(Ostream&, const Field<Type>&);
 
         //- Templated write operation
         template<class Type>
@@ -77,20 +107,31 @@ class dxSurfaceWriter
 public:
 
     //- Runtime type information
-    TypeName("dx");
+    TypeName("boundaryData");
 
 
     // Constructors
 
         //- Construct null
-        dxSurfaceWriter();
+        boundaryDataSurfaceWriter();
 
 
     //- Destructor
-    virtual ~dxSurfaceWriter();
+    virtual ~boundaryDataSurfaceWriter();
 
 
     // Member Functions
+
+        //- Write single surface geometry to file.
+        virtual fileName write
+        (
+            const fileName& outputDir,
+            const fileName& surfaceName,
+            const pointField& points,
+            const faceList& faces,
+            const bool verbose = false
+        ) const;
+
 
         //- Write scalarField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
@@ -171,7 +212,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "dxSurfaceWriterTemplates.C"
+    #include "boundaryDataSurfaceWriterTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

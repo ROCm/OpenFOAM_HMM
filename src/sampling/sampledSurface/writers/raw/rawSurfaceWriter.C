@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,11 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "rawSurfaceWriter.H"
-
-#include "OFstream.H"
-#include "OSspecific.H"
-#include "IOmanip.H"
-
 #include "makeSurfaceWriterMethods.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -208,66 +203,6 @@ namespace Foam
 }
 
 
-template<class Type>
-void Foam::rawSurfaceWriter::writeTemplate
-(
-    const fileName& outputDir,
-    const fileName& surfaceName,
-    const pointField& points,
-    const faceList& faces,
-    const word& fieldName,
-    const Field<Type>& values,
-    const bool isNodeValues,
-    const bool verbose
-) const
-{
-    if (!isDir(outputDir))
-    {
-        mkDir(outputDir);
-    }
-
-    OFstream os(outputDir/fieldName + '_' + surfaceName + ".raw");
-
-    if (verbose)
-    {
-        Info<< "Writing field " << fieldName << " to " << os.name() << endl;
-    }
-
-    // header
-    os  << "# " << fieldName;
-    if (isNodeValues)
-    {
-        os  << "  POINT_DATA ";
-    }
-    else
-    {
-        os  << "  FACE_DATA ";
-    }
-
-    // header
-    writeHeader(os, fieldName, values);
-
-    // values
-    if (isNodeValues)
-    {
-        forAll(values, elemI)
-        {
-            writeLocation(os, points, elemI);
-            writeData(os, values[elemI]);
-        }
-    }
-    else
-    {
-        forAll(values, elemI)
-        {
-            writeLocation(os, points, faces, elemI);
-            writeData(os, values[elemI]);
-        }
-    }
-}
-
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::rawSurfaceWriter::rawSurfaceWriter()
@@ -284,7 +219,7 @@ Foam::rawSurfaceWriter::~rawSurfaceWriter()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::rawSurfaceWriter::write
+Foam::fileName Foam::rawSurfaceWriter::write
 (
     const fileName& outputDir,
     const fileName& surfaceName,
@@ -318,6 +253,8 @@ void Foam::rawSurfaceWriter::write
     }
 
     os  << nl;
+
+    return os.name();
 }
 
 

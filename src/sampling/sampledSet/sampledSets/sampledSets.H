@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +36,7 @@ SourceFiles
 #ifndef sampledSets_H
 #define sampledSets_H
 
+#include "functionObjectState.H"
 #include "sampledSet.H"
 #include "volFieldsFwd.H"
 #include "meshSearch.H"
@@ -59,6 +60,7 @@ class fvMesh;
 
 class sampledSets
 :
+    public functionObjectState,
     public PtrList<sampledSet>
 {
     // Private classes
@@ -152,10 +154,6 @@ class sampledSets
 
 
     // Private data
-
-        //- Name of this set of sets,
-        //  Also used as the name of the sampledSets directory.
-        word name_;
 
         //- Const reference to fvMesh
         const fvMesh& mesh_;
@@ -272,12 +270,6 @@ public:
 
 
     // Member Functions
-
-        //- Return name of the set of probes
-        virtual const word& name() const
-        {
-            return name_;
-        }
 
         //- Set verbosity level
         void verbose(const bool verbosity = true);
