@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -227,7 +227,8 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
                     newBoundary[patchI].start(),
                     patchI,
                     boundary_,
-                    newBoundary[patchI].type()
+                    newBoundary[patchI].physicalType(),
+                    newBoundary[patchI].inGroups()
                 );
             }
         }
