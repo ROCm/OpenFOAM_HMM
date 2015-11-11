@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,40 +23,33 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "proxySurfaceWriter.H"
-
-#include "MeshedSurfaceProxy.H"
-#include "OFstream.H"
-#include "OSspecific.H"
-
+#include "boundaryDataSurfaceWriter.H"
 #include "makeSurfaceWriterMethods.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(proxySurfaceWriter, 0);
+    makeSurfaceWriterType(boundaryDataSurfaceWriter);
 }
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::proxySurfaceWriter::proxySurfaceWriter(const word& ext)
+Foam::boundaryDataSurfaceWriter::boundaryDataSurfaceWriter()
 :
-    surfaceWriter(),
-    ext_(ext)
+    surfaceWriter()
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::proxySurfaceWriter::~proxySurfaceWriter()
+Foam::boundaryDataSurfaceWriter::~boundaryDataSurfaceWriter()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::fileName Foam::proxySurfaceWriter::write
+Foam::fileName Foam::boundaryDataSurfaceWriter::write
 (
     const fileName& outputDir,
     const fileName& surfaceName,
@@ -65,28 +58,60 @@ Foam::fileName Foam::proxySurfaceWriter::write
     const bool verbose
 ) const
 {
-    // avoid bad values
-    if (ext_.empty())
-    {
-        return fileName::null;
-    }
+    const fileName baseDir(outputDir.path()/surfaceName);
+    const fileName timeName(outputDir.name());
 
-    if (!isDir(outputDir))
-    {
-        mkDir(outputDir);
-    }
 
-    fileName outName(outputDir/surfaceName + "." + ext_);
+    // Construct dummy time to use as an objectRegistry
+    const fileName caseDir(getEnv("FOAM_CASE"));
+    Time dummyTime
+    (
+        caseDir.path(), //rootPath,
+        caseDir.name(), //caseName,
+        "system",       //systemName,
+        "constant",     //constantName,
+        false           //enableFunctionObjects
+    );
 
+
+    // Write points
     if (verbose)
     {
-        Info<< "Writing geometry to " << outName << endl;
+        Info<< "Writing points to " << baseDir/"points" << endl;
     }
 
-    MeshedSurfaceProxy<face>(points, faces).write(outName);
+    pointIOField pts
+    (
+        IOobject
+        (
+            baseDir/"points",
+            dummyTime,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        points
+    );
 
-    return outName;
+    {
+        // Do like regIOobject::writeObject but don't do instance() adaptation
+        // since this would write to e.g. 0/ instead of postProcessing/
+
+        // Try opening an OFstream for object
+        mkDir(pts.path());
+        OFstream os(pts.objectPath());
+
+        pts.writeHeader(os);
+        pts.writeData(os);
+        pts.writeEndDivider(os);
+    }
+
+    return baseDir;
 }
+
+
+// create write methods
+defineSurfaceWriterWriteFields(Foam::boundaryDataSurfaceWriter);
 
 
 // ************************************************************************* //

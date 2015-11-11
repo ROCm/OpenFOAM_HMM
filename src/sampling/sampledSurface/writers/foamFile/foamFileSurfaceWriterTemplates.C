@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
@@ -23,69 +23,51 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "proxySurfaceWriter.H"
-
-#include "MeshedSurfaceProxy.H"
 #include "OFstream.H"
 #include "OSspecific.H"
 
-#include "makeSurfaceWriterMethods.H"
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    defineTypeNameAndDebug(proxySurfaceWriter, 0);
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::proxySurfaceWriter::proxySurfaceWriter(const word& ext)
-:
-    surfaceWriter(),
-    ext_(ext)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::proxySurfaceWriter::~proxySurfaceWriter()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::fileName Foam::proxySurfaceWriter::write
+template<class Type>
+Foam::fileName Foam::foamFileSurfaceWriter::writeTemplate
 (
     const fileName& outputDir,
     const fileName& surfaceName,
     const pointField& points,
     const faceList& faces,
+    const word& fieldName,
+    const Field<Type>& values,
+    const bool isNodeValues,
     const bool verbose
 ) const
 {
-    // avoid bad values
-    if (ext_.empty())
-    {
-        return fileName::null;
-    }
+    fileName surfaceDir(outputDir/surfaceName);
 
-    if (!isDir(outputDir))
+    if (!isDir(surfaceDir))
     {
-        mkDir(outputDir);
+        mkDir(surfaceDir);
     }
-
-    fileName outName(outputDir/surfaceName + "." + ext_);
 
     if (verbose)
     {
-        Info<< "Writing geometry to " << outName << endl;
+        Info<< "Writing field " << fieldName << " to " << surfaceDir << endl;
     }
 
-    MeshedSurfaceProxy<face>(points, faces).write(outName);
+    // geometry should already have been written
+    // Values to separate directory (e.g. "scalarField/p")
 
-    return outName;
+    fileName foamName(pTraits<Type>::typeName);
+    fileName valuesDir(surfaceDir/(foamName + Field<Type>::typeName));
+
+    if (!isDir(valuesDir))
+    {
+        mkDir(valuesDir);
+    }
+
+    // values
+    OFstream(valuesDir/fieldName)()  << values;
+
+    return valuesDir/fieldName;
 }
 
 
