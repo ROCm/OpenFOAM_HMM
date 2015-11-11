@@ -75,10 +75,10 @@ Foam::fieldValue::fieldValue
     const bool loadFromFiles
 )
 :
+    functionObjectState(obr, name),
     functionObjectFile(obr, name, valueType, dict),
     obr_(obr),
     dict_(dict),
-    active_(true),
     log_(true),
     sourceName_(dict.lookupOrDefault<word>("sourceName", "sampledSurface")),
     fields_(),
@@ -86,24 +86,9 @@ Foam::fieldValue::fieldValue
     scaleFactor_(1.0)
 {
     // Only active if obr is an fvMesh
-    if (isA<fvMesh>(obr_))
+    if (setActive<fvMesh>())
     {
         read(dict);
-    }
-    else
-    {
-        WarningIn
-        (
-            "fieldValue::fieldValue"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating " << name << nl
-            << endl;
-        active_ = false;
     }
 }
 
