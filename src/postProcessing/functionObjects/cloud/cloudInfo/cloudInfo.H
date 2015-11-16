@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -109,11 +109,20 @@ protected:
         //- on/off switch
         bool active_;
 
+        //- Switch to send output to Info as well
+        Switch log_;
+
+        //- List of cloud names
+        wordList cloudNames_;
+
+        //- Output file per cloud
+        PtrList<OFstream> filePtrs_;
+
 
     // Protected Member Functions
 
         //- File header information
-        virtual void writeFileHeader(const label i);
+        virtual void writeFileHeader(Ostream& os) const;
 
         //- Disallow default bitwise copy construct
         cloudInfo(const cloudInfo&);

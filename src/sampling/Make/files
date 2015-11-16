@@ -50,6 +50,7 @@ $(surfWriters)/proxy/proxySurfaceWriter.C
 $(surfWriters)/raw/rawSurfaceWriter.C
 $(surfWriters)/starcd/starcdSurfaceWriter.C
 $(surfWriters)/vtk/vtkSurfaceWriter.C
+$(surfWriters)/boundaryData/boundaryDataSurfaceWriter.C
 
 graphField/writePatchGraph.C
 graphField/writeCellGraph.C

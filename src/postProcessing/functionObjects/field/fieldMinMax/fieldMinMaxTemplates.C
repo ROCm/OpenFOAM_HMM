@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,7 @@ void Foam::fieldMinMax::output
 {
     OFstream& file = this->file();
 
-    if (location_)
+    if (writeLocation_)
     {
         file<< obr_.time().value();
 
@@ -95,6 +95,15 @@ void Foam::fieldMinMax::output
     }
 
     if (log_) Info<< endl;
+
+    // Write state/results information
+    word nameStr('(' + outputName + ')');
+    this->setResult("min" + nameStr, minValue);
+    this->setResult("min" + nameStr + "_position", minC);
+    this->setResult("min" + nameStr + "_processor", minProcI);
+    this->setResult("max" + nameStr, maxValue);
+    this->setResult("max" + nameStr + "_position", maxC);
+    this->setResult("max" + nameStr + "_processor", maxProcI);
 }
 
 
@@ -163,33 +172,34 @@ void Foam::fieldMinMax::calcMinMaxFields
                 }
 
                 Pstream::gatherList(minVs);
+                Pstream::scatterList(minVs);
                 Pstream::gatherList(minCs);
+                Pstream::scatterList(minCs);
 
                 Pstream::gatherList(maxVs);
+                Pstream::scatterList(maxVs);
                 Pstream::gatherList(maxCs);
+                Pstream::scatterList(maxCs);
 
-                if (Pstream::master())
-                {
-                    label minI = findMin(minVs);
-                    scalar minValue = minVs[minI];
-                    const vector& minC = minCs[minI];
+                label minI = findMin(minVs);
+                scalar minValue = minVs[minI];
+                const vector& minC = minCs[minI];
 
-                    label maxI = findMax(maxVs);
-                    scalar maxValue = maxVs[maxI];
-                    const vector& maxC = maxCs[maxI];
+                label maxI = findMax(maxVs);
+                scalar maxValue = maxVs[maxI];
+                const vector& maxC = maxCs[maxI];
 
-                    output
-                    (
-                        fieldName,
-                        word("mag(" + fieldName + ")"),
-                        minC,
-                        maxC,
-                        minI,
-                        maxI,
-                        minValue,
-                        maxValue
-                    );
-                }
+                output
+                (
+                    fieldName,
+                    word("mag(" + fieldName + ")"),
+                    minC,
+                    maxC,
+                    minI,
+                    maxI,
+                    minValue,
+                    maxValue
+                );
                 break;
             }
             case mdCmpt:
@@ -236,33 +246,34 @@ void Foam::fieldMinMax::calcMinMaxFields
                 }
 
                 Pstream::gatherList(minVs);
+                Pstream::scatterList(minVs);
                 Pstream::gatherList(minCs);
+                Pstream::scatterList(minCs);
 
                 Pstream::gatherList(maxVs);
+                Pstream::scatterList(maxVs);
                 Pstream::gatherList(maxCs);
+                Pstream::scatterList(maxCs);
 
-                if (Pstream::master())
-                {
-                    label minI = findMin(minVs);
-                    Type minValue = minVs[minI];
-                    const vector& minC = minCs[minI];
+                label minI = findMin(minVs);
+                Type minValue = minVs[minI];
+                const vector& minC = minCs[minI];
 
-                    label maxI = findMax(maxVs);
-                    Type maxValue = maxVs[maxI];
-                    const vector& maxC = maxCs[maxI];
+                label maxI = findMax(maxVs);
+                Type maxValue = maxVs[maxI];
+                const vector& maxC = maxCs[maxI];
 
-                    output
-                    (
-                        fieldName,
-                        fieldName,
-                        minC,
-                        maxC,
-                        minI,
-                        maxI,
-                        minValue,
-                        maxValue
-                    );
-                }
+                output
+                (
+                    fieldName,
+                    fieldName,
+                    minC,
+                    maxC,
+                    minI,
+                    maxI,
+                    minValue,
+                    maxValue
+                );
                 break;
             }
             default:
@@ -274,7 +285,8 @@ void Foam::fieldMinMax::calcMinMaxFields
                         "const word&, "
                         "const modeType&"
                     ")"
-                )   << "Unknown min/max mode: " << modeTypeNames_[mode_]
+                )
+                    << "Unknown min/max mode: " << modeTypeNames_[mode_]
                     << exit(FatalError);
             }
         }

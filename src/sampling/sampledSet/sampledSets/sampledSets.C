@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -136,8 +136,8 @@ Foam::sampledSets::sampledSets
     const bool loadFromFiles
 )
 :
+    functionObjectState(obr, name),
     PtrList<sampledSet>(),
-    name_(name),
     mesh_(refCast<const fvMesh>(obr)),
     loadFromFiles_(loadFromFiles),
     outputPath_(fileName::null),

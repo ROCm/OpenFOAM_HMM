@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,28 @@ License
 #include "mapPolyMesh.H"
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+void Foam::functionObjectList::createStateDict() const
+{
+    // Cannot set the state dictionary on construction since Time has not
+    // been fully initialised
+    stateDictPtr_.reset
+    (
+        new IOdictionary
+        (
+            IOobject
+            (
+                "functionObjectProperties",
+                time_.timeName(),
+                "uniform"/word("functionObjects"),
+                time_,
+                IOobject::READ_IF_PRESENT,
+                IOobject::NO_WRITE
+            )
+        )
+    );
+}
+
 
 Foam::functionObject* Foam::functionObjectList::remove
 (
@@ -70,6 +92,7 @@ Foam::functionObjectList::functionObjectList
     indices_(),
     time_(t),
     parentDict_(t.controlDict()),
+    stateDictPtr_(),
     execution_(execution),
     updated_(false)
 {}
@@ -87,6 +110,7 @@ Foam::functionObjectList::functionObjectList
     indices_(),
     time_(t),
     parentDict_(parentDict),
+    stateDictPtr_(),
     execution_(execution),
     updated_(false)
 {}
@@ -99,6 +123,28 @@ Foam::functionObjectList::~functionObjectList()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::IOdictionary& Foam::functionObjectList::stateDict()
+{
+    if (!stateDictPtr_.valid())
+    {
+        createStateDict();
+    }
+
+    return stateDictPtr_();
+}
+
+
+const Foam::IOdictionary& Foam::functionObjectList::stateDict() const
+{
+    if (!stateDictPtr_.valid())
+    {
+        createStateDict();
+    }
+
+    return stateDictPtr_();
+}
+
 
 void Foam::functionObjectList::clear()
 {
@@ -163,6 +209,22 @@ bool Foam::functionObjectList::execute(const bool forceWrite)
         {
             ok = operator[](objectI).execute(forceWrite) && ok;
         }
+    }
+
+    // Force writing of state dictionary after function object execution
+    if (time_.outputTime())
+    {
+        label oldPrecision = IOstream::precision_;
+        IOstream::precision_ = 16;
+
+        stateDictPtr_->writeObject
+        (
+            IOstream::ASCII,
+            IOstream::currentVersion,
+            time_.writeCompression()
+        );
+
+        IOstream::precision_ = oldPrecision;
     }
 
     return ok;
@@ -234,6 +296,11 @@ bool Foam::functionObjectList::adjustTimeStep()
 
 bool Foam::functionObjectList::read()
 {
+    if (!stateDictPtr_.valid())
+    {
+        createStateDict();
+    }
+
     bool ok = true;
     updated_ = execution_;
 
