@@ -15,11 +15,17 @@
 #
 #------------------------------------------------------------------------------
 
+#- Lines to ignore
+Ignore/Solving for .* region /
+
 #- String to recognize new iteration by (usually same as 'Time')
 Separator/^[ \t]*Time = /Time = 
 
 #- Time value:
 Time/^[ \t]*Time = /Time = 
+
+#- DeltaT value:
+deltaT/^[ \t]*deltaT = /deltaT = 
 
 #- Continuity errors:
 contLocal/time step continuity errors :/sum local = 
@@ -32,6 +38,10 @@ minFt/min\(ft\) = /min(ft) =
 
 #- Execution time:
 executionTime/ExecutionTime = /ExecutionTime = 
+
+#- Interface Courant no:
+IntCourantMax/Interface Courant Number /max: 
+IntCourantMean/Interface Courant Number /mean: 
 
 #- Courant no:
 CourantMax/Courant Number /max: 
@@ -48,8 +58,8 @@ epsMax/bounding epsilon,/max:
 epsAvg/bounding epsilon,/average: 
 
 #- gamma bounding
-alpha1Min/Min\(alpha1\) =/Min(alpha1) =
-alpha1Max/Max\(alpha1\) =/Max(alpha1) =
+alpha1Min/Min\(alpha1\) =/Min(alpha1) = 
+alpha1Max/Max\(alpha1\) =/Max(alpha1) = 
 
 # AMI
 AMIMin/AMI: Patch source sum/average = 
