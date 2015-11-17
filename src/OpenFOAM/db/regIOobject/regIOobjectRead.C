@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +35,7 @@ Foam::Istream& Foam::regIOobject::readStream()
 {
     if (IFstream::debug)
     {
-        Info<< "regIOobject::readStream() : "
+        Pout<< "regIOobject::readStream() : "
             << "reading object " << name()
             << " from file " << objectPath()
             << endl;
@@ -112,7 +112,7 @@ Foam::Istream& Foam::regIOobject::readStream(const word& expectName)
 {
     if (IFstream::debug)
     {
-        Info<< "regIOobject::readStream(const word&) : "
+        Pout<< "regIOobject::readStream(const word&) : "
             << "reading object " << name()
             << " from file " << objectPath()
             << endl;
@@ -149,7 +149,7 @@ void Foam::regIOobject::close()
 {
     if (IFstream::debug)
     {
-        Info<< "regIOobject::close() : "
+        Pout<< "regIOobject::close() : "
             << "finished reading " << filePath()
             << endl;
     }
@@ -288,7 +288,7 @@ bool Foam::regIOobject::readIfModified()
         if (modified())
         {
             const fileName& fName = time().getFile(watchIndex_);
-            Info<< "regIOobject::readIfModified() : " << nl
+            Pout<< "regIOobject::readIfModified() : " << nl
                 << "    Re-reading object " << name()
                 << " from file " << fName << endl;
             return read();

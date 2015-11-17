@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 #include "emptyFvPatchFields.H"
 #include "directFvPatchFieldMapper.H"
 #include "directPointPatchFieldMapper.H"
+#include "flipOp.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -178,7 +179,9 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > fvMeshSubset::interpolate
     const GeometricField<Type, fvsPatchField, surfaceMesh>& vf,
     const fvMesh& sMesh,
     const labelList& patchMap,
-    const labelList& faceMap
+    const labelList& cellMap,
+    const labelList& faceMap,
+    const bool negateIfFlipped
 )
 {
     // 1. Create the complete field with dummy patch fields
@@ -297,14 +300,24 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > fvMeshSubset::interpolate
             // Postprocess patch field for exposed faces
 
             fvsPatchField<Type>& pfld = bf[patchI];
+            const labelUList& fc = bf[patchI].patch().faceCells();
+            const labelList& own = vf.mesh().faceOwner();
 
             forAll(pfld, i)
             {
                 label baseFaceI = faceMap[subPatch.start()+i];
                 if (baseFaceI < vf.internalField().size())
                 {
-                    // Exposed internal face
-                    pfld[i] = vf.internalField()[baseFaceI];
+                    Type val = vf.internalField()[baseFaceI];
+
+                    if (cellMap[fc[i]] == own[baseFaceI] || !negateIfFlipped)
+                    {
+                        pfld[i] = val;
+                    }
+                    else
+                    {
+                        pfld[i] = flipOp()(val);
+                    }
                 }
                 else
                 {
@@ -329,7 +342,8 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > fvMeshSubset::interpolate
 template<class Type>
 tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > fvMeshSubset::interpolate
 (
-    const GeometricField<Type, fvsPatchField, surfaceMesh>& sf
+    const GeometricField<Type, fvsPatchField, surfaceMesh>& sf,
+    const bool negateIfFlipped
 ) const
 {
     return interpolate
@@ -337,7 +351,9 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > fvMeshSubset::interpolate
         sf,
         subMesh(),
         patchMap(),
-        faceMap()
+        cellMap(),
+        faceMap(),
+        negateIfFlipped
     );
 }
 
@@ -486,6 +502,47 @@ tmp<GeometricField<Type, pointPatchField, pointMesh> > fvMeshSubset::interpolate
         patchMap(),
         pointMap()
     );
+}
+
+
+template<class Type>
+tmp<DimensionedField<Type, volMesh> > fvMeshSubset::interpolate
+(
+    const DimensionedField<Type, volMesh>& df,
+    const fvMesh& sMesh,
+    const labelList& cellMap
+)
+{
+    // Create the complete field from the pieces
+    tmp<DimensionedField<Type, volMesh> > tresF
+    (
+        new DimensionedField<Type, volMesh>
+        (
+            IOobject
+            (
+                "subset"+df.name(),
+                sMesh.time().timeName(),
+                sMesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            sMesh,
+            df.dimensions(),
+            Field<Type>(df, cellMap)
+        )
+    );
+
+    return tresF;
+}
+
+
+template<class Type>
+tmp<DimensionedField<Type, volMesh> > fvMeshSubset::interpolate
+(
+    const DimensionedField<Type, volMesh>& df
+) const
+{
+    return interpolate(df, subMesh(), cellMap());
 }
 
 

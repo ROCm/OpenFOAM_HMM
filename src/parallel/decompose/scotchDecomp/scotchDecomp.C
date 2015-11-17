@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,52 +65,54 @@ License
     The current default mapping strategy in Scotch can be seen by using the
     "-vs" option of program gmap. It is, to date:
 
-    r
+    m
     {
-        job=t,
-        map=t,
-        poli=S,
-        sep=
-        (
-            m
-            {
-                asc=b
+        asc=b
+        {
+            width=3,
+            bnd=d{pass=40, dif=1, rem=0}
+            f{move=80, pass=-1, bal=0.01},
+            org=f{move=80,pass=-1,bal=0.01}
+        },
+        low=r
+        {
+            job=t,
+            bal=0.01,
+            map=t,
+            poli=S,
+            sep=
+            (
+                m
                 {
-                    bnd=
-                    (
-                        d{pass=40,dif=1,rem=1}
-                     |
-                    )
-                    f{move=80,pass=-1,bal=0.002491},
-                    org=f{move=80,pass=-1,bal=0.002491},
-                    width=3
-                },
-                low=h{pass=10}
-                f{move=80,pass=-1,bal=0.002491},
-                type=h,
-                vert=80,
-                rat=0.8
-            }
-          | m
-            {
-                asc=b
+                    asc=b
+                    {
+                        bnd=f{move=120, pass=-1, bal=0.01, type=b},
+                        org=f{move=120,pass=-1,bal=0.01,type=b},
+                        width=3
+                    },
+                    low=h{pass=10}
+                    f{move=120,pass=-1,bal=0.01,type=b},
+                    vert=120,
+                    rat=0.8
+                }
+               |m
                 {
-                    bnd=
-                    (
-                        d{pass=40,dif=1,rem=1}
-                      |
-                    )
-                    f{move=80,pass=-1,bal=0.002491},
-                    org=f{move=80,pass=-1,bal=0.002491},
-                    width=3
-                },
-                low=h{pass=10}
-                f{move=80,pass=-1,bal=0.002491},
-                type=h,
-                vert=80,
-                rat=0.8
-            }
-        )
+                    asc=b
+                    {
+                        bnd=f{move=120,pass=-1,bal=0.01,type=b},
+                        org=f{move=120,pass=-1,bal=0.01,type=b},
+                        width=3
+                    },
+                    low=h{pass=10}
+                    f{move=120,pass=-1,bal=0.01,type=b},
+                    vert=120,
+                    rat=0.8
+                }
+            )
+        },
+        vert=10000,
+        rat=0.8,
+        type=0
     }
 
 

@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -118,6 +118,42 @@ Foam::scalar Foam::meshToMeshMethod::interVol
     );
 
     return vol;
+}
+
+
+Foam::Tuple2<Foam::scalar, Foam::point>
+Foam::meshToMeshMethod::interVolAndCentroid
+(
+    const label srcCellI,
+    const label tgtCellI
+)
+{
+    tetOverlapVolume overlapEngine;
+
+    treeBoundBox bbTgtCell(tgt_.points(), tgt_.cellPoints()[tgtCellI]);
+
+    Tuple2<scalar, point> volAndInertia =
+    overlapEngine.cellCellOverlapMomentMinDecomp
+    (
+        src_,
+        srcCellI,
+        tgt_,
+        tgtCellI,
+        bbTgtCell
+    );
+
+    // Convert from inertia to centroid
+    if (volAndInertia.first() <= ROOTVSMALL)
+    {
+        volAndInertia.first() = 0.0;
+        volAndInertia.second() = vector::zero;
+    }
+    else
+    {
+        volAndInertia.second() /= volAndInertia.first();
+    }
+
+    return volAndInertia;
 }
 
 

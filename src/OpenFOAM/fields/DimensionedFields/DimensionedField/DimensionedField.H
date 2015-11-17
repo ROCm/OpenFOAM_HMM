@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -146,6 +146,15 @@ public:
         (
             const IOobject&,
             const Mesh& mesh,
+            const word& fieldDictEntry="value"
+        );
+
+        //- Construct from dictionary
+        DimensionedField
+        (
+            const IOobject&,
+            const Mesh& mesh,
+            const dictionary& fieldDict,
             const word& fieldDictEntry="value"
         );
 

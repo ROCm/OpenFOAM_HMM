@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -221,7 +221,7 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::resetTree()
     // Clear the old octree
     treePtr_.clear();
 
-    treeBoundBox bb(tgtPatch_.points());
+    treeBoundBox bb(tgtPatch_.points(), tgtPatch_.meshPoints());
     bb.inflate(0.01);
 
     if (!treePtr_.valid())

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,7 +37,7 @@ if ((gf1).mesh() != (gf2).mesh())                                   \
     FatalErrorIn("checkField(gf1, gf2, op)")                        \
         << "different mesh for fields "                             \
         << (gf1).name() << " and " << (gf2).name()                  \
-        << " during operatrion " <<  op                             \
+        << " during operation " <<  op                              \
         << abort(FatalError);                                       \
 }
 
@@ -319,7 +319,8 @@ template<class Type, template<class> class PatchField, class GeoMesh>
 Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 (
     const IOobject& io,
-    const Mesh& mesh
+    const Mesh& mesh,
+    const bool readOldTime
 )
 :
     DimensionedField<Type, GeoMesh>(io, mesh, dimless, false),
@@ -344,7 +345,10 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
             << exit(FatalIOError);
     }
 
-    readOldTimeIfPresent();
+    if (readOldTime)
+    {
+        readOldTimeIfPresent();
+    }
 
     if (debug)
     {
@@ -383,8 +387,6 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
             << " number of mesh elements = " << GeoMesh::size(this->mesh())
             << exit(FatalIOError);
     }
-
-    readOldTimeIfPresent();
 
     if (debug)
     {
@@ -600,7 +602,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     if (debug)
     {
         Info<< "GeometricField<Type, PatchField, GeoMesh>::GeometricField : "
-               "constructing as copy resetting IO params"
+               "constructing as copy resetting IO params and patch type"
             << endl << this->info() << endl;
     }
 

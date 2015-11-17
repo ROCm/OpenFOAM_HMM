@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,8 +61,8 @@ class domainDecomposition
         //- Optional: points at the facesInstance
         autoPtr<pointIOField> facesInstancePointsPtr_;
 
-        //- Mesh decomposition control dictionary
-        IOdictionary decompositionDict_;
+        //- Optional non-standard file for decomposeParDict
+        const fileName decompDictFile_;
 
         //- Number of processors in decomposition
         label nProcs_;
@@ -159,8 +159,13 @@ public:
 
     // Constructors
 
-        //- Construct from IOobject
-        domainDecomposition(const IOobject& io);
+        //- Construct from IOobjects (for mesh and optional non-standard
+        //  decomposeParDict location)
+        domainDecomposition
+        (
+            const IOobject& io,
+            const fileName& decompDictFile = ""
+        );
 
 
     //- Destructor

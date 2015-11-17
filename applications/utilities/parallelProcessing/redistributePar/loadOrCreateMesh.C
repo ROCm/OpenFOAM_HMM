@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,14 +27,15 @@ License
 #include "processorPolyPatch.H"
 #include "processorCyclicPolyPatch.H"
 #include "Time.H"
-#include "IOPtrList.H"
+//#include "IOPtrList.H"
+#include "polyBoundaryMeshEntries.H"
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTemplateTypeNameAndDebug(IOPtrList<entry>, 0);
-}
+//namespace Foam
+//{
+//    defineTemplateTypeNameAndDebug(IOPtrList<entry>, 0);
+//}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,6 +47,9 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
     const IOobject& io
 )
 {
+    // Region name
+    // ~~~~~~~~~~~
+
     fileName meshSubDir;
 
     if (io.name() == polyMesh::defaultRegion)
@@ -58,24 +62,52 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
     }
 
 
-    // Scatter master patches
+    // Patch types
+    // ~~~~~~~~~~~
+    // Read and scatter master patches (without reading master mesh!)
+
     PtrList<entry> patchEntries;
     if (Pstream::master())
     {
-        // Read PtrList of dictionary as dictionary.
-        const word oldTypeName = IOPtrList<entry>::typeName;
-        const_cast<word&>(IOPtrList<entry>::typeName) = word::null;
-        IOPtrList<entry> dictList
+        //// Read PtrList of dictionary as dictionary.
+        //const word oldTypeName = IOPtrList<entry>::typeName;
+        //const_cast<word&>(IOPtrList<entry>::typeName) = word::null;
+        //IOPtrList<entry> dictList
+        //(
+        //    IOobject
+        //    (
+        //        "boundary",
+        //        io.time().findInstance
+        //        (
+        //            meshSubDir,
+        //            "boundary",
+        //            IOobject::MUST_READ
+        //        ),
+        //        meshSubDir,
+        //        io.db(),
+        //        IOobject::MUST_READ,
+        //        IOobject::NO_WRITE,
+        //        false
+        //    )
+        //);
+        //const_cast<word&>(IOPtrList<entry>::typeName) = oldTypeName;
+        //// Fake type back to what was in field
+        //const_cast<word&>(dictList.type()) = dictList.headerClassName();
+        //
+        //patchEntries.transfer(dictList);
+        const fileName facesInstance = io.time().findInstance
+        (
+            meshSubDir,
+            "faces",
+            IOobject::MUST_READ
+        );
+
+        patchEntries = polyBoundaryMeshEntries
         (
             IOobject
             (
                 "boundary",
-                io.time().findInstance
-                (
-                    meshSubDir,
-                    "boundary",
-                    IOobject::MUST_READ
-                ),
+                facesInstance,
                 meshSubDir,
                 io.db(),
                 IOobject::MUST_READ,
@@ -83,11 +115,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
                 false
             )
         );
-        const_cast<word&>(IOPtrList<entry>::typeName) = oldTypeName;
-        // Fake type back to what was in field
-        const_cast<word&>(dictList.type()) = dictList.headerClassName();
-
-        patchEntries.transfer(dictList);
 
         // Send patches
         for
@@ -110,8 +137,16 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
 
 
 
+    // Dummy meshes
+    // ~~~~~~~~~~~~
+
     // Check who has a mesh
-    const bool haveMesh = isDir(io.time().path()/io.instance()/meshSubDir);
+    //const bool haveMesh = isDir(io.time().path()/io.instance()/meshSubDir);
+    const bool haveMesh = isFile
+    (
+        io.time().path()/io.instance()/meshSubDir/"faces"
+    );
+
 
     if (!haveMesh)
     {
@@ -164,6 +199,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
         patches.setSize(nPatches);
         dummyMesh.addFvPatches(patches, false);  // no parallel comms
 
+
         // Add some dummy zones so upon reading it does not read them
         // from the undecomposed case. Should be done as extra argument to
         // regIOobject::readStream?
@@ -202,6 +238,9 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
             )
         );
         dummyMesh.addZones(pz, fz, cz);
+        dummyMesh.pointZones().clear();
+        dummyMesh.faceZones().clear();
+        dummyMesh.cellZones().clear();
         //Pout<< "Writing dummy mesh to " << dummyMesh.polyMesh::objectPath()
         //    << endl;
         dummyMesh.write();
@@ -209,9 +248,17 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
         Pstream::parRun() = oldParRun;
     }
 
+
+
+    // Read mesh
+    // ~~~~~~~~~
+    // Now all processors have a (possibly zero size) mesh so read in
+    // parallel
+
     //Pout<< "Reading mesh from " << io.objectPath() << endl;
     autoPtr<fvMesh> meshPtr(new fvMesh(io));
     fvMesh& mesh = meshPtr();
+
 
 
     // Sync patches
@@ -327,17 +374,17 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
     }
 
 
-    if (!haveMesh)
-    {
-        // We created a dummy mesh file above. Delete it.
-        const fileName meshFiles = io.time().path()/io.instance()/meshSubDir;
-        //Pout<< "Removing dummy mesh " << meshFiles << endl;
-        mesh.removeFiles();
-        rmDir(meshFiles);
-    }
-
+//    if (!haveMesh)
+//    {
+//        // We created a dummy mesh file above. Delete it.
+//        const fileName meshFiles = io.time().path()/io.instance()/meshSubDir;
+//        //Pout<< "Removing dummy mesh " << meshFiles << endl;
+//        mesh.removeFiles();
+//        rmDir(meshFiles);
+//    }
+//
     // Force recreation of globalMeshData.
-    mesh.clearOut();
+//    mesh.clearOut();
     mesh.globalData();
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,7 +72,7 @@ Foam::IOmapDistribute::IOmapDistribute
 :
     regIOobject(io)
 {
-     // Temporary warning
+    // Temporary warning
     if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
     {
         WarningIn("IOmapDistribute::IOmapDistribute(const IOobject&)")
