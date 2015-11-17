@@ -2234,7 +2234,8 @@ Foam::hexRef8::hexRef8
             IOobject::AUTO_WRITE
         ),
         List<refinementHistory::splitCell8>(0),
-        labelList(0)
+        labelList(0),
+        false
     ),
     faceRemover_(mesh_, GREAT),     // merge boundary faces wherever possible
     savedPointLevel_(0),

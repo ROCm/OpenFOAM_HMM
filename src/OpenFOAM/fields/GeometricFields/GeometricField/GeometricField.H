@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -337,7 +337,8 @@ public:
         GeometricField
         (
             const IOobject&,
-            const Mesh&
+            const Mesh&,
+            const bool readOldTime = true
         );
 
         //- Construct from dictionary

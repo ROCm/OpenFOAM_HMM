@@ -1,0 +1,33 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+application=`getApplication`
+
+# create mesh
+runApplication blockMesh
+
+# copy 0.org to 0
+cp -r 0.org 0
+
+# create sets
+runApplication topoSet
+
+# create baffles and fields
+runApplication createBaffles -overwrite
+
+runApplication $application
+
+#- redistributePar to do decomposition
+runParallel redistributePar 3 -decompose -cellDist
+
+#- Continue running for a bit more
+runParallel -l log.reactingParcelFoam-par $application 3
+
+#- Reconstruct all times
+runParallel -l log.redistributePar-1 redistributePar 3 -reconstruct
+
+
+# ----------------------------------------------------------------- end-of-file

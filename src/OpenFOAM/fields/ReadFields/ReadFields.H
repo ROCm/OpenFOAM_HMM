@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ Description
 
 SourceFiles
     ReadFields.C
+    ReadFieldsTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -37,6 +38,7 @@ SourceFiles
 
 #include "PtrList.H"
 #include "wordList.H"
+#include "GeometricField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,11 +47,37 @@ namespace Foam
 
 class IOobjectList;
 
-//- Helper routine to read fields
+
+//- Get sorted names of fields of type. If syncPar and running in parallel
+//  check for identical names
+wordList fieldNames(const IOobjectList& objects, const bool syncPar);
+
+//- Helper routine to read Geometric fields
+template<class Type, template<class> class PatchField, class GeoMesh>
+wordList ReadFields
+(
+    const typename GeoMesh::Mesh& mesh,
+    const IOobjectList& objects,
+    PtrList<GeometricField<Type, PatchField, GeoMesh> >& fields,
+    const bool syncPar = true,
+    const bool readOldTime = false
+);
+
+//- Helper routine to read other mesh fields
 template<class GeoField, class Mesh>
 wordList ReadFields
 (
     const Mesh& mesh,
+    const IOobjectList& objects,
+    PtrList<GeoField>& fields,
+    const bool syncPar = true
+);
+
+//- Helper routine to read non-mesh fields (e.g. uniformDimensionedField like
+//  'g')
+template<class GeoField>
+wordList ReadFields
+(
     const IOobjectList& objects,
     PtrList<GeoField>& fields,
     const bool syncPar = true
@@ -82,7 +110,7 @@ static void ReadFields
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "ReadFields.C"
+#   include "ReadFieldsTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

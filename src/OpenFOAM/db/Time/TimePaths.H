@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,7 @@ class TimePaths
         bool processorCase_;
         const fileName rootPath_;
         fileName globalCaseName_;
-        const fileName case_;
+        fileName case_;
         const word system_;
         const word constant_;
 
@@ -107,6 +107,12 @@ public:
 
             //- Return case name
             const fileName& caseName() const
+            {
+                return case_;
+            }
+
+            //- Return case name
+            fileName& caseName()
             {
                 return case_;
             }

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,6 +44,8 @@ Description
 #include "cellSet.H"
 #include "faceSet.H"
 #include "pointSet.H"
+
+#include "hexRef8Data.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -865,6 +867,78 @@ int main(int argc, char *argv[])
                     pointSets[i].write();
                 }
             }
+
+
+            // Reconstruct refinement data
+            {
+                PtrList<hexRef8Data> procData(procMeshes.meshes().size());
+
+                forAll(procMeshes.meshes(), procI)
+                {
+                    const fvMesh& procMesh = procMeshes.meshes()[procI];
+
+                    procData.set
+                    (
+                        procI,
+                        new hexRef8Data
+                        (
+                            IOobject
+                            (
+                                "dummy",
+                                procMesh.time().timeName(),
+                                polyMesh::meshSubDir,
+                                procMesh,
+                                IOobject::READ_IF_PRESENT,
+                                IOobject::NO_WRITE,
+                                false
+                            )
+                        )
+                    );
+                }
+
+                // Combine individual parts
+
+                const PtrList<labelIOList>& cellAddr =
+                    procMeshes.cellProcAddressing();
+
+                UPtrList<const labelList> cellMaps(cellAddr.size());
+                forAll(cellAddr, i)
+                {
+                    cellMaps.set(i, &cellAddr[i]);
+                }
+
+                const PtrList<labelIOList>& pointAddr =
+                    procMeshes.pointProcAddressing();
+
+                UPtrList<const labelList> pointMaps(pointAddr.size());
+                forAll(pointAddr, i)
+                {
+                    pointMaps.set(i, &pointAddr[i]);
+                }
+
+                UPtrList<const hexRef8Data> procRefs(procData.size());
+                forAll(procData, i)
+                {
+                    procRefs.set(i, &procData[i]);
+                }
+
+                hexRef8Data
+                (
+                    IOobject
+                    (
+                        "dummy",
+                        mesh.time().timeName(),
+                        polyMesh::meshSubDir,
+                        mesh,
+                        IOobject::NO_READ,
+                        IOobject::NO_WRITE,
+                        false
+                    ),
+                    cellMaps,
+                    pointMaps,
+                    procRefs
+                ).write();
+            }
         }
     }
 
@@ -882,7 +956,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    Info<< "End.\n" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

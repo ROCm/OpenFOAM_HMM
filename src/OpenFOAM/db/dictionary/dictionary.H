@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -200,7 +200,7 @@ public:
         dictionary();
 
         //- Construct top-level empty dictionary with given name
-        dictionary(const fileName& name);
+        explicit dictionary(const fileName& name);
 
         //- Construct given the entry name, parent dictionary and Istream,
         //  reading entries until lastEntry or EOF

@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,7 @@ Description
     cell centre and normal in direction of provided direction. Snaps cuts
     close to edge endpoints (close = snapTol * minEdgeLen) to vertices.
 
-    Currently determines cuts through edges (and edgeendpoints close to plane)
+    Currently determines cuts through edges (and edge endpoints close to plane)
     in random order and then sorts them acc. to angle. Could be converted to
     use walk but problem is that face can be cut multiple times (since does
     not need to be convex). Another problem is that edges parallel to plane

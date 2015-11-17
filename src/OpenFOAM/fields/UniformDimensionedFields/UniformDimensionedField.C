@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,7 +103,7 @@ bool Foam::UniformDimensionedField<Type>::writeData(Ostream& os) const
     os.writeKeyword("value") << this->value()/multiplier << token::END_STATEMENT
         << nl << nl;
 
-    return (os.good());
+    return os.good();
 }
 
 

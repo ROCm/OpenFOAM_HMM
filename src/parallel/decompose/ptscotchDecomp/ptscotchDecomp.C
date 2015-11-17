@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,45 +63,133 @@ License
     "b{sep=m{vert=100,low=h,asc=f}x}"
 
     The current default mapping strategy in Scotch can be seen by using the
-    "-vs" option of program gmap. It is, to date:
+    "-vs" option of program dgpart. It is, to date:
 
-    b
+    r
     {
-        job=t,
-        map=t,
-        poli=S,
-        sep=
-        (
-            m
+        sep=m
+        {
+            asc=b
             {
-                asc=b
-                {
-                    bnd=d{pass=40,dif=1,rem=1}f{move=80,pass=-1,bal=0.005},
-                    org=f{move=80,pass=-1,bal=0.005},
-                    width=3
-                },
-                low=h{pass=10}f{move=80,pass=-1,bal=0.0005},
-                type=h,
-                vert=80,
-                rat=0.8
-            }
-          | m
+                width=3,
+                bnd=(d{pass=40,dif=1,rem=0,type=b}|)
+                q{strat=f{move=80,pass=-1,bal=0.01,type=b}}
+                x{sbbt=5,bal=0.05},
+                org=q{strat=f{move=80,pass=-1,bal=0.01,type=b}}
+                x{sbbt=5,bal=0.05}
+            },
+            low=q
             {
-                asc=b
+                strat=
+                (
+                    m
+                    {
+                        asc=b
+                        {
+                            bnd=(d{pass=40,type=b}|)
+                            f{move=80,pass=-1,bal=0.05,type=b},
+                            org=f{move=80,pass=-1,bal=0.05,type=b},
+                            width=3
+                        },
+                        low=h{pass=10}
+                        f{move=80,pass=-1,bal=0.05,type=b},
+                        vert=80,
+                        rat=0.8
+                    }
+                   |m
+                    {
+                        asc=b
+                        {
+                            bnd=(d{pass=40,type=b}|)
+                            f{move=80,pass=-1,bal=0.05,type=b},
+                            org=f{move=80,pass=-1,bal=0.05,type=b},
+                            width=3
+                        },
+                        low=h{pass=10}
+                        f{move=80,pass=-1,bal=0.05,type=b},
+                        vert=80,
+                        rat=0.8
+                    }
+                )
+            },
+            seq=q
+            {
+                strat=
+                (
+                    m
+                    {
+                        asc=b
+                        {
+                            bnd=(d{pass=40,type=b}|)
+                            f{move=80,pass=-1,bal=0.05,type=b},
+                            org=f{move=80,pass=-1,bal=0.05,type=b},
+                            width=3
+                        },
+                        low=h{pass=10}
+                        f{move=80,pass=-1,bal=0.05,type=b},
+                        vert=80,
+                        rat=0.8
+                    }
+                   |m
+                    {
+                        asc=b
+                        {
+                            bnd=(d{pass=40,type=b}|)
+                            f{move=80,pass=-1,bal=0.05,type=b},
+                            org=f{move=80,pass=-1,bal=0.05,type=b},
+                            width=3
+                        },
+                        low=h{pass=10}
+                        f{move=80,pass=-1,bal=0.05,type=b},
+                        vert=80,
+                        rat=0.8
+                    }
+                )
+            },
+            pass=5,
+            vert=10000,
+            rat=0.8
+        },
+        seq=r
+        {
+            job=t,
+            bal=0.05,
+            map=t,
+            poli=S,
+            sep=
+            (
+                m
                 {
-                    bnd=d{pass=40,dif=1,rem=1}f{move=80,pass=-1,bal=0.005},
-                    org=f{move=80,pass=-1,bal=0.005},
-                    width=3
-                },
-                low=h{pass=10}f{move=80,pass=-1,bal=0.0005},
-                type=h,
-                vert=80,
-                rat=0.8
-            }
-        )
+                    asc=b
+                    {
+                        bnd=(d{pass=40,type=b}|)
+                        f{move=80,pass=-1,bal=0.05,type=b},
+                        org=f{move=80,pass=-1,bal=0.05,type=b},
+                        width=3
+                    },
+                    low=h{pass=10}
+                    f{move=80,pass=-1,bal=0.05,type=b},
+                    vert=80,
+                    rat=0.8
+                }
+               |m
+                {
+                    asc=b
+                    {
+                        bnd=(d{pass=40,type=b}|)
+                        f{move=80,pass=-1,bal=0.05,type=b},
+                        org=f{move=80,pass=-1,bal=0.05,type=b},
+                        width=3
+                    },
+                    low=h{pass=10}
+                    f{move=80,pass=-1,bal=0.05,type=b},
+                    vert=80,
+                    rat=0.8
+                }
+            )
+        },
+        bal=0.05
     }
-
-
 
     Note: writeGraph=true : writes out .dgr files for debugging. Run with e.g.
 

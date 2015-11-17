@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,6 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "fvMeshTools.H"
+#include "processorCyclicPolyPatch.H"
+#include "polyBoundaryMeshEntries.H"
 #include "fvMeshTools.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -349,6 +352,266 @@ void Foam::fvMeshTools::reorderPatches
 
     // Remove last.
     trimPatches(mesh, nNewPatches);
+}
+
+
+Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
+(
+    const IOobject& io,
+    const bool masterOnlyReading
+)
+{
+    // Region name
+    // ~~~~~~~~~~~
+
+    fileName meshSubDir;
+
+    if (io.name() == polyMesh::defaultRegion)
+    {
+        meshSubDir = polyMesh::meshSubDir;
+    }
+    else
+    {
+        meshSubDir = io.name()/polyMesh::meshSubDir;
+    }
+
+
+    fileName facesInstance;
+
+    // Patch types
+    // ~~~~~~~~~~~
+    // Read and scatter master patches (without reading master mesh!)
+
+    PtrList<entry> patchEntries;
+    if (Pstream::master())
+    {
+        facesInstance = io.time().findInstance
+        (
+            meshSubDir,
+            "faces",
+            IOobject::MUST_READ
+        );
+
+        patchEntries = polyBoundaryMeshEntries
+        (
+            IOobject
+            (
+                "boundary",
+                facesInstance,
+                meshSubDir,
+                io.db(),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
+            )
+        );
+
+        // Send patches
+        for
+        (
+            int slave=Pstream::firstSlave();
+            slave<=Pstream::lastSlave();
+            slave++
+        )
+        {
+            OPstream toSlave(Pstream::scheduled, slave);
+            toSlave << patchEntries;
+        }
+    }
+    else
+    {
+        // Receive patches
+        IPstream fromMaster(Pstream::scheduled, Pstream::masterNo());
+        fromMaster >> patchEntries;
+    }
+
+
+    Pstream::scatter(facesInstance);
+
+    // Dummy meshes
+    // ~~~~~~~~~~~~
+
+    // Check who has a mesh
+    const fileName meshDir = io.time().path()/facesInstance/meshSubDir;
+    bool haveMesh = isDir(meshDir);
+    if (masterOnlyReading && !Pstream::master())
+    {
+        haveMesh = false;
+    }
+
+
+    // Set up to read-if-present. Note: does not search for mesh so set
+    // instance explicitly
+    IOobject meshIO(io);
+    meshIO.instance() = facesInstance;
+    if (masterOnlyReading && !Pstream::master())
+    {
+        meshIO.readOpt() = IOobject::NO_READ;
+    }
+    else
+    {
+        meshIO.readOpt() = IOobject::READ_IF_PRESENT;
+    }
+
+
+    // Read mesh
+    // ~~~~~~~~~
+    // Now all processors read a mesh and use supplied points,faces etc
+    // if there is none.
+    // Note: fvSolution, fvSchemes are also using the supplied Ioobject so
+    //       on slave will be NO_READ, on master READ_IF_PRESENT. This will
+    //       conflict with e.g. timeStampMaster reading so switch off.
+
+    const regIOobject::fileCheckTypes oldCheckType =
+        regIOobject::fileModificationChecking;
+    regIOobject::fileModificationChecking = regIOobject::timeStamp;
+
+    autoPtr<fvMesh> meshPtr
+    (
+        new fvMesh
+        (
+            meshIO,
+            xferCopy(pointField()),
+            xferCopy(faceList()),
+            xferCopy(labelList()),
+            xferCopy(labelList())
+        )
+    );
+    fvMesh& mesh = meshPtr();
+
+    regIOobject::fileModificationChecking = oldCheckType;
+
+
+
+    // Add patches
+    // ~~~~~~~~~~~
+
+
+    bool havePatches = mesh.boundary().size();
+    reduce(havePatches, andOp<bool>());
+
+    if (!havePatches)
+    {
+        // There are one or more processors without full complement of
+        // patches
+
+        DynamicList<polyPatch*> newPatches;
+
+        if (haveMesh)   //Pstream::master())
+        {
+            forAll(mesh.boundary(), patchI)
+            {
+                newPatches.append
+                (
+                    mesh.boundaryMesh()[patchI].clone(mesh.boundaryMesh()).ptr()
+                );
+            }
+        }
+        else
+        {
+            forAll(patchEntries, patchI)
+            {
+                const entry& e = patchEntries[patchI];
+                const word type(e.dict().lookup("type"));
+
+                if
+                (
+                    type == processorPolyPatch::typeName
+                 || type == processorCyclicPolyPatch::typeName
+                )
+                {}
+                else
+                {
+                    dictionary patchDict(e.dict());
+                    patchDict.set("nFaces", 0);
+                    patchDict.set("startFace", 0);
+
+                    newPatches.append
+                    (
+                        polyPatch::New
+                        (
+                            patchEntries[patchI].keyword(),
+                            patchDict,
+                            newPatches.size(),
+                            mesh.boundaryMesh()
+                        ).ptr()
+                    );
+                }
+            }
+        }
+        mesh.removeFvBoundary();
+        mesh.addFvPatches(newPatches);
+    }
+
+    //Pout<< "patches:" << endl;
+    //forAll(mesh.boundary(), patchI)
+    //{
+    //    Pout<< "    type" << mesh.boundary()[patchI].type()
+    //        << " size:" << mesh.boundary()[patchI].size()
+    //        << " start:" << mesh.boundary()[patchI].start() << endl;
+    //}
+    //Pout<< endl;
+
+
+    // Determine zones
+    // ~~~~~~~~~~~~~~~
+
+    wordList pointZoneNames(mesh.pointZones().names());
+    Pstream::scatter(pointZoneNames);
+    wordList faceZoneNames(mesh.faceZones().names());
+    Pstream::scatter(faceZoneNames);
+    wordList cellZoneNames(mesh.cellZones().names());
+    Pstream::scatter(cellZoneNames);
+
+    if (!haveMesh)
+    {
+        // Add the zones. Make sure to remove the old dummy ones first
+        mesh.pointZones().clear();
+        mesh.faceZones().clear();
+        mesh.cellZones().clear();
+
+        List<pointZone*> pz(pointZoneNames.size());
+        forAll(pointZoneNames, i)
+        {
+            pz[i] = new pointZone
+            (
+                pointZoneNames[i],
+                labelList(0),
+                i,
+                mesh.pointZones()
+            );
+        }
+        List<faceZone*> fz(faceZoneNames.size());
+        forAll(faceZoneNames, i)
+        {
+            fz[i] = new faceZone
+            (
+                faceZoneNames[i],
+                labelList(0),
+                boolList(0),
+                i,
+                mesh.faceZones()
+            );
+        }
+        List<cellZone*> cz(cellZoneNames.size());
+        forAll(cellZoneNames, i)
+        {
+            cz[i] = new cellZone
+            (
+                cellZoneNames[i],
+                labelList(0),
+                i,
+                mesh.cellZones()
+            );
+        }
+
+        if (pz.size() && fz.size() && cz.size())
+        {
+            mesh.addZones(pz, fz, cz);
+        }
+    }
+
+    return meshPtr;
 }
 
 

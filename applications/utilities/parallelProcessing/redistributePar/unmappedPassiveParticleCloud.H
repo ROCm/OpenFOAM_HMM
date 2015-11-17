@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,17 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::weightedFvPatchFieldMapper
+    Foam::unmappedPassiveParticleCloud
 
 Description
-    FieldMapper with weighted mapping.
+    passiveParticleCloud but with autoMap and writing disabled. Only used
+    for its objectRegistry to store lagrangian fields
+
+SourceFiles
+    unmappedPassiveParticleCloud.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef weightedFvPatchFieldMapper_H
-#define weightedFvPatchFieldMapper_H
+#ifndef unmappedPassiveParticleCloud_H
+#define unmappedPassiveParticleCloud_H
 
-#include "fvPatchFieldMapper.H"
+#include "passiveParticleCloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -40,76 +44,62 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class weightedFvPatchFieldMapper Declaration
+                Class unmappedPassiveParticleCloud Declaration
 \*---------------------------------------------------------------------------*/
 
-class weightedFvPatchFieldMapper
+class unmappedPassiveParticleCloud
 :
-    public fvPatchFieldMapper
+    public passiveParticleCloud
 {
-    const labelListList& addressing_;
-
-    const scalarListList& weights_;
-
-    bool hasUnmapped_;
 
 public:
 
     // Constructors
 
-        //- Construct given addressing
-        weightedFvPatchFieldMapper
+        //- Construct given mesh
+        unmappedPassiveParticleCloud
         (
-            const labelListList& addressing,
-            const scalarListList& weights
+            const polyMesh& mesh,
+            const word& cloudName = "defaultCloud",
+            bool readFields = true
         )
         :
-            addressing_(addressing),
-            weights_(weights),
-            hasUnmapped_(false)
+            passiveParticleCloud(mesh, cloudName, readFields)
+        {}
+
+        //- Construct from mesh, cloud name, and a list of particles
+        unmappedPassiveParticleCloud
+        (
+            const polyMesh& mesh,
+            const word& cloudName,
+            const IDLList<passiveParticle>& particles
+        )
+        :
+            passiveParticleCloud(mesh, cloudName, particles)
+        {}
+
+        //- Destructor
+        virtual ~unmappedPassiveParticleCloud()
+        {}
+
+        //- Switch off remapping of cells of particles when
+        //  mesh topology changes
+        virtual void autoMap(const mapPolyMesh&)
+        {}
+
+        //- Switch off writing the objects
+        virtual bool writeObject
+        (
+            IOstream::streamFormat fmt,
+            IOstream::versionNumber ver,
+            IOstream::compressionType cmp
+        ) const
         {
-            forAll(addressing_, i)
-            {
-                if (addressing_[i].size() == 0)
-                {
-                    hasUnmapped_ = true;
-                }
-            }
-        }
-
-    //- Destructor
-    virtual ~weightedFvPatchFieldMapper()
-    {}
-
-
-    // Member Functions
-
-        virtual label size() const
-        {
-            return addressing().size();
-        }
-
-        virtual bool direct() const
-        {
-            return false;
-        }
-
-        virtual bool hasUnmapped() const
-        {
-            return hasUnmapped_;
-        }
-
-        virtual const labelListList& addressing() const
-        {
-            return addressing_;
-        }
-
-        virtual const scalarListList& weights() const
-        {
-            return weights_;
+            return true;
         }
 
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -154,6 +154,66 @@ void volPointInterpolation::interpolateInternalField
             {
                 pf[pointi] += pw[pointCelli]*vf[ppc[pointCelli]];
             }
+        }
+    }
+}
+
+
+template<class Type>
+void volPointInterpolation::interpolateDimensionedInternalField
+(
+    const DimensionedField<Type, volMesh>& vf,
+    DimensionedField<Type, pointMesh>& pf
+) const
+{
+    if (debug)
+    {
+        Pout<< "volPointInterpolation::interpolateDimensionedInternalField("
+            << "const DimensionedField<Type, volMesh>&, "
+            << "DimensionedField<Type, pointMesh>&) : "
+            << "interpolating field from cells to points"
+            << endl;
+    }
+
+    const fvMesh& mesh = vf.mesh();
+
+    const labelListList& pointCells = mesh.pointCells();
+    const pointField& points = mesh.points();
+    const vectorField& cellCentres = mesh.cellCentres();
+
+    // Re-do weights and interpolation since normal interpolation
+    // pointWeights_ are for non-boundary points only. Not efficient but
+    // then saves on space.
+
+    // Multiply volField by weighting factor matrix to create pointField
+    scalarField sumW(points.size(), 0.0);
+    forAll(pointCells, pointi)
+    {
+        const labelList& ppc = pointCells[pointi];
+
+        pf[pointi] = pTraits<Type>::zero;
+
+        forAll(ppc, pointCelli)
+        {
+            label celli = ppc[pointCelli];
+            scalar pw = 1.0/mag(points[pointi] - cellCentres[celli]);
+
+            pf[pointi] += pw*vf[celli];
+            sumW[pointi] += pw;
+        }
+    }
+
+    // Sum collocated contributions
+    pointConstraints::syncUntransformedData(mesh, sumW, plusEqOp<scalar>());
+    pointConstraints::syncUntransformedData(mesh, pf, plusEqOp<Type>());
+
+    // Normalise
+    forAll(pf, pointi)
+    {
+        scalar s = sumW[pointi];
+        if (s > ROOTVSMALL)
+        {
+            pf[pointi] /= s;
         }
     }
 }
@@ -424,24 +484,13 @@ volPointInterpolation::interpolate
             if (pf.upToDate(vf))    //TBD: , vf.mesh().points()))
             {
                 solution::cachePrintMessage("Reusing", name, vf);
-                return pf;
             }
             else
             {
-                solution::cachePrintMessage("Deleting", name, vf);
-                pf.release();
-                delete &pf;
-
-                solution::cachePrintMessage("Recalculating", name, vf);
-                tmp<PointFieldType> tpf = interpolate(vf, name, false);
-
-                solution::cachePrintMessage("Storing", name, vf);
-                PointFieldType* pfPtr = tpf.ptr();
-                regIOobject::store(pfPtr);
-
-                // Note: return reference, not pointer
-                return *pfPtr;
+                solution::cachePrintMessage("Updating", name, vf);
+                interpolate(vf, pf);
             }
+            return pf;
         }
     }
 }
@@ -468,6 +517,116 @@ volPointInterpolation::interpolate
     // Construct tmp<pointField>
     tmp<GeometricField<Type, pointPatchField, pointMesh> > tpf =
         interpolate(tvf());
+    tvf.clear();
+    return tpf;
+}
+
+
+template<class Type>
+tmp<DimensionedField<Type, pointMesh> >
+volPointInterpolation::interpolate
+(
+    const DimensionedField<Type, volMesh>& vf,
+    const word& name,
+    const bool cache
+) const
+{
+    typedef DimensionedField<Type, pointMesh> PointFieldType;
+
+    const pointMesh& pm = pointMesh::New(vf.mesh());
+    const objectRegistry& db = pm.thisDb();
+
+    if (!cache || vf.mesh().changing())
+    {
+        // Delete any old occurences to avoid double registration
+        if (db.objectRegistry::template foundObject<PointFieldType>(name))
+        {
+            PointFieldType& pf = const_cast<PointFieldType&>
+            (
+                db.objectRegistry::template lookupObject<PointFieldType>(name)
+            );
+
+            if (pf.ownedByRegistry())
+            {
+                solution::cachePrintMessage("Deleting", name, vf);
+                pf.release();
+                delete &pf;
+            }
+        }
+
+
+        tmp<DimensionedField<Type, pointMesh> > tpf
+        (
+            new DimensionedField<Type, pointMesh>
+            (
+                IOobject
+                (
+                    name,
+                    vf.instance(),
+                    pm.thisDb()
+                ),
+                pm,
+                vf.dimensions()
+            )
+        );
+
+        interpolateDimensionedInternalField(vf, tpf());
+
+        return tpf;
+    }
+    else
+    {
+        if (!db.objectRegistry::template foundObject<PointFieldType>(name))
+        {
+            solution::cachePrintMessage("Calculating and caching", name, vf);
+            tmp<PointFieldType> tpf = interpolate(vf, name, false);
+            PointFieldType* pfPtr = tpf.ptr();
+            regIOobject::store(pfPtr);
+            return *pfPtr;
+        }
+        else
+        {
+            PointFieldType& pf = const_cast<PointFieldType&>
+            (
+                db.objectRegistry::template lookupObject<PointFieldType>(name)
+            );
+
+            if (pf.upToDate(vf))    //TBD: , vf.mesh().points()))
+            {
+                solution::cachePrintMessage("Reusing", name, vf);
+            }
+            else
+            {
+                solution::cachePrintMessage("Updating", name, vf);
+                interpolateDimensionedInternalField(vf, pf);
+            }
+
+            return pf;
+        }
+    }
+}
+
+
+template<class Type>
+tmp<DimensionedField<Type, pointMesh> >
+volPointInterpolation::interpolate
+(
+    const DimensionedField<Type, volMesh>& vf
+) const
+{
+    return interpolate(vf, "volPointInterpolate(" + vf.name() + ')', false);
+}
+
+
+template<class Type>
+tmp<DimensionedField<Type, pointMesh> >
+volPointInterpolation::interpolate
+(
+    const tmp<DimensionedField<Type, volMesh> >& tvf
+) const
+{
+    // Construct tmp<pointField>
+    tmp<DimensionedField<Type, pointMesh> > tpf = interpolate(tvf());
     tvf.clear();
     return tpf;
 }

@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,11 +43,12 @@ SourceFiles
 #define meshToMesh_H
 
 #include "polyMesh.H"
-#include "boundBox.H"
+#include "treeBoundBox.H"
 #include "mapDistribute.H"
 #include "volFieldsFwd.H"
 #include "NamedEnum.H"
 #include "AMIPatchToPatchInterpolation.H"
+#include "pointList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -69,10 +70,11 @@ public:
         {
             imDirect,
             imMapNearest,
-            imCellVolumeWeight
+            imCellVolumeWeight,
+            imCorrectedCellVolumeWeight
         };
 
-        static const NamedEnum<interpolationMethod, 3>
+        static const NamedEnum<interpolationMethod, 4>
             interpolationMethodNames_;
 
 private:
@@ -109,6 +111,15 @@ private:
         //- Target to source cell interpolation weights
         scalarListList tgtToSrcCellWght_;
 
+        // Vectors from cell centre to overlap volume for 2nd order correction
+        // (only set for corrected methods)
+
+            //- Source to target cell offset vectors
+            pointListList srcToTgtCellVec_;
+
+            //- Target to source cell offset vectors
+            pointListList tgtToSrcCellVec_;
+
         //- Cell total volume in overlap region [m3]
         scalar V_;
 
@@ -128,6 +139,50 @@ private:
         //- Helper function to add a constant offset to a list
         template<class Type>
         void add(UList<Type>& fld, const label offset) const;
+
+        //- Helper function to interpolate internal field. Optionally uses
+        //  gradient. Template specialisations for tensor types below
+        template<class Type, class CombineOp>
+        void mapInternalSrcToTgt
+        (
+            const GeometricField<Type, fvPatchField, volMesh>& field,
+            const CombineOp& cop,
+            GeometricField<Type, fvPatchField, volMesh>& result,
+            const bool secondOrder
+        ) const;
+
+        //- Helper function to interpolate internal field. Optionally uses
+        //  gradient. Template specialisations for tensor types below
+        template<class Type, class CombineOp>
+        void mapInternalTgtToSrc
+        (
+            const GeometricField<Type, fvPatchField, volMesh>& field,
+            const CombineOp& cop,
+            GeometricField<Type, fvPatchField, volMesh>& result,
+            const bool secondOrder
+        ) const;
+
+        //- Helper function to interpolate patch field. Template
+        //  specialisations  below
+        template<class Type, class CombineOp>
+        void mapAndOpSrcToTgt
+        (
+            const AMIPatchToPatchInterpolation& AMI,
+            const Field<Type>& srcField,
+            Field<Type>& tgtField,
+            const CombineOp& cop
+        ) const;
+
+        //- Helper function to interpolate patch field. Template
+        //  specialisations  below
+        template<class Type, class CombineOp>
+        void mapAndOpTgtToSrc
+        (
+            const AMIPatchToPatchInterpolation& AMI,
+            Field<Type>& srcField,
+            const Field<Type>& tgtField,
+            const CombineOp& cop
+        ) const;
 
         //- Return src cell IDs for the overlap region
         labelList maskCells(const polyMesh& src, const polyMesh& tgt) const;
@@ -172,11 +227,6 @@ private:
             const wordList& cuttingPatches
         );
 
-        //- Return the list of AMIs between source and target patches
-        inline const PtrList<AMIPatchToPatchInterpolation>&
-        patchAMIs() const;
-
-
         // Parallel operations
 
             //- Determine whether the meshes are split across multiple pocessors
@@ -189,7 +239,7 @@ private:
             //- Determine which processor bounding-boxes overlap
             label calcOverlappingProcs
             (
-                const List<boundBox>& procBb,
+                const List<treeBoundBoxList>& procBb,
                 const boundBox& bb,
                 boolList& overlaps
             ) const;
@@ -312,6 +362,12 @@ public:
             //- Return const access to the target to source cell weights
             inline const scalarListList& tgtToSrcCellWght() const;
 
+            //- Return const access to the source to target offset vectors
+            inline const pointListList& srcToTgtCellVec() const;
+
+            //- Return const access to the target to source offset vectors
+            inline const pointListList& tgtToSrcCellVec() const;
+
             //- Return const access to the overlap volume
             inline scalar V() const;
 
@@ -322,12 +378,16 @@ public:
                 const interpolationMethod method
             );
 
+            //- Return the list of AMIs between source and target patches
+            inline const PtrList<AMIPatchToPatchInterpolation>&
+            patchAMIs() const;
+
 
         // Evaluation
 
             // Source-to-target field mapping
 
-                //- Map field from src to tgt mesh with defined operation
+                //- Map field from src to tgt mesh with defined operation.
                 //  Values passed in via 'result' are used to initialise the
                 //  return value
                 template<class Type, class CombineOp>
@@ -338,8 +398,23 @@ public:
                     List<Type>& result
                 ) const;
 
+                //- Map extrapolated field (using gradient) from src to tgt
+                //  mesh with defined operation. Falls back to non-extrapolated
+                //  mapping (above) if not constructed with method that supports
+                //  getting offset vectors. Extrapolation only for internal
+                //  values. Values passed in via 'result' are used to
+                //  initialise the return value.
+                template<class Type, class CombineOp>
+                void mapSrcToTgt
+                (
+                    const UList<Type>& srcField,
+                    const UList<typename outerProduct<vector, Type>::type>&,
+                    const CombineOp& cop,
+                    List<Type>& result
+                ) const;
+
                 //- Return the src field mapped to the tgt mesh with a defined
-                //  operation.  Initial values of the result are set to zero
+                //  operation. Initial values of the result are set to zero
                 template<class Type, class CombineOp>
                 tmp<Field<Type> > mapSrcToTgt
                 (
@@ -386,8 +461,23 @@ public:
                     List<Type>& result
                 ) const;
 
+                //- Map extrapolated field (using gradient) from tgt to src
+                //  mesh with defined operation. Falls back to non-extrapolated
+                //  mapping (above) if not constructed with method that supports
+                //  getting offset vectors. Extrapolation only for internal
+                //  values. Values passed in via 'result' are used to
+                //  initialise the return value
+                template<class Type, class CombineOp>
+                void mapTgtToSrc
+                (
+                    const UList<Type>& srcField,
+                    const UList<typename outerProduct<vector, Type>::type>&,
+                    const CombineOp& cop,
+                    List<Type>& result
+                ) const;
+
                 //- Return the tgt field mapped to the src mesh with a defined
-                //  operation.  Initial values of the result are set to zero
+                //  operation. Initial values of the result are set to zero
                 template<class Type, class CombineOp>
                 tmp<Field<Type> > mapTgtToSrc
                 (
@@ -425,13 +515,15 @@ public:
 
                 //- Interpolate a field with a defined operation.  Values
                 //  passed in via 'result' are used to initialise the return
-                //  value
+                //  value. Optionallly uses gradient correction (internal
+                //  field only) if interpolationMethod supports it
                 template<class Type, class CombineOp>
                 void mapSrcToTgt
                 (
                     const GeometricField<Type, fvPatchField, volMesh>& field,
                     const CombineOp& cop,
-                    GeometricField<Type, fvPatchField, volMesh>& result
+                    GeometricField<Type, fvPatchField, volMesh>& result,
+                    const bool secondOrder = true
                 ) const;
 
                 //- Interpolate a field with a defined operation.  The initial
@@ -440,7 +532,8 @@ public:
                 tmp<GeometricField<Type, fvPatchField, volMesh> > mapSrcToTgt
                 (
                     const GeometricField<Type, fvPatchField, volMesh>& field,
-                    const CombineOp& cop
+                    const CombineOp& cop,
+                    const bool secondOrder = true
                 ) const;
 
                 //- Interpolate a tmp field with a defined operation.  The
@@ -450,7 +543,8 @@ public:
                 (
                     const tmp<GeometricField<Type, fvPatchField, volMesh> >&
                         tfield,
-                    const CombineOp& cop
+                    const CombineOp& cop,
+                    const bool secondOrder = true
                 ) const;
 
                 //- Convenience function to map a field with a default
@@ -458,7 +552,8 @@ public:
                 template<class Type>
                 tmp<GeometricField<Type, fvPatchField, volMesh> > mapSrcToTgt
                 (
-                    const GeometricField<Type, fvPatchField, volMesh>& field
+                    const GeometricField<Type, fvPatchField, volMesh>& field,
+                    const bool secondOrder = true
                 ) const;
 
                 //- Convenience function to map a tmp field with a default
@@ -467,7 +562,8 @@ public:
                 tmp<GeometricField<Type, fvPatchField, volMesh> > mapSrcToTgt
                 (
                     const tmp<GeometricField<Type, fvPatchField, volMesh> >&
-                        tfield
+                        tfield,
+                    const bool secondOrder = true
                 ) const;
 
 
@@ -475,13 +571,15 @@ public:
 
                 //- Interpolate a field with a defined operation.  Values
                 //  passed in via 'result' are used to initialise the return
-                //  value
+                //  value. Optionallly uses gradient correction (internal
+                //  field only) if interpolationMethod supports it
                 template<class Type, class CombineOp>
                 void mapTgtToSrc
                 (
                     const GeometricField<Type, fvPatchField, volMesh>& field,
                     const CombineOp& cop,
-                    GeometricField<Type, fvPatchField, volMesh>& result
+                    GeometricField<Type, fvPatchField, volMesh>& result,
+                    const bool secondOrder = true
                 ) const;
 
                 //- Interpolate a field with a defined operation.  The initial
@@ -490,7 +588,8 @@ public:
                 tmp<GeometricField<Type, fvPatchField, volMesh> > mapTgtToSrc
                 (
                     const GeometricField<Type, fvPatchField, volMesh>& field,
-                    const CombineOp& cop
+                    const CombineOp& cop,
+                    const bool secondOrder = true
                 ) const;
 
                 //- Interpolate a tmp field with a defined operation.  The
@@ -500,7 +599,8 @@ public:
                 (
                     const tmp<GeometricField<Type, fvPatchField, volMesh> >&
                         tfield,
-                    const CombineOp& cop
+                    const CombineOp& cop,
+                    const bool secondOrder = true
                 ) const;
 
                 //- Convenience function to map a field with a default
@@ -508,7 +608,8 @@ public:
                 template<class Type>
                 tmp<GeometricField<Type, fvPatchField, volMesh> > mapTgtToSrc
                 (
-                    const GeometricField<Type, fvPatchField, volMesh>& field
+                    const GeometricField<Type, fvPatchField, volMesh>& field,
+                    const bool secondOrder = true
                 ) const;
 
                 //- Convenience function to map a tmp field with a default
@@ -517,12 +618,199 @@ public:
                 tmp<GeometricField<Type, fvPatchField, volMesh> > mapTgtToSrc
                 (
                     const tmp<GeometricField<Type, fvPatchField, volMesh> >&
-                        tfield
+                        tfield,
+                    const bool secondOrder = true
                 ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Disable gradient 2nd order correction for tensor types
+
+template<>
+void meshToMesh::mapInternalSrcToTgt
+(
+    const GeometricField<sphericalTensor, fvPatchField, volMesh>&,
+    const plusEqOp<sphericalTensor>&,
+    GeometricField<sphericalTensor, fvPatchField, volMesh>&,
+    const bool
+) const;
+template<>
+void meshToMesh::mapInternalSrcToTgt
+(
+    const GeometricField<sphericalTensor, fvPatchField, volMesh>&,
+    const minusEqOp<sphericalTensor>&,
+    GeometricField<sphericalTensor, fvPatchField, volMesh>&,
+    const bool
+) const;
+template<>
+void meshToMesh::mapInternalSrcToTgt
+(
+    const GeometricField<symmTensor, fvPatchField, volMesh>&,
+    const plusEqOp<symmTensor>&,
+    GeometricField<symmTensor, fvPatchField, volMesh>&,
+    const bool
+) const;
+template<>
+void meshToMesh::mapInternalSrcToTgt
+(
+    const GeometricField<symmTensor, fvPatchField, volMesh>&,
+    const minusEqOp<symmTensor>&,
+    GeometricField<symmTensor, fvPatchField, volMesh>&,
+    const bool
+) const;
+template<>
+void meshToMesh::mapInternalSrcToTgt
+(
+    const GeometricField<tensor, fvPatchField, volMesh>&,
+    const plusEqOp<tensor>&,
+    GeometricField<tensor, fvPatchField, volMesh>&,
+    const bool
+) const;
+template<>
+void meshToMesh::mapInternalSrcToTgt
+(
+    const GeometricField<tensor, fvPatchField, volMesh>&,
+    const minusEqOp<tensor>&,
+    GeometricField<tensor, fvPatchField, volMesh>&,
+    const bool
+) const;
+template<>
+void meshToMesh::mapInternalTgtToSrc
+(
+    const GeometricField<sphericalTensor, fvPatchField, volMesh>&,
+    const plusEqOp<sphericalTensor>&,
+    GeometricField<sphericalTensor, fvPatchField, volMesh>&,
+    const bool
+) const;
+template<>
+void meshToMesh::mapInternalTgtToSrc
+(
+    const GeometricField<sphericalTensor, fvPatchField, volMesh>&,
+    const minusEqOp<sphericalTensor>&,
+    GeometricField<sphericalTensor, fvPatchField, volMesh>&,
+    const bool
+) const;
+template<>
+void meshToMesh::mapInternalTgtToSrc
+(
+    const GeometricField<symmTensor, fvPatchField, volMesh>&,
+    const plusEqOp<symmTensor>&,
+    GeometricField<symmTensor, fvPatchField, volMesh>&,
+    const bool
+) const;
+template<>
+void meshToMesh::mapInternalTgtToSrc
+(
+    const GeometricField<symmTensor, fvPatchField, volMesh>&,
+    const minusEqOp<symmTensor>&,
+    GeometricField<symmTensor, fvPatchField, volMesh>&,
+    const bool
+) const;
+template<>
+void meshToMesh::mapInternalTgtToSrc
+(
+    const GeometricField<tensor, fvPatchField, volMesh>&,
+    const plusEqOp<tensor>&,
+    GeometricField<tensor, fvPatchField, volMesh>&,
+    const bool
+) const;
+template<>
+void meshToMesh::mapInternalTgtToSrc
+(
+    const GeometricField<tensor, fvPatchField, volMesh>&,
+    const minusEqOp<tensor>&,
+    GeometricField<tensor, fvPatchField, volMesh>&,
+    const bool
+) const;
+
+
+// Disable fvPatchField value override after rmap
+
+template<>
+void meshToMesh::mapAndOpSrcToTgt
+(
+    const AMIPatchToPatchInterpolation& AMI,
+    const Field<scalar>& srcField,
+    Field<scalar>& tgtField,
+    const plusEqOp<scalar>& cop
+) const;
+template<>
+void meshToMesh::mapAndOpSrcToTgt
+(
+    const AMIPatchToPatchInterpolation& AMI,
+    const Field<vector>& srcField,
+    Field<vector>& tgtField,
+    const plusEqOp<vector>& cop
+) const;
+template<>
+void meshToMesh::mapAndOpSrcToTgt
+(
+    const AMIPatchToPatchInterpolation& AMI,
+    const Field<sphericalTensor>& srcField,
+    Field<sphericalTensor>& tgtField,
+    const plusEqOp<sphericalTensor>& cop
+) const;
+template<>
+void meshToMesh::mapAndOpSrcToTgt
+(
+    const AMIPatchToPatchInterpolation& AMI,
+    const Field<symmTensor>& srcField,
+    Field<symmTensor>& tgtField,
+    const plusEqOp<symmTensor>& cop
+) const;
+template<>
+void meshToMesh::mapAndOpSrcToTgt
+(
+    const AMIPatchToPatchInterpolation& AMI,
+    const Field<tensor>& srcField,
+    Field<tensor>& tgtField,
+    const plusEqOp<tensor>& cop
+) const;
+
+
+template<>
+void meshToMesh::mapAndOpTgtToSrc
+(
+    const AMIPatchToPatchInterpolation& AMI,
+    Field<scalar>& srcField,
+    const Field<scalar>& tgtField,
+    const plusEqOp<scalar>& cop
+) const;
+template<>
+void meshToMesh::mapAndOpTgtToSrc
+(
+    const AMIPatchToPatchInterpolation& AMI,
+    Field<vector>& srcField,
+    const Field<vector>& tgtField,
+    const plusEqOp<vector>& cop
+) const;
+template<>
+void meshToMesh::mapAndOpTgtToSrc
+(
+    const AMIPatchToPatchInterpolation& AMI,
+    Field<sphericalTensor>& srcField,
+    const Field<sphericalTensor>& tgtField,
+    const plusEqOp<sphericalTensor>& cop
+) const;
+template<>
+void meshToMesh::mapAndOpTgtToSrc
+(
+    const AMIPatchToPatchInterpolation& AMI,
+    Field<symmTensor>& srcField,
+    const Field<symmTensor>& tgtField,
+    const plusEqOp<symmTensor>& cop
+) const;
+template<>
+void meshToMesh::mapAndOpTgtToSrc
+(
+    const AMIPatchToPatchInterpolation& AMI,
+    Field<tensor>& srcField,
+    const Field<tensor>& tgtField,
+    const plusEqOp<tensor>& cop
+) const;
+
 
 } // End namespace Foam
 
