@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,6 +43,7 @@ SourceFiles
 #include "functionObject.H"
 #include "SHA1Digest.H"
 #include "HashTable.H"
+#include "IOdictionary.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -74,6 +75,9 @@ class functionObjectList
         //  functionObject specifications.
         const dictionary& parentDict_;
 
+        //- Function object properties - stores state information
+        mutable autoPtr<IOdictionary> stateDictPtr_;
+
         //- Switch for the execution of the functionObjects
         bool execution_;
 
@@ -82,6 +86,9 @@ class functionObjectList
 
 
     // Private Member Functions
+
+        //- Create state dictionary
+        void createStateDict() const;
 
         //- Remove and return the function object pointer by name,
         //  and returns the old index via the parameter.
@@ -135,6 +142,12 @@ public:
 
         //- Access to the functionObjects
         using PtrList<functionObject>::operator[];
+
+        //- Return the state dictionary
+        IOdictionary& stateDict();
+
+        //- Return const access to the state dictionary
+        const IOdictionary& stateDict() const;
 
         //- Clear the list of function objects
         virtual void clear();

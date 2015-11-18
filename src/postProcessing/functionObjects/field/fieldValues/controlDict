@@ -60,10 +60,13 @@ functions
         // Output field values as well
         valueOutput     true;
 
+        // Output format for field values
+        surfaceFormat vtk;
+
         // Type of source: patch/faceZone/sampledSurface
         source          patch;
 
-        // if patch or faceZone: name of patch or faceZone
+        // If patch or faceZone: name of patch or faceZone
         sourceName      movingWall;
 
         //// if sampledSurface: dictionary with a sampledSurface
@@ -96,6 +99,7 @@ functions
         outputControl   outputTime;
         log             true;
         valueOutput     true;
+        surfaceFormat   vtk;
         source          faceZone;
         sourceName      f0;
         operation       sum;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,6 +63,8 @@ functions
         enabled             yes;
         timeStart           0;
         timeEnd             10;
+        evaluateControl     timeStep;
+        evaluateInterval    1;
         outputControl       outputTime;
         outputInterval      1;
         ...
@@ -78,7 +80,9 @@ Where:
     region   | name of region for multi-region cases | no       |
     enabled  | on/off switch                         | no       | yes
     timeStart| start time                            | no       |
-    timeEnd  | end time                              | no       | 
+    timeEnd  | end time                              | no       |
+    evaluateControl | when to evaluate: either 'outputTime' or 'timeStep'| no | timeStep
+    evaluateInterval| steps between evaluation when evaluateControl=timeStep | no | 1
     outputControl | when to output: either 'outputTime' or 'timeStep'| no | timeStep
     outputInterval| steps between output when outputControl=timeStep | no | 1
 \endtable
@@ -88,7 +92,7 @@ typically used as the name of the output directory for any derived data.  The
 \c type entry defines the type of function object properties that follow.
 Since the function objects are packaged into separate libraries, the user must
 tell the code where to find the function object implementation, identified
-using the \c libs entry.  
+using the \c functionObjectLibs entry.
 
 
 \*---------------------------------------------------------------------------*/

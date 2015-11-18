@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,13 +37,16 @@ namespace Foam
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::cloudInfo::writeFileHeader(const label i)
+void Foam::cloudInfo::writeFileHeader(Ostream& os) const
 {
-    writeHeader(file(), "Cloud information");
-    writeCommented(file(), "Time");
-    writeTabbed(file(), "nParcels");
-    writeTabbed(file(), "mass");
-    file() << endl;
+    writeHeader(os, "Cloud information");
+    writeCommented(os, "Time");
+    writeTabbed(os, "nParcels");
+    writeTabbed(os, "mass");
+    writeTabbed(os, "Dmax");
+    writeTabbed(os, "D10");
+    writeTabbed(os, "D32");
+    os  << endl;
 }
 
 
@@ -60,7 +63,10 @@ Foam::cloudInfo::cloudInfo
     functionObjectFile(obr, name),
     name_(name),
     obr_(obr),
-    active_(true)
+    active_(true),
+    log_(true),
+    cloudNames_(),
+    filePtrs_()
 {
     read(dict);
 }
@@ -78,47 +84,70 @@ void Foam::cloudInfo::read(const dictionary& dict)
 {
     if (active_)
     {
-        functionObjectFile::resetNames(dict.lookup("clouds"));
+        functionObjectFile::read(dict);
 
-        Info<< type() << " " << name_ << ": ";
-        if (names().size())
+        log_ = dict.lookupOrDefault<Switch>("log", true);
+        dict.lookup("clouds") >> cloudNames_;
+
+        if (log_)
         {
-            Info<< "applying to clouds:" << nl;
-            forAll(names(), i)
+            Info<< type() << " " << name_ << ": ";
+
+            if (cloudNames_.size())
             {
-                Info<< "    " << names()[i] << nl;
+                Info<< "applying to clouds:" << nl;
+                forAll(cloudNames_, i)
+                {
+                    Info<< "    " << cloudNames_[i] << nl;
+                }
+                Info<< endl;
             }
-            Info<< endl;
+            else
+            {
+                Info<< "no clouds to be processed" << nl << endl;
+            }
         }
-        else
+
+        if (writeToFile())
         {
-            Info<< "no clouds to be processed" << nl << endl;
+            filePtrs_.setSize(cloudNames_.size());
+            filePtrs_.clear();
+            forAll(filePtrs_, fileI)
+            {
+                const word& cloudName = cloudNames_[fileI];
+                filePtrs_.set(fileI, createFile(cloudName));
+                writeFileHeader(filePtrs_[fileI]);
+            }
         }
     }
 }
 
 
 void Foam::cloudInfo::execute()
-{}
+{
+    // Do nothing
+}
 
 
 void Foam::cloudInfo::end()
-{}
+{
+    // Do nothing
+}
 
 
 void Foam::cloudInfo::timeSet()
-{}
+{
+    // Do nothing
+}
 
 
 void Foam::cloudInfo::write()
 {
     if (active_)
     {
-        functionObjectFile::write();
-
-        forAll(names(), i)
+        forAll(cloudNames_, cloudI)
         {
-            const word& cloudName = names()[i];
+            const word& cloudName = cloudNames_[cloudI];
 
             const kinematicCloud& cloud =
                 obr_.lookupObject<kinematicCloud>(cloudName);
@@ -127,12 +156,31 @@ void Foam::cloudInfo::write()
             scalar massInSystem =
                 returnReduce(cloud.massInSystem(), sumOp<scalar>());
 
+            scalar Dmax = cloud.Dmax();
+            scalar D10 = cloud.Dij(1, 0);
+            scalar D32 = cloud.Dij(3, 2);
+
             if (Pstream::master())
             {
-                file(i)
+                filePtrs_[cloudI]
                     << obr_.time().value() << token::TAB
                     << nParcels << token::TAB
-                    << massInSystem << endl;
+                    << massInSystem << token::TAB
+                    << Dmax << token::TAB
+                    << D10 << token::TAB
+                    << D32 << token::TAB
+                    << endl;
+            }
+
+            if (log_)
+            {
+                Info<< type() << " " << name_ <<  " output:" << nl
+                    << "    number of parcels : " << nParcels << nl
+                    << "    mass in system    : " << massInSystem << nl
+                    << "    maximum diameter  : " << Dmax << nl
+                    << "    D10 diameter      : " << D10 << nl
+                    << "    D32 diameter      : " << D32 << nl
+                    << endl;
             }
         }
     }
