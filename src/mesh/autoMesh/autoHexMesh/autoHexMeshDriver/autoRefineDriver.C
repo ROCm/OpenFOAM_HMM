@@ -1522,6 +1522,11 @@ void Foam::autoRefineDriver::baffleAndSplitMesh
 
     const fvMesh& mesh = meshRefiner_.mesh();
 
+    if (debug)
+    {
+       const_cast<Time&>(mesh.time())++;
+    }
+
     // Introduce baffles at surface intersections. Note:
     // meshRefiment::surfaceIndex() will
     // be like boundary face from now on so not coupled anymore.
