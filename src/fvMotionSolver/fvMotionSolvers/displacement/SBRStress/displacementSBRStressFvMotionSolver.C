@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "displacementSBRStressFvMotionSolver.H"
+#include "motionInterpolation.H"
 #include "motionDiffusivity.H"
 #include "fvmLaplacian.H"
 #include "addToRunTimeSelectionTable.H"
@@ -32,7 +33,6 @@ License
 #include "surfaceInterpolate.H"
 #include "fvcLaplacian.H"
 #include "mapPolyMesh.H"
-#include "volPointInterpolation.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -45,6 +45,13 @@ namespace Foam
         motionSolver,
         displacementSBRStressFvMotionSolver,
         dictionary
+    );
+
+    addToRunTimeSelectionTable
+    (
+        displacementMotionSolver,
+        displacementSBRStressFvMotionSolver,
+        displacement
     );
 }
 
@@ -78,6 +85,58 @@ Foam::displacementSBRStressFvMotionSolver::displacementSBRStressFvMotionSolver
         ),
         cellMotionBoundaryTypes<vector>(pointDisplacement().boundaryField())
     ),
+    interpolationPtr_
+    (
+        coeffDict().found("interpolation")
+      ? motionInterpolation::New(fvMesh_, coeffDict().lookup("interpolation"))
+      : motionInterpolation::New(fvMesh_)
+    ),
+    diffusivityPtr_
+    (
+        motionDiffusivity::New(fvMesh_, coeffDict().lookup("diffusivity"))
+    )
+{}
+
+
+Foam::displacementSBRStressFvMotionSolver::
+displacementSBRStressFvMotionSolver
+(
+    const polyMesh& mesh,
+    const IOdictionary& dict,
+    const pointVectorField& pointDisplacement,
+    const pointIOField& points0
+)
+:
+    displacementMotionSolver(mesh, dict, pointDisplacement, points0, typeName),
+    fvMotionSolverCore(mesh),
+    cellDisplacement_
+    (
+        IOobject
+        (
+            "cellDisplacement",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        fvMesh_,
+        dimensionedVector
+        (
+            "cellDisplacement",
+            displacementMotionSolver::pointDisplacement().dimensions(),
+            vector::zero
+        ),
+        cellMotionBoundaryTypes<vector>
+        (
+            displacementMotionSolver::pointDisplacement().boundaryField()
+        )
+    ),
+    interpolationPtr_
+    (
+        coeffDict().found("interpolation")
+      ? motionInterpolation::New(fvMesh_, coeffDict().lookup("interpolation"))
+      : motionInterpolation::New(fvMesh_)
+    ),
     diffusivityPtr_
     (
         motionDiffusivity::New(fvMesh_, coeffDict().lookup("diffusivity"))
@@ -97,7 +156,7 @@ Foam::displacementSBRStressFvMotionSolver::
 Foam::tmp<Foam::pointField>
 Foam::displacementSBRStressFvMotionSolver::curPoints() const
 {
-    volPointInterpolation::New(fvMesh_).interpolate
+    interpolationPtr_->interpolate
     (
         cellDisplacement_,
         pointDisplacement_
