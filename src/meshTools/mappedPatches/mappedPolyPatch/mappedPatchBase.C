@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -837,25 +837,27 @@ void Foam::mappedPatchBase::calcAMI() const
 
     AMIPtr_.clear();
 
+
+    const polyPatch& nbr = samplePolyPatch();
+
+    // Transform neighbour patch to local system
+    pointField nbrPoints(samplePoints(nbr.localPoints()));
+
+    primitivePatch nbrPatch0
+    (
+        SubList<face>
+        (
+            nbr.localFaces(),
+            nbr.size()
+        ),
+        nbrPoints
+    );
+
+
     if (debug)
     {
-        const polyPatch& nbr = samplePolyPatch();
-
-        pointField nbrPoints(nbr.localPoints());
-
         OFstream os(patch_.name() + "_neighbourPatch-org.obj");
         meshTools::writeOBJ(os, samplePolyPatch().localFaces(), nbrPoints);
-
-        // transform neighbour patch to local system
-        primitivePatch nbrPatch0
-        (
-            SubList<face>
-            (
-                nbr.localFaces(),
-                nbr.size()
-            ),
-            nbrPoints
-        );
 
         OFstream osN(patch_.name() + "_neighbourPatch-trans.obj");
         meshTools::writeOBJ(osN, nbrPatch0, nbrPoints);
@@ -870,7 +872,7 @@ void Foam::mappedPatchBase::calcAMI() const
         new AMIPatchToPatchInterpolation
         (
             patch_,
-            samplePolyPatch(), // nbrPatch0,
+            nbrPatch0,
             surfPtr(),
             faceAreaIntersect::tmMesh,
             true,

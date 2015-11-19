@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,6 +38,7 @@ License
 #include "vectorList.H"
 #include "PackedBoolList.H"
 #include "PatchTools.H"
+#include "OBJstream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -815,21 +816,46 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
 {
     if (!decomposer_.valid())
     {
-        // Use current decomposer.
-        // Note: or always use hierarchical?
-        IOdictionary decomposeDict
+        // Use singleton decomposeParDict. Cannot use decompositionModel
+        // here since we've only got Time and not a mesh.
+        if
         (
-            IOobject
+            searchableSurface::time().foundObject<IOdictionary>
             (
-                "decomposeParDict",
-                searchableSurface::time().system(),
-                searchableSurface::time(),
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE,
-                false
+                "decomposeParDict"
             )
-        );
-        decomposer_ = decompositionMethod::New(decomposeDict);
+        )
+        {
+            decomposer_ = decompositionMethod::New
+            (
+                searchableSurface::time().lookupObject<IOdictionary>
+                (
+                    "decomposeParDict"
+                )
+            );
+        }
+        else
+        {
+            if (!decomposeParDict_.valid())
+            {
+                decomposeParDict_.reset
+                (
+                    new IOdictionary
+                    (
+                        IOobject
+                        (
+                            "decomposeParDict",
+                            searchableSurface::time().system(),
+                            searchableSurface::time(),
+                            IOobject::MUST_READ_IF_MODIFIED,
+                            IOobject::NO_WRITE
+                        )
+                    )
+                );
+            }
+            decomposer_ = decompositionMethod::New(decomposeParDict_());
+        }
+
 
         if (!decomposer_().parallelAware())
         {
@@ -2254,13 +2280,15 @@ void Foam::distributedTriSurfaceMesh::distribute
     // Send all
     // ~~~~~~~~
 
+    PstreamBuffers pBufs(Pstream::defaultCommsType);
+
     forAll(faceSendSizes, procI)
     {
         if (procI != Pstream::myProcNo())
         {
             if (faceSendSizes[Pstream::myProcNo()][procI] > 0)
             {
-                OPstream str(Pstream::blocking, procI);
+                UOPstream str(procI, pBufs);
 
                 labelList pointMap;
                 triSurface subSurface
@@ -2282,9 +2310,11 @@ void Foam::distributedTriSurfaceMesh::distribute
                 //}
 
                 str << subSurface;
-           }
+            }
         }
     }
+
+    pBufs.finishedSends();   // no-op for blocking
 
 
     // Receive and merge all
@@ -2296,7 +2326,7 @@ void Foam::distributedTriSurfaceMesh::distribute
         {
             if (faceSendSizes[procI][Pstream::myProcNo()] > 0)
             {
-                IPstream str(Pstream::blocking, procI);
+                UIPstream str(procI, pBufs);
 
                 // Receive
                 triSurface subSurface(str);
@@ -2327,7 +2357,7 @@ void Foam::distributedTriSurfaceMesh::distribute
                 //    Pout<< "Current merged surface : faces:" << allTris.size()
                 //        << " points:" << allPoints.size() << endl << endl;
                 //}
-           }
+            }
         }
     }
 
@@ -2388,6 +2418,20 @@ void Foam::distributedTriSurfaceMesh::distribute
             Info<< '\t' << procI << '\t' << nTris[procI] << endl;
         }
         Info<< endl;
+
+        OBJstream str(searchableSurface::time().path()/"after.obj");
+        Info<< "Writing local bounding box to " << str.name() << endl;
+        const List<treeBoundBox>& myBbs = procBb_[Pstream::myProcNo()];
+        forAll(myBbs, i)
+        {
+            pointField pts(myBbs[i].points());
+            const edgeList& es = treeBoundBox::edges;
+            forAll(es, eI)
+            {
+                const edge& e = es[eI];
+                str.write(linePointRef(pts[e[0]], pts[e[1]]));
+            }
+        }
     }
 }
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -332,13 +332,23 @@ public:
 
             const dictionary& paramDict() const;
 
+            //- Return reference to the point motion displacement field
+            pointVectorField& pointDisplacement()
+            {
+                return displacement_;
+            }
+
+            //- Return const reference to the point motion displacement field
+            const pointVectorField& pointDisplacement() const
+            {
+                return displacement_;
+            }
 
 
         // Edit
 
             //- Take over existing mesh position.
             void correct();
-
 
             //- Set patch fields on patchIDs to be consistent with
             //  all other boundary conditions
@@ -471,6 +481,7 @@ public:
                 const bool report,
                 const dictionary& dict,
                 const polyMeshGeometry&,
+                const pointField&,
                 const labelList& checkFaces,
                 labelHashSet& wrongFaces
             );
@@ -483,6 +494,7 @@ public:
                 const bool report,
                 const dictionary& dict,
                 const polyMeshGeometry&,
+                const pointField&,
                 const labelList& checkFaces,
                 const List<labelPair>& baffles,
                 labelHashSet& wrongFaces

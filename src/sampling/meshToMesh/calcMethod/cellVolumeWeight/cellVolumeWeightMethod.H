@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,13 +116,15 @@ public:
 
         // Evaluate
 
-            //- Calculate addressing and weights
+            //- Calculate addressing and weights and optionally offset vectors
             virtual void calculate
             (
                 labelListList& srcToTgtAddr,
                 scalarListList& srcToTgtWght,
-                labelListList& tgtToTgtAddr,
-                scalarListList& tgtToTgtWght
+                pointListList& srcToTgtVec,
+                labelListList& tgtToSrcAddr,
+                scalarListList& tgtToSrcWght,
+                pointListList& tgtToSrcVec
             );
 };
 

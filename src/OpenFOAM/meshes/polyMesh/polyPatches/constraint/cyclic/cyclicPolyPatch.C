@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,11 +29,9 @@ License
 #include "polyMesh.H"
 #include "demandDrivenData.H"
 #include "OFstream.H"
-#include "patchZones.H"
 #include "matchPoints.H"
 #include "EdgeMap.H"
 #include "Time.H"
-#include "diagTensor.H"
 #include "transformField.H"
 #include "SubField.H"
 #include "unitConversion.H"

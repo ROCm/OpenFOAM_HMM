@@ -80,8 +80,6 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     const scalar Tdash = min(T, TMax);
     const scalar Tsdash = min(Ts, TMax);
 
-    scalarField hmm(dMassPC);
-
     // Calculate mass transfer due to phase change
     phaseChange.calculate
     (

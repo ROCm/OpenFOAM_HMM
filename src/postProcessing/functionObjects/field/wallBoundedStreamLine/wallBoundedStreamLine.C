@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -705,41 +705,55 @@ void Foam::wallBoundedStreamLine::write()
 
             // Distribute the track positions. Note: use scheduled comms
             // to prevent buffering.
-            mapDistribute::distribute
+            allTracks_.shrink();
+            mapDistributeBase::distribute
             (
                 Pstream::scheduled,
                 distMap.schedule(),
                 distMap.constructSize(),
                 distMap.subMap(),
+                false,
                 distMap.constructMap(),
-                allTracks_
+                false,
+                allTracks_,
+                flipOp()
             );
 
             // Distribute the scalars
             forAll(allScalars_, scalarI)
             {
-                mapDistribute::distribute
+                allScalars_[scalarI].shrink();
+                mapDistributeBase::distribute
                 (
                     Pstream::scheduled,
                     distMap.schedule(),
                     distMap.constructSize(),
                     distMap.subMap(),
+                    false,
                     distMap.constructMap(),
-                    allScalars_[scalarI]
+                    false,
+                    allScalars_[scalarI],
+                    flipOp()
                 );
+                allScalars_[scalarI].setCapacity(allScalars_[scalarI].size());
             }
             // Distribute the vectors
             forAll(allVectors_, vectorI)
             {
-                mapDistribute::distribute
+                allVectors_[vectorI].shrink();
+                mapDistributeBase::distribute
                 (
                     Pstream::scheduled,
                     distMap.schedule(),
                     distMap.constructSize(),
                     distMap.subMap(),
+                    false,
                     distMap.constructMap(),
-                    allVectors_[vectorI]
+                    false,
+                    allVectors_[vectorI],
+                    flipOp()
                 );
+                allVectors_[vectorI].setCapacity(allVectors_[vectorI].size());
             }
         }
 

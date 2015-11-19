@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,16 +26,11 @@ License
 #include "residuals.H"
 #include "volFields.H"
 #include "dictionary.H"
-#include "Time.H"
-#include "ListOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::residuals::writeResidual
-(
-    const word& fieldName
-)
+void Foam::residuals::writeResidual(const word& fieldName)
 {
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 

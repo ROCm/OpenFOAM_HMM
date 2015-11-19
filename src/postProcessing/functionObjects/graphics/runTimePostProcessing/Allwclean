@@ -1,0 +1,12 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Source the wmake functions
+. $WM_DIR/scripts/wmakeFunctions
+
+(
+    # Where are the generated files stored?
+    findObjectDir dummy.C
+    depDir="$objectsDir"
+    rm -rf "$depDir" > /dev/null 2>&1
+)

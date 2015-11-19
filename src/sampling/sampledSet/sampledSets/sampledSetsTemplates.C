@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -155,6 +155,14 @@ void Foam::sampledSets::writeSampleFile
             valueSets,
             ofs
         );
+
+        forAll(masterFields, fieldi)
+        {
+            dictionary propsDict;
+            propsDict.add("file", fName);
+            const word& fieldName = masterFields[fieldi].name();
+            setProperty(fieldName, propsDict);
+        }
     }
     else
     {
@@ -226,10 +234,7 @@ void Foam::sampledSets::combineSampledValues
 
 
 template<class Type>
-void Foam::sampledSets::sampleAndWrite
-(
-    fieldGroup<Type>& fields
-)
+void Foam::sampledSets::sampleAndWrite(fieldGroup<Type>& fields)
 {
     if (fields.size())
     {

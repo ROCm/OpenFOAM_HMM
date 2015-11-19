@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -186,6 +186,44 @@ void Foam::cellVolumeWeightMethod::calculateAddressing
         tgtToSrcCellAddr[i].transfer(tgtToSrcAddr[i]);
         tgtToSrcCellWght[i].transfer(tgtToSrcWght[i]);
     }
+
+
+    if (debug%2)
+    {
+        // At this point the overlaps are still in volume so we could
+        // get out the relative error
+        forAll(srcToTgtCellAddr, cellI)
+        {
+            scalar srcVol = src_.cellVolumes()[cellI];
+            scalar tgtVol = sum(srcToTgtCellWght[cellI]);
+
+            if (mag(srcVol) > ROOTVSMALL && mag((tgtVol-srcVol)/srcVol) > 1e-6)
+            {
+                WarningIn("cellVolumeWeightMethod::calculateAddressing(..)")
+                    << "At cell " << cellI << " cc:"
+                    << src_.cellCentres()[cellI]
+                    << " vol:" << srcVol
+                    << " total overlap volume:" << tgtVol
+                    << endl;
+            }
+        }
+
+        forAll(tgtToSrcCellAddr, cellI)
+        {
+            scalar tgtVol = tgt_.cellVolumes()[cellI];
+            scalar srcVol = sum(tgtToSrcCellWght[cellI]);
+
+            if (mag(tgtVol) > ROOTVSMALL && mag((srcVol-tgtVol)/tgtVol) > 1e-6)
+            {
+                WarningIn("cellVolumeWeightMethod::calculateAddressing(..)")
+                    << "At cell " << cellI << " cc:"
+                    << tgt_.cellCentres()[cellI]
+                    << " vol:" << tgtVol
+                    << " total overlap volume:" << srcVol
+                    << endl;
+            }
+        }
+    }
 }
 
 
@@ -315,8 +353,10 @@ void Foam::cellVolumeWeightMethod::calculate
 (
     labelListList& srcToTgtAddr,
     scalarListList& srcToTgtWght,
+    pointListList& srcToTgtVec,
     labelListList& tgtToSrcAddr,
-    scalarListList& tgtToSrcWght
+    scalarListList& tgtToSrcWght,
+    pointListList& tgtToSrcVec
 )
 {
     bool ok = initialise

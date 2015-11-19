@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,6 +96,7 @@ Usage
 #include "fvFieldDecomposer.H"
 #include "pointFieldDecomposer.H"
 #include "lagrangianFieldDecomposer.H"
+#include "decompositionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -142,6 +143,12 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
+    Foam::argList::addOption
+    (
+        "decomposeParDict",
+        "file",
+        "read decomposePar dictionary from specified location"
+    );
     #include "addRegionOption.H"
     argList::addBoolOption
     (
@@ -197,6 +204,17 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     // Allow override of time
     instantList times = timeSelector::selectIfPresent(runTime, args);
+
+
+    // Allow override of decomposeParDict location
+    fileName decompDictFile;
+    if (args.optionReadIfPresent("decomposeParDict", decompDictFile))
+    {
+        if (isDir(decompDictFile))
+        {
+            decompDictFile = decompDictFile/"decomposeParDict";
+        }
+    }
 
 
     wordList regionNames;
@@ -260,21 +278,27 @@ int main(int argc, char *argv[])
             ++nProcs;
         }
 
-        // get requested numberOfSubdomains
+        // get requested numberOfSubdomains. Note: have no mesh yet so
+        // cannot use decompositionModel::New
         const label nDomains = readLabel
         (
             IOdictionary
             (
-                IOobject
+                decompositionModel::selectIO
                 (
-                    "decomposeParDict",
-                    runTime.time().system(),
-                    regionDir,          // use region if non-standard
-                    runTime,
-                    IOobject::MUST_READ_IF_MODIFIED,
-                    IOobject::NO_WRITE,
-                    false
+                    IOobject
+                    (
+                        "decomposeParDict",
+                        runTime.time().system(),
+                        regionDir,          // use region if non-standard
+                        runTime,
+                        IOobject::MUST_READ_IF_MODIFIED,
+                        IOobject::NO_WRITE,
+                        false
+                    ),
+                    decompDictFile
                 )
+
             ).lookup("numberOfSubdomains")
         );
 
@@ -288,8 +312,7 @@ int main(int argc, char *argv[])
                     << nProcs << " domains"
                     << nl
                     << "instead of " << nDomains
-                    << " domains as specified in decomposeParDict"
-                    << nl
+                    << " domains as specified in decomposeParDict" << nl
                     << exit(FatalError);
             }
         }
@@ -351,7 +374,8 @@ int main(int argc, char *argv[])
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
-            )
+            ),
+            decompDictFile
         );
 
         // Decompose the mesh
@@ -447,15 +471,15 @@ int main(int argc, char *argv[])
             // Construct the vol fields
             // ~~~~~~~~~~~~~~~~~~~~~~~~
             PtrList<volScalarField> volScalarFields;
-            readFields(mesh, objects, volScalarFields);
+            readFields(mesh, objects, volScalarFields, false);
             PtrList<volVectorField> volVectorFields;
-            readFields(mesh, objects, volVectorFields);
+            readFields(mesh, objects, volVectorFields, false);
             PtrList<volSphericalTensorField> volSphericalTensorFields;
-            readFields(mesh, objects, volSphericalTensorFields);
+            readFields(mesh, objects, volSphericalTensorFields, false);
             PtrList<volSymmTensorField> volSymmTensorFields;
-            readFields(mesh, objects, volSymmTensorFields);
+            readFields(mesh, objects, volSymmTensorFields, false);
             PtrList<volTensorField> volTensorFields;
-            readFields(mesh, objects, volTensorFields);
+            readFields(mesh, objects, volTensorFields, false);
 
 
             // Construct the dimensioned fields
@@ -476,15 +500,15 @@ int main(int argc, char *argv[])
             // Construct the surface fields
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             PtrList<surfaceScalarField> surfaceScalarFields;
-            readFields(mesh, objects, surfaceScalarFields);
+            readFields(mesh, objects, surfaceScalarFields, false);
             PtrList<surfaceVectorField> surfaceVectorFields;
-            readFields(mesh, objects, surfaceVectorFields);
+            readFields(mesh, objects, surfaceVectorFields, false);
             PtrList<surfaceSphericalTensorField> surfaceSphericalTensorFields;
-            readFields(mesh, objects, surfaceSphericalTensorFields);
+            readFields(mesh, objects, surfaceSphericalTensorFields, false);
             PtrList<surfaceSymmTensorField> surfaceSymmTensorFields;
-            readFields(mesh, objects, surfaceSymmTensorFields);
+            readFields(mesh, objects, surfaceSymmTensorFields, false);
             PtrList<surfaceTensorField> surfaceTensorFields;
-            readFields(mesh, objects, surfaceTensorFields);
+            readFields(mesh, objects, surfaceTensorFields, false);
 
 
             // Construct the point fields
@@ -492,15 +516,15 @@ int main(int argc, char *argv[])
             const pointMesh& pMesh = pointMesh::New(mesh);
 
             PtrList<pointScalarField> pointScalarFields;
-            readFields(pMesh, objects, pointScalarFields);
+            readFields(pMesh, objects, pointScalarFields, false);
             PtrList<pointVectorField> pointVectorFields;
-            readFields(pMesh, objects, pointVectorFields);
+            readFields(pMesh, objects, pointVectorFields, false);
             PtrList<pointSphericalTensorField> pointSphericalTensorFields;
-            readFields(pMesh, objects, pointSphericalTensorFields);
+            readFields(pMesh, objects, pointSphericalTensorFields, false);
             PtrList<pointSymmTensorField> pointSymmTensorFields;
-            readFields(pMesh, objects, pointSymmTensorFields);
+            readFields(pMesh, objects, pointSymmTensorFields, false);
             PtrList<pointTensorField> pointTensorFields;
-            readFields(pMesh, objects, pointTensorFields);
+            readFields(pMesh, objects, pointTensorFields, false);
 
 
             // Construct the Lagrangian fields
@@ -819,16 +843,6 @@ int main(int argc, char *argv[])
 
 
                 processorDb.setTime(runTime);
-
-                // remove files remnants that can cause horrible problems
-                // - mut and nut are used to mark the new turbulence models,
-                //   their existence prevents old models from being upgraded
-                {
-                    fileName timeDir(processorDb.path()/processorDb.timeName());
-
-                    rm(timeDir/"mut");
-                    rm(timeDir/"nut");
-                }
 
                 // read the mesh
                 if (!procMeshList.set(procI))

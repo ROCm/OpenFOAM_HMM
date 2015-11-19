@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1085,7 +1085,9 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
 Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
 (
     const snapParameters& snapParams,
-    const dictionary& motionDict
+    const dictionary& motionDict,
+    const labelList& globalToMasterPatch,
+    const labelList& globalToSlavePatch
 ) const
 {
     pointField oldPoints(mesh_.points());
@@ -1162,7 +1164,10 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
         (
             autoSnapDriver::calcNearestSurface
             (
+                snapParams.strictRegionSnap(),
                 *this,
+                globalToMasterPatch,
+                globalToSlavePatch,
                 snapDist,   // attraction
                 pp,
                 nearestPoint,

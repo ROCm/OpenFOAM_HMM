@@ -63,7 +63,9 @@ indexedOctree/treeDataTriSurface.C
 
 searchableSurface = searchableSurface
 $(searchableSurface)/searchableBox.C
+$(searchableSurface)/searchableRotatedBox.C
 $(searchableSurface)/searchableCylinder.C
+$(searchableSurface)/searchableCone.C
 $(searchableSurface)/searchableDisk.C
 $(searchableSurface)/searchablePlane.C
 $(searchableSurface)/searchablePlate.C
@@ -75,6 +77,7 @@ $(searchableSurface)/searchableSurfacesQueries.C
 $(searchableSurface)/searchableSurfaceWithGaps.C
 $(searchableSurface)/triSurfaceMesh.C
 $(searchableSurface)/closedTriSurfaceMesh.C
+$(searchableSurface)/subTriSurfaceMesh.C
 
 topoSets = sets/topoSets
 $(topoSets)/cellSet.C

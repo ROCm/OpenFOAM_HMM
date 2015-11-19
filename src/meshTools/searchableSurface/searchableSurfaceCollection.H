@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,8 +25,8 @@ Class
     Foam::searchableSurfaceCollection
 
 Description
-    Set of transformed searchableSurfaces. Does not do boolean operations.
-    So when meshing might find parts 'inside'.
+    Set of transformed searchableSurfaces. Does not do boolean operations
+    so when meshing might find parts 'inside'.
 
 SourceFiles
     searchableSurfaceCollection.C
@@ -46,8 +46,6 @@ SourceFiles
 
 namespace Foam
 {
-
-// Forward declaration of classes
 
 /*---------------------------------------------------------------------------*\
                  Class searchableSurfaceCollection Declaration

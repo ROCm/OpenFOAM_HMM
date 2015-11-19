@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -408,7 +408,14 @@ void Foam::hierarchGeomDecomp::sortComponent
         {
             // No need for binary searching of bin size
             localSize = label(current.size()/n_[compI]);
-            rightCoord = sortedCoord[leftIndex+localSize];
+            if (leftIndex+localSize < sortedCoord.size())
+            {
+                rightCoord = sortedCoord[leftIndex+localSize];
+            }
+            else
+            {
+                rightCoord = maxCoord;
+            }
         }
         else
         {

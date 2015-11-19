@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -284,6 +284,8 @@ bool Foam::LocalInteraction<CloudType>::correct
 template<class CloudType>
 void Foam::LocalInteraction<CloudType>::info(Ostream& os)
 {
+    PatchInteractionModel<CloudType>::info(os);
+
     // retrieve any stored data
     labelList npe0(patchData_.size(), 0);
     this->getModelProperty("nEscape", npe0);
@@ -317,8 +319,8 @@ void Foam::LocalInteraction<CloudType>::info(Ostream& os)
 
     forAll(patchData_, i)
     {
-        os  << "    Parcel fate (number, mass)      : patch "
-            <<  patchData_[i].patchName() << nl
+        os  << "    Parcel fate: patch " <<  patchData_[i].patchName()
+            << " (number, mass)" << nl
             << "      - escape                      = " << npe[i]
             << ", " << mpe[i] << nl
             << "      - stick                       = " << nps[i]

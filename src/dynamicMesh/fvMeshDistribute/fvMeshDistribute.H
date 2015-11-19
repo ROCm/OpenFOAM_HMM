@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,6 +82,14 @@ class fvMeshDistribute
 
     // Private Member Functions
 
+        static void inplaceRenumberWithFlip
+        (
+            const labelUList& oldToNew,
+            const bool oldToNewHasFlip,
+            const bool lstHasFlip,
+            labelUList& lst
+        );
+
         //- Find indices with value
         static labelList select
         (
@@ -115,6 +123,21 @@ class fvMeshDistribute
             (
                 const mapPolyMesh& map,
                 const PtrList<FieldField<fvsPatchField, T> >& oldBflds
+            );
+
+            //- Save internal fields of surfaceFields
+            template<class T>
+            void saveInternalFields
+            (
+                PtrList<Field<T> >& iflds
+            ) const;
+
+            //- Set value of patch faces resulting from internal faces
+            template<class T>
+            void mapExposedFaces
+            (
+                const mapPolyMesh& map,
+                const PtrList<Field<T> >& oldFlds
             );
 
             //- Init patch fields of certain type
@@ -337,6 +360,12 @@ public:
 
             //- Print some info on mesh.
             static void printMeshInfo(const fvMesh&);
+
+            //- Generate a test field on faces
+            static tmp<surfaceScalarField> generateTestField(const fvMesh&);
+
+            //- Check whether field consistent with face orientation
+            static void testField(const surfaceScalarField&);
 };
 
 

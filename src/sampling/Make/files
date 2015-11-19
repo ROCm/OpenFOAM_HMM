@@ -50,6 +50,7 @@ $(surfWriters)/proxy/proxySurfaceWriter.C
 $(surfWriters)/raw/rawSurfaceWriter.C
 $(surfWriters)/starcd/starcdSurfaceWriter.C
 $(surfWriters)/vtk/vtkSurfaceWriter.C
+$(surfWriters)/boundaryData/boundaryDataSurfaceWriter.C
 
 graphField/writePatchGraph.C
 graphField/writeCellGraph.C
@@ -61,6 +62,7 @@ meshToMeshMethods = meshToMesh/calcMethod
 $(meshToMeshMethods)/meshToMeshMethod/meshToMeshMethod.C
 $(meshToMeshMethods)/meshToMeshMethod/meshToMeshMethodNew.C
 $(meshToMeshMethods)/cellVolumeWeight/cellVolumeWeightMethod.C
+$(meshToMeshMethods)/correctedCellVolumeWeight/correctedCellVolumeWeightMethod.C
 $(meshToMeshMethods)/direct/directMethod.C
 $(meshToMeshMethods)/mapNearest/mapNearestMethod.C
 

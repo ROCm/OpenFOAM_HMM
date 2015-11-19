@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -102,6 +102,11 @@ public:
 
         //- Reconstruct point position after motion in parallel
         void reconstructPoints(fvMesh&);
+
+        const PtrList<fvMesh>& meshes() const
+        {
+            return meshes_;
+        }
 
         PtrList<fvMesh>& meshes()
         {

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -732,6 +732,29 @@ void Foam::ListAppendEqOp<T>::operator()(List<T>& x, const List<T>& y) const
             forAll(y, i)
             {
                 x[sz++] = y[i];
+            }
+        }
+        else
+        {
+            x = y;
+        }
+    }
+}
+
+
+template<class T>
+void Foam::ListUniqueEqOp<T>::operator()(List<T>& x, const List<T>& y) const
+{
+    if (y.size())
+    {
+        if (x.size())
+        {
+            forAll(y, i)
+            {
+                if (findIndex(x, y[i]) == -1)
+                {
+                    x.append(y[i]);
+                }
             }
         }
         else

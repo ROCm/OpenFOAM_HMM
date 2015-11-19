@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -232,6 +232,25 @@ Foam::IOobject::IOobject
             << endl;
     }
 }
+
+
+Foam::IOobject::IOobject
+(
+    const IOobject& io,
+    const word& name
+)
+:
+    name_(name),
+    headerClassName_(io.headerClassName_),
+    note_(io.note_),
+    instance_(io.instance_),
+    local_(io.local_),
+    db_(io.db_),
+    rOpt_(io.rOpt_),
+    wOpt_(io.wOpt_),
+    registerObject_(io.registerObject_),
+    objState_(io.objState_)
+{}
 
 
 // * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //

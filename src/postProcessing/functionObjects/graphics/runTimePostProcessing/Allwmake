@@ -1,0 +1,28 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Source the wmake functions
+. $WM_DIR/scripts/wmakeFunctions
+
+# Store current directory
+sourceDir=$PWD
+
+# Where are any generated files stored?
+findObjectDir dummy.C
+depDir="$objectsDir"
+
+if [ -d "$VTK_DIR" -o  -d "$ParaView_DIR" ]
+then
+    # ensure CMake gets the correct C++ compiler
+    [ -n "$WM_CXX" ] && export CXX="$WM_CXX"
+    [ -n "$WM_CC" ] && export CC="$WM_CC"
+
+    (mkdir -p $depDir && cd $depDir && cmake $sourceDir && make)
+else
+    echo "ERROR: Build of $PWD requires a valid VTK installation which"
+    echo "       can be supplied either by ParaView by VTK. In case of"
+    echo "       - ParaView : export the ParaView_DIR environment variable"
+    echo "       - VTK      : export the VTK_DIR variable"
+fi
+
+# ----------------------------------------------------------------- end-of-file

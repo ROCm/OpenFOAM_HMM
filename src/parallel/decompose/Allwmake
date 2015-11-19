@@ -29,11 +29,13 @@ wmakeMpiLib()
     do
     (
         WM_OPTIONS="$WM_OPTIONS$WM_MPLIB"
-        whichmpi="$WM_PROJECT_DIR/platforms/$WM_OPTIONS/src/parallel/decompose/$libName/using:$FOAM_MPI"
-        whichscotch="$WM_PROJECT_DIR/platforms/$WM_OPTIONS/src/parallel/decompose/$libName/using:$SCOTCH_VERSION"
+        libDir="$WM_PROJECT_DIR/platforms/$WM_OPTIONS/src/parallel/decompose/$libName"
+        whichmpi="$libDir/using:$FOAM_MPI"
+        whichscotch="$libDir/using:$SCOTCH_VERSION"
         [ -e "$whichmpi" -a -e "$whichscotch" ] || wclean $libName
         echo "wmake $targetType $libName"
         wmake $targetType $libName
+        mkdir -p "$libDir"
         touch "$whichmpi" "$whichscotch"
     )
     done
@@ -50,6 +52,15 @@ then
 
     if [ -d "$FOAM_LIBBIN/$FOAM_MPI" ]
     then
+        #- Bit of a hack: ptscotch 6 requires scotch linked as well as. Can be
+        #  removed once ptscotch declares dependency on scotch itself.
+        case "$SCOTCH_VERSION" in
+        scotch_6.*)
+            export LINK_FLAGS="-lscotch"
+            ;;
+        esac
+
+
         wmakeMpiLib ptscotchDecomp
     fi
 else

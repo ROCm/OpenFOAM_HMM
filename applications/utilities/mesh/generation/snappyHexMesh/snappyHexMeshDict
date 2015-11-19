@@ -71,6 +71,11 @@ geometry
     }
 };
 
+
+// Optional: avoid patch-face merging. Allows mesh to be used for
+//           refinement/unrefinement
+//mergePatchFaces    off; // default on
+
 // Settings for the castellatedMesh generation.
 castellatedMeshControls
 {
@@ -90,10 +95,10 @@ castellatedMeshControls
     // actually be a lot less.
     maxGlobalCells 2000000;
 
-    // The surface refinement loop might spend lots of iterations refining just a
-    // few cells. This setting will cause refinement to stop if <= minimumRefine
-    // are selected for refinement. Note: it will at least do one iteration
-    // (unless the number of cells to refine is 0)
+    // The surface refinement loop might spend lots of iterations refining just
+    // a few cells. This setting will cause refinement to stop if
+    // <= minimumRefine cells are selected for refinement. Note: it will
+    // at least do one iteration (unless the number of cells to refine is 0)
     minRefinementCells 0;
 
     // Allow a certain level of imbalance during refining
@@ -177,7 +182,7 @@ castellatedMeshControls
             //  how to select the cells that are in the cellZone
             //  (inside / outside / specified insidePoint)
             //  The orientation of the faceZone is
-            //  - if on cellZone(s) : point out of (maximum) cellZone
+            //  - if on cellZone(s) : point out of (minimum) cellZone
             //  - if freestanding   : oriented according to surface
 
             //faceZone sphere;
@@ -239,26 +244,96 @@ castellatedMeshControls
         }
         //sphere.stl
         //{
-        //    mode distance;
-        //    levels ((1.0 5) (2.0 3));
+        //    mode inside;
+        //    levels ((1.0 4));
+        //    // Optional override of uniform refinement level such
+        //    //  that in small gaps we're getting more cells.
+        //    //  The specification is
+        //    //  - numGapCells : minimum number of cells in the gap
+        //    //  - minLevel    : min refinement level at which to kick in
+        //    //  - maxLevel    : upper refinement level
+        //    // All three settings can be overridden on a surface by
+        //    // surface basis in the refinementSurfaces section.
+        //    gapLevel (<numGapCells> <minLevel> <maxlevel>);
         //}
     }
+
+
+    // Limit refinement in geometric region
+    limitRegions
+    {
+    }
+
 
     // Mesh selection
     // ~~~~~~~~~~~~~~
 
     // After refinement patches get added for all refinementSurfaces and
     // all cells intersecting the surfaces get put into these patches. The
-    // section reachable from the locationInMesh is kept.
+    // section reachable from the location(s)InMesh is kept.
     // NOTE: This point should never be on a face, always inside a cell, even
     // after refinement.
-    locationInMesh (5 0.28 0.43);
+    //
+    // There are two different ways of specifying the regions to keep:
+    // 1. a single locationInMesh. All the 'zoned' surfaces are marked as such
+    //    in the refinementSurfaces with the faceZone and cellZone keywords.
+    //
+    // or
+    //
+    // 2. multiple locationsInMesh, with per location the name of the cellZone.
+    //    This uses walking to determine zones and automatically creates
+    //    faceZones on the outside of cellZones.
 
-    // Whether any faceZones (as specified in the refinementSurfaces)
-    // are only on the boundary of corresponding cellZones or also allow
-    // free-standing zone faces. Not used if there are no faceZones.
-    allowFreeStandingZoneFaces true;
 
+        // Ad 1. Specify a single location and how to treat faces inbetween
+        //       cellZones
+        locationInMesh (5 0.28 0.43);
+
+        // Whether any faceZones (as specified in the refinementSurfaces)
+        // are only on the boundary of corresponding cellZones or also allow
+        // free-standing zone faces. Not used if there are no faceZones.
+        allowFreeStandingZoneFaces true;
+
+
+
+        // 2. Specify multiple locations with optional cellZones for the
+        //    regions. faceZones are automatically constructed from the
+        //    names of the cellZones: <cellZoneA> _to_ <cellZoneB>
+        //    where the cellZoneA is the lowest numbered cellZone (non-cellZone
+        //    cells are in a special region called "none" which is always
+        //    last).
+
+        locationsInMesh
+        (
+            ((-0.09 -0.039 -0.049)  bottomAir)  // cellZone 0
+            ((-0.09 0.009 -0.049)   topAir)     // cellZone 1
+            ((-0.09 0.001 -0.049)   leftSolid)  // cellZone 2
+            ((0.02  0.001 -0.049)   rightSolid) // cellZone 3
+            ((-0.001 -0.039 0.0015) heater)     // cellZone 4
+        );
+
+        // Per synthesised faceZone name the faceType and type of baffles to
+        // create
+        faceZoneControls
+        {
+            bottomAir_to_heater
+            {
+                // Optional specification of patch type (default is wall). No
+                // constraint types (cyclic, symmetry) etc. are allowed.
+                patchInfo
+                {
+                    type patch;
+                    inGroups (patchPatches);
+                }
+                faceType baffle;
+            }
+        }
+
+
+
+    // Optional locations that should not be reachable from
+    // location(s)InMesh
+    locationsOutsideMesh ((100 100 100));
 
     // Optional: do not remove cells likely to give snapping problems
     // handleSnapProblems false;
@@ -266,6 +341,10 @@ castellatedMeshControls
     // Optional: switch off topological test for cells to-be-squashed
     //           and use geometric test instead
     //useTopologicalSnapDetection false;
+
+    // Optional: do not refine surface cells with opposite faces of
+    //           differing refinement levels
+    //interfaceRefine false;
 }
 
 // Settings for the snapping.
@@ -274,6 +353,11 @@ snapControls
     // Number of patch smoothing iterations before finding correspondence
     // to surface
     nSmoothPatch 3;
+
+    // Optional: number of smoothing iterations for internal points on
+    // refinement interfaces. This will reduce non-orthogonality on
+    // refinement interfaces.
+    //nSmoothInternal $nSmoothPatch;
 
     // Maximum relative distance for points to be attracted by surface.
     // True distance is this factor times local maximum edge length.
@@ -286,6 +370,11 @@ snapControls
     // Maximum number of snapping relaxation iterations. Should stop
     // before upon reaching a correct mesh.
     nRelaxIter 5;
+
+    // (wip) disable snapping to opposite near surfaces (revert to 22x
+    //  behaviour)
+    // detectNearSurfacesSnap false;
+
 
     // Feature snapping
 
@@ -305,8 +394,28 @@ snapControls
         multiRegionFeatureSnap false;
 
 
-    // wip: disable snapping to opposite near surfaces (revert to 22x behaviour)
-    // detectNearSurfacesSnap false;
+        //- When to run face splitting (never at first iteration, always
+        //  at last iteration). Is interval. Default -1 (disabled)
+        //nFaceSplitInterval 5;
+
+
+        // (wip) Optional for explicit feature snapping:
+        //- Detect baffle edges. Default is true.
+        //detectBaffles false;
+        //- Erase attraction close to feature point. Default is false.
+        //releasePoints true;
+        //- Walk along feature edges, adding missing ones. Default is true.
+        //stringFeatures false;
+        //- If diagonal attraction also attract other face points. Default is
+        //  false
+        //avoidDiagonal true;
+        //- When splitting what concave faces to leave intact. Default is 45
+        //  degrees.
+        //concaveAngle 30;
+        //- When splitting the minimum area ratio of faces. If face split
+        //  causes ratio of area less than this do not split. Default is 0.3
+        //minAreaRatio 0.3;
+
 }
 
 // Settings for the layer addition.
@@ -350,10 +459,10 @@ addLayersControls
     // cannot be above minThickness do not add layer.
     // If relativeSizes this is relative to undistorted size of cell
     // outside layer..
-    minThickness 0.25;
+    minThickness 0.1;
 
 
-    // Per final patch (so not geometry!) the layer information
+    // Per final patch or faceZone (so not geometry!) the layer information
     // Note: This behaviour changed after 21x. Any non-mentioned patches
     //       now slide unless:
     //          - nSurfaceLayers is explicitly mentioned to be 0.
@@ -397,6 +506,10 @@ addLayersControls
         // are perpendicular
         featureAngle 130;
 
+        // When to merge patch faces. Default is featureAngle. Useful when
+        // featureAngle is large.
+        //mergePatchFacesAngle 45;
+
         // Stop layer growth on highly warped cells
         maxFaceThicknessRatio 0.5;
 
@@ -433,8 +546,10 @@ addLayersControls
         // default is 0.
         //nSmoothDisplacement 90;
 
-        // (wip)Optional: do not extrude a point if none of the surrounding points is
-        // not extruded. Default is false.
+        // (wip)Optional: do not extrude any point where
+        //   (false) : all surrounding faces are not fully extruded
+        //   (true)  : all surrounding points are not extruded
+        // Default is false.
         //detectExtrusionIsland true;
 
 
@@ -449,7 +564,8 @@ addLayersControls
         // before upon reaching a correct mesh.
         nRelaxIter 5;
 
-        // Create buffer region for new layer terminations
+        // Create buffer region for new layer terminations, i.e. gradually
+        // step down number of layers. Set to <0 to terminate layer in one go.
         nBufferCellsNoExtrude 0;
 
         // Overall max number of layer addition iterations. The mesher will

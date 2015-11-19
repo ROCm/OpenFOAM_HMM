@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -112,7 +112,7 @@ public:
     //- Change patchField to zero on registered fields
     static void zeroPatchFields(fvMesh& mesh, const label patchI);
 
-    // -Reorder and remove trailing patches. If validBoundary call is parallel
+    //- Reorder and remove trailing patches. If validBoundary call is parallel
     //  synced and all add the same patch with same settings
     static void reorderPatches
     (
@@ -120,6 +120,18 @@ public:
         const labelList& oldToNew,
         const label nPatches,
         const bool validBoundary
+    );
+
+
+    //- Read mesh or create dummy mesh (0 cells, >0 patches). Works in two
+    //  modes according to masterOnlyReading:
+    //  true : all slaves create dummy mesh
+    //  false: checks locally for mesh directories and only creates dummy mesh
+    //         if not present
+    static autoPtr<fvMesh> newMesh
+    (
+        const IOobject& io,
+        const bool masterOnlyReading
     );
 
 };

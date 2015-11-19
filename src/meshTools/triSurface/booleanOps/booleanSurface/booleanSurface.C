@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +36,23 @@ License
 namespace Foam
 {
 defineTypeNameAndDebug(booleanSurface, 0);
+
+template<>
+const char* Foam::NamedEnum
+<
+    Foam::booleanSurface::booleanOpType,
+    4
+>::names[] =
+{
+    "union",
+    "intersection",
+    "difference",
+    "all"
+};
 }
+
+const Foam::NamedEnum<Foam::booleanSurface::booleanOpType, 4>
+Foam::booleanSurface::booleanOpTypeNames;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +47,7 @@ namespace Foam
 
 
 #define defineSurfaceWriterWriteField(ThisClass, FieldType)                   \
-    void ThisClass::write                                                     \
+    Foam::fileName ThisClass::write                                           \
     (                                                                         \
         const fileName& outputDir,                                            \
         const fileName& surfaceName,                                          \
@@ -59,7 +59,7 @@ namespace Foam
         const bool verbose                                                    \
     ) const                                                                   \
     {                                                                         \
-        writeTemplate                                                         \
+        return writeTemplate                                                  \
         (                                                                     \
             outputDir,                                                        \
             surfaceName,                                                      \

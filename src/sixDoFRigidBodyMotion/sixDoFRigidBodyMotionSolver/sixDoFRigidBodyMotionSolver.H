@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,6 +69,10 @@ class sixDoFRigidBodyMotionSolver
 
         //- Outer morphing distance (limit of linear interpolation region)
         const scalar do_;
+
+        //- Switch for test-mode in which only the
+        //  gravitational body-force is applied
+        Switch test_;
 
         //- Reference density required by the forces object for
         //  incompressible calculations, required if rhoName == rhoInf

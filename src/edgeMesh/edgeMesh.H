@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -247,11 +247,12 @@ public:
         //- Scale points. A non-positive factor is ignored
         virtual void scalePoints(const scalar);
 
-        //- Merge common points (points within mergeDist)
-        void mergePoints(const scalar mergeDist);
+        //- Merge common points (points within mergeDist). Return map from
+        //  old to new points.
+        virtual void mergePoints(const scalar mergeDist, labelList&);
 
-        //- Merge similar edges
-        void mergeEdges();
+        //- Merge duplicate edges
+        virtual void mergeEdges();
 
 
     // Write

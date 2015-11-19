@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -742,7 +742,7 @@ Foam::label Foam::meshRefinement::markInternalDistanceToFeatureRefinement
         }
     }
 
-    // Do test to see whether cells is inside/outside shell with higher level
+    // Do test to see whether cells are inside/outside shell with higher level
     labelList maxLevel;
     features_.findHigherLevel(testCc, testLevels, maxLevel);
 
@@ -820,7 +820,7 @@ Foam::label Foam::meshRefinement::markInternalRefinement
         }
     }
 
-    // Do test to see whether cells is inside/outside shell with higher level
+    // Do test to see whether cells are inside/outside shell with higher level
     labelList maxLevel;
     shells_.findHigherLevel(testCc, testLevels, maxLevel);
 
@@ -866,6 +866,56 @@ Foam::label Foam::meshRefinement::markInternalRefinement
     }
 
     return returnReduce(nRefine-oldNRefine, sumOp<label>());
+}
+
+
+Foam::label Foam::meshRefinement::unmarkInternalRefinement
+(
+    labelList& refineCell,
+    label& nRefine
+) const
+{
+    const labelList& cellLevel = meshCutter_.cellLevel();
+    const pointField& cellCentres = mesh_.cellCentres();
+
+    label oldNRefine = nRefine;
+
+    // Collect cells to test
+    pointField testCc(nRefine);
+    labelList testLevels(nRefine);
+    label testI = 0;
+
+    forAll(cellLevel, cellI)
+    {
+        if (refineCell[cellI] >= 0)
+        {
+            testCc[testI] = cellCentres[cellI];
+            testLevels[testI] = cellLevel[cellI];
+            testI++;
+        }
+    }
+
+    // Do test to see whether cells are inside/outside shell with higher level
+    labelList levelShell;
+    limitShells_.findLevel(testCc, testLevels, levelShell);
+
+    // Mark for refinement. Note that we didn't store the original cellID so
+    // now just reloop in same order.
+    testI = 0;
+    forAll(cellLevel, cellI)
+    {
+        if (refineCell[cellI] >= 0)
+        {
+            if (levelShell[testI] != -1)
+            {
+                refineCell[cellI] = -1;
+                nRefine--;
+            }
+            testI++;
+        }
+    }
+
+    return returnReduce(oldNRefine-nRefine, sumOp<label>());
 }
 
 
@@ -922,7 +972,6 @@ Foam::label Foam::meshRefinement::markSurfaceRefinement
 ) const
 {
     const labelList& cellLevel = meshCutter_.cellLevel();
-    const pointField& cellCentres = mesh_.cellCentres();
 
     label oldNRefine = nRefine;
 
@@ -941,36 +990,15 @@ Foam::label Foam::meshRefinement::markSurfaceRefinement
     pointField end(testFaces.size());
     labelList minLevel(testFaces.size());
 
-    forAll(testFaces, i)
-    {
-        label faceI = testFaces[i];
-
-        label own = mesh_.faceOwner()[faceI];
-
-        if (mesh_.isInternalFace(faceI))
-        {
-            label nei = mesh_.faceNeighbour()[faceI];
-
-            start[i] = cellCentres[own];
-            end[i] = cellCentres[nei];
-            minLevel[i] = min(cellLevel[own], cellLevel[nei]);
-        }
-        else
-        {
-            label bFaceI = faceI - mesh_.nInternalFaces();
-
-            start[i] = cellCentres[own];
-            end[i] = neiCc[bFaceI];
-            minLevel[i] = min(cellLevel[own], neiLevel[bFaceI]);
-        }
-    }
-
-    // Extend segments a bit
-    {
-        const vectorField smallVec(ROOTSMALL*(end-start));
-        start -= smallVec;
-        end += smallVec;
-    }
+    calcCellCellRays
+    (
+        neiCc,
+        neiLevel,
+        testFaces,
+        start,
+        end,
+        minLevel
+    );
 
 
     // Do test for higher intersections
@@ -980,6 +1008,7 @@ Foam::label Foam::meshRefinement::markSurfaceRefinement
     labelList surfaceMinLevel;
     surfaces_.findHigherIntersection
     (
+        shells_,
         start,
         end,
         minLevel,
@@ -1129,6 +1158,7 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
     pointField end(testFaces.size());
     labelList minLevel(testFaces.size());
 
+    // Note: uses isMasterFace otherwise could be call to calcCellCellRays
     forAll(testFaces, i)
     {
         label faceI = testFaces[i];
@@ -1718,7 +1748,6 @@ Foam::label Foam::meshRefinement::markProximityRefinement
 ) const
 {
     const labelList& cellLevel = meshCutter_.cellLevel();
-    const pointField& cellCentres = mesh_.cellCentres();
 
     label oldNRefine = nRefine;
 
@@ -1738,36 +1767,15 @@ Foam::label Foam::meshRefinement::markProximityRefinement
     pointField end(testFaces.size());
     labelList minLevel(testFaces.size());
 
-    forAll(testFaces, i)
-    {
-        label faceI = testFaces[i];
-
-        label own = mesh_.faceOwner()[faceI];
-
-        if (mesh_.isInternalFace(faceI))
-        {
-            label nei = mesh_.faceNeighbour()[faceI];
-
-            start[i] = cellCentres[own];
-            end[i] = cellCentres[nei];
-            minLevel[i] = min(cellLevel[own], cellLevel[nei]);
-        }
-        else
-        {
-            label bFaceI = faceI - mesh_.nInternalFaces();
-
-            start[i] = cellCentres[own];
-            end[i] = neiCc[bFaceI];
-            minLevel[i] = min(cellLevel[own], neiLevel[bFaceI]);
-        }
-    }
-
-    // Extend segments a bit
-    {
-        const vectorField smallVec(ROOTSMALL*(end-start));
-        start -= smallVec;
-        end += smallVec;
-    }
+    calcCellCellRays
+    (
+        neiCc,
+        neiLevel,
+        testFaces,
+        start,
+        end,
+        minLevel
+    );
 
 
     // Test for all intersections (with surfaces of higher gap level than
@@ -2044,7 +2052,10 @@ Foam::labelList Foam::meshRefinement::refineCandidates
     const bool internalRefinement,
     const bool surfaceRefinement,
     const bool curvatureRefinement,
+    const bool smallFeatureRefinement,
     const bool gapRefinement,
+    const bool bigGapRefinement,
+    const bool spreadGapSize,
     const label maxGlobalCells,
     const label maxLocalCells
 ) const
@@ -2094,6 +2105,8 @@ Foam::labelList Foam::meshRefinement::refineCandidates
         pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
         calcNeighbourData(neiLevel, neiCc);
 
+
+        const scalar planarCos = Foam::cos(degToRad(planarAngle));
 
 
         // Cells pierced by feature lines
@@ -2162,6 +2175,30 @@ Foam::labelList Foam::meshRefinement::refineCandidates
             );
             Info<< "Marked for refinement due to surface intersection          "
                 << ": " << nSurf << " cells."  << endl;
+
+            // Refine intersected-cells only inside gaps. See
+            // markInternalGapRefinement to refine all cells inside gaps.
+            if
+            (
+                planarCos >= -1
+             && planarCos <= 1
+             && max(shells_.maxGapLevel()) > 0
+            )
+            {
+                label nGapSurf = markSurfaceGapRefinement
+                (
+                    planarCos,
+                    nAllowRefine,
+                    neiLevel,
+                    neiCc,
+
+                    refineCell,
+                    nRefine
+                );
+                Info<< "Marked for refinement due to surface intersection"
+                    << " (at gaps)"
+                    << ": " << nGapSurf << " cells."  << endl;
+            }
         }
 
         // Refinement based on curvature of surface
@@ -2189,7 +2226,33 @@ Foam::labelList Foam::meshRefinement::refineCandidates
         }
 
 
-        const scalar planarCos = Foam::cos(degToRad(planarAngle));
+        // Refinement based on features smaller than cell size
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        if
+        (
+            smallFeatureRefinement
+         && (planarCos >= -1 && planarCos <= 1)
+         && max(shells_.maxGapLevel()) > 0
+        )
+        {
+            label nGap = markSmallFeatureRefinement
+            (
+                planarCos,
+                nAllowRefine,
+                neiLevel,
+                neiCc,
+
+                refineCell,
+                nRefine
+            );
+            Info<< "Marked for refinement due to close opposite surfaces       "
+                << ": " << nGap << " cells."  << endl;
+        }
+
+
+        // Refinement based on gap (only neighbouring cells)
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         if
         (
@@ -2213,6 +2276,50 @@ Foam::labelList Foam::meshRefinement::refineCandidates
             );
             Info<< "Marked for refinement due to close opposite surfaces       "
                 << ": " << nGap << " cells."  << endl;
+        }
+
+
+        // Refinement based on gaps larger than cell size
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        if
+        (
+            bigGapRefinement
+         && (planarCos >= -1 && planarCos <= 1)
+         && max(shells_.maxGapLevel()) > 0
+        )
+        {
+            // Refine based on gap information provided by shell and nearest
+            // surface
+            labelList numGapCells;
+            scalarField gapSize;
+            label nGap = markInternalGapRefinement
+            (
+                planarCos,
+                spreadGapSize,
+                nAllowRefine,
+
+                refineCell,
+                nRefine,
+                numGapCells,
+                gapSize
+            );
+            Info<< "Marked for refinement due to opposite surfaces"
+                << "             "
+                << ": " << nGap << " cells."  << endl;
+        }
+
+
+        // Limit refinement
+        // ~~~~~~~~~~~~~~~~
+
+        {
+            label nUnmarked = unmarkInternalRefinement(refineCell, nRefine);
+            if (nUnmarked > 0)
+            {
+                Info<< "Unmarked for refinement due to limit shells"
+                    << "                : " << nUnmarked << " cells."  << endl;
+            }
         }
 
 

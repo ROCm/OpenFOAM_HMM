@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,6 +50,7 @@ SourceFiles
 #include "boolList.H"
 #include "labelList.H"
 #include "primitiveFieldsFwd.H"
+#include "labelPair.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,6 +81,9 @@ class FaceCellWave
 
         //- Reference to mesh
         const polyMesh& mesh_;
+
+        //- Optional boundary faces that information should travel through
+        const List<labelPair> explicitConnections_;
 
         //- Information for all faces
         UList<Type>& allFaceInfo_;
@@ -232,6 +236,10 @@ class FaceCellWave
             //- Merge data from across AMI cyclics
             void handleAMICyclicPatches();
 
+            //- Merge data across explicitly provided local connections (usually
+            //  baffles)
+            void handleExplicitConnections();
+
 
       // Private static data
 
@@ -278,6 +286,23 @@ public:
         FaceCellWave
         (
             const polyMesh&,
+            const labelList& initialChangedFaces,
+            const List<Type>& changedFacesInfo,
+            UList<Type>& allFaceInfo,
+            UList<Type>& allCellInfo,
+            const label maxIter,
+            TrackingData& td = dummyTrackData_
+        );
+
+        //- Construct from mesh and explicitly connected boundary faces
+        //  and list of changed faces with the Type
+        //  for these faces. Iterates until nothing changes or maxIter reached.
+        //  (maxIter can be 0)
+        FaceCellWave
+        (
+            const polyMesh&,
+            const List<labelPair>& explicitConnections,
+            const bool handleCyclicAMI,
             const labelList& initialChangedFaces,
             const List<Type>& changedFacesInfo,
             UList<Type>& allFaceInfo,

@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,9 +59,11 @@ Description
 
     \heading Function object usage
     \table
-        Property | Description               | Required    | Default value
+        Property | Description                | Required   | Default value
         type     | type name: wallShearStress | yes        |
+        resultName | Name of wall shear stress field | no  | <function name>
         patches  | list of patches to process | no         | all wall patches
+        log      | Log to standard output     | no         | yes
     \endtable
 
 SourceFiles
@@ -105,10 +107,14 @@ protected:
         //- Name of this set of wallShearStress object
         word name_;
 
+        //- Refefence to the database
         const objectRegistry& obr_;
 
         //- on/off switch
         bool active_;
+
+        //- Result name
+        word resultName_;
 
         //- Switch to send output to Info as well as to file
         Switch log_;
@@ -120,7 +126,7 @@ protected:
     // Protected Member Functions
 
         //- File header information
-        virtual void writeFileHeader(const label i);
+        virtual void writeFileHeader(Ostream& os) const;
 
         //- Calculate the shear stress
         void calcShearStress

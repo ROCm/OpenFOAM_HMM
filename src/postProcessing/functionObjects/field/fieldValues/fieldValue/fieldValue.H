@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Base class for field value -based function objects.
+    Base class for field value-based function objects.
 
 SourceFiles
     fieldValue.C
@@ -38,6 +38,7 @@ SourceFiles
 #ifndef fieldValue_H
 #define fieldValue_H
 
+#include "functionObjectState.H"
 #include "functionObjectFile.H"
 #include "Switch.H"
 #include "OFstream.H"
@@ -62,6 +63,7 @@ class mapPolyMesh;
 
 class fieldValue
 :
+    public functionObjectState,
     public functionObjectFile
 {
 
@@ -69,17 +71,11 @@ protected:
 
     // Protected data
 
-        //- Name of this fieldValue object
-        word name_;
-
         //- Database this class is registered to
         const objectRegistry& obr_;
 
         //- Construction dictionary
         dictionary dict_;
-
-        //- Active flag
-        bool active_;
 
         //- Switch to send output to Info as well as to file
         Switch log_;
@@ -93,8 +89,8 @@ protected:
         //- Output field values flag
         Switch valueOutput_;
 
-        //- Results dictionary for external access of results
-        dictionary resultDict_;
+        //- Scale factor - optional
+        scalar scaleFactor_;
 
 
 public:
@@ -172,9 +168,6 @@ public:
 
             //- Helper function to return the reference to the mesh
             inline const fvMesh& mesh() const;
-
-            //- Return access to the latest set of results
-            inline const dictionary& resultDict() const;
 
 
         // Function object functions

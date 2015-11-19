@@ -37,7 +37,7 @@ Foam::label Foam::sampledSurfaces::classifyFields()
     if (loadFromFiles_)
     {
         // Check files for a particular time
-        IOobjectList objects(mesh_, mesh_.time().timeName());
+        IOobjectList objects(obr_, obr_.time().timeName());
         wordList allFields = objects.sortedNames();
 
         forAll(fieldSelection_, i)
@@ -59,7 +59,7 @@ Foam::label Foam::sampledSurfaces::classifyFields()
     else
     {
         // Check currently available fields
-        wordList allFields = mesh_.sortedNames();
+        wordList allFields = obr_.sortedNames();
         labelList indices = findStrings(fieldSelection_, allFields);
 
         forAll(fieldSelection_, i)

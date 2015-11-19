@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,14 +75,15 @@ void Foam::Pstream::exchange
     // Send sizes across. Note: blocks.
     combineReduce(sizes, UPstream::listEq(), tag, comm);
 
-    if (UPstream::nProcs(comm) > 1)
+    recvBufs.setSize(sendBufs.size());
+
+    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
     {
         label startOfRequests = Pstream::nRequests();
 
         // Set up receives
         // ~~~~~~~~~~~~~~~
 
-        recvBufs.setSize(sendBufs.size());
         forAll(sizes, procI)
         {
             label nRecv = sizes[procI][UPstream::myProcNo(comm)];

@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "sixDoFRigidBodyMotion.H"
+#include "sixDoFSolver.H"
 #include "septernion.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -84,7 +85,8 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion()
     momentOfInertia_(diagTensor::one*VSMALL),
     aRelax_(1.0),
     aDamp_(1.0),
-    report_(false)
+    report_(false),
+    solver_(NULL)
 {}
 
 
@@ -121,7 +123,8 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     momentOfInertia_(dict.lookup("momentOfInertia")),
     aRelax_(dict.lookupOrDefault<scalar>("accelerationRelaxation", 1.0)),
     aDamp_(dict.lookupOrDefault<scalar>("accelerationDamping", 1.0)),
-    report_(dict.lookupOrDefault<Switch>("report", false))
+    report_(dict.lookupOrDefault<Switch>("report", false)),
+    solver_(sixDoFSolver::New(dict.subDict("solver"), *this))
 {
     addRestraints(dict);
 
@@ -168,6 +171,12 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     aRelax_(sDoFRBM.aRelax_),
     aDamp_(sDoFRBM.aDamp_),
     report_(sDoFRBM.report_)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::sixDoFRigidBodyMotion::~sixDoFRigidBodyMotion()
 {}
 
 
@@ -257,67 +266,46 @@ void Foam::sixDoFRigidBodyMotion::addConstraints
 }
 
 
-void Foam::sixDoFRigidBodyMotion::updatePosition
-(
-    scalar deltaT,
-    scalar deltaT0
-)
-{
-    // First leapfrog velocity adjust and motion part, required before
-    // force calculation
-
-    if (Pstream::master())
-    {
-        v() = tConstraints_ & (v0() + aDamp_*0.5*deltaT0*a());
-        pi() = rConstraints_ & (pi0() + aDamp_*0.5*deltaT0*tau());
-
-        // Leapfrog move part
-        centreOfRotation() = centreOfRotation0() + deltaT*v();
-
-        // Leapfrog orientation adjustment
-        Tuple2<tensor, vector> Qpi = rotate(Q0(), pi(), deltaT);
-        Q() = Qpi.first();
-        pi() = rConstraints_ & Qpi.second();
-    }
-
-    Pstream::scatter(motionState_);
-}
-
-
 void Foam::sixDoFRigidBodyMotion::updateAcceleration
 (
     const vector& fGlobal,
-    const vector& tauGlobal,
-    scalar deltaT
+    const vector& tauGlobal
 )
 {
     static bool first = false;
 
-    // Second leapfrog velocity adjust part, required after motion and
-    // acceleration calculation
+    // Save the previous iteration accelerations for relaxation
+    vector aPrevIter = a();
+    vector tauPrevIter = tau();
 
+    // Calculate new accelerations
+    a() = fGlobal/mass_;
+    tau() = (Q().T() & tauGlobal);
+    applyRestraints();
+
+    // Relax accelerations on all but first iteration
+    if (!first)
+    {
+        a() = aRelax_*a() + (1 - aRelax_)*aPrevIter;
+        tau() = aRelax_*tau() + (1 - aRelax_)*tauPrevIter;
+    }
+
+    first = false;
+}
+
+
+void Foam::sixDoFRigidBodyMotion::update
+(
+    bool firstIter,
+    const vector& fGlobal,
+    const vector& tauGlobal,
+    scalar deltaT,
+    scalar deltaT0
+)
+{
     if (Pstream::master())
     {
-        // Save the previous iteration accelerations for relaxation
-        vector aPrevIter = a();
-        vector tauPrevIter = tau();
-
-        // Calculate new accelerations
-        a() = fGlobal/mass_;
-        tau() = (Q().T() & tauGlobal);
-        applyRestraints();
-
-        // Relax accelerations on all but first iteration
-        if (!first)
-        {
-            a() = aRelax_*a() + (1 - aRelax_)*aPrevIter;
-            tau() = aRelax_*tau() + (1 - aRelax_)*tauPrevIter;
-        }
-        first = false;
-
-        // Correct velocities
-        v() += tConstraints_ & aDamp_*0.5*deltaT*a();
-        pi() += rConstraints_ & aDamp_*0.5*deltaT*tau();
+        solver_->solve(firstIter, fGlobal, tauGlobal, deltaT, deltaT0);
 
         if (report_)
         {

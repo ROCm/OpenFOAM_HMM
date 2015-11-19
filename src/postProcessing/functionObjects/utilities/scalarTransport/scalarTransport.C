@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,6 +67,34 @@ Foam::wordList Foam::scalarTransport::boundaryTypes() const
     }
 
     return bTypes;
+}
+
+
+Foam::volScalarField& Foam::scalarTransport::transportedField()
+{
+    if (!mesh_.foundObject<volScalarField>(name()))
+    {
+        volScalarField* fldPtr = new volScalarField
+        (
+            IOobject
+            (
+                name(),
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::READ_IF_PRESENT,
+                IOobject::AUTO_WRITE
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimless, 0.0),
+            boundaryTypes()
+        );
+        fldPtr->store();
+    }
+
+    return const_cast<volScalarField&>
+    (
+        mesh_.lookupObject<volScalarField>(name())
+    );
 }
 
 
@@ -158,27 +186,13 @@ Foam::scalarTransport::scalarTransport
     resetOnStartUp_(false),
     nCorr_(0),
     autoSchemes_(false),
-    fvOptions_(mesh_),
-    T_
-    (
-        IOobject
-        (
-            name,
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::READ_IF_PRESENT,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar("zero", dimless, 0.0),
-        boundaryTypes()
-    )
+    fvOptions_(mesh_)
 {
     read(dict);
 
     if (resetOnStartUp_)
     {
-        T_ == dimensionedScalar("zero", dimless, 0.0);
+        transportedField() == dimensionedScalar("zero", dimless, 0.0);
     }
 }
 
@@ -227,11 +241,13 @@ void Foam::scalarTransport::execute()
         const surfaceScalarField& phi =
             mesh_.lookupObject<surfaceScalarField>(phiName_);
 
+        volScalarField& T = transportedField();
+
         // calculate the diffusivity
         volScalarField DT(this->DT(phi));
 
         // set schemes
-        word schemeVar = T_.name();
+        word schemeVar = T.name();
         if (autoSchemes_)
         {
             schemeVar = UName_;
@@ -257,11 +273,11 @@ void Foam::scalarTransport::execute()
             {
                 fvScalarMatrix TEqn
                 (
-                    fvm::ddt(rho, T_)
-                  + fvm::div(phi, T_, divScheme)
-                  - fvm::laplacian(DT, T_, laplacianScheme)
+                    fvm::ddt(rho, T)
+                  + fvm::div(phi, T, divScheme)
+                  - fvm::laplacian(DT, T, laplacianScheme)
                  ==
-                    fvOptions_(rho, T_)
+                    fvOptions_(rho, T)
                 );
 
                 TEqn.relax(relaxCoeff);
@@ -278,11 +294,11 @@ void Foam::scalarTransport::execute()
             {
                 fvScalarMatrix TEqn
                 (
-                    fvm::ddt(T_)
-                  + fvm::div(phi, T_, divScheme)
-                  - fvm::laplacian(DT, T_, laplacianScheme)
+                    fvm::ddt(T)
+                  + fvm::div(phi, T, divScheme)
+                  - fvm::laplacian(DT, T, laplacianScheme)
                  ==
-                    fvOptions_(T_)
+                    fvOptions_(T)
                 );
 
                 TEqn.relax(relaxCoeff);
