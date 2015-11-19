@@ -524,7 +524,25 @@ addLayersControls
 
 
 
-    // Medial axis analysis
+    // Choice of mesh shrinking algorithm
+
+        // Optional mesh shrinking algorithm (default is displacementMedialAxis)
+        // The displacementMotionSolver is a wrapper around the displacement
+        // motion solvers. It needs specification of the solver to use and
+        // its control dictionary.
+        //meshShrinker displacementMotionSolver;
+        //solver displacementLaplacian;
+        //displacementLaplacianCoeffs
+        //{
+        //    diffusivity quadratic inverseDistance
+        //    (
+        //        sphere.stl_firstSolid
+        //        maxY
+        //    );
+        //}
+
+
+    // Medial axis analysis (for use with default displacementMedialAxis)
 
         // Angle used to pick up medial axis points
         // Note: changed(corrected) w.r.t 17x! 90 degrees corresponds to 130
@@ -552,9 +570,6 @@ addLayersControls
         // Default is false.
         //detectExtrusionIsland true;
 
-
-    // Mesh shrinking
-
         // Optional: at non-patched sides allow mesh to slip if extrusion
         // direction makes angle larger than slipFeatureAngle. Default is
         // 0.5*featureAngle.
@@ -563,6 +578,9 @@ addLayersControls
         // Maximum number of snapping relaxation iterations. Should stop
         // before upon reaching a correct mesh.
         nRelaxIter 5;
+
+
+    // Mesh shrinking
 
         // Create buffer region for new layer terminations, i.e. gradually
         // step down number of layers. Set to <0 to terminate layer in one go.

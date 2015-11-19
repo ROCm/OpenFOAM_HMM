@@ -34,7 +34,7 @@ Description
     solver displacementLaplacian;
     displacementLaplacianCoeffs
     {
-        diffusivity  quadratic inverseDistance 1(wall);
+        diffusivity quadratic inverseDistance 1(wall);
     }
     \endverbatim
 

@@ -47,10 +47,10 @@ wmake $targetType lagrangian/distributionModels
 wmake $targetType genericPatchFields
 
 wmake $targetType conversion
-wmake $targetType sampling
 wmake $targetType mesh/extrudeModel
 wmake $targetType dynamicMesh
 wmake $targetType dynamicFvMesh
+wmake $targetType sampling
 wmake $targetType topoChangerFvMesh
 
 # Compile scotchDecomp, metisDecomp etc.
