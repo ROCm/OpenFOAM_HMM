@@ -4,7 +4,6 @@ EXE_NDEBUG = -DNDEBUG
 
 c++CGALWARN = -Wno-old-style-cast
 
-/*-- Define NO_CGAL to avoid using CGAL altogether */
 /*-- Define CGAL_INEXACT to use inexact CGAL constructions */
 
 include $(GENERAL_RULES)/CGAL
@@ -14,16 +13,13 @@ EXE_INC = \
     ${EXE_NDEBUG} \
     ${CGAL_INC} \
     ${c++CGALWARN} \
-    $(COMPILE_FLAGS) \
-    -IPolyhedronReader \
+    -I.. \
     -I$(FOAM_SRC)/surfMesh/lnInclude \
     -I$(FOAM_SRC)/triSurface/lnInclude \
     -I$(LIB_SRC)/edgeMesh/lnInclude \
-    -I$(LIB_SRC)/meshTools/lnInclude
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I/usr/include/Qt
 
-EXE_LIBS = \
-    -lsurfMesh \
-    -ltriSurface \
-    -ledgeMesh \
-    -lmeshTools \
-    $(LINK_FLAGS)
+LIB_LIBS = \
+    -L${CGAL_ARCH_PATH}/lib \
+    -ltriSurface
