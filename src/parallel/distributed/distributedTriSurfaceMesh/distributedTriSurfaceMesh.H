@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,6 +94,8 @@ private:
 
         //- Merging distance
         scalar mergeDist_;
+
+        autoPtr<IOdictionary> decomposeParDict_;
 
         //- Decomposition used when independently decomposing surface.
         autoPtr<decompositionMethod> decomposer_;

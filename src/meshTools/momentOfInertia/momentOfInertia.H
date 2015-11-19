@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,7 +72,8 @@ public:
         scalar density,
         scalar& mass,
         vector& cM,
-        tensor& J
+        tensor& J,
+        bool doReduce = false
     );
 
     static void massPropertiesSolid
@@ -90,7 +91,18 @@ public:
         scalar density,
         scalar& mass,
         vector& cM,
-        tensor& J
+        tensor& J,
+        bool doReduce = false
+    );
+
+    static void massPropertiesPatch
+    (
+        const polyPatch& pp,
+        scalar density,
+        scalar& mass,
+        vector& cM,
+        tensor& J,
+        bool doReduce = false
     );
 
     static tensor applyParallelAxisTheorem

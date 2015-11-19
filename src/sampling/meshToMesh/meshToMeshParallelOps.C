@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,7 @@ License
 #include "mergePoints.H"
 #include "processorPolyPatch.H"
 #include "SubField.H"
+#include "AABBTree.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -84,7 +85,7 @@ Foam::label Foam::meshToMesh::calcDistribution
 
 Foam::label Foam::meshToMesh::calcOverlappingProcs
 (
-    const List<boundBox>& procBb,
+    const List<treeBoundBoxList>& procBb,
     const boundBox& bb,
     boolList& overlaps
 ) const
@@ -95,12 +96,16 @@ Foam::label Foam::meshToMesh::calcOverlappingProcs
 
     forAll(procBb, procI)
     {
-        const boundBox& bbp = procBb[procI];
+        const treeBoundBoxList& bbp = procBb[procI];
 
-        if (bbp.overlaps(bb))
+        forAll(bbp, bbI)
         {
-            overlaps[procI] = true;
-            nOverlaps++;
+            if (bbp[bbI].overlaps(bb))
+            {
+                overlaps[procI] = true;
+                nOverlaps++;
+                break;
+            }
         }
     }
 
@@ -115,20 +120,20 @@ Foam::autoPtr<Foam::mapDistribute> Foam::meshToMesh::calcProcMap
 ) const
 {
     // get decomposition of cells on src mesh
-    List<boundBox> procBb(Pstream::nProcs());
+    List<treeBoundBoxList> procBb(Pstream::nProcs());
 
     if (src.nCells() > 0)
     {
-        // bounding box for my mesh - do not parallel reduce
-        procBb[Pstream::myProcNo()] = boundBox(src.points(), false);
-
-        // slightly increase size of bounding boxes to allow for cases where
-        // bounding boxes are perfectly alligned
-        procBb[Pstream::myProcNo()].inflate(0.01);
+        procBb[Pstream::myProcNo()] = AABBTree<labelList>
+        (
+            src.cellPoints(),
+            src.points(),
+            false
+        ).boundBoxes();
     }
     else
     {
-        procBb[Pstream::myProcNo()] = boundBox();
+        procBb[Pstream::myProcNo()] = treeBoundBoxList();
     }
 
 
@@ -417,7 +422,7 @@ void Foam::meshToMesh::distributeCells
             labelList globalElems(sendElems.size());
             forAll(sendElems, i)
             {
-                if (debug)
+                if (debug > 1)
                 {
                     Pout<< "tgtProc:" << Pstream::myProcNo()
                         << " sending tgt cell " << sendElems[i]
@@ -605,7 +610,7 @@ void Foam::meshToMesh::distributeAndMergeCells
                 }
                 else
                 {
-                    if (debug)
+                    if (debug > 1)
                     {
                         Pout<< "Additional internal face between procs:"
                             << key[0] << " and " << key[1]
@@ -732,7 +737,7 @@ void Foam::meshToMesh::distributeAndMergeCells
                         label newNbr = fnd();
                         label tgtFaceI = internalFaceOffset[procI]++;
 
-                        if (debug)
+                        if (debug > 1)
                         {
                             Pout<< "    proc " << procI
                                 << "\tinserting face:" << tgtFaceI
@@ -812,7 +817,7 @@ void Foam::meshToMesh::distributeAndMergeCells
                     label newOwn = cellOffset[procI] + faceOs[i];
                     label tgtFaceI = nIntFaces++;
 
-                    if (debug)
+                    if (debug > 1)
                     {
                         Pout<< "    proc " << procI
                             << "\tinserting boundary face:" << tgtFaceI

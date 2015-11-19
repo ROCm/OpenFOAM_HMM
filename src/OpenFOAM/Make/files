@@ -91,6 +91,9 @@ $(strings)/wordRe/wordRe.C
 $(strings)/lists/hashedWordList.C
 $(strings)/stringOps/stringOps.C
 
+ops = primitives/ops
+$(ops)/flipOp.C
+
 primitives/hashes/Hasher/Hasher.C
 
 sha1 = primitives/hashes/SHA1
@@ -505,6 +508,7 @@ $(mapPolyMesh)/mapPolyMesh.C
 $(mapPolyMesh)/faceMapper/faceMapper.C
 $(mapPolyMesh)/cellMapper/cellMapper.C
 $(mapPolyMesh)/mapDistribute/mapDistribute.C
+$(mapPolyMesh)/mapDistribute/mapDistributeBase.C
 $(mapPolyMesh)/mapDistribute/mapDistributePolyMesh.C
 $(mapPolyMesh)/mapDistribute/IOmapDistribute.C
 $(mapPolyMesh)/mapAddedPolyMesh.C
@@ -617,6 +621,8 @@ $(derivedPointPatchFields)/timeVaryingUniformFixedValue/timeVaryingUniformFixedV
 $(derivedPointPatchFields)/codedFixedValue/codedFixedValuePointPatchFields.C
 
 fields/GeometricFields/pointFields/pointFields.C
+
+fields/ReadFields/ReadFields.C
 
 meshes/bandCompression/bandCompression.C
 meshes/preservePatchTypes/preservePatchTypes.C

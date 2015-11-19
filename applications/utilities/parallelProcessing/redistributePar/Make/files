@@ -1,3 +1,5 @@
+parLagrangianRedistributor.C
+parFvFieldReconstructor.C
 loadOrCreateMesh.C
 redistributePar.C
 

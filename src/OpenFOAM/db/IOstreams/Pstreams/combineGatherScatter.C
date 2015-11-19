@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +55,7 @@ void Pstream::combineGather
     const label comm
 )
 {
-    if (UPstream::nProcs(comm) > 1)
+    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
     {
         // Get my communication order
         const commsStruct& myComm = comms[UPstream::myProcNo(comm)];
@@ -182,7 +182,7 @@ void Pstream::combineScatter
     const label comm
 )
 {
-    if (UPstream::nProcs(comm) > 1)
+    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
     {
         // Get my communication order
         const UPstream::commsStruct& myComm = comms[UPstream::myProcNo(comm)];
@@ -287,7 +287,7 @@ void Pstream::listCombineGather
     const label comm
 )
 {
-    if (UPstream::nProcs(comm) > 1)
+    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
     {
         // Get my communication order
         const commsStruct& myComm = comms[UPstream::myProcNo(comm)];
@@ -421,7 +421,7 @@ void Pstream::listCombineScatter
     const label comm
 )
 {
-    if (UPstream::nProcs(comm) > 1)
+    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
     {
         // Get my communication order
         const UPstream::commsStruct& myComm = comms[UPstream::myProcNo(comm)];
@@ -540,7 +540,7 @@ void Pstream::mapCombineGather
     const label comm
 )
 {
-    if (UPstream::nProcs(comm) > 1)
+    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
     {
         // Get my communication order
         const commsStruct& myComm = comms[UPstream::myProcNo(comm)];
@@ -640,7 +640,7 @@ void Pstream::mapCombineScatter
     const label comm
 )
 {
-    if (UPstream::nProcs(comm) > 1)
+    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
     {
         // Get my communication order
         const UPstream::commsStruct& myComm = comms[UPstream::myProcNo(comm)];

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -310,16 +310,14 @@ void Foam::directAMI<SourcePatch, TargetPatch>::calculate
     forAll(srcAddr, i)
     {
         scalar magSf = this->srcMagSf_[i];
-//        srcWeights[i] = scalarList(srcAddr[i].size(), magSf);
-        srcWeights[i] = scalarList(1, magSf);
         srcAddress[i].transfer(srcAddr[i]);
+        srcWeights[i] = scalarList(1, magSf);
     }
     forAll(tgtAddr, i)
     {
         scalar magSf = this->tgtMagSf_[i];
-//        tgtWeights[i] = scalarList(tgtAddr[i].size(), magSf);
-        tgtWeights[i] = scalarList(1, magSf);
         tgtAddress[i].transfer(tgtAddr[i]);
+        tgtWeights[i] = scalarList(1, magSf);
     }
 }
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,6 +63,17 @@ Foam::argList::initValidTables::initValidTables()
         "slave root directories for distributed running"
     );
     validParOptions.set("roots", "(dir1 .. dirN)");
+
+    argList::addOption
+    (
+        "decomposeParDict", "file",
+        "read decomposePar dictionary from specified location"
+    );
+    validParOptions.set
+    (
+        "decomposeParDict",
+        "file"
+    );
 
     argList::addBoolOption
     (
@@ -147,6 +158,7 @@ void Foam::argList::noParallel()
 {
     removeOption("parallel");
     removeOption("roots");
+    removeOption("decomposeParDict");
     validParOptions.clear();
 }
 
@@ -601,13 +613,23 @@ void Foam::argList::parse
             }
             else
             {
-                source = rootPath_/globalCase_/"system/decomposeParDict";
+                source = rootPath_/globalCase_/"system"/"decomposeParDict";
+                // Override with -decomposeParDict
+                if (options_.found("decomposeParDict"))
+                {
+                    source = options_["decomposeParDict"];
+                    if (isDir(source))
+                    {
+                        source = source/"decomposeParDict";
+                    }
+                }
+
                 IFstream decompDictStream(source);
 
                 if (!decompDictStream.good())
                 {
                     FatalError
-                        << "Cannot read "
+                        << "Cannot read decomposeParDict from "
                         << decompDictStream.name()
                         << exit(FatalError);
                 }
@@ -770,9 +792,6 @@ void Foam::argList::parse
         if (Pstream::master())
         {
             slaveProcs.setSize(Pstream::nProcs() - 1);
-            string  slaveMachine;
-            label slavePid;
-
             label procI = 0;
             for
             (
@@ -782,15 +801,30 @@ void Foam::argList::parse
             )
             {
                 IPstream fromSlave(Pstream::scheduled, slave);
-                fromSlave >> slaveMachine >> slavePid;
+
+                string slaveBuild;
+                string slaveMachine;
+                label slavePid;
+                fromSlave >> slaveBuild >> slaveMachine >> slavePid;
 
                 slaveProcs[procI++] = slaveMachine + "." + name(slavePid);
+
+                // Check build string to make sure all processors are running
+                // the same build
+                if (slaveBuild != Foam::FOAMbuild)
+                {
+                    FatalErrorIn(executable())
+                        << "Master is running version " << Foam::FOAMbuild
+                        << "; slave " << procI << " is running version "
+                        << slaveBuild
+                        << exit(FatalError);
+                }
             }
         }
         else
         {
             OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster << hostName() << pid();
+            toMaster << string(Foam::FOAMbuild) << hostName() << pid();
         }
     }
 

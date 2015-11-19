@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -101,7 +101,7 @@ inline void Foam::UList<T>::checkIndex(const label i) const
     if (!size_)
     {
         FatalErrorIn("UList<T>::checkIndex(const label)")
-            << "attempt to access element from zero sized list"
+            << "attempt to access element " << i << " from zero sized list"
             << abort(FatalError);
     }
     else if (i<0 || i>=size_)

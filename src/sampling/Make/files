@@ -62,6 +62,7 @@ meshToMeshMethods = meshToMesh/calcMethod
 $(meshToMeshMethods)/meshToMeshMethod/meshToMeshMethod.C
 $(meshToMeshMethods)/meshToMeshMethod/meshToMeshMethodNew.C
 $(meshToMeshMethods)/cellVolumeWeight/cellVolumeWeightMethod.C
+$(meshToMeshMethods)/correctedCellVolumeWeight/correctedCellVolumeWeightMethod.C
 $(meshToMeshMethods)/direct/directMethod.C
 $(meshToMeshMethods)/mapNearest/mapNearestMethod.C
 

@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +37,8 @@ Description
 namespace Foam
 {
 
+class mapDistributeBase;
+
 /*---------------------------------------------------------------------------*\
                            Class FieldMapper Declaration
 \*---------------------------------------------------------------------------*/
@@ -63,6 +65,19 @@ public:
         virtual label size() const = 0;
 
         virtual bool direct() const = 0;
+
+        virtual bool distributed() const
+        {
+            return false;
+        }
+
+        virtual const mapDistributeBase& distributeMap() const
+        {
+            FatalErrorIn("FieldMapper::distributeMap() const")
+                << "attempt to access null distributeMap"
+                << abort(FatalError);
+            return *reinterpret_cast<mapDistributeBase*>(NULL);
+        }
 
         //- Are there unmapped values? I.e. do all size() elements get
         //  get value

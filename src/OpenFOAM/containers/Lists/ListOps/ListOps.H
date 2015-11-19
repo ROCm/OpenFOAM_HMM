@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -226,7 +226,7 @@ label findLower
 (
     const ListType&,
     typename ListType::const_reference,
-    const label stary,
+    const label start,
     const BinaryOp& bop
 );
 
@@ -257,6 +257,15 @@ List<Container> initListList(const T[nRows][nColumns]);
 //- Helper class for list to append y onto the end of x
 template<class T>
 class ListAppendEqOp
+{
+public:
+    void operator()(List<T>& x, const List<T>& y) const;
+};
+
+
+//- Helper class for list to append unique elelements of y onto the end of x
+template<class T>
+class ListUniqueEqOp
 {
 public:
     void operator()(List<T>& x, const List<T>& y) const;
