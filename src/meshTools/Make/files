@@ -199,6 +199,9 @@ $(ACMICycPatches)/cyclicACMIPolyPatch/cyclicACMIPolyPatch.C
 $(ACMICycPatches)/cyclicACMIPointPatch/cyclicACMIPointPatch.C
 $(ACMICycPatches)/cyclicACMIPointPatchField/cyclicACMIPointPatchFields.C
 
+PeriodicAMICycPatches=$(AMI)/patches/cyclicPeriodicAMI
+$(PeriodicAMICycPatches)/cyclicPeriodicAMIPolyPatch/cyclicPeriodicAMIPolyPatch.C
+
 mappedPatches/mappedPolyPatch/mappedPatchBase.C
 mappedPatches/mappedPolyPatch/mappedPolyPatch.C
 mappedPatches/mappedPolyPatch/mappedWallPolyPatch.C

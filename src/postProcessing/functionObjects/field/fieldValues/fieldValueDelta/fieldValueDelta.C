@@ -232,7 +232,6 @@ void Foam::fieldValues::fieldValueDelta::execute()
             {
                 Info<< "    none";
             }
-            
             Info<< endl;
         }
 

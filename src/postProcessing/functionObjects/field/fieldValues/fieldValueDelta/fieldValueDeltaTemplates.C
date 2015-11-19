@@ -95,8 +95,7 @@ void Foam::fieldValues::fieldValueDelta::apply
         }
     }
 
-    const word
-    	resultName(opName + '(' + entryName1 + ',' + entryName2 + ')');
+    const word resultName(opName + '(' + entryName1 + ',' + entryName2 + ')');
 
     if (log_) Info << "    " << resultName << " = " << result << endl;
 

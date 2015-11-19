@@ -247,7 +247,7 @@ void Foam::fieldValues::cellSource::write()
         {
             weightField = setFieldValues<scalar>(weightFieldName_, true);
         }
-        
+
         if (writeVolume_)
         {
             volume_ = volume();

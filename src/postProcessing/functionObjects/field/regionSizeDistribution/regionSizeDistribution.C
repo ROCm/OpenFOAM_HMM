@@ -74,7 +74,7 @@ void Foam::regionSizeDistribution::writeGraph
 
     if (log_)
     {
-    	Info<< "Writing distribution of " << valueName << " to " << str.name()
+        Info<< "Writing distribution of " << valueName << " to " << str.name()
             << endl;
     }
 
