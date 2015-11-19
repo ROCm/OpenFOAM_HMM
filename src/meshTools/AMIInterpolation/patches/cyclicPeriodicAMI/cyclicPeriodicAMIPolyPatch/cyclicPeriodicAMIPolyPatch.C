@@ -493,6 +493,14 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
         // Check that the match is complete
         if (iter == maxIter_)
         {
+            // The matching algorithm has exited without getting the
+            // srcSum and tgtSum above 1. This can happen because
+            // - of an incorrect setup
+            // - or because of non-exact meshes and truncation errors
+            //   (transformation, accumulation of cutting errors)
+            // so for now this situation is flagged as a SeriousError instead of
+            // a FatalError since the default matchTolerance is quite strict
+            // (0.001) and can get triggered far into the simulation.
             SeriousErrorIn
             (
                 "void Foam::cyclicPeriodicAMIPolyPatch::resetPeriodicAMI"
@@ -505,11 +513,13 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
                 << matchTolerance()
                 << " when transformed according to the periodic patch "
                 << periodicPatch.name() << "." << nl
+                << "The current sum of weights are for owner " << name()
+                << " : " << srcSum << " and for neighbour "
+                << neighbPatch().name() << " : " << tgtSum << nl
                 << "This is only acceptable during post-processing"
                 << "; not during running. Improve your mesh or increase"
                 << " the 'matchTolerance' setting in the patch specification."
                 << endl;
-                // << exit(FatalError);
         }
 
         // Check that both patches have replicated an integer number of times
@@ -519,6 +529,11 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
          || mag(tgtSum - floor(tgtSum + 0.5)) > tgtSum*matchTolerance()
         )
         {
+            // This condition is currently enforced until there is more
+            // experience with the matching algorithm and numerics.
+            // This check means that e.g. different numbers of stator and
+            // rotor partitions are not allowed.
+            // Again see the section above about tolerances.
             SeriousErrorIn
             (
                 "void Foam::cyclicPeriodicAMIPolyPatch::resetPeriodicAMI"
@@ -530,10 +545,14 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
                 << " do not overlap an integer number of times when transformed"
                 << " according to the periodic patch "
                 << periodicPatch.name() << "." << nl
+                << "The current matchTolerance : " << matchTolerance()
+                << ", sum of owner weights : " << srcSum
+                << ", sum of neighbour weights : " << tgtSum
+                 << "." << nl
                 << "This is only acceptable during post-processing"
                 << "; not during running. Improve your mesh or increase"
                 << " the 'matchTolerance' setting in the patch specification."
-                << endl;    //<< exit(FatalError);
+                << endl;
         }
 
         // Normalise the weights
