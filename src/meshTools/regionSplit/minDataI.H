@@ -199,7 +199,7 @@ inline bool Foam::minData::operator!=
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<
+inline Foam::Ostream& Foam::operator<<
 (
     Foam::Ostream& os,
     const Foam::minData& wDist
@@ -209,7 +209,7 @@ Foam::Ostream& Foam::operator<<
 }
 
 
-Foam::Istream& Foam::operator>>
+inline Foam::Istream& Foam::operator>>
 (
     Foam::Istream& is,
     Foam::minData& wDist
