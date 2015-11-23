@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,6 +34,7 @@ Description
 
 #include "pTraits.H"
 #include "fieldTypes.H"
+#include "direction.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,48 +54,41 @@ public:
 
         static const char* const typeName;
 
-};
-
-
-template<>
-class ensightPTraits<scalar>
-{
-public:
-
-    static const char* const typeName;
+        //- Ordering table: return OpenFOAM component given Ensight component
+        //  This is used for the symmTensor ordering: Ensight requires
+        //  xx yy zz xy xz yz
+        static const direction componentOrder[];
 };
 
 template<>
-class ensightPTraits<vector>
-{
-public:
-
-    static const char* const typeName;
-};
+const char* const ensightPTraits<scalar>::typeName;
 
 template<>
-class ensightPTraits<sphericalTensor>
-{
-public:
-
-    static const char* const typeName;
-};
+const direction ensightPTraits<scalar>::componentOrder[];
 
 template<>
-class ensightPTraits<symmTensor>
-{
-public:
-
-    static const char* const typeName;
-};
+const char* const ensightPTraits<vector>::typeName;
 
 template<>
-class ensightPTraits<tensor>
-{
-public:
+const direction ensightPTraits<vector>::componentOrder[];
 
-    static const char* const typeName;
-};
+template<>
+const char* const ensightPTraits<sphericalTensor>::typeName;
+
+template<>
+const direction ensightPTraits<sphericalTensor>::componentOrder[];
+
+template<>
+const char* const ensightPTraits<symmTensor>::typeName;
+
+template<>
+const direction ensightPTraits<symmTensor>::componentOrder[];
+
+template<>
+const char* const ensightPTraits<tensor>::typeName;
+
+template<>
+const direction ensightPTraits<tensor>::componentOrder[];
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
