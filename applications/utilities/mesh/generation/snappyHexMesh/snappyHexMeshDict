@@ -361,7 +361,6 @@ snapControls
 
     // Maximum relative distance for points to be attracted by surface.
     // True distance is this factor times local maximum edge length.
-    // Note: changed(corrected) w.r.t 17x! (17x used 2* tolerance)
     tolerance 2.0;
 
     // Number of mesh displacement relaxation iterations.

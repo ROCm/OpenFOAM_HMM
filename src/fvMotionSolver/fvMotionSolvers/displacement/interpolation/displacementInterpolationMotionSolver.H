@@ -87,7 +87,7 @@ class displacementInterpolationMotionSolver
     // Private Member Functions
 
         //- Read settings
-        void read(const dictionary& coeffDict);
+        void calcInterpolation();
 
         //- Disallow default bitwise copy construct
         displacementInterpolationMotionSolver

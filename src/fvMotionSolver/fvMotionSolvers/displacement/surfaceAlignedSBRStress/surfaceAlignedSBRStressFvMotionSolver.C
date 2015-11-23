@@ -213,8 +213,9 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::calculateCellRot()
                     }
                 }
 
-// Note: faces on boundaries that get hit are noy included as the
-// pointDisplacement on boundaries is usually zero for this solver.
+                // Note: faces on boundaries that get hit are noy included as
+                // the pointDisplacement on boundaries is usually zero for
+                // this solver.
 
                 // Search for closest direction on faces on mesh
                 // and surface normal.

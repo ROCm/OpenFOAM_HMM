@@ -33,6 +33,7 @@ Description
 
     Input parameters:
 
+    \verbatim
     surfaceAlignedSBRStressCoeffs
     {
         diffusivity         uniform;
@@ -44,6 +45,7 @@ Description
         smoothFactor        0.9;
         minSigmaDiff        1e-4;
     }
+    \endverbatim
 
     surfaces: name of the stl surfaces to which apply alignment.
 

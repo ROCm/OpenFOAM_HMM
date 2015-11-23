@@ -58,17 +58,14 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::displacementInterpolationMotionSolver::read
-(
-    const dictionary& coeffDict
-)
+void Foam::displacementInterpolationMotionSolver::calcInterpolation()
 {
     // Get zones and their interpolation tables for displacement
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     List<Pair<word> > faceZoneToTable
     (
-        coeffDict.lookup("interpolationTables")
+        coeffDict().lookup("interpolationTables")
     );
 
     const faceZoneMesh& fZones = mesh().faceZones();
@@ -311,7 +308,7 @@ displacementInterpolationMotionSolver
 :
     displacementMotionSolver(mesh, dict, typeName)
 {
-    read(coeffDict());
+    calcInterpolation();
 }
 
 
@@ -326,7 +323,7 @@ displacementInterpolationMotionSolver
 :
     displacementMotionSolver(mesh, dict, pointDisplacement, points0, typeName)
 {
-    read(coeffDict());
+    calcInterpolation();
 }
 
 
