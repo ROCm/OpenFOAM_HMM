@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
     Info<< "Finished extruding in = "
         << runTime.cpuTimeIncrement() << " s." << endl;
 
-    Info<< nl << "End\n" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

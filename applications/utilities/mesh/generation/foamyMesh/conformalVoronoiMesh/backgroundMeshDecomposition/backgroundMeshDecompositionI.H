@@ -57,11 +57,4 @@ const Foam::labelList& Foam::backgroundMeshDecomposition::pointLevel() const
 }
 
 
-const Foam::decompositionMethod&
-Foam::backgroundMeshDecomposition::decomposer() const
-{
-    return decomposerPtr_();
-}
-
-
 // ************************************************************************* //

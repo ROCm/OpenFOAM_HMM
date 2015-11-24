@@ -104,6 +104,8 @@ void MapLagrangianFields
             Info<< "    mapping lagrangian fieldField " << fieldName << endl;
 
             // Read field (does not need mesh)
+            // Note: some fieldFields are 0 size (e.g. collision records) if
+            //       not used
             IOField<Field<Type> > fieldSource(*fieldIter());
 
             // Map - use CompactIOField to automatically write in
@@ -120,12 +122,22 @@ void MapLagrangianFields
                     IOobject::NO_WRITE,
                     false
                 ),
-                addParticles.size()
+                min(fieldSource.size(), addParticles.size()) // handle 0 size
             );
 
-            forAll(addParticles, i)
+            if (fieldSource.size())
             {
-                fieldTarget[i] = fieldSource[addParticles[i]];
+                forAll(addParticles, i)
+                {
+                    fieldTarget[i] = fieldSource[addParticles[i]];
+                }
+            }
+            else if (cloud::debug)
+            {
+                Pout<< "Not mapping " << fieldName << " since source size "
+                    << fieldSource.size() << " different to"
+                    << " cloud size " << addParticles.size()
+                    << endl;
             }
 
             // Write field
@@ -139,8 +151,9 @@ void MapLagrangianFields
 
         forAllIter(IOobjectList, fieldFields, fieldIter)
         {
-            Info<< "    mapping lagrangian fieldField "
-                << fieldIter()->name() << endl;
+            const word& fieldName = fieldIter()->name();
+
+            Info<< "    mapping lagrangian fieldField " << fieldName << endl;
 
             // Read field (does not need mesh)
             CompactIOField<Field<Type>, Type> fieldSource(*fieldIter());
@@ -150,7 +163,7 @@ void MapLagrangianFields
             (
                 IOobject
                 (
-                    fieldIter()->name(),
+                    fieldName,
                     meshTarget.time().timeName(),
                     cloud::prefix/cloudName,
                     meshTarget,
@@ -158,12 +171,22 @@ void MapLagrangianFields
                     IOobject::NO_WRITE,
                     false
                 ),
-                addParticles.size()
+                min(fieldSource.size(), addParticles.size()) // handle 0 size
             );
 
-            forAll(addParticles, i)
+            if (fieldSource.size())
             {
-                fieldTarget[i] = fieldSource[addParticles[i]];
+                forAll(addParticles, i)
+                {
+                    fieldTarget[i] = fieldSource[addParticles[i]];
+                }
+            }
+            else if (cloud::debug)
+            {
+                Pout<< "Not mapping " << fieldName << " since source size "
+                    << fieldSource.size() << " different to"
+                    << " cloud size " << addParticles.size()
+                    << endl;
             }
 
             // Write field
