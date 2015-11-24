@@ -59,11 +59,7 @@ $(generalConstraints)/explicitSetValue/explicitSetValue.C
 
 derivedConstraints=constraints/derived
 $(derivedConstraints)/fixedTemperatureConstraint/fixedTemperatureConstraint.C
-
-
-/* Corrections */
-
-corrections/limitTemperature/limitTemperature.C
+$(derivedConstraints)/velocityDampingConstraint/velocityDampingConstraint.C
 
 
 LIB = $(FOAM_LIBBIN)/libfvOptions
