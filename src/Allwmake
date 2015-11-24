@@ -50,6 +50,7 @@ wmake $targetType conversion
 wmake $targetType mesh/extrudeModel
 wmake $targetType dynamicMesh
 wmake $targetType dynamicFvMesh
+wmake $targetType sampling
 wmake $targetType topoChangerFvMesh
 wmake $targetType sampling
 

@@ -295,10 +295,7 @@ bool Foam::displacementMotionSolverMeshMover::move
 }
 
 
-void Foam::displacementMotionSolverMeshMover::movePoints
-(
-    const pointField& p
-)
+void Foam::displacementMotionSolverMeshMover::movePoints(const pointField& p)
 {
     externalDisplacementMeshMover::movePoints(p);
 

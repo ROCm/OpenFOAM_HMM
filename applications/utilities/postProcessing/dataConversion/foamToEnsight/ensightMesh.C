@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,10 +50,12 @@ void Foam::ensightMesh::correct()
     meshCellSets_.setSize(mesh_.nCells());
 
     boundaryFaceSets_.setSize(mesh_.boundary().size());
+    boundaryFaceSets_ = faceSets(); // if number of patches changes
     allPatchNames_.clear();
     patchNames_.clear();
     nPatchPrims_ = 0;
     faceZoneFaceSets_.setSize(mesh_.faceZones().size());
+    faceZoneFaceSets_ = faceSets(); // if number of patches changes
     faceZoneNames_.clear();
     nFaceZonePrims_ = 0;
     boundaryFaceToBeIncluded_.clear();

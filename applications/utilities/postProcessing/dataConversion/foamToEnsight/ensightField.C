@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,6 +34,7 @@ License
 #include "ensightAsciiStream.H"
 #include "globalIndex.H"
 #include "ensightPTraits.H"
+#include "zeroGradientFvPatchField.H"
 
 using namespace Foam;
 
@@ -62,6 +63,85 @@ volField
         return vf;
     }
 }
+
+
+template<class Type>
+tmp<GeometricField<Type, fvPatchField, volMesh> >
+volField
+(
+    const fvMeshSubset& meshSubsetter,
+    const typename GeometricField
+    <
+        Type,
+        fvPatchField,
+        volMesh
+    >::DimensionedInternalField& df
+)
+{
+    // Construct volField (with zeroGradient) from dimensioned field
+
+    IOobject io(df);
+    io.readOpt() = IOobject::NO_READ;
+
+    tmp<GeometricField<Type, fvPatchField, volMesh> > tvf
+    (
+        new GeometricField<Type, fvPatchField, volMesh>
+        (
+            io,
+            df.mesh(),
+            df.dimensions(),
+            zeroGradientFvPatchField<scalar>::typeName
+        )
+    );
+    tvf().internalField() = df;
+    tvf().correctBoundaryConditions();
+    const GeometricField<Type, fvPatchField, volMesh>& vf = tvf();
+
+    if (meshSubsetter.hasSubMesh())
+    {
+        tmp<GeometricField<Type, fvPatchField, volMesh> > tfld
+        (
+            meshSubsetter.interpolate(vf)
+        );
+        tfld().checkOut();
+        tfld().rename(vf.name());
+        return tfld;
+    }
+    else
+    {
+        return tvf;
+    }
+}
+
+
+//template<class Container>
+//void readAndConvertField
+//(
+//    const fvMeshSubset& meshSubsetter,
+//    const IOobject& io,
+//    const fvMesh& mesh,
+//    const ensightMesh& eMesh,
+//    const fileName& postProcPath,
+//    const word& prepend,
+//    const label timeIndex,
+//    const bool binary,
+//    const bool nodeValues,
+//    Ostream& ensightCaseFile
+//)
+//{
+//    Container fld(io, mesh);
+//    ensightField<typename Container::value_type>
+//    (
+//        volField<typename Container::value_type>(meshSubsetter, fld),
+//        eMesh,
+//        postProcPath,
+//        prepend,
+//        timeIndex,
+//        binary,
+//        nodeValues,
+//        ensightCaseFile
+//    );
+//}
 
 
 template<class Type>
@@ -104,8 +184,10 @@ void writeField
         {
             ensightFile.write(key);
 
-            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+            for (direction i=0; i < pTraits<Type>::nComponents; ++i)
             {
+                label cmpt = ensightPTraits<Type>::componentOrder[i];
+
                 ensightFile.write(vf.component(cmpt));
 
                 for (int slave=1; slave<Pstream::nProcs(); slave++)
@@ -118,8 +200,10 @@ void writeField
         }
         else
         {
-            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+            for (direction i=0; i < pTraits<Type>::nComponents; ++i)
             {
+                label cmpt = ensightPTraits<Type>::componentOrder[i];
+
                 OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
                 toMaster<< vf.component(cmpt);
             }

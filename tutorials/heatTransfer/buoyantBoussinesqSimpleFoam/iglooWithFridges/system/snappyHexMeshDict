@@ -294,7 +294,7 @@ addLayersControls
     // cannot be above minThickness do not add layer.
     // Relative to undistorted size of cell outside layer.
     // See relativeSizes parameter.
-    minThickness 0.25;
+    minThickness 0.05;
 
     // If points get not extruded do nGrow layers of connected faces that are
     // also not grown. This helps convergence of the layer addition process
@@ -313,29 +313,28 @@ addLayersControls
     // before upon reaching a correct mesh.
     nRelaxIter 5;
 
-    // Number of smoothing iterations of surface normals
-    nSmoothSurfaceNormals 1;
-
-    // Number of smoothing iterations of interior mesh movement direction
-    nSmoothNormals 3;
+    // Stop layer growth on highly warped cells
+    maxFaceThicknessRatio 0.5;
 
     // Smooth layer thickness over surface patches
     nSmoothThickness 10;
 
-    // Stop layer growth on highly warped cells
-    maxFaceThicknessRatio 0.5;
 
-    // Reduce layer growth where ratio thickness to medial
-    // distance is large
-    maxThicknessToMedialRatio 0.3;
 
-    // Angle used to pick up medial axis points
-    // Note: changed(corrected) w.r.t 16x! 90 degrees corresponds to 130 in 16x.
-    minMedianAxisAngle 90;
+    //- Use displacementMotionSolver to shrink mesh
+    meshShrinker displacementMotionSolver;
+
+    //- Use laplacian for shrinking
+    solver displacementLaplacian;
+
+    displacementLaplacianCoeffs
+    {
+        diffusivity quadratic inverseDistance ("two.*" igloo);
+    }
+
 
     // Create buffer region for new layer terminations
     nBufferCellsNoExtrude 0;
-
 
     // Overall max number of layer addition iterations. The mesher will exit
     // if it reaches this number of iterations; possibly with an illegal
