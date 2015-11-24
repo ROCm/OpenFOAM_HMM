@@ -3,6 +3,7 @@ curvedEdges/CatmullRomSpline.C
 curvedEdges/polyLine.C
 
 curvedEdges/arcEdge.C
+curvedEdges/bezier.C
 curvedEdges/curvedEdge.C
 curvedEdges/lineEdge.C
 curvedEdges/polyLineEdge.C
