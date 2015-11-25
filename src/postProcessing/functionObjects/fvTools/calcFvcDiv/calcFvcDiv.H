@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,9 +28,29 @@ Group
     grpFVFunctionObjects
 
 Description
-    This function object calculates the divergence of a field.  The operation is
-    limited to surfaceScalarFields and volumeVector fields, and the output is a
-    volume scalar field.
+    This function object calculates the divergence of a field.  The operation
+    is limited to surfaceScalarFields and volumeVector fields, and the output
+    is a volume scalar field.
+
+    Example of function object specification:
+    \verbatim
+    calcFvcDiv1
+    {
+        type        calcFvcDiv;
+        functionObjectLibs ("libFVFunctionObjects.so");
+        ...
+        fieldName   U;
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property | Description                | Required  | Default value
+        type     | type name: calcFvcDiv      | yes       |
+        fieldName | Name of field to process  | yes       |
+        resultName | Name of divergence field | no        | fvc::div(fieldName)
+        log      | Log to standard output     | no        | yes
+    \endtable
 
 SourceFiles
     calcFvcDiv.C
@@ -81,6 +101,9 @@ class calcFvcDiv
 
         //- Name of result field
         word resultName_;
+
+        //- Switch to send output to Info as well as to file
+        Switch log_;
 
 
     // Private Member Functions

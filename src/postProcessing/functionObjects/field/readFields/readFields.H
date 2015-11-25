@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,8 +28,8 @@ Group
     grpFieldFunctionObjects
 
 Description
-    This function object reads fields from the time directories and adds them to
-    the mesh database for further post-processing.
+    This function object reads fields from the time directories and adds them
+    to the mesh database for further post-processing.
 
     Example of function object specification:
     \verbatim
@@ -38,11 +38,7 @@ Description
         type        readFields;
         functionObjectLibs ("libfieldFunctionObjects.so");
         ...
-        fields
-        (
-            U
-            p
-        );
+        fields      (U p);
     }
     \endverbatim
 
@@ -51,6 +47,7 @@ Description
         Property     | Description             | Required    | Default value
         type         | type name: readFields   | yes         |
         fields       | list of fields to read  |  no         |
+        log          | Log to standard output  | no          | yes
     \endtable
 
 SeeAlso
@@ -102,18 +99,8 @@ protected:
         //- Fields to load
         wordList fieldSet_;
 
-        //- Loaded fields
-        PtrList<volScalarField> vsf_;
-        PtrList<volVectorField> vvf_;
-        PtrList<volSphericalTensorField> vSpheretf_;
-        PtrList<volSymmTensorField> vSymmtf_;
-        PtrList<volTensorField> vtf_;
-
-        PtrList<surfaceScalarField> ssf_;
-        PtrList<surfaceVectorField> svf_;
-        PtrList<surfaceSphericalTensorField> sSpheretf_;
-        PtrList<surfaceSymmTensorField> sSymmtf_;
-        PtrList<surfaceTensorField> stf_;
+        //- Switch to send output to Info as well as to file
+        Switch log_;
 
 
     // Protected Member Functions
@@ -125,12 +112,7 @@ protected:
         void operator=(const readFields&);
 
         template<class Type>
-        void loadField
-        (
-            const word&,
-            PtrList<GeometricField<Type, fvPatchField, volMesh> >&,
-            PtrList<GeometricField<Type, fvsPatchField, surfaceMesh> >&
-        ) const;
+        void loadField(const word&) const;
 
 
 public:

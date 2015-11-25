@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,19 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * //
+
+void Foam::blendingFactor::writeFileHeader(Ostream& os) const
+{
+    writeHeader(os, "Blending factor");
+    writeCommented(os, "Time");
+    writeTabbed(os, "Scheme1");
+    writeTabbed(os, "Scheme2");
+    writeTabbed(os, "Blended");
+    os  << endl;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::blendingFactor::blendingFactor
@@ -44,30 +57,44 @@ Foam::blendingFactor::blendingFactor
     const bool loadFromFiles
 )
 :
+    functionObjectState(obr, name),
+    functionObjectFile(obr, name, typeName, dict),
     name_(name),
     obr_(obr),
-    active_(true),
-    phiName_("unknown-phiName"),
-    fieldName_("unknown-fieldName")
+    phiName_("phi"),
+    fieldName_("unknown-fieldName"),
+    resultName_(word::null),
+    tolerance_(0.001),
+    log_(true)
 {
     // Check if the available mesh is an fvMesh, otherwise deactivate
-    if (!isA<fvMesh>(obr_))
+    if (setActive<fvMesh>())
     {
-        active_ = false;
-        WarningIn
-        (
-            "blendingFactor::blendingFactor"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating " << name_ << nl
-            << endl;
-    }
+        read(dict);
+        writeFileHeader(file());
 
-    read(dict);
+        const fvMesh& mesh = refCast<const fvMesh>(obr_);
+
+        volScalarField* indicatorPtr
+        (
+            new volScalarField
+            (
+                IOobject
+                (
+                    resultName_,
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensionedScalar("0", dimless, 0.0),
+                zeroGradientFvPatchScalarField::typeName
+            )
+        );
+
+        mesh.objectRegistry::store(indicatorPtr);
+    }
 }
 
 
@@ -83,8 +110,26 @@ void Foam::blendingFactor::read(const dictionary& dict)
 {
     if (active_)
     {
-        phiName_ = dict.lookupOrDefault<word>("phiName", "phi");
+        functionObjectFile::read(dict);
+
+        log_.readIfPresent("log", dict);
+
+        dict.readIfPresent("phiName", phiName_);
         dict.lookup("fieldName") >> fieldName_;
+
+
+        if (!dict.readIfPresent("resultName", resultName_))
+        {
+            resultName_ = name_ + ':' + fieldName_;
+        }
+
+        dict.readIfPresent("tolerance", tolerance_);
+        if ((tolerance_ < 0) || (tolerance_ > 1))
+        {
+            FatalErrorIn("void Foam::blendingFactor::read(const dictionary&)")
+                << "tolerance must be in the range 0 to 1.  Supplied value: "
+                << tolerance_ << exit(FatalError);
+        }
     }
 }
 
@@ -117,16 +162,15 @@ void Foam::blendingFactor::write()
 {
     if (active_)
     {
-        const word fieldName = "blendingFactor:" + fieldName_;
+        const volScalarField& indicator =
+            obr_.lookupObject<volScalarField>(resultName_);
 
-        const volScalarField& blendingFactor =
-            obr_.lookupObject<volScalarField>(fieldName);
-
-        Info<< type() << " " << name_ << " output:" << nl
-            << "    writing field " << blendingFactor.name() << nl
+        if (log_) Info
+            << type() << " " << name_ << " output:" << nl
+            << "    writing field " << indicator.name() << nl
             << endl;
 
-        blendingFactor.write();
+        indicator.write();
     }
 }
 

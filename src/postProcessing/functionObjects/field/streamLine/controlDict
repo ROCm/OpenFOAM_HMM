@@ -84,6 +84,10 @@ functions
             // subcycling.
             nSubCycle 5;
 
+
+        // Optional clipping
+        //bounds  (0.2 -10 -10)(0.22 10 10);
+
         // Cloud name to use
         cloudName       particleTracks;
 

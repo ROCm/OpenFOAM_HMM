@@ -343,20 +343,18 @@ void Foam::forceCoeffs::execute()
     scalar ClfTot = ClTot/2.0 + CmTot;
     scalar ClrTot = ClTot/2.0 - CmTot;
 
-    if (log_)
-    {
-        Info<< type() << " " << name_ << " output:" << nl
-            << "    Coefficients" << nl;
-    }
+    if (log_) Info
+        << type() << " " << name_ << " output:" << nl
+        << "    Coefficients" << nl;
+
     writeIntegratedData("Cm", momentCoeffs);
     writeIntegratedData("Cd", dragCoeffs);
     writeIntegratedData("Cl", liftCoeffs);
-    if (log_)
-    {
-        Info<< "        Cl(f)    : " << ClfTot << nl
-            << "        Cl(r)    : " << ClrTot << nl
-            << endl;
-    }
+
+    if (log_) Info
+        << "        Cl(f)    : " << ClfTot << nl
+        << "        Cl(r)    : " << ClrTot << nl
+        << endl;
 
     if (writeToFile())
     {

@@ -47,7 +47,9 @@ Foam::processorField::processorField
 :
     name_(name),
     obr_(obr),
-    active_(true)
+    active_(true),
+    resultName_(name),
+    log_(true)
 {
     // Check if the available mesh is an fvMesh otherise deactivate
     if (isA<fvMesh>(obr_))
@@ -62,7 +64,7 @@ Foam::processorField::processorField
             (
                 IOobject
                 (
-                    "processorID",
+                    resultName_,
                     mesh.time().timeName(),
                     mesh,
                     IOobject::NO_READ,
@@ -103,7 +105,10 @@ Foam::processorField::~processorField()
 
 void Foam::processorField::read(const dictionary& dict)
 {
-    // do nothing
+    if (active_)
+    {
+        log_.readIfPresent("log", dict);
+    }
 }
 
 
@@ -112,7 +117,7 @@ void Foam::processorField::execute()
     if (active_)
     {
         const volScalarField& procField =
-            obr_.lookupObject<volScalarField>("processorID");
+            obr_.lookupObject<volScalarField>(resultName_);
 
         const_cast<volScalarField&>(procField) ==
             dimensionedScalar("procI", dimless, Pstream::myProcNo());
@@ -140,7 +145,12 @@ void Foam::processorField::write()
     if (active_)
     {
         const volScalarField& procField =
-            obr_.lookupObject<volScalarField>("processorID");
+            obr_.lookupObject<volScalarField>(resultName_);
+
+        if (log_) Info
+            << type() << " " << name_ << " output:" << nl
+            << "    writing field " << procField.name() << nl
+            << endl;
 
         procField.write();
     }

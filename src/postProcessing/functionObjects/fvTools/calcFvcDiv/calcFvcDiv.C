@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,7 +88,8 @@ Foam::calcFvcDiv::calcFvcDiv
     obr_(obr),
     active_(true),
     fieldName_("undefined-fieldName"),
-    resultName_("undefined-resultName")
+    resultName_(word::null),
+    log_(true)
 {
     // Check if the available mesh is an fvMesh, otherwise deactivate
     if (!isA<fvMesh>(obr_))
@@ -123,10 +124,12 @@ void Foam::calcFvcDiv::read(const dictionary& dict)
 {
     if (active_)
     {
-        dict.lookup("fieldName") >> fieldName_;
-        dict.lookup("resultName") >> resultName_;
+        log_.readIfPresent("log", dict);
 
-        if (resultName_ == "none")
+        dict.lookup("fieldName") >> fieldName_;
+        dict.readIfPresent("resultName", resultName_);
+
+        if (resultName_ == word::null)
         {
             resultName_ = "fvc::div(" + fieldName_ + ")";
         }
@@ -176,7 +179,8 @@ void Foam::calcFvcDiv::write()
             const regIOobject& field =
                 obr_.lookupObject<regIOobject>(resultName_);
 
-            Info<< type() << " " << name_ << " output:" << nl
+            if (log_) Info
+                << type() << " " << name_ << " output:" << nl
                 << "    writing field " << field.name() << nl << endl;
 
             field.write();

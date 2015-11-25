@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,6 +46,7 @@ Description
         Property     | Description             | Required    | Default value
         type         | type name: removeRegisteredObject | yes |
         objectNames  | objects to remove       | yes         |
+        log          | Log to standard output  | no          | yes
     \endtable
 
 SeeAlso
@@ -63,6 +64,7 @@ SourceFiles
 
 #include "wordList.H"
 #include "runTimeSelectionTables.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -85,15 +87,19 @@ protected:
 
     // Private data
 
-        //- Name of this set of removeRegisteredObject
+        //- Name of this set of removeRegisteredObject object
         word name_;
 
+        //- Refefence to the database
         const objectRegistry& obr_;
 
         // Read from dictionary
 
             //- Names of objects to control
             wordList objectNames_;
+
+            //- Switch to send output to Info as well as to file
+            Switch log_;
 
 
     // Private Member Functions

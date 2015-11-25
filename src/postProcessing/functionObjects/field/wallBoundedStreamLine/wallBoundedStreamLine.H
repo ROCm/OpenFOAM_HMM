@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,7 @@ Description
         );
         lifeTime        10000;
         trackLength     1e-3;
-        nSubCycle       5;
+        bounds          (0.2 -10 -10)(0.22 10 10);
         cloudName       particleTracks;
         seedSampleSet   patchSeed;
         patchSeedCoeffs
@@ -71,8 +71,9 @@ Description
         fields       | fields to sample        | yes         |
         lifetime     | maximum number of particle tracking steps | yes |
         trackLength  | tracking segment length | no          |
-        nSubCycle    | number of tracking steps per cell | no|
         cloudName    | cloud name to use       | yes         |
+        log          | Log to standard output  | no          | yes
+        bounds       | Bounding box to trim tracks | no | greatBox
         seedSampleSet| seeding method (see below)| yes       |
     \endtable
 
@@ -85,14 +86,11 @@ Description
         triSurfaceMeshPointSet | points according to a tri-surface mesh
     \endplaintable
 
-Note
-    When specifying the track resolution, the \c trackLength OR \c nSubCycle
-    option should be used
-
 SeeAlso
     Foam::functionObject
     Foam::OutputFilterFunctionObject
     Foam::sampledSet
+    Foam::streamLineBase
     Foam::streamLine
 
 SourceFiles
@@ -103,16 +101,7 @@ SourceFiles
 #ifndef wallBoundedStreamLine_H
 #define wallBoundedStreamLine_H
 
-#include "volFieldsFwd.H"
-#include "pointFieldFwd.H"
-#include "Switch.H"
-#include "DynamicList.H"
-#include "scalarList.H"
-#include "vectorList.H"
-#include "polyMesh.H"
-#include "writer.H"
-#include "indirectPrimitivePatch.H"
-#include "tetIndices.H"
+#include "streamLineBase.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -120,99 +109,15 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-class objectRegistry;
-class dictionary;
-class mapPolyMesh;
-class meshSearch;
-class sampledSet;
-
 /*---------------------------------------------------------------------------*\
                     Class wallBoundedStreamLine Declaration
 \*---------------------------------------------------------------------------*/
 
 class wallBoundedStreamLine
+:
+    public streamLineBase
 {
-    // Private data
-
-        //- Input dictionary
-        dictionary dict_;
-
-        //- Name of this set of field averages.
-        word name_;
-
-        //- Database this class is registered to
-        const objectRegistry& obr_;
-
-        //- Load fields from files (not from objectRegistry)
-        bool loadFromFiles_;
-
-        //- On/off switch
-        bool active_;
-
-
-        //- List of fields to sample
-        wordList fields_;
-
-        //- Field to transport particle with
-        word UName_;
-
-        //- Interpolation scheme to use
-        word interpolationScheme_;
-
-        //- Whether to use +u or -u
-        bool trackForward_;
-
-        //- Maximum lifetime (= number of cells) of particle
-        label lifeTime_;
-
-        //- Track length
-        scalar trackLength_;
-
-        //- Optional specified name of particles
-        word cloudName_;
-
-        //- Type of seed
-        word seedSet_;
-
-        //- Names of scalar fields
-        wordList scalarNames_;
-
-        //- Names of vector fields
-        wordList vectorNames_;
-
-
-        // Demand driven
-
-            //- Mesh searching enigne
-            autoPtr<meshSearch> meshSearchPtr_;
-
-            //- Seed set engine
-            autoPtr<sampledSet> sampledSetPtr_;
-
-            //- Axis of the sampled points to output
-            word sampledSetAxis_;
-
-            //- File output writer
-            autoPtr<writer<scalar> > scalarFormatterPtr_;
-
-            autoPtr<writer<vector> > vectorFormatterPtr_;
-
-
-        // Generated data
-
-            //- All tracks. Per particle the points it passed through
-            DynamicList<List<point> > allTracks_;
-
-            //- Per scalarField, per particle, the sampled value.
-            List<DynamicList<scalarList> > allScalars_;
-
-            //- Per scalarField, per particle, the sampled value.
-            List<DynamicList<vectorList> > allVectors_;
-
-
-        //- Construct patch out of all wall patch faces
-        autoPtr<indirectPrimitivePatch> wallPatch() const;
+   // Private Member Functions
 
         //- Find wall tet on cell
         tetIndices findNearestTet
@@ -221,9 +126,6 @@ class wallBoundedStreamLine
             const point& seedPt,
             const label cellI
         ) const;
-
-        //- Do all seeding and tracking
-        void track();
 
         //- Disallow default bitwise copy construct
         wallBoundedStreamLine(const wallBoundedStreamLine&);
@@ -257,35 +159,11 @@ public:
 
     // Member Functions
 
-        //- Return name of the set of field averages
-        virtual const word& name() const
-        {
-            return name_;
-        }
-
-        //- Read the field average data
+        //- Read settings
         virtual void read(const dictionary&);
 
-        //- Execute the averaging
-        virtual void execute();
-
-        //- Execute the averaging at the final time-loop, currently does nothing
-        virtual void end();
-
-        //- Called when time was set at the end of the Time::operator++
-        virtual void timeSet();
-
-        //- Calculate the field average data and write
-        virtual void write();
-
-        //- Update for changes of mesh
-        virtual void updateMesh(const mapPolyMesh&);
-
-        //- Update for mesh point-motion
-        virtual void movePoints(const polyMesh&);
-
-        ////- Update for changes of mesh due to readUpdate
-        //virtual void readUpdate(const polyMesh::readUpdateState state);
+        //- Do the actual tracking to fill the track data
+        virtual void track();
 };
 
 
