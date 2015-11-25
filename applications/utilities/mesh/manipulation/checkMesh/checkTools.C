@@ -245,13 +245,16 @@ void Foam::mergeAndWrite
             mergedFaces,
             pointMergeMap
         );
-        writer.write
-        (
-            outputDir,
-            set.name(),
-            mergedPoints,
-            mergedFaces
-        );
+        if (Pstream::master())
+        {
+            writer.write
+            (
+                outputDir,
+                set.name(),
+                mergedPoints,
+                mergedFaces
+            );
+        }
     }
     else
     {
@@ -376,13 +379,16 @@ void Foam::mergeAndWrite
             mergedFaces,
             pointMergeMap
         );
-        writer.write
-        (
-            outputDir,
-            set.name(),
-            mergedPoints,
-            mergedFaces
-        );
+        if (Pstream::master())
+        {
+            writer.write
+            (
+                outputDir,
+                set.name(),
+                mergedPoints,
+                mergedFaces
+            );
+        }
     }
     else
     {
