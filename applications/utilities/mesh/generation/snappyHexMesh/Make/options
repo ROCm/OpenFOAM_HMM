@@ -8,14 +8,18 @@ EXE_INC = \
     -I$(LIB_SRC)/surfMesh/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/edgeMesh/lnInclude \
+    -I$(LIB_SRC)/parallel/decompose/decompose/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude
 
 EXE_LIBS = \
     -lfiniteVolume \
     -ldecompositionMethods \
     -L$(FOAM_LIBBIN)/dummy -lptscotchDecomp \
+    /* note: scotch < 6.0 does not like both scotch and ptscotch together */ \
+    -lscotchDecomp \
     -lmeshTools \
     -lsurfMesh \
     -lfileFormats \
     -ldynamicMesh \
+    -ldecompose \
     -lautoMesh

@@ -16,6 +16,7 @@ EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/parallel/decompose/decompositionMethods/lnInclude \
+    -I$(LIB_SRC)/parallel/decompose/decompose/lnInclude \
     -I$(LIB_SRC)/edgeMesh/lnInclude \
     -I$(LIB_SRC)/fileFormats/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
@@ -29,6 +30,7 @@ EXE_INC = \
 LIB_LIBS = \
     ${CGAL_LIBS} \
     -lmeshTools \
+    -ldecompose \
     -ledgeMesh \
     -lfileFormats \
     -ltriSurface \

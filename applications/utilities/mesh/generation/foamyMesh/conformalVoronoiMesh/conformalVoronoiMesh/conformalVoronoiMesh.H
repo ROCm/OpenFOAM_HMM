@@ -163,10 +163,8 @@ private:
         //- Limiting bound box before infinity begins
         treeBoundBox limitBounds_;
 
-        //-
         mutable pointPairs<Delaunay> ptPairs_;
 
-        //-
         featurePointConformer ftPtConformer_;
 
         //- Search tree for edge point locations
@@ -546,7 +544,7 @@ private:
         ) const;
 
         //- Check if a location is in the exclusion range of an existing feature
-        //- Edge conformation location
+        //  edge conformation location
         bool nearFeatureEdgeLocation
         (
             const pointIndexHit& pHit,
@@ -730,8 +728,7 @@ private:
 
         label classifyBoundaryPoint(Cell_handle cit) const;
 
-        //- Index all of the the Delaunay cells and calculate their
-        //- Dual points
+        //- Index all of the the Delaunay cells and calculate their dual points
         void indexDualVertices
         (
             pointField& pts,
@@ -874,7 +871,8 @@ public:
         conformalVoronoiMesh
         (
             const Time& runTime,
-            const dictionary& foamyHexMeshDict
+            const dictionary& foamyHexMeshDict,
+            const fileName& decompDictFile = ""
         );
 
 
