@@ -8,6 +8,7 @@ setWriters = sampledSetWriters
 
 $(setWriters)/writers.C
 $(setWriters)/ensight/ensightSetWriterRunTime.C
+$(setWriters)/ensight/ensightPTraits.C
 $(setWriters)/gnuplot/gnuplotSetWriterRunTime.C
 $(setWriters)/jplot/jplotSetWriterRunTime.C
 $(setWriters)/raw/rawSetWriterRunTime.C

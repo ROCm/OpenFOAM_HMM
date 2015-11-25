@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,20 +27,57 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+template<>
 const char* const Foam::ensightPTraits<Foam::scalar>::typeName =
     Foam::pTraits<Foam::scalar>::typeName;
 
+template<>
+const Foam::direction
+Foam::ensightPTraits<Foam::scalar>::componentOrder[] = {0};
+
+template<>
 const char* const Foam::ensightPTraits<Foam::vector>::typeName =
     Foam::pTraits<Foam::vector>::typeName;
 
+template<>
+const Foam::direction
+Foam::ensightPTraits<Foam::vector>::componentOrder[] = {0, 1, 2};
+
+template<>
 const char* const Foam::ensightPTraits<Foam::sphericalTensor>::typeName =
     Foam::pTraits<Foam::scalar>::typeName;
 
+template<>
+const Foam::direction
+Foam::ensightPTraits<Foam::sphericalTensor>::componentOrder[] = {0};
+
+template<>
 const char* const Foam::ensightPTraits<Foam::symmTensor>::typeName =
     "tensor symm";
 
+
+template<>
+const Foam::direction
+Foam::ensightPTraits<Foam::symmTensor>::componentOrder[] = {0, 3, 5, 1, 2, 4};
+
+template<>
 const char* const Foam::ensightPTraits<Foam::tensor>::typeName =
     "tensor asym";
+
+template<>
+const Foam::direction
+Foam::ensightPTraits<Foam::tensor>::componentOrder[] =
+{
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+};
 
 
 // ************************************************************************* //

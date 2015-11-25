@@ -32,6 +32,12 @@ solvers
         tolerance       1e-07;
         relTol          0.1;
     }
+
+    cellDisplacement
+    {
+        $p_rgh;
+        relTol          0;
+    }
 }
 
 SIMPLE

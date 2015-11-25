@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,6 +44,13 @@ namespace Foam
         dictionary
     );
 
+    addToRunTimeSelectionTable
+    (
+        displacementMotionSolver,
+        displacementInterpolationMotionSolver,
+        displacement
+    );
+
     template<>
     const word IOList<Tuple2<scalar, vector> >::typeName("scalarVectorTable");
 }
@@ -51,16 +58,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::displacementInterpolationMotionSolver::
-displacementInterpolationMotionSolver
-(
-    const polyMesh& mesh,
-    const IOdictionary& dict
-)
-:
-    displacementMotionSolver(mesh, dict, typeName)
+void Foam::displacementInterpolationMotionSolver::calcInterpolation()
 {
     // Get zones and their interpolation tables for displacement
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -70,7 +68,7 @@ displacementInterpolationMotionSolver
         coeffDict().lookup("interpolationTables")
     );
 
-    const faceZoneMesh& fZones = mesh.faceZones();
+    const faceZoneMesh& fZones = mesh().faceZones();
 
     times_.setSize(fZones.size());
     displacements_.setSize(fZones.size());
@@ -88,7 +86,7 @@ displacementInterpolationMotionSolver
                 "displacementInterpolationMotionSolver(const polyMesh&,"
                 "Istream&)"
             )   << "Cannot find zone " << zoneName << endl
-                << "Valid zones are " << mesh.faceZones().names()
+                << "Valid zones are " << mesh().faceZones().names()
                 << exit(FatalError);
         }
 
@@ -99,9 +97,9 @@ displacementInterpolationMotionSolver
             IOobject
             (
                 tableName,
-                mesh.time().constant(),
+                mesh().time().constant(),
                 "tables",
-                mesh,
+                mesh(),
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
                 false
@@ -296,6 +294,36 @@ displacementInterpolationMotionSolver
             nPoints++;
         }
     }
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::displacementInterpolationMotionSolver::
+displacementInterpolationMotionSolver
+(
+    const polyMesh& mesh,
+    const IOdictionary& dict
+)
+:
+    displacementMotionSolver(mesh, dict, typeName)
+{
+    calcInterpolation();
+}
+
+
+Foam::displacementInterpolationMotionSolver::
+displacementInterpolationMotionSolver
+(
+    const polyMesh& mesh,
+    const IOdictionary& dict,
+    const pointVectorField& pointDisplacement,
+    const pointIOField& points0
+)
+:
+    displacementMotionSolver(mesh, dict, pointDisplacement, points0, typeName)
+{
+    calcInterpolation();
 }
 
 

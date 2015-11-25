@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,6 +45,7 @@ namespace Foam
 {
 
 // Forward class declarations
+class motionInterpolation;
 class motionDiffusivity;
 
 /*---------------------------------------------------------------------------*\
@@ -60,6 +61,9 @@ class velocityLaplacianFvMotionSolver
 
         //- Cell-centre motion field
         mutable volVectorField cellMotionU_;
+
+        //- Interpolation used to transfer cell displacement to the points
+        autoPtr<motionInterpolation> interpolationPtr_;
 
         //- Diffusivity used to control the motion
         autoPtr<motionDiffusivity> diffusivityPtr_;
