@@ -32,6 +32,42 @@ Description
 
     Call write() to sample and write files.
 
+    Example of function object specification:
+    \verbatim
+    probes
+    {
+        type            probes;
+        functionObjectLibs ( "libsampling.so" );
+
+        // Name of the directory for probe data
+        name            probes;
+
+        // Write at same frequency as fields
+        outputControl   outputTime;
+        outputInterval  1;
+
+        // Fields to be probed
+        fields
+        (
+            p U
+        );
+
+        // Optional: do not recalculate cells if mesh moves
+        fixedLocations  false;
+
+        // Optional: interpolation scheme to use (default is cell)
+        interpolationScheme cellPoint;
+
+        probeLocations
+        (
+            ( 1e-06 0 0.01 )      // at inlet
+            (0.21 -0.20999 0.01)  // at outlet1
+            (0.21 0.20999 0.01)   // at outlet2
+            (0.21 0 0.01)         // at central block
+        );
+    }
+    \endverbatim
+
 SourceFiles
     probes.C
 
@@ -91,13 +127,13 @@ protected:
 
         //- Name of this set of probes,
         //  Also used as the name of the probes directory.
-        word name_;
+        const word name_;
 
         //- Const reference to fvMesh
         const fvMesh& mesh_;
 
         //- Load fields from files (not from objectRegistry)
-        bool loadFromFiles_;
+        const bool loadFromFiles_;
 
 
         // Read from dictonary
@@ -106,7 +142,7 @@ protected:
             wordReList fieldSelection_;
 
             //- Fixed locations, default = yes
-            //  Note: set to false for moving mesh calations where locations
+            //  Note: set to false for moving mesh calculations where locations
             //        should move with the mesh
             bool fixedLocations_;
 
@@ -141,7 +177,7 @@ protected:
             HashPtrTable<OFstream> probeFilePtrs_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
         //- Clear old field groups
         void clearFieldGroups();
@@ -159,6 +195,8 @@ protected:
         //  returns number of fields to sample
         label prepare();
 
+        //- Read dictionary settings
+        void readDict(const dictionary& dict);
 
 private:
 
@@ -207,7 +245,8 @@ public:
             const word& name,
             const objectRegistry&,
             const dictionary&,
-            const bool loadFromFiles = false
+            const bool loadFromFiles = false,
+            const bool findElements = true
         );
 
 
