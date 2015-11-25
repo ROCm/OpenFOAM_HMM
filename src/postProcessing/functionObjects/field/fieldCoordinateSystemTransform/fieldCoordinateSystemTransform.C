@@ -48,14 +48,16 @@ Foam::fieldCoordinateSystemTransform::fieldCoordinateSystemTransform
     obr_(obr),
     active_(true),
     fieldSet_(),
-    coordSys_(obr, dict)
+    coordSys_(obr, dict),
+    log_(true)
 {
     // Check if the available mesh is an fvMesh otherise deactivate
     if (isA<fvMesh>(obr_))
     {
         read(dict);
 
-        Info<< type() << " " << name_ << ":" << nl
+        if (log_) Info
+            << type() << " " << name_ << ":" << nl
             << "   Applying transformation from global Cartesian to local "
             << coordSys_ << nl << endl;
     }
@@ -89,6 +91,7 @@ void Foam::fieldCoordinateSystemTransform::read(const dictionary& dict)
 {
     if (active_)
     {
+        log_.readIfPresent("log", dict);
         dict.lookup("fields") >> fieldSet_;
     }
 }
@@ -98,7 +101,7 @@ void Foam::fieldCoordinateSystemTransform::execute()
 {
     if (active_)
     {
-        Info<< type() << " " << name_ << " output:" << nl;
+        if (log_) Info<< type() << " " << name_ << " output:" << nl;
 
         forAll(fieldSet_, fieldI)
         {
@@ -132,7 +135,7 @@ void Foam::fieldCoordinateSystemTransform::write()
 {
     if (active_)
     {
-        Info<< type() << " " << name_ << " output:" << nl;
+        if (log_) Info<< type() << " " << name_ << " output:" << nl;
 
         forAll(fieldSet_, fieldI)
         {
@@ -141,12 +144,12 @@ void Foam::fieldCoordinateSystemTransform::write()
             const regIOobject& field =
                 obr_.lookupObject<regIOobject>(fieldName);
 
-            Info<< "    writing field " << field.name() << nl;
+            if (log_) Info << "    writing field " << field.name() << nl;
 
             field.write();
         }
 
-        Info<< endl;
+        if (log_) Info<< endl;
     }
 }
 

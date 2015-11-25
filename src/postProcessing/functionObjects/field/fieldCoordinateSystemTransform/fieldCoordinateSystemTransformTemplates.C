@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,7 +67,7 @@ void Foam::fieldCoordinateSystemTransform::transformField
 
     Foam::transform(transField, R, transField);
 
-    Info<< "    writing field " << transField.name() << nl << endl;
+    if (log_) Info<< "    writing field " << transField.name() << nl << endl;
 
     transField.write();
 }

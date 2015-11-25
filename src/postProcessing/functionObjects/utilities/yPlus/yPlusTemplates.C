@@ -69,12 +69,9 @@ void Foam::yPlus::calcYPlus
             const scalar maxYplus = gMax(yPlusp);
             const scalar avgYplus = gAverage(yPlusp);
 
-            if (log_)
-            {
-                Info<< "    patch " << patch.name()
-                    << " y+ : min = " << minYplus << ", max = " << maxYplus
-                    << ", average = " << avgYplus << nl;
-            }
+            if (log_) Info<< "    patch " << patch.name()
+                << " y+ : min = " << minYplus << ", max = " << maxYplus
+                << ", average = " << avgYplus << nl;
 
             file() << obr_.time().value()
                 << token::TAB << patch.name()

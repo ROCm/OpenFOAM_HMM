@@ -101,6 +101,8 @@ Description
         pInf         | Freestream pressure for coefficient calculation | no |
         UInf         | Freestream velocity for coefficient calculation | no |
         rhoInf       | Freestream density for coefficient calculation | no |
+        resultName   | Name of derived pressure field | no   | auto generated
+        log          | log to standard output  | no          | yes
     \endtable
 
 SourceFiles
@@ -114,6 +116,7 @@ SourceFiles
 
 #include "volFieldsFwd.H"
 #include "dimensionedScalar.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -152,6 +155,12 @@ class pressureTools
         //- Name of density field, default is "rho"
         word rhoName_;
 
+        //- Result name
+        word resultName_;
+
+        //- Switch to send output to Info as well as to file
+        Switch log_;
+
 
         // Total pressure calculation
 
@@ -176,13 +185,13 @@ class pressureTools
             //- Freestream density
             scalar rhoInf_;
 
+            //- Flag to show whether rhoInf has been initialised
+            bool rhoInfInitialised_;
+
 
     // Private Member Functions
 
-        //- Return the name of the derived pressure field
-        word pName() const;
-
-        //- Return the density scaling if supplied with kinematic pressure
+        //- Return the density scale
         dimensionedScalar rhoScale(const volScalarField& p) const;
 
         //- Return the density field

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,6 +62,7 @@ public:
         ocRunTime,        /*!< run time for dumping */
         ocClockTime,      /*!< clock time for dumping */
         ocCpuTime,        /*!< cpu time for dumping */
+        ocOnEnd,          /*!< on end of run*/
         ocNone            /*!< no output */
     };
 
@@ -77,7 +78,7 @@ private:
         const word prefix_;
 
         //- String representation of outputControls enums
-        static const NamedEnum<outputControls, 7> outputControlNames_;
+        static const NamedEnum<outputControls, 8> outputControlNames_;
 
         //- Type of output
         outputControls outputControl_;

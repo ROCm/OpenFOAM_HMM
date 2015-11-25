@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,7 +52,8 @@ Foam::dsmcFields::dsmcFields
 :
     name_(name),
     obr_(obr),
-    active_(true)
+    active_(true),
+    log_(true)
 {
     // Check if the available mesh is an fvMesh, otherwise deactivate
     if (!isA<fvMesh>(obr_))
@@ -87,7 +88,7 @@ void Foam::dsmcFields::read(const dictionary& dict)
 {
     if (active_)
     {
-
+        log_.readIfPresent("log", dict);
     }
 }
 
@@ -122,46 +123,32 @@ void Foam::dsmcFields::write()
         word iDofMeanName = "iDofMean";
         word fDMeanName = "fDMean";
 
-        const volScalarField& rhoNMean = obr_.lookupObject<volScalarField>
-        (
-            rhoNMeanName
-        );
+        const volScalarField& rhoNMean =
+            obr_.lookupObject<volScalarField>(rhoNMeanName);
 
-        const volScalarField& rhoMMean = obr_.lookupObject<volScalarField>
-        (
-            rhoMMeanName
-        );
+        const volScalarField& rhoMMean =
+            obr_.lookupObject<volScalarField>(rhoMMeanName);
 
-        const volVectorField& momentumMean = obr_.lookupObject<volVectorField>
-        (
-            momentumMeanName
-        );
+        const volVectorField& momentumMean =
+            obr_.lookupObject<volVectorField>(momentumMeanName);
 
-        const volScalarField& linearKEMean = obr_.lookupObject<volScalarField>
-        (
-            linearKEMeanName
-        );
+        const volScalarField& linearKEMean =
+            obr_.lookupObject<volScalarField>(linearKEMeanName);
 
-        const volScalarField& internalEMean = obr_.lookupObject<volScalarField>
-        (
-            internalEMeanName
-        );
+        const volScalarField& internalEMean =
+            obr_.lookupObject<volScalarField>(internalEMeanName);
 
-        const volScalarField& iDofMean = obr_.lookupObject<volScalarField>
-        (
-            iDofMeanName
-        );
+        const volScalarField& iDofMean =
+            obr_.lookupObject<volScalarField>(iDofMeanName);
 
-        const volVectorField& fDMean = obr_.lookupObject<volVectorField>
-        (
-            fDMeanName
-        );
+        const volVectorField& fDMean =
+            obr_.lookupObject<volVectorField>(fDMeanName);
 
         if (min(mag(rhoNMean)).value() > VSMALL)
         {
-            Info<< "Calculating dsmcFields." << endl;
+            if (log_) Info<< type() << " " << name_ << " output:" << endl;
 
-            Info<< "    Calculating UMean field." << endl;
+            if (log_) Info<< "    Calculating UMean field" << endl;
             volVectorField UMean
             (
                 IOobject
@@ -174,7 +161,7 @@ void Foam::dsmcFields::write()
                 momentumMean/rhoMMean
             );
 
-            Info<< "    Calculating translationalT field." << endl;
+            if (log_) Info<< "    Calculating translationalT field" << endl;
             volScalarField translationalT
             (
                 IOobject
@@ -189,7 +176,7 @@ void Foam::dsmcFields::write()
                *(linearKEMean - 0.5*rhoMMean*(UMean & UMean))
             );
 
-            Info<< "    Calculating internalT field." << endl;
+            if (log_) Info<< "    Calculating internalT field" << endl;
             volScalarField internalT
             (
                 IOobject
@@ -202,7 +189,7 @@ void Foam::dsmcFields::write()
                 (2.0/physicoChemical::k.value())*(internalEMean/iDofMean)
             );
 
-            Info<< "    Calculating overallT field." << endl;
+            if (log_) Info<< "    Calculating overallT field" << endl;
             volScalarField overallT
             (
                 IOobject
@@ -216,7 +203,7 @@ void Foam::dsmcFields::write()
                *(linearKEMean - 0.5*rhoMMean*(UMean & UMean) + internalEMean)
             );
 
-            Info<< "    Calculating pressure field." << endl;
+            if (log_) Info<< "    Calculating pressure field" << endl;
             volScalarField p
             (
                 IOobject
@@ -243,25 +230,28 @@ void Foam::dsmcFields::write()
                 }
             }
 
-            Info<< "    mag(UMean) max/min : "
-                << max(mag(UMean)).value() << " "
-                << min(mag(UMean)).value() << endl;
+            if (log_)
+            {
+                Info<< "    mag(UMean) max/min: "
+                    << max(mag(UMean)).value() << " "
+                    << min(mag(UMean)).value() << endl;
 
-            Info<< "    translationalT max/min : "
-                << max(translationalT).value() << " "
-                << min(translationalT).value() << endl;
+                Info<< "    translationalT max/min: "
+                    << max(translationalT).value() << " "
+                    << min(translationalT).value() << endl;
 
-            Info<< "    internalT max/min : "
-                << max(internalT).value() << " "
-                << min(internalT).value() << endl;
+                Info<< "    internalT max/min: "
+                    << max(internalT).value() << " "
+                    << min(internalT).value() << endl;
 
-            Info<< "    overallT max/min : "
-                << max(overallT).value() << " "
-                << min(overallT).value() << endl;
+                Info<< "    overallT max/min: "
+                    << max(overallT).value() << " "
+                    << min(overallT).value() << endl;
 
-            Info<< "    p max/min : "
-                << max(p).value() << " "
-                << min(p).value() << endl;
+                Info<< "    p max/min: "
+                    << max(p).value() << " "
+                    << min(p).value() << endl;
+            }
 
             UMean.write();
 
@@ -273,13 +263,14 @@ void Foam::dsmcFields::write()
 
             p.write();
 
-            Info<< "dsmcFields written." << nl << endl;
+            if (log_) Info<< "    " << type() << " written" << nl << endl;
         }
         else
         {
-            Info<< "Small value (" << min(mag(rhoNMean))
+            if (log_) Info
+                << "Small value (" << min(mag(rhoNMean))
                 << ") found in rhoNMean field. "
-                << "Not calculating dsmcFields to avoid division by zero."
+                << "Not calculating " << type() << " to avoid division by zero."
                 << endl;
         }
     }

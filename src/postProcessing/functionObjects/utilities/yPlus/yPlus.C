@@ -229,13 +229,10 @@ void Foam::yPlus::write()
         const volScalarField& yPlus =
             obr_.lookupObject<volScalarField>(resultName_);
 
-        if (log_)
-        {
-            Info
-                << type() << " " << name_ << " output:" << nl
-                << "    writing field " << yPlus.name() << nl
-                << endl;
-        }
+        if (log_) Info
+            << type() << " " << name_ << " output:" << nl
+            << "    writing field " << yPlus.name() << nl
+            << endl;
 
         yPlus.write();
     }

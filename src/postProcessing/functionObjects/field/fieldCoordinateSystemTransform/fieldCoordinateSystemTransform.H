@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,6 +60,7 @@ Description
         type         | type name: fieldCoordinateSystemTransform | yes |
         fields       | list of fields to be transformed |yes |
         coordinateSystem | local co-ordinate system | yes    |
+        log          | Log to standard output  | no          | yes
     \endtable
 
 SeeAlso
@@ -116,6 +117,9 @@ protected:
 
         //- Co-ordinate system to transform to
         coordinateSystem coordSys_;
+
+        //- Switch to send output to Info as well as to file
+        Switch log_;
 
 
     // Protected Member Functions
