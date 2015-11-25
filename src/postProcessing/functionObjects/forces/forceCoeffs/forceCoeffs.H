@@ -84,6 +84,7 @@ Description
         magUInf      | free stream velocity magnitude | yes  |
         lRef         | reference length scale for moment calculations | yes |
         Aref         | reference area          | yes |
+        porosity     | flag to include porosity contributions | no | no
     \endtable
 
     Bin data is optional, but if the dictionary is present, the entries must

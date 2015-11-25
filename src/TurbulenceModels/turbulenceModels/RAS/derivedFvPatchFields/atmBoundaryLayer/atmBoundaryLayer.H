@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +39,7 @@ Description
         \f]
 
         \f[
-            k = \frac{(U^*)^2}{\sqrt{C_mu}}
+            k = \frac{(U^*)^2}{\sqrt{C_{\mu}}}
         \f]
 
         \f[
@@ -50,7 +50,7 @@ Description
     \vartable
         U^*     | Friction velocity
         \kappa  | von Karman's constant
-        C_mu    | Turbulence viscosity coefficient
+        C_{\mu} | Turbulence viscosity coefficient
         z       | Vertical coordinate
         z_0     | Surface roughness height [m]
         z_g     | Minimum z-coordinate [m]

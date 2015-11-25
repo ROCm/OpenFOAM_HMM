@@ -79,6 +79,7 @@ Description
         UName        | velocity field name     | no          | U
         rhoName      | density field name (see below) | no   | rho
         CofR         | centre of rotation (see below) | no   |
+        porosity     | flag to include porosity contributions | no | no
         directForceDensity | force density supplied directly (see below)|no|no
         fDName       | name of force density field (see below) | no | fD
     \endtable
