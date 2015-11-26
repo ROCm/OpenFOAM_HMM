@@ -883,7 +883,8 @@ void Foam::streamLineBase::write()
                     )
                 );
 
-                Info(log_)<< "    Writing data to " << vtkFile.path() << endl;
+                if (log_) Info
+                    << "    Writing data to " << vtkFile.path() << endl;
 
                 scalarFormatterPtr_().write
                 (
