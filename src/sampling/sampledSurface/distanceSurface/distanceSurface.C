@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -278,7 +278,8 @@ void Foam::distanceSurface::createGeometry()
                 cellDistance,
                 pointDistance_,
                 distance_,
-                regularise_
+                regularise_,
+                bounds_
             )
         );
     }
@@ -291,7 +292,8 @@ void Foam::distanceSurface::createGeometry()
                 cellDistance,
                 pointDistance_,
                 distance_,
-                regularise_
+                regularise_,
+                bounds_
             )
         );
     }
@@ -336,6 +338,7 @@ Foam::distanceSurface::distanceSurface
     cell_(dict.lookupOrDefault("cell", true)),
     regularise_(dict.lookupOrDefault("regularise", true)),
     average_(dict.lookupOrDefault("average", false)),
+    bounds_(dict.lookupOrDefault("bounds", boundBox::greatBox)),
     zoneKey_(keyType::null),
     needsUpdate_(true),
     isoSurfCellPtr_(NULL),
@@ -364,7 +367,8 @@ Foam::distanceSurface::distanceSurface
     const bool signedDistance,
     const bool cell,
     const Switch regularise,
-    const Switch average
+    const Switch average,
+    const boundBox& bounds
 )
 :
     sampledSurface(name, mesh, interpolate),
@@ -390,6 +394,7 @@ Foam::distanceSurface::distanceSurface
     cell_(cell),
     regularise_(regularise),
     average_(average),
+    bounds_(bounds),
     zoneKey_(keyType::null),
     needsUpdate_(true),
     isoSurfCellPtr_(NULL),
