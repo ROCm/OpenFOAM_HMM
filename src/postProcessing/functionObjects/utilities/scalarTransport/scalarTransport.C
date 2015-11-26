@@ -186,7 +186,8 @@ Foam::scalarTransport::scalarTransport
     resetOnStartUp_(false),
     nCorr_(0),
     autoSchemes_(false),
-    fvOptions_(mesh_)
+    fvOptions_(mesh_),
+    log_(true)
 {
     read(dict);
 
@@ -209,11 +210,13 @@ void Foam::scalarTransport::read(const dictionary& dict)
 {
     if (active_)
     {
-        Info<< type() << ":" << nl;
+        log_.readIfPresent("log", dict);
 
-        phiName_ = dict.lookupOrDefault<word>("phiName", "phi");
-        UName_ = dict.lookupOrDefault<word>("UName", "U");
-        rhoName_ = dict.lookupOrDefault<word>("rhoName", "rho");
+        if (log_) Info<< type() << " " << name_ << " output:" << nl;
+
+        dict.readIfPresent("phiName", phiName_);
+        dict.readIfPresent("UName", UName_);
+        dict.readIfPresent("rhoName", rhoName_);
 
         userDT_ = false;
         if (dict.readIfPresent("DT", DT_))
@@ -221,10 +224,8 @@ void Foam::scalarTransport::read(const dictionary& dict)
             userDT_ = true;
         }
 
-        dict.lookup("resetOnStartUp") >> resetOnStartUp_;
-
         dict.readIfPresent("nCorr", nCorr_);
-
+        dict.lookup("resetOnStartUp") >> resetOnStartUp_;
         dict.lookup("autoSchemes") >> autoSchemes_;
 
         fvOptions_.reset(dict.subDict("fvOptions"));
@@ -236,7 +237,7 @@ void Foam::scalarTransport::execute()
 {
     if (active_)
     {
-        Info<< type() << " output:" << endl;
+        if (log_) Info<< type() << " " << name_ << " output:" << nl;
 
         const surfaceScalarField& phi =
             mesh_.lookupObject<surfaceScalarField>(phiName_);
@@ -316,7 +317,7 @@ void Foam::scalarTransport::execute()
                 << dimVolume/dimTime << endl;
         }
 
-        Info<< endl;
+        if (log_) Info<< endl;
     }
 }
 

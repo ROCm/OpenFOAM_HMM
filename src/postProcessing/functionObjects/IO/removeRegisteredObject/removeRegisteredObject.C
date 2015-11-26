@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(removeRegisteredObject, 0);
+    defineTypeNameAndDebug(removeRegisteredObject, 0);
 }
 
 
@@ -47,7 +47,8 @@ Foam::removeRegisteredObject::removeRegisteredObject
 :
     name_(name),
     obr_(obr),
-    objectNames_()
+    objectNames_(),
+    log_(true)
 {
     read(dict);
 }
@@ -78,7 +79,8 @@ void Foam::removeRegisteredObject::execute()
 
             if (obj.ownedByRegistry())
             {
-                Info<< type() << " " << name_ << " output:" << nl
+                if (log_) Info
+                    << type() << " " << name_ << " output:" << nl
                     << "    removing object " << obj.name() << nl
                     << endl;
 

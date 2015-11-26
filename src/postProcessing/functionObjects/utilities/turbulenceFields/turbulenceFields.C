@@ -102,7 +102,8 @@ Foam::turbulenceFields::turbulenceFields
     name_(name),
     obr_(obr),
     active_(true),
-    fieldSet_()
+    fieldSet_(),
+    log_(true)
 {
     // Check if the available mesh is an fvMesh otherise deactivate
     if (isA<fvMesh>(obr_))
@@ -139,21 +140,26 @@ void Foam::turbulenceFields::read(const dictionary& dict)
 {
     if (active_)
     {
+        log_.readIfPresent("log", dict);
         fieldSet_.insert(wordList(dict.lookup("fields")));
 
         Info<< type() << " " << name_ << ": ";
-        if (fieldSet_.size())
+        if (log_)
         {
-            Info<< "storing fields:" << nl;
-            forAllConstIter(wordHashSet, fieldSet_, iter)
+            Info<< type() << " " << name_ << " output:" << nl;
+            if (fieldSet_.size())
             {
-                Info<< "    " << modelName << ':' << iter.key() << nl;
+                Info<< "storing fields:" << nl;
+                forAllConstIter(wordHashSet, fieldSet_, iter)
+                {
+                    Info<< "    " << modelName << ':' << iter.key() << nl;
+                }
+                Info<< endl;
             }
-            Info<< endl;
-        }
-        else
-        {
-            Info<< "no fields requested to be stored" << nl << endl;
+            else
+            {
+                Info<< "no fields requested to be stored" << nl << endl;
+            }
         }
     }
 }

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,28 +37,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::word Foam::pressureTools::pName() const
-{
-    word fieldName = pName_;
-
-    if (calcTotal_)
-    {
-        fieldName = "total(" + fieldName + ")";
-    }
-    else
-    {
-        fieldName = "static(" + fieldName + ")";
-    }
-
-    if (calcCoeff_)
-    {
-        fieldName = fieldName + "_coeff";
-    }
-
-    return fieldName;
-}
-
-
 Foam::dimensionedScalar Foam::pressureTools::rhoScale
 (
     const volScalarField& p
@@ -86,7 +64,23 @@ Foam::tmp<Foam::volScalarField> Foam::pressureTools::rho
     }
     else
     {
-        return
+        if (!rhoInfInitialised_)
+        {
+            FatalErrorIn
+            (
+                "Foam::tmp<Foam::volScalarField> Foam::pressureTools::rho"
+                "("
+                "    const volScalarField&"
+                ") const"
+            )
+                << type() << " " << name_ << ": "
+                << "pressure identified as incompressible, but reference "
+                << "density is not set.  Please set rhoName to rhoInf, and "
+                << "set an appropriate value for rhoInf"
+                << exit(FatalError);
+        }
+
+       return
             tmp<volScalarField>
             (
                 new volScalarField
@@ -193,12 +187,15 @@ Foam::pressureTools::pressureTools
     pName_("p"),
     UName_("U"),
     rhoName_("rho"),
+    resultName_(word::null),
+    log_(true),
     calcTotal_(false),
     pRef_(0.0),
     calcCoeff_(false),
     pInf_(0.0),
     UInf_(vector::zero),
-    rhoInf_(0.0)
+    rhoInf_(0.0),
+    rhoInfInitialised_(false)
 {
     // Check if the available mesh is an fvMesh, otherwise deactivate
     if (!isA<fvMesh>(obr_))
@@ -236,7 +233,7 @@ Foam::pressureTools::pressureTools
             (
                 IOobject
                 (
-                    pName(),
+                    resultName_,
                     mesh.time().timeName(),
                     mesh,
                     IOobject::NO_READ,
@@ -264,13 +261,18 @@ void Foam::pressureTools::read(const dictionary& dict)
 {
     if (active_)
     {
+        log_.readIfPresent("log", dict);
+
         dict.readIfPresent("pName", pName_);
         dict.readIfPresent("UName", UName_);
         dict.readIfPresent("rhoName", rhoName_);
 
+        rhoInfInitialised_ = false;
+
         if (rhoName_ == "rhoInf")
         {
             dict.lookup("rhoInf") >> rhoInf_;
+            rhoInfInitialised_ = true;
         }
 
         dict.lookup("calcTotal") >> calcTotal_;
@@ -296,6 +298,27 @@ void Foam::pressureTools::read(const dictionary& dict)
                     << "pressure level is zero.  Please check the supplied "
                     << "values of pInf, UInf and rhoInf" << endl;
             }
+
+            rhoInfInitialised_ = true;
+        }
+
+        if (!dict.readIfPresent("resultName", resultName_))
+        {
+            resultName_ = pName_;
+
+            if (calcTotal_)
+            {
+                resultName_ = "total(" + resultName_ + ")";
+            }
+            else
+            {
+                resultName_ = "static(" + resultName_ + ")";
+            }
+
+            if (calcCoeff_)
+            {
+                resultName_ = resultName_ + "_coeff";
+            }
         }
     }
 }
@@ -310,7 +333,7 @@ void Foam::pressureTools::execute()
         volScalarField& pResult =
             const_cast<volScalarField&>
             (
-                obr_.lookupObject<volScalarField>(pName())
+                obr_.lookupObject<volScalarField>(resultName_)
             );
 
         pResult == convertToCoeff(rhoScale(p)*p + pDyn(p) + pRef());
@@ -338,9 +361,10 @@ void Foam::pressureTools::write()
     if (active_)
     {
         const volScalarField& pResult =
-            obr_.lookupObject<volScalarField>(pName());
+            obr_.lookupObject<volScalarField>(resultName_);
 
-        Info<< type() << " " << name_ << " output:" << nl
+        if (log_) Info
+            << type() << " " << name_ << " output:" << nl
             << "    writing field " << pResult.name() << nl
             << endl;
 

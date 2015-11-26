@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,11 +28,29 @@ Group
     grpUtilitiesFunctionObjects
 
 Description
-    Overrides the timeStep. Can only be used with
-    solvers with adjustTimeStep control (e.g. pimpleFoam). Makes no attempt
-    to cooperate with other timeStep 'controllers' (maxCo, other
-    functionObjects). Supports 'enabled' flag but none of othe other ones
+    This function object overrides the calculation time step. Can only be used
+    with solvers with adjustTimeStep control (e.g. pimpleFoam).  It makes no
+    attempt to co-operate with other time step 'controllers', e.g. maxCo, other
+    functionObjects. Supports 'enabled' flag but none of the other options
     'timeStart', 'timeEnd', 'outputControl' etc.
+
+
+    Example of function object specification to manipulate the time step:
+    \verbatim
+    setTimeStep1
+    {
+        type        setTimeStep;
+        functionObjectLibs ("libutilityFunctionObjects.so");
+        ...
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | Type name: setTimeStep  | yes         |
+        enabled      | On/off switch           | no          | yes
+    \endtable
 
 SourceFiles
     setTimeStepFunctionObject.C
@@ -45,6 +63,7 @@ SourceFiles
 #include "functionObject.H"
 #include "dictionary.H"
 #include "DataEntry.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,7 +87,7 @@ class setTimeStepFunctionObject
         // Optional user inputs
 
             //- Switch for the execution - defaults to 'yes/on'
-            bool enabled_;
+            Switch enabled_;
 
             //- Time step
             autoPtr<DataEntry<scalar> > timeStepPtr_;
@@ -82,6 +101,7 @@ class setTimeStepFunctionObject
 
 
 public:
+
     //- Runtime type information
     TypeName("setTimeStep");
 
@@ -121,7 +141,6 @@ public:
             //- Switch the function object off
             virtual void off();
 
-
             //- Called at the start of the time-loop
             virtual bool start();
 
@@ -145,7 +164,6 @@ public:
 
             //- Update for changes of mesh
             virtual void movePoints(const polyMesh& mesh);
-
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -172,16 +172,14 @@ void Foam::cloudInfo::write()
                     << endl;
             }
 
-            if (log_)
-            {
-                Info<< type() << " " << name_ <<  " output:" << nl
-                    << "    number of parcels : " << nParcels << nl
-                    << "    mass in system    : " << massInSystem << nl
-                    << "    maximum diameter  : " << Dmax << nl
-                    << "    D10 diameter      : " << D10 << nl
-                    << "    D32 diameter      : " << D32 << nl
-                    << endl;
-            }
+            if (log_) Info
+                << type() << " " << name_ <<  " output:" << nl
+                << "    number of parcels : " << nParcels << nl
+                << "    mass in system    : " << massInSystem << nl
+                << "    maximum diameter  : " << Dmax << nl
+                << "    D10 diameter      : " << D10 << nl
+                << "    D32 diameter      : " << D32 << nl
+                << endl;
         }
     }
 }

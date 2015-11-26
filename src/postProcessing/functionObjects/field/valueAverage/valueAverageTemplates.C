@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,20 +23,38 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "externalCoupledMixedFvPatchFields.H"
-#include "addToRunTimeSelectionTable.H"
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+template<class Type>
+void Foam::valueAverage::calc
+(
+    const word& fieldName,
+    const word& meanName,
+    const scalar alpha,
+    const scalar beta,
+    bool& processed
+)
 {
+    const word valueType = objectResultType(functionObjectName_, fieldName);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+    if (pTraits<Type>::typeName != valueType)
+    {
+        return;
+    }
 
-makePatchFields(externalCoupledMixed);
+    Type currentValue = getObjectResult<Type>(functionObjectName_, fieldName);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    Type meanValue = getResult<Type>(meanName);
+    meanValue = alpha*meanValue + beta*currentValue;
 
-} // End namespace Foam
+    setResult(meanName, meanValue);
+
+    file() << tab << meanValue;
+
+    if (log_) Info<< "    " << meanName << ": " << meanValue << nl;
+
+    processed = true;
+}
+
 
 // ************************************************************************* //

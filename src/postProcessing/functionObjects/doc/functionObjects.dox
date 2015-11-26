@@ -40,6 +40,7 @@ The current range of features comprises of:
 - \ref grpFieldFunctionObjects
 - \ref grpForcesFunctionObjects
 - \ref grpFVFunctionObjects
+- \ref grpGraphicsFunctionObjects
 - \ref grpIOFunctionObjects
 - \ref grpJobControlFunctionObjects
 - \ref grpUtilitiesFunctionObjects

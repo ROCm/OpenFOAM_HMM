@@ -144,14 +144,12 @@ void Foam::fieldValues::cellSource::initialise(const dictionary& dict)
 
     volume_ = volume();
 
-    if (log_)
-    {
-        Info<< type() << " " << name_ << ":"
-            << sourceTypeNames_[source_] << "(" << sourceName_ << "):" << nl
-            << "    total cells  = " << nCells_ << nl
-            << "    total volume = " << volume_
-            << nl << endl;
-    }
+    if (log_) Info
+        << type() << " " << name_ << ":"
+        << sourceTypeNames_[source_] << "(" << sourceName_ << "):" << nl
+        << "    total cells  = " << nCells_ << nl
+        << "    total volume = " << volume_
+        << nl << endl;
 
     if (dict.readIfPresent("weightField", weightFieldName_))
     {

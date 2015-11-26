@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,12 +28,31 @@ Group
     grpUtilitiesFunctionObjects
 
 Description
-    Calculate intensive fields:
+    This function object calculates and outputs the intensive fields:
     - UMean
     - translationalT
     - internalT
     - overallT
     from averaged extensive fields from a DSMC calculation.
+
+
+    Example of function object specification to calculate DSMC fields:
+    \verbatim
+    dsmcFields1
+    {
+        type        dsmcFields;
+        functionObjectLibs ("libutilityFunctionObjects.so");
+        ...
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | Type name: dsmcFields   | yes         |
+        log          | Log to standard output  | no          | yes
+    \endtable
+
 
 SourceFiles
     dsmcFields.C
@@ -45,6 +64,7 @@ SourceFiles
 #define dsmcFields_H
 
 #include "typeInfo.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -72,6 +92,9 @@ class dsmcFields
 
         //- on/off switch
         bool active_;
+
+        //- Switch to send output to Info as well as to file
+        Switch log_;
 
 
     // Private Member Functions

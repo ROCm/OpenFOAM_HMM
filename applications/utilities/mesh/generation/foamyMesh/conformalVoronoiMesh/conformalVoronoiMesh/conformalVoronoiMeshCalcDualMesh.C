@@ -1292,9 +1292,9 @@ void Foam::conformalVoronoiMesh::indexDualVertices
         }
     }
 
-    OBJstream snapping1("snapToSurface1.obj");
-    OBJstream snapping2("snapToSurface2.obj");
-    OFstream tetToSnapTo("tetsToSnapTo.obj");
+    //OBJstream snapping1("snapToSurface1.obj");
+    //OBJstream snapping2("snapToSurface2.obj");
+    //OFstream tetToSnapTo("tetsToSnapTo.obj");
 
     for
     (

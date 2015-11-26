@@ -366,12 +366,10 @@ bool Foam::fieldValues::faceSource::writeValues
 
         file()<< tab << result;
 
-        if (log_)
-        {
-            Info<< "    " << operationTypeNames_[operation_]
-                << "(" << sourceName_ << ") for " << fieldName
-                <<  " = " << result << endl;
-        }
+        if (log_) Info
+            << "    " << operationTypeNames_[operation_]
+            << "(" << sourceName_ << ") for " << fieldName
+            <<  " = " << result << endl;
 
         // Write state/results information
         const word& opName = operationTypeNames_[operation_];

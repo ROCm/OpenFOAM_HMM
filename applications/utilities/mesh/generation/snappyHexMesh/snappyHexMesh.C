@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,6 +57,7 @@ Description
 #include "MeshedSurface.H"
 #include "globalIndex.H"
 #include "IOmanip.H"
+#include "decompositionModel.H"
 
 using namespace Foam;
 
@@ -819,15 +820,28 @@ int main(int argc, char *argv[])
     {
         if (Pstream::parRun())
         {
+            fileName decompDictFile;
+            if (args.optionReadIfPresent("decomposeParDict", decompDictFile))
+            {
+                if (isDir(decompDictFile))
+                {
+                    decompDictFile = decompDictFile/"decomposeParDict";
+                }
+            }
+
             decomposeDict = IOdictionary
             (
-                IOobject
+                decompositionModel::selectIO
                 (
-                    "decomposeParDict",
-                    runTime.system(),
-                    mesh,
-                    IOobject::MUST_READ_IF_MODIFIED,
-                    IOobject::NO_WRITE
+                    IOobject
+                    (
+                        "decomposeParDict",
+                        runTime.system(),
+                        mesh,
+                        IOobject::MUST_READ_IF_MODIFIED,
+                        IOobject::NO_WRITE
+                    ),
+                    decompDictFile
                 )
             );
         }

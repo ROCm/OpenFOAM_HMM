@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,6 +34,30 @@ Description
     \f[
         Q = 0.5(sqr(tr(\nabla U)) - tr(((\nabla U) \cdot (\nabla U))))
     \f]
+
+    where
+    \vartable
+        U           | velocity [m/s]
+    \endvartable
+
+    Example of function object specification to calculate Q:
+    \verbatim
+    Q1
+    {
+        type        Q;
+        functionObjectLibs ("libutilityFunctionObjects.so");
+        ...
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | type name: Q            | yes         |
+        UName        | Name of velocity field  | no          | U
+        resultName   | Name of Q field         | no          | <function name>
+        log          | Log to standard output  | no          | yes
+    \endtable
 
 SourceFiles
     Q.C
@@ -79,6 +103,12 @@ class Q
 
         //- Name of velocity field, default is "U"
         word UName_;
+
+        //- Result name
+        word resultName_;
+
+        //- Switch to send output to Info as well as to file
+        Switch log_;
 
 
     // Private Member Functions

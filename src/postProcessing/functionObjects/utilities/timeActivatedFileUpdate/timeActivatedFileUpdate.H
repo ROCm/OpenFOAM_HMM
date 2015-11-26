@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,18 +28,16 @@ Group
     grpUtilitiesFunctionObjects
 
 Description
-    Performs a file copy/replacement once a specified time has been reached.
+    This function object performs a file copy/replacement once a specified
+    time has been reached.
 
     Example usage to update the fvSolution dictionary at various times
     throughout the calculation:
-
     \verbatim
     fileUpdate1
     {
         type              timeActivatedFileUpdate;
         functionObjectLibs ("libutilityFunctionObjects.so");
-        outputControl     timeStep;
-        outputInterval    1;
         fileToUpdate      "$FOAM_CASE/system/fvSolution";
         timeVsFile
         (
@@ -48,8 +46,19 @@ Description
             (0.20 "$FOAM_CASE/system/fvSolution.20")
             (0.35 "$FOAM_CASE/system/fvSolution.35")
         );
+        ...
     }
     \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | Type name: timeActivatedFileUpdate | yes |
+        fileToUpdate | Name of file to update  | yes         |
+        timeVsFile   | List of time vs file    | yes         |
+        log          | Log to standard output  | no          | yes
+    \endtable
+
 
 SourceFiles
     timeActivatedFileUpdate.C
@@ -61,6 +70,7 @@ SourceFiles
 #define timeActivatedFileUpdate_H
 
 #include "Tuple2.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -98,6 +108,9 @@ class timeActivatedFileUpdate
 
         //- Index of last file copied
         label lastIndex_;
+
+        //- Switch to send output to Info as well as to file
+        Switch log_;
 
 
     // Private Member Functions

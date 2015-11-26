@@ -25,7 +25,7 @@ Class
     Foam::turbulenceFields
 
 Group
-    grpFieldFunctionObjects
+    grpUtilitiesFunctionObjects
 
 Description
     This function object stores turbulence fields on the mesh database for
@@ -89,6 +89,7 @@ SourceFiles
 #include "IOobject.H"
 #include "NamedEnum.H"
 #include "volFieldsFwd.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -150,6 +151,9 @@ protected:
 
         //- Fields to load
         wordHashSet fieldSet_;
+
+        //- Switch to send output to Info as well as to file
+        Switch log_;
 
 
     // Protected Member Functions

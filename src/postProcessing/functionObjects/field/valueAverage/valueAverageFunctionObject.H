@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,26 +21,31 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::valueAverageFunctionObject
+
+Description
+    FunctionObject wrapper around valueAverageFunctionObject to allow them
+    to be created via the functions entry within controlDict.
+
+SourceFiles
+    fieldMinMaxFunctionObject.C
+
 \*---------------------------------------------------------------------------*/
 
-#ifndef externalCoupledMixedFvPatchFields_H
-#define externalCoupledMixedFvPatchFields_H
+#ifndef valueAverageFunctionObject_H
+#define valueAverageFunctionObject_H
 
-#include "externalCoupledMixedFvPatchField.H"
-#include "fieldTypes.H"
+#include "valueAverage.H"
+#include "OutputFilterFunctionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-makePatchTypeFieldTypedefs(externalCoupledMixed);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+    typedef OutputFilterFunctionObject<valueAverage>
+        valueAverageFunctionObject;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

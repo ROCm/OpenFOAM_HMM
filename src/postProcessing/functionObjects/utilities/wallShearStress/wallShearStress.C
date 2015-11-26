@@ -80,11 +80,9 @@ void Foam::wallShearStress::calcShearStress
             << token::TAB << maxSsp
             << endl;
 
-        if (log_)
-        {
-            Info<< "    min/max(" << pp.name() << ") = "
-                << minSsp << ", " << maxSsp << endl;
-        }
+        if (log_) Info
+            << "    min/max(" << pp.name() << ") = "
+            << minSsp << ", " << maxSsp << endl;
     }
 }
 
@@ -296,12 +294,10 @@ void Foam::wallShearStress::write()
         const volVectorField& wallShearStress =
             obr_.lookupObject<volVectorField>(resultName_);
 
-        if (log_)
-        {
-            Info<< type() << " " << name_ << " output:" << nl
-                << "    writing field " << wallShearStress.name() << nl
-                << endl;
-        }
+        if (log_) Info
+            << type() << " " << name_ << " output:" << nl
+            << "    writing field " << wallShearStress.name() << nl
+            << endl;
 
         wallShearStress.write();
     }
