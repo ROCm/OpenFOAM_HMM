@@ -27,7 +27,7 @@ Class
 Description
     A surfaceWriter for outputting to a form useable for the
     timeVaryingMapped boundary condition. This reads the data from
-    constant/boundaryData/<patch>
+    constant/boundaryData/\<patch\>
 
     Typical way of working:
     - use a sampledSurface of type 'patch' (to sample a patch):
