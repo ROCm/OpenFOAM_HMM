@@ -837,7 +837,8 @@ bool Foam::conformalVoronoiMesh::ownerAndNeighbour
 Foam::conformalVoronoiMesh::conformalVoronoiMesh
 (
     const Time& runTime,
-    const dictionary& foamyHexMeshDict
+    const dictionary& foamyHexMeshDict,
+    const fileName& decompDictFile
 )
 :
     DistributedDelaunayMesh<Delaunay>(runTime),
@@ -876,7 +877,8 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
             foamyHexMeshControls().foamyHexMeshDict().subDict
             (
                 "backgroundMeshDecomposition"
-            )
+            ),
+            decompDictFile
         )
       : NULL
     ),

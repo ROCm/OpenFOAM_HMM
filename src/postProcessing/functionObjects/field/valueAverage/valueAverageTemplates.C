@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,27 +23,38 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef externalCoupledMixedFvPatchFields_H
-#define externalCoupledMixedFvPatchFields_H
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-#include "externalCoupledMixedFvPatchField.H"
-#include "fieldTypes.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+template<class Type>
+void Foam::valueAverage::calc
+(
+    const word& fieldName,
+    const word& meanName,
+    const scalar alpha,
+    const scalar beta,
+    bool& processed
+)
 {
+    const word valueType = objectResultType(functionObjectName_, fieldName);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    if (pTraits<Type>::typeName != valueType)
+    {
+        return;
+    }
 
-makePatchTypeFieldTypedefs(externalCoupledMixed);
+    Type currentValue = getObjectResult<Type>(functionObjectName_, fieldName);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    Type meanValue = getResult<Type>(meanName);
+    meanValue = alpha*meanValue + beta*currentValue;
 
-} // End namespace Foam
+    setResult(meanName, meanValue);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    file() << tab << meanValue;
 
-#endif
+    if (log_) Info<< "    " << meanName << ": " << meanValue << nl;
+
+    processed = true;
+}
+
 
 // ************************************************************************* //

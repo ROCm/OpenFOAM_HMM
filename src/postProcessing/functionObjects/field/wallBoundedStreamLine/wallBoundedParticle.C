@@ -190,9 +190,7 @@ Foam::scalar Foam::wallBoundedParticle::trackFaceTri
         currentE = currentEdge();
     }
 
-    // Determine path along line position+s*d to see where intersections
-    // are.
-
+    // Determine path along line position+s*d to see where intersections are.
     forAll(tri, i)
     {
         label j = tri.fcIndex(i);
@@ -259,23 +257,20 @@ bool Foam::wallBoundedParticle::isTriAlongTrack
     const triFace triVerts(currentTetIndices().faceTriIs(mesh_));
     const edge currentE = currentEdge();
 
-    //if (debug)
+    if
+    (
+        currentE[0] == currentE[1]
+     || findIndex(triVerts, currentE[0]) == -1
+     || findIndex(triVerts, currentE[1]) == -1
+    )
     {
-        if
+        FatalErrorIn
         (
-            currentE[0] == currentE[1]
-         || findIndex(triVerts, currentE[0]) == -1
-         || findIndex(triVerts, currentE[1]) == -1
-        )
-        {
-            FatalErrorIn
-            (
-                "wallBoundedParticle::isTriAlongTrack"
-                "(const point&)"
-            )   << "Edge " << currentE << " not on triangle " << triVerts
-                << info()
-                << abort(FatalError);
-        }
+            "wallBoundedParticle::isTriAlongTrack"
+            "(const point&)"
+        )   << "Edge " << currentE << " not on triangle " << triVerts
+            << info()
+            << abort(FatalError);
     }
 
 
@@ -344,12 +339,7 @@ Foam::wallBoundedParticle::wallBoundedParticle
         }
         else
         {
-            is.read
-            (
-                reinterpret_cast<char*>(&meshEdgeStart_),
-                sizeof(meshEdgeStart_)
-              + sizeof(diagEdge_)
-            );
+            is.read(reinterpret_cast<char*>(&meshEdgeStart_), sizeofFields_);
         }
     }
 

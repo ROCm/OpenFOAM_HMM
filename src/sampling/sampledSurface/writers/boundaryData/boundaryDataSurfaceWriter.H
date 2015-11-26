@@ -27,30 +27,32 @@ Class
 Description
     A surfaceWriter for outputting to a form useable for the
     timeVaryingMapped boundary condition. This reads the data from
-    constant/boundaryData/<patch>
+    constant/boundaryData/\<patch\> directory
 
     Typical way of working:
     - use a sampledSurface of type 'patch' (to sample a patch):
+    \verbatim
+    surfaces
+    {
+        type            surfaces;
+        surfaceFormat   boundaryData;
+        fields          ( p );
         surfaces
-        {
-            type            surfaces;
-            surfaceFormat   boundaryData;
-            fields          ( p );
-            surfaces
-            (
-                outlet
-                {
-                    type            patch;
-                    patches         (outlet);
-                    interpolate     false;
-                }
-            );
-        }
+        (
+            outlet
+            {
+                type            patch;
+                patches         (outlet);
+                interpolate     false;
+            }
+        );
+    }
+    \endverbatim
 
     - write using this writer.
     - move postProcessing/surfaces/outlet to constant/boundaryData/outlet
       in your destination case.
-    - use a timeVaryingMappedFixedValue bc to read&interpolate
+    - use a timeVaryingMappedFixedValue condition to read and interpolate
       the profile:
         type            timeVaryingMappedFixedValue;
         setAverage      false;  // do not use read average

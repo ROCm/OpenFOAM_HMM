@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,26 +21,31 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::valueAverageFunctionObject
+
+Description
+    FunctionObject wrapper around valueAverageFunctionObject to allow them
+    to be created via the functions entry within controlDict.
+
+SourceFiles
+    fieldMinMaxFunctionObject.C
+
 \*---------------------------------------------------------------------------*/
 
-#ifndef createExternalCoupledPatchGeometryTemplates_H
-#define createExternalCoupledPatchGeometryTemplates_H
+#ifndef valueAverageFunctionObject_H
+#define valueAverageFunctionObject_H
 
-#include "word.H"
+#include "valueAverage.H"
+#include "OutputFilterFunctionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    template<class Type>
-    void processField(bool& processed, const word& fieldName);
+    typedef OutputFilterFunctionObject<valueAverage>
+        valueAverageFunctionObject;
 }
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "createExternalCoupledPatchGeometryTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

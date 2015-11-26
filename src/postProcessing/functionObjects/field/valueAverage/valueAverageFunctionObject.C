@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,28 +23,20 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef externalCoupledMixedFvPatchFieldsFwd_H
-#define externalCoupledMixedFvPatchFieldsFwd_H
+#include "valueAverageFunctionObject.H"
 
-#include "fieldTypes.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineNamedTemplateTypeNameAndDebug(valueAverageFunctionObject, 0);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class Type> class externalCoupledMixedFvPatchField;
-
-makePatchTypeFieldTypedefs(externalCoupledMixed);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
+    addToRunTimeSelectionTable
+    (
+        functionObject,
+        valueAverageFunctionObject,
+        dictionary
+    );
+}
 
 // ************************************************************************* //

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +50,9 @@ Foam::Lambda2::Lambda2
     name_(name),
     obr_(obr),
     active_(true),
-    UName_("U")
+    UName_("U"),
+    resultName_(name),
+    log_(true)
 {
     // Check if the available mesh is an fvMesh, otherwise deactivate
     if (!isA<fvMesh>(obr_))
@@ -81,7 +83,7 @@ Foam::Lambda2::Lambda2
             (
                 IOobject
                 (
-                    type(),
+                    resultName_,
                     mesh.time().timeName(),
                     mesh,
                     IOobject::NO_READ,
@@ -109,7 +111,17 @@ void Foam::Lambda2::read(const dictionary& dict)
 {
     if (active_)
     {
-        UName_ = dict.lookupOrDefault<word>("UName", "U");
+        log_.readIfPresent("log", dict);
+        dict.readIfPresent("UName", UName_);
+
+        if (!dict.readIfPresent("resultName", resultName_))
+        {
+            resultName_ = name_;
+            if (UName_ != "U")
+            {
+                resultName_ = resultName_ + "(" + UName_ + ")";
+            }
+        }
     }
 }
 
@@ -134,7 +146,7 @@ void Foam::Lambda2::execute()
         volScalarField& Lambda2 =
             const_cast<volScalarField&>
             (
-                mesh.lookupObject<volScalarField>(type())
+                mesh.lookupObject<volScalarField>(resultName_)
             );
 
         Lambda2 = -eigenValues(SSplusWW)().component(vector::Y);
@@ -162,9 +174,10 @@ void Foam::Lambda2::write()
     if (active_)
     {
         const volScalarField& Lambda2 =
-            obr_.lookupObject<volScalarField>(type());
+            obr_.lookupObject<volScalarField>(resultName_);
 
-        Info<< type() << " " << name_ << " output:" << nl
+        if (log_) Info
+            << type() << " " << name_ << " output:" << nl
             << "    writing field " << Lambda2.name() << nl
             << endl;
 

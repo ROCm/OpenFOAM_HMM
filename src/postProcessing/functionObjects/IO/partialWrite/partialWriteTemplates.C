@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,7 +68,7 @@ void Foam::partialWrite::loadField
                 << " found in database" << endl;
         }
 
-         sfType& sField =
+        sfType& sField =
             const_cast<sfType&>
             (
                 obr_.lookupObject<sfType>(fieldName)

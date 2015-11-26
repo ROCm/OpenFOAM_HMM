@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,6 +32,25 @@ Description
     can be applied to any volume or surface fieldsm and the output is a
     volume or surface scalar field.
 
+    Example of function object specification:
+    \verbatim
+    calcMag1
+    {
+        type        calcMag;
+        functionObjectLibs ("libFVFunctionObjects.so");
+        ...
+        fieldName   U;
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property | Description                | Required  | Default value
+        type     | type name: calcMag         | yes       |
+        fieldName | Name of field to process  | yes       |
+        resultName | Name of magnitude field  | no        | mag(fieldName)
+        log      | Log to standard output     | no        | yes
+    \endtable
 SourceFiles
     calcMag.C
     IOcalcMag.H
@@ -81,6 +100,9 @@ class calcMag
 
         //- Name of result field
         word resultName_;
+
+        //- Switch to send output to Info as well as to file
+        Switch log_;
 
 
     // Private Member Functions

@@ -124,11 +124,9 @@ void Foam::fieldAverage::calcAverages()
         prevTimeIndex_ = currentTimeIndex;
     }
 
-    if (log_)
-    {
-        Info<< type() << " " << name_ << " output:" << nl
-            << "    Calculating averages" << nl;
-    }
+    if (log_) Info
+        << type() << " " << name_ << " output:" << nl
+        << "    Calculating averages" << nl;
 
     addMeanSqrToPrime2Mean<scalar, scalar>();
     addMeanSqrToPrime2Mean<vector, symmTensor>();
@@ -204,21 +202,17 @@ void Foam::fieldAverage::readAveragingProperties()
                 totalIter_[fieldI] = readLabel(fieldDict.lookup("totalIter"));
                 totalTime_[fieldI] = readScalar(fieldDict.lookup("totalTime"));
 
-                if (log_)
-                {
-                    Info<< "        " << fieldName
-                        << " iters = " << totalIter_[fieldI]
-                        << " time = " << totalTime_[fieldI] << nl;
-                }
+                if (log_) Info
+                    << "        " << fieldName
+                    << " iters = " << totalIter_[fieldI]
+                    << " time = " << totalTime_[fieldI] << nl;
             }
             else
             {
-                if (log_)
-                {
-                    Info<< "        " << fieldName
-                        << ": starting averaging at time "
-                        << obr_.time().timeName() << endl;
-                }
+                if (log_) Info
+                    << "        " << fieldName
+                    << ": starting averaging at time "
+                    << obr_.time().timeName() << endl;
             }
         }
     }
@@ -315,11 +309,9 @@ void Foam::fieldAverage::write()
 
         if (resetOnOutput_)
         {
-            if (log_)
-            {
-                Info<< "    Restarting averaging at time " << obr_.time().timeName()
-                    << nl << endl;
-            }
+            if (log_) Info
+                << "    Restarting averaging at time " << obr_.time().timeName()
+                << nl << endl;
 
             totalIter_.clear();
             totalIter_.setSize(faItems_.size(), 1);

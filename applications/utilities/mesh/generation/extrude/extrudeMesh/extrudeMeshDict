@@ -63,6 +63,10 @@ extrudeModel        wedge;
 //- Extrudes into sphere with grading according to pressure (atmospherics)
 //extrudeModel        sigmaRadial;
 
+//- Extrudes by interpolating along path inbetween two (topologically identical)
+//  surfaces (e.g. one is an offsetted version of the other)
+//extrudeModel        offsetSurface;
+
 nLayers             10;
 
 expansionRatio      1.0;
@@ -104,6 +108,16 @@ sigmaRadialCoeffs
     pRef            1;
     pStrat          1;
 }
+
+offsetSurfaceCoeffs
+{
+    // Surface that mesh has been meshed to
+    baseSurface "$FOAM_CASE/constant/triSurface/DTC-scaled-inflated.obj";
+
+    // Surface to fill in to
+    offsetSurface "$FOAM_CASE/constant/triSurface/DTC-scaled.obj";
+}
+
 
 // Do front and back need to be merged? Usually only makes sense for 360
 // degree wedges.

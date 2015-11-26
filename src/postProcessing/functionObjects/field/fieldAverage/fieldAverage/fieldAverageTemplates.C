@@ -46,12 +46,10 @@ void Foam::fieldAverage::addMeanFieldType(const label fieldI)
     }
     else if (obr_.found(meanFieldName))
     {
-        if (log_)
-        {
-            Info<< "    Cannot allocate average field " << meanFieldName
-                << " since an object with that name already exists."
-                << " Disabling averaging for field." << endl;
-        }
+        if (log_) Info
+            << "    Cannot allocate average field " << meanFieldName
+            << " since an object with that name already exists."
+            << " Disabling averaging for field." << endl;
 
         faItems_[fieldI].mean() = false;
     }
@@ -110,10 +108,8 @@ void Foam::fieldAverage::addPrime2MeanFieldType(const label fieldI)
     const word& meanFieldName = faItems_[fieldI].meanFieldName();
     const word& prime2MeanFieldName = faItems_[fieldI].prime2MeanFieldName();
 
-    if (log_)
-    {
-        Info << "    Reading/initialising field " << prime2MeanFieldName << nl;
-    }
+    if (log_) Info
+        << "    Reading/initialising field " << prime2MeanFieldName << endl;
 
     if (obr_.foundObject<Type2>(prime2MeanFieldName))
     {
@@ -121,12 +117,10 @@ void Foam::fieldAverage::addPrime2MeanFieldType(const label fieldI)
     }
     else if (obr_.found(prime2MeanFieldName))
     {
-        if (log_)
-        {
-            Info<< "    Cannot allocate average field " << prime2MeanFieldName
-                << " since an object with that name already exists."
-                << " Disabling averaging for field." << nl;
-        }
+        if (log_) Info
+            << "    Cannot allocate average field " << prime2MeanFieldName
+            << " since an object with that name already exists."
+            << " Disabling averaging for field." << endl;
 
         faItems_[fieldI].prime2Mean() = false;
     }

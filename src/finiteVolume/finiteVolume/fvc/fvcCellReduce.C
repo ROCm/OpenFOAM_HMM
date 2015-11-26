@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,8 @@ template<class Type, class CombineOp>
 tmp<GeometricField<Type, fvPatchField, volMesh> > cellReduce
 (
     const GeometricField<Type, fvsPatchField, surfaceMesh>& ssf,
-    const CombineOp& cop
+    const CombineOp& cop,
+    const Type& nullValue
 )
 {
     typedef GeometricField<Type, fvPatchField, volMesh> volFieldType;
@@ -65,7 +66,7 @@ tmp<GeometricField<Type, fvPatchField, volMesh> > cellReduce
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimensioned<Type>("0", ssf.dimensions(), pTraits<Type>::zero),
+            dimensioned<Type>("initialValue", ssf.dimensions(), nullValue),
             zeroGradientFvPatchField<Type>::typeName
         )
     );
@@ -75,15 +76,29 @@ tmp<GeometricField<Type, fvPatchField, volMesh> > cellReduce
     const labelUList& own = mesh.owner();
     const labelUList& nbr = mesh.neighbour();
 
-    forAll(own, i)
+    // Internal field
+    const Field<Type>& iField = ssf.internalField();
+    forAll(iField, faceI)
     {
-        label cellI = own[i];
-        cop(result[cellI], ssf[i]);
+        label cellOwn = own[faceI];
+        cop(result[cellOwn], iField[faceI]);
+
+        label cellNbr = nbr[faceI];
+        cop(result[cellNbr], iField[faceI]);
     }
-    forAll(nbr, i)
+
+    // Boundary field
+    forAll(ssf.boundaryField(), patchI)
     {
-        label cellI = nbr[i];
-        cop(result[cellI], ssf[i]);
+        const fvsPatchField<Type>& pf = ssf.boundaryField()[patchI];
+        const label start = pf.patch().start();
+
+        forAll(pf, i)
+        {
+            label faceI = start + i;
+            label cellI = own[faceI];
+            cop(result[cellI], pf[i]);
+        }
     }
 
     result.correctBoundaryConditions();
@@ -96,13 +111,14 @@ template<class Type, class CombineOp>
 tmp<GeometricField<Type, fvPatchField, volMesh> > cellReduce
 (
     const tmp<GeometricField<Type, fvsPatchField, surfaceMesh>&> tssf,
-    const CombineOp& cop
+    const CombineOp& cop,
+    const Type& nullValue
 )
 {
     tmp<GeometricField<Type, fvPatchField, volMesh> >
-        tvf(cellReduce(cop, tssf));
+        tvf(cellReduce(cop, tssf, nullValue));
 
-   tssf.clear();
+    tssf.clear();
     return tvf;
 }
 

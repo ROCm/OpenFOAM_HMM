@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,13 +30,13 @@ Group
 Description
     This function object allows specification of different writing frequency
     of objects registered to the database. It has similar functionality
-    as the main time database through the outputControl setting:
-        timeStep
-        outputTime
-        adjustableTime
-        runTime
-        clockTime
-        cpuTime
+    as the main time database through the \c outputControl setting:
+    - timeStep
+    - outputTime
+    - adjustableTime
+    - runTime
+    - clockTime
+    - cpuTime
 
     Example of function object specification:
     \verbatim
@@ -56,6 +56,7 @@ Description
         type         | type name: writeRegisteredObject | yes |
         objectNames  | objects to write        | yes         |
         exclusiveWriting    | Takes over object writing | no | yes
+        log          | Log to standard output  | no          | yes
     \endtable
 
     exclusiveWriting disables automatic writing (i.e through database) of the
@@ -76,6 +77,7 @@ SourceFiles
 
 #include "wordReList.H"
 #include "runTimeSelectionTables.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -104,13 +106,16 @@ protected:
         //- Takes over the writing from Db
         bool exclusiveWriting_;
 
-        //- Refererence to Db
+        //- Refererence to the database
         const objectRegistry& obr_;
 
         // Read from dictionary
 
             //- Names of objects to control
             wordReList objectNames_;
+
+            //- Switch to send output to Info as well as to file
+            Switch log_;
 
 
     // Private Member Functions

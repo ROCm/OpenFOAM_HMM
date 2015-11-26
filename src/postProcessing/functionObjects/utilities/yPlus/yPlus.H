@@ -47,7 +47,7 @@ Description
         Property     | Description             | Required    | Default value
         type         | Type name: yPlus        | yes         |
         phiName      | Name of flux field      | no          | phi
-        resultName   | Name of y+ field        | no          | <function name>
+        resultName   | Name of y+ field        | no          | \<function name\>
         log          | Log to standard output  | no          | yes
     \endtable
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,9 +55,10 @@ Description
     \table
         Property | Description               | Required    | Default value
         type     | type name: nearWallFields | yes         |
-        fields   | list of fields with correspoding output field names | yes |
+        fields   | list of fields with corresponding output field names | yes |
         patches  | list of patches to sample | yes         |
         distance | distance from patch to sample | yes     |
+        log      | Log to standard output    | no          | yes
     \endtable
 
 SeeAlso
@@ -110,6 +111,9 @@ protected:
 
             //- Fields to process
             List<Tuple2<word, word> > fieldSet_;
+
+            //- Switch to send output to Info as well as to file
+            Switch log_;
 
             //- Patches to sample
             labelHashSet patchSet_;

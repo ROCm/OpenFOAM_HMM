@@ -89,7 +89,7 @@ for (label procI = 0; procI < Pstream::nProcs(); procI++)
 
     DynamicList<label> dRayIs;
 
-    // Collect the rays which has not abstacle in bettween in rayStartFace
+    // Collect the rays which has not hit obstacle inbetween rayStartFace
     // and rayEndFace. If the ray hit itself get stored in dRayIs
     forAll(hitInfo, rayI)
     {

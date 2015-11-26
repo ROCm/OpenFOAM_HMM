@@ -127,13 +127,7 @@ class backgroundMeshDecomposition
         //  a point that is not found on any processor is in the domain at all
         treeBoundBox globalBackgroundBounds_;
 
-        //- Decomposition dictionary
-        IOdictionary decomposeDict_;
-
-        //- Decomposition method
-        autoPtr<decompositionMethod> decomposerPtr_;
-
-        //- Merge distance required by fvMeshDistribute
+        //- merge distance required by fvMeshDistribute
         scalar mergeDist_;
 
         //- Scale of a cell span vs cell size used to decide to refine a cell
@@ -204,7 +198,8 @@ public:
             const Time& runTime,
             Random& rndGen,
             const conformationSurfaces& geometryToConformTo,
-            const dictionary& coeffsDict
+            const dictionary& coeffsDict,
+            const fileName& decompDictFile = ""
         );
 
 
@@ -324,8 +319,6 @@ public:
             //- Return the point level of the underlying mesh
             inline const labelList& pointLevel() const;
 
-            //- Return the current decomposition method
-            inline const decompositionMethod& decomposer() const;
 };
 
 

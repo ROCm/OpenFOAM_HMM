@@ -271,11 +271,18 @@ motionControl
             forceInitialPointInsertion  on;
             priority                    1;
             mode                        inside;
+
+            // Cell size at surface
             surfaceCellSizeFunction     uniformValue;
             uniformValueCoeffs
             {
                 surfaceCellSizeCoeff    0.5;
             }
+
+            // Cell size inside domain by having a region of thickness
+            // surfaceOffsetaround the surface with the surface cell size
+            // (so constant) and then down to distanceCellSize over a distance
+            // of linearDistance.
             cellSizeFunction            surfaceOffsetLinearDistance;
             surfaceOffsetLinearDistanceCoeffs
             {
@@ -375,8 +382,16 @@ polyMeshFiltering
     // Filter small and sliver faces
     filterFaces                             off;
 
-    // Write the underlying Delaunay tet mesh at output time
+    // Write the underlying Delaunay tet mesh (at output time)
     writeTetDualMesh                        false;
+
+    // Write the Delaunay tet mesh used for interpolating cell size and
+    // alignment (at output time)
+    writeCellShapeControlMesh           true;
+
+    // Write the hex/split-hex mesh used for parallel load balancing
+    // (at output time)
+    writeBackgroundMeshDecomposition    true;
 
     // Upper limit on the size of faces to be filtered.
     // fraction of the local target cell size

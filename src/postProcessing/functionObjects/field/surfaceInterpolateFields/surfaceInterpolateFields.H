@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,6 +54,7 @@ Description
         Property | Description               | Required    | Default value
         type     | type name: nearWallFields | yes         |
         fields   | list of fields with correspoding output field names | yes |
+        log      | Log to standard output    | no          | yes
     \endtable
 
 
@@ -103,8 +104,10 @@ protected:
         bool active_;
 
         //- Fields to process
-        //wordList fieldSet_;
         List<Tuple2<word, word> > fieldSet_;
+
+        //- Switch to send output to Info as well as to file
+        Switch log_;
 
         //- Locally constructed fields
         PtrList<surfaceScalarField> ssf_;

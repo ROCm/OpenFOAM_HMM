@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,6 +31,25 @@ Description
     This function object calculates and outputs the second largest eigenvalue
     of the sum of the square of the symmetrical and anti-symmetrical parts of
     the velocity gradient tensor.
+
+    Example of function object specification to calculate Lambda2:
+    \verbatim
+    Lambda2_1
+    {
+        type        Lambda2;
+        functionObjectLibs ("libutilityFunctionObjects.so");
+        ...
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | Type name: Lambda2      | yes         |
+        UName        | Name of velocity field  | no          | U
+        resultName   | Name of Lambda2 field   | no          | <function name>
+        log          | Log to standard output  | no          | yes
+    \endtable
 
 SourceFiles
     Lambda2.C
@@ -76,6 +95,12 @@ class Lambda2
 
         //- Name of velocity field, default is "U"
         word UName_;
+
+        //- Result name
+        word resultName_;
+
+        //- Switch to send output to Info as well as to file
+        Switch log_;
 
 
     // Private Member Functions

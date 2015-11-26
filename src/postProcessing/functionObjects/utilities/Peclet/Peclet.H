@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,25 @@ Group
 Description
     This function object calculates and outputs the Peclet number as a
     surfaceScalarField.
+
+    Example of function object specification to calculate the Peclet number:
+    \verbatim
+    Peclet1
+    {
+        type        Peclet;
+        functionObjectLibs ("libutilityFunctionObjects.so");
+        ...
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | type name: Peclet       | yes         |
+        phiName      | Name of flux field      | no          | phi
+        resultName   | Name of Peclet field    | no          | <function name>
+        log          | Log to standard output  | no          | yes
+    \endtable
 
 SourceFiles
     Peclet.C
@@ -76,8 +95,11 @@ class Peclet
         //- Name of flux field, default is "phi"
         word phiName_;
 
-        //- Name of density field (compressible cases only), default is "rho"
-        word rhoName_;
+        //- Result name
+        word resultName_;
+
+        //- Switch to send output to Info as well as to file
+        Switch log_;
 
 
     // Private Member Functions

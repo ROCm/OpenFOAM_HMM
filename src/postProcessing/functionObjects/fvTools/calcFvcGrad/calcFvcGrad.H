@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,9 +28,29 @@ Group
     grpFVFunctionObjects
 
 Description
-    This function object calculates the gradient of a field.  The operation is
-    limited to scalar and vector volume or surface fields, and the output is a
-    volume vector or tensor field.
+    This function object calculates the gradient of a field.  The operation
+    is limited to scalar and vector volume or surface fields, and the output
+    is a volume vector or tensor field.
+
+    Example of function object specification:
+    \verbatim
+    calcFvcGrad1
+    {
+        type        calcFvcGrad;
+        functionObjectLibs ("libFVFunctionObjects.so");
+        ...
+        fieldName   U;
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property | Description                | Required  | Default value
+        type     | type name: calcFvcGrad     | yes       |
+        fieldName | Name of field to process  | yes       |
+        resultName | Name of gradient field   | no        | fvc::grad(fieldName)
+        log      | Log to standard output     | no        | yes
+    \endtable
 
 SourceFiles
     calcFvcGrad.C
@@ -81,6 +101,9 @@ class calcFvcGrad
 
         //- Name of result field
         word resultName_;
+
+        //- Switch to send output to Info as well as to file
+        Switch log_;
 
 
     // Private Member Functions
