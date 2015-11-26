@@ -61,7 +61,7 @@ Description
     \table
         Property | Description                | Required   | Default value
         type     | type name: wallShearStress | yes        |
-        resultName | Name of wall shear stress field | no | \<function name\>
+        resultName | Name of wall shear stress field | no  | \<function name\>
         patches  | list of patches to process | no         | all wall patches
         log      | Log to standard output     | no         | yes
     \endtable

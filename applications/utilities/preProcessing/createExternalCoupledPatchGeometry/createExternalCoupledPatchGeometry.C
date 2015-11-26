@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,15 +26,19 @@ Application
 
 Description
     Application to generate the patch geometry (points and faces) for use
-    with the externalCoupled boundary condition.
+    with the externalCoupled functionObject.
 
-    Usage:
+Usage
+    - createExternalCoupledPatchGeometry \<patchGroup\> [OPTION]
 
-        createExternalCoupledPatchGeometry \<fieldName\>
+    \param -commsDir \<commsDir\> \n
+    Specify an alternative communications directory (default is comms
+    in the case directory)
 
-    On execution, the field \<fieldName\> is read, and its boundary conditions
-    interrogated for the presence of an \c externalCoupled type.  If found,
-    the patch geometry (points and faces) for the coupled patches are output
+    \param -region \<name\> \n
+    Specify an alternative mesh region.
+
+    On execution, the combined patch geometry (points and faces) are output
     to the communications directory.
 
 Note:
@@ -42,12 +46,12 @@ Note:
     used for face addressing starts at index 0.
 
 SeeAlso
-    externalCoupledMixedFvPatchField
+    externalCoupledFunctionObject
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "createExternalCoupledPatchGeometryTemplates.H"
+#include "externalCoupledFunctionObject.H"
 #include "IOobjectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -55,28 +59,25 @@ SeeAlso
 int main(int argc, char *argv[])
 {
     #include "addRegionOption.H"
-    argList::validArgs.append("fieldName");
+    argList::validArgs.append("patchGroup");
+    argList::addOption
+    (
+        "commsDir",
+        "dir",
+        "specify alternate communications directory. default is 'comms'"
+    );
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedMesh.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    const word fieldName = args[1];
+    const wordRe patchGroup(args[1]);
 
-    IOobjectList objects(IOobjectList(mesh, mesh.time().timeName()));
+    fileName commsDir(runTime.path()/"comms");
+    args.optionReadIfPresent("commsDir", commsDir);
 
-    label processed = -1;
-    processField<scalar>(mesh, objects, fieldName, processed);
-    processField<vector>(mesh, objects, fieldName, processed);
-    processField<sphericalTensor>(mesh, objects, fieldName, processed);
-    processField<symmTensor>(mesh, objects, fieldName, processed);
-    processField<tensor>(mesh, objects, fieldName, processed);
-
-    if (processed == -1)
-    {
-        Info<< "Field " << fieldName << " not found" << endl;
-    }
+    externalCoupledFunctionObject::writeGeometry(mesh, commsDir, patchGroup);
 
     Info<< "\nEnd\n" << endl;
 

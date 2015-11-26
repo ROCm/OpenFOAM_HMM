@@ -30,6 +30,7 @@ readFields/readFields.C
 readFields/readFieldsFunctionObject.C
 
 streamLine/streamLine.C
+streamLine/streamLineBase.C
 streamLine/streamLineParticle.C
 streamLine/streamLineParticleCloud.C
 streamLine/streamLineFunctionObject.C
