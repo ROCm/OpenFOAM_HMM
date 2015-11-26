@@ -24,9 +24,13 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cyclicAMIPolyPatch.H"
+#include "transformField.H"
 #include "SubField.H"
+#include "polyMesh.H"
 #include "Time.H"
 #include "addToRunTimeSelectionTable.H"
+#include "faceAreaIntersect.H"
+#include "ops.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -172,18 +176,19 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
                 scalar errorPos = mag(transformedAreaPos + area0);
                 scalar errorNeg = mag(transformedAreaNeg + area0);
 
-                if (errorPos < errorNeg)
-                {
-                    revT = revTPos;
-                }
-                else
+                scalar scaledErrorPos = errorPos/(mag(area0) + ROOTVSMALL);
+                scalar scaledErrorNeg = errorNeg/(mag(area0) + ROOTVSMALL);
+
+                // One of the errors should be (close to) zero. If this is
+                // the reverse transformation flip the rotation angle.
+                revT = revTPos;
+                if (errorPos > errorNeg && scaledErrorNeg <= matchTolerance())
                 {
                     revT = revTNeg;
                     rotationAngle_ *= -1;
                 }
 
-                scalar areaError =
-                    min(errorPos, errorNeg)/(mag(area0) + ROOTVSMALL);
+                scalar areaError = min(scaledErrorPos, scaledErrorNeg);
 
                 if (areaError > matchTolerance())
                 {
@@ -406,6 +411,9 @@ void Foam::cyclicAMIPolyPatch::resetAMI
 
 void Foam::cyclicAMIPolyPatch::initGeometry(PstreamBuffers& pBufs)
 {
+    // The AMI is no longer valid. Leave it up to demand-driven calculation
+    AMIPtr_.clear();
+
     polyPatch::initGeometry(pBufs);
 }
 
@@ -431,6 +439,9 @@ void Foam::cyclicAMIPolyPatch::initMovePoints
     const pointField& p
 )
 {
+    // The AMI is no longer valid. Leave it up to demand-driven calculation
+    AMIPtr_.clear();
+
     polyPatch::initMovePoints(pBufs, p);
 
     // See below. Clear out any local geometry
@@ -447,19 +458,15 @@ void Foam::cyclicAMIPolyPatch::movePoints
     polyPatch::movePoints(pBufs, p);
 
     calcTransforms();
-
-    // Note: resetAMI is called whilst in geometry update. So the slave
-    // side might not have reached 'movePoints'. Is explicitly handled by
-    // - clearing geometry of neighbour inside initMovePoints
-    // - not using localPoints() inside resetAMI
-    resetAMI();
 }
 
 
 void Foam::cyclicAMIPolyPatch::initUpdateMesh(PstreamBuffers& pBufs)
 {
-    polyPatch::initUpdateMesh(pBufs);
+    // The AMI is no longer valid. Leave it up to demand-driven calculation
     AMIPtr_.clear();
+
+    polyPatch::initUpdateMesh(pBufs);
 }
 
 
