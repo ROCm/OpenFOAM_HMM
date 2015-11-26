@@ -40,24 +40,19 @@ License
 template<class Type>
 bool Foam::externalCoupledFunctionObject::readData
 (
-    const fvMesh& mesh,
+    const UPtrList<const fvMesh>& meshes,
     const wordRe& groupName,
-    const labelList& patchIDs,
     const word& fieldName
 )
 {
     typedef GeometricField<Type, fvPatchField, volMesh> volFieldType;
     typedef externalCoupledMixedFvPatchField<Type> patchFieldType;
 
-    if (!mesh.foundObject<volFieldType>(fieldName))
+    wordList regionNames(meshes.size());
+    forAll(meshes, i)
     {
-        return false;
+        regionNames[i] = meshes[i].dbDir();
     }
-
-    const volFieldType& cvf = mesh.lookupObject<volFieldType>(fieldName);
-    const typename volFieldType::GeometricBoundaryField& bf =
-        cvf.boundaryField();
-
 
     // File only opened on master; contains data for all processors, for all
     // patchIDs.
@@ -66,7 +61,7 @@ bool Foam::externalCoupledFunctionObject::readData
     {
         const fileName transferFile
         (
-            groupDir(commsDir_, mesh.dbDir(), groupName)
+            groupDir(commsDir_, compositeName(regionNames), groupName)
           / fieldName + ".in"
         );
 
@@ -82,181 +77,234 @@ bool Foam::externalCoupledFunctionObject::readData
             (
                 "void externalCoupledFunctionObject::readData"
                 "("
-                    "const fvMesh&, "
+                    "const UPtrList<const fvMesh>&, "
                     "const wordRe&, "
-                    "const labelList&, "
                     "const word&"
                ")",
                 masterFilePtr()
-            )   << "Cannot open file for region " << mesh.name()
-                << ", field " << fieldName << ", patches " << patchIDs
+            )   << "Cannot open file for region " << compositeName(regionNames)
+                << ", field " << fieldName
                 << exit(FatalIOError);
         }
     }
 
-    // Handle column-wise reading of patch data. Supports most easy types
-    forAll(patchIDs, i)
+
+    label nFound = 0;
+
+
+    forAll(meshes, i)
     {
-        label patchI = patchIDs[i];
+        const fvMesh& mesh = meshes[i];
 
-        if (isA<patchFieldType>(bf[patchI]))
+        if (!mesh.foundObject<volFieldType>(fieldName))
         {
-            // Explicit handling of externalCoupledObjectMixed bcs - they have
-            // specialised reading routines.
-
-            patchFieldType& pf = const_cast<patchFieldType&>
-            (
-                refCast<const patchFieldType>
-                (
-                    bf[patchI]
-                )
-            );
-
-            // Read from master into local stream
-            OStringStream os;
-            readLines
-            (
-                bf[patchI].size(),      // number of lines to read
-                masterFilePtr,
-                os
-            );
-
-            // Pass responsability for all reading over to bc
-            pf.readData(IStringStream(os.str())());
-
-            // Update the value from the read coefficicient. Bypass any
-            // additional processing by derived type.
-            pf.patchFieldType::evaluate();
+            continue;
         }
-        else if (isA<mixedFvPatchField<Type> >(bf[patchI]))
+
+        nFound++;
+
+        const volFieldType& cvf = mesh.lookupObject<volFieldType>(fieldName);
+        const typename volFieldType::GeometricBoundaryField& bf =
+            cvf.boundaryField();
+
+
+        // Get the patches
+        const labelList patchIDs
+        (
+            mesh.boundaryMesh().patchSet
+            (
+                List<wordRe>(1, groupName)
+            ).sortedToc()
+        );
+
+        // Handle column-wise reading of patch data. Supports most easy types
+        forAll(patchIDs, i)
         {
-            // Read columns from file for
-            // value, snGrad, refValue, refGrad, valueFraction
-            List<scalarField> data;
-            readColumns
-            (
-                bf[patchI].size(),              // number of lines to read
-                4*pTraits<Type>::nComponents+1, // nColumns: 4*Type + 1*scalar
-                masterFilePtr,
-                data
-            );
+            label patchI = patchIDs[i];
 
-            mixedFvPatchField<Type>& pf = const_cast<mixedFvPatchField<Type>&>
-            (
-                refCast<const mixedFvPatchField<Type> >
-                (
-                    bf[patchI]
-                )
-            );
-
-            // Transfer read data to bc.
-            // Skip value, snGrad
-            direction columnI = 2*pTraits<Type>::nComponents;
-
-            Field<Type>& refValue = pf.refValue();
-            for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
+            if (isA<patchFieldType>(bf[patchI]))
             {
-                refValue.replace(cmpt, data[columnI++]);
-            }
-            Field<Type>& refGrad = pf.refGrad();
-            for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
-            {
-                refGrad.replace(cmpt, data[columnI++]);
-            }
-            pf.valueFraction() = data[columnI];
+                // Explicit handling of externalCoupledMixed bcs - they
+                // have specialised reading routines.
 
-            // Update the value from the read coefficicient. Bypass any
-            // additional processing by derived type.
-            pf.mixedFvPatchField<Type>::evaluate();
-        }
-        else if (isA<fixedGradientFvPatchField<Type> >(bf[patchI]))
-        {
-            // Read columns for value and gradient
-            List<scalarField> data;
-            readColumns
-            (
-                bf[patchI].size(),              // number of lines to read
-                2*pTraits<Type>::nComponents,   // nColumns: Type
-                masterFilePtr,
-                data
-            );
-
-            fixedGradientFvPatchField<Type>& pf =
-            const_cast<fixedGradientFvPatchField<Type>&>
-            (
-                refCast<const fixedGradientFvPatchField<Type> >
+                patchFieldType& pf = const_cast<patchFieldType&>
                 (
-                    bf[patchI]
-                )
-            );
+                    refCast<const patchFieldType>
+                    (
+                        bf[patchI]
+                    )
+                );
 
-            // Transfer gradient to bc
-            Field<Type>& gradient = pf.gradient();
-            for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
-            {
-                gradient.replace(cmpt, data[pTraits<Type>::nComponents+cmpt]);
-            }
-
-            // Update the value from the read coefficicient. Bypass any
-            // additional processing by derived type.
-            pf.fixedGradientFvPatchField<Type>::evaluate();
-        }
-        else if (isA<fixedValueFvPatchField<Type> >(bf[patchI]))
-        {
-            // Read columns for value only
-            List<scalarField> data;
-            readColumns
-            (
-                bf[patchI].size(),              // number of lines to read
-                pTraits<Type>::nComponents,     // number of columns to read
-                masterFilePtr,
-                data
-            );
-
-            // Transfer read value to bc
-            Field<Type> value(bf[patchI].size());
-            for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
-            {
-                value.replace(cmpt, data[cmpt]);
-            }
-
-            fixedValueFvPatchField<Type>& pf =
-            const_cast<fixedValueFvPatchField<Type>&>
-            (
-                refCast<const fixedValueFvPatchField<Type> >
+                // Read from master into local stream
+                OStringStream os;
+                readLines
                 (
-                    bf[patchI]
+                    bf[patchI].size(),      // number of lines to read
+                    masterFilePtr,
+                    os
+                );
+
+                // Pass responsability for all reading over to bc
+                pf.readData(IStringStream(os.str())());
+
+                // Update the value from the read coefficicient. Bypass any
+                // additional processing by derived type.
+                pf.patchFieldType::evaluate();
+            }
+            else if (isA<mixedFvPatchField<Type> >(bf[patchI]))
+            {
+                // Read columns from file for
+                // value, snGrad, refValue, refGrad, valueFraction
+                List<scalarField> data;
+                readColumns
+                (
+                    bf[patchI].size(),              // number of lines to read
+                    4*pTraits<Type>::nComponents+1, // nColumns: 4*Type+1*scalar
+                    masterFilePtr,
+                    data
+                );
+
+                mixedFvPatchField<Type>& pf =
+                const_cast<mixedFvPatchField<Type>&>
+                (
+                    refCast<const mixedFvPatchField<Type> >
+                    (
+                        bf[patchI]
+                    )
+                );
+
+                // Transfer read data to bc.
+                // Skip value, snGrad
+                direction columnI = 2*pTraits<Type>::nComponents;
+
+                Field<Type>& refValue = pf.refValue();
+                for
+                (
+                    direction cmpt = 0;
+                    cmpt < pTraits<Type>::nComponents;
+                    cmpt++
                 )
-            );
+                {
+                    refValue.replace(cmpt, data[columnI++]);
+                }
+                Field<Type>& refGrad = pf.refGrad();
+                for
+                (
+                    direction cmpt = 0;
+                    cmpt < pTraits<Type>::nComponents;
+                    cmpt++
+                )
+                {
+                    refGrad.replace(cmpt, data[columnI++]);
+                }
+                pf.valueFraction() = data[columnI];
 
-            pf == value;
+                // Update the value from the read coefficicient. Bypass any
+                // additional processing by derived type.
+                pf.mixedFvPatchField<Type>::evaluate();
+            }
+            else if (isA<fixedGradientFvPatchField<Type> >(bf[patchI]))
+            {
+                // Read columns for value and gradient
+                List<scalarField> data;
+                readColumns
+                (
+                    bf[patchI].size(),              // number of lines to read
+                    2*pTraits<Type>::nComponents,   // nColumns: Type
+                    masterFilePtr,
+                    data
+                );
 
-            // Update the value from the read coefficicient. Bypass any
-            // additional processing by derived type.
-            pf.fixedValueFvPatchField<Type>::evaluate();
+                fixedGradientFvPatchField<Type>& pf =
+                const_cast<fixedGradientFvPatchField<Type>&>
+                (
+                    refCast<const fixedGradientFvPatchField<Type> >
+                    (
+                        bf[patchI]
+                    )
+                );
+
+                // Transfer gradient to bc
+                Field<Type>& gradient = pf.gradient();
+                for
+                (
+                    direction cmpt = 0;
+                    cmpt < pTraits<Type>::nComponents;
+                    cmpt++
+                )
+                {
+                    gradient.replace
+                    (
+                        cmpt,
+                        data[pTraits<Type>::nComponents+cmpt]
+                    );
+                }
+
+                // Update the value from the read coefficicient. Bypass any
+                // additional processing by derived type.
+                pf.fixedGradientFvPatchField<Type>::evaluate();
+            }
+            else if (isA<fixedValueFvPatchField<Type> >(bf[patchI]))
+            {
+                // Read columns for value only
+                List<scalarField> data;
+                readColumns
+                (
+                    bf[patchI].size(),              // number of lines to read
+                    pTraits<Type>::nComponents,     // number of columns to read
+                    masterFilePtr,
+                    data
+                );
+
+                // Transfer read value to bc
+                Field<Type> value(bf[patchI].size());
+                for
+                (
+                    direction cmpt = 0;
+                    cmpt < pTraits<Type>::nComponents;
+                    cmpt++
+                )
+                {
+                    value.replace(cmpt, data[cmpt]);
+                }
+
+                fixedValueFvPatchField<Type>& pf =
+                const_cast<fixedValueFvPatchField<Type>&>
+                (
+                    refCast<const fixedValueFvPatchField<Type> >
+                    (
+                        bf[patchI]
+                    )
+                );
+
+                pf == value;
+
+                // Update the value from the read coefficicient. Bypass any
+                // additional processing by derived type.
+                pf.fixedValueFvPatchField<Type>::evaluate();
+            }
+            else
+            {
+                FatalErrorIn
+                (
+                    "void externalCoupledFunctionObject::readData"
+                    "("
+                        "const UPtrList<const fvMesh>&, "
+                        "const wordRe&, "
+                        "const word&"
+                   ")"
+                )
+                    << "Unsupported boundary condition " << bf[patchI].type()
+                    << " for patch " << bf[patchI].patch().name()
+                    << " in region " << mesh.name()
+                    << exit(FatalError);
+            }
+
+            initialised_ = true;
         }
-        else
-        {
-            FatalErrorIn
-            (
-                "void externalCoupledFunctionObject::readData"
-                "("
-                    "const fvMesh&, "
-                    "const wordRe&, "
-                    "const labelList&, "
-                    "const word&"
-               ")"
-            )
-                << "Unsupported boundary condition " << bf[patchI].type()
-                << " for patch " << bf[patchI].patch().name()
-                << " in region " << mesh.name()
-                << exit(FatalError);
-        }
-
-        initialised_ = true;
     }
 
-    return true;
+    return nFound > 0;
 }
 
 
@@ -308,24 +356,19 @@ Foam::externalCoupledFunctionObject::gatherAndCombine
 template<class Type>
 bool Foam::externalCoupledFunctionObject::writeData
 (
-    const fvMesh& mesh,
+    const UPtrList<const fvMesh>& meshes,
     const wordRe& groupName,
-    const labelList& patchIDs,
     const word& fieldName
 ) const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> volFieldType;
     typedef externalCoupledMixedFvPatchField<Type> patchFieldType;
 
-    if (!mesh.foundObject<volFieldType>(fieldName))
+    wordList regionNames(meshes.size());
+    forAll(meshes, i)
     {
-        return false;
+        regionNames[i] = meshes[i].dbDir();
     }
-
-    const volFieldType& cvf = mesh.lookupObject<volFieldType>(fieldName);
-    const typename volFieldType::GeometricBoundaryField& bf =
-        cvf.boundaryField();
-
 
     // File only opened on master; contains data for all processors, for all
     // patchIDs
@@ -334,7 +377,7 @@ bool Foam::externalCoupledFunctionObject::writeData
     {
         const fileName transferFile
         (
-            groupDir(commsDir_, mesh.dbDir(), groupName)
+            groupDir(commsDir_, compositeName(regionNames), groupName)
           / fieldName + ".out"
         );
 
@@ -350,14 +393,13 @@ bool Foam::externalCoupledFunctionObject::writeData
             (
                 "externalCoupledFunctionObject::writeData"
                 "("
-                    "const fvMesh&, "
+                    "const UPtrList<const fvMesh>&, "
                     "const wordRe&, "
-                    "const labelList&, "
                     "const word&"
                 ") const",
                 masterFilePtr()
-            )   << "Cannot open file for region " << mesh.name()
-                << ", field " << fieldName << ", patches " << patchIDs
+            )   << "Cannot open file for region " << compositeName(regionNames)
+                << ", field " << fieldName
                 << exit(FatalIOError);
         }
     }
@@ -365,94 +407,122 @@ bool Foam::externalCoupledFunctionObject::writeData
 
     bool headerDone = false;
 
-    // Handle column-wise writing of patch data. Supports most easy types
-    forAll(patchIDs, i)
+    label nFound = 0;
+
+    forAll(meshes, i)
     {
-        label patchI = patchIDs[i];
+        const fvMesh& mesh = meshes[i];
 
-        const globalIndex globalFaces(bf[patchI].size());
-
-        if (isA<patchFieldType>(bf[patchI]))
+        if (!mesh.foundObject<volFieldType>(fieldName))
         {
-            // Explicit handling of externalCoupledObjectMixed bcs - they have
-            // specialised writing routines
+            continue;
+        }
 
-            const patchFieldType& pf = refCast<const patchFieldType>
+        nFound++;
+
+        const volFieldType& cvf = mesh.lookupObject<volFieldType>(fieldName);
+        const typename volFieldType::GeometricBoundaryField& bf =
+            cvf.boundaryField();
+
+
+        // Get the patches
+        const labelList patchIDs
+        (
+            mesh.boundaryMesh().patchSet
             (
-                bf[patchI]
-            );
-            OStringStream os;
+                List<wordRe>(1, groupName)
+            ).sortedToc()
+        );
 
-            // Pass responsibility for all writing over to bc
-            pf.writeData(os);
+        // Handle column-wise writing of patch data. Supports most easy types
+        forAll(patchIDs, i)
+        {
+            label patchI = patchIDs[i];
 
-            // Collect contributions from all processors and output them on
-            // master
-            if (Pstream::master())
+            const globalIndex globalFaces(bf[patchI].size());
+
+            if (isA<patchFieldType>(bf[patchI]))
             {
-                // Output master data first
-                if (!headerDone)
-                {
-                    pf.writeHeader(masterFilePtr());
-                    headerDone = true;
-                }
-                masterFilePtr() << os.str().c_str();
+                // Explicit handling of externalCoupledMixed bcs - they
+                // have specialised writing routines
 
-                for (label procI = 1; procI < Pstream::nProcs(); procI++)
+                const patchFieldType& pf = refCast<const patchFieldType>
+                (
+                    bf[patchI]
+                );
+                OStringStream os;
+
+                // Pass responsibility for all writing over to bc
+                pf.writeData(os);
+
+                // Collect contributions from all processors and output them on
+                // master
+                if (Pstream::master())
                 {
-                    IPstream fromSlave(Pstream::scheduled, procI);
-                    string str(fromSlave);
-                    masterFilePtr() << str.c_str();
+                    // Output master data first
+                    if (!headerDone)
+                    {
+                        pf.writeHeader(masterFilePtr());
+                        headerDone = true;
+                    }
+                    masterFilePtr() << os.str().c_str();
+
+                    for (label procI = 1; procI < Pstream::nProcs(); procI++)
+                    {
+                        IPstream fromSlave(Pstream::scheduled, procI);
+                        string str(fromSlave);
+                        masterFilePtr() << str.c_str();
+                    }
+                }
+                else
+                {
+                    OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
+                    toMaster << os.str();
+                }
+            }
+            else if (isA<mixedFvPatchField<Type> >(bf[patchI]))
+            {
+                const mixedFvPatchField<Type>& pf =
+                    refCast<const mixedFvPatchField<Type> >(bf[patchI]);
+
+                Field<Type> value(gatherAndCombine(pf));
+                Field<Type> snGrad(gatherAndCombine(pf.snGrad()()));
+                Field<Type> refValue(gatherAndCombine(pf.refValue()));
+                Field<Type> refGrad(gatherAndCombine(pf.refGrad()));
+                scalarField valueFraction(gatherAndCombine(pf.valueFraction()));
+
+                if (Pstream::master())
+                {
+                    forAll(refValue, faceI)
+                    {
+                        masterFilePtr()
+                            << value[faceI] << token::SPACE
+                            << snGrad[faceI] << token::SPACE
+                            << refValue[faceI] << token::SPACE
+                            << refGrad[faceI] << token::SPACE
+                            << valueFraction[faceI] << nl;
+                    }
                 }
             }
             else
             {
-                OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-                toMaster << os.str();
-            }
-        }
-        else if (isA<mixedFvPatchField<Type> >(bf[patchI]))
-        {
-            const mixedFvPatchField<Type>& pf =
-                refCast<const mixedFvPatchField<Type> >(bf[patchI]);
-
-            Field<Type> value(gatherAndCombine(pf));
-            Field<Type> snGrad(gatherAndCombine(pf.snGrad()()));
-            Field<Type> refValue(gatherAndCombine(pf.refValue()));
-            Field<Type> refGrad(gatherAndCombine(pf.refGrad()));
-            scalarField valueFraction(gatherAndCombine(pf.valueFraction()));
-
-            if (Pstream::master())
-            {
-                forAll(refValue, faceI)
+                // Output the value and snGrad
+                Field<Type> value(gatherAndCombine(bf[patchI]));
+                Field<Type> snGrad(gatherAndCombine(bf[patchI].snGrad()()));
+                if (Pstream::master())
                 {
-                    masterFilePtr()
-                        << value[faceI] << token::SPACE
-                        << snGrad[faceI] << token::SPACE
-                        << refValue[faceI] << token::SPACE
-                        << refGrad[faceI] << token::SPACE
-                        << valueFraction[faceI] << nl;
-                }
-            }
-        }
-        else
-        {
-            // Output the value and snGrad
-            Field<Type> value(gatherAndCombine(bf[patchI]));
-            Field<Type> snGrad(gatherAndCombine(bf[patchI].snGrad()()));
-            if (Pstream::master())
-            {
-                forAll(value, faceI)
-                {
-                    masterFilePtr()
-                        << value[faceI] << token::SPACE
-                        << snGrad[faceI] << nl;
+                    forAll(value, faceI)
+                    {
+                        masterFilePtr()
+                            << value[faceI] << token::SPACE
+                            << snGrad[faceI] << nl;
+                    }
                 }
             }
         }
     }
 
-    return true;
+    return nFound > 0;
 }
 
 

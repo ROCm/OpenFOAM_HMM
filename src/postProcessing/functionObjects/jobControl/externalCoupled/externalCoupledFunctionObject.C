@@ -31,6 +31,7 @@ License
 #include "volFields.H"
 #include "globalIndex.H"
 #include "fvMesh.H"
+#include "DynamicField.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -65,11 +66,16 @@ Foam::fileName Foam::externalCoupledFunctionObject::baseDir() const
 Foam::fileName Foam::externalCoupledFunctionObject::groupDir
 (
     const fileName& commsDir,
-    const word& regionName,
+    const word& regionGroupName,
     const wordRe& groupName
 )
 {
-    fileName result(commsDir/regionName/string::validate<fileName>(groupName));
+    fileName result
+    (
+        commsDir
+       /regionGroupName
+       /string::validate<fileName>(groupName)
+    );
     result.clean();
 
     return result;
@@ -126,11 +132,11 @@ void Foam::externalCoupledFunctionObject::removeReadFiles() const
 
     if (log_) Info<< type() << ": removing all read files" << endl;
 
-    forAll(regionNames_, regionI)
+    forAll(regionGroupNames_, regionI)
     {
-        const word& regionName = regionNames_[regionI];
-        const fvMesh& mesh = time_.lookupObject<fvMesh>(regionName);
-        const labelList& groups = regionToGroups_[regionName];
+        const word& compName = regionGroupNames_[regionI];
+
+        const labelList& groups = regionToGroups_[compName];
         forAll(groups, i)
         {
             label groupI = groups[i];
@@ -141,7 +147,7 @@ void Foam::externalCoupledFunctionObject::removeReadFiles() const
                 const word& fieldName = groupReadFields_[groupI][fieldI];
                 rm
                 (
-                    groupDir(commsDir_, mesh.dbDir(), groupName)
+                    groupDir(commsDir_, compName, groupName)
                   / fieldName + ".in"
                 );
             }
@@ -159,22 +165,22 @@ void Foam::externalCoupledFunctionObject::removeWriteFiles() const
 
     if (log_) Info<< type() << ": removing all write files" << endl;
 
-    forAll(regionNames_, regionI)
+    forAll(regionGroupNames_, regionI)
     {
-        const word& regionName = regionNames_[regionI];
-        const fvMesh& mesh = time_.lookupObject<fvMesh>(regionName);
-        const labelList& groups = regionToGroups_[regionName];
+        const word& compName = regionGroupNames_[regionI];
+
+        const labelList& groups = regionToGroups_[compName];
         forAll(groups, i)
         {
             label groupI = groups[i];
             const wordRe& groupName = groupNames_[groupI];
 
-            forAll(groupWriteFields_[groupI], fieldI)
+            forAll(groupReadFields_[groupI], fieldI)
             {
-                const word& fieldName = groupWriteFields_[groupI][fieldI];
+                const word& fieldName = groupReadFields_[groupI][fieldI];
                 rm
                 (
-                    groupDir(commsDir_, mesh.dbDir(), groupName)
+                    groupDir(commsDir_, compName, groupName)
                   / fieldName + ".out"
                 );
             }
@@ -376,12 +382,21 @@ void Foam::externalCoupledFunctionObject::readLines
 
 void Foam::externalCoupledFunctionObject::writeGeometry
 (
-    const fvMesh& mesh,
+    const UPtrList<const fvMesh>& meshes,
     const fileName& commsDir,
     const wordRe& groupName
 )
 {
-    fileName dir(groupDir(commsDir, mesh.dbDir(), groupName));
+    wordList regionNames(meshes.size());
+    forAll(meshes, i)
+    {
+        regionNames[i] = meshes[i].dbDir();
+    }
+
+    // Make sure meshes are provided in sorted order
+    checkOrder(regionNames);
+
+    fileName dir(groupDir(commsDir, compositeName(regionNames), groupName));
 
     //if (log_)
     {
@@ -397,99 +412,210 @@ void Foam::externalCoupledFunctionObject::writeGeometry
         osFacesPtr.reset(new OFstream(dir/"patchFaces"));
     }
 
-    const labelList patchIDs
-    (
-        mesh.boundaryMesh().patchSet
-        (
-            List<wordRe>(1, groupName)
-        ).sortedToc()
-    );
 
-    forAll(patchIDs, i)
+    DynamicList<face> allMeshesFaces;
+    DynamicField<point> allMeshesPoints;
+
+    forAll(meshes, meshI)
     {
-        label patchI = patchIDs[i];
+        const fvMesh& mesh = meshes[meshI];
 
-        const polyPatch& p = mesh.boundaryMesh()[patchI];
+        const labelList patchIDs
+        (
+            mesh.boundaryMesh().patchSet
+            (
+                List<wordRe>(1, groupName)
+            ).sortedToc()
+        );
+
+        // Count faces
+        label nFaces = 0;
+        forAll(patchIDs, i)
+        {
+            nFaces += mesh.boundaryMesh()[patchIDs[i]].size();
+        }
+
+        // Collect faces
+        DynamicList<label> allFaceIDs(nFaces);
+        forAll(patchIDs, i)
+        {
+            const polyPatch& p = mesh.boundaryMesh()[patchIDs[i]];
+
+            forAll(p, pI)
+            {
+                allFaceIDs.append(p.start()+pI);
+            }
+        }
+
+        // Construct overall patch
+        indirectPrimitivePatch allPatch
+        (
+            IndirectList<face>(mesh.faces(), allFaceIDs),
+            mesh.points()
+        );
 
         labelList pointToGlobal;
         labelList uniquePointIDs;
         mesh.globalData().mergePoints
         (
-            p.meshPoints(),
-            p.meshPointMap(),
+            allPatch.meshPoints(),
+            allPatch.meshPointMap(),
             pointToGlobal,
             uniquePointIDs
         );
 
         label procI = Pstream::myProcNo();
 
-        List<pointField> allPoints(Pstream::nProcs());
-        allPoints[procI] = pointField(mesh.points(), uniquePointIDs);
-        Pstream::gatherList(allPoints);
+        List<pointField> collectedPoints(Pstream::nProcs());
+        collectedPoints[procI] = pointField(mesh.points(), uniquePointIDs);
+        Pstream::gatherList(collectedPoints);
 
-        List<faceList> allFaces(Pstream::nProcs());
-        faceList& patchFaces = allFaces[procI];
-        patchFaces = p.localFaces();
+        List<faceList> collectedFaces(Pstream::nProcs());
+        faceList& patchFaces = collectedFaces[procI];
+        patchFaces = allPatch.localFaces();
         forAll(patchFaces, faceI)
         {
             inplaceRenumber(pointToGlobal, patchFaces[faceI]);
         }
-        Pstream::gatherList(allFaces);
+        Pstream::gatherList(collectedFaces);
 
         if (Pstream::master())
         {
-            pointField pts
-            (
-                ListListOps::combine<pointField>
-                (
-                    allPoints,
-                    accessOp<pointField>()
-                )
-            );
+            // Append and renumber
+            label nPoints = allMeshesPoints.size();
 
-            //if (log_)
+            forAll(collectedPoints, procI)
             {
-                Info<< typeName << ": for patch " << p.name()
-                    << " writing " << pts.size() << " points to "
-                    << osPointsPtr().name() << endl;
+                allMeshesPoints.append(collectedPoints[procI]);
+
             }
-
-            // Write points
-            osPointsPtr() << patchKey.c_str() << p.name() << pts << endl;
-
-            faceList fcs
-            (
-                ListListOps::combine<faceList>(allFaces, accessOp<faceList>())
-            );
-
-            //if (log_)
+            face newFace;
+            forAll(collectedFaces, procI)
             {
-                Info<< typeName << ": for patch " << p.name()
-                    << " writing " << fcs.size() << " faces to "
-                    << osFacesPtr().name() << endl;
-            }
+                const faceList& procFaces = collectedFaces[procI];
 
-            // Write faces
-            osFacesPtr() << patchKey.c_str() << p.name() << fcs << endl;
+                forAll(procFaces, faceI)
+                {
+                    const face& f = procFaces[faceI];
+
+                    newFace.setSize(f.size());
+                    forAll(f, fp)
+                    {
+                        newFace[fp] = f[fp]+nPoints;
+                    }
+                    allMeshesFaces.append(newFace);
+                }
+
+                nPoints += collectedPoints[procI].size();
+            }
         }
+
+        //if (log_)
+        {
+            Info<< typeName << ": for mesh " << mesh.name()
+                << " writing " << allMeshesPoints.size() << " points to "
+                << osPointsPtr().name() << endl;
+            Info<< typeName << ": for mesh " << mesh.name()
+                << " writing " << allMeshesFaces.size() << " faces to "
+                << osFacesPtr().name() << endl;
+        }
+    }
+
+    // Write points
+    if (osPointsPtr.valid())
+    {
+        osPointsPtr() << allMeshesPoints << endl;
+    }
+
+    // Write faces
+    if (osFacesPtr.valid())
+    {
+        osFacesPtr() << allMeshesFaces << endl;
+    }
+}
+
+
+Foam::word Foam::externalCoupledFunctionObject::compositeName
+(
+    const wordList& regionNames
+)
+{
+    if (regionNames.size() == 0)
+    {
+        FatalErrorIn
+        (
+            "externalCoupledFunctionObject::compositeName(const wordList&)"
+        )   << "Empty regionNames" << abort(FatalError);
+        return word::null;
+    }
+    else if (regionNames.size() == 1)
+    {
+        if (regionNames[0] == polyMesh::defaultRegion)
+        {
+            // For compatibility with single region cases suppress single
+            // region name
+            return word("");
+        }
+        else
+        {
+            return regionNames[0];
+        }
+    }
+    else
+    {
+        // Enforce lexical ordering
+        checkOrder(regionNames);
+
+        word composite(regionNames[0]);
+        for (label i = 1; i < regionNames.size(); i++)
+        {
+            composite += "_" + regionNames[i];
+        }
+
+        return composite;
+    }
+}
+
+
+void Foam::externalCoupledFunctionObject::checkOrder
+(
+    const wordList& regionNames
+)
+{
+    labelList order;
+    sortedOrder(regionNames, order);
+    if (order != identity(regionNames.size()))
+    {
+        FatalErrorIn
+        (
+            "externalCoupledFunctionObject::checkOrder(const wordList&)"
+        )   << "regionNames " << regionNames << " not in alphabetical order :"
+            << order << exit(FatalError);
     }
 }
 
 
 void Foam::externalCoupledFunctionObject::readData()
 {
-    forAll(regionNames_, regionI)
+    forAll(regionGroupNames_, regionI)
     {
-        const word& regionName = regionNames_[regionI];
-        const labelList& groups = regionToGroups_[regionName];
+        const word& compName = regionGroupNames_[regionI];
+        const wordList& regionNames = regionGroupRegions_[regionI];
 
-        const fvMesh& mesh = time_.lookupObject<fvMesh>(regionName);
+        // Get the meshes for the region-group
+        UPtrList<const fvMesh> meshes(regionNames.size());
+        forAll(regionNames, j)
+        {
+            const word& regionName = regionNames[j];
+            meshes.set(j, &time_.lookupObject<fvMesh>(regionName));
+        }
+
+        const labelList& groups = regionToGroups_[compName];
 
         forAll(groups, i)
         {
             label groupI = groups[i];
             const wordRe& groupName = groupNames_[groupI];
-            const labelList& patchIDs = groupPatchIDs_[groupI];
             const wordList& fieldNames = groupReadFields_[groupI];
 
             forAll(fieldNames, fieldI)
@@ -498,37 +624,32 @@ void Foam::externalCoupledFunctionObject::readData()
 
                 bool ok = readData<scalar>
                 (
-                    mesh,
+                    meshes,
                     groupName,
-                    patchIDs,
                     fieldName
                 );
                 ok = ok || readData<vector>
                 (
-                    mesh,
+                    meshes,
                     groupName,
-                    patchIDs,
                     fieldName
                 );
                 ok = ok || readData<sphericalTensor>
                 (
-                    mesh,
+                    meshes,
                     groupName,
-                    patchIDs,
                     fieldName
                 );
                 ok = ok || readData<symmTensor>
                 (
-                    mesh,
+                    meshes,
                     groupName,
-                    patchIDs,
                     fieldName
                 );
                 ok = ok || readData<tensor>
                 (
-                    mesh,
+                    meshes,
                     groupName,
-                    patchIDs,
                     fieldName
                 );
 
@@ -538,7 +659,7 @@ void Foam::externalCoupledFunctionObject::readData()
                     (
                         "void Foam::externalCoupledFunctionObject::readData()"
                     )
-                        << "Field " << fieldName << " in region " << mesh.name()
+                        << "Field " << fieldName << " in regions " << compName
                         << " was not found." << endl;
                 }
             }
@@ -549,56 +670,59 @@ void Foam::externalCoupledFunctionObject::readData()
 
 void Foam::externalCoupledFunctionObject::writeData() const
 {
-    forAll(regionNames_, regionI)
+    forAll(regionGroupNames_, regionI)
     {
-        const word& regionName = regionNames_[regionI];
-        const labelList& groups = regionToGroups_[regionName];
+        const word& compName = regionGroupNames_[regionI];
+        const wordList& regionNames = regionGroupRegions_[regionI];
 
-        const fvMesh& mesh = time_.lookupObject<fvMesh>(regionName);
+        // Get the meshes for the region-group
+        UPtrList<const fvMesh> meshes(regionNames.size());
+        forAll(regionNames, j)
+        {
+            const word& regionName = regionNames[j];
+            meshes.set(j, &time_.lookupObject<fvMesh>(regionName));
+        }
+
+        const labelList& groups = regionToGroups_[compName];
 
         forAll(groups, i)
         {
             label groupI = groups[i];
             const wordRe& groupName = groupNames_[groupI];
-            const labelList& patchIDs = groupPatchIDs_[groupI];
             const wordList& fieldNames = groupWriteFields_[groupI];
 
             forAll(fieldNames, fieldI)
             {
                 const word& fieldName = fieldNames[fieldI];
+
                 bool ok = writeData<scalar>
                 (
-                    mesh,
+                    meshes,
                     groupName,
-                    patchIDs,
                     fieldName
                 );
                 ok = ok || writeData<vector>
                 (
-                    mesh,
+                    meshes,
                     groupName,
-                    patchIDs,
                     fieldName
                 );
                 ok = ok || writeData<sphericalTensor>
                 (
-                    mesh,
+                    meshes,
                     groupName,
-                    patchIDs,
                     fieldName
                 );
                 ok = ok || writeData<symmTensor>
                 (
-                    mesh,
+                    meshes,
                     groupName,
-                    patchIDs,
                     fieldName
                 );
                 ok = ok || writeData<tensor>
                 (
-                    mesh,
+                    meshes,
                     groupName,
-                    patchIDs,
                     fieldName
                 );
 
@@ -608,7 +732,7 @@ void Foam::externalCoupledFunctionObject::writeData() const
                     (
                         "void Foam::externalCoupledFunctionObject::writeData()"
                     )
-                        << "Field " << fieldName << " in region " << mesh.name()
+                        << "Field " << fieldName << " in regions " << compName
                         << " was not found." << endl;
                 }
             }
@@ -625,12 +749,20 @@ void Foam::externalCoupledFunctionObject::initialise()
     }
 
     // Write the geometry if not already there
-    forAll(regionNames_, regionI)
+    forAll(regionGroupRegions_, i)
     {
-        const word& regionName = regionNames_[regionI];
-        const labelList& groups = regionToGroups_[regionName];
+        const word& compName = regionGroupNames_[i];
+        const wordList& regionNames = regionGroupRegions_[i];
 
-        const fvMesh& mesh = time_.lookupObject<fvMesh>(regionName);
+        // Get the meshes for the region-group
+        UPtrList<const fvMesh> meshes(regionNames.size());
+        forAll(regionNames, j)
+        {
+            const word& regionName = regionNames[j];
+            meshes.set(j, &time_.lookupObject<fvMesh>(regionName));
+        }
+
+        const labelList& groups = regionToGroups_[compName];
 
         forAll(groups, i)
         {
@@ -640,14 +772,16 @@ void Foam::externalCoupledFunctionObject::initialise()
             bool exists = false;
             if (Pstream::master())
             {
-                fileName dir(groupDir(commsDir_, mesh.dbDir(), groupName));
+                fileName dir(groupDir(commsDir_, compName, groupName));
 
-                exists = isFile(dir/"patchPoints") || isFile(dir/"patchFaces");
+                exists =
+                    isFile(dir/"patchPoints")
+                 || isFile(dir/"patchFaces");
             }
 
             if (!returnReduce(exists, orOp<bool>()))
             {
-                writeGeometry(mesh, commsDir_, groupName);
+                writeGeometry(meshes, commsDir_, groupName);
             }
         }
     }
@@ -802,6 +936,12 @@ bool Foam::externalCoupledFunctionObject::read(const dictionary& dict)
     initByExternal_ = readBool(dict.lookup("initByExternal"));
     log_ = dict.lookupOrDefault("log", false);
 
+
+    // Get names of all fvMeshes (and derived types)
+    wordList allRegionNames(time_.lookupClass<fvMesh>().sortedToc());
+
+
+
     const dictionary& allRegionsDict = dict.subDict("regions");
 
     forAllConstIter(dictionary, allRegionsDict, iter)
@@ -818,9 +958,16 @@ bool Foam::externalCoupledFunctionObject::read(const dictionary& dict)
                 << exit(FatalIOError);
         }
 
-        const word& regionName = iter().keyword();
+        const wordRe regionGroupName(iter().keyword());
         const dictionary& regionDict = iter().dict();
-        regionNames_.append(regionName);
+
+        labelList regionIDs = findStrings(regionGroupName, allRegionNames);
+
+        const wordList regionNames(allRegionNames, regionIDs);
+
+        regionGroupNames_.append(compositeName(regionNames));
+        regionGroupRegions_.append(regionNames);
+
 
         forAllConstIter(dictionary, regionDict, regionIter)
         {
@@ -844,7 +991,7 @@ bool Foam::externalCoupledFunctionObject::read(const dictionary& dict)
 
             HashTable<labelList>::iterator fnd = regionToGroups_.find
             (
-                regionName
+                regionGroupNames_.last()
             );
             if (fnd != regionToGroups_.end())
             {
@@ -852,21 +999,15 @@ bool Foam::externalCoupledFunctionObject::read(const dictionary& dict)
             }
             else
             {
-                regionToGroups_.insert(regionName, labelList(1, nGroups));
+                regionToGroups_.insert
+                (
+                    regionGroupNames_.last(),
+                    labelList(1, nGroups)
+                );
             }
             groupNames_.append(groupName);
             groupReadFields_.append(readFields);
             groupWriteFields_.append(writeFields);
-
-            // Pre-calculate the patchIDs
-            const fvMesh& mesh = time_.lookupObject<fvMesh>(regionName);
-            groupPatchIDs_.append
-            (
-                mesh.boundaryMesh().patchSet
-                (
-                    List<wordRe>(1, groupName)
-                ).sortedToc()
-            );
         }
     }
 
@@ -875,25 +1016,26 @@ bool Foam::externalCoupledFunctionObject::read(const dictionary& dict)
     if (log_)
     {
         Info<< type() << ": Communicating with regions:" << endl;
-        forAll(regionNames_, regionI)
+        forAll(regionGroupNames_, rgI)
         {
-            const word& regionName = regionNames_[regionI];
-            const fvMesh& mesh = time_.lookupObject<fvMesh>(regionName);
+            //const wordList& regionNames = regionGroupRegions_[rgI];
+            const word& compName = regionGroupNames_[rgI];
 
-            Info<< "Region: " << mesh.name() << endl << incrIndent;
-            const labelList& groups = regionToGroups_[regionName];
+            Info<< "Region: " << compName << endl << incrIndent;
+            const labelList& groups = regionToGroups_[compName];
             forAll(groups, i)
             {
                 label groupI = groups[i];
                 const wordRe& groupName = groupNames_[groupI];
-                const labelList& patchIDs = groupPatchIDs_[groupI];
 
-                Info<< indent << "Group: " << groupName << "\t"
-                    << " patches: " << patchIDs << endl
-                    << incrIndent
-                    << indent << "Reading fields: " << groupReadFields_[groupI]
+                Info<< indent << "patchGroup: " << groupName << "\t"
                     << endl
-                    << indent << "Writing fields: " << groupWriteFields_[groupI]
+                    << incrIndent
+                    << indent << "Reading fields: "
+                    << groupReadFields_[groupI]
+                    << endl
+                    << indent << "Writing fields: "
+                    << groupWriteFields_[groupI]
                     << endl
                     << decrIndent;
             }
@@ -907,25 +1049,24 @@ bool Foam::externalCoupledFunctionObject::read(const dictionary& dict)
     //       should already be written - but just make sure
     if (Pstream::master())
     {
-        forAll(regionNames_, regionI)
+        forAll(regionGroupNames_, rgI)
         {
-            const word& regionName = regionNames_[regionI];
-            const fvMesh& mesh = time_.lookupObject<fvMesh>(regionName);
-            const labelList& groups = regionToGroups_[regionName];
+            const word& compName = regionGroupNames_[rgI];
+
+            const labelList& groups = regionToGroups_[compName];
             forAll(groups, i)
             {
                 label groupI = groups[i];
                 const wordRe& groupName = groupNames_[groupI];
 
-                fileName dir(groupDir(commsDir_, mesh.dbDir(), groupName));
+                fileName dir(groupDir(commsDir_, compName, groupName));
                 if (!isDir(dir))
                 {
                     if (log_)
                     {
                         Info<< type() << ": creating communications directory "
-                        << dir << endl;
+                            << dir << endl;
                     }
-
                     mkDir(dir);
                 }
             }
