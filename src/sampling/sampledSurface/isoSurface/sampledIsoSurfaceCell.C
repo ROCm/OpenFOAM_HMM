@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -148,7 +148,8 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
             cellAvg,
             pointFld().internalField(),
             isoVal_,
-            regularise_
+            regularise_,
+            bounds_
         );
 
         const_cast<sampledIsoSurfaceCell&>
@@ -166,7 +167,8 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
             cellFld.internalField(),
             pointFld().internalField(),
             isoVal_,
-            regularise_
+            regularise_,
+            bounds_
         );
 
         const_cast<sampledIsoSurfaceCell&>
@@ -185,6 +187,7 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
             << "    average        : " << average_ << nl
             << "    isoField       : " << isoField_ << nl
             << "    isoValue       : " << isoVal_ << nl
+            << "    bounds         : " << bounds_ << nl
             << "    points         : " << points().size() << nl
             << "    tris           : " << triSurface::size() << nl
             << "    cut cells      : " << meshCells_.size() << endl;
@@ -206,6 +209,7 @@ Foam::sampledIsoSurfaceCell::sampledIsoSurfaceCell
     sampledSurface(name, mesh, dict),
     isoField_(dict.lookup("isoField")),
     isoVal_(readScalar(dict.lookup("isoValue"))),
+    bounds_(dict.lookupOrDefault("bounds", boundBox::greatBox)),
     regularise_(dict.lookupOrDefault("regularise", true)),
     average_(dict.lookupOrDefault("average", true)),
     zoneKey_(keyType::null),

@@ -12,6 +12,7 @@ volVectorField U
     mesh
 );
 
+// Initialise the velocity internal field to zero
 U = dimensionedVector("0", U.dimensions(), vector::zero);
 
 surfaceScalarField phi
@@ -34,7 +35,9 @@ if (args.optionFound("initialiseUBCs"))
 }
 
 
-// Default name for the pressure field
+// Construct a pressure field
+// If it is available read it otherwise construct from the velocity BCs
+// converting fixed-value BCs to zero-gradient and vice versa.
 word pName("p");
 
 // Update name of the pressure field from the command-line option
@@ -55,6 +58,9 @@ forAll(U.boundaryField(), patchi)
     }
 }
 
+// Note that registerObject is false for the pressure field. The pressure
+// field in this solver doesn't have a physical value during the solution.
+// It shouldn't be looked up and used by sub models or boundary conditions.
 Info<< "Constructing pressure field " << pName << nl << endl;
 volScalarField p
 (
@@ -64,12 +70,27 @@ volScalarField p
         runTime.timeName(),
         mesh,
         IOobject::READ_IF_PRESENT,
-        IOobject::NO_WRITE
+        IOobject::NO_WRITE,
+        false
     ),
     mesh,
     dimensionedScalar(pName, sqr(dimVelocity), 0),
     pBCTypes
 );
+
+label pRefCell = 0;
+scalar pRefValue = 0.0;
+if (args.optionFound("writep"))
+{
+    setRefCell
+    (
+        p,
+        potentialFlow.dict(),
+        pRefCell,
+        pRefValue
+    );
+}
+
 
 Info<< "Constructing velocity potential field Phi\n" << endl;
 volScalarField Phi

@@ -63,6 +63,9 @@ class sampledIsoSurface
         //- Iso value
         const scalar isoVal_;
 
+        //- Optional bounding box to trim triangles against
+        const boundBox bounds_;
+
         //- Merge tolerance
         const scalar mergeTol_;
 
@@ -94,7 +97,6 @@ class sampledIsoSurface
             mutable const volScalarField* volFieldPtr_;
 
             //- Cached pointfield
-            mutable autoPtr<pointScalarField> storedPointFieldPtr_;
             mutable const pointScalarField* pointFieldPtr_;
 
             // And on subsetted mesh
@@ -107,7 +109,6 @@ class sampledIsoSurface
                 mutable const volScalarField* volSubFieldPtr_;
 
                 //- Cached pointfield
-                mutable autoPtr<pointScalarField> storedPointSubFieldPtr_;
                 mutable const pointScalarField* pointSubFieldPtr_;
 
 
