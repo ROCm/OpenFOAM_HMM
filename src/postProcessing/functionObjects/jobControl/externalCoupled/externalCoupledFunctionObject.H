@@ -48,7 +48,10 @@ Description
     which gets read/written on the master processor only. In the
     communications directory the structure will be
 
-        <regionName>/<patchGroup>/<fieldName>.[in|out]
+        <regionsName>/<patchGroup>/<fieldName>.[in|out]
+
+    (where regionsName is either the name of a single region or a composite
+     of multiple region names)
 
     At start-up, the boundary creates a lock file, i.e..
 
@@ -58,13 +61,13 @@ Description
     execution the boundary values are written to files (one per region,
     per patch(group), per field), e.g.
 
-        <regionName>/<patchGroup>/<fieldName>.out
+        <regionsName>/<patchGroup>/<fieldName>.out
 
     The lock file is then removed, instructing the external source to take
     control of the program execution. When ready, the external program
     should create the return values, e.g. to files
 
-        <regionName>/<patchGroup>/<fieldName>.in
+        <regionsName>/<patchGroup>/<fieldName>.in
 
     ... and then re-instate the lock file. The functionObject will then
     read these values, apply them to the boundary conditions and pass
@@ -82,7 +85,7 @@ Description
 
         regions
         {
-            region0
+            "(region1|region0)"         // Name of region(s)
             {
                 TPatchGroup             // Name of patch(group)
                 {
@@ -95,7 +98,7 @@ Description
     \endverbatim
 
     This reads/writes (on the master processor) the directory:
-        comms/region0/TPatchGroup/
+        comms/region0_region1/TPatchGroup/
     with contents:
         patchPoints     (collected points)
         patchFaces      (collected faces)
@@ -120,6 +123,7 @@ SourceFiles
 #include "wordReList.H"
 #include "scalarField.H"
 #include "Switch.H"
+#include "UPtrList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -167,17 +171,17 @@ class externalCoupledFunctionObject
         //- Log flag
         bool log_;
 
-        //- Names of regions
-        DynamicList<word> regionNames_;
+        //- Names of (composite) regions
+        DynamicList<word> regionGroupNames_;
 
-        // Per region the indices of the group information
+        // Per (composite) region the names of the regions
+        DynamicList<wordList> regionGroupRegions_;
+
+        // Per (composite) region the indices of the group information
         HashTable<labelList> regionToGroups_;
 
         // Per group the names of the patches/patchGroups
         DynamicList<wordRe> groupNames_;
-
-        // Per group the indices of the patches
-        DynamicList<labelList> groupPatchIDs_;
 
         // Per group the names of the fields to read
         DynamicList<wordList> groupReadFields_;
@@ -195,7 +199,7 @@ class externalCoupledFunctionObject
         static fileName groupDir
         (
             const fileName& commsDir,
-            const word& regionName,
+            const word& regionsName,
             const wordRe& groupName
         );
 
@@ -225,9 +229,8 @@ class externalCoupledFunctionObject
         template<class Type>
         bool readData
         (
-            const fvMesh& mesh,
+            const UPtrList<const fvMesh>& meshes,
             const wordRe& groupName,
-            const labelList& patchIDs,
             const word& fieldName
         );
         //- Read data for all regions, all fields
@@ -237,9 +240,8 @@ class externalCoupledFunctionObject
         template<class Type>
         bool writeData
         (
-            const fvMesh& mesh,
+            const UPtrList<const fvMesh>& meshes,
             const wordRe& groupName,
-            const labelList& patchIDs,
             const word& fieldName
         ) const;
 
@@ -275,6 +277,7 @@ class externalCoupledFunctionObject
         template<class Type>
         static tmp<Field<Type> > gatherAndCombine(const Field<Type>& fld);
 
+        static void checkOrder(const wordList&);
 
         //- Disallow default bitwise copy construc
         externalCoupledFunctionObject(const externalCoupledFunctionObject&);
@@ -356,10 +359,14 @@ public:
 
         // Other
 
+            //- Create single name by appending words (in sorted order),
+            //  separated by '_'
+            static word compositeName(const wordList&);
+
             //- Write geometry for the group/patch
             static void writeGeometry
             (
-                const fvMesh& mesh,
+                const UPtrList<const fvMesh>& meshes,
                 const fileName& commsDir,
                 const wordRe& groupName
             );
