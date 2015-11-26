@@ -1645,8 +1645,6 @@ Foam::isoSurfaceCell::isoSurfaceCell
             meshCells_ = labelField(meshCells_, subsetTriMap);
             inplaceRenumber(reversePointMap, triPointMergeMap_);
         }
-
-        //orientSurface(*this, faceEdges, edgeFace0, edgeFace1, edgeFacesRest);
     }
 }
 
