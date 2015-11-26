@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,10 +78,9 @@ protected:
         string sourceFileName_;
         label sourceFileLineNumber_;
 
-        bool abort_;
-
         bool throwExceptions_;
         OStringStream* messageStreamPtr_;
+
 
 public:
 
