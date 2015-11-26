@@ -33,8 +33,8 @@ SeeAlso
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef plane_H
-#define plane_H
+#ifndef planeExtrusion_H
+#define planeExtrusion_H
 
 #include "linearNormal.H"
 

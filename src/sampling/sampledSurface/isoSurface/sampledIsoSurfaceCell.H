@@ -62,6 +62,9 @@ class sampledIsoSurfaceCell
         //- Iso value
         const scalar isoVal_;
 
+        //- Optional bounding box to trim triangles against
+        const boundBox bounds_;
+
         //- Whether to coarse
         const Switch regularise_;
 

@@ -30,9 +30,8 @@ License
 #include "treeDataFace.H"
 #include "Time.H"
 #include "meshTools.H"
-//#include "Random.H"
-// For 'facePoint' helper function only
 #include "mappedPatchBase.H"
+#include "indirectPrimitivePatch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -85,19 +84,145 @@ void Foam::patchSeedSet::calcSamples
     }
 
 
-    label totalSize = returnReduce(sz, sumOp<label>());
+    if (!rndGenPtr_.valid())
+    {
+        rndGenPtr_.reset(new Random(0));
+    }
+    Random& rndGen = rndGenPtr_();
+
+
+    if (selectedLocations_.size())
+    {
+        DynamicList<label> newPatchFaces(patchFaces.size());
+
+        // Find the nearest patch face
+        {
+            // 1. All processors find nearest local patch face for all
+            //    selectedLocations
+
+            // All the info for nearest. Construct to miss
+            List<mappedPatchBase::nearInfo> nearest(selectedLocations_.size());
+
+            const indirectPrimitivePatch pp
+            (
+                IndirectList<face>(mesh().faces(), patchFaces),
+                mesh().points()
+            );
+
+            treeBoundBox patchBb
+            (
+                treeBoundBox(pp.points(), pp.meshPoints()).extend
+                (
+                    rndGen,
+                    1e-4
+                )
+            );
+            patchBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+            patchBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+
+            indexedOctree<treeDataFace> boundaryTree
+            (
+                treeDataFace    // all information needed to search faces
+                (
+                    false,      // do not cache bb
+                    mesh(),
+                    patchFaces  // boundary faces only
+                ),
+                patchBb,        // overall search domain
+                8,              // maxLevel
+                10,             // leafsize
+                3.0             // duplicity
+            );
+
+            // Get some global dimension so all points are equally likely
+            // to be found
+            const scalar globalDistSqr
+            (
+                //magSqr
+                //(
+                //    boundBox
+                //    (
+                //        pp.points(),
+                //        pp.meshPoints(),
+                //        true
+                //    ).span()
+                //)
+                GREAT
+            );
+
+            forAll(selectedLocations_, sampleI)
+            {
+                const point& sample = selectedLocations_[sampleI];
+
+                pointIndexHit& nearInfo = nearest[sampleI].first();
+                nearInfo = boundaryTree.findNearest
+                (
+                    sample,
+                    globalDistSqr
+                );
+
+                if (!nearInfo.hit())
+                {
+                    nearest[sampleI].second().first() = Foam::sqr(GREAT);
+                    nearest[sampleI].second().second() =
+                        Pstream::myProcNo();
+                }
+                else
+                {
+                    point fc(pp[nearInfo.index()].centre(pp.points()));
+                    nearInfo.setPoint(fc);
+                    nearest[sampleI].second().first() = magSqr(fc-sample);
+                    nearest[sampleI].second().second() =
+                        Pstream::myProcNo();
+                }
+            }
+
+
+            // 2. Reduce on master. Select nearest processor.
+
+            // Find nearest. Combine on master.
+            Pstream::listCombineGather(nearest, mappedPatchBase::nearestEqOp());
+            Pstream::listCombineScatter(nearest);
+
+
+            // 3. Pick up my local faces that have won
+
+            forAll(nearest, sampleI)
+            {
+                if (nearest[sampleI].first().hit())
+                {
+                    label procI = nearest[sampleI].second().second();
+                    label index = nearest[sampleI].first().index();
+
+                    if (procI == Pstream::myProcNo())
+                    {
+                        newPatchFaces.append(pp.addressing()[index]);
+                    }
+                }
+            }
+        }
+
+        if (debug)
+        {
+            Pout<< "Found " << newPatchFaces.size()
+                << " out of " << selectedLocations_.size()
+                << " on local processor" << endl;
+        }
+
+        patchFaces.transfer(newPatchFaces);
+    }
 
 
     // Shuffle and truncate if in random mode
+    label totalSize = returnReduce(patchFaces.size(), sumOp<label>());
+
     if (maxPoints_ < totalSize)
     {
         // Check what fraction of maxPoints_ I need to generate locally.
-        label myMaxPoints = label(scalar(sz)/totalSize*maxPoints_);
+        label myMaxPoints =
+            label(scalar(patchFaces.size())/totalSize*maxPoints_);
 
-        rndGenPtr_.reset(new Random(123456));
-        Random& rndGen = rndGenPtr_();
-
-        labelList subset = identity(sz);
+        labelList subset = identity(patchFaces.size());
         for (label iter = 0; iter < 4; iter++)
         {
             forAll(subset, i)
@@ -115,7 +240,7 @@ void Foam::patchSeedSet::calcSamples
         if (debug)
         {
             Pout<< "In random mode : selected " << patchFaces.size()
-                << " faces out of " << sz << endl;
+                << " faces out of " << patchFaces.size() << endl;
         }
     }
 
@@ -135,6 +260,9 @@ void Foam::patchSeedSet::calcSamples
     forAll(patchFaces, i)
     {
         label faceI = patchFaces[i];
+
+        // Slightly shift point in since on warped face face-diagonal
+        // decomposition might be outside cell for face-centre decomposition!
         pointIndexHit info = mappedPatchBase::facePoint
         (
             mesh(),
@@ -217,9 +345,15 @@ Foam::patchSeedSet::patchSeedSet
             wordReList(dict.lookup("patches"))
         )
     ),
-    //searchDist_(readScalar(dict.lookup("maxDistance"))),
-    //offsetDist_(readScalar(dict.lookup("offsetDist"))),
-    maxPoints_(readLabel(dict.lookup("maxPoints")))
+    maxPoints_(readLabel(dict.lookup("maxPoints"))),
+    selectedLocations_
+    (
+        dict.lookupOrDefault<pointField>
+        (
+            "points",
+            pointField(0)
+        )
+    )
 {
     genSamples();
 
