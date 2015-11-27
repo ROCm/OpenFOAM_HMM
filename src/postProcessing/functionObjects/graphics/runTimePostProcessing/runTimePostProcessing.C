@@ -31,6 +31,7 @@ License
 #include "surface.H"
 #include "text.H"
 #include "Time.H"
+#include "sigFpe.H"
 
 // VTK includes
 #include "vtkPolyDataMapper.h"
@@ -143,6 +144,10 @@ void Foam::runTimePostProcessing::write()
     Info<< type() << " " << name_ <<  " output:" << nl
         << "    Constructing scene" << endl;
 
+    // Unset any floating point trapping (some low-level rendering functionality
+    // does not like it)
+    sigFpe::unset(false);
+
     // Initialise render window
     vtkSmartPointer<vtkRenderWindow> renderWindow =
         vtkSmartPointer<vtkRenderWindow>::New();
@@ -204,6 +209,9 @@ void Foam::runTimePostProcessing::write()
             surfaces_[i].updateActors(position);
         }
     }
+
+    // Reset any floating point trapping
+    sigFpe::set(false);
 }
 
 

@@ -32,6 +32,8 @@ License
 
 struct sigaction Foam::sigSegv::oldAction_;
 
+bool Foam::sigSegv::sigActive_ = false;
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -61,7 +63,7 @@ void Foam::sigSegv::sigHandler(int)
 
 Foam::sigSegv::sigSegv()
 {
-    oldAction_.sa_handler = NULL;
+    set(false);
 }
 
 
@@ -69,15 +71,7 @@ Foam::sigSegv::sigSegv()
 
 Foam::sigSegv::~sigSegv()
 {
-    // Reset old handling
-    if (sigaction(SIGSEGV, &oldAction_, NULL) < 0)
-    {
-        FatalErrorIn
-        (
-            "Foam::sigSegv::~sigSegv()"
-        )   << "Cannot reset SIGSEGV trapping"
-            << abort(FatalError);
-    }
+    unset(false);
 }
 
 
@@ -85,26 +79,38 @@ Foam::sigSegv::~sigSegv()
 
 void Foam::sigSegv::set(const bool)
 {
-    if (oldAction_.sa_handler)
+    if (!sigActive_)
     {
-        FatalErrorIn
-        (
-            "Foam::sigSegv::set()"
-        )   << "Cannot call sigSegv::set() more than once"
-            << abort(FatalError);
+        struct sigaction newAction;
+        newAction.sa_handler = sigHandler;
+        newAction.sa_flags = SA_NODEFER;
+        sigemptyset(&newAction.sa_mask);
+        if (sigaction(SIGSEGV, &newAction, &oldAction_) < 0)
+        {
+            FatalErrorIn
+            (
+                "Foam::sigSegv::set()"
+            )   << "Cannot set SIGSEGV trapping"
+                << abort(FatalError);
+        }
+        sigActive_ = true;
     }
+}
 
-    struct sigaction newAction;
-    newAction.sa_handler = sigHandler;
-    newAction.sa_flags = SA_NODEFER;
-    sigemptyset(&newAction.sa_mask);
-    if (sigaction(SIGSEGV, &newAction, &oldAction_) < 0)
+
+void Foam::sigSegv::unset(const bool)
+{
+    if (sigActive_)
     {
-        FatalErrorIn
-        (
-            "Foam::sigSegv::set()"
-        )   << "Cannot set SIGSEGV trapping"
-            << abort(FatalError);
+        if (sigaction(SIGSEGV, &oldAction_, NULL) < 0)
+        {
+            FatalErrorIn
+            (
+                "Foam::sigSegv::unset()"
+            )   << "Cannot reset SIGSEGV trapping"
+                << abort(FatalError);
+        }
+        sigActive_ = false;
     }
 }
 

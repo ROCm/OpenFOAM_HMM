@@ -32,6 +32,8 @@ License
 
 struct sigaction Foam::sigQuit::oldAction_;
 
+bool Foam::sigQuit::sigActive_ = false;
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -61,7 +63,7 @@ void Foam::sigQuit::sigHandler(int)
 
 Foam::sigQuit::sigQuit()
 {
-    oldAction_.sa_handler = NULL;
+    set(false);
 }
 
 
@@ -69,15 +71,7 @@ Foam::sigQuit::sigQuit()
 
 Foam::sigQuit::~sigQuit()
 {
-    // Reset old handling
-    if (oldAction_.sa_handler && sigaction(SIGQUIT, &oldAction_, NULL) < 0)
-    {
-        FatalErrorIn
-        (
-            "Foam::sigQuit::~sigQuit()"
-        )   << "Cannot reset SIGQUIT trapping"
-            << abort(FatalError);
-    }
+    unset(false);
 }
 
 
@@ -85,26 +79,38 @@ Foam::sigQuit::~sigQuit()
 
 void Foam::sigQuit::set(const bool verbose)
 {
-    if (oldAction_.sa_handler)
+    if (!sigActive_)
     {
-        FatalErrorIn
-        (
-            "Foam::sigQuit::set()"
-        )   << "Cannot call sigQuit::set() more than once"
-            << abort(FatalError);
+        struct sigaction newAction;
+        newAction.sa_handler = sigHandler;
+        newAction.sa_flags = SA_NODEFER;
+        sigemptyset(&newAction.sa_mask);
+        if (sigaction(SIGQUIT, &newAction, &oldAction_) < 0)
+        {
+            FatalErrorIn
+            (
+                "Foam::sigQuit::set()"
+            )   << "Cannot set SIGQUIT trapping"
+                << abort(FatalError);
+        }
+        sigActive_ = true;
     }
+}
 
-    struct sigaction newAction;
-    newAction.sa_handler = sigHandler;
-    newAction.sa_flags = SA_NODEFER;
-    sigemptyset(&newAction.sa_mask);
-    if (sigaction(SIGQUIT, &newAction, &oldAction_) < 0)
+
+void Foam::sigQuit::unset(const bool)
+{
+    if (sigActive_)
     {
-        FatalErrorIn
-        (
-            "Foam::sigQuit::set()"
-        )   << "Cannot set SIGQUIT trapping"
-            << abort(FatalError);
+        if (sigaction(SIGQUIT, &oldAction_, NULL) < 0)
+        {
+            FatalErrorIn
+            (
+                "Foam::sigQuit::unset()"
+            )   << "Cannot reset SIGQUIT trapping"
+                << abort(FatalError);
+        }
+        sigActive_ = false;
     }
 }
 
