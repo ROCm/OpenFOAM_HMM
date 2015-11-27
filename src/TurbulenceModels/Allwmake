@@ -9,6 +9,7 @@ set -x
 wmake $targetType turbulenceModels
 wmake $targetType incompressible
 wmake $targetType compressible
+wmake $targetType schemes
 wmakeLnInclude phaseIncompressible
 wmakeLnInclude phaseCompressible
 
