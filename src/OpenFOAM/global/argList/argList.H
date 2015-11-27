@@ -86,11 +86,6 @@ SourceFiles
 #include "IStringStream.H"
 #include "OSspecific.H"
 
-#include "sigFpe.H"
-#include "sigInt.H"
-#include "sigQuit.H"
-#include "sigSegv.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -117,12 +112,6 @@ class argList
         fileName globalCase_;
         fileName case_;
         string argListStr_;
-
-        // Signal handlers
-        sigFpe sigFpe_;
-        sigInt sigInt_;
-        sigQuit sigQuit_;
-        sigSegv sigSegv_;
 
 
     // Private Member Functions

@@ -32,6 +32,8 @@ License
 
 struct sigaction Foam::sigInt::oldAction_;
 
+bool Foam::sigInt::sigActive_ = false;
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -59,7 +61,7 @@ void Foam::sigInt::sigHandler(int)
 
 Foam::sigInt::sigInt()
 {
-    oldAction_.sa_handler = NULL;
+    set(false);
 }
 
 
@@ -67,15 +69,7 @@ Foam::sigInt::sigInt()
 
 Foam::sigInt::~sigInt()
 {
-    // Reset old handling
-    if (sigaction(SIGINT, &oldAction_, NULL) < 0)
-    {
-        FatalErrorIn
-        (
-            "Foam::sigInt::~sigInt()"
-        )   << "Cannot reset SIGINT trapping"
-            << abort(FatalError);
-    }
+    unset(false);
 }
 
 
@@ -83,26 +77,38 @@ Foam::sigInt::~sigInt()
 
 void Foam::sigInt::set(const bool)
 {
-    if (oldAction_.sa_handler)
+    if (!sigActive_)
     {
-        FatalErrorIn
-        (
-            "Foam::sigInt::set()"
-        )   << "Cannot call sigInt::set() more than once"
-            << abort(FatalError);
+        struct sigaction newAction;
+        newAction.sa_handler = sigHandler;
+        newAction.sa_flags = SA_NODEFER;
+        sigemptyset(&newAction.sa_mask);
+        if (sigaction(SIGINT, &newAction, &oldAction_) < 0)
+        {
+            FatalErrorIn
+            (
+                "Foam::sigInt::set()"
+            )   << "Cannot set SIGINT trapping"
+                << abort(FatalError);
+        }
+        sigActive_ = true;
     }
+}
 
-    struct sigaction newAction;
-    newAction.sa_handler = sigHandler;
-    newAction.sa_flags = SA_NODEFER;
-    sigemptyset(&newAction.sa_mask);
-    if (sigaction(SIGINT, &newAction, &oldAction_) < 0)
+
+void Foam::sigInt::unset(const bool)
+{
+    if (sigActive_)
     {
-        FatalErrorIn
-        (
-            "Foam::sigInt::set()"
-        )   << "Cannot set SIGINT trapping"
-            << abort(FatalError);
+        if (sigaction(SIGINT, &oldAction_, NULL) < 0)
+        {
+            FatalErrorIn
+            (
+                "Foam::sigInt::unset()"
+            )   << "Cannot reset SIGINT trapping"
+                << abort(FatalError);
+        }
+        sigActive_ = false;
     }
 }
 

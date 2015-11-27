@@ -33,6 +33,10 @@ License
 #include "labelList.H"
 #include "regIOobject.H"
 #include "dynamicCode.H"
+#include "sigFpe.H"
+#include "sigInt.H"
+#include "sigQuit.H"
+#include "sigSegv.H"
 
 #include <cctype>
 
@@ -868,10 +872,10 @@ void Foam::argList::parse
 
         // Switch on signal trapping. We have to wait until after Pstream::init
         // since this sets up its own ones.
-        sigFpe_.set(bannerEnabled);
-        sigInt_.set(bannerEnabled);
-        sigQuit_.set(bannerEnabled);
-        sigSegv_.set(bannerEnabled);
+        sigFpe::set(bannerEnabled);
+        sigInt::set(bannerEnabled);
+        sigQuit::set(bannerEnabled);
+        sigSegv::set(bannerEnabled);
 
         if (bannerEnabled)
         {
