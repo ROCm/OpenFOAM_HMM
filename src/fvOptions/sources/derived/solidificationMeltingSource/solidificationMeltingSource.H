@@ -34,13 +34,12 @@ Description
     phase change is added as an enthalpy contribution.
 
     Based on the references:
-
-      1. V.R. Voller and C. Prakash, A fixed grid numerical modelling
-         methodology for convection-diffusion mushy phase-change problems,
-         Int. J. Heat Mass Transfer 30(8):17091719, 1987.
-      2. C.R. Swaminathan. and V.R. Voller, A general enthalpy model for
-         modeling solidification processes, Metallurgical Transactions
-         23B:651664, 1992.
+    -# V.R. Voller and C. Prakash, A fixed grid numerical modelling
+       methodology for convection-diffusion mushy phase-change problems,
+       Int. J. Heat Mass Transfer 30(8):17091719, 1987.
+    -# C.R. Swaminathan. and V.R. Voller, A general enthalpy model for
+       modeling solidification processes, Metallurgical Transactions
+       23B:651664, 1992.
 
     The model generates a field \c \<name\>:alpha1 which can be visualised to
     to show the melt distribution as a fraction [0-1]
