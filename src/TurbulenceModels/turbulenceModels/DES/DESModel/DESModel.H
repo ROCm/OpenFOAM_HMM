@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,33 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::LESModels::SpalartAllmarasDDES
-
-Group
-    grpDESTurbulence
+    Foam::DESModel
 
 Description
-    SpalartAllmaras DDES turbulence model for incompressible and compressible
-    flows
-
-    Reference:
-    \verbatim
-        Spalart, P. R., Deck, S., Shur, M. L., Squires, K. D., Strelets, M. K.,
-        & Travin, A. (2006).
-        A new version of detached-eddy simulation, resistant to ambiguous grid
-        densities.
-        Theoretical and computational fluid dynamics, 20(3), 181-195.
-    \endverbatim
+    Templated abstract base class for DES models
 
 SourceFiles
-    SpalartAllmarasDDES.C
+    DESModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SpalartAllmarasDDES_H
-#define SpalartAllmarasDDES_H
+#ifndef DESModel_H
+#define DESModel_H
 
-#include "SpalartAllmarasDES.H"
+#include "DESModelBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,36 +45,25 @@ namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class SpalartAllmarasDDES Declaration
+                          Class DESModel Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class BasicTurbulenceModel>
-class SpalartAllmarasDDES
+class DESModel
 :
-    public SpalartAllmarasDES<BasicTurbulenceModel>
+    public DESModelBase,
+    public LESeddyViscosity<BasicTurbulenceModel>
 {
+
+private:
+
     // Private Member Functions
 
-        tmp<volScalarField> fd(const volScalarField& magGradU) const;
+        //- Disallow default bitwise copy construct
+        DESModel(const DESModel&);
 
-        tmp<volScalarField> rd(const volScalarField& magGradU) const;
-
-        // Disallow default bitwise copy construct and assignment
-        SpalartAllmarasDDES(const SpalartAllmarasDDES&);
-        SpalartAllmarasDDES& operator=(const SpalartAllmarasDDES&);
-
-
-protected:
-
-    // Protected Member Functions
-
-        //- Length scale
-        virtual tmp<volScalarField> dTilda
-        (
-            const volScalarField& chi,
-            const volScalarField& fv1,
-            const volTensorField& gradU
-        ) const;
+        //- Disallow default bitwise assignment
+        DESModel& operator=(const DESModel&);
 
 
 public:
@@ -96,30 +72,30 @@ public:
     typedef typename BasicTurbulenceModel::rhoField rhoField;
     typedef typename BasicTurbulenceModel::transportModel transportModel;
 
-
-    //- Runtime type information
-    TypeName("SpalartAllmarasDDES");
-
-
     // Constructors
 
         //- Construct from components
-        SpalartAllmarasDDES
+        DESModel
         (
+            const word& type,
             const alphaField& alpha,
             const rhoField& rho,
             const volVectorField& U,
             const surfaceScalarField& alphaRhoPhi,
             const surfaceScalarField& phi,
             const transportModel& transport,
-            const word& propertiesName = turbulenceModel::propertiesName,
-            const word& type = typeName
+            const word& propertiesName = turbulenceModel::propertiesName
         );
 
 
     //- Destructor
-    virtual ~SpalartAllmarasDDES()
-    {}
+    virtual ~DESModel();
+
+
+    // Public Member Functions
+
+        //- Return the LES field indicator
+        virtual tmp<volScalarField> LESRegion() const = 0;
 };
 
 
@@ -131,7 +107,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "SpalartAllmarasDDES.C"
+    #include "DESModel.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

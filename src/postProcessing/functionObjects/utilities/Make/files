@@ -6,6 +6,9 @@ codedFunctionObject/codedFunctionObject.C
 CourantNo/CourantNo.C
 CourantNo/CourantNoFunctionObject.C
 
+DESModelRegions/DESModelRegions.C
+DESModelRegions/DESModelRegionsFunctionObject.C
+
 dsmcFields/dsmcFields.C
 dsmcFields/dsmcFieldsFunctionObject.C
 

@@ -20,6 +20,10 @@ $(LESfilters)/laplaceFilter/laplaceFilter.C
 $(LESfilters)/anisotropicFilter/anisotropicFilter.C
 
 
+/* Base class for DES models */
+DES/DESModel/DESModelBase.C
+
+
 /* Turbulence BCs */
 derivedFvPatchFields/fixedShearStress/fixedShearStressFvPatchVectorField.C
 derivedFvPatchFields/porousBafflePressure/porousBafflePressureFvPatchField.C

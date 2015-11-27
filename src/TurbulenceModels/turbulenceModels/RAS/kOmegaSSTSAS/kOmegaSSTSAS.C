@@ -113,7 +113,8 @@ kOmegaSSTSAS<BasicTurbulenceModel>::kOmegaSSTSAS
         alphaRhoPhi,
         phi,
         transport,
-        propertiesName
+        propertiesName,
+        type
     ),
 
     Cs_
@@ -171,7 +172,12 @@ kOmegaSSTSAS<BasicTurbulenceModel>::kOmegaSSTSAS
             this->coeffDict_
         )
     )
-{}
+{
+    if (type == typeName)
+    {
+        this->printCoeffs(type);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

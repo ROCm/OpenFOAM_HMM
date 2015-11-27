@@ -68,7 +68,7 @@ tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::fd
     const volScalarField& magGradU
 ) const
 {
-    return 1 - tanh(pow3(8*rd(magGradU)));
+    return 1 - tanh(pow(fdFactor_*rd(magGradU), fdExponent_));
 }
 
 
@@ -120,8 +120,44 @@ SpalartAllmarasDDES<BasicTurbulenceModel>::SpalartAllmarasDDES
         phi,
         transport,
         propertiesName
+    ),
+    fdFactor_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "fdFactor",
+            this->coeffDict_,
+            8
+        )
+    ),
+    fdExponent_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "fdExponent",
+            this->coeffDict_,
+            3
+        )
     )
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class BasicTurbulenceModel>
+bool SpalartAllmarasDDES<BasicTurbulenceModel>::read()
+{
+    if (SpalartAllmarasDES<BasicTurbulenceModel>::read())
+    {
+        fdFactor_.readIfPresent(this->coeffDict());
+        fdExponent_.readIfPresent(this->coeffDict());
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

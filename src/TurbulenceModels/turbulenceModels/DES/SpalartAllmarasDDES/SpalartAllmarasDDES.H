@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,51 +22,81 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::EddyDiffusivity
+    Foam::LESModels::SpalartAllmarasDDES
+
+Group
+    grpDESTurbulence
 
 Description
-    Templated abstract base class for single-phase compressible
-    turbulence models.
+    SpalartAllmaras DDES turbulence model for incompressible and compressible
+    flows
+
+    Reference:
+    \verbatim
+        Spalart, P. R., Deck, S., Shur, M. L., Squires, K. D., Strelets, M. K.,
+        & Travin, A. (2006).
+        A new version of detached-eddy simulation, resistant to ambiguous grid
+        densities.
+        Theoretical and computational fluid dynamics, 20(3), 181-195.
+    \endverbatim
 
 SourceFiles
-    EddyDiffusivity.C
+    SpalartAllmarasDDES.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef EddyDiffusivity_H
-#define EddyDiffusivity_H
+#ifndef SpalartAllmarasDDES_H
+#define SpalartAllmarasDDES_H
+
+#include "SpalartAllmarasDES.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace LESModels
+{
 
 /*---------------------------------------------------------------------------*\
-               Class EddyDiffusivity Declaration
+                     Class SpalartAllmarasDDES Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class BasicTurbulenceModel>
-class EddyDiffusivity
+class SpalartAllmarasDDES
 :
-    public BasicTurbulenceModel
+    public SpalartAllmarasDES<BasicTurbulenceModel>
 {
+    // Private Member Functions
+
+        tmp<volScalarField> fd(const volScalarField& magGradU) const;
+
+        tmp<volScalarField> rd(const volScalarField& magGradU) const;
+
+        // Disallow default bitwise copy construct and assignment
+        SpalartAllmarasDDES(const SpalartAllmarasDDES&);
+        SpalartAllmarasDDES& operator=(const SpalartAllmarasDDES&);
+
 
 protected:
 
     // Protected data
 
-        // Model coefficients
+        //- fd function pre-factor
+        dimensionedScalar fdFactor_;
 
-            dimensionedScalar Prt_;
-
-        // Fields
-
-            volScalarField alphat_;
+        //- fd function exponent
+        dimensionedScalar fdExponent_;
 
 
     // Protected Member Functions
 
-        virtual void correctNut();
+        //- Length scale
+        virtual tmp<volScalarField> dTilda
+        (
+            const volScalarField& chi,
+            const volScalarField& fv1,
+            const volTensorField& gradU
+        ) const;
 
 
 public:
@@ -76,86 +106,47 @@ public:
     typedef typename BasicTurbulenceModel::transportModel transportModel;
 
 
+    //- Runtime type information
+    TypeName("SpalartAllmarasDDES");
+
+
     // Constructors
 
-        //- Construct
-        EddyDiffusivity
+        //- Construct from components
+        SpalartAllmarasDDES
         (
-            const word& type,
             const alphaField& alpha,
-            const volScalarField& rho,
+            const rhoField& rho,
             const volVectorField& U,
             const surfaceScalarField& alphaRhoPhi,
             const surfaceScalarField& phi,
             const transportModel& transport,
-            const word& propertiesName
+            const word& propertiesName = turbulenceModel::propertiesName,
+            const word& type = typeName
         );
 
 
     //- Destructor
-    virtual ~EddyDiffusivity()
+    virtual ~SpalartAllmarasDDES()
     {}
 
 
     // Member Functions
 
-        //- Re-read model coefficients if they have changed
+        //- Read from dictionary
         virtual bool read();
-
-        //- Return the turbulent thermal diffusivity for enthalpy [kg/m/s]
-        virtual tmp<volScalarField> alphat() const
-        {
-            return alphat_;
-        }
-
-        //- Return the turbulent thermal diffusivity for enthalpy for a patch
-        //  [kg/m/s]
-        virtual tmp<scalarField> alphat(const label patchi) const
-        {
-            return alphat()().boundaryField()[patchi];
-        }
-
-        //- Return the effective turbulent thermal diffusivity for temperature
-        //  [J/m/s/K]
-        virtual tmp<volScalarField> kappaEff() const
-        {
-            return this->transport_.kappaEff(alphat());
-        }
-
-        //- Return the effective turbulent thermal diffusivity for temperature
-        //  [J/m/s/K]
-        virtual tmp<scalarField> kappaEff(const label patchi) const
-        {
-            return this->transport_.kappaEff(alphat(patchi), patchi);
-        }
-
-        //- Return the effective turbulent thermal diffusivity for enthalpy
-        //  [kg/m/s]
-        virtual tmp<volScalarField> alphaEff() const
-        {
-            return this->transport_.alphaEff(alphat());
-        }
-
-        //- Return the effective turbulent thermal diffusivity for enthalpy
-        //  for a patch [kg/m/s]
-        virtual tmp<scalarField> alphaEff(const label patchi) const
-        {
-            return this->transport_.alphaEff(alphat(patchi), patchi);
-        }
-
-        //- Correct the turbulence thermal diffusivity for energy transport
-        virtual void correctEnergyTransport();
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace LESModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "EddyDiffusivity.C"
+#   include "SpalartAllmarasDDES.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

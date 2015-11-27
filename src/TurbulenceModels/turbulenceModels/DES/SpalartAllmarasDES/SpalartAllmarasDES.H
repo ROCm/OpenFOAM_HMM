@@ -47,7 +47,7 @@ SourceFiles
 #ifndef SpalartAllmarasDES_H
 #define SpalartAllmarasDES_H
 
-#include "LESeddyViscosity.H"
+#include "DESModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,7 +63,7 @@ namespace LESModels
 template<class BasicTurbulenceModel>
 class SpalartAllmarasDES
 :
-    public LESeddyViscosity<BasicTurbulenceModel>
+    public DESModel<BasicTurbulenceModel>
 {
     // Private Member Functions
 
