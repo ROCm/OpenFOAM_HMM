@@ -38,6 +38,11 @@ Usage
     \param -region \<name\> \n
     Specify an alternative mesh region.
 
+    \param -regions (\<name1\> \<name2\> .. \<namen\>) \n
+    Specify alternative mesh regions. The region names will be sorted
+    alphabetically and a single composite name will be created
+        \<nameX\>_\<nameY\>.._\<nameZ\>
+
     On execution, the combined patch geometry (points and faces) are output
     to the communications directory.
 
@@ -59,6 +64,7 @@ SeeAlso
 int main(int argc, char *argv[])
 {
     #include "addRegionOption.H"
+    #include "addRegionsOption.H"
     argList::validArgs.append("patchGroup");
     argList::addOption
     (
@@ -68,16 +74,52 @@ int main(int argc, char *argv[])
     );
     #include "setRootCase.H"
     #include "createTime.H"
-    #include "createNamedMesh.H"
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    wordList regionNames(1, fvMesh::defaultRegion);
+    if (!args.optionReadIfPresent("region", regionNames[0]))
+    {
+        args.optionReadIfPresent("regions", regionNames);
+    }
 
-    const wordRe patchGroup(args[1]);
+    const wordRe patchGroup(args.argRead<wordRe>(1));
 
     fileName commsDir(runTime.path()/"comms");
     args.optionReadIfPresent("commsDir", commsDir);
 
-    externalCoupledFunctionObject::writeGeometry(mesh, commsDir, patchGroup);
+
+    // Make sure region names are in canonical order
+    stableSort(regionNames);
+
+
+    PtrList<const fvMesh> meshes(regionNames.size());
+    forAll(regionNames, i)
+    {
+        Info<< "Create mesh " << regionNames[i] << " for time = "
+            << runTime.timeName() << nl << endl;
+
+        meshes.set
+        (
+            i,
+            new fvMesh
+            (
+                Foam::IOobject
+                (
+                    regionNames[i],
+                    runTime.timeName(),
+                    runTime,
+                    Foam::IOobject::MUST_READ
+                )
+            )
+        );
+    }
+
+
+    externalCoupledFunctionObject::writeGeometry
+    (
+        UPtrList<const fvMesh>(meshes),
+        commsDir,
+        patchGroup
+    );
 
     Info<< "\nEnd\n" << endl;
 

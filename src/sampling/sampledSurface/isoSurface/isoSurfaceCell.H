@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,6 +48,7 @@ SourceFiles
 #include "labelPair.H"
 #include "pointIndexHit.H"
 #include "PackedBoolList.H"
+#include "boundBox.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,6 +56,7 @@ namespace Foam
 {
 
 class polyMesh;
+class plane;
 
 /*---------------------------------------------------------------------------*\
                        Class isoSurfaceCell Declaration
@@ -91,6 +93,9 @@ class isoSurfaceCell
         //- isoSurfaceCell value
         const scalar iso_;
 
+        //- Optional bounds
+        const boundBox bounds_;
+
         //- When to merge points
         const scalar mergeDistance_;
 
@@ -105,6 +110,15 @@ class isoSurfaceCell
 
         //- For every unmerged triangle point the point in the triSurface
         labelList triPointMergeMap_;
+
+        //- triSurface points that have weighted interpolation
+        DynamicList<label> interpolatedPoints_;
+
+        //- corresponding original, unmerged points
+        DynamicList<FixedList<label, 3> > interpolatedOldPoints_;
+
+        //- corresponding weights
+        DynamicList<FixedList<scalar, 3> > interpolationWeights_;
 
 
     // Private Member Functions
@@ -214,19 +228,15 @@ class isoSurfaceCell
         void generateTriPoints
         (
             const DynamicList<Type>& snapped,
-            const scalar isoVal0,
             const scalar s0,
             const Type& p0,
             const label p0Index,
-            const scalar isoVal1,
             const scalar s1,
             const Type& p1,
             const label p1Index,
-            const scalar isoVal2,
             const scalar s2,
             const Type& p2,
             const label p2Index,
-            const scalar isoVal3,
             const scalar s3,
             const Type& p3,
             const label p3Index,
@@ -271,27 +281,6 @@ class isoSurfaceCell
             Map<labelList>& edgeFacesRest
         ) const;
 
-        ////- Determine orientation
-        //static void walkOrientation
-        //(
-        //    const triSurface& surf,
-        //    const List<FixedList<label, 3> >& faceEdges,
-        //    const labelList& edgeFace0,
-        //    const labelList& edgeFace1,
-        //    const label seedTriI,
-        //    labelList& flipState
-        //);
-
-        ////- Orient surface
-        //static void orientSurface
-        //(
-        //    triSurface&,
-        //    const List<FixedList<label, 3> >& faceEdges,
-        //    const labelList& edgeFace0,
-        //    const labelList& edgeFace1,
-        //    const Map<labelList>& edgeFacesRest
-        //);
-
         //- Is triangle (given by 3 edges) not fully connected?
         static bool danglingTriangle
         (
@@ -317,8 +306,6 @@ class isoSurfaceCell
             labelList& newToOldPoints
         );
 
-        //- Combine all triangles inside a cell into a minimal triangulation
-        void combineCellTriangles();
 
 public:
 
@@ -336,6 +323,7 @@ public:
             const scalarField& pointValues,
             const scalar iso,
             const bool regularise,
+            const boundBox& bounds = boundBox::greatBox,
             const scalar mergeTol = 1e-6    // fraction of bounding box
         );
 
@@ -347,24 +335,6 @@ public:
         {
             return meshCells_;
         }
-
-        //- For every unmerged triangle point the point in the triSurface
-        const labelList triPointMergeMap() const
-        {
-            return triPointMergeMap_;
-        }
-
-
-        //- Interpolates cCoords,pCoords. Takes the original fields
-        //  used to create the iso surface.
-        template<class Type>
-        tmp<Field<Type> > interpolate
-        (
-            const scalarField& cVals,
-            const scalarField& pVals,
-            const Field<Type>& cCoords,
-            const Field<Type>& pCoords
-        ) const;
 
         //- Interpolates cCoords,pCoords.
         template<class Type>

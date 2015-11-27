@@ -514,12 +514,31 @@ void Foam::motionSmootherAlgo::setDisplacement
     const labelList& cppMeshPoints =
         mesh.globalData().coupledPatch().meshPoints();
 
-    forAll(cppMeshPoints, i)
+    const labelList& ppMeshPoints = pp.meshPoints();
+
+    // Knock out displacement on points which are not on pp but are coupled
+    // to them since we want 'proper' values from displacement to take
+    // precedence.
     {
-        displacement[cppMeshPoints[i]] = vector::zero;
+        PackedBoolList isPatchPoint(mesh.nPoints());
+        isPatchPoint.set(ppMeshPoints);
+        syncTools::syncPointList
+        (
+            mesh,
+            isPatchPoint,
+            maxEqOp<unsigned int>(),
+            0
+        );
+        forAll(cppMeshPoints, i)
+        {
+            label pointI = cppMeshPoints[i];
+            if (isPatchPoint[pointI])
+            {
+                displacement[pointI] = vector::zero;
+            }
+        }
     }
 
-    const labelList& ppMeshPoints = pp.meshPoints();
 
     // Set internal point data from displacement on combined patch points.
     forAll(ppMeshPoints, patchPointI)

@@ -24,13 +24,64 @@ License
 Application
     potentialFoam
 
-Description
-    Potential flow solver which solves for the velocity potential
-    from which the flux-field is obtained and velocity field by reconstructing
-    the flux.
+Group
+    grpBasicSolvers
 
-    This application is particularly useful to generate starting fields for
-    Navier-Stokes codes.
+Description
+    Potential flow solver.
+
+    \heading Solver details
+    The potential flow solution is typically employed to generate initial fields
+    for full Navier-Stokes codes.  The flow is evolved using the equation:
+
+    \f[
+        \laplacian \Phi = \div(\vec{U})
+    \f]
+
+    Where:
+    \vartable
+        \Phi      | Velocity potential [m2/s]
+        \vec{U}   | Velocity [m/s]
+    \endvartable
+
+    The corresponding pressure field could be calculated from the divergence
+    of the Euler equation:
+
+    \f[
+        \laplacian p + \div(\div(\vec{U}\otimes\vec{U})) = 0
+    \f]
+
+    but this generates excessive pressure variation in regions of large
+    velocity gradient normal to the flow direction.  A better option is to
+    calculate the pressure field corresponding to velocity variation along the
+    stream-lines:
+
+    \f[
+        \laplacian p + \div(\vec{F}\cdot\div(\vec{U}\otimes\vec{U})) = 0
+    \f]
+    where the flow direction tensor \f$\vec{F}\f$ is obtained from
+    \f[
+        \vec{F} = \hat{\vec{U}}\otimes\hat{\vec{U}}
+    \f]
+
+    \heading Required fields
+    \plaintable
+        U         | Velocity [m/s]
+    \endplaintable
+
+    \heading Optional fields
+    \plaintable
+        p         | Kinematic pressure [m2/s2]
+        Phi       | Velocity potential [m2/s]
+                  | Generated from p (if present) or U if not present
+    \endplaintable
+
+    \heading Options
+    \plaintable
+        -writep   | write the Euler pressure
+        -writePhi | Write the final velocity potential
+        -initialiseUBCs | Update the velocity boundaries before solving for Phi
+    \endplaintable
 
 \*---------------------------------------------------------------------------*/
 
@@ -58,19 +109,13 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "writePhi",
-        "Write the velocity potential field"
+        "Write the final velocity potential field"
     );
 
     argList::addBoolOption
     (
         "writep",
-        "Calculate and write the pressure field"
-    );
-
-    argList::addBoolOption
-    (
-        "withFunctionObjects",
-        "execute functionObjects"
+        "Calculate and write the Euler pressure field"
     );
 
     #include "setRootCase.H"
@@ -137,7 +182,7 @@ int main(int argc, char *argv[])
         Phi.write();
     }
 
-    // Calculate the pressure field
+    // Calculate the pressure field from the Euler equation
     if (args.optionFound("writep"))
     {
         Info<< nl << "Calculating approximate pressure field" << endl;

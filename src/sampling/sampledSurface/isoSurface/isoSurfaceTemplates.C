@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -120,7 +120,7 @@ Foam::isoSurface::adaptPatchFields
         {
             fvPatchField<Type>& pfld = const_cast<fvPatchField<Type>&>
             (
-                fld.boundaryField()[patchI]
+                sliceFld.boundaryField()[patchI]
             );
 
             const scalarField& w = mesh.weights().boundaryField()[patchI];
@@ -189,6 +189,8 @@ Type Foam::isoSurface::generatePoint
 }
 
 
+// Note: cannot use simpler isoSurfaceCell::generateTriPoints since
+//       the need here to sometimes pass in remote 'snappedPoints'
 template<class Type>
 void Foam::isoSurface::generateTriPoints
 (
@@ -240,8 +242,8 @@ void Foam::isoSurface::generateTriPoints
         case 0x0F:
         break;
 
-        case 0x0E:
         case 0x01:
+        case 0x0E:
             points.append
             (
                 generatePoint(s0,p0,hasSnap0,snapP0,s1,p1,hasSnap1,snapP1)
@@ -254,10 +256,16 @@ void Foam::isoSurface::generateTriPoints
             (
                 generatePoint(s0,p0,hasSnap0,snapP0,s3,p3,hasSnap3,snapP3)
             );
+            if (triIndex == 0x0E)
+            {
+                // Flip normals
+                label sz = points.size();
+                Swap(points[sz-2], points[sz-1]);
+            }
         break;
 
-        case 0x0D:
         case 0x02:
+        case 0x0D:
             points.append
             (
                 generatePoint(s1,p1,hasSnap1,snapP1,s0,p0,hasSnap0,snapP0)
@@ -270,97 +278,133 @@ void Foam::isoSurface::generateTriPoints
             (
                 generatePoint(s1,p1,hasSnap1,snapP1,s2,p2,hasSnap2,snapP2)
             );
+            if (triIndex == 0x0D)
+            {
+                // Flip normals
+                label sz = points.size();
+                Swap(points[sz-2], points[sz-1]);
+            }
         break;
 
-        case 0x0C:
         case 0x03:
-        {
-            Type tp1 =
-                generatePoint(s0,p0,hasSnap0,snapP0,s2,p2,hasSnap2,snapP2);
-            Type tp2 =
-                generatePoint(s1,p1,hasSnap1,snapP1,s3,p3,hasSnap3,snapP3);
+        case 0x0C:
+            {
+                Type p0p2 =
+                    generatePoint(s0,p0,hasSnap0,snapP0,s2,p2,hasSnap2,snapP2);
+                Type p1p3 =
+                    generatePoint(s1,p1,hasSnap1,snapP1,s3,p3,hasSnap3,snapP3);
 
-            points.append
-            (
-                generatePoint(s0,p0,hasSnap0,snapP0,s3,p3,hasSnap3,snapP3)
-            );
-            points.append(tp1);
-            points.append(tp2);
-            points.append(tp2);
-            points.append
-            (
-                generatePoint(s1,p1,hasSnap1,snapP1,s2,p2,hasSnap2,snapP2)
-            );
-            points.append(tp1);
-        }
+                points.append
+                (
+                    generatePoint(s0,p0,hasSnap0,snapP0,s3,p3,hasSnap3,snapP3)
+                );
+                points.append(p1p3);
+                points.append(p0p2);
+
+                points.append(p1p3);
+                points.append
+                (
+                    generatePoint(s1,p1,hasSnap1,snapP1,s2,p2,hasSnap2,snapP2)
+                );
+                points.append(p0p2);
+            }
+            if (triIndex == 0x0C)
+            {
+                // Flip normals
+                label sz = points.size();
+                Swap(points[sz-5], points[sz-4]);
+                Swap(points[sz-2], points[sz-1]);
+            }
         break;
 
-        case 0x0B:
         case 0x04:
-        {
-            points.append
-            (
-                generatePoint(s2,p2,hasSnap2,snapP2,s0,p0,hasSnap0,snapP0)
-            );
-            points.append
-            (
-                generatePoint(s2,p2,hasSnap2,snapP2,s1,p1,hasSnap1,snapP1)
-            );
-            points.append
-            (
-                generatePoint(s2,p2,hasSnap2,snapP2,s3,p3,hasSnap3,snapP3)
-            );
-        }
+        case 0x0B:
+            {
+                points.append
+                (
+                    generatePoint(s2,p2,hasSnap2,snapP2,s0,p0,hasSnap0,snapP0)
+                );
+                points.append
+                (
+                    generatePoint(s2,p2,hasSnap2,snapP2,s1,p1,hasSnap1,snapP1)
+                );
+                points.append
+                (
+                    generatePoint(s2,p2,hasSnap2,snapP2,s3,p3,hasSnap3,snapP3)
+                );
+            }
+            if (triIndex == 0x0B)
+            {
+                // Flip normals
+                label sz = points.size();
+                Swap(points[sz-2], points[sz-1]);
+            }
         break;
 
-        case 0x0A:
         case 0x05:
-        {
-            Type tp0 =
-                generatePoint(s0,p0,hasSnap0,snapP0,s1,p1,hasSnap1,snapP1);
-            Type tp1 =
-                generatePoint(s2,p2,hasSnap2,snapP2,s3,p3,hasSnap3,snapP3);
+        case 0x0A:
+            {
+                Type p0p1 =
+                    generatePoint(s0,p0,hasSnap0,snapP0,s1,p1,hasSnap1,snapP1);
+                Type p2p3 =
+                    generatePoint(s2,p2,hasSnap2,snapP2,s3,p3,hasSnap3,snapP3);
 
-            points.append(tp0);
-            points.append(tp1);
-            points.append
-            (
-                generatePoint(s0,p0,hasSnap0,snapP0,s3,p3,hasSnap3,snapP3)
-            );
-            points.append(tp0);
-            points.append
-            (
-                generatePoint(s1,p1,hasSnap1,snapP1,s2,p2,hasSnap2,snapP2)
-            );
-            points.append(tp1);
-        }
+                points.append(p0p1);
+                points.append(p2p3);
+                points.append
+                (
+                    generatePoint(s0,p0,hasSnap0,snapP0,s3,p3,hasSnap3,snapP3)
+                );
+
+                points.append(p0p1);
+                points.append
+                (
+                    generatePoint(s1,p1,hasSnap1,snapP1,s2,p2,hasSnap2,snapP2)
+                );
+                points.append(p2p3);
+            }
+            if (triIndex == 0x0A)
+            {
+                // Flip normals
+                label sz = points.size();
+                Swap(points[sz-5], points[sz-4]);
+                Swap(points[sz-2], points[sz-1]);
+            }
         break;
 
-        case 0x09:
         case 0x06:
-        {
-            Type tp0 =
-                generatePoint(s0,p0,hasSnap0,snapP0,s1,p1,hasSnap1,snapP1);
-            Type tp1 =
-                generatePoint(s2,p2,hasSnap2,snapP2,s3,p3,hasSnap3,snapP3);
+        case 0x09:
+            {
+                Type p0p1 =
+                    generatePoint(s0,p0,hasSnap0,snapP0,s1,p1,hasSnap1,snapP1);
+                Type p2p3 =
+                    generatePoint(s2,p2,hasSnap2,snapP2,s3,p3,hasSnap3,snapP3);
 
-            points.append(tp0);
-            points.append
-            (
-                generatePoint(s1,p1,hasSnap1,snapP1,s3,p3,hasSnap3,snapP3)
-            );
-            points.append(tp1);
-            points.append(tp0);
-            points.append
-            (
-                generatePoint(s0,p0,hasSnap0,snapP0,s2,p2,hasSnap2,snapP2)
-            );
-            points.append(tp1);
-        }
+                points.append(p0p1);
+                points.append
+                (
+                    generatePoint(s1,p1,hasSnap1,snapP1,s3,p3,hasSnap3,snapP3)
+                );
+                points.append(p2p3);
+
+                points.append(p0p1);
+                points.append(p2p3);
+                points.append
+                (
+                    generatePoint(s0,p0,hasSnap0,snapP0,s2,p2,hasSnap2,snapP2)
+                );
+            }
+            if (triIndex == 0x09)
+            {
+                // Flip normals
+                label sz = points.size();
+                Swap(points[sz-5], points[sz-4]);
+                Swap(points[sz-2], points[sz-1]);
+            }
         break;
 
-        case 0x07:
         case 0x08:
+        case 0x07:
             points.append
             (
                 generatePoint(s3,p3,hasSnap3,snapP3,s0,p0,hasSnap0,snapP0)
@@ -373,6 +417,12 @@ void Foam::isoSurface::generateTriPoints
             (
                 generatePoint(s3,p3,hasSnap3,snapP3,s1,p1,hasSnap1,snapP1)
             );
+            if (triIndex == 0x07)
+            {
+                // Flip normals
+                label sz = points.size();
+                Swap(points[sz-2], points[sz-1]);
+            }
         break;
     }
 }
@@ -693,6 +743,69 @@ template<class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::isoSurface::interpolate
 (
+    const label nPoints,
+    const labelList& triPointMergeMap,
+    const labelList& interpolatedPoints,
+    const List<FixedList<label, 3> >& interpolatedOldPoints,
+    const List<FixedList<scalar, 3> >& interpolationWeights,
+    const DynamicList<Type>& unmergedValues
+)
+{
+    // One value per point
+    tmp<Field<Type> > tvalues(new Field<Type>(nPoints, pTraits<Type>::zero));
+    Field<Type>& values = tvalues();
+
+
+    // Pass1: unweighted average of merged point values
+    {
+        labelList nValues(values.size(), 0);
+
+        forAll(unmergedValues, i)
+        {
+            label mergedPointI = triPointMergeMap[i];
+
+            if (mergedPointI >= 0)
+            {
+                values[mergedPointI] += unmergedValues[i];
+                nValues[mergedPointI]++;
+            }
+        }
+
+        forAll(values, i)
+        {
+            if (nValues[i] > 0)
+            {
+                values[i] /= scalar(nValues[i]);
+            }
+        }
+    }
+
+
+    // Pass2: weighted average for remaining values (from clipped triangles)
+
+    forAll(interpolatedPoints, i)
+    {
+        label pointI = interpolatedPoints[i];
+        const FixedList<label, 3>& oldPoints = interpolatedOldPoints[i];
+        const FixedList<scalar, 3>& w = interpolationWeights[i];
+
+        // Note: zeroing should not be necessary if interpolation only done
+        //       for newly introduced points (i.e. not in triPointMergeMap)
+        values[pointI] = pTraits<Type>::zero;
+        forAll(oldPoints, j)
+        {
+            values[pointI] = w[j]*unmergedValues[oldPoints[j]];
+        }
+    }
+
+    return tvalues;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type> >
+Foam::isoSurface::interpolate
+(
     const GeometricField<Type, fvPatchField, volMesh>& cCoords,
     const Field<Type>& pCoords
 ) const
@@ -707,7 +820,7 @@ Foam::isoSurface::interpolate
     > > c2(adaptPatchFields(cCoords));
 
 
-    DynamicList<Type> triPoints(nCutCells_);
+    DynamicList<Type> triPoints(3*nCutCells_);
     DynamicList<label> triMeshCells(nCutCells_);
 
     // Dummy snap data
@@ -731,52 +844,15 @@ Foam::isoSurface::interpolate
         triMeshCells
     );
 
-
-    // One value per point
-    tmp<Field<Type> > tvalues
+    return interpolate
     (
-        new Field<Type>(points().size(), pTraits<Type>::zero)
+        points().size(),
+        triPointMergeMap_,
+        interpolatedPoints_,
+        interpolatedOldPoints_,
+        interpolationWeights_,
+        triPoints
     );
-    Field<Type>& values = tvalues();
-    labelList nValues(values.size(), 0);
-
-    forAll(triPoints, i)
-    {
-        label mergedPointI = triPointMergeMap_[i];
-
-        if (mergedPointI >= 0)
-        {
-            values[mergedPointI] += triPoints[i];
-            nValues[mergedPointI]++;
-        }
-    }
-
-    if (debug)
-    {
-        Pout<< "nValues:" << values.size() << endl;
-        label nMult = 0;
-        forAll(nValues, i)
-        {
-            if (nValues[i] == 0)
-            {
-                FatalErrorIn("isoSurface::interpolate(..)")
-                    << "point:" << i << " nValues:" << nValues[i]
-                    << abort(FatalError);
-            }
-            else if (nValues[i] > 1)
-            {
-                nMult++;
-            }
-        }
-        Pout<< "Of which mult:" << nMult << endl;
-    }
-
-    forAll(values, i)
-    {
-        values[i] /= scalar(nValues[i]);
-    }
-
-    return tvalues;
 }
 
 

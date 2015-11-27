@@ -1,0 +1,96 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Library defines new boundary conditions
+libs            ("libOpenFOAM.so" "libjobControl.so");
+
+application     chtMultiRegionFoam;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         1;
+
+deltaT          0.001;
+
+writeControl    adjustableRunTime;
+writeInterval   0.1;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  8;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable yes;
+
+maxCo           0.6;
+
+// Maximum diffusion number
+maxDi           10.0;
+
+adjustTimeStep  yes;
+
+functions
+{
+    externalCoupled
+    {
+        // Where to load it from (if not already in solver)
+        functionObjectLibs ("libjobControl.so");
+
+        type            externalCoupled;
+
+        // Directory to use for communication
+        commsDir        "${FOAM_CASE}/comms";
+
+        // Does external process start first
+        initByExternal  true;
+
+        // Additional output
+        log             true;
+
+        regions
+        {
+            // Region name (wildcards allowed)
+            "(topAir|heater)"
+            {
+                // In topAir adjust the minX patch (fixedValue)
+
+                // Patch or patchGroup
+                coupleGroup
+                {
+                    // Fields to output in commsDir
+                    writeFields (T);
+                    // Fields to read from commsDir
+                    readFields  (T);
+                }
+            }
+        }
+    }
+}
+
+
+// ************************************************************************* //

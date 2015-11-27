@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -162,19 +162,7 @@ void Foam::sampledSurfaces::write()
 
         const label nFields = classifyFields();
 
-        if (Pstream::master())
-        {
-            if (debug)
-            {
-                Pout<< "Creating directory "
-                    << outputPath_/obr_.time().timeName() << nl << endl;
-
-            }
-
-            mkDir(outputPath_/obr_.time().timeName());
-        }
-
-        // Write geometry first if required,
+        // write geometry first if required,
         // or when no fields would otherwise be written
         if (nFields == 0 || formatter_->separateGeometry())
         {
