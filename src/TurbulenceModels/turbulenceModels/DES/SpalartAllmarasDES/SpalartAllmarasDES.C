@@ -197,7 +197,7 @@ SpalartAllmarasDES<BasicTurbulenceModel>::SpalartAllmarasDES
     const word& type
 )
 :
-    LESeddyViscosity<BasicTurbulenceModel>
+    DESModel<BasicTurbulenceModel>
     (
         type,
         alpha,
@@ -329,7 +329,7 @@ SpalartAllmarasDES<BasicTurbulenceModel>::SpalartAllmarasDES
 template<class BasicTurbulenceModel>
 bool SpalartAllmarasDES<BasicTurbulenceModel>::read()
 {
-    if (LESeddyViscosity<BasicTurbulenceModel>::read())
+    if (DESModel<BasicTurbulenceModel>::read())
     {
         sigmaNut_.readIfPresent(this->coeffDict());
         kappa_.readIfPresent(*this);
@@ -414,7 +414,7 @@ void SpalartAllmarasDES<BasicTurbulenceModel>::correct()
     const surfaceScalarField& alphaRhoPhi = this->alphaRhoPhi_;
     const volVectorField& U = this->U_;
 
-    LESeddyViscosity<BasicTurbulenceModel>::correct();
+    DESModel<BasicTurbulenceModel>::correct();
 
     const volScalarField chi(this->chi());
     const volScalarField fv1(this->fv1(chi));

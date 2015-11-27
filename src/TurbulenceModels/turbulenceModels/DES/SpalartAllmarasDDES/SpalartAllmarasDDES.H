@@ -79,6 +79,15 @@ class SpalartAllmarasDDES
 
 protected:
 
+    // Protected data
+
+        //- fd function pre-factor
+        dimensionedScalar fdFactor_;
+
+        //- fd function exponent
+        dimensionedScalar fdExponent_;
+
+
     // Protected Member Functions
 
         //- Length scale
@@ -120,6 +129,12 @@ public:
     //- Destructor
     virtual ~SpalartAllmarasDDES()
     {}
+
+
+    // Member Functions
+
+        //- Read from dictionary
+        virtual bool read();
 };
 
 
