@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,76 +22,73 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::doxygenXmlParser
+    Foam::helpSolver
 
 Description
-    Parser for doxygen XML
+    This class provides help for solvers.  When no additional arguments
+    are given, the utility outputs all known solvers.
+
+    Usage:
+    \plaintable
+        \c -browse \<patch type\> | open documentation for object in browser
+    \endplaintable
+
+SeeAlso
+    Foam::helpType
 
 SourceFiles
-    doxygenXmlParser.C
+    helpSolver.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef doxygenXmlParser_H
-#define doxygenXmlParser_H
+#ifndef helpSolver_H
+#define helpSolver_H
 
-#include "dictionary.H"
-#include "IFstream.H"
+#include "helpType.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace helpTypes
+{
 
 /*---------------------------------------------------------------------------*\
-                      Class doxygenXmlParser Declaration
+                         Class helpSolver Declaration
 \*---------------------------------------------------------------------------*/
 
-class doxygenXmlParser
+class helpSolver
 :
-    public dictionary
+    public helpType
 {
 
 public:
 
-    //- Construct from components
-    doxygenXmlParser
-    (
-        const fileName& fName,
-        const string& startTag,
-        const string& searchStr,
-        const bool exactMatch,
-        const word& ext
-    );
+    //- Runtime type information
+    TypeName("helpSolver");
+
+    //- Constructor
+    helpSolver();
+
+    //- Destructor
+    virtual ~helpSolver();
 
 
-    // Member functions
+    // Member Functions
 
-        //- Skip past a block
-        void skipBlock(IFstream& is, const word& blockName) const;
+        //- Initialise - typically setting static variables,
+        //  e.g. command line arguments
+        virtual void init();
 
-        //- Skip forward to block
-        void skipForward(IFstream& is, const word& blockName) const;
-
-        //- Return the entry
-        template<class Type>
-        void getEntry(IFstream& is, Type& entry) const;
-
-        //- Return the entry value
-        template<class Type>
-        void getValue(IFstream& is, Type& entry) const;
+        //- Execute the help
+        virtual void execute(const argList& args, const fvMesh& mesh);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace helpTypes
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "doxygenXmlParserTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

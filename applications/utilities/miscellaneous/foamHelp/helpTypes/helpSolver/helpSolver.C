@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "helpFunctionObject.H"
+#include "helpSolver.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -32,13 +32,13 @@ namespace Foam
 {
     namespace helpTypes
     {
-        defineTypeNameAndDebug(helpFunctionObject, 0);
+        defineTypeNameAndDebug(helpSolver, 0);
         addNamedToRunTimeSelectionTable
         (
             helpType,
-            helpFunctionObject,
+            helpSolver,
             dictionary,
-            functionObject
+            solver
         );
     }
 }
@@ -46,41 +46,41 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::helpTypes::helpFunctionObject::helpFunctionObject()
+Foam::helpTypes::helpSolver::helpSolver()
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::helpTypes::helpFunctionObject::~helpFunctionObject()
+Foam::helpTypes::helpSolver::~helpSolver()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::helpTypes::helpFunctionObject::init()
+void Foam::helpTypes::helpSolver::init()
 {
     helpType::init();
 
-    argList::validArgs.append("functionObject");
+    argList::validArgs.append("solver");
 }
 
 
-void Foam::helpTypes::helpFunctionObject::execute
+void Foam::helpTypes::helpSolver::execute
 (
     const argList& args,
     const fvMesh& mesh
 )
 {
-    word function(word::null);
+    word solver(word::null);
 
-    if (args.optionReadIfPresent("browse", function))
+    if (args.optionReadIfPresent("browse", solver))
     {
-        displayDoc(function, ".*[fF]unctionObject.*", true, "H");
+        displayDoc(solver, ".*solvers/.*Foam/", true, "C");
     }
     else
     {
-        displayDocOptions(".*[fF]unctionObject.*", true, "H");
+        displayDocOptions(".*solvers/.*Foam/", true, "C");
     }
 }
 
