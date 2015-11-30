@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -77,6 +77,9 @@ protected:
 
         //- Lower limit of k
         dimensionedScalar kMin_;
+
+        //- Lower limit of omega
+        dimensionedScalar omegaMin_;
 
         //- Run-time selectable delta model
         autoPtr<Foam::LESdelta> delta_;
