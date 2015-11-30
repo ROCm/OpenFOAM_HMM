@@ -30,6 +30,7 @@ License
 #include "surfaceFields.H"
 #include "linear.H"
 #include "steadyStateDdtScheme.H"
+#include "syncTools.H"
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -78,6 +79,8 @@ void Foam::pressurePIDControlInletVelocityFvPatchVectorField::faceZoneAverage
 {
     const fvMesh& mesh(patch().boundaryMesh().mesh());
 
+    PackedBoolList isMasterFace(syncTools::getInternalOrMasterFaces(mesh));
+
     const faceZone& zone = mesh.faceZones()[name];
 
     area = 0;
@@ -87,10 +90,23 @@ void Foam::pressurePIDControlInletVelocityFvPatchVectorField::faceZoneAverage
     {
         const label f(zone[faceI]);
 
-        const scalar da(mesh.magSf()[f]);
+        if (mesh.isInternalFace(f))
+        {
+            const scalar da(mesh.magSf()[f]);
 
-        area += da;
-        average += da*field[f];
+            area += da;
+            average += da*field[f];
+        }
+        else if (isMasterFace[f])
+        {
+            const label bf(f-mesh.nInternalFaces());
+            const label patchID = mesh.boundaryMesh().patchID()[bf];
+            const label lf(mesh.boundaryMesh()[patchID].whichFace(f));
+            const scalar da(mesh.magSf().boundaryField()[patchID][lf]);
+
+            area += da;
+            average += da*field.boundaryField()[patchID][lf];
+        }
     }
 
     reduce(area, sumOp<scalar>());
