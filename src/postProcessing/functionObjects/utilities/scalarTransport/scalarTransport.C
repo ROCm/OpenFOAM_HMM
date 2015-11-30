@@ -191,9 +191,13 @@ Foam::scalarTransport::scalarTransport
 {
     read(dict);
 
+    // Force creation of transported field so any bcs using it can look it
+    // up
+    volScalarField& T = transportedField();
+
     if (resetOnStartUp_)
     {
-        transportedField() == dimensionedScalar("zero", dimless, 0.0);
+        T == dimensionedScalar("zero", dimless, 0.0);
     }
 }
 
