@@ -54,11 +54,7 @@ const IDDESDelta& kOmegaSSTIDDES<BasicTurbulenceModel>::setDelta() const
 template<class BasicTurbulenceModel>
 tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::alpha() const
 {
-    return max
-    (
-        0.25 - this->y_/static_cast<const volScalarField&>(IDDESDelta_.hmax()),
-        scalar(-5)
-    );
+    return max(0.25 - this->y_/IDDESDelta_.hmax(), scalar(-5));
 }
 
 
