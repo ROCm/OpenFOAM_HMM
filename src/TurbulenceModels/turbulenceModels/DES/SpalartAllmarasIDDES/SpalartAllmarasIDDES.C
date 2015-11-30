@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -140,7 +140,7 @@ tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::dTilda
     (
         dimensionedScalar("SMALL", dimLength, SMALL),
         fHyb*(1 + fRestore*Psi)*this->y_
-      + (1 - fHyb)*this->CDES_*Psi*this->delta()
+      + (1 - fHyb)*this->psi(chi, fv1)*this->CDES_*Psi*this->delta()
     );
 }
 

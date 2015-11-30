@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,7 +88,7 @@ tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::dTilda
       - fd(mag(gradU))
        *max
         (
-            this->y_ - this->CDES_*this->delta(),
+            this->y_ - this->psi(chi, fv1)*this->CDES_*this->delta(),
             dimensionedScalar("zero", dimLength, 0)
         ),
         dimensionedScalar("small", dimLength, SMALL)
