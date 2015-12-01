@@ -513,17 +513,17 @@ void Foam::fluxSummary::initialiseCellZoneAndDirection
             returnReduce(patch.nEdges(), sumOp<label>())
         );
 
-        label nCells = 0;
-        forAll(allFaceInfo, faceI)
-        {
-            if (allFaceInfo[faceI].region() == regionI)
-            {
-                nCells++;
-            }
-        }
-
         if (debug)
         {
+            label nCells = 0;
+            forAll(allFaceInfo, faceI)
+            {
+                if (allFaceInfo[faceI].region() == regionI)
+                {
+                    nCells++;
+                }
+            }
+
             Info<< "*** region:" << regionI
                 << "  found:" << returnReduce(nCells, sumOp<label>())
                 << " faces" << endl;
