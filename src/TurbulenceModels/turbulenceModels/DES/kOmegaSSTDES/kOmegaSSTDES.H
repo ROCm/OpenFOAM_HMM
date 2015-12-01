@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,99 +22,103 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::incompressible::RASModels::LamBremhorstKE
+    Foam::LESModels::kOmegaSSTDES
 
 Group
-    grpIcoRASTurbulence
+    grpDESTurbulence
 
 Description
-    Lam and Bremhorst low-Reynolds number k-epsilon turbulence model
-    for incompressible flows
+    k-omega-SST DES turbulence model for incompressible and compressible flows
 
-    This turbulence model is described in:
+    Reference:
     \verbatim
-        Lam, C. K. G., & Bremhorst, K. (1981).
-        A modified form of the k-ε model for predicting wall turbulence.
-        Journal of Fluids Engineering, 103(3), 456-460.
+        Strelets, M. (2001)
+        Detached Eddy Simulation of Massively Separated Flows,
+        39th AIAA Aerospace Sciences Meeting and Exhibit, Reno, NV
     \endverbatim
 
 SourceFiles
-    LamBremhorstKE.C
+    kOmegaSSTDES.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef LamBremhorstKE_H
-#define LamBremhorstKE_H
+#ifndef kOmegaSSTDES_H
+#define kOmegaSSTDES_H
 
-#include "turbulentTransportModel.H"
-#include "eddyViscosity.H"
+#include "DESModel.H"
+#include "kOmegaSSTBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace incompressible
-{
-namespace RASModels
+namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class LamBremhorstKE Declaration
+                        class kOmegaSSTDES Declaration
 \*---------------------------------------------------------------------------*/
 
-class LamBremhorstKE
+template<class BasicTurbulenceModel>
+class kOmegaSSTDES
 :
-    public eddyViscosity<incompressible::RASModel>
+    public kOmegaSSTBase<DESModel<BasicTurbulenceModel> >
 {
     // Private Member Functions
 
         // Disallow default bitwise copy construct and assignment
-        LamBremhorstKE(const LamBremhorstKE&);
-        LamBremhorstKE& operator=(const LamBremhorstKE&);
-
-        tmp<volScalarField> Rt() const;
-        tmp<volScalarField> fMu(const volScalarField& Rt) const;
-        tmp<volScalarField> f1(const volScalarField& fMu) const;
-        tmp<volScalarField> f2(const volScalarField& Rt) const;
-        void correctNut(const volScalarField& fMu);
+        kOmegaSSTDES(const kOmegaSSTDES&);
+        kOmegaSSTDES& operator=(const kOmegaSSTDES&);
 
 
 protected:
 
     // Protected data
 
-        dimensionedScalar Cmu_;
-        dimensionedScalar Ceps1_;
-        dimensionedScalar Ceps2_;
-        dimensionedScalar sigmaEps_;
+        // Model coefficients
 
-        volScalarField k_;
-        volScalarField epsilon_;
-
-        //- Wall distance
-        //  Note: different to wall distance in parent RASModel
-        //  which is for near-wall cells only
-        const volScalarField& y_;
+            dimensionedScalar kappa_;
+            dimensionedScalar CDESkom_;
+            dimensionedScalar CDESkeps_;
 
 
     // Protected Member Functions
 
+        //- Blending for CDES parameter
+        virtual tmp<volScalarField> CDES(const volScalarField& F1) const
+        {
+            return this->blend(F1, CDESkom_, CDESkeps_);
+        }
+
+        virtual void correctNut(const volScalarField& S2);
         virtual void correctNut();
+
+        //- Length scale
+        virtual tmp<volScalarField> dTilda
+        (
+            const volScalarField& magGradU,
+            const volScalarField& CDES
+        ) const;
 
 
 public:
 
+    typedef typename BasicTurbulenceModel::alphaField alphaField;
+    typedef typename BasicTurbulenceModel::rhoField rhoField;
+    typedef typename BasicTurbulenceModel::transportModel transportModel;
+
+
     //- Runtime type information
-    TypeName("LamBremhorstKE");
+    TypeName("kOmegaSSTDES");
 
 
     // Constructors
 
         //- Construct from components
-        LamBremhorstKE
+        kOmegaSSTDES
         (
-            const geometricOneField& alpha,
-            const geometricOneField& rho,
+            const alphaField& alpha,
+            const rhoField& rho,
             const volVectorField& U,
             const surfaceScalarField& alphaRhoPhi,
             const surfaceScalarField& phi,
@@ -125,7 +129,7 @@ public:
 
 
     //- Destructor
-    virtual ~LamBremhorstKE()
+    virtual ~kOmegaSSTDES()
     {}
 
 
@@ -134,49 +138,25 @@ public:
         //- Re-read model coefficients if they have changed
         virtual bool read();
 
-        //- Return the effective diffusivity for k
-        tmp<volScalarField> DkEff() const
-        {
-            return tmp<volScalarField>
-            (
-                new volScalarField("DkEff", nut_ + nu())
-            );
-        }
-
-        //- Return the effective diffusivity for epsilon
-        tmp<volScalarField> DepsilonEff() const
-        {
-            return tmp<volScalarField>
-            (
-                new volScalarField("DepsilonEff", nut_/sigmaEps_ + nu())
-            );
-        }
-
-        //- Return the turbulence kinetic energy
-        virtual tmp<volScalarField> k() const
-        {
-            return k_;
-        }
-
-        //- Return the turbulence kinetic energy dissipation rate
-        virtual tmp<volScalarField> epsilon() const
-        {
-            return epsilon_;
-        }
-
         //- Solve the turbulence equations and correct the turbulence viscosity
         virtual void correct();
+
+        //- Return the LES field indicator
+        virtual tmp<volScalarField> LESRegion() const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
-} // End namespace incompressible
+} // End namespace LESModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#ifdef NoRepository
+#   include "kOmegaSSTDES.C"
+#endif
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 #endif
 
 // ************************************************************************* //

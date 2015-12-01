@@ -677,120 +677,138 @@ Foam::fluxSummary::~fluxSummary()
 
 void Foam::fluxSummary::read(const dictionary& dict)
 {
-    if (active_)
+    if (!active_)
     {
-        functionObjectFile::read(dict);
+        return;
+    }
 
-        log_ = dict.lookupOrDefault<Switch>("log", true);
+    functionObjectFile::read(dict);
 
-        mode_ = modeTypeNames_.read(dict.lookup("mode"));
-        phiName_= dict.lookupOrDefault<word>("phiName", "phi");
-        dict.readIfPresent("scaleFactor", scaleFactor_);
-        dict.readIfPresent("tolerance", tolerance_);
+    log_ = dict.lookupOrDefault<Switch>("log", true);
 
-        // initialise with capacity of 10 faceZones
-        DynamicList<vector> refDir(10);
-        DynamicList<word> faceZoneName(refDir.size());
-        DynamicList<List<label> > faceID(refDir.size());
-        DynamicList<List<label> > facePatchID(refDir.size());
-        DynamicList<List<scalar> > faceSign(refDir.size());
+    mode_ = modeTypeNames_.read(dict.lookup("mode"));
+    phiName_= dict.lookupOrDefault<word>("phiName", "phi");
+    dict.readIfPresent("scaleFactor", scaleFactor_);
+    dict.readIfPresent("tolerance", tolerance_);
 
-        switch (mode_)
+    // initialise with capacity of 10 faceZones
+    DynamicList<vector> refDir(10);
+    DynamicList<word> faceZoneName(refDir.size());
+    DynamicList<List<label> > faceID(refDir.size());
+    DynamicList<List<label> > facePatchID(refDir.size());
+    DynamicList<List<scalar> > faceSign(refDir.size());
+
+    switch (mode_)
+    {
+        case mdFaceZone:
         {
-            case mdFaceZone:
-            {
-                List<word> zones(dict.lookup("faceZones"));
+            List<word> zones(dict.lookup("faceZones"));
 
-                forAll(zones, i)
-                {
-                    initialiseFaceZone
-                    (
-                        zones[i],
-                        faceZoneName,
-                        faceID,
-                        facePatchID,
-                        faceSign
-                    );
-                }
-                break;
-            }
-            case mdFaceZoneAndDirection:
+            forAll(zones, i)
             {
-                List<Tuple2<word, vector> >
-                    zoneAndDirection(dict.lookup("faceZoneAndDirection"));
-
-                forAll(zoneAndDirection, i)
-                {
-                    initialiseFaceZoneAndDirection
-                    (
-                        zoneAndDirection[i].first(),
-                        zoneAndDirection[i].second(),
-                        refDir,
-                        faceZoneName,
-                        faceID,
-                        facePatchID,
-                        faceSign
-                    );
-                }
-                break;
-            }
-            case mdCellZoneAndDirection:
-            {
-                List<Tuple2<word, vector> >
-                    zoneAndDirection(dict.lookup("cellZoneAndDirection"));
-
-                forAll(zoneAndDirection, i)
-                {
-                    initialiseCellZoneAndDirection
-                    (
-                        zoneAndDirection[i].first(),
-                        zoneAndDirection[i].second(),
-                        refDir,
-                        faceZoneName,
-                        faceID,
-                        facePatchID,
-                        faceSign
-                    );
-                }
-                break;
-            }
-            default:
-            {
-                FatalIOErrorIn
+                initialiseFaceZone
                 (
-                    "void Foam::fluxSummary::read(const dictionary&)",
-                    dict
-                )
-                    << "unhandled enumeration " << modeTypeNames_[mode_]
-                    << abort(FatalIOError);
-            }
-        }
-
-        faceZoneName_.transfer(faceZoneName);
-        refDir_.transfer(refDir);
-        faceID_.transfer(faceID);
-        facePatchID_.transfer(facePatchID);
-        faceSign_.transfer(faceSign);
-
-        initialiseFaceArea();
-
-        if (writeToFile())
-        {
-            filePtrs_.setSize(faceZoneName_.size());
-
-            forAll(filePtrs_, fileI)
-            {
-                const word& fzName = faceZoneName_[fileI];
-                filePtrs_.set(fileI, createFile(fzName));
-                writeFileHeader
-                (
-                    fzName,
-                    faceArea_[fileI],
-                    refDir_[fileI],
-                    filePtrs_[fileI]
+                    zones[i],
+                    faceZoneName,
+                    faceID,
+                    facePatchID,
+                    faceSign
                 );
             }
+            break;
         }
+        case mdFaceZoneAndDirection:
+        {
+            List<Tuple2<word, vector> >
+                zoneAndDirection(dict.lookup("faceZoneAndDirection"));
+
+            forAll(zoneAndDirection, i)
+            {
+                initialiseFaceZoneAndDirection
+                (
+                    zoneAndDirection[i].first(),
+                    zoneAndDirection[i].second(),
+                    refDir,
+                    faceZoneName,
+                    faceID,
+                    facePatchID,
+                    faceSign
+                );
+            }
+            break;
+        }
+        case mdCellZoneAndDirection:
+        {
+            List<Tuple2<word, vector> >
+                zoneAndDirection(dict.lookup("cellZoneAndDirection"));
+
+            forAll(zoneAndDirection, i)
+            {
+                initialiseCellZoneAndDirection
+                (
+                    zoneAndDirection[i].first(),
+                    zoneAndDirection[i].second(),
+                    refDir,
+                    faceZoneName,
+                    faceID,
+                    facePatchID,
+                    faceSign
+                );
+            }
+            break;
+        }
+        default:
+        {
+            FatalIOErrorIn
+            (
+                "void Foam::fluxSummary::read(const dictionary&)",
+                dict
+            )
+                << "unhandled enumeration " << modeTypeNames_[mode_]
+                << abort(FatalIOError);
+        }
+    }
+
+    faceZoneName_.transfer(faceZoneName);
+    refDir_.transfer(refDir);
+    faceID_.transfer(faceID);
+    facePatchID_.transfer(facePatchID);
+    faceSign_.transfer(faceSign);
+
+    initialiseFaceArea();
+
+    if (writeToFile())
+    {
+        filePtrs_.setSize(faceZoneName_.size());
+
+        forAll(filePtrs_, fileI)
+        {
+            const word& fzName = faceZoneName_[fileI];
+            filePtrs_.set(fileI, createFile(fzName));
+            writeFileHeader
+            (
+                fzName,
+                faceArea_[fileI],
+                refDir_[fileI],
+                filePtrs_[fileI]
+            );
+        }
+    }
+
+    // Provide some output
+    if (log_)
+    {
+        Info<< type() << " " << name_ << " output:" << nl;
+
+        forAll(faceZoneName_, zoneI)
+        {
+            const word& zoneName = faceZoneName_[zoneI];
+            scalar zoneArea = faceArea_[zoneI];
+
+            Info<< "    Zone: " << zoneName << ", area: " << zoneArea << nl;
+        }
+
+        Info<< endl;
     }
 }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,33 +22,32 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::LESModels::SpalartAllmarasIDDES
+    Foam::LESModels::kOmegaSSTIDDES
 
 Group
     grpDESTurbulence
 
 Description
-    SpalartAllmaras IDDES turbulence model for incompressible and compressible
+    k-omega-SST IDDES turbulence model for incompressible and compressible
     flows
 
     Reference:
     \verbatim
-        Shur, M. L., Spalart, P. R., Strelets, M. K., & Travin, A. K. (2008).
-        A hybrid RANS-LES approach with delayed-DES and wall-modelled LES
-        capabilities.
-        International Journal of Heat and Fluid Flow, 29(6), 1638-1649.
+        Gritskevich, M.S., Garbaruk, A.V., Schuetze, J., Menter, F.R. (2011)
+        Development of DDES and IDDES Formulations for the k-omega
+        Shear Stress Transport Model, Flow, Turbulence and Combustion,
+        pp. 1-19
     \endverbatim
 
 SourceFiles
-    SpalartAllmarasIDDES.C
+    kOmegaSSTIDDES.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SpalartAllmarasIDDES_H
-#define SpalartAllmarasIDDES_H
+#ifndef kOmegaSSTIDDES_H
+#define kOmegaSSTIDDES_H
 
-#include "SpalartAllmarasDES.H"
-#include "IDDESDelta.H"
+#include "kOmegaSSTDES.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,28 +57,18 @@ namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class SpalartAllmarasIDDES Declaration
+                       class kOmegaSSTIDDES Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class BasicTurbulenceModel>
-class SpalartAllmarasIDDES
+class kOmegaSSTIDDES
 :
-    public SpalartAllmarasDES<BasicTurbulenceModel>
+    public kOmegaSSTDES<BasicTurbulenceModel>
 {
-    // Private data
-
-        // Model constants
-
-            dimensionedScalar fwStar_;
-            dimensionedScalar cl_;
-            dimensionedScalar ct_;
-
-        // Fields
-
-            const IDDESDelta& IDDESDelta_;
-
-
     // Private Member Functions
+
+        //- Check that the supplied delta is an IDDESDelta
+        const IDDESDelta& setDelta() const;
 
         tmp<volScalarField> alpha() const;
         tmp<volScalarField> ft(const volScalarField& magGradU) const;
@@ -92,23 +81,34 @@ class SpalartAllmarasIDDES
         ) const;
 
         //- Delay function
-        tmp<volScalarField> fdt(const volScalarField& magGradU) const;
+        tmp<volScalarField> fd(const volScalarField& maggradU) const;
 
         // Disallow default bitwise copy construct and assignment
-        SpalartAllmarasIDDES(const SpalartAllmarasIDDES&);
-        SpalartAllmarasIDDES& operator=(const SpalartAllmarasIDDES&);
+        kOmegaSSTIDDES(const kOmegaSSTIDDES&);
+        kOmegaSSTIDDES& operator=(const kOmegaSSTIDDES&);
 
 
 protected:
 
-    // Protected Member Functions
+    // Protected data
+
+        // Model coefficients
+
+            dimensionedScalar cdt1_;
+            dimensionedScalar cdt2_;
+            dimensionedScalar cl_;
+            dimensionedScalar ct_;
+
+        // Fields
+
+            const IDDESDelta& IDDESDelta_;
+
 
         //- Length scale
         virtual tmp<volScalarField> dTilda
         (
-            const volScalarField& chi,
-            const volScalarField& fv1,
-            const volTensorField& gradU
+            const volScalarField& magGradU,
+            const volScalarField& CDES
         ) const;
 
 
@@ -120,13 +120,13 @@ public:
 
 
     //- Runtime type information
-    TypeName("SpalartAllmarasIDDES");
+    TypeName("kOmegaSSTIDDES");
 
 
     // Constructors
 
         //- Construct from components
-        SpalartAllmarasIDDES
+        kOmegaSSTIDDES
         (
             const alphaField& alpha,
             const rhoField& rho,
@@ -140,7 +140,7 @@ public:
 
 
     //- Destructor
-    virtual ~SpalartAllmarasIDDES()
+    virtual ~kOmegaSSTIDDES()
     {}
 
 
@@ -157,13 +157,11 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 #ifdef NoRepository
-#   include "SpalartAllmarasIDDES.C"
+#   include "kOmegaSSTIDDES.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 #endif
 
 // ************************************************************************* //
