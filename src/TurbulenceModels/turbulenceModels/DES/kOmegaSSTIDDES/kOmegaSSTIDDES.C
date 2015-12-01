@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "SpalartAllmarasIDDES.H"
+#include "kOmegaSSTIDDES.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -35,116 +35,125 @@ namespace LESModels
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::alpha() const
+const IDDESDelta& kOmegaSSTIDDES<BasicTurbulenceModel>::setDelta() const
 {
-    // Equation 9 (plus limits)
-    return max
-    (
-        0.25 - this->y_/static_cast<const volScalarField&>(IDDESDelta_.hmax()),
-        scalar(-5)
-    );
+    if (!isA<IDDESDelta>(this->delta_()))
+    {
+        FatalErrorIn
+        (
+            "const kOmegaSSTIDDES<BasicTurbulenceModel>::setDelta() const"
+        )
+            << "The delta function must be set to a " << IDDESDelta::typeName
+            << " -based model" << exit(FatalError);
+    }
+
+    return refCast<const IDDESDelta>(this->delta_());
 }
 
 
 template<class BasicTurbulenceModel>
-tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::ft
+tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::alpha() const
+{
+    return max(0.25 - this->y_/IDDESDelta_.hmax(), scalar(-5));
+}
+
+
+template<class BasicTurbulenceModel>
+tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::ft
 (
     const volScalarField& magGradU
 ) const
 {
-    // Equation 13
     return tanh(pow3(sqr(ct_)*rd(this->nut_, magGradU)));
 }
 
 
 template<class BasicTurbulenceModel>
-tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::fl
+tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::fl
 (
     const volScalarField& magGradU
 ) const
 {
-    // Equation 13
     return tanh(pow(sqr(cl_)*rd(this->nu(), magGradU), 10));
 }
 
 
 template<class BasicTurbulenceModel>
-tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::rd
+tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::rd
 (
     const volScalarField& nur,
     const volScalarField& magGradU
 ) const
 {
-    return min
+    tmp<volScalarField> tr
     (
-        nur
-       /(
-           max
-           (
-               magGradU,
-               dimensionedScalar("SMALL", magGradU.dimensions(), SMALL)
-           )*sqr(this->kappa_*this->y_)
-       ),
-       scalar(10)
+        min
+        (
+            nur
+           /(
+                max
+                (
+                    magGradU,
+                    dimensionedScalar("SMALL", magGradU.dimensions(), SMALL)
+                )
+                *sqr(this->kappa_*this->y_)
+            ),
+            scalar(10)
+        )
     );
+    tr().boundaryField() == 0.0;
+
+    return tr;
+}
+
+
+template<class BasicTurbulenceModel>
+tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::fd
+(
+    const volScalarField& magGradU
+) const
+{
+    return 1 - tanh(pow(cdt1_*rd(this->nuEff(), magGradU), cdt2_));
 }
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::fdt
+tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::dTilda
 (
-    const volScalarField& magGradU
+    const volScalarField& magGradU,
+    const volScalarField& CDES
 ) const
 {
-    // Related to equation 16
-    return 1 - tanh(pow3(8*rd(this->nuEff(), magGradU)));
-}
+    const volScalarField& k = this->k_;
+    const volScalarField& omega = this->omega_;
 
+    const volScalarField lRAS(sqrt(k)/(this->betaStar_*omega));
+    const volScalarField lLES(CDES*this->delta());
+    const dimensionedScalar d0("SMALL", dimLength, SMALL);
 
-template<class BasicTurbulenceModel>
-tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::dTilda
-(
-    const volScalarField& chi,
-    const volScalarField& fv1,
-    const volTensorField& gradU
-) const
-{
     const volScalarField alpha(this->alpha());
     const volScalarField expTerm(exp(sqr(alpha)));
-    const volScalarField magGradU(mag(gradU));
 
-    // Equation 9
-    tmp<volScalarField> fB = min(2*pow(expTerm, -9.0), scalar(1));
+    tmp<volScalarField> fStep = min(2*pow(expTerm, -9.0), scalar(1));
+    const volScalarField fHyb(max(1 - fd(magGradU), fStep));
+    // Simplified version where fRestore = 0
+    // return max(d0, fHyb*lRAS + (1 - fHyb)*lLES);
 
-    // Equation 11
-    tmp<volScalarField> fe1 =
+    // Original form
+    tmp<volScalarField> fHill =
         2*(pos(alpha)*pow(expTerm, -11.09) + neg(alpha)*pow(expTerm, -9.0));
-
-    // Equation 12
-    tmp<volScalarField> fe2 = 1 - max(ft(magGradU), fl(magGradU));
-
-    // Equation 10
-    const volScalarField psi(this->psi(chi, fv1));
-    tmp<volScalarField> fe = max(fe1 - 1, scalar(0))*psi*fe2;
-
-    // Equation 16
-    const volScalarField fdTilda(max(1 - fdt(magGradU), fB));
-
-    // Equation 17 (plus limits)
-    return max
-    (
-        fdTilda*(1 + fe)*this->y_ + (1 - fdTilda)*psi*this->CDES_*this->delta(),
-        dimensionedScalar("SMALL", dimLength, SMALL)
-    );
+    tmp<volScalarField> fAmp = 1 - max(ft(magGradU), fl(magGradU));
+    tmp<volScalarField> fRestore = max(fHill - 1, scalar(0))*fAmp;
+    return max(d0, fHyb*(1 + fRestore)*lRAS + (1 - fHyb)*lLES);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-SpalartAllmarasIDDES<BasicTurbulenceModel>::SpalartAllmarasIDDES
+kOmegaSSTIDDES<BasicTurbulenceModel>::kOmegaSSTIDDES
 (
     const alphaField& alpha,
     const rhoField& rho,
@@ -156,7 +165,7 @@ SpalartAllmarasIDDES<BasicTurbulenceModel>::SpalartAllmarasIDDES
     const word& type
 )
 :
-    SpalartAllmarasDES<BasicTurbulenceModel>
+    kOmegaSSTDES<BasicTurbulenceModel>
     (
         alpha,
         rho,
@@ -164,15 +173,25 @@ SpalartAllmarasIDDES<BasicTurbulenceModel>::SpalartAllmarasIDDES
         alphaRhoPhi,
         phi,
         transport,
-        propertiesName
+        propertiesName,
+        type
     ),
-    fwStar_
+    cdt1_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "fwStar",
+            "cdt1",
             this->coeffDict_,
-            0.424
+            20
+        )
+    ),
+    cdt2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "cdt2",
+            this->coeffDict_,
+            3
         )
     ),
     cl_
@@ -181,7 +200,7 @@ SpalartAllmarasIDDES<BasicTurbulenceModel>::SpalartAllmarasIDDES
         (
             "cl",
             this->coeffDict_,
-            3.55
+            5
         )
     ),
     ct_
@@ -190,21 +209,27 @@ SpalartAllmarasIDDES<BasicTurbulenceModel>::SpalartAllmarasIDDES
         (
             "ct",
             this->coeffDict_,
-            1.63
+            1.87
         )
     ),
-    IDDESDelta_(refCast<IDDESDelta>(this->delta_()))
-{}
+    IDDESDelta_(setDelta())
+{
+    if (type == typeName)
+    {
+        this->printCoeffs(type);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-bool SpalartAllmarasIDDES<BasicTurbulenceModel>::read()
+bool kOmegaSSTIDDES<BasicTurbulenceModel>::read()
 {
-    if (SpalartAllmarasDES<BasicTurbulenceModel>::read())
+    if (kOmegaSSTDES<BasicTurbulenceModel>::read())
     {
-        fwStar_.readIfPresent(this->coeffDict());
+        cdt1_.readIfPresent(this->coeffDict());
+        cdt2_.readIfPresent(this->coeffDict());
         cl_.readIfPresent(this->coeffDict());
         ct_.readIfPresent(this->coeffDict());
 

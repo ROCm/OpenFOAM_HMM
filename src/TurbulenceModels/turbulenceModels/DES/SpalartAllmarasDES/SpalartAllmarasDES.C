@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,6 +60,16 @@ tmp<volScalarField> SpalartAllmarasDES<BasicTurbulenceModel>::fv2
 ) const
 {
     return 1.0 - chi/(1.0 + chi*fv1);
+}
+
+
+template<class BasicTurbulenceModel>
+tmp<volScalarField> SpalartAllmarasDES<BasicTurbulenceModel>::ft2
+(
+    const volScalarField& chi
+) const
+{
+    return Ct3_*exp(-Ct4_*sqr(chi));
 }
 
 
@@ -149,6 +159,53 @@ tmp<volScalarField> SpalartAllmarasDES<BasicTurbulenceModel>::fw
 
 
 template<class BasicTurbulenceModel>
+tmp<volScalarField> SpalartAllmarasDES<BasicTurbulenceModel>::psi
+(
+    const volScalarField& chi,
+    const volScalarField& fv1
+) const
+{
+    tmp<volScalarField> tpsi
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                type() + ":psi",
+                this->time().timeName(),
+                this->mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            this->mesh(),
+            dimensionedScalar("one", dimless, 1)
+        )
+    );
+
+    if (lowReCorrection_)
+    {
+        volScalarField& psi = tpsi();
+
+        const volScalarField fv2(this->fv2(chi, fv1));
+        const volScalarField ft2(this->ft2(chi));
+
+        psi =
+            sqrt
+            (
+                min
+                (
+                    scalar(100),
+                    (1 - Cb1_/(Cw1_*sqr(kappa_)*fwStar_)*(ft2 + (1 - ft2)*fv2))
+                   /max(SMALL, (fv1*max(1e-10, 1 - ft2)))
+                )
+            );
+    }
+
+    return tpsi;
+}
+
+
+template<class BasicTurbulenceModel>
 tmp<volScalarField> SpalartAllmarasDES<BasicTurbulenceModel>::dTilda
 (
     const volScalarField& chi,
@@ -156,7 +213,7 @@ tmp<volScalarField> SpalartAllmarasDES<BasicTurbulenceModel>::dTilda
     const volTensorField& gradU
 ) const
 {
-    tmp<volScalarField> tdTilda(CDES_*this->delta());
+    tmp<volScalarField> tdTilda(psi(chi, fv1)*CDES_*this->delta());
     min(tdTilda().dimensionedInternalField(), tdTilda(), y_);
     return tdTilda;
 }
@@ -300,6 +357,42 @@ SpalartAllmarasDES<BasicTurbulenceModel>::SpalartAllmarasDES
             0.07
         )
     ),
+    lowReCorrection_
+    (
+        Switch::lookupOrAddToDict
+        (
+            "lowReCorrection",
+            this->coeffDict_,
+            true
+        )
+    ),
+    Ct3_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Ct3",
+            this->coeffDict_,
+            1.2
+        )
+    ),
+    Ct4_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Ct4",
+            this->coeffDict_,
+            0.5
+        )
+    ),
+    fwStar_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "fwStar",
+            this->coeffDict_,
+            0.424
+        )
+    ),
 
     nuTilda_
     (
@@ -344,6 +437,11 @@ bool SpalartAllmarasDES<BasicTurbulenceModel>::read()
 
         CDES_.readIfPresent(this->coeffDict());
         ck_.readIfPresent(this->coeffDict());
+
+        lowReCorrection_.readIfPresent("lowReCorrection", this->coeffDict());
+        Ct3_.readIfPresent(this->coeffDict());
+        Ct4_.readIfPresent(this->coeffDict());
+        fwStar_.readIfPresent(this->coeffDict());
 
         return true;
     }
@@ -418,6 +516,7 @@ void SpalartAllmarasDES<BasicTurbulenceModel>::correct()
 
     const volScalarField chi(this->chi());
     const volScalarField fv1(this->fv1(chi));
+    const volScalarField ft2(this->ft2(chi));
 
     tmp<volTensorField> tgradU = fvc::grad(U);
     const volScalarField Omega(this->Omega(tgradU()));
@@ -431,10 +530,11 @@ void SpalartAllmarasDES<BasicTurbulenceModel>::correct()
       - fvm::laplacian(alpha*rho*DnuTildaEff(), nuTilda_)
       - Cb2_/sigmaNut_*alpha*rho*magSqr(fvc::grad(nuTilda_))
      ==
-        Cb1_*alpha*rho*Stilda*nuTilda_
+        Cb1_*alpha*rho*Stilda*nuTilda_*(scalar(1) - ft2)
       - fvm::Sp
         (
-            Cw1_*alpha*rho*fw(Stilda, dTilda)*nuTilda_/sqr(dTilda),
+            (Cw1_*fw(Stilda, dTilda) - Cb1_/sqr(kappa_)*ft2)
+           *alpha*rho*nuTilda_/sqr(dTilda),
             nuTilda_
         )
     );

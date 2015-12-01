@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "SpalartAllmarasDDES.H"
+#include "kOmegaSSTDDES.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -35,8 +35,9 @@ namespace LESModels
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::rd
+tmp<volScalarField> kOmegaSSTDDES<BasicTurbulenceModel>::rd
 (
+    const volScalarField& nur,
     const volScalarField& magGradU
 ) const
 {
@@ -44,14 +45,14 @@ tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::rd
     (
         min
         (
-            this->nuEff()
+            nur
            /(
-               max
-               (
-                   magGradU,
-                   dimensionedScalar("SMALL", magGradU.dimensions(), SMALL)
-               )
-              *sqr(this->kappa_*this->y_)
+                max
+                (
+                    magGradU,
+                    dimensionedScalar("SMALL", magGradU.dimensions(), SMALL)
+                )
+                *sqr(this->kappa_*this->y_)
             ),
             scalar(10)
         )
@@ -63,43 +64,39 @@ tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::rd
 
 
 template<class BasicTurbulenceModel>
-tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::fd
+tmp<volScalarField> kOmegaSSTDDES<BasicTurbulenceModel>::fd
 (
     const volScalarField& magGradU
 ) const
 {
-    return 1 - tanh(pow(fdFactor_*rd(magGradU), fdExponent_));
+    return 1 - tanh(pow(cd1_*rd(this->nuEff(), magGradU), cd2_));
 }
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::dTilda
+tmp<volScalarField> kOmegaSSTDDES<BasicTurbulenceModel>::dTilda
 (
-    const volScalarField& chi,
-    const volScalarField& fv1,
-    const volTensorField& gradU
+    const volScalarField& magGradU,
+    const volScalarField& CDES
 ) const
 {
-    return max
-    (
-        this->y_
-      - fd(mag(gradU))
-       *max
-        (
-            this->y_ - this->psi(chi, fv1)*this->CDES_*this->delta(),
-            dimensionedScalar("zero", dimLength, 0)
-        ),
-        dimensionedScalar("small", dimLength, SMALL)
-    );
+    const volScalarField& k = this->k_;
+    const volScalarField& omega = this->omega_;
+
+    const volScalarField lRAS(sqrt(k)/(this->betaStar_*omega));
+    const volScalarField lLES(CDES*this->delta());
+    const dimensionedScalar d0("SMALL", dimLength, SMALL);
+
+    return max(lRAS - fd(magGradU)*max(lRAS - lLES, d0), d0);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-SpalartAllmarasDDES<BasicTurbulenceModel>::SpalartAllmarasDDES
+kOmegaSSTDDES<BasicTurbulenceModel>::kOmegaSSTDDES
 (
     const alphaField& alpha,
     const rhoField& rho,
@@ -111,7 +108,7 @@ SpalartAllmarasDDES<BasicTurbulenceModel>::SpalartAllmarasDDES
     const word& type
 )
 :
-    SpalartAllmarasDES<BasicTurbulenceModel>
+    kOmegaSSTDES<BasicTurbulenceModel>
     (
         alpha,
         rho,
@@ -119,38 +116,46 @@ SpalartAllmarasDDES<BasicTurbulenceModel>::SpalartAllmarasDDES
         alphaRhoPhi,
         phi,
         transport,
-        propertiesName
+        propertiesName,
+        type
     ),
-    fdFactor_
+
+    cd1_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "fdFactor",
+            "cd1",
             this->coeffDict_,
-            8
+            20
         )
     ),
-    fdExponent_
+    cd2_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "fdExponent",
+            "cd2",
             this->coeffDict_,
             3
         )
     )
-{}
+{
+    if (type == typeName)
+    {
+        this->printCoeffs(type);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-bool SpalartAllmarasDDES<BasicTurbulenceModel>::read()
+bool kOmegaSSTDDES<BasicTurbulenceModel>::read()
 {
-    if (SpalartAllmarasDES<BasicTurbulenceModel>::read())
+    if (kOmegaSSTDES<BasicTurbulenceModel>::read())
     {
-        fdFactor_.readIfPresent(this->coeffDict());
-        fdExponent_.readIfPresent(this->coeffDict());
+        cd1_.readIfPresent(this->coeffDict());
+        cd2_.readIfPresent(this->coeffDict());
+
         return true;
     }
     else
