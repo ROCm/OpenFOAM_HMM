@@ -48,6 +48,7 @@ $(interRegion)/interRegionHeatTransfer/interRegionHeatTransferModel/interRegionH
 $(interRegion)/interRegionHeatTransfer/interRegionHeatTransferModel/interRegionHeatTransferModelIO.C
 $(interRegion)/interRegionHeatTransfer/constantHeatTransfer/constantHeatTransfer.C
 $(interRegion)/interRegionHeatTransfer/tabulatedHeatTransfer/tabulatedHeatTransfer.C
+$(interRegion)/interRegionHeatTransfer/tabulatedNTUHeatTransfer/tabulatedNTUHeatTransfer.C
 $(interRegion)/interRegionHeatTransfer/variableHeatTransfer/variableHeatTransfer.C
 $(interRegion)/interRegionExplicitPorositySource/interRegionExplicitPorositySource.C
 
