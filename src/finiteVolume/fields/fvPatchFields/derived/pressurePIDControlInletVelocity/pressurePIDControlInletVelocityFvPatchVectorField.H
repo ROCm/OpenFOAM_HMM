@@ -274,6 +274,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#ifdef NoRepository
+#   include "pressurePIDControlInletVelocityFvPatchVectorFieldTemplates.C"
+#endif
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 #endif
 
 // ************************************************************************* //
