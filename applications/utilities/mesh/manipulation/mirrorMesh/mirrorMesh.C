@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     Info<< "Writing mirrored mesh" << endl;
     mesh.mirrorMesh().write();
 
-    Info<< "End" << endl;
+    Info<< "End" << nl << endl;
 
     return 0;
 }

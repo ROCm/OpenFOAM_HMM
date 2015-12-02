@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anispulation  |
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,6 +46,9 @@ Description
 #include "zeroGradientFvPatchFields.H"
 #include "CuthillMcKeeRenumber.H"
 #include "fvMeshSubset.H"
+#include "cellSet.H"
+#include "faceSet.H"
+#include "pointSet.H"
 
 #ifdef FOAM_USE_ZOLTAN
     #include "zoltanRenumber.H"
@@ -634,6 +637,12 @@ int main(int argc, char *argv[])
         "calculate the rms of the frontwidth"
     );
 
+
+    #include "setRootCase.H"
+    #include "createTime.H"
+    runTime.functionObjects().off();
+
+
     // Force linker to include zoltan symbols. This section is only needed since
     // Zoltan is a static library
     #ifdef FOAM_USE_ZOLTAN
@@ -641,9 +650,6 @@ int main(int argc, char *argv[])
     (void)zoltanRenumber::typeName;
     #endif
 
-    #include "setRootCase.H"
-    #include "createTime.H"
-    runTime.functionObjects().off();
 
     // Get times list
     instantList Times = runTime.times();
@@ -700,6 +706,7 @@ int main(int argc, char *argv[])
     bool writeMaps = false;
     bool orderPoints = false;
     label blockSize = 0;
+    bool renumberSets = true;
 
     // Construct renumberMethod
     autoPtr<IOdictionary> renumberDictPtr;
@@ -760,6 +767,8 @@ int main(int argc, char *argv[])
             Info<< "Writing renumber maps (new to old) to polyMesh." << nl
                 << endl;
         }
+
+        renumberSets = renumberDict.lookupOrDefault("renumberSets", true);
     }
     else
     {
@@ -860,6 +869,71 @@ int main(int argc, char *argv[])
 
     PtrList<surfaceTensorField> stFlds;
     ReadFields(mesh, objects, stFlds);
+
+    // Read point fields.
+
+    PtrList<pointScalarField> psFlds;
+    ReadFields(pointMesh::New(mesh), objects, psFlds);
+
+    PtrList<pointVectorField> pvFlds;
+    ReadFields(pointMesh::New(mesh), objects, pvFlds);
+
+    PtrList<pointSphericalTensorField> pstFlds;
+    ReadFields(pointMesh::New(mesh), objects, pstFlds);
+
+    PtrList<pointSymmTensorField> psymtFlds;
+    ReadFields(pointMesh::New(mesh), objects, psymtFlds);
+
+    PtrList<pointTensorField> ptFlds;
+    ReadFields(pointMesh::New(mesh), objects, ptFlds);
+
+    // Read sets
+    PtrList<cellSet> cellSets;
+    PtrList<faceSet> faceSets;
+    PtrList<pointSet> pointSets;
+    if (renumberSets)
+    {
+        // Read sets
+        IOobjectList objects(mesh, mesh.facesInstance(), "polyMesh/sets");
+        {
+            IOobjectList cSets(objects.lookupClass(cellSet::typeName));
+            if (cSets.size())
+            {
+                Info<< "Reading cellSets:" << endl;
+                forAllConstIter(IOobjectList, cSets, iter)
+                {
+                    cellSets.append(new cellSet(*iter()));
+                    Info<< "    " << cellSets.last().name() << endl;
+                }
+            }
+        }
+        {
+            IOobjectList fSets(objects.lookupClass(faceSet::typeName));
+            if (fSets.size())
+            {
+                Info<< "Reading faceSets:" << endl;
+                forAllConstIter(IOobjectList, fSets, iter)
+                {
+                    faceSets.append(new faceSet(*iter()));
+                    Info<< "    " << faceSets.last().name() << endl;
+                }
+            }
+        }
+        {
+            IOobjectList pSets(objects.lookupClass(pointSet::typeName));
+            if (pSets.size())
+            {
+                Info<< "Reading pointSets:" << endl;
+                forAllConstIter(IOobjectList, pSets, iter)
+                {
+                    pointSets.append(new pointSet(*iter()));
+                    Info<< "    " << pointSets.last().name() << endl;
+                }
+            }
+        }
+    }
+
+
 
     Info<< endl;
 
@@ -1055,7 +1129,6 @@ int main(int argc, char *argv[])
     mesh.updateMesh(map);
 
     // Update proc maps
-    if (cellProcAddressing.headerOk())
     if
     (
         cellProcAddressing.headerOk()
@@ -1070,7 +1143,6 @@ int main(int argc, char *argv[])
             UIndirectList<label>(cellProcAddressing, map().cellMap())
         );
     }
-    if (faceProcAddressing.headerOk())
     if
     (
         faceProcAddressing.headerOk()
@@ -1101,7 +1173,6 @@ int main(int argc, char *argv[])
             }
         }
     }
-    if (pointProcAddressing.headerOk())
     if
     (
         pointProcAddressing.headerOk()
@@ -1226,46 +1297,79 @@ int main(int argc, char *argv[])
 
     mesh.write();
     if (cellProcAddressing.headerOk())
-    if
-    (
-        cellProcAddressing.headerOk()
-     && cellProcAddressing.size() == mesh.nCells()
-    )
     {
         cellProcAddressing.instance() = mesh.facesInstance();
-        cellProcAddressing.write();
+        if (cellProcAddressing.size() == mesh.nCells())
+        {
+            cellProcAddressing.write();
+        }
+        else
+        {
+            // procAddressing no longer valid. Delete it.
+            const fileName fName(cellProcAddressing.filePath());
+            if (fName.size())
+            {
+                Info<< "Deleting inconsistent processor cell decomposition"
+                    << " map " << fName << endl;
+                rm(fName);
+            }
+        }
     }
     if (faceProcAddressing.headerOk())
-    if
-    (
-        faceProcAddressing.headerOk()
-     && faceProcAddressing.size() == mesh.nFaces()
-    )
     {
         faceProcAddressing.instance() = mesh.facesInstance();
-        faceProcAddressing.write();
-    }
-    if (pointProcAddressing.headerOk())
-    if
-    (
-        pointProcAddressing.headerOk()
-     && pointProcAddressing.size() == mesh.nPoints()
-    )
-    {
-        pointProcAddressing.instance() = mesh.facesInstance();
-        pointProcAddressing.write();
-    }
-    if (boundaryProcAddressing.headerOk())
-    if
-    (
-        boundaryProcAddressing.headerOk()
-     && boundaryProcAddressing.size() == mesh.boundaryMesh().size()
-    )
-    {
-        boundaryProcAddressing.instance() = mesh.facesInstance();
-        boundaryProcAddressing.write();
+        if (faceProcAddressing.size() == mesh.nFaces())
+        {
+            faceProcAddressing.write();
+        }
+        else
+        {
+            const fileName fName(faceProcAddressing.filePath());
+            if (fName.size())
+            {
+                Info<< "Deleting inconsistent processor face decomposition"
+                    << " map " << fName << endl;
+                rm(fName);
+            }
+        }
     }
 
+    if (pointProcAddressing.headerOk())
+    {
+        pointProcAddressing.instance() = mesh.facesInstance();
+        if (pointProcAddressing.size() == mesh.nPoints())
+        {
+            pointProcAddressing.write();
+        }
+        else
+        {
+            const fileName fName(pointProcAddressing.filePath());
+            if (fName.size())
+            {
+                Info<< "Deleting inconsistent processor point decomposition"
+                    << " map " << fName << endl;
+                rm(fName);
+            }
+        }
+    }
+    if (boundaryProcAddressing.headerOk())
+    {
+        boundaryProcAddressing.instance() = mesh.facesInstance();
+        if (boundaryProcAddressing.size() == mesh.boundaryMesh().size())
+        {
+            boundaryProcAddressing.write();
+        }
+        else
+        {
+            const fileName fName(boundaryProcAddressing.filePath());
+            if (fName.size())
+            {
+                Info<< "Deleting inconsistent processor patch decomposition"
+                    << " map " << fName << endl;
+                rm(fName);
+            }
+        }
+    }
 
     if (writeMaps)
     {
@@ -1329,6 +1433,28 @@ int main(int argc, char *argv[])
             ),
             map().pointMap()
         ).write();
+    }
+
+    if (renumberSets)
+    {
+        forAll(cellSets, i)
+        {
+            cellSets[i].updateMesh(map());
+            cellSets[i].instance() = mesh.facesInstance();
+            cellSets[i].write();
+        }
+        forAll(faceSets, i)
+        {
+            faceSets[i].updateMesh(map());
+            faceSets[i].instance() = mesh.facesInstance();
+            faceSets[i].write();
+        }
+        forAll(pointSets, i)
+        {
+            pointSets[i].updateMesh(map());
+            pointSets[i].instance() = mesh.facesInstance();
+            pointSets[i].write();
+        }
     }
 
     Info<< "\nEnd\n" << endl;
