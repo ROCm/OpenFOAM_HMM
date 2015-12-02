@@ -686,7 +686,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::info(Ostream& os)
     label nSplashTotal =
         nSplash0 + returnReduce(nParcelsSplashed_, sumOp<label>());
 
-    os  << "    New film splash parcels         = " << nSplashTotal << endl;
+    os  << "      - new splash parcels          = " << nSplashTotal << endl;
 
     if (this->outputTime())
     {

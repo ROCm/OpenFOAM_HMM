@@ -101,7 +101,7 @@ class WallSpringSliderDashpot
     // Private Member Functions
 
         //- Find the appropriate properties for determining the minimum
-        //- Allowable timestep
+        //  allowable timestep
         void findMinMaxProperties
         (
             scalar& rMin,

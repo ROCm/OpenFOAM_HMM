@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -80,25 +80,25 @@ Foam::MPPICCloud<CloudType>::MPPICCloud
     dampingModel_(NULL),
     isotropyModel_(NULL)
 {
-    if (this->solution().steadyState())
-    {
-        FatalErrorIn
-        (
-            "Foam::MPPICCloud<CloudType>::MPPICCloud"
-            "("
-                "const word&, "
-                "const volScalarField&, "
-                "const volVectorField&, "
-                "const volScalarField&, "
-                "const dimensionedVector&, "
-                "bool"
-            ")"
-        )   << "MPPIC modelling not available for steady state calculations"
-            << exit(FatalError);
-    }
-
     if (this->solution().active())
     {
+        if (this->solution().steadyState())
+        {
+            FatalErrorIn
+            (
+                "Foam::MPPICCloud<CloudType>::MPPICCloud"
+                "("
+                    "const word&, "
+                    "const volScalarField&, "
+                    "const volVectorField&, "
+                    "const volScalarField&, "
+                    "const dimensionedVector&, "
+                    "bool"
+                ")"
+            )   << "MPPIC modelling not available for steady state calculations"
+                << exit(FatalError);
+        }
+
         setModels();
 
         if (readFields)

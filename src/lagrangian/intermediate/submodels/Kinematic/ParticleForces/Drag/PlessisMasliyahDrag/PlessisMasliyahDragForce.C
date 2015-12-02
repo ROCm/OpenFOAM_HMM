@@ -104,7 +104,7 @@ Foam::forceSuSp Foam::PlessisMasliyahDragForce<CloudType>::calcCoupled
 {
     scalar alphac(alphac_[p.cell()]);
 
-    scalar cbrtAlphap(pow(1.0 - alphac, 1.0/3.0));
+    scalar cbrtAlphap(cbrt(1.0 - alphac));
 
     scalar A =
         26.8*pow3(alphac)
