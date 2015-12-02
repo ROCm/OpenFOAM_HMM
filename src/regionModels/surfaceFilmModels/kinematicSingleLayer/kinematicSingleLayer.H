@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -495,6 +495,9 @@ public:
             //- Return the gravity tangential component contributions
             inline tmp<volVectorField> gTan() const;
 
+            //- Return the gravity tangential component contributions for patchI
+            inline tmp<vectorField> gTan(const label patchI) const;
+
 
         // Evolution
 
@@ -503,6 +506,9 @@ public:
 
             //- Evolve the film equations
             virtual void evolveRegion();
+
+            //- Post-evolve film hook
+            virtual void postEvolveRegion();
 
 
         // Source fields

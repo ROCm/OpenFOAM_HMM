@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,8 +52,10 @@ void noPyrolysis::constructThermoChemistry()
         basicSolidChemistryModel::New(regionMesh()).ptr()
     );
 
-    solidThermo_.reset(&solidChemistry_->solidThermo());
-    radiation_.reset(radiation::radiationModel::New(solidThermo_->T()).ptr());
+    radiation_.reset(radiation::radiationModel::New
+    (
+        solidChemistry_->thermo().T()
+    ).ptr());
 }
 
 
@@ -96,7 +98,6 @@ noPyrolysis::noPyrolysis
 :
     pyrolysisModel(mesh, regionType),
     solidChemistry_(NULL),
-    solidThermo_(NULL),
     radiation_(NULL)
 {
     if (active())
@@ -116,7 +117,6 @@ noPyrolysis::noPyrolysis
 :
     pyrolysisModel(mesh, regionType),
     solidChemistry_(NULL),
-    solidThermo_(NULL),
     radiation_(NULL)
 {
     if (active())
@@ -148,19 +148,19 @@ void noPyrolysis::evolveRegion()
 
 const volScalarField& noPyrolysis::rho() const
 {
-    return solidThermo_->rho();
+    return solidChemistry_->thermo().rho();
 }
 
 
 const volScalarField& noPyrolysis::T() const
 {
-    return solidThermo_->T();
+    return solidChemistry_->thermo().T();
 }
 
 
 const tmp<volScalarField> noPyrolysis::Cp() const
 {
-    return solidThermo_->Cp();
+    return solidChemistry_->thermo().Cp();
 }
 
 
@@ -172,7 +172,7 @@ tmp<volScalarField> noPyrolysis::kappaRad() const
 
 tmp<volScalarField> noPyrolysis::kappa() const
 {
-     return solidThermo_->kappa();
+    return solidChemistry_->thermo().kappa();
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -261,10 +261,7 @@ tmp<volScalarField> liquidFilmThermo::rho() const
 
     if (useReferenceValues_)
     {
-        forAll(rho, cellI)
-        {
-            rho[cellI] = this->rho(pRef_, TRef_);
-        }
+        rho = this->rho(pRef_, TRef_);
     }
     else
     {
@@ -309,10 +306,7 @@ tmp<volScalarField> liquidFilmThermo::mu() const
 
     if (useReferenceValues_)
     {
-        forAll(mu, cellI)
-        {
-            mu[cellI] = this->mu(pRef_, TRef_);
-        }
+        mu = this->mu(pRef_, TRef_);
     }
     else
     {
@@ -357,10 +351,7 @@ tmp<volScalarField> liquidFilmThermo::sigma() const
 
     if (useReferenceValues_)
     {
-        forAll(sigma, cellI)
-        {
-            sigma[cellI] = this->sigma(pRef_, TRef_);
-        }
+        sigma = this->sigma(pRef_, TRef_);
     }
     else
     {
@@ -405,10 +396,7 @@ tmp<volScalarField> liquidFilmThermo::Cp() const
 
     if (useReferenceValues_)
     {
-        forAll(Cp, cellI)
-        {
-            Cp[cellI] = this->Cp(pRef_, TRef_);
-        }
+        Cp = this->Cp(pRef_, TRef_);
     }
     else
     {
@@ -453,10 +441,7 @@ tmp<volScalarField> liquidFilmThermo::kappa() const
 
     if (useReferenceValues_)
     {
-        forAll(kappa, cellI)
-        {
-            kappa[cellI] = this->kappa(pRef_, TRef_);
-        }
+        kappa = this->kappa(pRef_, TRef_);
     }
     else
     {
