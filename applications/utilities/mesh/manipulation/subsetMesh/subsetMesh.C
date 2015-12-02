@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,10 +41,85 @@ Description
 #include "cellSet.H"
 #include "IOobjectList.H"
 #include "volFields.H"
+#include "topoDistanceData.H"
+#include "FaceCellWave.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+labelList nearestPatch(const polyMesh& mesh, const labelList& patchIDs)
+{
+    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+
+    // Count number of faces in exposedPatchIDs
+    label nFaces = 0;
+    forAll(patchIDs, i)
+    {
+        const polyPatch& pp = pbm[patchIDs[i]];
+        nFaces += pp.size();
+    }
+
+    // Field on cells and faces.
+    List<topoDistanceData> cellData(mesh.nCells());
+    List<topoDistanceData> faceData(mesh.nFaces());
+
+    // Start of changes
+    labelList patchFaces(nFaces);
+    List<topoDistanceData> patchData(nFaces);
+    nFaces = 0;
+    forAll(patchIDs, i)
+    {
+        label patchI = patchIDs[i];
+        const polyPatch& pp = pbm[patchI];
+
+        forAll(pp, i)
+        {
+            patchFaces[nFaces] = pp.start()+i;
+            patchData[nFaces] = topoDistanceData(patchI, 0);
+            nFaces++;
+        }
+    }
+
+    // Propagate information inwards
+    FaceCellWave<topoDistanceData> deltaCalc
+    (
+        mesh,
+        patchFaces,
+        patchData,
+        faceData,
+        cellData,
+        mesh.globalData().nTotalCells()+1
+    );
+
+    // And extract
+
+    labelList nearest(mesh.nFaces());
+
+    bool haveWarned = false;
+    forAll(faceData, faceI)
+    {
+        if (!faceData[faceI].valid(deltaCalc.data()))
+        {
+            if (!haveWarned)
+            {
+                WarningIn("meshRefinement::nearestPatch(..)")
+                    << "Did not visit some faces, e.g. face " << faceI
+                    << " at " << mesh.faceCentres()[faceI] << endl
+                    << "Using patch " << patchIDs[0] << " as nearest"
+                    << endl;
+                haveWarned = true;
+            }
+            nearest[faceI] = patchIDs[0];
+        }
+        else
+        {
+            nearest[faceI] = faceData[faceI].data();
+        }
+    }
+
+    return nearest;
+}
 
 
 template<class Type>
@@ -150,6 +225,40 @@ void subsetPointFields
 }
 
 
+template<class Type>
+void subsetDimensionedFields
+(
+    const fvMeshSubset& subsetter,
+    const wordList& fieldNames,
+    PtrList<DimensionedField<Type, volMesh> >& subFields
+)
+{
+    const fvMesh& baseMesh = subsetter.baseMesh();
+
+    forAll(fieldNames, i)
+    {
+        const word& fieldName = fieldNames[i];
+
+        Info<< "Subsetting field " << fieldName << endl;
+
+        DimensionedField<Type, volMesh> fld
+        (
+            IOobject
+            (
+                fieldName,
+                baseMesh.time().timeName(),
+                baseMesh,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            ),
+            baseMesh
+        );
+
+        subFields.set(i, subsetter.interpolate(fld));
+    }
+}
+
+
 
 int main(int argc, char *argv[])
 {
@@ -167,6 +276,13 @@ int main(int argc, char *argv[])
         "name",
         "add exposed internal faces to specified patch instead of to "
         "'oldInternalFaces'"
+    );
+    argList::addOption
+    (
+        "patches",
+        "names",
+        "add exposed internal faces to nearest of specified patches"
+        " instead of to 'oldInternalFaces'"
     );
     argList::addOption
     (
@@ -207,15 +323,19 @@ int main(int argc, char *argv[])
     // Create mesh subsetting engine
     fvMeshSubset subsetter(mesh);
 
-    label patchI = -1;
+    labelList exposedPatchIDs;
 
     if (args.optionFound("patch"))
     {
         const word patchName = args["patch"];
 
-        patchI = mesh.boundaryMesh().findPatchID(patchName);
+        exposedPatchIDs = labelList
+        (
+            1,
+            mesh.boundaryMesh().findPatchID(patchName)
+        );
 
-        if (patchI == -1)
+        if (exposedPatchIDs[0] == -1)
         {
             FatalErrorIn(args.executable()) << "Illegal patch " << patchName
                 << nl << "Valid patches are " << mesh.boundaryMesh().names()
@@ -225,17 +345,53 @@ int main(int argc, char *argv[])
         Info<< "Adding exposed internal faces to patch " << patchName << endl
             << endl;
     }
+    else if (args.optionFound("patches"))
+    {
+        const wordReList patchNames(args.optionRead<wordReList>("patches"));
+
+        exposedPatchIDs = mesh.boundaryMesh().patchSet(patchNames).sortedToc();
+
+        Info<< "Adding exposed internal faces to nearest of patches "
+            << patchNames << endl << endl;
+    }
     else
     {
         Info<< "Adding exposed internal faces to a patch called"
             << " \"oldInternalFaces\" (created if necessary)" << endl
             << endl;
+        exposedPatchIDs = labelList(1, label(-1));
     }
 
 
     cellSet currentSet(mesh, setName);
 
-    subsetter.setLargeCellSubset(currentSet, patchI, true);
+    if (exposedPatchIDs.size() == 1)
+    {
+        subsetter.setLargeCellSubset(currentSet, exposedPatchIDs[0], true);
+    }
+    else
+    {
+
+        // Find per face the nearest patch
+        labelList nearestExposedPatch(nearestPatch(mesh, exposedPatchIDs));
+
+        labelList region(mesh.nCells(), 0);
+        forAllConstIter(cellSet, currentSet, iter)
+        {
+            region[iter.key()] = 1;
+        }
+
+        labelList exposedFaces(subsetter.getExposedFaces(region, 1, true));
+        subsetter.setLargeCellSubset
+        (
+            region,
+            1,
+            exposedFaces,
+            UIndirectList<label>(nearestExposedPatch, exposedFaces)(),
+            true
+        );
+    }
+
 
     IOobjectList objects(mesh, runTime.timeName());
 
@@ -361,6 +517,42 @@ int main(int argc, char *argv[])
     subsetPointFields(subsetter, pMesh, pointTensorNames, pointTensorFlds);
 
 
+    // Read dimensioned fields and subset
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    typedef volScalarField::DimensionedInternalField dimScalType;
+    wordList scalarDimNames(objects.names(dimScalType::typeName));
+    PtrList<dimScalType> scalarDimFlds(scalarDimNames.size());
+    subsetDimensionedFields(subsetter, scalarDimNames, scalarDimFlds);
+
+    typedef volVectorField::DimensionedInternalField dimVecType;
+    wordList vectorDimNames(objects.names(dimVecType::typeName));
+    PtrList<dimVecType> vectorDimFlds(vectorDimNames.size());
+    subsetDimensionedFields(subsetter, vectorDimNames, vectorDimFlds);
+
+    typedef volSphericalTensorField::DimensionedInternalField dimSphereType;
+    wordList sphericalTensorDimNames(objects.names(dimSphereType::typeName));
+    PtrList<dimSphereType> sphericalTensorDimFlds
+    (
+        sphericalTensorDimNames.size()
+    );
+    subsetDimensionedFields
+    (
+        subsetter,
+        sphericalTensorDimNames,
+        sphericalTensorDimFlds
+    );
+
+    typedef volSymmTensorField::DimensionedInternalField dimSymmTensorType;
+    wordList symmTensorDimNames(objects.names(dimSymmTensorType::typeName));
+    PtrList<dimSymmTensorType> symmTensorDimFlds(symmTensorDimNames.size());
+    subsetDimensionedFields(subsetter, symmTensorDimNames, symmTensorDimFlds);
+
+    typedef volTensorField::DimensionedInternalField dimTensorType;
+    wordList tensorDimNames(objects.names(dimTensorType::typeName));
+    PtrList<dimTensorType> tensorDimFlds(tensorDimNames.size());
+    subsetDimensionedFields(subsetter, tensorDimNames, tensorDimFlds);
+
 
     // Write mesh and fields to new time
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -459,6 +651,33 @@ int main(int argc, char *argv[])
     {
         pointTensorFlds[i].rename(pointTensorNames[i]);
         pointTensorFlds[i].write();
+    }
+
+    // DimensionedFields
+    forAll(scalarDimFlds, i)
+    {
+        scalarDimFlds[i].rename(scalarDimNames[i]);
+        scalarDimFlds[i].write();
+    }
+    forAll(vectorDimFlds, i)
+    {
+        vectorDimFlds[i].rename(vectorDimNames[i]);
+        vectorDimFlds[i].write();
+    }
+    forAll(sphericalTensorDimFlds, i)
+    {
+        sphericalTensorDimFlds[i].rename(sphericalTensorDimNames[i]);
+        sphericalTensorDimFlds[i].write();
+    }
+    forAll(symmTensorDimFlds, i)
+    {
+        symmTensorDimFlds[i].rename(symmTensorDimNames[i]);
+        symmTensorDimFlds[i].write();
+    }
+    forAll(tensorDimFlds, i)
+    {
+        tensorDimFlds[i].rename(tensorDimNames[i]);
+        tensorDimFlds[i].write();
     }
 
 

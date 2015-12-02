@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
 
     U.write();
 
-    Info<< "\n end\n";
+    Info<< nl << "End" << nl << endl;
 
     return 0;
 }

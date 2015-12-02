@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -139,6 +139,27 @@ void Foam::vtkPV4Foam::convertVolFields
         mesh, ppInterpList, objects, interpFields, output
     );
     convertVolFields<tensor>
+    (
+        mesh, ppInterpList, objects, interpFields, output
+    );
+
+    convertDimFields<scalar>
+    (
+        mesh, ppInterpList, objects, interpFields, output
+    );
+    convertDimFields<vector>
+    (
+        mesh, ppInterpList, objects, interpFields, output
+    );
+    convertDimFields<sphericalTensor>
+    (
+        mesh, ppInterpList, objects, interpFields, output
+    );
+    convertDimFields<symmTensor>
+    (
+        mesh, ppInterpList, objects, interpFields, output
+    );
+    convertDimFields<tensor>
     (
         mesh, ppInterpList, objects, interpFields, output
     );

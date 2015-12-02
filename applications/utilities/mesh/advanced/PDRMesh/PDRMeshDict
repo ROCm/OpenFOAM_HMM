@@ -17,7 +17,8 @@ FoamFile
 //- Per faceSet the patch the faces should go into blocked baffles
 blockedFaces ((blockedFacesSet blockedFaces));
 
-//- Per faceSet the patch the faces should go into coupled baffles
+//- Per faceSet the duplicate baffles to generate (one 'normal', wall baffle,
+//  one cyclic baffle). For use with active baffle boundary conditions.
 coupledFaces
 {
     coupledFacesSet

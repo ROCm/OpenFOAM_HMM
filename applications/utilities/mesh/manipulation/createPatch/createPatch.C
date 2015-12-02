@@ -512,6 +512,11 @@ int main(int argc, char *argv[])
     #include "addOverwriteOption.H"
     #include "addRegionOption.H"
     #include "addDictOption.H"
+    Foam::argList::addBoolOption
+    (
+        "writeObj",
+        "write obj files showing the cyclic matching process"
+    );
     #include "setRootCase.H"
     #include "createTime.H"
     runTime.functionObjects().off();
@@ -523,12 +528,13 @@ int main(int argc, char *argv[])
 
     #include "createNamedPolyMesh.H"
 
+    const bool writeObj = args.optionFound("writeObj");
+
     const word oldInstance = mesh.pointsInstance();
 
     const word dictName("createPatchDict");
     #include "setSystemMeshDictionaryIO.H"
-
-    Info<< "Reading " << dictName << nl << endl;
+    Info<< "Reading " << dictIO.instance()/dictIO.name() << nl << endl;
 
     IOdictionary dict(dictIO);
 
@@ -542,7 +548,10 @@ int main(int argc, char *argv[])
     patches.checkParallelSync(true);
 
 
-    dumpCyclicMatch("initial_", mesh);
+    if (writeObj)
+    {
+        dumpCyclicMatch("initial_", mesh);
+    }
 
     // Read patch construct info from dictionary
     PtrList<dictionary> patchSources(dict.lookup("patches"));
@@ -761,7 +770,10 @@ int main(int argc, char *argv[])
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, true);
     mesh.movePoints(map().preMotionPoints());
 
-    dumpCyclicMatch("coupled_", mesh);
+    if (writeObj)
+    {
+        dumpCyclicMatch("coupled_", mesh);
+    }
 
     // Synchronise points.
     if (!pointSync)
@@ -872,7 +884,10 @@ int main(int argc, char *argv[])
     filterPatches(mesh, addedPatchNames);
 
 
-    dumpCyclicMatch("final_", mesh);
+    if (writeObj)
+    {
+        dumpCyclicMatch("final_", mesh);
+    }
 
 
     // Set the precision of the points data to 10
