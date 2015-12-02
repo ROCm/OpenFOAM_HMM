@@ -325,7 +325,9 @@ bool Foam::regIOobject::checkOut()
 
 bool Foam::regIOobject::upToDate(const regIOobject& a) const
 {
-    if (a.eventNo() >= eventNo_)
+    label da = a.eventNo()-eventNo_;
+
+    if (da >= 0 && da < labelMax/2)
     {
         return false;
     }
@@ -342,10 +344,14 @@ bool Foam::regIOobject::upToDate
     const regIOobject& b
 ) const
 {
+    label halfLabelMax = labelMax/2;
+    label da = a.eventNo()-eventNo_;
+    label db = b.eventNo()-eventNo_;
+
     if
     (
-        a.eventNo() >= eventNo_
-     || b.eventNo() >= eventNo_
+        (da >= 0 && da < halfLabelMax)
+     || (db >= 0 && db < halfLabelMax)
     )
     {
         return false;
@@ -364,11 +370,16 @@ bool Foam::regIOobject::upToDate
     const regIOobject& c
 ) const
 {
+    label halfLabelMax = labelMax/2;
+    label da = a.eventNo()-eventNo_;
+    label db = b.eventNo()-eventNo_;
+    label dc = c.eventNo()-eventNo_;
+
     if
     (
-        a.eventNo() >= eventNo_
-     || b.eventNo() >= eventNo_
-     || c.eventNo() >= eventNo_
+        (da >= 0 && da < halfLabelMax)
+     || (db >= 0 && db < halfLabelMax)
+     || (dc >= 0 && dc < halfLabelMax)
     )
     {
         return false;
@@ -388,12 +399,18 @@ bool Foam::regIOobject::upToDate
     const regIOobject& d
 ) const
 {
+    label halfLabelMax = labelMax/2;
+    label da = a.eventNo()-eventNo_;
+    label db = b.eventNo()-eventNo_;
+    label dc = c.eventNo()-eventNo_;
+    label dd = d.eventNo()-eventNo_;
+
     if
     (
-        a.eventNo() >= eventNo_
-     || b.eventNo() >= eventNo_
-     || c.eventNo() >= eventNo_
-     || d.eventNo() >= eventNo_
+        (da >= 0 && da < halfLabelMax)
+     || (db >= 0 && db < halfLabelMax)
+     || (dc >= 0 && dc < halfLabelMax)
+     || (dd >= 0 && dd < halfLabelMax)
     )
     {
         return false;
