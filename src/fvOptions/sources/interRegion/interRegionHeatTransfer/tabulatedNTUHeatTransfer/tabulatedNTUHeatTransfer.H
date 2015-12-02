@@ -54,9 +54,46 @@ Description
         C_{min} = min \left(Cp_1 \dot{m}_1, Cp_2 \dot{m}_2 \right)
     \f]
 
+    \heading Example usage
+
+    \verbatim
+    coolerToAir
+    {
+        type            tabulatedNTUHeatTransfer;
+        active          yes;
+
+        tabulatedNTUHeatTransferCoeffs
+        {
+            interpolationMethod cellVolumeWeight;
+            nbrRegionName   air;
+            master          true;
+
+            fieldNames      (h);
+            outOfBounds     clamp;
+            fileName        "ntuTable";
+            nbrModelName    airToCooler;
+            semiImplicit    no;
+
+
+            geometryMode    user;
+            Ain             0.01728;
+            AinNbr          0.3456;
+            Vcore           0.01244;  // Optional
+    
+            // geometryMode    calculated;
+            // inletPatch      inlet_HWK;
+            // inletPatchNbr   inlet_air;
+            // inletBlockageRatio 0.10;
+            // inletBlockageRatioNbr 0.04;
+            // coreBlockageRatio 0;
+        }
+    }
 
 SourceFiles
     tabulatedNTUHeatTransfer.C
+
+SeeAlso
+    interRegionHeatTransferModel.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -170,9 +207,6 @@ public:
 
 
         // I-O
-
-            //- Write data
-            virtual void writeData(Ostream&) const;
 
             //- Read dictionary
             virtual bool read(const dictionary& dict);

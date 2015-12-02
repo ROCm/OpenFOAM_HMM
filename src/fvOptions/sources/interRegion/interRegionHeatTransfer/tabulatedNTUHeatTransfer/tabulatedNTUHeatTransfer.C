@@ -295,19 +295,6 @@ void Foam::fv::tabulatedNTUHeatTransfer::calculateHtc()
 }
 
 
-void Foam::fv::tabulatedNTUHeatTransfer::writeData(Ostream& os) const
-{
-    os  << indent << token::BEGIN_BLOCK << incrIndent << nl;
-    interRegionHeatTransferModel::writeData(os);
-
-    os << indent << type() + "Coeffs" << nl;
-
-    coeffs_.write(os);
-
-    os << decrIndent << indent << token::END_BLOCK << endl;
-}
-
-
 bool Foam::fv::tabulatedNTUHeatTransfer::read(const dictionary& dict)
 {
     if (option::read(dict))
