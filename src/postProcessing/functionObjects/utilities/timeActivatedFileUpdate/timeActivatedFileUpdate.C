@@ -140,10 +140,7 @@ void Foam::timeActivatedFileUpdate::execute()
 
 void Foam::timeActivatedFileUpdate::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

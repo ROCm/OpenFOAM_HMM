@@ -112,10 +112,7 @@ void Foam::readFields::execute()
 
 void Foam::readFields::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

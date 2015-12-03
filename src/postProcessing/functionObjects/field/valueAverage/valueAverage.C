@@ -180,10 +180,7 @@ void Foam::valueAverage::execute()
 
 void Foam::valueAverage::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

@@ -167,10 +167,7 @@ void Foam::CourantNo::execute()
 
 void Foam::CourantNo::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

@@ -242,10 +242,7 @@ void Foam::fieldValues::fieldValueDelta::execute()
 
 void Foam::fieldValues::fieldValueDelta::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 
