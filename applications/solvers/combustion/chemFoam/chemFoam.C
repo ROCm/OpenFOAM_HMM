@@ -24,6 +24,9 @@ License
 Application
     chemFoam
 
+Group
+    grpCombustionSolvers
+
 Description
     Solver for chemistry problems
     - designed for use on single cell cases to provide comparison against

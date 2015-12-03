@@ -24,6 +24,9 @@ License
 Application
     potentialFreeSurfaceDyMFoam
 
+Group
+    grpMultiphaseSolvers grpMovingMeshSolvers
+
 Description
     Incompressible Navier-Stokes solver with inclusion of a wave height field
     to enable single-phase free-surface approximations.

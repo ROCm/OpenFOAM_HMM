@@ -24,6 +24,9 @@ License
 Application
     boundaryFoam
 
+Group
+    grpIncompressibleSolvers
+
 Description
     Steady-state solver for incompressible, 1D turbulent flow, typically to
     generate boundary layer conditions at an inlet, for use in a simulation.

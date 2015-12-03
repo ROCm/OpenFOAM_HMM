@@ -24,6 +24,9 @@ License
 Application
     pimpleDyMFoam.C
 
+Group
+    grpIncompressibleSolvers grpMovingMeshSolvers
+
 Description
     Transient solver for incompressible, flow of Newtonian fluids
     on a moving mesh using the PIMPLE (merged PISO-SIMPLE) algorithm.

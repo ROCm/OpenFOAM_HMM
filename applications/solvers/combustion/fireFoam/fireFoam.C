@@ -24,8 +24,11 @@ License
 Application
     fireFoam
 
+Group
+    grpCombustionSolvers
+
 Description
-    Transient PIMPLE solver for Fires and turbulent diffusion flames with
+    Transient PIMPLE solver for fires and turbulent diffusion flames with
     reacting Lagrangian parcels, surface film and pyrolysis modelling.
 
 \*---------------------------------------------------------------------------*/

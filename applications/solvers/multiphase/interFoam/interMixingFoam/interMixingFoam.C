@@ -24,6 +24,9 @@ License
 Application
     interMixingFoam
 
+Group
+    grpMultiphaseSolvers
+
 Description
     Solver for 3 incompressible fluids, two of which are miscible,
     using a VOF method to capture the interface.

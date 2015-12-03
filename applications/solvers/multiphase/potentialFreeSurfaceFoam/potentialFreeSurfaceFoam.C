@@ -24,6 +24,9 @@ License
 Application
     potentialFreeSurfaceFoam
 
+Group
+    grpMultiphaseSolvers
+
 Description
     Incompressible Navier-Stokes solver with inclusion of a wave height field
     to enable single-phase free-surface approximations

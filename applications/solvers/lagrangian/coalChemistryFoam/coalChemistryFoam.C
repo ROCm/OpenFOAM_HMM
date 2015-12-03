@@ -24,6 +24,9 @@ License
 Application
     coalChemistryFoam
 
+Group
+    grpLagrangianSolvers
+
 Description
     Transient solver for:
     - compressible,

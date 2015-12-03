@@ -24,6 +24,9 @@ License
 Application
     twoLiquidMixingFoam
 
+Group
+    grpMultiphaseSolvers
+
 Description
     Solver for mixing 2 incompressible fluids.
 

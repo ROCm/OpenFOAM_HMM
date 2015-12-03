@@ -24,6 +24,9 @@ License
 Application
     buoyantSimpleFoam
 
+Group
+    grpHeatTransferSolvers
+
 Description
     Steady-state solver for buoyant, turbulent flow of compressible fluids,
     including radiation, for ventilation and heat-transfer.

@@ -24,6 +24,9 @@ License
 Application
     solidDisplacementFoam
 
+Group
+    grpStressAnalysisSolvers
+
 Description
     Transient segregated finite-volume solver of linear-elastic,
     small-strain deformation of a solid body, with optional thermal

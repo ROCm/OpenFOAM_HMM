@@ -24,6 +24,9 @@ License
 Application
     reactingParcelFoam
 
+Group
+    grpLagrangianSolvers
+
 Description
     Transient PIMPLE solver for compressible, laminar or turbulent flow with
     reacting multiphase Lagrangian parcels, including run-time selectable

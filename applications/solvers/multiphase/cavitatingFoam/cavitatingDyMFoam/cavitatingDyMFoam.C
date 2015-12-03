@@ -24,6 +24,9 @@ License
 Application
     cavitatingFoam
 
+Group
+    grpMultiphaseSolvers grpMovingMeshSolvers
+
 Description
     Transient cavitation code based on the homogeneous equilibrium model
     from which the compressibility of the liquid/vapour "mixture" is obtained.

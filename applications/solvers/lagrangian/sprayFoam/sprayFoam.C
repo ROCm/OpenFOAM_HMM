@@ -24,6 +24,9 @@ License
 Application
     sprayFoam
 
+Group
+    grpLagrangianSolvers
+
 Description
     Transient PIMPLE solver for compressible, laminar or turbulent flow with
     spray parcels.

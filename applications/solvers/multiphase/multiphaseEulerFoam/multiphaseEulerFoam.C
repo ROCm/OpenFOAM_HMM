@@ -24,6 +24,9 @@ License
 Application
     multiphaseEulerFoam
 
+Group
+    grpMultiphaseSolvers
+
 Description
     Solver for a system of many compressible fluid phases including
     heat-transfer.

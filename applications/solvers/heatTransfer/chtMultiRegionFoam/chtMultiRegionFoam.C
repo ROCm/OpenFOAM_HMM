@@ -24,6 +24,9 @@ License
 Application
     chtMultiRegionFoam
 
+Group
+    grpHeatTransferSolvers
+
 Description
     Combination of heatConductionFoam and buoyantFoam for conjugate heat
     transfer between solid regions and fluid regions. Both regions include

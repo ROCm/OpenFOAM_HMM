@@ -24,6 +24,9 @@ License
 Application
     ajointShapeOptimizationFoam
 
+Group
+    grpIncompressibleSolvers
+
 Description
     Steady-state solver for incompressible, turbulent flow of non-Newtonian
     fluids with optimisation of duct shape by applying "blockage" in regions

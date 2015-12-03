@@ -24,6 +24,9 @@ License
 Application
     rhoPorousSimpleFoam
 
+Group
+    grpCompressibleSolvers
+
 Description
     Steady-state solver for turbulent flow of compressible fluids with
     RANS turbulence modelling, implicit or explicit porosity treatment

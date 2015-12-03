@@ -22,7 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    engineFoam
+    coldEngineFoam
+
+Group
+    grpCombustionSolvers grpMovingMeshSolvers
 
 Description
     Solver for cold-flow in internal combustion engines.

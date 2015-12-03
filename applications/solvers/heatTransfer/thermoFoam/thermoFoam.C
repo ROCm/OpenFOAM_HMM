@@ -24,6 +24,9 @@ License
 Application
     thermoFoam
 
+Group
+    grpHeatTransferSolvers
+
 Description
     Evolves the thermodynamics on a frozen flow field
 

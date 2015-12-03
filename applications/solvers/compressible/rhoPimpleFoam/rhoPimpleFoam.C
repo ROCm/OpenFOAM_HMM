@@ -24,6 +24,9 @@ License
 Application
     rhoPimpleFoam
 
+Group
+    grpCompressibleSolvers
+
 Description
     Transient solver for laminar or turbulent flow of compressible fluids
     for HVAC and similar applications.

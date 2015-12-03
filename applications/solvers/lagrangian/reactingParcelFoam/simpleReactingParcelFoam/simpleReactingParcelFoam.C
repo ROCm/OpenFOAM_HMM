@@ -24,6 +24,9 @@ License
 Application
     simpleReactingParcelFoam
 
+Group
+    grpLagrangianSolvers
+
 Description
     Steady state SIMPLE solver for compressible, laminar or turbulent flow with
     reacting multiphase Lagrangian parcels, including run-time selectable

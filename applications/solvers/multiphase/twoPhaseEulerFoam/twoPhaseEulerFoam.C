@@ -24,6 +24,9 @@ License
 Application
     twoPhaseEulerFoam
 
+Group
+    grpMultiphaseSolvers
+
 Description
     Solver for a system of 2 compressible fluid phases with one phase
     dispersed, e.g. gas bubbles in a liquid including heat-transfer.
