@@ -209,10 +209,7 @@ void Foam::yPlus::execute()
 
 void Foam::yPlus::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

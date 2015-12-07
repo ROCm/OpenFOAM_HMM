@@ -122,10 +122,7 @@ void Foam::calcMag::execute()
 
 void Foam::calcMag::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

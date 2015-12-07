@@ -274,10 +274,7 @@ void Foam::wallShearStress::execute()
 
 void Foam::wallShearStress::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

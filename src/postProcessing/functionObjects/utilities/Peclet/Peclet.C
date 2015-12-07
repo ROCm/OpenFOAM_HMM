@@ -210,10 +210,7 @@ void Foam::Peclet::execute()
 
 void Foam::Peclet::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 
