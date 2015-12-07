@@ -29,7 +29,7 @@ runParallel -l log.redistributePar-5 redistributePar 5 -decomposeParDict system/
 runParallel -l log.icoFoam-5 icoFoam 5 -decomposeParDict system/decomposeParDict-5
 
 #- reconstruct mesh and results
-runParallel -l log.redistributePar-1 redistributePar 5 -reconstruct -decomposeParDict system/decomposeParDict
+runParallel -l log.redistributePar-1 redistributePar 5 -reconstruct
 
 
 # ----------------------------------------------------------------- end-of-file
