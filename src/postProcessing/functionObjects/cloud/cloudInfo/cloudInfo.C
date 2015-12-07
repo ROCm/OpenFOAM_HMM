@@ -162,8 +162,9 @@ void Foam::cloudInfo::write()
 
             if (Pstream::master())
             {
+                writeTime(filePtrs_[cloudI]);
                 filePtrs_[cloudI]
-                    << obr_.time().value() << token::TAB
+                    << token::TAB
                     << nParcels << token::TAB
                     << massInSystem << token::TAB
                     << Dmax << token::TAB

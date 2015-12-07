@@ -72,16 +72,8 @@ Foam::yPlus::yPlus
     if (!isA<fvMesh>(obr_))
     {
         active_ = false;
-        WarningIn
-        (
-            "yPlus::yPlus"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating " << name_ << nl
+        WarningInFunction
+            << "No fvMesh available, deactivating " << name_ << nl
             << endl;
     }
 
@@ -201,6 +193,7 @@ void Foam::yPlus::execute()
                 << phi.dimensions() << nl
                 << "Expected either " << dimMass/dimTime << " or "
                 << dimVolume/dimTime << nl
+                << "Unable to determine turbulence model type. "
                 << "yPlus will not be calculated" << endl;
         }
     }

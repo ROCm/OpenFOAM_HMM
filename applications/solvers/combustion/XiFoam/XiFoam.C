@@ -56,7 +56,7 @@ Description
 #include "ignition.H"
 #include "Switch.H"
 #include "pimpleControl.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,7 +70,6 @@ int main(int argc, char *argv[])
     pimpleControl pimple(mesh);
 
     #include "readCombustionProperties.H"
-    #include "readGravitationalAcceleration.H"
     #include "createFields.H"
     #include "createMRF.H"
     #include "createFvOptions.H"
@@ -78,6 +77,8 @@ int main(int argc, char *argv[])
     #include "createTimeControls.H"
     #include "compressibleCourantNo.H"
     #include "setInitialDeltaT.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

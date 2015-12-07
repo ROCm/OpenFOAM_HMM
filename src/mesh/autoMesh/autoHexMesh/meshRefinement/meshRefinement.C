@@ -134,7 +134,7 @@ void Foam::meshRefinement::calcNeighbourData
 
     if (neiLevel.size() != nBoundaryFaces || neiCc.size() != nBoundaryFaces)
     {
-        FatalErrorIn("meshRefinement::calcNeighbour(..)") << "nBoundaries:"
+        FatalErrorInFunction
             << nBoundaryFaces << " neiLevel:" << neiLevel.size()
             << abort(FatalError);
     }
@@ -378,11 +378,8 @@ void Foam::meshRefinement::testSyncPointList
 {
     if (fld.size() != mesh.nPoints())
     {
-        FatalErrorIn
-        (
-            "meshRefinement::testSyncPointList(const polyMesh&"
-            ", const List<scalar>&)"
-        )   << msg << endl
+        FatalErrorInFunction
+            << msg << endl
             << "fld size:" << fld.size() << " mesh points:" << mesh.nPoints()
             << abort(FatalError);
     }
@@ -428,11 +425,8 @@ void Foam::meshRefinement::testSyncPointList
 {
     if (fld.size() != mesh.nPoints())
     {
-        FatalErrorIn
-        (
-            "meshRefinement::testSyncPointList(const polyMesh&"
-            ", const List<point>&)"
-        )   << msg << endl
+        FatalErrorInFunction
+            << msg << endl
             << "fld size:" << fld.size() << " mesh points:" << mesh.nPoints()
             << abort(FatalError);
     }
@@ -579,7 +573,7 @@ void Foam::meshRefinement::checkData()
             {
                 if (mesh_.isInternalFace(faceI))
                 {
-                    WarningIn("meshRefinement::checkData()")
+                    WarningInFunction
                         << "Internal face:" << faceI
                         << " fc:" << mesh_.faceCentres()[faceI]
                         << " cached surfaceIndex_:" << surfaceIndex_[faceI]
@@ -596,7 +590,7 @@ void Foam::meshRefinement::checkData()
                  != neiHit[faceI-mesh_.nInternalFaces()]
                 )
                 {
-                    WarningIn("meshRefinement::checkData()")
+                    WarningInFunction
                         << "Boundary face:" << faceI
                         << " fc:" << mesh_.faceCentres()[faceI]
                         << " cached surfaceIndex_:" << surfaceIndex_[faceI]
@@ -1768,10 +1762,8 @@ void Foam::meshRefinement::checkCoupledFaceZones(const polyMesh& mesh)
             {
                 if (zoneNames[procI] != zoneNames[Pstream::myProcNo()])
                 {
-                    FatalErrorIn
-                    (
-                        "meshRefinement::checkCoupledFaceZones(const polyMesh&)"
-                    )   << "faceZones are not synchronised on processors." << nl
+                    FatalErrorInFunction
+                        << "faceZones are not synchronised on processors." << nl
                         << "Processor " << procI << " has faceZones "
                         << zoneNames[procI] << nl
                         << "Processor " << Pstream::myProcNo()
@@ -1803,20 +1795,16 @@ void Foam::meshRefinement::checkCoupledFaceZones(const polyMesh& mesh)
                 }
                 else if (faceToZone[bFaceI] == zoneI)
                 {
-                    FatalErrorIn
-                    (
-                        "meshRefinement::checkCoupledFaceZones(const polyMesh&)"
-                    )   << "Face " << fZone[i] << " in zone "
+                    FatalErrorInFunction
+                        << "Face " << fZone[i] << " in zone "
                         << fZone.name()
                         << " is twice in zone!"
                         << abort(FatalError);
                 }
                 else
                 {
-                    FatalErrorIn
-                    (
-                        "meshRefinement::checkCoupledFaceZones(const polyMesh&)"
-                    )   << "Face " << fZone[i] << " in zone "
+                    FatalErrorInFunction
+                        << "Face " << fZone[i] << " in zone "
                         << fZone.name()
                         << " is also in zone "
                         << fZones[faceToZone[bFaceI]].name()
@@ -1833,10 +1821,8 @@ void Foam::meshRefinement::checkCoupledFaceZones(const polyMesh& mesh)
     {
         if (faceToZone[i] != neiFaceToZone[i])
         {
-            FatalErrorIn
-            (
-                "meshRefinement::checkCoupledFaceZones(const polyMesh&)"
-            )   << "Face " << mesh.nInternalFaces()+i
+            FatalErrorInFunction
+                << "Face " << mesh.nInternalFaces()+i
                 << " is in zone " << faceToZone[i]
                 << ", its coupled face is in zone " << neiFaceToZone[i]
                 << abort(FatalError);
@@ -2140,7 +2126,7 @@ Foam::labelList Foam::meshRefinement::meshedPatches() const
 
         if (patchI == -1)
         {
-            FatalErrorIn("meshRefinement::meshedPatches() const")
+            FatalErrorInFunction
                 << "Problem : did not find patch " << meshedPatches_[i]
                 << endl << "Valid patches are " << patches.names()
                 << abort(FatalError);

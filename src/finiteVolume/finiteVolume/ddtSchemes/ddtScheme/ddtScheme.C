@@ -57,9 +57,8 @@ tmp<ddtScheme<Type> > ddtScheme<Type>::New
 
     if (schemeData.eof())
     {
-        FatalIOErrorIn
+        FatalIOErrorInFunction
         (
-            "ddtScheme<Type>::New(const fvMesh&, Istream&)",
             schemeData
         )   << "Ddt scheme not specified" << endl << endl
             << "Valid ddt schemes are :" << endl
@@ -74,9 +73,8 @@ tmp<ddtScheme<Type> > ddtScheme<Type>::New
 
     if (cstrIter == IstreamConstructorTablePtr_->end())
     {
-        FatalIOErrorIn
+        FatalIOErrorInFunction
         (
-            "ddtScheme<Type>::New(const fvMesh&, Istream&)",
             schemeData
         )   << "Unknown ddt scheme " << schemeName << nl << nl
             << "Valid ddt schemes are :" << endl
@@ -105,7 +103,7 @@ tmp<GeometricField<Type, fvPatchField, volMesh> > ddtScheme<Type>::fvcDdt
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    notImplemented("fvmDdt(alpha, rho, psi");
+    NotImplemented;
 
     return tmp<GeometricField<Type, fvPatchField, volMesh> >
     (
@@ -122,7 +120,7 @@ tmp<fvMatrix<Type> > ddtScheme<Type>::fvmDdt
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    notImplemented("fvmDdt(alpha, rho, psi");
+    NotImplemented;
 
     return tmp<fvMatrix<Type> >
     (

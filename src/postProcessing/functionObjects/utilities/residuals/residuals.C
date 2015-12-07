@@ -72,16 +72,8 @@ Foam::residuals::residuals
     if (!isA<fvMesh>(obr_))
     {
         active_ = false;
-        WarningIn
-        (
-            "residuals::residuals"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating " << name_
+        WarningInFunction
+            << "No fvMesh available, deactivating " << name_
             << endl;
     }
 
@@ -115,21 +107,15 @@ void Foam::residuals::read(const dictionary& dict)
 
 
 void Foam::residuals::execute()
-{
-    // Do nothing - only valid on write
-}
+{}
 
 
 void Foam::residuals::end()
-{
-    // Do nothing - only valid on write
-}
+{}
 
 
 void Foam::residuals::timeSet()
-{
-    // Do nothing - only valid on write
-}
+{}
 
 
 void Foam::residuals::write()
@@ -138,7 +124,7 @@ void Foam::residuals::write()
     {
         if (Pstream::master())
         {
-            file()<< obr_.time().value();
+            writeTime(file());
 
             forAll(fieldSet_, fieldI)
             {
@@ -155,5 +141,6 @@ void Foam::residuals::write()
         }
     }
 }
+
 
 // ************************************************************************* //

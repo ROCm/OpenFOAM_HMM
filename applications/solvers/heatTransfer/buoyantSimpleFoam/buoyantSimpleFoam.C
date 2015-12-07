@@ -35,7 +35,7 @@ Description
 #include "turbulentFluidThermoModel.H"
 #include "radiationModel.H"
 #include "simpleControl.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "fixedFluxPressureFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -48,12 +48,13 @@ int main(int argc, char *argv[])
 
     simpleControl simple(mesh);
 
-    #include "readGravitationalAcceleration.H"
     #include "createFields.H"
     #include "createMRF.H"
     #include "createFvOptions.H"
     #include "createRadiationModel.H"
     #include "initContinuityErrs.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

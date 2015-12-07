@@ -37,7 +37,7 @@ Description
 #include "rhoCombustionModel.H"
 #include "radiationModel.H"
 #include "IOporosityModelList.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "SLGThermo.H"
 #include "simpleControl.H"
 
@@ -59,6 +59,8 @@ int main(int argc, char *argv[])
     #include "createMRF.H"
     #include "createFvOptions.H"
     #include "initContinuityErrs.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

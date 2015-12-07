@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
@@ -35,8 +35,8 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(sampledSets, 0);
-bool sampledSets::verbose_ = false;
+    defineTypeNameAndDebug(sampledSets, 0);
+    bool sampledSets::verbose_ = false;
 }
 
 
@@ -102,7 +102,7 @@ void Foam::sampledSets::combineSampledSets
 
         if (Pstream::master() && allCurveDist.size() == 0)
         {
-            WarningIn("sampledSets::combineSampledSets(..)")
+            WarningInFunction
                 << "Sample set " << samplePts.name()
                 << " has zero points." << endl;
         }

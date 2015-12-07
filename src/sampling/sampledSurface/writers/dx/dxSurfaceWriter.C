@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
@@ -69,10 +69,8 @@ void Foam::dxSurfaceWriter::writeGeometry
 
         if (f.size() != 3)
         {
-            FatalErrorIn
-            (
-                "writeGeometry(Ostream&, const pointField&, const faceList&)"
-            )   << "Face " << faceI << " vertices " << f
+            FatalErrorInFunction
+                << "Face " << faceI << " vertices " << f
                 << " is not a triangle."
                 << exit(FatalError);
         }

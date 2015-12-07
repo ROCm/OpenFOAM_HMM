@@ -185,7 +185,6 @@ dynamicKEqn<BasicTurbulenceModel>::dynamicKEqn
 
     if (type == typeName)
     {
-        correctNut();
         this->printCoeffs(type);
     }
 }

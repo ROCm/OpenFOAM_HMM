@@ -110,9 +110,8 @@ DeardorffDiffStress<BasicTurbulenceModel>::DeardorffDiffStress
 {
     if (type == typeName)
     {
-        this->boundNormalStress(this->R_);
-        correctNut();
         this->printCoeffs(type);
+        this->boundNormalStress(this->R_);
     }
 }
 

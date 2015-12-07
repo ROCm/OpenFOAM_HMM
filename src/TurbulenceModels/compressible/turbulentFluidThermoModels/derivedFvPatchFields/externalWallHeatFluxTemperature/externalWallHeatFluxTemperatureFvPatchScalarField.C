@@ -164,16 +164,8 @@ externalWallHeatFluxTemperatureFvPatchScalarField
     }
     else
     {
-        FatalErrorIn
-        (
-            "externalWallHeatFluxTemperatureFvPatchScalarField::"
-            "externalWallHeatFluxTemperatureFvPatchScalarField\n"
-            "(\n"
-            "    const fvPatch&,\n"
-            "    const DimensionedField<scalar, volMesh>&,\n"
-            "    const dictionary&\n"
-            ")\n"
-        )   << "\n patch type '" << p.type()
+        FatalErrorInFunction
+            << "\n patch type '" << p.type()
             << "' either q or h and Ta were not found '"
             << "\n for patch " << p.name()
             << " of field " << dimensionedInternalField().name()
@@ -332,11 +324,8 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
         }
         default:
         {
-            FatalErrorIn
-            (
-                "externalWallHeatFluxTemperatureFvPatchScalarField"
-                "::updateCoeffs()"
-            )   << "Illegal heat flux mode " << operationModeNames[mode_]
+            FatalErrorInFunction
+                << "Illegal heat flux mode " << operationModeNames[mode_]
                 << exit(FatalError);
         }
     }
@@ -391,13 +380,8 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::write
         }
         default:
         {
-            FatalErrorIn
-            (
-                "void externalWallHeatFluxTemperatureFvPatchScalarField::write"
-                "("
-                    "Ostream&"
-                ") const"
-            )   << "Illegal heat flux mode " << operationModeNames[mode_]
+            FatalErrorInFunction
+                << "Illegal heat flux mode " << operationModeNames[mode_]
                 << abort(FatalError);
         }
     }

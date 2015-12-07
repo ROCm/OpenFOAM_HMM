@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
@@ -190,14 +190,8 @@ void Foam::nastranSurfaceWriter::writeCoord
         }
         default:
         {
-            FatalErrorIn
-            (
-                "void Foam::nastranSurfaceWriter::writeCoord"
-                "("
-                    "Ostream&, "
-                    "const point&"
-                ") const"
-            )   << "Unknown writeFormat enumeration" << abort(FatalError);
+            FatalErrorInFunction
+                << "Unknown writeFormat enumeration" << abort(FatalError);
         }
     }
 
@@ -280,16 +274,8 @@ void Foam::nastranSurfaceWriter::writeFace
         }
         default:
         {
-            FatalErrorIn
-            (
-                "void Foam::nastranSurfaceWriter::writeFace"
-                "("
-                    "const word&"
-                    "const labelList&"
-                    "label&"
-                    "Ostream&, "
-                ") const"
-            )   << "Unknown writeFormat enumeration" << abort(FatalError);
+            FatalErrorInFunction
+                << "Unknown writeFormat enumeration" << abort(FatalError);
         }
     }
 

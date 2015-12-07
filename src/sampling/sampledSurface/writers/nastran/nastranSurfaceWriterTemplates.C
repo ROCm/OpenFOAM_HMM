@@ -105,17 +105,7 @@ void Foam::nastranSurfaceWriter::writeFaceValue
             }
             else
             {
-                WarningIn
-                (
-                    "template<class Type>"
-                    "void Foam::nastranSurfaceWriter::writeNodeValue"
-                    "("
-                        "const dataFormat&, "
-                        "const Type&, "
-                        "const label, "
-                        "OFstream&"
-                    ") const"
-                )
+                WarningInFunction
                     << dataFormatNames_[format] << " requires scalar values "
                     << "and cannot be used for higher rank values"
                     << endl;
@@ -141,19 +131,9 @@ void Foam::nastranSurfaceWriter::writeFaceValue
         }
         default:
         {
-            WarningIn
-            (
-                "template<class Type>"
-                "void Foam::nastranSurfaceWriter::writeNodeValue"
-                "("
-                    "const dataFormat&, "
-                    "const Type&, "
-                    "const label, "
-                    "OFstream&"
-                ") const"
-            )
+            FatalErrorInFunction
                 << "Unhandled enumeration " << dataFormatNames_[format]
-                << endl;
+                << exit(FatalError);
         }
     }
 
@@ -176,23 +156,9 @@ Foam::fileName Foam::nastranSurfaceWriter::writeTemplate
     const bool verbose
 ) const
 {
-
     if (!fieldMap_.found(fieldName))
     {
-        WarningIn
-        (
-            "void Foam::nastranSurfaceWriter::writeTemplate"
-            "("
-                "const fileName&, "
-                "const fileName&, "
-                "const pointField&, "
-                "const faceList&, "
-                "const word&, "
-                "const Field<Type>&, "
-                "const bool, "
-                "const bool"
-            ") const"
-        )
+        FatalErrorInFunction
             << "No mapping found between field " << fieldName
             << " and corresponding Nastran field.  Available types are:"
             << fieldMap_

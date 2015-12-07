@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -210,10 +210,8 @@ Foam::refinementSurfaces::refinementSurfaces
              || globalLevelIncr[surfI] < 0
             )
             {
-                FatalIOErrorIn
+                FatalIOErrorInFunction
                 (
-                    "refinementSurfaces::refinementSurfaces"
-                    "(const searchableSurfaces&, const dictionary>&",
                     dict
                 )   << "Illegal level specification for surface "
                     << names_[surfI]
@@ -310,10 +308,8 @@ Foam::refinementSurfaces::refinementSurfaces
                          || levelIncr < 0
                         )
                         {
-                            FatalIOErrorIn
+                            FatalIOErrorInFunction
                             (
-                                "refinementSurfaces::refinementSurfaces"
-                                "(const searchableSurfaces&, const dictionary&",
                                 dict
                             )   << "Illegal level specification for surface "
                                 << names_[surfI] << " region "
@@ -401,9 +397,8 @@ Foam::refinementSurfaces::refinementSurfaces
 
     if (unmatchedKeys.size() > 0)
     {
-        IOWarningIn
+        IOWarningInFunction
         (
-            "refinementSurfaces::refinementSurfaces(..)",
             surfacesDict
         )   << "Not all entries in refinementSurfaces dictionary were used."
             << " The following entries were not used : "
@@ -1686,7 +1681,7 @@ void Foam::refinementSurfaces::findInside
          && selectionMethod != surfaceZonesInfo::OUTSIDE
         )
         {
-            FatalErrorIn("refinementSurfaces::findInside(..)")
+            FatalErrorInFunction
                 << "Trying to use surface "
                 << surface.name()
                 << " which has non-geometric inside selection method "

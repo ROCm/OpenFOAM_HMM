@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -197,11 +197,8 @@ Foam::labelList Foam::refinementParameters::findCells
 
         if (checkInsideMesh && globalCellI == -1)
         {
-            FatalErrorIn
-            (
-                "refinementParameters::findCells"
-                "(const polyMesh&, const pointField&) const"
-            )   << "Point " << location
+            FatalErrorInFunction
+                << "Point " << location
                 << " is not inside the mesh or on a face or edge." << nl
                 << "Bounding box of the mesh:" << mesh.bounds()
                 << exit(FatalError);

@@ -77,20 +77,9 @@ void Foam::fieldValues::fieldValueDelta::apply
         }
         default:
         {
-            FatalErrorIn
-            (
-                "void Foam::fieldValues::fieldValueDelta::applyOperation"
-                "("
-                    "const word&, "
-                    "const word&, "
-                    "const word&, "
-                    "const word&, "
-                    "const word&"
-                    "bool&"
-                ") const"
-            )
-                << "Operation not supported: "
-                << opName
+            FatalErrorInFunction
+                << "Unable to process operation "
+                << operationTypeNames_[operation_]
                 << abort(FatalError);
         }
     }

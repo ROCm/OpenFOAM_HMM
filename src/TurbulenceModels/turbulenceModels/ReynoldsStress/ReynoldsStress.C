@@ -168,10 +168,8 @@ Foam::ReynoldsStress<BasicTurbulenceModel>::ReynoldsStress
 {
     if (couplingFactor_.value() < 0.0 || couplingFactor_.value() > 1.0)
     {
-        FatalErrorIn
-        (
-            "ReynoldsStress::ReynoldsStress"
-        )   << "couplingFactor = " << couplingFactor_
+        FatalErrorInFunction
+            << "couplingFactor = " << couplingFactor_
             << " is not in range 0 - 1" << nl
             << exit(FatalError);
     }
@@ -294,6 +292,13 @@ Foam::ReynoldsStress<BasicTurbulenceModel>::divDevRhoReff
       - fvm::laplacian(this->alpha_*rho*this->nuEff(), U)
       - fvc::div((this->alpha_*rho*this->nuEff())*dev2(T(fvc::grad(U))))
     );
+}
+
+
+template<class BasicTurbulenceModel>
+void Foam::ReynoldsStress<BasicTurbulenceModel>::validate()
+{
+    correctNut();
 }
 
 

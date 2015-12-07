@@ -122,7 +122,6 @@ dynamicLagrangian<BasicTurbulenceModel>::dynamicLagrangian
 {
     if (type == typeName)
     {
-        correctNut();
         this->printCoeffs(type);
     }
 }

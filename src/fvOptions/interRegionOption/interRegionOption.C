@@ -29,10 +29,10 @@ License
 
 namespace Foam
 {
-namespace fv
-{
-    defineTypeNameAndDebug(interRegionOption, 0);
-}
+    namespace fv
+    {
+        defineTypeNameAndDebug(interRegionOption, 0);
+    }
 }
 
 
@@ -49,7 +49,7 @@ void Foam::fv::interRegionOption::setMapper()
 
         if (mesh_.name() == nbrMesh.name())
         {
-            FatalErrorIn("interRegionOption::setMapper()")
+            FatalErrorInFunction
                 << "Inter-region model selected, but local and "
                 << "neighbour regions are the same: " << nl
                 << "    local region: " << mesh_.name() << nl
@@ -75,7 +75,7 @@ void Foam::fv::interRegionOption::setMapper()
         }
         else
         {
-            FatalErrorIn("interRegionOption::setMapper()")
+            FatalErrorInFunction
                 << "regions " << mesh_.name() << " and "
                 << nbrMesh.name() <<  " do not intersect"
                 << exit(FatalError);

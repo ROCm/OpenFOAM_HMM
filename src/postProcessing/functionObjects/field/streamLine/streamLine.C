@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -152,7 +152,7 @@ void Foam::streamLine::read(const dictionary& dict)
 
         if (subCycling && fixedLength)
         {
-            FatalIOErrorIn("streamLine::read(const dictionary&)", dict)
+            FatalIOErrorInFunction(dict)
                 << "Cannot both specify automatic time stepping (through '"
                 << "nSubCycle' specification) and fixed track length (through '"
                 << "trackLength')"

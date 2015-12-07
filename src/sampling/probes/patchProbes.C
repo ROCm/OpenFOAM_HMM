@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,7 +48,6 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
 
     // All the info for nearest. Construct to miss
     List<mappedPatchBase::nearInfo> nearest(this->size());
-
 
     const labelList patchIDs(bm.patchSet(patchNames_).sortedToc());
 
@@ -124,10 +123,7 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
 
             if (isA<emptyPolyPatch>(bm[patchi]))
             {
-                WarningIn
-                (
-                    " Foam::patchProbes::findElements(const fvMesh&)"
-                )
+                WarningInFunction
                 << " The sample point: " << sample
                 << " belongs to " << patchi
                 << " which is an empty patch. This is not permitted. "

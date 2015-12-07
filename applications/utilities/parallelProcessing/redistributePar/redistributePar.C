@@ -106,7 +106,7 @@ scalar getMergeDistance
 
     if (runTime.writeFormat() == IOstream::ASCII && mergeTol < writeTol)
     {
-        FatalErrorIn("getMergeDistance")
+        FatalErrorInFunction
             << "Your current settings specify ASCII writing with "
             << IOstream::defaultPrecision() << " digits precision." << endl
             << "Your merging tolerance (" << mergeTol << ") is finer than this."
@@ -612,7 +612,7 @@ void readFields
 
     if (haveMesh[Pstream::myProcNo()] && objectNames != masterNames)
     {
-        FatalErrorIn("readFields()")
+        FatalErrorInFunction
             << "differing fields of type " << GeoField::typeName
             << " on processors." << endl
             << "Master has:" << masterNames << endl
@@ -812,7 +812,6 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 )
 {
     Time& runTime = const_cast<Time&>(mesh.time());
-
 
     //// Print some statistics
     //Info<< "Before distribution:" << endl;

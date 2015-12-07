@@ -113,7 +113,6 @@ Smagorinsky<BasicTurbulenceModel>::Smagorinsky
 {
     if (type == typeName)
     {
-        correctNut();
         this->printCoeffs(type);
     }
 }

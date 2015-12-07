@@ -42,9 +42,25 @@ void Foam::residuals::writeResidual(const word& fieldName)
 
         if (solverDict.found(fieldName))
         {
-            const List<solverPerformance> sp(solverDict.lookup(fieldName));
-            const scalar residual = sp.first().initialResidual();
-            file() << token::TAB << residual;
+            const List<SolverPerformance<Type> > sp
+            (
+                solverDict.lookup(fieldName)
+            );
+
+            const Type& residual = sp.first().initialResidual();
+
+            typename pTraits<Type>::labelType validComponents
+            (
+                mesh.validComponents<Type>()
+            );
+
+            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+            {
+                if (component(validComponents, cmpt) != -1)
+                {
+                    file() << token::TAB << component(residual, cmpt);
+                }
+            }
         }
     }
 }

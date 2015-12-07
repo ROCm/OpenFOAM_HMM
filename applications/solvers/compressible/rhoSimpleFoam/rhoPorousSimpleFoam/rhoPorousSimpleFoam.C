@@ -34,7 +34,7 @@ Description
 #include "fvCFD.H"
 #include "rhoThermo.H"
 #include "turbulentFluidThermoModel.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "IOporosityModelList.H"
 #include "simpleControl.H"
 
@@ -53,6 +53,8 @@ int main(int argc, char *argv[])
     #include "createFvOptions.H"
     #include "createZones.H"
     #include "initContinuityErrs.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

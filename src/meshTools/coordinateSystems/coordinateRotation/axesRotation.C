@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,7 +57,7 @@ void Foam::axesRotation::calcTransform
 
     if (mag(b) < SMALL)
     {
-        FatalErrorIn("axesRotation::calcTransform()")
+        FatalErrorInFunction
             << "axis1, axis2 appear co-linear: "
             << axis1 << ", " << axis2 << endl
             << abort(FatalError);
@@ -86,15 +86,7 @@ void Foam::axesRotation::calcTransform
         }
         default:
         {
-            FatalErrorIn
-            (
-                "axesRotation::calcTransform"
-                "("
-                    "const vector&,"
-                    "const vector&,"
-                    "const axisOrder&"
-                ")"
-            )
+            FatalErrorInFunction
                 << "Unhandled axes specifictation" << endl
                 << abort(FatalError);
 
@@ -169,10 +161,7 @@ Foam::axesRotation::axesRotation(const tensor& R)
 
 const Foam::tensorField& Foam::axesRotation::Tr() const
 {
-    notImplemented
-    (
-        "const Foam::tensorField& axesRotation::Tr() const"
-    );
+    NotImplemented;
     return NullObjectRef<tensorField>();
 }
 
@@ -212,10 +201,7 @@ Foam::tmp<Foam::tensorField> Foam::axesRotation::transformTensor
     const tensorField& st
 ) const
 {
-    notImplemented
-    (
-        "const tensorField& axesRotation::transformTensor() const"
-    );
+    NotImplemented;
     return tmp<tensorField>(NULL);
 }
 
@@ -235,14 +221,7 @@ Foam::tmp<Foam::tensorField> Foam::axesRotation::transformTensor
     const labelList& cellMap
 ) const
 {
-    notImplemented
-    (
-        "tmp<Foam::tensorField> axesRotation::transformTensor "
-        "("
-            "const tensorField&,"
-            "const labelList&"
-        ") const"
-    );
+    NotImplemented;
     return tmp<tensorField>(NULL);
 }
 
@@ -307,10 +286,8 @@ void Foam::axesRotation::operator=(const dictionary& dict)
     }
     else
     {
-        FatalErrorIn
-        (
-            "axesRotation::operator=(const dictionary&) "
-        )   << "not entry of the type (e1, e2) or (e2, e3) or (e3, e1) "
+        FatalErrorInFunction
+            << "not entry of the type (e1, e2) or (e2, e3) or (e3, e1) "
             << "found "
             << exit(FatalError);
     }

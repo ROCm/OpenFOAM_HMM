@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -128,16 +128,8 @@ Foam::displacementMotionSolver::displacementMotionSolver
 {
     if (points0_.size() != mesh.nPoints())
     {
-        FatalErrorIn
-        (
-            "displacementMotionSolver::"
-            "displacementMotionSolver\n"
-            "(\n"
-            "    const polyMesh&,\n"
-            "    const IOdictionary&,\n"
-            "    const word&\n"
-            ")"
-        )   << "Number of points in mesh " << mesh.nPoints()
+        FatalErrorInFunction
+            << "Number of points in mesh " << mesh.nPoints()
             << " differs from number of points " << points0_.size()
             << " read from file "
             << IOobject
@@ -317,11 +309,8 @@ void Foam::displacementMotionSolver::updateMesh(const mapPolyMesh& mpm)
         }
         else
         {
-            FatalErrorIn
-            (
-                "displacementMotionSolver::updateMesh"
-                "(const mapPolyMesh&)"
-            )   << "Cannot determine co-ordinates of introduced vertices."
+            FatalErrorInFunction
+                << "Cannot determine co-ordinates of introduced vertices."
                 << " New vertex " << pointI << " at co-ordinate "
                 << points[pointI] << exit(FatalError);
         }

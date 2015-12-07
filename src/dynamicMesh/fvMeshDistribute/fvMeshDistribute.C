@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -210,7 +210,7 @@ void Foam::fvMeshDistribute::checkEqualWordList
     {
         if (allNames[procI] != allNames[0])
         {
-            FatalErrorIn("fvMeshDistribute::checkEqualWordList(..)")
+            FatalErrorInFunction
                 << "When checking for equal " << msg.c_str() << " :" << endl
                 << "processor0 has:" << allNames[0] << endl
                 << "processor" << procI << " has:" << allNames[procI] << endl
@@ -347,7 +347,7 @@ Foam::label Foam::fvMeshDistribute::findNonEmptyPatch() const
 
     if (nonEmptyPatchI == -1)
     {
-        FatalErrorIn("fvMeshDistribute::findNonEmptyPatch() const")
+        FatalErrorInFunction
             << "Cannot find a patch which is neither of type empty nor"
             << " coupled in patches " << patches.names() << endl
             << "There has to be at least one such patch for"
@@ -375,7 +375,7 @@ Foam::label Foam::fvMeshDistribute::findNonEmptyPatch() const
         }
         else if (procPatchI != -1)
         {
-            FatalErrorIn("fvMeshDistribute::findNonEmptyPatch() const")
+            FatalErrorInFunction
                 << "Processor patches should be at end of patch list."
                 << endl
                 << "Have processor patch " << procPatchI
@@ -663,10 +663,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::repatch
 
         if (index != -1)
         {
-            FatalErrorIn
-            (
-                "fvMeshDistribute::repatch(const labelList&, labelListList&)"
-            )   << "reverseFaceMap contains -1 at index:"
+            FatalErrorInFunction
+                << "reverseFaceMap contains -1 at index:"
                 << index << endl
                 << "This means that the repatch operation was not just"
                 << " a shuffle?" << abort(FatalError);
@@ -745,7 +743,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::mergeSharedPoints
             }
             else
             {
-                FatalErrorIn("fvMeshDistribute::mergeSharedPoints()")
+                FatalErrorInFunction
                     << "Problem. oldPointI:" << oldPointI
                     << " newPointI:" << newPointI << abort(FatalError);
             }
@@ -1607,7 +1605,7 @@ Foam::labelList Foam::fvMeshDistribute::countCells
 
         if (newProc < 0 || newProc >= Pstream::nProcs())
         {
-            FatalErrorIn("fvMeshDistribute::distribute(const labelList&)")
+            FatalErrorInFunction
                 << "Distribution should be in range 0.." << Pstream::nProcs()-1
                 << endl
                 << "At index " << cellI << " distribution:" << newProc
@@ -1627,7 +1625,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     // Some checks on distribution
     if (distribution.size() != mesh_.nCells())
     {
-        FatalErrorIn("fvMeshDistribute::distribute(const labelList&)")
+        FatalErrorInFunction
             << "Size of distribution:"
             << distribution.size() << " mesh nCells:" << mesh_.nCells()
             << abort(FatalError);
@@ -1639,7 +1637,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     // Check all processors have same non-proc patches in same order.
     if (patches.checkParallelSync(true))
     {
-        FatalErrorIn("fvMeshDistribute::distribute(const labelList&)")
+        FatalErrorInFunction
             << "This application requires all non-processor patches"
             << " to be present in the same order on all patches" << nl
             << "followed by the processor patches (which of course are unique)."

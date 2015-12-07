@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -171,11 +171,8 @@ Foam::volumeType Foam::treeDataPrimitivePatch<PatchType>::getVolumeType
 
     if (info.index() == -1)
     {
-        FatalErrorIn
-        (
-            "treeDataPrimitivePatch::getSampleType"
-            "(indexedOctree<treeDataPrimitivePatch>&, const point&)"
-        )   << "Could not find " << sample << " in octree."
+        FatalErrorInFunction
+            << "Could not find " << sample << " in octree."
             << abort(FatalError);
     }
 
@@ -541,18 +538,7 @@ void Foam::treeDataPrimitivePatch<PatchType>::findNearestOp::operator()
     point& nearestPoint
 ) const
 {
-    notImplemented
-    (
-        "treeDataPrimitivePatch<PatchType>::findNearestOp::operator()"
-        "("
-        "    const labelUList&,"
-        "    const linePointRef&,"
-        "    treeBoundBox&,"
-        "    label&,"
-        "    point&,"
-        "    point&"
-        ") const"
-    );
+    NotImplemented;
 }
 
 
@@ -598,16 +584,8 @@ bool Foam::treeDataPrimitivePatch<PatchType>::findSelfIntersectOp::operator()
 {
     if (edgeID_ == -1)
     {
-        FatalErrorIn
-        (
-            "findSelfIntersectOp::operator()\n"
-            "(\n"
-            "    const label index,\n"
-            "    const point& start,\n"
-            "    const point& end,\n"
-            "    point& intersectionPoint\n"
-            ") const"
-        )   << "EdgeID not set. Please set edgeID to the index of"
+        FatalErrorInFunction
+            << "EdgeID not set. Please set edgeID to the index of"
             << " the edge you are testing"
             << exit(FatalError);
     }
