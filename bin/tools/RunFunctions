@@ -81,6 +81,7 @@ runApplication()
         else
             $APP_RUN "$@" > $APP_LOGFILE 2>&1
         fi
+    fi
 }
 
 runParallel()
