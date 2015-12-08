@@ -102,14 +102,7 @@ void Foam::patchTransformedInterpolation::interpolate
     pointScalarField&
 ) const
 {
-    notImplemented
-    (
-        "void Foam::patchTransformedInterpolation::interpolate"
-        "("
-            "const volScalarField&"
-            "pointScalarField&"
-         ")"
-    );
+    NotImplemented;
 }
 
 

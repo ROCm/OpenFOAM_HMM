@@ -32,13 +32,7 @@ void Foam::fv::directionalPressureGradientExplicitSource::writeData
     Ostream& os
 ) const
 {
-    notImplemented
-    (
-        "void Foam::fv::directionalPressureGradientExplicitSource::writeData"
-        "("
-            "Ostream&"
-        ") const"
-    );
+    NotImplemented;
 }
 
 
