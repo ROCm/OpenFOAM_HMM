@@ -119,10 +119,8 @@ void Foam::fvMeshDistribute::inplaceRenumberWithFlip
                 }
                 else
                 {
-                    FatalErrorIn
-                    (
-                        "fvMeshDistribute::inplaceRenumberWithFlip(..)"
-                    )   << "Problem : zero value " << val
+                    FatalErrorInFunction
+                        << "Problem : zero value " << val
                         << " at index " << elemI << " out of " << lst.size()
                         << " list with flip bit" << exit(FatalError);
                 }
@@ -145,10 +143,8 @@ void Foam::fvMeshDistribute::inplaceRenumberWithFlip
                 }
                 else
                 {
-                    FatalErrorIn
-                    (
-                        "fvMeshDistribute::inplaceRenumberWithFlip(..)"
-                    )   << "Problem : zero value " << newVal
+                    FatalErrorInFunction
+                        << "Problem : zero value " << newVal
                         << " at index " << elemI << " out of "
                         << oldToNew.size()
                         << " list with flip bit" << exit(FatalError);
@@ -452,11 +448,9 @@ void Foam::fvMeshDistribute::testField(const surfaceScalarField& fld)
 
         if (mag(cos-fld[faceI]) > 1e-6)
         {
-            //FatalErrorIn
-            WarningIn
-            (
-                "fvMeshDistribute::testField(const surfaceScalarField&)"
-            )   << "On internal face " << faceI << " at "
+            //FatalErrorInFunction
+            WarningInFunction
+                << "On internal face " << faceI << " at "
                 << mesh.faceCentres()[faceI]
                 << " the field value is " << fld[faceI]
                 << " whereas cos angle of " << testNormal
@@ -478,11 +472,9 @@ void Foam::fvMeshDistribute::testField(const surfaceScalarField& fld)
             if (mag(cos-fvp[i]) > 1e-6)
             {
                 label faceI = fvp.patch().start()+i;
-                //FatalErrorIn
-                WarningIn
-                (
-                    "fvMeshDistribute::testField(const surfaceScalarField&)"
-                )   << "On face " << faceI
+                //FatalErrorInFunction
+                WarningInFunction
+                    << "On face " << faceI
                     << " on patch " << fvp.patch().name()
                     << " at " << mesh.faceCentres()[faceI]
                     << " the field value is " << fvp[i]

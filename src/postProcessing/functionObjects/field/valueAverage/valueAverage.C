@@ -162,7 +162,7 @@ void Foam::valueAverage::execute()
 
     if (unprocessedFields.size())
     {
-        WarningIn("bool Foam::valueAverage::execute()")
+        WarningInFunction
             << "From function object: " << functionObjectName_ << nl
             << "Unprocessed fields:" << nl;
 

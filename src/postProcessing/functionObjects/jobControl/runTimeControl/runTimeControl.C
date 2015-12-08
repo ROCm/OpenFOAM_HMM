@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -163,7 +163,7 @@ void Foam::runTimeControl::execute()
 
             if (conditionIter == groupMap_.end())
             {
-                FatalErrorIn("void Foam::runTimeControl::execute()")
+                FatalErrorInFunction
                     << "group " << groupI << " not found in map"
                     << abort(FatalError);
             }

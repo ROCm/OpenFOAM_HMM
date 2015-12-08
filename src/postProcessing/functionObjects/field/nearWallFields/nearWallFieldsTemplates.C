@@ -47,13 +47,7 @@ void Foam::nearWallFields::createFields
 
             if (obr_.found(sampleFldName))
             {
-                WarningIn
-                (
-                    "void Foam::nearWallFields::createFields"
-                    "("
-                        "PtrList<GeometricField<Type, fvPatchField, volMesh> >&"
-                    ") const"
-                )
+                WarningInFunction
                     << "    a field named " << sampleFldName
                     << " already exists on the mesh"
                     << endl;

@@ -80,7 +80,6 @@ void Foam::yPlus::calcYPlus
                 << token::TAB << maxYplus
                 << token::TAB << avgYplus
                 << endl;
-            }
         }
         else if (isA<wallFvPatch>(patch))
         {

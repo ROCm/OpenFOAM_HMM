@@ -73,7 +73,7 @@ public:
 
         virtual const mapDistributeBase& distributeMap() const
         {
-            FatalErrorIn("FieldMapper::distributeMap() const")
+            FatalErrorInFunction
                 << "attempt to access null distributeMap"
                 << abort(FatalError);
             return *reinterpret_cast<mapDistributeBase*>(NULL);

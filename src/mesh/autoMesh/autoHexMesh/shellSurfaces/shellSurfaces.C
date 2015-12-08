@@ -159,11 +159,8 @@ void Foam::shellSurfaces::checkGapLevels
         {
             if (modes_[shellI] == DISTANCE)
             {
-                FatalIOErrorIn
-                (
-                    "shellSurfaces::shellSurfaces(..)",
-                    shellDict
-                )   << "'gapLevel' specification cannot be used with mode "
+                FatalIOErrorInFunction(shellDict)
+                    << "'gapLevel' specification cannot be used with mode "
                     << refineModeNames_[DISTANCE]
                     << " for shell " << shell.name()
                     << exit(FatalIOError);

@@ -2479,7 +2479,7 @@ Foam::List<Foam::labelPair> Foam::autoLayerDriver::getBafflesOnAddedMesh
             }
             else
             {
-                FatalErrorIn("addLayers(..)")
+                FatalErrorInFunction
                     << "Problem:" << faceI << " at:"
                     << mesh.faceCentres()[faceI]
                     << " is on same baffle as " << p[0]
@@ -4107,7 +4107,7 @@ void Foam::autoLayerDriver::addLayers
                     const point& dupPt = mesh.points()[dupI];
                     if (mag(pt-dupPt) > meshRefiner_.mergeDistance())
                     {
-                        WarningIn("autoLayerDriver::addLayers(..)")
+                        WarningInFunction
                             << "Trying to merge points "
                             << pointI << " at:" << pt
                             << "and " << dupI << " at:" << dupPt

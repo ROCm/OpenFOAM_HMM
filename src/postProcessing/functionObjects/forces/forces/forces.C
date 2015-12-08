@@ -923,10 +923,8 @@ void Foam::forces::read(const dictionary& dict)
 
         if (nBin_ < 0)
         {
-            FatalIOErrorIn
-            (
-                "void Foam::forces::read(const dictionary&)", dict
-            )   << "Number of bins (nBin) must be zero or greater"
+            FatalIOErrorInFunction(dict)
+                << "Number of bins (nBin) must be zero or greater"
                 << exit(FatalIOError);
         }
         else if (nBin_ == 0)

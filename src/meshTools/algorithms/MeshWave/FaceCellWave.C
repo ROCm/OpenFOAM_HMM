@@ -1036,13 +1036,8 @@ Foam::FaceCellWave<Type, TrackingData>::FaceCellWave
      || allCellInfo.size() != mesh_.nCells()
     )
     {
-        FatalErrorIn
-        (
-            "FaceCellWave<Type, TrackingData>::FaceCellWave"
-            "(const polyMesh&, const List<labelPair>&, const labelList&"
-            ", const List<Type>,"
-            " UList<Type>&, UList<Type>&, const label maxIter)"
-        )   << "face and cell storage not the size of mesh faces, cells:"
+        FatalErrorInFunction
+            << "face and cell storage not the size of mesh faces, cells:"
             << endl
             << "    allFaceInfo   :" << allFaceInfo.size() << endl
             << "    mesh_.nFaces():" << mesh_.nFaces() << endl
@@ -1059,13 +1054,8 @@ Foam::FaceCellWave<Type, TrackingData>::FaceCellWave
 
     if ((maxIter > 0) && (iter >= maxIter))
     {
-        FatalErrorIn
-        (
-            "FaceCellWave<Type, TrackingData>::FaceCellWave"
-            "(const polyMesh&, const List<labelPair>&, const labelList&"
-            ", const List<Type>, UList<Type>&, UList<Type>&"
-            ", const label maxIter)"
-        )   << "Maximum number of iterations reached. Increase maxIter." << endl
+        FatalErrorInFunction
+            << "Maximum number of iterations reached. Increase maxIter." << endl
             << "    maxIter:" << maxIter << endl
             << "    nChangedCells:" << nChangedCells_ << endl
             << "    nChangedFaces:" << nChangedFaces_ << endl

@@ -160,7 +160,7 @@ void Foam::fieldMinMax::write()
 {
     if (active_)
     {
-        if (!writeLocation_) writeTime(obr_.time().value());
+        if (!writeLocation_) writeTime(file());
 
         if (log_) Info<< type() << " " << name_ <<  " output:" << nl;
 

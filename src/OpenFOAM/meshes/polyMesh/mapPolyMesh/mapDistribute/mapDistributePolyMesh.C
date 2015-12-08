@@ -48,7 +48,7 @@ void Foam::mapDistributePolyMesh::calcPatchSizes()
 
         if (min(oldPatchSizes_) < 0)
         {
-            FatalErrorIn("mapDistributePolyMesh::calcPatchSizes()")
+            FatalErrorInFunction
                 << "Calculated negative old patch size:" << oldPatchSizes_ << nl
                 << "Error in mapping data" << abort(FatalError);
         }

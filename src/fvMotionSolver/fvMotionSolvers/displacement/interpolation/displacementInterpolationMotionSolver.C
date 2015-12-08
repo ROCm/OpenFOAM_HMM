@@ -82,7 +82,7 @@ void Foam::displacementInterpolationMotionSolver::calcInterpolation()
         {
             FatalErrorInFunction
                 << "Cannot find zone " << zoneName << endl
-                << "Valid zones are " << mesh.faceZones().names()
+                << "Valid zones are " << fZones.names()
                 << exit(FatalError);
         }
 

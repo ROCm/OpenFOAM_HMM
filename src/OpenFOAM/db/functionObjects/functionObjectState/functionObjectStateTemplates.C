@@ -32,10 +32,8 @@ bool Foam::functionObjectState::setActive()
 
     if (!isA<Type>(obr_))
     {
-        WarningIn
-        (
-            "void Foam::functionObjectState::setActive()"
-        )   << "No " << Type::typeName << " available, deactivating " << name_
+        WarningInFunction
+            << "No " << Type::typeName << " available, deactivating " << name_
             << endl;
 
         active_ = false;

@@ -162,7 +162,7 @@ void Foam::yPlus::execute()
             }
             else
             {
-                WarningIn("void Foam::yPlus::execute()")
+                WarningInFunction
                     << "Unable to find compressible turbulence model in the "
                     << "database: yPlus will not be calculated" << endl;
             }
@@ -181,14 +181,14 @@ void Foam::yPlus::execute()
             }
             else
             {
-                WarningIn("void Foam::yPlus::execute()")
+                WarningInFunction
                     << "Unable to find incompressible turbulence model in the "
                     << "database: yPlus will not be calculated" << endl;
             }
         }
         else
         {
-            WarningIn("void Foam::yPlus::execute()")
+            WarningInFunction
                 << "Unknown " << phiName_ << " dimensions: "
                 << phi.dimensions() << nl
                 << "Expected either " << dimMass/dimTime << " or "

@@ -83,7 +83,7 @@ void Foam::UPstream::setParRun(const label nProcs)
         label comm = allocateCommunicator(-1, identity(nProcs), true);
         if (comm != UPstream::worldComm)
         {
-            FatalErrorIn("UPstream::setParRun(const label)")
+            FatalErrorInFunction
                 << "problem : comm:" << comm
                 << "  UPstream::worldComm:" << UPstream::worldComm
                 << Foam::exit(FatalError);

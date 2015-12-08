@@ -430,7 +430,7 @@ int main(int argc, char *argv[])
 
             if (f[0] == f[1] || f[0] == f[2] || f[1] == f[2])
             {
-                //WarningIn(args.executable())
+                //WarningInFunction
                 //    << "Illegal triangle " << faceI << " vertices " << f
                 //    << " coords " << f.points(surf.points()) << endl;
             }

@@ -243,17 +243,8 @@ humidityTemperatureCoupledMixedFvPatchScalarField
 {
     if (!isA<mappedPatchBase>(this->patch().patch()))
     {
-        FatalIOErrorIn
-        (
-            "humidityTemperatureCoupledMixedFvPatchScalarField::"
-            "humidityTemperatureCoupledMixedFvPatchScalarField\n"
-            "(\n"
-            "    const fvPatch&,\n"
-            "    const DimensionedField<scalar, volMesh>&,\n"
-            "    const dictionary&\n"
-            ")\n",
-            dict
-        )   << "\n    patch type '" << p.type()
+        FatalIOErrorInFunction(dict)
+            << "\n    patch type '" << p.type()
             << "' not type '" << mappedPatchBase::typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << dimensionedInternalField().name()
@@ -312,17 +303,7 @@ humidityTemperatureCoupledMixedFvPatchScalarField
             }
             default:
             {
-                FatalIOErrorIn
-                (
-                    "humidityTemperatureCoupledMixedFvPatchScalarField::"
-                    "humidityTemperatureCoupledMixedFvPatchScalarField\n"
-                    "(\n"
-                    "    const fvPatch&,\n"
-                    "    const DimensionedField<scalar, volMesh>&,\n"
-                    "    const dictionary& \n"
-                    ")\n",
-                    dict
-                )
+                FatalIOErrorInFunction(dict)
                     << "Did not find mode " << mode_
                     << " on  patch " << patch().name()
                     << nl

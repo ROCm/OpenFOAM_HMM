@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -182,16 +182,8 @@ Foam::autoPtr<Foam::pathline> Foam::pathline::New
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalErrorIn
-        (
-            "Foam::autoPtr<Foam::pathline> Foam::pathline::New"
-            "("
-                "const runTimePostProcessing&, "
-                "const dictionary&, "
-                "const HashPtrTable<DataEntry<vector>, word>&, "
-                "const word&"
-            ")"
-        )   << "Unknown pathline type "
+        FatalErrorInFunction
+            << "Unknown pathline type "
             << pathlineType << nl << nl
             << "Valid pathline types are:" << endl
             << dictionaryConstructorTablePtr_->sortedToc()

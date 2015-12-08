@@ -66,13 +66,7 @@ Foam::tmp<Foam::volScalarField> Foam::pressureTools::rho
     {
         if (!rhoInfInitialised_)
         {
-            FatalErrorIn
-            (
-                "Foam::tmp<Foam::volScalarField> Foam::pressureTools::rho"
-                "("
-                "    const volScalarField&"
-                ") const"
-            )
+            FatalErrorInFunction
                 << type() << " " << name_ << ": "
                 << "pressure identified as incompressible, but reference "
                 << "density is not set.  Please set rhoName to rhoInf, and "

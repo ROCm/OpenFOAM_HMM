@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1523,7 +1523,7 @@ int main(int argc, char *argv[])
         // Check
         if (dict.found("faceSets"))
         {
-            FatalIOErrorIn(args.executable().c_str(), dict)
+            FatalIOErrorInFunction(dict)
                 << "Please supply faces to extrude either through 'faceZones'"
                 << " or 'faceSets' entry. Found both."
                 << exit(FatalIOError);
@@ -1567,7 +1567,7 @@ int main(int argc, char *argv[])
 
     if (shellRegionName == regionName)
     {
-        FatalIOErrorIn(args.executable().c_str(), dict)
+        FatalIOErrorInFunction(dict)
             << "Cannot extrude into same region as mesh." << endl
             << "Mesh region : " << regionName << endl
             << "Shell region : " << shellRegionName
@@ -1693,7 +1693,7 @@ int main(int argc, char *argv[])
             meshZoneID[i] = faceZones.findZoneID(zoneNames[i]);
             if (meshZoneID[i] == -1)
             {
-                FatalIOErrorIn(args.executable().c_str(), dict)
+                FatalIOErrorInFunction(dict)
                     << "Cannot find zone " << zoneNames[i] << endl
                     << "Valid zones are " << faceZones.names()
                     << exit(FatalIOError);
@@ -1740,7 +1740,7 @@ int main(int argc, char *argv[])
                 zoneShadowIDs[i] = faceZones.findZoneID(zoneShadowNames[i]);
                 if (zoneShadowIDs[i] == -1)
                 {
-                    FatalIOErrorIn(args.executable().c_str(), dict)
+                    FatalIOErrorInFunction(dict)
                         << "Cannot find zone " << zoneShadowNames[i] << endl
                         << "Valid zones are " << faceZones.names()
                         << exit(FatalIOError);
@@ -1803,7 +1803,7 @@ int main(int argc, char *argv[])
                 label faceI = iter.key();
                 if (mesh.isInternalFace(faceI))
                 {
-                    FatalIOErrorIn(args.executable().c_str(), dict)
+                    FatalIOErrorInFunction(dict)
                         << "faceSet " << fz.name()
                         << "contains internal faces."
                         << " This is not permitted."
@@ -1843,7 +1843,7 @@ int main(int argc, char *argv[])
 
             if (nExtrudeFaces != nShadowFaces)
             {
-                FatalIOErrorIn(args.executable().c_str(), dict)
+                FatalIOErrorInFunction(dict)
                     << "Extruded faces " << nExtrudeFaces << endl
                     << "is different from shadow faces. " << nShadowFaces
                     << "This is not permitted " << endl
@@ -1863,7 +1863,7 @@ int main(int argc, char *argv[])
                     label faceI = iter.key();
                     if (mesh.isInternalFace(faceI))
                     {
-                        FatalIOErrorIn(args.executable().c_str(), dict)
+                        FatalIOErrorInFunction(dict)
                             << "faceSet " << fz.name()
                             << "contains internal faces."
                             << " This is not permitted."

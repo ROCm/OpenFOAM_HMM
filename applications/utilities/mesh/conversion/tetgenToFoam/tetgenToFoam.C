@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
         }
         if (pointI != nNodes)
         {
-            FatalIOErrorIn(args.executable().c_str(), nodeStream)
+            FatalIOErrorInFunction(nodeStream)
                 << "Only " << pointI << " nodes present instead of " << nNodes
                 << " from header." << exit(FatalIOError);
         }
@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
 
     if (nPtsPerTet != 4)
     {
-        FatalIOErrorIn(args.executable().c_str(), eleStream)
+        FatalIOErrorInFunction(eleStream)
             << "Cannot handle tets with "
             << nPtsPerTet << " points per tetrahedron in .ele file" << endl
             << "Can only handle tetrahedra with four points"
@@ -377,7 +377,7 @@ int main(int argc, char *argv[])
 
         if (nFaceAttr != 1)
         {
-            FatalIOErrorIn(args.executable().c_str(), faceStream)
+            FatalIOErrorInFunction(faceStream)
                 << "Expect boundary markers to be"
                 << " present in .face file." << endl
                 << "This is the second number in the header which is now:"

@@ -2975,7 +2975,7 @@ void Foam::autoSnapDriver::doSnap
 
                     if (mag(fc0-fc1) > meshRefiner_.mergeDistance())
                     {
-                        FatalErrorIn("autoSnapDriver::doSnap(..)")
+                        FatalErrorInFunction
                             << "Separated baffles : f0:" << p[0]
                             << " centre:" << fc0
                             << " f1:" << p[1] << " centre:" << fc1

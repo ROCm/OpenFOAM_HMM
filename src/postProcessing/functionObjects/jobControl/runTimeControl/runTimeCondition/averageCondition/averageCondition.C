@@ -135,7 +135,7 @@ bool Foam::averageCondition::apply()
 
     if (unprocessedFields.size())
     {
-        WarningIn("bool Foam::averageCondition::apply()")
+        WarningInFunction
             << "From function object: " << functionObjectName_ << nl
             << "Unprocessed fields:" << nl;
 

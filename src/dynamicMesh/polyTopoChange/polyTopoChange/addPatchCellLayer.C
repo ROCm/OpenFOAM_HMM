@@ -493,7 +493,7 @@ void Foam::addPatchCellLayer::setFaceProps
 
         if (!found)
         {
-            FatalErrorIn("addPatchCellLayer::setFaceProps(..)")
+            FatalErrorInFunction
                 << "Problem: cannot find patch edge " << ppEdgeI
                 << " with mesh vertices " << patchEdge
                 << " at " << patchEdge.line(mesh.points())

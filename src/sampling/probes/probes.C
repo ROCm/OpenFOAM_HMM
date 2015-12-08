@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -275,7 +275,7 @@ void Foam::probes::readDict(const dictionary& dict)
     {
         if (!fixedLocations_ && interpolationScheme_ != "cell")
         {
-            WarningIn("void Foam::probes::read(const dictionary&)")
+            WarningInFunction
                 << "Only cell interpolation can be applied when "
                 << "not using fixedLocations. InterpolationScheme "
                 << "entry will be ignored";

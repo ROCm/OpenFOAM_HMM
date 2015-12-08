@@ -775,7 +775,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createZoneBaffles
 
             if (masterPatchI == -1 || slavePatchI == -1)
             {
-                FatalErrorIn("meshRefinement::createZoneBaffles(..)")
+                FatalErrorInFunction
                     << "Problem: masterPatchI:" << masterPatchI
                     << " slavePatchI:" << slavePatchI << exit(FatalError);
             }
@@ -1270,7 +1270,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeBaffles
 
             if (!mesh_.isInternalFace(faceI))
             {
-                FatalErrorIn("meshRefinement::mergeBaffles(..)")
+                FatalErrorInFunction
                     << "problem: face:" << faceI
                     << " at:" << mesh_.faceCentres()[faceI]
                     << "(wanted patch:" << patchI
@@ -1770,12 +1770,8 @@ void Foam::meshRefinement::findCellZoneInsideWalk
 
         if (keepRegionI == -1)
         {
-            FatalErrorIn
-            (
-                "meshRefinement::findCellZoneInsideWalk"
-                "(const labelList&, const labelList&"
-                ", const labelList&, const labelList&)"
-            )   << "Point " << insidePoint
+            FatalErrorInFunction
+                << "Point " << insidePoint
                 << " is not inside the mesh." << nl
                 << "Bounding box of the mesh:" << mesh_.bounds()
                 << exit(FatalError);
@@ -1804,12 +1800,8 @@ void Foam::meshRefinement::findCellZoneInsideWalk
                 {
                     if (nWarnings < 10)
                     {
-                        WarningIn
-                        (
-                            "meshRefinement::findCellZoneInsideWalk"
-                            "(const labelList&, const labelList&"
-                            ", const labelList&, const labelList&)"
-                        )   << "Cell " << cellI
+                        WarningInFunction
+                            << "Cell " << cellI
                             << " at " << mesh_.cellCentres()[cellI]
                             << " is inside cellZone " << zonesInMesh[i]
                             << " from locationInMesh " << insidePoint
@@ -2003,12 +1995,8 @@ void Foam::meshRefinement::findCellZoneTopo
 
         if (keepRegionI == -1)
         {
-            FatalErrorIn
-            (
-                "meshRefinement::findCellZoneTopo"
-                "(const point&, const labelList&"
-                ", const labelList&, labelList&)"
-            )   << "Point " << keepPoint
+            FatalErrorInFunction
+                << "Point " << keepPoint
                 << " is not inside the mesh." << nl
                 << "Bounding box of the mesh:" << mesh_.bounds()
                 << exit(FatalError);

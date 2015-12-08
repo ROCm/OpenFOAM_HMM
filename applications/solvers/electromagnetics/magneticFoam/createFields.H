@@ -58,7 +58,7 @@
 
         if (magnetZonei == -1)
         {
-            FatalIOErrorIn(args.executable().c_str(), transportProperties)
+            FatalIOErrorInFunction(transportProperties)
                 << "Cannot find faceZone for magnet " << magnets[i].name()
                 << exit(FatalIOError);
         }

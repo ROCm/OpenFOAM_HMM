@@ -935,7 +935,7 @@ Foam::label Foam::meshRefinement::splitFacesUndo
                     }
                     else
                     {
-                        FatalErrorIn("meshRefinement::splitFacesUndo()")
+                        FatalErrorInFunction
                             << "problem: twoFaces:" << twoFaces
                             << exit(FatalError);
                     }
@@ -966,7 +966,7 @@ Foam::label Foam::meshRefinement::splitFacesUndo
 
             if (baffle.first() == -1 || baffle.second() == -1)
             {
-                FatalErrorIn("meshRefinement::splitFacesUndo()")
+                FatalErrorInFunction
                     << "Removed baffle : faces:" << baffle
                     << exit(FatalError);
             }
@@ -1149,7 +1149,7 @@ Foam::label Foam::meshRefinement::splitFacesUndo
                     // Faces still split
                     if (new0 < 0 || new1 < 0)
                     {
-                        FatalErrorIn("meshRefinement::splitFacesUndo()")
+                        FatalErrorInFunction
                             << "Problem: oldFaces:" << oldSplit
                             << " newFaces:" << labelPair(new0, new1)
                             << exit(FatalError);
@@ -1168,7 +1168,7 @@ Foam::label Foam::meshRefinement::splitFacesUndo
                     // Merged face. Only new0 kept.
                     if (new0 < 0 || new1 == -1)
                     {
-                        FatalErrorIn("meshRefinement::splitFacesUndo()")
+                        FatalErrorInFunction
                             << "Problem: oldFaces:" << oldSplit
                             << " newFace:" << labelPair(new0, new1)
                             << exit(FatalError);
@@ -1207,7 +1207,7 @@ Foam::label Foam::meshRefinement::splitFacesUndo
 
                 if (baffle.first() == -1 || baffle.second() == -1)
                 {
-                    FatalErrorIn("meshRefinement::splitFacesUndo()")
+                    FatalErrorInFunction
                         << "Removed baffle : faces:" << baffle
                         << exit(FatalError);
                 }
@@ -1518,7 +1518,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
 
                         if (patchI >= 0 && pbm[patchI].coupled())
                         {
-                            WarningIn("meshRefinement::balance(..)")
+                            WarningInFunction
                                 << "Face at " << mesh_.faceCentres()[faceI]
                                 << " on zone " << fZone.name()
                                 << " is on coupled patch " << pbm[patchI].name()
@@ -2299,12 +2299,8 @@ Foam::label Foam::meshRefinement::findRegion
 //    {
 //        if (regions[i] == -1)
 //        {
-//            FatalErrorIn
-//            (
-//                "meshRefinement::findRegion"
-//                "(const polyMesh&, const labelList&, const vector&"
-//                  ", const pointField&)"
-//            )   << "Point " << pts[i]
+//            FatalErrorInFunction
+//                << "Point " << pts[i]
 //                << " is not inside the mesh." << nl
 //                << "Bounding box of the mesh:" << mesh.bounds()
 //                //<< "All points " << pts
@@ -2381,7 +2377,7 @@ void Foam::meshRefinement::findRegions
             label index = findIndex(insideRegions, regionI);
             if (index != -1)
             {
-                FatalErrorIn("meshRefinement::findRegions(..)")
+                FatalErrorInFunction
                     << "Location in mesh " << locationsInMesh[index]
                     << " is inside same mesh region " << regionI
                     << " as location outside mesh "
@@ -2475,10 +2471,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
         label nExposedFaces = returnReduce(exposedFaces.size(), sumOp<label>());
         if (nExposedFaces)
         {
-            //FatalErrorIn
-            //(
-            //    "meshRefinement::splitMeshRegions(const point&)"
-            //)   << "Removing non-reachable cells should only expose"
+            // FatalErrorInFunction
+            //    << "Removing non-reachable cells should only expose"
             //    << " boundary faces" << nl
             //    << "ExposedFaces:" << exposedFaces << abort(FatalError);
 
@@ -2489,10 +2483,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
                 defaultPatch = globalToMasterPatch[0];
             }
 
-            WarningIn
-            (
-                "meshRefinement::splitMeshRegions(const point&)"
-            )   << "Removing non-reachable cells exposes "
+            WarningInFunction
+                << "Removing non-reachable cells exposes "
                 << nExposedFaces << " internal or coupled faces." << endl
                 << "    These get put into patch " << defaultPatch << endl;
             exposedPatch.setSize(exposedFaces.size(), defaultPatch);

@@ -180,7 +180,7 @@ void Foam::fieldValues::fieldValueDelta::execute()
 
         if (entries1.size() != entries2.size())
         {
-            FatalErrorIn("void Foam::fieldValues::fieldValueDelta::execute()")
+            FatalErrorInFunction
                 << name_ << ": objects must generate the same number of results"
                 << nl
                 << "    " << name1 << " objects: " << entries1 << nl
@@ -197,10 +197,7 @@ void Foam::fieldValues::fieldValueDelta::execute()
 
             if (type1 != type2)
             {
-                FatalErrorIn
-                (
-                    "void Foam::fieldValues::fieldValueDelta::execute()"
-                )
+                FatalErrorInFunction
                     << name_
                     << ": input values for operation must be of the same type"
                     << nl

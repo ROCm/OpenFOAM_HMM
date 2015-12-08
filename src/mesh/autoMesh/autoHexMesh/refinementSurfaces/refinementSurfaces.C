@@ -210,10 +210,8 @@ Foam::refinementSurfaces::refinementSurfaces
              || globalLevelIncr[surfI] < 0
             )
             {
-                FatalIOErrorInFunction
-                (
-                    dict
-                )   << "Illegal level specification for surface "
+                FatalIOErrorInFunction(dict)
+                    << "Illegal level specification for surface "
                     << names_[surfI]
                     << " : minLevel:" << globalMinLevel[surfI]
                     << " maxLevel:" << globalMaxLevel[surfI]
@@ -246,12 +244,8 @@ Foam::refinementSurfaces::refinementSurfaces
              || globalGapLevel[surfI][1] > globalGapLevel[surfI][2]
             )
             {
-                FatalIOErrorIn
-                (
-                    "refinementSurfaces::refinementSurfaces"
-                    "(const searchableSurfaces&, const dictionary>&",
-                    dict
-                )   << "Illegal gapLevel specification for surface "
+                FatalIOErrorInFunction(dict)
+                    << "Illegal gapLevel specification for surface "
                     << names_[surfI]
                     << " : gapLevel:" << globalGapLevel[surfI]
                     << " gapMode:" << volumeType::names[globalGapMode[surfI]]
@@ -308,10 +302,8 @@ Foam::refinementSurfaces::refinementSurfaces
                          || levelIncr < 0
                         )
                         {
-                            FatalIOErrorInFunction
-                            (
-                                dict
-                            )   << "Illegal level specification for surface "
+                            FatalIOErrorInFunction(dict)
+                                << "Illegal level specification for surface "
                                 << names_[surfI] << " region "
                                 << regionNames[regionI]
                                 << " : minLevel:" << refLevel[0]
@@ -354,13 +346,8 @@ Foam::refinementSurfaces::refinementSurfaces
                          || gapSpec[1] > gapSpec[2]
                         )
                         {
-                            FatalIOErrorIn
-                            (
-                                "refinementSurfaces::refinementSurfaces"
-                                "(const searchableSurfaces&,"
-                                " const dictionary>&",
-                                dict
-                            )   << "Illegal gapLevel specification for surface "
+                            FatalIOErrorInFunction(dict)
+                                << "Illegal gapLevel specification for surface "
                                 << names_[surfI]
                                 << " : gapLevel:" << gapSpec
                                 << " gapMode:" << volumeType::names[gapModeSpec]

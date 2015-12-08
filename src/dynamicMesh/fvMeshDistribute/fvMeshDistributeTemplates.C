@@ -191,7 +191,8 @@ void Foam::fvMeshDistribute::mapExposedFaces
 
     if (flds.size() != oldFlds.size())
     {
-        FatalErrorIn("fvMeshDistribute::mapExposedFaces(..)") << "problem"
+        FatalErrorInFunction
+            << "problem"
             << abort(FatalError);
     }
 

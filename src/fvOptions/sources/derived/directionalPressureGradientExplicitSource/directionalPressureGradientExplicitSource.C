@@ -202,33 +202,14 @@ directionalPressureGradientExplicitSource
 
     if (fieldNames_.size() != 1)
     {
-        FatalErrorIn
-        (
-            "Foam::fv::directionalPressureGradientExplicitSource::"
-            "directionalPressureGradientExplicitSource"
-            "("
-                "const word&, "
-                "const word&, "
-                "const dictionary&, "
-                "const fvMesh&"
-            ")"
-        )   << "Source can only be applied to a single field.  Current "
+        FatalErrorInFunction
+            << "Source can only be applied to a single field.  Current "
             << "settings are:" << fieldNames_ << exit(FatalError);
     }
 
     if (zoneID_ < 0)
     {
-        FatalErrorIn
-        (
-            "directionalPressureGradientExplicitSource::"
-            "directionalPressureGradientExplicitSource\n"
-            "(\n"
-                "const word&,\n "
-                "const word&,\n "
-                "const dictionary&, \n"
-                "const fvMesh& \n"
-            ")\n"
-        )
+        FatalErrorInFunction
             << type() << " " << this->name() << ": "
             << "    Unknown face zone name: " << faceZoneName_
             << ". Valid face zones are: " << mesh_.faceZones().names()
@@ -251,17 +232,7 @@ directionalPressureGradientExplicitSource
     }
     else
     {
-        FatalErrorIn
-        (
-            "directionalPressureGradientExplicitSource::"
-            "directionalPressureGradientExplicitSource\n"
-            "(\n"
-                "const word&, \n"
-                "const word&, \n"
-                "const dictionary&, \n"
-                "const fvMesh& \n"
-            ") \n"
-        )
+        FatalErrorInFunction
             << "Did not find mode " << model_
             << nl
             << "Please set 'model' to one of "
@@ -407,15 +378,8 @@ void Foam::fv::directionalPressureGradientExplicitSource::correct
         }
         else if (meshToLocal[masterCellI] == -1)
         {
-            FatalErrorIn
-            (
-                "directionalPressureGradientExplicitSource::"
-                "directionalPressureGradientExplicitSource\n"
-                "correct"
-                "("
-                "   volVectorField& U \n"
-                ")"
-            )   << "Did not find  cell " << masterCellI
+            FatalErrorInFunction
+                << "Did not find  cell " << masterCellI
                 << "in cellZone :" << cellSetName()
                 << exit(FatalError);
         }
