@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -147,7 +147,7 @@ Foam::ConeInjection<CloudType>::ConeInjection
     Umag_(im.Umag_),
     thetaInner_(im.thetaInner_),
     thetaOuter_(im.thetaOuter_),
-    sizeDistribution_(im.sizeDistribution_().clone().ptr()),
+    sizeDistribution_(im.sizeDistribution_, false),
     nInjected_(im.nInjected_),
     tanVec1_(im.tanVec1_),
     tanVec2_(im.tanVec2_)
