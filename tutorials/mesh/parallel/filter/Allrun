@@ -24,10 +24,10 @@ runApplication $application
 runParallel redistributePar 3 -decompose -cellDist
 
 #- Continue running for a bit more
-runParallel -l log.reactingParcelFoam-par $application 3
+runParallel -log log.reactingParcelFoam-par $application 3
 
 #- Reconstruct all times
-runParallel -l log.redistributePar-1 redistributePar 3 -reconstruct
+runParallel -log log.redistributePar-1 redistributePar 3 -reconstruct
 
 
 # ----------------------------------------------------------------- end-of-file

@@ -40,7 +40,7 @@ getApplication()
 
 runApplication()
 {
-    APP_LOGFILE=
+    LOG_NAME=
     APP_RUN=
     LOG_IGNORE=false
     LOG_APPEND=false
@@ -57,7 +57,7 @@ runApplication()
                 LOG_IGNORE=true
                 ;;
             -log)
-                APP_LOGFILE=$1
+                LOG_NAME=$2
                 shift
                 ;;
             *)
@@ -68,24 +68,24 @@ runApplication()
         shift
     done
 
-    APP_LOGFILE=${APP_LOGFILE:="log.$APP_NAME"}
+    LOG_NAME=${LOG_NAME:="log.$APP_NAME"}
 
-    if [ -f $APP_LOGFILE ] && [ "$LOG_IGNORE" = "false" ]
+    if [ -f $LOG_NAME ] && [ "$LOG_IGNORE" = "false" ]
     then
-        echo "$APP_NAME already run on $PWD: remove log file $APP_LOGFILE to re-run"
+        echo "$APP_NAME already run on $PWD: remove log file $LOG_NAME to re-run"
     else
         echo "Running $APP_RUN on $PWD"
-        $APP_RUN "$@" > $APP_LOGFILE 2>&1
         if [ "$LOG_APPEND" = "true" ]; then
-            $APP_RUN "$@" >> $APP_LOGFILE 2>&1
+            $APP_RUN "$@" >> $LOG_NAME 2>&1
         else
-            $APP_RUN "$@" > $APP_LOGFILE 2>&1
+            $APP_RUN "$@" > $LOG_NAME 2>&1
         fi
+    fi
 }
 
 runParallel()
 {
-    APP_LOGFILE=
+    LOG_NAME=
     APP_RUN=
     LOG_IGNORE=false
     LOG_APPEND=false
@@ -102,7 +102,7 @@ runParallel()
                 LOG_IGNORE=true
                 ;;
             -log)
-                APP_LOGFILE=$1
+                LOG_NAME=$2
                 shift
                 ;;
             *)
@@ -116,28 +116,17 @@ runParallel()
     shift
     done
 
-    APP_LOGFILE=${APP_LOGFILE:="log.$APP_NAME"}
+    LOG_NAME=${LOG_NAME:="log.$APP_NAME"}
 
-    if [ -f $APP_LOGFILE ] && [ "$LOG_IGNORE" = "false" ]
+    if [ -f $LOG_NAME ] && [ "$LOG_IGNORE" = "false" ]
     then
-        echo "$APP_NAME already run on $PWD: remove log file $APP_LOGFILE to re-run"
+        echo "$APP_NAME already run on $PWD: remove log file $LOG_NAME to re-run"
     else
-        nProcs=$1
-        shift
         echo "Running $APP_RUN in parallel on $PWD using $nProcs processes"
-
-        #if [ "$WM_SCHEDULER" ]
-        #then
-        #    echo "$PWD: $WM_SCHEDULER -np $nProcs" 1>&2
-        #    $WM_SCHEDULER -np $nProcs "( mpirun -np $nProcs $APP_RUN -parallel "$@" < /dev/null > $APP_LOGFILE 2>&1 )"
-        #else
-            ( mpirun -np $nProcs $APP_RUN -parallel "$@" < /dev/null > $APP_LOGFILE 2>&1 )
-        #fi
-
         if [ "$LOG_APPEND" = "true" ]; then
-            ( mpirun -np $nProcs $APP_RUN -parallel "$@" < /dev/null >> $APP_LOGFILE 2>&1 )
+            ( mpirun -np $nProcs $APP_RUN -parallel "$@" < /dev/null >> $LOG_NAME 2>&1 )
         else
-            ( mpirun -np $nProcs $APP_RUN -parallel "$@" < /dev/null > $APP_LOGFILE 2>&1 )
+            ( mpirun -np $nProcs $APP_RUN -parallel "$@" < /dev/null > $LOG_NAME 2>&1 )
         fi
     fi
 }
