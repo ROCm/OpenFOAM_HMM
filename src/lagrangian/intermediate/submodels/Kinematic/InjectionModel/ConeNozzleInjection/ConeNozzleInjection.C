@@ -353,9 +353,6 @@ void Foam::ConeNozzleInjection<CloudType>::setPositionAndCell
 
             position = position_ + r*normal_;
 
-            // Ensure that all procssors set the same position
-            reduce(position, maxMagSqrOp<vector>());
-
             this->findCellAtPosition
             (
                 cellOwner,
