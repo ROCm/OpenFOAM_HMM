@@ -189,7 +189,7 @@ greyMeanAbsorptionEmissionCoeffs
 
 scatterModel    none;
 
-sootModel mixtureFractionSoot<gasHThermoPhysics>;
+sootModel none;//mixtureFractionSoot<gasHThermoPhysics>;
 
 mixtureFractionSootCoeffs
 {

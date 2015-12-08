@@ -16,7 +16,12 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 combustionModel  infinitelyFastChemistry<psiThermoCombustion,gasHThermoPhysics>;
+
 //combustionModel  FSD<psiThermoCombustion,gasHThermoPhysics>;
+//combustionModel  diffusionMulticomponent<psiChemistryCombustion,gasHThermoPhysics>;
+//NOTE: To use diffusionMulticomponent combustion model you need to rename files:
+// reactions.twoSteps -> reactions
+// thermophysicalProperties.twoSteps -> thermophysicalProperties
 
 active  true;
 
@@ -26,8 +31,22 @@ infinitelyFastChemistryCoeffs
     C           5.0;
 }
 
+diffusionMulticomponentCoeffs
+{
+    Ci          (1.0 1.5);
+    fuels       (CH4 CO);
+    oxydants    (O2 O2);
+    YoxStream   (0.23 0.23);
+    YfStream    (1.0 1.0);
+    sigma       (0.02 0.02);
+    oxydantRes  (0.015 0.005);
+    ftCorr      (0  0);
+    laminarIgn  false;
+}
+
 FSDCoeffs
 {
+    semiImplicit no;
     Cv          0.1;
     ftVarMin    1e-2;
 
