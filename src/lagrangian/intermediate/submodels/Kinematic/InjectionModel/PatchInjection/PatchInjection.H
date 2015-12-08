@@ -26,12 +26,15 @@ Class
 
 Description
     Patch injection
-    - User specifies
-      - Total mass to inject
-      - Name of patch
-      - Injection duration
-      - Initial parcel velocity
-      - Injection volume flow rate
+
+    User specifies
+    - Total mass to inject
+    - Name of patch
+    - Injection duration
+    - Initial parcel velocity
+    - Injection volume flow rate
+
+    Additional
     - Parcel diameters obtained by distribution model
     - Parcels injected randomly across the patch
 

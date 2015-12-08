@@ -68,7 +68,7 @@ class WallLocalSpringSliderDashpot
         //- Cohesion energy density [J/m^3]
         scalarList cohesionEnergyDensity_;
 
-        // Switch cohesion on and off
+        //- Switch cohesion on and off
         boolList cohesion_;
 
         //- Mapping the patch index to the model data
@@ -107,7 +107,7 @@ class WallLocalSpringSliderDashpot
     // Private Member Functions
 
         //- Find the appropriate properties for determining the minimum
-        //- Allowable timestep
+        //  allowable timestep
         void findMinMaxProperties
         (
             scalar& rMin,
