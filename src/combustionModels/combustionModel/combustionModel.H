@@ -112,9 +112,9 @@ public:
             inline const fvMesh& mesh() const;
 
             //- Return const access to phi
-            inline const surfaceScalarField& phi() const;
+            inline tmp<surfaceScalarField> phi() const;
 
-            //- Return const access to rho
+            //- Returns rho
             virtual tmp<volScalarField> rho() const = 0;
 
             //- Return access to turbulence

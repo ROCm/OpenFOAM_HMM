@@ -37,10 +37,11 @@ divSchemes
         N2              limitedLinear01 1;
         H2O             limitedLinear01 1;
         CO2             limitedLinear01 1;
+        CO              limitedLinear01 1;
         h               limitedLinear 1;
     };
     div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
-    div(phi,omega)  Gauss limitedLinear 1;
+    div(phi,omega)  Gauss upwind;
     div(phi,K)      Gauss limitedLinear 1;
     div(U)          Gauss linear;
     div(Ji,Ii_h)    Gauss upwind;
