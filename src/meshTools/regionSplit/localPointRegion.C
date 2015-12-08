@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -70,6 +70,11 @@ bool Foam::localPointRegion::isDuplicate
     const bool forward
 )
 {
+    if (f0.size() != f1.size())
+    {
+        return false;
+    }
+
     label fp1 = findIndex(f1, f0[0]);
 
     if (fp1 == -1)
