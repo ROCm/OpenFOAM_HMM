@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,7 +70,7 @@ protected:
         //- Helper function to write VTK data
         void writeData
         (
-            OFstream& os,
+            std::ostream& vtkOs,
             const bool binary,
             const List<floatScalar>& data
         ) const;
@@ -79,7 +79,7 @@ protected:
         template<class Type>
         void writeFieldData
         (
-            OFstream& os,
+            std::ostream& vtkOs,
             const bool binary,
             const List<floatScalar>& data,
             const word& title,
