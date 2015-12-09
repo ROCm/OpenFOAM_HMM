@@ -25,16 +25,15 @@ Application
     surfaceBooleanFeatures
 
 Description
-
     Generates the extendedFeatureEdgeMesh for the interface between a boolean
-    operation on two surfaces.  Assumes that the orientation of the surfaces is
-    correct:
+    operation on two surfaces.
 
-    + if the operation is union or intersection, that both surface's normals
+    Assumes that the orientation of the surfaces iscorrect:
+    - if the operation is union or intersection, that both surface's normals
       (n) have the same orientation with respect to a point, i.e. surfaces and b
       are orientated the same with respect to point x:
 
-    @verbatim
+    \verbatim
        _______
       |       |--> n
       |    ___|___             x
@@ -43,14 +42,14 @@ Description
           |       |
           |_______|
 
-    @endverbatim
+    \endverbatim
 
-    + if the operation is a subtraction, the surfaces should be oppositely
+    - if the operation is a subtraction, the surfaces should be oppositely
     oriented with respect to a point, i.e. for (a - b), then b's orientation
     should be such that x is "inside", and a's orientation such that x is
     "outside"
 
-    @verbatim
+    \verbatim
        _______
       |       |--> n
       |    ___|___             x
@@ -59,7 +58,7 @@ Description
           |  n <--|
           |_______|
 
-    @endverbatim
+    \endverbatim
 
     When the operation is peformed - for union, all of the edges generates where
     one surfaces cuts another are all "internal" for union, and "external" for

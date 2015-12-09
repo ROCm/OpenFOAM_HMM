@@ -25,6 +25,9 @@ Application
     surfaceClean
 
 Description
+    Utility to clean surfaces.
+
+    Current functionality
     - removes baffles
     - collapses small edges, removing triangles.
     - converts sliver triangles into split edges by projecting point onto

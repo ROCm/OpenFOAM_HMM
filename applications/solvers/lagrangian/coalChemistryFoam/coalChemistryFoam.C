@@ -28,13 +28,12 @@ Group
     grpLagrangianSolvers
 
 Description
-    Transient solver for:
-    - compressible,
-    - turbulent flow,
-    with
-    - coal and limestone parcel injections,
-    - energy source, and
-    - combustion.
+    Transient PIMPLE solver for compressible, laminar or turbulent flow with 
+    coal and thermodynamic parcels, and combustion.
+
+    Note:
+    - includes run-time selectable finite volume options, e.g. sources,
+      constraints
 
 \*---------------------------------------------------------------------------*/
 

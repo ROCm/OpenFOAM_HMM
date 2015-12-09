@@ -25,7 +25,6 @@ Application
     faceAgglomerate
 
 Description
-
     Agglomerate boundary faces using the pairPatchAgglomeration algorithm.
     It writes a map from the fine to coarse grid.
 

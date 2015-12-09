@@ -29,7 +29,7 @@ Group
 
 Description
     Steady-state solver for incompressible, 1D turbulent flow, typically to
-    generate boundary layer conditions at an inlet, for use in a simulation.
+    generate boundary layer conditions at an inlet.
 
     Boundary layer code to calculate the U, k and epsilon distributions.
     Used to create inlet boundary conditions for experimental comparisons
