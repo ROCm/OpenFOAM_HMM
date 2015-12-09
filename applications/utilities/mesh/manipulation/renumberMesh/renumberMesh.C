@@ -924,8 +924,6 @@ int main(int argc, char *argv[])
     }
 
 
->>>>>>> develop
-
     Info<< endl;
 
     // From renumbering:
