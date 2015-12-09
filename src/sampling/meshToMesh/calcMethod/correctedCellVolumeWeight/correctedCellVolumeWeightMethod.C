@@ -164,10 +164,8 @@ void Foam::correctedCellVolumeWeightMethod::calculateAddressing
 
             if (mag(srcVol) > ROOTVSMALL && mag((tgtVol-srcVol)/srcVol) > 1e-6)
             {
-                WarningIn
-                (
-                    "correctedCellVolumeWeightMethod::calculateAddressing(..)"
-                )   << "At cell " << cellI << " cc:"
+                WarningInFunction
+                    << "At cell " << cellI << " cc:"
                     << src_.cellCentres()[cellI]
                     << " vol:" << srcVol
                     << " total overlap volume:" << tgtVol
@@ -182,10 +180,8 @@ void Foam::correctedCellVolumeWeightMethod::calculateAddressing
 
             if (mag(tgtVol) > ROOTVSMALL && mag((srcVol-tgtVol)/tgtVol) > 1e-6)
             {
-                WarningIn
-                (
-                    "correctedCellVolumeWeightMethod::calculateAddressing(..)"
-                )   << "At cell " << cellI << " cc:"
+                WarningInFunction
+                    << "At cell " << cellI << " cc:"
                     << tgt_.cellCentres()[cellI]
                     << " vol:" << tgtVol
                     << " total overlap volume:" << srcVol

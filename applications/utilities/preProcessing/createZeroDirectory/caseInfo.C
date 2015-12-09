@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,7 @@ Foam::label Foam::caseInfo::findPatchConditionID
 {
     const wordList& patchGroups = boundaryInfo_.groups()[patchI];
 
-    // assign condition according to last condition applied, wins
+    // Assign condition according to last condition applied, wins
     forAllReverse(conditionNames_, conditionI)
     {
         const wordReList& patchNames = patchNames_[conditionI];
@@ -49,17 +49,17 @@ Foam::label Foam::caseInfo::findPatchConditionID
         {
             if (patchNames[nameI] == patchName)
             {
-                // check for explicit match
+                // Check for explicit match
                 return conditionI;
             }
             else if (patchNames[nameI].match(patchName))
             {
-                // check wildcards
+                // Check wildcards
                 return conditionI;
             }
             else
             {
-                // check for group match
+                // Check for group match
                 forAll(patchGroups, groupI)
                 {
                     if (patchNames[nameI] == patchGroups[groupI])
@@ -71,14 +71,7 @@ Foam::label Foam::caseInfo::findPatchConditionID
         }
     }
 
-    FatalErrorIn
-    (
-        "Foam::label Foam::caseInfo::findPatchConditionID"
-        "("
-            "const label, "
-            "const word&"
-        ") const"
-    )
+    FatalErrorInFunction
         << "Boundary patch " << patchName << " not defined"
         << exit(FatalError);
 
@@ -94,7 +87,7 @@ void Foam::caseInfo::updateGeometricBoundaryField()
 
         if (!boundaryInfo_.constraint()[i])
         {
-            // condition ID to apply to mesh boundary patch name
+            // Condition ID to apply to mesh boundary patch name
             const label conditionI = findPatchConditionID(i, patchName);
 
             const word& category = patchCategories_[conditionI];
@@ -130,7 +123,7 @@ Foam::caseInfo::caseInfo(const Time& runTime, const word& regionName)
     patchCategories_(conditionNames_.size()),
     patchTypes_(conditionNames_.size())
 {
-    // read the (user-supplied) boundary condition information
+    // Read the (user-supplied) boundary condition information
     Info<< "    Reading case properties" << endl;
 
     forAll(conditionNames_, i)
@@ -153,7 +146,7 @@ void Foam::caseInfo::checkPatches
     const boundaryTemplates& bcTemplates
 ) const
 {
-    // check that all conditions have been specified correctly wrt templates
+    // Check that all conditions have been specified correctly wrt templates
     forAll(conditionNames_, i)
     {
         bcTemplates.checkPatch
@@ -209,26 +202,18 @@ Foam::dictionary Foam::caseInfo::generateBoundaryField
             dictionary patchDict = dictionary::null;
             patchDict.add("type", boundaryInfo_.types()[j]);
 
-            // add value for processor patches
+            // Add value for processor patches
             patchDict.add("value", "${:internalField}");
             boundaryField.add(patchName.c_str(), patchDict);
         }
         else
         {
-            // condition ID to apply to mesh boundary patch name
+            // Condition ID to apply to mesh boundary patch name
             const label conditionI = findPatchConditionID(j, patchName);
 
             if (conditionI == -1)
             {
-                FatalErrorIn
-                (
-                    "Foam::dictionary Foam::caseInfo::generateBoundaryField"
-                    "("
-                        "const word&, "
-                        "const word&, "
-                        "const boundaryTemplates&"
-                    ") const"
-                )
+                FatalErrorInFunction
                     << "Unable to find patch " << patchName
                     << " in list of boundary conditions"
                     << exit(FatalError);
@@ -246,7 +231,7 @@ Foam::dictionary Foam::caseInfo::generateBoundaryField
                 optionDict = bcDict_.subDict(condition).subDict("options");
             }
 
-            // create the patch dictionary entry
+            // Create the patch dictionary entry
             dictionary patchDict
             (
                 bcTemplates.generatePatchDict

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +60,7 @@ void Foam::printMeshStats(const polyMesh& mesh, const bool allTopology)
 
         if (returnReduce(mesh.nInternalPoints(), minOp<label>()) == -1)
         {
-            WarningIn("Foam::printMeshStats(const polyMesh&, const bool)")
+            WarningInFunction
                 << "Some processors have their points sorted into internal"
                 << " and external and some do not." << endl
                 << "This can cause problems later on." << endl;

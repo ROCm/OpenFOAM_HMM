@@ -57,7 +57,7 @@ void Foam::mapDistributeBase::flipAndCombine
             }
             else
             {
-                FatalErrorIn("mapDistributeBase::combine(..)")
+                FatalErrorInFunction
                     << "At index " << i << " out of " << map.size()
                     << " have illegal index " << map[i]
                     << " for field " << rhs.size() << " with flipMap"
@@ -97,7 +97,7 @@ T Foam::mapDistributeBase::accessAndFlip
         }
         else
         {
-            FatalErrorIn("mapDistributeBase::accessAndFlip(..)")
+            FatalErrorInFunction
                 << "Illegal index " << index
                 << " into field of size " << fld.size()
                 << " with face-flipping"
@@ -590,7 +590,7 @@ void Foam::mapDistributeBase::distribute
     }
     else
     {
-        FatalErrorIn("mapDistributeBase::distribute(..)")
+        FatalErrorInFunction
             << "Unknown communication schedule " << commsType
             << abort(FatalError);
     }
@@ -1066,7 +1066,7 @@ void Foam::mapDistributeBase::distribute
     }
     else
     {
-        FatalErrorIn("mapDistributeBase::distribute(..)")
+        FatalErrorInFunction
             << "Unknown communication schedule " << commsType
             << abort(FatalError);
     }
@@ -1125,15 +1125,8 @@ const
 
             if (recvField.size() != map.size())
             {
-                FatalErrorIn
-                (
-                    "template<class T>\n"
-                    "void mapDistributeBase::receive\n"
-                    "(\n"
-                    "    PstreamBuffers&,\n"
-                    "    List<T>&\n"
-                    ")\n"
-                )   << "Expected from processor " << domain
+                FatalErrorInFunction
+                    << "Expected from processor " << domain
                     << " " << map.size() << " but received "
                     << recvField.size() << " elements."
                     << abort(FatalError);

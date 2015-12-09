@@ -2,8 +2,8 @@
  =========                   |
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
-   \\  /     A nd            | Copyright (C) 2011-2014 OpenFOAM Foundation
-    \\/      M anipulation   |
+   \\  /     A nd            | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\/      M anipulation   | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 
     if (m < 0)
     {
-        WarningIn(args.executable() + "::main")
+        WarningInFunction
             << "Negative mass detected, the surface may be inside-out." << endl;
     }
 
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
 
     while ((magSqr(eVal) < VSMALL) && pertI < 10)
     {
-        WarningIn(args.executable() + "::main")
+        WarningInFunction
             << "No eigenValues found, shape may have symmetry, "
             << "perturbing inertia tensor diagonal" << endl;
 
@@ -321,7 +321,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        WarningIn(args.executable() + "::main")
+        WarningInFunction
             << "Non-unique eigenvectors, cannot compute transformation "
             << "from Cartesian axes" << endl;
 
@@ -338,7 +338,7 @@ int main(int argc, char *argv[])
 
         if (f[0] == f[1] || f[0] == f[2] || f[1] == f[2])
         {
-            WarningIn(args.executable())
+            WarningInFunction
                << "Illegal triangle " << faceI << " vertices " << f
                << " coords " << f.points(surf.points()) << endl;
         }

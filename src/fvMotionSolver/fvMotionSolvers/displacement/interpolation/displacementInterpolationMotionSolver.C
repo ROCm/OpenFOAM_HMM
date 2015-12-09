@@ -80,13 +80,9 @@ void Foam::displacementInterpolationMotionSolver::calcInterpolation()
 
         if (zoneI == -1)
         {
-            FatalErrorIn
-            (
-                "displacementInterpolationMotionSolver::"
-                "displacementInterpolationMotionSolver(const polyMesh&,"
-                "Istream&)"
-            )   << "Cannot find zone " << zoneName << endl
-                << "Valid zones are " << mesh().faceZones().names()
+            FatalErrorInFunction
+                << "Cannot find zone " << zoneName << endl
+                << "Valid zones are " << fZones.names()
                 << exit(FatalError);
         }
 
@@ -248,12 +244,8 @@ void Foam::displacementInterpolationMotionSolver::calcInterpolation()
 
             if (rangeI == -1 || rangeI == rangeToCoord.size()-1)
             {
-                FatalErrorIn
-                (
-                    "displacementInterpolationMotionSolver::"
-                    "displacementInterpolationMotionSolver"
-                    "(const polyMesh&, Istream&)"
-                )   << "Did not find point " << points0()[pointI]
+                FatalErrorInFunction
+                    << "Did not find point " << points0()[pointI]
                     << " coordinate " << meshCoords[pointI]
                     << " in ranges " << rangeToCoord
                     << abort(FatalError);
@@ -341,10 +333,8 @@ Foam::displacementInterpolationMotionSolver::curPoints() const
 {
     if (mesh().nPoints() != points0().size())
     {
-        FatalErrorIn
-        (
-            "displacementInterpolationMotionSolver::curPoints() const"
-        )   << "The number of points in the mesh seems to have changed." << endl
+        FatalErrorInFunction
+            << "The number of points in the mesh seems to have changed." << endl
             << "In constant/polyMesh there are " << points0().size()
             << " points; in the current mesh there are " << mesh().nPoints()
             << " points." << exit(FatalError);

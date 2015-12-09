@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -119,7 +119,7 @@ void Foam::regionSplit::calcNonCompactRegionSplit
 
             if (blockedFace.size() && !blockedFace[faceI])
             {
-                FatalErrorIn("regionSplit::calcNonCompactRegionSplit(..)")
+                FatalErrorInFunction
                     << "Problem: unblocked face " << faceI
                     << " at " << mesh().faceCentres()[faceI]
                     << " on unassigned cell " << cellI

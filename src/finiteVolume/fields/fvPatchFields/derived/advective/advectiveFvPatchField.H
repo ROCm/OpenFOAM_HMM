@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,7 @@ Description
     This boundary condition provides an advective outflow condition, based on
     solving DDt(psi, U) = 0 at the boundary.
 
-    The standard (Euler, backward, CrankNicolson) time schemes are
+    The standard (Euler, backward, CrankNicolson, localEuler) time schemes are
     supported.  Additionally an optional mechanism to relax the value at
     the boundary to a specified far-field value is provided which is
     switched on by specifying the relaxation length-scale \c lInf and the

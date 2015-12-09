@@ -270,7 +270,7 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::THE
     const labelList& cells
 ) const
 {
-    notImplemented("multiphaseMixtureThermo::THE(...)");
+    NotImplemented;
     return T0;
 }
 
@@ -283,7 +283,7 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::THE
     const label patchi
 ) const
 {
-    notImplemented("multiphaseMixtureThermo::THE(...)");
+    NotImplemented;
     return T0;
 }
 
@@ -297,6 +297,28 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseMixtureThermo::rho() const
     for (++phasei; phasei != phases_.end(); ++phasei)
     {
         trho() += phasei()*phasei().thermo().rho();
+    }
+
+    return trho;
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::rho
+(
+    const label patchi
+) const
+{
+    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+
+    tmp<scalarField> trho
+    (
+        phasei().boundaryField()[patchi]*phasei().thermo().rho(patchi)
+    );
+
+    for (++phasei; phasei != phases_.end(); ++phasei)
+    {
+        trho() +=
+            phasei().boundaryField()[patchi]*phasei().thermo().rho(patchi);
     }
 
     return trho;
@@ -501,6 +523,21 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::CpByCpv
 }
 
 
+Foam::tmp<Foam::volScalarField> Foam::multiphaseMixtureThermo::nu() const
+{
+    return mu()/rho();
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::nu
+(
+    const label patchi
+) const
+{
+    return mu(patchi)/rho(patchi);
+}
+
+
 Foam::tmp<Foam::volScalarField> Foam::multiphaseMixtureThermo::kappa() const
 {
     PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
@@ -680,10 +717,8 @@ Foam::multiphaseMixtureThermo::surfaceTensionForce() const
 
             if (sigma == sigmas_.end())
             {
-                FatalErrorIn
-                (
-                    "multiphaseMixtureThermo::surfaceTensionForce() const"
-                )   << "Cannot find interface " << interfacePair(alpha1, alpha2)
+                FatalErrorInFunction
+                    << "Cannot find interface " << interfacePair(alpha1, alpha2)
                     << " in list of sigma values"
                     << exit(FatalError);
             }
@@ -811,12 +846,8 @@ void Foam::multiphaseMixtureThermo::correctContactAngle
 
             if (tp == acap.thetaProps().end())
             {
-                FatalErrorIn
-                (
-                    "multiphaseMixtureThermo::correctContactAngle"
-                    "(const phaseModel& alpha1, const phaseModel& alpha2, "
-                    "fvPatchVectorFieldField& nHatb) const"
-                )   << "Cannot find interface " << interfacePair(alpha1, alpha2)
+                FatalErrorInFunction
+                    << "Cannot find interface " << interfacePair(alpha1, alpha2)
                     << "\n    in table of theta properties for patch "
                     << acap.patch().name()
                     << exit(FatalError);

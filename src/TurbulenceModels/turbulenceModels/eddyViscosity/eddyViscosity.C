@@ -84,6 +84,23 @@ Foam::eddyViscosity<BasicTurbulenceModel>::R() const
 {
     tmp<volScalarField> tk(k());
 
+    // Get list of patchField type names from k
+    wordList patchFieldTypes(tk().boundaryField().types());
+
+    // For k patchField types which do not have an equivalent for symmTensor
+    // set to calculated
+    forAll(patchFieldTypes, i)
+    {
+        if
+        (
+           !fvPatchField<symmTensor>::patchConstructorTablePtr_
+                ->found(patchFieldTypes[i])
+        )
+        {
+            patchFieldTypes[i] = calculatedFvPatchField<symmTensor>::typeName;
+        }
+    }
+
     return tmp<volSymmTensorField>
     (
         new volSymmTensorField
@@ -98,9 +115,16 @@ Foam::eddyViscosity<BasicTurbulenceModel>::R() const
                 false
             ),
             ((2.0/3.0)*I)*tk() - (nut_)*dev(twoSymm(fvc::grad(this->U_))),
-            tk().boundaryField().types()
+            patchFieldTypes
         )
     );
+}
+
+
+template<class BasicTurbulenceModel>
+void Foam::eddyViscosity<BasicTurbulenceModel>::validate()
+{
+    correctNut();
 }
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -114,6 +114,10 @@ protected:
 
         //- Disallow default bitwise assignment
         void operator=(const residuals&);
+
+        //- Output field header information
+        template<class Type>
+        void writeFileHeader(const word& fieldName);
 
         //- Output file header information
         virtual void writeFileHeader(Ostream& os) const;

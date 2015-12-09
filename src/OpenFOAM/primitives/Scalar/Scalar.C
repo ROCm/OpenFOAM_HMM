@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ const Scalar pTraits<Scalar>::max = ScalarVGREAT;
 const Scalar pTraits<Scalar>::rootMin = -ScalarROOTVGREAT;
 const Scalar pTraits<Scalar>::rootMax = ScalarROOTVGREAT;
 
-const char* pTraits<Scalar>::componentNames[] = { "x" };
+const char* pTraits<Scalar>::componentNames[] = { "" };
 
 pTraits<Scalar>::pTraits(const Scalar& p)
 :
@@ -90,7 +90,7 @@ Istream& operator>>(Istream& is, Scalar& s)
     else
     {
         is.setBad();
-        FatalIOErrorIn("operator>>(Istream&, Scalar&)", is)
+        FatalIOErrorInFunction(is)
             << "wrong token type - expected Scalar, found " << t.info()
             << exit(FatalIOError);
 

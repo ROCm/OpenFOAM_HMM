@@ -44,7 +44,11 @@ const Foam::scalar Foam::cyclicACMIPolyPatch::tolerance_ = 1e-6;
 
 void Foam::cyclicACMIPolyPatch::initPatchFaceAreas() const
 {
-    if (!empty() && (faceAreas0_.empty() || boundaryMesh().mesh().moving()))
+    if
+    (
+        !empty()
+     && (faceAreas0_.empty() || boundaryMesh().mesh().moving())
+    )
     {
         faceAreas0_ = faceAreas();
     }
@@ -131,7 +135,7 @@ void Foam::cyclicACMIPolyPatch::setNeighbourFaceAreas() const
     }
     else
     {
-        WarningIn("cyclicACMIPolyPatch::setNeighbourFaceAreas() const")
+        WarningInFunction
             << "Target mask size differs to that of the neighbour patch\n"
             << "    May occur when decomposing." << endl;
     }
@@ -261,16 +265,8 @@ Foam::cyclicACMIPolyPatch::cyclicACMIPolyPatch
 
     if (nonOverlapPatchName_ == name)
     {
-        FatalIOErrorIn
+        FatalIOErrorInFunction
         (
-            "cyclicACMIPolyPatch::cyclicACMIPolyPatch"
-            "("
-                "const word&, "
-                "const dictionary&, "
-                "const label, "
-                "const polyBoundaryMesh&, "
-                "const word&"
-            ")",
             dict
         )   << "Non-overlapping patch name " << nonOverlapPatchName_
             << " cannot be the same as this patch " << name
@@ -326,16 +322,8 @@ Foam::cyclicACMIPolyPatch::cyclicACMIPolyPatch
 
     if (nonOverlapPatchName_ == name())
     {
-        FatalErrorIn
-        (
-            "const cyclicACMIPolyPatch& "
-            "const polyBoundaryMesh&, "
-            "const label, "
-            "const label, "
-            "const label, "
-            "const word&, "
-            "const word&"
-        )   << "Non-overlapping patch name " << nonOverlapPatchName_
+        FatalErrorInFunction
+            << "Non-overlapping patch name " << nonOverlapPatchName_
             << " cannot be the same as this patch " << name()
             << exit(FatalError);
     }
@@ -390,7 +378,7 @@ Foam::label Foam::cyclicACMIPolyPatch::nonOverlapPatchID() const
 
         if (nonOverlapPatchID_ == -1)
         {
-            FatalErrorIn("cyclicPolyAMIPatch::neighbPatchID() const")
+            FatalErrorInFunction
                 << "Illegal non-overlapping patch name " << nonOverlapPatchName_
                 << nl << "Valid patch names are "
                 << this->boundaryMesh().names()
@@ -399,7 +387,7 @@ Foam::label Foam::cyclicACMIPolyPatch::nonOverlapPatchID() const
 
         if (nonOverlapPatchID_ < index())
         {
-            FatalErrorIn("cyclicPolyAMIPatch::neighbPatchID() const")
+            FatalErrorInFunction
                 << "Boundary ordering error: " << type()
                 << " patch must be defined prior to its non-overlapping patch"
                 << nl
@@ -436,11 +424,8 @@ Foam::label Foam::cyclicACMIPolyPatch::nonOverlapPatchID() const
 
         if (!ok)
         {
-            FatalErrorIn
-            (
-                "Foam::label "
-                "Foam::cyclicACMIPolyPatch::nonOverlapPatchID() const"
-            )   << "Inconsistent ACMI patches " << name() << " and "
+            FatalErrorInFunction
+                << "Inconsistent ACMI patches " << name() << " and "
                 << noPp.name() << ".  Patches should have identical topology"
                 << exit(FatalError);
         }

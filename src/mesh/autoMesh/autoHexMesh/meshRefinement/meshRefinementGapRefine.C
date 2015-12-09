@@ -1504,7 +1504,7 @@ Foam::label Foam::meshRefinement::markSmallFeatureRefinement
             {
                 if (!info[i].hit())
                 {
-                    FatalErrorIn("meshRefinement::markSmallFeatureRefinement")
+                    FatalErrorInFunction
                         << "fc:" << ctrs[i]
                         << " radius:" << radiusSqr[i]
                         << exit(FatalError);

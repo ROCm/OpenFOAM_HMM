@@ -39,7 +39,6 @@ Description
 
 #include "fvCFD.H"
 #include "psiReactionThermo.H"
-#include "turbulentFluidThermoModel.H"
 #include "psiChemistryModel.H"
 #include "chemistrySolver.H"
 #include "OFstream.H"

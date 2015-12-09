@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -407,19 +407,7 @@ void Foam::fieldVisualisationBase::addGlyphs
     }
     else
     {
-        WarningIn
-        (
-            "void Foam::fieldVisualisationBase::addGlyphs"
-            "("
-                "const scalar, "
-                "const word&, "
-                "const word&, "
-                "const scalar, "
-                "vtkPolyData*, "
-                "vtkActor*, "
-                "vtkRenderer*"
-            ") const"
-        )
+        WarningInFunction
             << "Glyphs can only be added to " << pTraits<scalar>::typeName
             << " and " << pTraits<vector>::typeName << " fields. "
             << " Field " << scaleFieldName << " has " << nComponents

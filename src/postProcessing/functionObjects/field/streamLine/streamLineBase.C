@@ -165,7 +165,7 @@ void Foam::streamLineBase::initInterpolations
             }
             else
             {
-                FatalErrorIn("streamLineBase::track()")
+                FatalErrorInFunction
                     << "Cannot find field " << fields_[i] << nl
                     << "Valid scalar fields are:"
                     << mesh.names(volScalarField::typeName) << nl
@@ -238,7 +238,7 @@ void Foam::streamLineBase::initInterpolations
 
     if (UIndex == -1)
     {
-        FatalErrorIn("streamLineBase::track()")
+        FatalErrorInFunction
             << "Cannot find field to move particles with : " << UName_ << nl
             << "This field has to be present in the sampled fields " << fields_
             << " and in the objectRegistry."
@@ -575,7 +575,7 @@ void Foam::streamLineBase::read(const dictionary& dict)
             UName_ = "U";
             if (dict.found("U"))
             {
-                IOWarningIn("streamLineBase::read(const dictionary&)", dict)
+                IOWarningInFunction(dict)
                     << "Using deprecated entry \"U\"."
                     << " Please use \"UName\" instead."
                     << endl;
@@ -585,7 +585,7 @@ void Foam::streamLineBase::read(const dictionary& dict)
 
         if (findIndex(fields_, UName_) == -1)
         {
-            FatalIOErrorIn("streamLineBase::read(const dictionary&)", dict)
+            FatalIOErrorInFunction(dict)
                 << "Velocity field for tracking " << UName_
                 << " should be present in the list of fields " << fields_
                 << exit(FatalIOError);
@@ -596,7 +596,7 @@ void Foam::streamLineBase::read(const dictionary& dict)
         dict.lookup("lifeTime") >> lifeTime_;
         if (lifeTime_ < 1)
         {
-            FatalErrorIn(":streamLineBase::read(const dictionary&)")
+            FatalErrorInFunction
                 << "Illegal value " << lifeTime_ << " for lifeTime"
                 << exit(FatalError);
         }

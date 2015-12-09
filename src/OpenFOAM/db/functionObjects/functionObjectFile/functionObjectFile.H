@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -170,6 +170,9 @@ public:
             Ostream& os,
             const string& str
         ) const;
+
+        //- Write the current time to stream
+        void writeTime(Ostream& os) const;
 
         //- Write a (commented) header property and value pair
         template<class Type>

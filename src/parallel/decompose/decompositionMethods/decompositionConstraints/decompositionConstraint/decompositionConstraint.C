@@ -62,15 +62,8 @@ Foam::decompositionConstraint::New
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalIOErrorIn
-        (
-            "decompositionConstraint::New"
-            "("
-                "const dictionary&, "
-                "const word&"
-            ")",
-            dict
-        )   << "Unknown decompositionConstraint type "
+        FatalIOErrorInFunction(dict)
+            << "Unknown decompositionConstraint type "
             << modelType << nl << nl
             << "Valid decompositionConstraint types:" << endl
             << dictionaryConstructorTablePtr_->sortedToc()

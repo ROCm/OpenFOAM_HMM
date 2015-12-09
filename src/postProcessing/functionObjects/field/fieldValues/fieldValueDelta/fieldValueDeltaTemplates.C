@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,20 +77,9 @@ void Foam::fieldValues::fieldValueDelta::apply
         }
         default:
         {
-            FatalErrorIn
-            (
-                "void Foam::fieldValues::fieldValueDelta::applyOperation"
-                "("
-                    "const word&, "
-                    "const word&, "
-                    "const word&, "
-                    "const word&, "
-                    "const word&"
-                    "bool&"
-                ") const"
-            )
-                << "Operation not supported: "
-                << opName
+            FatalErrorInFunction
+                << "Unable to process operation "
+                << operationTypeNames_[operation_]
                 << abort(FatalError);
         }
     }

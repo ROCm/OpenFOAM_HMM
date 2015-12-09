@@ -131,7 +131,7 @@ bool Foam::sampledPatch::update()
 
         if (isA<emptyPolyPatch>(pp))
         {
-            FatalErrorIn("sampledPatch::update()")
+            FatalErrorInFunction
                 << "Cannot sample an empty patch. Patch " << pp.name()
                 << exit(FatalError);
         }

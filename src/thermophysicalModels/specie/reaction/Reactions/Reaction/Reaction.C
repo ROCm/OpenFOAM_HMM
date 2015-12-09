@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -222,7 +222,7 @@ Foam::Reaction<ReactionThermo>::specieCoeffs::specieCoeffs
     }
     else
     {
-        FatalIOErrorIn("Reaction<ReactionThermo>::lrhs(Istream& is)", is)
+        FatalIOErrorInFunction(is)
             << "Expected a word but found " << t.info()
             << exit(FatalIOError);
     }
@@ -306,7 +306,7 @@ void Foam::Reaction<ReactionThermo>::setLRhs
         }
     }
 
-    FatalIOErrorIn("Reaction<ReactionThermo>::setLRhs(Istream& is)", is)
+    FatalIOErrorInFunction(is)
         << "Cannot continue reading reaction data from stream"
         << exit(FatalIOError);
 }
@@ -365,10 +365,8 @@ Foam::Reaction<ReactionThermo>::New
 {
     if (is.eof())
     {
-        FatalIOErrorIn
+        FatalIOErrorInFunction
         (
-            "Reaction<ReactionThermo>::New(const speciesTable&, "
-            " const HashPtrTable<ReactionThermo>&, Istream&)",
             is
         )   << "Reaction type not specified" << nl << nl
             << "Valid Reaction types are :" << nl
@@ -383,10 +381,8 @@ Foam::Reaction<ReactionThermo>::New
 
     if (cstrIter == IstreamConstructorTablePtr_->end())
     {
-        FatalIOErrorIn
+        FatalIOErrorInFunction
         (
-            "Reaction<ReactionThermo>::New(const speciesTable&, "
-            " const HashPtrTable<ReactionThermo>&, Istream&)",
             is
         )   << "Unknown reaction type "
             << reactionTypeName << nl << nl
@@ -418,15 +414,8 @@ Foam::Reaction<ReactionThermo>::New
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalErrorIn
-        (
-            "Reaction<ReactionThermo>::New"
-            "("
-                "const speciesTable&, "
-                "const HashPtrTable<ReactionThermo>&, "
-                "const dictionary&"
-            ")"
-        )   << "Unknown reaction type "
+        FatalErrorInFunction
+            << "Unknown reaction type "
             << reactionTypeName << nl << nl
             << "Valid reaction types are :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
@@ -498,11 +487,7 @@ const Foam::speciesTable& Foam::Reaction<ReactionThermo>::species() const
 template<class ReactionThermo>
 const Foam::speciesTable& Foam::Reaction<ReactionThermo>::gasSpecies() const
 {
-    notImplemented
-    (
-        "const speciesTable& gasSpecies() const"
-        " for this reaction"
-    );
+    NotImplemented;
     return NullObjectRef<speciesTable>();
 }
 
@@ -511,11 +496,7 @@ template<class ReactionThermo>
 const Foam::List<typename Foam::Reaction<ReactionThermo>::specieCoeffs>&
 Foam::Reaction<ReactionThermo>::glhs() const
 {
-    notImplemented
-    (
-        "inline const List<typename Reaction<ReactionThermo>::specieCoeffs>&"
-        "Reaction<ReactionThermo>::glhs()"
-    );
+    NotImplemented;
     return NullObjectRef<List<specieCoeffs> >();
 }
 
@@ -524,11 +505,7 @@ template<class ReactionThermo>
 const Foam::List<typename Foam::Reaction<ReactionThermo>::specieCoeffs>&
 Foam::Reaction<ReactionThermo>::grhs() const
 {
-    notImplemented
-    (
-        "inline const List<typename Reaction<ReactionThermo>::specieCoeffs>&"
-        "Reaction<ReactionThermo>::grhs()"
-    );
+    NotImplemented;
     return NullObjectRef<List<specieCoeffs> >();
 }
 

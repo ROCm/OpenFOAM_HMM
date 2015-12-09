@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,14 +52,8 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
         {
             const word interactionTypeName(this->coeffDict().lookup("type"));
 
-            FatalErrorIn
-            (
-                "StandardWallInteraction<CloudType>::StandardWallInteraction"
-                "("
-                    "const dictionary&, "
-                    "CloudType&"
-                ")"
-            )   << "Unknown interaction result type "
+            FatalErrorInFunction
+                << "Unknown interaction result type "
                 << interactionTypeName
                 << ". Valid selections are:" << this->interactionTypeNames_
                 << endl << exit(FatalError);
@@ -172,17 +166,8 @@ bool Foam::StandardWallInteraction<CloudType>::correct
             }
             default:
             {
-                FatalErrorIn
-                (
-                    "bool StandardWallInteraction<CloudType>::correct"
-                    "("
-                        "typename CloudType::parcelType&, "
-                        "const polyPatch&, "
-                        "bool& keepParticle, "
-                        "const scalar, "
-                        "const tetIndices&"
-                    ") const"
-                )   << "Unknown interaction type "
+                FatalErrorInFunction
+                    << "Unknown interaction type "
                     << this->interactionTypeToWord(interactionType_)
                     << "(" << interactionType_ << ")" << endl
                     << abort(FatalError);

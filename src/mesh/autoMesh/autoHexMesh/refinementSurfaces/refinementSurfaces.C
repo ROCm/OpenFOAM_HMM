@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -210,12 +210,8 @@ Foam::refinementSurfaces::refinementSurfaces
              || globalLevelIncr[surfI] < 0
             )
             {
-                FatalIOErrorIn
-                (
-                    "refinementSurfaces::refinementSurfaces"
-                    "(const searchableSurfaces&, const dictionary>&",
-                    dict
-                )   << "Illegal level specification for surface "
+                FatalIOErrorInFunction(dict)
+                    << "Illegal level specification for surface "
                     << names_[surfI]
                     << " : minLevel:" << globalMinLevel[surfI]
                     << " maxLevel:" << globalMaxLevel[surfI]
@@ -248,12 +244,8 @@ Foam::refinementSurfaces::refinementSurfaces
              || globalGapLevel[surfI][1] > globalGapLevel[surfI][2]
             )
             {
-                FatalIOErrorIn
-                (
-                    "refinementSurfaces::refinementSurfaces"
-                    "(const searchableSurfaces&, const dictionary>&",
-                    dict
-                )   << "Illegal gapLevel specification for surface "
+                FatalIOErrorInFunction(dict)
+                    << "Illegal gapLevel specification for surface "
                     << names_[surfI]
                     << " : gapLevel:" << globalGapLevel[surfI]
                     << " gapMode:" << volumeType::names[globalGapMode[surfI]]
@@ -310,12 +302,8 @@ Foam::refinementSurfaces::refinementSurfaces
                          || levelIncr < 0
                         )
                         {
-                            FatalIOErrorIn
-                            (
-                                "refinementSurfaces::refinementSurfaces"
-                                "(const searchableSurfaces&, const dictionary&",
-                                dict
-                            )   << "Illegal level specification for surface "
+                            FatalIOErrorInFunction(dict)
+                                << "Illegal level specification for surface "
                                 << names_[surfI] << " region "
                                 << regionNames[regionI]
                                 << " : minLevel:" << refLevel[0]
@@ -358,13 +346,8 @@ Foam::refinementSurfaces::refinementSurfaces
                          || gapSpec[1] > gapSpec[2]
                         )
                         {
-                            FatalIOErrorIn
-                            (
-                                "refinementSurfaces::refinementSurfaces"
-                                "(const searchableSurfaces&,"
-                                " const dictionary>&",
-                                dict
-                            )   << "Illegal gapLevel specification for surface "
+                            FatalIOErrorInFunction(dict)
+                                << "Illegal gapLevel specification for surface "
                                 << names_[surfI]
                                 << " : gapLevel:" << gapSpec
                                 << " gapMode:" << volumeType::names[gapModeSpec]
@@ -401,9 +384,8 @@ Foam::refinementSurfaces::refinementSurfaces
 
     if (unmatchedKeys.size() > 0)
     {
-        IOWarningIn
+        IOWarningInFunction
         (
-            "refinementSurfaces::refinementSurfaces(..)",
             surfacesDict
         )   << "Not all entries in refinementSurfaces dictionary were used."
             << " The following entries were not used : "
@@ -1686,7 +1668,7 @@ void Foam::refinementSurfaces::findInside
          && selectionMethod != surfaceZonesInfo::OUTSIDE
         )
         {
-            FatalErrorIn("refinementSurfaces::findInside(..)")
+            FatalErrorInFunction
                 << "Trying to use surface "
                 << surface.name()
                 << " which has non-geometric inside selection method "

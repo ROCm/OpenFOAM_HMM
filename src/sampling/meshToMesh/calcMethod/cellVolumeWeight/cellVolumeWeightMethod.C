@@ -199,7 +199,7 @@ void Foam::cellVolumeWeightMethod::calculateAddressing
 
             if (mag(srcVol) > ROOTVSMALL && mag((tgtVol-srcVol)/srcVol) > 1e-6)
             {
-                WarningIn("cellVolumeWeightMethod::calculateAddressing(..)")
+                WarningInFunction
                     << "At cell " << cellI << " cc:"
                     << src_.cellCentres()[cellI]
                     << " vol:" << srcVol
@@ -215,7 +215,7 @@ void Foam::cellVolumeWeightMethod::calculateAddressing
 
             if (mag(tgtVol) > ROOTVSMALL && mag((srcVol-tgtVol)/tgtVol) > 1e-6)
             {
-                WarningIn("cellVolumeWeightMethod::calculateAddressing(..)")
+                WarningInFunction
                     << "At cell " << cellI << " cc:"
                     << tgt_.cellCentres()[cellI]
                     << " vol:" << tgtVol

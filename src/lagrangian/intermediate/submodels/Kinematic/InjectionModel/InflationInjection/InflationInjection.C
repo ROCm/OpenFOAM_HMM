@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -140,7 +140,7 @@ Foam::InflationInjection<CloudType>::InflationInjection
     fraction_(im.fraction_),
     selfSeed_(im.selfSeed_),
     dSeed_(im.dSeed_),
-    sizeDistribution_(im.sizeDistribution_().clone().ptr())
+    sizeDistribution_(im.sizeDistribution_, false)
 {}
 
 
@@ -236,15 +236,7 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
     {
         if (iterationNo > maxIterations)
         {
-            WarningIn
-            (
-                "Foam::label "
-                "Foam::InflationInjection<CloudType>::parcelsToInject"
-                "("
-                    "const scalar, "
-                    "const scalar"
-                ")"
-            )
+            WarningInFunction
                 << "Maximum particle split iterations ("
                 << maxIterations << ") exceeded" << endl;
 

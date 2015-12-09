@@ -84,18 +84,8 @@ Foam::MPPICCloud<CloudType>::MPPICCloud
     {
         if (this->solution().steadyState())
         {
-            FatalErrorIn
-            (
-                "Foam::MPPICCloud<CloudType>::MPPICCloud"
-                "("
-                    "const word&, "
-                    "const volScalarField&, "
-                    "const volVectorField&, "
-                    "const volScalarField&, "
-                    "const dimensionedVector&, "
-                    "bool"
-                ")"
-            )   << "MPPIC modelling not available for steady state calculations"
+            FatalErrorInFunction
+                << "MPPIC modelling not available for steady state calculations"
                 << exit(FatalError);
         }
 

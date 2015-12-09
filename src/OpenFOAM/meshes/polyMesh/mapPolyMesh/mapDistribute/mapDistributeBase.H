@@ -447,10 +447,7 @@ public:
             //- Correct for topo change.
             void updateMesh(const mapPolyMesh&)
             {
-                notImplemented
-                (
-                    "mapDistributeBase::updateMesh(const mapPolyMesh&)"
-                );
+                NotImplemented;
             }
 
     // Member Operators

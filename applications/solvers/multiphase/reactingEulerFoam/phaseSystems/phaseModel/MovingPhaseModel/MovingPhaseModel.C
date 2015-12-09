@@ -25,7 +25,7 @@ License
 
 #include "MovingPhaseModel.H"
 #include "phaseSystem.H"
-#include "PhaseCompressibleTurbulenceModel.H"
+#include "phaseCompressibleTurbulenceModel.H"
 #include "fixedValueFvPatchFields.H"
 #include "slipFvPatchFields.H"
 #include "partialSlipFvPatchFields.H"
@@ -174,9 +174,10 @@ Foam::MovingPhaseModel<BasePhaseModel>::MovingPhaseModel
         fluid.mesh(),
         dimensionedVector("0", dimAcceleration, vector::zero)
     ),
+    divU_(NULL),
     turbulence_
     (
-        PhaseCompressibleTurbulenceModel<phaseModel>::New
+        phaseCompressibleTurbulenceModel::New
         (
             *this,
             this->thermo().rho(),
@@ -318,6 +319,25 @@ Foam::MovingPhaseModel<BasePhaseModel>::DUDt() const
 
 
 template<class BasePhaseModel>
+const Foam::tmp<Foam::volScalarField>&
+Foam::MovingPhaseModel<BasePhaseModel>::divU() const
+{
+    return divU_;
+}
+
+
+template<class BasePhaseModel>
+void
+Foam::MovingPhaseModel<BasePhaseModel>::divU
+(
+    const tmp<volScalarField>& divU
+)
+{
+    divU_ = divU;
+}
+
+
+template<class BasePhaseModel>
 Foam::tmp<Foam::volScalarField>
 Foam::MovingPhaseModel<BasePhaseModel>::continuityError() const
 {
@@ -374,7 +394,7 @@ Foam::MovingPhaseModel<BasePhaseModel>::alphaRhoPhi()
 
 
 template<class BasePhaseModel>
-const Foam::PhaseCompressibleTurbulenceModel<Foam::phaseModel>&
+const Foam::phaseCompressibleTurbulenceModel&
 Foam::MovingPhaseModel<BasePhaseModel>::turbulence() const
 {
     return turbulence_;

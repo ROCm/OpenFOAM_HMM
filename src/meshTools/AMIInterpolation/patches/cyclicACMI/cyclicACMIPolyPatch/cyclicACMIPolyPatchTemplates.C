@@ -32,7 +32,7 @@ Foam::tmp<Foam::Field<Type> > Foam::cyclicACMIPolyPatch::interpolate
     const Field<Type>& fldNonOverlap
 ) const
 {
-    // note: do not scale AMI field as face areas have already been taken
+    // Note: do not scale AMI field as face areas have already been taken
     // into account
 
     if (owner())
@@ -77,7 +77,7 @@ void Foam::cyclicACMIPolyPatch::interpolate
     List<Type>& result
 ) const
 {
-    // note: do not scale AMI field as face areas have already been taken
+    // Note: do not scale AMI field as face areas have already been taken
     // into account
 
     if (owner())

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,7 +45,7 @@ void Foam::fieldMinMax::output
 
     if (writeLocation_)
     {
-        file<< obr_.time().value();
+        writeTime(file());
 
         writeTabbed(file, fieldName);
 
@@ -278,14 +278,7 @@ void Foam::fieldMinMax::calcMinMaxFields
             }
             default:
             {
-                FatalErrorIn
-                (
-                    "Foam::fieldMinMax::calcMinMaxFields"
-                    "("
-                        "const word&, "
-                        "const modeType&"
-                    ")"
-                )
+                FatalErrorInFunction
                     << "Unknown min/max mode: " << modeTypeNames_[mode_]
                     << exit(FatalError);
             }

@@ -102,7 +102,7 @@ void Foam::faceOnlySet::calcSamples
     // distance vector between sampling points
     if (mag(end_ - start_) < SMALL)
     {
-        FatalErrorIn("faceOnlySet::calcSamples()")
+        FatalErrorInFunction
             << "Incorrect sample specification :"
             << " start equals end point." << endl
             << "  start:" << start_

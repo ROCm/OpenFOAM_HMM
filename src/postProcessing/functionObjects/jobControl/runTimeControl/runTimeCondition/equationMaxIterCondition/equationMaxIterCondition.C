@@ -59,17 +59,7 @@ Foam::equationMaxIterCondition::equationMaxIterCondition
 {
     if (!fieldNames_.size())
     {
-        WarningIn
-        (
-            "Foam::equationMaxIterCondition::"
-            "equationMaxIterCondition"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "functionObjectState&"
-            ")"
-        )
+        WarningInFunction
             << "No fields supplied: deactivating" << endl;
 
         active_ = false;
@@ -129,7 +119,7 @@ bool Foam::equationMaxIterCondition::apply()
     {
         if (result[i] < 0)
         {
-            WarningIn("bool Foam::equationMaxIterCondition::apply()")
+            WarningInFunction
                 << "Number of iterations data not found for field "
                 << fieldNames_[i] << endl;
         }
@@ -141,7 +131,7 @@ bool Foam::equationMaxIterCondition::apply()
 
     if (!valid)
     {
-        WarningIn("bool Foam::equationMaxIterCondition::apply()")
+        WarningInFunction
             << "Number of iterations data not found for any fields: "
             << "deactivating" << endl;
 

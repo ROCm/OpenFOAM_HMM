@@ -143,7 +143,6 @@ WALE<BasicTurbulenceModel>::WALE
 {
     if (type == typeName)
     {
-        correctNut();
         this->printCoeffs(type);
     }
 }

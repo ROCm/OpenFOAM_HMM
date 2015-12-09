@@ -817,7 +817,7 @@ void Foam::argList::parse
                 // the same build
                 if (slaveBuild != Foam::FOAMbuild)
                 {
-                    FatalErrorIn(executable())
+                    FatalError
                         << "Master is running version " << Foam::FOAMbuild
                         << "; slave " << procI << " is running version "
                         << slaveBuild

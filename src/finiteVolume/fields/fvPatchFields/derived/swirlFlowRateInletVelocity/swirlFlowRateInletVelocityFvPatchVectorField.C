@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,8 +59,8 @@ swirlFlowRateInletVelocityFvPatchVectorField
     fixedValueFvPatchField<vector>(ptf, p, iF, mapper),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_),
-    flowRate_(ptf.flowRate_().clone().ptr()),
-    rpm_(ptf.rpm_().clone().ptr())
+    flowRate_(ptf.flowRate_, false),
+    rpm_(ptf.rpm_, false)
 {}
 
 
@@ -89,8 +89,8 @@ swirlFlowRateInletVelocityFvPatchVectorField
     fixedValueFvPatchField<vector>(ptf),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_),
-    flowRate_(ptf.flowRate_().clone().ptr()),
-    rpm_(ptf.rpm_().clone().ptr())
+    flowRate_(ptf.flowRate_, false),
+    rpm_(ptf.rpm_, false)
 {}
 
 
@@ -104,8 +104,8 @@ swirlFlowRateInletVelocityFvPatchVectorField
     fixedValueFvPatchField<vector>(ptf, iF),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_),
-    flowRate_(ptf.flowRate_().clone().ptr()),
-    rpm_(ptf.rpm_().clone().ptr())
+    flowRate_(ptf.flowRate_, false),
+    rpm_(ptf.rpm_, false)
 {}
 
 
@@ -155,10 +155,8 @@ void Foam::swirlFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
     }
     else
     {
-        FatalErrorIn
-        (
-            "swirlFlowRateInletVelocityFvPatchVectorField::updateCoeffs()"
-        )   << "dimensions of " << phiName_ << " are incorrect" << nl
+        FatalErrorInFunction
+            << "dimensions of " << phiName_ << " are incorrect" << nl
             << "    on patch " << this->patch().name()
             << " of field " << this->dimensionedInternalField().name()
             << " in file " << this->dimensionedInternalField().objectPath()

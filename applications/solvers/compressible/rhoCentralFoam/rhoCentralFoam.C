@@ -54,6 +54,8 @@ int main(int argc, char *argv[])
     #include "createTimeControls.H"
     #include "createRDeltaT.H"
 
+    turbulence->validate();
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     #include "readFluxScheme.H"

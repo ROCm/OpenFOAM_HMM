@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -121,10 +121,8 @@ Foam::PackedBoolList Foam::isoSurface::collocatedFaces
     }
     else
     {
-        FatalErrorIn
-        (
-            "isoSurface::collocatedFaces(const coupledPolyPatch&) const"
-        )   << "Unhandled coupledPolyPatch type " << pp.type()
+        FatalErrorInFunction
+            << "Unhandled coupledPolyPatch type " << pp.type()
             << abort(FatalError);
     }
     return collocated;
@@ -887,7 +885,7 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
 
     if ((triPoints.size() % 3) != 0)
     {
-        FatalErrorIn("isoSurface::stitchTriPoints(..)")
+        FatalErrorInFunction
             << "Problem: number of points " << triPoints.size()
             << " not a multiple of 3." << abort(FatalError);
     }
@@ -918,7 +916,7 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
 
         if (hasMerged)
         {
-            FatalErrorIn("isoSurface::stitchTriPoints(..)")
+            FatalErrorInFunction
                 << "Merged points contain duplicates"
                 << " when merging with distance " << mergeDistance_ << endl
                 << "merged:" << newPoints.size() << " re-merged:"
@@ -1035,7 +1033,7 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
 
                     if (f == nbrF)
                     {
-                        FatalErrorIn("validTri(const triSurface&, const label)")
+                        FatalErrorInFunction
                             << "Check : "
                             << " triangle " << faceI << " vertices " << f
                             << " fc:" << f.centre(surf.points())
@@ -1281,7 +1279,7 @@ bool Foam::isoSurface::validTri(const triSurface& surf, const label faceI)
      || (f[2] < 0) || (f[2] >= surf.points().size())
     )
     {
-        WarningIn("validTri(const triSurface&, const label)")
+        WarningInFunction
             << "triangle " << faceI << " vertices " << f
             << " uses point indices outside point range 0.."
             << surf.points().size()-1 << endl;
@@ -1291,7 +1289,7 @@ bool Foam::isoSurface::validTri(const triSurface& surf, const label faceI)
 
     if ((f[0] == f[1]) || (f[0] == f[2]) || (f[1] == f[2]))
     {
-        WarningIn("validTri(const triSurface&, const label)")
+        WarningInFunction
             << "triangle " << faceI
             << " uses non-unique vertices " << f
             << endl;
@@ -1323,7 +1321,7 @@ bool Foam::isoSurface::validTri(const triSurface& surf, const label faceI)
          && ((f[2] == nbrF[0]) || (f[2] == nbrF[1]) || (f[2] == nbrF[2]))
         )
         {
-            WarningIn("validTri(const triSurface&, const label)")
+            WarningInFunction
                 << "triangle " << faceI << " vertices " << f
                 << " fc:" << f.centre(surf.points())
                 << " has the same vertices as triangle " << nbrFaceI

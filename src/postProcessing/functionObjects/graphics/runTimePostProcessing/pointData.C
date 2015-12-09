@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -142,16 +142,8 @@ Foam::autoPtr<Foam::pointData> Foam::pointData::New
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalErrorIn
-        (
-            "Foam::autoPtr<Foam::pointData> Foam::pointData::New"
-            "("
-                "const runTimePostProcessing&, "
-                "const dictionary&, "
-                "const HashPtrTable<DataEntry<vector>, word>&, "
-                "const word&"
-            ")"
-        )   << "Unknown pointData type "
+        FatalErrorInFunction
+            << "Unknown pointData type "
             << pointDataType << nl << nl
             << "Valid pointData types are:" << endl
             << dictionaryConstructorTablePtr_->sortedToc()

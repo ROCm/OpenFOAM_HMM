@@ -113,10 +113,8 @@ void Foam::distanceSurface::createGeometry()
                 }
                 else
                 {
-                    FatalErrorIn
-                    (
-                        "void Foam::distanceSurface::createGeometry()"
-                    )   << "getVolumeType failure, neither INSIDE or OUTSIDE"
+                    FatalErrorInFunction
+                        << "getVolumeType failure, neither INSIDE or OUTSIDE"
                         << exit(FatalError);
                 }
             }
@@ -165,10 +163,8 @@ void Foam::distanceSurface::createGeometry()
                     }
                     else
                     {
-                        FatalErrorIn
-                        (
-                            "void Foam::distanceSurface::createGeometry()"
-                        )   << "getVolumeType failure, "
+                        FatalErrorInFunction
+                            << "getVolumeType failure, "
                             << "neither INSIDE or OUTSIDE"
                             << exit(FatalError);
                     }
@@ -224,10 +220,8 @@ void Foam::distanceSurface::createGeometry()
                 }
                 else
                 {
-                    FatalErrorIn
-                    (
-                        "void Foam::distanceSurface::createGeometry()"
-                    )   << "getVolumeType failure, neither INSIDE or OUTSIDE"
+                    FatalErrorInFunction
+                        << "getVolumeType failure, neither INSIDE or OUTSIDE"
                         << exit(FatalError);
                 }
             }

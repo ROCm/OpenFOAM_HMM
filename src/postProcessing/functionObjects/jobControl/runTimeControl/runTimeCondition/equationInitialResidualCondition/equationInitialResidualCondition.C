@@ -74,17 +74,7 @@ Foam::equationInitialResidualCondition::equationInitialResidualCondition
 {
     if (!fieldNames_.size())
     {
-        WarningIn
-        (
-            "Foam::equationInitialResidualCondition::"
-            "equationInitialResidualCondition"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "functionObjectState&"
-            ")"
-        )
+        WarningInFunction
             << "No fields supplied: deactivating" << endl;
 
         active_ = false;
@@ -151,10 +141,7 @@ bool Foam::equationInitialResidualCondition::apply()
                 }
                 default:
                 {
-                    FatalErrorIn
-                    (
-                        "bool Foam::equationInitialResidualCondition::apply()"
-                    )
+                    FatalErrorInFunction
                         << "Unhandled enumeration "
                         << operatingModeNames[mode_]
                         << abort(FatalError);
@@ -168,7 +155,7 @@ bool Foam::equationInitialResidualCondition::apply()
     {
         if (result[i] < 0)
         {
-            WarningIn("bool Foam::equationInitialResidualCondition::apply()")
+            WarningInFunction
                 << "Initial residual data not found for field "
                 << fieldNames_[i] << endl;
         }
@@ -180,7 +167,7 @@ bool Foam::equationInitialResidualCondition::apply()
 
     if (!valid)
     {
-        WarningIn("bool Foam::equationInitialResidualCondition::apply()")
+        WarningInFunction
             << "Initial residual data not found for any fields: "
             << "deactivating" << endl;
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -103,7 +103,7 @@ labelList nearestPatch(const polyMesh& mesh, const labelList& patchIDs)
         {
             if (!haveWarned)
             {
-                WarningIn("meshRefinement::nearestPatch(..)")
+                WarningInFunction
                     << "Did not visit some faces, e.g. face " << faceI
                     << " at " << mesh.faceCentres()[faceI] << endl
                     << "Using patch " << patchIDs[0] << " as nearest"
@@ -337,7 +337,7 @@ int main(int argc, char *argv[])
 
         if (exposedPatchIDs[0] == -1)
         {
-            FatalErrorIn(args.executable()) << "Illegal patch " << patchName
+            FatalErrorInFunction
                 << nl << "Valid patches are " << mesh.boundaryMesh().names()
                 << exit(FatalError);
         }
