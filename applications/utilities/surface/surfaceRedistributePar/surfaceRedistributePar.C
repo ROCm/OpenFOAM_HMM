@@ -160,6 +160,23 @@ int main(int argc, char *argv[])
         Pstream::scatterList(meshBb);
     }
 
+
+
+    // Temporarily: override master-only checking
+    regIOobject::fileCheckTypes oldCheckType =
+        regIOobject::fileModificationChecking;
+
+    if (oldCheckType == regIOobject::timeStampMaster)
+    {
+        regIOobject::fileModificationChecking = regIOobject::timeStamp;
+    }
+    else if (oldCheckType == regIOobject::inotifyMaster)
+    {
+        regIOobject::fileModificationChecking = regIOobject::inotify;
+    }
+
+
+
     IOobject io
     (
         surfFileName,         // name
@@ -283,6 +300,10 @@ int main(int argc, char *argv[])
 
     Info<< "Writing surface." << nl << endl;
     surfMesh.objectRegistry::write();
+
+
+    regIOobject::fileModificationChecking = oldCheckType;
+
 
     Info<< "End\n" << endl;
 
