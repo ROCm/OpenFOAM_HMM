@@ -41,7 +41,7 @@ Description
 #include "turbulentFluidThermoModel.H"
 #include "bound.H"
 #include "pimpleControl.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "localEulerDdtScheme.H"
 #include "fvcSmooth.H"
 
@@ -61,6 +61,8 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "createMRF.H"
     #include "createFvOptions.H"
+
+    turbulence->validate();
 
     if (!LTS)
     {

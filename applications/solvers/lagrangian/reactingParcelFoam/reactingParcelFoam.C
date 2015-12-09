@@ -42,7 +42,7 @@ Description
 #include "basicReactingMultiphaseCloud.H"
 #include "rhoCombustionModel.H"
 #include "radiationModel.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "SLGThermo.H"
 #include "pimpleControl.H"
 #include "localEulerDdtScheme.H"
@@ -68,6 +68,8 @@ int main(int argc, char *argv[])
     #include "createClouds.H"
     #include "createMRF.H"
     #include "createFvOptions.H"
+
+    turbulence->validate();
 
     if (!LTS)
     {

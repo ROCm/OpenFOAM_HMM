@@ -38,7 +38,7 @@ Description
 
 #include "fvCFD.H"
 #include "twoPhaseSystem.H"
-#include "PhaseCompressibleTurbulenceModel.H"
+#include "phaseCompressibleTurbulenceModel.H"
 #include "fixedFluxPressureFvPatchScalarField.H"
 #include "pimpleControl.H"
 #include "localEulerDdtScheme.H"
@@ -79,6 +79,11 @@ int main(int argc, char *argv[])
     );
 
     #include "pUf/createDDtU.H"
+
+    int nEnergyCorrectors
+    (
+        pimple.dict().lookupOrDefault<int>("nEnergyCorrectors", 1)
+    );
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

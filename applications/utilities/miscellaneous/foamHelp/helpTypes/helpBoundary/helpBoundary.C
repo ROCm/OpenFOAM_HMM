@@ -90,22 +90,6 @@ void Foam::helpTypes::helpBoundary::execute
 )
 {
     setEnv("FOAM_ABORT", "", true);
-/*
-    bool abortVar(env("FOAM_ABORT"));
-    if (abortVar)
-    {
-        FatalErrorIn
-        (
-            "void Foam::helpTypes::helpBoundary::execute"
-            "("
-                "const argList&, "
-                "const fvMesh&"
-            ")"
-        )
-            << "Please unset FOAM_ABORT to use this utility"
-            << exit(FatalError);
-    }
-*/
 
     word condition(word::null);
     word fieldName(word::null);
@@ -159,27 +143,13 @@ void Foam::helpTypes::helpBoundary::execute
         }
         else
         {
-            FatalErrorIn
-            (
-                "void Foam::helpTypes::helpBoundary::execute"
-                "("
-                    "const argList&, "
-                    "const fvMesh&"
-                ")"
-            )
+            FatalErrorInFunction
                 << "Unable to read field " << fieldName << exit(FatalError);
         }
     }
     else if (args.optionReadIfPresent("fixedValue", fieldName))
     {
-        FatalErrorIn
-        (
-            "void Foam::helpTypes::helpBoundary::execute"
-            "("
-                "const argList&, "
-                "const fvMesh&"
-            ")"
-        )
+        FatalErrorInFunction
             << "-field option must be specified when using the -fixedValue "
             << "option" << exit(FatalError);
     }

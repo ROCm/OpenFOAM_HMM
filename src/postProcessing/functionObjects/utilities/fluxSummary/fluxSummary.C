@@ -75,17 +75,7 @@ void Foam::fluxSummary::initialiseFaceZone
 
     if (zoneI == -1)
     {
-        FatalErrorIn
-        (
-            "void  Foam::fluxSummary::initialiseFaceZone"
-            "("
-                "const word&, "
-                "DynamicList<word>&, "
-                "DynamicList<List<label> >&, "
-                "DynamicList<List<label> >&, "
-                "DynamicList<List<scalar> >&"
-            ") const"
-        )
+        FatalErrorInFunction
             << "Unable to find faceZone " << faceZoneName
             << ".  Valid faceZones are: " << mesh.faceZones().names()
             << exit(FatalError);
@@ -178,19 +168,7 @@ void Foam::fluxSummary::initialiseFaceZoneAndDirection
 
     if (zoneI == -1)
     {
-        FatalErrorIn
-        (
-            "void  Foam::fluxSummary::initialiseFaceZoneAndDirection"
-            "("
-                "const word&, "
-                "const vector&, "
-                "DynamicList<vector>&, "
-                "DynamicList<word>&, "
-                "DynamicList<List<label> >&, "
-                "DynamicList<List<label> >&, "
-                "DynamicList<List<scalar> >&"
-            ") const"
-        )
+         FatalErrorInFunction
             << "Unable to find faceZone " << faceZoneName
             << ".  Valid faceZones are: " << mesh.faceZones().names()
             << exit(FatalError);
@@ -299,19 +277,7 @@ void Foam::fluxSummary::initialiseCellZoneAndDirection
 
     if (cellZoneI == -1)
     {
-        FatalErrorIn
-        (
-            "void Foam::fluxSummary::initialiseCellZoneAndDirection"
-            "("
-                "const word&, "
-                "const vector&, "
-                "DynamicList<vector>&, "
-                "DynamicList<word>&, "
-                "DynamicList<List<label> >&, "
-                "DynamicList<List<label> >&, "
-                "DynamicList<List<scalar> >&"
-            ") const"
-        )
+        FatalErrorInFunction
             << "Unable to find cellZone " << cellZoneName
             << ". Valid zones are: " << mesh.cellZones().names()
             << exit(FatalError);
@@ -474,19 +440,8 @@ void Foam::fluxSummary::initialiseCellZoneAndDirection
             {
                 if (allEdgeInfo[fEdges[i]].region() != -1)
                 {
-                    WarningIn
-                    (
-                        "void Foam::fluxSummary::initialiseCellZoneAndDirection"
-                        "("
-                            "const word&, "
-                            "const vector&, "
-                            "DynamicList<vector>&, "
-                            "DynamicList<word>&, "
-                            "DynamicList<List<label> >&, "
-                            "DynamicList<List<label> >&, "
-                            "DynamicList<List<scalar> >&"
-                        ") const"
-                    )   << "Problem in edge face wave: attempted to assign a "
+                    WarningInFunction
+                        << "Problem in edge face wave: attempted to assign a "
                         << "value to an edge that has already been visited. "
                         << "Edge info: " << allEdgeInfo[fEdges[i]]
                         << endl;
@@ -650,16 +605,8 @@ Foam::fluxSummary::fluxSummary
     if (!isA<fvMesh>(obr_))
     {
         active_ = false;
-        WarningIn
-        (
-            "fluxSummary::fluxSummary"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating " << name_
+        WarningInFunction
+            << "No fvMesh available, deactivating " << name_
             << endl;
     }
 
@@ -759,11 +706,7 @@ void Foam::fluxSummary::read(const dictionary& dict)
         }
         default:
         {
-            FatalIOErrorIn
-            (
-                "void Foam::fluxSummary::read(const dictionary&)",
-                dict
-            )
+            FatalIOErrorInFunction(dict)
                 << "unhandled enumeration " << modeTypeNames_[mode_]
                 << abort(FatalIOError);
         }
@@ -887,7 +830,7 @@ void Foam::fluxSummary::write()
     }
     else
     {
-        FatalErrorIn("void Foam::fluxSummary::write()")
+        FatalErrorInFunction
             << "Unsupported flux field " << phi.name() << " with dimensions "
             << phi.dimensions() << ".  Expected eithe mass flow or volumetric "
             << "flow rate" << abort(FatalError);

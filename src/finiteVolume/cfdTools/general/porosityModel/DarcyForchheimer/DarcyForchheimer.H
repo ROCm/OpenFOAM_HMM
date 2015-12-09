@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,8 +70,6 @@ class DarcyForchheimer
 :
     public porosityModel
 {
-private:
-
     // Private data
 
         //- Darcy coeffient XYZ components (user-supplied) [1/m2]
@@ -149,7 +147,7 @@ public:
     // Member Functions
 
         //- Transform the model data wrt mesh changes
-        virtual void calcTranformModelData();
+        virtual void calcTransformModelData();
 
         //- Calculate the porosity force
         virtual void calcForce

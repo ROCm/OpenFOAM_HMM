@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,14 +59,7 @@ Foam::word Foam::solverTemplate::readFromDict
 {
     if (!dictHeader.headerOk())
     {
-        FatalErrorIn
-        (
-            "Foam::word Foam::solverTemplate::readFromDict"
-            "("
-                "IOobject&, "
-                "const word&"
-            ") const"
-        )
+        FatalErrorInFunction
             << "Unable to open file "
             << dictHeader.objectPath()
             << exit(FatalError);
@@ -142,33 +135,16 @@ Foam::dictionary Foam::solverTemplate::readFluidFieldTemplates
             }
             else
             {
-                FatalErrorIn
-                (
-                    "Foam::dictionary "
-                    "Foam::solverTemplate::readFluidFieldTemplates"
-                    "("
-                        "const word&, "
-                        "const fileName&, "
-                        "const dictionary&, "
-                        "const Time&"
-                    ") const"
-                )   << "Unhandled turbulence model option " << simulationType
+                FatalErrorInFunction
+                    << "Unhandled turbulence model option " << simulationType
                     << ". Valid options are laminar, RAS, LES"
                     << exit(FatalError);
             }
         }
         else
         {
-            FatalErrorIn
-            (
-                "Foam::dictionary Foam::solverTemplate::readFluidFieldTemplates"
-                "("
-                    "const word&, "
-                    "const fileName&, "
-                    "const dictionary&, "
-                    "const Time&"
-                ") const"
-            )   << "Unhandled turbulence model option " << simulationType
+            FatalErrorInFunction
+                << "Unhandled turbulence model option " << simulationType
                 << ". Valid options are turbulenceModel"
                 << exit(FatalError);
         }

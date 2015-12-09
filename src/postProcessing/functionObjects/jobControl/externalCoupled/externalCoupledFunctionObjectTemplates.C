@@ -73,16 +73,8 @@ bool Foam::externalCoupledFunctionObject::readData
 
         if (!masterFilePtr().good())
         {
-            FatalIOErrorIn
-            (
-                "void externalCoupledFunctionObject::readData"
-                "("
-                    "const UPtrList<const fvMesh>&, "
-                    "const wordRe&, "
-                    "const word&"
-               ")",
-                masterFilePtr()
-            )   << "Cannot open file for region " << compositeName(regionNames)
+            FatalIOErrorInFunction(masterFilePtr())
+                << "Cannot open file for region " << compositeName(regionNames)
                 << ", field " << fieldName
                 << exit(FatalIOError);
         }
@@ -285,15 +277,7 @@ bool Foam::externalCoupledFunctionObject::readData
             }
             else
             {
-                FatalErrorIn
-                (
-                    "void externalCoupledFunctionObject::readData"
-                    "("
-                        "const UPtrList<const fvMesh>&, "
-                        "const wordRe&, "
-                        "const word&"
-                   ")"
-                )
+                FatalErrorInFunction
                     << "Unsupported boundary condition " << bf[patchI].type()
                     << " for patch " << bf[patchI].patch().name()
                     << " in region " << mesh.name()
@@ -389,16 +373,8 @@ bool Foam::externalCoupledFunctionObject::writeData
 
         if (!masterFilePtr().good())
         {
-            FatalIOErrorIn
-            (
-                "externalCoupledFunctionObject::writeData"
-                "("
-                    "const UPtrList<const fvMesh>&, "
-                    "const wordRe&, "
-                    "const word&"
-                ") const",
-                masterFilePtr()
-            )   << "Cannot open file for region " << compositeName(regionNames)
+            FatalIOErrorInFunction(masterFilePtr())
+                << "Cannot open file for region " << compositeName(regionNames)
                 << ", field " << fieldName
                 << exit(FatalIOError);
         }

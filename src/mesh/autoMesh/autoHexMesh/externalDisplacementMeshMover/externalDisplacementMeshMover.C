@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -146,12 +146,8 @@ Foam::externalDisplacementMeshMover::New
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalErrorIn
-        (
-            "externalDisplacementMeshMover::New(const word&"
-            ", pointVectorField&, const List<labelPair>&"
-            ", const dictionary&)"
-        )   << "Unknown externalDisplacementMeshMover type "
+        FatalErrorInFunction
+            << "Unknown externalDisplacementMeshMover type "
             << type << nl << nl
             << "Valid externalDisplacementMeshMover types:" << endl
             << dictionaryConstructorTablePtr_->sortedToc()

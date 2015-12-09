@@ -41,6 +41,7 @@ Description
 #include "fvCFD.H"
 #include "singlePhaseTransportModel.H"
 #include "turbulentTransportModel.H"
+#include "fvOptions.H"
 #include "wallFvPatch.H"
 #include "makeGraph.H"
 
@@ -55,7 +56,10 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
     #include "createFields.H"
+    #include "createFvOptions.H"
     #include "interrogateWallPatches.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,12 +74,16 @@ int main(int argc, char *argv[])
 
         fvVectorMatrix UEqn
         (
-            divR == gradP
+            divR == gradP + fvOptions(U)
         );
 
         UEqn.relax();
 
+        fvOptions.constrain(UEqn);
+
         UEqn.solve();
+
+        fvOptions.correct(U);
 
 
         // Correct driving force for a constant volume flow rate

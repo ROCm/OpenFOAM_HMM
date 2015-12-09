@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,7 +76,7 @@ offsetSurface::offsetSurface(const dictionary& dict)
      || b.nEdges() != o.nEdges()
     )
     {
-        FatalIOErrorIn("offsetSurface::offsetSurface(const dictionary&)", dict)
+        FatalIOErrorInFunction(dict)
             << "offsetSurface " << offsetName
             << " should have exactly the same topology as the baseSurface "
             << baseName << exit(FatalIOError);

@@ -80,7 +80,7 @@ bool Foam::turbulenceFields::compressible()
     }
     else
     {
-        WarningIn("Foam::word& Foam::turbulenceFields::compressible() const")
+        WarningInFunction
             << "Turbulence model not found in database, deactivating";
         active_ = false;
     }
@@ -113,16 +113,8 @@ Foam::turbulenceFields::turbulenceFields
     else
     {
         active_ = false;
-        WarningIn
-        (
-            "turbulenceFields::turbulenceFields"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating " << name_
+        WarningInFunction
+            << "No fvMesh available, deactivating " << name_
             << endl;
     }
 }
@@ -226,7 +218,7 @@ void Foam::turbulenceFields::execute()
                 }
                 default:
                 {
-                    FatalErrorIn("void Foam::turbulenceFields::execute()")
+                    FatalErrorInFunction
                         << "Invalid field selection" << abort(FatalError);
                 }
             }
@@ -274,7 +266,7 @@ void Foam::turbulenceFields::execute()
                 }
                 default:
                 {
-                    FatalErrorIn("void Foam::turbulenceFields::execute()")
+                    FatalErrorInFunction
                         << "Invalid field selection" << abort(FatalError);
                 }
             }

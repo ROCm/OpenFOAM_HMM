@@ -222,7 +222,6 @@ ShihQuadraticKE::ShihQuadraticKE
 
     if (type == typeName)
     {
-        correctNut();
         printCoeffs(type);
     }
 }

@@ -155,7 +155,7 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
 
         if (curPatch.coupled())
         {
-            WarningIn("mirrorFvMesh::mirrorFvMesh(const IOobject&)")
+            WarningInFunction
                 << "Found coupled patch " << curPatch.name() << endl
                 << "    Mirroring faces on coupled patches destroys"
                 << " the ordering. This might be fixed by running a dummy"
@@ -242,10 +242,7 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
     }
 
     // Mirror boundary faces patch by patch
-
-
     labelList newToOldPatch(boundary().size(), -1);
-
     labelList newPatchSizes(boundary().size(), -1);
     labelList newPatchStarts(boundary().size(), -1);
     label nNewPatches = 0;

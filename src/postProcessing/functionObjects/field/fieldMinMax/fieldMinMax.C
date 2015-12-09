@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -160,7 +160,8 @@ void Foam::fieldMinMax::write()
 {
     if (active_)
     {
-        if (!writeLocation_) file()<< obr_.time().value();
+        if (!writeLocation_) writeTime(file());
+
         if (log_) Info<< type() << " " << name_ <<  " output:" << nl;
 
         forAll(fieldSet_, fieldI)

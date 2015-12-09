@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -31,13 +31,11 @@ License
 #include "unitConversion.H"
 #include "primitiveMeshTools.H"
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(polyMeshGeometry, 0);
-
+namespace Foam
+{
+    defineTypeNameAndDebug(polyMeshGeometry, 0);
 }
 
 
@@ -257,12 +255,8 @@ Foam::scalar Foam::polyMeshGeometry::checkNonOrtho
             // Non-orthogonality greater than 90 deg
             if (report)
             {
-                WarningIn
-                (
-                    "polyMeshGeometry::checkFaceDotProduct"
-                    "(const bool, const scalar, const labelList&"
-                    ", labelHashSet*)"
-                )   << "Severe non-orthogonality detected for face "
+                WarningInFunction
+                    << "Severe non-orthogonality detected for face "
                     << faceI
                     << " between cells " << mesh.faceOwner()[faceI]
                     << " and " << nei
@@ -537,11 +531,8 @@ bool Foam::polyMeshGeometry::checkFaceDotProduct
     {
         if (report)
         {
-            SeriousErrorIn
-            (
-                "polyMeshGeometry::checkFaceDotProduct"
-                "(const bool, const scalar, const labelList&, labelHashSet*)"
-            )   << "Error in non-orthogonality detected" << endl;
+            SeriousErrorInFunction
+                << "Error in non-orthogonality detected" << endl;
         }
 
         return true;
@@ -720,12 +711,8 @@ bool Foam::polyMeshGeometry::checkFacePyramids
     {
         if (report)
         {
-            SeriousErrorIn
-            (
-                "polyMeshGeometry::checkFacePyramids("
-                "const bool, const scalar, const pointField&"
-                ", const labelList&, labelHashSet*)"
-            )   << "Error in face pyramids: faces pointing the wrong way."
+            SeriousErrorInFunction
+                << "Error in face pyramids: faces pointing the wrong way."
                 << endl;
         }
 
@@ -953,12 +940,8 @@ bool Foam::polyMeshGeometry::checkFaceTets
     {
         if (report)
         {
-            SeriousErrorIn
-            (
-                "polyMeshGeometry::checkFaceTets("
-                "const bool, const scalar, const pointField&, const pointField&"
-                ", const labelList&, labelHashSet*)"
-            )   << "Error in face decomposition: negative tets."
+            SeriousErrorInFunction
+                << "Error in face decomposition: negative tets."
                 << endl;
         }
 
@@ -1167,11 +1150,7 @@ bool Foam::polyMeshGeometry::checkFaceSkewness
     {
         if (report)
         {
-            WarningIn
-            (
-                "polyMeshGeometry::checkFaceSkewness"
-                "(const bool, const scalar, const labelList&, labelHashSet*)"
-            )   << "Large face skewness detected.  Max skewness = "
+            WarningInFunction
                 << 100*maxSkew
                 << " percent.\nThis may impair the quality of the result." << nl
                 << nWarnSkew << " highly skew faces detected."
@@ -1327,11 +1306,7 @@ bool Foam::polyMeshGeometry::checkFaceWeights
     {
         if (report)
         {
-            WarningIn
-            (
-                "polyMeshGeometry::checkFaceWeights"
-                "(const bool, const scalar, const labelList&, labelHashSet*)"
-            )   << "Small interpolation weight detected.  Min weight = "
+            WarningInFunction
                 << minWeight << '.' << nl
                 << nWarnWeight << " faces with small weights detected."
                 << endl;
@@ -1469,11 +1444,7 @@ bool Foam::polyMeshGeometry::checkVolRatio
     {
         if (report)
         {
-            WarningIn
-            (
-                "polyMeshGeometry::checkVolRatio"
-                "(const bool, const scalar, const labelList&, labelHashSet*)"
-            )   << "Small volume ratio detected.  Min ratio = "
+            WarningInFunction
                 << minRatio << '.' << nl
                 << nWarnRatio << " faces with small ratios detected."
                 << endl;
@@ -1511,12 +1482,8 @@ bool Foam::polyMeshGeometry::checkFaceAngles
 {
     if (maxDeg < -SMALL || maxDeg > 180+SMALL)
     {
-        FatalErrorIn
-        (
-            "polyMeshGeometry::checkFaceAngles"
-            "(const bool, const scalar, const pointField&, const labelList&"
-            ", labelHashSet*)"
-        )   << "maxDeg should be [0..180] but is now " << maxDeg
+        FatalErrorInFunction
+            << "maxDeg should be [0..180] but is now " << maxDeg
             << abort(FatalError);
     }
 
@@ -1618,12 +1585,8 @@ bool Foam::polyMeshGeometry::checkFaceAngles
     {
         if (report)
         {
-            WarningIn
-            (
-                "polyMeshGeometry::checkFaceAngles"
-                "(const bool, const scalar,  const pointField&"
-                ", const labelList&, labelHashSet*)"
-            )   << nConcave  << " face points with severe concave angle (> "
+            WarningInFunction
+                << nConcave  << " face points with severe concave angle (> "
                 << maxDeg << " deg) found.\n"
                 << endl;
         }
@@ -1654,13 +1617,8 @@ bool Foam::polyMeshGeometry::checkFaceTwist
 {
     if (minTwist < -1-SMALL || minTwist > 1+SMALL)
     {
-        FatalErrorIn
-        (
-            "polyMeshGeometry::checkFaceTwist"
-            "(const bool, const scalar, const polyMesh&, const pointField&"
-            ", const pointField&, const pointField&, const pointField&"
-            ", const labelList&, labelHashSet*)"
-        )   << "minTwist should be [-1..1] but is now " << minTwist
+        FatalErrorInFunction
+            << "minTwist should be [-1..1] but is now " << minTwist
             << abort(FatalError);
     }
 
@@ -1812,13 +1770,8 @@ bool Foam::polyMeshGeometry::checkFaceTwist
     {
         if (report)
         {
-            WarningIn
-            (
-                "polyMeshGeometry::checkFaceTwist"
-                "(const bool, const scalar, const polyMesh&, const pointField&"
-                ", const pointField&, const pointField&, const pointField&"
-                ", const labelList&, labelHashSet*)"
-            )   << nWarped  << " faces with severe warpage "
+            WarningInFunction
+                << nWarped  << " faces with severe warpage "
                 << "(cosine of the angle between triangle normal and "
                 << "face normal < " << minTwist << ") found.\n"
                 << endl;
@@ -1848,12 +1801,8 @@ bool Foam::polyMeshGeometry::checkTriangleTwist
 {
     if (minTwist < -1-SMALL || minTwist > 1+SMALL)
     {
-        FatalErrorIn
-        (
-            "polyMeshGeometry::checkTriangleTwist"
-            "(const bool, const scalar, const polyMesh&, const pointField&"
-            ", const labelList&, labelHashSet*)"
-        )   << "minTwist should be [-1..1] but is now " << minTwist
+        FatalErrorInFunction
+            << "minTwist should be [-1..1] but is now " << minTwist
             << abort(FatalError);
     }
 
@@ -1972,12 +1921,8 @@ bool Foam::polyMeshGeometry::checkTriangleTwist
     {
         if (report)
         {
-            WarningIn
-            (
-                "polyMeshGeometry::checkTriangleTwist"
-                "(const bool, const scalar, const polyMesh&"
-                ", const pointField&, const labelList&, labelHashSet*)"
-            )   << nWarped  << " faces with severe warpage "
+            WarningInFunction
+                << nWarped  << " faces with severe warpage "
                 << "(cosine of the angle between consecutive triangle normals"
                 << " < " << minTwist << ") found.\n"
                 << endl;
@@ -2006,12 +1951,8 @@ bool Foam::polyMeshGeometry::checkFaceFlatness
 {
     if (minFlatness < -SMALL || minFlatness > 1+SMALL)
     {
-        FatalErrorIn
-        (
-            "polyMeshGeometry::checkFaceFlatness"
-            "(const bool, const scalar, const polyMesh&, const pointField&"
-            ", const pointField&, const labelList&, labelHashSet*)"
-        )   << "minFlatness should be [0..1] but is now " << minFlatness
+        FatalErrorInFunction
+            << "minFlatness should be [0..1] but is now " << minFlatness
             << abort(FatalError);
     }
 
@@ -2077,13 +2018,8 @@ bool Foam::polyMeshGeometry::checkFaceFlatness
     {
         if (report)
         {
-            WarningIn
-            (
-                "polyMeshGeometry::checkFaceFlatness"
-                "(const bool, const scalar, const polyMesh&"
-                ", const pointField&, const pointField&, const labelList&"
-                ", labelHashSet*)"
-            )   << nWarped  << " non-flat faces "
+            WarningInFunction
+                << nWarped  << " non-flat faces "
                 << "(area of invidual triangles"
                 << " compared to overall area"
                 << " < " << minFlatness << ") found.\n"
@@ -2145,12 +2081,8 @@ bool Foam::polyMeshGeometry::checkFaceArea
     {
         if (report)
         {
-            WarningIn
-            (
-                "polyMeshGeometry::checkFaceArea"
-                "(const bool, const scalar, const polyMesh&"
-                ", const pointField&, const labelList&, labelHashSet*)"
-            )   << nZeroArea  << " faces with area < " << minArea
+            WarningInFunction
+                << nZeroArea  << " faces with area < " << minArea
                 << " found.\n"
                 << endl;
         }
@@ -2250,13 +2182,8 @@ bool Foam::polyMeshGeometry::checkCellDeterminant
     {
         if (report)
         {
-            WarningIn
-            (
-                "polyMeshGeometry::checkCellDeterminant"
-                "(const bool, const scalar, const polyMesh&"
-                ", const pointField&, const labelList&, const labelList&"
-                ", labelHashSet*)"
-            )   << nWarnDet << " cells with determinant < " << warnDet
+            WarningInFunction
+                << nWarnDet << " cells with determinant < " << warnDet
                 << " found.\n"
                 << endl;
         }

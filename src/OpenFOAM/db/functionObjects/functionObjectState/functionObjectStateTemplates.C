@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,10 +32,8 @@ bool Foam::functionObjectState::setActive()
 
     if (!isA<Type>(obr_))
     {
-        WarningIn
-        (
-            "void Foam::functionObjectState::setActive()"
-        )   << "No " << Type::typeName << " available, deactivating " << name_
+        WarningInFunction
+            << "No " << Type::typeName << " available, deactivating " << name_
             << endl;
 
         active_ = false;

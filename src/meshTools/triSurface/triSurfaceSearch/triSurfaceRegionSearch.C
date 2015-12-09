@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -135,7 +135,7 @@ Foam::triSurfaceRegionSearch::treeByRegion() const
 
     //            if (nPoints != surface().points().size())
     //            {
-    //                WarningIn("triSurfaceRegionSearch::treeByRegion() const")
+    //                WarningInFunction
     //                    << "Surface does not have compact point numbering. "
     //                    << "Of " << surface().points().size()
     //                    << " only " << nPoints

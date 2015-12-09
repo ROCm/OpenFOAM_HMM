@@ -60,7 +60,7 @@ void Foam::blendingFactor::calc()
 
     if (!isA<blendedSchemeBase<Type> >(interpScheme))
     {
-        FatalErrorIn("void Foam::blendingFactor::execute()")
+        FatalErrorInFunction
             << interpScheme.typeName << " is not a blended scheme"
             << exit(FatalError);
     }

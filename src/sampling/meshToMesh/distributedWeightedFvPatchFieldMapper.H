@@ -87,11 +87,8 @@ public:
 
             if ((singlePatchProc_ == -1) != (distMapPtr_ != NULL))
             {
-                FatalErrorIn
-                (
-                    "distributedWeightedFvPatchFieldMapper::"
-                    "distributedWeightedFvPatchFieldMapper(..)"
-                )   << "Supply a mapDistributeBase if and only if "
+                FatalErrorInFunction
+                    << "Supply a mapDistributeBase if and only if "
                     << "singlePatchProc is -1"
                     << " singlePatchProc_:" << singlePatchProc_
                     << " distMapPtr_:" << (distMapPtr_ != NULL)
@@ -132,11 +129,8 @@ public:
         {
             if (!distMapPtr_)
             {
-                FatalErrorIn
-                (
-                    "distributedWeightedFvPatchFieldMapper::"
-                    "distributeMap()"
-                )   << "Cannot ask for distributeMap on a non-distributed"
+                FatalErrorInFunction
+                    << "Cannot ask for distributeMap on a non-distributed"
                     << " mapper" << exit(FatalError);
             }
             return *distMapPtr_;

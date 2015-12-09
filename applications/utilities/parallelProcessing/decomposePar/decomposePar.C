@@ -307,7 +307,7 @@ int main(int argc, char *argv[])
             // Sanity check on previously decomposed case
             if (nProcs != nDomains)
             {
-                FatalErrorIn(args.executable())
+                FatalErrorInFunction
                     << "Specified -fields, but the case was decomposed with "
                     << nProcs << " domains"
                     << nl
@@ -352,7 +352,7 @@ int main(int argc, char *argv[])
 
             if (procDirsProblem)
             {
-                FatalErrorIn(args.executable())
+                FatalErrorInFunction
                     << "Case is already decomposed with " << nProcs
                     << " domains, use the -force option or manually" << nl
                     << "remove processor directories before decomposing. e.g.,"
@@ -664,7 +664,7 @@ int main(int argc, char *argv[])
                         // Check
                         if (celli < 0 || celli >= mesh.nCells())
                         {
-                            FatalErrorIn(args.executable())
+                            FatalErrorInFunction
                                 << "Illegal cell number " << celli
                                 << " for particle with index " << iter().index()
                                 << " at position " << iter().position() << nl

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -93,14 +93,7 @@ void Foam::functionObjectLine::addGeometryToScene
     fileName fName;
     if (!dict.readIfPresent("file", fName))
     {
-        WarningIn
-        (
-            "void Foam::functionObjectLine::addToScene"
-            "("
-                "const scalar, "
-                "vtkRenderer*"
-            ")"
-        )
+        WarningInFunction
             << "Unable to find function object " << functionObject_
             << " output for field " << fieldName_
             << ". Line will not be processed"

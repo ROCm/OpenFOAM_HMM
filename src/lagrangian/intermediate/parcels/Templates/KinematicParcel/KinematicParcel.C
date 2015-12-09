@@ -54,15 +54,8 @@ void Foam::KinematicParcel<ParcelType>::setCellValues
     {
         if (debug)
         {
-            WarningIn
-            (
-                "void Foam::KinematicParcel<ParcelType>::setCellValues"
-                "("
-                    "TrackData&, "
-                    "const scalar, "
-                    "const label"
-                ")"
-            )   << "Limiting observed density in cell " << cellI << " to "
+            WarningInFunction
+                << "Limiting observed density in cell " << cellI << " to "
                 << td.cloud().constProps().rhoMin() <<  nl << endl;
         }
 

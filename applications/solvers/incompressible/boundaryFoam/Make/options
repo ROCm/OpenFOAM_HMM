@@ -13,4 +13,5 @@ EXE_LIBS = \
     -lincompressibleTransportModels \
     -lfiniteVolume \
     -lmeshTools \
+    -lfvOptions \
     -lsampling

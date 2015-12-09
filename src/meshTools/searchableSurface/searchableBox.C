@@ -58,7 +58,7 @@ void Foam::searchableBox::projectOntoCoordPlane
     }
     else
     {
-        FatalErrorIn("searchableBox::projectOntoCoordPlane(..)")
+        FatalErrorInFunction
             << "Point on plane " << planePt
             << " is not on coordinate " << min()[dir]
             << " nor " << max()[dir] << abort(FatalError);
@@ -172,14 +172,8 @@ Foam::searchableBox::searchableBox
 {
     if (!contains(midpoint()))
     {
-        FatalErrorIn
-        (
-            "Foam::searchableBox::searchableBox\n"
-            "(\n"
-            "    const IOobject& io,\n"
-            "    const treeBoundBox& bb\n"
-            ")\n"
-        )   << "Illegal bounding box specification : "
+        FatalErrorInFunction
+            << "Illegal bounding box specification : "
             << static_cast<const treeBoundBox>(*this) << exit(FatalError);
     }
 
@@ -198,14 +192,8 @@ Foam::searchableBox::searchableBox
 {
     if (!contains(midpoint()))
     {
-        FatalErrorIn
-        (
-            "Foam::searchableBox::searchableBox\n"
-            "(\n"
-            "    const IOobject& io,\n"
-            "    const treeBoundBox& bb\n"
-            ")\n"
-        )   << "Illegal bounding box specification : "
+        FatalErrorInFunction
+            << "Illegal bounding box specification : "
             << static_cast<const treeBoundBox>(*this) << exit(FatalError);
     }
 
@@ -377,11 +365,7 @@ Foam::pointIndexHit Foam::searchableBox::findNearest
     point& linePoint
 ) const
 {
-    notImplemented
-    (
-        "searchableBox::findNearest"
-        "(const linePointRef&, treeBoundBox&, point&)"
-    );
+    NotImplemented;
     return pointIndexHit();
 }
 
@@ -437,7 +421,7 @@ Foam::pointIndexHit Foam::searchableBox::findLine
 
         if (info.index() == -1)
         {
-            FatalErrorIn("searchableBox::findLine(const point&, const point&)")
+            FatalErrorInFunction
                 << "point " << info.rawPoint()
                 << " on segment " << start << end
                 << " should be on face of " << *this

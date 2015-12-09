@@ -17,4 +17,5 @@ EXE_LIBS = \
     -lcompressibleTransportModels \
     -lgenericPatchFields \
     -lfiniteVolume \
-    -lmeshTools
+    -lmeshTools \
+    -lfvOptions

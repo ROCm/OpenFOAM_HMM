@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -66,13 +66,7 @@ Foam::tmp<Foam::volScalarField> Foam::pressureTools::rho
     {
         if (!rhoInfInitialised_)
         {
-            FatalErrorIn
-            (
-                "Foam::tmp<Foam::volScalarField> Foam::pressureTools::rho"
-                "("
-                "    const volScalarField&"
-                ") const"
-            )
+            FatalErrorInFunction
                 << type() << " " << name_ << ": "
                 << "pressure identified as incompressible, but reference "
                 << "density is not set.  Please set rhoName to rhoInf, and "
@@ -201,16 +195,8 @@ Foam::pressureTools::pressureTools
     if (!isA<fvMesh>(obr_))
     {
         active_ = false;
-        WarningIn
-        (
-            "pressureTools::pressureTools"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating " << name_ << nl
+        WarningInFunction
+            << "No fvMesh available, deactivating " << name_ << nl
             << endl;
     }
 
@@ -292,7 +278,7 @@ void Foam::pressureTools::read(const dictionary& dict)
 
             if (mag(zeroCheck) < ROOTVSMALL)
             {
-                WarningIn("void Foam::pressureTools::read(const dictionary&)")
+                WarningInFunction
                     << type() << " " << name_ << ": "
                     << "Coefficient calculation requested, but reference "
                     << "pressure level is zero.  Please check the supplied "

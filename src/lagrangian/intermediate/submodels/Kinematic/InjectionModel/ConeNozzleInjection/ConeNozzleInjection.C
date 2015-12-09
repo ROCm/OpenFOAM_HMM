@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +56,7 @@ void Foam::ConeNozzleInjection<CloudType>::setInjectionMethod()
     }
     else
     {
-        FatalErrorIn("Foam::InjectionModel<CloudType>::setInjectionMethod()")
+        FatalErrorInFunction
             << "injectionMethod must be either 'point' or 'disc'"
             << exit(FatalError);
     }
@@ -84,7 +84,7 @@ void Foam::ConeNozzleInjection<CloudType>::setFlowType()
     }
     else
     {
-        FatalErrorIn("Foam::InjectionModel<CloudType>::setFlowType()")
+        FatalErrorInFunction
             << "flowType must be either 'constantVelocity', "
             <<"'pressureDrivenVelocity' or 'flowRateAndDischarge'"
             << exit(FatalError);
@@ -162,15 +162,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
 {
     if (innerDiameter_ >= outerDiameter_)
     {
-        FatalErrorIn
-        (
-            "Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection"
-            "("
-                "const dictionary&, "
-                "CloudType&, "
-                "const word&"
-            ")"
-        )
+        FatalErrorInFunction
             << "Inner diameter must be less than the outer diameter:" << nl
             << "    innerDiameter: " << innerDiameter_ << nl
             << "    outerDiameter: " << outerDiameter_
@@ -231,7 +223,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     flowRateProfile_(im.flowRateProfile_),
     thetaInner_(im.thetaInner_),
     thetaOuter_(im.thetaOuter_),
-    sizeDistribution_(im.sizeDistribution_().clone().ptr()),
+    sizeDistribution_(im.sizeDistribution_, false),
     tanVec1_(im.tanVec1_),
     tanVec2_(im.tanVec1_),
     normal_(im.normal_),
@@ -364,19 +356,8 @@ void Foam::ConeNozzleInjection<CloudType>::setPositionAndCell
         }
         default:
         {
-            FatalErrorIn
-            (
-                "void Foam::ConeNozzleInjection<CloudType>::setPositionAndCell"
-                "("
-                    "const label, "
-                    "const label, "
-                    "const scalar, "
-                    "vector&, "
-                    "label&, "
-                    "label&, "
-                    "label&"
-                ")"
-            )<< "Unknown injectionMethod type" << nl
+            FatalErrorInFunction
+             << "Unknown injectionMethod type" << nl
              << exit(FatalError);
         }
     }

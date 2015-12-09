@@ -75,7 +75,7 @@ public:
         //- Clone
         autoPtr<searchableSurfaceModifier> clone() const
         {
-            notImplemented("autoPtr<searchableSurfaceModifier> clone() const");
+            NotImplemented;
             return autoPtr<searchableSurfaceModifier>(NULL);
         }
 

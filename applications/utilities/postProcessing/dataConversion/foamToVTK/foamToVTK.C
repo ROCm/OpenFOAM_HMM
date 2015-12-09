@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -332,7 +332,7 @@ int main(int argc, char *argv[])
 
     if (binary && (sizeof(floatScalar) != 4 || sizeof(label) != 4))
     {
-        FatalErrorIn(args.executable())
+        FatalErrorInFunction
             << "floatScalar and/or label are not 4 bytes in size" << nl
             << "Hence cannot use binary VTK format. Please use -ascii"
             << exit(FatalError);
@@ -342,7 +342,7 @@ int main(int argc, char *argv[])
 
     if (nearCellValue)
     {
-        WarningIn(args.executable())
+        WarningInFunction
             << "Using neighbouring cell value instead of patch value"
             << nl << endl;
     }
@@ -351,7 +351,7 @@ int main(int argc, char *argv[])
 
     if (noPointValues)
     {
-        WarningIn(args.executable())
+        WarningInFunction
             << "Outputting cell values only" << nl << endl;
     }
 
@@ -429,7 +429,7 @@ int main(int argc, char *argv[])
     mkDir(fvPath);
 
 
-    // mesh wrapper; does subsetting and decomposition
+    // Mesh wrapper; does subsetting and decomposition
     vtkMesh vMesh(mesh, cellSetName);
 
 
@@ -1295,7 +1295,7 @@ int main(int argc, char *argv[])
                     );
                     if (system(cmd.c_str()) == -1)
                     {
-                        WarningIn(args.executable())
+                        WarningInFunction
                             << "Could not execute command " << cmd << endl;
                     }
                 }
