@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
+    Strips any baffle parts of a surface.
 
-    Strips any baffle parts of a surface.  A baffle region is one which is
-    reached by walking from an open edge, and stopping when a multiply connected
-    edge is reached.
+    A baffle region is one which is reached by walking from an open edge, and
+    stopping when a multiply connected edge is reached.
 
 \*---------------------------------------------------------------------------*/
 

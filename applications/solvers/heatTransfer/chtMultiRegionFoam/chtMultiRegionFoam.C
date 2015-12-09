@@ -29,11 +29,12 @@ Group
 
 Description
     Combination of heatConductionFoam and buoyantFoam for conjugate heat
-    transfer between solid regions and fluid regions. Both regions include
-    the fvOptions framework.
+    transfer between solid regions and fluid regions.
 
-    It handles secondary fluid or solid circuits which can be coupled
-    thermally with the main fluid region. i.e radiators, etc.
+    Note:
+    - Both regions support the fvOptions framework.
+    - It handles secondary fluid or solid circuits which can be coupled
+      thermally with the main fluid region. i.e radiators, etc.
 
 \*---------------------------------------------------------------------------*/
 

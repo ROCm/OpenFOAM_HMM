@@ -29,8 +29,11 @@ Group
 
 Description
     Transient PIMPLE solver for compressible, laminar or turbulent flow with
-    reacting multiphase Lagrangian parcels, including run-time selectable
-    finite volume options, e.g. sources, constraints
+    reacting multiphase Lagrangian parcels.
+
+    Note:
+    - includes run-time selectable finite volume options, e.g. sources,
+      constraints
 
 \*---------------------------------------------------------------------------*/
 

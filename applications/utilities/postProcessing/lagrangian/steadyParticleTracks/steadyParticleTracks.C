@@ -27,7 +27,9 @@ Application
 Description
     Generates a VTK file of particle tracks for cases that were computed using
     a steady-state cloud
-    NOTE: case must be re-constructed (if running in parallel) before use
+
+    Note:
+    - Case must be re-constructed (if running in parallel) before use
 
 \*---------------------------------------------------------------------------*/
 

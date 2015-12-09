@@ -26,8 +26,9 @@ Application
 
 Description
     Calculates the inertia tensor, principal axes and moments of a
-    command line specified triSurface. Inertia can either be of the
-    solid body or of a thin shell.
+    command line specified triSurface.
+
+    Inertia can either be of the solid body or of a thin shell.
 
 \*---------------------------------------------------------------------------*/
 
