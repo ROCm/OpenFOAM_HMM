@@ -250,7 +250,7 @@ const Foam::scalarField& Foam::CompositionModel<CloudType>::Y0
 
 
 template<class CloudType>
-Foam::scalarField Foam::CompositionModel<CloudType>::X
+Foam::tmp<Foam::scalarField> Foam::CompositionModel<CloudType>::X
 (
     const label phasei,
     const scalarField& Y
@@ -284,7 +284,7 @@ Foam::scalarField Foam::CompositionModel<CloudType>::X
         {
             FatalErrorIn
             (
-                "scalarField CompositionModel<CloudType>::X"
+                "tmp<scalarField> CompositionModel<CloudType>::X"
                 "("
                     "const label, "
                     "const scalarField&"
@@ -294,9 +294,8 @@ Foam::scalarField Foam::CompositionModel<CloudType>::X
         }
     }
 
-    X /= WInv;
-
-    return X;
+    tmp<scalarField> tfld = X/(WInv + ROOTVSMALL);
+    return tfld;
 }
 
 

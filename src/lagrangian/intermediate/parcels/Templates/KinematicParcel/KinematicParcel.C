@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,7 @@ License
 #include "forceSuSp.H"
 #include "IntegrationScheme.H"
 #include "meshTools.H"
+#include "cloudSolution.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -271,15 +272,11 @@ bool Foam::KinematicParcel<ParcelType>::move
 
     const polyMesh& mesh = td.cloud().pMesh();
     const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
+    const cloudSolution& solution = td.cloud().solution();
     const scalarField& cellLengthScale = td.cloud().cellLengthScale();
-    const scalar maxCo = td.cloud().solution().maxCo();
 
     scalar tEnd = (1.0 - p.stepFraction())*trackTime;
-    scalar dtMax = trackTime;
-    if (td.cloud().solution().transient())
-    {
-        dtMax *= maxCo;
-    }
+    scalar dtMax = solution.deltaTMax(trackTime);
 
     bool tracking = true;
     label nTrackingStalled = 0;
@@ -301,7 +298,8 @@ bool Foam::KinematicParcel<ParcelType>::move
         if (p.active() && tracking && (magU > ROOTVSMALL))
         {
             const scalar d = dt*magU;
-            const scalar dCorr = min(d, maxCo*cellLengthScale[cellI]);
+            const scalar deltaLMax = solution.deltaLMax(cellLengthScale[cellI]);
+            const scalar dCorr = min(d, deltaLMax);
             dt *=
                 dCorr/d
                *p.trackToFace(p.position() + dCorr*U_/magU, td);
@@ -309,7 +307,7 @@ bool Foam::KinematicParcel<ParcelType>::move
 
         tEnd -= dt;
 
-        scalar newStepFraction = 1.0 - tEnd/trackTime;
+        const scalar newStepFraction = 1.0 - tEnd/trackTime;
 
         if (tracking)
         {
@@ -335,7 +333,7 @@ bool Foam::KinematicParcel<ParcelType>::move
         p.stepFraction() = newStepFraction;
 
         bool calcParcel = true;
-        if (!tracking && td.cloud().solution().steadyState())
+        if (!tracking && solution.steadyState())
         {
             calcParcel = false;
         }
@@ -346,7 +344,7 @@ bool Foam::KinematicParcel<ParcelType>::move
             // Update cell based properties
             p.setCellValues(td, dt, cellI);
 
-            if (td.cloud().solution().cellValueSourceCorrection())
+            if (solution.cellValueSourceCorrection())
             {
                 p.cellValueSourceCorrection(td, dt, cellI);
             }
@@ -466,6 +464,8 @@ void Foam::KinematicParcel<ParcelType>::hitPatch
 )
 {
     td.keepParticle = false;
+
+    td.cloud().patchInteraction().addToEscapedParcels(nParticle_*mass());
 }
 
 

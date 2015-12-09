@@ -41,7 +41,7 @@ Description
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                    Class PairSpringSliderDashpot Declaration
+                   Class PairSpringSliderDashpot Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
@@ -71,7 +71,7 @@ class PairSpringSliderDashpot
         //- Cohesion energy density [J/m^3]
         scalar cohesionEnergyDensity_;
 
-        // Switch cohesion on and off
+        //- Switch cohesion on and off
         bool cohesion_;
 
         //- The number of steps over which to resolve the minimum
@@ -104,7 +104,7 @@ class PairSpringSliderDashpot
     // Private Member Functions
 
         //- Find the appropriate properties for determining the minimum
-        //- Allowable timestep
+        //  allowable timestep
         void findMinMaxProperties
         (
             scalar& RMin,
@@ -136,8 +136,8 @@ public:
             return volumeFactor_;
         }
 
-        // Return the area of overlap between two spheres of radii rA and rB,
-        // centres separated by a distance rAB.  Assumes rAB < (rA + rB).
+        //- Return the area of overlap between two spheres of radii rA and rB,
+        //  centres separated by a distance rAB.  Assumes rAB < (rA + rB).
         inline scalar overlapArea(scalar rA, scalar rB, scalar rAB) const
         {
             // From:

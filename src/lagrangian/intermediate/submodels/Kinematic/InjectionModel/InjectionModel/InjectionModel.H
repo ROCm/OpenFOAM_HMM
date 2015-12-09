@@ -138,6 +138,9 @@ protected:
             //  less than 1 particle per parcel
             scalar delayedVolume_;
 
+            //- Optional injector ID
+            label injectorID_;
+
 
     // Protected Member Functions
 
