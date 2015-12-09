@@ -183,7 +183,7 @@ void Foam::helpType::init()
     (
         "browse",
         "word",
-        "display documentation for boundary condition in browser"
+        "display documentation in browser"
     );
 }
 
