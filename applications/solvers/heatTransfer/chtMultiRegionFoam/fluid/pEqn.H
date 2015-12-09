@@ -36,12 +36,21 @@
         )/(mesh.magSf().boundaryField()*rhorAUf.boundaryField())
     );
 
+    tmp<fvScalarMatrix> p_rghDDtEqn
+    (
+        new fvScalarMatrix(p_rgh, dimMass/dimTime)
+    );
+
     {
-        fvScalarMatrix p_rghDDtEqn
-        (
-            fvc::ddt(rho) + psi*correction(fvm::ddt(p_rgh))
-          + fvc::div(phiHbyA)
-        );
+        if (compressible)
+        {
+            p_rghDDtEqn =
+            (
+                fvc::ddt(rho) + psi*correction(fvm::ddt(p_rgh))
+             ==
+                fvOptions(psi, p_rgh, rho.name())
+            );
+        }
 
         // Thermodynamic density needs to be updated by psi*d(p) after the
         // pressure solution - done in 2 parts. Part 1:
@@ -52,6 +61,7 @@
             fvScalarMatrix p_rghEqn
             (
                 p_rghDDtEqn
+              + fvc::div(phiHbyA)
               - fvm::laplacian(rhorAUf, p_rgh)
             );
 
@@ -93,8 +103,11 @@
         dpdt = fvc::ddt(p);
     }
 
-    // Solve continuity
-    #include "rhoEqn.H"
+    if (compressible)
+    {
+        // Solve continuity
+        #include "rhoEqn.H"
+    }
 
     // Update continuity errors
     #include "compressibleContinuityErrors.H"
