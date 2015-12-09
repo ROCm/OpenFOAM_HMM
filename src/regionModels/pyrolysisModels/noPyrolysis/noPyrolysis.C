@@ -54,7 +54,7 @@ void noPyrolysis::constructThermoChemistry()
 
     radiation_.reset(radiation::radiationModel::New
     (
-        solidChemistry_->thermo().T()
+        solidChemistry_->solidThermo().T()
     ).ptr());
 }
 
@@ -148,19 +148,19 @@ void noPyrolysis::evolveRegion()
 
 const volScalarField& noPyrolysis::rho() const
 {
-    return solidChemistry_->thermo().rho();
+    return solidChemistry_->solidThermo().rho();
 }
 
 
 const volScalarField& noPyrolysis::T() const
 {
-    return solidChemistry_->thermo().T();
+    return solidChemistry_->solidThermo().T();
 }
 
 
 const tmp<volScalarField> noPyrolysis::Cp() const
 {
-    return solidChemistry_->thermo().Cp();
+    return solidChemistry_->solidThermo().Cp();
 }
 
 
@@ -172,7 +172,7 @@ tmp<volScalarField> noPyrolysis::kappaRad() const
 
 tmp<volScalarField> noPyrolysis::kappa() const
 {
-    return solidChemistry_->thermo().kappa();
+    return solidChemistry_->solidThermo().kappa();
 }
 
 
