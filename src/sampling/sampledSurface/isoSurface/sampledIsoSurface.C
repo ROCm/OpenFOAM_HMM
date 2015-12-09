@@ -110,7 +110,7 @@ void Foam::sampledIsoSurface::getIsoFields() const
             }
             else
             {
-                FatalErrorIn("sampledIsoSurface::getIsoFields()")
+                FatalErrorInFunction
                 << "Cannot find isosurface field " << isoField_
                 << " in database or directory " << vfHeader.path()
                 << exit(FatalError);
@@ -476,10 +476,8 @@ Foam::sampledIsoSurface::sampledIsoSurface
 {
     if (!sampledSurface::interpolate())
     {
-        FatalIOErrorIn
+        FatalIOErrorInFunction
         (
-            "sampledIsoSurface::sampledIsoSurface"
-            "(const word&, const polyMesh&, const dictionary&)",
             dict
         )   << "Non-interpolated iso surface not supported since triangles"
             << " span across cells." << exit(FatalIOError);
@@ -491,10 +489,8 @@ Foam::sampledIsoSurface::sampledIsoSurface
 
         if (mesh.boundaryMesh().findPatchID(exposedPatchName_) == -1)
         {
-            FatalIOErrorIn
+            FatalIOErrorInFunction
             (
-                "sampledIsoSurface::sampledIsoSurface"
-                "(const word&, const polyMesh&, const dictionary&)",
                 dict
             )   << "Cannot find patch " << exposedPatchName_
                 << " in which to put exposed faces." << endl

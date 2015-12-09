@@ -38,7 +38,7 @@ Description
 #include "psiThermo.H"
 #include "turbulentFluidThermoModel.H"
 #include "OFstream.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -61,6 +61,8 @@ int main(int argc, char *argv[])
     #include "compressibleCourantNo.H"
     #include "setInitialDeltaT.H"
     #include "startSummary.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

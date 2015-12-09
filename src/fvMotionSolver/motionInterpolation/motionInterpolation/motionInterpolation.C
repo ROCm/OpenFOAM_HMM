@@ -79,10 +79,8 @@ Foam::motionInterpolation::New(const fvMesh& mesh, Istream& entry)
 
     if (cstrIter == IstreamConstructorTablePtr_->end())
     {
-        FatalErrorIn
-        (
-            "motionInterpolation::New(const fvMesh&, const Istream&)"
-        )   << "Unknown interpolation type "
+        FatalErrorInFunction
+            << "Unknown interpolation type "
             << type << nl << nl
             << "Valid interpolation types are :" << endl
             << IstreamConstructorTablePtr_->sortedToc()

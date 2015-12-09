@@ -1,11 +1,10 @@
 EXE_INC = \
-    -IcellSelection \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude
 
 EXE_LIBS = \
     -lfiniteVolume \
-    -ldynamicMesh \
     -lmeshTools \
+    -ldynamicMesh \
     -lgenericPatchFields

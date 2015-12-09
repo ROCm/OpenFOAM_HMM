@@ -792,13 +792,7 @@ bool Foam::DistributedDelaunayMesh<Triangulation>::distribute
     const boundBox& bb
 )
 {
-    notImplemented
-    (
-        "Foam::DistributedDelaunayMesh<Triangulation>::distribute"
-        "("
-        "    const boundBox& bb"
-        ")"
-    );
+    NotImplemented;
 
     if (!Pstream::parRun())
     {
@@ -960,11 +954,8 @@ Foam::DistributedDelaunayMesh<Triangulation>::rangeInsertReferredWithInfo
         }
         else if (lt == Triangulation::OUTSIDE_AFFINE_HULL)
         {
-            WarningIn
-            (
-                "Foam::DistributedDelaunayMesh<Triangulation>"
-                "::rangeInsertReferredWithInfo"
-            )   << "Point is outside affine hull! pt = " << pointToInsert
+            WarningInFunction
+                << "Point is outside affine hull! pt = " << pointToInsert
                 << endl;
         }
         else if (lt == Triangulation::OUTSIDE_CONVEX_HULL)

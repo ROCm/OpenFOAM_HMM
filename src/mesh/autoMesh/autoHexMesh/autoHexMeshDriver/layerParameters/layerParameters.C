@@ -226,10 +226,8 @@ Foam::layerParameters::layerParameters
 
     if (layerSpec_ == ILLEGAL || nSpec != 2)
     {
-        FatalIOErrorIn
+        FatalIOErrorInFunction
         (
-            "layerParameters::layerParameters"
-            "(const dictionary&, const polyBoundaryMesh&)",
             dict
         )   << "Over- or underspecified layer thickness."
             << " Please specify" << nl
@@ -251,7 +249,7 @@ Foam::layerParameters::layerParameters
 
     if (nLayerIter_ < 0 || nRelaxedIter_ < 0)
     {
-        FatalIOErrorIn("layerParameters::layerParameters(..)", dict)
+        FatalIOErrorInFunction(dict)
             << "Layer iterations should be >= 0." << endl
             << "nLayerIter:" << nLayerIter_
             << " nRelaxedIter:" << nRelaxedIter_
@@ -273,7 +271,7 @@ Foam::layerParameters::layerParameters
 
             if (patchIDs.size() == 0)
             {
-                IOWarningIn("layerParameters::layerParameters(..)", layersDict)
+                IOWarningInFunction(layersDict)
                     << "Layer specification for " << key
                     << " does not match any patch." << endl
                     << "Valid patches are " << boundaryMesh.names() << endl;
@@ -357,9 +355,8 @@ Foam::layerParameters::layerParameters
                         break;
 
                         default:
-                            FatalIOErrorIn
+                            FatalIOErrorInFunction
                             (
-                                "layerParameters::layerParameters(..)",
                                 dict
                             )   << "problem." << exit(FatalIOError);
                         break;
@@ -431,8 +428,7 @@ Foam::scalar Foam::layerParameters::layerThickness
 
         default:
         {
-            FatalErrorIn("layerParameters::layerThickness(..)")
-                << "Illegal thickness specification " <<    layerSpec_
+            FatalErrorInFunction
                 << exit(FatalError);
             return -VGREAT;
         }
@@ -483,7 +479,7 @@ Foam::scalar Foam::layerParameters::layerExpansionRatio
 
         default:
         {
-            FatalErrorIn("layerParameters::layerThickness(..)")
+            FatalErrorInFunction
                 << "Illegal thickness specification" << exit(FatalError);
             return -VGREAT;
         }
@@ -542,7 +538,7 @@ Foam::scalar Foam::layerParameters::firstLayerThickness
 
         default:
         {
-            FatalErrorIn("layerParameters::layerThickness(..)")
+            FatalErrorInFunction
                 << "Illegal thickness specification" << exit(FatalError);
             return -VGREAT;
         }

@@ -9,27 +9,28 @@ runApplication blockMesh
 #cp system/decomposeParDict-2 system/decomposeParDict
 #runApplication decomposePar
 
-#- redistributePar to do decomposition
+# redistributePar to do decomposition
 runParallel redistributePar 2 -decompose
 
-#- bit of renumbering and running
-runParallel -l log.renumberMesh-CuthillMcKee renumberMesh 2 -overwrite
-runParallel -l log.icoFoam-CuthillMcKee icoFoam 2
+# Bit of renumbering and running
+runParallel -log log.renumberMesh-CuthillMcKee renumberMesh 2 -overwrite
+runParallel -log log.icoFoam-CuthillMcKee icoFoam 2
 
-#- bit of bad renumbering and running
-runParallel -l log.renumberMesh-parallel renumberMesh 2 -overwrite -dict system/renumberMeshDict-random
-runParallel -l log.icoFoam-random icoFoam 2
+# Bit of bad renumbering and running
+runParallel -log log.renumberMesh-parallel renumberMesh 2 -overwrite -dict system/renumberMeshDict-random
+runParallel -log log.icoFoam-random icoFoam 2
 
-#- pick up last result
+# Pick up last result
 cp system/controlDict-latestTime system/controlDict
 
-#- redistribute to 5 processors
-runParallel -l log.redistributePar-5 redistributePar 5 -decomposeParDict system/decomposeParDict-5 -cellDist
-#- run a bit more
-runParallel -l log.icoFoam-5 icoFoam 5 -decomposeParDict system/decomposeParDict-5
+# Redistribute to 5 processors
+runParallel -log log.redistributePar-5 redistributePar 5 -decomposeParDict system/decomposeParDict-5 -cellDist
 
-#- reconstruct mesh and results
-runParallel -l log.redistributePar-1 redistributePar 5 -reconstruct
+# Run a bit more
+runParallel -log log.icoFoam-5 icoFoam 5 -decomposeParDict system/decomposeParDict-5
+
+# Reconstruct mesh and results
+runParallel -log log.redistributePar-1 redistributePar 5 -reconstruct -decomposeParDict system/decomposeParDict
 
 
 # ----------------------------------------------------------------- end-of-file

@@ -30,7 +30,7 @@ Description
     operation on two surfaces.  Assumes that the orientation of the surfaces is
     correct:
 
-    + if the operation is union or intersection, that both surface's normals
+    - if the operation is union or intersection, that both surface's normals
       (n) have the same orientation with respect to a point, i.e. surfaces and b
       are orientated the same with respect to point x:
 
@@ -45,7 +45,7 @@ Description
 
     @endverbatim
 
-    + if the operation is a subtraction, the surfaces should be oppositely
+    - if the operation is a subtraction, the surfaces should be oppositely
     oriented with respect to a point, i.e. for (a - b), then b's orientation
     should be such that x is "inside", and a's orientation such that x is
     "outside"
@@ -406,8 +406,9 @@ void visitPointRegion
         }
         else
         {
-            FatalErrorIn("visitPointRegion(..)")
+            FatalErrorInFunction
                 << "problem" << exit(FatalError);
+
             nextFaceI = -1;
         }
 
@@ -440,7 +441,7 @@ void visitPointRegion
 
             if (nextEdgeI == -1)
             {
-                FatalErrorIn("visitPointRegion()")
+                FatalErrorInFunction
                     << "Problem: cannot find edge out of " << fEdges
                     << "on face " << nextFaceI << " that uses point " << pointI
                     << " and is not edge " << startEdgeI << abort(FatalError);
@@ -576,7 +577,7 @@ label dupNonManifoldPoints(triSurface& s, labelList& pointMap)
 
             if (mag(dupPt-sPt) > SMALL)
             {
-                FatalErrorIn("dupNonManifoldPoints(..)")
+                FatalErrorInFunction
                     << "dupPt:" << dupPt
                     << " sPt:" << sPt
                     << exit(FatalError);
@@ -803,7 +804,8 @@ labelList matchEdges
 {
     if (pointMap.size() != subSurf.nPoints())
     {
-        FatalErrorIn("findEdges(..)") << "problem" << exit(FatalError);
+        FatalErrorInFunction
+            << "problem" << exit(FatalError);
     }
 
     labelList edgeMap(subSurf.nEdges(), -1);
@@ -835,7 +837,7 @@ labelList matchEdges
                 }
                 else if (edgeMap[subEdgeI] != edgeI)
                 {
-                    WarningIn("findEdges(..)") << "sub edge "
+                    FatalErrorInFunction
                         << subE << " points:"
                         << subE.line(subSurf.localPoints())
                         << " matches to " << edgeI
@@ -851,7 +853,7 @@ labelList matchEdges
 
         if (edgeMap[subEdgeI] == -1)
         {
-            FatalErrorIn("findEdges(..)") << "did not find edge matching "
+            FatalErrorInFunction
                 << subE << " at:" << subSurf.localPoints()[subE[0]]
                 << subSurf.localPoints()[subE[1]]
                 << exit(FatalError);
@@ -1449,7 +1451,7 @@ autoPtr<extendedFeatureEdgeMesh> createEdgeMesh
     }
     else
     {
-        FatalErrorIn("createEdgeMesh(..)")
+        FatalErrorInFunction
             << "Unsupported booleanSurface:booleanOpType and space "
             << action << " " << invertedSpace
             << abort(FatalError);
@@ -1563,7 +1565,7 @@ int main(int argc, char *argv[])
 
     if (!validActions.found(action))
     {
-        FatalErrorIn(args.executable())
+        FatalErrorInFunction
             << "Unsupported action " << action << endl
             << "Supported actions:" << validActions.toc() << abort(FatalError);
     }
@@ -1620,7 +1622,7 @@ int main(int argc, char *argv[])
 
     if (invertedSpace && validActions[action] == booleanSurface::DIFFERENCE)
     {
-        FatalErrorIn(args.executable())
+        FatalErrorInFunction
             << "Inverted space only makes sense for union or intersection."
             << exit(FatalError);
     }

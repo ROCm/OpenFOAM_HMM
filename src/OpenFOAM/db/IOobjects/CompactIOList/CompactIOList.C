@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -45,11 +45,8 @@ void Foam::CompactIOList<T, BaseType>::readFromStream()
     }
     else
     {
-        FatalIOErrorIn
-        (
-            "CompactIOList<T, BaseType>::readFromStream()",
-            is
-        )   << "unexpected class name " << headerClassName()
+        FatalIOErrorInFunction(is)
+            << "unexpected class name " << headerClassName()
             << " expected " << typeName << " or " << IOList<T>::typeName
             << endl
             << "    while reading object " << name()
@@ -197,12 +194,8 @@ bool Foam::CompactIOList<T, BaseType>::writeObject
     }
     else if (overflows())
     {
-        WarningIn
-        (
-            "CompactIOList<T, BaseType>::writeObject"
-            "(IOstream::streamFormat, IOstream::versionNumber"
-            ", IOstream::compressionType) const"
-        )   << "Overall number of elements of CompactIOList of size "
+        WarningInFunction
+            << "Overall number of elements of CompactIOList of size "
             << this->size() << " overflows the representation of a label"
             << endl << "    Switching to ascii writing" << endl;
 
@@ -309,12 +302,8 @@ Foam::Ostream& Foam::operator<<
 
             if (start[i] < prev)
             {
-                FatalIOErrorIn
-                (
-                    "operator<<"
-                    "(Ostream& os, const CompactIOList<T, BaseType>&)",
-                    os
-                )   << "Overall number of elements " << start[i]
+                FatalIOErrorInFunction(os)
+                    << "Overall number of elements " << start[i]
                     << " of CompactIOList of size "
                     << L.size() << " overflows the representation of a label"
                     << endl << "Please recompile with a larger representation"

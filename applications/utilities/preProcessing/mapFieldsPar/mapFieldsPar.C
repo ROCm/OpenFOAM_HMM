@@ -277,7 +277,7 @@ int main(int argc, char *argv[])
 
     if (patchMapMethod.empty())
     {
-        FatalErrorIn(args.executable())
+        FatalErrorInFunction
             << "No valid patchMapMethod for method " << mapMethod
             << ". Please supply one through the 'patchMapMethod' option"
             << exit(FatalError);

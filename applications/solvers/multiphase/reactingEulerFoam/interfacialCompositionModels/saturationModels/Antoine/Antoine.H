@@ -61,7 +61,7 @@ class Antoine
 {
 protected:
 
-    // Private data
+    // Protected data
 
         //- Constant A
         dimensionedScalar A_;

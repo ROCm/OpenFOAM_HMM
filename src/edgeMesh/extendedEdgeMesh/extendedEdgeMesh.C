@@ -2260,7 +2260,8 @@ void Foam::extendedEdgeMesh::sortedOrder
             break;
 
             default:
-                FatalErrorIn("order(..)") << "Problem" << exit(FatalError);
+                FatalErrorInFunction
+                    << "Problem" << exit(FatalError);
             break;
         }
     }
@@ -2334,7 +2335,8 @@ void Foam::extendedEdgeMesh::sortedOrder
 
             case extendedEdgeMesh::NONE:
             default:
-                FatalErrorIn("order(..)") << "Problem" << exit(FatalError);
+                FatalErrorInFunction
+                    << "Problem" << exit(FatalError);
             break;
         }
     }
@@ -2378,7 +2380,8 @@ void Foam::extendedEdgeMesh::sortedOrder
 
             case extendedEdgeMesh::NONE:
             default:
-                FatalErrorIn("order(..)") << "Problem" << exit(FatalError);
+                FatalErrorInFunction
+                    << "Problem" << exit(FatalError);
             break;
         }
     }

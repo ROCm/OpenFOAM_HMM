@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,7 +53,7 @@ void Foam::sampledSurface::makeSf() const
     // It is an error to recalculate if the pointer is already set
     if (SfPtr_)
     {
-        FatalErrorIn("Foam::sampledSurface::makeSf()")
+        FatalErrorInFunction
             << "face area vectors already exist"
             << abort(FatalError);
     }
@@ -74,7 +74,7 @@ void Foam::sampledSurface::makeMagSf() const
     // It is an error to recalculate if the pointer is already set
     if (magSfPtr_)
     {
-        FatalErrorIn("Foam::sampledSurface::makeMagSf()")
+        FatalErrorInFunction
             << "mag face areas already exist"
             << abort(FatalError);
     }
@@ -95,7 +95,7 @@ void Foam::sampledSurface::makeCf() const
     // It is an error to recalculate if the pointer is already set
     if (CfPtr_)
     {
-        FatalErrorIn("Foam::sampledSurface::makeCf()")
+        FatalErrorInFunction
             << "face centres already exist"
             << abort(FatalError);
     }
@@ -132,11 +132,8 @@ Foam::autoPtr<Foam::sampledSurface> Foam::sampledSurface::New
 
     if (cstrIter == wordConstructorTablePtr_->end())
     {
-        FatalErrorIn
-        (
-            "sampledSurface::New"
-            "(const word&, const polyMesh&, const dictionary&)"
-        )   << "Unknown sample type "
+        FatalErrorInFunction
+            << "Unknown sample type "
             << sampleType << nl << nl
             << "Valid sample types : " << endl
             << wordConstructorTablePtr_->sortedToc()
@@ -245,7 +242,7 @@ Foam::tmp<Foam::scalarField> Foam::sampledSurface::sample
     const surfaceScalarField& sField
 ) const
 {
-    notImplemented("tmp<Foam::scalarField> sampledSurface::sample");
+    NotImplemented;
     return tmp<scalarField>(NULL);
 }
 
@@ -255,7 +252,7 @@ Foam::tmp<Foam::vectorField> Foam::sampledSurface::sample
     const surfaceVectorField& sField
 ) const
 {
-    notImplemented("tmp<Foam::vectorField> sampledSurface::sample");
+    NotImplemented;
     return tmp<vectorField>(NULL);
 }
 
@@ -265,7 +262,7 @@ Foam::tmp<Foam::sphericalTensorField> Foam::sampledSurface::sample
     const surfaceSphericalTensorField& sField
 ) const
 {
-    notImplemented("tmp<Foam::sphericalTensorField> sampledSurface::sample");
+    NotImplemented;
     return tmp<sphericalTensorField>(NULL);
 }
 
@@ -275,7 +272,7 @@ Foam::tmp<Foam::symmTensorField> Foam::sampledSurface::sample
     const surfaceSymmTensorField& sField
 ) const
 {
-    notImplemented("tmp<Foam::symmTensorField> sampledSurface::sample");
+    NotImplemented;
     return tmp<symmTensorField>(NULL);
 }
 
@@ -285,7 +282,7 @@ Foam::tmp<Foam::tensorField> Foam::sampledSurface::sample
     const surfaceTensorField& sField
 ) const
 {
-    notImplemented("tmp<Foam::tensorField> sampledSurface::sample");
+    NotImplemented;
     return tmp<tensorField>(NULL);
 }
 

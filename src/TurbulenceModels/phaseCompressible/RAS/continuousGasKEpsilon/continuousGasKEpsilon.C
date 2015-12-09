@@ -89,7 +89,6 @@ continuousGasKEpsilon<BasicTurbulenceModel>::continuousGasKEpsilon
 {
     if (type == typeName)
     {
-        kEpsilon<BasicTurbulenceModel>::correctNut();
         this->printCoeffs(type);
     }
 }

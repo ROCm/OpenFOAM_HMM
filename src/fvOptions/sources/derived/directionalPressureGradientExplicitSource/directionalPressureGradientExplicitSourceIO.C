@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,13 +32,7 @@ void Foam::fv::directionalPressureGradientExplicitSource::writeData
     Ostream& os
 ) const
 {
-    notImplemented
-    (
-        "void Foam::fv::directionalPressureGradientExplicitSource::writeData"
-        "("
-            "Ostream&"
-        ") const"
-    );
+    NotImplemented;
 }
 
 

@@ -89,7 +89,7 @@ Foam::point Foam::bezier::position(const scalar lambda) const
 
 Foam::scalar Foam::bezier::length() const
 {
-    notImplemented("bezier::length() const");
+    NotImplemented;
     return 1.0;
 }
 

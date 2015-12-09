@@ -163,7 +163,7 @@ void Foam::runTimeControl::execute()
 
             if (conditionIter == groupMap_.end())
             {
-                FatalErrorIn("void Foam::runTimeControl::execute()")
+                FatalErrorInFunction
                     << "group " << groupI << " not found in map"
                     << abort(FatalError);
             }

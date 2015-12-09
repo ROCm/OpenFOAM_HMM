@@ -257,12 +257,8 @@ void Foam::pressurePIDControlInletVelocityFvPatchVectorField::updateCoeffs()
     }
     else
     {
-        FatalErrorIn
-        (
-            "void Foam::"
-            "pressurePIDControlInletVelocityFvPatchVectorField::"
-            "updateCoeffs()"
-        )   << "The dimensions of the field " << phiName_
+        FatalErrorInFunction
+            << "The dimensions of the field " << phiName_
             << "are not recognised. The dimensions are " << phi.dimensions()
             << ". The dimensions should be either " << dimVelocity*dimArea
             << " for an incompressible case, or "
@@ -298,11 +294,8 @@ void Foam::pressurePIDControlInletVelocityFvPatchVectorField::updateCoeffs()
     }
     else
     {
-        WarningIn
-        (
-            "void Foam::pressurePIDControlInletVelocityFvPatchVectorField::"
-            "updateCoeffs()"
-        )   << "The pressure field name, \"pName\", is \"" << pName_ << "\", "
+        WarningInFunction
+            << "The pressure field name, \"pName\", is \"" << pName_ << "\", "
             << "but a field of that name was not found. The inlet velocity "
             << "will be set to an analytical value calculated from the "
             << "specified pressure drop. No PID control will be done and "

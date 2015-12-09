@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,16 +72,8 @@ Foam::yPlus::yPlus
     if (!isA<fvMesh>(obr_))
     {
         active_ = false;
-        WarningIn
-        (
-            "yPlus::yPlus"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating " << name_ << nl
+        WarningInFunction
+            << "No fvMesh available, deactivating " << name_ << nl
             << endl;
     }
 
@@ -170,7 +162,7 @@ void Foam::yPlus::execute()
             }
             else
             {
-                WarningIn("void Foam::yPlus::execute()")
+                WarningInFunction
                     << "Unable to find compressible turbulence model in the "
                     << "database: yPlus will not be calculated" << endl;
             }
@@ -189,18 +181,19 @@ void Foam::yPlus::execute()
             }
             else
             {
-                WarningIn("void Foam::yPlus::execute()")
+                WarningInFunction
                     << "Unable to find incompressible turbulence model in the "
                     << "database: yPlus will not be calculated" << endl;
             }
         }
         else
         {
-            WarningIn("void Foam::yPlus::execute()")
+            WarningInFunction
                 << "Unknown " << phiName_ << " dimensions: "
                 << phi.dimensions() << nl
                 << "Expected either " << dimMass/dimTime << " or "
                 << dimVolume/dimTime << nl
+                << "Unable to determine turbulence model type. "
                 << "yPlus will not be calculated" << endl;
         }
     }

@@ -147,7 +147,6 @@ kOmega<BasicTurbulenceModel>::kOmega
 
     if (type == typeName)
     {
-        correctNut();
         this->printCoeffs(type);
     }
 }

@@ -138,11 +138,7 @@ public:
         //-  Update local data for topology changes
         virtual void updateMesh(const mapPolyMesh&)
         {
-            notImplemented
-            (
-                "displacementMotionSolverMeshMover::updateMesh"
-                "(const mapPolyMesh&)"
-            );
+            NotImplemented;
         }
 };
 

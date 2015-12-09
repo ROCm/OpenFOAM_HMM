@@ -180,7 +180,6 @@ LamBremhorstKE::LamBremhorstKE
 
     if (type == typeName)
     {
-        correctNut();
         printCoeffs(type);
     }
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -202,11 +202,8 @@ Foam::volumeType Foam::treeDataFace::getVolumeType
 
     if (info.index() == -1)
     {
-        FatalErrorIn
-        (
-            "treeDataFace::getSampleType"
-            "(indexedOctree<treeDataFace>&, const point&)"
-        )   << "Could not find " << sample << " in octree."
+        FatalErrorInFunction
+            << "Could not find " << sample << " in octree."
             << abort(FatalError);
     }
 
@@ -537,18 +534,7 @@ void Foam::treeDataFace::findNearestOp::operator()
     point& nearestPoint
 ) const
 {
-    notImplemented
-    (
-        "treeDataFace::findNearestOp::operator()"
-        "("
-        "    const labelUList&,"
-        "    const linePointRef&,"
-        "    treeBoundBox&,"
-        "    label&,"
-        "    point&,"
-        "    point&"
-        ") const"
-    );
+    NotImplemented;
 }
 
 

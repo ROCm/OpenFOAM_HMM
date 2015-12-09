@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -104,7 +104,7 @@ void Foam::fvMeshDistribute::mapBoundaryFields
 
     if (flds.size() != oldBflds.size())
     {
-        FatalErrorIn("fvMeshDistribute::mapBoundaryFields(..)") << "problem"
+        FatalErrorInFunction
             << abort(FatalError);
     }
 
@@ -191,7 +191,8 @@ void Foam::fvMeshDistribute::mapExposedFaces
 
     if (flds.size() != oldFlds.size())
     {
-        FatalErrorIn("fvMeshDistribute::mapExposedFaces(..)") << "problem"
+        FatalErrorInFunction
+            << "problem"
             << abort(FatalError);
     }
 

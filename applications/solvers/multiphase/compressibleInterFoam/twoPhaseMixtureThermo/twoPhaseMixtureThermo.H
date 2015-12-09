@@ -122,14 +122,14 @@ public:
             //  Non-const access allowed for transport equations
             virtual volScalarField& he()
             {
-                notImplemented("twoPhaseMixtureThermo::he()");
+                NotImplemented;
                 return thermo1_->he();
             }
 
             //- Enthalpy/Internal energy [J/kg]
             virtual const volScalarField& he() const
             {
-                notImplemented("twoPhaseMixtureThermo::he() const");
+                NotImplemented;
                 return thermo1_->he();
             }
 
@@ -238,6 +238,12 @@ public:
 
 
         // Fields derived from transport state variables
+
+            //- Kinematic viscosity of mixture [m^2/s]
+            virtual tmp<volScalarField> nu() const;
+
+            //- Kinematic viscosity of mixture for patch [m^2/s]
+            virtual tmp<scalarField> nu(const label patchi) const;
 
             //- Thermal diffusivity for temperature of mixture [J/m/s/K]
             virtual tmp<volScalarField> kappa() const;

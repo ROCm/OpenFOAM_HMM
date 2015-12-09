@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
 
     if (!isDir(baseDir))
     {
-        FatalErrorIn(args.executable())
+        FatalErrorInFunction
             << "templateDir " << baseDir
             << " should point to the folder containing the "
             << "case set-up templates" << exit(FatalError);

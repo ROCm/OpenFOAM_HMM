@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -134,11 +134,8 @@ Foam::searchableSurfaces::searchableSurfaces(const label size)
 //
 //                    if (index == -1)
 //                    {
-//                        FatalErrorIn
-//                        (
-//                            "searchableSurfaces::searchableSurfaces"
-//                            "( const IOobject&, const dictionary&)"
-//                        )   << "Unknown region name " << key
+//                        FatalErrorInFunction
+//                            << "Unknown region name " << key
 //                            << " for surface " << s.name() << endl
 //                            << "Valid region names are " << localNames
 //                            << exit(FatalError);
@@ -189,11 +186,8 @@ Foam::searchableSurfaces::searchableSurfaces
 
         if (!topDict.isDict(key))
         {
-            FatalErrorIn
-            (
-                "searchableSurfaces::searchableSurfaces"
-                "( const IOobject&, const dictionary&)"
-            )   << "Found non-dictionary entry " << iter()
+            FatalErrorInFunction
+                << "Found non-dictionary entry " << iter()
                 << " in top-level dictionary " << topDict
                 << exit(FatalError);
         }
@@ -262,11 +256,8 @@ Foam::searchableSurfaces::searchableSurfaces
 
                     if (index == -1)
                     {
-                        FatalErrorIn
-                        (
-                            "searchableSurfaces::searchableSurfaces"
-                            "( const IOobject&, const dictionary&)"
-                        )   << "Unknown region name " << key
+                        FatalErrorInFunction
+                            << "Unknown region name " << key
                             << " for surface " << s.name() << endl
                             << "Valid region names are " << localNames
                             << exit(FatalError);
@@ -926,10 +917,8 @@ const Foam::searchableSurface& Foam::searchableSurfaces::operator[]
 
     if (surfI < 0)
     {
-        FatalErrorIn
-        (
-            "searchableSurfaces::operator[](const word&) const"
-        )   << "Surface named " << surfName << " not found." << nl
+        FatalErrorInFunction
+            << "Surface named " << surfName << " not found." << nl
             << "Available surface names: " << names_ << endl
             << abort(FatalError);
     }
@@ -947,10 +936,8 @@ Foam::searchableSurface& Foam::searchableSurfaces::operator[]
 
     if (surfI < 0)
     {
-        FatalErrorIn
-        (
-            "searchableSurfaces::operator[](const word&)"
-        )   << "Surface named " << surfName << " not found." << nl
+        FatalErrorInFunction
+            << "Surface named " << surfName << " not found." << nl
             << "Available surface names: " << names_ << endl
             << abort(FatalError);
     }

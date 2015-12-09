@@ -207,7 +207,6 @@ qZeta::qZeta
 
     if (type == typeName)
     {
-        correctNut();
         printCoeffs(type);
     }
 }

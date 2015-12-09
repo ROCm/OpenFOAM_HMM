@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -205,16 +205,8 @@ Foam::autoPtr<Foam::surface> Foam::surface::New
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalErrorIn
-        (
-            "Foam::autoPtr<Foam::surface> Foam::surface::New"
-            "("
-                "const runTimePostProcessing&, "
-                "const dictionary&, "
-                "const HashPtrTable<DataEntry<vector>, word>&, "
-                "const word&"
-            ")"
-        )   << "Unknown surface type "
+        FatalErrorInFunction
+            << "Unknown surface type "
             << surfaceType << nl << nl
             << "Valid surface types are:" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
