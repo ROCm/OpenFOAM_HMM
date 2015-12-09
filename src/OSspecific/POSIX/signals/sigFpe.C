@@ -94,10 +94,8 @@ void Foam::sigFpe::sigHandler(int)
     // Reset old handling
     if (sigaction(SIGFPE, &oldAction_, NULL) < 0)
     {
-        FatalErrorIn
-        (
-            "Foam::sigSegv::sigHandler()"
-        )   << "Cannot reset SIGFPE trapping"
+        FatalErrorInFunction
+            << "Cannot reset SIGFPE trapping"
             << abort(FatalError);
     }
 
@@ -152,10 +150,8 @@ void Foam::sigFpe::set(const bool verbose)
         sigemptyset(&newAction.sa_mask);
         if (sigaction(SIGFPE, &newAction, &oldAction_) < 0)
         {
-            FatalErrorIn
-            (
-                "Foam::sigFpe::set()"
-            )   << "Cannot set SIGFPE trapping"
+            FatalErrorInFunction
+                << "Cannot set SIGFPE trapping"
                 << abort(FatalError);
         }
 

@@ -203,12 +203,7 @@ void Foam::externalCoupledFunctionObject::wait() const
         {
             if (totalTime > timeOut_)
             {
-                FatalErrorIn
-                (
-                    "void "
-                    "Foam::externalCoupledFunctionObject::wait() "
-                    "const"
-                )
+                FatalErrorInFunction
                     << "Wait time exceeded time out time of " << timeOut_
                     << " s" << abort(FatalError);
             }
@@ -280,11 +275,8 @@ void Foam::externalCoupledFunctionObject::readColumns
                 {
                     if (!masterFilePtr().good())
                     {
-                        FatalIOErrorIn
-                        (
-                            "externalCoupledFunctionObject::readColumns()",
-                            masterFilePtr()
-                        )   << "Trying to read data for processor " << procI
+                        FatalIOErrorInFunction(masterFilePtr())
+                            << "Trying to read data for processor " << procI
                             << " row " << rowI
                             << ". Does your file have as many rows as there are"
                             << " patch faces (" << globalFaces.size()
@@ -347,11 +339,8 @@ void Foam::externalCoupledFunctionObject::readLines
                 {
                     if (!masterFilePtr().good())
                     {
-                        FatalIOErrorIn
-                        (
-                            "externalCoupledFunctionObject::readColumns()",
-                            masterFilePtr()
-                        )   << "Trying to read data for processor " << procI
+                        FatalIOErrorInFunction(masterFilePtr())
+                            << "Trying to read data for processor " << procI
                             << " row " << rowI
                             << ". Does your file have as many rows as there are"
                             << " patch faces (" << globalFaces.size()
@@ -542,10 +531,8 @@ Foam::word Foam::externalCoupledFunctionObject::compositeName
 {
     if (regionNames.size() == 0)
     {
-        FatalErrorIn
-        (
-            "externalCoupledFunctionObject::compositeName(const wordList&)"
-        )   << "Empty regionNames" << abort(FatalError);
+        FatalErrorInFunction
+            << "Empty regionNames" << abort(FatalError);
         return word::null;
     }
     else if (regionNames.size() == 1)
@@ -586,10 +573,8 @@ void Foam::externalCoupledFunctionObject::checkOrder
     sortedOrder(regionNames, order);
     if (order != identity(regionNames.size()))
     {
-        FatalErrorIn
-        (
-            "externalCoupledFunctionObject::checkOrder(const wordList&)"
-        )   << "regionNames " << regionNames << " not in alphabetical order :"
+        FatalErrorInFunction
+            << "regionNames " << regionNames << " not in alphabetical order :"
             << order << exit(FatalError);
     }
 }
@@ -655,10 +640,7 @@ void Foam::externalCoupledFunctionObject::readData()
 
                 if (!ok)
                 {
-                    WarningIn
-                    (
-                        "void Foam::externalCoupledFunctionObject::readData()"
-                    )
+                    WarningInFunction
                         << "Field " << fieldName << " in regions " << compName
                         << " was not found." << endl;
                 }
@@ -728,10 +710,7 @@ void Foam::externalCoupledFunctionObject::writeData() const
 
                 if (!ok)
                 {
-                    WarningIn
-                    (
-                        "void Foam::externalCoupledFunctionObject::writeData()"
-                    )
+                    WarningInFunction
                         << "Field " << fieldName << " in regions " << compName
                         << " was not found." << endl;
                 }
@@ -948,12 +927,7 @@ bool Foam::externalCoupledFunctionObject::read(const dictionary& dict)
     {
         if (!iter().isDict())
         {
-            FatalIOErrorIn
-            (
-                "void Foam::externalCoupledFunctionObject::read"
-                "(const dictionary&)",
-                allRegionsDict
-            )
+            FatalIOErrorInFunction(allRegionsDict)
                 << "Regions must be specified in dictionary format"
                 << exit(FatalIOError);
         }
@@ -973,12 +947,7 @@ bool Foam::externalCoupledFunctionObject::read(const dictionary& dict)
         {
             if (!regionIter().isDict())
             {
-                FatalIOErrorIn
-                (
-                    "void Foam::externalCoupledFunctionObject::read"
-                    "(const dictionary&)",
-                    regionDict
-                )
+                FatalIOErrorInFunction(regionDict)
                     << "Regions must be specified in dictionary format"
                     << exit(FatalIOError);
             }

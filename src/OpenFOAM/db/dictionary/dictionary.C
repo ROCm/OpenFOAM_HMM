@@ -433,9 +433,8 @@ const Foam::entry& Foam::dictionary::lookupEntry
 
     if (entryPtr == NULL)
     {
-        FatalIOErrorIn
+        FatalIOErrorInFunction
         (
-            "dictionary::lookupEntry(const word&, bool, bool) const",
             *this
         )   << "keyword " << keyword << " is undefined in dictionary "
             << name()
@@ -513,10 +512,8 @@ const Foam::entry* Foam::dictionary::lookupScopedEntryPtr
                     // Go to parent
                     if (&dictPtr->parent_ == &dictionary::null)
                     {
-                        FatalIOErrorIn
+                        FatalIOErrorInFunction
                         (
-                            "dictionary::lookupScopedEntryPtr"
-                            "(const word&, bool, bool)",
                             *this
                         )   << "No parent of current dictionary"
                             << " when searching for "
@@ -547,10 +544,8 @@ const Foam::entry* Foam::dictionary::lookupScopedEntryPtr
 
                 if (!entPtr)
                 {
-                    FatalIOErrorIn
+                    FatalIOErrorInFunction
                     (
-                        "dictionary::lookupScopedEntryPtr"
-                        "(const word&, bool, bool)",
                         *this
                     )   << "keyword " << firstWord
                         << " is undefined in dictionary "
@@ -639,9 +634,8 @@ const Foam::dictionary& Foam::dictionary::subDict(const word& keyword) const
 
     if (entryPtr == NULL)
     {
-        FatalIOErrorIn
+        FatalIOErrorInFunction
         (
-            "dictionary::subDict(const word& keyword) const",
             *this
         )   << "keyword " << keyword << " is undefined in dictionary "
             << name()
@@ -657,9 +651,8 @@ Foam::dictionary& Foam::dictionary::subDict(const word& keyword)
 
     if (entryPtr == NULL)
     {
-        FatalIOErrorIn
+        FatalIOErrorInFunction
         (
-            "dictionary::subDict(const word& keyword)",
             *this
         )   << "keyword " << keyword << " is undefined in dictionary "
             << name()
@@ -681,9 +674,8 @@ Foam::dictionary Foam::dictionary::subOrEmptyDict
     {
         if (mustRead)
         {
-            FatalIOErrorIn
+            FatalIOErrorInFunction
             (
-                "dictionary::subOrEmptyDict(const word& keyword, const bool)",
                 *this
             )   << "keyword " << keyword << " is undefined in dictionary "
                 << name()
@@ -775,7 +767,7 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
             }
             else
             {
-                IOWarningIn("dictionary::add(entry*, bool)", (*this))
+                IOWarningInFunction((*this))
                     << "problem replacing entry "<< entryPtr->keyword()
                     << " in dictionary " << name() << endl;
 
@@ -804,7 +796,7 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
     }
     else
     {
-        IOWarningIn("dictionary::add(entry*, bool)", (*this))
+        IOWarningInFunction((*this))
             << "attempt to add entry "<< entryPtr->keyword()
             << " which already exists in dictionary " << name()
             << endl;
@@ -941,9 +933,8 @@ bool Foam::dictionary::changeKeyword
 
     if (iter()->keyword().isPattern())
     {
-        FatalIOErrorIn
+        FatalIOErrorInFunction
         (
-            "dictionary::changeKeyword(const word&, const word&, bool)",
             *this
         )   << "Old keyword "<< oldKeyword
             << " is a pattern."
@@ -982,9 +973,8 @@ bool Foam::dictionary::changeKeyword
         }
         else
         {
-            IOWarningIn
+            IOWarningInFunction
             (
-                "dictionary::changeKeyword(const word&, const word&, bool)",
                 *this
             )   << "cannot rename keyword "<< oldKeyword
                 << " to existing keyword " << newKeyword
@@ -1017,7 +1007,7 @@ bool Foam::dictionary::merge(const dictionary& dict)
     // Check for assignment to self
     if (this == &dict)
     {
-        FatalIOErrorIn("dictionary::merge(const dictionary&)", *this)
+        FatalIOErrorInFunction(*this)
             << "attempted merge to self for dictionary " << name()
             << abort(FatalIOError);
     }
@@ -1098,7 +1088,7 @@ void Foam::dictionary::operator=(const dictionary& rhs)
     // Check for assignment to self
     if (this == &rhs)
     {
-        FatalIOErrorIn("dictionary::operator=(const dictionary&)", *this)
+        FatalIOErrorInFunction(*this)
             << "attempted assignment to self for dictionary " << name()
             << abort(FatalIOError);
     }
@@ -1121,7 +1111,7 @@ void Foam::dictionary::operator+=(const dictionary& rhs)
     // Check for assignment to self
     if (this == &rhs)
     {
-        FatalIOErrorIn("dictionary::operator+=(const dictionary&)", *this)
+        FatalIOErrorInFunction(*this)
             << "attempted addition assignment to self for dictionary " << name()
             << abort(FatalIOError);
     }
@@ -1138,7 +1128,7 @@ void Foam::dictionary::operator|=(const dictionary& rhs)
     // Check for assignment to self
     if (this == &rhs)
     {
-        FatalIOErrorIn("dictionary::operator|=(const dictionary&)", *this)
+        FatalIOErrorInFunction(*this)
             << "attempted assignment to self for dictionary " << name()
             << abort(FatalIOError);
     }
@@ -1158,7 +1148,7 @@ void Foam::dictionary::operator<<=(const dictionary& rhs)
     // Check for assignment to self
     if (this == &rhs)
     {
-        FatalIOErrorIn("dictionary::operator<<=(const dictionary&)", *this)
+        FatalIOErrorInFunction(*this)
             << "attempted assignment to self for dictionary " << name()
             << abort(FatalIOError);
     }

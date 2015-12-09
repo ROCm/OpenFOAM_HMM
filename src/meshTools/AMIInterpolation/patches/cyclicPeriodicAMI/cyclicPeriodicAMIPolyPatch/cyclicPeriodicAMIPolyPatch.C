@@ -86,12 +86,8 @@ void Foam::cyclicPeriodicAMIPolyPatch::syncTransforms() const
         {
             if (periodicPatch.separation().size() > 1)
             {
-                FatalErrorIn
-                (
-                    "cyclicPeriodicAMIPolyPatch::resetAMI"
-                    "(const AMIPatchToPatchInterpolation::interpolationMethod&"
-                    ") const"
-                )   << "Periodic patch " << periodicPatchName_
+                FatalErrorInFunction
+                    << "Periodic patch " << periodicPatchName_
                     << " has non-uniform separation vector "
                     << periodicPatch.separation()
                     << "This is not allowed inside " << type()
@@ -101,12 +97,8 @@ void Foam::cyclicPeriodicAMIPolyPatch::syncTransforms() const
 
             if (periodicPatch.forwardT().size() > 1)
             {
-                FatalErrorIn
-                (
-                    "cyclicPeriodicAMIPolyPatch::resetAMI"
-                    "(const AMIPatchToPatchInterpolation::interpolationMethod&"
-                    ") const"
-                )   << "Periodic patch " << periodicPatchName_
+                FatalErrorInFunction
+                    << "Periodic patch " << periodicPatchName_
                     << " has non-uniform transformation tensor "
                     << periodicPatch.forwardT()
                     << "This is not allowed inside " << type()
@@ -362,7 +354,7 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
         scalar srcSum(gAverage(AMIPtr_->srcWeightsSum()));
         scalar tgtSum(gAverage(AMIPtr_->tgtWeightsSum()));
 
-        // Direction (or rather side of AMI : this or nbr patch) of 
+        // Direction (or rather side of AMI : this or nbr patch) of
         // geometry replication
         bool direction = nTransforms_ >= 0;
 
@@ -501,13 +493,7 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
             // so for now this situation is flagged as a SeriousError instead of
             // a FatalError since the default matchTolerance is quite strict
             // (0.001) and can get triggered far into the simulation.
-            SeriousErrorIn
-            (
-                "void Foam::cyclicPeriodicAMIPolyPatch::resetPeriodicAMI"
-                "("
-                    "const AMIPatchToPatchInterpolation::interpolationMethod&"
-                ") const"
-            )
+            SeriousErrorInFunction
                 << "Patches " << name() << " and " << neighbPatch().name()
                 << " do not couple to within a tolerance of "
                 << matchTolerance()
@@ -534,13 +520,7 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
             // This check means that e.g. different numbers of stator and
             // rotor partitions are not allowed.
             // Again see the section above about tolerances.
-            SeriousErrorIn
-            (
-                "void Foam::cyclicPeriodicAMIPolyPatch::resetPeriodicAMI"
-                "("
-                    "const AMIPatchToPatchInterpolation::interpolationMethod&"
-                ") const"
-            )
+            SeriousErrorInFunction
                 << "Patches " << name() << " and " << neighbPatch().name()
                 << " do not overlap an integer number of times when transformed"
                 << " according to the periodic patch "
@@ -676,7 +656,7 @@ Foam::label Foam::cyclicPeriodicAMIPolyPatch::periodicPatchID() const
 
         if (periodicPatchID_ == -1)
         {
-            FatalErrorIn("cyclicPolyAMIPatch::periodicPatchID() const")
+            FatalErrorInFunction
                 << "Illegal periodicPatch name " << periodicPatchName_
                 << nl << "Valid patch names are "
                 << this->boundaryMesh().names()

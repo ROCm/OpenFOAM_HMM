@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -212,13 +212,13 @@ public:
         {
             if (invTau_.value() <= 0)
             {
-                FatalErrorIn("DEShybrid(const fvMesh&, Istream&)")
+                FatalErrorInFunction
                     << "invTau coefficient must be greater than 0. "
                     << "Current value: " << invTau_ << exit(FatalError);
             }
             if (sigmaMax_ > 1)
             {
-                FatalErrorIn("DEShybrid(const fvMesh&, Istream&)")
+                FatalErrorInFunction
                     << "sigmaMax coefficient must be less than or equal to 1. "
                     << "Current value: " << sigmaMax_ << exit(FatalError);
             }
@@ -249,13 +249,13 @@ public:
         {
             if (invTau_.value() <= 0)
             {
-                FatalErrorIn("DEShybrid(const fvMesh&, Istream&)")
+                FatalErrorInFunction
                     << "invTau coefficient must be greater than 0. "
                     << "Current value: " << invTau_ << exit(FatalError);
             }
             if (sigmaMax_ > 1)
             {
-                FatalErrorIn("DEShybrid(const fvMesh&, Istream&)")
+                FatalErrorInFunction
                     << "sigmaMax coefficient must be less than or equal to 1. "
                     << "Current value: " << sigmaMax_ << exit(FatalError);
             }
@@ -303,13 +303,7 @@ public:
             }
             else
             {
-                FatalErrorIn
-                (
-                    "virtual tmp<surfaceScalarField> DEShybrid::blendingFactor"
-                    "("
-                         "const GeometricField<Type, fvPatchField, volMesh>&"
-                    ") const"
-                )
+                FatalErrorInFunction
                     << "Scheme requires a turbulence model to be present. "
                     << "Unable to retrieve turbulence model from the mesh "
                     << "database" << exit(FatalError);

@@ -59,10 +59,8 @@ Foam::wordList Foam::fieldNames
 
             if (iter == localNamesSet.end())
             {
-                FatalErrorIn
-                (
-                    "fieldNames(const IOobjectList&, const bool syncPar)"
-                )   << "Fields not synchronised across processors." << endl
+                FatalErrorInFunction
+                    << "Fields not synchronised across processors." << endl
                     << "Master has fields " << masterNames
                     << "  processor " << Pstream::myProcNo()
                     << " has fields " << localNames << exit(FatalError);
@@ -75,10 +73,8 @@ Foam::wordList Foam::fieldNames
 
         forAllConstIter(HashSet<word>, localNamesSet, iter)
         {
-            FatalErrorIn
-            (
-                "fieldNames(const IOobjectList&, const bol syncPar)"
-            )   << "Fields not synchronised across processors." << endl
+            FatalErrorInFunction
+                << "Fields not synchronised across processors." << endl
                 << "Master has fields " << masterNames
                 << "  processor " << Pstream::myProcNo()
                 << " has fields " << localNames << exit(FatalError);

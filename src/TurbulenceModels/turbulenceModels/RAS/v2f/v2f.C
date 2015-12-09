@@ -239,7 +239,6 @@ v2f<BasicTurbulenceModel>::v2f
     if (type == typeName)
     {
         this->printCoeffs(type);
-        correctNut();
     }
 }
 

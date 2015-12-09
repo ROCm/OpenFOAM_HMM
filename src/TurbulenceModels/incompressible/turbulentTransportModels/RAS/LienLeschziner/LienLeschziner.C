@@ -224,7 +224,6 @@ LienLeschziner::LienLeschziner
 
     if (type == typeName)
     {
-        correctNut();
         printCoeffs(type);
     }
 }

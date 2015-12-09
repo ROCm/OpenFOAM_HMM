@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,15 +61,15 @@ int main(int argc, char *argv[])
     const fileName importName = args[1];
     const fileName exportName = args[2];
 
-    // disable inplace editing
+    // Disable inplace editing
     if (importName == exportName)
     {
-        FatalErrorIn(args.executable())
+        FatalErrorInFunction
             << "Output file " << exportName << " would overwrite input file."
             << exit(FatalError);
     }
 
-    // check that reading/writing is supported
+    // Check that reading/writing is supported
     if
     (
         !edgeMesh::canReadType(importName.ext(), true)

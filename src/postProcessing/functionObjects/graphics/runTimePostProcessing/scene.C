@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,11 +61,8 @@ void Foam::scene::readCamera(const dictionary& dict)
     {
         if (nFrameTotal_ < 1)
         {
-            FatalIOErrorIn
-            (
-                "void Foam::scene::readCamera(const dictionary&)",
-                dict
-            )   << "nFrameTotal must be 1 or greater"
+            FatalIOErrorInFunction(dict)
+                << "nFrameTotal must be 1 or greater"
                 << exit(FatalIOError);
         }
     }
@@ -74,11 +71,8 @@ void Foam::scene::readCamera(const dictionary& dict)
     {
         if ((position_ < 0) || (position_ > 1))
         {
-            FatalIOErrorIn
-            (
-                "void Foam::scene::readCamera(const dictionary&)",
-                dict
-            )   << "startPosition must be in the range 0-1"
+            FatalIOErrorInFunction(dict)
+                << "startPosition must be in the range 0-1"
                 << exit(FatalIOError);
         }
     }
@@ -91,11 +85,8 @@ void Foam::scene::readCamera(const dictionary& dict)
         scalar endPosition = dict.lookupOrDefault<scalar>("endPosition", 1);
         if ((endPosition < 0) || (endPosition > 1))
         {
-            FatalIOErrorIn
-            (
-                "void Foam::scene::readCamera(const dictionary&)",
-                dict
-            )   << "endPosition must be in the range 0-1"
+            FatalIOErrorInFunction(dict)
+                << "endPosition must be in the range 0-1"
                 << exit(FatalIOError);
         }
         dPosition_ = (endPosition - position_)/scalar(nFrameTotal_ - 1);
@@ -137,7 +128,7 @@ void Foam::scene::readCamera(const dictionary& dict)
         }
         default:
         {
-            FatalErrorIn("void Foam::scene::read(const dictionary&)")
+            FatalErrorInFunction
                 << "Unhandled enumeration " << modeTypeNames_[mode_]
                 << abort(FatalError);
         }

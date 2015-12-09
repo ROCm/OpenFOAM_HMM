@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,7 +88,7 @@ label findFace(const primitiveMesh& mesh, const face& f)
         }
     }
 
-    FatalErrorIn("findFace(const primitiveMesh&, const face&)")
+    FatalErrorInFunction
         << "Cannot find face " << f << " in mesh." << abort(FatalError);
 
     return -1;
@@ -135,14 +135,14 @@ int main(int argc, char *argv[])
 
     if (!isFile(nodeFile) || !isFile(eleFile))
     {
-        FatalErrorIn(args.executable())
+        FatalErrorInFunction
             << "Cannot read " << nodeFile << " or " << eleFile
             << exit(FatalError);
     }
 
     if (readFaceFile && !isFile(faceFile))
     {
-        FatalErrorIn(args.executable())
+        FatalErrorInFunction
             << "Cannot read " << faceFile << endl
             << "Did you run tetgen with -f option?" << endl
             << "If you don't want to read the .face file and thus not have"
@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
         }
         if (pointI != nNodes)
         {
-            FatalIOErrorIn(args.executable().c_str(), nodeStream)
+            FatalIOErrorInFunction(nodeStream)
                 << "Only " << pointI << " nodes present instead of " << nNodes
                 << " from header." << exit(FatalIOError);
         }
@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
 
     if (nPtsPerTet != 4)
     {
-        FatalIOErrorIn(args.executable().c_str(), eleStream)
+        FatalIOErrorInFunction(eleStream)
             << "Cannot handle tets with "
             << nPtsPerTet << " points per tetrahedron in .ele file" << endl
             << "Can only handle tetrahedra with four points"
@@ -267,7 +267,7 @@ int main(int argc, char *argv[])
 
     if (nElemAttr != 0)
     {
-        WarningIn(args.executable())
+        WarningInFunction
             << "Element attributes (third elemenent in .ele header)"
             << " not used" << endl;
     }
@@ -377,7 +377,7 @@ int main(int argc, char *argv[])
 
         if (nFaceAttr != 1)
         {
-            FatalIOErrorIn(args.executable().c_str(), faceStream)
+            FatalIOErrorInFunction(faceStream)
                 << "Expect boundary markers to be"
                 << " present in .face file." << endl
                 << "This is the second number in the header which is now:"

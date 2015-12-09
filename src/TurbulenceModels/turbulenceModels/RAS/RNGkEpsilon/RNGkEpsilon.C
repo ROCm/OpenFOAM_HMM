@@ -205,7 +205,6 @@ RNGkEpsilon<BasicTurbulenceModel>::RNGkEpsilon
 
     if (type == typeName)
     {
-        correctNut();
         this->printCoeffs(type);
     }
 }

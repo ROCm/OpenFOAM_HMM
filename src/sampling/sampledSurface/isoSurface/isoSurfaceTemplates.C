@@ -542,7 +542,7 @@ void Foam::isoSurface::generateTriPoints
      || (snappedPoint.size() != mesh_.nPoints())
     )
     {
-        FatalErrorIn("isoSurface::generateTriPoints(..)")
+        FatalErrorInFunction
             << "Incorrect size." << endl
             << "mesh: nCells:" << mesh_.nCells()
             << " points:" << mesh_.nPoints() << endl

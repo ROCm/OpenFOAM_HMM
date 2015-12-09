@@ -43,7 +43,7 @@ Description
 #include "bound.H"
 #include "pimpleControl.H"
 #include "CorrectPhi.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "localEulerDdtScheme.H"
 #include "fvcSmooth.H"
 
@@ -64,6 +64,8 @@ int main(int argc, char *argv[])
     #include "createFvOptions.H"
     #include "createRhoUf.H"
     #include "createControls.H"
+
+    turbulence->validate();
 
     if (!LTS)
     {

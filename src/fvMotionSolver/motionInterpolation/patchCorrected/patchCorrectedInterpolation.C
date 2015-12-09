@@ -66,11 +66,8 @@ Foam::labelListList Foam::patchCorrectedInterpolation::getPatchGroups
 
             if (patchGroups[patchI][patchJ] == -1)
             {
-                FatalErrorIn
-                (
-                    "Foam::patchCorrectedInterpolation::getPatchGroups"
-                    "(Istream&) const"
-                )   << "patch \"" << patchGroupNames[patchI][patchJ]
+                FatalErrorInFunction
+                    << "patch \"" << patchGroupNames[patchI][patchJ]
                     << "\" not found" << exit(FatalError);
             }
         }

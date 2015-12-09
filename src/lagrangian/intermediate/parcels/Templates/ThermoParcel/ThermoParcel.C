@@ -51,15 +51,8 @@ void Foam::ThermoParcel<ParcelType>::setCellValues
     {
         if (debug)
         {
-            WarningIn
-            (
-                "void Foam::ThermoParcel<ParcelType>::setCellValues"
-                "("
-                    "TrackData&, "
-                    "const scalar, "
-                    "const label"
-                ")"
-            )   << "Limiting observed temperature in cell " << cellI << " to "
+            WarningInFunction
+                << "Limiting observed temperature in cell " << cellI << " to "
                 << td.cloud().constProps().TMin() <<  nl << endl;
         }
 
@@ -89,15 +82,8 @@ void Foam::ThermoParcel<ParcelType>::cellValueSourceCorrection
     {
         if (debug)
         {
-            WarningIn
-            (
-                "void Foam::ThermoParcel<ParcelType>::cellValueSourceCorrection"
-                "("
-                    "TrackData&, "
-                    "const scalar, "
-                    "const label"
-                ")"
-            )   << "Limiting observed temperature in cell " << cellI << " to "
+            WarningInFunction
+                << "Limiting observed temperature in cell " << cellI << " to "
                 << td.cloud().constProps().TMin() <<  nl << endl;
         }
 
@@ -127,20 +113,8 @@ void Foam::ThermoParcel<ParcelType>::calcSurfaceValues
     {
         if (debug)
         {
-            WarningIn
-            (
-                "void Foam::ThermoParcel<ParcelType>::calcSurfaceValues"
-                "("
-                    "TrackData&, "
-                    "const label, "
-                    "const scalar, "
-                    "scalar&, "
-                    "scalar&, "
-                    "scalar&, "
-                    "scalar&, "
-                    "scalar&"
-                ") const"
-            )   << "Limiting parcel surface temperature to "
+            WarningInFunction
+                << "Limiting parcel surface temperature to "
                 << td.cloud().constProps().TMin() <<  nl << endl;
         }
 

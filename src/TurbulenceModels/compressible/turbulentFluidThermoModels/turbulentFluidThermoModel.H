@@ -35,6 +35,7 @@ Description
     based on the standard laminar transport package.
 
 SourceFiles
+    turbulentFluidThermoModel.C
     turbulentFluidThermoModels.C
 
 \*---------------------------------------------------------------------------*/
@@ -42,7 +43,7 @@ SourceFiles
 #ifndef turbulentFluidThermoModel_H
 #define turbulentFluidThermoModel_H
 
-#include "SpecificCompressibleTurbulenceModel.H"
+#include "CompressibleTurbulenceModel.H"
 #include "ThermalDiffusivity.H"
 #include "EddyDiffusivity.H"
 #include "RASModel.H"
@@ -58,18 +59,28 @@ namespace Foam
         typedef ThermalDiffusivity<CompressibleTurbulenceModel<fluidThermo> >
             turbulenceModel;
 
-        typedef SpecificCompressibleTurbulenceModel
-        <
-            RASModel<EddyDiffusivity<turbulenceModel> >
-        > RASModel;
+        typedef RASModel<EddyDiffusivity<turbulenceModel> > RASModel;
+        typedef LESModel<EddyDiffusivity<turbulenceModel> > LESModel;
 
-        typedef SpecificCompressibleTurbulenceModel
-        <
-            LESModel<EddyDiffusivity<turbulenceModel> >
-        > LESModel;
+        template<class BasicCompressibleTurbulenceModel>
+        autoPtr<BasicCompressibleTurbulenceModel> New
+        (
+            const volScalarField& rho,
+            const volVectorField& U,
+            const surfaceScalarField& phi,
+            const typename BasicCompressibleTurbulenceModel::transportModel&
+                transport,
+            const word& propertiesName = turbulenceModel::propertiesName
+        );
     }
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "turbulentFluidThermoModel.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

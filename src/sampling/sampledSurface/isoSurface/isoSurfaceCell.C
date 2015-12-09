@@ -920,7 +920,7 @@ Foam::triSurface Foam::isoSurfaceCell::stitchTriPoints
 
     if ((triPoints.size() % 3) != 0)
     {
-        FatalErrorIn("isoSurfaceCell::stitchTriPoints(..)")
+        FatalErrorInFunction
             << "Problem: number of points " << triPoints.size()
             << " not a multiple of 3." << abort(FatalError);
     }
@@ -954,7 +954,7 @@ Foam::triSurface Foam::isoSurfaceCell::stitchTriPoints
 
         if (hasMerged)
         {
-            FatalErrorIn("isoSurfaceCell::stitchTriPoints(..)")
+            FatalErrorInFunction
                 << "Merged points contain duplicates"
                 << " when merging with distance " << mergeDistance_ << endl
                 << "merged:" << newPoints.size() << " re-merged:"
@@ -1067,7 +1067,7 @@ bool Foam::isoSurfaceCell::validTri(const triSurface& surf, const label faceI)
     {
         if (f[fp] < 0 || f[fp] >= surf.points().size())
         {
-            WarningIn("validTri(const triSurface&, const label)")
+            WarningInFunction
                 << "triangle " << faceI << " vertices " << f
                 << " uses point indices outside point range 0.."
                 << surf.points().size()-1 << endl;
@@ -1078,7 +1078,7 @@ bool Foam::isoSurfaceCell::validTri(const triSurface& surf, const label faceI)
 
     if ((f[0] == f[1]) || (f[0] == f[2]) || (f[1] == f[2]))
     {
-        WarningIn("validTri(const triSurface&, const label)")
+        WarningInFunction
             << "triangle " << faceI
             << " uses non-unique vertices " << f
             << endl;
@@ -1110,7 +1110,7 @@ bool Foam::isoSurfaceCell::validTri(const triSurface& surf, const label faceI)
          && ((f[2] == nbrF[0]) || (f[2] == nbrF[1]) || (f[2] == nbrF[2]))
         )
         {
-            WarningIn("validTri(const triSurface&, const label)")
+            WarningInFunction
                 << "triangle " << faceI << " vertices " << f
                 << " coords:" << f.points(surf.points())
                 << " has the same vertices as triangle " << nbrFaceI
@@ -1202,7 +1202,7 @@ void Foam::isoSurfaceCell::calcAddressing
         }
         else
         {
-            //WarningIn("orientSurface(triSurface&)")
+            //WarningInFunction
             //    << "Edge " << edgeI << " with centre " << mergedCentres[edgeI]
             //    << " used by more than two triangles: " << edgeFace0[edgeI]
             //    << ", "

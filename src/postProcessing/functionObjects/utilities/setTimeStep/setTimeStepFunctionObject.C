@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -132,8 +132,8 @@ bool Foam::setTimeStepFunctionObject::read(const dictionary& dict)
          || !adjust
         )
         {
-            FatalIOErrorIn("setTimeStep::read(const dictionary&)", dict)
-                << "'adjustTimeStep' must be set to true to enable external"
+            FatalIOErrorInFunction(dict)
+                << "Need to have 'adjustTimeStep' true to enable external"
                 << " timestep control" << exit(FatalIOError);
         }
     }

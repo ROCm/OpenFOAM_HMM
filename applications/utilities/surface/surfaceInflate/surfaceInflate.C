@@ -71,7 +71,7 @@ scalar calcVertexNormalWeight
 
     if (index == -1)
     {
-        FatalErrorIn("calcVertexNormals()")
+        FatalErrorInFunction
             << "Point not in face" << abort(FatalError);
     }
 
@@ -199,7 +199,8 @@ tmp<vectorField> calcPointNormals
     {
         if (mag(mag(pointNormals[pointI])-1) > SMALL)
         {
-            FatalErrorIn("calcPointNormals()") << "unitialised"
+            FatalErrorInFunction
+                << "unitialised"
                 << exit(FatalError);
         }
     }
@@ -626,7 +627,7 @@ int main(int argc, char *argv[])
 
     if (extendFactor < 1 || extendFactor > 10)
     {
-        FatalErrorIn(args.executable())
+        FatalErrorInFunction
             << "Illegal safety factor " << extendFactor
             << ". It is usually 1..2"
             << exit(FatalError);

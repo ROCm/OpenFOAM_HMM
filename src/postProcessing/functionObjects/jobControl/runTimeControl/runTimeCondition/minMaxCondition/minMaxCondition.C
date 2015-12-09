@@ -104,7 +104,7 @@ bool Foam::minMaxCondition::apply()
 
         if (valueType == word::null)
         {
-            WarningIn("bool Foam::minMaxCondition::apply()")
+            WarningInFunction
                 << "Unable to find entry " << fieldName
                 << " for function object " << functionObjectName_
                 << ".  Condition will not be applied."

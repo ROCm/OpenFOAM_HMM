@@ -223,7 +223,7 @@ public:
         {
             if (!from1(faceI))
             {
-                FatalErrorIn("booleanSurface::surf1Face(const label)")
+                FatalErrorInFunction
                     << "face " << faceI << " not from surface 1"
                     << abort(FatalError);
             }
@@ -234,7 +234,7 @@ public:
         {
             if (from1(faceI))
             {
-                FatalErrorIn("booleanSurface::surf2Face(const label)")
+                FatalErrorInFunction
                     << "face " << faceI << " not from surface 2"
                     << abort(FatalError);
             }

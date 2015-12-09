@@ -275,7 +275,7 @@ void Foam::wallBoundedStreamLine::read(const dictionary& dict)
             {
                 label nFaces = returnReduce(faces.size(), sumOp<label>());
 
-                WarningIn("wallBoundedStreamLine::read(const dictionary&)")
+                WarningInFunction
                     << "Found " << nFaces
                     <<" faces with low quality or negative volume "
                     << "decomposition tets. Writing to faceSet " << faces.name()
@@ -314,10 +314,8 @@ void Foam::wallBoundedStreamLine::read(const dictionary& dict)
                 {
                     if (iter() != 2)
                     {
-                        FatalErrorIn
-                        (
-                            "wallBoundedStreamLine::read(const dictionary&)"
-                        )   << "problem cell:" << cellI
+                        FatalErrorInFunction
+                            << "problem cell:" << cellI
                             << abort(FatalError);
                     }
                 }

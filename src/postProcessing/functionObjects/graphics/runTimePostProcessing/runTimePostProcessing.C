@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -102,11 +102,7 @@ void Foam::runTimePostProcessing::read(const dictionary& dict)
     {
         if (!iter().isDict())
         {
-            FatalIOErrorIn
-            (
-                "void Foam::runTimePostProcessing::read(const dictionary&)",
-                textDict
-            )
+            FatalIOErrorInFunction(textDict)
                 << "text must be specified in dictionary format"
                 << exit(FatalIOError);
         }

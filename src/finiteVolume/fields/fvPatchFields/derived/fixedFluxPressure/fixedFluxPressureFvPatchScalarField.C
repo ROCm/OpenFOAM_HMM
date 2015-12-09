@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -44,48 +44,6 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
 
 Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
 (
-    const fixedFluxPressureFvPatchScalarField& ptf,
-    const fvPatch& p,
-    const DimensionedField<scalar, volMesh>& iF,
-    const fvPatchFieldMapper& mapper
-)
-:
-    fixedGradientFvPatchScalarField(p, iF),
-    curTimeIndex_(-1)
-{
-    patchType() = ptf.patchType();
-
-    // Map gradient. Set unmapped values and overwrite with mapped ptf
-    gradient() = 0.0;
-    gradient().map(ptf.gradient(), mapper);
-
-    // Evaluate the value field from the gradient if the internal field is valid
-    if (notNull(iF))
-    {
-        if (iF.size())
-        {
-            // Note: cannot ask for nf() if zero faces
-
-            scalarField::operator=
-            (
-                //patchInternalField() + gradient()/patch().deltaCoeffs()
-                // ***HGW Hack to avoid the construction of mesh.deltaCoeffs
-                // which fails for AMI patches for some mapping operations
-                patchInternalField()
-              + gradient()*(patch().nf() & patch().delta())
-            );
-        }
-    }
-    else
-    {
-        // Enforce mapping of values so we have a valid starting value
-        this->map(ptf, mapper);
-    }
-}
-
-
-Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
-(
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const dictionary& dict
@@ -106,6 +64,37 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
     {
         fvPatchField<scalar>::operator=(patchInternalField());
         gradient() = 0.0;
+    }
+}
+
+
+Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
+(
+    const fixedFluxPressureFvPatchScalarField& ptf,
+    const fvPatch& p,
+    const DimensionedField<scalar, volMesh>& iF,
+    const fvPatchFieldMapper& mapper
+)
+:
+    fixedGradientFvPatchScalarField(p, iF),
+    curTimeIndex_(-1)
+{
+    patchType() = ptf.patchType();
+
+    // Map gradient. Set unmapped values and overwrite with mapped ptf
+    gradient() = 0.0;
+    gradient().map(ptf.gradient(), mapper);
+
+    // Evaluate the value field from the gradient if the internal field is valid
+    if (notNull(iF) && iF.size())
+    {
+        scalarField::operator=
+        (
+            //patchInternalField() + gradient()/patch().deltaCoeffs()
+            // ***HGW Hack to avoid the construction of mesh.deltaCoeffs
+            // which fails for AMI patches for some mapping operations
+            patchInternalField() + gradient()*(patch().nf() & patch().delta())
+        );
     }
 }
 
@@ -159,7 +148,7 @@ void Foam::fixedFluxPressureFvPatchScalarField::updateCoeffs()
 
     if (curTimeIndex_ != this->db().time().timeIndex())
     {
-        FatalErrorIn("fixedFluxPressureFvPatchScalarField::updateCoeffs()")
+        FatalErrorInFunction
             << "updateCoeffs(const scalarField& snGradp) MUST be called before"
                " updateCoeffs() or evaluate() to set the boundary gradient."
             << exit(FatalError);

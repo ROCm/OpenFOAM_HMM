@@ -190,19 +190,8 @@ void Foam::mapDistributeBase::checkReceivedSize
 {
     if (receivedSize != expectedSize)
     {
-        FatalErrorIn
-        (
-            "template<class T>\n"
-            "void mapDistributeBase::distribute\n"
-            "(\n"
-            "    const Pstream::commsTypes commsType,\n"
-            "    const List<labelPair>& schedule,\n"
-            "    const label constructSize,\n"
-            "    const labelListList& subMap,\n"
-            "    const labelListList& constructMap,\n"
-            "    List<T>& field\n"
-            ")\n"
-        )   << "Expected from processor " << procI
+        FatalErrorInFunction
+            << "Expected from processor " << procI
             << " " << expectedSize << " but received "
             << receivedSize << " elements."
             << abort(FatalError);
@@ -265,7 +254,7 @@ void Foam::mapDistributeBase::printLayout(Ostream& os) const
             {
                 if (minIndex[procI] != offset)
                 {
-                    FatalErrorIn("mapDistributeBase::printLayout(..)")
+                    FatalErrorInFunction
                         << "offset:" << offset
                         << " procI:" << procI
                         << " minIndex:" << minIndex[procI]
@@ -604,11 +593,8 @@ Foam::mapDistributeBase::mapDistributeBase
 {
     if (sendProcs.size() != recvProcs.size())
     {
-        FatalErrorIn
-        (
-            "mapDistributeBase::mapDistributeBase"
-            "(const labelList&, const labelList&)"
-        )   << "The send and receive data is not the same length. sendProcs:"
+        FatalErrorInFunction
+            << "The send and receive data is not the same length. sendProcs:"
             << sendProcs.size() << " recvProcs:" << recvProcs.size()
             << abort(FatalError);
     }
@@ -1248,10 +1234,8 @@ void Foam::mapDistributeBase::operator=(const mapDistributeBase& rhs)
     // Check for assignment to self
     if (this == &rhs)
     {
-        FatalErrorIn
-        (
-            "Foam::mapDistributeBase::operator=(const Foam::mapDistributeBase&)"
-        )   << "Attempted assignment to self"
+        FatalErrorInFunction
+            << "Attempted assignment to self"
             << abort(FatalError);
     }
     constructSize_ = rhs.constructSize_;

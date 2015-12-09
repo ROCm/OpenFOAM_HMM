@@ -62,7 +62,7 @@ Description
 #include "OFstream.H"
 #include "mathematicalConstants.H"
 #include "pimpleControl.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -85,6 +85,8 @@ int main(int argc, char *argv[])
     #include "compressibleCourantNo.H"
     #include "setInitialDeltaT.H"
     #include "startSummary.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
