@@ -26,8 +26,9 @@ Application
 
 Description
     Calculate the geometric compression ratio.
-    Note that if you have valves and/or extra volumes it will not work,
-    since it calculates the volume at BDC and TCD.
+
+    Note: if you have valves and/or extra volumes it will not work,
+          since it calculates the volume at BDC and TCD.
 
 \*---------------------------------------------------------------------------*/
 
@@ -68,9 +69,9 @@ int main(int argc, char *argv[])
 
     scalar Vmax = sum(mesh.V().field());
 
-    while (mag(runTime.theta()-ca1) > eps)
+    while (mag(runTime.theta() - ca1) > eps)
     {
-        scalar t1 = runTime.userTimeToTime(ca1-runTime.theta());
+        scalar t1 = runTime.userTimeToTime(ca1 - runTime.theta());
         runTime.setDeltaT(t1);
         runTime++;
         Info<< "CA = " << runTime.theta() << endl;
@@ -79,9 +80,10 @@ int main(int argc, char *argv[])
 
     scalar Vmin = sum(mesh.V().field());
 
-    Info<< "\nVmax = " << Vmax;
-    Info<< ", Vmin = " << Vmin << endl;
-    Info<< "Vmax/Vmin = " << Vmax/Vmin << endl;
+    Info<< "\nVmax = " << Vmax
+        << ", Vmin = " << Vmin << nl
+        << "Vmax/Vmin = " << Vmax/Vmin << endl;
+    
     Info<< "\nEnd\n" << endl;
 
     return 0;
