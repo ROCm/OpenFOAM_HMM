@@ -653,7 +653,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                WarningIn(args.executable())
+                WarningInFunction
                     << "Requested field to change " << fieldName
                     << " does not exist in " << fieldHeader.path() << endl;
             }

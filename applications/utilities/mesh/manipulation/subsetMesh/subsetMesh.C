@@ -103,7 +103,7 @@ labelList nearestPatch(const polyMesh& mesh, const labelList& patchIDs)
         {
             if (!haveWarned)
             {
-                WarningIn("meshRefinement::nearestPatch(..)")
+                WarningInFunction
                     << "Did not visit some faces, e.g. face " << faceI
                     << " at " << mesh.faceCentres()[faceI] << endl
                     << "Using patch " << patchIDs[0] << " as nearest"
