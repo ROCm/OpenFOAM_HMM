@@ -24,6 +24,9 @@ License
 Application
     buoyantPimpleFoam
 
+Group
+    grpHeatTransferSolvers
+
 Description
     Transient solver for buoyant, turbulent flow of compressible fluids for
     ventilation and heat-transfer.

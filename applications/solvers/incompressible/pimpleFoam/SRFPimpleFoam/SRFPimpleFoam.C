@@ -24,6 +24,9 @@ License
 Application
     SRFPimpleFoam
 
+Group
+    grpIncompressibleSolvers
+
 Description
     Large time-step transient solver for incompressible, flow in a single
     rotating frame using the PIMPLE (merged PISO-SIMPLE) algorithm.

@@ -80,15 +80,15 @@ Foam::MPPICCloud<CloudType>::MPPICCloud
     dampingModel_(NULL),
     isotropyModel_(NULL)
 {
-    if (this->solution().steadyState())
-    {
-        FatalErrorInFunction
-            << "MPPIC modelling not available for steady state calculations"
-            << exit(FatalError);
-    }
-
     if (this->solution().active())
     {
+        if (this->solution().steadyState())
+        {
+            FatalErrorInFunction
+                << "MPPIC modelling not available for steady state calculations"
+                << exit(FatalError);
+        }
+
         setModels();
 
         if (readFields)

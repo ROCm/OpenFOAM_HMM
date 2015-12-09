@@ -24,6 +24,9 @@ License
 Application
     sprayEngineFoam
 
+Group
+    grpLagrangianSolvers grpMovingMeshSolvers
+
 Description
     Transient PIMPLE solver for compressible, laminar or turbulent engine
     flow swith spray parcels.

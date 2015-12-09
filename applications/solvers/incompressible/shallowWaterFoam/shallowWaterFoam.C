@@ -24,6 +24,9 @@ License
 Application
     shallowWaterFoam
 
+Group
+    grpIncompressibleSolvers
+
 Description
     Transient solver for inviscid shallow-water equations with rotation.
 

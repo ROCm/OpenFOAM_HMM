@@ -96,6 +96,8 @@ int main(int argc, char *argv[])
     Info<< "Writing points into directory " << points.path() << nl << endl;
     points.write();
 
+    Info<< nl << "End" << nl << endl;
+
     return 0;
 }
 

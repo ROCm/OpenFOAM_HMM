@@ -24,6 +24,9 @@ License
 Application
     SRFSimpleFoam
 
+Group
+    grpIncompressibleSolvers
+
 Description
     Steady-state solver for incompressible, turbulent flow of non-Newtonian
     fluids in a single rotating frame.

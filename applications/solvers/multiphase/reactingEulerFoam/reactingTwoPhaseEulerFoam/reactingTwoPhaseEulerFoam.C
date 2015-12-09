@@ -24,6 +24,9 @@ License
 Application
     reactingTwoPhaseEulerFoam
 
+Group
+    grpMultiphaseSolvers
+
 Description
     Solver for a system of 2 compressible fluid phases with a common pressure,
     but otherwise separate properties. The type of phase model is run time

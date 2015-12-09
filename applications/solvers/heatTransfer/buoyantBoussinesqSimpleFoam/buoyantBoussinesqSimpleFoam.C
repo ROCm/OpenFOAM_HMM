@@ -24,6 +24,9 @@ License
 Application
     buoyantBoussinesqSimpleFoam
 
+Group
+    grpHeatTransferSolvers
+
 Description
     Steady-state solver for buoyant, turbulent flow of incompressible fluids
 

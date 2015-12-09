@@ -24,6 +24,9 @@ License
 Application
     XiFoam
 
+Group
+    grpCombustionSolvers
+
 Description
     Solver for compressible premixed/partially-premixed combustion with
     turbulence modelling.

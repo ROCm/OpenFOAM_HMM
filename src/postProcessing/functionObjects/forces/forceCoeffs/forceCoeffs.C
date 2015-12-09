@@ -425,10 +425,7 @@ void Foam::forceCoeffs::execute()
 
 void Foam::forceCoeffs::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

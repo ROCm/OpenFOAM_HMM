@@ -390,15 +390,6 @@ class vtkPV4Foam
             //- Reduce memory footprint after conversion
             void reduceMemory();
 
-            //- Volume fields
-            void updateVolFields(vtkMultiBlockDataSet*);
-
-            //- Point fields
-            void updatePointFields(vtkMultiBlockDataSet*);
-
-            //- Lagrangian fields
-            void updateLagrangianFields(vtkMultiBlockDataSet*);
-
 
         // Mesh conversion functions
 
@@ -492,9 +483,30 @@ class vtkPV4Foam
 
         // Convert OpenFOAM fields
 
+            //- Volume field - all types
+            template<class Type>
+            void convertVolField
+            (
+                const PtrList<PrimitivePatchInterpolation<primitivePatch> >&,
+                const GeometricField<Type, fvPatchField, volMesh>&,
+                const bool interpFields,
+                vtkMultiBlockDataSet* output
+            );
+
             //- Volume fields - all types
             template<class Type>
             void convertVolFields
+            (
+                const fvMesh&,
+                const PtrList<PrimitivePatchInterpolation<primitivePatch> >&,
+                const IOobjectList&,
+                const bool interpFields,
+                vtkMultiBlockDataSet* output
+            );
+
+            //- Volume internal fields (DimensionedField)- all types
+            template<class Type>
+            void convertDimFields
             (
                 const fvMesh&,
                 const PtrList<PrimitivePatchInterpolation<primitivePatch> >&,

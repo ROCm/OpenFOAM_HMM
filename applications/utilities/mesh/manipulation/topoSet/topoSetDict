@@ -372,19 +372,22 @@ FoamFile
 //                          //           is the master side)
 //    }
 //
-//    // Select based on surface. Orientation from normals on surface
+//    // Select based on faceSet, using supplied normal to determine orientation
+//    source setAndNormalToFaceZone;
+//    sourceInfo
 //    {
-//        name    fz0;
-//        type    faceZoneSet;
-//        action  new;
-//        source  searchableSurfaceToFaceZone;
-//        sourceInfo
-//        {
-//            surface searchableSphere;
-//            centre  (0.05 0.05 0.005);
-//            radius  0.025;
-//            //name  sphere.stl; // Optional name if surface triSurfaceMesh
-//        }
+//        faceSet f0;       // name of faceSet
+//        normal (1 0 0);   // normal orientation
+//    }
+//
+//    // Select based on surface. Orientation from normals on surface
+//    source  searchableSurfaceToFaceZone;
+//    sourceInfo
+//    {
+//        surface searchableSphere;
+//        centre  (0.05 0.05 0.005);
+//        radius  0.025;
+//        //name  sphere.stl; // Optional name if surface triSurfaceMesh
 //    }
 //
 //
@@ -413,7 +416,7 @@ actions
         name    c0;
         type    cellSet;
         action  new;
-        source labelToCell;
+        source  labelToCell;
         sourceInfo
         {
             value (12 13 56);

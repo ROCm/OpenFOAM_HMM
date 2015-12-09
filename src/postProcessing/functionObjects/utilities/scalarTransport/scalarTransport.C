@@ -328,10 +328,7 @@ void Foam::scalarTransport::execute()
 
 void Foam::scalarTransport::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

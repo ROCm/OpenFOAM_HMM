@@ -34,7 +34,8 @@ Description
     NOTE: To avoid exposing wrong fields values faceSets should include
     faces contained in the blockedCells cellset.
 
-    - coupledFaces reads coupledFacesSet to introduces mixe-coupled baffles
+    - coupledFaces reads coupledFacesSet to introduces mixed-coupled
+      duplicate baffles
 
     Subsets out the blocked cells and splits the blockedFaces and updates
     fields.

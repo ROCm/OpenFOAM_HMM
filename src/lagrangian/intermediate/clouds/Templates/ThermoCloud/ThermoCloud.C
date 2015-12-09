@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,10 +51,7 @@ void Foam::ThermoCloud<CloudType>::setModels()
         ).ptr()
     );
 
-    if (this->solution().coupled())
-    {
-        this->subModelProperties().lookup("radiation") >> radiation_;
-    }
+    this->subModelProperties().lookup("radiation") >> radiation_;
 
     if (radiation_)
     {

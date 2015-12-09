@@ -329,10 +329,7 @@ void Foam::pressureTools::execute()
 
 void Foam::pressureTools::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

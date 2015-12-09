@@ -195,21 +195,9 @@ Foam::label Foam::objectRegistry::getEvent() const
         curEvent = 1;
         event_ = 2;
 
-        for (const_iterator iter = begin(); iter != end(); ++iter)
-        {
-            const regIOobject& io = *iter();
 
-            if (objectRegistry::debug)
-            {
-                Pout<< "objectRegistry::getEvent() : "
-                    << "resetting count on " << iter.key() << endl;
-            }
-
-            if (io.eventNo() != 0)
-            {
-                const_cast<regIOobject&>(io).eventNo() = curEvent;
-            }
-        }
+        // No need to reset dependent objects; overflow is now handled
+        // in regIOobject::upToDate
     }
 
     return curEvent;

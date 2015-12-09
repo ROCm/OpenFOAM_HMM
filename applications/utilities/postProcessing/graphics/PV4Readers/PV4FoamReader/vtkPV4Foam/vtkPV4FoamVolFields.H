@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,6 +34,7 @@ InClass
 #include "wallPolyPatch.H"
 #include "faceSet.H"
 #include "volPointInterpolation.H"
+#include "zeroGradientFvPatchField.H"
 
 #include "vtkPV4FoamFaceField.H"
 #include "vtkPV4FoamPatchField.H"
@@ -41,6 +42,224 @@ InClass
 #include "vtkOpenFOAMTupleRemap.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class Type>
+void Foam::vtkPV4Foam::convertVolField
+(
+    const PtrList<PrimitivePatchInterpolation<primitivePatch> >& ppInterpList,
+    const GeometricField<Type, fvPatchField, volMesh>& tf,
+    const bool interpFields,
+    vtkMultiBlockDataSet* output
+)
+{
+    const fvMesh& mesh = tf.mesh();
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+    // Interpolated field (demand driven)
+    autoPtr<GeometricField<Type, pointPatchField, pointMesh> > ptfPtr;
+    if (interpFields)
+    {
+        if (debug)
+        {
+            Info<< "convertVolFieldBlock interpolating:" << tf.name()
+                << endl;
+        }
+
+        ptfPtr.reset
+        (
+            volPointInterpolation::New(mesh).interpolate(tf).ptr()
+        );
+    }
+
+
+    // Convert activated internalMesh regions
+    convertVolFieldBlock
+    (
+        tf,
+        ptfPtr,
+        output,
+        arrayRangeVolume_,
+        regionPolyDecomp_
+    );
+
+    // Convert activated cellZones
+    convertVolFieldBlock
+    (
+        tf,
+        ptfPtr,
+        output,
+        arrayRangeCellZones_,
+        zonePolyDecomp_
+    );
+
+    // Convert activated cellSets
+    convertVolFieldBlock
+    (
+        tf,
+        ptfPtr,
+        output,
+        arrayRangeCellSets_,
+        csetPolyDecomp_
+    );
+
+
+    //
+    // Convert patches - if activated
+    //
+    for
+    (
+        int partId = arrayRangePatches_.start();
+        partId < arrayRangePatches_.end();
+        ++partId
+    )
+    {
+        const word patchName = getPartName(partId);
+        const label datasetNo = partDataset_[partId];
+        const label patchId = patches.findPatchID(patchName);
+
+        if (!partStatus_[partId] || datasetNo < 0 || patchId < 0)
+        {
+            continue;
+        }
+
+        const fvPatchField<Type>& ptf = tf.boundaryField()[patchId];
+
+        if
+        (
+            isType<emptyFvPatchField<Type> >(ptf)
+         ||
+            (
+                reader_->GetExtrapolatePatches()
+            && !polyPatch::constraintType(patches[patchId].type())
+            )
+        )
+        {
+            fvPatch p(ptf.patch().patch(), mesh.boundary());
+
+            tmp<Field<Type> > tpptf
+            (
+                fvPatchField<Type>(p, tf).patchInternalField()
+            );
+
+            convertPatchField
+            (
+                tf.name(),
+                tpptf(),
+                output,
+                arrayRangePatches_,
+                datasetNo
+            );
+
+            if (interpFields)
+            {
+                convertPatchPointField
+                (
+                    tf.name(),
+                    ppInterpList[patchId].faceToPointInterpolate(tpptf)(),
+                    output,
+                    arrayRangePatches_,
+                    datasetNo
+                );
+            }
+        }
+        else
+        {
+            convertPatchField
+            (
+                tf.name(),
+                ptf,
+                output,
+                arrayRangePatches_,
+                datasetNo
+            );
+
+            if (interpFields)
+            {
+                convertPatchPointField
+                (
+                    tf.name(),
+                    ppInterpList[patchId].faceToPointInterpolate(ptf)(),
+                    output,
+                    arrayRangePatches_,
+                    datasetNo
+                );
+            }
+        }
+    }
+
+    //
+    // Convert face zones - if activated
+    //
+    for
+    (
+        int partId = arrayRangeFaceZones_.start();
+        partId < arrayRangeFaceZones_.end();
+        ++partId
+    )
+    {
+        const word zoneName = getPartName(partId);
+        const label datasetNo = partDataset_[partId];
+
+        if (!partStatus_[partId] || datasetNo < 0)
+        {
+            continue;
+        }
+
+        const faceZoneMesh& zMesh = mesh.faceZones();
+        const label zoneId = zMesh.findZoneID(zoneName);
+
+        if (zoneId < 0)
+        {
+            continue;
+        }
+
+        convertFaceField
+        (
+            tf,
+            output,
+            arrayRangeFaceZones_,
+            datasetNo,
+            mesh,
+            zMesh[zoneId]
+        );
+
+        // TODO: points
+    }
+
+    //
+    // Convert face sets - if activated
+    //
+    for
+    (
+        int partId = arrayRangeFaceSets_.start();
+        partId < arrayRangeFaceSets_.end();
+        ++partId
+    )
+    {
+        const word selectName = getPartName(partId);
+        const label datasetNo = partDataset_[partId];
+
+        if (!partStatus_[partId] || datasetNo < 0)
+        {
+            continue;
+        }
+
+        const faceSet fSet(mesh, selectName);
+
+        convertFaceField
+        (
+            tf,
+            output,
+            arrayRangeFaceSets_,
+            datasetNo,
+            mesh,
+            fSet.toc()
+        );
+
+        // TODO: points
+    }
+}
+
 
 template<class Type>
 void Foam::vtkPV4Foam::convertVolFields
@@ -52,8 +271,6 @@ void Foam::vtkPV4Foam::convertVolFields
     vtkMultiBlockDataSet* output
 )
 {
-    const polyBoundaryMesh& patches = mesh.boundaryMesh();
-
     forAllConstIter(IOobjectList, objects, iter)
     {
         // restrict to GeometricField<Type, ...>
@@ -73,209 +290,69 @@ void Foam::vtkPV4Foam::convertVolFields
             mesh
         );
 
-        // Interpolated field (demand driven)
-        autoPtr<GeometricField<Type, pointPatchField, pointMesh> > ptfPtr;
-        if (interpFields)
-        {
-            if (debug)
-            {
-                Info<< "convertVolFieldBlock interpolating:" << tf.name()
-                    << endl;
-            }
-
-            ptfPtr.reset
-            (
-                volPointInterpolation::New(tf.mesh()).interpolate(tf).ptr()
-            );
-        }
+        // Convert
+        convertVolField(ppInterpList, tf, interpFields, output);
+    }
+}
 
 
-        // Convert activated internalMesh regions
-        convertVolFieldBlock
+template<class Type>
+void Foam::vtkPV4Foam::convertDimFields
+(
+    const fvMesh& mesh,
+    const PtrList<PrimitivePatchInterpolation<primitivePatch> >& ppInterpList,
+    const IOobjectList& objects,
+    const bool interpFields,
+    vtkMultiBlockDataSet* output
+)
+{
+    forAllConstIter(IOobjectList, objects, iter)
+    {
+        // restrict to DimensionedField<Type, ...>
+        if
         (
-            tf,
-            ptfPtr,
-            output,
-            arrayRangeVolume_,
-            regionPolyDecomp_
-        );
-
-        // Convert activated cellZones
-        convertVolFieldBlock
-        (
-            tf,
-            ptfPtr,
-            output,
-            arrayRangeCellZones_,
-            zonePolyDecomp_
-        );
-
-        // Convert activated cellSets
-        convertVolFieldBlock
-        (
-            tf,
-            ptfPtr,
-            output,
-            arrayRangeCellSets_,
-            csetPolyDecomp_
-        );
-
-
-        //
-        // Convert patches - if activated
-        //
-        for
-        (
-            int partId = arrayRangePatches_.start();
-            partId < arrayRangePatches_.end();
-            ++partId
+            iter()->headerClassName()
+         != DimensionedField<Type, volMesh>::typeName
         )
         {
-            const word patchName = getPartName(partId);
-            const label datasetNo = partDataset_[partId];
-            const label patchId = patches.findPatchID(patchName);
+            continue;
+        }
 
-            if (!partStatus_[partId] || datasetNo < 0 || patchId < 0)
-            {
-                continue;
-            }
+        // Load field
+        DimensionedField<Type, volMesh> dimFld(*iter(), mesh);
 
-            const fvPatchField<Type>& ptf = tf.boundaryField()[patchId];
 
-            if
+        // Construct volField with zero-gradient patch fields
+
+        IOobject io(dimFld);
+        io.readOpt() = IOobject::NO_READ;
+
+        PtrList<fvPatchField<Type> > patchFields(mesh.boundary().size());
+        forAll(patchFields, patchI)
+        {
+            patchFields.set
             (
-                isType<emptyFvPatchField<Type> >(ptf)
-             ||
+                patchI,
+                fvPatchField<Type>::New
                 (
-                    reader_->GetExtrapolatePatches()
-                && !polyPatch::constraintType(patches[patchId].type())
+                    zeroGradientFvPatchField<scalar>::typeName,
+                    mesh.boundary()[patchI],
+                    dimFld
                 )
-            )
-            {
-                fvPatch p(ptf.patch().patch(), tf.mesh().boundary());
-
-                tmp<Field<Type> > tpptf
-                (
-                    fvPatchField<Type>(p, tf).patchInternalField()
-                );
-
-                convertPatchField
-                (
-                    tf.name(),
-                    tpptf(),
-                    output,
-                    arrayRangePatches_,
-                    datasetNo
-                );
-
-                if (interpFields)
-                {
-                    convertPatchPointField
-                    (
-                        tf.name(),
-                        ppInterpList[patchId].faceToPointInterpolate(tpptf)(),
-                        output,
-                        arrayRangePatches_,
-                        datasetNo
-                    );
-                }
-            }
-            else
-            {
-                convertPatchField
-                (
-                    tf.name(),
-                    ptf,
-                    output,
-                    arrayRangePatches_,
-                    datasetNo
-                );
-
-                if (interpFields)
-                {
-                    convertPatchPointField
-                    (
-                        tf.name(),
-                        ppInterpList[patchId].faceToPointInterpolate(ptf)(),
-                        output,
-                        arrayRangePatches_,
-                        datasetNo
-                    );
-                }
-            }
-        }
-
-        //
-        // Convert face zones - if activated
-        //
-        for
-        (
-            int partId = arrayRangeFaceZones_.start();
-            partId < arrayRangeFaceZones_.end();
-            ++partId
-        )
-        {
-            const word zoneName = getPartName(partId);
-            const label datasetNo = partDataset_[partId];
-
-            if (!partStatus_[partId] || datasetNo < 0)
-            {
-                continue;
-            }
-
-            const faceZoneMesh& zMesh = mesh.faceZones();
-            const label zoneId = zMesh.findZoneID(zoneName);
-
-            if (zoneId < 0)
-            {
-                continue;
-            }
-
-            convertFaceField
-            (
-                tf,
-                output,
-                arrayRangeFaceZones_,
-                datasetNo,
-                mesh,
-                zMesh[zoneId]
             );
-
-            // TODO: points
         }
 
-        //
-        // Convert face sets - if activated
-        //
-        for
+        GeometricField<Type, fvPatchField, volMesh> volFld
         (
-            int partId = arrayRangeFaceSets_.start();
-            partId < arrayRangeFaceSets_.end();
-            ++partId
-        )
-        {
-            const word selectName = getPartName(partId);
-            const label datasetNo = partDataset_[partId];
+            io,
+            dimFld.mesh(),
+            dimFld.dimensions(),
+            dimFld,
+            patchFields
+        );
+        volFld.correctBoundaryConditions();
 
-            if (!partStatus_[partId] || datasetNo < 0)
-            {
-                continue;
-            }
-
-            const faceSet fSet(mesh, selectName);
-
-            convertFaceField
-            (
-                tf,
-                output,
-                arrayRangeFaceSets_,
-                datasetNo,
-                mesh,
-                fSet.toc()
-            );
-
-            // TODO: points
-        }
+        convertVolField(ppInterpList, volFld, interpFields, output);
     }
 }
 

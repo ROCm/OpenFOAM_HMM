@@ -24,6 +24,9 @@ License
 Application
     interPhaseChangeFoam
 
+Group
+    grpMultiphaseSolvers
+
 Description
     Solver for 2 incompressible, isothermal immiscible fluids with phase-change
     (e.g. cavitation).  Uses a VOF (volume of fluid) phase-fraction based

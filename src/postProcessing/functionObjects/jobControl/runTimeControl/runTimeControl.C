@@ -236,10 +236,7 @@ void Foam::runTimeControl::execute()
 
 void Foam::runTimeControl::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

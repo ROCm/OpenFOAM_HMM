@@ -24,8 +24,39 @@ License
 Application
     icoFoam
 
+Group
+    grpIncompressibleSolvers
+
 Description
     Transient solver for incompressible, laminar flow of Newtonian fluids.
+
+    \heading Solver details
+    The solver uses the PISO algorithm to solve the continuity equation:
+
+        \f[
+            \div \vec{U} = 0
+        \f]
+
+    and momentum equation:
+
+        \f[
+            \ddt{\vec{U}}
+          + \div \left( \vec{U} \vec{U} \right)
+          - \div \left(\nu \grad \vec{U} \right)
+          = - \grad p
+        \f]
+
+    Where:
+    \vartable
+        \vec{U} | Velocity
+        p       | Pressure
+    \endvartable
+
+    \heading Required fields
+    \plaintable
+        U       | Velocity [m/s]
+        p       | Kinematic pressure, p/rho [m2/s2]
+    \endplaintable
 
 \*---------------------------------------------------------------------------*/
 

@@ -24,6 +24,9 @@ License
 Application
     driftFluxFoam
 
+Group
+    grpMultiphaseSolvers
+
 Description
     Solver for 2 incompressible fluids using the mixture approach with the
     drift-flux approximation for relative motion of the phases.

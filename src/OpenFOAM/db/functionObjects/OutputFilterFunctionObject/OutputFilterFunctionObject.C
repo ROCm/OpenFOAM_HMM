@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -206,14 +206,6 @@ bool Foam::OutputFilterFunctionObject<OutputFilter>::end()
         }
 
         ptr_->end();
-
-        // Only write if
-        // - time within timeStart_ and timeEnd_
-        // - it is an output time
-        if (active() && outputControl_.output())
-        {
-            ptr_->write();
-        }
 
         if (!storeFilter_)
         {

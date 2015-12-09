@@ -108,10 +108,7 @@ void Foam::surfaceInterpolateFields::execute()
 
 void Foam::surfaceInterpolateFields::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

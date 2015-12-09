@@ -56,7 +56,7 @@ FSD<CombThermoType, ThermoType>::FSD
         (
             this->coeffs(),
             this->mesh(),
-            *this
+           *this
         )
     ),
     ft_
@@ -188,21 +188,17 @@ void FSD<CombThermoType, ThermoType>::calculateSourceNorm()
     volScalarField& omegaFuelBar = tomegaFuel();
 
     // Calculation of the mixture fraction variance (ftVar)
-    const compressible::LESModel& lesModel =
-        YO2.db().lookupObject<compressible::LESModel>
-        (
-            turbulenceModel::propertiesName
-        );
+    // TODO: generalize delta for RAS and LES.
+    const volScalarField& delta =
+        refCast<const compressible::LESModel>(this->turbulence()).delta();
 
-    const volScalarField& delta = lesModel.delta();
     const volScalarField ftVar(Cv_*sqr(delta)*sqr(mgft));
 
     // Thickened flame (average flame thickness for counterflow configuration
     // is 1.5 mm)
-
     volScalarField  deltaF
     (
-        lesModel.delta()/dimensionedScalar("flame", dimLength, 1.5e-3)
+        delta/dimensionedScalar("flame", dimLength, 1.5e-3)
     );
 
     // Linear correlation between delta and flame thickness

@@ -74,12 +74,22 @@ public:
         static wordList interactionTypeNames_;
 
 
-private:
+protected:
 
     // Private data
 
         //- Name of velocity field - default = "U"
         const word UName_;
+
+
+        // Counters
+
+            //- Number of parcels escaped
+            label escapedParcels_;
+
+            //- Mass of parcels escaped
+            scalar escapedMass_;
+
 
 
 public:
@@ -157,6 +167,9 @@ public:
             const scalar trackFraction,
             const tetIndices& tetIs
         ) = 0;
+
+        //- Add to escaped parcels
+        void addToEscapedParcels(const scalar mass);
 
 
         // I-O

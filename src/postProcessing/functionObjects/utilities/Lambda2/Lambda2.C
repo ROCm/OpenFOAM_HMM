@@ -148,10 +148,7 @@ void Foam::Lambda2::execute()
 
 void Foam::Lambda2::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

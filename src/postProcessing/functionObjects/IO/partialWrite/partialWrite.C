@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -135,12 +135,12 @@ void Foam::partialWrite::read(const dictionary& dict)
 
 void Foam::partialWrite::execute()
 {
+    // Do nothing - only valid on write
 }
 
 
 void Foam::partialWrite::end()
 {
-    //Pout<< "end at time " << obr_.time().timeName() << endl;
     // Do nothing - only valid on write
 }
 

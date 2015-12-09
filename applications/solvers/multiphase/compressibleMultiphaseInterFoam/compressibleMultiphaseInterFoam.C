@@ -24,6 +24,9 @@ License
 Application
     compressibleMultiphaseInterFoam
 
+Group
+    grpMultiphaseSolvers
+
 Description
     Solver for n compressible, non-isothermal immiscible fluids using a VOF
     (volume of fluid) phase-fraction based interface capturing approach.

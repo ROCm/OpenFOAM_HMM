@@ -123,20 +123,20 @@ void Foam::reactionRateFlameAreaModels::relaxation::correct
        /(sqr(omega0 - omegaInf) + sqr(omegaMin))
     );
 
-    const volScalarField rho(combModel_.rho());
-    const surfaceScalarField phi(combModel_.phi());
+    tmp<surfaceScalarField> phi(combModel_.phi());
 
     solve
     (
-         fvm::ddt(rho, omega_)
+         fvm::ddt(omega_)
        + fvm::div(phi, omega_, "div(phi,omega)")
       ==
-         rho*Rc*omega0
-       - fvm::SuSp(rho*(tau + Rc), omega_)
+         Rc*omega0
+       - fvm::SuSp((tau + Rc), omega_)
     );
 
     omega_.min(omega0);
     omega_.max(0.0);
+
 }
 
 

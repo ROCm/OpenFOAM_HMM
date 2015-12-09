@@ -148,7 +148,11 @@ void calc
     functionObjectList& fol
 )
 {
-    if (args.optionFound("noFlow"))
+    if (args.optionFound("noRead"))
+    {
+        fol.execute(true);
+    }
+    else if (args.optionFound("noFlow"))
     {
         Info<< "    Operating in no-flow mode; no models will be loaded."
             << " All vol, surface and point fields will be loaded." << endl;

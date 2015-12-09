@@ -24,6 +24,9 @@ License
 Application
     rhoSimpleFoam
 
+Group
+    grpCompressibleSolvers
+
 Description
     Steady-state SIMPLE solver for laminar or turbulent RANS flow of
     compressible fluids.

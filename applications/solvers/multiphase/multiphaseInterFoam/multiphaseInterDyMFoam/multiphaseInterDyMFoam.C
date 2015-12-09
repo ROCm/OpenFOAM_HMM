@@ -24,6 +24,9 @@ License
 Application
     multiphaseInterFoam
 
+Group
+    grpMultiphaseSolvers grpMovingMeshSolvers
+
 Description
     Solver for n incompressible fluids which captures the interfaces and
     includes surface-tension and contact-angle effects for each phase.

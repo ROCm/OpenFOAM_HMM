@@ -144,7 +144,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
         Info<< "    Missing U or T" << endl;
     }
 
-    Info<< "\nEnd\n" << endl;
+    Info<< nl << "End" << nl << endl;
 }
 
 

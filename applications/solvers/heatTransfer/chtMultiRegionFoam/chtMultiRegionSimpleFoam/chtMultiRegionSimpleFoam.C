@@ -24,6 +24,9 @@ License
 Application
     chtMultiRegionSimpleFoam
 
+Group
+    grpHeatTransferSolvers
+
 Description
     Steady-state version of chtMultiRegionFoam
 

@@ -146,11 +146,9 @@ void Foam::blendingFactor::execute()
 
 void Foam::blendingFactor::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
+
 
 void Foam::blendingFactor::timeSet()
 {

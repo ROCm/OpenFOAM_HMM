@@ -68,54 +68,6 @@ Foam::pressurePIDControlInletVelocityFvPatchVectorField::facePressure() const
 }
 
 
-template <class Type>
-void Foam::pressurePIDControlInletVelocityFvPatchVectorField::faceZoneAverage
-(
-    const word& name,
-    const GeometricField<Type, fvsPatchField, surfaceMesh>& field,
-    scalar& area,
-    Type& average
-) const
-{
-    const fvMesh& mesh(patch().boundaryMesh().mesh());
-
-    PackedBoolList isMasterFace(syncTools::getInternalOrMasterFaces(mesh));
-
-    const faceZone& zone = mesh.faceZones()[name];
-
-    area = 0;
-    average = pTraits<Type>::zero;
-
-    forAll(zone, faceI)
-    {
-        const label f(zone[faceI]);
-
-        if (mesh.isInternalFace(f))
-        {
-            const scalar da(mesh.magSf()[f]);
-
-            area += da;
-            average += da*field[f];
-        }
-        else if (isMasterFace[f])
-        {
-            const label bf(f-mesh.nInternalFaces());
-            const label patchID = mesh.boundaryMesh().patchID()[bf];
-            const label lf(mesh.boundaryMesh()[patchID].whichFace(f));
-            const scalar da(mesh.magSf().boundaryField()[patchID][lf]);
-
-            area += da;
-            average += da*field.boundaryField()[patchID][lf];
-        }
-    }
-
-    reduce(area, sumOp<scalar>());
-    reduce(average, sumOp<Type>());
-
-    average /= area;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::pressurePIDControlInletVelocityFvPatchVectorField::

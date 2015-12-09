@@ -24,6 +24,9 @@ License
 Application
     reactingParcelFilmFoam
 
+Group
+    grpLagrangianSolvers
+
 Description
     Transient PIMPLE solver for compressible, laminar or turbulent flow with
     reacting Lagrangian parcels, and surface film modelling.

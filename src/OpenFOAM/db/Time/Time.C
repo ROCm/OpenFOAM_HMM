@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -891,7 +891,10 @@ bool Foam::Time::run() const
         // ie, when exiting the control loop
         if (!running && timeIndex_ != startTimeIndex_)
         {
-            // Note, end() also calls an indirect start() as required
+            // Ensure functionObjects execute on last time step
+            // (and hence write uptodate functionObjectProperties)
+            functionObjects_.execute();
+
             functionObjects_.end();
         }
     }

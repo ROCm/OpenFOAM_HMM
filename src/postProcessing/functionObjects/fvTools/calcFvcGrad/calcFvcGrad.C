@@ -111,10 +111,7 @@ void Foam::calcFvcGrad::execute()
 
 void Foam::calcFvcGrad::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

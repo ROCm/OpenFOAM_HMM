@@ -24,6 +24,9 @@ License
 Application
     engineFoam
 
+Group
+    grpCombustionSolvers
+
 Description
     Solver for internal combustion engines.
 

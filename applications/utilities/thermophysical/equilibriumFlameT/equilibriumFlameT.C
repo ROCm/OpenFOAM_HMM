@@ -273,7 +273,7 @@ int main(int argc, char *argv[])
     }
     }
 
-    Info<< nl << "end" << endl;
+    Info<< nl << "End" << nl << endl;
 
     return 0;
 }

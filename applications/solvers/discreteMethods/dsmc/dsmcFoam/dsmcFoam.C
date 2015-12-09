@@ -24,6 +24,9 @@ License
 Application
     dsmcFoam
 
+Group
+    grpDiscreteMethodsSolvers
+
 Description
     Direct simulation Monte Carlo (DSMC) solver for 3D, transient, multi-
     species flows

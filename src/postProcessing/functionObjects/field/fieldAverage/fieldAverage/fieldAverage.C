@@ -288,12 +288,7 @@ void Foam::fieldAverage::execute()
 
 
 void Foam::fieldAverage::end()
-{
-    if (active_)
-    {
-        execute();
-    }
-}
+{}
 
 
 void Foam::fieldAverage::timeSet()

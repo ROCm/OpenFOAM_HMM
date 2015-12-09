@@ -69,6 +69,8 @@ bool Foam::CollidingParcel<ParcelType>::move
     typename TrackData::cloudType::parcelType& p =
         static_cast<typename TrackData::cloudType::parcelType&>(*this);
 
+    td.keepParticle = true;
+
     switch (td.part())
     {
         case TrackData::tpVelocityHalfStep:

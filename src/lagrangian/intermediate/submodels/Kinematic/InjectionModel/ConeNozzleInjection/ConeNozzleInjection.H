@@ -27,17 +27,16 @@ Class
 Description
     Cone injection
 
-    - User specifies
-      - time of start of injection
-      - injector position
-      - direction (along injection axis)
-      - parcel flow rate
-      - inner and outer half-cone angles
+    User specifies
+    - time of start of injection
+    - injector position
+    - direction (along injection axis)
+    - parcel flow rate
+    - inner and outer half-cone angles
 
+    Additional
     - Parcel diameters obtained by size distribution model
-
     - Parcel velocity is calculated as:
-
         - Constant velocity
             U = \<specified by user\>
         - Pressure driven velocity

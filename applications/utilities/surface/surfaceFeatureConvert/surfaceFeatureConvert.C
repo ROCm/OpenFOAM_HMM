@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     const fileName importName = args[1];
     const fileName exportName = args[2];
 
-    // disable inplace editing
+    // Disable inplace editing
     if (importName == exportName)
     {
         FatalErrorInFunction
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    // check that reading/writing is supported
+    // Check that reading/writing is supported
     if
     (
         !edgeMesh::canReadType(importName.ext(), true)

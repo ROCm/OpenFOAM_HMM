@@ -31,7 +31,7 @@ inline const Foam::fvMesh& Foam::combustionModel::mesh() const
 }
 
 
-inline const Foam::surfaceScalarField& Foam::combustionModel::phi() const
+inline Foam::tmp<Foam::surfaceScalarField> Foam::combustionModel::phi() const
 {
     if (turbulencePtr_)
     {
@@ -42,7 +42,7 @@ inline const Foam::surfaceScalarField& Foam::combustionModel::phi() const
         FatalErrorInFunction
             << "turbulencePtr_ is empty. Please use "
             << "combustionModel::setTurbulence "
-            << "(compressibleTurbulenceModel& )"
+            << "(compressibleTurbulenceModel&)"
             << abort(FatalError);
 
         return turbulencePtr_->phi();

@@ -149,10 +149,7 @@ void Foam::calcFvcDiv::execute()
 
 void Foam::calcFvcDiv::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

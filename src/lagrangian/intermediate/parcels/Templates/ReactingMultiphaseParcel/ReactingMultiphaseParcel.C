@@ -121,7 +121,13 @@ Foam::scalar Foam::ReactingMultiphaseParcel<ParcelType>::updateMassFractions
 
     YMix[GAS] = massGas/massNew;
     YMix[LIQ] = massLiquid/massNew;
-    YMix[SLD] = 1.0 - YMix[GAS] - YMix[LIQ];
+    YMix[SLD] = massSolid/massNew;
+
+    scalar Ytotal = sum(YMix);
+
+    YMix[GAS] /= Ytotal;
+    YMix[LIQ] /= Ytotal;
+    YMix[SLD] /= Ytotal;
 
     return massNew;
 }

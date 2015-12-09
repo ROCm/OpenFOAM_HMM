@@ -163,8 +163,10 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     if (innerDiameter_ >= outerDiameter_)
     {
         FatalErrorInFunction
-         << "innerNozzleDiameter >= outerNozzleDiameter" << nl
-         << exit(FatalError);
+            << "Inner diameter must be less than the outer diameter:" << nl
+            << "    innerDiameter: " << innerDiameter_ << nl
+            << "    outerDiameter: " << outerDiameter_
+            << exit(FatalError);
     }
 
     duration_ = owner.db().time().userTimeToTime(duration_);
@@ -258,7 +260,7 @@ void Foam::ConeNozzleInjection<CloudType>::updateMesh()
         }
         default:
         {
-            // do nothing
+            // Do nothing
         }
     }
 }
@@ -337,9 +339,10 @@ void Foam::ConeNozzleInjection<CloudType>::setPositionAndCell
         }
         case imDisc:
         {
-            scalar frac = rndGen.sample01<scalar>();
+            scalar frac = rndGen.globalSample01<scalar>();
             scalar dr = outerDiameter_ - innerDiameter_;
             scalar r = 0.5*(innerDiameter_ + frac*dr);
+
             position = position_ + r*normal_;
 
             this->findCellAtPosition
@@ -347,8 +350,7 @@ void Foam::ConeNozzleInjection<CloudType>::setPositionAndCell
                 cellOwner,
                 tetFaceI,
                 tetPtI,
-                position,
-                false
+                position
             );
             break;
         }
@@ -373,7 +375,7 @@ void Foam::ConeNozzleInjection<CloudType>::setProperties
 {
     cachedRandom& rndGen = this->owner().rndGen();
 
-    // set particle velocity
+    // Set particle velocity
     const scalar deg2Rad = mathematical::pi/180.0;
 
     scalar t = time - this->SOI_;
@@ -423,7 +425,7 @@ void Foam::ConeNozzleInjection<CloudType>::setProperties
         }
     }
 
-    // set particle diameter
+    // Set particle diameter
     parcel.d() = sizeDistribution_->sample();
 }
 
