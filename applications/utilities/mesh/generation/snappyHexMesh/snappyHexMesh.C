@@ -58,6 +58,7 @@ Description
 #include "globalIndex.H"
 #include "IOmanip.H"
 #include "decompositionModel.H"
+#include "fvMeshTools.H"
 
 using namespace Foam;
 
@@ -813,6 +814,7 @@ int main(int argc, char *argv[])
         readScalar(meshDict.lookup("mergeTolerance"))
     );
 
+    const Switch keepPatches(meshDict.lookupOrDefault("keepPatches", false));
 
 
     // Read decomposePar dictionary
@@ -1517,6 +1519,12 @@ int main(int argc, char *argv[])
             motionDict
         );
 
+        // Remove zero sized patches originating from faceZones
+        if (!keepPatches && !wantSnap && !wantLayers)
+        {
+            fvMeshTools::removeEmptyPatches(mesh, true);
+        }
+
         writeMesh
         (
             "Refined mesh",
@@ -1558,6 +1566,12 @@ int main(int argc, char *argv[])
             planarAngle,
             snapParams
         );
+
+        // Remove zero sized patches originating from faceZones
+        if (!keepPatches && !wantLayers)
+        {
+            fvMeshTools::removeEmptyPatches(mesh, true);
+        }
 
         writeMesh
         (
@@ -1609,6 +1623,12 @@ int main(int argc, char *argv[])
             distributor
         );
 
+        // Remove zero sized patches originating from faceZones
+        if (!keepPatches)
+        {
+            fvMeshTools::removeEmptyPatches(mesh, true);
+        }
+
         writeMesh
         (
             "Layer mesh",
@@ -1620,6 +1640,7 @@ int main(int argc, char *argv[])
         Info<< "Layers added in = "
             << timer.cpuTimeIncrement() << " s." << endl;
     }
+
 
 
     {

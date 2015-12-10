@@ -318,6 +318,47 @@ void Foam::meshRefinement::getBafflePatches
             namedSurfaceIndex,
             posOrientation
         );
+
+
+        // Some stats
+        if (debug)
+        {
+            label nZones = gMax(cellToZone)+1;
+
+            label nUnvisited = 0;
+            label nBackgroundCells = 0;
+            labelList nZoneCells(nZones, 0);
+            forAll(cellToZone, cellI)
+            {
+                label zoneI = cellToZone[cellI];
+                if (zoneI >= 0)
+                {
+                    nZoneCells[zoneI]++;
+                }
+                else if (zoneI == -1)
+                {
+                    nBackgroundCells++;
+                }
+                else if (zoneI == -2)
+                {
+                    nUnvisited++;
+                }
+                else
+                {
+                    FatalErrorIn("meshRefinement::getBafflePatches()")
+                        << "problem" << exit(FatalError);
+                }
+            }
+            reduce(nUnvisited, sumOp<label>());
+            reduce(nBackgroundCells, sumOp<label>());
+            forAll(nZoneCells, zoneI)
+            {
+                reduce(nZoneCells[zoneI], sumOp<label>());
+            }
+            Info<< "nUnvisited      :" << nUnvisited << endl;
+            Info<< "nBackgroundCells:" << nBackgroundCells << endl;
+            Info<< "nZoneCells      :" << nZoneCells << endl;
+        }
     }
 
 
@@ -342,9 +383,16 @@ void Foam::meshRefinement::getBafflePatches
     syncTools::swapBoundaryCellList(mesh_, cellToZone, neiCellZone);
 
 
-    // 3. Baffle all faces on outside of unvisited cells (cellToZone = -2)
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // 3. Baffle all boundary faces
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Baffle all boundary faces except those on outside of unvisited cells
+    // (cellToZone = -2)
     // Use patch according to globalRegion1,2
+    // Note: the behaviour is slightly different from version3.0 and earlier
+    //       in that it will not create baffles which are outside the meshed
+    //       domain. On a medium testcase (motorBike tutorial geometry) this
+    //       selects about 20 cells less (out of 120000). These cells are where
+    //       there might e.g. be a single cell which is fully unreachable.
 
     ownPatch.setSize(mesh_.nFaces());
     ownPatch = -1;
@@ -365,12 +413,7 @@ void Foam::meshRefinement::getBafflePatches
             neiZone = neiCellZone[faceI-mesh_.nInternalFaces()];
         }
 
-
-        if
-        (
-            (ownZone == -2 && neiZone != -2)
-         || (ownZone != -2 && neiZone == -2)
-        )
+        if (ownZone != -2 || neiZone != -2)
         {
             if (globalRegion1[faceI] != -1)
             {
@@ -382,7 +425,6 @@ void Foam::meshRefinement::getBafflePatches
             }
         }
     }
-
 
     // No need to parallel sync since intersection data (surfaceIndex_ etc.)
     // already guaranteed to be synced...
@@ -1390,12 +1432,19 @@ void Foam::meshRefinement::findCellZoneGeometric
 
     forAll(insideSurfaces, cellI)
     {
-        if (cellToZone[cellI] == -2)
-        {
-            label surfI = insideSurfaces[cellI];
+        label surfI = insideSurfaces[cellI];
 
-            if (surfI != -1)
+        if (surfI != -1)
+        {
+            if (cellToZone[cellI] == -2)
             {
+                cellToZone[cellI] = surfaceToCellZone[surfI];
+            }
+            else if (cellToZone[cellI] == -1)
+            {
+                // ? Allow named surface to override background zone (-1)
+                // This is used in the multiRegionHeater tutorial where the
+                // locationInMesh is inside a named surface.
                 cellToZone[cellI] = surfaceToCellZone[surfI];
             }
         }
