@@ -1390,12 +1390,19 @@ void Foam::meshRefinement::findCellZoneGeometric
 
     forAll(insideSurfaces, cellI)
     {
-        if (cellToZone[cellI] == -2)
-        {
-            label surfI = insideSurfaces[cellI];
+        label surfI = insideSurfaces[cellI];
 
-            if (surfI != -1)
+        if (surfI != -1)
+        {
+            if (cellToZone[cellI] == -2)
             {
+                cellToZone[cellI] = surfaceToCellZone[surfI];
+            }
+            else if (cellToZone[cellI] == -1)
+            {
+                // ? Allow named surface to override background zone (-1)
+                // This is used in the multiRegionHeater tutorial where the
+                // locationInMesh is inside a named surface.
                 cellToZone[cellI] = surfaceToCellZone[surfI];
             }
         }
