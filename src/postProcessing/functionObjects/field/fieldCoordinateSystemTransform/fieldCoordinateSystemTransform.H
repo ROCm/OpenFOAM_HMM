@@ -45,9 +45,11 @@ Description
             UMean
             UPrime2Mean
         );
-        coordinateSystem
+        origin      (0.001 0 0);
+
+        coordinateRotation
         {
-            origin  (0.001  0       0);
+            type    axesRotation;
             e1      (1      0.15    0);
             e3      (0      0      -1);
         }
@@ -59,7 +61,8 @@ Description
         Property     | Description             | Required    | Default value
         type         | type name: fieldCoordinateSystemTransform | yes |
         fields       | list of fields to be transformed |yes |
-        coordinateSystem | local co-ordinate system | yes    |
+        origin       | origin of local co-ordinate system | yes    |
+        coordinateRotation | orientation of local co-ordinate system | yes    |
         log          | Log to standard output  | no          | yes
     \endtable
 
