@@ -94,11 +94,8 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
             {
                 if (!speciesNames_.found(key))
                 {
-                    FatalErrorIn
-                    (
-                        "Foam::radiation::wideBandAbsorptionEmission(const"
-                        "dictionary& dict, const fvMesh& mesh)"
-                    )   << "specie: " << key << "is not in all the bands"
+                    FatalErrorInFunction
+                        << "specie: " << key << "is not in all the bands"
                         << nl << exit(FatalError);
                 }
             }

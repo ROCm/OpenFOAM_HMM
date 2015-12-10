@@ -44,10 +44,8 @@ transmissivityModel::New
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalErrorIn
-        (
-            "transmissivityModel::New(const dictionary&, const fvMesh&)"
-        )   << "Unknown transmissivityModel type "
+        FatalErrorInFunction
+            << "Unknown transmissivityModel type "
             << modelType << nl << nl
             << "Valid transmissivityModel types are :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()

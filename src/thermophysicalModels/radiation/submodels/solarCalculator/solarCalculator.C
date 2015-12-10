@@ -169,10 +169,8 @@ void Foam::solarCalculator::init()
         {
             if (word(mesh_.ddtScheme("default")) == "steadyState")
             {
-                FatalErrorIn
-                (
-                    "Foam::solarCalculator::init()"
-                )   << " Sun direction model can not be sunDirtracking if the "
+                FatalErrorInFunction
+                    << " Sun direction model can not be sunDirtracking if the "
                     << " case is steady " << nl << exit(FatalError);
             }
 

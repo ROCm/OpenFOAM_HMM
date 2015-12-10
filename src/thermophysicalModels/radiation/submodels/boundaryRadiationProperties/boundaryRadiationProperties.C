@@ -118,11 +118,8 @@ emissivity(const label index, const label bandI) const
     }
     else
     {
-        FatalErrorIn
-        (
-            "Foam::radiation::boundaryRadiationProperties::"
-            "emissivity(const label, const label)"
-        )   << "Field 'boundaryRadiationProperties'"
+        FatalErrorInFunction
+            << "Field 'boundaryRadiationProperties'"
             << "is not found in the constant directory."
             << "Please add it "
             << exit(FatalError);
@@ -144,11 +141,8 @@ absorptivity(const label index, const label bandI) const
     }
     else
     {
-        FatalErrorIn
-        (
-            "Foam::radiation::boundaryRadiationProperties::"
-            "absorptivity(const label, const label)"
-        )   << "Field 'boundaryRadiationProperties'"
+        FatalErrorInFunction
+            << "Field 'boundaryRadiationProperties'"
             << "is not found in the constant directory."
             << "Please add it "
             << exit(FatalError);
@@ -170,11 +164,8 @@ transmissivity(const label index, const label bandI) const
     }
     else
     {
-        FatalErrorIn
-        (
-            "Foam::radiation::boundaryRadiationProperties::"
-            "transmissivity(const label, const label)"
-        )   << "Field 'boundaryRadiationProperties'"
+        FatalErrorInFunction
+            << "Field 'boundaryRadiationProperties'"
             << "is not found in the constant directory."
             << "Please add it "
             << exit(FatalError);
@@ -196,11 +187,8 @@ reflectivity(const label index, const label bandI) const
     }
     else
     {
-        FatalErrorIn
-        (
-            "Foam::radiation::boundaryRadiationProperties::"
-            "reflectivity(const label, const label)"
-        )   << "Field 'boundaryRadiationProperties'"
+        FatalErrorInFunction
+            << "Field 'boundaryRadiationProperties'"
             << "is not found in the constant directory."
             << "Please add it "
             << exit(FatalError);

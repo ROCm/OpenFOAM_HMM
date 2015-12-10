@@ -196,7 +196,7 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
             IOobject::AUTO_WRITE
         );
 
-        // check if field exists and can be read
+        // Check if field exists and can be read
         if (IHeader.headerOk())
         {
             ILambda_.set
@@ -251,7 +251,7 @@ Foam::radiation::radiativeIntensityRay::~radiativeIntensityRay()
 
 Foam::scalar Foam::radiation::radiativeIntensityRay::correct()
 {
-    // reset boundary heat flux to zero
+    // Reset boundary heat flux to zero
     Qr_.boundaryField() = 0.0;
 
     scalar maxResidual = -GREAT;
@@ -293,8 +293,7 @@ Foam::scalar Foam::radiation::radiativeIntensityRay::correct()
                     (k - absorptionEmission_.aDisp(lambdaI))
                    *blackBody_.bLambda(lambdaI)
 
-                 + absorptionEmission_.ECont(lambdaI)
-                 + absorptionEmission_.EDisp(lambdaI)
+                 + absorptionEmission_.E(lambdaI)/4
                )
             );
         }

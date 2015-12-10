@@ -66,14 +66,8 @@ Foam::radiation::greyMeanAbsorptionEmission::greyMeanAbsorptionEmission
 {
     if (!isA<basicSpecieMixture>(thermo_))
     {
-        FatalErrorIn
-        (
-            "radiation::greyMeanAbsorptionEmission::greyMeanAbsorptionEmission"
-            "("
-                "const dictionary&, "
-                "const fvMesh&"
-            ")"
-        )   << "Model requires a multi-component thermo package"
+        FatalErrorInFunction
+            << "Model requires a multi-component thermo package"
             << abort(FatalError);
     }
 
@@ -112,11 +106,8 @@ Foam::radiation::greyMeanAbsorptionEmission::greyMeanAbsorptionEmission
 
             if (!mesh.foundObject<volScalarField>("ft"))
             {
-                FatalErrorIn
-                (
-                    "Foam::radiation::greyMeanAbsorptionEmission(const"
-                    "dictionary& dict, const fvMesh& mesh)"
-                )   << "specie ft is not present to use with "
+                FatalErrorInFunction
+                    << "specie ft is not present to use with "
                     << "lookUpTableFileName " << nl
                     << exit(FatalError);
             }
@@ -154,11 +145,8 @@ Foam::radiation::greyMeanAbsorptionEmission::greyMeanAbsorptionEmission
             }
             else
             {
-                FatalErrorIn
-                (
-                    "Foam::radiation::greyMeanAbsorptionEmission(const"
-                    "dictionary& dict, const fvMesh& mesh)"
-                )   << "specie: " << iter.key()
+                FatalErrorInFunction
+                    << "specie: " << iter.key()
                     << " is neither in look-up table: "
                     << lookUpTablePtr_().tableName()
                     << " nor is being solved" << nl
@@ -179,15 +167,11 @@ Foam::radiation::greyMeanAbsorptionEmission::greyMeanAbsorptionEmission
         }
         else
         {
-            FatalErrorIn
-            (
-                "Foam::radiation::greyMeanAbsorptionEmission(const"
-                "dictionary& dict, const fvMesh& mesh)"
-            )   << " there is not lookup table and the specie" << nl
+            FatalErrorInFunction
+                << " there is not lookup table and the specie" << nl
                 << iter.key() << nl
                 << " is not found " << nl
                 << exit(FatalError);
-
         }
     }
 }

@@ -226,14 +226,11 @@ void Foam::radiation::fvDOM::initialise()
 
         if (solarLoad_->nBands() > 1)
         {
-            FatalErrorIn
-            (
-                "const Foam::radiation::fvDOM::initialise()"
-            )
+            FatalErrorInFunction
                 << "Requested solar radiation with fvDOM. Using "
                 << "more than one band for the solar load is not allowed"
                 << abort(FatalError);
-            }
+        }
 
         Info<< "Creating Solar Load Model " << nl;
     }

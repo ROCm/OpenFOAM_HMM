@@ -115,19 +115,11 @@ boundaryRadiationPropertiesFvPatchField
         {
             if (!isA<mappedPatchBase>(p.patch()))
             {
-                FatalIOErrorIn
-                (
-                    "boundaryRadiationPropertiesFvPatchField:"
-                    ":boundaryRadiationPropertiesFvPatchField\n"
-                    "(\n"
-                    "    const fvPatch& p,\n"
-                    "    const dictionary& dict\n"
-                    ")\n",
-                    dict
-                )   << "\n    patch type '" << p.type()
+                FatalErrorInFunction
+                    << "\n    patch type '" << p.type()
                     << "' not type '" << mappedPatchBase::typeName << "'"
                     << "\n    for patch " << p.name()
-                    << exit(FatalIOError);
+                    << abort(FatalIOError);
             }
         }
         break;
@@ -301,13 +293,8 @@ emissivity(const label bandI) const
 
         default:
         {
-            FatalErrorIn
-            (
-                "boundaryRadiationPropertiesFvPatchField::"
-                "emissivity(const scalarField&)"
-            )   << "Unimplemented method " << method_ << endl
-                << "Please set 'mode' to one of "
-                << methodTypeNames_.toc()
+            FatalErrorInFunction
+                << "Please set 'mode' to one of " << methodTypeNames_.toc()
                 << exit(FatalError);
         }
         break;
@@ -380,11 +367,8 @@ boundaryRadiationPropertiesFvPatchField::absorptivity
 
         default:
         {
-            FatalErrorIn
-            (
-                "boundaryRadiationPropertiesFvPatchField::"
-                "absorptivity(const scalarField&)"
-            )   << "Unimplemented method " << method_ << endl
+            FatalErrorInFunction
+                << "Unimplemented method " << method_ << endl
                 << "Please set 'mode' to one of "
                 << methodTypeNames_.toc()
                 << exit(FatalError);
@@ -459,11 +443,8 @@ transmissivity(const label bandI) const
 
         default:
         {
-            FatalErrorIn
-            (
-                "boundaryRadiationPropertiesFvPatchField::"
-                "transmissivity(const scalarField&)"
-            )   << "Unimplemented method " << method_ << endl
+            FatalErrorInFunction
+                << "Unimplemented method " << method_ << endl
                 << "Please set 'mode' to one of "
                 << methodTypeNames_.toc()
                 << exit(FatalError);

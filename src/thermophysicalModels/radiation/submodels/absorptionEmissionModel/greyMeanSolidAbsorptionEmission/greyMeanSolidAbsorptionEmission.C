@@ -96,15 +96,8 @@ greyMeanSolidAbsorptionEmission
 {
     if (!isA<basicSpecieMixture>(thermo_))
     {
-        FatalErrorIn
-        (
-            "radiation::greyMeanSolidAbsorptionEmission::"
-            "greyMeanSolidAbsorptionEmission"
-            "("
-                "const dictionary&, "
-                "const fvMesh&"
-            ")"
-        )   << "Model requires a multi-component thermo package"
+        FatalErrorInFunction
+            << "Model requires a multi-component thermo package"
             << abort(FatalError);
     }
 
