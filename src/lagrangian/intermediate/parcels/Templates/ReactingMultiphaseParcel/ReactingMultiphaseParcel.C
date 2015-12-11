@@ -175,7 +175,6 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     const CompositionModel<reactingCloudType>& composition =
         td.cloud().composition();
 
-
     // Define local properties at beginning of timestep
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -291,7 +290,6 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         Cs
     );
 
-
     // Surface reactions
     // ~~~~~~~~~~~~~~~~~
 
@@ -324,27 +322,14 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         dhsTrans
     );
 
-
     // 2. Update the parcel properties due to change in mass
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     scalarField dMassGas(dMassDV + dMassSRGas);
     scalarField dMassLiquid(dMassPC + dMassSRLiquid);
     scalarField dMassSolid(dMassSRSolid);
-    scalar mass1 =
-        updateMassFractions(mass0, dMassGas, dMassLiquid, dMassSolid);
 
-    this->Cp_ = CpEff(td, pc, T0, idG, idL, idS);
-
-    // Update particle density or diameter
-    if (td.cloud().constProps().constantVolume())
-    {
-        this->rho_ = mass1/this->volume();
-    }
-    else
-    {
-        this->d_ = cbrt(mass1/this->rho_*6.0/pi);
-    }
+    scalar mass1 = mass0 - sum(dMassGas) - sum(dMassLiquid) - sum(dMassSolid);
 
     // Remove the particle when mass falls below minimum threshold
     if (np0*mass1 < td.cloud().constProps().minParcelMass())
@@ -384,6 +369,18 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         }
 
         return;
+    }
+
+    (void)updateMassFractions(mass0, dMassGas, dMassLiquid, dMassSolid);
+
+     // Update particle density or diameter
+    if (td.cloud().constProps().constantVolume())
+    {
+        this->rho_ = mass1/this->volume();
+    }
+    else
+    {
+        this->d_ = cbrt(mass1/this->rho_*6.0/pi);
     }
 
     // Correct surface values due to emitted species
