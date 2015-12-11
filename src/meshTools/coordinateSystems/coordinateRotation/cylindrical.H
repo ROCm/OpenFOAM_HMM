@@ -120,10 +120,13 @@ public:
         //- Construct from tensor Field
         cylindrical(const tensorField&);
 
+        //- Construct as copy
+        cylindrical(const cylindrical&);
+
         //- Return clone
-        autoPtr<cylindrical> clone() const
+        autoPtr<coordinateRotation> clone() const
         {
-            return autoPtr<cylindrical>(new cylindrical(*this));
+            return autoPtr<coordinateRotation>(new cylindrical(*this));
         }
 
 

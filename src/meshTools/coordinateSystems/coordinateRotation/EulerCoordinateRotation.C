@@ -274,6 +274,16 @@ Foam::EulerCoordinateRotation::EulerCoordinateRotation
 }
 
 
+Foam::EulerCoordinateRotation::EulerCoordinateRotation
+(
+    const EulerCoordinateRotation& r
+)
+:
+    R_(r.R_),
+    Rtr_(r.Rtr_)
+{}
+
+
 void Foam::EulerCoordinateRotation::write(Ostream& os) const
 {
      os.writeKeyword("e1") << e1() << token::END_STATEMENT << nl;

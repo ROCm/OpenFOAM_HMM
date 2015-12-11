@@ -271,6 +271,16 @@ Foam::STARCDCoordinateRotation::STARCDCoordinateRotation
 }
 
 
+Foam::STARCDCoordinateRotation::STARCDCoordinateRotation
+(
+    const STARCDCoordinateRotation& r
+)
+:
+    R_(r.R_),
+    Rtr_(r.Rtr_)
+{}
+
+
 void Foam::STARCDCoordinateRotation::write(Ostream& os) const
 {
      os.writeKeyword("e1") << e1() << token::END_STATEMENT << nl;

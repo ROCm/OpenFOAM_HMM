@@ -172,6 +172,15 @@ Foam::cylindrical::cylindrical(const tensorField& R)
 }
 
 
+Foam::cylindrical::cylindrical(const cylindrical& r)
+:
+    Rptr_(r.Rptr_, false),  // clone
+    origin_(r.origin_),
+    e3_(r.e3_)
+{}
+
+
+
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 void Foam::cylindrical::clear()

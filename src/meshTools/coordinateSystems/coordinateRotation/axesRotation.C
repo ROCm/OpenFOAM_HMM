@@ -157,6 +157,14 @@ Foam::axesRotation::axesRotation(const tensor& R)
 {}
 
 
+Foam::axesRotation::axesRotation(const axesRotation& r)
+:
+    R_(r.R_),
+    Rtr_(r.Rtr_)
+{}
+
+
+
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 const Foam::tensorField& Foam::axesRotation::Tr() const

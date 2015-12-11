@@ -110,6 +110,11 @@ public:
         (dict)
     );
 
+    // Constructors
+
+        //- Construct and return a clone
+        virtual autoPtr<coordinateRotation> clone() const = 0;
+
 
     // Selectors
 
