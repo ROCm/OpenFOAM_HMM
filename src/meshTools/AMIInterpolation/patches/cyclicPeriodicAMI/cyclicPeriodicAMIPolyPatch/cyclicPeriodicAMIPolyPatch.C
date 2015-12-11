@@ -535,8 +535,36 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
                 << endl;
         }
 
-        // Normalise the weights
+        // Normalise the weights. Disable printing since weights are
+        // still areas.
         AMIPtr_->normaliseWeights(true, false);
+
+        // Print some statistics
+        const label nFace = returnReduce(size(), sumOp<label>());
+
+        if (nFace)
+        {
+            scalarField srcWghtSum(size(), 0);
+            scalarField tgtWghtSum(size(), 0);
+            forAll(*this, faceI)
+            {
+                srcWghtSum[faceI] = sum(AMIPtr_->srcWeights()[faceI]);
+                tgtWghtSum[faceI] = sum(AMIPtr_->tgtWeights()[faceI]);
+            }
+
+            Info<< indent
+                << "AMI: Patch " << name()
+                << " sum(weights) min/max/average = "
+                << gMin(srcWghtSum) << ", "
+                << gMax(srcWghtSum) << ", "
+                << gAverage(srcWghtSum) << endl;
+            Info<< indent
+                << "AMI: Patch " << neighbPatch().name()
+                << " sum(weights) min/max/average = "
+                << gMin(tgtWghtSum) << ", "
+                << gMax(tgtWghtSum) << ", "
+                << gAverage(tgtWghtSum) << endl;
+        }
     }
 }
 
