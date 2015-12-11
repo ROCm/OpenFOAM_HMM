@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,6 +35,23 @@ namespace Foam
     defineTypeNameAndDebug(residuals, 0);
 }
 
+
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+void Foam::residuals::writeFileHeader(Ostream& os) const
+{
+    writeHeader(os, "Residuals");
+    writeCommented(os, "Time");
+
+    forAll(fieldSet_, fieldI)
+    {
+        writeTabbed(os, fieldSet_[fieldI]);
+    }
+
+    os << endl;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::residuals::residuals
@@ -45,7 +62,7 @@ Foam::residuals::residuals
     const bool loadFromFiles
 )
 :
-    functionObjectFile(obr, name, typeName),
+    functionObjectFile(obr, name, typeName, dict),
     name_(name),
     obr_(obr),
     active_(true),
@@ -55,20 +72,16 @@ Foam::residuals::residuals
     if (!isA<fvMesh>(obr_))
     {
         active_ = false;
-        WarningIn
-        (
-            "residuals::residuals"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating " << name_
+        WarningInFunction
+            << "No fvMesh available, deactivating " << name_
             << endl;
     }
 
-    read(dict);
+    if (active_)
+    {
+        read(dict);
+        writeFileHeader(file());
+    }
 }
 
 
@@ -84,55 +97,34 @@ void Foam::residuals::read(const dictionary& dict)
 {
     if (active_)
     {
-        dict.lookup("fields") >> fieldSet_;
-    }
-}
+        functionObjectFile::read(dict);
 
-
-void Foam::residuals::writeFileHeader(const label i)
-{
-    if (Pstream::master())
-    {
-        writeHeader(file(), "Residuals");
-        writeCommented(file(), "Time");
-
-        forAll(fieldSet_, fieldI)
-        {
-            writeTabbed(file(), fieldSet_[fieldI]);
-        }
-
-        file() << endl;
+        wordList allFields(dict.lookup("fields"));
+        wordHashSet uniqueFields(allFields);
+        fieldSet_ = uniqueFields.toc();
     }
 }
 
 
 void Foam::residuals::execute()
-{
-    // Do nothing - only valid on write
-}
+{}
 
 
 void Foam::residuals::end()
-{
-    // Do nothing - only valid on write
-}
+{}
 
 
 void Foam::residuals::timeSet()
-{
-    // Do nothing - only valid on write
-}
+{}
 
 
 void Foam::residuals::write()
 {
     if (active_)
     {
-        functionObjectFile::write();
-
         if (Pstream::master())
         {
-            file()<< obr_.time().value();
+            writeTime(file());
 
             forAll(fieldSet_, fieldI)
             {
@@ -149,5 +141,6 @@ void Foam::residuals::write()
         }
     }
 }
+
 
 // ************************************************************************* //

@@ -28,7 +28,29 @@ Group
     grpUtilitiesFunctionObjects
 
 Description
-    This function object calculates the vorticity, the curl of the velocity.
+    This function object calculates and outputs the vorticity, the curl of
+    the velocity as a volvectorField.  The field is stored on the mesh
+    database so that it can be retrieved and used for other applications.
+
+    Example of function object specification to calculate the vorticity:
+    \verbatim
+    vorticity1
+    {
+        type        vorticity;
+        functionObjectLibs ("libutilityFunctionObjects.so");
+        ...
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | Type name: vorticity    | yes         |
+        UName        | Name of velocity field  | no          | U
+        resultName   | Name of Courant number field | no    | \<function name\>
+        log          | Log to standard output  | no          | yes
+    \endtable
+
 
 SourceFiles
     vorticity.C
@@ -40,6 +62,7 @@ SourceFiles
 #define vorticity_H
 
 #include "volFieldsFwd.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,7 +96,10 @@ class vorticity
         word UName_;
 
         //- Name of vorticity field
-        word outputName_;
+        word resultName_;
+
+        //- Switch to send output to Info as well as to file
+        Switch log_;
 
 
     // Private Member Functions

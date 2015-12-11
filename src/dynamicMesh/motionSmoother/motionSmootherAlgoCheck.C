@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -434,6 +434,7 @@ bool Foam::motionSmootherAlgo::checkMesh
     const bool report,
     const dictionary& dict,
     const polyMeshGeometry& meshGeom,
+    const pointField& points,
     const labelList& checkFaces,
     labelHashSet& wrongFaces
 )
@@ -445,6 +446,7 @@ bool Foam::motionSmootherAlgo::checkMesh
         report,
         dict,
         meshGeom,
+        points,
         checkFaces,
         emptyBaffles,
         wrongFaces
@@ -457,6 +459,7 @@ bool Foam::motionSmootherAlgo::checkMesh
     const bool report,
     const dictionary& dict,
     const polyMeshGeometry& meshGeom,
+    const pointField& points,
     const labelList& checkFaces,
     const List<labelPair>& baffles,
     labelHashSet& wrongFaces
@@ -482,14 +485,14 @@ bool Foam::motionSmootherAlgo::checkMesh
     (
         readScalar(dict.lookup("minArea", true))
     );
-    //const scalar maxIntSkew
-    //(
-    //    readScalar(dict.lookup("maxInternalSkewness", true))
-    //);
-    //const scalar maxBounSkew
-    //(
-    //    readScalar(dict.lookup("maxBoundarySkewness", true))
-    //);
+    const scalar maxIntSkew
+    (
+        readScalar(dict.lookup("maxInternalSkewness", true))
+    );
+    const scalar maxBounSkew
+    (
+        readScalar(dict.lookup("maxBoundarySkewness", true))
+    );
     const scalar minWeight
     (
         readScalar(dict.lookup("minFaceWeight", true))
@@ -512,7 +515,6 @@ bool Foam::motionSmootherAlgo::checkMesh
     (
         readScalar(dict.lookup("minDeterminant", true))
     );
-
     label nWrongFaces = 0;
 
     Info<< "Checking faces in error :" << endl;
@@ -544,8 +546,8 @@ bool Foam::motionSmootherAlgo::checkMesh
         meshGeom.checkFacePyramids
         (
             report,
-            minVol,
-            meshGeom.mesh().points(),
+            minTetQuality,
+            points,
             checkFaces,
             baffles,
             &wrongFaces
@@ -566,7 +568,7 @@ bool Foam::motionSmootherAlgo::checkMesh
         (
             report,
             minTetQuality,
-            meshGeom.mesh().points(),
+            points,
             checkFaces,
             baffles,
             &wrongFaces
@@ -575,7 +577,7 @@ bool Foam::motionSmootherAlgo::checkMesh
         label nNewWrongFaces = returnReduce(wrongFaces.size(), sumOp<label>());
 
         Info<< "    faces with face-decomposition tet quality < "
-            << setw(5) << minTetQuality << "                : "
+            << setw(5) << minTetQuality << "      : "
             << nNewWrongFaces-nWrongFaces << endl;
 
         nWrongFaces = nNewWrongFaces;
@@ -587,7 +589,7 @@ bool Foam::motionSmootherAlgo::checkMesh
         (
             report,
             maxConcave,
-            meshGeom.mesh().points(),
+            points,
             checkFaces,
             &wrongFaces
         );
@@ -604,7 +606,13 @@ bool Foam::motionSmootherAlgo::checkMesh
 
     if (minArea > -SMALL)
     {
-        meshGeom.checkFaceArea(report, minArea, checkFaces, &wrongFaces);
+        meshGeom.checkFaceArea
+        (
+            report,
+            minArea,
+            checkFaces,
+            &wrongFaces
+        );
 
         label nNewWrongFaces = returnReduce(wrongFaces.size(), sumOp<label>());
 
@@ -616,30 +624,32 @@ bool Foam::motionSmootherAlgo::checkMesh
         nWrongFaces = nNewWrongFaces;
     }
 
+    if (maxIntSkew > 0 || maxBounSkew > 0)
+    {
+        polyMeshGeometry::checkFaceSkewness
+        (
+            report,
+            maxIntSkew,
+            maxBounSkew,
+            meshGeom.mesh(),
+            points,
+            meshGeom.cellCentres(),
+            meshGeom.faceCentres(),
+            meshGeom.faceAreas(),
+            checkFaces,
+            baffles,
+            &wrongFaces
+        );
 
-    //- Note: cannot check the skewness without the points and don't want
-    //  to store them on polyMeshGeometry.
-    //if (maxIntSkew > 0 || maxBounSkew > 0)
-    //{
-    //    meshGeom.checkFaceSkewness
-    //    (
-    //        report,
-    //        maxIntSkew,
-    //        maxBounSkew,
-    //        checkFaces,
-    //        baffles,
-    //        &wrongFaces
-    //    );
-    //
-    //    label nNewWrongFaces = returnReduce(wrongFaces.size(),sumOp<label>());
-    //
-    //    Info<< "    faces with skewness > "
-    //        << setw(3) << maxIntSkew
-    //        << " (internal) or " << setw(3) << maxBounSkew
-    //        << " (boundary) : " << nNewWrongFaces-nWrongFaces << endl;
-    //
-    //    nWrongFaces = nNewWrongFaces;
-    //}
+        label nNewWrongFaces = returnReduce(wrongFaces.size(), sumOp<label>());
+
+        Info<< "    faces with skewness > "
+            << setw(3) << maxIntSkew
+            << " (internal) or " << setw(3) << maxBounSkew
+            << " (boundary) : " << nNewWrongFaces-nWrongFaces << endl;
+
+        nWrongFaces = nNewWrongFaces;
+    }
 
     if (minWeight >= 0 && minWeight < 1)
     {
@@ -691,7 +701,7 @@ bool Foam::motionSmootherAlgo::checkMesh
         (
             report,
             minTwist,
-            meshGeom.mesh().points(),
+            points,
             checkFaces,
             &wrongFaces
         );
@@ -714,7 +724,7 @@ bool Foam::motionSmootherAlgo::checkMesh
         (
             report,
             minTriangleTwist,
-            meshGeom.mesh().points(),
+            points,
             checkFaces,
             &wrongFaces
         );
@@ -729,13 +739,13 @@ bool Foam::motionSmootherAlgo::checkMesh
         nWrongFaces = nNewWrongFaces;
     }
 
-    if (minFaceFlatness > -1)
+    if (minFaceFlatness > -SMALL)
     {
         meshGeom.checkFaceFlatness
         (
             report,
             minFaceFlatness,
-            meshGeom.mesh().points(),
+            points,
             checkFaces,
             &wrongFaces
         );
@@ -757,7 +767,7 @@ bool Foam::motionSmootherAlgo::checkMesh
             report,
             minDet,
             checkFaces,
-            meshGeom.affectedCells(meshGeom.mesh(), checkFaces),
+            polyMeshGeometry::affectedCells(meshGeom.mesh(), checkFaces),
             &wrongFaces
         );
 

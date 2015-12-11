@@ -24,13 +24,17 @@ License
 Application
     chtMultiRegionFoam
 
+Group
+    grpHeatTransferSolvers
+
 Description
     Combination of heatConductionFoam and buoyantFoam for conjugate heat
-    transfer between solid regions and fluid regions. Both regions include
-    the fvOptions framework.
+    transfer between solid regions and fluid regions.
 
-    It handles secondary fluid or solid circuits which can be coupled
-    thermally with the main fluid region. i.e radiators, etc.
+    Note:
+    - Both regions support the fvOptions framework.
+    - It handles secondary fluid or solid circuits which can be coupled
+      thermally with the main fluid region. i.e radiators, etc.
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,7 +47,7 @@ Description
 #include "solidRegionDiffNo.H"
 #include "solidThermo.H"
 #include "radiationModel.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "coordinateSystem.H"
 #include "fixedFluxPressureFvPatchScalarField.H"
 

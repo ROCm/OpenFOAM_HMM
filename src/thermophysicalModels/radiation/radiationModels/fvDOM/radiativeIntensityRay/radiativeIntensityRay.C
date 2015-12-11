@@ -30,7 +30,6 @@ License
 
 using namespace Foam::constant;
 
-
 const Foam::word
 Foam::radiation::radiativeIntensityRay::intensityPrefix("ILambda");
 
@@ -275,7 +274,6 @@ Foam::scalar Foam::radiation::radiativeIntensityRay::correct()
               * (
                     (k - absorptionEmission_.aDisp(lambdaI))
                     *blackBody_.bLambda(lambdaI)
-
                   + absorptionEmission_.ECont(lambdaI)
                   + absorptionEmission_.EDisp(lambdaI)
                 )
@@ -292,7 +290,6 @@ Foam::scalar Foam::radiation::radiativeIntensityRay::correct()
              * (
                     (k - absorptionEmission_.aDisp(lambdaI))
                    *blackBody_.bLambda(lambdaI)
-
                  + absorptionEmission_.E(lambdaI)/4
                )
             );

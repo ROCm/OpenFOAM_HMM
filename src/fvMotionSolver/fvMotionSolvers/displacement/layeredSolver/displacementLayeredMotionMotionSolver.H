@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -134,6 +134,16 @@ public:
         (
             const polyMesh&,
             const IOdictionary&
+        );
+
+        //- Construct from polyMesh, IOdictionary and displacement and
+        //  zero-time fields
+        displacementLayeredMotionMotionSolver
+        (
+            const polyMesh&,
+            const IOdictionary&,
+            const pointVectorField&,
+            const pointIOField&
         );
 
 

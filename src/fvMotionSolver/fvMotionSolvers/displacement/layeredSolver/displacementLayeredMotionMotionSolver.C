@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,6 +44,13 @@ namespace Foam
         motionSolver,
         displacementLayeredMotionMotionSolver,
         dictionary
+    );
+
+    addToRunTimeSelectionTable
+    (
+        displacementMotionSolver,
+        displacementLayeredMotionMotionSolver,
+        displacement
     );
 }
 
@@ -241,18 +248,7 @@ Foam::displacementLayeredMotionMotionSolver::faceZoneEvaluate
     {
         if ((patchI % 2) != 1)
         {
-            FatalIOErrorIn
-            (
-                "displacementLayeredMotionMotionSolver::faceZoneEvaluate"
-                "("
-                    "const faceZone&, "
-                    "const labelList&, "
-                    "const dictionary&, "
-                    "const PtrList<pointVectorField>&, "
-                    "const label"
-                ") const",
-                *this
-            )   << "slip can only be used on second faceZone patch of pair.  "
+            FatalIOErrorInFunction(*this)
                 << "FaceZone:" << fz.name()
                 << exit(FatalIOError);
         }
@@ -278,18 +274,8 @@ Foam::displacementLayeredMotionMotionSolver::faceZoneEvaluate
     }
     else
     {
-        FatalIOErrorIn
-        (
-            "displacementLayeredMotionMotionSolver::faceZoneEvaluate"
-            "("
-                "const faceZone&, "
-                "const labelList&, "
-                "const dictionary&, "
-                "const PtrList<pointVectorField>&, "
-                "const label"
-            ") const",
-            *this
-        )   << "Unknown faceZonePatch type " << type << " for faceZone "
+        FatalIOErrorInFunction(*this)
+            << "Unknown faceZonePatch type " << type << " for faceZone "
             << fz.name() << exit(FatalIOError);
     }
     return tfld;
@@ -310,12 +296,8 @@ void Foam::displacementLayeredMotionMotionSolver::cellZoneSolve
 
     if (patchesDict.size() != 2)
     {
-        FatalIOErrorIn
-        (
-            "displacementLayeredMotionMotionSolver::"
-            "cellZoneSolve(const label, const dictionary&)",
-            *this
-        )   << "Two faceZones (patches) must be specifed per cellZone. "
+        FatalIOErrorInFunction(*this)
+            << "Two faceZones (patches) must be specifed per cellZone. "
             << " cellZone:" << cellZoneI
             << " patches:" << patchesDict.toc()
             << exit(FatalIOError);
@@ -332,12 +314,8 @@ void Foam::displacementLayeredMotionMotionSolver::cellZoneSolve
         label zoneI = mesh().faceZones().findZoneID(faceZoneName);
         if (zoneI == -1)
         {
-            FatalIOErrorIn
-            (
-                "displacementLayeredMotionMotionSolver::"
-                "cellZoneSolve(const label, const dictionary&)",
-                *this
-            )   << "Cannot find faceZone " << faceZoneName
+            FatalIOErrorInFunction(*this)
+                << "Cannot find faceZone " << faceZoneName
                 << endl << "Valid zones are " << mesh().faceZones().names()
                 << exit(FatalIOError);
         }
@@ -506,11 +484,7 @@ void Foam::displacementLayeredMotionMotionSolver::cellZoneSolve
     }
     else
     {
-        FatalErrorIn
-        (
-            "displacementLayeredMotionMotionSolver::"
-            "cellZoneSolve(const label, const dictionary&)"
-        )
+        FatalErrorInFunction
             << "Invalid interpolationScheme: " << interpolationScheme
             << ". Valid schemes are 'oneSided' and 'linear'"
             << exit(FatalError);
@@ -528,6 +502,19 @@ displacementLayeredMotionMotionSolver
 )
 :
     displacementMotionSolver(mesh, dict, typeName)
+{}
+
+
+Foam::displacementLayeredMotionMotionSolver::
+displacementLayeredMotionMotionSolver
+(
+    const polyMesh& mesh,
+    const IOdictionary& dict,
+    const pointVectorField& pointDisplacement,
+    const pointIOField& points0
+)
+:
+    displacementMotionSolver(mesh, dict, pointDisplacement, points0, typeName)
 {}
 
 
@@ -573,11 +560,8 @@ void Foam::displacementLayeredMotionMotionSolver::solve()
 
         if (zoneI == -1)
         {
-            FatalIOErrorIn
-            (
-                "displacementLayeredMotionMotionSolver::solve()",
-                *this
-            )   << "Cannot find cellZone " << cellZoneName
+            FatalIOErrorInFunction(*this)
+                << "Cannot find cellZone " << cellZoneName
                 << endl << "Valid zones are " << mesh().cellZones().names()
                 << exit(FatalIOError);
         }

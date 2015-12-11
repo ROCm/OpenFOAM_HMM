@@ -24,6 +24,9 @@ License
 Application
     rhoCentralFoam
 
+Group
+    grpCompressibleSolvers
+
 Description
     Density-based compressible flow solver based on central-upwind schemes of
     Kurganov and Tadmor
@@ -50,6 +53,8 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "createTimeControls.H"
     #include "createRDeltaT.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

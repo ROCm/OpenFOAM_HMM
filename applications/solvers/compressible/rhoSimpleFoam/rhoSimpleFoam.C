@@ -24,6 +24,9 @@ License
 Application
     rhoSimpleFoam
 
+Group
+    grpCompressibleSolvers
+
 Description
     Steady-state SIMPLE solver for laminar or turbulent RANS flow of
     compressible fluids.
@@ -34,7 +37,7 @@ Description
 #include "psiThermo.H"
 #include "turbulentFluidThermoModel.H"
 #include "simpleControl.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,6 +53,8 @@ int main(int argc, char *argv[])
     #include "createMRF.H"
     #include "createFvOptions.H"
     #include "initContinuityErrs.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

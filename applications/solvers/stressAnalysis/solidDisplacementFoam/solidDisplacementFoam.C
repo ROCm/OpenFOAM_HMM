@@ -24,6 +24,9 @@ License
 Application
     solidDisplacementFoam
 
+Group
+    grpStressAnalysisSolvers
+
 Description
     Transient segregated finite-volume solver of linear-elastic,
     small-strain deformation of a solid body, with optional thermal
@@ -93,7 +96,7 @@ int main(int argc, char *argv[])
                 //DEqn.setComponentReference(1, 0, vector::X, 0);
                 //DEqn.setComponentReference(1, 0, vector::Z, 0);
 
-                initialResidual = DEqn.solve().initialResidual();
+                initialResidual = DEqn.solve().max().initialResidual();
 
                 if (!compactNormalStress)
                 {

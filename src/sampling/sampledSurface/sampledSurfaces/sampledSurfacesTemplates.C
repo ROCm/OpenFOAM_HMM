@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,7 +72,7 @@ void Foam::sampledSurfaces::writeSurface
             // skip surface without faces (eg, a failed cut-plane)
             if (mergeList_[surfI].faces.size())
             {
-                formatter_->write
+                fileName fName = formatter_->write
                 (
                     outputDir,
                     s.name(),
@@ -82,6 +82,10 @@ void Foam::sampledSurfaces::writeSurface
                     allValues,
                     s.interpolate()
                 );
+
+                dictionary propsDict;
+                propsDict.add("file", fName);
+                setProperty(fieldName, propsDict);
             }
         }
     }
@@ -91,7 +95,7 @@ void Foam::sampledSurfaces::writeSurface
         // skip surface without faces (eg, a failed cut-plane)
         if (s.faces().size())
         {
-            formatter_->write
+            fileName fName = formatter_->write
             (
                 outputDir,
                 s.name(),
@@ -101,6 +105,10 @@ void Foam::sampledSurfaces::writeSurface
                 values,
                 s.interpolate()
             );
+
+            dictionary propsDict;
+            propsDict.add("file", fName);
+            setProperty(fieldName, propsDict);
         }
     }
 }
@@ -153,7 +161,7 @@ void Foam::sampledSurfaces::sampleAndWrite
     const GeometricField<Type, fvsPatchField, surfaceMesh>& sField
 )
 {
-    const word& fieldName   = sField.name();
+    const word& fieldName = sField.name();
     const fileName outputDir = outputPath_/sField.time().timeName();
 
     forAll(*this, surfI)
@@ -169,6 +177,8 @@ template<class GeoField>
 void Foam::sampledSurfaces::sampleAndWrite(const IOobjectList& objects)
 {
     wordList names;
+    const fvMesh& mesh = refCast<const fvMesh>(obr_);
+
     if (loadFromFiles_)
     {
         IOobjectList fieldObjects(objects.lookupClass(GeoField::typeName));
@@ -176,7 +186,7 @@ void Foam::sampledSurfaces::sampleAndWrite(const IOobjectList& objects)
     }
     else
     {
-        names = mesh_.thisDb().names<GeoField>();
+        names = mesh.thisDb().names<GeoField>();
     }
 
     labelList nameIDs(findStrings(fieldSelection_, names));
@@ -199,11 +209,11 @@ void Foam::sampledSurfaces::sampleAndWrite(const IOobjectList& objects)
                 IOobject
                 (
                     fieldName,
-                    mesh_.time().timeName(),
-                    mesh_,
+                    mesh.time().timeName(),
+                    mesh,
                     IOobject::MUST_READ
                 ),
-                mesh_
+                mesh
             );
 
             sampleAndWrite(fld);
@@ -212,7 +222,7 @@ void Foam::sampledSurfaces::sampleAndWrite(const IOobjectList& objects)
         {
             sampleAndWrite
             (
-                mesh_.thisDb().lookupObject<GeoField>(fieldName)
+                mesh.thisDb().lookupObject<GeoField>(fieldName)
             );
         }
     }

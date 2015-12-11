@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,8 +28,29 @@ Group
     grpUtilitiesFunctionObjects
 
 Description
-    Evaluates and outputs turbulence y+ for  models.  Values written to
-    time directories as field 'yPlus'
+    This function object evaluates and outputs turbulence y+ for turbulence
+    models. The field is stored on the mesh database so that it can be
+    retrieved and used for other applications.
+
+    Example of function object specification to calculate the y+ (LES):
+    \verbatim
+    yPlus1
+    {
+        type        yPlus;
+        functionObjectLibs ("libutilityFunctionObjects.so");
+        ...
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | Type name: yPlus        | yes         |
+        phiName      | Name of flux field      | no          | phi
+        resultName   | Name of y+ field        | no          | \<function name\>
+        log          | Log to standard output  | no          | yes
+    \endtable
+
 
 SourceFiles
     yPlus.C
@@ -44,6 +65,7 @@ SourceFiles
 #include "volFieldsFwd.H"
 #include "Switch.H"
 #include "OFstream.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,7 +80,7 @@ class mapPolyMesh;
 class fvMesh;
 
 /*---------------------------------------------------------------------------*\
-                          Class yPlus Declaration
+                            Class yPlus Declaration
 \*---------------------------------------------------------------------------*/
 
 class yPlus
@@ -75,17 +97,20 @@ class yPlus
         //- on/off switch
         bool active_;
 
-        //- Switch to send output to Info as well as to file
-        Switch log_;
-
         //- Name of mass/volume flux field (optional, default = phi)
         word phiName_;
+
+        //- Result name
+        word resultName_;
+
+        //- Switch to send output to Info as well as to file
+        Switch log_;
 
 
     // Private Member Functions
 
         //- File header information
-        virtual void writeFileHeader(const label i);
+        virtual void writeFileHeader(Ostream& os) const;
 
         //- Calculate y+
         template<class TurbulenceModel>

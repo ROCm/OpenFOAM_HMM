@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -313,7 +313,7 @@ void createFaces
                     {
                         if (patchWarned.insert(patchI))
                         {
-                            WarningIn("createFaces(..)")
+                            WarningInFunction
                                 << "Found boundary face (in patch "
                                 << pp.name()
                                 << ") in faceZone " << fZone.name()
@@ -525,7 +525,7 @@ int main(int argc, char *argv[])
 
         Info<< "Created zone " << name
             << " at index " << zoneID
-            << " with " << n << " faces" << endl;
+            << " with " << returnReduce(n, sumOp<label>()) << " faces" << endl;
 
         mesh.faceZones().set
         (
@@ -770,7 +770,7 @@ int main(int argc, char *argv[])
                 if (!hasWarned)
                 {
                     hasWarned = true;
-                    WarningIn(args.executable())
+                    WarningInFunction
                         << "Setting field on boundary faces to zero." << endl
                         << "You might have to edit these fields." << endl;
                 }

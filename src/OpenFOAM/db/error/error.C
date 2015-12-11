@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,6 @@ Foam::error::error(const string& title)
     functionName_("unknown"),
     sourceFileName_("unknown"),
     sourceFileLineNumber_(0),
-    abort_(env("FOAM_ABORT")),
     throwExceptions_(false),
     messageStreamPtr_(new OStringStream())
 {
@@ -61,7 +60,6 @@ Foam::error::error(const dictionary& errDict)
     functionName_(errDict.lookup("functionName")),
     sourceFileName_(errDict.lookup("sourceFileName")),
     sourceFileLineNumber_(readLabel(errDict.lookup("sourceFileLineNumber"))),
-    abort_(env("FOAM_ABORT")),
     throwExceptions_(false),
     messageStreamPtr_(new OStringStream())
 {
@@ -83,7 +81,6 @@ Foam::error::error(const error& err)
     functionName_(err.functionName_),
     sourceFileName_(err.sourceFileName_),
     sourceFileLineNumber_(err.sourceFileLineNumber_),
-    abort_(err.abort_),
     throwExceptions_(err.throwExceptions_),
     messageStreamPtr_(new OStringStream(*err.messageStreamPtr_))
 {
@@ -173,7 +170,7 @@ void Foam::error::exit(const int errNo)
         jobInfo.exit();
     }
 
-    if (abort_)
+    if (env("FOAM_ABORT"))
     {
         abort();
     }
@@ -214,7 +211,7 @@ void Foam::error::abort()
         jobInfo.abort();
     }
 
-    if (abort_)
+    if (env("FOAM_ABORT"))
     {
         Perr<< endl << *this << endl
             << "\nFOAM aborting (FOAM_ABORT set)\n" << endl;

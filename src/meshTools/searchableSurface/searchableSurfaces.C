@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,9 +27,7 @@ License
 #include "searchableSurfacesQueries.H"
 #include "ListOps.H"
 #include "Time.H"
-//#include "vtkSetWriter.H"
 #include "DynamicField.H"
-//#include "OBJstream.H"
 #include "PatchTools.H"
 #include "triSurfaceMesh.H"
 
@@ -136,11 +134,8 @@ Foam::searchableSurfaces::searchableSurfaces(const label size)
 //
 //                    if (index == -1)
 //                    {
-//                        FatalErrorIn
-//                        (
-//                            "searchableSurfaces::searchableSurfaces"
-//                            "( const IOobject&, const dictionary&)"
-//                        )   << "Unknown region name " << key
+//                        FatalErrorInFunction
+//                            << "Unknown region name " << key
 //                            << " for surface " << s.name() << endl
 //                            << "Valid region names are " << localNames
 //                            << exit(FatalError);
@@ -191,11 +186,8 @@ Foam::searchableSurfaces::searchableSurfaces
 
         if (!topDict.isDict(key))
         {
-            FatalErrorIn
-            (
-                "searchableSurfaces::searchableSurfaces"
-                "( const IOobject&, const dictionary&)"
-            )   << "Found non-dictionary entry " << iter()
+            FatalErrorInFunction
+                << "Found non-dictionary entry " << iter()
                 << " in top-level dictionary " << topDict
                 << exit(FatalError);
         }
@@ -264,11 +256,8 @@ Foam::searchableSurfaces::searchableSurfaces
 
                     if (index == -1)
                     {
-                        FatalErrorIn
-                        (
-                            "searchableSurfaces::searchableSurfaces"
-                            "( const IOobject&, const dictionary&)"
-                        )   << "Unknown region name " << key
+                        FatalErrorInFunction
+                            << "Unknown region name " << key
                             << " for surface " << s.name() << endl
                             << "Valid region names are " << localNames
                             << exit(FatalError);
@@ -405,9 +394,9 @@ void Foam::searchableSurfaces::findNearest
 // Find nearest. Return -1 or nearest point
 void Foam::searchableSurfaces::findNearest
 (
+    const labelListList& regionIndices,
     const pointField& samples,
     const scalarField& nearestDistSqr,
-    const labelList& regionIndices,
     labelList& nearestSurfaces,
     List<pointIndexHit>& nearestInfo
 ) const
@@ -416,9 +405,11 @@ void Foam::searchableSurfaces::findNearest
     (
         *this,
         allSurfaces_,
+        regionIndices,
+
         samples,
         nearestDistSqr,
-        regionIndices,
+
         nearestSurfaces,
         nearestInfo
     );
@@ -926,10 +917,8 @@ const Foam::searchableSurface& Foam::searchableSurfaces::operator[]
 
     if (surfI < 0)
     {
-        FatalErrorIn
-        (
-            "searchableSurfaces::operator[](const word&) const"
-        )   << "Surface named " << surfName << " not found." << nl
+        FatalErrorInFunction
+            << "Surface named " << surfName << " not found." << nl
             << "Available surface names: " << names_ << endl
             << abort(FatalError);
     }
@@ -947,10 +936,8 @@ Foam::searchableSurface& Foam::searchableSurfaces::operator[]
 
     if (surfI < 0)
     {
-        FatalErrorIn
-        (
-            "searchableSurfaces::operator[](const word&)"
-        )   << "Surface named " << surfName << " not found." << nl
+        FatalErrorInFunction
+            << "Surface named " << surfName << " not found." << nl
             << "Available surface names: " << names_ << endl
             << abort(FatalError);
     }

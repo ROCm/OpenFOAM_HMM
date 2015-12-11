@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -672,9 +672,11 @@ void Foam::searchableSurfacesQueries::findNearest
 (
     const PtrList<searchableSurface>& allSurfaces,
     const labelList& surfacesToTest,
+    const labelListList& regionIndices,
+
     const pointField& samples,
     const scalarField& nearestDistSqr,
-    const labelList& regionIndices,
+
     labelList& nearestSurfaces,
     List<pointIndexHit>& nearestInfo
 )
@@ -707,7 +709,7 @@ void Foam::searchableSurfacesQueries::findNearest
         (
             samples,
             minDistSqr,
-            regionIndices,
+            regionIndices[testI],
             hitInfo
         );
 
@@ -810,7 +812,7 @@ void Foam::searchableSurfacesQueries::signedDistance
                     }
                     default:
                     {
-                        FatalErrorIn("signedDistance()")
+                        FatalErrorInFunction
                             << "getVolumeType failure,"
                             << " neither INSIDE or OUTSIDE."
                             << " point:" << surfPoints[i]
@@ -879,11 +881,8 @@ Foam::pointIndexHit Foam::searchableSurfacesQueries::facesIntersection
         }
         else
         {
-            FatalErrorIn
-            (
-                "searchableSurfacesQueries::facesIntersection"
-                "(const labelList&, const scalar, const scalar, const point&)"
-            )   << "Did not find point within distance "
+            FatalErrorInFunction
+                << "Did not find point within distance "
                 << initDistSqr << " of starting point " << start
                 << " on surface "
                 << allSurfaces[surfacesToTest[i]].IOobject::name()

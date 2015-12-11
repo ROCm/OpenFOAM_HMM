@@ -24,9 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cloudAbsorptionEmission.H"
-#include "addToRunTimeSelectionTable.H"
-
 #include "thermoCloud.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -159,6 +158,7 @@ Foam::radiation::cloudAbsorptionEmission::EDisp(const label bandI) const
         tE() += tc.Ep();
     }
 
+    // Total emission is 4 times the projected emission
     return 4*tE;
 }
 

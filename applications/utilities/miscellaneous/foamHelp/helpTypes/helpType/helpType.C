@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,7 +66,8 @@ Foam::fileName Foam::helpType::doxygenPath() const
 void Foam::helpType::displayDocOptions
 (
     const string& searchStr,
-    const bool exactMatch
+    const bool exactMatch,
+    const word& ext
 ) const
 {
     fileName doxyPath(doxygenPath());
@@ -83,8 +84,14 @@ void Foam::helpType::displayDocOptions
         doxyPath/"../DTAGS",
         "tagfile",
         searchStr,
-        exactMatch
+        exactMatch,
+        ext
     );
+
+    if (debug)
+    {
+        Info<< parser;
+    }
 
     Info<< "Valid types include:" << nl << SortableList<word>(parser.toc());
 }
@@ -94,7 +101,8 @@ void Foam::helpType::displayDoc
 (
     const word& className,
     const string& searchStr,
-    const bool exactMatch
+    const bool exactMatch,
+    const word& ext
 ) const
 {
     fileName doxyPath(doxygenPath());
@@ -119,7 +127,8 @@ void Foam::helpType::displayDoc
         doxyPath/"../DTAGS",
         "tagfile",
         searchStr,
-        exactMatch
+        exactMatch,
+        ext
     );
 
     if (debug)
@@ -146,15 +155,7 @@ void Foam::helpType::displayDoc
     }
     else
     {
-        FatalErrorIn
-        (
-            "void Foam::helpType::displayDoc"
-            "("
-                "const word&, "
-                "const string&, "
-                "const bool"
-            ")"
-        )
+        FatalErrorInFunction
             << "No help for type " << className << " found."
             << "  Valid options include:" << SortableList<word>(parser.toc())
             << exit(FatalError);
@@ -182,7 +183,7 @@ void Foam::helpType::init()
     (
         "browse",
         "word",
-        "display documentation for boundary condition in browser"
+        "display documentation in browser"
     );
 }
 

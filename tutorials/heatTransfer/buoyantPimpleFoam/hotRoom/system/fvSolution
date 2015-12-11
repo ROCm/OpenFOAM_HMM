@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -60,6 +60,8 @@ PIMPLE
     nOuterCorrectors 1;
     nCorrectors     2;
     nNonOrthogonalCorrectors 0;
+    pRefCell        0;
+    pRefValue       1e5;
 }
 
 

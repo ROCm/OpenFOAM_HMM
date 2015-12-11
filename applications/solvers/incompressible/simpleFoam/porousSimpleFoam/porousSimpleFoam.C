@@ -24,6 +24,9 @@ License
 Application
     porousSimpleFoam
 
+Group
+    grpIncompressibleSolvers
+
 Description
     Steady-state solver for incompressible, turbulent flow with
     implicit or explicit porosity treatment and support for multiple reference
@@ -36,7 +39,7 @@ Description
 #include "turbulentTransportModel.H"
 #include "simpleControl.H"
 #include "IOporosityModelList.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,6 +56,8 @@ int main(int argc, char *argv[])
     #include "createPorousZones.H"
     #include "createFvOptions.H"
     #include "initContinuityErrs.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

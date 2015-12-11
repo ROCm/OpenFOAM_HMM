@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -76,6 +76,8 @@ namespace Foam
 {
 
 class fvMesh;
+class plane;
+class treeBoundBox;
 
 /*---------------------------------------------------------------------------*\
                        Class isoSurface Declaration
@@ -116,9 +118,11 @@ class isoSurface
         //- Regularise?
         const Switch regularise_;
 
+        //- Optional bounds
+        const boundBox bounds_;
+
         //- When to merge points
         const scalar mergeDistance_;
-
 
         //- Whether face might be cut
         List<cellCutType> faceCutType_;
@@ -134,6 +138,15 @@ class isoSurface
 
         //- For every unmerged triangle point the point in the triSurface
         labelList triPointMergeMap_;
+
+        //- triSurface points that have weighted interpolation
+        DynamicList<label> interpolatedPoints_;
+
+        //- corresponding original, unmerged points
+        DynamicList<FixedList<label, 3> > interpolatedOldPoints_;
+
+        //- corresponding weights
+        DynamicList<FixedList<scalar, 3> > interpolationWeights_;
 
 
     // Private Member Functions
@@ -193,19 +206,7 @@ class isoSurface
             const scalarField& pVals
         );
 
-        static labelPair findCommonPoints
-        (
-            const labelledTri&,
-            const labelledTri&
-        );
-
         static point calcCentre(const triSurface&);
-
-        static pointIndexHit collapseSurface
-        (
-            pointField& localPoints,
-            DynamicList<labelledTri, 64>& localTris
-        );
 
         //- Determine per cc whether all near cuts can be snapped to single
         //  point.
@@ -323,6 +324,17 @@ class isoSurface
             DynamicList<label>& triMeshCells
         ) const;
 
+        template<class Type>
+        static tmp<Field<Type> > interpolate
+        (
+            const label nPoints,
+            const labelList& triPointMergeMap,
+            const labelList& interpolatedPoints,
+            const List<FixedList<label, 3> >& interpolatedOldPoints,
+            const List<FixedList<scalar, 3> >& interpolationWeights,
+            const DynamicList<Type>& unmergedValues
+        );
+
         triSurface stitchTriPoints
         (
             const bool checkDuplicates,
@@ -331,56 +343,37 @@ class isoSurface
             labelList& triMap               // merged to unmerged triangle
         ) const;
 
+        //- Trim triangle to planes
+        static void trimToPlanes
+        (
+            const PtrList<plane>& planes,
+            const triPointRef& tri,
+            DynamicList<point>& newTriPoints
+        );
+
+        //- Trim all triangles to box
+        static void trimToBox
+        (
+            const treeBoundBox& bb,
+            DynamicList<point>& triPoints,
+            DynamicList<label>& triMeshCells
+        );
+
+        //- Trim all triangles to box. Determine interpolation
+        //  for existing and new points
+        static void trimToBox
+        (
+            const treeBoundBox& bb,
+            DynamicList<point>& triPoints,
+            DynamicList<label>& triMap,
+            labelList& triPointMap,
+            labelList& interpolatedPoints,
+            List<FixedList<label, 3> >& interpolatedOldPoints,
+            List<FixedList<scalar, 3> >& interpolationWeights
+        );
+
         //- Check single triangle for (topological) validity
         static bool validTri(const triSurface&, const label);
-
-        //- Determine edge-face addressing
-        void calcAddressing
-        (
-            const triSurface& surf,
-            List<FixedList<label, 3> >& faceEdges,
-            labelList& edgeFace0,
-            labelList& edgeFace1,
-            Map<labelList>& edgeFacesRest
-        ) const;
-
-        //- Determine orientation
-        static void walkOrientation
-        (
-            const triSurface& surf,
-            const List<FixedList<label, 3> >& faceEdges,
-            const labelList& edgeFace0,
-            const labelList& edgeFace1,
-            const label seedTriI,
-            labelList& flipState
-        );
-
-        //- Orient surface
-        static void orientSurface
-        (
-            triSurface&,
-            const List<FixedList<label, 3> >& faceEdges,
-            const labelList& edgeFace0,
-            const labelList& edgeFace1,
-            const Map<labelList>& edgeFacesRest
-        );
-
-        //- Is triangle (given by 3 edges) not fully connected?
-        static bool danglingTriangle
-        (
-            const FixedList<label, 3>& fEdges,
-            const labelList& edgeFace1
-        );
-
-        //- Mark all non-fully connected triangles
-        static label markDanglingTriangles
-        (
-            const List<FixedList<label, 3> >& faceEdges,
-            const labelList& edgeFace0,
-            const labelList& edgeFace1,
-            const Map<labelList>& edgeFacesRest,
-            boolList& keepTriangles
-        );
 
         static triSurface subsetMesh
         (
@@ -391,6 +384,10 @@ class isoSurface
         );
 
 public:
+
+    //- Declare friendship with isoSurfaceCell to share some functionality
+    friend class isoSurfaceCell;
+
 
     //- Runtime type information
     TypeName("isoSurface");
@@ -407,22 +404,17 @@ public:
             const scalarField& pointIsoVals,
             const scalar iso,
             const bool regularise,
+            const boundBox& bounds = boundBox::greatBox,
             const scalar mergeTol = 1e-6    // fraction of bounding box
         );
 
 
     // Member Functions
 
-        //- For every face original cell in mesh
+        //- For every triangle the original cell in mesh
         const labelList& meshCells() const
         {
             return meshCells_;
-        }
-
-        //- For every unmerged triangle point the point in the triSurface
-        const labelList& triPointMergeMap() const
-        {
-            return triPointMergeMap_;
         }
 
         //- Interpolates cCoords,pCoords. Uses the references to the original

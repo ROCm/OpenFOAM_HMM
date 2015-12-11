@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,7 +34,8 @@ Description
     NOTE: To avoid exposing wrong fields values faceSets should include
     faces contained in the blockedCells cellset.
 
-    - coupledFaces reads coupledFacesSet to introduces mixe-coupled baffles
+    - coupledFaces reads coupledFacesSet to introduces mixed-coupled
+      duplicate baffles
 
     Subsets out the blocked cells and splits the blockedFaces and updates
     fields.
@@ -530,7 +531,7 @@ label findPatch(const polyBoundaryMesh& patches, const word& patchName)
 
     if (patchI == -1)
     {
-        FatalErrorIn("findPatch(const polyBoundaryMesh&, const word&)")
+        FatalErrorInFunction
             << "Illegal patch " << patchName
             << nl << "Valid patches are " << patches.names()
             << exit(FatalError);
@@ -543,7 +544,7 @@ label findPatch(const polyBoundaryMesh& patches, const word& patchName)
 
         if (newPatch != patchI)
         {
-            FatalErrorIn("findPatch(const polyBoundaryMesh&, const word&)")
+            FatalErrorInFunction
                 << "Patch " << patchName
                 << " should have the same patch index on all processors." << nl
                 << "On my processor it has index " << patchI
@@ -651,7 +652,7 @@ int main(int argc, char *argv[])
         {
             if (wantedPatch[iter.key()] != -1)
             {
-                FatalErrorIn(args.executable())
+                FatalErrorInFunction
                     << "Face " << iter.key()
                     << " is in faceSet " << setsAndPatches[setI][0]
                     << " destined for patch " << setsAndPatches[setI][1]
@@ -689,7 +690,7 @@ int main(int argc, char *argv[])
         {
             if (coupledWantedPatch[iter.key()] != -1)
             {
-                FatalErrorIn(args.executable())
+                FatalErrorInFunction
                     << "Face " << iter.key()
                     << " is in faceSet " << coupledAndPatches[setI][0]
                     << " destined for patch " << coupledAndPatches[setI][1]
@@ -1151,7 +1152,7 @@ int main(int argc, char *argv[])
 
     if (cellRegion.nRegions() > 1)
     {
-        WarningIn(args.executable())
+        WarningInFunction
             << "Removing blocked faces and cells created "
             << cellRegion.nRegions()
             << " regions that are not connected via a face." << nl
@@ -1167,7 +1168,7 @@ int main(int argc, char *argv[])
 
         if (startFrom != "latestTime")
         {
-            WarningIn(args.executable())
+            WarningInFunction
                 << "To run splitMeshRegions please set your"
                 << " startFrom entry to latestTime" << endl;
         }

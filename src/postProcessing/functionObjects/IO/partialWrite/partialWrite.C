@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,8 @@ Foam::partialWrite::partialWrite
 )
 :
     name_(name),
-    obr_(obr)
+    obr_(obr),
+    log_(true)
 {
     read(dict);
 }
@@ -65,21 +66,44 @@ Foam::partialWrite::~partialWrite()
 
 void Foam::partialWrite::read(const dictionary& dict)
 {
+    log_.readIfPresent("log", dict);
     dict.lookup("objectNames") >> objectNames_;
     dict.lookup("writeInterval") >> writeInterval_;
     writeInstance_ = 0;
 
-    Info<< type() << " " << name() << ":" << nl
-        << "    dumping every " << writeInterval_
-        << " th outputTime : " << nl << endl ;
-    forAllConstIter(HashSet<word>, objectNames_, iter)
+    if (log_)
     {
-        Info<< ' ' << iter.key();
+        Info<< type() << " " << name() << ":" << nl
+            << "    dumping every outputTime :";
+
+        forAllConstIter(HashSet<word>, objectNames_, iter)
+        {
+            Info<< ' ' << iter.key();
+        }
+
+        word postStr = "";
+        if (writeInterval_ == 2)
+        {
+            postStr = "nd ";
+        }
+        else if (writeInterval_ == 3)
+        {
+            postStr = "rd ";
+        }
+        else
+        {
+            postStr = "th ";
+        }
+
+        Info<< nl
+            << "    dumping all other fields every "
+            << writeInterval_ << postStr << " outputTime" << nl
+            << endl;
     }
 
     if (writeInterval_ < 1)
     {
-        FatalIOErrorIn("partialWrite::read(const dictionary&)", dict)
+        FatalIOErrorInFunction(dict)
             << "Illegal value for writeInterval " << writeInterval_
             << ". It should be >= 1."
             << exit(FatalIOError);
@@ -111,12 +135,12 @@ void Foam::partialWrite::read(const dictionary& dict)
 
 void Foam::partialWrite::execute()
 {
+    // Do nothing - only valid on write
 }
 
 
 void Foam::partialWrite::end()
 {
-    //Pout<< "end at time " << obr_.time().timeName() << endl;
     // Do nothing - only valid on write
 }
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,11 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "starcdSurfaceWriter.H"
-
 #include "MeshedSurfaceProxy.H"
-#include "OFstream.H"
-#include "OSspecific.H"
-
 #include "makeSurfaceWriterMethods.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -78,50 +74,6 @@ namespace Foam
 }
 
 
-template<class Type>
-inline void Foam::starcdSurfaceWriter::writeData
-(
-    Ostream& os,
-    const Type& v
-)
-{}
-
-
-template<class Type>
-void Foam::starcdSurfaceWriter::writeTemplate
-(
-    const fileName& outputDir,
-    const fileName& surfaceName,
-    const pointField& points,
-    const faceList& faces,
-    const word& fieldName,
-    const Field<Type>& values,
-    const bool isNodeValues,
-    const bool verbose
-) const
-{
-    if (!isDir(outputDir))
-    {
-        mkDir(outputDir);
-    }
-
-    OFstream os(outputDir/fieldName + '_' + surfaceName + ".usr");
-
-    if (verbose)
-    {
-        Info<< "Writing field " << fieldName << " to " << os.name() << endl;
-    }
-
-    // no header, just write values
-    forAll(values, elemI)
-    {
-        os  << elemI+1 << ' ';
-        writeData(os, values[elemI]);
-    }
-}
-
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::starcdSurfaceWriter::starcdSurfaceWriter()
@@ -138,7 +90,7 @@ Foam::starcdSurfaceWriter::~starcdSurfaceWriter()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::starcdSurfaceWriter::write
+Foam::fileName Foam::starcdSurfaceWriter::write
 (
     const fileName& outputDir,
     const fileName& surfaceName,
@@ -160,6 +112,8 @@ void Foam::starcdSurfaceWriter::write
     }
 
     MeshedSurfaceProxy<face>(points, faces).write(outName);
+
+    return outName;
 }
 
 

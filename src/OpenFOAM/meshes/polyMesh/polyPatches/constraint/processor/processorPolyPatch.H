@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,13 +62,13 @@ class processorPolyPatch
         int myProcNo_;
         int neighbProcNo_;
 
-        //- Processor-neighbbour patch face centres
+        //- Processor-neighbour patch face centres
         vectorField neighbFaceCentres_;
 
-        //- Processor-neighbbour patch face areas
+        //- Processor-neighbour patch face areas
         vectorField neighbFaceAreas_;
 
-        //- Processor-neighbbour patch neighbour cell centres
+        //- Processor-neighbour patch neighbour cell centres
         vectorField neighbFaceCellCentres_;
 
         //- Corresponding neighbouring local point label for every local point
@@ -102,7 +102,7 @@ protected:
             const pointField& nbrCc
         )
         {
-            notImplemented("processorPolyPatch::calcGeometry(..)");
+            NotImplemented;
         }
 
         //- Initialise the patches for moving points
@@ -270,19 +270,19 @@ public:
             return !owner();
         }
 
-        //- Return processor-neighbbour patch face centres
+        //- Return processor-neighbour patch face centres
         const vectorField& neighbFaceCentres() const
         {
             return neighbFaceCentres_;
         }
 
-        //- Return processor-neighbbour patch face areas
+        //- Return processor-neighbour patch face areas
         const vectorField& neighbFaceAreas() const
         {
             return neighbFaceAreas_;
         }
 
-        //- Return processor-neighbbour patch neighbour cell centres
+        //- Return processor-neighbour patch neighbour cell centres
         const vectorField& neighbFaceCellCentres() const
         {
             return neighbFaceCellCentres_;

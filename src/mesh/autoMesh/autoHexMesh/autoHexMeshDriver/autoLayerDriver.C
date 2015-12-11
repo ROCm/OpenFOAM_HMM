@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,9 +55,7 @@ Description
 #include "cyclicSlipPointPatchFields.H"
 #include "fixedValueFvPatchFields.H"
 #include "localPointRegion.H"
-
 #include "externalDisplacementMeshMover.H"
-#include "medialAxisMeshMover.H"
 #include "scalarIOField.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -743,7 +741,7 @@ void Foam::autoLayerDriver::setNumLayers
     {
         if (maxLayers[i] == labelMin || minLayers[i] == labelMax)
         {
-            FatalErrorIn("setNumLayers(..)")
+            FatalErrorInFunction
                 << "Patchpoint:" << i << " coord:" << pp.localPoints()[i]
                 << " maxLayers:" << maxLayers
                 << " minLayers:" << minLayers
@@ -973,34 +971,42 @@ void Foam::autoLayerDriver::determineSidePatches
     const labelListList& edgeGlobalFaces,
     const indirectPrimitivePatch& pp,
 
-    labelList& sidePatchID
+    labelList& edgePatchID,
+    labelList& edgeZoneID,
+    boolList& edgeFlip,
+    labelList& inflateFaceID
 )
 {
     // Sometimes edges-to-be-extruded are on more than 2 processors.
     // Work out which 2 hold the faces to be extruded and thus which procpatch
-    // the side-face should be in. As an additional complication this might
+    // the edge-face should be in. As an additional complication this might
     // mean that 2 procesors that were only edge-connected now suddenly need
     // to become face-connected i.e. have a processor patch between them.
 
     fvMesh& mesh = meshRefiner_.mesh();
 
-    // Determine sidePatchID. Any additional processor boundary gets added to
+    // Determine edgePatchID. Any additional processor boundary gets added to
     // patchToNbrProc,nbrProcToPatch and nPatches gets set to the new number
     // of patches.
     label nPatches;
     Map<label> nbrProcToPatch;
     Map<label> patchToNbrProc;
-    addPatchCellLayer::calcSidePatch
+    addPatchCellLayer::calcExtrudeInfo
     (
+        true,           // zoneFromAnyFace
+
         mesh,
         globalFaces,
         edgeGlobalFaces,
         pp,
 
-        sidePatchID,
+        edgePatchID,
         nPatches,
         nbrProcToPatch,
-        patchToNbrProc
+        patchToNbrProc,
+        edgeZoneID,
+        edgeFlip,
+        inflateFaceID
     );
 
     label nOldPatches = mesh.boundaryMesh().size();
@@ -1012,7 +1018,7 @@ void Foam::autoLayerDriver::determineSidePatches
     if (nAdded > 0)
     {
         // We might not add patches in same order as in patchToNbrProc
-        // so prepare to renumber sidePatchID
+        // so prepare to renumber edgePatchID
         Map<label> wantedToAddedPatch;
 
         for (label patchI = nOldPatches; patchI < nPatches; patchI++)
@@ -1046,14 +1052,14 @@ void Foam::autoLayerDriver::determineSidePatches
             wantedToAddedPatch.insert(patchI, procPatchI);
         }
 
-        // Renumber sidePatchID
-        forAll(sidePatchID, i)
+        // Renumber edgePatchID
+        forAll(edgePatchID, i)
         {
-            label patchI = sidePatchID[i];
+            label patchI = edgePatchID[i];
             Map<label>::const_iterator fnd = wantedToAddedPatch.find(patchI);
             if (fnd != wantedToAddedPatch.end())
             {
-                sidePatchID[i] = fnd();
+                edgePatchID[i] = fnd();
             }
         }
 
@@ -1189,7 +1195,7 @@ void Foam::autoLayerDriver::calculateLayerThickness
          || max(layerParams.minThickness()) > 2
         )
         {
-            FatalErrorIn("calculateLayerThickness(..)")
+            FatalErrorInFunction
                 << "Thickness should be factor of local undistorted cell size."
                 << " Valid values are [0..2]." << nl
                 << " minThickness:" << layerParams.minThickness()
@@ -1654,7 +1660,7 @@ void Foam::autoLayerDriver::getVertexString
 
     if (fp == -1)
     {
-        FatalErrorIn("autoLayerDriver::getVertexString(..)")
+        FatalErrorInFunction
             << "problem." << abort(FatalError);
     }
 
@@ -1741,7 +1747,7 @@ Foam::label Foam::autoLayerDriver::truncateDisplacement
 
         if (mesh.isInternalFace(faceI))
         {
-            FatalErrorIn("truncateDisplacement(..)")
+            FatalErrorInFunction
                 << "Faceset " << illegalPatchFaces.name()
                 << " contains internal face " << faceI << nl
                 << "It should only contain patch faces" << abort(FatalError);
@@ -2427,6 +2433,67 @@ Foam::label Foam::autoLayerDriver::countExtrusion
 }
 
 
+Foam::List<Foam::labelPair> Foam::autoLayerDriver::getBafflesOnAddedMesh
+(
+    const polyMesh& mesh,
+    const labelList& newToOldFaces,
+    const List<labelPair>& baffles
+)
+{
+    // The problem is that the baffle faces are now inside the
+    // mesh (addPatchCellLayer modifies original boundary faces and
+    // adds new ones. So 2 pass:
+    // - find the boundary face for all faces originating from baffle
+    // - use the boundary face for the new baffles
+
+    Map<label> baffleSet(4*baffles.size());
+    forAll(baffles, baffleI)
+    {
+        baffleSet.insert(baffles[baffleI][0], baffleI);
+        baffleSet.insert(baffles[baffleI][1], baffleI);
+    }
+
+
+    List<labelPair> newBaffles(baffles.size(), labelPair(-1, -1));
+    for
+    (
+        label faceI = mesh.nInternalFaces();
+        faceI < mesh.nFaces();
+        faceI++
+    )
+    {
+        label oldFaceI = newToOldFaces[faceI];
+
+        Map<label>::const_iterator faceFnd = baffleSet.find(oldFaceI);
+        if (faceFnd != baffleSet.end())
+        {
+            label baffleI = faceFnd();
+            labelPair& p = newBaffles[baffleI];
+            if (p[0] == -1)
+            {
+                p[0] = faceI;
+            }
+            else if (p[1] == -1)
+            {
+                p[1] = faceI;
+            }
+            else
+            {
+                FatalErrorInFunction
+                    << "Problem:" << faceI << " at:"
+                    << mesh.faceCentres()[faceI]
+                    << " is on same baffle as " << p[0]
+                    << " at:" << mesh.faceCentres()[p[0]]
+                    << " and " << p[1]
+                    << " at:" << mesh.faceCentres()[p[1]]
+                    << exit(FatalError);
+            }
+        }
+    }
+    return newBaffles;
+}
+
+
 // Collect layer faces and layer cells into mesh fields for ease of handling
 void Foam::autoLayerDriver::getLayerCellsFaces
 (
@@ -2457,6 +2524,7 @@ void Foam::autoLayerDriver::getLayerCellsFaces
 
         if (layer.size())
         {
+            // Leave out original internal face
             forAll(added, i)
             {
                 cellNLayers[added[i]] = layer.size()-1;
@@ -2577,6 +2645,69 @@ void Foam::autoLayerDriver::printLayerData
 }
 
 
+bool Foam::autoLayerDriver::writeLayerSets
+(
+    const fvMesh& mesh,
+    const labelList& cellNLayers,
+    const scalarField& faceRealThickness
+) const
+{
+    bool allOk = true;
+    {
+        label nAdded = 0;
+        forAll(cellNLayers, cellI)
+        {
+            if (cellNLayers[cellI] > 0)
+            {
+                nAdded++;
+            }
+        }
+        cellSet addedCellSet(mesh, "addedCells", nAdded);
+        forAll(cellNLayers, cellI)
+        {
+            if (cellNLayers[cellI] > 0)
+            {
+                addedCellSet.insert(cellI);
+            }
+        }
+        addedCellSet.instance() = meshRefiner_.timeName();
+        Info<< "Writing "
+            << returnReduce(addedCellSet.size(), sumOp<label>())
+            << " added cells to cellSet "
+            << addedCellSet.name() << endl;
+        bool ok = addedCellSet.write();
+        allOk = allOk && ok;
+    }
+    {
+        label nAdded = 0;
+        for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
+        {
+            if (faceRealThickness[faceI] > 0)
+            {
+                nAdded++;
+            }
+        }
+
+        faceSet layerFacesSet(mesh, "layerFaces", nAdded);
+        for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
+        {
+            if (faceRealThickness[faceI] > 0)
+            {
+                layerFacesSet.insert(faceI);
+            }
+        }
+        layerFacesSet.instance() = meshRefiner_.timeName();
+        Info<< "Writing "
+            << returnReduce(layerFacesSet.size(), sumOp<label>())
+            << " faces inside added layer to faceSet "
+            << layerFacesSet.name() << endl;
+        bool ok = layerFacesSet.write();
+        allOk = allOk && ok;
+    }
+    return allOk;
+}
+
+
 bool Foam::autoLayerDriver::writeLayerData
 (
     const fvMesh& mesh,
@@ -2590,57 +2721,8 @@ bool Foam::autoLayerDriver::writeLayerData
 
     if (meshRefinement::writeLevel() & meshRefinement::WRITELAYERSETS)
     {
-        {
-            label nAdded = 0;
-            forAll(cellNLayers, cellI)
-            {
-                if (cellNLayers[cellI] > 0)
-                {
-                    nAdded++;
-                }
-            }
-            cellSet addedCellSet(mesh, "addedCells", nAdded);
-            forAll(cellNLayers, cellI)
-            {
-                if (cellNLayers[cellI] > 0)
-                {
-                    addedCellSet.insert(cellI);
-                }
-            }
-            addedCellSet.instance() = meshRefiner_.timeName();
-            Info<< "Writing "
-                << returnReduce(addedCellSet.size(), sumOp<label>())
-                << " added cells to cellSet "
-                << addedCellSet.name() << endl;
-            bool ok = addedCellSet.write();
-            allOk = allOk & ok;
-        }
-        {
-            label nAdded = 0;
-            for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
-            {
-                if (faceRealThickness[faceI] > 0)
-                {
-                    nAdded++;
-                }
-            }
-
-            faceSet layerFacesSet(mesh, "layerFaces", nAdded);
-            for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
-            {
-                if (faceRealThickness[faceI] > 0)
-                {
-                    layerFacesSet.insert(faceI);
-                }
-            }
-            layerFacesSet.instance() = meshRefiner_.timeName();
-            Info<< "Writing "
-                << returnReduce(layerFacesSet.size(), sumOp<label>())
-                << " faces inside added layer to faceSet "
-                << layerFacesSet.name() << endl;
-            bool ok = layerFacesSet.write();
-            allOk = allOk & ok;
-        }
+        bool ok = writeLayerSets(mesh, cellNLayers, faceRealThickness);
+        allOk = allOk && ok;
     }
 
     if (meshRefinement::writeLevel() & meshRefinement::WRITELAYERFIELDS)
@@ -2663,6 +2745,10 @@ bool Foam::autoLayerDriver::writeLayerData
                 dimensionedScalar("zero", dimless, 0),
                 fixedValueFvPatchScalarField::typeName
             );
+            forAll(fld, cellI)
+            {
+                fld[cellI] = cellNLayers[cellI];
+            }
             const polyBoundaryMesh& pbm = mesh.boundaryMesh();
             forAll(patchIDs, i)
             {
@@ -2679,7 +2765,7 @@ bool Foam::autoLayerDriver::writeLayerData
             Info<< indent << fld.name() << "    : actual number of layers"
                 << endl;
             bool ok = fld.write();
-            allOk = allOk & ok;
+            allOk = allOk && ok;
         }
         {
             volScalarField fld
@@ -2709,7 +2795,7 @@ bool Foam::autoLayerDriver::writeLayerData
             Info<< indent << fld.name() << "         : overall layer thickness"
                 << endl;
             bool ok = fld.write();
-            allOk = allOk & ok;
+            allOk = allOk && ok;
         }
         {
             volScalarField fld
@@ -2757,21 +2843,9 @@ bool Foam::autoLayerDriver::writeLayerData
                 << " : overall layer thickness (fraction"
                 << " of desired thickness)" << endl;
             bool ok = fld.write();
-            allOk = allOk & ok;
+            allOk = allOk && ok;
         }
         Info<< decrIndent<< endl;
-    }
-
-    //if (meshRefinement::outputLevel() & meshRefinement::OUTPUTLAYERINFO)
-    {
-        printLayerData
-        (
-            mesh,
-            patchIDs,
-            cellNLayers,
-            faceWantedThickness,
-            faceRealThickness
-        );
     }
 
     return allOk;
@@ -2803,7 +2877,7 @@ void Foam::autoLayerDriver::mergePatchFacesUndo
 {
     // Clip to 30 degrees. Not helpful!
     //scalar planarAngle = min(30.0, layerParams.featureAngle());
-    scalar planarAngle = layerParams.featureAngle();
+    scalar planarAngle = layerParams.mergePatchFacesAngle();
     scalar minCos = Foam::cos(degToRad(planarAngle));
 
     scalar concaveCos = Foam::cos(degToRad(layerParams.concaveAngle()));
@@ -2814,8 +2888,7 @@ void Foam::autoLayerDriver::mergePatchFacesUndo
         << "    - which are on the same patch" << nl
         << "    - which make an angle < " << planarAngle
         << " degrees"
-        << nl
-        << "      (cos:" << minCos << ')' << nl
+        << " (cos:" << minCos << ')' << nl
         << "    - as long as the resulting face doesn't become concave"
         << " by more than "
         << layerParams.concaveAngle() << " degrees" << nl
@@ -2859,32 +2932,324 @@ void Foam::autoLayerDriver::addLayers
 {
     fvMesh& mesh = meshRefiner_.mesh();
 
+
+    // faceZones of type internal or baffle (for merging points across)
+    labelList internalOrBaffleFaceZones;
+    {
+        List<surfaceZonesInfo::faceZoneType> fzTypes(2);
+        fzTypes[0] = surfaceZonesInfo::INTERNAL;
+        fzTypes[1] = surfaceZonesInfo::BAFFLE;
+        internalOrBaffleFaceZones = meshRefiner_.getZones(fzTypes);
+    }
+
+    // faceZones of type internal (for checking mesh quality across and
+    // merging baffles)
+    const labelList internalFaceZones
+    (
+        meshRefiner_.getZones
+        (
+            List<surfaceZonesInfo::faceZoneType>
+            (
+                1,
+                surfaceZonesInfo::INTERNAL
+            )
+        )
+    );
+
     // Create baffles (pairs of faces that share the same points)
     // Baffles stored as owner and neighbour face that have been created.
     List<labelPair> baffles;
-    meshRefiner_.createZoneBaffles
-    (
-        globalToMasterPatch_,
-        globalToSlavePatch_,
-        baffles
-    );
-
-    if (debug&meshRefinement::MESH)
     {
-        const_cast<Time&>(mesh.time())++;
-        Info<< "Writing baffled mesh to time "
-            << meshRefiner_.timeName() << endl;
-        meshRefiner_.write
+        labelList originatingFaceZone;
+        meshRefiner_.createZoneBaffles
         (
-            meshRefinement::debugType(debug),
-            meshRefinement::writeType
-            (
-                meshRefinement::writeLevel()
-              | meshRefinement::WRITEMESH
-            ),
-            mesh.time().path()/meshRefiner_.timeName()
+            identity(mesh.faceZones().size()),
+            baffles,
+            originatingFaceZone
         );
+
+        if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
+        {
+            const_cast<Time&>(mesh.time())++;
+            Info<< "Writing baffled mesh to time "
+                << meshRefiner_.timeName() << endl;
+            meshRefiner_.write
+            (
+                meshRefinement::debugType(debug),
+                meshRefinement::writeType
+                (
+                    meshRefinement::writeLevel()
+                  | meshRefinement::WRITEMESH
+                ),
+                mesh.time().path()/meshRefiner_.timeName()
+            );
+        }
     }
+
+
+    // Duplicate points on faceZones of type boundary. Should normally already
+    // be done by snapping phase
+    {
+        autoPtr<mapPolyMesh> map = meshRefiner_.dupNonManifoldBoundaryPoints();
+        if (map.valid())
+        {
+            const labelList& reverseFaceMap = map().reverseFaceMap();
+            forAll(baffles, i)
+            {
+                label f0 = reverseFaceMap[baffles[i].first()];
+                label f1 = reverseFaceMap[baffles[i].second()];
+                baffles[i] = labelPair(f0, f1);
+            }
+        }
+    }
+
+
+
+    // Now we have all patches determine the number of layer per patch
+    // This will be layerParams.numLayers() except for faceZones where one
+    // side does get layers and the other not in which case we want to
+    // suppress movement by explicitly setting numLayers 0
+    labelList numLayers(layerParams.numLayers());
+    {
+        labelHashSet layerIDs(patchIDs);
+        forAll(mesh.faceZones(), zoneI)
+        {
+            label mpI, spI;
+            surfaceZonesInfo::faceZoneType fzType;
+            bool hasInfo = meshRefiner_.getFaceZoneInfo
+            (
+                mesh.faceZones()[zoneI].name(),
+                mpI,
+                spI,
+                fzType
+            );
+            if (hasInfo)
+            {
+                const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+                if (layerIDs.found(mpI) && !layerIDs.found(spI))
+                {
+                    // Only layers on master side. Fix points on slave side
+                    Info<< "On faceZone " << mesh.faceZones()[zoneI].name()
+                        << " adding layers to master patch " << pbm[mpI].name()
+                        << " only. Freezing points on slave patch "
+                        << pbm[spI].name() << endl;
+                    numLayers[spI] = 0;
+                }
+                else if (!layerIDs.found(mpI) && layerIDs.found(spI))
+                {
+                    // Only layers on slave side. Fix points on master side
+                    Info<< "On faceZone " << mesh.faceZones()[zoneI].name()
+                        << " adding layers to slave patch " << pbm[spI].name()
+                        << " only. Freezing points on master patch "
+                        << pbm[mpI].name() << endl;
+                    numLayers[mpI] = 0;
+                }
+            }
+        }
+    }
+
+
+
+    // Duplicate points on faceZones that layers are added to
+    labelList pointToDuplicate;
+
+    {
+        // Check outside of baffles for non-manifoldness
+        PackedBoolList duplicatePoint(mesh.nPoints());
+        {
+            // Do full analysis to see if we need to extrude points
+            // so have to duplicate them
+            autoPtr<indirectPrimitivePatch> pp
+            (
+                meshRefinement::makePatch
+                (
+                    mesh,
+                    patchIDs
+                )
+            );
+
+            // Displacement for all pp.localPoints. Set to large value to
+            // avoid truncation in syncPatchDisplacement because of
+            // minThickness.
+            vectorField patchDisp(pp().nPoints(), vector(GREAT, GREAT, GREAT));
+            labelList patchNLayers(pp().nPoints(), 0);
+            label nIdealTotAddedCells = 0;
+            List<extrudeMode> extrudeStatus(pp().nPoints(), EXTRUDE);
+            // Get number of layers per point from number of layers per patch
+            setNumLayers
+            (
+                numLayers,              // per patch the num layers
+                patchIDs,               // patches that are being moved
+                pp,                     // indirectpatch for all faces moving
+
+                patchDisp,
+                patchNLayers,
+                extrudeStatus,
+                nIdealTotAddedCells
+            );
+            // Make sure displacement is equal on both sides of coupled patches.
+            // Note that we explicitly disable the minThickness truncation
+            // of the patchDisp here.
+            syncPatchDisplacement
+            (
+                pp,
+                scalarField(patchDisp.size(), 0.0), //minThickness,
+                patchDisp,
+                patchNLayers,
+                extrudeStatus
+            );
+
+            forAll(extrudeStatus, patchPointI)
+            {
+                if (extrudeStatus[patchPointI] != NOEXTRUDE)
+                {
+                    duplicatePoint[pp().meshPoints()[patchPointI]] = 1;
+                }
+            }
+        }
+
+
+        // Duplicate points only if all points agree
+        syncTools::syncPointList
+        (
+            mesh,
+            duplicatePoint,
+            andEqOp<unsigned int>(),    // combine op
+            0u                          // null value
+        );
+        label n = duplicatePoint.count();
+        labelList candidatePoints(n);
+        n = 0;
+        forAll(duplicatePoint, pointI)
+        {
+            if (duplicatePoint[pointI])
+            {
+                candidatePoints[n++] = pointI;
+            }
+        }
+
+        // Not duplicate points on either side of baffles that don't get any
+        // layers
+        labelPairList nonDupBaffles;
+
+        {
+            // faceZones that are not being duplicated
+            DynamicList<label> nonDupZones(mesh.faceZones().size());
+
+            labelHashSet layerIDs(patchIDs);
+            forAll(mesh.faceZones(), zoneI)
+            {
+                label mpI, spI;
+                surfaceZonesInfo::faceZoneType fzType;
+                bool hasInfo = meshRefiner_.getFaceZoneInfo
+                (
+                    mesh.faceZones()[zoneI].name(),
+                    mpI,
+                    spI,
+                    fzType
+                );
+                if (hasInfo && !layerIDs.found(mpI) && !layerIDs.found(spI))
+                {
+                    nonDupZones.append(zoneI);
+                }
+            }
+            nonDupBaffles = meshRefinement::subsetBaffles
+            (
+                mesh,
+                nonDupZones,
+                localPointRegion::findDuplicateFacePairs(mesh)
+            );
+        }
+
+
+        const localPointRegion regionSide(mesh, nonDupBaffles, candidatePoints);
+
+        autoPtr<mapPolyMesh> map = meshRefiner_.dupNonManifoldPoints
+        (
+            regionSide
+        );
+
+        if (map.valid())
+        {
+            // Store point duplication
+            pointToDuplicate.setSize(mesh.nPoints(), -1);
+
+            const labelList& pointMap = map().pointMap();
+            const labelList& reversePointMap = map().reversePointMap();
+
+            forAll(pointMap, pointI)
+            {
+                label oldPointI = pointMap[pointI];
+                label newMasterPointI = reversePointMap[oldPointI];
+
+                if (newMasterPointI != pointI)
+                {
+                    // Found slave. Mark both master and slave
+                    pointToDuplicate[pointI] = newMasterPointI;
+                    pointToDuplicate[newMasterPointI] = newMasterPointI;
+                }
+            }
+
+            // Update baffle numbering
+            {
+                const labelList& reverseFaceMap = map().reverseFaceMap();
+                forAll(baffles, i)
+                {
+                    label f0 = reverseFaceMap[baffles[i].first()];
+                    label f1 = reverseFaceMap[baffles[i].second()];
+                    baffles[i] = labelPair(f0, f1);
+                }
+            }
+
+
+            if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
+            {
+                const_cast<Time&>(mesh.time())++;
+                Info<< "Writing point-duplicate mesh to time "
+                    << meshRefiner_.timeName() << endl;
+
+                meshRefiner_.write
+                (
+                    meshRefinement::debugType(debug),
+                    meshRefinement::writeType
+                    (
+                        meshRefinement::writeLevel()
+                      | meshRefinement::WRITEMESH
+                    ),
+                    mesh.time().path()/meshRefiner_.timeName()
+                );
+
+                OBJstream str
+                (
+                    mesh.time().path()
+                  / "duplicatePoints_"
+                  + meshRefiner_.timeName()
+                  + ".obj"
+                );
+                Info<< "Writing point-duplicates to " << str.name() << endl;
+                const pointField& p = mesh.points();
+                forAll(pointMap, pointI)
+                {
+                    label newMasterI = reversePointMap[pointMap[pointI]];
+
+                    if (newMasterI != pointI)
+                    {
+                        str.write(linePointRef(p[pointI], p[newMasterI]));
+                    }
+                }
+            }
+        }
+    }
+
+
+    // Add layers to patches
+    // ~~~~~~~~~~~~~~~~~~~~~
+
+    // Now we have
+    // - mesh with optional baffles and duplicated points for faceZones
+    //   where layers are to be added
+    // - pointToDuplicate : correspondence for duplicated points
+    // - baffles          : list of pairs of faces
 
 
     autoPtr<indirectPrimitivePatch> pp
@@ -2916,22 +3281,29 @@ void Foam::autoLayerDriver::addLayers
     // Determine patches for extruded boundary edges. Calculates if any
     // additional processor patches need to be constructed.
 
-    labelList sidePatchID;
+    labelList edgePatchID;
+    labelList edgeZoneID;
+    boolList edgeFlip;
+    labelList inflateFaceID;
     determineSidePatches
     (
         globalFaces,
         edgeGlobalFaces,
         pp,
 
-        sidePatchID
+        edgePatchID,
+        edgeZoneID,
+        edgeFlip,
+        inflateFaceID
     );
 
 
     // Point-wise extrusion data
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    // Displacement for all pp.localPoints.
-    vectorField patchDisp(pp().nPoints(), vector::one);
+    // Displacement for all pp.localPoints. Set to large value so does
+    // not trigger the minThickness truncation (see syncPatchDisplacement below)
+    vectorField patchDisp(pp().nPoints(), vector(GREAT, GREAT, GREAT));
 
     // Number of layers for all pp.localPoints. Note: only valid if
     // extrudeStatus = EXTRUDE.
@@ -2945,12 +3317,12 @@ void Foam::autoLayerDriver::addLayers
 
 
     {
-        // Get number of layer per point from number of layers per patch
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // Get number of layers per point from number of layers per patch
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         setNumLayers
         (
-            layerParams.numLayers(),    // per patch the num layers
+            numLayers,                  // per patch the num layers
             patchIDs,                   // patches that are being moved
             pp,                         // indirectpatch for all faces moving
 
@@ -3077,41 +3449,6 @@ void Foam::autoLayerDriver::addLayers
 
 
 
-    // Overall displacement field
-    pointVectorField displacement
-    (
-        makeLayerDisplacementField
-        (
-            pointMesh::New(mesh),
-            layerParams.numLayers()
-        )
-    );
-
-    // Allocate run-time selectable mesh mover
-    autoPtr<externalDisplacementMeshMover> medialAxisMoverPtr;
-    {
-        // Set up controls for meshMover
-        dictionary combinedDict(layerParams.dict());
-        // Add mesh quality constraints
-        combinedDict.merge(motionDict);
-        // Where to get minThickness from
-        combinedDict.add("minThicknessName", minThickness.name());
-
-        // Take over patchDisp as boundary conditions on displacement
-        // pointVectorField
-        medialAxisMoverPtr = externalDisplacementMeshMover::New
-        (
-            layerParams.meshShrinker(),
-            combinedDict,
-            baffles,
-            displacement
-        );
-    }
-
-
-    // Saved old points
-    pointField oldPoints(mesh.points());
-
     // Current set of topology changes. (changing mesh clears out
     // polyTopoChange)
     polyTopoChange savedMeshMod(mesh.boundaryMesh().size());
@@ -3127,127 +3464,505 @@ void Foam::autoLayerDriver::addLayers
     }
 
 
-    for (label iteration = 0; iteration < layerParams.nLayerIter(); iteration++)
     {
-        Info<< nl
-            << "Layer addition iteration " << iteration << nl
-            << "--------------------------" << endl;
-
-
-        // Unset the extrusion at the pp.
-        const dictionary& meshQualityDict =
+        // Overall displacement field
+        pointVectorField displacement
         (
-            iteration < layerParams.nRelaxedIter()
-          ? motionDict
-          : motionDict.subDict("relaxed")
-        );
-
-        if (iteration >= layerParams.nRelaxedIter())
-        {
-            Info<< "Switched to relaxed meshQuality constraints." << endl;
-        }
-
-
-
-        // Make sure displacement is equal on both sides of coupled patches.
-        syncPatchDisplacement
-        (
-            pp,
-            minThickness,
-            patchDisp,
-            patchNLayers,
-            extrudeStatus
-        );
-
-        // Displacement acc. to pointnormals
-        getPatchDisplacement
-        (
-            pp,
-            thickness,
-            minThickness,
-            patchDisp,
-            patchNLayers,
-            extrudeStatus
-        );
-
-        // Shrink mesh by displacement value first.
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        {
-            pointField oldPatchPos(pp().localPoints());
-
-            // Take over patchDisp into pointDisplacement field and
-            // adjust both for multi-patch constraints
-            motionSmootherAlgo::setDisplacement
+            makeLayerDisplacementField
             (
-                patchIDs,
-                pp,
-                patchDisp,
-                displacement
-            );
+                pointMesh::New(mesh),
+                numLayers
+            )
+        );
 
-
-            // Move mesh
-            // ~~~~~~~~~
-
+        // Allocate run-time selectable mesh mover
+        autoPtr<externalDisplacementMeshMover> medialAxisMoverPtr;
+        {
             // Set up controls for meshMover
             dictionary combinedDict(layerParams.dict());
-            // Add standard quality constraints
+            // Add mesh quality constraints
             combinedDict.merge(motionDict);
-            // Add relaxed constraints (overrides standard ones)
-            combinedDict.merge(meshQualityDict);
             // Where to get minThickness from
             combinedDict.add("minThicknessName", minThickness.name());
 
-            labelList checkFaces(identity(mesh.nFaces()));
-            medialAxisMoverPtr().move
+            const List<labelPair> internalBaffles
             (
-                combinedDict,
-                nAllowableErrors,
-                checkFaces
+                meshRefinement::subsetBaffles
+                (
+                    mesh,
+                    internalFaceZones,
+                    localPointRegion::findDuplicateFacePairs(mesh)
+                )
             );
 
-            pp().movePoints(mesh.points());
-
-            // Update patchDisp (since not all might have been honoured)
-            patchDisp = oldPatchPos - pp().localPoints();
+            // Take over patchDisp as boundary conditions on displacement
+            // pointVectorField
+            medialAxisMoverPtr = externalDisplacementMeshMover::New
+            (
+                layerParams.meshShrinker(),
+                combinedDict,
+                internalBaffles,
+                displacement
+            );
         }
 
-        // Truncate displacements that are too small (this will do internal
-        // ones, coupled ones have already been truncated by
-        // syncPatchDisplacement)
-        faceSet dummySet(mesh, "wrongPatchFaces", 0);
-        truncateDisplacement
+
+        // Saved old points
+        const pointField oldPoints(mesh.points());
+
+        for
         (
-            globalFaces,
-            edgeGlobalFaces,
-            pp,
-            minThickness,
-            dummySet,
-            patchDisp,
-            patchNLayers,
-            extrudeStatus
-        );
-
-
-        // Dump to .obj file for debugging.
-        if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
+            label iteration = 0;
+            iteration < layerParams.nLayerIter();
+            iteration++
+        )
         {
-            dumpDisplacement
+            Info<< nl
+                << "Layer addition iteration " << iteration << nl
+                << "--------------------------" << endl;
+
+
+            // Unset the extrusion at the pp.
+            const dictionary& meshQualityDict =
             (
-                mesh.time().path()/"layer_" + meshRefiner_.timeName(),
-                pp(),
+                iteration < layerParams.nRelaxedIter()
+              ? motionDict
+              : motionDict.subDict("relaxed")
+            );
+
+            if (iteration >= layerParams.nRelaxedIter())
+            {
+                Info<< "Switched to relaxed meshQuality constraints." << endl;
+            }
+
+
+
+            // Make sure displacement is equal on both sides of coupled patches.
+            // Note that this also does the patchDisp < minThickness truncation
+            // so for the first pass make sure the patchDisp is larger than
+            // that.
+            syncPatchDisplacement
+            (
+                pp,
+                minThickness,
                 patchDisp,
+                patchNLayers,
                 extrudeStatus
             );
 
+            // Displacement acc. to pointnormals
+            getPatchDisplacement
+            (
+                pp,
+                thickness,
+                minThickness,
+                patchDisp,
+                patchNLayers,
+                extrudeStatus
+            );
+
+            // Shrink mesh by displacement value first.
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            {
+                const pointField oldPatchPos(pp().localPoints());
+
+                // We have patchDisp which is the outwards pointing
+                // extrusion distance. Convert into an inwards pointing
+                // shrink distance
+                patchDisp = -patchDisp;
+
+                // Take over patchDisp into pointDisplacement field and
+                // adjust both for multi-patch constraints
+                motionSmootherAlgo::setDisplacement
+                (
+                    patchIDs,
+                    pp,
+                    patchDisp,
+                    displacement
+                );
+
+
+                // Move mesh
+                // ~~~~~~~~~
+
+                // Set up controls for meshMover
+                dictionary combinedDict(layerParams.dict());
+                // Add standard quality constraints
+                combinedDict.merge(motionDict);
+                // Add relaxed constraints (overrides standard ones)
+                combinedDict.merge(meshQualityDict);
+                // Where to get minThickness from
+                combinedDict.add("minThicknessName", minThickness.name());
+
+                labelList checkFaces(identity(mesh.nFaces()));
+                medialAxisMoverPtr().move
+                (
+                    combinedDict,
+                    nAllowableErrors,
+                    checkFaces
+                );
+
+                pp().movePoints(mesh.points());
+
+                // Update patchDisp (since not all might have been honoured)
+                patchDisp = oldPatchPos - pp().localPoints();
+            }
+
+            // Truncate displacements that are too small (this will do internal
+            // ones, coupled ones have already been truncated by
+            // syncPatchDisplacement)
+            faceSet dummySet(mesh, "wrongPatchFaces", 0);
+            truncateDisplacement
+            (
+                globalFaces,
+                edgeGlobalFaces,
+                pp,
+                minThickness,
+                dummySet,
+                patchDisp,
+                patchNLayers,
+                extrudeStatus
+            );
+
+
+            // Dump to .obj file for debugging.
+            if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
+            {
+                dumpDisplacement
+                (
+                    mesh.time().path()/"layer_" + meshRefiner_.timeName(),
+                    pp(),
+                    patchDisp,
+                    extrudeStatus
+                );
+
+                const_cast<Time&>(mesh.time())++;
+                Info<< "Writing shrunk mesh to time "
+                    << meshRefiner_.timeName() << endl;
+
+                // See comment in autoSnapDriver why we should not remove
+                // meshPhi using mesh.clearOut().
+
+                meshRefiner_.write
+                (
+                    meshRefinement::debugType(debug),
+                    meshRefinement::writeType
+                    (
+                        meshRefinement::writeLevel()
+                      | meshRefinement::WRITEMESH
+                    ),
+                    mesh.time().path()/meshRefiner_.timeName()
+                );
+            }
+
+
+            // Mesh topo change engine. Insert current mesh.
+            polyTopoChange meshMod(mesh);
+
+            // Grow layer of cells on to patch. Handles zero sized displacement.
+            addPatchCellLayer addLayer(mesh);
+
+            // Determine per point/per face number of layers to extrude. Also
+            // handles the slow termination of layers when going switching
+            // layers
+
+            labelList nPatchPointLayers(pp().nPoints(), -1);
+            labelList nPatchFaceLayers(pp().size(), -1);
+            setupLayerInfoTruncation
+            (
+                pp,
+                patchNLayers,
+                extrudeStatus,
+                layerParams.nBufferCellsNoExtrude(),
+                nPatchPointLayers,
+                nPatchFaceLayers
+            );
+
+            // Calculate displacement for final layer for addPatchLayer.
+            // (layer of cells next to the original mesh)
+            vectorField finalDisp(patchNLayers.size(), vector::zero);
+
+            forAll(nPatchPointLayers, i)
+            {
+                scalar ratio = layerParams.finalLayerThicknessRatio
+                (
+                    nPatchPointLayers[i],
+                    expansionRatio[i]
+                );
+                finalDisp[i] = ratio*patchDisp[i];
+            }
+
+
+            const scalarField invExpansionRatio(1.0/expansionRatio);
+
+            // Add topo regardless of whether extrudeStatus is extruderemove.
+            // Not add layer if patchDisp is zero.
+            addLayer.setRefinement
+            (
+                globalFaces,
+                edgeGlobalFaces,
+
+                invExpansionRatio,
+                pp(),
+
+                edgePatchID,    // boundary patch for extruded boundary edges
+                edgeZoneID,     // zone for extruded edges
+                edgeFlip,
+                inflateFaceID,
+
+
+                labelList(0),   // exposed patchIDs, not used for adding layers
+                nPatchFaceLayers,   // layers per face
+                nPatchPointLayers,  // layers per point
+                finalDisp,      // thickness of layer nearest internal mesh
+                meshMod
+            );
+
+            if (debug)
+            {
+                const_cast<Time&>(mesh.time())++;
+            }
+
+            // Store mesh changes for if mesh is correct.
+            savedMeshMod = meshMod;
+
+
+            // With the stored topo changes we create a new mesh so we can
+            // undo if neccesary.
+
+            autoPtr<fvMesh> newMeshPtr;
+            autoPtr<mapPolyMesh> map = meshMod.makeMesh
+            (
+                newMeshPtr,
+                IOobject
+                (
+                    //mesh.name()+"_layer",
+                    mesh.name(),
+                    static_cast<polyMesh&>(mesh).instance(),
+                    mesh.time(),  // register with runTime
+                    IOobject::NO_READ,
+                    static_cast<polyMesh&>(mesh).writeOpt()
+                ),              // io params from original mesh but new name
+                mesh,           // original mesh
+                true            // parallel sync
+            );
+            fvMesh& newMesh = newMeshPtr();
+
+            //?neccesary? Update fields
+            newMesh.updateMesh(map);
+
+            newMesh.setInstance(meshRefiner_.timeName());
+
+            // Update numbering on addLayer:
+            // - cell/point labels to be newMesh.
+            // - patchFaces to remain in oldMesh order.
+            addLayer.updateMesh
+            (
+                map,
+                identity(pp().size()),
+                identity(pp().nPoints())
+            );
+
+            // Collect layer faces and cells for outside loop.
+            getLayerCellsFaces
+            (
+                newMesh,
+                addLayer,
+                avgPointData(pp, mag(patchDisp))(), // current thickness
+
+                cellNLayers,
+                faceRealThickness
+            );
+
+
+            // Count number of added cells
+            label nAddedCells = 0;
+            forAll(cellNLayers, cellI)
+            {
+                if (cellNLayers[cellI] > 0)
+                {
+                    nAddedCells++;
+                }
+            }
+
+
+            if (debug&meshRefinement::MESH)
+            {
+                Info<< "Writing layer mesh to time " << meshRefiner_.timeName()
+                    << endl;
+                newMesh.write();
+                writeLayerSets(newMesh, cellNLayers, faceRealThickness);
+
+                // Reset the instance of the original mesh so next iteration
+                // it dumps a complete mesh. This is just so that the inbetween
+                // newMesh does not upset e.g. paraFoam cycling through the
+                // times.
+                mesh.setInstance(meshRefiner_.timeName());
+            }
+
+
+            //- Get baffles in newMesh numbering. Note that we cannot detect
+            //  baffles here since the points are duplicated
+            List<labelPair> internalBaffles;
+            {
+                // From old mesh face to corresponding newMesh boundary face
+                labelList meshToNewMesh(mesh.nFaces(), -1);
+                for
+                (
+                    label faceI = newMesh.nInternalFaces();
+                    faceI < newMesh.nFaces();
+                    faceI++
+                )
+                {
+                    label newMeshFaceI = map().faceMap()[faceI];
+                    if (newMeshFaceI != -1)
+                    {
+                        meshToNewMesh[newMeshFaceI] = faceI;
+                    }
+                }
+
+                List<labelPair> newMeshBaffles(baffles.size());
+                label newI = 0;
+                forAll(baffles, i)
+                {
+                    const labelPair& p = baffles[i];
+                    labelPair newMeshBaffle
+                    (
+                        meshToNewMesh[p[0]],
+                        meshToNewMesh[p[1]]
+                    );
+                    if (newMeshBaffle[0] != -1 && newMeshBaffle[1] != -1)
+                    {
+                        newMeshBaffles[newI++] = newMeshBaffle;
+                    }
+                }
+                newMeshBaffles.setSize(newI);
+
+                internalBaffles = meshRefinement::subsetBaffles
+                (
+                    newMesh,
+                    internalFaceZones,
+                    newMeshBaffles
+                );
+
+                Info<< "Detected "
+                    << returnReduce(internalBaffles.size(), sumOp<label>())
+                    << " baffles across faceZones of type internal" << nl
+                    << endl;
+            }
+
+            label nTotChanged = checkAndUnmark
+            (
+                addLayer,
+                meshQualityDict,
+                layerParams.additionalReporting(),
+                internalBaffles,
+                pp(),
+                newMesh,
+
+                patchDisp,
+                patchNLayers,
+                extrudeStatus
+            );
+
+            label nTotExtruded = countExtrusion(pp, extrudeStatus);
+            label nTotFaces = returnReduce(pp().size(), sumOp<label>());
+            label nTotAddedCells = returnReduce(nAddedCells, sumOp<label>());
+
+            Info<< "Extruding " << nTotExtruded
+                << " out of " << nTotFaces
+                << " faces (" << 100.0*nTotExtruded/nTotFaces << "%)."
+                << " Removed extrusion at " << nTotChanged << " faces."
+                << endl
+                << "Added " << nTotAddedCells << " out of "
+                << nIdealTotAddedCells
+                << " cells (" << 100.0*nTotAddedCells/nIdealTotAddedCells
+                << "%)." << endl;
+
+            if (nTotChanged == 0)
+            {
+                break;
+            }
+
+            // Reset mesh points and start again
+            mesh.movePoints(oldPoints);
+            pp().movePoints(mesh.points());
+            medialAxisMoverPtr().movePoints(mesh.points());
+
+            // Grow out region of non-extrusion
+            for (label i = 0; i < layerParams.nGrow(); i++)
+            {
+                growNoExtrusion
+                (
+                    pp,
+                    patchDisp,
+                    patchNLayers,
+                    extrudeStatus
+                );
+            }
+
+            Info<< endl;
+        }
+    }
+
+
+    // At this point we have a (shrunk) mesh and a set of topology changes
+    // which will make a valid mesh with layer. Apply these changes to the
+    // current mesh.
+
+    {
+        // Apply the stored topo changes to the current mesh.
+        autoPtr<mapPolyMesh> map = savedMeshMod.changeMesh(mesh, false);
+
+        // Hack to remove meshPhi - mapped incorrectly. TBD.
+        mesh.clearOut();
+
+        // Update fields
+        mesh.updateMesh(map);
+
+        // Move mesh (since morphing does not do this)
+        if (map().hasMotionPoints())
+        {
+            mesh.movePoints(map().preMotionPoints());
+        }
+        else
+        {
+            // Delete mesh volumes.
+            mesh.clearOut();
+        }
+
+        // Reset the instance for if in overwrite mode
+        mesh.setInstance(meshRefiner_.timeName());
+
+        meshRefiner_.updateMesh(map, labelList(0));
+
+        // Update numbering of faceWantedThickness
+        meshRefinement::updateList
+        (
+            map().faceMap(),
+            scalar(0),
+            faceWantedThickness
+        );
+
+        // Print data now that we still have patches for the zones
+        //if (meshRefinement::outputLevel() & meshRefinement::OUTPUTLAYERINFO)
+        printLayerData
+        (
+            mesh,
+            patchIDs,
+            cellNLayers,
+            faceWantedThickness,
+            faceRealThickness
+        );
+
+
+        // Dump for debugging
+        if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
+        {
             const_cast<Time&>(mesh.time())++;
-            Info<< "Writing shrunk mesh to time "
+            Info<< "Writing mesh with layers but disconnected to time "
                 << meshRefiner_.timeName() << endl;
-
-            // See comment in autoSnapDriver why we should not remove meshPhi
-            // using mesh.clearOut().
-
             meshRefiner_.write
             (
                 meshRefinement::debugType(debug),
@@ -3261,287 +3976,242 @@ void Foam::autoLayerDriver::addLayers
         }
 
 
-        // Mesh topo change engine
-        polyTopoChange meshMod(mesh);
-
-        // Grow layer of cells on to patch. Handles zero sized displacement.
-        addPatchCellLayer addLayer(mesh);
-
-        // Determine per point/per face number of layers to extrude. Also
-        // handles the slow termination of layers when going switching layers
-
-        labelList nPatchPointLayers(pp().nPoints(), -1);
-        labelList nPatchFaceLayers(pp().size(), -1);
-        setupLayerInfoTruncation
-        (
-            pp,
-            patchNLayers,
-            extrudeStatus,
-            layerParams.nBufferCellsNoExtrude(),
-            nPatchPointLayers,
-            nPatchFaceLayers
-        );
-
-        // Calculate displacement for final layer for addPatchLayer.
-        // (layer of cells next to the original mesh)
-        vectorField finalDisp(patchNLayers.size(), vector::zero);
-
-        forAll(nPatchPointLayers, i)
-        {
-            scalar ratio = layerParams.finalLayerThicknessRatio
-            (
-                nPatchPointLayers[i],
-                expansionRatio[i]
-            );
-            finalDisp[i] = ratio*patchDisp[i];
-        }
-
-
-        const scalarField invExpansionRatio(1.0/expansionRatio);
-
-        // Add topo regardless of whether extrudeStatus is extruderemove.
-        // Not add layer if patchDisp is zero.
-        addLayer.setRefinement
-        (
-            globalFaces,
-            edgeGlobalFaces,
-
-            invExpansionRatio,
-            pp(),
-            sidePatchID,        // boundary patch for extruded boundary edges
-            labelList(0),       // exposed patchIDs, not used for adding layers
-            nPatchFaceLayers,   // layers per face
-            nPatchPointLayers,  // layers per point
-            finalDisp,          // thickness of layer nearest internal mesh
-            meshMod
-        );
-
-        if (debug)
-        {
-            const_cast<Time&>(mesh.time())++;
-        }
-
-        // Store mesh changes for if mesh is correct.
-        savedMeshMod = meshMod;
-
-
-        // With the stored topo changes we create a new mesh so we can
-        // undo if neccesary.
-
-        autoPtr<fvMesh> newMeshPtr;
-        autoPtr<mapPolyMesh> map = meshMod.makeMesh
-        (
-            newMeshPtr,
-            IOobject
-            (
-                //mesh.name()+"_layer",
-                mesh.name(),
-                static_cast<polyMesh&>(mesh).instance(),
-                mesh.time(),  // register with runTime
-                IOobject::NO_READ,
-                static_cast<polyMesh&>(mesh).writeOpt()
-            ),              // io params from original mesh but new name
-            mesh,           // original mesh
-            true            // parallel sync
-        );
-        fvMesh& newMesh = newMeshPtr();
-
-        //?neccesary? Update fields
-        newMesh.updateMesh(map);
-
-        newMesh.setInstance(meshRefiner_.timeName());
-
-        // Update numbering on addLayer:
-        // - cell/point labels to be newMesh.
-        // - patchFaces to remain in oldMesh order.
-        addLayer.updateMesh
-        (
-            map,
-            identity(pp().size()),
-            identity(pp().nPoints())
-        );
 
         // Update numbering of baffles
-        List<labelPair> newMeshBaffles(baffles.size());
-        forAll(baffles, i)
         {
-            const labelPair& p = baffles[i];
-            newMeshBaffles[i][0] = map().reverseFaceMap()[p[0]];
-            newMeshBaffles[i][1] = map().reverseFaceMap()[p[1]];
-        }
-
-        // Collect layer faces and cells for outside loop.
-        getLayerCellsFaces
-        (
-            newMesh,
-            addLayer,
-            avgPointData(pp, mag(patchDisp))(), // current thickness
-
-            cellNLayers,
-            faceRealThickness
-        );
-
-
-        // Count number of added cells
-        label nAddedCells = 0;
-        forAll(cellNLayers, cellI)
-        {
-            if (cellNLayers[cellI] > 0)
-            {
-                nAddedCells++;
-            }
-        }
-
-
-        if (debug&meshRefinement::MESH)
-        {
-            Info<< "Writing layer mesh to time " << meshRefiner_.timeName()
-                << endl;
-            newMesh.write();
-
-            cellSet addedCellSet(newMesh, "addedCells", nAddedCells);
-            forAll(cellNLayers, cellI)
-            {
-                if (cellNLayers[cellI] > 0)
-                {
-                    addedCellSet.insert(cellI);
-                }
-            }
-            addedCellSet.instance() = meshRefiner_.timeName();
-            Info<< "Writing "
-                << returnReduce(addedCellSet.size(), sumOp<label>())
-                << " added cells to cellSet " << addedCellSet.name() << endl;
-            addedCellSet.write();
-
-            faceSet layerFacesSet(newMesh, "layerFaces", newMesh.nFaces()/100);
-            for (label faceI = 0; faceI < newMesh.nInternalFaces(); faceI++)
-            {
-                if (faceRealThickness[faceI] > 0)
-                {
-                    layerFacesSet.insert(faceI);
-                }
-            }
-            layerFacesSet.instance() = meshRefiner_.timeName();
-            Info<< "Writing "
-                << returnReduce(layerFacesSet.size(), sumOp<label>())
-                << " faces inside added layer to faceSet "
-                << layerFacesSet.name() << endl;
-            layerFacesSet.write();
-        }
-
-
-        label nTotChanged = checkAndUnmark
-        (
-            addLayer,
-            meshQualityDict,
-            layerParams.additionalReporting(),
-            newMeshBaffles,
-            pp(),
-            newMesh,
-
-            patchDisp,
-            patchNLayers,
-            extrudeStatus
-        );
-
-        label nTotExtruded = countExtrusion(pp, extrudeStatus);
-        label nTotFaces = returnReduce(pp().size(), sumOp<label>());
-        label nTotAddedCells = returnReduce(nAddedCells, sumOp<label>());
-
-        Info<< "Extruding " << nTotExtruded
-            << " out of " << nTotFaces
-            << " faces (" << 100.0*nTotExtruded/nTotFaces << "%)."
-            << " Removed extrusion at " << nTotChanged << " faces."
-            << endl
-            << "Added " << nTotAddedCells << " out of " << nIdealTotAddedCells
-            << " cells (" << 100.0*nTotAddedCells/nIdealTotAddedCells << "%)."
-            << endl;
-
-        if (nTotChanged == 0)
-        {
-            break;
-        }
-
-        // Reset mesh points and start again
-        mesh.movePoints(oldPoints);
-        pp().movePoints(mesh.points());
-
-        // Grow out region of non-extrusion
-        for (label i = 0; i < layerParams.nGrow(); i++)
-        {
-            growNoExtrusion
+            // From old mesh face to corresponding newMesh boundary face.
+            // (we cannot just use faceMap or reverseFaceMap here since
+            //  multiple faces originate from the old face)
+            labelList oldMeshToNewMesh(map().nOldFaces(), -1);
+            for
             (
-                pp,
-                patchDisp,
-                patchNLayers,
-                extrudeStatus
-            );
+                label faceI = mesh.nInternalFaces();
+                faceI < mesh.nFaces();
+                faceI++
+            )
+            {
+                label oldFaceI = map().faceMap()[faceI];
+
+                if (oldFaceI != -1)
+                {
+                    oldMeshToNewMesh[oldFaceI] = faceI;
+                }
+            }
+
+            label newI = 0;
+            forAll(baffles, i)
+            {
+                const labelPair& p = baffles[i];
+
+                labelPair newB(oldMeshToNewMesh[p[0]], oldMeshToNewMesh[p[1]]);
+                if (newB[0] != -1 && newB[1] != -1)
+                {
+                    baffles[newI++] = newB;
+                }
+            }
+            baffles.setSize(newI);
         }
 
-        Info<< endl;
+
+
+        // Update numbering of pointToDuplicate
+        if (returnReduce(pointToDuplicate.size(), sumOp<label>()))
+        {
+            // The problem is that pointToDuplicate is valid for the old
+            // boundary points which are now internal. We need to find the
+            // corresponding new boundary point.
+
+
+            List<labelPair> mergePointBaffles
+            (
+                meshRefinement::subsetBaffles
+                (
+                    mesh,
+                    internalOrBaffleFaceZones,
+                    baffles
+                )
+            );
+            Info<< "Detected "
+                << returnReduce(mergePointBaffles.size(), sumOp<label>())
+                << " baffles to merge points across" << nl << endl;
+
+
+            label nPointPairs = 0;
+            forAll(pointToDuplicate, oldPointI)
+            {
+                label otherOldPointI = pointToDuplicate[oldPointI];
+                if (otherOldPointI != -1)
+                {
+                    nPointPairs++;
+                }
+            }
+
+            const labelList& pointMap = map().pointMap();
+
+            // 1. Construct map from old (possibly) internal point to
+            //    new boundary point
+            Map<label> oldPointToBoundaryPoint(2*nPointPairs);
+
+            forAll(mergePointBaffles, i)
+            {
+                const labelPair& baffle = mergePointBaffles[i];
+                forAll(baffle, j)
+                {
+                    const face& f = mesh.faces()[baffle[j]];
+                    forAll(f, fp)
+                    {
+                        label pointI = f[fp];
+                        label oldPointI = pointMap[pointI];
+                        if (pointToDuplicate[oldPointI] != -1)
+                        {
+                            oldPointToBoundaryPoint.insert(oldPointI, pointI);
+                        }
+                    }
+                }
+            }
+
+
+            // 2. Pick up old internal point
+
+            labelList oldPointToDuplicate(pointToDuplicate.xfer());
+            pointToDuplicate.setSize(mesh.nPoints(), -1);
+
+            forAll(mergePointBaffles, i)
+            {
+                const labelPair& baffle = mergePointBaffles[i];
+                forAll(baffle, j)
+                {
+                    const face& f = mesh.faces()[baffle[j]];
+                    forAll(f, fp)
+                    {
+                        label pointI = f[fp];
+                        label oldPointI = pointMap[pointI];
+                        label oldDupI = oldPointToDuplicate[oldPointI];
+                        if (oldDupI != -1)
+                        {
+                            label newPointI = oldPointToBoundaryPoint[oldDupI];
+                            pointToDuplicate[pointI] = newPointI;
+                        }
+                    }
+                }
+            }
+
+
+            // Check
+            forAll(pointToDuplicate, pointI)
+            {
+                label dupI = pointToDuplicate[pointI];
+                if (dupI != -1)
+                {
+                    const point& pt = mesh.points()[pointI];
+                    const point& dupPt = mesh.points()[dupI];
+                    if (mag(pt-dupPt) > meshRefiner_.mergeDistance())
+                    {
+                        WarningInFunction
+                            << "Trying to merge points "
+                            << pointI << " at:" << pt
+                            << "and " << dupI << " at:" << dupPt
+                            << " distance " << mag(pt-dupPt)
+                            << endl;
+                    }
+                }
+            }
+        }
     }
 
-
-    // At this point we have a (shrunk) mesh and a set of topology changes
-    // which will make a valid mesh with layer. Apply these changes to the
-    // current mesh.
-
-    // Apply the stored topo changes to the current mesh.
-    autoPtr<mapPolyMesh> map = savedMeshMod.changeMesh(mesh, false);
-
-    // Hack to remove meshPhi - mapped incorrectly. TBD.
-    mesh.clearOut();
-
-    // Update fields
-    mesh.updateMesh(map);
-
-    // Move mesh (since morphing does not do this)
-    if (map().hasMotionPoints())
+    // Count duplicate points
+    label nPointPairs = 0;
+    forAll(pointToDuplicate, pointI)
     {
-        mesh.movePoints(map().preMotionPoints());
+        label otherPointI = pointToDuplicate[pointI];
+        if (otherPointI != -1)
+        {
+            nPointPairs++;
+        }
     }
-    else
+    reduce(nPointPairs, sumOp<label>());
+    if (nPointPairs > 0)
     {
-        // Delete mesh volumes.
-        mesh.clearOut();
+        // Merge any duplicated points
+        Info<< "Merging " << nPointPairs << " duplicated points ..." << endl;
+
+        if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
+        {
+            OBJstream str
+            (
+                mesh.time().path()
+              / "mergePoints_"
+              + meshRefiner_.timeName()
+              + ".obj"
+            );
+            Info<< "Points to be merged to " << str.name() << endl;
+            forAll(pointToDuplicate, pointI)
+            {
+                label otherPointI = pointToDuplicate[pointI];
+                if (otherPointI != -1)
+                {
+                    const point& pt = mesh.points()[pointI];
+                    const point& otherPt = mesh.points()[otherPointI];
+                    str.write(linePointRef(pt, otherPt));
+                }
+            }
+        }
+
+
+        autoPtr<mapPolyMesh> map = meshRefiner_.mergePoints(pointToDuplicate);
+        if (map.valid())
+        {
+            inplaceReorder(map().reverseCellMap(), cellNLayers);
+
+            const labelList& reverseFaceMap = map().reverseFaceMap();
+            inplaceReorder(reverseFaceMap, faceWantedThickness);
+            inplaceReorder(reverseFaceMap, faceRealThickness);
+
+            Info<< "Merged points in = "
+                << mesh.time().cpuTimeIncrement() << " s\n" << nl << endl;
+        }
     }
 
-    // Reset the instance for if in overwrite mode
-    mesh.setInstance(meshRefiner_.timeName());
-
-    meshRefiner_.updateMesh(map, labelList(0));
-
-    // Update numbering of faceWantedThickness
-    meshRefinement::updateList(map().faceMap(), scalar(0), faceWantedThickness);
-
-    // Update numbering on baffles
-    forAll(baffles, i)
-    {
-        labelPair& p = baffles[i];
-        p[0] = map().reverseFaceMap()[p[0]];
-        p[1] = map().reverseFaceMap()[p[1]];
-    }
-
-
-    label nBaffles = returnReduce(baffles.size(), sumOp<label>());
-    if (nBaffles > 0)
+    if (mesh.faceZones().size() > 0)
     {
         // Merge any baffles
-        Info<< "Converting " << nBaffles
-            << " baffles back into zoned faces ..."
+        Info<< "Converting baffles back into zoned faces ..."
             << endl;
 
-        autoPtr<mapPolyMesh> map = meshRefiner_.mergeBaffles(baffles);
+        autoPtr<mapPolyMesh> map = meshRefiner_.mergeZoneBaffles
+        (
+            true,   // internal zones
+            false   // baffle zones
+        );
+        if (map.valid())
+        {
+            inplaceReorder(map().reverseCellMap(), cellNLayers);
 
-        inplaceReorder(map().reverseCellMap(), cellNLayers);
-        inplaceReorder(map().reverseFaceMap(), faceWantedThickness);
-        inplaceReorder(map().reverseFaceMap(), faceRealThickness);
+            const labelList& faceMap = map().faceMap();
+
+            // Make sure to keep the max since on two patches only one has
+            // layers.
+            scalarField newFaceRealThickness(mesh.nFaces(), 0.0);
+            scalarField newFaceWantedThickness(mesh.nFaces(), 0.0);
+            forAll(newFaceRealThickness, faceI)
+            {
+                label oldFaceI = faceMap[faceI];
+                if (oldFaceI >= 0)
+                {
+                    scalar& realThick = newFaceRealThickness[faceI];
+                    realThick = max(realThick, faceRealThickness[oldFaceI]);
+                    scalar& wanted = newFaceWantedThickness[faceI];
+                    wanted = max(wanted, faceWantedThickness[oldFaceI]);
+                }
+            }
+            faceRealThickness.transfer(newFaceRealThickness);
+            faceWantedThickness.transfer(newFaceWantedThickness);
+        }
 
         Info<< "Converted baffles in = "
             << meshRefiner_.mesh().time().cpuTimeIncrement()
             << " s\n" << nl << endl;
     }
-
 
     // Do final balancing
     // ~~~~~~~~~~~~~~~~~~
@@ -3594,6 +4264,7 @@ void Foam::autoLayerDriver::doLayers
     const dictionary& shrinkDict,
     const dictionary& motionDict,
     const layerParameters& layerParams,
+    const bool mergePatchFaces,
     const bool preBalance,
     decompositionMethod& decomposer,
     fvMeshDistribute& distributor
@@ -3606,10 +4277,15 @@ void Foam::autoLayerDriver::doLayers
         << "----------------------------------" << nl
         << endl;
 
+
     Info<< "Using mesh parameters " << motionDict << nl << endl;
 
     // Merge coplanar boundary faces
-    mergePatchFacesUndo(layerParams, motionDict);
+    if (mergePatchFaces)
+    {
+        mergePatchFacesUndo(layerParams, motionDict);
+    }
+
 
     // Per patch the number of layers (-1 or 0 if no layer)
     const labelList& numLayers = layerParams.numLayers();
@@ -3630,12 +4306,32 @@ void Foam::autoLayerDriver::doLayers
             }
             else
             {
-                WarningIn("autoLayerDriver::doLayers(..)")
+                WarningInFunction
                     << "Ignoring layers on coupled patch " << pp.name()
                     << endl;
             }
         }
     }
+
+    // Add contributions from faceZones that get layers
+    const faceZoneMesh& fZones = mesh.faceZones();
+    forAll(fZones, zoneI)
+    {
+        label mpI, spI;
+        surfaceZonesInfo::faceZoneType fzType;
+        meshRefiner_.getFaceZoneInfo(fZones[zoneI].name(), mpI, spI, fzType);
+
+        if (numLayers[mpI] > 0)
+        {
+            nFacesWithLayers += fZones[zoneI].size();
+        }
+        if (numLayers[spI] > 0)
+        {
+            nFacesWithLayers += fZones[zoneI].size();
+        }
+    }
+
+
     patchIDs.shrink();
 
     if (returnReduce(nFacesWithLayers, sumOp<label>()) == 0)
@@ -3683,12 +4379,45 @@ void Foam::autoLayerDriver::doLayers
                 }
             }
 
+            // Add contributions from faceZones that get layers
+            const faceZoneMesh& fZones = mesh.faceZones();
+            forAll(fZones, zoneI)
+            {
+                const faceZone& fZone = fZones[zoneI];
+                const word& fzName = fZone.name();
+
+                label mpI, spI;
+                surfaceZonesInfo::faceZoneType fzType;
+                meshRefiner_.getFaceZoneInfo(fzName, mpI, spI, fzType);
+
+                if (numLayers[mpI] > 0)
+                {
+                    // Get the owner side for unflipped faces, neighbour side
+                    // for flipped ones
+                    const labelList& cellIDs = fZone.slaveCells();
+                    forAll(cellIDs, i)
+                    {
+                        cellWeights[cellIDs[i]] += numLayers[mpI];
+                    }
+                }
+                if (numLayers[spI] > 0)
+                {
+                    const labelList& cellIDs = fZone.masterCells();
+                    forAll(cellIDs, i)
+                    {
+                        cellWeights[cellIDs[i]] += numLayers[mpI];
+                    }
+                }
+            }
+
+
+
             // Balance mesh (and meshRefinement). Restrict faceZones to
             // be on internal faces only since they will be converted into
             // baffles.
             autoPtr<mapDistributePolyMesh> map = meshRefiner_.balance
             (
-                true,   //false,    // keepZoneFaces
+                true,           // keepZoneFaces
                 false,
                 cellWeights,
                 decomposer,

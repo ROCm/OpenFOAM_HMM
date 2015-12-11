@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,7 +86,15 @@ public:
 
     // Constructors
 
-        //- Construct from entry name and Istream
+        //- Construct from components
+        Constant
+        (
+            const word& entryName,
+            const Type& value,
+            const dimensionSet& dimensions = dimless
+        );
+
+        //- Construct from entry name and dictionary
         Constant(const word& entryName, const dictionary& dict);
 
         //- Copy constructor

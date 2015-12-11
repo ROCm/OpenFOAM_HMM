@@ -24,6 +24,9 @@ License
 Application
     multiphaseEulerFoam
 
+Group
+    grpMultiphaseSolvers
+
 Description
     Solver for a system of many compressible fluid phases including
     heat-transfer.
@@ -60,6 +63,8 @@ int main(int argc, char *argv[])
     #include "correctPhi.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -60,10 +60,8 @@ for (label procI = 0; procI < Pstream::nProcs(); procI++)
                         endAgg.append(globalNumbering.toGlobal(procI, remAgg));
                         if (startIndex.size() > maxDynListLength)
                         {
-                            FatalErrorIn
-                            (
-                                "shootRays"
-                            )   << "Dynamic list need from capacity."
+                            FatalErrorInFunction
+                                << "Dynamic list need from capacity."
                                 << "Actual size maxDynListLength : "
                                 <<  maxDynListLength
                                 << abort(FatalError);
@@ -89,8 +87,8 @@ for (label procI = 0; procI < Pstream::nProcs(); procI++)
 
     DynamicList<label> dRayIs;
 
-    // Collect the rays which has not obstacle in bettween in rayStartFace
-    // and rayEndFace. If the ray hit itself get stored in dRayIs
+    // Collect the rays which have no obstacle in between rayStartFace
+    // and rayEndFace. If the ray hit itself, it gets stored in dRayIs
     forAll(hitInfo, rayI)
     {
         if (!hitInfo[rayI].hit())

@@ -1,4 +1,20 @@
 abortCalculation/abortCalculation.C
 abortCalculation/abortCalculationFunctionObject.C
 
+runTimeControl/runTimeControl.C
+runTimeControl/runTimeControlFunctionObject.C
+runTimeControl/runTimeCondition/runTimeCondition/runTimeCondition.C
+runTimeControl/runTimeCondition/runTimeCondition/runTimeConditionNew.C
+runTimeControl/runTimeCondition/equationMaxIterCondition/equationMaxIterCondition.C
+runTimeControl/runTimeCondition/equationInitialResidualCondition/equationInitialResidualCondition.C
+runTimeControl/runTimeCondition/minMaxCondition/minMaxCondition.C
+runTimeControl/runTimeCondition/averageCondition/averageCondition.C
+runTimeControl/runTimeCondition/minTimeStepCondition/minTimeStepCondition.C
+
+externalCoupled = externalCoupled
+$(externalCoupled)/externalCoupledFunctionObject.C
+$(externalCoupled)/externalCoupledMixed/externalCoupledMixedFvPatchFields.C
+$(externalCoupled)/externalCoupledTemperatureMixed/externalCoupledTemperatureMixedFvPatchScalarField.C
+
+
 LIB = $(FOAM_LIBBIN)/libjobControl

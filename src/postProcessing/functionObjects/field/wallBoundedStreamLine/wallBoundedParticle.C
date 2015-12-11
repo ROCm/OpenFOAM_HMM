@@ -39,7 +39,7 @@ Foam::edge Foam::wallBoundedParticle::currentEdge() const
 {
     if ((meshEdgeStart_ != -1) == (diagEdge_ != -1))
     {
-        FatalErrorIn("wallBoundedParticle::currentEdge() const")
+        FatalErrorInFunction
             << "Particle:"
             << info()
             << "cannot both be on a mesh edge and a face-diagonal edge."
@@ -93,11 +93,8 @@ void Foam::wallBoundedParticle::crossEdgeConnectedFace
         }
         else
         {
-            FatalErrorIn
-            (
-                "wallBoundedParticle::crossEdgeConnectedFace"
-                "(const edge&)"
-            )   << "Problem :"
+            FatalErrorInFunction
+                << "Problem :"
                 << " particle:"
                 << info()
                 << "face:" << tetFace()
@@ -113,11 +110,8 @@ void Foam::wallBoundedParticle::crossEdgeConnectedFace
     const edge eNew(f[meshEdgeStart_], f.nextLabel(meshEdgeStart_));
     if (eNew != meshEdge)
     {
-        FatalErrorIn
-        (
-            "wallBoundedParticle::crossEdgeConnectedFace"
-            "(const edge&)"
-        )   << "Problem" << abort(FatalError);
+        FatalErrorInFunction
+            << "Problem" << abort(FatalError);
     }
 }
 
@@ -126,14 +120,14 @@ void Foam::wallBoundedParticle::crossDiagonalEdge()
 {
     if (diagEdge_ == -1)
     {
-        FatalErrorIn("wallBoundedParticle::crossDiagonalEdge()")
+        FatalErrorInFunction
             << "Particle:"
             << info()
             << "not on a diagonal edge" << abort(FatalError);
     }
     if (meshEdgeStart_ != -1)
     {
-        FatalErrorIn("wallBoundedParticle::crossDiagonalEdge()")
+        FatalErrorInFunction
             << "Particle:"
             << info()
             << "meshEdgeStart_:" << meshEdgeStart_ << abort(FatalError);
@@ -156,7 +150,7 @@ void Foam::wallBoundedParticle::crossDiagonalEdge()
         }
         else
         {
-            FatalErrorIn("wallBoundedParticle::crossDiagonalEdge()")
+            FatalErrorInFunction
                 << "Particle:"
                 << info()
                 << "tetPt:" << tetPt()
@@ -190,9 +184,7 @@ Foam::scalar Foam::wallBoundedParticle::trackFaceTri
         currentE = currentEdge();
     }
 
-    // Determine path along line position+s*d to see where intersections
-    // are.
-
+    // Determine path along line position+s*d to see where intersections are.
     forAll(tri, i)
     {
         label j = tri.fcIndex(i);
@@ -259,23 +251,17 @@ bool Foam::wallBoundedParticle::isTriAlongTrack
     const triFace triVerts(currentTetIndices().faceTriIs(mesh_));
     const edge currentE = currentEdge();
 
-    //if (debug)
+    if
+    (
+        currentE[0] == currentE[1]
+     || findIndex(triVerts, currentE[0]) == -1
+     || findIndex(triVerts, currentE[1]) == -1
+    )
     {
-        if
-        (
-            currentE[0] == currentE[1]
-         || findIndex(triVerts, currentE[0]) == -1
-         || findIndex(triVerts, currentE[1]) == -1
-        )
-        {
-            FatalErrorIn
-            (
-                "wallBoundedParticle::isTriAlongTrack"
-                "(const point&)"
-            )   << "Edge " << currentE << " not on triangle " << triVerts
-                << info()
-                << abort(FatalError);
-        }
+        FatalErrorInFunction
+            << "Edge " << currentE << " not on triangle " << triVerts
+            << info()
+            << abort(FatalError);
     }
 
 
@@ -298,11 +284,8 @@ bool Foam::wallBoundedParticle::isTriAlongTrack
         }
     }
 
-    FatalErrorIn
-    (
-        "wallBoundedParticle::isTriAlongTrack"
-        "(const point&)"
-    )   << "Problem" << abort(FatalError);
+    FatalErrorInFunction
+        << "Problem" << abort(FatalError);
 
     return false;
 }
@@ -344,12 +327,7 @@ Foam::wallBoundedParticle::wallBoundedParticle
         }
         else
         {
-            is.read
-            (
-                reinterpret_cast<char*>(&meshEdgeStart_),
-                sizeof(meshEdgeStart_)
-              + sizeof(diagEdge_)
-            );
+            is.read(reinterpret_cast<char*>(&meshEdgeStart_), sizeofFields_);
         }
     }
 

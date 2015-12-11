@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,17 +69,7 @@ bool Foam::mapNearestMethod::findInitialSeeds
             }
             else
             {
-                FatalErrorIn
-                (
-                    "bool Foam::mapNearestMethod::findInitialSeeds"
-                    "("
-                        "const labelList&, "
-                        "const boolList&, "
-                        "const label, "
-                        "label&, "
-                        "label&"
-                    ") const"
-                )
+                FatalErrorInFunction
                     << "Unable to find nearest target cell"
                     << " for source cell " << srcI
                     << " with centre " << srcCc
@@ -359,8 +349,10 @@ void Foam::mapNearestMethod::calculate
 (
     labelListList& srcToTgtAddr,
     scalarListList& srcToTgtWght,
+    pointListList& srcToTgtVec,
     labelListList& tgtToSrcAddr,
-    scalarListList& tgtToSrcWght
+    scalarListList& tgtToSrcWght,
+    pointListList& tgtToSrcVec
 )
 {
     bool ok = initialise

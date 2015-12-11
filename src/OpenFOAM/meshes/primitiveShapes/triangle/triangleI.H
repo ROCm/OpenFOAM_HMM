@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ License
 
 #include "IOstreams.H"
 #include "pointHit.H"
+#include "triPoints.H"
 #include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
@@ -40,6 +41,18 @@ inline Foam::triangle<Point, PointRef>::triangle
     a_(a),
     b_(b),
     c_(c)
+{}
+
+
+template<class Point, class PointRef>
+inline Foam::triangle<Point, PointRef>::triangle
+(
+    const FixedList<Point, 3>& tri
+)
+:
+    a_(tri[0]),
+    b_(tri[1]),
+    c_(tri[2])
 {}
 
 
@@ -801,6 +814,66 @@ inline Foam::pointHit Foam::triangle<Point, PointRef>::nearestPoint
         }
     }
     return triInfo;
+}
+
+
+template<class Point, class PointRef>
+inline void Foam::triangle<Point, PointRef>::dummyOp::operator()
+(
+    const triPoints&
+)
+{}
+
+
+template<class Point, class PointRef>
+inline Foam::triangle<Point, PointRef>::sumAreaOp::sumAreaOp()
+:
+    area_(0.0)
+{}
+
+
+template<class Point, class PointRef>
+inline void Foam::triangle<Point, PointRef>::sumAreaOp::operator()
+(
+    const triPoints& tri
+)
+{
+    area_ += triangle<Point, const Point&>(tri).mag();
+}
+
+
+template<class Point, class PointRef>
+inline Foam::triangle<Point, PointRef>::storeOp::storeOp
+(
+    triIntersectionList& tris,
+    label& nTris
+)
+:
+    tris_(tris),
+    nTris_(nTris)
+{}
+
+
+template<class Point, class PointRef>
+inline void Foam::triangle<Point, PointRef>::storeOp::operator()
+(
+    const triPoints& tri
+)
+{
+    tris_[nTris_++] = tri;
+}
+
+
+template<class Point, class PointRef>
+inline Foam::point Foam::triangle<Point, PointRef>::planeIntersection
+(
+    const FixedList<scalar, 3>& d,
+    const triPoints& t,
+    const label negI,
+    const label posI
+)
+{
+    return (d[posI]*t[negI] - d[negI]*t[posI])/(-d[negI] + d[posI]);
 }
 
 

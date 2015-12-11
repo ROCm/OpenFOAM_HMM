@@ -49,14 +49,8 @@ Foam::patchInjectionBase::patchInjectionBase
 {
     if (patchId_ < 0)
     {
-        FatalErrorIn
-        (
-            "patchInjectionBase::patchInjectionBase"
-            "("
-                "const polyMesh& mesh, "
-                "const word& patchName"
-            ")"
-        )   << "Requested patch " << patchName_ << " not found" << nl
+        FatalErrorInFunction
+            << "Requested patch " << patchName_ << " not found" << nl
             << "Available patches are: " << mesh.boundaryMesh().names() << nl
             << exit(FatalError);
     }
@@ -221,8 +215,20 @@ void Foam::patchInjectionBase::setPositionAndCell
             // first face of the cell as the tetFace and the first point after
             // the base point on the face as the tetPt.  The tracking will pick
             // the cell consistent with the motion in the first tracking step
-            tetFaceI = mesh.cells()[cellOwner][0];
-            tetPtI = 1;
+            //tetFaceI = mesh.cells()[cellOwner][0];
+            //tetPtI = 1;
+
+            //SAF: temporary fix for patchInjection.
+            // This function finds both cellOwner and tetFaceI. The particle
+            // was injected in a non-boundary cell and the tracking function
+            // could not find the cellOwner
+            mesh.findCellFacePt
+            (
+                position,
+                cellOwner,
+                tetFaceI,
+                tetPtI
+            );
         }
         else
         {

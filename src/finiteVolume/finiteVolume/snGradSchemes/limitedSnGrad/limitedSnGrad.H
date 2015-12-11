@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,11 +34,11 @@ Description
     non-orthogonal contribution does not exceed the orthogonal part.
 
     Format:
-        limited <corrected scheme> <coefficient>;
+        limited \<corrected scheme\> \<coefficient\>;
 
         or
 
-        limited <coefficient>;  // Backward compatibility
+        limited \<coefficient\>;  // Backward compatibility
 
 SourceFiles
     limitedSnGrad.C
@@ -135,9 +135,8 @@ public:
         {
             if (limitCoeff_ < 0 || limitCoeff_ > 1)
             {
-                FatalIOErrorIn
+                FatalIOErrorInFunction
                 (
-                    "limitedSnGrad(const fvMesh& mesh, Istream& schemeData) : ",
                     schemeData
                 )   << "limitCoeff is specified as " << limitCoeff_
                     << " but should be >= 0 && <= 1"

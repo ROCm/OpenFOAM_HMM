@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,6 +70,11 @@ bool Foam::localPointRegion::isDuplicate
     const bool forward
 )
 {
+    if (f0.size() != f1.size())
+    {
+        return false;
+    }
+
     label fp1 = findIndex(f1, f0[0]);
 
     if (fp1 == -1)
@@ -127,7 +132,7 @@ void Foam::localPointRegion::countPointRegions
 
             if (minRegion[faceI].empty())
             {
-                FatalErrorIn("localPointRegion::countPointRegions(..)")
+                FatalErrorInFunction
                     << "Face from candidateFace without minRegion set." << endl
                     << "Face:" << faceI << " fc:" << mesh.faceCentres()[faceI]
                     << " verts:" << f << abort(FatalError);
@@ -242,6 +247,7 @@ void Foam::localPointRegion::countPointRegions
 void Foam::localPointRegion::calcPointRegions
 (
     const polyMesh& mesh,
+    const labelPairList& baffles,
     boolList& candidatePoint
 )
 {
@@ -423,6 +429,13 @@ void Foam::localPointRegion::calcPointRegions
             minEqOpFace(),
             Foam::dummyTransform()  // dummy transformation
         );
+        forAll(baffles, i)
+        {
+            label f0 = baffles[i].first();
+            label f1 = baffles[i].second();
+            minEqOpFace()(minRegion[f0], minRegion[f1]);
+            minRegion[f1] = minRegion[f0];
+        }
     }
 
 
@@ -469,7 +482,7 @@ Foam::localPointRegion::localPointRegion(const polyMesh& mesh)
         }
     }
 
-    calcPointRegions(mesh, candidatePoint);
+    calcPointRegions(mesh, labelPairList(0), candidatePoint);
 }
 
 
@@ -492,7 +505,31 @@ Foam::localPointRegion::localPointRegion
         candidatePoint[candidatePoints[i]] = true;
     }
 
-    calcPointRegions(mesh, candidatePoint);
+    calcPointRegions(mesh, labelPairList(0), candidatePoint);
+}
+
+
+Foam::localPointRegion::localPointRegion
+(
+    const polyMesh& mesh,
+    const labelPairList& baffles,
+    const labelList& candidatePoints
+)
+:
+    //nRegions_(0),
+    meshPointMap_(0),
+    pointRegions_(0),
+    meshFaceMap_(0),
+    faceRegions_(0)
+{
+    boolList candidatePoint(mesh.nPoints(), false);
+
+    forAll(candidatePoints, i)
+    {
+        candidatePoint[candidatePoints[i]] = true;
+    }
+
+    calcPointRegions(mesh, baffles, candidatePoint);
 }
 
 
@@ -535,11 +572,8 @@ Foam::labelList Foam::localPointRegion::findDuplicateFaces
 
                 if (isDuplicate(f, otherF, true))
                 {
-                    FatalErrorIn
-                    (
-                        "findDuplicateFaces(const primitiveMesh&"
-                        ", const labelList&)"
-                    )   << "Face:" << bFaceI + mesh.nInternalFaces()
+                    FatalErrorInFunction
+                        << "Face:" << bFaceI + mesh.nInternalFaces()
                         << " has local points:" << f
                         << " which are in same order as face:"
                         << otherFaceI + mesh.nInternalFaces()
@@ -557,11 +591,8 @@ Foam::labelList Foam::localPointRegion::findDuplicateFaces
                      || duplicateFace[otherFaceI] != -1
                     )
                     {
-                        FatalErrorIn
-                        (
-                            "findDuplicateFaces(const primitiveMesh&"
-                            ", const labelList&)"
-                        )   << "One of two duplicate faces already marked"
+                        FatalErrorInFunction
+                            << "One of two duplicate faces already marked"
                             << " as duplicate." << nl
                             << "This means that three or more faces share"
                             << " the same points and this is illegal." << nl
@@ -623,21 +654,23 @@ Foam::List<Foam::labelPair> Foam::localPointRegion::findDuplicateFacePairs
              || (patch1 != -1 && isA<processorPolyPatch>(patches[patch1]))
             )
             {
-                FatalErrorIn
-                (
-                    "localPointRegion::findDuplicateFacePairs(const polyMesh&)"
-                )   << "One of two duplicate faces is on"
+                FatalErrorInFunction
+                    << "One of two duplicate faces is on"
                     << " processorPolyPatch."
                     << "This is not allowed." << nl
                     << "Face:" << meshFace0
+                    << " fc:" << mesh.faceCentres()[meshFace0]
                     << " is on patch:" << patches[patch0].name()
                     << nl
                     << "Face:" << meshFace1
+                    << " fc:" << mesh.faceCentres()[meshFace1]
                     << " is on patch:" << patches[patch1].name()
                     << abort(FatalError);
             }
-
-            baffles.append(labelPair(meshFace0, meshFace1));
+            else
+            {
+                baffles.append(labelPair(meshFace0, meshFace1));
+            }
         }
     }
     return baffles.shrink();

@@ -24,6 +24,9 @@ License
 Application
     driftFluxFoam
 
+Group
+    grpMultiphaseSolvers
+
 Description
     Solver for 2 incompressible fluids using the mixture approach with the
     drift-flux approximation for relative motion of the phases.
@@ -41,7 +44,7 @@ Description
 #include "turbulenceModel.H"
 #include "CompressibleTurbulenceModel.H"
 #include "pimpleControl.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "fixedFluxPressureFvPatchScalarField.H"
 #include "gaussLaplacianScheme.H"
 #include "uncorrectedSnGrad.H"
@@ -62,6 +65,8 @@ int main(int argc, char *argv[])
     #include "createMRF.H"
     #include "createFvOptions.H"
     #include "initContinuityErrs.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

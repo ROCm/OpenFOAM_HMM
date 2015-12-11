@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,45 +63,133 @@ License
     "b{sep=m{vert=100,low=h,asc=f}x}"
 
     The current default mapping strategy in Scotch can be seen by using the
-    "-vs" option of program gmap. It is, to date:
+    "-vs" option of program dgpart. It is, to date:
 
-    b
+    r
     {
-        job=t,
-        map=t,
-        poli=S,
-        sep=
-        (
-            m
+        sep=m
+        {
+            asc=b
             {
-                asc=b
-                {
-                    bnd=d{pass=40,dif=1,rem=1}f{move=80,pass=-1,bal=0.005},
-                    org=f{move=80,pass=-1,bal=0.005},
-                    width=3
-                },
-                low=h{pass=10}f{move=80,pass=-1,bal=0.0005},
-                type=h,
-                vert=80,
-                rat=0.8
-            }
-          | m
+                width=3,
+                bnd=(d{pass=40,dif=1,rem=0,type=b}|)
+                q{strat=f{move=80,pass=-1,bal=0.01,type=b}}
+                x{sbbt=5,bal=0.05},
+                org=q{strat=f{move=80,pass=-1,bal=0.01,type=b}}
+                x{sbbt=5,bal=0.05}
+            },
+            low=q
             {
-                asc=b
+                strat=
+                (
+                    m
+                    {
+                        asc=b
+                        {
+                            bnd=(d{pass=40,type=b}|)
+                            f{move=80,pass=-1,bal=0.05,type=b},
+                            org=f{move=80,pass=-1,bal=0.05,type=b},
+                            width=3
+                        },
+                        low=h{pass=10}
+                        f{move=80,pass=-1,bal=0.05,type=b},
+                        vert=80,
+                        rat=0.8
+                    }
+                   |m
+                    {
+                        asc=b
+                        {
+                            bnd=(d{pass=40,type=b}|)
+                            f{move=80,pass=-1,bal=0.05,type=b},
+                            org=f{move=80,pass=-1,bal=0.05,type=b},
+                            width=3
+                        },
+                        low=h{pass=10}
+                        f{move=80,pass=-1,bal=0.05,type=b},
+                        vert=80,
+                        rat=0.8
+                    }
+                )
+            },
+            seq=q
+            {
+                strat=
+                (
+                    m
+                    {
+                        asc=b
+                        {
+                            bnd=(d{pass=40,type=b}|)
+                            f{move=80,pass=-1,bal=0.05,type=b},
+                            org=f{move=80,pass=-1,bal=0.05,type=b},
+                            width=3
+                        },
+                        low=h{pass=10}
+                        f{move=80,pass=-1,bal=0.05,type=b},
+                        vert=80,
+                        rat=0.8
+                    }
+                   |m
+                    {
+                        asc=b
+                        {
+                            bnd=(d{pass=40,type=b}|)
+                            f{move=80,pass=-1,bal=0.05,type=b},
+                            org=f{move=80,pass=-1,bal=0.05,type=b},
+                            width=3
+                        },
+                        low=h{pass=10}
+                        f{move=80,pass=-1,bal=0.05,type=b},
+                        vert=80,
+                        rat=0.8
+                    }
+                )
+            },
+            pass=5,
+            vert=10000,
+            rat=0.8
+        },
+        seq=r
+        {
+            job=t,
+            bal=0.05,
+            map=t,
+            poli=S,
+            sep=
+            (
+                m
                 {
-                    bnd=d{pass=40,dif=1,rem=1}f{move=80,pass=-1,bal=0.005},
-                    org=f{move=80,pass=-1,bal=0.005},
-                    width=3
-                },
-                low=h{pass=10}f{move=80,pass=-1,bal=0.0005},
-                type=h,
-                vert=80,
-                rat=0.8
-            }
-        )
+                    asc=b
+                    {
+                        bnd=(d{pass=40,type=b}|)
+                        f{move=80,pass=-1,bal=0.05,type=b},
+                        org=f{move=80,pass=-1,bal=0.05,type=b},
+                        width=3
+                    },
+                    low=h{pass=10}
+                    f{move=80,pass=-1,bal=0.05,type=b},
+                    vert=80,
+                    rat=0.8
+                }
+               |m
+                {
+                    asc=b
+                    {
+                        bnd=(d{pass=40,type=b}|)
+                        f{move=80,pass=-1,bal=0.05,type=b},
+                        org=f{move=80,pass=-1,bal=0.05,type=b},
+                        width=3
+                    },
+                    low=h{pass=10}
+                    f{move=80,pass=-1,bal=0.05,type=b},
+                    vert=80,
+                    rat=0.8
+                }
+            )
+        },
+        bal=0.05
     }
-
-
 
     Note: writeGraph=true : writes out .dgr files for debugging. Run with e.g.
 
@@ -152,7 +240,7 @@ void Foam::ptscotchDecomp::check(const int retVal, const char* str)
 {
     if (retVal)
     {
-        FatalErrorIn("ptscotchDecomp::decompose(..)")
+        FatalErrorInFunction
             << "Call to scotch routine " << str << " failed."
             << exit(FatalError);
     }
@@ -238,7 +326,7 @@ void Foam::ptscotchDecomp::check(const int retVal, const char* str)
 //
 //        if (prevXadj.size() != nSendCells[Pstream::myProcNo()-1])
 //        {
-//            FatalErrorIn("ptscotchDecomp::decompose(..)")
+//            FatalErrorInFunction
 //                << "Expected from processor " << Pstream::myProcNo()-1
 //                << " connectivity for " << nSendCells[Pstream::myProcNo()-1]
 //                << " nCells but only received " << prevXadj.size()
@@ -315,7 +403,7 @@ void Foam::ptscotchDecomp::check(const int retVal, const char* str)
 //
 //        if (nextFinalDecomp.size() != nSendCells[Pstream::myProcNo()])
 //        {
-//            FatalErrorIn("parMetisDecomp::decompose(..)")
+//            FatalErrorInFunction
 //                << "Expected from processor " << Pstream::myProcNo()+1
 //                << " decomposition for " << nSendCells[Pstream::myProcNo()]
 //                << " nCells but only received " << nextFinalDecomp.size()
@@ -489,19 +577,15 @@ Foam::label Foam::ptscotchDecomp::decompose
     {
         if (minWeights <= 0)
         {
-            WarningIn
-            (
-                "ptscotchDecomp::decompose(..)"
-            )   << "Illegal minimum weight " << minWeights
+            WarningInFunction
+                << "Illegal minimum weight " << minWeights
                 << endl;
         }
 
         if (cWeights.size() != xadjSize-1)
         {
-            FatalErrorIn
-            (
-                "ptscotchDecomp::decompose(..)"
-            )   << "Number of cell weights " << cWeights.size()
+            FatalErrorInFunction
+                << "Number of cell weights " << cWeights.size()
                 << " does not equal number of cells " << xadjSize-1
                 << exit(FatalError);
         }
@@ -519,10 +603,8 @@ Foam::label Foam::ptscotchDecomp::decompose
             // rangeScale tipping the subsequent sum over the integer limit.
             rangeScale = 0.9*scalar(labelMax - 1)/velotabSum;
 
-            WarningIn
-            (
-                "ptscotchDecomp::decompose(...)"
-            )   << "Sum of weights has overflowed integer: " << velotabSum
+            WarningInFunction
+                << "Sum of weights has overflowed integer: " << velotabSum
                 << ", compressing weight scale by a factor of " << rangeScale
                 << endl;
         }
@@ -737,10 +819,7 @@ Foam::labelList Foam::ptscotchDecomp::decompose
 {
     if (points.size() != mesh.nCells())
     {
-        FatalErrorIn
-        (
-            "ptscotchDecomp::decompose(const pointField&, const scalarField&)"
-        )
+        FatalErrorInFunction
             << "Can use this decomposition method only for the whole mesh"
             << endl
             << "and supply one coordinate (cellCentre) for every cell." << endl
@@ -796,10 +875,8 @@ Foam::labelList Foam::ptscotchDecomp::decompose
 {
     if (agglom.size() != mesh.nCells())
     {
-        FatalErrorIn
-        (
-            "ptscotchDecomp::decompose(const labelList&, const pointField&)"
-        )   << "Size of cell-to-coarse map " << agglom.size()
+        FatalErrorInFunction
+            << "Size of cell-to-coarse map " << agglom.size()
             << " differs from number of cells in mesh " << mesh.nCells()
             << exit(FatalError);
     }
@@ -850,10 +927,8 @@ Foam::labelList Foam::ptscotchDecomp::decompose
 {
     if (cellCentres.size() != globalCellCells.size())
     {
-        FatalErrorIn
-        (
-            "ptscotchDecomp::decompose(const pointField&, const labelListList&)"
-        )   << "Inconsistent number of cells (" << globalCellCells.size()
+        FatalErrorInFunction
+            << "Inconsistent number of cells (" << globalCellCells.size()
             << ") and number of cell centres (" << cellCentres.size()
             << ")." << exit(FatalError);
     }

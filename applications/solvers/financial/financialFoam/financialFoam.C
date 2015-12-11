@@ -24,6 +24,9 @@ License
 Application
     financialFoam
 
+Group
+    grpFinancialSolvers
+
 Description
     Solves the Black-Scholes equation to price commodities.
 

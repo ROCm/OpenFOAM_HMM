@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -31,18 +31,66 @@ setFormat raw;
 //      dx          : DX scalar or vector format
 //      vtk         : VTK ascii format
 //      raw         : x y z value format for use with e.g. gnuplot 'splot'.
+//      boundaryData: written in a form that can be used with timeVaryingMapped
+//                    boundary conditions (move to constant/boundaryData)
+//      starcd      : Star-CD format (geometry in .cel/.vrt, data in .usr)
+//      nastran     : Nastran (.nas) format
 //
 // Note:
-// other formats such as obj, stl, etc can also be written (by proxy)
-// but without any values!
+// - other formats such as obj, stl, etc can also be written (by proxy)
+//   but without any values!
+// - boundaryData format: typical use:
+//      - use a surfaces functionObject to sample a patch:
+//            type            surfaces;
+//            surfaceFormat   boundaryData;
+//            fields          ( p );
+//            surfaces
+//            (
+//                inlet
+//                {
+//                    type            patch;
+//                    patches         (inpletPatch);
+//                    interpolate     false;
+//                }
+//            );
+//      - the boundaryData writer will write postProcessing/surfaces/inlet/
+//      - move this to constant/boundaryData/inlet of the destination case
+//      - use a timeVaryingMappedFixedValue bc to read&interpolate and use
+//        as fixedValue.
+// - boundaryData: 'interpolate false' writes face centres, 'interpolate true'
+//   writes points. For 2D case the face centres might only be a single column
+//   so cannot be used in timeVaryingMapped with standard mapping (since
+//   uses triangulation to do interpolation).
+
 surfaceFormat vtk;
 
-// optionally define extra controls for the output formats
+// Optionally define extra controls for the output formats
 formatOptions
 {
     ensight
     {
+        // ascii/binary format
         format  ascii;
+        //collateTimes true;  // write single file containing multiple timesteps
+                              // (only for static surfaces)
+    }
+    nastran
+    {
+        // From OpenFOAM field name to Nastran field name
+        fields
+        (
+            (U      PLOAD4)
+            (p      PLOAD2)
+        );
+        // Optional scale
+        scale 1.0;
+        // Optional format
+        // short/long/free format
+        // short: scalar field width 8. default.
+        // long : scalar field width 16
+        // free : comma separated, field width according to writePrecision
+        //        setting
+        format  short;      // short/long/free
     }
 }
 
@@ -143,9 +191,19 @@ sets
         type        patchSeed;
         axis        xyz;
         patches     (".*Wall.*");
-        // Number of points to seed. Divided amongst all processors according
-        // to fraction of patches they hold.
+
+        // Subset patch faces by:
+
+        // 1. Number of points to seed. Divided amongst all processors
+        //   according to fraction of patches they hold.
         maxPoints   100;
+
+        // 2. Specified set of locations. This selects for every the specified
+        //    point the nearest patch face. (in addition the number of points
+        //    is also truncated by the maxPoints setting)
+        //    The difference with patchCloud is that this selects patch
+        //    face centres, not an arbitrary location on the face.
+        points   ((0.049 0.099 0.005)(0.051 0.054 0.005));
     }
 
 );
@@ -249,8 +307,10 @@ surfaces
         isoValue        0.5;
         interpolate     true;
 
-        //zone            ABC;          // Optional: zone only
-        //exposedPatchName fixedWalls;  // Optional: zone only
+        // zone            ABC;         // Optional: zone only
+        // exposedPatchName fixedWalls; // Optional: zone only
+
+        // bounds       (1 1 1)(2 2 2); // Optional: limit extent
 
         // regularise      false;    // Optional: do not simplify
         // mergeTol        1e-10;    // Optional: fraction of mesh bounding box
@@ -265,6 +325,9 @@ surfaces
         isoValue        0.5;
         interpolate     false;
         regularise      false;              // do not simplify
+
+        // bounds       (1 1 1)(2 2 2); // Optional: limit extent
+
         // mergeTol        1e-10;    // Optional: fraction of mesh bounding box
                                      // to merge points (default=1e-6)
     }
@@ -281,8 +344,10 @@ surfaces
         }
         interpolate     true;
 
-        //zone            ABC;          // Optional: zone only
-        //exposedPatchName fixedWalls;  // Optional: zone only
+        // zone             ABC;          // Optional: zone only
+        // exposedPatchName fixedWalls;  // Optional: zone only
+
+        // bounds       (1 1 1)(2 2 2); // Optional: limit extent
 
         // regularise      false;    // Optional: do not simplify
         // mergeTol        1e-10;    // Optional: fraction of mesh bounding box
@@ -305,6 +370,8 @@ surfaces
                                 // of isoSurfaceCell
         interpolate     false;
         regularise      false;  // Optional: do not simplify
+        // bounds       (1 1 1)(2 2 2); // Optional: limit extent
+
         // mergeTol 1e-10;      // Optional: fraction of mesh bounding box
                                 // to merge points (default=1e-6)
     }

@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -149,7 +149,7 @@ Foam::label Foam::tetDecomposer::triIndex(const label faceI, const label fp)
 const
 {
     const face& f = mesh_.faces()[faceI];
-    const label fp0 = mesh_.tetBasePtIs()[faceI];
+    const label fp0 = max(0, mesh_.tetBasePtIs()[faceI]);
 
     // Work out triangle index on this face
     label thisTriI;
@@ -436,7 +436,7 @@ void Foam::tetDecomposer::setRefinement
         }
         else
         {
-            label fp0 = mesh_.tetBasePtIs()[faceI];
+            label fp0 = max(mesh_.tetBasePtIs()[faceI], 0);
             label fp = f.fcIndex(fp0);
 
             for (label triI = 0; triI < f.size()-2; triI++)
@@ -606,7 +606,7 @@ void Foam::tetDecomposer::setRefinement
                     }
                     else
                     {
-                        FatalErrorIn("tetDecomposer::setRefinement(..)")
+                        FatalErrorInFunction
                             << "problem." << abort(FatalError);
                     }
 

@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -27,19 +27,13 @@ boundaryField
         value           $internalField;
     }
 
-    top
-    {
-        type            zeroGradient;
-        value           $internalField;
-    }
-
     burner
     {
         type            fixedFluxPressure;
         value           $internalField;
     }
 
-    sides
+    "(top|sides)"
     {
         type            totalPressure;
         U               U;

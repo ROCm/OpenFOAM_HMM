@@ -261,7 +261,7 @@ bool Foam::regIOobject::checkIn()
         {
             if (watchIndex_ != -1)
             {
-                FatalErrorIn("regIOobject::checkIn()")
+                FatalErrorInFunction
                     << "Object " << objectPath()
                     << " already watched with index " << watchIndex_
                     << abort(FatalError);
@@ -285,7 +285,7 @@ bool Foam::regIOobject::checkIn()
             {
                 // for ease of finding where attempted duplicate check-in
                 // originated
-                FatalErrorIn("regIOobject::checkIn()")
+                FatalErrorInFunction
                     << "failed to register object " << objectPath()
                     << " the name already exists in the objectRegistry" << endl
                     << "Contents:" << db().sortedToc()
@@ -293,7 +293,7 @@ bool Foam::regIOobject::checkIn()
             }
             else
             {
-                WarningIn("regIOobject::checkIn()")
+                WarningInFunction
                     << "failed to register object " << objectPath()
                     << " the name already exists in the objectRegistry"
                     << endl;
@@ -325,13 +325,41 @@ bool Foam::regIOobject::checkOut()
 
 bool Foam::regIOobject::upToDate(const regIOobject& a) const
 {
-    if (a.eventNo() >= eventNo_)
+    label da = a.eventNo()-eventNo_;
+
+    // In case of overflow *this.event() might be 2G but a.event() might
+    // have overflowed to 0.
+    // Detect this by detecting a massive difference (labelMax/2) between
+    // the two events.
+    //
+    //  a       *this   return
+    //  -       -----   ------
+    // normal operation:
+    //  11      10      false
+    //  11      11      false
+    //  10      11      true
+    // overflow situation:
+    //  0       big     false
+    //  big     0       true
+
+    if (da > labelMax/2)
     {
+        // *this.event overflowed but a.event not yet
+        return true;
+    }
+    else if (da < -labelMax/2)
+    {
+        // a.event overflowed but *this not yet
         return false;
+    }
+    else if (da < 0)
+    {
+        // My event number higher than a
+        return true;
     }
     else
     {
-        return true;
+        return false;
     }
 }
 
@@ -342,18 +370,7 @@ bool Foam::regIOobject::upToDate
     const regIOobject& b
 ) const
 {
-    if
-    (
-        a.eventNo() >= eventNo_
-     || b.eventNo() >= eventNo_
-    )
-    {
-        return false;
-    }
-    else
-    {
-        return true;
-    }
+    return upToDate(a) && upToDate(b);
 }
 
 
@@ -364,19 +381,7 @@ bool Foam::regIOobject::upToDate
     const regIOobject& c
 ) const
 {
-    if
-    (
-        a.eventNo() >= eventNo_
-     || b.eventNo() >= eventNo_
-     || c.eventNo() >= eventNo_
-    )
-    {
-        return false;
-    }
-    else
-    {
-        return true;
-    }
+    return upToDate(a) && upToDate(b) && upToDate(c);
 }
 
 
@@ -388,20 +393,7 @@ bool Foam::regIOobject::upToDate
     const regIOobject& d
 ) const
 {
-    if
-    (
-        a.eventNo() >= eventNo_
-     || b.eventNo() >= eventNo_
-     || c.eventNo() >= eventNo_
-     || d.eventNo() >= eventNo_
-    )
-    {
-        return false;
-    }
-    else
-    {
-        return true;
-    }
+    return upToDate(a) && upToDate(b) && upToDate(c) && upToDate(d);
 }
 
 

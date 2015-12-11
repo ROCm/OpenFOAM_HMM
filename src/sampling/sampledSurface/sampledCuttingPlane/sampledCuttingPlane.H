@@ -60,6 +60,9 @@ class sampledCuttingPlane
         //- Plane
         const plane plane_;
 
+        //- Optional bounding box to trim triangles against
+        const boundBox bounds_;
+
         //- Merge tolerance
         const scalar mergeTol_;
 

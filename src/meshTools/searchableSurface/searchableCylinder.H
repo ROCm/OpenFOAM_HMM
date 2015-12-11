@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,8 +42,6 @@ SourceFiles
 
 namespace Foam
 {
-
-// Forward declaration of classes
 
 /*---------------------------------------------------------------------------*\
                            Class searchableCylinder Declaration
@@ -171,10 +169,7 @@ public:
         //- Does any part of the surface overlap the supplied bound box?
         virtual bool overlaps(const boundBox& bb) const
         {
-            notImplemented
-            (
-                "searchableCylinder::overlaps(const boundBox&) const"
-            );
+            NotImplemented;
 
             return false;
         }
@@ -238,7 +233,7 @@ public:
 
             bool writeData(Ostream&) const
             {
-                notImplemented("searchableCylinder::writeData(Ostream&) const");
+                NotImplemented;
                 return false;
             }
 

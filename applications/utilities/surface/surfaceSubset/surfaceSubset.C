@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 
     if (markedZone.size() && markedZone.size() != 2)
     {
-        FatalErrorIn(args.executable())
+        FatalErrorInFunction
             << "zone specification should be two points, min and max of "
             << "the boundingbox" << endl
             << "zone:" << markedZone
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
              || markedPoints[pointI] >= surf1.nPoints()
             )
             {
-                FatalErrorIn(args.executable())
+                FatalErrorInFunction
                     << "localPoint label " << markedPoints[pointI]
                     << "out of range."
                     << " The mesh has got "
@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
              || markedEdges[edgeI] >= surf1.nEdges()
             )
             {
-                FatalErrorIn(args.executable())
+                FatalErrorInFunction
                     << "edge label " << markedEdges[edgeI]
                     << "out of range."
                     << " The mesh has got "
@@ -323,7 +323,7 @@ int main(int argc, char *argv[])
              || markedFaces[faceI] >= surf1.size()
             )
             {
-                FatalErrorIn(args.executable())
+                FatalErrorInFunction
                     << "Face label " << markedFaces[faceI] << "out of range."
                     << " The mesh has got "
                     << surf1.size() << " faces."
@@ -386,6 +386,8 @@ int main(int argc, char *argv[])
     Info<< "Writing surface to " << outFileName << endl;
 
     surf2.write(outFileName);
+
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

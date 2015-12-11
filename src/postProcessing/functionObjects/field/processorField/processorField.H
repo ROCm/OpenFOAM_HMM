@@ -45,6 +45,7 @@ Description
     \table
         Property     | Description             | Required    | Default value
         type         | type name: processorField | yes       |
+        log          | Log to standard output  | no          | yes
     \endtable
 
 SeeAlso
@@ -94,6 +95,12 @@ protected:
 
         //- on/off switch
         bool active_;
+
+        //- Result name
+        word resultName_;
+
+        //- Switch to send output to Info as well as to file
+        Switch log_;
 
 
     // Protected Member Functions

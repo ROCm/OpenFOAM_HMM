@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -237,10 +237,8 @@ void Foam::processorPolyPatch::calcGeometry(PstreamBuffers& pBufs)
                     writeOBJ(ccStr, c0, c1, vertI);
                 }
 
-                FatalErrorIn
-                (
-                    "processorPolyPatch::calcGeometry()"
-                )   << "face " << facei << " area does not match neighbour by "
+                FatalErrorInFunction
+                    << "face " << facei << " area does not match neighbour by "
                     << 100*mag(magSf - nbrMagSf)/avSf
                     << "% -- possible face ordering problem." << endl
                     << "patch:" << name()
@@ -465,7 +463,7 @@ const Foam::labelList& Foam::processorPolyPatch::neighbPoints() const
 {
     if (!neighbPointsPtr_.valid())
     {
-        FatalErrorIn("processorPolyPatch::neighbPoints() const")
+        FatalErrorInFunction
             << "No extended addressing calculated for patch " << name()
             << abort(FatalError);
     }
@@ -477,7 +475,7 @@ const Foam::labelList& Foam::processorPolyPatch::neighbEdges() const
 {
     if (!neighbEdgesPtr_.valid())
     {
-        FatalErrorIn("processorPolyPatch::neighbEdges() const")
+        FatalErrorInFunction
             << "No extended addressing calculated for patch " << name()
             << abort(FatalError);
     }
@@ -838,7 +836,7 @@ bool Foam::processorPolyPatch::order
                         pts[pI] = localPts[localPtI];
                     }
 
-                    FatalErrorIn("Foam::processorPolyPatch::order(...) const")
+                    FatalErrorInFunction
                         << "No match for face " << localFace << nl << pts
                         << abort(FatalError);
                 }
@@ -885,11 +883,8 @@ bool Foam::processorPolyPatch::order
 
                 if (masterCtrs.size() != pp.size())
                 {
-                    FatalErrorIn
-                    (
-                        "processorPolyPatch::order(const primitivePatch&"
-                        ", labelList&, labelList&) const"
-                    )   << "in patch:" << name() << " : "
+                    FatalErrorInFunction
+                        << "in patch:" << name() << " : "
                         << "Local size of patch is " << pp.size() << " (faces)."
                         << endl
                         << "Received from neighbour " << masterCtrs.size()
@@ -913,7 +908,7 @@ bool Foam::processorPolyPatch::order
                 faceMap
             );
 
-            // Try using face point average for matching
+            // Fallback: try using face point average for matching
             if (!matchedAll)
             {
                 const pointField& ppPoints = pp.points();
@@ -933,16 +928,20 @@ bool Foam::processorPolyPatch::order
 
                 scalarField tols2
                 (
-                    calcFaceTol(pp, pp.points(), facePointAverages)
+                    matchTolerance()
+                   *calcFaceTol(pp, pp.points(), facePointAverages)
                 );
 
+                // Note that we do not use the faceNormals anymore for
+                // comparison. Since we're
+                // having problems with the face centres (e.g. due to extreme
+                // aspect ratios) we will probably also have problems with
+                // reliable normals calculation
                 labelList faceMap2(faceMap.size(), -1);
                 matchedAll = matchPoints
                 (
                     facePointAverages,
                     masterFacePointAverages,
-                    pp.faceNormals(),
-                    masterNormals,
                     tols2,
                     true,
                     faceMap2
@@ -1008,11 +1007,8 @@ bool Foam::processorPolyPatch::order
 
             if (!matchedAll)
             {
-                SeriousErrorIn
-                (
-                    "processorPolyPatch::order(const primitivePatch&"
-                    ", labelList&, labelList&) const"
-                )   << "in patch:" << name() << " : "
+                SeriousErrorInFunction
+                    << "in patch:" << name() << " : "
                     << "Cannot match vectors to faces on both sides of patch"
                     << endl
                     << "    masterCtrs[0]:" << masterCtrs[0] << endl
@@ -1047,11 +1043,8 @@ bool Foam::processorPolyPatch::order
 
                 if (rotation[newFaceI] == -1)
                 {
-                    SeriousErrorIn
-                    (
-                        "processorPolyPatch::order(const primitivePatch&"
-                        ", labelList&, labelList&) const"
-                    )   << "in patch " << name()
+                    SeriousErrorInFunction
+                        << "in patch " << name()
                         << " : "
                         << "Cannot find point on face " << pp[oldFaceI]
                         << " with vertices "

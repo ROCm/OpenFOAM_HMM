@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,16 +45,30 @@ void Foam::CompactIOList<T, BaseType>::readFromStream()
     }
     else
     {
-        FatalIOErrorIn
-        (
-            "CompactIOList<T, BaseType>::readFromStream()",
-            is
-        )   << "unexpected class name " << headerClassName()
+        FatalIOErrorInFunction(is)
+            << "unexpected class name " << headerClassName()
             << " expected " << typeName << " or " << IOList<T>::typeName
             << endl
             << "    while reading object " << name()
             << exit(FatalIOError);
     }
+}
+
+
+template<class T, class BaseType>
+bool Foam::CompactIOList<T, BaseType>::overflows() const
+{
+    label size = 0;
+    forAll(*this, i)
+    {
+        label oldSize = size;
+        size += this->operator[](i).size();
+        if (size < oldSize)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 
@@ -178,6 +192,25 @@ bool Foam::CompactIOList<T, BaseType>::writeObject
 
         return good;
     }
+    else if (overflows())
+    {
+        WarningInFunction
+            << "Overall number of elements of CompactIOList of size "
+            << this->size() << " overflows the representation of a label"
+            << endl << "    Switching to ascii writing" << endl;
+
+        // Change type to be non-compact format type
+        const word oldTypeName = typeName;
+
+        const_cast<word&>(typeName) = IOList<T>::typeName;
+
+        bool good = regIOobject::writeObject(IOstream::ASCII, ver, cmp);
+
+        // Change type back
+        const_cast<word&>(typeName) = oldTypeName;
+
+        return good;
+    }
     else
     {
         return regIOobject::writeObject(fmt, ver, cmp);
@@ -264,7 +297,18 @@ Foam::Ostream& Foam::operator<<
         start[0] = 0;
         for (label i = 1; i < start.size(); i++)
         {
-            start[i] = start[i-1]+L[i-1].size();
+            label prev = start[i-1];
+            start[i] = prev+L[i-1].size();
+
+            if (start[i] < prev)
+            {
+                FatalIOErrorInFunction(os)
+                    << "Overall number of elements " << start[i]
+                    << " of CompactIOList of size "
+                    << L.size() << " overflows the representation of a label"
+                    << endl << "Please recompile with a larger representation"
+                    << " for label" << exit(FatalIOError);
+            }
         }
 
         List<BaseType> elems(start[start.size()-1]);

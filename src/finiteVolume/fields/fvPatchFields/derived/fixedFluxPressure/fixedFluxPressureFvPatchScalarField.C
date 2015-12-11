@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,6 +44,32 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
 
 Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
 (
+    const fvPatch& p,
+    const DimensionedField<scalar, volMesh>& iF,
+    const dictionary& dict
+)
+:
+    fixedGradientFvPatchScalarField(p, iF),
+    curTimeIndex_(-1)
+{
+    if (dict.found("value") && dict.found("gradient"))
+    {
+        fvPatchField<scalar>::operator=
+        (
+            scalarField("value", dict, p.size())
+        );
+        gradient() = scalarField("gradient", dict, p.size());
+    }
+    else
+    {
+        fvPatchField<scalar>::operator=(patchInternalField());
+        gradient() = 0.0;
+    }
+}
+
+
+Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
+(
     const fixedFluxPressureFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -69,32 +95,6 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
             // which fails for AMI patches for some mapping operations
             patchInternalField() + gradient()*(patch().nf() & patch().delta())
         );
-    }
-}
-
-
-Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
-(
-    const fvPatch& p,
-    const DimensionedField<scalar, volMesh>& iF,
-    const dictionary& dict
-)
-:
-    fixedGradientFvPatchScalarField(p, iF),
-    curTimeIndex_(-1)
-{
-    if (dict.found("value") && dict.found("gradient"))
-    {
-        fvPatchField<scalar>::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-        gradient() = scalarField("gradient", dict, p.size());
-    }
-    else
-    {
-        fvPatchField<scalar>::operator=(patchInternalField());
-        gradient() = 0.0;
     }
 }
 
@@ -148,7 +148,7 @@ void Foam::fixedFluxPressureFvPatchScalarField::updateCoeffs()
 
     if (curTimeIndex_ != this->db().time().timeIndex())
     {
-        FatalErrorIn("fixedFluxPressureFvPatchScalarField::updateCoeffs()")
+        FatalErrorInFunction
             << "updateCoeffs(const scalarField& snGradp) MUST be called before"
                " updateCoeffs() or evaluate() to set the boundary gradient."
             << exit(FatalError);

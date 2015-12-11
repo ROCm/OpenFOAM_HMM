@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -113,6 +113,8 @@ private:
 
 
         scalar featureAngle_;
+
+        scalar mergePatchFacesAngle_;
 
         scalar concaveAngle_;
 
@@ -247,6 +249,11 @@ public:
                 return featureAngle_;
             }
 
+            scalar mergePatchFacesAngle() const
+            {
+                return mergePatchFacesAngle_;
+            }
+
             scalar concaveAngle() const
             {
                 return concaveAngle_;
@@ -326,7 +333,6 @@ public:
                 const label nLayers,
                 const scalar expansionRatio
             ) const;
-
 };
 
 

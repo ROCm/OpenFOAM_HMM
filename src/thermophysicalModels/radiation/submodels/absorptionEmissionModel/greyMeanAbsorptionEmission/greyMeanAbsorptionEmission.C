@@ -309,28 +309,15 @@ Foam::radiation::greyMeanAbsorptionEmission::ECont(const label bandI) const
         {
             if (debug)
             {
-                WarningIn
-                (
-                    "tmp<volScalarField>"
-                    "radiation::greyMeanAbsorptionEmission::ECont"
-                    "("
-                        "const label"
-                    ") const"
-                )
+                WarningInFunction
                     << "Incompatible dimensions for dQ field" << endl;
             }
         }
     }
     else
     {
-        WarningIn
-        (
-            "tmp<volScalarField>"
-            "radiation::greyMeanAbsorptionEmission::ECont"
-            "("
-                "const label"
-            ") const"
-        ) << "dQ field not found in mesh" << endl;
+        WarningInFunction
+          << "dQ field not found in mesh" << endl;
     }
 
     return E;

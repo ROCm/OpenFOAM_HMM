@@ -73,7 +73,7 @@ void Foam::radiation::viewFactor::initialise()
 
     if (debug && Pstream::master())
     {
-        InfoIn("radiation::viewFactor::initialise()")
+        InfoInFunction
             << "Total number of clusters : " << totalNCoarseFaces_ << endl;
     }
 
@@ -138,7 +138,7 @@ void Foam::radiation::viewFactor::initialise()
 
         if (debug)
         {
-            InfoIn("radiation::viewFactor::initialise()")
+            InfoInFunction
                 << "Insert elements in the matrix..." << endl;
         }
 
@@ -160,7 +160,7 @@ void Foam::radiation::viewFactor::initialise()
         {
             if (debug)
             {
-                InfoIn("radiation::viewFactor::initialise()")
+                InfoInFunction
                     << "Smoothing the matrix..." << endl;
             }
 
@@ -579,7 +579,7 @@ void Foam::radiation::viewFactor::calculate()
 
                 if (debug)
                 {
-                    InfoIn("radiation::viewFactor::initialise()")
+                    InfoInFunction
                         << "\nDecomposing C matrix..." << endl;
                 }
 
@@ -607,7 +607,7 @@ void Foam::radiation::viewFactor::calculate()
 
             if (debug)
             {
-                InfoIn("radiation::viewFactor::initialise()")
+                InfoInFunction
                     << "\nLU Back substitute C matrix.." << endl;
             }
 
@@ -665,7 +665,7 @@ void Foam::radiation::viewFactor::calculate()
             const scalarField& magSf = mesh_.magSf().boundaryField()[patchID];
             scalar heatFlux = gSum(Qrp*magSf);
 
-            InfoIn("radiation::viewFactor::initialise()")
+            InfoInFunction
                 << "Total heat transfer rate at patch: "
                 << patchID << " "
                 << heatFlux << endl;

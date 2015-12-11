@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,6 +49,45 @@ const Foam::NamedEnum<Foam::fieldMinMax::modeType, 2>
 Foam::fieldMinMax::modeTypeNames_;
 
 
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+void Foam::fieldMinMax::writeFileHeader(Ostream& os) const
+{
+    writeHeader(os, "Field minima and maxima");
+    writeCommented(os, "Time");
+
+    if (writeLocation_)
+    {
+        writeTabbed(os, "field");
+        writeTabbed(os, "min");
+        writeTabbed(os, "position(min)");
+
+        if (Pstream::parRun())
+        {
+            writeTabbed(os, "processor");
+        }
+
+        writeTabbed(os, "max");
+        writeTabbed(os, "position(max)");
+
+        if (Pstream::parRun())
+        {
+            writeTabbed(os, "processor");
+        }
+    }
+    else
+    {
+        forAll(fieldSet_, fieldI)
+        {
+            writeTabbed(os, "min(" + fieldSet_[fieldI] + ')');
+            writeTabbed(os, "max(" + fieldSet_[fieldI] + ')');
+        }
+    }
+
+    os  << endl;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::fieldMinMax::fieldMinMax
@@ -59,33 +98,20 @@ Foam::fieldMinMax::fieldMinMax
     const bool loadFromFiles
 )
 :
-    functionObjectFile(obr, name, typeName),
-    name_(name),
+    functionObjectState(obr, name),
+    functionObjectFile(obr, name, typeName, dict),
     obr_(obr),
-    active_(true),
     log_(true),
-    location_(true),
+    writeLocation_(true),
     mode_(mdMag),
     fieldSet_()
 {
     // Check if the available mesh is an fvMesh otherise deactivate
-    if (!isA<fvMesh>(obr_))
+    if (setActive<fvMesh>())
     {
-        active_ = false;
-        WarningIn
-        (
-            "fieldMinMax::fieldMinMax"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating " << name_
-            << endl;
+        read(dict);
+        writeFileHeader(file());
     }
-
-    read(dict);
 }
 
 
@@ -101,52 +127,14 @@ void Foam::fieldMinMax::read(const dictionary& dict)
 {
     if (active_)
     {
+        functionObjectFile::read(dict);
+
         log_ = dict.lookupOrDefault<Switch>("log", true);
-        location_ = dict.lookupOrDefault<Switch>("location", true);
+        writeLocation_ = dict.lookupOrDefault<Switch>("writeLocation", true);
 
         mode_ = modeTypeNames_[dict.lookupOrDefault<word>("mode", "magnitude")];
         dict.lookup("fields") >> fieldSet_;
     }
-}
-
-
-void Foam::fieldMinMax::writeFileHeader(const label i)
-{
-    OFstream& file = this->file();
-
-    writeHeader(file, "Field minima and maxima");
-    writeCommented(file, "Time");
-
-    if (location_)
-    {
-        writeTabbed(file, "field");
-
-        writeTabbed(file, "min");
-        writeTabbed(file, "location(min)");
-
-        if (Pstream::parRun())
-        {
-            writeTabbed(file, "processor");
-        }
-
-        writeTabbed(file, "max");
-        writeTabbed(file, "location(max)");
-
-        if (Pstream::parRun())
-        {
-            writeTabbed(file, "processor");
-        }
-    }
-    else
-    {
-        forAll(fieldSet_, fieldI)
-        {
-            writeTabbed(file, "min(" + fieldSet_[fieldI] + ')');
-            writeTabbed(file, "max(" + fieldSet_[fieldI] + ')');
-        }
-    }
-
-    file<< endl;
 }
 
 
@@ -172,9 +160,8 @@ void Foam::fieldMinMax::write()
 {
     if (active_)
     {
-        functionObjectFile::write();
+        if (!writeLocation_) writeTime(file());
 
-        if (!location_) file()<< obr_.time().value();
         if (log_) Info<< type() << " " << name_ <<  " output:" << nl;
 
         forAll(fieldSet_, fieldI)
@@ -186,7 +173,7 @@ void Foam::fieldMinMax::write()
             calcMinMaxFields<tensor>(fieldSet_[fieldI], mode_);
         }
 
-        if (!location_) file()<< endl;
+        if (!writeLocation_) file()<< endl;
         if (log_) Info<< endl;
     }
 }

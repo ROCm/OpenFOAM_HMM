@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,20 +89,7 @@ void Foam::helpTypes::helpBoundary::execute
     const fvMesh& mesh
 )
 {
-    bool abortVar(env("FOAM_ABORT"));
-    if (abortVar)
-    {
-        FatalErrorIn
-        (
-            "void Foam::helpTypes::helpBoundary::execute"
-            "("
-                "const argList&, "
-                "const fvMesh&"
-            ")"
-        )
-            << "Please unset FOAM_ABORT to use this utlity"
-            << exit(FatalError);
-    }
+    setEnv("FOAM_ABORT", "", true);
 
     word condition(word::null);
     word fieldName(word::null);
@@ -112,7 +99,7 @@ void Foam::helpTypes::helpBoundary::execute
         // TODO: strip scoping info if present?
         // e.g. conditions with leading "compressible::" will not be found
         // ".*[fF]vPatchField.*" + className + ".*"
-        displayDoc(condition, ".*[fF]vPatchField.*", false);
+        displayDoc(condition, ".*[fF]vPatchField.*", false, "H");
     }
     else if (args.optionFound("constraint"))
     {
@@ -134,6 +121,7 @@ void Foam::helpTypes::helpBoundary::execute
             IOobject::MUST_READ
         );
 
+        // Check for any type of volField
         if (fieldHeader.headerOk())
         {
             if (args.optionFound("fixedValue"))
@@ -155,27 +143,13 @@ void Foam::helpTypes::helpBoundary::execute
         }
         else
         {
-            FatalErrorIn
-            (
-                "void Foam::helpTypes::helpBoundary::execute"
-                "("
-                    "const argList&, "
-                    "const fvMesh&"
-                ")"
-            )
+            FatalErrorInFunction
                 << "Unable to read field " << fieldName << exit(FatalError);
         }
     }
     else if (args.optionReadIfPresent("fixedValue", fieldName))
     {
-        FatalErrorIn
-        (
-            "void Foam::helpTypes::helpBoundary::execute"
-            "("
-                "const argList&, "
-                "const fvMesh&"
-            ")"
-        )
+        FatalErrorInFunction
             << "-field option must be specified when using the -fixedValue "
             << "option" << exit(FatalError);
     }
@@ -184,7 +158,7 @@ void Foam::helpTypes::helpBoundary::execute
         // TODO: strip scoping info if present?
         // e.g. conditions with leading "compressible::" will not be found
         // ".*[fF]vPatchField.*" + className + ".*"
-        displayDocOptions(".*[fF]vPatchField.*", false);
+        displayDocOptions(".*[fF]vPatchField.*", false, "H");
     }
 }
 

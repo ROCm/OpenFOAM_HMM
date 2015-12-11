@@ -255,7 +255,6 @@ SpalartAllmaras<BasicTurbulenceModel>::SpalartAllmaras
 {
     if (type == typeName)
     {
-        correctNut();
         this->printCoeffs(type);
     }
 }
@@ -321,7 +320,7 @@ tmp<volScalarField> SpalartAllmaras<BasicTurbulenceModel>::k() const
 template<class BasicTurbulenceModel>
 tmp<volScalarField> SpalartAllmaras<BasicTurbulenceModel>::epsilon() const
 {
-    WarningIn("tmp<volScalarField> SpalartAllmaras::epsilon() const")
+    WarningInFunction
         << "Turbulence kinetic energy dissipation rate not defined for "
         << "Spalart-Allmaras model. Returning zero field"
         << endl;

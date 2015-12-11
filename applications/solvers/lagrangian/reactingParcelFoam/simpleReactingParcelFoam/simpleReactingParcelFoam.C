@@ -24,6 +24,9 @@ License
 Application
     simpleReactingParcelFoam
 
+Group
+    grpLagrangianSolvers
+
 Description
     Steady state SIMPLE solver for compressible, laminar or turbulent flow with
     reacting multiphase Lagrangian parcels, including run-time selectable
@@ -37,7 +40,7 @@ Description
 #include "rhoCombustionModel.H"
 #include "radiationModel.H"
 #include "IOporosityModelList.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "SLGThermo.H"
 #include "simpleControl.H"
 
@@ -59,6 +62,8 @@ int main(int argc, char *argv[])
     #include "createMRF.H"
     #include "createFvOptions.H"
     #include "initContinuityErrs.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,11 +29,9 @@ License
 #include "polyMesh.H"
 #include "demandDrivenData.H"
 #include "OFstream.H"
-#include "patchZones.H"
 #include "matchPoints.H"
 #include "EdgeMap.H"
 #include "Time.H"
-#include "diagTensor.H"
 #include "transformField.H"
 #include "SubField.H"
 #include "unitConversion.H"
@@ -155,10 +153,8 @@ void Foam::cyclicPolyPatch::calcTransforms
 
     if (half0Ctrs.size() != half1Ctrs.size())
     {
-        FatalErrorIn
-        (
-            "cyclicPolyPatch::calcTransforms()"
-        )   << "For patch " << name()
+        FatalErrorInFunction
+            << "For patch " << name()
             << " there are " << half0Ctrs.size()
             << " face centres, for the neighbour patch " << neighbPatch().name()
             << " there are " << half1Ctrs.size()
@@ -167,10 +163,8 @@ void Foam::cyclicPolyPatch::calcTransforms
 
     if (transform() != neighbPatch().transform())
     {
-        FatalErrorIn
-        (
-            "cyclicPolyPatch::calcTransforms()"
-        )   << "Patch " << name()
+        FatalErrorInFunction
+            << "Patch " << name()
             << " has transform type " << transformTypeNames[transform()]
             << ", neighbour patch " << neighbPatchName()
             << " has transform type "
@@ -215,10 +209,8 @@ void Foam::cyclicPolyPatch::calcTransforms
 
                 if (areaDiff > matchTolerance())
                 {
-                    FatalErrorIn
-                    (
-                        "cyclicPolyPatch::calcTransforms()"
-                    )   << "face " << facei
+                    FatalErrorInFunction
+                        << "face " << facei
                         << " area does not match neighbour by "
                         << 100*areaDiff
                         << "% -- possible face ordering problem." << endl
@@ -347,10 +339,8 @@ void Foam::cyclicPolyPatch::calcTransforms
                   > avgTol
                 )
                 {
-                    WarningIn
-                    (
-                        "cyclicPolyPatch::calcTransforms()"
-                    )   << "Specified separation vector " << separationVector_
+                    WarningInFunction
+                        << "Specified separation vector " << separationVector_
                         << " differs by that of neighbouring patch "
                         << neighbPatch().separationVector_
                         << " by more than tolerance " << avgTol << endl
@@ -367,10 +357,8 @@ void Foam::cyclicPolyPatch::calcTransforms
                  || mag(separation()[0] - separationVector_) > avgTol
                 )
                 {
-                    WarningIn
-                    (
-                        "cyclicPolyPatch::calcTransforms()"
-                    )   << "Specified separationVector " << separationVector_
+                    WarningInFunction
+                        << "Specified separationVector " << separationVector_
                         << " differs from computed separation vector "
                         << separation() << endl
                         << "This probably means your geometry is not consistent"
@@ -677,15 +665,8 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
 {
     if (neighbPatchName_ == word::null && !coupleGroup_.valid())
     {
-        FatalIOErrorIn
+        FatalIOErrorInFunction
         (
-            "cyclicPolyPatch::cyclicPolyPatch\n"
-            "(\n"
-            "    const word& name,\n"
-            "    const dictionary& dict,\n"
-            "    const label index,\n"
-            "    const polyBoundaryMesh& bm\n"
-            ")",
             dict
         )   << "No \"neighbourPatch\" provided." << endl
             << "Is your mesh uptodate with split cyclics?" << endl
@@ -695,7 +676,7 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
 
     if (neighbPatchName_ == name)
     {
-        FatalIOErrorIn("cyclicPolyPatch::cyclicPolyPatch(..)", dict)
+        FatalIOErrorInFunction(dict)
             << "Neighbour patch name " << neighbPatchName_
             << " cannot be the same as this patch " << name
             << exit(FatalIOError);
@@ -711,7 +692,7 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
             scalar magRot = mag(rotationAxis_);
             if (magRot < SMALL)
             {
-                FatalIOErrorIn("cyclicPolyPatch::cyclicPolyPatch(..)", dict)
+                FatalIOErrorInFunction(dict)
                     << "Illegal rotationAxis " << rotationAxis_ << endl
                     << "Please supply a non-zero vector."
                     << exit(FatalIOError);
@@ -779,7 +760,7 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
 {
     if (neighbName == name())
     {
-        FatalErrorIn("cyclicPolyPatch::cyclicPolyPatch(..)")
+        FatalErrorInFunction
             << "Neighbour patch name " << neighbName
             << " cannot be the same as this patch " << name()
             << exit(FatalError);
@@ -843,7 +824,7 @@ Foam::label Foam::cyclicPolyPatch::neighbPatchID() const
 
         if (neighbPatchID_ == -1)
         {
-            FatalErrorIn("cyclicPolyPatch::neighbPatchID() const")
+            FatalErrorInFunction
                 << "Illegal neighbourPatch name " << neighbPatchName()
                 << endl << "Valid patch names are "
                 << this->boundaryMesh().names()
@@ -858,7 +839,7 @@ Foam::label Foam::cyclicPolyPatch::neighbPatchID() const
 
         if (nbrPatch.neighbPatchName() != name())
         {
-            WarningIn("cyclicPolyPatch::neighbPatchID() const")
+            WarningInFunction
                 << "Patch " << name()
                 << " specifies neighbour patch " << neighbPatchName()
                 << endl << " but that in return specifies "
@@ -1207,7 +1188,7 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
 
             if (e[0] < 0 || e[1] < 0)
             {
-                FatalErrorIn("cyclicPolyPatch::coupledEdges() const")
+                FatalErrorInFunction
                     << "Problem : at position " << i
                     << " illegal couple:" << e
                     << abort(FatalError);
@@ -1395,11 +1376,8 @@ bool Foam::cyclicPolyPatch::order
 
         if (!matchedAll)
         {
-            SeriousErrorIn
-            (
-                "cyclicPolyPatch::order"
-                "(const primitivePatch&, labelList&, labelList&) const"
-            )   << "Patch:" << name() << " : "
+            SeriousErrorInFunction
+                << "Patch:" << name() << " : "
                 << "Cannot match vectors to faces on both sides of patch"
                 << endl
                 << "    Perhaps your faces do not match?"
@@ -1432,11 +1410,8 @@ bool Foam::cyclicPolyPatch::order
 
             if (rotation[newFaceI] == -1)
             {
-                SeriousErrorIn
-                (
-                    "cyclicPolyPatch::order(const primitivePatch&"
-                    ", labelList&, labelList&) const"
-                )   << "in patch " << name()
+                SeriousErrorInFunction
+                    << "in patch " << name()
                     << " : "
                     << "Cannot find point on face " << pp[oldFaceI]
                     << " with vertices "

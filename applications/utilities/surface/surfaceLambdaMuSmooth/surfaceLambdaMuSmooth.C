@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -109,7 +109,7 @@ void getFixedPoints
 
     if (!matchedAll)
     {
-        WarningIn("getFixedPoints(const edgeMesh&, const pointField&)")
+        WarningInFunction
             << "Did not match all feature points to points on the surface"
             << endl;
     }
@@ -150,14 +150,14 @@ int main(int argc, char *argv[])
 
     if (lambda < 0 || lambda > 1)
     {
-        FatalErrorIn(args.executable()) << "Illegal relaxation factor "
+        FatalErrorInFunction
             << lambda << endl
             << "0: no change   1: move vertices to average of neighbours"
             << exit(FatalError);
     }
     if (mu < 0 || mu > 1)
     {
-        FatalErrorIn(args.executable()) << "Illegal relaxation factor "
+        FatalErrorInFunction
             << mu << endl
             << "0: no change   1: move vertices to average of neighbours"
             << exit(FatalError);
@@ -188,8 +188,6 @@ int main(int argc, char *argv[])
         Info<< "Number of fixed points on surface = " << fixedPoints.count()
             << endl;
     }
-
-    pointField newPoints(surf1.localPoints());
 
     for (label iter = 0; iter < iters; iter++)
     {

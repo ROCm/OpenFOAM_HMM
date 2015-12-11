@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,6 +41,30 @@ Foam::UPtrList<T>::UPtrList(const label s)
 :
     ptrs_(s, reinterpret_cast<T*>(0))
 {}
+
+
+template<class T>
+Foam::UPtrList<T>::UPtrList(UList<T>& lst)
+:
+    ptrs_(lst.size())
+{
+    forAll(lst, i)
+    {
+        ptrs_[i] = &lst[i];
+    }
+}
+
+
+template<class T>
+Foam::UPtrList<T>::UPtrList(PtrList<T>& lst)
+:
+    ptrs_(lst.size())
+{
+    forAll(lst, i)
+    {
+        ptrs_[i] = &lst[i];
+    }
+}
 
 
 template<class T>
@@ -104,7 +128,7 @@ void Foam::UPtrList<T>::reorder(const labelUList& oldToNew)
 {
     if (oldToNew.size() != size())
     {
-        FatalErrorIn("UPtrList<T>::reorder(const labelUList&)")
+        FatalErrorInFunction
             << "Size of map (" << oldToNew.size()
             << ") not equal to list size (" << size()
             << ")." << abort(FatalError);
@@ -118,7 +142,7 @@ void Foam::UPtrList<T>::reorder(const labelUList& oldToNew)
 
         if (newI < 0 || newI >= size())
         {
-            FatalErrorIn("UPtrList<T>::reorder(const labelUList&)")
+            FatalErrorInFunction
                 << "Illegal index " << newI << nl
                 << "Valid indices are 0.." << size()-1
                 << abort(FatalError);
@@ -126,7 +150,7 @@ void Foam::UPtrList<T>::reorder(const labelUList& oldToNew)
 
         if (newPtrs_[newI])
         {
-            FatalErrorIn("UPtrList<T>::reorder(const labelUList&)")
+            FatalErrorInFunction
                 << "reorder map is not unique; element " << newI
                 << " already set." << abort(FatalError);
         }
@@ -137,7 +161,7 @@ void Foam::UPtrList<T>::reorder(const labelUList& oldToNew)
     {
         if (!newPtrs_[i])
         {
-            FatalErrorIn("UPtrList<T>::reorder(const labelUList&)")
+            FatalErrorInFunction
                 << "Element " << i << " not set after reordering." << nl
                 << abort(FatalError);
         }

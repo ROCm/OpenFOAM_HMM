@@ -29,6 +29,11 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 template<class ParcelType>
+Foam::string Foam::SprayParcel<ParcelType>::propertyList_ =
+    Foam::SprayParcel<ParcelType>::propertyList();
+
+
+template<class ParcelType>
 const std::size_t Foam::SprayParcel<ParcelType>::sizeofFields_
 (
     sizeof(SprayParcel<ParcelType>) - sizeof(ParcelType)
@@ -89,7 +94,7 @@ Foam::SprayParcel<ParcelType>::SprayParcel
     (
         "SprayParcel<ParcelType>::SprayParcel"
         "("
-            "const polyMesh, "
+            "const polyMesh&, "
             "Istream&, "
             "bool"
         ")"

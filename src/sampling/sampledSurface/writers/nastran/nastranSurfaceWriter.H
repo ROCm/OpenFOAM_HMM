@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,11 @@ Description
         nastran
         {
             // From OpenFOAM field name to Nastran field name
-            fields ((pMean PLOAD2));
+            fields
+            (
+                (pMean PLOAD2)
+                (p     PLOAD4)
+            );
             // Optional scale
             scale 2.0;
             // Optional format
@@ -52,6 +56,7 @@ SourceFiles
 #include "surfaceWriter.H"
 #include "NamedEnum.H"
 #include "OFstream.H"
+#include "HashTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,6 +82,14 @@ public:
 
     static const NamedEnum<writeFormat, 3> writeFormatNames_;
 
+    enum dataFormat
+    {
+        dfPLOAD2,
+        dfPLOAD4
+    };
+
+    static const NamedEnum<dataFormat, 2> dataFormatNames_;
+
 
 private:
 
@@ -85,11 +98,14 @@ private:
         //- Write option
         writeFormat writeFormat_;
 
-        //- Map of OpenFOAM field name vs nastran field name
-        HashTable<word> fieldMap_;
+        //- Mapping from field name to data format enumeration
+        HashTable<dataFormat, word> fieldMap_;
 
         //- Scale to apply to values (default = 1.0)
         scalar scale_;
+
+        //- Separator used for free format
+        word separator_;
 
 
     // Private Member Functions
@@ -123,19 +139,37 @@ private:
             OFstream& os
         ) const;
 
+        //- Write the formatted keyword to the output stream
+        void writeKeyword
+        (
+            const word& keyword,
+            Ostream& os
+        ) const;
+
+        //- Write the footer information
+        void writeFooter(Ostream& os) const;
+
+        //- Write a formatted value to the output stream
+        template<class Type>
+        void writeValue
+        (
+            const Type& value,
+            Ostream& os
+        ) const;
+
         //- Write a face-based value
         template<class Type>
         void writeFaceValue
         (
-            const word& nasFieldName,
+            const dataFormat& format,
             const Type& value,
             const label EID,
-            OFstream& os
+            Ostream& os
         ) const;
 
         //- Templated write operation
         template<class Type>
-        void writeTemplate
+        fileName writeTemplate
         (
             const fileName& outputDir,
             const fileName& surfaceName,
@@ -171,13 +205,13 @@ public:
 
         //- True if the surface format supports geometry in a separate file.
         //  False if geometry and field must be in a single file
-        virtual bool separateGeometry()
+        virtual bool separateGeometry() const
         {
             return false;
         }
 
         //- Write single surface geometry to file.
-        virtual void write
+        virtual fileName write
         (
             const fileName& outputDir,
             const fileName& surfaceName,
@@ -188,7 +222,7 @@ public:
 
         //- Write scalarField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
-        virtual void write
+        virtual fileName write
         (
             const fileName& outputDir,
             const fileName& surfaceName,
@@ -202,7 +236,7 @@ public:
 
         //- Write vectorField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
-        virtual void write
+        virtual fileName write
         (
             const fileName& outputDir,
             const fileName& surfaceName,
@@ -216,7 +250,7 @@ public:
 
         //- Write sphericalTensorField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
-        virtual void write
+        virtual fileName write
         (
             const fileName& outputDir,
             const fileName& surfaceName,
@@ -230,7 +264,7 @@ public:
 
         //- Write symmTensorField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
-        virtual void write
+        virtual fileName write
         (
             const fileName& outputDir,
             const fileName& surfaceName,
@@ -244,7 +278,7 @@ public:
 
         //- Write tensorField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
-        virtual void write
+        virtual fileName write
         (
             const fileName& outputDir,
             const fileName& surfaceName,

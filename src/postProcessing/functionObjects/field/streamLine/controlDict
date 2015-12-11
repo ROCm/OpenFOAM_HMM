@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -83,6 +83,10 @@ functions
             // Number of steps per cell (estimate). Set to 1 to disable
             // subcycling.
             nSubCycle 5;
+
+
+        // Optional clipping
+        //bounds  (0.2 -10 -10)(0.22 10 10);
 
         // Cloud name to use
         cloudName       particleTracks;

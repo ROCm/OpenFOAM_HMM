@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,6 +42,8 @@ SourceFiles
 #include "vectorList.H"
 #include "pointIndexHit.H"
 #include "surfaceZonesInfo.H"
+#include "volumeType.H"
+#include "pointList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,8 +53,6 @@ namespace Foam
 class searchableSurfaces;
 class shellSurfaces;
 class triSurfaceMesh;
-
-typedef List<point> pointList;
 
 /*---------------------------------------------------------------------------*\
                            Class refinementSurfaces Declaration
@@ -86,6 +86,12 @@ class refinementSurfaces
         //- From global region number to small-gap level
         labelList gapLevel_;
 
+        //- From global region number to small-gap level specification
+        List<FixedList<label, 3> > extendedGapLevel_;
+
+        //- From global region number to side of surface to detect
+        List<volumeType> extendedGapMode_;
+
         //- From global region number to perpendicular angle
         scalarField perpendicularAngle_;
 
@@ -94,6 +100,16 @@ class refinementSurfaces
 
 
     // Private Member Functions
+
+        //- Given intersection results with geom detect local shell refinement
+        //  level (possibly cached on triangles of geom)
+        labelList findHigherLevel
+        (
+            const searchableSurface& geom,
+            const shellSurfaces& shells,
+            const List<pointIndexHit>& intersectionInfo,
+            const labelList& surfaceLevel
+        ) const;
 
         //- Disallow default bitwise copy construct
         refinementSurfaces(const refinementSurfaces&);
@@ -179,6 +195,23 @@ public:
                 return gapLevel_;
             }
 
+            //- From global region number to specification of gap and its
+            //  refinement: 3 labels specifying
+            //  - minimum wanted number of cells in the gap
+            //  - minimum cell level when to start trying to detect gaps
+            //  - maximum cell level to refine to (so do not detect gaps if
+            //    cell >= maximum level)
+            const List<FixedList<label, 3> >& extendedGapLevel() const
+            {
+                return extendedGapLevel_;
+            }
+
+            //- From global region number to side of surface to detect
+            const List<volumeType>& extendedGapMode() const
+            {
+                return extendedGapMode_;
+            }
+
             //- From global region number to perpendicular angle
             const scalarField& perpendicularAngle() const
             {
@@ -217,6 +250,9 @@ public:
                 return minLevel_.size();
             }
 
+            //- Per surface the maximum extendedGapLevel over all its regions
+            labelList maxGapLevel() const;
+
             //- Calculate minLevelFields
             void setMinLevelFields
             (
@@ -234,6 +270,8 @@ public:
             //  Return surface number and level.
             void findHigherIntersection
             (
+                const shellSurfaces& shells,
+
                 const pointField& start,
                 const pointField& end,
                 const labelList& currentLevel,  // current cell refinement level
@@ -303,6 +341,25 @@ public:
                 vectorField& normal2
             ) const;
 
+            //- Find nearest (to start only) intersection of edge
+            void findNearestIntersection
+            (
+                const pointField& start,
+                const pointField& end,
+                labelList& surfaces,
+                vectorField& normal
+            ) const;
+
+            //- Find nearest (to start only) intersection of edge
+            void findNearestIntersection
+            (
+                const pointField& start,
+                const pointField& end,
+                labelList& surfaces,
+                List<pointIndexHit>&,
+                vectorField& normal
+            ) const;
+
             //- Used for debugging only: find intersection of edge.
             void findAnyIntersection
             (
@@ -354,6 +411,37 @@ public:
                 const pointField& pt,
                 labelList& insideSurfaces
             ) const;
+
+            // Region wise searching
+
+                //- Find nearest point on selected regions of surfaces.
+                void findNearest
+                (
+                    const labelList& surfacesToTest,
+                    const labelListList& regions,
+
+                    const pointField& samples,
+                    const scalarField& nearestDistSqr,
+
+                    labelList& hitSurface,
+                    List<pointIndexHit>& hitInfo
+                ) const;
+
+                //- Find nearest point on selected regions of surfaces.
+                void findNearestRegion
+                (
+                    const labelList& surfacesToTest,
+                    const labelListList& regions,
+
+                    const pointField& samples,
+                    const scalarField& nearestDistSqr,
+
+                    labelList& hitSurface,
+                    List<pointIndexHit>& hitInfo,
+                    labelList& hitRegion,
+                    vectorField& hitNormal
+                ) const;
+
 };
 
 

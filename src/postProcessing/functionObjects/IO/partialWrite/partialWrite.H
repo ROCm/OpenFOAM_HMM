@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,6 +50,7 @@ Description
         type         | type name: partialWrite | yes         |
         objectNames  | objects to write        | yes         |
         writeInterval | write interval         | yes         |
+        log          | Log to standard output  | no          | yes
     \endtable
 
 SeeAlso
@@ -91,10 +92,14 @@ protected:
 
     // Private data
 
-        //- Name of this set of partialWrite
+        //- Name of this set of partialWrite object
         word name_;
 
+        //- Refefence to the database
         const objectRegistry& obr_;
+
+        //- Switch to send output to Info as well as to file
+        Switch log_;
 
         //- Loaded fields
         UPtrList<volScalarField> vsf_;

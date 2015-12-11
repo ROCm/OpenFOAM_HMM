@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,10 +34,10 @@ License
 #define checkField(gf1, gf2, op)                                    \
 if ((gf1).mesh() != (gf2).mesh())                                   \
 {                                                                   \
-    FatalErrorIn("checkField(gf1, gf2, op)")                        \
+    FatalErrorInFunction                                            \
         << "different mesh for fields "                             \
         << (gf1).name() << " and " << (gf2).name()                  \
-        << " during operatrion " <<  op                             \
+        << " during operation " <<  op                              \
         << abort(FatalError);                                       \
 }
 
@@ -100,10 +100,8 @@ bool Foam::GeometricField<Type, PatchField, GeoMesh>::readIfPresent()
      || this->readOpt() == IOobject::MUST_READ_IF_MODIFIED
     )
     {
-        WarningIn
-        (
-            "GeometricField<Type, PatchField, GeoMesh>::readIfPresent()"
-        )   << "read option IOobject::MUST_READ or MUST_READ_IF_MODIFIED"
+        WarningInFunction
+            << "read option IOobject::MUST_READ or MUST_READ_IF_MODIFIED"
             << " suggests that a read constructor for field " << this->name()
             << " would be more appropriate." << endl;
     }
@@ -114,12 +112,8 @@ bool Foam::GeometricField<Type, PatchField, GeoMesh>::readIfPresent()
         // Check compatibility between field and mesh
         if (this->size() != GeoMesh::size(this->mesh()))
         {
-            FatalIOErrorIn
-            (
-                "GeometricField<Type, PatchField, GeoMesh>::"
-                "readIfPresent()",
-                this->readStream(typeName)
-            )   << "   number of field elements = " << this->size()
+            FatalIOErrorInFunction(this->readStream(typeName))
+                << "   number of field elements = " << this->size()
                 << " number of mesh elements = "
                 << GeoMesh::size(this->mesh())
                 << exit(FatalIOError);
@@ -319,7 +313,8 @@ template<class Type, template<class> class PatchField, class GeoMesh>
 Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 (
     const IOobject& io,
-    const Mesh& mesh
+    const Mesh& mesh,
+    const bool readOldTime
 )
 :
     DimensionedField<Type, GeoMesh>(io, mesh, dimless, false),
@@ -334,17 +329,16 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 
     if (this->size() != GeoMesh::size(this->mesh()))
     {
-        FatalIOErrorIn
-        (
-            "GeometricField<Type, PatchField, GeoMesh>::GeometricField"
-            "(const IOobject&, const Mesh&)",
-            this->readStream(typeName)
-        )   << "   number of field elements = " << this->size()
+        FatalIOErrorInFunction(this->readStream(typeName))
+            << "   number of field elements = " << this->size()
             << " number of mesh elements = " << GeoMesh::size(this->mesh())
             << exit(FatalIOError);
     }
 
-    readOldTimeIfPresent();
+    if (readOldTime)
+    {
+        readOldTimeIfPresent();
+    }
 
     if (debug)
     {
@@ -375,16 +369,11 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 
     if (this->size() != GeoMesh::size(this->mesh()))
     {
-        FatalErrorIn
-        (
-            "GeometricField<Type, PatchField, GeoMesh>::GeometricField"
-            "(const IOobject&, const Mesh&, const dictionary&)"
-        )   << "   number of field elements = " << this->size()
+        FatalErrorInFunction
+            << "   number of field elements = " << this->size()
             << " number of mesh elements = " << GeoMesh::size(this->mesh())
             << exit(FatalIOError);
     }
-
-    readOldTimeIfPresent();
 
     if (debug)
     {
@@ -600,7 +589,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     if (debug)
     {
         Info<< "GeometricField<Type, PatchField, GeoMesh>::GeometricField : "
-               "constructing as copy resetting IO params"
+               "constructing as copy resetting IO params and patch type"
             << endl << this->info() << endl;
     }
 
@@ -833,10 +822,8 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::prevIter() const
 {
     if (!fieldPrevIterPtr_)
     {
-        FatalErrorIn
-        (
-            "GeometricField<Type, PatchField, GeoMesh>::prevIter() const"
-        )   << "previous iteration field" << endl << this->info() << endl
+        FatalErrorInFunction
+            << "previous iteration field" << endl << this->info() << endl
             << "  not stored."
             << "  Use field.storePrevIter() at start of iteration."
             << abort(FatalError);
@@ -884,11 +871,8 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::relax(const scalar alpha)
 {
     if (debug)
     {
-        InfoIn
-        (
-            "GeometricField<Type, PatchField, GeoMesh>::relax"
-            "(const scalar alpha)"
-        )  << "Relaxing" << endl << this->info() << " by " << alpha << endl;
+        InfoInFunction
+           << "Relaxing" << endl << this->info() << " by " << alpha << endl;
     }
 
     operator==(prevIter() + alpha*(*this - prevIter()));
@@ -1092,11 +1076,8 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::operator=
 {
     if (this == &gf)
     {
-        FatalErrorIn
-        (
-            "GeometricField<Type, PatchField, GeoMesh>::operator="
-            "(const GeometricField<Type, PatchField, GeoMesh>&)"
-        )   << "attempted assignment to self"
+        FatalErrorInFunction
+            << "attempted assignment to self"
             << abort(FatalError);
     }
 
@@ -1117,11 +1098,8 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::operator=
 {
     if (this == &(tgf()))
     {
-        FatalErrorIn
-        (
-            "GeometricField<Type, PatchField, GeoMesh>::operator="
-            "(const tmp<GeometricField<Type, PatchField, GeoMesh> >&)"
-        )   << "attempted assignment to self"
+        FatalErrorInFunction
+            << "attempted assignment to self"
             << abort(FatalError);
     }
 

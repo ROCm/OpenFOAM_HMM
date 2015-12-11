@@ -79,13 +79,11 @@ void Foam::fieldValues::cellSource::setCellZoneCells()
     {
         case stCellZone:
         {
-            dict().lookup("sourceName") >> sourceName_;
-
             label zoneId = mesh().cellZones().findZoneID(sourceName_);
 
             if (zoneId < 0)
             {
-                FatalErrorIn("cellSource::cellSource::setCellZoneCells()")
+                FatalErrorInFunction
                     << "Unknown cell zone name: " << sourceName_
                     << ". Valid cell zones are: " << mesh().cellZones().names()
                     << nl << exit(FatalError);
@@ -105,7 +103,7 @@ void Foam::fieldValues::cellSource::setCellZoneCells()
 
         default:
         {
-            FatalErrorIn("cellSource::setCellZoneCells()")
+            FatalErrorInFunction
                << "Unknown source type. Valid source types are:"
                 << sourceTypeNames_ << nl << exit(FatalError);
         }
@@ -132,10 +130,8 @@ void Foam::fieldValues::cellSource::initialise(const dictionary& dict)
 
     if (nCells_ == 0)
     {
-        WarningIn
-        (
-            "Foam::fieldValues::cellSource::initialise(const dictionary&)"
-        )   << type() << " " << name_ << ": "
+        WarningInFunction
+            << type() << " " << name_ << ": "
             << sourceTypeNames_[source_] << "(" << sourceName_ << "):" << nl
             << "    Source has no cells - deactivating" << endl;
 
@@ -145,7 +141,8 @@ void Foam::fieldValues::cellSource::initialise(const dictionary& dict)
 
     volume_ = volume();
 
-    Info<< type() << " " << name_ << ":"
+    if (log_) Info
+        << type() << " " << name_ << ":"
         << sourceTypeNames_[source_] << "(" << sourceName_ << "):" << nl
         << "    total cells  = " << nCells_ << nl
         << "    total volume = " << volume_
@@ -153,36 +150,35 @@ void Foam::fieldValues::cellSource::initialise(const dictionary& dict)
 
     if (dict.readIfPresent("weightField", weightFieldName_))
     {
-        Info<< "    weight field = " << weightFieldName_;
+        if (log_) Info << "    weight field = " << weightFieldName_;
     }
 
-    Info<< nl << endl;
+    if (log_) Info << nl << endl;
 }
 
 
-void Foam::fieldValues::cellSource::writeFileHeader(const label i)
+void Foam::fieldValues::cellSource::writeFileHeader(Ostream& os) const
 {
-    writeCommented(file(), "Source : ");
-    file() << sourceTypeNames_[source_] << " " << sourceName_ << endl;
-    writeCommented(file(), "Cells  : ");
-    file() << nCells_ << endl;
-    writeCommented(file(), "Volume : ");
-    file() << volume_ << endl;
+    writeHeaderValue(os, "Source", sourceTypeNames_[source_]);
+    writeHeaderValue(os, "Name", sourceName_);
+    writeHeaderValue(os, "Cells", nCells_);
+    writeHeaderValue(os, "Volume", volume_);
+    writeHeaderValue(os, "Scale factor", scaleFactor_);
 
-    writeCommented(file(), "Time");
+
+    writeCommented(os, "Time");
     if (writeVolume_)
     {
-        file() << tab << "Volume";
+        os  << tab << "Volume";
     }
 
     forAll(fields_, i)
     {
-        file()
-            << tab << operationTypeNames_[operation_]
+        os  << tab << operationTypeNames_[operation_]
             << "(" << fields_[i] << ")";
     }
 
-    file() << endl;
+    os << endl;
 }
 
 
@@ -204,7 +200,11 @@ Foam::fieldValues::cellSource::cellSource
     weightFieldName_("none"),
     writeVolume_(dict.lookupOrDefault("writeVolume", false))
 {
-    read(dict);
+    if (active_)
+    {
+        read(dict);
+        writeFileHeader(file());
+    }
 }
 
 
@@ -218,11 +218,11 @@ Foam::fieldValues::cellSource::~cellSource()
 
 void Foam::fieldValues::cellSource::read(const dictionary& dict)
 {
-    fieldValue::read(dict);
-
     if (active_)
     {
-        // no additional info to read
+        fieldValue::read(dict);
+
+        // No additional info to read
         initialise(dict);
     }
 }
@@ -234,45 +234,43 @@ void Foam::fieldValues::cellSource::write()
 
     if (active_)
     {
-        if (Pstream::master())
+        writeTime(file());
+
+        // Construct weight field. Note: zero size indicates unweighted
+        scalarField weightField;
+        if (weightFieldName_ != "none")
         {
-            file() << obr_.time().value();
+            weightField = setFieldValues<scalar>(weightFieldName_, true);
         }
 
         if (writeVolume_)
         {
             volume_ = volume();
-            if (Pstream::master())
-            {
-                file() << tab << volume_;
-            }
+            file() << tab << volume_;
             if (log_) Info<< "    total volume = " << volume_ << endl;
         }
 
         forAll(fields_, i)
         {
             const word& fieldName = fields_[i];
-            bool processed = false;
+            bool ok = false;
 
-            processed = processed || writeValues<scalar>(fieldName);
-            processed = processed || writeValues<vector>(fieldName);
-            processed = processed || writeValues<sphericalTensor>(fieldName);
-            processed = processed || writeValues<symmTensor>(fieldName);
-            processed = processed || writeValues<tensor>(fieldName);
+            ok = ok || writeValues<scalar>(fieldName, weightField);
+            ok = ok || writeValues<vector>(fieldName, weightField);
+            ok = ok || writeValues<sphericalTensor>(fieldName, weightField);
+            ok = ok || writeValues<symmTensor>(fieldName, weightField);
+            ok = ok || writeValues<tensor>(fieldName, weightField);
 
-            if (!processed)
+            if (!ok)
             {
-                WarningIn("void Foam::fieldValues::cellSource::write()")
+                WarningInFunction
                     << "Requested field " << fieldName
                     << " not found in database and not processed"
                     << endl;
             }
         }
 
-        if (Pstream::master())
-        {
-            file()<< endl;
-        }
+        file()<< endl;
 
         if (log_) Info<< endl;
     }

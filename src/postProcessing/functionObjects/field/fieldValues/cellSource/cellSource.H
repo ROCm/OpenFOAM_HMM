@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,11 +62,11 @@ Description
         log          | Write data to standard output | no    | no
         valueOutput  | Write the raw output values | yes     |
         writeVolume  | Write the volume of the cellSource | no |
-        source       | cell source: see below  | yes         |
-        sourceName   | name of cell source if required  | no |
-        operation    | operation to perform    | yes         |
-        weightField  | name of field to apply weighting | no |
-        fields       | list of fields to operate on | yes    |
+        source       | Cell source: see below  | yes         |
+        sourceName   | Name of cell source if required  | no |
+        operation    | Operation to perform    | yes         |
+        weightField  | Name of field to apply weighting | no |
+        fields       | List of fields to operate on | yes    |
     \endtable
 
     \linebreak
@@ -228,7 +228,7 @@ protected:
         ) const;
 
         //- Output file header information
-        virtual void writeFileHeader(const label i);
+        virtual void writeFileHeader(Ostream& os) const;
 
 
 public:
@@ -272,7 +272,11 @@ public:
 
             //- Templated helper function to output field values
             template<class Type>
-            bool writeValues(const word& fieldName);
+            bool writeValues
+            (
+                const word& fieldName,
+                const scalarField& weightField
+            );
 
             //- Filter a field according to cellIds
             template<class Type>

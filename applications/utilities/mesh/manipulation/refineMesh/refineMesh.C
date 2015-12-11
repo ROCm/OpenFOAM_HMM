@@ -28,9 +28,9 @@ Description
     Utility to refine cells in multiple directions.
 
     Command-line option handling:
-    + If -all specified or no refineMeshDict exists or, refine all cells
-    + If -dict <file> specified refine according to <file>
-    + If refineMeshDict exists refine according to refineMeshDict
+    - If -all specified or no refineMeshDict exists or, refine all cells
+    - If -dict \<file\> specified refine according to \<file\>
+    - If refineMeshDict exists refine according to refineMeshDict
 
     When the refinement or all cells is selected apply 3D refinement for 3D
     cases and 2D refinement for 2D cases.
@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
 
         if (!dictIO.headerOk())
         {
-            FatalErrorIn(args.executable())
+            FatalErrorInFunction
                 << "Cannot open specified refinement dictionary "
                 << dictPath
                 << exit(FatalError);

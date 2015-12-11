@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -49,7 +49,7 @@ divSchemes
     div(phid,p)     bounded Gauss upwind;
     div((phi|interpolate(rho)),p)  bounded Gauss upwind;
 
-    div((muEff*dev2(T(grad(U)))))      Gauss linear;
+    div(((rho*nuEff)*dev2(T(grad(U)))))    Gauss linear;
 }
 
 laplacianSchemes

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,12 +55,42 @@ class ensightSurfaceWriter
         //- Write option (default is IOstream::ASCII
         IOstream::streamFormat writeFormat_;
 
+        bool collateTimes_;
+
 
     // Private Member Functions
 
+        //- Templated write operation - one file per timestep
+        template<class Type>
+        fileName writeCollated
+        (
+            const fileName& outputDir,
+            const fileName& surfaceName,
+            const pointField& points,
+            const faceList& faces,
+            const word& fieldName,
+            const Field<Type>& values,
+            const bool isNodeValues,
+            const bool verbose
+        ) const;
+
+        //- Templated write operation - all time steps in single file
+        template<class Type>
+        fileName writeUncollated
+        (
+            const fileName& outputDir,
+            const fileName& surfaceName,
+            const pointField& points,
+            const faceList& faces,
+            const word& fieldName,
+            const Field<Type>& values,
+            const bool isNodeValues,
+            const bool verbose
+        ) const;
+
         //- Templated write operation
         template<class Type>
-        void writeTemplate
+        fileName writeTemplate
         (
             const fileName& outputDir,
             const fileName& surfaceName,
@@ -96,14 +126,14 @@ public:
 
         //- True if the surface format supports geometry in a separate file.
         //  False if geometry and field must be in a single file
-        virtual bool separateGeometry()
+        virtual bool separateGeometry() const
         {
-            return true;
+            return !collateTimes_;
         }
 
 
         //- Write single surface geometry to file.
-        virtual void write
+        virtual fileName write
         (
             const fileName& outputDir,
             const fileName& surfaceName,
@@ -115,7 +145,7 @@ public:
 
         //- Write scalarField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
-        virtual void write
+        virtual fileName write
         (
             const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
@@ -129,7 +159,7 @@ public:
 
         //- Write vectorField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
-        virtual void write
+        virtual fileName write
         (
             const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
@@ -143,7 +173,7 @@ public:
 
         //- Write sphericalTensorField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
-        virtual void write
+        virtual fileName write
         (
             const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
@@ -157,7 +187,7 @@ public:
 
         //- Write symmTensorField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
-        virtual void write
+        virtual fileName write
         (
             const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
@@ -171,7 +201,7 @@ public:
 
         //- Write tensorField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
-        virtual void write
+        virtual fileName write
         (
             const fileName& outputDir,      // <case>/surface/TIME
             const fileName& surfaceName,    // name of surface
@@ -182,13 +212,18 @@ public:
             const bool isNodeValues,
             const bool verbose = false
         ) const;
-
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "ensightSurfaceWriterTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

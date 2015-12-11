@@ -18,4 +18,5 @@ LIB_LIBS = \
     -ledgeMesh \
     -lsurfMesh \
     -ltriSurface \
+    -lfvMotionSolvers \
     -ldistributed

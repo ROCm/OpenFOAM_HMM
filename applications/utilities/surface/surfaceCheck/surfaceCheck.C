@@ -57,7 +57,7 @@ bool validTri
     {
         if (f[fp] < 0 || f[fp] >= surf.points().size())
         {
-            WarningIn("validTri(const triSurface&, const label)")
+            WarningInFunction
                 << "triangle " << faceI << " vertices " << f
                 << " uses point indices outside point range 0.."
                 << surf.points().size()-1 << endl;
@@ -67,7 +67,7 @@ bool validTri
 
     if ((f[0] == f[1]) || (f[0] == f[2]) || (f[1] == f[2]))
     {
-        WarningIn("validTri(const triSurface&, const label)")
+        WarningInFunction
             << "triangle " << faceI
             << " uses non-unique vertices " << f
             << " coords:" << f.points(surf.points())
@@ -100,7 +100,7 @@ bool validTri
          && ((f[2] == nbrF[0]) || (f[2] == nbrF[1]) || (f[2] == nbrF[2]))
         )
         {
-            WarningIn("validTri(const triSurface&, const label)")
+            WarningInFunction
                 << "triangle " << faceI << " vertices " << f
                 << " has the same vertices as triangle " << nbrFaceI
                 << " vertices " << nbrF
@@ -146,11 +146,8 @@ labelList countBins
 
             if ((index < 0) || (index >= nBins))
             {
-                WarningIn
-                (
-                    "countBins(const scalar, const scalar, const label"
-                    ", const scalarField&)"
-                )   << "value " << val << " at index " << i
+                WarningInFunction
+                    << "value " << val << " at index " << i
                     << " outside range " << min << " .. " << max << endl;
 
                 if (index < 0)
@@ -167,6 +164,101 @@ labelList countBins
     }
 
     return binCount;
+}
+
+
+
+void writeZoning
+(
+    const triSurface& surf,
+    const labelList& faceZone,
+    const word& fieldName,
+    const fileName& surfFilePath,
+    const fileName& surfFileNameBase
+)
+{
+    Info<< "Writing zoning to "
+        <<  fileName
+            (
+                surfFilePath
+              / fieldName
+              + '_'
+              + surfFileNameBase
+              + '.'
+              + vtkSurfaceWriter::typeName
+            )
+        << "..." << endl << endl;
+
+    // Convert data
+    scalarField scalarFaceZone(faceZone.size());
+    forAll(faceZone, i)
+    {
+        scalarFaceZone[i] = faceZone[i];
+    }
+    faceList faces(surf.size());
+    forAll(surf, i)
+    {
+        faces[i] = surf[i].triFaceFace();
+    }
+
+    vtkSurfaceWriter().write
+    (
+        surfFilePath,
+        surfFileNameBase,
+        surf.points(),
+        faces,
+        fieldName,
+        scalarFaceZone,
+        false               // face based data
+    );
+}
+
+
+void writeParts
+(
+    const triSurface& surf,
+    const label nFaceZones,
+    const labelList& faceZone,
+    const fileName& surfFilePath,
+    const fileName& surfFileNameBase
+)
+{
+    for (label zone = 0; zone < nFaceZones; zone++)
+    {
+        boolList includeMap(surf.size(), false);
+
+        forAll(faceZone, faceI)
+        {
+            if (faceZone[faceI] == zone)
+            {
+                includeMap[faceI] = true;
+            }
+        }
+
+        labelList pointMap;
+        labelList faceMap;
+
+        triSurface subSurf
+        (
+            surf.subsetMesh
+            (
+                includeMap,
+                pointMap,
+                faceMap
+            )
+        );
+
+        fileName subName
+        (
+            surfFilePath
+           /surfFileNameBase + "_" + name(zone) + ".obj"
+        );
+
+        Info<< "writing part " << zone << " size " << subSurf.size()
+            << " to " << subName << endl;
+
+        subSurf.write(subName);
+    }
 }
 
 
@@ -218,6 +310,20 @@ int main(int argc, char *argv[])
     surf.writeStats(Info);
     Info<< endl;
 
+
+    // Determine path and extension
+    fileName surfFileNameBase(surfFileName.name());
+    const word fileType = surfFileNameBase.ext();
+    // Strip extension
+    surfFileNameBase = surfFileNameBase.lessExt();
+    // If extension was .gz strip original extension
+    if (fileType == "gz")
+    {
+        surfFileNameBase = surfFileNameBase.lessExt();
+    }
+    const fileName surfFilePath(surfFileName.path());
+
+
     // write bounding box corners
     if (args.optionFound("blockMesh"))
     {
@@ -257,7 +363,7 @@ int main(int argc, char *argv[])
 
             if (region < 0 || region >= regionSize.size())
             {
-                WarningIn(args.executable())
+                WarningInFunction
                     << "Triangle " << faceI << " vertices " << surf[faceI]
                     << " has region " << region << " which is outside the range"
                     << " of regions 0.." << surf.patches().size()-1
@@ -324,7 +430,7 @@ int main(int argc, char *argv[])
 
             if (f[0] == f[1] || f[0] == f[2] || f[1] == f[2])
             {
-                //WarningIn(args.executable())
+                //WarningInFunction
                 //    << "Illegal triangle " << faceI << " vertices " << f
                 //    << " coords " << f.points(surf.points()) << endl;
             }
@@ -371,7 +477,7 @@ int main(int argc, char *argv[])
 
         if (triQ[minIndex] < SMALL)
         {
-            WarningIn(args.executable()) << "Minimum triangle quality is "
+            WarningInFunction
                 << triQ[minIndex] << ". This might give problems in"
                 << " self-intersection testing later on." << endl;
         }
@@ -515,12 +621,12 @@ int main(int argc, char *argv[])
 
     DynamicList<label> problemFaces(surf.size()/100 + 1);
 
-    const labelListList& eFaces = surf.edgeFaces();
+    const labelListList& edgeFaces = surf.edgeFaces();
 
     label nSingleEdges = 0;
-    forAll(eFaces, edgeI)
+    forAll(edgeFaces, edgeI)
     {
-        const labelList& myFaces = eFaces[edgeI];
+        const labelList& myFaces = edgeFaces[edgeI];
 
         if (myFaces.size() == 1)
         {
@@ -531,9 +637,9 @@ int main(int argc, char *argv[])
     }
 
     label nMultEdges = 0;
-    forAll(eFaces, edgeI)
+    forAll(edgeFaces, edgeI)
     {
-        const labelList& myFaces = eFaces[edgeI];
+        const labelList& myFaces = edgeFaces[edgeI];
 
         if (myFaces.size() > 2)
         {
@@ -549,7 +655,8 @@ int main(int argc, char *argv[])
 
     if ((nSingleEdges != 0) || (nMultEdges != 0))
     {
-        Info<< "Surface is not closed since not all edges connected to "
+        Info<< "Surface is not closed since not all edges ("
+            << edgeFaces.size() << ") connected to "
             << "two faces:" << endl
             << "    connected to one face : " << nSingleEdges << endl
             << "    connected to >2 faces : " << nMultEdges << endl;
@@ -578,10 +685,9 @@ int main(int argc, char *argv[])
         boolList borderEdge(surf.nEdges(), false);
         if (splitNonManifold)
         {
-            const labelListList& eFaces = surf.edgeFaces();
-            forAll(eFaces, edgeI)
+            forAll(edgeFaces, edgeI)
             {
-                if (eFaces[edgeI].size() > 2)
+                if (edgeFaces[edgeI].size() > 2)
                 {
                     borderEdge[edgeI] = true;
                 }
@@ -597,85 +703,15 @@ int main(int argc, char *argv[])
         {
             Info<< "Splitting surface into parts ..." << endl << endl;
 
-            fileName surfFileNameBase(surfFileName.name());
-            const word fileType = surfFileNameBase.ext();
-            // Strip extension
-            surfFileNameBase = surfFileNameBase.lessExt();
-            // If extension was .gz strip original extension
-            if (fileType == "gz")
-            {
-                surfFileNameBase = surfFileNameBase.lessExt();
-            }
-
-
-            {
-                Info<< "Writing zoning to "
-                    <<  fileName
-                        (
-                            "zone_"
-                          + surfFileNameBase
-                          + '.'
-                          + vtkSurfaceWriter::typeName
-                        )
-                    << "..." << endl << endl;
-
-                // Convert data
-                scalarField scalarFaceZone(faceZone.size());
-                forAll(faceZone, i)
-                {
-                    scalarFaceZone[i] = faceZone[i];
-                }
-                faceList faces(surf.size());
-                forAll(surf, i)
-                {
-                    faces[i] = surf[i].triFaceFace();
-                }
-
-                vtkSurfaceWriter().write
-                (
-                    surfFileName.path(),
-                    surfFileNameBase,
-                    surf.points(),
-                    faces,
-                    "zone",
-                    scalarFaceZone,
-                    false               // face based data
-                );
-            }
-
-
-            for (label zone = 0; zone < numZones; zone++)
-            {
-                boolList includeMap(surf.size(), false);
-
-                forAll(faceZone, faceI)
-                {
-                    if (faceZone[faceI] == zone)
-                    {
-                        includeMap[faceI] = true;
-                    }
-                }
-
-                labelList pointMap;
-                labelList faceMap;
-
-                triSurface subSurf
-                (
-                    surf.subsetMesh
-                    (
-                        includeMap,
-                        pointMap,
-                        faceMap
-                    )
-                );
-
-                fileName subName(surfFileNameBase + "_" + name(zone) + ".obj");
-
-                Info<< "writing part " << zone << " size " << subSurf.size()
-                    << " to " << subName << endl;
-
-                subSurf.write(subName);
-            }
+            writeZoning(surf, faceZone, "zone", surfFilePath, surfFileNameBase);
+            writeParts
+            (
+                surf,
+                numZones,
+                faceZone,
+                surfFilePath,
+                surfFileNameBase
+            );
         }
     }
 
@@ -700,6 +736,15 @@ int main(int argc, char *argv[])
     if (numNormalZones > 1)
     {
         Info<< "More than one normal orientation." << endl;
+        writeZoning(surf, normalZone, "normal", surfFilePath, surfFileNameBase);
+        writeParts
+        (
+            surf,
+            numNormalZones,
+            normalZone,
+            surfFilePath,
+            surfFileNameBase + "_normal"
+        );
     }
     Info<< endl;
 

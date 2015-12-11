@@ -24,14 +24,16 @@ License
 Application
     coalChemistryFoam
 
+Group
+    grpLagrangianSolvers
+
 Description
-    Transient solver for:
-    - compressible,
-    - turbulent flow,
-    with
-    - coal and limestone parcel injections,
-    - energy source, and
-    - combustion.
+    Transient PIMPLE solver for compressible, laminar or turbulent flow with 
+    coal and thermodynamic parcels, and combustion.
+
+    Note:
+    - includes run-time selectable finite volume options, e.g. sources,
+      constraints
 
 \*---------------------------------------------------------------------------*/
 
@@ -40,7 +42,7 @@ Description
 #include "basicThermoCloud.H"
 #include "coalCloud.H"
 #include "psiCombustionModel.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "radiationModel.H"
 #include "SLGThermo.H"
 #include "pimpleControl.H"
@@ -67,6 +69,8 @@ int main(int argc, char *argv[])
     #include "createFvOptions.H"
     #include "createClouds.H"
     #include "createRadiationModel.H"
+
+    turbulence->validate();
 
     if (!LTS)
     {

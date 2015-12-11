@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -104,7 +104,7 @@ void Foam::fvMeshDistribute::mapBoundaryFields
 
     if (flds.size() != oldBflds.size())
     {
-        FatalErrorIn("fvMeshDistribute::mapBoundaryFields(..)") << "problem"
+        FatalErrorInFunction
             << abort(FatalError);
     }
 
@@ -113,8 +113,7 @@ void Foam::fvMeshDistribute::mapBoundaryFields
     forAllIter(typename HashTable<fldType*>, flds, iter)
     {
         fldType& fld = *iter();
-        typename fldType::GeometricBoundaryField& bfld =
-            fld.boundaryField();
+        typename fldType::GeometricBoundaryField& bfld = fld.boundaryField();
 
         const FieldField<fvsPatchField, T>& oldBfld = oldBflds[fieldI++];
 
@@ -137,6 +136,95 @@ void Foam::fvMeshDistribute::mapBoundaryFields
                     if (oldLocalI >= 0 && oldLocalI < oldBfld[oldPatchI].size())
                     {
                         patchFld[i] = oldBfld[oldPatchI][oldLocalI];
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+template<class T>
+void Foam::fvMeshDistribute::saveInternalFields
+(
+    PtrList<Field<T> >& iflds
+) const
+{
+    typedef GeometricField<T, fvsPatchField, surfaceMesh> fldType;
+
+    HashTable<const fldType*> flds
+    (
+        static_cast<const fvMesh&>(mesh_).objectRegistry::lookupClass<fldType>()
+    );
+
+    iflds.setSize(flds.size());
+
+    label i = 0;
+
+    forAllConstIter(typename HashTable<const fldType*>, flds, iter)
+    {
+        const fldType& fld = *iter();
+
+        iflds.set(i, fld.internalField().clone());
+
+        i++;
+    }
+}
+
+
+// Set boundary values of exposed internal faces
+template<class T>
+void Foam::fvMeshDistribute::mapExposedFaces
+(
+    const mapPolyMesh& map,
+    const PtrList<Field<T> >& oldFlds
+)
+{
+    const labelList& faceMap = map.faceMap();
+
+    typedef GeometricField<T, fvsPatchField, surfaceMesh> fldType;
+
+    HashTable<fldType*> flds
+    (
+        mesh_.objectRegistry::lookupClass<fldType>()
+    );
+
+    if (flds.size() != oldFlds.size())
+    {
+        FatalErrorInFunction
+            << "problem"
+            << abort(FatalError);
+    }
+
+
+    label fieldI = 0;
+
+    forAllIter(typename HashTable<fldType*>, flds, iter)
+    {
+        fldType& fld = *iter();
+        typename fldType::GeometricBoundaryField& bfld = fld.boundaryField();
+
+        const Field<T>& oldInternal = oldFlds[fieldI++];
+
+        // Pull from old internal field into bfld.
+
+        forAll(bfld, patchI)
+        {
+            fvsPatchField<T>& patchFld = bfld[patchI];
+
+            forAll(patchFld, i)
+            {
+                const label faceI = patchFld.patch().start()+i;
+
+                label oldFaceI = faceMap[faceI];
+
+                if (oldFaceI < oldInternal.size())
+                {
+                    patchFld[i] = oldInternal[oldFaceI];
+
+                    if (map.flipFaceFlux().found(faceI))
+                    {
+                        patchFld[i] = flipOp()(patchFld[i]);
                     }
                 }
             }

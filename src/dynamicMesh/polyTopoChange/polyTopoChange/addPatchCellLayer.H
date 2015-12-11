@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -220,6 +220,9 @@ class addPatchCellLayer
 
             const face& newFace,
             const label newPatchID,
+            const label newZoneI,
+            const bool newFlip,
+            const label inflateFaceI,
 
             const label ownFaceI,
             const label nbrFaceI,
@@ -241,6 +244,39 @@ class addPatchCellLayer
             label&,
             label&,
             bool&
+        );
+
+        //- Extract properties from mesh face in pp edge ordering
+        static void setFaceProps
+        (
+            const polyMesh& mesh,
+            const indirectPrimitivePatch& pp,
+            const label ppEdgeI,
+            const label faceI,
+
+            label& patchI,
+            label& zoneI,
+            bool& zoneFlip,
+            label& inflateFaceI
+        );
+
+        //- Find internal or boundary face to get extrude properties
+        //  from. zoneFlip consistent with ppEdge ordering
+        static void findZoneFace
+        (
+            const bool useInternalFaces,
+            const bool useBoundaryFaces,
+
+            const polyMesh& mesh,
+            const indirectPrimitivePatch& pp,
+            const label ppEdgeI,
+            const UIndirectList<label>& excludeFaces,
+            const labelList& meshFaces,
+
+            label& inflateFaceI,
+            label& patchI,
+            label& zoneI,
+            bool& zoneFlip
         );
 
         //- Disallow default bitwise copy construct
@@ -303,22 +339,37 @@ public:
                 const indirectPrimitivePatch& pp
             );
 
-            //- Boundary edges get extruded into boundary faces. Determine patch
-            //  for these faces. This might be a to-be-created processor patch
-            //  (patchI >= mesh.boundaryMesh().size()) in which case the
-            //  nbrProcToPatch, patchToNbrProc give the correspondence. nPatches
-            //  is the new number of patches.
-            static void calcSidePatch
+            //- Determine extrude information per patch edge:
+            //  - zoneID, zoneFlip :
+            //      picks one of the faces that connects to
+            //      the edge. For boundary edge only looks
+            //      at boundary faces. For internal edge it looks at internal
+            //      faces only (zoneFromAnyFace = false) or at any face
+            //      (zoneFromAnyFace = true). zoneFlip is consistent with
+            //      ordering of pp edge.
+            //      Face selected gets stored in inflateFaceID
+            //  - patchID :
+            //      get patch from any boundary face connected to the
+            //      edge. The patch might be a to-be-created processor patch
+            //      (patchI >= mesh.boundaryMesh().size()) in which case the
+            //      nbrProcToPatch, patchToNbrProc give the correspondence.
+            //      nPatches is the new number of patches.
+            static void calcExtrudeInfo
             (
+                const bool zoneFromAnyFace,
+
                 const polyMesh&,
                 const globalIndex& globalFaces,
                 const labelListList& globalEdgeFaces,
                 const indirectPrimitivePatch& pp,
 
-                labelList& sidePatchID,
+                labelList& edgePatchID,     // if extruding a patch edge
                 label& nPatches,
                 Map<label>& nbrProcToPatch,
-                Map<label>& patchToNbrProc
+                Map<label>& patchToNbrProc,
+                labelList& edgeZoneID,
+                boolList& edgeFlip,
+                labelList& inflateFaceID
             );
 
             //- Play commands into polyTopoChange to create layers on top
@@ -347,7 +398,12 @@ public:
                 const labelListList& globalEdgeFaces,
                 const scalarField& expansionRatio,
                 const indirectPrimitivePatch& pp,
+
                 const labelList& sidePatchID,
+                const labelList& sideZoneID,
+                const boolList& sideFlip,
+                const labelList& inflateFaceID,
+
                 const labelList& exposedPatchID,
                 const labelList& nFaceLayers,
                 const labelList& nPointLayers,
@@ -374,7 +430,12 @@ public:
                     globalEdgeFaces,
                     scalarField(pp.nPoints(), 1.0),     // expansion ration
                     pp,
+
                     sidePatchID,
+                    labelList(pp.nEdges(), -1),         // zoneID
+                    boolList(pp.nEdges(), false),       // zoneFlip
+                    labelList(pp.nEdges(), -1),         // inflateFaceID
+
                     labelList(0),
                     labelList(pp.size(), nLayers),      // nFaceLayers
                     labelList(pp.nPoints(), nLayers),   // nPointLayers

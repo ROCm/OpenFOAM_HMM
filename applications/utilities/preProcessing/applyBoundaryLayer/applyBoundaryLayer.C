@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,18 +33,284 @@ Description
     the thickness coefficient supplied via the option -Cbl.  If both options
     are provided -ybl is used.
 
+    Compressible modes is automatically selected based on the existence of the
+    "thermophysicalProperties" dictionary required to construct the
+    thermodynamics package.
+
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "singlePhaseTransportModel.H"
 #include "turbulentTransportModel.H"
+#include "turbulentFluidThermoModel.H"
 #include "wallDist.H"
+#include "processorFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // turbulence constants - file-scope
 static const scalar Cmu(0.09);
 static const scalar kappa(0.41);
+
+void correctProcessorPatches(volScalarField& vf)
+{
+    if (!Pstream::parRun())
+    {
+        return;
+    }
+
+    // Not possible to use correctBoundaryConditions on fields as they may
+    // use local info as opposed to the constraint values employed here,
+    // but still need to update processor patches
+
+    volScalarField::GeometricBoundaryField& bf = vf.boundaryField();
+
+    forAll(bf, patchI)
+    {
+        if (isA<processorFvPatchField<scalar> >(bf[patchI]))
+        {
+            bf[patchI].initEvaluate();
+        }
+    }
+
+    forAll(bf, patchI)
+    {
+        if (isA<processorFvPatchField<scalar> >(bf[patchI]))
+        {
+            bf[patchI].evaluate();
+        }
+    }
+}
+
+
+template<class TurbulenceModel>
+Foam::tmp<Foam::volScalarField> calcK
+(
+    TurbulenceModel& turbulence,
+    const volScalarField& mask,
+    const volScalarField& nut,
+    const volScalarField& y,
+    const dimensionedScalar& ybl,
+    const scalar Cmu,
+    const scalar kappa
+)
+{
+    // Turbulence k
+    tmp<volScalarField> tk = turbulence->k();
+    volScalarField& k = tk();
+    scalar ck0 = pow025(Cmu)*kappa;
+    k = (1 - mask)*k + mask*sqr(nut/(ck0*min(y, ybl)));
+
+    // Do not correct BC
+    // - operation may use inconsistent fields wrt these local manipulations
+    // k.correctBoundaryConditions();
+    correctProcessorPatches(k);
+
+    Info<< "Writing k\n" << endl;
+    k.write();
+
+    return tk;
+}
+
+
+template<class TurbulenceModel>
+Foam::tmp<Foam::volScalarField> calcEpsilon
+(
+    TurbulenceModel& turbulence,
+    const volScalarField& mask,
+    const volScalarField& k,
+    const volScalarField& y,
+    const dimensionedScalar& ybl,
+    const scalar Cmu,
+    const scalar kappa
+)
+{
+    // Turbulence epsilon
+    tmp<volScalarField> tepsilon = turbulence->epsilon();
+    volScalarField& epsilon = tepsilon();
+    scalar ce0 = ::pow(Cmu, 0.75)/kappa;
+    epsilon = (1 - mask)*epsilon + mask*ce0*k*sqrt(k)/min(y, ybl);
+    epsilon.max(SMALL);
+
+    // Do not correct BC
+    // - operation may use inconsistent fields wrt these local manipulations
+    // epsilon.correctBoundaryConditions();
+    correctProcessorPatches(epsilon);
+
+    Info<< "Writing epsilon\n" << endl;
+    epsilon.write();
+
+    return tepsilon;
+}
+
+
+void calcOmega
+(
+    const fvMesh& mesh,
+    const volScalarField& mask,
+    const volScalarField& k,
+    const volScalarField& epsilon
+)
+{
+    // Turbulence omega
+    IOobject omegaHeader
+    (
+        "omega",
+        mesh.time().timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE,
+        false
+    );
+
+    if (omegaHeader.headerOk())
+    {
+        volScalarField omega(omegaHeader, mesh);
+        dimensionedScalar k0("SMALL", k.dimensions(), SMALL);
+
+        omega = (1 - mask)*omega + mask*epsilon/(Cmu*k + k0);
+        omega.max(SMALL);
+
+        // Do not correct BC
+        // - operation may use inconsistent fields wrt these local
+        //   manipulations
+        // omega.correctBoundaryConditions();
+        correctProcessorPatches(omega);
+
+        Info<< "Writing omega\n" << endl;
+        omega.write();
+    }
+}
+
+
+void setField
+(
+    const fvMesh& mesh,
+    const word& fieldName,
+    const volScalarField& value
+)
+{
+    IOobject fldHeader
+    (
+        fieldName,
+        mesh.time().timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE,
+        false
+    );
+
+    if (fldHeader.headerOk())
+    {
+        volScalarField fld(fldHeader, mesh);
+        fld = value;
+
+        // Do not correct BC
+        // - operation may use inconsistent fields wrt these local
+        //   manipulations
+        // fld.correctBoundaryConditions();
+        correctProcessorPatches(fld);
+
+        Info<< "Writing " << fieldName << nl << endl;
+        fld.write();
+    }
+}
+
+
+void calcCompressible
+(
+    const fvMesh& mesh,
+    const volScalarField& mask,
+    const volVectorField& U,
+    const volScalarField& y,
+    const dimensionedScalar& ybl
+)
+{
+    const Time& runTime = mesh.time();
+
+    autoPtr<fluidThermo> pThermo(fluidThermo::New(mesh));
+    fluidThermo& thermo = pThermo();
+    volScalarField rho(thermo.rho());
+
+    // Update/re-write phi
+    #include "compressibleCreatePhi.H"
+    phi.write();
+
+    autoPtr<compressible::turbulenceModel> turbulence
+    (
+        compressible::turbulenceModel::New
+        (
+            rho,
+            U,
+            phi,
+            thermo
+        )
+    );
+
+    // Calculate nut - reference nut is calculated by the turbulence model
+    // on its construction
+    tmp<volScalarField> tnut = turbulence->nut();
+
+    volScalarField& nut = tnut();
+    volScalarField S(mag(dev(symm(fvc::grad(U)))));
+    nut = (1 - mask)*nut + mask*sqr(kappa*min(y, ybl))*::sqrt(2)*S;
+
+    // Do not correct BC - wall functions will 'undo' manipulation above
+    // by using nut from turbulence model
+    correctProcessorPatches(nut);
+    nut.write();
+
+    tmp<volScalarField> k =
+        calcK(turbulence, mask, nut, y, ybl, Cmu, kappa);
+    tmp<volScalarField> epsilon =
+        calcEpsilon(turbulence, mask, k, y, ybl, Cmu, kappa);
+    calcOmega(mesh, mask, k, epsilon);
+    setField(mesh, "nuTilda", nut);
+}
+
+
+void calcIncompressible
+(
+    const fvMesh& mesh,
+    const volScalarField& mask,
+    const volVectorField& U,
+    const volScalarField& y,
+    const dimensionedScalar& ybl
+)
+{
+    const Time& runTime = mesh.time();
+
+    // Update/re-write phi
+    #include "createPhi.H"
+    phi.write();
+
+    singlePhaseTransportModel laminarTransport(U, phi);
+
+    autoPtr<incompressible::turbulenceModel> turbulence
+    (
+        incompressible::turbulenceModel::New(U, phi, laminarTransport)
+    );
+
+    tmp<volScalarField> tnut = turbulence->nut();
+
+    // Calculate nut - reference nut is calculated by the turbulence model
+    // on its construction
+    volScalarField& nut = tnut();
+    volScalarField S(mag(dev(symm(fvc::grad(U)))));
+    nut = (1 - mask)*nut + mask*sqr(kappa*min(y, ybl))*::sqrt(2)*S;
+
+    // Do not correct BC - wall functions will 'undo' manipulation above
+    // by using nut from turbulence model
+    correctProcessorPatches(nut);
+    nut.write();
+
+    tmp<volScalarField> k =
+        calcK(turbulence, mask, nut, y, ybl, Cmu, kappa);
+    tmp<volScalarField> epsilon =
+        calcEpsilon(turbulence, mask, k, y, ybl, Cmu, kappa);
+    calcOmega(mesh, mask, k, epsilon);
+    setField(mesh, "nuTilda", nut);
+}
 
 
 int main(int argc, char *argv[])
@@ -54,6 +320,8 @@ int main(int argc, char *argv[])
         "apply a simplified boundary-layer model to the velocity and\n"
         "turbulence fields based on the 1/7th power-law."
     );
+
+    #include "addRegionOption.H"
 
     argList::addOption
     (
@@ -67,17 +335,12 @@ int main(int argc, char *argv[])
         "scalar",
         "boundary-layer thickness as Cbl * mean distance to wall"
     );
-    argList::addBoolOption
-    (
-        "writenut",
-        "write nut field"
-    );
 
     #include "setRootCase.H"
 
     if (!args.optionFound("ybl") && !args.optionFound("Cbl"))
     {
-        FatalErrorIn(args.executable())
+        FatalErrorInFunction
             << "Neither option 'ybl' or 'Cbl' have been provided to calculate "
             << "the boundary-layer thickness.\n"
             << "Please choose either 'ybl' OR 'Cbl'."
@@ -85,7 +348,7 @@ int main(int argc, char *argv[])
     }
     else if (args.optionFound("ybl") && args.optionFound("Cbl"))
     {
-        FatalErrorIn(args.executable())
+        FatalErrorInFunction
             << "Both 'ybl' and 'Cbl' have been provided to calculate "
             << "the boundary-layer thickness.\n"
             << "Please choose either 'ybl' OR 'Cbl'."
@@ -93,7 +356,7 @@ int main(int argc, char *argv[])
     }
 
     #include "createTime.H"
-    #include "createMesh.H"
+    #include "createNamedMesh.H"
     #include "createFields.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -117,113 +380,24 @@ int main(int argc, char *argv[])
     Info<< "Writing U\n" << endl;
     U.write();
 
-    // Update/re-write phi
-    #include "createPhi.H"
-    phi.write();
 
-    singlePhaseTransportModel laminarTransport(U, phi);
-
-    autoPtr<incompressible::turbulenceModel> turbulence
+    if
     (
-        incompressible::turbulenceModel::New(U, phi, laminarTransport)
-    );
-
-    if (isA<incompressible::RASModel>(turbulence()))
+        IOobject
+        (
+            basicThermo::dictName,
+            runTime.constant(),
+            mesh
+        ).headerOk()
+    )
     {
-        // Calculate nut - reference nut is calculated by the turbulence model
-        // on its construction
-        tmp<volScalarField> tnut = turbulence->nut();
-        volScalarField& nut = tnut();
-        volScalarField S(mag(dev(symm(fvc::grad(U)))));
-        nut = (1 - mask)*nut + mask*sqr(kappa*min(y, ybl))*::sqrt(2)*S;
-
-        // do not correct BC - wall functions will 'undo' manipulation above
-        // by using nut from turbulence model
-
-        if (args.optionFound("writenut"))
-        {
-            Info<< "Writing nut" << endl;
-            nut.write();
-        }
-
-
-        //--- Read and modify turbulence fields
-
-        // Turbulence k
-        tmp<volScalarField> tk = turbulence->k();
-        volScalarField& k = tk();
-        scalar ck0 = pow025(Cmu)*kappa;
-        k = (1 - mask)*k + mask*sqr(nut/(ck0*min(y, ybl)));
-
-        // do not correct BC - operation may use inconsistent fields wrt these
-        // local manipulations
-        // k.correctBoundaryConditions();
-
-        Info<< "Writing k\n" << endl;
-        k.write();
-
-
-        // Turbulence epsilon
-        tmp<volScalarField> tepsilon = turbulence->epsilon();
-        volScalarField& epsilon = tepsilon();
-        scalar ce0 = ::pow(Cmu, 0.75)/kappa;
-        epsilon = (1 - mask)*epsilon + mask*ce0*k*sqrt(k)/min(y, ybl);
-
-        // do not correct BC - wall functions will use non-updated k from
-        // turbulence model
-        // epsilon.correctBoundaryConditions();
-
-        Info<< "Writing epsilon\n" << endl;
-        epsilon.write();
-
-        // Turbulence omega
-        IOobject omegaHeader
-        (
-            "omega",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        );
-
-        if (omegaHeader.headerOk())
-        {
-            volScalarField omega(omegaHeader, mesh);
-            dimensionedScalar k0("VSMALL", k.dimensions(), VSMALL);
-            omega = (1 - mask)*omega + mask*epsilon/(Cmu*k + k0);
-
-            // do not correct BC - wall functions will use non-updated k from
-            // turbulence model
-            // omega.correctBoundaryConditions();
-
-            Info<< "Writing omega\n" << endl;
-            omega.write();
-        }
-
-        // Turbulence nuTilda
-        IOobject nuTildaHeader
-        (
-            "nuTilda",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        );
-
-        if (nuTildaHeader.headerOk())
-        {
-            volScalarField nuTilda(nuTildaHeader, mesh);
-            nuTilda = nut;
-
-            // do not correct BC
-            // nuTilda.correctBoundaryConditions();
-
-            Info<< "Writing nuTilda\n" << endl;
-            nuTilda.write();
-        }
+        calcCompressible(mesh, mask, U, y, ybl);
     }
+    else
+    {
+        calcIncompressible(mesh, mask, U, y, ybl);
+    }
+
 
     Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
         << "  ClockTime = " << runTime.elapsedClockTime() << " s"

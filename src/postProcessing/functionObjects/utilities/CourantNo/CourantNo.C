@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,22 +68,16 @@ Foam::CourantNo::CourantNo
     obr_(obr),
     active_(true),
     phiName_("phi"),
-    rhoName_("rho")
+    rhoName_("rho"),
+    resultName_(name),
+    log_(true)
 {
     // Check if the available mesh is an fvMesh, otherwise deactivate
     if (!isA<fvMesh>(obr_))
     {
         active_ = false;
-        WarningIn
-        (
-            "CourantNo::CourantNo"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating " << name_ << nl
+        WarningInFunction
+            << "No fvMesh available, deactivating " << name_ << nl
             << endl;
     }
 
@@ -99,7 +93,7 @@ Foam::CourantNo::CourantNo
             (
                 IOobject
                 (
-                    type(),
+                    resultName_,
                     mesh.time().timeName(),
                     mesh,
                     IOobject::NO_READ,
@@ -128,8 +122,11 @@ void Foam::CourantNo::read(const dictionary& dict)
 {
     if (active_)
     {
-        phiName_ = dict.lookupOrDefault<word>("phiName", "phi");
-        rhoName_ = dict.lookupOrDefault<word>("rhoName", "rho");
+        log_.readIfPresent("log", dict);
+
+        dict.readIfPresent("phiName", phiName_);
+        dict.readIfPresent("rhoName", rhoName_);
+        dict.readIfPresent("resultName", resultName_);
     }
 }
 
@@ -146,7 +143,7 @@ void Foam::CourantNo::execute()
         volScalarField& Co =
             const_cast<volScalarField&>
             (
-                mesh.lookupObject<volScalarField>(type())
+                mesh.lookupObject<volScalarField>(resultName_)
             );
 
         Co.dimensionedInternalField() = byRho
@@ -162,10 +159,7 @@ void Foam::CourantNo::execute()
 
 void Foam::CourantNo::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 
@@ -178,9 +172,10 @@ void Foam::CourantNo::write()
     if (active_)
     {
         const volScalarField& CourantNo =
-            obr_.lookupObject<volScalarField>(type());
+            obr_.lookupObject<volScalarField>(resultName_);
 
-        Info<< type() << " " << name_ << " output:" << nl
+        if (log_) Info
+            << type() << " " << name_ << " output:" << nl
             << "    writing field " << CourantNo.name() << nl
             << endl;
 

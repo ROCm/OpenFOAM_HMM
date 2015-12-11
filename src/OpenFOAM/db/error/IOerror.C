@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,9 +125,8 @@ void Foam::IOerror::SafeFatalIOError
 {
     if (JobInfo::constructed)
     {
-        FatalIOErrorIn
+        FatalIOErrorInFunction
         (
-            "primitiveEntry::readEntry(const dictionary&, Istream&)",
             ioStream
         )   << msg << Foam::exit(FatalIOError);
     }
@@ -174,7 +173,7 @@ void Foam::IOerror::exit(const int)
         jobInfo.exit();
     }
 
-    if (abort_)
+    if (env("FOAM_ABORT"))
     {
         abort();
     }
@@ -215,7 +214,7 @@ void Foam::IOerror::abort()
         jobInfo.abort();
     }
 
-    if (abort_)
+    if (env("FOAM_ABORT"))
     {
         Perr<< endl << *this << endl
             << "\nFOAM aborting (FOAM_ABORT set)\n" << endl;

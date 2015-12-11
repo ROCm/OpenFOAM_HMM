@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +30,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(fieldCoordinateSystemTransform, 0);
+    defineTypeNameAndDebug(fieldCoordinateSystemTransform, 0);
 }
 
 
@@ -48,30 +48,24 @@ Foam::fieldCoordinateSystemTransform::fieldCoordinateSystemTransform
     obr_(obr),
     active_(true),
     fieldSet_(),
-    coordSys_(obr, dict)
+    coordSys_(obr, dict),
+    log_(true)
 {
     // Check if the available mesh is an fvMesh otherise deactivate
     if (isA<fvMesh>(obr_))
     {
         read(dict);
 
-        Info<< type() << " " << name_ << ":" << nl
+        if (log_) Info
+            << type() << " " << name_ << ":" << nl
             << "   Applying transformation from global Cartesian to local "
             << coordSys_ << nl << endl;
     }
     else
     {
         active_ = false;
-        WarningIn
-        (
-            "fieldCoordinateSystemTransform::fieldCoordinateSystemTransform"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating " << name_
+        WarningInFunction
+            << "No fvMesh available, deactivating " << name_
             << endl;
     }
 }
@@ -89,6 +83,7 @@ void Foam::fieldCoordinateSystemTransform::read(const dictionary& dict)
 {
     if (active_)
     {
+        log_.readIfPresent("log", dict);
         dict.lookup("fields") >> fieldSet_;
     }
 }
@@ -98,7 +93,7 @@ void Foam::fieldCoordinateSystemTransform::execute()
 {
     if (active_)
     {
-        Info<< type() << " " << name_ << " output:" << nl;
+        if (log_) Info<< type() << " " << name_ << " output:" << nl;
 
         forAll(fieldSet_, fieldI)
         {
@@ -115,10 +110,7 @@ void Foam::fieldCoordinateSystemTransform::execute()
 
 void Foam::fieldCoordinateSystemTransform::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 
@@ -132,7 +124,7 @@ void Foam::fieldCoordinateSystemTransform::write()
 {
     if (active_)
     {
-        Info<< type() << " " << name_ << " output:" << nl;
+        if (log_) Info<< type() << " " << name_ << " output:" << nl;
 
         forAll(fieldSet_, fieldI)
         {
@@ -141,12 +133,12 @@ void Foam::fieldCoordinateSystemTransform::write()
             const regIOobject& field =
                 obr_.lookupObject<regIOobject>(fieldName);
 
-            Info<< "    writing field " << field.name() << nl;
+            if (log_) Info << "    writing field " << field.name() << nl;
 
             field.write();
         }
 
-        Info<< endl;
+        if (log_) Info<< endl;
     }
 }
 

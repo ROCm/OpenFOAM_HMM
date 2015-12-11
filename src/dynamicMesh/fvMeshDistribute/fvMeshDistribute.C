@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,16 +40,124 @@ License
 #include "syncTools.H"
 #include "CompactListList.H"
 #include "fvMeshTools.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
 defineTypeNameAndDebug(fvMeshDistribute, 0);
+
+//- Less function class that can be used for sorting processor patches
+class lessProcPatches
+{
+    const labelList& nbrProc_;
+    const labelList& referPatchID_;
+
+public:
+
+    lessProcPatches( const labelList& nbrProc, const labelList& referPatchID)
+    :
+        nbrProc_(nbrProc),
+        referPatchID_(referPatchID)
+    {}
+
+    bool operator()(const label a, const label b)
+    {
+        if (nbrProc_[a] < nbrProc_[b])
+        {
+            return true;
+        }
+        else if (nbrProc_[a] > nbrProc_[b])
+        {
+            return false;
+        }
+        else
+        {
+            // Equal neighbour processor
+            return referPatchID_[a] < referPatchID_[b];
+        }
+    }
+};
+
 }
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::fvMeshDistribute::inplaceRenumberWithFlip
+(
+    const labelUList& oldToNew,
+    const bool oldToNewHasFlip,
+    const bool lstHasFlip,
+    labelUList& lst
+)
+{
+    if (!lstHasFlip && !oldToNewHasFlip)
+    {
+        Foam::inplaceRenumber(oldToNew, lst);
+    }
+    else
+    {
+        // Either input data or map encodes sign so result encodes sign
+
+        forAll(lst, elemI)
+        {
+            // Extract old value and sign
+            label val = lst[elemI];
+            label sign = 1;
+            if (lstHasFlip)
+            {
+                if (val > 0)
+                {
+                    val = val-1;
+                }
+                else if (val < 0)
+                {
+                    val = -val-1;
+                    sign = -1;
+                }
+                else
+                {
+                    FatalErrorInFunction
+                        << "Problem : zero value " << val
+                        << " at index " << elemI << " out of " << lst.size()
+                        << " list with flip bit" << exit(FatalError);
+                }
+            }
+
+
+            // Lookup new value and possibly change sign
+            label newVal = oldToNew[val];
+
+            if (oldToNewHasFlip)
+            {
+                if (newVal > 0)
+                {
+                    newVal = newVal-1;
+                }
+                else if (newVal < 0)
+                {
+                    newVal = -newVal-1;
+                    sign = -sign;
+                }
+                else
+                {
+                    FatalErrorInFunction
+                        << "Problem : zero value " << newVal
+                        << " at index " << elemI << " out of "
+                        << oldToNew.size()
+                        << " list with flip bit" << exit(FatalError);
+                }
+            }
+
+
+            // Encode new value and sign
+            lst[elemI] = sign*(newVal+1);
+        }
+    }
+}
+
 
 Foam::labelList Foam::fvMeshDistribute::select
 (
@@ -98,7 +206,7 @@ void Foam::fvMeshDistribute::checkEqualWordList
     {
         if (allNames[procI] != allNames[0])
         {
-            FatalErrorIn("fvMeshDistribute::checkEqualWordList(..)")
+            FatalErrorInFunction
                 << "When checking for equal " << msg.c_str() << " :" << endl
                 << "processor0 has:" << allNames[0] << endl
                 << "processor" << procI << " has:" << allNames[procI] << endl
@@ -235,7 +343,7 @@ Foam::label Foam::fvMeshDistribute::findNonEmptyPatch() const
 
     if (nonEmptyPatchI == -1)
     {
-        FatalErrorIn("fvMeshDistribute::findNonEmptyPatch() const")
+        FatalErrorInFunction
             << "Cannot find a patch which is neither of type empty nor"
             << " coupled in patches " << patches.names() << endl
             << "There has to be at least one such patch for"
@@ -263,7 +371,7 @@ Foam::label Foam::fvMeshDistribute::findNonEmptyPatch() const
         }
         else if (procPatchI != -1)
         {
-            FatalErrorIn("fvMeshDistribute::findNonEmptyPatch() const")
+            FatalErrorInFunction
                 << "Processor patches should be at end of patch list."
                 << endl
                 << "Have processor patch " << procPatchI
@@ -274,6 +382,110 @@ Foam::label Foam::fvMeshDistribute::findNonEmptyPatch() const
     }
 
     return nonEmptyPatchI;
+}
+
+
+Foam::tmp<Foam::surfaceScalarField> Foam::fvMeshDistribute::generateTestField
+(
+    const fvMesh& mesh
+)
+{
+    vector testNormal(1, 1, 1);
+    testNormal /= mag(testNormal);
+
+    tmp<surfaceScalarField> tfld
+    (
+        new surfaceScalarField
+        (
+            IOobject
+            (
+                "myFlux",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            dimensionedScalar("zero", dimless, 0.0)
+        )
+    );
+    surfaceScalarField& fld = tfld();
+
+    const surfaceVectorField n(mesh.Sf()/mesh.magSf());
+
+    forAll(fld, faceI)
+    {
+        fld[faceI] = (n[faceI] & testNormal);
+    }
+    forAll(fld.boundaryField(), patchI)
+    {
+        fvsPatchScalarField& fvp = fld.boundaryField()[patchI];
+
+        scalarField newPfld(fvp.size());
+        forAll(newPfld, i)
+        {
+            newPfld[i] = (n.boundaryField()[patchI][i] & testNormal);
+        }
+        fvp == newPfld;
+    }
+
+    return tfld;
+}
+
+
+void Foam::fvMeshDistribute::testField(const surfaceScalarField& fld)
+{
+    const fvMesh& mesh = fld.mesh();
+
+    vector testNormal(1, 1, 1);
+    testNormal /= mag(testNormal);
+
+    const surfaceVectorField n(mesh.Sf()/mesh.magSf());
+
+    forAll(fld, faceI)
+    {
+        scalar cos = (n[faceI] & testNormal);
+
+        if (mag(cos-fld[faceI]) > 1e-6)
+        {
+            //FatalErrorInFunction
+            WarningInFunction
+                << "On internal face " << faceI << " at "
+                << mesh.faceCentres()[faceI]
+                << " the field value is " << fld[faceI]
+                << " whereas cos angle of " << testNormal
+                << " with mesh normal " << n[faceI]
+                << " is " << cos
+                //<< exit(FatalError);
+                << endl;
+        }
+    }
+    forAll(fld.boundaryField(), patchI)
+    {
+        const fvsPatchScalarField& fvp = fld.boundaryField()[patchI];
+        const fvsPatchVectorField& np = n.boundaryField()[patchI];
+
+        forAll(fvp, i)
+        {
+            scalar cos = (np[i] & testNormal);
+
+            if (mag(cos-fvp[i]) > 1e-6)
+            {
+                label faceI = fvp.patch().start()+i;
+                //FatalErrorInFunction
+                WarningInFunction
+                    << "On face " << faceI
+                    << " on patch " << fvp.patch().name()
+                    << " at " << mesh.faceCentres()[faceI]
+                    << " the field value is " << fvp[i]
+                    << " whereas cos angle of " << testNormal
+                    << " with mesh normal " << np[i]
+                    << " is " << cos
+                    //<< exit(FatalError);
+                    << endl;
+            }
+        }
+    }
 }
 
 
@@ -443,10 +655,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::repatch
 
         if (index != -1)
         {
-            FatalErrorIn
-            (
-                "fvMeshDistribute::repatch(const labelList&, labelListList&)"
-            )   << "reverseFaceMap contains -1 at index:"
+            FatalErrorInFunction
+                << "reverseFaceMap contains -1 at index:"
                 << index << endl
                 << "This means that the repatch operation was not just"
                 << " a shuffle?" << abort(FatalError);
@@ -455,9 +665,14 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::repatch
 
     forAll(constructFaceMap, procI)
     {
-        inplaceRenumber(map().reverseFaceMap(), constructFaceMap[procI]);
+        inplaceRenumberWithFlip
+        (
+            map().reverseFaceMap(),
+            false,
+            true,
+            constructFaceMap[procI]
+        );
     }
-
 
     return map;
 }
@@ -520,7 +735,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::mergeSharedPoints
             }
             else
             {
-                FatalErrorIn("fvMeshDistribute::mergeSharedPoints()")
+                FatalErrorInFunction
                     << "Problem. oldPointI:" << oldPointI
                     << " newPointI:" << newPointI << abort(FatalError);
             }
@@ -886,17 +1101,51 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::doRemoveCells
         meshMod
     );
 
+
+    //// Generate test field
+    //tmp<surfaceScalarField> sfld(generateTestField(mesh_));
+
+    // Save internal fields (note: not as DimensionedFields since would
+    // get mapped)
+    PtrList<Field<scalar> > sFlds;
+    saveInternalFields(sFlds);
+    PtrList<Field<vector> > vFlds;
+    saveInternalFields(vFlds);
+    PtrList<Field<sphericalTensor> > sptFlds;
+    saveInternalFields(sptFlds);
+    PtrList<Field<symmTensor> > sytFlds;
+    saveInternalFields(sytFlds);
+    PtrList<Field<tensor> > tFlds;
+    saveInternalFields(tFlds);
+
     // Change the mesh. No inflation. Note: no parallel comms allowed.
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, false);
 
     // Update fields
     mesh_.updateMesh(map);
 
+
+    // Any exposed faces in a surfaceField will not be mapped. Map the value
+    // of these separately (until there is support in all PatchFields for
+    // mapping from internal faces ...)
+
+    mapExposedFaces(map(), sFlds);
+    mapExposedFaces(map(), vFlds);
+    mapExposedFaces(map(), sptFlds);
+    mapExposedFaces(map(), sytFlds);
+    mapExposedFaces(map(), tFlds);
+
+
+    //// Test test field
+    //testField(sfld);
+
+
     // Move mesh (since morphing does not do this)
     if (map().hasMotionPoints())
     {
         mesh_.movePoints(map().preMotionPoints());
     }
+
 
     return map;
 }
@@ -915,10 +1164,18 @@ void Foam::fvMeshDistribute::addProcPatches
     // contain for all current boundary faces the global patchID (for non-proc
     // patch) or the processor.
 
+    // Determine a visit order such that the processor patches get added
+    // in order of increasing neighbour processor (and for same neighbour
+    // processor (in case of processor cyclics) in order of increasing
+    // 'refer' patch)
+    labelList indices;
+    sortedOrder(nbrProc, indices, lessProcPatches(nbrProc, referPatchID));
+
     procPatchID.setSize(Pstream::nProcs());
 
-    forAll(nbrProc, bFaceI)
+    forAll(indices, i)
     {
+        label bFaceI = indices[i];
         label procI = nbrProc[bFaceI];
 
         if (procI != -1 && procI != Pstream::myProcNo())
@@ -946,7 +1203,7 @@ void Foam::fvMeshDistribute::addProcPatches
                         mesh_.boundaryMesh().size(),
                         mesh_.boundaryMesh(),
                         Pstream::myProcNo(),
-                        nbrProc[bFaceI]
+                        procI
                     );
 
                     procPatchID[procI].insert
@@ -989,7 +1246,7 @@ void Foam::fvMeshDistribute::addProcPatches
                         mesh_.boundaryMesh().size(),
                         mesh_.boundaryMesh(),
                         Pstream::myProcNo(),
-                        nbrProc[bFaceI],
+                        procI,
                         cycName,
                         pcPatch.transform()
                     );
@@ -1340,7 +1597,7 @@ Foam::labelList Foam::fvMeshDistribute::countCells
 
         if (newProc < 0 || newProc >= Pstream::nProcs())
         {
-            FatalErrorIn("fvMeshDistribute::distribute(const labelList&)")
+            FatalErrorInFunction
                 << "Distribution should be in range 0.." << Pstream::nProcs()-1
                 << endl
                 << "At index " << cellI << " distribution:" << newProc
@@ -1360,7 +1617,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     // Some checks on distribution
     if (distribution.size() != mesh_.nCells())
     {
-        FatalErrorIn("fvMeshDistribute::distribute(const labelList&)")
+        FatalErrorInFunction
             << "Size of distribution:"
             << distribution.size() << " mesh nCells:" << mesh_.nCells()
             << abort(FatalError);
@@ -1372,7 +1629,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     // Check all processors have same non-proc patches in same order.
     if (patches.checkParallelSync(true))
     {
-        FatalErrorIn("fvMeshDistribute::distribute(const labelList&)")
+        FatalErrorInFunction
             << "This application requires all non-processor patches"
             << " to be present in the same order on all patches" << nl
             << "followed by the processor patches (which of course are unique)."
@@ -1524,7 +1781,33 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     const wordList surfTensors(mesh_.names(surfaceTensorField::typeName));
     checkEqualWordList("surfaceTensorFields", surfTensors);
 
+    typedef volScalarField::DimensionedInternalField dimScalType;
+    const wordList dimScalars(mesh_.names(dimScalType::typeName));
+    checkEqualWordList("volScalarField::DimensionedInternalField", dimScalars);
 
+    typedef volVectorField::DimensionedInternalField dimVecType;
+    const wordList dimVectors(mesh_.names(dimVecType::typeName));
+    checkEqualWordList("volVectorField::DimensionedInternalField", dimVectors);
+
+    typedef volSphericalTensorField::DimensionedInternalField dimSphereType;
+    const wordList dimSphereTensors(mesh_.names(dimSphereType::typeName));
+    checkEqualWordList
+    (
+        "volSphericalTensorField::DimensionedInternalField",
+        dimSphereTensors
+    );
+
+    typedef volSymmTensorField::DimensionedInternalField dimSymmTensorType;
+    const wordList dimSymmTensors(mesh_.names(dimSymmTensorType::typeName));
+    checkEqualWordList
+    (
+        "volSymmTensorField::DimensionedInternalField",
+        dimSymmTensors
+    );
+
+    typedef volTensorField::DimensionedInternalField dimTensorType;
+    const wordList dimTensors(mesh_.names(dimTensorType::typeName));
+    checkEqualWordList("volTensorField::DimensionedInternalField", dimTensors);
 
 
     // Find patch to temporarily put exposed and processor faces into.
@@ -1650,10 +1933,13 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
             );
 
             subCellMap[recvProc] = subsetter.cellMap();
-            subFaceMap[recvProc] = renumber
+            subFaceMap[recvProc] = subsetter.faceFlipMap();
+            inplaceRenumberWithFlip
             (
                 repatchFaceMap,
-                subsetter.faceMap()
+                false,      // oldToNew has flip
+                true,       // subFaceMap has flip
+                subFaceMap[recvProc]
             );
             subPointMap[recvProc] = subsetter.pointMap();
             subPatchMap[recvProc] = subsetter.patchMap();
@@ -1705,6 +1991,8 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
                 procSourceNewNbrProc,
                 str
             );
+
+            // volFields
             sendFields<volScalarField>(recvProc, volScalars, subsetter, str);
             sendFields<volVectorField>(recvProc, volVectors, subsetter, str);
             sendFields<volSphericalTensorField>
@@ -1723,6 +2011,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
             );
             sendFields<volTensorField>(recvProc, volTensors, subsetter, str);
 
+            // surfaceFields
             sendFields<surfaceScalarField>
             (
                 recvProc,
@@ -1755,6 +2044,43 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
             (
                 recvProc,
                 surfTensors,
+                subsetter,
+                str
+            );
+
+            // dimensionedFields
+            sendFields<volScalarField::DimensionedInternalField>
+            (
+                recvProc,
+                dimScalars,
+                subsetter,
+                str
+            );
+            sendFields<volVectorField::DimensionedInternalField>
+            (
+                recvProc,
+                dimVectors,
+                subsetter,
+                str
+            );
+            sendFields<volSphericalTensorField::DimensionedInternalField>
+            (
+                recvProc,
+                dimSphereTensors,
+                subsetter,
+                str
+            );
+            sendFields<volSymmTensorField::DimensionedInternalField>
+            (
+                recvProc,
+                dimSymmTensors,
+                subsetter,
+                str
+            );
+            sendFields<volTensorField::DimensionedInternalField>
+            (
+                recvProc,
+                dimTensors,
                 subsetter,
                 str
             );
@@ -1795,12 +2121,24 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
             repatchFaceMap,
             subMap().faceMap()
         );
+        // Insert the sign bit from face flipping
+        labelList& faceMap = subFaceMap[Pstream::myProcNo()];
+        forAll(faceMap, faceI)
+        {
+            faceMap[faceI] += 1;
+        }
+        const labelHashSet& flip = subMap().flipFaceFlux();
+        forAllConstIter(labelHashSet, flip, iter)
+        {
+            label faceI = iter.key();
+            faceMap[faceI] = -faceMap[faceI];
+        }
         subPointMap[Pstream::myProcNo()] = subMap().pointMap();
         subPatchMap[Pstream::myProcNo()] = identity(patches.size());
 
         // Initialize all addressing into current mesh
         constructCellMap[Pstream::myProcNo()] = identity(mesh_.nCells());
-        constructFaceMap[Pstream::myProcNo()] = identity(mesh_.nFaces());
+        constructFaceMap[Pstream::myProcNo()] = identity(mesh_.nFaces()) + 1;
         constructPointMap[Pstream::myProcNo()] = identity(mesh_.nPoints());
         constructPatchMap[Pstream::myProcNo()] = identity(patches.size());
 
@@ -1896,16 +2234,25 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
             labelList domainSourceNewNbrProc;
 
             autoPtr<fvMesh> domainMeshPtr;
+
             PtrList<volScalarField> vsf;
             PtrList<volVectorField> vvf;
             PtrList<volSphericalTensorField> vsptf;
             PtrList<volSymmTensorField> vsytf;
             PtrList<volTensorField> vtf;
+
             PtrList<surfaceScalarField> ssf;
             PtrList<surfaceVectorField> svf;
             PtrList<surfaceSphericalTensorField> ssptf;
             PtrList<surfaceSymmTensorField> ssytf;
             PtrList<surfaceTensorField> stf;
+
+            PtrList<volScalarField::DimensionedInternalField> dsf;
+            PtrList<volVectorField::DimensionedInternalField> dvf;
+            PtrList<volSphericalTensorField::DimensionedInternalField> dstf;
+            PtrList<volSymmTensorField::DimensionedInternalField> dsytf;
+            PtrList<volTensorField::DimensionedInternalField> dtf;
+
 
             // Opposite of sendMesh
             {
@@ -1932,6 +2279,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
                 // of problems reading consecutive fields from single stream.
                 dictionary fieldDicts(str);
 
+                // Vol fields
                 receiveFields<volScalarField>
                 (
                     sendProc,
@@ -1973,6 +2321,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
                     fieldDicts.subDict(volTensorField::typeName)
                 );
 
+                // Surface fields
                 receiveFields<surfaceScalarField>
                 (
                     sendProc,
@@ -2013,12 +2362,70 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
                     stf,
                     fieldDicts.subDict(surfaceTensorField::typeName)
                 );
+
+                // Dimensioned fields
+                receiveFields<volScalarField::DimensionedInternalField>
+                (
+                    sendProc,
+                    dimScalars,
+                    domainMesh,
+                    dsf,
+                    fieldDicts.subDict
+                    (
+                        volScalarField::DimensionedInternalField::typeName
+                    )
+                );
+                receiveFields<volVectorField::DimensionedInternalField>
+                (
+                    sendProc,
+                    dimVectors,
+                    domainMesh,
+                    dvf,
+                    fieldDicts.subDict
+                    (
+                        volVectorField::DimensionedInternalField::typeName
+                    )
+                );
+                receiveFields<volSphericalTensorField::DimensionedInternalField>
+                (
+                    sendProc,
+                    dimSphereTensors,
+                    domainMesh,
+                    dstf,
+                    fieldDicts.subDict
+                    (
+                        volSphericalTensorField::DimensionedInternalField::
+                        typeName
+                    )
+                );
+                receiveFields<volSymmTensorField::DimensionedInternalField>
+                (
+                    sendProc,
+                    dimSymmTensors,
+                    domainMesh,
+                    dsytf,
+                    fieldDicts.subDict
+                    (
+                        volSymmTensorField::DimensionedInternalField::typeName
+                    )
+                );
+                receiveFields<volTensorField::DimensionedInternalField>
+                (
+                    sendProc,
+                    dimTensors,
+                    domainMesh,
+                    dtf,
+                    fieldDicts.subDict
+                    (
+                        volTensorField::DimensionedInternalField::typeName
+                    )
+                );
             }
             const fvMesh& domainMesh = domainMeshPtr();
 
 
             constructCellMap[sendProc] = identity(domainMesh.nCells());
-            constructFaceMap[sendProc] = identity(domainMesh.nFaces());
+            constructFaceMap[sendProc] = identity(domainMesh.nFaces()) + 1;
             constructPointMap[sendProc] = identity(domainMesh.nPoints());
             constructPatchMap[sendProc] =
                 identity(domainMesh.boundaryMesh().size());
@@ -2129,28 +2536,76 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
                 domainSourceNewNbrProc
             );
 
-            // Update all addressing so xxProcAddressing points to correct item
-            // in masterMesh.
+            // Update all addressing so xxProcAddressing points to correct
+            // item in masterMesh.
             const labelList& oldCellMap = map().oldCellMap();
             const labelList& oldFaceMap = map().oldFaceMap();
             const labelList& oldPointMap = map().oldPointMap();
             const labelList& oldPatchMap = map().oldPatchMap();
 
+            //Note: old mesh faces never flipped!
             forAll(constructPatchMap, procI)
             {
                 if (procI != sendProc && constructPatchMap[procI].size())
                 {
                     // Processor already in mesh (either myProcNo or received)
                     inplaceRenumber(oldCellMap, constructCellMap[procI]);
-                    inplaceRenumber(oldFaceMap, constructFaceMap[procI]);
+                    inplaceRenumberWithFlip
+                    (
+                        oldFaceMap,
+                        false,
+                        true,
+                        constructFaceMap[procI]
+                    );
                     inplaceRenumber(oldPointMap, constructPointMap[procI]);
                     inplaceRenumber(oldPatchMap, constructPatchMap[procI]);
                 }
             }
 
+
+            labelHashSet flippedAddedFaces;
+            {
+                // Find out if any faces of domain mesh were flipped (boundary
+                // faces becoming internal)
+                label nBnd = domainMesh.nFaces()-domainMesh.nInternalFaces();
+                flippedAddedFaces.resize(nBnd/4);
+
+                for
+                (
+                    label domainFaceI = domainMesh.nInternalFaces();
+                    domainFaceI < domainMesh.nFaces();
+                    domainFaceI++
+                )
+                {
+                    label newFaceI = map().addedFaceMap()[domainFaceI];
+                    label newCellI = mesh_.faceOwner()[newFaceI];
+
+                    label domainCellI = domainMesh.faceOwner()[domainFaceI];
+
+                    if (newCellI != map().addedCellMap()[domainCellI])
+                    {
+                        flippedAddedFaces.insert(domainFaceI);
+                    }
+                }
+            }
+
+
             // Added processor
             inplaceRenumber(map().addedCellMap(), constructCellMap[sendProc]);
-            inplaceRenumber(map().addedFaceMap(), constructFaceMap[sendProc]);
+            // Add flip
+            forAllConstIter(labelHashSet, flippedAddedFaces, iter)
+            {
+                label domainFaceI = iter.key();
+                label& val = constructFaceMap[sendProc][domainFaceI];
+                val = -val;
+            }
+            inplaceRenumberWithFlip
+            (
+                map().addedFaceMap(),
+                false,
+                true,           // constructFaceMap has flip sign
+                constructFaceMap[sendProc]
+            );
             inplaceRenumber(map().addedPointMap(), constructPointMap[sendProc]);
             inplaceRenumber(map().addedPatchMap(), constructPatchMap[sendProc]);
 
@@ -2260,35 +2715,6 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
         pTraits<tensor>::zero
     );
 
-    initPatchFields<surfaceScalarField, processorFvsPatchField<scalar> >
-    (
-        pTraits<scalar>::zero
-    );
-    initPatchFields<surfaceVectorField, processorFvsPatchField<vector> >
-    (
-        pTraits<vector>::zero
-    );
-    initPatchFields
-    <
-        surfaceSphericalTensorField,
-        processorFvsPatchField<sphericalTensor>
-    >
-    (
-        pTraits<sphericalTensor>::zero
-    );
-    initPatchFields
-    <
-        surfaceSymmTensorField,
-        processorFvsPatchField<symmTensor>
-    >
-    (
-        pTraits<symmTensor>::zero
-    );
-    initPatchFields<surfaceTensorField, processorFvsPatchField<tensor> >
-    (
-        pTraits<tensor>::zero
-    );
-
 
     mesh_.setInstance(mesh_.time().timeName());
 
@@ -2332,7 +2758,10 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
             constructPointMap.xfer(),
             constructFaceMap.xfer(),
             constructCellMap.xfer(),
-            constructPatchMap.xfer()
+            constructPatchMap.xfer(),
+
+            true,           // subFaceMap has flip
+            true            // constructFaceMap has flip
         )
     );
 }

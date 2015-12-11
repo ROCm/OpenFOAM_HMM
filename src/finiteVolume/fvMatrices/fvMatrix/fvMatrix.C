@@ -43,11 +43,8 @@ void Foam::fvMatrix<Type>::addToInternalField
 {
     if (addr.size() != pf.size())
     {
-        FatalErrorIn
-        (
-            "fvMatrix<Type>::addToInternalField(const labelUList&, "
-            "const Field&, Field&)"
-        )   << "sizes of addressing and field are different"
+        FatalErrorInFunction
+            << "sizes of addressing and field are different"
             << abort(FatalError);
     }
 
@@ -83,11 +80,8 @@ void Foam::fvMatrix<Type>::subtractFromInternalField
 {
     if (addr.size() != pf.size())
     {
-        FatalErrorIn
-        (
-            "fvMatrix<Type>::addToInternalField(const labelUList&, "
-            "const Field&, Field&)"
-        )   << "sizes of addressing and field are different"
+        FatalErrorInFunction
+            << "sizes of addressing and field are different"
             << abort(FatalError);
     }
 
@@ -531,7 +525,7 @@ void Foam::fvMatrix<Type>::relax(const scalar alpha)
 
     if (debug)
     {
-        InfoIn("fvMatrix<Type>::relax(const scalar alpha)")
+        InfoInFunction
             << "Relaxing " << psi_.name() << " by " << alpha
             << endl;
     }
@@ -622,7 +616,7 @@ void Foam::fvMatrix<Type>::relax(const scalar alpha)
             psi_.mesh().comm()
         );
 
-        InfoIn("fvMatrix<Type>::relax(const scalar alpha)")
+        InfoInFunction
             << "Matrix dominance test for " << psi_.name() << nl
             << "    number of non-dominant cells   : " << nNon << nl
             << "    maximum relative non-dominance : " << maxNon << nl
@@ -808,11 +802,7 @@ Foam::fvMatrix<Type>::H() const
 
     typename Type::labelType validComponents
     (
-        pow
-        (
-            psi_.mesh().solutionD(),
-            pTraits<typename powProduct<Vector<label>, Type::rank>::type>::zero
-        )
+        psi_.mesh().template validComponents<Type>()
     );
 
     for (direction cmpt=0; cmpt<Type::nComponents; cmpt++)
@@ -884,7 +874,7 @@ flux() const
 {
     if (!psi_.mesh().fluxRequired(psi_.name()))
     {
-        FatalErrorIn("fvMatrix<Type>::flux()")
+        FatalErrorInFunction
             << "flux requested but " << psi_.name()
             << " not specified in the fluxRequired sub-dictionary"
                " of fvSchemes."
@@ -968,14 +958,14 @@ void Foam::fvMatrix<Type>::operator=(const fvMatrix<Type>& fvmv)
 {
     if (this == &fvmv)
     {
-        FatalErrorIn("fvMatrix<Type>::operator=(const fvMatrix<Type>&)")
+        FatalErrorInFunction
             << "attempted assignment to self"
             << abort(FatalError);
     }
 
     if (&psi_ != &(fvmv.psi_))
     {
-        FatalErrorIn("fvMatrix<Type>::operator=(const fvMatrix<Type>&)")
+        FatalErrorInFunction
             << "different fields"
             << abort(FatalError);
     }
@@ -1213,11 +1203,8 @@ void Foam::fvMatrix<Type>::operator*=
 
     if (faceFluxCorrectionPtr_)
     {
-        FatalErrorIn
-        (
-            "fvMatrix<Type>::operator*="
-            "(const DimensionedField<scalar, volMesh>&)"
-        )   << "cannot scale a matrix containing a faceFluxCorrection"
+        FatalErrorInFunction
+            << "cannot scale a matrix containing a faceFluxCorrection"
             << abort(FatalError);
     }
 }
@@ -1276,10 +1263,8 @@ void Foam::checkMethod
 {
     if (&fvm1.psi() != &fvm2.psi())
     {
-        FatalErrorIn
-        (
-            "checkMethod(const fvMatrix<Type>&, const fvMatrix<Type>&)"
-        )   << "incompatible fields for operation "
+        FatalErrorInFunction
+            << "incompatible fields for operation "
             << endl << "    "
             << "[" << fvm1.psi().name() << "] "
             << op
@@ -1289,10 +1274,8 @@ void Foam::checkMethod
 
     if (dimensionSet::debug && fvm1.dimensions() != fvm2.dimensions())
     {
-        FatalErrorIn
-        (
-            "checkMethod(const fvMatrix<Type>&, const fvMatrix<Type>&)"
-        )   << "incompatible dimensions for operation "
+        FatalErrorInFunction
+            << "incompatible dimensions for operation "
             << endl << "    "
             << "[" << fvm1.psi().name() << fvm1.dimensions()/dimVolume << " ] "
             << op
@@ -1312,11 +1295,7 @@ void Foam::checkMethod
 {
     if (dimensionSet::debug && fvm.dimensions()/dimVolume != df.dimensions())
     {
-        FatalErrorIn
-        (
-            "checkMethod(const fvMatrix<Type>&, const GeometricField<Type, "
-            "fvPatchField, volMesh>&)"
-        )   <<  "incompatible dimensions for operation "
+        FatalErrorInFunction
             << endl << "    "
             << "[" << fvm.psi().name() << fvm.dimensions()/dimVolume << " ] "
             << op
@@ -1336,10 +1315,8 @@ void Foam::checkMethod
 {
     if (dimensionSet::debug && fvm.dimensions()/dimVolume != dt.dimensions())
     {
-        FatalErrorIn
-        (
-            "checkMethod(const fvMatrix<Type>&, const dimensioned<Type>&)"
-        )   << "incompatible dimensions for operation "
+        FatalErrorInFunction
+            << "incompatible dimensions for operation "
             << endl << "    "
             << "[" << fvm.psi().name() << fvm.dimensions()/dimVolume << " ] "
             << op
@@ -1350,7 +1327,7 @@ void Foam::checkMethod
 
 
 template<class Type>
-Foam::solverPerformance Foam::solve
+Foam::SolverPerformance<Type> Foam::solve
 (
     fvMatrix<Type>& fvm,
     const dictionary& solverControls
@@ -1360,13 +1337,13 @@ Foam::solverPerformance Foam::solve
 }
 
 template<class Type>
-Foam::solverPerformance Foam::solve
+Foam::SolverPerformance<Type> Foam::solve
 (
     const tmp<fvMatrix<Type> >& tfvm,
     const dictionary& solverControls
 )
 {
-    solverPerformance solverPerf =
+    SolverPerformance<Type> solverPerf =
         const_cast<fvMatrix<Type>&>(tfvm()).solve(solverControls);
 
     tfvm.clear();
@@ -1376,15 +1353,15 @@ Foam::solverPerformance Foam::solve
 
 
 template<class Type>
-Foam::solverPerformance Foam::solve(fvMatrix<Type>& fvm)
+Foam::SolverPerformance<Type> Foam::solve(fvMatrix<Type>& fvm)
 {
     return fvm.solve();
 }
 
 template<class Type>
-Foam::solverPerformance Foam::solve(const tmp<fvMatrix<Type> >& tfvm)
+Foam::SolverPerformance<Type> Foam::solve(const tmp<fvMatrix<Type> >& tfvm)
 {
-    solverPerformance solverPerf =
+    SolverPerformance<Type> solverPerf =
         const_cast<fvMatrix<Type>&>(tfvm()).solve();
 
     tfvm.clear();

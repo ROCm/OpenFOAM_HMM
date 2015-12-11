@@ -43,13 +43,13 @@ surfWriters = sampledSurface/writers
 $(surfWriters)/surfaceWriter.C
 $(surfWriters)/dx/dxSurfaceWriter.C
 $(surfWriters)/ensight/ensightSurfaceWriter.C
-$(surfWriters)/ensight/ensightPTraits.C
 $(surfWriters)/foamFile/foamFileSurfaceWriter.C
 $(surfWriters)/nastran/nastranSurfaceWriter.C
 $(surfWriters)/proxy/proxySurfaceWriter.C
 $(surfWriters)/raw/rawSurfaceWriter.C
 $(surfWriters)/starcd/starcdSurfaceWriter.C
 $(surfWriters)/vtk/vtkSurfaceWriter.C
+$(surfWriters)/boundaryData/boundaryDataSurfaceWriter.C
 
 graphField/writePatchGraph.C
 graphField/writeCellGraph.C
@@ -61,6 +61,7 @@ meshToMeshMethods = meshToMesh/calcMethod
 $(meshToMeshMethods)/meshToMeshMethod/meshToMeshMethod.C
 $(meshToMeshMethods)/meshToMeshMethod/meshToMeshMethodNew.C
 $(meshToMeshMethods)/cellVolumeWeight/cellVolumeWeightMethod.C
+$(meshToMeshMethods)/correctedCellVolumeWeight/correctedCellVolumeWeightMethod.C
 $(meshToMeshMethods)/direct/directMethod.C
 $(meshToMeshMethods)/mapNearest/mapNearestMethod.C
 

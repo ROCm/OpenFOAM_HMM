@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
@@ -39,11 +39,13 @@ nonuniformTransformCyclic
 processor
 {
     type  processor;
+    value $internalField;
 }
 
 processorCyclic
 {
     type  processorCyclic;
+    value $internalField;
 }
 
 symmetryPlane

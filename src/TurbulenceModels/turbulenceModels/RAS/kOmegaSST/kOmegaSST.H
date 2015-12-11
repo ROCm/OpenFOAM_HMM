@@ -31,6 +31,8 @@ Description
     Implementation of the k-omega-SST turbulence model for
     incompressible and compressible flows.
 
+    Light wrapper around base class.
+
     Turbulence model described in:
     \verbatim
         Menter, F. R. & Esch, T. (2001).
@@ -98,11 +100,15 @@ Description
 SourceFiles
     kOmegaSST.C
 
+SeeAlso
+    kOmegaSSTBase.H
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef kOmegaSST_H
 #define kOmegaSST_H
 
+#include "kOmegaSSTBase.H"
 #include "RASModel.H"
 #include "eddyViscosity.H"
 
@@ -114,110 +120,21 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class kOmegaSST Declaration
+                          Class kOmegaSST Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class BasicTurbulenceModel>
 class kOmegaSST
 :
-    public eddyViscosity<RASModel<BasicTurbulenceModel> >
+    public kOmegaSSTBase<eddyViscosity<RASModel<BasicTurbulenceModel> > >
 {
-    // Private Member Functions
-
-        // Disallow default bitwise copy construct and assignment
-        kOmegaSST(const kOmegaSST&);
-        kOmegaSST& operator=(const kOmegaSST&);
-
 
 protected:
 
-    // Protected data
+    // Protecetd Member Functions
 
-        // Model coefficients
-
-            dimensionedScalar alphaK1_;
-            dimensionedScalar alphaK2_;
-
-            dimensionedScalar alphaOmega1_;
-            dimensionedScalar alphaOmega2_;
-
-            dimensionedScalar gamma1_;
-            dimensionedScalar gamma2_;
-
-            dimensionedScalar beta1_;
-            dimensionedScalar beta2_;
-
-            dimensionedScalar betaStar_;
-
-            dimensionedScalar a1_;
-            dimensionedScalar b1_;
-            dimensionedScalar c1_;
-
-            Switch F3_;
-
-
-        // Fields
-
-            //- Wall distance
-            //  Note: different to wall distance in parent RASModel
-            //  which is for near-wall cells only
-            const volScalarField& y_;
-
-            volScalarField k_;
-            volScalarField omega_;
-
-
-    // Private Member Functions
-
-        tmp<volScalarField> F1(const volScalarField& CDkOmega) const;
-        tmp<volScalarField> F2() const;
-        tmp<volScalarField> F3() const;
-        tmp<volScalarField> F23() const;
-
-        tmp<volScalarField> blend
-        (
-            const volScalarField& F1,
-            const dimensionedScalar& psi1,
-            const dimensionedScalar& psi2
-        ) const
-        {
-            return F1*(psi1 - psi2) + psi2;
-        }
-
-        tmp<volScalarField> alphaK(const volScalarField& F1) const
-        {
-            return blend(F1, alphaK1_, alphaK2_);
-        }
-
-        tmp<volScalarField> alphaOmega(const volScalarField& F1) const
-        {
-            return blend(F1, alphaOmega1_, alphaOmega2_);
-        }
-
-        tmp<volScalarField> beta(const volScalarField& F1) const
-        {
-            return blend(F1, beta1_, beta2_);
-        }
-
-        tmp<volScalarField> gamma(const volScalarField& F1) const
-        {
-            return blend(F1, gamma1_, gamma2_);
-        }
-
-        void correctNut(const volScalarField& S2);
-
-
-    // Protected Member Functions
-
+        virtual void correctNut(const volScalarField& S2);
         virtual void correctNut();
-        virtual tmp<fvScalarMatrix> kSource() const;
-        virtual tmp<fvScalarMatrix> omegaSource() const;
-        virtual tmp<fvScalarMatrix> Qsas
-        (
-            const volScalarField& S2,
-            const volScalarField& gamma,
-            const volScalarField& beta
-        ) const;
 
 
 public:
@@ -250,68 +167,6 @@ public:
     //- Destructor
     virtual ~kOmegaSST()
     {}
-
-
-    // Member Functions
-
-        //- Re-read model coefficients if they have changed
-        virtual bool read();
-
-        //- Return the effective diffusivity for k
-        tmp<volScalarField> DkEff(const volScalarField& F1) const
-        {
-            return tmp<volScalarField>
-            (
-                new volScalarField("DkEff", alphaK(F1)*this->nut_ + this->nu())
-            );
-        }
-
-        //- Return the effective diffusivity for omega
-        tmp<volScalarField> DomegaEff(const volScalarField& F1) const
-        {
-            return tmp<volScalarField>
-            (
-                new volScalarField
-                (
-                    "DomegaEff",
-                    alphaOmega(F1)*this->nut_ + this->nu()
-                )
-            );
-        }
-
-        //- Return the turbulence kinetic energy
-        virtual tmp<volScalarField> k() const
-        {
-            return k_;
-        }
-
-        //- Return the turbulence kinetic energy dissipation rate
-        virtual tmp<volScalarField> epsilon() const
-        {
-              return tmp<volScalarField>
-            (
-                new volScalarField
-                (
-                    IOobject
-                    (
-                        "epsilon",
-                        this->mesh_.time().timeName(),
-                        this->mesh_
-                    ),
-                    betaStar_*k_*omega_,
-                    omega_.boundaryField().types()
-                )
-            );
-        }
-
-        //- Return the turbulence kinetic energy dissipation rate
-        virtual tmp<volScalarField> omega() const
-        {
-            return omega_;
-        }
-
-        //- Solve the turbulence equations and correct the turbulence viscosity
-        virtual void correct();
 };
 
 

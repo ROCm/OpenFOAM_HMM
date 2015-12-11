@@ -52,9 +52,9 @@ Description
 
     where
     \vartable
-        U_p     = patch velocity [m/s]
-        U_{in}  = user-specified inlet velocity
-        U_{p,srf} = SRF velocity
+        U_p     | patch velocity [m/s]
+        U_{in}  | user-specified inlet velocity
+        U_{p,srf} | SRF velocity
     \endvartable
 
 

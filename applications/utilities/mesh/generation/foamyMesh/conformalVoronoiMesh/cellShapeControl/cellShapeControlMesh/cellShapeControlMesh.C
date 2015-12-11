@@ -65,10 +65,8 @@ word cellShapeControlMesh::meshSubDir = "cellShapeControlMesh";
 //
 //    if (!surfHit.hit())
 //    {
-//        FatalErrorIn
-//        (
-//            "Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment"
-//        )   << "findSurfaceNearest did not find a hit across the surfaces."
+//        FatalErrorInFunction
+//            << "findSurfaceNearest did not find a hit across the surfaces."
 //            << exit(FatalError) << endl;
 //    }
 //
@@ -174,13 +172,8 @@ word cellShapeControlMesh::meshSubDir = "cellShapeControlMesh";
 //
 //    if (closestSpokeSurface == -1)
 //    {
-////        WarningIn
-////        (
-////            "conformalVoronoiMesh::requiredAlignment"
-////            "("
-////                "const Foam::point& pt"
-////            ") const"
-////        )   << "No secondary surface hit found in spoke search "
+////        WarningInFunction
+////            << "No secondary surface hit found in spoke search "
 ////            << "using " << s
 ////            << " spokes, try increasing alignmentSearchSpokes."
 ////            << endl;
@@ -203,7 +196,7 @@ word cellShapeControlMesh::meshSubDir = "cellShapeControlMesh";
 //
 //    if (mag(ns) < SMALL)
 //    {
-//        FatalErrorIn("conformalVoronoiMesh::requiredAlignment")
+//        FatalErrorInFunction
 //            << "Parallel normals detected in spoke search." << nl
 //            << "point: " << pt << nl
 //            << "closest surface point: " << surfHit.hitPoint() << nl
@@ -355,10 +348,8 @@ void Foam::cellShapeControlMesh::writeTriangulation()
     }
     else
     {
-        FatalErrorIn
-        (
-            "Foam::triangulatedMesh::writeRefinementTriangulation()"
-        )   << "Triangulation is not valid"
+        FatalErrorInFunction
+            << "Triangulation is not valid"
             << abort(FatalError);
     }
 }
@@ -392,61 +383,56 @@ Foam::cellShapeControlMesh::cellShapeControlMesh(const Time& runTime)
 
         if (mesh.nPoints() == this->vertexCount())
         {
-            pointScalarField sizes
+            IOobject io
             (
-                IOobject
-                (
-                    "sizes",
-                    runTime.timeName(),
-                    meshSubDir,
-                    runTime,
-                    IOobject::READ_IF_PRESENT,
-                    IOobject::NO_WRITE,
-                    false
-                ),
-                pointMesh::New(mesh)
+                "sizes",
+                runTime.timeName(),
+                meshSubDir,
+                runTime,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
             );
 
-            triadIOField alignments
-            (
-                IOobject
-                (
-                    "alignments",
-                    mesh.time().timeName(),
-                    meshSubDir,
-                    mesh.time(),
-                    IOobject::READ_IF_PRESENT,
-                    IOobject::AUTO_WRITE,
-                    false
-                )
-            );
-
-            if
-            (
-                sizes.size() == this->vertexCount()
-             && alignments.size() == this->vertexCount()
-            )
+            if (io.headerOk())
             {
-                for
+                pointScalarField sizes(io, pointMesh::New(mesh));
+
+                triadIOField alignments
                 (
-                    Finite_vertices_iterator vit = finite_vertices_begin();
-                    vit != finite_vertices_end();
-                    ++vit
-                )
+                    IOobject
+                    (
+                        "alignments",
+                        mesh.time().timeName(),
+                        meshSubDir,
+                        mesh.time(),
+                        IOobject::MUST_READ,
+                        IOobject::NO_WRITE,
+                        false
+                    )
+                );
+
+                if (alignments.size() == this->vertexCount())
                 {
-                    vit->targetCellSize() = sizes[vit->index()];
-                    vit->alignment() = alignments[vit->index()];
+                    for
+                    (
+                        Finite_vertices_iterator vit = finite_vertices_begin();
+                        vit != finite_vertices_end();
+                        ++vit
+                    )
+                    {
+                        vit->targetCellSize() = sizes[vit->index()];
+                        vit->alignment() = alignments[vit->index()];
+                    }
                 }
-            }
-            else
-            {
-                FatalErrorIn
-                (
-                    "Foam::cellShapeControlMesh::cellShapeControlMesh"
-                    "(const Time&)"
-                )   << "Cell size point field is not the same size as the "
-                    << "mesh."
-                    << abort(FatalError);
+                else
+                {
+                    FatalErrorInFunction
+                        << "Cell alignments point field " << alignments.size()
+                        << " is not the same size as the number of vertices"
+                        << " in the mesh " << this->vertexCount()
+                        << abort(FatalError);
+                }
             }
         }
     }
@@ -672,7 +658,7 @@ void Foam::cellShapeControlMesh::write() const
             IOobject::AUTO_WRITE
         ),
         pointMesh::New(mesh),
-        scalar(0)
+        dimensionedScalar("zero", dimLength, scalar(0))
     );
 
     triadIOField alignments

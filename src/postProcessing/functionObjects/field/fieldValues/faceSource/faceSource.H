@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -257,9 +257,6 @@ protected:
         //- Start index of fields that require application of flipMap
         label orientedFieldsStart_;
 
-        //- Scale factor - optional
-        scalar scaleFactor_;
-
         //- Total area of the faceSource
         scalar totalArea_;
 
@@ -300,7 +297,7 @@ protected:
 
         //- Return field values by looking up field name
         template<class Type>
-        tmp<Field<Type> > getFieldValues
+        tmp<Field<Type> > setFieldValues
         (
             const word& fieldName,
             const bool mustGet = false,
@@ -328,7 +325,7 @@ protected:
         ) const;
 
         //- Output file header information
-        virtual void writeFileHeader(const label i);
+        virtual void writeFileHeader(Ostream& os) const;
 
 
 public:

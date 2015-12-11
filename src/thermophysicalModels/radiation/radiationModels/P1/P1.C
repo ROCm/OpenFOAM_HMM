@@ -286,7 +286,7 @@ Foam::radiation::P1::Ru() const
     const DimensionedField<scalar, volMesh> a =
         absorptionEmission_->aCont()().dimensionedInternalField();
 
-    return a*G - 4.0*E;
+    return a*G - E;
 }
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,8 +47,9 @@ void Foam::nearWallFields::createFields
 
             if (obr_.found(sampleFldName))
             {
-                Info<< "    a field " << sampleFldName
-                    << " already exists on the mesh."
+                WarningInFunction
+                    << "    a field named " << sampleFldName
+                    << " already exists on the mesh"
                     << endl;
             }
             else
@@ -63,7 +64,8 @@ void Foam::nearWallFields::createFields
 
                 sflds.set(sz, new vfType(io, fld));
 
-                Info<< "    created " << sflds[sz].name() << " to sample "
+                if (log_) Info
+                    << "    created " << sflds[sz].name() << " to sample "
                     << fld.name() << endl;
             }
         }

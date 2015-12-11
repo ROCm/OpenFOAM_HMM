@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -197,9 +197,6 @@ private:
 
     // Private Member Functions
 
-        //- Set data for parallel running
-        static void setParRun(const label nProcs);
-
         //- Calculate linear communication schedule
         static List<commsStruct> calcLinearComm(const label nProcs);
 
@@ -382,6 +379,10 @@ public:
         {
             return parRun_;
         }
+
+        //- Set data for parallel running. Special case nProcs=0 to switch off
+        //  parallel running
+        static void setParRun(const label nProcs);
 
         //- Number of processes in parallel run
         static label nProcs(const label communicator = 0)

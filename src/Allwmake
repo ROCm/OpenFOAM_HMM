@@ -41,23 +41,28 @@ wmake $targetType edgeMesh
 parallel/decompose/AllwmakeLnInclude
 dummyThirdParty/Allwmake $targetType $*
 
+wmakeLnInclude fvOptions
+
 wmake $targetType finiteVolume
 wmake $targetType lagrangian/basic
 wmake $targetType lagrangian/distributionModels
 wmake $targetType genericPatchFields
 
 wmake $targetType conversion
-wmake $targetType sampling
 wmake $targetType mesh/extrudeModel
 wmake $targetType dynamicMesh
 wmake $targetType dynamicFvMesh
+wmake $targetType sampling
 wmake $targetType topoChangerFvMesh
+wmake $targetType sampling
 
 # Compile scotchDecomp, metisDecomp etc.
 parallel/Allwmake $targetType $*
 
 wmake $targetType ODE
 wmake $targetType randomProcesses
+
+wmake $targetType fvMotionSolver
 
 transportModels/Allwmake $targetType $*
 thermophysicalModels/Allwmake $targetType $*
@@ -69,7 +74,6 @@ mesh/Allwmake $targetType $*
 renumber/Allwmake $targetType $*
 fvAgglomerationMethods/Allwmake $targetType $*
 
-wmake $targetType fvMotionSolver
 wmake $targetType engine
 wmake $targetType fvOptions
 wmake $targetType regionCoupled
@@ -78,5 +82,7 @@ postProcessing/Allwmake $targetType $*
 
 wmake $targetType sixDoFRigidBodyMotion
 
+# Needs access to Turbulence
+wmake $targetType thermophysicalModels/properties/liquidPropertiesFvPatchFields
 
 # ----------------------------------------------------------------- end-of-file

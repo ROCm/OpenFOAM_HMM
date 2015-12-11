@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,12 +25,15 @@ Application
     surfaceCoarsen
 
 Description
-    Surface coarsening using 'bunnylod':
+    Surface coarsening using `bunnylod'
 
+    Reference:
+    \verbatim
         Polygon Reduction Demo
         By Stan Melax (c) 1998
         mailto:melax@cs.ualberta.ca
         http://www.cs.ualberta.ca/~melax
+    \endverbatim
 
 \*---------------------------------------------------------------------------*/
 
@@ -77,7 +80,7 @@ int main(int argc, char *argv[])
 
     if (reduction <= 0 || reduction > 1)
     {
-        FatalErrorIn(args.executable())
+        FatalErrorInFunction
             << "Reduction factor " << reduction
             << " should be within 0..1" << endl
             << "(it is the reduction in number of vertices)"

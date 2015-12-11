@@ -24,6 +24,9 @@ License
 Application
     mdEquilibrationFoam
 
+Group
+    grpDiscreteMethodsSolvers
+
 Description
     Equilibrates and/or preconditions molecular dynamics systems
 

@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -204,7 +204,7 @@ Foam::CellZoneInjection<CloudType>::CellZoneInjection
     injectorTetPts_(im.injectorTetPts_),
     diameters_(im.diameters_),
     U0_(im.U0_),
-    sizeDistribution_(im.sizeDistribution_().clone().ptr())
+    sizeDistribution_(im.sizeDistribution_, false)
 {}
 
 
@@ -226,7 +226,7 @@ void Foam::CellZoneInjection<CloudType>::updateMesh()
 
     if (zoneI < 0)
     {
-        FatalErrorIn("Foam::CellZoneInjection<CloudType>::updateMesh()")
+        FatalErrorInFunction
             << "Unknown cell zone name: " << cellZoneName_
             << ". Valid cell zones are: " << mesh.cellZones().names()
             << nl << exit(FatalError);
@@ -242,7 +242,7 @@ void Foam::CellZoneInjection<CloudType>::updateMesh()
 
     if ((nCellsTotal == 0) || (VCellsTotal*numberDensity_ < 1))
     {
-        WarningIn("Foam::CellZoneInjection<CloudType>::updateMesh()")
+        WarningInFunction
             << "Number of particles to be added to cellZone " << cellZoneName_
             << " is zero" << endl;
     }

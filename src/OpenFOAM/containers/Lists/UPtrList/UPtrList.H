@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,6 +42,7 @@ SourceFiles
 #define UPtrList_H
 
 #include "List.H"
+#include "PtrList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -108,6 +109,12 @@ public:
 
         //- Construct with size specified.
         explicit UPtrList(const label);
+
+        //- Construct from UList
+        explicit UPtrList(UList<T>&);
+
+        //- Construct from PtrList
+        explicit UPtrList(PtrList<T>&);
 
         //- Construct by transferring the parameter contents
         UPtrList(const Xfer<UPtrList<T> >&);

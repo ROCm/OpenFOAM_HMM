@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,57 +65,59 @@ License
     The current default mapping strategy in Scotch can be seen by using the
     "-vs" option of program gmap. It is, to date:
 
-    r
+    m
     {
-        job=t,
-        map=t,
-        poli=S,
-        sep=
-        (
-            m
-            {
-                asc=b
+        asc=b
+        {
+            width=3,
+            bnd=d{pass=40, dif=1, rem=0}
+            f{move=80, pass=-1, bal=0.01},
+            org=f{move=80,pass=-1,bal=0.01}
+        },
+        low=r
+        {
+            job=t,
+            bal=0.01,
+            map=t,
+            poli=S,
+            sep=
+            (
+                m
                 {
-                    bnd=
-                    (
-                        d{pass=40,dif=1,rem=1}
-                     |
-                    )
-                    f{move=80,pass=-1,bal=0.002491},
-                    org=f{move=80,pass=-1,bal=0.002491},
-                    width=3
-                },
-                low=h{pass=10}
-                f{move=80,pass=-1,bal=0.002491},
-                type=h,
-                vert=80,
-                rat=0.8
-            }
-          | m
-            {
-                asc=b
+                    asc=b
+                    {
+                        bnd=f{move=120, pass=-1, bal=0.01, type=b},
+                        org=f{move=120,pass=-1,bal=0.01,type=b},
+                        width=3
+                    },
+                    low=h{pass=10}
+                    f{move=120,pass=-1,bal=0.01,type=b},
+                    vert=120,
+                    rat=0.8
+                }
+               |m
                 {
-                    bnd=
-                    (
-                        d{pass=40,dif=1,rem=1}
-                      |
-                    )
-                    f{move=80,pass=-1,bal=0.002491},
-                    org=f{move=80,pass=-1,bal=0.002491},
-                    width=3
-                },
-                low=h{pass=10}
-                f{move=80,pass=-1,bal=0.002491},
-                type=h,
-                vert=80,
-                rat=0.8
-            }
-        )
+                    asc=b
+                    {
+                        bnd=f{move=120,pass=-1,bal=0.01,type=b},
+                        org=f{move=120,pass=-1,bal=0.01,type=b},
+                        width=3
+                    },
+                    low=h{pass=10}
+                    f{move=120,pass=-1,bal=0.01,type=b},
+                    vert=120,
+                    rat=0.8
+                }
+            )
+        },
+        vert=10000,
+        rat=0.8,
+        type=0
     }
 
 
-    Note: instead of gmap run gpart <nProcs> -vs <grfFile>
-    where <grfFile> can be obtained by running with 'writeGraph=true'
+    Note: instead of gmap run gpart \<nProcs\> -vs \<grfFile\>
+    where \<grfFile\> can be obtained by running with 'writeGraph=true'
 
 \*---------------------------------------------------------------------------*/
 
@@ -163,7 +165,7 @@ void Foam::scotchDecomp::check(const int retVal, const char* str)
 {
     if (retVal)
     {
-        FatalErrorIn("scotchDecomp::decompose(..)")
+        FatalErrorInFunction
             << "Call to scotch routine " << str << " failed."
             << exit(FatalError);
     }
@@ -382,19 +384,15 @@ Foam::label Foam::scotchDecomp::decomposeOneProc
     {
         if (minWeights <= 0)
         {
-            WarningIn
-            (
-                "scotchDecomp::decompose(...)"
-            )   << "Illegal minimum weight " << minWeights
+            WarningInFunction
+                << "Illegal minimum weight " << minWeights
                 << endl;
         }
 
         if (cWeights.size() != xadj.size()-1)
         {
-            FatalErrorIn
-            (
-                "scotchDecomp::decompose(...)"
-            )   << "Number of cell weights " << cWeights.size()
+            FatalErrorInFunction
+                << "Number of cell weights " << cWeights.size()
                 << " does not equal number of cells " << xadj.size()-1
                 << exit(FatalError);
         }
@@ -409,10 +407,8 @@ Foam::label Foam::scotchDecomp::decomposeOneProc
             // rangeScale tipping the subsequent sum over the integer limit.
             rangeScale = 0.9*scalar(labelMax - 1)/velotabSum;
 
-            WarningIn
-            (
-                "scotchDecomp::decompose(...)"
-            )   << "Sum of weights has overflowed integer: " << velotabSum
+            WarningInFunction
+                << "Sum of weights has overflowed integer: " << velotabSum
                 << ", compressing weight scale by a factor of " << rangeScale
                 << endl;
         }
@@ -601,11 +597,8 @@ Foam::labelList Foam::scotchDecomp::decompose
 {
     if (points.size() != mesh.nCells())
     {
-        FatalErrorIn
-        (
-            "scotchDecomp::decompose(const polyMesh&, const pointField&"
-            ", const scalarField&)"
-        )   << "Can use this decomposition method only for the whole mesh"
+        FatalErrorInFunction
+            << "Can use this decomposition method only for the whole mesh"
             << endl
             << "and supply one coordinate (cellCentre) for every cell." << endl
             << "The number of coordinates " << points.size() << endl
@@ -655,12 +648,8 @@ Foam::labelList Foam::scotchDecomp::decompose
 {
     if (agglom.size() != mesh.nCells())
     {
-        FatalErrorIn
-        (
-            "scotchDecomp::decompose"
-            "(const polyMesh&, const labelList&, const pointField&"
-            ", const scalarField&)"
-        )   << "Size of cell-to-coarse map " << agglom.size()
+        FatalErrorInFunction
+            << "Size of cell-to-coarse map " << agglom.size()
             << " differs from number of cells in mesh " << mesh.nCells()
             << exit(FatalError);
     }
@@ -708,11 +697,8 @@ Foam::labelList Foam::scotchDecomp::decompose
 {
     if (cellCentres.size() != globalCellCells.size())
     {
-        FatalErrorIn
-        (
-            "scotchDecomp::decompose"
-            "(const labelListList&, const pointField&, const scalarField&)"
-        )   << "Inconsistent number of cells (" << globalCellCells.size()
+        FatalErrorInFunction
+            << "Inconsistent number of cells (" << globalCellCells.size()
             << ") and number of cell centres (" << cellCentres.size()
             << ")." << exit(FatalError);
     }

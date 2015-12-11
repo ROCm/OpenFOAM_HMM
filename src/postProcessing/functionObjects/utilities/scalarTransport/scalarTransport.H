@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,9 +29,10 @@ Group
 
 Description
     This function object evolves a passive scalar transport equation.  The
-    field in ininitially zero, to which sources are added.  The field name
+    field is initially zero, to which sources are added.  The field name
     is assigned the name of the function object.  Boundary conditions are
-    automatically applied, based on the velocity boundary conditions.
+    read from file if the field file is available, or automatically applied
+    based on the velocity boundary conditions.
 
     - the field can be zeroed on start-up using the resetOnStartUp flag
     - to employ the same numerical schemes as the flow velocity, use the
@@ -39,9 +40,50 @@ Description
     - the diffusivity can be set manually using the DT entry, or retrieved
       from the turbulence model (if applicable)
 
+    Example of function object specification to solve a scalar transport
+    equation:
+    \verbatim
+    functions
+    {
+        scalar1                                     // <--- NOTE: SCALAR NAME
+        {
+            type            scalarTransport;
+            functionObjectLibs ("libutilityFunctionObjects.so");
+            resetOnStartUp  no;
+
+            autoSchemes     yes;
+
+            fvOptions
+            {
+                ...
+            }
+        }
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | Type name: scalarTransport | yes      |
+        phiName      | Name of flux field      | no          | phi
+        UName        | Name of velocity field  | no          | U
+        rhoName      | Name of density field   | no          | rho
+        nCorr        | Number of correctors    | no          | 0
+        DT           | Diffision coefficient   | no          | auto generated
+        resetOnStartUp | Reset source to zero on start-up | no | no
+        autoSchemes  | Use U schemes to evolve scalar | no   | yes
+        fvOptions    | List of scalar sources  | yes         |
+        log          | Log to standard output  | no          | yes
+    \endtable
+
+SeeAlso
+    fvOption.H
+    fvOptionList.H
+
 SourceFiles
     scalarTransport.C
     IOscalarTransport.H
+
 
 \*---------------------------------------------------------------------------*/
 
@@ -108,14 +150,17 @@ class scalarTransport
         //- Run-time selectable finite volume options, e.g. sources, constraints
         fv::optionList fvOptions_;
 
-        //- The scalar field
-        volScalarField T_;
+        //- Switch to send output to Info as well as to file
+        Switch log_;
 
 
     // Private Member Functions
 
         //- Return the boundary types for the scalar field
         wordList boundaryTypes() const;
+
+        //- Return reference to registered transported field
+        volScalarField& transportedField();
 
         //- Return the diffusivity field
         tmp<volScalarField> DT(const surfaceScalarField& phi) const;

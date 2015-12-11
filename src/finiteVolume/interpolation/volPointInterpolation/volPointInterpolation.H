@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -187,6 +187,22 @@ public:
             const wordList& patchFieldTypes
         ) const;
 
+        //- Interpolate dimensionedField using inverse distance weighting
+        //  returning pointField
+        template<class Type>
+        tmp<DimensionedField<Type, pointMesh> > interpolate
+        (
+            const DimensionedField<Type, volMesh>&
+        ) const;
+
+        //- Interpolate tmp<dimensionedField> using inverse distance
+        //  weighting returning pointField
+        template<class Type>
+        tmp<DimensionedField<Type, pointMesh> > interpolate
+        (
+            const tmp<DimensionedField<Type, volMesh> >&
+        ) const;
+
 
         // Low level
 
@@ -236,6 +252,24 @@ public:
                 const bool cache
             ) const;
 
+            //- Interpolate dimensioned internal field from cells to points
+            //  using inverse distance weighting
+            template<class Type>
+            void interpolateDimensionedInternalField
+            (
+                const DimensionedField<Type, volMesh>& vf,
+                DimensionedField<Type, pointMesh>& pf
+            ) const;
+
+            //- Interpolate dimensionedField using inverse distance weighting
+            //  returning pointField with name. Optionally caches
+            template<class Type>
+            tmp<DimensionedField<Type, pointMesh> > interpolate
+            (
+                const DimensionedField<Type, volMesh>&,
+                const word& name,
+                const bool cache
+            ) const;
 
         // Interpolation for displacement (applies 2D correction)
 

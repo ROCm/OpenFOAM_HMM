@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,20 +23,30 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "GeometricField.H"
-#include "volMesh.H"
-#include "surfaceMesh.H"
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Type Foam::fieldValues::fieldValueDelta::applyOperation
+void Foam::fieldValues::fieldValueDelta::apply
 (
-    const Type& value1,
-    const Type& value2
-) const
+    const word& resultType,
+    const word& name1,
+    const word& name2,
+    const word& entryName1,
+    const word& entryName2,
+    bool& found
+)
 {
+    if (pTraits<Type>::typeName != resultType)
+    {
+        return;
+    }
+
     Type result = pTraits<Type>::zero;
+
+    Type value1 = this->getObjectResult<Type>(name1, entryName1);
+    Type value2 = this->getObjectResult<Type>(name2, entryName2);
+
+    const word& opName = operationTypeNames_[operation_];
 
     switch (operation_)
     {
@@ -67,65 +77,23 @@ Type Foam::fieldValues::fieldValueDelta::applyOperation
         }
         default:
         {
-            FatalErrorIn
-            (
-                "Type Foam::fieldValues::fieldValueDelta::applyOperation"
-                "("
-                    "const Type&, "
-                    "const Type&"
-                ") const"
-            )
+            FatalErrorInFunction
                 << "Unable to process operation "
                 << operationTypeNames_[operation_]
                 << abort(FatalError);
         }
     }
 
-    return result;
-}
+    const word resultName(opName + '(' + entryName1 + ',' + entryName2 + ')');
 
+    if (log_) Info << "    " << resultName << " = " << result << endl;
 
-template<class Type>
-void Foam::fieldValues::fieldValueDelta::processFields(bool& found)
-{
-    typedef GeometricField<Type, fvPatchField, volMesh> vf;
-    typedef GeometricField<Type, fvsPatchField, surfaceMesh> sf;
+    this->file()<< tab << result;
 
-    const wordList& fields1 = source1Ptr_->fields();
+    // Write state/results information
+    this->setResult(resultName, result);
 
-    const dictionary& results1 = source1Ptr_->resultDict();
-    const dictionary& results2 = source2Ptr_->resultDict();
-
-    Type r1(pTraits<Type>::zero);
-    Type r2(pTraits<Type>::zero);
-
-    forAll(fields1, i)
-    {
-        const word& fieldName = fields1[i];
-
-        if
-        (
-            (obr_.foundObject<vf>(fieldName) || obr_.foundObject<sf>(fieldName))
-         && results2.found(fieldName)
-        )
-        {
-            results1.lookup(fieldName) >> r1;
-            results2.lookup(fieldName) >> r2;
-
-            Type result = applyOperation(r1, r2);
-
-            if (log_) Info<< "    " << operationTypeNames_[operation_]
-                << "(" << fieldName << ") = " << result
-                << endl;
-
-            if (Pstream::master())
-            {
-                file()<< tab << result;
-            }
-
-            found = true;
-        }
-    }
+    found = true;
 }
 
 

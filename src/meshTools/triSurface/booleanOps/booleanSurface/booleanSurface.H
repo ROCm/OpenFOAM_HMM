@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -170,6 +170,11 @@ public:
                           // surface. (Produces multiply connected surface)
         };
 
+    // Static data
+
+        static const NamedEnum<booleanOpType, 4> booleanOpTypeNames;
+
+
 
     // Constructors
 
@@ -218,7 +223,7 @@ public:
         {
             if (!from1(faceI))
             {
-                FatalErrorIn("booleanSurface::surf1Face(const label)")
+                FatalErrorInFunction
                     << "face " << faceI << " not from surface 1"
                     << abort(FatalError);
             }
@@ -229,7 +234,7 @@ public:
         {
             if (from1(faceI))
             {
-                FatalErrorIn("booleanSurface::surf2Face(const label)")
+                FatalErrorInFunction
                     << "face " << faceI << " not from surface 2"
                     << abort(FatalError);
             }

@@ -27,6 +27,7 @@ Application
 Description
     Maps volume fields from one mesh to another, reading and
     interpolating all fields present in the time directory of both cases.
+
     Parallel and non-parallel cases are handled without the need to reconstruct
     them first.
 
@@ -36,8 +37,47 @@ Description
 #include "meshToMesh0.H"
 #include "processorFvPatch.H"
 #include "MapMeshes.H"
+#include "decompositionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+int readNumProcs
+(
+    const argList& args,
+    const word& optionName,
+    const Time& runTime
+)
+{
+    fileName dictFile;
+    if (args.optionReadIfPresent(optionName, dictFile))
+    {
+        if (isDir(dictFile))
+        {
+            dictFile = dictFile/"decomposeParDict";
+        }
+    }
+
+    return readInt
+    (
+        IOdictionary
+        (
+            decompositionModel::selectIO
+            (
+                IOobject
+                (
+                    "decomposeParDict",
+                    runTime.system(),
+                    runTime,
+                    IOobject::MUST_READ_IF_MODIFIED,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                dictFile
+            )
+        ).lookup("numberOfSubdomains")
+    );
+}
+
 
 void mapConsistentMesh
 (
@@ -225,6 +265,19 @@ int main(int argc, char *argv[])
         "subtract",
         "subtract mapped source from target"
     );
+    argList::addOption
+    (
+        "sourceDecomposeParDict",
+        "file",
+        "read decomposePar dictionary from specified location"
+    );
+    argList::addOption
+    (
+        "targetDecomposeParDict",
+        "file",
+        "read decomposePar dictionary from specified location"
+    );
+
 
     argList args(argc, argv);
 
@@ -278,7 +331,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            FatalErrorIn(args.executable())
+            FatalErrorInFunction
                 << "Unknown mapMethod " << mapMethod << ". Valid options are: "
                 << "mapNearest, interpolate and cellPointInterpolate"
                 << exit(FatalError);
@@ -320,19 +373,12 @@ int main(int argc, char *argv[])
 
     if (parallelSource && !parallelTarget)
     {
-        IOdictionary decompositionDict
+        int nProcs = readNumProcs
         (
-            IOobject
-            (
-                "decomposeParDict",
-                runTimeSource.system(),
-                runTimeSource,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE
-            )
+            args,
+            "sourceDecomposeParDict",
+            runTimeSource
         );
-
-        int nProcs(readInt(decompositionDict.lookup("numberOfSubdomains")));
 
         Info<< "Create target mesh\n" << endl;
 
@@ -399,19 +445,13 @@ int main(int argc, char *argv[])
     }
     else if (!parallelSource && parallelTarget)
     {
-        IOdictionary decompositionDict
+        int nProcs = readNumProcs
         (
-            IOobject
-            (
-                "decomposeParDict",
-                runTimeTarget.system(),
-                runTimeTarget,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE
-            )
+            args,
+            "targetDecomposeParDict",
+            runTimeTarget
         );
 
-        int nProcs(readInt(decompositionDict.lookup("numberOfSubdomains")));
 
         Info<< "Create source mesh\n" << endl;
 
@@ -478,39 +518,17 @@ int main(int argc, char *argv[])
     }
     else if (parallelSource && parallelTarget)
     {
-        IOdictionary decompositionDictSource
+        int nProcsSource = readNumProcs
         (
-            IOobject
-            (
-                "decomposeParDict",
-                runTimeSource.system(),
-                runTimeSource,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE
-            )
+            args,
+            "sourceDecomposeParDict",
+            runTimeSource
         );
-
-        int nProcsSource
+        int nProcsTarget = readNumProcs
         (
-            readInt(decompositionDictSource.lookup("numberOfSubdomains"))
-        );
-
-
-        IOdictionary decompositionDictTarget
-        (
-            IOobject
-            (
-                "decomposeParDict",
-                runTimeTarget.system(),
-                runTimeTarget,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE
-            )
-        );
-
-        int nProcsTarget
-        (
-            readInt(decompositionDictTarget.lookup("numberOfSubdomains"))
+            args,
+            "targetDecomposeParDict",
+            runTimeTarget
         );
 
         List<boundBox> bbsTarget(nProcsTarget);

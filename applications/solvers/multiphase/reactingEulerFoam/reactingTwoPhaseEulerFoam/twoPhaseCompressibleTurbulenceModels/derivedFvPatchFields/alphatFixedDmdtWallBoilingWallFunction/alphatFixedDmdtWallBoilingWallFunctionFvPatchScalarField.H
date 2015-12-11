@@ -22,17 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::compressible::alphatFixedDmdtWallBoilingWallFunctionFvPatchScalarField
+    Foam::compressible::
+        alphatFixedDmdtWallBoilingWallFunctionFvPatchScalarField
 
 Group
     grpCmpWallFunctions
 
 Description
-    A simple alphatPhaseChangeWallFunctionFvPatchScalarField with a fixed
-    volumetric phase-change mass flux.
+    A simple alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField with
+    a fixed volumetric phase-change mass flux.
 
 SeeAlso
-    Foam::compressible::alphatPhaseChangeWallFunctionFvPatchScalarField
+    Foam::compressible::
+        alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField
 
 SourceFiles
     alphatFixedDmdtWallBoilingWallFunctionFvPatchScalarField.C
@@ -42,7 +44,7 @@ SourceFiles
 #ifndef compressibleAlphatFixedDmdtWallBoilingWallFunctionFvPatchScalarField_H
 #define compressibleAlphatFixedDmdtWallBoilingWallFunctionFvPatchScalarField_H
 
-#include "alphatPhaseChangeWallFunctionFvPatchScalarField.H"
+#include "alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,47 +59,18 @@ namespace compressible
 
 class alphatFixedDmdtWallBoilingWallFunctionFvPatchScalarField
 :
-    public alphatPhaseChangeWallFunctionFvPatchScalarField
+    public alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField
 {
     // Private data
 
-        //- Turbulent Prandtl number
-        scalar Prt_;
+        //- dmdt relaxationFactor
+        scalar relax_;
 
-        //- Cmu coefficient
-        scalar Cmu_;
-
-        //- Von Karman constant
-        scalar kappa_;
-
-        //- E coefficient
-        scalar E_;
-
-        //- E coefficient
+        //- Volumetric phase-change mass flux in near wall cells
         scalar fixedDmdt_;
 
-
-        // Solution parameters
-
-            static scalar maxExp_;
-            static scalar tolerance_;
-            static label maxIters_;
-
-
-    // Private Member Functions
-
-        //- Check the type of the patch
-        void checkType();
-
-        //- 'P' function
-        tmp<scalarField> Psmooth(const scalarField& Prat) const;
-
-        //- Calculate y+ at the edge of the thermal laminar sublayer
-        tmp<scalarField> yPlusTherm
-        (
-            const scalarField& P,
-            const scalarField& Prat
-        ) const;
+        //- Latent heat
+        scalar L_;
 
 
 public:
@@ -177,13 +150,6 @@ public:
 
 
     // Member functions
-
-        //- Return the rate of phase-change
-        virtual const scalarField& dmdt() const
-        {
-            return dmdt_;
-        }
-
 
         // Evaluation functions
 

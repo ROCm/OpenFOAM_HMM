@@ -237,7 +237,7 @@ public:
 
     // Member Functions
 
-        //- Read RASProperties dictionary
+        //- Re-read model coefficients if they have changed
         virtual bool read();
 
         //- Return the effective diffusivity for k
@@ -300,6 +300,10 @@ public:
         {
             return epsilon_;
         }
+
+        //- Validate the turbulence fields after construction
+        //  Update turbulence viscosity and other derived fields as requires
+        virtual void validate();
 
         //- Solve the turbulence equations and correct the turbulence viscosity
         virtual void correct();

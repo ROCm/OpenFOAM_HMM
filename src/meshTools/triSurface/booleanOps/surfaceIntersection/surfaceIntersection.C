@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -184,7 +184,7 @@ bool Foam::surfaceIntersection::excludeEdgeHit
 //        }
 //    }
 //
-//    FatalErrorIn("surfaceIntersection::borderEdgeIntersection")
+//    FatalErrorInFunction
 //        << "Did not find intersection of plane " << pl
 //        << " with edges of face " << hitFaceI << " verts:" << f
 //        << abort(FatalError);
@@ -239,13 +239,8 @@ void Foam::surfaceIntersection::storeIntersection
 
             if (mag(prevHit - thisHit) < SMALL)
             {
-                WarningIn
-                (
-                    "Foam::surfaceIntersection::storeIntersection"
-                    "(const bool isFirstSurf, const labelList& facesA,"
-                    "const label faceB, DynamicList<edge>& allCutEdges,"
-                    "DynamicList<point>& allCutPoints)"
-                )   << "Encountered degenerate edge between face "
+                WarningInFunction
+                    << "Encountered degenerate edge between face "
                     << twoFaces[0] << " on first surface"
                     << " and face " << twoFaces[1] << " on second surface"
                     << endl
@@ -815,7 +810,7 @@ Foam::surfaceIntersection::surfaceIntersection
 }
 
 
-// Construct from full intersection Poutrmation
+// Construct from full intersection information
 Foam::surfaceIntersection::surfaceIntersection
 (
     const triSurface& surf1,
@@ -968,7 +963,7 @@ Foam::surfaceIntersection::surfaceIntersection
 
             if (!usedPoints.found(pointI))
             {
-                WarningIn("surfaceIntersection::surfaceIntersection")
+                WarningInFunction
                     << "Problem: cut point:" << pointI
                     << " coord:" << cutPoints_[pointI]
                     << " not used by any edge" << endl;

@@ -158,17 +158,8 @@ bool Foam::InjectionModel<CloudType>::findCellAtPosition
     {
         if (errorOnNotFound)
         {
-            FatalErrorIn
-            (
-                "Foam::InjectionModel<CloudType>::findCellAtPosition"
-                "("
-                    "label&, "
-                    "label&, "
-                    "label&, "
-                    "vector&, "
-                    "bool"
-                ")"
-            )   << "Cannot find parcel injection cell. "
+            FatalErrorInFunction
+                << "Cannot find parcel injection cell. "
                 << "Parcel position = " << p0 << nl
                 << abort(FatalError);
         }
@@ -215,17 +206,8 @@ Foam::scalar Foam::InjectionModel<CloudType>::setNumberOfParticles
         default:
         {
             nP = 0.0;
-            FatalErrorIn
-            (
-                "Foam::scalar "
-                "Foam::InjectionModel<CloudType>::setNumberOfParticles"
-                "("
-                    "const label, "
-                    "const scalar, "
-                    "const scalar, "
-                    "const scalar"
-                ")"
-            )<< "Unknown parcelBasis type" << nl
+            FatalErrorInFunction
+             << "Unknown parcelBasis type" << nl
              << exit(FatalError);
         }
     }
@@ -285,7 +267,8 @@ Foam::InjectionModel<CloudType>::InjectionModel(CloudType& owner)
     nParticleFixed_(0.0),
     time0_(0.0),
     timeStep0_(this->template getModelProperty<scalar>("timeStep0")),
-    delayedVolume_(0.0)
+    delayedVolume_(0.0),
+    injectorID_(-1)
 {}
 
 
@@ -313,7 +296,8 @@ Foam::InjectionModel<CloudType>::InjectionModel
     nParticleFixed_(0.0),
     time0_(owner.db().time().value()),
     timeStep0_(this->template getModelProperty<scalar>("timeStep0")),
-    delayedVolume_(0.0)
+    delayedVolume_(0.0),
+    injectorID_(this->coeffDict().lookupOrDefault("injectorID", -1))
 {
     // Provide some info
     // - also serves to initialise mesh dimensions - needed for parallel runs
@@ -321,17 +305,24 @@ Foam::InjectionModel<CloudType>::InjectionModel
     Info<< "    Constructing " << owner.mesh().nGeometricD() << "-D injection"
         << endl;
 
+    if (injectorID_ != -1)
+    {
+        Info<< "    injector ID: " << injectorID_ << endl;
+    }
+
     if (owner.solution().transient())
     {
         this->coeffDict().lookup("massTotal") >> massTotal_;
         this->coeffDict().lookup("SOI") >> SOI_;
-        SOI_ = owner.db().time().userTimeToTime(SOI_);
     }
     else
     {
         massFlowRate_.reset(this->coeffDict());
         massTotal_ = massFlowRate_.value(owner.db().time().value());
+        this->coeffDict().readIfPresent("SOI", SOI_);
     }
+
+    SOI_ = owner.db().time().userTimeToTime(SOI_);
 
     const word parcelBasisType = this->coeffDict().lookup("parcelBasisType");
 
@@ -355,15 +346,8 @@ Foam::InjectionModel<CloudType>::InjectionModel
     }
     else
     {
-        FatalErrorIn
-        (
-            "Foam::InjectionModel<CloudType>::InjectionModel"
-            "("
-                "const dictionary&, "
-                "CloudType&, "
-                "const word&"
-            ")"
-        )<< "parcelBasisType must be either 'number', 'mass' or 'fixed'" << nl
+        FatalErrorInFunction
+         << "parcelBasisType must be either 'number', 'mass' or 'fixed'" << nl
          << exit(FatalError);
     }
 }
@@ -387,7 +371,8 @@ Foam::InjectionModel<CloudType>::InjectionModel
     nParticleFixed_(im.nParticleFixed_),
     time0_(im.time0_),
     timeStep0_(im.timeStep0_),
-    delayedVolume_(im.delayedVolume_)
+    delayedVolume_(im.delayedVolume_),
+    injectorID_(im.injectorID_)
 {}
 
 
@@ -440,10 +425,10 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
     scalar massAdded = 0.0;
     label newParcels = 0;
     scalar newVolumeFraction = 0.0;
+    scalar delayedVolume = 0;
 
     if (prepareForNextTimeStep(time, newParcels, newVolumeFraction))
     {
-        scalar delayedVolume = 0;
 
         const scalar trackTime = this->owner().solution().trackTime();
         const polyMesh& mesh = this->owner().mesh();
@@ -529,7 +514,8 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
 
                         if (pPtr->move(td, dt))
                         {
-                            td.cloud().addParticle(pPtr);
+                            pPtr->typeId() = injectorID_;
+                            cloud.addParticle(pPtr);
                         }
                         else
                         {
@@ -544,9 +530,9 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                 }
             }
         }
-
-        delayedVolume_ = delayedVolume;
     }
+
+    delayedVolume_ = returnReduce(delayedVolume, sumOp<scalar>());
 
     postInjectCheck(parcelsAdded, massAdded);
 }
@@ -561,6 +547,13 @@ void Foam::InjectionModel<CloudType>::injectSteadyState
 )
 {
     if (!this->active())
+    {
+        return;
+    }
+
+    const scalar time = this->owner().db().time().value();
+
+    if (time < SOI_)
     {
         return;
     }
@@ -634,8 +627,10 @@ void Foam::InjectionModel<CloudType>::injectSteadyState
                     pPtr->rho()
                 );
 
+            pPtr->typeId() = injectorID_;
+
             // Add the new parcel
-            td.cloud().addParticle(pPtr);
+            cloud.addParticle(pPtr);
 
             massAdded += pPtr->nParticle()*pPtr->mass();
             parcelsAdded++;
@@ -649,9 +644,9 @@ void Foam::InjectionModel<CloudType>::injectSteadyState
 template<class CloudType>
 void Foam::InjectionModel<CloudType>::info(Ostream& os)
 {
-    os  << "    " << this->modelName() << ":" << nl
-        << "        number of parcels added     = " << parcelsAddedTotal_ << nl
-        << "        mass introduced             = " << massInjected_ << nl;
+    os  << "    Injector " << this->modelName() << ":" << nl
+        << "      - parcels added               = " << parcelsAddedTotal_ << nl
+        << "      - mass introduced             = " << massInjected_ << nl;
 
     if (this->outputTime())
     {

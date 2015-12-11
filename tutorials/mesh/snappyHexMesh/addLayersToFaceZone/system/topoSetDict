@@ -1,0 +1,88 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      topoSetDict;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+actions
+(
+    // FaceZone A
+    {
+        name    leftA;
+        type    cellSet;
+        action  new;
+        source  boxToCell;
+        sourceInfo
+        {
+            box (-100e-3 -100e-3 -100e-3) (2e-3 100e-3 100e-3);
+        }
+    }
+    {
+        name    A;
+        type    faceSet;
+        action  new;
+        source  boxToFace;
+        sourceInfo
+        {
+            box (1.999e-3 -100e-3 -100e-3) (2.001e-3 100e-3 100e-3);
+        }
+    }
+    {
+        name    A;
+        type    faceZoneSet;
+        action  new;
+        source  setsToFaceZone;
+        sourceInfo
+        {
+            faceSet A;      // name of faceSet
+            cellSet leftA;  // name of cellSet of slave side
+        }
+    }
+
+
+    // FaceZone B
+    {
+        name    leftB;
+        type    cellSet;
+        action  new;
+        source  boxToCell;
+        sourceInfo
+        {
+            box (-100e-3 -100e-3 -100e-3) (8e-3 100e-3 100e-3);
+        }
+    }
+    {
+        name    B;
+        type    faceSet;
+        action  new;
+        source  boxToFace;
+        sourceInfo
+        {
+            box (7.999e-3 -100e-3 -100e-3) (8.001e-3 100e-3 100e-3);
+        }
+    }
+    {
+        name    B;
+        type    faceZoneSet;
+        action  new;
+        source  setsToFaceZone;
+        sourceInfo
+        {
+            faceSet B;      // name of faceSet
+            cellSet leftB;  // name of cellSet of slave side
+        }
+    }
+);
+
+// ************************************************************************* //

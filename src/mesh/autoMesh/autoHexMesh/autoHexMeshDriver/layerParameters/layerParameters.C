@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,11 +48,8 @@ Foam::scalar Foam::layerParameters::layerExpansionRatio
         return 1.0;
     }
 
-    //scalar totalOverFirst = totalThickness/firstLayerThickess;
-
-    const label maxIters = 10;
+    const label maxIters = 20;
     const scalar tol = 1e-8;
-
 
     if (mag(n-totalOverFirst) < tol)
     {
@@ -74,8 +71,6 @@ Foam::scalar Foam::layerParameters::layerExpansionRatio
         maxR = totalOverFirst/(n - 1);
     }
 
-    //Info<< "Solution bounds = (" << minR << ", " << maxR << ")" << nl << endl;
-
     // Starting guess
     scalar r = 0.5*(minR + maxR);
 
@@ -85,14 +80,9 @@ Foam::scalar Foam::layerParameters::layerExpansionRatio
 
         const scalar fx = pow(r, n) - totalOverFirst*r - (1 - totalOverFirst);
         const scalar dfx = n*pow(r, n - 1) - totalOverFirst;
-
         r -= fx/dfx;
 
-        const scalar error = mag(r - prevr);
-
-        //Info<< i << " " << r << " Error = " << error << endl;
-
-        if (error < tol)
+        if (mag(r - prevr) < tol)
         {
             break;
         }
@@ -103,7 +93,6 @@ Foam::scalar Foam::layerParameters::layerExpansionRatio
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from dictionary
 Foam::layerParameters::layerParameters
 (
     const dictionary& dict,
@@ -124,6 +113,14 @@ Foam::layerParameters::layerParameters
         readScalar(dict.lookup("minThickness"))
     ),
     featureAngle_(readScalar(dict.lookup("featureAngle"))),
+    mergePatchFacesAngle_
+    (
+        dict.lookupOrDefault<scalar>
+        (
+            "mergePatchFacesAngle",
+            featureAngle_
+        )
+    ),
     concaveAngle_
     (
         dict.lookupOrDefault("concaveAngle", defaultConcaveAngle)
@@ -229,10 +226,8 @@ Foam::layerParameters::layerParameters
 
     if (layerSpec_ == ILLEGAL || nSpec != 2)
     {
-        FatalIOErrorIn
+        FatalIOErrorInFunction
         (
-            "layerParameters::layerParameters"
-            "(const dictionary&, const polyBoundaryMesh&)",
             dict
         )   << "Over- or underspecified layer thickness."
             << " Please specify" << nl
@@ -254,7 +249,7 @@ Foam::layerParameters::layerParameters
 
     if (nLayerIter_ < 0 || nRelaxedIter_ < 0)
     {
-        FatalIOErrorIn("layerParameters::layerParameters(..)", dict)
+        FatalIOErrorInFunction(dict)
             << "Layer iterations should be >= 0." << endl
             << "nLayerIter:" << nLayerIter_
             << " nRelaxedIter:" << nRelaxedIter_
@@ -276,7 +271,7 @@ Foam::layerParameters::layerParameters
 
             if (patchIDs.size() == 0)
             {
-                IOWarningIn("layerParameters::layerParameters(..)", layersDict)
+                IOWarningInFunction(layersDict)
                     << "Layer specification for " << key
                     << " does not match any patch." << endl
                     << "Valid patches are " << boundaryMesh.names() << endl;
@@ -360,9 +355,8 @@ Foam::layerParameters::layerParameters
                         break;
 
                         default:
-                            FatalIOErrorIn
+                            FatalIOErrorInFunction
                             (
-                                "layerParameters::layerParameters(..)",
                                 dict
                             )   << "problem." << exit(FatalIOError);
                         break;
@@ -409,9 +403,9 @@ Foam::scalar Foam::layerParameters::layerThickness
             }
             else
             {
-                return firstLayerThickess *
-                    (1.0 - pow(expansionRatio, nLayers))
-                  / (1.0 - expansionRatio);
+                return firstLayerThickess
+                   *(1.0 - pow(expansionRatio, nLayers))
+                   /(1.0 - expansionRatio);
             }
         }
         break;
@@ -425,17 +419,16 @@ Foam::scalar Foam::layerParameters::layerThickness
             else
             {
                 scalar invExpansion = 1.0 / expansionRatio;
-                return finalLayerThickess *
-                    (1.0 - pow(invExpansion, nLayers))
-                  / (1.0 - invExpansion);
+                return finalLayerThickess
+                   *(1.0 - pow(invExpansion, nLayers))
+                   /(1.0 - invExpansion);
             }
         }
         break;
 
         default:
         {
-            FatalErrorIn("layerParameters::layerThickness(..)")
-                << "Illegal thickness specification " <<    layerSpec_
+            FatalErrorInFunction
                 << exit(FatalError);
             return -VGREAT;
         }
@@ -476,7 +469,7 @@ Foam::scalar Foam::layerParameters::layerExpansionRatio
         {
             return
                 1.0
-              / layerExpansionRatio
+               /layerExpansionRatio
                 (
                     nLayers,
                     totalThickness/finalLayerThickess
@@ -486,7 +479,7 @@ Foam::scalar Foam::layerParameters::layerExpansionRatio
 
         default:
         {
-            FatalErrorIn("layerParameters::layerThickness(..)")
+            FatalErrorInFunction
                 << "Illegal thickness specification" << exit(FatalError);
             return -VGREAT;
         }
@@ -545,7 +538,7 @@ Foam::scalar Foam::layerParameters::firstLayerThickness
 
         default:
         {
-            FatalErrorIn("layerParameters::layerThickness(..)")
+            FatalErrorInFunction
                 << "Illegal thickness specification" << exit(FatalError);
             return -VGREAT;
         }
@@ -569,8 +562,8 @@ Foam::scalar Foam::layerParameters::finalLayerThicknessRatio
         {
             return
                 pow(expansionRatio, nLayers - 1)
-              * (1.0 - expansionRatio)
-              / (1.0 - pow(expansionRatio, nLayers));
+               *(1.0 - expansionRatio)
+               /(1.0 - pow(expansionRatio, nLayers));
         }
     }
     else

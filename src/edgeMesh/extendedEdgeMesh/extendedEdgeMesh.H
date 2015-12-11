@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,7 +68,7 @@ namespace Foam
 {
 
 class surfaceFeatures;
-class objectRegistry;
+class searchableSurface;
 
 // Forward declaration of friend functions and operators
 class extendedEdgeMesh;
@@ -138,7 +138,7 @@ protected:
         static label externalStart_;
 
 
-    // Private data
+    // Protected data
 
         //- Index of the start of the concave feature points
         label concaveStart_;
@@ -200,11 +200,32 @@ protected:
         mutable PtrList<indexedOctree<treeDataEdge> > edgeTreesByType_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
-        //- Classify the type of feature point.  Requires valid stored member
+        //- Classify the type of feature point. Requires valid stored member
         //  data for edges and normals.
         pointStatus classifyFeaturePoint(label ptI) const;
+
+        //- Cut edges with surface. Return map from cut points&edges back
+        //  to original
+        void cut
+        (
+            const searchableSurface&,
+            labelList& pMap,
+            labelList& eMap,
+            labelList& pointsFromEdge,  // new points created by cutting
+            labelList& oldEdge,         // the orginal edge
+            labelList& surfTri          // the surface triangle index
+        );
+
+        //- Remove outside/inside edges. volType denotes which side to keep
+        void select
+        (
+            const searchableSurface& surf,
+            const volumeType volType,
+            labelList& pMap,
+            labelList& eMap
+        );
 
         template<class Patch>
         void sortPointsAndEdges
@@ -262,9 +283,8 @@ public:
             const Xfer<edgeList>&
         );
 
-        //- Construct given a surface with selected edges,point
-        //  (surfaceFeatures), an objectRegistry and a
-        //  fileName to write to.
+        //- Construct given a surface with selected edges,points
+        //  (surfaceFeatures)
         //  Extracts, classifies and reorders the data from surfaceFeatures.
         extendedEdgeMesh
         (
@@ -501,6 +521,43 @@ public:
             //  etc.
             void flipNormals();
 
+            //- Update with derived geometry
+            void autoMap
+            (
+                const pointField&,
+                const edgeList&,
+                const labelList& pointMap,
+                const labelList& edgeMap
+            );
+
+            //- Trim to surface. Keep volType side. Return map from current back
+            //  to original points (-1 for newly introduced points), edges
+            void trim
+            (
+                const searchableSurface& surf,
+                const volumeType volType,
+                labelList& pointMap,
+                labelList& edgeMap
+            );
+
+            //- Order according to point and edge status
+            void setFromStatus
+            (
+                const List<extendedEdgeMesh::pointStatus>& pointStat,
+                const List<extendedEdgeMesh::edgeStatus>& edgeStat,
+                labelList& sortedToOriginalPoint,
+                labelList& sortedToOriginalEdge
+            );
+
+            //- Geometric merge points. Returns true if any points merged.
+            //  Return maps from new back to original points/edges.
+            bool mergePointsAndSort
+            (
+                const scalar mergeDist,
+                labelList& pointMap,
+                labelList& edgeMap
+            );
+
 
         // Read
 
@@ -530,6 +587,24 @@ public:
             const List<vector>& norms,
             const labelList& edNorms,
             const vector& fC0tofC1
+        );
+
+        //- Determine the ordering
+        static void sortedOrder
+        (
+            const List<extendedEdgeMesh::pointStatus>& pointStat,
+            const List<extendedEdgeMesh::edgeStatus>& edgeStat,
+            labelList& sortedToOriginalPoint,
+            labelList& sortedToOriginalEdge,
+
+            label& pointConcaveStart,
+            label& pointMixedStart,
+            label& pointNonFeatStart,
+
+            label& edgeInternalStart,
+            label& edgeFlatStart,
+            label& edgeOpenStart,
+            label& edgeMultipleStart
         );
 
 

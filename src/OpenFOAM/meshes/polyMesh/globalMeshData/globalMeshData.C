@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -140,7 +140,7 @@ void Foam::globalMeshData::calcSharedPoints() const
      || sharedPointAddrPtr_.valid()
     )
     {
-        FatalErrorIn("globalMeshData::calcSharedPoints()")
+        FatalErrorInFunction
             << "Shared point addressing already done" << abort(FatalError);
     }
 
@@ -307,7 +307,7 @@ void Foam::globalMeshData::calcSharedEdges() const
      || sharedEdgeAddrPtr_.valid()
     )
     {
-        FatalErrorIn("globalMeshData::calcSharedEdges()")
+        FatalErrorInFunction
             << "Shared edge addressing already done" << abort(FatalError);
     }
 
@@ -845,7 +845,7 @@ Foam::label Foam::globalMeshData::findTransform
 
     if (remoteTransformI == -1 || localTransformI == -1)
     {
-        FatalErrorIn("globalMeshData::findTransform(..)")
+        FatalErrorInFunction
             << "Problem. Cannot find " << remotePoint
             << " or " << localPoint  << " "
             << coupledPatch().localPoints()[localPoint]
@@ -1177,10 +1177,8 @@ void Foam::globalMeshData::calcGlobalEdgeOrientation() const
             );
             if (stat == 0)
             {
-                FatalErrorIn
-                (
-                    "globalMeshData::calcGlobalEdgeOrientation() const"
-                )   << "problem : my edge:" << e
+                FatalErrorInFunction
+                    << "problem : my edge:" << e
                     << " in master points:" << masterE
                     << " v.s. masterEdgeVerts:" << masterEdgeVerts[edgeI]
                     << exit(FatalError);
@@ -2748,7 +2746,13 @@ void Foam::globalMeshData::updateMesh()
 
     // *** Temporary hack to avoid problems with overlapping communication
     // *** between these reductions and the calculation of deltaCoeffs
-    label comm = UPstream::worldComm + 1;
+    //label comm = UPstream::worldComm + 1;
+    label comm = UPstream::allocateCommunicator
+    (
+        UPstream::worldComm,
+        identity(UPstream::nProcs(UPstream::worldComm)),
+        true
+    );
 
     // Total number of faces.
     nTotalFaces_ = returnReduce
@@ -2784,6 +2788,8 @@ void Foam::globalMeshData::updateMesh()
         Pstream::msgType(),
         comm
     );
+
+    UPstream::freeCommunicator(comm);
 
     if (debug)
     {

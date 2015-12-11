@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -122,9 +122,8 @@ Foam::surfaceZonesInfo::surfaceZonesInfo
             && !surface.hasVolumeType()
             )
             {
-                IOWarningIn
+                IOWarningInFunction
                 (
-                    "surfaceZonesInfo::surfaceZonesInfo(..)",
                     surfacesDict
                 )   << "Illegal entry zoneInside "
                     << areaSelectionAlgoNames[zoneInside_]
@@ -135,9 +134,8 @@ Foam::surfaceZonesInfo::surfaceZonesInfo
         }
         else if (hasSide)
         {
-            IOWarningIn
+            IOWarningInFunction
             (
-                "surfaceZonesInfo::surfaceZonesInfo(..)",
                 surfacesDict
             )   << "Unused entry zoneInside for faceZone "
                 << faceZoneName_
@@ -341,6 +339,37 @@ Foam::labelList Foam::surfaceZonesInfo::getInsidePointNamedSurfaces
 }
 
 
+Foam::label Foam::surfaceZonesInfo::addCellZone
+(
+    const word& name,
+    const labelList& addressing,
+    polyMesh& mesh
+)
+{
+    cellZoneMesh& cellZones = mesh.cellZones();
+
+    label zoneI = cellZones.findZoneID(name);
+
+    if (zoneI == -1)
+    {
+        zoneI = cellZones.size();
+        cellZones.setSize(zoneI+1);
+        cellZones.set
+        (
+            zoneI,
+            new cellZone
+            (
+                name,           // name
+                addressing,     // addressing
+                zoneI,          // index
+                cellZones       // cellZoneMesh
+            )
+        );
+    }
+    return zoneI;
+}
+
+
 Foam::labelList Foam::surfaceZonesInfo::addCellZonesToMesh
 (
     const PtrList<surfaceZonesInfo>& surfList,
@@ -350,8 +379,6 @@ Foam::labelList Foam::surfaceZonesInfo::addCellZonesToMesh
 {
     labelList surfaceToCellZone(surfList.size(), -1);
 
-    cellZoneMesh& cellZones = mesh.cellZones();
-
     forAll(namedSurfaces, i)
     {
         label surfI = namedSurfaces[i];
@@ -360,24 +387,12 @@ Foam::labelList Foam::surfaceZonesInfo::addCellZonesToMesh
 
         if (cellZoneName != word::null)
         {
-            label zoneI = cellZones.findZoneID(cellZoneName);
-
-            if (zoneI == -1)
-            {
-                zoneI = cellZones.size();
-                cellZones.setSize(zoneI+1);
-                cellZones.set
-                (
-                    zoneI,
-                    new cellZone
-                    (
-                        cellZoneName,   //name
-                        labelList(0),   //addressing
-                        zoneI,          //index
-                        cellZones       //cellZoneMesh
-                    )
-                );
-            }
+            label zoneI = addCellZone
+            (
+                cellZoneName,
+                labelList(0),   // addressing
+                mesh
+            );
 
             surfaceToCellZone[surfI] = zoneI;
         }
@@ -385,7 +400,7 @@ Foam::labelList Foam::surfaceZonesInfo::addCellZonesToMesh
 
     // Check they are synced
     List<wordList> allCellZones(Pstream::nProcs());
-    allCellZones[Pstream::myProcNo()] = cellZones.names();
+    allCellZones[Pstream::myProcNo()] = mesh.cellZones().names();
     Pstream::gatherList(allCellZones);
     Pstream::scatterList(allCellZones);
 
@@ -393,11 +408,8 @@ Foam::labelList Foam::surfaceZonesInfo::addCellZonesToMesh
     {
         if (allCellZones[procI] != allCellZones[0])
         {
-            FatalErrorIn
-            (
-                "meshRefinement::zonify"
-                "(const label, const point&)"
-            )   << "Zones not synchronised among processors." << nl
+            FatalErrorInFunction
+                << "Zones not synchronised among processors." << nl
                 << " Processor0 has cellZones:" << allCellZones[0]
                 << " , processor" << procI
                 << " has cellZones:" << allCellZones[procI]
@@ -406,6 +418,40 @@ Foam::labelList Foam::surfaceZonesInfo::addCellZonesToMesh
     }
 
     return surfaceToCellZone;
+}
+
+
+
+Foam::label Foam::surfaceZonesInfo::addFaceZone
+(
+    const word& name,
+    const labelList& addressing,
+    const boolList& flipMap,
+    polyMesh& mesh
+)
+{
+    faceZoneMesh& faceZones = mesh.faceZones();
+
+    label zoneI = faceZones.findZoneID(name);
+
+    if (zoneI == -1)
+    {
+        zoneI = faceZones.size();
+        faceZones.setSize(zoneI+1);
+        faceZones.set
+        (
+            zoneI,
+            new faceZone
+            (
+                name,           // name
+                addressing,     // addressing
+                flipMap,        // flipMap
+                zoneI,          // index
+                faceZones       // faceZoneMesh
+            )
+        );
+    }
+    return zoneI;
 }
 
 
@@ -426,25 +472,13 @@ Foam::labelList Foam::surfaceZonesInfo::addFaceZonesToMesh
 
         const word& faceZoneName = surfList[surfI].faceZoneName();
 
-        label zoneI = faceZones.findZoneID(faceZoneName);
-
-        if (zoneI == -1)
-        {
-            zoneI = faceZones.size();
-            faceZones.setSize(zoneI+1);
-            faceZones.set
-            (
-                zoneI,
-                new faceZone
-                (
-                    faceZoneName,   //name
-                    labelList(0),   //addressing
-                    boolList(0),    //flipmap
-                    zoneI,          //index
-                    faceZones       //faceZoneMesh
-                )
-            );
-        }
+        label zoneI = addFaceZone
+        (
+            faceZoneName,   //name
+            labelList(0),   //addressing
+            boolList(0),    //flipmap
+            mesh
+        );
 
         surfaceToFaceZone[surfI] = zoneI;
     }
@@ -459,11 +493,8 @@ Foam::labelList Foam::surfaceZonesInfo::addFaceZonesToMesh
     {
         if (allFaceZones[procI] != allFaceZones[0])
         {
-            FatalErrorIn
-            (
-                "meshRefinement::zonify"
-                "(const label, const point&)"
-            )   << "Zones not synchronised among processors." << nl
+            FatalErrorInFunction
+                << "Zones not synchronised among processors." << nl
                 << " Processor0 has faceZones:" << allFaceZones[0]
                 << " , processor" << procI
                 << " has faceZones:" << allFaceZones[procI]

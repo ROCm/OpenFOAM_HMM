@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,10 +28,13 @@ Description
     Mesh motion solver that uses a medial axis algorithm to work
     out a fraction between the (nearest point on a) moving surface
     and the (nearest point on a) fixed surface.
+
     This fraction is then used to scale the motion. Use
     - fixedValue on all moving patches
     - zeroFixedValue on stationary patches
     - slip on all slipping patches
+    Note that the fixedValue boundary conditions might be changed by this
+    solver to enforce consistency and a valid resulting mesh.
 
 SourceFiles
     medialAxisMeshMover.C
@@ -44,13 +47,15 @@ SourceFiles
 #include "externalDisplacementMeshMover.H"
 #include "motionSmootherAlgo.H"
 #include "autoLayerDriver.H"
+#include "fieldSmoother.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class pointData;
+template <class DataType>
+class PointData;
 
 /*---------------------------------------------------------------------------*\
              Class medialAxisMeshMover Declaration
@@ -75,6 +80,9 @@ class medialAxisMeshMover
         //- Mesh mover algorithm
         motionSmootherAlgo meshMover_;
 
+        //- Field smoothing
+        fieldSmoother fieldSmoother_;
+
 
     // Pre-calculated medial axis information
 
@@ -95,45 +103,16 @@ class medialAxisMeshMover
 
     // Private Member Functions
 
-        //- Extract fixed-value patchfields
-        static labelList getFixedValueBCs(const pointVectorField&);
-
         //- Extract bc types. Replace fixedValue derivatives with fixedValue
         wordList getPatchFieldTypes(const pointVectorField& fld);
-
-        //- Construct patch on selected patches
-        static autoPtr<indirectPrimitivePatch> getPatch
-        (
-            const polyMesh&,
-            const labelList&
-        );
 
 
         // Calculation of medial axis information
 
-            //- Smooth normals on patch
-            void smoothPatchNormals
-            (
-                const label nSmoothDisp,
-                const PackedBoolList& isMasterPoint,
-                const PackedBoolList& isMasterEdge,
-                pointField& normals
-            ) const;
-
-            //- Smooth normals on interior
-            void smoothNormals
-            (
-                const label nSmoothDisp,
-                const PackedBoolList& isMasterPoint,
-                const PackedBoolList& isMasterEdge,
-                const labelList& fixedPoints,
-                pointVectorField& normals
-            ) const;
-
             //- Is mesh edge on a cusp of displacement
             bool isMaxEdge
             (
-                const List<pointData>& pointWallDist,
+                const List<PointData<vector> >& pointWallDist,
                 const label edgeI,
                 const scalar minCos
             ) const;
@@ -159,23 +138,6 @@ class medialAxisMeshMover
                 const scalarField& minThickness,
                 pointField& patchDisp,
                 List<autoLayerDriver::extrudeMode>& extrudeStatus
-            ) const;
-
-            void smoothLambdaMuDisplacement
-            (
-                const label nSmoothDisp,
-                const PackedBoolList& isMasterPoint,
-                const PackedBoolList& isMasterEdge,
-                vectorField& displacement
-            ) const;
-
-            void minSmoothField
-            (
-                const label nSmoothDisp,
-                const PackedBoolList& isMasterPoint,
-                const PackedBoolList& isMasterEdge,
-                const scalarField& fieldMin,
-                scalarField& field
             ) const;
 
             //- Stop layer growth at feature edges
@@ -271,11 +233,7 @@ public:
         //-  Update local data for topology changes
         virtual void updateMesh(const mapPolyMesh&)
         {
-            notImplemented
-            (
-                "medialAxisMeshMover::updateMesh"
-                "(const mapPolyMesh&)"
-            );
+            NotImplemented;
         }
 
 };

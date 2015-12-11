@@ -39,9 +39,10 @@ Foam::porousBafflePressureFvPatchField::porousBafflePressureFvPatchField
     fixedJumpFvPatchField<scalar>(p, iF),
     phiName_("phi"),
     rhoName_("rho"),
-    D_(0),
-    I_(0),
-    length_(0)
+    D_(),
+    I_(),
+    length_(0),
+    uniformJump_(false)
 {}
 
 
@@ -55,9 +56,10 @@ Foam::porousBafflePressureFvPatchField::porousBafflePressureFvPatchField
     fixedJumpFvPatchField<scalar>(p, iF),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
     rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
-    D_(readScalar(dict.lookup("D"))),
-    I_(readScalar(dict.lookup("I"))),
-    length_(readScalar(dict.lookup("length")))
+    D_(DataEntry<scalar>::New("D", dict)),
+    I_(DataEntry<scalar>::New("I", dict)),
+    length_(readScalar(dict.lookup("length"))),
+    uniformJump_(dict.lookupOrDefault<bool>("uniformJump", false))
 {
     fvPatchField<scalar>::operator=
     (
@@ -77,9 +79,10 @@ Foam::porousBafflePressureFvPatchField::porousBafflePressureFvPatchField
     fixedJumpFvPatchField<scalar>(ptf, p, iF, mapper),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_),
-    D_(ptf.D_),
-    I_(ptf.I_),
-    length_(ptf.length_)
+    D_(ptf.D_, false),
+    I_(ptf.I_, false),
+    length_(ptf.length_),
+    uniformJump_(ptf.uniformJump_)
 {}
 
 
@@ -92,9 +95,10 @@ Foam::porousBafflePressureFvPatchField::porousBafflePressureFvPatchField
     fixedJumpFvPatchField<scalar>(ptf),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_),
-    D_(ptf.D_),
-    I_(ptf.I_),
-    length_(ptf.length_)
+    D_(ptf.D_, false),
+    I_(ptf.I_, false),
+    length_(ptf.length_),
+    uniformJump_(ptf.uniformJump_)
 {}
 
 
@@ -107,9 +111,10 @@ Foam::porousBafflePressureFvPatchField::porousBafflePressureFvPatchField
     fixedJumpFvPatchField<scalar>(ptf, iF),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_),
-    D_(ptf.D_),
-    I_(ptf.I_),
-    length_(ptf.length_)
+    D_(ptf.D_, false),
+    I_(ptf.I_, false),
+    length_(ptf.length_),
+    uniformJump_(ptf.uniformJump_)
 {}
 
 
@@ -130,11 +135,15 @@ void Foam::porousBafflePressureFvPatchField::updateCoeffs()
 
     scalarField Un(phip/patch().magSf());
 
-    if (phi.dimensions() == dimensionSet(0, 3, -1, 0, 0))
+    if (phi.dimensions() == dimMass/dimTime)
     {
         Un /= patch().lookupPatchField<volScalarField, scalar>(rhoName_);
     }
 
+    if (uniformJump_)
+    {
+        Un = gAverage(Un);
+    }
     scalarField magUn(mag(Un));
 
     const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
@@ -146,11 +155,15 @@ void Foam::porousBafflePressureFvPatchField::updateCoeffs()
         )
     );
 
+    const scalar t = db().time().timeOutputValue();
+    const scalar D = D_->value(t);
+    const scalar I = I_->value(t);
+
     jump_ =
         -sign(Un)
         *(
-            D_*turbModel.nu(patch().index())
-          + I_*0.5*magUn
+            D*turbModel.nu(patch().index())
+          + I*0.5*magUn
          )*magUn*length_;
 
     if (dimensionedInternalField().dimensions() == dimPressure)
@@ -161,7 +174,7 @@ void Foam::porousBafflePressureFvPatchField::updateCoeffs()
     if (debug)
     {
         scalar avePressureJump = gAverage(jump_);
-        scalar aveVelocity = gAverage(mag(Un));
+        scalar aveVelocity = gAverage(Un);
 
         Info<< patch().boundaryMesh().mesh().name() << ':'
             << patch().name() << ':'
@@ -179,9 +192,11 @@ void Foam::porousBafflePressureFvPatchField::write(Ostream& os) const
     fixedJumpFvPatchField<scalar>::write(os);
     writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
     writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
-    os.writeKeyword("D") << D_ << token::END_STATEMENT << nl;
-    os.writeKeyword("I") << I_ << token::END_STATEMENT << nl;
+    D_->writeData(os);
+    I_->writeData(os);
     os.writeKeyword("length") << length_ << token::END_STATEMENT << nl;
+    os.writeKeyword("uniformJump") << uniformJump_
+        << token::END_STATEMENT << nl;
 }
 
 

@@ -1,10 +1,18 @@
 rho = thermo.rho();
+rho = max(rho, rhoMin);
+rho = min(rho, rhoMax);
+rho.relax();
 
-volScalarField rAU(1.0/UEqn.A());
+volScalarField rAU(1.0/UEqn().A());
 surfaceScalarField rhorAUf("rhorAUf", fvc::interpolate(rho*rAU));
 
 volVectorField HbyA("HbyA", U);
-HbyA = rAU*UEqn.H();
+HbyA = rAU*UEqn().H();
+
+if (pimple.nCorrPISO() <= 1)
+{
+    UEqn.clear();
+}
 
 if (pimple.transonic())
 {
@@ -26,7 +34,7 @@ if (pimple.transonic())
         (
             fvm::ddt(psi, p)
           + fvm::div(phid, p)
-          - fvm::laplacian(rho*rAU, p)
+          - fvm::laplacian(rhorAUf, p)
          ==
             fvOptions(psi, p, rho.name())
         );
@@ -58,7 +66,7 @@ else
         (
             fvm::ddt(psi, p)
           + fvc::div(phiHbyA)
-          - fvm::laplacian(rho*rAU, p)
+          - fvm::laplacian(rhorAUf, p)
          ==
             fvOptions(psi, p, rho.name())
         );
@@ -74,6 +82,17 @@ else
 
 #include "rhoEqn.H"
 #include "compressibleContinuityErrs.H"
+
+// Explicitly relax pressure for momentum corrector
+p.relax();
+
+// Recalculate density from the relaxed pressure
+rho = thermo.rho();
+rho = max(rho, rhoMin);
+rho = min(rho, rhoMax);
+rho.relax();
+Info<< "rho max/min : " << max(rho).value()
+    << " " << min(rho).value() << endl;
 
 U = HbyA - rAU*fvc::grad(p);
 U.correctBoundaryConditions();

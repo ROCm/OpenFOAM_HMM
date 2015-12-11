@@ -24,6 +24,9 @@ License
 Application
     reactingParcelFilmFoam
 
+Group
+    grpLagrangianSolvers
+
 Description
     Transient PIMPLE solver for compressible, laminar or turbulent flow with
     reacting Lagrangian parcels, and surface film modelling.
@@ -37,7 +40,7 @@ Description
 #include "psiCombustionModel.H"
 #include "radiationModel.H"
 #include "SLGThermo.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "pimpleControl.H"
 #include "fixedFluxPressureFvPatchScalarField.H"
 
@@ -62,6 +65,8 @@ int main(int argc, char *argv[])
     #include "createTimeControls.H"
     #include "compressibleCourantNo.H"
     #include "setInitialDeltaT.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

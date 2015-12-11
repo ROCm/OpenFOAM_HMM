@@ -7,6 +7,8 @@
 #include "wedgePolyPatch.H"
 #include "unitConversion.H"
 #include "polyMeshTetDecomposition.H"
+#include "surfaceWriter.H"
+#include "checkTools.H"
 
 
 // Find wedge with opposite orientation. Note: does not actually check that
@@ -402,13 +404,8 @@ bool Foam::checkCoupledPoints
 
                     if (f.size() != nbrPoints[bFaceI].size())
                     {
-                        FatalErrorIn
-                        (
-                            "Foam::checkCoupledPoints\n"
-                            "(\n"
-                            "   const polyMesh&, const bool, labelHashSet*\n"
-                            ")\n"
-                        )   << "Local face size : " << f.size()
+                        FatalErrorInFunction
+                            << "Local face size : " << f.size()
                             << " does not equal neighbour face size : "
                             << nbrPoints[bFaceI].size()
                             << abort(FatalError);
@@ -477,7 +474,12 @@ bool Foam::checkCoupledPoints
 }
 
 
-Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
+Foam::label Foam::checkGeometry
+(
+    const polyMesh& mesh,
+    const bool allGeometry,
+    const autoPtr<surfaceWriter>& writer
+)
 {
     label noFailedChecks = 0;
 
@@ -563,6 +565,10 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
                     << " non closed cells to set " << cells.name() << endl;
                 cells.instance() = mesh.pointsInstance();
                 cells.write();
+                if (writer.valid())
+                {
+                    mergeAndWrite(writer(), cells);
+                }
             }
         }
 
@@ -575,6 +581,10 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
                 << aspectCells.name() << endl;
             aspectCells.instance() = mesh.pointsInstance();
             aspectCells.write();
+            if (writer.valid())
+            {
+                mergeAndWrite(writer(), aspectCells);
+            }
         }
     }
 
@@ -592,6 +602,10 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
                     << " zero area faces to set " << faces.name() << endl;
                 faces.instance() = mesh.pointsInstance();
                 faces.write();
+                if (writer.valid())
+                {
+                    mergeAndWrite(writer(), faces);
+                }
             }
         }
     }
@@ -610,6 +624,10 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
                     << " zero volume cells to set " << cells.name() << endl;
                 cells.instance() = mesh.pointsInstance();
                 cells.write();
+                if (writer.valid())
+                {
+                    mergeAndWrite(writer(), cells);
+                }
             }
         }
     }
@@ -629,6 +647,10 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
                 << " non-orthogonal faces to set " << faces.name() << endl;
             faces.instance() = mesh.pointsInstance();
             faces.write();
+            if (writer.valid())
+            {
+                mergeAndWrite(writer(), faces);
+            }
         }
     }
 
@@ -647,6 +669,10 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
                     << faces.name() << endl;
                 faces.instance() = mesh.pointsInstance();
                 faces.write();
+                if (writer.valid())
+                {
+                    mergeAndWrite(writer(), faces);
+                }
             }
         }
     }
@@ -665,6 +691,10 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
                     << " skew faces to set " << faces.name() << endl;
                 faces.instance() = mesh.pointsInstance();
                 faces.write();
+                if (writer.valid())
+                {
+                    mergeAndWrite(writer(), faces);
+                }
             }
         }
     }
@@ -685,6 +715,10 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
                     << faces.name() << endl;
                 faces.instance() = mesh.pointsInstance();
                 faces.write();
+                if (writer.valid())
+                {
+                    mergeAndWrite(writer(), faces);
+                }
             }
         }
     }
@@ -714,6 +748,10 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
                     << "decomposition tets to set " << faces.name() << endl;
                 faces.instance() = mesh.pointsInstance();
                 faces.write();
+                if (writer.valid())
+                {
+                    mergeAndWrite(writer(), faces);
+                }
             }
         }
     }
@@ -774,6 +812,10 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
                     << endl;
                 faces.instance() = mesh.pointsInstance();
                 faces.write();
+                if (writer.valid())
+                {
+                    mergeAndWrite(writer(), faces);
+                }
             }
         }
     }
@@ -793,6 +835,10 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
                     << " warped faces to set " << faces.name() << endl;
                 faces.instance() = mesh.pointsInstance();
                 faces.write();
+                if (writer.valid())
+                {
+                    mergeAndWrite(writer(), faces);
+                }
             }
         }
     }
@@ -810,6 +856,10 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
                 << " under-determined cells to set " << cells.name() << endl;
             cells.instance() = mesh.pointsInstance();
             cells.write();
+            if (writer.valid())
+            {
+                mergeAndWrite(writer(), cells);
+            }
         }
     }
 
@@ -826,6 +876,10 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
                 << " concave cells to set " << cells.name() << endl;
             cells.instance() = mesh.pointsInstance();
             cells.write();
+            if (writer.valid())
+            {
+                mergeAndWrite(writer(), cells);
+            }
         }
     }
 
@@ -843,6 +897,10 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
                 << faces.name() << endl;
             faces.instance() = mesh.pointsInstance();
             faces.write();
+            if (writer.valid())
+            {
+                mergeAndWrite(writer(), faces);
+            }
         }
     }
 
@@ -860,6 +918,10 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
                 << faces.name() << endl;
             faces.instance() = mesh.pointsInstance();
             faces.write();
+            if (writer.valid())
+            {
+                mergeAndWrite(writer(), faces);
+            }
         }
     }
 

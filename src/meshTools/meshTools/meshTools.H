@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -200,7 +200,7 @@ namespace meshTools
             const label v1
         );
 
-        //- Return edge between two vertices. Returns -1 if no edge.
+        //- Return edge between two mesh vertices. Returns -1 if no edge.
         label findEdge
         (
             const primitiveMesh&,

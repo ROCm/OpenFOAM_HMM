@@ -24,6 +24,9 @@ License
 Application
     uncoupledKinematicParcelFoam
 
+Group
+    grpLagrangianSolvers
+
 Description
     Transient solver for the passive transport of a single kinematic
     particle cloud.

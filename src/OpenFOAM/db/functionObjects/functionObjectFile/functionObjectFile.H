@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,6 +57,8 @@ namespace Foam
 
 class functionObjectFile
 {
+private:
+
     // Private data
 
         //- Reference to the database
@@ -65,14 +67,23 @@ class functionObjectFile
         //- Prefix
         const word prefix_;
 
-        //- File names
-        wordList names_;
+        //- Name of file
+        word fileName_;
 
         //- File pointer
-        PtrList<OFstream> filePtrs_;
+        autoPtr<OFstream> filePtr_;
+
+        //- Write precision
+        label writePrecision_;
 
 
 protected:
+
+    // Protected Data
+
+        //- Flag to enable/disable writing to file
+        bool writeToFile_;
+
 
     // Protected Member Functions
 
@@ -85,20 +96,11 @@ protected:
         //- Return the base directory for the current time value
         virtual fileName baseTimeDir() const;
 
-        //- Create the output file
-        virtual void createFiles();
+        //- Return an autoPtr to a new file
+        virtual autoPtr<OFstream> createFile(const word& name) const;
 
-        //- File header information
-        virtual void writeFileHeader(const label i = 0);
-
-        //- Write function
-        virtual void write();
-
-        //- Reset the list of names from a wordList
-        virtual void resetNames(const wordList& names);
-
-        //- Reset the list of names to a single name entry
-        virtual void resetName(const word& name);
+        //- Reset internal file pointer to new file with new name
+        virtual void resetFile(const word& name);
 
         //- Return the value width when writing to stream with optional offset
         virtual Omanip<int> valueWidth(const label offset = 0) const;
@@ -118,26 +120,18 @@ public:
     //- Additional characters for writing
     static label addChars;
 
-
     // Constructors
 
         //- Construct null
         functionObjectFile(const objectRegistry& obr, const word& prefix);
 
-        //- Construct from components
+        //- Construct from components and read options from dictionary
         functionObjectFile
         (
             const objectRegistry& obr,
             const word& prefix,
-            const word& name
-        );
-
-        //- Construct from components
-        functionObjectFile
-        (
-            const objectRegistry& obr,
-            const word& prefix,
-            const wordList& names
+            const word& fileName,
+            const dictionary& dict
         );
 
 
@@ -147,17 +141,14 @@ public:
 
     // Member Functions
 
-        //- Return const access to the names
-        const wordList& names() const;
+        //- Read
+        void read(const dictionary& dict);
 
         //- Return access to the file (if only 1)
         OFstream& file();
 
-        //- Return access to the files
-        PtrList<OFstream>& files();
-
-        //- Return file 'i'
-        OFstream& file(const label i);
+        //- Return true if can write to file
+        bool writeToFile() const;
 
         //- Write a commented string to stream
         void writeCommented
@@ -179,6 +170,9 @@ public:
             Ostream& os,
             const string& str
         ) const;
+
+        //- Write the current time to stream
+        void writeTime(Ostream& os) const;
 
         //- Write a (commented) header property and value pair
         template<class Type>

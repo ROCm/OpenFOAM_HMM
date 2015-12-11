@@ -114,15 +114,8 @@ greyMeanSolidAbsorptionEmission
         const word& key = iter().keyword();
         if (!mixture_.contains(key))
         {
-            WarningIn
-            (
-                "greyMeanSolidAbsorptionEmission::"
-                "greyMeanSolidAbsorptionEmission "
-                "("
-                "   const dictionary& dict,"
-                "   const fvMesh& mesh"
-                ")"
-            )   << " specie: " << key << " is not found in the solid mixture"
+            WarningInFunction
+                << " specie: " << key << " is not found in the solid mixture"
                 << nl
                 << " specie is the mixture are:" << mixture_.species() << nl
                 << nl << endl;

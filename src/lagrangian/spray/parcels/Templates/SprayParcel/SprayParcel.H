@@ -181,6 +181,25 @@ public:
         //- Runtime type information
         TypeName("SprayParcel");
 
+        //- String representation of properties
+        AddToPropertyList
+        (
+            ParcelType,
+          + " d0"
+          + " position0"
+          + " sigma"
+          + " mu"
+          + " liquidCore"
+          + " KHindex"
+          + " y"
+          + " yDot"
+          + " tc"
+          + " ms"
+          + " injector"
+          + " tMom"
+          + " user"
+        );
+
 
     // Constructors
 

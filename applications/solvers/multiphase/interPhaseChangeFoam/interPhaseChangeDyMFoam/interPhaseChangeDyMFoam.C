@@ -24,6 +24,9 @@ License
 Application
     interPhaseChangeDyMFoam
 
+Group
+    grpMultiphaseSolvers grpMovingMeshSolvers
+
 Description
     Solver for 2 incompressible, isothermal immiscible fluids with phase-change
     (e.g. cavitation).  Uses a VOF (volume of fluid) phase-fraction based
@@ -49,7 +52,7 @@ Description
 #include "phaseChangeTwoPhaseMixture.H"
 #include "turbulentTransportModel.H"
 #include "pimpleControl.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "CorrectPhi.H"
 #include "fixedFluxPressureFvPatchScalarField.H"
 
@@ -85,6 +88,8 @@ int main(int argc, char *argv[])
     #include "createUf.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

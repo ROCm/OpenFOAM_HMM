@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,10 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "yPlus.H"
+#include "wallFvPatch.H"
 #include "nutWallFunctionFvPatchScalarField.H"
 #include "nearWallDist.H"
-#include "wallFvPatch.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -70,20 +69,17 @@ void Foam::yPlus::calcYPlus
             const scalar maxYplus = gMax(yPlusp);
             const scalar avgYplus = gAverage(yPlusp);
 
-            if (Pstream::master())
-            {
-                if (log_) Info
-                    << "    patch " << patch.name()
-                    << " y+ : min = " << minYplus << ", max = " << maxYplus
-                    << ", average = " << avgYplus << nl;
+            if (log_) Info<< "    patch " << patch.name()
+                << " y+ : min = " << minYplus << ", max = " << maxYplus
+                << ", average = " << avgYplus << nl;
 
-                file() << obr_.time().value()
-                    << token::TAB << patch.name()
-                    << token::TAB << minYplus
-                    << token::TAB << maxYplus
-                    << token::TAB << avgYplus
-                    << endl;
-            }
+            writeTime(file());
+            file()
+                << token::TAB << patch.name()
+                << token::TAB << minYplus
+                << token::TAB << maxYplus
+                << token::TAB << avgYplus
+                << endl;
         }
         else if (isA<wallFvPatch>(patch))
         {
@@ -100,20 +96,18 @@ void Foam::yPlus::calcYPlus
             const scalar maxYplus = gMax(yPlusp);
             const scalar avgYplus = gAverage(yPlusp);
 
-            if (Pstream::master())
-            {
-                if (log_) Info
-                    << "    patch " << patch.name()
-                    << " y+ : min = " << minYplus << ", max = " << maxYplus
-                    << ", average = " << avgYplus << nl;
+            if (log_) Info
+                << "    patch " << patch.name()
+                << " y+ : min = " << minYplus << ", max = " << maxYplus
+                << ", average = " << avgYplus << nl;
 
-                file() << obr_.time().value()
-                    << token::TAB << patch.name()
-                    << token::TAB << minYplus
-                    << token::TAB << maxYplus
-                    << token::TAB << avgYplus
-                    << endl;
-            }
+            writeTime(file());
+            file()
+                << token::TAB << patch.name()
+                << token::TAB << minYplus
+                << token::TAB << maxYplus
+                << token::TAB << avgYplus
+                << endl;
         }
     }
 }

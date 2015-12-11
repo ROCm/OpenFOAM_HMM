@@ -1,8 +1,3 @@
-fvOption/fvOption.C
-fvOption/fvOptionIO.C
-fvOption/fvOptionList.C
-fvOption/fvIOoptionList.C
-
 cellSetOption/cellSetOption.C
 cellSetOption/cellSetOptionIO.C
 
@@ -38,13 +33,19 @@ $(derivedSources)/solidificationMeltingSource/solidificationMeltingSource.C
 $(derivedSources)/solidificationMeltingSource/solidificationMeltingSourceIO.C
 $(derivedSources)/tabulatedAccelerationSource/tabulatedAccelerationSource.C
 $(derivedSources)/tabulatedAccelerationSource/tabulated6DoFAcceleration/tabulated6DoFAcceleration.C
-
+$(derivedSources)/directionalPressureGradientExplicitSource/directionalPressureGradientExplicitSource.C
+$(derivedSources)/directionalPressureGradientExplicitSource/directionalPressureGradientExplicitSourceIO.C
+$(derivedSources)/buoyancyForce/buoyancyForce.C
+$(derivedSources)/buoyancyForce/buoyancyForceIO.C
+$(derivedSources)/buoyancyEnergy/buoyancyEnergy.C
+$(derivedSources)/buoyancyEnergy/buoyancyEnergyIO.C
 
 interRegion = sources/interRegion
 $(interRegion)/interRegionHeatTransfer/interRegionHeatTransferModel/interRegionHeatTransferModel.C
 $(interRegion)/interRegionHeatTransfer/interRegionHeatTransferModel/interRegionHeatTransferModelIO.C
 $(interRegion)/interRegionHeatTransfer/constantHeatTransfer/constantHeatTransfer.C
 $(interRegion)/interRegionHeatTransfer/tabulatedHeatTransfer/tabulatedHeatTransfer.C
+$(interRegion)/interRegionHeatTransfer/tabulatedNTUHeatTransfer/tabulatedNTUHeatTransfer.C
 $(interRegion)/interRegionHeatTransfer/variableHeatTransfer/variableHeatTransfer.C
 $(interRegion)/interRegionExplicitPorositySource/interRegionExplicitPorositySource.C
 
@@ -56,11 +57,7 @@ $(generalConstraints)/explicitSetValue/explicitSetValue.C
 
 derivedConstraints=constraints/derived
 $(derivedConstraints)/fixedTemperatureConstraint/fixedTemperatureConstraint.C
-
-
-/* Corrections */
-
-corrections/limitTemperature/limitTemperature.C
+$(derivedConstraints)/velocityDampingConstraint/velocityDampingConstraint.C
 
 
 LIB = $(FOAM_LIBBIN)/libfvOptions

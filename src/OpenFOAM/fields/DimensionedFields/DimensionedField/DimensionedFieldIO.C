@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,6 +77,24 @@ Foam::DimensionedField<Type, GeoMesh>::DimensionedField
     dimensions_(dimless)
 {
     readField(dictionary(readStream(typeName)), fieldDictEntry);
+}
+
+
+template<class Type, class GeoMesh>
+Foam::DimensionedField<Type, GeoMesh>::DimensionedField
+(
+    const IOobject& io,
+    const Mesh& mesh,
+    const dictionary& fieldDict,
+    const word& fieldDictEntry
+)
+:
+    regIOobject(io),
+    Field<Type>(0),
+    mesh_(mesh),
+    dimensions_(dimless)
+{
+    readField(fieldDict, fieldDictEntry);
 }
 
 

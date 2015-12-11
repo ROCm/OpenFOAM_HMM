@@ -24,6 +24,9 @@ License
 Application
     thermoFoam
 
+Group
+    grpHeatTransferSolvers
+
 Description
     Evolves the thermodynamics on a frozen flow field
 
@@ -35,7 +38,7 @@ Description
 #include "turbulentFluidThermoModel.H"
 #include "LESModel.H"
 #include "radiationModel.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "simpleControl.H"
 #include "pimpleControl.H"
 

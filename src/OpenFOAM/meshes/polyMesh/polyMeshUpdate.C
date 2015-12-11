@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,15 +78,43 @@ void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
         newMotionPoints.setSize(points_.size());
 
         // Map the list
-        newMotionPoints.map(oldMotionPoints, mpm.pointMap());
-
-        // Any points created out-of-nothing get set to the current coordinate
-        // for lack of anything better.
-        forAll(mpm.pointMap(), newPointI)
+        if (mpm.hasMotionPoints())
         {
-            if (mpm.pointMap()[newPointI] == -1)
+            newMotionPoints.map(oldMotionPoints, mpm.pointMap());
+
+            // Any points created out-of-nothing get set to the current
+            // coordinate for lack of anything better.
+            forAll(mpm.pointMap(), newPointI)
             {
-                newMotionPoints[newPointI] = points_[newPointI];
+                if (mpm.pointMap()[newPointI] == -1)
+                {
+                    newMotionPoints[newPointI] = points_[newPointI];
+                }
+            }
+        }
+        else
+        {
+            const labelList& pointMap = mpm.pointMap();
+            const labelList& revPointMap = mpm.reversePointMap();
+
+            forAll(pointMap, newPointI)
+            {
+                label oldPointI = pointMap[newPointI];
+                if (oldPointI >= 0)
+                {
+                    if (revPointMap[oldPointI] == newPointI) // master point
+                    {
+                        newMotionPoints[newPointI] = oldMotionPoints[oldPointI];
+                    }
+                    else
+                    {
+                        newMotionPoints[newPointI] = points_[newPointI];
+                    }
+                }
+                else
+                {
+                    newMotionPoints[newPointI] = points_[newPointI];
+                }
             }
         }
     }

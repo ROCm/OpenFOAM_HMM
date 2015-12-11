@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -157,7 +157,7 @@ void Foam::polyTopoChange::countMap
         }
         else
         {
-            FatalErrorIn("countMap") << "old:" << oldCellI
+            FatalErrorInFunction
                 << " new:" << newCellI << abort(FatalError);
         }
     }
@@ -323,7 +323,7 @@ Foam::pointField Foam::polyTopoChange::facePoints(const face& f) const
     {
         if (f[fp] < 0 && f[fp] >= points_.size())
         {
-            FatalErrorIn("polyTopoChange::facePoints(const face&) const")
+            FatalErrorInFunction
                 << "Problem." << abort(FatalError);
         }
         points[fp] = points_[f[fp]];
@@ -350,11 +350,8 @@ void Foam::polyTopoChange::checkFace
         }
         else if (patchI == -1 || patchI >= nPatches_)
         {
-            FatalErrorIn
-            (
-                "polyTopoChange::checkFace(const face&, const label"
-                ", const label, const label, const label)"
-            )   << "Face has no neighbour (so external) but does not have"
+            FatalErrorInFunction
+                << "Face has no neighbour (so external) but does not have"
                 << " a valid patch" << nl
                 << "f:" << f
                 << " faceI(-1 if added face):" << faceI
@@ -373,11 +370,8 @@ void Foam::polyTopoChange::checkFace
     {
         if (patchI != -1)
         {
-            FatalErrorIn
-            (
-                "polyTopoChange::checkFace(const face&, const label"
-                ", const label, const label, const label)"
-            )   << "Cannot both have valid patchI and neighbour" << nl
+            FatalErrorInFunction
+                << "Cannot both have valid patchI and neighbour" << nl
                 << "f:" << f
                 << " faceI(-1 if added face):" << faceI
                 << " own:" << own << " nei:" << nei
@@ -393,11 +387,8 @@ void Foam::polyTopoChange::checkFace
 
         if (nei <= own)
         {
-            FatalErrorIn
-            (
-                "polyTopoChange::checkFace(const face&, const label"
-                ", const label, const label, const label)"
-            )   << "Owner cell label should be less than neighbour cell label"
+            FatalErrorInFunction
+                << "Owner cell label should be less than neighbour cell label"
                 << nl
                 << "f:" << f
                 << " faceI(-1 if added face):" << faceI
@@ -415,11 +406,8 @@ void Foam::polyTopoChange::checkFace
 
     if (f.size() < 3 || findIndex(f, -1) != -1)
     {
-        FatalErrorIn
-        (
-            "polyTopoChange::checkFace(const face&, const label"
-            ", const label, const label, const label)"
-        )   << "Illegal vertices in face"
+        FatalErrorInFunction
+            << "Illegal vertices in face"
             << nl
             << "f:" << f
             << " faceI(-1 if added face):" << faceI
@@ -435,11 +423,8 @@ void Foam::polyTopoChange::checkFace
     }
     if (faceI >= 0 && faceI < faces_.size() && faceRemoved(faceI))
     {
-        FatalErrorIn
-        (
-            "polyTopoChange::checkFace(const face&, const label"
-            ", const label, const label, const label)"
-        )   << "Face already marked for removal"
+        FatalErrorInFunction
+            << "Face already marked for removal"
             << nl
             << "f:" << f
             << " faceI(-1 if added face):" << faceI
@@ -457,11 +442,8 @@ void Foam::polyTopoChange::checkFace
     {
         if (f[fp] < points_.size() && pointRemoved(f[fp]))
         {
-            FatalErrorIn
-            (
-                "polyTopoChange::checkFace(const face&, const label"
-                ", const label, const label, const label)"
-            )   << "Face uses removed vertices"
+            FatalErrorInFunction
+                << "Face uses removed vertices"
                 << nl
                 << "f:" << f
                 << " faceI(-1 if added face):" << faceI
@@ -498,15 +480,23 @@ void Foam::polyTopoChange::makeCells
     {
         if (faceOwner_[faceI] < 0)
         {
-            FatalErrorIn
-            (
-                "polyTopoChange::makeCells\n"
-                "(\n"
-                "    const label,\n"
-                "    labelList&,\n"
-                "    labelList&\n"
-                ") const\n"
-            )   << "Face " << faceI << " is active but its owner has"
+            pointField newPoints;
+            if (faceI < faces_.size())
+            {
+                const face& f = faces_[faceI];
+                newPoints.setSize(f.size(), vector::max);
+                forAll(f, fp)
+                {
+                    if (f[fp] < points_.size())
+                    {
+                        newPoints[fp] = points_[f[fp]];
+                    }
+                }
+            }
+
+
+            FatalErrorInFunction
+                << "Face " << faceI << " is active but its owner has"
                 << " been deleted. This is usually due to deleting cells"
                 << " without modifying exposed faces to be boundary faces."
                 << exit(FatalError);
@@ -866,12 +856,8 @@ void Foam::polyTopoChange::getFaceOrder
     {
         if (oldToNew[faceI] == -1)
         {
-            FatalErrorIn
-            (
-                "polyTopoChange::getFaceOrder"
-                "(const label, const labelList&, const labelList&)"
-                " const"
-            )   << "Did not determine new position"
+            FatalErrorInFunction
+                << "Did not determine new position"
                 << " for face " << faceI
                 << " owner " << faceOwner_[faceI]
                 << " neighbour " << faceNeighbour_[faceI]
@@ -1010,7 +996,7 @@ void Foam::polyTopoChange::compact
                              || retiredPoints_.found(pointI)
                             )
                             {
-                                FatalErrorIn("polyTopoChange::compact(..)")
+                                FatalErrorInFunction
                                     << "Removed or retired point " << pointI
                                     << " in face " << f
                                     << " at position " << faceI << endl
@@ -1062,7 +1048,7 @@ void Foam::polyTopoChange::compact
                              || retiredPoints_.found(pointI)
                             )
                             {
-                                FatalErrorIn("polyTopoChange::compact(..)")
+                                FatalErrorInFunction
                                     << "Removed or retired point " << pointI
                                     << " in face " << f
                                     << " at position " << faceI << endl
@@ -1077,7 +1063,7 @@ void Foam::polyTopoChange::compact
 
             if (newPointI != nInternalPoints)
             {
-                FatalErrorIn("polyTopoChange::compact(..)")
+                FatalErrorInFunction
                     << "Problem." << abort(FatalError);
             }
             newPointI = nActivePoints;
@@ -1116,7 +1102,7 @@ void Foam::polyTopoChange::compact
 
             if (!faceRemoved(faceI) && f.size() < 3)
             {
-                FatalErrorIn("polyTopoChange::compact(..)")
+                FatalErrorInFunction
                     << "Created illegal face " << f
                     //<< " from face " << oldF
                     << " at position:" << faceI
@@ -1620,11 +1606,8 @@ void Foam::polyTopoChange::resetZones
 
             if (zoneI < 0 || zoneI >= pointZones.size())
             {
-                FatalErrorIn
-                (
-                    "resetZones(const polyMesh&, polyMesh&, labelListList&"
-                    "labelListList&, labelListList&)"
-                )   << "Illegal zoneID " << zoneI << " for point "
+                FatalErrorInFunction
+                    << "Illegal zoneID " << zoneI << " for point "
                     << iter.key() << " coord " << mesh.points()[iter.key()]
                     << abort(FatalError);
             }
@@ -1707,11 +1690,8 @@ void Foam::polyTopoChange::resetZones
 
             if (zoneI < 0 || zoneI >= faceZones.size())
             {
-                FatalErrorIn
-                (
-                    "resetZones(const polyMesh&, polyMesh&, labelListList&"
-                    "labelListList&, labelListList&)"
-                )   << "Illegal zoneID " << zoneI << " for face "
+                FatalErrorInFunction
+                    << "Illegal zoneID " << zoneI << " for face "
                     << iter.key()
                     << abort(FatalError);
             }
@@ -1823,11 +1803,8 @@ void Foam::polyTopoChange::resetZones
 
             if (zoneI >= cellZones.size())
             {
-                FatalErrorIn
-                (
-                    "resetZones(const polyMesh&, polyMesh&, labelListList&"
-                    "labelListList&, labelListList&)"
-                )   << "Illegal zoneID " << zoneI << " for cell "
+                FatalErrorInFunction
+                    << "Illegal zoneID " << zoneI << " for cell "
                     << cellI << abort(FatalError);
             }
 
@@ -2097,7 +2074,7 @@ void Foam::polyTopoChange::compactAndReorder
 {
     if (mesh.boundaryMesh().size() != nPatches_)
     {
-        FatalErrorIn("polyTopoChange::compactAndReorder(..)")
+        FatalErrorInFunction
             << "polyTopoChange was constructed with a mesh with "
             << nPatches_ << " patches." << endl
             << "The mesh now provided has a different number of patches "
@@ -2395,13 +2372,8 @@ void Foam::polyTopoChange::addMesh
 
                 if (newZoneID[cellI] != -1)
                 {
-                    WarningIn
-                    (
-                        "polyTopoChange::addMesh"
-                        "(const polyMesh&, const labelList&,"
-                        "const labelList&, const labelList&,"
-                        "const labelList&)"
-                    )   << "Cell:" << cellI
+                    WarningInFunction
+                        << "Cell:" << cellI
                         << " centre:" << mesh.cellCentres()[cellI]
                         << " is in two zones:"
                         << cellZones[newZoneID[cellI]].name()
@@ -2491,11 +2463,8 @@ void Foam::polyTopoChange::addMesh
 
             if (pp.start() != faces_.size())
             {
-                FatalErrorIn
-                (
-                    "polyTopoChange::polyTopoChange"
-                    "(const polyMesh& mesh, const bool strict)"
-                )   << "Problem : "
+                FatalErrorInFunction
+                    << "Problem : "
                     << "Patch " << pp.name() << " starts at " << pp.start()
                     << endl
                     << "Current face counter at " << faces_.size() << endl
@@ -2676,10 +2645,8 @@ Foam::label Foam::polyTopoChange::setAction(const topoAction& action)
     }
     else
     {
-        FatalErrorIn
-        (
-            "label polyTopoChange::setAction(const topoAction& action)"
-        )   << "Unknown type of topoChange: " << action.type()
+        FatalErrorInFunction
+            << "Unknown type of topoChange: " << action.type()
             << abort(FatalError);
 
         // Dummy return to keep compiler happy
@@ -2726,19 +2693,15 @@ void Foam::polyTopoChange::modifyPoint
 {
     if (pointI < 0 || pointI >= points_.size())
     {
-        FatalErrorIn
-        (
-            "polyTopoChange::modifyPoint(const label, const point&)"
-        )   << "illegal point label " << pointI << endl
+        FatalErrorInFunction
+            << "illegal point label " << pointI << endl
             << "Valid point labels are 0 .. " << points_.size()-1
             << abort(FatalError);
     }
     if (pointRemoved(pointI) || pointMap_[pointI] == -1)
     {
-        FatalErrorIn
-        (
-            "polyTopoChange::modifyPoint(const label, const point&)"
-        )   << "point " << pointI << " already marked for removal"
+        FatalErrorInFunction
+            << "point " << pointI << " already marked for removal"
             << abort(FatalError);
     }
     points_[pointI] = pt;
@@ -2776,7 +2739,7 @@ void Foam::polyTopoChange::movePoints(const pointField& newPoints)
 {
     if (newPoints.size() != points_.size())
     {
-        FatalErrorIn("polyTopoChange::movePoints(const pointField&)")
+        FatalErrorInFunction
             << "illegal pointField size." << endl
             << "Size:" << newPoints.size() << endl
             << "Points in mesh:" << points_.size()
@@ -2798,7 +2761,7 @@ void Foam::polyTopoChange::removePoint
 {
     if (pointI < 0 || pointI >= points_.size())
     {
-        FatalErrorIn("polyTopoChange::removePoint(const label, const label)")
+        FatalErrorInFunction
             << "illegal point label " << pointI << endl
             << "Valid point labels are 0 .. " << points_.size()-1
             << abort(FatalError);
@@ -2810,7 +2773,7 @@ void Foam::polyTopoChange::removePoint
      && (pointRemoved(pointI) || pointMap_[pointI] == -1)
     )
     {
-        FatalErrorIn("polyTopoChange::removePoint(const label, const label)")
+        FatalErrorInFunction
             << "point " << pointI << " already marked for removal" << nl
             << "Point:" << points_[pointI] << " pointMap:" << pointMap_[pointI]
             << abort(FatalError);
@@ -2818,7 +2781,7 @@ void Foam::polyTopoChange::removePoint
 
     if (pointI == mergePointI)
     {
-        FatalErrorIn("polyTopoChange::removePoint(const label, const label)")
+        FatalErrorInFunction
             << "Cannot remove/merge point " << pointI << " onto itself."
             << abort(FatalError);
     }
@@ -2882,7 +2845,7 @@ Foam::label Foam::polyTopoChange::addFace
     else
     {
         // Allow inflate-from-nothing?
-        //FatalErrorIn("polyTopoChange::addFace")
+        //FatalErrorInFunction
         //    << "Need to specify a master point, edge or face"
         //    << "face:" << f << " own:" << own << " nei:" << nei
         //    << abort(FatalError);
@@ -2952,7 +2915,7 @@ void Foam::polyTopoChange::removeFace(const label faceI, const label mergeFaceI)
 {
     if (faceI < 0 || faceI >= faces_.size())
     {
-        FatalErrorIn("polyTopoChange::removeFace(const label, const label)")
+        FatalErrorInFunction
             << "illegal face label " << faceI << endl
             << "Valid face labels are 0 .. " << faces_.size()-1
             << abort(FatalError);
@@ -2964,7 +2927,7 @@ void Foam::polyTopoChange::removeFace(const label faceI, const label mergeFaceI)
      && (faceRemoved(faceI) || faceMap_[faceI] == -1)
     )
     {
-        FatalErrorIn("polyTopoChange::removeFace(const label, const label)")
+        FatalErrorInFunction
             << "face " << faceI
             << " already marked for removal"
             << abort(FatalError);
@@ -3042,7 +3005,7 @@ void Foam::polyTopoChange::removeCell(const label cellI, const label mergeCellI)
 {
     if (cellI < 0 || cellI >= cellMap_.size())
     {
-        FatalErrorIn("polyTopoChange::removeCell(const label, const label)")
+        FatalErrorInFunction
             << "illegal cell label " << cellI << endl
             << "Valid cell labels are 0 .. " << cellMap_.size()-1
             << abort(FatalError);
@@ -3050,7 +3013,7 @@ void Foam::polyTopoChange::removeCell(const label cellI, const label mergeCellI)
 
     if (strict_ && cellMap_[cellI] == -2)
     {
-        FatalErrorIn("polyTopoChange::removeCell(const label, const label)")
+        FatalErrorInFunction
             << "cell " << cellI
             << " already marked for removal"
             << abort(FatalError);

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,6 +67,19 @@ protected:
         pointVectorField& pointDisplacement_;
 
 
+    // Protected Member functions
+
+        //- Extract fixed-value patchfields
+        static labelList getFixedValueBCs(const pointVectorField&);
+
+        //- Construct patch on selected patches
+        static autoPtr<indirectPrimitivePatch> getPatch
+        (
+            const polyMesh&,
+            const labelList&
+        );
+
+
 private:
 
     // Private Member Functions
@@ -79,6 +92,7 @@ private:
 
         //- Disallow default bitwise assignment
         void operator=(const externalDisplacementMeshMover&);
+
 
 public:
 

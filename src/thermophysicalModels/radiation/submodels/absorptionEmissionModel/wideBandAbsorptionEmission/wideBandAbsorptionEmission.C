@@ -132,11 +132,8 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
         }
         else
         {
-            FatalErrorIn
-            (
-                "radiation::wideBandAbsorptionEmission(const"
-                "dictionary& dict, const fvMesh& mesh)"
-            )   << "specie: " << iter.key()
+            FatalErrorInFunction
+                << "specie: " << iter.key()
                 << " is neither in look-up table : "
                 << lookUpTable_.tableName() << " nor is being solved"
                 << exit(FatalError);
@@ -275,14 +272,7 @@ Foam::radiation::wideBandAbsorptionEmission::ECont(const label bandI) const
         }
         else
         {
-            WarningIn
-            (
-                "tmp<volScalarField>"
-                "radiation::wideBandAbsorptionEmission::ECont"
-                "("
-                    "const label"
-                ") const"
-            )
+            WarningInFunction
                 << "Incompatible dimensions for dQ field" << endl;
         }
     }

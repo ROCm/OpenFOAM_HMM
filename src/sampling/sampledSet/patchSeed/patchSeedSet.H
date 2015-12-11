@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,17 +58,14 @@ class patchSeedSet
         //- Patches to sample
         const labelHashSet patchSet_;
 
-//        //- Maximum distance to look for nearest
-//        const scalar searchDist_;
-//
-//        //- Offset distance
-//        const scalar offsetDist_;
-
-        //- Maximum number of patch faces to seed
+        //- Maximum number of patch faces to seed (if in random subset mode)
         const label maxPoints_;
 
         //- Random number generator (if maxPoints < num patch faces)
         autoPtr<Random> rndGenPtr_;
+
+        //- Patch faces to seed selected based on nearness to supplied points
+        const pointField selectedLocations_;
 
 
     // Private Member Functions

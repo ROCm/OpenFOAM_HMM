@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,7 +83,7 @@ class polyMesh;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                       Class residuals Declaration
+                          Class residuals Declaration
 \*---------------------------------------------------------------------------*/
 
 class residuals
@@ -115,8 +115,12 @@ protected:
         //- Disallow default bitwise assignment
         void operator=(const residuals&);
 
+        //- Output field header information
+        template<class Type>
+        void writeFileHeader(const word& fieldName);
+
         //- Output file header information
-        virtual void writeFileHeader(const label i);
+        virtual void writeFileHeader(Ostream& os) const;
 
 
 public:
@@ -150,7 +154,7 @@ public:
             return name_;
         }
 
-        //- Read the field min/max data
+        //- Read the field residuals data
         virtual void read(const dictionary&);
 
         //- Execute, currently does nothing
@@ -162,7 +166,7 @@ public:
         //- Called when time was set at the end of the Time::operator++
         virtual void timeSet();
 
-        //- Calculate the field min/max
+        //- Calculate the field residuals
         template<class Type>
         void writeResidual(const word& fieldName);
 

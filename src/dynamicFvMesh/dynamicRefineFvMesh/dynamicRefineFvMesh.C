@@ -241,7 +241,7 @@ Foam::dynamicRefineFvMesh::refine
 
             if (oldFaceI >= nInternalFaces())
             {
-                FatalErrorIn("dynamicRefineFvMesh::refine(const labelList&)")
+                FatalErrorInFunction
                     << "New internal face:" << faceI
                     << " fc:" << faceCentres()[faceI]
                     << " originates from boundary oldFace:" << oldFaceI
@@ -294,10 +294,8 @@ Foam::dynamicRefineFvMesh::refine
 
                 if (masterFaceI < 0)
                 {
-                    FatalErrorIn
-                    (
-                        "dynamicRefineFvMesh::refine(const labelList&)"
-                    )   << "Problem: should not have removed faces"
+                    FatalErrorInFunction
+                        << "Problem: should not have removed faces"
                         << " when refining."
                         << nl << "face:" << faceI << abort(FatalError);
                 }
@@ -320,7 +318,7 @@ Foam::dynamicRefineFvMesh::refine
         {
             if (!correctFluxes_.found(iter.key()))
             {
-                WarningIn("dynamicRefineFvMesh::refine(const labelList&)")
+                WarningInFunction
                     << "Cannot find surfaceScalarField " << iter.key()
                     << " in user-provided flux mapping table "
                     << correctFluxes_ << endl
@@ -549,7 +547,7 @@ Foam::dynamicRefineFvMesh::unrefine
         {
             if (!correctFluxes_.found(iter.key()))
             {
-                WarningIn("dynamicRefineFvMesh::refine(const labelList&)")
+                WarningInFunction
                     << "Cannot find surfaceScalarField " << iter.key()
                     << " in user-provided flux mapping table "
                     << correctFluxes_ << endl
@@ -862,16 +860,62 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectUnrefinePoints
     // All points that can be unrefined
     const labelList splitPoints(meshCutter_.getSplitPoints());
 
+
+    const labelListList& pointCells = this->pointCells();
+
+    // If we have any protected cells make sure they also are not being
+    // unrefined
+
+    PackedBoolList protectedPoint(nPoints());
+
+    if (protectedCell_.size())
+    {
+        // Get all points on a protected cell
+        forAll(pointCells, pointI)
+        {
+            const labelList& pCells = pointCells[pointI];
+
+            forAll(pCells, pCellI)
+            {
+                label cellI = pCells[pCellI];
+
+                if (protectedCell_[cellI])
+                {
+                    protectedPoint[pointI] = true;
+                    break;
+                }
+            }
+        }
+
+        syncTools::syncPointList
+        (
+            *this,
+            protectedPoint,
+            orEqOp<unsigned int>(),
+            0U
+        );
+
+        if (debug)
+        {
+            Info<< "From "
+                << returnReduce(protectedCell_.count(), sumOp<label>())
+                << " protected cells found "
+                << returnReduce(protectedPoint.count(), sumOp<label>())
+                << " protected points." << endl;
+        }
+    }
+
+
     DynamicList<label> newSplitPoints(splitPoints.size());
 
     forAll(splitPoints, i)
     {
         label pointI = splitPoints[i];
 
-        if (pFld[pointI] < unrefineLevel)
+        if (!protectedPoint[pointI] && pFld[pointI] < unrefineLevel)
         {
             // Check that all cells are not marked
-            const labelList& pCells = pointCells()[pointI];
+            const labelList& pCells = pointCells[pointI];
 
             bool hasMarked = false;
 
@@ -1227,7 +1271,7 @@ bool Foam::dynamicRefineFvMesh::update()
     }
     else if (refineInterval < 0)
     {
-        FatalErrorIn("dynamicRefineFvMesh::update()")
+        FatalErrorInFunction
             << "Illegal refineInterval " << refineInterval << nl
             << "The refineInterval setting in the dynamicMeshDict should"
             << " be >= 1." << nl
@@ -1246,7 +1290,7 @@ bool Foam::dynamicRefineFvMesh::update()
 
         if (maxCells <= 0)
         {
-            FatalErrorIn("dynamicRefineFvMesh::update()")
+            FatalErrorInFunction
                 << "Illegal maximum number of cells " << maxCells << nl
                 << "The maxCells setting in the dynamicMeshDict should"
                 << " be > 0." << nl
@@ -1257,7 +1301,7 @@ bool Foam::dynamicRefineFvMesh::update()
 
         if (maxRefinement <= 0)
         {
-            FatalErrorIn("dynamicRefineFvMesh::update()")
+            FatalErrorInFunction
                 << "Illegal maximum refinement level " << maxRefinement << nl
                 << "The maxCells setting in the dynamicMeshDict should"
                 << " be > 0." << nl

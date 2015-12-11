@@ -164,14 +164,8 @@ Foam::label Foam::CompositionModel<CloudType>::carrierId
 
     if (id < 0 && !allowNotFound)
     {
-        FatalErrorIn
-        (
-            "label CompositionModel<CloudType>::carrierId"
-            "("
-                "const word&, "
-                "const bool"
-            ") const"
-        )   << "Unable to determine global id for requested component "
+        FatalErrorInFunction
+            << "Unable to determine global id for requested component "
             << cmptName << ". Available components are " << nl
             << thermo_.carrier().species()
             << abort(FatalError);
@@ -193,15 +187,8 @@ Foam::label Foam::CompositionModel<CloudType>::localId
 
     if (id < 0 && !allowNotFound)
     {
-        FatalErrorIn
-        (
-            "label CompositionModel<CloudType>::localId"
-            "("
-                "const label, "
-                "const word&, "
-                "const bool"
-            ") const"
-        )   << "Unable to determine local id for component " << cmptName
+        FatalErrorInFunction
+            << "Unable to determine local id for component " << cmptName
             << abort(FatalError);
     }
 
@@ -221,16 +208,8 @@ Foam::label Foam::CompositionModel<CloudType>::localToCarrierId
 
     if (cid < 0 && !allowNotFound)
     {
-        FatalErrorIn
-        (
-            "label "
-            "CompositionModel<CloudType>::localToCarrierId"
-            "("
-                "const label, "
-                "const label, "
-                "const bool"
-            ") const"
-        )   << "Unable to determine global carrier id for phase "
+        FatalErrorInFunction
+            << "Unable to determine global carrier id for phase "
             << phasei << " with local id " << id
             << abort(FatalError);
     }
@@ -250,7 +229,7 @@ const Foam::scalarField& Foam::CompositionModel<CloudType>::Y0
 
 
 template<class CloudType>
-Foam::scalarField Foam::CompositionModel<CloudType>::X
+Foam::tmp<Foam::scalarField> Foam::CompositionModel<CloudType>::X
 (
     const label phasei,
     const scalarField& Y
@@ -282,21 +261,14 @@ Foam::scalarField Foam::CompositionModel<CloudType>::X
         }
         default:
         {
-            FatalErrorIn
-            (
-                "scalarField CompositionModel<CloudType>::X"
-                "("
-                    "const label, "
-                    "const scalarField&"
-                ") const"
-            )   << "Only possible to convert gas and liquid mass fractions"
+            FatalErrorInFunction
+                << "Only possible to convert gas and liquid mass fractions"
                 << abort(FatalError);
         }
     }
 
-    X /= WInv;
-
-    return X;
+    tmp<scalarField> tfld = X/(WInv + ROOTVSMALL);
+    return tfld;
 }
 
 
@@ -345,16 +317,8 @@ Foam::scalar Foam::CompositionModel<CloudType>::H
         }
         default:
         {
-            FatalErrorIn
-            (
-                "scalar CompositionModel<CloudType>::H"
-                "("
-                "    const label, "
-                "    const scalarField&, "
-                "    const scalar, "
-                "    const scalar"
-                ") const"
-            )   << "Unknown phase enumeration" << abort(FatalError);
+            FatalErrorInFunction
+                << "Unknown phase enumeration" << abort(FatalError);
         }
     }
 
@@ -407,16 +371,8 @@ Foam::scalar Foam::CompositionModel<CloudType>::Hs
         }
         default:
         {
-            FatalErrorIn
-            (
-                "scalar CompositionModel<CloudType>::Hs"
-                "("
-                "    const label, "
-                "    const scalarField&, "
-                "    const scalar, "
-                "    const scalar"
-                ") const"
-            )   << "Unknown phase enumeration"
+            FatalErrorInFunction
+                << "Unknown phase enumeration"
                 << abort(FatalError);
         }
     }
@@ -466,16 +422,8 @@ Foam::scalar Foam::CompositionModel<CloudType>::Hc
         }
         default:
         {
-            FatalErrorIn
-            (
-                "scalar CompositionModel<CloudType>::Hc"
-                "("
-                "    const label, "
-                "    const scalarField&, "
-                "    const scalar, "
-                "    const scalar"
-                ") const"
-            )   << "Unknown phase enumeration"
+            FatalErrorInFunction
+                << "Unknown phase enumeration"
                 << abort(FatalError);
         }
     }
@@ -524,16 +472,8 @@ Foam::scalar Foam::CompositionModel<CloudType>::Cp
         }
         default:
         {
-            FatalErrorIn
-            (
-                "scalar CompositionModel<CloudType>::Cp"
-                "("
-                    "const label, "
-                    "const scalarField&, "
-                    "const scalar, "
-                    "const scalar"
-                ") const"
-            )   << "Unknown phase enumeration"
+            FatalErrorInFunction
+                << "Unknown phase enumeration"
                 << abort(FatalError);
         }
     }
@@ -559,16 +499,8 @@ Foam::scalar Foam::CompositionModel<CloudType>::L
         {
             if (debug)
             {
-                WarningIn
-                (
-                    "scalar CompositionModel<CloudType>::L"
-                    "("
-                        "const label, "
-                        "const scalarField&, "
-                        "const scalar, "
-                        "const scalar"
-                    ") const\n"
-                )   << "No support for gaseous components" << endl;
+                WarningInFunction
+                    << "No support for gaseous components" << endl;
             }
             break;
         }
@@ -584,31 +516,15 @@ Foam::scalar Foam::CompositionModel<CloudType>::L
         {
             if (debug)
             {
-                WarningIn
-                (
-                    "scalar CompositionModel<CloudType>::L"
-                    "("
-                        "const label, "
-                        "const scalarField&, "
-                        "const scalar, "
-                        "const scalar"
-                    ") const\n"
-                )   << "No support for solid components" << endl;
+                WarningInFunction
+                    << "No support for solid components" << endl;
             }
             break;
         }
         default:
         {
-            FatalErrorIn
-            (
-                "scalar CompositionModel<CloudType>::L"
-                "("
-                    "const label, "
-                    "const scalarField&, "
-                    "const scalar, "
-                    "const scalar"
-                ") const"
-            )   << "Unknown phase enumeration"
+            FatalErrorInFunction
+                << "Unknown phase enumeration"
                 << abort(FatalError);
         }
     }

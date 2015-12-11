@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -296,7 +296,7 @@ ListType Foam::subset
     // select must at least cover the list range
     if (select.size() < lst.size())
     {
-        FatalErrorIn("subset(const UList<T>&, const T&, const ListType&)")
+        FatalErrorInFunction
             << "select is of size " << select.size()
             << "; but it must index a list of size " << lst.size()
             << abort(FatalError);
@@ -332,7 +332,7 @@ void Foam::inplaceSubset
     // select must at least cover the list range
     if (select.size() < lst.size())
     {
-        FatalErrorIn("inplaceSubset(const UList<T>&, const T&, ListType&)")
+        FatalErrorInFunction
             << "select is of size " << select.size()
             << "; but it must index a list of size " << lst.size()
             << abort(FatalError);
@@ -732,6 +732,29 @@ void Foam::ListAppendEqOp<T>::operator()(List<T>& x, const List<T>& y) const
             forAll(y, i)
             {
                 x[sz++] = y[i];
+            }
+        }
+        else
+        {
+            x = y;
+        }
+    }
+}
+
+
+template<class T>
+void Foam::ListUniqueEqOp<T>::operator()(List<T>& x, const List<T>& y) const
+{
+    if (y.size())
+    {
+        if (x.size())
+        {
+            forAll(y, i)
+            {
+                if (findIndex(x, y[i]) == -1)
+                {
+                    x.append(y[i]);
+                }
             }
         }
         else

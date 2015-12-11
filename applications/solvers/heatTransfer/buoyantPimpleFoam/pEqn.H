@@ -1,4 +1,9 @@
 {
+    bool closedVolume = p_rgh.needReference();
+
+    dimensionedScalar compressibility = fvc::domainIntegrate(psi);
+    bool compressible = (compressibility.value() > SMALL);
+
     rho = thermo.rho();
 
     // Thermodynamic density needs to be updated by psi*d(p) after the
@@ -36,19 +41,27 @@
         )/(mesh.magSf().boundaryField()*rAUf.boundaryField())
     );
 
-    fvScalarMatrix p_rghDDtEqn
+    tmp<fvScalarMatrix> p_rghDDtEqn
     (
-        fvc::ddt(rho) + psi*correction(fvm::ddt(p_rgh))
-      + fvc::div(phiHbyA)
-      ==
-        fvOptions(psi, p_rgh, rho.name())
+        new fvScalarMatrix(p_rgh, dimMass/dimTime)
     );
+
+    if (compressible)
+    {
+        p_rghDDtEqn =
+        (
+            fvc::ddt(rho) + psi*correction(fvm::ddt(p_rgh))
+        ==
+            fvOptions(psi, p_rgh, rho.name())
+        );
+    }
 
     while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix p_rghEqn
         (
-            p_rghDDtEqn
+            p_rghDDtEqn()
+          + fvc::div(phiHbyA)
           - fvm::laplacian(rAUf, p_rgh)
         );
 
@@ -81,6 +94,32 @@
         dpdt = fvc::ddt(p);
     }
 
-    #include "rhoEqn.H"
+    if (compressible)
+    {
+        #include "rhoEqn.H"
+    }
     #include "compressibleContinuityErrs.H"
+
+    if (closedVolume)
+    {
+        if (!compressible)
+        {
+            p += dimensionedScalar
+            (
+                "p",
+                p.dimensions(),
+                pRefValue - getRefCellValue(p, pRefCell)
+            );
+        }
+        else
+        {
+            p += (initialMass - fvc::domainIntegrate(thermo.rho()))
+                /compressibility;
+            rho = thermo.rho();
+        }
+        p_rgh = p - rho*gh;
+    }
+
+    Info<< "rho max/min : " << max(rho).value() << " " << min(rho).value()
+        << endl;
 }

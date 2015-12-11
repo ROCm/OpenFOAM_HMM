@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,6 +33,22 @@ Description
       as one.
     - extend the test vector slightly (with SMALL) to account for numerical
       inaccuracies.
+
+    \verbatim
+    sphere.stl
+    {
+        type triSurfaceMesh;
+    }
+
+    sphere
+    {
+        type searchableSurfaceWithGaps;
+        // Underlying surface
+        surface sphere.stl;
+        // Perturb distance
+        gap 1e-3;
+    }
+    \endverbatim
 
 SourceFiles
     searchableSurfaceWithGaps.C

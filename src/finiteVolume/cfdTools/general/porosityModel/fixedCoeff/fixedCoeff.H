@@ -60,8 +60,6 @@ class fixedCoeff
 :
     public porosityModel
 {
-private:
-
     // Private data
 
         //- Alpha coefficient XYZ components (user-supplied) [1/s]
@@ -126,7 +124,7 @@ public:
     // Member Functions
 
         //- Transform the model data wrt mesh changes
-        virtual void calcTranformModelData();
+        virtual void calcTransformModelData();
 
         //- Calculate the porosity force
         virtual void calcForce

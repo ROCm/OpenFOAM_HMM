@@ -30,6 +30,7 @@ License
 #include "Time.H"
 #include "Random.H"
 #include "pointConversion.H"
+#include "decompositionModel.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -149,7 +150,8 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
 
     const conformationSurfaces& geometry = geometryToConformTo_;
 
-    decompositionMethod& decomposer = decomposerPtr_();
+    decompositionMethod& decomposer =
+        decompositionModel::New(mesh_).decomposer();
 
     volScalarField::InternalField& icellWeights = cellWeights.internalField();
 
@@ -782,7 +784,8 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
     const Time& runTime,
     Random& rndGen,
     const conformationSurfaces& geometryToConformTo,
-    const dictionary& coeffsDict
+    const dictionary& coeffsDict,
+    const fileName& decompDictFile
 )
 :
     runTime_(runTime),
@@ -810,18 +813,6 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
     bFTreePtr_(),
     allBackgroundMeshBounds_(Pstream::nProcs()),
     globalBackgroundBounds_(),
-    decomposeDict_
-    (
-        IOobject
-        (
-            "decomposeParDict",
-            runTime_.system(),
-            runTime_,
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE
-        )
-    ),
-    decomposerPtr_(decompositionMethod::New(decomposeDict_)),
     mergeDist_(1e-6*mesh_.bounds().mag()),
     spanScale_(readScalar(coeffsDict.lookup("spanScale"))),
     minCellSizeLimit_
@@ -834,26 +825,19 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
 {
     if (!Pstream::parRun())
     {
-        FatalErrorIn
-        (
-            "Foam::backgroundMeshDecomposition::backgroundMeshDecomposition"
-            "("
-                "const dictionary& coeffsDict, "
-                "const conformalVoronoiMesh& foamyHexMesh"
-            ")"
-        )
+        FatalErrorInFunction
             << "This cannot be used when not running in parallel."
             << exit(FatalError);
     }
 
-    if (!decomposerPtr_().parallelAware())
+    const decompositionMethod& decomposer =
+        decompositionModel::New(mesh_, decompDictFile).decomposer();
+
+    if (!decomposer.parallelAware())
     {
-        FatalErrorIn
-        (
-            "void Foam::backgroundMeshDecomposition::initialRefinement() const"
-        )
+        FatalErrorInFunction
             << "You have selected decomposition method "
-            << decomposerPtr_().typeName
+            << decomposer.typeName
             << " which is not parallel aware." << endl
             << exit(FatalError);
     }
@@ -1008,7 +992,10 @@ Foam::backgroundMeshDecomposition::distribute
             << endl;
     }
 
-    labelList newDecomp = decomposerPtr_().decompose
+    decompositionMethod& decomposer =
+        decompositionModel::New(mesh_).decomposer();
+
+    labelList newDecomp = decomposer.decompose
     (
         mesh_,
         mesh_.cellCentres(),
@@ -1217,14 +1204,7 @@ Foam::labelList Foam::backgroundMeshDecomposition::processorNearestPosition
 
         if (ptNearestProc[pI] < 0)
         {
-            FatalErrorIn
-            (
-                "Foam::labelList"
-                "Foam::backgroundMeshDecomposition::processorNearestPosition"
-                "("
-                    "const List<point>& pts"
-                ") const"
-            )
+            FatalErrorInFunction
                 << "The position " << pts[pI]
                 << " did not find a nearest point on the background mesh."
                 << exit(FatalError);

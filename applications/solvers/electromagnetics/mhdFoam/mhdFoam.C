@@ -24,6 +24,9 @@ License
 Application
     mhdFoam
 
+Group
+    grpElectroMagneticsSolvers
+
 Description
     Solver for magnetohydrodynamics (MHD): incompressible, laminar flow of a
     conducting fluid under the influence of a magnetic field.
