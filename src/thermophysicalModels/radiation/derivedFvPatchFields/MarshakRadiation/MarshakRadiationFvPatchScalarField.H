@@ -64,11 +64,12 @@ SourceFiles
 #define MarshakRadiationMixedFvPatchField_H
 
 #include "mixedFvPatchFields.H"
-#include "radiationCoupledBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace radiation
 {
 
 /*---------------------------------------------------------------------------*\
@@ -77,8 +78,7 @@ namespace Foam
 
 class MarshakRadiationFvPatchScalarField
 :
-    public mixedFvPatchScalarField,
-    public radiationCoupledBase
+    public mixedFvPatchScalarField
 {
 
     // Private data
@@ -204,6 +204,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace radiation
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -38,7 +38,6 @@ Description
     \table
         Property     | Description             | Required    | Default value
         T            | temperature field name  | no          | T
-        emissivityMode | emissivity mode: solidRadiation or lookup | yes |
     \endtable
 
     Example of the boundary condition specification:
@@ -47,15 +46,14 @@ Description
     {
         type            greyDiffusiveRadiation;
         T               T;
-        emissivityMode  solidRadiation;
         value           uniform 0;
     }
     \endverbatim
 
 SeeAlso
-    Foam::radiationCoupledBase
     Foam::radiation::radiationModel
     Foam::radiation::fvDOM
+    Foam::radiationCoupledBase
     Foam::mixedFvPatchField
 
 SourceFiles
@@ -67,7 +65,6 @@ SourceFiles
 #define greyDiffusiveRadiationMixedFvPatchScalarField_H
 
 #include "mixedFvPatchFields.H"
-#include "radiationCoupledBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -81,13 +78,15 @@ namespace radiation
 
 class greyDiffusiveRadiationMixedFvPatchScalarField
 :
-    public mixedFvPatchScalarField,
-    public radiationCoupledBase
+    public mixedFvPatchScalarField
 {
     // Private data
 
         //- Name of temperature field
         word TName_;
+
+        //- Activate solar load
+        bool solarLoad_;
 
 
 public:
@@ -191,8 +190,8 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace radiation
 } // End namespace Foam
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
