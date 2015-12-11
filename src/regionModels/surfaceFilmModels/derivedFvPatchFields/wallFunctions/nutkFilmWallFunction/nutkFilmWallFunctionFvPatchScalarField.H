@@ -51,8 +51,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef compressibleNutSpalartAllmarasWallFunctionFvPatchScalarField_H
-#define compressibleNutSpalartAllmarasWallFunctionFvPatchScalarField_H
+#ifndef nutkFilmWallFunctionFvPatchScalarField_H
+#define nutkFilmWallFunctionFvPatchScalarField_H
 
 #include "nutkWallFunctionFvPatchScalarField.H"
 
@@ -76,6 +76,9 @@ class nutkFilmWallFunctionFvPatchScalarField
 protected:
 
     // Protected data
+
+        //- Name of film region
+        word filmRegionName_;
 
         //- B Coefficient (default = 5.5)
         scalar B_;
