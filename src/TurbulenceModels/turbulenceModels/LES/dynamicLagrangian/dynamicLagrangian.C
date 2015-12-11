@@ -155,6 +155,9 @@ void dynamicLagrangian<BasicTurbulenceModel>::correct()
     }
 
     // Local references
+    const alphaField& alpha = this->alpha_;
+    const rhoField& rho = this->rho_;
+    const surfaceScalarField& alphaRhoPhi = this->alphaRhoPhi_;
     const surfaceScalarField& phi = this->phi_;
     const volVectorField& U = this->U_;
 
@@ -185,11 +188,11 @@ void dynamicLagrangian<BasicTurbulenceModel>::correct()
 
     fvScalarMatrix flmEqn
     (
-        fvm::ddt(flm_)
-      + fvm::div(phi, flm_)
+        fvm::ddt(alpha, rho, flm_)
+      + fvm::div(alphaRhoPhi, flm_)
      ==
-        invT*LM
-      - fvm::Sp(invT, flm_)
+        rho*invT*LM
+      - fvm::Sp(rho*invT, flm_)
     );
 
     flmEqn.relax();
@@ -201,11 +204,11 @@ void dynamicLagrangian<BasicTurbulenceModel>::correct()
 
     fvScalarMatrix fmmEqn
     (
-        fvm::ddt(fmm_)
-      + fvm::div(phi, fmm_)
+        fvm::ddt(alpha, rho, fmm_)
+      + fvm::div(alphaRhoPhi, fmm_)
      ==
-        invT*MM
-      - fvm::Sp(invT, fmm_)
+        rho*invT*MM
+      - fvm::Sp(rho*invT, fmm_)
     );
 
     fmmEqn.relax();
