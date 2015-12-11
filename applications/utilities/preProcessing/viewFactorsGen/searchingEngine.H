@@ -23,21 +23,6 @@ dict.add
 );
 dict.add("mergeDistance", SMALL);
 
-labelHashSet includePatches;
-forAll(patches, patchI)
-{
-    const polyPatch& pp = patches[patchI];
-    if
-    (
-        !pp.coupled()
-     && !isA<cyclicAMIPolyPatch>(pp)
-     && !isA<emptyPolyPatch>(pp)
-    )
-    {
-        includePatches.insert(patchI);
-    }
-}
-
 labelList triSurfaceToAgglom(5*nFineFaces);
 
 const triSurface localSurface = triangulate
@@ -68,7 +53,5 @@ distributedTriSurfaceMesh surfacesMesh
 
 
 triSurfaceToAgglom.resize(surfacesMesh.size());
-
-//surfacesMesh.searchableSurface::write();
 
 surfacesMesh.setField(triSurfaceToAgglom);

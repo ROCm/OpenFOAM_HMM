@@ -30,10 +30,8 @@ License
 
 using namespace Foam::constant;
 
-const Foam::word Foam::radiation::radiativeIntensityRay::intensityPrefix
-(
-    "ILambda"
-);
+const Foam::word
+Foam::radiation::radiativeIntensityRay::intensityPrefix("ILambda");
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -137,6 +135,53 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
         0.5*deltaPhi*Foam::sin(2.0*theta)*Foam::sin(deltaTheta)
     );
 
+    if (mesh_.nSolutionD() == 2)
+    {
+        vector meshDir(vector::zero);
+        if (dom_.meshOrientation() != vector::zero)
+        {
+            meshDir = dom_.meshOrientation();
+        }
+        else
+        {
+            for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
+            {
+                if (mesh_.geometricD()[cmpt] == -1)
+                {
+                    meshDir[cmpt] = 1;
+                }
+            }
+        }
+        const vector normal(vector(0, 0, 1));
+
+        const tensor coordRot = rotationTensor(normal, meshDir);
+
+        dAve_ = coordRot & dAve_;
+        d_ = coordRot & d_;
+    }
+    else if (mesh_.nSolutionD() == 1)
+    {
+        vector meshDir(vector::zero);
+        if (dom_.meshOrientation() != vector::zero)
+        {
+            meshDir = dom_.meshOrientation();
+        }
+        else
+        {
+            for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
+            {
+                if (mesh_.geometricD()[cmpt] == 1)
+                {
+                    meshDir[cmpt] = 1;
+                }
+            }
+        }
+        const vector normal(vector(1, 0, 0));
+
+        dAve_ = (dAve_ & normal)*meshDir;
+        d_ = (d_ & normal)*meshDir;
+    }
+
     autoPtr<volScalarField> IDefaultPtr;
 
     forAll(ILambda_, lambdaI)
@@ -226,12 +271,11 @@ Foam::scalar Foam::radiation::radiativeIntensityRay::correct()
               + fvm::Sp(k*omega_, ILambda_[lambdaI])
             ==
                 1.0/constant::mathematical::pi*omega_
-               *(
-                    // Remove aDisp from k
+              * (
                     (k - absorptionEmission_.aDisp(lambdaI))
-                   *blackBody_.bLambda(lambdaI)
-
-                  + absorptionEmission_.E(lambdaI)/4
+                    *blackBody_.bLambda(lambdaI)
+                  + absorptionEmission_.ECont(lambdaI)
+                  + absorptionEmission_.EDisp(lambdaI)
                 )
             );
         }
@@ -244,10 +288,8 @@ Foam::scalar Foam::radiation::radiativeIntensityRay::correct()
            ==
                1.0/constant::mathematical::pi*omega_
              * (
-                   // Remove aDisp from k
-                   (k - absorptionEmission_.aDisp(lambdaI))
-                  *blackBody_.bLambda(lambdaI)
-
+                    (k - absorptionEmission_.aDisp(lambdaI))
+                   *blackBody_.bLambda(lambdaI)
                  + absorptionEmission_.E(lambdaI)/4
                )
             );
