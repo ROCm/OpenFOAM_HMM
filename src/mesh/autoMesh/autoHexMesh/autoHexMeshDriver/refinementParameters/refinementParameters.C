@@ -75,6 +75,13 @@ Foam::refinementParameters::refinementParameters(const dictionary& dict)
     {
         locationsInMesh_.append(locationInMesh);
         zonesInMesh_.append("noneIfNotSet");// special name for no cellZone
+
+        if (dict.found("locationsInMesh"))
+        {
+            FatalIOErrorInFunction(dict)
+                << "Cannot both specify 'locationInMesh' and 'locationsInMesh'"
+                << exit(FatalIOError);
+        }
     }
 
     List<Tuple2<point, word> > pointsToZone;
