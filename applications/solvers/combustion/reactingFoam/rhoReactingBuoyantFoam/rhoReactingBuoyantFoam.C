@@ -24,6 +24,9 @@ License
 Application
     rhoReactingBuoyantFoam
 
+Group
+    grpCombustionSolvers
+
 Description
     Solver for combustion with chemical reactions using density based
     thermodynamics package, using enahanced buoyancy treatment.
@@ -35,7 +38,7 @@ Description
 #include "turbulentFluidThermoModel.H"
 #include "multivariateScheme.H"
 #include "pimpleControl.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "fixedFluxPressureFvPatchScalarField.H"
 #include "localEulerDdtScheme.H"
 #include "fvcSmooth.H"
@@ -56,6 +59,8 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "createMRF.H"
     #include "createFvOptions.H"
+
+    turbulence->validate();
 
     if (!LTS)
     {

@@ -411,7 +411,6 @@ SpalartAllmarasDES<BasicTurbulenceModel>::SpalartAllmarasDES
 {
     if (type == typeName)
     {
-        correctNut();
         this->printCoeffs(type);
     }
 }

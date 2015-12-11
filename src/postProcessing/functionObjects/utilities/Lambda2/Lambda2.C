@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -58,16 +58,8 @@ Foam::Lambda2::Lambda2
     if (!isA<fvMesh>(obr_))
     {
         active_ = false;
-        WarningIn
-        (
-            "Lambda2::Lambda2"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating " << name_ << nl
+        WarningInFunction
+            << "No fvMesh available, deactivating " << name_ << nl
             << endl;
     }
 
@@ -156,10 +148,7 @@ void Foam::Lambda2::execute()
 
 void Foam::Lambda2::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

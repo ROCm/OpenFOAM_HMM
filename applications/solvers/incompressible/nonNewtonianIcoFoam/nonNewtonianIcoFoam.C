@@ -24,6 +24,9 @@ License
 Application
     nonNewtonianIcoFoam
 
+Group
+    grpIncompressibleSolvers
+
 Description
     Transient solver for incompressible, laminar flow of non-Newtonian fluids.
 

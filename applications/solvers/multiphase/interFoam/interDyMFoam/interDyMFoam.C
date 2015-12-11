@@ -24,6 +24,9 @@ License
 Application
     interDyMFoam
 
+Group
+    grpMultiphaseSolvers grpMovingMeshSolvers
+
 Description
     Solver for 2 incompressible, isothermal immiscible fluids using a VOF
     (volume of fluid) phase-fraction based interface capturing approach,
@@ -42,7 +45,7 @@ Description
 #include "immiscibleIncompressibleTwoPhaseMixture.H"
 #include "turbulentTransportModel.H"
 #include "pimpleControl.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "CorrectPhi.H"
 #include "fixedFluxPressureFvPatchScalarField.H"
 #include "localEulerDdtScheme.H"
@@ -81,6 +84,8 @@ int main(int argc, char *argv[])
 
     #include "correctPhi.H"
     #include "createUf.H"
+
+    turbulence->validate();
 
     if (!LTS)
     {

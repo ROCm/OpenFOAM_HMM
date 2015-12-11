@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -155,16 +155,7 @@ void Foam::helpType::displayDoc
     }
     else
     {
-        FatalErrorIn
-        (
-            "void Foam::helpType::displayDoc"
-            "("
-                "const word&, "
-                "const string&, "
-                "const bool, "
-                "const word&"
-            ")"
-        )
+        FatalErrorInFunction
             << "No help for type " << className << " found."
             << "  Valid options include:" << SortableList<word>(parser.toc())
             << exit(FatalError);
@@ -192,7 +183,7 @@ void Foam::helpType::init()
     (
         "browse",
         "word",
-        "display documentation for boundary condition in browser"
+        "display documentation in browser"
     );
 }
 

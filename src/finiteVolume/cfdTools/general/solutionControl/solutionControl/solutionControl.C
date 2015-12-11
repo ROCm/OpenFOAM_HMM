@@ -81,7 +81,7 @@ void Foam::solutionControl::read(const bool absTolOnly)
                 }
                 else
                 {
-                    FatalErrorIn("bool Foam::solutionControl::read()")
+                    FatalErrorInFunction
                         << "Residual data for " << iter().keyword()
                         << " must be specified as a dictionary"
                         << exit(FatalError);
@@ -107,7 +107,7 @@ void Foam::solutionControl::read(const bool absTolOnly)
                 }
                 else
                 {
-                    FatalErrorIn("bool Foam::solutionControl::read()")
+                    FatalErrorInFunction
                         << "Residual data for " << iter().keyword()
                         << " must be specified as a dictionary"
                         << exit(FatalError);
@@ -169,6 +169,45 @@ void Foam::solutionControl::storePrevIterFields() const
     storePrevIter<sphericalTensor>();
     storePrevIter<symmTensor>();
     storePrevIter<tensor>();
+}
+
+
+template<class Type>
+void Foam::solutionControl::maxTypeResidual
+(
+    const word& fieldName,
+    ITstream& data,
+    scalar& firstRes,
+    scalar& lastRes
+) const
+{
+    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
+
+    if (mesh_.foundObject<fieldType>(fieldName))
+    {
+        const List<SolverPerformance<Type> > sp(data);
+        firstRes = cmptMax(sp.first().initialResidual());
+        lastRes = cmptMax(sp.last().initialResidual());
+    }
+}
+
+
+Foam::scalar Foam::solutionControl::maxResidual
+(
+    const word& fieldName,
+    ITstream& data,
+    scalar& lastRes
+) const
+{
+    scalar firstRes = 0;
+
+    maxTypeResidual<scalar>(fieldName, data, firstRes, lastRes);
+    maxTypeResidual<vector>(fieldName, data, firstRes, lastRes);
+    maxTypeResidual<sphericalTensor>(fieldName, data, firstRes, lastRes);
+    maxTypeResidual<symmTensor>(fieldName, data, firstRes, lastRes);
+    maxTypeResidual<tensor>(fieldName, data, firstRes, lastRes);
+
+    return firstRes;
 }
 
 

@@ -126,7 +126,7 @@ void Foam::blendingFactor::read(const dictionary& dict)
         dict.readIfPresent("tolerance", tolerance_);
         if ((tolerance_ < 0) || (tolerance_ > 1))
         {
-            FatalErrorIn("void Foam::blendingFactor::read(const dictionary&)")
+            FatalErrorInFunction
                 << "tolerance must be in the range 0 to 1.  Supplied value: "
                 << tolerance_ << exit(FatalError);
         }
@@ -146,11 +146,9 @@ void Foam::blendingFactor::execute()
 
 void Foam::blendingFactor::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
+
 
 void Foam::blendingFactor::timeSet()
 {

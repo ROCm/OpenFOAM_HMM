@@ -24,6 +24,9 @@ License
 Application
     buoyantPimpleFoam
 
+Group
+    grpHeatTransferSolvers
+
 Description
     Transient solver for buoyant, turbulent flow of compressible fluids for
     ventilation and heat-transfer.
@@ -37,7 +40,7 @@ Description
 #include "rhoThermo.H"
 #include "turbulentFluidThermoModel.H"
 #include "radiationModel.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "pimpleControl.H"
 #include "fixedFluxPressureFvPatchScalarField.H"
 
@@ -51,7 +54,6 @@ int main(int argc, char *argv[])
 
     pimpleControl pimple(mesh);
 
-    #include "readGravitationalAcceleration.H"
     #include "createFields.H"
     #include "createMRF.H"
     #include "createFvOptions.H"
@@ -60,6 +62,8 @@ int main(int argc, char *argv[])
     #include "createTimeControls.H"
     #include "compressibleCourantNo.H"
     #include "setInitialDeltaT.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

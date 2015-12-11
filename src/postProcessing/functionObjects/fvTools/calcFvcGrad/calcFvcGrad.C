@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -32,7 +32,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(calcFvcGrad, 0);
+    defineTypeNameAndDebug(calcFvcGrad, 0);
 }
 
 
@@ -57,16 +57,8 @@ Foam::calcFvcGrad::calcFvcGrad
     if (!isA<fvMesh>(obr_))
     {
         active_ = false;
-        WarningIn
-        (
-            "calcFvcGrad::calcFvcGrad"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating." << nl
+        WarningInFunction
+            << "No fvMesh available, deactivating." << nl
             << endl;
     }
 
@@ -110,7 +102,7 @@ void Foam::calcFvcGrad::execute()
 
         if (!processed)
         {
-            WarningIn("void Foam::calcFvcGrad::write()")
+            WarningInFunction
                 << "Unprocessed field " << fieldName_ << endl;
         }
     }
@@ -119,10 +111,7 @@ void Foam::calcFvcGrad::execute()
 
 void Foam::calcFvcGrad::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

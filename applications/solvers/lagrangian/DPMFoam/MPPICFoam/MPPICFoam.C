@@ -24,6 +24,9 @@ License
 Application
     MPPICFoam
 
+Group
+    grpLagrangianSolvers
+
 Description
     Transient solver for the coupled transport of a single kinematic particle
     cloud including the effect of the volume fraction of particles on the

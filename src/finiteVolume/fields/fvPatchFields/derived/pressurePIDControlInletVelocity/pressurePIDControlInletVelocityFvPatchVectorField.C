@@ -68,54 +68,6 @@ Foam::pressurePIDControlInletVelocityFvPatchVectorField::facePressure() const
 }
 
 
-template <class Type>
-void Foam::pressurePIDControlInletVelocityFvPatchVectorField::faceZoneAverage
-(
-    const word& name,
-    const GeometricField<Type, fvsPatchField, surfaceMesh>& field,
-    scalar& area,
-    Type& average
-) const
-{
-    const fvMesh& mesh(patch().boundaryMesh().mesh());
-
-    PackedBoolList isMasterFace(syncTools::getInternalOrMasterFaces(mesh));
-
-    const faceZone& zone = mesh.faceZones()[name];
-
-    area = 0;
-    average = pTraits<Type>::zero;
-
-    forAll(zone, faceI)
-    {
-        const label f(zone[faceI]);
-
-        if (mesh.isInternalFace(f))
-        {
-            const scalar da(mesh.magSf()[f]);
-
-            area += da;
-            average += da*field[f];
-        }
-        else if (isMasterFace[f])
-        {
-            const label bf(f-mesh.nInternalFaces());
-            const label patchID = mesh.boundaryMesh().patchID()[bf];
-            const label lf(mesh.boundaryMesh()[patchID].whichFace(f));
-            const scalar da(mesh.magSf().boundaryField()[patchID][lf]);
-
-            area += da;
-            average += da*field.boundaryField()[patchID][lf];
-        }
-    }
-
-    reduce(area, sumOp<scalar>());
-    reduce(average, sumOp<Type>());
-
-    average /= area;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::pressurePIDControlInletVelocityFvPatchVectorField::
@@ -305,12 +257,8 @@ void Foam::pressurePIDControlInletVelocityFvPatchVectorField::updateCoeffs()
     }
     else
     {
-        FatalErrorIn
-        (
-            "void Foam::"
-            "pressurePIDControlInletVelocityFvPatchVectorField::"
-            "updateCoeffs()"
-        )   << "The dimensions of the field " << phiName_
+        FatalErrorInFunction
+            << "The dimensions of the field " << phiName_
             << "are not recognised. The dimensions are " << phi.dimensions()
             << ". The dimensions should be either " << dimVelocity*dimArea
             << " for an incompressible case, or "
@@ -346,11 +294,8 @@ void Foam::pressurePIDControlInletVelocityFvPatchVectorField::updateCoeffs()
     }
     else
     {
-        WarningIn
-        (
-            "void Foam::pressurePIDControlInletVelocityFvPatchVectorField::"
-            "updateCoeffs()"
-        )   << "The pressure field name, \"pName\", is \"" << pName_ << "\", "
+        WarningInFunction
+            << "The pressure field name, \"pName\", is \"" << pName_ << "\", "
             << "but a field of that name was not found. The inlet velocity "
             << "will be set to an analytical value calculated from the "
             << "specified pressure drop. No PID control will be done and "

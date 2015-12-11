@@ -546,7 +546,7 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
 //
 //        if (cLevel >= minLevel && cLevel < maxLevel)
 //        {
-//            scalar cellSize = edge0Len/pow(2, cLevel);
+//            scalar cellSize = edge0Len/pow(2.0, cLevel);
 //
 //            // Update gap size
 //            nearGap[i] = nGapCells*cellSize;
@@ -687,7 +687,7 @@ Foam::label Foam::meshRefinement::generateRays
 
     if (cLevel >= gapInfo[1] && cLevel < gapInfo[2])
     {
-        scalar cellSize = meshCutter_.level0EdgeLength()/pow(2, cLevel);
+        scalar cellSize = meshCutter_.level0EdgeLength()/pow(2.0, cLevel);
 
         // Calculate gap size
         scalar nearGap = gapInfo[0]*cellSize;
@@ -803,7 +803,7 @@ Foam::label Foam::meshRefinement::generateRays
 
     if (cLevel >= gapInfo[1] && cLevel < gapInfo[2])
     {
-        scalar cellSize = meshCutter_.level0EdgeLength()/pow(2, cLevel);
+        scalar cellSize = meshCutter_.level0EdgeLength()/pow(2.0, cLevel);
 
         // Calculate gap size
         scalar nearGap = gapInfo[0]*cellSize;
@@ -1133,7 +1133,7 @@ Foam::label Foam::meshRefinement::markInternalGapRefinement
             forAll(cellMap, i)
             {
                 label cellI = cellMap[i];
-                scalar cellSize = edge0Len/pow(2, cellLevel[cellI]);
+                scalar cellSize = edge0Len/pow(2.0, cellLevel[cellI]);
                 gapSize[i] = shellGapInfo[i][0]*cellSize;
             }
 
@@ -1410,7 +1410,8 @@ Foam::label Foam::meshRefinement::markInternalGapRefinement
             {
                 // Needed gap size
                 label cLevel = cellLevel[cellI];
-                scalar cellSize = meshCutter_.level0EdgeLength()/pow(2, cLevel);
+                scalar cellSize =
+                    meshCutter_.level0EdgeLength()/pow(2.0, cLevel);
                 scalar neededGapSize = numGapCells[cellI]*cellSize;
 
                 if (neededGapSize > detectedGapSize[cellI])
@@ -1504,7 +1505,7 @@ Foam::label Foam::meshRefinement::markSmallFeatureRefinement
             {
                 if (!info[i].hit())
                 {
-                    FatalErrorIn("meshRefinement::markSmallFeatureRefinement")
+                    FatalErrorInFunction
                         << "fc:" << ctrs[i]
                         << " radius:" << radiusSqr[i]
                         << exit(FatalError);

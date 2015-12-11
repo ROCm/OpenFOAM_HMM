@@ -43,7 +43,7 @@ Description
 #include "pointFields.H"
 #include "uniformDimensionedFields.H"
 #include "ReadFields.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 
 #include "singlePhaseTransportModel.H"
 #include "turbulentTransportModel.H"
@@ -84,12 +84,8 @@ wordList ReadUniformFields
 
             if (iter == localNamesSet.end())
             {
-                FatalErrorIn
-                (
-                    "ReadFields<class GeoField>"
-                    "(const IOobjectList&, PtrList<GeoField>&"
-                    ", const bool)"
-                )   << "Fields not synchronised across processors." << endl
+                FatalErrorInFunction
+                    << "Fields not synchronised across processors." << endl
                     << "Master has fields " << masterNames
                     << "  processor " << Pstream::myProcNo()
                     << " has fields " << localNames << exit(FatalError);
@@ -102,12 +98,8 @@ wordList ReadUniformFields
 
         forAllConstIter(HashSet<word>, localNamesSet, iter)
         {
-            FatalErrorIn
-            (
-                "ReadFields<class GeoField>"
-                "(const IOobjectList&, PtrList<GeoField>&"
-                ", const bool)"
-            )   << "Fields not synchronised across processors." << endl
+            FatalErrorInFunction
+                << "Fields not synchronised across processors." << endl
                 << "Master has fields " << masterNames
                 << "  processor " << Pstream::myProcNo()
                 << " has fields " << localNames << exit(FatalError);
@@ -156,7 +148,11 @@ void calc
     functionObjectList& fol
 )
 {
-    if (args.optionFound("noFlow"))
+    if (args.optionFound("noRead"))
+    {
+        fol.execute(true);
+    }
+    else if (args.optionFound("noFlow"))
     {
         Info<< "    Operating in no-flow mode; no models will be loaded."
             << " All vol, surface and point fields will be loaded." << endl;
@@ -294,8 +290,6 @@ void calc
             mesh
         );
 
-        #include "createFvOptions.H"
-
         if (phi.dimensions() == dimVolume/dimTime)
         {
             IOobject turbulencePropertiesHeader
@@ -400,7 +394,7 @@ void calc
         }
         else
         {
-            FatalErrorIn(args.executable())
+            FatalErrorInFunction
                 << "Incorrect dimensions of phi: " << phi.dimensions()
                 << nl << exit(FatalError);
         }

@@ -1005,10 +1005,8 @@ const volScalarField& kinematicSingleLayer::rho() const
 
 const volScalarField& kinematicSingleLayer::T() const
 {
-    FatalErrorIn
-    (
-        "const volScalarField& kinematicSingleLayer::T() const"
-    )   << "T field not available for " << type() << abort(FatalError);
+    FatalErrorInFunction
+        << "T field not available for " << type() << abort(FatalError);
 
     return volScalarField::null();
 }
@@ -1016,10 +1014,8 @@ const volScalarField& kinematicSingleLayer::T() const
 
 const volScalarField& kinematicSingleLayer::Ts() const
 {
-    FatalErrorIn
-    (
-        "const volScalarField& kinematicSingleLayer::Ts() const"
-    )   << "Ts field not available for " << type() << abort(FatalError);
+    FatalErrorInFunction
+        << "Ts field not available for " << type() << abort(FatalError);
 
     return volScalarField::null();
 }
@@ -1027,10 +1023,8 @@ const volScalarField& kinematicSingleLayer::Ts() const
 
 const volScalarField& kinematicSingleLayer::Tw() const
 {
-    FatalErrorIn
-    (
-        "const volScalarField& kinematicSingleLayer::Tw() const"
-    )   << "Tw field not available for " << type() << abort(FatalError);
+    FatalErrorInFunction
+        << "Tw field not available for " << type() << abort(FatalError);
 
     return volScalarField::null();
 }
@@ -1038,10 +1032,8 @@ const volScalarField& kinematicSingleLayer::Tw() const
 
 const volScalarField& kinematicSingleLayer::Cp() const
 {
-    FatalErrorIn
-    (
-        "const volScalarField& kinematicSingleLayer::Cp() const"
-    )   << "Cp field not available for " << type() << abort(FatalError);
+    FatalErrorInFunction
+        << "Cp field not available for " << type() << abort(FatalError);
 
     return volScalarField::null();
 }
@@ -1049,10 +1041,8 @@ const volScalarField& kinematicSingleLayer::Cp() const
 
 const volScalarField& kinematicSingleLayer::kappa() const
 {
-    FatalErrorIn
-    (
-        "const volScalarField& kinematicSingleLayer::kappa() const"
-    )   << "kappa field not available for " << type() << abort(FatalError);
+    FatalErrorInFunction
+        << "kappa field not available for " << type() << abort(FatalError);
 
     return volScalarField::null();
 }

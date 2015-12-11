@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,16 +57,8 @@ Foam::vorticity::vorticity
     if (!isA<fvMesh>(obr_))
     {
         active_ = false;
-        WarningIn
-        (
-            "vorticity::vorticity"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating " << name_ << nl
+        WarningInFunction
+            << "No fvMesh available, deactivating " << name_ << nl
             << endl;
     }
 
@@ -144,10 +136,7 @@ void Foam::vorticity::execute()
 
 void Foam::vorticity::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

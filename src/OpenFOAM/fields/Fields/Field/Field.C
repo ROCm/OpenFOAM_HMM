@@ -283,10 +283,8 @@ Foam::Field<Type>::Field
                 is >> static_cast<List<Type>&>(*this);
                 if (this->size() != s)
                 {
-                    FatalIOErrorIn
+                    FatalIOErrorInFunction
                     (
-                        "Field<Type>::Field"
-                        "(const word& keyword, const dictionary&, const label)",
                         dict
                     )   << "size " << this->size()
                         << " is not equal to the given value of " << s
@@ -295,10 +293,8 @@ Foam::Field<Type>::Field
             }
             else
             {
-                FatalIOErrorIn
+                FatalIOErrorInFunction
                 (
-                    "Field<Type>::Field"
-                    "(const word& keyword, const dictionary&, const label)",
                     dict
                 )   << "expected keyword 'uniform' or 'nonuniform', found "
                     << firstToken.wordToken()
@@ -309,10 +305,8 @@ Foam::Field<Type>::Field
         {
             if (is.version() == 2.0)
             {
-                IOWarningIn
+                IOWarningInFunction
                 (
-                    "Field<Type>::Field"
-                    "(const word& keyword, const dictionary&, const label)",
                     dict
                 )   << "expected keyword 'uniform' or 'nonuniform', "
                        "assuming deprecated Field format from "
@@ -325,10 +319,8 @@ Foam::Field<Type>::Field
             }
             else
             {
-                FatalIOErrorIn
+                FatalIOErrorInFunction
                 (
-                    "Field<Type>::Field"
-                    "(const word& keyword, const dictionary&, const label)",
                     dict
                 )   << "expected keyword 'uniform' or 'nonuniform', found "
                     << firstToken.info()
@@ -406,15 +398,7 @@ void Foam::Field<Type>::map
 
     if (mapWeights.size() != mapAddressing.size())
     {
-        FatalErrorIn
-        (
-            "void Field<Type>::map\n"
-            "(\n"
-            "    const UList<Type>& mapF,\n"
-            "    const labelListList& mapAddressing,\n"
-            "    const scalarListList& mapWeights\n"
-            ")"
-        ) << "Weights and addressing map have different sizes.  Weights size: "
+        FatalErrorInFunction
             << mapWeights.size() << " map size: " << mapAddressing.size()
             << abort(FatalError);
     }
@@ -755,7 +739,7 @@ void Foam::Field<Type>::operator=(const Field<Type>& rhs)
 {
     if (this == &rhs)
     {
-        FatalErrorIn("Field<Type>::operator=(const Field<Type>&)")
+        FatalErrorInFunction
             << "attempted assignment to self"
             << abort(FatalError);
     }
@@ -783,7 +767,7 @@ void Foam::Field<Type>::operator=(const tmp<Field>& rhs)
 {
     if (this == &(rhs()))
     {
-        FatalErrorIn("Field<Type>::operator=(const tmp<Field>&)")
+        FatalErrorInFunction
             << "attempted assignment to self"
             << abort(FatalError);
     }

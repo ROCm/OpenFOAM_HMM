@@ -113,7 +113,6 @@ kEqn<BasicTurbulenceModel>::kEqn
 
     if (type == typeName)
     {
-        correctNut();
         this->printCoeffs(type);
     }
 }

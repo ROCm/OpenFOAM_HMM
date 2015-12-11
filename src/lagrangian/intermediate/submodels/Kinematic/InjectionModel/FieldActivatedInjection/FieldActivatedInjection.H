@@ -25,18 +25,19 @@ Class
     Foam::FieldActivatedInjection
 
 Description
-    Injection at specified positions, with the conditions:
+    Conditional injection at specified positions.
 
-    - for injection to be allowed
+    For injection to be allowed, the equality must be satisfied:
 
         factor*referenceField[cellI] >= thresholdField[cellI]
 
-        where:
-          - referenceField is the field used to supply the look-up values
-          - thresholdField supplies the values beyond which the injection is
+        Where:
+        - referenceField is the field used to supply the look-up values
+        - thresholdField supplies the values beyond which the injection is
             permitted
 
-    - limited to a user-supllied number of injections per injector location
+    Note:
+    - Limited to a user-supplied number of injections per injector location
 
 SourceFiles
     FieldActivatedInjection.C
@@ -56,7 +57,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class FieldActivatedInjection Declaration
+                   Class FieldActivatedInjection Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>

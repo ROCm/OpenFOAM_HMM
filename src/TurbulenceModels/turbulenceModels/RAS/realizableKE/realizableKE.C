@@ -226,7 +226,6 @@ realizableKE<BasicTurbulenceModel>::realizableKE
 
     if (type == typeName)
     {
-        correctNut();
         this->printCoeffs(type);
     }
 }

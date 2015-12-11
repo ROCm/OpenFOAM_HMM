@@ -24,6 +24,9 @@ License
 Application
     SRFSimpleFoam
 
+Group
+    grpIncompressibleSolvers
+
 Description
     Steady-state solver for incompressible, turbulent flow of non-Newtonian
     fluids in a single rotating frame.
@@ -35,7 +38,7 @@ Description
 #include "turbulentTransportModel.H"
 #include "SRFModel.H"
 #include "simpleControl.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,6 +53,8 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "createFvOptions.H"
     #include "initContinuityErrs.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

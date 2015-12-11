@@ -24,6 +24,9 @@ License
 Application
     cavitatingFoam
 
+Group
+    grpMultiphaseSolvers
+
 Description
     Transient cavitation code based on the homogeneous equilibrium model
     from which the compressibility of the liquid/vapour "mixture" is obtained.
@@ -54,6 +57,8 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

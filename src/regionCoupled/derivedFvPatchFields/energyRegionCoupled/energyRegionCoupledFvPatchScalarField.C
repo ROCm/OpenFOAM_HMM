@@ -130,7 +130,7 @@ kappa() const
 
         case UNDEFINED:
         {
-            FatalErrorIn("energyRegionCoupledFvPatchScalarField::kappa() const")
+            FatalErrorInFunction
                     << " on mesh " << this->db().name() << " patch "
                     << patch().name()
                     << " could not find a method in. Methods are:  "
@@ -255,16 +255,7 @@ energyRegionCoupledFvPatchScalarField
 
     if (!isA<regionCoupledBase>(this->patch().patch()))
     {
-        FatalErrorIn
-        (
-            "energyRegionCoupledFvPatchScalarField::"
-            "energyRegionCoupledFvPatchScalarField\n"
-            "(\n"
-            "    const fvPatch& p,\n"
-            "    const DimensionedField<scalar, volMesh>& iF,\n"
-            "    const dictionary& dict\n"
-            ")\n"
-        )   << "\n    patch type '" << p.type()
+        FatalErrorInFunction
             << "' not type '" << regionCoupledBase::typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << dimensionedInternalField().name()
@@ -463,15 +454,7 @@ void Foam::energyRegionCoupledFvPatchScalarField::updateInterfaceMatrix
     const Pstream::commsTypes
 ) const
 {
-    notImplemented
-    (
-        "energyRegionCoupledFvPatchScalarField::updateInterfaceMatrix()"
-        "("
-        "Field<scalar>& "
-        "const Field<scalar>&"
-        "const scalarField& "
-        "const Pstream::commsTypes"
-    );
+    NotImplemented;
 }
 
 

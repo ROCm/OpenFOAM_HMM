@@ -84,7 +84,7 @@ inline Stream& Foam::IOobject::writeBanner(Stream& os, bool noHint)
         "|  \\\\    /   O peration     |"
         " Version:  " << FOAMversion << spaces << "|\n"
         "|   \\\\  /    A nd           |"
-        " Web:      www.OpenFOAM.org                      |\n"
+        " Web:      www.OpenFOAM.com                      |\n"
         "|    \\\\/     M anipulation  |"
         "                                                 |\n"
         "\\*-----------------------------------------"

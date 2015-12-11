@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -118,14 +118,8 @@ Foam::triSurface& Foam::searchableSurfaceModifiers::cut::triangulate
     }
     else
     {
-        FatalErrorIn
-        (
-            "searchableSurfaceModifiers::cut::triangulate\n"
-            "(\n"
-            "    const searchableSurface&,\n"
-            "    triSurface&\n"
-            ")"
-        )   << "Triangulation only supported for triSurfaceMesh, searchableBox"
+        FatalErrorInFunction
+            << "Triangulation only supported for triSurfaceMesh, searchableBox"
             << ", not for surface " << cutter.name()
             << " of type " << cutter.type()
             << exit(FatalError);

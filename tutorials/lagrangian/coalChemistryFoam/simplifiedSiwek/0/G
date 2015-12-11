@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -24,25 +24,16 @@ boundaryField
     top
     {
         type            MarshakRadiation;
-        T               T;
-        emissivityMode  lookup;
-        emissivity      uniform 1.0;
         value           uniform 0;
     }
     bottom
     {
         type            MarshakRadiation;
-        T               T;
-        emissivityMode  lookup;
-        emissivity      uniform 1.0;
         value           uniform 0;
     }
     walls
     {
         type            MarshakRadiation;
-        T               T;
-        emissivityMode  lookup;
-        emissivity      uniform 1.0;
         value           uniform 0;
     }
     symmetry

@@ -66,11 +66,8 @@ Foam::labelList Foam::patchTransformedInterpolation::getPatches
 
         if (patches[patchI] == -1)
         {
-            FatalErrorIn
-            (
-                "Foam::patchTransformedInterpolation::getPatches"
-                "(Istream&) const"
-            )   << "patch \"" << patchNames[patchI]
+            FatalErrorInFunction
+                << "patch \"" << patchNames[patchI]
                 << "\" not found" << exit(FatalError);
         }
     }
@@ -105,14 +102,7 @@ void Foam::patchTransformedInterpolation::interpolate
     pointScalarField&
 ) const
 {
-    notImplemented
-    (
-        "void Foam::patchTransformedInterpolation::interpolate"
-        "("
-            "const volScalarField&"
-            "pointScalarField&"
-         ")"
-    );
+    NotImplemented;
 }
 
 

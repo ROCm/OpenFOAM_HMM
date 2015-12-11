@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -242,16 +242,8 @@ Foam::nearWallFields::nearWallFields
     else
     {
         active_ = false;
-        WarningIn
-        (
-            "nearWallFields::nearWallFields"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating " << name_
+        WarningInFunction
+            << "No fvMesh available, deactivating " << name_
             << endl;
     }
 
@@ -369,15 +361,7 @@ void Foam::nearWallFields::execute()
 
 void Foam::nearWallFields::end()
 {
-    if (debug)
-    {
-        Info<< "nearWallFields:end()" << endl;
-    }
-
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

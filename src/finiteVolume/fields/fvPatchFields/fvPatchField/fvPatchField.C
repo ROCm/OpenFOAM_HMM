@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -135,15 +135,8 @@ Foam::fvPatchField<Type>::fvPatchField
     }
     else
     {
-        FatalIOErrorIn
+        FatalIOErrorInFunction
         (
-            "fvPatchField<Type>::fvPatchField"
-            "("
-            "const fvPatch& p,"
-            "const DimensionedField<Type, volMesh>& iF,"
-            "const dictionary& dict,"
-            "const bool valueRequired"
-            ")",
             dict
         )   << "Essential entry 'value' missing"
             << exit(FatalIOError);
@@ -196,7 +189,7 @@ void Foam::fvPatchField<Type>::check(const fvPatchField<Type>& ptf) const
 {
     if (&patch_ != &(ptf.patch_))
     {
-        FatalErrorIn("PatchField<Type>::check(const fvPatchField<Type>&)")
+        FatalErrorInFunction
             << "different patches for fvPatchField<Type>s"
             << abort(FatalError);
     }
@@ -435,10 +428,8 @@ void Foam::fvPatchField<Type>::operator*=
 {
     if (&patch_ != &ptf.patch())
     {
-        FatalErrorIn
-        (
-            "PatchField<Type>::operator*=(const fvPatchField<scalar>& ptf)"
-        )   << "incompatible patches for patch fields"
+        FatalErrorInFunction
+            << "incompatible patches for patch fields"
             << abort(FatalError);
     }
 
@@ -454,10 +445,7 @@ void Foam::fvPatchField<Type>::operator/=
 {
     if (&patch_ != &ptf.patch())
     {
-        FatalErrorIn
-        (
-            "PatchField<Type>::operator/=(const fvPatchField<scalar>& ptf)"
-        )   << "    incompatible patches for patch fields"
+        FatalErrorInFunction
             << abort(FatalError);
     }
 

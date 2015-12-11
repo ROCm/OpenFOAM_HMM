@@ -24,6 +24,9 @@ License
 Application
     rhoPorousSimpleFoam
 
+Group
+    grpCompressibleSolvers
+
 Description
     Steady-state solver for turbulent flow of compressible fluids with
     RANS turbulence modelling, implicit or explicit porosity treatment
@@ -34,7 +37,7 @@ Description
 #include "fvCFD.H"
 #include "rhoThermo.H"
 #include "turbulentFluidThermoModel.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "IOporosityModelList.H"
 #include "simpleControl.H"
 
@@ -53,6 +56,8 @@ int main(int argc, char *argv[])
     #include "createFvOptions.H"
     #include "createZones.H"
     #include "initContinuityErrs.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

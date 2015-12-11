@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,7 +62,6 @@ int main(int argc, char *argv[])
         "merge two meshes"
     );
 
-    argList::noParallel();
     #include "addOverwriteOption.H"
 
     argList::validArgs.append("masterCase");
@@ -96,6 +95,18 @@ int main(int argc, char *argv[])
     fileName addCase = args[2];
     word addRegion = polyMesh::defaultRegion;
     args.optionReadIfPresent("addRegion", addRegion);
+
+    // Since we don't use argList processor directory detection, add it to
+    // the casename ourselves so it triggers the logic inside TimePath.
+    const fileName& cName = args.caseName();
+    std::string::size_type pos = cName.find("processor");
+    if (pos != string::npos && pos != 0)
+    {
+        fileName processorName = cName.substr(pos, cName.size()-pos);
+        masterCase += '/' + processorName;
+        addCase += '/' + processorName;
+    }
+
 
     getRootCase(masterCase);
     getRootCase(addCase);

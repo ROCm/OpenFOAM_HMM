@@ -24,6 +24,9 @@ License
 Application
     mdFoam
 
+Group
+    grpDiscreteMethodsSolvers
+
 Description
     Molecular dynamics solver for fluid dynamics
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -58,16 +58,8 @@ Foam::readFields::readFields
     else
     {
         active_ = false;
-        WarningIn
-        (
-            "readFields::readFields"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating " << name_
+        WarningInFunction
+            << "No fvMesh available, deactivating " << name_
             << endl;
     }
 }
@@ -112,10 +104,7 @@ void Foam::readFields::execute()
 
 void Foam::readFields::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

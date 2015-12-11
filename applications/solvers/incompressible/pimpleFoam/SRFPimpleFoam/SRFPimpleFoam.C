@@ -24,6 +24,9 @@ License
 Application
     SRFPimpleFoam
 
+Group
+    grpIncompressibleSolvers
+
 Description
     Large time-step transient solver for incompressible, flow in a single
     rotating frame using the PIMPLE (merged PISO-SIMPLE) algorithm.
@@ -37,7 +40,7 @@ Description
 #include "turbulentTransportModel.H"
 #include "pimpleControl.H"
 #include "SRFModel.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,6 +56,8 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "createFvOptions.H"
     #include "initContinuityErrs.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -97,7 +97,7 @@ Foam::ManualInjection<CloudType>::ManualInjection
     injectorTetFaces_(im.injectorTetFaces_),
     injectorTetPts_(im.injectorTetPts_),
     U0_(im.U0_),
-    sizeDistribution_(im.sizeDistribution_().clone().ptr()),
+    sizeDistribution_(im.sizeDistribution_, false),
     ignoreOutOfBounds_(im.ignoreOutOfBounds_)
 {}
 

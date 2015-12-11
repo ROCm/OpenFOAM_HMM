@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -358,8 +358,9 @@ void Foam::forceCoeffs::execute()
 
     if (writeToFile())
     {
+        writeTime(coeffFilePtr_());
         coeffFilePtr_()
-            << obr_.time().value() << tab << CmTot << tab  << CdTot
+            << tab << CmTot << tab  << CdTot
             << tab << ClTot << tab << ClfTot << tab << ClrTot << endl;
 
 
@@ -424,10 +425,7 @@ void Foam::forceCoeffs::execute()
 
 void Foam::forceCoeffs::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

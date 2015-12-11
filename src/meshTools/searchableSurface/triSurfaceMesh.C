@@ -91,11 +91,8 @@ word triSurfaceMesh::meshSubDir = "triSurface";
 //        return runTime.constant();
 //    }
 //
-//    FatalErrorIn
-//    (
-//        "searchableSurfaces::findRawInstance"
-//        "(const Time&, const fileName&, const word&)"
-//    )   << "Cannot find file \"" << name << "\" in directory "
+//    FatalErrorInFunction
+//        << "Cannot find file \"" << name << "\" in directory "
 //        << runTime.constant()/dir
 //        << exit(FatalError);
 //
@@ -112,10 +109,8 @@ const Foam::fileName& Foam::triSurfaceMesh::checkFile
 {
     if (fName.empty())
     {
-        FatalErrorIn
-        (
-            "triSurfaceMesh::checkFile(const fileName&, const fileName&)"
-        )   << "Cannot find triSurfaceMesh starting from "
+        FatalErrorInFunction
+            << "Cannot find triSurfaceMesh starting from "
             << objectName << exit(FatalError);
     }
     return fName;

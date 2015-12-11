@@ -24,8 +24,30 @@ License
 Application
     laplacianFoam
 
+Group
+    grpBasicSolvers
+
 Description
-    Solves a simple Laplace equation, e.g. for thermal diffusion in a solid.
+    Laplace equation solver for a scalar quantity.
+
+    \heading Solver details
+    The solver is applicable to, e.g. for thermal diffusion in a solid.  The
+    equation is given by:
+
+    \f[
+        \ddt{T}  = \div \left( D_T \grad T \right)
+    \f]
+
+    Where:
+    \vartable
+        T     | Scalar field which is solved for, e.g. temperature
+        D_T   | Diffusion coefficient
+    \endvartable
+
+    \heading Required fields
+    \plaintable
+        T     | Scalar field which is solved for, e.g. temperature
+    \endplaintable
 
 \*---------------------------------------------------------------------------*/
 

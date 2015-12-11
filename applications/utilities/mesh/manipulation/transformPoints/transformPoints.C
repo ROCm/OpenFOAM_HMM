@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
     // this is not actually stringent enough:
     if (args.options().empty())
     {
-        FatalErrorIn(args.executable())
+        FatalErrorInFunction
             << "No options supplied, please use one or more of "
                "-translate, -rotate or -scale options."
             << exit(FatalError);
@@ -307,6 +307,8 @@ int main(int argc, char *argv[])
 
     Info<< "Writing points into directory " << points.path() << nl << endl;
     points.write();
+
+    Info<< nl << "End" << nl << endl;
 
     return 0;
 }

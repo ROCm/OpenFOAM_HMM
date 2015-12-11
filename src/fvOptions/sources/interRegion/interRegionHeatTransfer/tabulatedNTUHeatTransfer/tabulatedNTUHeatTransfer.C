@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -79,13 +79,8 @@ const Foam::basicThermo& Foam::fv::tabulatedNTUHeatTransfer::thermo
 {
     if (!mesh.foundObject<basicThermo>("thermophysicalProperties"))
     {
-        FatalErrorIn
-        (
-            "void Foam::fv::tabulatedHeatTransferMassFlow::thermo"
-            "("
-                "const fvMesh&"
-            ")"
-        )   << " on mesh " << mesh.name()
+        FatalErrorInFunction
+            << " on mesh " << mesh.name()
             << " could not find thermophysicalProperties "
             << exit(FatalError);
     }
@@ -126,12 +121,7 @@ void Foam::fv::tabulatedNTUHeatTransfer::initialiseGeometry()
 
                 if ((alpha < 0) || (alpha > 1))
                 {
-                    FatalErrorIn
-                    (
-                        "void "
-                        "Foam::fv::tabulatedNTUHeatTransfer::"
-                        "initialiseGeometry()"
-                    )
+                    FatalErrorInFunction
                         << "Inlet patch blockage ratio must be between 0 and 1"
                         << ".  Current value: " << alpha
                         << abort(FatalError);
@@ -144,12 +134,7 @@ void Foam::fv::tabulatedNTUHeatTransfer::initialiseGeometry()
 
                 if ((alphaNbr < 0) || (alphaNbr > 1))
                 {
-                    FatalErrorIn
-                    (
-                        "void "
-                        "Foam::fv::tabulatedNTUHeatTransfer::"
-                        "initialiseGeometry()"
-                    )
+                    FatalErrorInFunction
                         << "Inlet patch neighbour blockage ratio must be "
                         << "between 0 and 1.  Current value: " << alphaNbr
                         << abort(FatalError);
@@ -171,12 +156,7 @@ void Foam::fv::tabulatedNTUHeatTransfer::initialiseGeometry()
 
                 if ((beta < 0) || (beta > 1))
                 {
-                    FatalErrorIn
-                    (
-                        "void "
-                        "Foam::fv::tabulatedNTUHeatTransfer::"
-                        "initialiseGeometry()"
-                    )
+                    FatalErrorInFunction
                         << "Core volume blockage ratio must be between 0 and 1"
                         << ".  Current value: " << beta
                         << abort(FatalError);
@@ -202,11 +182,7 @@ void Foam::fv::tabulatedNTUHeatTransfer::initialiseGeometry()
             }
             default:
             {
-                FatalErrorIn
-                (
-                    "void "
-                    "Foam::fv::tabulatedNTUHeatTransfer::initialiseGeometry()"
-                )
+                FatalErrorInFunction
                     << "Unhandled enumeration " << geometryMode_
                     << abort(FatalError);
             }

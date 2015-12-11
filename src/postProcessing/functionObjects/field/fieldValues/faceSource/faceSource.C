@@ -90,7 +90,7 @@ void Foam::fieldValues::faceSource::setFaceZoneFaces()
 
     if (zoneId < 0)
     {
-        FatalErrorIn("faceSource::faceSource::setFaceZoneFaces()")
+        FatalErrorInFunction
             << type() << " " << name_ << ": "
             << sourceTypeNames_[source_] << "(" << sourceName_ << "):" << nl
             << "    Unknown face zone name: " << sourceName_
@@ -175,7 +175,7 @@ void Foam::fieldValues::faceSource::setPatchFaces()
 
     if (patchId < 0)
     {
-        FatalErrorIn("faceSource::constructFaceAddressing()")
+        FatalErrorInFunction
             << type() << " " << name_ << ": "
             << sourceTypeNames_[source_] << "(" << sourceName_ << "):" << nl
             << "    Unknown patch name: " << sourceName_
@@ -419,7 +419,7 @@ void Foam::fieldValues::faceSource::initialise(const dictionary& dict)
         }
         default:
         {
-            FatalErrorIn("faceSource::initialise()")
+            FatalErrorInFunction
                 << type() << " " << name_ << ": "
                 << sourceTypeNames_[source_] << "(" << sourceName_ << "):"
                 << nl << "    Unknown source type. Valid source types are:"
@@ -429,10 +429,7 @@ void Foam::fieldValues::faceSource::initialise(const dictionary& dict)
 
     if (nFaces_ == 0)
     {
-        WarningIn
-        (
-            "Foam::fieldValues::faceSource::initialise(const dictionary&)"
-        )
+        WarningInFunction
             << type() << " " << name_ << ": "
             << sourceTypeNames_[source_] << "(" << sourceName_ << "):" << nl
             << "    Source has no faces - deactivating" << endl;
@@ -459,14 +456,7 @@ void Foam::fieldValues::faceSource::initialise(const dictionary& dict)
 
         if (source_ == stSampledSurface)
         {
-            FatalIOErrorIn
-            (
-                "void Foam::fieldValues::faceSource::initialise"
-                "("
-                    "const dictionary&"
-                ")",
-                dict
-            )
+            FatalIOErrorInFunction(dict)
                 << "Cannot use weightField for a sampledSurface"
                 << exit(FatalIOError);
         }
@@ -482,14 +472,7 @@ void Foam::fieldValues::faceSource::initialise(const dictionary& dict)
         }
         else
         {
-            FatalIOErrorIn
-            (
-                "void Foam::fieldValues::faceSource::initialise"
-                "("
-                    "const dictionary&"
-                ")",
-                dict
-            )
+            FatalIOErrorInFunction(dict)
                 << "Either weightField or orientedWeightField can be supplied, "
                 << "but not both"
                 << exit(FatalIOError);
@@ -684,7 +667,7 @@ void Foam::fieldValues::faceSource::write()
             surfacePtr_().update();
         }
 
-        file() << obr_.time().value();
+        writeTime(file());
 
         if (writeArea_)
         {
@@ -722,7 +705,7 @@ void Foam::fieldValues::faceSource::write()
 
             if (!ok)
             {
-                WarningIn("void Foam::fieldValues::faceSource::write()")
+                WarningInFunction
                     << "Requested field " << fieldName
                     << " not found in database and not processed"
                     << endl;

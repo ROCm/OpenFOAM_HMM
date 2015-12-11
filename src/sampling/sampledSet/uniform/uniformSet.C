@@ -217,7 +217,7 @@ void Foam::uniformSet::calcSamples
     // distance vector between sampling points
     if ((nPoints_ < 2) || (mag(end_ - start_) < SMALL))
     {
-        FatalErrorIn("uniformSet::calcSamples()")
+        FatalErrorInFunction
             << "Incorrect sample specification. Either too few points or"
             << " start equals end point." << endl
             << "nPoints:" << nPoints_

@@ -24,6 +24,9 @@ License
 Application
     twoLiquidMixingFoam
 
+Group
+    grpMultiphaseSolvers
+
 Description
     Solver for mixing 2 incompressible fluids.
 
@@ -54,6 +57,8 @@ int main(int argc, char *argv[])
     #include "createTimeControls.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

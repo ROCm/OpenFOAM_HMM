@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -166,10 +166,7 @@ void Foam::fieldAverage::addPrime2MeanField(const label fieldI)
 
         if (!faItems_[fieldI].mean())
         {
-            FatalErrorIn
-            (
-                "void Foam::fieldAverage::addPrime2MeanField(const label) const"
-            )
+            FatalErrorInFunction
                 << "To calculate the prime-squared average, the "
                 << "mean average must also be selected for field "
                 << fieldName << nl << exit(FatalError);

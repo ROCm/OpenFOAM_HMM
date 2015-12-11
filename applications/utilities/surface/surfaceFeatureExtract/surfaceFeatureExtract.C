@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,7 +73,7 @@ scalar calcVertexNormalWeight
 
     if (index == -1)
     {
-        FatalErrorIn("calcVertexNormals()")
+        FatalErrorInFunction
             << "Point not in face" << abort(FatalError);
     }
 
@@ -853,7 +853,7 @@ surfaceFeatures::edgeStatus checkFlatRegionEdge
             }
             else if (dir == 0)
             {
-                FatalErrorIn("problem.")
+                FatalErrorInFunction
                     << exit(FatalError);
             }
             else
@@ -1083,7 +1083,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            FatalErrorIn(args.executable())
+            FatalErrorInFunction
                 << "No initial feature set. Provide either one"
                 << " of extractFromFile (to read existing set)" << nl
                 << " or extractFromSurface (to construct new set from angle)"
@@ -1454,7 +1454,7 @@ int main(int argc, char *argv[])
                 {
                     drawHitProblem(fI, surf, start, faceCentres, end, hitInfo);
 
-                    // FatalErrorIn(args.executable())
+                    // FatalErrorInFunction
                     //     << "findLineAll did not hit its own face."
                     //     << exit(FatalError);
                 }
@@ -1462,7 +1462,7 @@ int main(int argc, char *argv[])
                 {
                     if (!hitInfo[0].hit())
                     {
-                        // FatalErrorIn(args.executable())
+                        // FatalErrorInFunction
                         //     << "findLineAll did not hit any face."
                         //     << exit(FatalError);
                     }
@@ -1478,7 +1478,7 @@ int main(int argc, char *argv[])
                             hitInfo
                         );
 
-                        // FatalErrorIn(args.executable())
+                        // FatalErrorInFunction
                         //     << "findLineAll did not hit its own face."
                         //     << exit(FatalError);
                     }
@@ -1511,7 +1511,7 @@ int main(int argc, char *argv[])
                             hitInfo
                         );
 
-                        // FatalErrorIn(args.executable())
+                        // FatalErrorInFunction
                         //     << "findLineAll did not hit its own face."
                         //     << exit(FatalError);
                     }

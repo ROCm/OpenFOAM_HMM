@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -111,15 +111,15 @@ Foam::porosityModels::fixedCoeff::fixedCoeff
 )
 :
     porosityModel(name, modelType, mesh, dict, cellZoneName),
-    alphaXYZ_(coeffs_.lookup("alpha")),
-    betaXYZ_(coeffs_.lookup("beta")),
+    alphaXYZ_("alpha", dimless/dimTime, coeffs_),
+    betaXYZ_("beta", dimless/dimLength, coeffs_),
     alpha_(cellZoneIDs_.size()),
     beta_(cellZoneIDs_.size())
 {
     adjustNegativeResistance(alphaXYZ_);
     adjustNegativeResistance(betaXYZ_);
 
-    calcTranformModelData();
+    calcTransformModelData();
 }
 
 
@@ -131,7 +131,7 @@ Foam::porosityModels::fixedCoeff::~fixedCoeff()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::porosityModels::fixedCoeff::calcTranformModelData()
+void Foam::porosityModels::fixedCoeff::calcTransformModelData()
 {
     if (coordSys_.R().uniform())
     {

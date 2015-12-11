@@ -24,6 +24,9 @@ License
 Application
     reactingTwoPhaseEulerFoam
 
+Group
+    grpMultiphaseSolvers
+
 Description
     Solver for a system of 2 compressible fluid phases with a common pressure,
     but otherwise separate properties. The type of phase model is run time
@@ -35,7 +38,7 @@ Description
 
 #include "fvCFD.H"
 #include "twoPhaseSystem.H"
-#include "PhaseCompressibleTurbulenceModel.H"
+#include "phaseCompressibleTurbulenceModel.H"
 #include "fixedFluxPressureFvPatchScalarField.H"
 #include "pimpleControl.H"
 #include "localEulerDdtScheme.H"
@@ -76,6 +79,11 @@ int main(int argc, char *argv[])
     );
 
     #include "pUf/createDDtU.H"
+
+    int nEnergyCorrectors
+    (
+        pimple.dict().lookupOrDefault<int>("nEnergyCorrectors", 1)
+    );
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

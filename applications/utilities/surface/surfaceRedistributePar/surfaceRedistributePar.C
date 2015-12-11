@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
 
     if (!Pstream::parRun())
     {
-        FatalErrorIn(args.executable())
+        FatalErrorInFunction
             << "Please run this program on the decomposed case."
             << " It will read surface " << surfFileName
             << " and decompose it such that it overlaps the mesh bounding box."
@@ -159,6 +159,23 @@ int main(int argc, char *argv[])
         Pstream::gatherList(meshBb);
         Pstream::scatterList(meshBb);
     }
+
+
+
+    // Temporarily: override master-only checking
+    regIOobject::fileCheckTypes oldCheckType =
+        regIOobject::fileModificationChecking;
+
+    if (oldCheckType == regIOobject::timeStampMaster)
+    {
+        regIOobject::fileModificationChecking = regIOobject::timeStamp;
+    }
+    else if (oldCheckType == regIOobject::inotifyMaster)
+    {
+        regIOobject::fileModificationChecking = regIOobject::inotify;
+    }
+
+
 
     IOobject io
     (
@@ -283,6 +300,10 @@ int main(int argc, char *argv[])
 
     Info<< "Writing surface." << nl << endl;
     surfMesh.objectRegistry::write();
+
+
+    regIOobject::fileModificationChecking = oldCheckType;
+
 
     Info<< "End\n" << endl;
 

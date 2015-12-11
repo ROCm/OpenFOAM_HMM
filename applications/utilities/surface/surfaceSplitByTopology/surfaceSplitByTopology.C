@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
+    Strips any baffle parts of a surface.
 
-    Strips any baffle parts of a surface.  A baffle region is one which is
-    reached by walking from an open edge, and stopping when a multiply connected
-    edge is reached.
+    A baffle region is one which is reached by walking from an open edge, and
+    stopping when a multiply connected edge is reached.
 
 \*---------------------------------------------------------------------------*/
 
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 
         if (iterationNo == iterationLimit)
         {
-            WarningIn("surfaceSplitByTopology")
+            WarningInFunction
             << "Iteration limit of " << iterationLimit << "reached" << endl;
         }
 

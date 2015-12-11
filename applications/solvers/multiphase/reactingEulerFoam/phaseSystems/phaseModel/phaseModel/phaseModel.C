@@ -76,7 +76,7 @@ Foam::phaseModel::phaseModel
 
 Foam::autoPtr<Foam::phaseModel> Foam::phaseModel::clone() const
 {
-    notImplemented("phaseModel::clone() const");
+    NotImplemented;
     return autoPtr<phaseModel>(NULL);
 }
 
@@ -167,7 +167,7 @@ bool Foam::phaseModel::compressible() const
 
 const Foam::tmp<Foam::volScalarField>& Foam::phaseModel::divU() const
 {
-    notImplemented("Foam::phaseModel::divU()");
+    NotImplemented;
     static tmp<Foam::volScalarField> divU_(NULL);
     return divU_;
 }
@@ -175,7 +175,7 @@ const Foam::tmp<Foam::volScalarField>& Foam::phaseModel::divU() const
 
 void Foam::phaseModel::divU(const tmp<volScalarField>& divU)
 {
-    WarningIn("phaseModel::divU(const tmp<volScalarField>& divU)")
+    WarningInFunction
         << "Attempt to set the dilatation rate of an incompressible phase"
         << endl;
 }
@@ -183,7 +183,7 @@ void Foam::phaseModel::divU(const tmp<volScalarField>& divU)
 
 const Foam::volScalarField& Foam::phaseModel::K() const
 {
-    notImplemented("Foam::phaseModel::K()");
+    NotImplemented;
     return volScalarField::null();
 }
 
@@ -196,7 +196,7 @@ const Foam::surfaceScalarField& Foam::phaseModel::DbyA() const
 
 void Foam::phaseModel::DbyA(const tmp<surfaceScalarField>& DbyA)
 {
-    WarningIn("phaseModel::DbyA(const surfaceScalarField& DbyA)")
+    WarningInFunction
         << "Attempt to set the dilatation rate of an incompressible phase"
         << endl;
 }

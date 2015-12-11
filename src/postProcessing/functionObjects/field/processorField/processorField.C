@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(processorField, 0);
+    defineTypeNameAndDebug(processorField, 0);
 }
 
 
@@ -80,16 +80,8 @@ Foam::processorField::processorField
     else
     {
         active_ = false;
-        WarningIn
-        (
-            "processorField::processorField"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating " << name_
+        WarningInFunction
+            << "No fvMesh available, deactivating " << name_
             << endl;
     }
 }
@@ -127,10 +119,7 @@ void Foam::processorField::execute()
 
 void Foam::processorField::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

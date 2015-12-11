@@ -178,7 +178,7 @@ tmp<volScalarField> noPyrolysis::kappa() const
 
 const surfaceScalarField& noPyrolysis::phiGas() const
 {
-    FatalErrorIn("const volScalarField& noPyrolysis::phiGas() const")
+    FatalErrorInFunction
         << "phiGas field not available for " << type() << abort(FatalError);
     return surfaceScalarField::null();
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -73,8 +73,8 @@ uniformTotalPressureFvPatchScalarField
     }
     else
     {
-        scalar p0 = pressure_->value(this->db().time().timeOutputValue());
-        fvPatchField<scalar>::operator=(p0);
+        const scalar t = this->db().time().timeOutputValue();
+        fvPatchScalarField::operator==(pressure_->value(t));
     }
 }
 
@@ -88,15 +88,18 @@ uniformTotalPressureFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchScalarField(p, iF),  // bypass mapper
+    fixedValueFvPatchScalarField(p, iF),  // Don't map
     UName_(ptf.UName_),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_),
     psiName_(ptf.psiName_),
     gamma_(ptf.gamma_),
-    pressure_(ptf.pressure_().clone().ptr())
+    pressure_(ptf.pressure_, false)
 {
-    // Evaluate since value not mapped
+    patchType() = ptf.patchType();
+
+    // Set the patch pressure to the current total pressure
+    // This is not ideal but avoids problems with the creation of patch faces
     const scalar t = this->db().time().timeOutputValue();
     fvPatchScalarField::operator==(pressure_->value(t));
 }
@@ -114,12 +117,7 @@ uniformTotalPressureFvPatchScalarField
     rhoName_(ptf.rhoName_),
     psiName_(ptf.psiName_),
     gamma_(ptf.gamma_),
-    pressure_
-    (
-        ptf.pressure_.valid()
-      ? ptf.pressure_().clone().ptr()
-      : NULL
-    )
+    pressure_(ptf.pressure_, false)
 {}
 
 
@@ -136,12 +134,7 @@ uniformTotalPressureFvPatchScalarField
     rhoName_(ptf.rhoName_),
     psiName_(ptf.psiName_),
     gamma_(ptf.gamma_),
-    pressure_
-    (
-        ptf.pressure_.valid()
-      ? ptf.pressure_().clone().ptr()
-      : NULL
-    )
+    pressure_(ptf.pressure_, false)
 {}
 
 
@@ -199,7 +192,7 @@ void Foam::uniformTotalPressureFvPatchScalarField::updateCoeffs
     }
     else
     {
-        FatalErrorIn("uniformTotalPressureFvPatchScalarField::updateCoeffs()")
+        FatalErrorInFunction
             << " rho or psi set inconsitently, rho = " << rhoName_
             << ", psi = " << psiName_ << ".\n"
             << "    Set either rho or psi or neither depending on the "

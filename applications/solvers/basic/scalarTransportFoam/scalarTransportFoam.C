@@ -24,13 +24,37 @@ License
 Application
     scalarTransportFoam
 
+Group
+    grpBasicSolvers
+
 Description
-    Solves a transport equation for a passive scalar
+    Passive scalar transport equation solver.
+
+    \heading Solver details
+    The equation is given by:
+
+    \f[
+        \ddt{T} + \div \left(\vec{U} T\right) - \div \left(D_T \grad T \right)
+        = S_{T}
+    \f]
+
+    Where:
+    \vartable
+        T       | Passive scalar
+        D_T     | Diffusion coefficient
+        S_T     | Source
+    \endvartable
+
+    \heading Required fields
+    \plaintable
+        T       | Passive scalar
+        U       | Velocity [m/s]
+    \endplaintable
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "simpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

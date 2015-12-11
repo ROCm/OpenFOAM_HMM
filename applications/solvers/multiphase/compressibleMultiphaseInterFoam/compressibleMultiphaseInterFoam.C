@@ -24,6 +24,9 @@ License
 Application
     compressibleMultiphaseInterFoam
 
+Group
+    grpMultiphaseSolvers
+
 Description
     Solver for n compressible, non-isothermal immiscible fluids using a VOF
     (volume of fluid) phase-fraction based interface capturing approach.
@@ -55,6 +58,8 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

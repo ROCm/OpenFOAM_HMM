@@ -24,6 +24,9 @@ License
 Application
     interMixingFoam
 
+Group
+    grpMultiphaseSolvers
+
 Description
     Solver for 3 incompressible fluids, two of which are miscible,
     using a VOF method to capture the interface.
@@ -36,7 +39,7 @@ Description
 #include "immiscibleIncompressibleThreePhaseMixture.H"
 #include "turbulentTransportModel.H"
 #include "pimpleControl.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "CorrectPhi.H"
 #include "fixedFluxPressureFvPatchScalarField.H"
 #include "localEulerDdtScheme.H"
@@ -59,6 +62,8 @@ int main(int argc, char *argv[])
     #include "createMRF.H"
     #include "createFvOptions.H"
     #include "correctPhi.H"
+
+    turbulence->validate();
 
     if (!LTS)
     {

@@ -84,7 +84,6 @@ kOmegaSST<BasicTurbulenceModel>::kOmegaSST
 {
     if (type == typeName)
     {
-        correctNut();
         this->printCoeffs(type);
     }
 }

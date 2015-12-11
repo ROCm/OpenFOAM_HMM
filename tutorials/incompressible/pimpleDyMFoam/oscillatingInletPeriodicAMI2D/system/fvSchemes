@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -50,13 +50,6 @@ interpolationSchemes
 snGradSchemes
 {
     default         limited corrected 0.33;
-}
-
-fluxRequired
-{
-    default         no;
-    pcorr           ;
-    p               ;
 }
 
 

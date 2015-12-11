@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,10 @@ Description
     or calculated as the average of the distance to the wall scaled with
     the thickness coefficient supplied via the option -Cbl.  If both options
     are provided -ybl is used.
+
+    Compressible modes is automatically selected based on the existence of the
+    "thermophysicalProperties" dictionary required to construct the
+    thermodynamics package.
 
 \*---------------------------------------------------------------------------*/
 
@@ -331,17 +335,12 @@ int main(int argc, char *argv[])
         "scalar",
         "boundary-layer thickness as Cbl * mean distance to wall"
     );
-    argList::addBoolOption
-    (
-        "compressible",
-        "apply to compressible case"
-    );
 
     #include "setRootCase.H"
 
     if (!args.optionFound("ybl") && !args.optionFound("Cbl"))
     {
-        FatalErrorIn(args.executable())
+        FatalErrorInFunction
             << "Neither option 'ybl' or 'Cbl' have been provided to calculate "
             << "the boundary-layer thickness.\n"
             << "Please choose either 'ybl' OR 'Cbl'."
@@ -349,7 +348,7 @@ int main(int argc, char *argv[])
     }
     else if (args.optionFound("ybl") && args.optionFound("Cbl"))
     {
-        FatalErrorIn(args.executable())
+        FatalErrorInFunction
             << "Both 'ybl' and 'Cbl' have been provided to calculate "
             << "the boundary-layer thickness.\n"
             << "Please choose either 'ybl' OR 'Cbl'."
@@ -359,8 +358,6 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createNamedMesh.H"
     #include "createFields.H"
-
-    const bool compressible = args.optionFound("compressible");
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -384,7 +381,15 @@ int main(int argc, char *argv[])
     U.write();
 
 
-    if (compressible)
+    if
+    (
+        IOobject
+        (
+            basicThermo::dictName,
+            runTime.constant(),
+            mesh
+        ).headerOk()
+    )
     {
         calcCompressible(mesh, mask, U, y, ybl);
     }

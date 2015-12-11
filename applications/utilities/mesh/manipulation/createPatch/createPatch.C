@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -284,10 +284,8 @@ void separateList
     }
     else
     {
-        FatalErrorIn
-        (
-            "separateList(const vectorField&, UList<vector>&)"
-        )   << "Sizes of field and transformation not equal. field:"
+        FatalErrorInFunction
+            << "Sizes of field and transformation not equal. field:"
             << field.size() << " transformation:" << separation.size()
             << abort(FatalError);
     }
@@ -306,11 +304,8 @@ void syncPoints
 {
     if (points.size() != mesh.nPoints())
     {
-        FatalErrorIn
-        (
-            "syncPoints"
-            "(const polyMesh&, pointField&, const CombineOp&, const point&)"
-        )   << "Number of values " << points.size()
+        FatalErrorInFunction
+            << "Number of values " << points.size()
             << " is not equal to the number of points in the mesh "
             << mesh.nPoints() << abort(FatalError);
     }
@@ -470,11 +465,8 @@ void syncPoints
     {
         if (hasTransformation)
         {
-            WarningIn
-            (
-                "syncPoints"
-                "(const polyMesh&, pointField&, const CombineOp&, const point&)"
-            )   << "There are decomposed cyclics in this mesh with"
+            WarningInFunction
+                << "There are decomposed cyclics in this mesh with"
                 << " transformations." << endl
                 << "This is not supported. The result will be incorrect"
                 << endl;
@@ -512,6 +504,11 @@ int main(int argc, char *argv[])
     #include "addOverwriteOption.H"
     #include "addRegionOption.H"
     #include "addDictOption.H"
+    Foam::argList::addBoolOption
+    (
+        "writeObj",
+        "write obj files showing the cyclic matching process"
+    );
     #include "setRootCase.H"
     #include "createTime.H"
     runTime.functionObjects().off();
@@ -523,12 +520,13 @@ int main(int argc, char *argv[])
 
     #include "createNamedPolyMesh.H"
 
+    const bool writeObj = args.optionFound("writeObj");
+
     const word oldInstance = mesh.pointsInstance();
 
     const word dictName("createPatchDict");
     #include "setSystemMeshDictionaryIO.H"
-
-    Info<< "Reading " << dictName << nl << endl;
+    Info<< "Reading " << dictIO.instance()/dictIO.name() << nl << endl;
 
     IOdictionary dict(dictIO);
 
@@ -542,7 +540,10 @@ int main(int argc, char *argv[])
     patches.checkParallelSync(true);
 
 
-    dumpCyclicMatch("initial_", mesh);
+    if (writeObj)
+    {
+        dumpCyclicMatch("initial_", mesh);
+    }
 
     // Read patch construct info from dictionary
     PtrList<dictionary> patchSources(dict.lookup("patches"));
@@ -671,7 +672,7 @@ int main(int argc, char *argv[])
 
         if (destPatchI == -1)
         {
-            FatalErrorIn(args.executable())
+            FatalErrorInFunction
                 << "patch " << patchName << " not added. Problem."
                 << abort(FatalError);
         }
@@ -728,7 +729,7 @@ int main(int argc, char *argv[])
 
                 if (mesh.isInternalFace(faceI))
                 {
-                    FatalErrorIn(args.executable())
+                    FatalErrorInFunction
                         << "Face " << faceI << " specified in set "
                         << faces.name()
                         << " is not an external face of the mesh." << endl
@@ -747,7 +748,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            FatalErrorIn(args.executable())
+            FatalErrorInFunction
                 << "Invalid source type " << sourceType << endl
                 << "Valid source types are 'patches' 'set'" << exit(FatalError);
         }
@@ -761,7 +762,10 @@ int main(int argc, char *argv[])
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, true);
     mesh.movePoints(map().preMotionPoints());
 
-    dumpCyclicMatch("coupled_", mesh);
+    if (writeObj)
+    {
+        dumpCyclicMatch("coupled_", mesh);
+    }
 
     // Synchronise points.
     if (!pointSync)
@@ -872,7 +876,10 @@ int main(int argc, char *argv[])
     filterPatches(mesh, addedPatchNames);
 
 
-    dumpCyclicMatch("final_", mesh);
+    if (writeObj)
+    {
+        dumpCyclicMatch("final_", mesh);
+    }
 
 
     // Set the precision of the points data to 10

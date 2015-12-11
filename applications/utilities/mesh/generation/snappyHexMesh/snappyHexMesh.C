@@ -556,7 +556,7 @@ scalar getMergeDistance(const polyMesh& mesh, const scalar mergeTol)
 
         if (mergeTol < writeTol)
         {
-            FatalErrorIn("getMergeDistance(const polyMesh&, const dictionary&)")
+            FatalErrorInFunction
                 << "Your current settings specify ASCII writing with "
                 << IOstream::defaultPrecision() << " digits precision." << nl
                 << "Your merging tolerance (" << mergeTol
@@ -1452,7 +1452,7 @@ int main(int argc, char *argv[])
 
     if (Pstream::parRun() && !decomposer.parallelAware())
     {
-        FatalErrorIn(args.executable())
+        FatalErrorInFunction
             << "You have selected decomposition method "
             << decomposer.typeName
             << " which is not parallel aware." << endl

@@ -94,7 +94,7 @@ void Foam::removeRegisteredObject::execute()
 
 void Foam::removeRegisteredObject::end()
 {
-    execute();
+    // Do nothing - only valid on execute
 }
 
 

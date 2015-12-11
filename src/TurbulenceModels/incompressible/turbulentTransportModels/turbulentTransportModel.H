@@ -35,6 +35,7 @@ Description
     based on the standard laminar transport package.
 
 SourceFiles
+    turbulentTransportModel.C
     turbulentTransportModels.C
 
 \*---------------------------------------------------------------------------*/
@@ -42,7 +43,7 @@ SourceFiles
 #ifndef turbulentTransportModel_H
 #define turbulentTransportModel_H
 
-#include "SpecificIncompressibleTurbulenceModel.H"
+#include "IncompressibleTurbulenceModel.H"
 #include "RASModel.H"
 #include "LESModel.H"
 #include "incompressible/transportModel/transportModel.H"
@@ -55,18 +56,27 @@ namespace Foam
     {
         typedef IncompressibleTurbulenceModel<transportModel> turbulenceModel;
 
-        typedef SpecificIncompressibleTurbulenceModel
-        <
-            RASModel<turbulenceModel>
-        > RASModel;
+        typedef RASModel<turbulenceModel> RASModel;
+        typedef LESModel<turbulenceModel> LESModel;
 
-        typedef SpecificIncompressibleTurbulenceModel
-        <
-            LESModel<turbulenceModel>
-        > LESModel;
+        template<class BasicCompressibleTurbulenceModel>
+        autoPtr<BasicCompressibleTurbulenceModel> New
+        (
+            const volVectorField& U,
+            const surfaceScalarField& phi,
+            const typename BasicCompressibleTurbulenceModel::transportModel&
+                transport,
+            const word& propertiesName = turbulenceModel::propertiesName
+        );
     }
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "turbulentTransportModel.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

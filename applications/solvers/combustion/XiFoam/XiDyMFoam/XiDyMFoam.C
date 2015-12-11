@@ -24,6 +24,9 @@ License
 Application
     XiFoam
 
+Group
+    grpCombustionSolvers grpMovingMeshSolvers
+
 Description
     Solver for compressible premixed/partially-premixed combustion with
     turbulence modelling.
@@ -58,7 +61,7 @@ Description
 #include "Switch.H"
 #include "pimpleControl.H"
 #include "CorrectPhi.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

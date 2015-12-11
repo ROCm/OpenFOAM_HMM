@@ -83,7 +83,7 @@ void Foam::fieldValues::cellSource::setCellZoneCells()
 
             if (zoneId < 0)
             {
-                FatalErrorIn("cellSource::cellSource::setCellZoneCells()")
+                FatalErrorInFunction
                     << "Unknown cell zone name: " << sourceName_
                     << ". Valid cell zones are: " << mesh().cellZones().names()
                     << nl << exit(FatalError);
@@ -103,7 +103,7 @@ void Foam::fieldValues::cellSource::setCellZoneCells()
 
         default:
         {
-            FatalErrorIn("cellSource::setCellZoneCells()")
+            FatalErrorInFunction
                << "Unknown source type. Valid source types are:"
                 << sourceTypeNames_ << nl << exit(FatalError);
         }
@@ -130,10 +130,7 @@ void Foam::fieldValues::cellSource::initialise(const dictionary& dict)
 
     if (nCells_ == 0)
     {
-        WarningIn
-        (
-            "Foam::fieldValues::cellSource::initialise(const dictionary&)"
-        )
+        WarningInFunction
             << type() << " " << name_ << ": "
             << sourceTypeNames_[source_] << "(" << sourceName_ << "):" << nl
             << "    Source has no cells - deactivating" << endl;
@@ -237,7 +234,7 @@ void Foam::fieldValues::cellSource::write()
 
     if (active_)
     {
-        file() << obr_.time().value();
+        writeTime(file());
 
         // Construct weight field. Note: zero size indicates unweighted
         scalarField weightField;
@@ -266,7 +263,7 @@ void Foam::fieldValues::cellSource::write()
 
             if (!ok)
             {
-                WarningIn("void Foam::fieldValues::cellSource::write()")
+                WarningInFunction
                     << "Requested field " << fieldName
                     << " not found in database and not processed"
                     << endl;

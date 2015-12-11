@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -143,17 +143,8 @@ externalWallHeatFluxTemperatureFvPatchScalarField
 
             if (thicknessLayers_.size() != kappaLayers_.size())
             {
-                FatalIOErrorIn
-                (
-                    "externalWallHeatFluxTemperatureFvPatchScalarField::"
-                    "externalWallHeatFluxTemperatureFvPatchScalarField\n"
-                    "(\n"
-                    "    const fvPatch&,\n"
-                    "    const DimensionedField<scalar, volMesh>&,\n"
-                    "    const dictionary&\n"
-                    ")\n",
-                    dict
-                )   << "\n number of layers for thicknessLayers and "
+                FatalIOErrorInFunction(dict)
+                    << "\n number of layers for thicknessLayers and "
                     << "kappaLayers must be the same"
                     << "\n for patch " << p.name()
                     << " of field " << dimensionedInternalField().name()
@@ -164,16 +155,8 @@ externalWallHeatFluxTemperatureFvPatchScalarField
     }
     else
     {
-        FatalErrorIn
-        (
-            "externalWallHeatFluxTemperatureFvPatchScalarField::"
-            "externalWallHeatFluxTemperatureFvPatchScalarField\n"
-            "(\n"
-            "    const fvPatch&,\n"
-            "    const DimensionedField<scalar, volMesh>&,\n"
-            "    const dictionary&\n"
-            ")\n"
-        )   << "\n patch type '" << p.type()
+        FatalErrorInFunction
+            << "\n patch type '" << p.type()
             << "' either q or h and Ta were not found '"
             << "\n for patch " << p.name()
             << " of field " << dimensionedInternalField().name()
@@ -332,11 +315,8 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
         }
         default:
         {
-            FatalErrorIn
-            (
-                "externalWallHeatFluxTemperatureFvPatchScalarField"
-                "::updateCoeffs()"
-            )   << "Illegal heat flux mode " << operationModeNames[mode_]
+            FatalErrorInFunction
+                << "Illegal heat flux mode " << operationModeNames[mode_]
                 << exit(FatalError);
         }
     }
@@ -391,13 +371,8 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::write
         }
         default:
         {
-            FatalErrorIn
-            (
-                "void externalWallHeatFluxTemperatureFvPatchScalarField::write"
-                "("
-                    "Ostream&"
-                ") const"
-            )   << "Illegal heat flux mode " << operationModeNames[mode_]
+            FatalErrorInFunction
+                << "Illegal heat flux mode " << operationModeNames[mode_]
                 << abort(FatalError);
         }
     }

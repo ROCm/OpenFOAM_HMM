@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -87,7 +87,7 @@ protected:
             const pointField& nbrCc
         )
         {
-            notImplemented("processorCyclicPolyPatch::calcGeometry(..)");
+            NotImplemented;
         }
 
         //- Initialise the patches for moving points
@@ -277,10 +277,8 @@ public:
                 );
                 if (referPatchID_ == -1)
                 {
-                    FatalErrorIn
-                    (
-                        "processorCyclicPolyPatch::referPatchID() const"
-                    )   << "Illegal referPatch name " << referPatchName_
+                    FatalErrorInFunction
+                        << "Illegal referPatch name " << referPatchName_
                         << endl << "Valid patch names are "
                         << this->boundaryMesh().names()
                         << exit(FatalError);

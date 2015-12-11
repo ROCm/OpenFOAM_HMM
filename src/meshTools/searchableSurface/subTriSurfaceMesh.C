@@ -98,15 +98,8 @@ Foam::triSurface Foam::subTriSurfaceMesh::subset
 
     if (regionMap.size() == 0)
     {
-        FatalIOErrorIn
-        (
-            "subTriSurfaceMesh::subset"
-            "(\n"
-            "    const IOobject&,\n"
-            "    const dictionary&\n"
-            ")",
-            dict
-        )   << "Found no regions in triSurface matching " << regionNames
+        FatalIOErrorInFunction(dict)
+            << "Found no regions in triSurface matching " << regionNames
             << ". Valid regions are " << patchNames(s)
             << exit(FatalIOError);
     }

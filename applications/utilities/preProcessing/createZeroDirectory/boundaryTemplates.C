@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -192,7 +192,8 @@ Foam::dictionary Foam::boundaryTemplates::generatePatchDict
 
                 if (!regionOptions.found(category))
                 {
-                    FatalError<< "No options available for category "
+                    FatalErrorInFunction
+                        << "No options available for category "
                         << category << exit(FatalError);
                 }
 
@@ -207,19 +208,7 @@ Foam::dictionary Foam::boundaryTemplates::generatePatchDict
                     word selected;
                     if (!conditionOptions.readIfPresent(option, selected))
                     {
-                        FatalErrorIn
-                        (
-                            "Foam::dictionary "
-                            "Foam::boundaryTemplates::generatePatchDict"
-                            "("
-                                "const word&, "
-                                "const word&, "
-                                "const word&, "
-                                "const word&, "
-                                "const word&, "
-                                "const dictionary&"
-                            ") const"
-                        )
+                        FatalErrorInFunction
                             << "Condition " << condition << ": "
                             << "No option '" << option
                             << "' available for category '" << category
@@ -231,19 +220,7 @@ Foam::dictionary Foam::boundaryTemplates::generatePatchDict
 
                     if (!dict.found(option))
                     {
-                        FatalErrorIn
-                        (
-                            "Foam::dictionary "
-                            "Foam::boundaryTemplates::generatePatchDict"
-                            "("
-                                "const word&, "
-                                "const word&, "
-                                "const word&, "
-                                "const word&, "
-                                "const word&, "
-                                "const dictionary&"
-                            ") const"
-                        )
+                        FatalErrorInFunction
                             << "Condition " << condition << ": "
                             << "No option '" << option
                             << "' available for category '" << category
@@ -256,19 +233,7 @@ Foam::dictionary Foam::boundaryTemplates::generatePatchDict
 
                     if (!optionDict.found(selected))
                     {
-                        FatalErrorIn
-                        (
-                            "Foam::dictionary "
-                            "Foam::boundaryTemplates::generatePatchDict"
-                            "("
-                                "const word&, "
-                                "const word&, "
-                                "const word&, "
-                                "const word&, "
-                                "const word&, "
-                                "const dictionary&"
-                            ") const"
-                        )
+                        FatalErrorInFunction
                             << "Condition " << condition << ": "
                             << "No option '" << selected
                             << "' available for category '" << category
@@ -307,19 +272,7 @@ Foam::dictionary Foam::boundaryTemplates::generatePatchDict
             }
             else
             {
-                FatalErrorIn
-                (
-                    "Foam::dictionary "
-                    "Foam::boundaryTemplates::generatePatchDict"
-                    "("
-                        "const word&, "
-                        "const word&, "
-                        "const word&, "
-                        "const word&, "
-                        "const word&, "
-                        "const dictionary&"
-                    ") const"
-                )
+                FatalErrorInFunction
                     << "Condition " << condition << ": "
                     << "No '" << patchType
                     << "' condition found for field '" << fieldName
@@ -329,19 +282,7 @@ Foam::dictionary Foam::boundaryTemplates::generatePatchDict
         }
         else
         {
-            FatalErrorIn
-            (
-                "Foam::dictionary "
-                "Foam::boundaryTemplates::generatePatchDict"
-                "("
-                    "const word&, "
-                    "const word&, "
-                    "const word&, "
-                    "const word&, "
-                    "const word&, "
-                    "const dictionary&"
-                ") const"
-            )
+            FatalErrorInFunction
                 << "Condition " << condition << ": "
                 << "No '" << patchType << "' boundary types defined in "
                 << categoryDict.dictName() << " templates.  "
@@ -351,19 +292,7 @@ Foam::dictionary Foam::boundaryTemplates::generatePatchDict
     }
     else
     {
-        FatalErrorIn
-        (
-            "Foam::dictionary "
-            "Foam::boundaryTemplates::generatePatchDict"
-            "("
-                "const word&, "
-                "const word&, "
-                "const word&, "
-                "const word&, "
-                "const word&, "
-                "const dictionary&"
-            ") const"
-        )
+        FatalErrorInFunction
             << "Condition " << condition << ": "
             << "Invalid boundary condition type '" << patchType
             << "'.  Valid types are:" << regionTemplates.toc()
@@ -386,14 +315,7 @@ void Foam::boundaryTemplates::checkPatch
 
     if (!regionTemplates.found(category))
     {
-        FatalErrorIn
-        (
-            "void Foam::boundaryTemplates::checkPatch"
-            "("
-                "const word&, "
-                "const word&"
-            ") const"
-        )
+        FatalErrorInFunction
             << "Condition " << condition << ": "
             << "Unknown category '" << category
             << "'.  Valid categories are: " << regionTemplates.toc()
@@ -404,14 +326,7 @@ void Foam::boundaryTemplates::checkPatch
 
     if (!categoryDict.found(patchType))
     {
-        FatalErrorIn
-        (
-            "void Foam::boundaryTemplates::checkPatch"
-            "("
-                "const word&, "
-                "const word&"
-            ") const"
-        )
+        FatalErrorInFunction
             << "Condition " << condition << ": "
             << "Unknown type '" << patchType << "' in category '"
             << category << "'.  Valid types are: " << categoryDict.toc()
@@ -444,14 +359,7 @@ bool Foam::boundaryTemplates::optionsRequired
         }
         else
         {
-            FatalErrorIn
-            (
-                "bool Foam::boundaryTemplates::optionsRequired"
-                "("
-                    "const word&, "
-                    "const word&"
-                ") const"
-            )
+            FatalErrorInFunction
                 << "No type '" << patchType << "' found in category '"
                 << category << "'.  Valid types are "
                 << categoryDict.toc()
@@ -460,14 +368,7 @@ bool Foam::boundaryTemplates::optionsRequired
     }
     else
     {
-        FatalErrorIn
-        (
-            "bool Foam::boundaryTemplates::optionsRequired"
-            "("
-                "const word&, "
-                "const word&"
-            ") const"
-        )
+        FatalErrorInFunction
             << "No category '" << category << "' found in templates.  "
             << "Valid categories are " << templates_.toc()
             << exit(FatalError);

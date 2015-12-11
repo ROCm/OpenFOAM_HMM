@@ -76,16 +76,8 @@ Foam::CourantNo::CourantNo
     if (!isA<fvMesh>(obr_))
     {
         active_ = false;
-        WarningIn
-        (
-            "CourantNo::CourantNo"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating " << name_ << nl
+        WarningInFunction
+            << "No fvMesh available, deactivating " << name_ << nl
             << endl;
     }
 
@@ -167,10 +159,7 @@ void Foam::CourantNo::execute()
 
 void Foam::CourantNo::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

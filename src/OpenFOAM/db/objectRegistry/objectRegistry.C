@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(objectRegistry, 0);
+    defineTypeNameAndDebug(objectRegistry, 0);
 }
 
 
@@ -185,7 +185,7 @@ Foam::label Foam::objectRegistry::getEvent() const
     {
         if (objectRegistry::debug)
         {
-            WarningIn("objectRegistry::getEvent() const")
+            WarningInFunction
                 << "Event counter has overflowed. "
                 << "Resetting counter on all dependent objects." << nl
                 << "This might cause extra evaluations." << endl;
@@ -195,21 +195,9 @@ Foam::label Foam::objectRegistry::getEvent() const
         curEvent = 1;
         event_ = 2;
 
-        for (const_iterator iter = begin(); iter != end(); ++iter)
-        {
-            const regIOobject& io = *iter();
 
-            if (objectRegistry::debug)
-            {
-                Pout<< "objectRegistry::getEvent() : "
-                    << "resetting count on " << iter.key() << endl;
-            }
-
-            if (io.eventNo() != 0)
-            {
-                const_cast<regIOobject&>(io).eventNo() = curEvent;
-            }
-        }
+        // No need to reset dependent objects; overflow is now handled
+        // in regIOobject::upToDate
     }
 
     return curEvent;
@@ -247,7 +235,7 @@ bool Foam::objectRegistry::checkOut(regIOobject& io) const
         {
             if (objectRegistry::debug)
             {
-                WarningIn("objectRegistry::checkOut(regIOobject&)")
+                WarningInFunction
                     << name() << " : attempt to checkOut copy of "
                     << iter.key()
                     << endl;

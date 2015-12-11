@@ -132,4 +132,10 @@ inline Foam::scalar Foam::radiation::fvDOM::omegaMax() const
 }
 
 
+inline Foam::vector Foam::radiation::fvDOM::meshOrientation() const
+{
+    return meshOrientation_;
+}
+
+
 // ************************************************************************* //

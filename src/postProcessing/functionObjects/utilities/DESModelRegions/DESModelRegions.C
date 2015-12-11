@@ -70,16 +70,8 @@ Foam::DESModelRegions::DESModelRegions
     if (!isA<fvMesh>(obr_))
     {
         active_ = false;
-        WarningIn
-        (
-            "DESModelRegions::DESModelRegions"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating " << name_ << nl
+        WarningInFunction
+            << "No fvMesh available, deactivating " << name_ << nl
             << endl;
     }
 
@@ -184,10 +176,7 @@ void Foam::DESModelRegions::execute()
 
 void Foam::DESModelRegions::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 
