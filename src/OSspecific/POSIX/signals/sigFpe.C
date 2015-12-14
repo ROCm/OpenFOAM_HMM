@@ -237,10 +237,8 @@ void Foam::sigFpe::unset(const bool verbose)
 
         if (sigaction(SIGFPE, &oldAction_, NULL) < 0)
         {
-            FatalErrorIn
-            (
-                "Foam::sigFpe::unset(const bool)"
-            )   << "Cannot reset SIGFPE trapping"
+            FatalErrorInFunction
+                << "Cannot reset SIGFPE trapping"
                 << abort(FatalError);
         }
 
@@ -254,10 +252,8 @@ void Foam::sigFpe::unset(const bool verbose)
 
         if (oldExcept == -1)
         {
-            FatalErrorIn
-            (
-                "sigFpe::unset(const bool)"
-            )   << "Cannot reset SIGFPE trapping"
+            FatalErrorInFunction
+                << "Cannot reset SIGFPE trapping"
                 << abort(FatalError);
         }
         sigFpeActive_ = false;

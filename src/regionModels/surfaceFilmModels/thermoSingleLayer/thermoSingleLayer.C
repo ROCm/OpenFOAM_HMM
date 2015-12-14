@@ -27,6 +27,7 @@ License
 #include "fvcDiv.H"
 #include "fvcLaplacian.H"
 #include "fvm.H"
+#include "fvcDdt.H"
 #include "addToRunTimeSelectionTable.H"
 #include "zeroGradientFvPatchFields.H"
 #include "mappedFieldFvPatchField.H"
@@ -188,6 +189,14 @@ void thermoSingleLayer::transferPrimaryRegionSourceFields()
 
     // Apply enthalpy source as difference between incoming and actual states
     hsSp_ -= rhoSp_*hs_;
+
+    if (time().outputTime())
+    {
+        if (debug)
+        {
+            hsSp_.write();
+        }
+    }
 }
 
 
@@ -231,10 +240,12 @@ void thermoSingleLayer::updateSubmodels()
     htcs_->correct();
     htcw_->correct();
 
+    scalarField availableMass(alpha_*availableMass_);
+
     phaseChange_->correct
     (
         time_.deltaTValue(),
-        availableMass_,
+        availableMass,
         primaryMassPCTrans_,
         primaryEnergyPCTrans_
     );
@@ -256,6 +267,12 @@ void thermoSingleLayer::updateSubmodels()
 
 tmp<fvScalarMatrix> thermoSingleLayer::q(volScalarField& hs) const
 {
+//    Only apply heat transfer where the film is present
+//    - leads to temperature unboundedness?
+//    volScalarField boundedAlpha(max(alpha_, ROOTVSMALL));
+//    volScalarField htcst(htcs_->h()*boundedAlpha);
+//    volScalarField htcwt(htcw_->h()*boundedAlpha);
+
     return
     (
       - fvm::Sp(htcs_->h()/Cp_, hs)
@@ -274,7 +291,13 @@ void thermoSingleLayer::solveEnergy()
         Info<< "thermoSingleLayer::solveEnergy()" << endl;
     }
 
-    updateSurfaceTemperatures();
+
+    dimensionedScalar residualDeltaRho
+    (
+        "residualDeltaRho",
+        deltaRho_.dimensions(),
+        1e-10
+    );
 
     solve
     (
@@ -282,16 +305,21 @@ void thermoSingleLayer::solveEnergy()
       + fvm::div(phi_, hs_)
      ==
       - hsSp_
-      + q(hs_)
-      + radiation_->Shs()
+      + alpha_*q(hs_)
+      + alpha_*radiation_->Shs()
 //      - fvm::SuSp(rhoSp_, hs_)
       - rhoSp_*hs_
+      + fvc::ddt(residualDeltaRho + deltaRho_, hs_)
+      - fvm::ddt(residualDeltaRho + deltaRho_, hs_)
     );
 
     correctThermoFields();
 
     // evaluate viscosity from user-model
     viscosity_->correct(pPrimary_, T_);
+
+    // Update film wall and surface temperatures
+    updateSurfaceTemperatures();
 }
 
 
@@ -611,9 +639,9 @@ void thermoSingleLayer::preEvolveRegion()
         Info<< "thermoSingleLayer::preEvolveRegion()" << endl;
     }
 
-//    correctHsForMappedT();
-
     kinematicSingleLayer::preEvolveRegion();
+
+    updateSurfaceTemperatures();
 
     // Update phase change
     primaryMassPCTrans_ == dimensionedScalar("zero", dimMass, 0.0);
@@ -627,15 +655,6 @@ void thermoSingleLayer::evolveRegion()
     {
         Info<< "thermoSingleLayer::evolveRegion()" << endl;
     }
-
-    // Update film coverage indicator
-    correctAlpha();
-
-    // Update film wall and surface velocities
-    updateSurfaceVelocities();
-
-    // Update film wall and surface temperatures
-    updateSurfaceTemperatures();
 
     // Update sub-models to provide updated source contributions
     updateSubmodels();
@@ -670,9 +689,6 @@ void thermoSingleLayer::evolveRegion()
 
     // Update temperature using latest hs_
     T_ == T(hs_);
-
-    // Reset source terms for next time integration
-    resetPrimaryRegionSourceTerms();
 }
 
 
@@ -739,7 +755,7 @@ tmp<DimensionedField<scalar, volMesh> > thermoSingleLayer::Srho() const
         (
             IOobject
             (
-                "thermoSingleLayer::Srho",
+                typeName + ":Srho",
                 time().timeName(),
                 primaryMesh(),
                 IOobject::NO_READ,
@@ -791,7 +807,7 @@ tmp<DimensionedField<scalar, volMesh> > thermoSingleLayer::Srho
         (
             IOobject
             (
-                "thermoSingleLayer::Srho(" + Foam::name(i) + ")",
+                typeName + ":Srho(" + Foam::name(i) + ")",
                 time_.timeName(),
                 primaryMesh(),
                 IOobject::NO_READ,
@@ -841,7 +857,7 @@ tmp<DimensionedField<scalar, volMesh> > thermoSingleLayer::Sh() const
         (
             IOobject
             (
-                "thermoSingleLayer::Sh",
+                typeName + ":Sh",
                 time().timeName(),
                 primaryMesh(),
                 IOobject::NO_READ,

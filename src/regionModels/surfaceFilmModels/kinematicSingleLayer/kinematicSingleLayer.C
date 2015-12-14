@@ -140,6 +140,13 @@ void kinematicSingleLayer::transferPrimaryRegionSourceFields()
     // update addedMassTotal counter
     if (time().outputTime())
     {
+        if (debug)
+        {
+            rhoSp_.write();
+            USp_.write();
+            pSp_.write();
+        }
+
         scalar addedMassTotal = 0.0;
         outputProperties().readIfPresent("addedMassTotal", addedMassTotal);
         addedMassTotal += returnReduce(addedMassTotal_, sumOp<scalar>());
@@ -233,7 +240,7 @@ void kinematicSingleLayer::continuityCheck()
                 fvc::domainIntegrate(mag(mass - magSf()*deltaRho0))/totalMass
             ).value();
 
-       const scalar globalContErr =
+        const scalar globalContErr =
             (
                 fvc::domainIntegrate(mass - magSf()*deltaRho0)/totalMass
             ).value();
@@ -421,6 +428,9 @@ void kinematicSingleLayer::solveThickness
     U_ -= nHat()*(nHat() & U_);
 
     U_.correctBoundaryConditions();
+
+    // Update film wall and surface velocities
+    updateSurfaceVelocities();
 
     // Continuity check
     continuityCheck();
@@ -865,6 +875,10 @@ void kinematicSingleLayer::preEvolveRegion()
 
     transferPrimaryRegionSourceFields();
 
+    updateSurfaceVelocities();
+
+    correctAlpha();
+
     // Reset transfer fields
 //    availableMass_ = mass();
     availableMass_ = netMass();
@@ -879,12 +893,6 @@ void kinematicSingleLayer::evolveRegion()
     {
         Info<< "kinematicSingleLayer::evolveRegion()" << endl;
     }
-
-    // Update film coverage indicator
-    correctAlpha();
-
-    // Update film wall and surface velocities
-    updateSurfaceVelocities();
 
     // Update sub-models to provide updated source contributions
     updateSubmodels();
@@ -913,6 +921,15 @@ void kinematicSingleLayer::evolveRegion()
 
     // Update deltaRho_ with new delta_
     deltaRho_ == delta_*rho_;
+}
+
+
+void kinematicSingleLayer::postEvolveRegion()
+{
+    if (debug)
+    {
+        Info<< "kinematicSingleLayer::postEvolveRegion()" << endl;
+    }
 
     // Reset source terms for next time integration
     resetPrimaryRegionSourceTerms();
@@ -933,7 +950,7 @@ scalar kinematicSingleLayer::CourantNumber() const
 
         forAll(delta_, i)
         {
-            if (delta_[i] > deltaCoLimit_)
+            if ((delta_[i] > deltaCoLimit_) && (alpha_[i] > 0.5))
             {
                 CoNum = max(CoNum, sumPhi[i]/(delta_[i]*magSf()[i]));
             }

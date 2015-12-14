@@ -187,7 +187,8 @@ castellatedMeshControls
 
             //faceZone sphere;
             //cellZone sphere;
-            //cellZoneInside inside;  //outside/insidePoint
+            //cellZoneInside inside;    // outside/insidePoint
+            //insidePoint    (1 1 1);   // if (cellZoneInside == insidePoint)
 
             //- Optional specification of what to do with faceZone faces:
             //      internal : keep them as internal faces (default)
@@ -259,7 +260,12 @@ castellatedMeshControls
     }
 
 
-    // Limit refinement in geometric region
+    // Optionally limit refinement in geometric region. This limits all
+    // refinement (from features, refinementSurfaces, refinementRegions)
+    // in a given geometric region. The syntax is exactly the same as for the
+    // refinementRegions; the cell level now specifies the upper limit
+    // for any cell. Note that it does not override the refinement constraints
+    // given by the nCellsBetweenLevels settting.
     limitRegions
     {
     }
@@ -297,7 +303,8 @@ castellatedMeshControls
 
 
         // 2. Specify multiple locations with optional cellZones for the
-        //    regions. faceZones are automatically constructed from the
+        //    regions (use cellZone "none" to specify the unzoned cells)
+        //    FaceZones are automatically constructed from the
         //    names of the cellZones: <cellZoneA> _to_ <cellZoneB>
         //    where the cellZoneA is the lowest numbered cellZone (non-cellZone
         //    cells are in a special region called "none" which is always
