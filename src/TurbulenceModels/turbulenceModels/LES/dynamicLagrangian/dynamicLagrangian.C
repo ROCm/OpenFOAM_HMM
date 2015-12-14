@@ -158,7 +158,6 @@ void dynamicLagrangian<BasicTurbulenceModel>::correct()
     const alphaField& alpha = this->alpha_;
     const rhoField& rho = this->rho_;
     const surfaceScalarField& alphaRhoPhi = this->alphaRhoPhi_;
-    const surfaceScalarField& phi = this->phi_;
     const volVectorField& U = this->U_;
 
     LESeddyViscosity<BasicTurbulenceModel>::correct();
