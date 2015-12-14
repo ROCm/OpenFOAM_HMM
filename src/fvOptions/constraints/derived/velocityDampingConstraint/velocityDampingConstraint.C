@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -93,7 +93,7 @@ Foam::fv::velocityDampingConstraint::velocityDampingConstraint
     const fvMesh& mesh
 )
 :
-    option(name, modelType, dict, mesh)
+    cellSetOption(name, modelType, dict, mesh)
 {
     read(dict);
 }
@@ -101,13 +101,7 @@ Foam::fv::velocityDampingConstraint::velocityDampingConstraint
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::fv::velocityDampingConstraint::alwaysApply() const
-{
-    return true;
-}
-
-
-void Foam::fv::velocityDampingConstraint::setValue
+void Foam::fv::velocityDampingConstraint::constrain
 (
     fvMatrix<vector>& eqn,
     const label fieldI
@@ -126,7 +120,7 @@ void Foam::fv::velocityDampingConstraint::writeData(Ostream& os) const
 
 bool Foam::fv::velocityDampingConstraint::read(const dictionary& dict)
 {
-    if (option::read(dict))
+    if (cellSetOption::read(dict))
     {
         UMax_ = readScalar(coeffs_.lookup("UMax"));
 
