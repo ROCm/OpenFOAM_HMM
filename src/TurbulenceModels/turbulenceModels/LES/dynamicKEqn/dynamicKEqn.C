@@ -48,7 +48,13 @@ volScalarField dynamicKEqn<BasicTurbulenceModel>::Ck
 
     const volSymmTensorField MM
     (
-        simpleFilter_(-2.0*this->delta()*sqrt(KK)*filter_(D))
+        simpleFilter_
+        (
+            -2.0*this->delta()*sqrt
+            (
+                max(KK, dimensionedScalar("zero", KK.dimensions(), 0.0))
+            )*filter_(D)
+        )
     );
 
     const volScalarField Ck
