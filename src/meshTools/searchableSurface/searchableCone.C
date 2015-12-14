@@ -1075,21 +1075,6 @@ void Foam::searchableCone::getVolumeType
     volType.setSize(points.size());
     volType = volumeType::INSIDE;
 
-    scalar magDir = magDir_;
-
-    bool swap = false;
-    bool swapInner = false;
-
-    if (radius1_ > radius2_)
-    {
-         swap = true;
-    }
-
-    if (innerRadius1_ > innerRadius2_)
-    {
-         swapInner = true;
-    }
-
     forAll(points, pointI)
     {
         const point& pt = points[pointI];
@@ -1100,15 +1085,7 @@ void Foam::searchableCone::getVolumeType
         scalar parallel = v & unitDir_;
         scalar comp = parallel;
         scalar compInner = parallel;
-        if (swap)
-        {
-            comp = -(magDir-parallel);
-        }
 
-        if (swapInner)
-        {
-            compInner = -(magDir-parallel);
-        }
 
         scalar radius_sec = radius1_+comp*(radius2_-radius1_)/magDir_;
 
