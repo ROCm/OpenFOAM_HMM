@@ -2376,10 +2376,8 @@ void Foam::distributedTriSurfaceMesh::distribute
     clearOut();
 
     // Set the bounds() value to the boundBox of the undecomposed surface
-    triSurfaceMesh::bounds() = boundBox(points());
+    bounds() = boundBox(points(), true);
 
-    reduce(bounds().min(), minOp<point>());
-    reduce(bounds().max(), maxOp<point>());
 
     // Regions stays same
     // Volume type stays same.
