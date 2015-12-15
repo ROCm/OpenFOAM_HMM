@@ -507,7 +507,6 @@ private:
             void getIntersections
             (
                 const labelList& surfacesToTest,
-                const labelList& neiLevel,
                 const pointField& neiCc,
                 const labelList& testFaces,
 
@@ -515,7 +514,19 @@ private:
                 labelList& globalRegion2
             ) const;
 
-            //- Determine patches for baffles on all intersected unnamed faces
+            //- Calculate intersections on zoned faces. Return per face -1
+            // or the index of the surface and the orientation w.r.t. surface
+            void getIntersections
+            (
+                const labelList& surfacesToTest,
+                const pointField& neiCc,
+                const labelList& testFaces,
+
+                labelList& namedSurfaceIndex,
+                PackedBoolList& posOrientation
+            ) const;
+
+            //- Determine patches for baffles
             void getBafflePatches
             (
                 const labelList& globalToMasterPatch,
@@ -635,13 +646,13 @@ private:
                 labelList& cellToZone
             ) const;
 
-            //- Finds zone per cell for cells inside named surfaces that have
-            //  an inside point specified.
+            //- Finds zone per cell for cells inside region for which name
+            //  is specified.
             void findCellZoneInsideWalk
             (
-                const labelList& locationSurfaces,
-                const labelList& namedSurfaceIndex,
-                const labelList& surfaceToCellZone,
+                const pointField& locationsInMesh,
+                const labelList& zonesInMesh,
+                const labelList& blockedFace, // per face -1 or some index >= 0
                 labelList& cellToZone
             ) const;
 
@@ -650,8 +661,8 @@ private:
             void findCellZoneInsideWalk
             (
                 const pointField& locationsInMesh,
-                const wordList& regionsInMesh,
-                const labelList& blockedFace, // per face -1 or some index >= 0
+                const wordList& zoneNamesInMesh,
+                const labelList& faceToZone, // per face -1 or some index >= 0
                 labelList& cellToZone
             ) const;
 
@@ -670,6 +681,7 @@ private:
             void findCellZoneTopo
             (
                 const pointField& locationsInMesh,
+                const labelList& allSurfaceIndex,
                 const labelList& namedSurfaceIndex,
                 const labelList& surfaceToCellZone,
                 labelList& cellToZone
@@ -679,8 +691,21 @@ private:
             //  - clear out any blocked faces inbetween same cell zone.
             void makeConsistentFaceIndex
             (
+                const labelList& zoneToNamedSurface,
                 const labelList& cellToZone,
                 labelList& namedSurfaceIndex
+            ) const;
+
+            //- Calculate cellZone allocation
+            void zonify
+            (
+                const bool allowFreeStandingZoneFaces,
+                const pointField& locationsInMesh,
+                const wordList& zonesInMesh,
+
+                labelList& cellToZone,
+                labelList& namedSurfaceIndex,
+                PackedBoolList& posOrientation
             ) const;
 
             //- Put cells into cellZone, faces into faceZone

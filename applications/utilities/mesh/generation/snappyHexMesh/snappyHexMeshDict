@@ -296,8 +296,18 @@ castellatedMeshControls
         locationInMesh (5 0.28 0.43);
 
         // Whether any faceZones (as specified in the refinementSurfaces)
-        // are only on the boundary of corresponding cellZones or also allow
-        // free-standing zone faces. Not used if there are no faceZones.
+        // are only on the boundary of corresponding cellZones.
+        // Not used if there are no faceZones. The behaviour has changed
+        // with respect to previous versions:
+        //  true  : all intersections with surface are put in faceZone
+        //          (same behaviour as before)
+        //  false : depending on the type of surface intersected:
+        //      - if intersecting surface has faceZone only (so no cellZone)
+        //        leave in faceZone (so behave as if set to true) (= changed
+        //        behaviour)
+        //      - if intersecting surface has faceZone and cellZone
+        //        remove if inbetween same cellZone or if on boundary
+        //        (same behaviour as before)
         allowFreeStandingZoneFaces true;
 
 
