@@ -228,6 +228,32 @@ Foam::labelList Foam::surfaceZonesInfo::getNamedSurfaces
 }
 
 
+Foam::labelList Foam::surfaceZonesInfo::getStandaloneNamedSurfaces
+(
+    const PtrList<surfaceZonesInfo>& surfList
+)
+{
+   labelList namedSurfaces(surfList.size());
+
+    label namedI = 0;
+    forAll(surfList, surfI)
+    {
+        if
+        (
+            surfList.set(surfI)
+        &&  surfList[surfI].faceZoneName().size()
+        && !surfList[surfI].cellZoneName().size()
+        )
+        {
+            namedSurfaces[namedI++] = surfI;
+        }
+    }
+    namedSurfaces.setSize(namedI);
+
+    return namedSurfaces;
+}
+
+
 Foam::labelList Foam::surfaceZonesInfo::getClosedNamedSurfaces
 (
     const PtrList<surfaceZonesInfo>& surfList,

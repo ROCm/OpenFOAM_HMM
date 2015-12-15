@@ -2069,15 +2069,21 @@ void Foam::meshRefinement::findCellZoneTopo
 }
 
 
-// Make namedSurfaceIndex consistent with cellToZone - clear out any blocked
-// faces inbetween same cell zone.
 void Foam::meshRefinement::makeConsistentFaceIndex
 (
-    const labelList& zoneToNamedSurface,
+    const labelList& surfaceMap,
     const labelList& cellToZone,
     labelList& namedSurfaceIndex
 ) const
 {
+    // Make namedSurfaceIndex consistent with cellToZone - clear out any
+    // blocked faces inbetween same cell zone (or background (=-1))
+    // Do not do this for surfaces relating to 'pure' faceZones i.e.
+    // faceZones without a cellZone. Note that we cannot check here
+    // for different cellZones on either side but no namedSurfaceIndex
+    // since cellZones can now originate from locationsInMesh as well
+    // (instead of only through named surfaces)
+
     const labelList& faceOwner = mesh_.faceOwner();
     const labelList& faceNeighbour = mesh_.faceNeighbour();
 
@@ -2088,22 +2094,13 @@ void Foam::meshRefinement::makeConsistentFaceIndex
 
         if
         (
-            namedSurfaceIndex[faceI] != -1
-         && ownZone == neiZone
-         && ownZone != -1
-         && zoneToNamedSurface[ownZone] != -1
+            ownZone == neiZone
+         && namedSurfaceIndex[faceI] != -1
+         && surfaceMap[namedSurfaceIndex[faceI]] == -1
         )
         {
             namedSurfaceIndex[faceI] = -1;
         }
-        //else if (ownZone != neiZone && namedSurfaceIndex[faceI] == -1)
-        //{
-        //    FatalErrorIn("meshRefinement::zonify()")
-        //        << "Different cell zones on either side of face " << faceI
-        //        << " at " << mesh_.faceCentres()[faceI]
-        //        << " but face not marked with a surface."
-        //        << abort(FatalError);
-        //}
     }
 
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
@@ -2128,22 +2125,13 @@ void Foam::meshRefinement::makeConsistentFaceIndex
 
                 if
                 (
-                    namedSurfaceIndex[faceI] != -1
-                 && ownZone == neiZone
-                 && ownZone != -1
-                 && zoneToNamedSurface[ownZone] != -1
+                    ownZone == neiZone
+                 && namedSurfaceIndex[faceI] != -1
+                 && surfaceMap[namedSurfaceIndex[faceI]] == -1
                 )
                 {
                     namedSurfaceIndex[faceI] = -1;
                 }
-                //else if (ownZone != neiZone && namedSurfaceIndex[faceI] == -1)
-                //{
-                //    FatalErrorIn("meshRefinement::zonify()")
-                //        << "Different cell zones on either side of face "
-                //        << faceI << " at " << mesh_.faceCentres()[faceI]
-                //        << " but face not marked with a surface."
-                //        << abort(FatalError);
-                //}
             }
         }
         else
@@ -2152,7 +2140,15 @@ void Foam::meshRefinement::makeConsistentFaceIndex
             forAll(pp, i)
             {
                 label faceI = pp.start()+i;
-                namedSurfaceIndex[faceI] = -1;
+
+                if
+                (
+                    namedSurfaceIndex[faceI] != -1
+                 && surfaceMap[namedSurfaceIndex[faceI]] == -1
+                )
+                {
+                    namedSurfaceIndex[faceI] = -1;
+                }
             }
         }
     }
@@ -2526,21 +2522,26 @@ void Foam::meshRefinement::zonify
             Info<< "Only keeping zone faces inbetween different cellZones."
                 << nl << endl;
 
-            // Map from cellZone to named surface (or -1)
-            labelList zoneToNamedSurface(mesh_.cellZones().size(), -1);
-            forAll(namedSurfaces, i)
+            // Surfaces with faceZone but no cellZone
+            labelList standaloneNamedSurfaces
+            (
+                surfaceZonesInfo::getStandaloneNamedSurfaces
+                (
+                    surfZones
+                )
+            );
+
+            // Construct map from surface index to index in
+            // standaloneNamedSurfaces (or -1)
+            labelList surfaceMap(surfZones.size(), -1);
+            forAll(standaloneNamedSurfaces, i)
             {
-                label surfI = namedSurfaces[i];
-                label zoneI = surfaceToCellZone[i];
-                if (zoneI >= 0)
-                {
-                    zoneToNamedSurface[zoneI] = surfI;
-                }
+                surfaceMap[standaloneNamedSurfaces[i]] = i;
             }
 
             makeConsistentFaceIndex
             (
-                zoneToNamedSurface,
+                surfaceMap,
                 cellToZone,
                 namedSurfaceIndex
             );
