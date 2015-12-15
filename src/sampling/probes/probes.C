@@ -132,8 +132,7 @@ void Foam::probes::findElements(const fvMesh& mesh)
                     << " seems to be on multiple domains:"
                     << " cell " << elementList_[probeI]
                     << " on my domain " << Pstream::myProcNo()
-                        << " and cell " << cellI << " on some other domain."
-                    << endl
+                    << " and cell " << cellI << " on some other domain." << endl
                     << "This might happen if the probe location is on"
                     << " a processor patch. Change the location slightly"
                     << " to prevent this." << endl;
@@ -146,8 +145,7 @@ void Foam::probes::findElements(const fvMesh& mesh)
                     << " seems to be on multiple domains:"
                     << " cell " << faceList_[probeI]
                     << " on my domain " << Pstream::myProcNo()
-                        << " and face " << faceI << " on some other domain."
-                    << endl
+                    << " and face " << faceI << " on some other domain." << endl
                     << "This might happen if the probe location is on"
                     << " a processor patch. Change the location slightly"
                     << " to prevent this." << endl;
