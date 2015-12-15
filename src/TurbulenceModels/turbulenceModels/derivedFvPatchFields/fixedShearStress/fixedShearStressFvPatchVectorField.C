@@ -109,7 +109,7 @@ void Foam::fixedShearStressFvPatchVectorField::updateCoeffs()
         )
     );
 
-    scalarField nuEff(turbModel.nuEff()()[patch().index()]);
+    tmp<scalarField> nuEff(turbModel.nuEff(patch().index()));
 
     const vectorField Uc(patchInternalField());
 
@@ -117,7 +117,7 @@ void Foam::fixedShearStressFvPatchVectorField::updateCoeffs()
 
     const scalarField& ry = patch().deltaCoeffs();
 
-    operator==(tauHat*(tauHat & (tau0_*(1.0/(ry*nuEff)) + Uc)));
+    operator==(tauHat*(tauHat & (tau0_*(1.0/(ry*nuEff())) + Uc)));
 
     fixedValueFvPatchVectorField::updateCoeffs();
 }
