@@ -284,6 +284,17 @@ void realizableKE<BasicTurbulenceModel>::correct()
     // Update epsilon and G at the wall
     epsilon_.boundaryField().updateCoeffs();
 
+    // SAF: limiting thermo->nu(). If psiThermo is used rho might be < 0
+    // temporarily when p < 0 then nu < 0 which needs limiting
+    volScalarField nuLimited
+    (
+        max
+        (
+            this->nu(),
+            dimensionedScalar("zero", this->nu()().dimensions(), 0.0)
+        )
+    );
+
     // Dissipation equation
     tmp<fvScalarMatrix> epsEqn
     (
@@ -294,7 +305,7 @@ void realizableKE<BasicTurbulenceModel>::correct()
         C1*alpha*rho*magS*epsilon_
       - fvm::Sp
         (
-            C2_*alpha*rho*epsilon_/(k_ + sqrt(this->nu()*epsilon_)),
+            C2_*alpha*rho*epsilon_/(k_ + sqrt(nuLimited*epsilon_)),
             epsilon_
         )
       + epsilonSource()
