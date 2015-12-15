@@ -191,6 +191,12 @@ public:
                 const PtrList<surfaceZonesInfo>& surfList
             );
 
+            //- Get indices of named surfaces without a cellZone
+            static labelList getStandaloneNamedSurfaces
+            (
+                const PtrList<surfaceZonesInfo>& surfList
+            );
+
             //- Get indices of surfaces with a cellZone that are closed and
             //  have 'inside' or 'outside' selection.
             static labelList getClosedNamedSurfaces
