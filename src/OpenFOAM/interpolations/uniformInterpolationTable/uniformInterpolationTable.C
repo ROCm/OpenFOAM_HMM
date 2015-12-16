@@ -25,6 +25,7 @@ License
 
 #include "uniformInterpolationTable.H"
 #include "Time.H"
+#include "IOstream.H"
 
 // * * * * * * * * * * * *  Private Member Functions * * * * * * * * * * * * //
 
@@ -228,7 +229,12 @@ void Foam::uniformInterpolationTable<Type>::write() const
         dict.add("bound", bound_);
     }
 
-    dict.regIOobject::write();
+    dict.regIOobject::writeObject
+    (
+        IOstream::ASCII,
+        IOstream::currentVersion,
+        dict.time().writeCompression()
+    );
 }
 
 
