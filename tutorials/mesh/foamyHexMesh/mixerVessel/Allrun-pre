@@ -36,34 +36,34 @@ nProcs=$(getNumberOfProcessors)
 
 # Surface intersections
 intersectSurfaces                           \
-    constant/triSurface/vessel.stl          \
-    constant/triSurface/spargerShaft.stl    \
+    vessel.stl                              \
+    spargerShaft.stl                        \
     -perturb
 
 intersectSurfaces                           \
-    constant/triSurface/vessel.stl          \
-    constant/triSurface/shaft.stl           \
+    vessel.stl                              \
+    shaft.stl                               \
     -perturb
 
 intersectSurfaces                           \
-    constant/triSurface/spargerShaft.stl    \
-    constant/triSurface/spargerInlet.stl    \
+    spargerShaft.stl                        \
+    spargerInlet.stl                        \
     -perturb
 
 intersectSurfaces                           \
-    constant/triSurface/stirrer.stl         \
-    constant/triSurface/shaftRotating.stl   \
+    stirrer.stl                             \
+    shaftRotating.stl                       \
     -perturb
 
 intersectSurfaces                           \
-    constant/triSurface/stirrer_baffles.stl \
-    constant/triSurface/stirrer.stl         \
+    stirrer_baffles.stl                     \
+    stirrer.stl                             \
     -surf1Baffle                            \
     -perturb
 
 intersectSurfaces                           \
-    constant/triSurface/rotating.stl        \
-    constant/triSurface/shaft.stl           \
+    rotating.stl                            \
+    shaft.stl                               \
     -surf1Baffle                            \
     -perturb
 
@@ -71,8 +71,8 @@ intersectSurfaces                           \
 for bladeI in $(seq 1 6);
 do
     intersectSurfaces                                   \
-        constant/triSurface/stirrer_baffles_$bladeI.obj \
-        constant/triSurface/stirrer_baffles_plate.obj   \
+        stirrer_baffles_$bladeI.obj                     \
+        stirrer_baffles_plate.obj                       \
         -surf1Baffle                                    \
         -surf2Baffle
 done
