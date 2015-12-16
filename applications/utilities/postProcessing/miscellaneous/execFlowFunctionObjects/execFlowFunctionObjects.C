@@ -438,9 +438,9 @@ autoPtr<functionObjectList> readFunctionObjects
 
 int main(int argc, char *argv[])
 {
-    Foam::timeSelector::addOptions();
+    timeSelector::addOptions();
     #include "addRegionOption.H"
-    Foam::argList::addBoolOption
+    argList::addBoolOption
     (
         "noFlow",
         "suppress creating flow models"
@@ -449,7 +449,7 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
     #include "createTime.H"
-    Foam::instantList timeDirs = Foam::timeSelector::select0(runTime, args);
+    instantList timeDirs = timeSelector::select0(runTime, args);
     #include "createNamedMesh.H"
 
     // Externally stored dictionary for functionObjectList
