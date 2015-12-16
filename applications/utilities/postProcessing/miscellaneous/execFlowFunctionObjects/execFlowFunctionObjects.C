@@ -290,6 +290,8 @@ void calc
             mesh
         );
 
+        #include "createFvOptions.H"
+
         if (phi.dimensions() == dimVolume/dimTime)
         {
             IOobject turbulencePropertiesHeader
