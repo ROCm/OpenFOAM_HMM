@@ -35,46 +35,25 @@ nProcs=$(getNumberOfProcessors)
 
 
 # Surface intersections
-intersectSurfaces                           \
-    vessel.stl                              \
-    spargerShaft.stl                        \
-    -perturb
+intersectSurfaces vessel.stl spargerShaft.stl -perturb
 
-intersectSurfaces                           \
-    vessel.stl                              \
-    shaft.stl                               \
-    -perturb
+intersectSurfaces vessel.stl shaft.stl -perturb
 
-intersectSurfaces                           \
-    spargerShaft.stl                        \
-    spargerInlet.stl                        \
-    -perturb
+intersectSurfaces spargerShaft.stl spargerInlet.stl -perturb
 
-intersectSurfaces                           \
-    stirrer.stl                             \
-    shaftRotating.stl                       \
-    -perturb
+intersectSurfaces stirrer.stl shaftRotating.stl -perturb
 
-intersectSurfaces                           \
-    stirrer_baffles.stl                     \
-    stirrer.stl                             \
-    -surf1Baffle                            \
-    -perturb
+intersectSurfaces stirrer_baffles.stl stirrer.stl -surf1Baffle -perturb
 
-intersectSurfaces                           \
-    rotating.stl                            \
-    shaft.stl                               \
-    -surf1Baffle                            \
-    -perturb
+intersectSurfaces rotating.stl shaft.stl -surf1Baffle -perturb
 
 # Intersect blades with the plate
 for bladeI in $(seq 1 6);
 do
-    intersectSurfaces                                   \
-        stirrer_baffles_$bladeI.obj                     \
-        stirrer_baffles_plate.obj                       \
-        -surf1Baffle                                    \
-        -surf2Baffle
+    intersectSurfaces \
+        stirrer_baffles_$bladeI.obj \
+        stirrer_baffles_plate.obj   \
+       -surf1Baffle -surf2Baffle
 done
 
 
@@ -90,8 +69,7 @@ runApplication surfaceFeatureExtract
 
 runParallel foamyHexMesh $nProcs
 
-runParallel collapseEdges $nProcs -collapseFaces -latestTime
-mv log.collapseEdges log.collapseFaces
+runParallel -log log.collapseFaces collapseEdges $nProcs -collapseFaces -latestTime
 
 #\cp system/collapseDict.indirectPatchFaces system/collapseDict
 #runParallel collapseEdges $nProcs -collapseFaceSet indirectPatchFaces -latestTime
@@ -99,11 +77,15 @@ mv log.collapseEdges log.collapseFaces
 
 runParallel checkMesh $nProcs -allTopology -allGeometry -latestTime
 
-runApplication reconstructParMesh -latestTime
+# Copy the mesh into polyMesh and delete the latest time directory
+latestTime=$(foamInfoExec -case processor0 -latestTime)
+if [ "$latestTime" != "constant" ] && [ -d processor0/$latestTime/polyMesh ]
+then
+    runApplication reconstructParMesh -latestTime
 
-# Copy the mesh into polyMesh and delete the 102 directory
-\cp -r 101/polyMesh constant
-\rm -rf 101
+    \cp -r $latestTime/polyMesh constant
+    \rm -rf $latestTime
+fi
 
 
 # ----------------------------------------------------------------- end-of-file
