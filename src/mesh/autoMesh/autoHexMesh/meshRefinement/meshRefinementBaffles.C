@@ -279,7 +279,6 @@ void Foam::meshRefinement::getIntersections
 }
 
 
-// Determine patches for baffles on all intersected unnamed faces
 void Foam::meshRefinement::getBafflePatches
 (
     const labelList& globalToMasterPatch,
@@ -293,9 +292,16 @@ void Foam::meshRefinement::getBafflePatches
     labelList& neiPatch
 ) const
 {
+    // This determines the patches for the intersected faces to
+    // - remove the outside of the mesh
+    // - introduce baffles for (non-faceZone) intersections
+    // Any baffles for faceZones (faceType 'baffle'/'boundary') get introduced
+    // later
+
+
     // 1. Determine cell zones
     // ~~~~~~~~~~~~~~~~~~~~~~~
-    // Note that this does not determine the surface that was intersected
+    // Note that this does not determine the surface+region that was intersected
     // so that is done in step 2 below.
 
     labelList cellToZone;
@@ -312,48 +318,48 @@ void Foam::meshRefinement::getBafflePatches
             namedSurfaceIndex,
             posOrientation
         );
-
-
-        // Some stats
-        if (debug)
-        {
-            label nZones = gMax(cellToZone)+1;
-
-            label nUnvisited = 0;
-            label nBackgroundCells = 0;
-            labelList nZoneCells(nZones, 0);
-            forAll(cellToZone, cellI)
-            {
-                label zoneI = cellToZone[cellI];
-                if (zoneI >= 0)
-                {
-                    nZoneCells[zoneI]++;
-                }
-                else if (zoneI == -1)
-                {
-                    nBackgroundCells++;
-                }
-                else if (zoneI == -2)
-                {
-                    nUnvisited++;
-                }
-                else
-                {
-                    FatalErrorIn("meshRefinement::getBafflePatches()")
-                        << "problem" << exit(FatalError);
-                }
-            }
-            reduce(nUnvisited, sumOp<label>());
-            reduce(nBackgroundCells, sumOp<label>());
-            forAll(nZoneCells, zoneI)
-            {
-                reduce(nZoneCells[zoneI], sumOp<label>());
-            }
-            Info<< "nUnvisited      :" << nUnvisited << endl;
-            Info<< "nBackgroundCells:" << nBackgroundCells << endl;
-            Info<< "nZoneCells      :" << nZoneCells << endl;
-        }
     }
+
+
+    // The logic is quite complicated and depends on the cell zone allocation
+    // (see zonify). Cells can have zone:
+    //  -2  : unreachable
+    //  -1  : in background zone
+    //  >=0 : in named cellZone
+    // Faces can be intersected by a
+    //  - unnamed surface (no faceZone defined for it)
+    //  - named surface (a faceZone defined for it)
+    // Per intersected faces, depending on the cellToZone on either side of
+    // the face we need to:
+    //
+    // surface type    |   cellToZone      |   action
+    // ----------------+-------------------+---------
+    // unnamed         |  -2  | same       |   -
+    // unnamed         |  -2  | different  |   baffle
+    //                 |      |            |
+    // unnamed         |  -1  | same       |   baffle
+    // unnamed         |  -1  | different  |   -
+    //                 |      |            |
+    // unnamed         | >=0  | same       |   baffle
+    // unnamed         | >=0  | different  |   -
+    //
+    // named           |  -2  | same       |   -
+    // named           |  -2  | different  |   see note
+    //
+    // named           |  -1  | same       |   -
+    // named           |  -1  | different  |   -
+    //
+    // named           | >=0  | same       |   -
+    // named           | >=0  | different  |   -
+    //
+    // So the big difference between surface with a faceZone and those
+    // without is that 'standing-up-baffles' are not supported. Note that
+    // they are still in a faceZone so can be split etc. later on.
+    // Note: this all depends on whether we allow named surfaces
+    //       to be outside the unnamed geometry. 2.3 does not allow this
+    //       so we do the same. We could implement it but it would require
+    //       re-testing of the intersections with the named surfaces to
+    //       obtain the surface and region number.
 
 
     // 2. Check intersections of all unnamed surfaces
@@ -380,7 +386,6 @@ void Foam::meshRefinement::getBafflePatches
     // 3. Baffle all boundary faces
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Baffle all boundary faces except those on outside of unvisited cells
-    // (cellToZone = -2)
     // Use patch according to globalRegion1,2
     // Note: the behaviour is slightly different from version3.0 and earlier
     //       in that it will not create baffles which are outside the meshed
@@ -395,27 +400,52 @@ void Foam::meshRefinement::getBafflePatches
     forAll(testFaces, i)
     {
         label faceI = testFaces[i];
-        label ownZone = cellToZone[mesh_.faceOwner()[faceI]];
-        label neiZone = -1;
 
-        if (mesh_.isInternalFace(faceI))
+        if (globalRegion1[faceI] != -1 || globalRegion2[faceI] != -1)
         {
-            neiZone = cellToZone[mesh_.faceNeighbour()[faceI]];
-        }
-        else
-        {
-            neiZone = neiCellZone[faceI-mesh_.nInternalFaces()];
-        }
-
-        if (ownZone != -2 || neiZone != -2)
-        {
+            label ownMasterPatch = -1;
             if (globalRegion1[faceI] != -1)
             {
-                ownPatch[faceI] = globalToMasterPatch[globalRegion1[faceI]];
+                ownMasterPatch = globalToMasterPatch[globalRegion1[faceI]];
             }
+            label neiMasterPatch = -1;
             if (globalRegion2[faceI] != -1)
             {
-                neiPatch[faceI] = globalToMasterPatch[globalRegion2[faceI]];
+                neiMasterPatch = globalToMasterPatch[globalRegion2[faceI]];
+            }
+
+
+            label ownZone = cellToZone[mesh_.faceOwner()[faceI]];
+            label neiZone = -1;
+
+            if (mesh_.isInternalFace(faceI))
+            {
+                neiZone = cellToZone[mesh_.faceNeighbour()[faceI]];
+            }
+            else
+            {
+                neiZone = neiCellZone[faceI-mesh_.nInternalFaces()];
+            }
+
+
+            if (ownZone == -2)
+            {
+                if (neiZone != -2)
+                {
+                    ownPatch[faceI] = ownMasterPatch;
+                    neiPatch[faceI] = neiMasterPatch;
+                }
+            }
+            else if (neiZone == -2)
+            {
+                ownPatch[faceI] = ownMasterPatch;
+                neiPatch[faceI] = neiMasterPatch;
+            }
+            else if (ownZone == neiZone)
+            {
+                // Free-standing baffle
+                ownPatch[faceI] = ownMasterPatch;
+                neiPatch[faceI] = neiMasterPatch;
             }
         }
     }
@@ -2374,8 +2404,7 @@ void Foam::meshRefinement::zonify
                 label zoneID = mesh_.cellZones().findZoneID(name);
                 if (zoneID == -1)
                 {
-                    FatalErrorIn("meshRefinement::zonify(..)") << "problem"
-                        << abort(FatalError);
+                    FatalErrorInFunction << "problem" << abort(FatalError);
                 }
                 locationsZoneIDs[i] = zoneID;
             }
@@ -2520,6 +2549,73 @@ void Foam::meshRefinement::zonify
                 namedSurfaceIndex
             );
         }
+    }
+
+
+    // Some stats
+    if (debug)
+    {
+        label nZones = gMax(cellToZone)+1;
+
+        label nUnvisited = 0;
+        label nBackgroundCells = 0;
+        labelList nZoneCells(nZones, 0);
+        forAll(cellToZone, cellI)
+        {
+            label zoneI = cellToZone[cellI];
+            if (zoneI >= 0)
+            {
+                nZoneCells[zoneI]++;
+            }
+            else if (zoneI == -1)
+            {
+                nBackgroundCells++;
+            }
+            else if (zoneI == -2)
+            {
+                nUnvisited++;
+            }
+            else
+            {
+                FatalErrorIn("meshRefinement::getBafflePatches()")
+                    << "problem" << exit(FatalError);
+            }
+        }
+        reduce(nUnvisited, sumOp<label>());
+        reduce(nBackgroundCells, sumOp<label>());
+        forAll(nZoneCells, zoneI)
+        {
+            reduce(nZoneCells[zoneI], sumOp<label>());
+        }
+        Info<< "nUnvisited      :" << nUnvisited << endl;
+        Info<< "nBackgroundCells:" << nBackgroundCells << endl;
+        Info<< "nZoneCells      :" << nZoneCells << endl;
+    }
+    if (debug&MESH)
+    {
+        Pout<< "Writing cell zone allocation on mesh to time "
+            << timeName() << endl;
+        volScalarField volCellToZone
+        (
+            IOobject
+            (
+                "cellToZone",
+                timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimless, 0),
+            zeroGradientFvPatchScalarField::typeName
+        );
+
+        forAll(cellToZone, cellI)
+        {
+            volCellToZone[cellI] = cellToZone[cellI];
+        }
+        volCellToZone.write();
     }
 }
 
@@ -4208,41 +4304,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
         {
             faceToZone[faceI] = surfaceToFaceZone[surfI];
         }
-    }
-
-
-    if (debug&MESH)
-    {
-        const_cast<Time&>(mesh_.time())++;
-        Pout<< "Writing cell zone allocation on mesh to time "
-            << timeName() << endl;
-        write
-        (
-            debugType(debug),
-            writeType(writeLevel() | WRITEMESH),
-            mesh_.time().path()/"cellToZone"
-        );
-        volScalarField volCellToZone
-        (
-            IOobject
-            (
-                "cellToZone",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
-            ),
-            mesh_,
-            dimensionedScalar("zero", dimless, 0),
-            zeroGradientFvPatchScalarField::typeName
-        );
-
-        forAll(cellToZone, cellI)
-        {
-            volCellToZone[cellI] = cellToZone[cellI];
-        }
-        volCellToZone.write();
     }
 
 

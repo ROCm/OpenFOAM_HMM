@@ -290,6 +290,8 @@ void calc
             mesh
         );
 
+        // Note: fvOptions not directly used but constructs fvOptions so
+        //       e.g. porosity modelling is effective for use in forces fo.
         #include "createFvOptions.H"
 
         if (phi.dimensions() == dimVolume/dimTime)
@@ -444,6 +446,11 @@ int main(int argc, char *argv[])
     (
         "noFlow",
         "suppress creating flow models"
+    );
+    argList::addBoolOption
+    (
+        "noRead",
+        "do not read any field data"
     );
     #include "addDictOption.H"
 
