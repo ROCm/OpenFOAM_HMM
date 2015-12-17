@@ -70,10 +70,22 @@
 
     // For closed-volume cases adjust the pressure level
     // to obey overall mass continuity
-    if (closedVolume && compressible)
+    if (closedVolume)
     {
-        p += (initialMass - fvc::domainIntegrate(psi*p))
-            /fvc::domainIntegrate(psi);
+        if(!compressible)
+        {
+            p += dimensionedScalar
+            (
+                "p",
+                p.dimensions(),
+                pRefValue - getRefCellValue(p, pRefCell)
+            );
+        }
+        else
+        {
+            p += (initialMass - fvc::domainIntegrate(psi*p))
+                /fvc::domainIntegrate(psi);
+        }
         p_rgh = p - rho*gh;
     }
 
