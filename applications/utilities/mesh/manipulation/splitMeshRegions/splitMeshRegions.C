@@ -1827,6 +1827,8 @@ int main(int argc, char *argv[])
 
     if (detectOnly)
     {
+        Info<< "End\n" << endl;
+
         return 0;
     }
 
