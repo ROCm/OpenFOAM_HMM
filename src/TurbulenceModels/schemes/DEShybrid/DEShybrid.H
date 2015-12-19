@@ -45,13 +45,23 @@ Description
         w_2   | scheme 2 weights
     \endvartable
 
-    Reference:
+    First published in:
     \verbatim
         A. Travin, M. Shur, M. Strelets, P. Spalart (2000).
         Physical and numerical upgrades in the detached-eddy simulation of
         complex turbulent flows.
         In Proceedings of the 412th Euromech Colloquium on LES and Complex
         Transition and Turbulent Flows, Munich, Germany
+    \endverbatim
+
+    Original publication contained a typo for C_H3 constant. Corrected version
+    with minor changes for 2 lower limiters published in:
+    \verbatim
+        P. Spalart, M. Shur, M. Strelets, A. Travin (2012).
+        Sensitivity of Landing-Gear Noise Predictions by Large-Eddy
+        Simulation to Numerics and Resolution.
+        AIAA Paper 2012-1174, 50th AIAA Aerospace Sciences Meeting,
+        Nashville / TN, Jan. 2012
     \endverbatim
 
     Example of the DEShybrid scheme specification using linear within the LES
@@ -65,7 +75,9 @@ Description
             linear                        // scheme 1
             linearUpwind grad(U)          // scheme 2
             0.65                          // DES coefficient, typically = 0.65
-            10                            // Reference time scale (Uref/Lref)
+            30                            // Reference velocity scale
+            2                             // Reference length scale
+            0                             // Minimum sigma limit (0-1)
             1;                            // Maximum sigma limit (0-1)
         .
         .
@@ -119,17 +131,22 @@ class DEShybrid
         //- DES Coefficient
         scalar CDES_;
 
-        //- Time scale coefficient [1/s]
-        dimensionedScalar invTau_;
+        //- Reference velocity scale [m/s]
+        dimensionedScalar U0_;
 
-        //- Maximum bound for sigma (limited to 1)
+        //- Reference length scale [m]
+        dimensionedScalar L0_;
+
+        //- Minimum bound for sigma (0 <= sigmaMin <= 1)
+        scalar sigmaMin_;
+
+        //- Maximum bound for sigma (0 <= sigmaMax <= 1)
         scalar sigmaMax_;
 
-        //- Lower limit for `B' coefficient
-        dimensionedScalar B0_;
-
-        //- Small length scale to avoid division by zero
-        dimensionedScalar d0_;
+        //- constants of scheme
+        scalar CH1_;
+        scalar CH2_;
+        scalar CH3_;
 
         //- Disallow default bitwise copy construct
         DEShybrid(const DEShybrid&);
@@ -152,31 +169,48 @@ class DEShybrid
             tmp<volTensorField> gradU(fvc::grad(U));
             const volScalarField S(sqrt(2.0)*mag(symm(gradU())));
             const volScalarField Omega(sqrt(2.0)*mag(skew(gradU())));
-            const volScalarField magSqrGradU(magSqr(gradU));
+            const dimensionedScalar tau0_ = L0_/U0_;
 
             const volScalarField B
             (
-                0.5*Omega*max(S, Omega)
-               /max(0.5*magSqrGradU, B0_)
+                CH3_*Omega*max(S, Omega)
+               /max(0.5*(sqr(S)+sqr(Omega)), sqr(1.0e-3/tau0_))
             );
             const volScalarField K
             (
-                max(Foam::sqrt(0.5*magSqrGradU), 0.1*invTau_)
+                max(Foam::sqrt(0.5*(sqr(S)+sqr(Omega))), 0.1/tau0_)
             );
+
             const volScalarField lTurb(Foam::sqrt(nuEff/(pow(0.09, 1.5)*K)));
             const volScalarField g(tanh(pow4(B)));
             const volScalarField A
             (
-                 max(scalar(0), CDES_*delta/max(lTurb*g, d0_) - 0.5)
+                 CH2_*max(scalar(0), CDES_*delta/max(lTurb*g, 1.0e-15*L0_) - 0.5)
             );
-            const surfaceScalarField Af(fvc::interpolate(A));
+
+            const volScalarField IOhybrid
+            (
+                IOobject
+                (
+                    "DEShybridFactor",
+                    this->mesh().time().timeName(),
+                    this->mesh(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                max(sigmaMax_*tanh(pow(A, CH1_)), sigmaMin_)
+            );
+            if (this->mesh().time().outputTime())
+            {
+                IOhybrid.write();
+            }
 
             return tmp<surfaceScalarField>
             (
                 new surfaceScalarField
                 (
                     vf.name() + "BlendingFactor",
-                    max(sigmaMax_*tanh(pow3(Af)), scalar(0))
+                    fvc::interpolate(IOhybrid)
                 )
             );
         }
@@ -205,16 +239,43 @@ public:
                 surfaceInterpolationScheme<Type>::New(mesh, is)
             ),
             CDES_(readScalar(is)),
-            invTau_("invTau", dimless/dimTime, readScalar(is)),
+            U0_("U0", dimLength/dimTime, readScalar(is)),
+            L0_("L0", dimLength, readScalar(is)),
+            sigmaMin_(readScalar(is)),
             sigmaMax_(readScalar(is)),
-            B0_("B0", dimless/sqr(dimTime), 1e-20),
-            d0_("d0", dimLength, SMALL)
+            CH1_(3.0),
+            CH2_(1.0),
+            CH3_(2.0)
         {
-            if (invTau_.value() <= 0)
+            if (U0_.value() <= 0)
             {
                 FatalErrorInFunction
-                    << "invTau coefficient must be greater than 0. "
-                    << "Current value: " << invTau_ << exit(FatalError);
+                    << "U0 coefficient must be greater than 0. "
+                    << "Current value: " << U0_ << exit(FatalError);
+            }
+            if (L0_.value() <= 0)
+            {
+                FatalErrorInFunction
+                    << "L0 coefficient must be greater than 0. "
+                    << "Current value: " << L0_ << exit(FatalError);
+            }
+            if (sigmaMin_ < 0)
+            {
+                FatalErrorInFunction
+                    << "sigmaMin coefficient must be greater than or equal to 0. "
+                    << "Current value: " << sigmaMin_ << exit(FatalError);
+            }
+            if (sigmaMax_ < 0)
+            {
+                FatalErrorInFunction
+                    << "sigmaMax coefficient must be greater than or equal to 0. "
+                    << "Current value: " << sigmaMax_ << exit(FatalError);
+            }
+            if (sigmaMin_ > 1)
+            {
+                FatalErrorInFunction
+                    << "sigmaMin coefficient must be less than or equal to 1. "
+                    << "Current value: " << sigmaMin_ << exit(FatalError);
             }
             if (sigmaMax_ > 1)
             {
@@ -242,16 +303,43 @@ public:
                 surfaceInterpolationScheme<Type>::New(mesh, faceFlux, is)
             ),
             CDES_(readScalar(is)),
-            invTau_("invTau", dimless/dimTime, readScalar(is)),
+            U0_("U0", dimLength/dimTime, readScalar(is)),
+            L0_("L0", dimLength, readScalar(is)),
+            sigmaMin_(readScalar(is)),
             sigmaMax_(readScalar(is)),
-            B0_("B0", dimless/sqr(dimTime), 1e-20),
-            d0_("d0", dimLength, SMALL)
+            CH1_(3.0),
+            CH2_(1.0),
+            CH3_(2.0)
         {
-            if (invTau_.value() <= 0)
+            if (U0_.value() <= 0)
             {
                 FatalErrorInFunction
-                    << "invTau coefficient must be greater than 0. "
-                    << "Current value: " << invTau_ << exit(FatalError);
+                    << "U0 coefficient must be greater than 0. "
+                    << "Current value: " << U0_ << exit(FatalError);
+            }
+            if (L0_.value() <= 0)
+            {
+                FatalErrorInFunction
+                    << "L0 coefficient must be greater than 0. "
+                    << "Current value: " << U0_ << exit(FatalError);
+            }
+            if (sigmaMin_ < 0)
+            {
+                FatalErrorInFunction
+                    << "sigmaMin coefficient must be greater than or equal to 0. "
+                    << "Current value: " << sigmaMin_ << exit(FatalError);
+            }
+            if (sigmaMax_ < 0)
+            {
+                FatalErrorInFunction
+                    << "sigmaMax coefficient must be greater than or equal to 0. "
+                    << "Current value: " << sigmaMax_ << exit(FatalError);
+            }
+            if (sigmaMin_ > 1)
+            {
+                FatalErrorInFunction
+                    << "sigmaMin coefficient must be less than or equal to 1. "
+                    << "Current value: " << sigmaMin_ << exit(FatalError);
             }
             if (sigmaMax_ > 1)
             {

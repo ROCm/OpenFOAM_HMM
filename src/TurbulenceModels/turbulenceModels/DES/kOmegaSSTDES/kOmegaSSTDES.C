@@ -62,12 +62,7 @@ tmp<volScalarField> kOmegaSSTDES<BasicTurbulenceModel>::dTilda
     const volScalarField& k = this->k_;
     const volScalarField& omega = this->omega_;
 
-    return
-        min
-        (
-            CDES*this->delta(),
-            sqrt(k + this->kMin_)/(this->betaStar_*omega)
-        );
+    return min(CDES*this->delta(), sqrt(k)/(this->betaStar_*omega));
 }
 
 
@@ -113,7 +108,7 @@ kOmegaSSTDES<BasicTurbulenceModel>::kOmegaSSTDES
         (
             "CDESkom",
             this->coeffDict_,
-            0.78
+            0.82
         )
     ),
     CDESkeps_
@@ -122,7 +117,7 @@ kOmegaSSTDES<BasicTurbulenceModel>::kOmegaSSTDES
         (
             "CDESkeps",
             this->coeffDict_,
-            0.61
+            0.60
         )
     )
 {

@@ -61,7 +61,7 @@ tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::ft
     const volScalarField& magGradU
 ) const
 {
-    return tanh(pow3(sqr(ct_)*rd(this->nut_, magGradU)));
+    return tanh(pow3(sqr(Ct_)*rd(this->nut_, magGradU)));
 }
 
 
@@ -71,7 +71,7 @@ tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::fl
     const volScalarField& magGradU
 ) const
 {
-    return tanh(pow(sqr(cl_)*rd(this->nu(), magGradU), 10));
+    return tanh(pow(sqr(Cl_)*rd(this->nu(), magGradU), 10));
 }
 
 
@@ -104,17 +104,17 @@ tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::rd
 }
 
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
 template<class BasicTurbulenceModel>
-tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::fd
+tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::fdt
 (
     const volScalarField& magGradU
 ) const
 {
-    return 1 - tanh(pow(cdt1_*rd(this->nuEff(), magGradU), cdt2_));
+    return 1 - tanh(pow(Cdt1_*rd(this->nut_, magGradU), Cdt2_));
 }
 
-
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
 tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::dTilda
@@ -128,22 +128,35 @@ tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::dTilda
 
     const volScalarField lRAS(sqrt(k)/(this->betaStar_*omega));
     const volScalarField lLES(CDES*this->delta());
-    const dimensionedScalar d0("SMALL", dimLength, SMALL);
 
     const volScalarField alpha(this->alpha());
     const volScalarField expTerm(exp(sqr(alpha)));
 
-    tmp<volScalarField> fStep = min(2*pow(expTerm, -9.0), scalar(1));
-    const volScalarField fHyb(max(1 - fd(magGradU), fStep));
-    // Simplified version where fRestore = 0
-    // return max(d0, fHyb*lRAS + (1 - fHyb)*lLES);
-
-    // Original form
-    tmp<volScalarField> fHill =
+    tmp<volScalarField> fB = min(2*pow(expTerm, -9.0), scalar(1));
+    tmp<volScalarField> fe1 =
         2*(pos(alpha)*pow(expTerm, -11.09) + neg(alpha)*pow(expTerm, -9.0));
-    tmp<volScalarField> fAmp = 1 - max(ft(magGradU), fl(magGradU));
-    tmp<volScalarField> fRestore = max(fHill - 1, scalar(0))*fAmp;
-    return max(d0, fHyb*(1 + fRestore)*lRAS + (1 - fHyb)*lLES);
+    tmp<volScalarField> fe2 = 1 - max(ft(magGradU), fl(magGradU));
+    tmp<volScalarField> fe = max(fe1 - 1, scalar(0))*fe2;
+
+    const volScalarField fdTilda(max(1 - fdt(magGradU), fB));
+
+    // Simplified formulation from Gritskevich et al. paper (2011) where fe = 0
+    /*
+    return max
+    (
+        fdTilda*lRAS 
+      + (1 - fdTilda)*lLES, 
+        dimensionedScalar("SMALL", dimLength, SMALL)
+    );
+    */
+
+    // Original formulation from Shur et al. paper (2008)
+    return max
+    (
+        fdTilda*(1 + fe)*lRAS 
+      + (1 - fdTilda)*lLES,
+        dimensionedScalar("SMALL", dimLength, SMALL)
+    );
 }
 
 
@@ -173,38 +186,39 @@ kOmegaSSTIDDES<BasicTurbulenceModel>::kOmegaSSTIDDES
         propertiesName,
         type
     ),
-    cdt1_
+
+    Cdt1_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "cdt1",
+            "Cdt1",
             this->coeffDict_,
             20
         )
     ),
-    cdt2_
+    Cdt2_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "cdt2",
+            "Cdt2",
             this->coeffDict_,
             3
         )
     ),
-    cl_
+    Cl_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "cl",
+            "Cl",
             this->coeffDict_,
             5
         )
     ),
-    ct_
+    Ct_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "ct",
+            "Ct",
             this->coeffDict_,
             1.87
         )
@@ -225,10 +239,10 @@ bool kOmegaSSTIDDES<BasicTurbulenceModel>::read()
 {
     if (kOmegaSSTDES<BasicTurbulenceModel>::read())
     {
-        cdt1_.readIfPresent(this->coeffDict());
-        cdt2_.readIfPresent(this->coeffDict());
-        cl_.readIfPresent(this->coeffDict());
-        ct_.readIfPresent(this->coeffDict());
+        Cdt1_.readIfPresent(this->coeffDict());
+        Cdt2_.readIfPresent(this->coeffDict());
+        Cl_.readIfPresent(this->coeffDict());
+        Ct_.readIfPresent(this->coeffDict());
 
         return true;
     }

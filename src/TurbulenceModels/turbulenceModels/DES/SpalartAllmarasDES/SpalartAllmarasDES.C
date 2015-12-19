@@ -74,16 +74,6 @@ tmp<volScalarField> SpalartAllmarasDES<BasicTurbulenceModel>::ft2
 
 
 template<class BasicTurbulenceModel>
-tmp<volScalarField> SpalartAllmarasDES<BasicTurbulenceModel>::S
-(
-    const volTensorField& gradU
-) const
-{
-    return sqrt(2.0)*mag(symm(gradU));
-}
-
-
-template<class BasicTurbulenceModel>
 tmp<volScalarField> SpalartAllmarasDES<BasicTurbulenceModel>::Omega
 (
     const volTensorField& gradU

@@ -46,12 +46,12 @@ tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::rd
         (
             this->nuEff()
            /(
-               max
-               (
-                   magGradU,
-                   dimensionedScalar("SMALL", magGradU.dimensions(), SMALL)
-               )
-              *sqr(this->kappa_*this->y_)
+                max
+                (
+                    magGradU,
+                    dimensionedScalar("SMALL", magGradU.dimensions(), SMALL)
+                )
+               *sqr(this->kappa_*this->y_)
             ),
             scalar(10)
         )
@@ -68,7 +68,7 @@ tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::fd
     const volScalarField& magGradU
 ) const
 {
-    return 1 - tanh(pow(fdFactor_*rd(magGradU), fdExponent_));
+    return 1 - tanh(pow(Cd1_*rd(magGradU), Cd2_));
 }
 
 
@@ -82,13 +82,16 @@ tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::dTilda
     const volTensorField& gradU
 ) const
 {
+    const volScalarField lRAS(this->y_);
+    const volScalarField lLES(this->psi(chi, fv1)*this->CDES_*this->delta());
+
     return max
     (
-        this->y_
+        lRAS
       - fd(mag(gradU))
        *max
         (
-            this->y_ - this->psi(chi, fv1)*this->CDES_*this->delta(),
+            lRAS - lLES,
             dimensionedScalar("zero", dimLength, 0)
         ),
         dimensionedScalar("small", dimLength, SMALL)
@@ -119,27 +122,34 @@ SpalartAllmarasDDES<BasicTurbulenceModel>::SpalartAllmarasDDES
         alphaRhoPhi,
         phi,
         transport,
-        propertiesName
+        propertiesName,
+        type
     ),
-    fdFactor_
+
+    Cd1_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "fdFactor",
+            "Cd1",
             this->coeffDict_,
             8
         )
     ),
-    fdExponent_
+    Cd2_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "fdExponent",
+            "Cd2",
             this->coeffDict_,
             3
         )
     )
-{}
+{
+    if (type == typeName)
+    {
+        this->printCoeffs(type);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -149,8 +159,9 @@ bool SpalartAllmarasDDES<BasicTurbulenceModel>::read()
 {
     if (SpalartAllmarasDES<BasicTurbulenceModel>::read())
     {
-        fdFactor_.readIfPresent(this->coeffDict());
-        fdExponent_.readIfPresent(this->coeffDict());
+        Cd1_.readIfPresent(this->coeffDict());
+        Cd2_.readIfPresent(this->coeffDict());
+
         return true;
     }
     else

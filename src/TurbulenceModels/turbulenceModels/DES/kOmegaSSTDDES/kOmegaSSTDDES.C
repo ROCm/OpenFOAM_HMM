@@ -37,7 +37,6 @@ namespace LESModels
 template<class BasicTurbulenceModel>
 tmp<volScalarField> kOmegaSSTDDES<BasicTurbulenceModel>::rd
 (
-    const volScalarField& nur,
     const volScalarField& magGradU
 ) const
 {
@@ -45,7 +44,7 @@ tmp<volScalarField> kOmegaSSTDDES<BasicTurbulenceModel>::rd
     (
         min
         (
-            nur
+            this->nuEff()
            /(
                 max
                 (
@@ -69,7 +68,7 @@ tmp<volScalarField> kOmegaSSTDDES<BasicTurbulenceModel>::fd
     const volScalarField& magGradU
 ) const
 {
-    return 1 - tanh(pow(cd1_*rd(this->nuEff(), magGradU), cd2_));
+    return 1 - tanh(pow(Cd1_*rd(magGradU), Cd2_));
 }
 
 
@@ -87,9 +86,18 @@ tmp<volScalarField> kOmegaSSTDDES<BasicTurbulenceModel>::dTilda
 
     const volScalarField lRAS(sqrt(k)/(this->betaStar_*omega));
     const volScalarField lLES(CDES*this->delta());
-    const dimensionedScalar d0("SMALL", dimLength, SMALL);
 
-    return max(lRAS - fd(magGradU)*max(lRAS - lLES, d0), d0);
+    return max
+    (
+        lRAS 
+      - fd(magGradU)
+       *max
+        (
+            lRAS - lLES,
+            dimensionedScalar("zero", dimLength, 0)
+        ),
+        dimensionedScalar("small", dimLength, SMALL)
+    );
 }
 
 
@@ -120,20 +128,20 @@ kOmegaSSTDDES<BasicTurbulenceModel>::kOmegaSSTDDES
         type
     ),
 
-    cd1_
+    Cd1_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "cd1",
+            "Cd1",
             this->coeffDict_,
             20
         )
     ),
-    cd2_
+    Cd2_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "cd2",
+            "Cd2",
             this->coeffDict_,
             3
         )
@@ -153,8 +161,8 @@ bool kOmegaSSTDDES<BasicTurbulenceModel>::read()
 {
     if (kOmegaSSTDES<BasicTurbulenceModel>::read())
     {
-        cd1_.readIfPresent(this->coeffDict());
-        cd2_.readIfPresent(this->coeffDict());
+        Cd1_.readIfPresent(this->coeffDict());
+        Cd2_.readIfPresent(this->coeffDict());
 
         return true;
     }

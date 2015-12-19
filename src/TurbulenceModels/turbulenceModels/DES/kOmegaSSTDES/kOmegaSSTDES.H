@@ -37,6 +37,9 @@ Description
         39th AIAA Aerospace Sciences Meeting and Exhibit, Reno, NV
     \endverbatim
 
+    Note: DES constants CDES_kom and CDES_keps have been re-calibrated to 
+          OpenFOAM numerics via decaying isotropic turbulence test case
+
 SourceFiles
     kOmegaSSTDES.C
 

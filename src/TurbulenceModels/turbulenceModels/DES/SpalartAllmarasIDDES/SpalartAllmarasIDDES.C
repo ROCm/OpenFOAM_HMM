@@ -35,14 +35,23 @@ namespace LESModels
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
+const IDDESDelta& SpalartAllmarasIDDES<BasicTurbulenceModel>::setDelta() const
+{
+    if (!isA<IDDESDelta>(this->delta_()))
+    {
+        FatalErrorInFunction
+            << "The delta function must be set to a " << IDDESDelta::typeName
+            << " -based model" << exit(FatalError);
+    }
+
+    return refCast<const IDDESDelta>(this->delta_());
+}
+
+
+template<class BasicTurbulenceModel>
 tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::alpha() const
 {
-    // Equation 9 (plus limits)
-    return max
-    (
-        0.25 - this->y_/static_cast<const volScalarField&>(IDDESDelta_.hmax()),
-        scalar(-5)
-    );
+    return max(0.25 - this->y_/IDDESDelta_.hmax(), scalar(-5));
 }
 
 
@@ -52,8 +61,7 @@ tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::ft
     const volScalarField& magGradU
 ) const
 {
-    // Equation 13
-    return tanh(pow3(sqr(ct_)*rd(this->nut_, magGradU)));
+    return tanh(pow3(sqr(Ct_)*rd(this->nut_, magGradU)));
 }
 
 
@@ -63,8 +71,7 @@ tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::fl
     const volScalarField& magGradU
 ) const
 {
-    // Equation 13
-    return tanh(pow(sqr(cl_)*rd(this->nu(), magGradU), 10));
+    return tanh(pow(sqr(Cl_)*rd(this->nu(), magGradU), 10));
 }
 
 
@@ -75,18 +82,25 @@ tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::rd
     const volScalarField& magGradU
 ) const
 {
-    return min
+    tmp<volScalarField> tr
     (
-        nur
-       /(
-           max
-           (
-               magGradU,
-               dimensionedScalar("SMALL", magGradU.dimensions(), SMALL)
-           )*sqr(this->kappa_*this->y_)
-       ),
-       scalar(10)
+        min
+        (
+            nur
+           /(
+                max
+                (
+                    magGradU,
+                    dimensionedScalar("SMALL", magGradU.dimensions(), SMALL)
+                )
+                *sqr(this->kappa_*this->y_)
+            ),
+            scalar(10)
+        )
     );
+    tr().boundaryField() == 0.0;
+
+    return tr;
 }
 
 
@@ -98,8 +112,7 @@ tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::fdt
     const volScalarField& magGradU
 ) const
 {
-    // Related to equation 16
-    return 1 - tanh(pow3(8*rd(this->nuEff(), magGradU)));
+    return 1 - tanh(pow(Cdt1_*rd(this->nut_, magGradU), Cdt2_));
 }
 
 
@@ -111,31 +124,38 @@ tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::dTilda
     const volTensorField& gradU
 ) const
 {
+    const volScalarField magGradU(mag(gradU));
+    const volScalarField psi(this->psi(chi, fv1));
+
+    const volScalarField lRAS(this->y_);
+    const volScalarField lLES(psi*this->CDES_*this->delta());
+
     const volScalarField alpha(this->alpha());
     const volScalarField expTerm(exp(sqr(alpha)));
-    const volScalarField magGradU(mag(gradU));
 
-    // Equation 9
     tmp<volScalarField> fB = min(2*pow(expTerm, -9.0), scalar(1));
-
-    // Equation 11
     tmp<volScalarField> fe1 =
         2*(pos(alpha)*pow(expTerm, -11.09) + neg(alpha)*pow(expTerm, -9.0));
-
-    // Equation 12
     tmp<volScalarField> fe2 = 1 - max(ft(magGradU), fl(magGradU));
-
-    // Equation 10
-    const volScalarField psi(this->psi(chi, fv1));
     tmp<volScalarField> fe = max(fe1 - 1, scalar(0))*psi*fe2;
 
-    // Equation 16
     const volScalarField fdTilda(max(1 - fdt(magGradU), fB));
 
-    // Equation 17 (plus limits)
+    // Simplified formulation from Gritskevich et al. paper (2011) where fe = 0
+    /*
     return max
     (
-        fdTilda*(1 + fe)*this->y_ + (1 - fdTilda)*psi*this->CDES_*this->delta(),
+        fdTilda*lRAS 
+      + (1 - fdTilda)*lLES, 
+        dimensionedScalar("SMALL", dimLength, SMALL)
+    );
+    */
+
+    // Original formulation from Shur et al. paper (2008)
+    return max
+    (
+        fdTilda*(1 + fe)*lRAS 
+      + (1 - fdTilda)*lLES,
         dimensionedScalar("SMALL", dimLength, SMALL)
     );
 }
@@ -164,37 +184,53 @@ SpalartAllmarasIDDES<BasicTurbulenceModel>::SpalartAllmarasIDDES
         alphaRhoPhi,
         phi,
         transport,
-        propertiesName
+        propertiesName,
+        type
     ),
-    fwStar_
+
+    Cdt1_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "fwStar",
+            "Cdt1",
             this->coeffDict_,
-            0.424
+            8
         )
     ),
-    cl_
+    Cdt2_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "cl",
+            "Cdt2",
+            this->coeffDict_,
+            3
+        )
+    ),
+    Cl_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cl",
             this->coeffDict_,
             3.55
         )
     ),
-    ct_
+    Ct_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "ct",
+            "Ct",
             this->coeffDict_,
             1.63
         )
     ),
-    IDDESDelta_(refCast<IDDESDelta>(this->delta_()))
-{}
+    IDDESDelta_(setDelta())
+{
+    if (type == typeName)
+    {
+        this->printCoeffs(type);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -204,9 +240,10 @@ bool SpalartAllmarasIDDES<BasicTurbulenceModel>::read()
 {
     if (SpalartAllmarasDES<BasicTurbulenceModel>::read())
     {
-        fwStar_.readIfPresent(this->coeffDict());
-        cl_.readIfPresent(this->coeffDict());
-        ct_.readIfPresent(this->coeffDict());
+        Cdt1_.readIfPresent(this->coeffDict());
+        Cdt2_.readIfPresent(this->coeffDict());
+        Cl_.readIfPresent(this->coeffDict());
+        Ct_.readIfPresent(this->coeffDict());
 
         return true;
     }

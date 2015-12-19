@@ -81,7 +81,7 @@ class kOmegaSSTIDDES
         ) const;
 
         //- Delay function
-        tmp<volScalarField> fd(const volScalarField& maggradU) const;
+        tmp<volScalarField> fdt(const volScalarField& magGradU) const;
 
         // Disallow default bitwise copy construct and assignment
         kOmegaSSTIDDES(const kOmegaSSTIDDES&);
@@ -94,15 +94,16 @@ protected:
 
         // Model coefficients
 
-            dimensionedScalar cdt1_;
-            dimensionedScalar cdt2_;
-            dimensionedScalar cl_;
-            dimensionedScalar ct_;
+            dimensionedScalar Cdt1_;
+            dimensionedScalar Cdt2_;
+            dimensionedScalar Cl_;
+            dimensionedScalar Ct_;
 
         // Fields
 
             const IDDESDelta& IDDESDelta_;
 
+    // Protected Member Functions
 
         //- Length scale
         virtual tmp<volScalarField> dTilda
@@ -157,11 +158,13 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 #ifdef NoRepository
 #   include "kOmegaSSTIDDES.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 #endif
 
 // ************************************************************************* //

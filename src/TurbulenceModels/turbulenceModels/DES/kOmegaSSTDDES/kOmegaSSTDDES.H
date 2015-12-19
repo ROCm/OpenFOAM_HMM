@@ -66,13 +66,9 @@ class kOmegaSSTDDES
 {
     // Private Member Functions
 
-        tmp<volScalarField> rd
-        (
-            const volScalarField& nur,
-            const volScalarField& magGradU
-        ) const;
-
         tmp<volScalarField> fd(const volScalarField& magGradU) const;
+
+        tmp<volScalarField> rd(const volScalarField& magGradU) const;
 
         // Disallow default bitwise copy construct and assignment
         kOmegaSSTDDES(const kOmegaSSTDDES&);
@@ -85,8 +81,8 @@ protected:
 
         // Model coefficients
 
-            dimensionedScalar cd1_;
-            dimensionedScalar cd2_;
+            dimensionedScalar Cd1_;
+            dimensionedScalar Cd2_;
 
 
     // Protected Member Functions
@@ -144,11 +140,13 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 #ifdef NoRepository
 #   include "kOmegaSSTDDES.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 #endif
 
 // ************************************************************************* //
