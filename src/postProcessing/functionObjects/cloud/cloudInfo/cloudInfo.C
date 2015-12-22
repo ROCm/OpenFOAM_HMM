@@ -111,7 +111,6 @@ void Foam::cloudInfo::read(const dictionary& dict)
         if (writeToFile())
         {
             filePtrs_.setSize(cloudNames_.size());
-            filePtrs_.clear();
             forAll(filePtrs_, fileI)
             {
                 const word& cloudName = cloudNames_[fileI];
@@ -160,7 +159,7 @@ void Foam::cloudInfo::write()
             scalar D10 = cloud.Dij(1, 0);
             scalar D32 = cloud.Dij(3, 2);
 
-            if (Pstream::master())
+            if (Pstream::master() && writeToFile())
             {
                 writeTime(filePtrs_[cloudI]);
                 filePtrs_[cloudI]

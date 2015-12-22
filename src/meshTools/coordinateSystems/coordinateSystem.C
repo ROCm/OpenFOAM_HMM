@@ -57,7 +57,7 @@ Foam::coordinateSystem::coordinateSystem
     name_(name),
     note_(),
     origin_(cs.origin_),
-    R_(const_cast<coordinateRotation*>(&cs.R()))
+    R_(cs.R().clone())
 {}
 
 
@@ -71,7 +71,7 @@ Foam::coordinateSystem::coordinateSystem
     name_(name),
     note_(),
     origin_(origin),
-    R_(const_cast<coordinateRotation*>(&cr))
+    R_(cr.clone())
 {}
 
 

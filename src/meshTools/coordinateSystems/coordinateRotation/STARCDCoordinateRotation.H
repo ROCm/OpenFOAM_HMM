@@ -117,7 +117,23 @@ public:
         //- Construct from dictionary and mesh
         STARCDCoordinateRotation(const dictionary&, const objectRegistry&);
 
-         // Member Functions
+         //- Construct as copy
+        STARCDCoordinateRotation(const STARCDCoordinateRotation&);
+
+        //- Return clone
+        autoPtr<coordinateRotation> clone() const
+        {
+            return autoPtr<coordinateRotation>
+            (
+                new STARCDCoordinateRotation
+                (
+                    *this
+                )
+            );
+        }
+
+
+    // Member Functions
 
         //- Reset rotation to an identity rotation
         virtual void clear()

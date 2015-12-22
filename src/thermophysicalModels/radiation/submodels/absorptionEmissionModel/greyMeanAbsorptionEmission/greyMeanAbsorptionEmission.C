@@ -172,7 +172,6 @@ Foam::radiation::greyMeanAbsorptionEmission::greyMeanAbsorptionEmission
                 << iter.key() << nl
                 << " is not found " << nl
                 << exit(FatalError);
-
         }
     }
 }

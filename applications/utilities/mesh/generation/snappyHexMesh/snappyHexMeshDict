@@ -187,7 +187,8 @@ castellatedMeshControls
 
             //faceZone sphere;
             //cellZone sphere;
-            //cellZoneInside inside;  //outside/insidePoint
+            //cellZoneInside inside;    // outside/insidePoint
+            //insidePoint    (1 1 1);   // if (cellZoneInside == insidePoint)
 
             //- Optional specification of what to do with faceZone faces:
             //      internal : keep them as internal faces (default)
@@ -259,7 +260,12 @@ castellatedMeshControls
     }
 
 
-    // Limit refinement in geometric region
+    // Optionally limit refinement in geometric region. This limits all
+    // refinement (from features, refinementSurfaces, refinementRegions)
+    // in a given geometric region. The syntax is exactly the same as for the
+    // refinementRegions; the cell level now specifies the upper limit
+    // for any cell. Note that it does not override the refinement constraints
+    // given by the nCellsBetweenLevels settting.
     limitRegions
     {
     }
@@ -290,14 +296,25 @@ castellatedMeshControls
         locationInMesh (5 0.28 0.43);
 
         // Whether any faceZones (as specified in the refinementSurfaces)
-        // are only on the boundary of corresponding cellZones or also allow
-        // free-standing zone faces. Not used if there are no faceZones.
+        // are only on the boundary of corresponding cellZones.
+        // Not used if there are no faceZones. The behaviour has changed
+        // with respect to previous versions:
+        //  true  : all intersections with surface are put in faceZone
+        //          (same behaviour as before)
+        //  false : depending on the type of surface intersected:
+        //      - if intersecting surface has faceZone only (so no cellZone)
+        //        leave in faceZone (so behave as if set to true) (= changed
+        //        behaviour)
+        //      - if intersecting surface has faceZone and cellZone
+        //        remove if inbetween same cellZone or if on boundary
+        //        (same behaviour as before)
         allowFreeStandingZoneFaces true;
 
 
 
         // 2. Specify multiple locations with optional cellZones for the
-        //    regions. faceZones are automatically constructed from the
+        //    regions (use cellZone "none" to specify the unzoned cells)
+        //    FaceZones are automatically constructed from the
         //    names of the cellZones: <cellZoneA> _to_ <cellZoneB>
         //    where the cellZoneA is the lowest numbered cellZone (non-cellZone
         //    cells are in a special region called "none" which is always

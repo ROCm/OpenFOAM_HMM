@@ -34,6 +34,7 @@
         )/(mesh.magSf().boundaryField()*rhorAUf.boundaryField())
     );
 
+
     while (simple.correctNonOrthogonal())
     {
         fvScalarMatrix p_rghEqn
@@ -64,12 +65,27 @@
 
     p = p_rgh + rho*gh;
 
+    dimensionedScalar compressibility = fvc::domainIntegrate(psi);
+    bool compressible = (compressibility.value() > SMALL);
+
     // For closed-volume cases adjust the pressure level
     // to obey overall mass continuity
     if (closedVolume)
     {
-        p += (initialMass - fvc::domainIntegrate(psi*p))
-            /fvc::domainIntegrate(psi);
+        if(!compressible)
+        {
+            p += dimensionedScalar
+            (
+                "p",
+                p.dimensions(),
+                pRefValue - getRefCellValue(p, pRefCell)
+            );
+        }
+        else
+        {
+            p += (initialMass - fvc::domainIntegrate(psi*p))
+                /fvc::domainIntegrate(psi);
+        }
         p_rgh = p - rho*gh;
     }
 

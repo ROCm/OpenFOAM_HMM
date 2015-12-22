@@ -60,7 +60,7 @@ SourceFiles
 #define wideBandDiffusiveRadiationMixedFvPatchScalarField_H
 
 #include "mixedFvPatchFields.H"
-#include "radiationCoupledBase.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -74,15 +74,8 @@ namespace radiation
 
 class wideBandDiffusiveRadiationMixedFvPatchScalarField
 :
-    public mixedFvPatchScalarField,
-    public radiationCoupledBase
+    public mixedFvPatchScalarField
 {
-    // Private data
-
-        //- Name of temperature field
-        word TName_;
-
-
 public:
 
     //- Runtime type information
@@ -153,20 +146,6 @@ public:
 
     // Member functions
 
-        // Access
-
-            //- Return the temperature field name
-            const word& TName() const
-            {
-                return TName_;
-            }
-
-            //- Return reference to the temperature field name to allow
-            //  adjustment
-            word& TName()
-            {
-                return TName_;
-            }
 
 
         // Evaluation functions

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +55,7 @@ SourceFiles
 #ifndef velocityDampingConstraint_H
 #define velocityDampingConstraint_H
 
-#include "fvOption.H"
+#include "cellSetOption.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,7 +70,7 @@ namespace fv
 
 class velocityDampingConstraint
 :
-    public option
+    public cellSetOption
 {
 
 protected:
@@ -122,17 +122,10 @@ public:
 
     // Member Functions
 
-        virtual bool alwaysApply() const;
-
-
         // Set values directly
 
             //- Constrain vector matrix
-            virtual void setValue
-            (
-                fvMatrix<vector>& eqn,
-                const label fieldI
-            );
+            virtual void constrain(fvMatrix<vector>& eqn, const label fieldI);
 
 
         // I-O

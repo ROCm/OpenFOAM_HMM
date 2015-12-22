@@ -290,6 +290,10 @@ void calc
             mesh
         );
 
+        // Note: fvOptions not directly used but constructs fvOptions so
+        //       e.g. porosity modelling is effective for use in forces fo.
+        #include "createFvOptions.H"
+
         if (phi.dimensions() == dimVolume/dimTime)
         {
             IOobject turbulencePropertiesHeader
@@ -436,18 +440,23 @@ autoPtr<functionObjectList> readFunctionObjects
 
 int main(int argc, char *argv[])
 {
-    Foam::timeSelector::addOptions();
+    timeSelector::addOptions();
     #include "addRegionOption.H"
-    Foam::argList::addBoolOption
+    argList::addBoolOption
     (
         "noFlow",
         "suppress creating flow models"
+    );
+    argList::addBoolOption
+    (
+        "noRead",
+        "do not read any field data"
     );
     #include "addDictOption.H"
 
     #include "setRootCase.H"
     #include "createTime.H"
-    Foam::instantList timeDirs = Foam::timeSelector::select0(runTime, args);
+    instantList timeDirs = timeSelector::select0(runTime, args);
     #include "createNamedMesh.H"
 
     // Externally stored dictionary for functionObjectList

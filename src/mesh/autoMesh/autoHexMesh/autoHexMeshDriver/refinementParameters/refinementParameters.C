@@ -74,7 +74,14 @@ Foam::refinementParameters::refinementParameters(const dictionary& dict)
     if (dict.readIfPresent("locationInMesh", locationInMesh))
     {
         locationsInMesh_.append(locationInMesh);
-        zonesInMesh_.append("noneIfNotSet");// special name for no cellZone
+        zonesInMesh_.append("none");    // special name for no cellZone
+
+        if (dict.found("locationsInMesh"))
+        {
+            FatalIOErrorInFunction(dict)
+                << "Cannot both specify 'locationInMesh' and 'locationsInMesh'"
+                << exit(FatalIOError);
+        }
     }
 
     List<Tuple2<point, word> > pointsToZone;
@@ -88,6 +95,10 @@ Foam::refinementParameters::refinementParameters(const dictionary& dict)
         {
             locationsInMesh_[nZones] = pointsToZone[i].first();
             zonesInMesh_[nZones] = pointsToZone[i].second();
+            if (zonesInMesh_[nZones] == word::null)
+            {
+                zonesInMesh_[nZones] = "none";
+            }
             nZones++;
         }
     }
@@ -145,12 +156,7 @@ Foam::labelList Foam::refinementParameters::addCellZonesToMesh
     labelList zoneIDs(zonesInMesh_.size(), -1);
     forAll(zonesInMesh_, i)
     {
-        if
-        (
-            zonesInMesh_[i] != word::null
-         && zonesInMesh_[i] != "none"
-         && zonesInMesh_[i] != "noneIfNotSet"
-        )
+        if (zonesInMesh_[i] != word::null && zonesInMesh_[i] != "none")
         {
             zoneIDs[i] = surfaceZonesInfo::addCellZone
             (
@@ -235,8 +241,8 @@ Foam::labelList Foam::refinementParameters::zonedLocations
     {
         if
         (
-            zonesInMesh[i] == word::null
-        ||  zonesInMesh[i] != "noneIfNotSet"
+            zonesInMesh[i] != word::null
+         && zonesInMesh[i] != "none"
         )
         {
             indices.append(i);
@@ -257,8 +263,8 @@ Foam::labelList Foam::refinementParameters::unzonedLocations
     {
         if
         (
-            zonesInMesh[i] != word::null
-        &&  zonesInMesh[i] == "noneIfNotSet"
+            zonesInMesh[i] == word::null
+         || zonesInMesh[i] == "none"
         )
         {
             indices.append(i);

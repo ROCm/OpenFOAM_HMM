@@ -42,9 +42,10 @@ mixture
 
 radiation
 {
-    radiationModel  opaqueSolid;
+    radiationModel          opaqueSolid;
     absorptionEmissionModel none;
-    scatterModel    none;
+    scatterModel            none;
+    transmissivityModel     none;
 }
 
 // ************************************************************************* //

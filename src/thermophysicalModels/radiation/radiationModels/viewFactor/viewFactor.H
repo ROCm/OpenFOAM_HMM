@@ -50,8 +50,9 @@ SourceFiles
 #include "scalarMatrices.H"
 #include "globalIndex.H"
 #include "scalarListIOList.H"
-#include "mapDistribute.H"
 #include "volFields.H"
+#include "IOmapDistribute.H"
+#include "solarLoad.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,13 +69,21 @@ class viewFactor
 :
     public radiationModel
 {
+protected:
+
+// Static data
+
+    //- Static name for view factor walls
+    static const word viewFactorWalls;
+
+
     // Private data
 
         //- Agglomeration List
         labelListIOList finalAgglom_;
 
         //- Map distributed
-        autoPtr<mapDistribute> map_;
+        autoPtr<IOmapDistribute> map_;
 
         //- Coarse mesh
         singleCellFvMesh coarseMesh_;
@@ -105,6 +114,12 @@ class viewFactor
 
         //- Pivot Indices for LU decomposition
         labelList pivotIndices_;
+
+        //- Use Solar Load model
+        bool useSolarLoad_;
+
+        //- Solar load radiation model
+        autoPtr<solarLoad> solarLoad_;
 
 
     // Private Member Functions

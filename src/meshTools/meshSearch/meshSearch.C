@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -502,7 +502,11 @@ Foam::meshSearch::meshSearch
     mesh_(mesh),
     cellDecompMode_(cellDecompMode)
 {
-    if (cellDecompMode_ == polyMesh::FACE_DIAG_TRIS)
+    if
+    (
+        cellDecompMode_ == polyMesh::FACE_DIAG_TRIS
+     || cellDecompMode_ == polyMesh::CELL_TETS
+    )
     {
         // Force construction of face diagonals
         (void)mesh.tetBasePtIs();
@@ -523,7 +527,11 @@ Foam::meshSearch::meshSearch
 {
     overallBbPtr_.reset(new treeBoundBox(bb));
 
-    if (cellDecompMode_ == polyMesh::FACE_DIAG_TRIS)
+    if
+    (
+        cellDecompMode_ == polyMesh::FACE_DIAG_TRIS
+     || cellDecompMode_ == polyMesh::CELL_TETS
+    )
     {
         // Force construction of face diagonals
         (void)mesh.tetBasePtIs();
