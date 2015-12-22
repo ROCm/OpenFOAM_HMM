@@ -141,20 +141,16 @@ tmp<volScalarField> kOmegaSSTIDDES<BasicTurbulenceModel>::dTilda
     const volScalarField fdTilda(max(1 - fdt(magGradU), fB));
 
     // Simplified formulation from Gritskevich et al. paper (2011) where fe = 0
-    /*
-    return max
-    (
-        fdTilda*lRAS 
-      + (1 - fdTilda)*lLES, 
-        dimensionedScalar("SMALL", dimLength, SMALL)
-    );
-    */
+    // return max
+    // (
+    //     fdTilda*lRAS + (1 - fdTilda)*lLES,
+    //     dimensionedScalar("SMALL", dimLength, SMALL)
+    // );
 
     // Original formulation from Shur et al. paper (2008)
     return max
     (
-        fdTilda*(1 + fe)*lRAS 
-      + (1 - fdTilda)*lLES,
+        fdTilda*(1 + fe)*lRAS + (1 - fdTilda)*lLES,
         dimensionedScalar("SMALL", dimLength, SMALL)
     );
 }

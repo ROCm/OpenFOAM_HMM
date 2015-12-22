@@ -93,7 +93,7 @@ tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::rd
                     magGradU,
                     dimensionedScalar("SMALL", magGradU.dimensions(), SMALL)
                 )
-                *sqr(this->kappa_*this->y_)
+               *sqr(this->kappa_*this->y_)
             ),
             scalar(10)
         )
@@ -127,7 +127,7 @@ tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::dTilda
     const volScalarField magGradU(mag(gradU));
     const volScalarField psi(this->psi(chi, fv1));
 
-    const volScalarField lRAS(this->y_);
+    const volScalarField& lRAS(this->y_);
     const volScalarField lLES(psi*this->CDES_*this->delta());
 
     const volScalarField alpha(this->alpha());
@@ -142,20 +142,16 @@ tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::dTilda
     const volScalarField fdTilda(max(1 - fdt(magGradU), fB));
 
     // Simplified formulation from Gritskevich et al. paper (2011) where fe = 0
-    /*
-    return max
-    (
-        fdTilda*lRAS 
-      + (1 - fdTilda)*lLES, 
-        dimensionedScalar("SMALL", dimLength, SMALL)
-    );
-    */
+    // return max
+    // (
+    //     fdTilda*lRAS + (1 - fdTilda)*lLES,
+    //     dimensionedScalar("SMALL", dimLength, SMALL)
+    // );
 
     // Original formulation from Shur et al. paper (2008)
     return max
     (
-        fdTilda*(1 + fe)*lRAS 
-      + (1 - fdTilda)*lLES,
+        fdTilda*(1 + fe)*lRAS + (1 - fdTilda)*lLES,
         dimensionedScalar("SMALL", dimLength, SMALL)
     );
 }

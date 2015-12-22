@@ -82,7 +82,7 @@ tmp<volScalarField> SpalartAllmarasDDES<BasicTurbulenceModel>::dTilda
     const volTensorField& gradU
 ) const
 {
-    const volScalarField lRAS(this->y_);
+    const volScalarField& lRAS(this->y_);
     const volScalarField lLES(this->psi(chi, fv1)*this->CDES_*this->delta());
 
     return max

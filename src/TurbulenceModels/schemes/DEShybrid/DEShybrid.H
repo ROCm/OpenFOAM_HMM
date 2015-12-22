@@ -143,7 +143,7 @@ class DEShybrid
         //- Maximum bound for sigma (0 <= sigmaMax <= 1)
         scalar sigmaMax_;
 
-        //- constants of scheme
+        //- Scheme constants
         scalar CH1_;
         scalar CH2_;
         scalar CH3_;
@@ -174,11 +174,11 @@ class DEShybrid
             const volScalarField B
             (
                 CH3_*Omega*max(S, Omega)
-               /max(0.5*(sqr(S)+sqr(Omega)), sqr(1.0e-3/tau0_))
+               /max(0.5*(sqr(S) + sqr(Omega)), sqr(1.0e-3/tau0_))
             );
             const volScalarField K
             (
-                max(Foam::sqrt(0.5*(sqr(S)+sqr(Omega))), 0.1/tau0_)
+                max(Foam::sqrt(0.5*(sqr(S) + sqr(Omega))), 0.1/tau0_)
             );
 
             const volScalarField lTurb(Foam::sqrt(nuEff/(pow(0.09, 1.5)*K)));
@@ -188,11 +188,11 @@ class DEShybrid
                  CH2_*max(scalar(0), CDES_*delta/max(lTurb*g, 1.0e-15*L0_) - 0.5)
             );
 
-            const volScalarField IOhybrid
+            const volScalarField factor
             (
                 IOobject
                 (
-                    "DEShybridFactor",
+                    typeName + ":Factor",
                     this->mesh().time().timeName(),
                     this->mesh(),
                     IOobject::NO_READ,
@@ -200,17 +200,18 @@ class DEShybrid
                 ),
                 max(sigmaMax_*tanh(pow(A, CH1_)), sigmaMin_)
             );
-            if (this->mesh().time().outputTime())
-            {
-                IOhybrid.write();
-            }
+
+            // if (this->mesh().time().outputTime())
+            // {
+            //     factor.write();
+            // }
 
             return tmp<surfaceScalarField>
             (
                 new surfaceScalarField
                 (
                     vf.name() + "BlendingFactor",
-                    fvc::interpolate(IOhybrid)
+                    fvc::interpolate(factor)
                 )
             );
         }
