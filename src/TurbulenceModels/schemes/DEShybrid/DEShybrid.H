@@ -85,10 +85,16 @@ Description
     \endverbatim
 
 Notes
-    - Scheme 1 should be linear (or other low-dissipative schemes) which will
-      be used in the detached/vortex shedding regions.
-    - Scheme 2 should be an upwind/deferred correction/TVD scheme which will
-      be used in the free-stream/Euler/boundary layer regions.
+  - Scheme 1 should be linear (or other low-dissipative schemes) which will
+    be used in the detached/vortex shedding regions.
+  - Scheme 2 should be an upwind/deferred correction/TVD scheme which will
+    be used in the free-stream/Euler/boundary layer regions.
+  - the scheme is compiled into a separate library, and not available to
+    solvers by default.  In order to use the scheme, add the library as a
+    run-time loaded library in the \$FOAM\_CASE/system/controlDict
+    dictionary, e.g.:
+
+        libs ("libturbulenceModelSchemes.so");
 
 SourceFiles
     DEShybrid.C
