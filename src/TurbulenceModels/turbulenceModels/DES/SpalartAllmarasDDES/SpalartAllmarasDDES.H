@@ -81,11 +81,10 @@ protected:
 
     // Protected data
 
-        //- fd function pre-factor
-        dimensionedScalar fdFactor_;
+        // Model coefficients
 
-        //- fd function exponent
-        dimensionedScalar fdExponent_;
+            dimensionedScalar Cd1_;
+            dimensionedScalar Cd2_;
 
 
     // Protected Member Functions

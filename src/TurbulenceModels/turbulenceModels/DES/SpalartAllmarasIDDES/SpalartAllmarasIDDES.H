@@ -66,20 +66,10 @@ class SpalartAllmarasIDDES
 :
     public SpalartAllmarasDES<BasicTurbulenceModel>
 {
-    // Private data
-
-        // Model constants
-
-            dimensionedScalar fwStar_;
-            dimensionedScalar cl_;
-            dimensionedScalar ct_;
-
-        // Fields
-
-            const IDDESDelta& IDDESDelta_;
-
-
     // Private Member Functions
+
+        //- Check that the supplied delta is an IDDESDelta
+        const IDDESDelta& setDelta() const;
 
         tmp<volScalarField> alpha() const;
         tmp<volScalarField> ft(const volScalarField& magGradU) const;
@@ -100,6 +90,19 @@ class SpalartAllmarasIDDES
 
 
 protected:
+
+    // Protected data
+
+        // Model coefficients
+
+            dimensionedScalar Cdt1_;
+            dimensionedScalar Cdt2_;
+            dimensionedScalar Cl_;
+            dimensionedScalar Ct_;
+
+        // Fields
+
+            const IDDESDelta& IDDESDelta_;
 
     // Protected Member Functions
 

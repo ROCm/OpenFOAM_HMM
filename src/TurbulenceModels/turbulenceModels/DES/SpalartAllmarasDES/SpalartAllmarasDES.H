@@ -133,8 +133,6 @@ protected:
 
         tmp<volScalarField> ft2(const volScalarField& chi) const;
 
-        tmp<volScalarField> S(const volTensorField& gradU) const;
-
         tmp<volScalarField> Omega(const volTensorField& gradU) const;
 
         tmp<volScalarField> Stilda
