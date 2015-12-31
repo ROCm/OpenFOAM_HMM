@@ -119,7 +119,7 @@ void Foam::sampledSets::combineSampledSets
                 samplePts.name(),
                 samplePts.axis(),
                 List<point>(UIndirectList<point>(allPts, indexSets[setI])),
-                allCurveDist
+                sortedDist
             )
         );
     }
