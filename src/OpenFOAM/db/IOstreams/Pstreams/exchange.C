@@ -37,8 +37,8 @@ template<class Container, class T>
 void Foam::Pstream::exchange
 (
     const List<Container>& sendBufs,
+    const labelUList& recvSizes,
     List<Container>& recvBufs,
-    labelListList& sizes,
     const int tag,
     const label comm,
     const bool block
@@ -53,23 +53,20 @@ void Foam::Pstream::exchange
     if (sendBufs.size() != UPstream::nProcs(comm))
     {
         FatalErrorInFunction
-            << "Size of list:" << sendBufs.size()
+            << "Size of send buffer:" << sendBufs.size()
+            << " does not equal the number of processors:"
+            << UPstream::nProcs(comm)
+            << Foam::abort(FatalError);
+    }
+    if (recvSizes.size() != UPstream::nProcs(comm))
+    {
+        FatalErrorInFunction
+            << "Size of receive sizes:" << recvSizes.size()
             << " does not equal the number of processors:"
             << UPstream::nProcs(comm)
             << Foam::abort(FatalError);
     }
 
-    sizes.setSize(UPstream::nProcs(comm));
-    labelList& nsTransPs = sizes[UPstream::myProcNo(comm)];
-    nsTransPs.setSize(UPstream::nProcs(comm));
-
-    forAll(sendBufs, procI)
-    {
-        nsTransPs[procI] = sendBufs[procI].size();
-    }
-
-    // Send sizes across. Note: blocks.
-    combineReduce(sizes, UPstream::listEq(), tag, comm);
 
     recvBufs.setSize(sendBufs.size());
 
@@ -80,9 +77,9 @@ void Foam::Pstream::exchange
         // Set up receives
         // ~~~~~~~~~~~~~~~
 
-        forAll(sizes, procI)
+        forAll(recvSizes, procI)
         {
-            label nRecv = sizes[procI][UPstream::myProcNo(comm)];
+            label nRecv = recvSizes[procI];
 
             if (procI != Pstream::myProcNo(comm) && nRecv > 0)
             {
@@ -141,6 +138,36 @@ void Foam::Pstream::exchange
 
     // Do myself
     recvBufs[Pstream::myProcNo(comm)] = sendBufs[Pstream::myProcNo(comm)];
+}
+
+
+template<class Container, class T>
+void Foam::Pstream::exchange
+(
+    const List<Container>& sendBufs,
+    List<Container>& recvBufs,
+    const int tag,
+    const label comm,
+    const bool block
+)
+{
+    labelList sendSizes(sendBufs.size());
+    forAll(sendBufs, procI)
+    {
+        sendSizes[procI] = sendBufs[procI].size();
+    }
+    labelList recvSizes(sendBufs.size());
+    UPstream::exchange(sendSizes.begin(), recvSizes.begin(), comm);
+
+    exchange<Container, T>
+    (
+        sendBufs,
+        recvSizes,
+        recvBufs,
+        tag,
+        comm,
+        block
+    );
 }
 
 

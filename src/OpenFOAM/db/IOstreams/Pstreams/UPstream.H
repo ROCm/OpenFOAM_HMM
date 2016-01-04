@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -347,6 +347,18 @@ public:
         //- Initialisation function called from main
         //  Spawns slave processes and initialises inter-communication
         static bool init(int& argc, char**& argv);
+
+        //- Exchange single integer to/from all processors in communicator
+        //  sendBuf, recvBuf need to be sized with number of processors in
+        //  communicstor. Sets recvBuf to whatever sendBuf on sending processor
+        //  is
+        static void exchange
+        (
+            int* sendBuf,
+            int* recvBuf,
+            const label comm = UPstream::worldComm
+        );
+
 
         // Non-blocking comms
 

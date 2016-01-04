@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -292,6 +292,41 @@ void Foam::reduce
     reduce(Value, bop, tag, communicator);
     requestID = -1;
 #endif
+}
+
+
+void Foam::UPstream::exchange
+(
+    int* sendBuf,
+    int* recvBuf,
+    const label communicator
+)
+{
+    if (!UPstream::parRun())
+    {
+        recvBuf[0] = sendBuf[0];
+    }
+    else
+    {
+        if
+        (
+            MPI_Alltoall
+            (
+                sendBuf,
+                1,
+                MPI_INT,
+                recvBuf,
+                1,
+                MPI_INT,
+                PstreamGlobals::MPICommunicators_[communicator]
+            )
+        )
+        {
+            FatalErrorInFunction
+                << "MPI_Alltoall failure"
+                << Foam::abort(FatalError);
+        }
+    }
 }
 
 

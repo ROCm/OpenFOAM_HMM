@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -303,16 +303,25 @@ public:
 
         // Exchange
 
-            //- Exchange data. Sends sendData, receives into recvData, sets
-            //  sizes (not bytes). sizes[p0][p1] is what processor p0 has
-            //  sent to p1. Continuous data only.
+            //- Exchange data. Sends sendData, receives into recvData. Gets
+            //  passed sizes to receive. Continuous data only.
             //  If block=true will wait for all transfers to finish.
+            template<class Container, class T>
+            static void exchange
+            (
+                const List<Container >& sendBufs,
+                const labelUList& recvSizes,
+                List<Container >& recvBufs,
+                const int tag = UPstream::msgType(),
+                const label comm = UPstream::worldComm,
+                const bool block = true
+            );
+
             template<class Container, class T>
             static void exchange
             (
                 const List<Container >&,
                 List<Container >&,
-                labelListList& sizes,
                 const int tag = UPstream::msgType(),
                 const label comm = UPstream::worldComm,
                 const bool block = true

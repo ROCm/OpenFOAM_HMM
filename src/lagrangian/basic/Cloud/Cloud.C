@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -321,24 +321,24 @@ void Foam::Cloud<ParticleType>::move(TrackData& td, const scalar trackTime)
         }
 
 
-        // Start sending. Sets number of bytes transferred
-        labelListList allNTrans(Pstream::nProcs());
-        pBufs.finishedSends(allNTrans);
+        // Start sending. Sets number of bytes received
+        labelList nRecv(Pstream::nProcs());
+        pBufs.finishedSends(nRecv);
 
 
         bool transfered = false;
 
-        forAll(allNTrans, i)
+        forAll(nRecv, i)
         {
-            forAll(allNTrans[i], j)
+            if (nRecv[i])
             {
-                if (allNTrans[i][j])
-                {
-                    transfered = true;
-                    break;
-                }
+                transfered = true;
+                break;
             }
         }
+
+        reduce(transfered, orOp<bool>());
+
 
         if (!transfered)
         {
@@ -350,7 +350,7 @@ void Foam::Cloud<ParticleType>::move(TrackData& td, const scalar trackTime)
         {
             label neighbProci = neighbourProcs[i];
 
-            label nRec = allNTrans[neighbProci][Pstream::myProcNo()];
+            label nRec = nRecv[neighbProci];
 
             if (nRec)
             {
