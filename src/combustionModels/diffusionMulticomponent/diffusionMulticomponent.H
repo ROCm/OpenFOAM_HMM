@@ -41,8 +41,8 @@ Description
             of each reaction. The distribtion has the input parameter 'sigma'
             for standard deviation.
 
-    The variable prob is multiplied by the factor: 1  + pow2(O2/oxydantRes),
-    where oxydantRes is the residual oxydant specified for each reaction.
+    The variable prob is multiplied by the factor: 1  + pow2(O2/oxidantRes),
+    where oxidantRes is the residual oxydant specified for each reaction.
 
     In the combustion properties dictionary:
 
@@ -54,7 +54,7 @@ Description
         YoxStream   (0.23 0.23);    // Default to 0.23
         YfStream    (1.0 1.0);      // Default to 1.0
         sigma       (0.02 0.02);    // Default to 0.02
-        oxydantRes  (0.025 0.005);
+        oxidantRes  (0.025 0.005);
         ftCorr      (0.0 0.0);      // Default to 0.0
         laminarIgn  false;          // Default false
     }
@@ -113,7 +113,7 @@ class diffusionMulticomponent
         wordList fuelNames_;
 
         //- List of oxydants for each reaction
-        wordList oxydantNames_;
+        wordList oxidantNames_;
 
         //- Heat of combustion [J/Kg]
         scalarList qFuel_;
@@ -134,7 +134,7 @@ class diffusionMulticomponent
         scalarList sigma_;
 
         //- Residual oxydaser
-        scalarList oxydantRes_;
+        scalarList oxidantRes_;
 
         //- ft stochiometric correction
         scalarList ftCorr_;

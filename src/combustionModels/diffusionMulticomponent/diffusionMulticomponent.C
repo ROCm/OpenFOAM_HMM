@@ -106,7 +106,7 @@ diffusionMulticomponent<CombThermoType, ThermoType>::init()
         const List<specieCoeffs>& rhs = reactions_[k].rhs();
 
         const label fuelIndex = species[fuelNames_[k]];
-        const label oxydantIndex = species[oxydantNames_[k]];
+        const label oxydantIndex = species[oxidantNames_[k]];
 
         const scalar Wu = specieThermo_[fuelIndex].W();
         const scalar Wox = specieThermo_[oxydantIndex].W();
@@ -169,14 +169,14 @@ diffusionMulticomponent
     RijPtr_(reactions_.size()),
     Ci_(reactions_.size(), 1.0),
     fuelNames_(this->coeffs().lookup("fuels")),
-    oxydantNames_(this->coeffs().lookup("oxydants")),
+    oxidantNames_(this->coeffs().lookup("oxydants")),
     qFuel_(reactions_.size()),
     stoicRatio_(reactions_.size()),
     s_(reactions_.size()),
     YoxStream_(reactions_.size(), 0.23),
     YfStream_(reactions_.size(), 1.0),
     sigma_(reactions_.size(), 0.02),
-    oxydantRes_(this->coeffs().lookup("oxydantRes")),
+    oxidantRes_(this->coeffs().lookup("oxidantRes")),
     ftCorr_(reactions_.size(), 0.0),
     alpha_(1),
     laminarIgn_(false)
@@ -275,7 +275,7 @@ diffusionMulticomponent<CombThermoType, ThermoType>::correct()
         for (label k=0; k < nReactions; k++)
         {
             const label fuelIndex = species[fuelNames_[k]];
-            const label oxydantIndex = species[oxydantNames_[k]];
+            const label oxydantIndex = species[oxidantNames_[k]];
 
             const volScalarField& Yfuel =
                 this->thermo().composition().Y(fuelIndex);
@@ -303,7 +303,7 @@ diffusionMulticomponent<CombThermoType, ThermoType>::correct()
             const volScalarField OAvailScaled
             (
                 "OAvailScaled",
-                Yox/max(oxydantRes_[k], 1e-3)
+                Yox/max(oxidantRes_[k], 1e-3)
             );
 
             const volScalarField preExp
@@ -499,7 +499,7 @@ diffusionMulticomponent<CombThermoType, ThermoType>::read()
     {
         this->coeffs().readIfPresent("Ci", Ci_);
         this->coeffs().readIfPresent("sigma", sigma_);
-        this->coeffs().readIfPresent("oxydantRes", oxydantRes_);
+        this->coeffs().readIfPresent("oxidantRes", oxidantRes_);
         this->coeffs().readIfPresent("ftCorr", ftCorr_);
         this->coeffs().readIfPresent("alpha", alpha_);
         this->coeffs().readIfPresent("laminarIgn", laminarIgn_);
