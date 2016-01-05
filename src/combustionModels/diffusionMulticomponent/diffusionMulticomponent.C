@@ -106,10 +106,10 @@ diffusionMulticomponent<CombThermoType, ThermoType>::init()
         const List<specieCoeffs>& rhs = reactions_[k].rhs();
 
         const label fuelIndex = species[fuelNames_[k]];
-        const label oxydantIndex = species[oxidantNames_[k]];
+        const label oxidantIndex = species[oxidantNames_[k]];
 
         const scalar Wu = specieThermo_[fuelIndex].W();
-        const scalar Wox = specieThermo_[oxydantIndex].W();
+        const scalar Wox = specieThermo_[oxidantIndex].W();
 
         forAll(lhs, i)
         {
@@ -130,7 +130,7 @@ diffusionMulticomponent<CombThermoType, ThermoType>::init()
         Info << "Fuel heat of combustion : " << qFuel_[k] << endl;
 
         s_[k] =
-            (Wox*mag(specieStoichCoeffs[oxydantIndex]))
+            (Wox*mag(specieStoichCoeffs[oxidantIndex]))
           / (Wu*mag(specieStoichCoeffs[fuelIndex]));
 
         Info << "stoichiometric oxygen-fuel ratio : " << s_[k] << endl;
@@ -169,7 +169,7 @@ diffusionMulticomponent
     RijPtr_(reactions_.size()),
     Ci_(reactions_.size(), 1.0),
     fuelNames_(this->coeffs().lookup("fuels")),
-    oxidantNames_(this->coeffs().lookup("oxydants")),
+    oxidantNames_(this->coeffs().lookup("oxidants")),
     qFuel_(reactions_.size()),
     stoicRatio_(reactions_.size()),
     s_(reactions_.size()),
@@ -275,13 +275,13 @@ diffusionMulticomponent<CombThermoType, ThermoType>::correct()
         for (label k=0; k < nReactions; k++)
         {
             const label fuelIndex = species[fuelNames_[k]];
-            const label oxydantIndex = species[oxidantNames_[k]];
+            const label oxidantIndex = species[oxidantNames_[k]];
 
             const volScalarField& Yfuel =
                 this->thermo().composition().Y(fuelIndex);
 
             const volScalarField& Yox =
-                this->thermo().composition().Y(oxydantIndex);
+                this->thermo().composition().Y(oxidantIndex);
 
             const volScalarField ft
             (
