@@ -35,11 +35,11 @@ diffusionMulticomponentCoeffs
 {
     Ci          (1.0 1.5);
     fuels       (CH4 CO);
-    oxydants    (O2 O2);
+    oxidants    (O2 O2);
     YoxStream   (0.23 0.23);
     YfStream    (1.0 1.0);
     sigma       (0.02 0.02);
-    oxydantRes  (0.015 0.005);
+    oxidantRes  (0.015 0.005);
     ftCorr      (0  0);
     laminarIgn  false;
 }

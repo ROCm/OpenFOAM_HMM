@@ -119,6 +119,8 @@ functions
         lRef            1.42;
         Aref            0.75;
     }
+
+    #include "runtimePostProcessing"
 }
 
 

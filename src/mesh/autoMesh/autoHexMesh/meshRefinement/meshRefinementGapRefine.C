@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -199,7 +199,11 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
                 const point& surfPt = ccHit1[i].hitPoint();
 
                 label own = mesh_.faceOwner()[faceI];
-                if (cellToCompact[own] != -1)
+                if
+                (
+                    cellToCompact[own] != -1
+                 && shellGapInfo[cellToCompact[own]][2] > 0
+                )
                 {
                     // Combine info from shell and surface
                     label compactI = cellToCompact[own];
@@ -243,7 +247,11 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
                 if (mesh_.isInternalFace(faceI))
                 {
                     label nei = mesh_.faceNeighbour()[faceI];
-                    if (cellToCompact[nei] != -1)
+                    if
+                    (
+                        cellToCompact[nei] != -1
+                     && shellGapInfo[cellToCompact[nei]][2] > 0
+                    )
                     {
                         // Combine info from shell and surface
                         label compactI = cellToCompact[nei];
@@ -293,7 +301,11 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
                     // this side...
                     label bFaceI = faceI - mesh_.nInternalFaces();
 
-                    if (bFaceToCompact[bFaceI] != -1)
+                    if
+                    (
+                        bFaceToCompact[bFaceI] != -1
+                     && shellGapInfo[bFaceToCompact[bFaceI]][2] > 0
+                    )
                     {
                         // Combine info from shell and surface
                         label compactI = bFaceToCompact[bFaceI];
@@ -685,7 +697,7 @@ Foam::label Foam::meshRefinement::generateRays
 {
     label nOldRays = start.size();
 
-    if (cLevel >= gapInfo[1] && cLevel < gapInfo[2])
+    if (cLevel >= gapInfo[1] && cLevel < gapInfo[2] && gapInfo[0] > 0)
     {
         scalar cellSize = meshCutter_.level0EdgeLength()/pow(2.0, cLevel);
 
@@ -801,7 +813,7 @@ Foam::label Foam::meshRefinement::generateRays
 
     label nOldRays = start.size();
 
-    if (cLevel >= gapInfo[1] && cLevel < gapInfo[2])
+    if (cLevel >= gapInfo[1] && cLevel < gapInfo[2] && gapInfo[0] > 0)
     {
         scalar cellSize = meshCutter_.level0EdgeLength()/pow(2.0, cLevel);
 

@@ -207,10 +207,10 @@ class DEShybrid
                 max(sigmaMax_*tanh(pow(A, CH1_)), sigmaMin_)
             );
 
-            // if (this->mesh().time().outputTime())
-            // {
-            //     factor.write();
-            // }
+            if (blendedSchemeBaseName::debug)
+            {
+                factor.write();
+            }
 
             return tmp<surfaceScalarField>
             (
