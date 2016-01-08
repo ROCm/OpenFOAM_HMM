@@ -23,7 +23,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\defgroup grpDESTurbulence DES
+\defgroup grpDESTurbulence DES turbulence
 @{
     \ingroup grpTurbulence
     This group contains DES turbulence models.

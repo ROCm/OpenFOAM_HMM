@@ -23,13 +23,13 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\defgroup grpTurbulenceBoundaryConditions turbulence boundary conditions
+\defgroup grpTurbulenceBoundaryConditions Turbulence boundary conditions
 @{
     \ingroup grpTurbulence
     This group contains turbulence model boundary conditions
 @}
 
-\defgroup grpWallFunctions wall functions
+\defgroup grpWallFunctions Wall functions
 @{
     \ingroup grpTurbulenceBoundaryConditions
     This group contains turbulence model wall functions

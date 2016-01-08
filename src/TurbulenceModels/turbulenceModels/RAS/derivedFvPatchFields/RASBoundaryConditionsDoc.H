@@ -29,11 +29,4 @@ License
     This group contains RAS turbulence model boundary conditions
 @}
 
-\defgroup grpWallFunctions RAS wall functions
-@{
-    \ingroup grpRASBoundaryConditions
-    This group contains RAS turbulence model wall functions
-@}
-
-
 \*---------------------------------------------------------------------------*/
