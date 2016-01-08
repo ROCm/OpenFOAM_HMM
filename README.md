@@ -17,7 +17,7 @@ OpenCFD Limited, owner of the OpenFOAM Trademark, has granted the use of the Tra
 # Useful Links
 - [Download and installation instructions](http://www.openfoam.com/releases)
 - [Documentation](http://www.openfoam.com/documentation)
-- [Reporting bugsissues (including bugs/suggestions/feature requests) in OpenFOAM+](http://www.openfoam.com/???)
+- [Reporting bugs/issues (including bugs/suggestions/feature requests) in OpenFOAM+](http://www.openfoam.com/???)
 - [Collaborative and Community-based Developments](http://www.openfoam.com/development/community-projects.php)
 - [Contacting OpenCFD](http://www.openfoam.com/contact)
 
