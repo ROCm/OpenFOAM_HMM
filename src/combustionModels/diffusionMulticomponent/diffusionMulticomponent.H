@@ -35,14 +35,15 @@ Description
 
     where:
 
-    D :     is a model constant.
-    muEff : is the effective turbulent diffusivity
-    prob :  is a Gaussian shaped distribution around the stoichiometric value
-            of each reaction. The distribtion has the input parameter 'sigma'
-            for standard deviation.
+    D :     is a model dynamic constant defined as C*f02 where:
+            C is a model constant
+            f02 = 1  + sqr(O2/oxidantRes), oxidantRes is an user input
 
-    The variable prob is multiplied by the factor: 1  + pow2(O2/oxydantRes),
-    where oxydantRes is the residual oxydant specified for each reaction.
+    muEff : is the effective turbulent viscosity
+    prob :  is a normalized Gaussian shaped distribution around the stoichiometric
+            value of each reaction. The distribtion is controled by 'sigma'
+            for standard deviation and ftCorr for correction of the stoichiometric
+            value.
 
     In the combustion properties dictionary:
 
@@ -50,21 +51,14 @@ Description
     {
         Ci          (1.0 1.0);      // Default to 1
         fuels       (CH4 CO);
-        oxydants    (O2 O2);
+        oxidants    (O2 O2);
         YoxStream   (0.23 0.23);    // Default to 0.23
         YfStream    (1.0 1.0);      // Default to 1.0
         sigma       (0.02 0.02);    // Default to 0.02
-        oxydantRes  (0.025 0.005);
+        oxidantRes  (0.025 0.005);
         ftCorr      (0.0 0.0);      // Default to 0.0
         laminarIgn  false;          // Default false
     }
-
-    ftCorr is used to shift the location of the flame and corrects the
-    stochimetric mixture value when the mesh resolution is not enough
-    to resolve the combustion zone.
-
-    NOTE: Optionally the switch 'laminarIgn' can be used to ignite the mixture
-    using laminar combustion.
 
 
 SourceFiles
@@ -112,8 +106,8 @@ class diffusionMulticomponent
         //- List of fuels for each reaction
         wordList fuelNames_;
 
-        //- List of oxydants for each reaction
-        wordList oxydantNames_;
+        //- List of oxidants for each reaction
+        wordList oxidantNames_;
 
         //- Heat of combustion [J/Kg]
         scalarList qFuel_;
@@ -134,7 +128,7 @@ class diffusionMulticomponent
         scalarList sigma_;
 
         //- Residual oxydaser
-        scalarList oxydantRes_;
+        scalarList oxidantRes_;
 
         //- ft stochiometric correction
         scalarList ftCorr_;

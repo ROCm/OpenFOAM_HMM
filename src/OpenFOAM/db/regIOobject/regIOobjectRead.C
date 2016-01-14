@@ -289,7 +289,7 @@ bool Foam::regIOobject::readIfModified()
         if (modified())
         {
             const fileName& fName = time().getFile(watchIndex_);
-            Pout<< "regIOobject::readIfModified() : " << nl
+            Info<< "regIOobject::readIfModified() : " << nl
                 << "    Re-reading object " << name()
                 << " from file " << fName << endl;
             return read();

@@ -86,13 +86,13 @@ div.navtab {
 /* @group Link Styling */
 
 a {
-	color: rgb(85,144,112);
+	color: #153788;
 	font-weight: normal;
 	text-decoration: none;
 }
 
 .contents a:visited {
-	color: rgb(85,144,112);
+	color: #1b77c5;
 }
 
 a:hover {
@@ -546,7 +546,7 @@ table.doxtable {
 }
 
 table.doxtable td, table.doxtable th {
-	border: 1px solid rgb(85,144,112);
+	border: 1px solid #153788;
 	padding: 3px 7px 2px;
 }
 

@@ -86,15 +86,34 @@ tr.memlist
 }
 
 .OFTable th {
+    height:20px;
     text-align: left;
     padding: 5px;
     border-bottom: 2px solid rgb(175,175,175);
 }
 
-.OFTable td {
+.OFTable tr td {
+    height:20px;
     padding-left: 5px;
 }
 
+.OFPlainTable {
+    border: 0px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+/*    background-color: #F0F0F0; */
+/*    padding: 3px 7px 2px; */
+}
+
+.OFPlainTable th {
+    height: 20px;
+    text-align: left;
+/*    padding: 5px; */
+}
+
+.OFPlainTable tr td {
+    height: 20px;
+    padding-left: 5px;
 div.line,
 span.comment,
 span.keyword,

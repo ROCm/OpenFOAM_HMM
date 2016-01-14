@@ -33,12 +33,12 @@ License
     and academic organisations.  OpenFOAM has an extensive range of features to
     solve anything from complex fluid flows involving chemical reactions,
     turbulence and heat transfer, to solid dynamics and electromagnetics.
-    <a href="http://www.openfoam.com/features">More ...</a>
+    <a href="http://www.openfoam.com/documentation">More ...</a>
 
 
 \section layout Code Layout
 
-    The OpenFOAM source code comprises of four main components:
+    The OpenFOAM source code has four main components:
     - src:
         the core OpenFOAM source code
 
@@ -56,8 +56,9 @@ License
 
 \section usingTheCode Using the code
 
-    - \subpage pagePostProcessing
+    - \subpage pageSolvers
     - \subpage pageBoundaryConditions
+    - \subpage pagePostProcessing
 
 
 \*---------------------------------------------------------------------------*/
