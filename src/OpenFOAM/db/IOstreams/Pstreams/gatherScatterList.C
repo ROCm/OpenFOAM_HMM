@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -274,7 +274,11 @@ void Pstream::scatterList
         }
 
         // Send to my downstairs neighbours
-        forAll(myComm.below(), belowI)
+        // Note that the critical path is the one last in the 'below'
+        // processors which is why we receive from it last and send to it
+        // first (to give it maximum time to digest). Note that there will
+        // not be any conflict since it is a directed graph.
+        forAllReverse(myComm.below(), belowI)
         {
             label belowID = myComm.below()[belowI];
             const labelList& notBelowLeaves = comms[belowID].allNotBelow();

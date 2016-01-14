@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -111,8 +111,9 @@ void Foam::IOdictionary::readFile(const bool masterOnly)
             IOdictionary::readData(fromAbove);
         }
 
-        // Send to my downstairs neighbours
-        forAll(myComm.below(), belowI)
+        // Send to my downstairs neighbours. Note reverse order
+        // (see comment in gatherScatter.C)
+        forAllReverse(myComm.below(), belowI)
         {
             if (debug)
             {

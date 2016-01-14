@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -222,8 +222,9 @@ void Pstream::combineScatter
             }
         }
 
-        // Send to my downstairs neighbours
-        forAll(myComm.below(), belowI)
+        // Send to my downstairs neighbours. Note reverse order (see comment in
+        // gatherScatter.C)
+        forAllReverse(myComm.below(), belowI)
         {
             label belowID = myComm.below()[belowI];
 
@@ -461,8 +462,9 @@ void Pstream::listCombineScatter
             }
         }
 
-        // Send to my downstairs neighbours
-        forAll(myComm.below(), belowI)
+        // Send to my downstairs neighbours. Note reverse order (see comment in
+        // gatherScatter.C)
+        forAllReverse(myComm.below(), belowI)
         {
             label belowID = myComm.below()[belowI];
 
@@ -665,8 +667,9 @@ void Pstream::mapCombineScatter
             }
         }
 
-        // Send to my downstairs neighbours
-        forAll(myComm.below(), belowI)
+        // Send to my downstairs neighbours. Note reverse order (see comment in
+        // gatherScatter.C)
+        forAllReverse(myComm.below(), belowI)
         {
             label belowID = myComm.below()[belowI];
 
