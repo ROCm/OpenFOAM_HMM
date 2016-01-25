@@ -584,7 +584,10 @@ int main(int argc, char *argv[])
                     IOobject::MUST_READ
                 );
 
-                bool fieldExists = fieldObject.headerOk();
+                bool fieldExists = fieldObject.typeHeaderOk<IOField<scalar> >
+                (
+                    false
+                );
                 if (fieldType == scalarIOField::typeName)
                 {
                     ensightCloudField<scalar>

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -567,7 +567,13 @@ double* Foam::vtkPV3Foam::findTimes(int& nTimeSteps)
             if
             (
                 isFile(runTime.path()/timeName/meshDir_/"points")
-             && IOobject("points", timeName, meshDir_, runTime).headerOk()
+             && IOobject
+                (
+                    "points",
+                    timeName,
+                    meshDir_,
+                    runTime
+                ).typeHeaderOk<pointIOField>(true)
             )
             {
                 break;

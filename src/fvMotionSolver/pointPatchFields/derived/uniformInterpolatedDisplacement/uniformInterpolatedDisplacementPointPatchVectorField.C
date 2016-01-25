@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -82,7 +82,7 @@ uniformInterpolatedDisplacementPointPatchVectorField
             IOobject::NO_WRITE,
             false
         );
-        if (io.headerOk())
+        if (io.typeHeaderOk<pointVectorField>(false))
         {
             names.append(allTimes[i].name());
             values.append(allTimes[i].value());

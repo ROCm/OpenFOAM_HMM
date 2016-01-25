@@ -9,7 +9,7 @@
 
     surfaceScalarField* phiBPtr;
 
-    if (phiBHeader.headerOk())
+    if (phiBHeader.typeHeaderOk<surfaceScalarField>(true))
     {
         Info<< "Reading field phiB\n" << endl;
 

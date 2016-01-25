@@ -70,7 +70,11 @@ int main(int argc, char *argv[])
 
         // Check availability of tubulence fields
 
-        if (!IOobject("k", runTime.timeName(), mesh).headerOk())
+        if
+        (
+           !IOobject("k", runTime.timeName(), mesh).
+            typeHeaderOk<volScalarField>(true)
+        )
         {
             Info<< "\nWriting turbulence field k" << endl;
             k.write();
@@ -80,7 +84,11 @@ int main(int argc, char *argv[])
             Info<< "\nTurbulence k field already exists" << endl;
         }
 
-        if (!IOobject("epsilon", runTime.timeName(), mesh).headerOk())
+        if
+        (
+           !IOobject("epsilon", runTime.timeName(), mesh).
+            typeHeaderOk<volScalarField>(true)
+        )
         {
             Info<< "\nWriting turbulence field epsilon" << endl;
             epsilon.write();
@@ -90,7 +98,11 @@ int main(int argc, char *argv[])
             Info<< "\nTurbulence epsilon field already exists" << endl;
         }
 
-        if (!IOobject("R", runTime.timeName(), mesh).headerOk())
+        if
+        (
+           !IOobject("R", runTime.timeName(), mesh).
+            typeHeaderOk<volSymmTensorField>(true)
+        )
         {
             Info<< "\nWriting turbulence field R" << endl;
             R.write();
@@ -100,7 +112,11 @@ int main(int argc, char *argv[])
             Info<< "\nTurbulence R field already exists" << endl;
         }
 
-        if (!IOobject("omega", runTime.timeName(), mesh).headerOk())
+        if
+        (
+           !IOobject("omega", runTime.timeName(), mesh).
+            typeHeaderOk<volScalarField>(true)
+        )
         {
             const scalar Cmu = 0.09;
 

@@ -286,7 +286,10 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io)
     (
         checkFile
         (
-            searchableSurface::filePath(),
+            typeFilePath<searchableSurface>
+            (
+                static_cast<const searchableSurface&>(*this)
+            ),
             searchableSurface::objectPath()
         )
     ),
@@ -338,7 +341,10 @@ Foam::triSurfaceMesh::triSurfaceMesh
     (
         checkFile
         (
-            searchableSurface::filePath(),
+            typeFilePath<searchableSurface>
+            (
+                static_cast<const searchableSurface&>(*this)
+            ),
             searchableSurface::objectPath()
         )
     ),

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,6 +31,7 @@ Description
 
 #include "Time.H"
 #include "IOobject.H"
+#include "IOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,8 +43,9 @@ Foam::word Foam::Time::findInstance
     const word& stopInstance
 ) const
 {
-    // Note: if name is empty, just check the directory itself
-
+    // Note: - if name is empty, just check the directory itself
+    //       - check for an object with local file scope (so no looking up in
+    //         parent directory in case of parallel)
 
     const fileName tPath(path());
     const fileName dirPath(tPath/timeName()/dir);
@@ -56,7 +58,13 @@ Foam::word Foam::Time::findInstance
       :
         (
             isFile(dirPath/name)
-         && IOobject(name, timeName(), dir, *this).headerOk()
+         && IOobject
+            (
+                name,
+                timeName(),
+                dir,
+                *this
+            ).typeHeaderOk<IOList<label> >(false) // use object with local scope
         )
     )
     {
@@ -97,7 +105,13 @@ Foam::word Foam::Time::findInstance
           :
             (
                 isFile(tPath/ts[instanceI].name()/dir/name)
-             && IOobject(name, ts[instanceI].name(), dir, *this).headerOk()
+             && IOobject
+                (
+                    name,
+                    ts[instanceI].name(),
+                    dir,
+                    *this
+                ).typeHeaderOk<IOList<label> >(false)
             )
         )
         {
@@ -176,7 +190,13 @@ Foam::word Foam::Time::findInstance
       :
         (
             isFile(tPath/constant()/dir/name)
-         && IOobject(name, constant(), dir, *this).headerOk()
+         && IOobject
+            (
+                name,
+                constant(),
+                dir,
+                *this
+            ).typeHeaderOk<IOList<label> >(false)
         )
     )
     {

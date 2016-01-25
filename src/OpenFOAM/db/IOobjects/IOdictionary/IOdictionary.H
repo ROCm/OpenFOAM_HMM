@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,8 +39,7 @@ SourceFiles
 #ifndef IOdictionary_H
 #define IOdictionary_H
 
-#include "dictionary.H"
-#include "regIOobject.H"
+#include "baseIOdictionary.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,24 +52,10 @@ namespace Foam
 
 class IOdictionary
 :
-    public regIOobject,
-    public dictionary
+    public baseIOdictionary
 {
-    // Private data
-
-        static bool writeDictionaries;
-
-
-    // Private Member Functions
-
-        //- Read dictionary from file
-        void readFile(const bool);
-
 
 public:
-
-    TypeName("dictionary");
-
 
     // Constructors
 
@@ -90,22 +75,28 @@ public:
 
     // Member functions
 
-        //- Name function is needed to disambiguate those inherited
-        //  from regIOobject and dictionary
-        const word& name() const;
+        //- Is object global
+        virtual bool global() const
+        {
+            return true;
+        }
 
-        //- ReadData function required for regIOobject read operation
-        bool readData(Istream&);
+        //- Return complete path + object name if the file exists
+        //  either in the case/processor or case otherwise null
+        virtual fileName filePath() const
+        {
+            return globalFilePath();
+        }
 
-        //- WriteData function required for regIOobject write operation
-        bool writeData(Ostream&) const;
-
-
-    // Member operators
-
-        //- Assignment of other IOdictionary's entries to this IOdictionary
-        void operator=(const IOdictionary&);
 };
+
+
+//- Template function for obtaining global status
+template<>
+inline bool typeGlobal<IOdictionary>()
+{
+    return true;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

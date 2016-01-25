@@ -56,9 +56,15 @@ Foam::basicMultiComponentMixture::basicMultiComponentMixture
             IOobject::NO_READ
         );
 
-        // Check if field exists and can be read
-        if (header.headerOk())
+        // check if field exists and can be read
+        if (header.typeHeaderOk<volScalarField>(true))
         {
+            if (debug)
+            {
+                Info<< "basicMultiComponentMixture: reading " << species_[i]
+                    << endl;
+            }
+
             Y_.set
             (
                 i,
@@ -78,6 +84,12 @@ Foam::basicMultiComponentMixture::basicMultiComponentMixture
         }
         else
         {
+            if (debug)
+            {
+                Info<< "basicMultiComponentMixture: specie " << species_[i]
+                    << " not found - looking for Ydefault" << endl;
+            }
+
             volScalarField Ydefault
             (
                 IOobject

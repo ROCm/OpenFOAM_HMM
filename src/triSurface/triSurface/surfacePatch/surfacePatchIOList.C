@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,18 +55,8 @@ Foam::surfacePatchIOList::surfacePatchIOList
      || readOpt() == IOobject::MUST_READ_IF_MODIFIED
     )
     {
-        if (readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-        {
-            WarningIn
-            (
-                "surfacePatchIOList::surfacePatchIOList\n"
-                "(\n"
-                "    const IOobject&\n"
-                ")"
-            )   << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
-                << " does not support automatic rereading."
-                << endl;
-        }
+        // Warn for MUST_READ_IF_MODIFIED
+        warnNoRereading<surfacePatchIOList>();
 
 
         surfacePatchList& patches = *this;

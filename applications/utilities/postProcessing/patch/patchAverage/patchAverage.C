@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
         );
 
         // Check field exists
-        if (io.headerOk())
+        if (io.typeHeaderOk<volScalarField>(false))
         {
             mesh.readUpdate();
 

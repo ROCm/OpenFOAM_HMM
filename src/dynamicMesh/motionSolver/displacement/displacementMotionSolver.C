@@ -78,7 +78,7 @@ Foam::IOobject Foam::displacementMotionSolver::points0IO(const polyMesh& mesh)
             false
         );
 
-        if (io.headerOk())
+        if (io.typeHeaderOk<pointIOField>())
         {
             return io;
         }
@@ -140,16 +140,19 @@ Foam::displacementMotionSolver::displacementMotionSolver
         )   << "Number of points in mesh " << mesh.nPoints()
             << " differs from number of points " << points0_.size()
             << " read from file "
-            << IOobject
+            <<  typeFilePath<pointIOField>
                 (
-                    "points",
-                    time().constant(),
-                    mesh.meshDir(),
-                    mesh,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ).filePath()
+                    IOobject
+                    (
+                        "points",
+                        time().constant(),
+                        mesh.meshDir(),
+                        mesh,
+                        IOobject::MUST_READ,
+                        IOobject::NO_WRITE,
+                        false
+                    )
+                )
             << exit(FatalError);
     }
 }

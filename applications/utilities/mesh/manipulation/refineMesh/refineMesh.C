@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
             IOobject::MUST_READ
         );
 
-        if (!dictIO.headerOk())
+        if (!dictIO.typeHeaderOk<IOdictionary>(true))
         {
             FatalErrorIn(args.executable())
                 << "Cannot open specified refinement dictionary "
@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
             IOobject::MUST_READ
         );
 
-        if (dictIO.headerOk())
+        if (dictIO.typeHeaderOk<IOdictionary>(true))
         {
             Info<< "Refining according to " << dictName << nl << endl;
 

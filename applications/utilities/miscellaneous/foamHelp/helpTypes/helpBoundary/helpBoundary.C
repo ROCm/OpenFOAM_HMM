@@ -134,7 +134,8 @@ void Foam::helpTypes::helpBoundary::execute
             IOobject::MUST_READ
         );
 
-        if (fieldHeader.headerOk())
+        // Check for any type of volField
+        if (fieldHeader.typeHeaderOk<volScalarField>(false))
         {
             if (args.optionFound("fixedValue"))
             {

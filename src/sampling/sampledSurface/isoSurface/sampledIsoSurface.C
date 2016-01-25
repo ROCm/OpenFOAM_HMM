@@ -96,7 +96,7 @@ void Foam::sampledIsoSurface::getIsoFields() const
                 false
             );
 
-            if (vfHeader.headerOk())
+            if (vfHeader.typeHeaderOk<volScalarField>(true))
             {
                 storedVolFieldPtr_.reset
                 (

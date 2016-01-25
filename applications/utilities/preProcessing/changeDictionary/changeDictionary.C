@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -612,41 +612,51 @@ int main(int argc, char *argv[])
         }
         else
         {
-            // Read dictionary. (disable class type checking so we can load
-            // field)
+            // Read dictionary
+            // Note: disable class type checking so we can load field
             Info<< "Loading dictionary " << fieldName << endl;
             const word oldTypeName = IOdictionary::typeName;
             const_cast<word&>(IOdictionary::typeName) = word::null;
 
-            IOdictionary fieldDict
+            IOobject fieldHeader
             (
-                IOobject
-                (
-                    fieldName,
-                    instance,
-                    mesh,
-                    IOobject::MUST_READ_IF_MODIFIED,
-                    IOobject::NO_WRITE,
-                    false
-                )
+                fieldName,
+                instance,
+                mesh,
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE,
+                false
             );
 
-            const_cast<word&>(IOdictionary::typeName) = oldTypeName;
-            // Fake type back to what was in field
-            const_cast<word&>(fieldDict.type()) = fieldDict.headerClassName();
+            if (fieldHeader.typeHeaderOk<IOdictionary>(false))
+            {
+                IOdictionary fieldDict(fieldHeader);
 
-            Info<< "Loaded dictionary " << fieldName
-                << " with entries " << fieldDict.toc() << endl;
+                const_cast<word&>(IOdictionary::typeName) = oldTypeName;
 
-            // Get the replacement dictionary for the field
-            const dictionary& replaceDict = fieldIter().dict();
-            Info<< "Merging entries from " << replaceDict.toc() << endl;
+                // Fake type back to what was in field
+                const_cast<word&>(fieldDict.type()) =
+                    fieldDict.headerClassName();
 
-            // Merge the replacements in
-            merge(fieldDict, replaceDict, literalRE, patchGroups);
+                Info<< "Loaded dictionary " << fieldName
+                    << " with entries " << fieldDict.toc() << endl;
 
-            Info<< "Writing modified fieldDict " << fieldName << endl;
-            fieldDict.regIOobject::write();
+                // Get the replacement dictionary for the field
+                const dictionary& replaceDict = fieldIter().dict();
+                Info<< "Merging entries from " << replaceDict.toc() << endl;
+
+                // Merge the replacements in
+                merge(fieldDict, replaceDict, literalRE, patchGroups);
+
+                Info<< "Writing modified fieldDict " << fieldName << endl;
+                fieldDict.regIOobject::write();
+            }
+            else
+            {
+                WarningIn(args.executable())
+                    << "Requested field to change " << fieldName
+                    << " does not exist in " << fieldHeader.path() << endl;
+            }
         }
     }
 

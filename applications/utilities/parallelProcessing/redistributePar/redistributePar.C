@@ -1440,7 +1440,7 @@ void readProcAddressing
     //    mesh,
     //    IOobject::MUST_READ
     //);
-    //if (io.headerOk())
+    //if (io.typeHeaderOk<labelIOList>(true))
     //{
     //    Pout<< "Reading addressing from " << io.name() << " at "
     //        << mesh.facesInstance() << nl << endl;
@@ -1793,28 +1793,12 @@ void readLagrangian
 
     forAll(cloudNames, i)
     {
-        {
-            // Note: disable master-only reading of uniform/cloudProperties
-            regIOobject::fileCheckTypes oldCheckType =
-                regIOobject::fileModificationChecking;
-
-            if (oldCheckType == regIOobject::timeStampMaster)
-            {
-                regIOobject::fileModificationChecking = regIOobject::timeStamp;
-            }
-            else if (oldCheckType == regIOobject::inotifyMaster)
-            {
-                regIOobject::fileModificationChecking = regIOobject::inotify;
-            }
-
-            clouds.set
-            (
-                i,
-                new unmappedPassiveParticleCloud(mesh, cloudNames[i], false)
-            );
-
-            regIOobject::fileModificationChecking = oldCheckType;
-        }
+        //Pout<< "Loading cloud " << cloudNames[i] << endl;
+        clouds.set
+        (
+            i,
+            new unmappedPassiveParticleCloud(mesh, cloudNames[i], false)
+        );
 
 
         //forAllConstIter
@@ -2441,7 +2425,7 @@ int main(int argc, char *argv[])
                     meshSubDir,
                     runTime,
                     IOobject::READ_IF_PRESENT
-                ).headerOk();
+                ).typeHeaderOk<labelIOList>(true);
             }
             else
             {

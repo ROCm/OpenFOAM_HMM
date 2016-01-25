@@ -65,7 +65,7 @@ Foam::sixDoFRigidBodyMotionSolver::sixDoFRigidBodyMotionSolver
             mesh.time().timeName(),
             "uniform",
             mesh
-        ).headerOk()
+        ).typeHeaderOk<IOdictionary>(true)
       ? IOdictionary
         (
             IOobject

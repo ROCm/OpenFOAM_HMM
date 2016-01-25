@@ -58,7 +58,7 @@ pyrolysisChemistryModel
         );
 
         // check if field exists and can be read
-        if (header.headerOk())
+        if (header.typeHeaderOk<volScalarField>(true))
         {
             Ys0_.set
             (

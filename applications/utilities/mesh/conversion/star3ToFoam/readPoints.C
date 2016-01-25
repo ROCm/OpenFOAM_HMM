@@ -37,6 +37,11 @@ Foam::label Foam::starMesh::readVtxLabel(IFstream& is)
 
     for (int i=0; i<15; i++)
     {
+        if (!is.good())
+        {
+            return -1;
+        }
+
         is.get(lcs[i]);
     }
 
@@ -85,12 +90,10 @@ void Foam::starMesh::readPoints(const scalar scaleFactor)
 
         if (pointsFile.good())
         {
-            label pointLabel;
-
             maxLabel = -1;
             while (pointsFile)
             {
-                pointLabel = readVtxLabel(pointsFile);
+                label pointLabel = readVtxLabel(pointsFile);
 
                 if (!pointsFile) break;
 

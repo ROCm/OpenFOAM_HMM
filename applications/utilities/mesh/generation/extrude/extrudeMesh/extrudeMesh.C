@@ -96,7 +96,7 @@ void createDummyFvMeshFiles(const polyMesh& mesh, const word& regionName)
 
         Info<< "Testing:" << io.objectPath() << endl;
 
-        if (!io.headerOk())
+        if (!io.typeHeaderOk<IOdictionary>(false))
         {
             Info<< "Writing dummy " << regionName/io.name() << endl;
             dictionary dummyDict;
@@ -122,7 +122,7 @@ void createDummyFvMeshFiles(const polyMesh& mesh, const word& regionName)
             false
         );
 
-        if (!io.headerOk())
+        if (!io.typeHeaderOk<IOdictionary>(false))
         {
             Info<< "Writing dummy " << regionName/io.name() << endl;
             dictionary dummyDict;

@@ -400,7 +400,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
         const lduInterfacePtrsList interfaces =
             mesh(myMesh, otherMeshes, procMeshI).interfaces();
 
-        // Inialise all boundaries as merged
+        // Initialise all boundaries as merged
         boundaryMap[procMeshI].setSize(interfaces.size(), -1);
         boundaryFaceMap[procMeshI].setSize(interfaces.size());
 

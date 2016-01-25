@@ -601,7 +601,7 @@ autoPtr<mapPolyMesh> createRegionMesh
 
         Info<< "Testing:" << io.objectPath() << endl;
 
-        if (!io.headerOk())
+        if (!io.typeHeaderOk<IOdictionary>(true))
         // if (!exists(io.objectPath()))
         {
             Info<< "Writing dummy " << regionName/io.name() << endl;
@@ -628,7 +628,7 @@ autoPtr<mapPolyMesh> createRegionMesh
             false
         );
 
-        if (!io.headerOk())
+        if (!io.typeHeaderOk<IOdictionary>(true))
         //if (!exists(io.objectPath()))
         {
             Info<< "Writing dummy " << regionName/io.name() << endl;

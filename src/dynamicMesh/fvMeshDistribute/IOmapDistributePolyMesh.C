@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,16 +39,8 @@ Foam::IOmapDistributePolyMesh::IOmapDistributePolyMesh(const IOobject& io)
 :
     regIOobject(io)
 {
-    // Temporary warning
-    if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-    {
-        WarningIn
-        (
-            "IOmapDistributePolyMesh::IOmapDistributePolyMesh(const IOobject&)"
-        )   << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
-            << " does not support automatic rereading."
-            << endl;
-    }
+    // Warn for MUST_READ_IF_MODIFIED
+    warnNoRereading<IOmapDistributePolyMesh>();
 
     if
     (
@@ -73,16 +65,8 @@ Foam::IOmapDistributePolyMesh::IOmapDistributePolyMesh
 :
     regIOobject(io)
 {
-    // Temporary warning
-    if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-    {
-        WarningIn
-        (
-            "IOmapDistributePolyMesh::IOmapDistributePolyMesh(const IOobject&)"
-        )   << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
-            << " does not support automatic rereading."
-            << endl;
-    }
+    // Warn for MUST_READ_IF_MODIFIED
+    warnNoRereading<IOmapDistributePolyMesh>();
 
     if
     (

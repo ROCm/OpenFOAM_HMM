@@ -79,7 +79,7 @@
 
     autoPtr<volVectorField> HPtr;
 
-    if (Hheader.headerOk())
+    if (Hheader.typeHeaderOk<volVectorField>(true))
     {
         Info<< "\nReading field H\n" << endl;
 
@@ -97,7 +97,7 @@
 
     autoPtr<volVectorField> HdotGradHPtr;
 
-    if (HdotGradHheader.headerOk())
+    if (HdotGradHheader.typeHeaderOk<volVectorField>(true))
     {
         Info<< "Reading field HdotGradH" << endl;
 

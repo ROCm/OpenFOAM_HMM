@@ -54,7 +54,7 @@ Foam::MovingPhaseModel<BasePhaseModel>::phi(const volVectorField& U) const
         IOobject::NO_READ
     );
 
-    if (phiHeader.headerOk())
+    if (phiHeader.typeHeaderOk<surfaceScalarField>(true))
     {
         Info<< "Reading face flux field " << phiName << endl;
 

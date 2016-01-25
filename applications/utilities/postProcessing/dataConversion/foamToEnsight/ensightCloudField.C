@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,7 @@ License
 #include "IOField.H"
 #include "OFstream.H"
 #include "IOmanip.H"
+#include "ensightPTraits.H"
 
 using namespace Foam;
 
@@ -105,8 +106,10 @@ void ensightCloudField
                 v = pTraits<Type>::zero;
             }
 
-            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+            for (direction i=0; i < pTraits<Type>::nComponents; ++i)
             {
+                label cmpt = ensightPTraits<Type>::componentOrder[i];
+
                 ensightFile << setw(12) << component(v, cmpt);
                 if (++count % 6 == 0)
                 {

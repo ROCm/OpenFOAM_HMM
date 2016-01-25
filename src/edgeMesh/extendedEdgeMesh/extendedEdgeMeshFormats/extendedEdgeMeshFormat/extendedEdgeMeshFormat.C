@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,9 +24,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "extendedEdgeMeshFormat.H"
-#include "edgeMeshFormat.H"
 #include "IFstream.H"
 #include "Time.H"
+#include "extendedFeatureEdgeMesh.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -73,7 +73,7 @@ bool Foam::fileFormats::extendedEdgeMeshFormat::read
         false
     );
 
-    if (!io.headerOk())
+    if (!io.typeHeaderOk<extendedFeatureEdgeMesh>(false))
     {
         FatalErrorIn
         ("fileFormats::extendedEdgeMeshFormat::read(const fileName&)")
@@ -81,7 +81,9 @@ bool Foam::fileFormats::extendedEdgeMeshFormat::read
             << exit(FatalError);
     }
 
-    autoPtr<IFstream> isPtr(new IFstream(io.filePath()));
+    const fileName fName(typeFilePath<extendedFeatureEdgeMesh>(io));
+
+    autoPtr<IFstream> isPtr(new IFstream(fName));
     bool ok = false;
     if (isPtr().good())
     {

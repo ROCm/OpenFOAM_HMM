@@ -58,7 +58,11 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
     );
 
     // Check U and T exists
-    if (Uheader.headerOk() && Theader.headerOk())
+    if
+    (
+        Uheader.typeHeaderOk<volVectorField>(true)
+     && Theader.typeHeaderOk<volScalarField>(true)
+    )
     {
         autoPtr<volScalarField> MachPtr;
 
@@ -71,7 +75,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                 basicThermo::dictName,
                 runTime.constant(),
                 mesh
-            ).headerOk()
+            ).typeHeaderOk<IOdictionary>(false)
         )
         {
             // thermophysical Mach

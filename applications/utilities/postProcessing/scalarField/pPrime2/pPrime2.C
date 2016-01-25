@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
         );
 
         // Check p exists
-        if (pheader.headerOk())
+        if (pheader.typeHeaderOk<volScalarField>(true))
         {
             mesh.readUpdate();
 

@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,6 +42,7 @@ Note
 #include "polyMesh.H"
 #include "distributedTriSurfaceMesh.H"
 #include "mapDistribute.H"
+#include "localIOdictionary.H"
 
 using namespace Foam;
 
@@ -171,7 +172,8 @@ int main(int argc, char *argv[])
         IOobject::AUTO_WRITE
     );
 
-    const fileName actualPath(io.filePath());
+    // Look for file (using searchableSurface rules)
+    const fileName actualPath(typeFilePath<searchableSurface>(io));
     fileName localPath(actualPath);
     localPath.replace(runTime.rootPath() + '/', "");
 
@@ -193,7 +195,7 @@ int main(int argc, char *argv[])
         dict.add("distributionType", distType);
         dict.add("mergeDistance", SMALL);
 
-        IOdictionary ioDict
+        localIOdictionary ioDict
         (
             IOobject
             (
@@ -238,7 +240,6 @@ int main(int argc, char *argv[])
                 (
                     "faceCentres",                                  // name
                     surfMesh.searchableSurface::time().timeName(),  // instance
-                    surfMesh.searchableSurface::local(),    // local
                     surfMesh,
                     IOobject::NO_READ,
                     IOobject::AUTO_WRITE

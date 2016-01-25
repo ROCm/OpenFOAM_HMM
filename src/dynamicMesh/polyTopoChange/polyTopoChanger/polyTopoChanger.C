@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,14 +47,8 @@ void Foam::polyTopoChanger::readModifiers()
      || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
     )
     {
-        if (readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-        {
-            WarningIn("polyTopoChanger::readModifiers()")
-                << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
-                << " does not support automatic re-reading."
-                << endl;
-        }
-
+        // Warn for MUST_READ_IF_MODIFIED
+        warnNoRereading<polyTopoChanger>();
 
         PtrList<polyMeshModifier>& modifiers = *this;
 

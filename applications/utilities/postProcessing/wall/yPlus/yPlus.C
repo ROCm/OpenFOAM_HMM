@@ -149,7 +149,7 @@ void calcCompressibleYPlus
         IOobject::NO_WRITE
     );
 
-    if (!rhoHeader.headerOk())
+    if (!rhoHeader.typeHeaderOk<volScalarField>(true))
     {
         Info<< "    no rho field" << endl;
         return;
@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
             IOobject::NO_WRITE
         );
 
-        if (UHeader.headerOk())
+        if (UHeader.typeHeaderOk<volVectorField>(true))
         {
             Info<< "Reading field U\n" << endl;
             volVectorField U(UHeader, mesh);
@@ -228,7 +228,7 @@ int main(int argc, char *argv[])
                     basicThermo::dictName,
                     runTime.constant(),
                     mesh
-                ).headerOk()
+                ).typeHeaderOk<IOdictionary>(true)
             )
             {
                 calcCompressibleYPlus(mesh, runTime, U, yPlus);
