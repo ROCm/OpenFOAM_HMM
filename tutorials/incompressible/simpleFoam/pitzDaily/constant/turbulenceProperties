@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  plus                                  |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -21,7 +21,7 @@ RAS
 {
     // Tested with kEpsilon, realizableKE, kOmega, kOmegaSST, v2f,
     // ShihQuadraticKE, LienCubicKE.
-    RASModel        v2f;
+    RASModel        kEpsilon;
 
     turbulence      on;
 

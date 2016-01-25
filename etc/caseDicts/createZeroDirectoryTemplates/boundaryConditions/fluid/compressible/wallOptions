@@ -1,0 +1,70 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  plus                                  |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "templates";
+    object      wallOptions;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+wallFunction
+{
+    highReynolds
+    {
+        alphat
+        {
+            type        compressible::alphatWallFunction;
+            value       ${:VALUE.alphat};
+        }
+    }
+    lowReynolds
+    {
+        alphat
+        {
+            type        fixedValue;
+            value       uniform 0;
+        }
+    }
+}
+
+
+heatTransfer
+{
+    adiabatic
+    {
+        T
+        {
+            type        zeroGradient;
+        }
+    }
+    fixedTemperature
+    {
+        T
+        {
+            type        fixedValue;
+            value       ${:VALUE.T};
+        }
+    }
+    thermalCoupled
+    {
+        T
+        {
+            type        compressible::turbulentTemperatureCoupledBaffleMixed;
+            value       ${:VALUE.T};
+            Tnbr        T;
+            kappa       fluidThermo;
+            kappaName   none;
+        }
+    }
+}
+
+
+// ************************************************************************* //

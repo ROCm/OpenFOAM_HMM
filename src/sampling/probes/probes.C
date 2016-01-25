@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -108,7 +108,7 @@ void Foam::probes::findElements(const fvMesh& mesh)
         {
             if (Pstream::master())
             {
-                WarningIn("findElements::findElements(const fvMesh&)")
+                WarningInFunction
                     << "Did not find location " << location
                     << " in any cell. Skipping location." << endl;
             }
@@ -117,7 +117,7 @@ void Foam::probes::findElements(const fvMesh& mesh)
         {
             if (Pstream::master())
             {
-                WarningIn("probes::findElements(const fvMesh&)")
+                WarningInFunction
                     << "Did not find location " << location
                     << " in any face. Skipping location." << endl;
             }
@@ -127,13 +127,12 @@ void Foam::probes::findElements(const fvMesh& mesh)
             // Make sure location not on two domains.
             if (elementList_[probeI] != -1 && elementList_[probeI] != cellI)
             {
-                WarningIn("probes::findElements(const fvMesh&)")
+                WarningInFunction
                     << "Location " << location
                     << " seems to be on multiple domains:"
                     << " cell " << elementList_[probeI]
                     << " on my domain " << Pstream::myProcNo()
-                        << " and cell " << cellI << " on some other domain."
-                    << endl
+                    << " and cell " << cellI << " on some other domain." << endl
                     << "This might happen if the probe location is on"
                     << " a processor patch. Change the location slightly"
                     << " to prevent this." << endl;
@@ -141,13 +140,12 @@ void Foam::probes::findElements(const fvMesh& mesh)
 
             if (faceList_[probeI] != -1 && faceList_[probeI] != faceI)
             {
-                WarningIn("probes::findElements(const fvMesh&)")
+                WarningInFunction
                     << "Location " << location
                     << " seems to be on multiple domains:"
                     << " cell " << faceList_[probeI]
                     << " on my domain " << Pstream::myProcNo()
-                        << " and face " << faceI << " on some other domain."
-                    << endl
+                    << " and face " << faceI << " on some other domain." << endl
                     << "This might happen if the probe location is on"
                     << " a processor patch. Change the location slightly"
                     << " to prevent this." << endl;
@@ -265,6 +263,25 @@ Foam::label Foam::probes::prepare()
 }
 
 
+void Foam::probes::readDict(const dictionary& dict)
+{
+    dict.lookup("probeLocations") >> *this;
+    dict.lookup("fields") >> fieldSelection_;
+
+    dict.readIfPresent("fixedLocations", fixedLocations_);
+    if (dict.readIfPresent("interpolationScheme", interpolationScheme_))
+    {
+        if (!fixedLocations_ && interpolationScheme_ != "cell")
+        {
+            WarningInFunction
+                << "Only cell interpolation can be applied when "
+                << "not using fixedLocations. InterpolationScheme "
+                << "entry will be ignored";
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::probes::probes
@@ -272,7 +289,8 @@ Foam::probes::probes
     const word& name,
     const objectRegistry& obr,
     const dictionary& dict,
-    const bool loadFromFiles
+    const bool loadFromFiles,
+    const bool doFindElements
 )
 :
     pointField(0),
@@ -283,7 +301,18 @@ Foam::probes::probes
     fixedLocations_(true),
     interpolationScheme_("cell")
 {
-    read(dict);
+    // Read dictionary (but do not search for elements)
+    readDict(dict);
+
+    // Optionally find elements in constructor
+    if (doFindElements)
+    {
+        // Find the elements
+        findElements(mesh_);
+
+        // Open the probe streams
+        prepare();
+    }
 }
 
 
@@ -334,15 +363,15 @@ void Foam::probes::write()
 
 void Foam::probes::read(const dictionary& dict)
 {
-    dict.lookup("probeLocations") >> *this;
-    dict.lookup("fields") >> fieldSelection_;
+    readDict(dict);
 
+    // Find the elements
     dict.readIfPresent("fixedLocations", fixedLocations_);
     if (dict.readIfPresent("interpolationScheme", interpolationScheme_))
     {
         if (!fixedLocations_ && interpolationScheme_ != "cell")
         {
-            WarningIn("void Foam::probes::read(const dictionary&)")
+            WarningInFunction
                 << "Only cell interpolation can be applied when "
                 << "not using fixedLocations.  InterpolationScheme "
                 << "entry will be ignored";
@@ -352,6 +381,7 @@ void Foam::probes::read(const dictionary& dict)
     // Initialise cells to sample from supplied locations
     findElements(mesh_);
 
+    // Open the probe streams
     prepare();
 }
 
@@ -382,20 +412,28 @@ void Foam::probes::updateMesh(const mapPolyMesh& mpm)
             forAll(elementList_, i)
             {
                 label cellI = elementList_[i];
-                label newCellI = reverseMap[cellI];
-                if (newCellI == -1)
+                if (cellI != -1)
                 {
-                    // cell removed
-                }
-                else if (newCellI < -1)
-                {
-                    // cell merged
-                    elems.append(-newCellI - 2);
+                    label newCellI = reverseMap[cellI];
+                    if (newCellI == -1)
+                    {
+                        // cell removed
+                    }
+                    else if (newCellI < -1)
+                    {
+                        // cell merged
+                        elems.append(-newCellI - 2);
+                    }
+                    else
+                    {
+                        // valid new cell
+                        elems.append(newCellI);
+                    }
                 }
                 else
                 {
-                    // valid new cell
-                    elems.append(newCellI);
+                    // Keep -1 elements so the size stays the same
+                    elems.append(-1);
                 }
             }
 
@@ -410,20 +448,28 @@ void Foam::probes::updateMesh(const mapPolyMesh& mpm)
             forAll(faceList_, i)
             {
                 label faceI = faceList_[i];
-                label newFaceI = reverseMap[faceI];
-                if (newFaceI == -1)
+                if (faceI != -1)
                 {
-                    // face removed
-                }
-                else if (newFaceI < -1)
-                {
-                    // face merged
-                    elems.append(-newFaceI - 2);
+                    label newFaceI = reverseMap[faceI];
+                    if (newFaceI == -1)
+                    {
+                        // face removed
+                    }
+                    else if (newFaceI < -1)
+                    {
+                        // face merged
+                        elems.append(-newFaceI - 2);
+                    }
+                    else
+                    {
+                        // valid new face
+                        elems.append(newFaceI);
+                    }
                 }
                 else
                 {
-                    // valid new face
-                    elems.append(newFaceI);
+                    // Keep -1 elements
+                    elems.append(-1);
                 }
             }
 

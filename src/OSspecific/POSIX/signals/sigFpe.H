@@ -35,6 +35,10 @@ Description
         also set, this will cause usage of uninitialized scalars to trigger
         an abort.
 
+    Can be used either directly through the static member functions or
+    through the scope of the object (constructor sets trapping; destructor
+    restores original).
+
 SourceFiles
     sigFpe.C
 
@@ -72,6 +76,9 @@ class sigFpe
         //- Saved old signal trapping setting
         static struct sigaction oldAction_;
 
+        //- Flag to indicate floating point trapping is enabled
+        static bool sigFpeActive_;
+
 
     // Static data members
 
@@ -98,7 +105,10 @@ public:
 
         //- Activate SIGFPE signal handler when FOAM_SIGFPE is %set
         //  Fill memory with NaN when FOAM_SETNAN is %set
-        void set(const bool verbose);
+        static void set(const bool verbose);
+
+        //- Deactivate SIGFPE signal handler and NaN memory initialisation
+        static void unset(const bool verbose);
 
         //- Flag to indicate mallocNan is enabled
         static bool mallocNanActive_;

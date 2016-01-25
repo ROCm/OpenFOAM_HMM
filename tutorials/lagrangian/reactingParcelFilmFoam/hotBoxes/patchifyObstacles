@@ -2,8 +2,8 @@
 #--------------------------------*- C++ -*------------------------------------#
 # =========                 |                                                 #
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           #
-#  \\    /   O peration     | Version:  dev                                   #
-#   \\  /    A nd           | Web:      www.OpenFOAM.org                      #
+#  \\    /   O peration     | Version:  plus                                  #
+#   \\  /    A nd           | Web:      www.OpenFOAM.com                      #
 #    \\/     M anipulation  |                                                 #
 #-----------------------------------------------------------------------------#
 cd ${0%/*} || exit 1    # Run from this directory
@@ -71,7 +71,7 @@ for xi in $(seq 1 1 $nx); do
            echo "processing cube $n"
 
            pad=""
-           if [ $n -lt 10]; then
+           if [ $n -lt 10 ]; then
                pad="0"
            fi
 

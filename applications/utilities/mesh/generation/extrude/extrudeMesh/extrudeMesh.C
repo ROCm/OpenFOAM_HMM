@@ -138,7 +138,7 @@ label findPatchID(const polyBoundaryMesh& patches, const word& name)
 
     if (patchID == -1)
     {
-        FatalErrorIn("findPatchID(const polyBoundaryMesh&, const word&)")
+        FatalErrorInFunction
             << "Cannot find patch " << name
             << " in the source mesh.\n"
             << "Valid patch names are " << patches.names()
@@ -343,7 +343,7 @@ int main(int argc, char *argv[])
     {
         if (flipNormals && mode == MESH)
         {
-            FatalErrorIn(args.executable())
+            FatalErrorInFunction
                 << "Flipping normals not supported for extrusions from mesh."
                 << exit(FatalError);
         }
@@ -961,7 +961,7 @@ int main(int argc, char *argv[])
     {
         if (mode == MESH)
         {
-            FatalErrorIn(args.executable())
+            FatalErrorInFunction
                 << "Cannot stitch front and back of extrusion since"
                 << " in 'mesh' mode (extrusion appended to mesh)."
                 << exit(FatalError);
@@ -974,7 +974,7 @@ int main(int argc, char *argv[])
 
         if (frontPatchFaces.size() != backPatchFaces.size())
         {
-            FatalErrorIn(args.executable())
+            FatalErrorInFunction
                 << "Differing number of faces on front ("
                 << frontPatchFaces.size() << ") and back ("
                 << backPatchFaces.size() << ")"
@@ -1061,7 +1061,7 @@ int main(int argc, char *argv[])
 
     if (!mesh.write())
     {
-        FatalErrorIn(args.executable()) << "Failed writing mesh"
+        FatalErrorInFunction
             << exit(FatalError);
     }
 
@@ -1074,7 +1074,7 @@ int main(int argc, char *argv[])
             << nl << endl;
         if (!addedCells.write())
         {
-            FatalErrorIn(args.executable()) << "Failed writing cellSet"
+            FatalErrorInFunction
                 << addedCells.name()
                 << exit(FatalError);
         }

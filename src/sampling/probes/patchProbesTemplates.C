@@ -208,7 +208,7 @@ Foam::patchProbes::sample
 
     forAll(*this, probeI)
     {
-        label faceI = elementList_[probeI];
+        label faceI = faceList_[probeI];
 
         if (faceI >= 0)
         {
@@ -259,7 +259,7 @@ Foam::patchProbes::sample
 
     forAll(*this, probeI)
     {
-        label faceI = elementList_[probeI];
+        label faceI = faceList_[probeI];
 
         if (faceI >= 0)
         {
@@ -274,4 +274,6 @@ Foam::patchProbes::sample
 
     return tValues;
 }
+
+
 // ************************************************************************* //

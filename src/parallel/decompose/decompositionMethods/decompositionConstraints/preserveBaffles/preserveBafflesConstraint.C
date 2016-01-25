@@ -132,11 +132,8 @@ void Foam::decompositionConstraints::preserveBafflesConstraint::add
             {
                 label p0Slave = faceToFace[p[0]];
                 label p1Slave = faceToFace[p[1]];
-                IOWarningIn
-                (
-                    "preserveBafflesConstraint::add(..)",
-                    coeffDict_
-                )   << "When adding baffle between faces "
+                IOWarningInFunction(coeffDict_)
+                    << "When adding baffle between faces "
                     << p[0] << " at " << mesh.faceCentres()[p[0]]
                     << " and "
                     << p[1] << " at " << mesh.faceCentres()[p[1]]

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -146,10 +146,8 @@ Foam::label Foam::meshSearch::findNearestCellWalk
 {
     if (seedCellI < 0)
     {
-        FatalErrorIn
-        (
-            "meshSearch::findNearestCellWalk(const point&, const label)"
-        )   << "illegal seedCell:" << seedCellI << exit(FatalError);
+        FatalErrorInFunction
+            << "illegal seedCell:" << seedCellI << exit(FatalError);
     }
 
     // Walk in direction of face that decreases distance
@@ -245,10 +243,8 @@ Foam::label Foam::meshSearch::findNearestFaceWalk
 {
     if (seedFaceI < 0)
     {
-        FatalErrorIn
-        (
-            "meshSearch::findNearestFaceWalk(const point&, const label)"
-        )   << "illegal seedFace:" << seedFaceI << exit(FatalError);
+        FatalErrorInFunction
+            << "illegal seedFace:" << seedFaceI << exit(FatalError);
     }
 
     const vectorField& centres = mesh_.faceCentres();
@@ -335,10 +331,8 @@ Foam::label Foam::meshSearch::findCellWalk
 {
     if (seedCellI < 0)
     {
-        FatalErrorIn
-        (
-            "meshSearch::findCellWalk(const point&, const label)"
-        )   << "illegal seedCell:" << seedCellI << exit(FatalError);
+        FatalErrorInFunction
+            << "illegal seedCell:" << seedCellI << exit(FatalError);
     }
 
     if (mesh_.pointInCell(location, seedCellI, cellDecompMode_))
@@ -408,11 +402,8 @@ Foam::label Foam::meshSearch::findNearestBoundaryFaceWalk
 {
     if (seedFaceI < 0)
     {
-        FatalErrorIn
-        (
-            "meshSearch::findNearestBoundaryFaceWalk"
-            "(const point&, const label)"
-        )   << "illegal seedFace:" << seedFaceI << exit(FatalError);
+        FatalErrorInFunction
+            << "illegal seedFace:" << seedFaceI << exit(FatalError);
     }
 
     // Start off from seedFaceI
@@ -511,7 +502,11 @@ Foam::meshSearch::meshSearch
     mesh_(mesh),
     cellDecompMode_(cellDecompMode)
 {
-    if (cellDecompMode_ == polyMesh::FACE_DIAG_TRIS)
+    if
+    (
+        cellDecompMode_ == polyMesh::FACE_DIAG_TRIS
+     || cellDecompMode_ == polyMesh::CELL_TETS
+    )
     {
         // Force construction of face diagonals
         (void)mesh.tetBasePtIs();
@@ -532,7 +527,11 @@ Foam::meshSearch::meshSearch
 {
     overallBbPtr_.reset(new treeBoundBox(bb));
 
-    if (cellDecompMode_ == polyMesh::FACE_DIAG_TRIS)
+    if
+    (
+        cellDecompMode_ == polyMesh::FACE_DIAG_TRIS
+     || cellDecompMode_ == polyMesh::CELL_TETS
+    )
     {
         // Force construction of face diagonals
         (void)mesh.tetBasePtIs();

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -98,6 +98,12 @@ inline Foam::label Foam::cloudSolution::nextIter()
 inline Foam::scalar Foam::cloudSolution::trackTime() const
 {
     return trackTime_;
+}
+
+
+inline Foam::scalar Foam::cloudSolution::deltaTMax() const
+{
+    return deltaTMax_;
 }
 
 

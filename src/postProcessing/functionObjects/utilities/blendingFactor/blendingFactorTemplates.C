@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,45 +28,6 @@ License
 #include "fvcCellReduce.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::volScalarField& Foam::blendingFactor::factor
-(
-    const GeometricField<Type, fvPatchField, volMesh>& field
-)
-{
-    const word fieldName = "blendingFactor:" + field.name();
-
-    if (!obr_.foundObject<volScalarField>(fieldName))
-    {
-        const fvMesh& mesh = refCast<const fvMesh>(obr_);
-
-        volScalarField* factorPtr =
-            new volScalarField
-            (
-                IOobject
-                (
-                    fieldName,
-                    mesh.time().timeName(),
-                    mesh,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                mesh,
-                dimensionedScalar("0", dimless, 0.0),
-                zeroGradientFvPatchScalarField::typeName
-            );
-
-        obr_.store(factorPtr);
-    }
-
-    return
-        const_cast<volScalarField&>
-        (
-            obr_.lookupObject<volScalarField>(fieldName)
-        );
-}
-
 
 template<class Type>
 void Foam::blendingFactor::calc()
@@ -99,20 +60,65 @@ void Foam::blendingFactor::calc()
 
     if (!isA<blendedSchemeBase<Type> >(interpScheme))
     {
-        FatalErrorIn("void Foam::blendingFactor::execute()")
+        FatalErrorInFunction
             << interpScheme.typeName << " is not a blended scheme"
             << exit(FatalError);
     }
 
-    // retrieve the face-based blending factor
+    // Retrieve the face-based blending factor
     const blendedSchemeBase<Type>& blendedScheme =
         refCast<const blendedSchemeBase<Type> >(interpScheme);
     const surfaceScalarField factorf(blendedScheme.blendingFactor(field));
 
-    // convert into vol field whose values represent the local face maxima
-    volScalarField& factor = this->factor(field);
-    factor = fvc::cellReduce(factorf, maxEqOp<scalar>());
-    factor.correctBoundaryConditions();
+    // Convert into vol field whose values represent the local face minima
+    // Note: factor applied to 1st scheme, and (1-factor) to 2nd scheme
+    volScalarField& indicator =
+        const_cast<volScalarField&>
+        (
+            obr_.lookupObject<volScalarField>(resultName_)
+        );
+    indicator = 1 - fvc::cellReduce(factorf, minEqOp<scalar>(), GREAT);
+    indicator.correctBoundaryConditions();
+
+    // Generate scheme statistics
+    label nCellsScheme1 = 0;
+    label nCellsScheme2 = 0;
+    label nCellsBlended = 0;
+    forAll(indicator, cellI)
+    {
+        scalar i = indicator[cellI];
+
+        if (i < tolerance_)
+        {
+            nCellsScheme1++;
+        }
+        else if (i > (1 - tolerance_))
+        {
+            nCellsScheme2++;
+        }
+        else
+        {
+            nCellsBlended++;
+        }
+    }
+
+    reduce(nCellsScheme1, sumOp<label>());
+    reduce(nCellsScheme2, sumOp<label>());
+    reduce(nCellsBlended, sumOp<label>());
+
+    if (log_) Info
+        << type() << " " << name_ << " output:" << nl
+        << "    scheme 1 cells :  " << nCellsScheme1 << nl
+        << "    scheme 2 cells :  " << nCellsScheme2 << nl
+        << "    blended cells  :  " << nCellsBlended << nl
+        << endl;
+
+    file()
+        << obr_.time().time().value()
+        << token::TAB << nCellsScheme1
+        << token::TAB << nCellsScheme2
+        << token::TAB << nCellsBlended
+        << endl;
 }
 
 

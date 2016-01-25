@@ -22,7 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    engineFoam
+    coldEngineFoam
+
+Group
+    grpCombustionSolvers grpMovingMeshSolvers
 
 Description
     Solver for cold-flow in internal combustion engines.
@@ -35,7 +38,7 @@ Description
 #include "psiThermo.H"
 #include "turbulentFluidThermoModel.H"
 #include "OFstream.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -58,6 +61,8 @@ int main(int argc, char *argv[])
     #include "compressibleCourantNo.H"
     #include "setInitialDeltaT.H"
     #include "startSummary.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

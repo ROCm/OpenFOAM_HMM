@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +47,8 @@ Foam::readFields::readFields
     name_(name),
     obr_(obr),
     active_(true),
-    fieldSet_()
+    fieldSet_(),
+    log_(true)
 {
     // Check if the available mesh is an fvMesh otherise deactivate
     if (isA<fvMesh>(obr_))
@@ -57,16 +58,8 @@ Foam::readFields::readFields
     else
     {
         active_ = false;
-        WarningIn
-        (
-            "readFields::readFields"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating " << name_
+        WarningInFunction
+            << "No fvMesh available, deactivating " << name_
             << endl;
     }
 }
@@ -84,6 +77,7 @@ void Foam::readFields::read(const dictionary& dict)
 {
     if (active_)
     {
+        log_.readIfPresent("log", dict);
         dict.lookup("fields") >> fieldSet_;
     }
 }
@@ -93,29 +87,16 @@ void Foam::readFields::execute()
 {
     if (active_)
     {
-        // Clear out any previously loaded fields
-        vsf_.clear();
-        vvf_.clear();
-        vSpheretf_.clear();
-        vSymmtf_.clear();
-        vtf_.clear();
-
-        ssf_.clear();
-        svf_.clear();
-        sSpheretf_.clear();
-        sSymmtf_.clear();
-        stf_.clear();
-
         forAll(fieldSet_, fieldI)
         {
             const word& fieldName = fieldSet_[fieldI];
 
             // If necessary load field
-            loadField<scalar>(fieldName, vsf_, ssf_);
-            loadField<vector>(fieldName, vvf_, svf_);
-            loadField<sphericalTensor>(fieldName, vSpheretf_, sSpheretf_);
-            loadField<symmTensor>(fieldName, vSymmtf_, sSymmtf_);
-            loadField<tensor>(fieldName, vtf_, stf_);
+            loadField<scalar>(fieldName);
+            loadField<vector>(fieldName);
+            loadField<sphericalTensor>(fieldName);
+            loadField<symmTensor>(fieldName);
+            loadField<tensor>(fieldName);
         }
     }
 }
@@ -123,10 +104,7 @@ void Foam::readFields::execute()
 
 void Foam::readFields::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

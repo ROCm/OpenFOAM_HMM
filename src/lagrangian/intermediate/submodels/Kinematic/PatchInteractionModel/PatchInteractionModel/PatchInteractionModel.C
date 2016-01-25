@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -110,7 +110,9 @@ Foam::PatchInteractionModel<CloudType>::PatchInteractionModel
 )
 :
     CloudSubModelBase<CloudType>(owner),
-    UName_("unknown_UName")
+    UName_("unknown_UName"),
+    escapedParcels_(0),
+    escapedMass_(0.0)
 {}
 
 
@@ -123,7 +125,9 @@ Foam::PatchInteractionModel<CloudType>::PatchInteractionModel
 )
 :
     CloudSubModelBase<CloudType>(owner, dict, typeName, type),
-    UName_(this->coeffDict().lookupOrDefault("UName", word("U")))
+    UName_(this->coeffDict().lookupOrDefault("UName", word("U"))),
+    escapedParcels_(0),
+    escapedMass_(0.0)
 {}
 
 
@@ -134,7 +138,9 @@ Foam::PatchInteractionModel<CloudType>::PatchInteractionModel
 )
 :
     CloudSubModelBase<CloudType>(pim),
-    UName_(pim.UName_)
+    UName_(pim.UName_),
+    escapedParcels_(pim.escapedParcels_),
+    escapedMass_(pim.escapedMass_)
 {}
 
 
@@ -155,9 +161,41 @@ const Foam::word& Foam::PatchInteractionModel<CloudType>::UName() const
 
 
 template<class CloudType>
+void Foam::PatchInteractionModel<CloudType>::addToEscapedParcels
+(
+    const scalar mass
+)
+{
+    escapedMass_ += mass;
+    escapedParcels_++;
+}
+
+
+template<class CloudType>
 void Foam::PatchInteractionModel<CloudType>::info(Ostream& os)
 {
-    // do nothing
+    const label escapedParcels0 =
+        this->template getBaseProperty<label>("escapedParcels");
+    const label escapedParcelsTotal =
+        escapedParcels0 + returnReduce(escapedParcels_, sumOp<label>());
+
+    const scalar escapedMass0 =
+        this->template getBaseProperty<scalar>("escapedMass");
+    const scalar escapedMassTotal =
+        escapedMass0 + returnReduce(escapedMass_, sumOp<scalar>());
+
+    os  << "    Parcel fate: system (number, mass)" << nl
+        << "      - escape                      = " << escapedParcelsTotal
+        << ", " << escapedMassTotal << endl;
+
+    if (this->outputTime())
+    {
+        this->setBaseProperty("escapedParcels", escapedParcelsTotal);
+        escapedParcels_ = 0;
+
+        this->setBaseProperty("escapedMass", escapedMassTotal);
+        escapedMass_ = 0.0;
+    }
 }
 
 

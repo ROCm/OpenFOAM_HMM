@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,7 +90,7 @@ void Foam::fieldAverage::initialize()
     {
         if (!faItems_[fieldI].active())
         {
-            WarningIn("void Foam::fieldAverage::initialize()")
+            WarningInFunction
                 << "Field " << faItems_[fieldI].fieldName()
                 << " not found in database for averaging";
         }
@@ -124,11 +124,9 @@ void Foam::fieldAverage::calcAverages()
         prevTimeIndex_ = currentTimeIndex;
     }
 
-    if (log_)
-    {
-        Info<< type() << " " << name_ << " output:" << nl
-            << "    Calculating averages" << nl;
-    }
+    if (log_) Info
+        << type() << " " << name_ << " output:" << nl
+        << "    Calculating averages" << nl;
 
     addMeanSqrToPrime2Mean<scalar, scalar>();
     addMeanSqrToPrime2Mean<vector, symmTensor>();
@@ -204,21 +202,17 @@ void Foam::fieldAverage::readAveragingProperties()
                 totalIter_[fieldI] = readLabel(fieldDict.lookup("totalIter"));
                 totalTime_[fieldI] = readScalar(fieldDict.lookup("totalTime"));
 
-                if (log_)
-                {
-                    Info<< "        " << fieldName
-                        << " iters = " << totalIter_[fieldI]
-                        << " time = " << totalTime_[fieldI] << nl;
-                }
+                if (log_) Info
+                    << "        " << fieldName
+                    << " iters = " << totalIter_[fieldI]
+                    << " time = " << totalTime_[fieldI] << nl;
             }
             else
             {
-                if (log_)
-                {
-                    Info<< "        " << fieldName
-                        << ": starting averaging at time "
-                        << obr_.time().timeName() << endl;
-                }
+                if (log_) Info
+                    << "        " << fieldName
+                    << ": starting averaging at time "
+                    << obr_.time().timeName() << endl;
             }
         }
     }
@@ -294,12 +288,7 @@ void Foam::fieldAverage::execute()
 
 
 void Foam::fieldAverage::end()
-{
-    if (active_)
-    {
-        execute();
-    }
-}
+{}
 
 
 void Foam::fieldAverage::timeSet()
@@ -315,11 +304,9 @@ void Foam::fieldAverage::write()
 
         if (resetOnOutput_)
         {
-            if (log_)
-            {
-                Info<< "    Restarting averaging at time " << obr_.time().timeName()
-                    << nl << endl;
-            }
+            if (log_) Info
+                << "    Restarting averaging at time " << obr_.time().timeName()
+                << nl << endl;
 
             totalIter_.clear();
             totalIter_.setSize(faItems_.size(), 1);

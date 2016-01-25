@@ -15,4 +15,6 @@ wmake $targetType jobControl
 wmake $targetType systemCall
 wmake $targetType utilities
 
+./graphics/Allwmake
+
 # ----------------------------------------------------------------- end-of-file

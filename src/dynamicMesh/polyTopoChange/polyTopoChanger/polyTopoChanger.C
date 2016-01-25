@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -293,13 +293,8 @@ void Foam::polyTopoChanger::addTopologyModifiers
     {
         if (tm[tmI]->topoChanger() != *this)
         {
-            FatalErrorIn
-            (
-                "void polyTopoChanger::addTopologyModifiers"
-                "("
-                    "const List<polyMeshModifier*>&"
-                ")"
-            )   << "Mesh modifier created with different mesh reference."
+            FatalErrorInFunction
+                << "Mesh modifier created with different mesh reference."
                 << abort(FatalError);
         }
         set(tmI, tm[tmI]);
@@ -327,8 +322,7 @@ Foam::label Foam::polyTopoChanger::findModifierID
     // Modifier not found
     if (debug)
     {
-        WarningIn("label polyTopoChanger::findModifierID(const word&) const")
-            << "Modifier named " << modName << " not found.  "
+        WarningInFunction
             << "List of available modifier names: " << names() << endl;
     }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -285,7 +285,7 @@ void Foam::fvMeshTools::trimPatches(fvMesh& mesh, const label nPatches)
 
     if (polyPatches.empty())
     {
-        FatalErrorIn("fvMeshTools::trimPatches(fvMesh&, const label)")
+        FatalErrorInFunction
             << "No patches in mesh"
             << abort(FatalError);
     }
@@ -299,7 +299,7 @@ void Foam::fvMeshTools::trimPatches(fvMesh& mesh, const label nPatches)
 
     if (nFaces)
     {
-        FatalErrorIn("fvMeshTools::trimPatches(fvMesh&, const label)")
+        FatalErrorInFunction
             << "There are still " << nFaces
             << " faces in " << polyPatches.size()-nPatches
             << " patches to be deleted" << abort(FatalError);
@@ -352,6 +352,69 @@ void Foam::fvMeshTools::reorderPatches
 
     // Remove last.
     trimPatches(mesh, nNewPatches);
+}
+
+
+Foam::labelList Foam::fvMeshTools::removeEmptyPatches
+(
+    fvMesh& mesh,
+    const bool validBoundary
+)
+{
+    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+
+    labelList newToOld(pbm.size());
+    labelList oldToNew(pbm.size(), -1);
+    label newI = 0;
+
+
+    // Assumes all non-coupled boundaries are on all processors!
+    forAll(pbm, patchI)
+    {
+        const polyPatch& pp = pbm[patchI];
+
+        if (!isA<processorPolyPatch>(pp))
+        {
+            label nFaces = pp.size();
+            if (validBoundary)
+            {
+                reduce(nFaces, sumOp<label>());
+            }
+
+            if (nFaces > 0)
+            {
+                newToOld[newI] = patchI;
+                oldToNew[patchI] = newI++;
+            }
+        }
+    }
+
+    // Same for processor patches (but need no reduction)
+    forAll(pbm, patchI)
+    {
+        const polyPatch& pp = pbm[patchI];
+
+        if (isA<processorPolyPatch>(pp) && pp.size())
+        {
+            newToOld[newI] = patchI;
+            oldToNew[patchI] = newI++;
+        }
+    }
+
+    newToOld.setSize(newI);
+
+    // Move all deleteable patches to the end
+    forAll(oldToNew, patchI)
+    {
+        if (oldToNew[patchI] == -1)
+        {
+            oldToNew[patchI] = newI++;
+        }
+    }
+
+    reorderPatches(mesh, oldToNew, newToOld.size(), validBoundary);
+
+    return newToOld;
 }
 
 

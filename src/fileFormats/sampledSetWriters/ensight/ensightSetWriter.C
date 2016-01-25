@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,6 +29,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "IOmanip.H"
 #include "foamVersion.H"
+#include "ensightPTraits.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -57,7 +58,7 @@ Foam::fileName Foam::ensightSetWriter<Type>::getFileName
     return
         this->getBaseName(points, valueSetNames)
       //+ '_'
-      //+ pTraits<Type>::typeName
+      //+ ensightPTraits<Type>::typeName
       + ".case";
 }
 
@@ -88,7 +89,7 @@ void Foam::ensightSetWriter<Type>::write
         fileName dataFile(base + ".***." + valueSetNames[setI]);
 
         os.setf(ios_base::left);
-        os  << pTraits<Type>::typeName
+        os  << ensightPTraits<Type>::typeName
             << " per node:            1       "
             << setw(15) << valueSetNames[setI]
             << " " << dataFile.name().c_str()
@@ -151,12 +152,15 @@ void Foam::ensightSetWriter<Type>::write
         os.setf(ios_base::scientific, ios_base::floatfield);
         os.precision(5);
         {
-            os  << pTraits<Type>::typeName << nl
+            os  << ensightPTraits<Type>::typeName << nl
                 << "part" << nl
                 << setw(10) << 1 << nl
                 << "coordinates" << nl;
-            for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
+
+            for (direction i=0; i < pTraits<Type>::nComponents; ++i)
             {
+                label cmpt = ensightPTraits<Type>::componentOrder[i];
+
                 const scalarField fld(valueSets[setI]->component(cmpt));
                 forAll(fld, i)
                 {
@@ -202,7 +206,7 @@ void Foam::ensightSetWriter<Type>::write
         fileName dataFile(base + ".***." + valueSetNames[setI]);
 
         os.setf(ios_base::left);
-        os  << pTraits<Type>::typeName
+        os  << ensightPTraits<Type>::typeName
             << " per node:            1       "
             << setw(15) << valueSetNames[setI]
             << " " << dataFile.name().c_str()
@@ -277,7 +281,7 @@ void Foam::ensightSetWriter<Type>::write
         os.setf(ios_base::scientific, ios_base::floatfield);
         os.precision(5);
         {
-            os  << pTraits<Type>::typeName << nl;
+            os  << ensightPTraits<Type>::typeName << nl;
 
             const List<Field<Type> >& fieldVals = valueSets[setI];
             forAll(fieldVals, trackI)
@@ -286,13 +290,10 @@ void Foam::ensightSetWriter<Type>::write
                     << setw(10) << trackI+1 << nl
                     << "coordinates" << nl;
 
-                for
-                (
-                    direction cmpt = 0;
-                    cmpt < pTraits<Type>::nComponents;
-                    cmpt++
-                )
+                for (direction i=0; i < pTraits<Type>::nComponents; ++i)
                 {
+                    label cmpt = ensightPTraits<Type>::componentOrder[i];
+
                     const scalarField fld(fieldVals[trackI].component(cmpt));
                     forAll(fld, i)
                     {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,6 +52,8 @@ namespace Foam
 
 class Istream;
 class Ostream;
+class triPoints;
+class plane;
 
 // Forward declaration of friend functions and operators
 
@@ -71,6 +73,8 @@ inline Ostream& operator<<
     const triangle<Point, PointRef>&
 );
 
+typedef triangle<point, const point&> triPointRef;
+
 
 /*---------------------------------------------------------------------------*\
                           Class triangle Declaration
@@ -79,26 +83,97 @@ inline Ostream& operator<<
 template<class Point, class PointRef>
 class triangle
 {
+public:
+
+    // Public typedefs
+
+        //- Storage type for triangles originating from intersecting triangle
+        //  with another triangle
+        typedef FixedList<triPoints, 27> triIntersectionList;
+
+        //- Return types for classify
+        enum proxType
+        {
+            NONE,
+            POINT,  // Close to point
+            EDGE    // Close to edge
+        };
+
+
+    // Public classes
+
+        // Classes for use in sliceWithPlane. What to do with decomposition
+        // of triangle.
+
+            //- Dummy
+            class dummyOp
+            {
+            public:
+                inline void operator()(const triPoints&);
+            };
+
+            //- Sum resulting areas
+            class sumAreaOp
+            {
+            public:
+                scalar area_;
+
+                inline sumAreaOp();
+
+                inline void operator()(const triPoints&);
+            };
+
+            //- Store resulting tris
+            class storeOp
+            {
+            public:
+                triIntersectionList& tris_;
+                label& nTris_;
+
+                inline storeOp(triIntersectionList&, label&);
+
+                inline void operator()(const triPoints&);
+            };
+
+
+private:
+
     // Private data
 
         PointRef a_, b_, c_;
 
 
+   // Private Member Functions
+
+        //- Helper: calculate intersection point
+        inline static point planeIntersection
+        (
+            const FixedList<scalar, 3>& d,
+            const triPoints& t,
+            const label negI,
+            const label posI
+        );
+
+        //- Helper: slice triangle with plane
+        template<class AboveOp, class BelowOp>
+        inline static void triSliceWithPlane
+        (
+            const plane& pl,
+            const triPoints& tri,
+            AboveOp& aboveOp,
+            BelowOp& belowOp
+        );
+
+
 public:
-
-    //- Return types for classify
-    enum proxType
-    {
-        NONE,
-        POINT,  // Close to point
-        EDGE    // Close to edge
-    };
-
 
     // Constructors
 
         //- Construct from three points
         inline triangle(const Point& a, const Point& b, const Point& c);
+
+        //- Construct from three points
+        inline triangle(const FixedList<Point, 3>&);
 
         //- Construct from three points in the list of points
         //  The indices could be from triFace etc.
@@ -237,6 +312,27 @@ public:
                 pointHit& edgePoint
             ) const;
 
+            //- Decompose triangle into triangles above and below plane
+            template<class AboveOp, class BelowOp>
+            inline void sliceWithPlane
+            (
+                const plane& pl,
+                AboveOp& aboveOp,
+                BelowOp& belowOp
+            ) const;
+
+            //- Decompose triangle into triangles inside and outside
+            //  (with respect to user provided normal) other
+            //  triangle.
+            template<class InsideOp, class OutsideOp>
+            inline void triangleOverlap
+            (
+                const vector& n,
+                const triangle<Point, PointRef>& tri,
+                InsideOp& insideOp,
+                OutsideOp& outsideOp
+            ) const;
+
 
     // IOstream operators
 
@@ -261,6 +357,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "triangleI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "triangle.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

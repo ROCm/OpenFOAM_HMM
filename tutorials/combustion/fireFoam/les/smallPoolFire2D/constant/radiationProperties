@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  plus                                  |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -189,7 +189,7 @@ greyMeanAbsorptionEmissionCoeffs
 
 scatterModel    none;
 
-sootModel mixtureFractionSoot<gasHThermoPhysics>;
+sootModel none;//mixtureFractionSoot<gasHThermoPhysics>;
 
 mixtureFractionSootCoeffs
 {
@@ -197,4 +197,8 @@ mixtureFractionSootCoeffs
     nuSoot              0.055;
     Wsoot               12;
 }
+
+transmissivityModel       none;
+
+
 // ************************************************************************* //

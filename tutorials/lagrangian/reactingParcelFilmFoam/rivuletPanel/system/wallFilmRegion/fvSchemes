@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  plus                                  |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -17,45 +17,41 @@ FoamFile
 
 ddtSchemes
 {
-    default none;
-    ddt(deltaf*rhof) Euler;
-    ddt(rhof,deltaf) Euler;
-    ddt(deltaf*rhof,Uf) Euler;
-    ddt(deltaf*rhof,hf) Euler;
+    default         Euler;
 }
 
 divSchemes
 {
-    default none;
-    div(phi,Uf) Gauss upwind;
+    default         none;
+    div(phi,Uf)     Gauss upwind;
     div(phid,deltaf) Gauss upwind;
-    div(phi,hf) Gauss upwind;
+    div(phi,hf)     Gauss upwind;
 }
 
 gradSchemes
 {
-    default none;
-    grad(pL) Gauss linear;
-    grad(sigmaf) Gauss linear;
+    default         none;
+    grad(pL)        Gauss linear;
+    grad(sigmaf)    Gauss linear;
     snGradCorr(deltaf) Gauss linear;
-    snGradCorr(pp) Gauss linear;
-    snGradCorr(pu) Gauss linear;
-    grad(nHat) Gauss linear;
+    snGradCorr(pp)  Gauss linear;
+    snGradCorr(pu)  Gauss linear;
+    grad(nHat)  Gauss linear;
 
-    grad(alpha) Gauss linear;
+    grad(alpha)     Gauss linear;
 }
 
 laplacianSchemes
 {
-    default none;
+    default         none;
     laplacian(sigmaf,deltaf) Gauss linear orthogonal;
     laplacian(deltaCoeff,deltaf) Gauss linear orthogonal;
 }
 
 snGradSchemes
 {
-    snGrad(p) orthogonal;
-    snGrad(deltaf) orthogonal;
+    snGrad(p)       orthogonal;
+    snGrad(deltaf)  orthogonal;
 }
 
 

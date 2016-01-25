@@ -24,6 +24,9 @@ License
 Application
     reactingMultiphaseEulerFoam
 
+Group
+    grpMultiphaseSolvers
+
 Description
     Solver for a system of any number of compressible fluid phases with a
     common pressure, but otherwise separate properties. The type of phase model
@@ -75,6 +78,11 @@ int main(int argc, char *argv[])
     // );
 
     //#include "pUf/createDDtU.H"
+
+    int nEnergyCorrectors
+    (
+        pimple.dict().lookupOrDefault<int>("nEnergyCorrectors", 1)
+    );
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

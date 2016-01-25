@@ -245,10 +245,7 @@ public:
 
             bool writeData(Ostream&) const
             {
-                notImplemented
-                (
-                    "searchableRotatedBox::writeData(Ostream&) const"
-                );
+                NotImplemented;
                 return false;
             }
 };

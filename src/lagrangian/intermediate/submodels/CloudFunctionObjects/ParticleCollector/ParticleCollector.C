@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -119,11 +119,7 @@ void Foam::ParticleCollector<CloudType>::initPolygons
         label np = polygons[polyI].size();
         if (np < 3)
         {
-            FatalIOErrorIn
-            (
-                "Foam::ParticleCollector<CloudType>::initPolygons()",
-                this->coeffDict()
-            )
+            FatalIOErrorInFunction(this->coeffDict())
                 << "polygons must consist of at least 3 points"
                 << exit(FatalIOError);
         }
@@ -383,9 +379,9 @@ void Foam::ParticleCollector<CloudType>::collectParcelConcentricCircles
                     scalar(nSector_)*theta/constant::mathematical::twoPi
                 );
         }
-    }
 
-    hitFaceIDs_.append(secI);
+        hitFaceIDs_.append(secI);
+    }
 }
 
 
@@ -457,7 +453,15 @@ void Foam::ParticleCollector<CloudType>::write()
     {
         if (Pstream::master())
         {
-            autoPtr<surfaceWriter> writer(surfaceWriter::New(surfaceFormat_));
+            autoPtr<surfaceWriter> writer
+            (
+                surfaceWriter::New
+                (
+                    surfaceFormat_,
+                    this->coeffDict().subOrEmptyDict("formatOptions").
+                        subOrEmptyDict(surfaceFormat_)
+                )
+            );
 
             writer->write
             (
@@ -584,16 +588,7 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     }
     else
     {
-        FatalIOErrorIn
-        (
-            "Foam::ParticleCollector<CloudType>::ParticleCollector"
-            "("
-                "const dictionary&,"
-                "CloudType&, "
-                "const word&"
-            ")",
-            this->coeffDict()
-        )
+        FatalIOErrorInFunction(this->coeffDict())
             << "Unknown mode " << mode << ".  Available options are "
             << "polygon, polygonWithNormal and concentricCircle"
             << exit(FatalIOError);

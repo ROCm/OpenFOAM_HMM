@@ -204,7 +204,6 @@ LaunderSharmaKE<BasicTurbulenceModel>::LaunderSharmaKE
 
     if (type == typeName)
     {
-        correctNut();
         this->printCoeffs(type);
     }
 }

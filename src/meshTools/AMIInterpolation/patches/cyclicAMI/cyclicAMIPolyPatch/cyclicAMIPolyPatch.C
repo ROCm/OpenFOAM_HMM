@@ -24,9 +24,13 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cyclicAMIPolyPatch.H"
+#include "transformField.H"
 #include "SubField.H"
+#include "polyMesh.H"
 #include "Time.H"
 #include "addToRunTimeSelectionTable.H"
+#include "faceAreaIntersect.H"
+#include "ops.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -71,7 +75,6 @@ Foam::vector Foam::cyclicAMIPolyPatch::findFaceNormalMaxRadius
 
 void Foam::cyclicAMIPolyPatch::calcTransforms()
 {
-    // Half0
     const cyclicAMIPolyPatch& half0 = *this;
     vectorField half0Areas(half0.size());
     forAll(half0, facei)
@@ -79,7 +82,6 @@ void Foam::cyclicAMIPolyPatch::calcTransforms()
         half0Areas[facei] = half0[facei].normal(half0.points());
     }
 
-    // Half1
     const cyclicAMIPolyPatch& half1 = neighbPatch();
     vectorField half1Areas(half1.size());
     forAll(half1, facei)
@@ -118,7 +120,7 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
 {
     if (transform() != neighbPatch().transform())
     {
-        FatalErrorIn("cyclicAMIPolyPatch::calcTransforms()")
+        FatalErrorInFunction
             << "Patch " << name()
             << " has transform type " << transformTypeNames[transform()]
             << ", neighbour patch " << neighbPatchName()
@@ -138,23 +140,23 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
 
             if (rotationAngleDefined_)
             {
-                tensor T(rotationAxis_*rotationAxis_);
+                const tensor T(rotationAxis_*rotationAxis_);
 
-                tensor S
+                const tensor S
                 (
                     0, -rotationAxis_.z(), rotationAxis_.y(),
                     rotationAxis_.z(), 0, -rotationAxis_.x(),
                     -rotationAxis_.y(), rotationAxis_.x(), 0
                 );
 
-                tensor revTPos
+                const tensor revTPos
                 (
                     T
                   + cos(rotationAngle_)*(tensor::I - T)
                   + sin(rotationAngle_)*S
                 );
 
-                tensor revTNeg
+                const tensor revTNeg
                 (
                     T
                   + cos(-rotationAngle_)*(tensor::I - T)
@@ -163,41 +165,34 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
 
                 // Check - assume correct angle when difference in face areas
                 // is the smallest
-                vector transformedAreaPos = gSum(half1Areas & revTPos);
-                vector transformedAreaNeg = gSum(half1Areas & revTNeg);
-                vector area0 = gSum(half0Areas);
+                const vector transformedAreaPos = gSum(half1Areas & revTPos);
+                const vector transformedAreaNeg = gSum(half1Areas & revTNeg);
+                const vector area0 = gSum(half0Areas);
+                const scalar magArea0 = mag(area0) + ROOTVSMALL;
 
-                // Areas have opposite sign, so sum should be zero when
-                // correct rotation applied
-                scalar errorPos = mag(transformedAreaPos + area0);
-                scalar errorNeg = mag(transformedAreaNeg + area0);
+                // Areas have opposite sign, so sum should be zero when correct
+                // rotation applied
+                const scalar errorPos = mag(transformedAreaPos + area0);
+                const scalar errorNeg = mag(transformedAreaNeg + area0);
 
-                if (errorPos < errorNeg)
-                {
-                    revT = revTPos;
-                }
-                else
+                const scalar normErrorPos = errorPos/magArea0;
+                const scalar normErrorNeg = errorNeg/magArea0;
+
+                if (errorPos > errorNeg && normErrorNeg < matchTolerance())
                 {
                     revT = revTNeg;
                     rotationAngle_ *= -1;
                 }
+                else
+                {
+                    revT = revTPos;
+                }
 
-                scalar areaError =
-                    min(errorPos, errorNeg)/(mag(area0) + ROOTVSMALL);
+                const scalar areaError = min(normErrorPos, normErrorNeg);
 
                 if (areaError > matchTolerance())
                 {
-                    WarningIn
-                    (
-                        "void Foam::cyclicAMIPolyPatch::calcTransforms"
-                        "("
-                            "const primitivePatch&, "
-                            "const pointField&, "
-                            "const vectorField&, "
-                            "const pointField&, "
-                            "const vectorField&"
-                        ")"
-                    )
+                    WarningInFunction
                         << "Patch areas are not consistent within "
                         << 100*matchTolerance()
                         << " % indicating a possible error in the specified "
@@ -406,6 +401,9 @@ void Foam::cyclicAMIPolyPatch::resetAMI
 
 void Foam::cyclicAMIPolyPatch::initGeometry(PstreamBuffers& pBufs)
 {
+    // The AMI is no longer valid. Leave it up to demand-driven calculation
+    AMIPtr_.clear();
+
     polyPatch::initGeometry(pBufs);
 }
 
@@ -431,6 +429,9 @@ void Foam::cyclicAMIPolyPatch::initMovePoints
     const pointField& p
 )
 {
+    // The AMI is no longer valid. Leave it up to demand-driven calculation
+    AMIPtr_.clear();
+
     polyPatch::initMovePoints(pBufs, p);
 
     // See below. Clear out any local geometry
@@ -447,19 +448,15 @@ void Foam::cyclicAMIPolyPatch::movePoints
     polyPatch::movePoints(pBufs, p);
 
     calcTransforms();
-
-    // Note: resetAMI is called whilst in geometry update. So the slave
-    // side might not have reached 'movePoints'. Is explicitly handled by
-    // - clearing geometry of neighbour inside initMovePoints
-    // - not using localPoints() inside resetAMI
-    resetAMI();
 }
 
 
 void Foam::cyclicAMIPolyPatch::initUpdateMesh(PstreamBuffers& pBufs)
 {
-    polyPatch::initUpdateMesh(pBufs);
+    // The AMI is no longer valid. Leave it up to demand-driven calculation
     AMIPtr_.clear();
+
+    polyPatch::initUpdateMesh(pBufs);
 }
 
 
@@ -536,15 +533,8 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
 {
     if (nbrPatchName_ == word::null && !coupleGroup_.valid())
     {
-        FatalIOErrorIn
+        FatalIOErrorInFunction
         (
-            "cyclicAMIPolyPatch::cyclicAMIPolyPatch"
-            "("
-                "const word&, "
-                "const dictionary&, "
-                "const label, "
-                "const polyBoundaryMesh&"
-            ")",
             dict
         )   << "No \"neighbourPatch\" or \"coupleGroup\" provided."
             << exit(FatalIOError);
@@ -552,15 +542,8 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
 
     if (nbrPatchName_ == name)
     {
-        FatalIOErrorIn
+        FatalIOErrorInFunction
         (
-            "cyclicAMIPolyPatch::cyclicAMIPolyPatch"
-            "("
-                "const word&, "
-                "const dictionary&, "
-                "const label, "
-                "const polyBoundaryMesh&"
-            ")",
             dict
         )   << "Neighbour patch name " << nbrPatchName_
             << " cannot be the same as this patch " << name
@@ -588,15 +571,8 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
             scalar magRot = mag(rotationAxis_);
             if (magRot < SMALL)
             {
-                FatalIOErrorIn
+                FatalIOErrorInFunction
                 (
-                    "cyclicAMIPolyPatch::cyclicAMIPolyPatch"
-                    "("
-                        "const word&, "
-                        "const dictionary&, "
-                        "const label, "
-                        "const polyBoundaryMesh&"
-                    ")",
                     dict
                 )   << "Illegal rotationAxis " << rotationAxis_ << endl
                     << "Please supply a non-zero vector."
@@ -677,15 +653,8 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
 {
     if (nbrPatchName_ == name())
     {
-        FatalErrorIn
-        (
-            "const cyclicAMIPolyPatch& "
-            "const polyBoundaryMesh&, "
-            "const label, "
-            "const label, "
-            "const label, "
-            "const word&"
-        )   << "Neighbour patch name " << nbrPatchName_
+        FatalErrorInFunction
+            << "Neighbour patch name " << nbrPatchName_
             << " cannot be the same as this patch " << name()
             << exit(FatalError);
     }
@@ -738,7 +707,7 @@ Foam::label Foam::cyclicAMIPolyPatch::neighbPatchID() const
 
         if (nbrPatchID_ == -1)
         {
-            FatalErrorIn("cyclicPolyAMIPatch::neighbPatchID() const")
+            FatalErrorInFunction
                 << "Illegal neighbourPatch name " << neighbPatchName()
                 << nl << "Valid patch names are "
                 << this->boundaryMesh().names()
@@ -754,7 +723,7 @@ Foam::label Foam::cyclicAMIPolyPatch::neighbPatchID() const
 
         if (nbrPatch.neighbPatchName() != name())
         {
-            WarningIn("cyclicAMIPolyPatch::neighbPatchID() const")
+            WarningInFunction
                 << "Patch " << name()
                 << " specifies neighbour patch " << neighbPatchName()
                 << nl << " but that in return specifies "
@@ -815,10 +784,7 @@ const Foam::AMIPatchToPatchInterpolation& Foam::cyclicAMIPolyPatch::AMI() const
 {
     if (!owner())
     {
-        FatalErrorIn
-        (
-            "const AMIPatchToPatchInterpolation& cyclicAMIPolyPatch::AMI()"
-        )
+        FatalErrorInFunction
             << "AMI interpolator only available to owner patch"
             << abort(FatalError);
     }

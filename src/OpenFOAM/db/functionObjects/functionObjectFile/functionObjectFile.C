@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -195,9 +195,8 @@ Foam::OFstream& Foam::functionObjectFile::file()
 
     if (!filePtr_.valid())
     {
-        FatalErrorIn("Foam::OFstream& Foam::functionObjectFile::file()")
-            << "File pointer not allocated"
-            << abort(FatalError);
+        FatalErrorInFunction
+            << "File pointer not allocated";
     }
 
     return filePtr_();
@@ -245,6 +244,12 @@ void Foam::functionObjectFile::writeHeader
 {
     os  << setw(1) << "#" << setw(1) << ' '
         << setf(ios_base::left) << setw(charWidth() - 2) << str.c_str() << nl;
+}
+
+
+void Foam::functionObjectFile::writeTime(Ostream& os) const
+{
+    os  << setw(charWidth()) << obr_.time().timeName();
 }
 
 

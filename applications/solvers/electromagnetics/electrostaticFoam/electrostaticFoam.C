@@ -24,6 +24,9 @@ License
 Application
     electrostaticFoam
 
+Group
+    grpElectroMagneticsSolvers
+
 Description
     Solver for electrostatics.
 

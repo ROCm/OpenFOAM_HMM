@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,10 +28,49 @@ Group
     grpUtilitiesFunctionObjects
 
 Description
-    This function object calculates and outputs the blendingFactor as used by
-    the bended convection schemes.  The output is a volume field (cells) whose
-    value is calculated via the maximum blending factor for any cell face.
+    This function object provides information on the mode of operation of
+    blended convection schemes.
 
+    The weight of a blended scheme is given by a function of the blending
+    factor, f:
+
+        weight = f*scheme1 + (1 - f)*scheme2
+
+    The factor is a face-based quantity, which is converted to a cell-based
+    quantity by assigning the minimum blending factor for any cell face.
+
+    An indicator (volume) field, named <functionObjectName>:<fieldName>, is
+    generated that is set to (1 - f), i.e. values of:
+    - 0 represent scheme1 as active, and
+    - 1 represent scheme2 as active.
+    - intermediate values show the contribution to scheme2
+
+    Additional reporting is written to the standard output, providing
+    statistics as to the number of cells used by each scheme.
+
+    Example of function object specification to calculate the blending factor:
+    \verbatim
+    blendingFactor1
+    {
+        type        blendingFactor;
+        functionObjectLibs ("libutilityFunctionObjects.so");
+
+        ...
+
+        // Name of field
+        fieldName   U;
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | Type name: blendingFactor | yes       |
+        phiName      | Name of flux field      | no          | phi
+        fieldName    | Name of field to evaluate | yes       |
+        tolerance    | Tolerance for number of blended cells | no | 0.001
+        log          | Log to standard output  | no          | yes
+    \endtable
 
 SourceFiles
     blendingFactor.C
@@ -42,6 +81,8 @@ SourceFiles
 #ifndef blendingFactor_H
 #define blendingFactor_H
 
+#include "functionObjectState.H"
+#include "functionObjectFile.H"
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
 #include "OFstream.H"
@@ -59,27 +100,36 @@ class polyMesh;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                          Class blendingFactor Declaration
+                       Class blendingFactor Declaration
 \*---------------------------------------------------------------------------*/
 
 class blendingFactor
+:
+    public functionObjectState,
+    public functionObjectFile
 {
     // Private data
 
-        //- Name of this set of blendingFactor objects
-        word name_;
+        //- Name
+        const word name_;
 
         //- Reference to the database
         const objectRegistry& obr_;
-
-        //- On/off switch
-        bool active_;
 
         //- Name of flux field, default is "phi"
         word phiName_;
 
         //- Field name
         word fieldName_;
+
+        //- Result field name
+        word resultName_;
+
+        //- Tolerance used when calculating the number of blended cells
+        scalar tolerance_;
+
+        //- Switch to send output to Info as well as to file
+        Switch log_;
 
 
     // Private Member Functions
@@ -90,16 +140,17 @@ class blendingFactor
         //- Disallow default bitwise assignment
         void operator=(const blendingFactor&);
 
-        //- Return the blending factor field from the database
-        template<class Type>
-        volScalarField& factor
-        (
-            const GeometricField<Type, fvPatchField, volMesh>& field
-        );
-
         //- Calculate the blending factor
         template<class Type>
         void calc();
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Write the file header
+        virtual void writeFileHeader(Ostream& os) const;
 
 
 public:

@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(calcMag, 0);
+    defineTypeNameAndDebug(calcMag, 0);
 }
 
 
@@ -50,22 +50,15 @@ Foam::calcMag::calcMag
     obr_(obr),
     active_(true),
     fieldName_("undefined-fieldName"),
-    resultName_("undefined-resultName")
+    resultName_(word::null),
+    log_(true)
 {
     // Check if the available mesh is an fvMesh, otherwise deactivate
     if (!isA<fvMesh>(obr_))
     {
         active_ = false;
-        WarningIn
-        (
-            "calcMag::calcMag"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating." << nl
+        WarningInFunction
+            << "No fvMesh available, deactivating." << nl
             << endl;
     }
 
@@ -85,10 +78,12 @@ void Foam::calcMag::read(const dictionary& dict)
 {
     if (active_)
     {
-        dict.lookup("fieldName") >> fieldName_;
-        dict.lookup("resultName") >> resultName_;
+        log_.readIfPresent("log", dict);
 
-        if (resultName_ == "none")
+        dict.lookup("fieldName") >> fieldName_;
+        dict.readIfPresent("resultName", resultName_);
+
+        if (resultName_ == word::null)
         {
             resultName_ = "mag(" + fieldName_ + ")";
         }
@@ -110,7 +105,7 @@ void Foam::calcMag::execute()
 
         if (!processed)
         {
-            WarningIn("void Foam::calcMag::write()")
+            WarningInFunction
                 << "Unprocessed field " << fieldName_ << endl;
         }
     }
@@ -119,10 +114,7 @@ void Foam::calcMag::execute()
 
 void Foam::calcMag::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 
@@ -141,7 +133,8 @@ void Foam::calcMag::write()
             const regIOobject& field =
                 obr_.lookupObject<regIOobject>(resultName_);
 
-            Info<< type() << " " << name_ << " output:" << nl
+            if (log_) Info
+                << type() << " " << name_ << " output:" << nl
                 << "    writing field " << field.name() << nl << endl;
 
             field.write();

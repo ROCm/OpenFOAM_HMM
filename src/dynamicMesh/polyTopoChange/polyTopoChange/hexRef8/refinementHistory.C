@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,9 +33,7 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(refinementHistory, 0);
-
+    defineTypeNameAndDebug(refinementHistory, 0);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -84,7 +82,7 @@ void Foam::refinementHistory::splitCell8::operator=(const splitCell8& s)
     // Check for assignment to self
     if (this == &s)
     {
-        FatalErrorIn("splitCell8::operator=(const Foam::splitCell8&)")
+        FatalErrorInFunction
             << "Attempted assignment to self"
             << abort(FatalError);
     }
@@ -245,7 +243,7 @@ void Foam::refinementHistory::checkIndices() const
     {
         if (visibleCells_[i] < 0 && visibleCells_[i] >= splitCells_.size())
         {
-            FatalErrorIn("refinementHistory::checkIndices() const")
+            FatalErrorInFunction
                 << "Illegal entry " << visibleCells_[i]
                 << " in visibleCells at location" << i << nl
                 << "It points outside the range of splitCells : 0.."
@@ -318,7 +316,7 @@ void Foam::refinementHistory::freeSplitCell(const label index)
 
             if (myPos == -1)
             {
-                FatalErrorIn("refinementHistory::freeSplitCell")
+                FatalErrorInFunction
                     << "Problem: cannot find myself in"
                     << " parents' children" << abort(FatalError);
             }
@@ -783,11 +781,8 @@ Foam::refinementHistory::refinementHistory
      || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
     )
     {
-        WarningIn
-        (
-            "refinementHistory::refinementHistory(const IOobject&"
-            ", const labelListList&, const PtrList<refinementHistory>&)"
-        )   << "read option IOobject::MUST_READ, READ_IF_PRESENT or "
+        WarningInFunction
+            << "read option IOobject::MUST_READ, READ_IF_PRESENT or "
             << "MUST_READ_IF_MODIFIED"
             << " suggests that a read constructor would be more appropriate."
             << endl;
@@ -1137,10 +1132,8 @@ void Foam::refinementHistory::updateMesh(const mapPolyMesh& map)
                 // Check not already set
                 if (splitCells_[index].addedCellsPtr_.valid())
                 {
-                    FatalErrorIn
-                    (
-                        "refinementHistory::updateMesh(const mapPolyMesh&)"
-                    )   << "Problem" << abort(FatalError);
+                    FatalErrorInFunction
+                        << "Problem" << abort(FatalError);
                 }
 
                 label newCellI = reverseCellMap[cellI];
@@ -1186,11 +1179,8 @@ void Foam::refinementHistory::subset
             // Check that cell is live (so its parent has no refinement)
             if (index >= 0 && splitCells_[index].addedCellsPtr_.valid())
             {
-                FatalErrorIn
-                (
-                    "refinementHistory::subset"
-                    "(const labelList&, const labelList&, const labelList&)"
-                )   << "Problem" << abort(FatalError);
+                FatalErrorInFunction
+                    << "Problem" << abort(FatalError);
             }
 
             newVisibleCells[cellI] = index;
@@ -1255,10 +1245,8 @@ void Foam::refinementHistory::distribute(const mapDistributePolyMesh& map)
 {
     if (!active())
     {
-        FatalErrorIn
-        (
-            "refinementHistory::distribute(const mapDistributePolyMesh&)"
-        )   << "Calling distribute on inactive history" << abort(FatalError);
+        FatalErrorInFunction
+            << "Calling distribute on inactive history" << abort(FatalError);
     }
 
 
@@ -1520,7 +1508,7 @@ void Foam::refinementHistory::compact()
 
             if (splitCells_[index].parent_ != -2)
             {
-                FatalErrorIn("refinementHistory::compact()")
+                FatalErrorInFunction
                     << "Problem index:" << index
                     << abort(FatalError);
             }
@@ -1535,7 +1523,7 @@ void Foam::refinementHistory::compact()
              && splitCells_[visibleCells_[cellI]].parent_ == -2
             )
             {
-                FatalErrorIn("refinementHistory::compact()")
+                FatalErrorInFunction
                     << "Problem : visible cell:" << cellI
                     << " is marked as being free." << abort(FatalError);
             }

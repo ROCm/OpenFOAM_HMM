@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,27 @@ Description
     This function object calculates and outputs the Courant number as a
     volScalarField.  The field is stored on the mesh database so that it can
     be retrieved and used for other applications.
+
+    Example of function object specification to calculate the Courant number:
+    \verbatim
+    CourantNo1
+    {
+        type        CourantNo;
+        functionObjectLibs ("libutilityFunctionObjects.so");
+        ...
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | Type name: CourantNo    | yes         |
+        rhoName      | Name of density field   | no          | rho
+        phiName      | Name of flux field      | no          | phi
+        resultName   | Name of Courant number field | no     | <function name>
+        log          | Log to standard output  | no          | yes
+    \endtable
+
 
 SourceFiles
     CourantNo.C
@@ -76,6 +97,12 @@ class CourantNo
 
         //- Name of density field (optional)
         word rhoName_;
+
+        //- Result name
+        word resultName_;
+
+        //- Switch to send output to Info as well as to file
+        Switch log_;
 
 
     // Private Member Functions

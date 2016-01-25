@@ -127,7 +127,7 @@ case SunOS:
 default:
     echo
     echo "Your '$WM_ARCH' operating system is not supported by this release"
-    echo "of OpenFOAM. For further assistance, please contact www.OpenFOAM.org"
+    echo "of OpenFOAM. For further assistance, please contact www.OpenFOAM.com"
     echo
     breaksw
 
@@ -379,7 +379,7 @@ case SYSTEMOPENMPI:
     breaksw
 
 case OPENMPI:
-    setenv FOAM_MPI openmpi-1.8.5
+    setenv FOAM_MPI openmpi-1.10.0
     # Optional configuration tweaks:
     _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config/openmpi.csh`
 

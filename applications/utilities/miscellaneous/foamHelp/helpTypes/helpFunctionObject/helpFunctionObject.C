@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -76,11 +76,11 @@ void Foam::helpTypes::helpFunctionObject::execute
 
     if (args.optionReadIfPresent("browse", function))
     {
-        displayDoc(function, ".*[fF]unctionObject.*", true);
+        displayDoc(function, ".*[fF]unctionObject.*", true, "H");
     }
     else
     {
-        displayDocOptions(".*[fF]unctionObject.*", true);
+        displayDocOptions(".*[fF]unctionObject.*", true, "H");
     }
 }
 

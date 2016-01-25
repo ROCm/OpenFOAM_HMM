@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -200,7 +200,7 @@ Foam::Istream& Foam::regIOobject::readStream()
 
     if (readOpt() == NO_READ)
     {
-        FatalErrorIn("regIOobject::readStream()")
+        FatalErrorInFunction
             << "NO_READ specified for read-constructor of object " << name()
             << " of class " << headerClassName()
             << abort(FatalError);
@@ -257,7 +257,7 @@ Foam::Istream& Foam::regIOobject::readStream()
         }
         else if (!readHeader(*isPtr_))
         {
-            FatalIOErrorIn("regIOobject::readStream()", *isPtr_)
+            FatalIOErrorInFunction(*isPtr_)
                 << "problem while reading header for object " << name()
                 << exit(FatalIOError);
         }
@@ -293,7 +293,7 @@ Foam::Istream& Foam::regIOobject::readStream(const word& expectName)
          && headerClassName() != "dictionary"
         )
         {
-            FatalIOErrorIn("regIOobject::readStream(const word&)", *isPtr_)
+            FatalIOErrorInFunction(*isPtr_)
                 << "unexpected class name " << headerClassName()
                 << " expected " << expectName << endl
                 << "    while reading object " << name()

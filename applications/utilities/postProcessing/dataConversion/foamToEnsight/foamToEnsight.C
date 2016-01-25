@@ -167,14 +167,20 @@ int main(int argc, char *argv[])
         regionPrefix = regionName;
     }
 
-    const label nVolFieldTypes = 5;
+    const label nVolFieldTypes = 10;
     const word volFieldTypes[] =
     {
         volScalarField::typeName,
         volVectorField::typeName,
         volSphericalTensorField::typeName,
         volSymmTensorField::typeName,
-        volTensorField::typeName
+        volTensorField::typeName,
+
+        volScalarField::DimensionedInternalField::typeName,
+        volVectorField::DimensionedInternalField::typeName,
+        volSphericalTensorField::DimensionedInternalField::typeName,
+        volSymmTensorField::DimensionedInternalField::typeName,
+        volTensorField::DimensionedInternalField::typeName
     };
 
     // Path to EnSight directory at case level only
@@ -534,6 +540,122 @@ int main(int argc, char *argv[])
                     ensightField<tensor>
                     (
                         volField(meshSubsetter, vf),
+                        eMesh,
+                        ensightDir,
+                        prepend,
+                        timeIndex,
+                        binary,
+                        nodeValues,
+                        ensightCaseFile
+                    );
+                }
+                // DimensionedFields
+                else if
+                (
+                    volFieldTypes[i]
+                 == volScalarField::DimensionedInternalField::typeName
+                )
+                {
+                    volScalarField::DimensionedInternalField df
+                    (
+                        fieldObject,
+                        mesh
+                    );
+                    ensightField<scalar>
+                    (
+                        volField<scalar>(meshSubsetter, df),
+                        eMesh,
+                        ensightDir,
+                        prepend,
+                        timeIndex,
+                        binary,
+                        nodeValues,
+                        ensightCaseFile
+                    );
+                }
+                else if
+                (
+                    volFieldTypes[i]
+                 == volVectorField::DimensionedInternalField::typeName
+                )
+                {
+                    volVectorField::DimensionedInternalField df
+                    (
+                        fieldObject,
+                        mesh
+                    );
+                    ensightField<vector>
+                    (
+                        volField<vector>(meshSubsetter, df),
+                        eMesh,
+                        ensightDir,
+                        prepend,
+                        timeIndex,
+                        binary,
+                        nodeValues,
+                        ensightCaseFile
+                    );
+                }
+                else if
+                (
+                    volFieldTypes[i]
+                 == volSphericalTensorField::DimensionedInternalField::typeName
+                )
+                {
+                    volSphericalTensorField::DimensionedInternalField df
+                    (
+                        fieldObject,
+                        mesh
+                    );
+                    ensightField<sphericalTensor>
+                    (
+                        volField<sphericalTensor>(meshSubsetter, df),
+                        eMesh,
+                        ensightDir,
+                        prepend,
+                        timeIndex,
+                        binary,
+                        nodeValues,
+                        ensightCaseFile
+                    );
+                }
+                else if
+                (
+                    volFieldTypes[i]
+                 == volSymmTensorField::DimensionedInternalField::typeName
+                )
+                {
+                    volSymmTensorField::DimensionedInternalField df
+                    (
+                        fieldObject,
+                        mesh
+                    );
+                    ensightField<symmTensor>
+                    (
+                        volField<symmTensor>(meshSubsetter, df),
+                        eMesh,
+                        ensightDir,
+                        prepend,
+                        timeIndex,
+                        binary,
+                        nodeValues,
+                        ensightCaseFile
+                    );
+                }
+                else if
+                (
+                    volFieldTypes[i]
+                 == volTensorField::DimensionedInternalField::typeName
+                )
+                {
+                    volTensorField::DimensionedInternalField df
+                    (
+                        fieldObject,
+                        mesh
+                    );
+                    ensightField<tensor>
+                    (
+                        volField<tensor>(meshSubsetter, df),
                         eMesh,
                         ensightDir,
                         prepend,

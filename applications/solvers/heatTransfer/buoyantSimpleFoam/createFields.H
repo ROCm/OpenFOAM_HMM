@@ -37,9 +37,9 @@ volVectorField U
 #include "compressibleCreatePhi.H"
 
 Info<< "Creating turbulence model\n" << endl;
-autoPtr<compressible::RASModel> turbulence
+autoPtr<compressible::turbulenceModel> turbulence
 (
-    compressible::RASModel::New
+    compressible::turbulenceModel::New
     (
         rho,
         U,
@@ -49,9 +49,10 @@ autoPtr<compressible::RASModel> turbulence
 );
 
 
-Info<< "Calculating field g.h\n" << endl;
-volScalarField gh("gh", g & mesh.C());
-surfaceScalarField ghf("ghf", g & mesh.Cf());
+#include "readGravitationalAcceleration.H"
+#include "readhRef.H"
+#include "gh.H"
+
 
 Info<< "Reading field p_rgh\n" << endl;
 volScalarField p_rgh

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,6 +57,8 @@ Description
 #include "MeshedSurface.H"
 #include "globalIndex.H"
 #include "IOmanip.H"
+#include "decompositionModel.H"
+#include "fvMeshTools.H"
 
 using namespace Foam;
 
@@ -555,7 +557,7 @@ scalar getMergeDistance(const polyMesh& mesh, const scalar mergeTol)
 
         if (mergeTol < writeTol)
         {
-            FatalErrorIn("getMergeDistance(const polyMesh&, const dictionary&)")
+            FatalErrorInFunction
                 << "Your current settings specify ASCII writing with "
                 << IOstream::defaultPrecision() << " digits precision." << nl
                 << "Your merging tolerance (" << mergeTol
@@ -812,6 +814,7 @@ int main(int argc, char *argv[])
         readScalar(meshDict.lookup("mergeTolerance"))
     );
 
+    const Switch keepPatches(meshDict.lookupOrDefault("keepPatches", false));
 
 
     // Read decomposePar dictionary
@@ -819,15 +822,28 @@ int main(int argc, char *argv[])
     {
         if (Pstream::parRun())
         {
+            fileName decompDictFile;
+            if (args.optionReadIfPresent("decomposeParDict", decompDictFile))
+            {
+                if (isDir(decompDictFile))
+                {
+                    decompDictFile = decompDictFile/"decomposeParDict";
+                }
+            }
+
             decomposeDict = IOdictionary
             (
-                IOobject
+                decompositionModel::selectIO
                 (
-                    "decomposeParDict",
-                    runTime.system(),
-                    mesh,
-                    IOobject::MUST_READ_IF_MODIFIED,
-                    IOobject::NO_WRITE
+                    IOobject
+                    (
+                        "decomposeParDict",
+                        runTime.system(),
+                        mesh,
+                        IOobject::MUST_READ_IF_MODIFIED,
+                        IOobject::NO_WRITE
+                    ),
+                    decompDictFile
                 )
             );
         }
@@ -1438,7 +1454,7 @@ int main(int argc, char *argv[])
 
     if (Pstream::parRun() && !decomposer.parallelAware())
     {
-        FatalErrorIn(args.executable())
+        FatalErrorInFunction
             << "You have selected decomposition method "
             << decomposer.typeName
             << " which is not parallel aware." << endl
@@ -1503,6 +1519,12 @@ int main(int argc, char *argv[])
             motionDict
         );
 
+        // Remove zero sized patches originating from faceZones
+        if (!keepPatches && !wantSnap && !wantLayers)
+        {
+            fvMeshTools::removeEmptyPatches(mesh, true);
+        }
+
         writeMesh
         (
             "Refined mesh",
@@ -1544,6 +1566,12 @@ int main(int argc, char *argv[])
             planarAngle,
             snapParams
         );
+
+        // Remove zero sized patches originating from faceZones
+        if (!keepPatches && !wantLayers)
+        {
+            fvMeshTools::removeEmptyPatches(mesh, true);
+        }
 
         writeMesh
         (
@@ -1595,6 +1623,12 @@ int main(int argc, char *argv[])
             distributor
         );
 
+        // Remove zero sized patches originating from faceZones
+        if (!keepPatches)
+        {
+            fvMeshTools::removeEmptyPatches(mesh, true);
+        }
+
         writeMesh
         (
             "Layer mesh",
@@ -1606,6 +1640,7 @@ int main(int argc, char *argv[])
         Info<< "Layers added in = "
             << timer.cpuTimeIncrement() << " s." << endl;
     }
+
 
 
     {

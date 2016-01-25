@@ -200,11 +200,11 @@ LRR<BasicTurbulenceModel>::LRR
 {
     if (type == typeName)
     {
+        this->printCoeffs(type);
+
         this->boundNormalStress(this->R_);
         bound(epsilon_, this->epsilonMin_);
         k_ = 0.5*tr(this->R_);
-        correctNut();
-        this->printCoeffs(type);
     }
 }
 

@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(processorField, 0);
+    defineTypeNameAndDebug(processorField, 0);
 }
 
 
@@ -47,7 +47,9 @@ Foam::processorField::processorField
 :
     name_(name),
     obr_(obr),
-    active_(true)
+    active_(true),
+    resultName_(name),
+    log_(true)
 {
     // Check if the available mesh is an fvMesh otherise deactivate
     if (isA<fvMesh>(obr_))
@@ -62,7 +64,7 @@ Foam::processorField::processorField
             (
                 IOobject
                 (
-                    "processorID",
+                    resultName_,
                     mesh.time().timeName(),
                     mesh,
                     IOobject::NO_READ,
@@ -78,16 +80,8 @@ Foam::processorField::processorField
     else
     {
         active_ = false;
-        WarningIn
-        (
-            "processorField::processorField"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating " << name_
+        WarningInFunction
+            << "No fvMesh available, deactivating " << name_
             << endl;
     }
 }
@@ -103,7 +97,10 @@ Foam::processorField::~processorField()
 
 void Foam::processorField::read(const dictionary& dict)
 {
-    // do nothing
+    if (active_)
+    {
+        log_.readIfPresent("log", dict);
+    }
 }
 
 
@@ -112,7 +109,7 @@ void Foam::processorField::execute()
     if (active_)
     {
         const volScalarField& procField =
-            obr_.lookupObject<volScalarField>("processorID");
+            obr_.lookupObject<volScalarField>(resultName_);
 
         const_cast<volScalarField&>(procField) ==
             dimensionedScalar("procI", dimless, Pstream::myProcNo());
@@ -122,10 +119,7 @@ void Foam::processorField::execute()
 
 void Foam::processorField::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 
@@ -140,7 +134,12 @@ void Foam::processorField::write()
     if (active_)
     {
         const volScalarField& procField =
-            obr_.lookupObject<volScalarField>("processorID");
+            obr_.lookupObject<volScalarField>(resultName_);
+
+        if (log_) Info
+            << type() << " " << name_ << " output:" << nl
+            << "    writing field " << procField.name() << nl
+            << endl;
 
         procField.write();
     }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,11 +53,8 @@ Foam::autoPtr<Foam::renumberMethod> Foam::renumberMethod::New
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalErrorIn
-        (
-            "renumberMethod::New"
-            "(const dictionary& renumberDict)"
-        )   << "Unknown renumberMethod "
+        FatalErrorInFunction
+            << "Unknown renumberMethod "
             << methodType << nl << nl
             << "Valid renumberMethods are : " << endl
             << dictionaryConstructorTablePtr_->sortedToc()
@@ -96,15 +93,7 @@ Foam::labelList Foam::renumberMethod::renumber
     const pointField& cc
 ) const
 {
-    notImplemented
-    (
-        "renumberMethod::renumber\n"
-        "(\n"
-        "    const labelList&,\n"
-        "    const labelList&,\n"
-        "    const pointField&\n"
-        ") const"
-    );
+    NotImplemented;
     return labelList();
 }
 

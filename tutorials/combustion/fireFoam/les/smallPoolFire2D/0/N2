@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  plus                                  |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -21,24 +21,22 @@ internalField   uniform 0.76699;
 
 boundaryField
 {
-    outlet
+    "(outlet|sides)"
     {
         type            calculated;
-    }
-
-    sides
-    {
-        type            calculated;
+        value           $internalField;
     }
 
     base
     {
         type            calculated;
+        value           $internalField;
     }
 
     inlet
     {
         type            calculated;
+        value           $internalField;
     }
 
     frontAndBack

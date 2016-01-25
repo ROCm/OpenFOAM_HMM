@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::SRFVelocityFvPatchVectorField
+    Foam::SRFFreestreamVelocityFvPatchVectorField
 
 Description
     Freestream velocity condition to be used in conjunction with the single
@@ -32,17 +32,17 @@ Description
     applies the appropriate rotation transformation in time and space to
     determine the local velocity using:
 
-        \f[
-            U_p = cos(\theta)*U_{Inf} + sin(theta) (n^UInf) - U_{p,srf}
-        \f]
+    \f[
+        U_p = cos(\theta) U_{Inf} + sin(\theta) (n \times U_{Inf}) - U_{p,srf}
+    \f]
 
     where
     \vartable
-        U_p     = patch velocity [m/s]
-        U_{Inf} = free stream velocity in the absolute frame [m/s]
-        theta   = swept angle [rad]
-        n       = axis direction of the SRF
-        U_{p,srf} = SRF velocity of the patch
+        U_p     | patch velocity [m/s]
+        U_{Inf} | free stream velocity in the absolute frame [m/s]
+        \theta  | swept angle [rad]
+        n       | axis direction of the SRF
+        U_{p,srf} | SRF velocity of the patch [m/s]
     \endvartable
 
 

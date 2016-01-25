@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,7 +65,8 @@ protected:
     void displayDocOptions
     (
         const string& searchStr,
-        const bool exactMatch
+        const bool exactMatch,
+        const word& ext
     ) const;
 
     //- Display the help documentation in a browser
@@ -73,7 +74,8 @@ protected:
     (
         const word& className,
         const string& searchStr,
-        const bool exactMatch
+        const bool exactMatch,
+        const word& ext
     ) const;
 
 

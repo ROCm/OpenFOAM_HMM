@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,6 +45,7 @@ namespace Foam
 {
 
 // Forward class declarations
+class motionInterpolation;
 class motionDiffusivity;
 
 /*---------------------------------------------------------------------------*\
@@ -60,6 +61,9 @@ class displacementSBRStressFvMotionSolver
 
         //- Cell-centre motion field
         mutable volVectorField cellDisplacement_;
+
+        //- Interpolation used to transfer cell displacement to the points
+        autoPtr<motionInterpolation> interpolationPtr_;
 
         //- Diffusivity used to control the motion
         autoPtr<motionDiffusivity> diffusivityPtr_;
@@ -90,6 +94,15 @@ public:
         (
             const polyMesh&,
             const IOdictionary&
+        );
+
+        //- Construct from components
+        displacementSBRStressFvMotionSolver
+        (
+            const polyMesh& mesh,
+            const IOdictionary& dict,
+            const pointVectorField& pointDisplacement,
+            const pointIOField& points0
         );
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,6 +79,7 @@ Description
         UName        | velocity field name     | no          | U
         rhoName      | density field name (see below) | no   | rho
         CofR         | centre of rotation (see below) | no   |
+        porosity     | flag to include porosity contributions | no | no
         directForceDensity | force density supplied directly (see below)|no|no
         fDName       | name of force density field (see below) | no | fD
     \endtable

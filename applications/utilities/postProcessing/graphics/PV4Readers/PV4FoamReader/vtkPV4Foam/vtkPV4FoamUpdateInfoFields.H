@@ -99,6 +99,34 @@ void Foam::vtkPV4Foam::updateInfoFields
         objects
     );
 
+    //- Add dimensioned fields to GUI
+    addToSelection<DimensionedField<scalar, meshType> >
+    (
+        select,
+        objects
+    );
+    addToSelection<DimensionedField<vector, meshType> >
+    (
+        select,
+        objects
+    );
+    addToSelection<DimensionedField<sphericalTensor, meshType> >
+    (
+        select,
+        objects
+    );
+    addToSelection<DimensionedField<symmTensor, meshType> >
+    (
+        select,
+        objects
+    );
+    addToSelection<DimensionedField<tensor, meshType> >
+    (
+        select,
+        objects
+    );
+
+
     // restore the enabled selections
     setSelectedArrayEntries(select, enabledEntries);
 

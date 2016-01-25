@@ -541,11 +541,8 @@ void Foam::mapDistribute::operator=(const mapDistribute& rhs)
     // Check for assignment to self
     if (this == &rhs)
     {
-        FatalErrorIn
-        (
-            "Foam::mapDistribute::operator="
-            "(const Foam::mapDistribute&)"
-        )   << "Attempted assignment to self"
+        FatalErrorInFunction
+            << "Attempted assignment to self"
             << abort(FatalError);
     }
     mapDistributeBase::operator=(rhs);

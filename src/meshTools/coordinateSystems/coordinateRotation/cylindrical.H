@@ -120,10 +120,13 @@ public:
         //- Construct from tensor Field
         cylindrical(const tensorField&);
 
+        //- Construct as copy
+        cylindrical(const cylindrical&);
+
         //- Return clone
-        autoPtr<cylindrical> clone() const
+        autoPtr<coordinateRotation> clone() const
         {
-            return autoPtr<cylindrical>(new cylindrical(*this));
+            return autoPtr<coordinateRotation>(new cylindrical(*this));
         }
 
 
@@ -143,28 +146,28 @@ public:
         //- Return local-to-global transformation tensor
         virtual const tensor& R() const
         {
-            notImplemented("const tensor& cylindrical::R() const");
+            NotImplemented;
             return tensor::zero;
         }
 
         //- Return global-to-local transformation tensor
         virtual const tensor& Rtr() const
         {
-             notImplemented("const tensor& cylindrical::Rtr() const");
+             NotImplemented;
              return tensor::zero;
         }
 
         //- Return local Cartesian x-axis
         virtual const vector e1() const
         {
-            notImplemented("const tensor& cylindrical::e1() const");
+            NotImplemented;
             return vector::zero;
         }
 
         //- Return local Cartesian y-axis
         virtual const vector e2() const
         {
-            notImplemented("const tensor& cylindrical::e2() const");
+            NotImplemented;
             return vector::zero;
         }
 

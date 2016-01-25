@@ -62,6 +62,17 @@ int main(int argc, char *argv[])
     const bool checkGeometry = args.optionFound("checkGeometry");
     const bool conformationOnly = args.optionFound("conformationOnly");
 
+    // Allow override of decomposeParDict location
+    fileName decompDictFile;
+    if (args.optionReadIfPresent("decomposeParDict", decompDictFile))
+    {
+        if (isDir(decompDictFile))
+        {
+            decompDictFile = decompDictFile / "decomposeParDict";
+        }
+    }
+
+
     IOdictionary foamyHexMeshDict
     (
         IOobject
@@ -114,7 +125,7 @@ int main(int argc, char *argv[])
 
     Info<< "Create mesh for time = " << runTime.timeName() << nl << endl;
 
-    conformalVoronoiMesh mesh(runTime, foamyHexMeshDict);
+    conformalVoronoiMesh mesh(runTime, foamyHexMeshDict, decompDictFile);
 
 
     if (conformationOnly)
@@ -145,7 +156,7 @@ int main(int argc, char *argv[])
     }
 
 
-    Info<< nl << "End" << nl << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

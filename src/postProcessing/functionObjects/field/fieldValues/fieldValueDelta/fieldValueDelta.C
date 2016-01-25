@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -168,7 +168,7 @@ void Foam::fieldValues::fieldValueDelta::execute()
         source1Ptr_->write();
         source2Ptr_->write();
 
-        file()<< obr_.time().value();
+        writeTime(file());
 
         if (log_) Info << type() << " " << name_ << " output:" << endl;
 
@@ -180,7 +180,7 @@ void Foam::fieldValues::fieldValueDelta::execute()
 
         if (entries1.size() != entries2.size())
         {
-            FatalErrorIn("void Foam::fieldValues::fieldValueDelta::execute()")
+            FatalErrorInFunction
                 << name_ << ": objects must generate the same number of results"
                 << nl
                 << "    " << name1 << " objects: " << entries1 << nl
@@ -197,10 +197,7 @@ void Foam::fieldValues::fieldValueDelta::execute()
 
             if (type1 != type2)
             {
-                FatalErrorIn
-                (
-                    "void Foam::fieldValues::fieldValueDelta::execute()"
-                )
+                FatalErrorInFunction
                     << name_
                     << ": input values for operation must be of the same type"
                     << nl
@@ -242,10 +239,7 @@ void Foam::fieldValues::fieldValueDelta::execute()
 
 void Foam::fieldValues::fieldValueDelta::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

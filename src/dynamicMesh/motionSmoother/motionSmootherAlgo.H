@@ -56,7 +56,8 @@ Note
     and/or edges but no faces of pp). Hence we have to be careful when e.g.
     synchronising displacements that the value from the processor which has
     faces of pp get priority. This is currently handled in setDisplacement
-    by resetting the internal displacement to zero before doing anything
+    by resetting the internal displacement to zero on coupled points
+    that are coupled to patch points before doing anything
     else. The combine operator used will give preference to non-zero
     values.
 

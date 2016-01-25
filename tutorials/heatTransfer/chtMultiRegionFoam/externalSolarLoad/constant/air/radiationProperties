@@ -1,0 +1,98 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  plus                                  |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      radiationProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+radiation       on;
+
+radiationModel  solarLoad;
+
+solarLoadCoeffs
+{
+    // Calculate reflected/secondary heat fluxes
+    useVFbeamToDiffuse  true;
+
+    // Sun direction ray model. Give the sunDirection or calculated using the
+    // (solar calculator)
+    sunDirectionModel   sunDirTraking;//sunDirConstant;
+
+        // Time interval to update Sun position (sec)
+        sunTrackingUpdateInterval 800;
+
+        //sunDirection        (-1 1 -1);
+
+        localStandardMeridian   9;      // GMT offset (hours)
+        startDay                204;    // day of the year
+        startTime               15;     // time of the day (hours decimal)
+        longitude               139.74; // longitude (degrees)
+        latitude                35.658; // latitude (degrees)
+
+        // Grid orientation
+        gridUp                  (0 0 1);
+        gridEast                (1 0 0);
+
+    // Energy spectrum
+    spectralDistribution (1 1);
+
+    // Solar model:
+
+        // sunLoadConstant-sunLoadFairWeatherConditions-SunLoadTheoreticalMaximum;
+        sunLoadModel sunLoadFairWeatherConditions;
+
+        // Sun load constant model
+        directSolarRad  500;    // [w/m2]
+        diffuseSolarRad 40;     // [w/m2]
+
+        // Fair Weather Conditions Model Constants.
+        // Calculate beta from the Solar calculator or input
+        A       300;        // Apparent solar irradiation at air mass m = 0
+        B       0.142;      // Atmospheric extinction coefficient
+        //beta    45;       // Solar altitude (in degrees) above the horizontal
+
+        // Theoretical maximum model constants
+        Setrn       10;
+        SunPrime    1;
+
+        // Ground reflectivity
+        groundReflectivity 0.2;
+
+        // Solar diffusivity constants
+        C   0.058;  // Model constant
+
+    // Radiative flux coupling flags
+    solidCoupled    true;  //Couple through Qr the solid regions (default true)
+    wallCoupled     false; //Couple through Qr wall patches (default false)
+}
+
+
+viewFactorCoeffs
+{
+    smoothing true; //Smooth view factor matrix (use when in a close surface
+                    //to force Sum(Fij = 1)
+    constantEmissivity true; //constant emissivity on surfaces.
+}
+
+// Number of flow iterations per radiation iteration
+solverFreq 1;
+
+absorptionEmissionModel none;
+
+scatterModel    none;
+
+sootModel       none;
+
+transmissivityModel none;
+
+// ************************************************************************* //

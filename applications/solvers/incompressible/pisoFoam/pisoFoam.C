@@ -24,12 +24,43 @@ License
 Application
     pisoFoam
 
+Group
+    grpIncompressibleSolvers
+
 Description
     Transient solver for incompressible flow.
+
+    \heading Solver details
+    The solver uses the PISO algorithm to solve the continuity equation:
+
+        \f[
+            \div \vec{U} = 0
+        \f]
+
+    and momentum equation:
+
+        \f[
+            \ddt{\vec{U}} + \div \left( \vec{U} \vec{U} \right) - \div \gvec{R}
+          = - \grad p
+        \f]
+
+    Where:
+    \vartable
+        \vec{U} | Velocity
+        p       | Pressure
+        \vec{R} | Stress tensor
+    \endvartable
 
     Sub-models include:
     - turbulence modelling, i.e. laminar, RAS or LES
     - run-time selectable MRF and finite volume options, e.g. explicit porosity
+
+    \heading Required fields
+    \plaintable
+        U       | Velocity [m/s]
+        p       | Kinematic pressure, p/rho [m2/s2]
+        \<turbulence fields\> | As required by user selection
+    \endplaintable
 
 \*---------------------------------------------------------------------------*/
 
@@ -37,7 +68,7 @@ Description
 #include "singlePhaseTransportModel.H"
 #include "turbulentTransportModel.H"
 #include "pisoControl.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,6 +84,8 @@ int main(int argc, char *argv[])
     #include "createMRF.H"
     #include "createFvOptions.H"
     #include "initContinuityErrs.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

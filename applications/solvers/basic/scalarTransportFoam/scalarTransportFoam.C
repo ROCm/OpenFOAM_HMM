@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,13 +24,37 @@ License
 Application
     scalarTransportFoam
 
+Group
+    grpBasicSolvers
+
 Description
-    Solves a transport equation for a passive scalar
+    Passive scalar transport equation solver.
+
+    \heading Solver details
+    The equation is given by:
+
+    \f[
+        \ddt{T} + \div \left(\vec{U} T\right) - \div \left(D_T \grad T \right)
+        = S_{T}
+    \f]
+
+    Where:
+    \vartable
+        T       | Passive scalar
+        D_T     | Diffusion coefficient
+        S_T     | Source
+    \endvartable
+
+    \heading Required fields
+    \plaintable
+        T       | Passive scalar
+        U       | Velocity [m/s]
+    \endplaintable
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "simpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -58,7 +82,7 @@ int main(int argc, char *argv[])
 
         while (simple.correctNonOrthogonal())
         {
-            solve
+            fvScalarMatrix TEqn
             (
                 fvm::ddt(T)
               + fvm::div(phi, T)
@@ -66,6 +90,11 @@ int main(int argc, char *argv[])
              ==
                 fvOptions(T)
             );
+
+            fvOptions.constrain(TEqn);
+
+            TEqn.solve();
+
         }
 
         runTime.write();

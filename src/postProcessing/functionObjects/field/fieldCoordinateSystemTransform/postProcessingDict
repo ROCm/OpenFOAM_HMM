@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  plus                                  |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -38,9 +38,11 @@ functions
             UPrime2Mean
         );
 
-        coordinateSystem
+        origin  (0.001  0       0);
+
+        coordinateRotation
         {
-            origin  (0.001  0       0);
+            type    axesRotation;
             e1      (1      0.15    0);
             e3      (0      0      -1);
         }

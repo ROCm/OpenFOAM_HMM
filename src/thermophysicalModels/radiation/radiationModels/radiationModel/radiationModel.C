@@ -42,6 +42,8 @@ namespace Foam
     }
 }
 
+const Foam::word Foam::radiation::radiationModel::externalRadHeatFieldName_ =
+    "QrExt";
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -86,6 +88,8 @@ void Foam::radiation::radiationModel::initialise()
         scatter_.reset(scatterModel::New(*this, mesh_).ptr());
 
         soot_.reset(sootModel::New(*this, mesh_).ptr());
+
+        transmissivity_.reset(transmissivityModel::New(*this, mesh_).ptr());
     }
 }
 
@@ -114,7 +118,8 @@ Foam::radiation::radiationModel::radiationModel(const volScalarField& T)
     firstIter_(true),
     absorptionEmission_(NULL),
     scatter_(NULL),
-    soot_(NULL)
+    soot_(NULL),
+    transmissivity_(NULL)
 {}
 
 
@@ -134,7 +139,8 @@ Foam::radiation::radiationModel::radiationModel
     firstIter_(true),
     absorptionEmission_(NULL),
     scatter_(NULL),
-    soot_(NULL)
+    soot_(NULL),
+    transmissivity_(NULL)
 {
     if (readOpt() == IOobject::NO_READ)
     {
@@ -173,7 +179,8 @@ Foam::radiation::radiationModel::radiationModel
     firstIter_(true),
     absorptionEmission_(NULL),
     scatter_(NULL),
-    soot_(NULL)
+    soot_(NULL),
+    transmissivity_(NULL)
 {
     initialise();
 }
@@ -263,11 +270,7 @@ Foam::radiation::radiationModel::absorptionEmission() const
 {
     if (!absorptionEmission_.valid())
     {
-        FatalErrorIn
-        (
-            "const Foam::radiation::absorptionEmissionModel&"
-            "Foam::radiation::radiationModel::absorptionEmission() const"
-        )
+        FatalErrorInFunction
             << "Requested radiation absorptionEmission model, but model is "
             << "not activate" << abort(FatalError);
     }
@@ -281,16 +284,26 @@ Foam::radiation::radiationModel::soot() const
 {
     if (!soot_.valid())
     {
-        FatalErrorIn
-        (
-            "const Foam::radiation::sootModel&"
-            "Foam::radiation::radiationModel::soot() const"
-        )
+        FatalErrorInFunction
             << "Requested radiation sootModel model, but model is "
             << "not activate" << abort(FatalError);
     }
 
     return soot_();
+}
+
+
+const Foam::radiation::transmissivityModel&
+Foam::radiation::radiationModel::transmissivity() const
+{
+    if (!transmissivity_.valid())
+    {
+        FatalErrorInFunction
+            << "Requested radiation sootModel model, but model is "
+            << "not activate" << abort(FatalError);
+    }
+
+    return transmissivity_();
 }
 
 

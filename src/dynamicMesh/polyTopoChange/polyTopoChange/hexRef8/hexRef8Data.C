@@ -280,7 +280,7 @@ void Foam::hexRef8Data::sync(const IOobject& io)
     if (hasLevel0Edge)
     {
         // Get master length
-        scalar masterLen = level0EdgePtr_().value();
+        scalar masterLen = (Pstream::master() ? level0EdgePtr_().value() : 0);
         Pstream::scatter(masterLen);
         if (!level0EdgePtr_.valid())
         {

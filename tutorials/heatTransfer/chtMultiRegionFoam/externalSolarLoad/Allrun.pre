@@ -1,0 +1,29 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+runApplication blockMesh
+runApplication topoSet
+runApplication splitMeshRegions -cellZones -overwrite
+
+# Remove unwanted region
+rm -r 0/domain3
+rm -r constant/domain3
+rm -r system/domain3
+
+# remove fluid fields from solid regions (important for post-processing)
+for i in solid floor
+do
+   rm -f 0*/$i/{rho,mut,alphat,epsilon,k,U,p_rgh,Qr,G,IDefault}
+done
+
+for i in air solid floor
+do
+    changeDictionary -region $i > log.changeDictionary.$i 2>&1
+done
+
+
+# ----------------------------------------------------------------- end-of-file

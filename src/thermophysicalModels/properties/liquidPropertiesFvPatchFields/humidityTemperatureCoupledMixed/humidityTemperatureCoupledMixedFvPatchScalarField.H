@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,112 +28,120 @@ Class
     humidityTemperatureCoupledMixedFvPatchScalarField
 
 Description
-    Mixed boundary condition for temperature to be used on coupling flow and
-    solid regions. This BC can operate in four modes:
+    Mixed boundary condition for temperature to be used at the coupling
+    interface between fluid solid regions.
 
-    1) 'inert' : thermal inertia is important and no condensation/evaporation
-                  is taken place.
-    2) 'condensation' : just condensation is taken place
-    3) 'vaporization' : just evaporation is take place
-    4) 'condEvap' : both condensation and evaporation take place
+    This boundary condition can operate in four modes:
+    - \c constantMass: thermal inertia only
+      - requires \c rho, \c thickness and \cp
+    - \c condensation: condensation only
+      - when the wall temperature (Tw) is below the dew temperature (Tdew)
+        condesation takes place and the resulting condensed mass is stored
+        on the wall
+    - \c evaporation: evaporation only
+      - initial mass is vaporized when Tw is above the input vaporization
+        temperature (Tvap).
+    - \c condensationAndEvaporation : condensation and evaporation take place
+      simultaneously.
 
-    For 'inert' operation the 'rho', 'thickness' and 'cp' entries are needed.
-
-    In 'condensation' mode when the wall temperature (Tw) is bellow the dew
-    temperature (Tdew) condesation takes place and the resulting condensed mass
-    is stored on the wall.
-
-    In 'vaporization' the initial mass is vaporized when Tw is above the
-    input vaporization temperature (Tvap).
-
-    In 'condEvap', condensation and evaporation take place simultaneously.
-
-    The BC assumes no mass flow on the wall.i.e the mass condensed on a face
-    remains on that face. It uses a 'lump mass' model to include thermal
+    There is no mass flow on the wall, i.e. the mass condensed on a face
+    remains on that face. It uses a 'lumped mass' model to include thermal
     inertia effects.
 
-    It assumes a drop-wise type of condensation and its heat transfer Nu number
-    is:
+    It assumes a drop-wise type of condensation, whereby its heat transfer
+    Nusselt number is calculated using:
+    \f{eqnarray*}{
+        51104 + 2044 T   & T > 295 & T < 373 \\
+        255510           & T > 373 &
+    \f}
 
-        51104 + 2044*T   T > 295  T < 373
-        255510           T > 373
+    Reference:
+    - T. Bergam, A.Lavine, F. Incropera and D. Dewitt. Heat and Mass Transfer.
+      7th Edition. Chapter 10.
 
-    T. Bergam, A.Lavine, F. Incropera and D. Dewitt. Heat and Mass Transfer.
-    7th Edition. Chapter 10.
+    The mass transfer correlation used is:
 
-    The mass transfer correlation used is hm = Dab*Sh/L
+    \f[ h_m = D_{ab} \frac{Sc}{L} \f]
 
     where:
+    \vartable
+        D_{ab} | mass vapour difussivity
+        L      | characteristic length
+        Sc     | Schmidt number
+    \endvartable
 
-        Dab is the mass vapor difussivity
-        L   is the characteristic lenght
-        Sc  the Schmidt number and it is calculated as:
+    The Schmidt number is calculated using:
 
-            0.664*sqrt(Re)*cbrt(Sc)  Re < 5.0E+05
-            0.037*pow(Re, 0.8)*cbrt(Sc)  Re > 5.0E+05
+    \f{eqnarray*}{
+            0.664 Re^\frac{1}{2} Sc^\frac{1}{3} & Re < 5.0E+05 \\
+            0.037 Re^\frac{4}{5} Sc^\frac{1}{3} & Re > 5.0E+05
+    \f}
 
-    NOTE: The correclation used to calculate Tdew is for water vapor.
-    In addition a scalar transport for the carrier specie have to be specified
-    via function objects or in the main solver. This specie transports the
-    vapour phase in the main ragion. The BC of this specie on the coupled wall
-    has to fixedGradient in order to allow condensation or evaporation of the
-    vapor in or out of this wall
+    NOTE:
+    - The correlation used to calculate Tdew is for water vapour.
+    - A scalar transport equation for the carrier specie is required, e.g.
+      supplied via a function object or in the main solver. This specie
+      transports the vapour phase in the main ragion.
+    - The boundary condition of this specie on the coupled wall must be 
+      fixedGradient in order to allow condensation or evaporation of the
+      vapour in or out of this wall
 
 
     Example usage:
 
     On the fluid side
+    \verbatim
+    myInterfacePatchName
+    {
+        type            thermalHumidityCoupledMixed;
+        kappa           fluidThermo;
+        kappaName       none;
 
-        myInterfacePatchName
+        // Modes of operation: inert, condensation, vaporization, condEvap
+        mode            condEvap;
+
+        // Carrier species name
+        specieName      H2O;
+
+        // Carrier molecular weight
+        carrierMolWeight           28.9;
+
+        // Characteristic lenght of the wall
+        L               0.1;
+
+        // Vaporasation temperature
+        Tvap            273;
+
+        // Liquid properties for the condensed mass
+        liquid
         {
-            type            thermalHumidityCoupledMixed;
-            kappa           fluidThermo;
-            kappaName       none;
-
-            // Modes of operation: inert, condensation, vaporization, condEvap
-            mode            condEvap;
-
-            // Carrier species name
-            specieName      H2O;
-
-            // Carrier molecular weight
-            carrierMolWeight           28.9;
-
-            // Characteristic lenght of the wall
-            L               0.1;
-
-            // Vaporasation temperature
-            Tvap            273;
-
-            // Liquid properties for the condensed mass
-            liquid
+            H2O
             {
-                H2O
-                {
-                    defaultCoeffs       yes;
-                }
+                defaultCoeffs       yes;
             }
-
-            // thickness, density and cp required for inert and condensation
-            // modes
-
-            //thickness       uniform 0;
-            //cp              uniform 0;
-            //rho             uniform 0;
-
-            value           $internalField;
         }
 
+        // thickness, density and cp required for inert and condensation
+        // modes
+
+        //thickness       uniform 0;
+        //cp              uniform 0;
+        //rho             uniform 0;
+
+        value           $internalField;
+    }
+    \endverbatim
 
     On the solid side:
-
-        myInterfacePatchName
-        {
-            type            thermalInertiaMassTransferCoupledMixed;
-            kappa           solidThermo;
-            kappaName       none;
-            value           uniform 260;
-        }
+    \verbatim
+    myInterfacePatchName
+    {
+        type            thermalInertiaMassTransferCoupledMixed;
+        kappa           solidThermo;
+        kappaName       none;
+        value           uniform 260;
+    }
+    \endverbatim
 
 
 SourceFiles
@@ -170,10 +178,10 @@ public:
         //- Modes of mass transfer
         enum massTransferMode
         {
-            mConstantMass,
-            mCondensation,
-            mEvaporation,
-            mCondensationAndEvaporation
+            mtConstantMass,
+            mtCondensation,
+            mtEvaporation,
+            mtCondensationAndEvaporation
         };
 
 
@@ -181,22 +189,38 @@ private:
 
     // Private data
 
-        static const NamedEnum<massTransferMode, 4> MassModeTypeNames_;
+        static const NamedEnum<massTransferMode, 4> massModeTypeNames_;
 
-        //- BC mode
+        //- Operating mode
         massTransferMode mode_;
 
-        //- Name of field on the neighbour region
-        const word TnbrName_;
 
-        //- Name of the radiative heat flux in the neighbout region
-        const word QrNbrName_;
+        // Field names
 
-        //- Name of the radiative heat flux
-        const word QrName_;
+            //- Name of the pressure field
+            const word pName_;
 
-        //- Name of the species on which the mass transfered (default H2O)
-        const word specieName_;
+            //- Name of the velocity field
+            const word UName_;
+
+            //- Name of the density field
+            const word rhoName_;
+
+            //- Name of the dynamic viscosity field
+            const word muName_;
+
+            //- Name of temperature field on the neighbour region
+            const word TnbrName_;
+
+            //- Name of the radiative heat flux in the neighbout region
+            const word QrNbrName_;
+
+            //- Name of the radiative heat flux field
+            const word QrName_;
+
+            //- Name of the species on which the mass transfered (default H2O)
+            const word specieName_;
+
 
         //- Liquid properties
         autoPtr<liquidProperties> liquid_;
@@ -345,7 +369,7 @@ public:
             return myKDelta_;
         }
 
-        //- Return mpCpdTpd
+        //- Return mpCpTp
         const scalarField mpCpTp() const
         {
             return mpCpTp_;
@@ -356,7 +380,6 @@ public:
         {
             return dmHfg_;
         }
-
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();

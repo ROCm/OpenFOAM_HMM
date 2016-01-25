@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,7 +57,7 @@ Foam::coordinateSystem::coordinateSystem
     name_(name),
     note_(),
     origin_(cs.origin_),
-    R_(const_cast<coordinateRotation*>(&cs.R()))
+    R_(cs.R().clone())
 {}
 
 
@@ -71,7 +71,7 @@ Foam::coordinateSystem::coordinateSystem
     name_(name),
     note_(),
     origin_(origin),
-    R_(const_cast<coordinateRotation*>(&cr))
+    R_(cr.clone())
 {}
 
 
@@ -147,11 +147,8 @@ Foam::coordinateSystem::coordinateSystem
 
         if (index < 0)
         {
-            FatalErrorIn
-            (
-                "coordinateSystem::coordinateSystem"
-                "(const objectRegistry&, const dictionary&):"
-            )   << "could not find coordinate system: " << key << nl
+            FatalErrorInFunction
+                << "could not find coordinate system: " << key << nl
                 << "available coordinate systems: " << lst.toc() << nl << nl
                 << exit(FatalError);
         }

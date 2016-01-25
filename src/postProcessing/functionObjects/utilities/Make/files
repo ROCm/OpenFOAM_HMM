@@ -1,7 +1,19 @@
+blendingFactor/blendingFactor.C
+blendingFactor/blendingFactorFunctionObject.C
+
 codedFunctionObject/codedFunctionObject.C
 
 CourantNo/CourantNo.C
 CourantNo/CourantNoFunctionObject.C
+
+DESModelRegions/DESModelRegions.C
+DESModelRegions/DESModelRegionsFunctionObject.C
+
+dsmcFields/dsmcFields.C
+dsmcFields/dsmcFieldsFunctionObject.C
+
+fluxSummary/fluxSummary.C
+fluxSummary/fluxSummaryFunctionObject.C
 
 Lambda2/Lambda2.C
 Lambda2/Lambda2FunctionObject.C
@@ -9,20 +21,11 @@ Lambda2/Lambda2FunctionObject.C
 Peclet/Peclet.C
 Peclet/PecletFunctionObject.C
 
-Q/Q.C
-Q/QFunctionObject.C
-
-blendingFactor/blendingFactor.C
-blendingFactor/blendingFactorFunctionObject.C
-
-dsmcFields/dsmcFields.C
-dsmcFields/dsmcFieldsFunctionObject.C
-
 pressureTools/pressureTools.C
 pressureTools/pressureToolsFunctionObject.C
 
-residuals/residuals.C
-residuals/residualsFunctionObject.C
+Q/Q.C
+Q/QFunctionObject.C
 
 scalarTransport/scalarTransport.C
 scalarTransport/scalarTransportFunctionObject.C

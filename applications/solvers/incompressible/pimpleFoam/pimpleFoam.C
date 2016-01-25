@@ -24,13 +24,46 @@ License
 Application
     pimpleFoam
 
+Group
+    grpIncompressibleSolvers
+
 Description
     Large time-step transient solver for incompressible, flow using the PIMPLE
     (merged PISO-SIMPLE) algorithm.
 
+    \heading Solver details
+    The solver uses the PIMPLE (merged PISO-SIMPLE) algorithm to solve the
+    continuity equation:
+
+        \f[
+            \div \vec{U} = 0
+        \f]
+
+    and momentum equation:
+
+        \f[
+            \ddt{\vec{U}} + \div \left( \vec{U} \vec{U} \right) - \div \gvec{R}
+          = - \grad p + \vec{S}_U
+        \f]
+
+    Where:
+    \vartable
+        \vec{U} | Velocity
+        p       | Pressure
+        \vec{R} | Stress tensor
+        \vec{S}_U | Momentum source
+    \endvartable
+
     Sub-models include:
     - turbulence modelling, i.e. laminar, RAS or LES
     - run-time selectable MRF and finite volume options, e.g. explicit porosity
+
+    \heading Required fields
+    \plaintable
+        U       | Velocity [m/s]
+        p       | Kinematic pressure, p/rho [m2/s2]
+        \<turbulence fields\> | As required by user selection
+    \endplaintable
 
 \*---------------------------------------------------------------------------*/
 
@@ -38,7 +71,7 @@ Description
 #include "singlePhaseTransportModel.H"
 #include "turbulentTransportModel.H"
 #include "pimpleControl.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "fixedFluxPressureFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -56,6 +89,8 @@ int main(int argc, char *argv[])
     #include "createMRF.H"
     #include "createFvOptions.H"
     #include "initContinuityErrs.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -179,7 +179,7 @@ void Foam::Time::setControls()
         }
         else
         {
-            FatalIOErrorIn("Time::setControls()", controlDict_)
+            FatalIOErrorInFunction(controlDict_)
                 << "expected startTime, firstTime or latestTime"
                 << " found '" << startFrom << "'"
                 << exit(FatalIOError);
@@ -226,7 +226,7 @@ void Foam::Time::setControls()
             // Update the time formatting
             setTime(startTime_, 0);
 
-            WarningIn("Time::setControls()")
+            WarningInFunction
                 << "Increasing the timePrecision from " << oldPrecision
                 << " to " << precision_
                 << " to support the formatting of the current time directory "
@@ -252,7 +252,7 @@ void Foam::Time::setControls()
           > Pstream::nProcs()*deltaT_/10.0
         )
         {
-            FatalIOErrorIn("Time::setControls()", controlDict_)
+            FatalIOErrorInFunction(controlDict_)
                 << "Start time is not the same for all processors" << nl
                 << "processor " << Pstream::myProcNo() << " has startTime "
                 << startTime_ << exit(FatalIOError);
@@ -319,7 +319,7 @@ void Foam::Time::setControls()
 
             if (storedTimeName != timeName())
             {
-                IOWarningIn("Time::setControls()", timeDict)
+                IOWarningInFunction(timeDict)
                     << "Time read from time dictionary " << storedTimeName
                     << " differs from actual time " << timeName() << '.' << nl
                     << "    This may cause unexpected database behaviour."
@@ -931,7 +931,10 @@ bool Foam::Time::run() const
         // ie, when exiting the control loop
         if (!running && timeIndex_ != startTimeIndex_)
         {
-            // Note, end() also calls an indirect start() as required
+            // Ensure functionObjects execute on last time step
+            // (and hence write uptodate functionObjectProperties)
+            functionObjects_.execute();
+
             functionObjects_.end();
         }
     }
@@ -1348,7 +1351,7 @@ Foam::Time& Foam::Time::operator++()
 
                 if (precision_ != oldPrecision)
                 {
-                    WarningIn("Time::operator++()")
+                    WarningInFunction
                         << "Increased the timePrecision from " << oldPrecision
                         << " to " << precision_
                         << " to distinguish between timeNames at time "
@@ -1358,7 +1361,7 @@ Foam::Time& Foam::Time::operator++()
                     if (precision_ == maxPrecision_)
                     {
                         // Reached maxPrecision limit
-                        WarningIn("Time::operator++()")
+                        WarningInFunction
                             << "Current time name " << dimensionedScalar::name()
                             << nl
                             << "    The maximum time precision has been reached"
@@ -1378,7 +1381,7 @@ Foam::Time& Foam::Time::operator++()
                         )
                     )
                     {
-                        WarningIn("Time::operator++()")
+                        WarningInFunction
                             << "Current time name " << dimensionedScalar::name()
                             << " is set to an instance prior to the "
                                "previous one "

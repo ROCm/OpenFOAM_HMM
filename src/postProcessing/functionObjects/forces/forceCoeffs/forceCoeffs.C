@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -343,25 +343,24 @@ void Foam::forceCoeffs::execute()
     scalar ClfTot = ClTot/2.0 + CmTot;
     scalar ClrTot = ClTot/2.0 - CmTot;
 
-    if (log_)
-    {
-        Info<< type() << " " << name_ << " output:" << nl
-            << "    Coefficients" << nl;
-    }
+    if (log_) Info
+        << type() << " " << name_ << " output:" << nl
+        << "    Coefficients" << nl;
+
     writeIntegratedData("Cm", momentCoeffs);
     writeIntegratedData("Cd", dragCoeffs);
     writeIntegratedData("Cl", liftCoeffs);
-    if (log_)
-    {
-        Info<< "        Cl(f)    : " << ClfTot << nl
-            << "        Cl(r)    : " << ClrTot << nl
-            << endl;
-    }
+
+    if (log_) Info
+        << "        Cl(f)    : " << ClfTot << nl
+        << "        Cl(r)    : " << ClrTot << nl
+        << endl;
 
     if (writeToFile())
     {
+        writeTime(coeffFilePtr_());
         coeffFilePtr_()
-            << obr_.time().value() << tab << CmTot << tab  << CdTot
+            << tab << CmTot << tab  << CdTot
             << tab << ClTot << tab << ClfTot << tab << ClrTot << endl;
 
 
@@ -426,10 +425,7 @@ void Foam::forceCoeffs::execute()
 
 void Foam::forceCoeffs::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +47,7 @@ Description
         Property     | Description             | Required    | Default value
         type         | Type name: yPlus        | yes         |
         phiName      | Name of flux field      | no          | phi
-        resultName   | Name of y+ field        | no          | <function name>
+        resultName   | Name of y+ field        | no          | \<function name\>
         log          | Log to standard output  | no          | yes
     \endtable
 

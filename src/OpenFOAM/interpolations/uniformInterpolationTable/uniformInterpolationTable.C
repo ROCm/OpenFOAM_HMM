@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ License
 
 #include "uniformInterpolationTable.H"
 #include "Time.H"
+#include "IOstream.H"
 
 // * * * * * * * * * * * *  Private Member Functions * * * * * * * * * * * * //
 
@@ -33,7 +34,7 @@ void Foam::uniformInterpolationTable<Type>::checkTable() const
 {
     if (size() < 2)
     {
-        FatalErrorIn("uniformInterpolationTable<Type>::checkTable()")
+        FatalErrorInFunction
             << "Table " << name() << ": must have at least 2 values." << nl
             << "Table size = " << size() << nl
             << "    min, interval width = " << x0_ << ", " << dx_ << nl
@@ -149,20 +150,16 @@ Type Foam::uniformInterpolationTable<Type>::interpolate(scalar x) const
     {
         if (x < x0_)
         {
-            FatalErrorIn
-            (
-                "uniformInterpolationTable<Type>::interpolate(scalar x)"
-            )   << "Supplied value is less than minimum table value:" << nl
+            FatalErrorInFunction
+                << "Supplied value is less than minimum table value:" << nl
                 << "xMin=" << x0_ << ", xMax=" << xMax() << ", x=" << x << nl
                 << exit(FatalError);
         }
 
         if (x > xMax())
         {
-            FatalErrorIn
-            (
-                "uniformInterpolationTable<Type>::interpolate(scalar x)"
-            )   << "Supplied value is greater than maximum table value:" << nl
+            FatalErrorInFunction
+                << "Supplied value is greater than maximum table value:" << nl
                 << "xMin=" << x0_ << ", xMax=" << xMax() << ", x=" << x << nl
                 << exit(FatalError);
         }
@@ -204,10 +201,8 @@ Type Foam::uniformInterpolationTable<Type>::interpolateLog10
         }
         else
         {
-            FatalErrorIn
-            (
-                "uniformInterpolationTable<Type>::interpolateLog10(scalar x)"
-            )   << "Table " << name() << nl
+            FatalErrorInFunction
+                << "Table " << name() << nl
                 << "Supplied value must be greater than 0 when in log10 mode"
                 << nl << "x=" << x << nl << exit(FatalError);
         }
@@ -234,7 +229,12 @@ void Foam::uniformInterpolationTable<Type>::write() const
         dict.add("bound", bound_);
     }
 
-    dict.regIOobject::write();
+    dict.regIOobject::writeObject
+    (
+        IOstream::ASCII,
+        IOstream::currentVersion,
+        dict.time().writeCompression()
+    );
 }
 
 

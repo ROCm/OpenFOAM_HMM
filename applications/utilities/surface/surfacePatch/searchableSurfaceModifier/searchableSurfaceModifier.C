@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,11 +69,8 @@ Foam::searchableSurfaceModifier::New
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalErrorIn
-        (
-            "searchableSurfaceModifier::New"
-            "(const word&, const searchableSurfaces&, const dictionary&)"
-        )   << "Unknown searchableSurfaceModifier type "
+        FatalErrorInFunction
+            << "Unknown searchableSurfaceModifier type "
             << type << nl << nl
             << "Valid searchableSurfaceModifier types : " << endl
             << dictionaryConstructorTablePtr_->sortedToc()

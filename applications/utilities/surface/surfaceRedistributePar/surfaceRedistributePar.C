@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,13 +75,16 @@ void writeProcStats
 
     forAll(surfBb, procI)
     {
-        const List<treeBoundBox>& bbs = meshBb[procI];
+        Info<< "processor" << procI << nl;
 
-        Info<< "processor" << procI << nl
-            << "\tMesh bounds          : " << bbs[0] << nl;
-        for (label i = 1; i < bbs.size(); i++)
+        const List<treeBoundBox>& bbs = meshBb[procI];
+        if (bbs.size())
         {
-            Info<< "\t                       " << bbs[i]<< nl;
+            Info<< "\tMesh bounds          : " << bbs[0] << nl;
+            for (label i = 1; i < bbs.size(); i++)
+            {
+                Info<< "\t                       " << bbs[i]<< nl;
+            }
         }
         Info<< "\tSurface bounding box : " << surfBb[procI] << nl
             << "\tTriangles            : " << nFaces[procI] << nl
@@ -113,12 +116,13 @@ int main(int argc, char *argv[])
     runTime.functionObjects().off();
 
     const fileName surfFileName = args[1];
-    const word distType = args[2];
+    const word distTypeName = args[2];
+    const label distType =
+        distributedTriSurfaceMesh::distributionTypeNames_[distTypeName];
 
     Info<< "Reading surface from " << surfFileName << nl << nl
         << "Using distribution method "
-        << distributedTriSurfaceMesh::distributionTypeNames_[distType]
-        << " " << distType << nl << endl;
+        << distTypeName << nl << endl;
 
     const bool keepNonMapped = args.options().found("keepNonMapped");
 
@@ -134,7 +138,7 @@ int main(int argc, char *argv[])
 
     if (!Pstream::parRun())
     {
-        FatalErrorIn(args.executable())
+        FatalErrorInFunction
             << "Please run this program on the decomposed case."
             << " It will read surface " << surfFileName
             << " and decompose it such that it overlaps the mesh bounding box."
@@ -142,13 +146,14 @@ int main(int argc, char *argv[])
     }
 
 
-    #include "createPolyMesh.H"
-
     Random rndGen(653213);
 
     // Determine mesh bounding boxes:
     List<List<treeBoundBox> > meshBb(Pstream::nProcs());
+    if (distType == distributedTriSurfaceMesh::FOLLOW)
     {
+        #include "createPolyMesh.H"
+
         meshBb[Pstream::myProcNo()] = List<treeBoundBox>
         (
             1,
@@ -177,82 +182,48 @@ int main(int argc, char *argv[])
     fileName localPath(actualPath);
     localPath.replace(runTime.rootPath() + '/', "");
 
+
+    autoPtr<distributedTriSurfaceMesh> surfMeshPtr;
+
     if (actualPath == io.objectPath())
     {
         Info<< "Loading local (decomposed) surface " << localPath << nl <<endl;
+        surfMeshPtr.reset(new distributedTriSurfaceMesh(io));
     }
     else
     {
-        Info<< "Loading undecomposed surface " << localPath << nl << endl;
-    }
+        Info<< "Loading undecomposed surface " << localPath
+            << " on master only" << endl;
 
+        triSurface s;
+        List<treeBoundBox> bbs;
+        if (Pstream::master())
+        {
+            // Actually load the surface
+            triSurfaceMesh surf(io);
+            s = surf;
+            bbs = List<treeBoundBox>(1, treeBoundBox(boundBox::greatBox));
+        }
+        else
+        {
+            bbs = List<treeBoundBox>(1, treeBoundBox(boundBox::invertedBox));
+        }
 
-    // Create dummy dictionary for bounding boxes if does not exist.
-    if (!isFile(actualPath / "Dict"))
-    {
         dictionary dict;
-        dict.add("bounds", meshBb[Pstream::myProcNo()]);
-        dict.add("distributionType", distType);
+        dict.add("distributionType", distTypeName);
         dict.add("mergeDistance", SMALL);
+        dict.add("bounds", bbs);
 
-        localIOdictionary ioDict
-        (
-            IOobject
-            (
-                io.name() + "Dict",
-                io.instance(),
-                io.local(),
-                io.db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            dict
-        );
+        // Scatter patch information
+        Pstream::scatter(s.patches());
 
-        Info<< "Writing dummy bounds dictionary to " << ioDict.name()
-            << nl << endl;
-
-        // Force writing in ascii
-        ioDict.regIOobject::writeObject
-        (
-            IOstream::ASCII,
-            IOstream::currentVersion,
-            ioDict.time().writeCompression()
-        );
+        // Construct distributedTrisurfaceMesh from components
+        IOobject notReadIO(io);
+        notReadIO.readOpt() = IOobject::NO_READ;
+        surfMeshPtr.reset(new distributedTriSurfaceMesh(notReadIO, s, dict));
     }
 
-
-    // Load surface
-    distributedTriSurfaceMesh surfMesh(io);
-    Info<< "Loaded surface" << nl << endl;
-
-
-    // Generate a test field
-    {
-        const triSurface& s = static_cast<const triSurface&>(surfMesh);
-
-        autoPtr<triSurfaceVectorField> fcPtr
-        (
-            new triSurfaceVectorField
-            (
-                IOobject
-                (
-                    "faceCentres",                                  // name
-                    surfMesh.searchableSurface::time().timeName(),  // instance
-                    surfMesh,
-                    IOobject::NO_READ,
-                    IOobject::AUTO_WRITE
-                ),
-                surfMesh,
-                dimLength,
-                s.faceCentres()
-            )
-        );
-
-        // Steal pointer and store object on surfMesh
-        fcPtr.ptr()->store();
-    }
+    distributedTriSurfaceMesh& surfMesh = surfMeshPtr();
 
 
     // Write per-processor stats

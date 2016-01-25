@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -199,7 +199,11 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
                 const point& surfPt = ccHit1[i].hitPoint();
 
                 label own = mesh_.faceOwner()[faceI];
-                if (cellToCompact[own] != -1)
+                if
+                (
+                    cellToCompact[own] != -1
+                 && shellGapInfo[cellToCompact[own]][2] > 0
+                )
                 {
                     // Combine info from shell and surface
                     label compactI = cellToCompact[own];
@@ -243,7 +247,11 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
                 if (mesh_.isInternalFace(faceI))
                 {
                     label nei = mesh_.faceNeighbour()[faceI];
-                    if (cellToCompact[nei] != -1)
+                    if
+                    (
+                        cellToCompact[nei] != -1
+                     && shellGapInfo[cellToCompact[nei]][2] > 0
+                    )
                     {
                         // Combine info from shell and surface
                         label compactI = cellToCompact[nei];
@@ -293,7 +301,11 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
                     // this side...
                     label bFaceI = faceI - mesh_.nInternalFaces();
 
-                    if (bFaceToCompact[bFaceI] != -1)
+                    if
+                    (
+                        bFaceToCompact[bFaceI] != -1
+                     && shellGapInfo[bFaceToCompact[bFaceI]][2] > 0
+                    )
                     {
                         // Combine info from shell and surface
                         label compactI = bFaceToCompact[bFaceI];
@@ -546,7 +558,7 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
 //
 //        if (cLevel >= minLevel && cLevel < maxLevel)
 //        {
-//            scalar cellSize = edge0Len/pow(2, cLevel);
+//            scalar cellSize = edge0Len/pow(2.0, cLevel);
 //
 //            // Update gap size
 //            nearGap[i] = nGapCells*cellSize;
@@ -685,9 +697,9 @@ Foam::label Foam::meshRefinement::generateRays
 {
     label nOldRays = start.size();
 
-    if (cLevel >= gapInfo[1] && cLevel < gapInfo[2])
+    if (cLevel >= gapInfo[1] && cLevel < gapInfo[2] && gapInfo[0] > 0)
     {
-        scalar cellSize = meshCutter_.level0EdgeLength()/pow(2, cLevel);
+        scalar cellSize = meshCutter_.level0EdgeLength()/pow(2.0, cLevel);
 
         // Calculate gap size
         scalar nearGap = gapInfo[0]*cellSize;
@@ -801,9 +813,9 @@ Foam::label Foam::meshRefinement::generateRays
 
     label nOldRays = start.size();
 
-    if (cLevel >= gapInfo[1] && cLevel < gapInfo[2])
+    if (cLevel >= gapInfo[1] && cLevel < gapInfo[2] && gapInfo[0] > 0)
     {
-        scalar cellSize = meshCutter_.level0EdgeLength()/pow(2, cLevel);
+        scalar cellSize = meshCutter_.level0EdgeLength()/pow(2.0, cLevel);
 
         // Calculate gap size
         scalar nearGap = gapInfo[0]*cellSize;
@@ -1133,7 +1145,7 @@ Foam::label Foam::meshRefinement::markInternalGapRefinement
             forAll(cellMap, i)
             {
                 label cellI = cellMap[i];
-                scalar cellSize = edge0Len/pow(2, cellLevel[cellI]);
+                scalar cellSize = edge0Len/pow(2.0, cellLevel[cellI]);
                 gapSize[i] = shellGapInfo[i][0]*cellSize;
             }
 
@@ -1410,7 +1422,8 @@ Foam::label Foam::meshRefinement::markInternalGapRefinement
             {
                 // Needed gap size
                 label cLevel = cellLevel[cellI];
-                scalar cellSize = meshCutter_.level0EdgeLength()/pow(2, cLevel);
+                scalar cellSize =
+                    meshCutter_.level0EdgeLength()/pow(2.0, cLevel);
                 scalar neededGapSize = numGapCells[cellI]*cellSize;
 
                 if (neededGapSize > detectedGapSize[cellI])
@@ -1504,7 +1517,7 @@ Foam::label Foam::meshRefinement::markSmallFeatureRefinement
             {
                 if (!info[i].hit())
                 {
-                    FatalErrorIn("meshRefinement::markSmallFeatureRefinement")
+                    FatalErrorInFunction
                         << "fc:" << ctrs[i]
                         << " radius:" << radiusSqr[i]
                         << exit(FatalError);

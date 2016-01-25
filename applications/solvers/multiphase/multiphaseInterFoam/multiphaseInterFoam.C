@@ -24,6 +24,9 @@ License
 Application
     multiphaseInterFoam
 
+Group
+    grpMultiphaseSolvers
+
 Description
     Solver for n incompressible fluids which captures the interfaces and
     includes surface-tension and contact-angle effects for each phase.
@@ -36,7 +39,7 @@ Description
 #include "multiphaseMixture.H"
 #include "turbulentTransportModel.H"
 #include "pimpleControl.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "CorrectPhi.H"
 #include "fixedFluxPressureFvPatchScalarField.H"
 
@@ -58,6 +61,8 @@ int main(int argc, char *argv[])
     #include "correctPhi.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

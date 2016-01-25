@@ -80,6 +80,17 @@ Foam::LESModel<BasicTurbulenceModel>::LESModel
         )
     ),
 
+    omegaMin_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "omegaMin",
+            LESDict_,
+            dimless/dimTime,
+            SMALL
+        )
+    ),
+
     delta_
     (
         LESdelta::New
@@ -136,17 +147,8 @@ Foam::LESModel<BasicTurbulenceModel>::New
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalErrorIn
-        (
-            "LESModel::New"
-            "("
-                "const volScalarField&, "
-                "const volVectorField&, "
-                "const surfaceScalarField&, "
-                "transportModel&, "
-                "const word&"
-            ")"
-        )   << "Unknown LESModel type "
+        FatalErrorInFunction
+            << "Unknown LESModel type "
             << modelType << nl << nl
             << "Valid LESModel types:" << endl
             << dictionaryConstructorTablePtr_->sortedToc()

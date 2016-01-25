@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  plus                                  |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -33,7 +33,7 @@ solvers
         relTol          0;
     }
 
-    cellDisplacement
+    "cellDisplacement.*"
     {
         solver          GAMG;
         tolerance       1e-08;
@@ -52,6 +52,9 @@ solvers
         relTol          0;
     }
 }
+
+PIMPLE
+{}
 
 
 // ************************************************************************* //

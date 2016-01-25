@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,7 +75,6 @@ void Foam::reactionRateFlameAreaModels::relaxation::correct
     const volScalarField& sigma
 )
 {
-
     dimensionedScalar omega0
     (
         "omega0",
@@ -97,13 +96,19 @@ void Foam::reactionRateFlameAreaModels::relaxation::correct
         1e-4
     );
 
-    const compressible::LESModel& lesModel =
-        omega_.db().lookupObject<compressible::LESModel>("LESProperties");
+    dimensionedScalar kMin
+    (
+        "kMin",
+        sqr(dimVelocity),
+        SMALL
+    );
 
-    // Total strain : resolved and sub-grid (just LES for now)
+    const compressibleTurbulenceModel& turbulence = combModel_.turbulence();
+
+    // Total strain
     const volScalarField sigmaTotal
     (
-        sigma + alpha_*lesModel.epsilon()/(lesModel.k() + lesModel.kMin())
+        sigma + alpha_*turbulence.epsilon()/(turbulence.k() + kMin)
     );
 
     const volScalarField omegaInf(correlation_.omega0Sigma(sigmaTotal));
@@ -118,20 +123,20 @@ void Foam::reactionRateFlameAreaModels::relaxation::correct
        /(sqr(omega0 - omegaInf) + sqr(omegaMin))
     );
 
-    const volScalarField rho(combModel_.rho());
-    const surfaceScalarField phi(combModel_.phi());
+    tmp<surfaceScalarField> phi(combModel_.phi());
 
     solve
     (
-         fvm::ddt(rho, omega_)
+         fvm::ddt(omega_)
        + fvm::div(phi, omega_, "div(phi,omega)")
       ==
-         rho*Rc*omega0
-       - fvm::SuSp(rho*(tau + Rc), omega_)
+         Rc*omega0
+       - fvm::SuSp((tau + Rc), omega_)
     );
 
     omega_.min(omega0);
     omega_.max(0.0);
+
 }
 
 

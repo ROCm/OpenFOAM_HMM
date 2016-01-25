@@ -22,12 +22,12 @@
 <div class="page-container">
   <div class="header">
     <div class="header-top">
-      <a class="sitelogo" href="http://www.openfoam.org" title="Home">
+      <a class="sitelogo" href="http://www.openfoam.com" title="Home">
         <img class=left src="../css/img/OpenFOAMlogo.png">
       </a>
       <div class="sitename">
         <h1>
-          <a href="http://foam.sourceforge.net/doc/Doxygen/html/"
+          <a href="http://www.openfoam.com/doc/Doxygen/html/"
              title="Source Guide">OpenFOAM C++ Documentation
           </a>
         </h1>

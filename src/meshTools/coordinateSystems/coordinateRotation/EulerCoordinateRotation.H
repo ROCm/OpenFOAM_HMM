@@ -120,6 +120,21 @@ public:
         //- Construct from dictionary and mesh
         EulerCoordinateRotation(const dictionary&, const objectRegistry&);
 
+        //- Construct as copy
+        EulerCoordinateRotation(const EulerCoordinateRotation&);
+
+        //- Return clone
+        autoPtr<coordinateRotation> clone() const
+        {
+            return autoPtr<coordinateRotation>
+            (
+                new EulerCoordinateRotation
+                (
+                    *this
+                )
+            );
+        }
+
 
     // Member Functions
 

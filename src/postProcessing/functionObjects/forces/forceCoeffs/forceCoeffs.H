@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,6 +84,7 @@ Description
         magUInf      | free stream velocity magnitude | yes  |
         lRef         | reference length scale for moment calculations | yes |
         Aref         | reference area          | yes |
+        porosity     | flag to include porosity contributions | no | no
     \endtable
 
     Bin data is optional, but if the dictionary is present, the entries must

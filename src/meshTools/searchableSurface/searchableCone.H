@@ -209,11 +209,7 @@ public:
         //- Does any part of the surface overlap the supplied bound box?
         virtual bool overlaps(const boundBox& bb) const
         {
-            notImplemented
-            (
-                "searchableCone::overlaps(const boundBox&) const"
-            );
-
+            NotImplemented;
             return false;
         }
 
@@ -279,7 +275,7 @@ public:
 
             virtual bool writeData(Ostream&) const
             {
-                notImplemented("searchableCone::writeData(Ostream&) const");
+                NotImplemented;
                 return false;
             }
 };

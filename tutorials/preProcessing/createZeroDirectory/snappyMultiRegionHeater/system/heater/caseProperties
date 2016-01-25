@@ -1,0 +1,73 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.2.0                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      caseProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+initialConditions
+{
+    p       uniform 100000;
+    T       uniform 300;
+}
+
+
+boundaryConditions
+{
+    fixedTemperature
+    {
+        category    wall;
+        type        thermal;
+        patches     (minY);
+        options
+        {
+            heatTransfer fixedTemperature;
+        }
+        values
+        {
+            $:initialConditions;
+            T       uniform 500;
+        }
+    }
+    thermalWalls
+    {
+        category    wall;
+        type        thermal;
+        patches     (minZ maxZ);
+        options
+        {
+            heatTransfer adiabatic;
+        }
+        values
+        {
+            $:initialConditions;
+        }
+    }
+    thermalCoupledWalls
+    {
+        category    wall;
+        type        thermal;
+        patches     (".*_to_.*");
+        options
+        {
+            heatTransfer thermalCoupled;
+        }
+        values
+        {
+            $:initialConditions;
+        }
+    }
+}
+
+
+// ************************************************************************* //

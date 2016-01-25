@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,7 +84,7 @@ Foam::PatchInjection<CloudType>::PatchInjection
     parcelsPerSecond_(im.parcelsPerSecond_),
     U0_(im.U0_),
     flowRateProfile_(im.flowRateProfile_),
-    sizeDistribution_(im.sizeDistribution_().clone().ptr())
+    sizeDistribution_(im.sizeDistribution_, false)
 {}
 
 
@@ -121,9 +121,8 @@ Foam::label Foam::PatchInjection<CloudType>::parcelsToInject
     if ((time0 >= 0.0) && (time0 < duration_))
     {
         scalar nParcels = (time1 - time0)*parcelsPerSecond_;
-
         cachedRandom& rnd = this->owner().rndGen();
-
+        scalar rndPos = rnd.globalPosition(scalar(0), scalar(1));
         label nParcelsToInject = floor(nParcels);
 
         // Inject an additional parcel with a probability based on the
@@ -131,10 +130,7 @@ Foam::label Foam::PatchInjection<CloudType>::parcelsToInject
         if
         (
             nParcelsToInject > 0
-         && (
-               nParcels - scalar(nParcelsToInject)
-             > rnd.globalPosition(scalar(0), scalar(1))
-            )
+         && (nParcels - scalar(nParcelsToInject) > rndPos)
         )
         {
             ++nParcelsToInject;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -110,16 +110,8 @@ Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::setFieldValues
 
     if (mustGet)
     {
-        FatalErrorIn
-        (
-            "Foam::tmp<Foam::Field<Type> > "
-            "Foam::fieldValues::faceSource::setFieldValues"
-            "("
-                "const word&, "
-                "const bool, "
-                "const bool"
-            ") const"
-        )   << "Field " << fieldName << " not found in database"
+        FatalErrorInFunction
+            << "Field " << fieldName << " not found in database"
             << abort(FatalError);
     }
 
@@ -150,16 +142,7 @@ Type Foam::fieldValues::faceSource::processSameTypeValues
         }
         case opSumDirection:
         {
-            FatalErrorIn
-            (
-                "template<class Type>"
-                "Type Foam::fieldValues::faceSource::processSameTypeValues"
-                "("
-                    "const Field<Type>&, "
-                    "const vectorField&, "
-                    "const scalarField&"
-                ") const"
-            )
+            FatalErrorInFunction
                 << "Operation " << operationTypeNames_[operation_]
                 << " not available for values of type "
                 << pTraits<Type>::typeName
@@ -170,16 +153,7 @@ Type Foam::fieldValues::faceSource::processSameTypeValues
         }
         case opSumDirectionBalance:
         {
-            FatalErrorIn
-            (
-                "template<class Type>"
-                "Type Foam::fieldValues::faceSource::processSameTypeValues"
-                "("
-                    "const Field<Type>&, "
-                    "const vectorField&, "
-                    "const scalarField&"
-                ") const"
-            )
+            FatalErrorInFunction
                 << "Operation " << operationTypeNames_[operation_]
                 << " not available for values of type "
                 << pTraits<Type>::typeName
@@ -366,12 +340,10 @@ bool Foam::fieldValues::faceSource::writeValues
 
         file()<< tab << result;
 
-        if (log_)
-        {
-            Info<< "    " << operationTypeNames_[operation_]
-                << "(" << sourceName_ << ") for " << fieldName
-                <<  " = " << result << endl;
-        }
+        if (log_) Info
+            << "    " << operationTypeNames_[operation_]
+            << "(" << sourceName_ << ") for " << fieldName
+            <<  " = " << result << endl;
 
         // Write state/results information
         const word& opName = operationTypeNames_[operation_];
@@ -403,14 +375,8 @@ Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::filterField
         }
         else
         {
-            FatalErrorIn
-            (
-                "fieldValues::faceSource::filterField"
-                "("
-                    "const GeometricField<Type, fvPatchField, volMesh>&, "
-                    "const bool"
-                ") const"
-            )   << type() << " " << name_ << ": "
+            FatalErrorInFunction
+                << type() << " " << name_ << ": "
                 << sourceTypeNames_[source_] << "(" << sourceName_ << "):"
                 << nl
                 << "    Unable to process internal faces for volume field "

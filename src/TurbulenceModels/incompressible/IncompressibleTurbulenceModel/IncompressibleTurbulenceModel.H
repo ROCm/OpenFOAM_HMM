@@ -91,7 +91,7 @@ public:
         (
             const volVectorField& U,
             const surfaceScalarField& phi,
-            const TransportModel& trasportModel,
+            const TransportModel& transportModel,
             const word& propertiesName = turbulenceModel::propertiesName
         );
 

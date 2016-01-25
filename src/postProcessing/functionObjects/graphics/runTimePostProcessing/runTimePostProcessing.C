@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,7 @@ License
 #include "surface.H"
 #include "text.H"
 #include "Time.H"
+#include "sigFpe.H"
 
 // VTK includes
 #include "vtkPolyDataMapper.h"
@@ -101,11 +102,7 @@ void Foam::runTimePostProcessing::read(const dictionary& dict)
     {
         if (!iter().isDict())
         {
-            FatalIOErrorIn
-            (
-                "void Foam::runTimePostProcessing::read(const dictionary&)",
-                textDict
-            )
+            FatalIOErrorInFunction(textDict)
                 << "text must be specified in dictionary format"
                 << exit(FatalIOError);
         }
@@ -142,6 +139,10 @@ void Foam::runTimePostProcessing::write()
 
     Info<< type() << " " << name_ <<  " output:" << nl
         << "    Constructing scene" << endl;
+
+    // Unset any floating point trapping (some low-level rendering functionality
+    // does not like it)
+    sigFpe::unset(false);
 
     // Initialise render window
     vtkSmartPointer<vtkRenderWindow> renderWindow =
@@ -204,6 +205,9 @@ void Foam::runTimePostProcessing::write()
             surfaces_[i].updateActors(position);
         }
     }
+
+    // Reset any floating point trapping
+    sigFpe::set(false);
 }
 
 

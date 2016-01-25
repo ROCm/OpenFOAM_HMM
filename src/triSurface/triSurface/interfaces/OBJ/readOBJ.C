@@ -1,8 +1,9 @@
+
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,7 +36,7 @@ bool Foam::triSurface::readOBJ(const fileName& OBJfileName)
 
     if (!OBJfile.good())
     {
-        FatalErrorIn("triSurface::readOBJ(const fileName&)")
+        FatalErrorInFunction
             << "Cannot read file " << OBJfileName
             << exit(FatalError);
     }
@@ -53,105 +54,112 @@ bool Foam::triSurface::readOBJ(const fileName& OBJfileName)
 
         label sz = line.size();
 
-        if (sz && line[sz-1] == '\\')
+        if (sz)
         {
-            line.substr(0, sz-1);
-            line += getLineNoComment(OBJfile);
-        }
-
-        // Read first word
-        IStringStream lineStream(line);
-        word cmd;
-        lineStream >> cmd;
-
-        if (cmd == "v")
-        {
-            scalar x, y, z;
-
-            lineStream >> x >> y >> z;
-
-            points.append(point(x, y, z));
-        }
-        else if (cmd == "g")
-        {
-            word group;
-
-            lineStream >> group;
-
-            HashTable<label>::const_iterator findGroup =
-                groupToPatch.find(group);
-
-            if (findGroup != groupToPatch.end())
+            if (line[sz-1] == '\\')
             {
-                groupID = findGroup();
+                line.substr(0, sz-1);
+                line += getLineNoComment(OBJfile);
             }
-            else
+
+            // Read first word
+            IStringStream lineStream(line);
+            word cmd;
+            lineStream >> cmd;
+
+            if (cmd == "v")
             {
-                groupID = maxGroupID;
+                scalar x, y, z;
 
-                groupToPatch.insert(group, groupID);
+                lineStream >> x >> y >> z;
 
-                maxGroupID++;
+                points.append(point(x, y, z));
             }
-        }
-        else if (cmd == "f")
-        {
-            DynamicList<label> verts;
-
-            // Assume 'f' is followed by space.
-            string::size_type endNum = 1;
-
-            while (true)
+            else if (cmd == "g")
             {
-                string::size_type startNum =
-                    line.find_first_not_of(" \r", endNum);
+                word group;
 
-                if (startNum == string::npos)
+                lineStream >> group;
+
+                HashTable<label>::const_iterator findGroup =
+                    groupToPatch.find(group);
+
+                if (findGroup != groupToPatch.end())
                 {
-                    break;
-                }
-
-                endNum = line.find(' ', startNum);
-
-                string vertexSpec;
-                if (endNum != string::npos)
-                {
-                    vertexSpec = line.substr(startNum, endNum-startNum);
+                    groupID = findGroup();
                 }
                 else
                 {
-                    vertexSpec = line.substr(startNum, line.size() - startNum);
+                    groupID = maxGroupID;
+
+                    groupToPatch.insert(group, groupID);
+
+                    maxGroupID++;
                 }
-
-                string::size_type slashPos = vertexSpec.find('/');
-
-                label vertI = 0;
-                if (slashPos != string::npos)
-                {
-                    IStringStream intStream(vertexSpec.substr(0, slashPos));
-
-                    intStream >> vertI;
-                }
-                else
-                {
-                    IStringStream intStream(vertexSpec);
-
-                    intStream >> vertI;
-                }
-                verts.append(vertI - 1);
             }
-
-            verts.shrink();
-
-            // Do simple face triangulation around f[0].
-            // Cannot use face::triangulation since no complete points yet.
-            for (label fp = 1; fp < verts.size() - 1; fp++)
+            else if (cmd == "f")
             {
-                label fp1 = verts.fcIndex(fp);
+                DynamicList<label> verts;
 
-                labelledTri tri(verts[0], verts[fp], verts[fp1], groupID);
+                // Assume 'f' is followed by space.
+                string::size_type endNum = 1;
 
-                faces.append(tri);
+                while (true)
+                {
+                    string::size_type startNum =
+                        line.find_first_not_of(" \r", endNum);
+
+                    if (startNum == string::npos)
+                    {
+                        break;
+                    }
+
+                    endNum = line.find(' ', startNum);
+
+                    string vertexSpec;
+                    if (endNum != string::npos)
+                    {
+                        vertexSpec = line.substr(startNum, endNum-startNum);
+                    }
+                    else
+                    {
+                        vertexSpec = line.substr
+                        (
+                            startNum,
+                            line.size() - startNum
+                        );
+                    }
+
+                    string::size_type slashPos = vertexSpec.find('/');
+
+                    label vertI = 0;
+                    if (slashPos != string::npos)
+                    {
+                        IStringStream intStream(vertexSpec.substr(0, slashPos));
+
+                        intStream >> vertI;
+                    }
+                    else
+                    {
+                        IStringStream intStream(vertexSpec);
+
+                        intStream >> vertI;
+                    }
+                    verts.append(vertI - 1);
+                }
+
+                verts.shrink();
+
+                // Do simple face triangulation around f[0].
+                // Cannot use face::triangulation since no complete points yet.
+                for (label fp = 1; fp < verts.size() - 1; fp++)
+                {
+                    label fp1 = verts.fcIndex(fp);
+
+                    labelledTri tri(verts[0], verts[fp], verts[fp1], groupID);
+
+                    faces.append(tri);
+                }
             }
         }
     }

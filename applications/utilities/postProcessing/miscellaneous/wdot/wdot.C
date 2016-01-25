@@ -49,6 +49,8 @@ int main(int argc, char *argv[])
     {
         runTime.setTime(timeDirs[timeI], timeI);
 
+        Info<< "Time = " << runTime.timeName() << endl;
+
         mesh.readUpdate();
 
         volScalarField mgb
@@ -114,7 +116,11 @@ int main(int argc, char *argv[])
         );
 
         wdot.write();
+
+        Info<< endl;
     }
+
+    Info<< "End" << nl << endl;
 
     return 0;
 }

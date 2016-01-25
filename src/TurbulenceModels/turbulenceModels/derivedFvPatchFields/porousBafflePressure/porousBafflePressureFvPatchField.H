@@ -43,8 +43,8 @@ Description
         p      | pressure [Pa]
         \rho   | density [kg/m3]
         \mu    | laminar viscosity [Pa s]
-        I      | inertial coefficient
         D      | Darcy coefficient
+        I      | inertial coefficient
         L      | porous media length in the flow direction
     \endvartable
 
@@ -58,7 +58,8 @@ Description
         rho          | density field name      | no          | rho
         D            | Darcy coefficient       | yes         |
         I            | inertial coefficient    | yes         |
-        L            | porous media length in the flow direction | yes |
+        length       | porous media length in the flow direction | yes |
+        uniformJump  | applies a uniform pressure drop on the patch based on the
     \endtable
 
     Example of the boundary condition specification:
@@ -70,7 +71,8 @@ Description
         jump            uniform 0;
         D               0.001;
         I               1000000;
-        L               0.1;
+        length          0.1;
+        uniformJump     false;
         value           uniform 0;
     }
     \endverbatim
@@ -87,6 +89,7 @@ SourceFiles
 #define porousBafflePressureFvPatchField_H
 
 #include "fixedJumpFvPatchField.H"
+#include "DataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -110,13 +113,16 @@ class porousBafflePressureFvPatchField
         const word rhoName_;
 
         //- Darcy pressure loss coefficient
-        scalar D_;
+        autoPtr<DataEntry<scalar> > D_;
 
         //- Inertia pressure lost coefficient
-        scalar I_;
+        autoPtr<DataEntry<scalar> > I_;
 
         //- Porous media length
         scalar length_;
+
+        //- Aplies uniform pressure drop
+        bool uniformJump_;
 
 
 public:

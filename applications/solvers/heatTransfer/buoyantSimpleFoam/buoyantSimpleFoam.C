@@ -24,6 +24,9 @@ License
 Application
     buoyantSimpleFoam
 
+Group
+    grpHeatTransferSolvers
+
 Description
     Steady-state solver for buoyant, turbulent flow of compressible fluids,
     including radiation, for ventilation and heat-transfer.
@@ -35,7 +38,7 @@ Description
 #include "turbulentFluidThermoModel.H"
 #include "radiationModel.H"
 #include "simpleControl.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "fixedFluxPressureFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -48,12 +51,13 @@ int main(int argc, char *argv[])
 
     simpleControl simple(mesh);
 
-    #include "readGravitationalAcceleration.H"
     #include "createFields.H"
     #include "createMRF.H"
     #include "createFvOptions.H"
     #include "createRadiationModel.H"
     #include "initContinuityErrs.H"
+
+    turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

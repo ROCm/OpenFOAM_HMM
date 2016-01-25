@@ -330,7 +330,6 @@ LienCubicKE::LienCubicKE
 
     if (type == typeName)
     {
-        correctNut();
         printCoeffs(type);
     }
 }

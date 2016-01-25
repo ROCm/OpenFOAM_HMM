@@ -29,6 +29,9 @@ Description
 
     The standard interupt handler is overridden to ensure that the
     runningJob file is removed.
+    Can be used either directly through the static member functions or
+    through the scope of the object (constructor sets trapping; destructor
+    restores original).
 
 See Also
     Foam::JobInfo
@@ -59,6 +62,9 @@ class sigQuit
         //- Saved old signal trapping setting
         static struct sigaction oldAction_;
 
+        //- Flag to indicate signal trapping is enabled
+        static bool sigActive_;
+
 
     // Private Member Functions
 
@@ -81,7 +87,10 @@ public:
     // Member functions
 
         //- Activate SIGQUIT signal handler
-        void set(const bool verbose);
+        static void set(const bool verbose);
+
+        //- Deactivate SIGQUIT signal handler
+        static void unset(const bool verbose);
 };
 
 

@@ -142,6 +142,8 @@ int main(int argc, char *argv[])
         Info<< endl;
     }
 
+    Info<< "End" << nl << endl;
+
     return 0;
 }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,7 +58,6 @@ Foam::surfacePatchIOList::surfacePatchIOList
         // Warn for MUST_READ_IF_MODIFIED
         warnNoRereading<surfacePatchIOList>();
 
-
         surfacePatchList& patches = *this;
 
         // read polyPatchList
@@ -89,7 +88,7 @@ Foam::surfacePatchIOList::surfacePatchIOList
 
             if (startFaceI != faceI)
             {
-                FatalErrorIn(functionName)
+                FatalErrorInFunction
                     << "Patches are not ordered. Start of patch " << patchI
                     << " does not correspond to sum of preceding patches."
                     << endl

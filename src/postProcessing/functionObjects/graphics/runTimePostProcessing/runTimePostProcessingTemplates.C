@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,15 +37,7 @@ void Foam::runTimePostProcessing::readObjects
     {
         if (!iter().isDict())
         {
-            FatalIOErrorIn
-            (
-                "void Foam::runTimePostProcessing::readObjects"
-                "("
-                    "const dictionary&, "
-                    "PtrList<Type>&"
-                ")",
-                dict
-            )
+            FatalIOErrorInFunction(dict)
                 << dict.dictName()
                 << " objects must be specified in dictionary format"
                 << exit(FatalIOError);

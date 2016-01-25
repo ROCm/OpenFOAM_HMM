@@ -50,9 +50,11 @@ autoPtr<compressible::turbulenceModel> turbulence
     )
 );
 
-Info<< "Calculating field g.h\n" << endl;
-volScalarField gh("gh", g & mesh.C());
-surfaceScalarField ghf("ghf", g & mesh.Cf());
+
+#include "readGravitationalAcceleration.H"
+#include "readhRef.H"
+#include "gh.H"
+
 
 Info<< "Reading field p_rgh\n" << endl;
 volScalarField p_rgh
@@ -88,3 +90,27 @@ volScalarField dpdt
 
 Info<< "Creating field kinetic energy K\n" << endl;
 volScalarField K("K", 0.5*magSqr(U));
+
+label pRefCell = 0;
+scalar pRefValue = 0.0;
+
+if (p_rgh.needReference())
+{
+    setRefCell
+    (
+        p,
+        p_rgh,
+        pimple.dict(),
+        pRefCell,
+        pRefValue
+    );
+
+    p += dimensionedScalar
+    (
+        "p",
+        p.dimensions(),
+        pRefValue - getRefCellValue(p, pRefCell)
+    );
+}
+
+dimensionedScalar initialMass("initialMass", fvc::domainIntegrate(rho));

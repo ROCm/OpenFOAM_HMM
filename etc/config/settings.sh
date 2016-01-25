@@ -156,7 +156,7 @@ SunOS)
     /bin/cat <<USAGE 1>&2
 
     Your "$WM_ARCH" operating system is not supported by this release
-    of OpenFOAM. For further assistance, please contact www.OpenFOAM.org
+    of OpenFOAM. For further assistance, please contact www.OpenFOAM.com
 
 USAGE
     ;;
@@ -403,7 +403,7 @@ SYSTEMOPENMPI)
     ;;
 
 OPENMPI)
-    export FOAM_MPI=openmpi-1.8.5
+    export FOAM_MPI=openmpi-1.10.0
     # Optional configuration tweaks:
     _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config/openmpi.sh`
 

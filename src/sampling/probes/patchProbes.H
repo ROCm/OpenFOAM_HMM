@@ -25,9 +25,45 @@ Class
     Foam::patchProbes
 
 Description
-    Set of locations to sample.at patches
+    Set of locations to sample at patches
 
     Call write() to sample and write files.
+    - find nearest location on nearest face
+    - update *this with location (so header contains 'snapped' locations
+    - use *this as the sampling location
+
+    Example of function object specification:
+    \verbatim
+    patchProbes
+    {
+        type            patchProbes;
+        functionObjectLibs ( "libsampling.so" );
+
+        // Name of the directory for probe data
+        name            patchProbes;
+
+        // Patches to sample (wildcards allowed)
+        patches         (".*inl.*");
+
+        // Write at same frequency as fields
+        outputControl   outputTime;
+        outputInterval  1;
+
+        // Fields to be probed
+        fields
+        (
+            p U
+        );
+
+        // Locations to probe. These get snapped onto the nearest point
+        // on the selected patches
+        probeLocations
+        (
+            ( -100 0 0.01 )      // at inlet
+        );
+    }
+    \endverbatim
+
 
 SourceFiles
     patchProbes.C
@@ -58,13 +94,15 @@ class patchProbes
 :
     public probes
 {
-    // Private data
+protected:
 
-        //- Patch name
-        word patchName_;
+    // Protected data
+
+        //- Patches to sample
+        wordReList patchNames_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
         //- Sample and write a particular volume field
         template<class Type>
@@ -73,7 +111,6 @@ class patchProbes
             const GeometricField<Type, fvPatchField, volMesh>&
         );
 
-
         //- Sample and write a particular surface field
         template<class Type>
         void sampleAndWrite
@@ -81,16 +118,13 @@ class patchProbes
             const GeometricField<Type, fvsPatchField, surfaceMesh>&
         );
 
-
         //- Sample and write all the fields of the given type
         template<class Type>
         void sampleAndWrite(const fieldGroup<Type>&);
 
-
          //- Sample and write all the surface fields of the given type
         template<class Type>
         void sampleAndWriteSurfaceFields(const fieldGroup<Type>&);
-
 
         //- Sample a volume field at all locations
         template<class Type>
@@ -99,7 +133,6 @@ class patchProbes
             const GeometricField<Type, fvPatchField, volMesh>&
         ) const;
 
-
         //- Sample a surface field at all locations
         template<class Type>
         tmp<Field<Type> > sample
@@ -107,11 +140,18 @@ class patchProbes
             const GeometricField<Type, fvsPatchField, surfaceMesh>&
         ) const;
 
-
         //- Sample a single field on all sample locations
         template<class Type>
         tmp<Field<Type> > sample(const word& fieldName) const;
 
+        //- Find elements containing patchProbes
+        virtual void findElements(const fvMesh&);
+
+        //- Read dictionary settings
+        void readDict(const dictionary& dict);
+
+
+private:
 
         //- Disallow default bitwise copy construct
         patchProbes(const patchProbes&);
@@ -135,7 +175,8 @@ public:
             const word& name,
             const objectRegistry&,
             const dictionary&,
-            const bool loadFromFiles = false
+            const bool loadFromFiles = false,
+            const bool findElements = true
         );
 
 
@@ -149,9 +190,6 @@ public:
 
         //- Read
         virtual void read(const dictionary&);
-
-        //- Find elements containing patchProbes
-        virtual void findElements(const fvMesh&);
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

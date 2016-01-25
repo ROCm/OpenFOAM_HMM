@@ -111,10 +111,13 @@ public:
         //- Construct from dictionary and mesh
         axesRotation(const dictionary&, const objectRegistry&);
 
+        //- Construct as copy
+        axesRotation(const axesRotation&);
+
         //- Return clone
-        autoPtr<axesRotation> clone() const
+        autoPtr<coordinateRotation> clone() const
         {
-            return autoPtr<axesRotation>(new axesRotation(*this));
+            return autoPtr<coordinateRotation>(new axesRotation(*this));
         }
 
 

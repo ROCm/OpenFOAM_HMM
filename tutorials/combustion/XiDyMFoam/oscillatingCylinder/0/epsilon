@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  2.2.1                                 |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -34,7 +34,9 @@ boundaryField
     }
     outlet
     {
-        type            zeroGradient;
+        type           inletOutlet;
+        inletValue      uniform 100;
+        value           uniform 100;
     }
     frontAndBack
     {

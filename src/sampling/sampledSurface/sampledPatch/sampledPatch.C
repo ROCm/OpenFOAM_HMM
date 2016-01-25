@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,11 +84,7 @@ const Foam::labelList& Foam::sampledPatch::patchIDs() const
 {
     if (patchIDs_.empty())
     {
-        patchIDs_ = mesh().boundaryMesh().patchSet
-        (
-            patchNames_,
-            false
-        ).sortedToc();
+        patchIDs_ = mesh().boundaryMesh().patchSet(patchNames_).sortedToc();
     }
     return patchIDs_;
 }
@@ -135,7 +131,7 @@ bool Foam::sampledPatch::update()
 
         if (isA<emptyPolyPatch>(pp))
         {
-            FatalErrorIn("sampledPatch::update()")
+            FatalErrorInFunction
                 << "Cannot sample an empty patch. Patch " << pp.name()
                 << exit(FatalError);
         }

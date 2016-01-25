@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  plus                                  |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -187,7 +187,8 @@ castellatedMeshControls
 
             //faceZone sphere;
             //cellZone sphere;
-            //cellZoneInside inside;  //outside/insidePoint
+            //cellZoneInside inside;    // outside/insidePoint
+            //insidePoint    (1 1 1);   // if (cellZoneInside == insidePoint)
 
             //- Optional specification of what to do with faceZone faces:
             //      internal : keep them as internal faces (default)
@@ -259,7 +260,12 @@ castellatedMeshControls
     }
 
 
-    // Limit refinement in geometric region
+    // Optionally limit refinement in geometric region. This limits all
+    // refinement (from features, refinementSurfaces, refinementRegions)
+    // in a given geometric region. The syntax is exactly the same as for the
+    // refinementRegions; the cell level now specifies the upper limit
+    // for any cell. Note that it does not override the refinement constraints
+    // given by the nCellsBetweenLevels settting.
     limitRegions
     {
     }
@@ -290,14 +296,25 @@ castellatedMeshControls
         locationInMesh (5 0.28 0.43);
 
         // Whether any faceZones (as specified in the refinementSurfaces)
-        // are only on the boundary of corresponding cellZones or also allow
-        // free-standing zone faces. Not used if there are no faceZones.
+        // are only on the boundary of corresponding cellZones.
+        // Not used if there are no faceZones. The behaviour has changed
+        // with respect to previous versions:
+        //  true  : all intersections with surface are put in faceZone
+        //          (same behaviour as before)
+        //  false : depending on the type of surface intersected:
+        //      - if intersecting surface has faceZone only (so no cellZone)
+        //        leave in faceZone (so behave as if set to true) (= changed
+        //        behaviour)
+        //      - if intersecting surface has faceZone and cellZone
+        //        remove if inbetween same cellZone or if on boundary
+        //        (same behaviour as before)
         allowFreeStandingZoneFaces true;
 
 
 
         // 2. Specify multiple locations with optional cellZones for the
-        //    regions. faceZones are automatically constructed from the
+        //    regions (use cellZone "none" to specify the unzoned cells)
+        //    FaceZones are automatically constructed from the
         //    names of the cellZones: <cellZoneA> _to_ <cellZoneB>
         //    where the cellZoneA is the lowest numbered cellZone (non-cellZone
         //    cells are in a special region called "none" which is always
@@ -361,7 +378,6 @@ snapControls
 
     // Maximum relative distance for points to be attracted by surface.
     // True distance is this factor times local maximum edge length.
-    // Note: changed(corrected) w.r.t 17x! (17x used 2* tolerance)
     tolerance 2.0;
 
     // Number of mesh displacement relaxation iterations.
@@ -524,7 +540,25 @@ addLayersControls
 
 
 
-    // Medial axis analysis
+    // Choice of mesh shrinking algorithm
+
+        // Optional mesh shrinking algorithm (default is displacementMedialAxis)
+        // The displacementMotionSolver is a wrapper around the displacement
+        // motion solvers. It needs specification of the solver to use and
+        // its control dictionary.
+        //meshShrinker displacementMotionSolver;
+        //solver displacementLaplacian;
+        //displacementLaplacianCoeffs
+        //{
+        //    diffusivity quadratic inverseDistance
+        //    (
+        //        sphere.stl_firstSolid
+        //        maxY
+        //    );
+        //}
+
+
+    // Medial axis analysis (for use with default displacementMedialAxis)
 
         // Angle used to pick up medial axis points
         // Note: changed(corrected) w.r.t 17x! 90 degrees corresponds to 130
@@ -552,9 +586,6 @@ addLayersControls
         // Default is false.
         //detectExtrusionIsland true;
 
-
-    // Mesh shrinking
-
         // Optional: at non-patched sides allow mesh to slip if extrusion
         // direction makes angle larger than slipFeatureAngle. Default is
         // 0.5*featureAngle.
@@ -563,6 +594,9 @@ addLayersControls
         // Maximum number of snapping relaxation iterations. Should stop
         // before upon reaching a correct mesh.
         nRelaxIter 5;
+
+
+    // Mesh shrinking
 
         // Create buffer region for new layer terminations, i.e. gradually
         // step down number of layers. Set to <0 to terminate layer in one go.

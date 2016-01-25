@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,11 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::cloudSolution::cloudSolution
-(
-    const fvMesh& mesh,
-    const dictionary& dict
-)
+Foam::cloudSolution::cloudSolution(const fvMesh& mesh, const dictionary& dict)
 :
     mesh_(mesh),
     dict_(dict),
@@ -42,6 +38,7 @@ Foam::cloudSolution::cloudSolution
     maxCo_(0.3),
     iter_(1),
     trackTime_(0.0),
+    deltaTMax_(GREAT),
     coupled_(false),
     cellValueSourceCorrection_(false),
     maxTrackTime_(0.0),
@@ -52,13 +49,25 @@ Foam::cloudSolution::cloudSolution
     {
         read();
     }
+    else
+    {
+        // see if existing source terms should be reset
+        const dictionary sourceTerms(dict_.subOrEmptyDict("sourceTerms"));
+        sourceTerms.readIfPresent("resetOnStartup", resetSourcesOnStartup_);
+
+        if (resetSourcesOnStartup_)
+        {
+            Info<< "Cloud source terms will be reset" << endl;
+        }
+        else
+        {
+            Info<< "Cloud source terms will be held constant" << endl;
+        }
+    }
 }
 
 
-Foam::cloudSolution::cloudSolution
-(
-    const cloudSolution& cs
-)
+Foam::cloudSolution::cloudSolution(const cloudSolution& cs)
 :
     mesh_(cs.mesh_),
     dict_(cs.dict_),
@@ -68,6 +77,7 @@ Foam::cloudSolution::cloudSolution
     maxCo_(cs.maxCo_),
     iter_(cs.iter_),
     trackTime_(cs.trackTime_),
+    deltaTMax_(cs.deltaTMax_),
     coupled_(cs.coupled_),
     cellValueSourceCorrection_(cs.cellValueSourceCorrection_),
     maxTrackTime_(cs.maxTrackTime_),
@@ -76,10 +86,7 @@ Foam::cloudSolution::cloudSolution
 {}
 
 
-Foam::cloudSolution::cloudSolution
-(
-    const fvMesh& mesh
-)
+Foam::cloudSolution::cloudSolution(const fvMesh& mesh)
 :
     mesh_(mesh),
     dict_(dictionary::null),
@@ -89,6 +96,7 @@ Foam::cloudSolution::cloudSolution
     maxCo_(GREAT),
     iter_(0),
     trackTime_(0.0),
+    deltaTMax_(GREAT),
     coupled_(false),
     cellValueSourceCorrection_(false),
     maxTrackTime_(0.0),
@@ -111,6 +119,7 @@ void Foam::cloudSolution::read()
     dict_.lookup("coupled") >> coupled_;
     dict_.lookup("cellValueSourceCorrection") >> cellValueSourceCorrection_;
     dict_.readIfPresent("maxCo", maxCo_);
+    dict_.readIfPresent("deltaTMax", deltaTMax_);
 
     if (steadyState())
     {
@@ -149,7 +158,7 @@ void Foam::cloudSolution::read()
             }
             else
             {
-                FatalErrorIn("void cloudSolution::read()")
+                FatalErrorInFunction
                     << "Invalid scheme " << scheme << ". Valid schemes are "
                     << "explicit and semiImplicit" << exit(FatalError);
             }
@@ -171,7 +180,7 @@ Foam::scalar Foam::cloudSolution::relaxCoeff(const word& fieldName) const
         }
     }
 
-    FatalErrorIn("scalar cloudSolution::relaxCoeff(const word&) const")
+    FatalErrorInFunction
         << "Field name " << fieldName << " not found in schemes"
         << abort(FatalError);
 
@@ -189,7 +198,7 @@ bool Foam::cloudSolution::semiImplicit(const word& fieldName) const
         }
     }
 
-    FatalErrorIn("bool cloudSolution::semiImplicit(const word&) const")
+    FatalErrorInFunction
         << "Field name " << fieldName << " not found in schemes"
         << abort(FatalError);
 
@@ -226,6 +235,25 @@ bool Foam::cloudSolution::canEvolve()
 bool Foam::cloudSolution::output() const
 {
     return active_ && mesh_.time().outputTime();
+}
+
+
+Foam::scalar Foam::cloudSolution::deltaTMax(const scalar trackTime) const
+{
+    if (transient_)
+    {
+        return min(deltaTMax_, maxCo_*trackTime);
+    }
+    else
+    {
+        return min(deltaTMax_, trackTime);
+    }
+}
+
+
+Foam::scalar Foam::cloudSolution::deltaLMax(const scalar lRef) const
+{
+    return maxCo_*lRef;
 }
 
 

@@ -34,7 +34,7 @@ Description
     solver displacementLaplacian;
     displacementLaplacianCoeffs
     {
-        diffusivity  quadratic inverseDistance 1(wall);
+        diffusivity quadratic inverseDistance 1(wall);
     }
     \endverbatim
 
@@ -138,11 +138,7 @@ public:
         //-  Update local data for topology changes
         virtual void updateMesh(const mapPolyMesh&)
         {
-            notImplemented
-            (
-                "displacementMotionSolverMeshMover::updateMesh"
-                "(const mapPolyMesh&)"
-            );
+            NotImplemented;
         }
 };
 

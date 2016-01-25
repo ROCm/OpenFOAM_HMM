@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,15 +26,24 @@ Application
 
 Description
     Application to generate the patch geometry (points and faces) for use
-    with the externalCoupled boundary condition.
+    with the externalCoupled functionObject.
 
-    Usage:
+Usage
+    - createExternalCoupledPatchGeometry \<patchGroup\> [OPTION]
 
-        createExternalCoupledPatchGeometry \<fieldName\>
+    \param -commsDir \<commsDir\> \n
+    Specify an alternative communications directory (default is comms
+    in the case directory)
 
-    On execution, the field \<fieldName\> is read, and its boundary conditions
-    interrogated for the presence of an \c externalCoupled type.  If found,
-    the patch geometry (points and faces) for the coupled patches are output
+    \param -region \<name\> \n
+    Specify an alternative mesh region.
+
+    \param -regions (\<name1\> \<name2\> .. \<namen\>) \n
+    Specify alternative mesh regions. The region names will be sorted
+    alphabetically and a single composite name will be created
+        \<nameX\>_\<nameY\>.._\<nameZ\>
+
+    On execution, the combined patch geometry (points and faces) are output
     to the communications directory.
 
 Note:
@@ -42,12 +51,12 @@ Note:
     used for face addressing starts at index 0.
 
 SeeAlso
-    externalCoupledMixedFvPatchField
+    externalCoupledFunctionObject
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "createExternalCoupledPatchGeometryTemplates.H"
+#include "externalCoupledFunctionObject.H"
 #include "IOobjectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -55,28 +64,62 @@ SeeAlso
 int main(int argc, char *argv[])
 {
     #include "addRegionOption.H"
-    argList::validArgs.append("fieldName");
+    #include "addRegionsOption.H"
+    argList::validArgs.append("patchGroup");
+    argList::addOption
+    (
+        "commsDir",
+        "dir",
+        "specify alternate communications directory. default is 'comms'"
+    );
     #include "setRootCase.H"
     #include "createTime.H"
-    #include "createNamedMesh.H"
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    const word fieldName = args[1];
-
-    IOobjectList objects(IOobjectList(mesh, mesh.time().timeName()));
-
-    label processed = -1;
-    processField<scalar>(mesh, objects, fieldName, processed);
-    processField<vector>(mesh, objects, fieldName, processed);
-    processField<sphericalTensor>(mesh, objects, fieldName, processed);
-    processField<symmTensor>(mesh, objects, fieldName, processed);
-    processField<tensor>(mesh, objects, fieldName, processed);
-
-    if (processed == -1)
+    wordList regionNames(1, fvMesh::defaultRegion);
+    if (!args.optionReadIfPresent("region", regionNames[0]))
     {
-        Info<< "Field " << fieldName << " not found" << endl;
+        args.optionReadIfPresent("regions", regionNames);
     }
+
+    const wordRe patchGroup(args.argRead<wordRe>(1));
+
+    fileName commsDir(runTime.path()/"comms");
+    args.optionReadIfPresent("commsDir", commsDir);
+
+
+    // Make sure region names are in canonical order
+    stableSort(regionNames);
+
+
+    PtrList<const fvMesh> meshes(regionNames.size());
+    forAll(regionNames, i)
+    {
+        Info<< "Create mesh " << regionNames[i] << " for time = "
+            << runTime.timeName() << nl << endl;
+
+        meshes.set
+        (
+            i,
+            new fvMesh
+            (
+                Foam::IOobject
+                (
+                    regionNames[i],
+                    runTime.timeName(),
+                    runTime,
+                    Foam::IOobject::MUST_READ
+                )
+            )
+        );
+    }
+
+
+    externalCoupledFunctionObject::writeGeometry
+    (
+        UPtrList<const fvMesh>(meshes),
+        commsDir,
+        patchGroup
+    );
 
     Info<< "\nEnd\n" << endl;
 

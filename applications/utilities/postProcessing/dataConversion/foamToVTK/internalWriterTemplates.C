@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,11 +41,45 @@ void Foam::internalWriter::write
 }
 
 
+template<class Type, class GeoMesh>
+void Foam::internalWriter::write
+(
+    const PtrList<DimensionedField<Type, volMesh> >& flds
+)
+{
+    forAll(flds, i)
+    {
+        writeFuns::write(os_, binary_, flds[i], vMesh_);
+    }
+}
+
+
 template<class Type>
 void Foam::internalWriter::write
 (
     const volPointInterpolation& pInterp,
     const PtrList<GeometricField<Type, fvPatchField, volMesh> >& flds
+)
+{
+    forAll(flds, i)
+    {
+        writeFuns::write
+        (
+            os_,
+            binary_,
+            flds[i],
+            pInterp.interpolate(flds[i])(),
+            vMesh_
+        );
+    }
+}
+
+
+template<class Type, class GeoMesh>
+void Foam::internalWriter::write
+(
+    const volPointInterpolation& pInterp,
+    const PtrList<DimensionedField<Type, volMesh> >& flds
 )
 {
     forAll(flds, i)

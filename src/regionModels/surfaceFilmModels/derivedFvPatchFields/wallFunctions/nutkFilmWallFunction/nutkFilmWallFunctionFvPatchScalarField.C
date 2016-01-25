@@ -53,8 +53,7 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::calcUTau
 
     typedef regionModels::surfaceFilmModels::surfaceFilmModel modelType;
 
-    bool foundFilm =
-        db().time().foundObject<modelType>("surfaceFilmProperties");
+    bool foundFilm = db().time().foundObject<modelType>(filmRegionName_);
 
     if (!foundFilm)
     {
@@ -66,7 +65,7 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::calcUTau
 
     // Retrieve phase change mass from surface film model
     const modelType& filmModel =
-        db().time().lookupObject<modelType>("surfaceFilmProperties");
+        db().time().lookupObject<modelType>(filmRegionName_);
 
     const label filmPatchI = filmModel.regionPatchID(patchi);
 
@@ -158,6 +157,7 @@ nutkFilmWallFunctionFvPatchScalarField::nutkFilmWallFunctionFvPatchScalarField
 )
 :
     nutkWallFunctionFvPatchScalarField(p, iF),
+    filmRegionName_("surfaceFilmProperties"),
     B_(5.5),
     yPlusCrit_(11.05)
 {}
@@ -172,6 +172,7 @@ nutkFilmWallFunctionFvPatchScalarField::nutkFilmWallFunctionFvPatchScalarField
 )
 :
     nutkWallFunctionFvPatchScalarField(ptf, p, iF, mapper),
+    filmRegionName_(ptf.filmRegionName_),
     B_(5.5),
     yPlusCrit_(11.05)
 {}
@@ -185,6 +186,10 @@ nutkFilmWallFunctionFvPatchScalarField::nutkFilmWallFunctionFvPatchScalarField
 )
 :
     nutkWallFunctionFvPatchScalarField(p, iF, dict),
+    filmRegionName_
+    (
+        dict.lookupOrDefault<word>("filmRegion", "surfaceFilmProperties")
+    ),
     B_(dict.lookupOrDefault("B", 5.5)),
     yPlusCrit_(dict.lookupOrDefault("yPlusCrit", 11.05))
 {}
@@ -196,6 +201,7 @@ nutkFilmWallFunctionFvPatchScalarField::nutkFilmWallFunctionFvPatchScalarField
 )
 :
     nutkWallFunctionFvPatchScalarField(wfpsf),
+    filmRegionName_(wfpsf.filmRegionName_),
     B_(wfpsf.B_),
     yPlusCrit_(wfpsf.yPlusCrit_)
 {}
@@ -208,6 +214,7 @@ nutkFilmWallFunctionFvPatchScalarField::nutkFilmWallFunctionFvPatchScalarField
 )
 :
     nutkWallFunctionFvPatchScalarField(wfpsf, iF),
+    filmRegionName_(wfpsf.filmRegionName_),
     B_(wfpsf.B_),
     yPlusCrit_(wfpsf.yPlusCrit_)
 {}
@@ -240,6 +247,13 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::yPlus() const
 void nutkFilmWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
+    writeEntryIfDifferent<word>
+    (
+        os,
+        "filmRegion",
+        "surfaceFilmProperties",
+        filmRegionName_
+    );
     writeLocalEntries(os);
     os.writeKeyword("B") << B_ << token::END_STATEMENT << nl;
     os.writeKeyword("yPlusCrit") << yPlusCrit_ << token::END_STATEMENT << nl;

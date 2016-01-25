@@ -115,15 +115,6 @@ protected:
         //- Construct current edge
         edge currentEdge() const;
 
-        //- Check if inside current tet
-        //void checkInside() const;
-
-        //- Check if on current edge
-        //void checkOnEdge() const;
-
-        //- Check if point on triangle
-        //void checkOnTriangle(const point&) const;
-
         //- Cross mesh edge into different face on same cell
         void crossEdgeConnectedFace(const edge& meshEdge);
 

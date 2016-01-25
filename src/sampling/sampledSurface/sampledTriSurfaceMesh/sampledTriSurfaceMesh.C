@@ -644,8 +644,25 @@ bool Foam::sampledTriSurfaceMesh::update()
         return false;
     }
 
+    // Calculate surface and mesh overlap bounding box
+    treeBoundBox bb
+    (
+        surface_.triSurface::points(),
+        surface_.triSurface::meshPoints()
+    );
+    bb.min() = max(bb.min(), mesh().bounds().min());
+    bb.max() = min(bb.max(), mesh().bounds().max());
+
+    // Extend a bit
+    const vector span(bb.span());
+
+    bb.min() -= 0.5*span;
+    bb.max() += 0.5*span;
+
+    bb.inflate(1e-6);
+
     // Mesh search engine, no triangulation of faces.
-    meshSearch meshSearcher(mesh(), polyMesh::FACE_PLANES);
+    meshSearch meshSearcher(mesh(), bb, polyMesh::FACE_PLANES);
 
     return update(meshSearcher);
 }

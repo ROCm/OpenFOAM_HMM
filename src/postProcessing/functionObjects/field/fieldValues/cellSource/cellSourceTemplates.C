@@ -58,15 +58,8 @@ Foam::tmp<Foam::Field<Type> > Foam::fieldValues::cellSource::setFieldValues
 
     if (mustGet)
     {
-        FatalErrorIn
-        (
-            "Foam::tmp<Foam::Field<Type> > "
-            "Foam::fieldValues::cellSource::setFieldValues"
-            "("
-                "const word&, "
-                "const bool"
-            ") const"
-        )   << "Field " << fieldName << " not found in database"
+        FatalErrorInFunction
+            << "Field " << fieldName << " not found in database"
             << abort(FatalError);
     }
 
@@ -217,12 +210,10 @@ bool Foam::fieldValues::cellSource::writeValues
 
         file()<< tab << result;
 
-        if (log_)
-        {
-            Info<< "    " << operationTypeNames_[operation_]
-                << "(" << sourceName_ << ") of " << fieldName
-                <<  " = " << result << endl;
-        }
+        if (log_) Info
+            << "    " << operationTypeNames_[operation_]
+            << "(" << sourceName_ << ") of " << fieldName
+            <<  " = " << result << endl;
 
         // write state/results information
         const word& opName = operationTypeNames_[operation_];

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,7 +64,7 @@ void Foam::writeFuns::write
 (
     std::ostream& os,
     const bool binary,
-    const GeometricField<Type, fvPatchField, volMesh>& vvf,
+    const DimensionedField<Type, volMesh>& vvf,
     const vtkMesh& vMesh
 )
 {
@@ -79,7 +79,7 @@ void Foam::writeFuns::write
 
     DynamicList<floatScalar> fField(pTraits<Type>::nComponents*nValues);
 
-    insert(vvf.internalField(), fField);
+    insert(vvf, fField);
 
     forAll(superCells, superCellI)
     {
@@ -128,8 +128,8 @@ void Foam::writeFuns::write
 (
     std::ostream& os,
     const bool binary,
-    const GeometricField<Type, fvPatchField, volMesh>& vvf,
-    const GeometricField<Type, pointPatchField, pointMesh>& pvf,
+    const DimensionedField<Type, volMesh>& vvf,
+    const DimensionedField<Type, pointMesh>& pvf,
     const vtkMesh& vMesh
 )
 {
@@ -162,6 +162,22 @@ void Foam::writeFuns::write
     std::ostream& os,
     const bool binary,
     const PtrList<GeometricField<Type, PatchField, GeoMesh> >& flds,
+    const vtkMesh& vMesh
+)
+{
+    forAll(flds, i)
+    {
+        write(os, binary, flds[i].dimensionedInternalField(), vMesh);
+    }
+}
+
+
+template<class Type>
+void Foam::writeFuns::write
+(
+    std::ostream& os,
+    const bool binary,
+    const PtrList<DimensionedField<Type, volMesh> >& flds,
     const vtkMesh& vMesh
 )
 {

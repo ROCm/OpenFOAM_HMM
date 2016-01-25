@@ -38,16 +38,47 @@ namespace RASModels
 template<class BasicTurbulenceModel>
 tmp<volScalarField> v2f<BasicTurbulenceModel>::Ts() const
 {
-    return max(k_/epsilon_, 6.0*sqrt(this->nu()/epsilon_));
+    // SAF: limiting thermo->nu(). If psiThermo is used rho might be < 0
+    // temporarily when p < 0 then nu < 0 which needs limiting
+    return
+        max
+        (
+            k_/epsilon_,
+            6.0*sqrt
+            (
+                max
+                (
+                    this->nu(),
+                    dimensionedScalar("zero", this->nu()().dimensions(), 0.0)
+                )
+              / epsilon_
+            )
+        );
 }
 
 
 template<class BasicTurbulenceModel>
 tmp<volScalarField> v2f<BasicTurbulenceModel>::Ls() const
 {
+    // SAF: limiting thermo->nu(). If psiThermo is used rho might be < 0
+    // temporarily when p < 0 then nu < 0 which needs limiting
     return
-        CL_*max(pow(k_, 1.5)
-       /epsilon_, Ceta_*pow025(pow3(this->nu())/epsilon_));
+        CL_
+      * max
+        (
+            pow(k_, 1.5)/epsilon_,
+            Ceta_*pow025
+            (
+                pow3
+                (
+                    max
+                    (
+                        this->nu(),
+                        dimensionedScalar("zero", this->nu()().dimensions(), 0.0)
+                    )
+                )/epsilon_
+            )
+        );
 }
 
 
@@ -239,7 +270,6 @@ v2f<BasicTurbulenceModel>::v2f
     if (type == typeName)
     {
         this->printCoeffs(type);
-        correctNut();
     }
 }
 

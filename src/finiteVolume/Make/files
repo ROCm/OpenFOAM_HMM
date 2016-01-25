@@ -133,7 +133,6 @@ $(derivedFvPatchFields)/advective/advectiveFvPatchFields.C
 $(derivedFvPatchFields)/codedFixedValue/codedFixedValueFvPatchFields.C
 $(derivedFvPatchFields)/codedMixed/codedMixedFvPatchFields.C
 $(derivedFvPatchFields)/cylindricalInletVelocity/cylindricalInletVelocityFvPatchVectorField.C
-$(derivedFvPatchFields)/externalCoupledMixed/externalCoupledMixedFvPatchFields.C
 $(derivedFvPatchFields)/fan/fanFvPatchFields.C
 $(derivedFvPatchFields)/fanPressure/fanPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/fixedFluxPressure/fixedFluxPressureFvPatchScalarField.C
@@ -168,6 +167,7 @@ $(derivedFvPatchFields)/pressureInletOutletVelocity/pressureInletOutletVelocityF
 $(derivedFvPatchFields)/pressureInletUniformVelocity/pressureInletUniformVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/pressureInletVelocity/pressureInletVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/pressureNormalInletOutletVelocity/pressureNormalInletOutletVelocityFvPatchVectorField.C
+$(derivedFvPatchFields)/pressurePIDControlInletVelocity/pressurePIDControlInletVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/fixedNormalInletOutletVelocity/fixedNormalInletOutletVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/rotatingPressureInletOutletVelocity/rotatingPressureInletOutletVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/rotatingTotalPressure/rotatingTotalPressureFvPatchScalarField.C
@@ -199,6 +199,7 @@ $(derivedFvPatchFields)/waveSurfacePressure/waveSurfacePressureFvPatchScalarFiel
 $(derivedFvPatchFields)/interstitialInletVelocity/interstitialInletVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/prghPressure/prghPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/prghTotalPressure/prghTotalPressureFvPatchScalarField.C
+$(derivedFvPatchFields)/fixedProfile/fixedProfileFvPatchFields.C
 
 fvsPatchFields = fields/fvsPatchFields
 $(fvsPatchFields)/fvsPatchField/fvsPatchFields.C
@@ -422,5 +423,11 @@ $(SRF)/SRFModel/SRFModel/SRFModelNew.C
 $(SRF)/SRFModel/rpm/rpm.C
 $(SRF)/derivedFvPatchFields/SRFVelocityFvPatchVectorField/SRFVelocityFvPatchVectorField.C
 $(SRF)/derivedFvPatchFields/SRFFreestreamVelocityFvPatchVectorField/SRFFreestreamVelocityFvPatchVectorField.C
+
+fvOptions = $(general)/fvOptions
+$(fvOptions)/fvOption.C
+$(fvOptions)/fvOptionIO.C
+$(fvOptions)/fvOptionList.C
+$(fvOptions)/fvOptions.C
 
 LIB = $(FOAM_LIBBIN)/libfiniteVolume

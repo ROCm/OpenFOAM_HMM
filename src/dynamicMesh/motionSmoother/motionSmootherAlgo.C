@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,14 +63,8 @@ void Foam::motionSmootherAlgo::testSyncPositions
     {
         if (mag(syncedFld[i] - fld[i]) > maxMag)
         {
-            FatalErrorIn
-            (
-                "motionSmootherAlgo::testSyncPositions"
-                "("
-                    "const pointField&, "
-                    "const scalar"
-                ")"
-            )   << "On point " << i << " point:" << fld[i]
+            FatalErrorInFunction
+                << "On point " << i << " point:" << fld[i]
                 << " synchronised point:" << syncedFld[i]
                 << abort(FatalError);
         }
@@ -88,11 +82,8 @@ void Foam::motionSmootherAlgo::checkFld(const pointScalarField& fld)
         {}
         else
         {
-            FatalErrorIn
-            (
-                "motionSmootherAlgo::checkFld"
-                "(const pointScalarField&)"
-            )   << "Problem : point:" << pointI << " value:" << val
+            FatalErrorInFunction
+                << "Problem : point:" << pointI << " value:" << val
                 << abort(FatalError);
         }
     }
@@ -514,12 +505,31 @@ void Foam::motionSmootherAlgo::setDisplacement
     const labelList& cppMeshPoints =
         mesh.globalData().coupledPatch().meshPoints();
 
-    forAll(cppMeshPoints, i)
+    const labelList& ppMeshPoints = pp.meshPoints();
+
+    // Knock out displacement on points which are not on pp but are coupled
+    // to them since we want 'proper' values from displacement to take
+    // precedence.
     {
-        displacement[cppMeshPoints[i]] = vector::zero;
+        PackedBoolList isPatchPoint(mesh.nPoints());
+        isPatchPoint.set(ppMeshPoints);
+        syncTools::syncPointList
+        (
+            mesh,
+            isPatchPoint,
+            maxEqOp<unsigned int>(),
+            0
+        );
+        forAll(cppMeshPoints, i)
+        {
+            label pointI = cppMeshPoints[i];
+            if (isPatchPoint[pointI])
+            {
+                displacement[pointI] = vector::zero;
+            }
+        }
     }
 
-    const labelList& ppMeshPoints = pp.meshPoints();
 
     // Set internal point data from displacement on combined patch points.
     forAll(ppMeshPoints, patchPointI)
@@ -657,7 +667,7 @@ void Foam::motionSmootherAlgo::modifyMotionPoints(pointField& newPoints) const
 
         if (mesh_.globalData().parallel())
         {
-            WarningIn("motionSmootherAlgo::modifyMotionPoints(pointField&)")
+            WarningInFunction
                 << "2D mesh-motion probably not correct in parallel" << endl;
         }
 
@@ -842,18 +852,7 @@ bool Foam::motionSmootherAlgo::scaleMesh
 {
     if (!smoothMesh && adaptPatchIDs_.empty())
     {
-        FatalErrorIn
-        (
-            "motionSmootherAlgo::scaleMesh"
-            "("
-                "labelList&, "
-                "const List<labelPair>&, "
-                "const dictionary&, "
-                "const dictionary&, "
-                "const bool, "
-                "const label"
-            ")"
-        )
+        FatalErrorInFunction
             << "You specified both no movement on the internal mesh points"
             << " (smoothMesh = false)" << nl
             << "and no movement on the patch (adaptPatchIDs is empty)" << nl
@@ -1064,10 +1063,8 @@ void Foam::motionSmootherAlgo::updateMesh()
             )
         )
         {
-            FatalErrorIn
-            (
-                "motionSmootherAlgo::updateMesh"
-            )   << "Patch " << patches[patchI].name()
+            FatalErrorInFunction
+                << "Patch " << patches[patchI].name()
                 << " has wrong boundary condition "
                 << displacement_.boundaryField()[patchI].type()
                 << " on field " << displacement_.name() << nl

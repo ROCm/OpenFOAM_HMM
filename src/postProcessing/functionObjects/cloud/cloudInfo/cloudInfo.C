@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -111,7 +111,6 @@ void Foam::cloudInfo::read(const dictionary& dict)
         if (writeToFile())
         {
             filePtrs_.setSize(cloudNames_.size());
-            filePtrs_.clear();
             forAll(filePtrs_, fileI)
             {
                 const word& cloudName = cloudNames_[fileI];
@@ -160,10 +159,11 @@ void Foam::cloudInfo::write()
             scalar D10 = cloud.Dij(1, 0);
             scalar D32 = cloud.Dij(3, 2);
 
-            if (Pstream::master())
+            if (Pstream::master() && writeToFile())
             {
+                writeTime(filePtrs_[cloudI]);
                 filePtrs_[cloudI]
-                    << obr_.time().value() << token::TAB
+                    << token::TAB
                     << nParcels << token::TAB
                     << massInSystem << token::TAB
                     << Dmax << token::TAB
@@ -172,16 +172,14 @@ void Foam::cloudInfo::write()
                     << endl;
             }
 
-            if (log_)
-            {
-                Info<< type() << " " << name_ <<  " output:" << nl
-                    << "    number of parcels : " << nParcels << nl
-                    << "    mass in system    : " << massInSystem << nl
-                    << "    maximum diameter  : " << Dmax << nl
-                    << "    D10 diameter      : " << D10 << nl
-                    << "    D32 diameter      : " << D32 << nl
-                    << endl;
-            }
+            if (log_) Info
+                << type() << " " << name_ <<  " output:" << nl
+                << "    number of parcels : " << nParcels << nl
+                << "    mass in system    : " << massInSystem << nl
+                << "    maximum diameter  : " << Dmax << nl
+                << "    D10 diameter      : " << D10 << nl
+                << "    D32 diameter      : " << D32 << nl
+                << endl;
         }
     }
 }

@@ -27,10 +27,12 @@ Class
 Description
     Injection positions specified by a particle number density within a cell set
 
-    - User specifies
-      - Number density of particles in cell set (effective)
-      - Total mass to inject
-      - Initial parcel velocity
+    User specifies
+    - Number density of particles in cell set (effective)
+    - Total mass to inject
+    - Initial parcel velocity
+
+    Additional
     - Parcel diameters obtained by PDF model
     - All parcels introduced at SOI
 

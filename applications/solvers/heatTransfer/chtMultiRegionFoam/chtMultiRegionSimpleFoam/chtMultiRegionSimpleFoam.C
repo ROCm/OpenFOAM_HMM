@@ -24,6 +24,9 @@ License
 Application
     chtMultiRegionSimpleFoam
 
+Group
+    grpHeatTransferSolvers
+
 Description
     Steady-state version of chtMultiRegionFoam
 
@@ -36,7 +39,7 @@ Description
 #include "regionProperties.H"
 #include "solidThermo.H"
 #include "radiationModel.H"
-#include "fvIOoptionList.H"
+#include "fvOptions.H"
 #include "coordinateSystem.H"
 #include "fixedFluxPressureFvPatchScalarField.H"
 

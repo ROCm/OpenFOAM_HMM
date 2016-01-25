@@ -75,6 +75,9 @@ class distanceSurface
         //- Whether to recalculate cell values as average of point values
         const Switch average_;
 
+        //- Optional bounding box to trim triangles against
+        const boundBox bounds_;
+
         //- If restricted to zones, name of this zone or a regular expression
         keyType zoneKey_;
 
@@ -144,7 +147,8 @@ public:
             const bool signedDistance,
             const bool cell,
             const Switch regularise,
-            const Switch average
+            const Switch average,
+            const boundBox& bounds = boundBox::greatBox
         );
 
 

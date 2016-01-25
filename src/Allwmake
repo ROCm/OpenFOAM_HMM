@@ -41,6 +41,8 @@ wmake $targetType edgeMesh
 parallel/decompose/AllwmakeLnInclude
 dummyThirdParty/Allwmake $targetType $*
 
+wmakeLnInclude fvOptions
+
 wmake $targetType finiteVolume
 wmake $targetType lagrangian/basic
 wmake $targetType lagrangian/distributionModels
@@ -50,6 +52,7 @@ wmake $targetType conversion
 wmake $targetType mesh/extrudeModel
 wmake $targetType dynamicMesh
 wmake $targetType dynamicFvMesh
+wmake $targetType sampling
 wmake $targetType topoChangerFvMesh
 wmake $targetType sampling
 

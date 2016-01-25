@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,9 @@ Application
 Description
     Generates a VTK file of particle tracks for cases that were computed using
     a steady-state cloud
-    NOTE: case must be re-constructed (if running in parallel) before use
+
+    Note:
+    - Case must be re-constructed (if running in parallel) before use
 
 \*---------------------------------------------------------------------------*/
 
@@ -331,7 +333,7 @@ int main(int argc, char *argv[])
         Info<< endl;
     }
 
-    Info<< "\ndone" << endl;
+    Info<< "End" << nl << endl;
 
     return 0;
 }

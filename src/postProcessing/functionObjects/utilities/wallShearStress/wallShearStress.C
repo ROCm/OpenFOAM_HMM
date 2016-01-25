@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,11 +80,9 @@ void Foam::wallShearStress::calcShearStress
             << token::TAB << maxSsp
             << endl;
 
-        if (log_)
-        {
-            Info<< "    min/max(" << pp.name() << ") = "
-                << minSsp << ", " << maxSsp << endl;
-        }
+        if (log_) Info
+            << "    min/max(" << pp.name() << ") = "
+            << minSsp << ", " << maxSsp << endl;
     }
 }
 
@@ -111,16 +109,8 @@ Foam::wallShearStress::wallShearStress
     if (!isA<fvMesh>(obr_))
     {
         active_ = false;
-        WarningIn
-        (
-            "wallShearStress::wallShearStress"
-            "("
-                "const word&, "
-                "const objectRegistry&, "
-                "const dictionary&, "
-                "const bool"
-            ")"
-        )   << "No fvMesh available, deactivating " << name_ << nl
+        WarningInFunction
+            << "No fvMesh available, deactivating " << name_ << nl
             << endl;
     }
 
@@ -213,7 +203,7 @@ void Foam::wallShearStress::read(const dictionary& dict)
                 }
                 else
                 {
-                    WarningIn("void wallShearStress::read(const dictionary&)")
+                    WarningInFunction
                         << "Requested wall shear stress on non-wall boundary "
                         << "type patch: " << pbm[patchI].name() << endl;
                 }
@@ -262,7 +252,7 @@ void Foam::wallShearStress::execute()
         }
         else
         {
-            FatalErrorIn("void Foam::wallShearStress::write()")
+            FatalErrorInFunction
                 << "Unable to find turbulence model in the "
                 << "database" << exit(FatalError);
         }
@@ -276,10 +266,7 @@ void Foam::wallShearStress::execute()
 
 void Foam::wallShearStress::end()
 {
-    if (active_)
-    {
-        execute();
-    }
+    // Do nothing
 }
 
 
@@ -296,12 +283,10 @@ void Foam::wallShearStress::write()
         const volVectorField& wallShearStress =
             obr_.lookupObject<volVectorField>(resultName_);
 
-        if (log_)
-        {
-            Info<< type() << " " << name_ << " output:" << nl
-                << "    writing field " << wallShearStress.name() << nl
-                << endl;
-        }
+        if (log_) Info
+            << type() << " " << name_ << " output:" << nl
+            << "    writing field " << wallShearStress.name() << nl
+            << endl;
 
         wallShearStress.write();
     }

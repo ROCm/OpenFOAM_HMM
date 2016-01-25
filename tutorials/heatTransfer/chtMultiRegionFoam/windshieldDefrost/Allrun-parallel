@@ -1,0 +1,25 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+./Allrun.pre
+
+# Set application name
+application=$(getApplication)
+
+# Get number of processors to run on
+nProcs=4 #$(getNumberOfProcessors)
+
+# decompose
+runApplication -log log.decomposePar.cabin decomposePar -region cabin
+runApplication -log log.decomposePar.ice decomposePar -region ice
+runApplication -log log.decomposePar.exterior decomposePar -region exterior
+
+runParallel $application $nProcs
+
+runApplication -log log.reconstructPar.cabin reconstructPar -region cabin
+runApplication -log log.reconstructPar.ice reconstructPar -region ice
+runApplication -log log.reconstructPar.exterior reconstructPar -region exterior
+

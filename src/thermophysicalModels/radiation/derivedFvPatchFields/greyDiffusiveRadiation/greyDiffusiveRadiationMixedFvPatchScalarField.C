@@ -27,6 +27,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
+#include "boundaryRadiationProperties.H"
 
 #include "fvDOM.H"
 #include "constants.H"
@@ -44,8 +45,8 @@ greyDiffusiveRadiationMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    radiationCoupledBase(p, "undefined", scalarField::null()),
-    TName_("T")
+    TName_("T"),
+    solarLoad_(false)
 {
     refValue() = 0.0;
     refGrad() = 0.0;
@@ -63,13 +64,8 @@ greyDiffusiveRadiationMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(ptf, p, iF, mapper),
-    radiationCoupledBase
-    (
-        p,
-        ptf.emissivityMethod(),
-        ptf.emissivity_
-    ),
-    TName_(ptf.TName_)
+    TName_(ptf.TName_),
+    solarLoad_(ptf.solarLoad_)
 {}
 
 
@@ -82,8 +78,8 @@ greyDiffusiveRadiationMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    radiationCoupledBase(p, dict),
-    TName_(dict.lookupOrDefault<word>("T", "T"))
+    TName_(dict.lookupOrDefault<word>("T", "T")),
+    solarLoad_(dict.lookupOrDefault<bool>("solarLoad", false))
 {
     if (dict.found("refValue"))
     {
@@ -113,13 +109,8 @@ greyDiffusiveRadiationMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(ptf),
-    radiationCoupledBase
-    (
-        ptf.patch(),
-        ptf.emissivityMethod(),
-        ptf.emissivity_
-    ),
-    TName_(ptf.TName_)
+    TName_(ptf.TName_),
+    solarLoad_(ptf.solarLoad_)
 {}
 
 
@@ -131,13 +122,8 @@ greyDiffusiveRadiationMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(ptf, iF),
-    radiationCoupledBase
-    (
-        ptf.patch(),
-        ptf.emissivityMethod(),
-        ptf.emissivity_
-    ),
-    TName_(ptf.TName_)
+    TName_(ptf.TName_),
+    solarLoad_(ptf.solarLoad_)
 {}
 
 
@@ -172,15 +158,13 @@ updateCoeffs()
 
     if (dom.nLambda() != 1)
     {
-        FatalErrorIn
-        (
-            "Foam::radiation::"
-            "greyDiffusiveRadiationMixedFvPatchScalarField::updateCoeffs"
-        )   << " a grey boundary condition is used with a non-grey "
+        FatalErrorInFunction
+            << " a grey boundary condition is used with a non-grey "
             << "absorption model" << nl << exit(FatalError);
     }
 
     scalarField& Iw = *this;
+
     const vectorField n(patch().nf());
 
     radiativeIntensityRay& ray =
@@ -190,7 +174,15 @@ updateCoeffs()
 
     ray.Qr().boundaryField()[patchI] += Iw*nAve;
 
-    const scalarField temissivity = emissivity();
+    const boundaryRadiationProperties& boundaryRadiation =
+        boundaryRadiationProperties::New(dimensionedInternalField().mesh());
+
+    const tmp<scalarField> temissivity
+    (
+        boundaryRadiation.emissivity(patch().index())
+    );
+
+    const scalarField& emissivity = temissivity();
 
     scalarField& Qem = ray.Qem().boundaryField()[patchI];
     scalarField& Qin = ray.Qin().boundaryField()[patchI];
@@ -206,6 +198,14 @@ updateCoeffs()
         Ir += dom.IRay(rayI).Qin().boundaryField()[patchI];
     }
 
+    if (solarLoad_)
+    {
+        Ir += patch().lookupPatchField<volScalarField,scalar>
+        (
+            radiation.externalRadHeatFieldName_
+        );
+    }
+
     forAll(Iw, faceI)
     {
         if ((-n[faceI] & myRayId) > 0.0)
@@ -215,8 +215,8 @@ updateCoeffs()
             valueFraction()[faceI] = 1.0;
             refValue()[faceI] =
                 (
-                    Ir[faceI]*(scalar(1.0) - temissivity[faceI])
-                  + temissivity[faceI]*physicoChemical::sigma.value()
+                    Ir[faceI]*(scalar(1.0) - emissivity[faceI])
+                  + emissivity[faceI]*physicoChemical::sigma.value()
                   * pow4(Tp[faceI])
                 )/pi;
 
@@ -248,8 +248,8 @@ void Foam::radiation::greyDiffusiveRadiationMixedFvPatchScalarField::write
 ) const
 {
     mixedFvPatchScalarField::write(os);
-    radiationCoupledBase::write(os);
     writeEntryIfDifferent<word>(os, "T", "T", TName_);
+    os.writeKeyword("solarLoad") << solarLoad_ << token::END_STATEMENT << nl;
 }
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd
+     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,7 +61,7 @@ Description
     \table
         Property | Description                | Required   | Default value
         type     | type name: wallShearStress | yes        |
-        resultName | Name of wall shear stress field | no  | <function name>
+        resultName | Name of wall shear stress field | no  | \<function name\>
         patches  | list of patches to process | no         | all wall patches
         log      | Log to standard output     | no         | yes
     \endtable

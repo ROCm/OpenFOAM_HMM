@@ -24,6 +24,9 @@ License
 Application
     uncoupledKinematicParcelDyMFoam
 
+Group
+    grpLagrangianSolvers grpMovingMeshSolvers
+
 Description
     Transient solver for the passive transport of a single kinematic
     particle cloud.
