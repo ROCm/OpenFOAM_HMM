@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1499,34 +1499,6 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
                 Pout<< "    " << procI << '\t' << nProcCells[procI] << endl;
             }
             Pout<< endl;
-
-
-            if (keepZoneFaces)
-            {
-                const faceZoneMesh& fZones = mesh_.faceZones();
-                const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
-
-                // Check that faceZone faces are indeed internal
-                forAll(fZones, zoneI)
-                {
-                    const faceZone& fZone = fZones[zoneI];
-
-                    forAll(fZone, i)
-                    {
-                        label faceI = fZone[i];
-                        label patchI = pbm.whichPatch(faceI);
-
-                        if (patchI >= 0 && pbm[patchI].coupled())
-                        {
-                            WarningInFunction
-                                << "Face at " << mesh_.faceCentres()[faceI]
-                                << " on zone " << fZone.name()
-                                << " is on coupled patch " << pbm[patchI].name()
-                                << endl;
-                        }
-                    }
-                }
-            }
         }
 
         // Do actual sending/receiving of mesh
@@ -1538,6 +1510,35 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
         // Set correct instance (for if overwrite)
         mesh_.setInstance(timeName());
         setInstance(mesh_.facesInstance());
+
+
+
+        if (debug && keepZoneFaces)
+        {
+            const faceZoneMesh& fZones = mesh_.faceZones();
+            const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
+
+            // Check that faceZone faces are indeed internal
+            forAll(fZones, zoneI)
+            {
+                const faceZone& fZone = fZones[zoneI];
+
+                forAll(fZone, i)
+                {
+                    label faceI = fZone[i];
+                    label patchI = pbm.whichPatch(faceI);
+
+                    if (patchI >= 0 && pbm[patchI].coupled())
+                    {
+                        WarningInFunction
+                            << "Face at " << mesh_.faceCentres()[faceI]
+                            << " on zone " << fZone.name()
+                            << " is on coupled patch " << pbm[patchI].name()
+                            << endl;
+                    }
+                }
+            }
+        }
     }
 
     return map;

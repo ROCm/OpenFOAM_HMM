@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -3051,7 +3051,7 @@ void Foam::autoLayerDriver::addLayers
 
 
     // Duplicate points on faceZones that layers are added to
-    labelList pointToDuplicate;
+    labelList pointToMaster;
 
     {
         // Check outside of baffles for non-manifoldness
@@ -3172,7 +3172,7 @@ void Foam::autoLayerDriver::addLayers
         if (map.valid())
         {
             // Store point duplication
-            pointToDuplicate.setSize(mesh.nPoints(), -1);
+            pointToMaster.setSize(mesh.nPoints(), -1);
 
             const labelList& pointMap = map().pointMap();
             const labelList& reversePointMap = map().reversePointMap();
@@ -3185,8 +3185,8 @@ void Foam::autoLayerDriver::addLayers
                 if (newMasterPointI != pointI)
                 {
                     // Found slave. Mark both master and slave
-                    pointToDuplicate[pointI] = newMasterPointI;
-                    pointToDuplicate[newMasterPointI] = newMasterPointI;
+                    pointToMaster[pointI] = newMasterPointI;
+                    pointToMaster[newMasterPointI] = newMasterPointI;
                 }
             }
 
@@ -3248,7 +3248,7 @@ void Foam::autoLayerDriver::addLayers
     // Now we have
     // - mesh with optional baffles and duplicated points for faceZones
     //   where layers are to be added
-    // - pointToDuplicate : correspondence for duplicated points
+    // - pointToMaster    : correspondence for duplicated points
     // - baffles          : list of pairs of faces
 
 
@@ -3976,13 +3976,26 @@ void Foam::autoLayerDriver::addLayers
         }
 
 
-
-        // Update numbering of baffles
+        // Use geometric detection of points-to-be-merged
+        //  - detect any boundary face created from a duplicated face (=baffle)
+        //  - on these mark any point created from a duplicated point
+        if (returnReduce(pointToMaster.size(), sumOp<label>()))
         {
-            // From old mesh face to corresponding newMesh boundary face.
-            // (we cannot just use faceMap or reverseFaceMap here since
-            //  multiple faces originate from the old face)
-            labelList oldMeshToNewMesh(map().nOldFaces(), -1);
+            // Estimate number of points-to-be-merged
+            DynamicList<label> candidates(baffles.size()*4);
+
+            // Mark whether old face was on baffle
+            PackedBoolList oldBaffleFace(map().nOldFaces());
+            forAll(baffles, i)
+            {
+                const labelPair& baffle = baffles[i];
+                oldBaffleFace[baffle[0]] = true;
+                oldBaffleFace[baffle[1]] = true;
+            }
+
+            // Collect candidate if
+            //  - point on boundary face originating from baffle
+            //  - and point originating from duplicate
             for
             (
                 label faceI = mesh.nInternalFaces();
@@ -3991,139 +4004,75 @@ void Foam::autoLayerDriver::addLayers
             )
             {
                 label oldFaceI = map().faceMap()[faceI];
-
-                if (oldFaceI != -1)
+                if (oldFaceI != -1 && oldBaffleFace[oldFaceI])
                 {
-                    oldMeshToNewMesh[oldFaceI] = faceI;
+                    const face& f = mesh.faces()[faceI];
+                    forAll(f, fp)
+                    {
+                        label pointI = f[fp];
+                        label oldPointI = map().pointMap()[pointI];
+
+                        if (pointToMaster[oldPointI] != -1)
+                        {
+                            candidates.append(pointI);
+                        }
+                    }
                 }
             }
 
-            label newI = 0;
-            forAll(baffles, i)
-            {
-                const labelPair& p = baffles[i];
 
-                labelPair newB(oldMeshToNewMesh[p[0]], oldMeshToNewMesh[p[1]]);
-                if (newB[0] != -1 && newB[1] != -1)
-                {
-                    baffles[newI++] = newB;
-                }
-            }
-            baffles.setSize(newI);
-        }
-
-
-
-        // Update numbering of pointToDuplicate
-        if (returnReduce(pointToDuplicate.size(), sumOp<label>()))
-        {
-            // The problem is that pointToDuplicate is valid for the old
-            // boundary points which are now internal. We need to find the
-            // corresponding new boundary point.
-
-
-            List<labelPair> mergePointBaffles
+            // Do geometric merge. Ideally we'd like to use a topological
+            // merge but we've thrown away all layer-wise addressing when
+            // throwing away addPatchCellLayer engine. Also the addressing
+            // is extremely complicated. There is no problem with merging
+            // too many points; the problem would be if merging baffles.
+            // Trust mergeZoneBaffles to do sufficient checks.
+            labelList oldToNew;
+            label nNew = mergePoints
             (
-                meshRefinement::subsetBaffles
-                (
-                    mesh,
-                    internalOrBaffleFaceZones,
-                    baffles
-                )
+                pointField(mesh.points(), candidates),
+                meshRefiner_.mergeDistance(),
+                false,
+                oldToNew
             );
-            Info<< "Detected "
-                << returnReduce(mergePointBaffles.size(), sumOp<label>())
-                << " baffles to merge points across" << nl << endl;
 
+            // Extract points to be merged (i.e. multiple points originating
+            // from a single one)
 
-            label nPointPairs = 0;
-            forAll(pointToDuplicate, oldPointI)
+            labelListList newToOld(invertOneToMany(nNew, oldToNew));
+
+            // Extract points with more than one old one
+            pointToMaster.setSize(mesh.nPoints());
+            pointToMaster = -1;
+
+            forAll(newToOld, newI)
             {
-                label otherOldPointI = pointToDuplicate[oldPointI];
-                if (otherOldPointI != -1)
+                const labelList& oldPoints = newToOld[newI];
+                if (oldPoints.size() > 1)
                 {
-                    nPointPairs++;
-                }
-            }
-
-            const labelList& pointMap = map().pointMap();
-
-            // 1. Construct map from old (possibly) internal point to
-            //    new boundary point
-            Map<label> oldPointToBoundaryPoint(2*nPointPairs);
-
-            forAll(mergePointBaffles, i)
-            {
-                const labelPair& baffle = mergePointBaffles[i];
-                forAll(baffle, j)
-                {
-                    const face& f = mesh.faces()[baffle[j]];
-                    forAll(f, fp)
+                    labelList meshPoints
+                    (
+                        UIndirectList<label>(candidates, oldPoints)
+                    );
+                    label masterI = min(meshPoints);
+                    forAll(meshPoints, i)
                     {
-                        label pointI = f[fp];
-                        label oldPointI = pointMap[pointI];
-                        if (pointToDuplicate[oldPointI] != -1)
-                        {
-                            oldPointToBoundaryPoint.insert(oldPointI, pointI);
-                        }
-                    }
-                }
-            }
-
-
-            // 2. Pick up old internal point
-
-            labelList oldPointToDuplicate(pointToDuplicate.xfer());
-            pointToDuplicate.setSize(mesh.nPoints(), -1);
-
-            forAll(mergePointBaffles, i)
-            {
-                const labelPair& baffle = mergePointBaffles[i];
-                forAll(baffle, j)
-                {
-                    const face& f = mesh.faces()[baffle[j]];
-                    forAll(f, fp)
-                    {
-                        label pointI = f[fp];
-                        label oldPointI = pointMap[pointI];
-                        label oldDupI = oldPointToDuplicate[oldPointI];
-                        if (oldDupI != -1)
-                        {
-                            label newPointI = oldPointToBoundaryPoint[oldDupI];
-                            pointToDuplicate[pointI] = newPointI;
-                        }
-                    }
-                }
-            }
-
-
-            // Check
-            forAll(pointToDuplicate, pointI)
-            {
-                label dupI = pointToDuplicate[pointI];
-                if (dupI != -1)
-                {
-                    const point& pt = mesh.points()[pointI];
-                    const point& dupPt = mesh.points()[dupI];
-                    if (mag(pt-dupPt) > meshRefiner_.mergeDistance())
-                    {
-                        WarningInFunction
-                            << "Trying to merge points "
-                            << pointI << " at:" << pt
-                            << "and " << dupI << " at:" << dupPt
-                            << " distance " << mag(pt-dupPt)
-                            << endl;
+                        pointToMaster[meshPoints[i]] = masterI;
                     }
                 }
             }
         }
     }
 
+
+
+
+
     // Count duplicate points
     label nPointPairs = 0;
-    forAll(pointToDuplicate, pointI)
+    forAll(pointToMaster, pointI)
     {
-        label otherPointI = pointToDuplicate[pointI];
+        label otherPointI = pointToMaster[pointI];
         if (otherPointI != -1)
         {
             nPointPairs++;
@@ -4145,9 +4094,9 @@ void Foam::autoLayerDriver::addLayers
               + ".obj"
             );
             Info<< "Points to be merged to " << str.name() << endl;
-            forAll(pointToDuplicate, pointI)
+            forAll(pointToMaster, pointI)
             {
-                label otherPointI = pointToDuplicate[pointI];
+                label otherPointI = pointToMaster[pointI];
                 if (otherPointI != -1)
                 {
                     const point& pt = mesh.points()[pointI];
@@ -4158,7 +4107,7 @@ void Foam::autoLayerDriver::addLayers
         }
 
 
-        autoPtr<mapPolyMesh> map = meshRefiner_.mergePoints(pointToDuplicate);
+        autoPtr<mapPolyMesh> map = meshRefiner_.mergePoints(pointToMaster);
         if (map.valid())
         {
             inplaceReorder(map().reverseCellMap(), cellNLayers);
@@ -4358,8 +4307,64 @@ void Foam::autoLayerDriver::doLayers
             << endl;
 
 
+        bool faceZoneOnCoupledFace = false;
+
+        if (!preBalance)
+        {
+            // Check if there are faceZones on processor boundaries. This
+            // requires balancing to move them off the processor boundaries.   
+
+            // Is face on a faceZone
+            PackedBoolList isExtrudedZoneFace(mesh.nFaces());
+            {
+                // Add contributions from faceZones that get layers
+                const faceZoneMesh& fZones = mesh.faceZones();
+                forAll(fZones, zoneI)
+                {
+                    const faceZone& fZone = fZones[zoneI];
+                    const word& fzName = fZone.name();
+
+                    label mpI, spI;
+                    surfaceZonesInfo::faceZoneType fzType;
+                    meshRefiner_.getFaceZoneInfo(fzName, mpI, spI, fzType);
+
+                    if (numLayers[mpI] > 0 || numLayers[spI])
+                    {
+                        forAll(fZone, i)
+                        {
+                            isExtrudedZoneFace[fZone[i]] = true;
+                        }
+                    }
+                }
+            }
+
+            PackedBoolList intOrCoupled
+            (
+                syncTools::getInternalOrCoupledFaces(mesh)
+            );
+
+            for
+            (
+                label faceI = mesh.nInternalFaces();
+                faceI < mesh.nFaces();
+                faceI++
+            )
+            {
+                if (intOrCoupled[faceI] && isExtrudedZoneFace[faceI])
+                {
+                    faceZoneOnCoupledFace = true;
+                    break;
+                }
+            }
+
+            reduce(faceZoneOnCoupledFace, orOp<bool>());
+        }
+
+
+
+
         // Balance
-        if (Pstream::parRun() && preBalance)
+        if (Pstream::parRun() && (preBalance || faceZoneOnCoupledFace))
         {
             Info<< nl
                 << "Doing initial balancing" << nl
@@ -4397,7 +4402,10 @@ void Foam::autoLayerDriver::doLayers
                     const labelList& cellIDs = fZone.slaveCells();
                     forAll(cellIDs, i)
                     {
-                        cellWeights[cellIDs[i]] += numLayers[mpI];
+                        if (cellIDs[i] >= 0)
+                        {
+                            cellWeights[cellIDs[i]] += numLayers[mpI];
+                        }
                     }
                 }
                 if (numLayers[spI] > 0)
@@ -4405,12 +4413,13 @@ void Foam::autoLayerDriver::doLayers
                     const labelList& cellIDs = fZone.masterCells();
                     forAll(cellIDs, i)
                     {
-                        cellWeights[cellIDs[i]] += numLayers[mpI];
+                        if (cellIDs[i] >= 0)
+                        {
+                            cellWeights[cellIDs[i]] += numLayers[mpI];
+                        }
                     }
                 }
             }
-
-
 
             // Balance mesh (and meshRefinement). Restrict faceZones to
             // be on internal faces only since they will be converted into
