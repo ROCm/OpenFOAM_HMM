@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1911,12 +1911,31 @@ void Foam::autoRefineDriver::doRefine
         0       // min cells to refine
     );
 
-    // Refine cells that contain a gap
-    smallFeatureRefine
+
+    if
     (
-        refineParams,
-        100     // maxIter
-    );
+        max(meshRefiner_.surfaces().maxGapLevel()) > 0
+     || max(meshRefiner_.shells().maxGapLevel()) > 0
+    )
+    {
+        // In case we use automatic gap level refinement do some pre-refinement
+        // (fast) since it is so slow.
+
+        // Refine based on surface
+        surfaceOnlyRefine
+        (
+            refineParams,
+            20     // maxIter
+        );
+
+        // Refine cells that contain a gap
+        smallFeatureRefine
+        (
+            refineParams,
+            100     // maxIter
+        );
+    }
+
 
     // Refine based on surface
     surfaceOnlyRefine
