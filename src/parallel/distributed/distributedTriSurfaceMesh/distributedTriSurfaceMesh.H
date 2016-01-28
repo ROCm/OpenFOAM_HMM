@@ -49,6 +49,7 @@ SourceFiles
 #define distributedTriSurfaceMesh_H
 
 #include "triSurfaceMesh.H"
+#include "localIOdictionary.H"
 #include "IOdictionary.H"
 #include "Pair.H"
 #include "globalIndex.H"
@@ -101,7 +102,7 @@ private:
         autoPtr<decompositionMethod> decomposer_;
 
         //- Bounding box settings
-        IOdictionary dict_;
+        localIOdictionary dict_;
 
         //- Bounding boxes of all processors
         List<List<treeBoundBox> > procBb_;

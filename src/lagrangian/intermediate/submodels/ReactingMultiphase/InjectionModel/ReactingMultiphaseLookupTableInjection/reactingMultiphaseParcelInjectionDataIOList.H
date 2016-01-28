@@ -34,14 +34,14 @@ SourceFiles
 #ifndef reactingMultiphaseParcelInjectionDataIOList_H
 #define reactingMultiphaseParcelInjectionDataIOList_H
 
-#include "IOList.H"
+#include "GlobalIOList.H"
 #include "reactingMultiphaseParcelInjectionData.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef IOList<reactingMultiphaseParcelInjectionData>
+    typedef GlobalIOList<reactingMultiphaseParcelInjectionData>
         reactingMultiphaseParcelInjectionDataIOList;
 }
 
