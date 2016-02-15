@@ -100,6 +100,7 @@ Foam::tmp<Foam::volScalarField> calcK
     volScalarField& k = tk();
     scalar ck0 = pow025(Cmu)*kappa;
     k = (1 - mask)*k + mask*sqr(nut/(ck0*min(y, ybl)));
+    k.rename("k");
 
     // Do not correct BC
     // - operation may use inconsistent fields wrt these local manipulations
