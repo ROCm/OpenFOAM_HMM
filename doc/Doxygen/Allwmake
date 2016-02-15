@@ -24,23 +24,20 @@ USAGE
 
 defineURL() {
 
+  WEB_PATH="https://develop.openfoam.com"
+  FOAM_REPO_VERSION="$WM_PROJECT-plus"
+
   case "$WM_PROJECT_VERSION" in
-  [0-9].[0-9].x)
-    FOAM_BRANCH_NAME="master"
-    FOAM_REPO_VERSION="$WM_PROJECT-$WM_PROJECT_VERSION"
-    ;;
-  [0-9].[0-9].[0-9])
-    FOAM_BRANCH_NAME="version-$WM_PROJECT_VERSION"
-    FOAM_REPO_VERSION="$WM_PROJECT-${WM_PROJECT_VERSION%.*}.x"
+  v[0-9].[0-9]+)
+    FOAM_REPO_TAG="$WM_PROJECT-$WM_PROJECT_VERSION"
     ;;
   *)
-    FOAM_BRANCH_NAME="master"
-    FOAM_REPO_VERSION="$WM_PROJECT-$WM_PROJECT_VERSION"
+    FOAM_REPO_TAG="master"
     ;;
   esac
 
-  export FOAM_BASE_REPO="https://github.com/$WM_PROJECT/$FOAM_REPO_VERSION"
-  export FOAM_ONLINE_REPO="$FOAM_BASE_REPO/tree/$FOAM_BRANCH_NAME"
+  export FOAM_BASE_REPO="$WEB_PATH/Development/$FOAM_REPO_VERSION"
+  export FOAM_ONLINE_REPO="$FOAM_BASE_REPO/blob/${FOAM_REPO_TAG}"
 }
 
 # parse options
@@ -61,7 +58,6 @@ do
 done
 
 #------------------------------------------------------------------------------
-
 set -x
 
 rm -rf latex man
