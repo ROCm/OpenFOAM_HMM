@@ -104,7 +104,7 @@ Foam::tmp<Foam::volScalarField> calcK
 
     // Do not correct BC
     // - operation may use inconsistent fields wrt these local manipulations
-    // k.correctBoundaryConditions();
+    //k.correctBoundaryConditions();
     correctProcessorPatches(k);
 
     Info<< "Writing k\n" << endl;
@@ -132,6 +132,7 @@ Foam::tmp<Foam::volScalarField> calcEpsilon
     scalar ce0 = ::pow(Cmu, 0.75)/kappa;
     epsilon = (1 - mask)*epsilon + mask*ce0*k*sqrt(k)/min(y, ybl);
     epsilon.max(SMALL);
+    epsilon.rename("epsilon");
 
     // Do not correct BC
     // - operation may use inconsistent fields wrt these local manipulations
@@ -297,6 +298,7 @@ void calcIncompressible
     // Calculate nut - reference nut is calculated by the turbulence model
     // on its construction
     volScalarField& nut = tnut();
+
     volScalarField S(mag(dev(symm(fvc::grad(U)))));
     nut = (1 - mask)*nut + mask*sqr(kappa*min(y, ybl))*::sqrt(2)*S;
 
