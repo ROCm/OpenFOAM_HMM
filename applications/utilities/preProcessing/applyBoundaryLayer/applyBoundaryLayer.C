@@ -62,7 +62,6 @@ void correctProcessorPatches(volScalarField& vf)
     // Not possible to use correctBoundaryConditions on fields as they may
     // use local info as opposed to the constraint values employed here,
     // but still need to update processor patches
-
     volScalarField::GeometricBoundaryField& bf = vf.boundaryField();
 
     forAll(bf, patchI)
@@ -249,6 +248,7 @@ void calcCompressible
         )
     );
 
+    turbulence->correct();
     // Calculate nut - reference nut is calculated by the turbulence model
     // on its construction
     tmp<volScalarField> tnut = turbulence->nut();
@@ -295,11 +295,13 @@ void calcIncompressible
 
     tmp<volScalarField> tnut = turbulence->nut();
 
+    turbulence->correct();
+
     // Calculate nut - reference nut is calculated by the turbulence model
     // on its construction
     volScalarField& nut = tnut();
 
-    volScalarField S(mag(dev(symm(fvc::grad(U)))));
+    volScalarField S("S", mag(dev(symm(fvc::grad(U)))));
     nut = (1 - mask)*nut + mask*sqr(kappa*min(y, ybl))*::sqrt(2)*S;
 
     // Do not correct BC - wall functions will 'undo' manipulation above
@@ -367,7 +369,6 @@ int main(int argc, char *argv[])
     // Modify velocity by applying a 1/7th power law boundary-layer
     // u/U0 = (y/ybl)^(1/7)
     // assumes U0 is the same as the current cell velocity
-
     Info<< "Setting boundary layer velocity" << nl << endl;
     scalar yblv = ybl.value();
     forAll(U, cellI)
@@ -379,6 +380,8 @@ int main(int argc, char *argv[])
         }
     }
     mask.correctBoundaryConditions();
+
+
 
     Info<< "Writing U\n" << endl;
     U.write();
