@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,65 +25,129 @@ Application
     noise
 
 Description
-    Utility to perform noise analysis of pressure data using the noiseFFT
-    library.
+    Utility to perform noise analysis of pressure data.
 
-    Control settings are read from the $FOAM_CASE/system/noiseDict dictionary,
-    or user-specified dictionary using the -dict option.  Pressure data is
-    read using a CSV reader:
 
     \heading Usage
 
-    \verbatim
-    pRef        101325;
-    N           65536;
-    nw          100;
-    f1          25;
-    fU          10000;
-    graphFormat raw;
+    Control settings are read from the $FOAM_CASE/system/noiseDict dictionary,
+    or user-specified dictionary using the -dict option.  Presure data can be
+    supplied as a single time history at a given point location, or a surface
+    of time histories, based on the run-time selectable \c noiseModel, e.g.
 
-    pressureData
+    \vebatim
+    noiseModel      <geometryType>Noise;
+
+    <geometryType>Coeffs
     {
-        fileName        "pressureData"
-        nHeaderLine         1;          // number of header lines
-        refColumn           0;          // reference column index
-        componentColumns    (1);        // component column indices
-        separator           " ";        // optional (defaults to ",")
-        mergeSeparators     no;         // merge multiple separators
-        outOfBounds         clamp;      // optional out-of-bounds handling
-        interpolationScheme linear;     // optional interpolation scheme
+        ...
     }
+    \endverbatim
+
+    where \<geometryMode\> is either \c point or \surface
+
+    Both operation types require:
+    \verbatim
+    pRef            101325;
+    N               65536;
+    fl              25;
+    fu              10000;
+    fftWriteInterval 1;
+    dataMode        point;
     \endverbatim
 
     where
     \table
         Property    | Description                   | Required  | Default value
         pRef        | Reference pressure            | no        | 0
-        N           | Number of samples in sampling window | no | 65536
-        nw          | Number of sampling windows    | no        | 100
+        N           | Number of samples in sampling window | no | 65536 (2^16)
         fl          | Lower frequency band          | no        | 25
-        fU          | Upper frequency band          | no        | 10000
-        graphFormat | Output graph format          | no        | raw
+        fu          | Upper frequency band          | no        | 10000
+        fftWriteInterval | Output interval for FFT data | no    | 1
+        dataMode    | Input data mode, 'point' or 'surface' | yes |
     \endtable
 
-    Current graph outputs include:
-    - FFT of the pressure data
-    - narrow-band PFL (pressure-fluctuation level) spectrum
-    - one-third-octave-band PFL spectrum
-    - one-third-octave-band pressure spectrum
+    Point-based pressure data is read using a CSV reader, and output in a
+    graph format:
+    \verbatim
+    pointData
+    {
+        csvFileData
+        {
+            fileName        "pressureData";
+            nHeaderLine     1;
+            refColumn       0;
+            componentColumns (1);
+            separator       " ";
+            mergeSeparators yes;
+        }
+
+        graphFormat     raw;
+        windowOverlapPercent 0;
+        nWindow         100; // fixed number of windows
+    }
+    \endverbatim
+
+    where
+    \table
+        Property    | Description                   | Required  | Default value
+        csvFileData | CSV file data dictionary - see CSV.H  | yes |
+        graphFormat | Output graph format           | no        | raw
+        windowOverlapPercent | Window overla percent| yes       |
+        nWindow     | Number of sampling windows    | no        | 1, calculated
+    \endtable
+
+    Surface-based pressure data is specified using a surface reader, and output
+    using a surface writer.  The reader type must support multiple time
+    handling, e.g. the ensight format.  Output surfaces are written on a
+    per-frequency basis:
+    \verbatim
+    surfaceData
+    {
+        reader          ensight;
+        writer          ensight;
+        inputFile       "postProcessing/faceSource1/surface/patch1/patch1.case";
+        pName           p;
+        windowOverlapPercent 50;
+        // nWindow         0; // let code decide if not present
+    }
+    \endverbatim
+
+    where
+    \table
+        Property    | Description                   | Required  | Default value
+        reader      | Surface reader type           | yes       |
+        writer      | Surface writer type           | yes       |
+        inputFile   | Pressure data surface file    | yes       |
+        pName       | Name of pressure field        | no        | p
+        windowOverlapPercent | Window overla percent| yes       |
+        nWindow     | Number of sampling windows    | no        | 1, calculated
+    \endtable
+
+    Current outputs include:
+    - FFT of the pressure data (Pf)
+    - narrow-band PFL (pressure-fluctuation level) spectrum (Lf)
+    - one-third-octave-band PFL spectrum (Ldelta)
+    - one-third-octave-band pressure spectrum (Pdelta)
+
+Note:
+  - If using the windowOverlapPercent entry, the code will automatically
+    determine number of windows
+  - However, if supplied, the nWindow entry will take precedence
 
 SeeAlso
     CSV.H
+    surfaceReader.H
+    surfaceWriter.H
     noiseFFT.H
+    noiseModel.H
+    windowModel.H
 
 \*---------------------------------------------------------------------------*/
 
-
-#include "noiseFFT.H"
 #include "argList.H"
 #include "Time.H"
-#include "functionObjectFile.H"
-#include "CSV.H"
+#include "noiseModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -91,91 +155,31 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::scalar checkUniformTimeStep(const scalarField& t)
-{
-    // check that a uniform time step has been applied
-    scalar deltaT = -1.0;
-    if (t.size() > 1)
-    {
-        for (label i = 1; i < t.size(); i++)
-        {
-            scalar dT = t[i] - t[i-1];
-            if (deltaT < 0)
-            {
-                deltaT = dT;
-            }
-
-            if (mag(deltaT - dT) > SMALL)
-            {
-                FatalErrorInFunction
-                    << "Unable to process data with a variable time step"
-                    << exit(FatalError);
-            }
-        }
-    }
-    else
-    {
-        FatalErrorInFunction
-            << "Unable to create FFT with a single value"
-            << exit(FatalError);
-    }
-
-    return deltaT;
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 int main(int argc, char *argv[])
 {
-    argList::noParallel();
     #include "addDictOption.H"
     #include "setRootCase.H"
     #include "createTime.H"
-    #include "createFields.H"
 
-    Info<< "Reading data file" << endl;
-    CSV<scalar> pData("pressure", dict, "Data");
-
-    // time history data
-    const scalarField t(pData.x());
-
-    // pressure data
-    const scalarField p(pData.y());
-
-    if (t.size() < N)
+    word dictName("noiseDict");
+    if (args.optionFound("dict"))
     {
-        FatalErrorInFunction
-            << "Block size N = " << N
-            << " is larger than number of data = " << t.size()
-            << exit(FatalError);
+        dictName = args["dict"];
     }
 
-    Info<< "    read " << t.size() << " values" << nl << endl;
+    IOdictionary dict
+    (
+        IOobject
+        (
+            dictName,
+            runTime.system(),
+            runTime,
+            IOobject::MUST_READ
+        )
+    );
 
-
-    Info<< "Creating noise FFT" << endl;
-    noiseFFT nfft(checkUniformTimeStep(t), p);
-
-    nfft -= pRef;
-
-    fileName baseFileName(pData.fName().lessExt());
-
-    graph Pf(nfft.RMSmeanPf(N, min(nfft.size()/N, nw)));
-    Info<< "    Creating graph for " << Pf.title() << endl;
-    Pf.write(baseFileName + graph::wordify(Pf.title()), graphFormat);
-
-    graph Lf(nfft.Lf(Pf));
-    Info<< "    Creating graph for " << Lf.title() << endl;
-    Lf.write(baseFileName + graph::wordify(Lf.title()), graphFormat);
-
-    graph Ldelta(nfft.Ldelta(Lf, f1, fU));
-    Info<< "    Creating graph for " << Ldelta.title() << endl;
-    Ldelta.write(baseFileName + graph::wordify(Ldelta.title()), graphFormat);
-
-    graph Pdelta(nfft.Pdelta(Pf, f1, fU));
-    Info<< "    Creating graph for " << Pdelta.title() << endl;
-    Pdelta.write(baseFileName + graph::wordify(Pdelta.title()), graphFormat);
+    autoPtr<noiseModel> model(noiseModel::New(dict));
+    model->calculate();
 
     Info<< nl << "End\n" << endl;
 
