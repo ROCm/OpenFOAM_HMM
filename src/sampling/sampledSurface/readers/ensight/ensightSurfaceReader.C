@@ -86,7 +86,7 @@ void Foam::ensightSurfaceReader::readCase(IFstream& is)
 
     if (!is.good())
     {
-        FatalErrorInFile
+        FatalErrorInFunction
             << "Cannot read file " << is.name()
             << exit(FatalError);
     }
@@ -197,7 +197,7 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry()
 
         if (!is.good())
         {
-            FatalErrorInFile
+            FatalErrorInFunction
                 << "Cannot read file " << is.name()
                 << exit(FatalError);
         }
