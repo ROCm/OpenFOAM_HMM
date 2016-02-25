@@ -27,118 +27,62 @@ Application
 Description
     Utility to perform noise analysis of pressure data.
 
+    The utility provides a light wrapper around the run-time selectable
+    noise model.  Current options include:
+    - point, and
+    - surface
+    models.
 
-    \heading Usage
+    \heading Example usage
 
-    Control settings are read from the $FOAM_CASE/system/noiseDict dictionary,
-    or user-specified dictionary using the -dict option.  Presure data can be
-    supplied as a single time history at a given point location, or a surface
-    of time histories, based on the run-time selectable \c noiseModel, e.g.
-
-    \vebatim
-    noiseModel      <geometryType>Noise;
-
-    <geometryType>Coeffs
-    {
-        ...
-    }
-    \endverbatim
-
-    where \<geometryMode\> is either \c point or \surface
-
-    Both operation types require:
     \verbatim
-    pRef            101325;
-    N               65536;
-    fl              25;
-    fu              10000;
-    fftWriteInterval 1;
-    dataMode        point;
-    \endverbatim
+    noiseModel      surfaceNoise; // pointNoise
 
-    where
-    \table
-        Property    | Description                   | Required  | Default value
-        pRef        | Reference pressure            | no        | 0
-        N           | Number of samples in sampling window | no | 65536 (2^16)
-        fl          | Lower frequency band          | no        | 25
-        fu          | Upper frequency band          | no        | 10000
-        fftWriteInterval | Output interval for FFT data | no    | 1
-        dataMode    | Input data mode, 'point' or 'surface' | yes |
-    \endtable
-
-    Point-based pressure data is read using a CSV reader, and output in a
-    graph format:
-    \verbatim
-    pointData
+    surfaceNoiseCoeffs
     {
-        csvFileData
+        windowModel     Hanning;
+
+        HanningCoeffs
         {
-            fileName        "pressureData";
-            nHeaderLine     1;
-            refColumn       0;
-            componentColumns (1);
-            separator       " ";
-            mergeSeparators yes;
+            // Window overlap percentage
+            overlapPercent  50;
+            symmetric       yes;
+            extended        yes;
+
+            // Optional number of windows, default = all available
+            nWindow         5;
         }
 
-        graphFormat     raw;
-        windowOverlapPercent 0;
-        nWindow         100; // fixed number of windows
+
+        // Input file
+        inputFile   "postProcessing/faceSource1/surface/patch/patch.case";
+
+        // Surface reader
+        reader      ensight;
+
+        // Surface writer
+        writer      ensight;
+
+        // Collate times for ensight output - ensures geometry is only written once
+        writeOptions
+        {
+            ensight
+            {
+                collateTimes 1;
+            }
+        }
+
+        // Number of samples in sampling window
+        // Must be a power of 2, default = 2^16 (=65536)
+        N               4096;
+
+        // Write interval for FFT data, default = 1
+        fftWriteInterval 100;
     }
     \endverbatim
 
-    where
-    \table
-        Property    | Description                   | Required  | Default value
-        csvFileData | CSV file data dictionary - see CSV.H  | yes |
-        graphFormat | Output graph format           | no        | raw
-        windowOverlapPercent | Window overla percent| yes       |
-        nWindow     | Number of sampling windows    | no        | 1, calculated
-    \endtable
-
-    Surface-based pressure data is specified using a surface reader, and output
-    using a surface writer.  The reader type must support multiple time
-    handling, e.g. the ensight format.  Output surfaces are written on a
-    per-frequency basis:
-    \verbatim
-    surfaceData
-    {
-        reader          ensight;
-        writer          ensight;
-        inputFile       "postProcessing/faceSource1/surface/patch1/patch1.case";
-        pName           p;
-        windowOverlapPercent 50;
-        // nWindow         0; // let code decide if not present
-    }
-    \endverbatim
-
-    where
-    \table
-        Property    | Description                   | Required  | Default value
-        reader      | Surface reader type           | yes       |
-        writer      | Surface writer type           | yes       |
-        inputFile   | Pressure data surface file    | yes       |
-        pName       | Name of pressure field        | no        | p
-        windowOverlapPercent | Window overla percent| yes       |
-        nWindow     | Number of sampling windows    | no        | 1, calculated
-    \endtable
-
-    Current outputs include:
-    - FFT of the pressure data (Pf)
-    - narrow-band PFL (pressure-fluctuation level) spectrum (Lf)
-    - one-third-octave-band PFL spectrum (Ldelta)
-    - one-third-octave-band pressure spectrum (Pdelta)
-
-Note:
-  - If using the windowOverlapPercent entry, the code will automatically
-    determine number of windows
-  - However, if supplied, the nWindow entry will take precedence
 
 SeeAlso
-    CSV.H
-    surfaceReader.H
-    surfaceWriter.H
     noiseFFT.H
     noiseModel.H
     windowModel.H
