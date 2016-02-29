@@ -62,7 +62,6 @@ void correctProcessorPatches(volScalarField& vf)
     // Not possible to use correctBoundaryConditions on fields as they may
     // use local info as opposed to the constraint values employed here,
     // but still need to update processor patches
-
     volScalarField::GeometricBoundaryField& bf = vf.boundaryField();
 
     forAll(bf, patchI)
@@ -100,10 +99,11 @@ Foam::tmp<Foam::volScalarField> calcK
     volScalarField& k = tk();
     scalar ck0 = pow025(Cmu)*kappa;
     k = (1 - mask)*k + mask*sqr(nut/(ck0*min(y, ybl)));
+    k.rename("k");
 
     // Do not correct BC
     // - operation may use inconsistent fields wrt these local manipulations
-    // k.correctBoundaryConditions();
+    //k.correctBoundaryConditions();
     correctProcessorPatches(k);
 
     Info<< "Writing k\n" << endl;
@@ -131,6 +131,7 @@ Foam::tmp<Foam::volScalarField> calcEpsilon
     scalar ce0 = ::pow(Cmu, 0.75)/kappa;
     epsilon = (1 - mask)*epsilon + mask*ce0*k*sqrt(k)/min(y, ybl);
     epsilon.max(SMALL);
+    epsilon.rename("epsilon");
 
     // Do not correct BC
     // - operation may use inconsistent fields wrt these local manipulations
@@ -247,6 +248,7 @@ void calcCompressible
         )
     );
 
+    turbulence->correct();
     // Calculate nut - reference nut is calculated by the turbulence model
     // on its construction
     tmp<volScalarField> tnut = turbulence->nut();
@@ -293,10 +295,13 @@ void calcIncompressible
 
     tmp<volScalarField> tnut = turbulence->nut();
 
+    turbulence->correct();
+
     // Calculate nut - reference nut is calculated by the turbulence model
     // on its construction
     volScalarField& nut = tnut();
-    volScalarField S(mag(dev(symm(fvc::grad(U)))));
+
+    volScalarField S("S", mag(dev(symm(fvc::grad(U)))));
     nut = (1 - mask)*nut + mask*sqr(kappa*min(y, ybl))*::sqrt(2)*S;
 
     // Do not correct BC - wall functions will 'undo' manipulation above
@@ -364,7 +369,6 @@ int main(int argc, char *argv[])
     // Modify velocity by applying a 1/7th power law boundary-layer
     // u/U0 = (y/ybl)^(1/7)
     // assumes U0 is the same as the current cell velocity
-
     Info<< "Setting boundary layer velocity" << nl << endl;
     scalar yblv = ybl.value();
     forAll(U, cellI)
@@ -376,6 +380,8 @@ int main(int argc, char *argv[])
         }
     }
     mask.correctBoundaryConditions();
+
+
 
     Info<< "Writing U\n" << endl;
     U.write();
