@@ -45,12 +45,40 @@ Description
 #include "turbulentFluidThermoModel.H"
 #include "wallDist.H"
 #include "processorFvPatchField.H"
+#include "zeroGradientFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // turbulence constants - file-scope
 static const scalar Cmu(0.09);
 static const scalar kappa(0.41);
+
+
+Foam::tmp<Foam::volVectorField> createSimplifiedU(const volVectorField& U)
+{
+    tmp<volVectorField> tU
+    (
+        new volVectorField
+        (
+            IOobject
+            (
+                "Udash",
+                U.mesh().time().timeName(),
+                U.mesh(),
+                IOobject::NO_READ
+            ),
+            U.mesh(),
+            dimensionedVector("0", dimVelocity, vector::zero),
+            zeroGradientFvPatchField<vector>::typeName
+        )
+    );
+
+    // Assign the internal value to the original field
+    tU() = U;
+
+    return tU;
+}
+
 
 void correctProcessorPatches(volScalarField& vf)
 {
@@ -248,9 +276,14 @@ void calcCompressible
         )
     );
 
+    // Hack to correct nut
+    // Note: in previous versions of the code, nut was initialised on
+    //       construction of the turbulence model.  This is no longer the
+    //       case for the Templated Turbulence models.  The call to correct
+    //       below will evolve the turbulence model equations and update nut,
+    //       whereas only nut update is required.  Need to revisit.
     turbulence->correct();
-    // Calculate nut - reference nut is calculated by the turbulence model
-    // on its construction
+
     tmp<volScalarField> tnut = turbulence->nut();
 
     volScalarField& nut = tnut();
@@ -293,9 +326,15 @@ void calcIncompressible
         incompressible::turbulenceModel::New(U, phi, laminarTransport)
     );
 
-    tmp<volScalarField> tnut = turbulence->nut();
-
+    // Hack to correct nut
+    // Note: in previous versions of the code, nut was initialised on
+    //       construction of the turbulence model.  This is no longer the
+    //       case for the Templated Turbulence models.  The call to correct
+    //       below will evolve the turbulence model equations and update nut,
+    //       whereas only nut update is required.  Need to revisit.
     turbulence->correct();
+
+    tmp<volScalarField> tnut = turbulence->nut();
 
     // Calculate nut - reference nut is calculated by the turbulence model
     // on its construction
@@ -366,26 +405,27 @@ int main(int argc, char *argv[])
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    // Create a copy of the U field where BCs are simplified to  zeroGradient
+    // to enable boundary condition update without requiring other fields,
+    // e.g. phi.  We can then call correctBoundaryConditions on this field to
+    // enable appropriate behaviour for processor patches.
+    volVectorField Udash(createSimplifiedU(U));
+
     // Modify velocity by applying a 1/7th power law boundary-layer
     // u/U0 = (y/ybl)^(1/7)
     // assumes U0 is the same as the current cell velocity
     Info<< "Setting boundary layer velocity" << nl << endl;
     scalar yblv = ybl.value();
-    forAll(U, cellI)
+    forAll(Udash, cellI)
     {
         if (y[cellI] <= yblv)
         {
             mask[cellI] = 1;
-            U[cellI] *= ::pow(y[cellI]/yblv, (1.0/7.0));
+            Udash[cellI] *= ::pow(y[cellI]/yblv, (1.0/7.0));
         }
     }
     mask.correctBoundaryConditions();
-
-
-
-    Info<< "Writing U\n" << endl;
-    U.write();
-
+    Udash.correctBoundaryConditions();
 
     if
     (
@@ -397,13 +437,17 @@ int main(int argc, char *argv[])
         ).headerOk()
     )
     {
-        calcCompressible(mesh, mask, U, y, ybl);
+        calcCompressible(mesh, mask, Udash, y, ybl);
     }
     else
     {
-        calcIncompressible(mesh, mask, U, y, ybl);
+        calcIncompressible(mesh, mask, Udash, y, ybl);
     }
 
+    // Copy internal field Udash into U before writing
+    Info<< "Writing U\n" << endl;
+    U = Udash;
+    U.write();
 
     Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
         << "  ClockTime = " << runTime.elapsedClockTime() << " s"
