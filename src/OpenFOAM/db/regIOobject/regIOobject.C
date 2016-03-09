@@ -453,7 +453,7 @@ bool Foam::regIOobject::headerOk()
         {
             if (objectRegistry::debug)
             {
-                IOWarningIn("regIOobject::headerOk()", (*isPtr))
+                IOWarningInFunction(*isPtr)
                     << "failed to read header of file " << objectPath()
                     << endl;
             }

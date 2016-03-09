@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,8 +55,7 @@ bool Foam::IOobject::typeHeaderOk(const bool checkType)
         {
             if (IOobject::debug)
             {
-                Info
-                    << "IOobject::typeHeaderOk() : "
+                InfoInFunction
                     << "file " << objectPath() << " could not be opened"
                     << endl;
             }
@@ -70,7 +69,7 @@ bool Foam::IOobject::typeHeaderOk(const bool checkType)
             {
                 if (checkType && headerClassName_ != Type::typeName)
                 {
-                    IOWarningIn("IOobject::typeHeaderOk()", (*isPtr))
+                    IOWarningInFunction(*isPtr)
                         << "unexpected class name " << headerClassName_
                         << " expected " << Type::typeName << endl;
 
@@ -81,7 +80,7 @@ bool Foam::IOobject::typeHeaderOk(const bool checkType)
             {
                 if (IOobject::debug)
                 {
-                    IOWarningIn("IOobject::typeHeaderOk()", (*isPtr))
+                    IOWarningInFunction(*isPtr)
                         << "failed to read header of file " << objectPath()
                         << endl;
                 }
@@ -108,7 +107,7 @@ void Foam::IOobject::warnNoRereading() const
 {
     if (readOpt() == IOobject::MUST_READ_IF_MODIFIED)
     {
-        WarningIn("IOobject::warnNoRereading()")
+        WarningInFunction
             << Type::typeName << ' ' << name()
             << " constructed with IOobject::MUST_READ_IF_MODIFIED"
             " but " << Type::typeName
