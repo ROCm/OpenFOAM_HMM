@@ -32,15 +32,8 @@ Foam::IOField<Type>::IOField(const IOobject& io)
 :
     regIOobject(io)
 {
-    // Temporary warning
-    if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-    {
-        WarningInFunction
-            << "IOField " << name()
-            << " constructed with IOobject::MUST_READ_IF_MODIFIED"
-            " but IOField does not support automatic rereading."
-            << endl;
-    }
+    // Check for MUST_READ_IF_MODIFIED
+    warnNoRereading<IOField<Type> >();
 
     if
     (
@@ -62,15 +55,8 @@ Foam::IOField<Type>::IOField(const IOobject& io, const label size)
 :
     regIOobject(io)
 {
-    // Temporary warning
-    if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-    {
-        WarningInFunction
-            << "IOField " << name()
-            << " constructed with IOobject::MUST_READ_IF_MODIFIED"
-            " but IOField does not support automatic rereading."
-            << endl;
-    }
+    // Check for MUST_READ_IF_MODIFIED
+    warnNoRereading<IOField<Type> >();
 
     if
     (
@@ -96,15 +82,8 @@ Foam::IOField<Type>::IOField(const IOobject& io, const Field<Type>& f)
 :
     regIOobject(io)
 {
-    // Temporary warning
-    if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-    {
-        WarningInFunction
-            << "IOField " << name()
-            << " constructed with IOobject::MUST_READ_IF_MODIFIED"
-            " but IOField does not support automatic rereading."
-            << endl;
-    }
+    // Check for MUST_READ_IF_MODIFIED
+    warnNoRereading<IOField<Type> >();
 
     if
     (
@@ -130,15 +109,8 @@ Foam::IOField<Type>::IOField(const IOobject& io, const Xfer<Field<Type> >& f)
 :
     regIOobject(io)
 {
-    // Temporary warning
-    if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-    {
-        WarningInFunction
-            << "IOField " << name()
-            << " constructed with IOobject::MUST_READ_IF_MODIFIED"
-            " but IOField does not support automatic rereading."
-            << endl;
-    }
+    // Check for MUST_READ_IF_MODIFIED
+    warnNoRereading<IOField<Type> >();
 
     Field<Type>::transfer(f());
 

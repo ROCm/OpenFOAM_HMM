@@ -54,7 +54,7 @@ Foam::IOobject Foam::fv::options::createIOobject
         IOobject::NO_WRITE
     );
 
-    if (io.headerOk())
+    if (io.typeHeaderOk<IOdictionary>(true))
     {
         Info<< "Creating finite volume options from "
             << io.instance()/io.name() << nl
@@ -68,7 +68,7 @@ Foam::IOobject Foam::fv::options::createIOobject
         // Check if the fvOptions file is in system
         io.instance() = mesh.time().system();
 
-        if (io.headerOk())
+        if (io.typeHeaderOk<IOdictionary>(true))
         {
             Info<< "Creating finite volume options from "
                 << io.instance()/io.name() << nl

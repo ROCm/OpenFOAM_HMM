@@ -34,14 +34,14 @@ SourceFiles
 #ifndef thermoParcelInjectionDataIOList_H
 #define thermoParcelInjectionDataIOList_H
 
-#include "IOList.H"
+#include "GlobalIOList.H"
 #include "thermoParcelInjectionData.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef IOList<thermoParcelInjectionData>
+    typedef GlobalIOList<thermoParcelInjectionData>
         thermoParcelInjectionDataIOList;
 }
 

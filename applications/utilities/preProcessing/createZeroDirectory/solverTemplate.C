@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +57,7 @@ Foam::word Foam::solverTemplate::readFromDict
     const word& entryName
 ) const
 {
-    if (!dictHeader.headerOk())
+    if (!dictHeader.typeHeaderOk<IOdictionary>(true))
     {
         FatalErrorInFunction
             << "Unable to open file "

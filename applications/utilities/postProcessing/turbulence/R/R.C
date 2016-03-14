@@ -78,7 +78,7 @@ void calcCompressibleR
         IOobject::NO_WRITE
     );
 
-    if (!rhoHeader.headerOk())
+    if (!rhoHeader.typeHeaderOk<volScalarField>(true))
     {
         Info<< "    no " << rhoHeader.name() <<" field" << endl;
         return;
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
             IOobject::NO_WRITE
         );
 
-        if (UHeader.headerOk())
+        if (UHeader.typeHeaderOk<volVectorField>(true))
         {
             Info<< "Reading field " << UHeader.name() << nl << endl;
             volVectorField U(UHeader, mesh);
@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
                     basicThermo::dictName,
                     runTime.constant(),
                     mesh
-                ).headerOk()
+                ).typeHeaderOk<IOdictionary>(true)
             )
             {
                 calcCompressibleR(mesh, runTime, U);

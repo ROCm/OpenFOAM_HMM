@@ -25,7 +25,7 @@
         IOobject::MUST_READ
     );
 
-    if (turbulenceHeader.headerOk())
+    if (turbulenceHeader.typeHeaderOk<IOdictionary>(true))
     {
         autoPtr<compressible::turbulenceModel> turbulence
         (
@@ -40,7 +40,7 @@
 
         talphaEff = turbulence->alphaEff();
     }
-    else if (RASHeader.headerOk())
+    else if (RASHeader.typeHeaderOk<IOdictionary>(true))
     {
         autoPtr<compressible::RASModel> turbulence
         (
@@ -55,7 +55,7 @@
 
         talphaEff = turbulence->alphaEff();
     }
-    else if (LESHeader.headerOk())
+    else if (LESHeader.typeHeaderOk<IOdictionary>(true))
     {
         autoPtr<compressible::LESModel> turbulence
         (

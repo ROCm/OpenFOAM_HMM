@@ -26,6 +26,7 @@ License
 #include "Time.H"
 #include "PstreamReduceOps.H"
 #include "argList.H"
+#include "HashSet.H"
 
 #include <sstream>
 
@@ -413,19 +414,12 @@ Foam::Time::Time
             )
         );
 
-        // File might not exist yet.
-        fileName f(controlDict_.filePath());
-
-        if (!f.size())
-        {
-            // We don't have this file but would like to re-read it.
-            // Possibly if in master-only reading mode. Use a non-existing
-            // file to keep fileMonitor synced.
-            f = controlDict_.objectPath();
-        }
-
-        controlDict_.watchIndex() = addWatch(f);
+        // Monitor all files that controlDict depends on
+        addWatches(controlDict_, controlDict_.files());
     }
+
+    // Clear dependent files
+    controlDict_.files().clear();
 }
 
 
@@ -514,19 +508,12 @@ Foam::Time::Time
             )
         );
 
-        // File might not exist yet.
-        fileName f(controlDict_.filePath());
-
-        if (!f.size())
-        {
-            // We don't have this file but would like to re-read it.
-            // Possibly if in master-only reading mode. Use a non-existing
-            // file to keep fileMonitor synced.
-            f = controlDict_.objectPath();
-        }
-
-        controlDict_.watchIndex() = addWatch(f);
+        // Monitor all files that controlDict depends on
+        addWatches(controlDict_, controlDict_.files());
     }
+
+    // Clear dependent files since not needed
+    controlDict_.files().clear();
 }
 
 
@@ -614,19 +601,12 @@ Foam::Time::Time
             )
         );
 
-        // File might not exist yet.
-        fileName f(controlDict_.filePath());
-
-        if (!f.size())
-        {
-            // We don't have this file but would like to re-read it.
-            // Possibly if in master-only reading mode. Use a non-existing
-            // file to keep fileMonitor synced.
-            f = controlDict_.objectPath();
-        }
-
-        controlDict_.watchIndex() = addWatch(f);
+        // Monitor all files that controlDict depends on
+        addWatches(controlDict_, controlDict_.files());
     }
+
+    // Clear dependent files since not needed
+    controlDict_.files().clear();
 }
 
 
@@ -694,9 +674,9 @@ Foam::Time::Time
 
 Foam::Time::~Time()
 {
-    if (controlDict_.watchIndex() != -1)
+    forAllReverse(controlDict_.watchIndices(), i)
     {
-        removeWatch(controlDict_.watchIndex());
+        removeWatch(controlDict_.watchIndices()[i]);
     }
 
     // destroy function objects first
@@ -706,7 +686,58 @@ Foam::Time::~Time()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::label Foam::Time::addWatch(const fileName& fName) const
+void Foam::Time::addWatches(regIOobject& rio, const fileNameList& files) const
+{
+    const labelList& watchIndices = rio.watchIndices();
+
+    DynamicList<label> newWatchIndices;
+    labelHashSet removedWatches(watchIndices);
+
+    forAll(files, i)
+    {
+        const fileName& f = files[i];
+        label index = findWatch(watchIndices, f);
+
+        if (index == -1)
+        {
+            newWatchIndices.append(addTimeWatch(f));
+        }
+        else
+        {
+            // Existing watch
+            newWatchIndices.append(watchIndices[index]);
+            removedWatches.erase(index);
+        }
+    }
+
+    // Remove any unused watches
+    forAllConstIter(labelHashSet, removedWatches, iter)
+    {
+        removeWatch(watchIndices[iter.key()]);
+    }
+
+    rio.watchIndices() = newWatchIndices;
+}
+
+
+Foam::label Foam::Time::findWatch
+(
+    const labelList& watchIndices,
+    const fileName& fName
+) const
+{
+    forAll(watchIndices, i)
+    {
+        if (getFile(watchIndices[i]) == fName)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+
+Foam::label Foam::Time::addTimeWatch(const fileName& fName) const
 {
     return monitorPtr_().addWatch(fName);
 }
@@ -761,11 +792,12 @@ Foam::instantList Foam::Time::times() const
 }
 
 
-Foam::word Foam::Time::findInstancePath(const instant& t) const
+Foam::word Foam::Time::findInstancePath
+(
+    const fileName& directory,
+    const instant& t
+) const
 {
-    const fileName directory = path();
-    const word& constantName = constant();
-
     // Read directory entries into a list
     fileNameList dirEntries(readDir(directory, fileName::DIRECTORY));
 
@@ -780,6 +812,8 @@ Foam::word Foam::Time::findInstancePath(const instant& t) const
 
     if (t.equal(0.0))
     {
+        const word& constantName = constant();
+
         // Looking for 0 or constant. 0 already checked above.
         if (isDir(directory/constantName))
         {
@@ -788,6 +822,12 @@ Foam::word Foam::Time::findInstancePath(const instant& t) const
     }
 
     return word::null;
+}
+
+
+Foam::word Foam::Time::findInstancePath(const instant& t) const
+{
+    return findInstancePath(path(), t);
 }
 
 

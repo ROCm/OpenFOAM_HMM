@@ -42,6 +42,7 @@ Note
 #include "polyMesh.H"
 #include "distributedTriSurfaceMesh.H"
 #include "mapDistribute.H"
+#include "localIOdictionary.H"
 
 using namespace Foam;
 
@@ -165,23 +166,6 @@ int main(int argc, char *argv[])
         Pstream::scatterList(meshBb);
     }
 
-
-
-    // Temporarily: override master-only checking
-    regIOobject::fileCheckTypes oldCheckType =
-        regIOobject::fileModificationChecking;
-
-    if (oldCheckType == regIOobject::timeStampMaster)
-    {
-        regIOobject::fileModificationChecking = regIOobject::timeStamp;
-    }
-    else if (oldCheckType == regIOobject::inotifyMaster)
-    {
-        regIOobject::fileModificationChecking = regIOobject::inotify;
-    }
-
-
-
     IOobject io
     (
         surfFileName,         // name
@@ -193,7 +177,8 @@ int main(int argc, char *argv[])
         IOobject::AUTO_WRITE
     );
 
-    const fileName actualPath(io.filePath());
+    // Look for file (using searchableSurface rules)
+    const fileName actualPath(typeFilePath<searchableSurface>(io));
     fileName localPath(actualPath);
     localPath.replace(runTime.rootPath() + '/', "");
 
@@ -270,10 +255,6 @@ int main(int argc, char *argv[])
 
     Info<< "Writing surface." << nl << endl;
     surfMesh.objectRegistry::write();
-
-
-    regIOobject::fileModificationChecking = oldCheckType;
-
 
     Info<< "End\n" << endl;
 

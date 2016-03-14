@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,6 +47,7 @@ SourceFiles
 #include "InjectionModel.H"
 #include "distributionModel.H"
 #include "Switch.H"
+#include "globalIOFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,7 +69,7 @@ class ManualInjection
         const word positionsFile_;
 
         //- Field of parcel positions
-        vectorIOField positions_;
+        vectorGlobalIOField positions_;
 
         //- Field of parcel diameters
         scalarList diameters_;

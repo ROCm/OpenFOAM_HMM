@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
                 IOobject::MUST_READ
             );
 
-            if (obj.headerOk())
+            if (obj.typeHeaderOk<volScalarField>(false))
             {
                 addToFieldList(vsf, obj, objI, mesh);
                 addToFieldList(vvf, obj, objI, mesh);

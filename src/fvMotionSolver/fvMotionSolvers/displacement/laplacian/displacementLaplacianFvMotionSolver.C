@@ -118,7 +118,7 @@ Foam::displacementLaplacianFvMotionSolver::displacementLaplacianFvMotionSolver
     }
 
 
-    if (io.headerOk())
+    if (io.typeHeaderOk<pointVectorField>(true))
     {
         pointLocation_.reset
         (
@@ -208,7 +208,7 @@ displacementLaplacianFvMotionSolver
     }
 
 
-    if (io.headerOk())
+    if (io.typeHeaderOk<pointVectorField>(true))
     {
         pointLocation_.reset
         (

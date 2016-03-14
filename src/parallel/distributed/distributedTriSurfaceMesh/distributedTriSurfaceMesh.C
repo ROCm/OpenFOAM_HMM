@@ -1388,27 +1388,6 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh(const IOobject& io)
         )
     )
 {
-    if
-    (
-        Pstream::parRun()
-     && (
-            dict_.readOpt() == IOobject::MUST_READ
-         || dict_.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     && (
-            regIOobject::fileModificationChecking == timeStampMaster
-         || regIOobject::fileModificationChecking == inotifyMaster
-        )
-    )
-    {
-        FatalErrorInFunction
-            << "    using 'timeStampMaster' or 'inotifyMaster.'\n"
-            << "    Modify the entry fileModificationChecking\n"
-            << "    in the etc/controlDict.\n"
-            << "    Use 'timeStamp' instead."
-            << exit(FatalError);
-    }
-
     read();
 
     reduce(bounds().min(), minOp<point>());
@@ -1471,27 +1450,6 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
         )
     )
 {
-    if
-    (
-        Pstream::parRun()
-     && (
-            dict_.readOpt() == IOobject::MUST_READ
-         || dict_.readOpt() == IOobject::MUST_READ_IF_MODIFIED
-        )
-     && (
-            regIOobject::fileModificationChecking == timeStampMaster
-         || regIOobject::fileModificationChecking == inotifyMaster
-        )
-    )
-    {
-        FatalErrorInFunction
-            << "    using 'timeStampMaster' or 'inotifyMaster.'\n"
-            << "    Modify the entry fileModificationChecking\n"
-            << "    in the etc/controlDict.\n"
-            << "    Use 'timeStamp' instead."
-            << exit(FatalError);
-    }
-
     read();
 
     reduce(bounds().min(), minOp<point>());

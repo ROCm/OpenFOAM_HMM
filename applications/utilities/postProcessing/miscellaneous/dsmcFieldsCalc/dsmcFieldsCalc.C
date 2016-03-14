@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,7 +62,11 @@ namespace Foam
                 IOobject::MUST_READ
             );
 
-            if (obj.headerOk() && obj.headerClassName() == fieldType::typeName)
+            if
+            (
+                obj.typeHeaderOk<fieldType>(false)
+             && obj.headerClassName() == fieldType::typeName
+            )
             {
                 list.set(index++, new fieldType(obj, mesh));
             }

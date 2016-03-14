@@ -262,9 +262,30 @@ public:
         //- Inherit read from regIOobject
         using regIOobject::read;
 
+        //- Is object global
+        virtual bool global() const
+        {
+            return true;
+        }
+
+        //- Return complete path + object name if the file exists
+        //  either in the case/processor or case otherwise null
+        virtual fileName filePath() const
+        {
+            return globalFilePath();
+        }
+
         //- Read porosity dictionary
         virtual bool read(const dictionary& dict);
 };
+
+
+//- Template function for obtaining global status
+template<>
+inline bool typeGlobal<porosityModel>()
+{
+    return true;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

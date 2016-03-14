@@ -26,7 +26,7 @@ License
 #include "displacementInterpolationMotionSolver.H"
 #include "addToRunTimeSelectionTable.H"
 #include "SortableList.H"
-#include "IOList.H"
+#include "GlobalIOList.H"
 #include "Tuple2.H"
 #include "mapPolyMesh.H"
 #include "interpolateXY.H"
@@ -52,7 +52,10 @@ namespace Foam
     );
 
     template<>
-    const word IOList<Tuple2<scalar, vector> >::typeName("scalarVectorTable");
+    const word GlobalIOList<Tuple2<scalar, vector> >::typeName
+    (
+        "scalarVectorTable"
+    );
 }
 
 
@@ -88,7 +91,7 @@ void Foam::displacementInterpolationMotionSolver::calcInterpolation()
 
         const word& tableName = faceZoneToTable[i][1];
 
-        IOList<Tuple2<scalar, vector> > table
+        GlobalIOList<Tuple2<scalar, vector> > table
         (
             IOobject
             (

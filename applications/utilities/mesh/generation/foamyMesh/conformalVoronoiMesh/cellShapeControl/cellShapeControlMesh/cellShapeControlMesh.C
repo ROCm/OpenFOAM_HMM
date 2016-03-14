@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -394,7 +394,7 @@ Foam::cellShapeControlMesh::cellShapeControlMesh(const Time& runTime)
                 false
             );
 
-            if (io.headerOk())
+            if (io.typeHeaderOk<pointScalarField>(true))
             {
                 pointScalarField sizes(io, pointMesh::New(mesh));
 

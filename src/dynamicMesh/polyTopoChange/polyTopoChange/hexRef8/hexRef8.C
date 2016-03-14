@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1987,17 +1987,11 @@ Foam::hexRef8::hexRef8(const polyMesh& mesh, const bool readHistory)
 {
     if (readHistory)
     {
-        // Make sure we don't use the master-only reading. Bit of a hack for
-        // now.
-        regIOobject::fileCheckTypes oldType =
-            regIOobject::fileModificationChecking;
-        regIOobject::fileModificationChecking = regIOobject::timeStamp;
         history_.readOpt() = IOobject::READ_IF_PRESENT;
-        if (history_.headerOk())
+        if (history_.typeHeaderOk<refinementHistory>(true))
         {
             history_.read();
         }
-        regIOobject::fileModificationChecking = oldType;
     }
 
     if (history_.active() && history_.visibleCells().size() != mesh_.nCells())

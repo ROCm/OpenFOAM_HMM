@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,6 +50,7 @@ SourceFiles
 #include "InjectionModel.H"
 #include "distributionModel.H"
 #include "volFieldsFwd.H"
+#include "globalIOFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -85,7 +86,7 @@ class FieldActivatedInjection
             const word positionsFile_;
 
             //- Field of injector (x,y,z) positions
-            vectorIOField positions_;
+            vectorGlobalIOField positions_;
 
             //- List of cell labels corresponding to injector positions
             labelList injectorCells_;

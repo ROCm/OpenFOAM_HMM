@@ -64,7 +64,7 @@ bool setCellFieldType
     );
 
     // Check the "constant" directory
-    if (!fieldHeader.headerOk())
+    if (!fieldHeader.typeHeaderOk<fieldType>(true))
     {
         fieldHeader = IOobject
         (
@@ -76,7 +76,7 @@ bool setCellFieldType
     }
 
     // Check field exists
-    if (fieldHeader.headerOk())
+    if (fieldHeader.typeHeaderOk<fieldType>(true))
     {
         Info<< "    Setting internal values of "
             << fieldHeader.headerClassName()
@@ -208,7 +208,7 @@ bool setFaceFieldType
     );
 
     // Check the "constant" directory
-    if (!fieldHeader.headerOk())
+    if (!fieldHeader.typeHeaderOk<fieldType>(true))
     {
         fieldHeader = IOobject
         (
@@ -220,7 +220,7 @@ bool setFaceFieldType
     }
 
     // Check field exists
-    if (fieldHeader.headerOk())
+    if (fieldHeader.typeHeaderOk<fieldType>(true))
     {
         Info<< "    Setting patchField values of "
             << fieldHeader.headerClassName()

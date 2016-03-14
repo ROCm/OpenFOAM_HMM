@@ -45,7 +45,7 @@ Foam::radiation::radiationModel::New
     );
 
     word modelType("none");
-    if (radIO.headerOk())
+    if (radIO.typeHeaderOk<IOdictionary>(true))
     {
         IOdictionary(radIO).lookup("radiationModel") >> modelType;
     }

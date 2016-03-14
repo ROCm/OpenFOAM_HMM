@@ -60,7 +60,8 @@ Foam::decompositionModel::decompositionModel
                 mesh.db(),
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false   //io.registerObject(),
+                false,  //io.registerObject(),
+                true    //io.globalObject()
             ),
             decompDictFile
         )
@@ -93,7 +94,8 @@ Foam::decompositionModel::decompositionModel
                 mesh.db(),
                 (dict.size() ? IOobject::NO_READ : IOobject::MUST_READ),
                 IOobject::NO_WRITE,
-                false   //io.registerObject(),
+                false,  //io.registerObject(),
+                true    //io.globalObject()
             ),
             decompDictFile
         ),
@@ -154,7 +156,8 @@ Foam::IOobject Foam::decompositionModel::selectIO
             io.db(),
             io.readOpt(),
             io.writeOpt(),
-            io.registerObject()
+            io.registerObject(),
+            io.globalObject()
         )
      :  io
     );

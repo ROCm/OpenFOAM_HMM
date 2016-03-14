@@ -238,7 +238,7 @@ int main(int argc, char *argv[])
         runTime
     );
 
-    if (!readLevel && refHeader.headerOk())
+    if (!readLevel && refHeader.typeHeaderOk<labelIOList>(true))
     {
         WarningInFunction
             << "Detected " << refHeader.name() << " file in "

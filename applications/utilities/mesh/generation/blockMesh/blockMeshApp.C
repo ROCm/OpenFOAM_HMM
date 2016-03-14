@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
         false
     );
 
-    if (!meshDictIO.headerOk())
+    if (!meshDictIO.typeHeaderOk<IOdictionary>(true))
     {
         FatalErrorInFunction
             << meshDictIO.objectPath()
