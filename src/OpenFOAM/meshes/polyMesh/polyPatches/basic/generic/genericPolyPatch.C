@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -127,11 +127,14 @@ void Foam::genericPolyPatch::write(Ostream& os) const
 
     forAllConstIter(dictionary, dict_, iter)
     {
+        // Filter out any keywords already written by above
         if
         (
             iter().keyword() != "type"
          && iter().keyword() != "nFaces"
          && iter().keyword() != "startFace"
+         && iter().keyword() != "physicalType"
+         && iter().keyword() != "inGroups"
         )
         {
             iter().write(os);
