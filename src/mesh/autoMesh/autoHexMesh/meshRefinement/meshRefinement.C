@@ -2127,12 +2127,12 @@ Foam::labelList Foam::meshRefinement::meshedPatches() const
 
         if (patchI == -1)
         {
-            FatalErrorInFunction
+            WarningInFunction
                 << "Problem : did not find patch " << meshedPatches_[i]
                 << endl << "Valid patches are " << patches.names()
-                << abort(FatalError);
+                << endl;    //abort(FatalError);
         }
-        if (!polyPatch::constraintType(patches[patchI].type()))
+        else if (!polyPatch::constraintType(patches[patchI].type()))
         {
             patchIDs.append(patchI);
         }
