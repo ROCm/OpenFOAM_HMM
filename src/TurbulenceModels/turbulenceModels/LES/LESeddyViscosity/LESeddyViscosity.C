@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,7 +94,7 @@ tmp<volScalarField> LESeddyViscosity<BasicTurbulenceModel>::epsilon() const
 {
     tmp<volScalarField> tk(this->k());
 
-    return tmp<volScalarField>
+    tmp<volScalarField> tepsilon
     (
         new volScalarField
         (
@@ -106,9 +106,14 @@ tmp<volScalarField> LESeddyViscosity<BasicTurbulenceModel>::epsilon() const
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            Ce_*tk()*sqrt(tk())/this->delta()
+            Ce_*tk()*sqrt(tk())/this->delta(),
+            zeroGradientFvPatchScalarField::typeName
         )
     );
+    volScalarField& epsilon = tepsilon();
+    epsilon.correctBoundaryConditions();
+
+    return tepsilon;
 }
 
 
