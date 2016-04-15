@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -437,12 +437,15 @@ void Foam::plane::writeDict(Ostream& os) const
 {
     os.writeKeyword("planeType") << "pointAndNormal"
         << token::END_STATEMENT << nl;
-    os  << indent << "pointAndNormalDict" << nl
-        << indent << token::BEGIN_BLOCK << incrIndent << nl;
-    os.writeKeyword("basePoint") << basePoint_ << token::END_STATEMENT << nl;
-    os.writeKeyword("normalVector") << unitVector_ << token::END_STATEMENT
-        << nl;
-    os << decrIndent << indent << token::END_BLOCK << endl;
+
+    os.beginBlock("pointAndNormalDict") << nl;
+
+    os.writeKeyword("basePoint") << basePoint_
+        << token::END_STATEMENT << nl;
+    os.writeKeyword("normalVector") << unitVector_
+        << token::END_STATEMENT << nl;
+
+    os.endBlock() << endl;
 }
 
 
