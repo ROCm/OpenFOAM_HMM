@@ -64,7 +64,7 @@ Description
         kappa           lookup;
         KappaName       kappa;
         thicknessLayers (0.1 0.2 0.3 0.4);
-        kappaLayers     (1 2 3 4)
+        kappaLayers     (1 2 3 4);
         value           uniform 300;
     }
     \endverbatim
