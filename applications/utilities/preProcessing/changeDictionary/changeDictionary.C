@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,6 +125,7 @@ HashTable<wordList, word> extractPatchGroups(const dictionary& boundaryDict)
 
 bool merge
 (
+    const bool addNonExisting,
     dictionary&,
     const dictionary&,
     const bool,
@@ -152,6 +153,7 @@ bool addEntry
         (
             merge
             (
+                true,
                 const_cast<dictionary&>(thisEntry.dict()),
                 mergeEntry.dict(),
                 literalRE,
@@ -220,6 +222,7 @@ labelList findMatches
 // - false : interpret wildcard as a rule for items to be matched.
 bool merge
 (
+    const bool addNonExisting,
     dictionary& thisDict,
     const dictionary& mergeDict,
     const bool literalRE,
@@ -290,9 +293,18 @@ bool merge
             }
             else
             {
-                // not found - just add
-                thisDict.add(mergeIter().clone(thisDict).ptr());
-                changed = true;
+                if (addNonExisting)
+                {
+                    // not found - just add
+                    thisDict.add(mergeIter().clone(thisDict).ptr());
+                    changed = true;
+                }
+                else
+                {
+                    IOWarningInFunction(mergeDict)
+                        << "Ignoring non-existing entry " << key
+                        << endl;
+                }
             }
         }
     }
@@ -568,8 +580,8 @@ int main(int argc, char *argv[])
             const dictionary& replaceDict = fieldIter().dict();
             Info<< "Merging entries from " << replaceDict.toc() << endl;
 
-            // Merge the replacements in
-            merge(fieldDict, replaceDict, literalRE, patchGroups);
+            // Merge the replacements in. Do not add non-existing entries.
+            merge(false, fieldDict, replaceDict, literalRE, patchGroups);
 
             Info<< "fieldDict:" << fieldDict << endl;
 
@@ -645,8 +657,8 @@ int main(int argc, char *argv[])
                 const dictionary& replaceDict = fieldIter().dict();
                 Info<< "Merging entries from " << replaceDict.toc() << endl;
 
-                // Merge the replacements in
-                merge(fieldDict, replaceDict, literalRE, patchGroups);
+                // Merge the replacements in (allow adding)
+                merge(true, fieldDict, replaceDict, literalRE, patchGroups);
 
                 Info<< "Writing modified fieldDict " << fieldName << endl;
                 fieldDict.regIOobject::write();
