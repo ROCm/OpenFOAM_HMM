@@ -27,6 +27,9 @@ pressureTools/pressureToolsFunctionObject.C
 Q/Q.C
 Q/QFunctionObject.C
 
+residuals/residuals.C
+residuals/residualsFunctionObject.C
+
 scalarTransport/scalarTransport.C
 scalarTransport/scalarTransportFunctionObject.C
 
