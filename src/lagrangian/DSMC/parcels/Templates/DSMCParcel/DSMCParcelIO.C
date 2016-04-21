@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,7 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 template<class ParcelType>
-const std::size_t Foam::DSMCParcel<ParcelType>::sizeofFields_
+const std::size_t Foam::DSMCParcel<ParcelType>::sizeofFields
 (
     sizeof(DSMCParcel<ParcelType>) - sizeof(ParcelType)
 );
@@ -62,7 +62,7 @@ Foam::DSMCParcel<ParcelType>::DSMCParcel
         }
         else
         {
-            is.read(reinterpret_cast<char*>(&U_), sizeofFields_);
+            is.read(reinterpret_cast<char*>(&U_), sizeofFields);
         }
     }
 
@@ -160,7 +160,7 @@ Foam::Ostream& Foam::operator<<
         os.write
         (
             reinterpret_cast<const char*>(&p.U_),
-            DSMCParcel<ParcelType>::sizeofFields_
+            DSMCParcel<ParcelType>::sizeofFields
         );
     }
 

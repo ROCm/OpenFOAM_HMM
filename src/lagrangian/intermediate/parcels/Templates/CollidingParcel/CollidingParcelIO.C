@@ -34,7 +34,7 @@ Foam::string Foam::CollidingParcel<ParcelType>::propertyList_ =
     Foam::CollidingParcel<ParcelType>::propertyList();
 
 template<class ParcelType>
-const std::size_t Foam::CollidingParcel<ParcelType>::sizeofFields_
+const std::size_t Foam::CollidingParcel<ParcelType>::sizeofFields
 (
     offsetof(CollidingParcel<ParcelType>, collisionRecords_)
   - offsetof(CollidingParcel<ParcelType>, f_)
@@ -67,7 +67,7 @@ Foam::CollidingParcel<ParcelType>::CollidingParcel
         }
         else
         {
-            is.read(reinterpret_cast<char*>(&f_), sizeofFields_);
+            is.read(reinterpret_cast<char*>(&f_), sizeofFields);
         }
 
         is >> collisionRecords_;
@@ -297,7 +297,7 @@ Foam::Ostream& Foam::operator<<
         os.write
         (
             reinterpret_cast<const char*>(&p.f_),
-            CollidingParcel<ParcelType>::sizeofFields_
+            CollidingParcel<ParcelType>::sizeofFields
         );
         os  << p.collisionRecords();
     }

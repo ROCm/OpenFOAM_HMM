@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,14 +73,13 @@ class MPPICParcel
 :
     public ParcelType
 {
-    // Private data
-
-        //- Size in bytes of the fields
-        static const std::size_t sizeofFields_;
-
-
 public:
 
+    //- Size in bytes of the fields
+    static const std::size_t sizeofFields;
+
+
+    //- Tracking data
     template<class CloudType>
     class TrackingData
     :
@@ -175,7 +174,14 @@ public:
         AddToPropertyList
         (
             ParcelType,
-            "(UCorrectx UCorrecty UCorrectz)"
+            " (UCorrectx UCorrecty UCorrectz)"
+        );
+
+        //- String representation of property types
+        AddToPropertyTypes
+        (
+            ParcelType,
+            " vector"
         );
 
 

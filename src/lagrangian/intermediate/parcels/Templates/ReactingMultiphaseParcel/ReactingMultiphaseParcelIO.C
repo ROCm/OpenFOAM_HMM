@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,11 @@ Foam::string Foam::ReactingMultiphaseParcel<ParcelType>::propertyList_ =
     Foam::ReactingMultiphaseParcel<ParcelType>::propertyList();
 
 template<class ParcelType>
-const std::size_t Foam::ReactingMultiphaseParcel<ParcelType>::sizeofFields_
+Foam::string Foam::ReactingMultiphaseParcel<ParcelType>::propertyTypes_ =
+    Foam::ReactingMultiphaseParcel<ParcelType>::propertyTypes();
+
+template<class ParcelType>
+const std::size_t Foam::ReactingMultiphaseParcel<ParcelType>::sizeofFields
 (
     0
 );

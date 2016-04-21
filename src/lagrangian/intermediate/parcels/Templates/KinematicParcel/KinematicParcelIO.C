@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +35,11 @@ Foam::string Foam::KinematicParcel<ParcelType>::propertyList_ =
     Foam::KinematicParcel<ParcelType>::propertyList();
 
 template<class ParcelType>
-const std::size_t Foam::KinematicParcel<ParcelType>::sizeofFields_
+Foam::string Foam::KinematicParcel<ParcelType>::propertyTypes_ =
+    Foam::KinematicParcel<ParcelType>::propertyTypes();
+
+template<class ParcelType>
+const std::size_t Foam::KinematicParcel<ParcelType>::sizeofFields
 (
     offsetof(KinematicParcel<ParcelType>, rhoc_)
   - offsetof(KinematicParcel<ParcelType>, active_)
@@ -84,7 +88,7 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
         }
         else
         {
-            is.read(reinterpret_cast<char*>(&active_), sizeofFields_);
+            is.read(reinterpret_cast<char*>(&active_), sizeofFields);
         }
     }
 
@@ -229,7 +233,7 @@ Foam::Ostream& Foam::operator<<
     if (os.format() == IOstream::ASCII)
     {
         os  << static_cast<const ParcelType&>(p)
-            << token::SPACE << p.active()
+            << token::SPACE << bool(p.active())
             << token::SPACE << p.typeId()
             << token::SPACE << p.nParticle()
             << token::SPACE << p.d()
@@ -246,7 +250,7 @@ Foam::Ostream& Foam::operator<<
         os.write
         (
             reinterpret_cast<const char*>(&p.active_),
-            KinematicParcel<ParcelType>::sizeofFields_
+            KinematicParcel<ParcelType>::sizeofFields
         );
     }
 
