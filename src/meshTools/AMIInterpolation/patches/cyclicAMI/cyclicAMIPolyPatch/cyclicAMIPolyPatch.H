@@ -111,6 +111,9 @@ protected:
         //- AMI interpolation class
         mutable autoPtr<AMIPatchToPatchInterpolation> AMIPtr_;
 
+        //- AMI method
+        const AMIPatchToPatchInterpolation::interpolationMethod AMIMethod_;
+
         //- Flag to indicate that slave patch should be reversed for AMI
         const bool AMIReverse_;
 
