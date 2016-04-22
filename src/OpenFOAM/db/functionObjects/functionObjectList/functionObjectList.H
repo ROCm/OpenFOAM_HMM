@@ -143,11 +143,14 @@ public:
         //- Access to the functionObjects
         using PtrList<functionObject>::operator[];
 
+        //- Reset/read state dictionary for current time
+        virtual void resetState();
+
         //- Return the state dictionary
-        IOdictionary& stateDict();
+        virtual IOdictionary& stateDict();
 
         //- Return const access to the state dictionary
-        const IOdictionary& stateDict() const;
+        virtual const IOdictionary& stateDict() const;
 
         //- Clear the list of function objects
         virtual void clear();
@@ -163,7 +166,6 @@ public:
 
         //- Return the execution status (on/off) of the function objects
         virtual bool status() const;
-
 
         //- Called at the start of the time-loop
         virtual bool start();
