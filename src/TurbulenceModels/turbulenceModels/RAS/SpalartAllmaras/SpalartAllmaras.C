@@ -300,6 +300,11 @@ tmp<volScalarField> SpalartAllmaras<BasicTurbulenceModel>::DnuTildaEff() const
 template<class BasicTurbulenceModel>
 tmp<volScalarField> SpalartAllmaras<BasicTurbulenceModel>::k() const
 {
+    WarningInFunction
+        << "Turbulence kinetic energy not defined for "
+        << "Spalart-Allmaras model. Returning zero field"
+        << endl;
+
     return tmp<volScalarField>
     (
         new volScalarField
@@ -311,7 +316,8 @@ tmp<volScalarField> SpalartAllmaras<BasicTurbulenceModel>::k() const
                 this->mesh_
             ),
             this->mesh_,
-            dimensionedScalar("0", dimensionSet(0, 2, -2, 0, 0), 0)
+            dimensionedScalar("0", dimensionSet(0, 2, -2, 0, 0), 0),
+            zeroGradientFvPatchField<vector>::typeName
         )
     );
 }
@@ -336,7 +342,8 @@ tmp<volScalarField> SpalartAllmaras<BasicTurbulenceModel>::epsilon() const
                 this->mesh_
             ),
             this->mesh_,
-            dimensionedScalar("0", dimensionSet(0, 2, -3, 0, 0), 0)
+            dimensionedScalar("0", dimensionSet(0, 2, -3, 0, 0), 0),
+            zeroGradientFvPatchField<vector>::typeName
         )
     );
 }

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -457,7 +457,29 @@ tmp<volScalarField> SpalartAllmarasDES<BasicTurbulenceModel>::k() const
 {
     const volScalarField chi(this->chi());
     const volScalarField fv1(this->fv1(chi));
-    return sqr(this->nut()/ck_/dTilda(chi, fv1, fvc::grad(this->U_)));
+
+    tmp<volScalarField> tdTilda
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "dTilda",
+                this->mesh_.time().timeName(),
+                this->mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            this->mesh_,
+            dimensionedScalar("0", dimLength, 0.0),
+            zeroGradientFvPatchField<vector>::typeName
+        )
+    );
+    volScalarField& dTildaF = tdTilda();
+    dTildaF = dTilda(chi, fv1, fvc::grad(this->U_));
+    dTildaF.correctBoundaryConditions();
+
+    return sqr(this->nut()/ck_/dTildaF);
 }
 
 
