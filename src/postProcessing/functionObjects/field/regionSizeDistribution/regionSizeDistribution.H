@@ -69,10 +69,10 @@ Description
         maxDiameter     0.5e-4;
         minDiameter     0;
         setFormat       gnuplot;
-        coordinateSystem
+        origin          (0 0 0);
+        coordinateRoation
         {
             type            cartesian;
-            origin          (0 0 0);
             e3              (0 1 1);
             e1              (1 0 0);
         }
@@ -91,7 +91,8 @@ Description
         maxDiameter  | maximum region equivalent diameter | yes |
         minDiameter  | minimum region equivalent diameter | no  | 0
         setFormat    | writing format          | yes         |
-        coordinateSystem | transformation for vector fields | no         |
+        origin       | origin of local co-ordinate system | yes    |
+        coordinateRoation | orientation of local co-ordinate system | no         |
         log          | Log to standard output  | no          | yes
     \endtable
 

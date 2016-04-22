@@ -348,14 +348,14 @@ bool Foam::scene::loop(vtkRenderer* renderer)
 
     currentFrameI_++;
 
-    position_ += dPosition_;
-
     if (position_ > (1 + 0.5*dPosition_))
     {
         WarningInFunction
             << "Current position exceeded 1 - please check your setup"
             << endl;
     }
+
+    position_ += dPosition_;
 
     if (currentFrameI_ < nFrameTotal_)
     {
