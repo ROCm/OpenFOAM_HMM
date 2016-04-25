@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,10 +27,10 @@ License
 #include "volFields.H"
 #include "DimensionedField.H"
 
-Foam::tmp<Foam::DimensionedField<Foam::vector, Foam::volMesh> >
+Foam::tmp<Foam::DimensionedField<Foam::vector, Foam::volMesh>>
 Foam::coalCloudList::UTrans() const
 {
-    tmp<DimensionedField<vector, volMesh> > tfld
+    tmp<DimensionedField<vector, volMesh>> tfld
     (
         new DimensionedField<vector, volMesh>
         (
@@ -43,11 +43,11 @@ Foam::coalCloudList::UTrans() const
                 IOobject::NO_WRITE
             ),
             mesh_,
-            dimensionedVector("zero", dimMass*dimVelocity, vector::zero)
+            dimensionedVector("zero", dimMass*dimVelocity, Zero)
         )
     );
 
-    DimensionedField<vector, volMesh>& fld = tfld();
+    DimensionedField<vector, volMesh>& fld = tfld.ref();
 
     forAll(*this, i)
     {
@@ -64,7 +64,7 @@ Foam::tmp<Foam::fvVectorMatrix> Foam::coalCloudList::SU
 ) const
 {
     tmp<fvVectorMatrix> tfvm(new fvVectorMatrix(U, dimForce));
-    fvVectorMatrix& fvm = tfvm();
+    fvVectorMatrix& fvm = tfvm.ref();
 
     forAll(*this, i)
     {
@@ -75,10 +75,10 @@ Foam::tmp<Foam::fvVectorMatrix> Foam::coalCloudList::SU
 }
 
 
-Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh>>
 Foam::coalCloudList::hsTrans() const
 {
-    tmp<DimensionedField<scalar, volMesh> > tfld
+    tmp<DimensionedField<scalar, volMesh>> tfld
     (
         new DimensionedField<scalar, volMesh>
         (
@@ -95,7 +95,7 @@ Foam::coalCloudList::hsTrans() const
         )
     );
 
-    DimensionedField<scalar, volMesh>& fld = tfld();
+    DimensionedField<scalar, volMesh>& fld = tfld.ref();
 
     forAll(*this, i)
     {
@@ -112,7 +112,7 @@ Foam::tmp<Foam::fvScalarMatrix> Foam::coalCloudList::Sh
 ) const
 {
     tmp<fvScalarMatrix> tfvm(new fvScalarMatrix(hs, dimEnergy/dimTime));
-    fvScalarMatrix& fvm = tfvm();
+    fvScalarMatrix& fvm = tfvm.ref();
 
     forAll(*this, i)
     {
@@ -130,7 +130,7 @@ Foam::tmp<Foam::fvScalarMatrix> Foam::coalCloudList::SYi
 ) const
 {
     tmp<fvScalarMatrix> tfvm(new fvScalarMatrix(Yi, dimMass/dimTime));
-    fvScalarMatrix& fvm = tfvm();
+    fvScalarMatrix& fvm = tfvm.ref();
 
     forAll(*this, i)
     {
@@ -141,10 +141,10 @@ Foam::tmp<Foam::fvScalarMatrix> Foam::coalCloudList::SYi
 }
 
 
-Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh>>
 Foam::coalCloudList::rhoTrans() const
 {
-    tmp<DimensionedField<scalar, volMesh> > tfld
+    tmp<DimensionedField<scalar, volMesh>> tfld
     (
         new DimensionedField<scalar, volMesh>
         (
@@ -161,7 +161,7 @@ Foam::coalCloudList::rhoTrans() const
         )
     );
 
-    DimensionedField<scalar, volMesh>& fld = tfld();
+    DimensionedField<scalar, volMesh>& fld = tfld.ref();
 
     forAll(*this, i)
     {
@@ -177,10 +177,10 @@ Foam::coalCloudList::rhoTrans() const
 
 
 
-Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh>>
 Foam::coalCloudList::Srho() const
 {
-    tmp<DimensionedField<scalar, volMesh> > tfld
+    tmp<DimensionedField<scalar, volMesh>> tfld
     (
         new DimensionedField<scalar, volMesh>
         (
@@ -197,7 +197,7 @@ Foam::coalCloudList::Srho() const
         )
     );
 
-    DimensionedField<scalar, volMesh>& fld = tfld();
+    DimensionedField<scalar, volMesh>& fld = tfld.ref();
 
     forAll(*this, i)
     {
@@ -208,13 +208,13 @@ Foam::coalCloudList::Srho() const
 }
 
 
-Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh>>
 Foam::coalCloudList::Srho
 (
     const label i
 ) const
 {
-    tmp<DimensionedField<scalar, volMesh> > tfld
+    tmp<DimensionedField<scalar, volMesh>> tfld
     (
         new DimensionedField<scalar, volMesh>
         (
@@ -231,7 +231,7 @@ Foam::coalCloudList::Srho
         )
     );
 
-    DimensionedField<scalar, volMesh>& fld = tfld();
+    DimensionedField<scalar, volMesh>& fld = tfld.ref();
 
     forAll(*this, j)
     {
@@ -248,7 +248,7 @@ Foam::tmp<Foam::fvScalarMatrix> Foam::coalCloudList::Srho
 ) const
 {
     tmp<fvScalarMatrix> tfvm(new fvScalarMatrix(rho, dimMass/dimTime));
-    fvScalarMatrix& fvm = tfvm();
+    fvScalarMatrix& fvm = tfvm.ref();
 
     forAll(*this, i)
     {

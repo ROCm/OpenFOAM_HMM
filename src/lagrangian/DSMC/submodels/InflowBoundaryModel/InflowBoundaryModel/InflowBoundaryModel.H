@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -103,7 +103,7 @@ public:
 
 
     //- Selector
-    static autoPtr<InflowBoundaryModel<CloudType> > New
+    static autoPtr<InflowBoundaryModel<CloudType>> New
     (
         const dictionary& dict,
         CloudType& owner
@@ -141,30 +141,30 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeInflowBoundaryModel(CloudType)                                    \
-                                                                              \
-    defineNamedTemplateTypeNameAndDebug(InflowBoundaryModel<CloudType>, 0);   \
-                                                                              \
-    defineTemplateRunTimeSelectionTable                                       \
-    (                                                                         \
-        InflowBoundaryModel<CloudType>,                                       \
-        dictionary                                                            \
+#define makeInflowBoundaryModel(CloudType)                                     \
+                                                                               \
+    defineNamedTemplateTypeNameAndDebug(InflowBoundaryModel<CloudType>, 0);    \
+                                                                               \
+    defineTemplateRunTimeSelectionTable                                        \
+    (                                                                          \
+        InflowBoundaryModel<CloudType>,                                        \
+        dictionary                                                             \
     );
 
 
-#define makeInflowBoundaryModelType(SS, CloudType)                            \
-                                                                              \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
-                                                                              \
-    InflowBoundaryModel<CloudType>::                                          \
-        adddictionaryConstructorToTable<SS<CloudType> >                       \
+#define makeInflowBoundaryModelType(SS, CloudType)                             \
+                                                                               \
+    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                     \
+                                                                               \
+    InflowBoundaryModel<CloudType>::                                           \
+        adddictionaryConstructorToTable<SS<CloudType>>                         \
             add##SS##CloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "InflowBoundaryModel.C"
+    #include "InflowBoundaryModel.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "dynamicLagrangian.H"
+#include "fvOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,6 +43,9 @@ void dynamicLagrangian<BasicTurbulenceModel>::correctNut
 {
     this->nut_ = (flm_/fmm_)*sqr(this->delta())*mag(dev(symm(gradU)));
     this->nut_.correctBoundaryConditions();
+    fv::options::New(this->mesh_).correct(this->nut_);
+
+    BasicTurbulenceModel::correctNut();
 }
 
 
@@ -159,6 +163,7 @@ void dynamicLagrangian<BasicTurbulenceModel>::correct()
     const rhoField& rho = this->rho_;
     const surfaceScalarField& alphaRhoPhi = this->alphaRhoPhi_;
     const volVectorField& U = this->U_;
+    fv::options& fvOptions(fv::options::New(this->mesh_));
 
     LESeddyViscosity<BasicTurbulenceModel>::correct();
 
@@ -192,11 +197,13 @@ void dynamicLagrangian<BasicTurbulenceModel>::correct()
      ==
         rho*invT*LM
       - fvm::Sp(rho*invT, flm_)
+      + fvOptions(flm_)
     );
 
     flmEqn.relax();
+    fvOptions.constrain(flmEqn);
     flmEqn.solve();
-
+    fvOptions.correct(flm_);
     bound(flm_, flm0_);
 
     volScalarField MM(M && M);
@@ -208,11 +215,13 @@ void dynamicLagrangian<BasicTurbulenceModel>::correct()
      ==
         rho*invT*MM
       - fvm::Sp(rho*invT, fmm_)
+      + fvOptions(fmm_)
     );
 
     fmmEqn.relax();
+    fvOptions.constrain(fmmEqn);
     fmmEqn.solve();
-
+    fvOptions.correct(fmm_);
     bound(fmm_, fmm0_);
 
     correctNut(gradU);

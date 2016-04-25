@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "DeardorffDiffStress.H"
+#include "fvOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -39,6 +40,7 @@ void DeardorffDiffStress<BasicTurbulenceModel>::correctNut()
 {
     this->nut_ = Ck_*sqrt(this->k())*this->delta();
     this->nut_.correctBoundaryConditions();
+    fv::options::New(this->mesh_).correct(this->nut_);
 
     BasicTurbulenceModel::correctNut();
 }
@@ -59,7 +61,7 @@ DeardorffDiffStress<BasicTurbulenceModel>::DeardorffDiffStress
     const word& type
 )
 :
-    ReynoldsStress<LESModel<BasicTurbulenceModel> >
+    ReynoldsStress<LESModel<BasicTurbulenceModel>>
     (
         type,
         alpha,
@@ -121,7 +123,7 @@ DeardorffDiffStress<BasicTurbulenceModel>::DeardorffDiffStress
 template<class BasicTurbulenceModel>
 bool DeardorffDiffStress<BasicTurbulenceModel>::read()
 {
-    if (ReynoldsStress<LESModel<BasicTurbulenceModel> >::read())
+    if (ReynoldsStress<LESModel<BasicTurbulenceModel>>::read())
     {
         Ck_.readIfPresent(this->coeffDict());
         Cm_.readIfPresent(this->coeffDict());
@@ -174,8 +176,9 @@ void DeardorffDiffStress<BasicTurbulenceModel>::correct()
     const surfaceScalarField& alphaRhoPhi = this->alphaRhoPhi_;
     const volVectorField& U = this->U_;
     volSymmTensorField& R = this->R_;
+    fv::options& fvOptions(fv::options::New(this->mesh_));
 
-    ReynoldsStress<LESModel<BasicTurbulenceModel> >::correct();
+    ReynoldsStress<LESModel<BasicTurbulenceModel>>::correct();
 
     tmp<volTensorField> tgradU(fvc::grad(U));
     const volTensorField& gradU = tgradU();
@@ -196,12 +199,15 @@ void DeardorffDiffStress<BasicTurbulenceModel>::correct()
         alpha*rho*P
       + (4.0/5.0)*alpha*rho*k*D
       - ((2.0/3.0)*(1.0 - Cm_/this->Ce_)*I)*(alpha*rho*this->epsilon())
+      + fvOptions(alpha, rho, R)
     );
 
-    REqn().relax();
-    REqn().solve();
-
+    REqn.ref().relax();
+    fvOptions.constrain(REqn.ref());
+    REqn.ref().solve();
+    fvOptions.correct(R);
     this->boundNormalStress(R);
+
     correctNut();
 }
 

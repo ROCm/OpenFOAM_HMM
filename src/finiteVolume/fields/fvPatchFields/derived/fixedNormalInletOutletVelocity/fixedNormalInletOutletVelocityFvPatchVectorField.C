@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,29 +46,10 @@ fixedNormalInletOutletVelocityFvPatchVectorField
         fvPatchVectorField::New("fixedValue", p, iF)
     )
 {
-    refValue() = vector::zero;
-    refGrad() = vector::zero;
-    valueFraction() = symmTensor::zero;
+    refValue() = Zero;
+    refGrad() = Zero;
+    valueFraction() = Zero;
 }
-
-
-Foam::fixedNormalInletOutletVelocityFvPatchVectorField::
-fixedNormalInletOutletVelocityFvPatchVectorField
-(
-    const fixedNormalInletOutletVelocityFvPatchVectorField& ptf,
-    const fvPatch& p,
-    const DimensionedField<vector, volMesh>& iF,
-    const fvPatchFieldMapper& mapper
-)
-:
-    directionMixedFvPatchVectorField(ptf, p, iF, mapper),
-    phiName_(ptf.phiName_),
-    fixTangentialInflow_(ptf.fixTangentialInflow_),
-    normalVelocity_
-    (
-        fvPatchVectorField::New(ptf.normalVelocity(), p, iF, mapper)
-    )
-{}
 
 
 Foam::fixedNormalInletOutletVelocityFvPatchVectorField::
@@ -89,9 +70,28 @@ fixedNormalInletOutletVelocityFvPatchVectorField
 {
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
     refValue() = normalVelocity();
-    refGrad() = vector::zero;
-    valueFraction() = symmTensor::zero;
+    refGrad() = Zero;
+    valueFraction() = Zero;
 }
+
+
+Foam::fixedNormalInletOutletVelocityFvPatchVectorField::
+fixedNormalInletOutletVelocityFvPatchVectorField
+(
+    const fixedNormalInletOutletVelocityFvPatchVectorField& ptf,
+    const fvPatch& p,
+    const DimensionedField<vector, volMesh>& iF,
+    const fvPatchFieldMapper& mapper
+)
+:
+    directionMixedFvPatchVectorField(ptf, p, iF, mapper),
+    phiName_(ptf.phiName_),
+    fixTangentialInflow_(ptf.fixTangentialInflow_),
+    normalVelocity_
+    (
+        fvPatchVectorField::New(ptf.normalVelocity(), p, iF, mapper)
+    )
+{}
 
 
 Foam::fixedNormalInletOutletVelocityFvPatchVectorField::

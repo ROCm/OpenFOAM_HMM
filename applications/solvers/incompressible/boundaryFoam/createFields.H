@@ -31,9 +31,9 @@ surfaceScalarField phi
 
 singlePhaseTransportModel laminarTransport(U, phi);
 
-autoPtr<incompressible::RASModel> turbulence
+autoPtr<incompressible::turbulenceModel> turbulence
 (
-    incompressible::New<incompressible::RASModel>(U, phi, laminarTransport)
+    incompressible::turbulenceModel::New(U, phi, laminarTransport)
 );
 
 dimensionedVector Ubar("Ubar", dimVelocity, laminarTransport);
@@ -45,5 +45,5 @@ dimensionedVector gradP
 (
     "gradP",
     dimensionSet(0, 1, -2, 0, 0),
-    vector::zero
+    Zero
 );

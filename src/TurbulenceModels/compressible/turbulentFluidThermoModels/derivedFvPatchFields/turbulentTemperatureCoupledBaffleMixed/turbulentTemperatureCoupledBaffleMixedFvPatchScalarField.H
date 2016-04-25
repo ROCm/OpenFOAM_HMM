@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,14 +71,13 @@ Description
 
     Needs to be on underlying mapped(Wall)FvPatch.
 
-    Note: kappa : heat conduction at patch. Gets supplied how to lookup
-        calculate kappa:
+    Note:
 
-    - 'lookup' : lookup volScalarField (or volSymmTensorField) with name
-    - 'fluidThermo' : use fluidThermo and compressible::RASmodel to calculate
-        kappa
-    - 'solidThermo' : use solidThermo kappa()
-    - 'directionalSolidThermo' directionalKappa()
+    \li \c kappa and \c kappaName are inherited from temperatureCoupledBase.
+
+
+SeeAlso
+    Foam::temperatureCoupledBase
 
 SourceFiles
     turbulentTemperatureCoupledBaffleMixedFvPatchScalarField.C

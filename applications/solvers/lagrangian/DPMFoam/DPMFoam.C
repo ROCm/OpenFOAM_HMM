@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,6 @@ Description
 #include "singlePhaseTransportModel.H"
 #include "PhaseIncompressibleTurbulenceModel.H"
 #include "pimpleControl.H"
-#include "fixedFluxPressureFvPatchScalarField.H"
 
 #ifdef MPPIC
     #include "basicKinematicMPPICCloud.H"
@@ -106,14 +105,14 @@ int main(int argc, char *argv[])
             (
                 "0",
                 cloudSU.dimensions()/dimVolume,
-                vector::zero
+                Zero
             ),
             zeroGradientFvPatchVectorField::typeName
         );
 
         cloudVolSUSu.internalField() = -cloudSU.source()/mesh.V();
         cloudVolSUSu.correctBoundaryConditions();
-        cloudSU.source() = vector::zero;
+        cloudSU.source() = Zero;
 
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,16 +32,16 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-#define makePointPatchField(pointPatchTypeField)                              \
-                                                                              \
-defineNamedTemplateTypeNameAndDebug(pointPatchTypeField, 0);                  \
-template<>                                                                    \
-int pointPatchTypeField::disallowGenericPointPatchField                       \
-(                                                                             \
-    debug::debugSwitch("disallowGenericPointPatchField", 0)                   \
-);                                                                            \
-defineTemplateRunTimeSelectionTable(pointPatchTypeField, pointPatch);         \
-defineTemplateRunTimeSelectionTable(pointPatchTypeField, patchMapper);        \
+#define makePointPatchField(pointPatchTypeField)                               \
+                                                                               \
+defineNamedTemplateTypeNameAndDebug(pointPatchTypeField, 0);                   \
+template<>                                                                     \
+int pointPatchTypeField::disallowGenericPointPatchField                        \
+(                                                                              \
+    debug::debugSwitch("disallowGenericPointPatchField", 0)                    \
+);                                                                             \
+defineTemplateRunTimeSelectionTable(pointPatchTypeField, pointPatch);          \
+defineTemplateRunTimeSelectionTable(pointPatchTypeField, patchMapper);         \
 defineTemplateRunTimeSelectionTable(pointPatchTypeField, dictionary);
 
 makePointPatchField(pointPatchScalarField)

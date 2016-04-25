@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -177,10 +177,9 @@ Foam::scalarTransport::scalarTransport
 :
     name_(name),
     mesh_(refCast<const fvMesh>(obr)),
-    active_(true),
-    phiName_("phi"),
-    UName_("U"),
-    rhoName_("rho"),
+    phiName_(dict.lookupOrDefault<word>("phiName", "phi")),
+    UName_(dict.lookupOrDefault<word>("UName", "U")),
+    rhoName_(dict.lookupOrDefault<word>("rhoName", "rho")),
     DT_(0.0),
     userDT_(false),
     resetOnStartUp_(false),
@@ -212,6 +211,7 @@ Foam::scalarTransport::~scalarTransport()
 
 void Foam::scalarTransport::read(const dictionary& dict)
 {
+<<<<<<< HEAD
     if (active_)
     {
         log_.readIfPresent("log", dict);
@@ -221,31 +221,50 @@ void Foam::scalarTransport::read(const dictionary& dict)
         dict.readIfPresent("phiName", phiName_);
         dict.readIfPresent("UName", UName_);
         dict.readIfPresent("rhoName", rhoName_);
+=======
+    Info<< type() << ":" << nl;
 
-        userDT_ = false;
-        if (dict.readIfPresent("DT", DT_))
-        {
-            userDT_ = true;
-        }
+    phiName_ = dict.lookupOrDefault<word>("phiName", "phi");
+    UName_ = dict.lookupOrDefault<word>("UName", "U");
+    rhoName_ = dict.lookupOrDefault<word>("rhoName", "rho");
+>>>>>>> foundation
 
+    userDT_ = false;
+    if (dict.readIfPresent("DT", DT_))
+    {
+        userDT_ = true;
+    }
+
+<<<<<<< HEAD
         dict.readIfPresent("nCorr", nCorr_);
         dict.lookup("resetOnStartUp") >> resetOnStartUp_;
         dict.lookup("autoSchemes") >> autoSchemes_;
+=======
+    dict.lookup("resetOnStartUp") >> resetOnStartUp_;
 
-        fvOptions_.reset(dict.subDict("fvOptions"));
-    }
+    dict.readIfPresent("nCorr", nCorr_);
+
+    dict.lookup("autoSchemes") >> autoSchemes_;
+>>>>>>> foundation
+
+    fvOptions_.reset(dict.subDict("fvOptions"));
 }
 
 
 void Foam::scalarTransport::execute()
 {
+<<<<<<< HEAD
     if (active_)
     {
         if (log_) Info<< type() << " " << name_ << " output:" << nl;
+=======
+    Info<< type() << " output:" << endl;
+>>>>>>> foundation
 
-        const surfaceScalarField& phi =
-            mesh_.lookupObject<surfaceScalarField>(phiName_);
+    const surfaceScalarField& phi =
+        mesh_.lookupObject<surfaceScalarField>(phiName_);
 
+<<<<<<< HEAD
         volScalarField& T = transportedField();
 
         // calculate the diffusivity
@@ -257,22 +276,34 @@ void Foam::scalarTransport::execute()
         {
             schemeVar = UName_;
         }
+=======
+    // calculate the diffusivity
+    volScalarField DT(this->DT(phi));
 
-        word divScheme("div(phi," + schemeVar + ")");
-        word laplacianScheme("laplacian(" + DT.name() + "," + schemeVar + ")");
+    // set schemes
+    word schemeVar = T_.name();
+    if (autoSchemes_)
+    {
+        schemeVar = UName_;
+    }
+>>>>>>> foundation
 
-        // set under-relaxation coeff
-        scalar relaxCoeff = 0.0;
-        if (mesh_.relaxEquation(schemeVar))
-        {
-            relaxCoeff = mesh_.equationRelaxationFactor(schemeVar);
-        }
+    word divScheme("div(phi," + schemeVar + ")");
+    word laplacianScheme("laplacian(" + DT.name() + "," + schemeVar + ")");
 
-        if (phi.dimensions() == dimMass/dimTime)
-        {
-            const volScalarField& rho =
-                mesh_.lookupObject<volScalarField>(rhoName_);
+    // set under-relaxation coeff
+    scalar relaxCoeff = 0.0;
+    if (mesh_.relaxEquation(schemeVar))
+    {
+        relaxCoeff = mesh_.equationRelaxationFactor(schemeVar);
+    }
 
+    if (phi.dimensions() == dimMass/dimTime)
+    {
+        const volScalarField& rho =
+            mesh_.lookupObject<volScalarField>(rhoName_);
+
+<<<<<<< HEAD
             // solve
             for (label i = 0; i <= nCorr_; i++)
             {
@@ -284,16 +315,33 @@ void Foam::scalarTransport::execute()
                  ==
                     fvOptions_(rho, T)
                 );
-
-                TEqn.relax(relaxCoeff);
-
-                fvOptions_.constrain(TEqn);
-
-                TEqn.solve(mesh_.solverDict(schemeVar));
-            }
-        }
-        else if (phi.dimensions() == dimVolume/dimTime)
+=======
+        // solve
+        for (label i = 0; i <= nCorr_; i++)
         {
+            fvScalarMatrix TEqn
+            (
+                fvm::ddt(rho, T_)
+              + fvm::div(phi, T_, divScheme)
+              - fvm::laplacian(DT, T_, laplacianScheme)
+             ==
+                fvOptions_(rho, T_)
+            );
+>>>>>>> foundation
+
+            TEqn.relax(relaxCoeff);
+
+            fvOptions_.constrain(TEqn);
+
+            TEqn.solve(mesh_.solverDict(schemeVar));
+        }
+    }
+    else if (phi.dimensions() == dimVolume/dimTime)
+    {
+        // solve
+        for (label i = 0; i <= nCorr_; i++)
+        {
+<<<<<<< HEAD
             // solve
             for (label i = 0; i <= nCorr_; i++)
             {
@@ -305,43 +353,57 @@ void Foam::scalarTransport::execute()
                  ==
                     fvOptions_(T)
                 );
+=======
+            fvScalarMatrix TEqn
+            (
+                fvm::ddt(T_)
+              + fvm::div(phi, T_, divScheme)
+              - fvm::laplacian(DT, T_, laplacianScheme)
+             ==
+                fvOptions_(T_)
+            );
+>>>>>>> foundation
 
-                TEqn.relax(relaxCoeff);
+            TEqn.relax(relaxCoeff);
 
-                fvOptions_.constrain(TEqn);
+            fvOptions_.constrain(TEqn);
 
-                TEqn.solve(mesh_.solverDict(schemeVar));
-            }
+            TEqn.solve(mesh_.solverDict(schemeVar));
         }
-        else
-        {
-            FatalErrorInFunction
-                << "Incompatible dimensions for phi: " << phi.dimensions() << nl
-                << "Dimensions should be " << dimMass/dimTime << " or "
-                << dimVolume/dimTime << endl;
-        }
+<<<<<<< HEAD
 
         if (log_) Info<< endl;
+=======
+>>>>>>> foundation
     }
+    else
+    {
+        FatalErrorInFunction
+            << "Incompatible dimensions for phi: " << phi.dimensions() << nl
+            << "Dimensions should be " << dimMass/dimTime << " or "
+            << dimVolume/dimTime << endl;
+    }
+
+    Info<< endl;
 }
 
 
 void Foam::scalarTransport::end()
 {
+<<<<<<< HEAD
     // Do nothing
+=======
+    execute();
+>>>>>>> foundation
 }
 
 
 void Foam::scalarTransport::timeSet()
-{
-    // Do nothing
-}
+{}
 
 
 void Foam::scalarTransport::write()
-{
-    // Do nothing
-}
+{}
 
 
 // ************************************************************************* //

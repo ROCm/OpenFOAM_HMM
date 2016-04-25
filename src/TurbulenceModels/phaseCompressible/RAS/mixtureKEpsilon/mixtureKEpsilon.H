@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -83,7 +83,7 @@ namespace RASModels
 template<class BasicTurbulenceModel>
 class mixtureKEpsilon
 :
-    public eddyViscosity<RASModel<BasicTurbulenceModel> >
+    public eddyViscosity<RASModel<BasicTurbulenceModel>>
 {
     // Private data
 
@@ -94,7 +94,7 @@ class mixtureKEpsilon
 
         // Disallow default bitwise copy construct and assignment
         mixtureKEpsilon(const mixtureKEpsilon&);
-        mixtureKEpsilon& operator=(const mixtureKEpsilon&);
+        void operator=(const mixtureKEpsilon&);
 
         //- Return the turbulence model for the other phase
         mixtureKEpsilon<BasicTurbulenceModel>& liquidTurbulence() const;
@@ -257,7 +257,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "mixtureKEpsilon.C"
+    #include "mixtureKEpsilon.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

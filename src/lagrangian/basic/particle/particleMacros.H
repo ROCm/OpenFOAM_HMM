@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,23 +39,23 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define DefinePropertyList(str)                                               \
-                                                                              \
-    static string propertyList_;                                              \
-                                                                              \
-    static string propertyList()                                              \
-    {                                                                         \
-        return str;                                                           \
+#define DefinePropertyList(str)                                                \
+                                                                               \
+    static string propertyList_;                                               \
+                                                                               \
+    static string propertyList()                                               \
+    {                                                                          \
+        return str;                                                            \
     }
 
 
-#define AddToPropertyList(ParcelType, str)                                    \
-                                                                              \
-    static string propertyList_;                                              \
-                                                                              \
-    static string propertyList()                                              \
-    {                                                                         \
-        return ParcelType::propertyList() + str;                              \
+#define AddToPropertyList(ParcelType, str)                                     \
+                                                                               \
+    static string propertyList_;                                               \
+                                                                               \
+    static string propertyList()                                               \
+    {                                                                          \
+        return ParcelType::propertyList() + str;                               \
     }
 
 

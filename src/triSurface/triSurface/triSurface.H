@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -259,15 +259,15 @@ public:
             List<labelledTri>&,
             const geometricSurfacePatchList&,
             pointField&,
-            const bool reUse
+            const bool reuse
         );
 
         //- Construct from triangles, patches, points.
         triSurface
         (
-            const Xfer<List<labelledTri> >&,
+            const Xfer<List<labelledTri>>&,
             const geometricSurfacePatchList&,
-            const Xfer<List<point> >&
+            const Xfer<List<point>>&
         );
 
         //- Construct from triangles, points. Set patchnames to default.

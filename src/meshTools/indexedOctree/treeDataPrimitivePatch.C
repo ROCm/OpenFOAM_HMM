@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -88,7 +88,7 @@ Foam::treeDataPrimitivePatch<PatchType>::treeDataPrimitivePatch
 template<class PatchType>
 Foam::treeDataPrimitivePatch<PatchType>::findNearestOp::findNearestOp
 (
-    const indexedOctree<treeDataPrimitivePatch<PatchType> >& tree
+    const indexedOctree<treeDataPrimitivePatch<PatchType>>& tree
 )
 :
     tree_(tree)
@@ -98,7 +98,7 @@ Foam::treeDataPrimitivePatch<PatchType>::findNearestOp::findNearestOp
 template<class PatchType>
 Foam::treeDataPrimitivePatch<PatchType>::findIntersectOp::findIntersectOp
 (
-    const indexedOctree<treeDataPrimitivePatch<PatchType> >& tree
+    const indexedOctree<treeDataPrimitivePatch<PatchType>>& tree
 )
 :
     tree_(tree)
@@ -108,7 +108,7 @@ Foam::treeDataPrimitivePatch<PatchType>::findIntersectOp::findIntersectOp
 template<class PatchType>
 Foam::treeDataPrimitivePatch<PatchType>::findAllIntersectOp::findAllIntersectOp
 (
-    const indexedOctree<treeDataPrimitivePatch<PatchType> >& tree,
+    const indexedOctree<treeDataPrimitivePatch<PatchType>>& tree,
     DynamicList<label>& shapeMask
 )
 :
@@ -121,7 +121,7 @@ template<class PatchType>
 Foam::treeDataPrimitivePatch<PatchType>::
 findSelfIntersectOp::findSelfIntersectOp
 (
-    const indexedOctree<treeDataPrimitivePatch<PatchType> >& tree,
+    const indexedOctree<treeDataPrimitivePatch<PatchType>>& tree,
     const label edgeID
 )
 :
@@ -146,12 +146,10 @@ Foam::pointField Foam::treeDataPrimitivePatch<PatchType>::shapePoints() const
 }
 
 
-//- Get type (inside,outside,mixed,unknown) of point w.r.t. surface.
-//  Only makes sense for closed surfaces.
 template<class PatchType>
 Foam::volumeType Foam::treeDataPrimitivePatch<PatchType>::getVolumeType
 (
-    const indexedOctree<treeDataPrimitivePatch<PatchType> >& oc,
+    const indexedOctree<treeDataPrimitivePatch<PatchType>>& oc,
     const point& sample
 ) const
 {
@@ -290,7 +288,7 @@ Foam::volumeType Foam::treeDataPrimitivePatch<PatchType>::getVolumeType
             // triangle normals)
             const labelList& eFaces = patch_.edgeFaces()[edgeI];
 
-            vector edgeNormal(vector::zero);
+            vector edgeNormal(Zero);
 
             forAll(eFaces, i)
             {
@@ -610,7 +608,7 @@ bool Foam::treeDataPrimitivePatch<PatchType>::findSelfIntersectOp::operator()
 template<class PatchType>
 bool Foam::treeDataPrimitivePatch<PatchType>::findIntersection
 (
-    const indexedOctree<treeDataPrimitivePatch<PatchType> >& tree,
+    const indexedOctree<treeDataPrimitivePatch<PatchType>>& tree,
     const label index,
     const point& start,
     const point& end,

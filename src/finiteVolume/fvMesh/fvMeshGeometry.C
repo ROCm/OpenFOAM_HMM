@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,20 +33,13 @@ License
 #include "cyclicFvPatchFields.H"
 #include "cyclicAMIFvPatchFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void fvMesh::makeSf() const
+void Foam::fvMesh::makeSf() const
 {
     if (debug)
     {
-        Info<< "void fvMesh::makeSf() : "
-            << "assembling face areas"
-            << endl;
+        InfoInFunction << "Assembling face areas" << endl;
     }
 
     // It is an error to attempt to recalculate
@@ -77,13 +70,11 @@ void fvMesh::makeSf() const
 }
 
 
-void fvMesh::makeMagSf() const
+void Foam::fvMesh::makeMagSf() const
 {
     if (debug)
     {
-        Info<< "void fvMesh::makeMagSf() : "
-            << "assembling mag face areas"
-            << endl;
+        InfoInFunction << "Assembling mag face areas" << endl;
     }
 
     // It is an error to attempt to recalculate
@@ -115,13 +106,11 @@ void fvMesh::makeMagSf() const
 }
 
 
-void fvMesh::makeC() const
+void Foam::fvMesh::makeC() const
 {
     if (debug)
     {
-        Info<< "void fvMesh::makeC() : "
-            << "assembling cell centres"
-            << endl;
+        InfoInFunction << "Assembling cell centres" << endl;
     }
 
     // It is an error to attempt to recalculate
@@ -157,13 +146,11 @@ void fvMesh::makeC() const
 }
 
 
-void fvMesh::makeCf() const
+void Foam::fvMesh::makeCf() const
 {
     if (debug)
     {
-        Info<< "void fvMesh::makeCf() : "
-            << "assembling face centres"
-            << endl;
+        InfoInFunction << "Assembling face centres" << endl;
     }
 
     // It is an error to attempt to recalculate
@@ -196,15 +183,14 @@ void fvMesh::makeCf() const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const volScalarField::DimensionedInternalField& fvMesh::V() const
+const Foam::volScalarField::DimensionedInternalField& Foam::fvMesh::V() const
 {
     if (!VPtr_)
     {
         if (debug)
         {
-            Info<< "fvMesh::V() const: "
-                << "constructing from primitiveMesh::cellVolumes()"
-                << endl;
+            InfoInFunction
+                << "Constructing from primitiveMesh::cellVolumes()" << endl;
         }
 
         VPtr_ = new slicedVolScalarField::DimensionedInternalField
@@ -228,7 +214,7 @@ const volScalarField::DimensionedInternalField& fvMesh::V() const
 }
 
 
-const volScalarField::DimensionedInternalField& fvMesh::V0() const
+const Foam::volScalarField::DimensionedInternalField& Foam::fvMesh::V0() const
 {
     if (!V0Ptr_)
     {
@@ -241,7 +227,7 @@ const volScalarField::DimensionedInternalField& fvMesh::V0() const
 }
 
 
-volScalarField::DimensionedInternalField& fvMesh::setV0()
+Foam::volScalarField::DimensionedInternalField& Foam::fvMesh::setV0()
 {
     if (!V0Ptr_)
     {
@@ -254,15 +240,13 @@ volScalarField::DimensionedInternalField& fvMesh::setV0()
 }
 
 
-const volScalarField::DimensionedInternalField& fvMesh::V00() const
+const Foam::volScalarField::DimensionedInternalField& Foam::fvMesh::V00() const
 {
     if (!V00Ptr_)
     {
         if (debug)
         {
-            Info<< "fvMesh::V00() const: "
-                << "constructing from V0"
-                << endl;
+            InfoInFunction << "Constructing from V0" << endl;
         }
 
         V00Ptr_ = new DimensionedField<scalar, volMesh>
@@ -287,7 +271,8 @@ const volScalarField::DimensionedInternalField& fvMesh::V00() const
 }
 
 
-tmp<volScalarField::DimensionedInternalField> fvMesh::Vsc() const
+Foam::tmp<Foam::volScalarField::DimensionedInternalField>
+Foam::fvMesh::Vsc() const
 {
     if (moving() && time().subCycling())
     {
@@ -315,7 +300,8 @@ tmp<volScalarField::DimensionedInternalField> fvMesh::Vsc() const
 }
 
 
-tmp<volScalarField::DimensionedInternalField> fvMesh::Vsc0() const
+Foam::tmp<Foam::volScalarField::DimensionedInternalField>
+Foam::fvMesh::Vsc0() const
 {
     if (moving() && time().subCycling())
     {
@@ -344,7 +330,7 @@ tmp<volScalarField::DimensionedInternalField> fvMesh::Vsc0() const
 }
 
 
-const surfaceVectorField& fvMesh::Sf() const
+const Foam::surfaceVectorField& Foam::fvMesh::Sf() const
 {
     if (!SfPtr_)
     {
@@ -355,7 +341,7 @@ const surfaceVectorField& fvMesh::Sf() const
 }
 
 
-const surfaceScalarField& fvMesh::magSf() const
+const Foam::surfaceScalarField& Foam::fvMesh::magSf() const
 {
     if (!magSfPtr_)
     {
@@ -366,7 +352,7 @@ const surfaceScalarField& fvMesh::magSf() const
 }
 
 
-const volVectorField& fvMesh::C() const
+const Foam::volVectorField& Foam::fvMesh::C() const
 {
     if (!CPtr_)
     {
@@ -377,7 +363,7 @@ const volVectorField& fvMesh::C() const
 }
 
 
-const surfaceVectorField& fvMesh::Cf() const
+const Foam::surfaceVectorField& Foam::fvMesh::Cf() const
 {
     if (!CfPtr_)
     {
@@ -388,13 +374,11 @@ const surfaceVectorField& fvMesh::Cf() const
 }
 
 
-tmp<surfaceVectorField> fvMesh::delta() const
+Foam::tmp<Foam::surfaceVectorField> Foam::fvMesh::delta() const
 {
     if (debug)
     {
-        Info<< "void fvMesh::delta() : "
-            << "calculating face deltas"
-            << endl;
+        InfoInFunction << "Calculating face deltas" << endl;
     }
 
     tmp<surfaceVectorField> tdelta
@@ -415,7 +399,7 @@ tmp<surfaceVectorField> fvMesh::delta() const
             dimLength
         )
     );
-    surfaceVectorField& delta = tdelta();
+    surfaceVectorField& delta = tdelta.ref();
 
     const volVectorField& C = this->C();
     const labelUList& owner = this->owner();
@@ -435,7 +419,7 @@ tmp<surfaceVectorField> fvMesh::delta() const
 }
 
 
-const surfaceScalarField& fvMesh::phi() const
+const Foam::surfaceScalarField& Foam::fvMesh::phi() const
 {
     if (!phiPtr_)
     {
@@ -455,7 +439,7 @@ const surfaceScalarField& fvMesh::phi() const
 }
 
 
-surfaceScalarField& fvMesh::setPhi()
+Foam::surfaceScalarField& Foam::fvMesh::setPhi()
 {
     if (!phiPtr_)
     {
@@ -467,9 +451,5 @@ surfaceScalarField& fvMesh::setPhi()
     return *phiPtr_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

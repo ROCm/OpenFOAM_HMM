@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,7 +49,7 @@ limitedSnGrad<Type>::~limitedSnGrad()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
 limitedSnGrad<Type>::correction
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf
@@ -76,7 +76,8 @@ limitedSnGrad<Type>::correction
 
     if (fv::debug)
     {
-        Info<< "limitedSnGrad :: limiter min: " << min(limiter.internalField())
+        InfoInFunction
+            << "limiter min: " << min(limiter.internalField())
             << " max: "<< max(limiter.internalField())
             << " avg: " << average(limiter.internalField()) << endl;
     }

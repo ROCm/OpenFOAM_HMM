@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -119,7 +119,7 @@ Foam::tmp<Foam::scalarField> Foam::motionSmootherAlgo::calcEdgeWeights
     const edgeList& edges = mesh_.edges();
 
     tmp<scalarField> twght(new scalarField(edges.size()));
-    scalarField& wght = twght();
+    scalarField& wght = twght.ref();
 
     forAll(edges, edgeI)
     {
@@ -789,7 +789,7 @@ Foam::tmp<Foam::pointField> Foam::motionSmootherAlgo::curPoints() const
         actualPatchFieldTypes.setSize(pfld.size());
         forAll(pfld, patchI)
         {
-            if (isA<fixedValuePointPatchField<vector> >(pfld[patchI]))
+            if (isA<fixedValuePointPatchField<vector>>(pfld[patchI]))
             {
                 // Get rid of funny
                 actualPatchFieldTypes[patchI] =
@@ -834,7 +834,7 @@ Foam::tmp<Foam::pointField> Foam::motionSmootherAlgo::curPoints() const
     tmp<pointField> tnewPoints(oldPoints_ + totalDisplacement.internalField());
 
     // Correct for 2-D motion
-    modifyMotionPoints(tnewPoints());
+    modifyMotionPoints(tnewPoints.ref());
 
     return tnewPoints;
 }

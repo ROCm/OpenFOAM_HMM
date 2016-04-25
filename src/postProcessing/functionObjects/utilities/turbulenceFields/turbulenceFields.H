@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -32,9 +32,11 @@ Description
     further manipulation.
 
     Fields are stored as copies of the original, with the prefix
-    "tubulenceModel:", e.g.
+    "tubulenceModel:", e.g.:
 
-        turbulenceModel:R
+    \verbatim
+    turbulenceModel:R
+    \endverbatim
 
     Example of function object specification:
     \verbatim
@@ -158,12 +160,6 @@ protected:
 
     // Protected Member Functions
 
-        //- Disallow default bitwise copy construct
-        turbulenceFields(const turbulenceFields&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const turbulenceFields&);
-
         //- Return true if compressible turbulence model is identified
         bool compressible();
 
@@ -172,8 +168,19 @@ protected:
         void processField
         (
             const word& fieldName,
-            const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvalue
+            const tmp<GeometricField<Type, fvPatchField, volMesh>>& tvalue
         );
+
+
+private:
+
+    // Private member functions
+
+        //- Disallow default bitwise copy construct
+        turbulenceFields(const turbulenceFields&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const turbulenceFields&);
 
 
 public:

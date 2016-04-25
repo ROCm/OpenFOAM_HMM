@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -181,8 +181,8 @@ void subsetVolFields
         {
             if (addedPatches.found(patchI))
             {
-                tSubFld().boundaryField()[patchI] ==
-                    pTraits<typename GeoField::value_type>::zero;
+                tSubFld.ref().boundaryField()[patchI] ==
+                    typename GeoField::value_type(Zero);
             }
         }
 
@@ -235,8 +235,8 @@ void subsetSurfaceFields
         {
             if (addedPatches.found(patchI))
             {
-                tSubFld().boundaryField()[patchI] ==
-                    pTraits<typename GeoField::value_type>::zero;
+                tSubFld.ref().boundaryField()[patchI] ==
+                    typename GeoField::value_type(Zero);
             }
         }
 
@@ -269,7 +269,7 @@ void addToInterface
     const label zoneID,
     const label ownRegion,
     const label neiRegion,
-    EdgeMap<Map<label> >& regionsToSize
+    EdgeMap<Map<label>>& regionsToSize
 )
 {
     edge interface
@@ -278,7 +278,7 @@ void addToInterface
         max(ownRegion, neiRegion)
     );
 
-    EdgeMap<Map<label> >::iterator iter = regionsToSize.find
+    EdgeMap<Map<label>>::iterator iter = regionsToSize.find
     (
         interface
     );
@@ -318,14 +318,14 @@ void getInterfaceSizes
     const wordList& regionNames,
 
     edgeList& interfaces,
-    List<Pair<word> >& interfaceNames,
+    List<Pair<word>>& interfaceNames,
     labelList& interfaceSizes,
     labelList& faceToInterface
 )
 {
     // From region-region to faceZone (or -1) to number of faces.
 
-    EdgeMap<Map<label> > regionsToSize;
+    EdgeMap<Map<label>> regionsToSize;
 
 
     // Internal faces
@@ -396,11 +396,11 @@ void getInterfaceSizes
             {
                 IPstream fromSlave(Pstream::blocking, slave);
 
-                EdgeMap<Map<label> > slaveSizes(fromSlave);
+                EdgeMap<Map<label>> slaveSizes(fromSlave);
 
-                forAllConstIter(EdgeMap<Map<label> >, slaveSizes, slaveIter)
+                forAllConstIter(EdgeMap<Map<label>>, slaveSizes, slaveIter)
                 {
-                    EdgeMap<Map<label> >::iterator masterIter =
+                    EdgeMap<Map<label>>::iterator masterIter =
                         regionsToSize.find(slaveIter.key());
 
                     if (masterIter != regionsToSize.end())
@@ -454,7 +454,7 @@ void getInterfaceSizes
     // Now we have the global sizes of all inter-regions.
     // Invert this on master and distribute.
     label nInterfaces = 0;
-    forAllConstIter(EdgeMap<Map<label> >, regionsToSize, iter)
+    forAllConstIter(EdgeMap<Map<label>>, regionsToSize, iter)
     {
         const Map<label>& info = iter();
         nInterfaces += info.size();
@@ -463,10 +463,10 @@ void getInterfaceSizes
     interfaces.setSize(nInterfaces);
     interfaceNames.setSize(nInterfaces);
     interfaceSizes.setSize(nInterfaces);
-    EdgeMap<Map<label> > regionsToInterface(nInterfaces);
+    EdgeMap<Map<label>> regionsToInterface(nInterfaces);
 
     nInterfaces = 0;
-    forAllConstIter(EdgeMap<Map<label> >, regionsToSize, iter)
+    forAllConstIter(EdgeMap<Map<label>>, regionsToSize, iter)
     {
         const edge& e = iter.key();
         const word& name0 = regionNames[e[0]];
@@ -1059,7 +1059,7 @@ labelList addRegionPatches
     fvMesh& mesh,
     const wordList& regionNames,
     const edgeList& interfaces,
-    const List<Pair<word> >& interfaceNames
+    const List<Pair<word>>& interfaceNames
 )
 {
     Info<< nl << "Adding patches" << nl << endl;
@@ -1792,7 +1792,7 @@ int main(int argc, char *argv[])
     // - the name
     // - the (global) size
     edgeList interfaces;
-    List<Pair<word> > interfaceNames;
+    List<Pair<word>> interfaceNames;
     labelList interfaceSizes;
     // per face the interface
     labelList faceToInterface;

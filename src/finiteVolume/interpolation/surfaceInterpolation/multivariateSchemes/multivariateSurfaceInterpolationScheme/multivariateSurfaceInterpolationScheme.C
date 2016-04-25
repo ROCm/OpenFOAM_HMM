@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,16 +31,10 @@ Description
 #include "volFields.H"
 #include "surfaceFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct from face-flux field and coefficient
 template<class Type>
-multivariateSurfaceInterpolationScheme<Type>::
+Foam::multivariateSurfaceInterpolationScheme<Type>::
 multivariateSurfaceInterpolationScheme
 (
     const fvMesh& mesh,
@@ -56,10 +50,9 @@ multivariateSurfaceInterpolationScheme
 
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
-// Return weighting factors for scheme given by name in dictionary
 template<class Type>
-tmp<multivariateSurfaceInterpolationScheme<Type> >
-multivariateSurfaceInterpolationScheme<Type>::New
+Foam::tmp<Foam::multivariateSurfaceInterpolationScheme<Type>>
+Foam::multivariateSurfaceInterpolationScheme<Type>::New
 (
     const fvMesh& mesh,
     const multivariateSurfaceInterpolationScheme<Type>::fieldTable& vtfs,
@@ -69,11 +62,8 @@ multivariateSurfaceInterpolationScheme<Type>::New
 {
     if (fv::debug)
     {
-        Info<< "multivariateSurfaceInterpolationScheme<Type>::New"
-               "(const fvMesh& mesh, const fieldTable&, "
-               "const surfaceScalarField&, Istream&) : "
-               "constructing surfaceInterpolationScheme<Type>"
-            << endl;
+        InfoInFunction
+            << "Constructing surfaceInterpolationScheme<Type>" << endl;
     }
 
     const word schemeName(schemeData);
@@ -99,13 +89,9 @@ multivariateSurfaceInterpolationScheme<Type>::New
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class Type>
-multivariateSurfaceInterpolationScheme<Type>::
+Foam::multivariateSurfaceInterpolationScheme<Type>::
 ~multivariateSurfaceInterpolationScheme()
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

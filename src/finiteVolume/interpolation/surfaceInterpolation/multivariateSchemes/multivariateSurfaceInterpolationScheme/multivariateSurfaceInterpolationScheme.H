@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,7 +50,7 @@ namespace Foam
 template<class Type>
 class multivariateSurfaceInterpolationScheme
 :
-    public refCount
+    public tmp<multivariateSurfaceInterpolationScheme<Type>>::refCount
 {
 
 public:
@@ -133,7 +133,7 @@ public:
     // Selectors
 
         //- Return a pointer to a new gradScheme created on freestore
-        static tmp<multivariateSurfaceInterpolationScheme<Type> > New
+        static tmp<multivariateSurfaceInterpolationScheme<Type>> New
         (
             const fvMesh& mesh,
             const fieldTable& fields,
@@ -192,7 +192,7 @@ public:
                 ) const = 0;
         };
 
-        virtual tmp<surfaceInterpolationScheme<Type> > operator()
+        virtual tmp<surfaceInterpolationScheme<Type>> operator()
         (
             const GeometricField<Type, fvPatchField, volMesh>& field
         ) const = 0;
@@ -212,7 +212,7 @@ public:
 defineNamedTemplateTypeNameAndDebug(SS<Type>, 0);                              \
                                                                                \
 multivariateSurfaceInterpolationScheme<Type>::                                 \
-addIstreamConstructorToTable<SS<Type> >                                        \
+addIstreamConstructorToTable<SS<Type>>                                         \
     add##SS##Type##ConstructorToTable_;
 
 
@@ -228,7 +228,7 @@ makeMultivariateSurfaceInterpolationTypeScheme(SS, tensor)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "multivariateSurfaceInterpolationScheme.C"
+    #include "multivariateSurfaceInterpolationScheme.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

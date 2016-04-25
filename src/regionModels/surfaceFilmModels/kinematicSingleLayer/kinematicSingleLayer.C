@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,6 +30,7 @@ License
 #include "fvcSnGrad.H"
 #include "fvcReconstruct.H"
 #include "fvcVolumeIntegrate.H"
+#include "fvcFlux.H"
 #include "addToRunTimeSelectionTable.H"
 #include "mappedWallPolyPatch.H"
 #include "mapDistribute.H"
@@ -83,11 +84,11 @@ void kinematicSingleLayer::resetPrimaryRegionSourceTerms()
 {
     if (debug)
     {
-        Info<< "kinematicSingleLayer::resetPrimaryRegionSourceTerms()" << endl;
+        InfoInFunction << endl;
     }
 
     rhoSpPrimary_ == dimensionedScalar("zero", rhoSp_.dimensions(), 0.0);
-    USpPrimary_ == dimensionedVector("zero", USp_.dimensions(), vector::zero);
+    USpPrimary_ == dimensionedVector("zero", USp_.dimensions(), Zero);
     pSpPrimary_ == dimensionedScalar("zero", pSp_.dimensions(), 0.0);
 }
 
@@ -96,8 +97,7 @@ void kinematicSingleLayer::transferPrimaryRegionThermoFields()
 {
     if (debug)
     {
-        Info<< "kinematicSingleLayer::"
-            << "transferPrimaryRegionThermoFields()" << endl;
+        InfoInFunction << endl;
     }
 
     // Update fields from primary region via direct mapped
@@ -113,8 +113,7 @@ void kinematicSingleLayer::transferPrimaryRegionSourceFields()
 {
     if (debug)
     {
-        Info<< "kinematicSingleLayer::"
-            << "transferPrimaryRegionSourceFields()" << endl;
+        InfoInFunction << endl;
     }
 
     // Convert accummulated source terms into per unit area per unit time
@@ -208,7 +207,7 @@ void kinematicSingleLayer::updateSubmodels()
 {
     if (debug)
     {
-        Info<< "kinematicSingleLayer::updateSubmodels()" << endl;
+        InfoInFunction << endl;
     }
 
     // Update injection model - mass returned is mass available for injection
@@ -247,7 +246,8 @@ void kinematicSingleLayer::continuityCheck()
 
         cumulativeContErr_ += globalContErr;
 
-        Info<< "Surface film: " << type() << nl
+        InfoInFunction
+            << "Surface film: " << type() << nl
             << "    time step continuity errors: sum local = "
             << sumLocalContErr << ", global = " << globalContErr
             << ", cumulative = " << cumulativeContErr_ << endl;
@@ -259,7 +259,7 @@ void kinematicSingleLayer::solveContinuity()
 {
     if (debug)
     {
-        Info<< "kinematicSingleLayer::solveContinuity()" << endl;
+        InfoInFunction << endl;
     }
 
     solve
@@ -297,7 +297,7 @@ tmp<Foam::fvVectorMatrix> kinematicSingleLayer::solveMomentum
 {
     if (debug)
     {
-        Info<< "kinematicSingleLayer::solveMomentum()" << endl;
+        InfoInFunction << endl;
     }
 
     // Momentum
@@ -307,13 +307,13 @@ tmp<Foam::fvVectorMatrix> kinematicSingleLayer::solveMomentum
       + fvm::div(phi_, U_)
      ==
       - USp_
-//      - fvm::SuSp(rhoSp_, U_)
+   // - fvm::SuSp(rhoSp_, U_)
       - rhoSp_*U_
       + forces_.correct(U_)
       + turbulence_->Su(U_)
     );
 
-    fvVectorMatrix& UEqn = tUEqn();
+    fvVectorMatrix& UEqn = tUEqn.ref();
 
     UEqn.relax();
 
@@ -333,7 +333,7 @@ tmp<Foam::fvVectorMatrix> kinematicSingleLayer::solveMomentum
                       + fvc::snGrad(pp, "snGrad(p)")*fvc::interpolate(delta_)
                       + fvc::snGrad(delta_)*fvc::interpolate(pp)
                     )
-                  - (fvc::interpolate(rho_*gTan()) & regionMesh().Sf())
+                  - fvc::flux(rho_*gTan())
                 )
             )
         );
@@ -356,7 +356,7 @@ void kinematicSingleLayer::solveThickness
 {
     if (debug)
     {
-        Info<< "kinematicSingleLayer::solveThickness()" << endl;
+        InfoInFunction << endl;
     }
 
     volScalarField rUA(1.0/UEqn.A());
@@ -373,15 +373,14 @@ void kinematicSingleLayer::solveThickness
             fvc::snGrad(pu, "snGrad(p)")
           + fvc::snGrad(pp, "snGrad(p)")*fvc::interpolate(delta_)
         )
-      - (fvc::interpolate(rho_*gTan()) & regionMesh().Sf())
+      - fvc::flux(rho_*gTan())
     );
     constrainFilmField(phiAdd, 0.0);
 
     surfaceScalarField phid
     (
         "phid",
-        (fvc::interpolate(U_*rho_) & regionMesh().Sf())
-      - deltarUAf*phiAdd*rhof
+        fvc::flux(U_*rho_) - deltarUAf*phiAdd*rhof
     );
     constrainFilmField(phid, 0.0);
 
@@ -655,7 +654,7 @@ kinematicSingleLayer::kinematicSingleLayer
         regionMesh(),
         dimensionedVector
         (
-            "zero", dimMass*dimVelocity/dimArea/dimTime, vector::zero
+            "zero", dimMass*dimVelocity/dimArea/dimTime, Zero
         ),
         this->mappedPushedFieldPatchTypes<vector>()
     ),
@@ -699,7 +698,7 @@ kinematicSingleLayer::kinematicSingleLayer
             IOobject::NO_WRITE
         ),
         primaryMesh(),
-        dimensionedVector("zero", USp_.dimensions(), vector::zero)
+        dimensionedVector("zero", USp_.dimensions(), Zero)
     ),
     pSpPrimary_
     (
@@ -739,7 +738,7 @@ kinematicSingleLayer::kinematicSingleLayer
             IOobject::NO_WRITE
         ),
         regionMesh(),
-        dimensionedVector("zero", dimVelocity, vector::zero),
+        dimensionedVector("zero", dimVelocity, Zero),
         this->mappedFieldAndInternalPatchTypes<vector>()
     ),
     pPrimary_
@@ -818,7 +817,7 @@ kinematicSingleLayer::kinematicSingleLayer
                 IOobject::AUTO_WRITE,
                 false
             ),
-            fvc::interpolate(deltaRho_*U_) & regionMesh().Sf()
+            fvc::flux(deltaRho_*U_)
         );
 
         phi_ == phi0;
@@ -846,7 +845,8 @@ void kinematicSingleLayer::addSources
 {
     if (debug)
     {
-        Info<< "\nSurface film: " << type() << ": adding to film source:" << nl
+        InfoInFunction
+            << "\nSurface film: " << type() << ": adding to film source:" << nl
             << "    mass     = " << massSource << nl
             << "    momentum = " << momentumSource << nl
             << "    pressure = " << pressureSource << endl;
@@ -864,7 +864,7 @@ void kinematicSingleLayer::preEvolveRegion()
 {
     if (debug)
     {
-        Info<< "kinematicSingleLayer::preEvolveRegion()" << endl;
+        InfoInFunction << endl;
     }
 
     surfaceFilmModel::preEvolveRegion();
@@ -891,7 +891,7 @@ void kinematicSingleLayer::evolveRegion()
 {
     if (debug)
     {
-        Info<< "kinematicSingleLayer::evolveRegion()" << endl;
+        InfoInFunction << endl;
     }
 
     // Update sub-models to provide updated source contributions
@@ -1106,9 +1106,9 @@ void kinematicSingleLayer::info()
 }
 
 
-tmp<DimensionedField<scalar, volMesh> > kinematicSingleLayer::Srho() const
+tmp<DimensionedField<scalar, volMesh>> kinematicSingleLayer::Srho() const
 {
-    return tmp<DimensionedField<scalar, volMesh> >
+    return tmp<DimensionedField<scalar, volMesh>>
     (
         new DimensionedField<scalar, volMesh>
         (
@@ -1128,12 +1128,12 @@ tmp<DimensionedField<scalar, volMesh> > kinematicSingleLayer::Srho() const
 }
 
 
-tmp<DimensionedField<scalar, volMesh> > kinematicSingleLayer::Srho
+tmp<DimensionedField<scalar, volMesh>> kinematicSingleLayer::Srho
 (
     const label i
 ) const
 {
-    return tmp<DimensionedField<scalar, volMesh> >
+    return tmp<DimensionedField<scalar, volMesh>>
     (
         new DimensionedField<scalar, volMesh>
         (
@@ -1153,9 +1153,9 @@ tmp<DimensionedField<scalar, volMesh> > kinematicSingleLayer::Srho
 }
 
 
-tmp<DimensionedField<scalar, volMesh> > kinematicSingleLayer::Sh() const
+tmp<DimensionedField<scalar, volMesh>> kinematicSingleLayer::Sh() const
 {
-    return tmp<DimensionedField<scalar, volMesh> >
+    return tmp<DimensionedField<scalar, volMesh>>
     (
         new DimensionedField<scalar, volMesh>
         (

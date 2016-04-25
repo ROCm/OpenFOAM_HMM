@@ -3,6 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
 #    \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
@@ -28,9 +29,21 @@
 #     Miscellaneous functions for running tutorial cases
 #------------------------------------------------------------------------------
 
+isTest()
+{
+    for i in "$@"; do
+        if [ "$i" = "-test" ]
+        then
+            return 0
+        fi
+    done
+    return 1
+}
+
 getNumberOfProcessors()
 {
-    sed -ne 's/^numberOfSubdomains\s*\(.*\);/\1/p' system/decomposeParDict
+    expandDictionary system/decomposeParDict \
+        | sed -ne 's/^numberOfSubdomains\s*\(.*\);/\1/p'
 }
 
 getApplication()
@@ -44,41 +57,42 @@ runApplication()
     APP_RUN=
     LOG_IGNORE=false
     LOG_APPEND=false
+    LOG_SUFFIX=
 
     # Parse options and executable
     while [ $# -gt 0 ] && [ -z "$APP_RUN" ]; do
         key="$1"
         case "$key" in
-            -append)
+            -append|-a)
                 LOG_IGNORE=true
                 LOG_APPEND=true
                 ;;
-            -overwrite)
+            -overwrite|-o)
                 LOG_IGNORE=true
                 ;;
-            -log)
-                LOG_NAME=$2
+            -suffix|-s)
+                LOG_SUFFIX=".$2"
                 shift
                 ;;
             *)
                 APP_RUN="$key"
                 APP_NAME="${key##*/}"
+                LOG_SUFFIX="${APP_NAME}${LOG_SUFFIX}"
                 ;;
         esac
         shift
     done
 
-    LOG_NAME=${LOG_NAME:="log.$APP_NAME"}
-
-    if [ -f $LOG_NAME ] && [ "$LOG_IGNORE" = "false" ]
+    if [ -f log.$LOG_SUFFIX ] && [ "$LOG_IGNORE" = "false" ]
     then
-        echo "$APP_NAME already run on $PWD: remove log file $LOG_NAME to re-run"
+        echo "$APP_NAME already run on $PWD:" \
+             "remove log file 'log.$LOG_SUFFIX' to re-run"
     else
         echo "Running $APP_RUN on $PWD"
         if [ "$LOG_APPEND" = "true" ]; then
-            $APP_RUN "$@" >> $LOG_NAME 2>&1
+            $APP_RUN "$@" >> log.$LOG_SUFFIX 2>&1
         else
-            $APP_RUN "$@" > $LOG_NAME 2>&1
+            $APP_RUN "$@" > log.$LOG_SUFFIX 2>&1
         fi
     fi
 }
@@ -89,44 +103,48 @@ runParallel()
     APP_RUN=
     LOG_IGNORE=false
     LOG_APPEND=false
+    LOG_SUFFIX=
+    nProcs=$(getNumberOfProcessors)
 
     # Parse options and executable
     while [ $# -gt 0 ] && [ -z "$APP_RUN" ]; do
         key="$1"
         case "$key" in
-            -append)
+            -append|-a)
                 LOG_IGNORE=true
                 LOG_APPEND=true
                 ;;
-            -overwrite)
+            -overwrite|-o)
                 LOG_IGNORE=true
                 ;;
-            -log)
-                LOG_NAME=$2
+            -suffix|-s)
+                LOG_SUFFIX=".$2"
+                shift
+                ;;
+            -np|-n)
+                nProcs="$2"
                 shift
                 ;;
             *)
                 APP_RUN="$key"
                 APP_NAME="${key##*/}"
-                # also read number of processors
-                nProcs="$2"
-                shift
+                LOG_SUFFIX="${APP_NAME}${LOG_SUFFIX}"
                 ;;
         esac
-    shift
+
+        shift
     done
 
-    LOG_NAME=${LOG_NAME:="log.$APP_NAME"}
-
-    if [ -f $LOG_NAME ] && [ "$LOG_IGNORE" = "false" ]
+    if [ -f log.$SUFFIX ] && [ "$LOG_IGNORE" = "false" ]
     then
-        echo "$APP_NAME already run on $PWD: remove log file $LOG_NAME to re-run"
+        echo "$APP_NAME already run on $PWD:" \
+             "remove log file 'log.$LOG_SUFFIX' to re-run"
     else
         echo "Running $APP_RUN in parallel on $PWD using $nProcs processes"
         if [ "$LOG_APPEND" = "true" ]; then
-            ( mpirun -np $nProcs $APP_RUN -parallel "$@" < /dev/null >> $LOG_NAME 2>&1 )
+            ( mpirun -np $nProcs $APP_RUN -parallel "$@" < /dev/null >> log.$LOG_SUFFIX 2>&1 )
         else
-            ( mpirun -np $nProcs $APP_RUN -parallel "$@" < /dev/null > $LOG_NAME 2>&1 )
+            ( mpirun -np $nProcs $APP_RUN -parallel "$@" < /dev/null > log.$LOG_SUFFIX 2>&1 )
         fi
     fi
 }

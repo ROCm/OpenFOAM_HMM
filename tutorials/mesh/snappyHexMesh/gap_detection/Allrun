@@ -12,4 +12,4 @@ runParallel snappyHexMesh 8 -overwrite
 
 runApplication reconstructParMesh -constant
 
-# ----------------------------------------------------------------- end-of-file
+#------------------------------------------------------------------------------

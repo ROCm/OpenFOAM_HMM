@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,7 +35,7 @@ Foam::ParticleForceList<CloudType>::ParticleForceList
     const fvMesh& mesh
 )
 :
-    PtrList<ParticleForce<CloudType> >(),
+    PtrList<ParticleForce<CloudType>>(),
     owner_(owner),
     mesh_(mesh),
     dict_(dictionary::null),
@@ -53,7 +53,7 @@ Foam::ParticleForceList<CloudType>::ParticleForceList
     const bool readFields
 )
 :
-    PtrList<ParticleForce<CloudType> >(),
+    PtrList<ParticleForce<CloudType>>(),
     owner_(owner),
     mesh_(mesh),
     dict_(dict),
@@ -118,7 +118,7 @@ Foam::ParticleForceList<CloudType>::ParticleForceList
     const ParticleForceList& pf
 )
 :
-    PtrList<ParticleForce<CloudType> >(pf),
+    PtrList<ParticleForce<CloudType>>(pf),
     owner_(pf.owner_),
     mesh_(pf.mesh_),
     dict_(pf.dict_)
@@ -154,7 +154,7 @@ Foam::forceSuSp Foam::ParticleForceList<CloudType>::calcCoupled
     const scalar muc
 ) const
 {
-    forceSuSp value(vector::zero, 0.0);
+    forceSuSp value(Zero, 0.0);
 
     if (calcCoupled_)
     {
@@ -178,7 +178,7 @@ Foam::forceSuSp Foam::ParticleForceList<CloudType>::calcNonCoupled
     const scalar muc
 ) const
 {
-    forceSuSp value(vector::zero, 0.0);
+    forceSuSp value(Zero, 0.0);
 
     if (calcNonCoupled_)
     {

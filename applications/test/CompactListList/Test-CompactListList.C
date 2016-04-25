@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,8 +56,8 @@ int main(int argc, char *argv[])
         rowSizes[1] = row1.size();
         cll1.resize(rowSizes);
 
-        cll1[0].assign(row0);   //note: operator= will not work since UList
-        cll1[1].assign(row1);
+        cll1[0].deepCopy(row0);
+        cll1[1].deepCopy(row1);
         Info<< "cll1:" << cll1 << endl;
 
         forAll(cll1.m(), i)
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    List<List<label> > lll(5);
+    List<List<label>> lll(5);
     lll[0].setSize(3, 0);
     lll[1].setSize(2, 1);
     lll[2].setSize(6, 2);
@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
     cll2(2, 3) = 999;
     Info<< "cll2(2, 3) = " << cll2(2, 3) << nl << endl;
 
-    Info<< "cll2 as List<List<label > > " << cll2()
+    Info<< "cll2 as List<List<label >> " << cll2()
         << endl;
 
     cll2.setSize(3);

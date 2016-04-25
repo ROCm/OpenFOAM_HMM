@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ License
 #include "gaussGrad.H"
 #include "fvMesh.H"
 #include "volMesh.H"
-#include "zeroGradientFvPatchField.H"
+#include "extrapolatedCalculatedFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,7 +58,7 @@ Foam::fv::LeastSquaresGrad<Type, Stencil>::calcGrad
         mesh
     );
 
-    tmp<GeometricField<GradType, fvPatchField, volMesh> > tlsGrad
+    tmp<GeometricField<GradType, fvPatchField, volMesh>> tlsGrad
     (
         new GeometricField<GradType, fvPatchField, volMesh>
         (
@@ -75,21 +75,21 @@ Foam::fv::LeastSquaresGrad<Type, Stencil>::calcGrad
             (
                 "zero",
                 vtf.dimensions()/dimLength,
-                pTraits<GradType>::zero
+                Zero
             ),
-            zeroGradientFvPatchField<GradType>::typeName
+            extrapolatedCalculatedFvPatchField<GradType>::typeName
         )
     );
-    GeometricField<GradType, fvPatchField, volMesh>& lsGrad = tlsGrad();
+    GeometricField<GradType, fvPatchField, volMesh>& lsGrad = tlsGrad.ref();
     Field<GradType>& lsGradIf = lsGrad;
 
     const extendedCentredCellToCellStencil& stencil = lsv.stencil();
-    const List<List<label> >& stencilAddr = stencil.stencil();
-    const List<List<vector> >& lsvs = lsv.vectors();
+    const List<List<label>>& stencilAddr = stencil.stencil();
+    const List<List<vector>>& lsvs = lsv.vectors();
 
     // Construct flat version of vtf
     // including all values referred to by the stencil
-    List<Type> flatVtf(stencil.map().constructSize(), pTraits<Type>::zero);
+    List<Type> flatVtf(stencil.map().constructSize(), Zero);
 
     // Insert internal values
     forAll(vtf, celli)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,10 +69,10 @@ inline Foam::Boussinesq<Specie>::Boussinesq
 
 
 template<class Specie>
-inline Foam::autoPtr<Foam::Boussinesq<Specie> >
+inline Foam::autoPtr<Foam::Boussinesq<Specie>>
 Foam::Boussinesq<Specie>::clone() const
 {
-    return autoPtr<Boussinesq<Specie> >
+    return autoPtr<Boussinesq<Specie>>
     (
         new Boussinesq<Specie>(*this)
     );
@@ -80,13 +80,13 @@ Foam::Boussinesq<Specie>::clone() const
 
 
 template<class Specie>
-inline Foam::autoPtr<Foam::Boussinesq<Specie> >
+inline Foam::autoPtr<Foam::Boussinesq<Specie>>
 Foam::Boussinesq<Specie>::New
 (
     Istream& is
 )
 {
-    return autoPtr<Boussinesq<Specie> >
+    return autoPtr<Boussinesq<Specie>>
     (
         new Boussinesq<Specie>(is)
     );
@@ -94,13 +94,13 @@ Foam::Boussinesq<Specie>::New
 
 
 template<class Specie>
-inline Foam::autoPtr<Foam::Boussinesq<Specie> >
+inline Foam::autoPtr<Foam::Boussinesq<Specie>>
 Foam::Boussinesq<Specie>::New
 (
     const dictionary& dict
 )
 {
-    return autoPtr<Boussinesq<Specie> >
+    return autoPtr<Boussinesq<Specie>>
     (
         new Boussinesq<Specie>(dict)
     );
@@ -117,6 +117,20 @@ inline Foam::scalar Foam::Boussinesq<Specie>::rho
 ) const
 {
     return rho0_*(1.0 - beta_*(T - T0_));
+}
+
+
+template<class Specie>
+inline Foam::scalar Foam::Boussinesq<Specie>::h(scalar p, scalar T) const
+{
+    return 0;
+}
+
+
+template<class Specie>
+inline Foam::scalar Foam::Boussinesq<Specie>::cp(scalar p, scalar T) const
+{
+    return 0;
 }
 
 
@@ -167,8 +181,7 @@ inline Foam::scalar Foam::Boussinesq<Specie>::cpMcv
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Specie>
-inline Foam::Boussinesq<Specie>&
-Foam::Boussinesq<Specie>::operator=
+inline void Foam::Boussinesq<Specie>::operator=
 (
     const Boussinesq<Specie>& b
 )
@@ -178,9 +191,8 @@ Foam::Boussinesq<Specie>::operator=
     rho0_ = b.rho0_;
     T0_ = b.T0_;
     beta_ = b.beta_;
-
-    return *this;
 }
+
 
 template<class Specie>
 inline void Foam::Boussinesq<Specie>::operator+=

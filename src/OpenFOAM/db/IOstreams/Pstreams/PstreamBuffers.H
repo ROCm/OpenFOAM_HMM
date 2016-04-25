@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -102,10 +102,10 @@ class PstreamBuffers
         const IOstream::versionNumber version_;
 
         //- Send buffer
-        List<DynamicList<char> > sendBuf_;
+        List<DynamicList<char>> sendBuf_;
 
         //- Receive buffer
-        List<DynamicList<char> > recvBuf_;
+        List<DynamicList<char>> recvBuf_;
 
         //- Read position in recvBuf_
         labelList recvBufPos_;
@@ -149,9 +149,9 @@ public:
         void finishedSends(const bool block = true);
 
         //- Mark all sends as having been done. Same as above but also returns
-        //  sizes (bytes) transferred. Note:currently only valid for
+        //  sizes (bytes) received. Note:currently only valid for
         //  non-blocking.
-        void finishedSends(labelListList& sizes, const bool block = true);
+        void finishedSends(labelList& recvSizes, const bool block = true);
 
         //- Clear storage and reset
         void clear();

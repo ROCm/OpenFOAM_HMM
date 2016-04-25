@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -142,15 +142,15 @@ protected:
         void loadField
         (
             const word&,
-            UPtrList<GeometricField<Type, fvPatchField, volMesh> >&,
-            UPtrList<GeometricField<Type, fvsPatchField, surfaceMesh> >&
+            UPtrList<GeometricField<Type, fvPatchField, volMesh>>&,
+            UPtrList<GeometricField<Type, fvsPatchField, surfaceMesh>>&
         ) const;
 
         template<class Type>
         void changeWriteOptions
         (
-            UPtrList<GeometricField<Type, fvPatchField, volMesh> >&,
-            UPtrList<GeometricField<Type, fvsPatchField, surfaceMesh> >&,
+            UPtrList<GeometricField<Type, fvPatchField, volMesh>>&,
+            UPtrList<GeometricField<Type, fvsPatchField, surfaceMesh>>&,
             const IOobject::writeOption
         ) const;
 
@@ -218,7 +218,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "partialWriteTemplates.C"
+    #include "partialWriteTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

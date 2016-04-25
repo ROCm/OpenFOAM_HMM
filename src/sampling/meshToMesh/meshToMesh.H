@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -416,7 +416,7 @@ public:
                 //- Return the src field mapped to the tgt mesh with a defined
                 //  operation. Initial values of the result are set to zero
                 template<class Type, class CombineOp>
-                tmp<Field<Type> > mapSrcToTgt
+                tmp<Field<Type>> mapSrcToTgt
                 (
                     const Field<Type>& srcFld,
                     const CombineOp& cop
@@ -425,16 +425,16 @@ public:
                 //- Convenience function to map a tmp field to the tgt mesh
                 //  with a defined operation
                 template<class Type, class CombineOp>
-                tmp<Field<Type> > mapSrcToTgt
+                tmp<Field<Type>> mapSrcToTgt
                 (
-                    const tmp<Field<Type> >& tsrcFld,
+                    const tmp<Field<Type>>& tsrcFld,
                     const CombineOp& cop
                 ) const;
 
                 //- Convenience function to map a field to the tgt mesh with a
                 //  default operation (plusEqOp)
                 template<class Type>
-                tmp<Field<Type> > mapSrcToTgt
+                tmp<Field<Type>> mapSrcToTgt
                 (
                     const Field<Type>& srcFld
                 ) const;
@@ -442,9 +442,9 @@ public:
                 //- Convenience function to map a tmp field to the tgt mesh
                 //  with a default operation (plusEqOp)
                 template<class Type>
-                tmp<Field<Type> > mapSrcToTgt
+                tmp<Field<Type>> mapSrcToTgt
                 (
-                    const tmp<Field<Type> >& tsrcFld
+                    const tmp<Field<Type>>& tsrcFld
                 ) const;
 
 
@@ -479,7 +479,7 @@ public:
                 //- Return the tgt field mapped to the src mesh with a defined
                 //  operation. Initial values of the result are set to zero
                 template<class Type, class CombineOp>
-                tmp<Field<Type> > mapTgtToSrc
+                tmp<Field<Type>> mapTgtToSrc
                 (
                     const Field<Type>& tgtFld,
                     const CombineOp& cop
@@ -488,16 +488,16 @@ public:
                 //- Convenience function to map a tmp field to the src mesh
                 //  with a defined operation
                 template<class Type, class CombineOp>
-                tmp<Field<Type> > mapTgtToSrc
+                tmp<Field<Type>> mapTgtToSrc
                 (
-                    const tmp<Field<Type> >& ttgtFld,
+                    const tmp<Field<Type>>& ttgtFld,
                     const CombineOp& cop
                 ) const;
 
                 //- Convenience function to map a field to the src mesh with a
                 //  default operation (plusEqOp)
                 template<class Type>
-                tmp<Field<Type> > mapTgtToSrc
+                tmp<Field<Type>> mapTgtToSrc
                 (
                     const Field<Type>& tgtFld
                 ) const;
@@ -505,9 +505,9 @@ public:
                 //- Convenience function to map a tmp field to the src mesh
                 //  with a default operation (plusEqOp)
                 template<class Type>
-                tmp<Field<Type> > mapTgtToSrc
+                tmp<Field<Type>> mapTgtToSrc
                 (
-                    const tmp<Field<Type> >& ttgtFld
+                    const tmp<Field<Type>>& ttgtFld
                 ) const;
 
 
@@ -529,7 +529,7 @@ public:
                 //- Interpolate a field with a defined operation.  The initial
                 //  values of the result are set to zero
                 template<class Type, class CombineOp>
-                tmp<GeometricField<Type, fvPatchField, volMesh> > mapSrcToTgt
+                tmp<GeometricField<Type, fvPatchField, volMesh>> mapSrcToTgt
                 (
                     const GeometricField<Type, fvPatchField, volMesh>& field,
                     const CombineOp& cop,
@@ -539,9 +539,9 @@ public:
                 //- Interpolate a tmp field with a defined operation.  The
                 //  initial values of the result are set to zero
                 template<class Type, class CombineOp>
-                tmp<GeometricField<Type, fvPatchField, volMesh> > mapSrcToTgt
+                tmp<GeometricField<Type, fvPatchField, volMesh>> mapSrcToTgt
                 (
-                    const tmp<GeometricField<Type, fvPatchField, volMesh> >&
+                    const tmp<GeometricField<Type, fvPatchField, volMesh>>&
                         tfield,
                     const CombineOp& cop,
                     const bool secondOrder = true
@@ -550,7 +550,7 @@ public:
                 //- Convenience function to map a field with a default
                 //  operation (plusEqOp)
                 template<class Type>
-                tmp<GeometricField<Type, fvPatchField, volMesh> > mapSrcToTgt
+                tmp<GeometricField<Type, fvPatchField, volMesh>> mapSrcToTgt
                 (
                     const GeometricField<Type, fvPatchField, volMesh>& field,
                     const bool secondOrder = true
@@ -559,9 +559,9 @@ public:
                 //- Convenience function to map a tmp field with a default
                 //  operation (plusEqOp)
                 template<class Type>
-                tmp<GeometricField<Type, fvPatchField, volMesh> > mapSrcToTgt
+                tmp<GeometricField<Type, fvPatchField, volMesh>> mapSrcToTgt
                 (
-                    const tmp<GeometricField<Type, fvPatchField, volMesh> >&
+                    const tmp<GeometricField<Type, fvPatchField, volMesh>>&
                         tfield,
                     const bool secondOrder = true
                 ) const;
@@ -585,7 +585,7 @@ public:
                 //- Interpolate a field with a defined operation.  The initial
                 //  values of the result are set to zero
                 template<class Type, class CombineOp>
-                tmp<GeometricField<Type, fvPatchField, volMesh> > mapTgtToSrc
+                tmp<GeometricField<Type, fvPatchField, volMesh>> mapTgtToSrc
                 (
                     const GeometricField<Type, fvPatchField, volMesh>& field,
                     const CombineOp& cop,
@@ -595,9 +595,9 @@ public:
                 //- Interpolate a tmp field with a defined operation.  The
                 //  initial values of the result are set to zero
                 template<class Type, class CombineOp>
-                tmp<GeometricField<Type, fvPatchField, volMesh> > mapTgtToSrc
+                tmp<GeometricField<Type, fvPatchField, volMesh>> mapTgtToSrc
                 (
-                    const tmp<GeometricField<Type, fvPatchField, volMesh> >&
+                    const tmp<GeometricField<Type, fvPatchField, volMesh>>&
                         tfield,
                     const CombineOp& cop,
                     const bool secondOrder = true
@@ -606,7 +606,7 @@ public:
                 //- Convenience function to map a field with a default
                 //  operation (plusEqOp)
                 template<class Type>
-                tmp<GeometricField<Type, fvPatchField, volMesh> > mapTgtToSrc
+                tmp<GeometricField<Type, fvPatchField, volMesh>> mapTgtToSrc
                 (
                     const GeometricField<Type, fvPatchField, volMesh>& field,
                     const bool secondOrder = true
@@ -615,9 +615,9 @@ public:
                 //- Convenience function to map a tmp field with a default
                 //  operation (plusEqOp)
                 template<class Type>
-                tmp<GeometricField<Type, fvPatchField, volMesh> > mapTgtToSrc
+                tmp<GeometricField<Type, fvPatchField, volMesh>> mapTgtToSrc
                 (
-                    const tmp<GeometricField<Type, fvPatchField, volMesh> >&
+                    const tmp<GeometricField<Type, fvPatchField, volMesh>>&
                         tfield,
                     const bool secondOrder = true
                 ) const;

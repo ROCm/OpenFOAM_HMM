@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ Foam::labelListList Foam::polyMesh::cellShapePointCells
     const cellShapeList& c
 ) const
 {
-    List<DynamicList<label, primitiveMesh::cellsPerPoint_> >
+    List<DynamicList<label, primitiveMesh::cellsPerPoint_>>
         pc(points().size());
 
     // For each cell
@@ -127,7 +127,6 @@ Foam::labelList Foam::polyMesh::facePatchFaceCells
 }
 
 
-//- Set faces_, calculate cells and patchStarts.
 void Foam::polyMesh::setTopology
 (
     const cellShapeList& cellsAsShapes,
@@ -474,8 +473,8 @@ Foam::polyMesh::polyMesh
     ),
     bounds_(points_, syncPar),
     comm_(UPstream::worldComm),
-    geometricD_(Vector<label>::zero),
-    solutionD_(Vector<label>::zero),
+    geometricD_(Zero),
+    solutionD_(Zero),
     tetBasePtIsPtr_(NULL),
     cellTreePtr_(NULL),
     pointZones_
@@ -758,8 +757,8 @@ Foam::polyMesh::polyMesh
     ),
     bounds_(points_, syncPar),
     comm_(UPstream::worldComm),
-    geometricD_(Vector<label>::zero),
-    solutionD_(Vector<label>::zero),
+    geometricD_(Zero),
+    solutionD_(Zero),
     tetBasePtIsPtr_(NULL),
     cellTreePtr_(NULL),
     pointZones_

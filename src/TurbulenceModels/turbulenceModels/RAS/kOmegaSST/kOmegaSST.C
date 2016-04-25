@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,12 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "kOmegaSST.H"
+<<<<<<< HEAD
+=======
+#include "fvOptions.H"
+#include "bound.H"
+#include "wallDist.H"
+>>>>>>> foundation
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,7 +76,7 @@ kOmegaSST<BasicTurbulenceModel>::kOmegaSST
     const word& type
 )
 :
-    kOmegaSSTBase<eddyViscosity<RASModel<BasicTurbulenceModel> > >
+    kOmegaSSTBase<eddyViscosity<RASModel<BasicTurbulenceModel>>>
     (
         type,
         alpha,

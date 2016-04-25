@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -231,7 +231,7 @@ public:
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
-template<class Type, int r>
+template<class Type, direction r>
 dimensioned<typename powProduct<Type, r>::type>
 pow
 (
@@ -300,29 +300,26 @@ dimensioned<Type> operator/
 );
 
 
-// Products
-// ~~~~~~~~
-
-#define PRODUCT_OPERATOR(product, op, opFunc)                                 \
-                                                                              \
-template<class Type1, class Type2>                                            \
-dimensioned<typename product<Type1, Type2>::type>                             \
-operator op(const dimensioned<Type1>&, const dimensioned<Type2>&);            \
-                                                                              \
-template<class Type, class Form, class Cmpt, int nCmpt>                       \
-dimensioned<typename product<Type, Form>::type>                               \
-operator op                                                                   \
-(                                                                             \
-    const dimensioned<Type>&,                                                 \
-    const VectorSpace<Form,Cmpt,nCmpt>&                                       \
-);                                                                            \
-                                                                              \
-template<class Type, class Form, class Cmpt, int nCmpt>                       \
-dimensioned<typename product<Form, Type>::type>                               \
-operator op                                                                   \
-(                                                                             \
-    const VectorSpace<Form,Cmpt,nCmpt>&,                                      \
-    const dimensioned<Type>&                                                  \
+#define PRODUCT_OPERATOR(product, op, opFunc)                                  \
+                                                                               \
+template<class Type1, class Type2>                                             \
+dimensioned<typename product<Type1, Type2>::type>                              \
+operator op(const dimensioned<Type1>&, const dimensioned<Type2>&);             \
+                                                                               \
+template<class Type, class Form, class Cmpt, direction nCmpt>                  \
+dimensioned<typename product<Type, Form>::type>                                \
+operator op                                                                    \
+(                                                                              \
+    const dimensioned<Type>&,                                                  \
+    const VectorSpace<Form,Cmpt,nCmpt>&                                        \
+);                                                                             \
+                                                                               \
+template<class Type, class Form, class Cmpt, direction nCmpt>                  \
+dimensioned<typename product<Form, Type>::type>                                \
+operator op                                                                    \
+(                                                                              \
+    const VectorSpace<Form,Cmpt,nCmpt>&,                                       \
+    const dimensioned<Type>&                                                   \
 );
 
 PRODUCT_OPERATOR(outerProduct, *, outer)
@@ -340,7 +337,7 @@ PRODUCT_OPERATOR(scalarProduct, &&, dotdot)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "dimensionedType.C"
+    #include "dimensionedType.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -91,10 +91,10 @@ int main(int argc, char *argv[])
                 fvOptions(T)
             );
 
+            TEqn.relax();
             fvOptions.constrain(TEqn);
-
             TEqn.solve();
-
+            fvOptions.correct(T);
         }
 
         runTime.write();

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -56,8 +56,7 @@ void Foam::nearWallFields::calcAddressing()
 
     if (debug)
     {
-        Info<< "nearWallFields::calcAddressing() :"
-            << " nPatchFaces:" << globalWalls.size() << endl;
+        InfoInFunction << "nPatchFaces: " << globalWalls.size() << endl;
     }
 
     // Construct cloud
@@ -139,8 +138,7 @@ void Foam::nearWallFields::calcAddressing()
             mesh.time().path()
            /"wantedTracks_" + mesh.time().timeName() + ".obj"
         );
-        Info<< "nearWallFields::calcAddressing() :"
-            << "Dumping tracks to " << str.name() << endl;
+        InfoInFunction << "Dumping tracks to " << str.name() << endl;
 
         forAllConstIter(Cloud<findCellParticle>, cloud, iter)
         {
@@ -180,7 +178,7 @@ void Foam::nearWallFields::calcAddressing()
 
 
     // Rework cell-to-globalpatchface into a map
-    List<Map<label> > compactMap;
+    List<Map<label>> compactMap;
     getPatchDataMapPtr_.reset
     (
         new mapDistribute
@@ -202,8 +200,7 @@ void Foam::nearWallFields::calcAddressing()
                 mesh.time().path()
                /"obtainedTracks_" + mesh.time().timeName() + ".obj"
             );
-            Info<< "nearWallFields::calcAddressing() :"
-                << "Dumping obtained to " << str.name() << endl;
+            InfoInFunction << "Dumping obtained to " << str.name() << endl;
 
             forAll(cellToWalls_, cellI)
             {
@@ -256,7 +253,7 @@ Foam::nearWallFields::~nearWallFields()
 {
     if (debug)
     {
-        Info<< "nearWallFields::~nearWallFields()" << endl;
+        InfoInFunction << endl;
     }
 }
 
@@ -267,7 +264,7 @@ void Foam::nearWallFields::read(const dictionary& dict)
 {
     if (debug)
     {
-        Info<< "nearWallFields::read(const dictionary&)" << endl;
+        InfoInFunction << endl;
     }
 
     if (active_)
@@ -317,7 +314,7 @@ void Foam::nearWallFields::execute()
 {
     if (debug)
     {
-        Info<< "nearWallFields:execute()" << endl;
+        InfoInFunction << endl;
     }
 
 
@@ -375,7 +372,7 @@ void Foam::nearWallFields::write()
 {
     if (debug)
     {
-        Info<< "nearWallFields:write()" << endl;
+        InfoInFunction << endl;
     }
 
     if (active_)

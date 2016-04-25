@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,7 +64,7 @@ namespace fv
 template<class Type>
 class divScheme
 :
-    public refCount
+    public tmp<divScheme<Type>>::refCount
 {
 
 protected:
@@ -72,7 +72,7 @@ protected:
     // Protected data
 
         const fvMesh& mesh_;
-        tmp<surfaceInterpolationScheme<Type> > tinterpScheme_;
+        tmp<surfaceInterpolationScheme<Type>> tinterpScheme_;
 
 
     // Private Member Functions
@@ -122,7 +122,7 @@ public:
     // Selectors
 
         //- Return a pointer to a new divScheme created on freestore
-        static tmp<divScheme<Type> > New
+        static tmp<divScheme<Type>> New
         (
             const fvMesh& mesh,
             Istream& schemeData
@@ -171,7 +171,7 @@ public:
     {                                                                          \
         namespace fv                                                           \
         {                                                                      \
-            divScheme<Type>::addIstreamConstructorToTable<SS<Type> >           \
+            divScheme<Type>::addIstreamConstructorToTable<SS<Type>>            \
                 add##SS##Type##IstreamConstructorToTable_;                     \
         }                                                                      \
     }
@@ -187,7 +187,7 @@ makeFvDivTypeScheme(SS, tensor)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "divScheme.C"
+    #include "divScheme.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

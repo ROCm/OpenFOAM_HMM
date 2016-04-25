@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,7 +48,21 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
 :
     uniformJumpFvPatchField<Type>(p, iF),
     phiName_("phi"),
-    rhoName_("none")
+    rhoName_("rho")
+{}
+
+
+template<class Type>
+Foam::fanFvPatchField<Type>::fanFvPatchField
+(
+    const fvPatch& p,
+    const DimensionedField<Type, volMesh>& iF,
+    const dictionary& dict
+)
+:
+    uniformJumpFvPatchField<Type>(p, iF, dict),
+    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho"))
 {}
 
 
@@ -64,20 +78,6 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
     uniformJumpFvPatchField<Type>(ptf, p, iF, mapper),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_)
-{}
-
-
-template<class Type>
-Foam::fanFvPatchField<Type>::fanFvPatchField
-(
-    const fvPatch& p,
-    const DimensionedField<Type, volMesh>& iF,
-    const dictionary& dict
-)
-:
-    uniformJumpFvPatchField<Type>(p, iF, dict),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "none"))
 {}
 
 
@@ -126,9 +126,9 @@ void Foam::fanFvPatchField<Type>::updateCoeffs()
 template<class Type>
 void Foam::fanFvPatchField<Type>::write(Ostream& os) const
 {
-    this->template writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
-    this->template writeEntryIfDifferent<word>(os, "rho", "none", rhoName_);
     uniformJumpFvPatchField<Type>::write(os);
+    this->template writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
+    this->template writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
 }
 
 

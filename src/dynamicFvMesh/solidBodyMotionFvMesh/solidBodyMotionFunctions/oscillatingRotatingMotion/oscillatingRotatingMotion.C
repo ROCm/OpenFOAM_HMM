@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -81,12 +81,10 @@ transformation() const
     // Convert the rotational motion from deg to rad
     eulerAngles *= pi/180.0;
 
-    quaternion R(eulerAngles.x(), eulerAngles.y(), eulerAngles.z());
-    septernion TR(septernion(origin_)*R*septernion(-origin_));
+    quaternion R(quaternion::XYZ, eulerAngles);
+    septernion TR(septernion(-origin_)*R*septernion(origin_));
 
-    Info<< "solidBodyMotionFunctions::oscillatingRotatingMotion::"
-        << "transformation(): "
-        << "Time = " << t << " transformation: " << TR << endl;
+    DebugInFunction << "Time = " << t << " transformation: " << TR << endl;
 
     return TR;
 }
@@ -105,5 +103,6 @@ bool Foam::solidBodyMotionFunctions::oscillatingRotatingMotion::read
 
     return true;
 }
+
 
 // ************************************************************************* //

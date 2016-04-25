@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,13 +33,16 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::SlicedGeometricField
+Foam::tmp
 <
-    Type,
-    Foam::fvPatchField,
-    Foam::slicedFvPatchField,
-    Foam::volMesh
-> >
+    Foam::SlicedGeometricField
+    <
+        Type,
+        Foam::fvPatchField,
+        Foam::slicedFvPatchField,
+        Foam::volMesh
+    >
+>
 Foam::isoSurface::adaptPatchFields
 (
     const GeometricField<Type, fvPatchField, volMesh>& fld
@@ -70,7 +73,7 @@ Foam::isoSurface::adaptPatchFields
             true        // preserveCouples
         )
     );
-    FieldType& sliceFld = tsliceFld();
+    FieldType& sliceFld = tsliceFld.ref();
 
     const fvMesh& mesh = fld.mesh();
 
@@ -125,7 +128,7 @@ Foam::isoSurface::adaptPatchFields
 
             const scalarField& w = mesh.weights().boundaryField()[patchI];
 
-            tmp<Field<Type> > f =
+            tmp<Field<Type>> f =
                 w*pfld.patchInternalField()
               + (1.0-w)*pfld.patchNeighbourField();
 
@@ -235,7 +238,7 @@ void Foam::isoSurface::generateTriPoints
         triIndex |= 8;
     }
 
-    /* Form the vertices of the triangles for each case */
+    // Form the vertices of the triangles for each case
     switch (triIndex)
     {
         case 0x00:
@@ -470,7 +473,7 @@ Foam::label Foam::isoSurface::generateFaceTriPoints
             (
                 snappedPoint[pointI] != -1
               ? snappedPoints[snappedPoint[pointI]]
-              : pTraits<Type>::zero
+              : Type(Zero)
             ),
 
             pVals[nextPointI],
@@ -479,7 +482,7 @@ Foam::label Foam::isoSurface::generateFaceTriPoints
             (
                 snappedPoint[nextPointI] != -1
               ? snappedPoints[snappedPoint[nextPointI]]
-              : pTraits<Type>::zero
+              : Type(Zero)
             ),
 
             cVals[own],
@@ -488,7 +491,7 @@ Foam::label Foam::isoSurface::generateFaceTriPoints
             (
                 snappedCc[own] != -1
               ? snappedPoints[snappedCc[own]]
-              : pTraits<Type>::zero
+              : Type(Zero)
             ),
 
             neiVal,
@@ -584,7 +587,7 @@ void Foam::isoSurface::generateTriPoints
                 (
                     snappedCc[nei[faceI]] != -1
                   ? snappedPoints[snappedCc[nei[faceI]]]
-                  : pTraits<Type>::zero
+                  : Type(Zero)
                 ),
 
                 triPoints,
@@ -596,7 +599,7 @@ void Foam::isoSurface::generateTriPoints
 
     // Determine neighbouring snap status
     boolList neiSnapped(mesh_.nFaces()-mesh_.nInternalFaces(), false);
-    List<Type> neiSnappedPoint(neiSnapped.size(), pTraits<Type>::zero);
+    List<Type> neiSnappedPoint(neiSnapped.size(), Type(Zero));
     forAll(patches, patchI)
     {
         const polyPatch& pp = patches[patchI];
@@ -682,7 +685,7 @@ void Foam::isoSurface::generateTriPoints
                             cVals.boundaryField()[patchI][i],
                             cCoords.boundaryField()[patchI][i],
                             false,
-                            pTraits<Type>::zero,
+                            Type(Zero),
 
                             triPoints,
                             triMeshCells
@@ -715,7 +718,7 @@ void Foam::isoSurface::generateTriPoints
                         cVals.boundaryField()[patchI][i],
                         cCoords.boundaryField()[patchI][i],
                         false,  // fc not snapped
-                        pTraits<Type>::zero,
+                        Type(Zero),
 
                         triPoints,
                         triMeshCells
@@ -729,14 +732,6 @@ void Foam::isoSurface::generateTriPoints
     triPoints.shrink();
     triMeshCells.shrink();
 }
-
-
-//template<class Type>
-//Foam::tmp<Foam::Field<Type> >
-//Foam::isoSurface::sample(const Field<Type>& vField) const
-//{
-//    return tmp<Field<Type> >(new Field<Type>(vField, meshCells()));
-//}
 
 
 template<class Type>
@@ -817,7 +812,7 @@ Foam::isoSurface::interpolate
         fvPatchField,
         slicedFvPatchField,
         volMesh
-    > > c2(adaptPatchFields(cCoords));
+    >> c2(adaptPatchFields(cCoords));
 
 
     DynamicList<Type> triPoints(3*nCutCells_);

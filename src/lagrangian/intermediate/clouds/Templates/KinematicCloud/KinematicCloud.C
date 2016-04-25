@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,7 +41,7 @@ void Foam::KinematicCloud<CloudType>::setModels()
 {
     dispersionModel_.reset
     (
-        DispersionModel<KinematicCloud<CloudType> >::New
+        DispersionModel<KinematicCloud<CloudType>>::New
         (
             subModelProperties_,
             *this
@@ -50,7 +50,7 @@ void Foam::KinematicCloud<CloudType>::setModels()
 
     patchInteractionModel_.reset
     (
-        PatchInteractionModel<KinematicCloud<CloudType> >::New
+        PatchInteractionModel<KinematicCloud<CloudType>>::New
         (
             subModelProperties_,
             *this
@@ -59,7 +59,7 @@ void Foam::KinematicCloud<CloudType>::setModels()
 
     stochasticCollisionModel_.reset
     (
-        StochasticCollisionModel<KinematicCloud<CloudType> >::New
+        StochasticCollisionModel<KinematicCloud<CloudType>>::New
         (
             subModelProperties_,
             *this
@@ -68,7 +68,7 @@ void Foam::KinematicCloud<CloudType>::setModels()
 
     surfaceFilmModel_.reset
     (
-        SurfaceFilmModel<KinematicCloud<CloudType> >::New
+        SurfaceFilmModel<KinematicCloud<CloudType>>::New
         (
             subModelProperties_,
             *this
@@ -133,7 +133,7 @@ void Foam::KinematicCloud<CloudType>::buildCellOccupancy()
     {
         cellOccupancyPtr_.reset
         (
-            new List<DynamicList<parcelType*> >(mesh_.nCells())
+            new List<DynamicList<parcelType*>>(mesh_.nCells())
         );
     }
     else if (cellOccupancyPtr_().size() != mesh_.nCells())
@@ -144,7 +144,7 @@ void Foam::KinematicCloud<CloudType>::buildCellOccupancy()
         cellOccupancyPtr_().setSize(mesh_.nCells());
     }
 
-    List<DynamicList<parcelType*> >& cellOccupancy = cellOccupancyPtr_();
+    List<DynamicList<parcelType*>>& cellOccupancy = cellOccupancyPtr_();
 
     forAll(cellOccupancy, cO)
     {
@@ -367,7 +367,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
                 IOobject::AUTO_WRITE
             ),
             mesh_,
-            dimensionedVector("zero", dimMass*dimVelocity, vector::zero)
+            dimensionedVector("zero", dimMass*dimVelocity, Zero)
         )
     ),
     UCoeff_
@@ -601,7 +601,7 @@ void Foam::KinematicCloud<CloudType>::restoreState()
 template<class CloudType>
 void Foam::KinematicCloud<CloudType>::resetSourceTerms()
 {
-    UTrans().field() = vector::zero;
+    UTrans().field() = Zero;
     UCoeff().field() = 0.0;
 }
 
@@ -678,7 +678,7 @@ void Foam::KinematicCloud<CloudType>::evolve()
     if (solution_.canEvolve())
     {
         typename parcelType::template
-            TrackingData<KinematicCloud<CloudType> > td(*this);
+            TrackingData<KinematicCloud<CloudType>> td(*this);
 
         solve(td);
     }
@@ -729,7 +729,7 @@ void Foam::KinematicCloud<CloudType>::patchData
         }
         else
         {
-            Up = vector::zero;
+            Up = Zero;
         }
     }
     else
@@ -739,7 +739,7 @@ void Foam::KinematicCloud<CloudType>::patchData
         vector n00 = tetIs.oldFaceTri(mesh_).normal();
 
         // Difference in normal over timestep
-        vector dn = vector::zero;
+        vector dn = Zero;
 
         if (mag(n00) > SMALL)
         {
@@ -854,7 +854,7 @@ void Foam::KinematicCloud<CloudType>::updateMesh()
 template<class CloudType>
 void Foam::KinematicCloud<CloudType>::autoMap(const mapPolyMesh& mapper)
 {
-    typedef typename particle::TrackingData<KinematicCloud<CloudType> > tdType;
+    typedef typename particle::TrackingData<KinematicCloud<CloudType>> tdType;
 
     tdType td(*this);
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -173,10 +173,10 @@ protected:
         Switch log_;
 
         //- Pressure, viscous and porous force per bin
-        List<Field<vector> > force_;
+        List<Field<vector>> force_;
 
         //- Pressure, viscous and porous moment per bin
-        List<Field<vector> > moment_;
+        List<Field<vector>> moment_;
 
         // File streams
 

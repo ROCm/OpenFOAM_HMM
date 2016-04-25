@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,16 +25,17 @@ Class
     Foam::ParticleTrap
 
 Description
-    Traps particles within a given phase fraction for multi-phase cases
+    Traps particles within a given phase fraction for multi-phase cases.
 
     Model is activated using:
-
-        particleTrap1
-        {
-            type        particleTrap;
-            alphaName   alpha;      // name volume fraction field
-            threshold   0.95;       // alpha value below which model is active
-        }
+    \verbatim
+    particleTrap1
+    {
+        type        particleTrap;
+        alphaName   alpha;      // name volume fraction field
+        threshold   0.95;       // alpha value below which model is active
+    }
+    \endverbatim
 
 
 SourceFiles
@@ -103,9 +104,9 @@ public:
         ParticleTrap(const ParticleTrap<CloudType>& pe);
 
         //- Construct and return a clone
-        virtual autoPtr<CloudFunctionObject<CloudType> > clone() const
+        virtual autoPtr<CloudFunctionObject<CloudType>> clone() const
         {
-            return autoPtr<CloudFunctionObject<CloudType> >
+            return autoPtr<CloudFunctionObject<CloudType>>
             (
                 new ParticleTrap<CloudType>(*this)
             );
@@ -145,7 +146,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "ParticleTrap.C"
+    #include "ParticleTrap.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

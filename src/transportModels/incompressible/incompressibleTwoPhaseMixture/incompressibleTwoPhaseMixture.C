@@ -38,7 +38,6 @@ namespace Foam
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-//- Calculate and return the laminar viscosity
 void Foam::incompressibleTwoPhaseMixture::calcNu()
 {
     nuModel1_->correct();

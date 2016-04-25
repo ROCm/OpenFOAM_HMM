@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,36 +39,36 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Only used internally
-#define makeTypeSetWritersTypeName(typeWriter, dataType)                      \
-                                                                              \
-    defineNamedTemplateTypeNameAndDebug(typeWriter< dataType >, 0)
+#define makeTypeSetWritersTypeName(typeWriter, dataType)                       \
+                                                                               \
+    defineNamedTemplateTypeNameAndDebug(typeWriter<dataType>, 0)
 
 // Sometimes used externally
-#define makeSetWritersTypeName(typeWriter)                                    \
-                                                                              \
-    makeTypeSetWritersTypeName(typeWriter, scalar);                           \
-    makeTypeSetWritersTypeName(typeWriter, vector);                           \
-    makeTypeSetWritersTypeName(typeWriter, sphericalTensor);                  \
-    makeTypeSetWritersTypeName(typeWriter, symmTensor);                       \
+#define makeSetWritersTypeName(typeWriter)                                     \
+                                                                               \
+    makeTypeSetWritersTypeName(typeWriter, scalar);                            \
+    makeTypeSetWritersTypeName(typeWriter, vector);                            \
+    makeTypeSetWritersTypeName(typeWriter, sphericalTensor);                   \
+    makeTypeSetWritersTypeName(typeWriter, symmTensor);                        \
     makeTypeSetWritersTypeName(typeWriter, tensor)
 
 // Define type info for single dataType template instantiation (eg, vector)
-#define makeSetWriterType(typeWriter, dataType)                               \
-                                                                              \
-    defineNamedTemplateTypeNameAndDebug(typeWriter< dataType >, 0);           \
-    addTemplatedToRunTimeSelectionTable                                       \
-    (                                                                         \
-        writer, typeWriter, dataType, word                                    \
+#define makeSetWriterType(typeWriter, dataType)                                \
+                                                                               \
+    defineNamedTemplateTypeNameAndDebug(typeWriter<dataType>, 0);              \
+    addTemplatedToRunTimeSelectionTable                                        \
+    (                                                                          \
+        writer, typeWriter, dataType, word                                     \
     )
 
 
 // Define type info for scalar, vector etc. instantiations
-#define makeSetWriters(typeWriter)                                            \
-                                                                              \
-    makeSetWriterType(typeWriter, scalar);                                    \
-    makeSetWriterType(typeWriter, vector);                                    \
-    makeSetWriterType(typeWriter, sphericalTensor);                           \
-    makeSetWriterType(typeWriter, symmTensor);                                \
+#define makeSetWriters(typeWriter)                                             \
+                                                                               \
+    makeSetWriterType(typeWriter, scalar);                                     \
+    makeSetWriterType(typeWriter, vector);                                     \
+    makeSetWriterType(typeWriter, sphericalTensor);                            \
+    makeSetWriterType(typeWriter, symmTensor);                                 \
     makeSetWriterType(typeWriter, tensor)
 
 

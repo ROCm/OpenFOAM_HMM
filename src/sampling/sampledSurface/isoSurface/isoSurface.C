@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -43,25 +43,24 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(isoSurface, 0);
+    defineTypeNameAndDebug(isoSurface, 0);
 
-// Helper class for slicing triangles
-class storeOp
-{
-public:
-    DynamicList<triPoints>& tris_;
-
-    inline storeOp(DynamicList<triPoints>& tris)
-    :
-        tris_(tris)
-    {}
-
-    inline void operator()(const triPoints& tri)
+    // Helper class for slicing triangles
+    class storeOp
     {
-        tris_.append(tri);
-    }
-};
+    public:
+        DynamicList<triPoints>& tris_;
 
+        inline storeOp(DynamicList<triPoints>& tris)
+        :
+            tris_(tris)
+        {}
+
+        inline void operator()(const triPoints& tri)
+        {
+            tris_.append(tri);
+        }
+    };
 }
 
 
@@ -82,7 +81,6 @@ bool Foam::isoSurface::noTransform(const tensor& tt) const
 }
 
 
-// Calculates per face whether couple is collocated.
 bool Foam::isoSurface::collocatedPatch(const polyPatch& pp)
 {
     const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>(pp);
@@ -90,7 +88,6 @@ bool Foam::isoSurface::collocatedPatch(const polyPatch& pp)
 }
 
 
-// Calculates per face whether couple is collocated.
 Foam::PackedBoolList Foam::isoSurface::collocatedFaces
 (
     const coupledPolyPatch& pp
@@ -321,7 +318,6 @@ bool Foam::isoSurface::isEdgeOfFaceCut
 }
 
 
-// Get neighbour value and position.
 void Foam::isoSurface::getNeighbour
 (
     const labelList& boundaryRegion,
@@ -355,7 +351,6 @@ void Foam::isoSurface::getNeighbour
 }
 
 
-// Determine for every face/cell whether it (possibly) generates triangles.
 void Foam::isoSurface::calcCutTypes
 (
     const labelList& boundaryRegion,
@@ -495,10 +490,9 @@ void Foam::isoSurface::calcCutTypes
 }
 
 
-// Caculate centre of surface.
 Foam::point Foam::isoSurface::calcCentre(const triSurface& s)
 {
-    vector sum = vector::zero;
+    vector sum = Zero;
 
     forAll(s, i)
     {
@@ -508,8 +502,6 @@ Foam::point Foam::isoSurface::calcCentre(const triSurface& s)
 }
 
 
-// Determine per cell centre whether all the intersections get collapsed
-// to a single point
 void Foam::isoSurface::calcSnappedCc
 (
     const labelList& boundaryRegion,
@@ -540,7 +532,7 @@ void Foam::isoSurface::calcSnappedCc
 
             localTriPoints.clear();
             label nOther = 0;
-            point otherPointSum = vector::zero;
+            point otherPointSum = Zero;
 
             // Create points for all intersections close to cell centre
             // (i.e. from pyramid edges)
@@ -675,8 +667,6 @@ void Foam::isoSurface::calcSnappedCc
 }
 
 
-// Determine per meshpoint whether all the intersections get collapsed
-// to a single point
 void Foam::isoSurface::calcSnappedPoint
 (
     const PackedBoolList& isBoundaryPoint,
@@ -728,7 +718,7 @@ void Foam::isoSurface::calcSnappedPoint
 
         localTriPoints.clear();
         label nOther = 0;
-        point otherPointSum = vector::zero;
+        point otherPointSum = Zero;
 
         forAll(pFaces, pFaceI)
         {
@@ -1265,7 +1255,6 @@ void Foam::isoSurface::trimToBox
 }
 
 
-// Does face use valid vertices?
 bool Foam::isoSurface::validTri(const triSurface& surf, const label faceI)
 {
     // Simple check on indices ok.

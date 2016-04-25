@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,13 +62,13 @@ Description
 // declarations (for use in header files)
 
 //- Declare a ClassNameNoDebug() with extra virtual type info
-#define TypeNameNoDebug(TypeNameString)                                       \
-    ClassNameNoDebug(TypeNameString);                                         \
+#define TypeNameNoDebug(TypeNameString)                                        \
+    ClassNameNoDebug(TypeNameString);                                          \
     virtual const word& type() const { return typeName; }
 
 //- Declare a ClassName() with extra virtual type info
-#define TypeName(TypeNameString)                                              \
-    ClassName(TypeNameString);                                                \
+#define TypeName(TypeNameString)                                               \
+    ClassName(TypeNameString);                                                 \
     virtual const word& type() const { return typeName; }
 
 

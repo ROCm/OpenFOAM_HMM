@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,7 +58,7 @@ void stabilise
 
 
 template<template<class> class Field>
-tmp<FieldField<Field, scalar> > stabilise
+tmp<FieldField<Field, scalar>> stabilise
 (
     const FieldField<Field, scalar>&,
     const scalar s
@@ -66,9 +66,9 @@ tmp<FieldField<Field, scalar> > stabilise
 
 
 template<template<class> class Field>
-tmp<FieldField<Field, scalar> > stabilise
+tmp<FieldField<Field, scalar>> stabilise
 (
-    const tmp<FieldField<Field, scalar> >&,
+    const tmp<FieldField<Field, scalar>>&,
     const scalar s
 );
 
@@ -128,15 +128,15 @@ UNARY_FUNCTION(scalar, scalar, y0)
 UNARY_FUNCTION(scalar, scalar, y1)
 
 
-#define BesselFunc(func)                                                      \
-void func                                                                     \
-(                                                                             \
-    FieldField<Field, scalar>& Res,                                           \
-    const int n,                                                              \
-    const FieldField<Field, scalar>& sf                                       \
-);                                                                            \
-tmp<scalarField> func(const int n, const FieldField<Field, scalar>&);         \
-tmp<scalarField> func(const int n, const tmp<FieldField<Field, scalar> >&);
+#define BesselFunc(func)                                                       \
+void func                                                                      \
+(                                                                              \
+    FieldField<Field, scalar>& Res,                                            \
+    const int n,                                                               \
+    const FieldField<Field, scalar>& sf                                        \
+);                                                                             \
+tmp<scalarField> func(const int n, const FieldField<Field, scalar>&);          \
+tmp<scalarField> func(const int n, const tmp<FieldField<Field, scalar>>&);
 
 BesselFunc(jn)
 BesselFunc(yn)
@@ -153,7 +153,7 @@ BesselFunc(yn)
 #include "undefFieldFunctionsM.H"
 
 #ifdef NoRepository
-#   include "scalarFieldField.C"
+    #include "scalarFieldField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

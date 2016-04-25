@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -183,7 +183,6 @@ bool Foam::regIOobject::readHeaderOk
         return false;
     }
 }
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -366,7 +365,6 @@ bool Foam::regIOobject::read()
     {
         // Re-watch master file
         addWatch();
-    }
 
     return ok;
 }
@@ -406,13 +404,13 @@ bool Foam::regIOobject::readIfModified()
 
         if (modified == watchIndices_.last())
         {
-            Info<< "regIOobject::readIfModified() : " << nl
+            InfoInFunction
                 << "    Re-reading object " << name()
                 << " from file " << fName << endl;
         }
         else
         {
-            Info<< "regIOobject::readIfModified() : " << nl
+            InfoInFunction
                 << "    Re-reading object " << name()
                 << " from file " << fName
                 << " because of modified file " << time().getFile(modified)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -100,13 +100,13 @@ namespace RASModels
 template<class BasicTurbulenceModel>
 class LRR
 :
-    public ReynoldsStress<RASModel<BasicTurbulenceModel> >
+    public ReynoldsStress<RASModel<BasicTurbulenceModel>>
 {
     // Private Member Functions
 
         // Disallow default bitwise copy construct and assignment
         LRR(const LRR&);
-        LRR& operator=(const LRR&);
+        void operator=(const LRR&);
 
 
 protected:
@@ -215,7 +215,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "LRR.C"
+    #include "LRR.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

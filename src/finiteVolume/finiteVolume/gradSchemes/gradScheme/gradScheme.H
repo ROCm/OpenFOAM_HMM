@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,7 +60,7 @@ namespace fv
 template<class Type>
 class gradScheme
 :
-    public refCount
+    public tmp<gradScheme<Type>>::refCount
 {
     // Private data
 
@@ -106,7 +106,7 @@ public:
     // Selectors
 
         //- Return a pointer to a new gradScheme created on freestore
-        static tmp<gradScheme<Type> > New
+        static tmp<gradScheme<Type>> New
         (
             const fvMesh& mesh,
             Istream& schemeData
@@ -171,7 +171,7 @@ public:
             <typename outerProduct<vector, Type>::type, fvPatchField, volMesh>
         > grad
         (
-            const tmp<GeometricField<Type, fvPatchField, volMesh> >&
+            const tmp<GeometricField<Type, fvPatchField, volMesh>>&
         ) const;
 };
 
@@ -195,7 +195,7 @@ public:
     {                                                                          \
         namespace fv                                                           \
         {                                                                      \
-            gradScheme<Type>::addIstreamConstructorToTable<SS<Type> >          \
+            gradScheme<Type>::addIstreamConstructorToTable<SS<Type>>           \
                 add##SS##Type##IstreamConstructorToTable_;                     \
         }                                                                      \
     }
@@ -210,7 +210,7 @@ makeFvGradTypeScheme(SS, vector)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "gradScheme.C"
+    #include "gradScheme.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

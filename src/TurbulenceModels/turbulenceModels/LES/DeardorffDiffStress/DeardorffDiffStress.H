@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -82,13 +82,13 @@ namespace LESModels
 template<class BasicTurbulenceModel>
 class DeardorffDiffStress
 :
-    public ReynoldsStress<LESModel<BasicTurbulenceModel> >
+    public ReynoldsStress<LESModel<BasicTurbulenceModel>>
 {
     // Private Member Functions
 
         // Disallow default bitwise copy construct and assignment
         DeardorffDiffStress(const DeardorffDiffStress&);
-        DeardorffDiffStress& operator=(const DeardorffDiffStress&);
+        void operator=(const DeardorffDiffStress&);
 
 
 protected:
@@ -162,7 +162,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "DeardorffDiffStress.C"
+    #include "DeardorffDiffStress.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

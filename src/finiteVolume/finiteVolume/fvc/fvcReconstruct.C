@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "fvcSurfaceIntegrate.H"
-#include "zeroGradientFvPatchFields.H"
+#include "extrapolatedCalculatedFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,7 +61,7 @@ reconstruct
 
     surfaceVectorField SfHat(mesh.Sf()/mesh.magSf());
 
-    tmp<GeometricField<GradType, fvPatchField, volMesh> > treconField
+    tmp<GeometricField<GradType, fvPatchField, volMesh>> treconField
     (
         new GeometricField<GradType, fvPatchField, volMesh>
         (
@@ -74,11 +74,11 @@ reconstruct
                 IOobject::NO_WRITE
             ),
             inv(surfaceSum(SfHat*mesh.Sf()))&surfaceSum(SfHat*ssf),
-            zeroGradientFvPatchField<GradType>::typeName
+            extrapolatedCalculatedFvPatchField<GradType>::typeName
         )
     );
 
-    treconField().correctBoundaryConditions();
+    treconField.ref().correctBoundaryConditions();
 
     return treconField;
 }
@@ -94,11 +94,11 @@ tmp
 >
 reconstruct
 (
-    const tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >& tssf
+    const tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>& tssf
 )
 {
     typedef typename outerProduct<vector, Type>::type GradType;
-    tmp<GeometricField<GradType, fvPatchField, volMesh> > tvf
+    tmp<GeometricField<GradType, fvPatchField, volMesh>> tvf
     (
         fvc::reconstruct(tssf())
     );

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -52,14 +52,15 @@ Description
 
     Information regarding the number of averaging steps, and total averaging
     time are written on a per-field basis to the
-    \c fieldAveragingProperties dictionary, located in \<time\>/uniform
+    \c "<functionObject name>Properties" dictionary, located in \<time\>/uniform
 
-    When restarting form a previous calculation, the averaging is continuous.
-    However, the averaging process can be restarted using the \c resetOnRestart
-    option.
+    When restarting form a previous calculation, the averaging is continuous or
+    may be restarted using the \c restartOnRestart option.
 
-    To restart the averaging process after each calculation output time, use
-    the \c resetOnOutput option.
+    The averaging process may be restarted after each calculation output time
+    using the \c restartOnOutput option or restarted periodically using the \c
+    periodicRestart option and setting \c restartPeriod to the required
+    averaging period.
 
     Example of function object specification:
     \verbatim
@@ -68,8 +69,10 @@ Description
         type fieldAverage;
         functionObjectLibs ("libfieldFunctionObjects.so");
         ...
-        resetOnRestart true;
-        resetOnOutput false;
+        restartOnRestart    false;
+        restartOnOutput     false;
+        periodicRestart     false;
+        restartPeriod       0.002;
         fields
         (
             U
@@ -92,12 +95,14 @@ Description
 
     \heading Function object usage
     \table
-        Property     | Description             | Required    | Default value
-        type         | type name: fieldAverage | yes         |
-        resetOnRestart | flag to reset the averaging on restart | yes |
-        resetOnOutput| flag to reset the averaging on output | yes |
-        fields       | list of fields and averaging options | yes |
-        log          | Log to standard output  | no          | yes
+        Property        | Description           | Required    | Default value
+        type            | Type name: fieldAverage | yes       |
+        restartOnRestart| Restart the averaging on restart | no | no
+        restartOnOutput | Restart the averaging on output | no | no
+        periodicRestart | Periodically restart the averaging | no | no
+        restartPeriod   | Periodic restart period | conditional |
+        log             | Log to standard output  | no        | yes
+        fields          | List of fields and averaging options | yes |
     \endtable
 
 
@@ -154,11 +159,17 @@ protected:
         //- Time at last call, prevents repeated averaging
         label prevTimeIndex_;
 
-        //- Reset the averaging process on restart flag
-        Switch resetOnRestart_;
+        //- Restart the averaging process on restart
+        Switch restartOnRestart_;
 
-        //- Reset the averaging process on output flag
-        Switch resetOnOutput_;
+        //- Restart the averaging process on output
+        Switch restartOnOutput_;
+
+        //- Periodically restart the averaging process
+        Switch periodicRestart_;
+
+        //- Restart period
+        scalar restartPeriod_;
 
         //- Switch to send output to Info as well as to file
         Switch log_;
@@ -178,6 +189,9 @@ protected:
             //- Total time counter
             List<scalar> totalTime_;
 
+            //- Index for periodic restart
+            label periodIndex_;
+
 
     // Private Member Functions
 
@@ -190,6 +204,9 @@ protected:
             //- Reset lists (clear existing values) and initialize averaging.
             //  Check requested field averages are valid, populate field lists
             void initialize();
+
+            //- Restart averaging for restartOnOutput
+            void restart();
 
             //- Add mean average field to database
             template<class Type>
@@ -326,7 +343,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "fieldAverageTemplates.C"
+    #include "fieldAverageTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

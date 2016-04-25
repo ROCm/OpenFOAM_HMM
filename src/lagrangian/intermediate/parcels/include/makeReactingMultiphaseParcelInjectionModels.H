@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,17 +40,17 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeReactingMultiphaseParcelInjectionModels(CloudType)                \
-                                                                              \
-    makeInjectionModel(CloudType);                                            \
-    makeInjectionModelType(CellZoneInjection, CloudType);                     \
-    makeInjectionModelType(ConeInjection, CloudType);                         \
-    makeInjectionModelType(ConeNozzleInjection, CloudType);                   \
-    makeInjectionModelType(FieldActivatedInjection, CloudType);               \
-    makeInjectionModelType(ManualInjection, CloudType);                       \
-    makeInjectionModelType(NoInjection, CloudType);                           \
-    makeInjectionModelType(PatchInjection, CloudType);                        \
-    makeInjectionModelType(PatchFlowRateInjection, CloudType);                \
+#define makeReactingMultiphaseParcelInjectionModels(CloudType)                 \
+                                                                               \
+    makeInjectionModel(CloudType);                                             \
+    makeInjectionModelType(CellZoneInjection, CloudType);                      \
+    makeInjectionModelType(ConeInjection, CloudType);                          \
+    makeInjectionModelType(ConeNozzleInjection, CloudType);                    \
+    makeInjectionModelType(FieldActivatedInjection, CloudType);                \
+    makeInjectionModelType(ManualInjection, CloudType);                        \
+    makeInjectionModelType(NoInjection, CloudType);                            \
+    makeInjectionModelType(PatchInjection, CloudType);                         \
+    makeInjectionModelType(PatchFlowRateInjection, CloudType);                 \
     makeInjectionModelType(ReactingMultiphaseLookupTableInjection, CloudType);
 
 

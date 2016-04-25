@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -118,7 +118,7 @@ void Foam::searchableSurfaceCollection::findNearest
 void Foam::searchableSurfaceCollection::sortHits
 (
     const List<pointIndexHit>& info,
-    List<List<pointIndexHit> >& surfInfo,
+    List<List<pointIndexHit>>& surfInfo,
     labelListList& infoMap
 ) const
 {
@@ -325,7 +325,7 @@ Foam::tmp<Foam::pointField>
 Foam::searchableSurfaceCollection::coordinates() const
 {
     tmp<pointField> tCtrs = tmp<pointField>(new pointField(size()));
-    pointField& ctrs = tCtrs();
+    pointField& ctrs = tCtrs.ref();
 
     // Append individual coordinates
     label coordI = 0;
@@ -400,7 +400,7 @@ Foam::searchableSurfaceCollection::points() const
     }
 
     tmp<pointField> tPts(new pointField(nPoints));
-    pointField& pts = tPts();
+    pointField& pts = tPts.ref();
 
     // Append individual coordinates
     nPoints = 0;
@@ -560,7 +560,7 @@ void Foam::searchableSurfaceCollection::findLineAll
 (
     const pointField& start,
     const pointField& end,
-    List<List<pointIndexHit> >& info
+    List<List<pointIndexHit>>& info
 ) const
 {
     // To be done. Assume for now only one intersection.
@@ -608,9 +608,9 @@ void Foam::searchableSurfaceCollection::getRegion
         // Multiple surfaces. Sort by surface.
 
         // Per surface the hit
-        List<List<pointIndexHit> > surfInfo;
+        List<List<pointIndexHit>> surfInfo;
         // Per surface the original position
-        List<List<label> > infoMap;
+        List<List<label>> infoMap;
         sortHits(info, surfInfo, infoMap);
 
         region.setSize(info.size());
@@ -665,9 +665,9 @@ void Foam::searchableSurfaceCollection::getNormal
         // Multiple surfaces. Sort by surface.
 
         // Per surface the hit
-        List<List<pointIndexHit> > surfInfo;
+        List<List<pointIndexHit>> surfInfo;
         // Per surface the original position
-        List<List<label> > infoMap;
+        List<List<label>> infoMap;
         sortHits(info, surfInfo, infoMap);
 
         normal.setSize(info.size());
@@ -774,9 +774,9 @@ void Foam::searchableSurfaceCollection::getField
         // Multiple surfaces. Sort by surface.
 
         // Per surface the hit
-        List<List<pointIndexHit> > surfInfo;
+        List<List<pointIndexHit>> surfInfo;
         // Per surface the original position
-        List<List<label> > infoMap;
+        List<List<label>> infoMap;
         sortHits(info, surfInfo, infoMap);
 
         // Do surface tests

@@ -11,9 +11,9 @@ runApplication blockMesh
 
 runApplication decomposePar
 
-runParallel mdInitialise 4
-runParallel $application 4
+runParallel mdInitialise
+runParallel $application
 
 runApplication reconstructPar
 
-# ----------------------------------------------------------------- end-of-file
+#------------------------------------------------------------------------------

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,9 +41,7 @@ bool Foam::polyMesh::checkFaceOrthogonality
 {
     if (debug)
     {
-        Info<< "bool polyMesh::checkFaceOrthogonality("
-            << "const bool, labelHashSet*) const: "
-            << "checking mesh non-orthogonality" << endl;
+        InfoInFunction << "Checking mesh non-orthogonality" << endl;
     }
 
     const labelList& own = faceOwner();
@@ -57,7 +55,7 @@ bool Foam::polyMesh::checkFaceOrthogonality
         fAreas,
         cellCtrs
     );
-    const scalarField& ortho = tortho();
+    const scalarField& ortho = tortho.ref();
 
     // Severe nonorthogonality threshold
     const scalar severeNonorthogonalityThreshold =
@@ -182,9 +180,7 @@ bool Foam::polyMesh::checkFaceSkewness
 {
     if (debug)
     {
-        Info<< "bool polyMesh::checkFaceSkewnesss("
-            << "const bool, labelHashSet*) const: "
-            << "checking face skewness" << endl;
+        InfoInFunction << "Checking face skewness" << endl;
     }
 
     const labelList& own = faceOwner();
@@ -201,7 +197,7 @@ bool Foam::polyMesh::checkFaceSkewness
         fAreas,
         cellCtrs
     );
-    const scalarField& skew = tskew();
+    const scalarField& skew = tskew.ref();
 
     scalar maxSkew = max(skew);
     label nWarnSkew = 0;
@@ -273,12 +269,6 @@ bool Foam::polyMesh::checkFaceSkewness
 }
 
 
-// Check 1D/2Dness of edges. Gets passed the non-empty directions and
-// checks all edges in the mesh whether they:
-// - have no component in a non-empty direction or
-// - are only in a singe non-empty direction.
-// Empty direction info is passed in as a vector of labels (synchronised)
-// which are 1 if the direction is non-empty, 0 if it is.
 bool Foam::polyMesh::checkEdgeAlignment
 (
     const pointField& p,
@@ -287,11 +277,16 @@ bool Foam::polyMesh::checkEdgeAlignment
     labelHashSet* setPtr
 ) const
 {
+    // Check 1D/2Dness of edges. Gets passed the non-empty directions and
+    // checks all edges in the mesh whether they:
+    // - have no component in a non-empty direction or
+    // - are only in a singe non-empty direction.
+    // Empty direction info is passed in as a vector of labels (synchronised)
+    // which are 1 if the direction is non-empty, 0 if it is.
+
     if (debug)
     {
-        Info<< "bool polyMesh::checkEdgeAlignment("
-            << "const bool, const Vector<label>&, labelHashSet*) const: "
-            << "checking edge alignment" << endl;
+        InfoInFunction << "Checking edge alignment" << endl;
     }
 
     label nDirs = 0;
@@ -422,9 +417,7 @@ bool Foam::polyMesh::checkCellDeterminant
 
     if (debug)
     {
-        Info<< "bool polyMesh::checkCellDeterminant(const bool"
-            << ", labelHashSet*) const: "
-            << "checking for under-determined cells" << endl;
+        InfoInFunction << "Checking for under-determined cells" << endl;
     }
 
     tmp<scalarField> tcellDeterminant = primitiveMeshTools::cellDeterminant
@@ -434,14 +427,14 @@ bool Foam::polyMesh::checkCellDeterminant
         faceAreas,
         syncTools::getInternalOrCoupledFaces(*this)
     );
-    scalarField& cellDeterminant = tcellDeterminant();
+    scalarField& cellDeterminant = tcellDeterminant.ref();
 
 
     label nErrorCells = 0;
     scalar minDet = min(cellDeterminant);
     scalar sumDet = sum(cellDeterminant);
 
-    forAll (cellDeterminant, cellI)
+    forAll(cellDeterminant, cellI)
     {
         if (cellDeterminant[cellI] < warnDet)
         {
@@ -506,9 +499,7 @@ bool Foam::polyMesh::checkFaceWeight
 {
     if (debug)
     {
-        Info<< "bool polyMesh::checkFaceWeight(const bool"
-            << ", labelHashSet*) const: "
-            << "checking for low face interpolation weights" << endl;
+        InfoInFunction << "Checking for low face interpolation weights" << endl;
     }
 
     tmp<scalarField> tfaceWght = polyMeshTools::faceWeights
@@ -518,7 +509,7 @@ bool Foam::polyMesh::checkFaceWeight
         fAreas,
         cellCtrs
     );
-    scalarField& faceWght = tfaceWght();
+    scalarField& faceWght = tfaceWght.ref();
 
 
     label nErrorFaces = 0;
@@ -529,7 +520,7 @@ bool Foam::polyMesh::checkFaceWeight
     // Statistics only for internal and masters of coupled faces
     PackedBoolList isMasterFace(syncTools::getInternalOrMasterFaces(*this));
 
-    forAll (faceWght, faceI)
+    forAll(faceWght, faceI)
     {
         if (faceWght[faceI] < minWeight)
         {
@@ -601,13 +592,11 @@ bool Foam::polyMesh::checkVolRatio
 {
     if (debug)
     {
-        Info<< "bool polyMesh::checkVolRatio(const bool"
-            << ", labelHashSet*) const: "
-            << "checking for volume ratio < " << minRatio << endl;
+        InfoInFunction << "Checking for volume ratio < " << minRatio << endl;
     }
 
     tmp<scalarField> tvolRatio = polyMeshTools::volRatio(*this, cellVols);
-    scalarField& volRatio = tvolRatio();
+    scalarField& volRatio = tvolRatio.ref();
 
 
     label nErrorFaces = 0;
@@ -618,7 +607,7 @@ bool Foam::polyMesh::checkVolRatio
     // Statistics only for internal and masters of coupled faces
     PackedBoolList isMasterFace(syncTools::getInternalOrMasterFaces(*this));
 
-    forAll (volRatio, faceI)
+    forAll(volRatio, faceI)
     {
         if (volRatio[faceI] < minRatio)
         {
@@ -678,19 +667,6 @@ bool Foam::polyMesh::checkVolRatio
 
     return false;
 }
-
-
-//- Could override checkClosedBoundary to not look at (collocated!) coupled
-//  faces
-//bool Foam::polyMesh::checkClosedBoundary(const bool report) const
-//{
-//    return primitiveMesh::checkClosedBoundary
-//    (
-//        faceAreas(),
-//        report,
-//        syncTools::getInternalOrCollocatedCoupledFaces(*this)
-//    );
-//}
 
 
 bool Foam::polyMesh::checkFaceOrthogonality

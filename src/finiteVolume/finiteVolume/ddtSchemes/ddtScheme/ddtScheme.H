@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,7 +64,7 @@ namespace fv
 template<class Type>
 class ddtScheme
 :
-    public refCount
+    public tmp<ddtScheme<Type>>::refCount
 {
 
 protected:
@@ -119,7 +119,7 @@ public:
     // Selectors
 
         //- Return a pointer to a new ddtScheme created on freestore
-        static tmp<ddtScheme<Type> > New
+        static tmp<ddtScheme<Type>> New
         (
             const fvMesh& mesh,
             Istream& schemeData
@@ -138,53 +138,53 @@ public:
             return mesh_;
         }
 
-        virtual tmp<GeometricField<Type, fvPatchField, volMesh> > fvcDdt
+        virtual tmp<GeometricField<Type, fvPatchField, volMesh>> fvcDdt
         (
             const dimensioned<Type>&
         ) = 0;
 
-        virtual tmp<GeometricField<Type, fvPatchField, volMesh> > fvcDdt
+        virtual tmp<GeometricField<Type, fvPatchField, volMesh>> fvcDdt
         (
             const GeometricField<Type, fvPatchField, volMesh>&
         ) = 0;
 
-        virtual tmp<GeometricField<Type, fvPatchField, volMesh> > fvcDdt
+        virtual tmp<GeometricField<Type, fvPatchField, volMesh>> fvcDdt
         (
             const dimensionedScalar&,
             const GeometricField<Type, fvPatchField, volMesh>&
         ) = 0;
 
-        virtual tmp<GeometricField<Type, fvPatchField, volMesh> > fvcDdt
+        virtual tmp<GeometricField<Type, fvPatchField, volMesh>> fvcDdt
         (
             const volScalarField&,
             const GeometricField<Type, fvPatchField, volMesh>&
         ) = 0;
 
-        virtual tmp<GeometricField<Type, fvPatchField, volMesh> > fvcDdt
+        virtual tmp<GeometricField<Type, fvPatchField, volMesh>> fvcDdt
         (
             const volScalarField& alpha,
             const volScalarField& rho,
             const GeometricField<Type, fvPatchField, volMesh>&
         ) = 0;
 
-        virtual tmp<fvMatrix<Type> > fvmDdt
+        virtual tmp<fvMatrix<Type>> fvmDdt
         (
             const GeometricField<Type, fvPatchField, volMesh>&
         ) = 0;
 
-        virtual tmp<fvMatrix<Type> > fvmDdt
+        virtual tmp<fvMatrix<Type>> fvmDdt
         (
             const dimensionedScalar&,
             const GeometricField<Type, fvPatchField, volMesh>&
         ) = 0;
 
-        virtual tmp<fvMatrix<Type> > fvmDdt
+        virtual tmp<fvMatrix<Type>> fvmDdt
         (
             const volScalarField&,
             const GeometricField<Type, fvPatchField, volMesh>&
         ) = 0;
 
-        virtual tmp<fvMatrix<Type> > fvmDdt
+        virtual tmp<fvMatrix<Type>> fvmDdt
         (
             const volScalarField& alpha,
             const volScalarField& rho,
@@ -263,7 +263,7 @@ public:
     {                                                                          \
         namespace fv                                                           \
         {                                                                      \
-            ddtScheme<Type>::addIstreamConstructorToTable<SS<Type> >           \
+            ddtScheme<Type>::addIstreamConstructorToTable<SS<Type>>            \
                 add##SS##Type##IstreamConstructorToTable_;                     \
         }                                                                      \
     }
@@ -288,7 +288,7 @@ tmp<surfaceScalarField> SS<scalar>::fvcDdtUfCorr                               \
     const surfaceScalarField& Uf                                               \
 )                                                                              \
 {                                                                              \
-    NotImplemented;                               \
+    NotImplemented;                                                            \
     return surfaceScalarField::null();                                         \
 }                                                                              \
                                                                                \
@@ -299,7 +299,7 @@ tmp<surfaceScalarField> SS<scalar>::fvcDdtPhiCorr                              \
     const surfaceScalarField& phi                                              \
 )                                                                              \
 {                                                                              \
-    NotImplemented;                              \
+    NotImplemented;                                                            \
     return surfaceScalarField::null();                                         \
 }                                                                              \
                                                                                \
@@ -311,7 +311,7 @@ tmp<surfaceScalarField> SS<scalar>::fvcDdtUfCorr                               \
     const surfaceScalarField& Uf                                               \
 )                                                                              \
 {                                                                              \
-    NotImplemented;                               \
+    NotImplemented;                                                            \
     return surfaceScalarField::null();                                         \
 }                                                                              \
                                                                                \
@@ -323,7 +323,7 @@ tmp<surfaceScalarField> SS<scalar>::fvcDdtPhiCorr                              \
     const surfaceScalarField& phi                                              \
 )                                                                              \
 {                                                                              \
-    NotImplemented;                              \
+    NotImplemented;                                                            \
     return surfaceScalarField::null();                                         \
 }                                                                              \
                                                                                \
@@ -334,7 +334,7 @@ tmp<surfaceScalarField> SS<scalar>::fvcDdtPhiCorr                              \
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "ddtScheme.C"
+    #include "ddtScheme.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

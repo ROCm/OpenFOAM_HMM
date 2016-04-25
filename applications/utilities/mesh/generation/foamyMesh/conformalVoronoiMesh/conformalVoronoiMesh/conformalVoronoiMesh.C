@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1082,7 +1082,7 @@ void Foam::conformalVoronoiMesh::move()
     vectorField displacementAccumulator
     (
         number_of_vertices(),
-        vector::zero
+        Zero
     );
 
     PackedBoolList pointToBeRetained

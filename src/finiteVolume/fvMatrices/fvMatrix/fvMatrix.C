@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "calculatedFvPatchFields.H"
-#include "zeroGradientFvPatchFields.H"
+#include "extrapolatedCalculatedFvPatchFields.H"
 #include "coupledFvPatchFields.H"
 #include "UIndirectList.H"
 
@@ -60,7 +60,7 @@ template<class Type2>
 void Foam::fvMatrix<Type>::addToInternalField
 (
     const labelUList& addr,
-    const tmp<Field<Type2> >& tpf,
+    const tmp<Field<Type2>>& tpf,
     Field<Type2>& intf
 ) const
 {
@@ -97,7 +97,7 @@ template<class Type2>
 void Foam::fvMatrix<Type>::subtractFromInternalField
 (
     const labelUList& addr,
-    const tmp<Field<Type2> >& tpf,
+    const tmp<Field<Type2>>& tpf,
     Field<Type2>& intf
 ) const
 {
@@ -158,7 +158,7 @@ void Foam::fvMatrix<Type>::addBoundarySource
         }
         else if (couples)
         {
-            tmp<Field<Type> > tpnf = ptf.patchNeighbourField();
+            const tmp<Field<Type>> tpnf = ptf.patchNeighbourField();
             const Field<Type>& pnf = tpnf();
 
             const labelUList& addr = lduAddr().patchAddr(patchI);
@@ -249,10 +249,10 @@ void Foam::fvMatrix<Type>::setValuesFromList
                             mesh.boundaryMesh()[patchi].whichFace(facei);
 
                         internalCoeffs_[patchi][patchFacei] =
-                            pTraits<Type>::zero;
+                            Zero;
 
                         boundaryCoeffs_[patchi][patchFacei] =
-                            pTraits<Type>::zero;
+                            Zero;
                     }
                 }
             }
@@ -273,17 +273,15 @@ Foam::fvMatrix<Type>::fvMatrix
     lduMatrix(psi.mesh()),
     psi_(psi),
     dimensions_(ds),
-    source_(psi.size(), pTraits<Type>::zero),
+    source_(psi.size(), Zero),
     internalCoeffs_(psi.mesh().boundary().size()),
     boundaryCoeffs_(psi.mesh().boundary().size()),
     faceFluxCorrectionPtr_(NULL)
 {
     if (debug)
     {
-        Info<< "fvMatrix<Type>(GeometricField<Type, fvPatchField, volMesh>&,"
-               " const dimensionSet&) : "
-               "constructing fvMatrix<Type> for field " << psi_.name()
-            << endl;
+        InfoInFunction
+            << "Constructing fvMatrix<Type> for field " << psi_.name() << endl;
     }
 
     // Initialise coupling coefficients
@@ -295,7 +293,7 @@ Foam::fvMatrix<Type>::fvMatrix
             new Field<Type>
             (
                 psi.mesh().boundary()[patchI].size(),
-                pTraits<Type>::zero
+                Zero
             )
         );
 
@@ -305,7 +303,7 @@ Foam::fvMatrix<Type>::fvMatrix
             new Field<Type>
             (
                 psi.mesh().boundary()[patchI].size(),
-                pTraits<Type>::zero
+                Zero
             )
         );
     }
@@ -323,7 +321,7 @@ Foam::fvMatrix<Type>::fvMatrix
 template<class Type>
 Foam::fvMatrix<Type>::fvMatrix(const fvMatrix<Type>& fvm)
 :
-    refCount(),
+    tmp<fvMatrix<Type>>::refCount(),
     lduMatrix(fvm),
     psi_(fvm.psi_),
     dimensions_(fvm.dimensions_),
@@ -334,9 +332,8 @@ Foam::fvMatrix<Type>::fvMatrix(const fvMatrix<Type>& fvm)
 {
     if (debug)
     {
-        Info<< "fvMatrix<Type>::fvMatrix(const fvMatrix<Type>&) : "
-            << "copying fvMatrix<Type> for field " << psi_.name()
-            << endl;
+        InfoInFunction
+            << "Copying fvMatrix<Type> for field " << psi_.name() << endl;
     }
 
     if (fvm.faceFluxCorrectionPtr_)
@@ -352,9 +349,8 @@ Foam::fvMatrix<Type>::fvMatrix(const fvMatrix<Type>& fvm)
 
 #ifndef NoConstructFromTmp
 template<class Type>
-Foam::fvMatrix<Type>::fvMatrix(const tmp<fvMatrix<Type> >& tfvm)
+Foam::fvMatrix<Type>::fvMatrix(const tmp<fvMatrix<Type>>& tfvm)
 :
-    refCount(),
     lduMatrix
     (
         const_cast<fvMatrix<Type>&>(tfvm()),
@@ -381,9 +377,8 @@ Foam::fvMatrix<Type>::fvMatrix(const tmp<fvMatrix<Type> >& tfvm)
 {
     if (debug)
     {
-        Info<< "fvMatrix<Type>::fvMatrix(const tmp<fvMatrix<Type> >&) : "
-            << "copying fvMatrix<Type> for field " << psi_.name()
-            << endl;
+        InfoInFunction
+            << "Copying fvMatrix<Type> for field " << psi_.name() << endl;
     }
 
     if (tfvm().faceFluxCorrectionPtr_)
@@ -425,10 +420,8 @@ Foam::fvMatrix<Type>::fvMatrix
 {
     if (debug)
     {
-        Info<< "fvMatrix<Type>"
-               "(GeometricField<Type, fvPatchField, volMesh>&, Istream&) : "
-               "constructing fvMatrix<Type> for field " << psi_.name()
-            << endl;
+        InfoInFunction
+            << "Constructing fvMatrix<Type> for field " << psi_.name() << endl;
     }
 
     // Initialise coupling coefficients
@@ -440,7 +433,7 @@ Foam::fvMatrix<Type>::fvMatrix
             new Field<Type>
             (
                 psi.mesh().boundary()[patchI].size(),
-                pTraits<Type>::zero
+                Zero
             )
         );
 
@@ -450,7 +443,7 @@ Foam::fvMatrix<Type>::fvMatrix
             new Field<Type>
             (
                 psi.mesh().boundary()[patchI].size(),
-                pTraits<Type>::zero
+                Zero
             )
         );
     }
@@ -463,9 +456,8 @@ Foam::fvMatrix<Type>::~fvMatrix()
 {
     if (debug)
     {
-        Info<< "fvMatrix<Type>::~fvMatrix<Type>() : "
-            << "destroying fvMatrix<Type> for field " << psi_.name()
-            << endl;
+        InfoInFunction
+            << "Destroying fvMatrix<Type> for field " << psi_.name() << endl;
     }
 
     if (faceFluxCorrectionPtr_)
@@ -526,8 +518,7 @@ void Foam::fvMatrix<Type>::relax(const scalar alpha)
     if (debug)
     {
         InfoInFunction
-            << "Relaxing " << psi_.name() << " by " << alpha
-            << endl;
+            << "Relaxing " << psi_.name() << " by " << alpha << endl;
     }
 
     Field<Type>& S = source();
@@ -701,15 +692,15 @@ template<class Type>
 Foam::tmp<Foam::scalarField> Foam::fvMatrix<Type>::D() const
 {
     tmp<scalarField> tdiag(new scalarField(diag()));
-    addCmptAvBoundaryDiag(tdiag());
+    addCmptAvBoundaryDiag(tdiag.ref());
     return tdiag;
 }
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::fvMatrix<Type>::DD() const
+Foam::tmp<Foam::Field<Type>> Foam::fvMatrix<Type>::DD() const
 {
-    tmp<Field<Type> > tdiag(pTraits<Type>::one*diag());
+    tmp<Field<Type>> tdiag(pTraits<Type>::one*diag());
 
     forAll(psi_.boundaryField(), patchI)
     {
@@ -721,7 +712,7 @@ Foam::tmp<Foam::Field<Type> > Foam::fvMatrix<Type>::DD() const
             (
                 lduAddr().patchAddr(patchI),
                 internalCoeffs_[patchI],
-                tdiag()
+                tdiag.ref()
             );
         }
     }
@@ -747,22 +738,22 @@ Foam::tmp<Foam::volScalarField> Foam::fvMatrix<Type>::A() const
             ),
             psi_.mesh(),
             dimensions_/psi_.dimensions()/dimVol,
-            zeroGradientFvPatchScalarField::typeName
+            extrapolatedCalculatedFvPatchScalarField::typeName
         )
     );
 
-    tAphi().internalField() = D()/psi_.mesh().V();
-    tAphi().correctBoundaryConditions();
+    tAphi.ref().internalField() = D()/psi_.mesh().V();
+    tAphi.ref().correctBoundaryConditions();
 
     return tAphi;
 }
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
 Foam::fvMatrix<Type>::H() const
 {
-    tmp<GeometricField<Type, fvPatchField, volMesh> > tHphi
+    tmp<GeometricField<Type, fvPatchField, volMesh>> tHphi
     (
         new GeometricField<Type, fvPatchField, volMesh>
         (
@@ -776,10 +767,10 @@ Foam::fvMatrix<Type>::H() const
             ),
             psi_.mesh(),
             dimensions_/dimVol,
-            zeroGradientFvPatchScalarField::typeName
+            extrapolatedCalculatedFvPatchScalarField::typeName
         )
     );
-    GeometricField<Type, fvPatchField, volMesh>& Hphi = tHphi();
+    GeometricField<Type, fvPatchField, volMesh>& Hphi = tHphi.ref();
 
     // Loop over field components
     for (direction cmpt=0; cmpt<Type::nComponents; cmpt++)
@@ -838,10 +829,10 @@ Foam::tmp<Foam::volScalarField> Foam::fvMatrix<Type>::H1() const
             ),
             psi_.mesh(),
             dimensions_/(dimVol*psi_.dimensions()),
-            zeroGradientFvPatchScalarField::typeName
+            extrapolatedCalculatedFvPatchScalarField::typeName
         )
     );
-    volScalarField& H1_ = tH1();
+    volScalarField& H1_ = tH1.ref();
 
     H1_.internalField() = lduMatrix::H1();
 
@@ -868,7 +859,7 @@ Foam::tmp<Foam::volScalarField> Foam::fvMatrix<Type>::H1() const
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh> >
+Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh>>
 Foam::fvMatrix<Type>::
 flux() const
 {
@@ -882,7 +873,7 @@ flux() const
     }
 
     // construct GeometricField<Type, fvsPatchField, surfaceMesh>
-    tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tfieldFlux
+    tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> tfieldFlux
     (
         new GeometricField<Type, fvsPatchField, surfaceMesh>
         (
@@ -898,7 +889,8 @@ flux() const
             dimensions()
         )
     );
-    GeometricField<Type, fvsPatchField, surfaceMesh>& fieldFlux = tfieldFlux();
+    GeometricField<Type, fvsPatchField, surfaceMesh>& fieldFlux =
+        tfieldFlux.ref();
 
     for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
     {
@@ -990,7 +982,7 @@ void Foam::fvMatrix<Type>::operator=(const fvMatrix<Type>& fvmv)
 
 
 template<class Type>
-void Foam::fvMatrix<Type>::operator=(const tmp<fvMatrix<Type> >& tfvmv)
+void Foam::fvMatrix<Type>::operator=(const tmp<fvMatrix<Type>>& tfvmv)
 {
     operator=(tfvmv());
     tfvmv.clear();
@@ -1039,7 +1031,7 @@ void Foam::fvMatrix<Type>::operator+=(const fvMatrix<Type>& fvmv)
 
 
 template<class Type>
-void Foam::fvMatrix<Type>::operator+=(const tmp<fvMatrix<Type> >& tfvmv)
+void Foam::fvMatrix<Type>::operator+=(const tmp<fvMatrix<Type>>& tfvmv)
 {
     operator+=(tfvmv());
     tfvmv.clear();
@@ -1071,7 +1063,7 @@ void Foam::fvMatrix<Type>::operator-=(const fvMatrix<Type>& fvmv)
 
 
 template<class Type>
-void Foam::fvMatrix<Type>::operator-=(const tmp<fvMatrix<Type> >& tfvmv)
+void Foam::fvMatrix<Type>::operator-=(const tmp<fvMatrix<Type>>& tfvmv)
 {
     operator-=(tfvmv());
     tfvmv.clear();
@@ -1092,7 +1084,7 @@ void Foam::fvMatrix<Type>::operator+=
 template<class Type>
 void Foam::fvMatrix<Type>::operator+=
 (
-    const tmp<DimensionedField<Type, volMesh> >& tsu
+    const tmp<DimensionedField<Type, volMesh>>& tsu
 )
 {
     operator+=(tsu());
@@ -1103,7 +1095,7 @@ void Foam::fvMatrix<Type>::operator+=
 template<class Type>
 void Foam::fvMatrix<Type>::operator+=
 (
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tsu
+    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tsu
 )
 {
     operator+=(tsu());
@@ -1125,7 +1117,7 @@ void Foam::fvMatrix<Type>::operator-=
 template<class Type>
 void Foam::fvMatrix<Type>::operator-=
 (
-    const tmp<DimensionedField<Type, volMesh> >& tsu
+    const tmp<DimensionedField<Type, volMesh>>& tsu
 )
 {
     operator-=(tsu());
@@ -1136,7 +1128,7 @@ void Foam::fvMatrix<Type>::operator-=
 template<class Type>
 void Foam::fvMatrix<Type>::operator-=
 (
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tsu
+    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tsu
 )
 {
     operator-=(tsu());
@@ -1213,7 +1205,7 @@ void Foam::fvMatrix<Type>::operator*=
 template<class Type>
 void Foam::fvMatrix<Type>::operator*=
 (
-    const tmp<DimensionedField<scalar, volMesh> >& tdsf
+    const tmp<DimensionedField<scalar, volMesh>>& tdsf
 )
 {
     operator*=(tdsf());
@@ -1339,7 +1331,7 @@ Foam::SolverPerformance<Type> Foam::solve
 template<class Type>
 Foam::SolverPerformance<Type> Foam::solve
 (
-    const tmp<fvMatrix<Type> >& tfvm,
+    const tmp<fvMatrix<Type>>& tfvm,
     const dictionary& solverControls
 )
 {
@@ -1359,7 +1351,7 @@ Foam::SolverPerformance<Type> Foam::solve(fvMatrix<Type>& fvm)
 }
 
 template<class Type>
-Foam::SolverPerformance<Type> Foam::solve(const tmp<fvMatrix<Type> >& tfvm)
+Foam::SolverPerformance<Type> Foam::solve(const tmp<fvMatrix<Type>>& tfvm)
 {
     SolverPerformance<Type> solverPerf =
         const_cast<fvMatrix<Type>&>(tfvm()).solve();
@@ -1371,12 +1363,12 @@ Foam::SolverPerformance<Type> Foam::solve(const tmp<fvMatrix<Type> >& tfvm)
 
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::correction
+Foam::tmp<Foam::fvMatrix<Type>> Foam::correction
 (
     const fvMatrix<Type>& A
 )
 {
-    tmp<Foam::fvMatrix<Type> > tAcorr = A - (A & A.psi());
+    tmp<Foam::fvMatrix<Type>> tAcorr = A - (A & A.psi());
 
     if
     (
@@ -1392,12 +1384,12 @@ Foam::tmp<Foam::fvMatrix<Type> > Foam::correction
 
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::correction
+Foam::tmp<Foam::fvMatrix<Type>> Foam::correction
 (
-    const tmp<fvMatrix<Type> >& tA
+    const tmp<fvMatrix<Type>>& tA
 )
 {
-    tmp<Foam::fvMatrix<Type> > tAcorr = tA - (tA() & tA().psi());
+    tmp<Foam::fvMatrix<Type>> tAcorr = tA - (tA() & tA().psi());
 
     // Note the matrix coefficients are still that of matrix A
     const fvMatrix<Type>& A = tAcorr();
@@ -1408,7 +1400,7 @@ Foam::tmp<Foam::fvMatrix<Type> > Foam::correction
      && A.psi().mesh().fluxRequired(A.psi().name())
     )
     {
-        tAcorr().faceFluxCorrectionPtr() = (-A.flux()).ptr();
+        tAcorr.ref().faceFluxCorrectionPtr() = (-A.flux()).ptr();
     }
 
     return tAcorr;
@@ -1418,7 +1410,7 @@ Foam::tmp<Foam::fvMatrix<Type> > Foam::correction
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator==
 (
     const fvMatrix<Type>& A,
     const fvMatrix<Type>& B
@@ -1429,9 +1421,9 @@ Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator==
 (
-    const tmp<fvMatrix<Type> >& tA,
+    const tmp<fvMatrix<Type>>& tA,
     const fvMatrix<Type>& B
 )
 {
@@ -1440,10 +1432,10 @@ Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator==
 (
     const fvMatrix<Type>& A,
-    const tmp<fvMatrix<Type> >& tB
+    const tmp<fvMatrix<Type>>& tB
 )
 {
     checkMethod(A, tB(), "==");
@@ -1451,10 +1443,10 @@ Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator==
 (
-    const tmp<fvMatrix<Type> >& tA,
-    const tmp<fvMatrix<Type> >& tB
+    const tmp<fvMatrix<Type>>& tA,
+    const tmp<fvMatrix<Type>>& tB
 )
 {
     checkMethod(tA(), tB(), "==");
@@ -1462,115 +1454,115 @@ Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator==
 (
     const fvMatrix<Type>& A,
     const DimensionedField<Type, volMesh>& su
 )
 {
     checkMethod(A, su, "==");
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC().source() += su.mesh().V()*su.field();
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref().source() += su.mesh().V()*su.field();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator==
 (
     const fvMatrix<Type>& A,
-    const tmp<DimensionedField<Type, volMesh> >& tsu
+    const tmp<DimensionedField<Type, volMesh>>& tsu
 )
 {
     checkMethod(A, tsu(), "==");
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC().source() += tsu().mesh().V()*tsu().field();
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref().source() += tsu().mesh().V()*tsu().field();
     tsu.clear();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator==
 (
     const fvMatrix<Type>& A,
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tsu
+    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tsu
 )
 {
     checkMethod(A, tsu(), "==");
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC().source() += tsu().mesh().V()*tsu().internalField();
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref().source() += tsu().mesh().V()*tsu().internalField();
     tsu.clear();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator==
 (
-    const tmp<fvMatrix<Type> >& tA,
+    const tmp<fvMatrix<Type>>& tA,
     const DimensionedField<Type, volMesh>& su
 )
 {
     checkMethod(tA(), su, "==");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC().source() += su.mesh().V()*su.field();
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() += su.mesh().V()*su.field();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator==
 (
-    const tmp<fvMatrix<Type> >& tA,
-    const tmp<DimensionedField<Type, volMesh> >& tsu
+    const tmp<fvMatrix<Type>>& tA,
+    const tmp<DimensionedField<Type, volMesh>>& tsu
 )
 {
     checkMethod(tA(), tsu(), "==");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC().source() += tsu().mesh().V()*tsu().field();
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() += tsu().mesh().V()*tsu().field();
     tsu.clear();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator==
 (
-    const tmp<fvMatrix<Type> >& tA,
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tsu
+    const tmp<fvMatrix<Type>>& tA,
+    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tsu
 )
 {
     checkMethod(tA(), tsu(), "==");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC().source() += tsu().mesh().V()*tsu().internalField();
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() += tsu().mesh().V()*tsu().internalField();
     tsu.clear();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator==
 (
     const fvMatrix<Type>& A,
     const dimensioned<Type>& su
 )
 {
     checkMethod(A, su, "==");
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC().source() += A.psi().mesh().V()*su.value();
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref().source() += A.psi().mesh().V()*su.value();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator==
 (
-    const tmp<fvMatrix<Type> >& tA,
+    const tmp<fvMatrix<Type>>& tA,
     const dimensioned<Type>& su
 )
 {
     checkMethod(tA(), su, "==");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC().source() += tC().psi().mesh().V()*su.value();
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() += tC().psi().mesh().V()*su.value();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator==
 (
     const fvMatrix<Type>& A,
     const zero&
@@ -1581,9 +1573,9 @@ Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==
 
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator==
 (
-    const tmp<fvMatrix<Type> >& tA,
+    const tmp<fvMatrix<Type>>& tA,
     const zero&
 )
 {
@@ -1592,683 +1584,683 @@ Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==
 
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator-
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator-
 (
     const fvMatrix<Type>& A
 )
 {
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC().negate();
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref().negate();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator-
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator-
 (
-    const tmp<fvMatrix<Type> >& tA
+    const tmp<fvMatrix<Type>>& tA
 )
 {
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC().negate();
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref().negate();
     return tC;
 }
 
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator+
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator+
 (
     const fvMatrix<Type>& A,
     const fvMatrix<Type>& B
 )
 {
     checkMethod(A, B, "+");
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC() += B;
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref() += B;
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator+
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator+
 (
-    const tmp<fvMatrix<Type> >& tA,
+    const tmp<fvMatrix<Type>>& tA,
     const fvMatrix<Type>& B
 )
 {
     checkMethod(tA(), B, "+");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC() += B;
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref() += B;
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator+
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator+
 (
     const fvMatrix<Type>& A,
-    const tmp<fvMatrix<Type> >& tB
+    const tmp<fvMatrix<Type>>& tB
 )
 {
     checkMethod(A, tB(), "+");
-    tmp<fvMatrix<Type> > tC(tB.ptr());
-    tC() += A;
+    tmp<fvMatrix<Type>> tC(tB.ptr());
+    tC.ref() += A;
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator+
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator+
 (
-    const tmp<fvMatrix<Type> >& tA,
-    const tmp<fvMatrix<Type> >& tB
+    const tmp<fvMatrix<Type>>& tA,
+    const tmp<fvMatrix<Type>>& tB
 )
 {
     checkMethod(tA(), tB(), "+");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC() += tB();
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref() += tB();
     tB.clear();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator+
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator+
 (
     const fvMatrix<Type>& A,
     const DimensionedField<Type, volMesh>& su
 )
 {
     checkMethod(A, su, "+");
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC().source() -= su.mesh().V()*su.field();
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref().source() -= su.mesh().V()*su.field();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator+
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator+
 (
     const fvMatrix<Type>& A,
-    const tmp<DimensionedField<Type, volMesh> >& tsu
+    const tmp<DimensionedField<Type, volMesh>>& tsu
 )
 {
     checkMethod(A, tsu(), "+");
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC().source() -= tsu().mesh().V()*tsu().field();
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref().source() -= tsu().mesh().V()*tsu().field();
     tsu.clear();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator+
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator+
 (
     const fvMatrix<Type>& A,
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tsu
+    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tsu
 )
 {
     checkMethod(A, tsu(), "+");
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC().source() -= tsu().mesh().V()*tsu().internalField();
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref().source() -= tsu().mesh().V()*tsu().internalField();
     tsu.clear();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator+
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator+
 (
-    const tmp<fvMatrix<Type> >& tA,
+    const tmp<fvMatrix<Type>>& tA,
     const DimensionedField<Type, volMesh>& su
 )
 {
     checkMethod(tA(), su, "+");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC().source() -= su.mesh().V()*su.field();
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() -= su.mesh().V()*su.field();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator+
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator+
 (
-    const tmp<fvMatrix<Type> >& tA,
-    const tmp<DimensionedField<Type, volMesh> >& tsu
+    const tmp<fvMatrix<Type>>& tA,
+    const tmp<DimensionedField<Type, volMesh>>& tsu
 )
 {
     checkMethod(tA(), tsu(), "+");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC().source() -= tsu().mesh().V()*tsu().field();
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() -= tsu().mesh().V()*tsu().field();
     tsu.clear();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator+
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator+
 (
-    const tmp<fvMatrix<Type> >& tA,
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tsu
+    const tmp<fvMatrix<Type>>& tA,
+    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tsu
 )
 {
     checkMethod(tA(), tsu(), "+");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC().source() -= tsu().mesh().V()*tsu().internalField();
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() -= tsu().mesh().V()*tsu().internalField();
     tsu.clear();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator+
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator+
 (
     const DimensionedField<Type, volMesh>& su,
     const fvMatrix<Type>& A
 )
 {
     checkMethod(A, su, "+");
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC().source() -= su.mesh().V()*su.field();
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref().source() -= su.mesh().V()*su.field();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator+
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator+
 (
-    const tmp<DimensionedField<Type, volMesh> >& tsu,
+    const tmp<DimensionedField<Type, volMesh>>& tsu,
     const fvMatrix<Type>& A
 )
 {
     checkMethod(A, tsu(), "+");
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC().source() -= tsu().mesh().V()*tsu().field();
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref().source() -= tsu().mesh().V()*tsu().field();
     tsu.clear();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator+
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator+
 (
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tsu,
+    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tsu,
     const fvMatrix<Type>& A
 )
 {
     checkMethod(A, tsu(), "+");
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC().source() -= tsu().mesh().V()*tsu().internalField();
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref().source() -= tsu().mesh().V()*tsu().internalField();
     tsu.clear();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator+
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator+
 (
     const DimensionedField<Type, volMesh>& su,
-    const tmp<fvMatrix<Type> >& tA
+    const tmp<fvMatrix<Type>>& tA
 )
 {
     checkMethod(tA(), su, "+");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC().source() -= su.mesh().V()*su.field();
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() -= su.mesh().V()*su.field();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator+
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator+
 (
-    const tmp<DimensionedField<Type, volMesh> >& tsu,
-    const tmp<fvMatrix<Type> >& tA
+    const tmp<DimensionedField<Type, volMesh>>& tsu,
+    const tmp<fvMatrix<Type>>& tA
 )
 {
     checkMethod(tA(), tsu(), "+");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC().source() -= tsu().mesh().V()*tsu().field();
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() -= tsu().mesh().V()*tsu().field();
     tsu.clear();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator+
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator+
 (
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tsu,
-    const tmp<fvMatrix<Type> >& tA
+    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tsu,
+    const tmp<fvMatrix<Type>>& tA
 )
 {
     checkMethod(tA(), tsu(), "+");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC().source() -= tsu().mesh().V()*tsu().internalField();
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() -= tsu().mesh().V()*tsu().internalField();
     tsu.clear();
     return tC;
 }
 
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator-
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator-
 (
     const fvMatrix<Type>& A,
     const fvMatrix<Type>& B
 )
 {
     checkMethod(A, B, "-");
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC() -= B;
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref() -= B;
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator-
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator-
 (
-    const tmp<fvMatrix<Type> >& tA,
+    const tmp<fvMatrix<Type>>& tA,
     const fvMatrix<Type>& B
 )
 {
     checkMethod(tA(), B, "-");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC() -= B;
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref() -= B;
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator-
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator-
 (
     const fvMatrix<Type>& A,
-    const tmp<fvMatrix<Type> >& tB
+    const tmp<fvMatrix<Type>>& tB
 )
 {
     checkMethod(A, tB(), "-");
-    tmp<fvMatrix<Type> > tC(tB.ptr());
-    tC() -= A;
-    tC().negate();
+    tmp<fvMatrix<Type>> tC(tB.ptr());
+    tC.ref() -= A;
+    tC.ref().negate();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator-
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator-
 (
-    const tmp<fvMatrix<Type> >& tA,
-    const tmp<fvMatrix<Type> >& tB
+    const tmp<fvMatrix<Type>>& tA,
+    const tmp<fvMatrix<Type>>& tB
 )
 {
     checkMethod(tA(), tB(), "-");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC() -= tB();
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref() -= tB();
     tB.clear();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator-
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator-
 (
     const fvMatrix<Type>& A,
     const DimensionedField<Type, volMesh>& su
 )
 {
     checkMethod(A, su, "-");
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC().source() += su.mesh().V()*su.field();
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref().source() += su.mesh().V()*su.field();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator-
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator-
 (
     const fvMatrix<Type>& A,
-    const tmp<DimensionedField<Type, volMesh> >& tsu
+    const tmp<DimensionedField<Type, volMesh>>& tsu
 )
 {
     checkMethod(A, tsu(), "-");
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC().source() += tsu().mesh().V()*tsu().field();
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref().source() += tsu().mesh().V()*tsu().field();
     tsu.clear();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator-
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator-
 (
     const fvMatrix<Type>& A,
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tsu
+    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tsu
 )
 {
     checkMethod(A, tsu(), "-");
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC().source() += tsu().mesh().V()*tsu().internalField();
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref().source() += tsu().mesh().V()*tsu().internalField();
     tsu.clear();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator-
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator-
 (
-    const tmp<fvMatrix<Type> >& tA,
+    const tmp<fvMatrix<Type>>& tA,
     const DimensionedField<Type, volMesh>& su
 )
 {
     checkMethod(tA(), su, "-");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC().source() += su.mesh().V()*su.field();
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() += su.mesh().V()*su.field();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator-
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator-
 (
-    const tmp<fvMatrix<Type> >& tA,
-    const tmp<DimensionedField<Type, volMesh> >& tsu
+    const tmp<fvMatrix<Type>>& tA,
+    const tmp<DimensionedField<Type, volMesh>>& tsu
 )
 {
     checkMethod(tA(), tsu(), "-");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC().source() += tsu().mesh().V()*tsu().field();
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() += tsu().mesh().V()*tsu().field();
     tsu.clear();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator-
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator-
 (
-    const tmp<fvMatrix<Type> >& tA,
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tsu
+    const tmp<fvMatrix<Type>>& tA,
+    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tsu
 )
 {
     checkMethod(tA(), tsu(), "-");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC().source() += tsu().mesh().V()*tsu().internalField();
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() += tsu().mesh().V()*tsu().internalField();
     tsu.clear();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator-
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator-
 (
     const DimensionedField<Type, volMesh>& su,
     const fvMatrix<Type>& A
 )
 {
     checkMethod(A, su, "-");
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC().negate();
-    tC().source() -= su.mesh().V()*su.field();
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref().negate();
+    tC.ref().source() -= su.mesh().V()*su.field();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator-
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator-
 (
-    const tmp<DimensionedField<Type, volMesh> >& tsu,
+    const tmp<DimensionedField<Type, volMesh>>& tsu,
     const fvMatrix<Type>& A
 )
 {
     checkMethod(A, tsu(), "-");
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC().negate();
-    tC().source() -= tsu().mesh().V()*tsu().field();
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref().negate();
+    tC.ref().source() -= tsu().mesh().V()*tsu().field();
     tsu.clear();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator-
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator-
 (
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tsu,
+    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tsu,
     const fvMatrix<Type>& A
 )
 {
     checkMethod(A, tsu(), "-");
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC().negate();
-    tC().source() -= tsu().mesh().V()*tsu().internalField();
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref().negate();
+    tC.ref().source() -= tsu().mesh().V()*tsu().internalField();
     tsu.clear();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator-
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator-
 (
     const DimensionedField<Type, volMesh>& su,
-    const tmp<fvMatrix<Type> >& tA
+    const tmp<fvMatrix<Type>>& tA
 )
 {
     checkMethod(tA(), su, "-");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC().negate();
-    tC().source() -= su.mesh().V()*su.field();
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref().negate();
+    tC.ref().source() -= su.mesh().V()*su.field();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator-
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator-
 (
-    const tmp<DimensionedField<Type, volMesh> >& tsu,
-    const tmp<fvMatrix<Type> >& tA
+    const tmp<DimensionedField<Type, volMesh>>& tsu,
+    const tmp<fvMatrix<Type>>& tA
 )
 {
     checkMethod(tA(), tsu(), "-");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC().negate();
-    tC().source() -= tsu().mesh().V()*tsu().field();
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref().negate();
+    tC.ref().source() -= tsu().mesh().V()*tsu().field();
     tsu.clear();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator-
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator-
 (
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tsu,
-    const tmp<fvMatrix<Type> >& tA
+    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tsu,
+    const tmp<fvMatrix<Type>>& tA
 )
 {
     checkMethod(tA(), tsu(), "-");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC().negate();
-    tC().source() -= tsu().mesh().V()*tsu().internalField();
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref().negate();
+    tC.ref().source() -= tsu().mesh().V()*tsu().internalField();
     tsu.clear();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator+
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator+
 (
     const fvMatrix<Type>& A,
     const dimensioned<Type>& su
 )
 {
     checkMethod(A, su, "+");
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC().source() -= su.value()*A.psi().mesh().V();
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref().source() -= su.value()*A.psi().mesh().V();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator+
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator+
 (
-    const tmp<fvMatrix<Type> >& tA,
+    const tmp<fvMatrix<Type>>& tA,
     const dimensioned<Type>& su
 )
 {
     checkMethod(tA(), su, "+");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC().source() -= su.value()*tC().psi().mesh().V();
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() -= su.value()*tC().psi().mesh().V();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator+
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator+
 (
     const dimensioned<Type>& su,
     const fvMatrix<Type>& A
 )
 {
     checkMethod(A, su, "+");
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC().source() -= su.value()*A.psi().mesh().V();
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref().source() -= su.value()*A.psi().mesh().V();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator+
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator+
 (
     const dimensioned<Type>& su,
-    const tmp<fvMatrix<Type> >& tA
+    const tmp<fvMatrix<Type>>& tA
 )
 {
     checkMethod(tA(), su, "+");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC().source() -= su.value()*tC().psi().mesh().V();
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() -= su.value()*tC().psi().mesh().V();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator-
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator-
 (
     const fvMatrix<Type>& A,
     const dimensioned<Type>& su
 )
 {
     checkMethod(A, su, "-");
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC().source() += su.value()*tC().psi().mesh().V();
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref().source() += su.value()*tC().psi().mesh().V();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator-
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator-
 (
-    const tmp<fvMatrix<Type> >& tA,
+    const tmp<fvMatrix<Type>>& tA,
     const dimensioned<Type>& su
 )
 {
     checkMethod(tA(), su, "-");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC().source() += su.value()*tC().psi().mesh().V();
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref().source() += su.value()*tC().psi().mesh().V();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator-
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator-
 (
     const dimensioned<Type>& su,
     const fvMatrix<Type>& A
 )
 {
     checkMethod(A, su, "-");
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC().negate();
-    tC().source() -= su.value()*A.psi().mesh().V();
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref().negate();
+    tC.ref().source() -= su.value()*A.psi().mesh().V();
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator-
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator-
 (
     const dimensioned<Type>& su,
-    const tmp<fvMatrix<Type> >& tA
+    const tmp<fvMatrix<Type>>& tA
 )
 {
     checkMethod(tA(), su, "-");
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC().negate();
-    tC().source() -= su.value()*tC().psi().mesh().V();
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref().negate();
+    tC.ref().source() -= su.value()*tC().psi().mesh().V();
     return tC;
 }
 
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator*
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator*
 (
     const DimensionedField<scalar, volMesh>& dsf,
     const fvMatrix<Type>& A
 )
 {
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC() *= dsf;
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref() *= dsf;
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator*
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator*
 (
-    const tmp< DimensionedField<scalar, volMesh> >& tdsf,
+    const tmp<DimensionedField<scalar, volMesh>>& tdsf,
     const fvMatrix<Type>& A
 )
 {
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC() *= tdsf;
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref() *= tdsf;
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator*
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator*
 (
     const tmp<volScalarField>& tvsf,
     const fvMatrix<Type>& A
 )
 {
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC() *= tvsf;
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref() *= tvsf;
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator*
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator*
 (
     const DimensionedField<scalar, volMesh>& dsf,
-    const tmp<fvMatrix<Type> >& tA
+    const tmp<fvMatrix<Type>>& tA
 )
 {
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC() *= dsf;
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref() *= dsf;
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator*
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator*
 (
-    const tmp<DimensionedField<scalar, volMesh> >& tdsf,
-    const tmp<fvMatrix<Type> >& tA
+    const tmp<DimensionedField<scalar, volMesh>>& tdsf,
+    const tmp<fvMatrix<Type>>& tA
 )
 {
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC() *= tdsf;
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref() *= tdsf;
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator*
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator*
 (
     const tmp<volScalarField>& tvsf,
-    const tmp<fvMatrix<Type> >& tA
+    const tmp<fvMatrix<Type>>& tA
 )
 {
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC() *= tvsf;
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref() *= tvsf;
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator*
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator*
 (
     const dimensioned<scalar>& ds,
     const fvMatrix<Type>& A
 )
 {
-    tmp<fvMatrix<Type> > tC(new fvMatrix<Type>(A));
-    tC() *= ds;
+    tmp<fvMatrix<Type>> tC(new fvMatrix<Type>(A));
+    tC.ref() *= ds;
     return tC;
 }
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::operator*
+Foam::tmp<Foam::fvMatrix<Type>> Foam::operator*
 (
     const dimensioned<scalar>& ds,
-    const tmp<fvMatrix<Type> >& tA
+    const tmp<fvMatrix<Type>>& tA
 )
 {
-    tmp<fvMatrix<Type> > tC(tA.ptr());
-    tC() *= ds;
+    tmp<fvMatrix<Type>> tC(tA.ptr());
+    tC.ref() *= ds;
     return tC;
 }
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
 Foam::operator&
 (
     const fvMatrix<Type>& M,
     const DimensionedField<Type, volMesh>& psi
 )
 {
-    tmp<GeometricField<Type, fvPatchField, volMesh> > tMphi
+    tmp<GeometricField<Type, fvPatchField, volMesh>> tMphi
     (
         new GeometricField<Type, fvPatchField, volMesh>
         (
@@ -2282,10 +2274,10 @@ Foam::operator&
             ),
             psi.mesh(),
             M.dimensions()/dimVol,
-            zeroGradientFvPatchScalarField::typeName
+            extrapolatedCalculatedFvPatchScalarField::typeName
         )
     );
-    GeometricField<Type, fvPatchField, volMesh>& Mphi = tMphi();
+    GeometricField<Type, fvPatchField, volMesh>& Mphi = tMphi.ref();
 
     // Loop over field components
     if (M.hasDiag())
@@ -2300,7 +2292,7 @@ Foam::operator&
     }
     else
     {
-        Mphi.internalField() = pTraits<Type>::zero;
+        Mphi.internalField() = Zero;
     }
 
     Mphi.internalField() += M.lduMatrix::H(psi.field()) + M.source();
@@ -2313,67 +2305,67 @@ Foam::operator&
 }
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
 Foam::operator&
 (
     const fvMatrix<Type>& M,
-    const tmp<DimensionedField<Type, volMesh> >& tpsi
+    const tmp<DimensionedField<Type, volMesh>>& tpsi
 )
 {
-    tmp<GeometricField<Type, fvPatchField, volMesh> > tMpsi = M & tpsi();
+    tmp<GeometricField<Type, fvPatchField, volMesh>> tMpsi = M & tpsi();
     tpsi.clear();
     return tMpsi;
 }
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
 Foam::operator&
 (
     const fvMatrix<Type>& M,
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tpsi
+    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tpsi
 )
 {
-    tmp<GeometricField<Type, fvPatchField, volMesh> > tMpsi = M & tpsi();
+    tmp<GeometricField<Type, fvPatchField, volMesh>> tMpsi = M & tpsi();
     tpsi.clear();
     return tMpsi;
 }
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
 Foam::operator&
 (
-    const tmp<fvMatrix<Type> >& tM,
+    const tmp<fvMatrix<Type>>& tM,
     const DimensionedField<Type, volMesh>& psi
 )
 {
-    tmp<GeometricField<Type, fvPatchField, volMesh> > tMpsi = tM() & psi;
+    tmp<GeometricField<Type, fvPatchField, volMesh>> tMpsi = tM() & psi;
     tM.clear();
     return tMpsi;
 }
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
 Foam::operator&
 (
-    const tmp<fvMatrix<Type> >& tM,
-    const tmp<DimensionedField<Type, volMesh> >& tpsi
+    const tmp<fvMatrix<Type>>& tM,
+    const tmp<DimensionedField<Type, volMesh>>& tpsi
 )
 {
-    tmp<GeometricField<Type, fvPatchField, volMesh> > tMpsi = tM() & tpsi();
+    tmp<GeometricField<Type, fvPatchField, volMesh>> tMpsi = tM() & tpsi();
     tM.clear();
     tpsi.clear();
     return tMpsi;
 }
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
 Foam::operator&
 (
-    const tmp<fvMatrix<Type> >& tM,
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tpsi
+    const tmp<fvMatrix<Type>>& tM,
+    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tpsi
 )
 {
-    tmp<GeometricField<Type, fvPatchField, volMesh> > tMpsi = tM() & tpsi();
+    tmp<GeometricField<Type, fvPatchField, volMesh>> tMpsi = tM() & tpsi();
     tM.clear();
     tpsi.clear();
     return tMpsi;

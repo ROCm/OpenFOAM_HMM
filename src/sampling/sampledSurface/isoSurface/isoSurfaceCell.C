@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(isoSurfaceCell, 0);
+    defineTypeNameAndDebug(isoSurfaceCell, 0);
 }
 
 
@@ -215,8 +215,6 @@ void Foam::isoSurfaceCell::calcCutTypes
 }
 
 
-
-// Return the two common points between two triangles
 Foam::labelPair Foam::isoSurfaceCell::findCommonPoints
 (
     const labelledTri& tri0,
@@ -253,10 +251,9 @@ Foam::labelPair Foam::isoSurfaceCell::findCommonPoints
 }
 
 
-// Caculate centre of surface.
 Foam::point Foam::isoSurfaceCell::calcCentre(const triSurface& s)
 {
-    vector sum = vector::zero;
+    vector sum = Zero;
 
     forAll(s, i)
     {
@@ -266,8 +263,6 @@ Foam::point Foam::isoSurfaceCell::calcCentre(const triSurface& s)
 }
 
 
-// Replace surface (localPoints, localTris) with single point. Returns
-// point. Destructs arguments.
 Foam::pointIndexHit Foam::isoSurfaceCell::collapseSurface
 (
     const label cellI,
@@ -275,7 +270,7 @@ Foam::pointIndexHit Foam::isoSurfaceCell::collapseSurface
     DynamicList<labelledTri, 64>& localTris
 ) const
 {
-    pointIndexHit info(false, vector::zero, localTris.size());
+    pointIndexHit info(false, Zero, localTris.size());
 
     if (localTris.size() == 1)
     {
@@ -535,7 +530,6 @@ void Foam::isoSurfaceCell::calcSnappedCc
 }
 
 
-// Generate triangles for face connected to pointI
 void Foam::isoSurfaceCell::genPointTris
 (
     const scalarField& cellValues,
@@ -608,7 +602,6 @@ void Foam::isoSurfaceCell::genPointTris
 }
 
 
-// Generate triangle for tet connected to pointI
 void Foam::isoSurfaceCell::genPointTris
 (
     const scalarField& pointValues,
@@ -1056,7 +1049,6 @@ Foam::triSurface Foam::isoSurfaceCell::stitchTriPoints
 }
 
 
-// Does face use valid vertices?
 bool Foam::isoSurfaceCell::validTri(const triSurface& surf, const label faceI)
 {
     // Simple check on indices ok.
@@ -1127,7 +1119,7 @@ bool Foam::isoSurfaceCell::validTri(const triSurface& surf, const label faceI)
 void Foam::isoSurfaceCell::calcAddressing
 (
     const triSurface& surf,
-    List<FixedList<label, 3> >& faceEdges,
+    List<FixedList<label, 3>>& faceEdges,
     labelList& edgeFace0,
     labelList& edgeFace1,
     Map<labelList>& edgeFacesRest
@@ -1225,7 +1217,6 @@ void Foam::isoSurfaceCell::calcAddressing
 }
 
 
-// Checks if triangle is connected through edgeI only.
 bool Foam::isoSurfaceCell::danglingTriangle
 (
     const FixedList<label, 3>& fEdges,
@@ -1252,10 +1243,9 @@ bool Foam::isoSurfaceCell::danglingTriangle
 }
 
 
-// Mark triangles to keep. Returns number of dangling triangles.
 Foam::label Foam::isoSurfaceCell::markDanglingTriangles
 (
-    const List<FixedList<label, 3> >& faceEdges,
+    const List<FixedList<label, 3>>& faceEdges,
     const labelList& edgeFace0,
     const labelList& edgeFace1,
     const Map<labelList>& edgeFacesRest,
@@ -1523,7 +1513,6 @@ Foam::isoSurfaceCell::isoSurfaceCell
         }
 
 
-
         // Merge points and compact out non-valid triangles
         labelList triMap;
         triSurface::operator=
@@ -1588,7 +1577,7 @@ Foam::isoSurfaceCell::isoSurfaceCell
 
     if (regularise)
     {
-        List<FixedList<label, 3> > faceEdges;
+        List<FixedList<label, 3>> faceEdges;
         labelList edgeFace0, edgeFace1;
         Map<labelList> edgeFacesRest;
 

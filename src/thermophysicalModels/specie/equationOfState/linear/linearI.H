@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,29 +57,29 @@ inline Foam::linear<Specie>::linear
 
 
 template<class Specie>
-inline Foam::autoPtr<Foam::linear<Specie> >
+inline Foam::autoPtr<Foam::linear<Specie>>
 Foam::linear<Specie>::clone() const
 {
-    return autoPtr<linear<Specie> >(new linear<Specie>(*this));
+    return autoPtr<linear<Specie>>(new linear<Specie>(*this));
 }
 
 
 template<class Specie>
-inline Foam::autoPtr<Foam::linear<Specie> >
+inline Foam::autoPtr<Foam::linear<Specie>>
 Foam::linear<Specie>::New(Istream& is)
 {
-    return autoPtr<linear<Specie> >(new linear<Specie>(is));
+    return autoPtr<linear<Specie>>(new linear<Specie>(is));
 }
 
 
 template<class Specie>
-inline Foam::autoPtr<Foam::linear<Specie> >
+inline Foam::autoPtr<Foam::linear<Specie>>
 Foam::linear<Specie>::New
 (
     const dictionary& dict
 )
 {
-    return autoPtr<linear<Specie> >(new linear<Specie>(dict));
+    return autoPtr<linear<Specie>>(new linear<Specie>(dict));
 }
 
 
@@ -89,6 +89,20 @@ template<class Specie>
 inline Foam::scalar Foam::linear<Specie>::rho(scalar p, scalar T) const
 {
     return rho0_ + psi_*p;
+}
+
+
+template<class Specie>
+inline Foam::scalar Foam::linear<Specie>::h(scalar p, scalar T) const
+{
+    return 0;
+}
+
+
+template<class Specie>
+inline Foam::scalar Foam::linear<Specie>::cp(scalar p, scalar T) const
+{
+    return 0;
 }
 
 

@@ -13,4 +13,4 @@ wmake $targetType schemes
 wmakeLnInclude phaseIncompressible
 wmakeLnInclude phaseCompressible
 
-# ----------------------------------------------------------------- end-of-file
+#------------------------------------------------------------------------------

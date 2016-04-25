@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,9 @@ License
 
 #include "wallLubricationModel.H"
 #include "phasePair.H"
+#include "fvcFlux.H"
 #include "surfaceInterpolate.H"
+#include "wallFvPatch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -36,6 +38,29 @@ namespace Foam
 }
 
 const Foam::dimensionSet Foam::wallLubricationModel::dimF(1, -2, -2, 0, 0);
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::tmp<Foam::volVectorField> Foam::wallLubricationModel::zeroGradWalls
+(
+    tmp<volVectorField> tFi
+) const
+{
+    volVectorField& Fi = tFi.ref();
+    const fvPatchList& patches =  Fi.mesh().boundary();
+
+    forAll(patches, patchi)
+    {
+        if (isA<wallFvPatch>(patches[patchi]))
+        {
+            fvPatchVectorField& Fiw = Fi.boundaryField()[patchi];
+            Fiw = Fiw.patchInternalField();
+        }
+    }
+
+    return tFi;
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -67,11 +92,7 @@ Foam::tmp<Foam::volVectorField> Foam::wallLubricationModel::F() const
 
 Foam::tmp<Foam::surfaceScalarField> Foam::wallLubricationModel::Ff() const
 {
-    const fvMesh& mesh(this->pair_.phase1().mesh());
-
-    return
-        fvc::interpolate(pair_.dispersed())
-       *(fvc::interpolate(Fi()) & mesh.Sf());
+    return fvc::interpolate(pair_.dispersed())*fvc::flux(Fi());
 }
 
 

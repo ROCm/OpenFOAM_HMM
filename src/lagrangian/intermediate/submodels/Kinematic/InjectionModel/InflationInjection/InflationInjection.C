@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -49,7 +49,7 @@ Foam::InflationInjection<CloudType>::InflationInjection
     duration_(readScalar(this->coeffDict().lookup("duration"))),
     flowRateProfile_
     (
-        TimeDataEntry<scalar>
+        TimeFunction1<scalar>
         (
             owner.db().time(),
             "flowRateProfile",
@@ -58,7 +58,7 @@ Foam::InflationInjection<CloudType>::InflationInjection
     ),
     growthRate_
     (
-        TimeDataEntry<scalar>
+        TimeFunction1<scalar>
         (
             owner.db().time(),
             "growthRate",
@@ -176,7 +176,7 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
 {
     const polyMesh& mesh = this->owner().mesh();
 
-    List<DynamicList<typename CloudType::parcelType*> >& cellOccupancy =
+    List<DynamicList<typename CloudType::parcelType*>>& cellOccupancy =
         this->owner().cellOccupancy();
 
     scalar gR = growthRate_.value(time1);
@@ -266,7 +266,7 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
                 (
                     vectorPairScalarPair
                     (
-                        Pair<vector>(mesh.cellCentres()[cI], vector::zero),
+                        Pair<vector>(mesh.cellCentres()[cI], Zero),
                         Pair<scalar>(dSeed_, dNew)
                     )
                 );
@@ -387,7 +387,7 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
 
     if (Pstream::parRun())
     {
-        List<List<vectorPairScalarPair> > gatheredNewParticles
+        List<List<vectorPairScalarPair>> gatheredNewParticles
         (
             Pstream::nProcs()
         );
@@ -400,10 +400,10 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
         // Combine
         List<vectorPairScalarPair> combinedNewParticles
         (
-            ListListOps::combine<List<vectorPairScalarPair> >
+            ListListOps::combine<List<vectorPairScalarPair>>
             (
                 gatheredNewParticles,
-                accessOp<List<vectorPairScalarPair> >()
+                accessOp<List<vectorPairScalarPair>>()
             )
         );
 

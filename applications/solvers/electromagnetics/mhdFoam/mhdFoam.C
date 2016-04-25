@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -100,16 +100,16 @@ int main(int argc, char *argv[])
             {
                 volScalarField rAU(1.0/UEqn.A());
                 surfaceScalarField rAUf("rAUf", fvc::interpolate(rAU));
-
-                volVectorField HbyA("HbyA", U);
-                HbyA = rAU*UEqn.H();
-
+                volVectorField HbyA(constrainHbyA(rAU*UEqn.H(), U, p));
                 surfaceScalarField phiHbyA
                 (
                     "phiHbyA",
-                    (fvc::interpolate(HbyA) & mesh.Sf())
+                    fvc::flux(HbyA)
                   + rAUf*fvc::ddtCorr(U, phi)
                 );
+
+                // Update the pressure BCs to ensure flux consistency
+                constrainPressure(p, U, phiHbyA, rAUf);
 
                 while (piso.correctNonOrthogonal())
                 {
@@ -150,8 +150,7 @@ int main(int argc, char *argv[])
             volScalarField rAB(1.0/BEqn.A());
             surfaceScalarField rABf("rABf", fvc::interpolate(rAB));
 
-            phiB = (fvc::interpolate(B) & mesh.Sf())
-                + rABf*fvc::ddtCorr(B, phiB);
+            phiB = fvc::flux(B) + rABf*fvc::ddtCorr(B, phiB);
 
             while (bpiso.correctNonOrthogonal())
             {

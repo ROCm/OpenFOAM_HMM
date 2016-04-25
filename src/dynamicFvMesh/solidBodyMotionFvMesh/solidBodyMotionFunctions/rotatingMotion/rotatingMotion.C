@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,7 +57,7 @@ Foam::solidBodyMotionFunctions::rotatingMotion::rotatingMotion
     solidBodyMotionFunction(SBMFCoeffs, runTime),
     origin_(SBMFCoeffs_.lookup("origin")),
     axis_(SBMFCoeffs_.lookup("axis")),
-    omega_(DataEntry<scalar>::New("omega", SBMFCoeffs_))
+    omega_(Function1<scalar>::New("omega", SBMFCoeffs_))
 {}
 
 
@@ -78,10 +78,9 @@ Foam::solidBodyMotionFunctions::rotatingMotion::transformation() const
     scalar angle = omega_->integrate(0, t);
 
     quaternion R(axis_, angle);
-    septernion TR(septernion(origin_)*R*septernion(-origin_));
+    septernion TR(septernion(-origin_)*R*septernion(origin_));
 
-    Info<< "solidBodyMotionFunctions::rotatingMotion::transformation(): "
-        << "Time = " << t << " transformation: " << TR << endl;
+    DebugInFunction << "Time = " << t << " transformation: " << TR << endl;
 
     return TR;
 }
@@ -96,10 +95,11 @@ bool Foam::solidBodyMotionFunctions::rotatingMotion::read
 
     omega_.reset
     (
-        DataEntry<scalar>::New("omega", SBMFCoeffs_).ptr()
+        Function1<scalar>::New("omega", SBMFCoeffs_).ptr()
     );
 
     return true;
 }
+
 
 // ************************************************************************* //

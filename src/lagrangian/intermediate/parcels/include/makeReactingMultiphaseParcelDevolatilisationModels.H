@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,15 +34,15 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeReactingMultiphaseParcelDevolatilisationModels(CloudType)         \
-                                                                              \
-    makeDevolatilisationModel(CloudType);                                     \
-    makeDevolatilisationModelType(ConstantRateDevolatilisation, CloudType);   \
-    makeDevolatilisationModelType(NoDevolatilisation, CloudType);             \
-    makeDevolatilisationModelType                                             \
-    (                                                                         \
-        SingleKineticRateDevolatilisation,                                    \
-        CloudType                                                             \
+#define makeReactingMultiphaseParcelDevolatilisationModels(CloudType)          \
+                                                                               \
+    makeDevolatilisationModel(CloudType);                                      \
+    makeDevolatilisationModelType(ConstantRateDevolatilisation, CloudType);    \
+    makeDevolatilisationModelType(NoDevolatilisation, CloudType);              \
+    makeDevolatilisationModelType                                              \
+    (                                                                          \
+        SingleKineticRateDevolatilisation,                                     \
+        CloudType                                                              \
     );
 
 

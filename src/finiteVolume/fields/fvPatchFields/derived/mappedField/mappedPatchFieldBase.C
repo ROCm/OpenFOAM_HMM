@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -94,7 +94,7 @@ mappedPatchFieldBase<Type>::mappedPatchFieldBase
     patchField_(patchField),
     fieldName_(patchField_.dimensionedInternalField().name()),
     setAverage_(false),
-    average_(pTraits<Type>::zero),
+    average_(Zero),
     interpolationScheme_(interpolationCell<Type>::typeName)
 {}
 
@@ -166,7 +166,7 @@ mappedPatchFieldBase<Type>::sampleField() const
 
 
 template<class Type>
-tmp<Field<Type> > mappedPatchFieldBase<Type>::mappedField() const
+tmp<Field<Type>> mappedPatchFieldBase<Type>::mappedField() const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
@@ -179,8 +179,8 @@ tmp<Field<Type> > mappedPatchFieldBase<Type>::mappedField() const
     const fvMesh& nbrMesh = refCast<const fvMesh>(mapper_.sampleMesh());
 
     // Result of obtaining remote values
-    tmp<Field<Type> > tnewValues(new Field<Type>(0));
-    Field<Type>& newValues = tnewValues();
+    tmp<Field<Type>> tnewValues(new Field<Type>(0));
+    Field<Type>& newValues = tnewValues.ref();
 
     switch (mapper_.mode())
     {
@@ -203,7 +203,7 @@ tmp<Field<Type> > mappedPatchFieldBase<Type>::mappedField() const
                     samples
                 );
 
-                autoPtr<interpolation<Type> > interpolator
+                autoPtr<interpolation<Type>> interpolator
                 (
                     interpolation<Type>::New
                     (
@@ -259,7 +259,7 @@ tmp<Field<Type> > mappedPatchFieldBase<Type>::mappedField() const
         }
         case mappedPatchBase::NEARESTFACE:
         {
-            Field<Type> allValues(nbrMesh.nFaces(), pTraits<Type>::zero);
+            Field<Type> allValues(nbrMesh.nFaces(), Zero);
 
             const fieldType& nbrField = sampleField();
 

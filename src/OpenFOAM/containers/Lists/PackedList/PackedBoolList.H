@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -112,7 +112,7 @@ public:
         inline PackedBoolList(const Xfer<PackedBoolList>&);
 
         //- Construct by transferring the parameter contents
-        inline PackedBoolList(const Xfer<PackedList<1> >&);
+        inline PackedBoolList(const Xfer<PackedList<1>>&);
 
         //- Construct from a list of bools
         explicit inline PackedBoolList(const Foam::UList<bool>&);
@@ -191,24 +191,24 @@ public:
     // Member Operators
 
             //- Assignment of all entries to the given value.
-            inline PackedBoolList& operator=(const bool val);
+            inline void operator=(const bool val);
 
             //- Assignment operator.
-            inline PackedBoolList& operator=(const PackedBoolList&);
+            inline void operator=(const PackedBoolList&);
 
             //- Assignment operator.
-            inline PackedBoolList& operator=(const PackedList<1>&);
+            inline void operator=(const PackedList<1>&);
 
             //- Assignment operator.
-            PackedBoolList& operator=(const Foam::UList<bool>&);
+            void operator=(const Foam::UList<bool>&);
 
             //- Assignment operator,
             //  using the labels as indices to indicate which bits are set
-            inline PackedBoolList& operator=(const labelUList& indices);
+            inline void operator=(const labelUList& indices);
 
             //- Assignment operator,
             //  using the labels as indices to indicate which bits are set
-            inline PackedBoolList& operator=(const UIndirectList<label>&);
+            inline void operator=(const UIndirectList<label>&);
 
             //- Complement operator
             inline PackedBoolList operator~() const;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,8 +69,8 @@ public:
         //- Constructor
         integrationResult()
         :
-            value_(pTraits<Type>::zero),
-            average_(pTraits<Type>::zero)
+            value_(Zero),
+            average_(Zero)
         {}
 
 
@@ -154,7 +154,7 @@ public:
         IntegrationScheme(const IntegrationScheme& is);
 
         //- Construct and return clone
-        virtual autoPtr<IntegrationScheme<Type> > clone() const = 0;
+        virtual autoPtr<IntegrationScheme<Type>> clone() const = 0;
 
 
     // Selectors
@@ -190,29 +190,29 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeIntegrationScheme(Type)                                           \
-                                                                              \
-    defineNamedTemplateTypeNameAndDebug(IntegrationScheme<Type>, 0);          \
-                                                                              \
-    defineTemplateRunTimeSelectionTable                                       \
-    (                                                                         \
-        IntegrationScheme<Type>,                                              \
-        dictionary                                                            \
+#define makeIntegrationScheme(Type)                                            \
+                                                                               \
+    defineNamedTemplateTypeNameAndDebug(IntegrationScheme<Type>, 0);           \
+                                                                               \
+    defineTemplateRunTimeSelectionTable                                        \
+    (                                                                          \
+        IntegrationScheme<Type>,                                               \
+        dictionary                                                             \
     );
 
 
-#define makeIntegrationSchemeType(SS, Type)                                   \
-                                                                              \
-    defineNamedTemplateTypeNameAndDebug(SS<Type>, 0);                         \
-                                                                              \
-    IntegrationScheme<Type>::adddictionaryConstructorToTable<SS<Type> >       \
+#define makeIntegrationSchemeType(SS, Type)                                    \
+                                                                               \
+    defineNamedTemplateTypeNameAndDebug(SS<Type>, 0);                          \
+                                                                               \
+    IntegrationScheme<Type>::adddictionaryConstructorToTable<SS<Type>>         \
         add##SS##Type##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "IntegrationScheme.C"
+    #include "IntegrationScheme.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

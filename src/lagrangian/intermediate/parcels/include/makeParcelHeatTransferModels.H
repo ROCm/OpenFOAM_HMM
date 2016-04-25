@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,11 +33,11 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeParcelHeatTransferModels(CloudType)                               \
-                                                                              \
-    makeHeatTransferModel(CloudType);                                         \
-                                                                              \
-    makeHeatTransferModelType(NoHeatTransfer, CloudType);                     \
+#define makeParcelHeatTransferModels(CloudType)                                \
+                                                                               \
+    makeHeatTransferModel(CloudType);                                          \
+                                                                               \
+    makeHeatTransferModelType(NoHeatTransfer, CloudType);                      \
     makeHeatTransferModelType(RanzMarshall, CloudType);
 
 
