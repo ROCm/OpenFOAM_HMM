@@ -26,7 +26,7 @@ Description
 
 \*----------------------------------------------------------------------------*/
 
-#include "autoLayerDriver.H"
+#include "snappyLayerDriver.H"
 #include "fvMesh.H"
 #include "Time.H"
 #include "meshRefinement.H"
@@ -63,7 +63,7 @@ Description
 namespace Foam
 {
 
-defineTypeNameAndDebug(autoLayerDriver, 0);
+defineTypeNameAndDebug(snappyLayerDriver, 0);
 
 } // End namespace Foam
 
@@ -71,7 +71,7 @@ defineTypeNameAndDebug(autoLayerDriver, 0);
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // For debugging: Dump displacement to .obj files
-void Foam::autoLayerDriver::dumpDisplacement
+void Foam::snappyLayerDriver::dumpDisplacement
 (
     const fileName& prefix,
     const indirectPrimitivePatch& pp,
@@ -103,7 +103,7 @@ void Foam::autoLayerDriver::dumpDisplacement
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::autoLayerDriver::avgPointData
+Foam::tmp<Foam::scalarField> Foam::snappyLayerDriver::avgPointData
 (
     const indirectPrimitivePatch& pp,
     const scalarField& pointFld
@@ -130,7 +130,7 @@ Foam::tmp<Foam::scalarField> Foam::autoLayerDriver::avgPointData
 
 // Check that primitivePatch is not multiply connected. Collect non-manifold
 // points in pointSet.
-void Foam::autoLayerDriver::checkManifold
+void Foam::snappyLayerDriver::checkManifold
 (
     const indirectPrimitivePatch& fp,
     pointSet& nonManifoldPoints
@@ -157,7 +157,7 @@ void Foam::autoLayerDriver::checkManifold
 }
 
 
-void Foam::autoLayerDriver::checkMeshManifold() const
+void Foam::snappyLayerDriver::checkMeshManifold() const
 {
     const fvMesh& mesh = meshRefiner_.mesh();
 
@@ -211,7 +211,7 @@ void Foam::autoLayerDriver::checkMeshManifold() const
 
 
 // Unset extrusion on point. Returns true if anything unset.
-bool Foam::autoLayerDriver::unmarkExtrusion
+bool Foam::snappyLayerDriver::unmarkExtrusion
 (
     const label patchPointI,
     pointField& patchDisp,
@@ -241,7 +241,7 @@ bool Foam::autoLayerDriver::unmarkExtrusion
 
 
 // Unset extrusion on face. Returns true if anything unset.
-bool Foam::autoLayerDriver::unmarkExtrusion
+bool Foam::snappyLayerDriver::unmarkExtrusion
 (
     const face& localFace,
     pointField& patchDisp,
@@ -272,7 +272,7 @@ bool Foam::autoLayerDriver::unmarkExtrusion
 
 
 // No extrusion at non-manifold points.
-void Foam::autoLayerDriver::handleNonManifolds
+void Foam::snappyLayerDriver::handleNonManifolds
 (
     const indirectPrimitivePatch& pp,
     const labelList& meshEdges,
@@ -383,7 +383,7 @@ void Foam::autoLayerDriver::handleNonManifolds
 
 
 // Parallel feature edge detection. Assumes non-manifold edges already handled.
-void Foam::autoLayerDriver::handleFeatureAngle
+void Foam::snappyLayerDriver::handleFeatureAngle
 (
     const indirectPrimitivePatch& pp,
     const labelList& meshEdges,
@@ -502,7 +502,7 @@ void Foam::autoLayerDriver::handleFeatureAngle
 // layer and compares it to the space the warped face takes up. Disables
 // extrusion if layer thickness is more than faceRatio of the thickness of
 // the face.
-void Foam::autoLayerDriver::handleWarpedFaces
+void Foam::snappyLayerDriver::handleWarpedFaces
 (
     const indirectPrimitivePatch& pp,
     const scalar faceRatio,
@@ -576,7 +576,7 @@ void Foam::autoLayerDriver::handleWarpedFaces
 
 //// No extrusion on cells with multiple patch faces. There ususally is a reason
 //// why combinePatchFaces hasn't succeeded.
-//void Foam::autoLayerDriver::handleMultiplePatchFaces
+//void Foam::snappyLayerDriver::handleMultiplePatchFaces
 //(
 //    const indirectPrimitivePatch& pp,
 //    pointField& patchDisp,
@@ -677,7 +677,7 @@ void Foam::autoLayerDriver::handleWarpedFaces
 //}
 
 
-void Foam::autoLayerDriver::setNumLayers
+void Foam::snappyLayerDriver::setNumLayers
 (
     const labelList& patchToNLayers,
     const labelList& patchIDs,
@@ -801,7 +801,7 @@ void Foam::autoLayerDriver::setNumLayers
 // Construct pointVectorField with correct boundary conditions for adding
 // layers
 Foam::tmp<Foam::pointVectorField>
-Foam::autoLayerDriver::makeLayerDisplacementField
+Foam::snappyLayerDriver::makeLayerDisplacementField
 (
     const pointMesh& pMesh,
     const labelList& numLayers
@@ -875,7 +875,7 @@ Foam::autoLayerDriver::makeLayerDisplacementField
 }
 
 
-void Foam::autoLayerDriver::growNoExtrusion
+void Foam::snappyLayerDriver::growNoExtrusion
 (
     const indirectPrimitivePatch& pp,
     pointField& patchDisp,
@@ -965,7 +965,7 @@ void Foam::autoLayerDriver::growNoExtrusion
 }
 
 
-void Foam::autoLayerDriver::determineSidePatches
+void Foam::snappyLayerDriver::determineSidePatches
 (
     const globalIndex& globalFaces,
     const labelListList& edgeGlobalFaces,
@@ -1069,7 +1069,7 @@ void Foam::autoLayerDriver::determineSidePatches
 }
 
 
-void Foam::autoLayerDriver::calculateLayerThickness
+void Foam::snappyLayerDriver::calculateLayerThickness
 (
     const indirectPrimitivePatch& pp,
     const labelList& patchIDs,
@@ -1357,7 +1357,7 @@ void Foam::autoLayerDriver::calculateLayerThickness
 
 
 // Synchronize displacement among coupled patches.
-void Foam::autoLayerDriver::syncPatchDisplacement
+void Foam::snappyLayerDriver::syncPatchDisplacement
 (
     const indirectPrimitivePatch& pp,
     const scalarField& minThickness,
@@ -1488,7 +1488,7 @@ void Foam::autoLayerDriver::syncPatchDisplacement
 // of the faces using it.
 // extrudeStatus is both input and output and gives the status of each
 // patch point.
-void Foam::autoLayerDriver::getPatchDisplacement
+void Foam::snappyLayerDriver::getPatchDisplacement
 (
     const indirectPrimitivePatch& pp,
     const scalarField& thickness,
@@ -1624,7 +1624,7 @@ void Foam::autoLayerDriver::getPatchDisplacement
 }
 
 
-bool Foam::autoLayerDriver::sameEdgeNeighbour
+bool Foam::snappyLayerDriver::sameEdgeNeighbour
 (
     const labelListList& globalEdgeFaces,
     const label myGlobalFaceI,
@@ -1644,7 +1644,7 @@ bool Foam::autoLayerDriver::sameEdgeNeighbour
 }
 
 
-void Foam::autoLayerDriver::getVertexString
+void Foam::snappyLayerDriver::getVertexString
 (
     const indirectPrimitivePatch& pp,
     const labelListList& globalEdgeFaces,
@@ -1723,7 +1723,7 @@ void Foam::autoLayerDriver::getVertexString
 // Truncates displacement
 // - for all patchFaces in the faceset displacement gets set to zero
 // - all displacement < minThickness gets set to zero
-Foam::label Foam::autoLayerDriver::truncateDisplacement
+Foam::label Foam::snappyLayerDriver::truncateDisplacement
 (
     const globalIndex& globalFaces,
     const labelListList& edgeGlobalFaces,
@@ -2038,7 +2038,7 @@ Foam::label Foam::autoLayerDriver::truncateDisplacement
 
 // Setup layer information (at points and faces) to modify mesh topology in
 // regions where layer mesh terminates.
-void Foam::autoLayerDriver::setupLayerInfoTruncation
+void Foam::snappyLayerDriver::setupLayerInfoTruncation
 (
     const indirectPrimitivePatch& pp,
     const labelList& patchNLayers,
@@ -2242,7 +2242,7 @@ void Foam::autoLayerDriver::setupLayerInfoTruncation
 
 
 // Does any of the cells use a face from faces?
-bool Foam::autoLayerDriver::cellsUseFace
+bool Foam::snappyLayerDriver::cellsUseFace
 (
     const polyMesh& mesh,
     const labelList& cellLabels,
@@ -2268,7 +2268,7 @@ bool Foam::autoLayerDriver::cellsUseFace
 // Checks the newly added cells and locally unmarks points so they
 // will not get extruded next time round. Returns global number of unmarked
 // points (0 if all was fine)
-Foam::label Foam::autoLayerDriver::checkAndUnmark
+Foam::label Foam::snappyLayerDriver::checkAndUnmark
 (
     const addPatchCellLayer& addLayer,
     const dictionary& meshQualityDict,
@@ -2403,7 +2403,7 @@ Foam::label Foam::autoLayerDriver::checkAndUnmark
 
 
 //- Count global number of extruded faces
-Foam::label Foam::autoLayerDriver::countExtrusion
+Foam::label Foam::snappyLayerDriver::countExtrusion
 (
     const indirectPrimitivePatch& pp,
     const List<extrudeMode>& extrudeStatus
@@ -2433,7 +2433,7 @@ Foam::label Foam::autoLayerDriver::countExtrusion
 }
 
 
-Foam::List<Foam::labelPair> Foam::autoLayerDriver::getBafflesOnAddedMesh
+Foam::List<Foam::labelPair> Foam::snappyLayerDriver::getBafflesOnAddedMesh
 (
     const polyMesh& mesh,
     const labelList& newToOldFaces,
@@ -2495,7 +2495,7 @@ Foam::List<Foam::labelPair> Foam::autoLayerDriver::getBafflesOnAddedMesh
 
 
 // Collect layer faces and layer cells into mesh fields for ease of handling
-void Foam::autoLayerDriver::getLayerCellsFaces
+void Foam::snappyLayerDriver::getLayerCellsFaces
 (
     const polyMesh& mesh,
     const addPatchCellLayer& addLayer,
@@ -2550,7 +2550,7 @@ void Foam::autoLayerDriver::getLayerCellsFaces
 }
 
 
-void Foam::autoLayerDriver::printLayerData
+void Foam::snappyLayerDriver::printLayerData
 (
     const fvMesh& mesh,
     const labelList& patchIDs,
@@ -2645,7 +2645,7 @@ void Foam::autoLayerDriver::printLayerData
 }
 
 
-bool Foam::autoLayerDriver::writeLayerSets
+bool Foam::snappyLayerDriver::writeLayerSets
 (
     const fvMesh& mesh,
     const labelList& cellNLayers,
@@ -2708,7 +2708,7 @@ bool Foam::autoLayerDriver::writeLayerSets
 }
 
 
-bool Foam::autoLayerDriver::writeLayerData
+bool Foam::snappyLayerDriver::writeLayerData
 (
     const fvMesh& mesh,
     const labelList& patchIDs,
@@ -2854,7 +2854,7 @@ bool Foam::autoLayerDriver::writeLayerData
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::autoLayerDriver::autoLayerDriver
+Foam::snappyLayerDriver::snappyLayerDriver
 (
     meshRefinement& meshRefiner,
     const labelList& globalToMasterPatch,
@@ -2869,7 +2869,7 @@ Foam::autoLayerDriver::autoLayerDriver
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::autoLayerDriver::mergePatchFacesUndo
+void Foam::snappyLayerDriver::mergePatchFacesUndo
 (
     const layerParameters& layerParams,
     const dictionary& motionDict
@@ -2920,7 +2920,7 @@ void Foam::autoLayerDriver::mergePatchFacesUndo
 }
 
 
-void Foam::autoLayerDriver::addLayers
+void Foam::snappyLayerDriver::addLayers
 (
     const layerParameters& layerParams,
     const dictionary& motionDict,
@@ -3641,7 +3641,7 @@ void Foam::autoLayerDriver::addLayers
                 Info<< "Writing shrunk mesh to time "
                     << meshRefiner_.timeName() << endl;
 
-                // See comment in autoSnapDriver why we should not remove
+                // See comment in snappySnapDriver why we should not remove
                 // meshPhi using mesh.clearOut().
 
                 meshRefiner_.write
@@ -4208,7 +4208,7 @@ void Foam::autoLayerDriver::addLayers
 }
 
 
-void Foam::autoLayerDriver::doLayers
+void Foam::snappyLayerDriver::doLayers
 (
     const dictionary& shrinkDict,
     const dictionary& motionDict,

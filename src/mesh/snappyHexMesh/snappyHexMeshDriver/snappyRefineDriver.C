@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "autoRefineDriver.H"
+#include "snappyRefineDriver.H"
 #include "meshRefinement.H"
 #include "fvMesh.H"
 #include "Time.H"
@@ -45,7 +45,7 @@ License
 namespace Foam
 {
 
-defineTypeNameAndDebug(autoRefineDriver, 0);
+defineTypeNameAndDebug(snappyRefineDriver, 0);
 
 } // End namespace Foam
 
@@ -53,7 +53,7 @@ defineTypeNameAndDebug(autoRefineDriver, 0);
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
-Foam::autoRefineDriver::autoRefineDriver
+Foam::snappyRefineDriver::snappyRefineDriver
 (
     meshRefinement& meshRefiner,
     decompositionMethod& decomposer,
@@ -72,7 +72,7 @@ Foam::autoRefineDriver::autoRefineDriver
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::label Foam::autoRefineDriver::featureEdgeRefine
+Foam::label Foam::snappyRefineDriver::featureEdgeRefine
 (
     const refinementParameters& refineParams,
     const label maxIter,
@@ -182,7 +182,7 @@ Foam::label Foam::autoRefineDriver::featureEdgeRefine
 }
 
 
-Foam::label Foam::autoRefineDriver::smallFeatureRefine
+Foam::label Foam::snappyRefineDriver::smallFeatureRefine
 (
     const refinementParameters& refineParams,
     const label maxIter
@@ -304,7 +304,7 @@ Foam::label Foam::autoRefineDriver::smallFeatureRefine
 }
 
 
-Foam::label Foam::autoRefineDriver::surfaceOnlyRefine
+Foam::label Foam::snappyRefineDriver::surfaceOnlyRefine
 (
     const refinementParameters& refineParams,
     const label maxIter
@@ -427,7 +427,7 @@ Foam::label Foam::autoRefineDriver::surfaceOnlyRefine
 }
 
 
-Foam::label Foam::autoRefineDriver::gapOnlyRefine
+Foam::label Foam::snappyRefineDriver::gapOnlyRefine
 (
     const refinementParameters& refineParams,
     const label maxIter
@@ -658,7 +658,7 @@ Foam::label Foam::autoRefineDriver::gapOnlyRefine
 }
 
 
-Foam::label Foam::autoRefineDriver::bigGapOnlyRefine
+Foam::label Foam::snappyRefineDriver::bigGapOnlyRefine
 (
     const refinementParameters& refineParams,
     const bool spreadGapSize,
@@ -800,7 +800,7 @@ Foam::label Foam::autoRefineDriver::bigGapOnlyRefine
 }
 
 
-Foam::label Foam::autoRefineDriver::danglingCellRefine
+Foam::label Foam::snappyRefineDriver::danglingCellRefine
 (
     const refinementParameters& refineParams,
     const label nFaces,
@@ -946,7 +946,7 @@ Foam::label Foam::autoRefineDriver::danglingCellRefine
 
 // Detect cells with opposing intersected faces of differing refinement
 // level and refine them.
-Foam::label Foam::autoRefineDriver::refinementInterfaceRefine
+Foam::label Foam::snappyRefineDriver::refinementInterfaceRefine
 (
     const refinementParameters& refineParams,
     const label maxIter
@@ -1286,7 +1286,7 @@ Foam::label Foam::autoRefineDriver::refinementInterfaceRefine
 }
 
 
-void Foam::autoRefineDriver::removeInsideCells
+void Foam::snappyRefineDriver::removeInsideCells
 (
     const refinementParameters& refineParams,
     const label nBufferLayers
@@ -1334,7 +1334,7 @@ void Foam::autoRefineDriver::removeInsideCells
 }
 
 
-Foam::label Foam::autoRefineDriver::shellRefine
+Foam::label Foam::snappyRefineDriver::shellRefine
 (
     const refinementParameters& refineParams,
     const label maxIter
@@ -1507,7 +1507,7 @@ Foam::label Foam::autoRefineDriver::shellRefine
 }
 
 
-void Foam::autoRefineDriver::baffleAndSplitMesh
+void Foam::snappyRefineDriver::baffleAndSplitMesh
 (
     const refinementParameters& refineParams,
     const snapParameters& snapParams,
@@ -1570,7 +1570,7 @@ void Foam::autoRefineDriver::baffleAndSplitMesh
 }
 
 
-void Foam::autoRefineDriver::zonify
+void Foam::snappyRefineDriver::zonify
 (
     const refinementParameters& refineParams,
     wordPairHashTable& zonesToFaceZone
@@ -1633,7 +1633,7 @@ void Foam::autoRefineDriver::zonify
 }
 
 
-void Foam::autoRefineDriver::splitAndMergeBaffles
+void Foam::snappyRefineDriver::splitAndMergeBaffles
 (
     const refinementParameters& refineParams,
     const snapParameters& snapParams,
@@ -1758,7 +1758,7 @@ void Foam::autoRefineDriver::splitAndMergeBaffles
 }
 
 
-void Foam::autoRefineDriver::addFaceZones
+void Foam::snappyRefineDriver::addFaceZones
 (
     meshRefinement& meshRefiner,
     const refinementParameters& refineParams,
@@ -1832,7 +1832,7 @@ void Foam::autoRefineDriver::addFaceZones
 }
 
 
-void Foam::autoRefineDriver::mergePatchFaces
+void Foam::snappyRefineDriver::mergePatchFaces
 (
     const bool geometricMerge,
     const refinementParameters& refineParams,
@@ -1883,7 +1883,7 @@ void Foam::autoRefineDriver::mergePatchFaces
 }
 
 
-void Foam::autoRefineDriver::doRefine
+void Foam::snappyRefineDriver::doRefine
 (
     const dictionary& refineDict,
     const refinementParameters& refineParams,

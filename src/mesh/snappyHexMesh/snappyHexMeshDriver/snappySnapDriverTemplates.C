@@ -23,12 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "autoSnapDriver.H"
+#include "snappySnapDriver.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class FaceList>
-Foam::labelList Foam::autoSnapDriver::getFacePoints
+Foam::labelList Foam::snappySnapDriver::getFacePoints
 (
     const indirectPrimitivePatch& pp,
     const FaceList& faces
