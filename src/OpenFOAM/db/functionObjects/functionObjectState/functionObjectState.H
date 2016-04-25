@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,6 +65,15 @@ private:
         const objectRegistry& obr_;
 
 
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        functionObjectState(const functionObjectState&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const functionObjectState&);
+
+
 protected:
 
     // Protected data
@@ -75,19 +84,15 @@ protected:
         //- Flag to indicate whether the object is active
         bool active_;
 
-        //- Reference to the state dictionary
-        IOdictionary& stateDict_;
 
+    // Protacted Member Functions
 
-protected:
+        //- Return a const reference to the state dictionary
+        const IOdictionary& stateDict() const;
 
-    // Protected Member Functions
+        //- Return non-const access to the state dictionary
+        IOdictionary& stateDict();
 
-        //- Disallow default bitwise copy construct
-        functionObjectState(const functionObjectState&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const functionObjectState&);
 
 
 public:
@@ -95,11 +100,7 @@ public:
     // Constructors
 
         //- Construct from components
-        functionObjectState
-        (
-            const objectRegistry& obr,
-            const word& name
-        );
+        functionObjectState(const objectRegistry& obr, const word& name);
 
 
     //- Destructor
@@ -113,9 +114,6 @@ public:
 
         //- Return the active flag
         bool active() const;
-
-        //- Return access to the state dictionary
-        const IOdictionary& stateDict() const;
 
         //- Return access to the property dictionary
         dictionary& propertyDict();
