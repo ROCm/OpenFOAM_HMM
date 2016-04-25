@@ -34,14 +34,14 @@ SourceFiles
 #ifndef kinematicParcelInjectionDataIOList_H
 #define kinematicParcelInjectionDataIOList_H
 
-#include "IOList.H"
+#include "GlobalIOList.H"
 #include "kinematicParcelInjectionData.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef IOList<kinematicParcelInjectionData>
+    typedef GlobalIOList<kinematicParcelInjectionData>
         kinematicParcelInjectionDataIOList;
 }
 

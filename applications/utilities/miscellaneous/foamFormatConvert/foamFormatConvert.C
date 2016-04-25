@@ -89,7 +89,7 @@ bool writeZones(const word& name, const fileName& meshDir, Time& runTime)
 
     bool writeOk = false;
 
-    if (io.headerOk())
+    if (io.typeHeaderOk<cellZoneMesh>(false))
     {
         Info<< "        Reading " << io.headerClassName()
             << " : " << name << endl;

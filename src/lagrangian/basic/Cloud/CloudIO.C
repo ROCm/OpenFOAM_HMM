@@ -49,7 +49,7 @@ void Foam::Cloud<ParticleType>::readCloudUniformProperties()
         false
     );
 
-    if (dictObj.headerOk())
+    if (dictObj.typeHeaderOk<IOdictionary>(true))
     {
         const IOdictionary uniformPropsDict(dictObj);
 

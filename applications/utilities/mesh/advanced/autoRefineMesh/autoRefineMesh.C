@@ -650,7 +650,7 @@ int main(int argc, char *argv[])
     // corrector for mesh motion
     twoDPointCorrector* correct2DPtr = NULL;
 
-    if (motionObj.headerOk())
+    if (motionObj.typeHeaderOk<IOdictionary>(true))
     {
         Info<< "Reading " << runTime.constant() / "motionProperties"
             << endl << endl;

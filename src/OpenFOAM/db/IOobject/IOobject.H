@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,6 +76,7 @@ SourceFiles
 #include "typeInfo.H"
 #include "autoPtr.H"
 #include "InfoProxy.H"
+#include "NamedEnum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -119,6 +120,16 @@ public:
             NO_WRITE = 1
         };
 
+        //- Enumeration defining the file checking options
+        enum fileCheckTypes
+        {
+            timeStamp,
+            timeStampMaster,
+            inotify,
+            inotifyMaster
+        };
+
+        static const NamedEnum<fileCheckTypes, 4> fileCheckTypesNames;
 
 private:
 
@@ -151,6 +162,9 @@ private:
         //- Register object created from this IOobject with registry if true
         bool registerObject_;
 
+        //- Is object same for all processors
+        bool globalObject_;
+
         //- IOobject state
         objectState objState_;
 
@@ -158,10 +172,6 @@ private:
 protected:
 
     // Protected Member Functions
-
-        //- Construct and return an IFstream for the object.
-        //  The results is NULL if the stream construction failed
-        Istream* objectStream();
 
         //- Construct and return an IFstream for the object given the
         //  exact file. The results is NULL if the stream construction failed
@@ -180,14 +190,6 @@ public:
     // Static Member Functions
 
         //- Split path into instance, local, name components
-        //  input               IOobject(instance, local, name)
-        //  -----               ------
-        //  "foo"               ("", "", "foo")
-        //  "foo/bar"           ("foo", "", "bar")
-        //  "/XXX/bar"          ("/XXX", "", "bar")
-        //  "foo/bar/"          ERROR - no name
-        //  "foo/xxx/bar"       ("foo", "xxx", "bar")
-        //  "foo/xxx/yyy/bar"   ("foo", "xxx/yyy", "bar")
         static bool fileNameComponents
         (
             const fileName& path,
@@ -198,6 +200,9 @@ public:
 
         template<class Name>
         static inline word groupName(Name name, const word& group);
+
+        //- Type of file modification checking
+        static fileCheckTypes fileModificationChecking;
 
 
     // Constructors
@@ -222,7 +227,8 @@ public:
             const objectRegistry& registry,
             readOption r=NO_READ,
             writeOption w=NO_WRITE,
-            bool registerObject=true
+            bool registerObject=true,
+            bool globalObject = false
         );
 
         //- Construct from path, registry, io options
@@ -233,7 +239,15 @@ public:
             const objectRegistry& registry,
             readOption r=NO_READ,
             writeOption w=NO_WRITE,
-            bool registerObject=true
+            bool registerObject=true,
+            bool globalObject = false
+        );
+
+        //- Construct as copy resetting registry
+        IOobject
+        (
+            const IOobject& io,
+            const objectRegistry& registry
         );
 
         //- Construct as copy resetting name
@@ -244,9 +258,15 @@ public:
         );
 
         //- Clone
-        Foam::autoPtr<IOobject> clone() const
+        autoPtr<IOobject> clone() const
         {
             return autoPtr<IOobject>(new IOobject(*this));
+        }
+
+        //- Clone resetting registry
+        autoPtr<IOobject> clone(const objectRegistry& registry) const
+        {
+            return autoPtr<IOobject>(new IOobject(*this, registry));
         }
 
 
@@ -304,6 +324,18 @@ public:
             bool registerObject() const
             {
                 return registerObject_;
+            }
+
+            //- Is object same for all processors
+            bool& globalObject()
+            {
+                return globalObject_;
+            }
+
+            //- Is object same for all processors
+            bool globalObject() const
+            {
+                return globalObject_;
             }
 
 
@@ -373,9 +405,11 @@ public:
                 return path()/name();
             }
 
-            //- Return complete path + object name if the file exists
-            //  either in the case/processor or case otherwise null
-            fileName filePath() const;
+            //- Helper for filePath that searches locally
+            fileName localFilePath() const;
+
+            //- Helper for filePath that searches up if in parallel
+            fileName globalFilePath() const;
 
 
         // Reading
@@ -383,9 +417,14 @@ public:
             //- Read header
             bool readHeader(Istream&);
 
-            //- Read and check header info
-            bool headerOk();
+            //- Read header (uses typeFilePath to find file) and check header
+            //  info. Optionally checks headerClassName against type
+            template<class Type>
+            bool typeHeaderOk(const bool checkType = true);
 
+            //- Helper: warn that type does not support re-reading
+            template<class Type>
+            void warnNoRereading() const;
 
         // Writing
 
@@ -442,6 +481,21 @@ template<>
 Ostream& operator<<(Ostream& os, const InfoProxy<IOobject>& ip);
 
 
+//- Template function for obtaining global status
+template<class T>
+inline bool typeGlobal()
+{
+    return false;
+}
+
+//- Template function for obtaining filePath
+template<class T>
+inline fileName typeFilePath(const IOobject& io)
+{
+    return (typeGlobal<T>() ? io.globalFilePath() : io.localFilePath());
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
@@ -449,6 +503,12 @@ Ostream& operator<<(Ostream& os, const InfoProxy<IOobject>& ip);
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "IOobjectI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "IOobjectTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

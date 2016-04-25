@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -115,7 +115,7 @@ void Foam::fieldCoordinateSystemTransform::transform
 
         if
         (
-            fieldHeader.headerOk()
+            fieldHeader.typeHeaderOk<vfType>(false)
          && fieldHeader.headerClassName() == vfType::typeName
         )
         {
@@ -129,7 +129,7 @@ void Foam::fieldCoordinateSystemTransform::transform
         }
         else if
         (
-            fieldHeader.headerOk()
+            fieldHeader.typeHeaderOk<sfType>(false)
          && fieldHeader.headerClassName() == sfType::typeName
         )
         {

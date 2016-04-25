@@ -25,6 +25,14 @@ addLayers       false;
 //          surface "_ "region. Default is true
 //singleRegionName false;
 
+// Optional: avoid patch-face merging. Allows mesh to be used for
+//           refinement/unrefinement
+//mergePatchFaces    false; // default true
+
+// Optional: keep zero-sized patches. By default snappyHexMesh filters
+//           these out.
+//keepPatches    true; // default false
+
 
 // Geometry. Definition of all surfaces. All surfaces are of class
 // searchableSurface.
@@ -71,10 +79,6 @@ geometry
     }
 };
 
-
-// Optional: avoid patch-face merging. Allows mesh to be used for
-//           refinement/unrefinement
-//mergePatchFaces    off; // default on
 
 // Settings for the castellatedMesh generation.
 castellatedMeshControls

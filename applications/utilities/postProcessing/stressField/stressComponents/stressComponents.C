@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
         );
 
         // Check U exists
-        if (Uheader.headerOk())
+        if (Uheader.typeHeaderOk<volVectorField>(true))
         {
             mesh.readUpdate();
 

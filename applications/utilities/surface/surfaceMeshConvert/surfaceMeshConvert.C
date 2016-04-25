@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
         }
 
 
-        if (!csDictIoPtr->headerOk())
+        if (!csDictIoPtr->typeHeaderOk<coordinateSystems>(false))
         {
             FatalErrorInFunction
                 << csDictIoPtr->objectPath() << nl

@@ -124,7 +124,7 @@ Foam::wordList Foam::vtkPV4Foam::getZoneNames(const word& zoneType) const
         false
     );
 
-    if (ioObj.headerOk())
+    if (ioObj.typeHeaderOk<cellZoneMesh>(false))
     {
         zonesEntries zones(ioObj);
 
@@ -333,7 +333,7 @@ void Foam::vtkPV4Foam::updateInfoPatches
         );
 
         // this should only ever fail if the mesh region doesn't exist
-        if (ioObj.headerOk())
+        if (ioObj.typeHeaderOk<polyBoundaryMesh>(true))
         {
             polyBoundaryMeshEntries patchEntries(ioObj);
 

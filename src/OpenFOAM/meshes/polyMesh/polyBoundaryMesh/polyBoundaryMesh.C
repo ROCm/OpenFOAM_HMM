@@ -59,14 +59,8 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
      || readOpt() == IOobject::MUST_READ_IF_MODIFIED
     )
     {
-        if (readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-        {
-            WarningInFunction
-                << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
-                << " does not support automatic rereading."
-                << endl;
-        }
-
+        // Warn for MUST_READ_IF_MODIFIED
+        warnNoRereading<polyBoundaryMesh>();
 
         polyPatchList& patches = *this;
 
@@ -134,14 +128,8 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
      || this->readOpt() == IOobject::MUST_READ_IF_MODIFIED
     )
     {
-
-        if (readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-        {
-            WarningInFunction
-                << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
-                << " does not support automatic rereading."
-                << endl;
-        }
+        // Warn for MUST_READ_IF_MODIFIED
+        warnNoRereading<polyBoundaryMesh>();
 
         polyPatchList& patches = *this;
 

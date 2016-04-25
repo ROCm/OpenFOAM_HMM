@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -141,6 +141,19 @@ public:
         //- writeData member function required by regIOobject
         bool writeData(Ostream&) const;
 
+        //- Is object global
+        virtual bool global() const
+        {
+            return true;
+        }
+
+        //- Return complete path + object name if the file exists
+        //  either in the case/processor or case otherwise null
+        virtual fileName filePath() const
+        {
+            return globalFilePath();
+        }
+
 
     // Member Operators
 
@@ -152,6 +165,14 @@ public:
 
         friend Ostream& operator<<(Ostream&, const polyTopoChanger&);
 };
+
+
+//- Template function for obtaining global status
+template<>
+inline bool typeGlobal<polyTopoChanger>()
+{
+    return true;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

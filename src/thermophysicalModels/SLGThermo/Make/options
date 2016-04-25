@@ -11,4 +11,5 @@ EXE_INC = \
 
 LIB_LIBS = \
     -lcompressibleTransportModels \
+    -lfluidThermophysicalModels \
     -lfiniteVolume

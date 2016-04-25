@@ -195,8 +195,8 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
             IOobject::AUTO_WRITE
         );
 
-        // Check if field exists and can be read
-        if (IHeader.headerOk())
+        // check if field exists and can be read
+        if (IHeader.typeHeaderOk<volScalarField>(true))
         {
             ILambda_.set
             (

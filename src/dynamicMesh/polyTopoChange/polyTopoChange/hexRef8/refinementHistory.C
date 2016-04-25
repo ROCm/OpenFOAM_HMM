@@ -560,14 +560,8 @@ Foam::refinementHistory::refinementHistory(const IOobject& io)
     refCount(),
     active_(false)
 {
-    // Temporary warning
-    if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-    {
-        WarningInFunction
-            << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
-            << " does not support automatic rereading."
-            << endl;
-    }
+    // Warn for MUST_READ_IF_MODIFIED
+    warnNoRereading<refinementHistory>();
 
     if
     (
@@ -612,14 +606,8 @@ Foam::refinementHistory::refinementHistory
     freeSplitCells_(0),
     visibleCells_(visibleCells)
 {
-    // Temporary warning
-    if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-    {
-        WarningInFunction
-            << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
-            << " does not support automatic rereading."
-            << endl;
-    }
+    // Warn for MUST_READ_IF_MODIFIED
+    warnNoRereading<refinementHistory>();
 
     if
     (
@@ -658,14 +646,8 @@ Foam::refinementHistory::refinementHistory
     active_(false),
     freeSplitCells_(0)
 {
-    // Temporary warning
-    if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-    {
-        WarningInFunction
-            << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
-            << " does not support automatic rereading."
-            << endl;
-    }
+    // Warn for MUST_READ_IF_MODIFIED
+    warnNoRereading<refinementHistory>();
 
     if
     (
@@ -719,14 +701,8 @@ Foam::refinementHistory::refinementHistory
     active_(active),
     freeSplitCells_(0)
 {
-    // Temporary warning
-    if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
-    {
-        WarningInFunction
-            << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
-            << " does not support automatic rereading."
-            << endl;
-    }
+    // Warn for MUST_READ_IF_MODIFIED
+    warnNoRereading<refinementHistory>();
 
     if
     (

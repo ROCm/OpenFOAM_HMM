@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -163,7 +163,7 @@ void calcOmega
         false
     );
 
-    if (omegaHeader.headerOk())
+    if (omegaHeader.typeHeaderOk<volScalarField>(true))
     {
         volScalarField omega(omegaHeader, mesh);
         dimensionedScalar k0("SMALL", k.dimensions(), SMALL);
@@ -200,7 +200,7 @@ void setField
         false
     );
 
-    if (fldHeader.headerOk())
+    if (fldHeader.typeHeaderOk<volScalarField>(true))
     {
         volScalarField fld(fldHeader, mesh);
         fld = value;
@@ -388,7 +388,7 @@ int main(int argc, char *argv[])
             basicThermo::dictName,
             runTime.constant(),
             mesh
-        ).headerOk()
+        ).typeHeaderOk<IOdictionary>(true)
     )
     {
         calcCompressible(mesh, mask, U, y, ybl);

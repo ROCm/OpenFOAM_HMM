@@ -24,7 +24,11 @@
 
 
         // Check U exists
-        if (Uheader.headerOk() && Theader.headerOk())
+        if
+        (
+            Uheader.typeHeaderOk<volVectorField>(true)
+         && Theader.typeHeaderOk<volScalarField>(true)
+        )
         {
             mesh.readUpdate();
 

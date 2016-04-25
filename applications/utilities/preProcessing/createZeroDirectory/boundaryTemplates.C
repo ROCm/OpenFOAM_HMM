@@ -90,7 +90,7 @@ Foam::boundaryTemplates::boundaryTemplates
                 IOobject::MUST_READ
             );
 
-            if (io.headerOk())
+            if (io.typeHeaderOk<IOdictionary>(true))
             {
                 IOdictionary dict(io);
                 regionTemplate.subDict(patchTypes[i]).merge(dict);

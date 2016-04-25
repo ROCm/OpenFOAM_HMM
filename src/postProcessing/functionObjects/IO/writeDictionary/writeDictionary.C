@@ -55,7 +55,7 @@ bool Foam::writeDictionary::tryDirectory
         false
     );
 
-    if (dictIO.headerOk())
+    if (dictIO.typeHeaderOk<IOdictionary>(true))
     {
         IOdictionary dict(dictIO);
 

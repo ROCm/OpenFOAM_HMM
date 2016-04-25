@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -88,7 +88,7 @@ void Foam::calcTypes::div::calc
     );
 
     // Check field exists
-    if (fieldHeader.headerOk())
+    if (fieldHeader.typeHeaderOk<surfaceScalarField>(false))
     {
         bool processed = false;
 

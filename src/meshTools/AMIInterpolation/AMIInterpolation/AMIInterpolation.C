@@ -962,6 +962,13 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
                 newTgtPoints
             );
 
+        scalarField newTgtMagSf(newTgtPatch.size());
+        forAll(newTgtPatch, faceI)
+        {
+            newTgtMagSf[faceI] = newTgtPatch[faceI].mag(newTgtPatch.points());
+        }
+
+
         // calculate AMI interpolation
         autoPtr<AMIMethod<SourcePatch, TargetPatch> > AMIPtr
         (
@@ -971,7 +978,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
                 srcPatch,
                 newTgtPatch,
                 srcMagSf_,
-                tgtMagSf_,
+                newTgtMagSf,
                 triMode_,
                 reverseTarget_,
                 requireMatch_ && (lowWeightCorrection_ < 0)
@@ -992,6 +999,11 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
         //                  tgtPatch) faces it overlaps
         //  tgtAddress_ :   per newTgtPatch (not tgtPatch) face a list of the
         //                  srcPatch faces it overlaps
+
+        if (debug)
+        {
+            writeFaceConnectivity(srcPatch, newTgtPatch, srcAddress_);
+        }
 
 
         // Rework newTgtPatch indices into globalIndices of tgtPatch
@@ -1056,11 +1068,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
         List<Map<label> > cMap;
         srcMapPtr_.reset(new mapDistribute(globalSrcFaces, tgtAddress_, cMap));
         tgtMapPtr_.reset(new mapDistribute(globalTgtFaces, srcAddress_, cMap));
-
-        if (debug)
-        {
-            writeFaceConnectivity(srcPatch, newTgtPatch, srcAddress_);
-        }
     }
     else
     {

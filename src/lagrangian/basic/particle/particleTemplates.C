@@ -135,7 +135,7 @@ void Foam::particle::readFields(CloudType& c)
 
     IOobject procIO(c.fieldIOobject("origProcId", IOobject::MUST_READ));
 
-    if (procIO.headerOk())
+    if (procIO.typeHeaderOk<IOField<label> >(true))
     {
         IOField<label> origProcId(procIO);
         c.checkFieldIOobject(c, origProcId);

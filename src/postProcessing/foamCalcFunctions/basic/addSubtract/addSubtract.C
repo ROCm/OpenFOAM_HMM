@@ -57,7 +57,7 @@ void Foam::calcTypes::addSubtract::writeAddSubtractFields
         IOobject::MUST_READ
     );
 
-    if (addSubtractFieldHeader.headerOk())
+    if (addSubtractFieldHeader.typeHeaderOk<volScalarField>(false))
     {
         writeAddSubtractField<scalar>
         (
@@ -265,7 +265,7 @@ void Foam::calcTypes::addSubtract::calc
         IOobject::MUST_READ
     );
 
-    if (baseFieldHeader.headerOk())
+    if (baseFieldHeader.typeHeaderOk<volScalarField>(false))
     {
         switch (calcType_)
         {

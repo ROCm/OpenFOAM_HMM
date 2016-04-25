@@ -76,7 +76,11 @@ int main(int argc, char *argv[])
 
         if (findStrings(fieldPatterns, "k"))
         {
-            if (!IOobject("k", runTime.timeName(), mesh).headerOk())
+            if
+            (
+               !IOobject("k", runTime.timeName(), mesh).
+                typeHeaderOk<volScalarField>(true)
+            )
             {
                 Info<< "    Writing turbulence field k" << endl;
                 const volScalarField k(RASModel->k());
@@ -90,7 +94,11 @@ int main(int argc, char *argv[])
 
         if (findStrings(fieldPatterns, "epsilon"))
         {
-            if (!IOobject("epsilon", runTime.timeName(), mesh).headerOk())
+            if
+            (
+               !IOobject("epsilon", runTime.timeName(), mesh).
+                typeHeaderOk<volScalarField>(true)
+            )
             {
                 Info<< "    Writing turbulence field epsilon" << endl;
                 const volScalarField epsilon(RASModel->epsilon());
@@ -104,7 +112,11 @@ int main(int argc, char *argv[])
 
         if (findStrings(fieldPatterns, "R"))
         {
-            if (!IOobject("R", runTime.timeName(), mesh).headerOk())
+            if
+            (
+               !IOobject("R", runTime.timeName(), mesh).
+                typeHeaderOk<volSymmTensorField>(true)
+            )
             {
                 Info<< "    Writing turbulence field R" << endl;
                 const volSymmTensorField R(RASModel->R());
@@ -118,7 +130,11 @@ int main(int argc, char *argv[])
 
         if (findStrings(fieldPatterns, "omega"))
         {
-            if (!IOobject("omega", runTime.timeName(), mesh).headerOk())
+            if
+            (
+               !IOobject("omega", runTime.timeName(), mesh).
+                typeHeaderOk<volScalarField>(true)
+            )
             {
                 const scalar Cmu = 0.09;
 
