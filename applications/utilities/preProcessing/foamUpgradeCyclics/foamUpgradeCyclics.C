@@ -74,7 +74,7 @@ void rewriteBoundary
     HashTable<word>& nbrNames
 )
 {
-    Info<< "Reading boundary from " << typeFilePath<IOPtrList<entry> >(io)
+    Info<< "Reading boundary from " << typeFilePath<IOPtrList<entry>>(io)
         << endl;
 
     // Read PtrList of dictionary.
@@ -447,7 +447,7 @@ int main(int argc, char *argv[])
         false
     );
 
-    if (io.typeHeaderOk<IOPtrList<entry> >(false))
+    if (io.typeHeaderOk<IOPtrList<entry>>(false))
     {
         rewriteBoundary
         (
@@ -481,7 +481,7 @@ int main(int argc, char *argv[])
             false
         );
 
-        if (io.typeHeaderOk<IOPtrList<entry> >(false))
+        if (io.typeHeaderOk<IOPtrList<entry>>(false))
         {
             rewriteBoundary
             (

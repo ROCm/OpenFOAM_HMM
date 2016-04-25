@@ -60,7 +60,7 @@ const NamedEnum<shellSurfaces::refineMode, 3> shellSurfaces::refineModeNames_;
 void Foam::shellSurfaces::setAndCheckLevels
 (
     const label shellI,
-    const List<Tuple2<scalar, label> >& distLevels
+    const List<Tuple2<scalar, label>>& distLevels
 )
 {
     if (modes_[shellI] != DISTANCE && distLevels.size() != 1)
@@ -146,7 +146,7 @@ void Foam::shellSurfaces::checkGapLevels
 (
     const dictionary& shellDict,
     const label shellI,
-    const List<FixedList<label, 3> >& levels
+    const List<FixedList<label, 3>>& levels
 )
 {
     const searchableSurface& shell = allGeometry_[shells_[shellI]];
@@ -389,7 +389,7 @@ void Foam::shellSurfaces::findHigherGapLevel
     const labelList& ptLevel,
     const label shellI,
     labelList& gapShell,
-    List<FixedList<label, 3> >& gapInfo,
+    List<FixedList<label, 3>>& gapInfo,
     List<volumeType>& gapMode
 ) const
 {
@@ -755,7 +755,7 @@ Foam::labelList Foam::shellSurfaces::maxGapLevel() const
 
     forAll(extendedGapLevel_, shellI)
     {
-        const List<FixedList<label, 3> >& levels = extendedGapLevel_[shellI];
+        const List<FixedList<label, 3>>& levels = extendedGapLevel_[shellI];
         forAll(levels, i)
         {
             surfaceMax[shellI] = max(surfaceMax[shellI], levels[i][2]);
@@ -787,7 +787,7 @@ void Foam::shellSurfaces::findHigherGapLevel
     const pointField& pt,
     const labelList& ptLevel,
     labelList& gapShell,
-    List<FixedList<label, 3> >& gapInfo,
+    List<FixedList<label, 3>>& gapInfo,
     List<volumeType>& gapMode
 ) const
 {
@@ -816,7 +816,7 @@ void Foam::shellSurfaces::findHigherGapLevel
 (
     const pointField& pt,
     const labelList& ptLevel,
-    List<FixedList<label, 3> >& gapInfo,
+    List<FixedList<label, 3>>& gapInfo,
     List<volumeType>& gapMode
 ) const
 {

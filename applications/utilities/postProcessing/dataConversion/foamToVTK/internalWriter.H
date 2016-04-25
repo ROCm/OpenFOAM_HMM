@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -98,7 +98,7 @@ public:
         template<class Type, class GeoMesh>
         void write
         (
-            const PtrList<DimensionedField<Type, volMesh> >& flds
+            const PtrList<DimensionedField<Type, volMesh>>& flds
         );
 
         //- Interpolate and write volFields
@@ -114,7 +114,7 @@ public:
         void write
         (
             const volPointInterpolation&,
-            const PtrList<DimensionedField<Type, volMesh> >&
+            const PtrList<DimensionedField<Type, volMesh>>&
         );
 };
 

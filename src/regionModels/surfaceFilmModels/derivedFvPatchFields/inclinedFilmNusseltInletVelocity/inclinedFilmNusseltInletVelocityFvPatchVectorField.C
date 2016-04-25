@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,9 +56,9 @@ inclinedFilmNusseltInletVelocityFvPatchVectorField
 :
     fixedValueFvPatchVectorField(ptf, p, iF, mapper),
     filmRegionName_(ptf.filmRegionName_),
-    GammaMean_(ptf.GammaMean_().clone().ptr()),
-    a_(ptf.a_().clone().ptr()),
-    omega_(ptf.omega_().clone().ptr())
+    GammaMean_(ptf.GammaMean_, false),
+    a_(ptf.a_, false),
+    omega_(ptf.omega_, false)
 {}
 
 
@@ -91,9 +91,9 @@ inclinedFilmNusseltInletVelocityFvPatchVectorField
 :
     fixedValueFvPatchVectorField(fmfrpvf),
     filmRegionName_(fmfrpvf.filmRegionName_),
-    GammaMean_(fmfrpvf.GammaMean_().clone().ptr()),
-    a_(fmfrpvf.a_().clone().ptr()),
-    omega_(fmfrpvf.omega_().clone().ptr())
+    GammaMean_(fmfrpvf.GammaMean_, false),
+    a_(fmfrpvf.a_, false),
+    omega_(fmfrpvf.omega_, false)
 {}
 
 
@@ -106,9 +106,9 @@ inclinedFilmNusseltInletVelocityFvPatchVectorField
 :
     fixedValueFvPatchVectorField(fmfrpvf, iF),
     filmRegionName_(fmfrpvf.filmRegionName_),
-    GammaMean_(fmfrpvf.GammaMean_().clone().ptr()),
-    a_(fmfrpvf.a_().clone().ptr()),
-    omega_(fmfrpvf.omega_().clone().ptr())
+    GammaMean_(fmfrpvf.GammaMean_, false),
+    a_(fmfrpvf.a_, false),
+    omega_(fmfrpvf.omega_, false)
 {}
 
 

@@ -79,7 +79,7 @@ public:
     //- Class used to pass tracking data to the trackToFace function
     class trackingData
     :
-        public particle::TrackingData<Cloud<trackedParticle> >
+        public particle::TrackingData<Cloud<trackedParticle>>
     {
     public:
 
@@ -97,7 +97,7 @@ public:
                 List<PackedBoolList>& featureEdgeVisited
             )
             :
-                particle::TrackingData<Cloud<trackedParticle> >(cloud),
+                particle::TrackingData<Cloud<trackedParticle>>(cloud),
                 maxLevel_(maxLevel),
                 featureEdgeVisited_(featureEdgeVisited)
             {}

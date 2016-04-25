@@ -735,20 +735,20 @@ void Foam::isoSurface::generateTriPoints
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> >
+Foam::tmp<Foam::Field<Type>>
 Foam::isoSurface::interpolate
 (
     const label nPoints,
     const labelList& triPointMergeMap,
     const labelList& interpolatedPoints,
-    const List<FixedList<label, 3> >& interpolatedOldPoints,
-    const List<FixedList<scalar, 3> >& interpolationWeights,
+    const List<FixedList<label, 3>>& interpolatedOldPoints,
+    const List<FixedList<scalar, 3>>& interpolationWeights,
     const DynamicList<Type>& unmergedValues
 )
 {
     // One value per point
-    tmp<Field<Type> > tvalues(new Field<Type>(nPoints, pTraits<Type>::zero));
-    Field<Type>& values = tvalues();
+    tmp<Field<Type>> tvalues(new Field<Type>(nPoints, Type(Zero)));
+    Field<Type>& values = tvalues.ref();
 
 
     // Pass1: unweighted average of merged point values
@@ -786,7 +786,7 @@ Foam::isoSurface::interpolate
 
         // Note: zeroing should not be necessary if interpolation only done
         //       for newly introduced points (i.e. not in triPointMergeMap)
-        values[pointI] = pTraits<Type>::zero;
+        values[pointI] = Type(Zero);
         forAll(oldPoints, j)
         {
             values[pointI] = w[j]*unmergedValues[oldPoints[j]];
@@ -798,7 +798,7 @@ Foam::isoSurface::interpolate
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> >
+Foam::tmp<Foam::Field<Type>>
 Foam::isoSurface::interpolate
 (
     const GeometricField<Type, fvPatchField, volMesh>& cCoords,

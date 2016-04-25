@@ -91,7 +91,7 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
         // Collect cells to test for inside/outside in shell
         labelList cellToCompact(mesh_.nCells(), -1);
         labelList bFaceToCompact(mesh_.nFaces()-mesh_.nInternalFaces(), -1);
-        List<FixedList<label, 3> > shellGapInfo;
+        List<FixedList<label, 3>> shellGapInfo;
         List<volumeType> shellGapMode;
         {
             DynamicField<point> compactToCc(mesh_.nCells()/10);
@@ -138,7 +138,7 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
         }
 
 
-        const List<FixedList<label, 3> >& extendedGapLevel =
+        const List<FixedList<label, 3>>& extendedGapLevel =
             surfaces_.extendedGapLevel();
         const List<volumeType>& extendedGapMode =
             surfaces_.extendedGapMode();
@@ -514,7 +514,7 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
 //    const scalar edge0Len = meshCutter_.level0EdgeLength();
 //
 //    const labelList& surfaceIndices = surfaces_.surfaces();
-//    const List<FixedList<label, 3> >& extendedGapLevel =
+//    const List<FixedList<label, 3>>& extendedGapLevel =
 //        surfaces_.extendedGapLevel();
 //    const List<volumeType>& extendedGapMode = surfaces_.extendedGapMode();
 //
@@ -997,7 +997,7 @@ void Foam::meshRefinement::selectGapCandidates
     const label nRefine,
 
     labelList& cellMap,
-    List<FixedList<label, 3> >& shellGapInfo,
+    List<FixedList<label, 3>>& shellGapInfo,
     List<volumeType>& shellGapMode
 ) const
 {
@@ -1048,7 +1048,7 @@ void Foam::meshRefinement::selectGapCandidates
 
     map.setSize(compactI);
     cellMap = UIndirectList<label>(cellMap, map)();
-    shellGapInfo = UIndirectList<FixedList<label, 3> >(shellGapInfo, map)();
+    shellGapInfo = UIndirectList<FixedList<label, 3>>(shellGapInfo, map)();
     shellGapMode = UIndirectList<volumeType>(shellGapMode, map)();
 }
 
@@ -1108,7 +1108,7 @@ Foam::label Foam::meshRefinement::markInternalGapRefinement
     const pointField& cellCentres = mesh_.cellCentres();
     const scalar edge0Len = meshCutter_.level0EdgeLength();
 
-    const List<FixedList<label, 3> >& extendedGapLevel =
+    const List<FixedList<label, 3>>& extendedGapLevel =
         surfaces_.extendedGapLevel();
     const List<volumeType>& extendedGapMode = surfaces_.extendedGapMode();
 
@@ -1121,7 +1121,7 @@ Foam::label Foam::meshRefinement::markInternalGapRefinement
     {
         // Collect cells to test
         labelList cellMap;
-        List<FixedList<label, 3> > shellGapInfo;
+        List<FixedList<label, 3>> shellGapInfo;
         List<volumeType> shellGapMode;
         selectGapCandidates
         (
@@ -1473,7 +1473,7 @@ Foam::label Foam::meshRefinement::markSmallFeatureRefinement
 {
     const labelList& cellLevel = meshCutter_.cellLevel();
     const labelList& surfaceIndices = surfaces_.surfaces();
-    const List<FixedList<label, 3> >& extendedGapLevel =
+    const List<FixedList<label, 3>>& extendedGapLevel =
         surfaces_.extendedGapLevel();
     const List<volumeType>& extendedGapMode = surfaces_.extendedGapMode();
 
@@ -1530,7 +1530,7 @@ Foam::label Foam::meshRefinement::markSmallFeatureRefinement
 
         // Do test to see whether triangles are inside/outside shell with
         // applicable specification (minLevel <= celllevel < maxLevel)
-        List<FixedList<label, 3> > shellGapInfo;
+        List<FixedList<label, 3>> shellGapInfo;
         List<volumeType> shellGapMode;
         shells_.findHigherGapLevel
         (

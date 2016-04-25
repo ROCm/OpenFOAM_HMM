@@ -87,7 +87,7 @@ class refinementSurfaces
         labelList gapLevel_;
 
         //- From global region number to small-gap level specification
-        List<FixedList<label, 3> > extendedGapLevel_;
+        List<FixedList<label, 3>> extendedGapLevel_;
 
         //- From global region number to side of surface to detect
         List<volumeType> extendedGapMode_;
@@ -201,7 +201,7 @@ public:
             //  - minimum cell level when to start trying to detect gaps
             //  - maximum cell level to refine to (so do not detect gaps if
             //    cell >= maximum level)
-            const List<FixedList<label, 3> >& extendedGapLevel() const
+            const List<FixedList<label, 3>>& extendedGapLevel() const
             {
                 return extendedGapLevel_;
             }

@@ -109,8 +109,8 @@ protected:
             const bool writeLinesOnly,
             const treeBoundBox& bb,
             const label nodeI,
-            const List<Pair<treeBoundBox> >& bbs,
-            const List<Pair<label> >& nodes,
+            const List<Pair<treeBoundBox>>& bbs,
+            const List<Pair<label>>& nodes,
             label& vertI,
             Ostream& os
         ) const;
@@ -126,7 +126,7 @@ protected:
             const treeBoundBox& bb,
             const label nodeI,
 
-            DynamicList<Pair<treeBoundBox> >& bbs,
+            DynamicList<Pair<treeBoundBox>>& bbs,
             DynamicList<labelPair>& nodes,
             DynamicList<labelList>& addressing
         ) const;

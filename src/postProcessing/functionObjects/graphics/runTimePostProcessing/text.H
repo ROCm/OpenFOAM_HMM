@@ -77,7 +77,7 @@ protected:
         scalar size_;
 
         //- Colour
-        autoPtr<DataEntry<vector> > colour_;
+        autoPtr<DataEntry<vector>> colour_;
 
         //- Bold flag
         bool bold_;

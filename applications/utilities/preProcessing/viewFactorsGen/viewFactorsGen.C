@@ -335,7 +335,7 @@ int main(int argc, char *argv[])
     const polyBoundaryMesh& coarsePatches = coarseMesh.boundaryMesh();
 
     labelList viewFactorsPatches(patches.findIndices(viewFactorWall));
-    forAll (viewFactorsPatches, i)
+    forAll(viewFactorsPatches, i)
     {
         label patchI = viewFactorsPatches[i];
         nCoarseFaces += coarsePatches[patchI].size();
@@ -413,14 +413,14 @@ int main(int argc, char *argv[])
                 (
                     availablePoints,
                     upp.faceCentres().size()
-                ).assign(upp.faceCentres());
+                ) = upp.faceCentres();
 
                 SubList<point>
                 (
                     availablePoints,
                     upp.localPoints().size(),
                     upp.faceCentres().size()
-                ).assign(upp.localPoints());
+                ) = upp.localPoints();
 
                 point cfo = cf;
                 scalar dist = GREAT;
@@ -783,24 +783,17 @@ int main(int argc, char *argv[])
             const labelList& agglom = finalAgglom[patchID];
             if (agglom.size() > 0)
             {
-<<<<<<< HEAD
                 label nAgglom = max(agglom)+1;
                 labelListList coarseToFine(invertOneToMany(nAgglom, agglom));
                 const labelList& coarsePatchFace =
                     coarseMesh.patchFaceMap()[patchID];
 
                 forAll(coarseToFine, coarseI)
-=======
-                const scalar Fij = sum(F[compactI]);
-                const label coarseFaceID = coarsePatchFace[coarseI];
-                const labelList& fineFaces = coarseToFine[coarseFaceID];
-                forAll(fineFaces, fineId)
->>>>>>> foundation
                 {
                     const scalar Fij = sum(F[compactI]);
                     const label coarseFaceID = coarsePatchFace[coarseI];
                     const labelList& fineFaces = coarseToFine[coarseFaceID];
-                    forAll (fineFaces, fineId)
+                    forAll(fineFaces, fineId)
                     {
                         const label faceID = fineFaces[fineId];
                         viewFactorField.boundaryField()[patchID][faceID] = Fij;

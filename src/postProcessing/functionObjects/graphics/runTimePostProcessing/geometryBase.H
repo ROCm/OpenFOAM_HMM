@@ -99,7 +99,7 @@ protected:
         renderModeType renderMode_;
 
         //- Opacity
-        autoPtr<DataEntry<scalar> > opacity_;
+        autoPtr<DataEntry<scalar>> opacity_;
 
         //- Reference to the colours
         const HashPtrTable<DataEntry<vector>, word>& colours_;

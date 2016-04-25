@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -190,7 +190,7 @@ public:
         //- Interpolate dimensionedField using inverse distance weighting
         //  returning pointField
         template<class Type>
-        tmp<DimensionedField<Type, pointMesh> > interpolate
+        tmp<DimensionedField<Type, pointMesh>> interpolate
         (
             const DimensionedField<Type, volMesh>&
         ) const;
@@ -198,9 +198,9 @@ public:
         //- Interpolate tmp<dimensionedField> using inverse distance
         //  weighting returning pointField
         template<class Type>
-        tmp<DimensionedField<Type, pointMesh> > interpolate
+        tmp<DimensionedField<Type, pointMesh>> interpolate
         (
-            const tmp<DimensionedField<Type, volMesh> >&
+            const tmp<DimensionedField<Type, volMesh>>&
         ) const;
 
 
@@ -264,7 +264,7 @@ public:
             //- Interpolate dimensionedField using inverse distance weighting
             //  returning pointField with name. Optionally caches
             template<class Type>
-            tmp<DimensionedField<Type, pointMesh> > interpolate
+            tmp<DimensionedField<Type, pointMesh>> interpolate
             (
                 const DimensionedField<Type, volMesh>&,
                 const word& name,

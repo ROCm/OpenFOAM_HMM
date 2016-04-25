@@ -204,7 +204,7 @@ void Foam::fieldAverage::readAveragingProperties()
     totalTime_.clear();
     totalTime_.setSize(faItems_.size(), obr_.time().deltaTValue());
 
-    if (log_ && (resetOnRestart_ || resetOnOutput_))
+    if (log_ && (restartOnRestart_ || restartOnOutput_))
     {
         Info<< "    Starting averaging at time " << obr_.time().timeName()
             << nl;

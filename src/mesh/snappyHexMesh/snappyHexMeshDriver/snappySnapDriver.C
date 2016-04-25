@@ -277,7 +277,7 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothInternalDisplacement
     );
 
     tmp<pointField> tdisplacement(new pointField(mesh.nPoints(), vector::zero));
-    pointField& displacement = tdisplacement();
+    pointField& displacement = tdisplacement.ref();
 
     label nAdapted = 0;
 
@@ -522,7 +522,7 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothPatchDisplacement
 
     // Displacement to calculate.
     tmp<pointField> tpatchDisp(new pointField(meshPoints.size(), vector::zero));
-    pointField& patchDisp = tpatchDisp();
+    pointField& patchDisp = tpatchDisp.ref();
 
     forAll(pointFaces, i)
     {
@@ -685,7 +685,7 @@ Foam::tmp<Foam::scalarField> Foam::snappySnapDriver::edgePatchDist
 
     // Copy edge values into scalarField
     tmp<scalarField> tedgeDist(new scalarField(mesh.nEdges()));
-    scalarField& edgeDist = tedgeDist();
+    scalarField& edgeDist = tedgeDist.ref();
 
     forAll(allEdgeInfo, edgeI)
     {
@@ -999,7 +999,7 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::avgCellCentres
     (
         new pointField(pointFaces.size(), vector::zero)
     );
-    pointField& avgBoundary = tavgBoundary();
+    pointField& avgBoundary = tavgBoundary.ref();
     labelList nBoundary(pointFaces.size(), 0);
 
     forAll(pointFaces, pointI)

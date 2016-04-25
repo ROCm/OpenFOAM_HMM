@@ -54,7 +54,7 @@ namespace fvc
     (
         const GeometricField<Type, fvsPatchField, surfaceMesh>&,
         const CombineOp& cop,
-        const Type& nullValue = pTraits<Type>::zero
+        const Type& nullValue = Type(Zero)
     );
 
     template<class Type, class CombineOp>
@@ -62,7 +62,7 @@ namespace fvc
     (
         const tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>&,
         const CombineOp& cop,
-        const Type& nullValue = pTraits<Type>::zero
+        const Type& nullValue = Type(Zero)
     );
 }
 

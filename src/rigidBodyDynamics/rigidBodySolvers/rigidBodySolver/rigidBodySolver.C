@@ -58,7 +58,7 @@ void Foam::RBD::rigidBodySolver::correctQuaternionJoints()
 {
     if (model_.unitQuaternions())
     {
-        forAll (model_.joints(), i)
+        forAll(model_.joints(), i)
         {
             const label qi = model_.joints()[i].qIndex();
 

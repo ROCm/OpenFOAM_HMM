@@ -84,7 +84,7 @@ Foam::refinementParameters::refinementParameters(const dictionary& dict)
         }
     }
 
-    List<Tuple2<point, word> > pointsToZone;
+    List<Tuple2<point, word>> pointsToZone;
     if (dict.readIfPresent("locationsInMesh", pointsToZone))
     {
         label nZones = locationsInMesh_.size();

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -147,7 +147,7 @@ void Foam::fvMeshDistribute::mapBoundaryFields
 template<class T>
 void Foam::fvMeshDistribute::saveInternalFields
 (
-    PtrList<Field<T> >& iflds
+    PtrList<Field<T>>& iflds
 ) const
 {
     typedef GeometricField<T, fvsPatchField, surfaceMesh> fldType;
@@ -177,7 +177,7 @@ template<class T>
 void Foam::fvMeshDistribute::mapExposedFaces
 (
     const mapPolyMesh& map,
-    const PtrList<Field<T> >& oldFlds
+    const PtrList<Field<T>>& oldFlds
 )
 {
     const labelList& faceMap = map.faceMap();

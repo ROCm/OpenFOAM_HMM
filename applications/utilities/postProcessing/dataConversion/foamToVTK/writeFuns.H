@@ -156,7 +156,7 @@ public:
     (
         std::ostream&,
         const bool binary,
-        const PtrList<DimensionedField<Type, volMesh> >&,
+        const PtrList<DimensionedField<Type, volMesh>>&,
         const vtkMesh&
     );
 

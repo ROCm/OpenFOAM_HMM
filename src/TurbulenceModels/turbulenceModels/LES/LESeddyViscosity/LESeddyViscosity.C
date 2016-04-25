@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "LESeddyViscosity.H"
+#include "zeroGradientFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -107,10 +108,10 @@ tmp<volScalarField> LESeddyViscosity<BasicTurbulenceModel>::epsilon() const
                 IOobject::NO_WRITE
             ),
             Ce_*tk()*sqrt(tk())/this->delta(),
-            zeroGradientFvPatchScalarField::typeName
+            zeroGradientFvPatchField<scalar>::typeName
         )
     );
-    volScalarField& epsilon = tepsilon();
+    volScalarField& epsilon = tepsilon.ref();
     epsilon.correctBoundaryConditions();
 
     return tepsilon;

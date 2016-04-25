@@ -256,14 +256,14 @@ diffusionMulticomponent<CombThermoType, ThermoType>::correct()
             const List<specieCoeffs>& lhs = reactions_[k].lhs();
 
             // Set to zero RR's
-            forAll (lhs, l)
+            forAll(lhs, l)
             {
                 const label lIndex = lhs[l].index;
                 this->chemistryPtr_->RR(lIndex) =
                     dimensionedScalar("zero", dimMass/dimTime/dimVolume, 0.0);
             }
 
-            forAll (rhs, l)
+            forAll(rhs, l)
             {
                 const label rIndex = rhs[l].index;
                 this->chemistryPtr_->RR(rIndex) =
@@ -363,7 +363,7 @@ diffusionMulticomponent<CombThermoType, ThermoType>::correct()
             const List<specieCoeffs>& lhs = reactions_[k].lhs();
 
             scalar fuelStoic = 1.0;
-            forAll (lhs, l)
+            forAll(lhs, l)
             {
                 const label lIndex = lhs[l].index;
                 if (lIndex == fuelIndex)
@@ -376,7 +376,7 @@ diffusionMulticomponent<CombThermoType, ThermoType>::correct()
             const scalar MwFuel = specieThermo_[fuelIndex].W();
 
             // Update left hand side species
-            forAll (lhs, l)
+            forAll(lhs, l)
             {
                 const label lIndex = lhs[l].index;
 
@@ -389,7 +389,7 @@ diffusionMulticomponent<CombThermoType, ThermoType>::correct()
             }
 
             // Update right hand side species
-            forAll (rhs, r)
+            forAll(rhs, r)
             {
                 const label rIndex = rhs[r].index;
 
@@ -411,7 +411,7 @@ R(volScalarField& Y) const
 {
     tmp<fvScalarMatrix> tSu(new fvScalarMatrix(Y, dimMass/dimTime));
 
-    fvScalarMatrix& Su = tSu();
+    fvScalarMatrix& Su = tSu.ref();
 
     if (this->active())
     {
@@ -449,7 +449,7 @@ dQ() const
 
     if (this->active())
     {
-        volScalarField& dQ = tdQ();
+        volScalarField& dQ = tdQ.ref();
         dQ = this->chemistryPtr_->dQ();
     }
 
@@ -483,7 +483,7 @@ Sh() const
 
     if (this->active())
     {
-        scalarField& Sh = tSh();
+        scalarField& Sh = tSh.ref();
         Sh = this->chemistryPtr_->Sh();
     }
 

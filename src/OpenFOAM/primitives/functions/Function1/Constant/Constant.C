@@ -31,6 +31,18 @@ template<class Type>
 Foam::Function1Types::Constant<Type>::Constant
 (
     const word& entryName,
+    const Type& value
+)
+:
+    Function1<Type>(entryName),
+    value_(value)
+{}
+
+
+template<class Type>
+Foam::Function1Types::Constant<Type>::Constant
+(
+    const word& entryName,
     const dictionary& dict
 )
 :
@@ -44,29 +56,11 @@ Foam::Function1Types::Constant<Type>::Constant
 
 
 template<class Type>
-<<<<<<< HEAD:src/OpenFOAM/primitives/functions/DataEntry/Constant/Constant.C
-Foam::Constant<Type>::Constant
-(
-    const word& entryName,
-    const Type& value,
-    const dimensionSet& dimensions
-)
-:
-    DataEntry<Type>(entryName),
-    value_(value),
-    dimensions_(dimensions)
-{}
-
-
-template<class Type>
-Foam::Constant<Type>::Constant(const Constant<Type>& cnst)
-=======
 Foam::Function1Types::Constant<Type>::Constant
 (
     const word& entryName,
     Istream& is
 )
->>>>>>> foundation:src/OpenFOAM/primitives/functions/Function1/Constant/Constant.C
 :
     Function1<Type>(entryName),
     value_(pTraits<Type>(is))

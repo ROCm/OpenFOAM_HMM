@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-        Class rigidBodyMeshMotion Declaration
+                     Class rigidBodyMeshMotion Declaration
 \*---------------------------------------------------------------------------*/
 
 class rigidBodyMeshMotion

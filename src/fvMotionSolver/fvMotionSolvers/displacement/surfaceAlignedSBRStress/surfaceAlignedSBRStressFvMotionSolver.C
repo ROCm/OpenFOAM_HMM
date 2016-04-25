@@ -97,7 +97,7 @@ surfaceAlignedSBRStressFvMotionSolver
     ),
     minSigmaDiff_(coeffDict().lookupOrDefault<scalar>("minSigmaDiff", 1e-4))
 {
-    forAll (surfaceNames_, i)
+    forAll(surfaceNames_, i)
     {
         surfaceMesh_.set
         (
@@ -146,7 +146,7 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::calculateCellRot()
 
     DynamicList<label> hitCells;
 
-    forAll (surfaceMesh_, surfI)
+    forAll(surfaceMesh_, surfI)
     {
         List<pointIndexHit> hit(start.size());
         surfaceMesh_[surfI].findLineAny(start, end, hit);
@@ -260,7 +260,7 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::calculateCellRot()
                             const labelList& cPoints =
                                 fvMesh_.cellPoints(rotCellId);
 
-                            forAll (cPoints, j)
+                            forAll(cPoints, j)
                             {
                                 const label pointId = cPoints[j];
 
@@ -279,7 +279,7 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::calculateCellRot()
             }
         }
 
-        forAll (pointDisplacement_.internalField(), iPoint)
+        forAll(pointDisplacement_.internalField(), iPoint)
         {
             vector& point = pointDisplacement_.internalField()[iPoint];
             point /= pointsCount[iPoint];
@@ -324,10 +324,10 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::solve()
         )
     );
 
-    volVectorField& Ud = tUd();
+    volVectorField& Ud = tUd.ref();
 
     const vectorList& C = fvMesh_.C();
-    forAll (Ud, i)
+    forAll(Ud, i)
     {
         pointMVCWeight pointInter(fvMesh_, C[i], i);
         Ud[i] = pointInter.interpolate(pointDisplacement_);
@@ -364,7 +364,7 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::solve()
             dimensionedScalar("zero", dimless, 0.0)
         )
     );
-    volScalarField& mu =  tmu();
+    volScalarField& mu =  tmu.ref();
 
     const scalarList& V = fvMesh_.V();
     mu.internalField() = (1.0/V);

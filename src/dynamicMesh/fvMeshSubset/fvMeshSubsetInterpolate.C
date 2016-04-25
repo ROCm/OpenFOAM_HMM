@@ -2,11 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-<<<<<<< HEAD:src/dynamicMesh/fvMeshSubset/fvMeshSubsetInterpolate.C
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-=======
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
->>>>>>> foundation:src/finiteVolume/fvMesh/fvMeshSubset/fvMeshSubsetInterpolate.C
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -510,7 +506,7 @@ tmp<GeometricField<Type, pointPatchField, pointMesh>> fvMeshSubset::interpolate
 
 
 template<class Type>
-tmp<DimensionedField<Type, volMesh> > fvMeshSubset::interpolate
+tmp<DimensionedField<Type, volMesh>> fvMeshSubset::interpolate
 (
     const DimensionedField<Type, volMesh>& df,
     const fvMesh& sMesh,
@@ -518,7 +514,7 @@ tmp<DimensionedField<Type, volMesh> > fvMeshSubset::interpolate
 )
 {
     // Create the complete field from the pieces
-    tmp<DimensionedField<Type, volMesh> > tresF
+    tmp<DimensionedField<Type, volMesh>> tresF
     (
         new DimensionedField<Type, volMesh>
         (
@@ -541,7 +537,7 @@ tmp<DimensionedField<Type, volMesh> > fvMeshSubset::interpolate
 
 
 template<class Type>
-tmp<DimensionedField<Type, volMesh> > fvMeshSubset::interpolate
+tmp<DimensionedField<Type, volMesh>> fvMeshSubset::interpolate
 (
     const DimensionedField<Type, volMesh>& df
 ) const

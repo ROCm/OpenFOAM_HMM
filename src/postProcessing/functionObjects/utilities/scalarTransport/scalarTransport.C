@@ -211,23 +211,14 @@ Foam::scalarTransport::~scalarTransport()
 
 void Foam::scalarTransport::read(const dictionary& dict)
 {
-<<<<<<< HEAD
-    if (active_)
-    {
-        log_.readIfPresent("log", dict);
+    log_.readIfPresent("log", dict);
 
-        if (log_) Info<< type() << " " << name_ << " output:" << nl;
+    if (log_) Info<< type() << " " << name_ << " output:" << nl;
 
-        dict.readIfPresent("phiName", phiName_);
-        dict.readIfPresent("UName", UName_);
-        dict.readIfPresent("rhoName", rhoName_);
-=======
-    Info<< type() << ":" << nl;
+    dict.readIfPresent("phiName", phiName_);
+    dict.readIfPresent("UName", UName_);
+    dict.readIfPresent("rhoName", rhoName_);
 
-    phiName_ = dict.lookupOrDefault<word>("phiName", "phi");
-    UName_ = dict.lookupOrDefault<word>("UName", "U");
-    rhoName_ = dict.lookupOrDefault<word>("rhoName", "rho");
->>>>>>> foundation
 
     userDT_ = false;
     if (dict.readIfPresent("DT", DT_))
@@ -235,17 +226,9 @@ void Foam::scalarTransport::read(const dictionary& dict)
         userDT_ = true;
     }
 
-<<<<<<< HEAD
-        dict.readIfPresent("nCorr", nCorr_);
-        dict.lookup("resetOnStartUp") >> resetOnStartUp_;
-        dict.lookup("autoSchemes") >> autoSchemes_;
-=======
-    dict.lookup("resetOnStartUp") >> resetOnStartUp_;
-
     dict.readIfPresent("nCorr", nCorr_);
-
+    dict.lookup("resetOnStartUp") >> resetOnStartUp_;
     dict.lookup("autoSchemes") >> autoSchemes_;
->>>>>>> foundation
 
     fvOptions_.reset(dict.subDict("fvOptions"));
 }
@@ -253,45 +236,27 @@ void Foam::scalarTransport::read(const dictionary& dict)
 
 void Foam::scalarTransport::execute()
 {
-<<<<<<< HEAD
-    if (active_)
-    {
-        if (log_) Info<< type() << " " << name_ << " output:" << nl;
-=======
-    Info<< type() << " output:" << endl;
->>>>>>> foundation
+    if (log_) Info<< type() << " " << name_ << " output:" << nl;
 
     const surfaceScalarField& phi =
         mesh_.lookupObject<surfaceScalarField>(phiName_);
 
-<<<<<<< HEAD
-        volScalarField& T = transportedField();
+    volScalarField& T = transportedField();
 
-        // calculate the diffusivity
-        volScalarField DT(this->DT(phi));
-
-        // set schemes
-        word schemeVar = T.name();
-        if (autoSchemes_)
-        {
-            schemeVar = UName_;
-        }
-=======
-    // calculate the diffusivity
+    // Calculate the diffusivity
     volScalarField DT(this->DT(phi));
 
-    // set schemes
-    word schemeVar = T_.name();
+    // Set schemes
+    word schemeVar = T.name();
     if (autoSchemes_)
     {
         schemeVar = UName_;
     }
->>>>>>> foundation
 
     word divScheme("div(phi," + schemeVar + ")");
     word laplacianScheme("laplacian(" + DT.name() + "," + schemeVar + ")");
 
-    // set under-relaxation coeff
+    // Set under-relaxation coeff
     scalar relaxCoeff = 0.0;
     if (mesh_.relaxEquation(schemeVar))
     {
@@ -303,31 +268,17 @@ void Foam::scalarTransport::execute()
         const volScalarField& rho =
             mesh_.lookupObject<volScalarField>(rhoName_);
 
-<<<<<<< HEAD
-            // solve
-            for (label i = 0; i <= nCorr_; i++)
-            {
-                fvScalarMatrix TEqn
-                (
-                    fvm::ddt(rho, T)
-                  + fvm::div(phi, T, divScheme)
-                  - fvm::laplacian(DT, T, laplacianScheme)
-                 ==
-                    fvOptions_(rho, T)
-                );
-=======
-        // solve
+        // Solve
         for (label i = 0; i <= nCorr_; i++)
         {
             fvScalarMatrix TEqn
             (
-                fvm::ddt(rho, T_)
-              + fvm::div(phi, T_, divScheme)
-              - fvm::laplacian(DT, T_, laplacianScheme)
+                fvm::ddt(rho, T)
+              + fvm::div(phi, T, divScheme)
+              - fvm::laplacian(DT, T, laplacianScheme)
              ==
-                fvOptions_(rho, T_)
+                fvOptions_(rho, T)
             );
->>>>>>> foundation
 
             TEqn.relax(relaxCoeff);
 
@@ -338,31 +289,17 @@ void Foam::scalarTransport::execute()
     }
     else if (phi.dimensions() == dimVolume/dimTime)
     {
-        // solve
+        // Solve
         for (label i = 0; i <= nCorr_; i++)
         {
-<<<<<<< HEAD
-            // solve
-            for (label i = 0; i <= nCorr_; i++)
-            {
-                fvScalarMatrix TEqn
-                (
-                    fvm::ddt(T)
-                  + fvm::div(phi, T, divScheme)
-                  - fvm::laplacian(DT, T, laplacianScheme)
-                 ==
-                    fvOptions_(T)
-                );
-=======
             fvScalarMatrix TEqn
             (
-                fvm::ddt(T_)
-              + fvm::div(phi, T_, divScheme)
-              - fvm::laplacian(DT, T_, laplacianScheme)
+                fvm::ddt(T)
+              + fvm::div(phi, T, divScheme)
+              - fvm::laplacian(DT, T, laplacianScheme)
              ==
-                fvOptions_(T_)
+                fvOptions_(T)
             );
->>>>>>> foundation
 
             TEqn.relax(relaxCoeff);
 
@@ -370,11 +307,6 @@ void Foam::scalarTransport::execute()
 
             TEqn.solve(mesh_.solverDict(schemeVar));
         }
-<<<<<<< HEAD
-
-        if (log_) Info<< endl;
-=======
->>>>>>> foundation
     }
     else
     {
@@ -384,17 +316,13 @@ void Foam::scalarTransport::execute()
             << dimVolume/dimTime << endl;
     }
 
-    Info<< endl;
+    if (log_) Info<< endl;
 }
 
 
 void Foam::scalarTransport::end()
 {
-<<<<<<< HEAD
     // Do nothing
-=======
-    execute();
->>>>>>> foundation
 }
 
 

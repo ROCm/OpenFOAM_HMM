@@ -365,6 +365,7 @@ bool Foam::regIOobject::read()
     {
         // Re-watch master file
         addWatch();
+    }
 
     return ok;
 }

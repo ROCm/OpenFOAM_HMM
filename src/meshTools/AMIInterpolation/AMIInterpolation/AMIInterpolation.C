@@ -1119,7 +1119,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::append
 )
 {
     // Create a new interpolation
-    autoPtr<AMIInterpolation<SourcePatch, TargetPatch> > newPtr
+    autoPtr<AMIInterpolation<SourcePatch, TargetPatch>> newPtr
     (
         new AMIInterpolation<SourcePatch, TargetPatch>
         (

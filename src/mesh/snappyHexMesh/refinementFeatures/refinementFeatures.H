@@ -64,13 +64,13 @@ private:
         labelListList levels_;
 
         //- Edge
-        PtrList<indexedOctree<treeDataEdge> > edgeTrees_;
+        PtrList<indexedOctree<treeDataEdge>> edgeTrees_;
 
         //- Features points
-        PtrList<indexedOctree<treeDataPoint> > pointTrees_;
+        PtrList<indexedOctree<treeDataPoint>> pointTrees_;
 
         //- Region edge trees (demand driven)
-        mutable autoPtr<PtrList<indexedOctree<treeDataEdge> > >
+        mutable autoPtr<PtrList<indexedOctree<treeDataEdge>>>
             regionEdgeTreesPtr_;
 
 
@@ -93,18 +93,18 @@ private:
 
 protected:
 
-        const PtrList<indexedOctree<treeDataEdge> >& edgeTrees() const
+        const PtrList<indexedOctree<treeDataEdge>>& edgeTrees() const
         {
             return edgeTrees_;
         }
 
-        const PtrList<indexedOctree<treeDataPoint> >& pointTrees() const
+        const PtrList<indexedOctree<treeDataPoint>>& pointTrees() const
         {
             return pointTrees_;
         }
 
 
-        const PtrList<indexedOctree<treeDataEdge> >& regionEdgeTrees() const;
+        const PtrList<indexedOctree<treeDataEdge>>& regionEdgeTrees() const;
 
 public:
 

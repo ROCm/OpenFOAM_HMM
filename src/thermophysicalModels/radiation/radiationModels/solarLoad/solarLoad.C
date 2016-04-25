@@ -120,7 +120,7 @@ void Foam::radiation::solarLoad::updateDirectHitRadiation
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
     const scalarField& V = mesh_.V();
 
-    forAll (hitFacesId, i)
+    forAll(hitFacesId, i)
     {
         const label faceI = hitFacesId[i];
         label patchID = patches.whichPatch(faceI);
@@ -182,7 +182,7 @@ void Foam::radiation::solarLoad::updateSkyDiffusiveRadiation
                 const vectorField n = pp.faceNormals();
                 const labelList& cellIds = pp.faceCells();
 
-                forAll (n, faceI)
+                forAll(n, faceI)
                 {
                     const scalar cosEpsilon(verticalDir_ & -n[faceI]);
 
@@ -261,7 +261,7 @@ void Foam::radiation::solarLoad::updateSkyDiffusiveRadiation
                 const scalarField& sf = mesh_.magSf().boundaryField()[patchID];
 
                 const labelList& cellIds = pp.faceCells();
-                forAll (pp, faceI)
+                forAll(pp, faceI)
                 {
                     const label cellI = cellIds[faceI];
                     if (includeMappedPatchBasePatches[patchID])
@@ -424,7 +424,7 @@ void Foam::radiation::solarLoad::calculateQdiff
 
     label startI = 0;
     label compactI = 0;
-    forAll (includePatches_, i)
+    forAll(includePatches_, i)
     {
         const label patchID = includePatches_[i];
         const polyPatch& pp = mesh_.boundaryMesh()[patchID];
@@ -456,7 +456,7 @@ void Foam::radiation::solarLoad::calculateQdiff
         const labelList& coarsePatchFace =
             coarseMesh_->patchFaceMap()[patchID];
 
-        forAll (cpp, coarseI)
+        forAll(cpp, coarseI)
         {
             const label coarseFaceID = coarsePatchFace[coarseI];
             const labelList& fineFaces =
@@ -489,7 +489,7 @@ void Foam::radiation::solarLoad::calculateQdiff
             localCoarseRave,
             Rave.size(),
             startI
-        ).assign(Rave);
+        ) = Rave;
 
 
         const vectorList coarseNSf = cpp.faceNormals();
@@ -498,25 +498,19 @@ void Foam::radiation::solarLoad::calculateQdiff
             localCoarseNorm,
             cpp.size(),
             startI
-        ).assign(coarseNSf);
+        ) = coarseNSf;
         startI += cpp.size();
     }
 
 
-     SubList<scalar>(compactCoarsePartialArea, nLocalVFCoarseFaces).assign
-     (
-         localCoarsePartialArea
-     );
+     SubList<scalar>(compactCoarsePartialArea, nLocalVFCoarseFaces) =
+         localCoarsePartialArea;
 
-     SubList<scalar>(compactCoarseRave, nLocalVFCoarseFaces).assign
-     (
-         localCoarseRave
-     );
+     SubList<scalar>(compactCoarseRave, nLocalVFCoarseFaces) =
+         localCoarseRave;
 
-     SubList<vector>(compactCoarseNorm, nLocalVFCoarseFaces).assign
-     (
-         localCoarseNorm
-     );
+     SubList<vector>(compactCoarseNorm, nLocalVFCoarseFaces) =
+         localCoarseNorm;
 
      map_->distribute(compactCoarsePartialArea);
      map_->distribute(compactCoarseRave);
@@ -527,7 +521,7 @@ void Foam::radiation::solarLoad::calculateQdiff
     scalarList localqDiffusive(nLocalVFCoarseFaces, 0.0);
 
     label locaFaceI = 0;
-    forAll (includePatches_, i)
+    forAll(includePatches_, i)
     {
         const label patchID = includePatches_[i];
         const polyPatch& pp = coarseMesh_->boundaryMesh()[patchID];
@@ -546,7 +540,7 @@ void Foam::radiation::solarLoad::calculateQdiff
             a += ta();
         }
 
-        forAll (pp, coarseI)
+        forAll(pp, coarseI)
         {
             const label coarseFaceID = coarsePatchFace[coarseI];
             const labelList& fineFaces = coarseToFine_[i][coarseFaceID];
@@ -569,7 +563,7 @@ void Foam::radiation::solarLoad::calculateQdiff
             const labelList& compactFaces = visibleFaceFaces_[locaFaceI];
 
 
-            forAll (compactFaces, j)
+            forAll(compactFaces, j)
             {
                 label compactI = compactFaces[j];
 
@@ -588,7 +582,7 @@ void Foam::radiation::solarLoad::calculateQdiff
 
     // Fill QsecondRad_
     label compactId = 0;
-    forAll (includePatches_, i)
+    forAll(includePatches_, i)
     {
         const label patchID = includePatches_[i];
         const polyPatch& pp = coarseMesh_->boundaryMesh()[patchID];
@@ -630,7 +624,7 @@ void Foam::radiation::solarLoad::calculateQdiff
             const polyPatch& pp = patches[patchID];
             const labelList& cellIds = pp.faceCells();
             const scalarField& sf = mesh_.magSf().boundaryField()[patchID];
-            forAll (pp, faceI)
+            forAll(pp, faceI)
             {
                 const label cellI = cellIds[faceI];
                 Ru_[cellI] += qSecond[faceI]*sf[faceI]/V[cellI];
@@ -1034,7 +1028,7 @@ Foam::tmp<Foam::volScalarField> Foam::radiation::solarLoad::Rp() const
 }
 
 
-Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh>>
 Foam::radiation::solarLoad::Ru() const
 {
     return Ru_;

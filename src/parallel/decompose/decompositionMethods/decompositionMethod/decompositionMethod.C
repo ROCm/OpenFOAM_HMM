@@ -157,7 +157,7 @@ Foam::decompositionMethod::decompositionMethod
         ) == -1
     )
     {
-        const List<Tuple2<word, label> > zNameAndProcs
+        const List<Tuple2<word, label>> zNameAndProcs
         (
             decompositionDict_.lookup("singleProcessorFaceSets")
         );

@@ -24,11 +24,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "thermoSingleLayer.H"
+#include "fvcDdt.H"
 #include "fvcDiv.H"
 #include "fvcLaplacian.H"
 #include "fvcFlux.H"
 #include "fvm.H"
-#include "fvcDdt.H"
 #include "addToRunTimeSelectionTable.H"
 #include "zeroGradientFvPatchFields.H"
 #include "mappedFieldFvPatchField.H"

@@ -51,7 +51,7 @@ template<class Type>
 <<<<<<< HEAD:applications/utilities/postProcessing/graphics/PV4Readers/PV4FoamReader/vtkPV4Foam/vtkPV4FoamVolFields.H
 void Foam::vtkPV4Foam::convertVolField
 (
-    const PtrList<PrimitivePatchInterpolation<primitivePatch> >& ppInterpList,
+    const PtrList<PrimitivePatchInterpolation<primitivePatch>>& ppInterpList,
     const GeometricField<Type, fvPatchField, volMesh>& tf,
 =======
 void Foam::vtkPVFoam::convertVolFields
@@ -68,7 +68,7 @@ void Foam::vtkPVFoam::convertVolFields
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
     // Interpolated field (demand driven)
-    autoPtr<GeometricField<Type, pointPatchField, pointMesh> > ptfPtr;
+    autoPtr<GeometricField<Type, pointPatchField, pointMesh>> ptfPtr;
     if (interpFields)
     {
         if (debug)
@@ -157,7 +157,7 @@ void Foam::vtkPVFoam::convertVolFields
 
         if
         (
-            isType<emptyFvPatchField<Type> >(ptf)
+            isType<emptyFvPatchField<Type>>(ptf)
          ||
             (
                 reader_->GetExtrapolatePatches()
@@ -167,7 +167,7 @@ void Foam::vtkPVFoam::convertVolFields
         {
             fvPatch p(ptf.patch().patch(), mesh.boundary());
 
-            tmp<Field<Type> > tpptf
+            tmp<Field<Type>> tpptf
             (
 <<<<<<< HEAD:applications/utilities/postProcessing/graphics/PV4Readers/PV4FoamReader/vtkPV4Foam/vtkPV4FoamVolFields.H
                 fvPatchField<Type>(p, tf).patchInternalField()
@@ -313,7 +313,7 @@ template<class Type>
 void Foam::vtkPV4Foam::convertVolFields
 (
     const fvMesh& mesh,
-    const PtrList<PrimitivePatchInterpolation<primitivePatch> >& ppInterpList,
+    const PtrList<PrimitivePatchInterpolation<primitivePatch>>& ppInterpList,
     const IOobjectList& objects,
     const bool interpFields,
     vtkMultiBlockDataSet* output
@@ -348,7 +348,7 @@ template<class Type>
 void Foam::vtkPV4Foam::convertDimFields
 (
     const fvMesh& mesh,
-    const PtrList<PrimitivePatchInterpolation<primitivePatch> >& ppInterpList,
+    const PtrList<PrimitivePatchInterpolation<primitivePatch>>& ppInterpList,
     const IOobjectList& objects,
     const bool interpFields,
     vtkMultiBlockDataSet* output
@@ -375,7 +375,7 @@ void Foam::vtkPV4Foam::convertDimFields
         IOobject io(dimFld);
         io.readOpt() = IOobject::NO_READ;
 
-        PtrList<fvPatchField<Type> > patchFields(mesh.boundary().size());
+        PtrList<fvPatchField<Type>> patchFields(mesh.boundary().size());
         forAll(patchFields, patchI)
         {
             patchFields.set

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,14 +31,14 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define checkField(gf1, gf2, op)                                    \
-if ((gf1).mesh() != (gf2).mesh())                                   \
-{                                                                   \
-    FatalErrorInFunction                                            \
-        << "different mesh for fields "                             \
-        << (gf1).name() << " and " << (gf2).name()                  \
-        << " during operation " <<  op                              \
-        << abort(FatalError);                                       \
+#define checkField(gf1, gf2, op)                                               \
+if ((gf1).mesh() != (gf2).mesh())                                              \
+{                                                                              \
+    FatalErrorInFunction                                                       \
+        << "different mesh for fields "                                        \
+        << (gf1).name() << " and " << (gf2).name()                             \
+        << " during operation " <<  op                                         \
+        << abort(FatalError);                                                  \
 }
 
 
@@ -108,7 +108,7 @@ bool Foam::GeometricField<Type, PatchField, GeoMesh>::readIfPresent()
     else if
     (
         this->readOpt() == IOobject::READ_IF_PRESENT
-     && this->template typeHeaderOk<GeometricField<Type, PatchField, GeoMesh> >
+     && this->template typeHeaderOk<GeometricField<Type, PatchField, GeoMesh>>
         (
             true
         )
@@ -151,7 +151,7 @@ bool Foam::GeometricField<Type, PatchField, GeoMesh>::readOldTimeIfPresent()
 
     if
     (
-        field0.template typeHeaderOk<GeometricField<Type, PatchField, GeoMesh> >
+        field0.template typeHeaderOk<GeometricField<Type, PatchField, GeoMesh>>
         (
             true
         )

@@ -1181,8 +1181,8 @@ void Foam::isoSurface::trimToBox
     DynamicList<label>& triMap,     // map from (new) triangle to original
     labelList& triPointMap,         // map from (new) point to original
     labelList& interpolatedPoints,  // labels of newly introduced points
-    List<FixedList<label, 3> >& interpolatedOldPoints,// and their interpolation
-    List<FixedList<scalar, 3> >& interpolationWeights
+    List<FixedList<label, 3>>& interpolatedOldPoints,// and their interpolation
+    List<FixedList<scalar, 3>>& interpolationWeights
 )
 {
     const List<point> oldTriPoints(triPoints);
@@ -1197,8 +1197,8 @@ void Foam::isoSurface::trimToBox
     //   (interpolatedOldPoints)
     label sz = oldTriPoints.size()/100;
     DynamicList<label> dynInterpolatedPoints(sz);
-    DynamicList<FixedList<label, 3> > dynInterpolatedOldPoints(sz);
-    DynamicList<FixedList<scalar, 3> > dynInterpolationWeights(sz);
+    DynamicList<FixedList<label, 3>> dynInterpolatedOldPoints(sz);
+    DynamicList<FixedList<scalar, 3>> dynInterpolationWeights(sz);
 
 
     triPointMap.setSize(triPoints.size());

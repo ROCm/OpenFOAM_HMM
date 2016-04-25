@@ -44,7 +44,6 @@ Foam::UPtrList<T>::UPtrList(const label s)
 
 
 template<class T>
-<<<<<<< HEAD
 Foam::UPtrList<T>::UPtrList(UList<T>& lst)
 :
     ptrs_(lst.size())

@@ -52,7 +52,7 @@ namespace Foam
     );
 
     template<>
-    const word GlobalIOList<Tuple2<scalar, vector> >::typeName
+    const word GlobalIOList<Tuple2<scalar, vector>>::typeName
     (
         "scalarVectorTable"
     );
@@ -91,7 +91,7 @@ void Foam::displacementInterpolationMotionSolver::calcInterpolation()
 
         const word& tableName = faceZoneToTable[i][1];
 
-        GlobalIOList<Tuple2<scalar, vector> > table
+        GlobalIOList<Tuple2<scalar, vector>> table
         (
             IOobject
             (

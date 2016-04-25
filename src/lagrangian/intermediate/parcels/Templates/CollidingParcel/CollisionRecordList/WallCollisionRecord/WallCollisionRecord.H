@@ -108,7 +108,7 @@ public:
         (
             bool accessed,
             const vector& pRel,
-            const Type& data = pTraits<Type>::zero
+            const Type& data = Type(Zero)
         );
 
         //- Construct from Istream

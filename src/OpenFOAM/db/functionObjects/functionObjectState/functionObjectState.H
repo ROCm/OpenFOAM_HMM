@@ -134,7 +134,7 @@ public:
             Type getProperty
             (
                 const word& entryName,
-                const Type& defaultValue = pTraits<Type>::zero
+                const Type& defaultValue = Type(Zero)
             ) const;
 
             //- Retrieve generic property
@@ -151,7 +151,7 @@ public:
             (
                 const word& objectName,
                 const word& entryName,
-                const Type& defaultValue = pTraits<Type>::zero
+                const Type& defaultValue = Type(Zero)
             ) const;
 
             //- Retrieve generic property from named object
@@ -197,7 +197,7 @@ public:
             Type getResult
             (
                 const word& entryName,
-                const Type& defaultValue = pTraits<Type>::zero
+                const Type& defaultValue = Type(Zero)
             ) const;
 
             //- Retrieve result from named object
@@ -206,7 +206,7 @@ public:
             (
                 const word& objectName,
                 const word& entryName,
-                const Type& defaultValue = pTraits<Type>::zero
+                const Type& defaultValue = Type(Zero)
             ) const;
 
             //- Retrieve result from named object

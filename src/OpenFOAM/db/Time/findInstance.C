@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,7 +64,7 @@ Foam::word Foam::Time::findInstance
                 timeName(),
                 dir,
                 *this
-            ).typeHeaderOk<IOList<label> >(false) // use object with local scope
+            ).typeHeaderOk<IOList<label>>(false) // use object with local scope
         )
     )
     {
@@ -109,7 +109,7 @@ Foam::word Foam::Time::findInstance
                     ts[instanceI].name(),
                     dir,
                     *this
-                ).typeHeaderOk<IOList<label> >(false)
+                ).typeHeaderOk<IOList<label>>(false)
             )
         )
         {
@@ -182,7 +182,7 @@ Foam::word Foam::Time::findInstance
                 constant(),
                 dir,
                 *this
-            ).typeHeaderOk<IOList<label> >(false)
+            ).typeHeaderOk<IOList<label>>(false)
         )
     )
     {

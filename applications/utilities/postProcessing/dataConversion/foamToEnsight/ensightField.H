@@ -51,7 +51,7 @@ volField
 
 //- Wrapper to convert dimensionedInternalField to volField
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
 volField
 (
     const Foam::fvMeshSubset&,

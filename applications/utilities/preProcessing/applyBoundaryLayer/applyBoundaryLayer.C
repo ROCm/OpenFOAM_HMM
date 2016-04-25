@@ -74,7 +74,7 @@ Foam::tmp<Foam::volVectorField> createSimplifiedU(const volVectorField& U)
     );
 
     // Assign the internal value to the original field
-    tU() = U;
+    tU.ref() = U;
 
     return tU;
 }
@@ -94,7 +94,7 @@ void correctProcessorPatches(volScalarField& vf)
 
     forAll(bf, patchI)
     {
-        if (isA<processorFvPatchField<scalar> >(bf[patchI]))
+        if (isA<processorFvPatchField<scalar>>(bf[patchI]))
         {
             bf[patchI].initEvaluate();
         }
@@ -102,7 +102,7 @@ void correctProcessorPatches(volScalarField& vf)
 
     forAll(bf, patchI)
     {
-        if (isA<processorFvPatchField<scalar> >(bf[patchI]))
+        if (isA<processorFvPatchField<scalar>>(bf[patchI]))
         {
             bf[patchI].evaluate();
         }
@@ -128,7 +128,7 @@ void blendField
         false
     );
 
-    if (fieldHeader.headerOk())
+    if (fieldHeader.typeHeaderOk<volScalarField>(true))
     {
         volScalarField fld(fieldHeader, mesh);
         scalarField& internalField = fld.internalField();
@@ -236,7 +236,7 @@ tmp<volScalarField> calcNut
             basicThermo::dictName,
             runTime.constant(),
             mesh
-        ).headerOk()
+        ).typeHeaderOk<IOdictionary>(true)
     )
     {
         // Compressible

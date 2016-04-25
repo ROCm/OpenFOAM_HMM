@@ -73,7 +73,7 @@ for (label i=0; i < nTypes; i++)
 
         if
         (
-            lagrangianHeader.typeHeaderOk<IOPosition<Cloud<passiveParticle> > >
+            lagrangianHeader.typeHeaderOk<IOPosition<Cloud<passiveParticle>>>
             (
                 false
             )

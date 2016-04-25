@@ -95,10 +95,10 @@ protected:
         bool featureEdges_;
 
         //- Surface colour
-        autoPtr<DataEntry<vector> > surfaceColour_;
+        autoPtr<DataEntry<vector>> surfaceColour_;
 
         //- Edge colour
-        autoPtr<DataEntry<vector> > edgeColour_;
+        autoPtr<DataEntry<vector>> edgeColour_;
 
         //- Surface actor
         vtkSmartPointer<vtkActor> surfaceActor_;

@@ -351,7 +351,7 @@ protected:
         //- Helper function to write binned forces and moments
         void writeBinnedForceMoment
         (
-            const List<Field<vector> >& fm,
+            const List<Field<vector>>& fm,
             autoPtr<OFstream>& osPtr
         ) const;
 

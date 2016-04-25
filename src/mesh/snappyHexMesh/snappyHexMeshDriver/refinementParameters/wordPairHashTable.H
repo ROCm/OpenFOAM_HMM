@@ -45,7 +45,7 @@ Description
 
 namespace Foam
 {
-    typedef HashTable<word, Pair<word>, FixedList<word, 2>::Hash<> >
+    typedef HashTable<word, Pair<word>, FixedList<word, 2>::Hash<>>
         wordPairHashTable;
 }
 

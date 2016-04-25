@@ -241,9 +241,9 @@ class snappySnapDriver
                     const vectorField& faceSurfaceNormal,
                     const labelList& faceSurfaceRegion,
 
-                    List<List<point> >& pointFaceSurfNormals,
-                    List<List<point> >& pointFaceDisp,
-                    List<List<point> >& pointFaceCentres,
+                    List<List<point>>& pointFaceSurfNormals,
+                    List<List<point>>& pointFaceDisp,
+                    List<List<point>>& pointFaceCentres,
                     List<labelList>&    pointFacePatchID
                 ) const;
                 void correctAttraction
@@ -285,7 +285,7 @@ class snappySnapDriver
                     const indirectPrimitivePatch& pp,
                     const scalarField& snapDist,
 
-                    const List<List<point> >& pointFaceCentres,
+                    const List<List<point>>& pointFaceCentres,
                     const labelListList& pointFacePatchID,
 
                     const vectorField& rawPatchAttraction,
@@ -442,9 +442,9 @@ class snappySnapDriver
                     const vectorField& nearestDisp,
                     const label pointI,
 
-                    const List<List<point> >& pointFaceSurfNormals,
-                    const List<List<point> >& pointFaceDisp,
-                    const List<List<point> >& pointFaceCentres,
+                    const List<List<point>>& pointFaceSurfNormals,
+                    const List<List<point>>& pointFaceDisp,
+                    const List<List<point>>& pointFaceCentres,
                     const labelListList& pointFacePatchID,
 
                     DynamicList<point>& surfacePoints,
@@ -465,9 +465,9 @@ class snappySnapDriver
                     const scalarField& snapDist,
                     const vectorField& nearestDisp,
 
-                    const List<List<point> >& pointFaceSurfNormals,
-                    const List<List<point> >& pointFaceDisp,
-                    const List<List<point> >& pointFaceCentres,
+                    const List<List<point>>& pointFaceSurfNormals,
+                    const List<List<point>>& pointFaceDisp,
+                    const List<List<point>>& pointFaceCentres,
                     const labelListList& pointFacePatchID,
 
                     vectorField& patchAttraction,
@@ -486,16 +486,16 @@ class snappySnapDriver
                     const scalarField& snapDist,
                     const vectorField& nearestDisp,
 
-                    const List<List<point> >& pointFaceSurfNormals,
-                    const List<List<point> >& pointFaceDisp,
-                    const List<List<point> >& pointFaceCentres,
+                    const List<List<point>>& pointFaceSurfNormals,
+                    const List<List<point>>& pointFaceDisp,
+                    const List<List<point>>& pointFaceCentres,
                     const labelListList& pointFacePatchID,
 
                     List<labelList>& pointAttractor,
-                    List<List<pointConstraint> >& pointConstraints,
+                    List<List<pointConstraint>>& pointConstraints,
                     // Feature-edge to pp point
-                    List<List<DynamicList<point> > >& edgeAttractors,
-                    List<List<DynamicList<pointConstraint> > >& edgeConstraints,
+                    List<List<DynamicList<point>>>& edgeAttractors,
+                    List<List<DynamicList<pointConstraint>>>& edgeConstraints,
                     vectorField& patchAttraction,
                     List<pointConstraint>& patchConstraints
                 ) const;
@@ -513,10 +513,10 @@ class snappySnapDriver
 
                     // Feature-point to pp point
                     List<labelList>& pointAttractor,
-                    List<List<pointConstraint> >& pointConstraints,
+                    List<List<pointConstraint>>& pointConstraints,
                     // Feature-edge to pp point
-                    List<List<DynamicList<point> > >& edgeAttractors,
-                    List<List<DynamicList<pointConstraint> > >& edgeConstraints,
+                    List<List<DynamicList<point>>>& edgeAttractors,
+                    List<List<DynamicList<pointConstraint>>>& edgeConstraints,
                     // pp point to nearest feature
                     vectorField& patchAttraction,
                     List<pointConstraint>& patchConstraints
@@ -530,10 +530,10 @@ class snappySnapDriver
 
                     // Feature-point to pp point
                     const List<labelList>& pointAttractor,
-                    const List<List<pointConstraint> >& pointConstraints,
+                    const List<List<pointConstraint>>& pointConstraints,
                     // Feature-edge to pp point
-                    const List<List<DynamicList<point> > >& edgeAttractors,
-                    const List<List<DynamicList<pointConstraint> > >&,
+                    const List<List<DynamicList<point>>>& edgeAttractors,
+                    const List<List<DynamicList<pointConstraint>>>&,
 
                     const vectorField& rawPatchAttraction,
                     const List<pointConstraint>& rawPatchConstraints,
@@ -555,8 +555,8 @@ class snappySnapDriver
                     const label pointI,
                     const point& estimatedPt,
 
-                    List<List<DynamicList<point> > >&,
-                    List<List<DynamicList<pointConstraint> > >&,
+                    List<List<DynamicList<point>>>&,
+                    List<List<DynamicList<pointConstraint>>>&,
                     vectorField&,
                     List<pointConstraint>&
                 ) const;
@@ -578,10 +578,10 @@ class snappySnapDriver
 
                     // Feature-point to pp point
                     List<labelList>& pointAttractor,
-                    List<List<pointConstraint> >& pointConstraints,
+                    List<List<pointConstraint>>& pointConstraints,
                     // Feature-edge to pp point
-                    List<List<DynamicList<point> > >& edgeAttractors,
-                    List<List<DynamicList<pointConstraint> > >& edgeConstraints,
+                    List<List<DynamicList<point>>>& edgeAttractors,
+                    List<List<DynamicList<pointConstraint>>>& edgeConstraints,
                     // pp point to nearest feature
                     vectorField& patchAttraction,
                     List<pointConstraint>& patchConstraints
@@ -605,9 +605,9 @@ class snappySnapDriver
                     const vectorField& nearestDisp,
                     const vectorField& nearestNormal,
 
-                    const List<List<point> >& pointFaceSurfNormals,
-                    const List<List<point> >& pointFaceDisp,
-                    const List<List<point> >& pointFaceCentres,
+                    const List<List<point>>& pointFaceSurfNormals,
+                    const List<List<point>>& pointFaceDisp,
+                    const List<List<point>>& pointFaceCentres,
                     const labelListList& pointFacePatchID,
 
                     vectorField& patchAttraction,

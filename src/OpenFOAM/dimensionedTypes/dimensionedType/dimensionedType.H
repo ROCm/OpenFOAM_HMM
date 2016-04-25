@@ -129,7 +129,7 @@ public:
             const word&,
             const dictionary&,
             const dimensionSet& dims = dimless,
-            const Type& defaultValue = pTraits<Type>::zero
+            const Type& defaultValue = Type(Zero)
         );
 
         //- Construct from dictionary dimensionless with value.
@@ -137,7 +137,7 @@ public:
         (
             const word&,
             const dictionary&,
-            const Type& defaultValue = pTraits<Type>::zero
+            const Type& defaultValue = Type(Zero)
         );
 
         //- Construct from dictionary, with default value.
@@ -147,7 +147,7 @@ public:
             const word&,
             dictionary&,
             const dimensionSet& dims = dimless,
-            const Type& defaultValue = pTraits<Type>::zero
+            const Type& defaultValue = Type(Zero)
         );
 
         //- Construct from dictionary, dimensionless with default value.
@@ -156,7 +156,7 @@ public:
         (
             const word&,
             dictionary&,
-            const Type& defaultValue = pTraits<Type>::zero
+            const Type& defaultValue = Type(Zero)
         );
 
 

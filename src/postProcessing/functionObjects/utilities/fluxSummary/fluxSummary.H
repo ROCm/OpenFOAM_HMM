@@ -161,13 +161,13 @@ protected:
             List<vector> refDir_;
 
             //- Face IDs
-            List<List<label> > faceID_;
+            List<List<label>> faceID_;
 
             //- Face patch IDs
-            List<List<label> > facePatchID_;
+            List<List<label>> facePatchID_;
 
             //- Face flip map signs
-            List<List<scalar> > faceSign_;
+            List<List<scalar>> faceSign_;
 
             //- Sum of face areas
             List<scalar> faceArea_;
@@ -187,9 +187,9 @@ protected:
         (
             const word& faceZoneName,
             DynamicList<word>& faceZoneNames,
-            DynamicList<List<label> >& faceID,
-            DynamicList<List<label> >& facePatchID,
-            DynamicList<List<scalar> >& faceSign
+            DynamicList<List<label>>& faceID,
+            DynamicList<List<label>>& facePatchID,
+            DynamicList<List<scalar>>& faceSign
         ) const;
 
         //- Initialise face set from face zone and direction
@@ -199,9 +199,9 @@ protected:
             const vector& refDir,
             DynamicList<vector>& dir,
             DynamicList<word>& faceZoneNames,
-            DynamicList<List<label> >& faceID,
-            DynamicList<List<label> >& facePatchID,
-            DynamicList<List<scalar> >& faceSign
+            DynamicList<List<label>>& faceID,
+            DynamicList<List<label>>& facePatchID,
+            DynamicList<List<scalar>>& faceSign
         ) const;
 
         //- Initialise face set from cell zone and direction
@@ -211,9 +211,9 @@ protected:
             const vector& refDir,
             DynamicList<vector>& dir,
             DynamicList<word>& faceZoneNames,
-            DynamicList<List<label> >& faceID,
-            DynamicList<List<label> >& facePatchID,
-            DynamicList<List<scalar> >& faceSign
+            DynamicList<List<label>>& faceID,
+            DynamicList<List<label>>& facePatchID,
+            DynamicList<List<scalar>>& faceSign
         ) const;
 
         //- Initialise the total area per derived faceZone

@@ -740,7 +740,7 @@ void Foam::meshRefinement::doSplitFaces
 (
     const labelList& splitFaces,
     const labelPairList& splits,
-    //const List<Pair<point> >& splitPoints,
+    //const List<Pair<point>>& splitPoints,
     polyTopoChange& meshMod
 ) const
 {

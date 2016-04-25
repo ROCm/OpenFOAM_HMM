@@ -218,7 +218,7 @@ public:
         (
             meshRefinement& meshRefiner,
             const refinementParameters& refineParams,
-            const HashTable<Pair<word> >& faceZoneToPatches
+            const HashTable<Pair<word>>& faceZoneToPatches
         );
 
 };

@@ -177,7 +177,7 @@ void Foam::writeFuns::write
 (
     std::ostream& os,
     const bool binary,
-    const PtrList<DimensionedField<Type, volMesh> >& flds,
+    const PtrList<DimensionedField<Type, volMesh>>& flds,
     const vtkMesh& vMesh
 )
 {

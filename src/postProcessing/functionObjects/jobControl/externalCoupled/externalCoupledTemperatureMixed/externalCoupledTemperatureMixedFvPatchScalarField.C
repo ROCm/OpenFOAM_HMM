@@ -104,7 +104,7 @@ externalCoupledTemperatureMixedFvPatchScalarField
 
         // Initialise as a fixed value
         this->refValue() = *this;
-        this->refGrad() = pTraits<scalar>::zero;
+        this->refGrad() = Zero;
         this->valueFraction() = 1.0;
     }
 }

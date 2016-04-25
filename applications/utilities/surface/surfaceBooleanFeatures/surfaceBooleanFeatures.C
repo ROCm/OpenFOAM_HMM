@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -607,7 +607,7 @@ labelPair edgeIntersectionsCGAL
     const labelList& meshPoints = surf.meshPoints();
 
     //Info<< "Intersecting CGAL surface ..." << endl;
-    List<List<pointIndexHit> > intersections(edges.size());
+    List<List<pointIndexHit>> intersections(edges.size());
     labelListList classifications(edges.size());
 
     label nPoints = 0;
@@ -1006,12 +1006,12 @@ void calcEdgeCutsBitsCGAL
     {
         edgeCuts1 = edgeIntersections
         (
-            List<List<pointIndexHit> >(surf1.nEdges()),
+            List<List<pointIndexHit>>(surf1.nEdges()),
             labelListList(surf1.nEdges())
         );
         edgeCuts2 = edgeIntersections
         (
-            List<List<pointIndexHit> >(surf2.nEdges()),
+            List<List<pointIndexHit>>(surf2.nEdges()),
             labelListList(surf2.nEdges())
         );
 
@@ -1247,8 +1247,8 @@ autoPtr<extendedFeatureEdgeMesh> createEdgeMesh
     (
         2*nFeatEds
     );
-    List<DynamicList<label> > edgeNormals(nFeatEds);
-    List<DynamicList<label> > normalDirections(nFeatEds);
+    List<DynamicList<label>> edgeNormals(nFeatEds);
+    List<DynamicList<label>> normalDirections(nFeatEds);
 
 
     const triSurface& s1 = surf1;
@@ -1570,7 +1570,7 @@ int main(int argc, char *argv[])
     }
 
 
-    List<Pair<word> > surfaceAndSide;
+    List<Pair<word>> surfaceAndSide;
     if (args.optionReadIfPresent("trim", surfaceAndSide))
     {
         Info<< "Trimming edges with " << surfaceAndSide << endl;

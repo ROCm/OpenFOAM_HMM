@@ -122,8 +122,8 @@ public:
         (
             const word&  solverName,
             const word&  fieldName,
-            const Type&  iRes = pTraits<Type>::zero,
-            const Type&  fRes = pTraits<Type>::zero,
+            const Type&  iRes = Type(Zero),
+            const Type&  fRes = Type(Zero),
             const label  nIter = 0,
             const bool   converged = false,
             const bool   singular = false

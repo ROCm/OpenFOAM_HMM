@@ -46,7 +46,7 @@ SourceFiles
 
 #include "externalDisplacementMeshMover.H"
 #include "motionSmootherAlgo.H"
-#include "autoLayerDriver.H"
+#include "snappyLayerDriver.H"
 #include "fieldSmoother.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -112,7 +112,7 @@ class medialAxisMeshMover
             //- Is mesh edge on a cusp of displacement
             bool isMaxEdge
             (
-                const List<PointData<vector> >& pointWallDist,
+                const List<PointData<vector>>& pointWallDist,
                 const label edgeI,
                 const scalar minCos
             ) const;
@@ -129,7 +129,7 @@ class medialAxisMeshMover
             (
                 const label patchPointI,
                 pointField& patchDisp,
-                List<autoLayerDriver::extrudeMode>& extrudeStatus
+                List<snappyLayerDriver::extrudeMode>& extrudeStatus
             );
 
             //- Synchronise extrusion
@@ -137,7 +137,7 @@ class medialAxisMeshMover
             (
                 const scalarField& minThickness,
                 pointField& patchDisp,
-                List<autoLayerDriver::extrudeMode>& extrudeStatus
+                List<snappyLayerDriver::extrudeMode>& extrudeStatus
             ) const;
 
             //- Stop layer growth at feature edges
@@ -146,7 +146,7 @@ class medialAxisMeshMover
                 const scalar minCos,
                 const PackedBoolList& isMasterPoint,
                 const labelList& meshEdges,
-                List<autoLayerDriver::extrudeMode>& extrudeStatus,
+                List<snappyLayerDriver::extrudeMode>& extrudeStatus,
                 pointField& patchDisp,
                 label& nPointCounter
             ) const;
@@ -162,7 +162,7 @@ class medialAxisMeshMover
                 const PackedBoolList& isMasterEdge,
                 const labelList& meshEdges,
                 const scalarField& minThickness,
-                List<autoLayerDriver::extrudeMode>& extrudeStatus,
+                List<snappyLayerDriver::extrudeMode>& extrudeStatus,
                 pointField& patchDisp
             ) const;
 
@@ -174,7 +174,7 @@ class medialAxisMeshMover
         (
             const dictionary&,
             const scalarField& minThickness,
-            List<autoLayerDriver::extrudeMode>& extrudeStatus,
+            List<snappyLayerDriver::extrudeMode>& extrudeStatus,
             pointField& patchDisp
         );
 

@@ -1762,7 +1762,7 @@ void Foam::snappyRefineDriver::addFaceZones
 (
     meshRefinement& meshRefiner,
     const refinementParameters& refineParams,
-    const HashTable<Pair<word> >& faceZoneToPatches
+    const HashTable<Pair<word>>& faceZoneToPatches
 )
 {
     if (faceZoneToPatches.size())
@@ -1789,7 +1789,7 @@ void Foam::snappyRefineDriver::addFaceZones
         const polyMesh& mesh = meshRefiner.mesh();
 
         // Add patches for added inter-region faceZones
-        forAllConstIter(HashTable<Pair<word> >, faceZoneToPatches, iter)
+        forAllConstIter(HashTable<Pair<word>>, faceZoneToPatches, iter)
         {
             const word& fzName = iter.key();
             const Pair<word>& patchNames = iter();
@@ -2009,12 +2009,12 @@ void Foam::snappyRefineDriver::doRefine
 
     // Create pairs of patches for faceZones
     {
-        HashTable<Pair<word> > faceZoneToPatches(zonesToFaceZone.size());
+        HashTable<Pair<word>> faceZoneToPatches(zonesToFaceZone.size());
 
         //    Note: zonesToFaceZone contains the same data on different
         //          processors but in different order. We could sort the
         //          contents but instead just loop in sortedToc order.
-        List<Pair<word> > czs(zonesToFaceZone.sortedToc());
+        List<Pair<word>> czs(zonesToFaceZone.sortedToc());
 
         forAll(czs, i)
         {

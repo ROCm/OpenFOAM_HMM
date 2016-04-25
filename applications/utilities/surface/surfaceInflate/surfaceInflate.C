@@ -90,7 +90,7 @@ tmp<vectorField> calcVertexNormals(const triSurface& surf)
     (
         new pointField(surf.nPoints(), vector::zero)
     );
-    vectorField& pointNormals = tpointNormals();
+    vectorField& pointNormals = tpointNormals.ref();
 
     const pointField& points = surf.points();
     const labelListList& pointFaces = surf.pointFaces();
@@ -134,7 +134,7 @@ tmp<vectorField> calcPointNormals
 {
     //const pointField pointNormals(s.pointNormals());
     tmp<vectorField> tpointNormals(calcVertexNormals(s));
-    vectorField& pointNormals = tpointNormals();
+    vectorField& pointNormals = tpointNormals.ref();
 
 
     // feature edges: create edge normals from edgeFaces only.
@@ -356,7 +356,7 @@ tmp<scalarField> avg
 )
 {
     tmp<scalarField> tres(new scalarField(s.nPoints(), 0.0));
-    scalarField& res = tres();
+    scalarField& res = tres.ref();
 
     scalarField sumWeight(s.nPoints(), 0.0);
 

@@ -181,13 +181,13 @@ public:
 //- Data associated with PointData types is contiguous
 
 template<>
-inline bool contiguous<PointData<scalar> >()
+inline bool contiguous<PointData<scalar>>()
 {
     return true;
 }
 
 template<>
-inline bool contiguous<PointData<vector> >()
+inline bool contiguous<PointData<vector>>()
 {
     return true;
 }

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -186,7 +186,7 @@ void Foam::volPointInterpolation::interpolateDimensionedInternalField
     {
         const labelList& ppc = pointCells[pointi];
 
-        pf[pointi] = pTraits<Type>::zero;
+        pf[pointi] = Type(Zero);
 
         forAll(ppc, pointCelli)
         {
@@ -382,10 +382,10 @@ Foam::volPointInterpolation::interpolate
         )
     );
 
-    interpolateInternalField(vf, tpf());
+    interpolateInternalField(vf, tpf.ref());
 
     // Interpolate to the patches overriding fixed value BCs
-    interpolateBoundaryField(vf, tpf(), true);
+    interpolateBoundaryField(vf, tpf.ref(), true);
 
     return tpf;
 }
@@ -518,8 +518,8 @@ Foam::volPointInterpolation::interpolate
 
 
 template<class Type>
-tmp<DimensionedField<Type, pointMesh> >
-volPointInterpolation::interpolate
+Foam::tmp<Foam::DimensionedField<Type, Foam::pointMesh>>
+Foam::volPointInterpolation::interpolate
 (
     const DimensionedField<Type, volMesh>& vf,
     const word& name,
@@ -550,7 +550,7 @@ volPointInterpolation::interpolate
         }
 
 
-        tmp<DimensionedField<Type, pointMesh> > tpf
+        tmp<DimensionedField<Type, pointMesh>> tpf
         (
             new DimensionedField<Type, pointMesh>
             (
@@ -565,7 +565,7 @@ volPointInterpolation::interpolate
             )
         );
 
-        interpolateDimensionedInternalField(vf, tpf());
+        interpolateDimensionedInternalField(vf, tpf.ref());
 
         return tpf;
     }
@@ -603,8 +603,8 @@ volPointInterpolation::interpolate
 
 
 template<class Type>
-tmp<DimensionedField<Type, pointMesh> >
-volPointInterpolation::interpolate
+Foam::tmp<Foam::DimensionedField<Type, Foam::pointMesh>>
+Foam::volPointInterpolation::interpolate
 (
     const DimensionedField<Type, volMesh>& vf
 ) const
@@ -614,21 +614,17 @@ volPointInterpolation::interpolate
 
 
 template<class Type>
-tmp<DimensionedField<Type, pointMesh> >
-volPointInterpolation::interpolate
+Foam::tmp<Foam::DimensionedField<Type, Foam::pointMesh>>
+Foam::volPointInterpolation::interpolate
 (
-    const tmp<DimensionedField<Type, volMesh> >& tvf
+    const tmp<DimensionedField<Type, volMesh>>& tvf
 ) const
 {
     // Construct tmp<pointField>
-    tmp<DimensionedField<Type, pointMesh> > tpf = interpolate(tvf());
+    tmp<DimensionedField<Type, pointMesh>> tpf = interpolate(tvf.ref());
     tvf.clear();
     return tpf;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

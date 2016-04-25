@@ -92,7 +92,7 @@ protected:
         scalar tubeRadius_;
 
         //- Line colour
-        autoPtr<DataEntry<vector> > lineColour_;
+        autoPtr<DataEntry<vector>> lineColour_;
 
 
     // Protected Member Functions

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -100,27 +100,27 @@ void Foam::vtkPVFoam::updateInfoFields
     );
 
     //- Add dimensioned fields to GUI
-    addToSelection<DimensionedField<scalar, meshType> >
+    addToSelection<DimensionedField<scalar, meshType>>
     (
         select,
         objects
     );
-    addToSelection<DimensionedField<vector, meshType> >
+    addToSelection<DimensionedField<vector, meshType>>
     (
         select,
         objects
     );
-    addToSelection<DimensionedField<sphericalTensor, meshType> >
+    addToSelection<DimensionedField<sphericalTensor, meshType>>
     (
         select,
         objects
     );
-    addToSelection<DimensionedField<symmTensor, meshType> >
+    addToSelection<DimensionedField<symmTensor, meshType>>
     (
         select,
         objects
     );
-    addToSelection<DimensionedField<tensor, meshType> >
+    addToSelection<DimensionedField<tensor, meshType>>
     (
         select,
         objects

@@ -533,7 +533,7 @@ void Foam::meshToMesh::mapAndOpSrcToTgt
     const CombineOp& cop
 ) const
 {
-    tgtField = pTraits<Type>::zero;
+    tgtField = Type(Zero);
 
     AMI.interpolateToTarget
     (
@@ -569,7 +569,7 @@ void Foam::meshToMesh::mapSrcToTgt
 
 
         // Clone and map (since rmap does not do general mapping)
-        tmp<fvPatchField<Type> > tnewTgt
+        tmp<fvPatchField<Type>> tnewTgt
         (
             fvPatchField<Type>::New
             (
@@ -728,7 +728,7 @@ template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
 Foam::meshToMesh::mapSrcToTgt
 (
-    const tmp<GeometricField<Type, fvPatchField, volMesh> >& tfield,
+    const tmp<GeometricField<Type, fvPatchField, volMesh>>& tfield,
     const bool secondOrder
 ) const
 {
@@ -771,7 +771,7 @@ void Foam::meshToMesh::mapAndOpTgtToSrc
     const CombineOp& cop
 ) const
 {
-    srcField = pTraits<Type>::zero;
+    srcField = Type(Tero);
 
     AMI.interpolateToSource
     (
@@ -806,7 +806,7 @@ void Foam::meshToMesh::mapTgtToSrc
         const fvPatchField<Type>& tgtField = field.boundaryField()[tgtPatchI];
 
         // Clone and map (since rmap does not do general mapping)
-        tmp<fvPatchField<Type> > tnewSrc
+        tmp<fvPatchField<Type>> tnewSrc
         (
             fvPatchField<Type>::New
             (

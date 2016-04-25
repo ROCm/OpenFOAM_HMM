@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -129,7 +129,7 @@ class fvMeshDistribute
             template<class T>
             void saveInternalFields
             (
-                PtrList<Field<T> >& iflds
+                PtrList<Field<T>>& iflds
             ) const;
 
             //- Set value of patch faces resulting from internal faces
@@ -137,7 +137,7 @@ class fvMeshDistribute
             void mapExposedFaces
             (
                 const mapPolyMesh& map,
-                const PtrList<Field<T> >& oldFlds
+                const PtrList<Field<T>>& oldFlds
             );
 
             //- Init patch fields of certain type

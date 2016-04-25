@@ -1368,7 +1368,7 @@ int main(int argc, char *argv[])
     // Add all information for all the remaining faceZones
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    HashTable<Pair<word> > faceZoneToPatches;
+    HashTable<Pair<word>> faceZoneToPatches;
     forAll(mesh.faceZones(), zoneI)
     {
         const word& fzName = mesh.faceZones()[zoneI].name();
@@ -1400,7 +1400,7 @@ int main(int argc, char *argv[])
 
     if (faceZoneToPatches.size())
     {
-        autoRefineDriver::addFaceZones
+        snappyRefineDriver::addFaceZones
         (
             meshRefiner,
             refineParams,

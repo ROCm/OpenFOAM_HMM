@@ -667,7 +667,7 @@ void Foam::forces::writeForces()
 
 void Foam::forces::writeBinnedForceMoment
 (
-    const List<Field<vector> >& fm,
+    const List<Field<vector>>& fm,
     autoPtr<OFstream>& osPtr
 ) const
 {
@@ -676,7 +676,7 @@ void Foam::forces::writeBinnedForceMoment
         return;
     }
 
-    List<Field<vector> > f(fm);
+    List<Field<vector>> f(fm);
 
     if (binCumulative_)
     {

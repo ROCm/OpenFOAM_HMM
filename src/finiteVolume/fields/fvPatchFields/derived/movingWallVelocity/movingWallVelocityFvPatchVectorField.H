@@ -39,12 +39,7 @@ Description
     myPatch
     {
         type            movingWallVelocity;
-<<<<<<< HEAD
-        U               U;
-        value           uniform (0 0 0);    // initial value
-=======
         value           uniform (0 0 0);    // Initial value
->>>>>>> foundation
     }
     \endverbatim
 

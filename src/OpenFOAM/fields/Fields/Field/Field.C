@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -167,14 +167,9 @@ Foam::Field<Type>::Field
 template<class Type>
 Foam::Field<Type>::Field
 (
-<<<<<<< HEAD
-    const tmp<Field<Type> >& tmapF,
+    const tmp<Field<Type>>& tmapF,
     const FieldMapper& mapper,
     const bool applyFlip
-=======
-    const tmp<Field<Type>>& tmapF,
-    const FieldMapper& mapper
->>>>>>> foundation
 )
 :
     List<Type>(mapper.size())
@@ -504,14 +499,9 @@ void Foam::Field<Type>::map
 template<class Type>
 void Foam::Field<Type>::map
 (
-<<<<<<< HEAD
-    const tmp<Field<Type> >& tmapF,
+    const tmp<Field<Type>>& tmapF,
     const FieldMapper& mapper,
     const bool applyFlip
-=======
-    const tmp<Field<Type>>& tmapF,
-    const FieldMapper& mapper
->>>>>>> foundation
 )
 {
     map(tmapF(), mapper, applyFlip);

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,9 +50,9 @@ Foam::labelList Foam::externalDisplacementMeshMover::getFixedValueBCs
         const pointPatchField<vector>& patchField =
             field.boundaryField()[patchI];
 
-        if (isA<valuePointPatchField<vector> >(patchField))
+        if (isA<valuePointPatchField<vector>>(patchField))
         {
-            if (isA<zeroFixedValuePointPatchField<vector> >(patchField))
+            if (isA<zeroFixedValuePointPatchField<vector>>(patchField))
             {
                 // Special condition of fixed boundary condition. Does not
                 // get adapted

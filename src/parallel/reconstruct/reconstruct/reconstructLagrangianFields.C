@@ -70,7 +70,7 @@ Foam::tmp<Foam::IOField<Type>> Foam::reconstructLagrangianField
             IOobject::NO_WRITE
         );
 
-        if (localIOobject.typeHeaderOk<IOField<Type> >(true))
+        if (localIOobject.typeHeaderOk<IOField<Type>>(true))
         {
             IOField<Type> fieldi(localIOobject);
 
@@ -132,11 +132,11 @@ Foam::reconstructLagrangianFieldField
 
         if
         (
-            localIOobject.typeHeaderOk<CompactIOField<Field<Type>, Type> >
+            localIOobject.typeHeaderOk<CompactIOField<Field<Type>, Type>>
             (
                 false
             )
-         || localIOobject.typeHeaderOk<IOField<Field<Type> > >(false)
+         || localIOobject.typeHeaderOk<IOField<Field<Type>>>(false)
         )
         {
             CompactIOField<Field<Type>, Type> fieldi(localIOobject);

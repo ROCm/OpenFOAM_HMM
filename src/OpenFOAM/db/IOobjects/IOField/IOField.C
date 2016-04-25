@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,7 @@ Foam::IOField<Type>::IOField(const IOobject& io)
     regIOobject(io)
 {
     // Check for MUST_READ_IF_MODIFIED
-    warnNoRereading<IOField<Type> >();
+    warnNoRereading<IOField<Type>>();
 
     if
     (
@@ -56,7 +56,7 @@ Foam::IOField<Type>::IOField(const IOobject& io, const label size)
     regIOobject(io)
 {
     // Check for MUST_READ_IF_MODIFIED
-    warnNoRereading<IOField<Type> >();
+    warnNoRereading<IOField<Type>>();
 
     if
     (
@@ -83,7 +83,7 @@ Foam::IOField<Type>::IOField(const IOobject& io, const Field<Type>& f)
     regIOobject(io)
 {
     // Check for MUST_READ_IF_MODIFIED
-    warnNoRereading<IOField<Type> >();
+    warnNoRereading<IOField<Type>>();
 
     if
     (
@@ -110,7 +110,7 @@ Foam::IOField<Type>::IOField(const IOobject& io, const Xfer<Field<Type>>& f)
     regIOobject(io)
 {
     // Check for MUST_READ_IF_MODIFIED
-    warnNoRereading<IOField<Type> >();
+    warnNoRereading<IOField<Type>>();
 
     Field<Type>::transfer(f());
 

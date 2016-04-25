@@ -3365,7 +3365,7 @@ void Foam::meshRefinement::allocateInterRegionFaceZone
     const label ownZone,
     const label neiZone,
     wordPairHashTable& zonesToFaceZone,
-    HashTable<word, labelPair, labelPair::Hash<> >& zoneIDsToFaceZone
+    HashTable<word, labelPair, labelPair::Hash<>>& zoneIDsToFaceZone
 ) const
 {
     const cellZoneMesh& cellZones = mesh_.cellZones();
@@ -3387,7 +3387,7 @@ void Foam::meshRefinement::allocateInterRegionFaceZone
             Swap(key.first(), key.second());
         }
 
-        HashTable<word, labelPair, labelPair::Hash<> >::
+        HashTable<word, labelPair, labelPair::Hash<>>::
         const_iterator zoneFnd = zoneIDsToFaceZone.find
         (
             key
@@ -4315,7 +4315,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     {
         // 1. Detect inter-region face and allocate names
 
-        HashTable<word, labelPair, labelPair::Hash<> > zoneIDsToFaceZone;
+        HashTable<word, labelPair, labelPair::Hash<>> zoneIDsToFaceZone;
 
         for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
         {
@@ -4368,7 +4368,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
             << endl;
 
         // From cellZone indices to faceZone index
-        HashTable<label, labelPair, labelPair::Hash<> > fZoneLookup
+        HashTable<label, labelPair, labelPair::Hash<>> fZoneLookup
         (
             zonesToFaceZone.size()
         );
@@ -4376,7 +4376,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
         const cellZoneMesh& cellZones = mesh_.cellZones();
 
         {
-            List<Pair<word> > czs(zonesToFaceZone.sortedToc());
+            List<Pair<word>> czs(zonesToFaceZone.sortedToc());
 
             forAll(czs, i)
             {

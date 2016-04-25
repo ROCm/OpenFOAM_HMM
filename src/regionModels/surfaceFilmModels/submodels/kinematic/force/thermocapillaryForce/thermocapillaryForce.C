@@ -69,11 +69,7 @@ tmp<fvVectorMatrix> thermocapillaryForce::correct(volVectorField& U)
     tmp<fvVectorMatrix>
         tfvm(new fvVectorMatrix(U, dimForce/dimArea*dimVolume));
 
-<<<<<<< HEAD
-    tfvm() += alpha*fvc::grad(sigma);
-=======
-    tfvm.ref() += fvc::grad(sigma);
->>>>>>> foundation
+    tfvm.ref() += alpha*fvc::grad(sigma);
 
     return tfvm;
 }

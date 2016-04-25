@@ -143,10 +143,10 @@ class isoSurface
         DynamicList<label> interpolatedPoints_;
 
         //- corresponding original, unmerged points
-        DynamicList<FixedList<label, 3> > interpolatedOldPoints_;
+        DynamicList<FixedList<label, 3>> interpolatedOldPoints_;
 
         //- corresponding weights
-        DynamicList<FixedList<scalar, 3> > interpolationWeights_;
+        DynamicList<FixedList<scalar, 3>> interpolationWeights_;
 
 
     // Private Member Functions
@@ -330,13 +330,13 @@ class isoSurface
         ) const;
 
         template<class Type>
-        static tmp<Field<Type> > interpolate
+        static tmp<Field<Type>> interpolate
         (
             const label nPoints,
             const labelList& triPointMergeMap,
             const labelList& interpolatedPoints,
-            const List<FixedList<label, 3> >& interpolatedOldPoints,
-            const List<FixedList<scalar, 3> >& interpolationWeights,
+            const List<FixedList<label, 3>>& interpolatedOldPoints,
+            const List<FixedList<scalar, 3>>& interpolationWeights,
             const DynamicList<Type>& unmergedValues
         );
 
@@ -373,8 +373,8 @@ class isoSurface
             DynamicList<label>& triMap,
             labelList& triPointMap,
             labelList& interpolatedPoints,
-            List<FixedList<label, 3> >& interpolatedOldPoints,
-            List<FixedList<scalar, 3> >& interpolationWeights
+            List<FixedList<label, 3>>& interpolatedOldPoints,
+            List<FixedList<scalar, 3>>& interpolationWeights
         );
 
         //- Check single triangle for (topological) validity

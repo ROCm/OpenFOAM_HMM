@@ -88,10 +88,10 @@ private:
         // Gap level refinement
 
             //- Per shell, per region the small-gap level specification
-            List<List<FixedList<label, 3> > > extendedGapLevel_;
+            List<List<FixedList<label, 3>>> extendedGapLevel_;
 
             //- Per shell, per region the small-gap level specification
-            List<List<volumeType> > extendedGapMode_;
+            List<List<volumeType>> extendedGapMode_;
 
 
     // Private data
@@ -106,7 +106,7 @@ private:
         void setAndCheckLevels
         (
             const label shellI,
-            const List<Tuple2<scalar, label> >&
+            const List<Tuple2<scalar, label>>&
         );
 
         //- Helper function for checking of gap information
@@ -114,7 +114,7 @@ private:
         (
             const dictionary&,
             const label shellI,
-            const List<FixedList<label, 3> >& levels
+            const List<FixedList<label, 3>>& levels
         );
 
         void orient();
@@ -134,7 +134,7 @@ private:
             const labelList& ptLevel,
             const label shellI,
             labelList& gapShell,
-            List<FixedList<label, 3> >& gapInfo,
+            List<FixedList<label, 3>>& gapInfo,
             List<volumeType>& gapMode
         ) const;
 
@@ -193,7 +193,7 @@ public:
                 const pointField& pt,
                 const labelList& ptLevel,
                 labelList& gapShell,
-                List<FixedList<label, 3> >& gapInfo,
+                List<FixedList<label, 3>>& gapInfo,
                 List<volumeType>& gapMode
             ) const;
 
@@ -203,7 +203,7 @@ public:
             (
                 const pointField& pt,
                 const labelList& ptLevel,
-                List<FixedList<label, 3> >& gapInfo,
+                List<FixedList<label, 3>>& gapInfo,
                 List<volumeType>& gapMode
             ) const;
 

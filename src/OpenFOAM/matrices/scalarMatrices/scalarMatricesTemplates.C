@@ -139,7 +139,7 @@ void Foam::LUBacksubstitute
                 sum -= luMatrixi[j]*sourceSol[j];
             }
         }
-        else if (sum != pTraits<Type>::zero)
+        else if (sum != Type(Zero))
         {
             ii = i+1;
         }
@@ -185,7 +185,7 @@ void Foam::LUBacksubstitute
                 sum -= luMatrixi[j]*sourceSol[j];
             }
         }
-        else if (sum != pTraits<Type>::zero)
+        else if (sum != Type(Zero))
         {
             ii = i+1;
         }

@@ -115,10 +115,10 @@ class isoSurfaceCell
         DynamicList<label> interpolatedPoints_;
 
         //- corresponding original, unmerged points
-        DynamicList<FixedList<label, 3> > interpolatedOldPoints_;
+        DynamicList<FixedList<label, 3>> interpolatedOldPoints_;
 
         //- corresponding weights
-        DynamicList<FixedList<scalar, 3> > interpolationWeights_;
+        DynamicList<FixedList<scalar, 3>> interpolationWeights_;
 
 
     // Private Member Functions

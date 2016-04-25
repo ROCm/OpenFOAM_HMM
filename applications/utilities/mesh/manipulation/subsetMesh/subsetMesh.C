@@ -230,7 +230,7 @@ void subsetDimensionedFields
 (
     const fvMeshSubset& subsetter,
     const wordList& fieldNames,
-    PtrList<DimensionedField<Type, volMesh> >& subFields
+    PtrList<DimensionedField<Type, volMesh>>& subFields
 )
 {
     const fvMesh& baseMesh = subsetter.baseMesh();

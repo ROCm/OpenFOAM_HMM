@@ -142,7 +142,7 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
     {
         // List of lists of particles to be transfered for all of the
         // neighbour processors
-        List<IDLList<passiveParticle> > particleTransferLists
+        List<IDLList<passiveParticle>> particleTransferLists
         (
             Pstream::nProcs()
         );
@@ -185,7 +185,7 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
 
 
     // Start sending. Sets number of bytes transferred
-    labelListList allNTrans(Pstream::nProcs());
+    labelList allNTrans(Pstream::nProcs());
     pBufs.finishedSends(allNTrans);
 
 
@@ -208,7 +208,7 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
         // Retrieve from receive buffers
         forAll(allNTrans, procI)
         {
-            label nRec = allNTrans[procI][Pstream::myProcNo()];
+            label nRec = allNTrans[procI];
 
             //Pout<< "From processor " << procI << " receiving bytes " << nRec
             //    << endl;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -185,14 +185,9 @@ public:
         //- Construct by mapping from the given tmp field
         Field
         (
-<<<<<<< HEAD
-            const tmp<Field<Type> >& tmapF,
+            const tmp<Field<Type>>& tmapF,
             const FieldMapper& map,
             const bool applyFlip = true
-=======
-            const tmp<Field<Type>>& tmapF,
-            const FieldMapper& map
->>>>>>> foundation
         );
 
         //- Construct by mapping from the given tmp field. Supplied uniform
@@ -290,14 +285,9 @@ public:
         //- Map from the given tmp field
         void map
         (
-<<<<<<< HEAD
-            const tmp<Field<Type> >& tmapF,
+            const tmp<Field<Type>>& tmapF,
             const FieldMapper& map,
             const bool applyFlip = true
-=======
-            const tmp<Field<Type>>& tmapF,
-            const FieldMapper& map
->>>>>>> foundation
         );
 
         //- Map from self

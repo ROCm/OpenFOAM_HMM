@@ -24,12 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "kOmegaSST.H"
-<<<<<<< HEAD
-=======
-#include "fvOptions.H"
-#include "bound.H"
-#include "wallDist.H"
->>>>>>> foundation
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,7 +38,7 @@ template<class BasicTurbulenceModel>
 void kOmegaSST<BasicTurbulenceModel>::correctNut(const volScalarField& S2)
 {
     // Correct the turbulence viscosity
-    kOmegaSSTBase<eddyViscosity<RASModel<BasicTurbulenceModel> > >::correctNut
+    kOmegaSSTBase<eddyViscosity<RASModel<BasicTurbulenceModel>>>::correctNut
     (
         S2
     );

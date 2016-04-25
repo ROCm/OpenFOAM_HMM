@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -408,7 +408,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::fvMeshDistribute::generateTestField
             dimensionedScalar("zero", dimless, 0.0)
         )
     );
-    surfaceScalarField& fld = tfld();
+    surfaceScalarField& fld = tfld.ref();
 
     const surfaceVectorField n(mesh.Sf()/mesh.magSf());
 
@@ -1104,15 +1104,15 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::doRemoveCells
 
     // Save internal fields (note: not as DimensionedFields since would
     // get mapped)
-    PtrList<Field<scalar> > sFlds;
+    PtrList<Field<scalar>> sFlds;
     saveInternalFields(sFlds);
-    PtrList<Field<vector> > vFlds;
+    PtrList<Field<vector>> vFlds;
     saveInternalFields(vFlds);
-    PtrList<Field<sphericalTensor> > sptFlds;
+    PtrList<Field<sphericalTensor>> sptFlds;
     saveInternalFields(sptFlds);
-    PtrList<Field<symmTensor> > sytFlds;
+    PtrList<Field<symmTensor>> sytFlds;
     saveInternalFields(sytFlds);
-    PtrList<Field<tensor> > tFlds;
+    PtrList<Field<tensor>> tFlds;
     saveInternalFields(tFlds);
 
     // Change the mesh. No inflation. Note: no parallel comms allowed.

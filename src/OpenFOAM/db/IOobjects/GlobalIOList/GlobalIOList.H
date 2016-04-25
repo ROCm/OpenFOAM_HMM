@@ -71,7 +71,7 @@ public:
         GlobalIOList(const IOobject&, const List<Type>&);
 
         //- Construct by transferring the List contents
-        GlobalIOList(const IOobject&, const Xfer<List<Type> >&);
+        GlobalIOList(const IOobject&, const Xfer<List<Type>>&);
 
 
     //- Destructor

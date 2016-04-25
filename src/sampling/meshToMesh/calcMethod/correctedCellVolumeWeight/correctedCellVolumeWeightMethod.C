@@ -59,13 +59,13 @@ void Foam::correctedCellVolumeWeightMethod::calculateAddressing
     label srcCellI = srcSeedI;
     label tgtCellI = tgtSeedI;
 
-    List<DynamicList<label> > srcToTgtAddr(src_.nCells());
-    List<DynamicList<scalar> > srcToTgtWght(src_.nCells());
-    List<DynamicList<point> > srcToTgtVec(src_.nCells());
+    List<DynamicList<label>> srcToTgtAddr(src_.nCells());
+    List<DynamicList<scalar>> srcToTgtWght(src_.nCells());
+    List<DynamicList<point>> srcToTgtVec(src_.nCells());
 
-    List<DynamicList<label> > tgtToSrcAddr(tgt_.nCells());
-    List<DynamicList<scalar> > tgtToSrcWght(tgt_.nCells());
-    List<DynamicList<point> > tgtToSrcVec(tgt_.nCells());
+    List<DynamicList<label>> tgtToSrcAddr(tgt_.nCells());
+    List<DynamicList<scalar>> tgtToSrcWght(tgt_.nCells());
+    List<DynamicList<point>> tgtToSrcVec(tgt_.nCells());
 
     // list of tgt cell neighbour cells
     DynamicList<label> nbrTgtCells(10);

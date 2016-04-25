@@ -108,19 +108,19 @@ protected:
             modeType mode_;
 
             //- Position
-            autoPtr<DataEntry<point> > cameraPosition_;
+            autoPtr<DataEntry<point>> cameraPosition_;
 
             //- Focal point
-            autoPtr<DataEntry<point> > cameraFocalPoint_;
+            autoPtr<DataEntry<point>> cameraFocalPoint_;
 
             //- Up direction
-            autoPtr<DataEntry<vector> > cameraUp_;
+            autoPtr<DataEntry<vector>> cameraUp_;
 
             //- Zoom level
-            autoPtr<DataEntry<scalar> > cameraZoom_;
+            autoPtr<DataEntry<scalar>> cameraZoom_;
 
             //- View angle
-            autoPtr<DataEntry<scalar> > cameraViewAngle_;
+            autoPtr<DataEntry<scalar>> cameraViewAngle_;
 
 
         // Scene management

@@ -27,7 +27,7 @@
         IOobject::MUST_READ
     );
 
-    if (turbulenceHeader.typeHeaderOk<IOdictionary>(true))
+    if (turbulencePropertiesHeader.typeHeaderOk<IOdictionary>(true))
     {
         autoPtr<compressible::turbulenceModel> turbulence
         (

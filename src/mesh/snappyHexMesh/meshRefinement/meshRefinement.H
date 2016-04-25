@@ -197,7 +197,7 @@ private:
 
 
         //- User supplied face based data.
-        List<Tuple2<mapType, labelList> > userFaceData_;
+        List<Tuple2<mapType, labelList>> userFaceData_;
 
         //- Meshed patches - are treated differently. Stored as wordList since
         //  order changes.
@@ -399,7 +399,7 @@ private:
                 const label nRefine,
 
                 labelList& cellMap,
-                List<FixedList<label, 3> >& shellGapInfo,
+                List<FixedList<label, 3>>& shellGapInfo,
                 List<volumeType>& shellGapMode
             ) const;
 
@@ -725,7 +725,7 @@ private:
                 const label ownZone,
                 const label neiZone,
                 wordPairHashTable& zonesToFaceZone,
-                HashTable<word, labelPair, labelPair::Hash<> >&
+                HashTable<word, labelPair, labelPair::Hash<>>&
             ) const;
 
             //- Remove any loose standing cells
@@ -887,12 +887,12 @@ public:
             //  topo changes. Every entry is a list over all faces.
             //  Bit of a hack. Additional flag to say whether to maintain master
             //  only (false) or increase set to account for face-from-face.
-            const List<Tuple2<mapType, labelList> >& userFaceData() const
+            const List<Tuple2<mapType, labelList>>& userFaceData() const
             {
                 return userFaceData_;
             }
 
-            List<Tuple2<mapType, labelList> >& userFaceData()
+            List<Tuple2<mapType, labelList>>& userFaceData()
             {
                 return userFaceData_;
             }

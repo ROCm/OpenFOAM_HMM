@@ -152,7 +152,7 @@ public:
 template<>
 inline bool contiguous<transportData>()
 {
-    return contiguous<wallPointData<scalar> >();
+    return contiguous<wallPointData<scalar>>();
 }
 
 

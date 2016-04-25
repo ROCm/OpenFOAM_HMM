@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,7 @@ Foam::IOList<T>::IOList(const IOobject& io)
     regIOobject(io)
 {
     // Check for MUST_READ_IF_MODIFIED
-    warnNoRereading<IOList<T> >();
+    warnNoRereading<IOList<T>>();
 
     if
     (
@@ -56,7 +56,7 @@ Foam::IOList<T>::IOList(const IOobject& io, const label size)
     regIOobject(io)
 {
     // Check for MUST_READ_IF_MODIFIED
-    warnNoRereading<IOList<T> >();
+    warnNoRereading<IOList<T>>();
 
     if
     (
@@ -83,7 +83,7 @@ Foam::IOList<T>::IOList(const IOobject& io, const List<T>& list)
     regIOobject(io)
 {
     // Check for MUST_READ_IF_MODIFIED
-    warnNoRereading<IOList<T> >();
+    warnNoRereading<IOList<T>>();
 
     if
     (
@@ -110,7 +110,7 @@ Foam::IOList<T>::IOList(const IOobject& io, const Xfer<List<T>>& list)
     regIOobject(io)
 {
     // Check for MUST_READ_IF_MODIFIED
-    warnNoRereading<IOList<T> >();
+    warnNoRereading<IOList<T>>();
 
     List<T>::transfer(list());
 

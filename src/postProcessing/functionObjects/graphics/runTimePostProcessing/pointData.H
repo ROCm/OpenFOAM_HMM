@@ -90,7 +90,7 @@ protected:
         scalar maxGlyphLength_;
 
         //- Point colour
-        autoPtr<DataEntry<vector> > pointColour_;
+        autoPtr<DataEntry<vector>> pointColour_;
 
 
     // Protected Member Functions

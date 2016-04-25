@@ -39,7 +39,7 @@ Foam::tmp<Foam::Field<Type>> Foam::cyclicACMIPolyPatch::interpolate
     {
         const scalarField& w = AMI().srcWeightsSum();
 
-        tmp<Field<Type> > interpField(AMI().interpolateToSource(fldCouple));
+        tmp<Field<Type>> interpField(AMI().interpolateToSource(fldCouple));
 
         return interpField + (1.0 - w)*fldNonOverlap;
     }
@@ -47,7 +47,7 @@ Foam::tmp<Foam::Field<Type>> Foam::cyclicACMIPolyPatch::interpolate
     {
         const scalarField& w = neighbPatch().AMI().tgtWeightsSum();
 
-        tmp<Field<Type> > interpField
+        tmp<Field<Type>> interpField
         (
             neighbPatch().AMI().interpolateToTarget(fldCouple)
         );

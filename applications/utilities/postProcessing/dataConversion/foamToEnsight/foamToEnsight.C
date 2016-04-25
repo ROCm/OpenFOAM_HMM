@@ -706,7 +706,7 @@ int main(int argc, char *argv[])
                     IOobject::MUST_READ
                 );
 
-                bool fieldExists = fieldObject.typeHeaderOk<IOField<scalar> >
+                bool fieldExists = fieldObject.typeHeaderOk<IOField<scalar>>
                 (
                     false
                 );

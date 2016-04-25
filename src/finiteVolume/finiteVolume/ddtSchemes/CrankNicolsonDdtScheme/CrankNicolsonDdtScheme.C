@@ -124,7 +124,7 @@ CrankNicolsonDdtScheme<Type>::ddt0_
                 name,
                 startTimeName,
                 mesh()
-            ).template typeHeaderOk<DDt0Field<GeoField> >(true)
+            ).template typeHeaderOk<DDt0Field<GeoField>>(true)
         )
         {
             regIOobject::store

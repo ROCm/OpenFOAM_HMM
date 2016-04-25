@@ -78,17 +78,13 @@ public:
 
     // Constructors
 
-<<<<<<< HEAD:src/OpenFOAM/primitives/functions/DataEntry/Constant/Constant.H
         //- Construct from components
         Constant
         (
             const word& entryName,
-            const Type& value,
-            const dimensionSet& dimensions = dimless
+            const Type& value
         );
 
-=======
->>>>>>> foundation:src/OpenFOAM/primitives/functions/Function1/Constant/Constant.H
         //- Construct from entry name and dictionary
         Constant(const word& entryName, const dictionary& dict);
 

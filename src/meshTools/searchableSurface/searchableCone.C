@@ -30,10 +30,8 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(searchableCone, 0);
-addToRunTimeSelectionTable(searchableSurface, searchableCone, dict);
-
+    defineTypeNameAndDebug(searchableCone, 0);
+    addToRunTimeSelectionTable(searchableSurface, searchableCone, dict);
 }
 
 
@@ -74,7 +72,7 @@ void Foam::searchableCone::boundingSpheres
 Foam::tmp<Foam::pointField> Foam::searchableCone::points() const
 {
     tmp<pointField> tPts(new pointField(2));
-    pointField& pts = tPts();
+    pointField& pts = tPts.ref();
 
     pts[0] = point1_;
     pts[1] = point2_;
@@ -939,7 +937,7 @@ void Foam::searchableCone::findLineAll
 (
     const pointField& start,
     const pointField& end,
-    List<List<pointIndexHit> >& info
+    List<List<pointIndexHit>>& info
 ) const
 {
     info.setSize(start.size());

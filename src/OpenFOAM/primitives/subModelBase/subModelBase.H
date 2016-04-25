@@ -165,7 +165,7 @@ public:
                 Type getBaseProperty
                 (
                     const word& entryName,
-                    const Type& defaultValue = pTraits<Type>::zero
+                    const Type& defaultValue = Type(Zero)
                 ) const;
 
                 //- Retrieve generic property from the base model
@@ -188,7 +188,7 @@ public:
                 Type getModelProperty
                 (
                     const word& entryName,
-                    const Type& defaultValue = pTraits<Type>::zero
+                    const Type& defaultValue = Type(Zero)
                 ) const;
 
                 //- Add generic property to the sub-model

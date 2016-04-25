@@ -163,18 +163,18 @@ Foam::refinementSurfaces::refinementSurfaces
     nullGapLevel[1] = 0;
     nullGapLevel[2] = 0;
 
-    List<FixedList<label, 3> > globalGapLevel(surfI);
+    List<FixedList<label, 3>> globalGapLevel(surfI);
     List<volumeType> globalGapMode(surfI);
 
     scalarField globalAngle(surfI, -GREAT);
     PtrList<dictionary> globalPatchInfo(surfI);
-    List<Map<label> > regionMinLevel(surfI);
-    List<Map<label> > regionMaxLevel(surfI);
-    List<Map<label> > regionLevelIncr(surfI);
-    List<Map<FixedList<label, 3> > > regionGapLevel(surfI);
-    List<Map<volumeType> > regionGapMode(surfI);
-    List<Map<scalar> > regionAngle(surfI);
-    List<Map<autoPtr<dictionary> > > regionPatchInfo(surfI);
+    List<Map<label>> regionMinLevel(surfI);
+    List<Map<label>> regionMaxLevel(surfI);
+    List<Map<label>> regionLevelIncr(surfI);
+    List<Map<FixedList<label, 3>>> regionGapLevel(surfI);
+    List<Map<volumeType>> regionGapMode(surfI);
+    List<Map<scalar>> regionAngle(surfI);
+    List<Map<autoPtr<dictionary>>> regionPatchInfo(surfI);
 
 
     HashSet<word> unmatchedKeys(surfacesDict.toc());
@@ -467,8 +467,8 @@ Foam::refinementSurfaces::refinementSurfaces
             perpendicularAngle_[globalRegionI] = regionAngle[surfI][iter.key()];
         }
 
-        const Map<autoPtr<dictionary> >& localInfo = regionPatchInfo[surfI];
-        forAllConstIter(Map<autoPtr<dictionary> >, localInfo, iter)
+        const Map<autoPtr<dictionary>>& localInfo = regionPatchInfo[surfI];
+        forAllConstIter(Map<autoPtr<dictionary>>, localInfo, iter)
         {
             label globalRegionI = regionOffset_[surfI] + iter.key();
 
@@ -902,7 +902,7 @@ void Foam::refinementSurfaces::findAllHigherIntersections
     }
 
     // Work arrays
-    List<List<pointIndexHit> > hitInfo;
+    List<List<pointIndexHit>> hitInfo;
     labelList pRegions;
     vectorField pNormals;
 
@@ -992,7 +992,7 @@ void Foam::refinementSurfaces::findAllHigherIntersections
     }
 
     // Work arrays
-    List<List<pointIndexHit> > hitInfo;
+    List<List<pointIndexHit>> hitInfo;
     labelList pRegions;
     vectorField pNormals;
 

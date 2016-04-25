@@ -175,7 +175,7 @@ tmp<volScalarField> SpalartAllmarasDES<BasicTurbulenceModel>::psi
 
     if (lowReCorrection_)
     {
-        volScalarField& psi = tpsi();
+        volScalarField& psi = tpsi.ref();
 
         const volScalarField fv2(this->fv2(chi, fv1));
         const volScalarField ft2(this->ft2(chi));
@@ -477,7 +477,7 @@ tmp<volScalarField> SpalartAllmarasDES<BasicTurbulenceModel>::k() const
             zeroGradientFvPatchField<vector>::typeName
         )
     );
-    volScalarField& dTildaF = tdTilda();
+    volScalarField& dTildaF = tdTilda.ref();
     dTildaF = dTilda(chi, fv1, fvc::grad(this->U_));
     dTildaF.correctBoundaryConditions();
 

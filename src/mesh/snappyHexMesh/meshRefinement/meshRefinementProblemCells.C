@@ -36,7 +36,7 @@ License
 #include "polyMeshGeometry.H"
 #include "IOmanip.H"
 #include "unitConversion.H"
-#include "autoSnapDriver.H"
+#include "snappySnapDriver.H"
 
 #include "snapParameters.H"
 #include "motionSmoother.H"
@@ -1092,7 +1092,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
 {
     pointField oldPoints(mesh_.points());
 
-    // Repeat (most of) autoSnapDriver::doSnap
+    // Repeat (most of) snappySnapDriver::doSnap
     {
         labelList adaptPatchIDs(meshedPatches());
 
@@ -1110,7 +1110,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
         // Distance to attract to nearest feature on surface
         const scalarField snapDist
         (
-            autoSnapDriver::calcSnapDistance(mesh_, snapParams, pp)
+            snappySnapDriver::calcSnapDistance(mesh_, snapParams, pp)
         );
 
 
@@ -1149,7 +1149,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
             << mesh_.time().cpuTimeIncrement() << " s\n" << nl << endl;
 
         // Pre-smooth patch vertices (so before determining nearest)
-        autoSnapDriver::preSmoothPatch
+        snappySnapDriver::preSmoothPatch
         (
             *this,
             snapParams,
@@ -1162,7 +1162,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
         vectorField nearestNormal;
         const vectorField disp
         (
-            autoSnapDriver::calcNearestSurface
+            snappySnapDriver::calcNearestSurface
             (
                 snapParams.strictRegionSnap(),
                 *this,

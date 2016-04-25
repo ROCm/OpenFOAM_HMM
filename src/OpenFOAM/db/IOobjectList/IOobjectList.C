@@ -78,7 +78,7 @@ Foam::IOobjectList::IOobjectList
         );
 
         // Use object with local scope
-        if (objectPtr->typeHeaderOk<IOList<label> >(false))
+        if (objectPtr->typeHeaderOk<IOList<label>>(false))
         {
             insert(ObjectNames[i], objectPtr);
         }

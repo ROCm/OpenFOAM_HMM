@@ -44,7 +44,7 @@ void Foam::internalWriter::write
 template<class Type, class GeoMesh>
 void Foam::internalWriter::write
 (
-    const PtrList<DimensionedField<Type, volMesh> >& flds
+    const PtrList<DimensionedField<Type, volMesh>>& flds
 )
 {
     forAll(flds, i)
@@ -79,7 +79,7 @@ template<class Type, class GeoMesh>
 void Foam::internalWriter::write
 (
     const volPointInterpolation& pInterp,
-    const PtrList<DimensionedField<Type, volMesh> >& flds
+    const PtrList<DimensionedField<Type, volMesh>>& flds
 )
 {
     forAll(flds, i)

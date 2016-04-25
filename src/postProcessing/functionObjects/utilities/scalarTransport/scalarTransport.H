@@ -120,6 +120,9 @@ class scalarTransport
         //- Reference to the mesh database
         const fvMesh& mesh_;
 
+        //- On/off switch
+        bool active_;
+
         //- Name of flux field (optional)
         word phiName_;
 
