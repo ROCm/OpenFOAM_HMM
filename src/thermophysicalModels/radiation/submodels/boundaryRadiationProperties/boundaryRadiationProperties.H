@@ -22,11 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fv::boundaryRadiationProperties
+    Foam::radiation::boundaryRadiationProperties
 
 Description
     Boundary radiation properties holder
-
 
 SourceFiles
     boundaryRadiationProperties.C
@@ -84,7 +83,7 @@ public:
 
     // Constructors
 
-        //- Construct given fvMesh and IOobject
+        //- Construct given fvMesh
         boundaryRadiationProperties(const fvMesh&);
 
 
@@ -127,8 +126,8 @@ public:
 
     //- Destructor
     virtual ~boundaryRadiationProperties();
-
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
