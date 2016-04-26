@@ -11,13 +11,13 @@ runApplication surfaceFeatureExtract
 runApplication blockMesh
 
 runApplication decomposePar
-runParallel snappyHexMesh 6 -overwrite
+runParallel snappyHexMesh -overwrite
 
-runParallel createZeroDirectory 6
+runParallel createZeroDirectory
 
-runParallel patchSummary 6
-runParallel potentialFoam 6 -noFunctionObjects
-runParallel $(getApplication) 6
+runParallel patchSummary
+runParallel potentialFoam -noFunctionObjects
+runParallel $(getApplication)
 
 runApplication reconstructParMesh -constant
 runApplication reconstructPar -latestTime

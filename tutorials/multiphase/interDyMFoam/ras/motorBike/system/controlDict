@@ -22,11 +22,11 @@ FoamFile
 
 application     interDyMFoam;
 
-startFrom       startTime;
+startFrom       latestTime;
 
 startTime       0;
 
-stopAt          endTime;
+stopAt          nextWrite;
 
 endTime         2;
 
@@ -55,12 +55,6 @@ adjustTimeStep  yes;
 maxCo           0.5;
 maxAlphaCo      0.5;
 maxDeltaT       1;
-
-functions
-{
-    // Print stats
-    #include "minMax"
-}
 
 
 // ************************************************************************* //

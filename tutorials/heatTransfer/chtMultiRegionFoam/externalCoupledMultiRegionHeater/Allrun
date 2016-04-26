@@ -8,7 +8,7 @@ cd ${0%/*} || exit 1    # Run from this directory
 ./Allrun.pre
 
 #-- Run on single processor
-#runApplication `getApplication` &
+#runApplication $(getApplication) &
 # Simulated external solver
 #runApplication ./externalSolver
 
@@ -16,7 +16,7 @@ cd ${0%/*} || exit 1    # Run from this directory
 runApplication decomposePar -allRegions
 
 # Run OpenFOAM
-runParallel `getApplication` 4 &
+runParallel $(getApplication) &
 
 # Simulated external solver
 runApplication ./externalSolver

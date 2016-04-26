@@ -10,27 +10,31 @@ runApplication blockMesh
 #runApplication decomposePar
 
 # redistributePar to do decomposition
-runParallel redistributePar -decompose
+runParallel -s decompose redistributePar -decompose
 
 # Bit of renumbering and running
 runParallel -s CuthillMcKee renumberMesh -overwrite
 runParallel -s CuthillMcKee icoFoam
 
 # Bit of bad renumbering and running
-runParallel -s random renumberMesh -overwrite -dict system/renumberMeshDict-random
+runParallel -s random renumberMesh \
+    -overwrite -dict system/renumberMeshDict-random
 runParallel -s random icoFoam
 
 # Pick up last result
 cp system/controlDict-latestTime system/controlDict
 
 # Redistribute to 5 processors
-runParallel -s 5 redistributePar -np 5 -decomposeParDict system/decomposeParDict-5 -cellDist
+runParallel -s 5 -np 5 redistributePar \
+    -decomposeParDict system/decomposeParDict-5 -cellDist
 
 # Run a bit more
-runParallel -s 5 icoFoam -np 5 -decomposeParDict system/decomposeParDict-5
+runParallel -s 5 -np 5 icoFoam \
+    -decomposeParDict system/decomposeParDict-5
 
 # Reconstruct mesh and results
-runParallel -s 1 redistributePar -np 5 -reconstruct -decomposeParDict system/decomposeParDict
+runParallel -s reconstruct redistributePar \
+    -reconstruct -decomposeParDict system/decomposeParDict
 
 
 # -----------------------------------------------------------------------------
