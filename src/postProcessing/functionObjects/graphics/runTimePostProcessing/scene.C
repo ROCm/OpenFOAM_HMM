@@ -103,27 +103,30 @@ void Foam::scene::readCamera(const dictionary& dict)
         {
             clipBox_ = boundBox(coeffs.lookup("clipBox"));
             const vector lookDir(vector(coeffs.lookup("lookDir")));
-            cameraPosition_.reset(new Constant<point>("position", -lookDir));
+            cameraPosition_.reset
+            (
+                new Function1Types::Constant<point>("position", -lookDir)
+            );
             const vector focalPoint(coeffs.lookup("focalPoint"));
             cameraFocalPoint_.reset
             (
-                new Constant<point>("focalPoint", focalPoint)
+                new Function1Types::Constant<point>("focalPoint", focalPoint)
             );
             const vector up(coeffs.lookup("up"));
-            cameraUp_.reset(new Constant<point>("up", up));
+            cameraUp_.reset(new Function1Types::Constant<point>("up", up));
             break;
         }
         case mtFlightPath:
         {
             cameraPosition_.reset
             (
-                DataEntry<vector>::New("position", coeffs).ptr()
+                Function1<vector>::New("position", coeffs).ptr()
             );
             cameraFocalPoint_.reset
             (
-                DataEntry<point>::New("focalPoint", coeffs).ptr()
+                Function1<point>::New("focalPoint", coeffs).ptr()
             );
-            cameraUp_.reset(DataEntry<vector>::New("up", coeffs).ptr());
+            cameraUp_.reset(Function1<vector>::New("up", coeffs).ptr());
             break;
         }
         default:
@@ -136,20 +139,23 @@ void Foam::scene::readCamera(const dictionary& dict)
 
     if (dict.found("zoom"))
     {
-        cameraZoom_.reset(DataEntry<scalar>::New("zoom", dict).ptr());
+        cameraZoom_.reset(Function1<scalar>::New("zoom", dict).ptr());
     }
     else
     {
-        cameraZoom_.reset(new Constant<scalar>("zoom", 1.0));
+        cameraZoom_.reset(new Function1Types::Constant<scalar>("zoom", 1.0));
     }
 
     if (dict.found("viewAngle"))
     {
-        cameraViewAngle_.reset(DataEntry<scalar>::New("viewAngle", dict).ptr());
+        cameraViewAngle_.reset(Function1<scalar>::New("viewAngle", dict).ptr());
     }
     else
     {
-        cameraViewAngle_.reset(new Constant<scalar>("viewAngle", 35.0));
+        cameraViewAngle_.reset
+        (
+            new Function1Types::Constant<scalar>("viewAngle", 35.0)
+        );
     }
 }
 
@@ -160,7 +166,7 @@ void Foam::scene::readColours(const dictionary& dict)
     forAll(colours, i)
     {
         const word& c = colours[i];
-        colours_.insert(c, DataEntry<vector>::New(c, dict).ptr());
+        colours_.insert(c, Function1<vector>::New(c, dict).ptr());
     }
 }
 
@@ -305,7 +311,7 @@ Foam::scene::~scene()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::HashPtrTable<Foam::DataEntry<Foam::vector>, Foam::word>&
+const Foam::HashPtrTable<Foam::Function1<Foam::vector>, Foam::word>&
 Foam::scene::colours() const
 {
     return colours_;

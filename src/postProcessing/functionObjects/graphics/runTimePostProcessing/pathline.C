@@ -118,7 +118,7 @@ Foam::pathline::pathline
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<DataEntry<vector>, word>& colours
+    const HashPtrTable<Function1<vector>, word>& colours
 )
 :
     geometryBase(parent, dict, colours),
@@ -131,7 +131,7 @@ Foam::pathline::pathline
 {
     if (dict.found("lineColour"))
     {
-        lineColour_.reset(DataEntry<vector>::New("lineColour", dict).ptr());
+        lineColour_.reset(Function1<vector>::New("lineColour", dict).ptr());
     }
     else
     {
@@ -168,7 +168,7 @@ Foam::autoPtr<Foam::pathline> Foam::pathline::New
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<DataEntry<vector>, word>& colours,
+    const HashPtrTable<Function1<vector>, word>& colours,
     const word& pathlineType
 )
 {

@@ -36,7 +36,7 @@ SourceFiles
 
 #include "dictionary.H"
 #include "vector.H"
-#include "DataEntry.H"
+#include "Function1.H"
 #include "HashPtrTable.H"
 #include "NamedEnum.H"
 
@@ -99,10 +99,10 @@ protected:
         renderModeType renderMode_;
 
         //- Opacity
-        autoPtr<DataEntry<scalar>> opacity_;
+        autoPtr<Function1<scalar>> opacity_;
 
         //- Reference to the colours
-        const HashPtrTable<DataEntry<vector>, word>& colours_;
+        const HashPtrTable<Function1<vector>, word>& colours_;
 
 
     // Protected functions
@@ -120,7 +120,7 @@ public:
         (
             const runTimePostProcessing& parent_,
             const dictionary& dict,
-            const HashPtrTable<DataEntry<vector>, word>& colours
+            const HashPtrTable<Function1<vector>, word>& colours
         );
 
 
@@ -145,7 +145,7 @@ public:
             scalar opacity(const scalar position) const;
 
             //- Return reference to the colours
-            const HashPtrTable<DataEntry<vector>, word>& colours() const;
+            const HashPtrTable<Function1<vector>, word>& colours() const;
 
 
         //- Add geometry to scene
