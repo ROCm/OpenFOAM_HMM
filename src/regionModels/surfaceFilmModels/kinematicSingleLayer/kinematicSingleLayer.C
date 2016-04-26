@@ -95,10 +95,7 @@ void kinematicSingleLayer::resetPrimaryRegionSourceTerms()
 
 void kinematicSingleLayer::transferPrimaryRegionThermoFields()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << endl;
 
     // Update fields from primary region via direct mapped
     // (coupled) boundary conditions
@@ -928,7 +925,7 @@ void kinematicSingleLayer::postEvolveRegion()
 {
     if (debug)
     {
-        Info<< "kinematicSingleLayer::postEvolveRegion()" << endl;
+        InfoInFunction << endl;
     }
 
     // Reset source terms for next time integration

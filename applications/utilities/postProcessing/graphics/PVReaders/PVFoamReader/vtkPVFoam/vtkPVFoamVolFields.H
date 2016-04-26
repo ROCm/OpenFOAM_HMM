@@ -2,11 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-<<<<<<< HEAD:applications/utilities/postProcessing/graphics/PV4Readers/PV4FoamReader/vtkPV4Foam/vtkPV4FoamVolFields.H
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-=======
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
->>>>>>> foundation:applications/utilities/postProcessing/graphics/PVReaders/PVFoamReader/vtkPVFoam/vtkPVFoamVolFields.H
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,18 +44,10 @@ InClass
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-<<<<<<< HEAD:applications/utilities/postProcessing/graphics/PV4Readers/PV4FoamReader/vtkPV4Foam/vtkPV4FoamVolFields.H
-void Foam::vtkPV4Foam::convertVolField
+void Foam::vtkPVFoam::convertVolField
 (
     const PtrList<PrimitivePatchInterpolation<primitivePatch>>& ppInterpList,
     const GeometricField<Type, fvPatchField, volMesh>& tf,
-=======
-void Foam::vtkPVFoam::convertVolFields
-(
-    const fvMesh& mesh,
-    const PtrList<PrimitivePatchInterpolation<primitivePatch>>& ppInterpList,
-    const IOobjectList& objects,
->>>>>>> foundation:applications/utilities/postProcessing/graphics/PVReaders/PVFoamReader/vtkPVFoam/vtkPVFoamVolFields.H
     const bool interpFields,
     vtkMultiBlockDataSet* output
 )
@@ -81,27 +69,7 @@ void Foam::vtkPVFoam::convertVolFields
         (
             volPointInterpolation::New(mesh).interpolate(tf).ptr()
         );
-<<<<<<< HEAD:applications/utilities/postProcessing/graphics/PV4Readers/PV4FoamReader/vtkPV4Foam/vtkPV4FoamVolFields.H
     }
-=======
-
-        // Interpolated field (demand driven)
-        autoPtr<GeometricField<Type, pointPatchField, pointMesh>> ptfPtr;
-        if (interpFields)
-        {
-            if (debug)
-            {
-                Info<< "convertVolFieldBlock interpolating:" << tf.name()
-                    << endl;
-            }
-
-            ptfPtr.reset
-            (
-                volPointInterpolation::New(tf.mesh()).interpolate(tf).ptr()
-            );
-        }
->>>>>>> foundation:applications/utilities/postProcessing/graphics/PVReaders/PVFoamReader/vtkPVFoam/vtkPVFoamVolFields.H
-
 
     // Convert activated internalMesh regions
     convertVolFieldBlock
@@ -169,7 +137,6 @@ void Foam::vtkPVFoam::convertVolFields
 
             tmp<Field<Type>> tpptf
             (
-<<<<<<< HEAD:applications/utilities/postProcessing/graphics/PV4Readers/PV4FoamReader/vtkPV4Foam/vtkPV4FoamVolFields.H
                 fvPatchField<Type>(p, tf).patchInternalField()
             );
 
@@ -181,22 +148,6 @@ void Foam::vtkPVFoam::convertVolFields
                 arrayRangePatches_,
                 datasetNo
             );
-=======
-                isType<emptyFvPatchField<Type>>(ptf)
-             ||
-                (
-                    reader_->GetExtrapolatePatches()
-                && !polyPatch::constraintType(patches[patchId].type())
-                )
-            )
-            {
-                fvPatch p(ptf.patch().patch(), tf.mesh().boundary());
-
-                tmp<Field<Type>> tpptf
-                (
-                    fvPatchField<Type>(p, tf).patchInternalField()
-                );
->>>>>>> foundation:applications/utilities/postProcessing/graphics/PVReaders/PVFoamReader/vtkPVFoam/vtkPVFoamVolFields.H
 
             if (interpFields)
             {
@@ -310,7 +261,7 @@ void Foam::vtkPVFoam::convertVolFields
 
 
 template<class Type>
-void Foam::vtkPV4Foam::convertVolFields
+void Foam::vtkPVFoam::convertVolFields
 (
     const fvMesh& mesh,
     const PtrList<PrimitivePatchInterpolation<primitivePatch>>& ppInterpList,
@@ -345,7 +296,7 @@ void Foam::vtkPV4Foam::convertVolFields
 
 
 template<class Type>
-void Foam::vtkPV4Foam::convertDimFields
+void Foam::vtkPVFoam::convertDimFields
 (
     const fvMesh& mesh,
     const PtrList<PrimitivePatchInterpolation<primitivePatch>>& ppInterpList,
