@@ -42,13 +42,14 @@ namespace Foam
 
 Foam::IOobject Foam::radiation::boundaryRadiationProperties::createIOobject
 (
-    const fvMesh& mesh, const word name
+    const fvMesh& mesh,
+    const word name
 ) const
 {
     IOobject io
     (
         name,
-        mesh.time().constant(),
+        mesh.time().caseConstant(),
         mesh,
         IOobject::MUST_READ,
         IOobject::NO_WRITE
@@ -71,7 +72,7 @@ Foam::IOobject Foam::radiation::boundaryRadiationProperties::createIOobject
 
 Foam::radiation::boundaryRadiationProperties::boundaryRadiationProperties
 (
-     const fvMesh& mesh
+    const fvMesh& mesh
 )
 :
     MeshObject
@@ -99,15 +100,19 @@ Foam::radiation::boundaryRadiationProperties::boundaryRadiationProperties
 
 // * * * * * * * * * * * * * * * Member fucntions * * * * * * * * * * * * *  //
 
-const Foam::volScalarField& Foam::radiation::boundaryRadiationProperties::
-radBoundaryProperties() const
+const Foam::volScalarField&
+Foam::radiation::boundaryRadiationProperties::radBoundaryProperties() const
 {
     return radBoundaryProperties_();
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::radiation::boundaryRadiationProperties::
-emissivity(const label index, const label bandI) const
+Foam::tmp<Foam::scalarField>
+Foam::radiation::boundaryRadiationProperties::emissivity
+(
+    const label index,
+    const label bandI
+) const
 {
     if (!radBoundaryProperties_.empty())
     {
@@ -120,8 +125,8 @@ emissivity(const label index, const label bandI) const
     {
         FatalErrorInFunction
             << "Field 'boundaryRadiationProperties'"
-            << "is not found in the constant directory."
-            << "Please add it "
+            << "is not found in the constant directory. "
+            << "Please add it"
             << exit(FatalError);
 
          return tmp<scalarField>(new scalarField());
@@ -129,8 +134,12 @@ emissivity(const label index, const label bandI) const
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::radiation::boundaryRadiationProperties::
-absorptivity(const label index, const label bandI) const
+Foam::tmp<Foam::scalarField>
+Foam::radiation::boundaryRadiationProperties::absorptivity
+(
+    const label index,
+    const label bandI
+) const
 {
     if (!radBoundaryProperties_.empty())
     {
@@ -143,7 +152,7 @@ absorptivity(const label index, const label bandI) const
     {
         FatalErrorInFunction
             << "Field 'boundaryRadiationProperties'"
-            << "is not found in the constant directory."
+            << "is not found in the constant directory. "
             << "Please add it "
             << exit(FatalError);
 
@@ -152,8 +161,12 @@ absorptivity(const label index, const label bandI) const
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::radiation::boundaryRadiationProperties::
-transmissivity(const label index, const label bandI) const
+Foam::tmp<Foam::scalarField>
+Foam::radiation::boundaryRadiationProperties::transmissivity
+(
+    const label index,
+    const label bandI
+) const
 {
     if (!radBoundaryProperties_.empty())
     {
@@ -166,8 +179,8 @@ transmissivity(const label index, const label bandI) const
     {
         FatalErrorInFunction
             << "Field 'boundaryRadiationProperties'"
-            << "is not found in the constant directory."
-            << "Please add it "
+            << "is not found in the constant directory. "
+            << "Please add it"
             << exit(FatalError);
 
         return tmp<scalarField>(new scalarField());
@@ -175,8 +188,12 @@ transmissivity(const label index, const label bandI) const
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::radiation::boundaryRadiationProperties::
-reflectivity(const label index, const label bandI) const
+Foam::tmp<Foam::scalarField>
+Foam::radiation::boundaryRadiationProperties::reflectivity
+(
+    const label index,
+    const label bandI
+) const
 {
     if (!radBoundaryProperties_.empty())
     {
@@ -189,8 +206,8 @@ reflectivity(const label index, const label bandI) const
     {
         FatalErrorInFunction
             << "Field 'boundaryRadiationProperties'"
-            << "is not found in the constant directory."
-            << "Please add it "
+            << "is not found in the constant directory. "
+            << "Please add it"
             << exit(FatalError);
 
         return tmp<scalarField>(new scalarField());
