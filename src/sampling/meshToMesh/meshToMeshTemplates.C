@@ -771,7 +771,7 @@ void Foam::meshToMesh::mapAndOpTgtToSrc
     const CombineOp& cop
 ) const
 {
-    srcField = Type(Tero);
+    srcField = Type(Zero);
 
     AMI.interpolateToSource
     (
