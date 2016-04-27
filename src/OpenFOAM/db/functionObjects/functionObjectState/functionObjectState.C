@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,19 @@ License
 
 const Foam::word Foam::functionObjectState::resultsName_ = "results";
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+const Foam::IOdictionary& Foam::functionObjectState::stateDict() const
+{
+    return obr_.time().functionObjects().stateDict();
+}
+
+
+Foam::IOdictionary& Foam::functionObjectState::stateDict()
+{
+    return const_cast<IOdictionary&>(obr_.time().functionObjects().stateDict());
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -39,11 +52,7 @@ Foam::functionObjectState::functionObjectState
 :
     obr_(obr),
     name_(name),
-    active_(true),
-    stateDict_
-    (
-        const_cast<IOdictionary&>(obr.time().functionObjects().stateDict())
-    )
+    active_(true)
 {}
 
 
@@ -67,28 +76,26 @@ bool Foam::functionObjectState::active() const
 }
 
 
-const Foam::IOdictionary& Foam::functionObjectState::stateDict() const
-{
-    return stateDict_;
-}
-
-
 Foam::dictionary& Foam::functionObjectState::propertyDict()
 {
-    if (!stateDict_.found(name_))
+    IOdictionary& stateDict = this->stateDict();
+
+    if (!stateDict.found(name_))
     {
-        stateDict_.add(name_, dictionary());
+        stateDict.add(name_, dictionary());
     }
 
-    return stateDict_.subDict(name_);
+    return stateDict.subDict(name_);
 }
 
 
 bool Foam::functionObjectState::foundProperty(const word& entryName) const
 {
-    if (stateDict_.found(name_))
+    const IOdictionary& stateDict = this->stateDict();
+
+    if (stateDict.found(name_))
     {
-        const dictionary& baseDict = stateDict_.subDict(name_);
+        const dictionary& baseDict = stateDict.subDict(name_);
         return baseDict.found(entryName);
     }
 
@@ -109,10 +116,11 @@ Foam::word Foam::functionObjectState::objectResultType
 ) const
 {
     word result = word::null;
+    const IOdictionary& stateDict = this->stateDict();
 
-    if (stateDict_.found(resultsName_))
+    if (stateDict.found(resultsName_))
     {
-        const dictionary& resultsDict = stateDict_.subDict(resultsName_);
+        const dictionary& resultsDict = stateDict.subDict(resultsName_);
 
         if (resultsDict.found(objectName))
         {
@@ -147,9 +155,11 @@ Foam::List<Foam::word> Foam::functionObjectState::objectResultEntries
 {
     DynamicList<word> result(2);
 
-    if (stateDict_.found(resultsName_))
+    const IOdictionary& stateDict = this->stateDict();
+
+    if (stateDict.found(resultsName_))
     {
-        const dictionary& resultsDict = stateDict_.subDict(resultsName_);
+        const dictionary& resultsDict = stateDict.subDict(resultsName_);
 
         if (resultsDict.found(objectName))
         {

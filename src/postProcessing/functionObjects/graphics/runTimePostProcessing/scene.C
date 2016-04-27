@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -348,7 +348,14 @@ bool Foam::scene::loop(vtkRenderer* renderer)
 
     currentFrameI_++;
 
-    position_ += currentFrameI_*dPosition_;
+    if (position_ > (1 + 0.5*dPosition_))
+    {
+        WarningInFunction
+            << "Current position exceeded 1 - please check your setup"
+            << endl;
+    }
+
+    position_ += dPosition_;
 
     if (currentFrameI_ < nFrameTotal_)
     {
