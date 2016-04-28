@@ -195,9 +195,9 @@ void dynamicLagrangian<BasicTurbulenceModel>::correct()
         fvm::ddt(alpha, rho, flm_)
       + fvm::div(alphaRhoPhi, flm_)
      ==
-        rho*invT*LM
-      - fvm::Sp(rho*invT, flm_)
-      + fvOptions(flm_)
+        alpha*rho*invT*LM
+      - fvm::Sp(alpha*rho*invT, flm_)
+      + fvOptions(alpha, rho, flm_)
     );
 
     flmEqn.relax();
@@ -213,9 +213,9 @@ void dynamicLagrangian<BasicTurbulenceModel>::correct()
         fvm::ddt(alpha, rho, fmm_)
       + fvm::div(alphaRhoPhi, fmm_)
      ==
-        rho*invT*MM
-      - fvm::Sp(rho*invT, fmm_)
-      + fvOptions(fmm_)
+        alpha*rho*invT*MM
+      - fvm::Sp(alpha*rho*invT, fmm_)
+      + fvOptions(alpha, rho, fmm_)
     );
 
     fmmEqn.relax();
