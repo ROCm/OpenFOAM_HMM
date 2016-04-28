@@ -136,7 +136,7 @@ boundaryRadiationPropertiesFvPatchField
                 );
             }
 
-           // if (dict.found("transmissivityModel"))
+            // if (dict.found("transmissivityModel"))
             {
                 transmissivity_.reset
                 (
@@ -230,9 +230,11 @@ transmissiveModel() const
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::radiation::
-boundaryRadiationPropertiesFvPatchField::
-emissivity(const label bandI) const
+Foam::tmp<Foam::scalarField>
+Foam::radiation::boundaryRadiationPropertiesFvPatchField::emissivity
+(
+    const label bandI
+) const
 {
     switch (method_)
     {
@@ -304,8 +306,8 @@ emissivity(const label bandI) const
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::radiation::
-boundaryRadiationPropertiesFvPatchField::absorptivity
+Foam::tmp<Foam::scalarField>
+Foam::radiation::boundaryRadiationPropertiesFvPatchField::absorptivity
 (
     const label bandI
 ) const
@@ -380,9 +382,11 @@ boundaryRadiationPropertiesFvPatchField::absorptivity
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::radiation::
-boundaryRadiationPropertiesFvPatchField::
-transmissivity(const label bandI) const
+Foam::tmp<Foam::scalarField>
+Foam::radiation::boundaryRadiationPropertiesFvPatchField::transmissivity
+(
+    const label bandI
+) const
 {
     switch (method_)
     {
@@ -457,9 +461,11 @@ transmissivity(const label bandI) const
 
 
 
-Foam::tmp<Foam::scalarField> Foam::radiation::
-boundaryRadiationPropertiesFvPatchField::
-reflectivity(const label bandI) const
+Foam::tmp<Foam::scalarField>
+Foam::radiation::boundaryRadiationPropertiesFvPatchField::reflectivity
+(
+    const label bandI
+) const
 {
     const tmp<scalarField> tt = transmissivity(bandI);
     const tmp<scalarField> ta = absorptivity(bandI);
@@ -468,16 +474,18 @@ reflectivity(const label bandI) const
 }
 
 
-void Foam::radiation::boundaryRadiationPropertiesFvPatchField::
-write(Ostream& os) const
+void Foam::radiation::boundaryRadiationPropertiesFvPatchField::write
+(
+    Ostream& os
+) const
 {
     calculatedFvPatchScalarField::write(os);
 
     os.writeKeyword("mode") << methodTypeNames_[method_]
         << token::END_STATEMENT << nl;
 
-     switch (method_)
-     {
+    switch (method_)
+    {
         case MODEL:
         {
             word modelType
