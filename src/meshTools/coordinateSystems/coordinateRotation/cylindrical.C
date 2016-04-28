@@ -99,7 +99,7 @@ Foam::cylindrical::cylindrical
 )
 :
     Rptr_(),
-    origin_(point::zero),
+    origin_(Zero),
     e3_(Zero)
 {
     // If origin is specified in the coordinateSystem

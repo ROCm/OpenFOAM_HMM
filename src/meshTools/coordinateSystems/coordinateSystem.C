@@ -43,7 +43,7 @@ Foam::coordinateSystem::coordinateSystem()
 :
     name_(),
     note_(),
-    origin_(point::zero),
+    origin_(Zero),
     R_(new axesRotation(sphericalTensor::I))
 {}
 
@@ -98,7 +98,7 @@ Foam::coordinateSystem::coordinateSystem
 :
     name_(name),
     note_(),
-    origin_(point::zero),
+    origin_(Zero),
     R_()
 {
     init(dict);
@@ -109,7 +109,7 @@ Foam::coordinateSystem::coordinateSystem(const dictionary& dict)
 :
     name_(),
     note_(),
-    origin_(point::zero),
+    origin_(Zero),
     R_()
 {
     init(dict);
@@ -124,7 +124,7 @@ Foam::coordinateSystem::coordinateSystem
 :
     name_(),
     note_(),
-    origin_(point::zero),
+    origin_(Zero),
     R_()
 {
     const entry* entryPtr = dict.lookupEntryPtr(typeName_(), false, false);
@@ -168,7 +168,7 @@ Foam::coordinateSystem::coordinateSystem(Istream& is)
 :
     name_(is),
     note_(),
-    origin_(point::zero),
+    origin_(Zero),
     R_()
 {
     dictionary dict(is);

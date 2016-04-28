@@ -630,13 +630,13 @@ bool Foam::medialAxisMeshMover::unmarkExtrusion
     if (extrudeStatus[patchPointI] == snappyLayerDriver::EXTRUDE)
     {
         extrudeStatus[patchPointI] = snappyLayerDriver::NOEXTRUDE;
-        patchDisp[patchPointI] = vector::zero;
+        patchDisp[patchPointI] = Zero;
         return true;
     }
     else if (extrudeStatus[patchPointI] == snappyLayerDriver::EXTRUDEREMOVE)
     {
         extrudeStatus[patchPointI] = snappyLayerDriver::NOEXTRUDE;
-        patchDisp[patchPointI] = vector::zero;
+        patchDisp[patchPointI] = Zero;
         return true;
     }
     else
@@ -1224,7 +1224,7 @@ Foam::medialAxisMeshMover::medialAxisMeshMover
             false
         ),
         pMesh(),
-        dimensionedVector("dispVec", dimLength, vector::zero)
+        dimensionedVector("dispVec", dimLength, Zero)
     ),
     medialRatio_
     (
@@ -1266,7 +1266,7 @@ Foam::medialAxisMeshMover::medialAxisMeshMover
             false
         ),
         pMesh(),
-        dimensionedVector("medialVec", dimLength, vector::zero)
+        dimensionedVector("medialVec", dimLength, Zero)
     )
 {
     update(dict);
@@ -1594,7 +1594,7 @@ void Foam::medialAxisMeshMover::calculateDisplacement
     {
         if (!pointWallDist[pointI].valid(dummyTrackData))
         {
-            displacement[pointI] = vector::zero;
+            displacement[pointI] = Zero;
         }
         else
         {

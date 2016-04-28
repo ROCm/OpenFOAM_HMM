@@ -124,7 +124,7 @@ displacementSBRStressFvMotionSolver
         (
             "cellDisplacement",
             displacementMotionSolver::pointDisplacement().dimensions(),
-            vector::zero
+            Zero
         ),
         cellMotionBoundaryTypes<vector>
         (

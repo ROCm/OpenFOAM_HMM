@@ -525,7 +525,7 @@ void Foam::motionSmootherAlgo::setDisplacement
             label pointI = cppMeshPoints[i];
             if (isPatchPoint[pointI])
             {
-                displacement[pointI] = vector::zero;
+                displacement[pointI] = Zero;
             }
         }
     }

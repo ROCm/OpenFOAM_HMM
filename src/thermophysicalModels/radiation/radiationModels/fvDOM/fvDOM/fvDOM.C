@@ -323,7 +323,7 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
     solarLoad_(),
     meshOrientation_
     (
-        coeffs_.lookupOrDefault<vector>("meshOrientation", vector::zero)
+        coeffs_.lookupOrDefault<vector>("meshOrientation", Zero)
     )
 {
     initialise();
@@ -418,7 +418,7 @@ Foam::radiation::fvDOM::fvDOM
     solarLoad_(),
     meshOrientation_
     (
-        coeffs_.lookupOrDefault<vector>("meshOrientation", vector::zero)
+        coeffs_.lookupOrDefault<vector>("meshOrientation", Zero)
     )
 {
     initialise();

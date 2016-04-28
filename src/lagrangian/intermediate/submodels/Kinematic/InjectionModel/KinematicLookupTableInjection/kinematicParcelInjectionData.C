@@ -36,7 +36,7 @@ namespace Foam
 
 Foam::kinematicParcelInjectionData::kinematicParcelInjectionData()
 :
-    x_(point::zero),
+    x_(Zero),
     U_(Zero),
     d_(0.0),
     rho_(0.0),
