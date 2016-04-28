@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -219,7 +219,7 @@ Foam::forceCoeffs::forceCoeffs
     CdBinFilePtr_(),
     ClBinFilePtr_()
 {
-    if (readFields)
+    if (active_ && readFields)
     {
         read(dict);
         if (log_) Info << endl;
@@ -309,6 +309,12 @@ void Foam::forceCoeffs::execute()
     }
 
     forces::calcForcesMoment();
+
+    // Need to re-check active_ flag - may have been reset in calcForcesMoment
+    if (!active_)
+    {
+        return;
+    }
 
     createFiles();
 

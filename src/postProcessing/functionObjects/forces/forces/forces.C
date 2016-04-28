@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -279,8 +279,8 @@ void Foam::forces::initialiseBins()
         // Allocate storage for forces and moments
         forAll(force_, i)
         {
-            force_[i].setSize(nBin_);
-            moment_[i].setSize(nBin_);
+            force_[i].setSize(nBin_, vector::zero);
+            moment_[i].setSize(nBin_, vector::zero);
         }
     }
 }
@@ -841,8 +841,8 @@ Foam::forces::forces
 
     forAll(force_, i)
     {
-        force_[i].setSize(nBin_);
-        moment_[i].setSize(nBin_);
+        force_[i].setSize(nBin_, vector::zero);
+        moment_[i].setSize(nBin_, vector::zero);
     }
 }
 
@@ -944,8 +944,8 @@ void Foam::forces::read(const dictionary& dict)
         // Allocate storage for forces and moments
         forAll(force_, i)
         {
-            force_[i].setSize(1);
-            moment_[i].setSize(1);
+            force_[i].setSize(1, vector::zero);
+            moment_[i].setSize(1, vector::zero);
         }
     }
 
