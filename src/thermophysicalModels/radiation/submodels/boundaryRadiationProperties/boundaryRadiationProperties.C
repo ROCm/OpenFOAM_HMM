@@ -38,36 +38,6 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-Foam::IOobject Foam::radiation::boundaryRadiationProperties::createIOobject
-(
-    const fvMesh& mesh,
-    const word name
-) const
-{
-    IOobject io
-    (
-        name,
-        mesh.time().caseConstant(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE
-    );
-
-    if (io.typeHeaderOk<volScalarField>(true))
-    {
-        io.readOpt() = IOobject::MUST_READ_IF_MODIFIED;
-        return io;
-    }
-    else
-    {
-        io.readOpt() = IOobject::NO_READ;
-        return io;
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
 
 Foam::radiation::boundaryRadiationProperties::boundaryRadiationProperties
@@ -83,12 +53,16 @@ Foam::radiation::boundaryRadiationProperties::boundaryRadiationProperties
     >(mesh),
     radBoundaryProperties_()
 {
-    const IOobject boundaryIO
+    IOobject boundaryIO
     (
-        createIOobject(mesh, boundaryRadiationProperties::typeName)
+        boundaryRadiationProperties::typeName,
+        mesh.time().constant(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
     );
 
-    if (boundaryIO.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
+    if (boundaryIO.typeHeaderOk<volScalarField>(true))
     {
         radBoundaryProperties_.set
         (
@@ -100,17 +74,10 @@ Foam::radiation::boundaryRadiationProperties::boundaryRadiationProperties
 
 // * * * * * * * * * * * * * * * Member fucntions * * * * * * * * * * * * *  //
 
-const Foam::volScalarField&
-Foam::radiation::boundaryRadiationProperties::radBoundaryProperties() const
-{
-    return radBoundaryProperties_();
-}
-
-
 Foam::tmp<Foam::scalarField>
 Foam::radiation::boundaryRadiationProperties::emissivity
 (
-    const label index,
+    const label patchI,
     const label bandI
 ) const
 {
@@ -118,7 +85,7 @@ Foam::radiation::boundaryRadiationProperties::emissivity
     {
         return refCast<const boundaryRadiationPropertiesFvPatchField>
         (
-            radBoundaryProperties_->boundaryField()[index]
+            radBoundaryProperties_->boundaryField()[patchI]
         ).emissivity(bandI);
     }
     else
@@ -129,7 +96,7 @@ Foam::radiation::boundaryRadiationProperties::emissivity
             << "Please add it"
             << exit(FatalError);
 
-         return tmp<scalarField>(new scalarField());
+        return tmp<scalarField>(new scalarField());
     }
 }
 
@@ -137,7 +104,7 @@ Foam::radiation::boundaryRadiationProperties::emissivity
 Foam::tmp<Foam::scalarField>
 Foam::radiation::boundaryRadiationProperties::absorptivity
 (
-    const label index,
+    const label patchI,
     const label bandI
 ) const
 {
@@ -145,7 +112,7 @@ Foam::radiation::boundaryRadiationProperties::absorptivity
     {
         return refCast<const boundaryRadiationPropertiesFvPatchField>
         (
-            radBoundaryProperties_->boundaryField()[index]
+            radBoundaryProperties_->boundaryField()[patchI]
         ).absorptivity(bandI);
     }
     else
@@ -164,7 +131,7 @@ Foam::radiation::boundaryRadiationProperties::absorptivity
 Foam::tmp<Foam::scalarField>
 Foam::radiation::boundaryRadiationProperties::transmissivity
 (
-    const label index,
+    const label patchI,
     const label bandI
 ) const
 {
@@ -172,7 +139,7 @@ Foam::radiation::boundaryRadiationProperties::transmissivity
     {
         return refCast<const boundaryRadiationPropertiesFvPatchField>
         (
-            radBoundaryProperties_->boundaryField()[index]
+            radBoundaryProperties_->boundaryField()[patchI]
         ).transmissivity(bandI);
     }
     else
@@ -191,7 +158,7 @@ Foam::radiation::boundaryRadiationProperties::transmissivity
 Foam::tmp<Foam::scalarField>
 Foam::radiation::boundaryRadiationProperties::reflectivity
 (
-    const label index,
+    const label patchI,
     const label bandI
 ) const
 {
@@ -199,7 +166,7 @@ Foam::radiation::boundaryRadiationProperties::reflectivity
     {
         return refCast<const boundaryRadiationPropertiesFvPatchField>
         (
-            radBoundaryProperties_->boundaryField()[index]
+            radBoundaryProperties_->boundaryField()[patchI]
         ).reflectivity(bandI);
     }
     else
