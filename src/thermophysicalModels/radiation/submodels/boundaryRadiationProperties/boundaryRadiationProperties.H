@@ -36,8 +36,7 @@ SourceFiles
 #define boundaryRadiationProperties_H
 
 #include "MeshObject.H"
-#include "GeometricField.H"
-#include "volMesh.H"
+#include "boundaryRadiationPropertiesPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,8 +64,9 @@ class boundaryRadiationProperties
 
     // Private data
 
-        //- AutoPtr to volSacalarField properties
-        autoPtr<volScalarField> radBoundaryProperties_;
+        //- Ptr list of boundaryRadiationProperties
+        List<autoPtr<boundaryRadiationPropertiesPatch> >
+            radBoundaryPropertiesPtrList_;
 
 
 public:
@@ -115,7 +115,7 @@ public:
 
 
     //- Destructor
-    virtual ~boundaryRadiationProperties();
+    ~boundaryRadiationProperties();
 };
 
 
