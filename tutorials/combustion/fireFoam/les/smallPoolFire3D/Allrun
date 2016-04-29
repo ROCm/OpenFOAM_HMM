@@ -9,7 +9,7 @@ application=`getApplication`
 runApplication blockMesh
 runApplication topoSet
 runApplication createPatch -overwrite
-runApplication decomposePar -force -constant
+runApplication decomposePar -force
 
 # Run
 runParallel $application

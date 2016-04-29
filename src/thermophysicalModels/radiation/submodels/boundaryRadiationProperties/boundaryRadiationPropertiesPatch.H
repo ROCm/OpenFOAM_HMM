@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::boundaryRadiationPropertiesFvPatchField
+    Foam::boundaryRadiationPropertiesPatch
 
 Description
     Common functions to emissivity. It gets supplied from lookup into a
@@ -33,12 +33,12 @@ Description
     - 'model' : use a model
 
 SourceFiles
-    boundaryRadiationPropertiesFvPatchField.C
+    boundaryRadiationPropertiesPatch.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef boundaryRadiationPropertiesFvPatchField_H
-#define boundaryRadiationPropertiesFvPatchField_H
+#ifndef boundaryRadiationPropertiesPatch_H
+#define boundaryRadiationPropertiesPatch_H
 
 #include "scalarField.H"
 #include "NamedEnum.H"
@@ -54,16 +54,14 @@ namespace Foam
 namespace radiation
 {
 /*---------------------------------------------------------------------------*\
-             Class boundaryRadiationPropertiesFvPatchField Declaration
+             Class boundaryRadiationPropertiesPatch Declaration
 \*---------------------------------------------------------------------------*/
 
-class boundaryRadiationPropertiesFvPatchField
-:
-    public calculatedFvPatchScalarField
+class boundaryRadiationPropertiesPatch
 {
 public:
 
-    // - Type of look up
+    // - Type of method
     enum methodType
     {
         SOLIDRADIATION,
@@ -90,6 +88,9 @@ private:
         //- transmissivity model
         autoPtr<transmissivityModel> transmissivity_;
 
+        //- reference to fvPatch
+        const polyPatch& patch_;
+
 
     // Private functions
 
@@ -102,70 +103,19 @@ private:
 
 public:
 
-    //- Runtime type information
-    TypeName("boundaryRadiation");
 
     // Constructors
 
 
-        //- Construct from patch and internal field
-        boundaryRadiationPropertiesFvPatchField
-        (
-            const fvPatch&,
-            const DimensionedField<scalar, volMesh>&
-        );
-
         //- Construct from patch, internal field and dictionary
-        boundaryRadiationPropertiesFvPatchField
+        boundaryRadiationPropertiesPatch
         (
-            const fvPatch&,
-            const DimensionedField<scalar, volMesh>&,
+            const polyPatch&,
             const dictionary&
         );
 
-        //- Construct by mapping given a
-        // greyDiffusiveViewFactorFixedValueFvPatchScalarField onto a new patch
-        boundaryRadiationPropertiesFvPatchField
-        (
-            const boundaryRadiationPropertiesFvPatchField&,
-            const fvPatch&,
-            const DimensionedField<scalar, volMesh>&,
-            const fvPatchFieldMapper&
-        );
-
-        //- Construct as copy
-        boundaryRadiationPropertiesFvPatchField
-        (
-            const boundaryRadiationPropertiesFvPatchField&
-        );
-
-        //- Construct as copy setting internal field reference
-        boundaryRadiationPropertiesFvPatchField
-        (
-            const boundaryRadiationPropertiesFvPatchField&,
-            const DimensionedField<scalar, volMesh>&
-        );
-
-        //- Construct and return a clone
-        virtual tmp<fvPatchScalarField> clone() const
-        {
-            return tmp<fvPatchScalarField>
-            (
-                new boundaryRadiationPropertiesFvPatchField(*this)
-            );
-        }
-
-        //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchScalarField> clone
-        (
-            const DimensionedField<scalar, volMesh>& iF
-        ) const
-        {
-            return tmp<fvPatchScalarField>
-            (
-                new boundaryRadiationPropertiesFvPatchField(*this, iF)
-            );
-        }
+         //- Destructor
+        virtual ~boundaryRadiationPropertiesPatch();
 
 
     // Member functions
@@ -196,7 +146,7 @@ public:
         tmp<scalarField> reflectivity(const label bandI = 0) const;
 
         //- Write
-        virtual void write(Ostream&) const;
+        void write(Ostream&) const;
 };
 
 
