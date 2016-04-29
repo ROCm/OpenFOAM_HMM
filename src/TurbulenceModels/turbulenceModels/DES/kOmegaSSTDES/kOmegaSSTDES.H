@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,8 +37,11 @@ Description
         39th AIAA Aerospace Sciences Meeting and Exhibit, Reno, NV
     \endverbatim
 
-    Note: DES constants CDES_kom and CDES_keps have been re-calibrated to 
-          OpenFOAM numerics via decaying isotropic turbulence test case
+Note
+    The default values of the DES constants implemented are code-specific
+    values calibrated for OpenFOAM using decaying isotropic turbulence, and
+    hence deviate slightly from the values suggested in the reference
+    publication.
 
 SourceFiles
     kOmegaSSTDES.C
