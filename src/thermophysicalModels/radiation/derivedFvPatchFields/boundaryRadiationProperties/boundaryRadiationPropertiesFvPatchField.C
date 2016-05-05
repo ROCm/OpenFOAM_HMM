@@ -23,10 +23,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "boundaryRadiationPropertiesPatch.H"
+#include "boundaryRadiationPropertiesFvPatchField.H"
+#include "volFields.H"
 #include "mappedPatchBase.H"
+#include "fvPatchFieldMapper.H"
 #include "radiationModel.H"
 #include "absorptionEmissionModel.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
@@ -35,7 +38,7 @@ namespace Foam
     template<>
     const char* Foam::NamedEnum
     <
-        Foam::radiation::boundaryRadiationPropertiesPatch::methodType,
+        Foam::radiation::boundaryRadiationPropertiesFvPatchField::methodType,
         3
     >::names[] =
     {
@@ -47,53 +50,70 @@ namespace Foam
 
 const Foam::NamedEnum
 <
-    Foam::radiation::boundaryRadiationPropertiesPatch::methodType,
+    Foam::radiation::boundaryRadiationPropertiesFvPatchField::methodType,
     3
-> Foam::radiation::boundaryRadiationPropertiesPatch::methodTypeNames_;
+> Foam::radiation::boundaryRadiationPropertiesFvPatchField::methodTypeNames_;
 
 
 // * * * * * * * * * * * * * * * * Private functions * * * * * * * * * * * * //
 
 Foam::label
-Foam::radiation::boundaryRadiationPropertiesPatch::nbrPatchIndex() const
+Foam::radiation::boundaryRadiationPropertiesFvPatchField::nbrPatchIndex() const
 {
     // Get the coupling information from the mappedPatchBase
     const mappedPatchBase& mpp =
-        refCast<const mappedPatchBase>(patch_);
+        refCast<const mappedPatchBase>(patch().patch());
 
     return (mpp.samplePolyPatch().index());
 }
 
 
 const Foam::fvMesh&
-Foam::radiation::boundaryRadiationPropertiesPatch::nbrRegion() const
+Foam::radiation::boundaryRadiationPropertiesFvPatchField::nbrRegion() const
 {
     const mappedPatchBase& mpp =
-        refCast<const mappedPatchBase>(patch_);
+        refCast<const mappedPatchBase>(patch().patch());
 
      return (refCast<const fvMesh>(mpp.sampleMesh()));
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::radiation::boundaryRadiationPropertiesPatch::
-boundaryRadiationPropertiesPatch
+
+Foam::radiation::boundaryRadiationPropertiesFvPatchField::
+boundaryRadiationPropertiesFvPatchField
 (
-    const polyPatch& p,
+    const fvPatch& p,
+    const DimensionedField<scalar, volMesh>& iF
+)
+:
+    calculatedFvPatchScalarField(p, iF),
+    method_(LOOKUP),
+    dict_(),
+    absorptionEmission_(NULL),
+    transmissivity_(NULL)
+{}
+
+
+Foam::radiation::boundaryRadiationPropertiesFvPatchField::
+boundaryRadiationPropertiesFvPatchField
+(
+    const fvPatch& p,
+    const DimensionedField<scalar, volMesh>& iF,
     const dictionary& dict
 )
 :
+    calculatedFvPatchScalarField(p, iF),
     method_(methodTypeNames_.read(dict.lookup("mode"))),
     dict_(dict),
     absorptionEmission_(NULL),
-    transmissivity_(NULL),
-    patch_(p)
+    transmissivity_(NULL)
 {
     switch (method_)
     {
         case SOLIDRADIATION:
         {
-            if (!isA<mappedPatchBase>(p))
+            if (!isA<mappedPatchBase>(p.patch()))
             {
                 FatalErrorInFunction
                     << "\n    patch type '" << p.type()
@@ -106,18 +126,23 @@ boundaryRadiationPropertiesPatch
 
         case MODEL:
         {
-            const fvMesh& mesh =
-                refCast<const fvMesh>(p.boundaryMesh().mesh());
+            const fvMesh& mesh = this->dimensionedInternalField().mesh();
 
-            absorptionEmission_.reset
-            (
-                absorptionEmissionModel::New(dict, mesh).ptr()
-            );
+            //if (dict.found("absorptionEmissionModel"))
+            {
+                absorptionEmission_.reset
+                (
+                    absorptionEmissionModel::New(dict, mesh).ptr()
+                );
+            }
 
-            transmissivity_.reset
-            (
-                transmissivityModel::New(dict, mesh).ptr()
-            );
+            // if (dict.found("transmissivityModel"))
+            {
+                transmissivity_.reset
+                (
+                    transmissivityModel::New(dict, mesh).ptr()
+                );
+            }
         }
         case LOOKUP:
         {
@@ -126,19 +151,71 @@ boundaryRadiationPropertiesPatch
         break;
     }
 
+    if (dict.found("value"))
+    {
+        fvPatchScalarField::operator=
+        (
+            scalarField("value", dict, p.size())
+        );
+
+    }
+    else
+    {
+         fvPatchScalarField::operator=(0.0);
+    }
 }
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::radiation::boundaryRadiationPropertiesPatch::
-~boundaryRadiationPropertiesPatch()
+Foam::radiation::boundaryRadiationPropertiesFvPatchField::
+boundaryRadiationPropertiesFvPatchField
+(
+    const boundaryRadiationPropertiesFvPatchField& ptf,
+    const fvPatch& p,
+    const DimensionedField<scalar, volMesh>& iF,
+    const fvPatchFieldMapper& mapper
+)
+:
+    calculatedFvPatchScalarField(ptf, p, iF, mapper),
+    method_(ptf.method_),
+    dict_(ptf.dict_),
+    absorptionEmission_(NULL),
+    transmissivity_(NULL)
+{}
+
+
+Foam::radiation::boundaryRadiationPropertiesFvPatchField::
+boundaryRadiationPropertiesFvPatchField
+(
+    const boundaryRadiationPropertiesFvPatchField& ptf
+)
+:
+    calculatedFvPatchScalarField(ptf),
+    method_(ptf.method_),
+    dict_(ptf.dict_),
+    absorptionEmission_(NULL),
+    transmissivity_(NULL)
+{}
+
+
+Foam::radiation::boundaryRadiationPropertiesFvPatchField::
+boundaryRadiationPropertiesFvPatchField
+(
+    const boundaryRadiationPropertiesFvPatchField& ptf,
+    const DimensionedField<scalar, volMesh>& iF
+)
+:
+    calculatedFvPatchScalarField(ptf, iF),
+    method_(ptf.method_),
+    dict_(ptf.dict_),
+    absorptionEmission_(NULL),
+    transmissivity_(NULL)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const Foam::radiation::absorptionEmissionModel&
-Foam::radiation::boundaryRadiationPropertiesPatch::
+Foam::radiation::boundaryRadiationPropertiesFvPatchField::
 absorptionEmission() const
 {
     return absorptionEmission_();
@@ -146,7 +223,7 @@ absorptionEmission() const
 
 
 const Foam::radiation::transmissivityModel&
-Foam::radiation::boundaryRadiationPropertiesPatch::
+Foam::radiation::boundaryRadiationPropertiesFvPatchField::
 transmissiveModel() const
 {
     return transmissivity_();
@@ -154,7 +231,7 @@ transmissiveModel() const
 
 
 Foam::tmp<Foam::scalarField>
-Foam::radiation::boundaryRadiationPropertiesPatch::emissivity
+Foam::radiation::boundaryRadiationPropertiesFvPatchField::emissivity
 (
     const label bandI
 ) const
@@ -180,7 +257,7 @@ Foam::radiation::boundaryRadiationPropertiesPatch::emissivity
             );
 
             const mappedPatchBase& mpp =
-                refCast<const mappedPatchBase>(patch_);
+                refCast<const mappedPatchBase>(patch().patch());
 
             mpp.distribute(emissivity);
 
@@ -195,7 +272,7 @@ Foam::radiation::boundaryRadiationPropertiesPatch::emissivity
         {
             tmp<scalarField> e
             (
-                 new scalarField("emissivity", dict_, patch_.size())
+                 new scalarField("emissivity", dict_, patch().size())
             );
 
             return e;
@@ -203,7 +280,7 @@ Foam::radiation::boundaryRadiationPropertiesPatch::emissivity
 
         case MODEL:
         {
-            const label index = patch_.index();
+            const label index = patch().index();
 
             tmp<scalarField> e
             (
@@ -230,7 +307,7 @@ Foam::radiation::boundaryRadiationPropertiesPatch::emissivity
 
 
 Foam::tmp<Foam::scalarField>
-Foam::radiation::boundaryRadiationPropertiesPatch::absorptivity
+Foam::radiation::boundaryRadiationPropertiesFvPatchField::absorptivity
 (
     const label bandI
 ) const
@@ -256,7 +333,7 @@ Foam::radiation::boundaryRadiationPropertiesPatch::absorptivity
             );
 
             const mappedPatchBase& mpp =
-                refCast<const mappedPatchBase>(patch_);
+                refCast<const mappedPatchBase>(patch().patch());
 
             mpp.distribute(absorp);
 
@@ -269,7 +346,7 @@ Foam::radiation::boundaryRadiationPropertiesPatch::absorptivity
 
         case MODEL:
         {
-            const label index = patch_.index();
+            const label index = patch().index();
             tmp<scalarField> a
             (
                  new scalarField
@@ -284,7 +361,7 @@ Foam::radiation::boundaryRadiationPropertiesPatch::absorptivity
         {
             tmp<scalarField> a
             (
-                 new scalarField("absorptivity", dict_, patch_.size())
+                 new scalarField("absorptivity", dict_, patch().size())
             );
 
             return a;
@@ -306,7 +383,7 @@ Foam::radiation::boundaryRadiationPropertiesPatch::absorptivity
 
 
 Foam::tmp<Foam::scalarField>
-Foam::radiation::boundaryRadiationPropertiesPatch::transmissivity
+Foam::radiation::boundaryRadiationPropertiesFvPatchField::transmissivity
 (
     const label bandI
 ) const
@@ -332,7 +409,7 @@ Foam::radiation::boundaryRadiationPropertiesPatch::transmissivity
             );
 
             const mappedPatchBase& mpp =
-                refCast<const mappedPatchBase>(patch_);
+                refCast<const mappedPatchBase>(patch().patch());
 
             mpp.distribute(trans);
 
@@ -345,7 +422,7 @@ Foam::radiation::boundaryRadiationPropertiesPatch::transmissivity
 
         case MODEL:
         {
-            const label index = patch_.index();
+            const label index = patch().index();
             tmp<scalarField> tau
             (
                  new scalarField
@@ -362,7 +439,7 @@ Foam::radiation::boundaryRadiationPropertiesPatch::transmissivity
             (
                 new scalarField
                 (
-                    "transmissivity", dict_, patch_.size()
+                    "transmissivity", dict_, patch().size()
                 )
             );
             return tau;
@@ -385,7 +462,7 @@ Foam::radiation::boundaryRadiationPropertiesPatch::transmissivity
 
 
 Foam::tmp<Foam::scalarField>
-Foam::radiation::boundaryRadiationPropertiesPatch::reflectivity
+Foam::radiation::boundaryRadiationPropertiesFvPatchField::reflectivity
 (
     const label bandI
 ) const
@@ -397,11 +474,13 @@ Foam::radiation::boundaryRadiationPropertiesPatch::reflectivity
 }
 
 
-void Foam::radiation::boundaryRadiationPropertiesPatch::write
+void Foam::radiation::boundaryRadiationPropertiesFvPatchField::write
 (
     Ostream& os
 ) const
 {
+    calculatedFvPatchScalarField::write(os);
+
     os.writeKeyword("mode") << methodTypeNames_[method_]
         << token::END_STATEMENT << nl;
 
@@ -438,18 +517,18 @@ void Foam::radiation::boundaryRadiationPropertiesPatch::write
 
         case LOOKUP:
         {
-            const scalarField emissivity("emissivity", dict_, patch_.size());
+            const scalarField emissivity("emissivity", dict_, patch().size());
             emissivity.writeEntry("emissivity", os);
 
             const scalarField absorptivity
             (
-                "absorptivity", dict_, patch_.size()
+                "absorptivity", dict_, patch().size()
             );
             absorptivity.writeEntry("absorptivity", os);
 
             const scalarField transmissivity
             (
-                "transmissivity", dict_, patch_.size()
+                "transmissivity", dict_, patch().size()
             );
             transmissivity.writeEntry("transmissivity", os);
 
@@ -460,6 +539,21 @@ void Foam::radiation::boundaryRadiationPropertiesPatch::write
         {
         }
     }
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace radiation
+{
+    makePatchTypeField
+    (
+        fvPatchScalarField,
+        boundaryRadiationPropertiesFvPatchField
+    );
+}
 }
 
 // ************************************************************************* //

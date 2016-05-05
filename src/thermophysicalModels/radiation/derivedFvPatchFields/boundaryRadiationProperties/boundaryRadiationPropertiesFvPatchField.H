@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::boundaryRadiationPropertiesPatch
+    Foam::boundaryRadiationPropertiesFvPatchField
 
 Description
     Common functions to emissivity. It gets supplied from lookup into a
@@ -33,12 +33,12 @@ Description
     - 'model' : use a model
 
 SourceFiles
-    boundaryRadiationPropertiesPatch.C
+    boundaryRadiationPropertiesFvPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef boundaryRadiationPropertiesPatch_H
-#define boundaryRadiationPropertiesPatch_H
+#ifndef boundaryRadiationPropertiesFvPatchField_H
+#define boundaryRadiationPropertiesFvPatchField_H
 
 #include "scalarField.H"
 #include "NamedEnum.H"
@@ -54,14 +54,16 @@ namespace Foam
 namespace radiation
 {
 /*---------------------------------------------------------------------------*\
-             Class boundaryRadiationPropertiesPatch Declaration
+             Class boundaryRadiationPropertiesFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
-class boundaryRadiationPropertiesPatch
+class boundaryRadiationPropertiesFvPatchField
+:
+    public calculatedFvPatchScalarField
 {
 public:
 
-    // - Type of method
+    // - Type of look up
     enum methodType
     {
         SOLIDRADIATION,
@@ -88,9 +90,6 @@ private:
         //- transmissivity model
         autoPtr<transmissivityModel> transmissivity_;
 
-        //- reference to fvPatch
-        const polyPatch& patch_;
-
 
     // Private functions
 
@@ -103,19 +102,70 @@ private:
 
 public:
 
+    //- Runtime type information
+    TypeName("boundaryRadiation");
 
     // Constructors
 
 
-        //- Construct from patch, internal field and dictionary
-        boundaryRadiationPropertiesPatch
+        //- Construct from patch and internal field
+        boundaryRadiationPropertiesFvPatchField
         (
-            const polyPatch&,
+            const fvPatch&,
+            const DimensionedField<scalar, volMesh>&
+        );
+
+        //- Construct from patch, internal field and dictionary
+        boundaryRadiationPropertiesFvPatchField
+        (
+            const fvPatch&,
+            const DimensionedField<scalar, volMesh>&,
             const dictionary&
         );
 
-         //- Destructor
-        virtual ~boundaryRadiationPropertiesPatch();
+        //- Construct by mapping given a
+        // greyDiffusiveViewFactorFixedValueFvPatchScalarField onto a new patch
+        boundaryRadiationPropertiesFvPatchField
+        (
+            const boundaryRadiationPropertiesFvPatchField&,
+            const fvPatch&,
+            const DimensionedField<scalar, volMesh>&,
+            const fvPatchFieldMapper&
+        );
+
+        //- Construct as copy
+        boundaryRadiationPropertiesFvPatchField
+        (
+            const boundaryRadiationPropertiesFvPatchField&
+        );
+
+        //- Construct as copy setting internal field reference
+        boundaryRadiationPropertiesFvPatchField
+        (
+            const boundaryRadiationPropertiesFvPatchField&,
+            const DimensionedField<scalar, volMesh>&
+        );
+
+        //- Construct and return a clone
+        virtual tmp<fvPatchScalarField> clone() const
+        {
+            return tmp<fvPatchScalarField>
+            (
+                new boundaryRadiationPropertiesFvPatchField(*this)
+            );
+        }
+
+        //- Construct and return a clone setting internal field reference
+        virtual tmp<fvPatchScalarField> clone
+        (
+            const DimensionedField<scalar, volMesh>& iF
+        ) const
+        {
+            return tmp<fvPatchScalarField>
+            (
+                new boundaryRadiationPropertiesFvPatchField(*this, iF)
+            );
+        }
 
 
     // Member functions
@@ -146,7 +196,7 @@ public:
         tmp<scalarField> reflectivity(const label bandI = 0) const;
 
         //- Write
-        void write(Ostream&) const;
+        virtual void write(Ostream&) const;
 };
 
 
