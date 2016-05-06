@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -41,8 +41,10 @@ isTest()
 
 getNumberOfProcessors()
 {
-    expandDictionary system/decomposeParDict \
-        | sed -ne 's/^numberOfSubdomains\s*\(.*\);/\1/p'
+    if [ -f $1 ]
+    then
+        expandDictionary $1 | sed -ne 's/^numberOfSubdomains\s*\(.*\);/\1/p'
+    fi
 }
 
 getApplication()
@@ -100,13 +102,16 @@ runParallel()
 {
     LOG_NAME=
     APP_RUN=
+    # Store any parsed additional arguments e.g. decomposeParDict
+    APP_PARARGS=
     LOG_IGNORE=false
     LOG_APPEND=false
     LOG_SUFFIX=
-    nProcs=$(getNumberOfProcessors)
+    # Check the default decomposeParDict if available
+    nProcs=$(getNumberOfProcessors "system/decomposeParDict")
 
     # Parse options and executable
-    while [ $# -gt 0 ] && [ -z "$APP_RUN" ]; do
+    while [ $# -gt 0 ] && [ -z "$APP_RUN" ] ; do
         key="$1"
         case "$key" in
             -append|-a)
@@ -122,6 +127,11 @@ runParallel()
                 ;;
             -np|-n)
                 nProcs="$2"
+                shift
+                ;;
+            -decomposeParDict)
+                nProcs=$(getNumberOfProcessors "$2")
+                APP_PARARGS="$APP_PARARGS -decomposeParDict $2"
                 shift
                 ;;
             *)
@@ -141,9 +151,9 @@ runParallel()
     else
         echo "Running $APP_RUN in parallel on $PWD using $nProcs processes"
         if [ "$LOG_APPEND" = "true" ]; then
-            ( mpirun -np $nProcs $APP_RUN -parallel "$@" < /dev/null >> log.$LOG_SUFFIX 2>&1 )
+            ( mpirun -np $nProcs $APP_RUN $APP_PARARGS -parallel "$@" < /dev/null >> log.$LOG_SUFFIX 2>&1 )
         else
-            ( mpirun -np $nProcs $APP_RUN -parallel "$@" < /dev/null > log.$LOG_SUFFIX 2>&1 )
+            ( mpirun -np $nProcs $APP_RUN $APP_PARARGS -parallel "$@" < /dev/null > log.$LOG_SUFFIX 2>&1 )
         fi
     fi
 }
