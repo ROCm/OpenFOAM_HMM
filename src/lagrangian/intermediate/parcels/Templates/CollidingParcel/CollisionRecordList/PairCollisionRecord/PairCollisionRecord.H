@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -111,7 +111,7 @@ public:
             bool accessed,
             label origProcOfOther,
             label origIdOfOther,
-            const Type& data = pTraits<Type>::zero
+            const Type& data = Type(Zero)
         );
 
         //- Construct from Istream
@@ -122,7 +122,7 @@ public:
 
 
     //- Destructor
-        ~PairCollisionRecord();
+    ~PairCollisionRecord();
 
 
     // Member Functions
@@ -211,7 +211,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "PairCollisionRecord.C"
+    #include "PairCollisionRecord.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

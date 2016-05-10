@@ -82,8 +82,8 @@ void Foam::AABBTree<Type>::writeOBJ
     const bool writeLinesOnly,
     const treeBoundBox& bb,
     const label nodeI,
-    const List<Pair<treeBoundBox> >& bbs,
-    const List<Pair<label> >& nodes,
+    const List<Pair<treeBoundBox>>& bbs,
+    const List<Pair<label>>& nodes,
     label& vertI,
     Ostream& os
 ) const
@@ -133,7 +133,7 @@ void Foam::AABBTree<Type>::createBoxes
     const treeBoundBox& bb,
     const label nodeI,
 
-    DynamicList<Pair<treeBoundBox> >& bbs,
+    DynamicList<Pair<treeBoundBox>>& bbs,
     DynamicList<labelPair>& nodes,
     DynamicList<labelList>& addressing
 ) const
@@ -356,7 +356,7 @@ Foam::AABBTree<Type>::AABBTree
     }
 
 
-    DynamicList<Pair<treeBoundBox> > bbs(maxLevel);
+    DynamicList<Pair<treeBoundBox>> bbs(maxLevel);
     DynamicList<labelPair> nodes(maxLevel);
     DynamicList<labelList> addr(maxLevel);
 

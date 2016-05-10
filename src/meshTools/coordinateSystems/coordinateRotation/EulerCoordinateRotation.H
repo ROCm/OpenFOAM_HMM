@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,13 +37,16 @@ Description
     - the rotation angles are in degrees, unless otherwise explictly specified:
 
     \verbatim
-        coordinateRotation
-        {
-            type        EulerRotation
-            degrees     false;
-            rotation    (0 0 3.141592654);
-        }
+    coordinateRotation
+    {
+        type        EulerRotation;
+        degrees     false;
+        rotation    (0 0 3.141592654);
+    }
     \endverbatim
+
+SourceFiles
+    EulerCoordinateRotation.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -163,22 +166,22 @@ public:
             return Rtr_;
         };
 
-        //- Return local Cartesian x-axis
+        //- Return local Cartesian x-axis in global coordinates
         virtual const vector e1() const
         {
-            return R_.x();
+            return Rtr_.x();
         }
 
-        //- Return local Cartesian y-axis
+        //- Return local Cartesian y-axis in global coordinates
         virtual const vector e2() const
         {
-            return R_.y();
+            return Rtr_.y();
         }
 
-        //- Return local Cartesian z-axis
+        //- Return local Cartesian z-axis in global coordinates
         virtual const vector e3() const
         {
-            return R_.z();
+            return Rtr_.z();
         }
 
         //- Return transformation tensor field

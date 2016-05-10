@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,16 @@ Class
     Foam::BrownianMotionForce
 
 Description
-    Calculates particle Brownian motion force
+    Calculates particle Brownian motion force.
+
+    Reference:
+    \verbatim
+        Li, A., & Ahmadi, G. (1992).
+        Dispersion and deposition of spherical particles from point sources
+        in a turbulent channel flow.
+        Aerosol science and technology,
+        16(4), 209-226.
+    \endverbatim
 
 SourceFiles
     BrownianMotionForceI.H
@@ -100,9 +109,9 @@ public:
         BrownianMotionForce(const BrownianMotionForce& bmf);
 
         //- Construct and return a clone
-        virtual autoPtr<ParticleForce<CloudType> > clone() const
+        virtual autoPtr<ParticleForce<CloudType>> clone() const
         {
-            return autoPtr<ParticleForce<CloudType> >
+            return autoPtr<ParticleForce<CloudType>>
             (
                 new BrownianMotionForce<CloudType>(*this)
             );
@@ -129,7 +138,7 @@ public:
             //- Cache fields
             virtual void cacheFields(const bool store);
 
-            //- Calculate the non-coupled force
+            //- Calculate the coupled force
             virtual forceSuSp calcCoupled
             (
                 const typename CloudType::parcelType& p,

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -109,7 +109,7 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
         if (thicknessLayers_.size() > 0)
         {
             // Calculate effective thermal resistance by harmonic averaging
-            forAll (thicknessLayers_, iLayer)
+            forAll(thicknessLayers_, iLayer)
             {
                 contactRes_ += thicknessLayers_[iLayer]/kappaLayers_[iLayer];
             }
@@ -195,17 +195,17 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
 
     if (contactRes_ == 0.0)
     {
-        nbrIntFld() = nbrField.patchInternalField();
-        nbrKDelta() = nbrField.kappa(nbrField)*nbrPatch.deltaCoeffs();
+        nbrIntFld.ref() = nbrField.patchInternalField();
+        nbrKDelta.ref() = nbrField.kappa(nbrField)*nbrPatch.deltaCoeffs();
     }
     else
     {
-        nbrIntFld() = nbrField;
-        nbrKDelta() = contactRes_;
+        nbrIntFld.ref() = nbrField;
+        nbrKDelta.ref() = contactRes_;
     }
 
-    mpp.distribute(nbrIntFld());
-    mpp.distribute(nbrKDelta());
+    mpp.distribute(nbrIntFld.ref());
+    mpp.distribute(nbrKDelta.ref());
 
     tmp<scalarField> myKDelta = kappa(*this)*patch().deltaCoeffs();
 

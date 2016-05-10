@@ -2,19 +2,17 @@
     rho = thermo.rho();
     rho.relax();
 
-    volScalarField rAU("rAU", 1.0/UEqn().A());
+    volScalarField rAU("rAU", 1.0/UEqn.A());
     surfaceScalarField rhorAUf("rhorAUf", fvc::interpolate(rho*rAU));
-
-    volVectorField HbyA("HbyA", U);
-    HbyA = rAU*UEqn().H();
-    UEqn.clear();
+    volVectorField HbyA(constrainHbyA(rAU*UEqn.H(), U, p_rgh));
+    tUEqn.clear();
 
     surfaceScalarField phig(-rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf());
 
     surfaceScalarField phiHbyA
     (
         "phiHbyA",
-        (fvc::interpolate(rho*HbyA) & mesh.Sf())
+        fvc::flux(rho*HbyA)
     );
 
     MRF.makeRelative(fvc::interpolate(rho), phiHbyA);
@@ -23,16 +21,8 @@
 
     phiHbyA += phig;
 
-    // Update the fixedFluxPressure BCs to ensure flux consistency
-    setSnGrad<fixedFluxPressureFvPatchScalarField>
-    (
-        p_rgh.boundaryField(),
-        (
-            phiHbyA.boundaryField()
-          - MRF.relative(mesh.Sf().boundaryField() & U.boundaryField())
-           *rho.boundaryField()
-        )/(mesh.magSf().boundaryField()*rhorAUf.boundaryField())
-    );
+    // Update the pressure BCs to ensure flux consistency
+    constrainPressure(p_rgh, rho, U, phiHbyA, rhorAUf, MRF);
 
 
     while (simple.correctNonOrthogonal())

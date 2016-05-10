@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -107,7 +107,7 @@ public:
         CompositionModel(const CompositionModel<CloudType>& cm);
 
         //- Construct and return a clone
-        virtual autoPtr<CompositionModel<CloudType> > clone() const = 0;
+        virtual autoPtr<CompositionModel<CloudType>> clone() const = 0;
 
 
     //- Destructor
@@ -115,7 +115,7 @@ public:
 
 
     //- Selector
-    static autoPtr<CompositionModel<CloudType> > New
+    static autoPtr<CompositionModel<CloudType>> New
     (
         const dictionary& dict,
         CloudType& owner
@@ -269,38 +269,38 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeCompositionModel(CloudType)                                       \
-                                                                              \
-    typedef Foam::CloudType::reactingCloudType reactingCloudType;             \
-    defineNamedTemplateTypeNameAndDebug                                       \
-    (                                                                         \
-        Foam::CompositionModel<reactingCloudType>,                            \
-        0                                                                     \
-    );                                                                        \
-    namespace Foam                                                            \
-    {                                                                         \
-        defineTemplateRunTimeSelectionTable                                   \
-        (                                                                     \
-            CompositionModel<reactingCloudType>,                              \
-            dictionary                                                        \
-        );                                                                    \
+#define makeCompositionModel(CloudType)                                        \
+                                                                               \
+    typedef Foam::CloudType::reactingCloudType reactingCloudType;              \
+    defineNamedTemplateTypeNameAndDebug                                        \
+    (                                                                          \
+        Foam::CompositionModel<reactingCloudType>,                             \
+        0                                                                      \
+    );                                                                         \
+    namespace Foam                                                             \
+    {                                                                          \
+        defineTemplateRunTimeSelectionTable                                    \
+        (                                                                      \
+            CompositionModel<reactingCloudType>,                               \
+            dictionary                                                         \
+        );                                                                     \
     }
 
 
-#define makeCompositionModelType(SS, CloudType)                               \
-                                                                              \
-    typedef Foam::CloudType::reactingCloudType reactingCloudType;             \
-    defineNamedTemplateTypeNameAndDebug(Foam::SS<reactingCloudType>, 0);      \
-                                                                              \
-    Foam::CompositionModel<reactingCloudType>::                               \
-        adddictionaryConstructorToTable<Foam::SS<reactingCloudType> >         \
+#define makeCompositionModelType(SS, CloudType)                                \
+                                                                               \
+    typedef Foam::CloudType::reactingCloudType reactingCloudType;              \
+    defineNamedTemplateTypeNameAndDebug(Foam::SS<reactingCloudType>, 0);       \
+                                                                               \
+    Foam::CompositionModel<reactingCloudType>::                                \
+        adddictionaryConstructorToTable<Foam::SS<reactingCloudType>>           \
             add##SS##CloudType##reactingCloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "CompositionModel.C"
+    #include "CompositionModel.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

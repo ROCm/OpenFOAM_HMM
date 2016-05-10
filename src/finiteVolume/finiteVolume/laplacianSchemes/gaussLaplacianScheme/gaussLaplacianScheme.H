@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,7 +58,7 @@ class gaussLaplacianScheme
 {
     // Private Member Functions
 
-        tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > gammaSnGradCorr
+        tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> gammaSnGradCorr
         (
             const surfaceVectorField& SfGammaCorr,
             const GeometricField<Type, fvPatchField, volMesh>&
@@ -95,8 +95,8 @@ public:
         gaussLaplacianScheme
         (
             const fvMesh& mesh,
-            const tmp<surfaceInterpolationScheme<GType> >& igs,
-            const tmp<snGradScheme<Type> >& sngs
+            const tmp<surfaceInterpolationScheme<GType>>& igs,
+            const tmp<snGradScheme<Type>>& sngs
         )
         :
             laplacianScheme<Type, GType>(mesh, igs, sngs)
@@ -110,25 +110,25 @@ public:
 
     // Member Functions
 
-        static tmp<fvMatrix<Type> > fvmLaplacianUncorrected
+        static tmp<fvMatrix<Type>> fvmLaplacianUncorrected
         (
             const surfaceScalarField& gammaMagSf,
             const surfaceScalarField& deltaCoeffs,
             const GeometricField<Type, fvPatchField, volMesh>&
         );
 
-        tmp<GeometricField<Type, fvPatchField, volMesh> > fvcLaplacian
+        tmp<GeometricField<Type, fvPatchField, volMesh>> fvcLaplacian
         (
             const GeometricField<Type, fvPatchField, volMesh>&
         );
 
-        tmp<fvMatrix<Type> > fvmLaplacian
+        tmp<fvMatrix<Type>> fvmLaplacian
         (
             const GeometricField<GType, fvsPatchField, surfaceMesh>&,
             const GeometricField<Type, fvPatchField, volMesh>&
         );
 
-        tmp<GeometricField<Type, fvPatchField, volMesh> > fvcLaplacian
+        tmp<GeometricField<Type, fvPatchField, volMesh>> fvcLaplacian
         (
             const GeometricField<GType, fvsPatchField, surfaceMesh>&,
             const GeometricField<Type, fvPatchField, volMesh>&
@@ -139,21 +139,21 @@ public:
 // Use macros to emulate partial-specialisation of the the Laplacian functions
 // for scalar diffusivity gamma
 
-#define defineFvmLaplacianScalarGamma(Type)                                 \
-                                                                            \
-template<>                                                                  \
-tmp<fvMatrix<Type> > gaussLaplacianScheme<Type, scalar>::fvmLaplacian       \
-(                                                                           \
-    const GeometricField<scalar, fvsPatchField, surfaceMesh>&,              \
-    const GeometricField<Type, fvPatchField, volMesh>&                      \
-);                                                                          \
-                                                                            \
-template<>                                                                  \
-tmp<GeometricField<Type, fvPatchField, volMesh> >                           \
-gaussLaplacianScheme<Type, scalar>::fvcLaplacian                            \
-(                                                                           \
-    const GeometricField<scalar, fvsPatchField, surfaceMesh>&,              \
-    const GeometricField<Type, fvPatchField, volMesh>&                      \
+#define defineFvmLaplacianScalarGamma(Type)                                    \
+                                                                               \
+template<>                                                                     \
+tmp<fvMatrix<Type>> gaussLaplacianScheme<Type, scalar>::fvmLaplacian           \
+(                                                                              \
+    const GeometricField<scalar, fvsPatchField, surfaceMesh>&,                 \
+    const GeometricField<Type, fvPatchField, volMesh>&                         \
+);                                                                             \
+                                                                               \
+template<>                                                                     \
+tmp<GeometricField<Type, fvPatchField, volMesh>>                               \
+gaussLaplacianScheme<Type, scalar>::fvcLaplacian                               \
+(                                                                              \
+    const GeometricField<scalar, fvsPatchField, surfaceMesh>&,                 \
+    const GeometricField<Type, fvPatchField, volMesh>&                         \
 );
 
 
@@ -175,7 +175,7 @@ defineFvmLaplacianScalarGamma(tensor);
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "gaussLaplacianScheme.C"
+    #include "gaussLaplacianScheme.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

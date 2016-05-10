@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ Foam::pointIndexHit Foam::searchablePlane::findLine
     const point& end
 ) const
 {
-    pointIndexHit info(true, vector::zero, 0);
+    pointIndexHit info(true, Zero, 0);
 
     linePointRef l(start, end);
 
@@ -206,7 +206,7 @@ void Foam::searchablePlane::findLineAll
 (
     const pointField& start,
     const pointField& end,
-    List<List<pointIndexHit> >& info
+    List<List<pointIndexHit>>& info
 ) const
 {
     List<pointIndexHit> nearestInfo;

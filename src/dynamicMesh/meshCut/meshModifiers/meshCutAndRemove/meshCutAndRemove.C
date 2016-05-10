@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(meshCutAndRemove, 0);
+    defineTypeNameAndDebug(meshCutAndRemove, 0);
 }
 
 
@@ -89,7 +89,6 @@ bool Foam::meshCutAndRemove::isIn
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Returns the cell in cellLabels that is cut. Or -1.
 Foam::label Foam::meshCutAndRemove::findCutCell
 (
     const cellCuts& cuts,
@@ -109,10 +108,6 @@ Foam::label Foam::meshCutAndRemove::findCutCell
 }
 
 
-//- Returns first pointI in pointLabels that uses an internal
-//  face. Used to find point to inflate cell/face from (has to be
-//  connected to internal face). Returns -1 (so inflate from nothing) if
-//  none found.
 Foam::label Foam::meshCutAndRemove::findInternalFacePoint
 (
     const labelList& pointLabels
@@ -145,8 +140,6 @@ Foam::label Foam::meshCutAndRemove::findInternalFacePoint
 }
 
 
-// Find point on face that is part of original mesh and that is point connected
-// to the patch
 Foam::label Foam::meshCutAndRemove::findPatchFacePoint
 (
     const face& f,
@@ -177,8 +170,6 @@ Foam::label Foam::meshCutAndRemove::findPatchFacePoint
 }
 
 
-// Get new owner and neighbour of face. Checks anchor points to see if
-// cells have been removed.
 void Foam::meshCutAndRemove::faceCells
 (
     const cellCuts& cuts,
@@ -244,7 +235,6 @@ void Foam::meshCutAndRemove::getZoneInfo
 }
 
 
-// Adds a face from point.
 void Foam::meshCutAndRemove::addFace
 (
     polyTopoChange& meshMod,
@@ -407,7 +397,6 @@ void Foam::meshCutAndRemove::modFace
 }
 
 
-// Copies face starting from startFp up to and including endFp.
 void Foam::meshCutAndRemove::copyFace
 (
     const face& f,
@@ -474,8 +463,6 @@ void Foam::meshCutAndRemove::splitFace
 }
 
 
-// Adds additional vertices (from edge cutting) to face. Used for faces which
-// are not split but still might use edge that has been cut.
 Foam::face Foam::meshCutAndRemove::addEdgeCutsToFace(const label faceI) const
 {
     const face& f = mesh().faces()[faceI];
@@ -492,7 +479,7 @@ Foam::face Foam::meshCutAndRemove::addEdgeCutsToFace(const label faceI) const
         // Check if edge has been cut.
         label fp1 = f.fcIndex(fp);
 
-        HashTable<label, edge, Hash<edge> >::const_iterator fnd =
+        HashTable<label, edge, Hash<edge>>::const_iterator fnd =
             addedPoints_.find(edge(f[fp], f[fp1]));
 
         if (fnd != addedPoints_.end())
@@ -554,7 +541,7 @@ Foam::face Foam::meshCutAndRemove::loopToFace
                 if (edgeI != -1)
                 {
                     // Existing edge. Insert split-edge point if any.
-                    HashTable<label, edge, Hash<edge> >::const_iterator fnd =
+                    HashTable<label, edge, Hash<edge>>::const_iterator fnd =
                         addedPoints_.find(mesh().edges()[edgeI]);
 
                     if (fnd != addedPoints_.end())
@@ -1315,11 +1302,11 @@ void Foam::meshCutAndRemove::updateMesh(const mapPolyMesh& map)
     }
 
     {
-        HashTable<label, edge, Hash<edge> > newAddedPoints(addedPoints_.size());
+        HashTable<label, edge, Hash<edge>> newAddedPoints(addedPoints_.size());
 
         for
         (
-            HashTable<label, edge, Hash<edge> >::const_iterator iter =
+            HashTable<label, edge, Hash<edge>>::const_iterator iter =
                 addedPoints_.begin();
             iter != addedPoints_.end();
             ++iter

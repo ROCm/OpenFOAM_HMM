@@ -8,14 +8,14 @@ rm -f log.* constant/polyMesh/*Level
 
 runApplication blockMesh
 
-runApplication -log log.createPatch.cyclic \
+runApplication -s cyclic \
     createPatch -dict system/createPatchDict.cyclic -overwrite
 
 runApplication snappyHexMesh -overwrite
 
 rm -rf 0
 
-runApplication -log log.createPatch.ami \
+runApplication -s ami \
     createPatch -dict system/createPatchDict.ami -overwrite
 
 runApplication transformPoints -scale '(0.01 0.01 0.01)'

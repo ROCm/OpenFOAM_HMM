@@ -1,12 +1,14 @@
     Info<< "Creating turbulence model\n" << endl;
     tmp<volScalarField> talphaEff;
 
-    IOobject turbulenceHeader
+    IOobject turbulencePropertiesHeader
     (
         "turbulenceProperties",
         runTime.constant(),
         mesh,
-        IOobject::MUST_READ
+        IOobject::MUST_READ_IF_MODIFIED,
+        IOobject::NO_WRITE,
+        false
     );
 
     IOobject RASHeader
@@ -25,7 +27,7 @@
         IOobject::MUST_READ
     );
 
-    if (turbulenceHeader.typeHeaderOk<IOdictionary>(true))
+    if (turbulencePropertiesHeader.typeHeaderOk<IOdictionary>(true))
     {
         autoPtr<compressible::turbulenceModel> turbulence
         (

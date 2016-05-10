@@ -56,7 +56,7 @@ tmp<volScalarField> kOmegaSSTDDES<BasicTurbulenceModel>::rd
             scalar(10)
         )
     );
-    tr().boundaryField() == 0.0;
+    tr.ref().boundaryField() == 0.0;
 
     return tr;
 }

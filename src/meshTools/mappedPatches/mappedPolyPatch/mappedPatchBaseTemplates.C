@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -73,7 +73,7 @@ void Foam::mappedPatchBase::distribute
                 lst,
                 cop,
                 flipOp(),
-                pTraits<Type>::zero
+                Type(Zero)
             );
         }
     }
@@ -132,7 +132,7 @@ void Foam::mappedPatchBase::reverseDistribute
                 lst,
                 cop,
                 flipOp(),
-                pTraits<Type>::zero
+                Type(Zero)
             );
             break;
         }

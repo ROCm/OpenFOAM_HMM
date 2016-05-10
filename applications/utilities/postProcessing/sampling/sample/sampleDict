@@ -92,6 +92,10 @@ formatOptions
         //        setting
         format  short;      // short/long/free
     }
+    raw
+    {
+         compression  uncompressed; // 'uncompressed' or 'compressed'
+    }
 }
 
 // interpolationScheme. choice of

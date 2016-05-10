@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,7 @@ License
 #include "kineticTheoryModel.H"
 #include "mathematicalConstants.H"
 #include "twoPhaseSystem.H"
+#include "fvOptions.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -43,7 +44,7 @@ Foam::RASModels::kineticTheoryModel::kineticTheoryModel
 :
     eddyViscosity
     <
-        RASModel<EddyDiffusivity<phaseCompressibleTurbulenceModel> >
+        RASModel<EddyDiffusivity<phaseCompressibleTurbulenceModel>>
     >
     (
         type,
@@ -186,7 +187,7 @@ bool Foam::RASModels::kineticTheoryModel::read()
     (
         eddyViscosity
         <
-            RASModel<EddyDiffusivity<phaseCompressibleTurbulenceModel> >
+            RASModel<EddyDiffusivity<phaseCompressibleTurbulenceModel>>
         >::read()
     )
     {
@@ -272,7 +273,8 @@ Foam::RASModels::kineticTheoryModel::pPrime() const
         )
     );
 
-    volScalarField::GeometricBoundaryField& bpPrime = tpPrime().boundaryField();
+    volScalarField::GeometricBoundaryField& bpPrime =
+        tpPrime.ref().boundaryField();
 
     forAll(bpPrime, patchi)
     {
@@ -417,6 +419,8 @@ void Foam::RASModels::kineticTheoryModel::correct()
         // 'thermal' conductivity (Table 3.3, p. 49)
         kappa_ = conductivityModel_->kappa(alpha, Theta_, gs0_, rho, da, e_);
 
+        fv::options& fvOptions(fv::options::New(mesh_));
+
         // Construct the granular temperature equation (Eq. 3.20, p. 44)
         // NB. note that there are two typos in Eq. 3.20:
         //     Ps should be without grad
@@ -431,15 +435,18 @@ void Foam::RASModels::kineticTheoryModel::correct()
             )
           - fvm::laplacian(kappa_, Theta_, "laplacian(kappa,Theta)")
          ==
-            fvm::SuSp(-((PsCoeff*I) && gradU), Theta_)
+          - fvm::SuSp((PsCoeff*I) && gradU, Theta_)
           + (tau && gradU)
           + fvm::Sp(-gammaCoeff, Theta_)
           + fvm::Sp(-J1, Theta_)
           + fvm::Sp(J2/(Theta_ + ThetaSmall), Theta_)
+          + fvOptions(alpha, rho, Theta_)
         );
 
         ThetaEqn.relax();
+        fvOptions.constrain(ThetaEqn);
         ThetaEqn.solve();
+        fvOptions.correct(Theta_);
     }
     else
     {

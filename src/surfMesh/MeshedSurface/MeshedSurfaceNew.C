@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,16 +28,13 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
 template<class Face>
-Foam::autoPtr< Foam::MeshedSurface<Face> >
+Foam::autoPtr<Foam::MeshedSurface<Face>>
 Foam::MeshedSurface<Face>::New(const fileName& name, const word& ext)
 {
     if (debug)
     {
-        Info<< "MeshedSurface::New(const fileName&, const word&) : "
-            "constructing MeshedSurface"
-            << endl;
+        InfoInFunction << "Constructing MeshedSurface" << endl;
     }
 
     typename fileExtensionConstructorTable::iterator cstrIter =
@@ -50,7 +47,7 @@ Foam::MeshedSurface<Face>::New(const fileName& name, const word& ext)
         if (supported.found(ext))
         {
             // create indirectly
-            autoPtr< MeshedSurface<Face> > surf(new MeshedSurface<Face>);
+            autoPtr<MeshedSurface<Face>> surf(new MeshedSurface<Face>);
             surf().transfer(FriendType::New(name, ext)());
 
             return surf;
@@ -66,12 +63,12 @@ Foam::MeshedSurface<Face>::New(const fileName& name, const word& ext)
             << exit(FatalError);
     }
 
-    return autoPtr< MeshedSurface<Face> >(cstrIter()(name));
+    return autoPtr<MeshedSurface<Face>>(cstrIter()(name));
 }
 
 
 template<class Face>
-Foam::autoPtr< Foam::MeshedSurface<Face> >
+Foam::autoPtr<Foam::MeshedSurface<Face>>
 Foam::MeshedSurface<Face>::New(const fileName& name)
 {
     word ext = name.ext();
@@ -81,5 +78,6 @@ Foam::MeshedSurface<Face>::New(const fileName& name)
     }
     return New(name, ext);
 }
+
 
 // ************************************************************************* //

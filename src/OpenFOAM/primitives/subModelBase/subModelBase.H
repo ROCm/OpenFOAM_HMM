@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -165,7 +165,7 @@ public:
                 Type getBaseProperty
                 (
                     const word& entryName,
-                    const Type& defaultValue = pTraits<Type>::zero
+                    const Type& defaultValue = Type(Zero)
                 ) const;
 
                 //- Retrieve generic property from the base model
@@ -188,7 +188,7 @@ public:
                 Type getModelProperty
                 (
                     const word& entryName,
-                    const Type& defaultValue = pTraits<Type>::zero
+                    const Type& defaultValue = Type(Zero)
                 ) const;
 
                 //- Add generic property to the sub-model
@@ -210,7 +210,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "subModelBaseTemplates.C"
+    #include "subModelBaseTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

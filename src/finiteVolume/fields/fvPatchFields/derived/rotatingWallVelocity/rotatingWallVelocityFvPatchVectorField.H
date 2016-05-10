@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,12 +50,11 @@ Description
     }
     \endverbatim
 
-    The \c omega entry is a DataEntry type, able to describe time varying
-    functions.
+    The \c omega entry is a Function1 of time, see Foam::Function1Types.
 
 SeeAlso
-    Foam::DataEntry
     Foam::fixedValueFvPatchField
+    Foam::Function1Types
 
 SourceFiles
     rotatingWallVelocityFvPatchVectorField.C
@@ -66,7 +65,7 @@ SourceFiles
 #define rotatingWallVelocityFvPatchVectorField_H
 
 #include "fixedValueFvPatchFields.H"
-#include "DataEntry.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -90,7 +89,7 @@ class rotatingWallVelocityFvPatchVectorField
         vector axis_;
 
         //- Rotational speed
-        autoPtr<DataEntry<scalar> > omega_;
+        autoPtr<Function1<scalar>> omega_;
 
 
 public:

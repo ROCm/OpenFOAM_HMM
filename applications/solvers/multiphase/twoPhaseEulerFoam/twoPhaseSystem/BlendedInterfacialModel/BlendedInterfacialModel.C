@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,7 @@ void Foam::BlendedInterfacialModel<modelType>::correctFixedFluxBCs
         )
         {
             field.boundaryField()[patchI]
-              = pTraits<typename GeometricField::value_type>::zero;
+              = Zero;
         }
     }
 }
@@ -155,17 +155,17 @@ Foam::BlendedInterfacialModel<modelType>::K() const
 
     if (model_.valid())
     {
-        x() += model_->K()*(f1() - f2());
+        x.ref() += model_->K()*(f1() - f2());
     }
 
     if (model1In2_.valid())
     {
-        x() += model1In2_->K()*(1 - f1);
+        x.ref() += model1In2_->K()*(1 - f1);
     }
 
     if (model2In1_.valid())
     {
-        x() += model2In1_->K()*f2;
+        x.ref() += model2In1_->K()*f2;
     }
 
     if
@@ -174,7 +174,7 @@ Foam::BlendedInterfacialModel<modelType>::K() const
      && (model_.valid() || model1In2_.valid() || model2In1_.valid())
     )
     {
-        correctFixedFluxBCs(x());
+        correctFixedFluxBCs(x.ref());
     }
 
     return x;
@@ -223,17 +223,17 @@ Foam::BlendedInterfacialModel<modelType>::Kf() const
 
     if (model_.valid())
     {
-        x() += model_->Kf()*(f1() - f2());
+        x.ref() += model_->Kf()*(f1() - f2());
     }
 
     if (model1In2_.valid())
     {
-        x() += model1In2_->Kf()*(1 - f1);
+        x.ref() += model1In2_->Kf()*(1 - f1);
     }
 
     if (model2In1_.valid())
     {
-        x() += model2In1_->Kf()*f2;
+        x.ref() += model2In1_->Kf()*f2;
     }
 
     if
@@ -242,7 +242,7 @@ Foam::BlendedInterfacialModel<modelType>::Kf() const
      && (model_.valid() || model1In2_.valid() || model2In1_.valid())
     )
     {
-        correctFixedFluxBCs(x());
+        correctFixedFluxBCs(x.ref());
     }
 
     return x;
@@ -251,7 +251,7 @@ Foam::BlendedInterfacialModel<modelType>::Kf() const
 
 template<class modelType>
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
 Foam::BlendedInterfacialModel<modelType>::F() const
 {
     tmp<volScalarField> f1, f2;
@@ -266,7 +266,7 @@ Foam::BlendedInterfacialModel<modelType>::F() const
         f2 = blending_.f2(pair1In2_.dispersed(), pair2In1_.dispersed());
     }
 
-    tmp<GeometricField<Type, fvPatchField, volMesh> > x
+    tmp<GeometricField<Type, fvPatchField, volMesh>> x
     (
         new GeometricField<Type, fvPatchField, volMesh>
         (
@@ -280,23 +280,23 @@ Foam::BlendedInterfacialModel<modelType>::F() const
                 false
             ),
             pair_.phase1().mesh(),
-            dimensioned<Type>("zero", modelType::dimF, pTraits<Type>::zero)
+            dimensioned<Type>("zero", modelType::dimF, Zero)
         )
     );
 
     if (model_.valid())
     {
-        x() += model_->F()*(f1() - f2());
+        x.ref() += model_->F()*(f1() - f2());
     }
 
     if (model1In2_.valid())
     {
-        x() += model1In2_->F()*(1 - f1);
+        x.ref() += model1In2_->F()*(1 - f1);
     }
 
     if (model2In1_.valid())
     {
-        x() -= model2In1_->F()*f2; // note : subtraction
+        x.ref() -= model2In1_->F()*f2; // note : subtraction
     }
 
     if
@@ -305,7 +305,7 @@ Foam::BlendedInterfacialModel<modelType>::F() const
      && (model_.valid() || model1In2_.valid() || model2In1_.valid())
     )
     {
-        correctFixedFluxBCs(x());
+        correctFixedFluxBCs(x.ref());
     }
 
     return x;
@@ -354,17 +354,17 @@ Foam::BlendedInterfacialModel<modelType>::Ff() const
 
     if (model_.valid())
     {
-        x() += model_->Ff()*(f1() - f2());
+        x.ref() += model_->Ff()*(f1() - f2());
     }
 
     if (model1In2_.valid())
     {
-        x() += model1In2_->Ff()*(1 - f1);
+        x.ref() += model1In2_->Ff()*(1 - f1);
     }
 
     if (model2In1_.valid())
     {
-        x() -= model2In1_->Ff()*f2; // note : subtraction
+        x.ref() -= model2In1_->Ff()*f2; // note : subtraction
     }
 
     if
@@ -373,7 +373,7 @@ Foam::BlendedInterfacialModel<modelType>::Ff() const
      && (model_.valid() || model1In2_.valid() || model2In1_.valid())
     )
     {
-        correctFixedFluxBCs(x());
+        correctFixedFluxBCs(x.ref());
     }
 
     return x;
@@ -416,17 +416,17 @@ Foam::BlendedInterfacialModel<modelType>::D() const
 
     if (model_.valid())
     {
-        x() += model_->D()*(f1() - f2());
+        x.ref() += model_->D()*(f1() - f2());
     }
 
     if (model1In2_.valid())
     {
-        x() += model1In2_->D()*(1 - f1);
+        x.ref() += model1In2_->D()*(1 - f1);
     }
 
     if (model2In1_.valid())
     {
-        x() += model2In1_->D()*f2;
+        x.ref() += model2In1_->D()*f2;
     }
 
     if
@@ -435,7 +435,7 @@ Foam::BlendedInterfacialModel<modelType>::D() const
      && (model_.valid() || model1In2_.valid() || model2In1_.valid())
     )
     {
-        correctFixedFluxBCs(x());
+        correctFixedFluxBCs(x.ref());
     }
 
     return x;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -132,6 +132,9 @@ public:
 
         //- Return the dynamic laminar viscosity
         tmp<volScalarField> mu() const;
+
+        //- Return the dynamic laminar viscosity on patch
+        tmp<scalarField> mu(const label patchI) const;
 
         //- Return the face-interpolated dynamic laminar viscosity
         tmp<surfaceScalarField> muf() const;

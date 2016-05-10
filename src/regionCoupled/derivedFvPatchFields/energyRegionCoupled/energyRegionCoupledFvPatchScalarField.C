@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -190,7 +190,7 @@ weights() const
     const scalarField nbrAlphaDelta(nbrAlpha/nbrDeltas);
 
     tmp<scalarField> tw(new scalarField(deltas.size()));
-    scalarField& w = tw();
+    scalarField& w = tw.ref();
 
     forAll(alphaDelta, faceI)
     {
@@ -299,7 +299,6 @@ energyRegionCoupledFvPatchScalarField
 Foam::tmp<Foam::scalarField> Foam::energyRegionCoupledFvPatchScalarField::
 snGrad() const
 {
-    Debug("snGrad");
     return
         regionCoupledPatch_.patch().deltaCoeffs()
        *(*this - patchInternalField());
@@ -309,7 +308,6 @@ snGrad() const
 Foam::tmp<Foam::scalarField> Foam::energyRegionCoupledFvPatchScalarField::
 snGrad(const scalarField&) const
 {
-    Debug("snGrad");
     return snGrad();
 }
 
@@ -344,7 +342,7 @@ void Foam::energyRegionCoupledFvPatchScalarField::evaluate
 }
 
 
-Foam::tmp<Foam::Field<Foam::scalar> >
+Foam::tmp<Foam::Field<Foam::scalar>>
 Foam::energyRegionCoupledFvPatchScalarField::
 patchNeighbourField() const
 {

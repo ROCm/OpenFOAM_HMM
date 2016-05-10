@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         |2011 OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
+Foam::autoPtr<Foam::pointPatchField<Type>> Foam::pointPatchField<Type>::New
 (
     const word& patchFieldType,
     const word& actualPatchType,
@@ -36,11 +36,7 @@ Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
 {
     if (debug)
     {
-        Info<< "PointPatchField<Type>::"
-               "New(const word&, const word&"
-                ", const pointPatch&, const Field<Type>&) : "
-               "constructing pointPatchField<Type>"
-            << endl;
+        InfoInFunction << "Constructing pointPatchField<Type>" << endl;
     }
 
     typename pointPatchConstructorTable::iterator cstrIter =
@@ -56,7 +52,7 @@ Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
             << exit(FatalError);
     }
 
-    autoPtr<pointPatchField<Type> > pfPtr(cstrIter()(p, iF));
+    autoPtr<pointPatchField<Type>> pfPtr(cstrIter()(p, iF));
 
     if
     (
@@ -95,7 +91,7 @@ Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
 
 
 template<class Type>
-Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
+Foam::autoPtr<Foam::pointPatchField<Type>> Foam::pointPatchField<Type>::New
 (
     const word& patchFieldType,
     const pointPatch& p,
@@ -107,7 +103,7 @@ Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
 
 
 template<class Type>
-Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
+Foam::autoPtr<Foam::pointPatchField<Type>> Foam::pointPatchField<Type>::New
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
@@ -116,10 +112,7 @@ Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
 {
     if (debug)
     {
-        Info<< "PointPatchField<Type>::"
-               "New(const pointPatch&, const Field<Type>&, const dictionary&)"
-               " : constructing pointPatchField<Type>"
-            << endl;
+        InfoInFunction << "Constructing pointPatchField<Type>" << endl;
     }
 
     word patchFieldType(dict.lookup("type"));
@@ -148,7 +141,7 @@ Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
     }
 
     // Construct (but not necesarily returned)
-    autoPtr<pointPatchField<Type> > pfPtr(cstrIter()(p, iF, dict));
+    autoPtr<pointPatchField<Type>> pfPtr(cstrIter()(p, iF, dict));
 
     if
     (
@@ -186,10 +179,8 @@ Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
 }
 
 
-// Return a pointer to a new patch created on freestore from
-// a given pointPatchField<Type> mapped onto a new patch
 template<class Type>
-Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
+Foam::autoPtr<Foam::pointPatchField<Type>> Foam::pointPatchField<Type>::New
 (
     const pointPatchField<Type>& ptf,
     const pointPatch& p,
@@ -199,12 +190,7 @@ Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
 {
     if (debug)
     {
-        Info<< "PointPatchField<Type>::"
-               "New(const pointPatchField<Type>&,"
-               " const pointPatch&, const Field<Type>&, "
-               "const pointPatchFieldMapper&) : "
-               "constructing pointPatchField<Type>"
-            << endl;
+        InfoInFunction << "Constructing pointPatchField<Type>" << endl;
     }
 
     typename patchMapperConstructorTable::iterator cstrIter =

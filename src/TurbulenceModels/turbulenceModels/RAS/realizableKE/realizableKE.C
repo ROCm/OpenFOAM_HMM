@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "realizableKE.H"
+#include "fvOptions.H"
 #include "bound.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -78,6 +79,7 @@ void realizableKE<BasicTurbulenceModel>::correctNut
 {
     this->nut_ = rCmu(gradU, S2, magS)*sqr(k_)/epsilon_;
     this->nut_.correctBoundaryConditions();
+    fv::options::New(this->mesh_).correct(this->nut_);
 
     BasicTurbulenceModel::correctNut();
 }
@@ -138,7 +140,7 @@ realizableKE<BasicTurbulenceModel>::realizableKE
     const word& type
 )
 :
-    eddyViscosity<RASModel<BasicTurbulenceModel> >
+    eddyViscosity<RASModel<BasicTurbulenceModel>>
     (
         type,
         alpha,
@@ -236,7 +238,7 @@ realizableKE<BasicTurbulenceModel>::realizableKE
 template<class BasicTurbulenceModel>
 bool realizableKE<BasicTurbulenceModel>::read()
 {
-    if (eddyViscosity<RASModel<BasicTurbulenceModel> >::read())
+    if (eddyViscosity<RASModel<BasicTurbulenceModel>>::read())
     {
         Cmu_.readIfPresent(this->coeffDict());
         A0_.readIfPresent(this->coeffDict());
@@ -267,8 +269,9 @@ void realizableKE<BasicTurbulenceModel>::correct()
     const surfaceScalarField& alphaRhoPhi = this->alphaRhoPhi_;
     const volVectorField& U = this->U_;
     volScalarField& nut = this->nut_;
+    fv::options& fvOptions(fv::options::New(this->mesh_));
 
-    eddyViscosity<RASModel<BasicTurbulenceModel> >::correct();
+    eddyViscosity<RASModel<BasicTurbulenceModel>>::correct();
 
     volScalarField divU(fvc::div(fvc::absolute(this->phi(), U)));
 
@@ -309,13 +312,14 @@ void realizableKE<BasicTurbulenceModel>::correct()
             epsilon_
         )
       + epsilonSource()
+      + fvOptions(alpha, rho, epsilon_)
     );
 
-    epsEqn().relax();
-
-    epsEqn().boundaryManipulate(epsilon_.boundaryField());
-
+    epsEqn.ref().relax();
+    fvOptions.constrain(epsEqn.ref());
+    epsEqn.ref().boundaryManipulate(epsilon_.boundaryField());
     solve(epsEqn);
+    fvOptions.correct(epsilon_);
     bound(epsilon_, this->epsilonMin_);
 
 
@@ -331,10 +335,13 @@ void realizableKE<BasicTurbulenceModel>::correct()
       - fvm::SuSp(2.0/3.0*alpha*rho*divU, k_)
       - fvm::Sp(alpha*rho*epsilon_/k_, k_)
       + kSource()
+      + fvOptions(alpha, rho, k_)
     );
 
-    kEqn().relax();
+    kEqn.ref().relax();
+    fvOptions.constrain(kEqn.ref());
     solve(kEqn);
+    fvOptions.correct(k_);
     bound(k_, this->kMin_);
 
     correctNut(tgradU(), S2, magS);

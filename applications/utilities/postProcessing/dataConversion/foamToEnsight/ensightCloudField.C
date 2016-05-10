@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -103,7 +103,7 @@ void ensightCloudField
 
             if (mag(v) < 1.0e-90)
             {
-                v = pTraits<Type>::zero;
+                v = Zero;
             }
 
             for (direction i=0; i < pTraits<Type>::nComponents; ++i)

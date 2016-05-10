@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -288,13 +288,13 @@ void Foam::forces::initialiseBins()
 
 void Foam::forces::resetFields()
 {
-    force_[0] = vector::zero;
-    force_[1] = vector::zero;
-    force_[2] = vector::zero;
+    force_[0] = Zero;
+    force_[1] = Zero;
+    force_[2] = Zero;
 
-    moment_[0] = vector::zero;
-    moment_[1] = vector::zero;
-    moment_[2] = vector::zero;
+    moment_[0] = Zero;
+    moment_[1] = Zero;
+    moment_[2] = Zero;
 
     if (writeFields_)
     {
@@ -304,7 +304,7 @@ void Foam::forces::resetFields()
                 obr_.lookupObject<volVectorField>(fieldName("force"))
             );
 
-        force == dimensionedVector("0", force.dimensions(), vector::zero);
+        force == dimensionedVector("0", force.dimensions(), Zero);
 
         volVectorField& moment =
             const_cast<volVectorField&>
@@ -312,7 +312,7 @@ void Foam::forces::resetFields()
                 obr_.lookupObject<volVectorField>(fieldName("moment"))
             );
 
-        moment == dimensionedVector("0", moment.dimensions(), vector::zero);
+        moment == dimensionedVector("0", moment.dimensions(), Zero);
     }
 }
 
@@ -667,7 +667,7 @@ void Foam::forces::writeForces()
 
 void Foam::forces::writeBinnedForceMoment
 (
-    const List<Field<vector> >& fm,
+    const List<Field<vector>>& fm,
     autoPtr<OFstream>& osPtr
 ) const
 {
@@ -676,7 +676,7 @@ void Foam::forces::writeBinnedForceMoment
         return;
     }
 
-    List<Field<vector> > f(fm);
+    List<Field<vector>> f(fm);
 
     if (binCumulative_)
     {
@@ -717,8 +717,8 @@ void Foam::forces::writeBins()
 
     if (localSystem_)
     {
-        List<Field<vector> > lf(3);
-        List<Field<vector> > lm(3);
+        List<Field<vector>> lf(3);
+        List<Field<vector>> lm(3);
         lf[0] = coordSys_.localVector(force_[0]);
         lf[1] = coordSys_.localVector(force_[1]);
         lf[2] = coordSys_.localVector(force_[2]);
@@ -769,7 +769,7 @@ Foam::forces::forces
     localSystem_(false),
     porosity_(false),
     nBin_(1),
-    binDir_(vector::zero),
+    binDir_(Zero),
     binDx_(0.0),
     binMin_(GREAT),
     binPoints_(),
@@ -828,7 +828,7 @@ Foam::forces::forces
     localSystem_(false),
     porosity_(false),
     nBin_(1),
-    binDir_(vector::zero),
+    binDir_(Zero),
     binDx_(0.0),
     binMin_(GREAT),
     binPoints_(),
@@ -968,7 +968,7 @@ void Foam::forces::read(const dictionary& dict)
                     IOobject::NO_WRITE
                 ),
                 mesh,
-                dimensionedVector("0", dimForce, vector::zero)
+                dimensionedVector("0", dimForce, Zero)
             )
         );
 
@@ -987,7 +987,7 @@ void Foam::forces::read(const dictionary& dict)
                     IOobject::NO_WRITE
                 ),
                 mesh,
-                dimensionedVector("0", dimForce*dimLength, vector::zero)
+                dimensionedVector("0", dimForce*dimLength, Zero)
             )
         );
 
@@ -1110,7 +1110,7 @@ void Foam::forces::calcForcesMoment()
             vectorField fT(sA*fD.boundaryField()[patchI] - fN);
 
             //- Porous force
-            vectorField fP(Md.size(), vector::zero);
+            vectorField fP(Md.size(), Zero);
 
             addToFields(patchI, Md, fN, fT, fP);
 
@@ -1150,7 +1150,7 @@ void Foam::forces::calcForcesMoment()
 
             vectorField fT(Sfb[patchI] & devRhoReffb[patchI]);
 
-            vectorField fP(Md.size(), vector::zero);
+            vectorField fP(Md.size(), Zero);
 
             addToFields(patchI, Md, fN, fT, fP);
 
@@ -1195,7 +1195,7 @@ void Foam::forces::calcForcesMoment()
                 const vectorField fP(fPTot, cZone);
                 const vectorField Md(d - coordSys_.origin());
 
-                const vectorField fDummy(Md.size(), vector::zero);
+                const vectorField fDummy(Md.size(), Zero);
 
                 addToFields(cZone, Md, fDummy, fDummy, fP);
 

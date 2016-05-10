@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,13 +43,7 @@ readField
 
     if (debug)
     {
-        Info<< "GeometricField<Type, PatchField, GeoMesh>::"
-               "GeometricBoundaryField::readField"
-               "("
-                   "const DimensionedField<Type, GeoMesh>&, "
-                   "const dictionary&"
-                ")"
-            << endl;
+        InfoInFunction << endl;
     }
 
 
@@ -230,11 +224,7 @@ GeometricBoundaryField
 {
     if (debug)
     {
-        Info<< "GeometricField<Type, PatchField, GeoMesh>::"
-               "GeometricBoundaryField::"
-               "GeometricBoundaryField(const BoundaryMesh&, "
-               "const DimensionedField<Type>&, const word&)"
-            << endl;
+        InfoInFunction << endl;
     }
 
     forAll(bmesh_, patchi)
@@ -268,16 +258,7 @@ GeometricBoundaryField
 {
     if (debug)
     {
-        Info<< "GeometricField<Type, PatchField, GeoMesh>::"
-               "GeometricBoundaryField::"
-               "GeometricBoundaryField"
-               "("
-                    "const BoundaryMesh&, "
-                    "const DimensionedField<Type>&, "
-                    "const wordList&, "
-                    "const wordList&"
-                ")"
-            << endl;
+        InfoInFunction << endl;
     }
 
     if
@@ -336,7 +317,7 @@ GeometricBoundaryField
 (
     const BoundaryMesh& bmesh,
     const DimensionedField<Type, GeoMesh>& field,
-    const PtrList<PatchField<Type> >& ptfl
+    const PtrList<PatchField<Type>>& ptfl
 )
 :
     FieldField<PatchField, Type>(bmesh.size()),
@@ -344,15 +325,7 @@ GeometricBoundaryField
 {
     if (debug)
     {
-        Info<< "GeometricField<Type, PatchField, GeoMesh>::"
-               "GeometricBoundaryField::"
-               "GeometricBoundaryField"
-               "("
-                    "const BoundaryMesh&, "
-                    "const DimensionedField<Type, GeoMesh>&, "
-                    "const PtrLIst<PatchField<Type> >&"
-               ")"
-            << endl;
+        InfoInFunction << endl;
     }
 
     forAll(bmesh_, patchi)
@@ -376,15 +349,7 @@ GeometricBoundaryField
 {
     if (debug)
     {
-        Info<< "GeometricField<Type, PatchField, GeoMesh>::"
-               "GeometricBoundaryField::"
-               "GeometricBoundaryField"
-               "("
-                   "const DimensionedField<Type, GeoMesh>&, "
-                   "const typename GeometricField<Type, PatchField, GeoMesh>::"
-                   "GeometricBoundaryField&"
-               ")"
-            << endl;
+        InfoInFunction << endl;
     }
 
     forAll(bmesh_, patchi)
@@ -394,11 +359,6 @@ GeometricBoundaryField
 }
 
 
-// Construct as copy
-// Dangerous because Field may be set to a field which gets deleted.
-// Need new type of GeometricBoundaryField, one which IS part of a geometric
-// field for which snGrad etc. may be called and a free standing
-// GeometricBoundaryField for which such operations are unavailable.
 template<class Type, template<class> class PatchField, class GeoMesh>
 Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
 GeometricBoundaryField
@@ -412,14 +372,7 @@ GeometricBoundaryField
 {
     if (debug)
     {
-        Info<< "GeometricField<Type, PatchField, GeoMesh>::"
-               "GeometricBoundaryField::"
-               "GeometricBoundaryField"
-               "("
-                   "const GeometricField<Type, PatchField, GeoMesh>::"
-                   "GeometricBoundaryField&"
-               ")"
-            << endl;
+        InfoInFunction << endl;
     }
 }
 
@@ -448,9 +401,7 @@ updateCoeffs()
 {
     if (debug)
     {
-        Info<< "GeometricField<Type, PatchField, GeoMesh>::"
-               "GeometricBoundaryField::"
-               "updateCoeffs()" << endl;
+        InfoInFunction << endl;
     }
 
     forAll(*this, patchi)
@@ -466,9 +417,7 @@ evaluate()
 {
     if (debug)
     {
-        Info<< "GeometricField<Type, PatchField, GeoMesh>::"
-               "GeometricBoundaryField::"
-               "evaluate()" << endl;
+        InfoInFunction << endl;
     }
 
     if
@@ -573,12 +522,12 @@ interfaces() const
 
     forAll(interfaces, patchi)
     {
-        if (isA<LduInterfaceField<Type> >(this->operator[](patchi)))
+        if (isA<LduInterfaceField<Type>>(this->operator[](patchi)))
         {
             interfaces.set
             (
                 patchi,
-                &refCast<const LduInterfaceField<Type> >
+                &refCast<const LduInterfaceField<Type>>
                 (
                     this->operator[](patchi)
                 )
@@ -677,7 +626,6 @@ operator=
 }
 
 
-// Forced assignments
 template<class Type, template<class> class PatchField, class GeoMesh>
 void Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
 operator==

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,9 +34,9 @@ inline Foam::SubList<T>::SubList
 :
     UList<T>(list.v_, subSize)
 {
-#   ifdef FULLDEBUG
+    #ifdef FULLDEBUG
     list.checkSize(subSize);
-#   endif
+    #endif
 }
 
 
@@ -50,7 +50,7 @@ inline Foam::SubList<T>::SubList
 :
     UList<T>(&(list.v_[startIndex]), subSize)
 {
-#   ifdef FULLDEBUG
+    #ifdef FULLDEBUG
 
     // Artificially allow the start of a zero-sized subList to be
     // one past the end of the original list.
@@ -65,7 +65,7 @@ inline Foam::SubList<T>::SubList
         // behind the last element is allowed
         list.checkSize(startIndex);
     }
-#   endif
+    #endif
 }
 
 
@@ -74,7 +74,7 @@ inline Foam::SubList<T>::SubList
 template<class T>
 inline const Foam::SubList<T>& Foam::SubList<T>::null()
 {
-    return NullObjectRef<SubList<T> >();
+    return NullObjectRef<SubList<T>>();
 }
 
 
@@ -83,7 +83,21 @@ inline const Foam::SubList<T>& Foam::SubList<T>::null()
 template<class T>
 inline Foam::SubList<T>::operator const Foam::List<T>&() const
 {
-    return *reinterpret_cast< const List<T>* >(this);
+    return *reinterpret_cast<const List<T>* >(this);
+}
+
+
+template<class T>
+inline void Foam::SubList<T>::operator=(const SubList<T>& sl)
+{
+    UList<T>::deepCopy(sl);
+}
+
+
+template<class T>
+inline void Foam::SubList<T>::operator=(const UList<T>& l)
+{
+    UList<T>::deepCopy(l);
 }
 
 

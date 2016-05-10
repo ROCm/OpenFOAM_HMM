@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,8 +34,6 @@ License
 
 namespace Foam
 {
-    const scalar sampledSet::tol = 1e-6;
-
     defineTypeNameAndDebug(sampledSet, 0);
     defineRunTimeSelectionTable(sampledSet, word);
 }
@@ -49,61 +47,88 @@ Foam::label Foam::sampledSet::getBoundaryCell(const label faceI) const
 }
 
 
-Foam::label Foam::sampledSet::getCell
-(
-    const label faceI,
-    const point& sample
-) const
+Foam::label Foam::sampledSet::getNeighbourCell(const label faceI) const
 {
-    if (faceI == -1)
-    {
-        FatalErrorInFunction
-            << "Illegal face label " << faceI
-            << abort(FatalError);
-    }
-
     if (faceI >= mesh().nInternalFaces())
     {
-        label cellI = getBoundaryCell(faceI);
-
-        if (!mesh().pointInCell(sample, cellI, searchEngine_.decompMode()))
-        {
-            FatalErrorInFunction
-                << "Found cell " << cellI << " using face " << faceI
-                << ". But cell does not contain point " << sample
-                << abort(FatalError);
-        }
-        return cellI;
+        return mesh().faceOwner()[faceI];
     }
     else
     {
-        // Try owner and neighbour to see which one contains sample
+        return mesh().faceNeighbour()[faceI];
+    }
+}
 
-        label cellI = mesh().faceOwner()[faceI];
 
-        if (mesh().pointInCell(sample, cellI, searchEngine_.decompMode()))
+Foam::label Foam::sampledSet::pointInCell
+(
+    const point& p,
+    const label samplei
+) const
+{
+    // Collect the face owner and neighbour cells of the sample into an array
+    // for convenience
+    label cells[4] =
+    {
+        mesh().faceOwner()[faces_[samplei]],
+        getNeighbourCell(faces_[samplei]),
+        mesh().faceOwner()[faces_[samplei+1]],
+        getNeighbourCell(faces_[samplei+1])
+    };
+
+    // Find the sampled cell by checking the owners and neighbours of the
+    // sampled faces
+    label cellm =
+        (cells[0] == cells[2] || cells[0] == cells[3]) ? cells[0]
+      : (cells[1] == cells[2] || cells[1] == cells[3]) ? cells[1]
+      : -1;
+
+    if (cellm != -1)
+    {
+        // If found the sampled cell check the point is in the cell
+        // otherwise ignore
+        if (!mesh().pointInCell(p, cellm, searchEngine_.decompMode()))
         {
-            return cellI;
-        }
-        else
-        {
-            cellI = mesh().faceNeighbour()[faceI];
+           cellm = -1;
 
-            if (mesh().pointInCell(sample, cellI, searchEngine_.decompMode()))
+            if (debug)
             {
-                return cellI;
-            }
-            else
-            {
-                FatalErrorInFunction
-                    << "None of the neighbours of face "
-                    << faceI << " contains point " << sample
-                    << abort(FatalError);
-
-                return -1;
+                WarningInFunction
+                    << "Could not find mid-point " << p
+                    << " cell " << cellm << endl;
             }
         }
     }
+    else
+    {
+        // If the sample does not pass through a single cell check if the point
+        // is in any of the owners or neighbours otherwise ignore
+        for (label i=0; i<4; i++)
+        {
+            if (mesh().pointInCell(p, cells[i], searchEngine_.decompMode()))
+            {
+                return cells[i];
+            }
+        }
+
+        if (debug)
+        {
+            WarningInFunction
+                << "Could not find cell for mid-point" << nl
+                << "  samplei: " << samplei
+                << "  pts[samplei]: " << operator[](samplei)
+                << "  face[samplei]: " << faces_[samplei]
+                << "  pts[samplei+1]: " << operator[](samplei+1)
+                << "  face[samplei+1]: " << faces_[samplei+1]
+                << "  cellio: " << cells[0]
+                << "  cellin: " << cells[1]
+                << "  celljo: " << cells[2]
+                << "  celljn: " << cells[3]
+                << endl;
+        }
+    }
+
+    return cellm;
 }
 
 
@@ -119,7 +144,7 @@ Foam::scalar Foam::sampledSet::calcSign
 
     if (magVec < VSMALL)
     {
-        // sample on face centre. Regard as inside
+        // Sample on face centre. Regard as inside
         return -1;
     }
 
@@ -133,7 +158,6 @@ Foam::scalar Foam::sampledSet::calcSign
 }
 
 
-// Return face (or -1) of face which is within smallDist of sample
 Foam::label Foam::sampledSet::findNearFace
 (
     const label cellI,
@@ -169,8 +193,6 @@ Foam::label Foam::sampledSet::findNearFace
 }
 
 
-// 'Pushes' point facePt (which is almost on face) in direction of cell centre
-// so it is clearly inside.
 Foam::point Foam::sampledSet::pushIn
 (
     const point& facePt,
@@ -224,30 +246,22 @@ Foam::point Foam::sampledSet::pushIn
             << abort(FatalError);
     }
 
-    //Info<< "pushIn : moved " << facePt << " to " << newPosition
-    //    << endl;
-
     return newPosition;
 }
 
 
-// Calculates start of tracking given samplePt and first boundary intersection
-// (bPoint, bFaceI). bFaceI == -1 if no boundary intersection.
-// Returns true if trackPt is sampling point
 bool Foam::sampledSet::getTrackingPoint
 (
-    const vector& offset,
     const point& samplePt,
     const point& bPoint,
     const label bFaceI,
+    const scalar smallDist,
 
     point& trackPt,
     label& trackCellI,
     label& trackFaceI
 ) const
 {
-    const scalar smallDist = mag(tol*offset);
-
     bool isGoodSample = false;
 
     if (bFaceI == -1)
@@ -268,9 +282,6 @@ bool Foam::sampledSet::getTrackingPoint
         {
             // Line samplePt - end_ does not intersect domain at all.
             // (or is along edge)
-            //Info<< "getTrackingPoint : samplePt outside domain : "
-            //    << "  samplePt:" << samplePt
-            //    << endl;
 
             trackCellI = -1;
             trackFaceI = -1;
@@ -279,11 +290,7 @@ bool Foam::sampledSet::getTrackingPoint
         }
         else
         {
-            // start is inside. Use it as tracking point
-            //Info<< "getTrackingPoint : samplePt inside :"
-            //    << "  samplePt:" << samplePt
-            //    << "  trackCellI:" << trackCellI
-            //    << endl;
+            // Start is inside. Use it as tracking point
 
             trackPt = samplePt;
             trackFaceI = -1;
@@ -293,10 +300,6 @@ bool Foam::sampledSet::getTrackingPoint
     }
     else if (mag(samplePt - bPoint) < smallDist)
     {
-        //Info<< "getTrackingPoint : samplePt:" << samplePt
-        //    << " close to bPoint:"
-        //    << bPoint << endl;
-
         // samplePt close to bPoint. Snap to it
         trackPt = pushIn(bPoint, bFaceI);
         trackFaceI = bFaceI;
@@ -330,8 +333,7 @@ bool Foam::sampledSet::getTrackingPoint
 
     if (debug)
     {
-        Info<< "sampledSet::getTrackingPoint :"
-            << " offset:" << offset
+        InfoInFunction
             << " samplePt:" << samplePt
             << " bPoint:" << bPoint
             << " bFaceI:" << bFaceI

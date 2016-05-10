@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,7 +65,7 @@ namespace LESModels
 template<class BasicTurbulenceModel>
 class kOmegaSSTDES
 :
-    public kOmegaSSTBase<DESModel<BasicTurbulenceModel> >
+    public kOmegaSSTBase<DESModel<BasicTurbulenceModel>>
 {
     // Private Member Functions
 

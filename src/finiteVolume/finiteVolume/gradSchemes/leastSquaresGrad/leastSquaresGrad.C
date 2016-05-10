@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ License
 #include "volMesh.H"
 #include "surfaceMesh.H"
 #include "GeometricField.H"
-#include "zeroGradientFvPatchField.H"
+#include "extrapolatedCalculatedFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,7 +54,7 @@ Foam::fv::leastSquaresGrad<Type>::calcGrad
 
     const fvMesh& mesh = vsf.mesh();
 
-    tmp<GeometricField<GradType, fvPatchField, volMesh> > tlsGrad
+    tmp<GeometricField<GradType, fvPatchField, volMesh>> tlsGrad
     (
         new GeometricField<GradType, fvPatchField, volMesh>
         (
@@ -71,12 +71,12 @@ Foam::fv::leastSquaresGrad<Type>::calcGrad
             (
                 "zero",
                 vsf.dimensions()/dimLength,
-                pTraits<GradType>::zero
+                Zero
             ),
-            zeroGradientFvPatchField<GradType>::typeName
+            extrapolatedCalculatedFvPatchField<GradType>::typeName
         )
     );
-    GeometricField<GradType, fvPatchField, volMesh>& lsGrad = tlsGrad();
+    GeometricField<GradType, fvPatchField, volMesh>& lsGrad = tlsGrad.ref();
 
     // Get reference to least square vectors
     const leastSquaresVectors& lsv = leastSquaresVectors::New(mesh);

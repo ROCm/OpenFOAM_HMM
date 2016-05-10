@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,16 +32,16 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-#define makeFvsPatchField(fvsPatchTypeField)                                  \
-                                                                              \
-defineNamedTemplateTypeNameAndDebug(fvsPatchTypeField, 0);                    \
-template<>                                                                    \
-int fvsPatchTypeField::disallowGenericFvsPatchField                           \
-(                                                                             \
-    debug::debugSwitch("disallowGenericFvsPatchField", 0)                     \
-);                                                                            \
-defineTemplateRunTimeSelectionTable(fvsPatchTypeField, patch);                \
-defineTemplateRunTimeSelectionTable(fvsPatchTypeField, patchMapper);          \
+#define makeFvsPatchField(fvsPatchTypeField)                                   \
+                                                                               \
+defineNamedTemplateTypeNameAndDebug(fvsPatchTypeField, 0);                     \
+template<>                                                                     \
+int fvsPatchTypeField::disallowGenericFvsPatchField                            \
+(                                                                              \
+    debug::debugSwitch("disallowGenericFvsPatchField", 0)                      \
+);                                                                             \
+defineTemplateRunTimeSelectionTable(fvsPatchTypeField, patch);                 \
+defineTemplateRunTimeSelectionTable(fvsPatchTypeField, patchMapper);           \
 defineTemplateRunTimeSelectionTable(fvsPatchTypeField, dictionary);
 
 makeFvsPatchField(fvsPatchScalarField)

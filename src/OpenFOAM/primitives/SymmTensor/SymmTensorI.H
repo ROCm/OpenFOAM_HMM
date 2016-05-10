@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,31 +26,33 @@ License
 #include "Vector.H"
 #include "Tensor.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline SymmTensor<Cmpt>::SymmTensor()
+inline Foam::SymmTensor<Cmpt>::SymmTensor()
+{}
+
+
+template<class Cmpt>
+inline Foam::SymmTensor<Cmpt>::SymmTensor(const Foam::zero)
+:
+    SymmTensor::vsType(Zero)
 {}
 
 
 template<class Cmpt>
 template<class Cmpt2>
-inline SymmTensor<Cmpt>::SymmTensor
+inline Foam::SymmTensor<Cmpt>::SymmTensor
 (
     const VectorSpace<SymmTensor<Cmpt2>, Cmpt2, 6>& vs
 )
 :
-    VectorSpace<SymmTensor<Cmpt>, Cmpt, 6>(vs)
+    SymmTensor::vsType(vs)
 {}
 
 
 template<class Cmpt>
-inline SymmTensor<Cmpt>::SymmTensor(const SphericalTensor<Cmpt>& st)
+inline Foam::SymmTensor<Cmpt>::SymmTensor(const SphericalTensor<Cmpt>& st)
 {
     this->v_[XX] = st.ii(); this->v_[XY] = 0;       this->v_[XZ] = 0;
                             this->v_[YY] = st.ii(); this->v_[YZ] = 0;
@@ -59,7 +61,7 @@ inline SymmTensor<Cmpt>::SymmTensor(const SphericalTensor<Cmpt>& st)
 
 
 template<class Cmpt>
-inline SymmTensor<Cmpt>::SymmTensor
+inline Foam::SymmTensor<Cmpt>::SymmTensor
 (
     const Cmpt txx, const Cmpt txy, const Cmpt txz,
                     const Cmpt tyy, const Cmpt tyz,
@@ -73,99 +75,99 @@ inline SymmTensor<Cmpt>::SymmTensor
 
 
 template<class Cmpt>
-inline SymmTensor<Cmpt>::SymmTensor(Istream& is)
+inline Foam::SymmTensor<Cmpt>::SymmTensor(Istream& is)
 :
-    VectorSpace<SymmTensor<Cmpt>, Cmpt, 6>(is)
+    SymmTensor::vsType(is)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline const Cmpt&  SymmTensor<Cmpt>::xx() const
+inline const Cmpt& Foam::SymmTensor<Cmpt>::xx() const
 {
     return this->v_[XX];
 }
 
 template<class Cmpt>
-inline const Cmpt&  SymmTensor<Cmpt>::xy() const
+inline const Cmpt& Foam::SymmTensor<Cmpt>::xy() const
 {
     return this->v_[XY];
 }
 
 template<class Cmpt>
-inline const Cmpt&  SymmTensor<Cmpt>::xz() const
+inline const Cmpt& Foam::SymmTensor<Cmpt>::xz() const
 {
     return this->v_[XZ];
 }
 
 template<class Cmpt>
-inline const Cmpt&  SymmTensor<Cmpt>::yy() const
+inline const Cmpt& Foam::SymmTensor<Cmpt>::yy() const
 {
     return this->v_[YY];
 }
 
 template<class Cmpt>
-inline const Cmpt&  SymmTensor<Cmpt>::yz() const
+inline const Cmpt& Foam::SymmTensor<Cmpt>::yz() const
 {
     return this->v_[YZ];
 }
 
 template<class Cmpt>
-inline const Cmpt&  SymmTensor<Cmpt>::zz() const
+inline const Cmpt& Foam::SymmTensor<Cmpt>::zz() const
 {
     return this->v_[ZZ];
 }
 
 
 template<class Cmpt>
-inline Cmpt& SymmTensor<Cmpt>::xx()
+inline Cmpt& Foam::SymmTensor<Cmpt>::xx()
 {
     return this->v_[XX];
 }
 
 template<class Cmpt>
-inline Cmpt& SymmTensor<Cmpt>::xy()
+inline Cmpt& Foam::SymmTensor<Cmpt>::xy()
 {
     return this->v_[XY];
 }
 
 template<class Cmpt>
-inline Cmpt& SymmTensor<Cmpt>::xz()
+inline Cmpt& Foam::SymmTensor<Cmpt>::xz()
 {
     return this->v_[XZ];
 }
 
 template<class Cmpt>
-inline Cmpt& SymmTensor<Cmpt>::yy()
+inline Cmpt& Foam::SymmTensor<Cmpt>::yy()
 {
     return this->v_[YY];
 }
 
 template<class Cmpt>
-inline Cmpt& SymmTensor<Cmpt>::yz()
+inline Cmpt& Foam::SymmTensor<Cmpt>::yz()
 {
     return this->v_[YZ];
 }
 
 template<class Cmpt>
-inline Cmpt& SymmTensor<Cmpt>::zz()
+inline Cmpt& Foam::SymmTensor<Cmpt>::zz()
 {
     return this->v_[ZZ];
 }
 
 
 template<class Cmpt>
-inline const SymmTensor<Cmpt>& SymmTensor<Cmpt>::T() const
+inline const Foam::SymmTensor<Cmpt>& Foam::SymmTensor<Cmpt>::T() const
 {
     return *this;
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline void SymmTensor<Cmpt>::operator=(const SphericalTensor<Cmpt>& st)
+inline void Foam::SymmTensor<Cmpt>::operator=(const SphericalTensor<Cmpt>& st)
 {
     this->v_[XX] = st.ii(); this->v_[XY] = 0;       this->v_[XZ] = 0;
                             this->v_[YY] = st.ii(); this->v_[YZ] = 0;
@@ -173,6 +175,10 @@ inline void SymmTensor<Cmpt>::operator=(const SphericalTensor<Cmpt>& st)
 }
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
@@ -398,13 +404,8 @@ inline Cmpt invariantII(const SymmTensor<Cmpt>& st)
 {
     return
     (
-        0.5*sqr(tr(st))
-      - 0.5*
-        (
-           st.xx()*st.xx() + st.xy()*st.xy() + st.xz()*st.xz()
-         + st.xy()*st.xy() + st.yy()*st.yy() + st.yz()*st.yz()
-         + st.xz()*st.xz() + st.yz()*st.yz() + st.zz()*st.zz()
-        )
+        st.xx()*st.yy() + st.yy()*st.zz() + st.xx()*st.zz()
+      - sqr(st.xy()) - sqr(st.yz()) - sqr(st.xz())
     );
 }
 
@@ -536,7 +537,7 @@ public:
 };
 
 template<class Cmpt>
-class outerProduct<Cmpt, SymmTensor<Cmpt> >
+class outerProduct<Cmpt, SymmTensor<Cmpt>>
 {
 public:
 
@@ -544,7 +545,7 @@ public:
 };
 
 template<class Cmpt>
-class innerProduct<SymmTensor<Cmpt>, SymmTensor<Cmpt> >
+class innerProduct<SymmTensor<Cmpt>, SymmTensor<Cmpt>>
 {
 public:
 
@@ -552,7 +553,7 @@ public:
 };
 
 template<class Cmpt>
-class innerProduct<SymmTensor<Cmpt>, Vector<Cmpt> >
+class innerProduct<SymmTensor<Cmpt>, Vector<Cmpt>>
 {
 public:
 
@@ -560,7 +561,7 @@ public:
 };
 
 template<class Cmpt>
-class innerProduct<Vector<Cmpt>, SymmTensor<Cmpt> >
+class innerProduct<Vector<Cmpt>, SymmTensor<Cmpt>>
 {
 public:
 
@@ -569,7 +570,7 @@ public:
 
 
 template<class Cmpt>
-class typeOfSum<SphericalTensor<Cmpt>, SymmTensor<Cmpt> >
+class typeOfSum<SphericalTensor<Cmpt>, SymmTensor<Cmpt>>
 {
 public:
 
@@ -577,7 +578,7 @@ public:
 };
 
 template<class Cmpt>
-class typeOfSum<SymmTensor<Cmpt>, SphericalTensor<Cmpt> >
+class typeOfSum<SymmTensor<Cmpt>, SphericalTensor<Cmpt>>
 {
 public:
 
@@ -585,7 +586,7 @@ public:
 };
 
 template<class Cmpt>
-class innerProduct<SphericalTensor<Cmpt>, SymmTensor<Cmpt> >
+class innerProduct<SphericalTensor<Cmpt>, SymmTensor<Cmpt>>
 {
 public:
 
@@ -593,7 +594,7 @@ public:
 };
 
 template<class Cmpt>
-class innerProduct<SymmTensor<Cmpt>, SphericalTensor<Cmpt> >
+class innerProduct<SymmTensor<Cmpt>, SphericalTensor<Cmpt>>
 {
 public:
 

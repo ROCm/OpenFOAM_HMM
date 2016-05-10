@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -95,7 +95,7 @@ void MapLagrangianFields
 
     {
         IOobjectList fieldFields =
-            objects.lookupClass(IOField<Field<Type> >::typeName);
+            objects.lookupClass(IOField<Field<Type>>::typeName);
 
         forAllIter(IOobjectList, fieldFields, fieldIter)
         {
@@ -106,7 +106,7 @@ void MapLagrangianFields
             // Read field (does not need mesh)
             // Note: some fieldFields are 0 size (e.g. collision records) if
             //       not used
-            IOField<Field<Type> > fieldSource(*fieldIter());
+            IOField<Field<Type>> fieldSource(*fieldIter());
 
             // Map - use CompactIOField to automatically write in
             // compact form for binary format.

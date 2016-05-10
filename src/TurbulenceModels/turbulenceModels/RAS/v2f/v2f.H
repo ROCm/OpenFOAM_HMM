@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -120,7 +120,7 @@ namespace RASModels
 template<class BasicTurbulenceModel>
 class v2f
 :
-    public eddyViscosity<RASModel<BasicTurbulenceModel> >,
+    public eddyViscosity<RASModel<BasicTurbulenceModel>>,
     public v2fBase
 {
 
@@ -274,7 +274,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "v2f.C"
+    #include "v2f.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

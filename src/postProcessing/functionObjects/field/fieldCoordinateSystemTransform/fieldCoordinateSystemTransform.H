@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -127,17 +127,22 @@ protected:
 
     // Protected Member Functions
 
-        //- Disallow default bitwise copy construct
-        fieldCoordinateSystemTransform(const fieldCoordinateSystemTransform&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const fieldCoordinateSystemTransform&);
-
         template<class Type>
         void transform(const word& fieldName) const;
 
         template<class Type>
         void transformField(const Type& field) const;
+
+
+private:
+
+    // Private member functions
+
+        //- Disallow default bitwise copy construct
+        fieldCoordinateSystemTransform(const fieldCoordinateSystemTransform&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const fieldCoordinateSystemTransform&);
 
 
 public:
@@ -203,7 +208,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "fieldCoordinateSystemTransformTemplates.C"
+    #include "fieldCoordinateSystemTransformTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

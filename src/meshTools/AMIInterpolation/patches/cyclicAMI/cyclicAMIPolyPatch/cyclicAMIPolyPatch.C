@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -136,7 +136,7 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
     {
         case ROTATIONAL:
         {
-            tensor revT = tensor::zero;
+            tensor revT = Zero;
 
             if (rotationAngleDefined_)
             {
@@ -221,8 +221,8 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
             }
             else
             {
-                point n0 = vector::zero;
-                point n1 = vector::zero;
+                point n0 = Zero;
+                point n1 = Zero;
                 if (half0Ctrs.size())
                 {
                     n0 = findFaceNormalMaxRadius(half0Ctrs);
@@ -489,11 +489,11 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     coupledPolyPatch(name, size, start, index, bm, patchType, transform),
     nbrPatchName_(word::null),
     nbrPatchID_(-1),
-    rotationAxis_(vector::zero),
-    rotationCentre_(point::zero),
+    rotationAxis_(Zero),
+    rotationCentre_(Zero),
     rotationAngleDefined_(false),
     rotationAngle_(0.0),
-    separationVector_(vector::zero),
+    separationVector_(Zero),
     AMIPtr_(NULL),
     AMIMethod_(AMIPatchToPatchInterpolation::imFaceAreaWeight),
     AMIReverse_(false),
@@ -520,11 +520,11 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     nbrPatchName_(dict.lookupOrDefault<word>("neighbourPatch", "")),
     coupleGroup_(dict),
     nbrPatchID_(-1),
-    rotationAxis_(vector::zero),
-    rotationCentre_(point::zero),
+    rotationAxis_(Zero),
+    rotationCentre_(Zero),
     rotationAngleDefined_(false),
     rotationAngle_(0.0),
-    separationVector_(vector::zero),
+    separationVector_(Zero),
     AMIPtr_(NULL),
     AMIMethod_
     (

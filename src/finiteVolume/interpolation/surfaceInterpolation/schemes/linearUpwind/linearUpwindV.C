@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh> >
+Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh>>
 Foam::linearUpwindV<Type>::correction
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf
@@ -39,7 +39,7 @@ Foam::linearUpwindV<Type>::correction
 {
     const fvMesh& mesh = this->mesh();
 
-    tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tsfCorr
+    tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> tsfCorr
     (
         new GeometricField<Type, fvsPatchField, surfaceMesh>
         (
@@ -57,12 +57,12 @@ Foam::linearUpwindV<Type>::correction
             (
                 vf.name(),
                 vf.dimensions(),
-                pTraits<Type>::zero
+                Zero
             )
         )
     );
 
-    GeometricField<Type, fvsPatchField, surfaceMesh>& sfCorr = tsfCorr();
+    GeometricField<Type, fvsPatchField, surfaceMesh>& sfCorr = tsfCorr.ref();
 
     const surfaceScalarField& faceFlux = this->faceFlux_;
     const surfaceScalarField& w = mesh.weights();
@@ -118,7 +118,7 @@ Foam::linearUpwindV<Type>::correction
         {
             if (maxCorrs < 0)
             {
-                sfCorr[facei] = vector::zero;
+                sfCorr[facei] = Zero;
             }
             else if (sfCorrs > maxCorrs)
             {
@@ -185,7 +185,7 @@ Foam::linearUpwindV<Type>::correction
                 {
                     if (maxCorrs < 0)
                     {
-                        pSfCorr[facei] = vector::zero;
+                        pSfCorr[facei] = Zero;
                     }
                     else if (pSfCorrs > maxCorrs)
                     {

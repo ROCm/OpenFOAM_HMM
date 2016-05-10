@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -99,7 +99,7 @@ public:
 
 
     //- Selector
-    static autoPtr<PairModel<CloudType> > New
+    static autoPtr<PairModel<CloudType>> New
     (
         const dictionary& dict,
         CloudType& owner
@@ -144,33 +144,33 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makePairModel(CloudType)                                              \
-                                                                              \
+#define makePairModel(CloudType)                                               \
+                                                                               \
     defineNamedTemplateTypeNameAndDebug(Foam::PairModel<Foam::CloudType>, 0); \
-                                                                              \
-    namespace Foam                                                            \
-    {                                                                         \
-        defineTemplateRunTimeSelectionTable                                   \
-        (                                                                     \
-            PairModel<Foam::CloudType>,                                       \
-            dictionary                                                        \
-        );                                                                    \
+                                                                               \
+    namespace Foam                                                             \
+    {                                                                          \
+        defineTemplateRunTimeSelectionTable                                    \
+        (                                                                      \
+            PairModel<Foam::CloudType>,                                        \
+            dictionary                                                         \
+        );                                                                     \
     }
 
 
-#define makePairModelType(SS, CloudType)                                      \
-                                                                              \
-    defineNamedTemplateTypeNameAndDebug(Foam::SS<Foam::CloudType>, 0);        \
-                                                                              \
-    Foam::PairModel<Foam::CloudType>::                                        \
-        adddictionaryConstructorToTable<Foam::SS<Foam::CloudType> >           \
+#define makePairModelType(SS, CloudType)                                       \
+                                                                               \
+    defineNamedTemplateTypeNameAndDebug(Foam::SS<Foam::CloudType>, 0);         \
+                                                                               \
+    Foam::PairModel<Foam::CloudType>::                                         \
+        adddictionaryConstructorToTable<Foam::SS<Foam::CloudType>>             \
         add##SS##CloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "PairModel.C"
+    #include "PairModel.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

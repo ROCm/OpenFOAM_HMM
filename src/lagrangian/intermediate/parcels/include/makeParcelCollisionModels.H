@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,17 +38,17 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeParcelCollisionModels(CloudType)                                  \
-                                                                              \
-    makeCollisionModel(CloudType);                                            \
-    makeCollisionModelType(NoCollision, CloudType);                           \
-    makeCollisionModelType(PairCollision, CloudType);                         \
-                                                                              \
-    makePairModel(CloudType);                                                 \
-    makePairModelType(PairSpringSliderDashpot, CloudType);                    \
-                                                                              \
-    makeWallModel(CloudType);                                                 \
-    makeWallModelType(WallSpringSliderDashpot, CloudType);                    \
+#define makeParcelCollisionModels(CloudType)                                   \
+                                                                               \
+    makeCollisionModel(CloudType);                                             \
+    makeCollisionModelType(NoCollision, CloudType);                            \
+    makeCollisionModelType(PairCollision, CloudType);                          \
+                                                                               \
+    makePairModel(CloudType);                                                  \
+    makePairModelType(PairSpringSliderDashpot, CloudType);                     \
+                                                                               \
+    makeWallModel(CloudType);                                                  \
+    makeWallModelType(WallSpringSliderDashpot, CloudType);                     \
     makeWallModelType(WallLocalSpringSliderDashpot, CloudType);
 
 

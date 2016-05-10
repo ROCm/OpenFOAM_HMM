@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh> >
+Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh>>
 Foam::pointLinear<Type>::
 correction
 (
@@ -45,10 +45,10 @@ correction
         volPointInterpolation::New(mesh).interpolate(vf)
     );
 
-    tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tsfCorr =
+    tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> tsfCorr =
         linearInterpolate(vf);
 
-    Field<Type>& sfCorr = tsfCorr().internalField();
+    Field<Type>& sfCorr = tsfCorr.ref().internalField();
 
     const pointField& points = mesh.points();
     const pointField& C = mesh.C().internalField();
@@ -104,7 +104,7 @@ correction
 
 
     typename GeometricField<Type, fvsPatchField, surfaceMesh>::
-        GeometricBoundaryField& bSfCorr = tsfCorr().boundaryField();
+        GeometricBoundaryField& bSfCorr = tsfCorr.ref().boundaryField();
 
     forAll(bSfCorr, patchi)
     {
@@ -166,7 +166,7 @@ correction
         }
         else
         {
-            pSfCorr = pTraits<Type>::zero;
+            pSfCorr = Zero;
         }
     }
 

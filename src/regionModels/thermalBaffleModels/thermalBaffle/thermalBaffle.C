@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,7 +68,7 @@ void thermalBaffle::solveEnergy()
 {
     if (debug)
     {
-        Info<< "thermalBaffle::solveEnergy()" << endl;
+        InfoInFunction << endl;
     }
 
     const polyBoundaryMesh& rbm = regionMesh().boundaryMesh();
@@ -91,7 +91,7 @@ void thermalBaffle::solveEnergy()
         )
     );
 
-    volScalarField& Q = tQ();
+    volScalarField& Q = tQ.ref();
 
     volScalarField rho("rho", thermo_->rho());
     volScalarField alpha("alpha", thermo_->alpha());
@@ -182,7 +182,7 @@ thermalBaffle::thermalBaffle
         (
             "zero",
             dimEnergy/dimArea/dimTime,
-            pTraits<scalar>::zero
+            Zero
         )
     ),
     Q_
@@ -200,7 +200,7 @@ thermalBaffle::thermalBaffle
         (
             "zero",
             dimEnergy/dimVolume/dimTime,
-            pTraits<scalar>::zero
+            Zero
         )
     ),
     radiation_
@@ -242,7 +242,7 @@ thermalBaffle::thermalBaffle
         (
             "zero",
             dimEnergy/dimArea/dimTime,
-            pTraits<scalar>::zero
+            Zero
         )
     ),
     Q_
@@ -260,7 +260,7 @@ thermalBaffle::thermalBaffle
         (
             "zero",
             dimEnergy/dimVolume/dimTime,
-            pTraits<scalar>::zero
+            Zero
         )
     ),
     radiation_

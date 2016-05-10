@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,9 +56,9 @@ inclinedFilmNusseltHeightFvPatchScalarField
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
     filmRegionName_(ptf.filmRegionName_),
-    GammaMean_(ptf.GammaMean_().clone().ptr()),
-    a_(ptf.a_().clone().ptr()),
-    omega_(ptf.omega_().clone().ptr())
+    GammaMean_(ptf.GammaMean_, false),
+    a_(ptf.a_, false),
+    omega_(ptf.omega_, false)
 {}
 
 
@@ -75,9 +75,9 @@ inclinedFilmNusseltHeightFvPatchScalarField
     (
         dict.lookupOrDefault<word>("filmRegion", "surfaceFilmProperties")
     ),
-    GammaMean_(DataEntry<scalar>::New("GammaMean", dict)),
-    a_(DataEntry<scalar>::New("a", dict)),
-    omega_(DataEntry<scalar>::New("omega", dict))
+    GammaMean_(Function1<scalar>::New("GammaMean", dict)),
+    a_(Function1<scalar>::New("a", dict)),
+    omega_(Function1<scalar>::New("omega", dict))
 {
     fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
 }
@@ -91,9 +91,9 @@ inclinedFilmNusseltHeightFvPatchScalarField
 :
     fixedValueFvPatchScalarField(wmfrhpsf),
     filmRegionName_(wmfrhpsf.filmRegionName_),
-    GammaMean_(wmfrhpsf.GammaMean_().clone().ptr()),
-    a_(wmfrhpsf.a_().clone().ptr()),
-    omega_(wmfrhpsf.omega_().clone().ptr())
+    GammaMean_(wmfrhpsf.GammaMean_, false),
+    a_(wmfrhpsf.a_, false),
+    omega_(wmfrhpsf.omega_, false)
 {}
 
 
@@ -106,9 +106,9 @@ inclinedFilmNusseltHeightFvPatchScalarField
 :
     fixedValueFvPatchScalarField(wmfrhpsf, iF),
     filmRegionName_(wmfrhpsf.filmRegionName_),
-    GammaMean_(wmfrhpsf.GammaMean_().clone().ptr()),
-    a_(wmfrhpsf.a_().clone().ptr()),
-    omega_(wmfrhpsf.omega_().clone().ptr())
+    GammaMean_(wmfrhpsf.GammaMean_, false),
+    a_(wmfrhpsf.a_, false),
+    omega_(wmfrhpsf.omega_, false)
 {}
 
 
@@ -123,7 +123,7 @@ void Foam::inclinedFilmNusseltHeightFvPatchScalarField::updateCoeffs()
 
     const label patchI = patch().index();
 
-    // retrieve the film region from the database
+    // Retrieve the film region from the database
 
     const regionModels::regionModel& region =
         db().time().lookupObject<regionModels::regionModel>(filmRegionName_);
@@ -134,9 +134,9 @@ void Foam::inclinedFilmNusseltHeightFvPatchScalarField::updateCoeffs()
             const regionModels::surfaceFilmModels::kinematicSingleLayer&
         >(region);
 
-    // calculate the vector tangential to the patch
+    // Calculate the vector tangential to the patch
 
-    // note: normal pointing into the domain
+    // Note: normal pointing into the domain
     const vectorField n(-patch().nf());
 
     const scalarField gTan(film.gTan(patchI) & n);
@@ -156,12 +156,12 @@ void Foam::inclinedFilmNusseltHeightFvPatchScalarField::updateCoeffs()
     vectorField nTan(nHatp ^ n);
     nTan /= mag(nTan) + ROOTVSMALL;
 
-    // calculate distance in patch tangential direction
+    // Calculate distance in patch tangential direction
 
     const vectorField& Cf = patch().Cf();
     scalarField d(nTan & Cf);
 
-    // calculate the wavy film height
+    // Calculate the wavy film height
 
     const scalar t = db().time().timeOutputValue();
 

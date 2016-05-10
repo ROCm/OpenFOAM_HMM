@@ -44,7 +44,7 @@ void Foam::pressurePIDControlInletVelocityFvPatchVectorField::faceZoneAverage
     const faceZone& zone = mesh.faceZones()[name];
 
     area = 0;
-    average = pTraits<Type>::zero;
+    average = Type(Zero);
 
     forAll(zone, faceI)
     {

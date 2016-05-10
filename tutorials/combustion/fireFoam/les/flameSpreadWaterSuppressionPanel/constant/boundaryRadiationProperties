@@ -34,6 +34,11 @@ boundaryField
         absorptivity    uniform 1.0;
         transmissivity  uniform 0.0;
     }
+    "procBoundary.*"
+    {
+        type            processor;
+        value           $internalField;
+    }
 }
 
 // ************************************************************************* //

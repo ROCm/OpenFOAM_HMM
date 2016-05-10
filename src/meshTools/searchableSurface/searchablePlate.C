@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,10 +31,8 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(searchablePlate, 0);
-addToRunTimeSelectionTable(searchableSurface, searchablePlate, dict);
-
+    defineTypeNameAndDebug(searchablePlate, 0);
+    addToRunTimeSelectionTable(searchableSurface, searchablePlate, dict);
 }
 
 
@@ -134,7 +132,7 @@ Foam::pointIndexHit Foam::searchablePlate::findLine
     pointIndexHit info
     (
         true,
-        vector::zero,
+        Zero,
         0
     );
 
@@ -220,7 +218,7 @@ Foam::searchablePlate::searchablePlate
 {
     if (debug)
     {
-        Info<< "searchablePlate::searchablePlate :"
+        InfoInFunction
             << " origin:" << origin_
             << " origin+span:" << origin_+span_
             << " normal:" << vector::componentNames[normalDir_]
@@ -244,7 +242,7 @@ Foam::searchablePlate::searchablePlate
 {
     if (debug)
     {
-        Info<< "searchablePlate::searchablePlate :"
+        InfoInFunction
             << " origin:" << origin_
             << " origin+span:" << origin_+span_
             << " normal:" << vector::componentNames[normalDir_]
@@ -300,7 +298,7 @@ void Foam::searchablePlate::boundingSpheres
 Foam::tmp<Foam::pointField> Foam::searchablePlate::points() const
 {
     tmp<pointField> tPts(new pointField(4));
-    pointField& pts = tPts();
+    pointField& pts = tPts.ref();
 
     pts[0] = origin_;
     pts[2] = origin_ + span_;
@@ -386,7 +384,7 @@ void Foam::searchablePlate::findLineAll
 (
     const pointField& start,
     const pointField& end,
-    List<List<pointIndexHit> >& info
+    List<List<pointIndexHit>>& info
 ) const
 {
     List<pointIndexHit> nearestInfo;
@@ -426,7 +424,7 @@ void Foam::searchablePlate::getNormal
 ) const
 {
     normal.setSize(info.size());
-    normal = vector::zero;
+    normal = Zero;
     forAll(normal, i)
     {
         normal[i][normalDir_] = 1.0;

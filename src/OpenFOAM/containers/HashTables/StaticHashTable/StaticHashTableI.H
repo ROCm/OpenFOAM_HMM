@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -78,7 +78,7 @@ inline bool Foam::StaticHashTable<T, Key, Hash>::set
 
 
 template<class T, class Key, class Hash>
-inline Foam::Xfer<Foam::StaticHashTable<T, Key, Hash> >
+inline Foam::Xfer<Foam::StaticHashTable<T, Key, Hash>>
 Foam::StaticHashTable<T, Key, Hash>::xfer()
 {
     return xferMove(*this);
@@ -345,12 +345,12 @@ Foam::StaticHashTable<T, Key, Hash>::begin()
         }
     }
 
-#   ifdef FULLDEBUG
+    #ifdef FULLDEBUG
     if (debug)
     {
         Info<< "StaticHashTable is empty\n";
     }
-#   endif
+    #endif
 
     return StaticHashTable<T, Key, Hash>::endIter_;
 }
@@ -377,12 +377,12 @@ Foam::StaticHashTable<T, Key, Hash>::cbegin() const
         }
     }
 
-#   ifdef FULLDEBUG
+    #ifdef FULLDEBUG
     if (debug)
     {
         Info<< "StaticHashTable is empty\n";
     }
-#   endif
+    #endif
 
     return StaticHashTable<T, Key, Hash>::endConstIter_;
 }

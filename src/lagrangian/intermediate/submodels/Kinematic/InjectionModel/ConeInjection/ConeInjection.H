@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,17 +25,16 @@ Class
     Foam::ConeInjection
 
 Description
-    Multi-point cone injection model
+    Multi-point cone injection model.
 
-    User specifies
-    - time of start of injection
-    - list of injector positions and directions (along injection axes)
-    - number of parcels to inject per injector
-    - parcel velocities
-    - inner and outer half-cone angles
+    \li User specifies:
+        - time of start of injection
+        - list of injector positions and directions (along injection axes)
+        - number of parcels to inject per injector
+        - parcel velocities
+        - inner and outer half-cone angles
 
-    Additional
-    - Parcel diameters obtained by distribution model
+    \li Parcel diameters obtained by distribution model
 
 SourceFiles
     ConeInjection.C
@@ -48,7 +47,7 @@ SourceFiles
 #include "InjectionModel.H"
 #include "distributionModel.H"
 #include "vectorList.H"
-#include "TimeDataEntry.H"
+#include "TimeFunction1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -67,7 +66,7 @@ class ConeInjection
     // Private data
 
         //- List of position and axis for each injector
-        List<Tuple2<vector, vector> > positionAxis_;
+        List<Tuple2<vector, vector>> positionAxis_;
 
         //- List of cell labels corresponding to injector positions
         labelList injectorCells_;
@@ -85,16 +84,16 @@ class ConeInjection
         const label parcelsPerInjector_;
 
         //- Flow rate profile relative to SOI []
-        const TimeDataEntry<scalar> flowRateProfile_;
+        const TimeFunction1<scalar> flowRateProfile_;
 
         //- Parcel velocity magnitude relative to SOI [m/s]
-        const TimeDataEntry<scalar> Umag_;
+        const TimeFunction1<scalar> Umag_;
 
         //- Inner half-cone angle relative to SOI [deg]
-        const TimeDataEntry<scalar> thetaInner_;
+        const TimeFunction1<scalar> thetaInner_;
 
         //- Outer half-cone angle relative to SOI [deg]
-        const TimeDataEntry<scalar> thetaOuter_;
+        const TimeFunction1<scalar> thetaOuter_;
 
         //- Parcel size distribution model
         const autoPtr<distributionModels::distributionModel> sizeDistribution_;
@@ -132,9 +131,9 @@ public:
         ConeInjection(const ConeInjection<CloudType>& im);
 
         //- Construct and return a clone
-        virtual autoPtr<InjectionModel<CloudType> > clone() const
+        virtual autoPtr<InjectionModel<CloudType>> clone() const
         {
-            return autoPtr<InjectionModel<CloudType> >
+            return autoPtr<InjectionModel<CloudType>>
             (
                 new ConeInjection<CloudType>(*this)
             );
@@ -200,7 +199,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "ConeInjection.C"
+    #include "ConeInjection.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,7 +60,7 @@ namespace fv
 template<class Type>
 class snGradScheme
 :
-    public refCount
+    public tmp<snGradScheme<Type>>::refCount
 {
     // Private data
 
@@ -69,6 +69,9 @@ class snGradScheme
 
 
     // Private Member Functions
+
+        //- Disallow copy construct
+        snGradScheme(const snGradScheme&);
 
         //- Disallow default bitwise assignment
         void operator=(const snGradScheme&);
@@ -104,7 +107,7 @@ public:
     // Selectors
 
         //- Return new tmp interpolation scheme
-        static tmp<snGradScheme<Type> > New
+        static tmp<snGradScheme<Type>> New
         (
             const fvMesh& mesh,
             Istream& schemeData
@@ -125,7 +128,7 @@ public:
 
 
         //- Return the snGrad of the given cell field with the given deltaCoeffs
-        static tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+        static tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         snGrad
         (
             const GeometricField<Type, fvPatchField, volMesh>&,
@@ -134,7 +137,7 @@ public:
         );
 
         //- Return the sndGrad of the given cell field
-        static tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+        static tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         sndGrad
         (
             const GeometricField<Type, fvPatchField, volMesh>&,
@@ -155,23 +158,23 @@ public:
 
         //- Return the explicit correction to the snGrad
         //  for the given field
-        virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+        virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         correction(const GeometricField<Type, fvPatchField, volMesh>&) const
         {
-            return tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >(NULL);
+            return tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>(NULL);
         }
 
         //- Return the snGrad of the given cell field
         //  with explicit correction
-        virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+        virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         snGrad(const GeometricField<Type, fvPatchField, volMesh>&) const;
 
         //- Return the snGrad of the given tmp cell field
         //  with explicit correction
-        tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+        tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         snGrad
         (
-            const tmp<GeometricField<Type, fvPatchField, volMesh> >&
+            const tmp<GeometricField<Type, fvPatchField, volMesh>>&
         ) const;
 };
 
@@ -195,7 +198,7 @@ public:
     {                                                                          \
         namespace fv                                                           \
         {                                                                      \
-            snGradScheme<Type>::addMeshConstructorToTable<SS<Type> >           \
+            snGradScheme<Type>::addMeshConstructorToTable<SS<Type>>            \
                 add##SS##Type##MeshConstructorToTable_;                        \
         }                                                                      \
     }
@@ -212,7 +215,7 @@ makeSnGradTypeScheme(SS, tensor)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "snGradScheme.C"
+    #include "snGradScheme.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

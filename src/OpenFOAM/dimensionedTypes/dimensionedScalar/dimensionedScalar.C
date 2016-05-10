@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -231,22 +231,22 @@ dimensionedScalar negPart(const dimensionedScalar& ds)
 }
 
 
-#define transFunc(func)                                                    \
-dimensionedScalar func(const dimensionedScalar& ds)                        \
-{                                                                          \
-    if (!ds.dimensions().dimensionless())                                  \
-    {                                                                      \
-        FatalErrorInFunction                                               \
-            << "ds not dimensionless"                                      \
-            << abort(FatalError);                                          \
-    }                                                                      \
-                                                                           \
-    return dimensionedScalar                                               \
-    (                                                                      \
-        #func "(" + ds.name() + ')',                                       \
-        dimless,                                                           \
-        ::func(ds.value())                                                 \
-    );                                                                     \
+#define transFunc(func)                                                        \
+dimensionedScalar func(const dimensionedScalar& ds)                            \
+{                                                                              \
+    if (!ds.dimensions().dimensionless())                                      \
+    {                                                                          \
+        FatalErrorInFunction                                                   \
+            << "ds not dimensionless"                                          \
+            << abort(FatalError);                                              \
+    }                                                                          \
+                                                                               \
+    return dimensionedScalar                                                   \
+    (                                                                          \
+        #func "(" + ds.name() + ')',                                           \
+        dimless,                                                               \
+        ::func(ds.value())                                                     \
+    );                                                                         \
 }
 
 transFunc(exp)
@@ -275,22 +275,22 @@ transFunc(y1)
 #undef transFunc
 
 
-#define transFunc(func)                                                    \
-dimensionedScalar func(const int n, const dimensionedScalar& ds)           \
-{                                                                          \
-    if (!ds.dimensions().dimensionless())                                  \
-    {                                                                      \
-        FatalErrorInFunction                                               \
-            << "ds not dimensionless"                                      \
-            << abort(FatalError);                                          \
-    }                                                                      \
-                                                                           \
-    return dimensionedScalar                                               \
-    (                                                                      \
-        #func "(" + name(n) + ',' + ds.name() + ')',                       \
-        dimless,                                                           \
-        ::func(n, ds.value())                                              \
-    );                                                                     \
+#define transFunc(func)                                                        \
+dimensionedScalar func(const int n, const dimensionedScalar& ds)               \
+{                                                                              \
+    if (!ds.dimensions().dimensionless())                                      \
+    {                                                                          \
+        FatalErrorInFunction                                                   \
+            << "ds not dimensionless"                                          \
+            << abort(FatalError);                                              \
+    }                                                                          \
+                                                                               \
+    return dimensionedScalar                                                   \
+    (                                                                          \
+        #func "(" + name(n) + ',' + ds.name() + ')',                           \
+        dimless,                                                               \
+        ::func(n, ds.value())                                                  \
+    );                                                                         \
 }
 
 transFunc(jn)

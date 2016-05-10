@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "SmagorinskyZhang.H"
+#include "fvOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -114,7 +115,7 @@ SmagorinskyZhang<BasicTurbulenceModel>::gasTurbulence() const
 
         gasTurbulencePtr_ =
            &U.db()
-           .lookupObject<PhaseCompressibleTurbulenceModel<transportModel> >
+           .lookupObject<PhaseCompressibleTurbulenceModel<transportModel>>
             (
                 IOobject::groupName
                 (
@@ -142,6 +143,9 @@ void SmagorinskyZhang<BasicTurbulenceModel>::correctNut()
        *(mag(this->U_ - gasTurbulence.U()));
 
     this->nut_.correctBoundaryConditions();
+    fv::options::New(this->mesh_).correct(this->nut_);
+
+    BasicTurbulenceModel::correctNut();
 }
 
 

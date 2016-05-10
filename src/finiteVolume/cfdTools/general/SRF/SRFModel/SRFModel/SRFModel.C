@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,7 +62,7 @@ Foam::SRF::SRFModel::SRFModel
     origin_("origin", dimLength, lookup("origin")),
     axis_(lookup("axis")),
     SRFModelCoeffs_(subDict(type + "Coeffs")),
-    omega_(dimensionedVector("omega", dimless/dimTime, vector::zero))
+    omega_(dimensionedVector("omega", dimless/dimTime, Zero))
 {
     // Normalise the axis
     axis_ /= mag(axis_);
@@ -118,10 +118,10 @@ const Foam::dimensionedVector& Foam::SRF::SRFModel::omega() const
 }
 
 
-Foam::tmp<Foam::DimensionedField<Foam::vector, Foam::volMesh> >
+Foam::tmp<Foam::DimensionedField<Foam::vector, Foam::volMesh>>
 Foam::SRF::SRFModel::Fcoriolis() const
 {
-    return tmp<DimensionedField<vector, volMesh> >
+    return tmp<DimensionedField<vector, volMesh>>
     (
         new DimensionedField<vector, volMesh>
         (
@@ -139,10 +139,10 @@ Foam::SRF::SRFModel::Fcoriolis() const
 }
 
 
-Foam::tmp<Foam::DimensionedField<Foam::vector, Foam::volMesh> >
+Foam::tmp<Foam::DimensionedField<Foam::vector, Foam::volMesh>>
 Foam::SRF::SRFModel::Fcentrifugal() const
 {
-    return tmp<DimensionedField<vector, volMesh> >
+    return tmp<DimensionedField<vector, volMesh>>
     (
         new DimensionedField<vector, volMesh>
         (
@@ -160,7 +160,7 @@ Foam::SRF::SRFModel::Fcentrifugal() const
 }
 
 
-Foam::tmp<Foam::DimensionedField<Foam::vector, Foam::volMesh> >
+Foam::tmp<Foam::DimensionedField<Foam::vector, Foam::volMesh>>
 Foam::SRF::SRFModel::Su() const
 {
     return Fcoriolis() + Fcentrifugal();
@@ -226,7 +226,7 @@ Foam::tmp<Foam::volVectorField> Foam::SRF::SRFModel::Uabs() const
     );
 
     // Add SRF contribution to internal field
-    tUabs().internalField() += Urel_.internalField();
+    tUabs.ref().internalField() += Urel_.internalField();
 
     // Add Urel boundary contributions
     const volVectorField::GeometricBoundaryField& bvf = Urel_.boundaryField();
@@ -241,12 +241,12 @@ Foam::tmp<Foam::volVectorField> Foam::SRF::SRFModel::Uabs() const
                 refCast<const SRFVelocityFvPatchVectorField>(bvf[i]);
             if (UrelPatch.relative())
             {
-                tUabs().boundaryField()[i] += Urel_.boundaryField()[i];
+                tUabs.ref().boundaryField()[i] += Urel_.boundaryField()[i];
             }
         }
         else
         {
-            tUabs().boundaryField()[i] += Urel_.boundaryField()[i];
+            tUabs.ref().boundaryField()[i] += Urel_.boundaryField()[i];
         }
     }
 

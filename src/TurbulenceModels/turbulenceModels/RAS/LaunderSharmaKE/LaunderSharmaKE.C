@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "LaunderSharmaKE.H"
+#include "fvOptions.H"
 #include "bound.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -56,6 +57,7 @@ void LaunderSharmaKE<BasicTurbulenceModel>::correctNut()
 {
     this->nut_ = Cmu_*fMu()*sqr(k_)/epsilon_;
     this->nut_.correctBoundaryConditions();
+    fv::options::New(this->mesh_).correct(this->nut_);
 
     BasicTurbulenceModel::correctNut();
 }
@@ -106,7 +108,7 @@ LaunderSharmaKE<BasicTurbulenceModel>::LaunderSharmaKE
     const word& type
 )
 :
-    eddyViscosity<RASModel<BasicTurbulenceModel> >
+    eddyViscosity<RASModel<BasicTurbulenceModel>>
     (
         type,
         alpha,
@@ -214,7 +216,7 @@ LaunderSharmaKE<BasicTurbulenceModel>::LaunderSharmaKE
 template<class BasicTurbulenceModel>
 bool LaunderSharmaKE<BasicTurbulenceModel>::read()
 {
-    if (eddyViscosity<RASModel<BasicTurbulenceModel> >::read())
+    if (eddyViscosity<RASModel<BasicTurbulenceModel>>::read())
     {
         Cmu_.readIfPresent(this->coeffDict());
         C1_.readIfPresent(this->coeffDict());
@@ -246,8 +248,9 @@ void LaunderSharmaKE<BasicTurbulenceModel>::correct()
     const surfaceScalarField& alphaRhoPhi = this->alphaRhoPhi_;
     const volVectorField& U = this->U_;
     volScalarField& nut = this->nut_;
+    fv::options& fvOptions(fv::options::New(this->mesh_));
 
-    eddyViscosity<RASModel<BasicTurbulenceModel> >::correct();
+    eddyViscosity<RASModel<BasicTurbulenceModel>>::correct();
 
     volScalarField divU(fvc::div(fvc::absolute(this->phi(), U)));
 
@@ -274,10 +277,14 @@ void LaunderSharmaKE<BasicTurbulenceModel>::correct()
       - fvm::Sp(C2_*f2()*alpha*rho*epsilon_/k_, epsilon_)
       + alpha*rho*E
       + epsilonSource()
+      + fvOptions(alpha, rho, epsilon_)
     );
 
-    epsEqn().relax();
+    epsEqn.ref().relax();
+    fvOptions.constrain(epsEqn.ref());
+    epsEqn.ref().boundaryManipulate(epsilon_.boundaryField());
     solve(epsEqn);
+    fvOptions.correct(epsilon_);
     bound(epsilon_, this->epsilonMin_);
 
 
@@ -291,10 +298,13 @@ void LaunderSharmaKE<BasicTurbulenceModel>::correct()
         alpha*rho*G - fvm::SuSp(2.0/3.0*alpha*rho*divU, k_)
       - fvm::Sp(alpha*rho*(epsilon_ + D)/k_, k_)
       + kSource()
+      + fvOptions(alpha, rho, k_)
     );
 
-    kEqn().relax();
+    kEqn.ref().relax();
+    fvOptions.constrain(kEqn.ref());
     solve(kEqn);
+    fvOptions.correct(k_);
     bound(k_, this->kMin_);
 
     correctNut();

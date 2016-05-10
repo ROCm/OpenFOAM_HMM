@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,7 +54,7 @@ namespace Foam
 
 #ifdef CGAL_INEXACT
 
-    template<typename Point>
+    template<class Point>
     inline pointFromPoint topoint(const Point& P)
     {
         return reinterpret_cast<pointFromPoint>(P);
@@ -67,7 +67,7 @@ namespace Foam
 
 #else
 
-    template<typename Point>
+    template<class Point>
     inline pointFromPoint topoint(const Point& P)
     {
         return Foam::point
@@ -87,7 +87,7 @@ namespace Foam
 
     //- Specialisation for indexedVertex.
     template<>
-    inline pointFromPoint topoint<CGAL::indexedVertex<K> >
+    inline pointFromPoint topoint<CGAL::indexedVertex<K>>
     (
         const CGAL::indexedVertex<K>& P
     )

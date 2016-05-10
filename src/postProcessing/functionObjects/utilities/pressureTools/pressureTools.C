@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -136,7 +136,7 @@ Foam::tmp<Foam::volScalarField> Foam::pressureTools::pDyn
     {
         const volVectorField& U = obr_.lookupObject<volVectorField>(UName_);
 
-        tpDyn() == rho(p)*0.5*magSqr(U);
+        tpDyn.ref() == rho(p)*0.5*magSqr(U);
     }
 
     return tpDyn;
@@ -148,20 +148,26 @@ Foam::tmp<Foam::volScalarField> Foam::pressureTools::convertToCoeff
     const volScalarField& p
 ) const
 {
-    tmp<volScalarField> tCoeff(p);
-
     if (calcCoeff_)
     {
-        tCoeff() -= dimensionedScalar("pInf", dimPressure, pInf_);
+        tmp<volScalarField> tCoeff(new volScalarField("pCoeff", p));
+        volScalarField& coeff = tCoeff.ref();
+
+        coeff -= dimensionedScalar("pInf", dimPressure, pInf_);
 
         const dimensionedScalar p0("p0", dimPressure, SMALL);
         const dimensionedVector U("U", dimVelocity, UInf_);
         const dimensionedScalar rho("rho", dimDensity, rhoInf_);
 
-        tCoeff() /= 0.5*rho*magSqr(U) + p0;
+        coeff /= 0.5*rho*magSqr(U) + p0;
+
+        return tCoeff;
+    }
+    else
+    {
+        return p;
     }
 
-    return tCoeff;
 }
 
 
@@ -187,7 +193,7 @@ Foam::pressureTools::pressureTools
     pRef_(0.0),
     calcCoeff_(false),
     pInf_(0.0),
-    UInf_(vector::zero),
+    UInf_(Zero),
     rhoInf_(0.0),
     rhoInfInitialised_(false)
 {

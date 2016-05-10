@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd. 
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -101,7 +101,7 @@ tmp<volScalarField> kOmegaSSTBase<BasicEddyViscosityModel>::F23() const
 
     if (F3_)
     {
-        f23() *= F3();
+        f23.ref() *= F3();
     }
 
     return f23;
@@ -117,6 +117,7 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correctNut
     // Correct the turbulence viscosity
     this->nut_ = a1_*k_/max(a1_*omega_, b1_*F23()*sqrt(S2));
     this->nut_.correctBoundaryConditions();
+    fv::options::New(this->mesh_).correct(this->nut_);
 }
 
 
@@ -395,6 +396,7 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
     const surfaceScalarField& alphaRhoPhi = this->alphaRhoPhi_;
     const volVectorField& U = this->U_;
     volScalarField& nut = this->nut_;
+    fv::options& fvOptions(fv::options::New(this->mesh_));
 
     BasicEddyViscosityModel::correct();
 
@@ -442,13 +444,14 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
             )
           + Qsas(S2, gamma, beta)
           + omegaSource()
+          + fvOptions(alpha, rho, omega_)
         );
 
-        omegaEqn().relax();
-
-        omegaEqn().boundaryManipulate(omega_.boundaryField());
-
+        omegaEqn.ref().relax();
+        fvOptions.constrain(omegaEqn.ref());
+        omegaEqn.ref().boundaryManipulate(omega_.boundaryField());
         solve(omegaEqn);
+        fvOptions.correct(omega_);
         bound(omega_, this->omegaMin_);
     }
 
@@ -463,10 +466,13 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
       - fvm::SuSp((2.0/3.0)*alpha*rho*divU, k_)
       - fvm::Sp(alpha*rho*betaStar_*omega_, k_)
       + kSource()
+      + fvOptions(alpha, rho, k_)
     );
 
-    kEqn().relax();
+    kEqn.ref().relax();
+    fvOptions.constrain(kEqn.ref());
     solve(kEqn);
+    fvOptions.correct(k_);
     bound(k_, this->kMin_);
 
     correctNut(S2);

@@ -41,7 +41,7 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::DimensionedField<Type, Foam::volMesh> >
+Foam::tmp<Foam::DimensionedField<Type, Foam::volMesh>>
 Foam::parFvFieldReconstructor::reconstructFvVolumeInternalField
 (
     const DimensionedField<Type, volMesh>& fld
@@ -66,7 +66,7 @@ Foam::parFvFieldReconstructor::reconstructFvVolumeInternalField
         IOobject::NO_WRITE
     );
 
-    return tmp<DimensionedField<Type, volMesh> >
+    return tmp<DimensionedField<Type, volMesh>>
     (
         new DimensionedField<Type, volMesh>
         (
@@ -80,7 +80,7 @@ Foam::parFvFieldReconstructor::reconstructFvVolumeInternalField
 
 
 template<class Type>
-Foam::tmp<Foam::DimensionedField<Type, Foam::volMesh> >
+Foam::tmp<Foam::DimensionedField<Type, Foam::volMesh>>
 Foam::parFvFieldReconstructor::reconstructFvVolumeInternalField
 (
     const IOobject& fieldIoObject
@@ -100,7 +100,7 @@ Foam::parFvFieldReconstructor::reconstructFvVolumeInternalField
 
 // Reconstruct a field onto the baseMesh
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
 Foam::parFvFieldReconstructor::reconstructFvVolumeField
 (
     const GeometricField<Type, fvPatchField, volMesh>& fld
@@ -123,7 +123,7 @@ Foam::parFvFieldReconstructor::reconstructFvVolumeField
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Note: patchFields still on mesh, not baseMesh
 
-    PtrList<fvPatchField<Type> > patchFields(fld.mesh().boundary().size());
+    PtrList<fvPatchField<Type>> patchFields(fld.mesh().boundary().size());
 
     const typename GeometricField
     <
@@ -151,7 +151,7 @@ Foam::parFvFieldReconstructor::reconstructFvVolumeField
     }
 
 
-    PtrList<fvPatchField<Type> > basePatchFields
+    PtrList<fvPatchField<Type>> basePatchFields
     (
         baseMesh_.boundary().size()
     );
@@ -213,7 +213,7 @@ Foam::parFvFieldReconstructor::reconstructFvVolumeField
         IOobject::NO_WRITE
     );
 
-    return tmp<GeometricField<Type, fvPatchField, volMesh> >
+    return tmp<GeometricField<Type, fvPatchField, volMesh>>
     (
         new GeometricField<Type, fvPatchField, volMesh>
         (
@@ -228,7 +228,7 @@ Foam::parFvFieldReconstructor::reconstructFvVolumeField
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
 Foam::parFvFieldReconstructor::reconstructFvVolumeField
 (
     const IOobject& fieldIoObject
@@ -247,7 +247,7 @@ Foam::parFvFieldReconstructor::reconstructFvVolumeField
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh> >
+Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh>>
 Foam::parFvFieldReconstructor::reconstructFvSurfaceField
 (
     const GeometricField<Type, fvsPatchField, surfaceMesh>& fld
@@ -263,16 +263,13 @@ Foam::parFvFieldReconstructor::reconstructFvSurfaceField
     );
 
     // Create flat field of internalField + all patch fields
-    Field<Type> flatFld(fld.mesh().nFaces(), pTraits<Type>::zero);
-    SubList<Type>(flatFld, fld.internalField().size()).assign
-    (
-        fld.internalField()
-    );
+    Field<Type> flatFld(fld.mesh().nFaces(), Type(Zero));
+    SubList<Type>(flatFld, fld.internalField().size()) = fld.internalField();
     forAll(fld.boundaryField(), patchI)
     {
         const fvsPatchField<Type>& fvp = fld.boundaryField()[patchI];
 
-        SubList<Type>(flatFld, fvp.size(), fvp.patch().start()).assign(fvp);
+        SubList<Type>(flatFld, fvp.size(), fvp.patch().start()) = fvp;
     }
 
     // Map all faces
@@ -293,7 +290,7 @@ Foam::parFvFieldReconstructor::reconstructFvSurfaceField
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Note: patchFields still on mesh, not baseMesh
 
-    PtrList<fvsPatchField<Type> > patchFields(fld.mesh().boundary().size());
+    PtrList<fvsPatchField<Type>> patchFields(fld.mesh().boundary().size());
 
     const typename GeometricField
     <
@@ -321,7 +318,7 @@ Foam::parFvFieldReconstructor::reconstructFvSurfaceField
     }
 
 
-    PtrList<fvsPatchField<Type> > basePatchFields
+    PtrList<fvsPatchField<Type>> basePatchFields
     (
         baseMesh_.boundary().size()
     );
@@ -383,7 +380,7 @@ Foam::parFvFieldReconstructor::reconstructFvSurfaceField
         IOobject::NO_WRITE
     );
 
-    return tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+    return tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
     (
         new GeometricField<Type, fvsPatchField, surfaceMesh>
         (
@@ -398,7 +395,7 @@ Foam::parFvFieldReconstructor::reconstructFvSurfaceField
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh> >
+Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh>>
 Foam::parFvFieldReconstructor::reconstructFvSurfaceField
 (
     const IOobject& fieldIoObject
@@ -440,7 +437,7 @@ void Foam::parFvFieldReconstructor::reconstructFvVolumeInternalFields
             {
                 Info<< "        " << fieldIter()->name() << endl;
 
-                tmp<DimensionedField<Type, volMesh> > tfld
+                tmp<DimensionedField<Type, volMesh>> tfld
                 (
                     reconstructFvVolumeInternalField<Type>(*fieldIter())
                 );
@@ -484,7 +481,7 @@ void Foam::parFvFieldReconstructor::reconstructFvVolumeFields
             {
                 Info<< "        " << name << endl;
 
-                tmp<GeometricField<Type, fvPatchField, volMesh> > tfld
+                tmp<GeometricField<Type, fvPatchField, volMesh>> tfld
                 (
                     reconstructFvVolumeField<Type>(*fieldIter())
                 );
@@ -525,7 +522,7 @@ void Foam::parFvFieldReconstructor::reconstructFvSurfaceFields
             {
                 Info<< "        " << fieldIter()->name() << endl;
 
-                tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tfld
+                tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> tfld
                 (
                     reconstructFvSurfaceField<Type>(*fieldIter())
                 );

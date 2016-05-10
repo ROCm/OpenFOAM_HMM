@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,7 @@ License
 #include "chemistryModel.H"
 #include "reactingMixture.H"
 #include "UniformField.H"
+#include "extrapolatedCalculatedFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -103,7 +104,7 @@ Foam::chemistryModel<CompType, ThermoType>::omega
     label lRef, rRef;
 
     tmp<scalarField> tom(new scalarField(nEqns(), 0.0));
-    scalarField& om = tom();
+    scalarField& om = tom.ref();
 
     forAll(reactions_, i)
     {
@@ -340,7 +341,7 @@ void Foam::chemistryModel<CompType, ThermoType>::jacobian
     {
         for (label j=0; j<nEqns(); j++)
         {
-            dfdc[i][j] = 0.0;
+            dfdc(i, j) = 0.0;
         }
     }
 
@@ -495,11 +496,11 @@ Foam::chemistryModel<CompType, ThermoType>::tc() const
             ),
             this->mesh(),
             dimensionedScalar("zero", dimTime, SMALL),
-            zeroGradientFvPatchScalarField::typeName
+            extrapolatedCalculatedFvPatchScalarField::typeName
         )
     );
 
-    scalarField& tc = ttc();
+    scalarField& tc = ttc.ref();
     const scalarField& T = this->thermo().T();
     const scalarField& p = this->thermo().p();
 
@@ -539,7 +540,7 @@ Foam::chemistryModel<CompType, ThermoType>::tc() const
     }
 
 
-    ttc().correctBoundaryConditions();
+    ttc.ref().correctBoundaryConditions();
 
     return ttc;
 }
@@ -563,15 +564,13 @@ Foam::chemistryModel<CompType, ThermoType>::Sh() const
                 false
             ),
             this->mesh_,
-            dimensionedScalar("zero", dimEnergy/dimTime/dimVolume, 0.0),
-            zeroGradientFvPatchScalarField::typeName
+            dimensionedScalar("zero", dimEnergy/dimTime/dimVolume, 0.0)
         )
     );
 
-
     if (this->chemistry_)
     {
-        scalarField& Sh = tSh();
+        scalarField& Sh = tSh.ref();
 
         forAll(Y_, i)
         {
@@ -605,14 +604,13 @@ Foam::chemistryModel<CompType, ThermoType>::dQ() const
                 false
             ),
             this->mesh_,
-            dimensionedScalar("dQ", dimEnergy/dimTime, 0.0),
-            zeroGradientFvPatchScalarField::typeName
+            dimensionedScalar("dQ", dimEnergy/dimTime, 0.0)
         )
     );
 
     if (this->chemistry_)
     {
-        volScalarField& dQ = tdQ();
+        volScalarField& dQ = tdQ.ref();
         dQ.dimensionedInternalField() = this->mesh_.V()*Sh()();
     }
 
@@ -629,7 +627,7 @@ Foam::label Foam::chemistryModel<CompType, ThermoType>::nEqns() const
 
 
 template<class CompType, class ThermoType>
-Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh>>
 Foam::chemistryModel<CompType, ThermoType>::calculateRR
 (
     const label reactionI,
@@ -653,7 +651,7 @@ Foam::chemistryModel<CompType, ThermoType>::calculateRR
         this->thermo().rho()
     );
 
-    tmp<DimensionedField<scalar, volMesh> > tRR
+    tmp<DimensionedField<scalar, volMesh>> tRR
     (
         new DimensionedField<scalar, volMesh>
         (
@@ -670,7 +668,7 @@ Foam::chemistryModel<CompType, ThermoType>::calculateRR
         )
     );
 
-    DimensionedField<scalar, volMesh>& RR = tRR();
+    DimensionedField<scalar, volMesh>& RR = tRR.ref();
 
     const scalarField& T = this->thermo().T();
     const scalarField& p = this->thermo().p();
@@ -850,7 +848,7 @@ Foam::scalar Foam::chemistryModel<CompType, ThermoType>::solve
     // Don't allow the time-step to change more than a factor of 2
     return min
     (
-        this->solve<UniformField<scalar> >(UniformField<scalar>(deltaT)),
+        this->solve<UniformField<scalar>>(UniformField<scalar>(deltaT)),
         2*deltaT
     );
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,17 +31,17 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeFvOption(Option, Type)                                            \
-                                                                              \
-    defineTemplateTypeNameAndDebugWithName                                    \
-    (                                                                         \
-        Foam::fv::Option<Foam::Type>,                                         \
-        #Type#Option,                                                         \
-        0                                                                     \
-    );                                                                        \
-                                                                              \
-    Foam::fv::option::adddictionaryConstructorToTable                         \
-        <Foam::fv::Option<Foam::Type> >                                       \
+#define makeFvOption(Option, Type)                                             \
+                                                                               \
+    defineTemplateTypeNameAndDebugWithName                                     \
+    (                                                                          \
+        Foam::fv::Option<Foam::Type>,                                          \
+        #Type#Option,                                                          \
+        0                                                                      \
+    );                                                                         \
+                                                                               \
+    Foam::fv::option::adddictionaryConstructorToTable                          \
+        <Foam::fv::Option<Foam::Type>>                                         \
         add##Option##Type##dictionary##ConstructorTooptionTable_
 
 

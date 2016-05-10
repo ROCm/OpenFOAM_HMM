@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -157,7 +157,7 @@ Foam::globalIndexAndTransform::decodeTransformIndex
         }
     }
 
-#   ifdef FULLDEBUG
+    #ifdef FULLDEBUG
     t /= 3;
     if (t != 0)
     {
@@ -166,7 +166,7 @@ Foam::globalIndexAndTransform::decodeTransformIndex
             << " has more than 3 fields."
             << abort(FatalError);
     }
-#   endif
+    #endif
 
     return permutation;
 }
@@ -432,7 +432,7 @@ Foam::label Foam::globalIndexAndTransform::nullTransformIndex() const
 }
 
 
-const Foam::List<Foam::Pair<Foam::label> >&
+const Foam::List<Foam::Pair<Foam::label>>&
 Foam::globalIndexAndTransform::patchTransformSign() const
 {
     return patchTransformSign_;

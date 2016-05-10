@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,7 +43,7 @@ Foam::coordinateSystem::coordinateSystem()
 :
     name_(),
     note_(),
-    origin_(point::zero),
+    origin_(Zero),
     R_(new axesRotation(sphericalTensor::I))
 {}
 
@@ -98,7 +98,7 @@ Foam::coordinateSystem::coordinateSystem
 :
     name_(name),
     note_(),
-    origin_(point::zero),
+    origin_(Zero),
     R_()
 {
     init(dict);
@@ -109,7 +109,7 @@ Foam::coordinateSystem::coordinateSystem(const dictionary& dict)
 :
     name_(),
     note_(),
-    origin_(point::zero),
+    origin_(Zero),
     R_()
 {
     init(dict);
@@ -124,7 +124,7 @@ Foam::coordinateSystem::coordinateSystem
 :
     name_(),
     note_(),
-    origin_(point::zero),
+    origin_(Zero),
     R_()
 {
     const entry* entryPtr = dict.lookupEntryPtr(typeName_(), false, false);
@@ -139,9 +139,8 @@ Foam::coordinateSystem::coordinateSystem
 
         if (debug)
         {
-            Info<< "coordinateSystem::coordinateSystem"
-                "(const objectRegistry&, const dictionary&):"
-                << nl << "using global coordinate system: "
+            InfoInFunction
+                << "Using global coordinate system: "
                 << key << "=" << index << endl;
         }
 
@@ -169,7 +168,7 @@ Foam::coordinateSystem::coordinateSystem(Istream& is)
 :
     name_(is),
     note_(),
-    origin_(point::zero),
+    origin_(Zero),
     R_()
 {
     dictionary dict(is);
@@ -282,7 +281,7 @@ Foam::tmp<Foam::vectorField> Foam::coordinateSystem::globalToLocal
 void Foam::coordinateSystem::clear()
 {
     note_.clear();
-    origin_ = point::zero;
+    origin_ = Zero;
     R_->clear();
 }
 

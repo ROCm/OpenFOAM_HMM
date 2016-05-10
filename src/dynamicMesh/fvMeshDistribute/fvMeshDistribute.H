@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -114,7 +114,7 @@ class fvMeshDistribute
             template<class T, class Mesh>
             void saveBoundaryFields
             (
-                PtrList<FieldField<fvsPatchField, T> >& bflds
+                PtrList<FieldField<fvsPatchField, T>>& bflds
             ) const;
 
             //- Map boundary fields
@@ -122,14 +122,14 @@ class fvMeshDistribute
             void mapBoundaryFields
             (
                 const mapPolyMesh& map,
-                const PtrList<FieldField<fvsPatchField, T> >& oldBflds
+                const PtrList<FieldField<fvsPatchField, T>>& oldBflds
             );
 
             //- Save internal fields of surfaceFields
             template<class T>
             void saveInternalFields
             (
-                PtrList<Field<T> >& iflds
+                PtrList<Field<T>>& iflds
             ) const;
 
             //- Set value of patch faces resulting from internal faces
@@ -137,7 +137,7 @@ class fvMeshDistribute
             void mapExposedFaces
             (
                 const mapPolyMesh& map,
-                const PtrList<Field<T> >& oldFlds
+                const PtrList<Field<T>>& oldFlds
             );
 
             //- Init patch fields of certain type
@@ -255,7 +255,7 @@ class fvMeshDistribute
             (
                 const labelList&, // processor that neighbour is now on
                 const labelList&, // -1 or patch that face originated from
-                List<Map<label> >& procPatchID
+                List<Map<label>>& procPatchID
             );
 
             //- Get boundary faces to be repatched. Is -1 or new patchID
@@ -263,7 +263,7 @@ class fvMeshDistribute
             (
                 const labelList& neighbourNewProc,  // new processor per b. face
                 const labelList& referPatchID,      // -1 or original patch
-                const List<Map<label> >& procPatchID// patchID
+                const List<Map<label>>& procPatchID// patchID
             );
 
             //- Send mesh and coupling data.
@@ -376,7 +376,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "fvMeshDistributeTemplates.C"
+    #include "fvMeshDistributeTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

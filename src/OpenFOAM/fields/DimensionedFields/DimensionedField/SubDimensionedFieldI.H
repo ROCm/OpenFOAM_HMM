@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,7 +63,7 @@ inline Foam::SubDimensionedField<Type, GeoMesh>::SubDimensionedField
     const SubDimensionedField<Type, GeoMesh>& sfield
 )
 :
-    refCount(),
+    tmp<SubDimensionedField<Type, GeoMesh>>::refCount(),
     SubField<Type>(sfield)
 {}
 
@@ -74,7 +74,7 @@ template<class Type, class GeoMesh>
 inline const Foam::SubDimensionedField<Type, GeoMesh>&
 Foam::SubDimensionedField<Type, GeoMesh>::null()
 {
-    return NullObjectRef<SubDimensionedField<Type, GeoMesh> >();
+    return NullObjectRef<SubDimensionedField<Type, GeoMesh>>();
 }
 
 
@@ -97,7 +97,7 @@ Foam::SubDimensionedField<Type, GeoMesh>::component
 
 
 template<class Type, class GeoMesh>
-inline Foam::tmp<Foam::DimensionedField<Type, GeoMesh> >
+inline Foam::tmp<Foam::DimensionedField<Type, GeoMesh>>
 Foam::SubDimensionedField<Type, GeoMesh>::T() const
 {
     return

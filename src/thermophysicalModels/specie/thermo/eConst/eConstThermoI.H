@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,10 +55,10 @@ inline Foam::eConstThermo<EquationOfState>::eConstThermo
 
 
 template<class EquationOfState>
-inline Foam::autoPtr<Foam::eConstThermo<EquationOfState> >
+inline Foam::autoPtr<Foam::eConstThermo<EquationOfState>>
 Foam::eConstThermo<EquationOfState>::clone() const
 {
-    return autoPtr<eConstThermo<EquationOfState> >
+    return autoPtr<eConstThermo<EquationOfState>>
     (
         new eConstThermo<EquationOfState>(*this)
     );
@@ -66,10 +66,10 @@ Foam::eConstThermo<EquationOfState>::clone() const
 
 
 template<class EquationOfState>
-inline Foam::autoPtr<Foam::eConstThermo<EquationOfState> >
+inline Foam::autoPtr<Foam::eConstThermo<EquationOfState>>
 Foam::eConstThermo<EquationOfState>::New(Istream& is)
 {
-    return autoPtr<eConstThermo<EquationOfState> >
+    return autoPtr<eConstThermo<EquationOfState>>
     (
         new eConstThermo<EquationOfState>(is)
     );
@@ -77,10 +77,10 @@ Foam::eConstThermo<EquationOfState>::New(Istream& is)
 
 
 template<class EquationOfState>
-inline Foam::autoPtr<Foam::eConstThermo<EquationOfState> >
+inline Foam::autoPtr<Foam::eConstThermo<EquationOfState>>
 Foam::eConstThermo<EquationOfState>::New(const dictionary& dict)
 {
-    return autoPtr<eConstThermo<EquationOfState> >
+    return autoPtr<eConstThermo<EquationOfState>>
     (
         new eConstThermo<EquationOfState>(dict)
     );
@@ -106,7 +106,7 @@ inline Foam::scalar Foam::eConstThermo<EquationOfState>::cp
     const scalar T
 ) const
 {
-    return Cv_ + this->cpMcv(p, T);
+    return Cv_ + this->cpMcv(p, T) + EquationOfState::cp(p, T);
 }
 
 
@@ -117,7 +117,7 @@ inline Foam::scalar Foam::eConstThermo<EquationOfState>::ha
     const scalar T
 ) const
 {
-    return cp(p, T)*T + Hf_;
+    return cp(p, T)*T + Hf_ + EquationOfState::h(p, T);
 }
 
 
@@ -128,7 +128,7 @@ inline Foam::scalar Foam::eConstThermo<EquationOfState>::hs
     const scalar T
 ) const
 {
-    return cp(p, T)*T;
+    return cp(p, T)*T + EquationOfState::h(p, T);
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -194,8 +194,9 @@ Foam::displacementComponentLaplacianFvMotionSolver::curPoints() const
     else
     {
         tmp<pointField> tcurPoints(new pointField(fvMesh_.points()));
+        pointField& curPoints = tcurPoints.ref();
 
-        tcurPoints().replace
+        curPoints.replace
         (
             cmpt_,
             points0_ + pointDisplacement_.internalField()
@@ -210,11 +211,11 @@ Foam::displacementComponentLaplacianFvMotionSolver::curPoints() const
             {
                 label pointI = pz[i];
 
-                tcurPoints()[pointI][cmpt_] = points0_[pointI];
+                curPoints[pointI][cmpt_] = points0_[pointI];
             }
         }
 
-        twoDCorrectPoints(tcurPoints());
+        twoDCorrectPoints(curPoints);
 
         return tcurPoints;
     }

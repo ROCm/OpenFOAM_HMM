@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -147,7 +147,7 @@ public:
                 ) = 0;
 
                 //- Return reaction rate of the speciei in reactioni
-                virtual tmp<DimensionedField<scalar, volMesh> > calculateRR
+                virtual tmp<DimensionedField<scalar, volMesh>> calculateRR
                 (
                     const label reactioni,
                     const label speciei
@@ -187,7 +187,7 @@ public:
 #include "basicChemistryModelI.H"
 
 #ifdef NoRepository
-#   include "basicChemistryModelTemplates.C"
+    #include "basicChemistryModelTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

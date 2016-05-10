@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -138,7 +138,7 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
 
             fT_PW = -mu_*mag(fN_PW)*USlip_PW/mag(USlip_PW);
 
-            tangentialOverlap_PW = vector::zero;
+            tangentialOverlap_PW = Zero;
         }
         else
         {
@@ -269,9 +269,9 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
 (
     typename CloudType::parcelType& p,
     const List<point>& flatSitePoints,
-    const List<WallSiteData<vector> >& flatSiteData,
+    const List<WallSiteData<vector>>& flatSiteData,
     const List<point>& sharpSitePoints,
-    const List<WallSiteData<vector> >& sharpSiteData
+    const List<WallSiteData<vector>>& sharpSiteData
 ) const
 {
     scalar pREff = this->pREff(p);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,13 +38,13 @@ namespace fv
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Define the constructor function hash tables
 
-#define makeLaplacianGTypeScheme(Type, GType)                                 \
-    typedef laplacianScheme<Type, GType> laplacianScheme##Type##GType;        \
+#define makeLaplacianGTypeScheme(Type, GType)                                  \
+    typedef laplacianScheme<Type, GType> laplacianScheme##Type##GType;         \
     defineTemplateRunTimeSelectionTable(laplacianScheme##Type##GType, Istream);
 
-#define makeLaplacianScheme(Type)                                             \
-    makeLaplacianGTypeScheme(Type, scalar);                                   \
-    makeLaplacianGTypeScheme(Type, symmTensor);                               \
+#define makeLaplacianScheme(Type)                                              \
+    makeLaplacianGTypeScheme(Type, scalar);                                    \
+    makeLaplacianGTypeScheme(Type, symmTensor);                                \
     makeLaplacianGTypeScheme(Type, tensor);
 
 makeLaplacianScheme(scalar);

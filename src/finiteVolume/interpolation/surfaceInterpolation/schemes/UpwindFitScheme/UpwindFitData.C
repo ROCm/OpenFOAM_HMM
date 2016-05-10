@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,16 +55,14 @@ Foam::UpwindFitData<Polynomial>::UpwindFitData
 {
     if (debug)
     {
-        Info<< "Contructing UpwindFitData<Polynomial>" << endl;
+        InfoInFunction << "Contructing UpwindFitData<Polynomial>" << endl;
     }
 
     calcFit();
 
     if (debug)
     {
-        Info<< "UpwindFitData<Polynomial>::UpwindFitData() :"
-            << "Finished constructing polynomialFit data"
-            << endl;
+        Info<< "    Finished constructing polynomialFit data" << endl;
     }
 }
 
@@ -83,7 +81,7 @@ void Foam::UpwindFitData<Polynomial>::calcFit()
     // ~~~~~~~~~~~~~~~~~~~~~
 
     // Get the cell/face centres in stencil order.
-    List<List<point> > stencilPoints(mesh.nFaces());
+    List<List<point>> stencilPoints(mesh.nFaces());
     this->stencil().collectData
     (
         this->stencil().ownMap(),

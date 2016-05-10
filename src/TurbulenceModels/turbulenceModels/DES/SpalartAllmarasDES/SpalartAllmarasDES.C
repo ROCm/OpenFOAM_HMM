@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "SpalartAllmarasDES.H"
+#include "fvOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -128,7 +129,7 @@ tmp<volScalarField> SpalartAllmarasDES<BasicTurbulenceModel>::r
             scalar(10)
         )
     );
-    tr().boundaryField() == 0.0;
+    tr.ref().boundaryField() == 0.0;
 
     return tr;
 }
@@ -174,7 +175,7 @@ tmp<volScalarField> SpalartAllmarasDES<BasicTurbulenceModel>::psi
 
     if (lowReCorrection_)
     {
-        volScalarField& psi = tpsi();
+        volScalarField& psi = tpsi.ref();
 
         const volScalarField fv2(this->fv2(chi, fv1));
         const volScalarField ft2(this->ft2(chi));
@@ -204,7 +205,7 @@ tmp<volScalarField> SpalartAllmarasDES<BasicTurbulenceModel>::dTilda
 ) const
 {
     tmp<volScalarField> tdTilda(psi(chi, fv1)*CDES_*this->delta());
-    min(tdTilda().dimensionedInternalField(), tdTilda(), y_);
+    min(tdTilda.ref().dimensionedInternalField(), tdTilda(), y_);
     return tdTilda;
 }
 
@@ -217,6 +218,7 @@ void SpalartAllmarasDES<BasicTurbulenceModel>::correctNut
 {
     this->nut_ = nuTilda_*fv1;
     this->nut_.correctBoundaryConditions();
+    fv::options::New(this->mesh_).correct(this->nut_);
 
     BasicTurbulenceModel::correctNut();
 }
@@ -457,7 +459,29 @@ tmp<volScalarField> SpalartAllmarasDES<BasicTurbulenceModel>::k() const
 {
     const volScalarField chi(this->chi());
     const volScalarField fv1(this->fv1(chi));
-    return sqr(this->nut()/ck_/dTilda(chi, fv1, fvc::grad(this->U_)));
+
+    tmp<volScalarField> tdTilda
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "dTilda",
+                this->mesh_.time().timeName(),
+                this->mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            this->mesh_,
+            dimensionedScalar("0", dimLength, 0.0),
+            zeroGradientFvPatchField<vector>::typeName
+        )
+    );
+    volScalarField& dTildaF = tdTilda.ref();
+    dTildaF = dTilda(chi, fv1, fvc::grad(this->U_));
+    dTildaF.correctBoundaryConditions();
+
+    return sqr(this->nut()/ck_/dTildaF);
 }
 
 
@@ -500,6 +524,7 @@ void SpalartAllmarasDES<BasicTurbulenceModel>::correct()
     const rhoField& rho = this->rho_;
     const surfaceScalarField& alphaRhoPhi = this->alphaRhoPhi_;
     const volVectorField& U = this->U_;
+    fv::options& fvOptions(fv::options::New(this->mesh_));
 
     DESModel<BasicTurbulenceModel>::correct();
 
@@ -526,11 +551,14 @@ void SpalartAllmarasDES<BasicTurbulenceModel>::correct()
            *alpha*rho*nuTilda_/sqr(dTilda),
             nuTilda_
         )
+      + fvOptions(alpha, rho, nuTilda_)
     );
 
-    nuTildaEqn().relax();
+    nuTildaEqn.ref().relax();
+    fvOptions.constrain(nuTildaEqn.ref());
     solve(nuTildaEqn);
-    bound(nuTilda_, dimensionedScalar("zero", nuTilda_.dimensions(), 0.0));
+    fvOptions.correct(nuTilda_);
+    bound(nuTilda_, dimensionedScalar("0", nuTilda_.dimensions(), 0.0));
     nuTilda_.correctBoundaryConditions();
 
     correctNut(fv1);

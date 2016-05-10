@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,7 @@ bool Foam::fieldValues::faceSource::validField(const word& fieldName) const
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::setFieldValues
+Foam::tmp<Foam::Field<Type>> Foam::fieldValues::faceSource::setFieldValues
 (
     const word& fieldName,
     const bool mustGet,
@@ -74,16 +74,16 @@ Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::setFieldValues
             if (surfacePtr_().interpolate())
             {
                 const interpolationCellPoint<Type> interp(fld);
-                tmp<Field<Type> > tintFld(surfacePtr_().interpolate(interp));
+                tmp<Field<Type>> tintFld(surfacePtr_().interpolate(interp));
                 const Field<Type>& intFld = tintFld();
 
                 // Average
                 const faceList& faces = surfacePtr_().faces();
-                tmp<Field<Type> > tavg
+                tmp<Field<Type>> tavg
                 (
-                    new Field<Type>(faces.size(), pTraits<Type>::zero)
+                    new Field<Type>(faces.size(), Zero)
                 );
-                Field<Type>& avg = tavg();
+                Field<Type>& avg = tavg.ref();
 
                 forAll(faces, faceI)
                 {
@@ -115,7 +115,7 @@ Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::setFieldValues
             << abort(FatalError);
     }
 
-    return tmp<Field<Type> >(new Field<Type>(0));
+    return tmp<Field<Type>>(new Field<Type>(0));
 }
 
 
@@ -127,7 +127,7 @@ Type Foam::fieldValues::faceSource::processSameTypeValues
     const scalarField& weightField
 ) const
 {
-    Type result = pTraits<Type>::zero;
+    Type result = Zero;
     switch (operation_)
     {
         case opSum:
@@ -148,7 +148,7 @@ Type Foam::fieldValues::faceSource::processSameTypeValues
                 << pTraits<Type>::typeName
                 << exit(FatalError);
 
-            result = pTraits<Type>::zero;
+            result = Zero;
             break;
         }
         case opSumDirectionBalance:
@@ -159,7 +159,7 @@ Type Foam::fieldValues::faceSource::processSameTypeValues
                 << pTraits<Type>::typeName
                 << exit(FatalError);
 
-            result = pTraits<Type>::zero;
+            result = Zero;
             break;
         }
         case opAverage:
@@ -268,7 +268,6 @@ Type Foam::fieldValues::faceSource::processValues
 }
 
 
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
@@ -356,14 +355,14 @@ bool Foam::fieldValues::faceSource::writeValues
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::filterField
+Foam::tmp<Foam::Field<Type>> Foam::fieldValues::faceSource::filterField
 (
     const GeometricField<Type, fvPatchField, volMesh>& field,
     const bool applyOrientation
 ) const
 {
-    tmp<Field<Type> > tvalues(new Field<Type>(faceId_.size()));
-    Field<Type>& values = tvalues();
+    tmp<Field<Type>> tvalues(new Field<Type>(faceId_.size()));
+    Field<Type>& values = tvalues.ref();
 
     forAll(values, i)
     {
@@ -397,14 +396,14 @@ Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::filterField
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::filterField
+Foam::tmp<Foam::Field<Type>> Foam::fieldValues::faceSource::filterField
 (
     const GeometricField<Type, fvsPatchField, surfaceMesh>& field,
     const bool applyOrientation
 ) const
 {
-    tmp<Field<Type> > tvalues(new Field<Type>(faceId_.size()));
-    Field<Type>& values = tvalues();
+    tmp<Field<Type>> tvalues(new Field<Type>(faceId_.size()));
+    Field<Type>& values = tvalues.ref();
 
     forAll(values, i)
     {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,23 +31,23 @@ License
 
 #if (UINT_MAX == 0xFFFFFFFF)
 // 32-bit counting, Hamming weight method
-#   define COUNT_PACKEDBITS(sum, x)                                           \
-{                                                                             \
-    x -= (x >> 1) & 0x55555555;                                               \
-    x = (x & 0x33333333) + ((x >> 2) & 0x33333333);                           \
-    sum += (((x + (x >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;                \
+    #define COUNT_PACKEDBITS(sum, x)                                            \
+{                                                                              \
+    x -= (x >> 1) & 0x55555555;                                                \
+    x = (x & 0x33333333) + ((x >> 2) & 0x33333333);                            \
+    sum += (((x + (x >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;                 \
 }
 #elif (UINT_MAX == 0xFFFFFFFFFFFFFFFF)
 // 64-bit counting, Hamming weight method
-#   define COUNT_PACKEDBITS(sum, x)                                           \
-{                                                                             \
-    x -= (x >> 1) & 0x5555555555555555;                                       \
-    x = (x & 0x3333333333333333) + ((x >> 2) & 0x3333333333333333);           \
+    #define COUNT_PACKEDBITS(sum, x)                                            \
+{                                                                              \
+    x -= (x >> 1) & 0x5555555555555555;                                        \
+    x = (x & 0x3333333333333333) + ((x >> 2) & 0x3333333333333333);            \
     sum += (((x + (x >> 4)) & 0x0F0F0F0F0F0F0F0F) * 0x0101010101010101) >> 56;\
 }
 #else
 // Arbitrary number of bits, Brian Kernighan's method
-#   define COUNT_PACKEDBITS(sum, x)    for (; x; ++sum) { x &= x - 1; }
+    #define COUNT_PACKEDBITS(sum, x)    for (; x; ++sum) { x &= x - 1; }
 #endif
 
 
@@ -513,18 +513,15 @@ void Foam::PackedList<nBits>::writeEntry
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<unsigned nBits>
-Foam::PackedList<nBits>&
-Foam::PackedList<nBits>::operator=(const PackedList<nBits>& lst)
+void Foam::PackedList<nBits>::operator=(const PackedList<nBits>& lst)
 {
     StorageList::operator=(lst);
     size_ = lst.size();
-    return *this;
 }
 
 
 template<unsigned nBits>
-Foam::PackedList<nBits>&
-Foam::PackedList<nBits>::operator=(const labelUList& lst)
+void Foam::PackedList<nBits>::operator=(const labelUList& lst)
 {
     setCapacity(lst.size());
     size_ = lst.size();
@@ -533,13 +530,11 @@ Foam::PackedList<nBits>::operator=(const labelUList& lst)
     {
         set(i, lst[i]);
     }
-    return *this;
 }
 
 
 template<unsigned nBits>
-Foam::PackedList<nBits>&
-Foam::PackedList<nBits>::operator=(const UIndirectList<label>& lst)
+void Foam::PackedList<nBits>::operator=(const UIndirectList<label>& lst)
 {
     setCapacity(lst.size());
     size_ = lst.size();
@@ -548,7 +543,6 @@ Foam::PackedList<nBits>::operator=(const UIndirectList<label>& lst)
     {
         set(i, lst[i]);
     }
-    return *this;
 }
 
 

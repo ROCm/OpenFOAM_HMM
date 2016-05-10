@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,11 +51,11 @@ class NullObject
     NullObject()
     {}
 
-    //- Prevent copy-construction
+    //- Disallow default bitwise copy construct
     NullObject(const NullObject&);
 
-    //- Prevent assignment
-    NullObject& operator=(const NullObject&);
+    //- Disallow default bitwise assignment
+    void operator=(const NullObject&);
 
 public:
 
@@ -69,29 +69,29 @@ extern const NullObject* nullObjectPtr;
 
 
 //- Return reference to the nullObject of type T
-template <class T>
+template<class T>
 inline const T& NullObjectRef();
 
 //- Return pointer to the nullObject of type T
-template <class T>
+template<class T>
 inline const T* NullObjectPtr();
 
 
 //- Return true if t is a reference to the nullObject of type T
-template <class T>
+template<class T>
 inline bool isNull(const T& t);
 
 //- Return true if t is not a reference to the nullObject of type T
-template <class T>
+template<class T>
 inline bool notNull(const T& t);
 
 
 //- Return true if t is a pointer to the nullObject of type T
-template <class T>
+template<class T>
 inline bool isNull(const T* t);
 
 //- Return true if t is not a pointer to the nullObject of type T
-template <class T>
+template<class T>
 inline bool notNull(const T* t);
 
 

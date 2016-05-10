@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -147,7 +147,7 @@ void Foam::forceCoeffs::writeBinHeader
 void Foam::forceCoeffs::writeIntegratedData
 (
     const word& title,
-    const List<Field<scalar> >& coeff
+    const List<Field<scalar>>& coeff
 ) const
 {
     scalar pressure = sum(coeff[0]);
@@ -174,7 +174,7 @@ void Foam::forceCoeffs::writeIntegratedData
 
 void Foam::forceCoeffs::writeBinData
 (
-    const List<Field<scalar> > coeffs,
+    const List<Field<scalar>> coeffs,
     Ostream& os
 ) const
 {
@@ -208,9 +208,9 @@ Foam::forceCoeffs::forceCoeffs
 )
 :
     forces(name, obr, dict, loadFromFiles, false),
-    liftDir_(vector::zero),
-    dragDir_(vector::zero),
-    pitchAxis_(vector::zero),
+    liftDir_(Zero),
+    dragDir_(Zero),
+    pitchAxis_(Zero),
     magUInf_(0.0),
     lRef_(0.0),
     Aref_(0.0),
@@ -273,7 +273,7 @@ void Foam::forceCoeffs::read(const dictionary& dict)
                     IOobject::NO_WRITE
                 ),
                 mesh,
-                dimensionedVector("0", dimless, vector::zero)
+                dimensionedVector("0", dimless, Zero)
             )
         );
 
@@ -292,7 +292,7 @@ void Foam::forceCoeffs::read(const dictionary& dict)
                     IOobject::NO_WRITE
                 ),
                 mesh,
-                dimensionedVector("0", dimless, vector::zero)
+                dimensionedVector("0", dimless, Zero)
             )
         );
 
@@ -315,9 +315,9 @@ void Foam::forceCoeffs::execute()
     scalar pDyn = 0.5*rhoRef_*magUInf_*magUInf_;
 
     // Storage for pressure, viscous and porous contributions to coeffs
-    List<Field<scalar> > momentCoeffs(3);
-    List<Field<scalar> > dragCoeffs(3);
-    List<Field<scalar> > liftCoeffs(3);
+    List<Field<scalar>> momentCoeffs(3);
+    List<Field<scalar>> dragCoeffs(3);
+    List<Field<scalar>> liftCoeffs(3);
     forAll(liftCoeffs, i)
     {
         momentCoeffs[i].setSize(nBin_);

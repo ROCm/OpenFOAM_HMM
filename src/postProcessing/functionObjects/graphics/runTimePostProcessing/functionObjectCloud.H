@@ -92,7 +92,7 @@ public:
         (
             const runTimePostProcessing& parent,
             const dictionary& dict,
-            const HashPtrTable<DataEntry<vector>, word>& colours
+            const HashPtrTable<Function1<vector>, word>& colours
         );
 
 

@@ -124,22 +124,22 @@ protected:
             word sampledSetAxis_;
 
             //- File writer for scalar data
-            autoPtr<writer<scalar> > scalarFormatterPtr_;
+            autoPtr<writer<scalar>> scalarFormatterPtr_;
 
             //- File writer for vector data
-            autoPtr<writer<vector> > vectorFormatterPtr_;
+            autoPtr<writer<vector>> vectorFormatterPtr_;
 
 
         // Generated data
 
             //- All tracks. Per track the points it passed through
-            DynamicList<List<point> > allTracks_;
+            DynamicList<List<point>> allTracks_;
 
             //- Per scalarField, per track, the sampled values
-            List<DynamicList<scalarList> > allScalars_;
+            List<DynamicList<scalarList>> allScalars_;
 
             //- Per vectorField, per track, the sampled values
-            List<DynamicList<vectorList> > allVectors_;
+            List<DynamicList<vectorList>> allVectors_;
 
 
         //- Construct patch out of all wall patch faces
@@ -151,9 +151,9 @@ protected:
             const label nSeeds,
             label& UIndex,
             PtrList<volScalarField>& vsFlds,
-            PtrList<interpolation<scalar> >& vsInterp,
+            PtrList<interpolation<scalar>>& vsInterp,
             PtrList<volVectorField>& vvFlds,
-            PtrList<interpolation<vector> >& vvInterp
+            PtrList<interpolation<vector>>& vvInterp
         );
 
         //- Generate point and values by interpolating from existing values
@@ -166,8 +166,8 @@ protected:
             const label rightI,
 
             DynamicList<point>& newTrack,
-            DynamicList<List<scalar> >& newScalars,
-            DynamicList<List<vector> >& newVectors
+            DynamicList<List<scalar>>& newScalars,
+            DynamicList<List<vector>>& newVectors
         ) const;
 
         //- Trim and possibly split a track
@@ -175,9 +175,9 @@ protected:
         (
             const treeBoundBox& bb,
             const label trackI,
-            PtrList<DynamicList<point> >& newTracks,
-            PtrList<DynamicList<scalarList> >& newScalars,
-            PtrList<DynamicList<vectorList> >& newVectors
+            PtrList<DynamicList<point>>& newTracks,
+            PtrList<DynamicList<scalarList>>& newScalars,
+            PtrList<DynamicList<vectorList>>& newVectors
         ) const;
 
         //- Trim tracks to bounding box

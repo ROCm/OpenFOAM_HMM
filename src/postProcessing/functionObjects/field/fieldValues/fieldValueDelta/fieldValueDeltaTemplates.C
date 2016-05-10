@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -41,7 +41,7 @@ void Foam::fieldValues::fieldValueDelta::apply
         return;
     }
 
-    Type result = pTraits<Type>::zero;
+    Type result = Zero;
 
     Type value1 = this->getObjectResult<Type>(name1, entryName1);
     Type value2 = this->getObjectResult<Type>(name2, entryName2);

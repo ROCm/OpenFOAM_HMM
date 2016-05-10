@@ -64,9 +64,9 @@ void Foam::fluxSummary::initialiseFaceZone
 (
     const word& faceZoneName,
     DynamicList<word>& faceZoneNames,
-    DynamicList<List<label> >& faceID,
-    DynamicList<List<label> >& facePatchID,
-    DynamicList<List<scalar> >& faceSign
+    DynamicList<List<label>>& faceID,
+    DynamicList<List<label>>& facePatchID,
+    DynamicList<List<scalar>>& faceSign
 ) const
 {
     const fvMesh& mesh = refCast<const fvMesh>(obr_);
@@ -155,9 +155,9 @@ void Foam::fluxSummary::initialiseFaceZoneAndDirection
     const vector& dir,
     DynamicList<vector>& zoneRefDir,
     DynamicList<word>& faceZoneNames,
-    DynamicList<List<label> >& faceID,
-    DynamicList<List<label> >& facePatchID,
-    DynamicList<List<scalar> >& faceSign
+    DynamicList<List<label>>& faceID,
+    DynamicList<List<label>>& facePatchID,
+    DynamicList<List<scalar>>& faceSign
 ) const
 {
     const fvMesh& mesh = refCast<const fvMesh>(obr_);
@@ -186,7 +186,7 @@ void Foam::fluxSummary::initialiseFaceZoneAndDirection
     const surfaceVectorField& Sf = mesh.Sf();
     const surfaceScalarField& magSf = mesh.magSf();
 
-    vector n = vector::zero;
+    vector n(Zero);
 
     forAll(fZone, i)
     {
@@ -264,9 +264,9 @@ void Foam::fluxSummary::initialiseCellZoneAndDirection
     const vector& dir,
     DynamicList<vector>& zoneRefDir,
     DynamicList<word>& faceZoneNames,
-    DynamicList<List<label> >& faceID,
-    DynamicList<List<label> >& facePatchID,
-    DynamicList<List<scalar> >& faceSign
+    DynamicList<List<label>>& faceID,
+    DynamicList<List<label>>& facePatchID,
+    DynamicList<List<scalar>>& faceSign
 ) const
 {
     const fvMesh& mesh = refCast<const fvMesh>(obr_);
@@ -490,9 +490,9 @@ void Foam::fluxSummary::initialiseCellZoneAndDirection
     // collect the data per region
     label nRegion = regionI;
 
-    List<DynamicList<label> > regionFaceIDs(nRegion);
-    List<DynamicList<label> > regionFacePatchIDs(nRegion);
-    List<DynamicList<scalar> > regionFaceSigns(nRegion);
+    List<DynamicList<label>> regionFaceIDs(nRegion);
+    List<DynamicList<label>> regionFacePatchIDs(nRegion);
+    List<DynamicList<scalar>> regionFaceSigns(nRegion);
 
     forAll(allFaceInfo, faceI)
     {
@@ -641,9 +641,9 @@ void Foam::fluxSummary::read(const dictionary& dict)
     // initialise with capacity of 10 faceZones
     DynamicList<vector> refDir(10);
     DynamicList<word> faceZoneName(refDir.size());
-    DynamicList<List<label> > faceID(refDir.size());
-    DynamicList<List<label> > facePatchID(refDir.size());
-    DynamicList<List<scalar> > faceSign(refDir.size());
+    DynamicList<List<label>> faceID(refDir.size());
+    DynamicList<List<label>> facePatchID(refDir.size());
+    DynamicList<List<scalar>> faceSign(refDir.size());
 
     switch (mode_)
     {
@@ -666,7 +666,7 @@ void Foam::fluxSummary::read(const dictionary& dict)
         }
         case mdFaceZoneAndDirection:
         {
-            List<Tuple2<word, vector> >
+            List<Tuple2<word, vector>>
                 zoneAndDirection(dict.lookup("faceZoneAndDirection"));
 
             forAll(zoneAndDirection, i)
@@ -686,7 +686,7 @@ void Foam::fluxSummary::read(const dictionary& dict)
         }
         case mdCellZoneAndDirection:
         {
-            List<Tuple2<word, vector> >
+            List<Tuple2<word, vector>>
                 zoneAndDirection(dict.lookup("cellZoneAndDirection"));
 
             forAll(zoneAndDirection, i)

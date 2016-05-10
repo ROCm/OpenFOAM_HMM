@@ -194,11 +194,11 @@ protected:
         void writeIntegratedData
         (
             const word& title,
-            const List<Field<scalar> >& coeff
+            const List<Field<scalar>>& coeff
         ) const;
 
         //- Write binned data
-        void writeBinData(const List<Field<scalar> > coeffs, Ostream& os) const;
+        void writeBinData(const List<Field<scalar>> coeffs, Ostream& os) const;
 
 
 public:

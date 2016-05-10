@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,13 +55,13 @@ namespace LESModels
 template<class BasicTurbulenceModel>
 class LESeddyViscosity
 :
-    public eddyViscosity<LESModel<BasicTurbulenceModel> >
+    public eddyViscosity<LESModel<BasicTurbulenceModel>>
 {
     // Private Member Functions
 
         // Disallow default bitwise copy construct and assignment
         LESeddyViscosity(const LESeddyViscosity&);
-        LESeddyViscosity& operator=(const LESeddyViscosity&);
+        void operator=(const LESeddyViscosity&);
 
 
 protected:
@@ -117,7 +117,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "LESeddyViscosity.C"
+    #include "LESeddyViscosity.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
