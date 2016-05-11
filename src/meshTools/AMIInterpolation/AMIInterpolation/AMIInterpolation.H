@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -372,15 +372,28 @@ public:
                 //- Return const access to source patch face areas
                 inline const scalarField& srcMagSf() const;
 
+                //- Return access to source patch face areas
+                inline scalarField& srcMagSf();
+
                 //- Return const access to source patch addressing
                 inline const labelListList& srcAddress() const;
+
+                //- Return access to source patch addressing
+                inline labelListList& srcAddress();
 
                 //- Return const access to source patch weights
                 inline const scalarListList& srcWeights() const;
 
+                //- Return access to source patch weights
+                inline scalarListList& srcWeights();
+
                 //- Return const access to normalisation factor of source
                 //  patch weights (i.e. the sum before normalisation)
                 inline const scalarField& srcWeightsSum() const;
+
+                //- Return access to normalisation factor of source
+                //  patch weights (i.e. the sum before normalisation)
+                inline scalarField& srcWeightsSum();
 
                 //- Source map pointer - valid only if singlePatchProc = -1
                 //  This gets source data into a form to be consumed by
@@ -393,15 +406,28 @@ public:
                 //- Return const access to target patch face areas
                 inline const scalarField& tgtMagSf() const;
 
+                //- Return access to target patch face areas
+                inline scalarField& tgtMagSf();
+
                 //- Return const access to target patch addressing
                 inline const labelListList& tgtAddress() const;
+
+                //- Return access to target patch addressing
+                inline labelListList& tgtAddress();
 
                 //- Return const access to target patch weights
                 inline const scalarListList& tgtWeights() const;
 
+                //- Return access to target patch weights
+                inline scalarListList& tgtWeights();
+
                 //- Return const access to normalisation factor of target
                 //  patch weights (i.e. the sum before normalisation)
                 inline const scalarField& tgtWeightsSum() const;
+
+                //- Return access to normalisation factor of target
+                //  patch weights (i.e. the sum before normalisation)
+                inline scalarField& tgtWeightsSum();
 
                 //- Target map pointer -  valid only if singlePatchProc=-1.
                 //  This gets target data into a form to be consumed by

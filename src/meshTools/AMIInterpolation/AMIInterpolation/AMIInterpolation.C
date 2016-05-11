@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1062,7 +1062,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
         );
 
         // weights normalisation
-        normaliseWeights(AMIPtr->conformal(), true);
+        AMIPtr->normaliseWeights(true, *this);
 
         // cache maps and reset addresses
         List<Map<label> > cMap;
@@ -1095,7 +1095,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             tgtWeights_
         );
 
-        normaliseWeights(AMIPtr->conformal(), true);
+        AMIPtr->normaliseWeights(true, *this);
     }
 
     if (debug)

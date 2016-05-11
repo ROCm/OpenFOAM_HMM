@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,8 +57,24 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcMagSf() const
 
 
 template<class SourcePatch, class TargetPatch>
+inline Foam::scalarField&
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcMagSf()
+{
+    return srcMagSf_;
+}
+
+
+template<class SourcePatch, class TargetPatch>
 inline const Foam::labelListList&
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcAddress() const
+{
+    return srcAddress_;
+}
+
+
+template<class SourcePatch, class TargetPatch>
+inline Foam::labelListList&
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcAddress()
 {
     return srcAddress_;
 }
@@ -73,8 +89,24 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcWeights() const
 
 
 template<class SourcePatch, class TargetPatch>
+inline Foam::scalarListList&
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcWeights()
+{
+    return srcWeights_;
+}
+
+
+template<class SourcePatch, class TargetPatch>
 inline const Foam::scalarField&
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcWeightsSum() const
+{
+    return srcWeightsSum_;
+}
+
+
+template<class SourcePatch, class TargetPatch>
+inline Foam::scalarField&
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcWeightsSum()
 {
     return srcWeightsSum_;
 }
@@ -97,8 +129,24 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtMagSf() const
 
 
 template<class SourcePatch, class TargetPatch>
+inline Foam::scalarField&
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtMagSf()
+{
+    return tgtMagSf_;
+}
+
+
+template<class SourcePatch, class TargetPatch>
 inline const Foam::labelListList&
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtAddress() const
+{
+    return tgtAddress_;
+}
+
+
+template<class SourcePatch, class TargetPatch>
+inline Foam::labelListList&
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtAddress()
 {
     return tgtAddress_;
 }
@@ -113,8 +161,24 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtWeights() const
 
 
 template<class SourcePatch, class TargetPatch>
+inline Foam::scalarListList&
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtWeights()
+{
+    return tgtWeights_;
+}
+
+
+template<class SourcePatch, class TargetPatch>
 inline const Foam::scalarField&
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtWeightsSum() const
+{
+    return tgtWeightsSum_;
+}
+
+
+template<class SourcePatch, class TargetPatch>
+inline Foam::scalarField&
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtWeightsSum()
 {
     return tgtWeightsSum_;
 }

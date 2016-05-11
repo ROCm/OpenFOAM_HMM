@@ -135,6 +135,14 @@ public:
                 label srcFaceI = -1,
                 label tgtFaceI = -1
             );
+
+            //- Normalise the weight. Can optionally subset addressing
+            //  (e.g. for mapNearest)
+            virtual void normaliseWeights
+            (
+                const bool verbose,
+                AMIInterpolation<SourcePatch, TargetPatch>& inter
+            );
 };
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -322,18 +322,110 @@ void Foam::mapNearestAMI<SourcePatch, TargetPatch>::calculate
 
 
     // transfer data to persistent storage
-    forAll(srcAddr, i)
+    const pointField& srcFc = this->srcPatch_.faceCentres();
+    const pointField& tgtFc = this->tgtPatch_.faceCentres();
+
+    forAll(srcAddr, srcI)
     {
-        scalar magSf = this->srcMagSf_[i];
-        srcAddress[i].transfer(srcAddr[i]);
-        srcWeights[i] = scalarList(1, magSf);
+        srcAddress[srcI].transfer(srcAddr[srcI]);
+
+        const labelList& addr = srcAddress[srcI];
+        srcWeights[srcI].setSize(addr.size());
+        const point& srcPt = srcFc[srcI];
+        forAll(addr, i)
+        {
+            srcWeights[srcI][i] = magSqr(srcPt-tgtFc[addr[i]]);
+        }
     }
-    forAll(tgtAddr, i)
+    forAll(tgtAddr, tgtI)
     {
-        scalar magSf = this->tgtMagSf_[i];
-        tgtAddress[i].transfer(tgtAddr[i]);
-        tgtWeights[i] = scalarList(1, magSf);
+        tgtAddress[tgtI].transfer(tgtAddr[tgtI]);
+
+        const labelList& addr = tgtAddress[tgtI];
+        tgtWeights[tgtI].setSize(addr.size());
+        const point& tgtPt = tgtFc[tgtI];
+        forAll(addr, i)
+        {
+            tgtWeights[tgtI][i] = magSqr(tgtPt-srcFc[addr[i]]);
+        }
     }
+}
+
+
+template<class SourcePatch, class TargetPatch>
+void Foam::mapNearestAMI<SourcePatch, TargetPatch>::normaliseWeights
+(
+    const bool verbose,
+    AMIInterpolation<SourcePatch, TargetPatch>& inter
+)
+{
+    {
+        labelListList& srcAddress = inter.srcAddress();
+        scalarListList& srcWeights = inter.srcWeights();
+
+        forAll(srcAddress, srcI)
+        {
+            labelList& addr = srcAddress[srcI];
+            scalarList& wghts = srcWeights[srcI];
+
+            // Choose one with smallest weight (since calculate above returns
+            // distance)
+            if (addr.size())
+            {
+                label minFaceI = addr[0];
+                scalar minWeight = wghts[0];
+
+                for (label i = 0; i < addr.size(); i++)
+                {
+                    if (wghts[i] < minWeight)
+                    {
+                        minWeight = wghts[i];
+                        minFaceI = addr[i];
+                    }
+                }
+
+                wghts.setSize(1);
+                wghts[0] = this->srcMagSf_[srcI];
+                addr.setSize(1);
+                addr[0] = minFaceI;
+            }
+        }
+    }
+
+    {
+        labelListList& tgtAddress = inter.tgtAddress();
+        scalarListList& tgtWeights = inter.tgtWeights();
+
+        forAll(tgtAddress, tgtI)
+        {
+            labelList& addr = tgtAddress[tgtI];
+            scalarList& wghts = tgtWeights[tgtI];
+
+            // Choose one with smallest weight (since calculate above returns
+            // distance)
+            if (addr.size())
+            {
+                label minFaceI = addr[0];
+                scalar minWeight = wghts[0];
+
+                for (label i = 0; i < addr.size(); i++)
+                {
+                    if (wghts[i] < minWeight)
+                    {
+                        minWeight = wghts[i];
+                        minFaceI = addr[i];
+                    }
+                }
+
+                wghts.setSize(1);
+                wghts[0] = inter.tgtMagSf()[tgtI];
+                addr.setSize(1);
+                addr[0] = minFaceI;
+            }
+        }
+    }
+
+    inter.normaliseWeights(this->conformal(), verbose);
 }
 
 
