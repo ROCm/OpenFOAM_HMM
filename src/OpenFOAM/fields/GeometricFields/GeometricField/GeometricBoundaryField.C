@@ -569,17 +569,16 @@ template<class Type, template<class> class PatchField, class GeoMesh>
 void Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
 writeEntry(const word& keyword, Ostream& os) const
 {
-    os  << keyword << nl << token::BEGIN_BLOCK << incrIndent << nl;
+    os.beginBlock(keyword) << nl;
 
     forAll(*this, patchi)
     {
-        os  << indent << this->operator[](patchi).patch().name() << nl
-            << indent << token::BEGIN_BLOCK << nl
-            << incrIndent << this->operator[](patchi) << decrIndent
-            << indent << token::END_BLOCK << endl;
+        os.beginBlock(this->operator[](patchi).patch().name()) << nl;
+        os  << this->operator[](patchi);
+        os.endBlock() << endl;
     }
 
-    os  << decrIndent << token::END_BLOCK << endl;
+    os.endBlock() << endl;
 
     // Check state of IOstream
     os.check

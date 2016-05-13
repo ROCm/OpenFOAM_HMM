@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -109,8 +109,8 @@ public:
             virtual Ostream& write(const word&) = 0;
 
             //- Write keyType
-            //  write regular expression as quoted string
-            //  write plain word as word (unquoted)
+            //  A plain word is written unquoted.
+            //  A regular expression is written as a quoted string.
             virtual Ostream& write(const keyType&);
 
             //- Write string
@@ -157,14 +157,29 @@ public:
             //- Incrememt the indent level
             void incrIndent()
             {
-                indentLevel_++;
+                ++indentLevel_;
             }
 
             //- Decrememt the indent level
             void decrIndent();
 
             //- Write the keyword followed by an appropriate indentation
-            Ostream& writeKeyword(const keyType&);
+            virtual Ostream& writeKeyword(const keyType&);
+
+            //- Write begin block group with the given name
+            //  Uses the appropriate indentation,
+            //  does not include a trailing newline.
+            virtual Ostream& beginBlock(const word&);
+
+            //- Write begin block group without a name
+            //  Uses the appropriate indentation,
+            //  does not include a trailing newline.
+            virtual Ostream& beginBlock();
+
+            //- Write end block group
+            //  Uses the appropriate indentation,
+            //  does not include a trailing newline.
+            virtual Ostream& endBlock();
 
 
         // Stream state functions

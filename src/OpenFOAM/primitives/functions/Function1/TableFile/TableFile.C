@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,17 +78,16 @@ template<class Type>
 void Foam::Function1Types::TableFile<Type>::writeData(Ostream& os) const
 {
     Function1<Type>::writeData(os);
+    os  << token::END_STATEMENT << nl;
 
-    os  << token::END_STATEMENT << nl
-        << indent << word(this->name() + "Coeffs") << nl
-        << indent << token::BEGIN_BLOCK << nl << incrIndent;
+    os.beginBlock(word(this->name() + "Coeffs")) << nl;
 
     // Note: for TableBase write the dictionary entries it needs but not
     // the values themselves
     TableBase<Type>::writeEntries(os);
-
     os.writeKeyword("fileName")<< fName_ << token::END_STATEMENT << nl;
-    os  << decrIndent << indent << token::END_BLOCK << endl;
+
+    os.endBlock() << endl;
 }
 
 
