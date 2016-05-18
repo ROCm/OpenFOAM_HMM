@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -669,6 +669,7 @@ private:
             //- Determines cell zone from cell region information.
             bool calcRegionToZone
             (
+                const label backgroundZoneID,
                 const label surfZoneI,
                 const label ownRegion,
                 const label neiRegion,
@@ -680,6 +681,7 @@ private:
             //  marked in namedSurfaceIndex regarded as blocked.
             void findCellZoneTopo
             (
+                const label backgroundZoneID,
                 const pointField& locationsInMesh,
                 const labelList& allSurfaceIndex,
                 const labelList& namedSurfaceIndex,
@@ -700,6 +702,7 @@ private:
             void zonify
             (
                 const bool allowFreeStandingZoneFaces,
+                const label backgroundZoneID,
                 const pointField& locationsInMesh,
                 const wordList& zonesInMesh,
 
